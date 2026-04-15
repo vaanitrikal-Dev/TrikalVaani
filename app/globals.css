@@ -1,0 +1,193 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 222 60% 3%;
+    --foreground: 45 55% 90%;
+    --card: 222 50% 5%;
+    --card-foreground: 45 55% 90%;
+    --popover: 222 50% 5%;
+    --popover-foreground: 45 55% 90%;
+    --primary: 43 65% 52%;
+    --primary-foreground: 222 60% 3%;
+    --secondary: 270 65% 35%;
+    --secondary-foreground: 45 55% 90%;
+    --muted: 222 35% 11%;
+    --muted-foreground: 210 18% 50%;
+    --accent: 270 65% 35%;
+    --accent-foreground: 45 55% 90%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 45 55% 90%;
+    --border: 222 35% 13%;
+    --input: 222 35% 11%;
+    --ring: 43 65% 52%;
+    --radius: 0.75rem;
+    --chart-1: 43 65% 52%;
+    --chart-2: 270 65% 55%;
+    --chart-3: 160 60% 45%;
+    --chart-4: 30 80% 55%;
+    --chart-5: 340 75% 55%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    background-color: #020817;
+  }
+
+  body {
+    @apply text-foreground;
+    background-color: #020817;
+    font-family: var(--font-inter), Inter, sans-serif;
+  }
+}
+
+/* ── Animated Starry Night Background ─────────────────── */
+
+@keyframes star-drift-a {
+  0%   { transform: translateY(0px)   translateX(0px); }
+  25%  { transform: translateY(-10px) translateX(5px); }
+  50%  { transform: translateY(-5px)  translateX(-8px); }
+  75%  { transform: translateY(-14px) translateX(3px); }
+  100% { transform: translateY(0px)   translateX(0px); }
+}
+
+@keyframes star-drift-b {
+  0%   { transform: translateY(0px)  translateX(0px); }
+  33%  { transform: translateY(8px)  translateX(-10px); }
+  66%  { transform: translateY(-8px) translateX(6px); }
+  100% { transform: translateY(0px)  translateX(0px); }
+}
+
+@keyframes twinkle-a {
+  0%, 100% { opacity: 0.2; }
+  50%       { opacity: 0.95; }
+}
+
+@keyframes twinkle-b {
+  0%, 100% { opacity: 0.6; }
+  50%       { opacity: 0.08; }
+}
+
+.starry-night {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+  background: radial-gradient(ellipse 120% 80% at 50% 0%, #0d1730 0%, #020817 55%);
+}
+
+.star-layer {
+  position: absolute;
+  inset: -8%;
+  width: 116%;
+  height: 116%;
+}
+
+.star-layer-1 {
+  background-image:
+    radial-gradient(1px   1px   at  8%  12%, rgba(255,255,255,0.80) 0%, transparent 100%),
+    radial-gradient(1px   1px   at 22%  55%, rgba(255,255,255,0.55) 0%, transparent 100%),
+    radial-gradient(1px   1px   at 37%   8%, rgba(255,255,255,0.65) 0%, transparent 100%),
+    radial-gradient(1px   1px   at 50%  40%, rgba(212,175,55,0.50)  0%, transparent 100%),
+    radial-gradient(1px   1px   at 63%  72%, rgba(255,255,255,0.55) 0%, transparent 100%),
+    radial-gradient(1px   1px   at 78%  18%, rgba(255,255,255,0.75) 0%, transparent 100%),
+    radial-gradient(1px   1px   at 90%  85%, rgba(255,255,255,0.50) 0%, transparent 100%),
+    radial-gradient(1px   1px   at 15%  90%, rgba(212,175,55,0.35)  0%, transparent 100%),
+    radial-gradient(1px   1px   at 44%  65%, rgba(255,255,255,0.45) 0%, transparent 100%),
+    radial-gradient(1px   1px   at 86%  50%, rgba(255,255,255,0.65) 0%, transparent 100%),
+    radial-gradient(1px   1px   at  5%  48%, rgba(212,175,55,0.30)  0%, transparent 100%),
+    radial-gradient(1px   1px   at 70%  30%, rgba(255,255,255,0.55) 0%, transparent 100%),
+    radial-gradient(1px   1px   at 32%  38%, rgba(255,255,255,0.40) 0%, transparent 100%),
+    radial-gradient(1px   1px   at 58%  92%, rgba(212,175,55,0.25)  0%, transparent 100%);
+  animation: star-drift-a 100s ease-in-out infinite, twinkle-a 7s ease-in-out infinite;
+}
+
+.star-layer-2 {
+  background-image:
+    radial-gradient(1.5px 1.5px at 18%  32%, rgba(212,175,55,0.65)  0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 42%  78%, rgba(255,255,255,0.70) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 65%  22%, rgba(255,255,255,0.80) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 80%  60%, rgba(212,175,55,0.55)  0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 10%  70%, rgba(255,255,255,0.60) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 55%  45%, rgba(255,255,255,0.50) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 92%  25%, rgba(212,175,55,0.45)  0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 30%  15%, rgba(255,255,255,0.70) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 75%  88%, rgba(255,255,255,0.45) 0%, transparent 100%);
+  animation: star-drift-b 130s ease-in-out infinite, twinkle-b 9s ease-in-out infinite;
+}
+
+.star-layer-3 {
+  background-image:
+    radial-gradient(2px 2px at 25%  25%, rgba(212,175,55,0.40)  0%, transparent 100%),
+    radial-gradient(2px 2px at 72%  68%, rgba(212,175,55,0.35)  0%, transparent 100%),
+    radial-gradient(2px 2px at 48%  88%, rgba(255,255,255,0.55) 0%, transparent 100%),
+    radial-gradient(2px 2px at 88%  12%, rgba(255,255,255,0.60) 0%, transparent 100%),
+    radial-gradient(2px 2px at  3%  35%, rgba(212,175,55,0.30)  0%, transparent 100%),
+    radial-gradient(2px 2px at 60%  58%, rgba(255,255,255,0.35) 0%, transparent 100%);
+  animation: star-drift-a 160s ease-in-out infinite reverse, twinkle-a 12s ease-in-out infinite;
+}
+
+/* ── Utilities ─────────────────────────────────────────── */
+@layer utilities {
+  .card-glass {
+    background: rgba(6, 12, 28, 0.78);
+    border: 1px solid rgba(212, 175, 55, 0.13);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
+  .card-glass-purple {
+    background: rgba(76, 29, 149, 0.15);
+    border: 1px solid rgba(76, 29, 149, 0.4);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
+  .text-gradient-gold {
+    background: linear-gradient(135deg, #D4AF37 0%, #E8CC6A 40%, #D4AF37 75%, #A8862A 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .text-gradient-cosmic {
+    background: linear-gradient(135deg, #D4AF37 0%, #C084FC 60%, #D4AF37 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .input-cosmic {
+    background: rgba(6, 12, 28, 0.88) !important;
+    border: 1px solid rgba(212, 175, 55, 0.22) !important;
+    color: #f0dfa0 !important;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .input-cosmic:focus {
+    border-color: rgba(212, 175, 55, 0.65) !important;
+    box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.12) !important;
+    outline: none !important;
+  }
+
+  .input-cosmic::placeholder {
+    color: rgba(200, 175, 100, 0.35) !important;
+  }
+
+  .pillar-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .pillar-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 32px rgba(212, 175, 55, 0.15), 0 0 0 1px rgba(212, 175, 55, 0.2);
+  }
+}
