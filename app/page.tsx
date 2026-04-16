@@ -3,7 +3,8 @@ import SiteFooter from '@/components/layout/SiteFooter';
 import Hero from '@/components/landing/Hero';
 import PillarsGrid from '@/components/landing/PillarsGrid';
 import BirthForm from '@/components/landing/BirthForm';
-import PremiumCard from '@/components/landing/PremiumCard';
+import SocialProofTicker from '@/components/landing/SocialProofTicker';
+import InnerCircleWaitlist from '@/components/landing/InnerCircleWaitlist';
 import BlogCard from '@/components/blog/BlogCard';
 import { blogPosts } from '@/lib/blog-data';
 
@@ -16,9 +17,10 @@ export default function HomePage() {
 
       <main>
         <Hero />
+        <SocialProofTicker />
         <PillarsGrid />
         <BirthForm />
-        <PremiumCard />
+        <InnerCircleWaitlist />
 
         <section className="py-20 px-4">
           <div className="max-w-6xl mx-auto">

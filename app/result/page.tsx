@@ -75,6 +75,9 @@ function ResultContent() {
     /* fallback */
   }
 
+  const autoSegment = params.get('autoSegment') || '';
+  const autoSegmentLabel = params.get('autoSegmentLabel') || '';
+
   const [aiData, setAiData] = useState<PredictiveTabsData | null>(null);
   const [monthlyTimeline, setMonthlyTimeline] = useState<MonthForecast[]>([]);
   const [aiLoading, setAiLoading] = useState(true);
@@ -118,6 +121,24 @@ function ResultContent() {
       .finally(() => setAiLoading(false));
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dob]);
+
+  useEffect(() => {
+    if (!autoSegment || !dob || !SUPABASE_URL) return;
+    setSegmentLoading(true);
+    callEdge({
+      ...basePayload,
+      mode: 'segment',
+      segmentId: autoSegment,
+      segmentLabel: autoSegmentLabel || autoSegment,
+    })
+      .then((json) => {
+        setSegmentAnalysis(json as SegmentAnalysis);
+        if (json.whatsappText) setLatestWhatsapp(json.whatsappText);
+      })
+      .catch(() => {})
+      .finally(() => setSegmentLoading(false));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dob, autoSegment]);
 
   const handleSegmentAnalyze = useCallback(async (segment: LifeSegment) => {
     setSegmentLoading(true);
