@@ -1,7 +1,7 @@
 'use client';
 
 import { useSearchParams } from 'next/navigation';
-import { Suspense } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, RefreshCw } from 'lucide-react';
 import SiteNav from '@/components/layout/SiteNav';
@@ -12,7 +12,10 @@ import ShareButtons from '@/components/result/ShareButtons';
 import PillarScoreGrid from '@/components/result/PillarScoreGrid';
 import LifeTimeline from '@/components/result/LifeTimeline';
 import PredictiveModules from '@/components/result/PredictiveModules';
-import type { DashaPeriod, LifeTimelineEvent, PredictiveModule } from '@/lib/vedic-astro';
+import FutureTimeline from '@/components/result/FutureTimeline';
+import type { DashaPeriod, LifeTimelineEvent } from '@/lib/vedic-astro';
+import type { PredictiveTabsData } from '@/components/result/PredictiveModules';
+import type { MonthForecast } from '@/components/result/FutureTimeline';
 
 function ResultContent() {
   const params = useSearchParams();
@@ -27,6 +30,7 @@ function ResultContent() {
   const practicalTip = params.get('tip') || 'Avoid making major decisions under time pressure today. Reflection yields better outcomes.';
   const dob = params.get('dob') || '';
   const city = params.get('city') || '';
+  const generation = params.get('gen') || 'millennial';
   const varshphalFocus = params.get('varshphal') || 'Jupiter rules your Varshphal year, signaling exceptional expansion in wisdom, family, wealth, and spiritual depth.';
   const ashtakvargaWealth = parseInt(params.get('avwealth') || '24', 10);
 
@@ -41,18 +45,64 @@ function ResultContent() {
 
   let dashaPeriods: DashaPeriod[] = [];
   let lifeTimeline: LifeTimelineEvent[] = [];
-  let predictiveModules: PredictiveModule[] = [];
 
   try {
     const dashaRaw = params.get('dasha');
     if (dashaRaw) dashaPeriods = JSON.parse(dashaRaw);
     const timelineRaw = params.get('timeline');
     if (timelineRaw) lifeTimeline = JSON.parse(timelineRaw);
-    const modulesRaw = params.get('modules');
-    if (modulesRaw) predictiveModules = JSON.parse(modulesRaw);
   } catch {
-    /* fallback to empty arrays */
+    /* fallback */
   }
+
+  const [aiData, setAiData] = useState<PredictiveTabsData | null>(null);
+  const [monthlyTimeline, setMonthlyTimeline] = useState<MonthForecast[]>([]);
+  const [aiLoading, setAiLoading] = useState(true);
+
+  useEffect(() => {
+    if (!dob) {
+      setAiLoading(false);
+      return;
+    }
+
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    if (!supabaseUrl) {
+      setAiLoading(false);
+      return;
+    }
+
+    const endpoint = `${supabaseUrl}/functions/v1/trikal-predict`;
+
+    fetch(endpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY}`,
+      },
+      body: JSON.stringify({
+        name,
+        dob,
+        city,
+        generation,
+        dashaPeriods,
+        pillarScores,
+        ashtakvargaWealth,
+        varshphalFocus,
+      }),
+    })
+      .then((r) => r.json())
+      .then((json) => {
+        const { career, love, wealth, guruMessage, monthlyTimeline: mt } = json;
+        if (career && love && wealth) {
+          setAiData({ career, love, wealth, guruMessage: guruMessage || '' });
+        }
+        if (Array.isArray(mt) && mt.length > 0) {
+          setMonthlyTimeline(mt);
+        }
+      })
+      .catch(() => {})
+      .finally(() => setAiLoading(false));
+  }, [dob]);
 
   return (
     <div className="min-h-screen bg-[#030712]">
@@ -60,6 +110,7 @@ function ResultContent() {
 
       <main className="pt-24 pb-16 px-4">
         <div className="max-w-5xl mx-auto">
+
           <div className="mb-8 flex items-center gap-3">
             <Link
               href="/"
@@ -78,10 +129,7 @@ function ResultContent() {
 
           <div
             className="text-center mb-10 py-6 px-4 rounded-2xl"
-            style={{
-              background: 'rgba(10,15,30,0.6)',
-              border: '1px solid rgba(250,204,21,0.1)',
-            }}
+            style={{ background: 'rgba(10,15,30,0.6)', border: '1px solid rgba(250,204,21,0.1)' }}
           >
             <p className="text-xs font-medium tracking-widest uppercase text-yellow-400/60 mb-2">
               Your Cosmic Report
@@ -135,14 +183,19 @@ function ResultContent() {
             <PillarScoreGrid scores={pillarScores} />
           </div>
 
-          {predictiveModules.length > 0 && (
+          <div className="mb-6">
+            <PredictiveModules
+              data={aiData}
+              loading={aiLoading}
+              varshphalFocus={varshphalFocus}
+              ashtakvargaWealth={ashtakvargaWealth}
+              name={name}
+            />
+          </div>
+
+          {monthlyTimeline.length > 0 && (
             <div className="mb-6">
-              <PredictiveModules
-                modules={predictiveModules}
-                varshphalFocus={varshphalFocus}
-                ashtakvargaWealth={ashtakvargaWealth}
-                name={name}
-              />
+              <FutureTimeline forecasts={monthlyTimeline} name={name} />
             </div>
           )}
 
@@ -197,9 +250,7 @@ export default function ResultPage() {
       fallback={
         <div className="min-h-screen bg-[#030712] flex items-center justify-center">
           <div className="text-center">
-            <div
-              className="w-12 h-12 rounded-full border-2 border-yellow-400/30 border-t-yellow-400 animate-spin mx-auto mb-4"
-            />
+            <div className="w-12 h-12 rounded-full border-2 border-yellow-400/30 border-t-yellow-400 animate-spin mx-auto mb-4" />
             <p className="text-sm text-slate-500">Reading the stars...</p>
           </div>
         </div>
