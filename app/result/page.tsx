@@ -1,7 +1,7 @@
 'use client';
 
 import { useSearchParams } from 'next/navigation';
-import { Suspense, useEffect, useState } from 'react';
+import { Suspense, useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, RefreshCw } from 'lucide-react';
 import SiteNav from '@/components/layout/SiteNav';
@@ -13,9 +13,29 @@ import PillarScoreGrid from '@/components/result/PillarScoreGrid';
 import LifeTimeline from '@/components/result/LifeTimeline';
 import PredictiveModules from '@/components/result/PredictiveModules';
 import FutureTimeline from '@/components/result/FutureTimeline';
+import DardEngine from '@/components/result/DardEngine';
+import CompatibilityMeter from '@/components/result/CompatibilityMeter';
 import type { DashaPeriod, LifeTimelineEvent } from '@/lib/vedic-astro';
 import type { PredictiveTabsData } from '@/components/result/PredictiveModules';
 import type { MonthForecast } from '@/components/result/FutureTimeline';
+import type { LifeSegment, SegmentAnalysis } from '@/components/result/DardEngine';
+import type { PartnerData, CompatibilityResult } from '@/components/result/CompatibilityMeter';
+
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? '';
+const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? '';
+
+async function callEdge(body: Record<string, unknown>) {
+  const res = await fetch(`${SUPABASE_URL}/functions/v1/trikal-predict`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+    },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) throw new Error('Edge function error');
+  return res.json();
+}
 
 function ResultContent() {
   const params = useSearchParams();
@@ -27,10 +47,10 @@ function ResultContent() {
   const luckyNumber = parseInt(params.get('number') || '7', 10);
   const insight = params.get('insight') || 'The stars illuminate your path today with clarity and purpose.';
   const remedy = params.get('remedy') || 'Chant the Gayatri Mantra 21 times at sunrise to align with the cosmic rhythm.';
-  const practicalTip = params.get('tip') || 'Avoid making major decisions under time pressure today. Reflection yields better outcomes.';
+  const practicalTip = params.get('tip') || 'Avoid making major decisions under time pressure today.';
   const dob = params.get('dob') || '';
   const city = params.get('city') || '';
-  const generation = params.get('gen') || 'millennial';
+  const generation = (params.get('gen') || 'millennial') as 'genz' | 'millennial' | 'genx';
   const varshphalFocus = params.get('varshphal') || 'Jupiter rules your Varshphal year, signaling exceptional expansion in wisdom, family, wealth, and spiritual depth.';
   const ashtakvargaWealth = parseInt(params.get('avwealth') || '24', 10);
 
@@ -59,38 +79,32 @@ function ResultContent() {
   const [monthlyTimeline, setMonthlyTimeline] = useState<MonthForecast[]>([]);
   const [aiLoading, setAiLoading] = useState(true);
 
+  const [segmentAnalysis, setSegmentAnalysis] = useState<SegmentAnalysis | null>(null);
+  const [segmentLoading, setSegmentLoading] = useState(false);
+  const [latestWhatsapp, setLatestWhatsapp] = useState<string | undefined>(undefined);
+
+  const [compatResult, setCompatResult] = useState<CompatibilityResult | null>(null);
+  const [compatLoading, setCompatLoading] = useState(false);
+
+  const basePayload = {
+    name,
+    dob,
+    city,
+    generation,
+    rashi,
+    dashaPeriods,
+    pillarScores,
+    ashtakvargaWealth,
+    varshphalFocus,
+  };
+
   useEffect(() => {
-    if (!dob) {
+    if (!dob || !SUPABASE_URL) {
       setAiLoading(false);
       return;
     }
 
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    if (!supabaseUrl) {
-      setAiLoading(false);
-      return;
-    }
-
-    const endpoint = `${supabaseUrl}/functions/v1/trikal-predict`;
-
-    fetch(endpoint, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY}`,
-      },
-      body: JSON.stringify({
-        name,
-        dob,
-        city,
-        generation,
-        dashaPeriods,
-        pillarScores,
-        ashtakvargaWealth,
-        varshphalFocus,
-      }),
-    })
-      .then((r) => r.json())
+    callEdge({ ...basePayload, mode: 'predict' })
       .then((json) => {
         const { career, love, wealth, guruMessage, monthlyTimeline: mt } = json;
         if (career && love && wealth) {
@@ -102,6 +116,45 @@ function ResultContent() {
       })
       .catch(() => {})
       .finally(() => setAiLoading(false));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dob]);
+
+  const handleSegmentAnalyze = useCallback(async (segment: LifeSegment) => {
+    setSegmentLoading(true);
+    setSegmentAnalysis(null);
+    try {
+      const json = await callEdge({
+        ...basePayload,
+        mode: 'segment',
+        segmentId: segment.id,
+        segmentLabel: segment.label,
+      });
+      setSegmentAnalysis(json as SegmentAnalysis);
+      if (json.whatsappText) setLatestWhatsapp(json.whatsappText);
+    } catch {
+      /* fallback handled in component */
+    } finally {
+      setSegmentLoading(false);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dob]);
+
+  const handleCompatCheck = useCallback(async (partner: PartnerData) => {
+    setCompatLoading(true);
+    setCompatResult(null);
+    try {
+      const json = await callEdge({
+        ...basePayload,
+        mode: 'compatibility',
+        partner,
+      });
+      setCompatResult(json as CompatibilityResult);
+    } catch {
+      /* silent */
+    } finally {
+      setCompatLoading(false);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dob]);
 
   return (
@@ -184,6 +237,16 @@ function ResultContent() {
           </div>
 
           <div className="mb-6">
+            <DardEngine
+              generation={generation}
+              name={name}
+              onAnalyze={handleSegmentAnalyze}
+              analysis={segmentAnalysis}
+              loading={segmentLoading}
+            />
+          </div>
+
+          <div className="mb-6">
             <PredictiveModules
               data={aiData}
               loading={aiLoading}
@@ -198,6 +261,16 @@ function ResultContent() {
               <FutureTimeline forecasts={monthlyTimeline} name={name} />
             </div>
           )}
+
+          <div className="mb-6">
+            <CompatibilityMeter
+              userName={name}
+              userDob={dob}
+              onCheck={handleCompatCheck}
+              result={compatResult}
+              loading={compatLoading}
+            />
+          </div>
 
           {lifeTimeline.length > 0 && (
             <div className="mb-6">
@@ -217,13 +290,15 @@ function ResultContent() {
               backdropFilter: 'blur(12px)',
             }}
           >
-            <div className="mb-6">
+            <div className="mb-5">
               <h3 className="text-base font-semibold text-white mb-1">Share & Connect</h3>
               <p className="text-xs text-slate-500">
-                Share your energy score with friends and join our cosmic community for daily updates.
+                {latestWhatsapp
+                  ? 'Share your Guru reading — already customized from your Dard Engine result.'
+                  : 'Share your energy score and join our cosmic community for daily updates.'}
               </p>
             </div>
-            <ShareButtons score={score} name={name} />
+            <ShareButtons score={score} name={name} segmentWhatsapp={latestWhatsapp} />
           </div>
 
           <div className="mt-8 text-center">
