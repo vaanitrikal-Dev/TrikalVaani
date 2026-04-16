@@ -10,6 +10,9 @@ import EnergyMeter from '@/components/result/EnergyMeter';
 import TrikalInsight from '@/components/result/TrikalInsight';
 import ShareButtons from '@/components/result/ShareButtons';
 import PillarScoreGrid from '@/components/result/PillarScoreGrid';
+import LifeTimeline from '@/components/result/LifeTimeline';
+import PredictiveModules from '@/components/result/PredictiveModules';
+import type { DashaPeriod, LifeTimelineEvent, PredictiveModule } from '@/lib/vedic-astro';
 
 function ResultContent() {
   const params = useSearchParams();
@@ -24,6 +27,8 @@ function ResultContent() {
   const practicalTip = params.get('tip') || 'Avoid making major decisions under time pressure today. Reflection yields better outcomes.';
   const dob = params.get('dob') || '';
   const city = params.get('city') || '';
+  const varshphalFocus = params.get('varshphal') || 'Jupiter rules your Varshphal year, signaling exceptional expansion in wisdom, family, wealth, and spiritual depth.';
+  const ashtakvargaWealth = parseInt(params.get('avwealth') || '24', 10);
 
   const pillarScores = {
     wealth: parseInt(params.get('wealth') || '72', 10),
@@ -33,6 +38,21 @@ function ResultContent() {
     students: parseInt(params.get('students') || '73', 10),
     peace: parseInt(params.get('peace') || '69', 10),
   };
+
+  let dashaPeriods: DashaPeriod[] = [];
+  let lifeTimeline: LifeTimelineEvent[] = [];
+  let predictiveModules: PredictiveModule[] = [];
+
+  try {
+    const dashaRaw = params.get('dasha');
+    if (dashaRaw) dashaPeriods = JSON.parse(dashaRaw);
+    const timelineRaw = params.get('timeline');
+    if (timelineRaw) lifeTimeline = JSON.parse(timelineRaw);
+    const modulesRaw = params.get('modules');
+    if (modulesRaw) predictiveModules = JSON.parse(modulesRaw);
+  } catch {
+    /* fallback to empty arrays */
+  }
 
   return (
     <div className="min-h-screen bg-[#030712]">
@@ -114,6 +134,27 @@ function ResultContent() {
           <div className="mb-6">
             <PillarScoreGrid scores={pillarScores} />
           </div>
+
+          {predictiveModules.length > 0 && (
+            <div className="mb-6">
+              <PredictiveModules
+                modules={predictiveModules}
+                varshphalFocus={varshphalFocus}
+                ashtakvargaWealth={ashtakvargaWealth}
+                name={name}
+              />
+            </div>
+          )}
+
+          {lifeTimeline.length > 0 && (
+            <div className="mb-6">
+              <LifeTimeline
+                events={lifeTimeline}
+                dashaPeriods={dashaPeriods}
+                name={name}
+              />
+            </div>
+          )}
 
           <div
             className="rounded-2xl p-6 sm:p-8"

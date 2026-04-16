@@ -72,6 +72,12 @@ export default function BirthForm() {
         health: String(analysis.pillarScores.health),
         students: String(analysis.pillarScores.students),
         peace: String(analysis.pillarScores.peace),
+        gen: analysis.generationLabel,
+        avwealth: String(analysis.ashtakvargaWealth),
+        varshphal: analysis.varshphalFocus,
+        dasha: JSON.stringify(analysis.dashaPeriods),
+        timeline: JSON.stringify(analysis.lifeTimeline),
+        modules: JSON.stringify(analysis.predictiveModules),
       });
 
       router.push(`/result?${params.toString()}`);
