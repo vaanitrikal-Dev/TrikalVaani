@@ -64,6 +64,8 @@ export default function BirthForm() {
         color: analysis.luckyColor,
         number: String(analysis.luckyNumber),
         insight: analysis.insight,
+        remedy: analysis.remedy,
+        tip: analysis.practicalTip,
         wealth: String(analysis.pillarScores.wealth),
         career: String(analysis.pillarScores.career),
         love: String(analysis.pillarScores.love),

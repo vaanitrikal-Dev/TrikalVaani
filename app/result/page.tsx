@@ -20,6 +20,8 @@ function ResultContent() {
   const luckyColor = params.get('color') || 'Golden';
   const luckyNumber = parseInt(params.get('number') || '7', 10);
   const insight = params.get('insight') || 'The stars illuminate your path today with clarity and purpose.';
+  const remedy = params.get('remedy') || 'Chant the Gayatri Mantra 21 times at sunrise to align with the cosmic rhythm.';
+  const practicalTip = params.get('tip') || 'Avoid making major decisions under time pressure today. Reflection yields better outcomes.';
   const dob = params.get('dob') || '';
   const city = params.get('city') || '';
 
@@ -99,6 +101,8 @@ function ResultContent() {
             <div className="space-y-5">
               <TrikalInsight
                 insight={insight}
+                remedy={remedy}
+                practicalTip={practicalTip}
                 rashi={rashi}
                 luckyColor={luckyColor}
                 luckyNumber={luckyNumber}
