@@ -39,9 +39,72 @@ const GOLD_RGBA = (a: number) => `rgba(212,175,55,${a})`;
 const PINK = '#F472B6';
 const PINK_RGBA = (a: number) => `rgba(244,114,182,${a})`;
 
+const GENZ_VIBE_LABELS: Record<string, { vibe: string; communication: string }> = {
+  high:   { vibe: 'Vibe Check: Verified',     communication: 'Communication: Very Open' },
+  mid:    { vibe: 'Vibe Check: Moderate',      communication: 'Communication: Work On It' },
+  low:    { vibe: 'Vibe Check: Not It',        communication: 'Communication: Ghosting Risk' },
+};
+
+function TwinFlameBadge({ score }: { score: number }) {
+  if (score < 86) return null;
+  const isTwinFlame = score >= 95;
+  const label = isTwinFlame ? 'Twin Flame' : 'Soulmate';
+  const color = isTwinFlame ? '#F472B6' : '#FACC15';
+  const colorRgba = isTwinFlame ? (a: number) => `rgba(244,114,182,${a})` : (a: number) => `rgba(250,204,21,${a})`;
+
+  return (
+    <div
+      className="flex items-center justify-center gap-2 px-4 py-2 rounded-full w-fit mx-auto mt-3"
+      style={{
+        background: colorRgba(0.1),
+        border: `1.5px solid ${colorRgba(0.45)}`,
+        boxShadow: `0 0 20px ${colorRgba(0.2)}`,
+      }}
+    >
+      <span style={{ fontSize: '16px', lineHeight: 1 }}>{isTwinFlame ? '♾' : '✦'}</span>
+      <span className="text-sm font-black tracking-wide" style={{ color }}>
+        {label} Detected
+      </span>
+      <span style={{ fontSize: '16px', lineHeight: 1 }}>{isTwinFlame ? '♾' : '✦'}</span>
+    </div>
+  );
+}
+
+function VibeLabel({ score }: { score: number }) {
+  const key = score >= 70 ? 'high' : score >= 45 ? 'mid' : 'low';
+  const { vibe, communication } = GENZ_VIBE_LABELS[key];
+  const color = score >= 70 ? '#22C55E' : score >= 45 ? '#FACC15' : '#FF4D4D';
+  const colorRgba = score >= 70
+    ? (a: number) => `rgba(34,197,94,${a})`
+    : score >= 45
+    ? (a: number) => `rgba(250,204,21,${a})`
+    : (a: number) => `rgba(255,77,77,${a})`;
+
+  return (
+    <div className="flex items-center justify-center gap-2 flex-wrap mt-2">
+      <span
+        className="text-xs font-bold px-3 py-1 rounded-full"
+        style={{ background: colorRgba(0.1), color, border: `1px solid ${colorRgba(0.3)}` }}
+      >
+        {vibe}
+      </span>
+      <span
+        className="text-xs font-bold px-3 py-1 rounded-full"
+        style={{
+          background: score < 45 ? 'rgba(255,77,77,0.08)' : colorRgba(0.06),
+          color: score < 45 ? '#FF4D4D' : color,
+          border: `1px solid ${colorRgba(0.22)}`,
+        }}
+      >
+        {communication}
+      </span>
+    </div>
+  );
+}
+
 function ScoreMeter({ score }: { score: number }) {
   const color = score >= 70 ? '#22C55E' : score >= 45 ? '#FACC15' : '#FF4D4D';
-  const label = score >= 70 ? 'Highly Compatible' : score >= 45 ? 'Moderately Compatible' : 'Needs Deep Work';
+  const label = score >= 86 ? (score >= 95 ? 'Twin Flame' : 'Soulmate Level') : score >= 70 ? 'Highly Compatible' : score >= 45 ? 'Moderately Compatible' : 'Needs Deep Work';
 
   return (
     <div className="flex flex-col items-center py-4">
@@ -69,6 +132,8 @@ function ScoreMeter({ score }: { score: number }) {
       >
         {label}
       </span>
+      <TwinFlameBadge score={score} />
+      <VibeLabel score={score} />
     </div>
   );
 }

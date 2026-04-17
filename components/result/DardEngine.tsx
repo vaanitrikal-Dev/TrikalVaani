@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { HeartCrack, TriangleAlert as AlertTriangle, Sparkles, TrendingUp, Chrome as Home, Banknote, Baby, Users, Sunset, Crown, MoonStar, Loader as Loader2, ChevronRight, Heart } from 'lucide-react';
+import { HeartCrack, TriangleAlert as AlertTriangle, Sparkles, TrendingUp, Chrome as Home, Banknote, Baby, Users, Sunset, Crown, MoonStar, Loader as Loader2, ChevronRight, Heart, RefreshCw, CircleCheck as CheckCircle2, Circle as XCircle, Briefcase } from 'lucide-react';
 import DualPartnerForm, { type PartnerFormData } from './DualPartnerForm';
 import FlagDashboard from './FlagDashboard';
 
@@ -23,6 +23,7 @@ export type SegmentAnalysis = {
   flags?: Array<{ type: 'red' | 'green'; label: string; explanation: string }>;
   reunionProbability?: number;
   reunionMonth?: string;
+  closureVerdict?: 'wait_reconnect' | 'accept_move_on';
   vibeMeters?: { energy: number; loyalty: number; passion: number };
 };
 
@@ -37,23 +38,23 @@ type Props = {
 };
 
 const GENZ_SEGMENTS: LifeSegment[] = [
-  { id: 'ex_back', label: 'Ex-Back & Closure', generation: 'genz', icon: HeartCrack, color: '#F472B6', description: 'Venus & Moon karmic bond analysis' },
-  { id: 'toxic_boss', label: 'Toxic Boss Radar', generation: 'genz', icon: AlertTriangle, color: '#FB923C', description: 'Saturn & Mars clash in your karma bhava' },
-  { id: 'manifestation', label: 'Manifestation & Luck', generation: 'genz', icon: Sparkles, color: '#FACC15', description: 'Your current Sankalpa activation window' },
-  { id: 'dream_career', label: 'Dream Career Pivot', generation: 'genz', icon: TrendingUp, color: '#60A5FA', description: '10th house + Rahu ambition transit' },
+  { id: 'ex_back',      label: 'Ex-Back & Closure',    generation: 'genz', icon: HeartCrack,    color: '#F472B6', description: 'Venus & Moon karmic bond analysis' },
+  { id: 'toxic_boss',   label: 'Toxic Boss Radar',     generation: 'genz', icon: AlertTriangle, color: '#FB923C', description: 'Saturn & Mars authority clash in karma bhava' },
+  { id: 'manifestation',label: 'Manifestation & Luck', generation: 'genz', icon: Sparkles,      color: '#FACC15', description: 'Your current Sankalpa activation window' },
+  { id: 'dream_career', label: 'Dream Career Pivot',   generation: 'genz', icon: TrendingUp,    color: '#60A5FA', description: '10th house + Rahu ambition transit' },
 ];
 
 const MILLENNIAL_SEGMENTS: LifeSegment[] = [
-  { id: 'property_yog', label: 'Property & Home Yog', generation: 'millennial', icon: Home, color: '#34D399', description: '4th house & Jupiter blessing analysis' },
-  { id: 'karz_mukti', label: 'Karz Mukti (Debt)', generation: 'millennial', icon: Banknote, color: '#FACC15', description: '6th house & Saturn Karma clearing' },
-  { id: 'child_destiny', label: "Child's Destiny", generation: 'millennial', icon: Baby, color: '#F472B6', description: '5th house Putra Bhava activation' },
-  { id: 'parents_wellness', label: "Parents' Wellness", generation: 'millennial', icon: Users, color: '#60A5FA', description: '4th & 9th house ancestral protection' },
+  { id: 'property_yog',     label: 'Property & Home Yog',  generation: 'millennial', icon: Home,    color: '#34D399', description: '4th house & Jupiter blessing analysis' },
+  { id: 'karz_mukti',       label: 'Karz Mukti (Debt)',    generation: 'millennial', icon: Banknote, color: '#FACC15', description: '6th house & Saturn Karma clearing' },
+  { id: 'child_destiny',    label: "Child's Destiny",      generation: 'millennial', icon: Baby,    color: '#F472B6', description: '5th house Putra Bhava activation' },
+  { id: 'parents_wellness', label: "Parents' Wellness",    generation: 'millennial', icon: Users,   color: '#60A5FA', description: '4th & 9th house ancestral protection' },
 ];
 
 const GENX_SEGMENTS: LifeSegment[] = [
-  { id: 'retirement_peace', label: 'Retirement Peace', generation: 'genx', icon: Sunset, color: '#FB923C', description: '12th house & Jupiter final cycle' },
-  { id: 'legacy_inheritance', label: 'Legacy & Inheritance', generation: 'genx', icon: Crown, color: '#FACC15', description: '8th & 2nd house Dhan-Karma' },
-  { id: 'spiritual_innings', label: 'Spiritual 2nd Innings', generation: 'genx', icon: MoonStar, color: '#D4AF37', description: 'Ketu & 12th house moksha activation' },
+  { id: 'retirement_peace',   label: 'Retirement Peace',       generation: 'genx', icon: Sunset,   color: '#FB923C', description: '12th house & Jupiter final cycle' },
+  { id: 'legacy_inheritance', label: 'Legacy & Inheritance',   generation: 'genx', icon: Crown,    color: '#FACC15', description: '8th & 2nd house Dhan-Karma' },
+  { id: 'spiritual_innings',  label: 'Spiritual 2nd Innings',  generation: 'genx', icon: MoonStar, color: '#D4AF37', description: 'Ketu & 12th house moksha activation' },
 ];
 
 const SEGMENT_MAP: Record<string, LifeSegment[]> = {
@@ -68,12 +69,148 @@ const GEN_LABELS = {
   genx: 'Gen X (47–56)',
 };
 
-const DUAL_SEGMENTS = new Set(['ex_back', 'compatibility']);
+const DUAL_SEGMENTS = new Set(['ex_back', 'compatibility', 'toxic_boss']);
 
-const GOLD = '#D4AF37';
+const GOLD     = '#D4AF37';
 const GOLD_RGBA = (a: number) => `rgba(212,175,55,${a})`;
-const CRIMSON = '#DC2626';
-const PINK = '#F472B6';
+const CRIMSON  = '#DC2626';
+const PINK     = '#F472B6';
+const ORANGE   = '#FB923C';
+
+function ClosureVerdict({ verdict, reunionProbability, reunionMonth, name }: {
+  verdict: 'wait_reconnect' | 'accept_move_on';
+  reunionProbability?: number;
+  reunionMonth?: string;
+  name: string;
+}) {
+  const isWait = verdict === 'wait_reconnect';
+  const color  = isWait ? '#22C55E' : '#F472B6';
+  const colorRgba = isWait ? (a: number) => `rgba(34,197,94,${a})` : (a: number) => `rgba(244,114,182,${a})`;
+  const Icon = isWait ? CheckCircle2 : XCircle;
+
+  return (
+    <div
+      className="rounded-2xl p-5 relative overflow-hidden"
+      style={{
+        background: colorRgba(0.06),
+        border: `1.5px solid ${colorRgba(0.3)}`,
+        boxShadow: `0 0 24px ${colorRgba(0.12)}`,
+      }}
+    >
+      <div
+        className="absolute top-0 right-0 w-32 h-32 rounded-full pointer-events-none"
+        style={{ background: color, opacity: 0.05, filter: 'blur(24px)', transform: 'translate(30%, -30%)' }}
+      />
+
+      <div className="flex items-start gap-4">
+        <div
+          className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0"
+          style={{ background: colorRgba(0.12), border: `1.5px solid ${colorRgba(0.35)}` }}
+        >
+          <Icon className="w-6 h-6" style={{ color }} />
+        </div>
+
+        <div className="flex-1 min-w-0">
+          <p className="text-xs font-bold tracking-widest uppercase mb-1" style={{ color: colorRgba(0.65) }}>
+            Karmic Closure Algorithm
+          </p>
+          <p className="text-lg font-black mb-1" style={{ color }}>
+            {isWait ? 'Wait & Reconnect' : 'Accept & Move On'}
+          </p>
+          <p className="text-xs text-slate-400 leading-relaxed">
+            {isWait
+              ? `The stars show an open karmic loop between you two. Venus retrograde window and 7th house alignment suggest a real reunion window${reunionMonth ? ` around ${reunionMonth}` : ''}.`
+              : `The karmic debt between ${name.split(' ')[0]} and your ex has been settled. Your Moon's nakshatra has moved past the conjunction — the Guru says: release, rise, and receive something better.`}
+          </p>
+        </div>
+      </div>
+
+      {isWait && reunionProbability !== undefined && (
+        <div
+          className="mt-4 pt-4 flex items-center gap-4"
+          style={{ borderTop: `1px solid ${colorRgba(0.15)}` }}
+        >
+          <div className="text-center">
+            <p className="text-3xl font-black" style={{ color }}>{reunionProbability}%</p>
+            <p className="text-xs text-slate-500 leading-none mt-0.5">Reunion Probability</p>
+          </div>
+          {reunionMonth && (
+            <div>
+              <p className="text-xs font-semibold" style={{ color: GOLD }}>Best Window:</p>
+              <p className="text-sm text-white font-bold">{reunionMonth}</p>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ToxicBossRadar({ flags }: { flags: Array<{ type: 'red' | 'green'; label: string; explanation: string }> }) {
+  const greenFlags = [
+    { label: 'Mentorship Potential', explanation: 'Jupiter aspect on your 10th house boss indicates genuine guidance capacity' },
+    { label: 'Financial Growth', explanation: 'Their Saturn energy activates your 2nd Dhan house — salary growth is possible' },
+    { label: 'Skill Transfer Window', explanation: 'Mercury-Sun alignment suggests knowledge will flow toward you this quarter' },
+    ...flags.filter(f => f.type === 'green'),
+  ].slice(0, 3);
+
+  const redFlags = [
+    { label: 'Micromanagement High', explanation: 'Their Mars squares your Moon — expect control-freak behavior in meetings' },
+    { label: 'Ego Clash Alert', explanation: 'Competing Sun signs create a silent power war — pick your battles carefully' },
+    { label: 'Credit Stealing Risk', explanation: 'Rahu in your 10th shows someone taking your achievements — document everything' },
+    ...flags.filter(f => f.type === 'red'),
+  ].slice(0, 3);
+
+  return (
+    <div
+      className="rounded-2xl overflow-hidden"
+      style={{ background: 'rgba(251,146,60,0.04)', border: '1px solid rgba(251,146,60,0.18)' }}
+    >
+      <div className="px-4 pt-4 pb-2 flex items-center gap-2">
+        <Briefcase className="w-4 h-4" style={{ color: ORANGE }} />
+        <p className="text-xs font-bold uppercase tracking-widest" style={{ color: `${ORANGE}99` }}>
+          Toxic Boss Radar — Sun vs Saturn
+        </p>
+      </div>
+
+      <div className="px-4 pb-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="space-y-3">
+          <p className="text-xs font-semibold tracking-widest uppercase" style={{ color: 'rgba(34,197,94,0.7)' }}>
+            Green Signals
+          </p>
+          {greenFlags.map((f, i) => (
+            <div key={i} className="rounded-xl p-3" style={{ background: 'rgba(34,197,94,0.05)', border: '1px solid rgba(34,197,94,0.12)' }}>
+              <div className="flex items-start gap-2">
+                <CheckCircle2 className="w-3.5 h-3.5 flex-shrink-0 mt-0.5 text-emerald-400" />
+                <div>
+                  <p className="text-xs font-bold text-emerald-400 leading-tight mb-0.5">{f.label}</p>
+                  <p className="text-xs text-slate-500 leading-relaxed">{f.explanation}</p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="space-y-3">
+          <p className="text-xs font-semibold tracking-widest uppercase" style={{ color: 'rgba(255,77,77,0.7)' }}>
+            Red Signals
+          </p>
+          {redFlags.map((f, i) => (
+            <div key={i} className="rounded-xl p-3" style={{ background: 'rgba(255,77,77,0.05)', border: '1px solid rgba(255,77,77,0.12)' }}>
+              <div className="flex items-start gap-2">
+                <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0 mt-0.5 text-red-400" />
+                <div>
+                  <p className="text-xs font-bold text-red-400 leading-tight mb-0.5">{f.label}</p>
+                  <p className="text-xs text-slate-500 leading-relaxed">{f.explanation}</p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function DardEngine({ generation, name, onAnalyze, analysis, loading, unlockedTiers, onUnlock }: Props) {
   const [selected, setSelected] = useState<LifeSegment | null>(null);
@@ -92,13 +229,20 @@ export default function DardEngine({ generation, name, onAnalyze, analysis, load
     }
   }
 
+  function handleReset() {
+    setSelected(null);
+    setShowPartnerForm(false);
+    setPartnerData(null);
+  }
+
   async function handlePartnerSubmit(pd: PartnerFormData) {
     setPartnerData(pd);
     if (selected) await onAnalyze(selected, pd);
   }
 
   const isDualSegment = selected && DUAL_SEGMENTS.has(selected.id);
-  const isExBack = selected?.id === 'ex_back';
+  const isExBack      = selected?.id === 'ex_back';
+  const isToxicBoss   = selected?.id === 'toxic_boss';
 
   return (
     <div
@@ -110,17 +254,30 @@ export default function DardEngine({ generation, name, onAnalyze, analysis, load
       }}
     >
       <div className="p-5">
-        <div className="flex items-center gap-2 mb-1">
-          <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: CRIMSON }} />
-          <span className="text-xs font-semibold tracking-widest uppercase" style={{ color: `${GOLD}80` }}>
-            The Dard Engine
-          </span>
-          <span
-            className="text-xs px-2 py-0.5 rounded-full font-medium"
-            style={{ background: 'rgba(220,38,38,0.15)', color: '#FCA5A5', border: '1px solid rgba(220,38,38,0.3)' }}
-          >
-            {GEN_LABELS[generation]}
-          </span>
+        <div className="flex items-center justify-between gap-2 mb-1">
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: CRIMSON }} />
+            <span className="text-xs font-semibold tracking-widest uppercase" style={{ color: `${GOLD}80` }}>
+              The Dard Engine
+            </span>
+            <span
+              className="text-xs px-2 py-0.5 rounded-full font-medium"
+              style={{ background: 'rgba(220,38,38,0.15)', color: '#FCA5A5', border: '1px solid rgba(220,38,38,0.3)' }}
+            >
+              {GEN_LABELS[generation]}
+            </span>
+          </div>
+          {analysis && (
+            <button
+              onClick={handleReset}
+              type="button"
+              className="flex items-center gap-1 text-xs transition-colors duration-200"
+              style={{ color: 'rgba(148,163,184,0.5)' }}
+            >
+              <RefreshCw className="w-3 h-3" />
+              Reset
+            </button>
+          )}
         </div>
         <h3 className="text-base font-semibold text-white mb-1">
           What&apos;s on your mind, <span style={{ color: GOLD }}>{name.split(' ')[0]}</span>?
@@ -154,7 +311,7 @@ export default function DardEngine({ generation, name, onAnalyze, analysis, load
                     <Icon className="w-4 h-4" style={{ color: seg.color }} />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-0.5">
+                    <div className="flex items-center gap-2 mb-0.5 flex-wrap">
                       <p className="text-sm font-semibold text-white leading-tight">{seg.label}</p>
                       {isDual && (
                         <span
@@ -176,7 +333,13 @@ export default function DardEngine({ generation, name, onAnalyze, analysis, load
                   <div className="absolute inset-0 rounded-xl flex items-center justify-center" style={{ background: `${seg.color}08` }}>
                     <div className="flex items-center gap-2">
                       <Loader2 className="w-4 h-4 animate-spin" style={{ color: seg.color }} />
-                      <span className="text-xs font-medium" style={{ color: seg.color }}>Guru is reading both charts...</span>
+                      <span className="text-xs font-medium" style={{ color: seg.color }}>
+                        {isToxicBoss
+                          ? 'Analyzing Boss karma...'
+                          : isExBack
+                          ? 'Running Closure Algorithm...'
+                          : 'Guru is reading both charts...'}
+                      </span>
                     </div>
                   </div>
                 )}
@@ -188,26 +351,36 @@ export default function DardEngine({ generation, name, onAnalyze, analysis, load
         {isDualSegment && showPartnerForm && !analysis && (
           <div
             className="mt-5 rounded-xl p-4"
-            style={{ background: `${isExBack ? PINK : GOLD}08`, border: `1px solid ${isExBack ? PINK : GOLD}20` }}
+            style={{
+              background: `${isToxicBoss ? ORANGE : isExBack ? PINK : GOLD}08`,
+              border: `1px solid ${isToxicBoss ? ORANGE : isExBack ? PINK : GOLD}20`,
+            }}
           >
             <div className="flex items-center gap-2 mb-1">
-              {isExBack ? (
+              {isToxicBoss ? (
+                <Briefcase className="w-4 h-4" style={{ color: ORANGE }} />
+              ) : isExBack ? (
                 <HeartCrack className="w-4 h-4" style={{ color: PINK }} />
               ) : (
                 <Heart className="w-4 h-4" style={{ color: GOLD }} />
               )}
-              <span className="text-xs font-bold uppercase tracking-widest" style={{ color: isExBack ? PINK : GOLD }}>
-                {isExBack ? "Enter Their Details" : "Partner's Details"}
+              <span
+                className="text-xs font-bold uppercase tracking-widest"
+                style={{ color: isToxicBoss ? ORANGE : isExBack ? PINK : GOLD }}
+              >
+                {isToxicBoss ? "Enter Boss Details" : isExBack ? "Enter Their Details" : "Partner's Details"}
               </span>
             </div>
             <p className="text-xs text-slate-500 mb-0">
-              {isExBack
-                ? "Trikal Guru will analyze Venus-Ketu axis, 7th house karma, and reunion probability."
+              {isToxicBoss
+                ? "Trikal Guru will analyze Sun–Saturn authority axis & workplace power dynamics."
+                : isExBack
+                ? "Trikal Guru will run the Karmic Closure Algorithm on Venus-Ketu axis & 7th house."
                 : "Both charts will be compared using Ashta-Koota Vedic matching."}
             </p>
             <DualPartnerForm
               userName={name}
-              mode={isExBack ? 'ex_back' : 'compatibility'}
+              mode={isToxicBoss ? 'toxic_boss' : isExBack ? 'ex_back' : 'compatibility'}
               loading={loading}
               onSubmit={handlePartnerSubmit}
             />
@@ -244,11 +417,12 @@ function AnalysisPanel({
   unlockedTiers?: Set<string>;
   onUnlock?: (id: string) => void;
 }) {
-  const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(analysis.whatsappText)}`;
-  const isDual = DUAL_SEGMENTS.has(segment.id);
-  const isExBack = segment.id === 'ex_back';
-  const hasFlags = Array.isArray(analysis.flags) && analysis.flags.length > 0;
-  const showFlagTeaser = isDual && !unlockedTiers?.has('addon_redflag');
+  const whatsappUrl   = `https://wa.me/?text=${encodeURIComponent(analysis.whatsappText)}`;
+  const isDual        = DUAL_SEGMENTS.has(segment.id);
+  const isExBack      = segment.id === 'ex_back';
+  const isToxicBoss   = segment.id === 'toxic_boss';
+  const hasFlags      = Array.isArray(analysis.flags) && analysis.flags.length > 0;
+  const showFlagTeaser= isDual && !unlockedTiers?.has('addon_redflag');
 
   return (
     <div className="border-t p-5 space-y-4" style={{ borderColor: `${segment.color}20` }}>
@@ -259,6 +433,7 @@ function AnalysisPanel({
         </span>
       </div>
 
+      {/* Dual-chart person pair header */}
       {isDual && partnerName && (
         <div
           className="flex items-center gap-3 rounded-xl px-4 py-3"
@@ -272,10 +447,14 @@ function AnalysisPanel({
               >
                 <span className="text-xs font-bold text-yellow-300">{name[0]}</span>
               </div>
-              <p className="text-xs text-white font-medium leading-none">{name.split(' ')[0]}</p>
+              <p className="text-xs text-white font-medium leading-none">
+                {isToxicBoss ? 'You' : name.split(' ')[0]}
+              </p>
             </div>
             <div className="flex-1 h-px" style={{ background: `${segment.color}30` }} />
-            {isExBack ? (
+            {isToxicBoss ? (
+              <Briefcase className="w-5 h-5 flex-shrink-0" style={{ color: segment.color }} />
+            ) : isExBack ? (
               <HeartCrack className="w-5 h-5 flex-shrink-0" style={{ color: segment.color }} />
             ) : (
               <Heart className="w-5 h-5 flex-shrink-0" style={{ color: segment.color }} />
@@ -288,7 +467,9 @@ function AnalysisPanel({
               >
                 <span className="text-xs font-bold" style={{ color: segment.color }}>{partnerName[0]}</span>
               </div>
-              <p className="text-xs text-white font-medium leading-none">{partnerName.split(' ')[0]}</p>
+              <p className="text-xs text-white font-medium leading-none">
+                {isToxicBoss ? 'Boss' : partnerName.split(' ')[0]}
+              </p>
             </div>
           </div>
           {isExBack && analysis.reunionProbability !== undefined && (
@@ -300,19 +481,39 @@ function AnalysisPanel({
         </div>
       )}
 
+      {/* Closure Algorithm Verdict — Ex-Back only */}
+      {isExBack && analysis.closureVerdict && (
+        <ClosureVerdict
+          verdict={analysis.closureVerdict}
+          reunionProbability={analysis.reunionProbability}
+          reunionMonth={analysis.reunionMonth}
+          name={name}
+        />
+      )}
+
+      {/* Toxic Boss Radar — dedicated flag grid */}
+      {isToxicBoss && (
+        <ToxicBossRadar flags={analysis.flags ?? []} />
+      )}
+
+      {/* Dual Chart Vibe Meters */}
       {isDual && analysis.vibeMeters && (
         <div className="rounded-xl p-4" style={{ background: `${segment.color}06`, border: `1px solid ${segment.color}15` }}>
           <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: `${segment.color}80` }}>
-            Dual Chart Vibe Meters
+            {isToxicBoss ? 'Workplace Energy Meters' : 'Dual Chart Vibe Meters'}
           </p>
           <div className="space-y-2.5">
-            {([
-              { label: 'Energy Sync', score: analysis.vibeMeters.energy, color: '#F472B6' },
-              { label: 'Loyalty Bond', score: analysis.vibeMeters.loyalty, color: '#22C55E' },
-              { label: 'Passion Fire', score: analysis.vibeMeters.passion, color: '#F59E0B' },
-            ] as const).map(({ label, score, color }) => (
+            {(isToxicBoss ? [
+              { label: 'Authority Clash', score: analysis.vibeMeters.energy,  color: '#FB923C' },
+              { label: 'Loyalty Score',   score: analysis.vibeMeters.loyalty, color: '#22C55E' },
+              { label: 'Burn-out Risk',   score: analysis.vibeMeters.passion, color: '#F87171' },
+            ] : [
+              { label: 'Energy Sync',   score: analysis.vibeMeters.energy,  color: '#F472B6' },
+              { label: 'Loyalty Bond',  score: analysis.vibeMeters.loyalty, color: '#22C55E' },
+              { label: 'Passion Fire',  score: analysis.vibeMeters.passion, color: '#F59E0B' },
+            ]).map(({ label, score, color }) => (
               <div key={label} className="flex items-center gap-3">
-                <span className="text-xs text-slate-400 w-20 flex-shrink-0">{label}</span>
+                <span className="text-xs text-slate-400 w-24 flex-shrink-0">{label}</span>
                 <div className="flex-1 h-2 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.06)' }}>
                   <div
                     className="h-full rounded-full transition-all duration-1000"
@@ -326,6 +527,7 @@ function AnalysisPanel({
         </div>
       )}
 
+      {/* The Insight */}
       <div
         className="rounded-xl p-4"
         style={{ background: `${segment.color}08`, border: `1px solid ${segment.color}20` }}
@@ -336,6 +538,7 @@ function AnalysisPanel({
         <p className="text-sm text-slate-200 leading-relaxed">{analysis.insight}</p>
       </div>
 
+      {/* The Timeline */}
       <div
         className="rounded-xl p-4"
         style={{ background: 'rgba(212,175,55,0.04)', border: '1px solid rgba(212,175,55,0.15)' }}
@@ -346,7 +549,8 @@ function AnalysisPanel({
         <p className="text-sm leading-relaxed" style={{ color: 'rgba(212,175,55,0.85)' }}>{analysis.timeline}</p>
       </div>
 
-      {hasFlags && (
+      {/* Standard Flag Dashboard — non-ToxicBoss dual segments */}
+      {hasFlags && !isToxicBoss && (
         <FlagDashboard
           flags={analysis.flags!}
           showUnlockTeaser={showFlagTeaser}
@@ -357,6 +561,7 @@ function AnalysisPanel({
         />
       )}
 
+      {/* Upay */}
       {analysis.upay.length > 0 && (
         <div
           className="rounded-xl p-4"
