@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { Heart, User, Calendar, MapPin, Loader as Loader2, Flag, CircleCheck as CheckCircle2, CircleAlert as AlertCircle } from 'lucide-react';
+import { Heart, User, Calendar, MapPin, Loader as Loader2, Lock, Clock } from 'lucide-react';
+import FlagDashboard, { type FlagItem } from './FlagDashboard';
 
 export type PartnerData = {
   name: string;
@@ -29,15 +30,18 @@ type Props = {
   onCheck: (partner: PartnerData) => Promise<void>;
   result: CompatibilityResult | null;
   loading: boolean;
+  unlockedTiers?: Set<string>;
+  onUnlock?: (id: string) => void;
 };
 
 const GOLD = '#D4AF37';
 const GOLD_RGBA = (a: number) => `rgba(212,175,55,${a})`;
-const CRIMSON = '#DC2626';
+const PINK = '#F472B6';
+const PINK_RGBA = (a: number) => `rgba(244,114,182,${a})`;
 
 function ScoreMeter({ score }: { score: number }) {
-  const color = score >= 70 ? '#22C55E' : score >= 45 ? '#FACC15' : CRIMSON;
-  const label = score >= 70 ? 'Highly Compatible' : score >= 45 ? 'Moderately Compatible' : 'Needs Work';
+  const color = score >= 70 ? '#22C55E' : score >= 45 ? '#FACC15' : '#FF4D4D';
+  const label = score >= 70 ? 'Highly Compatible' : score >= 45 ? 'Moderately Compatible' : 'Needs Deep Work';
 
   return (
     <div className="flex flex-col items-center py-4">
@@ -51,16 +55,16 @@ function ScoreMeter({ score }: { score: number }) {
             strokeLinecap="round"
             strokeDasharray={`${2 * Math.PI * 50}`}
             strokeDashoffset={`${2 * Math.PI * 50 * (1 - score / 100)}`}
-            style={{ transition: 'stroke-dashoffset 1.5s ease' }}
+            style={{ transition: 'stroke-dashoffset 1.5s ease', filter: `drop-shadow(0 0 8px ${color}60)` }}
           />
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className="text-3xl font-bold" style={{ color }}>{score}</span>
+          <span className="text-3xl font-black" style={{ color }}>{score}</span>
           <span className="text-xs text-slate-500">/ 100</span>
         </div>
       </div>
       <span
-        className="text-xs font-semibold px-3 py-1 rounded-full"
+        className="text-xs font-bold px-3 py-1 rounded-full"
         style={{ background: `${color}15`, color, border: `1px solid ${color}30` }}
       >
         {label}
@@ -69,25 +73,22 @@ function ScoreMeter({ score }: { score: number }) {
   );
 }
 
-function VibeMeterBar({ label, score, color }: { label: string; score: number; color: string }) {
+function VibeMeterBar({ label: barLabel, score, color }: { label: string; score: number; color: string }) {
   return (
     <div className="flex items-center gap-3">
-      <span className="text-xs text-slate-400 w-16">{label}</span>
+      <span className="text-xs text-slate-400 w-16 flex-shrink-0">{barLabel}</span>
       <div className="flex-1 h-2 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.06)' }}>
         <div
           className="h-full rounded-full transition-all duration-1000"
-          style={{
-            width: `${score}%`,
-            background: `linear-gradient(90deg, ${color} 0%, ${color}cc 100%)`,
-          }}
+          style={{ width: `${score}%`, background: `linear-gradient(90deg, ${color} 0%, ${color}cc 100%)` }}
         />
       </div>
-      <span className="text-xs font-semibold" style={{ color }}>{score}%</span>
+      <span className="text-xs font-semibold w-8 text-right" style={{ color }}>{score}%</span>
     </div>
   );
 }
 
-export default function CompatibilityMeter({ userName, userDob, onCheck, result, loading }: Props) {
+export default function CompatibilityMeter({ userName, userDob, onCheck, result, loading, unlockedTiers, onUnlock }: Props) {
   const [partner, setPartner] = useState<PartnerData>({ name: '', dob: '', birth_time: '', city: '' });
   const [errors, setErrors] = useState<Partial<PartnerData>>({});
   const [open, setOpen] = useState(false);
@@ -112,7 +113,7 @@ export default function CompatibilityMeter({ userName, userDob, onCheck, result,
       className="rounded-2xl overflow-hidden"
       style={{
         background: 'rgba(6,10,24,0.95)',
-        border: `1px solid rgba(244,114,182,0.18)`,
+        border: `1px solid ${PINK_RGBA(0.18)}`,
         backdropFilter: 'blur(16px)',
       }}
     >
@@ -122,25 +123,25 @@ export default function CompatibilityMeter({ userName, userDob, onCheck, result,
       >
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <Heart className="w-4 h-4" style={{ color: '#F472B6' }} />
-            <span className="text-xs font-semibold tracking-widest uppercase" style={{ color: 'rgba(244,114,182,0.7)' }}>
+            <Heart className="w-4 h-4" style={{ color: PINK }} />
+            <span className="text-xs font-semibold tracking-widest uppercase" style={{ color: PINK_RGBA(0.7) }}>
               Red Flag / Green Flag
             </span>
             <span
               className="text-xs px-2 py-0.5 rounded-full font-medium"
-              style={{ background: 'rgba(244,114,182,0.1)', color: '#F472B6', border: '1px solid rgba(244,114,182,0.25)' }}
+              style={{ background: PINK_RGBA(0.1), color: PINK, border: `1px solid ${PINK_RGBA(0.25)}` }}
             >
-              NEW
+              Ashta-Koota
             </span>
           </div>
           <h3 className="text-base font-semibold text-white">Partner Compatibility Check</h3>
-          <p className="text-xs text-slate-500 mt-0.5">Ashta-Koota Vedic compatibility with AI vibe analysis</p>
+          <p className="text-xs text-slate-500 mt-0.5">Vedic Ashta-Koota compatibility with Flag Dashboard</p>
         </div>
         <div
           className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-          style={{ background: 'rgba(244,114,182,0.1)', border: '1px solid rgba(244,114,182,0.25)' }}
+          style={{ background: PINK_RGBA(0.1), border: `1px solid ${PINK_RGBA(0.25)}` }}
         >
-          <span style={{ color: '#F472B6', fontSize: '18px', lineHeight: 1 }}>{open ? '−' : '+'}</span>
+          <span style={{ color: PINK, fontSize: '18px', lineHeight: 1 }}>{open ? '−' : '+'}</span>
         </div>
       </button>
 
@@ -153,22 +154,24 @@ export default function CompatibilityMeter({ userName, userDob, onCheck, result,
                 style={{ background: GOLD_RGBA(0.05), border: `1px solid ${GOLD_RGBA(0.15)}` }}
               >
                 <p className="text-xs text-slate-400">
-                  Analyzing compatibility between <span className="font-semibold" style={{ color: GOLD }}>{userName.split(' ')[0]}</span> and your partner using Vedic Ashta-Koota matching.
+                  Analyzing compatibility between{' '}
+                  <span className="font-semibold" style={{ color: GOLD }}>{userName.split(' ')[0]}</span>{' '}
+                  and your partner using Vedic Ashta-Koota matching.
                 </p>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-medium uppercase tracking-wide mb-1.5" style={{ color: 'rgba(244,114,182,0.7)' }}>
+                  <label className="block text-xs font-semibold uppercase tracking-wide mb-1.5" style={{ color: PINK_RGBA(0.7) }}>
                     Partner&apos;s Name <span className="text-rose-400">*</span>
                   </label>
                   <div className="relative">
-                    <User className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5" style={{ color: 'rgba(244,114,182,0.4)' }} />
+                    <User className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5" style={{ color: PINK_RGBA(0.4) }} />
                     <input
                       type="text"
                       placeholder="Their name"
                       value={partner.name}
-                      onChange={(e) => setPartner((p) => ({ ...p, name: e.target.value }))}
+                      onChange={(e) => setPartner(p => ({ ...p, name: e.target.value }))}
                       className="input-cosmic w-full h-11 pl-9 pr-3 rounded-xl text-sm"
                     />
                   </div>
@@ -176,15 +179,15 @@ export default function CompatibilityMeter({ userName, userDob, onCheck, result,
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium uppercase tracking-wide mb-1.5" style={{ color: 'rgba(244,114,182,0.7)' }}>
+                  <label className="block text-xs font-semibold uppercase tracking-wide mb-1.5" style={{ color: PINK_RGBA(0.7) }}>
                     Date of Birth <span className="text-rose-400">*</span>
                   </label>
                   <div className="relative">
-                    <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5" style={{ color: 'rgba(244,114,182,0.4)' }} />
+                    <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5" style={{ color: PINK_RGBA(0.4) }} />
                     <input
                       type="date"
                       value={partner.dob}
-                      onChange={(e) => setPartner((p) => ({ ...p, dob: e.target.value }))}
+                      onChange={(e) => setPartner(p => ({ ...p, dob: e.target.value }))}
                       className="input-cosmic w-full h-11 pl-9 pr-3 rounded-xl text-sm"
                       style={{ colorScheme: 'dark' }}
                     />
@@ -193,16 +196,16 @@ export default function CompatibilityMeter({ userName, userDob, onCheck, result,
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium uppercase tracking-wide mb-1.5" style={{ color: 'rgba(244,114,182,0.7)' }}>
+                  <label className="block text-xs font-semibold uppercase tracking-wide mb-1.5" style={{ color: PINK_RGBA(0.7) }}>
                     Birth City <span className="text-rose-400">*</span>
                   </label>
                   <div className="relative">
-                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5" style={{ color: 'rgba(244,114,182,0.4)' }} />
+                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5" style={{ color: PINK_RGBA(0.4) }} />
                     <input
                       type="text"
                       placeholder="e.g. Mumbai"
                       value={partner.city}
-                      onChange={(e) => setPartner((p) => ({ ...p, city: e.target.value }))}
+                      onChange={(e) => setPartner(p => ({ ...p, city: e.target.value }))}
                       className="input-cosmic w-full h-11 pl-9 pr-3 rounded-xl text-sm"
                     />
                   </div>
@@ -210,15 +213,15 @@ export default function CompatibilityMeter({ userName, userDob, onCheck, result,
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium uppercase tracking-wide mb-1.5" style={{ color: 'rgba(244,114,182,0.5)' }}>
+                  <label className="block text-xs font-semibold uppercase tracking-wide mb-1.5" style={{ color: PINK_RGBA(0.5) }}>
                     Birth Time <span className="text-slate-600">(optional)</span>
                   </label>
                   <div className="relative">
-                    <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5" style={{ color: 'rgba(244,114,182,0.3)' }} />
+                    <Clock className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5" style={{ color: PINK_RGBA(0.3) }} />
                     <input
                       type="time"
                       value={partner.birth_time}
-                      onChange={(e) => setPartner((p) => ({ ...p, birth_time: e.target.value }))}
+                      onChange={(e) => setPartner(p => ({ ...p, birth_time: e.target.value }))}
                       className="input-cosmic w-full h-11 pl-9 pr-3 rounded-xl text-sm"
                       style={{ colorScheme: 'dark' }}
                     />
@@ -231,8 +234,8 @@ export default function CompatibilityMeter({ userName, userDob, onCheck, result,
                 disabled={loading}
                 className="w-full h-12 rounded-xl text-sm font-bold transition-all duration-200 flex items-center justify-center gap-2"
                 style={{
-                  background: loading ? 'rgba(244,114,182,0.2)' : 'linear-gradient(135deg, #F472B6 0%, #EC4899 100%)',
-                  color: loading ? '#F472B6' : '#fff',
+                  background: loading ? PINK_RGBA(0.2) : 'linear-gradient(135deg, #F472B6 0%, #EC4899 100%)',
+                  color: loading ? PINK : '#fff',
                   boxShadow: loading ? 'none' : '0 4px 20px rgba(244,114,182,0.3)',
                 }}
               >
@@ -250,7 +253,14 @@ export default function CompatibilityMeter({ userName, userDob, onCheck, result,
               </button>
             </form>
           ) : (
-            <CompatibilityResult result={result} userName={userName} partnerName={partner.name} onReset={() => { setPartner({ name: '', dob: '', birth_time: '', city: '' }); }} />
+            <CompatibilityResultView
+              result={result}
+              userName={userName}
+              partnerName={partner.name}
+              unlockedTiers={unlockedTiers}
+              onUnlock={onUnlock}
+              onReset={() => setPartner({ name: '', dob: '', birth_time: '', city: '' })}
+            />
           )}
         </div>
       )}
@@ -258,10 +268,24 @@ export default function CompatibilityMeter({ userName, userDob, onCheck, result,
   );
 }
 
-function CompatibilityResult({ result, userName, partnerName, onReset }: { result: CompatibilityResult; userName: string; partnerName: string; onReset: () => void }) {
+function CompatibilityResultView({
+  result,
+  userName,
+  partnerName,
+  unlockedTiers,
+  onUnlock,
+  onReset,
+}: {
+  result: CompatibilityResult;
+  userName: string;
+  partnerName: string;
+  unlockedTiers?: Set<string>;
+  onUnlock?: (id: string) => void;
+  onReset: () => void;
+}) {
   const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(result.whatsappText)}`;
-  const reds = result.flags.filter((f) => f.type === 'red');
-  const greens = result.flags.filter((f) => f.type === 'green');
+  const flags: FlagItem[] = (result.flags || []).map(f => ({ ...f }));
+  const showTeaser = !unlockedTiers?.has('addon_redflag');
 
   return (
     <div className="space-y-4">
@@ -272,10 +296,10 @@ function CompatibilityResult({ result, userName, partnerName, onReset }: { resul
           </div>
           <p className="text-xs font-medium text-white">{userName.split(' ')[0]}</p>
         </div>
-        <Heart className="w-5 h-5" style={{ color: '#F472B6' }} />
+        <Heart className="w-5 h-5" style={{ color: PINK }} />
         <div className="text-center">
-          <div className="w-10 h-10 rounded-full flex items-center justify-center mx-auto mb-1" style={{ background: 'rgba(244,114,182,0.1)', border: '1px solid rgba(244,114,182,0.2)' }}>
-            <User className="w-4 h-4" style={{ color: '#F472B6' }} />
+          <div className="w-10 h-10 rounded-full flex items-center justify-center mx-auto mb-1" style={{ background: PINK_RGBA(0.1), border: `1px solid ${PINK_RGBA(0.2)}` }}>
+            <User className="w-4 h-4" style={{ color: PINK }} />
           </div>
           <p className="text-xs font-medium text-white">{partnerName.split(' ')[0]}</p>
         </div>
@@ -283,8 +307,10 @@ function CompatibilityResult({ result, userName, partnerName, onReset }: { resul
 
       <ScoreMeter score={result.score} />
 
-      <div className="rounded-xl p-4" style={{ background: 'rgba(244,114,182,0.04)', border: '1px solid rgba(244,114,182,0.15)' }}>
-        <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: 'rgba(244,114,182,0.7)' }}>Vibe Meters</p>
+      <div className="rounded-xl p-4" style={{ background: PINK_RGBA(0.04), border: `1px solid ${PINK_RGBA(0.15)}` }}>
+        <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: PINK_RGBA(0.7) }}>
+          Dual Chart Vibe Meters
+        </p>
         <div className="space-y-2.5">
           <VibeMeterBar label="Energy" score={result.vibeMeters?.energy || 70} color="#F472B6" />
           <VibeMeterBar label="Loyalty" score={result.vibeMeters?.loyalty || 75} color="#22C55E" />
@@ -292,43 +318,21 @@ function CompatibilityResult({ result, userName, partnerName, onReset }: { resul
         </div>
       </div>
 
-      <div className="rounded-xl p-4" style={{ background: 'rgba(244,114,182,0.06)', border: '1px solid rgba(244,114,182,0.2)' }}>
-        <p className="text-xs font-semibold tracking-widest uppercase mb-2" style={{ color: 'rgba(244,114,182,0.7)' }}>The Vibe</p>
+      <div className="rounded-xl p-4" style={{ background: PINK_RGBA(0.06), border: `1px solid ${PINK_RGBA(0.2)}` }}>
+        <p className="text-xs font-semibold tracking-widest uppercase mb-2" style={{ color: PINK_RGBA(0.7) }}>The Vibe</p>
         <p className="text-sm text-slate-200 leading-relaxed italic">&ldquo;{result.vibe}&rdquo;</p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        {greens.length > 0 && (
-          <div className="rounded-xl p-3.5" style={{ background: 'rgba(34,197,94,0.05)', border: '1px solid rgba(34,197,94,0.2)' }}>
-            <p className="text-xs font-semibold text-emerald-400/70 uppercase tracking-widest mb-2.5 flex items-center gap-1.5">
-              <CheckCircle2 className="w-3.5 h-3.5" /> Green Flags
-            </p>
-            <ul className="space-y-2">
-              {greens.map((f, i) => (
-                <li key={i}>
-                  <p className="text-xs font-semibold text-emerald-300">{f.label}</p>
-                  <p className="text-xs text-slate-500 mt-0.5">{f.explanation}</p>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-        {reds.length > 0 && (
-          <div className="rounded-xl p-3.5" style={{ background: 'rgba(220,38,38,0.05)', border: '1px solid rgba(220,38,38,0.2)' }}>
-            <p className="text-xs font-semibold text-red-400/70 uppercase tracking-widest mb-2.5 flex items-center gap-1.5">
-              <AlertCircle className="w-3.5 h-3.5" /> Red Flags
-            </p>
-            <ul className="space-y-2">
-              {reds.map((f, i) => (
-                <li key={i}>
-                  <p className="text-xs font-semibold text-red-300">{f.label}</p>
-                  <p className="text-xs text-slate-500 mt-0.5">{f.explanation}</p>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-      </div>
+      {flags.length > 0 && (
+        <FlagDashboard
+          flags={flags}
+          showUnlockTeaser={showTeaser}
+          onUnlock={() => onUnlock?.('addon_redflag')}
+          userName={userName}
+          partnerName={partnerName}
+          isExBack={false}
+        />
+      )}
 
       <div className="rounded-xl p-4" style={{ background: GOLD_RGBA(0.05), border: `1px solid ${GOLD_RGBA(0.18)}` }}>
         <p className="text-xs font-semibold tracking-widest uppercase mb-2" style={{ color: `${GOLD}70` }}>Guru Verdict</p>
@@ -359,4 +363,3 @@ function CompatibilityResult({ result, userName, partnerName, onReset }: { resul
     </div>
   );
 }
-

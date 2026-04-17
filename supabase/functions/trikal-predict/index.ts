@@ -20,7 +20,7 @@ interface PredictRequest {
   varshphalFocus?: string;
   segmentId?: string;
   segmentLabel?: string;
-  partner?: { name: string; dob: string; birth_time?: string; city: string };
+  partner?: { name: string; dob: string; birth_time?: string; city: string; gender?: string };
 }
 
 interface MonthForecast {
@@ -52,6 +52,10 @@ interface SegmentResponse {
   timeline: string;
   upay: string[];
   whatsappText: string;
+  flags?: Array<{ type: "red" | "green"; label: string; explanation: string }>;
+  reunionProbability?: number;
+  reunionMonth?: string;
+  vibeMeters?: { energy: number; loyalty: number; passion: number };
 }
 
 interface CompatibilityResponse {
@@ -140,11 +144,15 @@ function buildSegmentPrompt(req: PredictRequest, tier: string = "free"): string 
   const isGenZ = req.generation === "genz";
   const isMillennial = req.generation === "millennial";
   const currentYear = new Date().getFullYear();
+  const currentMonth = new Date().getMonth();
+  const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
   const activeDasha = getActiveDasha(req.dashaPeriods, currentYear);
   const isPaid = tier !== "free";
+  const isDualChart = req.segmentId === "ex_back" || req.segmentId === "compatibility";
+  const p = req.partner;
 
   const segmentContext: Record<string, string> = {
-    ex_back: "Venus karaka analysis for past karmic bonds, Moon-Rahu axis, 7th house unfinished karma",
+    ex_back: "Venus-Ketu axis for past karmic bonds, Moon-Rahu axis, 7th house unfinished karma, 8th house hidden secrets, reunion probability window",
     toxic_boss: "Saturn-Mars tension in 10th/6th house, Rahu workplace karma, power dynamics at work",
     manifestation: "11th house activation, current Dasha luck window, Jupiter transit for manifestation",
     dream_career: "10th house pivot, Rahu ambition in 9th/10th, Saturn discipline phase",
@@ -159,9 +167,65 @@ function buildSegmentPrompt(req: PredictRequest, tier: string = "free"): string 
 
   const ctx = segmentContext[req.segmentId || ""] || "general life analysis";
 
-  const cliffhangerNote = !isPaid
-    ? `IMPORTANT: End the "insight" with a CLIFFHANGER hook. Mention a specific planetary transit (Saturn Return, Rahu's Shadow Phase, Jupiter's Blessing Window, Ketu's Karmic Release) that is "locked" and only revealed in the premium reading. Example: "But there's a critical Rahu transit in ${currentYear + 1} that will determine whether this resolves smoothly or requires deeper work — the exact timing is in your full reading."`
+  const cliffhangerNote = !isPaid && !isDualChart
+    ? `IMPORTANT: End the "insight" with a CLIFFHANGER hook. Mention a specific planetary transit (Saturn Return, Rahu's Shadow Phase, Jupiter's Blessing Window, Ketu's Karmic Release) that is "locked" and only revealed in the premium reading.`
     : "";
+
+  const reunionMonth = months[(currentMonth + 3) % 12];
+
+  if (isDualChart && p) {
+    const genderTone = p.gender === "him" ? "masculine partner" : "feminine partner";
+    const p1 = req.name.split(" ")[0];
+    const p2 = p.name.split(" ")[0];
+    return `You are Trikal Guru — deeply personal, specific Vedic AI analyzing TWO birth charts for an Ex-Back reading.
+
+PERSON 1 (Seeker): ${req.name}, DOB: ${req.dob}, City: ${req.city}, Generation: ${req.generation}
+PERSON 2 (${genderTone}): ${p.name}, DOB: ${p.dob}, City: ${p.city || "Unknown"}
+Current Dasha: ${activeDasha ? `${activeDasha.planet} (${activeDasha.startYear}–${activeDasha.endYear}) — ${activeDasha.theme}` : "Unknown"}
+
+DUAL CHART ANALYSIS REQUIRED:
+1. Venus-Ketu axis: Analyze how Venus placement in ${p1}'s chart interacts with Ketu in ${p2}'s chart (karmic debt, past life bond, unfinished business)
+2. 7th House Karma: Compare the 7th lords of both charts — is there a Vivah Yoga or a separation pattern?
+3. 8th House Secrets: Look at ${p2}'s 8th house for hidden information, trust patterns, undisclosed connections
+4. Moon-Rahu axis: Emotional obsession vs. karmic release — which is dominant?
+5. Reunion Window: Calculate the Venus transit window when reconciliation energy peaks
+
+Output 3 GREEN FLAGS (e.g., "Karmic Soulmate Connection", "High Emotional Resonance", "7th House Reunion Yog") and 3 RED FLAGS (e.g., "Communication Blockage", "Ego Clash (Sun-Mars)", "8th House Hidden Secret").
+
+Vibe meters: Reflect the COMPARISON between BOTH charts:
+- energy: combined Mars + Venus charge (0–100)
+- loyalty: Moon-Saturn stability between both charts (0–100)
+- passion: Venus-Mars intensity comparison (0–100)
+
+${!isPaid ? `CLIFFHANGER RULE: The insight must end with: "The stars show a ${Math.floor(Math.random() * 15) + 60}% chance of reunion in ${reunionMonth} — but a hidden Red Flag in ${p2}'s 8th house suggests a secret you don't know... Unlock the 'Truth Shield' for ₹11 to reveal it."` : ""}
+
+Return ONLY valid JSON:
+{
+  "segmentId": "ex_back",
+  "reunionProbability": number between 55–85 based on Venus-Ketu and 7th house analysis,
+  "reunionMonth": "${reunionMonth} ${currentYear}",
+  "vibeMeters": {
+    "energy": number 0-100,
+    "loyalty": number 0-100,
+    "passion": number 0-100
+  },
+  "flags": [
+    {"type":"green","label":"Karmic Soulmate Connection","explanation":"one sentence — specific planetary reason why this bond has genuine cosmic roots"},
+    {"type":"green","label":"[second green flag name]","explanation":"one sentence"},
+    {"type":"green","label":"[third green flag name]","explanation":"one sentence"},
+    {"type":"red","label":"Communication Blockage","explanation":"one sentence — Mercury or 3rd house tension causing misunderstandings"},
+    {"type":"red","label":"[second red flag name]","explanation":"one sentence — specific planetary clash"},
+    {"type":"red","label":"8th House Hidden Secret","explanation":"one sentence — vague but suspenseful hint about what's hidden in ${p2}'s chart"}
+  ],
+  "insight": "4 sentences analyzing ${p1} and ${p2}'s Venus-Ketu bond, 7th house karma, and what the dual chart says about their reunion potential. Use both names.${!isPaid ? " End with the exact cliffhanger about the 8th house secret and Truth Shield." : ""}",
+  "timeline": "2–3 sentences with specific month/year windows: Venus transit peak, Saturn's test period, and the final closure or reunion gate.",
+  "upay": [
+    "Upay 1: Venus remedy specifically for rekindling this bond — mantra or ritual",
+    "Upay 2: Ketu release ritual to dissolve karmic debt and allow natural outcome"
+  ],
+  "whatsappText": "Guru says ${p1} & ${p2}'s reunion probability is [X]% — Venus-Ketu axis is LIVE! Check your Ex-Back reading free at TrikalVaani.com"
+}`;
+  }
 
   return `You are Trikal Guru — warm, specific, personalized Vedic AI.
 
@@ -314,15 +378,30 @@ function buildFallbackSegment(req: PredictRequest): SegmentResponse {
   const fallbacks: Record<string, SegmentResponse> = {
     ex_back: {
       segmentId: "ex_back",
+      reunionProbability: 70,
+      reunionMonth: `${futureMonth1} ${year}`,
+      vibeMeters: {
+        energy: Math.min(90, ((req.dob.replace(/-/g,"").split("").reduce((a,c)=>a+parseInt(c,10),0)) % 30) + 62),
+        loyalty: Math.min(88, ((req.dob.replace(/-/g,"").split("").reduce((a,c)=>a+parseInt(c,10),0)) % 25) + 58),
+        passion: Math.min(92, ((req.dob.replace(/-/g,"").split("").reduce((a,c)=>a+parseInt(c,10),0)) % 35) + 55),
+      },
+      flags: [
+        { type: "green", label: "Karmic Soulmate Connection", explanation: "Your Venus-Ketu axis shows this bond has genuine past-life roots — the pull you feel is cosmically real, not just emotional habit." },
+        { type: "green", label: "7th House Reunion Yog", explanation: "The 7th lord in both charts carries an active Vivah Yoga pattern — the stars have not closed this chapter." },
+        { type: "green", label: "High Emotional Resonance", explanation: "Your Moon signs are in a naturally harmonious relationship, creating deep emotional understanding between you two." },
+        { type: "red", label: "Communication Blockage", explanation: "Mercury tension in the 3rd house creates recurring misunderstandings — words said in anger carry outsized karmic weight here." },
+        { type: "red", label: "Ego Clash (Sun-Mars)", explanation: "Sun-Mars opposition between the two charts creates pride-driven conflicts that neither person initiates reconciliation from." },
+        { type: "red", label: "8th House Hidden Secret", explanation: "A planetary pattern in the 8th house suggests there is something undisclosed that, if revealed, would change the dynamic completely." },
+      ],
       insight: isGenZ
-        ? `${firstName}, the Venus-Rahu axis in your chart reveals this past connection carries unresolved karmic weight — and that's exactly why it keeps surfacing in your thoughts. The moon nodes don't allow unfinished business to stay buried forever. Your chart shows a rare 'closure window' in the next few months where either reconciliation or genuine emotional release becomes possible. The cosmos is asking you to choose healing over holding on.`
-        : `${firstName}, the 7th house analysis shows a classic Pitru-Dosha pattern in your relationship karma — where ancestral relationship patterns play out in your current bonds. This connection has a karmic purpose beyond its surface form. The Venus transit entering your 5th house in the coming months will bring either a meaningful reunion or — more powerfully — a full emotional release that frees you for a higher Prem Yoga.`,
+        ? `${firstName}, the Venus-Rahu axis in your chart reveals this past connection carries unresolved karmic weight — and that's exactly why it keeps surfacing in your thoughts. The moon nodes don't allow unfinished business to stay buried forever. Your chart shows a rare 'closure window' opening in ${futureMonth1} where either reconciliation or genuine emotional release becomes possible. The stars show a 70% chance of reunion in ${futureMonth1} — but a hidden Red Flag in their 8th house suggests a secret you don't know... Unlock the 'Truth Shield' for ₹11 to reveal it.`
+        : `${firstName}, the 7th house analysis reveals a classic karmic bond pattern where past-life connection is still active between you two. Venus entering a powerful aspect with your natal Moon creates a rare rekindling window in ${futureMonth1} ${year}. This connection has a purpose beyond its surface form — the cosmic question is whether both parties are ready to resolve it consciously. The stars show a 70% chance of reunion in ${futureMonth1} — but a hidden Red Flag in their 8th house suggests a secret you don't know... Unlock the 'Truth Shield' for ₹11 to reveal it.`,
       timeline: `Between ${futureMonth1} and ${futureMonth2} ${year}, Venus enters a powerful aspect with your natal Moon — this is the definitive closure or rekindling window. If nothing shifts by ${futureMonth2}, the cosmic door on this chapter closes completely and a new, higher-quality connection opens in its place.`,
       upay: [
         isGenZ ? `Write a "release letter" to this person — honest, specific, without sending it. Burn it on a Friday evening. This is a genuine Vedic Sankalpa ritual for emotional release.` : `On the next Purnima (full moon), offer white flowers to flowing water while consciously releasing this person's energy from your life. Chant "Om Shukraya Namah" 16 times.`,
         isGenZ ? `Chant "Om Chandraya Namah" 11 times before sleeping for 21 days — this directly works on the Moon-governed emotional layer and speeds karmic resolution.` : `Consult about your Kul-Devta — many persistent relationship entanglements trace to unresolved ancestral bonds that need a lineage-specific puja to dissolve.`,
       ],
-      whatsappText: `Guru says my ex situation will reach cosmic resolution by ${futureMonth1} ${year}! The stars don't do drama — they do closure. Check yours free at TrikalVaani.com`,
+      whatsappText: `Guru says my ex situation will reach cosmic resolution by ${futureMonth1} ${year}! The Venus-Ketu axis shows 70% reunion probability. Check yours free at TrikalVaani.com`,
     },
     toxic_boss: {
       segmentId: "toxic_boss",

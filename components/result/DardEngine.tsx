@@ -1,7 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { HeartCrack, TriangleAlert as AlertTriangle, Sparkles, TrendingUp, Chrome as Home, Banknote, Baby, Users, Sunset, Crown, MoonStar, Loader as Loader2, ChevronRight } from 'lucide-react';
+import { HeartCrack, TriangleAlert as AlertTriangle, Sparkles, TrendingUp, Chrome as Home, Banknote, Baby, Users, Sunset, Crown, MoonStar, Loader as Loader2, ChevronRight, Heart } from 'lucide-react';
+import DualPartnerForm, { type PartnerFormData } from './DualPartnerForm';
+import FlagDashboard from './FlagDashboard';
 
 export type LifeSegment = {
   id: string;
@@ -18,18 +20,24 @@ export type SegmentAnalysis = {
   timeline: string;
   upay: string[];
   whatsappText: string;
+  flags?: Array<{ type: 'red' | 'green'; label: string; explanation: string }>;
+  reunionProbability?: number;
+  reunionMonth?: string;
+  vibeMeters?: { energy: number; loyalty: number; passion: number };
 };
 
 type Props = {
   generation: 'genz' | 'millennial' | 'genx';
   name: string;
-  onAnalyze: (segment: LifeSegment) => Promise<void>;
+  onAnalyze: (segment: LifeSegment, partnerData?: PartnerFormData) => Promise<void>;
   analysis: SegmentAnalysis | null;
   loading: boolean;
+  unlockedTiers?: Set<string>;
+  onUnlock?: (id: string) => void;
 };
 
 const GENZ_SEGMENTS: LifeSegment[] = [
-  { id: 'ex_back', label: 'Ex-Back & Closure', generation: 'genz', icon: HeartCrack, color: '#F472B6', description: 'Venus & Moon analysis for past karmic bonds' },
+  { id: 'ex_back', label: 'Ex-Back & Closure', generation: 'genz', icon: HeartCrack, color: '#F472B6', description: 'Venus & Moon karmic bond analysis' },
   { id: 'toxic_boss', label: 'Toxic Boss Radar', generation: 'genz', icon: AlertTriangle, color: '#FB923C', description: 'Saturn & Mars clash in your karma bhava' },
   { id: 'manifestation', label: 'Manifestation & Luck', generation: 'genz', icon: Sparkles, color: '#FACC15', description: 'Your current Sankalpa activation window' },
   { id: 'dream_career', label: 'Dream Career Pivot', generation: 'genz', icon: TrendingUp, color: '#60A5FA', description: '10th house + Rahu ambition transit' },
@@ -60,18 +68,37 @@ const GEN_LABELS = {
   genx: 'Gen X (47–56)',
 };
 
+const DUAL_SEGMENTS = new Set(['ex_back', 'compatibility']);
+
 const GOLD = '#D4AF37';
 const GOLD_RGBA = (a: number) => `rgba(212,175,55,${a})`;
 const CRIMSON = '#DC2626';
+const PINK = '#F472B6';
 
-export default function DardEngine({ generation, name, onAnalyze, analysis, loading }: Props) {
+export default function DardEngine({ generation, name, onAnalyze, analysis, loading, unlockedTiers, onUnlock }: Props) {
   const [selected, setSelected] = useState<LifeSegment | null>(null);
+  const [showPartnerForm, setShowPartnerForm] = useState(false);
+  const [partnerData, setPartnerData] = useState<PartnerFormData | null>(null);
   const segments = SEGMENT_MAP[generation];
 
-  async function handleClick(seg: LifeSegment) {
+  function handleClick(seg: LifeSegment) {
     setSelected(seg);
-    await onAnalyze(seg);
+    if (DUAL_SEGMENTS.has(seg.id)) {
+      setShowPartnerForm(true);
+    } else {
+      setShowPartnerForm(false);
+      setPartnerData(null);
+      onAnalyze(seg);
+    }
   }
+
+  async function handlePartnerSubmit(pd: PartnerFormData) {
+    setPartnerData(pd);
+    if (selected) await onAnalyze(selected, pd);
+  }
+
+  const isDualSegment = selected && DUAL_SEGMENTS.has(selected.id);
+  const isExBack = selected?.id === 'ex_back';
 
   return (
     <div
@@ -84,14 +111,8 @@ export default function DardEngine({ generation, name, onAnalyze, analysis, load
     >
       <div className="p-5">
         <div className="flex items-center gap-2 mb-1">
-          <div
-            className="w-2 h-2 rounded-full animate-pulse"
-            style={{ background: CRIMSON }}
-          />
-          <span
-            className="text-xs font-semibold tracking-widest uppercase"
-            style={{ color: `${GOLD}80` }}
-          >
+          <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: CRIMSON }} />
+          <span className="text-xs font-semibold tracking-widest uppercase" style={{ color: `${GOLD}80` }}>
             The Dard Engine
           </span>
           <span
@@ -112,11 +133,12 @@ export default function DardEngine({ generation, name, onAnalyze, analysis, load
           {segments.map((seg) => {
             const Icon = seg.icon;
             const isSelected = selected?.id === seg.id;
+            const isDual = DUAL_SEGMENTS.has(seg.id);
             return (
               <button
                 key={seg.id}
                 onClick={() => handleClick(seg)}
-                disabled={loading}
+                disabled={loading && isSelected}
                 className="relative text-left rounded-xl p-4 transition-all duration-200 group"
                 style={{
                   background: isSelected ? `${seg.color}12` : 'rgba(255,255,255,0.02)',
@@ -127,15 +149,22 @@ export default function DardEngine({ generation, name, onAnalyze, analysis, load
                 <div className="flex items-start gap-3">
                   <div
                     className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5"
-                    style={{
-                      background: `${seg.color}15`,
-                      border: `1px solid ${seg.color}30`,
-                    }}
+                    style={{ background: `${seg.color}15`, border: `1px solid ${seg.color}30` }}
                   >
                     <Icon className="w-4 h-4" style={{ color: seg.color }} />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-white leading-tight mb-1">{seg.label}</p>
+                    <div className="flex items-center gap-2 mb-0.5">
+                      <p className="text-sm font-semibold text-white leading-tight">{seg.label}</p>
+                      {isDual && (
+                        <span
+                          className="text-xs px-1.5 py-0.5 rounded font-semibold flex-shrink-0"
+                          style={{ background: `${seg.color}15`, color: seg.color, border: `1px solid ${seg.color}30` }}
+                        >
+                          Dual Chart
+                        </span>
+                      )}
+                    </div>
                     <p className="text-xs leading-relaxed" style={{ color: 'rgba(148,163,184,0.7)' }}>{seg.description}</p>
                   </div>
                   <ChevronRight
@@ -147,7 +176,7 @@ export default function DardEngine({ generation, name, onAnalyze, analysis, load
                   <div className="absolute inset-0 rounded-xl flex items-center justify-center" style={{ background: `${seg.color}08` }}>
                     <div className="flex items-center gap-2">
                       <Loader2 className="w-4 h-4 animate-spin" style={{ color: seg.color }} />
-                      <span className="text-xs font-medium" style={{ color: seg.color }}>Guru is reading your chart...</span>
+                      <span className="text-xs font-medium" style={{ color: seg.color }}>Guru is reading both charts...</span>
                     </div>
                   </div>
                 )}
@@ -155,32 +184,147 @@ export default function DardEngine({ generation, name, onAnalyze, analysis, load
             );
           })}
         </div>
+
+        {isDualSegment && showPartnerForm && !analysis && (
+          <div
+            className="mt-5 rounded-xl p-4"
+            style={{ background: `${isExBack ? PINK : GOLD}08`, border: `1px solid ${isExBack ? PINK : GOLD}20` }}
+          >
+            <div className="flex items-center gap-2 mb-1">
+              {isExBack ? (
+                <HeartCrack className="w-4 h-4" style={{ color: PINK }} />
+              ) : (
+                <Heart className="w-4 h-4" style={{ color: GOLD }} />
+              )}
+              <span className="text-xs font-bold uppercase tracking-widest" style={{ color: isExBack ? PINK : GOLD }}>
+                {isExBack ? "Enter Their Details" : "Partner's Details"}
+              </span>
+            </div>
+            <p className="text-xs text-slate-500 mb-0">
+              {isExBack
+                ? "Trikal Guru will analyze Venus-Ketu axis, 7th house karma, and reunion probability."
+                : "Both charts will be compared using Ashta-Koota Vedic matching."}
+            </p>
+            <DualPartnerForm
+              userName={name}
+              mode={isExBack ? 'ex_back' : 'compatibility'}
+              loading={loading}
+              onSubmit={handlePartnerSubmit}
+            />
+          </div>
+        )}
       </div>
 
       {analysis && !loading && selected && (
-        <AnalysisPanel analysis={analysis} segment={selected} name={name} />
+        <AnalysisPanel
+          analysis={analysis}
+          segment={selected}
+          name={name}
+          partnerName={partnerData?.name}
+          unlockedTiers={unlockedTiers}
+          onUnlock={onUnlock}
+        />
       )}
     </div>
   );
 }
 
-function AnalysisPanel({ analysis, segment, name }: { analysis: SegmentAnalysis; segment: LifeSegment; name: string }) {
-  const GOLD = '#D4AF37';
-  const GOLD_RGBA = (a: number) => `rgba(212,175,55,${a})`;
-
+function AnalysisPanel({
+  analysis,
+  segment,
+  name,
+  partnerName,
+  unlockedTiers,
+  onUnlock,
+}: {
+  analysis: SegmentAnalysis;
+  segment: LifeSegment;
+  name: string;
+  partnerName?: string;
+  unlockedTiers?: Set<string>;
+  onUnlock?: (id: string) => void;
+}) {
   const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(analysis.whatsappText)}`;
+  const isDual = DUAL_SEGMENTS.has(segment.id);
+  const isExBack = segment.id === 'ex_back';
+  const hasFlags = Array.isArray(analysis.flags) && analysis.flags.length > 0;
+  const showFlagTeaser = isDual && !unlockedTiers?.has('addon_redflag');
 
   return (
-    <div
-      className="border-t p-5 space-y-4"
-      style={{ borderColor: `${segment.color}20` }}
-    >
+    <div className="border-t p-5 space-y-4" style={{ borderColor: `${segment.color}20` }}>
       <div className="flex items-center gap-2 mb-1">
         <div className="w-1.5 h-1.5 rounded-full" style={{ background: segment.color }} />
         <span className="text-xs font-semibold tracking-widest uppercase" style={{ color: `${segment.color}80` }}>
           Trikal Guru on: {segment.label}
         </span>
       </div>
+
+      {isDual && partnerName && (
+        <div
+          className="flex items-center gap-3 rounded-xl px-4 py-3"
+          style={{ background: `${segment.color}08`, border: `1px solid ${segment.color}18` }}
+        >
+          <div className="flex items-center gap-3 flex-1 min-w-0">
+            <div className="text-center flex-shrink-0">
+              <div
+                className="w-9 h-9 rounded-full flex items-center justify-center mx-auto mb-1"
+                style={{ background: 'rgba(212,175,55,0.12)', border: '1px solid rgba(212,175,55,0.22)' }}
+              >
+                <span className="text-xs font-bold text-yellow-300">{name[0]}</span>
+              </div>
+              <p className="text-xs text-white font-medium leading-none">{name.split(' ')[0]}</p>
+            </div>
+            <div className="flex-1 h-px" style={{ background: `${segment.color}30` }} />
+            {isExBack ? (
+              <HeartCrack className="w-5 h-5 flex-shrink-0" style={{ color: segment.color }} />
+            ) : (
+              <Heart className="w-5 h-5 flex-shrink-0" style={{ color: segment.color }} />
+            )}
+            <div className="flex-1 h-px" style={{ background: `${segment.color}30` }} />
+            <div className="text-center flex-shrink-0">
+              <div
+                className="w-9 h-9 rounded-full flex items-center justify-center mx-auto mb-1"
+                style={{ background: `${segment.color}12`, border: `1px solid ${segment.color}22` }}
+              >
+                <span className="text-xs font-bold" style={{ color: segment.color }}>{partnerName[0]}</span>
+              </div>
+              <p className="text-xs text-white font-medium leading-none">{partnerName.split(' ')[0]}</p>
+            </div>
+          </div>
+          {isExBack && analysis.reunionProbability !== undefined && (
+            <div className="flex flex-col items-center ml-2 flex-shrink-0">
+              <span className="text-2xl font-black" style={{ color: segment.color }}>{analysis.reunionProbability}%</span>
+              <span className="text-xs text-slate-500 leading-none">Reunion</span>
+            </div>
+          )}
+        </div>
+      )}
+
+      {isDual && analysis.vibeMeters && (
+        <div className="rounded-xl p-4" style={{ background: `${segment.color}06`, border: `1px solid ${segment.color}15` }}>
+          <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: `${segment.color}80` }}>
+            Dual Chart Vibe Meters
+          </p>
+          <div className="space-y-2.5">
+            {([
+              { label: 'Energy Sync', score: analysis.vibeMeters.energy, color: '#F472B6' },
+              { label: 'Loyalty Bond', score: analysis.vibeMeters.loyalty, color: '#22C55E' },
+              { label: 'Passion Fire', score: analysis.vibeMeters.passion, color: '#F59E0B' },
+            ] as const).map(({ label, score, color }) => (
+              <div key={label} className="flex items-center gap-3">
+                <span className="text-xs text-slate-400 w-20 flex-shrink-0">{label}</span>
+                <div className="flex-1 h-2 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.06)' }}>
+                  <div
+                    className="h-full rounded-full transition-all duration-1000"
+                    style={{ width: `${score}%`, background: `linear-gradient(90deg, ${color} 0%, ${color}cc 100%)` }}
+                  />
+                </div>
+                <span className="text-xs font-semibold w-8 text-right flex-shrink-0" style={{ color }}>{score}%</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div
         className="rounded-xl p-4"
@@ -194,13 +338,24 @@ function AnalysisPanel({ analysis, segment, name }: { analysis: SegmentAnalysis;
 
       <div
         className="rounded-xl p-4"
-        style={{ background: GOLD_RGBA(0.04), border: `1px solid ${GOLD_RGBA(0.15)}` }}
+        style={{ background: 'rgba(212,175,55,0.04)', border: '1px solid rgba(212,175,55,0.15)' }}
       >
-        <p className="text-xs font-semibold tracking-widest uppercase mb-2" style={{ color: `${GOLD}70` }}>
+        <p className="text-xs font-semibold tracking-widest uppercase mb-2" style={{ color: 'rgba(212,175,55,0.7)' }}>
           The Timeline
         </p>
-        <p className="text-sm leading-relaxed" style={{ color: `${GOLD}cc` }}>{analysis.timeline}</p>
+        <p className="text-sm leading-relaxed" style={{ color: 'rgba(212,175,55,0.85)' }}>{analysis.timeline}</p>
       </div>
+
+      {hasFlags && (
+        <FlagDashboard
+          flags={analysis.flags!}
+          showUnlockTeaser={showFlagTeaser}
+          onUnlock={() => onUnlock?.('addon_redflag')}
+          userName={name}
+          partnerName={partnerName || 'Partner'}
+          isExBack={isExBack}
+        />
+      )}
 
       {analysis.upay.length > 0 && (
         <div
@@ -243,10 +398,6 @@ function AnalysisPanel({ analysis, segment, name }: { analysis: SegmentAnalysis;
         </svg>
         <span className="relative z-10">Share This on WhatsApp</span>
       </a>
-
-      <p className="text-xs text-center text-slate-600 italic px-2">
-        &ldquo;{analysis.whatsappText.slice(0, 80)}...&rdquo;
-      </p>
     </div>
   );
 }

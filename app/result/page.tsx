@@ -24,6 +24,7 @@ import type { PredictiveTabsData } from '@/components/result/PredictiveModules';
 import type { MonthForecast } from '@/components/result/FutureTimeline';
 import type { LifeSegment, SegmentAnalysis } from '@/components/result/DardEngine';
 import type { PartnerData, CompatibilityResult } from '@/components/result/CompatibilityMeter';
+import type { PartnerFormData } from '@/components/result/DualPartnerForm';
 
 const GOLD = '#D4AF37';
 const GOLD_RGBA = (a: number) => `rgba(212,175,55,${a})`;
@@ -223,7 +224,7 @@ function GuruAnalysisPhase({
   generation: 'genz' | 'millennial' | 'genx';
   segmentAnalysis: SegmentAnalysis | null;
   segmentLoading: boolean;
-  onSegmentAnalyze: (seg: LifeSegment) => Promise<void>;
+  onSegmentAnalyze: (seg: LifeSegment, partnerData?: PartnerFormData) => Promise<void>;
   aiData: PredictiveTabsData | null;
   aiLoading: boolean;
   varshphalFocus: string;
@@ -246,6 +247,8 @@ function GuruAnalysisPhase({
         onAnalyze={onSegmentAnalyze}
         analysis={segmentAnalysis}
         loading={segmentLoading}
+        unlockedTiers={unlockedTiers}
+        onUnlock={onUnlock}
       />
 
       <PredictiveModules
@@ -262,6 +265,8 @@ function GuruAnalysisPhase({
         onCheck={onCompatCheck}
         result={compatResult}
         loading={compatLoading}
+        unlockedTiers={unlockedTiers}
+        onUnlock={onUnlock}
       />
       {compatResult && !unlockedTiers.has('addon_redflag') && (
         <UnlockButton
@@ -377,11 +382,26 @@ function ResultContent() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dob, autoSegment]);
 
-  const handleSegmentAnalyze = useCallback(async (segment: LifeSegment) => {
+  const handleSegmentAnalyze = useCallback(async (segment: LifeSegment, partnerData?: PartnerFormData) => {
     setSegmentLoading(true);
     setSegmentAnalysis(null);
     try {
-      const json = await callEdge({ ...basePayload, mode: 'segment', segmentId: segment.id, segmentLabel: segment.label });
+      const payload: Record<string, unknown> = {
+        ...basePayload,
+        mode: 'segment',
+        segmentId: segment.id,
+        segmentLabel: segment.label,
+      };
+      if (partnerData) {
+        payload.partner = {
+          name: partnerData.name,
+          dob: partnerData.dob,
+          birth_time: partnerData.birth_time,
+          city: partnerData.city,
+          gender: partnerData.gender,
+        };
+      }
+      const json = await callEdge(payload);
       setSegmentAnalysis(json as SegmentAnalysis);
       if (json.whatsappText) setLatestWhatsapp(json.whatsappText);
     } catch { /* fallback */ }
