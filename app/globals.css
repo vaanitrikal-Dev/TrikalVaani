@@ -38,13 +38,17 @@
   }
 
   html {
-    background-color: #020817;
+    background: linear-gradient(160deg, #0B0E14 0%, #151921 100%);
+    background-attachment: fixed;
+    min-height: 100%;
   }
 
   body {
     @apply text-foreground;
-    background-color: #020817;
-    font-family: var(--font-inter), Inter, sans-serif;
+    background: linear-gradient(160deg, #0B0E14 0%, #151921 100%);
+    background-attachment: fixed;
+    min-height: 100vh;
+    font-family: 'Inter', 'Poppins', system-ui, -apple-system, sans-serif;
   }
 }
 
@@ -81,7 +85,7 @@
   pointer-events: none;
   z-index: 0;
   overflow: hidden;
-  background: radial-gradient(ellipse 120% 80% at 50% 0%, #0d1730 0%, #020817 55%);
+  background: radial-gradient(ellipse 120% 80% at 50% 0%, #0f1a2e 0%, #0B0E14 55%);
 }
 
 .star-layer {
@@ -138,10 +142,19 @@
 /* ── Utilities ─────────────────────────────────────────── */
 @layer utilities {
   .card-glass {
-    background: rgba(6, 12, 28, 0.78);
-    border: 1px solid rgba(212, 175, 55, 0.13);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    background: rgba(11, 16, 26, 0.82);
+    border: 1px solid rgba(212, 175, 55, 0.18);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(212, 175, 55, 0.06);
+  }
+
+  .card-glass-strong {
+    background: rgba(8, 12, 22, 0.92);
+    border: 1px solid rgba(212, 175, 55, 0.2);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(212, 175, 55, 0.08);
   }
 
   .card-glass-purple {
@@ -149,6 +162,28 @@
     border: 1px solid rgba(76, 29, 149, 0.4);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
+  }
+
+  .insight-card {
+    background: rgba(11, 16, 26, 0.78);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease, background 0.25s ease;
+  }
+
+  .insight-card:hover {
+    transform: translateY(-4px) scale(1.005);
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4);
+  }
+
+  .dasha-row-alt {
+    background: rgba(212, 175, 55, 0.025);
+  }
+
+  .dasha-row-active {
+    background: rgba(34, 197, 94, 0.06) !important;
+    box-shadow: inset 0 0 0 1px rgba(34, 197, 94, 0.18), 0 0 16px rgba(34, 197, 94, 0.08);
   }
 
   .text-gradient-gold {

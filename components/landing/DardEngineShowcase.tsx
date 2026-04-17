@@ -120,61 +120,60 @@ export default function DardEngineShowcase() {
               <a
                 key={seg.id}
                 href="#birth-form"
-                className="group relative rounded-2xl p-5 transition-all duration-300 cursor-pointer block"
+                className="insight-card group relative rounded-2xl p-5 cursor-pointer block"
                 onMouseEnter={() => setHoveredId(seg.id)}
                 onMouseLeave={() => setHoveredId(null)}
                 style={{
-                  background: isHovered ? `${seg.color}0e` : 'rgba(6,10,24,0.7)',
-                  border: `1px solid ${isHovered ? seg.color + '35' : 'rgba(255,255,255,0.07)'}`,
-                  boxShadow: isHovered ? `0 8px 32px ${seg.color}18` : 'none',
-                  transform: isHovered ? 'translateY(-2px)' : 'none',
-                  backdropFilter: 'blur(8px)',
+                  background: isHovered ? `rgba(11,14,20,0.92)` : 'rgba(11,16,26,0.78)',
+                  border: `1px solid ${isHovered ? seg.color + '40' : 'rgba(255,255,255,0.07)'}`,
+                  boxShadow: isHovered ? `0 16px 48px rgba(0,0,0,0.4), 0 0 0 1px ${seg.color}20, inset 0 1px 0 ${seg.color}10` : '0 4px 16px rgba(0,0,0,0.25)',
                 }}
               >
                 <div className="flex items-start gap-4">
                   <div
-                    className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 transition-all duration-300"
+                    className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 transition-all duration-300"
                     style={{
-                      background: `${seg.color}15`,
-                      border: `1px solid ${seg.color}${isHovered ? '50' : '28'}`,
-                      boxShadow: isHovered ? `0 0 16px ${seg.color}20` : 'none',
+                      background: `${seg.color}12`,
+                      border: `1px solid ${seg.color}${isHovered ? '45' : '22'}`,
+                      boxShadow: isHovered ? `0 0 20px ${seg.color}22, inset 0 1px 0 ${seg.color}15` : 'none',
                     }}
                   >
-                    <Icon className="w-5 h-5 transition-transform duration-300 group-hover:scale-110" style={{ color: seg.color }} />
+                    <Icon
+                      className="w-5 h-5 transition-transform duration-300 group-hover:scale-110"
+                      style={{ color: seg.color }}
+                    />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-bold text-white mb-1 leading-snug">
+                    <p className="text-sm font-bold text-white mb-1 leading-snug group-hover:text-white transition-colors">
                       {seg.label}
                     </p>
-                    <p className="text-xs text-slate-500 leading-relaxed">
+                    <p className="text-xs leading-relaxed" style={{ color: 'rgba(100,116,139,0.85)' }}>
                       {seg.description}
                     </p>
                   </div>
-                  <ChevronRight
-                    className="w-4 h-4 flex-shrink-0 mt-1 transition-all duration-300"
-                    style={{
-                      color: isHovered ? seg.color : 'rgba(148,163,184,0.2)',
-                      transform: isHovered ? 'translateX(2px)' : 'none',
-                    }}
-                  />
                 </div>
 
                 <div
-                  className="mt-4 pt-3 flex items-center justify-between"
+                  className="mt-4 pt-3 flex items-center justify-between gap-3"
                   style={{ borderTop: `1px solid ${seg.color}12` }}
                 >
-                  <span className="text-xs" style={{ color: `${seg.color}60` }}>
-                    Tap to unlock your chart reading
+                  <span className="text-xs" style={{ color: `${seg.color}55` }}>
+                    Personalized chart reading
                   </span>
                   <div
-                    className="text-xs font-semibold px-2.5 py-1 rounded-full transition-all duration-300"
+                    className="flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full transition-all duration-300 flex-shrink-0"
                     style={{
-                      background: isHovered ? `${seg.color}18` : 'transparent',
+                      background: isHovered ? `${seg.color}18` : `${seg.color}0a`,
                       color: seg.color,
-                      border: `1px solid ${seg.color}${isHovered ? '40' : '20'}`,
+                      border: `1px solid ${seg.color}${isHovered ? '45' : '25'}`,
+                      boxShadow: isHovered ? `0 0 12px ${seg.color}18` : 'none',
                     }}
                   >
-                    Free
+                    Analyze Karma
+                    <ChevronRight
+                      className="w-3 h-3 transition-transform duration-300"
+                      style={{ transform: isHovered ? 'translateX(2px)' : 'none' }}
+                    />
                   </div>
                 </div>
               </a>

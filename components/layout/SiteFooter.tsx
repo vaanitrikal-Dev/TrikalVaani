@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Star, MapPin, Instagram, ExternalLink, Mail } from 'lucide-react';
+import { Star, MapPin, Instagram, ExternalLink, Mail, ShieldCheck } from 'lucide-react';
 
 const GOLD = '#D4AF37';
 const GOLD_RGBA = (a: number) => `rgba(212,175,55,${a})`;
@@ -104,25 +104,45 @@ export default function SiteFooter() {
         </div>
 
         <div
-          className="mb-8 rounded-xl px-5 py-4"
-          style={{ background: GOLD_RGBA(0.04), border: `1px solid ${GOLD_RGBA(0.1)}` }}
+          className="mb-8 rounded-2xl px-5 py-5"
+          style={{
+            background: 'rgba(11,16,26,0.7)',
+            border: `1px solid ${GOLD_RGBA(0.18)}`,
+            backdropFilter: 'blur(12px)',
+          }}
         >
-          <p className="text-xs font-semibold tracking-widest uppercase mb-2.5" style={{ color: GOLD_RGBA(0.55) }}>
-            Contact Support
-          </p>
-          <p className="text-xs text-slate-400 leading-relaxed">
-            For queries:{' '}
-            <a
-              href="mailto:vaanitrikal@gmail.com"
-              className="inline-flex items-center gap-1 transition-colors duration-200 hover:text-slate-200"
-              style={{ color: GOLD }}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <p className="text-xs font-semibold tracking-widest uppercase mb-2" style={{ color: GOLD_RGBA(0.55) }}>
+                Contact Support
+              </p>
+              <p className="text-sm leading-relaxed">
+                For queries:{' '}
+                <a
+                  href="mailto:vaanitrikal@gmail.com"
+                  className="inline-flex items-center gap-1.5 font-semibold transition-all duration-200 hover:opacity-80"
+                  style={{ color: GOLD, textDecoration: 'underline', textDecorationColor: GOLD_RGBA(0.3), textUnderlineOffset: '3px' }}
+                >
+                  <Mail className="w-3.5 h-3.5 flex-shrink-0" />
+                  vaanitrikal@gmail.com
+                </a>
+              </p>
+              <p className="text-xs text-slate-500 mt-1">
+                Chief Vedic Architect:{' '}
+                <span style={{ color: GOLD_RGBA(0.75) }} className="font-semibold">Rohiit Gupta</span>
+              </p>
+            </div>
+            <div
+              className="flex items-center gap-2.5 px-4 py-3 rounded-xl flex-shrink-0"
+              style={{ background: 'rgba(34,197,94,0.06)', border: '1px solid rgba(34,197,94,0.18)' }}
             >
-              <Mail className="w-3 h-3" />
-              vaanitrikal@gmail.com
-            </a>
-            {' '}| Chief Vedic Architect:{' '}
-            <span style={{ color: GOLD_RGBA(0.7) }} className="font-medium">Rohiit Gupta</span>
-          </p>
+              <ShieldCheck className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+              <div>
+                <p className="text-xs font-semibold text-emerald-300 leading-tight">256-bit Encrypted AI Prediction</p>
+                <p className="text-xs text-slate-500 leading-tight mt-0.5">Verified by Rohiit Gupta</p>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div
