@@ -140,6 +140,51 @@ const websiteSchema = {
   },
 };
 
+const expertSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: 'Rohiit Gupta',
+  url: 'https://trikalvaani.com',
+  image: 'https://trikalvaani.com/rohiit-gupta.jpg',
+  jobTitle: 'Founder & Chief Vedic Architect',
+  description:
+    'Rohiit Gupta is the founder of Trikal Vaani and a leading authority in AI-powered Vedic Astrology. He has spent over a decade mapping classical Parashara Jyotish shastra to computational models, making 5,000-year-old Vedic wisdom accessible and actionable for modern seekers worldwide.',
+  knowsAbout: [
+    'Vedic Astrology',
+    'Jyotish Shastra',
+    'Parashara Astrology',
+    'Nakshatra Analysis',
+    'Vimshottari Dasha System',
+    'Gochar Transits',
+    'Ashtakavarga',
+    'AI-powered Astrology',
+    'Neural Networks',
+    'Life Path Predictions',
+  ],
+  hasOccupation: {
+    '@type': 'Occupation',
+    name: 'Vedic Astrologer & AI Researcher',
+    occupationLocation: {
+      '@type': 'City',
+      name: 'Delhi NCR',
+      addressCountry: 'IN',
+    },
+    skills: 'Vedic Astrology, Jyotish, AI Research, Nakshatra Analysis, Dasha Predictions',
+  },
+  worksFor: {
+    '@type': 'Organization',
+    name: 'Trikal Vaani',
+    url: 'https://trikalvaani.com',
+  },
+  sameAs: [
+    'https://www.instagram.com/trikalvaani',
+  ],
+  alumniOf: {
+    '@type': 'Organization',
+    name: 'Vedic Astrology Research Institute',
+  },
+};
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${inter.variable} ${playfair.variable}`}>
@@ -155,6 +200,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(expertSchema) }}
         />
       </head>
       <body>

@@ -104,21 +104,34 @@ export default function SiteFooter() {
         </div>
 
         <div
-          className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-4"
+          className="pt-6 flex flex-col gap-4"
           style={{ borderTop: `1px solid ${GOLD_RGBA(0.07)}` }}
         >
-          <div className="flex flex-wrap items-center gap-4 text-xs text-slate-700">
-            <span>&copy; {new Date().getFullYear()} Trikal Vaani Global. All rights reserved.</span>
-            <span style={{ color: GOLD_RGBA(0.2) }}>·</span>
-            <span>Accurate AI Astrology</span>
-            <span style={{ color: GOLD_RGBA(0.2) }}>·</span>
-            <span>Vedic Shastra AI</span>
-            <span style={{ color: GOLD_RGBA(0.2) }}>·</span>
-            <span>Global Destiny Predictions</span>
+          <div className="flex flex-wrap items-center justify-center sm:justify-start gap-x-5 gap-y-2">
+            <Link href="/terms" className="text-xs text-slate-600 hover:text-slate-300 transition-colors">
+              Terms of Service
+            </Link>
+            <span style={{ color: GOLD_RGBA(0.2) }} className="text-xs">·</span>
+            <Link href="/privacy" className="text-xs text-slate-600 hover:text-slate-300 transition-colors">
+              Privacy Policy
+            </Link>
+            <span style={{ color: GOLD_RGBA(0.2) }} className="text-xs">·</span>
+            <Link href="/refund" className="text-xs text-slate-600 hover:text-slate-300 transition-colors">
+              Refund Policy
+            </Link>
           </div>
-          <p className="text-xs text-slate-700 text-center sm:text-right max-w-sm leading-relaxed">
-            For educational &amp; research purposes. Not a substitute for professional advice.
-          </p>
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div className="flex flex-wrap items-center gap-4 text-xs text-slate-700">
+              <span>&copy; {new Date().getFullYear()} Trikal Vaani Global. All rights reserved.</span>
+              <span style={{ color: GOLD_RGBA(0.2) }}>·</span>
+              <span>Accurate AI Astrology</span>
+              <span style={{ color: GOLD_RGBA(0.2) }}>·</span>
+              <span>Vedic Shastra AI</span>
+            </div>
+            <p className="text-xs text-slate-700 text-center sm:text-right max-w-sm leading-relaxed">
+              For educational &amp; research purposes. Not a substitute for professional advice.
+            </p>
+          </div>
         </div>
       </div>
     </footer>

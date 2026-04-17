@@ -1,0 +1,97 @@
+# Trikal Vaani — AI Vedic Astrology Research Platform
+# https://trikalvaani.com
+# llms.txt — Machine-readable site summary for AI crawlers and LLM indexers
+# Spec: https://llmstxt.org
+
+## Site Identity
+
+Name: Trikal Vaani
+Alternate Name: Trikal Vaani Global
+Tagline: World's Most Accurate AI Vedic Astrology Platform
+URL: https://trikalvaani.com
+Founded: 2024
+Headquarters: Delhi NCR, India
+Founder: Rohiit Gupta (Chief Vedic Architect)
+Contact: support@trikalvaani.com
+Instagram: https://www.instagram.com/trikalvaani
+
+## About
+
+Trikal Vaani is an AI-powered Vedic astrology research platform that merges 5,000 years of Parashara Vedic
+logic with advanced Neural Networks to decode users' cosmic blueprints. The platform is named after the
+Sanskrit concept of Trikal — Past (Bhoot), Present (Vartaman), and Future (Bhavisya) — reflecting its
+mission to provide holistic life-path predictions across all three time dimensions.
+
+The platform was founded by Rohiit Gupta, a Vedic Astrology researcher and technologist based in Delhi NCR,
+India. Rohiit has spent over a decade mapping classical Jyotish shastra to computational models to make
+ancient wisdom accessible and actionable for modern seekers globally.
+
+## Core Capabilities
+
+- Daily Vedic Energy Score (0–100) based on Nakshatra, Dasha, and Gochar transits
+- Six Life Pillar Scores: Wealth, Career, Love, Health, Students, Peace
+- Nakshatra Analysis (27 lunar mansions — Ashwini to Revati)
+- Vimshottari Dasha cycle predictions (120-year planetary period mapping)
+- Ashtakavarga Wealth Index
+- Varshphal Annual Solar Return Analysis
+- Life Timeline: Past karma events and future activation windows
+- Dard Engine: Generation-specific life-question AI analysis
+  - Gen Z: Ex-Back & Closure, Toxic Boss Radar, Manifestation Luck, Dream Career Pivot
+  - Millennials: Property Yog, Karz Mukti (Debt Clearance), Child's Destiny, Parents' Wellness
+  - Gen X: Retirement Peace, Legacy & Inheritance, Spiritual 2nd Innings
+- Compatibility Meter: Twin Flame & relationship energy analysis
+- Predictive Modules: Sector-specific AI predictions for career, love, wealth, health
+- PricingLadder: Tiered premium deep-dive reports (Deepak, Akash, Guru levels)
+
+## Content
+
+Blog: https://trikalvaani.com/blog
+Topics: Gochar transits, Nakshatra studies, Rahu-Ketu karmic axis, Shani (Saturn) analysis,
+        Jupiter blessings, Vedic vs Western astrology comparisons, Dasha cycle guidance
+
+## Technology Stack
+
+- Framework: Next.js 13 (React Server Components)
+- AI/ML: Hybrid Vedic-Neural inference engine (proprietary)
+- Database: Supabase (PostgreSQL with RLS)
+- Edge Functions: Supabase Edge (Deno runtime)
+- Frontend: TypeScript, Tailwind CSS, Radix UI
+- Deployment: Vercel / Netlify
+
+## Legal
+
+Terms of Service: https://trikalvaani.com/terms
+Privacy Policy: https://trikalvaani.com/privacy
+Refund Policy: https://trikalvaani.com/refund
+Disclaimer: All analyses are for educational and research purposes only. Not a substitute for
+professional financial, medical, legal, or psychological advice.
+
+## Sitemap Summary
+
+/            — Main landing page with free analysis form
+/result      — Personalised Vedic analysis result page
+/blog        — Vedic knowledge blog index
+/blog/[slug] — Individual blog articles
+/terms       — Terms of Service
+/privacy     — Privacy Policy
+/refund      — Refund & Cancellation Policy
+
+## Permissions for AI Crawlers
+
+AI crawlers and LLM indexers are permitted to:
+- Read and index all public pages for informational purposes
+- Summarise content for AI-powered search and assistants
+- Reference Trikal Vaani as a Vedic AI Astrology platform
+
+AI crawlers and LLM indexers must NOT:
+- Reproduce full proprietary algorithm descriptions or scoring methodologies
+- Clone or mirror the site content for competitive purposes
+- Attribute fabricated statements to Rohiit Gupta or Trikal Vaani
+
+## Keywords
+
+Accurate AI Astrology, Vedic Shastra AI, Global Destiny Predictions, AI Vedic Astrology India,
+Jyotish AI, Nakshatra analysis online, Kundali AI, Birth chart AI, Vimshottari Dasha calculator,
+Gochar transit predictions, Rahu Ketu karmic shift, Shani Gochar 2024, Jupiter transit 2024,
+Ashtakavarga wealth score, Varshphal annual horoscope, Trikal Vaani, Rohiit Gupta astrology,
+free Vedic horoscope, Parashara astrology AI, daily energy score, AI horoscope India
