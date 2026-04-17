@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Star, MapPin, Instagram, ExternalLink } from 'lucide-react';
+import { Star, MapPin, Instagram, ExternalLink, Mail } from 'lucide-react';
 
 const GOLD = '#D4AF37';
 const GOLD_RGBA = (a: number) => `rgba(212,175,55,${a})`;
@@ -101,6 +101,28 @@ export default function SiteFooter() {
               @trikalvaani
             </a>
           </div>
+        </div>
+
+        <div
+          className="mb-8 rounded-xl px-5 py-4"
+          style={{ background: GOLD_RGBA(0.04), border: `1px solid ${GOLD_RGBA(0.1)}` }}
+        >
+          <p className="text-xs font-semibold tracking-widest uppercase mb-2.5" style={{ color: GOLD_RGBA(0.55) }}>
+            Contact Support
+          </p>
+          <p className="text-xs text-slate-400 leading-relaxed">
+            For queries:{' '}
+            <a
+              href="mailto:vaanitrikal@gmail.com"
+              className="inline-flex items-center gap-1 transition-colors duration-200 hover:text-slate-200"
+              style={{ color: GOLD }}
+            >
+              <Mail className="w-3 h-3" />
+              vaanitrikal@gmail.com
+            </a>
+            {' '}| Chief Vedic Architect:{' '}
+            <span style={{ color: GOLD_RGBA(0.7) }} className="font-medium">Rohiit Gupta</span>
+          </p>
         </div>
 
         <div
