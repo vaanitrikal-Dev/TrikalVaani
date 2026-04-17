@@ -56,6 +56,11 @@ interface SegmentResponse {
 
 interface CompatibilityResponse {
   score: number;
+  vibeMeters: {
+    energy: number;
+    loyalty: number;
+    passion: number;
+  };
   flags: Array<{ type: "red" | "green"; label: string; explanation: string }>;
   vibe: string;
   verdict: string;
@@ -66,11 +71,16 @@ function getActiveDasha(dashaPeriods: PredictRequest["dashaPeriods"], currentYea
   return dashaPeriods?.find((d) => d.startYear <= currentYear && d.endYear >= currentYear);
 }
 
-function buildPredictPrompt(req: PredictRequest): string {
+function buildPredictPrompt(req: PredictRequest, tier: string = "free"): string {
   const currentYear = new Date().getFullYear();
   const currentMonth = new Date().getMonth() + 1;
   const activeDasha = getActiveDasha(req.dashaPeriods, currentYear);
   const isGenZ = req.generation === "genz";
+  const isPaid = tier !== "free";
+
+  const cliffhangerNote = !isPaid
+    ? `IMPORTANT: End each section with a CLIFFHANGER hook. Mention a specific planetary transit (Saturn Return, Rahu's Shadow, Jupiter's Blessing, Ketu's Release) that is "locked" and only revealed in the premium reading. Example: "But there's a deeper Saturn transit in ${currentYear + 1} that will either accelerate or block this — the exact timing is in your full reading."`
+    : "";
 
   return `You are Trikal Guru — polite, diplomatic, traditional yet practical Vedic AI. Speak with warmth and authority. Be specific, not vague.
 
@@ -84,12 +94,14 @@ BIRTH DATA:
 - Varshphal: ${req.varshphalFocus}
 - Pillar Scores: Career=${req.pillarScores?.career}, Love=${req.pillarScores?.love}, Wealth=${req.pillarScores?.wealth}
 
+${cliffhangerNote}
+
 Return ONLY valid JSON — no markdown, no commentary:
 {
   "career": {
     "headline": "one powerful sentence about career window",
     "window": "e.g. May–Sept 2026",
-    "depth": "3–4 sentences, 10th house + Saturn, specific: promotion/pivot/business/recognition",
+    "depth": "3–4 sentences, 10th house + Saturn, specific: promotion/pivot/business/recognition${!isPaid ? ". End with a cliffhanger about a locked transit." : ""}",
     "remedies": [
       {"level":"easy","action":"specific low-cost mantra or nature act","benefit":"what it unlocks","frequency":"daily/weekly"},
       {"level":"medium","action":"deeper practice","benefit":"what it unlocks","frequency":"weekly"},
@@ -99,7 +111,7 @@ Return ONLY valid JSON — no markdown, no commentary:
   "love": {
     "headline": "one powerful sentence about relationship window",
     "window": "e.g. July–Nov 2026",
-    "depth": "3–4 sentences, 7th house + Venus/Jupiter, address marriage/partner/deepening",
+    "depth": "3–4 sentences, 7th house + Venus/Jupiter, address marriage/partner/deepening${!isPaid ? ". End with a cliffhanger about a locked transit." : ""}",
     "remedies": [
       {"level":"easy","action":"specific low-cost mantra or nature act","benefit":"what it opens","frequency":"daily/weekly"},
       {"level":"medium","action":"deeper","benefit":"what it opens","frequency":"weekly"},
@@ -109,7 +121,7 @@ Return ONLY valid JSON — no markdown, no commentary:
   "wealth": {
     "headline": "one powerful sentence about wealth window",
     "window": "e.g. Apr–Dec 2026",
-    "depth": "3–4 sentences, 2nd & 11th house + Ashtakvarga ${req.ashtakvargaWealth} bindus, distinguish sudden gains vs savings",
+    "depth": "3–4 sentences, 2nd & 11th house + Ashtakvarga ${req.ashtakvargaWealth} bindus, distinguish sudden gains vs savings${!isPaid ? ". End with a cliffhanger about a locked transit." : ""}",
     "remedies": [
       {"level":"easy","action":"wealth mantra or act","benefit":"what it activates","frequency":"daily"},
       {"level":"medium","action":"deeper","benefit":"what it activates","frequency":"monthly"},
@@ -119,16 +131,17 @@ Return ONLY valid JSON — no markdown, no commentary:
   "monthlyTimeline": [
     {"month":"${new Date(new Date().getFullYear(), new Date().getMonth()).toLocaleString("default",{month:"long"})}","year":${currentYear},"vibe":"specific planetary event for ${req.name.split(" ")[0]} this month","category":"career","intensity":"high"}
   ],
-  "guruMessage": "warm 2–3 sentence personal blessing for ${req.name.split(" ")[0]} tying career+love+wealth with a Vedic mantra or wisdom quote"
+  "guruMessage": "warm 2–3 sentence personal blessing for ${req.name.split(" ")[0]} tying career+love+wealth with a Vedic mantra or wisdom quote${!isPaid ? ". End with a cliffhanger about what's locked in the premium reading." : ""}"
 }
 Generate 12 monthlyTimeline entries starting month ${currentMonth} year ${currentYear}. Customize each entry specifically for ${req.name.split(" ")[0]}'s dasha and scores.`;
 }
 
-function buildSegmentPrompt(req: PredictRequest): string {
+function buildSegmentPrompt(req: PredictRequest, tier: string = "free"): string {
   const isGenZ = req.generation === "genz";
   const isMillennial = req.generation === "millennial";
   const currentYear = new Date().getFullYear();
   const activeDasha = getActiveDasha(req.dashaPeriods, currentYear);
+  const isPaid = tier !== "free";
 
   const segmentContext: Record<string, string> = {
     ex_back: "Venus karaka analysis for past karmic bonds, Moon-Rahu axis, 7th house unfinished karma",
@@ -146,6 +159,10 @@ function buildSegmentPrompt(req: PredictRequest): string {
 
   const ctx = segmentContext[req.segmentId || ""] || "general life analysis";
 
+  const cliffhangerNote = !isPaid
+    ? `IMPORTANT: End the "insight" with a CLIFFHANGER hook. Mention a specific planetary transit (Saturn Return, Rahu's Shadow Phase, Jupiter's Blessing Window, Ketu's Karmic Release) that is "locked" and only revealed in the premium reading. Example: "But there's a critical Rahu transit in ${currentYear + 1} that will determine whether this resolves smoothly or requires deeper work — the exact timing is in your full reading."`
+    : "";
+
   return `You are Trikal Guru — warm, specific, personalized Vedic AI.
 
 BIRTH DATA for ${req.name}:
@@ -158,12 +175,14 @@ BIRTH DATA for ${req.name}:
 SPECIFIC QUESTION ASKED: "${req.segmentLabel}"
 VEDIC ANALYSIS CONTEXT: ${ctx}
 
+${cliffhangerNote}
+
 Give ${req.name.split(" ")[0]} a deeply personal answer to their specific question using ${isGenZ ? "modern relatable language (burnout, red flags, manifestation, energy alignment)" : isMillennial ? "balanced language mixing practical + Vedic wisdom" : "deep Vedic wisdom (Dharma, Karma, Pitru-Dosha, Kul-Devta)"}.
 
 Return ONLY valid JSON:
 {
   "segmentId": "${req.segmentId}",
-  "insight": "3–4 deeply personal sentences answering their specific question using the Vedic house analysis context. Address their pain point directly. Use their name once.",
+  "insight": "3–4 deeply personal sentences answering their specific question using the Vedic house analysis context. Address their pain point directly. Use their name once.${!isPaid ? " End with a cliffhanger about a locked transit." : ""}",
   "timeline": "2–3 specific sentences with month/year windows for when their specific situation will shift or resolve. Be concrete: 'Between July and October 2026...'",
   "upay": [
     "Upay 1: specific low-cost mantra or nature-based remedy for their exact question",
@@ -173,10 +192,15 @@ Return ONLY valid JSON:
 }`;
 }
 
-function buildCompatibilityPrompt(req: PredictRequest): string {
+function buildCompatibilityPrompt(req: PredictRequest, tier: string = "free"): string {
   const p = req.partner!;
   const p1Year = parseInt(req.dob.split("-")[0], 10);
   const p2Year = parseInt(p.dob.split("-")[0], 10);
+  const isPaid = tier !== "free";
+
+  const cliffhangerNote = !isPaid
+    ? `IMPORTANT: End the "vibe" section with a CLIFFHANGER hook. Mention a specific planetary clash or blessing (Mars-Venus tension, Saturn's relationship test, Rahu's karmic bond) that is "locked" and only revealed in the Red Flag Deep Dive. Example: "But there's a hidden Mars-Saturn tension that could surface during arguments — the exact trigger points are in your full Red Flag Alert reading."`
+    : "";
 
   return `You are Trikal Guru doing Vedic Ashta-Koota compatibility analysis.
 
@@ -193,17 +217,24 @@ Calculate compatibility using:
 - Bhakoot (love and prosperity) — 7 points
 - Nadi (health and progeny) — 8 points
 
-Total = 36 points. Convert to percentage. Identify 2–3 green flags and 1–2 red flags based on their DOBs and generation (${p1Year >= 1996 || p2Year >= 1996 ? "Gen Z couple — use modern relationship language" : "mature couple — use Vedic marriage wisdom"}).
+Total = 36 points. Convert to percentage. Identify 2–3 green flags and 1–2 red flags based on their DOBs and generation (${p1Year >= 1996 || p2Year >= 1996 ? "Gen Z couple — use modern relationship language: twin flame, ghosting probability, red flag detector, vibe check" : "mature couple — use Vedic marriage wisdom: Dharma, Karmic bond, spiritual partnership"}).
+
+${cliffhangerNote}
 
 Return ONLY valid JSON:
 {
   "score": number between 0-100 (based on Ashta-Koota out of 36 converted to percentage),
+  "vibeMeters": {
+    "energy": number 0-100 (physical and emotional chemistry),
+    "loyalty": number 0-100 (commitment and trust potential),
+    "passion": number 0-100 (romantic and physical intensity)
+  },
   "flags": [
-    {"type":"green","label":"flag name","explanation":"one sentence why this is positive for them"},
+    {"type":"green","label":"flag name in Gen Z terms like 'Twin Flame Match' or 'Green Flag Detector'","explanation":"one sentence why this is positive for them"},
     {"type":"green","label":"flag name","explanation":"one sentence"},
-    {"type":"red","label":"flag name","explanation":"one sentence about challenge to watch for"}
+    {"type":"red","label":"flag name like 'Ghosting Probability' or 'Red Flag Alert'","explanation":"one sentence about challenge to watch for"}
   ],
-  "vibe": "2 sentences describing the energy and attraction dynamic between ${req.name.split(" ")[0]} and ${p.name.split(" ")[0]} — be poetic but specific",
+  "vibe": "2 sentences describing the energy and attraction dynamic between ${req.name.split(" ")[0]} and ${p.name.split(" ")[0]} — be poetic but specific${!isPaid ? ". End with a cliffhanger about a locked planetary clash." : ""}",
   "verdict": "2–3 sentences of Trikal Guru's personal verdict on their compatibility — include one actionable remedy or advice to strengthen their bond",
   "whatsappText": "Guru says ${req.name.split(" ")[0]} and ${p.name.split(" ")[0]}'s Vedic compatibility score is [score]/100! [one fun insight about their vibe]. Check yours free at TrikalVaani.com"
 }`;
@@ -410,14 +441,23 @@ function buildFallbackCompatibility(req: PredictRequest): CompatibilityResponse 
   const rawScore = ((p1Seed + p2Seed) % 37) + 45;
   const score = Math.min(92, rawScore);
 
+  const energyScore = Math.min(95, ((p1Seed * 3) % 30) + 60);
+  const loyaltyScore = Math.min(92, ((p2Seed * 2) % 25) + 65);
+  const passionScore = Math.min(94, ((p1Seed + p2Seed) % 35) + 55);
+
   return {
     score,
+    vibeMeters: {
+      energy: energyScore,
+      loyalty: loyaltyScore,
+      passion: passionScore,
+    },
     flags: [
-      { type: "green", label: "Strong Graha Maitri", explanation: `Your ruling planets carry natural friendship — communication flows easily between ${p1} and ${p2}.` },
-      { type: "green", label: "Compatible Gana", explanation: "Both charts share temperamental alignment — your approaches to life don't fundamentally clash." },
-      { type: "red", label: "Nadi Tension", explanation: "Watch for health-related stress patterns — this can be mitigated with the right Vedic remedy." },
+      { type: "green", label: "Twin Flame Match", explanation: `Your ruling planets carry natural friendship — communication flows easily between ${p1} and ${p2}.` },
+      { type: "green", label: "Green Flag Detector: On", explanation: "Both charts share temperamental alignment — your approaches to life don't fundamentally clash." },
+      { type: "red", label: "Ghosting Probability: Low", explanation: "Watch for health-related stress patterns — this can be mitigated with the right Vedic remedy." },
     ],
-    vibe: `${p1} and ${p2} carry a magnetic attraction that has real cosmic roots — there's genuine Prem Yoga here. The connection isn't just chemistry; it carries a karmic purpose that both charts are oriented toward.`,
+    vibe: `${p1} and ${p2} carry a magnetic attraction that has real cosmic roots — there's genuine Prem Yoga here. But there's a hidden Mars-Saturn tension that could surface during arguments — the exact trigger points are in your full Red Flag Alert reading.`,
     verdict: `The Ashta-Koota analysis reveals a compatibility of ${score}/100 — which places this relationship in the ${score >= 70 ? "highly auspicious" : score >= 50 ? "moderately compatible" : "karmically challenging"} range. ${score >= 70 ? "The Shastras recommend moving forward with clear communication and the commitment ritual below." : "Work consciously on the Nadi tension — a shared Mahamrityunjaya mantra practice for 21 days will significantly strengthen the bond."}`,
     whatsappText: `Guru says ${p1} and ${p2}'s Vedic compatibility score is ${score}/100! ${score >= 70 ? "Green flags are real" : "Work to do but the love is genuine"}. Check yours free at TrikalVaani.com`,
   };

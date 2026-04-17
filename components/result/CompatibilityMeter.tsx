@@ -12,6 +12,11 @@ export type PartnerData = {
 
 export type CompatibilityResult = {
   score: number;
+  vibeMeters: {
+    energy: number;
+    loyalty: number;
+    passion: number;
+  };
   flags: Array<{ type: 'red' | 'green'; label: string; explanation: string }>;
   vibe: string;
   verdict: string;
@@ -60,6 +65,24 @@ function ScoreMeter({ score }: { score: number }) {
       >
         {label}
       </span>
+    </div>
+  );
+}
+
+function VibeMeterBar({ label, score, color }: { label: string; score: number; color: string }) {
+  return (
+    <div className="flex items-center gap-3">
+      <span className="text-xs text-slate-400 w-16">{label}</span>
+      <div className="flex-1 h-2 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.06)' }}>
+        <div
+          className="h-full rounded-full transition-all duration-1000"
+          style={{
+            width: `${score}%`,
+            background: `linear-gradient(90deg, ${color} 0%, ${color}cc 100%)`,
+          }}
+        />
+      </div>
+      <span className="text-xs font-semibold" style={{ color }}>{score}%</span>
     </div>
   );
 }
@@ -259,6 +282,15 @@ function CompatibilityResult({ result, userName, partnerName, onReset }: { resul
       </div>
 
       <ScoreMeter score={result.score} />
+
+      <div className="rounded-xl p-4" style={{ background: 'rgba(244,114,182,0.04)', border: '1px solid rgba(244,114,182,0.15)' }}>
+        <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: 'rgba(244,114,182,0.7)' }}>Vibe Meters</p>
+        <div className="space-y-2.5">
+          <VibeMeterBar label="Energy" score={result.vibeMeters?.energy || 70} color="#F472B6" />
+          <VibeMeterBar label="Loyalty" score={result.vibeMeters?.loyalty || 75} color="#22C55E" />
+          <VibeMeterBar label="Passion" score={result.vibeMeters?.passion || 68} color="#F59E0B" />
+        </div>
+      </div>
 
       <div className="rounded-xl p-4" style={{ background: 'rgba(244,114,182,0.06)', border: '1px solid rgba(244,114,182,0.2)' }}>
         <p className="text-xs font-semibold tracking-widest uppercase mb-2" style={{ color: 'rgba(244,114,182,0.7)' }}>The Vibe</p>

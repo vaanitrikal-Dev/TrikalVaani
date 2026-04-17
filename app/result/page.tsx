@@ -15,6 +15,8 @@ import PredictiveModules from '@/components/result/PredictiveModules';
 import FutureTimeline from '@/components/result/FutureTimeline';
 import DardEngine from '@/components/result/DardEngine';
 import CompatibilityMeter from '@/components/result/CompatibilityMeter';
+import PricingLadder, { type PricingSelection } from '@/components/result/PricingLadder';
+import UnlockButton from '@/components/result/UnlockButton';
 import type { DashaPeriod, LifeTimelineEvent } from '@/lib/vedic-astro';
 import type { PredictiveTabsData } from '@/components/result/PredictiveModules';
 import type { MonthForecast } from '@/components/result/FutureTimeline';
@@ -89,6 +91,9 @@ function ResultContent() {
   const [compatResult, setCompatResult] = useState<CompatibilityResult | null>(null);
   const [compatLoading, setCompatLoading] = useState(false);
 
+  const [unlockedTiers, setUnlockedTiers] = useState<Set<string>>(new Set());
+  const [showPricing, setShowPricing] = useState(false);
+
   const basePayload = {
     name,
     dob,
@@ -159,6 +164,17 @@ function ResultContent() {
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dob]);
+
+  const handlePricingSelect = useCallback((selection: PricingSelection) => {
+    console.log('Payment initiated:', selection);
+    setUnlockedTiers((prev) => new Set([...prev, selection.tier]));
+    setShowPricing(false);
+  }, []);
+
+  const handleUnlockContent = useCallback((contentId: string) => {
+    console.log('Unlock content:', contentId);
+    setUnlockedTiers((prev) => new Set([...prev, contentId]));
+  }, []);
 
   const handleCompatCheck = useCallback(async (partner: PartnerData) => {
     setCompatLoading(true);
@@ -277,9 +293,28 @@ function ResultContent() {
             />
           </div>
 
+          {!unlockedTiers.has('base') && (
+            <div className="mb-6">
+              <UnlockButton
+                label="Unlock Full Vibe Score + Compatibility Heatmap"
+                price={21}
+                contentId="base"
+                onUnlock={handleUnlockContent}
+              />
+            </div>
+          )}
+
           {monthlyTimeline.length > 0 && (
             <div className="mb-6">
               <FutureTimeline forecasts={monthlyTimeline} name={name} />
+              {!unlockedTiers.has('addon_timeline') && (
+                <UnlockButton
+                  label="Unlock Secret Timeline — Exact Dates for Major Events"
+                  price={11}
+                  contentId="addon_timeline"
+                  onUnlock={handleUnlockContent}
+                />
+              )}
             </div>
           )}
 
@@ -290,6 +325,22 @@ function ResultContent() {
               onCheck={handleCompatCheck}
               result={compatResult}
               loading={compatLoading}
+            />
+            {compatResult && !unlockedTiers.has('addon_redflag') && (
+              <UnlockButton
+                label="Unlock Red Flag Alert — Deep Planetary Clash Analysis"
+                price={11}
+                contentId="addon_redflag"
+                onUnlock={handleUnlockContent}
+              />
+            )}
+          </div>
+
+          <div className="mb-6">
+            <PricingLadder
+              name={name}
+              onSelect={handlePricingSelect}
+              unlockedTiers={Array.from(unlockedTiers) as any[]}
             />
           </div>
 
