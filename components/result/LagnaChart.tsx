@@ -414,43 +414,43 @@ export default function LagnaChart({ ascendant, planets, name }: Props) {
               />
             ))}
 
-            {/* ── Primary grid lines (the structural skeleton) ── */}
-            {/* Outer border */}
-            <rect x="1" y="1" width={S - 2} height={S - 2} fill="none" stroke={BORDER} strokeWidth="2" />
+            {/* ── Primary grid lines ── */}
+            {/* Outer border — crisp 2px gold */}
+            <rect x="1" y="1" width={S - 2} height={S - 2} fill="none" stroke={BORDER} strokeWidth="2" strokeLinejoin="miter" />
 
-            {/* Vertical midline */}
-            <line x1={x.H} y1={0} x2={x.H} y2={S} stroke={GRID} strokeWidth="1.2" />
-            {/* Horizontal midline */}
-            <line x1={0} y1={y.H} x2={S} y2={y.H} stroke={GRID} strokeWidth="1.2" />
             {/* Diagonal TL→BR */}
             <line x1={0} y1={0} x2={S} y2={S} stroke={GRID} strokeWidth="1.2" />
             {/* Diagonal TR→BL */}
             <line x1={S} y1={0} x2={0} y2={S} stroke={GRID} strokeWidth="1.2" />
+            {/* Vertical midline */}
+            <line x1={x.H} y1={0} x2={x.H} y2={S} stroke={GRID} strokeWidth="1.2" />
+            {/* Horizontal midline */}
+            <line x1={0} y1={y.H} x2={S} y2={y.H} stroke={GRID} strokeWidth="1.2" />
 
-            {/* ── Inner rotated diamond (the central square) ── */}
-            {/* This is the diamond connecting TC(H,0)–MR(S,H)–BC(H,S)–ML(0,H) */}
+            {/* ── Outer rotated diamond (TC–MR–BC–ML) ── */}
             <polygon
               points={`${x.H},${y.T} ${x.R},${y.H} ${x.H},${y.B} ${x.L},${y.H}`}
               fill="none"
               stroke={INNER}
-              strokeWidth="1.2"
+              strokeWidth="1.4"
+              strokeLinejoin="miter"
             />
 
-            {/* ── Inner quarter diamond (smaller, marks the central region) ── */}
+            {/* ── Inner quarter diamond — center lozenge ── */}
             <polygon
               points={`${x.H},${y.Q} ${x.Q3},${y.H} ${x.H},${y.Q3} ${x.Q},${y.H}`}
-              fill={GOLD_RGBA(0.03)}
-              stroke={GOLD_RGBA(0.3)}
-              strokeWidth="0.8"
+              fill={GOLD_RGBA(0.04)}
+              stroke={GOLD_RGBA(0.35)}
+              strokeWidth="1"
+              strokeLinejoin="miter"
             />
 
-            {/* ── H1 (Lagna) emphasis: subtle glow on top diamond ── */}
-            <polygon
-              points={`${x.H},${y.T} ${x.H},${y.Q} ${x.Q},${y.H} ${x.L},${y.H}`}
-              fill="none"
-              stroke={GOLD_RGBA(0.15)}
-              strokeWidth="0.5"
-            />
+            {/* ── Corner accent squares (crisp 90° chamfer marks) ── */}
+            {[
+              [x.Q, y.Q], [x.Q3, y.Q], [x.Q, y.Q3], [x.Q3, y.Q3],
+            ].map(([cx, cy], i) => (
+              <circle key={`qpt-${i}`} cx={cx} cy={cy} r="2" fill={GOLD_RGBA(0.35)} />
+            ))}
 
             {/* ── House numbers — small, muted, placed at outer corners of each cell ── */}
             {CELLS.map((cell, i) => (

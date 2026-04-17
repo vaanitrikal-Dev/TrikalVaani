@@ -1,4 +1,7 @@
-// @trikal-v5.0 — cache-bust: 2026-04-17T18:00:00Z
+'use client';
+
+// @trikal-v5.2 — cache-bust: 2026-04-17T22:00:00Z
+import { useState, useCallback } from 'react';
 import SiteNav from '@/components/layout/SiteNav';
 import SiteFooter from '@/components/layout/SiteFooter';
 import Hero from '@/components/landing/Hero';
@@ -11,8 +14,23 @@ import BlogCard from '@/components/blog/BlogCard';
 import DardEngineShowcase from '@/components/landing/DardEngineShowcase';
 import { blogPosts } from '@/lib/blog-data';
 
+export type SelectedCategory = {
+  id: string;
+  label: string;
+  color: string;
+} | null;
+
 export default function HomePage() {
   const latestPosts = blogPosts.slice(0, 3);
+  const [selectedCategory, setSelectedCategory] = useState<SelectedCategory>(null);
+
+  const handleSelectCategory = useCallback((cat: SelectedCategory) => {
+    setSelectedCategory(cat);
+    setTimeout(() => {
+      const el = document.getElementById('birth-form');
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 80);
+  }, []);
 
   return (
     <div className="min-h-screen bg-[#080B12]">
@@ -23,21 +41,25 @@ export default function HomePage() {
         <Hero />
         <SocialProofTicker />
 
-        {/* 2. Dard Engine — first interaction point immediately after Hero */}
-        <DardEngineShowcase />
+        {/* 2. Dard Engine — TOP, first interaction point */}
+        <DardEngineShowcase
+          selectedCategory={selectedCategory}
+          onSelectCategory={handleSelectCategory}
+        />
 
-        {/* 3. Birth Form */}
-        <BirthForm />
+        {/* 3. Birth Form — expands based on selectedCategory */}
+        <BirthForm selectedCategory={selectedCategory} />
 
-        {/* 4. AI Manifesto */}
-        <AIManifesto />
-
-        {/* 5. Inner Circle Waitlist */}
-        <InnerCircleWaitlist />
-
-        {/* 6. Life Pillars — moved to bottom */}
+        {/* 4. Life Pillars — middle */}
         <PillarsGrid />
 
+        {/* 5. AI Manifesto */}
+        <AIManifesto />
+
+        {/* 6. Inner Circle Waitlist */}
+        <InnerCircleWaitlist />
+
+        {/* 7. Blog */}
         <section className="py-20 px-4">
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-12">

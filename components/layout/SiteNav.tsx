@@ -6,7 +6,7 @@ const GOLD_RGBA = (a: number) => `rgba(212,175,55,${a})`;
 
 function GoldOwlLogo() {
   return (
-    <svg width="36" height="36" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Trikal Vaani owl logo">
+    <svg width="43" height="43" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Trikal Vaani owl logo">
       <defs>
         <radialGradient id="owlBodyGrad" cx="50%" cy="40%" r="55%">
           <stop offset="0%" stopColor="#F5E27A" />
@@ -48,12 +48,14 @@ export default function SiteNav() {
       <div className="max-w-6xl mx-auto h-16 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2.5 group">
           <div
-            className="w-11 h-11 rounded-full flex items-center justify-center transition-all duration-300 group-hover:scale-105"
+            className="w-13 h-13 rounded-full flex items-center justify-center transition-all duration-300 group-hover:scale-105"
             style={{
+              width: '52px',
+              height: '52px',
               background: `radial-gradient(circle, ${GOLD_RGBA(0.16)} 0%, rgba(2,8,23,0.5) 100%)`,
               border: `1px solid ${GOLD_RGBA(0.35)}`,
-              boxShadow: `0 0 18px ${GOLD_RGBA(0.3)}, 0 0 6px ${GOLD_RGBA(0.5)}`,
-              filter: `drop-shadow(0 0 8px ${GOLD_RGBA(0.55)})`,
+              boxShadow: `0 0 22px ${GOLD_RGBA(0.38)}, 0 0 8px ${GOLD_RGBA(0.55)}`,
+              animation: 'owlPulse 3s ease-in-out infinite',
             }}
           >
             <GoldOwlLogo />

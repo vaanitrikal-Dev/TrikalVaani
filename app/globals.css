@@ -52,6 +52,12 @@
   }
 }
 
+/* ── Owl Logo Pulse Glow ───────────────────────────────── */
+@keyframes owlPulse {
+  0%, 100% { box-shadow: 0 0 22px rgba(212,175,55,0.38), 0 0 8px rgba(212,175,55,0.55); }
+  50%       { box-shadow: 0 0 36px rgba(212,175,55,0.62), 0 0 16px rgba(212,175,55,0.75); }
+}
+
 /* ── Animated Starry Night Background ─────────────────── */
 
 @keyframes star-drift-a {
