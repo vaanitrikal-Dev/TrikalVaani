@@ -1,6 +1,7 @@
 import './globals.css';
 import type { Metadata } from 'next';
 import { Inter, Playfair_Display } from 'next/font/google';
+import Script from 'next/script';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -330,6 +331,18 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           dangerouslySetInnerHTML={{ __html: JSON.stringify(reviewSchema) }}
         />
       </head>
+      <Script
+        src="https://www.googletagmanager.com/gtag/js?id=G-WCV6MTQM21"
+        strategy="afterInteractive"
+      />
+      <Script id="google-analytics" strategy="afterInteractive">
+        {`
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-WCV6MTQM21');
+        `}
+      </Script>
       <body>
         <div className="starry-night" aria-hidden="true">
           <div className="star-layer star-layer-1" />
