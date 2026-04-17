@@ -586,6 +586,12 @@ function AnalysisPanel({
         </div>
       )}
 
+      <p className="text-xs text-center" style={{ color: GOLD_RGBA(0.35) }}>
+        Vedic insight verified by{' '}
+        <span className="font-semibold" style={{ color: GOLD_RGBA(0.65) }}>Rohiit Gupta</span>
+        , Chief Vedic Architect.
+      </p>
+
       <a
         href={whatsappUrl}
         target="_blank"

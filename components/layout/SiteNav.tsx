@@ -9,9 +9,9 @@ function GoldOwlLogo() {
     <svg width="43" height="43" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Trikal Vaani owl logo">
       <defs>
         <radialGradient id="owlBodyGrad" cx="50%" cy="40%" r="55%">
-          <stop offset="0%" stopColor="#F5E27A" />
-          <stop offset="60%" stopColor={GOLD} />
-          <stop offset="100%" stopColor="#7A5800" />
+          <stop offset="0%" stopColor="#FFEF99" />
+          <stop offset="60%" stopColor="#E8CC5A" />
+          <stop offset="100%" stopColor="#A8820A" />
         </radialGradient>
         <radialGradient id="owlEyeGrad" cx="50%" cy="50%" r="50%">
           <stop offset="0%" stopColor="#FFFBE0" />

@@ -120,19 +120,20 @@ export default function SiteFooter() {
                 For queries:{' '}
                 <a
                   href="mailto:vaanitrikal@gmail.com"
-                  className="inline-flex items-center gap-1.5 font-bold transition-all duration-200 hover:opacity-90"
+                  className="inline-flex items-center gap-1.5 font-bold transition-all duration-200 hover:scale-105 hover:brightness-110"
                   style={{
-                    color: GOLD,
-                    background: GOLD_RGBA(0.1),
-                    border: `1px solid ${GOLD_RGBA(0.38)}`,
+                    color: '#FFF0A0',
+                    background: `linear-gradient(135deg, ${GOLD_RGBA(0.18)} 0%, ${GOLD_RGBA(0.10)} 100%)`,
+                    border: `1.5px solid ${GOLD_RGBA(0.55)}`,
                     borderRadius: '8px',
-                    padding: '4px 12px 4px 9px',
+                    padding: '5px 14px 5px 10px',
                     textDecoration: 'none',
-                    boxShadow: `0 0 16px ${GOLD_RGBA(0.18)}, inset 0 1px 0 ${GOLD_RGBA(0.12)}`,
-                    letterSpacing: '0.01em',
+                    boxShadow: `0 0 22px ${GOLD_RGBA(0.28)}, inset 0 1px 0 ${GOLD_RGBA(0.18)}`,
+                    letterSpacing: '0.02em',
+                    fontSize: '0.875rem',
                   }}
                 >
-                  <Mail className="w-3.5 h-3.5 flex-shrink-0" />
+                  <Mail className="w-3.5 h-3.5 flex-shrink-0" style={{ color: GOLD }} />
                   vaanitrikal@gmail.com
                 </a>
               </p>
@@ -159,15 +160,21 @@ export default function SiteFooter() {
           style={{ borderTop: `1px solid ${GOLD_RGBA(0.07)}` }}
         >
           <div className="flex flex-wrap items-center justify-center sm:justify-start gap-x-5 gap-y-2">
-            <Link href="/terms" className="text-xs text-slate-600 hover:text-slate-300 transition-colors">
+            <Link href="/terms"
+              className="text-xs font-medium transition-colors duration-200 hover:text-white"
+              style={{ color: GOLD_RGBA(0.65) }}>
               Terms of Service
             </Link>
-            <span style={{ color: GOLD_RGBA(0.2) }} className="text-xs">·</span>
-            <Link href="/privacy" className="text-xs text-slate-600 hover:text-slate-300 transition-colors">
+            <span style={{ color: GOLD_RGBA(0.25) }} className="text-xs">·</span>
+            <Link href="/privacy"
+              className="text-xs font-medium transition-colors duration-200 hover:text-white"
+              style={{ color: GOLD_RGBA(0.65) }}>
               Privacy Policy
             </Link>
-            <span style={{ color: GOLD_RGBA(0.2) }} className="text-xs">·</span>
-            <Link href="/refund" className="text-xs text-slate-600 hover:text-slate-300 transition-colors">
+            <span style={{ color: GOLD_RGBA(0.25) }} className="text-xs">·</span>
+            <Link href="/refund"
+              className="text-xs font-medium transition-colors duration-200 hover:text-white"
+              style={{ color: GOLD_RGBA(0.65) }}>
               Refund Policy
             </Link>
           </div>

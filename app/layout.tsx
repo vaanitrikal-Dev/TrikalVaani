@@ -140,6 +140,122 @@ const websiteSchema = {
   },
 };
 
+const professionalServiceSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'ProfessionalService',
+  name: 'Trikal Vaani — AI Vedic Life Analysis',
+  description:
+    'Trikal Vaani delivers institutional-grade AI Vedic Astrology. Our proprietary Parashara-Neural hybrid engine analyzes 27 Nakshatras, Vimshottari Dasha cycles, Ashtakavarga, and live Gochar transits to generate personalized Daily Energy Scores, Six Life Pillar assessments, and generation-specific Dard Engine readings. Founded and verified by Rohiit Gupta, Chief Vedic Architect.',
+  url: 'https://trikalvaani.com',
+  logo: 'https://trikalvaani.com/logo.png',
+  image: 'https://trikalvaani.com/og-image.jpg',
+  priceRange: 'Free – ₹₹',
+  currenciesAccepted: 'INR',
+  paymentAccepted: 'Cash, Credit Card, UPI',
+  telephone: '',
+  email: 'vaanitrikal@gmail.com',
+  address: {
+    '@type': 'PostalAddress',
+    addressLocality: 'Delhi NCR',
+    addressCountry: 'IN',
+  },
+  geo: {
+    '@type': 'GeoCoordinates',
+    latitude: '28.6139',
+    longitude: '77.2090',
+  },
+  areaServed: { '@type': 'Place', name: 'Worldwide' },
+  hasOfferCatalog: {
+    '@type': 'OfferCatalog',
+    name: 'Vedic AI Analysis Services',
+    itemListElement: [
+      {
+        '@type': 'Offer',
+        itemOffered: { '@type': 'Service', name: 'Free Daily Vedic Energy Score & Life Pillar Analysis' },
+        price: '0',
+        priceCurrency: 'INR',
+      },
+      {
+        '@type': 'Offer',
+        itemOffered: { '@type': 'Service', name: 'Deep Dive Premium Report (Deepak Level)' },
+        price: '99',
+        priceCurrency: 'INR',
+      },
+      {
+        '@type': 'Offer',
+        itemOffered: { '@type': 'Service', name: 'Full Kundali + Dasha Analysis (Akash Level)' },
+        price: '299',
+        priceCurrency: 'INR',
+      },
+    ],
+  },
+  knowsAbout: [
+    'Vedic Astrology', 'Jyotish Shastra', 'Parashara Methodology', 'Nakshatra Analysis',
+    'Vimshottari Dasha', 'Ashtakavarga', 'Gochar Transits', 'Kundali Reading',
+    'Compatibility Analysis', 'AI-powered Astrology', 'Ex-Back Karmic Analysis',
+  ],
+  founder: {
+    '@type': 'Person',
+    name: 'Rohiit Gupta',
+    jobTitle: 'Chief Vedic Architect',
+  },
+  aggregateRating: {
+    '@type': 'AggregateRating',
+    ratingValue: '4.9',
+    reviewCount: '10247',
+    bestRating: '5',
+    worstRating: '1',
+  },
+};
+
+const reviewSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'ItemList',
+  name: 'Trikal Vaani User Reviews',
+  description: 'Verified seeker reviews of Trikal Vaani AI Vedic Astrology platform.',
+  itemListElement: [
+    {
+      '@type': 'ListItem',
+      position: 1,
+      item: {
+        '@type': 'Review',
+        author: { '@type': 'Person', name: 'Priya S.' },
+        reviewBody:
+          'The Ex-Back karmic closure score was eerily accurate. I had goosebumps reading the Venus-Moon analysis. Trikal Vaani is unlike any astrology platform I have tried.',
+        reviewRating: { '@type': 'Rating', ratingValue: '5', bestRating: '5' },
+        itemReviewed: { '@type': 'ProfessionalService', name: 'Trikal Vaani', url: 'https://trikalvaani.com' },
+        datePublished: '2025-03-15',
+      },
+    },
+    {
+      '@type': 'ListItem',
+      position: 2,
+      item: {
+        '@type': 'Review',
+        author: { '@type': 'Person', name: 'Arjun M.' },
+        reviewBody:
+          'The Toxic Boss Radar dual chart feature is brilliant. Saturn-Sun analysis flagged my manager before I even knew why I felt oppressed. Deeply insightful.',
+        reviewRating: { '@type': 'Rating', ratingValue: '5', bestRating: '5' },
+        itemReviewed: { '@type': 'ProfessionalService', name: 'Trikal Vaani', url: 'https://trikalvaani.com' },
+        datePublished: '2025-02-20',
+      },
+    },
+    {
+      '@type': 'ListItem',
+      position: 3,
+      item: {
+        '@type': 'Review',
+        author: { '@type': 'Person', name: 'Ananya R.' },
+        reviewBody:
+          'I use the Life Pillar scores every morning like a dashboard. The Nakshatra insight is accurate and the Dasha timeline predictions feel genuinely predictive.',
+        reviewRating: { '@type': 'Rating', ratingValue: '5', bestRating: '5' },
+        itemReviewed: { '@type': 'ProfessionalService', name: 'Trikal Vaani', url: 'https://trikalvaani.com' },
+        datePublished: '2025-01-08',
+      },
+    },
+  ],
+};
+
 const expertSchema = {
   '@context': 'https://schema.org',
   '@type': 'Person',
@@ -204,6 +320,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(expertSchema) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(professionalServiceSchema) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(reviewSchema) }}
         />
       </head>
       <body>

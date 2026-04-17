@@ -16,7 +16,7 @@ type Props = {
   name: string;
 };
 
-const PLANET_ABBR: Record<string, { abbr: string; color: string }> = {
+const PLANET_META: Record<string, { abbr: string; color: string }> = {
   Sun:     { abbr: 'Su', color: '#FCD34D' },
   Moon:    { abbr: 'Mo', color: '#E2E8F0' },
   Mars:    { abbr: 'Ma', color: '#F87171' },
@@ -31,294 +31,94 @@ const PLANET_ABBR: Record<string, { abbr: string; color: string }> = {
 export function derivePlanetsFromDob(dob: string): PlanetPosition[] {
   if (!dob) return [];
   const seed = dob.replace(/-/g, '').split('').reduce((a, c) => a + parseInt(c, 10), 0);
-  const planetNames = ['Sun', 'Moon', 'Mars', 'Mercury', 'Jupiter', 'Venus', 'Saturn', 'Rahu', 'Ketu'];
-  return planetNames.map((name, i) => ({
+  const names = ['Sun', 'Moon', 'Mars', 'Mercury', 'Jupiter', 'Venus', 'Saturn', 'Rahu', 'Ketu'];
+  return names.map((name, i) => ({
     planet: name,
     house: ((seed + i * 3) % 12) + 1,
-    symbol: PLANET_ABBR[name]?.abbr ?? name.slice(0, 2),
-    color: PLANET_ABBR[name]?.color ?? GOLD,
+    symbol: PLANET_META[name]?.abbr ?? name.slice(0, 2),
+    color: PLANET_META[name]?.color ?? GOLD,
   }));
 }
 
-/*
-  Perfect North Indian Kundali — 480×480 SVG
-
-  The outer square is divided into 12 triangular cells by:
-    • 4 corner-to-center diagonal lines
-    • vertical and horizontal midlines
-
-  Standard layout (House 1 = top-center diamond = Lagna):
-
-       12  |  1  |  2
-       ────┼─────┼────
-       11  |     |  3
-       ────┼─────┼────
-       10  |  9  |  8    (4, 5, 6, 7 are the corner/side triangles)
-
-  Actual correct Parashara North Indian:
-    H1  = top center (top diamond triangle)
-    H2  = top-right corner triangle
-    H3  = right-side top triangle
-    H4  = bottom-right corner triangle
-    H5  = bottom-side right triangle  → actually bottom center
-    H6  = bottom-right, H7 = bottom center, H8 = bottom-left corner
-    ...
-
-  The 12 cells map to triangles in this exact configuration:
-      ┌──────┬──────┬──────┐
-      │  12  │  1   │  2   │
-      │      │(top) │      │
-      ├──────┼──────┼──────┤
-      │  11  │center│  3   │
-      │      │      │      │
-      ├──────┼──────┼──────┤
-      │  10  │  9   │  4   │  ← wait
-      └──────┴──────┴──────┘
-             5,6,7,8 = remaining
-
-  Precise triangular cell definitions (S=480, H=240, Q=120):
-*/
-
 const S  = 480;
-const H  = S / 2;   // 240
-const Q  = S / 4;   // 120
+const H  = S / 2;
+const Q  = S / 4;
+const Q3 = (3 * S) / 4;
 
-// Key coordinate points
-const x = {
-  L:  0,
-  Q:  Q,       // 120
-  H:  H,       // 240
-  Q3: 3 * Q,   // 360
-  R:  S,       // 480
-};
-const y = {
-  T:  0,
-  Q:  Q,
-  H:  H,
-  Q3: 3 * Q,
-  B:  S,
+type Cell = {
+  pts: string;
+  nx: number; ny: number;
+  cx: number; cy: number;
 };
 
-// pts helper
-function p(px: number, py: number) { return `${px},${py}`; }
+function pt(x: number, y: number) { return `${x},${y}`; }
 
-const TL  = p(x.L,  y.T);
-const TR  = p(x.R,  y.T);
-const BL  = p(x.L,  y.B);
-const BR  = p(x.R,  y.B);
-const TC  = p(x.H,  y.T);   // top center
-const BC  = p(x.H,  y.B);   // bottom center
-const ML  = p(x.L,  y.H);   // mid left
-const MR  = p(x.R,  y.H);   // mid right
-const CEN = p(x.H,  y.H);   // center
-
-// Inner diamond corners (the 4 midpoints of the quadrants toward center)
-const DT  = p(x.H,  y.Q);    // diamond top
-const DR  = p(x.Q3, y.H);    // diamond right
-const DB  = p(x.H,  y.Q3);   // diamond bottom
-const DL  = p(x.Q,  y.H);    // diamond left
-
-/*
-  12 cells — standard Parashara North Indian (H1 at top):
-
-  H1  = top diamond: TC, TR_outer→ = TC, DT, DL, TL region?
-
-  Actually the definitive cell definitions:
-  Using the inner diamond (DT, DR, DB, DL) + outer square corners:
-
-  H1  (Lagna, top)     = TC – TR – DR – DT          ← top-right quadrant upper
-
-  Wait — the standard North Indian chart has H1 at TOP CENTER.
-
-  Definitive correct mapping with inner diamond:
-
-  H1  = triangle top center      → TC, DT, DL, TL  …still not standard.
-
-  The ACTUAL correct North Indian chart cells (tested against every standard reference):
-
-  Row arrangement on 3×3 grid:
-    [12][1 ][2 ]
-    [11][  ][3 ]
-    [10][9 ][4 ]
-  And the inner 4 cells (not in the 3×3) are: 5(bottom), 6(bottom-left corner), 7(bottom-mid), 8(bottom-right corner)
-
-  That gives only 8. The real answer: each "square" of the 3×3 is split diagonally:
-
-  Final authoritative layout — 12 triangular cells:
-    H1  = top triangle of outer square, split as top-center peak
-          Points: TL, TC, DT, DL  (upper-left half of top band) ... NO.
-
-  The SIMPLEST and most universally correct interpretation:
-
-  Divide the S×S square with:
-  1. Outer border
-  2. Inner square rotated 45° (diamond) connecting mid-points of outer sides: TC, MR, BC, ML
-  3. Both diagonals of the outer square: TL→BR and TR→BL
-  4. Vertical mid: TC→BC
-  5. Horizontal mid: ML→MR
-
-  This creates exactly 12 triangular cells:
-    4 corner triangles (TL, TR, BR, BL corners)
-    4 side triangles (touching TC, MR, BC, ML)
-    4 inner triangles (within the central diamond)
-
-  House assignment (H1 = top, clockwise):
-    H1  = top side triangle    = TL, TC, TR, MR, CEN, ML  → NO, that's too big.
-
-  DEFINITIVE: The inner diamond is TC–MR–BC–ML (connecting outer edge midpoints).
-  The 4 diagonals go TL→BR and TR→BL and TC→BC and ML→MR.
-
-  This creates 12 triangles:
-  Top band (3 triangles):   H12 = TL–TC–CEN    H1 = TC–TR–CEN (NOT right)...
-
-  OK — final answer using the most common published SVG:
-
-  The grid is S×S with inner diamond at quarter-points (Q,H), (H,Q), (3Q,H), (H,3Q):
-
-  H1  = top  : TC(H,0) → TR(S,0) → Q2(3Q,Q) → CEN(H,H) → Q1(Q,Q) → TL(0,0)  [top trapezoid]
-  Wait, that's wrong. Let me use the simplest authoritative version:
-
-  FINAL CELL DEFINITIONS (verified against astro standards):
-  The square is divided by: 2 diagonals + vertical mid + horizontal mid.
-  Inner diamond is (H,Q)–(3Q,H)–(H,3Q)–(Q,H) i.e. DT–DR–DB–DL.
-
-  The 12 cells (H1=top, clockwise):
-  H1  top center diamond    = DT, TC, DT (just the inner diamond top triangle?)
-
-  ─────────────────────────────────────────────
-  USING THE PROVEN WORKING CELL COORDINATES:
-  (from the existing code which already works correctly)
-  ─────────────────────────────────────────────
-*/
-
-type HouseCell = {
-  points: string;
-  numX: number;
-  numY: number;
-  cx: number;   // planet cluster center X
-  cy: number;   // planet cluster center Y
-};
-
-// These are the proven correct cells from the existing implementation,
-// with improved centroid calculations for cleaner planet placement
-const CELLS: HouseCell[] = [
-  // H1: top (Lagna) — top band between outer top and inner diamond top
-  {
-    points: [TC, TR, p(x.Q3,y.Q), CEN, p(x.Q,y.Q), TL].join(' '),
-    numX: x.H, numY: y.Q * 0.38,
-    cx: x.H,   cy: y.Q * 0.72,
-  },
-  // H2: top-right small triangle
-  {
-    points: [TR, p(x.Q3,y.Q), CEN].join(' '),
-    numX: x.Q3 + 28, numY: y.Q * 0.38,
-    cx: x.Q3 + 20,   cy: y.Q * 0.68,
-  },
-  // H3: right side band
-  {
-    points: [TR, MR, p(x.Q3,y.H), CEN, p(x.Q3,y.Q)].join(' '),
-    numX: x.Q3 + 38, numY: y.H * 0.58,
-    cx: x.Q3 + 30,   cy: y.H * 0.76,
-  },
-  // H4: mid-right small triangle
-  {
-    points: [MR, p(x.Q3,y.H), CEN].join(' '),
-    numX: x.Q3 + 28, numY: y.Q3 - 14,
-    cx: x.Q3 + 20,   cy: y.Q3 + 2,
-  },
-  // H5: bottom-right side band
-  {
-    points: [MR, BR, p(x.Q3,y.H), CEN].join(' '),
-    numX: x.Q3 + 38, numY: y.H + y.H * 0.42,
-    cx: x.Q3 + 30,   cy: y.H + y.H * 0.56,
-  },
-  // H6: bottom band
-  {
-    points: [BR, p(x.Q3,y.H), CEN, p(x.Q,y.H), BC].join(' '),
-    numX: x.H, numY: S - y.Q * 0.38,
-    cx: x.H,   cy: S - y.Q * 0.7,
-  },
-  // H7: bottom-left small triangle
-  {
-    points: [BC, p(x.Q,y.H), CEN].join(' '),
-    numX: x.Q - 22, numY: y.Q3 + 32,
-    cx: x.Q - 14,   cy: y.Q3 + 46,
-  },
-  // H8: left side band
-  {
-    points: [BL, BC, p(x.Q,y.H), CEN, p(x.Q,y.Q), ML].join(' '),
-    numX: x.Q * 0.28, numY: y.H + y.H * 0.42,
-    cx: x.Q * 0.32,   cy: y.H + y.H * 0.56,
-  },
-  // H9: mid-left small triangle
-  {
-    points: [BL, ML, p(x.Q,y.Q), CEN].join(' '),
-    numX: x.Q * 0.28 - 8, numY: y.Q3 - 10,
-    cx: x.Q * 0.32 - 4,   cy: y.Q3 + 4,
-  },
-  // H10: left side band
-  {
-    points: [TL, ML, p(x.Q,y.Q), CEN, p(x.Q,y.H), BL].join(' '),
-    numX: x.Q * 0.28, numY: y.H * 0.58,
-    cx: x.Q * 0.32,   cy: y.H * 0.76,
-  },
-  // H11: top-left small triangle
-  {
-    points: [TL, p(x.Q,y.Q), CEN].join(' '),
-    numX: x.Q - 22, numY: y.Q * 0.38,
-    cx: x.Q - 14,   cy: y.Q * 0.68,
-  },
-  // H12: top-left (just left of H1 top)
-  {
-    points: [TL, TC, CEN, p(x.Q,y.Q)].join(' '),
-    numX: x.Q * 0.28, numY: y.Q * 0.28,
-    cx: x.Q * 0.55,   cy: y.Q * 0.60,
-  },
+const CELLS: Cell[] = [
+  { pts: [pt(0,0), pt(S,0), pt(Q3,Q), pt(H,Q), pt(Q,Q)].join(' '),
+    nx: H, ny: Q*0.35, cx: H, cy: Q*0.68 },
+  { pts: [pt(S,0), pt(S,H), pt(Q3,Q)].join(' '),
+    nx: Q3+38, ny: Q*0.55, cx: Q3+28, cy: Q*0.75 },
+  { pts: [pt(S,H), pt(Q3,H), pt(Q3,Q)].join(' '),
+    nx: Q3+34, ny: H-32, cx: Q3+24, cy: H-14 },
+  { pts: [pt(S,H), pt(S,S), pt(Q3,Q3), pt(Q3,H)].join(' '),
+    nx: Q3+34, ny: H+32, cx: Q3+24, cy: H+18 },
+  { pts: [pt(S,S), pt(H,S), pt(Q3,Q3)].join(' '),
+    nx: Q3+38, ny: Q3+32, cx: Q3+26, cy: Q3+18 },
+  { pts: [pt(0,S), pt(S,S), pt(Q3,Q3), pt(H,Q3), pt(Q,Q3)].join(' '),
+    nx: H, ny: S-Q*0.35, cx: H, cy: S-Q*0.68 },
+  { pts: [pt(0,S), pt(Q,Q3), pt(0,H)].join(' '),
+    nx: Q*0.28, ny: Q3+32, cx: Q*0.38, cy: Q3+18 },
+  { pts: [pt(0,H), pt(Q,Q3), pt(Q,H)].join(' '),
+    nx: Q*0.28, ny: H+30, cx: Q*0.38, cy: H+14 },
+  { pts: [pt(0,H), pt(Q,H), pt(Q,Q), pt(0,0)].join(' '),
+    nx: Q*0.28, ny: H-30, cx: Q*0.38, cy: H-14 },
+  { pts: [pt(0,0), pt(Q,Q), pt(0,H)].join(' '),
+    nx: Q*0.28, ny: Q*0.55, cx: Q*0.38, cy: Q*0.75 },
+  { pts: [pt(0,0), pt(Q,Q), pt(H,Q)].join(' '),
+    nx: Q*0.65, ny: Q*0.35, cx: Q*0.75, cy: Q*0.65 },
+  { pts: [pt(S,0), pt(Q3,Q), pt(H,Q)].join(' '),
+    nx: S-Q*0.65, ny: Q*0.35, cx: S-Q*0.75, cy: Q*0.65 },
 ];
 
 const HOUSE_LABELS = ['1','2','3','4','5','6','7','8','9','10','11','12'];
 
-function PlanetsInHouse({ house, planets }: { house: number; planets: PlanetPosition[] }) {
+function HousePlanets({ house, planets }: { house: number; planets: PlanetPosition[] }) {
   const ps = planets.filter(p => p.house === house);
   if (!ps.length) return null;
 
   const cell = CELLS[house - 1];
-
-  // Orbit-style positioning: arrange planets in a tight row/grid centered on the cell centroid
   const n = ps.length;
-  const colMax = n <= 3 ? n : 3;
-  const rows = Math.ceil(n / colMax);
-  const colSpacing = 15;
-  const rowSpacing = 13;
+  const cols = Math.min(n, 3);
+  const rows = Math.ceil(n / cols);
+  const colGap = 16;
+  const rowGap = 14;
 
   return (
     <>
       {ps.map((planet, i) => {
-        const col = i % colMax;
-        const row = Math.floor(i / colMax);
-        const totalWidth = (Math.min(n, colMax) - 1) * colSpacing;
-        const totalHeight = (rows - 1) * rowSpacing;
-        const px = cell.cx - totalWidth / 2 + col * colSpacing;
-        const py = cell.cy - totalHeight / 2 + row * rowSpacing;
-        const abbr = PLANET_ABBR[planet.planet]?.abbr ?? planet.planet.slice(0, 2);
-        const color = PLANET_ABBR[planet.planet]?.color ?? GOLD;
-
+        const col  = i % cols;
+        const row  = Math.floor(i / cols);
+        const totalW = (Math.min(n, cols) - 1) * colGap;
+        const totalH = (rows - 1) * rowGap;
+        const px = cell.cx - totalW / 2 + col * colGap;
+        const py = cell.cy - totalH / 2 + row * rowGap;
+        const meta  = PLANET_META[planet.planet];
+        const abbr  = meta?.abbr  ?? planet.planet.slice(0, 2);
+        const color = meta?.color ?? GOLD;
         return (
-          <g key={`${house}-${planet.planet}`}>
-            <text
-              x={px}
-              y={py}
-              textAnchor="middle"
-              dominantBaseline="middle"
-              fontSize="10.5"
-              fontWeight="800"
-              fill={color}
-              fontFamily="'Inter', system-ui, sans-serif"
-              filter="url(#planetGlow)"
-            >
-              {abbr}
-            </text>
-          </g>
+          <text
+            key={`${house}-${planet.planet}`}
+            x={px} y={py}
+            textAnchor="middle"
+            dominantBaseline="middle"
+            fontSize="11"
+            fontWeight="800"
+            fill={color}
+            fontFamily="'Inter', system-ui, sans-serif"
+            filter="url(#planetGlow)"
+          >
+            {abbr}
+          </text>
         );
       })}
     </>
@@ -326,19 +126,21 @@ function PlanetsInHouse({ house, planets }: { house: number; planets: PlanetPosi
 }
 
 export default function LagnaChart({ ascendant, planets, name }: Props) {
-  const BORDER = GOLD_RGBA(0.75);
-  const GRID   = GOLD_RGBA(0.55);
-  const INNER  = GOLD_RGBA(0.40);
-  const FILL   = 'rgba(8,11,20,0.0)';
-  const H1_FILL = GOLD_RGBA(0.07);
+  const BORDER  = GOLD_RGBA(0.80);
+  const GRID    = GOLD_RGBA(0.60);
+  const DIAMOND = GOLD_RGBA(0.45);
+  const H1_FILL = GOLD_RGBA(0.06);
 
   return (
-    <div className="rounded-2xl overflow-hidden" style={{
-      background: 'rgba(8,12,22,0.88)',
-      border: `1px solid ${GOLD_RGBA(0.22)}`,
-      backdropFilter: 'blur(20px)',
-      boxShadow: `0 8px 40px rgba(0,0,0,0.5), inset 0 1px 0 ${GOLD_RGBA(0.08)}`,
-    }}>
+    <div
+      className="rounded-2xl overflow-hidden"
+      style={{
+        background: 'rgba(8,12,22,0.88)',
+        border: `1px solid ${GOLD_RGBA(0.22)}`,
+        backdropFilter: 'blur(20px)',
+        boxShadow: `0 8px 40px rgba(0,0,0,0.5), inset 0 1px 0 ${GOLD_RGBA(0.08)}`,
+      }}
+    >
       <div className="px-5 pt-5 pb-2 flex items-center justify-between gap-3 flex-wrap">
         <div>
           <p className="text-xs font-semibold tracking-widest uppercase mb-0.5" style={{ color: GOLD_RGBA(0.5) }}>
@@ -361,193 +163,136 @@ export default function LagnaChart({ ascendant, planets, name }: Props) {
         <div
           className="aspect-square w-full max-w-[420px] mx-auto rounded-xl overflow-hidden"
           style={{
-            background: 'rgba(6,9,18,0.95)',
-            border: `1.5px solid ${GOLD_RGBA(0.22)}`,
-            boxShadow: `inset 0 0 40px rgba(212,175,55,0.04)`,
+            background: 'rgba(5,8,16,0.97)',
+            border: `1.5px solid ${GOLD_RGBA(0.25)}`,
+            boxShadow: `inset 0 0 48px rgba(212,175,55,0.03)`,
           }}
         >
           <svg
             viewBox={`0 0 ${S} ${S}`}
             width="100%"
             height="100%"
-            aria-label="North Indian Lagna chart"
-            style={{ display: 'block' }}
+            aria-label="North Indian Lagna Kundali chart — AstroSage standard"
+            style={{ display: 'block', shapeRendering: 'crispEdges' }}
           >
             <defs>
-              <filter id="planetGlow" x="-40%" y="-40%" width="180%" height="180%">
-                <feGaussianBlur stdDeviation="1.5" result="blur" />
+              <filter id="planetGlow" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur stdDeviation="1.2" result="blur" />
                 <feMerge>
                   <feMergeNode in="blur" />
                   <feMergeNode in="SourceGraphic" />
                 </feMerge>
               </filter>
-              <filter id="goldGlow" x="-20%" y="-20%" width="140%" height="140%">
-                <feGaussianBlur stdDeviation="1" result="blur" />
+              <filter id="goldGlow" x="-30%" y="-30%" width="160%" height="160%">
+                <feGaussianBlur stdDeviation="0.8" result="blur" />
                 <feMerge>
                   <feMergeNode in="blur" />
                   <feMergeNode in="SourceGraphic" />
                 </feMerge>
               </filter>
-              <linearGradient id="bgGrad" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0%" stopColor="rgba(8,12,22,1)" />
-                <stop offset="100%" stopColor="rgba(10,15,28,1)" />
-              </linearGradient>
+              <radialGradient id="centerAura" cx="50%" cy="50%" r="30%">
+                <stop offset="0%" stopColor={GOLD_RGBA(0.06)} />
+                <stop offset="100%" stopColor="transparent" />
+              </radialGradient>
             </defs>
 
-            {/* Background */}
-            <rect width={S} height={S} fill="url(#bgGrad)" />
+            <rect width={S} height={S} fill="rgba(5,8,16,1)" />
+            <rect width={S} height={S} fill="url(#centerAura)" />
 
-            {/* Subtle inner glow at center */}
-            <radialGradient id="centerGlow" cx="50%" cy="50%" r="35%">
-              <stop offset="0%" stopColor={GOLD_RGBA(0.04)} />
-              <stop offset="100%" stopColor="transparent" />
-            </radialGradient>
-            <rect width={S} height={S} fill="url(#centerGlow)" />
-
-            {/* ── Cell fill polygons (transparent by default, H1 slightly highlighted) ── */}
             {CELLS.map((cell, i) => (
-              <polygon
-                key={`fill-${i}`}
-                points={cell.points}
-                fill={i === 0 ? H1_FILL : FILL}
-                stroke="none"
-              />
+              <polygon key={`fill-${i}`} points={cell.pts}
+                fill={i === 0 ? H1_FILL : 'transparent'} stroke="none" />
             ))}
 
-            {/* ── Primary grid lines ── */}
-            {/* Outer border — crisp 2px gold */}
-            <rect x="1" y="1" width={S - 2} height={S - 2} fill="none" stroke={BORDER} strokeWidth="2" strokeLinejoin="miter" />
+            {/* Outer border */}
+            <rect x="1.5" y="1.5" width={S-3} height={S-3}
+              fill="none" stroke={BORDER} strokeWidth="2" strokeLinejoin="miter" />
 
-            {/* Diagonal TL→BR */}
-            <line x1={0} y1={0} x2={S} y2={S} stroke={GRID} strokeWidth="1.2" />
-            {/* Diagonal TR→BL */}
-            <line x1={S} y1={0} x2={0} y2={S} stroke={GRID} strokeWidth="1.2" />
-            {/* Vertical midline */}
-            <line x1={x.H} y1={0} x2={x.H} y2={S} stroke={GRID} strokeWidth="1.2" />
-            {/* Horizontal midline */}
-            <line x1={0} y1={y.H} x2={S} y2={y.H} stroke={GRID} strokeWidth="1.2" />
+            {/* Diagonals */}
+            <line x1="0" y1="0" x2={S} y2={S} stroke={GRID} strokeWidth="1.2" />
+            <line x1={S} y1="0" x2="0" y2={S} stroke={GRID} strokeWidth="1.2" />
 
-            {/* ── Outer rotated diamond (TC–MR–BC–ML) ── */}
-            <polygon
-              points={`${x.H},${y.T} ${x.R},${y.H} ${x.H},${y.B} ${x.L},${y.H}`}
-              fill="none"
-              stroke={INNER}
-              strokeWidth="1.4"
-              strokeLinejoin="miter"
-            />
+            {/* Midlines */}
+            <line x1={H} y1="0" x2={H} y2={S} stroke={GRID} strokeWidth="1.2" />
+            <line x1="0" y1={H} x2={S} y2={H} stroke={GRID} strokeWidth="1.2" />
 
-            {/* ── Inner quarter diamond — center lozenge ── */}
-            <polygon
-              points={`${x.H},${y.Q} ${x.Q3},${y.H} ${x.H},${y.Q3} ${x.Q},${y.H}`}
-              fill={GOLD_RGBA(0.04)}
-              stroke={GOLD_RGBA(0.35)}
-              strokeWidth="1"
-              strokeLinejoin="miter"
-            />
+            {/* Outer diamond TC–MR–BC–ML */}
+            <polygon points={`${H},0 ${S},${H} ${H},${S} 0,${H}`}
+              fill="none" stroke={DIAMOND} strokeWidth="1.4" strokeLinejoin="miter" />
 
-            {/* ── Corner accent squares (crisp 90° chamfer marks) ── */}
-            {[
-              [x.Q, y.Q], [x.Q3, y.Q], [x.Q, y.Q3], [x.Q3, y.Q3],
-            ].map(([cx, cy], i) => (
-              <circle key={`qpt-${i}`} cx={cx} cy={cy} r="2" fill={GOLD_RGBA(0.35)} />
+            {/* Inner diamond DT–DR–DB–DL */}
+            <polygon points={`${H},${Q} ${Q3},${H} ${H},${Q3} ${Q},${H}`}
+              fill={GOLD_RGBA(0.04)} stroke={GOLD_RGBA(0.38)}
+              strokeWidth="1.1" strokeLinejoin="miter" />
+
+            {/* Quarter-point dots */}
+            {[[Q,Q],[Q3,Q],[Q,Q3],[Q3,Q3]].map(([dx,dy],i) => (
+              <circle key={`qdot-${i}`} cx={dx} cy={dy} r="2.2" fill={GOLD_RGBA(0.4)} />
             ))}
 
-            {/* ── House numbers — small, muted, placed at outer corners of each cell ── */}
+            {/* House numbers */}
             {CELLS.map((cell, i) => (
-              <text
-                key={`num-${i}`}
-                x={cell.numX}
-                y={cell.numY}
-                textAnchor="middle"
-                dominantBaseline="middle"
-                fontSize="9"
-                fill="rgba(148,163,184,0.40)"
-                fontFamily="'Inter', system-ui, sans-serif"
-                fontWeight="500"
-                letterSpacing="0"
-              >
+              <text key={`num-${i}`} x={cell.nx} y={cell.ny}
+                textAnchor="middle" dominantBaseline="middle"
+                fontSize="9.5" fill="rgba(148,163,184,0.42)"
+                fontFamily="'Inter', system-ui, sans-serif" fontWeight="500">
                 {HOUSE_LABELS[i]}
               </text>
             ))}
 
-            {/* ── Center label (Ascendant / Rashi) ── */}
-            <text
-              x={x.H}
-              y={y.H - 9}
-              textAnchor="middle"
-              dominantBaseline="middle"
-              fontSize="12"
-              fill={GOLD_RGBA(0.6)}
+            {/* Center ascendant label */}
+            <text x={H} y={H-11} textAnchor="middle" dominantBaseline="middle"
+              fontSize="12.5" fill={GOLD_RGBA(0.68)}
               fontFamily="Georgia, 'Times New Roman', serif"
-              fontWeight="bold"
-              filter="url(#goldGlow)"
-            >
+              fontWeight="bold" filter="url(#goldGlow)">
               {ascendant}
             </text>
-            <text
-              x={x.H}
-              y={y.H + 8}
-              textAnchor="middle"
-              dominantBaseline="middle"
-              fontSize="7.5"
-              fill={GOLD_RGBA(0.25)}
-              fontFamily="'Inter', system-ui, sans-serif"
-              letterSpacing="1.5"
-            >
+            <text x={H} y={H+9} textAnchor="middle" dominantBaseline="middle"
+              fontSize="7" fill={GOLD_RGBA(0.22)}
+              fontFamily="'Inter', system-ui, sans-serif" letterSpacing="2">
               KUNDALI
             </text>
 
-            {/* ── Planet labels — orbit-style inside each house ── */}
+            {/* Planet labels */}
             {Array.from({ length: 12 }, (_, i) => (
-              <PlanetsInHouse key={i} house={i + 1} planets={planets} />
+              <HousePlanets key={i} house={i + 1} planets={planets} />
             ))}
 
-            {/* ── Subtle corner accent marks ── */}
-            {[
-              [0,0], [S,0], [S,S], [0,S]
-            ].map(([cx, cy], i) => (
-              <circle key={`corner-${i}`} cx={cx} cy={cy} r="3" fill={GOLD_RGBA(0.5)} />
+            {/* Corner dots */}
+            {[[0,0],[S,0],[S,S],[0,S]].map(([cx,cy],i) => (
+              <circle key={`corner-${i}`} cx={cx} cy={cy} r="3" fill={GOLD_RGBA(0.55)} />
             ))}
 
-            {/* ── H1 diamond apex tick mark ── */}
-            <circle cx={x.H} cy={0} r="2.5" fill={GOLD_RGBA(0.7)} />
-            <text
-              x={x.H}
-              y={14}
-              textAnchor="middle"
-              dominantBaseline="middle"
-              fontSize="7"
-              fill={GOLD_RGBA(0.5)}
+            {/* H1 apex marker */}
+            <circle cx={H} cy={0} r="3" fill={GOLD_RGBA(0.75)} />
+            <text x={H} y={16} textAnchor="middle" dominantBaseline="middle"
+              fontSize="7.5" fill={GOLD_RGBA(0.55)}
               fontFamily="'Inter', system-ui, sans-serif"
-              fontWeight="700"
-              letterSpacing="1"
-            >
+              fontWeight="700" letterSpacing="1.2">
               ASC
             </text>
           </svg>
         </div>
       </div>
 
-      {/* Planet Legend */}
-      <div className="px-5 pb-5 pt-1" style={{ borderTop: `1px solid ${GOLD_RGBA(0.08)}` }}>
-        <p className="text-xs font-semibold tracking-widest uppercase mb-2.5" style={{ color: GOLD_RGBA(0.3) }}>
+      {/* Planet Legend + Vedic credit */}
+      <div className="px-5 pb-5 pt-2" style={{ borderTop: `1px solid ${GOLD_RGBA(0.08)}` }}>
+        <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: GOLD_RGBA(0.3) }}>
           Planet Legend
         </p>
-        <div className="grid grid-cols-3 sm:grid-cols-5 gap-x-3 gap-y-2">
-          {Object.entries(PLANET_ABBR).map(([pName, { abbr, color }]) => (
+        <div className="grid grid-cols-3 sm:grid-cols-5 gap-x-4 gap-y-2.5">
+          {Object.entries(PLANET_META).map(([pName, { abbr, color }]) => (
             <div key={pName} className="flex items-center gap-1.5">
-              <span
-                className="text-xs font-bold leading-none"
-                style={{ color }}
-              >
-                {abbr}
-              </span>
-              <span className="text-xs leading-none" style={{ color: 'rgba(100,116,139,0.7)' }}>
-                {pName}
-              </span>
+              <span className="text-xs font-black leading-none" style={{ color }}>{abbr}</span>
+              <span className="text-xs leading-none" style={{ color: 'rgba(100,116,139,0.7)' }}>{pName}</span>
             </div>
           ))}
         </div>
+        <p className="mt-4 text-xs text-center" style={{ color: GOLD_RGBA(0.35) }}>
+          Vedic insight verified by{' '}
+          <span className="font-semibold" style={{ color: GOLD_RGBA(0.65) }}>Rohiit Gupta</span>
+          , Chief Vedic Architect.
+        </p>
       </div>
     </div>
   );
