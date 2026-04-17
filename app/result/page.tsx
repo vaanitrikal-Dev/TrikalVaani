@@ -430,7 +430,7 @@ function ResultContent() {
   }, [dob]);
 
   return (
-    <div className="min-h-screen bg-[#030712]">
+    <div className="min-h-screen bg-[#080B12]">
       <SiteNav />
 
       <main className="pt-24 pb-16 px-4">
@@ -543,7 +543,7 @@ export default function ResultPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-[#030712] flex items-center justify-center">
+        <div className="min-h-screen bg-[#080B12] flex items-center justify-center">
           <div className="text-center">
             <div className="w-12 h-12 rounded-full border-2 border-yellow-400/30 border-t-yellow-400 animate-spin mx-auto mb-4" />
             <p className="text-sm text-slate-500">Reading the stars...</p>

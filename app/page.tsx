@@ -1,4 +1,4 @@
-// @trikal-v4.6 — cache-bust: 2026-04-17T12:00:00Z
+// @trikal-v5.0 — cache-bust: 2026-04-17T18:00:00Z
 import SiteNav from '@/components/layout/SiteNav';
 import SiteFooter from '@/components/layout/SiteFooter';
 import Hero from '@/components/landing/Hero';
@@ -15,17 +15,28 @@ export default function HomePage() {
   const latestPosts = blogPosts.slice(0, 3);
 
   return (
-    <div className="min-h-screen bg-[#030712]">
+    <div className="min-h-screen bg-[#080B12]">
       <SiteNav />
 
       <main>
+        {/* 1. Hero */}
         <Hero />
         <SocialProofTicker />
-        <PillarsGrid />
-        <BirthForm />
+
+        {/* 2. Dard Engine — first interaction point immediately after Hero */}
         <DardEngineShowcase />
+
+        {/* 3. Birth Form */}
+        <BirthForm />
+
+        {/* 4. AI Manifesto */}
         <AIManifesto />
+
+        {/* 5. Inner Circle Waitlist */}
         <InnerCircleWaitlist />
+
+        {/* 6. Life Pillars — moved to bottom */}
+        <PillarsGrid />
 
         <section className="py-20 px-4">
           <div className="max-w-6xl mx-auto">

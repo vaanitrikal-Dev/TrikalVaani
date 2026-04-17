@@ -120,8 +120,17 @@ export default function SiteFooter() {
                 For queries:{' '}
                 <a
                   href="mailto:vaanitrikal@gmail.com"
-                  className="inline-flex items-center gap-1.5 font-semibold transition-all duration-200 hover:opacity-80"
-                  style={{ color: GOLD, textDecoration: 'underline', textDecorationColor: GOLD_RGBA(0.3), textUnderlineOffset: '3px' }}
+                  className="inline-flex items-center gap-1.5 font-bold transition-all duration-200 hover:opacity-90"
+                  style={{
+                    color: GOLD,
+                    background: GOLD_RGBA(0.1),
+                    border: `1px solid ${GOLD_RGBA(0.38)}`,
+                    borderRadius: '8px',
+                    padding: '4px 12px 4px 9px',
+                    textDecoration: 'none',
+                    boxShadow: `0 0 16px ${GOLD_RGBA(0.18)}, inset 0 1px 0 ${GOLD_RGBA(0.12)}`,
+                    letterSpacing: '0.01em',
+                  }}
                 >
                   <Mail className="w-3.5 h-3.5 flex-shrink-0" />
                   vaanitrikal@gmail.com

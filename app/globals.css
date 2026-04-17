@@ -38,14 +38,14 @@
   }
 
   html {
-    background: linear-gradient(160deg, #0B0E14 0%, #151921 100%);
+    background: linear-gradient(160deg, #080B12 0%, #0D1018 100%);
     background-attachment: fixed;
     min-height: 100%;
   }
 
   body {
     @apply text-foreground;
-    background: linear-gradient(160deg, #0B0E14 0%, #151921 100%);
+    background: linear-gradient(160deg, #080B12 0%, #0D1018 100%);
     background-attachment: fixed;
     min-height: 100vh;
     font-family: 'Inter', 'Poppins', system-ui, -apple-system, sans-serif;
@@ -85,7 +85,7 @@
   pointer-events: none;
   z-index: 0;
   overflow: hidden;
-  background: radial-gradient(ellipse 120% 80% at 50% 0%, #0f1a2e 0%, #0B0E14 55%);
+  background: radial-gradient(ellipse 120% 80% at 50% 0%, #0d1a2e 0%, #080B12 55%);
 }
 
 .star-layer {
