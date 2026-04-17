@@ -1,3 +1,4 @@
+// @trikal-v4.6 — cache-bust: 2026-04-17T12:00:00Z
 import SiteNav from '@/components/layout/SiteNav';
 import SiteFooter from '@/components/layout/SiteFooter';
 import Hero from '@/components/landing/Hero';
@@ -5,7 +6,9 @@ import PillarsGrid from '@/components/landing/PillarsGrid';
 import BirthForm from '@/components/landing/BirthForm';
 import SocialProofTicker from '@/components/landing/SocialProofTicker';
 import InnerCircleWaitlist from '@/components/landing/InnerCircleWaitlist';
+import AIManifesto from '@/components/landing/AIManifesto';
 import BlogCard from '@/components/blog/BlogCard';
+import DardEngineShowcase from '@/components/landing/DardEngineShowcase';
 import { blogPosts } from '@/lib/blog-data';
 
 export default function HomePage() {
@@ -20,6 +23,8 @@ export default function HomePage() {
         <SocialProofTicker />
         <PillarsGrid />
         <BirthForm />
+        <DardEngineShowcase />
+        <AIManifesto />
         <InnerCircleWaitlist />
 
         <section className="py-20 px-4">
@@ -49,9 +54,9 @@ export default function HomePage() {
                 href="/blog"
                 className="inline-flex items-center gap-2 px-8 py-3 rounded-full text-sm font-medium transition-all duration-300"
                 style={{
-                  border: '1px solid rgba(250,204,21,0.2)',
-                  color: '#FACC15',
-                  background: 'rgba(250,204,21,0.04)',
+                  border: '1px solid rgba(212,175,55,0.2)',
+                  color: '#D4AF37',
+                  background: 'rgba(212,175,55,0.04)',
                 }}
               >
                 View All Articles &rarr;
