@@ -1,10 +1,23 @@
+'use client';
+
 import Link from 'next/link';
-import { Star, MapPin, Instagram, ExternalLink, Mail, ShieldCheck } from 'lucide-react';
+import Image from 'next/image';
+import { Star, MapPin, Instagram, ExternalLink, Mail, ShieldCheck, Users } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 const GOLD = '#D4AF37';
 const GOLD_RGBA = (a: number) => `rgba(212,175,55,${a})`;
 
 export default function SiteFooter() {
+  const [count, setCount] = useState(10666);
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      if (Math.random() < 0.6) setCount((c) => c + 1);
+    }, 45000);
+    return () => clearInterval(id);
+  }, []);
+
   return (
     <footer
       className="px-4 pt-14 pb-8"
@@ -32,17 +45,40 @@ export default function SiteFooter() {
               The world&apos;s leading Vedic AI Astrology Research Platform. Merging 5,000 years
               of Parashara wisdom with Neural Networks to decode your cosmic blueprint.
             </p>
+
+            <div
+              className="flex items-center gap-3 mb-4 rounded-xl p-3 max-w-xs"
+              style={{ background: 'rgba(11,16,26,0.8)', border: `1px solid ${GOLD_RGBA(0.2)}` }}
+            >
+              <div
+                className="relative w-12 h-12 rounded-full overflow-hidden flex-shrink-0"
+                style={{ border: `2px solid ${GOLD_RGBA(0.5)}`, boxShadow: `0 0 16px ${GOLD_RGBA(0.3)}` }}
+              >
+                <Image
+                  src="/images/founder.png/Rohiit_Gupta.jpg"
+                  alt="Rohiit Gupta"
+                  fill
+                  className="object-cover object-top"
+                />
+              </div>
+              <div className="min-w-0">
+                <Link href="/founder" className="font-serif font-semibold text-sm text-white hover:text-yellow-200 transition-colors block truncate">
+                  Rohiit Gupta
+                </Link>
+                <p className="text-xs text-slate-500 truncate">Chief Vedic Architect</p>
+                <div className="flex items-center gap-1 mt-0.5">
+                  <Users className="w-3 h-3 flex-shrink-0" style={{ color: GOLD_RGBA(0.55) }} />
+                  <span className="text-xs font-semibold" style={{ color: GOLD_RGBA(0.85) }}>
+                    {count.toLocaleString('en-IN')}+ seekers
+                  </span>
+                </div>
+              </div>
+            </div>
+
             <div className="flex items-center gap-1.5 text-xs text-slate-500 mb-2">
               <MapPin className="w-3.5 h-3.5 flex-shrink-0" style={{ color: GOLD_RGBA(0.5) }} />
-              <span>Trikal Vaani Global Headquarters — Delhi NCR, India</span>
+              <span>Delhi NCR, India — Global Platform</span>
             </div>
-            <p className="text-xs text-slate-600 pl-5">
-              Founded by{' '}
-              <Link href="/founder" style={{ color: GOLD_RGBA(0.8) }} className="font-semibold hover:text-white transition-colors">
-                Rohiit Gupta
-              </Link>
-              , Chief Vedic Architect
-            </p>
           </div>
 
           <div>

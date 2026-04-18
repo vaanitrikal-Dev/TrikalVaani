@@ -2,7 +2,7 @@
 
 import SiteNav from '@/components/layout/SiteNav';
 import SiteFooter from '@/components/layout/SiteFooter';
-import { ShieldCheck, Star, Award, BookOpen, Brain, Sparkles } from 'lucide-react';
+import { ShieldCheck, Award, BookOpen, Brain, Sparkles } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -12,8 +12,8 @@ const GOLD_RGBA = (a: number) => `rgba(212,175,55,${a})`;
 const credentials = [
   { icon: BookOpen, label: '10+ Years', sub: 'Classical Jyotish Research' },
   { icon: Brain, label: 'Parashara Expert', sub: 'Brihat Parashara Hora Shastra' },
-  { icon: Star, label: '10,000+ Analyses', sub: 'Verified Life Path Readings' },
-  { icon: Award, label: 'AI-Vedic Pioneer', sub: 'Neural-Jyotish Architecture' },
+  { icon: Award, label: '10,000+ Analyses', sub: 'Verified Life Path Readings' },
+  { icon: Sparkles, label: 'AI-Vedic Pioneer', sub: 'Neural-Jyotish Architecture' },
 ];
 
 const quotes = [
@@ -78,32 +78,21 @@ export default function FounderPage() {
               <div
                 className="relative w-64 h-64 sm:w-72 sm:h-72 rounded-2xl overflow-hidden mb-5"
                 style={{
-                  border: `2px solid ${GOLD_RGBA(0.4)}`,
-                  boxShadow: `0 0 60px ${GOLD_RGBA(0.18)}, 0 0 24px ${GOLD_RGBA(0.3)}`,
+                  border: `2px solid ${GOLD_RGBA(0.45)}`,
+                  boxShadow: `0 0 60px ${GOLD_RGBA(0.22)}, 0 0 28px ${GOLD_RGBA(0.35)}, inset 0 0 30px ${GOLD_RGBA(0.06)}`,
                 }}
               >
                 <Image
-                  src="/images/founder.png"
+                  src="/images/founder.png/Rohiit_Gupta.jpg"
                   alt="Rohiit Gupta — Chief Vedic Architect, Trikal Vaani"
                   fill
-                  className="object-cover"
-                  onError={(e) => {
-                    const target = e.currentTarget as HTMLImageElement;
-                    target.style.display = 'none';
-                  }}
+                  className="object-cover object-top"
+                  priority
                 />
                 <div
-                  className="absolute inset-0 flex flex-col items-center justify-center"
-                  style={{ background: 'linear-gradient(135deg, rgba(8,11,18,0.7) 0%, rgba(212,175,55,0.08) 100%)' }}
-                >
-                  <div
-                    className="w-24 h-24 rounded-full flex items-center justify-center mb-3"
-                    style={{ background: GOLD_RGBA(0.12), border: `1px solid ${GOLD_RGBA(0.4)}` }}
-                  >
-                    <Star className="w-10 h-10" style={{ color: GOLD }} />
-                  </div>
-                  <p className="font-serif font-bold text-lg" style={{ color: GOLD }}>R G</p>
-                </div>
+                  className="absolute inset-x-0 bottom-0 h-1/4"
+                  style={{ background: 'linear-gradient(to top, rgba(8,11,18,0.75) 0%, transparent 100%)' }}
+                />
               </div>
 
               <div
