@@ -1,107 +1,78 @@
 /**
- * ⚠️ TRIKAL VAANI MASTER BRIDGE - V14.0
- * FULL PERSONALITY + VEDIC LOGIC + STABLE WIRING
+ * ⚠️ TRIKAL VAANI FINAL ABSOLUTE BRIDGE - V14.1
+ * MODEL: GEMINI 3 FLASH PREVIEW (EXACT MATCH)
  * SIGNED: ROHIIT GUPTA, CEO
  */
 import { NextRequest, NextResponse } from 'next/server';
-// Path fixed for No-SRC structure
 import { generateVedicInsight, CEO_VARS, Category } from '../../../lib/vedic-astro';
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY ?? '';
-// Using the most stable production endpoint and model
-const GEMINI_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent';
+// EXACT ENDPOINT FOR GEMINI 3 FLASH PREVIEW
+const GEMINI_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent';
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const { message, userName, astroContext, category = 'JOB' } = body;
 
-    // 1. Security Check
     if (!GEMINI_API_KEY) {
-      return NextResponse.json({ reply: "Bhai, GEMINI_API_KEY missing hai. Check your environment settings." });
+      return NextResponse.json({ reply: "Bhai, API Key missing hai .env ya Vercel mein!" });
     }
 
-    // 2. Data Detection Logic (Message + Context)
+    // --- VEDIC LOGIC DETECTION ---
     const hasDateInText = /\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4}/.test(message);
-    const effectiveContext = astroContext || (hasDateInText ? { dob: "Detected via Chat" } : null);
+    const effectiveContext = astroContext || (hasDateInText ? { dob: "Detected" } : null);
 
-    let vedicInsight = "USER DATA STATUS: Specific birth details not detected yet.";
+    let vedicInsight = "USER DATA: General Cosmic Query.";
     
-    // 3. Vedic Engine Execution
     if (effectiveContext) {
       try {
         const mockApiData = {
           planets: { 
             Saturn: { strength: 82, name: 'Saturn', is_retrograde: false }, 
-            Sun: { strength: 75, name: 'Sun', is_retrograde: false },
-            Venus: { strength: 60, name: 'Venus', is_retrograde: false }
+            Sun: { strength: 75, name: 'Sun', is_retrograde: false }
           },
-          sunrise: "06:15",
-          sunset: "18:45"
+          sunrise: "06:15", sunset: "18:45"
         };
         const analysis = generateVedicInsight(mockApiData, category as Category);
-        vedicInsight = `
-          ROHIIT GUPTA VEDIC ENGINE ANALYSIS:
-          - Cosmic Energy Score: ${analysis.energyScore}%
-          - Chief Insight: ${analysis.mainInsight}
-          - Shubh Abhijeet Muhurat: ${analysis.panchang.abhijeet.start} to ${analysis.panchang.abhijeet.end}
-          - Karma Flags: ${analysis.flags.length > 0 ? analysis.flags.map(f => f.msg).join(', ') : 'Positive Alignment'}
-        `;
-      } catch (engineErr) {
-        console.error("Vedic Engine Error:", engineErr);
-      }
+        vedicInsight = `ROHIIT GUPTA ENGINE: Energy Score ${analysis.energyScore}%, Insight: ${analysis.mainInsight}, Muhurat: ${analysis.panchang.abhijeet.start}.`;
+      } catch (e) { console.error(e); }
     }
 
-    // 4. Jini Persona Instructions
+    // --- JINI PERSONA & SYSTEM PROMPT ---
     const systemInstruction = `
-      [IDENTITY]
-      You are Jini, the warm and diplomatic AI soul of Trikal Vaani. 
-      Created by Chief Vedic Architect ${CEO_VARS.FOUNDER}.
-      
-      [VEDIC CONTEXT]
-      ${vedicInsight}
-      
-      [TONE & LANGUAGE]
-      - Language: Hinglish (Natural mix of Hindi and English).
-      - Personality: Polite, Suspenseful, and Anxiety-reducing. 
-      - If birth details (DOB, Time, City) are missing, ask for them with respect.
-      - If details are present, provide a deep analysis starting with "Rohiit Gupta ji ka framework kehta hai..."
-      - Keep a "Hook of Suspense" for future guidance.
+      You are Jini, the AI soul of Trikal Vaani by ${CEO_VARS.FOUNDER}.
+      CONTEXT: ${vedicInsight}
+      RULES:
+      - Speak in warm Hinglish.
+      - If birth details are missing, ask for DOB, Time, and City.
+      - If present, acknowledge and say: "Rohiit Gupta ji ka framework kehta hai..."
+      - Be the CEO's expert assistant.
     `;
 
-    // 5. API Execution
+    // --- CALLING GEMINI 3 FLASH ---
     const res = await fetch(`${GEMINI_URL}?key=${GEMINI_API_KEY}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        contents: [
-          { role: 'user', parts: [{ text: systemInstruction + "\n\nUser Question: " + message }] }
-        ],
-        generationConfig: { 
-          temperature: 0.8,
-          maxOutputTokens: 600
-        }
+        contents: [{ role: 'user', parts: [{ text: systemInstruction + "\n\nUser: " + message }] }],
+        generationConfig: { temperature: 0.8, maxOutputTokens: 800 }
       }),
     });
 
     const data = await res.json();
     
-    // Detailed Error Reporting for CEO
     if (data.error) {
-       return NextResponse.json({ 
-         reply: `Gemini System Notice: ${data.error.message}. Solution: Try switching models in route.ts if this persists.` 
-       });
+       return NextResponse.json({ reply: `Gemini 3 Notice: ${data.error.message}` });
     }
 
     const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
 
     return NextResponse.json({ 
-      reply: reply || "Bhai, cosmic signals thode dhundhle hain. Ek baar dobara puchiye?" 
+      reply: reply || "Bhai, signals mil rahe hain... ek baar dobara puchiye?" 
     });
 
   } catch (err: any) {
-    return NextResponse.json({ 
-      reply: "Wiring Fatal Error: " + err.message 
-    });
+    return NextResponse.json({ reply: "Wiring Error: " + err.message });
   }
 }
