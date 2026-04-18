@@ -106,6 +106,20 @@ export default function JiniChat() {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, loading]);
 
+  function buildSlimContext(pred: Record<string, unknown> | null) {
+    if (!pred) return null;
+    return {
+      sunSign: pred.rashi ?? pred.sunSign ?? null,
+      moonSign: pred.moonSign ?? null,
+      muhuratStatus: pred.muhurat ?? pred.muhuratStatus ?? null,
+      dardContext: pred.segmentId ?? pred.segment ?? null,
+      name: pred.name ?? null,
+      dob: pred.dob ?? null,
+      city: pred.city ?? null,
+      energyScore: pred.energyScore ?? pred.score ?? null,
+    };
+  }
+
   async function sendMessage(text: string) {
     const trimmed = text.trim();
     if (!trimmed || loading) return;
@@ -115,28 +129,38 @@ export default function JiniChat() {
     setMessages((prev) => [...prev, { role: 'user', text: trimmed }]);
     setLoading(true);
 
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
+
     try {
       const res = await fetch('/api/jini-chat', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        signal: controller.signal,
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Vedic-Engine': 'Rohiit-Gupta-Vedic-Engine-v2',
+        },
         body: JSON.stringify({
           message: trimmed,
           userName,
           history: currentMessages.map((m) => ({ role: m.role, text: m.text })),
-          lastPrediction,
+          astroContext: buildSlimContext(lastPrediction),
         }),
       });
+      clearTimeout(timeoutId);
       const data = await res.json();
-      const reply =
-        data.reply ||
-        'Cosmic signals thodi slow hain abhi. Please ek baar phir try karein.';
+      const reply = data.reply || 'Thoda aur batao — main sun rahi hoon!';
       setMessages((prev) => [...prev, { role: 'jini', text: reply }]);
-    } catch {
+    } catch (err: unknown) {
+      clearTimeout(timeoutId);
+      const isTimeout = err instanceof Error && err.name === 'AbortError';
       setMessages((prev) => [
         ...prev,
         {
           role: 'jini',
-          text: 'Kuch cosmic interference aayi. Thodi der baad try karein.',
+          text: isTimeout
+            ? 'Network thodi slow hai abhi — lekin main yahan hoon! Kya aap apna Birth City aur Time bata sakte hain? Ussi se main aapka exact analysis de sakti hoon.'
+            : 'Ek second — cosmic thread reconnect ho rahi hai. Dobara try karein!',
         },
       ]);
     } finally {
