@@ -53,6 +53,9 @@ export default function JiniChat() {
   const [unread, setUnread] = useState(0);
   const [imgError, setImgError] = useState(false);
   const [lastPrediction, setLastPrediction] = useState<Record<string, unknown> | null>(null);
+  const [showBirthForm, setShowBirthForm] = useState(false);
+  const [birthFormData, setBirthFormData] = useState({ name: '', dob: '', city: '', birthTime: '' });
+  const greetedRef = useRef(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -98,20 +101,21 @@ export default function JiniChat() {
   }, []);
 
   useEffect(() => {
-    if (open && !greeted) {
+    if (open && !greetedRef.current) {
+      greetedRef.current = true;
+      setGreeted(true);
       const greeting = userName
         ? GREETINGS.returning(userName)
         : GREETINGS.anonymous;
       setTimeout(() => {
-        setMessages([{ role: 'jini', text: greeting }]);
-        setGreeted(true);
+        setMessages((prev) => prev.length === 0 ? [{ role: 'jini', text: greeting }] : prev);
       }, 400);
     }
     if (open) {
       setUnread(0);
       setTimeout(() => inputRef.current?.focus(), 300);
     }
-  }, [open, greeted, userName]);
+  }, [open]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -131,17 +135,17 @@ export default function JiniChat() {
     };
   }
 
-  async function sendMessage(text: string) {
+  async function sendMessage(text: string, overrideHistory?: Message[]) {
     const trimmed = text.trim();
     if (!trimmed || loading) return;
     setInput('');
 
-    const currentMessages = messages;
+    const historySnapshot = overrideHistory ?? messages;
     setMessages((prev) => [...prev, { role: 'user', text: trimmed }]);
     setLoading(true);
 
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 5000);
+    const timeoutId = setTimeout(() => controller.abort(), 12000);
 
     try {
       const res = await fetch('/api/jini-chat', {
@@ -154,7 +158,7 @@ export default function JiniChat() {
         body: JSON.stringify({
           message: trimmed,
           userName,
-          history: currentMessages.map((m) => ({ role: m.role, text: m.text })),
+          history: historySnapshot.map((m) => ({ role: m.role, text: m.text })),
           astroContext: buildSlimContext(lastPrediction),
         }),
       });
@@ -185,6 +189,23 @@ export default function JiniChat() {
 
   function handleClose() {
     setOpen(false);
+  }
+
+  function handleBirthFormSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    const { name, dob, city, birthTime } = birthFormData;
+    if (!dob || !city) return;
+    setShowBirthForm(false);
+    const summary = `My birth details: Name: ${name || 'Not provided'}, DOB: ${dob}, City: ${city}, Birth Time: ${birthTime || 'Unknown'}`;
+    const updatedContext = {
+      ...lastPrediction,
+      name: name || lastPrediction?.name || null,
+      dob,
+      city,
+      birth_time: birthTime || null,
+    };
+    setLastPrediction(updatedContext as Record<string, unknown>);
+    sendMessage(summary);
   }
 
   const avatarSrc = '/images/founder.png/Rohiit_Gupta.jpg';
@@ -367,7 +388,114 @@ export default function JiniChat() {
                       {q}
                     </button>
                   ))}
+                  <button
+                    onClick={() => setShowBirthForm(true)}
+                    className="text-xs px-2.5 py-1.5 rounded-full transition-colors hover:bg-white/8"
+                    style={{
+                      background: GOLD_RGBA(0.14),
+                      border: `1px solid ${GOLD_RGBA(0.35)}`,
+                      color: GOLD,
+                    }}
+                  >
+                    Share Birth Details
+                  </button>
                 </div>
+              </div>
+            )}
+
+            {showBirthForm && (
+              <div
+                className="mt-2 rounded-xl p-3"
+                style={{
+                  background: 'rgba(212,175,55,0.06)',
+                  border: `1px solid ${GOLD_RGBA(0.25)}`,
+                }}
+              >
+                <p className="text-xs font-semibold mb-2.5" style={{ color: GOLD }}>
+                  Birth Details — Accurate Reading ke Liye
+                </p>
+                <form onSubmit={handleBirthFormSubmit} className="space-y-2">
+                  <input
+                    type="text"
+                    placeholder="Your Name (optional)"
+                    value={birthFormData.name}
+                    onChange={(e) => setBirthFormData((p) => ({ ...p, name: e.target.value }))}
+                    className="w-full text-xs px-3 py-2 rounded-lg outline-none placeholder:text-slate-600"
+                    style={{
+                      background: 'rgba(255,255,255,0.04)',
+                      border: `1px solid ${GOLD_RGBA(0.15)}`,
+                      color: '#e2e8f0',
+                    }}
+                  />
+                  <input
+                    type="date"
+                    placeholder="Date of Birth *"
+                    value={birthFormData.dob}
+                    onChange={(e) => setBirthFormData((p) => ({ ...p, dob: e.target.value }))}
+                    required
+                    className="w-full text-xs px-3 py-2 rounded-lg outline-none"
+                    style={{
+                      background: 'rgba(255,255,255,0.04)',
+                      border: `1px solid ${GOLD_RGBA(0.15)}`,
+                      color: birthFormData.dob ? '#e2e8f0' : 'rgba(148,163,184,0.4)',
+                      colorScheme: 'dark',
+                    }}
+                  />
+                  <input
+                    type="text"
+                    placeholder="Birth City *  (e.g. Delhi, Mumbai)"
+                    value={birthFormData.city}
+                    onChange={(e) => setBirthFormData((p) => ({ ...p, city: e.target.value }))}
+                    required
+                    className="w-full text-xs px-3 py-2 rounded-lg outline-none placeholder:text-slate-600"
+                    style={{
+                      background: 'rgba(255,255,255,0.04)',
+                      border: `1px solid ${GOLD_RGBA(0.15)}`,
+                      color: '#e2e8f0',
+                    }}
+                  />
+                  <input
+                    type="time"
+                    placeholder="Birth Time (optional)"
+                    value={birthFormData.birthTime}
+                    onChange={(e) => setBirthFormData((p) => ({ ...p, birthTime: e.target.value }))}
+                    className="w-full text-xs px-3 py-2 rounded-lg outline-none"
+                    style={{
+                      background: 'rgba(255,255,255,0.04)',
+                      border: `1px solid ${GOLD_RGBA(0.15)}`,
+                      color: birthFormData.birthTime ? '#e2e8f0' : 'rgba(148,163,184,0.4)',
+                      colorScheme: 'dark',
+                    }}
+                  />
+                  <div className="flex gap-2 pt-0.5">
+                    <button
+                      type="submit"
+                      disabled={!birthFormData.dob || !birthFormData.city}
+                      className="flex-1 text-xs py-2 rounded-lg font-semibold transition-all"
+                      style={{
+                        background: birthFormData.dob && birthFormData.city
+                          ? `linear-gradient(135deg, ${GOLD} 0%, #A8820A 100%)`
+                          : GOLD_RGBA(0.1),
+                        color: birthFormData.dob && birthFormData.city ? '#080B12' : GOLD_RGBA(0.35),
+                        border: `1px solid ${GOLD_RGBA(0.25)}`,
+                      }}
+                    >
+                      Send to Jini
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setShowBirthForm(false)}
+                      className="px-3 text-xs py-2 rounded-lg transition-colors"
+                      style={{
+                        background: 'rgba(255,255,255,0.04)',
+                        border: `1px solid ${GOLD_RGBA(0.12)}`,
+                        color: 'rgba(148,163,184,0.6)',
+                      }}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </form>
               </div>
             )}
 
@@ -378,6 +506,27 @@ export default function JiniChat() {
             className="flex-shrink-0 px-3 py-3"
             style={{ borderTop: `1px solid ${GOLD_RGBA(0.12)}` }}
           >
+            {!showBirthForm && (
+              <div className="flex items-center gap-1.5 mb-2">
+                <button
+                  type="button"
+                  onClick={() => setShowBirthForm(true)}
+                  className="text-xs px-2.5 py-1 rounded-full transition-colors"
+                  style={{
+                    background: GOLD_RGBA(0.08),
+                    border: `1px solid ${GOLD_RGBA(0.22)}`,
+                    color: GOLD_RGBA(0.7),
+                  }}
+                >
+                  + Birth Details
+                </button>
+                {lastPrediction?.dob && (
+                  <span className="text-xs" style={{ color: GOLD_RGBA(0.45) }}>
+                    DOB: {String(lastPrediction.dob)}
+                  </span>
+                )}
+              </div>
+            )}
             <form
               onSubmit={(e) => { e.preventDefault(); sendMessage(input); }}
               className="flex items-center gap-2"

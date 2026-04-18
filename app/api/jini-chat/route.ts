@@ -173,6 +173,14 @@ ${!astroContext ? '\nNOTE: Using cached general transit data. Encourage user to 
     if (!res.ok) {
       const errText = await res.text();
       console.error(`[Jini Chat] Gemini FAIL — status ${res.status}: ${errText.slice(0, 300)}`);
+
+      if (res.status === 401 || res.status === 403) {
+        return NextResponse.json({
+          reply: 'Bhai, API authentication error hai. Keys check karein.',
+          errorCode: res.status,
+        });
+      }
+
       return NextResponse.json({
         reply: hasBirthData
           ? 'Aapka sawaal sun liya — thodi si cosmic re-alignment ho rahi hai. Ek baar phir try karein!'
