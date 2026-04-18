@@ -1,54 +1,52 @@
-/** * ⚠️ GEMINI 3 ULTIMATE RELEASE V13.8
- * FIX: Configured for Gemini 3 Flash Preview
+/** * ⚠️ STABLE PRODUCTION RELEASE V13.9
+ * FIX: Invalid Credentials / OAuth Error
  * SIGNED: ROHIIT GUPTA, CEO
  */
 import { NextRequest, NextResponse } from 'next/server';
 import { generateVedicInsight, CEO_VARS, Category } from '../../../lib/vedic-astro';
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY ?? '';
-// GEMINI 3 NEW ENDPOINT
-const GEMINI_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent';
+// STABLE PRODUCTION URL (Removing 'v1beta' and using 'v1' for maximum key compatibility)
+const GEMINI_URL = 'https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent';
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const { message, astroContext, category = 'JOB' } = body;
 
-    if (!GEMINI_API_KEY) return NextResponse.json({ reply: "Bhai, API Key updated nahi hai!" });
+    if (!GEMINI_API_KEY) return NextResponse.json({ reply: "Bhai, API Key check karein!" });
 
-    // --- VEDIC ENGINE ---
+    // --- LOGIC TRIGGER ---
     const hasDateInText = /\d{4}-\d{2}-\d{2}/.test(message);
-    let vedicInsight = "General Context.";
+    let vedicInsight = "General Analysis.";
     
     if (astroContext?.dob || hasDateInText) {
       const mockData = {
-        planets: { Saturn: { strength: 85, name: 'Saturn' }, Sun: { strength: 78, name: 'Sun' } },
+        planets: { Saturn: { strength: 80, name: 'Saturn' }, Sun: { strength: 75, name: 'Sun' } },
         sunrise: "06:10", sunset: "18:40"
       };
       const analysis = generateVedicInsight(mockData, category as Category);
-      vedicInsight = `ROHIIT GUPTA ENGINE: Score ${analysis.energyScore}%, Insight: ${analysis.mainInsight}, Muhurat: ${analysis.panchang.abhijeet.start}.`;
+      vedicInsight = `ROHIIT GUPTA ENGINE: Energy ${analysis.energyScore}%, Insight: ${analysis.mainInsight}, Muhurat: ${analysis.panchang.abhijeet.start}.`;
     }
 
+    // --- CLEAN FETCH CALL ---
     const res = await fetch(`${GEMINI_URL}?key=${GEMINI_API_KEY}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        contents: [{ 
-          role: 'user', 
-          parts: [{ text: `System: You are Jini from Trikal Vaani. Context: ${vedicInsight}. User Message: ${message}` }] 
-        }],
-        generationConfig: { temperature: 0.8 }
+        contents: [{ role: 'user', parts: [{ text: `You are Jini from Trikal Vaani. Context: ${vedicInsight}. Respond to: ${message}` }] }]
       }),
     });
 
     const data = await res.json();
     
+    // Exact Error Reporting if it fails
     if (data.error) {
-       return NextResponse.json({ reply: `Gemini 3 Error: ${data.error.message}` });
+       return NextResponse.json({ reply: `System Notice: ${data.error.message}` });
     }
 
     const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-    return NextResponse.json({ reply: reply || "Bhai, Gemini 3 thoda shant hai, phir se puchiye." });
+    return NextResponse.json({ reply: reply || "Bhai, cosmic signals check karein." });
 
   } catch (err: any) {
     return NextResponse.json({ reply: "Wiring Error: " + err.message });
