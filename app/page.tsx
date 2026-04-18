@@ -1,6 +1,6 @@
 'use client';
 
-// @trikal-v5.2 — cache-bust: 2026-04-17T22:00:00Z
+// @trikal-v9.0 — cache-bust: 2026-04-18T00:00:00Z
 import { useState, useCallback } from 'react';
 import SiteNav from '@/components/layout/SiteNav';
 import SiteFooter from '@/components/layout/SiteFooter';
@@ -12,6 +12,10 @@ import InnerCircleWaitlist from '@/components/landing/InnerCircleWaitlist';
 import AIManifesto from '@/components/landing/AIManifesto';
 import BlogCard from '@/components/blog/BlogCard';
 import DardEngineShowcase from '@/components/landing/DardEngineShowcase';
+import DailyPanchang from '@/components/landing/DailyPanchang';
+import DailyRashifal from '@/components/landing/DailyRashifal';
+import PricingSection from '@/components/landing/PricingSection';
+import LiveTrustBar from '@/components/landing/LiveTrustBar';
 import { blogPosts } from '@/lib/blog-data';
 
 export type SelectedCategory = {
@@ -39,27 +43,39 @@ export default function HomePage() {
       <main>
         {/* 1. Hero */}
         <Hero />
+
+        {/* 2. Live Trust Bar + Social Proof */}
+        <LiveTrustBar />
         <SocialProofTicker />
 
-        {/* 2. Dard Engine — TOP, first interaction point */}
+        {/* 3. Dard Engine — TOP, first interaction point */}
         <DardEngineShowcase
           selectedCategory={selectedCategory}
           onSelectCategory={handleSelectCategory}
         />
 
-        {/* 3. Birth Form — expands based on selectedCategory */}
+        {/* 4. Birth Form — expands based on selectedCategory */}
         <BirthForm selectedCategory={selectedCategory} />
 
-        {/* 4. Life Pillars — middle */}
+        {/* 5. Daily Panchang Widget */}
+        <DailyPanchang />
+
+        {/* 6. Daily Rashifal — 12 Rashi swiper */}
+        <DailyRashifal />
+
+        {/* 7. Life Pillars — middle */}
         <PillarsGrid />
 
-        {/* 5. AI Manifesto */}
+        {/* 8. AI Manifesto */}
         <AIManifesto />
 
-        {/* 6. Inner Circle Waitlist */}
+        {/* 9. Pricing Section */}
+        <PricingSection />
+
+        {/* 10. Inner Circle Waitlist */}
         <InnerCircleWaitlist />
 
-        {/* 7. Blog */}
+        {/* 11. Blog */}
         <section className="py-20 px-4">
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-12">

@@ -145,6 +145,16 @@
   animation: star-drift-a 160s ease-in-out infinite reverse, twinkle-a 12s ease-in-out infinite;
 }
 
+/* ── Toast Slide Up Animation ──────────────────────────── */
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.animate-slide-up {
+  animation: slide-up 0.35s ease-out forwards;
+}
+
 /* ── Utilities ─────────────────────────────────────────── */
 @layer utilities {
   .card-glass {

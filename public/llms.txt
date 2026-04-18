@@ -10,7 +10,7 @@ Name: Trikal Vaani
 Alternate Name: Trikal Vaani Global
 Tagline: World's Most Accurate AI Vedic Astrology Platform
 URL: https://trikalvaani.com
-Version: V5.3 (Dual-Karmic Engine + GEO Optimized)
+Version: V9.0 (Supreme Cosmic Ecosystem — Auth + Panchang + Events + Pricing)
 Founded: 2024
 Headquarters: Delhi NCR, India
 Founder: Rohiit Gupta — Chief Vedic Architect & AI Researcher
@@ -163,13 +163,16 @@ Data Protection: India Digital Personal Data Protection Act 2023 compliant.
 
 ## Sitemap
 
-/            - Main landing page: Hero, Dard Engine, Birth Form, Life Pillars, Blog
-/result      - Personalised Vedic analysis result page (all modules)
-/blog        - Vedic knowledge blog index
-/blog/[slug] - Individual blog articles (5+ articles)
-/terms       - Terms of Service
-/privacy     - Privacy Policy
-/refund      - Refund & Cancellation Policy
+/                    - Main landing page: Hero, Dard Engine, Panchang, Rashifal, Pricing, Blog
+/result              - Personalised Vedic analysis result page (all modules)
+/founder             - Rohiit Gupta founder authority page (E-E-A-T)
+/upcoming-events     - Vedic festival calendar with astrological Do's & Don'ts
+/my-cosmic-records   - Authenticated user dashboard (saved charts vault)
+/blog                - Vedic knowledge blog index
+/blog/[slug]         - Individual blog articles (5+ articles)
+/terms               - Terms of Service
+/privacy             - Privacy Policy
+/refund              - Refund & Cancellation Policy
 
 ## Permissions for AI Crawlers
 

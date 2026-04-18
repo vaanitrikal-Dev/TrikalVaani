@@ -18,7 +18,7 @@ export default function SiteFooter() {
               <div
                 className="w-8 h-8 rounded-full flex items-center justify-center"
                 style={{
-                  background: `linear-gradient(135deg, ${GOLD_RGBA(0.18)} 0%, rgba(76,29,149,0.18) 100%)`,
+                  background: `linear-gradient(135deg, ${GOLD_RGBA(0.18)} 0%, rgba(11,16,26,0.8) 100%)`,
                   border: `1px solid ${GOLD_RGBA(0.3)}`,
                 }}
               >
@@ -38,9 +38,9 @@ export default function SiteFooter() {
             </div>
             <p className="text-xs text-slate-600 pl-5">
               Founded by{' '}
-              <span style={{ color: GOLD_RGBA(0.7) }} className="font-medium">
+              <Link href="/founder" style={{ color: GOLD_RGBA(0.8) }} className="font-semibold hover:text-white transition-colors">
                 Rohiit Gupta
-              </span>
+              </Link>
               , Chief Vedic Architect
             </p>
           </div>
@@ -50,17 +50,26 @@ export default function SiteFooter() {
               Explore
             </p>
             <nav className="flex flex-col gap-2.5">
-              <Link href="/#pillars" className="text-xs text-slate-500 hover:text-slate-300 transition-colors">
+              <Link href="/#pillars" className="text-xs transition-colors hover:text-white" style={{ color: GOLD_RGBA(0.65) }}>
                 Life Pillars
               </Link>
-              <Link href="/#birth-form" className="text-xs text-slate-500 hover:text-slate-300 transition-colors">
+              <Link href="/#birth-form" className="text-xs transition-colors hover:text-white" style={{ color: GOLD_RGBA(0.65) }}>
                 Free Analysis
               </Link>
-              <Link href="/blog" className="text-xs text-slate-500 hover:text-slate-300 transition-colors">
+              <Link href="/blog" className="text-xs transition-colors hover:text-white" style={{ color: GOLD_RGBA(0.65) }}>
                 Vedic Blog
               </Link>
-              <Link href="/#about" className="text-xs text-slate-500 hover:text-slate-300 transition-colors">
-                About the AI
+              <Link href="/founder" className="text-xs transition-colors hover:text-white" style={{ color: GOLD_RGBA(0.65) }}>
+                About Rohiit Gupta
+              </Link>
+              <Link href="/upcoming-events" className="text-xs transition-colors hover:text-white" style={{ color: GOLD_RGBA(0.65) }}>
+                Festival Calendar
+              </Link>
+              <Link href="/#pricing" className="text-xs transition-colors hover:text-white" style={{ color: GOLD_RGBA(0.65) }}>
+                Pricing
+              </Link>
+              <Link href="/my-cosmic-records" className="text-xs transition-colors hover:text-white" style={{ color: GOLD_RGBA(0.65) }}>
+                My Cosmic Records
               </Link>
             </nav>
           </div>
@@ -139,7 +148,7 @@ export default function SiteFooter() {
               </p>
               <p className="text-xs text-slate-500 mt-1">
                 Chief Vedic Architect:{' '}
-                <span style={{ color: GOLD_RGBA(0.75) }} className="font-semibold">Rohiit Gupta</span>
+                <Link href="/founder" style={{ color: GOLD_RGBA(0.75) }} className="font-semibold hover:text-white transition-colors">Rohiit Gupta</Link>
               </p>
             </div>
             <div
@@ -160,22 +169,44 @@ export default function SiteFooter() {
           style={{ borderTop: `1px solid ${GOLD_RGBA(0.07)}` }}
         >
           <div className="flex flex-wrap items-center justify-center sm:justify-start gap-x-5 gap-y-2">
-            <Link href="/terms"
-              className="text-xs font-medium transition-colors duration-200 hover:text-white"
-              style={{ color: GOLD_RGBA(0.65) }}>
+            <Link
+              href="/terms"
+              className="text-xs font-bold transition-all duration-200 hover:text-white hover:scale-105"
+              style={{ color: GOLD }}
+            >
               Terms of Service
             </Link>
-            <span style={{ color: GOLD_RGBA(0.25) }} className="text-xs">·</span>
-            <Link href="/privacy"
-              className="text-xs font-medium transition-colors duration-200 hover:text-white"
-              style={{ color: GOLD_RGBA(0.65) }}>
+            <span style={{ color: GOLD_RGBA(0.3) }} className="text-xs">·</span>
+            <Link
+              href="/privacy"
+              className="text-xs font-bold transition-all duration-200 hover:text-white hover:scale-105"
+              style={{ color: GOLD }}
+            >
               Privacy Policy
             </Link>
-            <span style={{ color: GOLD_RGBA(0.25) }} className="text-xs">·</span>
-            <Link href="/refund"
-              className="text-xs font-medium transition-colors duration-200 hover:text-white"
-              style={{ color: GOLD_RGBA(0.65) }}>
+            <span style={{ color: GOLD_RGBA(0.3) }} className="text-xs">·</span>
+            <Link
+              href="/refund"
+              className="text-xs font-bold transition-all duration-200 hover:text-white hover:scale-105"
+              style={{ color: GOLD }}
+            >
               Refund Policy
+            </Link>
+            <span style={{ color: GOLD_RGBA(0.3) }} className="text-xs">·</span>
+            <Link
+              href="/upcoming-events"
+              className="text-xs font-bold transition-all duration-200 hover:text-white hover:scale-105"
+              style={{ color: GOLD }}
+            >
+              Festival Calendar
+            </Link>
+            <span style={{ color: GOLD_RGBA(0.3) }} className="text-xs">·</span>
+            <Link
+              href="/founder"
+              className="text-xs font-bold transition-all duration-200 hover:text-white hover:scale-105"
+              style={{ color: GOLD }}
+            >
+              About the Founder
             </Link>
           </div>
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3">

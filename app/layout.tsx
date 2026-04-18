@@ -330,6 +330,63 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(reviewSchema) }}
         />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'FAQPage',
+            mainEntity: [
+              {
+                '@type': 'Question',
+                name: 'What is Trikal Vaani?',
+                acceptedAnswer: {
+                  '@type': 'Answer',
+                  text: 'Trikal Vaani is an AI-powered Vedic Astrology Research Platform founded by Rohiit Gupta. It merges 5,000 years of Parashara Vedic logic with modern Neural Networks to provide personalised Daily Energy Scores, Six Life Pillar analyses, and generation-specific destiny insights.',
+                },
+              },
+              {
+                '@type': 'Question',
+                name: 'Is Trikal Vaani free?',
+                acceptedAnswer: {
+                  '@type': 'Answer',
+                  text: 'Yes. Trikal Vaani offers a completely free AI Vedic life analysis — no sign-up required. During the inaugural launch window, all premium features are also available at no cost for 30 days.',
+                },
+              },
+              {
+                '@type': 'Question',
+                name: 'Who is Rohiit Gupta?',
+                acceptedAnswer: {
+                  '@type': 'Answer',
+                  text: 'Rohiit Gupta is the founder and Chief Vedic Architect of Trikal Vaani. He has spent over a decade mapping classical Jyotish Shastra (Parashara methodology) into computational models, making 5,000-year-old Vedic wisdom accessible to modern seekers worldwide.',
+                },
+              },
+              {
+                '@type': 'Question',
+                name: 'What is the Dard Engine?',
+                acceptedAnswer: {
+                  '@type': 'Answer',
+                  text: 'The Dard Engine is Trikal Vaani\'s generation-specific life question AI. It provides targeted Vedic insights for Gen Z (Ex-Back, Toxic Boss, Career Pivot), Millennials (Property, Debt, Children), and Gen X (Retirement, Legacy, Spiritual purpose).',
+                },
+              },
+              {
+                '@type': 'Question',
+                name: 'How accurate is AI Vedic Astrology?',
+                acceptedAnswer: {
+                  '@type': 'Answer',
+                  text: 'Trikal Vaani uses the Parashara-Neural Architecture — classical Brihat Parashara Hora Shastra rules encoded into computational algorithms and back-tested against 10,000+ birth charts. The platform carries a 4.9-star rating across 10,247+ verified user analyses.',
+                },
+              },
+              {
+                '@type': 'Question',
+                name: 'What is Vimshottari Dasha?',
+                acceptedAnswer: {
+                  '@type': 'Answer',
+                  text: 'Vimshottari Dasha is a 120-year planetary period system in Vedic Astrology. Each of the nine planets governs a specific period of your life (Sun 6 years, Moon 10 years, Mars 7 years, etc.). Your current Mahadasha and Antardasha reveal which planetary energy governs your present life phase.',
+                },
+              },
+            ],
+          }) }}
+        />
       </head>
       <Script
         src="https://www.googletagmanager.com/gtag/js?id=G-WCV6MTQM21"
