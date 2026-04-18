@@ -2,6 +2,7 @@ import './globals.css';
 import type { Metadata } from 'next';
 import { Inter, Playfair_Display } from 'next/font/google';
 import Script from 'next/script';
+import JiniChat from '@/components/jini/JiniChat';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -409,6 +410,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <div className="relative z-10">
           {children}
         </div>
+        <JiniChat />
       </body>
     </html>
   );
