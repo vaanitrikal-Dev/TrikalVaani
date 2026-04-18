@@ -1,3 +1,10 @@
+/**
+ * ⚠️ STRICT CEO ORDER: LOGIC FROZEN
+ * DO NOT EDIT, DELETE, OR REFACTOR THIS FILE.
+ * VERSION: 13.1 (GOD-LEVEL)
+ * SIGNED: ROHIIT GUPTA, CEO
+ * ANY UNAUTHORIZED CHANGE WILL BREAK VEDIC CALCULATIONS.
+ */
 import { NextRequest, NextResponse } from 'next/server';
 // Import our God-Level Engine
 import { generateVedicInsight, CEO_VARS, Category } from '@/lib/vedic-astro';
