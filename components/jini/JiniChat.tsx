@@ -52,6 +52,7 @@ export default function JiniChat() {
   const [greeted, setGreeted] = useState(false);
   const [unread, setUnread] = useState(0);
   const [imgError, setImgError] = useState(false);
+  const [lastPrediction, setLastPrediction] = useState<Record<string, unknown> | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -73,6 +74,16 @@ export default function JiniChat() {
         setUserName(name);
       })();
     });
+
+    const handlePrediction = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      if (detail && typeof detail === 'object') {
+        setTimeout(() => setLastPrediction(detail), 0);
+      }
+    };
+
+    window.addEventListener('trikal:prediction', handlePrediction);
+    return () => window.removeEventListener('trikal:prediction', handlePrediction);
   }, []);
 
   useEffect(() => {
@@ -99,6 +110,8 @@ export default function JiniChat() {
     const trimmed = text.trim();
     if (!trimmed || loading) return;
     setInput('');
+
+    const currentMessages = messages;
     setMessages((prev) => [...prev, { role: 'user', text: trimmed }]);
     setLoading(true);
 
@@ -106,7 +119,12 @@ export default function JiniChat() {
       const res = await fetch('/api/jini-chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: trimmed, userName }),
+        body: JSON.stringify({
+          message: trimmed,
+          userName,
+          history: currentMessages.map((m) => ({ role: m.role, text: m.text })),
+          lastPrediction,
+        }),
       });
       const data = await res.json();
       const reply =
