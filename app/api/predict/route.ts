@@ -1,5 +1,28 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+const TEST_MODE = true;
+
+const MOCK_PROKERALA_RESPONSE = {
+  muhurat: 'Shubh (12:30 PM to 01:45 PM)',
+  status: 'Success',
+  message: 'TEST_MODE_ACTIVE',
+  data: {
+    ascendant: { rasi: { name: 'Scorpio' }, degree: 14.32 },
+    planets: [
+      { name: 'Sun', rasi: { name: 'Aries' }, degree: 22.5, house: 6, nakshatra: { name: 'Bharani' }, is_retrograde: false },
+      { name: 'Moon', rasi: { name: 'Taurus' }, degree: 8.1, house: 7, nakshatra: { name: 'Rohini' }, is_retrograde: false },
+      { name: 'Mars', rasi: { name: 'Capricorn' }, degree: 17.4, house: 3, nakshatra: { name: 'Shravana' }, is_retrograde: false },
+      { name: 'Mercury', rasi: { name: 'Pisces' }, degree: 5.9, house: 5, nakshatra: { name: 'Uttara Bhadrapada' }, is_retrograde: true },
+      { name: 'Jupiter', rasi: { name: 'Taurus' }, degree: 28.0, house: 7, nakshatra: { name: 'Mrigashira' }, is_retrograde: false },
+      { name: 'Venus', rasi: { name: 'Pisces' }, degree: 11.3, house: 5, nakshatra: { name: 'Uttara Bhadrapada' }, is_retrograde: false },
+      { name: 'Saturn', rasi: { name: 'Aquarius' }, degree: 19.6, house: 4, nakshatra: { name: 'Shatabhisha' }, is_retrograde: true },
+      { name: 'Rahu', rasi: { name: 'Pisces' }, degree: 14.0, house: 5, nakshatra: { name: 'Uttara Bhadrapada' }, is_retrograde: true },
+      { name: 'Ketu', rasi: { name: 'Virgo' }, degree: 14.0, house: 11, nakshatra: { name: 'Hasta' }, is_retrograde: true },
+    ],
+    dasha: { planet: 'Venus', end_date: '2027-06-15' },
+  },
+};
+
 const PROKERALA_CLIENT_ID = process.env.PROKERALA_CLIENT_ID ?? '';
 const PROKERALA_CLIENT_SECRET = process.env.PROKERALA_CLIENT_SECRET ?? '';
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY ?? '';
@@ -8,11 +31,16 @@ const GEMINI_URL =
   'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent';
 
 async function getProkeralaToken(): Promise<string | null> {
+  if (TEST_MODE) {
+    console.log('[Prokerala] TEST_MODE active — skipping real token fetch');
+    return 'TEST_MODE_TOKEN';
+  }
   if (!PROKERALA_CLIENT_ID || !PROKERALA_CLIENT_SECRET) {
     console.warn('[Prokerala] Credentials not configured — skipping chart fetch');
     return null;
   }
   try {
+    /* ISOLATED FOR TEST — real fetch commented out
     const res = await fetch('https://api.prokerala.com/token', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -29,6 +57,8 @@ async function getProkeralaToken(): Promise<string | null> {
     }
     console.error('[Prokerala] Token fetch FAIL — no access_token in response');
     return null;
+    */
+    return null;
   } catch (err) {
     console.error('[Prokerala] Token fetch FAIL — exception:', err);
     return null;
@@ -43,7 +73,12 @@ async function fetchProkeralaChart(
   lat: number,
   lng: number
 ): Promise<Record<string, unknown> | null> {
+  if (TEST_MODE) {
+    console.log(`[Prokerala] TEST_MODE — returning mock chart for ${label} (dob: ${dob}, time: ${birthTime}, coords: ${lat},${lng})`);
+    return MOCK_PROKERALA_RESPONSE as unknown as Record<string, unknown>;
+  }
   try {
+    /* ISOLATED FOR TEST — real fetch commented out
     const datetime = `${dob}T${birthTime || '12:00'}:00+05:30`;
     const url = new URL('https://api.prokerala.com/v2/astrology/kundli');
     url.searchParams.set('datetime', datetime);
@@ -64,6 +99,8 @@ async function fetchProkeralaChart(
     const data = await res.json();
     console.log(`[Prokerala] Chart fetch SUCCESS for ${label}`);
     return data;
+    */
+    return null;
   } catch (err) {
     console.error(`[Prokerala] Chart fetch FAIL for ${label} — exception:`, err);
     return null;
@@ -213,7 +250,7 @@ export async function POST(req: NextRequest) {
     let chartData: Record<string, unknown> | null = null;
     let chartData2: Record<string, unknown> | null = null;
 
-    if (PROKERALA_CLIENT_ID && PROKERALA_CLIENT_SECRET) {
+    if (TEST_MODE || PROKERALA_CLIENT_ID && PROKERALA_CLIENT_SECRET) {
       const token = await getProkeralaToken();
       if (token) {
         const lat = (person1.lat as number) ?? 28.6139;
@@ -299,6 +336,8 @@ export async function POST(req: NextRequest) {
       success: true,
       segment,
       prokerala: chartData !== null,
+      testMode: TEST_MODE,
+      muhurat: TEST_MODE ? MOCK_PROKERALA_RESPONSE.muhurat : null,
       analysis: parsed,
     });
   } catch (err) {

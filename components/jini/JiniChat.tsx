@@ -78,7 +78,18 @@ export default function JiniChat() {
     const handlePrediction = (e: Event) => {
       const detail = (e as CustomEvent).detail;
       if (detail && typeof detail === 'object') {
-        setTimeout(() => setLastPrediction(detail), 0);
+        setTimeout(() => {
+          setLastPrediction(detail);
+          if (detail.testMode === true && detail.muhurat) {
+            setMessages((prev) => [
+              ...prev,
+              {
+                role: 'jini' as const,
+                text: `Bhai, planets align ho gaye hain! Aaj ka shubh muhurat ${detail.muhurat} se hai. Kya aap is waqt koi naya kaam shuru karna chahte hain?`,
+              },
+            ]);
+          }
+        }, 0);
       }
     };
 
