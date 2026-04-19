@@ -1,3 +1,12 @@
+/**
+ * ⚠️ STRICT CEO ORDER: LOGIC FROZEN
+ * DO NOT EDIT, DELETE, OR REFACTOR THIS FILE.
+ * VERSION: 2.0 (GOD-LEVEL PROTECTION)
+ * SIGNED: ROHIIT GUPTA, CEO
+ * PURPOSE: BIRTH FORM — SWISS EPHEMERIS INTEGRATION + REAL KUNDALI
+ * WARNING: DO NOT CHANGE handleSubmit LOGIC — BREAKS KUNDALI CALCULATION
+ */
+
 'use client';
 
 import { useState } from 'react';
@@ -9,7 +18,6 @@ import {
   ChevronRight, Briefcase, Heart,
 } from 'lucide-react';
 import { saveSubmission } from '@/lib/supabase';
-import { getVedicAnalysis } from '@/lib/vedic-astro';
 import type { SelectedCategory } from '@/app/page';
 
 const GOLD = '#D4AF37';
@@ -37,10 +45,10 @@ const GENZ_QUESTIONS: LifeQuestion[] = [
 ];
 
 const MILLENNIAL_QUESTIONS: LifeQuestion[] = [
-  { id: 'property_yog',     label: 'Property Purchase Window',    icon: Home,    color: '#34D399', gen: 'millennial' },
+  { id: 'property_yog',     label: 'Property Purchase Window',    icon: Home,     color: '#34D399', gen: 'millennial' },
   { id: 'karz_mukti',       label: 'Debt Clearance (Karz Mukti)', icon: Banknote, color: '#FACC15', gen: 'millennial' },
-  { id: 'child_destiny',    label: "Child's Future Path",         icon: Baby,    color: '#F472B6', gen: 'millennial' },
-  { id: 'parents_wellness', label: "Parents' Wellness",           icon: Users,   color: '#60A5FA', gen: 'millennial' },
+  { id: 'child_destiny',    label: "Child's Future Path",         icon: Baby,     color: '#F472B6', gen: 'millennial' },
+  { id: 'parents_wellness', label: "Parents' Wellness",           icon: Users,    color: '#60A5FA', gen: 'millennial' },
 ];
 
 const GENX_QUESTIONS: LifeQuestion[] = [
@@ -108,7 +116,6 @@ function QuestionPicker({
       <p className="text-xs text-slate-500 mb-4">
         Tap the question on your mind — your analysis will be laser-focused on it
       </p>
-
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
         {questions.map((q) => {
           const Icon = q.icon;
@@ -148,7 +155,6 @@ function QuestionPicker({
           );
         })}
       </div>
-
       <p className="text-xs text-center text-slate-600 mt-3">
         Optional — skip to receive a full general analysis
       </p>
@@ -157,14 +163,7 @@ function QuestionPicker({
 }
 
 function PartnerMiniForm({
-  label,
-  sublabel,
-  accent,
-  accentRgba,
-  HeaderIcon,
-  data,
-  errors,
-  onChange,
+  label, sublabel, accent, accentRgba, HeaderIcon, data, errors, onChange,
 }: {
   label: string;
   sublabel: string;
@@ -178,10 +177,7 @@ function PartnerMiniForm({
   return (
     <div
       className="rounded-2xl p-5 space-y-4"
-      style={{
-        background: accentRgba(0.04),
-        border: `1px solid ${accentRgba(0.2)}`,
-      }}
+      style={{ background: accentRgba(0.04), border: `1px solid ${accentRgba(0.2)}` }}
     >
       <div className="flex items-center gap-2.5">
         <div
@@ -195,7 +191,6 @@ function PartnerMiniForm({
           <p className="text-xs" style={{ color: accentRgba(0.5) }}>{sublabel}</p>
         </div>
       </div>
-
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {FIELD_META.map((field) => {
           const Icon = field.icon;
@@ -220,9 +215,7 @@ function PartnerMiniForm({
                   type={field.type}
                   placeholder={field.placeholder}
                   value={data[field.key]}
-                  onChange={(e) => {
-                    onChange(field.key, e.target.value);
-                  }}
+                  onChange={(e) => onChange(field.key, e.target.value)}
                   className="input-cosmic w-full h-12 pl-10 pr-4 rounded-xl text-sm"
                   style={{ colorScheme: 'dark' }}
                 />
@@ -236,31 +229,26 @@ function PartnerMiniForm({
   );
 }
 
-type Props = {
-  selectedCategory?: SelectedCategory;
-};
-
+type Props = { selectedCategory?: SelectedCategory };
 const EMPTY_FORM: FormData = { name: '', dob: '', birth_time: '', city: '' };
 
 export default function BirthForm({ selectedCategory }: Props) {
   const router = useRouter();
-  const [form, setForm] = useState<FormData>(EMPTY_FORM);
+  const [form, setForm]               = useState<FormData>(EMPTY_FORM);
   const [partnerForm, setPartnerForm] = useState<FormData>(EMPTY_FORM);
-  const [loading, setLoading] = useState(false);
-  const [errors, setErrors] = useState<Partial<FormData>>({});
+  const [loading, setLoading]         = useState(false);
+  const [errors, setErrors]           = useState<Partial<FormData>>({});
   const [partnerErrors, setPartnerErrors] = useState<Partial<FormData>>({});
   const [selectedQuestion, setSelectedQuestion] = useState<LifeQuestion | null>(null);
-  const [gender, setGender] = useState<'him' | 'her'>('her');
+  const [gender, setGender]           = useState<'him' | 'her'>('her');
 
-  const detectedGen = getGenerationFromDob(form.dob);
-
+  const detectedGen     = getGenerationFromDob(form.dob);
   const activeCategoryId = selectedCategory?.id ?? selectedQuestion?.id ?? null;
-  const isDualMode = activeCategoryId !== null && DUAL_IDS.has(activeCategoryId);
-  const isExBack    = activeCategoryId === 'ex_back';
-  const isToxicBoss = activeCategoryId === 'toxic_boss';
-
-  const accentColor = isExBack ? PINK : isToxicBoss ? ORANGE : GOLD;
-  const accentRgba  = isExBack ? PINK_RGBA : isToxicBoss ? ORANGE_RGBA : GOLD_RGBA;
+  const isDualMode      = activeCategoryId !== null && DUAL_IDS.has(activeCategoryId);
+  const isExBack        = activeCategoryId === 'ex_back';
+  const isToxicBoss     = activeCategoryId === 'toxic_boss';
+  const accentColor     = isExBack ? PINK : isToxicBoss ? ORANGE : GOLD;
+  const accentRgba      = isExBack ? PINK_RGBA : isToxicBoss ? ORANGE_RGBA : GOLD_RGBA;
 
   const dualHeading = isToxicBoss
     ? 'Power Struggle Analysis: You vs Boss'
@@ -272,18 +260,9 @@ export default function BirthForm({ selectedCategory }: Props) {
     : 'Both birth charts will be compared using Ashta-Koota Vedic matching.';
 
   const PartnerIcon = isToxicBoss ? Briefcase : isExBack ? HeartCrack : Heart;
-  const partnerSectionLabel = isToxicBoss
-    ? "Boss Details"
-    : isExBack
-    ? "Ex-Partner's Details"
-    : "Partner's Details";
-  const partnerSublabel = isToxicBoss
-    ? "Sun vs Saturn authority axis"
-    : isExBack
-    ? "Venus-Ketu axis & 7th house"
-    : "Ashta-Koota compatibility";
-
-  const singleFormLabel = selectedCategory
+  const partnerSectionLabel = isToxicBoss ? 'Boss Details' : isExBack ? "Ex-Partner's Details" : "Partner's Details";
+  const partnerSublabel     = isToxicBoss ? 'Sun vs Saturn authority axis' : isExBack ? 'Venus-Ketu axis & 7th house' : 'Ashta-Koota compatibility';
+  const singleFormLabel     = selectedCategory
     ? `Getting insights for: ${selectedCategory.label}`
     : selectedQuestion
     ? `Getting insights for: ${selectedQuestion.label}`
@@ -292,7 +271,7 @@ export default function BirthForm({ selectedCategory }: Props) {
   function validateForm(f: FormData, setE: (e: Partial<FormData>) => void): boolean {
     const e: Partial<FormData> = {};
     if (!f.name.trim()) e.name = 'Name is required';
-    if (!f.dob) e.dob = 'Date of birth is required';
+    if (!f.dob)         e.dob  = 'Date of birth is required';
     if (!f.city.trim()) e.city = 'City is required';
     setE(e);
     return Object.keys(e).length === 0;
@@ -300,65 +279,112 @@ export default function BirthForm({ selectedCategory }: Props) {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    const userValid = validateForm(form, setErrors);
-    let partnerValid = true;
+    const userValid    = validateForm(form, setErrors);
+    let partnerValid   = true;
     if (isDualMode) partnerValid = validateForm(partnerForm, setPartnerErrors);
     if (!userValid || !partnerValid) return;
 
     setLoading(true);
     try {
-      const analysis = await getVedicAnalysis(form);
+      // Step 1 — Get lat/lng from city using free OpenStreetMap API
+      let lat = 28.6139; // Default: Delhi NCR
+      let lng = 77.2090;
+      try {
+        const geoRes  = await fetch(
+          `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(form.city)}&format=json&limit=1`
+        );
+        const geoData = await geoRes.json();
+        if (geoData[0]) {
+          lat = parseFloat(geoData[0].lat);
+          lng = parseFloat(geoData[0].lon);
+        }
+      } catch {
+        console.warn('[Trikal] Geocoding failed — using Delhi default');
+      }
 
+      // Step 2 — Build birth data object
+      const birthData = {
+        name:     form.name.trim(),
+        dob:      form.dob,
+        tob:      form.birth_time || '12:00',
+        lat,
+        lng,
+        cityName: form.city.trim(),
+      };
+
+      // Step 3 — Calculate real Kundali using Swiss Ephemeris engine
+      const { buildKundali } = await import('@/lib/swiss-ephemeris');
+      const kundali = buildKundali(birthData);
+
+      // Step 4 — Save to Supabase
       await saveSubmission({
-        name: form.name.trim(),
-        dob: form.dob,
-        birth_time: form.birth_time,
-        city: form.city.trim(),
-        energy_score: analysis.energyScore,
-        pillar_scores: analysis.pillarScores,
+        name:         form.name.trim(),
+        dob:          form.dob,
+        birth_time:   form.birth_time,
+        city:         form.city.trim(),
+        energy_score: kundali.planets['Sun']?.strength ?? 75,
+        pillar_scores: {
+          wealth:   kundali.planets['Jupiter']?.strength ?? 70,
+          career:   kundali.planets['Saturn']?.strength  ?? 70,
+          love:     kundali.planets['Venus']?.strength   ?? 70,
+          health:   kundali.planets['Sun']?.strength     ?? 70,
+          students: kundali.planets['Mercury']?.strength ?? 70,
+          peace:    kundali.planets['Moon']?.strength    ?? 70,
+        },
       });
 
+      // Step 5 — Build URL params and navigate to result page
       const effectiveQuestion = selectedCategory ?? selectedQuestion;
       const params = new URLSearchParams({
-        name: form.name.trim(),
-        dob: form.dob,
-        city: form.city.trim(),
-        score: String(analysis.energyScore),
-        rashi: analysis.dailyRashi,
-        color: analysis.luckyColor,
-        number: String(analysis.luckyNumber),
-        insight: analysis.insight,
-        remedy: analysis.remedy,
-        tip: analysis.practicalTip,
-        wealth: String(analysis.pillarScores.wealth),
-        career: String(analysis.pillarScores.career),
-        love: String(analysis.pillarScores.love),
-        health: String(analysis.pillarScores.health),
-        students: String(analysis.pillarScores.students),
-        peace: String(analysis.pillarScores.peace),
-        gen: analysis.generationLabel,
-        avwealth: String(analysis.ashtakvargaWealth),
-        varshphal: analysis.varshphalFocus,
-        dasha: JSON.stringify(analysis.dashaPeriods),
-        timeline: JSON.stringify(analysis.lifeTimeline),
-        modules: JSON.stringify(analysis.predictiveModules),
-        ...(effectiveQuestion
-          ? { autoSegment: effectiveQuestion.id, autoSegmentLabel: effectiveQuestion.label }
-          : {}),
-        ...(isDualMode && partnerForm.name.trim()
-          ? {
-              partnerName: partnerForm.name.trim(),
-              partnerDob: partnerForm.dob,
-              partnerCity: partnerForm.city.trim(),
-              partnerTime: partnerForm.birth_time,
-              partnerGender: gender,
-            }
-          : {}),
+        name:          form.name.trim(),
+        dob:           form.dob,
+        city:          form.city.trim(),
+        tob:           form.birth_time || '12:00',
+        lat:           String(lat),
+        lng:           String(lng),
+        lagna:         kundali.lagna,
+        lagnaLord:     kundali.lagnaLord,
+        nakshatra:     kundali.nakshatra,
+        nakshatraLord: kundali.nakshatraLord,
+        mahadasha:     kundali.currentMahadasha.lord,
+        antardasha:    kundali.currentAntardasha.lord,
+        dashaBalance:  kundali.dashaBalance,
+        choghadiya:    kundali.panchang.choghadiya.name,
+        choghadiyaType: kundali.panchang.choghadiya.type,
+        tithi:         kundali.panchang.tithi,
+        vara:          kundali.panchang.vara,
+        yoga:          kundali.panchang.yoga,
+        rahuStart:     kundali.panchang.rahuKaal.start,
+        rahuEnd:       kundali.panchang.rahuKaal.end,
+        abhijeetStart: kundali.panchang.abhijeetMuhurta.start,
+        abhijeetEnd:   kundali.panchang.abhijeetMuhurta.end,
+        planets:       JSON.stringify(
+          Object.values(kundali.planets).map(p => ({
+            name:         p.name,
+            rashi:        p.rashi,
+            house:        p.house,
+            strength:     p.strength,
+            isRetrograde: p.isRetrograde,
+            nakshatra:    p.nakshatra,
+            degree:       p.degree,
+          }))
+        ),
+        ...(effectiveQuestion ? {
+          autoSegment:      effectiveQuestion.id,
+          autoSegmentLabel: effectiveQuestion.label,
+        } : {}),
+        ...(isDualMode && partnerForm.name.trim() ? {
+          partnerName:   partnerForm.name.trim(),
+          partnerDob:    partnerForm.dob,
+          partnerCity:   partnerForm.city.trim(),
+          partnerTime:   partnerForm.birth_time,
+          partnerGender: gender,
+        } : {}),
       });
 
       router.push(`/result?${params.toString()}`);
     } catch (err) {
-      console.error(err);
+      console.error('[Trikal] Form submit error:', err);
       setLoading(false);
     }
   }
@@ -374,7 +400,6 @@ export default function BirthForm({ selectedCategory }: Props) {
       />
 
       <div className={`max-w-2xl mx-auto transition-all duration-500 ${isDualMode ? 'max-w-4xl' : ''}`}>
-        {/* Header */}
         <div className="text-center mb-10">
           <div
             className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-6"
@@ -400,9 +425,7 @@ export default function BirthForm({ selectedCategory }: Props) {
               <h2 className="font-serif text-3xl sm:text-4xl font-bold mb-3">
                 <span style={{ color: accentColor }}>{dualHeading}</span>
               </h2>
-              <p className="text-slate-400 text-sm max-w-lg mx-auto leading-relaxed">
-                {dualSubheading}
-              </p>
+              <p className="text-slate-400 text-sm max-w-lg mx-auto leading-relaxed">{dualSubheading}</p>
             </>
           ) : (
             <>
@@ -410,34 +433,27 @@ export default function BirthForm({ selectedCategory }: Props) {
                 <span className="text-white">Begin Your</span>{' '}
                 <span className="text-gradient-gold">Cosmic Journey</span>
               </h2>
-
               {singleFormLabel && (
                 <div
                   className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-4"
                   style={{
                     background: `${selectedCategory?.color ?? GOLD}0d`,
-                    border: `1px solid ${selectedCategory?.color ?? GOLD}35`,
+                    border:     `1px solid ${selectedCategory?.color ?? GOLD}35`,
                   }}
                 >
-                  <span
-                    className="text-xs font-bold"
-                    style={{ color: selectedCategory?.color ?? GOLD }}
-                  >
+                  <span className="text-xs font-bold" style={{ color: selectedCategory?.color ?? GOLD }}>
                     {singleFormLabel}
                   </span>
                 </div>
               )}
-
               <p className="text-slate-400 text-base max-w-md mx-auto leading-relaxed mb-6">
-                Enter your birth details. Your personalized Trikal analysis will be ready
-                instantly — no login required.
+                Enter your birth details. Your personalized Trikal analysis will be ready instantly — no login required.
               </p>
-
               <div
                 className="inline-block rounded-2xl px-6 py-4 max-w-lg mx-auto"
                 style={{
                   background: `linear-gradient(135deg, ${GOLD_RGBA(0.07)} 0%, rgba(6,10,24,0.9) 100%)`,
-                  border: `1px solid ${GOLD_RGBA(0.2)}`,
+                  border:     `1px solid ${GOLD_RGBA(0.2)}`,
                 }}
               >
                 <p className="font-serif text-base sm:text-lg italic leading-relaxed" style={{ color: `${GOLD}cc` }}>
@@ -450,9 +466,7 @@ export default function BirthForm({ selectedCategory }: Props) {
 
         <form onSubmit={handleSubmit} noValidate>
           {isDualMode ? (
-            /* ── DUAL FORM LAYOUT ── */
             <div className="space-y-5">
-              {/* Dual heading visual separator */}
               <div className="flex items-center gap-3">
                 <div className="flex-1 h-px" style={{ background: `${accentColor}18` }} />
                 <div
@@ -465,9 +479,8 @@ export default function BirthForm({ selectedCategory }: Props) {
                 <div className="flex-1 h-px" style={{ background: `${accentColor}18` }} />
               </div>
 
-              {/* Your details */}
               <PartnerMiniForm
-                label={isToxicBoss ? "Your Details (Employee)" : "Your Details"}
+                label={isToxicBoss ? 'Your Details (Employee)' : 'Your Details'}
                 sublabel="Your birth chart — already being read by the Guru"
                 accent={GOLD}
                 accentRgba={GOLD_RGBA}
@@ -480,7 +493,6 @@ export default function BirthForm({ selectedCategory }: Props) {
                 }}
               />
 
-              {/* VS / ♥ divider */}
               <div className="flex items-center gap-3">
                 <div className="flex-1 h-px" style={{ background: 'rgba(255,255,255,0.05)' }} />
                 <span className="text-base font-black" style={{ color: accentRgba(0.55) }}>
@@ -489,7 +501,6 @@ export default function BirthForm({ selectedCategory }: Props) {
                 <div className="flex-1 h-px" style={{ background: 'rgba(255,255,255,0.05)' }} />
               </div>
 
-              {/* Partner / Boss details */}
               <PartnerMiniForm
                 label={partnerSectionLabel}
                 sublabel={partnerSublabel}
@@ -504,7 +515,6 @@ export default function BirthForm({ selectedCategory }: Props) {
                 }}
               />
 
-              {/* Gender toggle for relationship modes */}
               {!isToxicBoss && (
                 <div className="flex items-center gap-3 px-1">
                   <span className="text-xs text-slate-500">Their gender:</span>
@@ -519,8 +529,8 @@ export default function BirthForm({ selectedCategory }: Props) {
                           className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all duration-200"
                           style={{
                             background: isActive ? PINK_RGBA(0.14) : 'rgba(255,255,255,0.03)',
-                            border: `1px solid ${isActive ? PINK_RGBA(0.4) : 'rgba(255,255,255,0.08)'}`,
-                            color: isActive ? PINK : 'rgba(148,163,184,0.55)',
+                            border:     `1px solid ${isActive ? PINK_RGBA(0.4) : 'rgba(255,255,255,0.08)'}`,
+                            color:      isActive ? PINK : 'rgba(148,163,184,0.55)',
                           }}
                         >
                           <span style={{ fontSize: '14px', lineHeight: 1 }}>{g === 'her' ? '♀' : '♂'}</span>
@@ -533,42 +543,36 @@ export default function BirthForm({ selectedCategory }: Props) {
               )}
 
               <PrivacyNote />
-
               <SubmitButton
                 loading={loading}
                 accentColor={accentColor}
                 accentRgba={accentRgba}
                 label={
                   loading
-                    ? isToxicBoss
-                      ? 'Analyzing Boss–Employee Charts...'
-                      : isExBack
-                      ? 'Running Karmic Closure Algorithm...'
+                    ? isToxicBoss ? 'Analyzing Boss–Employee Charts...'
+                      : isExBack  ? 'Running Karmic Closure Algorithm...'
                       : 'Comparing Both Charts...'
-                    : isToxicBoss
-                    ? 'Reveal Boss Karma Radar — Free'
-                    : isExBack
-                    ? 'Reveal Karmic Closure Status — Free'
-                    : 'Reveal Our Compatibility — Free'
+                    : isToxicBoss ? 'Reveal Boss Karma Radar — Free'
+                      : isExBack  ? 'Reveal Karmic Closure Status — Free'
+                      : 'Reveal Our Compatibility — Free'
                 }
                 IconEl={PartnerIcon}
               />
             </div>
           ) : (
-            /* ── SINGLE FORM LAYOUT ── */
             <div
               className="rounded-3xl p-8 sm:p-10"
               style={{
-                background: 'rgba(6,12,28,0.85)',
-                border: `1px solid ${GOLD_RGBA(0.16)}`,
+                background:     'rgba(6,12,28,0.85)',
+                border:         `1px solid ${GOLD_RGBA(0.16)}`,
                 backdropFilter: 'blur(16px)',
-                boxShadow: `0 24px 80px rgba(0,0,0,0.55), inset 0 1px 0 ${GOLD_RGBA(0.06)}`,
+                boxShadow:      `0 24px 80px rgba(0,0,0,0.55), inset 0 1px 0 ${GOLD_RGBA(0.06)}`,
               }}
             >
               <div className="space-y-6">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   {FIELD_META.map((field) => {
-                    const Icon = field.icon;
+                    const Icon  = field.icon;
                     const error = errors[field.key];
                     return (
                       <div key={field.key}>
@@ -623,7 +627,7 @@ export default function BirthForm({ selectedCategory }: Props) {
                     background: loading
                       ? GOLD_RGBA(0.25)
                       : `linear-gradient(135deg, ${GOLD} 0%, #A8862A 100%)`,
-                    color: '#020817',
+                    color:     '#020817',
                     boxShadow: loading ? 'none' : `0 0 32px ${GOLD_RGBA(0.38)}`,
                   }}
                 >
@@ -692,7 +696,7 @@ function SubmitButton({
         background: loading
           ? accentRgba(0.2)
           : `linear-gradient(135deg, ${accentColor} 0%, ${accentColor}cc 100%)`,
-        color: loading ? accentColor : '#fff',
+        color:     loading ? accentColor : '#fff',
         boxShadow: loading ? 'none' : `0 0 32px ${accentRgba(0.35)}`,
       }}
     >
