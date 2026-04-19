@@ -1,9 +1,9 @@
 /**
  * ⚠️ STRICT CEO ORDER: LOGIC FROZEN
  * DO NOT EDIT, DELETE, OR REFACTOR THIS FILE.
- * VERSION: 3.0 (GOD-LEVEL PROTECTION)
+ * VERSION: 4.0 (GOD-LEVEL PROTECTION)
  * SIGNED: ROHIIT GUPTA, CEO
- * PURPOSE: BIRTH FORM — PROKERALA API INTEGRATION (100% ACCURATE)
+ * PURPOSE: BIRTH FORM — PROKERALA SERVER API (100% ACCURATE)
  * WARNING: DO NOT CHANGE handleSubmit — BREAKS KUNDALI CALCULATION
  */
 
@@ -38,10 +38,10 @@ type LifeQuestion = {
 };
 
 const GENZ_QUESTIONS: LifeQuestion[] = [
-  { id: 'ex_back',       label: 'Will my Ex come back?',   icon: HeartCrack,    color: '#F472B6', gen: 'genz' },
-  { id: 'toxic_boss',    label: 'Is my Boss Toxic?',        icon: AlertTriangle, color: '#FB923C', gen: 'genz' },
-  { id: 'manifestation', label: 'Manifestation Luck',       icon: Sparkles,      color: '#FACC15', gen: 'genz' },
-  { id: 'dream_career',  label: 'Sudden Wealth / Trading',  icon: TrendingUp,    color: '#60A5FA', gen: 'genz' },
+  { id: 'ex_back',       label: 'Will my Ex come back?',  icon: HeartCrack,    color: '#F472B6', gen: 'genz' },
+  { id: 'toxic_boss',    label: 'Is my Boss Toxic?',       icon: AlertTriangle, color: '#FB923C', gen: 'genz' },
+  { id: 'manifestation', label: 'Manifestation Luck',      icon: Sparkles,      color: '#FACC15', gen: 'genz' },
+  { id: 'dream_career',  label: 'Sudden Wealth / Trading', icon: TrendingUp,    color: '#60A5FA', gen: 'genz' },
 ];
 
 const MILLENNIAL_QUESTIONS: LifeQuestion[] = [
@@ -96,10 +96,7 @@ function QuestionPicker({
   return (
     <div
       className="rounded-2xl p-5"
-      style={{
-        background: 'rgba(6,10,24,0.7)',
-        border: `1px solid ${GOLD_RGBA(0.14)}`,
-      }}
+      style={{ background: 'rgba(6,10,24,0.7)', border: `1px solid ${GOLD_RGBA(0.14)}` }}
     >
       <div className="flex items-center flex-wrap gap-2 mb-1">
         <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: '#DC2626' }} />
@@ -234,13 +231,13 @@ const EMPTY_FORM: FormData = { name: '', dob: '', birth_time: '', city: '' };
 
 export default function BirthForm({ selectedCategory }: Props) {
   const router = useRouter();
-  const [form, setForm]               = useState<FormData>(EMPTY_FORM);
-  const [partnerForm, setPartnerForm] = useState<FormData>(EMPTY_FORM);
-  const [loading, setLoading]         = useState(false);
-  const [errors, setErrors]           = useState<Partial<FormData>>({});
+  const [form, setForm]                   = useState<FormData>(EMPTY_FORM);
+  const [partnerForm, setPartnerForm]     = useState<FormData>(EMPTY_FORM);
+  const [loading, setLoading]             = useState(false);
+  const [errors, setErrors]               = useState<Partial<FormData>>({});
   const [partnerErrors, setPartnerErrors] = useState<Partial<FormData>>({});
   const [selectedQuestion, setSelectedQuestion] = useState<LifeQuestion | null>(null);
-  const [gender, setGender]           = useState<'him' | 'her'>('her');
+  const [gender, setGender]               = useState<'him' | 'her'>('her');
 
   const detectedGen      = getGenerationFromDob(form.dob);
   const activeCategoryId = selectedCategory?.id ?? selectedQuestion?.id ?? null;
@@ -250,11 +247,13 @@ export default function BirthForm({ selectedCategory }: Props) {
   const accentColor      = isExBack ? PINK : isToxicBoss ? ORANGE : GOLD;
   const accentRgba       = isExBack ? PINK_RGBA : isToxicBoss ? ORANGE_RGBA : GOLD_RGBA;
 
-  const dualHeading    = isToxicBoss ? 'Power Struggle Analysis: You vs Boss' : 'Karmic Bond Analysis: Enter Both Details';
+  const dualHeading    = isToxicBoss
+    ? 'Power Struggle Analysis: You vs Boss'
+    : 'Karmic Bond Analysis: Enter Both Details';
   const dualSubheading = isToxicBoss
-    ? 'Trikal Guru will analyze the Sun–Saturn authority axis and workplace karma between both charts.'
+    ? 'Trikal Guru will analyze the Sun–Saturn authority axis and workplace karma.'
     : isExBack
-    ? 'Both birth charts will be analyzed for Venus-Ketu axis, 7th house karma, and Karmic Closure status.'
+    ? 'Both birth charts will be analyzed for Venus-Ketu axis and 7th house karma.'
     : 'Both birth charts will be compared using Ashta-Koota Vedic matching.';
 
   const PartnerIcon         = isToxicBoss ? Briefcase : isExBack ? HeartCrack : Heart;
@@ -284,8 +283,8 @@ export default function BirthForm({ selectedCategory }: Props) {
 
     setLoading(true);
     try {
-      // Step 1 — Get lat/lng from city using free OpenStreetMap API
-      let lat = 28.6139; // Default: Delhi NCR
+      // Step 1 — Get lat/lng from city
+      let lat = 28.6139;
       let lng = 77.2090;
       try {
         const geoRes  = await fetch(
@@ -300,7 +299,7 @@ export default function BirthForm({ selectedCategory }: Props) {
         console.warn('[Trikal] Geocoding failed — using Delhi default');
       }
 
-      // Step 2 — Build birth data object
+      // Step 2 — Build birth data
       const birthData = {
         name:     form.name.trim(),
         dob:      form.dob,
@@ -310,9 +309,18 @@ export default function BirthForm({ selectedCategory }: Props) {
         cityName: form.city.trim(),
       };
 
-      // Step 3 — Calculate real Kundali using Prokerala API (100% accurate)
-      const { buildKundaliFromProkerala } = await import('@/lib/prokerala');
-      const kundali = await buildKundaliFromProkerala(birthData);
+      // Step 3 — Call server API route (Prokerala runs server-side only)
+      const kundaliRes = await fetch('/api/kundali', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify(birthData),
+      });
+
+      if (!kundaliRes.ok) {
+        throw new Error('Kundali API failed');
+      }
+
+      const { kundali } = await kundaliRes.json();
 
       // Step 4 — Save to Supabase
       await saveSubmission({
@@ -331,33 +339,33 @@ export default function BirthForm({ selectedCategory }: Props) {
         },
       });
 
-      // Step 5 — Navigate to result page with all data
+      // Step 5 — Navigate to result page
       const effectiveQuestion = selectedCategory ?? selectedQuestion;
       const params = new URLSearchParams({
-        name:          form.name.trim(),
-        dob:           form.dob,
-        city:          form.city.trim(),
-        tob:           form.birth_time || '12:00',
-        lat:           String(lat),
-        lng:           String(lng),
-        lagna:         kundali.lagna,
-        lagnaLord:     kundali.lagnaLord,
-        nakshatra:     kundali.nakshatra,
-        nakshatraLord: kundali.nakshatraLord,
-        mahadasha:     kundali.currentMahadasha.lord,
-        antardasha:    kundali.currentAntardasha.lord,
-        dashaBalance:  kundali.dashaBalance,
-        choghadiya:    kundali.panchang.choghadiya.name,
+        name:           form.name.trim(),
+        dob:            form.dob,
+        city:           form.city.trim(),
+        tob:            form.birth_time || '12:00',
+        lat:            String(lat),
+        lng:            String(lng),
+        lagna:          kundali.lagna,
+        lagnaLord:      kundali.lagnaLord,
+        nakshatra:      kundali.nakshatra,
+        nakshatraLord:  kundali.nakshatraLord,
+        mahadasha:      kundali.currentMahadasha.lord,
+        antardasha:     kundali.currentAntardasha.lord,
+        dashaBalance:   kundali.dashaBalance,
+        choghadiya:     kundali.panchang.choghadiya.name,
         choghadiyaType: kundali.panchang.choghadiya.type,
-        tithi:         kundali.panchang.tithi,
-        vara:          kundali.panchang.vara,
-        yoga:          kundali.panchang.yoga,
-        rahuStart:     kundali.panchang.rahuKaal.start,
-        rahuEnd:       kundali.panchang.rahuKaal.end,
-        abhijeetStart: kundali.panchang.abhijeetMuhurta.start,
-        abhijeetEnd:   kundali.panchang.abhijeetMuhurta.end,
+        tithi:          kundali.panchang.tithi,
+        vara:           kundali.panchang.vara,
+        yoga:           kundali.panchang.yoga,
+        rahuStart:      kundali.panchang.rahuKaal.start,
+        rahuEnd:        kundali.panchang.rahuKaal.end,
+        abhijeetStart:  kundali.panchang.abhijeetMuhurta.start,
+        abhijeetEnd:    kundali.panchang.abhijeetMuhurta.end,
         planets: JSON.stringify(
-          Object.values(kundali.planets).map(p => ({
+          Object.values(kundali.planets).map((p: any) => ({
             name:         p.name,
             rashi:        p.rashi,
             house:        p.house,
@@ -381,6 +389,7 @@ export default function BirthForm({ selectedCategory }: Props) {
       });
 
       router.push(`/result?${params.toString()}`);
+
     } catch (err) {
       console.error('[Trikal] Form submit error:', err);
       setLoading(false);
