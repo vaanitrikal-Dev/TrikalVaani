@@ -1,10 +1,9 @@
 /**
  * ⚠️ STRICT CEO ORDER: LOGIC FROZEN
  * DO NOT EDIT, DELETE, OR REFACTOR THIS FILE.
- * VERSION: 1.0 (GOD-LEVEL PROTECTION)
+ * VERSION: 2.0 (GOD-LEVEL PROTECTION)
  * SIGNED: ROHIIT GUPTA, CEO
- * PURPOSE: KUNDALI DISPLAY — SHOWS AFTER BIRTH FORM SUBMIT
- * WARNING: DO NOT CHANGE — THIS IS THE CORE USER-FACING RESULT
+ * PURPOSE: KUNDALI DISPLAY — BEAUTIFUL PLANET STATUS IN HINDI
  */
 
 'use client';
@@ -57,26 +56,60 @@ const PLANET_COLORS: Record<string, string> = {
   Ketu:    '#FCA5A5',
 };
 
-function StrengthBar({ strength, color }: { strength: number; color: string }) {
-  const pct = Math.round(strength);
-  const bg  = pct >= 70 ? '#22C55E' : pct >= 45 ? '#EAB308' : '#EF4444';
+const PLANET_NAMES_HI: Record<string, string> = {
+  Sun:     'Surya ☀️',
+  Moon:    'Chandra 🌙',
+  Mars:    'Mangal ♂',
+  Mercury: 'Budh ☿',
+  Jupiter: 'Guru ♃',
+  Venus:   'Shukra ♀',
+  Saturn:  'Shani ♄',
+  Rahu:    'Rahu ☊',
+  Ketu:    'Ketu ☋',
+};
+
+function getPlanetStatus(strength: number): {
+  label: string;
+  color: string;
+  bg: string;
+} {
+  if (strength >= 80) return { label: 'Uchcha',   color: '#4ADE80', bg: 'rgba(34,197,94,0.12)' };
+  if (strength >= 65) return { label: 'Balwaan',  color: GOLD,      bg: 'rgba(212,175,55,0.12)' };
+  if (strength >= 45) return { label: 'Madhyam',  color: '#94A3B8', bg: 'rgba(148,163,184,0.10)' };
+  return                      { label: 'Neech',   color: '#F87171', bg: 'rgba(239,68,68,0.12)' };
+}
+
+function StrengthBar({ strength }: { strength: number }) {
+  const pct    = Math.round(strength);
+  const status = getPlanetStatus(pct);
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
       <div style={{
-        flex: 1, height: 4, background: 'rgba(255,255,255,0.08)',
+        flex: 1, height: 4,
+        background: 'rgba(255,255,255,0.08)',
         borderRadius: 2, overflow: 'hidden',
       }}>
-        <div style={{ width: `${pct}%`, height: '100%', background: bg, borderRadius: 2 }} />
+        <div style={{
+          width: `${pct}%`, height: '100%',
+          background: status.color, borderRadius: 2,
+        }} />
       </div>
-      <span style={{ fontSize: 11, color: 'rgba(148,163,184,0.8)', minWidth: 24 }}>{pct}</span>
+      <span style={{
+        fontSize: 10, color: status.color,
+        minWidth: 52, fontWeight: 600,
+        textAlign: 'right',
+      }}>
+        {status.label}
+      </span>
     </div>
   );
 }
 
 export default function KundaliDisplay({
   name, dob, city, lagna, lagnaLord, nakshatra, nakshatraLord,
-  mahadasha, antardasha, dashaBalance, choghadiya, choghadiyaType,
-  tithi, vara, yoga, rahuStart, rahuEnd, abhijeetStart, abhijeetEnd,
+  mahadasha, antardasha, dashaBalance,
+  choghadiya, choghadiyaType, tithi, vara, yoga,
+  rahuStart, rahuEnd, abhijeetStart, abhijeetEnd,
   planets,
 }: KundaliDisplayProps) {
 
@@ -84,173 +117,206 @@ export default function KundaliDisplay({
     ? '#22C55E' : choghadiyaType === 'Bad' ? '#EF4444' : '#EAB308';
 
   return (
-    <div style={{ fontFamily: 'sans-serif', maxWidth: 600, margin: '0 auto', padding: '0 16px' }}>
+    <div style={{ fontFamily: 'sans-serif', maxWidth: 640, margin: '0 auto', padding: '0 4px' }}>
 
-      {/* Header Card */}
+      {/* ── HEADER CARD ── */}
       <div style={{
-        background: 'rgba(6,12,28,0.9)',
-        border: `1px solid ${GOLD_RGBA(0.25)}`,
+        background: 'rgba(6,12,28,0.95)',
+        border: `1px solid ${GOLD_RGBA(0.3)}`,
         borderRadius: 16, padding: '20px 24px', marginBottom: 12,
+        boxShadow: `0 0 40px ${GOLD_RGBA(0.06)}`,
       }}>
+        {/* Name + DOB row */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 16 }}>
           <div style={{
-            width: 48, height: 48, borderRadius: '50%',
+            width: 52, height: 52, borderRadius: '50%',
             background: GOLD_RGBA(0.15),
-            border: `1px solid ${GOLD_RGBA(0.4)}`,
+            border: `2px solid ${GOLD_RGBA(0.5)}`,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 18, fontWeight: 700, color: GOLD,
+            fontSize: 20, fontWeight: 700, color: GOLD, flexShrink: 0,
           }}>
             {name.charAt(0).toUpperCase()}
           </div>
           <div>
-            <div style={{ fontSize: 16, fontWeight: 600, color: '#fff', marginBottom: 2 }}>{name}</div>
+            <div style={{ fontSize: 17, fontWeight: 700, color: '#fff', marginBottom: 2 }}>
+              {name}
+            </div>
             <div style={{ fontSize: 12, color: 'rgba(148,163,184,0.7)' }}>
               {dob} · {city}
             </div>
-            <div style={{ fontSize: 10, color: GOLD_RGBA(0.6), marginTop: 2 }}>
+            <div style={{ fontSize: 10, color: GOLD_RGBA(0.55), marginTop: 2 }}>
               Trikal Engine V15 · Lahiri Ayanamsha
             </div>
           </div>
         </div>
 
-        {/* 3 Key Stats */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
+        {/* 3 Key Stat Cards */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8, marginBottom: 10 }}>
           {[
-            { label: 'Lagna',     value: lagna,     sub: `Lord: ${lagnaLord}` },
-            { label: 'Nakshatra', value: nakshatra,  sub: `Lord: ${nakshatraLord}` },
-            { label: 'Mahadasha', value: mahadasha,  sub: antardasha },
+            { label: 'Lagna',     value: lagna,    sub: `Lord: ${lagnaLord}` },
+            { label: 'Nakshatra', value: nakshatra, sub: `Lord: ${nakshatraLord}` },
+            { label: 'Mahadasha', value: mahadasha, sub: antardasha },
           ].map(item => (
             <div key={item.label} style={{
               background: 'rgba(255,255,255,0.04)',
               borderRadius: 10, padding: '10px 12px',
-              border: '1px solid rgba(255,255,255,0.07)',
+              border: `1px solid ${GOLD_RGBA(0.12)}`,
             }}>
-              <div style={{ fontSize: 10, color: 'rgba(148,163,184,0.6)', marginBottom: 3, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              <div style={{
+                fontSize: 9, color: 'rgba(148,163,184,0.5)',
+                marginBottom: 4, textTransform: 'uppercase', letterSpacing: '0.06em',
+              }}>
                 {item.label}
               </div>
-              <div style={{ fontSize: 14, fontWeight: 600, color: GOLD, marginBottom: 1 }}>{item.value}</div>
-              <div style={{ fontSize: 10, color: 'rgba(148,163,184,0.5)' }}>{item.sub}</div>
+              <div style={{ fontSize: 15, fontWeight: 700, color: GOLD, marginBottom: 1 }}>
+                {item.value}
+              </div>
+              <div style={{ fontSize: 10, color: 'rgba(148,163,184,0.55)' }}>
+                {item.sub}
+              </div>
             </div>
           ))}
         </div>
 
         {/* Dasha Balance */}
         <div style={{
-          marginTop: 10, padding: '8px 12px',
-          background: GOLD_RGBA(0.06),
-          borderRadius: 8, border: `1px solid ${GOLD_RGBA(0.15)}`,
+          padding: '8px 14px',
+          background: GOLD_RGBA(0.07),
+          borderRadius: 8,
+          border: `1px solid ${GOLD_RGBA(0.18)}`,
         }}>
-          <span style={{ fontSize: 11, color: GOLD_RGBA(0.7) }}>⏳ {dashaBalance}</span>
+          <span style={{ fontSize: 12, color: GOLD_RGBA(0.8) }}>⏳ {dashaBalance}</span>
         </div>
       </div>
 
-      {/* Planets Table */}
+      {/* ── PLANETS TABLE ── */}
       <div style={{
-        background: 'rgba(6,12,28,0.9)',
-        border: `1px solid rgba(255,255,255,0.08)`,
+        background: 'rgba(6,12,28,0.95)',
+        border: '1px solid rgba(255,255,255,0.08)',
         borderRadius: 16, padding: '16px 20px', marginBottom: 12,
       }}>
+        {/* Table header */}
         <div style={{
-          fontSize: 11, fontWeight: 600, color: 'rgba(148,163,184,0.5)',
-          textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 12,
+          display: 'grid',
+          gridTemplateColumns: '120px 1fr 140px',
+          gap: 8, marginBottom: 10,
+          paddingBottom: 8,
+          borderBottom: '1px solid rgba(255,255,255,0.06)',
         }}>
-          Planetary Positions
+          <span style={{ fontSize: 10, color: 'rgba(148,163,184,0.4)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Planet</span>
+          <span style={{ fontSize: 10, color: 'rgba(148,163,184,0.4)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Rashi · House</span>
+          <span style={{ fontSize: 10, color: 'rgba(148,163,184,0.4)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Strength</span>
         </div>
 
         {planets.map((p, i) => {
-          const color = PLANET_COLORS[p.name] ?? '#94A3B8';
+          const color  = PLANET_COLORS[p.name] ?? '#94A3B8';
+          const status = getPlanetStatus(p.strength);
           return (
             <div key={p.name} style={{
-              display: 'flex', alignItems: 'center', gap: 10,
-              padding: '7px 0',
-              borderBottom: i < planets.length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none',
+              display: 'grid',
+              gridTemplateColumns: '120px 1fr 140px',
+              gap: 8, alignItems: 'center',
+              padding: '8px 0',
+              borderBottom: i < planets.length - 1
+                ? '1px solid rgba(255,255,255,0.04)' : 'none',
             }}>
-              {/* Planet dot */}
-              <div style={{
-                width: 8, height: 8, borderRadius: '50%',
-                background: color, flexShrink: 0,
-              }} />
-              {/* Name */}
-              <div style={{ width: 64, fontSize: 13, fontWeight: 500, color: '#fff' }}>
-                {p.name}
+              {/* Planet name */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <div style={{
+                  width: 8, height: 8, borderRadius: '50%',
+                  background: color, flexShrink: 0,
+                  boxShadow: `0 0 6px ${color}60`,
+                }} />
+                <div>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: '#fff' }}>
+                    {PLANET_NAMES_HI[p.name] ?? p.name}
+                    {p.isRetrograde && (
+                      <span style={{
+                        fontSize: 9, background: 'rgba(167,139,250,0.15)',
+                        color: '#A78BFA', borderRadius: 3,
+                        padding: '1px 4px', marginLeft: 5,
+                      }}>℞</span>
+                    )}
+                  </div>
+                  <div style={{ fontSize: 10, color: 'rgba(148,163,184,0.4)' }}>
+                    {p.degree.toFixed(1)}°
+                  </div>
+                </div>
+              </div>
+
+              {/* Rashi + House */}
+              <div>
+                <span style={{ fontSize: 13, color: '#fff', fontWeight: 500 }}>
+                  {p.rashi}
+                </span>
+                <span style={{
+                  fontSize: 10, color: 'rgba(148,163,184,0.45)',
+                  marginLeft: 6,
+                }}>
+                  House {p.house}
+                </span>
+                <div style={{ fontSize: 10, color: 'rgba(148,163,184,0.35)', marginTop: 1 }}>
+                  {p.nakshatra}
+                </div>
+              </div>
+
+              {/* Strength bar + label */}
+              <div>
+                <StrengthBar strength={p.strength} />
                 {p.isRetrograde && (
-                  <span style={{
-                    fontSize: 9, background: 'rgba(239,68,68,0.15)',
-                    color: '#F87171', borderRadius: 3, padding: '1px 4px', marginLeft: 4,
-                  }}>
-                    ℞
-                  </span>
+                  <div style={{ fontSize: 9, color: '#A78BFA', marginTop: 2 }}>
+                    Vakri — karmic revisit
+                  </div>
                 )}
               </div>
-              {/* Rashi */}
-              <div style={{ flex: 1, fontSize: 12, color: 'rgba(148,163,184,0.7)' }}>
-                {p.rashi}
-                <span style={{ fontSize: 10, color: 'rgba(148,163,184,0.4)', marginLeft: 4 }}>
-                  H{p.house}
-                </span>
-              </div>
-              {/* Strength bar */}
-              <div style={{ width: 100 }}>
-                <StrengthBar strength={p.strength} color={color} />
-              </div>
-              {/* Exalted/Own badge */}
-              {p.strength >= 75 && (
-                <span style={{
-                  fontSize: 9, padding: '1px 5px', borderRadius: 3,
-                  background: 'rgba(34,197,94,0.12)', color: '#4ADE80',
-                }}>
-                  {p.strength >= 80 ? 'Exalted' : 'Strong'}
-                </span>
-              )}
             </div>
           );
         })}
       </div>
 
-      {/* Panchang Card */}
+      {/* ── PANCHANG CARD ── */}
       <div style={{
-        background: 'rgba(6,12,28,0.9)',
-        border: `1px solid rgba(255,255,255,0.08)`,
+        background: 'rgba(6,12,28,0.95)',
+        border: '1px solid rgba(255,255,255,0.08)',
         borderRadius: 16, padding: '16px 20px', marginBottom: 12,
       }}>
         <div style={{
-          fontSize: 11, fontWeight: 600, color: 'rgba(148,163,184,0.5)',
-          textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 12,
+          fontSize: 11, fontWeight: 700, color: GOLD_RGBA(0.6),
+          textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 14,
         }}>
-          Aaj Ka Panchang
+          🗓 Aaj Ka Panchang
         </div>
 
         {[
-          { label: 'Vara (Day)',         value: vara },
-          { label: 'Tithi',              value: tithi },
-          { label: 'Yoga',               value: yoga },
-          {
-            label: 'Choghadiya',
-            value: choghadiya,
-            badge: choghadiyaType,
-            badgeColor: choghadiyaColor,
-          },
-          { label: 'Abhijeet Muhurta',   value: `${abhijeetStart} – ${abhijeetEnd}` },
-          { label: 'Rahu Kaal (avoid)',  value: `${rahuStart} – ${rahuEnd}`, warn: true },
+          { label: 'Vara (Din)',       value: vara,                              warn: false },
+          { label: 'Tithi',            value: tithi,                             warn: false },
+          { label: 'Yoga',             value: yoga,                              warn: false },
+          { label: 'Choghadiya',       value: choghadiya, badge: choghadiyaType, warn: false },
+          { label: 'Abhijeet Muhurta', value: `${abhijeetStart} – ${abhijeetEnd}`, warn: false },
+          { label: 'Rahu Kaal ⚠️',    value: `${rahuStart} – ${rahuEnd}`,       warn: true  },
         ].map(row => (
           <div key={row.label} style={{
             display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-            padding: '6px 0',
+            padding: '7px 0',
             borderBottom: '1px solid rgba(255,255,255,0.04)',
           }}>
-            <span style={{ fontSize: 12, color: 'rgba(148,163,184,0.6)' }}>{row.label}</span>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <span style={{ fontSize: 12, color: 'rgba(148,163,184,0.55)' }}>
+              {row.label}
+            </span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <span style={{
-                fontSize: 13, fontWeight: 500,
+                fontSize: 13, fontWeight: 600,
                 color: row.warn ? '#F87171' : '#fff',
               }}>
                 {row.value}
               </span>
               {row.badge && (
                 <span style={{
-                  fontSize: 10, padding: '1px 6px', borderRadius: 4,
-                  background: `${row.badgeColor}18`, color: row.badgeColor,
-                  border: `1px solid ${row.badgeColor}30`,
+                  fontSize: 10, padding: '2px 7px', borderRadius: 4,
+                  background: `${choghadiyaColor}18`,
+                  color: choghadiyaColor,
+                  border: `1px solid ${choghadiyaColor}30`,
+                  fontWeight: 600,
                 }}>
                   {row.badge}
                 </span>
@@ -258,19 +324,47 @@ export default function KundaliDisplay({
             </div>
           </div>
         ))}
+
+        {/* Choghadiya advice */}
+        <div style={{
+          marginTop: 12, padding: '8px 12px',
+          background: `${choghadiyaColor}0d`,
+          borderRadius: 8,
+          border: `1px solid ${choghadiyaColor}25`,
+        }}>
+          <span style={{ fontSize: 11, color: choghadiyaColor }}>
+            {choghadiyaType === 'Good'
+              ? '✅ Abhi ka samay shubh hai — koi bhi naya kaam shuru kar sakte hain'
+              : choghadiyaType === 'Bad'
+              ? '⚠️ Abhi ka samay saavdhani ka hai — bade faisale thodi der mein karein'
+              : '⚡ Madhyam samay — routine kaam theek hain, bade faisale baad mein'}
+          </span>
+        </div>
       </div>
 
-      {/* Jini CTA */}
+      {/* ── JINI CTA ── */}
       <div style={{
-        background: 'rgba(30,10,60,0.8)',
-        border: '1px solid rgba(139,92,246,0.3)',
-        borderRadius: 16, padding: '16px 20px',
+        background: 'linear-gradient(135deg, rgba(30,10,60,0.9) 0%, rgba(6,12,28,0.95) 100%)',
+        border: '1px solid rgba(139,92,246,0.25)',
+        borderRadius: 16, padding: '18px 22px',
       }}>
-        <div style={{ fontSize: 12, color: 'rgba(167,139,250,0.8)', marginBottom: 8, fontStyle: 'italic' }}>
-          "Rohiit Gupta ji ka Trikal framework kehta hai — aapki Kundali mein bahut kuch hai jo sirf aap ke liye likha hai..."
+        <div style={{
+          fontSize: 13, color: 'rgba(167,139,250,0.85)',
+          marginBottom: 8, fontStyle: 'italic', lineHeight: 1.6,
+        }}>
+          "Rohiit Gupta ji ka Trikal framework kehta hai — aapki Kundali mein bahut kuch hai jo sirf aap ke liye likha hai. Kaal ka ek aur raaz abhi baki hai..."
         </div>
-        <div style={{ fontSize: 11, color: 'rgba(148,163,184,0.5)' }}>
-          Jini se poochiye — apna sawaal type karein neeche 👇
+        <div style={{
+          fontSize: 11, color: 'rgba(148,163,184,0.45)',
+          display: 'flex', alignItems: 'center', gap: 6,
+        }}>
+          <span style={{
+            width: 6, height: 6, borderRadius: '50%',
+            background: '#22C55E',
+            boxShadow: '0 0 6px #22C55E',
+            display: 'inline-block',
+          }} />
+          Jini online hai — apna sawaal neeche type karein 👇
         </div>
       </div>
 
