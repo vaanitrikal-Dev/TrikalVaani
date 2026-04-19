@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ reply: JINI_NAMASTE, kundaliSummary: null });
     }
 
-    // Build real Kundali
+    // Build real Kundali from Swiss Ephemeris
     let kundali = null;
     let kundaliSummary = null;
 
@@ -55,9 +55,13 @@ export async function POST(req: NextRequest) {
           vara:          kundali.panchang.vara,
           yoga:          kundali.panchang.yoga,
           planets: Object.values(kundali.planets).map(p => ({
-            name: p.name, rashi: p.rashi, house: p.house,
-            strength: p.strength, isRetrograde: p.isRetrograde,
-            nakshatra: p.nakshatra, degree: p.degree,
+            name:         p.name,
+            rashi:        p.rashi,
+            house:        p.house,
+            strength:     p.strength,
+            isRetrograde: p.isRetrograde,
+            nakshatra:    p.nakshatra,
+            degree:       p.degree,
           })),
         };
       } catch (calcErr) {
@@ -76,7 +80,7 @@ export async function POST(req: NextRequest) {
         contents: [{ role: 'user', parts: [{ text: message }] }],
         generationConfig: {
           temperature:     0.85,
-          maxOutputTokens: 280,  // SHORT = crisp suspenseful responses
+          maxOutputTokens: 280,
           topP:            0.9,
         },
       }),
@@ -93,10 +97,15 @@ export async function POST(req: NextRequest) {
     const data = await res.json();
     if (data.error) {
       console.error('[Trikal] Gemini error:', data.error);
-      return NextResponse.json({ reply: 'Jini abhi meditate kar rahi hai. 🙏', kundaliSummary });
+      return NextResponse.json({
+        reply: 'Jini abhi meditate kar rahi hai. 🙏',
+        kundaliSummary,
+      });
     }
 
-    const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() ?? 'Dobara puchiye. 🙏';
+    const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim()
+      ?? 'Dobara puchiye. 🙏';
+
     return NextResponse.json({ reply, kundaliSummary });
 
   } catch (err: unknown) {
