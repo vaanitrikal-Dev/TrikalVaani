@@ -3,9 +3,7 @@
  * DO NOT EDIT, DELETE, OR REFACTOR THIS FILE.
  * VERSION: 16.0-MASTER (GOD-LEVEL PROTECTION)
  * SIGNED: ROHIIT GUPTA, CEO
- * PURPOSE: SINGLE UNIFIED JINI API — REAL SWISS EPHEMERIS + GEMINI
- * THIS REPLACES ALL PREVIOUS ROUTE FILES (14.x, 15.x)
- * JINI MESSAGE: SHORT, CRISP, SUSPENSEFUL — MAX 70 WORDS
+ * PURPOSE: MAIN JINI API — REAL KUNDALI + SHORT CRISP RESPONSES
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -24,23 +22,18 @@ export async function POST(req: NextRequest) {
       isFirstMessage?: boolean;
     };
 
-    const {
-      message,
-      birthData,
-      category = 'JOB',
-      isFirstMessage = false,
-    } = body;
+    const { message, birthData, category = 'JOB', isFirstMessage = false } = body;
 
     if (!GEMINI_API_KEY) {
       return NextResponse.json({ reply: 'API Key missing.' });
     }
 
-    // ── FIRST MESSAGE: Return Jini signature opening ──────────────────────
+    // First message — Jini signature opening
     if (isFirstMessage) {
       return NextResponse.json({ reply: JINI_NAMASTE, kundaliSummary: null });
     }
 
-    // ── BUILD REAL KUNDALI from Swiss Ephemeris ───────────────────────────
+    // Build real Kundali
     let kundali = null;
     let kundaliSummary = null;
 
@@ -62,25 +55,19 @@ export async function POST(req: NextRequest) {
           vara:          kundali.panchang.vara,
           yoga:          kundali.panchang.yoga,
           planets: Object.values(kundali.planets).map(p => ({
-            name:        p.name,
-            rashi:       p.rashi,
-            house:       p.house,
-            strength:    p.strength,
-            isRetrograde: p.isRetrograde,
-            nakshatra:   p.nakshatra,
-            degree:      p.degree,
+            name: p.name, rashi: p.rashi, house: p.house,
+            strength: p.strength, isRetrograde: p.isRetrograde,
+            nakshatra: p.nakshatra, degree: p.degree,
           })),
         };
       } catch (calcErr) {
-        console.error('[Trikal Engine] Kundali error:', calcErr);
+        console.error('[Trikal] Kundali error:', calcErr);
       }
     }
 
-    // ── DETECT LANGUAGE + BUILD SYSTEM PROMPT ────────────────────────────
     const lang         = detectLanguage(message);
     const systemPrompt = buildJiniSystemPrompt(kundali, category, lang, birthData?.name);
 
-    // ── CALL GEMINI ───────────────────────────────────────────────────────
     const res = await fetch(`${GEMINI_URL}?key=${GEMINI_API_KEY}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -89,7 +76,7 @@ export async function POST(req: NextRequest) {
         contents: [{ role: 'user', parts: [{ text: message }] }],
         generationConfig: {
           temperature:     0.85,
-          maxOutputTokens: 300,   // SHORT responses — forces crisp answers
+          maxOutputTokens: 280,  // SHORT = crisp suspenseful responses
           topP:            0.9,
         },
       }),
@@ -106,21 +93,14 @@ export async function POST(req: NextRequest) {
     const data = await res.json();
     if (data.error) {
       console.error('[Trikal] Gemini error:', data.error);
-      return NextResponse.json({
-        reply: 'Jini abhi meditate kar rahi hai. 🙏',
-        kundaliSummary,
-      });
+      return NextResponse.json({ reply: 'Jini abhi meditate kar rahi hai. 🙏', kundaliSummary });
     }
 
-    const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim()
-      ?? 'Dobara puchiye. 🙏';
-
+    const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() ?? 'Dobara puchiye. 🙏';
     return NextResponse.json({ reply, kundaliSummary });
 
   } catch (err: unknown) {
     console.error('[Trikal] Error:', err);
-    return NextResponse.json({
-      reply: 'Kuch cosmic disturbance aa gayi. 🙏',
-    });
+    return NextResponse.json({ reply: 'Kuch cosmic disturbance aa gayi. 🙏' });
   }
 }
