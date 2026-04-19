@@ -138,14 +138,33 @@ function getHouse(planetLng: number, lagnaLng: number): number {
 }
 
 const EXALT_RASHI: Record<string, number> = {
-  Sun:4, Moon:1, Mars:9, Mercury:5, Jupiter:3, Venus:11, Saturn:6
+  // Mesh=0,Vrishabh=1,Mithun=2,Kark=3,Simha=4,Kanya=5
+  // Tula=6,Vrischik=7,Dhanu=8,Makar=9,Kumbh=10,Meen=11
+  Sun:     0,  // Exalted in Mesh (Aries)
+  Moon:    1,  // Exalted in Vrishabh (Taurus)
+  Mars:    9,  // Exalted in Makar (Capricorn)
+  Mercury: 5,  // Exalted in Kanya (Virgo)
+  Jupiter: 3,  // Exalted in Kark (Cancer)
+  Venus:   11, // Exalted in Meen (Pisces)
+  Saturn:  6,  // Exalted in Tula (Libra)
 };
 const DEBIL_RASHI: Record<string, number> = {
-  Sun:10, Moon:7, Mars:3, Mercury:11, Jupiter:9, Venus:5, Saturn:0
+  Sun:     6,  // Debilitated in Tula (Libra)
+  Moon:    7,  // Debilitated in Vrischik (Scorpio)
+  Mars:    3,  // Debilitated in Kark (Cancer)
+  Mercury: 11, // Debilitated in Meen (Pisces)
+  Jupiter: 9,  // Debilitated in Makar (Capricorn)
+  Venus:   5,  // Debilitated in Kanya (Virgo)
+  Saturn:  0,  // Debilitated in Mesh (Aries)
 };
 const OWN_RASHIS: Record<string, number[]> = {
-  Sun:[4], Moon:[3], Mars:[0,7], Mercury:[2,5],
-  Jupiter:[8,11], Venus:[1,6], Saturn:[9,10],
+  Sun:     [4],     // Simha (Leo)
+  Moon:    [3],     // Kark (Cancer)
+  Mars:    [0, 7],  // Mesh + Vrischik
+  Mercury: [2, 5],  // Mithun + Kanya
+  Jupiter: [8, 11], // Dhanu + Meen
+  Venus:   [1, 6],  // Vrishabh + Tula
+  Saturn:  [9, 10], // Makar + Kumbh
 };
 
 function getStrength(planet: string, rashiIdx: number, isRetrograde: boolean): number {
