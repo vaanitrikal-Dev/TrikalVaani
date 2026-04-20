@@ -1,10 +1,9 @@
 /**
  * ⚠️ STRICT CEO ORDER: LOGIC FROZEN
  * DO NOT EDIT, DELETE, OR REFACTOR THIS FILE.
- * VERSION: 2.0 (GOD-LEVEL PROTECTION)
+ * VERSION: 3.0 (GOD-LEVEL PROTECTION)
  * SIGNED: ROHIIT GUPTA, CEO
- * PURPOSE: RESULT PAGE — KUNDALI DISPLAY + ALL PHASES
- * WARNING: DO NOT REMOVE KundaliDisplay — CORE USER EXPERIENCE
+ * PURPOSE: RESULT PAGE — KUNDALI + AUTO PREDICTION + ALL PHASES
  */
 
 'use client';
@@ -29,6 +28,7 @@ import UnlockButton from '@/components/result/UnlockButton';
 import LagnaChart, { derivePlanetsFromDob } from '@/components/result/LagnaChart';
 import VimshottariDashaTable from '@/components/result/VimshottariDashaTable';
 import KundaliDisplay from '@/components/result/KundaliDisplay';
+import AutoPrediction from '@/components/result/AutoPrediction';
 import type { DashaPeriod, LifeTimelineEvent } from '@/lib/vedic-astro';
 import type { PredictiveTabsData } from '@/components/result/PredictiveModules';
 import type { MonthForecast } from '@/components/result/FutureTimeline';
@@ -92,10 +92,10 @@ function ThreeMonthSummary({
   luckyColor, luckyNumber, pillarScores, aiData, aiLoading,
   varshphalFocus, ashtakvargaWealth, monthlyTimeline,
   unlockedTiers, onUnlock,
-  // Kundali params
   lagna, lagnaLord, nakshatra, nakshatraLord, mahadasha, antardasha,
   dashaBalance, choghadiya, choghadiyaType, tithi, vara, yoga,
   rahuStart, rahuEnd, abhijeetStart, abhijeetEnd, planets,
+  autoSegment, autoSegmentLabel,
 }: {
   name: string; dob: string; city: string;
   score: number; insight: string; remedy: string; practicalTip: string;
@@ -113,11 +113,13 @@ function ThreeMonthSummary({
     name: string; rashi: string; house: number; strength: number;
     isRetrograde: boolean; nakshatra: string; degree: number;
   }>;
+  autoSegment: string;
+  autoSegmentLabel: string;
 }) {
   return (
     <div className="space-y-6">
 
-      {/* ── KUNDALI DISPLAY — shown first if real data available ── */}
+      {/* ── 1. KUNDALI DISPLAY ── */}
       {lagna && planets.length > 0 && (
         <KundaliDisplay
           name={name} dob={dob} city={city}
@@ -133,7 +135,23 @@ function ThreeMonthSummary({
         />
       )}
 
-      {/* ── 3 MONTH SUMMARY ── */}
+      {/* ── 2. AUTO PREDICTION — RIGHT AFTER KUNDALI (Yellow arrow area) ── */}
+      {lagna && (
+        <AutoPrediction
+          name={name}
+          lagna={lagna}
+          mahadasha={mahadasha}
+          antardasha={antardasha}
+          nakshatra={nakshatra}
+          choghadiya={choghadiya}
+          choghadiyaType={choghadiyaType}
+          planets={planets}
+          autoSegment={autoSegment || 'default'}
+          autoSegmentLabel={autoSegmentLabel}
+        />
+      )}
+
+      {/* ── 3. 3 MONTH SUMMARY ── */}
       <div
         className="rounded-2xl p-6 sm:p-8"
         style={{ background: 'rgba(4,8,20,0.85)', border: `1px solid ${GOLD_RGBA(0.12)}`, backdropFilter: 'blur(12px)' }}
@@ -147,7 +165,7 @@ function ThreeMonthSummary({
         <div className="grid grid-cols-3 gap-3 mt-4">
           {(['Month 1', 'Month 2', 'Month 3'] as const).map((m, i) => {
             const intensity = ['High Energy', 'Karmic Flow', 'Expansion'][i];
-            const colors = [GOLD, '#60A5FA', '#4ADE80'];
+            const colors    = [GOLD, '#60A5FA', '#4ADE80'];
             return (
               <div
                 key={m}
@@ -294,16 +312,15 @@ function ResultContent() {
   const city     = params.get('city')     || '';
   const score    = parseInt(params.get('score')  || '72', 10);
   const rashi    = params.get('rashi')    || 'Mesha';
-  const luckyColor  = params.get('color')  || 'Golden';
-  const luckyNumber = parseInt(params.get('number') || '7', 10);
-  const insight     = params.get('insight') || 'The stars illuminate your path today with clarity and purpose.';
-  const remedy      = params.get('remedy')  || 'Chant the Gayatri Mantra 21 times at sunrise.';
-  const practicalTip = params.get('tip')   || 'Avoid major decisions under time pressure today.';
-  const generation  = (params.get('gen') || 'millennial') as 'genz' | 'millennial' | 'genx';
+  const luckyColor   = params.get('color')   || 'Golden';
+  const luckyNumber  = parseInt(params.get('number')  || '7', 10);
+  const insight      = params.get('insight') || 'The stars illuminate your path today.';
+  const remedy       = params.get('remedy')  || 'Chant the Gayatri Mantra 21 times at sunrise.';
+  const practicalTip = params.get('tip')     || 'Avoid major decisions under time pressure today.';
+  const generation   = (params.get('gen') || 'millennial') as 'genz' | 'millennial' | 'genx';
   const varshphalFocus    = params.get('varshphal') || 'Jupiter rules your Varshphal year.';
   const ashtakvargaWealth = parseInt(params.get('avwealth') || '24', 10);
 
-  // ── NEW: Kundali params from Swiss Ephemeris ──
   const lagna          = params.get('lagna')          || '';
   const lagnaLord      = params.get('lagnaLord')      || '';
   const nakshatra      = params.get('nakshatra')      || '';
@@ -320,6 +337,8 @@ function ResultContent() {
   const rahuEnd        = params.get('rahuEnd')        || '';
   const abhijeetStart  = params.get('abhijeetStart')  || '';
   const abhijeetEnd    = params.get('abhijeetEnd')    || '';
+  const autoSegment      = params.get('autoSegment')      || 'default';
+  const autoSegmentLabel = params.get('autoSegmentLabel') || '';
 
   let planets: Array<{
     name: string; rashi: string; house: number; strength: number;
@@ -348,19 +367,16 @@ function ResultContent() {
     if (timelineRaw) lifeTimeline = JSON.parse(timelineRaw);
   } catch { /* fallback */ }
 
-  const autoSegment      = params.get('autoSegment')      || '';
-  const autoSegmentLabel = params.get('autoSegmentLabel') || '';
-
-  const [activePhase, setActivePhase]           = useState(0);
-  const [aiData, setAiData]                     = useState<PredictiveTabsData | null>(null);
-  const [monthlyTimeline, setMonthlyTimeline]   = useState<MonthForecast[]>([]);
-  const [aiLoading, setAiLoading]               = useState(true);
-  const [segmentAnalysis, setSegmentAnalysis]   = useState<SegmentAnalysis | null>(null);
-  const [segmentLoading, setSegmentLoading]     = useState(false);
-  const [latestWhatsapp, setLatestWhatsapp]     = useState<string | undefined>(undefined);
-  const [compatResult, setCompatResult]         = useState<CompatibilityResult | null>(null);
-  const [compatLoading, setCompatLoading]       = useState(false);
-  const [unlockedTiers, setUnlockedTiers]       = useState<Set<string>>(new Set());
+  const [activePhase, setActivePhase]         = useState(0);
+  const [aiData, setAiData]                   = useState<PredictiveTabsData | null>(null);
+  const [monthlyTimeline, setMonthlyTimeline] = useState<MonthForecast[]>([]);
+  const [aiLoading, setAiLoading]             = useState(true);
+  const [segmentAnalysis, setSegmentAnalysis] = useState<SegmentAnalysis | null>(null);
+  const [segmentLoading, setSegmentLoading]   = useState(false);
+  const [latestWhatsapp, setLatestWhatsapp]   = useState<string | undefined>(undefined);
+  const [compatResult, setCompatResult]       = useState<CompatibilityResult | null>(null);
+  const [compatLoading, setCompatLoading]     = useState(false);
+  const [unlockedTiers, setUnlockedTiers]     = useState<Set<string>>(new Set());
 
   const basePayload = {
     name, dob, city, generation, rashi,
@@ -381,7 +397,7 @@ function ResultContent() {
   }, [dob]);
 
   useEffect(() => {
-    if (!autoSegment || !dob || !SUPABASE_URL) return;
+    if (!autoSegment || autoSegment === 'default' || !dob || !SUPABASE_URL) return;
     setSegmentLoading(true);
     callEdge({ ...basePayload, mode: 'segment', segmentId: autoSegment, segmentLabel: autoSegmentLabel || autoSegment })
       .then((json) => {
@@ -404,7 +420,8 @@ function ResultContent() {
       if (partnerData) {
         payload.partner = {
           name: partnerData.name, dob: partnerData.dob,
-          birth_time: partnerData.birth_time, city: partnerData.city, gender: partnerData.gender,
+          birth_time: partnerData.birth_time, city: partnerData.city,
+          gender: partnerData.gender,
         };
       }
       const json = await callEdge(payload);
@@ -506,6 +523,8 @@ function ResultContent() {
               rahuStart={rahuStart} rahuEnd={rahuEnd}
               abhijeetStart={abhijeetStart} abhijeetEnd={abhijeetEnd}
               planets={planets}
+              autoSegment={autoSegment}
+              autoSegmentLabel={autoSegmentLabel}
             />
           )}
 
@@ -532,7 +551,7 @@ function ResultContent() {
             />
           )}
 
-          <div className="mt-8 mb-6">
+          <div id="pricing" className="mt-8 mb-6">
             <PricingLadder
               name={name}
               onSelect={handlePricingSelect}
