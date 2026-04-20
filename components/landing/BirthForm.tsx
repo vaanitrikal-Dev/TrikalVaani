@@ -1,9 +1,11 @@
 /**
  * ⚠️ STRICT CEO ORDER: LOGIC FROZEN
  * DO NOT EDIT, DELETE, OR REFACTOR THIS FILE.
- * VERSION: 4.0 (GOD-LEVEL PROTECTION)
+ * VERSION: 5.0 (GOD-LEVEL PROTECTION)
  * SIGNED: ROHIIT GUPTA, CEO
  * PURPOSE: BIRTH FORM — PROKERALA SERVER API (100% ACCURATE)
+ * v5.0 CHANGE: Added language selector (Hindi / Hinglish / English)
+ *              Lang stored as `lang` URL param — passed to result page
  * WARNING: DO NOT CHANGE handleSubmit — BREAKS KUNDALI CALCULATION
  */
 
@@ -15,7 +17,7 @@ import {
   Loader as Loader2, Star, MapPin, Clock, Calendar, User,
   HeartCrack, TriangleAlert as AlertTriangle, Sparkles, TrendingUp,
   Chrome as Home, Banknote, Baby, Users, Sunset, Crown, MoonStar,
-  ChevronRight, Briefcase, Heart,
+  ChevronRight, Briefcase, Heart, Languages,
 } from 'lucide-react';
 import { saveSubmission } from '@/lib/supabase';
 import type { SelectedCategory } from '@/app/page';
@@ -26,6 +28,15 @@ const PINK = '#F472B6';
 const PINK_RGBA = (a: number) => `rgba(244,114,182,${a})`;
 const ORANGE = '#FB923C';
 const ORANGE_RGBA = (a: number) => `rgba(251,146,60,${a})`;
+
+// ─── LANGUAGE OPTIONS ─────────────────────────────────────────────────────────
+type Lang = 'hindi' | 'hinglish' | 'english';
+
+const LANG_OPTIONS: { id: Lang; label: string; sublabel: string; flag: string }[] = [
+  { id: 'hindi',    label: 'हिंदी',    sublabel: 'Shudh Hindi mein',   flag: '🇮🇳' },
+  { id: 'hinglish', label: 'Hinglish', sublabel: 'Hindi + English mix', flag: '✨' },
+  { id: 'english',  label: 'English',  sublabel: 'Full English',        flag: '🌐' },
+];
 
 type FormData = { name: string; dob: string; birth_time: string; city: string };
 
@@ -76,6 +87,83 @@ function getGenerationFromDob(dob: string): 'genz' | 'millennial' | 'genx' | nul
   return null;
 }
 
+// ─── LANGUAGE SELECTOR COMPONENT ─────────────────────────────────────────────
+function LanguageSelector({
+  selected,
+  onSelect,
+}: {
+  selected: Lang;
+  onSelect: (lang: Lang) => void;
+}) {
+  return (
+    <div
+      className="rounded-2xl p-5"
+      style={{ background: 'rgba(6,10,24,0.7)', border: `1px solid ${GOLD_RGBA(0.14)}` }}
+    >
+      {/* Header */}
+      <div className="flex items-center gap-2 mb-1">
+        <Languages className="w-3.5 h-3.5" style={{ color: GOLD }} />
+        <span
+          className="text-xs font-semibold tracking-widest uppercase"
+          style={{ color: `${GOLD}80` }}
+        >
+          Reading Language
+        </span>
+      </div>
+      <p className="text-xs text-slate-500 mb-4">
+        Apni reading kis bhasha mein chahte hain? Choose your prediction language
+      </p>
+
+      {/* Language Pills */}
+      <div className="grid grid-cols-3 gap-2.5">
+        {LANG_OPTIONS.map((lang) => {
+          const isSelected = selected === lang.id;
+          return (
+            <button
+              key={lang.id}
+              type="button"
+              onClick={() => onSelect(lang.id)}
+              className="relative flex flex-col items-center gap-1.5 rounded-xl p-3.5 transition-all duration-200"
+              style={{
+                background: isSelected ? GOLD_RGBA(0.12) : 'rgba(255,255,255,0.02)',
+                border: `1px solid ${isSelected ? GOLD_RGBA(0.45) : 'rgba(255,255,255,0.07)'}`,
+                boxShadow: isSelected ? `0 4px 20px ${GOLD_RGBA(0.2)}` : 'none',
+              }}
+            >
+              {/* Selected glow dot */}
+              {isSelected && (
+                <div
+                  className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full"
+                  style={{ background: GOLD, boxShadow: `0 0 6px ${GOLD}` }}
+                />
+              )}
+              <span style={{ fontSize: 20, lineHeight: 1 }}>{lang.flag}</span>
+              <span
+                className="text-sm font-bold"
+                style={{ color: isSelected ? GOLD : 'rgba(226,232,240,0.7)' }}
+              >
+                {lang.label}
+              </span>
+              <span
+                className="text-xs text-center leading-tight"
+                style={{ color: isSelected ? GOLD_RGBA(0.6) : 'rgba(100,116,139,0.7)' }}
+              >
+                {lang.sublabel}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Default note */}
+      <p className="text-xs text-center text-slate-600 mt-3">
+        Default: Hinglish · Aap baad mein bhi change kar sakte hain
+      </p>
+    </div>
+  );
+}
+
+// ─── QUESTION PICKER ─────────────────────────────────────────────────────────
 function QuestionPicker({
   gen, selected, onSelect,
 }: {
@@ -159,6 +247,7 @@ function QuestionPicker({
   );
 }
 
+// ─── PARTNER MINI FORM ────────────────────────────────────────────────────────
 function PartnerMiniForm({
   label, sublabel, accent, accentRgba, HeaderIcon, data, errors, onChange,
 }: {
@@ -226,6 +315,7 @@ function PartnerMiniForm({
   );
 }
 
+// ─── MAIN COMPONENT ───────────────────────────────────────────────────────────
 type Props = { selectedCategory?: SelectedCategory };
 const EMPTY_FORM: FormData = { name: '', dob: '', birth_time: '', city: '' };
 
@@ -238,6 +328,7 @@ export default function BirthForm({ selectedCategory }: Props) {
   const [partnerErrors, setPartnerErrors] = useState<Partial<FormData>>({});
   const [selectedQuestion, setSelectedQuestion] = useState<LifeQuestion | null>(null);
   const [gender, setGender]               = useState<'him' | 'her'>('her');
+  const [selectedLang, setSelectedLang]   = useState<Lang>('hinglish'); // ✅ NEW
 
   const detectedGen      = getGenerationFromDob(form.dob);
   const activeCategoryId = selectedCategory?.id ?? selectedQuestion?.id ?? null;
@@ -340,6 +431,7 @@ export default function BirthForm({ selectedCategory }: Props) {
       });
 
       // Step 5 — Navigate to result page
+      // ✅ NEW: lang param added to URL
       const effectiveQuestion = selectedCategory ?? selectedQuestion;
       const params = new URLSearchParams({
         name:           form.name.trim(),
@@ -348,6 +440,7 @@ export default function BirthForm({ selectedCategory }: Props) {
         tob:            form.birth_time || '12:00',
         lat:            String(lat),
         lng:            String(lng),
+        lang:           selectedLang,               // ✅ NEW — language preference
         lagna:          kundali.lagna,
         lagnaLord:      kundali.lagnaLord,
         nakshatra:      kundali.nakshatra,
@@ -540,6 +633,9 @@ export default function BirthForm({ selectedCategory }: Props) {
                 </div>
               )}
 
+              {/* ✅ Language Selector — Dual Mode */}
+              <LanguageSelector selected={selectedLang} onSelect={setSelectedLang} />
+
               <PrivacyNote />
               <SubmitButton
                 loading={loading} accentColor={accentColor} accentRgba={accentRgba}
@@ -613,6 +709,9 @@ export default function BirthForm({ selectedCategory }: Props) {
                   />
                 )}
 
+                {/* ✅ Language Selector — Single Mode */}
+                <LanguageSelector selected={selectedLang} onSelect={setSelectedLang} />
+
                 <PrivacyNote />
 
                 <button
@@ -659,6 +758,7 @@ export default function BirthForm({ selectedCategory }: Props) {
   );
 }
 
+// ─── PRIVACY NOTE ─────────────────────────────────────────────────────────────
 function PrivacyNote() {
   return (
     <div
@@ -674,6 +774,7 @@ function PrivacyNote() {
   );
 }
 
+// ─── SUBMIT BUTTON ────────────────────────────────────────────────────────────
 function SubmitButton({
   loading, accentColor, accentRgba, label, IconEl,
 }: {
