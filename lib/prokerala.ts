@@ -1,10 +1,12 @@
 /**
  * ⚠️ STRICT CEO ORDER: LOGIC FROZEN
  * DO NOT EDIT, DELETE, OR REFACTOR THIS FILE.
- * VERSION: 1.0 (GOD-LEVEL PROTECTION)
+ * VERSION: 2.0 (GOD-LEVEL PROTECTION)
  * SIGNED: ROHIIT GUPTA, CEO
  * PURPOSE: PROKERALA API — 100% ACCURATE SWISS EPHEMERIS CALCULATIONS
  * WARNING: THIS REPLACES MEEUS MATH — DO NOT USE swiss-ephemeris.ts FOR PLANETS
+ * FIX v2.0: degree now taken directly from p.position.degree (Prokerala Swiss Ephemeris)
+ *           Previously was recalculated from lng % 30 which caused display errors
  */
 
 import type { PlanetPosition, KundaliData, BirthData } from './swiss-ephemeris';
@@ -48,7 +50,7 @@ interface ProkeralaPlanetData {
   longitude:    number;
   is_retro:     string; // "true" or "false"
   position: {
-    degree:     number;
+    degree:     number;  // ✅ Exact degree within rashi — USE THIS
     minute:     number;
     second:     number;
   };
@@ -59,6 +61,11 @@ interface ProkeralaChartData {
     id:        number;
     name:      string;
     longitude: number;
+    position: {
+      degree: number;
+      minute: number;
+      second: number;
+    };
   };
   planets: ProkeralaPlanetData[];
 }
@@ -247,6 +254,31 @@ function calcPanchang(sunLng: number, moonLng: number) {
   };
 }
 
+// ─── SAFE DEGREE PARSER ───────────────────────────────────────────────────────
+/**
+ * Extract degree-within-rashi from Prokerala position object.
+ * Uses p.position.degree directly (Swiss Ephemeris value).
+ * Falls back to lng % 30 only if position data is missing.
+ */
+function extractDegree(p: ProkeralaPlanetData): number {
+  // ✅ PRIMARY: Use Prokerala's own Swiss Ephemeris degree value
+  if (
+    p.position &&
+    typeof p.position.degree === 'number' &&
+    !isNaN(p.position.degree)
+  ) {
+    // Add minutes and seconds for full precision
+    const fullDeg =
+      p.position.degree +
+      (p.position.minute ?? 0) / 60 +
+      (p.position.second ?? 0) / 3600;
+    return Math.round(fullDeg * 10) / 10; // 1 decimal place
+  }
+  // ⚠️ FALLBACK: recalculate from longitude (less accurate)
+  console.warn(`[Prokerala] position.degree missing for ${p.name} — using lng fallback`);
+  return Math.round((p.longitude % 30) * 10) / 10;
+}
+
 // ─── MAIN FUNCTION ────────────────────────────────────────────────────────────
 /**
  * Build complete Kundali using Prokerala API
@@ -314,13 +346,15 @@ export async function buildKundaliFromProkerala(
     const rashiIdx   = Math.floor(((lng % 360) + 360) % 360 / 30);
     const rashiName  = RASHIS[rashiIdx] ?? 'Mesh';
     const nData      = getNakshatraFromLongitude(lng);
-    const degInRashi = lng % 30;
+
+    // ✅ FIX v2.0: Use Prokerala's Swiss Ephemeris degree directly
+    const degree = extractDegree(p);
 
     planets[ourName] = {
       name:              ourName,
       siderealLongitude: lng,
       rashi:             rashiName,
-      degree:            Math.round(degInRashi * 100) / 100,
+      degree,                          // ✅ FIXED — was: Math.round(degInRashi * 100) / 100
       nakshatra:         nData.nakshatra,
       nakshatraPada:     nData.pada,
       nakshatraLord:     nData.lord,
