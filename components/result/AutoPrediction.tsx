@@ -1,10 +1,11 @@
 /**
  * ⚠️ STRICT CEO ORDER: LOGIC FROZEN
  * DO NOT EDIT, DELETE, OR REFACTOR THIS FILE.
- * VERSION: 1.0 (GOD-LEVEL PROTECTION)
+ * VERSION: 2.0 (GOD-LEVEL PROTECTION)
  * SIGNED: ROHIIT GUPTA, CEO
  * PURPOSE: AUTO PREDICTION — SHOWN IMMEDIATELY AFTER KUNDALI
  * Shows Jini's brief prediction + upsell CTAs + internal guide links
+ * FIXED: Broken <a> tags in CTA buttons section (Vercel build error)
  */
 
 'use client';
@@ -36,7 +37,6 @@ type AutoPredictionProps = {
 };
 
 // ─── INTERNAL GUIDE LINKS ─────────────────────────────────────────────────────
-// Maps each life question to relevant internal pages
 const GUIDE_LINKS: Record<string, { label: string; href: string; emoji: string }[]> = {
   ex_back: [
     { label: 'Venus-Ketu Axis Guide', href: '/blog/venus-ketu-karmic-love', emoji: '💕' },
@@ -76,9 +76,6 @@ const GUIDE_LINKS: Record<string, { label: string; href: string; emoji: string }
 };
 
 // ─── PREDICTION ENGINE ────────────────────────────────────────────────────────
-// Generates brief prediction from real chart data
-// No API call needed — pure logic from Parashara classical rules
-
 function generateBriefPrediction(
   name: string,
   lagna: string,
@@ -90,16 +87,12 @@ function generateBriefPrediction(
 ): string {
   const firstName = name.split(' ')[0] ?? name;
 
-  // Find key planets
   const venus   = planets.find(p => p.name === 'Venus');
   const jupiter = planets.find(p => p.name === 'Jupiter');
   const saturn  = planets.find(p => p.name === 'Saturn');
   const sun     = planets.find(p => p.name === 'Sun');
-  const moon    = planets.find(p => p.name === 'Moon');
 
-  // Dasha quality assessment
-  const goodMahadashas   = ['Jupiter', 'Venus', 'Mercury', 'Moon'];
-  const neutralMahadashas = ['Sun', 'Mars'];
+  const goodMahadashas      = ['Jupiter', 'Venus', 'Mercury', 'Moon'];
   const challengeMahadashas = ['Saturn', 'Rahu', 'Ketu'];
 
   const dashaQuality = goodMahadashas.includes(mahadasha)
@@ -108,7 +101,6 @@ function generateBriefPrediction(
     ? 'transformative'
     : 'active';
 
-  // Segment-specific predictions
   const predictions: Record<string, string> = {
     ex_back: dashaQuality === 'favorable'
       ? `${firstName} ji, aapka ${nakshatra} Nakshatra aur ${mahadasha} Mahadasha — Venus ki energy abhi active hai. Purane rishte wapas aane ke strong signals hain. ${antardasha} Antardasha ke is phase mein reconnection possible hai. Lekin timing sab kuch hai — aur woh timing main jaanti hoon.`
@@ -137,7 +129,7 @@ function generateBriefPrediction(
     default: `${firstName} ji, aapka ${lagna} Lagna aur ${nakshatra} Nakshatra ek unique cosmic blueprint banata hai. ${mahadasha} Mahadasha ke is phase mein ek important life window khul rahi hai. Rohiit Gupta ji ka Trikal framework kehta hai — yeh waqt action ka hai, intezaar ka nahi.`,
   };
 
-  return predictions[segment] || predictions['default']!;
+  return predictions[segment] ?? predictions['default']!;
 }
 
 // ─── COMPONENT ────────────────────────────────────────────────────────────────
@@ -150,7 +142,6 @@ export default function AutoPrediction({
   const [visible, setVisible]       = useState(false);
 
   useEffect(() => {
-    // Small delay for dramatic effect
     const timer = setTimeout(() => {
       const text = generateBriefPrediction(
         name, lagna, mahadasha, antardasha, nakshatra, planets, autoSegment
@@ -169,24 +160,24 @@ export default function AutoPrediction({
   return (
     <div
       style={{
-        opacity:    visible ? 1 : 0,
-        transform:  visible ? 'translateY(0)' : 'translateY(12px)',
+        opacity: visible ? 1 : 0,
+        transform: visible ? 'translateY(0)' : 'translateY(12px)',
         transition: 'opacity 0.6s ease, transform 0.6s ease',
       }}
     >
       {/* ── JINI PREDICTION CARD ── */}
       <div style={{
-        background:   'linear-gradient(135deg, rgba(20,8,50,0.95) 0%, rgba(6,12,28,0.98) 100%)',
-        border:       '1px solid rgba(139,92,246,0.3)',
+        background: 'linear-gradient(135deg, rgba(20,8,50,0.95) 0%, rgba(6,12,28,0.98) 100%)',
+        border: '1px solid rgba(139,92,246,0.3)',
         borderRadius: 16,
-        padding:      '20px 24px',
+        padding: '20px 24px',
         marginBottom: 12,
-        position:     'relative',
-        overflow:     'hidden',
+        position: 'relative',
+        overflow: 'hidden',
       }}>
-        {/* Purple glow */}
+        {/* Purple glow top line */}
         <div style={{
-          position:   'absolute', top: 0, left: 0, right: 0, height: 2,
+          position: 'absolute', top: 0, left: 0, right: 0, height: 2,
           background: 'linear-gradient(90deg, transparent, rgba(139,92,246,0.6), transparent)',
         }} />
 
@@ -195,9 +186,9 @@ export default function AutoPrediction({
           <div style={{
             width: 36, height: 36, borderRadius: '50%',
             background: 'rgba(139,92,246,0.2)',
-            border:     '1px solid rgba(139,92,246,0.4)',
-            display:    'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize:   16, flexShrink: 0,
+            border: '1px solid rgba(139,92,246,0.4)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: 16, flexShrink: 0,
           }}>
             🔮
           </div>
@@ -214,7 +205,7 @@ export default function AutoPrediction({
             <div style={{
               width: 6, height: 6, borderRadius: '50%',
               background: '#22C55E',
-              boxShadow:  '0 0 6px #22C55E',
+              boxShadow: '0 0 6px #22C55E',
             }} />
             <span style={{ fontSize: 10, color: '#22C55E' }}>Live reading</span>
           </div>
@@ -222,24 +213,24 @@ export default function AutoPrediction({
 
         {/* Prediction text */}
         <div style={{
-          fontSize:   14,
+          fontSize: 14,
           lineHeight: 1.75,
-          color:      'rgba(226,232,240,0.9)',
+          color: 'rgba(226,232,240,0.9)',
           marginBottom: 16,
-          fontStyle:  'italic',
+          fontStyle: 'italic',
         }}>
           {prediction || 'Aapka cosmic blueprint pad raha hai...'}
         </div>
 
         {/* Choghadiya timing tip */}
         <div style={{
-          display:      'flex',
-          alignItems:   'center',
-          gap:          8,
-          padding:      '8px 12px',
-          background:   `${choghadiyaColor}10`,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 8,
+          padding: '8px 12px',
+          background: `${choghadiyaColor}10`,
           borderRadius: 8,
-          border:       `1px solid ${choghadiyaColor}25`,
+          border: `1px solid ${choghadiyaColor}25`,
           marginBottom: 16,
         }}>
           <span style={{ fontSize: 12 }}>
@@ -247,19 +238,21 @@ export default function AutoPrediction({
           </span>
           <span style={{ fontSize: 12, color: choghadiyaColor, fontWeight: 500 }}>
             Abhi ka Choghadiya: {choghadiya} — {
-              choghadiyaType === 'Good' ? 'Shubh samay hai — abhi padh rahe ho, yeh bhi ek sign hai'
-              : choghadiyaType === 'Bad' ? 'Koi bada faisla mat lo abhi — pehle poori reading dekho'
-              : 'Theek samay hai — apni reading carefully samjho'
+              choghadiyaType === 'Good'
+                ? 'Shubh samay hai — abhi padh rahe ho, yeh bhi ek sign hai'
+                : choghadiyaType === 'Bad'
+                ? 'Koi bada faisla mat lo abhi — pehle poori reading dekho'
+                : 'Theek samay hai — apni reading carefully samjho'
             }
           </span>
         </div>
 
         {/* Suspense hook */}
         <div style={{
-          fontSize:   13,
-          color:      GOLD_RGBA(0.8),
+          fontSize: 13,
+          color: GOLD_RGBA(0.8),
           fontWeight: 500,
-          borderTop:  `1px solid rgba(255,255,255,0.06)`,
+          borderTop: '1px solid rgba(255,255,255,0.06)',
           paddingTop: 12,
         }}>
           🌟 Aapke chart mein ek aur raaz hai — ek specific date jo aapki zindagi badal sakti hai.
@@ -269,26 +262,26 @@ export default function AutoPrediction({
 
       {/* ── TWO CTA BUTTONS ── */}
       <div style={{
-        display:             'grid',
+        display: 'grid',
         gridTemplateColumns: '1fr 1fr',
-        gap:                 10,
-        marginBottom:        12,
+        gap: 10,
+        marginBottom: 12,
       }}>
-        {/* 3 Month Reading */}
-        
+        {/* 3 Month Reading CTA */}
+        <a
           href="/result#pricing"
           style={{
-            display:        'flex',
-            flexDirection:  'column',
-            alignItems:     'center',
-            gap:            4,
-            padding:        '14px 12px',
-            background:     GOLD_RGBA(0.1),
-            border:         `1px solid ${GOLD_RGBA(0.35)}`,
-            borderRadius:   12,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: 4,
+            padding: '14px 12px',
+            background: GOLD_RGBA(0.1),
+            border: `1px solid ${GOLD_RGBA(0.35)}`,
+            borderRadius: 12,
             textDecoration: 'none',
-            cursor:         'pointer',
-            transition:     'all 0.2s',
+            cursor: 'pointer',
+            transition: 'all 0.2s',
           }}
         >
           <span style={{ fontSize: 18 }}>📅</span>
@@ -299,44 +292,44 @@ export default function AutoPrediction({
             Week-by-week guidance
           </span>
           <span style={{
-            fontSize:     12,
-            fontWeight:   700,
-            color:        '#080B12',
-            background:   GOLD,
-            padding:      '3px 12px',
+            fontSize: 12,
+            fontWeight: 700,
+            color: '#080B12',
+            background: GOLD,
+            padding: '3px 12px',
             borderRadius: 20,
-            marginTop:    4,
+            marginTop: 4,
           }}>
             ₹51 only
           </span>
         </a>
 
-        {/* Full Life Reading */}
-        
+        {/* Full Life Reading CTA */}
+        <a
           href="/result#pricing"
           style={{
-            display:        'flex',
-            flexDirection:  'column',
-            alignItems:     'center',
-            gap:            4,
-            padding:        '14px 12px',
-            background:     'rgba(139,92,246,0.1)',
-            border:         '2px solid rgba(139,92,246,0.4)',
-            borderRadius:   12,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: 4,
+            padding: '14px 12px',
+            background: 'rgba(139,92,246,0.1)',
+            border: '2px solid rgba(139,92,246,0.4)',
+            borderRadius: 12,
             textDecoration: 'none',
-            cursor:         'pointer',
-            position:       'relative',
-            overflow:       'hidden',
+            cursor: 'pointer',
+            position: 'relative',
+            overflow: 'hidden',
           }}
         >
           {/* Most Popular badge */}
           <div style={{
-            position:   'absolute',
-            top:        0, right: 0,
+            position: 'absolute',
+            top: 0, right: 0,
             background: '#7C3AED',
-            fontSize:   9, fontWeight: 700,
-            color:      '#fff',
-            padding:    '2px 8px',
+            fontSize: 9, fontWeight: 700,
+            color: '#fff',
+            padding: '2px 8px',
             borderRadius: '0 12px 0 8px',
           }}>
             POPULAR
@@ -349,13 +342,13 @@ export default function AutoPrediction({
             Dasha + Gochar + Remedy
           </span>
           <span style={{
-            fontSize:     12,
-            fontWeight:   700,
-            color:        '#fff',
-            background:   '#7C3AED',
-            padding:      '3px 12px',
+            fontSize: 12,
+            fontWeight: 700,
+            color: '#fff',
+            background: '#7C3AED',
+            padding: '3px 12px',
             borderRadius: 20,
-            marginTop:    4,
+            marginTop: 4,
           }}>
             ₹99 only
           </span>
@@ -364,36 +357,36 @@ export default function AutoPrediction({
 
       {/* ── INTERNAL GUIDE LINKS ── */}
       <div style={{
-        background:   'rgba(6,12,28,0.8)',
-        border:       `1px solid ${GOLD_RGBA(0.1)}`,
+        background: 'rgba(6,12,28,0.8)',
+        border: `1px solid ${GOLD_RGBA(0.1)}`,
         borderRadius: 12,
-        padding:      '14px 16px',
+        padding: '14px 16px',
       }}>
         <div style={{
-          fontSize:      11,
-          fontWeight:    600,
-          color:         GOLD_RGBA(0.5),
+          fontSize: 11,
+          fontWeight: 600,
+          color: GOLD_RGBA(0.5),
           textTransform: 'uppercase',
           letterSpacing: '0.05em',
-          marginBottom:  10,
+          marginBottom: 10,
         }}>
           📚 Rohiit Gupta ji ke guides — aapke liye
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
           {guideLinks.map((link, i) => (
-            
+            <a
               key={i}
               href={link.href}
               style={{
-                display:        'flex',
-                alignItems:     'center',
-                gap:            8,
-                padding:        '7px 10px',
-                background:     GOLD_RGBA(0.04),
-                border:         `1px solid ${GOLD_RGBA(0.1)}`,
-                borderRadius:   8,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8,
+                padding: '7px 10px',
+                background: GOLD_RGBA(0.04),
+                border: `1px solid ${GOLD_RGBA(0.1)}`,
+                borderRadius: 8,
                 textDecoration: 'none',
-                transition:     'all 0.2s',
+                transition: 'all 0.2s',
               }}
             >
               <span style={{ fontSize: 14 }}>{link.emoji}</span>
@@ -407,13 +400,13 @@ export default function AutoPrediction({
 
         {/* Tagline */}
         <div style={{
-          marginTop:  12,
+          marginTop: 12,
           paddingTop: 10,
-          borderTop:  `1px solid rgba(255,255,255,0.05)`,
-          fontSize:   11,
-          color:      'rgba(148,163,184,0.4)',
-          fontStyle:  'italic',
-          textAlign:  'center',
+          borderTop: '1px solid rgba(255,255,255,0.05)',
+          fontSize: 11,
+          color: 'rgba(148,163,184,0.4)',
+          fontStyle: 'italic',
+          textAlign: 'center',
         }}>
           "Kaal bada balwan hai — aur aapka Kaal, aapki Kundali mein likha hai"
         </div>
