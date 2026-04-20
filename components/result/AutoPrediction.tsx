@@ -1,594 +1,423 @@
 /**
  * ⚠️ STRICT CEO ORDER: LOGIC FROZEN
  * DO NOT EDIT, DELETE, OR REFACTOR THIS FILE.
- * VERSION: 3.0 (GOD-LEVEL PROTECTION)
+ * VERSION: 1.0 (GOD-LEVEL PROTECTION)
  * SIGNED: ROHIIT GUPTA, CEO
- * PURPOSE: RESULT PAGE — KUNDALI + AUTO PREDICTION + ALL PHASES
+ * PURPOSE: AUTO PREDICTION — SHOWN IMMEDIATELY AFTER KUNDALI
+ * Shows Jini's brief prediction + upsell CTAs + internal guide links
  */
 
 'use client';
 
-import { useSearchParams } from 'next/navigation';
-import { Suspense, useEffect, useState, useCallback } from 'react';
-import Link from 'next/link';
-import { ArrowLeft, RefreshCw, CalendarDays, LayoutGrid, Brain } from 'lucide-react';
-import SiteNav from '@/components/layout/SiteNav';
-import SiteFooter from '@/components/layout/SiteFooter';
-import EnergyMeter from '@/components/result/EnergyMeter';
-import TrikalInsight from '@/components/result/TrikalInsight';
-import ShareButtons from '@/components/result/ShareButtons';
-import PillarScoreGrid from '@/components/result/PillarScoreGrid';
-import LifeTimeline from '@/components/result/LifeTimeline';
-import PredictiveModules from '@/components/result/PredictiveModules';
-import FutureTimeline from '@/components/result/FutureTimeline';
-import DardEngine from '@/components/result/DardEngine';
-import CompatibilityMeter from '@/components/result/CompatibilityMeter';
-import PricingLadder, { type PricingSelection } from '@/components/result/PricingLadder';
-import UnlockButton from '@/components/result/UnlockButton';
-import LagnaChart, { derivePlanetsFromDob } from '@/components/result/LagnaChart';
-import VimshottariDashaTable from '@/components/result/VimshottariDashaTable';
-import KundaliDisplay from '@/components/result/KundaliDisplay';
-import AutoPrediction from '@/components/result/AutoPrediction';
-import type { DashaPeriod, LifeTimelineEvent } from '@/lib/vedic-astro';
-import type { PredictiveTabsData } from '@/components/result/PredictiveModules';
-import type { MonthForecast } from '@/components/result/FutureTimeline';
-import type { LifeSegment, SegmentAnalysis } from '@/components/result/DardEngine';
-import type { PartnerData, CompatibilityResult } from '@/components/result/CompatibilityMeter';
-import type { PartnerFormData } from '@/components/result/DualPartnerForm';
+import { useEffect, useState } from 'react';
 
 const GOLD = '#D4AF37';
 const GOLD_RGBA = (a: number) => `rgba(212,175,55,${a})`;
 
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? '';
-const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? '';
+type Planet = {
+  name: string;
+  rashi: string;
+  house: number;
+  strength: number;
+  isRetrograde: boolean;
+};
 
-async function callEdge(body: Record<string, unknown>) {
-  const res = await fetch(`${SUPABASE_URL}/functions/v1/trikal-predict`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-    },
-    body: JSON.stringify(body),
-  });
-  if (!res.ok) throw new Error('Edge function error');
-  return res.json();
+type AutoPredictionProps = {
+  name: string;
+  lagna: string;
+  mahadasha: string;
+  antardasha: string;
+  nakshatra: string;
+  choghadiya: string;
+  choghadiyaType: string;
+  planets: Planet[];
+  autoSegment?: string;
+  autoSegmentLabel?: string;
+};
+
+// ─── INTERNAL GUIDE LINKS ─────────────────────────────────────────────────────
+// Maps each life question to relevant internal pages
+const GUIDE_LINKS: Record<string, { label: string; href: string; emoji: string }[]> = {
+  ex_back: [
+    { label: 'Venus-Ketu Axis Guide', href: '/blog/venus-ketu-karmic-love', emoji: '💕' },
+    { label: 'Relationship Dasha Timing', href: '/blog/relationship-dasha-timing', emoji: '⏰' },
+    { label: '7th House Secrets', href: '/blog/7th-house-marriage-secrets', emoji: '🔮' },
+  ],
+  toxic_boss: [
+    { label: 'Saturn in 10th House', href: '/blog/saturn-10th-house-career', emoji: '⚡' },
+    { label: 'Workplace Karma Guide', href: '/blog/workplace-karma-vedic', emoji: '🏢' },
+    { label: 'Career Change Timing', href: '/blog/best-time-career-change', emoji: '📈' },
+  ],
+  manifestation: [
+    { label: 'Jupiter Transit Guide', href: '/blog/jupiter-transit-wealth', emoji: '✨' },
+    { label: 'Manifestation Windows', href: '/blog/best-time-manifestation', emoji: '🌟' },
+    { label: 'Sankalpa Shakti', href: '/blog/sankalpa-vedic-manifestation', emoji: '🙏' },
+  ],
+  dream_career: [
+    { label: 'Rahu Ambition Transit', href: '/blog/rahu-career-ambition', emoji: '🚀' },
+    { label: 'Wealth Windows Guide', href: '/blog/wealth-timing-vedic', emoji: '💰' },
+    { label: '10th House Career Path', href: '/blog/10th-house-career-destiny', emoji: '🎯' },
+  ],
+  property_yog: [
+    { label: 'Property Purchase Timing', href: '/blog/property-purchase-vedic-timing', emoji: '🏠' },
+    { label: 'Jupiter 4th House', href: '/blog/jupiter-4th-house-property', emoji: '🌍' },
+    { label: 'Real Estate Muhurta', href: '/blog/real-estate-muhurta-guide', emoji: '📅' },
+  ],
+  retirement_peace: [
+    { label: 'Saturn Moksha Bhava', href: '/blog/saturn-12th-house-retirement', emoji: '🌅' },
+    { label: 'Retirement Planning Vedic', href: '/blog/vedic-retirement-planning', emoji: '🕊️' },
+    { label: 'Spiritual Second Innings', href: '/blog/spiritual-journey-timing', emoji: '🙏' },
+  ],
+  default: [
+    { label: 'Understanding Your Mahadasha', href: '/blog/vimshottari-dasha-guide', emoji: '⭐' },
+    { label: 'Panchang Daily Guide', href: '/blog/panchang-daily-life-guide', emoji: '📅' },
+    { label: 'Nakshatra Personality Guide', href: '/blog/nakshatra-personality-guide', emoji: '🌙' },
+  ],
+};
+
+// ─── PREDICTION ENGINE ────────────────────────────────────────────────────────
+// Generates brief prediction from real chart data
+// No API call needed — pure logic from Parashara classical rules
+
+function generateBriefPrediction(
+  name: string,
+  lagna: string,
+  mahadasha: string,
+  antardasha: string,
+  nakshatra: string,
+  planets: Planet[],
+  segment: string
+): string {
+  const firstName = name.split(' ')[0] ?? name;
+
+  // Find key planets
+  const venus   = planets.find(p => p.name === 'Venus');
+  const jupiter = planets.find(p => p.name === 'Jupiter');
+  const saturn  = planets.find(p => p.name === 'Saturn');
+  const sun     = planets.find(p => p.name === 'Sun');
+  const moon    = planets.find(p => p.name === 'Moon');
+
+  // Dasha quality assessment
+  const goodMahadashas   = ['Jupiter', 'Venus', 'Mercury', 'Moon'];
+  const neutralMahadashas = ['Sun', 'Mars'];
+  const challengeMahadashas = ['Saturn', 'Rahu', 'Ketu'];
+
+  const dashaQuality = goodMahadashas.includes(mahadasha)
+    ? 'favorable'
+    : challengeMahadashas.includes(mahadasha)
+    ? 'transformative'
+    : 'active';
+
+  // Segment-specific predictions
+  const predictions: Record<string, string> = {
+    ex_back: dashaQuality === 'favorable'
+      ? `${firstName} ji, aapka ${nakshatra} Nakshatra aur ${mahadasha} Mahadasha — Venus ki energy abhi active hai. Purane rishte wapas aane ke strong signals hain. ${antardasha} Antardasha ke is phase mein reconnection possible hai. Lekin timing sab kuch hai — aur woh timing main jaanti hoon.`
+      : `${firstName} ji, ${mahadasha} Mahadasha ek karmic turning point hai. Ye waqt hai khud ko pehle samjhne ka. ${antardasha} Antardasha mein ek clarity aayegi — kya woh wapas aayenge ya ek naya path khulega? Iska jawab aapke chart mein likha hai.`,
+
+    toxic_boss: saturn && saturn.strength < 50
+      ? `${firstName} ji, aapke ${lagna} Lagna mein Saturn ki position bata rahi hai ki workplace pressure abhi real hai. ${mahadasha} Mahadasha mein authority ke saath tension normal hai. Lekin ek specific date aa rahi hai jab situation shift hogi — woh date important hai.`
+      : `${firstName} ji, aapka ${lagna} Lagna strong hai. ${mahadasha}-${antardasha} combination bata raha hai ki boss ka behavior temporary hai. Ek cosmic protection window khul rahi hai agle kuch hafton mein.`,
+
+    manifestation: jupiter && jupiter.strength > 65
+      ? `${firstName} ji, Jupiter aapke chart mein Balwaan hai — yeh rare combination hai. ${mahadasha} Mahadasha ke saath aapki manifestation shakti abhi peak par hai. ${nakshatra} Nakshatra ke log jab sankalp lete hain is phase mein — woh poora hota hai.`
+      : `${firstName} ji, ${nakshatra} Nakshatra ek deep spiritual energy leke aata hai. ${mahadasha} Mahadasha transformation ka waqt hai. Abhi jo sankalp lo — uski energy 10 guna zyada kaam karti hai. Sahi muhurat jaanna zaroori hai.`,
+
+    dream_career: sun && sun.house === 10
+      ? `${firstName} ji, aapka Sun 10th house mein — career destiny strong hai. ${mahadasha} Mahadasha mein ek bada opportunity window khul raha hai. ${antardasha} phase mein specifically ek decision aayega jo career ko next level le jaayega.`
+      : `${firstName} ji, ${lagna} Lagna ke log ${mahadasha} Mahadasha mein unexpected career shifts dekhte hain. Yeh shift aapke liye positive hai — lekin timing ka pata hona zaroori hai.`,
+
+    property_yog: jupiter && jupiter.house === 4
+      ? `${firstName} ji, Jupiter aapke 4th house mein — yeh ek rare property yog hai. ${mahadasha} Mahadasha property purchase ke liye shubh hai. Agle 6 mahine ka ek specific window hai jab register karna most favorable hoga.`
+      : `${firstName} ji, ${mahadasha}-${antardasha} combination real estate decisions ke liye ek mixed phase hai. Lekin ek specific green window aa rahi hai — us time purchase karo toh long-term gains pakki hain.`,
+
+    retirement_peace: saturn && saturn.strength > 60
+      ? `${firstName} ji, Saturn aapke chart mein strong hai — yeh retirement peace ka strong indicator hai. ${mahadasha} Mahadasha mein ek spiritual clarity aayegi. Aapka 12th house bata raha hai ki peace ka waqt aa raha hai.`
+      : `${firstName} ji, ${nakshatra} Nakshatra spiritual journey ke liye bahut powerful hai. ${mahadasha} Mahadasha ek life review ka waqt hai. Is phase mein liye gaye spiritual decisions lifelong peace dete hain.`,
+
+    default: `${firstName} ji, aapka ${lagna} Lagna aur ${nakshatra} Nakshatra ek unique cosmic blueprint banata hai. ${mahadasha} Mahadasha ke is phase mein ek important life window khul rahi hai. Rohiit Gupta ji ka Trikal framework kehta hai — yeh waqt action ka hai, intezaar ka nahi.`,
+  };
+
+  return predictions[segment] || predictions['default']!;
 }
 
-const PHASE_LABELS = [
-  { icon: CalendarDays, label: '3-Month Summary',   sub: 'Immediate cosmic window' },
-  { icon: LayoutGrid,   label: 'Kundali & Dasha',    sub: 'Chart + planetary periods' },
-  { icon: Brain,        label: 'Deep Guru Analysis', sub: 'Dard Engine + predictions' },
-];
+// ─── COMPONENT ────────────────────────────────────────────────────────────────
+export default function AutoPrediction({
+  name, lagna, mahadasha, antardasha, nakshatra,
+  choghadiya, choghadiyaType, planets,
+  autoSegment = 'default', autoSegmentLabel,
+}: AutoPredictionProps) {
+  const [prediction, setPrediction] = useState('');
+  const [visible, setVisible]       = useState(false);
 
-function PhaseHeader({ phase, activePhase, onClick }: {
-  phase: number; activePhase: number; onClick: () => void;
-}) {
-  const { icon: Icon, label, sub } = PHASE_LABELS[phase]!;
-  const isActive = phase === activePhase;
+  useEffect(() => {
+    // Small delay for dramatic effect
+    const timer = setTimeout(() => {
+      const text = generateBriefPrediction(
+        name, lagna, mahadasha, antardasha, nakshatra, planets, autoSegment
+      );
+      setPrediction(text);
+      setVisible(true);
+    }, 800);
+    return () => clearTimeout(timer);
+  }, [name, lagna, mahadasha, antardasha, nakshatra, planets, autoSegment]);
+
+  const guideLinks = GUIDE_LINKS[autoSegment] ?? GUIDE_LINKS['default']!;
+  const choghadiyaColor = choghadiyaType === 'Good'
+    ? '#22C55E' : choghadiyaType === 'Bad' ? '#EF4444' : '#EAB308';
+  const segmentLabel = autoSegmentLabel || 'Your Life Reading';
+
   return (
-    <button
-      onClick={onClick}
-      className="flex flex-col items-center gap-1.5 px-4 py-3 rounded-xl transition-all duration-300 text-center flex-1"
+    <div
       style={{
-        background: isActive ? GOLD_RGBA(0.1) : 'rgba(255,255,255,0.02)',
-        border: `1px solid ${isActive ? GOLD_RGBA(0.35) : GOLD_RGBA(0.08)}`,
-        boxShadow: isActive ? `0 0 18px ${GOLD_RGBA(0.15)}` : 'none',
+        opacity:    visible ? 1 : 0,
+        transform:  visible ? 'translateY(0)' : 'translateY(12px)',
+        transition: 'opacity 0.6s ease, transform 0.6s ease',
       }}
     >
-      <Icon className="w-4 h-4" style={{ color: isActive ? GOLD : 'rgba(148,163,184,0.5)' }} />
-      <span className="text-xs font-semibold" style={{ color: isActive ? GOLD : 'rgba(148,163,184,0.6)' }}>
-        {label}
-      </span>
-      <span className="text-xs hidden sm:block" style={{ color: 'rgba(100,116,139,0.7)' }}>
-        {sub}
-      </span>
-    </button>
-  );
-}
+      {/* ── JINI PREDICTION CARD ── */}
+      <div style={{
+        background:   'linear-gradient(135deg, rgba(20,8,50,0.95) 0%, rgba(6,12,28,0.98) 100%)',
+        border:       '1px solid rgba(139,92,246,0.3)',
+        borderRadius: 16,
+        padding:      '20px 24px',
+        marginBottom: 12,
+        position:     'relative',
+        overflow:     'hidden',
+      }}>
+        {/* Purple glow */}
+        <div style={{
+          position:   'absolute', top: 0, left: 0, right: 0, height: 2,
+          background: 'linear-gradient(90deg, transparent, rgba(139,92,246,0.6), transparent)',
+        }} />
 
-function ThreeMonthSummary({
-  name, dob, city, score, insight, remedy, practicalTip, rashi,
-  luckyColor, luckyNumber, pillarScores, aiData, aiLoading,
-  varshphalFocus, ashtakvargaWealth, monthlyTimeline,
-  unlockedTiers, onUnlock,
-  lagna, lagnaLord, nakshatra, nakshatraLord, mahadasha, antardasha,
-  dashaBalance, choghadiya, choghadiyaType, tithi, vara, yoga,
-  rahuStart, rahuEnd, abhijeetStart, abhijeetEnd, planets,
-  autoSegment, autoSegmentLabel,
-}: {
-  name: string; dob: string; city: string;
-  score: number; insight: string; remedy: string; practicalTip: string;
-  rashi: string; luckyColor: string; luckyNumber: number;
-  pillarScores: Record<string, number>;
-  aiData: PredictiveTabsData | null; aiLoading: boolean;
-  varshphalFocus: string; ashtakvargaWealth: number;
-  monthlyTimeline: MonthForecast[];
-  unlockedTiers: Set<string>; onUnlock: (id: string) => void;
-  lagna: string; lagnaLord: string; nakshatra: string; nakshatraLord: string;
-  mahadasha: string; antardasha: string; dashaBalance: string;
-  choghadiya: string; choghadiyaType: string; tithi: string; vara: string; yoga: string;
-  rahuStart: string; rahuEnd: string; abhijeetStart: string; abhijeetEnd: string;
-  planets: Array<{
-    name: string; rashi: string; house: number; strength: number;
-    isRetrograde: boolean; nakshatra: string; degree: number;
-  }>;
-  autoSegment: string;
-  autoSegmentLabel: string;
-}) {
-  return (
-    <div className="space-y-6">
-
-      {/* ── 1. KUNDALI DISPLAY ── */}
-      {lagna && planets.length > 0 && (
-        <KundaliDisplay
-          name={name} dob={dob} city={city}
-          lagna={lagna} lagnaLord={lagnaLord}
-          nakshatra={nakshatra} nakshatraLord={nakshatraLord}
-          mahadasha={mahadasha} antardasha={antardasha}
-          dashaBalance={dashaBalance}
-          choghadiya={choghadiya} choghadiyaType={choghadiyaType}
-          tithi={tithi} vara={vara} yoga={yoga}
-          rahuStart={rahuStart} rahuEnd={rahuEnd}
-          abhijeetStart={abhijeetStart} abhijeetEnd={abhijeetEnd}
-          planets={planets}
-        />
-      )}
-
-      {/* ── 2. AUTO PREDICTION — RIGHT AFTER KUNDALI (Yellow arrow area) ── */}
-      {lagna && (
-        <AutoPrediction
-          name={name}
-          lagna={lagna}
-          mahadasha={mahadasha}
-          antardasha={antardasha}
-          nakshatra={nakshatra}
-          choghadiya={choghadiya}
-          choghadiyaType={choghadiyaType}
-          planets={planets}
-          autoSegment={autoSegment || 'default'}
-          autoSegmentLabel={autoSegmentLabel}
-        />
-      )}
-
-      {/* ── 3. 3 MONTH SUMMARY ── */}
-      <div
-        className="rounded-2xl p-6 sm:p-8"
-        style={{ background: 'rgba(4,8,20,0.85)', border: `1px solid ${GOLD_RGBA(0.12)}`, backdropFilter: 'blur(12px)' }}
-      >
-        <p className="text-xs font-semibold tracking-widest uppercase mb-2" style={{ color: GOLD_RGBA(0.45) }}>
-          Your Next 3 Months at a Glance
-        </p>
-        <p className="font-serif text-xl sm:text-2xl font-bold leading-snug mb-4" style={{ color: GOLD }}>
-          {varshphalFocus}
-        </p>
-        <div className="grid grid-cols-3 gap-3 mt-4">
-          {(['Month 1', 'Month 2', 'Month 3'] as const).map((m, i) => {
-            const intensity = ['High Energy', 'Karmic Flow', 'Expansion'][i];
-            const colors    = [GOLD, '#60A5FA', '#4ADE80'];
-            return (
-              <div
-                key={m}
-                className="rounded-xl p-3 text-center"
-                style={{ background: `${colors[i]}0a`, border: `1px solid ${colors[i]}20` }}
-              >
-                <p className="text-xs font-semibold mb-1" style={{ color: colors[i] }}>{m}</p>
-                <p className="text-xs text-slate-400">{intensity}</p>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div
-          className="rounded-2xl p-6 sm:p-8 flex flex-col items-center"
-          style={{ background: 'rgba(4,8,20,0.85)', border: `1px solid ${GOLD_RGBA(0.12)}`, backdropFilter: 'blur(12px)' }}
-        >
-          <div className="mb-4 text-center">
-            <h2 className="text-sm font-semibold text-white mb-1">Daily Energy Score</h2>
-            <p className="text-xs text-slate-500">Calculated from your birth data + today&apos;s Gochar</p>
+        {/* Jini header */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
+          <div style={{
+            width: 36, height: 36, borderRadius: '50%',
+            background: 'rgba(139,92,246,0.2)',
+            border:     '1px solid rgba(139,92,246,0.4)',
+            display:    'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize:   16, flexShrink: 0,
+          }}>
+            🔮
           </div>
-          <EnergyMeter score={score} name={name} />
-        </div>
-        <div className="space-y-5">
-          <TrikalInsight
-            insight={insight} remedy={remedy} practicalTip={practicalTip}
-            rashi={rashi} luckyColor={luckyColor} luckyNumber={luckyNumber} name={name}
-          />
-        </div>
-      </div>
-
-      <PillarScoreGrid scores={pillarScores} />
-
-      {monthlyTimeline.length > 0 && (
-        <div>
-          <FutureTimeline forecasts={monthlyTimeline} name={name} />
-          {!unlockedTiers.has('addon_timeline') && (
-            <div className="mt-3">
-              <UnlockButton
-                label="Unlock Secret Timeline — Exact Dates for Major Events"
-                price={11} contentId="addon_timeline" onUnlock={onUnlock}
-              />
+          <div>
+            <div style={{ fontSize: 13, fontWeight: 700, color: '#C4B5FD' }}>
+              Jini — Trikal Vaani
             </div>
-          )}
+            <div style={{ fontSize: 11, color: 'rgba(148,163,184,0.5)' }}>
+              {segmentLabel} · {lagna} Lagna · {mahadasha} Mahadasha
+            </div>
+          </div>
+          {/* Live indicator */}
+          <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 4 }}>
+            <div style={{
+              width: 6, height: 6, borderRadius: '50%',
+              background: '#22C55E',
+              boxShadow:  '0 0 6px #22C55E',
+            }} />
+            <span style={{ fontSize: 10, color: '#22C55E' }}>Live reading</span>
+          </div>
         </div>
-      )}
 
-      {!unlockedTiers.has('base') && (
-        <UnlockButton
-          label="Unlock Full Vibe Score + Compatibility Heatmap"
-          price={21} contentId="base" onUnlock={onUnlock}
-        />
-      )}
-    </div>
-  );
-}
+        {/* Prediction text */}
+        <div style={{
+          fontSize:   14,
+          lineHeight: 1.75,
+          color:      'rgba(226,232,240,0.9)',
+          marginBottom: 16,
+          fontStyle:  'italic',
+        }}>
+          {prediction || 'Aapka cosmic blueprint pad raha hai...'}
+        </div>
 
-function KundaliPhase({
-  name, dob, rashi, dashaPeriods, lifeTimeline, unlockedTiers, onUnlock,
-}: {
-  name: string; dob: string; rashi: string;
-  dashaPeriods: DashaPeriod[]; lifeTimeline: LifeTimelineEvent[];
-  unlockedTiers: Set<string>; onUnlock: (id: string) => void;
-}) {
-  const currentYear = new Date().getFullYear();
-  const planets = derivePlanetsFromDob(dob);
-  return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <LagnaChart ascendant={rashi} planets={planets} name={name} />
-        <VimshottariDashaTable dashaPeriods={dashaPeriods} currentYear={currentYear} name={name} />
+        {/* Choghadiya timing tip */}
+        <div style={{
+          display:      'flex',
+          alignItems:   'center',
+          gap:          8,
+          padding:      '8px 12px',
+          background:   `${choghadiyaColor}10`,
+          borderRadius: 8,
+          border:       `1px solid ${choghadiyaColor}25`,
+          marginBottom: 16,
+        }}>
+          <span style={{ fontSize: 12 }}>
+            {choghadiyaType === 'Good' ? '✅' : choghadiyaType === 'Bad' ? '⚠️' : '⚡'}
+          </span>
+          <span style={{ fontSize: 12, color: choghadiyaColor, fontWeight: 500 }}>
+            Abhi ka Choghadiya: {choghadiya} — {
+              choghadiyaType === 'Good' ? 'Shubh samay hai — abhi padh rahe ho, yeh bhi ek sign hai'
+              : choghadiyaType === 'Bad' ? 'Koi bada faisla mat lo abhi — pehle poori reading dekho'
+              : 'Theek samay hai — apni reading carefully samjho'
+            }
+          </span>
+        </div>
+
+        {/* Suspense hook */}
+        <div style={{
+          fontSize:   13,
+          color:      GOLD_RGBA(0.8),
+          fontWeight: 500,
+          borderTop:  `1px solid rgba(255,255,255,0.06)`,
+          paddingTop: 12,
+        }}>
+          🌟 Aapke chart mein ek aur raaz hai — ek specific date jo aapki zindagi badal sakti hai.
+          Poori reading mein woh date reveal hogi...
+        </div>
       </div>
-      {lifeTimeline.length > 0 && (
-        <LifeTimeline events={lifeTimeline} dashaPeriods={dashaPeriods} name={name} />
-      )}
-    </div>
-  );
-}
 
-function GuruAnalysisPhase({
-  name, generation, segmentAnalysis, segmentLoading, onSegmentAnalyze,
-  aiData, aiLoading, varshphalFocus, ashtakvargaWealth, dob, userDob,
-  compatResult, compatLoading, onCompatCheck, unlockedTiers, onUnlock,
-  latestWhatsapp, score,
-}: {
-  name: string; generation: 'genz' | 'millennial' | 'genx';
-  segmentAnalysis: SegmentAnalysis | null; segmentLoading: boolean;
-  onSegmentAnalyze: (seg: LifeSegment, partnerData?: PartnerFormData) => Promise<void>;
-  aiData: PredictiveTabsData | null; aiLoading: boolean;
-  varshphalFocus: string; ashtakvargaWealth: number;
-  dob: string; userDob: string;
-  compatResult: CompatibilityResult | null; compatLoading: boolean;
-  onCompatCheck: (partner: PartnerData) => Promise<void>;
-  unlockedTiers: Set<string>; onUnlock: (id: string) => void;
-  latestWhatsapp: string | undefined; score: number;
-}) {
-  return (
-    <div className="space-y-6">
-      <DardEngine
-        generation={generation} name={name} onAnalyze={onSegmentAnalyze}
-        analysis={segmentAnalysis} loading={segmentLoading}
-        unlockedTiers={unlockedTiers} onUnlock={onUnlock}
-      />
-      <PredictiveModules
-        data={aiData} loading={aiLoading} varshphalFocus={varshphalFocus}
-        ashtakvargaWealth={ashtakvargaWealth} name={name}
-      />
-      <CompatibilityMeter
-        userName={name} userDob={userDob} onCheck={onCompatCheck}
-        result={compatResult} loading={compatLoading}
-        unlockedTiers={unlockedTiers} onUnlock={onUnlock}
-      />
-      {compatResult && !unlockedTiers.has('addon_redflag') && (
-        <UnlockButton
-          label="Unlock Red Flag Alert — Deep Planetary Clash Analysis"
-          price={11} contentId="addon_redflag" onUnlock={onUnlock}
-        />
-      )}
-      <div
-        className="rounded-2xl p-6 sm:p-8"
-        style={{ background: 'rgba(4,8,20,0.8)', border: '1px solid rgba(34,197,94,0.15)', backdropFilter: 'blur(12px)' }}
-      >
-        <div className="mb-5">
-          <h3 className="text-base font-semibold text-white mb-1">Share & Connect</h3>
-          <p className="text-xs text-slate-500">
-            {latestWhatsapp
-              ? 'Share your Guru reading — already customized from your Dard Engine result.'
-              : 'Share your energy score and join our cosmic community for daily updates.'}
-          </p>
+      {/* ── TWO CTA BUTTONS ── */}
+      <div style={{
+        display:             'grid',
+        gridTemplateColumns: '1fr 1fr',
+        gap:                 10,
+        marginBottom:        12,
+      }}>
+        {/* 3 Month Reading */}
+        
+          href="/result#pricing"
+          style={{
+            display:        'flex',
+            flexDirection:  'column',
+            alignItems:     'center',
+            gap:            4,
+            padding:        '14px 12px',
+            background:     GOLD_RGBA(0.1),
+            border:         `1px solid ${GOLD_RGBA(0.35)}`,
+            borderRadius:   12,
+            textDecoration: 'none',
+            cursor:         'pointer',
+            transition:     'all 0.2s',
+          }}
+        >
+          <span style={{ fontSize: 18 }}>📅</span>
+          <span style={{ fontSize: 13, fontWeight: 700, color: GOLD }}>
+            3 Mahine ki Reading
+          </span>
+          <span style={{ fontSize: 11, color: 'rgba(148,163,184,0.6)' }}>
+            Week-by-week guidance
+          </span>
+          <span style={{
+            fontSize:     12,
+            fontWeight:   700,
+            color:        '#080B12',
+            background:   GOLD,
+            padding:      '3px 12px',
+            borderRadius: 20,
+            marginTop:    4,
+          }}>
+            ₹51 only
+          </span>
+        </a>
+
+        {/* Full Life Reading */}
+        
+          href="/result#pricing"
+          style={{
+            display:        'flex',
+            flexDirection:  'column',
+            alignItems:     'center',
+            gap:            4,
+            padding:        '14px 12px',
+            background:     'rgba(139,92,246,0.1)',
+            border:         '2px solid rgba(139,92,246,0.4)',
+            borderRadius:   12,
+            textDecoration: 'none',
+            cursor:         'pointer',
+            position:       'relative',
+            overflow:       'hidden',
+          }}
+        >
+          {/* Most Popular badge */}
+          <div style={{
+            position:   'absolute',
+            top:        0, right: 0,
+            background: '#7C3AED',
+            fontSize:   9, fontWeight: 700,
+            color:      '#fff',
+            padding:    '2px 8px',
+            borderRadius: '0 12px 0 8px',
+          }}>
+            POPULAR
+          </div>
+          <span style={{ fontSize: 18 }}>🔮</span>
+          <span style={{ fontSize: 13, fontWeight: 700, color: '#C4B5FD' }}>
+            Poori Zindagi Reading
+          </span>
+          <span style={{ fontSize: 11, color: 'rgba(148,163,184,0.6)' }}>
+            Dasha + Gochar + Remedy
+          </span>
+          <span style={{
+            fontSize:     12,
+            fontWeight:   700,
+            color:        '#fff',
+            background:   '#7C3AED',
+            padding:      '3px 12px',
+            borderRadius: 20,
+            marginTop:    4,
+          }}>
+            ₹99 only
+          </span>
+        </a>
+      </div>
+
+      {/* ── INTERNAL GUIDE LINKS ── */}
+      <div style={{
+        background:   'rgba(6,12,28,0.8)',
+        border:       `1px solid ${GOLD_RGBA(0.1)}`,
+        borderRadius: 12,
+        padding:      '14px 16px',
+      }}>
+        <div style={{
+          fontSize:      11,
+          fontWeight:    600,
+          color:         GOLD_RGBA(0.5),
+          textTransform: 'uppercase',
+          letterSpacing: '0.05em',
+          marginBottom:  10,
+        }}>
+          📚 Rohiit Gupta ji ke guides — aapke liye
         </div>
-        <ShareButtons score={score} name={name} segmentWhatsapp={latestWhatsapp} />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+          {guideLinks.map((link, i) => (
+            
+              key={i}
+              href={link.href}
+              style={{
+                display:        'flex',
+                alignItems:     'center',
+                gap:            8,
+                padding:        '7px 10px',
+                background:     GOLD_RGBA(0.04),
+                border:         `1px solid ${GOLD_RGBA(0.1)}`,
+                borderRadius:   8,
+                textDecoration: 'none',
+                transition:     'all 0.2s',
+              }}
+            >
+              <span style={{ fontSize: 14 }}>{link.emoji}</span>
+              <span style={{ fontSize: 13, color: 'rgba(226,232,240,0.8)', flex: 1 }}>
+                {link.label}
+              </span>
+              <span style={{ fontSize: 11, color: GOLD_RGBA(0.4) }}>→</span>
+            </a>
+          ))}
+        </div>
+
+        {/* Tagline */}
+        <div style={{
+          marginTop:  12,
+          paddingTop: 10,
+          borderTop:  `1px solid rgba(255,255,255,0.05)`,
+          fontSize:   11,
+          color:      'rgba(148,163,184,0.4)',
+          fontStyle:  'italic',
+          textAlign:  'center',
+        }}>
+          "Kaal bada balwan hai — aur aapka Kaal, aapki Kundali mein likha hai"
+        </div>
       </div>
     </div>
-  );
-}
-
-function ResultContent() {
-  const params = useSearchParams();
-
-  const name     = params.get('name')     || 'Friend';
-  const dob      = params.get('dob')      || '';
-  const city     = params.get('city')     || '';
-  const score    = parseInt(params.get('score')  || '72', 10);
-  const rashi    = params.get('rashi')    || 'Mesha';
-  const luckyColor   = params.get('color')   || 'Golden';
-  const luckyNumber  = parseInt(params.get('number')  || '7', 10);
-  const insight      = params.get('insight') || 'The stars illuminate your path today.';
-  const remedy       = params.get('remedy')  || 'Chant the Gayatri Mantra 21 times at sunrise.';
-  const practicalTip = params.get('tip')     || 'Avoid major decisions under time pressure today.';
-  const generation   = (params.get('gen') || 'millennial') as 'genz' | 'millennial' | 'genx';
-  const varshphalFocus    = params.get('varshphal') || 'Jupiter rules your Varshphal year.';
-  const ashtakvargaWealth = parseInt(params.get('avwealth') || '24', 10);
-
-  const lagna          = params.get('lagna')          || '';
-  const lagnaLord      = params.get('lagnaLord')      || '';
-  const nakshatra      = params.get('nakshatra')      || '';
-  const nakshatraLord  = params.get('nakshatraLord')  || '';
-  const mahadasha      = params.get('mahadasha')      || '';
-  const antardasha     = params.get('antardasha')     || '';
-  const dashaBalance   = params.get('dashaBalance')   || '';
-  const choghadiya     = params.get('choghadiya')     || '';
-  const choghadiyaType = params.get('choghadiyaType') || 'Neutral';
-  const tithi          = params.get('tithi')          || '';
-  const vara           = params.get('vara')           || '';
-  const yoga           = params.get('yoga')           || '';
-  const rahuStart      = params.get('rahuStart')      || '';
-  const rahuEnd        = params.get('rahuEnd')        || '';
-  const abhijeetStart  = params.get('abhijeetStart')  || '';
-  const abhijeetEnd    = params.get('abhijeetEnd')    || '';
-  const autoSegment      = params.get('autoSegment')      || 'default';
-  const autoSegmentLabel = params.get('autoSegmentLabel') || '';
-
-  let planets: Array<{
-    name: string; rashi: string; house: number; strength: number;
-    isRetrograde: boolean; nakshatra: string; degree: number;
-  }> = [];
-  try {
-    const raw = params.get('planets');
-    if (raw) planets = JSON.parse(raw);
-  } catch { /* fallback */ }
-
-  const pillarScores = {
-    wealth:   parseInt(params.get('wealth')   || '72', 10),
-    career:   parseInt(params.get('career')   || '68', 10),
-    love:     parseInt(params.get('love')     || '75', 10),
-    health:   parseInt(params.get('health')   || '70', 10),
-    students: parseInt(params.get('students') || '73', 10),
-    peace:    parseInt(params.get('peace')    || '69', 10),
-  };
-
-  let dashaPeriods: DashaPeriod[] = [];
-  let lifeTimeline: LifeTimelineEvent[] = [];
-  try {
-    const dashaRaw    = params.get('dasha');
-    if (dashaRaw)    dashaPeriods = JSON.parse(dashaRaw);
-    const timelineRaw = params.get('timeline');
-    if (timelineRaw) lifeTimeline = JSON.parse(timelineRaw);
-  } catch { /* fallback */ }
-
-  const [activePhase, setActivePhase]         = useState(0);
-  const [aiData, setAiData]                   = useState<PredictiveTabsData | null>(null);
-  const [monthlyTimeline, setMonthlyTimeline] = useState<MonthForecast[]>([]);
-  const [aiLoading, setAiLoading]             = useState(true);
-  const [segmentAnalysis, setSegmentAnalysis] = useState<SegmentAnalysis | null>(null);
-  const [segmentLoading, setSegmentLoading]   = useState(false);
-  const [latestWhatsapp, setLatestWhatsapp]   = useState<string | undefined>(undefined);
-  const [compatResult, setCompatResult]       = useState<CompatibilityResult | null>(null);
-  const [compatLoading, setCompatLoading]     = useState(false);
-  const [unlockedTiers, setUnlockedTiers]     = useState<Set<string>>(new Set());
-
-  const basePayload = {
-    name, dob, city, generation, rashi,
-    dashaPeriods, pillarScores, ashtakvargaWealth, varshphalFocus,
-  };
-
-  useEffect(() => {
-    if (!dob || !SUPABASE_URL) { setAiLoading(false); return; }
-    callEdge({ ...basePayload, mode: 'predict' })
-      .then((json) => {
-        const { career, love, wealth, guruMessage, monthlyTimeline: mt } = json;
-        if (career && love && wealth) setAiData({ career, love, wealth, guruMessage: guruMessage || '' });
-        if (Array.isArray(mt) && mt.length > 0) setMonthlyTimeline(mt);
-      })
-      .catch(() => {})
-      .finally(() => setAiLoading(false));
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dob]);
-
-  useEffect(() => {
-    if (!autoSegment || autoSegment === 'default' || !dob || !SUPABASE_URL) return;
-    setSegmentLoading(true);
-    callEdge({ ...basePayload, mode: 'segment', segmentId: autoSegment, segmentLabel: autoSegmentLabel || autoSegment })
-      .then((json) => {
-        setSegmentAnalysis(json as SegmentAnalysis);
-        if (json.whatsappText) setLatestWhatsapp(json.whatsappText);
-      })
-      .catch(() => {})
-      .finally(() => setSegmentLoading(false));
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dob, autoSegment]);
-
-  const handleSegmentAnalyze = useCallback(async (segment: LifeSegment, partnerData?: PartnerFormData) => {
-    setSegmentLoading(true);
-    setSegmentAnalysis(null);
-    try {
-      const payload: Record<string, unknown> = {
-        ...basePayload, mode: 'segment',
-        segmentId: segment.id, segmentLabel: segment.label,
-      };
-      if (partnerData) {
-        payload.partner = {
-          name: partnerData.name, dob: partnerData.dob,
-          birth_time: partnerData.birth_time, city: partnerData.city,
-          gender: partnerData.gender,
-        };
-      }
-      const json = await callEdge(payload);
-      setSegmentAnalysis(json as SegmentAnalysis);
-      if (json.whatsappText) setLatestWhatsapp(json.whatsappText);
-    } catch { /* fallback */ }
-    finally { setSegmentLoading(false); }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dob]);
-
-  const handlePricingSelect = useCallback((selection: PricingSelection) => {
-    setUnlockedTiers(prev => new Set([...prev, selection.tier]));
-  }, []);
-
-  const handleUnlockContent = useCallback((contentId: string) => {
-    setUnlockedTiers(prev => new Set([...prev, contentId]));
-  }, []);
-
-  const handleCompatCheck = useCallback(async (partner: PartnerData) => {
-    setCompatLoading(true);
-    setCompatResult(null);
-    try {
-      const json = await callEdge({ ...basePayload, mode: 'compatibility', partner });
-      setCompatResult(json as CompatibilityResult);
-    } catch { /* silent */ }
-    finally { setCompatLoading(false); }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dob]);
-
-  return (
-    <div className="min-h-screen bg-[#080B12]">
-      <SiteNav />
-      <main className="pt-24 pb-16 px-4">
-        <div className="max-w-5xl mx-auto">
-
-          <div className="mb-6 flex items-center gap-3">
-            <Link
-              href="/"
-              className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-yellow-400/70 transition-colors duration-200"
-            >
-              <ArrowLeft className="w-3.5 h-3.5" />
-              New Analysis
-            </Link>
-            <span className="text-slate-700">·</span>
-            <span className="text-xs text-slate-600">
-              Results for <span className="text-yellow-400/60">{name}</span>
-              {city && ` · ${city}`}
-              {dob && ` · Born ${new Date(dob).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}`}
-            </span>
-          </div>
-
-          <div
-            className="text-center mb-8 py-6 px-4 rounded-2xl"
-            style={{ background: 'rgba(4,8,20,0.75)', border: `1px solid ${GOLD_RGBA(0.1)}` }}
-          >
-            <p className="text-xs font-medium tracking-widest uppercase mb-2" style={{ color: GOLD_RGBA(0.55) }}>
-              Your Cosmic Report
-            </p>
-            <h1 className="font-serif text-3xl sm:text-4xl font-bold">
-              <span className="text-white">Namaste, </span>
-              <span className="text-gradient-gold">{name.split(' ')[0]}</span>
-            </h1>
-            <p className="text-slate-400 text-sm mt-2">
-              Your Trikal Analysis for{' '}
-              {new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
-            </p>
-          </div>
-
-          <div className="flex gap-2 sm:gap-3 mb-8">
-            {PHASE_LABELS.map((_, i) => (
-              <PhaseHeader key={i} phase={i} activePhase={activePhase} onClick={() => setActivePhase(i)} />
-            ))}
-          </div>
-
-          <div
-            className="text-xs font-semibold tracking-widest uppercase mb-5 flex items-center gap-2"
-            style={{ color: GOLD_RGBA(0.45) }}
-          >
-            <div className="w-4 h-px" style={{ background: GOLD_RGBA(0.3) }} />
-            Phase {activePhase + 1} — {PHASE_LABELS[activePhase]!.label}
-          </div>
-
-          {activePhase === 0 && (
-            <ThreeMonthSummary
-              name={name} dob={dob} city={city}
-              score={score} insight={insight} remedy={remedy}
-              practicalTip={practicalTip} rashi={rashi}
-              luckyColor={luckyColor} luckyNumber={luckyNumber}
-              pillarScores={pillarScores} aiData={aiData} aiLoading={aiLoading}
-              varshphalFocus={varshphalFocus} ashtakvargaWealth={ashtakvargaWealth}
-              monthlyTimeline={monthlyTimeline}
-              unlockedTiers={unlockedTiers} onUnlock={handleUnlockContent}
-              lagna={lagna} lagnaLord={lagnaLord}
-              nakshatra={nakshatra} nakshatraLord={nakshatraLord}
-              mahadasha={mahadasha} antardasha={antardasha}
-              dashaBalance={dashaBalance}
-              choghadiya={choghadiya} choghadiyaType={choghadiyaType}
-              tithi={tithi} vara={vara} yoga={yoga}
-              rahuStart={rahuStart} rahuEnd={rahuEnd}
-              abhijeetStart={abhijeetStart} abhijeetEnd={abhijeetEnd}
-              planets={planets}
-              autoSegment={autoSegment}
-              autoSegmentLabel={autoSegmentLabel}
-            />
-          )}
-
-          {activePhase === 1 && (
-            <KundaliPhase
-              name={name} dob={dob} rashi={rashi}
-              dashaPeriods={dashaPeriods} lifeTimeline={lifeTimeline}
-              unlockedTiers={unlockedTiers} onUnlock={handleUnlockContent}
-            />
-          )}
-
-          {activePhase === 2 && (
-            <GuruAnalysisPhase
-              name={name} generation={generation}
-              segmentAnalysis={segmentAnalysis} segmentLoading={segmentLoading}
-              onSegmentAnalyze={handleSegmentAnalyze}
-              aiData={aiData} aiLoading={aiLoading}
-              varshphalFocus={varshphalFocus} ashtakvargaWealth={ashtakvargaWealth}
-              dob={dob} userDob={dob}
-              compatResult={compatResult} compatLoading={compatLoading}
-              onCompatCheck={handleCompatCheck}
-              unlockedTiers={unlockedTiers} onUnlock={handleUnlockContent}
-              latestWhatsapp={latestWhatsapp} score={score}
-            />
-          )}
-
-          <div id="pricing" className="mt-8 mb-6">
-            <PricingLadder
-              name={name}
-              onSelect={handlePricingSelect}
-              unlockedTiers={Array.from(unlockedTiers) as any[]}
-            />
-          </div>
-
-          <div className="text-center">
-            <Link
-              href="/"
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-full text-xs font-medium text-slate-500 hover:text-yellow-400/70 transition-colors duration-200"
-              style={{ border: '1px solid rgba(255,255,255,0.06)' }}
-            >
-              <RefreshCw className="w-3.5 h-3.5" />
-              Analyse another person
-            </Link>
-          </div>
-        </div>
-      </main>
-      <SiteFooter />
-    </div>
-  );
-}
-
-export default function ResultPage() {
-  return (
-    <Suspense
-      fallback={
-        <div className="min-h-screen bg-[#080B12] flex items-center justify-center">
-          <div className="text-center">
-            <div className="w-12 h-12 rounded-full border-2 border-yellow-400/30 border-t-yellow-400 animate-spin mx-auto mb-4" />
-            <p className="text-sm text-slate-500">Reading the stars...</p>
-          </div>
-        </div>
-      }
-    >
-      <ResultContent />
-    </Suspense>
   );
 }
