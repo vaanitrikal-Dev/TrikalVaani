@@ -1,9 +1,11 @@
 /**
  * ⚠️ STRICT CEO ORDER: LOGIC FROZEN
  * DO NOT EDIT, DELETE, OR REFACTOR THIS FILE.
- * VERSION: 2.0 (GOD-LEVEL PROTECTION)
+ * VERSION: 3.0 (GOD-LEVEL PROTECTION)
  * SIGNED: ROHIIT GUPTA, CEO
- * PURPOSE: TRIKAL INTELLIGENCE ENGINE — 3-LAYER PERSONALIZED PREDICTION
+ * PURPOSE: TRIKAL INTELLIGENCE ENGINE — 3-LAYER + 4-WEEK PREDICTION
+ * v3.0: FourWeekPrediction wired inside paid deep reading
+ *        employment + sector props added
  *
  * LAYER 1: Natal chart (birth data) — who they ARE
  * LAYER 2: Current Gochar (today's transits) — what's happening NOW
@@ -19,6 +21,7 @@
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
+import FourWeekPrediction from '@/components/result/FourWeekPrediction';
 
 const GOLD        = '#D4AF37';
 const GOLD_RGBA   = (a: number) => `rgba(212,175,55,${a})`;
@@ -76,6 +79,9 @@ export type PersonalizedPredictionProps = {
   // Unlock
   isPaid?: boolean;
   onUnlockClick?: () => void;
+  // User profile (from BirthForm)
+  employment?: string;
+  sector?: string;
 };
 
 // ─── LAYER 2: GOCHAR IMPACT ───────────────────────────────────────────────────
@@ -314,6 +320,7 @@ export default function PersonalizedPrediction({
   partnerName, partnerDob, partnerLagna,
   partnerMahadasha, partnerNakshatra, partnerPlanets,
   isPaid = false, onUnlockClick,
+  employment, sector,
 }: PersonalizedPredictionProps) {
 
   const isDual = !!(partnerName?.trim());
@@ -589,6 +596,21 @@ export default function PersonalizedPrediction({
             </div>
           )}
         </div>
+
+        {/* ── 4-WEEK PREDICTION — wired inside paid deep reading ── */}
+        <FourWeekPrediction
+          name={name}
+          lagna={lagna}
+          mahadasha={mahadasha}
+          antardasha={antardasha}
+          nakshatra={nakshatra}
+          planets={planets}
+          autoSegment={autoSegment}
+          autoSegmentLabel={autoSegmentLabel}
+          lang={lang}
+          employment={employment}
+          sector={sector}
+        />
 
         {/* Gochar note */}
         {gochar && (
