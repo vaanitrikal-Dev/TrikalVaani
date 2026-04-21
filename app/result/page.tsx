@@ -1,15 +1,13 @@
 /**
  * ⚠️ STRICT CEO ORDER: LOGIC FROZEN
  * DO NOT EDIT, DELETE, OR REFACTOR THIS FILE.
- * VERSION: 4.0 (GOD-LEVEL PROTECTION)
+ * VERSION: 5.0 (GOD-LEVEL PROTECTION)
  * SIGNED: ROHIIT GUPTA, CEO
  * PURPOSE: RESULT PAGE — KUNDALI + PERSONALIZED PREDICTION + ALL PHASES
- * v4.0 CHANGES:
- *   - PersonalizedPrediction wired (3-layer Trikal Intelligence Engine)
- *   - lang param extracted from URL and passed through
- *   - Dual chart params (partnerName, partnerDob etc) passed to prediction
- *   - Demo unlock mode (Option C) — isPaid auto-true after 3s click for testing
- *   - Razorpay slot ready — swap demoPaid for real payment in Phase 3
+ * v5.0 CHANGES:
+ *   - PratayantarDasha component wired into Phase 2
+ *   - pratyantar URL params extracted and passed to KundaliPhase
+ *   - 4-level dasha chain now displayed below VimshottariDashaTable
  */
 
 'use client';
@@ -36,6 +34,7 @@ import VimshottariDashaTable from '@/components/result/VimshottariDashaTable';
 import KundaliDisplay from '@/components/result/KundaliDisplay';
 import AutoPrediction from '@/components/result/AutoPrediction';
 import PersonalizedPrediction from '@/components/result/PersonalizedPrediction'; // ✅ NEW
+import PratayantarDasha from '@/components/result/PratayantarDasha'; // ✅ v5.0
 import type { DashaPeriod, LifeTimelineEvent } from '@/lib/vedic-astro';
 import type { PredictiveTabsData } from '@/components/result/PredictiveModules';
 import type { MonthForecast } from '@/components/result/FutureTimeline';
@@ -279,10 +278,18 @@ function ThreeMonthSummary({
 // ─── KUNDALI PHASE ────────────────────────────────────────────────────────────
 function KundaliPhase({
   name, dob, rashi, dashaPeriods, lifeTimeline, unlockedTiers, onUnlock,
+  mahadasha, antardasha, pratyantar, currentPratyantar, currentSookshma, lang,
 }: {
   name: string; dob: string; rashi: string;
   dashaPeriods: DashaPeriod[]; lifeTimeline: LifeTimelineEvent[];
   unlockedTiers: Set<string>; onUnlock: (id: string) => void;
+  // ✅ v5.0 — Pratyantar props
+  mahadasha: string;
+  antardasha: string;
+  pratyantar: any[];
+  currentPratyantar: any;
+  currentSookshma: any;
+  lang: 'hindi' | 'hinglish' | 'english';
 }) {
   const currentYear = new Date().getFullYear();
   const planets     = derivePlanetsFromDob(dob);
@@ -297,6 +304,18 @@ function KundaliPhase({
       {lifeTimeline.length > 0 && (
         <LifeTimeline
           events={lifeTimeline} dashaPeriods={dashaPeriods} name={name}
+        />
+      )}
+      {/* ✅ v5.0 — PRATYANTAR + SOOKSHMA DASHA — below Vimshottari table */}
+      {currentPratyantar && pratyantar?.length > 0 && (
+        <PratayantarDasha
+          name={name}
+          mahadasha={mahadasha}
+          antardasha={antardasha}
+          pratyantar={pratyantar}
+          currentPratyantar={currentPratyantar}
+          currentSookshma={currentSookshma}
+          lang={lang}
         />
       )}
     </div>
@@ -403,6 +422,45 @@ function ResultContent() {
   const abhijeetEnd    = params.get('abhijeetEnd')    || '';
   const autoSegment      = params.get('autoSegment')      || 'default';
   const autoSegmentLabel = params.get('autoSegmentLabel') || '';
+
+  // ✅ v5.0 — Pratyantar Dasha params
+  const pratayantarLord    = params.get('pratayantarLord')    || '';
+  const pratayantarStart   = params.get('pratayantarStart')   || '';
+  const pratayantarEnd     = params.get('pratayantarEnd')     || '';
+  const pratayantarDays    = parseInt(params.get('pratayantarDays')   || '7', 10);
+  const pratayantarQuality = (params.get('pratayantarQuality') || 'Madhyam') as 'Shubh' | 'Ashubh' | 'Madhyam';
+  const pratayantarRemDays = parseInt(params.get('pratayantarRemDays') || '0', 10);
+  const sookshmaLord       = params.get('sookshmaLord')    || '';
+  const sookshmaStart      = params.get('sookshmaStart')   || '';
+  const sookshmaEnd        = params.get('sookshmaEnd')     || '';
+  const sookshmaDays       = parseFloat(params.get('sookshmaDays') || '1');
+  const sookshmaQuality    = (params.get('sookshmaQuality') || 'Madhyam') as 'Shubh' | 'Ashubh' | 'Madhyam';
+
+  // Build structured pratyantar objects for PratayantarDasha component
+  const currentPratyantar = pratayantarLord ? {
+    lord:          pratayantarLord,
+    startDate:     pratayantarStart,
+    endDate:       pratayantarEnd,
+    durationDays:  pratayantarDays,
+    quality:       pratayantarQuality,
+    remainingDays: pratayantarRemDays,
+  } : null;
+
+  const currentSookshma = sookshmaLord ? {
+    lord:          sookshmaLord,
+    startDate:     sookshmaStart,
+    endDate:       sookshmaEnd,
+    durationDays:  sookshmaDays,
+    quality:       sookshmaQuality,
+    remainingDays: 0,
+  } : null;
+
+  // Full pratyantar list
+  let pratayantarList: any[] = [];
+  try {
+    const raw = params.get('pratayantarList');
+    if (raw) pratayantarList = JSON.parse(raw);
+  } catch { /* fallback */ }
 
   // ✅ NEW — Language param
   const lang = (params.get('lang') || 'hinglish') as 'hindi' | 'hinglish' | 'english';
@@ -674,6 +732,12 @@ function ResultContent() {
               name={name} dob={dob} rashi={rashi}
               dashaPeriods={dashaPeriods} lifeTimeline={lifeTimeline}
               unlockedTiers={unlockedTiers} onUnlock={handleUnlockContent}
+              mahadasha={mahadasha}
+              antardasha={antardasha}
+              pratyantar={pratayantarList}
+              currentPratyantar={currentPratyantar}
+              currentSookshma={currentSookshma}
+              lang={lang}
             />
           )}
 
