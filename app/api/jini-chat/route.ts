@@ -1,17 +1,23 @@
 /**
  * ⚠️ STRICT CEO ORDER: LOGIC FROZEN
  * DO NOT EDIT, DELETE, OR REFACTOR THIS FILE.
- * VERSION: 17.0-MASTER (GOD-LEVEL PROTECTION)
+ * VERSION: 18.0-MASTER (GOD-LEVEL PROTECTION)
  * SIGNED: ROHIIT GUPTA, CEO
- * PURPOSE: MAIN JINI API — REAL KUNDALI + SHORT CRISP RESPONSES
- * v17.0 CHANGES:
- *   - Added `mode` param handling:
- *       'chat'             → original flow (280 tokens, system prompt)
- *       'prediction'       → instant prediction (300 tokens, direct prompt)
- *       'deep_prediction'  → full Trikal Intelligence reading (800 tokens, direct prompt)
- *   - deep_prediction bypasses system prompt — uses the full structured prompt
- *     from PersonalizedPrediction.tsx directly
- *   - maxOutputTokens increased per mode to prevent cut-off responses
+ * PURPOSE: MAIN JINI API — ALL MODES
+ *
+ * v18.0 CHANGES:
+ *   - deep_prediction: 4096 tokens — full structured reading never cuts off
+ *   - master_prediction: 8192 tokens — CEO private dashboard, no limit
+ *   - Hindi planet names: explicit Devanagari mapping injected into every prompt
+ *   - Jini revenue guard: chat mode now returns service page links instead of free answers
+ *   - four_week: new mode — generates 4-week prediction + upay + date alerts
+ *
+ * MODES:
+ *   chat             → Jini chat, 280 tokens, revenue guard ON
+ *   prediction       → instant hook deepener, 300 tokens
+ *   deep_prediction  → full ₹51 reading, 4096 tokens
+ *   four_week        → 4-week prediction, 4096 tokens
+ *   master           → CEO private dashboard only, 8192 tokens, no limit
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -22,108 +28,207 @@ const GEMINI_API_KEY = process.env.GEMINI_API_KEY ?? '';
 const GEMINI_URL     =
   'https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent';
 
+// ─── HINDI PLANET NAME MAP ────────────────────────────────────────────────────
+// Injected into every prompt when lang = hindi
+// Forces Gemini to use Devanagari for ALL planet/rashi names
+const HINDI_PLANET_INSTRUCTION = `
+CRITICAL LANGUAGE RULE — HINDI MODE:
+Use ONLY these Devanagari names for planets and rashis. NEVER use English names:
+सूर्य (Sun) · चंद्र (Moon) · मंगल (Mars) · बुध (Mercury)
+गुरु/बृहस्पति (Jupiter) · शुक्र (Venus) · शनि (Saturn)
+राहु (Rahu) · केतु (Ketu)
+
+राशि names: मेष · वृषभ · मिथुन · कर्क · सिंह · कन्या
+            तुला · वृश्चिक · धनु · मकर · कुंभ · मीन
+
+नक्षत्र names: अश्विनी · भरणी · कृत्तिका · रोहिणी · मृगशिरा · आर्द्रा
+               पुनर्वसु · पुष्य · आश्लेषा · मघा · पूर्व फाल्गुनी · उत्तर फाल्गुनी
+               हस्त · चित्रा · स्वाति · विशाखा · अनुराधा · ज्येष्ठा
+               मूल · पूर्वाषाढ़ा · उत्तराषाढ़ा · श्रवण · धनिष्ठा · शतभिषा
+               पूर्व भाद्रपद · उत्तर भाद्रपद · रेवती
+
+Write EVERYTHING in Hindi (Devanagari script). No English words except proper nouns.
+`;
+
+// Hinglish planet names — for hinglish mode
+const HINGLISH_PLANET_INSTRUCTION = `
+Use these planet names consistently in Hinglish:
+Surya (Sun) · Chandra (Moon) · Mangal (Mars) · Budh (Mercury)
+Guru/Brihaspati (Jupiter) · Shukra (Venus) · Shani (Saturn)
+Rahu · Ketu
+
+Rashi names: Mesh · Vrishabh · Mithun · Kark · Simha · Kanya
+             Tula · Vrischik · Dhanu · Makar · Kumbh · Meen
+
+Write in natural Hinglish — Hindi words with English mixed naturally.
+`;
+
+// ─── SERVICE PAGE MAP — Jini revenue guard ────────────────────────────────────
+// When user asks these topics, Jini links to service page instead of free answer
+const SERVICE_PAGES: Record<string, { url: string; label: string }> = {
+  ex_back:            { url: '/services/ex-back-reading',        label: 'Ex-Back & Karmic Closure Reading' },
+  marriage:           { url: '/services/marriage-timing',        label: 'Marriage Timing Reading' },
+  career:             { url: '/services/career-pivot',           label: 'Dream Career Pivot Reading' },
+  job:                { url: '/services/career-pivot',           label: 'Career & Job Reading' },
+  business:           { url: '/services/wealth-reading',         label: 'Business & Wealth Reading' },
+  property:           { url: '/services/property-yog',           label: 'Property Purchase Timing' },
+  child:              { url: '/services/child-destiny',          label: "Child's Destiny Reading" },
+  health:             { url: '/services/health-reading',         label: 'Health & Vitality Reading' },
+  boss:               { url: '/services/toxic-boss-radar',       label: 'Toxic Boss Radar Reading' },
+  compatibility:      { url: '/services/compatibility',          label: 'Compatibility Reading' },
+  wealth:             { url: '/services/wealth-reading',         label: 'Wealth & Investment Reading' },
+  foreign:            { url: '/services/foreign-settlement',     label: 'Foreign Settlement Reading' },
+  spiritual:          { url: '/services/spiritual-purpose',      label: 'Spiritual Purpose Reading' },
+  retirement:         { url: '/services/retirement-peace',       label: 'Retirement Peace Reading' },
+};
+
+function detectServiceIntent(message: string): { url: string; label: string } | null {
+  const lower = message.toLowerCase();
+  if (lower.includes('ex') || lower.includes('वापस') || lower.includes('closure')) return SERVICE_PAGES['ex_back']!;
+  if (lower.includes('marr') || lower.includes('shaadi') || lower.includes('शादी')) return SERVICE_PAGES['marriage']!;
+  if (lower.includes('job') || lower.includes('career') || lower.includes('नौकरी')) return SERVICE_PAGES['job']!;
+  if (lower.includes('business') || lower.includes('व्यापार')) return SERVICE_PAGES['business']!;
+  if (lower.includes('property') || lower.includes('house') || lower.includes('मकान')) return SERVICE_PAGES['property']!;
+  if (lower.includes('child') || lower.includes('beta') || lower.includes('बेटा') || lower.includes('बच्चा')) return SERVICE_PAGES['child']!;
+  if (lower.includes('health') || lower.includes('bimari') || lower.includes('बीमारी')) return SERVICE_PAGES['health']!;
+  if (lower.includes('boss') || lower.includes('office') || lower.includes('toxic')) return SERVICE_PAGES['boss']!;
+  if (lower.includes('compat') || lower.includes('match') || lower.includes('partner')) return SERVICE_PAGES['compatibility']!;
+  if (lower.includes('wealth') || lower.includes('money') || lower.includes('पैसा')) return SERVICE_PAGES['wealth']!;
+  if (lower.includes('foreign') || lower.includes('abroad') || lower.includes('विदेश')) return SERVICE_PAGES['foreign']!;
+  if (lower.includes('spiritual') || lower.includes('moksha') || lower.includes('मोक्ष')) return SERVICE_PAGES['spiritual']!;
+  return null;
+}
+
+// ─── GEMINI CALL HELPER ───────────────────────────────────────────────────────
+async function callGemini(
+  prompt: string,
+  systemPrompt: string | null,
+  maxTokens: number,
+  temperature = 0.82
+): Promise<string> {
+  const body: Record<string, unknown> = {
+    contents: [{ role: 'user', parts: [{ text: prompt }] }],
+    generationConfig: { temperature, maxOutputTokens: maxTokens, topP: 0.92 },
+  };
+  if (systemPrompt) {
+    body.system_instruction = { parts: [{ text: systemPrompt }] };
+  }
+  const res = await fetch(`${GEMINI_URL}?key=${GEMINI_API_KEY}`, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) throw new Error(`Gemini HTTP ${res.status}`);
+  const data = await res.json();
+  if (data.error) throw new Error(`Gemini error: ${JSON.stringify(data.error)}`);
+  return data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() ?? '';
+}
+
+// ─── MAIN HANDLER ─────────────────────────────────────────────────────────────
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json() as {
-      message:        string;
-      mode?:          'chat' | 'prediction' | 'deep_prediction';
-      birthData?:     BirthData;
-      chartData?:     Record<string, unknown>;
-      category?:      string;
+      message:         string;
+      mode?:           'chat' | 'prediction' | 'deep_prediction' | 'four_week' | 'master';
+      lang?:           'hindi' | 'hinglish' | 'english';
+      birthData?:      BirthData;
+      chartData?:      Record<string, unknown>;
+      category?:       string;
       isFirstMessage?: boolean;
+      // Four week specific
+      segment?:        string;
+      segmentLabel?:   string;
+      // Master mode specific (CEO only)
+      clientPhone?:    string;
+      clientName?:     string;
     };
 
     const {
       message,
-      mode          = 'chat',
+      mode           = 'chat',
+      lang           = 'hinglish',
       birthData,
-      category      = 'JOB',
+      category       = 'JOB',
       isFirstMessage = false,
+      segment        = 'default',
+      segmentLabel   = '',
+      clientPhone    = '',
+      clientName     = '',
     } = body;
 
     if (!GEMINI_API_KEY) {
       return NextResponse.json({ reply: 'API Key missing.' });
     }
 
-    // ── FIRST MESSAGE — Jini signature opening ─────────────────────────────
+    // Language instruction injection
+    const langInstruction =
+      lang === 'hindi'   ? HINDI_PLANET_INSTRUCTION :
+      lang === 'english' ? 'Respond in clear, warm English only.' :
+                           HINGLISH_PLANET_INSTRUCTION;
+
+    // ── FIRST MESSAGE ──────────────────────────────────────────────────────
     if (isFirstMessage) {
       return NextResponse.json({ reply: JINI_NAMASTE, kundaliSummary: null });
     }
 
-    // ── DEEP PREDICTION MODE ───────────────────────────────────────────────
-    // Full structured prompt from PersonalizedPrediction.tsx
-    // Bypasses system prompt — message IS the complete prompt
-    // Needs 800 tokens for: scores + main prediction + key dates + action + hook
+    // ── DEEP PREDICTION MODE — ₹51 reading ────────────────────────────────
     if (mode === 'deep_prediction') {
-      const res = await fetch(`${GEMINI_URL}?key=${GEMINI_API_KEY}`, {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{
-            role:  'user',
-            parts: [{ text: message }],
-          }],
-          generationConfig: {
-            temperature:     0.80,
-            maxOutputTokens: 4096, // ✅ increased for complete structured reading
-            topP:            0.92,
-          },
-        }),
-      });
-
-      if (!res.ok) {
-        console.error(`[Trikal] Gemini deep_prediction HTTP ${res.status}`);
-        return NextResponse.json({
-          reply: '',
-          error: `Gemini HTTP ${res.status}`,
-        });
+      const fullPrompt = `${langInstruction}\n\n${message}`;
+      try {
+        const reply = await callGemini(fullPrompt, null, 4096, 0.80);
+        if (reply.length > 50) return NextResponse.json({ reply });
+        return NextResponse.json({ reply: '', error: 'Empty response' });
+      } catch (e) {
+        console.error('[Trikal] deep_prediction error:', e);
+        return NextResponse.json({ reply: '', error: String(e) });
       }
-
-      const data  = await res.json();
-      const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() ?? '';
-
-      if (!reply) {
-        console.error('[Trikal] Gemini deep_prediction — empty reply', data);
-        return NextResponse.json({ reply: '', error: 'Empty response from Gemini' });
-      }
-
-      return NextResponse.json({ reply });
     }
 
-    // ── PREDICTION MODE ────────────────────────────────────────────────────
-    // AutoPrediction / instant rule-deepener
-    // Direct prompt, no system prompt override, 300 tokens
-    if (mode === 'prediction') {
-      const res = await fetch(`${GEMINI_URL}?key=${GEMINI_API_KEY}`, {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{
-            role:  'user',
-            parts: [{ text: message }],
-          }],
-          generationConfig: {
-            temperature:     0.85,
-            maxOutputTokens: 300,
-            topP:            0.9,
-          },
-        }),
-      });
+    // ── FOUR WEEK MODE — 4-week prediction ────────────────────────────────
+    if (mode === 'four_week') {
+      const fullPrompt = `${langInstruction}\n\n${message}`;
+      try {
+        const reply = await callGemini(fullPrompt, null, 4096, 0.82);
+        return NextResponse.json({ reply });
+      } catch (e) {
+        console.error('[Trikal] four_week error:', e);
+        return NextResponse.json({ reply: '', error: String(e) });
+      }
+    }
 
-      if (!res.ok) {
-        console.error(`[Trikal] Gemini prediction HTTP ${res.status}`);
+    // ── MASTER MODE — CEO private dashboard — NO TOKEN LIMIT ──────────────
+    if (mode === 'master') {
+      const masterSystem = `You are the Master Intelligence Engine of Trikal Vaani.
+You are providing a PRIVATE briefing to Rohiit Gupta (CEO & Chief Vedic Architect) 
+before a ₹499 premium consultation call.
+
+This is NOT shown to the client. This is Rohiit Gupta's private preparation tool.
+Be extremely detailed, specific, and actionable. No word limits. Full analysis.
+Cross-reference everything — natal chart, current transits, numerology, sector trends.
+
+${langInstruction}`;
+
+      try {
+        const reply = await callGemini(message, masterSystem, 8192, 0.75);
+        return NextResponse.json({ reply });
+      } catch (e) {
+        console.error('[Trikal] master error:', e);
+        return NextResponse.json({ reply: '', error: String(e) });
+      }
+    }
+
+    // ── PREDICTION MODE — instant deepener ────────────────────────────────
+    if (mode === 'prediction') {
+      const fullPrompt = `${langInstruction}\n\n${message}`;
+      try {
+        const reply = await callGemini(fullPrompt, null, 300, 0.85);
+        return NextResponse.json({ reply });
+      } catch (e) {
+        console.error('[Trikal] prediction error:', e);
         return NextResponse.json({ reply: '' });
       }
-
-      const data  = await res.json();
-      const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() ?? '';
-      return NextResponse.json({ reply });
     }
 
-    // ── CHAT MODE (default) ────────────────────────────────────────────────
-    // Original Jini chat flow — unchanged from v16.0
-
-    // Build real Kundali from Swiss Ephemeris
+    // ── CHAT MODE — Jini with revenue guard ───────────────────────────────
     let kundali       = null;
     let kundaliSummary = null;
 
@@ -145,13 +250,9 @@ export async function POST(req: NextRequest) {
           vara:          kundali.panchang.vara,
           yoga:          kundali.panchang.yoga,
           planets: Object.values(kundali.planets).map(p => ({
-            name:         p.name,
-            rashi:        p.rashi,
-            house:        p.house,
-            strength:     p.strength,
-            isRetrograde: p.isRetrograde,
-            nakshatra:    p.nakshatra,
-            degree:       p.degree,
+            name: p.name, rashi: p.rashi, house: p.house,
+            strength: p.strength, isRetrograde: p.isRetrograde,
+            nakshatra: p.nakshatra, degree: p.degree,
           })),
         };
       } catch (calcErr) {
@@ -159,43 +260,47 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    const lang         = detectLanguage(message);
-    const systemPrompt = buildJiniSystemPrompt(kundali, category, lang, birthData?.name);
+    // Revenue guard — detect if user is asking a specific life question
+    const serviceIntent = detectServiceIntent(message);
 
-    const res = await fetch(`${GEMINI_URL}?key=${GEMINI_API_KEY}`, {
-      method:  'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        system_instruction: { parts: [{ text: systemPrompt }] },
-        contents: [{ role: 'user', parts: [{ text: message }] }],
-        generationConfig: {
-          temperature:     0.85,
-          maxOutputTokens: 280,  // kept small for crisp chat responses
-          topP:            0.9,
-        },
-      }),
-    });
+    const detectedLang = detectLanguage(message);
 
-    if (!res.ok) {
-      console.error(`[Trikal] Gemini chat HTTP ${res.status}`);
+    // Build Jini system prompt with revenue guard instruction
+    const revenueGuardInstruction = `
+REVENUE GUARD — CRITICAL RULE:
+When the user asks a specific life question (career, marriage, ex-back, health, property, child, boss etc.):
+1. Give ONE teaser sentence that hints at what their chart shows
+2. Then say "Is baare mein gehri jaankari ke liye, main aapko hamari specialized reading page par le jaati hoon"
+3. End with: [SERVICE_LINK]
+DO NOT give free full answers to specific life questions.
+For general chart questions, greetings, or panchang questions — answer freely.
+`;
+
+    const systemPrompt = buildJiniSystemPrompt(kundali, category, detectedLang, birthData?.name)
+      + '\n\n' + revenueGuardInstruction
+      + '\n\n' + langInstruction;
+
+    let reply = '';
+    try {
+      reply = await callGemini(message, systemPrompt, 280, 0.85);
+    } catch (e) {
+      console.error('[Trikal] chat error:', e);
       return NextResponse.json({
         reply: 'Cosmic signals weak hain. Ek minute mein dobara try karein. 🙏',
         kundaliSummary,
       });
     }
 
-    const data = await res.json();
-
-    if (data.error) {
-      console.error('[Trikal] Gemini error:', data.error);
-      return NextResponse.json({
-        reply: 'Jini abhi meditate kar rahi hai. 🙏',
-        kundaliSummary,
-      });
+    // Inject actual service page link if Jini used [SERVICE_LINK] placeholder
+    if (serviceIntent && reply.includes('[SERVICE_LINK]')) {
+      reply = reply.replace(
+        '[SERVICE_LINK]',
+        `\n\n🔮 [${serviceIntent.label}](${serviceIntent.url}) — Abhi dekho`
+      );
+    } else if (serviceIntent && !reply.includes('http')) {
+      // Jini answered freely — append service link softly
+      reply += `\n\n🔮 Gehri reading ke liye: [${serviceIntent.label}](${serviceIntent.url})`;
     }
-
-    const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim()
-      ?? 'Dobara puchiye. 🙏';
 
     return NextResponse.json({ reply, kundaliSummary });
 
