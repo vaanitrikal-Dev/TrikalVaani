@@ -65,7 +65,7 @@ export async function POST(req: NextRequest) {
           }],
           generationConfig: {
             temperature:     0.80,
-            maxOutputTokens: 800,  // ✅ enough for full structured reading
+            maxOutputTokens: 1200, // ✅ increased for complete structured reading
             topP:            0.92,
           },
         }),
