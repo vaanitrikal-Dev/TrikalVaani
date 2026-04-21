@@ -1,9 +1,15 @@
 /**
  * ⚠️ STRICT CEO ORDER: LOGIC FROZEN
  * DO NOT EDIT, DELETE, OR REFACTOR THIS FILE.
- * VERSION: 3.0 (GOD-LEVEL PROTECTION)
+ * VERSION: 4.0 (GOD-LEVEL PROTECTION)
  * SIGNED: ROHIIT GUPTA, CEO
- * PURPOSE: RESULT PAGE — KUNDALI + AUTO PREDICTION + ALL PHASES
+ * PURPOSE: RESULT PAGE — KUNDALI + PERSONALIZED PREDICTION + ALL PHASES
+ * v4.0 CHANGES:
+ *   - PersonalizedPrediction wired (3-layer Trikal Intelligence Engine)
+ *   - lang param extracted from URL and passed through
+ *   - Dual chart params (partnerName, partnerDob etc) passed to prediction
+ *   - Demo unlock mode (Option C) — isPaid auto-true after 3s click for testing
+ *   - Razorpay slot ready — swap demoPaid for real payment in Phase 3
  */
 
 'use client';
@@ -29,6 +35,7 @@ import LagnaChart, { derivePlanetsFromDob } from '@/components/result/LagnaChart
 import VimshottariDashaTable from '@/components/result/VimshottariDashaTable';
 import KundaliDisplay from '@/components/result/KundaliDisplay';
 import AutoPrediction from '@/components/result/AutoPrediction';
+import PersonalizedPrediction from '@/components/result/PersonalizedPrediction'; // ✅ NEW
 import type { DashaPeriod, LifeTimelineEvent } from '@/lib/vedic-astro';
 import type { PredictiveTabsData } from '@/components/result/PredictiveModules';
 import type { MonthForecast } from '@/components/result/FutureTimeline';
@@ -36,18 +43,18 @@ import type { LifeSegment, SegmentAnalysis } from '@/components/result/DardEngin
 import type { PartnerData, CompatibilityResult } from '@/components/result/CompatibilityMeter';
 import type { PartnerFormData } from '@/components/result/DualPartnerForm';
 
-const GOLD = '#D4AF37';
+const GOLD      = '#D4AF37';
 const GOLD_RGBA = (a: number) => `rgba(212,175,55,${a})`;
 
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? '';
+const SUPABASE_URL      = process.env.NEXT_PUBLIC_SUPABASE_URL      ?? '';
 const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? '';
 
 async function callEdge(body: Record<string, unknown>) {
   const res = await fetch(`${SUPABASE_URL}/functions/v1/trikal-predict`, {
-    method: 'POST',
+    method:  'POST',
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+      Authorization:  `Bearer ${SUPABASE_ANON_KEY}`,
     },
     body: JSON.stringify(body),
   });
@@ -57,13 +64,14 @@ async function callEdge(body: Record<string, unknown>) {
 
 const PHASE_LABELS = [
   { icon: CalendarDays, label: '3-Month Summary',   sub: 'Immediate cosmic window' },
-  { icon: LayoutGrid,   label: 'Kundali & Dasha',    sub: 'Chart + planetary periods' },
+  { icon: LayoutGrid,   label: 'Kundali & Dasha',   sub: 'Chart + planetary periods' },
   { icon: Brain,        label: 'Deep Guru Analysis', sub: 'Dard Engine + predictions' },
 ];
 
-function PhaseHeader({ phase, activePhase, onClick }: {
-  phase: number; activePhase: number; onClick: () => void;
-}) {
+// ─── PHASE HEADER BUTTON ──────────────────────────────────────────────────────
+function PhaseHeader({
+  phase, activePhase, onClick,
+}: { phase: number; activePhase: number; onClick: () => void }) {
   const { icon: Icon, label, sub } = PHASE_LABELS[phase]!;
   const isActive = phase === activePhase;
   return (
@@ -72,8 +80,8 @@ function PhaseHeader({ phase, activePhase, onClick }: {
       className="flex flex-col items-center gap-1.5 px-4 py-3 rounded-xl transition-all duration-300 text-center flex-1"
       style={{
         background: isActive ? GOLD_RGBA(0.1) : 'rgba(255,255,255,0.02)',
-        border: `1px solid ${isActive ? GOLD_RGBA(0.35) : GOLD_RGBA(0.08)}`,
-        boxShadow: isActive ? `0 0 18px ${GOLD_RGBA(0.15)}` : 'none',
+        border:     `1px solid ${isActive ? GOLD_RGBA(0.35) : GOLD_RGBA(0.08)}`,
+        boxShadow:  isActive ? `0 0 18px ${GOLD_RGBA(0.15)}` : 'none',
       }}
     >
       <Icon className="w-4 h-4" style={{ color: isActive ? GOLD : 'rgba(148,163,184,0.5)' }} />
@@ -87,6 +95,7 @@ function PhaseHeader({ phase, activePhase, onClick }: {
   );
 }
 
+// ─── THREE MONTH SUMMARY PHASE ────────────────────────────────────────────────
 function ThreeMonthSummary({
   name, dob, city, score, insight, remedy, practicalTip, rashi,
   luckyColor, luckyNumber, pillarScores, aiData, aiLoading,
@@ -96,6 +105,11 @@ function ThreeMonthSummary({
   dashaBalance, choghadiya, choghadiyaType, tithi, vara, yoga,
   rahuStart, rahuEnd, abhijeetStart, abhijeetEnd, planets,
   autoSegment, autoSegmentLabel,
+  // ✅ NEW props
+  lang,
+  partnerName, partnerDob, partnerLagna,
+  partnerMahadasha, partnerNakshatra, partnerPlanets,
+  isPredictionPaid, onPredictionUnlock,
 }: {
   name: string; dob: string; city: string;
   score: number; insight: string; remedy: string; practicalTip: string;
@@ -115,6 +129,19 @@ function ThreeMonthSummary({
   }>;
   autoSegment: string;
   autoSegmentLabel: string;
+  // NEW
+  lang: 'hindi' | 'hinglish' | 'english';
+  partnerName?: string;
+  partnerDob?: string;
+  partnerLagna?: string;
+  partnerMahadasha?: string;
+  partnerNakshatra?: string;
+  partnerPlanets?: Array<{
+    name: string; rashi: string; house: number; strength: number;
+    isRetrograde: boolean; nakshatra: string; degree: number;
+  }>;
+  isPredictionPaid: boolean;
+  onPredictionUnlock: () => void;
 }) {
   return (
     <div className="space-y-6">
@@ -135,26 +162,41 @@ function ThreeMonthSummary({
         />
       )}
 
-      {/* ── 2. AUTO PREDICTION — RIGHT AFTER KUNDALI (Yellow arrow area) ── */}
+      {/* ── 2. PERSONALIZED PREDICTION — 3-Layer Trikal Intelligence Engine ── */}
+      {/* ✅ YELLOW ARROW LOCATION — replaces old AutoPrediction */}
       {lagna && (
-        <AutoPrediction
+        <PersonalizedPrediction
           name={name}
           lagna={lagna}
           mahadasha={mahadasha}
           antardasha={antardasha}
           nakshatra={nakshatra}
-          choghadiya={choghadiya}
-          choghadiyaType={choghadiyaType}
           planets={planets}
+          dob={dob}
           autoSegment={autoSegment || 'default'}
           autoSegmentLabel={autoSegmentLabel}
+          lang={lang}
+          // Dual chart props
+          partnerName={partnerName}
+          partnerDob={partnerDob}
+          partnerLagna={partnerLagna}
+          partnerMahadasha={partnerMahadasha}
+          partnerNakshatra={partnerNakshatra}
+          partnerPlanets={partnerPlanets}
+          // Unlock — demo mode (Option C): free for now, Razorpay in Phase 3
+          isPaid={isPredictionPaid}
+          onUnlockClick={onPredictionUnlock}
         />
       )}
 
-      {/* ── 3. 3 MONTH SUMMARY ── */}
+      {/* ── 3. 3-MONTH SUMMARY CARD ── */}
       <div
         className="rounded-2xl p-6 sm:p-8"
-        style={{ background: 'rgba(4,8,20,0.85)', border: `1px solid ${GOLD_RGBA(0.12)}`, backdropFilter: 'blur(12px)' }}
+        style={{
+          background:     'rgba(4,8,20,0.85)',
+          border:         `1px solid ${GOLD_RGBA(0.12)}`,
+          backdropFilter: 'blur(12px)',
+        }}
       >
         <p className="text-xs font-semibold tracking-widest uppercase mb-2" style={{ color: GOLD_RGBA(0.45) }}>
           Your Next 3 Months at a Glance
@@ -180,14 +222,21 @@ function ThreeMonthSummary({
         </div>
       </div>
 
+      {/* ── 4. ENERGY METER + INSIGHT ── */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div
           className="rounded-2xl p-6 sm:p-8 flex flex-col items-center"
-          style={{ background: 'rgba(4,8,20,0.85)', border: `1px solid ${GOLD_RGBA(0.12)}`, backdropFilter: 'blur(12px)' }}
+          style={{
+            background:     'rgba(4,8,20,0.85)',
+            border:         `1px solid ${GOLD_RGBA(0.12)}`,
+            backdropFilter: 'blur(12px)',
+          }}
         >
           <div className="mb-4 text-center">
             <h2 className="text-sm font-semibold text-white mb-1">Daily Energy Score</h2>
-            <p className="text-xs text-slate-500">Calculated from your birth data + today&apos;s Gochar</p>
+            <p className="text-xs text-slate-500">
+              Calculated from your birth data + today&apos;s Gochar
+            </p>
           </div>
           <EnergyMeter score={score} name={name} />
         </div>
@@ -199,8 +248,10 @@ function ThreeMonthSummary({
         </div>
       </div>
 
+      {/* ── 5. PILLAR SCORES ── */}
       <PillarScoreGrid scores={pillarScores} />
 
+      {/* ── 6. FUTURE TIMELINE ── */}
       {monthlyTimeline.length > 0 && (
         <div>
           <FutureTimeline forecasts={monthlyTimeline} name={name} />
@@ -225,6 +276,7 @@ function ThreeMonthSummary({
   );
 }
 
+// ─── KUNDALI PHASE ────────────────────────────────────────────────────────────
 function KundaliPhase({
   name, dob, rashi, dashaPeriods, lifeTimeline, unlockedTiers, onUnlock,
 }: {
@@ -233,20 +285,25 @@ function KundaliPhase({
   unlockedTiers: Set<string>; onUnlock: (id: string) => void;
 }) {
   const currentYear = new Date().getFullYear();
-  const planets = derivePlanetsFromDob(dob);
+  const planets     = derivePlanetsFromDob(dob);
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <LagnaChart ascendant={rashi} planets={planets} name={name} />
-        <VimshottariDashaTable dashaPeriods={dashaPeriods} currentYear={currentYear} name={name} />
+        <VimshottariDashaTable
+          dashaPeriods={dashaPeriods} currentYear={currentYear} name={name}
+        />
       </div>
       {lifeTimeline.length > 0 && (
-        <LifeTimeline events={lifeTimeline} dashaPeriods={dashaPeriods} name={name} />
+        <LifeTimeline
+          events={lifeTimeline} dashaPeriods={dashaPeriods} name={name}
+        />
       )}
     </div>
   );
 }
 
+// ─── GURU ANALYSIS PHASE ──────────────────────────────────────────────────────
 function GuruAnalysisPhase({
   name, generation, segmentAnalysis, segmentLoading, onSegmentAnalyze,
   aiData, aiLoading, varshphalFocus, ashtakvargaWealth, dob, userDob,
@@ -288,7 +345,11 @@ function GuruAnalysisPhase({
       )}
       <div
         className="rounded-2xl p-6 sm:p-8"
-        style={{ background: 'rgba(4,8,20,0.8)', border: '1px solid rgba(34,197,94,0.15)', backdropFilter: 'blur(12px)' }}
+        style={{
+          background:     'rgba(4,8,20,0.8)',
+          border:         '1px solid rgba(34,197,94,0.15)',
+          backdropFilter: 'blur(12px)',
+        }}
       >
         <div className="mb-5">
           <h3 className="text-base font-semibold text-white mb-1">Share & Connect</h3>
@@ -304,23 +365,26 @@ function GuruAnalysisPhase({
   );
 }
 
+// ─── RESULT CONTENT ───────────────────────────────────────────────────────────
 function ResultContent() {
   const params = useSearchParams();
 
-  const name     = params.get('name')     || 'Friend';
-  const dob      = params.get('dob')      || '';
-  const city     = params.get('city')     || '';
-  const score    = parseInt(params.get('score')  || '72', 10);
-  const rashi    = params.get('rashi')    || 'Mesha';
-  const luckyColor   = params.get('color')   || 'Golden';
+  // ── Core params
+  const name         = params.get('name')     || 'Friend';
+  const dob          = params.get('dob')      || '';
+  const city         = params.get('city')     || '';
+  const score        = parseInt(params.get('score')   || '72', 10);
+  const rashi        = params.get('rashi')    || 'Mesha';
+  const luckyColor   = params.get('color')    || 'Golden';
   const luckyNumber  = parseInt(params.get('number')  || '7', 10);
-  const insight      = params.get('insight') || 'The stars illuminate your path today.';
-  const remedy       = params.get('remedy')  || 'Chant the Gayatri Mantra 21 times at sunrise.';
-  const practicalTip = params.get('tip')     || 'Avoid major decisions under time pressure today.';
-  const generation   = (params.get('gen') || 'millennial') as 'genz' | 'millennial' | 'genx';
+  const insight      = params.get('insight')  || 'The stars illuminate your path today.';
+  const remedy       = params.get('remedy')   || 'Chant the Gayatri Mantra 21 times at sunrise.';
+  const practicalTip = params.get('tip')      || 'Avoid major decisions under time pressure today.';
+  const generation   = (params.get('gen')     || 'millennial') as 'genz' | 'millennial' | 'genx';
   const varshphalFocus    = params.get('varshphal') || 'Jupiter rules your Varshphal year.';
   const ashtakvargaWealth = parseInt(params.get('avwealth') || '24', 10);
 
+  // ── Kundali params
   const lagna          = params.get('lagna')          || '';
   const lagnaLord      = params.get('lagnaLord')      || '';
   const nakshatra      = params.get('nakshatra')      || '';
@@ -340,6 +404,18 @@ function ResultContent() {
   const autoSegment      = params.get('autoSegment')      || 'default';
   const autoSegmentLabel = params.get('autoSegmentLabel') || '';
 
+  // ✅ NEW — Language param
+  const lang = (params.get('lang') || 'hinglish') as 'hindi' | 'hinglish' | 'english';
+
+  // ✅ NEW — Partner/dual chart params
+  const partnerName      = params.get('partnerName')   || '';
+  const partnerDob       = params.get('partnerDob')    || '';
+  const partnerCity      = params.get('partnerCity')   || '';
+  const partnerLagna     = params.get('partnerLagna')  || '';
+  const partnerMahadasha = params.get('partnerMahadasha') || '';
+  const partnerNakshatra = params.get('partnerNakshatra') || '';
+
+  // ── Planets
   let planets: Array<{
     name: string; rashi: string; house: number; strength: number;
     isRetrograde: boolean; nakshatra: string; degree: number;
@@ -349,6 +425,14 @@ function ResultContent() {
     if (raw) planets = JSON.parse(raw);
   } catch { /* fallback */ }
 
+  // ✅ Partner planets (future — when dual Prokerala is wired)
+  let partnerPlanets: typeof planets = [];
+  try {
+    const raw = params.get('partnerPlanets');
+    if (raw) partnerPlanets = JSON.parse(raw);
+  } catch { /* fallback */ }
+
+  // ── Pillar scores
   const pillarScores = {
     wealth:   parseInt(params.get('wealth')   || '72', 10),
     career:   parseInt(params.get('career')   || '68', 10),
@@ -358,8 +442,9 @@ function ResultContent() {
     peace:    parseInt(params.get('peace')    || '69', 10),
   };
 
-  let dashaPeriods: DashaPeriod[] = [];
-  let lifeTimeline: LifeTimelineEvent[] = [];
+  // ── Dasha + timeline
+  let dashaPeriods: DashaPeriod[]         = [];
+  let lifeTimeline: LifeTimelineEvent[]   = [];
   try {
     const dashaRaw    = params.get('dasha');
     if (dashaRaw)    dashaPeriods = JSON.parse(dashaRaw);
@@ -367,6 +452,7 @@ function ResultContent() {
     if (timelineRaw) lifeTimeline = JSON.parse(timelineRaw);
   } catch { /* fallback */ }
 
+  // ── State
   const [activePhase, setActivePhase]         = useState(0);
   const [aiData, setAiData]                   = useState<PredictiveTabsData | null>(null);
   const [monthlyTimeline, setMonthlyTimeline] = useState<MonthForecast[]>([]);
@@ -378,17 +464,35 @@ function ResultContent() {
   const [compatLoading, setCompatLoading]     = useState(false);
   const [unlockedTiers, setUnlockedTiers]     = useState<Set<string>>(new Set());
 
+  // ✅ NEW — Prediction unlock state
+  // Option C: demo mode — unlocks immediately on click (no payment)
+  // Phase 3: swap this for Razorpay payment check
+  const [isPredictionPaid, setIsPredictionPaid] = useState(false);
+  const [unlockLoading, setUnlockLoading]       = useState(false);
+
+  // ✅ DEMO UNLOCK HANDLER — replace with Razorpay in Phase 3
+  const handlePredictionUnlock = useCallback(() => {
+    setUnlockLoading(true);
+    // Simulate brief loading for UX — feels real even in demo
+    setTimeout(() => {
+      setIsPredictionPaid(true);
+      setUnlockLoading(false);
+    }, 1200);
+  }, []);
+
   const basePayload = {
     name, dob, city, generation, rashi,
     dashaPeriods, pillarScores, ashtakvargaWealth, varshphalFocus,
   };
 
+  // ── AI data fetch
   useEffect(() => {
     if (!dob || !SUPABASE_URL) { setAiLoading(false); return; }
     callEdge({ ...basePayload, mode: 'predict' })
       .then((json) => {
         const { career, love, wealth, guruMessage, monthlyTimeline: mt } = json;
-        if (career && love && wealth) setAiData({ career, love, wealth, guruMessage: guruMessage || '' });
+        if (career && love && wealth)
+          setAiData({ career, love, wealth, guruMessage: guruMessage || '' });
         if (Array.isArray(mt) && mt.length > 0) setMonthlyTimeline(mt);
       })
       .catch(() => {})
@@ -396,10 +500,16 @@ function ResultContent() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dob]);
 
+  // ── Auto segment edge call
   useEffect(() => {
     if (!autoSegment || autoSegment === 'default' || !dob || !SUPABASE_URL) return;
     setSegmentLoading(true);
-    callEdge({ ...basePayload, mode: 'segment', segmentId: autoSegment, segmentLabel: autoSegmentLabel || autoSegment })
+    callEdge({
+      ...basePayload,
+      mode: 'segment',
+      segmentId: autoSegment,
+      segmentLabel: autoSegmentLabel || autoSegment,
+    })
       .then((json) => {
         setSegmentAnalysis(json as SegmentAnalysis);
         if (json.whatsappText) setLatestWhatsapp(json.whatsappText);
@@ -409,7 +519,10 @@ function ResultContent() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dob, autoSegment]);
 
-  const handleSegmentAnalyze = useCallback(async (segment: LifeSegment, partnerData?: PartnerFormData) => {
+  const handleSegmentAnalyze = useCallback(async (
+    segment: LifeSegment,
+    partnerData?: PartnerFormData
+  ) => {
     setSegmentLoading(true);
     setSegmentAnalysis(null);
     try {
@@ -419,9 +532,11 @@ function ResultContent() {
       };
       if (partnerData) {
         payload.partner = {
-          name: partnerData.name, dob: partnerData.dob,
-          birth_time: partnerData.birth_time, city: partnerData.city,
-          gender: partnerData.gender,
+          name:       partnerData.name,
+          dob:        partnerData.dob,
+          birth_time: partnerData.birth_time,
+          city:       partnerData.city,
+          gender:     partnerData.gender,
         };
       }
       const json = await callEdge(payload);
@@ -457,6 +572,7 @@ function ResultContent() {
       <main className="pt-24 pb-16 px-4">
         <div className="max-w-5xl mx-auto">
 
+          {/* Back + name breadcrumb */}
           <div className="mb-6 flex items-center gap-3">
             <Link
               href="/"
@@ -469,10 +585,13 @@ function ResultContent() {
             <span className="text-xs text-slate-600">
               Results for <span className="text-yellow-400/60">{name}</span>
               {city && ` · ${city}`}
-              {dob && ` · Born ${new Date(dob).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}`}
+              {dob && ` · Born ${new Date(dob).toLocaleDateString('en-IN', {
+                day: 'numeric', month: 'long', year: 'numeric',
+              })}`}
             </span>
           </div>
 
+          {/* Hero greeting */}
           <div
             className="text-center mb-8 py-6 px-4 rounded-2xl"
             style={{ background: 'rgba(4,8,20,0.75)', border: `1px solid ${GOLD_RGBA(0.1)}` }}
@@ -486,16 +605,24 @@ function ResultContent() {
             </h1>
             <p className="text-slate-400 text-sm mt-2">
               Your Trikal Analysis for{' '}
-              {new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+              {new Date().toLocaleDateString('en-IN', {
+                weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
+              })}
             </p>
           </div>
 
+          {/* Phase tabs */}
           <div className="flex gap-2 sm:gap-3 mb-8">
             {PHASE_LABELS.map((_, i) => (
-              <PhaseHeader key={i} phase={i} activePhase={activePhase} onClick={() => setActivePhase(i)} />
+              <PhaseHeader
+                key={i} phase={i}
+                activePhase={activePhase}
+                onClick={() => setActivePhase(i)}
+              />
             ))}
           </div>
 
+          {/* Phase label */}
           <div
             className="text-xs font-semibold tracking-widest uppercase mb-5 flex items-center gap-2"
             style={{ color: GOLD_RGBA(0.45) }}
@@ -504,14 +631,17 @@ function ResultContent() {
             Phase {activePhase + 1} — {PHASE_LABELS[activePhase]!.label}
           </div>
 
+          {/* ── PHASE 1 ── */}
           {activePhase === 0 && (
             <ThreeMonthSummary
               name={name} dob={dob} city={city}
               score={score} insight={insight} remedy={remedy}
               practicalTip={practicalTip} rashi={rashi}
               luckyColor={luckyColor} luckyNumber={luckyNumber}
-              pillarScores={pillarScores} aiData={aiData} aiLoading={aiLoading}
-              varshphalFocus={varshphalFocus} ashtakvargaWealth={ashtakvargaWealth}
+              pillarScores={pillarScores}
+              aiData={aiData} aiLoading={aiLoading}
+              varshphalFocus={varshphalFocus}
+              ashtakvargaWealth={ashtakvargaWealth}
               monthlyTimeline={monthlyTimeline}
               unlockedTiers={unlockedTiers} onUnlock={handleUnlockContent}
               lagna={lagna} lagnaLord={lagnaLord}
@@ -525,9 +655,20 @@ function ResultContent() {
               planets={planets}
               autoSegment={autoSegment}
               autoSegmentLabel={autoSegmentLabel}
+              // ✅ NEW
+              lang={lang}
+              partnerName={partnerName || undefined}
+              partnerDob={partnerDob || undefined}
+              partnerLagna={partnerLagna || undefined}
+              partnerMahadasha={partnerMahadasha || undefined}
+              partnerNakshatra={partnerNakshatra || undefined}
+              partnerPlanets={partnerPlanets.length > 0 ? partnerPlanets : undefined}
+              isPredictionPaid={isPredictionPaid}
+              onPredictionUnlock={handlePredictionUnlock}
             />
           )}
 
+          {/* ── PHASE 2 ── */}
           {activePhase === 1 && (
             <KundaliPhase
               name={name} dob={dob} rashi={rashi}
@@ -536,13 +677,15 @@ function ResultContent() {
             />
           )}
 
+          {/* ── PHASE 3 ── */}
           {activePhase === 2 && (
             <GuruAnalysisPhase
               name={name} generation={generation}
               segmentAnalysis={segmentAnalysis} segmentLoading={segmentLoading}
               onSegmentAnalyze={handleSegmentAnalyze}
               aiData={aiData} aiLoading={aiLoading}
-              varshphalFocus={varshphalFocus} ashtakvargaWealth={ashtakvargaWealth}
+              varshphalFocus={varshphalFocus}
+              ashtakvargaWealth={ashtakvargaWealth}
               dob={dob} userDob={dob}
               compatResult={compatResult} compatLoading={compatLoading}
               onCompatCheck={handleCompatCheck}
@@ -551,6 +694,7 @@ function ResultContent() {
             />
           )}
 
+          {/* Pricing section */}
           <div id="pricing" className="mt-8 mb-6">
             <PricingLadder
               name={name}
@@ -559,6 +703,7 @@ function ResultContent() {
             />
           </div>
 
+          {/* New analysis CTA */}
           <div className="text-center">
             <Link
               href="/"
@@ -569,6 +714,7 @@ function ResultContent() {
               Analyse another person
             </Link>
           </div>
+
         </div>
       </main>
       <SiteFooter />
@@ -576,6 +722,7 @@ function ResultContent() {
   );
 }
 
+// ─── ROOT EXPORT ──────────────────────────────────────────────────────────────
 export default function ResultPage() {
   return (
     <Suspense
