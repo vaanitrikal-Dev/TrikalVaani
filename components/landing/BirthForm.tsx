@@ -1,11 +1,12 @@
 /**
  * ⚠️ STRICT CEO ORDER: LOGIC FROZEN
  * DO NOT EDIT, DELETE, OR REFACTOR THIS FILE.
- * VERSION: 5.0 (GOD-LEVEL PROTECTION)
+ * VERSION: 6.0 (GOD-LEVEL PROTECTION)
  * SIGNED: ROHIIT GUPTA, CEO
  * PURPOSE: BIRTH FORM — PROKERALA SERVER API (100% ACCURATE)
- * v5.0 CHANGE: Added language selector (Hindi / Hinglish / English)
- *              Lang stored as `lang` URL param — passed to result page
+ * v5.0: Language selector added
+ * v6.0: Pratyantar + Sookshma Dasha params added to URL
+ *        pratyantar list + currentPratyantar passed to result page
  * WARNING: DO NOT CHANGE handleSubmit — BREAKS KUNDALI CALCULATION
  */
 
@@ -468,6 +469,43 @@ export default function BirthForm({ selectedCategory }: Props) {
             degree:       p.degree,
           }))
         ),
+        // ✅ v6.0 — Pratyantar + Sookshma Dasha (Level 3 + 4)
+        ...(kundali.currentPratyantar ? {
+          pratayantarLord:     kundali.currentPratyantar.lord,
+          pratayantarStart:    kundali.currentPratyantar.startDate instanceof Date
+            ? kundali.currentPratyantar.startDate.toISOString()
+            : String(kundali.currentPratyantar.startDate),
+          pratayantarEnd:      kundali.currentPratyantar.endDate instanceof Date
+            ? kundali.currentPratyantar.endDate.toISOString()
+            : String(kundali.currentPratyantar.endDate),
+          pratayantarDays:     String(kundali.currentPratyantar.durationDays),
+          pratayantarQuality:  kundali.currentPratyantar.quality,
+          pratayantarRemDays:  String(kundali.currentPratyantar.remainingDays),
+        } : {}),
+        ...(kundali.currentSookshma ? {
+          sookshmaLord:        kundali.currentSookshma.lord,
+          sookshmaStart:       kundali.currentSookshma.startDate instanceof Date
+            ? kundali.currentSookshma.startDate.toISOString()
+            : String(kundali.currentSookshma.startDate),
+          sookshmaEnd:         kundali.currentSookshma.endDate instanceof Date
+            ? kundali.currentSookshma.endDate.toISOString()
+            : String(kundali.currentSookshma.endDate),
+          sookshmaDays:        String(kundali.currentSookshma.durationDays),
+          sookshmaQuality:     kundali.currentSookshma.quality,
+        } : {}),
+        // Full Pratyantar list — for PratayantarDasha component
+        ...(kundali.pratyantar?.length ? {
+          pratayantarList: JSON.stringify(
+            kundali.pratyantar.map((p: any) => ({
+              lord:          p.lord,
+              startDate:     p.startDate instanceof Date ? p.startDate.toISOString() : p.startDate,
+              endDate:       p.endDate instanceof Date ? p.endDate.toISOString() : p.endDate,
+              durationDays:  p.durationDays,
+              quality:       p.quality,
+              remainingDays: p.remainingDays,
+            }))
+          ),
+        } : {}),
         ...(effectiveQuestion ? {
           autoSegment:      effectiveQuestion.id,
           autoSegmentLabel: effectiveQuestion.label,
