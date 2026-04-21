@@ -252,19 +252,31 @@ IMPORTANT: Every claim must trace to a specific planet or transit. Speak directl
 }
 
 // ─── PARSER ───────────────────────────────────────────────────────────────────
+// Smart parser — tries structured labels first, falls back to full raw text
 function parseDeep(raw: string, isDual: boolean) {
-  const get = (key: string) => {
-    const m = raw.match(new RegExp(`${key}:\\s*([\\s\\S]*?)(?=\\n[A-Z_]+:|$)`, 'i'));
+  const get = (key: string): string => {
+    const m = raw.match(new RegExp(`${key}[:\\s]*([\\s\\S]*?)(?=\\n[A-Z_]+[:\\s]|$)`, 'i'));
     return m?.[1]?.trim() ?? '';
   };
+
+  // Try structured parse first
+  const mainPrediction = get('MAIN_PREDICTION');
+  const keyDates       = get('KEY_DATES');
+  const actionAdvice   = get('ACTION_ADVICE');
+  const closingHook    = get('CLOSING_HOOK');
+
+  // ✅ SMART FALLBACK: if Gemini ignored labels and wrote flowing prose,
+  // use the full raw text as mainPrediction — never show blank
+  const hasStructure = mainPrediction.length > 20;
+
   return {
     redFlagScore:   isDual ? parseInt(get('RED_FLAG_SCORE') || '0', 10) : 0,
     greenFlagScore: isDual ? parseInt(get('GREEN_FLAG_SCORE') || '0', 10) : 0,
     flagSummary:    get('FLAG_SUMMARY'),
-    mainPrediction: get('MAIN_PREDICTION'),
-    keyDates:       get('KEY_DATES'),
-    actionAdvice:   get('ACTION_ADVICE'),
-    closingHook:    get('CLOSING_HOOK'),
+    mainPrediction: hasStructure ? mainPrediction : raw.trim(),
+    keyDates:       keyDates,
+    actionAdvice:   actionAdvice,
+    closingHook:    closingHook,
   };
 }
 
@@ -354,31 +366,11 @@ export default function PersonalizedPrediction({
       }),
     })
       .then(r => r.json())
-      // ✅ FIXED — fallback when Gemini fails
-.then(d => {
-  const reply = d.reply ?? d.message ?? d.text ?? '';
-  if (reply?.length > 50) {
-    setDeep(parseDeep(reply, isDual));
-  } else {
-    // Gemini failed — show rule-based deep reading
-    setDeep({
-      redFlagScore: 0, greenFlagScore: 0, flagSummary: '',
-      mainPrediction: hook,
-      keyDates: 'May 2026 — Important decision window\nJune 2026 — Jupiter transit opportunity\nJuly 2026 — Naye raaste khulenge',
-      actionAdvice: '1. Primary goal par focus karein\n2. Venus uchcha hai — rishtein mein invest karein\n3. Rohiit Gupta ji ka Trikal framework kehta hai — abhi action lo',
-      closingHook: 'Aapke chart mein ek aur raaz hai — jo sirf poori reading mein saamne aata hai...',
-    });
-  }
-})
-.catch(() => {
-  setDeep({
-    redFlagScore: 0, greenFlagScore: 0, flagSummary: '',
-    mainPrediction: hook,
-    keyDates: 'May 2026 — Key window\nJune 2026 — Jupiter opportunity\nJuly 2026 — New doors',
-    actionAdvice: '1. Focus on primary goal\n2. Venus exalted — invest in relationships\n3. Act now — Trikal framework says timing is everything',
-    closingHook: 'One more secret in your chart — reveals in complete reading...',
-  });
-})
+      .then(d => {
+        const reply = d.reply ?? d.message ?? d.text ?? '';
+        if (reply?.length > 50) setDeep(parseDeep(reply, isDual));
+      })
+      .catch(e => console.error('[Trikal] Gemini error:', e))
       .finally(() => {
         clearInterval(cd);
         setLoading(false);
