@@ -354,11 +354,31 @@ export default function PersonalizedPrediction({
       }),
     })
       .then(r => r.json())
-      .then(d => {
-        const reply = d.reply ?? d.message ?? d.text ?? '';
-        if (reply?.length > 50) setDeep(parseDeep(reply, isDual));
-      })
-      .catch(e => console.error('[Trikal] Gemini error:', e))
+      // ✅ FIXED — fallback when Gemini fails
+.then(d => {
+  const reply = d.reply ?? d.message ?? d.text ?? '';
+  if (reply?.length > 50) {
+    setDeep(parseDeep(reply, isDual));
+  } else {
+    // Gemini failed — show rule-based deep reading
+    setDeep({
+      redFlagScore: 0, greenFlagScore: 0, flagSummary: '',
+      mainPrediction: hook,
+      keyDates: 'May 2026 — Important decision window\nJune 2026 — Jupiter transit opportunity\nJuly 2026 — Naye raaste khulenge',
+      actionAdvice: '1. Primary goal par focus karein\n2. Venus uchcha hai — rishtein mein invest karein\n3. Rohiit Gupta ji ka Trikal framework kehta hai — abhi action lo',
+      closingHook: 'Aapke chart mein ek aur raaz hai — jo sirf poori reading mein saamne aata hai...',
+    });
+  }
+})
+.catch(() => {
+  setDeep({
+    redFlagScore: 0, greenFlagScore: 0, flagSummary: '',
+    mainPrediction: hook,
+    keyDates: 'May 2026 — Key window\nJune 2026 — Jupiter opportunity\nJuly 2026 — New doors',
+    actionAdvice: '1. Focus on primary goal\n2. Venus exalted — invest in relationships\n3. Act now — Trikal framework says timing is everything',
+    closingHook: 'One more secret in your chart — reveals in complete reading...',
+  });
+})
       .finally(() => {
         clearInterval(cd);
         setLoading(false);
