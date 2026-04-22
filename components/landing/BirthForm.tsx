@@ -1,7 +1,7 @@
 /**
  * ⚠️ STRICT CEO ORDER: LOGIC FROZEN
  * DO NOT EDIT, DELETE, OR REFACTOR THIS FILE.
- * VERSION: 8.0 (GOD-LEVEL PROTECTION)
+ * VERSION: 9.0 (GOD-LEVEL PROTECTION)
  * SIGNED: ROHIIT GUPTA, CEO
  * PURPOSE: BIRTH FORM — PROKERALA SERVER API (100% ACCURATE)
  * v5.0: Language selector added
@@ -224,7 +224,7 @@ function MobileNumerologyCapture({
         <div className="relative flex-1">
           <input
             type="tel"
-            placeholder="Mobile number"
+            placeholder="Number"
             value={mobile}
             onChange={e => {
               const val = e.target.value.replace(/[^0-9]/g, '').slice(0, 15);
@@ -1014,6 +1014,24 @@ export default function BirthForm({ selectedCategory }: Props) {
                 }}
               />
 
+              {/* Partner mobile for ex-back / compatibility */}
+              {isExBack && (
+                <div
+                  className="rounded-xl px-4 py-3 flex items-center gap-3"
+                  style={{ background: 'rgba(244,114,182,0.05)', border: '1px solid rgba(244,114,182,0.15)' }}
+                >
+                  <span style={{ fontSize: 13 }}>📱</span>
+                  <div className="flex-1">
+                    <p className="text-xs font-semibold" style={{ color: '#F472B6' }}>
+                      Ex-Partner ka mobile number (Optional)
+                    </p>
+                    <p className="text-xs text-slate-500">
+                      Numerology cross-match — kya aapke numbers compatible hain?
+                    </p>
+                  </div>
+                </div>
+              )}
+
               {!isToxicBoss && (
                 <div className="flex items-center gap-3 px-1">
                   <span className="text-xs text-slate-500">Their gender:</span>
@@ -1038,6 +1056,21 @@ export default function BirthForm({ selectedCategory }: Props) {
                   </div>
                 </div>
               )}
+
+              {/* ✅ v9.0 — Profile + Mobile in Dual Mode */}
+              <ProfileSelector
+                employment={employment}
+                sector={sector}
+                onEmploymentChange={setEmployment}
+                onSectorChange={setSector}
+              />
+
+              <MobileNumerologyCapture
+                mobile={mobile}
+                onMobileChange={setMobile}
+                name={form.name}
+                lang={selectedLang}
+              />
 
               {/* ✅ Language Selector — Dual Mode */}
               <LanguageSelector selected={selectedLang} onSelect={setSelectedLang} />
