@@ -134,9 +134,11 @@ function MobileNumerologyCapture({
   name: string;
   lang: Lang;
 }) {
-  const lifePath = calcLifePath(mobile);
-  const data     = LIFE_PATH_DATA[lifePath];
-  const isValid  = mobile.replace(/\D/g, '').length >= 10;
+  const [countryCode, setCountryCode] = useState('+91');
+  const lifePath  = calcLifePath(mobile);
+  const data      = LIFE_PATH_DATA[lifePath];
+  // Valid if at least 6 digits (international numbers vary in length)
+  const isValid   = mobile.replace(/\D/g, '').length >= 6;
   const firstName = name.split(' ')[0] || 'aap';
 
   return (
@@ -175,32 +177,70 @@ function MobileNumerologyCapture({
         </p>
       </div>
 
-      {/* Input */}
-      <div className="relative mb-4">
-        <div
-          className="absolute left-3.5 top-1/2 -translate-y-1/2 flex items-center gap-1.5 pointer-events-none"
-        >
-          <span className="text-xs font-bold" style={{ color: GOLD_RGBA(0.6) }}>+91</span>
-          <div style={{ width: 1, height: 14, background: GOLD_RGBA(0.2) }} />
-        </div>
-        <input
-          type="tel"
-          placeholder="Enter 10-digit mobile number"
-          value={mobile}
-          onChange={e => {
-            const val = e.target.value.replace(/[^0-9]/g, '').slice(0, 10);
-            onMobileChange(val);
+      {/* Country Code + Input */}
+      <div className="flex gap-2 mb-4">
+        {/* Country code selector */}
+        <select
+          value={countryCode}
+          onChange={e => setCountryCode(e.target.value)}
+          className="input-cosmic rounded-xl text-sm px-2"
+          style={{
+            colorScheme: 'dark',
+            width: 110, flexShrink: 0,
+            color: GOLD,
+            fontWeight: 600,
+            background: 'rgba(6,12,28,0.9)',
+            border: `1px solid ${GOLD_RGBA(0.25)}`,
           }}
-          className="input-cosmic w-full h-12 pl-16 pr-4 rounded-xl text-sm"
-          style={{ colorScheme: 'dark' }}
-          maxLength={10}
-        />
-        {isValid && (
-          <div
-            className="absolute right-3.5 top-1/2 -translate-y-1/2"
-            style={{ width: 8, height: 8, borderRadius: '50%', background: '#22C55E', boxShadow: '0 0 8px #22C55E' }}
+        >
+          <option value="+91">🇮🇳 +91</option>
+          <option value="+1">🇺🇸 +1</option>
+          <option value="+44">🇬🇧 +44</option>
+          <option value="+61">🇦🇺 +61</option>
+          <option value="+971">🇦🇪 +971</option>
+          <option value="+65">🇸🇬 +65</option>
+          <option value="+60">🇲🇾 +60</option>
+          <option value="+64">🇳🇿 +64</option>
+          <option value="+49">🇩🇪 +49</option>
+          <option value="+33">🇫🇷 +33</option>
+          <option value="+81">🇯🇵 +81</option>
+          <option value="+86">🇨🇳 +86</option>
+          <option value="+1-CA">🇨🇦 +1</option>
+          <option value="+27">🇿🇦 +27</option>
+          <option value="+94">🇱🇰 +94</option>
+          <option value="+977">🇳🇵 +977</option>
+          <option value="+880">🇧🇩 +880</option>
+          <option value="+92">🇵🇰 +92</option>
+          <option value="+966">🇸🇦 +966</option>
+          <option value="+974">🇶🇦 +974</option>
+          <option value="+973">🇧🇭 +973</option>
+          <option value="+968">🇴🇲 +968</option>
+          <option value="+31">🇳🇱 +31</option>
+          <option value="+41">🇨🇭 +41</option>
+          <option value="+7">🇷🇺 +7</option>
+        </select>
+
+        {/* Number input */}
+        <div className="relative flex-1">
+          <input
+            type="tel"
+            placeholder="Mobile number"
+            value={mobile}
+            onChange={e => {
+              const val = e.target.value.replace(/[^0-9]/g, '').slice(0, 15);
+              onMobileChange(val);
+            }}
+            className="input-cosmic w-full h-12 px-4 rounded-xl text-sm"
+            style={{ colorScheme: 'dark' }}
+            maxLength={15}
           />
-        )}
+          {isValid && (
+            <div
+              className="absolute right-3.5 top-1/2 -translate-y-1/2"
+              style={{ width: 8, height: 8, borderRadius: '50%', background: '#22C55E', boxShadow: '0 0 8px #22C55E' }}
+            />
+          )}
+        </div>
       </div>
 
       {/* Numerology Preview — shows after valid number */}
