@@ -887,15 +887,13 @@ export default function BirthForm({ selectedCategory }: Props) {
                   })}
                 </div>
 
-                {/* ✅ v7.0 — Employment + Sector Profiling */}
-                {form.dob && (
-                  <ProfileSelector
-                    employment={employment}
-                    sector={sector}
-                    onEmploymentChange={setEmployment}
-                    onSectorChange={setSector}
-                  />
-                )}
+                {/* ✅ v7.0 — Employment + Sector Profiling — always visible */}
+                <ProfileSelector
+                  employment={employment}
+                  sector={sector}
+                  onEmploymentChange={setEmployment}
+                  onSectorChange={setSector}
+                />
 
                 {detectedGen && !selectedCategory && (
                   <QuestionPicker
