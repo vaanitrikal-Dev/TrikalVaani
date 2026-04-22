@@ -105,12 +105,11 @@ export default function Hero() {
           </Link>
         </div>
 
-        {/* ✅ FIXED: Removed "100% Free Forever" — replaced with accurate stats */}
         <div className="mt-8 flex items-center gap-6">
           {[
-            { value: '10K+',  label: 'Analyses Done' },
-            { value: '5000',  label: 'Years of Wisdom' },
-            { value: 'Free',  label: 'To Start' },        // ✅ was "100% Free Forever"
+            { value: '10K+', label: 'Analyses Done' },
+            { value: '5000', label: 'Years of Wisdom' },
+            { value: '100%', label: 'Free Forever' },
           ].map((stat, i) => (
             <div key={stat.label} className="flex items-center gap-6">
               {i > 0 && <div className="w-px h-8 bg-white/10" />}
@@ -126,6 +125,7 @@ export default function Hero() {
       <a
         href="#pillars"
         className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-slate-500 transition-colors duration-300"
+        style={{ ['--hover-color' as string]: GOLD }}
         aria-label="Scroll down"
       >
         <span className="text-xs tracking-widest uppercase">Explore</span>
