@@ -158,17 +158,17 @@ function buildSuspenseHook(
     },
     manifestation: {
       hinglish: `${f} ji, Venus abhi Meen mein uchcha hai aur aapka ${nakshatra} — yeh rare combination sirf kuch logo ko milta hai.\n${mahadasha} Mahadasha mein sankalp shakti 10 guna zyada hai — lekin ek specific window hai.\nWoh window kab khulti hai — deep reading mein pata chalega...`,
-      hindi:    `${f} जी, शुक्र मीन में उच्च और आपका ${nakshatra} — यह combination दुर्लभ है।\n${mahadasha} महादशा में संकल्प शक्ति 10 गुना — लेकिन एक window है।\nवह window कब — deep reading में पता चलेगा...`,
+      hindi:    `${f} जी, शुक्र मीन में उच्च और आपका ${nakshatra} — यह संयोग दुर्लभ है।\n${mahadasha} महादशा में संकल्प शक्ति दस गुना — लेकिन एक विशेष समय है।\nवह समय कब आएगा — विस्तृत पढ़ाई में पता चलेगा...`,
       english:  `${f}, Venus exalted in Pisces and your ${nakshatra} — this rare combination belongs to very few.\nIn your ${mahadasha} Mahadasha, manifestation power is 10x — but there's a specific window.\nWhen that window opens — only the deep reading reveals...`,
     },
     dream_career: {
       hinglish: `${f} ji, Jupiter Vrishabh mein aur ${lagna} Lagna — ek unexpected career shift ki energy build ho rahi hai.\n${mahadasha}-${antardasha} mein ek bada faisla aane wala hai.\nKya yeh aapke favor mein hai? Jawab deep reading mein hai...`,
-      hindi:    `${f} जी, Jupiter वृषभ में और ${lagna} लग्न — career shift की energy build हो रही है।\n${mahadasha}-${antardasha} में एक बड़ा फैसला आने वाला है।\nक्या यह आपके favor में है? Deep reading में जवाब है...`,
+      hindi:    `${f} जी, गुरु वृषभ में और ${lagna} लग्न — करियर में बड़े बदलाव की शक्ति बन रही है।\n${mahadasha}-${antardasha} में एक महत्वपूर्ण निर्णय आने वाला है।\nक्या यह आपके पक्ष में है? विस्तृत पढ़ाई में उत्तर है...`,
       english:  `${f}, Jupiter in Taurus and ${lagna} Ascendant — a career shift energy is building.\nThe ${mahadasha}-${antardasha} brings a major decision soon.\nIs it in your favor? The deep reading has the answer...`,
     },
     property_yog: {
       hinglish: `${f} ji, Jupiter Vrishabh mein 4th house activate kar raha hai — property yog present hai.\nAaj Venus uchcha — documents aur agreements ke liye signal strong hai.\nLekin sahi muhurat ka pata hona zaroori hai — woh deep reading mein hai...`,
-      hindi:    `${f} जी, Jupiter वृषभ में 4th house activate — property yog present है।\nआज Venus उच्च — documents के लिए signal strong है।\nसही मुहूर्त deep reading में है...`,
+      hindi:    `${f} जी, गुरु वृषभ में चतुर्थ भाव सक्रिय — संपत्ति योग उपस्थित है।\nआज शुक्र उच्च — दस्तावेज़ों के लिए संकेत प्रबल है।\nसही मुहूर्त विस्तृत पढ़ाई में मिलेगा...`,
       english:  `${f}, Jupiter activating your 4th house — a property yoga is present.\nToday's exalted Venus signals strength for documents and agreements.\nBut the exact muhurta is in your deep reading...`,
     },
     retirement_peace: {
@@ -178,7 +178,7 @@ function buildSuspenseHook(
     },
     default: {
       hinglish: `${f} ji, aapka ${lagna} Lagna aur aaj ka cosmic sky — ek important life window abhi khuli hui hai.\n${mahadasha}-${antardasha} combination ek aise phase mein hai jo sirf kuch saal mein aata hai.\nIs window ka poora faayda kaise uthayein — deep reading mein specific action plan hai...`,
-      hindi:    `${f} जी, ${lagna} लग्न और आज का cosmic sky — एक life window खुली है।\n${mahadasha}-${antardasha} ऐसे phase में है जो सालों में आता है।\nइसका पूरा फायदा कैसे — deep reading में है...`,
+      hindi:    `${f} जी, ${lagna} लग्न और आज का ब्रह्मांडीय आकाश — एक महत्वपूर्ण जीवन खिड़की खुली है।\n${mahadasha}-${antardasha} ऐसे काल में है जो वर्षों में एक बार आता है।\nइसका पूरा लाभ कैसे उठाएं — विस्तृत पढ़ाई में बताया जाएगा...`,
       english:  `${f}, your ${lagna} Ascendant and today's cosmic sky — an important life window is open.\nThe ${mahadasha}-${antardasha} is in a phase that comes once in years.\nHow to fully use it — a specific action plan awaits in your deep reading...`,
     },
   };
