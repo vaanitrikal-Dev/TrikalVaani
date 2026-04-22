@@ -145,12 +145,14 @@ export default function SiteNav() {
             <Link href="/founder" className="text-sm text-slate-400 hover:text-slate-200 transition-colors duration-200">
               Founder
             </Link>
+
+            {/* ✅ FIXED: Updated email */}
             <a
-              href="mailto:vaanitrikal@gmail.com"
+              href="mailto:rohiit@trikalvaani.com"
               className="hidden lg:flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-300 transition-colors duration-200"
             >
               <Mail className="w-3.5 h-3.5" style={{ color: GOLD_RGBA(0.5) }} />
-              <span>vaanitrikal@gmail.com</span>
+              <span>rohiit@trikalvaani.com</span>
             </a>
 
             <LangSwitcher lang={lang} setLang={setLang} />
