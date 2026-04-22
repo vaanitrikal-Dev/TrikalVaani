@@ -1,7 +1,7 @@
 /**
  * ⚠️ STRICT CEO ORDER: LOGIC FROZEN
  * DO NOT EDIT, DELETE, OR REFACTOR THIS FILE.
- * VERSION: 5.0 (GOD-LEVEL PROTECTION)
+ * VERSION: 6.0 (GOD-LEVEL PROTECTION)
  * SIGNED: ROHIIT GUPTA, CEO
  * PURPOSE: RESULT PAGE — KUNDALI + PERSONALIZED PREDICTION + ALL PHASES
  * v5.0 CHANGES:
@@ -422,6 +422,10 @@ function ResultContent() {
   const abhijeetEnd    = params.get('abhijeetEnd')    || '';
   const autoSegment      = params.get('autoSegment')      || 'default';
   const autoSegmentLabel = params.get('autoSegmentLabel') || '';
+
+  // ✅ v7.0 — Employment + Sector profiling
+  const employment = params.get('employment') || '';
+  const sector     = params.get('sector')     || '';
 
   // ✅ v5.0 — Pratyantar Dasha params
   const pratayantarLord    = params.get('pratayantarLord')    || '';
