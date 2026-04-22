@@ -29,25 +29,29 @@ const GEMINI_URL     =
   'https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent';
 
 // ─── HINDI PLANET NAME MAP ────────────────────────────────────────────────────
-// Injected into every prompt when lang = hindi
-// Forces Gemini to use Devanagari for ALL planet/rashi names
+// STRONG version — placed at TOP of every Hindi prompt
+// Gemini 3 Flash follows instructions better when they are first and explicit
 const HINDI_PLANET_INSTRUCTION = `
-CRITICAL LANGUAGE RULE — HINDI MODE:
-Use ONLY these Devanagari names for planets and rashis. NEVER use English names:
-सूर्य (Sun) · चंद्र (Moon) · मंगल (Mars) · बुध (Mercury)
-गुरु/बृहस्पति (Jupiter) · शुक्र (Venus) · शनि (Saturn)
-राहु (Rahu) · केतु (Ketu)
+⚠️ MOST IMPORTANT RULE — READ THIS FIRST:
+You MUST write this entire response in pure Hindi (देवनागरी लिपि).
 
-राशि names: मेष · वृषभ · मिथुन · कर्क · सिंह · कन्या
-            तुला · वृश्चिक · धनु · मकर · कुंभ · मीन
+MANDATORY planet name replacements — use ONLY these, NEVER English:
+Sun = सूर्य | Moon = चंद्र | Mars = मंगल | Mercury = बुध
+Jupiter = गुरु | Venus = शुक्र | Saturn = शनि | Rahu = राहु | Ketu = केतु
 
-नक्षत्र names: अश्विनी · भरणी · कृत्तिका · रोहिणी · मृगशिरा · आर्द्रा
-               पुनर्वसु · पुष्य · आश्लेषा · मघा · पूर्व फाल्गुनी · उत्तर फाल्गुनी
-               हस्त · चित्रा · स्वाति · विशाखा · अनुराधा · ज्येष्ठा
-               मूल · पूर्वाषाढ़ा · उत्तराषाढ़ा · श्रवण · धनिष्ठा · शतभिषा
-               पूर्व भाद्रपद · उत्तर भाद्रपद · रेवती
+MANDATORY rashi name replacements:
+Aries/Mesh = मेष | Taurus/Vrishabh = वृषभ | Gemini/Mithun = मिथुन
+Cancer/Kark = कर्क | Leo/Simha = सिंह | Virgo/Kanya = कन्या
+Libra/Tula = तुला | Scorpio/Vrischik = वृश्चिक | Sagittarius/Dhanu = धनु
+Capricorn/Makar = मकर | Aquarius/Kumbh = कुंभ | Pisces/Meen = मीन
 
-Write EVERYTHING in Hindi (Devanagari script). No English words except proper nouns.
+MANDATORY term replacements:
+Mahadasha = महादशा | Antardasha = अंतर्दशा | Lagna = लग्न
+Nakshatra = नक्षत्र | Gochar = गोचर | Dasha = दशा
+house = भाव | transit = गोचर | exalted = उच्च | retrograde = वक्री
+
+Write ALL words in Hindi. No English planet names. No English astrology terms.
+This is non-negotiable — failure to use Hindi names makes the response invalid.
 `;
 
 // Hinglish planet names — for hinglish mode
@@ -171,8 +175,11 @@ export async function POST(req: NextRequest) {
     }
 
     // ── DEEP PREDICTION MODE — ₹51 reading ────────────────────────────────
+    // ✅ Hindi instruction FIRST — Gemini follows first instructions most reliably
     if (mode === 'deep_prediction') {
-      const fullPrompt = `${langInstruction}\n\n${message}`;
+      const fullPrompt = lang === 'hindi'
+        ? `${langInstruction}\n\nAB NEECHE DIYE FORMAT MEIN SIRF SHUDDH HINDI MEIN LIKHO. KOI BHI ANGREZI SHABD MAT LIKHO:\n\n${message}`
+        : `${langInstruction}\n\n${message}`;
       try {
         const reply = await callGemini(fullPrompt, null, 4096, 0.80);
         if (reply.length > 50) return NextResponse.json({ reply });
@@ -185,7 +192,9 @@ export async function POST(req: NextRequest) {
 
     // ── FOUR WEEK MODE — 4-week prediction ────────────────────────────────
     if (mode === 'four_week') {
-      const fullPrompt = `${langInstruction}\n\n${message}`;
+      const fullPrompt = lang === 'hindi'
+        ? `${langInstruction}\n\nSampurn jawab sirf Hindi mein do — koi bhi planet ka naam Angrezi mein mat likho:\n\n${message}`
+        : `${langInstruction}\n\n${message}`;
       try {
         const reply = await callGemini(fullPrompt, null, 4096, 0.82);
         return NextResponse.json({ reply });
