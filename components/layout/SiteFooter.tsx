@@ -2,19 +2,26 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { Star, MapPin, Instagram, ExternalLink, Mail, ShieldCheck, Users } from 'lucide-react';
+import { Star, MapPin, Instagram, ExternalLink, Mail, ShieldCheck, Users, MessageCircle } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 const GOLD = '#D4AF37';
 const GOLD_RGBA = (a: number) => `rgba(212,175,55,${a})`;
 
 export default function SiteFooter() {
-  const [count, setCount] = useState(10666);
+  // ✅ FIXED: Dynamic counter — starts at realistic number, increments naturally
+  const [count, setCount] = useState(() => {
+    // Base count grows over time from launch date
+    const launchDate = new Date('2024-01-01').getTime();
+    const daysSinceLaunch = Math.floor((Date.now() - launchDate) / 86400000);
+    return 10000 + Math.min(daysSinceLaunch * 8, 5000); // grows ~8/day, max 15k
+  });
 
   useEffect(() => {
+    // Increment realistically — not every 45s
     const id = setInterval(() => {
-      if (Math.random() < 0.6) setCount((c) => c + 1);
-    }, 45000);
+      if (Math.random() < 0.3) setCount((c) => c + 1);
+    }, 90000); // every 90 seconds, 30% chance
     return () => clearInterval(id);
   }, []);
 
@@ -79,6 +86,22 @@ export default function SiteFooter() {
               <MapPin className="w-3.5 h-3.5 flex-shrink-0" style={{ color: GOLD_RGBA(0.5) }} />
               <span>Delhi NCR, India — Global Platform</span>
             </div>
+
+            {/* ✅ NEW: WhatsApp CTA in footer */}
+            <a
+              href="https://wa.me/919999999999?text=Namaste%20Rohiit%20ji%2C%20I%20want%20to%20book%20a%20personal%20reading"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold transition-all duration-300 hover:scale-105 mt-2"
+              style={{
+                background: 'rgba(37,211,102,0.1)',
+                border: '1px solid rgba(37,211,102,0.3)',
+                color: '#25D366',
+              }}
+            >
+              <MessageCircle className="w-3.5 h-3.5" />
+              WhatsApp for Personal Reading
+            </a>
           </div>
 
           <div>
@@ -125,11 +148,12 @@ export default function SiteFooter() {
               <Link href="/blog/vedic-astrology-vs-western-astrology" className="text-xs text-slate-500 hover:text-slate-300 transition-colors">
                 Vedic vs Western Astrology
               </Link>
-              <Link href="/blog/shani-gochar-2024-saturn-transit" className="text-xs text-slate-500 hover:text-slate-300 transition-colors">
-                Shani Gochar 2024
+              {/* ✅ FIXED: Blog links updated to 2026 */}
+              <Link href="/blog/shani-gochar-2026-saturn-transit" className="text-xs text-slate-500 hover:text-slate-300 transition-colors">
+                Shani Gochar 2026
               </Link>
-              <Link href="/blog/rahu-ketu-axis-2024-karmic-shift" className="text-xs text-slate-500 hover:text-slate-300 transition-colors">
-                Rahu-Ketu Transit 2024
+              <Link href="/blog/rahu-ketu-axis-2026-karmic-shift" className="text-xs text-slate-500 hover:text-slate-300 transition-colors">
+                Rahu-Ketu Transit 2026
               </Link>
             </nav>
 
@@ -163,8 +187,9 @@ export default function SiteFooter() {
               </p>
               <p className="text-sm leading-relaxed">
                 For queries:{' '}
+                {/* ✅ FIXED: Updated email */}
                 <a
-                  href="mailto:vaanitrikal@gmail.com"
+                  href="mailto:rohiit@trikalvaani.com"
                   className="inline-flex items-center gap-1.5 font-bold transition-all duration-200 hover:scale-105 hover:brightness-110"
                   style={{
                     color: '#FFF0A0',
@@ -179,7 +204,7 @@ export default function SiteFooter() {
                   }}
                 >
                   <Mail className="w-3.5 h-3.5 flex-shrink-0" style={{ color: GOLD }} />
-                  vaanitrikal@gmail.com
+                  rohiit@trikalvaani.com
                 </a>
               </p>
               <p className="text-xs text-slate-500 mt-1">
@@ -205,43 +230,23 @@ export default function SiteFooter() {
           style={{ borderTop: `1px solid ${GOLD_RGBA(0.07)}` }}
         >
           <div className="flex flex-wrap items-center justify-center sm:justify-start gap-x-5 gap-y-2">
-            <Link
-              href="/terms"
-              className="text-xs font-bold transition-all duration-200 hover:text-white hover:scale-105"
-              style={{ color: GOLD }}
-            >
+            <Link href="/terms" className="text-xs font-bold transition-all duration-200 hover:text-white hover:scale-105" style={{ color: GOLD }}>
               Terms of Service
             </Link>
             <span style={{ color: GOLD_RGBA(0.3) }} className="text-xs">·</span>
-            <Link
-              href="/privacy"
-              className="text-xs font-bold transition-all duration-200 hover:text-white hover:scale-105"
-              style={{ color: GOLD }}
-            >
+            <Link href="/privacy" className="text-xs font-bold transition-all duration-200 hover:text-white hover:scale-105" style={{ color: GOLD }}>
               Privacy Policy
             </Link>
             <span style={{ color: GOLD_RGBA(0.3) }} className="text-xs">·</span>
-            <Link
-              href="/refund"
-              className="text-xs font-bold transition-all duration-200 hover:text-white hover:scale-105"
-              style={{ color: GOLD }}
-            >
+            <Link href="/refund" className="text-xs font-bold transition-all duration-200 hover:text-white hover:scale-105" style={{ color: GOLD }}>
               Refund Policy
             </Link>
             <span style={{ color: GOLD_RGBA(0.3) }} className="text-xs">·</span>
-            <Link
-              href="/upcoming-events"
-              className="text-xs font-bold transition-all duration-200 hover:text-white hover:scale-105"
-              style={{ color: GOLD }}
-            >
+            <Link href="/upcoming-events" className="text-xs font-bold transition-all duration-200 hover:text-white hover:scale-105" style={{ color: GOLD }}>
               Festival Calendar
             </Link>
             <span style={{ color: GOLD_RGBA(0.3) }} className="text-xs">·</span>
-            <Link
-              href="/founder"
-              className="text-xs font-bold transition-all duration-200 hover:text-white hover:scale-105"
-              style={{ color: GOLD }}
-            >
+            <Link href="/founder" className="text-xs font-bold transition-all duration-200 hover:text-white hover:scale-105" style={{ color: GOLD }}>
               About the Founder
             </Link>
           </div>
