@@ -1,11 +1,12 @@
 /**
  * ⚠️ STRICT CEO ORDER: LOGIC FROZEN
  * DO NOT EDIT, DELETE, OR REFACTOR THIS FILE.
- * VERSION: 6.0 (GOD-LEVEL PROTECTION)
+ * VERSION: 7.0 (GOD-LEVEL PROTECTION)
  * SIGNED: ROHIIT GUPTA, CEO
  * PURPOSE: BIRTH FORM — PROKERALA SERVER API (100% ACCURATE)
  * v5.0: Language selector added
  * v6.0: Pratyantar + Sookshma Dasha params added to URL
+ * v7.0: Employment + Sector profiling added between City and Life Question
  *        pratyantar list + currentPratyantar passed to result page
  * WARNING: DO NOT CHANGE handleSubmit — BREAKS KUNDALI CALCULATION
  */
@@ -86,6 +87,149 @@ function getGenerationFromDob(dob: string): 'genz' | 'millennial' | 'genx' | nul
   if (year >= 1980) return 'millennial';
   if (year >= 1970) return 'genx';
   return null;
+}
+
+
+// ─── EMPLOYMENT + SECTOR SELECTOR ────────────────────────────────────────────
+// v7.0: Added between City field and Life Question picker
+// Data passed to Gemini for sector-specific predictions
+
+const EMPLOYMENT_OPTIONS = [
+  { id: 'salaried',    label: 'Salaried',         emoji: '💼', sublabel: 'Job / Service' },
+  { id: 'self',        label: 'Self-Employed',     emoji: '🛠️', sublabel: 'Freelance / Consulting' },
+  { id: 'business',    label: 'Business Owner',    emoji: '🏢', sublabel: 'Own company' },
+  { id: 'student',     label: 'Student',           emoji: '📚', sublabel: 'College / School' },
+  { id: 'homemaker',   label: 'Homemaker',         emoji: '🏠', sublabel: 'Family focus' },
+  { id: 'retired',     label: 'Retired',           emoji: '🌅', sublabel: 'Post-career' },
+];
+
+const SECTOR_OPTIONS = [
+  { id: 'it',          label: 'IT / Tech',         emoji: '💻' },
+  { id: 'finance',     label: 'Finance / Banking', emoji: '💰' },
+  { id: 'realestate',  label: 'Real Estate',       emoji: '🏠' },
+  { id: 'healthcare',  label: 'Healthcare',        emoji: '🏥' },
+  { id: 'govt',        label: 'Government / PSU',  emoji: '🏛️' },
+  { id: 'education',   label: 'Education',         emoji: '📖' },
+  { id: 'media',       label: 'Media / Creative',  emoji: '🎨' },
+  { id: 'telecom',     label: 'Telecom',            emoji: '📡' },
+  { id: 'legal',       label: 'Legal',              emoji: '⚖️' },
+  { id: 'trading',     label: 'Trading / Markets', emoji: '📈' },
+  { id: 'other',       label: 'Other',              emoji: '✨' },
+];
+
+function ProfileSelector({
+  employment, sector, onEmploymentChange, onSectorChange,
+}: {
+  employment: string;
+  sector: string;
+  onEmploymentChange: (v: string) => void;
+  onSectorChange: (v: string) => void;
+}) {
+  return (
+    <div
+      className="rounded-2xl p-5"
+      style={{ background: 'rgba(6,10,24,0.7)', border: `1px solid ${GOLD_RGBA(0.14)}` }}
+    >
+      {/* Header */}
+      <div className="flex items-center gap-2 mb-1">
+        <span style={{ fontSize: 14 }}>👤</span>
+        <span
+          className="text-xs font-semibold tracking-widest uppercase"
+          style={{ color: `${GOLD}80` }}
+        >
+          Your Profile
+        </span>
+        <span
+          className="text-xs px-2 py-0.5 rounded-full ml-1"
+          style={{ background: GOLD_RGBA(0.08), color: GOLD_RGBA(0.6), border: `1px solid ${GOLD_RGBA(0.15)}` }}
+        >
+          Optional
+        </span>
+      </div>
+      <p className="text-xs text-slate-500 mb-4">
+        Aapka profession batayein — predictions 10x more specific ho jaayengi
+      </p>
+
+      {/* Employment pills */}
+      <div className="mb-4">
+        <p className="text-xs font-medium mb-2" style={{ color: GOLD_RGBA(0.55) }}>
+          Employment Type
+        </p>
+        <div className="grid grid-cols-3 gap-2">
+          {EMPLOYMENT_OPTIONS.map(opt => {
+            const isSelected = employment === opt.id;
+            return (
+              <button
+                key={opt.id}
+                type="button"
+                onClick={() => onEmploymentChange(isSelected ? '' : opt.id)}
+                className="flex flex-col items-center gap-1 rounded-xl p-2.5 transition-all duration-200"
+                style={{
+                  background: isSelected ? GOLD_RGBA(0.12) : 'rgba(255,255,255,0.02)',
+                  border: `1px solid ${isSelected ? GOLD_RGBA(0.4) : 'rgba(255,255,255,0.07)'}`,
+                  boxShadow: isSelected ? `0 2px 12px ${GOLD_RGBA(0.15)}` : 'none',
+                }}
+              >
+                <span style={{ fontSize: 18, lineHeight: 1 }}>{opt.emoji}</span>
+                <span className="text-xs font-semibold" style={{ color: isSelected ? GOLD : 'rgba(226,232,240,0.65)' }}>
+                  {opt.label}
+                </span>
+                <span className="text-xs text-center leading-tight" style={{ color: 'rgba(100,116,139,0.6)', fontSize: 9 }}>
+                  {opt.sublabel}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Sector pills — only show if employment selected and relevant */}
+      {employment && !['student', 'homemaker', 'retired'].includes(employment) && (
+        <div>
+          <p className="text-xs font-medium mb-2" style={{ color: GOLD_RGBA(0.55) }}>
+            Your Sector / Industry
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {SECTOR_OPTIONS.map(opt => {
+              const isSelected = sector === opt.id;
+              return (
+                <button
+                  key={opt.id}
+                  type="button"
+                  onClick={() => onSectorChange(isSelected ? '' : opt.id)}
+                  className="flex items-center gap-1.5 rounded-full px-3 py-1.5 transition-all duration-200"
+                  style={{
+                    background: isSelected ? GOLD_RGBA(0.12) : 'rgba(255,255,255,0.03)',
+                    border: `1px solid ${isSelected ? GOLD_RGBA(0.35) : 'rgba(255,255,255,0.08)'}`,
+                    boxShadow: isSelected ? `0 0 10px ${GOLD_RGBA(0.15)}` : 'none',
+                  }}
+                >
+                  <span style={{ fontSize: 12 }}>{opt.emoji}</span>
+                  <span className="text-xs font-medium" style={{ color: isSelected ? GOLD : 'rgba(226,232,240,0.65)' }}>
+                    {opt.label}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Selected summary */}
+      {(employment || sector) && (
+        <div className="mt-3 pt-3" style={{ borderTop: `1px solid ${GOLD_RGBA(0.08)}` }}>
+          <p className="text-xs" style={{ color: GOLD_RGBA(0.5) }}>
+            ✅ Profile set:{' '}
+            <span style={{ color: GOLD }}>
+              {EMPLOYMENT_OPTIONS.find(e => e.id === employment)?.label ?? ''}
+              {sector ? ` · ${SECTOR_OPTIONS.find(s => s.id === sector)?.label ?? ''}` : ''}
+            </span>
+            {' '}— predictions will be tailored for you
+          </p>
+        </div>
+      )}
+    </div>
+  );
 }
 
 // ─── LANGUAGE SELECTOR COMPONENT ─────────────────────────────────────────────
@@ -330,6 +474,8 @@ export default function BirthForm({ selectedCategory }: Props) {
   const [selectedQuestion, setSelectedQuestion] = useState<LifeQuestion | null>(null);
   const [gender, setGender]               = useState<'him' | 'her'>('her');
   const [selectedLang, setSelectedLang]   = useState<Lang>('hinglish'); // ✅ NEW
+  const [employment, setEmployment]       = useState<string>('');          // ✅ v7.0
+  const [sector, setSector]               = useState<string>('');          // ✅ v7.0
 
   const detectedGen      = getGenerationFromDob(form.dob);
   const activeCategoryId = selectedCategory?.id ?? selectedQuestion?.id ?? null;
@@ -442,6 +588,8 @@ export default function BirthForm({ selectedCategory }: Props) {
         lat:            String(lat),
         lng:            String(lng),
         lang:           selectedLang,               // ✅ NEW — language preference
+        employment:     employment,                        // ✅ v7.0
+        sector:         sector,                            // ✅ v7.0
         lagna:          kundali.lagna,
         lagnaLord:      kundali.lagnaLord,
         nakshatra:      kundali.nakshatra,
@@ -738,6 +886,16 @@ export default function BirthForm({ selectedCategory }: Props) {
                     );
                   })}
                 </div>
+
+                {/* ✅ v7.0 — Employment + Sector Profiling */}
+                {form.dob && (
+                  <ProfileSelector
+                    employment={employment}
+                    sector={sector}
+                    onEmploymentChange={setEmployment}
+                    onSectorChange={setSector}
+                  />
+                )}
 
                 {detectedGen && !selectedCategory && (
                   <QuestionPicker
