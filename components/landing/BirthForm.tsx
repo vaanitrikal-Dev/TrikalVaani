@@ -1,12 +1,13 @@
 /**
  * ⚠️ STRICT CEO ORDER: LOGIC FROZEN
  * DO NOT EDIT, DELETE, OR REFACTOR THIS FILE.
- * VERSION: 7.0 (GOD-LEVEL PROTECTION)
+ * VERSION: 8.0 (GOD-LEVEL PROTECTION)
  * SIGNED: ROHIIT GUPTA, CEO
  * PURPOSE: BIRTH FORM — PROKERALA SERVER API (100% ACCURATE)
  * v5.0: Language selector added
  * v6.0: Pratyantar + Sookshma Dasha params added to URL
- * v7.0: Employment + Sector profiling added between City and Life Question
+ * v7.0: Employment + Sector profiling
+ * v8.0: Mobile number capture + numerology preview added
  *        pratyantar list + currentPratyantar passed to result page
  * WARNING: DO NOT CHANGE handleSubmit — BREAKS KUNDALI CALCULATION
  */
@@ -19,7 +20,7 @@ import {
   Loader as Loader2, Star, MapPin, Clock, Calendar, User,
   HeartCrack, TriangleAlert as AlertTriangle, Sparkles, TrendingUp,
   Chrome as Home, Banknote, Baby, Users, Sunset, Crown, MoonStar,
-  ChevronRight, Briefcase, Heart, Languages,
+  ChevronRight, Briefcase, Heart, Languages, Phone,
 } from 'lucide-react';
 import { saveSubmission } from '@/lib/supabase';
 import type { SelectedCategory } from '@/app/page';
@@ -89,6 +90,183 @@ function getGenerationFromDob(dob: string): 'genz' | 'millennial' | 'genx' | nul
   return null;
 }
 
+
+
+// ─── MOBILE NUMEROLOGY CAPTURE ────────────────────────────────────────────────
+// v8.0: Optional mobile number field with instant numerology preview
+// Use Case 1 (Client): Lucky number analysis + call prediction
+// Use Case 2 (CEO): Master data for ₹499 premium consultation
+
+// Numerology calculation — Pythagorean method
+function calcLifePath(mobile: string): number {
+  const digits = mobile.replace(/\D/g, '');
+  if (digits.length < 10) return 0;
+  let sum = digits.split('').reduce((a, d) => a + parseInt(d, 10), 0);
+  while (sum > 9 && sum !== 11 && sum !== 22 && sum !== 33) {
+    sum = String(sum).split('').reduce((a, d) => a + parseInt(d, 10), 0);
+  }
+  return sum;
+}
+
+const LIFE_PATH_DATA: Record<number, {
+  planet: string; emoji: string;
+  lucky: string; challenge: string;
+  callPrediction: string;
+}> = {
+  1:  { planet: 'Sun',     emoji: '☀️', lucky: 'Sunday, 1st/10th/19th/28th', challenge: 'Ego clashes', callPrediction: 'Leadership calls — job offers, promotions, authority figures calling soon' },
+  2:  { planet: 'Moon',    emoji: '🌙', lucky: 'Monday, 2nd/11th/20th/29th', challenge: 'Indecision',  callPrediction: 'Emotional calls — GF/BF/family reconnecting, partnership conversations coming' },
+  3:  { planet: 'Jupiter', emoji: '♃',  lucky: 'Thursday, 3rd/12th/21st/30th', challenge: 'Scatter', callPrediction: 'Opportunity calls — business offers, guru/mentor reaching out, good news calls' },
+  4:  { planet: 'Rahu',    emoji: '☊',  lucky: 'Saturday, 4th/13th/22nd/31st', challenge: 'Obstacles', callPrediction: 'Unexpected calls — sudden job change, ex reaching out after long gap, surprise news' },
+  5:  { planet: 'Mercury', emoji: '☿',  lucky: 'Wednesday, 5th/14th/23rd', challenge: 'Restlessness', callPrediction: 'Multiple calls — interview calls, business negotiations, communication-heavy phase' },
+  6:  { planet: 'Venus',   emoji: '♀️', lucky: 'Friday, 6th/15th/24th', challenge: 'Over-giving', callPrediction: 'Love calls — romantic reconnections, marriage proposals, family harmony calls' },
+  7:  { planet: 'Ketu',    emoji: '☋',  lucky: 'Monday, 7th/16th/25th', challenge: 'Isolation', callPrediction: 'Spiritual calls — hidden opportunities, research/study offers, introspective conversations' },
+  8:  { planet: 'Saturn',  emoji: '♄',  lucky: 'Saturday, 8th/17th/26th', challenge: 'Karma delays', callPrediction: 'Karmic calls — old debts resolving, long-pending matters clearing, authority calling' },
+  9:  { planet: 'Mars',    emoji: '♂️', lucky: 'Tuesday, 9th/18th/27th', challenge: 'Aggression', callPrediction: 'Action calls — urgent job offers, confrontational conversations, competitive wins' },
+  11: { planet: 'Moon+Sun', emoji: '✨', lucky: 'Master Number — 11th/29th', challenge: 'Sensitivity', callPrediction: 'Intuitive calls — psychic connections, spiritual mentors reaching out, life-changing conversations' },
+  22: { planet: 'Sat+Ura', emoji: '🌟', lucky: 'Master Number — 22nd', challenge: 'Overwhelm', callPrediction: 'Legacy calls — major business deals, empire-building conversations, powerful mentors contacting' },
+};
+
+function MobileNumerologyCapture({
+  mobile, onMobileChange, name, lang,
+}: {
+  mobile: string;
+  onMobileChange: (v: string) => void;
+  name: string;
+  lang: Lang;
+}) {
+  const lifePath = calcLifePath(mobile);
+  const data     = LIFE_PATH_DATA[lifePath];
+  const isValid  = mobile.replace(/\D/g, '').length >= 10;
+  const firstName = name.split(' ')[0] || 'aap';
+
+  return (
+    <div
+      className="rounded-2xl p-5"
+      style={{ background: 'rgba(6,10,24,0.7)', border: `1px solid ${GOLD_RGBA(0.14)}` }}
+    >
+      {/* Header */}
+      <div className="flex items-center gap-2 mb-1">
+        <Phone className="w-3.5 h-3.5" style={{ color: GOLD }} />
+        <span className="text-xs font-semibold tracking-widest uppercase" style={{ color: `${GOLD}80` }}>
+          Mobile Numerology
+        </span>
+        <span
+          className="text-xs px-2 py-0.5 rounded-full ml-1"
+          style={{ background: GOLD_RGBA(0.08), color: GOLD_RGBA(0.6), border: `1px solid ${GOLD_RGBA(0.15)}` }}
+        >
+          Free Bonus
+        </span>
+      </div>
+
+      {/* Teaser lines */}
+      <div className="mb-4 space-y-1">
+        <p className="text-xs text-slate-400 leading-relaxed">
+          📱 <span style={{ color: GOLD_RGBA(0.8) }}>Kya aapka mobile number lucky hai?</span>
+        </p>
+        <p className="text-xs text-slate-500">
+          Kya aapko jald koi important call aane wali hai —{' '}
+          <span style={{ color: 'rgba(244,114,182,0.8)' }}>GF/BF/Ex</span> ·{' '}
+          <span style={{ color: '#60A5FA' }}>Job/Interview</span> ·{' '}
+          <span style={{ color: '#34D399' }}>Business</span> ·{' '}
+          <span style={{ color: '#FACC15' }}>Parents/Kids</span>?
+        </p>
+        <p className="text-xs text-slate-600">
+          Apna mobile number daalo — Jini aapka numerology reading degi
+        </p>
+      </div>
+
+      {/* Input */}
+      <div className="relative mb-4">
+        <div
+          className="absolute left-3.5 top-1/2 -translate-y-1/2 flex items-center gap-1.5 pointer-events-none"
+        >
+          <span className="text-xs font-bold" style={{ color: GOLD_RGBA(0.6) }}>+91</span>
+          <div style={{ width: 1, height: 14, background: GOLD_RGBA(0.2) }} />
+        </div>
+        <input
+          type="tel"
+          placeholder="Enter 10-digit mobile number"
+          value={mobile}
+          onChange={e => {
+            const val = e.target.value.replace(/[^0-9]/g, '').slice(0, 10);
+            onMobileChange(val);
+          }}
+          className="input-cosmic w-full h-12 pl-16 pr-4 rounded-xl text-sm"
+          style={{ colorScheme: 'dark' }}
+          maxLength={10}
+        />
+        {isValid && (
+          <div
+            className="absolute right-3.5 top-1/2 -translate-y-1/2"
+            style={{ width: 8, height: 8, borderRadius: '50%', background: '#22C55E', boxShadow: '0 0 8px #22C55E' }}
+          />
+        )}
+      </div>
+
+      {/* Numerology Preview — shows after valid number */}
+      {isValid && data && (
+        <div
+          style={{
+            padding: '14px 16px',
+            background: `linear-gradient(135deg, ${GOLD_RGBA(0.08)}, rgba(6,12,28,0.95))`,
+            border: `1px solid ${GOLD_RGBA(0.25)}`,
+            borderRadius: 12,
+            animation: 'fadeIn 0.4s ease',
+          }}
+        >
+          {/* Life path number */}
+          <div className="flex items-center gap-10 mb-12" style={{ gap: 12, marginBottom: 12 }}>
+            <div style={{
+              width: 48, height: 48, borderRadius: '50%', flexShrink: 0,
+              background: GOLD_RGBA(0.12),
+              border: `2px solid ${GOLD_RGBA(0.4)}`,
+              display: 'flex', flexDirection: 'column' as const,
+              alignItems: 'center', justifyContent: 'center',
+            }}>
+              <span style={{ fontSize: 16, fontWeight: 900, color: GOLD, lineHeight: 1 }}>{lifePath}</span>
+              <span style={{ fontSize: 8, color: GOLD_RGBA(0.6) }}>PATH</span>
+            </div>
+            <div>
+              <div style={{ fontSize: 13, fontWeight: 700, color: GOLD, marginBottom: 2 }}>
+                {data.emoji} Life Path {lifePath} · {data.planet} Number
+              </div>
+              <div style={{ fontSize: 11, color: 'rgba(148,163,184,0.6)' }}>
+                Lucky days: {data.lucky}
+              </div>
+            </div>
+          </div>
+
+          {/* Call prediction — the hook */}
+          <div style={{
+            padding: '10px 12px',
+            background: 'rgba(139,92,246,0.08)',
+            border: '1px solid rgba(139,92,246,0.2)',
+            borderRadius: 8, marginBottom: 10,
+          }}>
+            <div style={{ fontSize: 10, fontWeight: 700, color: '#C4B5FD', textTransform: 'uppercase' as const, letterSpacing: '0.05em', marginBottom: 5 }}>
+              📞 Upcoming Call Prediction
+            </div>
+            <p style={{ fontSize: 12, color: 'rgba(226,232,240,0.85)', lineHeight: 1.65, margin: 0 }}>
+              {firstName} ji — {data.callPrediction}
+            </p>
+          </div>
+
+          {/* Suspense hook */}
+          <p style={{ fontSize: 11, color: GOLD_RGBA(0.6), fontStyle: 'italic', margin: 0 }}>
+            🔮 Exact date aur caller kaun hoga — yeh sirf deep reading mein reveal hoga...
+          </p>
+        </div>
+      )}
+
+      {/* Privacy note */}
+      <p className="text-xs text-slate-600 mt-3 text-center">
+        🔒 Number sirf aapki reading ke liye — kabhi share nahi hoga
+      </p>
+
+      <style>{`@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}`}</style>
+    </div>
+  );
+}
 
 // ─── EMPLOYMENT + SECTOR SELECTOR ────────────────────────────────────────────
 // v7.0: Added between City field and Life Question picker
@@ -476,6 +654,7 @@ export default function BirthForm({ selectedCategory }: Props) {
   const [selectedLang, setSelectedLang]   = useState<Lang>('hinglish'); // ✅ NEW
   const [employment, setEmployment]       = useState<string>('');          // ✅ v7.0
   const [sector, setSector]               = useState<string>('');          // ✅ v7.0
+  const [mobile, setMobile]               = useState<string>('');          // ✅ v8.0
 
   const detectedGen      = getGenerationFromDob(form.dob);
   const activeCategoryId = selectedCategory?.id ?? selectedQuestion?.id ?? null;
@@ -590,6 +769,7 @@ export default function BirthForm({ selectedCategory }: Props) {
         lang:           selectedLang,               // ✅ NEW — language preference
         employment:     employment,                        // ✅ v7.0
         sector:         sector,                            // ✅ v7.0
+        mobile:         mobile,                            // ✅ v8.0 — for numerology
         lagna:          kundali.lagna,
         lagnaLord:      kundali.lagnaLord,
         nakshatra:      kundali.nakshatra,
@@ -905,6 +1085,14 @@ export default function BirthForm({ selectedCategory }: Props) {
 
                 {/* ✅ Language Selector — Single Mode */}
                 <LanguageSelector selected={selectedLang} onSelect={setSelectedLang} />
+
+                {/* ✅ v8.0 — Mobile Number + Numerology Preview */}
+                <MobileNumerologyCapture
+                  mobile={mobile}
+                  onMobileChange={setMobile}
+                  name={form.name}
+                  lang={selectedLang}
+                />
 
                 <PrivacyNote />
 
