@@ -113,6 +113,8 @@ export default function SiteNav() {
         }}
       >
         <div className="max-w-6xl mx-auto h-16 flex items-center justify-between">
+
+          {/* ── LOGO ── */}
           <Link href="/" className="flex items-center gap-2.5 group">
             <div
               className="w-13 h-13 rounded-full flex items-center justify-center transition-all duration-300 group-hover:scale-105"
@@ -132,21 +134,34 @@ export default function SiteNav() {
             </span>
           </Link>
 
+          {/* ── DESKTOP NAV ── */}
           <nav className="hidden sm:flex items-center gap-4">
+
             <Link href="/#pillars" className="text-sm text-slate-400 hover:text-slate-200 transition-colors duration-200">
               Life Pillars
             </Link>
+
+            {/* ── SERVICES LINK (NEW) ── */}
+            <Link
+              href="/services"
+              className="text-sm font-semibold transition-colors duration-200"
+              style={{ color: GOLD_RGBA(0.85) }}
+            >
+              Services
+            </Link>
+
             <Link href="/blog" className="text-sm text-slate-400 hover:text-slate-200 transition-colors duration-200">
               Vedic Blog
             </Link>
+
             <Link href="/upcoming-events" className="text-sm text-slate-400 hover:text-slate-200 transition-colors duration-200">
               Events
             </Link>
+
             <Link href="/founder" className="text-sm text-slate-400 hover:text-slate-200 transition-colors duration-200">
               Founder
             </Link>
 
-            {/* ✅ FIXED: Updated email */}
             <a
               href="mailto:rohiit@trikalvaani.com"
               className="hidden lg:flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-300 transition-colors duration-200"
@@ -196,7 +211,19 @@ export default function SiteNav() {
             </Link>
           </nav>
 
+          {/* ── MOBILE NAV ── */}
           <div className="sm:hidden flex items-center gap-2">
+            <Link
+              href="/services"
+              className="text-xs font-semibold px-3 py-1.5 rounded-full transition-all duration-200"
+              style={{
+                color: GOLD_RGBA(0.9),
+                border: `1px solid ${GOLD_RGBA(0.25)}`,
+                background: GOLD_RGBA(0.06),
+              }}
+            >
+              Services
+            </Link>
             <LangSwitcher lang={lang} setLang={setLang} />
             <Link
               href="/#birth-form"
@@ -209,6 +236,7 @@ export default function SiteNav() {
               Start
             </Link>
           </div>
+
         </div>
       </header>
 
