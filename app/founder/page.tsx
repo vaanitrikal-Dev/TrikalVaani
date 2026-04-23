@@ -2,10 +2,11 @@
  * TRIKAL VAANI — trikalvaani.com
  * Chief Vedic Architect: Rohiit Gupta
  * FILE TO PASTE → app/founder/page.tsx (REPLACE EXISTING)
- * Version: 2.0 — Full SEO + EEAT + Schema — Critical for Google authority
+ * Version: 3.0 — Real photo + Full SEO + EEAT + Schema
  */
 
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import Script from "next/script";
 import SiteNav from "@/components/layout/SiteNav";
@@ -13,17 +14,33 @@ import SiteFooter from "@/components/layout/SiteFooter";
 
 export const metadata: Metadata = {
   title: "Rohiit Gupta — Chief Vedic Architect | Trikal Vaani",
-  description: "Rohiit Gupta — 15+ years Vedic astrology under Parashara BPHS tradition. Founder of Trikal Vaani and Star Properties Delhi NCR. Chief Vedic Architect behind Jini AI.",
-  keywords: ["Rohiit Gupta astrologer Delhi", "Trikal Vaani founder", "vedic astrologer Delhi NCR", "Chief Vedic Architect", "Rohiit Gupta real estate astrology"],
+  description:
+    "Rohiit Gupta — 15+ years Vedic astrology under Parashara BPHS tradition. Founder of Trikal Vaani and Star Properties Delhi NCR. Chief Vedic Architect behind Jini AI.",
+  keywords: [
+    "Rohiit Gupta astrologer Delhi",
+    "Trikal Vaani founder",
+    "vedic astrologer Delhi NCR",
+    "Chief Vedic Architect",
+    "Rohiit Gupta real estate astrology",
+  ],
   authors: [{ name: "Rohiit Gupta", url: "https://trikalvaani.com/founder" }],
   alternates: { canonical: "https://trikalvaani.com/founder" },
   openGraph: {
     title: "Rohiit Gupta — Chief Vedic Architect | Trikal Vaani",
-    description: "15+ years Vedic astrology. Founder of Trikal Vaani. Chief Vedic Architect behind Jini AI.",
+    description:
+      "15+ years Vedic astrology. Founder of Trikal Vaani. Chief Vedic Architect behind Jini AI.",
     url: "https://trikalvaani.com/founder",
     siteName: "Trikal Vaani",
     type: "profile",
     locale: "en_IN",
+    images: [
+      {
+        url: "https://trikalvaani.com/images/founder.png/Rohiit_Gupta.jpg",
+        width: 800,
+        height: 800,
+        alt: "Rohiit Gupta — Chief Vedic Architect, Trikal Vaani",
+      },
+    ],
   },
 };
 
@@ -35,20 +52,40 @@ const schema = {
       "@id": "https://trikalvaani.com/founder",
       name: "Rohiit Gupta",
       jobTitle: "Chief Vedic Architect",
-      description: "Rohiit Gupta has studied Vedic astrology for over 15 years under the Parashara BPHS tradition. Founder of Trikal Vaani and Star Properties Delhi NCR.",
+      image: "https://trikalvaani.com/images/founder.png/Rohiit_Gupta.jpg",
+      description:
+        "Rohiit Gupta has studied Vedic astrology for over 15 years under the Parashara BPHS tradition. Founder of Trikal Vaani and Star Properties Delhi NCR.",
       url: "https://trikalvaani.com/founder",
       email: "rohiit@trikalvaani.com",
       telephone: "+919211804111",
-      address: { "@type": "PostalAddress", addressLocality: "Delhi NCR", addressCountry: "IN" },
-      worksFor: { "@type": "Organization", name: "Trikal Vaani", url: "https://trikalvaani.com" },
-      knowsAbout: ["Vedic Astrology", "Vimshottari Dasha", "Parashara BPHS", "Jaimini Astrology", "Swiss Ephemeris", "Navamsa D9", "Real Estate Delhi NCR"],
+      address: {
+        "@type": "PostalAddress",
+        addressLocality: "Delhi NCR",
+        addressCountry: "IN",
+      },
+      worksFor: {
+        "@type": "Organization",
+        name: "Trikal Vaani",
+        url: "https://trikalvaani.com",
+      },
+      knowsAbout: [
+        "Vedic Astrology",
+        "Vimshottari Dasha",
+        "Parashara BPHS",
+        "Jaimini Astrology",
+        "Swiss Ephemeris",
+        "Navamsa D9",
+        "Real Estate Delhi NCR",
+      ],
     },
     {
       "@type": "Organization",
       name: "Trikal Vaani",
       url: "https://trikalvaani.com",
       founder: { "@type": "Person", name: "Rohiit Gupta" },
-      description: "India's first AI-powered Vedic Astrology platform combining Swiss Ephemeris precision with Gemini AI reasoning.",
+      logo: "https://trikalvaani.com/images/founder.png/Rohiit_Gupta.jpg",
+      description:
+        "India's first AI-powered Vedic Astrology platform combining Swiss Ephemeris precision with Gemini AI reasoning.",
       areaServed: "IN",
     },
     {
@@ -66,38 +103,136 @@ const GOLD = "#D4AF37";
 export default function FounderPage() {
   return (
     <>
-      <Script id="founder-schema" type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
+      <Script
+        id="founder-schema"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+      />
       <main className="min-h-screen bg-[#080B12] text-white">
         <SiteNav />
 
-        {/* HERO */}
+        {/* ── HERO ── */}
         <section className="relative overflow-hidden pt-28 pb-16 px-4">
           <div className="absolute inset-0 pointer-events-none">
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[400px] rounded-full blur-[120px]" style={{ background: "rgba(124,58,237,0.15)" }} />
-            <div className="absolute bottom-0 right-0 w-[400px] h-[300px] rounded-full blur-[100px]" style={{ background: "rgba(212,175,55,0.08)" }} />
+            <div
+              className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[400px] rounded-full blur-[120px]"
+              style={{ background: "rgba(124,58,237,0.15)" }}
+            />
+            <div
+              className="absolute bottom-0 right-0 w-[400px] h-[300px] rounded-full blur-[100px]"
+              style={{ background: "rgba(212,175,55,0.08)" }}
+            />
           </div>
+
           <div className="relative max-w-4xl mx-auto">
             <div className="flex flex-col md:flex-row items-center md:items-start gap-10">
+
+              {/* ── REAL PHOTO ── */}
               <div className="flex-shrink-0">
-                <div className="w-32 h-32 rounded-full flex items-center justify-center shadow-[0_0_40px_rgba(212,175,55,0.2)]" style={{ background: "linear-gradient(135deg, rgba(212,175,55,0.3), rgba(124,58,237,0.2))", border: `2px solid rgba(212,175,55,0.5)` }}>
-                  <span className="font-serif text-5xl font-bold" style={{ color: GOLD }}>RG</span>
+                <div
+                  className="relative w-40 h-40 md:w-48 md:h-48 rounded-2xl overflow-hidden"
+                  style={{
+                    border: `2px solid rgba(212,175,55,0.5)`,
+                    boxShadow: `0 0 40px rgba(212,175,55,0.2), 0 0 80px rgba(124,58,237,0.1)`,
+                  }}
+                >
+                  <Image
+                    src="/images/founder.png/Rohiit_Gupta.jpg"
+                    alt="Rohiit Gupta — Chief Vedic Architect, Trikal Vaani"
+                    fill
+                    className="object-cover object-top"
+                    priority
+                    sizes="(max-width: 768px) 160px, 192px"
+                  />
+                  {/* Gold overlay shimmer */}
+                  <div
+                    className="absolute inset-0"
+                    style={{
+                      background:
+                        "linear-gradient(135deg, rgba(212,175,55,0.08) 0%, transparent 60%)",
+                    }}
+                  />
+                </div>
+                {/* Name badge below photo */}
+                <div
+                  className="mt-3 text-center px-3 py-1.5 rounded-lg"
+                  style={{
+                    background: "rgba(212,175,55,0.08)",
+                    border: "1px solid rgba(212,175,55,0.2)",
+                  }}
+                >
+                  <p className="text-xs font-medium" style={{ color: GOLD }}>
+                    Chief Vedic Architect
+                  </p>
                 </div>
               </div>
-              <div>
-                <p className="text-xs font-semibold tracking-widest uppercase mb-2" style={{ color: GOLD }}>Chief Vedic Architect</p>
-                <h1 className="font-serif text-4xl md:text-5xl font-bold text-white mb-3">Rohiit Gupta</h1>
-                <p className="text-gray-400 text-lg mb-5">Founder, Trikal Vaani · Founder, Star Properties Delhi NCR</p>
-                <div className="flex flex-wrap gap-3">
-                  {["15+ Years Vedic Study", "Parashara BPHS Tradition", "Swiss Ephemeris", "Delhi NCR Based", "Real Estate Expert"].map((t) => (
-                    <span key={t} className="text-xs px-3 py-1.5 rounded-full" style={{ border: `1px solid rgba(212,175,55,0.3)`, color: GOLD, background: `rgba(212,175,55,0.05)` }}>{t}</span>
+
+              {/* ── IDENTITY ── */}
+              <div className="text-center md:text-left">
+                <p
+                  className="text-xs font-semibold tracking-widest uppercase mb-2"
+                  style={{ color: GOLD }}
+                >
+                  Founder · Trikal Vaani
+                </p>
+                <h1 className="font-serif text-4xl md:text-5xl font-bold text-white mb-3">
+                  Rohiit Gupta
+                </h1>
+                <p className="text-gray-400 text-base mb-2">
+                  Chief Vedic Architect · AI Vedic Astrology Pioneer
+                </p>
+                <p className="text-gray-500 text-sm mb-6">
+                  Founder, Trikal Vaani · Founder, Star Properties Delhi NCR
+                </p>
+                <div className="flex flex-wrap gap-3 justify-center md:justify-start">
+                  {[
+                    "15+ Years Vedic Study",
+                    "Parashara BPHS Tradition",
+                    "Swiss Ephemeris",
+                    "Delhi NCR Based",
+                    "Real Estate Expert",
+                  ].map((t) => (
+                    <span
+                      key={t}
+                      className="text-xs px-3 py-1.5 rounded-full"
+                      style={{
+                        border: `1px solid rgba(212,175,55,0.3)`,
+                        color: GOLD,
+                        background: `rgba(212,175,55,0.05)`,
+                      }}
+                    >
+                      {t}
+                    </span>
                   ))}
+                </div>
+
+                {/* Quick contact */}
+                <div className="flex gap-3 mt-6 justify-center md:justify-start">
+                  <a
+                    href="https://wa.me/919211804111?text=Hi%20Rohiit%20ji%2C%20I%20want%20to%20book%20a%20consultation"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200"
+                    style={{ background: "#25D366", color: "#fff" }}
+                  >
+                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+                    </svg>
+                    Book Call — ₹499
+                  </a>
+                  <a
+                    href="mailto:rohiit@trikalvaani.com"
+                    className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold border border-white/15 text-gray-300 hover:border-white/30 transition-all duration-200"
+                  >
+                    Email →
+                  </a>
                 </div>
               </div>
             </div>
           </div>
         </section>
 
-        {/* CONTENT */}
+        {/* ── CONTENT ── */}
         <section className="py-16 px-4">
           <div className="max-w-3xl mx-auto space-y-14 text-gray-400 text-sm leading-relaxed">
 
@@ -127,11 +262,15 @@ export default function FounderPage() {
                   { area: "Pratyantar Dasha (Level 3)", detail: "3-7 day precision timing using Parashara BPHS formula" },
                   { area: "Dhana Yoga Analysis", detail: "32+ wealth combinations for financial destiny mapping" },
                   { area: "Property Yog", detail: "4th house, Mars Karaka, Saturn transit for real estate timing" },
-                  { area: "Shoola/Amrita/Visha Yoga", detail: "Key differentiator yogas for life quality assessment" },
+                  { area: "Shoola / Amrita / Visha Yoga", detail: "Key differentiator yogas for life quality assessment" },
                   { area: "Atmakaraka & Jaimini", detail: "Soul purpose and past-life karma decoding" },
                   { area: "Compatibility & Synastry", detail: "Beyond guna milan — Navamsa, Nadi, Dasha synchronicity" },
                 ].map((e, i) => (
-                  <div key={i} className="border border-white/10 rounded-xl p-4" style={{ background: "rgba(255,255,255,0.02)" }}>
+                  <div
+                    key={i}
+                    className="border border-white/10 rounded-xl p-4"
+                    style={{ background: "rgba(255,255,255,0.02)" }}
+                  >
                     <p className="font-semibold text-sm mb-1" style={{ color: GOLD }}>{e.area}</p>
                     <p className="text-gray-500 text-xs">{e.detail}</p>
                   </div>
@@ -143,7 +282,10 @@ export default function FounderPage() {
               <p className="text-xs font-semibold tracking-widest uppercase mb-4" style={{ color: GOLD }}>Ventures</p>
               <h2 className="font-serif text-2xl font-bold text-white mb-5">What Rohiit Builds</h2>
               <div className="space-y-4">
-                <div className="border rounded-xl p-6" style={{ borderColor: `rgba(212,175,55,0.25)`, background: `rgba(212,175,55,0.05)` }}>
+                <div
+                  className="border rounded-xl p-6"
+                  style={{ borderColor: `rgba(212,175,55,0.25)`, background: `rgba(212,175,55,0.05)` }}
+                >
                   <div className="flex items-start gap-4">
                     <span className="text-3xl">🔮</span>
                     <div>
@@ -153,7 +295,10 @@ export default function FounderPage() {
                     </div>
                   </div>
                 </div>
-                <div className="border border-white/10 rounded-xl p-6" style={{ background: "rgba(255,255,255,0.02)" }}>
+                <div
+                  className="border border-white/10 rounded-xl p-6"
+                  style={{ background: "rgba(255,255,255,0.02)" }}
+                >
                   <div className="flex items-start gap-4">
                     <span className="text-3xl">🏠</span>
                     <div>
@@ -166,46 +311,45 @@ export default function FounderPage() {
             </div>
 
             {/* Tagline */}
-            <div className="rounded-2xl p-8 text-center" style={{ border: `1px solid rgba(212,175,55,0.2)`, background: `linear-gradient(135deg, rgba(212,175,55,0.08), rgba(124,58,237,0.08))` }}>
-              <p className="font-serif text-2xl font-bold mb-3" style={{ color: GOLD }}>&ldquo;Kaal bada balwan hai.&rdquo;</p>
+            <div
+              className="rounded-2xl p-8 text-center"
+              style={{
+                border: `1px solid rgba(212,175,55,0.2)`,
+                background: `linear-gradient(135deg, rgba(212,175,55,0.08), rgba(124,58,237,0.08))`,
+              }}
+            >
+              <p className="font-serif text-2xl font-bold mb-3" style={{ color: GOLD }}>
+                &ldquo;Kaal bada balwan hai.&rdquo;
+              </p>
               <p className="text-gray-400 text-sm">Time is the greatest force. — Trikal Vaani Tagline</p>
-            </div>
-
-            {/* Contact */}
-            <div>
-              <p className="text-xs font-semibold tracking-widest uppercase mb-4" style={{ color: GOLD }}>Get in Touch</p>
-              <h2 className="font-serif text-2xl font-bold text-white mb-5">Talk to Rohiit Ji</h2>
-              <div className="grid md:grid-cols-2 gap-4">
-                <a href="https://wa.me/919211804111?text=Hi%20Rohiit%20ji%2C%20I%20want%20to%20book%20a%20personal%20consultation" target="_blank" rel="noopener noreferrer" className="border rounded-xl p-5 flex items-center gap-4 transition-all duration-200 hover:opacity-90" style={{ borderColor: "rgba(37,211,102,0.4)", background: "rgba(37,211,102,0.05)" }}>
-                  <span className="text-2xl">💬</span>
-                  <div>
-                    <p className="text-green-400 font-semibold text-sm">WhatsApp</p>
-                    <p className="text-gray-400 text-xs">+91 92118 04111</p>
-                    <p className="text-gray-500 text-xs mt-1">Personal consultation — ₹499</p>
-                  </div>
-                </a>
-                <a href="mailto:rohiit@trikalvaani.com" className="border border-white/10 rounded-xl p-5 flex items-center gap-4 transition-all duration-200 hover:border-white/20" style={{ background: "rgba(255,255,255,0.02)" }}>
-                  <span className="text-2xl">📧</span>
-                  <div>
-                    <p className="text-white font-semibold text-sm">Email</p>
-                    <p className="text-gray-400 text-xs">rohiit@trikalvaani.com</p>
-                    <p className="text-gray-500 text-xs mt-1">Business enquiries</p>
-                  </div>
-                </a>
-              </div>
             </div>
 
           </div>
         </section>
 
-        {/* CTA */}
+        {/* ── CTA ── */}
         <section className="py-16 px-4 bg-[#0D1020]">
           <div className="max-w-2xl mx-auto text-center">
-            <h2 className="font-serif text-3xl font-bold mb-4">Ready for Your <span style={{ color: GOLD }}>Reading?</span></h2>
-            <p className="text-gray-400 mb-8 text-sm">Start with your free Kundali or unlock a deep Jini AI reading from ₹51.</p>
+            <h2 className="font-serif text-3xl font-bold mb-4">
+              Ready for Your <span style={{ color: GOLD }}>Reading?</span>
+            </h2>
+            <p className="text-gray-400 mb-8 text-sm">
+              Start with your free Kundali or unlock a deep Jini AI reading from ₹51.
+            </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/services" className="font-bold px-8 py-4 rounded-lg text-base transition-all duration-200" style={{ background: GOLD, color: "#080B12" }}>View All Services →</Link>
-              <Link href="/" className="border border-white/20 text-white font-semibold px-8 py-4 rounded-lg text-base hover:bg-white/5 transition-all duration-200">Free Kundali →</Link>
+              <Link
+                href="/services"
+                className="font-bold px-8 py-4 rounded-lg text-base transition-all duration-200 hover:opacity-90"
+                style={{ background: GOLD, color: "#080B12" }}
+              >
+                View All Services →
+              </Link>
+              <Link
+                href="/"
+                className="border border-white/20 text-white font-semibold px-8 py-4 rounded-lg text-base hover:bg-white/5 transition-all duration-200"
+              >
+                Free Kundali →
+              </Link>
             </div>
           </div>
         </section>
