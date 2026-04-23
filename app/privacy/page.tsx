@@ -1,166 +1,177 @@
-import Link from 'next/link';
-import type { Metadata } from 'next';
-import SiteNav from '@/components/layout/SiteNav';
-import SiteFooter from '@/components/layout/SiteFooter';
+/**
+ * TRIKAL VAANI — trikalvaani.com
+ * Chief Vedic Architect: Rohiit Gupta
+ * FILE TO PASTE → app/privacy/page.tsx (REPLACE EXISTING)
+ * Version: 2.0 — Full SEO + EEAT + Razorpay compliant
+ */
+
+import type { Metadata } from "next";
+import Link from "next/link";
+import SiteNav from "@/components/layout/SiteNav";
+import SiteFooter from "@/components/layout/SiteFooter";
 
 export const metadata: Metadata = {
-  title: 'Privacy Policy | Trikal Vaani',
-  description: 'Privacy Policy for Trikal Vaani. Learn how we collect, use, and protect your personal data.',
-  alternates: { canonical: 'https://trikalvaani.com/privacy' },
+  title: "Privacy Policy | Trikal Vaani",
+  description: "Privacy Policy for Trikal Vaani — AI-powered Vedic Astrology platform by Rohiit Gupta. How we collect, use, and protect your personal data.",
+  authors: [{ name: "Rohiit Gupta", url: "https://trikalvaani.com/founder" }],
+  alternates: { canonical: "https://trikalvaani.com/privacy" },
+  openGraph: { title: "Privacy Policy | Trikal Vaani", url: "https://trikalvaani.com/privacy", siteName: "Trikal Vaani", locale: "en_IN", type: "website" },
 };
 
-const GOLD = '#D4AF37';
-const GOLD_RGBA = (a: number) => `rgba(212,175,55,${a})`;
-
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <section className="mb-10">
-      <h2
-        className="font-serif text-xl font-bold mb-4"
-        style={{ color: GOLD }}
-      >
-        {title}
-      </h2>
-      <div className="text-sm text-slate-400 leading-relaxed space-y-3">
-        {children}
-      </div>
-    </section>
-  );
-}
+const GOLD = "#D4AF37";
 
 export default function PrivacyPage() {
   return (
-    <div className="min-h-screen bg-[#030712]">
+    <main className="min-h-screen bg-[#080B12] text-white">
       <SiteNav />
-      <main className="max-w-3xl mx-auto px-4 py-20">
-        <div className="mb-12">
-          <p
-            className="text-xs font-semibold tracking-widest uppercase mb-3"
-            style={{ color: GOLD_RGBA(0.55) }}
-          >
-            Legal
-          </p>
-          <h1 className="font-serif text-4xl font-bold text-white mb-4">
-            Privacy Policy
-          </h1>
-          <p className="text-sm text-slate-500">
-            Effective Date: 1 January 2025 &nbsp;·&nbsp; Last Updated: 1 April 2025
-          </p>
-          <div
-            className="mt-6 h-px w-16"
-            style={{ background: `linear-gradient(90deg, ${GOLD}, transparent)` }}
-          />
+
+      <section className="pt-28 pb-20 px-4">
+        <div className="max-w-3xl mx-auto">
+
+          <div className="mb-12">
+            <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: GOLD }}>Legal</p>
+            <h1 className="font-serif text-4xl font-bold text-white mb-4">Privacy Policy</h1>
+            <p className="text-gray-500 text-sm">Effective: 1 January 2025 · Last Updated: April 2025</p>
+            <p className="text-gray-500 text-sm mt-1">Operated by: <span style={{ color: GOLD }}>Rohiit Gupta</span> — Trikal Vaani, Delhi NCR, India</p>
+            <div className="mt-6 h-px w-16" style={{ background: `linear-gradient(90deg, ${GOLD}, transparent)` }} />
+          </div>
+
+          <div className="space-y-10 text-gray-400 text-sm leading-relaxed">
+
+            <div>
+              <h2 className="font-serif text-xl font-bold mb-4" style={{ color: GOLD }}>1. Information We Collect</h2>
+              <p className="mb-3">When you use Trikal Vaani, we collect the following information:</p>
+              <ul className="space-y-2">
+                {[
+                  "Date, time, and place of birth — required for Vedic astrology calculations",
+                  "Name and email address — for account creation and reading delivery",
+                  "Mobile number — for WhatsApp delivery of readings and booking confirmations",
+                  "Payment information — processed securely by Razorpay (we do not store card details)",
+                  "Device and browser information — for performance and security",
+                  "IP address — for fraud prevention and security",
+                ].map((item, i) => (
+                  <li key={i} className="flex items-start gap-2 list-none">
+                    <span style={{ color: GOLD }} className="flex-shrink-0 mt-0.5">✦</span>{item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div>
+              <h2 className="font-serif text-xl font-bold mb-4" style={{ color: GOLD }}>2. How We Use Your Information</h2>
+              <ul className="space-y-2">
+                {[
+                  "To generate your personalised Vedic astrology reading using Jini AI",
+                  "To deliver your reading via email or WhatsApp",
+                  "To process payments and send receipts",
+                  "To create and manage your account",
+                  "To send booking confirmations for personal consultations with Rohiit Gupta",
+                  "To improve our platform and services",
+                  "To comply with legal obligations",
+                ].map((item, i) => (
+                  <li key={i} className="flex items-start gap-2 list-none">
+                    <span style={{ color: GOLD }} className="flex-shrink-0 mt-0.5">✦</span>{item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div>
+              <h2 className="font-serif text-xl font-bold mb-4" style={{ color: GOLD }}>3. Data Storage & Security</h2>
+              <p className="mb-3">Your data is stored on Supabase (PostgreSQL) in secure data centres. We implement industry-standard security measures including:</p>
+              <ul className="space-y-2">
+                {[
+                  "SSL/TLS encryption for all data in transit",
+                  "Encrypted storage for sensitive information",
+                  "Row-level security on all database tables",
+                  "Regular security audits",
+                ].map((item, i) => (
+                  <li key={i} className="flex items-start gap-2 list-none">
+                    <span style={{ color: GOLD }} className="flex-shrink-0 mt-0.5">✦</span>{item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div>
+              <h2 className="font-serif text-xl font-bold mb-4" style={{ color: GOLD }}>4. Payment Data</h2>
+              <p>All payments are processed by <strong className="text-white">Razorpay</strong> — a PCI DSS compliant payment gateway. Trikal Vaani does not store, process, or transmit your card number, CVV, or banking credentials. Razorpay&apos;s privacy policy applies to payment data: <a href="https://razorpay.com/privacy/" target="_blank" rel="noopener noreferrer" style={{ color: GOLD }} className="hover:underline">razorpay.com/privacy</a></p>
+            </div>
+
+            <div>
+              <h2 className="font-serif text-xl font-bold mb-4" style={{ color: GOLD }}>5. Third-Party Services</h2>
+              <ul className="space-y-2">
+                {[
+                  "Razorpay — payment processing",
+                  "Supabase — database and authentication",
+                  "Prokerala API — Vedic astrology calculations (Lahiri Ayanamsha)",
+                  "Google Gemini AI — Jini AI reading generation",
+                  "Vercel — website hosting",
+                  "OpenStreetMap / Nominatim — birth place geocoding",
+                  "WhatsApp / Interakt — reading and booking delivery",
+                ].map((item, i) => (
+                  <li key={i} className="flex items-start gap-2 list-none">
+                    <span style={{ color: GOLD }} className="flex-shrink-0 mt-0.5">✦</span>{item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div>
+              <h2 className="font-serif text-xl font-bold mb-4" style={{ color: GOLD }}>6. Your Rights</h2>
+              <ul className="space-y-2">
+                {[
+                  "Access the personal data we hold about you",
+                  "Request correction of inaccurate data",
+                  "Request deletion of your account and data",
+                  "Withdraw consent for marketing communications",
+                  "Request a copy of your data (data portability)",
+                ].map((item, i) => (
+                  <li key={i} className="flex items-start gap-2 list-none">
+                    <span style={{ color: GOLD }} className="flex-shrink-0 mt-0.5">✦</span>{item}
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-3">To exercise any of these rights: <a href="mailto:rohiit@trikalvaani.com" style={{ color: GOLD }} className="hover:underline">rohiit@trikalvaani.com</a></p>
+            </div>
+
+            <div>
+              <h2 className="font-serif text-xl font-bold mb-4" style={{ color: GOLD }}>7. Cookies</h2>
+              <p>Trikal Vaani uses essential cookies only — for authentication, session management, and security. We do not use advertising or tracking cookies.</p>
+            </div>
+
+            <div>
+              <h2 className="font-serif text-xl font-bold mb-4" style={{ color: GOLD }}>8. Data Retention</h2>
+              <p>We retain your data for as long as your account is active. If you delete your account, your personal data will be permanently deleted within 30 days, except where required by law (payment records retained for 7 years for tax compliance).</p>
+            </div>
+
+            <div>
+              <h2 className="font-serif text-xl font-bold mb-4" style={{ color: GOLD }}>9. Children&apos;s Privacy</h2>
+              <p>Trikal Vaani is not directed at children under 13. We do not knowingly collect personal data from children.</p>
+            </div>
+
+            <div>
+              <h2 className="font-serif text-xl font-bold mb-4" style={{ color: GOLD }}>10. Contact Us</h2>
+              <div className="border border-white/10 rounded-xl p-5 space-y-2" style={{ background: `rgba(212,175,55,0.04)` }}>
+                <p><span className="text-white font-semibold">Rohiit Gupta</span> — Chief Vedic Architect</p>
+                <p>Trikal Vaani — trikalvaani.com · Delhi NCR, India</p>
+                <p>Email: <a href="mailto:rohiit@trikalvaani.com" style={{ color: GOLD }} className="hover:underline">rohiit@trikalvaani.com</a></p>
+                <p>WhatsApp: <a href="https://wa.me/919211804111" target="_blank" rel="noopener noreferrer" style={{ color: GOLD }} className="hover:underline">+91 92118 04111</a></p>
+              </div>
+            </div>
+
+          </div>
+
+          <div className="mt-14 pt-8 border-t border-white/10 flex flex-wrap gap-6">
+            <Link href="/terms" style={{ color: GOLD }} className="text-sm hover:underline">Terms of Service →</Link>
+            <Link href="/refund" style={{ color: GOLD }} className="text-sm hover:underline">Refund Policy →</Link>
+            <Link href="/contact" className="text-gray-500 text-sm hover:text-gray-300">Contact Us →</Link>
+            <Link href="/" className="text-gray-500 text-sm hover:text-gray-300">← Home</Link>
+          </div>
+
         </div>
-
-        <Section title="1. Who We Are">
-          <p>
-            Trikal Vaani Global (&ldquo;we&rdquo;, &ldquo;us&rdquo;, &ldquo;our&rdquo;) operates the AI Vedic Astrology Research Platform at trikalvaani.com. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit or use our Platform. Founder and Data Controller: Rohiit Gupta, Delhi NCR, India.
-          </p>
-        </Section>
-
-        <Section title="2. Information We Collect">
-          <p>We collect the following categories of data:</p>
-          <ul className="list-disc list-inside space-y-2 pl-2">
-            <li>
-              <strong className="text-white">Birth Data:</strong> Name, date of birth, approximate birth time, and birth city — collected only when you initiate a free analysis. This data is used solely to generate your Vedic profile.
-            </li>
-            <li>
-              <strong className="text-white">Waitlist / Contact Data:</strong> Email address, if you voluntarily join the Inner Circle Waitlist or contact us.
-            </li>
-            <li>
-              <strong className="text-white">Usage Data:</strong> Page views, session duration, browser type, and IP address — collected automatically via analytics to improve the Platform.
-            </li>
-            <li>
-              <strong className="text-white">Payment Data:</strong> For paid reports, payment is processed by a third-party gateway (Razorpay / Stripe). We do not store full card or bank details.
-            </li>
-          </ul>
-        </Section>
-
-        <Section title="3. How We Use Your Information">
-          <p>Your data is used to:</p>
-          <ul className="list-disc list-inside space-y-1 pl-2">
-            <li>Generate and display your personalised Vedic AI analysis.</li>
-            <li>Improve the accuracy and performance of our AI models (in aggregate, anonymised form only).</li>
-            <li>Send you updates or reports if you explicitly opted in.</li>
-            <li>Process payments and manage premium report delivery.</li>
-            <li>Comply with legal obligations.</li>
-          </ul>
-          <p>
-            We <strong className="text-white">never sell</strong> your personal data to third parties for marketing purposes.
-          </p>
-        </Section>
-
-        <Section title="4. Data Retention">
-          <p>
-            Birth data submitted for free analysis is retained in our database for a maximum of 12 months, after which it is deleted or anonymised. Waitlist email addresses are retained until you unsubscribe. Payment records are retained for 7 years as required by Indian tax law.
-          </p>
-        </Section>
-
-        <Section title="5. Data Sharing">
-          <p>We may share data with:</p>
-          <ul className="list-disc list-inside space-y-1 pl-2">
-            <li><strong className="text-white">Supabase:</strong> Our database and backend infrastructure provider, based in the EU/US. Data is encrypted at rest and in transit.</li>
-            <li><strong className="text-white">Payment Processors:</strong> Razorpay / Stripe for payment processing.</li>
-            <li><strong className="text-white">Analytics:</strong> Aggregated, anonymised usage data may be processed by analytics tools.</li>
-            <li><strong className="text-white">Legal Authorities:</strong> Where required by court order or applicable law.</li>
-          </ul>
-        </Section>
-
-        <Section title="6. Cookies">
-          <p>
-            We use essential cookies necessary for Platform functionality and analytics cookies to understand usage patterns. You may disable cookies in your browser settings; however, some features may not function correctly. We do not use advertising cookies or third-party tracking pixels.
-          </p>
-        </Section>
-
-        <Section title="7. Your Rights">
-          <p>
-            Under applicable data protection laws (including India&apos;s Digital Personal Data Protection Act 2023), you have the right to:
-          </p>
-          <ul className="list-disc list-inside space-y-1 pl-2">
-            <li>Access the personal data we hold about you.</li>
-            <li>Request correction of inaccurate data.</li>
-            <li>Request deletion of your data (subject to legal retention obligations).</li>
-            <li>Withdraw consent at any time for non-essential processing.</li>
-          </ul>
-          <p>
-            To exercise these rights, email{' '}
-            <a href="mailto:privacy@trikalvaani.com" className="underline" style={{ color: GOLD }}>
-              privacy@trikalvaani.com
-            </a>.
-            We will respond within 30 days.
-          </p>
-        </Section>
-
-        <Section title="8. Data Security">
-          <p>
-            We implement industry-standard security measures including TLS encryption, Row-Level Security (RLS) in our database, and access controls. However, no transmission over the internet is 100% secure and we cannot guarantee absolute security.
-          </p>
-        </Section>
-
-        <Section title="9. Children's Privacy">
-          <p>
-            The Platform is not directed at children under the age of 13. We do not knowingly collect personal data from children. If you believe a child has submitted data, please contact us immediately.
-          </p>
-        </Section>
-
-        <Section title="10. Changes to This Policy">
-          <p>
-            We may update this Privacy Policy periodically. Changes will be posted on this page with a revised effective date. Continued use of the Platform after changes constitutes acceptance.
-          </p>
-        </Section>
-
-        <Section title="11. Contact">
-          <p>
-            For privacy-related enquiries, write to:{' '}
-            <a href="mailto:privacy@trikalvaani.com" className="underline" style={{ color: GOLD }}>
-              privacy@trikalvaani.com
-            </a>
-            {' '}or refer to our{' '}
-            <Link href="/terms" className="underline" style={{ color: GOLD }}>Terms of Service</Link>.
-          </p>
-        </Section>
-      </main>
+      </section>
       <SiteFooter />
-    </div>
+    </main>
   );
 }
