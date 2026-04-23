@@ -1,7 +1,7 @@
 /**
  * TRIKAL VAANI — trikalvaani.com
  * Chief Vedic Architect: Rohiit Gupta
- * FILE TO PASTE → app/services/child-destiny/page.tsx
+ * FILE TO PASTE → app/services/career-pivot/page.tsx
  * Version: 4.0 — 100% self-contained, zero external shared imports
  */
 import type { Metadata } from "next";
@@ -11,49 +11,49 @@ import SiteNav from "@/components/layout/SiteNav";
 import SiteFooter from "@/components/layout/SiteFooter";
 
 export const metadata: Metadata = {
-  title: "Child Destiny Reading — What Is My Child Born to Become? | Trikal Vaani",
-  description: "Chief Vedic Architect Rohiit Gupta reads your child's 5th House, Moon sign and Mercury to reveal hidden talents, ideal education stream, and cosmic calling. Rs 51 reading.",
-  keywords: ["child kundali reading astrology", "what will my child become astrology", "child destiny vedic astrology", "education stream astrology India", "5th house children astrology"],
+  title: "Should I Change My Career? Vedic Astrology Career Pivot Reading | Trikal Vaani",
+  description: "Chief Vedic Architect Rohiit Gupta reads your 10th House, Jupiter & Atmakaraka to reveal your dharmic profession and exact pivot window. ₹51 deep reading.",
+  keywords: ["career change astrology vedic", "dharmic career astrology", "10th house career vedic astrology", "Atmakaraka career reading", "Rohiit Gupta vedic astrologer Delhi"],
   authors: [{ name: "Rohiit Gupta", url: "https://trikalvaani.com/about" }],
-  openGraph: { title: "Child Destiny Reading | Trikal Vaani", description: "Rohiit Gupta reads your child's 5th house, Moon sign, and hidden talents.", url: "https://trikalvaani.com/services/child-destiny", siteName: "Trikal Vaani", type: "website", locale: "en_IN" },
-  alternates: { canonical: "https://trikalvaani.com/services/child-destiny" },
+  openGraph: { title: "Should I Change My Career? | Trikal Vaani", description: "Rohiit Gupta decodes your 10th House, Jupiter & dharmic profession.", url: "https://trikalvaani.com/services/career-pivot", siteName: "Trikal Vaani", type: "website", locale: "en_IN" },
+  alternates: { canonical: "https://trikalvaani.com/services/career-pivot" },
 };
 
 const schema = {
   "@context": "https://schema.org",
   "@graph": [
-    { "@type": "Service", name: "Child Destiny — Talent and Education Reading", provider: { "@type": "Person", name: "Rohiit Gupta", jobTitle: "Chief Vedic Architect", url: "https://trikalvaani.com/about" }, offers: [{ "@type": "Offer", price: "51", priceCurrency: "INR" }], areaServed: "IN" },
+    { "@type": "Service", name: "Career Pivot — Dharmic Career Reading", provider: { "@type": "Person", name: "Rohiit Gupta", jobTitle: "Chief Vedic Architect", url: "https://trikalvaani.com/about" }, offers: [{ "@type": "Offer", price: "51", priceCurrency: "INR" }], areaServed: "IN" },
     { "@type": "FAQPage", mainEntity: [
-      { "@type": "Question", name: "Can Vedic astrology reveal my child's natural talents?", acceptedAnswer: { "@type": "Answer", text: "Yes. The 5th house governs intelligence, creativity, and natural genius. Its lord's strength and planetary associations reveal what domain the child is cosmically gifted in — before any schooling shapes them." } },
-      { "@type": "Question", name: "Which house in astrology shows a child's education?", acceptedAnswer: { "@type": "Answer", text: "The 4th house governs primary education. The 5th governs intelligence. The 9th governs higher education. Mercury and Jupiter placement determine the ideal academic stream — science, arts, commerce, or vocational." } },
-      { "@type": "Question", name: "At what age should I get my child's kundali read?", acceptedAnswer: { "@type": "Answer", text: "The earlier the better. Readings are most actionable around ages 5 to 12 when education decisions begin, and at 15 to 16 for stream selection. The birth chart does not change, so a reading is relevant at any age." } },
+      { "@type": "Question", name: "Can Vedic astrology tell me the right career for my soul?", acceptedAnswer: { "@type": "Answer", text: "Yes. The 10th house reveals your highest calling. The Atmakaraka shows your soul's primary purpose. Jupiter's sign and nakshatra determine what domain feels divinely aligned. Together these reveal your dharmic profession." } },
+      { "@type": "Question", name: "What is the best time to change careers according to Vedic astrology?", acceptedAnswer: { "@type": "Answer", text: "The best career change windows occur during Jupiter or Venus Mahadasha with 10th house activation. Changing during Ketu Mahadasha creates confusion. Rohiit Gupta reads your exact Dasha to give you a specific month window." } },
+      { "@type": "Question", name: "What is Atmakaraka and how does it relate to career?", acceptedAnswer: { "@type": "Answer", text: "The Atmakaraka is the planet with the highest degree in your birth chart. It represents your soul's deepest longing. When your career aligns with your Atmakaraka's energy, work feels meaningful." } },
     ]},
-    { "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: "https://trikalvaani.com" }, { "@type": "ListItem", position: 2, name: "Services", item: "https://trikalvaani.com/services" }, { "@type": "ListItem", position: 3, name: "Child Destiny", item: "https://trikalvaani.com/services/child-destiny" }] },
+    { "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: "https://trikalvaani.com" }, { "@type": "ListItem", position: 2, name: "Services", item: "https://trikalvaani.com/services" }, { "@type": "ListItem", position: 3, name: "Career Pivot", item: "https://trikalvaani.com/services/career-pivot" }] },
   ],
 };
 
-export default function ChildDestinyPage() {
+export default function CareerPivotPage() {
   return (
     <>
-      <Script id="schema-child-destiny" type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
+      <Script id="schema-career-pivot" type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
       <main className="min-h-screen bg-[#080B12] text-white">
         <SiteNav />
         <section className="relative overflow-hidden pt-28 pb-20 px-4">
           <div className="absolute inset-0 pointer-events-none">
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[400px] bg-blue-900/15 rounded-full blur-[120px]" />
-            <div className="absolute bottom-0 right-0 w-[400px] h-[300px] bg-[#D4AF37]/10 rounded-full blur-[100px]" />
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[400px] bg-[#7C3AED]/20 rounded-full blur-[120px]" />
+            <div className="absolute bottom-0 left-0 w-[400px] h-[300px] bg-amber-900/10 rounded-full blur-[100px]" />
           </div>
           <div className="relative max-w-4xl mx-auto text-center">
             <div className="inline-flex items-center gap-2 border border-[#D4AF37]/40 rounded-full px-4 py-1.5 mb-8 bg-[#D4AF37]/5">
               <span className="w-2 h-2 rounded-full bg-[#D4AF37] animate-pulse" />
-              <span className="text-[#D4AF37] text-sm font-medium tracking-widest uppercase">Child Destiny Intelligence · by Rohiit Gupta</span>
+              <span className="text-[#D4AF37] text-sm font-medium tracking-widest uppercase">Dharmic Career Intelligence · by Rohiit Gupta</span>
             </div>
-            <h1 className="font-serif text-4xl md:text-6xl font-bold leading-tight mb-6">What Is Your Child <span className="text-[#D4AF37]">Born to Become?</span><br />Their Stars Know.</h1>
-            <p className="text-lg md:text-xl text-gray-300 max-w-2xl mx-auto mb-3 leading-relaxed">Jini AI reads your child's 5th House, Moon sign, Mercury and Lagna to reveal hidden talents, ideal education stream, and <span className="text-[#D4AF37] font-semibold">cosmic calling</span> — before society tells them who to be.</p>
+            <h1 className="font-serif text-4xl md:text-6xl font-bold leading-tight mb-6">Are You in the <span className="text-[#D4AF37]">Wrong Career?</span><br />Your Stars Know Your Dharma.</h1>
+            <p className="text-lg md:text-xl text-gray-300 max-w-2xl mx-auto mb-3 leading-relaxed">Jini AI reads your 10th House, Jupiter, Atmakaraka & Dasha timing to reveal your dharmic profession — and the <span className="text-[#D4AF37] font-semibold">exact window</span> to pivot without financial risk.</p>
             <p className="text-sm text-gray-500 mb-10">Reading designed by <Link href="/about" className="text-[#D4AF37] hover:underline">Rohiit Gupta</Link> — Chief Vedic Architect · Swiss Ephemeris + Prokerala API</p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/?segment=child-destiny" className="bg-[#D4AF37] text-[#080B12] font-bold px-8 py-4 rounded-lg text-lg hover:bg-[#e8c84a] transition-all duration-200 shadow-[0_0_30px_rgba(212,175,55,0.3)]">Get Child Destiny Reading — ₹51</Link>
-              <a href="https://wa.me/919211804111?text=Hi%20Rohiit%20ji%2C%20I%20want%20a%20child%20destiny%20reading" target="_blank" rel="noopener noreferrer" className="border border-[#25D366] text-[#25D366] font-semibold px-8 py-4 rounded-lg text-lg hover:bg-[#25D366]/10 transition-all duration-200 flex items-center justify-center gap-2"><WAIcon /> Talk to Rohiit Ji — ₹499</a>
+              <Link href="/?segment=career-pivot" className="bg-[#D4AF37] text-[#080B12] font-bold px-8 py-4 rounded-lg text-lg hover:bg-[#e8c84a] transition-all duration-200 shadow-[0_0_30px_rgba(212,175,55,0.3)]">Get My Career Reading — ₹51</Link>
+              <a href="https://wa.me/919211804111?text=Hi%20Rohiit%20ji%2C%20I%20want%20a%20career%20pivot%20reading" target="_blank" rel="noopener noreferrer" className="border border-[#25D366] text-[#25D366] font-semibold px-8 py-4 rounded-lg text-lg hover:bg-[#25D366]/10 transition-all duration-200 flex items-center justify-center gap-2"><WAIcon /> Talk to Rohiit Ji — ₹499</a>
             </div>
           </div>
         </section>
@@ -62,13 +62,13 @@ export default function ChildDestinyPage() {
           <div className="max-w-5xl mx-auto">
             <div className="text-center mb-14">
               <p className="text-[#D4AF37] uppercase tracking-widest text-sm font-medium mb-3">Ancient Wisdom. Modern Precision.</p>
-              <h2 className="font-serif text-3xl md:text-4xl font-bold">Why Vedic Astrology Reveals <span className="text-[#D4AF37]">Your Child&apos;s Gift</span></h2>
+              <h2 className="font-serif text-3xl md:text-4xl font-bold">Why Vedic Astrology Can Find <span className="text-[#D4AF37]">Your True Career</span></h2>
             </div>
             <div className="grid md:grid-cols-3 gap-8">
               {[
-                { icon: "👶", title: "The 5th House Is the House of Children and Talent", desc: "The 5th house governs intelligence, creativity, and the child's natural genius. Its lord's strength, nakshatra, and planetary associations reveal what domain the child is cosmically gifted in — before any schooling shapes them." },
-                { icon: "🌙", title: "Moon Sign Reveals Emotional Intelligence and Learning Style", desc: "The Moon sign and nakshatra determine how a child processes information, relates to teachers, and handles pressure. Understanding this transforms parenting and education choices." },
-                { icon: "☿", title: "Mercury and Jupiter Determine the Right Education Stream", desc: "Mercury (intellect) and Jupiter (wisdom) reveal the ideal education domain. Mercury strong in Virgo favors analytics, science, writing. Jupiter in Sagittarius favors law, teaching, philosophy." },
+                { icon: "♃", title: "Jupiter & the 10th House Reveal Your Dharmic Profession", desc: "The 10th house (Karma Bhava) shows your highest calling. Jupiter's sign, nakshatra, and aspect determine what work feels divinely aligned. Many people spend decades in the wrong career because they never read this placement." },
+                { icon: "☀", title: "Atmakaraka Shows Your Soul's True Work", desc: "The Atmakaraka (planet with highest degree) is your soul's purpose indicator. When you're in a career misaligned with your Atmakaraka, you feel empty no matter how much you earn." },
+                { icon: "⏱", title: "Dasha Timing Prevents Costly Mistakes", desc: "Changing careers at the wrong Dasha can destroy momentum. But changing during Jupiter or Venus Dasha with 10th house activation? History shows these are the windows when careers transform permanently." },
               ].map((r, i) => (
                 <div key={i} className="border border-white/10 rounded-2xl p-7 bg-white/[0.03] hover:border-[#D4AF37]/40 transition-all duration-300 group">
                   <div className="text-4xl mb-5 group-hover:scale-110 transition-transform duration-300">{r.icon}</div>
@@ -84,10 +84,10 @@ export default function ChildDestinyPage() {
             <div className="grid md:grid-cols-2 gap-10 items-center">
               <div className="space-y-6">
                 {[
-                  { step: "01", title: "Enter Child's Birth Details", desc: "Date, exact time, and place of birth. Even 10-minute precision is important for the Lagna and Moon sign." },
-                  { step: "02", title: "Jini Maps Their Cosmic Blueprint", desc: "5th house lord analysis, Moon nakshatra learning style, Mercury and Jupiter education domain, Dasha timeline for peak talent years." },
-                  { step: "03", title: "Get Their Talent and Career Map", desc: "Rs 51 reading: Top 3 talent domains, ideal education stream, which ages bring peak growth, which careers are cosmically supported." },
-                  { step: "04", title: "Book a Family Consultation", desc: "Rs 499 call with Rohiit ji for a comprehensive child development plan — including remedies for challenged placements." },
+                  { step: "01", title: "Enter Your Birth Details", desc: "Date, time, place. We use Prokerala API with Lahiri Ayanamsha for maximum accuracy." },
+                  { step: "02", title: "Jini Maps Your Career Karma", desc: "10th lord placement, Jupiter sign, Atmakaraka, D10 Dasamsa career chart — all analyzed for dharmic alignment." },
+                  { step: "03", title: "Get Industries & Pivot Window", desc: "₹51 deep reading: Which industries your chart favors, which to avoid, and the astrologically supported months to pivot." },
+                  { step: "04", title: "Book a Strategy Session", desc: "₹499 personal call with Rohiit ji for a comprehensive career roadmap — which city, which domain, which role." },
                 ].map((s, i) => (
                   <div key={i} className="flex gap-5">
                     <div className="flex-shrink-0 w-12 h-12 rounded-full border border-[#D4AF37]/50 flex items-center justify-center text-[#D4AF37] font-bold text-sm">{s.step}</div>
@@ -95,23 +95,23 @@ export default function ChildDestinyPage() {
                   </div>
                 ))}
               </div>
-              <DeliverableCard segment="child-destiny" items={["5th House hidden talent analysis", "Moon nakshatra learning style", "Mercury and Jupiter education domain", "Top 3 ideal career paths", "Ages of peak academic performance", "Challenging placements and remedies", "4-week child energy forecast"]} />
+              <DeliverableCard segment="career-pivot" items={["Your dharmic profession (10th house)", "Atmakaraka soul-purpose decoding", "D10 Dasamsa career chart reading", "Industries your chart supports", "Pivot window — exact months", "Financial risk period to avoid", "4-week career momentum forecast"]} />
             </div>
           </div>
         </section>
-        <TestimonialsSection label="What Parents Are" items={[
-          { name: "Anita Sharma", city: "Gurgaon", date: "November 2024", text: "My son was forced into science stream. Jini's reading showed his Mercury in 12th house with strong Venus — a creative communicator, not an engineer. He's now thriving in journalism." },
-          { name: "Prashant Nanda", city: "Bhubaneswar", date: "January 2025", text: "We were pushing our daughter toward medicine. Her chart showed Jupiter in 5th in Sagittarius — a natural teacher. She's pursuing philosophy at DU and has never been happier." },
-          { name: "Kavya Reddy", city: "Hyderabad", date: "March 2025", text: "My 7-year-old son has anger issues. Rohiit ji read his chart and showed Mars conjunct the Ascendant — he's a natural leader, not a problem child. The framing changed everything for our family." },
+        <TestimonialsSection label="What People Are" items={[
+          { name: "Neha Agarwal", city: "Pune", date: "January 2025", text: "I was an engineer for 8 years and always felt wrong. Jini told me my Jupiter Mahadasha was the pivot window. I started my design studio. Best decision of my life." },
+          { name: "Vikram Bhatia", city: "Gurgaon", date: "November 2024", text: "The reading revealed I had a Hamsa Yoga wasting in a sales job. Rohiit ji advised me to move toward finance. I am now a financial trainer — income tripled." },
+          { name: "Meera Krishnan", city: "Kochi", date: "March 2025", text: "I was terrified to leave my government job. My chart showed a Rahu period ending and a Sun-Jupiter period beginning. Rohiit ji said the fear was the old Dasha talking. He was right." },
         ]} />
         <MaaDivineSeva />
         <FaqSection items={[
-          { q: "Can Vedic astrology reveal my child's natural talents?", a: "Yes. The 5th house governs intelligence, creativity, and natural genius. Its lord's strength and planetary associations reveal what domain the child is cosmically gifted in — before any schooling shapes them." },
-          { q: "Which house in astrology shows a child's education?", a: "The 4th house governs primary education. The 5th governs intelligence. The 9th governs higher education. Mercury and Jupiter placement determine the ideal academic stream." },
-          { q: "What is Moon nakshatra and why does it matter for children?", a: "The Moon nakshatra determines the child's emotional nature and learning style. A child in Rohini learns through beauty and consistency. A child in Ardra learns through questioning. Understanding this transforms how parents teach." },
-          { q: "At what age should I get my child's kundali read?", a: "The earlier the better. Readings are most actionable around ages 5 to 12 when education decisions begin, and at 15 to 16 for stream selection. The birth chart does not change, so a reading is relevant at any age." },
+          { q: "Can Vedic astrology tell me the right career for my soul?", a: "Yes. The 10th house reveals your highest calling. The Atmakaraka shows your soul's primary purpose. Jupiter's sign and nakshatra determine what domain feels divinely aligned. Together these reveal your dharmic profession." },
+          { q: "What is the best time to change careers?", a: "The best career change windows occur during Jupiter or Venus Mahadasha with 10th house activation. Changing during Ketu Mahadasha creates confusion. Rohiit Gupta reads your exact Dasha to give you a specific month window." },
+          { q: "What is the Dasamsa D10 chart?", a: "The Dasamsa (D10) is the 10th divisional chart used exclusively for career analysis. It shows your capacity for authority, the right professional domain, and whether self-employment or service suits you." },
+          { q: "What is Atmakaraka and how does it relate to career?", a: "The Atmakaraka is the planet with the highest degree in your birth chart. It represents your soul's deepest longing. When your career aligns with your Atmakaraka's energy, work feels meaningful." },
         ]} />
-        <CtaSection headline="Give Your Child the Gift of" highlight="Cosmic Clarity." body="Every child is born with a unique cosmic blueprint. Rs 51 to read it — before the education system overwrites it." segment="child-destiny" waText="I%20need%20a%20child%20destiny%20reading" />
+        <CtaSection headline="Stop Guessing. Start Living" highlight="Your Dharma." body="Your birth chart already knows your highest calling. ₹51 to find out what it is — and when to make the move." segment="career-pivot" waText="I%20need%20a%20career%20pivot%20reading" />
         <SiteFooter />
       </main>
     </>
