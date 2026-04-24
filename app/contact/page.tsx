@@ -109,7 +109,7 @@ export default function ContactPage() {
                 { icon: "🙏", title: "Maa Shakti Arzi / Dhanyewaad", desc: "Submit your prayer or gratitude offering to Maa Shakti", wa: "I%20want%20to%20submit%20my%20Arzi%20to%20Maa%20Shakti" },
                 { icon: "🤝", title: "Business Enquiry", desc: "Partnerships, collaborations, or media enquiries", wa: "I%20have%20a%20business%20enquiry%20for%20Trikal%20Vaani" },
               ].map((item, i) => (
-                <a key={i} href={`https://wa.me/919211804111?text=Hi%20Rohiit%20ji%2C%20${item.wa}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-4 border border-white/10 rounded-xl p-4 transition-all duration-200 group" style={{ background: "rgba(255,255,255,0)" }} onMouseEnter={e => (e.currentTarget.style.background = "rgba(255,255,255,0.03)")} onMouseLeave={e => (e.currentTarget.style.background = "rgba(255,255,255,0)")}>
+                <a key={i} href={`https://wa.me/919211804111?text=Hi%20Rohiit%20ji%2C%20${item.wa}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-4 border border-white/10 rounded-xl p-4 transition-all duration-200 group hover:bg-white/[0.03]">
                   <span className="text-2xl flex-shrink-0">{item.icon}</span>
                   <div className="flex-1">
                     <p className="text-white font-semibold text-sm">{item.title}</p>
