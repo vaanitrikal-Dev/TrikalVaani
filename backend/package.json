@@ -1,12 +1,10 @@
 {
   "name": "trikal-vaani-backend",
   "version": "1.0.0",
-  "description": "Trikal Vaani Backend — Razorpay Webhook + Swiss Ephemeris",
   "main": "dist/server.js",
   "scripts": {
-    "build": "tsc",
-    "start": "node dist/server.js",
-    "dev": "ts-node src/server.ts"
+    "build": "npm install --save-dev @types/node @types/express @types/cors && tsc",
+    "start": "node dist/server.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.39.0",
