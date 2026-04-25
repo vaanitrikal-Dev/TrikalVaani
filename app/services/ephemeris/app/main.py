@@ -3,15 +3,14 @@
   TRIKAL VAANI — Swiss Ephemeris Vedic Astrology API
   File: app/main.py
   Author: Rohiit Gupta, Chief Vedic Architect
-  Version: 2.1 — Python 3.14 + Pydantic v1 compatible
+  Version: 2.2 — Final Fix
 =============================================================
 """
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
-from pydantic import BaseModel
-from typing import Optional
+from pydantic import BaseModel, Field
 import os
 
 from .astro import (
@@ -25,7 +24,7 @@ from .astro import (
     compute_rashi,
 )
 
-app = FastAPI(title="Trikal Vaani — Vedic Ephemeris API", version="2.1.0")
+app = FastAPI(title="Trikal Vaani Ephemeris API", version="2.2.0")
 
 ALLOWED_ORIGINS = os.getenv(
     "ALLOWED_ORIGINS",
@@ -36,35 +35,38 @@ app.add_middleware(CORSMiddleware, allow_origins=ALLOWED_ORIGINS,
                    allow_credentials=True, allow_methods=["GET", "POST"], allow_headers=["*"])
 app.add_middleware(GZipMiddleware, minimum_size=500)
 
-API_KEY = os.getenv("TRIKAL_API_KEY", "")
 
 class BirthInput(BaseModel):
-    year: int = 2000
-    month: int = 1
-    day: int = 1
-    hour: int = 12
-    minute: int = 0
-    second: int = 0
-    latitude: float = 28.6
-    longitude: float = 77.2
-    timezone: float = 5.5
-    ayanamsa: str = "lahiri"
-    house_system: str = "P"
+    year: int = Field(default=2000)
+    month: int = Field(default=1)
+    day: int = Field(default=1)
+    hour: int = Field(default=12)
+    minute: int = Field(default=0)
+    second: int = Field(default=0)
+    latitude: float = Field(default=28.6)
+    longitude: float = Field(default=77.2)
+    timezone: float = Field(default=5.5)
+    ayanamsa: str = Field(default="lahiri")
+    house_system: str = Field(default="P")
 
     class Config:
         extra = "allow"
 
+
 class MatchingInput(BaseModel):
-    person1: BirthInput
-    person2: BirthInput
+    person1: BirthInput = Field(default=...)
+    person2: BirthInput = Field(default=...)
+
 
 @app.get("/")
 def root():
-    return {"status": "ok", "service": "Trikal Vaani Ephemeris API v2.1"}
+    return {"status": "ok", "service": "Trikal Vaani Ephemeris API v2.2"}
+
 
 @app.get("/health")
 def health():
     return {"status": "healthy"}
+
 
 @app.post("/kundali")
 def get_kundali(data: BirthInput):
@@ -73,12 +75,14 @@ def get_kundali(data: BirthInput):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+
 @app.post("/kundali-matching")
 def get_matching(data: MatchingInput):
     try:
         return compute_kundali_matching(data.person1, data.person2)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
 
 @app.post("/dasha")
 def get_dasha(data: BirthInput):
@@ -87,12 +91,14 @@ def get_dasha(data: BirthInput):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+
 @app.post("/nakshatra")
 def get_nakshatra(data: BirthInput):
     try:
         return compute_nakshatra(data)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
 
 @app.post("/sade-sati")
 def get_sade_sati(data: BirthInput):
@@ -101,6 +107,7 @@ def get_sade_sati(data: BirthInput):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+
 @app.post("/manglik-dosh")
 def get_manglik(data: BirthInput):
     try:
@@ -108,12 +115,14 @@ def get_manglik(data: BirthInput):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+
 @app.post("/lagna")
 def get_lagna(data: BirthInput):
     try:
         return compute_lagna(data)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
 
 @app.post("/rashi")
 def get_rashi(data: BirthInput):
