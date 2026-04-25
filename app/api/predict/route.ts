@@ -3,7 +3,7 @@
  * TRIKAL VAANI — Unified Prediction Endpoint
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/api/predict/route.ts
- * VERSION: 2.1-MASTER (GOD-LEVEL PROTECTION)
+ * VERSION: 2.1-MASTER-FORCE (GOD-LEVEL PROTECTION)
  * SIGNED: ROHIIT GUPTA, CEO
  *
  * ⚠️ STRICT CEO ORDER: DO NOT EDIT WITHOUT CEO APPROVAL
