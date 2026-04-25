@@ -5,7 +5,7 @@
  * TRIKAL VAANI — Birth Form
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: components/landing/BirthForm.tsx
- * VERSION: 10.0-MASTER (GOD-LEVEL PROTECTION)
+ * VERSION: 10.1-MASTER (GOD-LEVEL PROTECTION)
  * SIGNED: ROHIIT GUPTA, CEO
  *
  * v10.0: handleSubmit now calls /api/predict + saves to Supabase
@@ -694,15 +694,24 @@ export default function BirthForm({ selectedCategory }: Props) {
       const sessionId = getOrCreateSessionId();
 
       // Step 6 — Domain ID
+      // Domain prefix comes from domain definition — NOT from user's birth year
+      const DOMAIN_PREFIX_MAP: Record<string, string> = {
+        'ex_back':            'genz',
+        'toxic_boss':         'genz',
+        'manifestation':      'genz',
+        'dream_career':       'genz',
+        'property_yog':       'mill',
+        'karz_mukti':         'mill',
+        'child_destiny':      'mill',
+        'parents_wellness':   'mill',
+        'retirement_peace':   'genx',
+        'legacy_inheritance': 'genx',
+        'spiritual_innings':  'genx',
+      };
       const effectiveQuestion = selectedCategory ?? selectedQuestion;
-      const segmentPrefix =
-  detectedGen === 'millennial' ? 'mill' :
-  detectedGen === 'genz'       ? 'genz' :
-  detectedGen === 'genx'       ? 'genx' : 'mill';
-
-const domainId = effectiveQuestion
-  ? `${segmentPrefix}_${effectiveQuestion.id}`
-  : null;
+      const domainId = effectiveQuestion
+        ? `${DOMAIN_PREFIX_MAP[effectiveQuestion.id] ?? 'mill'}_${effectiveQuestion.id}`
+        : null;
 
       // Step 7 — Call /api/predict
       let predictionId: string | null = null;
