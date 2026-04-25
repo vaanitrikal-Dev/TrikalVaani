@@ -31,10 +31,10 @@ const GEMINI_MODEL   = 'gemini-2.5-flash';
 const GEMINI_URL     = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
 
 const MAX_TOKENS: Record<UserTier, number> = {
-  free:    2500,
-  basic:   5000,
-  pro:     6500,
-  premium: 6500,
+  free:    4096,
+  basic:   8192,
+  pro:     8192,
+  premium: 8192,
 };
 
 // Service role client — server-side only
