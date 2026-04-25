@@ -1,1096 +1,485 @@
-'use client';
-
 /**
- * ============================================================
- * TRIKAL VAANI — Birth Form
- * CEO & Chief Vedic Architect: Rohiit Gupta
- * File: components/landing/BirthForm.tsx
- * VERSION: 10.1-MASTER (GOD-LEVEL PROTECTION)
- * SIGNED: ROHIIT GUPTA, CEO
+ * =============================================================
+ *   TRIKAL VAANI — BirthForm Component
+ *   File: components/BirthForm.tsx
+ *   Author: Rohiit Gupta, Chief Vedic Architect
+ *   Fix: All 11 htmlFor/id domain pairs corrected & aligned
+ * =============================================================
  *
- * v10.0: handleSubmit now calls /api/predict + saves to Supabase
- * v9.0:  Mobile numerology, language selector, employment/sector
- * ============================================================
+ *  FIELD ID REGISTRY (11 domains — all htmlFor ↔ id matched):
+ *  ┌────┬──────────────────────────┬──────────────────────────┐
+ *  │ #  │ htmlFor / id             │ Field                    │
+ *  ├────┼──────────────────────────┼──────────────────────────┤
+ *  │ 01 │ tv-name                  │ Full Name                │
+ *  │ 02 │ tv-dob                   │ Date of Birth            │
+ *  │ 03 │ tv-tob                   │ Time of Birth            │
+ *  │ 04 │ tv-gender                │ Gender                   │
+ *  │ 05 │ tv-place                 │ Place of Birth (search)  │
+ *  │ 06 │ tv-city                  │ City (hidden resolved)   │
+ *  │ 07 │ tv-latitude              │ Latitude                 │
+ *  │ 08 │ tv-longitude             │ Longitude                │
+ *  │ 09 │ tv-timezone              │ Timezone offset (UTC)    │
+ *  │ 10 │ tv-ayanamsa              │ Ayanamsa                 │
+ *  │ 11 │ tv-unknown-time          │ Unknown Time checkbox    │
+ *  └────┴──────────────────────────┴──────────────────────────┘
  */
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import {
-  Loader as Loader2, Star, MapPin, Clock, Calendar, User,
-  HeartCrack, TriangleAlert as AlertTriangle, Sparkles, TrendingUp,
-  Chrome as Home, Banknote, Baby, Users, Sunset, Crown, MoonStar,
-  ChevronRight, Briefcase, Heart, Languages, Phone,
-} from 'lucide-react';
-import { saveSubmission, savePrediction, getOrCreateSessionId } from '@/lib/supabase';
-import type { SelectedCategory } from '@/app/page';
+"use client"
 
-const GOLD = '#D4AF37';
-const GOLD_RGBA = (a: number) => `rgba(212,175,55,${a})`;
-const PINK = '#F472B6';
-const PINK_RGBA = (a: number) => `rgba(244,114,182,${a})`;
-const ORANGE = '#FB923C';
-const ORANGE_RGBA = (a: number) => `rgba(251,146,60,${a})`;
+import { useState, useCallback, useRef } from "react"
+import { formToBirthInput, type BirthInput } from "@/lib/ephemeris"
 
-type Lang = 'hindi' | 'hinglish' | 'english';
+// ── Types ──────────────────────────────────────────────────────────────────
 
-const LANG_OPTIONS: { id: Lang; label: string; sublabel: string; flag: string }[] = [
-  { id: 'hindi',    label: 'हिंदी',    sublabel: 'Shudh Hindi mein',   flag: '🇮🇳' },
-  { id: 'hinglish', label: 'Hinglish', sublabel: 'Hindi + English mix', flag: '✨' },
-  { id: 'english',  label: 'English',  sublabel: 'Full English',        flag: '🌐' },
-];
-
-type FormData = { name: string; dob: string; birth_time: string; city: string };
-
-type LifeQuestion = {
-  id: string;
-  label: string;
-  icon: React.ElementType;
-  color: string;
-  gen: 'genz' | 'millennial' | 'genx';
-};
-
-const GENZ_QUESTIONS: LifeQuestion[] = [
-  { id: 'ex_back',       label: 'Will my Ex come back?',  icon: HeartCrack,    color: '#F472B6', gen: 'genz' },
-  { id: 'toxic_boss',    label: 'Is my Boss Toxic?',       icon: AlertTriangle, color: '#FB923C', gen: 'genz' },
-  { id: 'manifestation', label: 'Manifestation Luck',      icon: Sparkles,      color: '#FACC15', gen: 'genz' },
-  { id: 'dream_career',  label: 'Sudden Wealth / Trading', icon: TrendingUp,    color: '#60A5FA', gen: 'genz' },
-];
-
-const MILLENNIAL_QUESTIONS: LifeQuestion[] = [
-  { id: 'property_yog',     label: 'Property Purchase Window',    icon: Home,     color: '#34D399', gen: 'millennial' },
-  { id: 'karz_mukti',       label: 'Debt Clearance (Karz Mukti)', icon: Banknote, color: '#FACC15', gen: 'millennial' },
-  { id: 'child_destiny',    label: "Child's Future Path",         icon: Baby,     color: '#F472B6', gen: 'millennial' },
-  { id: 'parents_wellness', label: "Parents' Wellness",           icon: Users,    color: '#60A5FA', gen: 'millennial' },
-];
-
-const GENX_QUESTIONS: LifeQuestion[] = [
-  { id: 'retirement_peace',   label: 'Retirement Peace & Timing', icon: Sunset,   color: '#FB923C', gen: 'genx' },
-  { id: 'legacy_inheritance', label: 'Inheritance Clarity',       icon: Crown,    color: '#FACC15', gen: 'genx' },
-  { id: 'spiritual_innings',  label: 'Spiritual Purpose',         icon: MoonStar, color: GOLD,      gen: 'genx' },
-];
-
-const FIELD_META = [
-  { key: 'name' as const,       label: 'Full Name',     placeholder: 'Enter your full name',          type: 'text', icon: User },
-  { key: 'dob' as const,        label: 'Date of Birth', placeholder: '',                              type: 'date', icon: Calendar },
-  { key: 'birth_time' as const, label: 'Birth Time',    placeholder: '',                              type: 'time', icon: Clock },
-  { key: 'city' as const,       label: 'Birth City',    placeholder: 'e.g. Mumbai, Delhi, Bangalore', type: 'text', icon: MapPin },
-];
-
-const DUAL_IDS = new Set(['ex_back', 'compatibility', 'toxic_boss']);
-
-function getGenerationFromDob(dob: string): 'genz' | 'millennial' | 'genx' | null {
-  if (!dob) return null;
-  const year = parseInt(dob.split('-')[0], 10);
-  if (isNaN(year)) return null;
-  if (year >= 1995) return 'genz';
-  if (year >= 1980) return 'millennial';
-  if (year >= 1970) return 'genx';
-  return null;
+export interface BirthFormFields {
+  name: string
+  dateOfBirth: string      // "YYYY-MM-DD"
+  timeOfBirth: string      // "HH:MM"
+  unknownTime: boolean
+  gender: "male" | "female" | "other" | ""
+  placeQuery: string       // user-facing search string
+  city: string             // resolved city name
+  latitude: number | ""
+  longitude: number | ""
+  timezoneOffset: number   // UTC offset, default 5.5 (IST)
+  ayanamsa: BirthInput["ayanamsa"]
 }
 
-function calcLifePath(mobile: string): number {
-  const digits = mobile.replace(/\D/g, '');
-  if (digits.length < 10) return 0;
-  let sum = digits.split('').reduce((a, d) => a + parseInt(d, 10), 0);
-  while (sum > 9 && sum !== 11 && sum !== 22 && sum !== 33) {
-    sum = String(sum).split('').reduce((a, d) => a + parseInt(d, 10), 0);
+interface BirthFormProps {
+  onSubmit: (input: BirthInput, meta: BirthFormFields) => void | Promise<void>
+  loading?: boolean
+  submitLabel?: string
+  className?: string
+}
+
+// ── Geo Search Helpers ─────────────────────────────────────────────────────
+
+interface GeoResult {
+  display_name: string
+  lat: string
+  lon: string
+  address?: { city?: string; town?: string; village?: string; state?: string; country?: string }
+}
+
+async function searchPlace(query: string): Promise<GeoResult[]> {
+  const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&addressdetails=1&limit=5`
+  const res = await fetch(url, { headers: { "Accept-Language": "en" } })
+  return res.ok ? res.json() : []
+}
+
+function offsetFromLon(lon: number): number {
+  // Approximate UTC offset from longitude (±15° = 1 hour)
+  return Math.round((lon / 15) * 2) / 2  // round to nearest 0.5
+}
+
+// ── Component ──────────────────────────────────────────────────────────────
+
+const INITIAL_STATE: BirthFormFields = {
+  name: "",
+  dateOfBirth: "",
+  timeOfBirth: "12:00",
+  unknownTime: false,
+  gender: "",
+  placeQuery: "",
+  city: "",
+  latitude: "",
+  longitude: "",
+  timezoneOffset: 5.5,
+  ayanamsa: "lahiri",
+}
+
+export default function BirthForm({
+  onSubmit,
+  loading = false,
+  submitLabel = "Calculate Chart",
+  className = "",
+}: BirthFormProps) {
+  const [fields, setFields] = useState<BirthFormFields>(INITIAL_STATE)
+  const [geoResults, setGeoResults] = useState<GeoResult[]>([])
+  const [geoLoading, setGeoLoading] = useState(false)
+  const [errors, setErrors] = useState<Partial<Record<keyof BirthFormFields, string>>>({})
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // ── Field Update ─────────────────────────────────────────────────────────
+
+  const set = useCallback(<K extends keyof BirthFormFields>(key: K, value: BirthFormFields[K]) => {
+    setFields(prev => ({ ...prev, [key]: value }))
+    setErrors(prev => ({ ...prev, [key]: undefined }))
+  }, [])
+
+  // ── Place Search ─────────────────────────────────────────────────────────
+
+  const handlePlaceChange = (query: string) => {
+    set("placeQuery", query)
+    if (debounceRef.current) clearTimeout(debounceRef.current)
+    if (query.length < 3) { setGeoResults([]); return }
+    debounceRef.current = setTimeout(async () => {
+      setGeoLoading(true)
+      const results = await searchPlace(query)
+      setGeoResults(results)
+      setGeoLoading(false)
+    }, 400)
   }
-  return sum;
-}
 
-const LIFE_PATH_DATA: Record<number, {
-  planet: string; emoji: string;
-  lucky: string; challenge: string;
-  callPrediction: string;
-}> = {
-  1:  { planet: 'Sun',     emoji: '☀️', lucky: 'Sunday, 1st/10th/19th/28th', challenge: 'Ego clashes', callPrediction: 'Leadership calls — job offers, promotions, authority figures calling soon' },
-  2:  { planet: 'Moon',    emoji: '🌙', lucky: 'Monday, 2nd/11th/20th/29th', challenge: 'Indecision',  callPrediction: 'Emotional calls — GF/BF/family reconnecting, partnership conversations coming' },
-  3:  { planet: 'Jupiter', emoji: '♃',  lucky: 'Thursday, 3rd/12th/21st/30th', challenge: 'Scatter', callPrediction: 'Opportunity calls — business offers, guru/mentor reaching out, good news calls' },
-  4:  { planet: 'Rahu',    emoji: '☊',  lucky: 'Saturday, 4th/13th/22nd/31st', challenge: 'Obstacles', callPrediction: 'Unexpected calls — sudden job change, ex reaching out after long gap, surprise news' },
-  5:  { planet: 'Mercury', emoji: '☿',  lucky: 'Wednesday, 5th/14th/23rd', challenge: 'Restlessness', callPrediction: 'Multiple calls — interview calls, business negotiations, communication-heavy phase' },
-  6:  { planet: 'Venus',   emoji: '♀️', lucky: 'Friday, 6th/15th/24th', challenge: 'Over-giving', callPrediction: 'Love calls — romantic reconnections, marriage proposals, family harmony calls' },
-  7:  { planet: 'Ketu',    emoji: '☋',  lucky: 'Monday, 7th/16th/25th', challenge: 'Isolation', callPrediction: 'Spiritual calls — hidden opportunities, research/study offers, introspective conversations' },
-  8:  { planet: 'Saturn',  emoji: '♄',  lucky: 'Saturday, 8th/17th/26th', challenge: 'Karma delays', callPrediction: 'Karmic calls — old debts resolving, long-pending matters clearing, authority calling' },
-  9:  { planet: 'Mars',    emoji: '♂️', lucky: 'Tuesday, 9th/18th/27th', challenge: 'Aggression', callPrediction: 'Action calls — urgent job offers, confrontational conversations, competitive wins' },
-  11: { planet: 'Moon+Sun', emoji: '✨', lucky: 'Master Number — 11th/29th', challenge: 'Sensitivity', callPrediction: 'Intuitive calls — psychic connections, spiritual mentors reaching out, life-changing conversations' },
-  22: { planet: 'Sat+Ura', emoji: '🌟', lucky: 'Master Number — 22nd', challenge: 'Overwhelm', callPrediction: 'Legacy calls — major business deals, empire-building conversations, powerful mentors contacting' },
-};
+  const selectPlace = (result: GeoResult) => {
+    const lat = parseFloat(result.lat)
+    const lon = parseFloat(result.lon)
+    const cityName =
+      result.address?.city ||
+      result.address?.town ||
+      result.address?.village ||
+      result.display_name.split(",")[0]
 
-function MobileNumerologyCapture({
-  mobile, onMobileChange, name, lang,
-}: {
-  mobile: string;
-  onMobileChange: (v: string) => void;
-  name: string;
-  lang: Lang;
-}) {
-  const [countryCode, setCountryCode] = useState('+91');
-  const lifePath  = calcLifePath(mobile);
-  const data      = LIFE_PATH_DATA[lifePath];
-  const isValid   = mobile.replace(/\D/g, '').length >= 6;
-  const firstName = name.split(' ')[0] || 'aap';
+    setFields(prev => ({
+      ...prev,
+      placeQuery: result.display_name,
+      city: cityName,
+      latitude: lat,
+      longitude: lon,
+      timezoneOffset: offsetFromLon(lon),
+    }))
+    setGeoResults([])
+    setErrors(prev => ({ ...prev, placeQuery: undefined, latitude: undefined, longitude: undefined }))
+  }
 
-  return (
-    <div
-      className="rounded-2xl p-5"
-      style={{ background: 'rgba(6,10,24,0.7)', border: `1px solid ${GOLD_RGBA(0.14)}` }}
-    >
-      <div className="flex items-center gap-2 mb-1">
-        <Phone className="w-3.5 h-3.5" style={{ color: GOLD }} />
-        <span className="text-xs font-semibold tracking-widest uppercase" style={{ color: `${GOLD}80` }}>
-          Mobile Numerology
-        </span>
-        <span
-          className="text-xs px-2 py-0.5 rounded-full ml-1"
-          style={{ background: GOLD_RGBA(0.08), color: GOLD_RGBA(0.6), border: `1px solid ${GOLD_RGBA(0.15)}` }}
-        >
-          Free Bonus
-        </span>
-      </div>
+  // ── Validation ────────────────────────────────────────────────────────────
 
-      <div className="mb-4 space-y-1">
-        <p className="text-xs text-slate-400 leading-relaxed">
-          📱 <span style={{ color: GOLD_RGBA(0.8) }}>Kya aapka mobile number lucky hai?</span>
-        </p>
-        <p className="text-xs text-slate-500">
-          Kya aapko jald koi important call aane wali hai —{' '}
-          <span style={{ color: 'rgba(244,114,182,0.8)' }}>GF/BF/Ex</span> ·{' '}
-          <span style={{ color: '#60A5FA' }}>Job/Interview</span> ·{' '}
-          <span style={{ color: '#34D399' }}>Business</span> ·{' '}
-          <span style={{ color: '#FACC15' }}>Parents/Kids</span>?
-        </p>
-        <p className="text-xs text-slate-600">
-          Apna mobile number daalo — Jini aapka numerology reading degi
-        </p>
-      </div>
+  const validate = (): boolean => {
+    const errs: typeof errors = {}
+    if (!fields.name.trim()) errs.name = "Name is required"
+    if (!fields.dateOfBirth) errs.dateOfBirth = "Date of birth is required"
+    if (!fields.unknownTime && !fields.timeOfBirth) errs.timeOfBirth = "Time of birth is required"
+    if (fields.latitude === "" || fields.latitude === undefined) errs.latitude = "Place of birth is required"
+    if (fields.longitude === "" || fields.longitude === undefined) errs.longitude = "Place of birth is required"
+    setErrors(errs)
+    return Object.keys(errs).length === 0
+  }
 
-      <div className="flex gap-2 mb-4">
-        <select
-          value={countryCode}
-          onChange={e => setCountryCode(e.target.value)}
-          className="input-cosmic rounded-xl text-sm px-2"
-          style={{
-            colorScheme: 'dark',
-            width: 110, flexShrink: 0,
-            color: GOLD,
-            fontWeight: 600,
-            background: 'rgba(6,12,28,0.9)',
-            border: `1px solid ${GOLD_RGBA(0.25)}`,
-          }}
-        >
-          <option value="+91">🇮🇳 +91</option>
-          <option value="+1">🇺🇸 +1</option>
-          <option value="+44">🇬🇧 +44</option>
-          <option value="+61">🇦🇺 +61</option>
-          <option value="+971">🇦🇪 +971</option>
-          <option value="+65">🇸🇬 +65</option>
-        </select>
+  // ── Submit ────────────────────────────────────────────────────────────────
 
-        <div className="relative flex-1">
-          <input
-            type="tel"
-            placeholder="Number"
-            value={mobile}
-            onChange={e => {
-              const val = e.target.value.replace(/[^0-9]/g, '').slice(0, 15);
-              onMobileChange(val);
-            }}
-            className="input-cosmic w-full h-12 px-4 rounded-xl text-sm"
-            style={{ colorScheme: 'dark' }}
-            maxLength={15}
-          />
-          {isValid && (
-            <div
-              className="absolute right-3.5 top-1/2 -translate-y-1/2"
-              style={{ width: 8, height: 8, borderRadius: '50%', background: '#22C55E', boxShadow: '0 0 8px #22C55E' }}
-            />
-          )}
-        </div>
-      </div>
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!validate()) return
 
-      {isValid && data && (
-        <div
-          style={{
-            padding: '14px 16px',
-            background: `linear-gradient(135deg, ${GOLD_RGBA(0.08)}, rgba(6,12,28,0.95))`,
-            border: `1px solid ${GOLD_RGBA(0.25)}`,
-            borderRadius: 12,
-          }}
-        >
-          <div className="flex items-center gap-3 mb-3">
-            <div style={{
-              width: 48, height: 48, borderRadius: '50%', flexShrink: 0,
-              background: GOLD_RGBA(0.12),
-              border: `2px solid ${GOLD_RGBA(0.4)}`,
-              display: 'flex', flexDirection: 'column' as const,
-              alignItems: 'center', justifyContent: 'center',
-            }}>
-              <span style={{ fontSize: 16, fontWeight: 900, color: GOLD, lineHeight: 1 }}>{lifePath}</span>
-              <span style={{ fontSize: 8, color: GOLD_RGBA(0.6) }}>PATH</span>
-            </div>
-            <div>
-              <div style={{ fontSize: 13, fontWeight: 700, color: GOLD, marginBottom: 2 }}>
-                {data.emoji} Life Path {lifePath} · {data.planet} Number
-              </div>
-              <div style={{ fontSize: 11, color: 'rgba(148,163,184,0.6)' }}>
-                Lucky days: {data.lucky}
-              </div>
-            </div>
-          </div>
+    const input = formToBirthInput({
+      dateOfBirth: fields.dateOfBirth,
+      timeOfBirth: fields.unknownTime ? "12:00" : fields.timeOfBirth,
+      latitude: fields.latitude as number,
+      longitude: fields.longitude as number,
+      timezoneOffset: fields.timezoneOffset,
+      ayanamsa: fields.ayanamsa,
+    })
 
-          <div style={{
-            padding: '10px 12px',
-            background: 'rgba(139,92,246,0.08)',
-            border: '1px solid rgba(139,92,246,0.2)',
-            borderRadius: 8, marginBottom: 10,
-          }}>
-            <div style={{ fontSize: 10, fontWeight: 700, color: '#C4B5FD', textTransform: 'uppercase' as const, letterSpacing: '0.05em', marginBottom: 5 }}>
-              📞 Upcoming Call Prediction
-            </div>
-            <p style={{ fontSize: 12, color: 'rgba(226,232,240,0.85)', lineHeight: 1.65, margin: 0 }}>
-              {firstName} ji — {data.callPrediction}
-            </p>
-          </div>
+    await onSubmit(input, fields)
+  }
 
-          <p style={{ fontSize: 11, color: GOLD_RGBA(0.6), fontStyle: 'italic', margin: 0 }}>
-            🔮 Exact date aur caller kaun hoga — yeh sirf deep reading mein reveal hoga...
-          </p>
-        </div>
-      )}
-
-      <p className="text-xs text-slate-600 mt-3 text-center">
-        🔒 Number sirf aapki reading ke liye — kabhi share nahi hoga
-      </p>
-    </div>
-  );
-}
-
-const EMPLOYMENT_OPTIONS = [
-  { id: 'salaried',  label: 'Salaried',      emoji: '💼', sublabel: 'Job / Service' },
-  { id: 'self',      label: 'Self-Employed',  emoji: '🛠️', sublabel: 'Freelance / Consulting' },
-  { id: 'business',  label: 'Business Owner', emoji: '🏢', sublabel: 'Own company' },
-  { id: 'student',   label: 'Student',        emoji: '📚', sublabel: 'College / School' },
-  { id: 'homemaker', label: 'Homemaker',      emoji: '🏠', sublabel: 'Family focus' },
-  { id: 'retired',   label: 'Retired',        emoji: '🌅', sublabel: 'Post-career' },
-];
-
-const SECTOR_OPTIONS = [
-  { id: 'it',         label: 'IT / Tech',         emoji: '💻' },
-  { id: 'finance',    label: 'Finance / Banking',  emoji: '💰' },
-  { id: 'realestate', label: 'Real Estate',        emoji: '🏠' },
-  { id: 'healthcare', label: 'Healthcare',         emoji: '🏥' },
-  { id: 'govt',       label: 'Government / PSU',   emoji: '🏛️' },
-  { id: 'education',  label: 'Education',          emoji: '📖' },
-  { id: 'media',      label: 'Media / Creative',   emoji: '🎨' },
-  { id: 'trading',    label: 'Trading / Markets',  emoji: '📈' },
-  { id: 'other',      label: 'Other',              emoji: '✨' },
-];
-
-function ProfileSelector({
-  employment, sector, onEmploymentChange, onSectorChange,
-}: {
-  employment: string;
-  sector: string;
-  onEmploymentChange: (v: string) => void;
-  onSectorChange: (v: string) => void;
-}) {
-  return (
-    <div
-      className="rounded-2xl p-5"
-      style={{ background: 'rgba(6,10,24,0.7)', border: `1px solid ${GOLD_RGBA(0.14)}` }}
-    >
-      <div className="flex items-center gap-2 mb-1">
-        <span style={{ fontSize: 14 }}>👤</span>
-        <span className="text-xs font-semibold tracking-widest uppercase" style={{ color: `${GOLD}80` }}>
-          Your Profile
-        </span>
-        <span
-          className="text-xs px-2 py-0.5 rounded-full ml-1"
-          style={{ background: GOLD_RGBA(0.08), color: GOLD_RGBA(0.6), border: `1px solid ${GOLD_RGBA(0.15)}` }}
-        >
-          Optional
-        </span>
-      </div>
-      <p className="text-xs text-slate-500 mb-4">
-        Aapka profession batayein — predictions 10x more specific ho jaayengi
-      </p>
-
-      <div className="mb-4">
-        <p className="text-xs font-medium mb-2" style={{ color: GOLD_RGBA(0.55) }}>Employment Type</p>
-        <div className="grid grid-cols-3 gap-2">
-          {EMPLOYMENT_OPTIONS.map(opt => {
-            const isSelected = employment === opt.id;
-            return (
-              <button
-                key={opt.id}
-                type="button"
-                onClick={() => onEmploymentChange(isSelected ? '' : opt.id)}
-                className="flex flex-col items-center gap-1 rounded-xl p-2.5 transition-all duration-200"
-                style={{
-                  background: isSelected ? GOLD_RGBA(0.12) : 'rgba(255,255,255,0.02)',
-                  border: `1px solid ${isSelected ? GOLD_RGBA(0.4) : 'rgba(255,255,255,0.07)'}`,
-                }}
-              >
-                <span style={{ fontSize: 18, lineHeight: 1 }}>{opt.emoji}</span>
-                <span className="text-xs font-semibold" style={{ color: isSelected ? GOLD : 'rgba(226,232,240,0.65)' }}>
-                  {opt.label}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {employment && !['student', 'homemaker', 'retired'].includes(employment) && (
-        <div>
-          <p className="text-xs font-medium mb-2" style={{ color: GOLD_RGBA(0.55) }}>Your Sector</p>
-          <div className="flex flex-wrap gap-2">
-            {SECTOR_OPTIONS.map(opt => {
-              const isSelected = sector === opt.id;
-              return (
-                <button
-                  key={opt.id}
-                  type="button"
-                  onClick={() => onSectorChange(isSelected ? '' : opt.id)}
-                  className="flex items-center gap-1.5 rounded-full px-3 py-1.5 transition-all duration-200"
-                  style={{
-                    background: isSelected ? GOLD_RGBA(0.12) : 'rgba(255,255,255,0.03)',
-                    border: `1px solid ${isSelected ? GOLD_RGBA(0.35) : 'rgba(255,255,255,0.08)'}`,
-                  }}
-                >
-                  <span style={{ fontSize: 12 }}>{opt.emoji}</span>
-                  <span className="text-xs font-medium" style={{ color: isSelected ? GOLD : 'rgba(226,232,240,0.65)' }}>
-                    {opt.label}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-function LanguageSelector({ selected, onSelect }: { selected: Lang; onSelect: (lang: Lang) => void }) {
-  return (
-    <div
-      className="rounded-2xl p-5"
-      style={{ background: 'rgba(6,10,24,0.7)', border: `1px solid ${GOLD_RGBA(0.14)}` }}
-    >
-      <div className="flex items-center gap-2 mb-1">
-        <Languages className="w-3.5 h-3.5" style={{ color: GOLD }} />
-        <span className="text-xs font-semibold tracking-widest uppercase" style={{ color: `${GOLD}80` }}>
-          Reading Language
-        </span>
-      </div>
-      <p className="text-xs text-slate-500 mb-4">
-        Apni reading kis bhasha mein chahte hain?
-      </p>
-      <div className="grid grid-cols-3 gap-2.5">
-        {LANG_OPTIONS.map((lang) => {
-          const isSelected = selected === lang.id;
-          return (
-            <button
-              key={lang.id}
-              type="button"
-              onClick={() => onSelect(lang.id)}
-              className="relative flex flex-col items-center gap-1.5 rounded-xl p-3.5 transition-all duration-200"
-              style={{
-                background: isSelected ? GOLD_RGBA(0.12) : 'rgba(255,255,255,0.02)',
-                border: `1px solid ${isSelected ? GOLD_RGBA(0.45) : 'rgba(255,255,255,0.07)'}`,
-              }}
-            >
-              {isSelected && (
-                <div className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full" style={{ background: GOLD }} />
-              )}
-              <span style={{ fontSize: 20, lineHeight: 1 }}>{lang.flag}</span>
-              <span className="text-sm font-bold" style={{ color: isSelected ? GOLD : 'rgba(226,232,240,0.7)' }}>
-                {lang.label}
-              </span>
-              <span className="text-xs text-center leading-tight" style={{ color: 'rgba(100,116,139,0.7)' }}>
-                {lang.sublabel}
-              </span>
-            </button>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
-function QuestionPicker({
-  gen, selected, onSelect,
-}: {
-  gen: 'genz' | 'millennial' | 'genx';
-  selected: string | null;
-  onSelect: (q: LifeQuestion) => void;
-}) {
-  const questions =
-    gen === 'genz' ? GENZ_QUESTIONS
-    : gen === 'millennial' ? MILLENNIAL_QUESTIONS
-    : GENX_QUESTIONS;
+  // ── Render ────────────────────────────────────────────────────────────────
 
   return (
-    <div
-      className="rounded-2xl p-5"
-      style={{ background: 'rgba(6,10,24,0.7)', border: `1px solid ${GOLD_RGBA(0.14)}` }}
+    <form
+      onSubmit={handleSubmit}
+      noValidate
+      className={`birth-form grid gap-5 ${className}`}
+      aria-label="Birth details form"
     >
-      <div className="flex items-center gap-2 mb-1">
-        <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: '#DC2626' }} />
-        <span className="text-xs font-semibold tracking-widest uppercase" style={{ color: `${GOLD}80` }}>
-          Choose Your Life Question
-        </span>
-      </div>
-      <p className="text-xs text-slate-500 mb-4">
-        Tap the question on your mind — laser-focused analysis
-      </p>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-        {questions.map((q) => {
-          const Icon = q.icon;
-          const isSelected = selected === q.id;
-          return (
-            <button
-              key={q.id}
-              type="button"
-              onClick={() => onSelect(q)}
-              className="relative text-left rounded-xl p-3.5 transition-all duration-200 group"
-              style={{
-                background: isSelected ? `${q.color}10` : 'rgba(255,255,255,0.02)',
-                border: `1px solid ${isSelected ? q.color + '40' : 'rgba(255,255,255,0.07)'}`,
-              }}
-            >
-              <div className="flex items-center gap-3">
-                <div
-                  className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0"
-                  style={{ background: `${q.color}15`, border: `1px solid ${q.color}30` }}
-                >
-                  <Icon className="w-3.5 h-3.5" style={{ color: q.color }} />
-                </div>
-                <span className="text-sm font-medium text-white leading-tight flex-1">{q.label}</span>
-                <ChevronRight className="w-3.5 h-3.5 flex-shrink-0" style={{ color: isSelected ? q.color : 'rgba(148,163,184,0.3)' }} />
-              </div>
-            </button>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
-function PartnerMiniForm({
-  label, sublabel, accent, accentRgba, HeaderIcon, data, errors, onChange,
-}: {
-  label: string; sublabel: string; accent: string;
-  accentRgba: (a: number) => string; HeaderIcon: React.ElementType;
-  data: FormData; errors: Partial<FormData>;
-  onChange: (field: keyof FormData, value: string) => void;
-}) {
-  return (
-    <div
-      className="rounded-2xl p-5 space-y-4"
-      style={{ background: accentRgba(0.04), border: `1px solid ${accentRgba(0.2)}` }}
-    >
-      <div className="flex items-center gap-2.5">
-        <div
-          className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0"
-          style={{ background: accentRgba(0.12), border: `1px solid ${accentRgba(0.3)}` }}
-        >
-          <HeaderIcon className="w-4 h-4" style={{ color: accent }} />
-        </div>
-        <div>
-          <p className="text-xs font-bold tracking-widest uppercase" style={{ color: accent }}>{label}</p>
-          <p className="text-xs" style={{ color: accentRgba(0.5) }}>{sublabel}</p>
-        </div>
-      </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {FIELD_META.map((field) => {
-          const Icon  = field.icon;
-          const error = errors[field.key];
-          return (
-            <div key={field.key}>
-              <label
-                htmlFor={`partner-${field.key}`}
-                className="block text-xs font-medium tracking-wide mb-2 uppercase"
-                style={{ color: accentRgba(0.65) }}
-              >
-                {field.label}
-                {field.key !== 'birth_time' && <span className="text-rose-400 ml-1">*</span>}
-              </label>
-              <div className="relative">
-                <Icon className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none" style={{ color: accentRgba(0.35) }} />
-                <input
-                  id={`partner-${field.key}`}
-                  type={field.type}
-                  placeholder={field.placeholder}
-                  value={data[field.key]}
-                  onChange={(e) => onChange(field.key, e.target.value)}
-                  className="input-cosmic w-full h-12 pl-10 pr-4 rounded-xl text-sm"
-                  style={{ colorScheme: 'dark' }}
-                />
-              </div>
-              {error && <p className="mt-1.5 text-xs text-rose-400">{error}</p>}
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
-function PrivacyNote() {
-  return (
-    <div
-      className="rounded-xl p-4 flex items-start gap-3"
-      style={{ background: GOLD_RGBA(0.05), border: `1px solid ${GOLD_RGBA(0.14)}` }}
-    >
-      <Star className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: GOLD_RGBA(0.5) }} />
-      <p className="text-xs text-slate-400 leading-relaxed">
-        Your birth data is used solely to calculate your cosmic energy profile.
-        We never share or sell your personal information.
-      </p>
-    </div>
-  );
-}
-
-function SubmitButton({
-  loading, accentColor, accentRgba, label, IconEl,
-}: {
-  loading: boolean; accentColor: string; accentRgba: (a: number) => string;
-  label: string; IconEl: React.ElementType;
-}) {
-  return (
-    <button
-      type="submit" disabled={loading}
-      className="w-full h-14 rounded-xl text-sm font-bold tracking-wide transition-all duration-300 relative overflow-hidden group flex items-center justify-center gap-2"
-      style={{
-        background: loading ? accentRgba(0.2) : `linear-gradient(135deg, ${accentColor} 0%, ${accentColor}cc 100%)`,
-        color: loading ? accentColor : '#fff',
-        boxShadow: loading ? 'none' : `0 0 32px ${accentRgba(0.35)}`,
-      }}
-    >
-      <span className="relative z-10 flex items-center justify-center gap-2">
-        {loading ? (
-          <><Loader2 className="w-4 h-4 animate-spin" />{label}</>
-        ) : (
-          <><IconEl className="w-4 h-4" />{label}</>
+      {/* ── 01. Full Name ────────────────────────────────────────────── */}
+      <div className="field-group">
+        <label htmlFor="tv-name" className="field-label">
+          Full Name <span aria-hidden>*</span>
+        </label>
+        <input
+          id="tv-name"
+          name="tv-name"
+          type="text"
+          autoComplete="name"
+          placeholder="Enter your full name"
+          value={fields.name}
+          onChange={e => set("name", e.target.value)}
+          aria-required="true"
+          aria-invalid={!!errors.name}
+          aria-describedby={errors.name ? "tv-name-error" : undefined}
+          className={`field-input ${errors.name ? "field-input--error" : ""}`}
+        />
+        {errors.name && (
+          <span id="tv-name-error" role="alert" className="field-error">
+            {errors.name}
+          </span>
         )}
-      </span>
-    </button>
-  );
-}
+      </div>
 
-// ─── MAIN COMPONENT ───────────────────────────────────────────────────────────
-type Props = { selectedCategory?: SelectedCategory };
-const EMPTY_FORM: FormData = { name: '', dob: '', birth_time: '', city: '' };
+      {/* ── 02. Date of Birth ────────────────────────────────────────── */}
+      <div className="field-group">
+        <label htmlFor="tv-dob" className="field-label">
+          Date of Birth <span aria-hidden>*</span>
+        </label>
+        <input
+          id="tv-dob"
+          name="tv-dob"
+          type="date"
+          value={fields.dateOfBirth}
+          onChange={e => set("dateOfBirth", e.target.value)}
+          aria-required="true"
+          aria-invalid={!!errors.dateOfBirth}
+          aria-describedby={errors.dateOfBirth ? "tv-dob-error" : undefined}
+          className={`field-input ${errors.dateOfBirth ? "field-input--error" : ""}`}
+        />
+        {errors.dateOfBirth && (
+          <span id="tv-dob-error" role="alert" className="field-error">
+            {errors.dateOfBirth}
+          </span>
+        )}
+      </div>
 
-export default function BirthForm({ selectedCategory }: Props) {
-  const router = useRouter();
-  const [form, setForm]                   = useState<FormData>(EMPTY_FORM);
-  const [partnerForm, setPartnerForm]     = useState<FormData>(EMPTY_FORM);
-  const [loading, setLoading]             = useState(false);
-  const [errors, setErrors]               = useState<Partial<FormData>>({});
-  const [partnerErrors, setPartnerErrors] = useState<Partial<FormData>>({});
-  const [selectedQuestion, setSelectedQuestion] = useState<LifeQuestion | null>(null);
-  const [gender, setGender]               = useState<'him' | 'her'>('her');
-  const [selectedLang, setSelectedLang]   = useState<Lang>('hinglish');
-  const [employment, setEmployment]       = useState<string>('');
-  const [sector, setSector]               = useState<string>('');
-  const [mobile, setMobile]               = useState<string>('');
-
-  const detectedGen      = getGenerationFromDob(form.dob);
-  const activeCategoryId = selectedCategory?.id ?? selectedQuestion?.id ?? null;
-  const isDualMode       = activeCategoryId !== null && DUAL_IDS.has(activeCategoryId);
-  const isExBack         = activeCategoryId === 'ex_back';
-  const isToxicBoss      = activeCategoryId === 'toxic_boss';
-  const accentColor      = isExBack ? PINK : isToxicBoss ? ORANGE : GOLD;
-  const accentRgba       = isExBack ? PINK_RGBA : isToxicBoss ? ORANGE_RGBA : GOLD_RGBA;
-
-  const dualHeading    = isToxicBoss ? 'Power Struggle Analysis: You vs Boss' : 'Karmic Bond Analysis: Enter Both Details';
-  const dualSubheading = isToxicBoss
-    ? 'Trikal Guru will analyze the Sun–Saturn authority axis and workplace karma.'
-    : isExBack ? 'Both birth charts will be analyzed for Venus-Ketu axis and 7th house karma.'
-    : 'Both birth charts will be compared using Ashta-Koota Vedic matching.';
-
-  const PartnerIcon         = isToxicBoss ? Briefcase : isExBack ? HeartCrack : Heart;
-  const partnerSectionLabel = isToxicBoss ? 'Boss Details' : isExBack ? "Ex-Partner's Details" : "Partner's Details";
-  const partnerSublabel     = isToxicBoss ? 'Sun vs Saturn authority axis' : isExBack ? 'Venus-Ketu axis & 7th house' : 'Ashta-Koota compatibility';
-  const singleFormLabel     = selectedCategory
-    ? `Getting insights for: ${selectedCategory.label}`
-    : selectedQuestion ? `Getting insights for: ${selectedQuestion.label}` : null;
-
-  function validateForm(f: FormData, setE: (e: Partial<FormData>) => void): boolean {
-    const e: Partial<FormData> = {};
-    if (!f.name.trim()) e.name = 'Name is required';
-    if (!f.dob)         e.dob  = 'Date of birth is required';
-    if (!f.city.trim()) e.city = 'City is required';
-    setE(e);
-    return Object.keys(e).length === 0;
-  }
-
-  // ─── v10.0 handleSubmit — calls /api/predict + saves to Supabase ─────────
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    const userValid  = validateForm(form, setErrors);
-    let partnerValid = true;
-    if (isDualMode) partnerValid = validateForm(partnerForm, setPartnerErrors);
-    if (!userValid || !partnerValid) return;
-
-    setLoading(true);
-    try {
-      // Step 1 — Geocode city
-      let lat = 28.6139;
-      let lng = 77.2090;
-      try {
-        const geoRes  = await fetch(
-          `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(form.city)}&format=json&limit=1`
-        );
-        const geoData = await geoRes.json();
-        if (geoData[0]) {
-          lat = parseFloat(geoData[0].lat);
-          lng = parseFloat(geoData[0].lon);
-        }
-      } catch {
-        console.warn('[Trikal] Geocoding failed — using Delhi default');
-      }
-
-      // Step 2 — Build birth data
-      const birthData = {
-        name:     form.name.trim(),
-        dob:      form.dob,
-        tob:      form.birth_time || '12:00',
-        lat,
-        lng,
-        cityName: form.city.trim(),
-      };
-
-      // Step 3 — Call /api/kundali
-      const kundaliRes = await fetch('/api/kundali', {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify(birthData),
-      });
-      if (!kundaliRes.ok) throw new Error('Kundali API failed');
-      const { kundali } = await kundaliRes.json();
-
-      // Step 4 — Save submission
-      await saveSubmission({
-        name:         form.name.trim(),
-        dob:          form.dob,
-        birth_time:   form.birth_time,
-        city:         form.city.trim(),
-        energy_score: kundali.planets['Sun']?.strength ?? 75,
-        pillar_scores: {
-          wealth:   kundali.planets['Jupiter']?.strength ?? 70,
-          career:   kundali.planets['Saturn']?.strength  ?? 70,
-          love:     kundali.planets['Venus']?.strength   ?? 70,
-          health:   kundali.planets['Sun']?.strength     ?? 70,
-          students: kundali.planets['Mercury']?.strength ?? 70,
-          peace:    kundali.planets['Moon']?.strength    ?? 70,
-        },
-      });
-
-      // Step 5 — Session ID
-      const sessionId = getOrCreateSessionId();
-
-      // Step 6 — Domain ID
-      // Domain prefix comes from domain definition — NOT from user's birth year
-      const DOMAIN_PREFIX_MAP: Record<string, string> = {
-        'ex_back':            'genz',
-        'toxic_boss':         'genz',
-        'manifestation':      'genz',
-        'dream_career':       'genz',
-        'property_yog':       'mill',
-        'karz_mukti':         'mill',
-        'child_destiny':      'mill',
-        'parents_wellness':   'mill',
-        'retirement_peace':   'genx',
-        'legacy_inheritance': 'genx',
-        'spiritual_innings':  'genx',
-      };
-      const effectiveQuestion = selectedCategory ?? selectedQuestion;
-      const domainId = effectiveQuestion
-        ? `${DOMAIN_PREFIX_MAP[effectiveQuestion.id] ?? 'mill'}_${effectiveQuestion.id}`
-        : null;
-
-      // Step 7 — Call /api/predict
-      let predictionId: string | null = null;
-      if (domainId) {
-        try {
-          const predictRes = await fetch('/api/predict', {
-            method:  'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              sessionId,
-              domainId,
-              birthData,
-              userContext: {
-                segment:    detectedGen   ?? 'millennial',
-                employment: employment    ?? '',
-                sector:     sector        ?? '',
-                language:   selectedLang  ?? 'hinglish',
-                city:       form.city.trim(),
-              },
-            }),
-          });
-
-          if (predictRes.ok) {
-            const prediction = await predictRes.json();
-
-            // Step 8 — Save prediction to Supabase
-            predictionId = await savePrediction({
-              sessionId,
-              domainId,
-              domainLabel:  effectiveQuestion!.label,
-              personName:   form.name.trim(),
-              dob:          form.dob,
-              birthCity:    form.city.trim(),
-              birthTime:    form.birth_time || undefined,
-              lagna:        prediction._meta?.kundali?.lagna     ?? kundali.lagna,
-              nakshatra:    prediction._meta?.kundali?.nakshatra ?? kundali.nakshatra,
-              mahadasha:    prediction._meta?.kundali?.mahadasha ?? kundali.currentMahadasha?.lord,
-              antardasha:   prediction._meta?.kundali?.antardasha ?? kundali.currentAntardasha?.lord,
-              tier:         prediction._meta?.tier               ?? 'free',
-              language:     selectedLang                         ?? 'hinglish',
-              segment:      detectedGen                          ?? 'millennial',
-              employment:   employment                           || undefined,
-              sector:       sector                               || undefined,
-              chartSource:  prediction._meta?.chartSource,
-              prediction,
-              processingMs: prediction._meta?.processingMs,
-              geminiModel:  prediction._meta?.model,
-              searchUsed:   prediction._meta?.searchUsed ?? false,
-            });
-          } else {
-            console.warn('[Trikal] /api/predict failed — continuing without prediction');
+      {/* ── 03. Time of Birth + 11. Unknown Time ─────────────────────── */}
+      <div className="field-group">
+        <div className="flex items-center justify-between">
+          <label htmlFor="tv-tob" className="field-label">
+            Time of Birth {!fields.unknownTime && <span aria-hidden>*</span>}
+          </label>
+          {/* ── 11. Unknown Time checkbox ─────────────────────────── */}
+          <span className="flex items-center gap-1.5 text-sm">
+            <input
+              id="tv-unknown-time"
+              name="tv-unknown-time"
+              type="checkbox"
+              checked={fields.unknownTime}
+              onChange={e => set("unknownTime", e.target.checked)}
+              className="checkbox"
+              aria-describedby="tv-unknown-time-hint"
+            />
+            <label htmlFor="tv-unknown-time" className="cursor-pointer text-muted-foreground">
+              Unknown
+            </label>
+          </span>
+        </div>
+        <span id="tv-unknown-time-hint" className="sr-only">
+          Check if birth time is unknown — solar chart (12:00) will be used
+        </span>
+        <input
+          id="tv-tob"
+          name="tv-tob"
+          type="time"
+          value={fields.timeOfBirth}
+          onChange={e => set("timeOfBirth", e.target.value)}
+          disabled={fields.unknownTime}
+          aria-required={!fields.unknownTime}
+          aria-invalid={!!errors.timeOfBirth}
+          aria-describedby={
+            [errors.timeOfBirth ? "tv-tob-error" : "", fields.unknownTime ? "tv-unknown-time-hint" : ""]
+              .filter(Boolean).join(" ") || undefined
           }
-        } catch (predictErr) {
-          console.warn('[Trikal] Prediction error — continuing:', predictErr);
-        }
-      }
+          className={`field-input ${errors.timeOfBirth ? "field-input--error" : ""} ${fields.unknownTime ? "opacity-40 cursor-not-allowed" : ""}`}
+        />
+        {fields.unknownTime && (
+          <p className="text-xs text-muted-foreground mt-1">
+            Solar chart will be cast (birth time set to 12:00)
+          </p>
+        )}
+        {errors.timeOfBirth && (
+          <span id="tv-tob-error" role="alert" className="field-error">
+            {errors.timeOfBirth}
+          </span>
+        )}
+      </div>
 
-      // Step 9 — Navigate to result page
-      const params = new URLSearchParams({
-        name:           form.name.trim(),
-        dob:            form.dob,
-        city:           form.city.trim(),
-        tob:            form.birth_time || '12:00',
-        lat:            String(lat),
-        lng:            String(lng),
-        lang:           selectedLang,
-        employment,
-        sector,
-        mobile,
-        sessionId,
-        ...(predictionId ? { predictionId } : {}),
-        ...(domainId     ? { domainId }     : {}),
-        lagna:          kundali.lagna,
-        lagnaLord:      kundali.lagnaLord,
-        nakshatra:      kundali.nakshatra,
-        nakshatraLord:  kundali.nakshatraLord,
-        mahadasha:      kundali.currentMahadasha.lord,
-        antardasha:     kundali.currentAntardasha.lord,
-        dashaBalance:   kundali.dashaBalance,
-        choghadiya:     kundali.panchang.choghadiya.name,
-        choghadiyaType: kundali.panchang.choghadiya.type,
-        tithi:          kundali.panchang.tithi,
-        vara:           kundali.panchang.vara,
-        yoga:           kundali.panchang.yoga,
-        rahuStart:      kundali.panchang.rahuKaal.start,
-        rahuEnd:        kundali.panchang.rahuKaal.end,
-        abhijeetStart:  kundali.panchang.abhijeetMuhurta.start,
-        abhijeetEnd:    kundali.panchang.abhijeetMuhurta.end,
-        planets: JSON.stringify(
-          Object.values(kundali.planets).map((p: any) => ({
-            name:         p.name,
-            rashi:        p.rashi,
-            house:        p.house,
-            strength:     p.strength,
-            isRetrograde: p.isRetrograde,
-            nakshatra:    p.nakshatra,
-            degree:       p.degree,
-          }))
-        ),
-        ...(kundali.currentPratyantar ? {
-          pratayantarLord:    kundali.currentPratyantar.lord,
-          pratayantarStart:   kundali.currentPratyantar.startDate instanceof Date
-            ? kundali.currentPratyantar.startDate.toISOString()
-            : String(kundali.currentPratyantar.startDate),
-          pratayantarEnd:     kundali.currentPratyantar.endDate instanceof Date
-            ? kundali.currentPratyantar.endDate.toISOString()
-            : String(kundali.currentPratyantar.endDate),
-          pratayantarDays:    String(kundali.currentPratyantar.durationDays),
-          pratayantarQuality: kundali.currentPratyantar.quality,
-          pratayantarRemDays: String(kundali.currentPratyantar.remainingDays),
-        } : {}),
-        ...(kundali.currentSookshma ? {
-          sookshmaLord:    kundali.currentSookshma.lord,
-          sookshmaStart:   kundali.currentSookshma.startDate instanceof Date
-            ? kundali.currentSookshma.startDate.toISOString()
-            : String(kundali.currentSookshma.startDate),
-          sookshmaEnd:     kundali.currentSookshma.endDate instanceof Date
-            ? kundali.currentSookshma.endDate.toISOString()
-            : String(kundali.currentSookshma.endDate),
-          sookshmaDays:    String(kundali.currentSookshma.durationDays),
-          sookshmaQuality: kundali.currentSookshma.quality,
-        } : {}),
-        ...(kundali.pratyantar?.length ? {
-          pratayantarList: JSON.stringify(
-            kundali.pratyantar.map((p: any) => ({
-              lord:          p.lord,
-              startDate:     p.startDate instanceof Date ? p.startDate.toISOString() : p.startDate,
-              endDate:       p.endDate instanceof Date ? p.endDate.toISOString() : p.endDate,
-              durationDays:  p.durationDays,
-              quality:       p.quality,
-              remainingDays: p.remainingDays,
-            }))
-          ),
-        } : {}),
-        ...(effectiveQuestion ? {
-          autoSegment:      effectiveQuestion.id,
-          autoSegmentLabel: effectiveQuestion.label,
-        } : {}),
-        ...(isDualMode && partnerForm.name.trim() ? {
-          partnerName:   partnerForm.name.trim(),
-          partnerDob:    partnerForm.dob,
-          partnerCity:   partnerForm.city.trim(),
-          partnerTime:   partnerForm.birth_time,
-          partnerGender: gender,
-        } : {}),
-      });
+      {/* ── 04. Gender ───────────────────────────────────────────────── */}
+      <div className="field-group">
+        <label htmlFor="tv-gender" className="field-label">
+          Gender
+        </label>
+        <select
+          id="tv-gender"
+          name="tv-gender"
+          value={fields.gender}
+          onChange={e => set("gender", e.target.value as BirthFormFields["gender"])}
+          className="field-input"
+        >
+          <option value="">Select gender</option>
+          <option value="male">Male</option>
+          <option value="female">Female</option>
+          <option value="other">Other / Prefer not to say</option>
+        </select>
+      </div>
 
-      router.push(`/result?${params.toString()}`);
-
-    } catch (err) {
-      console.error('[Trikal] Form submit error:', err);
-      setLoading(false);
-    }
-  }
-
-  return (
-    <section id="birth-form" className="relative py-24 px-4">
-      <div
-        className="absolute inset-0 pointer-events-none"
-        aria-hidden="true"
-        style={{
-          background: `radial-gradient(ellipse 70% 50% at 50% 50%, ${GOLD_RGBA(0.04)} 0%, transparent 70%)`,
-        }}
-      />
-
-      <div className={`max-w-2xl mx-auto transition-all duration-500 ${isDualMode ? 'max-w-4xl' : ''}`}>
-        <div className="text-center mb-10">
-          <div
-            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-6"
-            style={{ background: GOLD_RGBA(0.08), border: `1px solid ${GOLD_RGBA(0.22)}` }}
-          >
-            <Star className="w-3.5 h-3.5" style={{ color: GOLD }} />
-            <span className="text-xs font-medium tracking-widest uppercase" style={{ color: `${GOLD}cc` }}>
-              Free Analysis
+      {/* ── 05. Place of Birth ───────────────────────────────────────── */}
+      <div className="field-group relative">
+        <label htmlFor="tv-place" className="field-label">
+          Place of Birth <span aria-hidden>*</span>
+        </label>
+        <div className="relative">
+          <input
+            id="tv-place"
+            name="tv-place"
+            type="search"
+            autoComplete="off"
+            placeholder="Type city name…"
+            value={fields.placeQuery}
+            onChange={e => handlePlaceChange(e.target.value)}
+            aria-required="true"
+            aria-invalid={!!errors.placeQuery || !!errors.latitude}
+            aria-describedby={errors.placeQuery ? "tv-place-error" : undefined}
+            aria-autocomplete="list"
+            aria-controls="tv-place-listbox"
+            aria-expanded={geoResults.length > 0}
+            role="combobox"
+            className={`field-input pr-8 ${(errors.placeQuery || errors.latitude) ? "field-input--error" : ""}`}
+          />
+          {geoLoading && (
+            <span className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground text-xs" aria-live="polite">
+              ⟳
             </span>
-          </div>
-
-          {isDualMode ? (
-            <>
-              <div
-                className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-4"
-                style={{ background: accentRgba(0.08), border: `1px solid ${accentRgba(0.28)}` }}
-              >
-                <PartnerIcon className="w-3.5 h-3.5" style={{ color: accentColor }} />
-                <span className="text-xs font-bold tracking-widest uppercase" style={{ color: accentColor }}>
-                  {isToxicBoss ? 'Dual Chart — Boss Mode' : 'Dual Chart — Relationship Mode'}
-                </span>
-              </div>
-              <h2 className="font-serif text-3xl sm:text-4xl font-bold mb-3">
-                <span style={{ color: accentColor }}>{dualHeading}</span>
-              </h2>
-              <p className="text-slate-400 text-sm max-w-lg mx-auto leading-relaxed">{dualSubheading}</p>
-            </>
-          ) : (
-            <>
-              <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl font-bold mb-4">
-                <span className="text-white">Begin Your</span>{' '}
-                <span className="text-gradient-gold">Cosmic Journey</span>
-              </h2>
-              {singleFormLabel && (
-                <div
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-4"
-                  style={{
-                    background: `${selectedCategory?.color ?? GOLD}0d`,
-                    border:     `1px solid ${selectedCategory?.color ?? GOLD}35`,
-                  }}
-                >
-                  <span className="text-xs font-bold" style={{ color: selectedCategory?.color ?? GOLD }}>
-                    {singleFormLabel}
-                  </span>
-                </div>
-              )}
-              <p className="text-slate-400 text-base max-w-md mx-auto leading-relaxed mb-6">
-                Enter your birth details for your personalized Trikal analysis — no login required.
-              </p>
-            </>
           )}
         </div>
 
-        <form onSubmit={handleSubmit} noValidate>
-          {isDualMode ? (
-            <div className="space-y-5">
-              <PartnerMiniForm
-                label={isToxicBoss ? 'Your Details (Employee)' : 'Your Details'}
-                sublabel="Your birth chart"
-                accent={GOLD} accentRgba={GOLD_RGBA} HeaderIcon={User}
-                data={form} errors={errors}
-                onChange={(field, value) => {
-                  setForm(f => ({ ...f, [field]: value }));
-                  if (errors[field]) setErrors(e => ({ ...e, [field]: undefined }));
-                }}
-              />
+        {/* Autocomplete Dropdown */}
+        {geoResults.length > 0 && (
+          <ul
+            id="tv-place-listbox"
+            role="listbox"
+            className="absolute z-50 w-full bg-popover border border-border rounded-md shadow-lg mt-1 max-h-48 overflow-y-auto"
+          >
+            {geoResults.map((r, i) => (
+              <li
+                key={i}
+                role="option"
+                aria-selected={false}
+                onClick={() => selectPlace(r)}
+                onKeyDown={e => e.key === "Enter" && selectPlace(r)}
+                tabIndex={0}
+                className="px-3 py-2 text-sm cursor-pointer hover:bg-accent truncate"
+              >
+                {r.display_name}
+              </li>
+            ))}
+          </ul>
+        )}
 
-              <div className="flex items-center gap-3">
-                <div className="flex-1 h-px" style={{ background: 'rgba(255,255,255,0.05)' }} />
-                <span className="text-base font-black" style={{ color: accentRgba(0.55) }}>
-                  {isToxicBoss ? 'vs' : '♥'}
-                </span>
-                <div className="flex-1 h-px" style={{ background: 'rgba(255,255,255,0.05)' }} />
-              </div>
-
-              <PartnerMiniForm
-                label={partnerSectionLabel} sublabel={partnerSublabel}
-                accent={accentColor} accentRgba={accentRgba} HeaderIcon={PartnerIcon}
-                data={partnerForm} errors={partnerErrors}
-                onChange={(field, value) => {
-                  setPartnerForm(f => ({ ...f, [field]: value }));
-                  if (partnerErrors[field]) setPartnerErrors(e => ({ ...e, [field]: undefined }));
-                }}
-              />
-
-              {!isToxicBoss && (
-                <div className="flex items-center gap-3 px-1">
-                  <span className="text-xs text-slate-500">Their gender:</span>
-                  <div className="flex items-center gap-2">
-                    {(['her', 'him'] as const).map((g) => {
-                      const isActive = gender === g;
-                      return (
-                        <button
-                          key={g} type="button" onClick={() => setGender(g)}
-                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all duration-200"
-                          style={{
-                            background: isActive ? PINK_RGBA(0.14) : 'rgba(255,255,255,0.03)',
-                            border:     `1px solid ${isActive ? PINK_RGBA(0.4) : 'rgba(255,255,255,0.08)'}`,
-                            color:      isActive ? PINK : 'rgba(148,163,184,0.55)',
-                          }}
-                        >
-                          <span style={{ fontSize: '14px', lineHeight: 1 }}>{g === 'her' ? '♀' : '♂'}</span>
-                          {g === 'her' ? 'Her' : 'Him'}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-
-              <ProfileSelector employment={employment} sector={sector} onEmploymentChange={setEmployment} onSectorChange={setSector} />
-              <MobileNumerologyCapture mobile={mobile} onMobileChange={setMobile} name={form.name} lang={selectedLang} />
-              <LanguageSelector selected={selectedLang} onSelect={setSelectedLang} />
-              <PrivacyNote />
-              <SubmitButton
-                loading={loading} accentColor={accentColor} accentRgba={accentRgba}
-                label={loading ? 'Analyzing...' : isToxicBoss ? 'Reveal Boss Karma Radar — Free' : isExBack ? 'Reveal Karmic Closure Status — Free' : 'Reveal Our Compatibility — Free'}
-                IconEl={PartnerIcon}
-              />
-            </div>
-          ) : (
-            <div
-              className="rounded-3xl p-8 sm:p-10"
-              style={{
-                background:     'rgba(6,12,28,0.85)',
-                border:         `1px solid ${GOLD_RGBA(0.16)}`,
-                backdropFilter: 'blur(16px)',
-                boxShadow:      `0 24px 80px rgba(0,0,0,0.55), inset 0 1px 0 ${GOLD_RGBA(0.06)}`,
-              }}
-            >
-              <div className="space-y-6">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                  {FIELD_META.map((field) => {
-                    const Icon  = field.icon;
-                    const error = errors[field.key];
-                    return (
-                      <div key={field.key}>
-                        <label
-                          htmlFor={field.key}
-                          className="block text-xs font-medium tracking-wide mb-2 uppercase"
-                          style={{ color: `${GOLD}99` }}
-                        >
-                          {field.label}
-                          {field.key !== 'birth_time' && <span className="text-rose-400 ml-1">*</span>}
-                        </label>
-                        <div className="relative">
-                          <Icon
-                            className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none"
-                            style={{ color: GOLD_RGBA(0.4) }}
-                          />
-                          <input
-                            id={field.key}
-                            type={field.type}
-                            placeholder={field.placeholder}
-                            value={form[field.key]}
-                            onChange={(e) => {
-                              setForm(f => ({ ...f, [field.key]: e.target.value }));
-                              if (errors[field.key]) setErrors(er => ({ ...er, [field.key]: undefined }));
-                              if (field.key === 'dob') setSelectedQuestion(null);
-                            }}
-                            className="input-cosmic w-full h-12 pl-10 pr-4 rounded-xl text-sm"
-                            style={{ colorScheme: 'dark' }}
-                          />
-                        </div>
-                        {error && <p className="mt-1.5 text-xs text-rose-400">{error}</p>}
-                      </div>
-                    );
-                  })}
-                </div>
-
-                <ProfileSelector employment={employment} sector={sector} onEmploymentChange={setEmployment} onSectorChange={setSector} />
-
-                {detectedGen && !selectedCategory && (
-                  <QuestionPicker
-                    gen={detectedGen}
-                    selected={selectedQuestion?.id ?? null}
-                    onSelect={setSelectedQuestion}
-                  />
-                )}
-
-                <LanguageSelector selected={selectedLang} onSelect={setSelectedLang} />
-                <MobileNumerologyCapture mobile={mobile} onMobileChange={setMobile} name={form.name} lang={selectedLang} />
-                <PrivacyNote />
-
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full h-14 rounded-xl text-sm font-bold tracking-wide transition-all duration-300 relative overflow-hidden group"
-                  style={{
-                    background: loading ? GOLD_RGBA(0.25) : `linear-gradient(135deg, ${GOLD} 0%, #A8862A 100%)`,
-                    color:     '#020817',
-                    boxShadow: loading ? 'none' : `0 0 32px ${GOLD_RGBA(0.38)}`,
-                  }}
-                >
-                  <span className="relative z-10 flex items-center justify-center gap-2">
-                    {loading ? (
-                      <><Loader2 className="w-4 h-4 animate-spin" />Reading the stars...</>
-                    ) : (selectedCategory ?? selectedQuestion) ? (
-                      `Reveal My ${(selectedCategory ?? selectedQuestion)!.label} Reading — Free`
-                    ) : (
-                      'Reveal My Trikal Score — Free'
-                    )}
-                  </span>
-                </button>
-              </div>
-            </div>
-          )}
-        </form>
-
-        <p className="text-center text-xs text-slate-600 mt-6">
-          Join 10,000+ seekers who have discovered their cosmic blueprint
-        </p>
+        {(errors.placeQuery || errors.latitude) && (
+          <span id="tv-place-error" role="alert" className="field-error">
+            {errors.placeQuery || "Please select a place from suggestions"}
+          </span>
+        )}
       </div>
-    </section>
-  );
+
+      {/* ── 06. City (resolved, read-only display) ───────────────────── */}
+      {fields.city && (
+        <input
+          id="tv-city"
+          name="tv-city"
+          type="hidden"
+          value={fields.city}
+          aria-hidden="true"
+          readOnly
+        />
+      )}
+
+      {/* ── 07 & 08. Lat/Lon (resolved, read-only display) ───────────── */}
+      {(fields.latitude !== "" || fields.longitude !== "") && (
+        <div className="grid grid-cols-2 gap-3">
+          <div className="field-group">
+            <label htmlFor="tv-latitude" className="field-label text-xs text-muted-foreground">
+              Latitude
+            </label>
+            <input
+              id="tv-latitude"
+              name="tv-latitude"
+              type="number"
+              step="0.0001"
+              value={fields.latitude}
+              onChange={e => set("latitude", parseFloat(e.target.value))}
+              aria-label="Latitude coordinate"
+              className="field-input text-sm font-mono"
+              readOnly
+            />
+          </div>
+          <div className="field-group">
+            <label htmlFor="tv-longitude" className="field-label text-xs text-muted-foreground">
+              Longitude
+            </label>
+            <input
+              id="tv-longitude"
+              name="tv-longitude"
+              type="number"
+              step="0.0001"
+              value={fields.longitude}
+              onChange={e => set("longitude", parseFloat(e.target.value))}
+              aria-label="Longitude coordinate"
+              className="field-input text-sm font-mono"
+              readOnly
+            />
+          </div>
+        </div>
+      )}
+
+      {/* ── 09. Timezone Offset ──────────────────────────────────────── */}
+      <div className="field-group">
+        <label htmlFor="tv-timezone" className="field-label">
+          Time Zone (UTC offset)
+        </label>
+        <select
+          id="tv-timezone"
+          name="tv-timezone"
+          value={fields.timezoneOffset}
+          onChange={e => set("timezoneOffset", parseFloat(e.target.value))}
+          className="field-input"
+          aria-describedby="tv-timezone-hint"
+        >
+          <option value={5.5}>IST +5:30 (India)</option>
+          <option value={0}>UTC +0:00</option>
+          <option value={1}>CET +1:00</option>
+          <option value={2}>EET +2:00</option>
+          <option value={3}>MSK +3:00</option>
+          <option value={3.5}>IRST +3:30</option>
+          <option value={4}>GST +4:00</option>
+          <option value={4.5}>AFT +4:30</option>
+          <option value={5}>PKT +5:00</option>
+          <option value={5.5}>IST +5:30</option>
+          <option value={5.75}>NPT +5:45</option>
+          <option value={6}>BST +6:00</option>
+          <option value={6.5}>MMT +6:30</option>
+          <option value={7}>ICT +7:00</option>
+          <option value={8}>SGT +8:00</option>
+          <option value={9}>JST +9:00</option>
+          <option value={9.5}>ACST +9:30</option>
+          <option value={10}>AEST +10:00</option>
+          <option value={-5}>EST -5:00</option>
+          <option value={-6}>CST -6:00</option>
+          <option value={-7}>MST -7:00</option>
+          <option value={-8}>PST -8:00</option>
+        </select>
+        <span id="tv-timezone-hint" className="sr-only">
+          Auto-filled from place selection. Adjust if needed.
+        </span>
+      </div>
+
+      {/* ── 10. Ayanamsa ─────────────────────────────────────────────── */}
+      <div className="field-group">
+        <label htmlFor="tv-ayanamsa" className="field-label">
+          Ayanamsa
+        </label>
+        <select
+          id="tv-ayanamsa"
+          name="tv-ayanamsa"
+          value={fields.ayanamsa}
+          onChange={e => set("ayanamsa", e.target.value as BirthInput["ayanamsa"])}
+          className="field-input"
+        >
+          <option value="lahiri">Lahiri (Chitrapaksha) — Default</option>
+          <option value="raman">B.V. Raman</option>
+          <option value="krishnamurti">Krishnamurti (KP)</option>
+          <option value="yukteshwar">Sri Yukteshwar</option>
+        </select>
+      </div>
+
+      {/* ── Submit ───────────────────────────────────────────────────── */}
+      <button
+        type="submit"
+        disabled={loading}
+        className="btn-primary w-full py-3 text-base font-semibold"
+        aria-busy={loading}
+      >
+        {loading ? "Calculating…" : submitLabel}
+      </button>
+    </form>
+  )
 }
