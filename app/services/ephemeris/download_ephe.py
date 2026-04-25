@@ -11,7 +11,7 @@ import urllib.request
 import zipfile
 import io
 
-EPHE_DIR = os.getenv("EPHE_PATH", "/app/ephe_data")
+EPHE_DIR = os.getenv("EPHE_PATH", "/opt/render/project/src/ephe_data")
 
 # Swiss Ephemeris files needed for 1800–2400 CE
 # Source: Astrodienst official CDN
