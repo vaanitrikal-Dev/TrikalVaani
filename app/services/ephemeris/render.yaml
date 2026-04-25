@@ -1,18 +1,15 @@
 services:
   - type: web
-    name: trikal-vaani-ephemeris
+    name: trikal-ephemeris
     runtime: python
-    buildCommand: |
-      pip install -r requirements.txt
-      python download_ephe.py
+    pythonVersion: "3.11"
+    buildCommand: pip install -r requirements.txt && python download_ephe.py
     startCommand: gunicorn app.main:app -w 2 -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:$PORT
     envVars:
       - key: EPHE_PATH
-        value: /app/ephe_data
+        value: /opt/render/project/src/ephe_data
       - key: TRIKAL_API_KEY
-        sync: false   # Set in Render dashboard — keep secret
+        sync: false
       - key: ALLOWED_ORIGINS
         value: https://trikalvaani.com,https://www.trikalvaani.com
     healthCheckPath: /health
-    autoDeploy: true
-    plan: starter
