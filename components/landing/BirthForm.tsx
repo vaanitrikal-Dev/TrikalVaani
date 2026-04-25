@@ -695,9 +695,14 @@ export default function BirthForm({ selectedCategory }: Props) {
 
       // Step 6 — Domain ID
       const effectiveQuestion = selectedCategory ?? selectedQuestion;
-      const domainId = effectiveQuestion
-        ? `${detectedGen ?? 'millennial'}_${effectiveQuestion.id}`
-        : null;
+      const segmentPrefix =
+  detectedGen === 'millennial' ? 'mill' :
+  detectedGen === 'genz'       ? 'genz' :
+  detectedGen === 'genx'       ? 'genx' : 'mill';
+
+const domainId = effectiveQuestion
+  ? `${segmentPrefix}_${effectiveQuestion.id}`
+  : null;
 
       // Step 7 — Call /api/predict
       let predictionId: string | null = null;
