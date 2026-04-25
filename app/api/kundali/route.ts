@@ -35,3 +35,6 @@ export async function POST(req: NextRequest) {
     );
   }
 }
+const prokeralaResponse = await res.json();
+console.log('PROKERALA RAW:', JSON.stringify(prokeralaResponse, null, 2));
+return NextResponse.json(prokeralaResponse);
