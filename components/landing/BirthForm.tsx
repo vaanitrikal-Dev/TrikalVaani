@@ -1,64 +1,59 @@
 /**
  * =============================================================
  *   TRIKAL VAANI — BirthForm Component
- *   File: components/BirthForm.tsx
+ *   File: components/landing/BirthForm.tsx
  *   Author: Rohiit Gupta, Chief Vedic Architect
- *   Fix: All 11 htmlFor/id domain pairs corrected & aligned
+ *   Version: 3.0 — Swiss Ephemeris + selectedCategory prop fixed
  * =============================================================
- *
- *  FIELD ID REGISTRY (11 domains — all htmlFor ↔ id matched):
- *  ┌────┬──────────────────────────┬──────────────────────────┐
- *  │ #  │ htmlFor / id             │ Field                    │
- *  ├────┼──────────────────────────┼──────────────────────────┤
- *  │ 01 │ tv-name                  │ Full Name                │
- *  │ 02 │ tv-dob                   │ Date of Birth            │
- *  │ 03 │ tv-tob                   │ Time of Birth            │
- *  │ 04 │ tv-gender                │ Gender                   │
- *  │ 05 │ tv-place                 │ Place of Birth (search)  │
- *  │ 06 │ tv-city                  │ City (hidden resolved)   │
- *  │ 07 │ tv-latitude              │ Latitude                 │
- *  │ 08 │ tv-longitude             │ Longitude                │
- *  │ 09 │ tv-timezone              │ Timezone offset (UTC)    │
- *  │ 10 │ tv-ayanamsa              │ Ayanamsa                 │
- *  │ 11 │ tv-unknown-time          │ Unknown Time checkbox    │
- *  └────┴──────────────────────────┴──────────────────────────┘
  */
 
 "use client"
 
 import { useState, useCallback, useRef } from "react"
-import { formToBirthInput, type BirthInput } from "@/lib/ephemeris"
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
 export interface BirthFormFields {
   name: string
-  dateOfBirth: string      // "YYYY-MM-DD"
-  timeOfBirth: string      // "HH:MM"
+  dateOfBirth: string
+  timeOfBirth: string
   unknownTime: boolean
   gender: "male" | "female" | "other" | ""
-  placeQuery: string       // user-facing search string
-  city: string             // resolved city name
+  placeQuery: string
+  city: string
   latitude: number | ""
   longitude: number | ""
-  timezoneOffset: number   // UTC offset, default 5.5 (IST)
-  ayanamsa: BirthInput["ayanamsa"]
+  timezoneOffset: number
+  ayanamsa: "lahiri" | "raman" | "krishnamurti" | "yukteshwar"
+}
+
+interface SelectedCategory {
+  id: string
+  label: string
+  color: string
 }
 
 interface BirthFormProps {
-  onSubmit: (input: BirthInput, meta: BirthFormFields) => void | Promise<void>
+  selectedCategory?: SelectedCategory | null
+  onSubmit?: (fields: BirthFormFields) => void | Promise<void>
   loading?: boolean
   submitLabel?: string
   className?: string
 }
 
-// ── Geo Search Helpers ─────────────────────────────────────────────────────
+// ── Geo Search ─────────────────────────────────────────────────────────────
 
 interface GeoResult {
   display_name: string
   lat: string
   lon: string
-  address?: { city?: string; town?: string; village?: string; state?: string; country?: string }
+  address?: {
+    city?: string
+    town?: string
+    village?: string
+    state?: string
+    country?: string
+  }
 }
 
 async function searchPlace(query: string): Promise<GeoResult[]> {
@@ -68,11 +63,10 @@ async function searchPlace(query: string): Promise<GeoResult[]> {
 }
 
 function offsetFromLon(lon: number): number {
-  // Approximate UTC offset from longitude (±15° = 1 hour)
-  return Math.round((lon / 15) * 2) / 2  // round to nearest 0.5
+  return Math.round((lon / 15) * 2) / 2
 }
 
-// ── Component ──────────────────────────────────────────────────────────────
+// ── Initial State ──────────────────────────────────────────────────────────
 
 const INITIAL_STATE: BirthFormFields = {
   name: "",
@@ -88,26 +82,31 @@ const INITIAL_STATE: BirthFormFields = {
   ayanamsa: "lahiri",
 }
 
+// ── Component ──────────────────────────────────────────────────────────────
+
 export default function BirthForm({
+  selectedCategory,
   onSubmit,
   loading = false,
-  submitLabel = "Calculate Chart",
+  submitLabel = "Calculate My Chart",
   className = "",
 }: BirthFormProps) {
   const [fields, setFields] = useState<BirthFormFields>(INITIAL_STATE)
   const [geoResults, setGeoResults] = useState<GeoResult[]>([])
   const [geoLoading, setGeoLoading] = useState(false)
   const [errors, setErrors] = useState<Partial<Record<keyof BirthFormFields, string>>>({})
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [result, setResult] = useState<any>(null)
+  const [apiError, setApiError] = useState<string | null>(null)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  // ── Field Update ─────────────────────────────────────────────────────────
-
-  const set = useCallback(<K extends keyof BirthFormFields>(key: K, value: BirthFormFields[K]) => {
+  const set = useCallback(<K extends keyof BirthFormFields>(
+    key: K,
+    value: BirthFormFields[K]
+  ) => {
     setFields(prev => ({ ...prev, [key]: value }))
     setErrors(prev => ({ ...prev, [key]: undefined }))
   }, [])
-
-  // ── Place Search ─────────────────────────────────────────────────────────
 
   const handlePlaceChange = (query: string) => {
     set("placeQuery", query)
@@ -129,7 +128,6 @@ export default function BirthForm({
       result.address?.town ||
       result.address?.village ||
       result.display_name.split(",")[0]
-
     setFields(prev => ({
       ...prev,
       placeQuery: result.display_name,
@@ -139,347 +137,369 @@ export default function BirthForm({
       timezoneOffset: offsetFromLon(lon),
     }))
     setGeoResults([])
-    setErrors(prev => ({ ...prev, placeQuery: undefined, latitude: undefined, longitude: undefined }))
+    setErrors(prev => ({ ...prev, placeQuery: undefined, latitude: undefined }))
   }
-
-  // ── Validation ────────────────────────────────────────────────────────────
 
   const validate = (): boolean => {
     const errs: typeof errors = {}
     if (!fields.name.trim()) errs.name = "Name is required"
     if (!fields.dateOfBirth) errs.dateOfBirth = "Date of birth is required"
     if (!fields.unknownTime && !fields.timeOfBirth) errs.timeOfBirth = "Time of birth is required"
-    if (fields.latitude === "" || fields.latitude === undefined) errs.latitude = "Place of birth is required"
-    if (fields.longitude === "" || fields.longitude === undefined) errs.longitude = "Place of birth is required"
+    if (fields.latitude === "") errs.latitude = "Place of birth is required"
     setErrors(errs)
     return Object.keys(errs).length === 0
   }
-
-  // ── Submit ────────────────────────────────────────────────────────────────
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!validate()) return
 
-    const input = formToBirthInput({
-      dateOfBirth: fields.dateOfBirth,
-      timeOfBirth: fields.unknownTime ? "12:00" : fields.timeOfBirth,
-      latitude: fields.latitude as number,
-      longitude: fields.longitude as number,
-      timezoneOffset: fields.timezoneOffset,
-      ayanamsa: fields.ayanamsa,
-    })
+    setIsSubmitting(true)
+    setApiError(null)
+    setResult(null)
 
-    await onSubmit(input, fields)
+    try {
+      // Build birth data for predict API
+      const [year, month, day] = fields.dateOfBirth.split("-").map(Number)
+      const [hour, minute] = (fields.unknownTime ? "12:00" : fields.timeOfBirth).split(":").map(Number)
+
+      const birthData = {
+        dob: fields.dateOfBirth,
+        tob: fields.unknownTime ? "12:00" : fields.timeOfBirth,
+        lat: fields.latitude as number,
+        lng: fields.longitude as number,
+        cityName: fields.city,
+        timezone: fields.timezoneOffset,
+        ayanamsa: fields.ayanamsa,
+      }
+
+      const res = await fetch("/api/predict", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          sessionId: `session_${Date.now()}`,
+          domainId: selectedCategory?.id || "general_fortune",
+          birthData,
+          userContext: {
+            segment: "millennial",
+            employment: "professional",
+            sector: "general",
+            language: "hinglish",
+            city: fields.city,
+          },
+        }),
+      })
+
+      const data = await res.json()
+
+      if (!res.ok) {
+        setApiError(data.error || "Something went wrong. Please try again.")
+      } else {
+        setResult(data)
+        if (onSubmit) await onSubmit(fields)
+      }
+    } catch (err) {
+      setApiError("Network error. Please check your connection.")
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
-  // ── Render ────────────────────────────────────────────────────────────────
+  const isLoading = loading || isSubmitting
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      noValidate
-      className={`birth-form grid gap-5 ${className}`}
-      aria-label="Birth details form"
-    >
-      {/* ── 01. Full Name ────────────────────────────────────────────── */}
-      <div className="field-group">
-        <label htmlFor="tv-name" className="field-label">
-          Full Name <span aria-hidden>*</span>
-        </label>
-        <input
-          id="tv-name"
-          name="tv-name"
-          type="text"
-          autoComplete="name"
-          placeholder="Enter your full name"
-          value={fields.name}
-          onChange={e => set("name", e.target.value)}
-          aria-required="true"
-          aria-invalid={!!errors.name}
-          aria-describedby={errors.name ? "tv-name-error" : undefined}
-          className={`field-input ${errors.name ? "field-input--error" : ""}`}
-        />
-        {errors.name && (
-          <span id="tv-name-error" role="alert" className="field-error">
-            {errors.name}
-          </span>
-        )}
-      </div>
+    <section id="birth-form" className={`py-16 px-4 ${className}`}>
+      <div className="max-w-2xl mx-auto">
 
-      {/* ── 02. Date of Birth ────────────────────────────────────────── */}
-      <div className="field-group">
-        <label htmlFor="tv-dob" className="field-label">
-          Date of Birth <span aria-hidden>*</span>
-        </label>
-        <input
-          id="tv-dob"
-          name="tv-dob"
-          type="date"
-          value={fields.dateOfBirth}
-          onChange={e => set("dateOfBirth", e.target.value)}
-          aria-required="true"
-          aria-invalid={!!errors.dateOfBirth}
-          aria-describedby={errors.dateOfBirth ? "tv-dob-error" : undefined}
-          className={`field-input ${errors.dateOfBirth ? "field-input--error" : ""}`}
-        />
-        {errors.dateOfBirth && (
-          <span id="tv-dob-error" role="alert" className="field-error">
-            {errors.dateOfBirth}
-          </span>
-        )}
-      </div>
-
-      {/* ── 03. Time of Birth + 11. Unknown Time ─────────────────────── */}
-      <div className="field-group">
-        <div className="flex items-center justify-between">
-          <label htmlFor="tv-tob" className="field-label">
-            Time of Birth {!fields.unknownTime && <span aria-hidden>*</span>}
-          </label>
-          {/* ── 11. Unknown Time checkbox ─────────────────────────── */}
-          <span className="flex items-center gap-1.5 text-sm">
-            <input
-              id="tv-unknown-time"
-              name="tv-unknown-time"
-              type="checkbox"
-              checked={fields.unknownTime}
-              onChange={e => set("unknownTime", e.target.checked)}
-              className="checkbox"
-              aria-describedby="tv-unknown-time-hint"
-            />
-            <label htmlFor="tv-unknown-time" className="cursor-pointer text-muted-foreground">
-              Unknown
-            </label>
-          </span>
-        </div>
-        <span id="tv-unknown-time-hint" className="sr-only">
-          Check if birth time is unknown — solar chart (12:00) will be used
-        </span>
-        <input
-          id="tv-tob"
-          name="tv-tob"
-          type="time"
-          value={fields.timeOfBirth}
-          onChange={e => set("timeOfBirth", e.target.value)}
-          disabled={fields.unknownTime}
-          aria-required={!fields.unknownTime}
-          aria-invalid={!!errors.timeOfBirth}
-          aria-describedby={
-            [errors.timeOfBirth ? "tv-tob-error" : "", fields.unknownTime ? "tv-unknown-time-hint" : ""]
-              .filter(Boolean).join(" ") || undefined
-          }
-          className={`field-input ${errors.timeOfBirth ? "field-input--error" : ""} ${fields.unknownTime ? "opacity-40 cursor-not-allowed" : ""}`}
-        />
-        {fields.unknownTime && (
-          <p className="text-xs text-muted-foreground mt-1">
-            Solar chart will be cast (birth time set to 12:00)
-          </p>
-        )}
-        {errors.timeOfBirth && (
-          <span id="tv-tob-error" role="alert" className="field-error">
-            {errors.timeOfBirth}
-          </span>
-        )}
-      </div>
-
-      {/* ── 04. Gender ───────────────────────────────────────────────── */}
-      <div className="field-group">
-        <label htmlFor="tv-gender" className="field-label">
-          Gender
-        </label>
-        <select
-          id="tv-gender"
-          name="tv-gender"
-          value={fields.gender}
-          onChange={e => set("gender", e.target.value as BirthFormFields["gender"])}
-          className="field-input"
-        >
-          <option value="">Select gender</option>
-          <option value="male">Male</option>
-          <option value="female">Female</option>
-          <option value="other">Other / Prefer not to say</option>
-        </select>
-      </div>
-
-      {/* ── 05. Place of Birth ───────────────────────────────────────── */}
-      <div className="field-group relative">
-        <label htmlFor="tv-place" className="field-label">
-          Place of Birth <span aria-hidden>*</span>
-        </label>
-        <div className="relative">
-          <input
-            id="tv-place"
-            name="tv-place"
-            type="search"
-            autoComplete="off"
-            placeholder="Type city name…"
-            value={fields.placeQuery}
-            onChange={e => handlePlaceChange(e.target.value)}
-            aria-required="true"
-            aria-invalid={!!errors.placeQuery || !!errors.latitude}
-            aria-describedby={errors.placeQuery ? "tv-place-error" : undefined}
-            aria-autocomplete="list"
-            aria-controls="tv-place-listbox"
-            aria-expanded={geoResults.length > 0}
-            role="combobox"
-            className={`field-input pr-8 ${(errors.placeQuery || errors.latitude) ? "field-input--error" : ""}`}
-          />
-          {geoLoading && (
-            <span className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground text-xs" aria-live="polite">
-              ⟳
+        {/* Header */}
+        {selectedCategory && (
+          <div className="mb-6 text-center">
+            <span
+              className="inline-block px-4 py-1.5 rounded-full text-sm font-medium mb-2"
+              style={{
+                background: `${selectedCategory.color}20`,
+                color: selectedCategory.color,
+                border: `1px solid ${selectedCategory.color}40`,
+              }}
+            >
+              {selectedCategory.label}
             </span>
-          )}
-        </div>
+            <p className="text-slate-400 text-sm">Enter your birth details for a personalized reading</p>
+          </div>
+        )}
 
-        {/* Autocomplete Dropdown */}
-        {geoResults.length > 0 && (
-          <ul
-            id="tv-place-listbox"
-            role="listbox"
-            className="absolute z-50 w-full bg-popover border border-border rounded-md shadow-lg mt-1 max-h-48 overflow-y-auto"
-          >
-            {geoResults.map((r, i) => (
-              <li
-                key={i}
-                role="option"
-                aria-selected={false}
-                onClick={() => selectPlace(r)}
-                onKeyDown={e => e.key === "Enter" && selectPlace(r)}
-                tabIndex={0}
-                className="px-3 py-2 text-sm cursor-pointer hover:bg-accent truncate"
+        <div
+          className="rounded-2xl p-6 sm:p-8"
+          style={{
+            background: "rgba(13,17,30,0.8)",
+            border: "1px solid rgba(212,175,55,0.15)",
+            backdropFilter: "blur(12px)",
+          }}
+        >
+          <form onSubmit={handleSubmit} noValidate className="grid gap-5">
+
+            {/* 01 — Name */}
+            <div>
+              <label htmlFor="tv-name" className="block text-sm font-medium text-slate-300 mb-1.5">
+                Full Name <span className="text-yellow-400">*</span>
+              </label>
+              <input
+                id="tv-name"
+                type="text"
+                placeholder="Enter your full name"
+                value={fields.name}
+                onChange={e => set("name", e.target.value)}
+                className="w-full px-4 py-2.5 rounded-lg text-white text-sm outline-none transition-all"
+                style={{
+                  background: "rgba(255,255,255,0.05)",
+                  border: errors.name ? "1px solid #ef4444" : "1px solid rgba(255,255,255,0.1)",
+                }}
+              />
+              {errors.name && <p className="text-red-400 text-xs mt-1">{errors.name}</p>}
+            </div>
+
+            {/* 02 — Date of Birth */}
+            <div>
+              <label htmlFor="tv-dob" className="block text-sm font-medium text-slate-300 mb-1.5">
+                Date of Birth <span className="text-yellow-400">*</span>
+              </label>
+              <input
+                id="tv-dob"
+                type="date"
+                value={fields.dateOfBirth}
+                onChange={e => set("dateOfBirth", e.target.value)}
+                className="w-full px-4 py-2.5 rounded-lg text-white text-sm outline-none"
+                style={{
+                  background: "rgba(255,255,255,0.05)",
+                  border: errors.dateOfBirth ? "1px solid #ef4444" : "1px solid rgba(255,255,255,0.1)",
+                  colorScheme: "dark",
+                }}
+              />
+              {errors.dateOfBirth && <p className="text-red-400 text-xs mt-1">{errors.dateOfBirth}</p>}
+            </div>
+
+            {/* 03 — Time of Birth */}
+            <div>
+              <div className="flex items-center justify-between mb-1.5">
+                <label htmlFor="tv-tob" className="text-sm font-medium text-slate-300">
+                  Time of Birth {!fields.unknownTime && <span className="text-yellow-400">*</span>}
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer text-sm text-slate-400">
+                  <input
+                    id="tv-unknown-time"
+                    type="checkbox"
+                    checked={fields.unknownTime}
+                    onChange={e => set("unknownTime", e.target.checked)}
+                    className="rounded"
+                  />
+                  Unknown time
+                </label>
+              </div>
+              <input
+                id="tv-tob"
+                type="time"
+                value={fields.timeOfBirth}
+                onChange={e => set("timeOfBirth", e.target.value)}
+                disabled={fields.unknownTime}
+                className="w-full px-4 py-2.5 rounded-lg text-white text-sm outline-none"
+                style={{
+                  background: "rgba(255,255,255,0.05)",
+                  border: errors.timeOfBirth ? "1px solid #ef4444" : "1px solid rgba(255,255,255,0.1)",
+                  opacity: fields.unknownTime ? 0.4 : 1,
+                  colorScheme: "dark",
+                }}
+              />
+              {fields.unknownTime && (
+                <p className="text-slate-500 text-xs mt-1">Solar chart will be used (12:00 noon)</p>
+              )}
+            </div>
+
+            {/* 04 — Gender */}
+            <div>
+              <label htmlFor="tv-gender" className="block text-sm font-medium text-slate-300 mb-1.5">
+                Gender
+              </label>
+              <select
+                id="tv-gender"
+                value={fields.gender}
+                onChange={e => set("gender", e.target.value as BirthFormFields["gender"])}
+                className="w-full px-4 py-2.5 rounded-lg text-white text-sm outline-none"
+                style={{
+                  background: "rgba(255,255,255,0.05)",
+                  border: "1px solid rgba(255,255,255,0.1)",
+                  colorScheme: "dark",
+                }}
               >
-                {r.display_name}
-              </li>
-            ))}
-          </ul>
-        )}
+                <option value="">Select gender</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+                <option value="other">Other / Prefer not to say</option>
+              </select>
+            </div>
 
-        {(errors.placeQuery || errors.latitude) && (
-          <span id="tv-place-error" role="alert" className="field-error">
-            {errors.placeQuery || "Please select a place from suggestions"}
-          </span>
-        )}
-      </div>
+            {/* 05 — Place of Birth */}
+            <div className="relative">
+              <label htmlFor="tv-place" className="block text-sm font-medium text-slate-300 mb-1.5">
+                Place of Birth <span className="text-yellow-400">*</span>
+              </label>
+              <div className="relative">
+                <input
+                  id="tv-place"
+                  type="search"
+                  autoComplete="off"
+                  placeholder="Type city name…"
+                  value={fields.placeQuery}
+                  onChange={e => handlePlaceChange(e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-lg text-white text-sm outline-none pr-8"
+                  style={{
+                    background: "rgba(255,255,255,0.05)",
+                    border: errors.latitude ? "1px solid #ef4444" : "1px solid rgba(255,255,255,0.1)",
+                  }}
+                />
+                {geoLoading && (
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs animate-spin">⟳</span>
+                )}
+              </div>
 
-      {/* ── 06. City (resolved, read-only display) ───────────────────── */}
-      {fields.city && (
-        <input
-          id="tv-city"
-          name="tv-city"
-          type="hidden"
-          value={fields.city}
-          aria-hidden="true"
-          readOnly
-        />
-      )}
+              {geoResults.length > 0 && (
+                <ul className="absolute z-50 w-full mt-1 rounded-lg overflow-hidden shadow-xl"
+                  style={{ background: "#1a1f2e", border: "1px solid rgba(212,175,55,0.2)" }}>
+                  {geoResults.map((r, i) => (
+                    <li
+                      key={i}
+                      onClick={() => selectPlace(r)}
+                      className="px-4 py-2.5 text-sm text-slate-300 cursor-pointer hover:bg-yellow-400/10 truncate"
+                    >
+                      {r.display_name}
+                    </li>
+                  ))}
+                </ul>
+              )}
+              {errors.latitude && <p className="text-red-400 text-xs mt-1">Please select a place from suggestions</p>}
+            </div>
 
-      {/* ── 07 & 08. Lat/Lon (resolved, read-only display) ───────────── */}
-      {(fields.latitude !== "" || fields.longitude !== "") && (
-        <div className="grid grid-cols-2 gap-3">
-          <div className="field-group">
-            <label htmlFor="tv-latitude" className="field-label text-xs text-muted-foreground">
-              Latitude
-            </label>
-            <input
-              id="tv-latitude"
-              name="tv-latitude"
-              type="number"
-              step="0.0001"
-              value={fields.latitude}
-              onChange={e => set("latitude", parseFloat(e.target.value))}
-              aria-label="Latitude coordinate"
-              className="field-input text-sm font-mono"
-              readOnly
-            />
-          </div>
-          <div className="field-group">
-            <label htmlFor="tv-longitude" className="field-label text-xs text-muted-foreground">
-              Longitude
-            </label>
-            <input
-              id="tv-longitude"
-              name="tv-longitude"
-              type="number"
-              step="0.0001"
-              value={fields.longitude}
-              onChange={e => set("longitude", parseFloat(e.target.value))}
-              aria-label="Longitude coordinate"
-              className="field-input text-sm font-mono"
-              readOnly
-            />
-          </div>
+            {/* 07+08 — Lat/Lon display */}
+            {fields.latitude !== "" && (
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs text-slate-500 mb-1">Latitude</label>
+                  <input
+                    id="tv-latitude"
+                    type="text"
+                    value={fields.latitude}
+                    readOnly
+                    className="w-full px-3 py-2 rounded-lg text-slate-400 text-xs font-mono"
+                    style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs text-slate-500 mb-1">Longitude</label>
+                  <input
+                    id="tv-longitude"
+                    type="text"
+                    value={fields.longitude}
+                    readOnly
+                    className="w-full px-3 py-2 rounded-lg text-slate-400 text-xs font-mono"
+                    style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* 09 — Timezone */}
+            <div>
+              <label htmlFor="tv-timezone" className="block text-sm font-medium text-slate-300 mb-1.5">
+                Time Zone
+              </label>
+              <select
+                id="tv-timezone"
+                value={fields.timezoneOffset}
+                onChange={e => set("timezoneOffset", parseFloat(e.target.value))}
+                className="w-full px-4 py-2.5 rounded-lg text-white text-sm outline-none"
+                style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", colorScheme: "dark" }}
+              >
+                <option value={5.5}>IST +5:30 (India)</option>
+                <option value={0}>UTC +0:00</option>
+                <option value={1}>CET +1:00</option>
+                <option value={2}>EET +2:00</option>
+                <option value={3}>MSK +3:00</option>
+                <option value={3.5}>IRST +3:30</option>
+                <option value={4}>GST +4:00</option>
+                <option value={4.5}>AFT +4:30</option>
+                <option value={5}>PKT +5:00</option>
+                <option value={5.75}>NPT +5:45</option>
+                <option value={6}>BST +6:00</option>
+                <option value={6.5}>MMT +6:30</option>
+                <option value={7}>ICT +7:00</option>
+                <option value={8}>SGT +8:00</option>
+                <option value={9}>JST +9:00</option>
+                <option value={9.5}>ACST +9:30</option>
+                <option value={10}>AEST +10:00</option>
+                <option value={-5}>EST -5:00</option>
+                <option value={-6}>CST -6:00</option>
+                <option value={-7}>MST -7:00</option>
+                <option value={-8}>PST -8:00</option>
+              </select>
+            </div>
+
+            {/* 10 — Ayanamsa */}
+            <div>
+              <label htmlFor="tv-ayanamsa" className="block text-sm font-medium text-slate-300 mb-1.5">
+                Ayanamsa
+              </label>
+              <select
+                id="tv-ayanamsa"
+                value={fields.ayanamsa}
+                onChange={e => set("ayanamsa", e.target.value as BirthFormFields["ayanamsa"])}
+                className="w-full px-4 py-2.5 rounded-lg text-white text-sm outline-none"
+                style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", colorScheme: "dark" }}
+              >
+                <option value="lahiri">Lahiri (Chitrapaksha) — Default</option>
+                <option value="raman">B.V. Raman</option>
+                <option value="krishnamurti">Krishnamurti (KP)</option>
+                <option value="yukteshwar">Sri Yukteshwar</option>
+              </select>
+            </div>
+
+            {/* API Error */}
+            {apiError && (
+              <div className="px-4 py-3 rounded-lg text-sm text-red-300"
+                style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.2)" }}>
+                {apiError}
+              </div>
+            )}
+
+            {/* Submit */}
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="w-full py-3.5 rounded-xl text-sm font-semibold transition-all duration-300"
+              style={{
+                background: isLoading
+                  ? "rgba(212,175,55,0.3)"
+                  : "linear-gradient(135deg, #D4AF37 0%, #F5D76E 50%, #D4AF37 100%)",
+                color: isLoading ? "rgba(255,255,255,0.5)" : "#080B12",
+                cursor: isLoading ? "not-allowed" : "pointer",
+              }}
+            >
+              {isLoading ? "Calculating your chart…" : submitLabel}
+            </button>
+
+          </form>
+
+          {/* Result Display */}
+          {result && (
+            <div className="mt-6 p-4 rounded-xl"
+              style={{ background: "rgba(212,175,55,0.05)", border: "1px solid rgba(212,175,55,0.2)" }}>
+              <p className="text-yellow-400 text-sm font-medium mb-2">✨ Your Reading is Ready</p>
+              <pre className="text-slate-300 text-xs overflow-auto max-h-64 whitespace-pre-wrap">
+                {JSON.stringify(result, null, 2)}
+              </pre>
+            </div>
+          )}
+
         </div>
-      )}
-
-      {/* ── 09. Timezone Offset ──────────────────────────────────────── */}
-      <div className="field-group">
-        <label htmlFor="tv-timezone" className="field-label">
-          Time Zone (UTC offset)
-        </label>
-        <select
-          id="tv-timezone"
-          name="tv-timezone"
-          value={fields.timezoneOffset}
-          onChange={e => set("timezoneOffset", parseFloat(e.target.value))}
-          className="field-input"
-          aria-describedby="tv-timezone-hint"
-        >
-          <option value={5.5}>IST +5:30 (India)</option>
-          <option value={0}>UTC +0:00</option>
-          <option value={1}>CET +1:00</option>
-          <option value={2}>EET +2:00</option>
-          <option value={3}>MSK +3:00</option>
-          <option value={3.5}>IRST +3:30</option>
-          <option value={4}>GST +4:00</option>
-          <option value={4.5}>AFT +4:30</option>
-          <option value={5}>PKT +5:00</option>
-          <option value={5.5}>IST +5:30</option>
-          <option value={5.75}>NPT +5:45</option>
-          <option value={6}>BST +6:00</option>
-          <option value={6.5}>MMT +6:30</option>
-          <option value={7}>ICT +7:00</option>
-          <option value={8}>SGT +8:00</option>
-          <option value={9}>JST +9:00</option>
-          <option value={9.5}>ACST +9:30</option>
-          <option value={10}>AEST +10:00</option>
-          <option value={-5}>EST -5:00</option>
-          <option value={-6}>CST -6:00</option>
-          <option value={-7}>MST -7:00</option>
-          <option value={-8}>PST -8:00</option>
-        </select>
-        <span id="tv-timezone-hint" className="sr-only">
-          Auto-filled from place selection. Adjust if needed.
-        </span>
       </div>
-
-      {/* ── 10. Ayanamsa ─────────────────────────────────────────────── */}
-      <div className="field-group">
-        <label htmlFor="tv-ayanamsa" className="field-label">
-          Ayanamsa
-        </label>
-        <select
-          id="tv-ayanamsa"
-          name="tv-ayanamsa"
-          value={fields.ayanamsa}
-          onChange={e => set("ayanamsa", e.target.value as BirthInput["ayanamsa"])}
-          className="field-input"
-        >
-          <option value="lahiri">Lahiri (Chitrapaksha) — Default</option>
-          <option value="raman">B.V. Raman</option>
-          <option value="krishnamurti">Krishnamurti (KP)</option>
-          <option value="yukteshwar">Sri Yukteshwar</option>
-        </select>
-      </div>
-
-      {/* ── Submit ───────────────────────────────────────────────────── */}
-      <button
-        type="submit"
-        disabled={loading}
-        className="btn-primary w-full py-3 text-base font-semibold"
-        aria-busy={loading}
-      >
-        {loading ? "Calculating…" : submitLabel}
-      </button>
-    </form>
+    </section>
   )
 }
