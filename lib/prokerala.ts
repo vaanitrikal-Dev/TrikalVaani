@@ -337,7 +337,7 @@ function extractDegree(p: ProkeralaPlanetData): number {
 // ─── MAIN FUNCTION ────────────────────────────────────────────────────────────
 export async function buildKundaliFromProkerala(data: BirthData): Promise<KundaliData> {
 
-  const datetime = `${data.dob}T${data.tob}:00+05:30`;
+  const datetime = `${data.dob}T${data.tob}+05:30`;
   const token    = await getProkeralaToken();
 
   const planetRes = await fetch(
