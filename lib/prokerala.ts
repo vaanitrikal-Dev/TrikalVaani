@@ -346,8 +346,6 @@ export async function buildKundaliFromProkerala(data: BirthData): Promise<Kundal
       ayanamsa:    '1',
       coordinates: `${data.lat},${data.lng}`,
       datetime,
-      chart_type:  'rasi',
-      chart_style: 'north-indian',
     }),
     {
       headers: {
