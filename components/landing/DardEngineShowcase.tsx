@@ -27,7 +27,7 @@ const SEGMENTS: Record<Generation, Segment[]> = {
   ],
   millennial: [
     { id: 'property_yog',     label: 'Property & Home Yog',    icon: Home,    color: '#34D399', description: '4th house & Jupiter blessing analysis' },
-    { id: 'karz_mukti',       label: 'Karz Mukti (Debt)',       icon: Banknote, color: '#FACC15', description: '6th house & Saturn Karma clearing' },
+    { id: 'mill_karz_mukti',       label: 'Karz Mukti (Debt)',       icon: Banknote, color: '#FACC15', description: '6th house & Saturn Karma clearing' },
     { id: 'child_destiny',    label: "Child's Destiny",         icon: Baby,    color: '#F472B6', description: '5th house Putra Bhava activation' },
     { id: 'parents_wellness', label: "Parents' Wellness",       icon: Users,   color: '#60A5FA', description: '4th & 9th house ancestral protection' },
   ],
