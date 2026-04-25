@@ -25,7 +25,7 @@ EPHE_FILES = [
     "seas_18.se1",   # Asteroids 1800–1900 (for Chiron etc.)
 ]
 
-BASE_URL = "https://www.astro.com/ftp/swisseph/ephe/"
+BASE_URL = "https://raw.githubusercontent.com/aloistr/swisseph/master/ephe/"
 
 
 def download_ephe_files():
