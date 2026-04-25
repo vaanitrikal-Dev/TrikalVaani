@@ -39,14 +39,14 @@ app.add_middleware(GZipMiddleware, minimum_size=500)
 API_KEY = os.getenv("TRIKAL_API_KEY", "")
 
 class BirthInput(BaseModel):
-    year: int
-    month: int
-    day: int
-    hour: int
-    minute: int
+    year: int = 2000
+    month: int = 1
+    day: int = 1
+    hour: int = 12
+    minute: int = 0
     second: int = 0
-    latitude: float
-    longitude: float
+    latitude: float = 28.6
+    longitude: float = 77.2
     timezone: float = 5.5
     ayanamsa: str = "lahiri"
     house_system: str = "P"
