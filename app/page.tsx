@@ -4,11 +4,11 @@ import { useState, useCallback } from 'react';
 import SiteNav from '@/components/layout/SiteNav';
 import SiteFooter from '@/components/layout/SiteFooter';
 import Hero from '@/components/landing/Hero';
+import DardEngineShowcase from '@/components/landing/DardEngineShowcase';
 import { blogPosts } from '@/lib/blog-data';
 
-// ── COMMENTED OUT FOR DIAGNOSIS ──
+// ── STILL COMMENTED OUT ──
 // import BirthForm from '@/components/landing/BirthForm';
-// import DardEngineShowcase from '@/components/landing/DardEngineShowcase';
 // import BlogCard from '@/components/blog/BlogCard';
 
 export type SelectedCategory = {
@@ -22,6 +22,10 @@ export default function HomePage() {
 
   const handleSelectCategory = useCallback((cat: SelectedCategory) => {
     setSelectedCategory(cat);
+    setTimeout(() => {
+      const el = document.getElementById('birth-form');
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 80);
   }, []);
 
   return (
@@ -29,7 +33,11 @@ export default function HomePage() {
       <SiteNav />
       <main>
         <Hero />
-        <p className="text-white text-center py-10">Diagnosis mode — checking broken component</p>
+        <DardEngineShowcase
+          selectedCategory={selectedCategory}
+          onSelectCategory={handleSelectCategory}
+        />
+        <p className="text-white text-center py-10">Testing DardEngineShowcase...</p>
       </main>
       <SiteFooter />
     </div>
