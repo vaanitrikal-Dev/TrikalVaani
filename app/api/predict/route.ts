@@ -3,7 +3,7 @@
  * TRIKAL VAANI — Unified Prediction Endpoint
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/api/predict/route.ts
- * VERSION: 3.0 — Swiss Ephemeris ONLY (Prokerala removed)
+ * VERSION: 3.1 — Swiss Ephemeris ONLY + Timeout Fix
  * SIGNED: ROHIIT GUPTA, CEO
  * ============================================================
  */
@@ -15,7 +15,10 @@ import { buildPredictionPrompt } from '@/lib/gemini-prompt';
 import type { DomainId } from '@/lib/domain-config';
 import type { UserTier, UserContext } from '@/lib/gemini-prompt';
 
-// ── Constants ────────────────────────────────────────────────────────────────
+// ── Allow 30s for this route (Render cold start fix) ─────────────────────────
+export const maxDuration = 30;
+
+// ── Constants ─────────────────────────────────────────────────────────────────
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY ?? '';
 const GEMINI_MODEL   = 'gemini-2.5-flash';
@@ -35,7 +38,7 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-// ── Types ────────────────────────────────────────────────────────────────────
+// ── Types ─────────────────────────────────────────────────────────────────────
 
 interface BirthData {
   dob: string;       // "YYYY-MM-DD"
@@ -53,18 +56,18 @@ interface PredictRequest {
   domainId:   DomainId;
   birthData:  BirthData;
   userContext: {
-    segment:      'genz' | 'millennial' | 'genx';
-    employment:   string;
-    sector:       string;
-    language:     'hindi' | 'hinglish' | 'english';
-    city?:        string;
+    segment:       'genz' | 'millennial' | 'genx';
+    employment:    string;
+    sector:        string;
+    language:      'hindi' | 'hinglish' | 'english';
+    city?:         string;
     businessName?: string;
     person2Name?:  string;
     person2City?:  string;
   };
 }
 
-// ── Tier Fetcher ─────────────────────────────────────────────────────────────
+// ── Tier Fetcher ──────────────────────────────────────────────────────────────
 
 async function getVerifiedTier(userId: string): Promise<UserTier> {
   try {
@@ -87,7 +90,7 @@ async function getVerifiedTier(userId: string): Promise<UserTier> {
   }
 }
 
-// ── Swiss Ephemeris Chart Builder ────────────────────────────────────────────
+// ── Swiss Ephemeris Chart Builder ─────────────────────────────────────────────
 
 async function buildKundaliFromSwiss(birthData: BirthData) {
   if (!EPHE_API_URL) throw new Error('EPHE_API_URL not configured');
@@ -110,7 +113,8 @@ async function buildKundaliFromSwiss(birthData: BirthData) {
       'Content-Type': 'application/json',
       ...(EPHE_API_KEY ? { 'X-Api-Key': EPHE_API_KEY } : {}),
     },
-    body: JSON.stringify(payload),
+    body:   JSON.stringify(payload),
+    signal: AbortSignal.timeout(25000), // ← 25s timeout for Render cold start
   });
 
   if (!res.ok) {
@@ -122,21 +126,21 @@ async function buildKundaliFromSwiss(birthData: BirthData) {
 
   // Normalize to match gemini-prompt expectations
   return {
-    lagna:            chart.lagna?.sign ?? 'Unknown',
-    lagnaLord:        chart.lagna?.sign_lord ?? 'Unknown',
-    nakshatra:        chart.grahas?.find((g: any) => g.planet === 'Moon')?.nakshatra ?? 'Unknown',
-    moonSign:         chart.grahas?.find((g: any) => g.planet === 'Moon')?.sign ?? 'Unknown',
-    sunSign:          chart.grahas?.find((g: any) => g.planet === 'Sun')?.sign ?? 'Unknown',
-    currentMahadasha: { lord: chart.dasha?.maha_dasha?.find((d: any) => d.is_current)?.planet ?? 'Unknown' },
-    currentAntardasha:{ lord: chart.dasha?.maha_dasha?.find((d: any) => d.is_current)?.antar?.find((a: any) => a.is_current)?.planet ?? 'Unknown' },
-    grahas:           chart.grahas ?? [],
-    bhavas:           chart.bhavas ?? [],
-    yogas:            chart.yogas ?? [],
-    rawChart:         chart,
+    lagna:             chart.lagna?.sign ?? 'Unknown',
+    lagnaLord:         chart.lagna?.sign_lord ?? 'Unknown',
+    nakshatra:         chart.grahas?.find((g: any) => g.planet === 'Moon')?.nakshatra ?? 'Unknown',
+    moonSign:          chart.grahas?.find((g: any) => g.planet === 'Moon')?.sign ?? 'Unknown',
+    sunSign:           chart.grahas?.find((g: any) => g.planet === 'Sun')?.sign ?? 'Unknown',
+    currentMahadasha:  { lord: chart.dasha?.maha_dasha?.find((d: any) => d.is_current)?.planet ?? 'Unknown' },
+    currentAntardasha: { lord: chart.dasha?.maha_dasha?.find((d: any) => d.is_current)?.antar?.find((a: any) => a.is_current)?.planet ?? 'Unknown' },
+    grahas:            chart.grahas ?? [],
+    bhavas:            chart.bhavas ?? [],
+    yogas:             chart.yogas ?? [],
+    rawChart:          chart,
   };
 }
 
-// ── Main Handler ─────────────────────────────────────────────────────────────
+// ── Main Handler ──────────────────────────────────────────────────────────────
 
 export async function POST(req: NextRequest) {
   const startTime = Date.now();
@@ -146,11 +150,11 @@ export async function POST(req: NextRequest) {
     const { userId, sessionId, domainId, birthData, userContext } = body;
 
     // Validate
-    if (!sessionId)       return NextResponse.json({ error: 'sessionId required' }, { status: 400 });
-    if (!domainId)        return NextResponse.json({ error: 'domainId required' }, { status: 400 });
-    if (!birthData?.dob)  return NextResponse.json({ error: 'birthData.dob required' }, { status: 400 });
-    if (!birthData?.lat)  return NextResponse.json({ error: 'birthData.lat required' }, { status: 400 });
-    if (!GEMINI_API_KEY)  return NextResponse.json({ error: 'Prediction engine not configured' }, { status: 500 });
+    if (!sessionId)      return NextResponse.json({ error: 'sessionId required' }, { status: 400 });
+    if (!domainId)       return NextResponse.json({ error: 'domainId required' }, { status: 400 });
+    if (!birthData?.dob) return NextResponse.json({ error: 'birthData.dob required' }, { status: 400 });
+    if (!birthData?.lat) return NextResponse.json({ error: 'birthData.lat required' }, { status: 400 });
+    if (!GEMINI_API_KEY) return NextResponse.json({ error: 'Prediction engine not configured' }, { status: 500 });
 
     // Tier
     const verifiedTier = userId ? await getVerifiedTier(userId) : 'free';
@@ -226,7 +230,7 @@ export async function POST(req: NextRequest) {
 
     if (!rawText) return NextResponse.json({ error: 'Empty prediction response' }, { status: 502 });
 
-    // Parse
+    // Parse JSON from Gemini
     let prediction: Record<string, unknown>;
     try {
       const cleaned = rawText
@@ -250,10 +254,10 @@ export async function POST(req: NextRequest) {
         searchUsed:   useSearch,
         processingMs: Date.now() - startTime,
         kundali: {
-          lagna:       kundali.lagna,
-          nakshatra:   kundali.nakshatra,
-          mahadasha:   kundali.currentMahadasha.lord,
-          antardasha:  kundali.currentAntardasha.lord,
+          lagna:      kundali.lagna,
+          nakshatra:  kundali.nakshatra,
+          mahadasha:  kundali.currentMahadasha.lord,
+          antardasha: kundali.currentAntardasha.lord,
         },
       },
     });
@@ -268,7 +272,7 @@ export async function POST(req: NextRequest) {
 export async function GET() {
   return NextResponse.json({
     status:      'operational',
-    engine:      'Trikal Vaani Predict v3.0',
+    engine:      'Trikal Vaani Predict v3.1',
     chartSource: 'Swiss Ephemeris (Render)',
     model:       GEMINI_MODEL,
     domains:     11,
