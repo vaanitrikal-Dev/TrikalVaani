@@ -32,7 +32,7 @@ import type { DomainId } from '@/lib/domain-config';
 import type { UserTier, UserContext } from '@/lib/gemini-prompt';
 
 // ── Allow 30s for Render cold start ──────────────────────────────────────────
-export const maxDuration = 60;
+export const maxDuration = 300;
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -257,7 +257,7 @@ export async function POST(req: NextRequest) {
           ...(EPHE_API_KEY ? { 'X-Api-Key': EPHE_API_KEY } : {}),
         },
         body:   JSON.stringify(swissPayload),
-        signal: AbortSignal.timeout(55000),
+        signal: AbortSignal.timeout(25000),signal: AbortSignal.timeout(240000),
       });
 
       if (!res.ok) {
