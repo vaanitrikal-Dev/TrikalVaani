@@ -3,7 +3,7 @@
  * TRIKAL VAANI — BirthForm Component
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: components/landing/BirthForm.tsx
- * VERSION: 4.0 — Redirect to /result after prediction
+ * VERSION: 5.0 — Saves to Supabase + Redirect to /result
  * SIGNED: ROHIIT GUPTA, CEO
  * ============================================================
  */
@@ -11,6 +11,7 @@
 "use client"
 
 import { useState, useCallback, useRef } from "react"
+import { savePrediction, getOrCreateSessionId } from "@/lib/supabase"
 
 export interface BirthFormFields {
   name: string
@@ -161,11 +162,13 @@ export default function BirthForm({
         ayanamsa: "lahiri",
       }
 
+      const sessionId = getOrCreateSessionId()
+
       const res = await fetch("/api/predict", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          sessionId: `session_${Date.now()}`,
+          sessionId,
           domainId:  selectedCategory?.id || "mill_karz_mukti",
           birthData,
           userContext: {
@@ -182,9 +185,50 @@ export default function BirthForm({
 
       if (!res.ok) {
         setApiError(data.error || "Something went wrong. Please try again.")
+        return
+      }
+
+      if (onSubmit) await onSubmit(fields)
+
+      // ── Save to Supabase ──────────────────────────────────────────────────
+      let predictionId: string | null = null
+      try {
+        predictionId = await savePrediction({
+          sessionId,
+          domainId:     data._meta?.domainId    ?? selectedCategory?.id ?? "general",
+          domainLabel:  selectedCategory?.label  ?? "General",
+          personName:   fields.name,
+          dob:          fields.dateOfBirth,
+          birthCity:    fields.city,
+          birthTime:    fields.unknownTime ? undefined : fields.timeOfBirth,
+          lagna:        data._meta?.kundali?.lagna,
+          nakshatra:    data._meta?.kundali?.nakshatra,
+          mahadasha:    data._meta?.kundali?.mahadasha,
+          antardasha:   data._meta?.kundali?.antardasha,
+          tier:         (data._meta?.tier ?? "free") as any,
+          language:     "hinglish",
+          segment:      "millennial",
+          chartSource:  data._meta?.chartSource,
+          prediction:   data,
+          processingMs: data._meta?.processingMs,
+          geminiModel:  data._meta?.model,
+          searchUsed:   data._meta?.searchUsed,
+          // Extra fields for re-prediction after upgrade
+          ...(fields.latitude  !== "" && { birth_lat:      fields.latitude  as number }),
+          ...(fields.longitude !== "" && { birth_lng:      fields.longitude as number }),
+          birth_timezone: fields.timezoneOffset,
+        } as any)
+        console.log("[TV] Prediction saved:", predictionId)
+      } catch (saveErr) {
+        console.warn("[TV] Supabase save failed — using inline fallback:", saveErr)
+      }
+
+      // ── Redirect to result page ───────────────────────────────────────────
+      if (predictionId) {
+        // Best path — fetch from Supabase on result page
+        window.location.href = `/result?predictionId=${predictionId}&sessionId=${sessionId}`
       } else {
-        if (onSubmit) await onSubmit(fields)
-        // Encode prediction inline and redirect to result page
+        // Fallback — encode inline (no Supabase needed)
         const payload = {
           id:           "inline",
           person_name:  fields.name,
@@ -197,8 +241,9 @@ export default function BirthForm({
           prediction:   data,
         }
         const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(payload))))
-        window.location.href = `/result?data=${encoded}`
+        window.location.href = `/result?data=${encoded}&sessionId=${sessionId}`
       }
+
     } catch {
       setApiError("Network error. Please check your connection.")
     } finally {
@@ -385,10 +430,7 @@ export default function BirthForm({
                 <div>
                   <label className="block text-xs text-slate-500 mb-1">Latitude</label>
                   <input
-                    id="tv-latitude"
-                    type="text"
-                    value={fields.latitude}
-                    readOnly
+                    id="tv-latitude" type="text" value={fields.latitude} readOnly
                     className="w-full px-3 py-2 rounded-lg text-slate-400 text-xs font-mono"
                     style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}
                   />
@@ -396,10 +438,7 @@ export default function BirthForm({
                 <div>
                   <label className="block text-xs text-slate-500 mb-1">Longitude</label>
                   <input
-                    id="tv-longitude"
-                    type="text"
-                    value={fields.longitude}
-                    readOnly
+                    id="tv-longitude" type="text" value={fields.longitude} readOnly
                     className="w-full px-3 py-2 rounded-lg text-slate-400 text-xs font-mono"
                     style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}
                   />
@@ -443,20 +482,15 @@ export default function BirthForm({
               </select>
             </div>
 
-            {/* Ayanamsa hidden */}
             <input type="hidden" id="tv-ayanamsa" value="lahiri" />
 
-            {/* Error */}
             {apiError && (
-              <div
-                className="px-4 py-3 rounded-lg text-sm text-red-300"
-                style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.2)" }}
-              >
+              <div className="px-4 py-3 rounded-lg text-sm text-red-300"
+                style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.2)" }}>
                 {apiError}
               </div>
             )}
 
-            {/* Submit */}
             <button
               type="submit"
               disabled={isLoading}
