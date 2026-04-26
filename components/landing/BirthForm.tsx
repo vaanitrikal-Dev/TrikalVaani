@@ -97,7 +97,6 @@ export default function BirthForm({
   const [geoLoading, setGeoLoading] = useState(false)
   const [errors, setErrors] = useState<Partial<Record<keyof BirthFormFields, string>>>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [result, setResult] = useState<any>(null)
   const [apiError, setApiError] = useState<string | null>(null)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
@@ -193,8 +192,67 @@ export default function BirthForm({
       if (!res.ok) {
         setApiError(data.error || "Something went wrong. Please try again.")
       } else {
-        setResult(data)
         if (onSubmit) await onSubmit(fields)
+
+        // Save prediction to Supabase then redirect to result page
+        try {
+          const { savePrediction, getOrCreateSessionId } = await import('@/lib/supabase')
+          const sid = getOrCreateSessionId()
+          const predId = await savePrediction({
+            sessionId:   sid,
+            domainId:    data._meta?.domainId ?? selectedCategory?.id ?? 'general',
+            domainLabel: selectedCategory?.label ?? 'General',
+            personName:  fields.name,
+            dob:         fields.dateOfBirth,
+            birthCity:   fields.city,
+            birthTime:   fields.unknownTime ? undefined : fields.timeOfBirth,
+            lagna:       data._meta?.kundali?.lagna,
+            nakshatra:   data._meta?.kundali?.nakshatra,
+            mahadasha:   data._meta?.kundali?.mahadasha,
+            antardasha:  data._meta?.kundali?.antardasha,
+            tier:        (data._meta?.tier ?? 'free') as any,
+            language:    'hinglish',
+            segment:     'millennial',
+            chartSource: data._meta?.chartSource,
+            prediction:  data,
+            processingMs: data._meta?.processingMs,
+            geminiModel:  data._meta?.model,
+            searchUsed:   data._meta?.searchUsed,
+          })
+
+          if (predId) {
+            window.location.href = `/result?predictionId=${predId}`
+          } else {
+            // Fallback — encode inline and redirect
+            const encoded = btoa(JSON.stringify({
+              id: 'inline',
+              person_name: fields.name,
+              dob: fields.dateOfBirth,
+              birth_city: fields.city,
+              birth_time: fields.timeOfBirth,
+              domain_id: data._meta?.domainId,
+              domain_label: selectedCategory?.label ?? '',
+              tier: data._meta?.tier,
+              prediction: data,
+            }))
+            const sid2 = `session_${Date.now()}`
+            window.location.href = `/result?data=${encoded}`
+          }
+        } catch {
+          // Supabase unavailable — redirect with inline data
+          const encoded = btoa(JSON.stringify({
+            id: 'inline',
+            person_name: fields.name,
+            dob: fields.dateOfBirth,
+            birth_city: fields.city,
+            birth_time: fields.timeOfBirth,
+            domain_id: data._meta?.domainId,
+            domain_label: selectedCategory?.label ?? '',
+            tier: data._meta?.tier ?? 'free',
+            prediction: data,
+          }))
+          window.location.href = `/result?data=${encoded}`
+        }
       }
     } catch (err) {
       setApiError("Network error. Please check your connection.")
@@ -469,50 +527,7 @@ export default function BirthForm({
 
           </form>
 
-          {/* Result Display — temporary raw view until PredictionDisplay is wired */}
-          {result && (
-            <div className="mt-6 p-4 rounded-xl"
-              style={{ background: "rgba(212,175,55,0.05)", border: "1px solid rgba(212,175,55,0.2)" }}>
-              <p className="text-yellow-400 text-sm font-medium mb-3">✨ Your Reading is Ready</p>
-              {result.simpleSummary?.text && (
-                <p className="text-slate-300 text-sm leading-relaxed">
-                  {result.simpleSummary.text}
-                </p>
-              )}
-              {result.simpleSummary?.keyMessage && (
-                <div className="mt-3 px-3 py-2 rounded-lg"
-                  style={{ background: "rgba(212,175,55,0.08)", border: "1px solid rgba(212,175,55,0.15)" }}>
-                  <p className="text-yellow-400 text-xs font-medium">Key Message</p>
-                  <p className="text-white text-sm mt-1">{result.simpleSummary.keyMessage}</p>
-                </div>
-              )}
-              {result.simpleSummary?.mainAction && (
-                <div className="mt-2 px-3 py-2 rounded-lg"
-                  style={{ background: "rgba(74,222,128,0.06)", border: "1px solid rgba(74,222,128,0.15)" }}>
-                  <p className="text-green-400 text-xs font-medium">✓ Do This</p>
-                  <p className="text-slate-300 text-sm mt-1">{result.simpleSummary.mainAction}</p>
-                </div>
-              )}
-              {result.simpleSummary?.mainCaution && (
-                <div className="mt-2 px-3 py-2 rounded-lg"
-                  style={{ background: "rgba(239,68,68,0.06)", border: "1px solid rgba(239,68,68,0.15)" }}>
-                  <p className="text-red-400 text-xs font-medium">✗ Avoid This</p>
-                  <p className="text-slate-300 text-sm mt-1">{result.simpleSummary.mainCaution}</p>
-                </div>
-              )}
-              {result.professional?.locked && (
-                <div className="mt-4 px-4 py-3 rounded-xl text-center"
-                  style={{ background: "rgba(212,175,55,0.06)", border: "1px solid rgba(212,175,55,0.2)" }}>
-                  <p className="text-slate-400 text-xs mb-2">{result.professional.locked.message}</p>
-                  <a href="/pricing"
-                    className="inline-block px-4 py-2 rounded-lg text-xs font-semibold"
-                    style={{ background: "linear-gradient(135deg, #D4AF37, #F5D76E)", color: "#080B12" }}>
-                    Upgrade — ₹51/month
-                  </a>
-                </div>
-              )}
-            </div>
-          )}
+          {/* Redirecting to /result page after success */}
 
         </div>
       </div>
