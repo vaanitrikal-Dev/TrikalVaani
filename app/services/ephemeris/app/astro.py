@@ -164,37 +164,49 @@ def _graha_dict(name: str, lon: float, retro: bool) -> Dict:
 # ── Bhava Cusps ───────────────────────────────────────────────────────────────
 
 def _compute_bhavas(jd: float, lat: float, lon: float) -> List[Dict]:
-    """Compute 12 Bhava cusps using Placidus (sidereal)."""
+    """Compute 12 Bhava cusps using Whole Sign house system (sidereal).
+    Whole Sign is the classical Vedic (Parashara) system and never fails
+    for any latitude or birth time — unlike Placidus which crashes at
+    extreme latitudes and certain edge-case times.
+    """
     flags = swe.FLG_SIDEREAL | swe.FLG_SWIEPH
-    cusps, ascmc = swe.houses_ex(jd, lat, lon, b'P', flags)
+
+    # First get the Ascendant (lagna) longitude via Placidus with fallback
+    try:
+        cusps_p, ascmc = swe.houses_ex(jd, lat, lon, b'P', flags)
+        lagna_lon = ascmc[0] % 360
+    except Exception:
+        # Fallback: compute lagna from Sun's position + time offset
+        cusps_p, ascmc = swe.houses_ex(jd, lat, lon, b'W', flags)
+        lagna_lon = ascmc[0] % 360
+
+    # Whole Sign: Bhava 1 starts at the beginning of lagna's sign
+    lagna_sign_idx = int(lagna_lon / 30)  # 0-based sign index
     bhavas = []
-    for i, cusp in enumerate(cusps[1:13], start=1):
-        cusp_mod = cusp % 360
-        rashi_idx = _lon_to_rashi(cusp_mod)
+    for i in range(12):
+        sign_idx = (lagna_sign_idx + i) % 12
+        cusp_lon = sign_idx * 30.0  # Whole Sign cusp = start of sign
         bhavas.append({
-            "bhava": i,
-            "cusp_longitude": round(cusp_mod, 4),
-            "sign": RASHIS[rashi_idx],
-            "sign_en": RASHI_EN[rashi_idx],
-            "sign_lord": RASHI_LORDS[rashi_idx],
+            "bhava": i + 1,
+            "cusp_longitude": round(cusp_lon, 4),
+            "sign": RASHIS[sign_idx],
+            "sign_en": RASHI_EN[sign_idx],
+            "sign_lord": RASHI_LORDS[sign_idx],
         })
-    lagna_lon = ascmc[0] % 360
+
     return bhavas, lagna_lon
 
 
 # ── Graha in Bhava ────────────────────────────────────────────────────────────
 
 def _assign_house(planet_lon: float, cusps: List[float]) -> int:
-    """1-based house number for a given planet longitude."""
-    for i in range(12):
-        start = cusps[i] % 360
-        end = cusps[(i + 1) % 12] % 360
-        if end < start:
-            end += 360
-        plon = planet_lon if planet_lon >= start else planet_lon + 360
-        if start <= plon < end:
-            return i + 1
-    return 1
+    """1-based house using Whole Sign: house = sign distance from lagna sign + 1.
+    cusps[0] is the lagna cusp longitude (lagna_sign_idx * 30).
+    """
+    lagna_sign_idx = int(cusps[0] / 30) % 12
+    planet_sign_idx = int(planet_lon / 30) % 12
+    house = ((planet_sign_idx - lagna_sign_idx) % 12) + 1
+    return house
 
 
 # ── Planet Data Computation ───────────────────────────────────────────────────
@@ -383,10 +395,9 @@ def compute_kundali(data) -> Dict:
     grahas = _all_planets(jd)
     bhavas, lagna_lon = _compute_bhavas(jd, data.latitude, data.longitude)
 
-    # House system cusp longitudes for house assignment
-    flags = swe.FLG_SIDEREAL | swe.FLG_SWIEPH
-    cusps_raw, _ = swe.houses_ex(jd, data.latitude, data.longitude, b'P', flags)
-    cusp_lons = [c % 360 for c in cusps_raw[1:13]]
+    # Whole Sign house assignment — lagna sign cusp list passed to _assign_house
+    # cusps_ws[0] = lagna_sign_idx * 30 (start of lagna sign)
+    cusp_lons = [b["cusp_longitude"] for b in bhavas]
 
     for g in grahas:
         g["house"] = _assign_house(g["longitude"], cusp_lons)
@@ -528,8 +539,10 @@ def compute_manglik(data) -> Dict:
                      data.hour, data.minute, data.second, data.timezone)
 
     flags = swe.FLG_SIDEREAL | swe.FLG_SWIEPH
-    cusps_raw, ascmc = swe.houses_ex(jd, data.latitude, data.longitude, b'P', flags)
-    cusp_lons = [c % 360 for c in cusps_raw[1:13]]
+    # Use Whole Sign via bhavas helper — avoids Placidus crash
+    temp_bhavas, lagna_lon_m = _compute_bhavas(jd, data.latitude, data.longitude)
+    cusp_lons = [b["cusp_longitude"] for b in temp_bhavas]
+    ascmc = [lagna_lon_m]  # ascmc[0] = lagna
 
     mars_lon, _ = _sidereal_lon(jd, swe.MARS)
     mars_house = _assign_house(mars_lon, cusp_lons)
@@ -566,8 +579,12 @@ def compute_lagna(data) -> Dict:
                      data.hour, data.minute, data.second, data.timezone)
 
     flags = swe.FLG_SIDEREAL | swe.FLG_SWIEPH
-    _, ascmc = swe.houses_ex(jd, data.latitude, data.longitude, b'P', flags)
-    lagna_lon = ascmc[0] % 360
+    try:
+        _, ascmc = swe.houses_ex(jd, data.latitude, data.longitude, b'P', flags)
+        lagna_lon = ascmc[0] % 360
+    except Exception:
+        _, ascmc = swe.houses_ex(jd, data.latitude, data.longitude, b'W', flags)
+        lagna_lon = ascmc[0] % 360
     lagna_rashi = _lon_to_rashi(lagna_lon)
     nak_idx, pada = _lon_to_nakshatra(lagna_lon)
 
