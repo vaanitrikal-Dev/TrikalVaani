@@ -187,12 +187,25 @@ export default function BirthForm({
         }),
       })
 
-      const data = await res.json()
+     const data = await res.json()
 
-      if (!res.ok) {
-        setApiError(data.error || "Something went wrong. Please try again.")
-      } else {
-        if (onSubmit) await onSubmit(fields)
+if (!res.ok) {
+  setApiError(data.error || "Something went wrong. Please try again.")
+} else {
+  if (onSubmit) await onSubmit(fields)
+  const encoded = btoa(unescape(encodeURIComponent(JSON.stringify({
+    id: 'inline',
+    person_name: fields.name,
+    dob: fields.dateOfBirth,
+    birth_city: fields.city,
+    birth_time: fields.timeOfBirth,
+    domain_id: data._meta?.domainId,
+    domain_label: selectedCategory?.label ?? '',
+    tier: data._meta?.tier ?? 'free',
+    prediction: data,
+  }))))
+  window.location.href = `/result?data=${encoded}`
+}
 
         // Save prediction to Supabase then redirect to result page
         try {
