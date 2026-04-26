@@ -3,7 +3,7 @@
  * TRIKAL VAANI — Unified Prediction Endpoint
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/api/predict/route.ts
- * VERSION: 3.1 — Swiss Ephemeris ONLY + Timeout Fix
+ * VERSION: 3.2 — Swiss Ephemeris ONLY + Safe Field Mapping
  * SIGNED: ROHIIT GUPTA, CEO
  * ============================================================
  */
@@ -15,7 +15,7 @@ import { buildPredictionPrompt } from '@/lib/gemini-prompt';
 import type { DomainId } from '@/lib/domain-config';
 import type { UserTier, UserContext } from '@/lib/gemini-prompt';
 
-// ── Allow 30s for this route (Render cold start fix) ─────────────────────────
+// ── Allow 30s for Render cold start ──────────────────────────────────────────
 export const maxDuration = 30;
 
 // ── Constants ─────────────────────────────────────────────────────────────────
@@ -41,12 +41,12 @@ const supabase = createClient(
 // ── Types ─────────────────────────────────────────────────────────────────────
 
 interface BirthData {
-  dob: string;       // "YYYY-MM-DD"
-  tob: string;       // "HH:MM"
-  lat: number;
-  lng: number;
+  dob:       string;   // "YYYY-MM-DD"
+  tob:       string;   // "HH:MM"
+  lat:       number;
+  lng:       number;
   cityName?: string;
-  timezone?: number; // UTC offset, default 5.5
+  timezone?: number;   // UTC offset, default 5.5
   ayanamsa?: string;
 }
 
@@ -78,10 +78,7 @@ async function getVerifiedTier(userId: string): Promise<UserTier> {
       .single();
 
     if (error || !data) return 'free';
-
-    if (data.tier_expires_at && new Date(data.tier_expires_at) < new Date()) {
-      return 'free';
-    }
+    if (data.tier_expires_at && new Date(data.tier_expires_at) < new Date()) return 'free';
 
     const validTiers: UserTier[] = ['free', 'basic', 'pro', 'premium'];
     return validTiers.includes(data.tier) ? data.tier : 'free';
@@ -91,6 +88,10 @@ async function getVerifiedTier(userId: string): Promise<UserTier> {
 }
 
 // ── Swiss Ephemeris Chart Builder ─────────────────────────────────────────────
+// Field names mapped EXACTLY to astro.py response:
+// chart.lagna.sign, chart.lagna.sign_lord
+// chart.grahas[].planet, .sign, .nakshatra
+// chart.dasha.maha_dasha[].planet, .is_current, .antar[].planet, .is_current
 
 async function buildKundaliFromSwiss(birthData: BirthData) {
   if (!EPHE_API_URL) throw new Error('EPHE_API_URL not configured');
@@ -98,14 +99,21 @@ async function buildKundaliFromSwiss(birthData: BirthData) {
   const [year, month, day] = birthData.dob.split('-').map(Number);
   const [hour, minute]     = birthData.tob.split(':').map(Number);
 
+  if (!year || !month || !day)          throw new Error('Invalid date format');
+  if (isNaN(hour) || isNaN(minute))     throw new Error('Invalid time format');
+  if (!birthData.lat || !birthData.lng) throw new Error('Missing coordinates');
+
   const payload = {
     year, month, day,
-    hour, minute, second: 0,
+    hour, minute,
+    second:    0,
     latitude:  birthData.lat,
     longitude: birthData.lng,
     timezone:  birthData.timezone ?? 5.5,
-    ayanamsa:  birthData.ayanamsa ?? 'lahiri',
+    ayanamsa:  (birthData.ayanamsa ?? 'lahiri').toLowerCase(),
   };
+
+  console.log('[TV-Predict] Swiss payload:', JSON.stringify(payload));
 
   const res = await fetch(`${EPHE_API_URL}/kundali`, {
     method:  'POST',
@@ -114,29 +122,39 @@ async function buildKundaliFromSwiss(birthData: BirthData) {
       ...(EPHE_API_KEY ? { 'X-Api-Key': EPHE_API_KEY } : {}),
     },
     body:   JSON.stringify(payload),
-    signal: AbortSignal.timeout(25000), // ← 25s timeout for Render cold start
+    signal: AbortSignal.timeout(25000),
   });
 
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
-    throw new Error(`Swiss API error: ${err.detail ?? res.statusText}`);
+    throw new Error(`Swiss API error ${res.status}: ${err.detail ?? res.statusText}`);
   }
 
   const chart = await res.json();
+  console.log('[TV-Predict] Swiss response keys:', Object.keys(chart));
 
-  // Normalize to match gemini-prompt expectations
+  // Safe extraction — every field has a fallback
+  const grahas: any[]    = Array.isArray(chart.grahas) ? chart.grahas : [];
+  const mahaDasha: any[] = Array.isArray(chart.dasha?.maha_dasha) ? chart.dasha.maha_dasha : [];
+
+  const moonGraha    = grahas.find((g: any) => g.planet === 'Moon')  ?? {};
+  const sunGraha     = grahas.find((g: any) => g.planet === 'Sun')   ?? {};
+  const currentMaha  = mahaDasha.find((d: any) => d.is_current === true) ?? mahaDasha[0] ?? {};
+  const antarList    = Array.isArray(currentMaha.antar) ? currentMaha.antar : [];
+  const currentAntar = antarList.find((a: any) => a.is_current === true) ?? antarList[0] ?? {};
+
   return {
-    lagna:             chart.lagna?.sign ?? 'Unknown',
+    lagna:             chart.lagna?.sign      ?? 'Unknown',
     lagnaLord:         chart.lagna?.sign_lord ?? 'Unknown',
-    nakshatra:         chart.grahas?.find((g: any) => g.planet === 'Moon')?.nakshatra ?? 'Unknown',
-    moonSign:          chart.grahas?.find((g: any) => g.planet === 'Moon')?.sign ?? 'Unknown',
-    sunSign:           chart.grahas?.find((g: any) => g.planet === 'Sun')?.sign ?? 'Unknown',
-    currentMahadasha:  { lord: chart.dasha?.maha_dasha?.find((d: any) => d.is_current)?.planet ?? 'Unknown' },
-    currentAntardasha: { lord: chart.dasha?.maha_dasha?.find((d: any) => d.is_current)?.antar?.find((a: any) => a.is_current)?.planet ?? 'Unknown' },
-    grahas:            chart.grahas ?? [],
-    bhavas:            chart.bhavas ?? [],
-    yogas:             chart.yogas ?? [],
-    rawChart:          chart,
+    nakshatra:         moonGraha.nakshatra    ?? 'Unknown',
+    moonSign:          moonGraha.sign         ?? 'Unknown',
+    sunSign:           sunGraha.sign          ?? 'Unknown',
+    currentMahadasha:  { lord: currentMaha?.planet  ?? 'Unknown' },
+    currentAntardasha: { lord: currentAntar?.planet ?? 'Unknown' },
+    grahas,
+    bhavas:   Array.isArray(chart.bhavas) ? chart.bhavas : [],
+    yogas:    Array.isArray(chart.yogas)  ? chart.yogas  : [],
+    rawChart: chart,
   };
 }
 
@@ -149,17 +167,15 @@ export async function POST(req: NextRequest) {
     const body = await req.json() as PredictRequest;
     const { userId, sessionId, domainId, birthData, userContext } = body;
 
-    // Validate
-    if (!sessionId)      return NextResponse.json({ error: 'sessionId required' }, { status: 400 });
-    if (!domainId)       return NextResponse.json({ error: 'domainId required' }, { status: 400 });
-    if (!birthData?.dob) return NextResponse.json({ error: 'birthData.dob required' }, { status: 400 });
-    if (!birthData?.lat) return NextResponse.json({ error: 'birthData.lat required' }, { status: 400 });
+    if (!sessionId)      return NextResponse.json({ error: 'sessionId required' },            { status: 400 });
+    if (!domainId)       return NextResponse.json({ error: 'domainId required' },             { status: 400 });
+    if (!birthData?.dob) return NextResponse.json({ error: 'birthData.dob required' },        { status: 400 });
+    if (!birthData?.tob) return NextResponse.json({ error: 'birthData.tob required' },        { status: 400 });
+    if (!birthData?.lat) return NextResponse.json({ error: 'birthData.lat required' },        { status: 400 });
     if (!GEMINI_API_KEY) return NextResponse.json({ error: 'Prediction engine not configured' }, { status: 500 });
 
-    // Tier
     const verifiedTier = userId ? await getVerifiedTier(userId) : 'free';
 
-    // Domain
     let domain;
     try {
       domain = getDomainConfig(domainId);
@@ -167,20 +183,18 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: `Unknown domainId: ${domainId}` }, { status: 400 });
     }
 
-    // Chart — Swiss Ephemeris ONLY
     let kundali;
     try {
       kundali = await buildKundaliFromSwiss(birthData);
-      console.log(`[TV-Predict] Swiss chart built for ${domainId}`);
+      console.log(`[TV-Predict] Chart OK — Lagna:${kundali.lagna} Moon:${kundali.moonSign} Maha:${kundali.currentMahadasha.lord}`);
     } catch (err) {
-      console.error('[TV-Predict] Swiss Ephemeris failed:', err);
+      console.error('[TV-Predict] Swiss failed:', err);
       return NextResponse.json(
         { error: 'Chart calculation failed. Please check birth details and try again.' },
         { status: 502 }
       );
     }
 
-    // User context
     const verifiedUserContext: UserContext = {
       tier:         verifiedTier,
       segment:      userContext.segment    || 'millennial',
@@ -193,12 +207,10 @@ export async function POST(req: NextRequest) {
       person2City:  userContext.person2City,
     };
 
-    // Gemini prompt
     const { systemPrompt, userMessage, useSearch } = buildPredictionPrompt(
       kundali, birthData, domain, verifiedUserContext
     );
 
-    // Gemini call
     const geminiBody: Record<string, unknown> = {
       system_instruction: { parts: [{ text: systemPrompt }] },
       contents: [{ role: 'user', parts: [{ text: userMessage }] }],
@@ -230,7 +242,6 @@ export async function POST(req: NextRequest) {
 
     if (!rawText) return NextResponse.json({ error: 'Empty prediction response' }, { status: 502 });
 
-    // Parse JSON from Gemini
     let prediction: Record<string, unknown>;
     try {
       const cleaned = rawText
@@ -272,7 +283,7 @@ export async function POST(req: NextRequest) {
 export async function GET() {
   return NextResponse.json({
     status:      'operational',
-    engine:      'Trikal Vaani Predict v3.1',
+    engine:      'Trikal Vaani Predict v3.2',
     chartSource: 'Swiss Ephemeris (Render)',
     model:       GEMINI_MODEL,
     domains:     11,
