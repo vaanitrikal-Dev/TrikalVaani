@@ -52,12 +52,23 @@ export default function ResultClient() {
   useEffect(() => {
     async function load() {
       try {
-        // Option 1 — inline data (fastest, no Supabase call)
-        if (inlineData) {
-          const decoded = JSON.parse(atob(inlineData));
-          setRecord(decoded);
-          setLoading(false);
-          return;
+        // Option 1a — sessionStorage (most reliable — no URL length limit)
+        const stored = sessionStorage.getItem('tv_last_prediction')
+        if (stored && (inlineData === '1' || params.get('inline') === '1')) {
+          const decoded = JSON.parse(stored)
+          setRecord(decoded)
+          setLoading(false)
+          return
+        }
+
+        // Option 1b — inline data in URL (legacy fallback)
+        if (inlineData && inlineData !== '1') {
+          try {
+            const decoded = JSON.parse(decodeURIComponent(escape(atob(inlineData))))
+            setRecord(decoded)
+            setLoading(false)
+            return
+          } catch { /* fall through to Supabase */ }
         }
 
         // Option 2 — fetch by predictionId
