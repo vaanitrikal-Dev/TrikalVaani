@@ -3,7 +3,7 @@
  * TRIKAL VAANI — BirthForm Component
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: components/landing/BirthForm.tsx
- * VERSION: 3.1 — name field added, Ayanamsa hidden
+ * VERSION: 4.0 — Redirect to /result after prediction
  * SIGNED: ROHIIT GUPTA, CEO
  * ============================================================
  */
@@ -11,8 +11,6 @@
 "use client"
 
 import { useState, useCallback, useRef } from "react"
-
-// ── Types ──────────────────────────────────────────────────────────────────
 
 export interface BirthFormFields {
   name: string
@@ -42,8 +40,6 @@ interface BirthFormProps {
   className?: string
 }
 
-// ── Geo Search ─────────────────────────────────────────────────────────────
-
 interface GeoResult {
   display_name: string
   lat: string
@@ -67,8 +63,6 @@ function offsetFromLon(lon: number): number {
   return Math.round((lon / 15) * 2) / 2
 }
 
-// ── Initial State ──────────────────────────────────────────────────────────
-
 const INITIAL_STATE: BirthFormFields = {
   name: "",
   dateOfBirth: "",
@@ -82,8 +76,6 @@ const INITIAL_STATE: BirthFormFields = {
   timezoneOffset: 5.5,
   ayanamsa: "lahiri",
 }
-
-// ── Component ──────────────────────────────────────────────────────────────
 
 export default function BirthForm({
   selectedCategory,
@@ -156,15 +148,14 @@ export default function BirthForm({
 
     setIsSubmitting(true)
     setApiError(null)
-    setResult(null)
 
     try {
       const birthData = {
-        name: fields.name,
-        dob: fields.dateOfBirth,
-        tob: fields.unknownTime ? "12:00" : fields.timeOfBirth,
-        lat: fields.latitude as number,
-        lng: fields.longitude as number,
+        name:     fields.name,
+        dob:      fields.dateOfBirth,
+        tob:      fields.unknownTime ? "12:00" : fields.timeOfBirth,
+        lat:      fields.latitude as number,
+        lng:      fields.longitude as number,
         cityName: fields.city,
         timezone: fields.timezoneOffset,
         ayanamsa: "lahiri",
@@ -175,99 +166,40 @@ export default function BirthForm({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           sessionId: `session_${Date.now()}`,
-          domainId: selectedCategory?.id || "mill_karz_mukti",
+          domainId:  selectedCategory?.id || "mill_karz_mukti",
           birthData,
           userContext: {
-            segment: "millennial",
+            segment:    "millennial",
             employment: "professional",
-            sector: "general",
-            language: "hinglish",
-            city: fields.city,
+            sector:     "general",
+            language:   "hinglish",
+            city:       fields.city,
           },
         }),
       })
 
-     const data = await res.json()
+      const data = await res.json()
 
-if (!res.ok) {
-  setApiError(data.error || "Something went wrong. Please try again.")
-} else {
-  if (onSubmit) await onSubmit(fields)
-  const encoded = btoa(unescape(encodeURIComponent(JSON.stringify({
-    id: 'inline',
-    person_name: fields.name,
-    dob: fields.dateOfBirth,
-    birth_city: fields.city,
-    birth_time: fields.timeOfBirth,
-    domain_id: data._meta?.domainId,
-    domain_label: selectedCategory?.label ?? '',
-    tier: data._meta?.tier ?? 'free',
-    prediction: data,
-  }))))
-  window.location.href = `/result?data=${encoded}`
-}
-
-        // Save prediction to Supabase then redirect to result page
-        try {
-          const { savePrediction, getOrCreateSessionId } = await import('@/lib/supabase')
-          const sid = getOrCreateSessionId()
-          const predId = await savePrediction({
-            sessionId:   sid,
-            domainId:    data._meta?.domainId ?? selectedCategory?.id ?? 'general',
-            domainLabel: selectedCategory?.label ?? 'General',
-            personName:  fields.name,
-            dob:         fields.dateOfBirth,
-            birthCity:   fields.city,
-            birthTime:   fields.unknownTime ? undefined : fields.timeOfBirth,
-            lagna:       data._meta?.kundali?.lagna,
-            nakshatra:   data._meta?.kundali?.nakshatra,
-            mahadasha:   data._meta?.kundali?.mahadasha,
-            antardasha:  data._meta?.kundali?.antardasha,
-            tier:        (data._meta?.tier ?? 'free') as any,
-            language:    'hinglish',
-            segment:     'millennial',
-            chartSource: data._meta?.chartSource,
-            prediction:  data,
-            processingMs: data._meta?.processingMs,
-            geminiModel:  data._meta?.model,
-            searchUsed:   data._meta?.searchUsed,
-          })
-
-          if (predId) {
-            window.location.href = `/result?predictionId=${predId}`
-          } else {
-            // Fallback — encode inline and redirect
-            const encoded = btoa(JSON.stringify({
-              id: 'inline',
-              person_name: fields.name,
-              dob: fields.dateOfBirth,
-              birth_city: fields.city,
-              birth_time: fields.timeOfBirth,
-              domain_id: data._meta?.domainId,
-              domain_label: selectedCategory?.label ?? '',
-              tier: data._meta?.tier,
-              prediction: data,
-            }))
-            const sid2 = `session_${Date.now()}`
-            window.location.href = `/result?data=${encoded}`
-          }
-        } catch {
-          // Supabase unavailable — redirect with inline data
-          const encoded = btoa(JSON.stringify({
-            id: 'inline',
-            person_name: fields.name,
-            dob: fields.dateOfBirth,
-            birth_city: fields.city,
-            birth_time: fields.timeOfBirth,
-            domain_id: data._meta?.domainId,
-            domain_label: selectedCategory?.label ?? '',
-            tier: data._meta?.tier ?? 'free',
-            prediction: data,
-          }))
-          window.location.href = `/result?data=${encoded}`
+      if (!res.ok) {
+        setApiError(data.error || "Something went wrong. Please try again.")
+      } else {
+        if (onSubmit) await onSubmit(fields)
+        // Encode prediction inline and redirect to result page
+        const payload = {
+          id:           "inline",
+          person_name:  fields.name,
+          dob:          fields.dateOfBirth,
+          birth_city:   fields.city,
+          birth_time:   fields.timeOfBirth,
+          domain_id:    data._meta?.domainId ?? selectedCategory?.id ?? "general",
+          domain_label: selectedCategory?.label ?? "",
+          tier:         data._meta?.tier ?? "free",
+          prediction:   data,
         }
+        const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(payload))))
+        window.location.href = `/result?data=${encoded}`
       }
-    } catch (err) {
+    } catch {
       setApiError("Network error. Please check your connection.")
     } finally {
       setIsSubmitting(false)
@@ -280,7 +212,6 @@ if (!res.ok) {
     <section id="birth-form" className={`py-16 px-4 ${className}`}>
       <div className="max-w-2xl mx-auto">
 
-        {/* Header */}
         {selectedCategory && (
           <div className="mb-6 text-center">
             <span
@@ -307,7 +238,7 @@ if (!res.ok) {
         >
           <form onSubmit={handleSubmit} noValidate className="grid gap-5">
 
-            {/* 01 — Name */}
+            {/* Name */}
             <div>
               <label htmlFor="tv-name" className="block text-sm font-medium text-slate-300 mb-1.5">
                 Full Name <span className="text-yellow-400">*</span>
@@ -327,7 +258,7 @@ if (!res.ok) {
               {errors.name && <p className="text-red-400 text-xs mt-1">{errors.name}</p>}
             </div>
 
-            {/* 02 — Date of Birth */}
+            {/* Date of Birth */}
             <div>
               <label htmlFor="tv-dob" className="block text-sm font-medium text-slate-300 mb-1.5">
                 Date of Birth <span className="text-yellow-400">*</span>
@@ -347,7 +278,7 @@ if (!res.ok) {
               {errors.dateOfBirth && <p className="text-red-400 text-xs mt-1">{errors.dateOfBirth}</p>}
             </div>
 
-            {/* 03 — Time of Birth */}
+            {/* Time of Birth */}
             <div>
               <div className="flex items-center justify-between mb-1.5">
                 <label htmlFor="tv-tob" className="text-sm font-medium text-slate-300">
@@ -383,7 +314,7 @@ if (!res.ok) {
               )}
             </div>
 
-            {/* 04 — Gender */}
+            {/* Gender */}
             <div>
               <label htmlFor="tv-gender" className="block text-sm font-medium text-slate-300 mb-1.5">
                 Gender
@@ -406,7 +337,7 @@ if (!res.ok) {
               </select>
             </div>
 
-            {/* 05 — Place of Birth */}
+            {/* Place of Birth */}
             <div className="relative">
               <label htmlFor="tv-place" className="block text-sm font-medium text-slate-300 mb-1.5">
                 Place of Birth <span className="text-yellow-400">*</span>
@@ -426,13 +357,14 @@ if (!res.ok) {
                   }}
                 />
                 {geoLoading && (
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs animate-spin">⟳</span>
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs">⟳</span>
                 )}
               </div>
-
               {geoResults.length > 0 && (
-                <ul className="absolute z-50 w-full mt-1 rounded-lg overflow-hidden shadow-xl"
-                  style={{ background: "#1a1f2e", border: "1px solid rgba(212,175,55,0.2)" }}>
+                <ul
+                  className="absolute z-50 w-full mt-1 rounded-lg overflow-hidden shadow-xl"
+                  style={{ background: "#1a1f2e", border: "1px solid rgba(212,175,55,0.2)" }}
+                >
                   {geoResults.map((r, i) => (
                     <li
                       key={i}
@@ -447,7 +379,7 @@ if (!res.ok) {
               {errors.latitude && <p className="text-red-400 text-xs mt-1">Please select a place from suggestions</p>}
             </div>
 
-            {/* Lat/Lon display */}
+            {/* Lat/Lon */}
             {fields.latitude !== "" && (
               <div className="grid grid-cols-2 gap-3">
                 <div>
@@ -475,7 +407,7 @@ if (!res.ok) {
               </div>
             )}
 
-            {/* 09 — Timezone */}
+            {/* Timezone */}
             <div>
               <label htmlFor="tv-timezone" className="block text-sm font-medium text-slate-300 mb-1.5">
                 Time Zone
@@ -511,13 +443,15 @@ if (!res.ok) {
               </select>
             </div>
 
-            {/* Ayanamsa — hidden, always Lahiri */}
+            {/* Ayanamsa hidden */}
             <input type="hidden" id="tv-ayanamsa" value="lahiri" />
 
-            {/* API Error */}
+            {/* Error */}
             {apiError && (
-              <div className="px-4 py-3 rounded-lg text-sm text-red-300"
-                style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.2)" }}>
+              <div
+                className="px-4 py-3 rounded-lg text-sm text-red-300"
+                style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.2)" }}
+              >
                 {apiError}
               </div>
             )}
@@ -539,9 +473,6 @@ if (!res.ok) {
             </button>
 
           </form>
-
-          {/* Redirecting to /result page after success */}
-
         </div>
       </div>
     </section>
