@@ -18,30 +18,31 @@ type Segment = {
   isDual?: boolean;
 };
 
+// ── ALL 11 DOMAIN IDs MATCH domain-config.ts EXACTLY ─────────────────────────
 const SEGMENTS: Record<Generation, Segment[]> = {
   genz: [
-    { id: 'ex_back',       label: 'Ex-Back & Closure',    icon: HeartCrack,    color: '#F472B6', description: 'Venus & Moon karmic bond analysis',               isDual: true },
-    { id: 'toxic_boss',    label: 'Toxic Boss Radar',      icon: AlertTriangle, color: '#FB923C', description: 'Saturn & Mars clash in your karma bhava',         isDual: true },
-    { id: 'manifestation', label: 'Manifestation & Luck',  icon: Sparkles,      color: '#FACC15', description: 'Your current Sankalpa activation window' },
-    { id: 'dream_career',  label: 'Dream Career Pivot',    icon: TrendingUp,    color: '#60A5FA', description: '10th house + Rahu ambition transit' },
+    { id: 'genz_ex_back',       label: 'Ex-Back & Closure',   icon: HeartCrack,    color: '#F472B6', description: 'Venus & Moon karmic bond analysis',       isDual: true },
+    { id: 'genz_toxic_boss',    label: 'Toxic Boss Radar',     icon: AlertTriangle, color: '#FB923C', description: 'Saturn & Mars clash in your karma bhava', isDual: true },
+    { id: 'genz_manifestation', label: 'Manifestation & Luck', icon: Sparkles,      color: '#FACC15', description: 'Your current Sankalpa activation window' },
+    { id: 'genz_dream_career',  label: 'Dream Career Pivot',   icon: TrendingUp,    color: '#60A5FA', description: '10th house + Rahu ambition transit' },
   ],
   millennial: [
-    { id: 'property_yog',     label: 'Property & Home Yog',    icon: Home,    color: '#34D399', description: '4th house & Jupiter blessing analysis' },
-    { id: 'mill_karz_mukti',       label: 'Karz Mukti (Debt)',       icon: Banknote, color: '#FACC15', description: '6th house & Saturn Karma clearing' },
-    { id: 'child_destiny',    label: "Child's Destiny",         icon: Baby,    color: '#F472B6', description: '5th house Putra Bhava activation' },
-    { id: 'parents_wellness', label: "Parents' Wellness",       icon: Users,   color: '#60A5FA', description: '4th & 9th house ancestral protection' },
+    { id: 'mill_property_yog',     label: 'Property & Home Yog',  icon: Home,    color: '#34D399', description: '4th house & Jupiter blessing analysis' },
+    { id: 'mill_karz_mukti',       label: 'Karz Mukti (Debt)',     icon: Banknote, color: '#FACC15', description: '6th house & Saturn Karma clearing' },
+    { id: 'mill_childs_destiny',   label: "Child's Destiny",       icon: Baby,    color: '#F472B6', description: '5th house Putra Bhava activation' },
+    { id: 'mill_parents_wellness', label: "Parents' Wellness",     icon: Users,   color: '#60A5FA', description: '4th & 9th house ancestral protection' },
   ],
   genx: [
-    { id: 'retirement_peace',   label: 'Retirement Peace',      icon: Sunset,   color: '#FB923C', description: '12th house & Jupiter final cycle' },
-    { id: 'legacy_inheritance', label: 'Legacy & Inheritance',   icon: Crown,    color: '#FACC15', description: '8th & 2nd house Dhan-Karma' },
-    { id: 'spiritual_innings',  label: 'Spiritual 2nd Innings',  icon: MoonStar, color: GOLD,      description: 'Ketu & 12th house moksha activation' },
+    { id: 'genx_retirement_peace',   label: 'Retirement Peace',     icon: Sunset,   color: '#FB923C', description: '12th house & Jupiter final cycle' },
+    { id: 'genx_legacy_inheritance', label: 'Legacy & Inheritance',  icon: Crown,    color: '#FACC15', description: '8th & 2nd house Dhan-Karma' },
+    { id: 'genx_spiritual_innings',  label: 'Spiritual 2nd Innings', icon: MoonStar, color: GOLD,      description: 'Ketu & 12th house moksha activation' },
   ],
 };
 
 const GEN_OPTIONS: { key: Generation; label: string; sub: string }[] = [
-  { key: 'genz',       label: 'Gen Z',       sub: 'Age 11–31' },
-  { key: 'millennial', label: 'Millennial',  sub: 'Age 32–46' },
-  { key: 'genx',       label: 'Gen X',       sub: 'Age 47–56' },
+  { key: 'genz',       label: 'Gen Z',      sub: 'Age 11–31' },
+  { key: 'millennial', label: 'Millennial', sub: 'Age 32–46' },
+  { key: 'genx',       label: 'Gen X',      sub: 'Age 47–56' },
 ];
 
 type Props = {
