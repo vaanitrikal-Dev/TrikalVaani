@@ -224,24 +224,26 @@ export default function BirthForm({
       }
 
       // ── Redirect to result page ───────────────────────────────────────────
+      // Always store prediction in sessionStorage as reliable fallback
+      const payload = {
+        id:           predictionId ?? "inline",
+        person_name:  fields.name,
+        dob:          fields.dateOfBirth,
+        birth_city:   fields.city,
+        birth_time:   fields.timeOfBirth,
+        domain_id:    data._meta?.domainId ?? selectedCategory?.id ?? "general",
+        domain_label: selectedCategory?.label ?? "",
+        tier:         data._meta?.tier ?? "free",
+        prediction:   data,
+      }
+      try {
+        sessionStorage.setItem('tv_last_prediction', JSON.stringify(payload))
+      } catch { /* storage full — ignore */ }
+
       if (predictionId) {
-        // Best path — fetch from Supabase on result page
         window.location.href = `/result?predictionId=${predictionId}&sessionId=${sessionId}`
       } else {
-        // Fallback — encode inline (no Supabase needed)
-        const payload = {
-          id:           "inline",
-          person_name:  fields.name,
-          dob:          fields.dateOfBirth,
-          birth_city:   fields.city,
-          birth_time:   fields.timeOfBirth,
-          domain_id:    data._meta?.domainId ?? selectedCategory?.id ?? "general",
-          domain_label: selectedCategory?.label ?? "",
-          tier:         data._meta?.tier ?? "free",
-          prediction:   data,
-        }
-        const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(payload))))
-        window.location.href = `/result?data=${encoded}&sessionId=${sessionId}`
+        window.location.href = `/result?inline=1&sessionId=${sessionId}`
       }
 
     } catch {
