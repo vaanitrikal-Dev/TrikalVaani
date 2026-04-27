@@ -3,7 +3,7 @@
  * TRIKAL VAANI — BirthForm Component
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: components/landing/BirthForm.tsx
- * VERSION: 5.1 — Supabase save moved to route.ts (server-side fix)
+ * VERSION: 5.2 — Fixed timezone auto-detection for India (IST +5:30)
  * SIGNED: ROHIIT GUPTA, CEO
  * ============================================================
  */
@@ -61,7 +61,11 @@ async function searchPlace(query: string): Promise<GeoResult[]> {
 }
 
 function offsetFromLon(lon: number): number {
-  return Math.round((lon / 15) * 2) / 2
+  // India longitude range 68–97 → always IST +5:30
+  if (lon >= 68 && lon <= 97) return 5.5;
+  // Nepal
+  if (lon >= 80 && lon <= 88) return 5.75;
+  return Math.round((lon / 15) * 2) / 2;
 }
 
 const INITIAL_STATE: BirthFormFields = {
