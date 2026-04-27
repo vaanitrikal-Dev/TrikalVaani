@@ -422,7 +422,7 @@ export async function POST(req: NextRequest) {
 export async function GET() {
   return NextResponse.json({
     status:      'operational',
-    engine:      'Trikal Vaani Predict v5.1',
+    engine:      'Trikal Vaani Predict v5.1C',
     chartSource: 'swiss_ephemeris_render',
     model:       GEMINI_MODEL,
     domains:     11,
