@@ -3,7 +3,7 @@
  * TRIKAL VAANI — BirthForm Component
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: components/landing/BirthForm.tsx
- * VERSION: 5.2 — Fixed timezone auto-detection for India (IST +5:30)
+ * VERSION: 5.0 — Saves to Supabase + Redirect to /result
  * SIGNED: ROHIIT GUPTA, CEO
  * ============================================================
  */
@@ -11,7 +11,7 @@
 "use client"
 
 import { useState, useCallback, useRef } from "react"
-import { getOrCreateSessionId } from "@/lib/supabase"
+import { savePrediction, getOrCreateSessionId } from "@/lib/supabase"
 
 export interface BirthFormFields {
   name: string
@@ -61,11 +61,7 @@ async function searchPlace(query: string): Promise<GeoResult[]> {
 }
 
 function offsetFromLon(lon: number): number {
-  // India longitude range 68–97 → always IST +5:30
-  if (lon >= 68 && lon <= 97) return 5.5;
-  // Nepal
-  if (lon >= 80 && lon <= 88) return 5.75;
-  return Math.round((lon / 15) * 2) / 2;
+  return Math.round((lon / 15) * 2) / 2
 }
 
 const INITIAL_STATE: BirthFormFields = {
@@ -155,6 +151,17 @@ export default function BirthForm({
     setApiError(null)
 
     try {
+      const birthData = {
+        name:     fields.name,
+        dob:      fields.dateOfBirth,
+        tob:      fields.unknownTime ? "12:00" : fields.timeOfBirth,
+        lat:      fields.latitude as number,
+        lng:      fields.longitude as number,
+        cityName: fields.city,
+        timezone: fields.timezoneOffset,
+        ayanamsa: "lahiri",
+      }
+
       const sessionId = getOrCreateSessionId()
 
       const res = await fetch("/api/predict", {
@@ -162,17 +169,8 @@ export default function BirthForm({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           sessionId,
-          domainId:    selectedCategory?.id || "mill_karz_mukti",
-          domainLabel: selectedCategory?.label || "General",
-          birthData: {
-            name:     fields.name,
-            dob:      fields.dateOfBirth,
-            tob:      fields.unknownTime ? "12:00" : fields.timeOfBirth,
-            lat:      fields.latitude as number,
-            lng:      fields.longitude as number,
-            cityName: fields.city,
-            timezone: fields.timezoneOffset,
-          },
+          domainId:  selectedCategory?.id || "mill_karz_mukti",
+          birthData,
           userContext: {
             segment:    "millennial",
             employment: "professional",
@@ -192,10 +190,41 @@ export default function BirthForm({
 
       if (onSubmit) await onSubmit(fields)
 
-      // ── predictionId now comes from server (Supabase saved server-side) ──
-      const predictionId: string | null = data._meta?.predictionId ?? null
+      // ── Save to Supabase ──────────────────────────────────────────────────
+      let predictionId: string | null = null
+      try {
+        predictionId = await savePrediction({
+          sessionId,
+          domainId:     data._meta?.domainId    ?? selectedCategory?.id ?? "general",
+          domainLabel:  selectedCategory?.label  ?? "General",
+          personName:   fields.name,
+          dob:          fields.dateOfBirth,
+          birthCity:    fields.city,
+          birthTime:    fields.unknownTime ? undefined : fields.timeOfBirth,
+          lagna:        data._meta?.kundali?.lagna,
+          nakshatra:    data._meta?.kundali?.nakshatra,
+          mahadasha:    data._meta?.kundali?.mahadasha,
+          antardasha:   data._meta?.kundali?.antardasha,
+          tier:         (data._meta?.tier ?? "free") as any,
+          language:     "hinglish",
+          segment:      "millennial",
+          chartSource:  data._meta?.chartSource,
+          prediction:   data,
+          processingMs: data._meta?.processingMs,
+          geminiModel:  data._meta?.model,
+          searchUsed:   data._meta?.searchUsed,
+          // Extra fields for re-prediction after upgrade
+          ...(fields.latitude  !== "" && { birth_lat:      fields.latitude  as number }),
+          ...(fields.longitude !== "" && { birth_lng:      fields.longitude as number }),
+          birth_timezone: fields.timezoneOffset,
+        } as any)
+        console.log("[TV] Prediction saved:", predictionId)
+      } catch (saveErr) {
+        console.warn("[TV] Supabase save failed — using inline fallback:", saveErr)
+      }
 
-      // ── Store in sessionStorage as fallback ──────────────────────────────
+      // ── Redirect to result page ───────────────────────────────────────────
+      // Always store prediction in sessionStorage as reliable fallback
       const payload = {
         id:           predictionId ?? "inline",
         person_name:  fields.name,
@@ -209,9 +238,8 @@ export default function BirthForm({
       }
       try {
         sessionStorage.setItem('tv_last_prediction', JSON.stringify(payload))
-      } catch { /* storage full */ }
+      } catch { /* storage full — ignore */ }
 
-      // ── Redirect ──────────────────────────────────────────────────────────
       if (predictionId) {
         window.location.href = `/result?predictionId=${predictionId}&sessionId=${sessionId}`
       } else {

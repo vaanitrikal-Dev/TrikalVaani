@@ -1,166 +1,268 @@
 /**
- * FILE: lib/supabase.ts
- * Trikal Vaani — Supabase Client + Prediction Save/Fetch
- * CEO: Rohiit Gupta | Chief Vedic Architect
- * Version: 3.2 | Date: 2026-04-27
- * FIX: supabaseAdmin now lazy — only created when called (server-side only)
- *      Prevents "supabaseKey is required" crash on client/browser
+ * ============================================================
+ * TRIKAL VAANI — Supabase Client + Data Functions
+ * CEO & Chief Vedic Architect: Rohiit Gupta
+ * File: lib/supabase.ts
+ * VERSION: 2.0-MASTER (GOD-LEVEL PROTECTION)
+ * SIGNED: ROHIIT GUPTA, CEO
+ *
+ * ⚠️ STRICT CEO ORDER: DO NOT EDIT WITHOUT CEO APPROVAL
+ *
+ * v2.0 CHANGES:
+ *   - Added savePrediction() — saves full Gemini prediction to Supabase
+ *   - Added getPrediction() — fetches prediction by sessionId + domainId
+ *   - Added getLatestPrediction() — fetches most recent prediction for session
+ *   - Fixed corrupted process.env references from v1.0
+ *   - Kept saveSubmission() intact — no breaking changes
+ * ============================================================
  */
 
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl     = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+const supabaseUrl     = process.env.NEXT_PUBLIC_SUPABASE_URL     ?? '';
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? '';
 
-// ─── Public client (browser safe) ───────────────────────────────────────────
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+export const supabase = createClient(
+  supabaseUrl     || 'https://placeholder.supabase.co',
+  supabaseAnonKey || 'placeholder-key'
+);
 
-// ─── Admin client — LAZY, server-side only ───────────────────────────────────
-// Never call this from a Client Component or browser context
-let _adminClient: SupabaseClient | null = null;
+// ─── EXISTING TYPE — kept intact ──────────────────────────────────────────────
+export type TrikalSubmission = {
+  id?:           string;
+  name:          string;
+  dob:           string;
+  birth_time:    string;
+  city:          string;
+  energy_score:  number;
+  pillar_scores: Record<string, number>;
+  created_at?:   string;
+};
 
-function getAdminClient(): SupabaseClient {
-  if (_adminClient) return _adminClient;
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!serviceKey) throw new Error('[Supabase] SUPABASE_SERVICE_ROLE_KEY is not set');
-  _adminClient = createClient(supabaseUrl, serviceKey);
-  return _adminClient;
-}
-
-// ─── Session ID (browser only) ───────────────────────────────────────────────
-export function getOrCreateSessionId(): string {
-  try {
-    const key = 'tv_session_id';
-    let id = sessionStorage.getItem(key);
-    if (!id) {
-      id = `tv_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
-      sessionStorage.setItem(key, id);
-    }
-    return id;
-  } catch {
-    return `tv_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
-  }
-}
-
-// ─── Save Prediction (server-side only) ─────────────────────────────────────
-export async function savePrediction(input: {
-  sessionId:    string;
-  domainId:     string;
-  domainLabel:  string;
-  personName:   string;
-  dob:          string;
-  birthCity:    string;
-  birthTime?:   string;
-  birth_lat?:      number;
-  birth_lng?:      number;
-  birth_timezone?: number | string;
-  lagna?:       string;
-  nakshatra?:   string;
-  mahadasha?:   string;
-  antardasha?:  string;
-  tier:         'free' | 'basic' | 'standard' | 'premium';
-  language?:    string;
-  segment?:     string;
-  chartSource?: string;
-  prediction:   Record<string, unknown>;
-  processingMs?: number;
-  geminiModel?:  string;
-  searchUsed?:   boolean;
-}): Promise<string> {
-
-  const admin = getAdminClient();
-
-  const { data, error } = await admin
-    .from('predictions')
-    .insert([{
-      session_id:      input.sessionId,
-      domain_id:       input.domainId,
-      domain_label:    input.domainLabel,
-      person_name:     input.personName,
-      dob:             input.dob,
-      birth_city:      input.birthCity,
-      birth_time:      input.birthTime      ?? null,
-      birth_lat:       input.birth_lat      ?? null,
-      birth_lng:       input.birth_lng      ?? null,
-      birth_timezone:  input.birth_timezone ?? null,
-      lagna:           input.lagna          ?? null,
-      nakshatra:       input.nakshatra      ?? null,
-      mahadasha:       input.mahadasha      ?? null,
-      antardasha:      input.antardasha     ?? null,
-      tier:            input.tier,
-      language:        input.language       ?? 'hinglish',
-      segment:         input.segment        ?? 'millennial',
-      chart_source:    input.chartSource    ?? null,
-      prediction_json: input.prediction,
-      processing_ms:   input.processingMs   ?? null,
-      gemini_model:    input.geminiModel    ?? null,
-      search_used:     input.searchUsed     ?? false,
-    }])
+// ─── EXISTING FUNCTION — kept intact ─────────────────────────────────────────
+export async function saveSubmission(
+  data: TrikalSubmission
+): Promise<string | null> {
+  const { data: result, error } = await supabase
+    .from('trikal_submissions')
+    .insert([data])
     .select('id')
     .single();
 
   if (error) {
-    console.error('[Supabase] savePrediction error:', error.message);
-    throw new Error(error.message);
-  }
-
-  return data.id as string;
-}
-
-// ─── Fetch by Session ────────────────────────────────────────────────────────
-export async function getPredictionBySession(sessionId: string) {
-  const admin = getAdminClient();
-  const { data, error } = await admin
-    .from('predictions')
-    .select('*')
-    .eq('session_id', sessionId)
-    .order('created_at', { ascending: false })
-    .limit(1)
-    .single();
-
-  if (error) {
-    if (error.code === 'PGRST116') return null;
-    console.error('[Supabase] getPredictionBySession error:', error.message);
+    console.error('[TV-Supabase] saveSubmission error:', error);
     return null;
   }
-  return data;
+  return result?.id ?? null;
 }
 
-// ─── Fetch by ID ─────────────────────────────────────────────────────────────
-export async function getPredictionById(id: string) {
-  const admin = getAdminClient();
-  const { data, error } = await admin
-    .from('predictions')
-    .select('*')
-    .eq('id', id)
-    .single();
+// ─── NEW: PREDICTION TYPES ────────────────────────────────────────────────────
 
-  if (error) {
-    if (error.code === 'PGRST116') return null;
-    console.error('[Supabase] getPredictionById error:', error.message);
+export interface SavePredictionInput {
+  sessionId:     string;        // client-generated session ID
+  userId?:       string;        // Supabase Auth user ID — optional for anonymous
+  domainId:      string;
+  domainLabel:   string;
+  personName:    string;
+  dob:           string;        // YYYY-MM-DD
+  birthCity:     string;
+  birthTime?:    string;
+  lagna?:        string;
+  nakshatra?:    string;
+  mahadasha?:    string;
+  antardasha?:   string;
+  tier:          'free' | 'basic' | 'pro' | 'premium';
+  language:      'hindi' | 'hinglish' | 'english';
+  segment:       'genz' | 'millennial' | 'genx';
+  employment?:   string;
+  sector?:       string;
+  chartSource?:  string;
+  prediction:    Record<string, unknown>;  // full Gemini JSON output
+  processingMs?: number;
+  geminiModel?:  string;
+  searchUsed?:   boolean;
+}
+
+export interface PredictionRecord {
+  id:             string;
+  user_id:        string | null;
+  session_id:     string;
+  domain_id:      string;
+  domain_label:   string;
+  person_name:    string;
+  dob:            string;
+  birth_city:     string;
+  tier:           string;
+  language:       string;
+  segment:        string;
+  prediction:     Record<string, unknown>;
+  simple_summary: string | null;
+  headline:       string | null;
+  confidence:     string | null;
+  best_dates:     string | null;
+  processing_ms:  number | null;
+  created_at:     string;
+}
+
+// ─── NEW: SAVE PREDICTION ─────────────────────────────────────────────────────
+// Called from BirthForm after /api/predict returns successfully
+// Stores full prediction JSON in Supabase predictions table
+
+export async function savePrediction(
+  input: SavePredictionInput
+): Promise<string | null> {
+  try {
+    // Extract quick-access fields from prediction JSON
+    // These allow dashboard queries without parsing full JSONB
+    const simpleSummaryText =
+      (input.prediction?.simpleSummary as Record<string, unknown>)?.text as string ?? null;
+    const headline =
+      (input.prediction?.professional as Record<string, unknown>)?.headline as string ?? null;
+    const confidence =
+      (input.prediction?.professional as Record<string, unknown>)?.confidenceLevel as string ?? null;
+    const bestDates =
+      (input.prediction?.simpleSummary as Record<string, unknown>)?.bestDates as string ?? null;
+
+    const { data: result, error } = await supabase
+      .from('predictions')
+      .insert([{
+        session_id:     input.sessionId,
+        user_id:        input.userId        ?? null,
+        domain_id:      input.domainId,
+        domain_label:   input.domainLabel,
+        person_name:    input.personName,
+        dob:            input.dob,
+        birth_city:     input.birthCity,
+        birth_time:     input.birthTime     ?? null,
+        lagna:          input.lagna         ?? null,
+        nakshatra:      input.nakshatra     ?? null,
+        mahadasha:      input.mahadasha     ?? null,
+        antardasha:     input.antardasha    ?? null,
+        tier:           input.tier,
+        language:       input.language,
+        segment:        input.segment,
+        employment:     input.employment    ?? null,
+        sector:         input.sector        ?? null,
+        chart_source:   input.chartSource   ?? 'prokerala_swiss_ephemeris',
+        prediction:     input.prediction,
+        simple_summary: simpleSummaryText,
+        headline,
+        confidence,
+        best_dates:     bestDates,
+        processing_ms:  input.processingMs  ?? null,
+        gemini_model:   input.geminiModel   ?? null,
+        search_used:    input.searchUsed    ?? false,
+      }])
+      .select('id')
+      .single();
+
+    if (error) {
+      console.error('[TV-Supabase] savePrediction error:', error);
+      return null;
+    }
+
+    console.log('[TV-Supabase] Prediction saved:', result?.id);
+    return result?.id ?? null;
+
+  } catch (err) {
+    console.error('[TV-Supabase] savePrediction exception:', err);
     return null;
   }
-  return data;
 }
 
-// ─── Upgrade Tier ────────────────────────────────────────────────────────────
-export async function upgradePredictionTier(
-  predictionId: string,
-  newTier: 'basic' | 'standard' | 'premium',
-  newPredictionJson: Record<string, unknown>
-): Promise<void> {
-  const admin = getAdminClient();
-  const { error } = await admin
-    .from('predictions')
-    .update({
-      tier:            newTier,
-      prediction_json: newPredictionJson,
-      updated_at:      new Date().toISOString(),
-    })
-    .eq('id', predictionId);
+// ─── NEW: GET PREDICTION BY ID ────────────────────────────────────────────────
+// Called from result page to fetch prediction by predictionId from URL
 
-  if (error) {
-    console.error('[Supabase] upgradePredictionTier error:', error.message);
-    throw new Error(error.message);
+export async function getPredictionById(
+  predictionId: string
+): Promise<PredictionRecord | null> {
+  try {
+    const { data, error } = await supabase
+      .from('predictions')
+      .select('*')
+      .eq('id', predictionId)
+      .single();
+
+    if (error) {
+      console.error('[TV-Supabase] getPredictionById error:', error);
+      return null;
+    }
+    return data as PredictionRecord;
+
+  } catch (err) {
+    console.error('[TV-Supabase] getPredictionById exception:', err);
+    return null;
   }
+}
+
+// ─── NEW: GET LATEST PREDICTION BY SESSION + DOMAIN ──────────────────────────
+// Fallback — if predictionId not in URL, fetch by session + domain
+
+export async function getPredictionBySession(
+  sessionId: string,
+  domainId:  string
+): Promise<PredictionRecord | null> {
+  try {
+    const { data, error } = await supabase
+      .from('predictions')
+      .select('*')
+      .eq('session_id', sessionId)
+      .eq('domain_id', domainId)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single();
+
+    if (error) {
+      console.error('[TV-Supabase] getPredictionBySession error:', error);
+      return null;
+    }
+    return data as PredictionRecord;
+
+  } catch (err) {
+    console.error('[TV-Supabase] getPredictionBySession exception:', err);
+    return null;
+  }
+}
+
+// ─── NEW: GET ALL PREDICTIONS FOR SESSION ────────────────────────────────────
+// For result page history — show all domains user has analyzed
+
+export async function getAllPredictionsForSession(
+  sessionId: string
+): Promise<PredictionRecord[]> {
+  try {
+    const { data, error } = await supabase
+      .from('predictions')
+      .select('id, domain_id, domain_label, person_name, tier, headline, simple_summary, confidence, best_dates, created_at')
+      .eq('session_id', sessionId)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('[TV-Supabase] getAllPredictionsForSession error:', error);
+      return [];
+    }
+    return (data ?? []) as PredictionRecord[];
+
+  } catch (err) {
+    console.error('[TV-Supabase] getAllPredictionsForSession exception:', err);
+    return [];
+  }
+}
+
+// ─── NEW: SESSION ID GENERATOR ────────────────────────────────────────────────
+// Creates a persistent session ID for anonymous users
+// Stored in localStorage — survives page refreshes
+// When user logs in, server backfills user_id on their predictions
+
+export function getOrCreateSessionId(): string {
+  if (typeof window === 'undefined') return 'server-side';
+
+  const KEY = 'tv_session_id';
+  const existing = localStorage.getItem(KEY);
+  if (existing) return existing;
+
+  // Generate a new session ID
+  const newId = `tv_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+  localStorage.setItem(KEY, newId);
+  return newId;
 }

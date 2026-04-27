@@ -3,8 +3,19 @@
  * TRIKAL VAANI — Result Client Component
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: components/result/ResultClient.tsx
- * VERSION: 1.2 — Fetches prediction via /api/prediction (server-safe)
+ * VERSION: 1.0
  * SIGNED: ROHIIT GUPTA, CEO
+ *
+ * PURPOSE:
+ *   Client component — reads URL params, fetches prediction
+ *   from Supabase, renders PredictionDisplay.
+ *
+ *   URL params accepted:
+ *     ?predictionId=xxx         — fetch by ID (preferred)
+ *     ?sessionId=xxx&domainId=xxx — fallback fetch
+ *
+ *   Also accepts inline data params (from BirthForm redirect):
+ *     ?data=base64encodedJSON   — full prediction inline
  * ============================================================
  */
 
@@ -17,6 +28,11 @@ import { ArrowLeft, RefreshCw } from 'lucide-react';
 import SiteNav from '@/components/layout/SiteNav';
 import SiteFooter from '@/components/layout/SiteFooter';
 import PredictionDisplay from '@/components/result/PredictionDisplay';
+import {
+  getPredictionById,
+  getPredictionBySession,
+} from '@/lib/supabase';
+import type { PredictionRecord } from '@/lib/supabase';
 
 const GOLD      = '#D4AF37';
 const GOLD_RGBA = (a: number) => `rgba(212,175,55,${a})`;
@@ -27,73 +43,64 @@ export default function ResultClient() {
   const predictionId = params.get('predictionId') ?? '';
   const sessionId    = params.get('sessionId')    ?? '';
   const domainId     = params.get('domainId')     ?? '';
-  const inlineFlag   = params.get('inline')       ?? '';
+  const inlineData   = params.get('data')         ?? '';
 
-  const [record, setRecord]   = useState<any | null>(null);
+  const [record, setRecord]   = useState<PredictionRecord | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError]     = useState<string | null>(null);
 
   useEffect(() => {
     async function load() {
       try {
-        // ── Option 1: sessionStorage (inline flow) ──────────────────────────
-        if (inlineFlag === '1') {
-          const stored = sessionStorage.getItem('tv_last_prediction');
-          if (stored) {
-            setRecord(JSON.parse(stored));
-            setLoading(false);
-            return;
-          }
+        // Option 1a — sessionStorage (most reliable — no URL length limit)
+        const stored = sessionStorage.getItem('tv_last_prediction')
+        if (stored && (inlineData === '1' || params.get('inline') === '1')) {
+          const decoded = JSON.parse(stored)
+          setRecord(decoded)
+          setLoading(false)
+          return
         }
 
-        // ── Option 2: fetch by predictionId via API route ───────────────────
+        // Option 1b — inline data in URL (legacy fallback)
+        if (inlineData && inlineData !== '1') {
+          try {
+            const decoded = JSON.parse(decodeURIComponent(escape(atob(inlineData))))
+            setRecord(decoded)
+            setLoading(false)
+            return
+          } catch { /* fall through to Supabase */ }
+        }
+
+        // Option 2 — fetch by predictionId
         if (predictionId) {
-          const res = await fetch(`/api/prediction?predictionId=${predictionId}`);
-          if (res.ok) {
-            const data = await res.json();
-            setRecord(data);
-            setLoading(false);
-            return;
-          }
+          const data = await getPredictionById(predictionId);
+          if (data) { setRecord(data); setLoading(false); return; }
         }
 
-        // ── Option 3: fetch by sessionId via API route ──────────────────────
-        if (sessionId) {
-          const res = await fetch(`/api/prediction?sessionId=${sessionId}`);
-          if (res.ok) {
-            const data = await res.json();
-            setRecord(data);
-            setLoading(false);
-            return;
-          }
-        }
-
-        // ── Option 4: sessionStorage last resort ────────────────────────────
-        const stored = sessionStorage.getItem('tv_last_prediction');
-        if (stored) {
-          setRecord(JSON.parse(stored));
-          setLoading(false);
-          return;
+        // Option 3 — fetch by sessionId + domainId
+        if (sessionId && domainId) {
+          const data = await getPredictionBySession(sessionId, domainId);
+          if (data) { setRecord(data); setLoading(false); return; }
         }
 
         setError('Prediction not found. Please submit the form again.');
-      } catch {
+      } catch (e) {
         setError('Something went wrong. Please try again.');
       } finally {
         setLoading(false);
       }
     }
     load();
-  }, [predictionId, sessionId, inlineFlag]);
+  }, [predictionId, sessionId, domainId, inlineData]);
 
   if (loading) return <LoadingScreen />;
   if (error || !record) return <ErrorScreen error={error} />;
 
-  // ── Extract data — handles Supabase row + sessionStorage formats ───────────
-  const prediction = record.prediction_json  // Supabase row
-    ?? record.prediction                      // sessionStorage
-    ?? record;
+  // Extract prediction data from record
+  const prediction = record.prediction as any;
+  const meta       = prediction?._meta ?? {};
 
+  // Extract grahas from raw Swiss API data stored in prediction
   const grahas = prediction?._rawChart?.grahas
     ?? prediction?._rawGrahas
     ?? [];
@@ -104,8 +111,6 @@ export default function ResultClient() {
     cityName: record.birth_city  ?? 'India',
     tob:      record.birth_time  ?? '12:00',
   };
-
-  const domainLabel = record.domain_label ?? record.domain_id ?? domainId ?? '';
 
   return (
     <div className="min-h-screen bg-[#080B12]">
@@ -143,7 +148,7 @@ export default function ResultClient() {
           >
             <p className="text-xs font-medium tracking-widest uppercase mb-2"
               style={{ color: GOLD_RGBA(0.55) }}>
-              Your Cosmic Report · {domainLabel}
+              Your Cosmic Report · {record.domain_label ?? record.domain_id}
             </p>
             <h1 className="text-2xl sm:text-3xl font-bold"
               style={{ fontFamily: 'Georgia, serif' }}>
@@ -159,22 +164,24 @@ export default function ResultClient() {
               })}
             </p>
 
+            {/* Domain badge */}
             <div className="mt-3 inline-flex items-center gap-2 px-3 py-1.5 rounded-full"
               style={{ background: GOLD_RGBA(0.08), border: `1px solid ${GOLD_RGBA(0.2)}` }}>
               <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: GOLD }} />
               <span className="text-xs font-semibold" style={{ color: GOLD }}>
-                {domainLabel}
+                {record.domain_label ?? domainId}
               </span>
             </div>
           </div>
 
-          {/* Main prediction */}
+          {/* Main prediction display */}
           <PredictionDisplay
             prediction={prediction}
             grahas={grahas}
             birthData={birthData}
           />
 
+          {/* New analysis CTA */}
           <div className="text-center mt-10">
             <Link
               href="/"
@@ -194,6 +201,8 @@ export default function ResultClient() {
   );
 }
 
+// ── Loading ────────────────────────────────────────────────────────────────────
+
 function LoadingScreen() {
   return (
     <div className="min-h-screen bg-[#080B12] flex items-center justify-center">
@@ -210,6 +219,8 @@ function LoadingScreen() {
     </div>
   );
 }
+
+// ── Error ──────────────────────────────────────────────────────────────────────
 
 function ErrorScreen({ error }: { error: string | null }) {
   return (
