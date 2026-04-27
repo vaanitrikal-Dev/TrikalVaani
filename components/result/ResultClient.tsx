@@ -3,7 +3,7 @@
  * TRIKAL VAANI — Result Client Component
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: components/result/ResultClient.tsx
- * VERSION: 1.1 — Fixed imports + Supabase fetch signature
+ * VERSION: 1.2 — Fetches prediction via /api/prediction (server-safe)
  * SIGNED: ROHIIT GUPTA, CEO
  * ============================================================
  */
@@ -17,10 +17,6 @@ import { ArrowLeft, RefreshCw } from 'lucide-react';
 import SiteNav from '@/components/layout/SiteNav';
 import SiteFooter from '@/components/layout/SiteFooter';
 import PredictionDisplay from '@/components/result/PredictionDisplay';
-import {
-  getPredictionById,
-  getPredictionBySession,
-} from '@/lib/supabase';
 
 const GOLD      = '#D4AF37';
 const GOLD_RGBA = (a: number) => `rgba(212,175,55,${a})`;
@@ -31,7 +27,7 @@ export default function ResultClient() {
   const predictionId = params.get('predictionId') ?? '';
   const sessionId    = params.get('sessionId')    ?? '';
   const domainId     = params.get('domainId')     ?? '';
-  const inlineData   = params.get('data')         ?? '';
+  const inlineFlag   = params.get('inline')       ?? '';
 
   const [record, setRecord]   = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
@@ -40,42 +36,42 @@ export default function ResultClient() {
   useEffect(() => {
     async function load() {
       try {
-        // Option 1 — sessionStorage (fastest, most reliable)
-        const stored = sessionStorage.getItem('tv_last_prediction');
-        if (stored && (inlineData === '1' || params.get('inline') === '1')) {
-          const decoded = JSON.parse(stored);
-          setRecord(decoded);
-          setLoading(false);
-          return;
-        }
-
-        // Option 2 — inline base64 data in URL (legacy)
-        if (inlineData && inlineData !== '1') {
-          try {
-            const decoded = JSON.parse(decodeURIComponent(escape(atob(inlineData))));
-            setRecord(decoded);
+        // ── Option 1: sessionStorage (inline flow) ──────────────────────────
+        if (inlineFlag === '1') {
+          const stored = sessionStorage.getItem('tv_last_prediction');
+          if (stored) {
+            setRecord(JSON.parse(stored));
             setLoading(false);
             return;
-          } catch { /* fall through */ }
+          }
         }
 
-        // Option 3 — fetch by predictionId from Supabase ✅
+        // ── Option 2: fetch by predictionId via API route ───────────────────
         if (predictionId) {
-          const data = await getPredictionById(predictionId);
-          if (data) { setRecord(data); setLoading(false); return; }
+          const res = await fetch(`/api/prediction?predictionId=${predictionId}`);
+          if (res.ok) {
+            const data = await res.json();
+            setRecord(data);
+            setLoading(false);
+            return;
+          }
         }
 
-        // Option 4 — fetch by sessionId from Supabase ✅ (fixed: 1 arg only)
+        // ── Option 3: fetch by sessionId via API route ──────────────────────
         if (sessionId) {
-          const data = await getPredictionBySession(sessionId);
-          if (data) { setRecord(data); setLoading(false); return; }
+          const res = await fetch(`/api/prediction?sessionId=${sessionId}`);
+          if (res.ok) {
+            const data = await res.json();
+            setRecord(data);
+            setLoading(false);
+            return;
+          }
         }
 
-        // Option 5 — try sessionStorage as last resort
-        const storedFallback = sessionStorage.getItem('tv_last_prediction');
-        if (storedFallback) {
-          const decoded = JSON.parse(storedFallback);
-          setRecord(decoded);
+        // ── Option 4: sessionStorage last resort ────────────────────────────
+        const stored = sessionStorage.getItem('tv_last_prediction');
+        if (stored) {
+          setRecord(JSON.parse(stored));
           setLoading(false);
           return;
         }
@@ -88,26 +84,25 @@ export default function ResultClient() {
       }
     }
     load();
-  }, [predictionId, sessionId, domainId, inlineData]);
+  }, [predictionId, sessionId, inlineFlag]);
 
   if (loading) return <LoadingScreen />;
   if (error || !record) return <ErrorScreen error={error} />;
 
-  // ── Extract prediction data ───────────────────────────────────────────────
-  // Handle both Supabase row format and sessionStorage format
-  const prediction = record.prediction_json   // Supabase row
-    ?? record.prediction                       // sessionStorage format
-    ?? record;                                 // direct prediction object
+  // ── Extract data — handles Supabase row + sessionStorage formats ───────────
+  const prediction = record.prediction_json  // Supabase row
+    ?? record.prediction                      // sessionStorage
+    ?? record;
 
   const grahas = prediction?._rawChart?.grahas
     ?? prediction?._rawGrahas
     ?? [];
 
   const birthData = {
-    name:     record.person_name  ?? record.person_name  ?? 'User',
-    dob:      record.dob          ?? '',
-    cityName: record.birth_city   ?? 'India',
-    tob:      record.birth_time   ?? '12:00',
+    name:     record.person_name ?? 'User',
+    dob:      record.dob         ?? '',
+    cityName: record.birth_city  ?? 'India',
+    tob:      record.birth_time  ?? '12:00',
   };
 
   const domainLabel = record.domain_label ?? record.domain_id ?? domainId ?? '';
@@ -164,7 +159,6 @@ export default function ResultClient() {
               })}
             </p>
 
-            {/* Domain badge */}
             <div className="mt-3 inline-flex items-center gap-2 px-3 py-1.5 rounded-full"
               style={{ background: GOLD_RGBA(0.08), border: `1px solid ${GOLD_RGBA(0.2)}` }}>
               <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: GOLD }} />
@@ -174,14 +168,13 @@ export default function ResultClient() {
             </div>
           </div>
 
-          {/* Main prediction display */}
+          {/* Main prediction */}
           <PredictionDisplay
             prediction={prediction}
             grahas={grahas}
             birthData={birthData}
           />
 
-          {/* New analysis CTA */}
           <div className="text-center mt-10">
             <Link
               href="/"
