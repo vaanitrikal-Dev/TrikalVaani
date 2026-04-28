@@ -1,0 +1,787 @@
+/**
+ * ============================================================
+ * TRIKAL VAANI — SEO Domain Pages Generator
+ * CEO & Chief Vedic Architect: Rohiit Gupta
+ * File: app/[domain]/page.tsx (template for all 11 domains)
+ * VERSION: 1.0 — GEO + SEO + E-E-A-T + FAQPage Schema
+ * SIGNED: ROHIIT GUPTA, CEO
+ *
+ * DOMAINS COVERED:
+ * /career /wealth /health /relationships /family
+ * /education /home /legal /travel /spirituality /wellbeing
+ * ============================================================
+ */
+
+import type { Metadata } from 'next';
+import { notFound } from 'next/navigation';
+import Link from 'next/link';
+
+// ── Domain Config ─────────────────────────────────────────────────────────────
+
+interface DomainPageConfig {
+  slug:          string;
+  title:         string;
+  h1:            string;
+  geoAnswer:     string;   // 40-60 words for AI search engines
+  description:   string;
+  planet:        string;
+  house:         string;
+  bphsRef:       string;
+  content:       string;
+  faqs:          { q: string; a: string }[];
+  ctaText:       string;
+  icon:          string;
+  keywords:      string[];
+}
+
+const DOMAIN_PAGES: Record<string, DomainPageConfig> = {
+
+  career: {
+    slug:    'career',
+    icon:    '📈',
+    title:   'Career Astrology — Vedic Kundali Career Prediction | Trikal Vaani',
+    h1:      'Career & Profession in Vedic Astrology',
+    geoAnswer: 'According to Trikal Vaani\'s Swiss Ephemeris-powered Vedic analysis by Rohiit Gupta, career destiny is revealed through the 10th house (Karma Bhava), its lord, and Saturn\'s position. BPHS states that 10th lord in Kendra or Trikona creates strong career yoga. Get your personalized career reading at trikalvaani.com.',
+    description: 'Discover your career destiny through Vedic astrology. Swiss Ephemeris-powered 10th house analysis by Rohiit Gupta, Chief Vedic Architect. BPHS-based career predictions for Delhi NCR and India.',
+    planet: 'Saturn & Sun',
+    house:  '10th House (Karma Bhava)',
+    bphsRef:'BPHS Chapter 25 — Karma Bhava Phala',
+    content: `The 10th house in Vedic astrology, called Karma Bhava, is the most powerful indicator of career, profession, and public recognition. According to Brihat Parashara Hora Shastra (BPHS), Chapter 25, the lord of the 10th house and its placement determines the native's professional destiny.
+
+Saturn (Shani) is the primary karaka (significator) of career and discipline. When Saturn occupies its own signs Makar or Kumbh in the 10th house, it creates a Sasa Mahapurusha Yoga — indicating a powerful, authoritative career with mass influence.
+
+The Sun (Surya) represents authority, government service, and leadership in one's profession. A strong Sun in the 10th house often indicates positions of power, administrative roles, or entrepreneurial success.
+
+Rahu in the 10th house gives an unconventional but highly ambitious career path — often in technology, foreign companies, or industries that disrupted their field. This is supported by classical texts like Saravali which states "Rahu in the 10th house gives unorthodox but powerful career success."
+
+The current Vimshottari Dasha (planetary period) is the most precise timing tool for career events. Jupiter Mahadasha activates expansion and recognition, while Saturn Dasha tests through hard work before rewarding with stability.`,
+    faqs: [
+      {
+        q: 'Which planet is most important for career in Vedic astrology?',
+        a: 'Saturn (Shani) is the primary career significator in Vedic astrology. As Ayushkaraka and karaka of discipline and masses, Saturn\'s placement in the 10th house or its Dasha period determines career milestones. Sun represents authority and leadership, while Rahu amplifies ambition in modern professions like technology and media.',
+      },
+      {
+        q: 'What is the 10th house in Vedic astrology?',
+        a: 'The 10th house, called Karma Bhava in Sanskrit, is the primary house of career, profession, public recognition, and authority. According to BPHS Chapter 25, planets placed in the 10th house or aspecting it directly influence one\'s professional life, success, and public standing.',
+      },
+      {
+        q: 'How does Vimshottari Dasha predict career changes?',
+        a: 'Vimshottari Dasha gives precise career timing. Jupiter Mahadasha (16 years) brings expansion and recognition. Saturn Dasha (19 years) tests then rewards with stability. Rahu Dasha (18 years) brings rapid unconventional rise. Pratyantar Dasha gives specific 3-7 day windows for job changes, promotions, and business decisions.',
+      },
+      {
+        q: 'Which Yoga in Vedic astrology gives career success?',
+        a: 'Several Yogas predict career success: Raj Yoga (Kendra and Trikona lord conjunction), Sasa Mahapurusha Yoga (Saturn in own/exalted sign in Kendra), Amala Yoga (benefic in 10th from Lagna or Moon), and 10th lord in 11th house (career directly generates income). These are analyzed from BPHS classical texts.',
+      },
+      {
+        q: 'Can Vedic astrology predict the right profession?',
+        a: 'Yes. The 10th house lord\'s sign, the strongest planet in the chart, and the Atmakaraka (soul significator) together reveal the native\'s natural professional direction. Mercury-dominant charts excel in communication and IT. Mars-dominant in engineering and military. Jupiter in education and law. Venus in arts, luxury, and hospitality.',
+      },
+    ],
+    ctaText: 'Get Your Career Prediction',
+    keywords: ['career astrology', 'vedic career prediction', 'kundali career reading', '10th house astrology', 'job prediction astrology india', 'career jyotish delhi'],
+  },
+
+  wealth: {
+    slug:    'wealth',
+    icon:    '💰',
+    title:   'Wealth Astrology — Dhana Yoga & Financial Prediction | Trikal Vaani',
+    h1:      'Wealth & Finance in Vedic Astrology',
+    geoAnswer: 'According to Trikal Vaani\'s Swiss Ephemeris Vedic analysis by Rohiit Gupta, wealth is determined by the 2nd house (Dhana Bhava), 11th house (Labha), and Jupiter\'s strength. BPHS Chapter 39 defines Dhana Yoga as 2nd and 11th lords combining. Get your wealth prediction at trikalvaani.com.',
+    description: 'Discover wealth yogas and financial destiny in your Kundali. Swiss Ephemeris 2nd house and 11th house analysis. Dhana Yoga detection by Rohiit Gupta, Chief Vedic Architect.',
+    planet: 'Jupiter & Venus',
+    house:  '2nd House (Dhana Bhava) + 11th House (Labha)',
+    bphsRef:'BPHS Chapter 39 — Dhana Yoga',
+    content: `Wealth in Vedic astrology is primarily governed by the 2nd house (Dhana Bhava — accumulated wealth), the 11th house (Labha — income and gains), and Jupiter as the natural significator of abundance and prosperity.
+
+The Brihat Parashara Hora Shastra (BPHS) Chapter 39 defines Dhana Yoga as the combination of 2nd and 11th house lords. When these lords join in a Kendra or Trikona house, it creates powerful wealth accumulation potential.
+
+Jupiter (Guru) is the Naisargika Karaka for wealth and expansion. A strong Jupiter in the 2nd, 5th, 9th, or 11th house blesses the native with natural prosperity. Jupiter's transit over natal Moon (Guru Chandal period of luck) often coincides with significant financial windfalls.
+
+Venus (Shukra) represents luxury wealth — property, vehicles, art, and aesthetic abundance. A strong Venus in the 11th or 2nd house supports consistent income from creative or luxury sectors.
+
+The 8th house governs inherited wealth, ancestral assets, and sudden financial events. When the 8th lord connects positively with the 2nd lord, inheritance and windfall income are strongly indicated.`,
+    faqs: [
+      {
+        q: 'What is Dhana Yoga in Vedic astrology?',
+        a: 'Dhana Yoga is a wealth-producing planetary combination defined in BPHS Chapter 39. It occurs when the lords of the 2nd house (accumulated wealth) and 11th house (income) join together in a Kendra (1,4,7,10) or Trikona (1,5,9) house. This combination significantly increases financial prosperity and wealth accumulation.',
+      },
+      {
+        q: 'Which house represents money in Vedic astrology?',
+        a: 'The 2nd house (Dhana Bhava) represents accumulated wealth, savings, and family assets. The 11th house (Labha Bhava) represents income, gains, and fulfillment of financial desires. The 5th house governs speculative gains and investments. The 8th house governs inherited wealth and sudden financial events.',
+      },
+      {
+        q: 'How does Jupiter affect wealth in Vedic astrology?',
+        a: 'Jupiter is the primary natural significator of wealth in Vedic astrology. When Jupiter transits over natal Moon or occupies the 2nd, 5th, or 11th house, it brings significant financial expansion. Jupiter Mahadasha (16 years) is often the period of maximum wealth growth in a native\'s life, especially when Jupiter is strong in the natal chart.',
+      },
+      {
+        q: 'Can astrology predict financial problems and debt?',
+        a: 'Yes. The 6th house (Rina Bhava) governs debt and financial obligations. When the 6th lord is strong and afflicts the 2nd or 11th house, debt accumulation is indicated. Saturn or Rahu in the 6th or 12th house during their Dasha period often creates financial pressure. Classical BPHS remedies for Rina Mukti (debt liberation) include specific Jupiter mantras and Dana.',
+      },
+      {
+        q: 'What Dasha period is best for financial growth?',
+        a: 'Jupiter Mahadasha and Venus Mahadasha are generally the most prosperous periods for wealth growth. Specific Antardasha and Pratyantar combinations are analyzed for precise timing. The quality of the current Pratyantar Dasha (3-7 day windows) determines the best dates for investments, new ventures, or major financial decisions.',
+      },
+    ],
+    ctaText: 'Discover Your Wealth Yoga',
+    keywords: ['wealth astrology', 'dhana yoga vedic', 'financial astrology india', 'money prediction kundali', 'prosperity jyotish', 'financial prediction delhi'],
+  },
+
+  health: {
+    slug:    'health',
+    icon:    '🏥',
+    title:   'Health Astrology — Vedic Health Prediction & Remedies | Trikal Vaani',
+    h1:      'Health & Wellbeing in Vedic Astrology',
+    geoAnswer: 'According to Trikal Vaani\'s Swiss Ephemeris Vedic analysis by Rohiit Gupta, health is governed by the 1st house (physical body), 6th house (disease), and 8th house (longevity). Saturn as Ayushkaraka determines lifespan. BPHS Chapter 66 guides health analysis. Visit trikalvaani.com for personalized health predictions.',
+    description: 'Vedic astrology health predictions based on 1st, 6th, and 8th house analysis. Saturn as Ayushkaraka, health Yogas, and classical BPHS remedies by Rohiit Gupta, Chief Vedic Architect.',
+    planet: 'Saturn & Moon',
+    house:  '1st, 6th & 8th Houses',
+    bphsRef:'BPHS Chapter 66 — Ayu (Longevity) Bhava',
+    content: `Health in Vedic astrology is analyzed through three primary houses: the 1st house (Tanu Bhava — physical body and constitution), the 6th house (Ari Bhava — disease and health challenges), and the 8th house (Ayu Bhava — longevity and chronic conditions).
+
+Saturn (Shani) is the Ayushkaraka — the natural significator of longevity. A strong Saturn in the natal chart indicates robust constitution and long life. When Saturn is afflicted or occupies the 6th or 8th house without benefic support, chronic health conditions may arise during Saturn Dasha.
+
+The Moon (Chandra) represents the mind and emotional health. Moon afflicted by Saturn creates depression and anxiety. Moon with Rahu or Ketu can indicate psychosomatic conditions or unusual health patterns.
+
+The 6th house lord's position determines the nature of health challenges. When the 6th lord is placed in the 8th or 12th house, health issues tend to be hidden or chronic. Classical BPHS remedies including Mahamrityunjaya Mantra, donation of sesame on Saturdays, and Kaal Bhairav worship are traditionally prescribed for health protection.
+
+Important: Vedic astrology provides guidance on tendencies and timing — always consult qualified medical professionals for health decisions.`,
+    faqs: [
+      {
+        q: 'Which planet controls health in Vedic astrology?',
+        a: 'Saturn (Shani) is the Ayushkaraka — significator of longevity and chronic health. The Sun governs vitality and the heart. Moon rules the mind and emotional health. Mars governs blood, muscles, and surgery. Mercury rules the nervous system. Each planet has domain over specific body parts as defined in BPHS.',
+      },
+      {
+        q: 'What does the 6th house in astrology represent for health?',
+        a: 'The 6th house (Ari Bhava) in Vedic astrology represents disease, health challenges, enemies of the body, and daily health routines. The 6th lord\'s placement and strength determines the type and severity of health challenges. Malefics in the 6th can create recurring health issues, while benefics provide protection.',
+      },
+      {
+        q: 'Can Vedic astrology predict serious illness?',
+        a: 'Vedic astrology identifies periods of health vulnerability through Dasha analysis, particularly when the 6th or 8th house lord\'s Dasha runs alongside malefic transits. However, astrology provides tendencies and timing, not medical diagnoses. Always consult qualified doctors. Astrological guidance focuses on preventive measures, remedies, and favorable timing for medical procedures.',
+      },
+      {
+        q: 'What are Vedic astrology remedies for good health?',
+        a: 'Classical BPHS remedies for health include: Mahamrityunjaya Mantra japa (108 times daily facing East), donation of sesame and black cloth on Saturdays for Saturn, green dal and green cloth on Wednesdays for Mercury (nervous system), copper vessel water donation on Sundays for Sun. Wearing specific gemstones requires expert consultation.',
+      },
+      {
+        q: 'How does Sade Sati affect health?',
+        a: 'Sade Sati (7.5 year Saturn transit over Moon) can create periods of health stress, fatigue, and chronic conditions, especially if Saturn is naturally weak in the natal chart. The middle phase (Saturn directly on natal Moon) is most intense. Regular Shani worship, oil donation on Saturdays, and Hanuman Chalisa recitation are classical remedies.',
+      },
+    ],
+    ctaText: 'Get Health Prediction',
+    keywords: ['health astrology vedic', 'disease prediction kundali', 'medical astrology india', 'health jyotish delhi', 'ayushkaraka saturn', 'health vedic prediction'],
+  },
+
+  relationships: {
+    slug:    'relationships',
+    icon:    '💑',
+    title:   'Relationship Astrology — Marriage & Love Prediction | Trikal Vaani',
+    h1:      'Relationships & Marriage in Vedic Astrology',
+    geoAnswer: 'According to Trikal Vaani\'s Swiss Ephemeris Vedic analysis by Rohiit Gupta, relationships are governed by the 7th house (partner karaka), Venus as Kalatrakaraka, and Navamsa D9 chart. BPHS Chapter 24 defines Vivah (marriage) Yoga. Get your relationship reading at trikalvaani.com.',
+    description: 'Vedic astrology relationship and marriage predictions. 7th house analysis, Venus karaka, Navamsa D9 chart, synastry by Rohiit Gupta. Swiss Ephemeris accuracy for Delhi NCR and India.',
+    planet: 'Venus & Moon',
+    house:  '7th House (Yuvati Bhava)',
+    bphsRef:'BPHS Chapter 24 — Vivah Bhava',
+    content: `The 7th house (Yuvati Bhava) in Vedic astrology is the primary house of marriage, partnerships, and significant relationships. According to BPHS Chapter 24, the 7th lord's strength and placement determine the nature and timing of marriage.
+
+Venus (Shukra) is the Kalatrakaraka — natural significator of spouse and relationships for men. The Moon (Chandra) plays a crucial role in emotional compatibility and the quality of the marital bond. For women's charts, Jupiter (Guru) represents the husband as Purusha karaka.
+
+The Navamsa (D9) chart is the most important divisional chart for marriage. A planet that is Vargottama (same Rashi in D1 and D9) has exceptional strength and reliability in relationship matters. The 7th lord's placement in D9 reveals the deeper karmic nature of the spouse.
+
+Rahu in the 7th house creates intense, karmic relationships — often past-life connections that require conscious resolution. Ketu in the 7th indicates spiritual detachment from conventional partnership, sometimes indicating foreign spouse or unconventional relationships.
+
+Synastry (dual chart analysis) examines where key planets of one person fall in the other's chart. Venus-Moon synastry creates deep emotional bonds, while Saturn-Moon creates karmic obligation and long-term commitment.`,
+    faqs: [
+      {
+        q: 'Which house governs marriage in Vedic astrology?',
+        a: 'The 7th house (Yuvati Bhava) is the primary house of marriage and partnerships. The 5th house governs romance and love affairs. The 2nd house represents family acceptance of the relationship. The 11th house shows fulfillment of relationship desires. All four houses are analyzed together for a complete marriage prediction.',
+      },
+      {
+        q: 'What is the Navamsa chart in marriage astrology?',
+        a: 'The Navamsa (D9) chart is the ninth divisional chart and is considered the most important chart for marriage after the natal D1. It reveals the deeper karmic nature of the spouse, the quality of the marital bond, and the dharmic purpose of the marriage. BPHS Chapter 6 states that the Navamsa chart should always be read alongside the natal chart for marriage analysis.',
+      },
+      {
+        q: 'How does Venus affect relationships in Vedic astrology?',
+        a: 'Venus (Shukra) is the primary relationship karaka in Vedic astrology. For men\'s charts, Venus represents the wife and the quality of romantic relationships. A strong Venus in the 7th house or aspecting it brings an attractive, harmonious spouse. Venus in Vrishabh or Tula (own signs) or Meen (exaltation) is especially powerful for relationships.',
+      },
+      {
+        q: 'What causes delayed marriage in Vedic astrology?',
+        a: 'Delayed marriage is primarily caused by Saturn\'s influence on the 7th house, 7th lord, or Venus. Karako Bhavo Nashaya — Venus in the 7th can sometimes delay marriage. Shani Sade Sati during prime marriage years creates delays. Rahu or Ketu on the 7th house axis also creates unconventional timing. Classical remedies include Venus mantras and Friday fasting.',
+      },
+      {
+        q: 'Can astrology predict compatibility between two people?',
+        a: 'Yes. Vedic astrology uses Ashtakoot (8 factor) matching for marriage compatibility, assessing Varna, Vashya, Tara, Yoni, Graha Maitri, Gana, Bhakoot, and Nadi. A score above 18/36 is considered good. Synastry analysis additionally examines where each person\'s planets fall in the other\'s chart, revealing deeper karmic and emotional patterns.',
+      },
+    ],
+    ctaText: 'Get Relationship Reading',
+    keywords: ['relationship astrology vedic', 'marriage prediction kundali', 'love astrology india', '7th house marriage', 'spouse prediction jyotish', 'compatibility astrology delhi'],
+  },
+
+  family: {
+    slug:    'family',
+    icon:    '👨‍👩‍👧',
+    title:   'Family Astrology — Children, Parents & Family Harmony | Trikal Vaani',
+    h1:      'Family Life in Vedic Astrology',
+    geoAnswer: 'According to Trikal Vaani\'s Swiss Ephemeris Vedic analysis by Rohiit Gupta, family harmony is governed by the 4th house (mother, home), 9th house (father, ancestors), and 5th house (children). Jupiter as Putrakaraka determines progeny. BPHS Chapters 19, 22, 26 guide family analysis. Visit trikalvaani.com.',
+    description: 'Vedic astrology family predictions — children, parents, and domestic harmony. 4th, 5th, 9th house analysis by Rohiit Gupta. Swiss Ephemeris-powered Kundali readings.',
+    planet: 'Jupiter & Moon',
+    house:  '4th, 5th & 9th Houses',
+    bphsRef:'BPHS Chapters 19, 22, 26',
+    content: `Family life in Vedic astrology is analyzed through multiple houses: the 4th house (Matru Bhava) for mother and domestic peace, the 9th house (Pitru Bhava) for father and ancestral blessings, and the 5th house (Putra Bhava) for children and progeny.
+
+Jupiter (Guru) is the Putrakaraka — natural significator of children. Jupiter's strength in the natal chart and its position in the D7 Saptamsa (divisional chart for children) determines the blessing of progeny. When Jupiter occupies the 5th house or aspects it, Putra Yoga is created.
+
+The Moon (Chandra) is the significator of mother and domestic harmony. A strong Moon in the 4th house creates a peaceful, nurturing home environment. Moon afflicted by Saturn or Rahu in the 4th can indicate tensions with mother or domestic instability.
+
+Pitru Dosha — when Rahu or Ketu afflicts the Sun or the 9th house — indicates ancestral karmic debt that requires resolution through Pitru Tarpan (ancestral offering), Mahalaya rituals, and specific Pitra Shanti mantras as prescribed in classical texts.`,
+    faqs: [
+      {
+        q: 'Which planet governs children in Vedic astrology?',
+        a: 'Jupiter (Guru) is the Putrakaraka — natural significator of children in Vedic astrology. The 5th house (Putra Bhava) is analyzed for progeny. Jupiter\'s strength in the natal chart and the D7 Saptamsa divisional chart determines the timing and nature of children. Saturn in the 5th can cause delays but eventual blessings with patience.',
+      },
+      {
+        q: 'What is Pitru Dosha in astrology?',
+        a: 'Pitru Dosha occurs when Rahu or Ketu afflicts the Sun (significator of father) or the 9th house (Pitru Bhava) in the natal chart. It indicates ancestral karmic debt that manifests as family difficulties, obstacles to progeny, or health issues. Classical remedies include Pitru Tarpan on Amavasya, Mahalaya Shraddha rituals, and specific Surya mantras.',
+      },
+      {
+        q: 'How does the 4th house affect family life?',
+        a: 'The 4th house (Matru Bhava or Sukha Bhava) governs mother, domestic peace, home environment, property, and the emotional foundation of life. Its lord\'s placement determines family happiness. Benefics in the 4th create a nurturing home environment, while malefics can create tension. Moon as natural 4th house karaka is analyzed for maternal relationships.',
+      },
+      {
+        q: 'Can astrology predict problems between family members?',
+        a: 'Yes. Family conflicts are revealed through afflictions to the 4th, 9th, and 2nd houses. Mars in the 4th can create aggressive household dynamics. Rahu in the 9th creates difficult father relationships. Saturn aspecting the Moon creates emotional distance in family. Specific Dasha periods activate these patterns, and classical remedies can help mitigate their intensity.',
+      },
+      {
+        q: 'What is the 9th house in family astrology?',
+        a: 'The 9th house (Dharma Bhava or Pitru Bhava) represents father, paternal lineage, ancestral blessings, and inherited fortune (Bhagya). A strong 9th house with benefic planets indicates paternal support and ancestral grace. The Sun as natural 9th house significator is analyzed for father\'s health, longevity, and the native\'s relationship with authority figures.',
+      },
+    ],
+    ctaText: 'Get Family Reading',
+    keywords: ['family astrology vedic', 'children prediction kundali', 'pitru dosha remedy', '5th house children astrology', 'family harmony jyotish', 'parents astrology india'],
+  },
+
+  education: {
+    slug:    'education',
+    icon:    '📚',
+    title:   'Education Astrology — Study Success & Academic Prediction | Trikal Vaani',
+    h1:      'Education & Learning in Vedic Astrology',
+    geoAnswer: 'According to Trikal Vaani\'s Swiss Ephemeris Vedic analysis by Rohiit Gupta, education success is determined by the 4th house (foundational learning), 5th house (intelligence, Purva Punya), and Mercury as Buddhi karaka. BPHS guides academic timing. Get your education prediction at trikalvaani.com.',
+    description: 'Vedic astrology education predictions. 4th and 5th house analysis, Mercury karaka, Saraswati Yoga detection. Swiss Ephemeris accuracy by Rohiit Gupta, Chief Vedic Architect.',
+    planet: 'Mercury & Jupiter',
+    house:  '4th & 5th Houses',
+    bphsRef:'BPHS Chapter 19 — Putra Bhava (Intelligence)',
+    content: `Education in Vedic astrology is governed by the 4th house (foundational education, schooling), the 5th house (intelligence, Purva Punya, higher thinking), and the 9th house (higher education, philosophy, wisdom).
+
+Mercury (Budha) is the Karaka of intelligence, analytical ability, and communication skills. A strong Mercury in the 1st, 4th, or 5th house creates natural academic brilliance. Mercury in its own signs (Mithun or Kanya) or exaltation (Kanya) provides exceptional academic aptitude.
+
+Jupiter (Guru) represents higher wisdom, philosophical education, and teaching. Saraswati Yoga — formed when Jupiter, Mercury, and Venus occupy Kendras or Trikonas — creates exceptional academic and creative intelligence as defined in Phaladeepika.
+
+The 5th house Putra Bhava represents Purva Punya (past life merit), which directly manifests as intelligence and learning capacity in this life. A powerful 5th house with benefics indicates natural scholarly ability and creative thinking.
+
+Timing of academic success or challenges is precisely determined through Vimshottari Dasha — Mercury Dasha and Jupiter Dasha are generally the most productive periods for educational achievement.`,
+    faqs: [
+      {
+        q: 'Which planet is most important for education in Vedic astrology?',
+        a: 'Mercury (Budha) is the primary karaka of education, intelligence, and analytical thinking. Jupiter represents wisdom and higher education. The combination of strong Mercury and Jupiter (Saraswati Yoga) creates exceptional academic ability. The 5th house lord\'s strength determines the native\'s natural learning capacity and intellectual gifts.',
+      },
+      {
+        q: 'What is Saraswati Yoga in astrology?',
+        a: 'Saraswati Yoga is formed when Jupiter, Mercury, and Venus occupy Kendra (1,4,7,10) or Trikona (1,5,9) houses simultaneously. This yoga blesses the native with exceptional intelligence, creative ability, mastery of arts and sciences, and academic recognition. It is defined in Phaladeepika as one of the most powerful Yogas for intellectual achievement.',
+      },
+      {
+        q: 'Can Vedic astrology predict the right field of study?',
+        a: 'Yes. The strongest planet in the chart and the 10th house lord reveal the native\'s natural academic direction. Mercury-dominant charts excel in mathematics, technology, and communication. Jupiter in education and law. Mars in engineering and medicine. Venus in arts, music, and design. Saturn in research, geology, and social work.',
+      },
+      {
+        q: 'How does Ketu affect education?',
+        a: 'Ketu in the 4th or 5th house can create unconventional learning patterns — the native may struggle with formal education but excel in self-directed learning, research, or spiritual studies. Ketu with Mercury in the 5th can indicate a highly intuitive, non-linear intelligence. Classical remedies include Saraswati mantra and white sesame donation on Wednesdays.',
+      },
+      {
+        q: 'When is the best time to start studies or exams according to astrology?',
+        a: 'Mercury Dasha and Jupiter Dasha are generally the most productive periods for academic pursuit. Auspicious Panchang elements for education include: Pushya Nakshatra (highest for starting studies), Wednesday (Mercury\'s day), Shukla Panchami (Saraswati Panchami), and Abhijeet Muhurta for exams. Avoid Rahu Kaal and Yamaghanta for important academic events.',
+      },
+    ],
+    ctaText: 'Get Education Prediction',
+    keywords: ['education astrology vedic', 'study success kundali', 'academic prediction jyotish', 'mercury education astrology', 'saraswati yoga', 'education timing astrology india'],
+  },
+
+  home: {
+    slug:    'home',
+    icon:    '🏠',
+    title:   'Property Astrology — Home & Real Estate Prediction | Trikal Vaani',
+    h1:      'Home & Property in Vedic Astrology',
+    geoAnswer: 'According to Trikal Vaani\'s Swiss Ephemeris Vedic analysis by Rohiit Gupta, property and home acquisition is governed by the 4th house, Mars as Bhoomi Karaka, and Jupiter\'s blessing. BPHS Chapter 22 defines Griha Yoga. Get your property prediction at trikalvaani.com.',
+    description: 'Vedic astrology property and home predictions. 4th house analysis, Mars as Bhoomi karaka, Griha Yoga detection. Swiss Ephemeris accuracy for Delhi NCR property market.',
+    planet: 'Mars & Jupiter',
+    house:  '4th House (Sukha Bhava)',
+    bphsRef:'BPHS Chapter 22 — Sukha Bhava',
+    content: `Property and real estate in Vedic astrology is governed by the 4th house (Sukha Bhava), which represents home, fixed assets, property, vehicles, and domestic peace. Mars (Mangal) is the Bhoomi Karaka — natural significator of land and immovable property.
+
+According to BPHS Chapter 22, when the 4th house lord is in a Kendra or Trikona with Jupiter's blessing, Griha Yoga is formed — indicating strong property acquisition potential. The 2nd house (accumulated wealth) and 11th house (gains) must also support the 4th house for successful property purchase.
+
+Mars Dasha or Mars Antardasha is traditionally the most active period for property transactions. Jupiter's transit over the natal Moon or 4th house cusp creates expansion and blessing in the area of home and property.
+
+Saturn's connection to the 4th house can create delays but ultimately provides stable, long-term property ownership. Rahu in the 4th creates unconventional property situations — often foreign locations, unusual properties, or complicated ownership situations.
+
+For rental income and real estate investment, the 11th house (Labha) must be strong. The current home loan rates and market timing should be considered alongside the planetary period analysis for comprehensive property decisions.`,
+    faqs: [
+      {
+        q: 'Which planet governs property in Vedic astrology?',
+        a: 'Mars (Mangal) is the Bhoomi Karaka — natural significator of land and immovable property. The 4th house and its lord govern home, property, and fixed assets. Jupiter blesses property acquisition when it aspects the 4th house. Moon as natural 4th house significator determines emotional attachment to home and domestic peace.',
+      },
+      {
+        q: 'What is Griha Yoga in astrology?',
+        a: 'Griha Yoga (property yoga) is formed when the 4th house lord is placed in a Kendra (1,4,7,10) or Trikona (1,5,9) house with Jupiter\'s blessing. This yoga indicates strong potential for home ownership and property acquisition. BPHS Chapter 22 defines this as a highly favorable combination for domestic stability and real estate success.',
+      },
+      {
+        q: 'When is the best time to buy property according to astrology?',
+        a: 'The best time for property purchase is during Mars Dasha or Mars Antardasha, when the 4th lord is active in Dasha, or when Jupiter transits over the natal Moon. Auspicious Muhurta elements include: Wednesday or Thursday, Rohini or Pushya Nakshatra, Shukla Paksha (waxing moon), and avoiding Rahu Kaal and Saturn\'s direct stations.',
+      },
+      {
+        q: 'How does Saturn affect property in Vedic astrology?',
+        a: 'Saturn in or aspecting the 4th house can delay property acquisition but ultimately provides stable, long-term ownership. Saturn\'s Dasha can bring property through hard work and sustained effort rather than sudden acquisition. Saturn also governs old properties and ancestral land — during Saturn Dasha, inherited property matters often come to the fore.',
+      },
+      {
+        q: 'Can astrology predict property disputes?',
+        a: 'Yes. Mars-Saturn conjunction or mutual aspect on the 4th house indicates potential property disputes, especially with siblings or family members. Rahu in the 4th or 8th house can create complex property situations involving multiple claimants. The legal dimension (6th house) combined with 4th house afflictions creates property litigation. Specific remedies include land donation (Bhoomi Dan) and Mars mantras.',
+      },
+    ],
+    ctaText: 'Get Property Prediction',
+    keywords: ['property astrology vedic', 'home purchase timing astrology', 'real estate prediction kundali', '4th house property', 'griha yoga', 'property jyotish delhi ncr'],
+  },
+
+  legal: {
+    slug:    'legal',
+    icon:    '⚖️',
+    title:   'Legal Astrology — Court Case & Dispute Prediction | Trikal Vaani',
+    h1:      'Legal Matters in Vedic Astrology',
+    geoAnswer: 'According to Trikal Vaani\'s Swiss Ephemeris Vedic analysis by Rohiit Gupta, legal matters are governed by the 6th house (disputes), Mars and Saturn as litigants, and Rahu\'s involvement in complex cases. BPHS guides timing for legal resolution. Get your legal prediction at trikalvaani.com.',
+    description: 'Vedic astrology legal predictions — court cases, disputes, and resolution timing. 6th house analysis by Rohiit Gupta. Swiss Ephemeris accuracy for Delhi NCR legal matters.',
+    planet: 'Mars & Saturn',
+    house:  '6th House (Ari Bhava)',
+    bphsRef:'BPHS Chapter 21 — Ari Bhava',
+    content: `Legal matters in Vedic astrology are primarily governed by the 6th house (Ari Bhava — enemies, disputes, litigation), with the 7th house (partnerships gone wrong) and 8th house (hidden matters, inheritance disputes) as supporting indicators.
+
+Mars (Mangal) governs conflict, aggression, and the fighting spirit in legal battles. A strong Mars in the 6th house gives the native the energy and determination to win legal disputes. Saturn governs karma and justice — Saturn's Dasha often brings legal matters to a conclusion, for better or worse.
+
+Rahu in the 6th house is particularly potent for winning legal battles — Rahu's unconventional, aggressive energy creates formidable opponents but also exceptional fighting ability. This is supported by Jataka Parijata's analysis of Rahu's effect in dusthana houses.
+
+Vipreet Raj Yoga (6th, 8th, or 12th lord in each other's houses) paradoxically creates strength — legal opponents may self-destruct. This is one of the most powerful Yogas for winning difficult court cases.
+
+Timing legal decisions through Vimshottari Dasha is critical — filing cases, hearing dates, and settlements all benefit from careful Muhurta selection aligned with favorable Dasha periods.`,
+    faqs: [
+      {
+        q: 'Which house governs legal matters in Vedic astrology?',
+        a: 'The 6th house (Ari Bhava) is the primary house of litigation, disputes, and legal enemies. The 7th house governs partnerships and contracts. The 8th house rules inheritance disputes and hidden legal matters. The 12th house indicates imprisonment or heavy legal expenses. All four houses are analyzed for comprehensive legal matter prediction.',
+      },
+      {
+        q: 'Which planet helps win court cases in astrology?',
+        a: 'Mars gives fighting spirit and determination in legal battles. A strong 6th house with Mars provides victory over enemies. Rahu in the 6th creates formidable but ultimately successful legal power. Jupiter as the planet of justice can bring favorable verdicts when well-placed. Saturn brings justice through karma — ensuring rightful outcomes in the long run.',
+      },
+      {
+        q: 'What is Vipreet Raj Yoga and how does it help in legal matters?',
+        a: 'Vipreet Raj Yoga forms when the lords of dusthana houses (6th, 8th, 12th) are placed in each other\'s houses. This paradoxical yoga creates strength through apparent weakness — legal opponents may self-destruct, witnesses may turn favorable, and circumstances may unexpectedly shift in the native\'s favor. BPHS Chapter 38 defines this as a powerful yoga for overcoming adversity.',
+      },
+      {
+        q: 'When is the best time to file a legal case according to astrology?',
+        a: 'Favorable timing for legal matters: Mars Dasha or strong Mars Antardasha, Tuesday (Mars\'s day) for filing, avoiding Rahu Kaal and Saturn\'s stations, Shukla Paksha for initiating legal action, and avoiding the 8th and 12th moon signs from natal Moon. Consulting a Muhurta specialist ensures the best possible timing for legal filings.',
+      },
+      {
+        q: 'Can astrology predict the outcome of a court case?',
+        a: 'Vedic astrology can indicate the likelihood of favorable or unfavorable outcomes based on the strength of the 6th house, the current Dasha period, and the comparative strength of the native\'s and opponent\'s charts. However, astrology indicates tendencies, not certainties. Favorable periods should be used for proactive legal strategy, while challenging periods call for patience and settlement consideration.',
+      },
+    ],
+    ctaText: 'Get Legal Prediction',
+    keywords: ['legal astrology vedic', 'court case prediction kundali', 'dispute resolution astrology', '6th house astrology', 'legal jyotish india', 'court case timing astrology'],
+  },
+
+  travel: {
+    slug:    'travel',
+    icon:    '✈️',
+    title:   'Travel Astrology — Foreign Settlement & Journey Prediction | Trikal Vaani',
+    h1:      'Travel & Foreign Settlement in Vedic Astrology',
+    geoAnswer: 'According to Trikal Vaani\'s Swiss Ephemeris Vedic analysis by Rohiit Gupta, travel and foreign settlement are governed by the 12th house (foreign lands), 9th house (long journeys), and Rahu\'s placement. BPHS guides foreign yog timing. Get your travel prediction at trikalvaani.com.',
+    description: 'Vedic astrology travel and foreign settlement predictions. 9th and 12th house analysis, Rahu foreign yoga by Rohiit Gupta. Swiss Ephemeris-powered NRI and foreign travel readings.',
+    planet: 'Rahu & Jupiter',
+    house:  '9th & 12th Houses',
+    bphsRef:'BPHS Chapter 29 — Vyaya Bhava (12th House)',
+    content: `Travel and foreign connections in Vedic astrology are governed by the 9th house (long journeys, dharma travel, higher education abroad), the 12th house (foreign lands, settlement abroad, expenses in foreign countries), and Rahu as the primary significator of foreign influence.
+
+Rahu (North Node) is the most powerful indicator of foreign travel, settlement, and unconventional journeys. Rahu in the 7th, 9th, or 12th house, or in Rahu Dasha with connections to these houses, strongly indicates foreign travel and possible settlement abroad.
+
+The 3rd house governs short journeys and communication travel. When the 3rd lord is strong and connected to the 9th or 12th, frequent travel becomes a life pattern.
+
+Jupiter's transit over the 9th house or the 9th lord activates long-distance travel, often for educational or spiritual purposes. The combination of Jupiter and Rahu (Guru Chandal Yoga) paradoxically creates powerful foreign connections and travel opportunities.
+
+For NRIs (Non-Resident Indians) analyzing return to India or property decisions, the 4th house (homeland) versus 12th house (foreign land) balance is critical. The timing of return or settlement decisions should align with favorable Jupiter or Saturn Dasha periods.`,
+    faqs: [
+      {
+        q: 'Which planet indicates foreign travel in Vedic astrology?',
+        a: 'Rahu is the primary significator of foreign travel and settlement abroad. Jupiter governs long journeys for education or pilgrimage. The 12th house lord\'s placement determines foreign settlement potential. When Rahu is placed in the 7th, 9th, or 12th house, or connects with these house lords during Rahu Dasha, foreign travel and settlement are strongly indicated.',
+      },
+      {
+        q: 'What is Videsh Yoga in astrology?',
+        a: 'Videsh Yoga (foreign settlement yoga) forms when the 12th house lord is strong and connected to the Lagna lord or when Rahu is placed in or aspects the 12th, 9th, or 7th house. Multiple planets in the 12th house, or the 12th lord in the 1st or 9th house, also create strong foreign settlement potential. This is supported by BPHS analysis of Vyaya Bhava.',
+      },
+      {
+        q: 'When is the best time to travel abroad according to astrology?',
+        a: 'Favorable periods for foreign travel include: Jupiter Dasha or Antardasha (especially for education or spiritual travel), Rahu Dasha with benefic support (for career abroad), and periods when Jupiter transits the 9th or 12th house. Auspicious travel days include Thursday (Jupiter), Wednesday (Mercury), and avoiding Saturn\'s direct stations and Rahu Kaal for departure.',
+      },
+      {
+        q: 'Can astrology predict visa approval and immigration success?',
+        a: 'Vedic astrology can identify favorable periods for visa applications and immigration proceedings. Strong Jupiter and Rahu Antardasha, favorable 9th and 12th house lords in Dasha, and Jupiter\'s transit over the 9th house all support successful visa outcomes. Timing applications during auspicious Muhurta — Rohini or Pushya Nakshatra, Thursday, Shukla Paksha — improves outcomes.',
+      },
+      {
+        q: 'What does the 12th house represent in travel astrology?',
+        a: 'The 12th house (Vyaya Bhava) represents foreign lands, settlement abroad, spiritual journeys, expenses in distant places, and liberation from the known world. A strong 12th house with beneficial planets indicates successful foreign connections and pleasant experiences abroad. The 12th lord\'s placement in the 9th or 1st house creates a natural predisposition toward foreign settlement.',
+      },
+    ],
+    ctaText: 'Get Travel Prediction',
+    keywords: ['travel astrology vedic', 'foreign settlement prediction', 'NRI astrology india', 'visa prediction astrology', 'videsh yoga kundali', 'foreign travel jyotish'],
+  },
+
+  spirituality: {
+    slug:    'spirituality',
+    icon:    '🕉️',
+    title:   'Spiritual Astrology — Moksha & Dharma Path | Trikal Vaani',
+    h1:      'Spirituality & Moksha in Vedic Astrology',
+    geoAnswer: 'According to Trikal Vaani\'s Swiss Ephemeris Vedic analysis by Rohiit Gupta, spiritual path is revealed through the 12th house (Moksha), 9th house (Dharma), Ketu\'s placement, and Jupiter as Guru karaka. BPHS Chapter 38 defines Sanyas Yoga. Get your spiritual reading at trikalvaani.com.',
+    description: 'Vedic astrology spiritual path predictions. Moksha house analysis, Ketu karaka, Sanyas Yoga detection by Rohiit Gupta. Swiss Ephemeris accuracy for spiritual seekers.',
+    planet: 'Ketu & Jupiter',
+    house:  '9th & 12th Houses',
+    bphsRef:'BPHS Chapter 38 — Sanyas Yoga',
+    content: `Spirituality in Vedic astrology is the highest domain of human inquiry, governed by the 12th house (Moksha Bhava — liberation), the 9th house (Dharma Bhava — righteous path), the 8th house (occult and mystical knowledge), and Ketu as the primary Moksha karaka.
+
+Ketu (South Node) represents past life spiritual credit, liberation from material world, and natural inclination toward meditation, renunciation, and mystical knowledge. Ketu in the 12th house, or Ketu Dasha in later life, is one of the most powerful indicators of spiritual awakening.
+
+Jupiter (Guru) is the planet of wisdom, dharma, and divine grace. When Jupiter occupies the 9th or 12th house, or forms Hamsa Mahapurusha Yoga (own/exalted in Kendra), it creates a natural teacher, spiritual authority, or guide.
+
+Sanyas Yoga — defined in BPHS Chapter 38 — forms when multiple planets occupy the 12th house or when the 9th and 10th lords combine with spiritual planets (Ketu, Jupiter, Saturn). This yoga indicates a life dedicated to spiritual pursuit, often including teaching, retreating from worldly affairs, or deep contemplative practice.
+
+The Navamsa D9 chart reveals the soul's spiritual mission in this life. Vargottama planets (same Rashi in D1 and D9) carry particularly strong karmic weight for spiritual development.`,
+    faqs: [
+      {
+        q: 'Which planet governs spirituality in Vedic astrology?',
+        a: 'Ketu is the primary Moksha karaka — significator of liberation, past life spiritual credit, and natural inclination toward renunciation. Jupiter governs wisdom and dharmic path. Saturn governs discipline and vairagya (detachment earned through life lessons). The 9th (Dharma) and 12th (Moksha) houses are the primary spiritual houses in Vedic astrology.',
+      },
+      {
+        q: 'What is Sanyas Yoga in Vedic astrology?',
+        a: 'Sanyas Yoga forms when four or more planets (excluding Sun and Moon) occupy the same house, when strong 12th house placements combine with Ketu, or when the 9th and 10th lords join with spiritual planets. BPHS Chapter 38 defines this yoga as indicating a life dedicated to spiritual pursuit, renunciation, or teaching. Not all Sanyas Yoga natives become monks — many become spiritual teachers or guides.',
+      },
+      {
+        q: 'Which Dasha period is most spiritually significant?',
+        a: 'Ketu Dasha (7 years) and Jupiter Dasha (16 years) are the most spiritually significant periods. Ketu Dasha often brings spiritual awakening, detachment from material pursuits, and deep inner transformation. Saturn Dasha in later life (after 50) creates vairagya — earned detachment through life experience. These periods are ideal for meditation, spiritual study, and pilgrimage.',
+      },
+      {
+        q: 'How does the 12th house relate to moksha in Vedic astrology?',
+        a: 'The 12th house (Vyaya Bhava or Moksha Bhava) represents liberation from the cycle of birth and death, dissolution of ego, spiritual withdrawal from worldly affairs, and the return to divine source. Benefics in the 12th house create a natural meditative quality and spiritual aspiration. Ketu in the 12th is the strongest indicator of Moksha yoga in the natal chart.',
+      },
+      {
+        q: 'What practices does Vedic astrology recommend for spiritual growth?',
+        a: 'Classical Vedic remedies for spiritual development are planet-specific: Ketu remedies include Ganesha worship and Ketu Beej Mantra. Jupiter remedies include Guru mantra on Thursdays and Vishnu worship. Saturn remedies for vairagya include Shani Stotra and blue sapphire (with expert consultation). Puja, fasting, charity, and pilgrimage to sacred sites aligned with planetary directions are classical prescriptions.',
+      },
+    ],
+    ctaText: 'Get Spiritual Reading',
+    keywords: ['spiritual astrology vedic', 'moksha yoga kundali', 'ketu spirituality astrology', 'sanyas yoga jyotish', 'dharma path astrology', 'spiritual prediction india'],
+  },
+
+  wellbeing: {
+    slug:    'wellbeing',
+    icon:    '🌸',
+    title:   'Mental Wellbeing Astrology — Mind & Peace Prediction | Trikal Vaani',
+    h1:      'Mental Wellbeing in Vedic Astrology',
+    geoAnswer: 'According to Trikal Vaani\'s Swiss Ephemeris Vedic analysis by Rohiit Gupta, mental wellbeing is governed by the Moon (Manas karaka), 4th house (inner peace), and Mercury (nervous system). BPHS guides mental health analysis. Get your wellbeing reading at trikalvaani.com.',
+    description: 'Vedic astrology mental wellbeing predictions. Moon karaka, 4th house analysis, anxiety and peace remedies by Rohiit Gupta. Swiss Ephemeris accuracy for mental health insights.',
+    planet: 'Moon & Mercury',
+    house:  '1st, 4th & 5th Houses',
+    bphsRef:'BPHS Chapter 5 — Moon and Mental Faculties',
+    content: `Mental wellbeing in Vedic astrology is primarily governed by the Moon (Chandra) as the Manas Karaka — the planet of mind, emotions, and psychological patterns. A strong, unafflicted Moon in the natal chart is the foundation of mental stability and emotional resilience.
+
+The 4th house (Sukha Bhava) represents inner peace, contentment, and psychological foundation. When the 4th house is afflicted by Saturn or Rahu, anxiety, restlessness, and lack of inner peace can become persistent patterns.
+
+Mercury (Budha) governs the nervous system and rational thinking. Mercury afflicted by Mars creates anxiety and overthinking. Mercury with Saturn creates chronic worry and negative thought patterns. Specific Mercury mantras and Wednesday fasting are classical remedies.
+
+Kemadruma Yoga — formed when no planet occupies the 2nd or 12th house from the Moon — creates psychological isolation and mental vulnerability according to BPHS Chapter 36. Benefic planets aspecting the Moon counter this yoga's effects.
+
+The Moon's Nakshatra at birth reveals fundamental psychological patterns. Ashlesha Nakshatra Moon creates intuitive but anxious minds. Rohini Nakshatra Moon creates emotional stability and contentment. Jyeshtha Nakshatra Moon creates a responsible but sometimes overburdened mental state.`,
+    faqs: [
+      {
+        q: 'Which planet governs mental health in Vedic astrology?',
+        a: 'The Moon (Chandra) is the primary Manas Karaka — ruler of mind, emotions, and psychological patterns. Mercury governs the nervous system and rational thinking. Saturn creates depression and chronic anxiety when afflicting the Moon. Rahu creates anxiety, obsessive thinking, and confusion. A strong, unafflicted Moon is the most important indicator of mental wellbeing in Vedic astrology.',
+      },
+      {
+        q: 'What is Kemadruma Yoga and how does it affect mental health?',
+        a: 'Kemadruma Yoga forms when no planet occupies the 2nd or 12th house from the Moon in the natal chart. BPHS Chapter 36 indicates this yoga can create psychological isolation, financial struggles, and mental vulnerability. However, if benefic planets aspect the Moon or if the Moon is in a Kendra, the yoga\'s negative effects are significantly reduced.',
+      },
+      {
+        q: 'How does Moon affliction affect mental wellbeing?',
+        a: 'Moon afflicted by Saturn creates depression, emotional heaviness, and separation from mother. Moon with Rahu creates anxiety, obsessive thoughts, and mental confusion. Moon with Mars creates emotional aggression and impulsive reactions. Moon with Ketu creates psychic sensitivity and emotional detachment. Classical remedies include Moon mantra (Om Chandraya Namah), white flower offerings on Mondays, and pearl or moonstone consultation.',
+      },
+      {
+        q: 'Which Dasha periods are challenging for mental health?',
+        a: 'Rahu Mahadasha (18 years) can create periods of mental confusion, anxiety, and unconventional thinking — especially if Rahu afflicts the Moon natally. Sade Sati (7.5 year Saturn transit over Moon) often creates emotional heaviness and life restructuring. Ketu Dasha can create detachment and existential questioning. These periods require conscious self-care, spiritual practice, and professional support.',
+      },
+      {
+        q: 'What Vedic remedies help with mental peace and anxiety?',
+        a: 'Classical Vedic remedies for mental wellbeing: Moon mantra (Om Chandraya Namah or Chandra Beej Mantra) 108 times on Mondays, white pearl wearing (with expert consultation for suitable Lagna), milk donation on Mondays, Shiva worship on Mondays for Moon strength, Hanuman Chalisa for Rahu-related anxiety, and daily meditation during Brahma Muhurta (1.5 hours before sunrise).',
+      },
+    ],
+    ctaText: 'Get Wellbeing Reading',
+    keywords: ['mental health astrology vedic', 'mind peace kundali', 'moon mental wellbeing', 'anxiety prediction jyotish', 'mental peace astrology india', 'wellbeing vedic prediction'],
+  },
+};
+
+// ── Page Component ────────────────────────────────────────────────────────────
+
+interface Props {
+  params: { domain: string };
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const config = DOMAIN_PAGES[params.domain];
+  if (!config) return { title: 'Trikal Vaani' };
+
+  return {
+    title:       config.title,
+    description: config.description,
+    keywords:    config.keywords,
+    authors:     [{ name: 'Rohiit Gupta', url: 'https://trikalvaani.com/about' }],
+    alternates: {
+      canonical: `https://trikalvaani.com/${config.slug}`,
+      languages: {
+        'hi': `https://trikalvaani.com/hi/${config.slug}`,
+        'en': `https://trikalvaani.com/${config.slug}`,
+      },
+    },
+    openGraph: {
+      title:       config.title,
+      description: config.description,
+      url:         `https://trikalvaani.com/${config.slug}`,
+      siteName:    'Trikal Vaani',
+      locale:      'en_IN',
+      type:        'article',
+    },
+    twitter: {
+      card:        'summary_large_image',
+      title:       config.title,
+      description: config.description,
+    },
+  };
+}
+
+export async function generateStaticParams() {
+  return Object.keys(DOMAIN_PAGES).map(slug => ({ domain: slug }));
+}
+
+export default function DomainPage({ params }: Props) {
+  const config = DOMAIN_PAGES[params.domain];
+  if (!config) notFound();
+
+  // JSON-LD Schemas
+  const breadcrumbSchema = {
+    '@context': 'https://schema.org',
+    '@type':    'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home',          item: 'https://trikalvaani.com' },
+      { '@type': 'ListItem', position: 2, name: config.h1,       item: `https://trikalvaani.com/${config.slug}` },
+    ],
+  };
+
+  const articleSchema = {
+    '@context':       'https://schema.org',
+    '@type':          'Article',
+    headline:          config.h1,
+    description:       config.description,
+    author: {
+      '@type':         'Person',
+      name:            'Rohiit Gupta',
+      jobTitle:        'Chief Vedic Architect',
+      url:             'https://trikalvaani.com/about',
+      knowsAbout:      ['Vedic Astrology', 'Jyotish Shastra', 'BPHS', 'Swiss Ephemeris', 'Vimshottari Dasha'],
+    },
+    publisher: {
+      '@type':         'Organization',
+      name:            'Trikal Vaani',
+      url:             'https://trikalvaani.com',
+      logo:            'https://trikalvaani.com/logo.png',
+    },
+    mainEntityOfPage: `https://trikalvaani.com/${config.slug}`,
+  };
+
+  const faqSchema = {
+    '@context': 'https://schema.org',
+    '@type':    'FAQPage',
+    mainEntity: config.faqs.map(faq => ({
+      '@type':          'Question',
+      name:              faq.q,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text:    faq.a,
+      },
+    })),
+  };
+
+  const serviceSchema = {
+    '@context':   'https://schema.org',
+    '@type':      'Service',
+    name:          `${config.h1} — Trikal Vaani`,
+    description:   config.description,
+    provider: {
+      '@type':     'Person',
+      name:        'Rohiit Gupta',
+      jobTitle:    'Chief Vedic Architect',
+      address: {
+        '@type':   'PostalAddress',
+        addressRegion:  'Delhi NCR',
+        addressCountry: 'IN',
+      },
+    },
+    serviceType:   'Vedic Astrology Prediction',
+    areaServed:    'India',
+    url:           `https://trikalvaani.com/${config.slug}`,
+  };
+
+  return (
+    <>
+      {/* JSON-LD Schemas */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceSchema) }} />
+
+      <div className="min-h-screen" style={{ background: '#080B12', color: '#e2e8f0' }}>
+
+        {/* Breadcrumb */}
+        <div className="max-w-4xl mx-auto px-4 pt-6">
+          <nav className="flex items-center gap-2 text-xs text-slate-500">
+            <Link href="/" className="hover:text-amber-400 transition-colors">Home</Link>
+            <span>/</span>
+            <span style={{ color: '#D4AF37' }}>{config.h1}</span>
+          </nav>
+        </div>
+
+        {/* Hero */}
+        <div className="max-w-4xl mx-auto px-4 py-10">
+          <div className="text-center mb-8">
+            <div className="text-5xl mb-4">{config.icon}</div>
+            <h1 className="text-3xl font-bold text-white mb-3">{config.h1}</h1>
+
+            {/* GEO Direct Answer Block */}
+            <div className="max-w-2xl mx-auto mt-4 p-4 rounded-xl text-left"
+              style={{ background: 'rgba(212,175,55,0.08)', border: '1px solid rgba(212,175,55,0.2)' }}>
+              <p className="text-xs text-amber-500 font-semibold mb-2 uppercase tracking-wider">
+                Vedic Astrology Answer
+              </p>
+              <p className="text-sm text-slate-300 leading-relaxed">{config.geoAnswer}</p>
+            </div>
+          </div>
+
+          {/* Meta Chips */}
+          <div className="flex flex-wrap justify-center gap-3 mb-8">
+            {[
+              { label: 'Key Planet', value: config.planet },
+              { label: 'Primary House', value: config.house },
+              { label: 'Classical Source', value: config.bphsRef },
+            ].map(chip => (
+              <div key={chip.label} className="px-4 py-2 rounded-full text-xs"
+                style={{ background: 'rgba(212,175,55,0.1)', border: '1px solid rgba(212,175,55,0.2)' }}>
+                <span style={{ color: '#64748b' }}>{chip.label}: </span>
+                <span style={{ color: '#D4AF37' }}>{chip.value}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* CTA — Top */}
+          <div className="text-center mb-10">
+            <Link href="/#birth-form"
+              className="inline-block px-8 py-3.5 rounded-xl text-sm font-semibold"
+              style={{ background: 'linear-gradient(135deg, #D4AF37, #F5D76E)', color: '#080B12' }}>
+              {config.ctaText} — Free 🔱
+            </Link>
+            <p className="text-xs text-slate-500 mt-2">Swiss Ephemeris accuracy | BPHS classical analysis</p>
+          </div>
+
+          {/* Main Content */}
+          <article className="rounded-2xl p-6 sm:p-8 mb-8"
+            style={{ background: 'rgba(13,17,30,0.8)', border: '1px solid rgba(255,255,255,0.07)' }}>
+            <div className="flex items-center gap-2 mb-4 pb-4"
+              style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+              <span className="text-xs px-2 py-1 rounded"
+                style={{ background: 'rgba(212,175,55,0.1)', color: '#D4AF37' }}>
+                By Rohiit Gupta, Chief Vedic Architect
+              </span>
+            </div>
+            <div className="prose prose-invert max-w-none">
+              {config.content.split('\n\n').map((para, i) => (
+                <p key={i} className="text-sm leading-relaxed text-slate-300 mb-4">{para}</p>
+              ))}
+            </div>
+          </article>
+
+          {/* FAQs */}
+          <section className="mb-8">
+            <h2 className="text-xl font-bold text-white mb-5">
+              Frequently Asked Questions — {config.h1}
+            </h2>
+            <div className="space-y-4">
+              {config.faqs.map((faq, i) => (
+                <div key={i} className="rounded-xl overflow-hidden"
+                  style={{ background: 'rgba(13,17,30,0.8)', border: '1px solid rgba(255,255,255,0.07)' }}>
+                  <div className="p-4" style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                    <h3 className="text-sm font-semibold text-white flex items-start gap-2">
+                      <span style={{ color: '#D4AF37', flexShrink: 0 }}>Q.</span>
+                      {faq.q}
+                    </h3>
+                  </div>
+                  <div className="p-4">
+                    <p className="text-sm text-slate-300 leading-relaxed flex items-start gap-2">
+                      <span style={{ color: '#22c55e', flexShrink: 0 }}>A.</span>
+                      {faq.a}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {/* CTA — Bottom */}
+          <div className="rounded-2xl p-8 text-center"
+            style={{ background: 'linear-gradient(135deg, rgba(212,175,55,0.1), rgba(212,175,55,0.03))', border: '1px solid rgba(212,175,55,0.25)' }}>
+            <div className="text-3xl mb-3">🔱</div>
+            <h2 className="text-xl font-bold text-white mb-2">
+              Get Your Personal {config.h1} Reading
+            </h2>
+            <p className="text-sm text-slate-400 mb-5">
+              Swiss Ephemeris accuracy + BPHS classical analysis + Bhrigu Nandi patterns.<br/>
+              By Rohiit Gupta, Chief Vedic Architect, Delhi NCR
+            </p>
+            <Link href="/#birth-form"
+              className="inline-block px-8 py-3.5 rounded-xl text-sm font-semibold"
+              style={{ background: 'linear-gradient(135deg, #D4AF37, #F5D76E)', color: '#080B12' }}>
+              {config.ctaText} — Free Reading 🔱
+            </Link>
+            <p className="text-xs text-slate-600 mt-3">
+              No credit card. Instant results. Trusted by thousands across India.
+            </p>
+          </div>
+
+          {/* Internal Links */}
+          <div className="mt-8">
+            <h3 className="text-sm font-semibold text-slate-400 mb-3">Explore Other Life Domains</h3>
+            <div className="flex flex-wrap gap-2">
+              {Object.values(DOMAIN_PAGES)
+                .filter(d => d.slug !== config.slug)
+                .slice(0, 6)
+                .map(d => (
+                  <Link key={d.slug} href={`/${d.slug}`}
+                    className="px-3 py-1.5 rounded-lg text-xs text-slate-400 hover:text-amber-400 transition-colors"
+                    style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}>
+                    {d.icon} {d.h1.split(' ')[0]}
+                  </Link>
+                ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
