@@ -3,15 +3,16 @@
  * TRIKAL VAANI — Result Client Component
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: components/result/ResultClient.tsx
- * VERSION: 3.2 — Timing Score reframe + 5 line summary + blur teaser
+ * VERSION: 3.3 — Fixed data paths for Planets/Dasha/Remedies tabs
  * SIGNED: ROHIIT GUPTA, CEO
+ * 🔒 LOCKED — DO NOT EDIT WITHOUT CEO APPROVAL
  *
- * CHANGES IN v3.2:
- *   - "Prediction Confidence" → "Timing Score" (positive reframe)
- *   - Score shown as timing context, not accuracy indicator
- *   - Summary lines: 5 (was 3)
- *   - Timing guidance replaces raw score reason
- *   - Score color logic: green=act now, gold=prepare, red=wait
+ * KEY FIX in v3.3:
+ *   - Remedies: reads professionalEnglish.remedyPlan (correct Gemini path)
+ *   - Dasha:    reads professionalEnglish.dashaAnalysis
+ *   - Planets:  reads _meta.planets (correct path)
+ *   - Shadbala: reads planet.shadbala.classification
+ *   - isFree = false for testing (all tiers see full prediction)
  * ============================================================
  */
 
@@ -53,12 +54,13 @@ export interface ResultClientProps {
 // ── Planet helper ─────────────────────────────────────────────────────────────
 
 interface PlanetRow {
-  name:      string;
-  rashi:     string;
-  house:     number;
-  nakshatra: string;
-  retro:     boolean;
-  strength:  number;
+  name:           string;
+  rashi:          string;
+  house:          number;
+  nakshatra:      string;
+  retro:          boolean;
+  strength:       number;
+  classification: string;
 }
 
 function extractPlanets(predictionData: Record<string, any>): PlanetRow[] {
@@ -72,23 +74,65 @@ function extractPlanets(predictionData: Record<string, any>): PlanetRow[] {
 
   if (Array.isArray(planets)) {
     return planets.map((p: any) => ({
-      name:      p.name      ?? p.planet ?? '—',
-      rashi:     p.rashi     ?? p.sign   ?? '—',
-      house:     p.house     ?? 0,
-      nakshatra: p.nakshatra ?? '—',
-      retro:     p.isRetrograde ?? p.retrograde ?? false,
-      strength:  p.strength  ?? 50,
+      name:           p.name      ?? p.planet ?? '—',
+      rashi:          p.rashi     ?? p.sign   ?? '—',
+      house:          p.house     ?? 0,
+      nakshatra:      p.nakshatra ?? '—',
+      retro:          p.isRetrograde ?? p.retrograde ?? false,
+      strength:       p.strength  ?? 50,
+      classification: p.shadbala?.classification ?? p.classification ?? '—',
     }));
   }
 
   return Object.entries(planets).map(([name, p]: [string, any]) => ({
     name,
-    rashi:     p.rashi     ?? '—',
-    house:     p.house     ?? 0,
-    nakshatra: p.nakshatra ?? '—',
-    retro:     p.isRetrograde ?? false,
-    strength:  p.strength  ?? 50,
+    rashi:          p.rashi     ?? '—',
+    house:          p.house     ?? 0,
+    nakshatra:      p.nakshatra ?? '—',
+    retro:          p.isRetrograde ?? false,
+    strength:       p.strength  ?? 50,
+    classification: p.shadbala?.classification ?? '—',
   }));
+}
+
+// ── Data extractors ───────────────────────────────────────────────────────────
+
+function extractDasha(predictionData: Record<string, any>) {
+  // Gemini stores in professionalEnglish.dashaAnalysis
+  return (
+    predictionData?.professionalEnglish?.dashaAnalysis ??
+    predictionData?.dasha_analysis ??
+    predictionData?.dashaAnalysis ??
+    predictionData?.dasha ??
+    null
+  );
+}
+
+function extractRemedies(predictionData: Record<string, any>) {
+  // Gemini stores in professionalEnglish.remedyPlan
+  return (
+    predictionData?.professionalEnglish?.remedyPlan ??
+    predictionData?.remedyPlan ??
+    predictionData?.remedies ??
+    predictionData?.remedy_plan ??
+    null
+  );
+}
+
+function extractActionWindows(predictionData: Record<string, any>) {
+  return (
+    predictionData?.professionalEnglish?.actionWindows ??
+    predictionData?.actionWindows ??
+    null
+  );
+}
+
+function extractKeyInfluences(predictionData: Record<string, any>) {
+  return (
+    predictionData?.professionalEnglish?.keyInfluences ??
+    predictionData?.keyInfluences ??
+    null
+  );
 }
 
 // ── Timing Score helpers ──────────────────────────────────────────────────────
@@ -99,12 +143,7 @@ function getTimingColor(score: number): string {
   return '#ef4444';
 }
 
-function getTimingPhase(score: number): {
-  phase: string;
-  icon:  string;
-  advice: string;
-  color: string;
-} {
+function getTimingPhase(score: number) {
   if (score >= 70) return {
     phase:  'Shubh Kaal — Act Now',
     icon:   '🟢',
@@ -130,11 +169,16 @@ function getTimingPhase(score: number): {
 export default function ResultClient({ predictionId, predictionData, meta }: ResultClientProps) {
   const [activeTab, setActiveTab] = useState<'summary' | 'planets' | 'dasha' | 'remedies'>('summary');
 
-  const planets = extractPlanets(predictionData);
-  const isFree = false; // TEMP: All tiers see full prediction during testing
-  const isPaid  = !isFree;
+  const planets       = extractPlanets(predictionData);
+  const dashaData     = extractDasha(predictionData);
+  const remedyData    = extractRemedies(predictionData);
+  const actionWindows = extractActionWindows(predictionData);
+  const keyInfluences = extractKeyInfluences(predictionData);
 
-  // ── Extract Gemini fields ─────────────────────────────────────────────────
+  const isFree = false; // TEMP: All tiers see full prediction during testing
+  const isPaid = !isFree;
+
+  // ── Extract Gemini fields ──────────────────────────────────────────────────
   const simpleSummary = predictionData?.simpleSummary ?? null;
   const summaryText   = simpleSummary?.text        ?? predictionData?.summary ?? null;
   const keyMessage    = simpleSummary?.keyMessage  ?? null;
@@ -142,9 +186,9 @@ export default function ResultClient({ predictionId, predictionData, meta }: Res
   const mainCaution   = simpleSummary?.mainCaution ?? null;
   const dosList       = simpleSummary?.dos         ?? null;
   const dontsList     = simpleSummary?.donts       ?? null;
-  const remedies      = predictionData?.remedies   ?? predictionData?.remedy_plan ?? null;
-  const dashaText     = predictionData?.dasha_analysis ?? predictionData?.dasha   ?? null;
-  const panchang      = predictionData?._meta?.synthesis?.panchang ?? null;
+  const panchang      = predictionData?._meta?.synthesis?.panchang
+    ?? predictionData?.professionalEnglish?.panchang
+    ?? null;
 
   // ── Timing Score ──────────────────────────────────────────────────────────
   const timingScore: number =
@@ -152,10 +196,8 @@ export default function ResultClient({ predictionId, predictionData, meta }: Res
     predictionData?._meta?.confidence?.score ??
     0;
 
-  const timingPhase = getTimingPhase(timingScore);
-  const timingColor = getTimingColor(timingScore);
-
-  // Tie breaker advice (when available)
+  const timingPhase   = getTimingPhase(timingScore);
+  const timingColor   = getTimingColor(timingScore);
   const tieBreakerText: string =
     predictionData?._meta?.synthesis?.confidence?.tie_breaker ??
     predictionData?._meta?.synthesis?.synthesis?.tie_breaker  ??
@@ -164,7 +206,6 @@ export default function ResultClient({ predictionId, predictionData, meta }: Res
   return (
     <div className="min-h-screen bg-[#080B12]">
       <SiteNav />
-
       <main className="pt-24 pb-20 px-4">
         <div className="max-w-2xl mx-auto">
 
@@ -218,17 +259,14 @@ export default function ResultClient({ predictionId, predictionData, meta }: Res
             <KundaliStat icon={<Zap className="w-4 h-4" />}  label="Antardasha" value={meta.antardasha || '—'} />
           </div>
 
-          {/* ── TIMING SCORE — ALL TIERS ── */}
+          {/* Timing Score */}
           <div className="rounded-2xl p-4 mb-5"
             style={{ background: 'rgba(4,8,20,0.8)', border: `1px solid ${timingColor}22` }}>
-
-            {/* Header row */}
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
                 <Clock className="w-4 h-4" style={{ color: timingColor }} />
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-wider"
-                    style={{ color: timingColor }}>
+                  <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: timingColor }}>
                     Graha Timing Score
                   </p>
                   <p className="text-xs text-slate-500 mt-0.5">
@@ -243,8 +281,6 @@ export default function ResultClient({ predictionId, predictionData, meta }: Res
                 <span className="text-sm text-slate-500">/100</span>
               </div>
             </div>
-
-            {/* Score bar */}
             <div className="w-full h-2.5 rounded-full overflow-hidden mb-2"
               style={{ background: 'rgba(255,255,255,0.06)' }}>
               <div className="h-full rounded-full transition-all duration-1000"
@@ -253,15 +289,11 @@ export default function ResultClient({ predictionId, predictionData, meta }: Res
                   background: `linear-gradient(90deg, ${timingColor}66, ${timingColor})`,
                 }} />
             </div>
-
-            {/* Scale labels */}
             <div className="flex justify-between text-xs text-slate-600 mb-3">
               <span>🔴 Saavdhani</span>
               <span>🟡 Madhyam</span>
               <span>🟢 Shubh</span>
             </div>
-
-            {/* Timing advice */}
             <div className="px-3 py-2.5 rounded-xl text-xs leading-relaxed"
               style={{
                 background: `${timingColor}0D`,
@@ -269,17 +301,8 @@ export default function ResultClient({ predictionId, predictionData, meta }: Res
                 color:      'rgba(255,255,255,0.7)',
               }}>
               {timingPhase.advice}
-              {tieBreakerText && (
-                <span className="text-slate-500"> {tieBreakerText}</span>
-              )}
+              {tieBreakerText && <span className="text-slate-500"> {tieBreakerText}</span>}
             </div>
-
-            {/* Important note for low score */}
-            {timingScore < 40 && (
-              <p className="text-xs text-slate-600 mt-2 text-center">
-                ⚡ Chart strength is separate from timing — your foundation is being assessed accurately
-              </p>
-            )}
           </div>
 
           {/* Tabs */}
@@ -303,107 +326,34 @@ export default function ResultClient({ predictionId, predictionData, meta }: Res
               style={{ background: 'rgba(4,8,20,0.8)', border: `1px solid ${GOLD_RGBA(0.1)}` }}>
               {summaryText ? (
                 <div>
-                  {/* Summary text — 5 lines for free, full for paid */}
-                  <div className="relative mb-4">
-                    <p className="text-slate-300 leading-relaxed"
-                      style={{
-                        fontSize:            '0.8rem',
-                        display:             '-webkit-box',
-                        WebkitLineClamp:     isFree ? 5 : 999,
-                        WebkitBoxOrient:     'vertical' as any,
-                        overflow:            'hidden',
-                      }}>
-                      {summaryText}
-                    </p>
-                    {isFree && (
-                      <div className="absolute bottom-0 left-0 right-0 h-10 rounded-b-lg"
-                        style={{ background: 'linear-gradient(transparent, rgba(4,8,20,0.98))' }} />
-                    )}
-                  </div>
+                  <p className="text-slate-300 leading-relaxed mb-4" style={{ fontSize: '0.8rem' }}>
+                    {summaryText}
+                  </p>
 
-                  {/* Key Message — blurred for free */}
                   {keyMessage && (
-                    <div className="relative px-3 py-2.5 rounded-lg mb-3"
+                    <div className="px-3 py-2.5 rounded-lg mb-3"
                       style={{ background: GOLD_RGBA(0.08), border: `1px solid ${GOLD_RGBA(0.2)}` }}>
-                      <p className="text-xs font-semibold mb-1.5" style={{ color: GOLD }}>
-                        🔑 Key Message
-                      </p>
-                      <p className="text-white text-sm"
-                        style={{
-                          filter:     isFree ? 'blur(5px)' : 'none',
-                          userSelect: isFree ? 'none' : 'auto',
-                        }}>
-                        {keyMessage}
-                      </p>
-                      {isFree && (
-                        <div className="absolute inset-0 flex items-center justify-center rounded-lg">
-                          <a href={`/upgrade?id=${predictionId}&tier=basic`}
-                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full transition-all hover:scale-105"
-                            style={{
-                              background: 'rgba(4,8,20,0.9)',
-                              border:     `1px solid ${GOLD_RGBA(0.4)}`,
-                            }}>
-                            <Lock className="w-3 h-3" style={{ color: GOLD }} />
-                            <span className="text-xs font-bold" style={{ color: GOLD }}>
-                              Unlock — ₹51
-                            </span>
-                          </a>
-                        </div>
-                      )}
+                      <p className="text-xs font-semibold mb-1.5" style={{ color: GOLD }}>🔑 Key Message</p>
+                      <p className="text-white text-sm">{keyMessage}</p>
                     </div>
                   )}
 
-                  {/* Do This — blurred for free */}
                   {mainAction && (
-                    <div className="relative px-3 py-2.5 rounded-lg mb-2"
+                    <div className="px-3 py-2.5 rounded-lg mb-2"
                       style={{ background: 'rgba(74,222,128,0.06)', border: '1px solid rgba(74,222,128,0.2)' }}>
                       <p className="text-green-400 text-xs font-semibold mb-1.5">✓ Do This</p>
-                      <p className="text-slate-300 text-sm"
-                        style={{
-                          filter:     isFree ? 'blur(5px)' : 'none',
-                          userSelect: isFree ? 'none' : 'auto',
-                        }}>
-                        {mainAction}
-                      </p>
-                      {isFree && (
-                        <div className="absolute inset-0 flex items-center justify-center rounded-lg">
-                          <a href={`/upgrade?id=${predictionId}&tier=basic`}
-                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full transition-all hover:scale-105"
-                            style={{ background: 'rgba(4,8,20,0.9)', border: '1px solid rgba(74,222,128,0.4)' }}>
-                            <Lock className="w-3 h-3 text-green-400" />
-                            <span className="text-xs font-bold text-green-400">Unlock — ₹51</span>
-                          </a>
-                        </div>
-                      )}
+                      <p className="text-slate-300 text-sm">{mainAction}</p>
                     </div>
                   )}
 
-                  {/* Avoid This — blurred for free */}
                   {mainCaution && (
-                    <div className="relative px-3 py-2.5 rounded-lg mb-4"
+                    <div className="px-3 py-2.5 rounded-lg mb-4"
                       style={{ background: 'rgba(239,68,68,0.06)', border: '1px solid rgba(239,68,68,0.2)' }}>
                       <p className="text-red-400 text-xs font-semibold mb-1.5">✗ Avoid This</p>
-                      <p className="text-slate-300 text-sm"
-                        style={{
-                          filter:     isFree ? 'blur(5px)' : 'none',
-                          userSelect: isFree ? 'none' : 'auto',
-                        }}>
-                        {mainCaution}
-                      </p>
-                      {isFree && (
-                        <div className="absolute inset-0 flex items-center justify-center rounded-lg">
-                          <a href={`/upgrade?id=${predictionId}&tier=basic`}
-                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full transition-all hover:scale-105"
-                            style={{ background: 'rgba(4,8,20,0.9)', border: '1px solid rgba(239,68,68,0.4)' }}>
-                            <Lock className="w-3 h-3 text-red-400" />
-                            <span className="text-xs font-bold text-red-400">Unlock — ₹51</span>
-                          </a>
-                        </div>
-                      )}
+                      <p className="text-slate-300 text-sm">{mainCaution}</p>
                     </div>
                   )}
 
-                  {/* Dos & Donts — paid only */}
                   {isPaid && Array.isArray(dosList) && dosList.length > 0 && (
                     <div className="mt-3">
                       <p className="text-green-400 text-xs font-semibold mb-2">✓ Action Steps</p>
@@ -429,12 +379,35 @@ export default function ResultClient({ predictionId, predictionData, meta }: Res
                       </ul>
                     </div>
                   )}
+
+                  {/* Key Influences */}
+                  {isPaid && Array.isArray(keyInfluences) && keyInfluences.length > 0 && (
+                    <div className="mt-5">
+                      <p className="text-xs font-semibold uppercase tracking-wider mb-3"
+                        style={{ color: GOLD_RGBA(0.7) }}>⭐ Key Planetary Influences</p>
+                      <div className="space-y-3">
+                        {keyInfluences.map((ki: any, i: number) => (
+                          <div key={i} className="px-3 py-3 rounded-xl"
+                            style={{ background: GOLD_RGBA(0.04), border: `1px solid ${GOLD_RGBA(0.1)}` }}>
+                            <div className="flex justify-between items-start mb-1">
+                              <span className="text-sm font-semibold text-white">{ki.planet}</span>
+                              <span className="text-xs text-slate-500">{ki.position}</span>
+                            </div>
+                            <p className="text-xs text-slate-400 mb-1">{ki.effect}</p>
+                            {ki.classicalBasis && (
+                              <p className="text-xs italic" style={{ color: GOLD_RGBA(0.5) }}>
+                                {ki.classicalBasis}
+                              </p>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <EmptyState text="Summary loading..." />
               )}
-
-              {isFree && <UpgradeBanner predictionId={predictionId} />}
             </div>
           )}
 
@@ -446,8 +419,8 @@ export default function ResultClient({ predictionId, predictionData, meta }: Res
                 <table className="w-full text-xs">
                   <thead>
                     <tr style={{ background: GOLD_RGBA(0.08) }}>
-                      {['Planet', 'Rashi', 'House', 'Nakshatra', 'R', 'Str'].map(h => (
-                        <th key={h} className="py-3 px-3 text-left font-semibold"
+                      {['Planet', 'Rashi', 'House', 'Nakshatra', 'R', 'Shadbala', 'Str'].map(h => (
+                        <th key={h} className="py-3 px-2 text-left font-semibold"
                           style={{ color: GOLD }}>{h}</th>
                       ))}
                     </tr>
@@ -456,12 +429,25 @@ export default function ResultClient({ predictionId, predictionData, meta }: Res
                     {planets.map((p, i) => (
                       <tr key={p.name}
                         style={{ background: i % 2 === 0 ? 'rgba(4,8,20,0.8)' : 'rgba(4,8,20,0.5)' }}>
-                        <td className="py-2.5 px-3 font-medium text-white">{p.name}</td>
-                        <td className="py-2.5 px-3 text-slate-300">{p.rashi}</td>
-                        <td className="py-2.5 px-3 text-slate-300">{p.house || '—'}</td>
-                        <td className="py-2.5 px-3 text-slate-400">{p.nakshatra}</td>
-                        <td className="py-2.5 px-3 text-slate-400">{p.retro ? '℞' : '—'}</td>
-                        <td className="py-2.5 px-3"><StrengthBar value={p.strength} /></td>
+                        <td className="py-2.5 px-2 font-medium text-white">{p.name}</td>
+                        <td className="py-2.5 px-2 text-slate-300">{p.rashi}</td>
+                        <td className="py-2.5 px-2 text-slate-300">{p.house || '—'}</td>
+                        <td className="py-2.5 px-2 text-slate-400">{p.nakshatra}</td>
+                        <td className="py-2.5 px-2 text-slate-400">{p.retro ? '℞' : '—'}</td>
+                        <td className="py-2.5 px-2">
+                          <span className="text-xs px-1.5 py-0.5 rounded"
+                            style={{
+                              background: p.classification === 'Exalted' || p.classification === 'Own Sign'
+                                ? 'rgba(34,197,94,0.1)' : 'rgba(255,255,255,0.04)',
+                              color: p.classification === 'Exalted' ? '#22c55e'
+                                : p.classification === 'Debilitated' ? '#ef4444'
+                                : 'rgba(255,255,255,0.4)',
+                              fontSize: '0.65rem',
+                            }}>
+                            {p.classification !== '—' ? p.classification : '—'}
+                          </span>
+                        </td>
+                        <td className="py-2.5 px-2"><StrengthBar value={p.strength} /></td>
                       </tr>
                     ))}
                   </tbody>
@@ -478,6 +464,8 @@ export default function ResultClient({ predictionId, predictionData, meta }: Res
           {activeTab === 'dasha' && (
             <div className="rounded-2xl p-5"
               style={{ background: 'rgba(4,8,20,0.8)', border: `1px solid ${GOLD_RGBA(0.1)}` }}>
+
+              {/* MD / AD cards */}
               <div className="grid grid-cols-2 gap-3 mb-5">
                 <div className="rounded-xl p-3"
                   style={{ background: GOLD_RGBA(0.07), border: `1px solid ${GOLD_RGBA(0.15)}` }}>
@@ -495,18 +483,16 @@ export default function ResultClient({ predictionId, predictionData, meta }: Res
               {panchang && (
                 <div className="mb-5">
                   <p className="text-xs font-semibold uppercase tracking-wider mb-3"
-                    style={{ color: GOLD_RGBA(0.6) }}>
-                    🗓 Aaj Ka Panchang
-                  </p>
+                    style={{ color: GOLD_RGBA(0.6) }}>🗓 Aaj Ka Panchang</p>
                   <div className="grid grid-cols-2 gap-2 text-xs">
                     {[
-                      ['Vara',      panchang.vara],
-                      ['Tithi',     panchang.tithi],
-                      ['Nakshatra', panchang.nakshatra],
-                      ['Yoga',      panchang.yoga],
-                      ['Sunrise',   panchang.sunrise],
-                      ['Sunset',    panchang.sunset],
-                      ['Rahu Kaal', panchang.rahuKaal
+                      ['Vara',       panchang.vara],
+                      ['Tithi',      panchang.tithi],
+                      ['Nakshatra',  panchang.nakshatra],
+                      ['Yoga',       panchang.yoga],
+                      ['Sunrise',    panchang.sunrise],
+                      ['Sunset',     panchang.sunset],
+                      ['Rahu Kaal',  panchang.rahuKaal
                         ? `${panchang.rahuKaal.start} – ${panchang.rahuKaal.end}`
                         : null],
                       ['Choghadiya', panchang.choghadiya?.name ?? null],
@@ -522,14 +508,89 @@ export default function ResultClient({ predictionId, predictionData, meta }: Res
                 </div>
               )}
 
-              {dashaText ? (
-                <p className="text-slate-300 text-sm leading-relaxed">
-                  {typeof dashaText === 'string' ? dashaText : JSON.stringify(dashaText)}
-                </p>
-              ) : isFree ? (
-                <UpgradeBanner predictionId={predictionId} />
+              {/* Dasha analysis from Gemini */}
+              {dashaData && typeof dashaData === 'object' ? (
+                <div className="space-y-4">
+                  {dashaData.combinedDashaReading && (
+                    <div className="px-3 py-3 rounded-xl"
+                      style={{ background: GOLD_RGBA(0.05), border: `1px solid ${GOLD_RGBA(0.1)}` }}>
+                      <p className="text-xs font-semibold mb-2" style={{ color: GOLD }}>
+                        🔮 Combined Dasha Reading
+                      </p>
+                      <p className="text-slate-300 text-sm leading-relaxed">
+                        {dashaData.combinedDashaReading}
+                      </p>
+                    </div>
+                  )}
+
+                  {dashaData.pratyantar && (
+                    <div className="px-3 py-3 rounded-xl"
+                      style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
+                      <p className="text-xs font-semibold mb-2 text-slate-400">
+                        ⚡ Pratyantar Dasha (Active Now)
+                      </p>
+                      <div className="flex justify-between text-xs mb-2">
+                        <span className="text-slate-500">Lord</span>
+                        <span className="text-white font-medium">{dashaData.pratyantar.lord}</span>
+                      </div>
+                      <div className="flex justify-between text-xs mb-2">
+                        <span className="text-slate-500">Until</span>
+                        <span className="text-white font-medium">{dashaData.pratyantar.endDate}</span>
+                      </div>
+                      <div className="flex justify-between text-xs mb-2">
+                        <span className="text-slate-500">Quality</span>
+                        <span className={`font-medium ${
+                          dashaData.pratyantar.quality === 'Shubh' ? 'text-green-400' :
+                          dashaData.pratyantar.quality === 'Ashubh' ? 'text-red-400' : 'text-yellow-400'
+                        }`}>{dashaData.pratyantar.quality}</span>
+                      </div>
+                      {dashaData.pratyantar.immediateEffect && (
+                        <p className="text-slate-400 text-xs mt-2 leading-relaxed">
+                          {dashaData.pratyantar.immediateEffect}
+                        </p>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Action Windows */}
+                  {Array.isArray(actionWindows) && actionWindows.length > 0 && (
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-wider mb-2"
+                        style={{ color: '#22c55e' }}>🟢 Action Windows</p>
+                      <div className="space-y-2">
+                        {actionWindows.map((w: any, i: number) => (
+                          <div key={i} className="px-3 py-2.5 rounded-xl"
+                            style={{ background: 'rgba(34,197,94,0.05)', border: '1px solid rgba(34,197,94,0.15)' }}>
+                            <p className="text-green-400 text-xs font-semibold">{w.dateRange}</p>
+                            <p className="text-slate-300 text-xs mt-1">{w.action}</p>
+                            {w.planetaryBasis && (
+                              <p className="text-slate-500 text-xs mt-0.5 italic">{w.planetaryBasis}</p>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {dashaData.mahadasha?.domainEffect && (
+                    <div className="px-3 py-3 rounded-xl"
+                      style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
+                      <p className="text-xs font-semibold mb-2 text-slate-400">
+                        📅 Mahadasha Effect
+                      </p>
+                      <p className="text-slate-300 text-sm leading-relaxed">
+                        {dashaData.mahadasha.domainEffect}
+                      </p>
+                      {dashaData.mahadasha.endDate && (
+                        <p className="text-xs text-slate-600 mt-1">Until: {dashaData.mahadasha.endDate}</p>
+                      )}
+                    </div>
+                  )}
+                </div>
+              ) : dashaData && typeof dashaData === 'string' ? (
+                <p className="text-slate-300 text-sm leading-relaxed">{dashaData}</p>
               ) : (
-                <EmptyState text="Detailed Dasha analysis included in full prediction." />
+                <EmptyState text="Dasha analysis not available. Please submit a new prediction." />
               )}
             </div>
           )}
@@ -538,39 +599,101 @@ export default function ResultClient({ predictionId, predictionData, meta }: Res
           {activeTab === 'remedies' && (
             <div className="rounded-2xl p-5"
               style={{ background: 'rgba(4,8,20,0.8)', border: `1px solid ${GOLD_RGBA(0.1)}` }}>
-              {isFree ? (
-                <UpgradeBanner predictionId={predictionId} />
-              ) : remedies ? (
+              {remedyData ? (
                 <div>
-                  {typeof remedies === 'string' ? (
-                    <p className="text-slate-300 text-sm leading-relaxed">{remedies}</p>
-                  ) : Array.isArray(remedies) ? (
-                    <ul className="space-y-3">
-                      {remedies.map((r: any, i: number) => (
-                        <li key={i} className="flex gap-3">
-                          <span style={{ color: GOLD }}>•</span>
-                          <p className="text-slate-300 text-sm leading-relaxed">
-                            {typeof r === 'string' ? r : r.description ?? JSON.stringify(r)}
-                          </p>
-                        </li>
-                      ))}
-                    </ul>
-                  ) : (
-                    Object.entries(remedies).map(([key, val]) => (
-                      <div key={key} className="mb-4">
-                        <h3 className="text-xs font-semibold uppercase tracking-wider mb-1"
-                          style={{ color: GOLD }}>
-                          {key.replace(/_/g, ' ')}
-                        </h3>
-                        <p className="text-slate-300 text-sm">
-                          {typeof val === 'string' ? val : JSON.stringify(val)}
-                        </p>
-                      </div>
-                    ))
+                  {/* Remedy Summary */}
+                  {remedyData.remedySummary && (
+                    <div className="px-3 py-3 rounded-xl mb-4"
+                      style={{ background: GOLD_RGBA(0.05), border: `1px solid ${GOLD_RGBA(0.15)}` }}>
+                      <p className="text-slate-300 text-sm leading-relaxed">
+                        {remedyData.remedySummary}
+                      </p>
+                    </div>
                   )}
+
+                  {/* Remedies list */}
+                  {Array.isArray(remedyData.remedies) && remedyData.remedies.map((r: any, i: number) => (
+                    <div key={i} className="mb-5 rounded-xl p-4"
+                      style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid ${GOLD_RGBA(0.08)}` }}>
+                      <div className="flex justify-between items-center mb-3">
+                        <p className="text-sm font-bold" style={{ color: GOLD }}>
+                          {r.planet} — Priority {r.priority}
+                        </p>
+                        {r.affliction && (
+                          <span className="text-xs text-slate-500 italic">{r.affliction}</span>
+                        )}
+                      </div>
+
+                      <div className="space-y-2 text-xs">
+                        {r.mantra?.text && (
+                          <RemedyRow emoji="🕉" label="Mantra"
+                            value={`${r.mantra.text} — ${r.mantra.count} times on ${r.mantra.day} facing ${r.mantra.direction ?? 'East'}`} />
+                        )}
+                        {r.dana?.item && (
+                          <RemedyRow emoji="🙏" label="Dana"
+                            value={`${r.dana.item} on ${r.dana.day} ${r.dana.time ?? ''} to ${r.dana.recipient ?? 'needy'}`} />
+                        )}
+                        {r.vrat?.day && (
+                          <RemedyRow emoji="🌙" label="Vrat"
+                            value={`${r.vrat.day} fast for ${r.vrat.deity ?? 'deity'} — ${r.vrat.rules ?? ''}`} />
+                        )}
+                        {r.rudraksha?.mukhi && (
+                          <RemedyRow emoji="📿" label="Rudraksha"
+                            value={`${r.rudraksha.mukhi} Mukhi — ${r.rudraksha.reason ?? ''}`} />
+                        )}
+                        {r.ratna?.gem && (
+                          <div className="flex gap-2 p-2 rounded-lg"
+                            style={{ background: 'rgba(239,68,68,0.05)', border: '1px solid rgba(239,68,68,0.1)' }}>
+                            <span>💎</span>
+                            <div>
+                              <p className="text-slate-400 font-medium">Ratna: {r.ratna.gem}</p>
+                              <p className="text-slate-500 mt-0.5">{r.ratna.metal} · {r.ratna.finger}</p>
+                              {r.ratna.caution && (
+                                <p className="text-red-400/70 mt-1 text-xs italic">⚠ {r.ratna.caution}</p>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Dos */}
+                      {Array.isArray(r.dos) && r.dos.length > 0 && (
+                        <div className="mt-3">
+                          <p className="text-green-400 text-xs font-semibold mb-1.5">✓ Do This</p>
+                          <ul className="space-y-1">
+                            {r.dos.map((d: string, j: number) => (
+                              <li key={j} className="flex gap-2 text-xs text-slate-400">
+                                <span className="text-green-400">•</span>{d}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+
+                      {/* Don'ts */}
+                      {Array.isArray(r.donts) && r.donts.length > 0 && (
+                        <div className="mt-3">
+                          <p className="text-red-400 text-xs font-semibold mb-1.5">✗ Avoid</p>
+                          <ul className="space-y-1">
+                            {r.donts.map((d: string, j: number) => (
+                              <li key={j} className="flex gap-2 text-xs text-slate-400">
+                                <span className="text-red-400">•</span>{d}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+
+                      {r.classicalBasis && (
+                        <p className="text-xs italic mt-2" style={{ color: GOLD_RGBA(0.4) }}>
+                          📖 {r.classicalBasis}
+                        </p>
+                      )}
+                    </div>
+                  ))}
                 </div>
               ) : (
-                <EmptyState text="Remedies not available in your current plan." />
+                <EmptyState text="Submit a new prediction to see personalized remedies." />
               )}
             </div>
           )}
@@ -594,6 +717,19 @@ export default function ResultClient({ predictionId, predictionData, meta }: Res
 
 // ── Sub-components ─────────────────────────────────────────────────────────────
 
+function RemedyRow({ emoji, label, value }: { emoji: string; label: string; value: string }) {
+  return (
+    <div className="flex gap-2 px-2 py-1.5 rounded-lg"
+      style={{ background: 'rgba(255,255,255,0.03)' }}>
+      <span>{emoji}</span>
+      <div>
+        <span className="text-slate-500 font-medium">{label}: </span>
+        <span className="text-slate-300">{value}</span>
+      </div>
+    </div>
+  );
+}
+
 function KundaliStat({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
     <div className="text-center">
@@ -609,7 +745,7 @@ function StrengthBar({ value }: { value: number }) {
   const color = pct >= 70 ? '#22c55e' : pct >= 40 ? GOLD : '#ef4444';
   return (
     <div className="flex items-center gap-1.5">
-      <div className="w-12 h-1.5 rounded-full bg-slate-800 overflow-hidden">
+      <div className="w-10 h-1.5 rounded-full bg-slate-800 overflow-hidden">
         <div className="h-full rounded-full" style={{ width: `${pct}%`, background: color }} />
       </div>
       <span className="text-slate-500">{pct}</span>
