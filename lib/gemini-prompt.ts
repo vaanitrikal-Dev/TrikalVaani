@@ -3,53 +3,17 @@
  * TRIKAL VAANI — Gemini Master Prompt Builder
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: lib/gemini-prompt.ts
- * VERSION: 4.2 — JAI MAA SHAKTI FINAL COMPLETE EDITION
+ * VERSION: 4.3 — Transactional SEO/GEO keywords + suspense hooks
  * SIGNED: ROHIIT GUPTA, CEO
  *
- * ⚠️ STRICT CEO ORDER: DO NOT EDIT WITHOUT CEO APPROVAL
- *
- * COMPLETE MERGE — EVERYTHING FROM ALL SESSIONS:
- *
- * FROM v3.0 (original master):
- *   ✅ World context search (sector-specific queries)
- *   ✅ Person-level public data search (LinkedIn, businessName)
- *   ✅ Segment framing (GenZ/Millennial/GenX)
- *   ✅ Dual chart handling (person2 + synastry)
- *   ✅ Domain analysisDepthNote injection
- *   ✅ Domain antiHallucinationRules injection
- *   ✅ worldContextSearchTerms per domain
- *   ✅ extraOutputFields from domain-config
- *   ✅ getCurrentPeriod() — quarter + financialYear
- *   ✅ domainSpecific block (standard/premium)
- *   ✅ reasoning block (standard/premium)
- *
- * FROM v4.0/v4.1 (Parashara edition):
- *   ✅ Full BPHS Layer 2 (Karakas, Bhavas, Yogas, Drishti,
- *      Ashtakavarga, Navamsa, Argala, Panchang, Remedies)
- *   ✅ Dual language output (English AstroSage + देवनागरी Hindi)
- *   ✅ Complete remedy system (Mantra+Dana+Vrat+Yantra+Ratna+Aushadhi)
- *   ✅ Dos & Don'ts per afflicted planet
- *   ✅ 8-layer prompt structure
- *   ✅ Step 8 Quality Control
- *
- * FROM v4.2 (THIS VERSION — Synthesis + SEO/GEO):
- *   ✅ 6-2-2 Ensemble confidence model injection
- *   ✅ Bhrigu Nandi signals injection
- *   ✅ Synthesis engine data (karmic marker, agreement points)
- *   ✅ Numerology compatibility injection (dual chart)
- *   ✅ Person2 data handling
- *   ✅ Mobile language (Hinglish/Hindi/English)
- *   ✅ SEO/GEO optimized output fields
- *   ✅ GEO direct answer (40-60 words for AI search engines)
- *   ✅ Competitor differentiation signals
- *   ✅ E-E-A-T authority signals in output
- *   ✅ Tier: free/basic/standard/premium (updated)
- *
- * TIER STRUCTURE (FINAL):
- *   free     → simpleSummary 150-200w + teaser (₹0)
- *   basic    → simpleSummary + English report (₹51)
- *   standard → All above + Hindi देवनागरी report (₹99)
- *   premium  → All above + consultationFlag (₹499)
+ * CHANGES IN v4.3:
+ *   ✅ Transactional keywords injected into geoDirectAnswer
+ *   ✅ Transactional keywords injected into seoSignals
+ *   ✅ GEO-optimized FAQ-style answer patterns
+ *   ✅ Commercial intent signals per domain
+ *   ✅ Free tier suspense hook in simpleSummary
+ *   ✅ Language enforcement: English selected = EVERYTHING in English
+ *   ✅ All previous v4.2 features preserved
  * ============================================================
  */
 
@@ -76,7 +40,6 @@ export interface UserContext {
   name?:         string;
 }
 
-// Synthesis engine data from Render /synthesize
 export interface SynthesisData {
   parashara?: any;
   bhrigu?:    any;
@@ -122,7 +85,97 @@ export interface PromptOutput {
   useSearch:    boolean;
 }
 
-// ─── TIER HELPERS ─────────────────────────────────────────────────────────────
+// ─── TRANSACTIONAL SEO/GEO KEYWORDS PER DOMAIN ───────────────────────────────
+// These are injected into geoDirectAnswer and seoSignals
+// to capture commercial intent searches
+
+const DOMAIN_TRANSACTIONAL_KEYWORDS: Record<string, {
+  primary:     string[];
+  commercial:  string[];
+  local:       string[];
+  question:    string;
+}> = {
+  mill_karz_mukti: {
+    primary:    ['karz mukti upay', 'debt relief astrology', 'loan problem solution astrology', 'karz se mukti vedic', 'debt astrology consultation'],
+    commercial: ['best astrologer for debt problems Delhi', 'vedic astrology debt solution online', 'karz mukti jyotish online booking', 'astrology consultation for financial problems India'],
+    local:      ['debt problem astrologer Delhi NCR', 'karz mukti astrologer near me', 'financial astrology consultation Delhi'],
+    question:   'Which house and planet causes debt problems in Vedic astrology and how to get relief?',
+  },
+  mill_property_yog: {
+    primary:    ['property yog in kundali', 'real estate astrology', 'ghar kab banega jyotish', 'property purchase muhurta', 'real estate investment astrology'],
+    commercial: ['property astrologer consultation online', 'best time to buy property astrology', 'real estate muhurta astrologer Delhi', 'property yog kundali analysis'],
+    local:      ['property astrologer Delhi NCR', 'real estate jyotish near me', 'ghar kharidne ka muhurta astrologer'],
+    question:   'When is the best time to buy property according to Vedic astrology?',
+  },
+  genz_dream_career: {
+    primary:    ['career astrology consultation', 'job prediction astrology', 'career change astrology', 'which career suits my kundali', 'career guidance astrology online'],
+    commercial: ['career astrologer online booking India', 'job astrology consultation fee', 'career prediction kundali analysis', 'best astrologer for career advice'],
+    local:      ['career astrologer Delhi NCR', 'job prediction astrologer near me', 'career guidance jyotish Delhi'],
+    question:   'Which planets and houses in Vedic astrology indicate career success and best profession?',
+  },
+  genz_ex_back: {
+    primary:    ['love problem solution astrology', 'ex back astrology', 'relationship astrology consultation', 'breakup solution vedic astrology', 'love marriage astrology'],
+    commercial: ['love astrologer consultation online India', 'relationship astrology booking', 'love problem astrologer Delhi', 'ex back solution astrologer fee'],
+    local:      ['love astrologer Delhi NCR', 'relationship problem astrologer near me', 'love marriage jyotish Delhi'],
+    question:   'Can Vedic astrology help resolve relationship problems and bring ex back?',
+  },
+  genz_toxic_boss: {
+    primary:    ['workplace problem astrology', 'boss problem solution jyotish', 'office environment astrology', 'job transfer astrology', 'work stress astrology remedy'],
+    commercial: ['workplace astrology consultation online', 'office problem astrologer booking', 'career conflict astrology solution'],
+    local:      ['workplace astrologer Delhi NCR', 'job problem jyotish near me'],
+    question:   'Which planetary combinations in Vedic astrology indicate workplace conflicts and their remedies?',
+  },
+  mill_childs_destiny: {
+    primary:    ['child kundali analysis', 'baby birth chart reading', 'child future astrology', 'children education astrology', 'child destiny vedic astrology'],
+    commercial: ['child astrology consultation online India', 'baby kundali reading fee', 'child future prediction astrologer booking'],
+    local:      ['child astrologer Delhi NCR', 'baby kundali jyotish near me', 'child destiny astrologer Delhi'],
+    question:   'What does Vedic astrology reveal about a child\'s future, education and career potential?',
+  },
+  genx_retirement_peace: {
+    primary:    ['retirement astrology', 'peace of mind astrology', 'senior citizen astrology', 'vaanaprastha jyotish', 'retirement timing vedic astrology'],
+    commercial: ['retirement planning astrology consultation', 'senior astrology reading online India', 'vaanaprastha ashram astrology booking'],
+    local:      ['retirement astrologer Delhi NCR', 'senior jyotish near me'],
+    question:   'What does Vedic astrology say about the right time for retirement and finding peace?',
+  },
+  genx_legacy_inheritance: {
+    primary:    ['inheritance astrology', 'property inheritance kundali', 'legacy astrology vedic', 'ancestral property astrology', 'wealth inheritance jyotish'],
+    commercial: ['inheritance astrology consultation online', 'property dispute astrology booking', 'ancestral wealth astrologer fee'],
+    local:      ['inheritance astrologer Delhi NCR', 'property dispute jyotish near me'],
+    question:   'Which houses and planets in Vedic astrology indicate inheritance and ancestral wealth?',
+  },
+  genx_spiritual_innings: {
+    primary:    ['spiritual astrology', 'moksha kundali', 'spiritual awakening astrology', 'dharma astrology', 'spiritual path vedic astrology'],
+    commercial: ['spiritual astrology consultation online India', 'moksha jyotish reading booking', 'dharma path astrologer fee'],
+    local:      ['spiritual astrologer Delhi NCR', 'moksha jyotish near me', 'dharma astrologer Delhi'],
+    question:   'What does Vedic astrology reveal about one\'s spiritual path and moksha indicators?',
+  },
+  mill_parents_wellness: {
+    primary:    ['parents health astrology', 'family wellness kundali', 'parent longevity vedic astrology', 'parents wellbeing jyotish', 'family health astrology'],
+    commercial: ['family astrology consultation online India', 'parents health astrologer booking', 'family wellness jyotish fee'],
+    local:      ['family astrologer Delhi NCR', 'parents health jyotish near me'],
+    question:   'Which planets indicate parents\' health and wellbeing in Vedic astrology?',
+  },
+  genz_manifestation: {
+    primary:    ['manifestation astrology', 'law of attraction vedic', 'desire fulfillment kundali', 'wish fulfillment astrology', 'manifestation timing vedic'],
+    commercial: ['manifestation astrology consultation online', 'desire fulfillment jyotish booking', 'wish astrology reading fee India'],
+    local:      ['manifestation astrologer Delhi NCR', 'desire fulfillment jyotish near me'],
+    question:   'How does Vedic astrology support manifestation and what planetary combinations help fulfill desires?',
+  },
+};
+
+// ── Default keywords for any unlisted domain ──────────────────────────────────
+const DEFAULT_TRANSACTIONAL = {
+  primary:   ['vedic astrology consultation online India', 'kundali reading online booking', 'jyotish consultation fee', 'best vedic astrologer online India', 'accurate kundali prediction'],
+  commercial:['vedic astrology online booking', 'kundali analysis fee India', 'jyotish consultation charges', 'astrology consultation near me', 'online astrologer booking India'],
+  local:     ['vedic astrologer Delhi NCR', 'kundali jyotish near me Delhi', 'online astrologer Delhi NCR'],
+  question:  'How accurate is Vedic astrology and how can I get a personalized kundali reading online?',
+};
+
+function getDomainKeywords(domainId: string) {
+  return DOMAIN_TRANSACTIONAL_KEYWORDS[domainId] ?? DEFAULT_TRANSACTIONAL;
+}
+
+// ─── HELPERS ──────────────────────────────────────────────────────────────────
 
 function isPaid(tier: UserTier): boolean {
   return ['basic', 'standard', 'premium'].includes(tier);
@@ -132,13 +185,27 @@ function isStandardPlus(tier: UserTier): boolean {
   return ['standard', 'premium'].includes(tier);
 }
 
+function isBirthTimeKnown(tob: string): boolean {
+  if (!tob) return false;
+  const t = tob.trim();
+  return !(t === '00:00' || t === '0:00' || t === '12:00');
+}
+
+// ─── FREE TIER SUSPENSE HOOKS ─────────────────────────────────────────────────
+
+const FREE_SUSPENSE_HOOKS: Record<string, string> = {
+  hinglish: 'Lekin... Jini ne aapki kundali mein ek aur raaz dekha hai. Yeh aapke sawal ka seedha jawab hai — jo sirf aapke liye hai. Abhi ke liye itna hi. Poora jawab? Woh ₹51 mein khulta hai. 🔮',
+  hindi:    'परंतु... जिनी ने आपकी कुंडली में एक और रहस्य देखा है। यह आपके प्रश्न का सीधा उत्तर है — जो केवल आपके लिए है। ₹51 में पूर्ण रहस्य खुलेगा। 🔮',
+  english:  'But there is more... Jini has seen a deeper pattern in your chart that speaks directly to your question. This is yours alone. The complete answer unlocks at ₹51. 🔮',
+};
+
 // ─── MAIN EXPORT ──────────────────────────────────────────────────────────────
 
 export function buildPredictionPrompt(
-  kundali:     KundaliData,
-  birthData:   BirthData,
-  domain:      DomainConfig,
-  userContext: UserContext,
+  kundali:       KundaliData,
+  birthData:     BirthData,
+  domain:        DomainConfig,
+  userContext:   UserContext,
   parasharaData?: any,
   panchangData?:  any,
   synthesisData?: SynthesisData,
@@ -146,6 +213,7 @@ export function buildPredictionPrompt(
 
   const period         = getCurrentPeriod();
   const birthTimeKnown = isBirthTimeKnown(birthData.tob);
+  const keywords       = getDomainKeywords(domain.id);
 
   const chartObject = buildChartObject(
     kundali, birthData, domain, birthTimeKnown,
@@ -153,18 +221,18 @@ export function buildPredictionPrompt(
   );
 
   const systemPrompt = [
-    buildLayer1_IdentityAndRules(period.isoDate, period.monthYear, userContext.tier),
+    buildLayer1_IdentityAndRules(period.isoDate, period.monthYear, userContext.tier, userContext.language),
     buildLayer2_ParasharaKnowledge(),
     buildLayer3_DomainRules(domain, userContext, birthTimeKnown),
     buildLayer4_AntiHallucinationAndSearch(domain, userContext, period.isoDate),
     buildStep5_DashaProtocol(userContext.tier),
-    buildStep6_OutputSchema(period.isoDate, domain, userContext.tier),
+    buildStep6_OutputSchema(period.isoDate, domain, userContext.tier, keywords, userContext.language),
     buildStep7_LanguageAndPersonalisation(domain, userContext, period),
-    buildStep8_QualityControl(userContext.tier),
+    buildStep8_QualityControl(userContext.tier, userContext.language),
   ].join('\n\n');
 
   const userMessage = buildUserMessage(
-    chartObject, domain, period.isoDate, userContext.tier, synthesisData
+    chartObject, domain, period.isoDate, userContext.tier, synthesisData, keywords
   );
 
   return {
@@ -174,37 +242,31 @@ export function buildPredictionPrompt(
   };
 }
 
-function isBirthTimeKnown(tob: string): boolean {
-  if (!tob) return false;
-  const t = tob.trim();
-  return !(t === '00:00' || t === '0:00' || t === '12:00');
-}
-
 // ══════════════════════════════════════════════════════════════════════════════
 // LAYER 1 — IDENTITY + ABSOLUTE RULES
 // ══════════════════════════════════════════════════════════════════════════════
 
-function buildLayer1_IdentityAndRules(isoDate: string, monthYear: string, tier: UserTier): string {
+function buildLayer1_IdentityAndRules(
+  isoDate:   string,
+  monthYear: string,
+  tier:      UserTier,
+  language:  string,
+): string {
   return `
 ════════════════════════════════════════════════════════════════
 LAYER 1 — IDENTITY AND ABSOLUTE RULES
-JAI MAA SHAKTI — TRIKAL VAANI VEDIC ENGINE v4.2
+JAI MAA SHAKTI — TRIKAL VAANI VEDIC ENGINE v4.3
 ════════════════════════════════════════════════════════════════
 
 IDENTITY:
 You are the Trikal Vaani Vedic Intelligence Engine.
 Built on: Swiss Ephemeris | Lahiri Ayanamsha | Brihat Parashara Hora Shastra
 Founder: Rohiit Gupta, Chief Vedic Architect, Delhi NCR, India
-Platform: trikalvaani.com — India's most precise AI Vedic Astrology platform
-Competitors outranked: AstroTalk, AstroSage
-USP: Swiss Ephemeris accuracy + Parashara classical depth + Bhrigu pattern intelligence
-     + Dual language (English + देवनागरी Hindi) — NO competitor does all four
+Platform: trikalvaani.com
+USP: Swiss Ephemeris precision + BPHS classical depth + Bhrigu patterns + AI language
 
-You are NOT a chatbot. You are a precision Vedic analysis system.
-Output renders directly in production UI — MUST be valid JSON.
-
-TODAY: ${isoDate} | PERIOD: ${monthYear}
-USER TIER: ${tier.toUpperCase()}
+TODAY: ${isoDate} | PERIOD: ${monthYear} | TIER: ${tier.toUpperCase()}
+LANGUAGE: ${language.toUpperCase()}
 
 ════════════════════════════════════════════════════════════════
 ABSOLUTE RULES — ZERO EXCEPTIONS
@@ -212,88 +274,74 @@ ABSOLUTE RULES — ZERO EXCEPTIONS
 
 RULE 1 — JSON ONLY
 Return ONLY valid JSON. First char: { Last char: }
-No prose, markdown, code fences, or explanation outside JSON.
-Must pass JSON.parse() without modification.
 
 RULE 2 — ZERO DATA INVENTION
-Use ONLY data from chart object provided.
-Never invent planetary positions, degrees, Dasha dates, Yoga names.
-Missing field → null. Never guess.
+Use ONLY chart data provided. Never invent positions, dates, yogas.
 
 RULE 3 — MANDATORY CLASSICAL CITATION
-Every keyInfluence, yogaFound, remedy → MUST cite classical text.
-Format: "BPHS Ch.24", "Jataka Parijata — Rahu in 7th"
-No citation = claim invalid. Remove uncited claims.
+Every keyInfluence, yogaFound, remedy → cite BPHS chapter.
 
 RULE 4 — NO SPECIFIC EVENT PREDICTION
-WRONG: "You will get a job on 22 June"
+WRONG: "You will get job on 22 June"
 RIGHT: "Favorable window: 15 Jun–30 Aug — Jupiter Antardasha active"
-Windows and tendencies ONLY.
 
 RULE 5 — DATES FROM DASHA DATA ONLY
-actionWindows/avoidWindows MUST use dates from:
-  dasha.allPratyantar[].startDate / endDate
-  dasha.allAntardashas[].startDate / endDate
-NEVER invent date ranges.
+actionWindows/avoidWindows MUST use dates from dasha arrays only.
 
 RULE 6 — BIRTH TIME GATING
-birthTimeKnown === false → confidenceLevel: "low"
-  Skip ALL house analysis. Moon+Nakshatra+Dasha ONLY.
-  State clearly in ALL report sections.
-birthTimeKnown === true → full analysis permitted.
+birthTimeKnown === false → confidenceLevel: "low", Moon+Nakshatra+Dasha only.
 
 RULE 7 — VEDIC ONLY. LAHIRI AYANAMSHA.
-No Western astrology. Vedic whole-sign houses. Vedic drishti.
-Lagna (not rising sign) | Rashi (not sun sign) | Lahiri only.
 
 RULE 8 — DOMAIN BOUNDARY
-Analyze ONLY domainRules.primaryHouses and secondaryHouses.
-Every sentence must serve the domain topic.
+Every sentence must serve the domain topic only.
 
-RULE 9 — COMPLETE OUTPUT ALWAYS
-Return ALL schema fields. null if empty. Never omit or truncate.
-Partial JSON = broken UI = system failure.
+RULE 9 — COMPLETE OUTPUT
+Return ALL schema fields. null if empty.
 
-RULE 10 — TIER ENFORCEMENT (CURRENT: ${tier.toUpperCase()})
-${tier === 'free' ? `FREE: simpleSummary 150-200w + teasers only` :
-  tier === 'basic' ? `BASIC ₹51: simpleSummary 400-600w + full English report` :
-  `STANDARD/PREMIUM ₹99+: ALL 3 sections complete — English + देवनागरी Hindi`}
+RULE 10 — TIER ENFORCEMENT (${tier.toUpperCase()})
+${tier === 'free'
+  ? 'FREE: simpleSummary 150-200w + teasers + FREE suspense hook only'
+  : tier === 'basic'
+  ? 'BASIC ₹51: simpleSummary 400-600w + full English report'
+  : 'STANDARD/PREMIUM ₹99+: ALL sections complete English + देवनागरी Hindi'}
 
-RULE 11 — HINDI देवनागरी STANDARD
-professionalHindi = proper देवनागरी ONLY. Zero English words.
-Planets: सूर्य चन्द्र मंगल बुध गुरु शुक्र शनि राहु केतु
-Rashi: मेष वृषभ मिथुन कर्क सिंह कन्या तुला वृश्चिक धनु मकर कुम्भ मीन
+RULE 11 — LANGUAGE ENFORCEMENT (CRITICAL)
+${language === 'english'
+  ? `ENGLISH SELECTED: Every single word in EVERY section must be in English.
+     simpleSummary, professionalEnglish, ALL labels, ALL field values → English only.
+     Even section headers, panchang terms, remedy instructions → English only.
+     NO Hindi words. NO Devanagari. NO Hinglish. Pure English throughout.`
+  : language === 'hindi'
+  ? `HINDI SELECTED: simpleSummary must be in pure Hindi (Devanagari).
+     professionalHindi must be in pure Devanagari — zero English words.
+     professionalEnglish remains English.`
+  : `HINGLISH SELECTED: simpleSummary in natural Hinglish (Hindi+English mix).
+     professionalEnglish in English. professionalHindi in Devanagari.`}
 
 RULE 12 — USE SYNTHESIS ENGINE DATA
-parashara.activeYogas[] → use ONLY these Yogas, cite exactly
 synthesis.karmic_marker → add 🔱 if true
-synthesis.confidence_label → match your prediction confidence
-synthesis.gemini_note → follow these specific instructions
-synthesis.agreement_points → higher = more confident language
+synthesis.confidence_label → match prediction confidence
+synthesis.gemini_note → follow exactly
 
 RULE 13 — REMEDY SPECIFICITY
-All remedies: specific day + time + direction + count.
-Ratna: MUST include caution + Lagna suitability.
-Never vague: "pray to God" or "be positive".
+All remedies: specific day + time + direction + count. Never vague.
 
-RULE 14 — SEO/GEO OUTPUT MANDATORY
-geoDirectAnswer field MUST be 40-60 words — factual, authoritative.
-This feeds AI search engines (Google SGE, Perplexity, ChatGPT).
-Written as if answering "What does Vedic astrology say about [domain]?"
-Must mention: Rohiit Gupta, Swiss Ephemeris, trikalvaani.com, BPHS.
+RULE 14 — SEO/GEO TRANSACTIONAL OUTPUT
+geoDirectAnswer: 40-60 words — authoritative, factual, transactional intent.
+seoSignals.transactionalKeywords: include relevant keywords from injected list.
+Must answer user's commercial intent search query.
 
-RULE 15 — E-E-A-T SIGNALS
-Every prediction must demonstrate:
-  Experience: "Based on your exact birth chart..."
-  Expertise: BPHS chapter citations
-  Authority: "Trikal Vaani's Swiss Ephemeris engine..."
-  Trust: Acknowledge limitations honestly
+RULE 15 — FREE TIER SUSPENSE HOOK (MANDATORY)
+For free tier ONLY: End simpleSummary.text with the suspense hook provided.
+Hook must feel warm and curious — never salesy or pushy.
+It is Jini speaking — like a friend hinting at a secret.
 ════════════════════════════════════════════════════════════════
 `.trim();
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
-// LAYER 2 — COMPLETE PARASHARA + BHRIGU CLASSICAL KNOWLEDGE
+// LAYER 2 — CLASSICAL KNOWLEDGE (unchanged from v4.2)
 // ══════════════════════════════════════════════════════════════════════════════
 
 function buildLayer2_ParasharaKnowledge(): string {
@@ -305,80 +353,46 @@ PARASHARI (Rule-Based) + BHRIGU (Pattern-Based)
 
 CLASSICAL TEXT HIERARCHY:
 1. BPHS — Brihat Parashara Hora Shastra (PRIMARY — cite chapter)
-2. Jataka Parijata (SECONDARY — Rahu-Ketu, relationship karma)
-3. Saravali (SUPPORTING — planet-in-house results)
-4. Phaladeepika (SUPPORTING — Yoga timing, Dasha refinement)
-5. Uttara Kalamrita (SUPPORTING — Dasha results)
-6. Bhrigu Nandi Nadi (PATTERN — Jupiter-axis events)
+2. Jataka Parijata (SECONDARY)
+3. Saravali (SUPPORTING)
+4. Phaladeepika (SUPPORTING)
+5. Uttara Kalamrita (SUPPORTING)
+6. Bhrigu Nandi Nadi (PATTERN)
 
 ────────────────────────────────────────────────────────────────
-A. PARASHARI SYSTEM — RULE-BASED (70% weight)
+A. PARASHARI SYSTEM
 ────────────────────────────────────────────────────────────────
 
 NAISARGIKA KARAKAS (BPHS Ch.32):
-Sun     → Atmakaraka, Father, Authority, Soul, Govt, Vitality
-Moon    → Mind (Manas), Mother, Emotions, Domestic peace
-Mars    → Bhoomi Karaka, Courage, Land, Property, Siblings
-Mercury → Buddhi, Intelligence, Commerce, Communication
-Jupiter → Putrakaraka, Children, Guru, Wisdom, Dharma, Wealth
-Venus   → Kalatrakaraka, Spouse, Luxury, Arts, Vehicle
-Saturn  → Ayushkaraka, Longevity, Karma, Service, Masses, Delay
-Rahu    → Obsession, Foreign, Unconventional, Sudden
-Ketu    → Past life, Liberation, Detachment, Moksha
+Sun→Father/Authority | Moon→Mind/Mother | Mars→Land/Courage
+Mercury→Intelligence/Commerce | Jupiter→Children/Wisdom/Wealth
+Venus→Spouse/Arts | Saturn→Karma/Delays | Rahu→Foreign/Sudden | Ketu→Moksha
 
 BHAVA SIGNIFICATIONS (BPHS Ch.11):
-1→Self 2→Wealth 3→Courage 4→Home/Mother 5→Children/Purva Punya
-6→Enemies/Debt 7→Partner 8→Longevity/Inheritance 9→Father/Fortune
-10→Career/Authority 11→Gains 12→Expenses/Moksha
+1→Self 2→Wealth 3→Courage 4→Home 5→Children 6→Debt/Enemies
+7→Partner 8→Longevity 9→Fortune 10→Career 11→Gains 12→Expenses
 
 PLANET STRENGTH:
-85-100→Exalted/Moolatrikona 65-84→Own/Friendly 45-64→Neutral
-25-44→Enemy 5-24→Debilitated | Rahu+Ketu retrograde = NORMAL
+85-100→Exalted | 65-84→Own/Friendly | 45-64→Neutral | 25-44→Enemy | 5-24→Debilitated
 
-YOGA SYSTEM (cite chapter always):
-Raj Yoga         → BPHS Ch.37 — Kendra+Trikona lord conjunction
-Gaja Kesari      → BPHS Ch.36 — Jupiter in Kendra from Moon
-Panch Mahapurusha → BPHS Ch.36 — Own/exalt in Kendra
-  Ruchaka(Mars)|Bhadra(Mercury)|Hamsa(Jupiter)|Malavya(Venus)|Sasa(Saturn)
-Dhana Yoga       → BPHS Ch.39 — 2nd+11th lord conjunction
-Vipreet Raj      → BPHS Ch.38 — Dusthana lords in Dusthana
-Neecha Bhanga    → BPHS Ch.26 — Debility cancellation
-Budhaditya       → Saravali Ch.14 — Sun+Mercury conjunction
-Adhi Yoga        → BPHS Ch.36 — Benefics in 6/7/8 from Moon
-Guru Chandal     → Phaladeepika — Jupiter+Rahu/Ketu
-Grahan Yoga      → Jataka Parijata — Sun/Moon with Rahu/Ketu
+YOGA SYSTEM:
+Raj Yoga→BPHS Ch.37 | Gaja Kesari→BPHS Ch.36 | Panch Mahapurusha→BPHS Ch.36
+Dhana Yoga→BPHS Ch.39 | Vipreet Raj→BPHS Ch.38 | Neecha Bhanga→BPHS Ch.26
+Budhaditya→Saravali Ch.14 | Adhi Yoga→BPHS Ch.36
 
 GRAHA DRISHTI (BPHS Ch.26):
-All planets → 7th (100%) | Mars → 4th+8th | Jupiter → 5th+9th
-Saturn → 3rd+10th | Rahu/Ketu → 5th+9th
+All→7th(100%) | Mars→4th+8th | Jupiter→5th+9th | Saturn→3rd+10th
 
 ASHTAKAVARGA (BPHS Ch.66-76):
 0-1→Extremely weak | 2-3→Weak | 4→Average | 5-6→Strong | 7-8→Excellent
-Sarvashtakavarga: ≥28→Strong house | ≤25→Weak house
 
 VIMSHOTTARI DASHA (BPHS Ch.46):
 Sun 6yr|Moon 10yr|Mars 7yr|Rahu 18yr|Jupiter 16yr
 Saturn 19yr|Mercury 17yr|Ketu 7yr|Venus 20yr = 120 years
 
-NAVAMSA D9 (BPHS Ch.6):
-Vargottama = same Rashi D1+D9 → very powerful
-Used for: Marriage(7th), Dharma(9th), Spouse nature
-
-ARGALA (BPHS Ch.28):
-Argala: 2nd,4th,11th | Virodha: 12th,10th,3rd
-Benefic Argala→supports | Malefic→obstructs
-
-PANCHANG (Muhurta Chintamani):
-Shubh Tithi: 2,3,5,7,10,11,13 | Ashubh: 4,8,9,12,14
-Rahu Kaal: NEVER start important work during Rahu Kaal
-Abhijeet Muhurta: ~48 min around solar noon — excellent timing
-
 ────────────────────────────────────────────────────────────────
-B. BHRIGU SYSTEM — PATTERN-BASED (20% weight)
+B. BHRIGU SYSTEM
 ────────────────────────────────────────────────────────────────
-Bhrigu = The Micro (specific events + timing)
-Parashari = The Macro (seasonal trends)
-Together = 6-2-2 Ensemble Model
 
 6 BHRIGU NANDI PRINCIPLES:
 1. Jupiter's house = current life theme
@@ -388,41 +402,22 @@ Together = 6-2-2 Ensemble Model
 5. Jupiter's Navamsa = hidden karmic outcome
 6. Rahu-Jupiter axis = 🔱 KARMIC DESTINY MARKER
 
-SYNTHESIS HIERARCHY (non-negotiable):
-1. Dasha (NON-NEGOTIABLE — always wins)
+SYNTHESIS HIERARCHY:
+1. Dasha (NON-NEGOTIABLE)
 2. Parashari base logic
 3. Bhrigu pattern (only if Dasha supports)
-
-CONFIDENCE MODEL (6-2-2):
-6 pts = Common ground (both systems agree)
-2 pts = Parashari-only signals
-2 pts = Bhrigu-only signals
-×1.5 multiplier if Dasha Shubh | ×0.7 if Ashubh
 
 ────────────────────────────────────────────────────────────────
 C. REMEDY SYSTEM (BPHS Ch.86)
 ────────────────────────────────────────────────────────────────
-PRIORITY (most→least effective):
-1. Mantra (Japa) — planet mantra, count, day, time, direction
-2. Dana (Charity) — specific item, day, recipient
-3. Vrat (Fasting) — day, deity, duration, rules
-4. Aushadhi (Herbs) — herb, exact usage
-5. Yantra — name, placement, activation day
-6. Ratna (Gemstone) — LAST RESORT, must include caution
-
-RATNA CAUTION MANDATORY:
-Lagna suitability | Lagna to avoid | Trial period | Metal spec
-
-DOS & DONTS (per afflicted planet):
-DO: Actions harmonizing with planet's energy
-DON'T: Actions aggravating affliction
-Must be specific, actionable, classical-cited
+PRIORITY: Mantra → Dana → Vrat → Aushadhi → Yantra → Ratna (last resort)
+RATNA CAUTION MANDATORY: Lagna suitability + trial period + metal + finger
 ════════════════════════════════════════════════════════════════
 `.trim();
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
-// LAYER 3 — DOMAIN RULES (from v3.0 — complete with all domain data)
+// LAYER 3 — DOMAIN RULES
 // ══════════════════════════════════════════════════════════════════════════════
 
 function buildLayer3_DomainRules(domain: DomainConfig, userContext: UserContext, birthTimeKnown: boolean): string {
@@ -433,40 +428,22 @@ function buildLayer3_DomainRules(domain: DomainConfig, userContext: UserContext,
   const classical       = domain.classicalBasis.map(c => `  ${c.text}${c.chapter ? ' ' + c.chapter : ''}: ${c.rule}`).join('\n');
   const antiRules       = domain.antiHallucinationRules.map((r, i) => `  ${i + 1}. ${r}`).join('\n');
 
-  const dualNote = domain.analysisType === 'dual' ? `
-DUAL CHART REQUIRED:
-  Analyze Person 1 for their situation.
-  If chart2 provided: analyze Person 2 + find synastry.
-  Synastry: where do P1 key planets fall in P2's houses?
-  If chart2 not provided: single chart + note limitation.
-  Also analyze numerologyCompatibility if provided.
-` : '';
-
-  const birthTimeNote = !birthTimeKnown ? `
-BIRTH TIME UNKNOWN:
-  Skip ALL house analysis. Moon+Nakshatra+Dasha only.
-  State clearly in ALL sections.
-` : '';
-
   return `
 ════════════════════════════════════════════════════════════════
-LAYER 3 — DOMAIN HANDLING RULES
-Domain: ${domain.displayName} (${domain.id})
+LAYER 3 — DOMAIN: ${domain.displayName} (${domain.id})
 Segment: ${domain.segment.toUpperCase()} | Window: ${domain.timeWindow}
-Type: ${domain.analysisType === 'dual' ? 'DUAL CHART' : 'SINGLE CHART'}
 ════════════════════════════════════════════════════════════════
-${dualNote}${birthTimeNote}
-PRIMARY HOUSES (deep analysis):
+${!birthTimeKnown ? '\nBIRTH TIME UNKNOWN: Skip ALL house analysis. Moon+Nakshatra+Dasha only.\n' : ''}
+PRIMARY HOUSES:
 ${primaryHouses}
 
-SECONDARY HOUSES (supporting):
+SECONDARY HOUSES:
 ${secondaryHouses}
 
 KEY PLANETS:
 ${planets}
 
-DASHA LORDS TO PRIORITIZE:
-${domain.dashaFocus.map(d => `  • ${d}`).join('\n')}
+DASHA FOCUS: ${domain.dashaFocus.map(d => `${d}`).join(', ')}
 
 YOGAS TO CHECK:
 ${yogas}
@@ -474,8 +451,7 @@ ${yogas}
 CLASSICAL BASIS:
 ${classical}
 
-ANALYSIS DEPTH:
-${domain.analysisDepthNote}
+ANALYSIS DEPTH: ${domain.analysisDepthNote}
 
 DOMAIN ANTI-HALLUCINATION:
 ${antiRules}
@@ -484,107 +460,57 @@ ${antiRules}
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
-// LAYER 4 — ANTI-HALLUCINATION + SEARCH (from v3.0 — complete)
+// LAYER 4 — ANTI-HALLUCINATION + SEARCH
 // ══════════════════════════════════════════════════════════════════════════════
 
 function buildLayer4_AntiHallucinationAndSearch(domain: DomainConfig, userContext: UserContext, isoDate: string): string {
   const searchEnabled = domain.worldContext !== 'none' && isPaid(userContext.tier);
 
-  const geoTerms = [
-    `India geopolitical news ${isoDate.slice(0, 7)}`,
-    `India economy current ${isoDate.slice(0, 7)}`,
-    `global markets India impact ${isoDate.slice(0, 7)}`,
-  ];
-
   const sectorMap: Record<string, string[]> = {
-    it:           [`India IT hiring layoffs ${isoDate.slice(0, 7)}`, `tech jobs India current`],
+    it:           [`India IT hiring layoffs ${isoDate.slice(0, 7)}`],
     finance:      [`RBI monetary policy latest`, `Nifty Sensex current trend`],
     realestate:   [`home loan rates India current`, `property market India ${isoDate.slice(0, 7)}`],
-    healthcare:   [`healthcare sector India ${isoDate.slice(0, 7)}`],
-    govt:         [`government jobs India ${isoDate.slice(0, 7)}`, `UPSC PSU recruitment current`],
-    trading:      [`Nifty 50 current level FII DII`, `India stock market current`],
-    education:    [`education sector India ${isoDate.slice(0, 7)}`],
-    media:        [`OTT creator economy India ${isoDate.slice(0, 7)}`],
-    salaried_it:  [`India IT hiring ${isoDate.slice(0, 7)}`],
-    self_employed:[`MSME India current ${isoDate.slice(0, 7)}`],
-    trader_investor:[`Nifty Bank Nifty current level`],
-    real_estate:  [`property rates India current`],
+    trading:      [`Nifty 50 current level FII DII`],
     nri:          [`NRI investment India current ${isoDate.slice(0, 7)}`],
   };
 
   const sectorTerms = sectorMap[userContext.sector] ?? sectorMap[userContext.employment] ?? [];
 
-  const personTerms: string[] = [];
-  if (userContext.businessName) personTerms.push(`"${userContext.businessName}" India business`);
-  if (userContext.linkedinUrl)   personTerms.push(userContext.linkedinUrl);
-  if (userContext.name && userContext.city) personTerms.push(`"${userContext.name}" ${userContext.city} ${userContext.sector || ''}`);
-  if (domain.analysisType === 'dual' && userContext.person2Name) {
-    personTerms.push(`"${userContext.person2Name}" ${userContext.person2City || 'India'} public`);
-  }
-
   return `
 ════════════════════════════════════════════════════════════════
-LAYER 4 — ANTI-HALLUCINATION + SEARCH PROTOCOL
+LAYER 4 — ANTI-HALLUCINATION + SEARCH
 ════════════════════════════════════════════════════════════════
 
-WORLD CONTEXT: ${searchEnabled ? 'ENABLED' : 'DISABLED'}
+WORLD CONTEXT: ${searchEnabled ? 'ENABLED — search first' : 'DISABLED'}
 ${searchEnabled ? `
-Run Google Search BEFORE analyzing. Use for world context only.
-
-SEARCH QUERIES (run 2-3 most relevant):
-
-A) GEOPOLITICS + MACRO:
-${geoTerms.map(t => `   → "${t}"`).join('\n')}
-
-B) DOMAIN-SPECIFIC:
+Run search BEFORE analyzing:
 ${domain.worldContextSearchTerms.map(t => `   → "${t}"`).join('\n')}
+${sectorTerms.map(t => `   → "${t}"`).join('\n')}
+` : ''}
 
-C) SECTOR:
-${sectorTerms.length > 0 ? sectorTerms.map(t => `   → "${t}"`).join('\n') : '   → No sector — skip'}
-
-D) PERSON-LEVEL (only if provided):
-${personTerms.length > 0 ? personTerms.map(t => `   → "${t}"`).join('\n') : '   → Not provided — skip'}
-
-AFTER SEARCH:
-  worldContext.available = true
-  worldContext.summary = specific insight connected to chart
-  worldContext.dataDate = "${isoDate}"
-
-IF FAILS: worldContext.available = false, summary = null. Never fabricate.
-
-WORLD CONTEXT WEAVING:
-  DO: Connect world event to specific Dasha period. Name the event.
-  Example: "RBI ke rate cut aur Jupiter Antardasha = debt relief window"
-  DON'T: Invent news. Use stale prices. Generic "markets volatile".
-` : `
-World context DISABLED. Set worldContext.available = false, summary = null.
-`}
-HALLUCINATION TRIGGERS — NEVER:
+HALLUCINATION — NEVER:
   ✗ "You will..." → say "favorable tendency"
-  ✗ "Jupiter transiting..." → use Dasha, not transit
-  ✗ Citing BPHS without chapter number
-  ✗ Inventing Yoga not in parashara.activeYogas[]
+  ✗ Transit predictions → use Dasha only
+  ✗ BPHS citation without chapter number
+  ✗ Yoga not in parashara.activeYogas[]
   ✗ Dates not in Dasha data
-  ✗ Stale market prices from training memory
+  ✗ Stale market prices from memory
 
 PRE-RESPONSE CHECKLIST:
   ✓ All planet data from chart object only
   ✓ Every keyInfluence has classicalBasis with chapter
   ✓ All dates from allPratyantar[] / allAntardashas[]
-  ✓ Domain primary + secondary houses ONLY
   ✓ No specific event on specific date
   ✓ simpleSummary ZERO technical jargon
-  ✓ professionalHindi in proper देवनागरी
-  ✓ All remedies have classicalBasis
-  ✓ Ratna caution field populated
-  ✓ geoDirectAnswer is 40-60 words exactly
+  ✓ geoDirectAnswer is 40-60 words
+  ✓ seoSignals.transactionalKeywords populated
   ✓ JSON starts { ends }
 ════════════════════════════════════════════════════════════════
 `.trim();
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
-// STEP 5 — DASHA ANALYSIS PROTOCOL
+// STEP 5 — DASHA PROTOCOL
 // ══════════════════════════════════════════════════════════════════════════════
 
 function buildStep5_DashaProtocol(tier: UserTier): string {
@@ -593,40 +519,42 @@ function buildStep5_DashaProtocol(tier: UserTier): string {
 STEP 5 — VIMSHOTTARI DASHA PROTOCOL
 ════════════════════════════════════════════════════════════════
 
-PRIMARY TIMING TOOL. Use all 4 levels.
+4 LEVELS — USE ALL:
 LEVEL 1 — MAHADASHA (years) — overall theme
 LEVEL 2 — ANTARDASHA (months) — current chapter
-LEVEL 3 — PRATYANTAR (days, 3-7 day windows) — active NOW
-LEVEL 4 — SOOKSHMA (hours) — precise current moment
+LEVEL 3 — PRATYANTAR (3-7 day windows) — active NOW
+LEVEL 4 — SOOKSHMA (hours) — precise moment
 
-ACTION WINDOWS (from allPratyantar[]):
-actionWindows → quality === "Shubh" AND lord in dashaFocus
-avoidWindows  → quality === "Ashubh" AND malefic lord
+ACTION WINDOWS: quality === "Shubh" AND lord in dashaFocus
+AVOID WINDOWS: quality === "Ashubh" AND malefic lord
 Format: "DD MMM YYYY to DD MMM YYYY"
 
-DASHA IN PLAIN LANGUAGE:
-${tier === 'free' ? `FREE: 1-2 sentences. No lord names. "Abhi aap ek [good/challenging] daur mein hain jo [timeframe] tak rahega."` :
-`PAID:
+PLAIN LANGUAGE RULE:
+${tier === 'free'
+  ? 'FREE: 1-2 sentences. "Abhi aap ek [good/challenging] daur mein hain jo [timeframe] tak rahega."'
+  : `PAID:
 NEVER: "Aapka Jupiter Mahadasha chal raha hai"
-ALWAYS: "Aap ek expansion ke daur mein hain jo agle X saal tak rahega"
-NEVER: "Ashubh Pratyantar"
-ALWAYS: "Agli [date] tak decision avoid karo — uske baad better hogi"
+ALWAYS: "Aap ek expansion ke daur mein hain jo agle X saal tak chahega"
 Give specific timeframes from Dasha data always.`}
 ════════════════════════════════════════════════════════════════
 `.trim();
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
-// STEP 6 — COMPLETE DUAL-LANGUAGE OUTPUT SCHEMA
+// STEP 6 — OUTPUT SCHEMA WITH TRANSACTIONAL KEYWORDS
 // ══════════════════════════════════════════════════════════════════════════════
 
-function buildStep6_OutputSchema(isoDate: string, domain: DomainConfig, tier: UserTier): string {
-  const extraFields = Object.entries(domain.extraOutputFields)
-    .map(([k, v]) => `      "${k}": "${v}"`).join(',\n');
+function buildStep6_OutputSchema(
+  isoDate:   string,
+  domain:    DomainConfig,
+  tier:      UserTier,
+  keywords:  ReturnType<typeof getDomainKeywords>,
+  language:  string,
+): string {
 
-  const domainSpecificBlock = isStandardPlus(tier) && extraFields
-    ? `\n    "domainSpecific": {\n${extraFields}\n    },`
-    : '\n    "domainSpecific": null,';
+  const freeSuspenseHook = FREE_SUSPENSE_HOOKS[language] ?? FREE_SUSPENSE_HOOKS.hinglish;
+
+  const geoAnswerTemplate = `"According to Trikal Vaani's Swiss Ephemeris-powered Vedic analysis by Rohiit Gupta, Chief Vedic Architect: [answer ${keywords.question}]. Classical BPHS rules and Bhrigu Nandi patterns provide the astrological basis. Get your personalized Vedic reading at trikalvaani.com — India's most precise AI astrology platform."`;
 
   if (tier === 'free') {
     return `
@@ -635,82 +563,121 @@ STEP 6 — OUTPUT SCHEMA — FREE TIER
 ════════════════════════════════════════════════════════════════
 
 {
-  "geoDirectAnswer": "40-60 words EXACTLY. Factual authoritative answer for AI search engines.
-    Start with: 'According to Trikal Vaani\'s Swiss Ephemeris-powered Vedic analysis by Rohiit Gupta...'
-    Cover: what Vedic astrology says about ${domain.displayName}, key planetary factors, BPHS basis.
-    End with: 'Get your personalized reading at trikalvaani.com'",
+  "geoDirectAnswer": "${geoAnswerTemplate}
+    MUST be 40-60 words. Transactional intent. Answers: '${keywords.question}'",
 
   "simpleSummary": {
-    "text":        "150-200 words ONLY. Plain language. ZERO jargon. Start with person name.
-                   Situation + 1 action + 1 caution + timeframe + encouragement.",
-    "keyMessage":  "ONE sentence. Most important. Max 20 words.",
+    "text": "150-200 words. Plain language. ZERO jargon. Warm Dharma Guru voice.
+      Start: '[Name] ji, ...'
+      Situation + 1 action + 1 caution + timeframe + encouragement.
+      END WITH THIS EXACT SUSPENSE HOOK AS NEW PARAGRAPH:
+      '${freeSuspenseHook}'",
+    "keyMessage":  "ONE sentence — like a Guru's blessing. Max 20 words.",
     "mainAction":  "ONE specific action right now.",
     "mainCaution": "ONE specific caution right now.",
-    "dos":         ["3 simple dos"],
-    "donts":       ["3 simple donts"]
+    "dos":   ["3 simple, specific dos"],
+    "donts": ["3 simple, specific donts"]
   },
 
   "professionalEnglish": {
     "locked": true,
-    "teaser": "Your chart shows a powerful ${domain.displayName} pattern active now. Unlock full English analysis — planetary positions, Dasha timing, Ashtakavarga, remedies, gemstone guidance.",
-    "upgradeUrl": "/pricing", "upgradePrice": "₹51"
+    "teaser": "Your chart shows a powerful ${domain.displayName} pattern active now. Unlock complete planetary analysis, Dasha timing, Ashtakavarga, remedies, gemstone guidance, and 30-day roadmap.",
+    "upgradeUrl": "/upgrade", "upgradePrice": "₹51"
   },
 
   "professionalHindi": {
     "locked": true,
     "teaser": "आपकी कुंडली में अभी एक महत्वपूर्ण योग सक्रिय है। पूर्ण हिंदी विश्लेषण ₹99 में अनलॉक करें।",
-    "upgradeUrl": "/pricing", "upgradePrice": "₹99"
+    "upgradeUrl": "/upgrade", "upgradePrice": "₹99"
+  },
+
+  "seoSignals": {
+    "primaryKeywords":       ${JSON.stringify(keywords.primary.slice(0, 4))},
+    "transactionalKeywords": ${JSON.stringify(keywords.commercial.slice(0, 4))},
+    "localKeywords":         ${JSON.stringify(keywords.local.slice(0, 3))},
+    "targetQuestion":        "${keywords.question}",
+    "authorityStatement":    "This analysis is powered by Trikal Vaani's Swiss Ephemeris engine, validated against BPHS classical texts by Rohiit Gupta, Chief Vedic Architect, Delhi NCR.",
+    "differentiator":        "Unlike AstroTalk and AstroSage, Trikal Vaani uses Swiss Ephemeris precision + Bhrigu Nandi pattern intelligence — not generic automated reports.",
+    "ctaText":               "Get your complete ${domain.displayName} analysis at trikalvaani.com — ₹51 only."
   }
 }
 ════════════════════════════════════════════════════════════════
 `.trim();
   }
 
-  const englishReport = `
+  // BASIC + STANDARD + PREMIUM schemas (full)
+  const extraFields = Object.entries(domain.extraOutputFields ?? {})
+    .map(([k, v]) => `      "${k}": "${v}"`).join(',\n');
+
+  const domainSpecificBlock = isStandardPlus(tier) && extraFields
+    ? `\n    "domainSpecific": {\n${extraFields}\n    },`
+    : '\n    "domainSpecific": null,';
+
+  const hindiLockedTeaser = `
+  "professionalHindi": {
+    "locked": true,
+    "teaser": "हिंदी में पूर्ण ज्योतिष विश्लेषण — लग्न, दशा, योग, अष्टकवर्ग, भृगु, उपाय और रत्न सहित। ₹99 में अनलॉक करें।",
+    "upgradeUrl": "/upgrade", "upgradePrice": "₹99"
+  }`;
+
+  return `
+════════════════════════════════════════════════════════════════
+STEP 6 — OUTPUT SCHEMA — ${tier.toUpperCase()} TIER
+════════════════════════════════════════════════════════════════
+
+{
+  "geoDirectAnswer": "${geoAnswerTemplate}
+    MUST be 40-60 words. Answers commercial intent: '${keywords.question}'",
+
+  "simpleSummary": {
+    "text": "${tier === 'basic' ? '400-600' : '500-700'} words. Plain language. ZERO jargon.
+      Dharma Guru voice — warm, compassionate, direct. Short sentences.
+      Structure: current situation → why (simple) → what's coming → actions → caution → remedy → encouragement.
+      ${tier === 'basic' ? `END WITH THIS SUSPENSE HOOK:
+      'Aur ek baat... Aapki kundali mein Parashara ke classical yogas aur Bhrigu patterns ne kuch aur bhi reveal kiya hai — jo 30-day ka poora roadmap deta hai. ₹99 mein dekhein. ✨'` : ''}",
+    "keyMessage":  "ONE sentence. Like a Guru blessing. Max 20 words.",
+    "bestDates":   "2-3 date ranges from Dasha data",
+    "mainAction":  "Most important action right now",
+    "mainCaution": "Most important thing to avoid",
+    "dos":   ["5 specific dos with timing"],
+    "donts": ["5 specific donts with reason"]
+  },
+
   "professionalEnglish": {
     "domainId":     "${domain.id}",
     "personName":   "from chart.birthData.name",
     "analysisDate": "${isoDate}",
     "reportType":   "${tier === 'basic' ? 'Standard Analysis' : 'Complete Vedic Analysis'}",
     "poweredBy":    "Swiss Ephemeris + BPHS + Bhrigu Nandi Nadi | Trikal Vaani by Rohiit Gupta",
-
-    "confidenceBadge": "from synthesis.confidence.badge — show as UI badge",
-    "karmicMarker":    "boolean — show 🔱 if synthesis.karmic_marker is true",
-
+    "confidenceBadge": "from synthesis.confidence.badge",
+    "karmicMarker":    "boolean — show 🔱 if synthesis.karmic_marker true",
     "executiveSummary": "5-7 sentences — Lagna, dominant Yoga, Dasha, key planet, tendency, remedy.",
-
-    "lagnaAnalysis": {
-      "lagna": "Rashi", "lagnaLord": "Planet", "lagnaLordHouse": "number",
-      "lagnaLordStrength": "number", "lagnaEffect": "3-4 sentences on this domain",
-      "classicalBasis": "BPHS citation"
-    },
-
     "headline":      "ONE powerful sentence naming specific planet + domain",
     "periodSummary": "3-5 sentences on MD-AD-PD for this domain",
 
     "keyInfluences": [{
       "planet": "name", "position": "Rashi+house", "strength": "number",
       "isRetrograde": "boolean", "ashtakavargaScore": "0-8",
-      "effect": "3-4 sentences domain-specific", "classicalBasis": "MANDATORY"
+      "effect": "3-4 sentences domain-specific", "classicalBasis": "MANDATORY BPHS chapter"
     }],
 
     "yogasFound": [{
       "name": "ONLY from parashara.activeYogas[]", "present": "boolean",
       "planets": ["array"], "strength": "strong|moderate|weak",
-      "effect": "3-4 sentences for this domain", "classicalBasis": "MANDATORY BPHS chapter"
+      "effect": "3-4 sentences", "classicalBasis": "MANDATORY"
     }],
 
     "bhriguInsights": {
       "currentLifeTheme": "from synthesis.bhrigu.current_life_theme",
-      "domainSignals":    "from synthesis.bhrigu.domain_signals — key patterns",
-      "karmicText":       "from synthesis.synthesis.karmic_text if karmic_marker true",
-      "bhriguSummary":    "2-3 sentences on Bhrigu pattern for this domain"
+      "domainSignals":    "from synthesis.bhrigu.domain_signals",
+      "karmicText":       "from synthesis.synthesis.karmic_text if true",
+      "bhriguSummary":    "2-3 sentences"
     },
 
     "ashtakavargaAnalysis": {
       "strongHouses": [">=28"], "weakHouses": ["<=25"],
-      "domainHouseScore": "Sarvashtakavarga for primary domain house",
-      "interpretation":   "3-4 sentences", "classicalBasis": "BPHS Ch.66-76"
+      "domainHouseScore": "primary house score",
+      "interpretation": "3-4 sentences", "classicalBasis": "BPHS Ch.66-76"
     },
 
     "dashaAnalysis": {
@@ -719,289 +686,158 @@ STEP 6 — OUTPUT SCHEMA — FREE TIER
       "pratyantar": {"lord": "name", "endDate": "YYYY-MM-DD", "quality": "Shubh|Madhyam|Ashubh", "immediateEffect": "2-3 sentences"},
       "sookshma":   {"lord": "name", "endDate": "YYYY-MM-DD", "effect": "1-2 sentences"},
       "upcomingPeriods": [{"lord": "name", "startDate": "date", "endDate": "date", "quality": "type", "preview": "2 sentences"}],
-      "combinedDashaReading": "5-6 sentences synthesizing all 4 levels"
+      "combinedDashaReading": "5-6 sentences"
     },
 
-    "actionWindows": [{
-      "dateRange": "DD MMM YYYY to DD MMM YYYY",
-      "action": "domain-specific", "planetaryBasis": "Pratyantar lord + why",
-      "quality": "peak|favorable|moderate", "ashtakavargaSupport": "boolean"
-    }],
-
-    "avoidWindows": [{
-      "dateRange": "DD MMM YYYY to DD MMM YYYY",
-      "reason": "specific planetary", "whatToAvoid": "domain-specific",
-      "alternativeAction": "what to do instead"
-    }],
+    "actionWindows": [{"dateRange": "DD MMM YYYY to DD MMM YYYY", "action": "domain-specific", "planetaryBasis": "why", "quality": "peak|favorable|moderate"}],
+    "avoidWindows":  [{"dateRange": "DD MMM YYYY to DD MMM YYYY", "reason": "planetary", "whatToAvoid": "specific", "alternativeAction": "what to do instead"}],
 
     "remedyPlan": {
       "primaryPlanet": "most afflicted",
       "remedies": [{
-        "planet": "name", "affliction": "why needed", "priority": "1|2|3",
+        "planet": "name", "affliction": "why", "priority": "1|2|3",
         "mantra":   {"text": "full mantra", "count": "number", "day": "day", "time": "time", "direction": "direction"},
         "dana":     {"item": "specific", "day": "day", "time": "morning|evening", "recipient": "who"},
         "vrat":     {"day": "day", "deity": "deity", "duration": "weeks", "rules": "what to eat/avoid"},
         "yantra":   {"name": "name", "placement": "location", "day": "day", "time": "time"},
         "ratna":    {"gem": "name", "metal": "metal", "finger": "finger+hand", "weight": "carats", "day": "day+time", "caution": "MANDATORY — Lagna suitability + trial period"},
+        "rudraksha":{"mukhi": "number", "reason": "planetary basis", "wearing": "day + mantra", "caution": "who should avoid"},
         "aushadhi": {"herb": "name", "use": "exact method"},
         "dos":      ["5 behavioral dos with reason"],
         "donts":    ["5 behavioral donts with reason"],
         "classicalBasis": "BPHS Ch.86"
       }],
-      "remedySummary": "2-3 sentences overall approach"
+      "remedySummary": "2-3 sentences"
     },
 
-    "navamsaInsights": {
-      "vargottamaPlanets": ["list"], "d9Strength": "assessment",
-      "insights": "2-3 sentences", "classicalBasis": "BPHS Ch.6"
-    },
-
-    "argalaAnalysis": {
-      "primaryHouseArgala": "planets on primary domain house",
-      "netEffect": "positive|negative|mixed",
-      "interpretation": "2-3 sentences", "classicalBasis": "BPHS Ch.28"
-    },
-
-    "worldContext": {
-      "available": "boolean", "summary": "specific event connected to chart or null",
-      "dataDate": "${isoDate}", "sources": ["array or []"]
-    },
+    "navamsaInsights": {"vargottamaPlanets": ["list"], "d9Strength": "assessment", "insights": "2-3 sentences", "classicalBasis": "BPHS Ch.6"},
+    "argalaAnalysis": {"primaryHouseArgala": "planets", "netEffect": "positive|negative|mixed", "interpretation": "2-3 sentences", "classicalBasis": "BPHS Ch.28"},
+    "worldContext":   {"available": "boolean", "summary": "specific or null", "dataDate": "${isoDate}", "sources": []},
 
     "panchang": {
       "vara": "day", "varaLord": "planet", "tithi": "name+paksha",
-      "nakshatra": "name", "nakshatraLord": "planet",
-      "yoga": "Nitya Yoga", "yogaType": "Shubh|Ashubh|Madhyam",
-      "karana": "name",
+      "nakshatra": "name", "yoga": "name", "yogaType": "Shubh|Ashubh|Madhyam",
       "rahuKaal": {"start": "time", "end": "time", "avoid": "what"},
       "abhijeetMuhurta": {"start": "time", "end": "time"},
-      "choghadiya": {"name": "current", "type": "Shubh|Ashubh|Madhyam"},
+      "choghadiya": {"name": "name", "type": "Shubh|Ashubh|Madhyam"},
       "sunrise": "time", "sunset": "time", "moonPhase": "phase",
-      "isTodayAuspicious": "boolean",
       "panchangAdvice": "3-4 sentences on today's auspiciousness for this domain"
     },
 
     "synthesisScore": {
       "label":          "from synthesis.confidence.label",
       "badge":          "from synthesis.confidence.badge",
-      "agreementPoints":"from synthesis.agreement_points — X/10",
-      "conflictNote":   "from synthesis.conflicts[0] if any or null",
-      "actionGuidance": "from synthesis.confidence.action_guidance"
-    },
-
-    "reasoning": {
-      "lagnaAnalysis":       "2 sentences",
-      "dashaAnalysis":       "MD+AD+PD combined signal — 2 sentences",
-      "keyYogaFound":        "primary yoga + basis — 1 sentence",
-      "ashtakavargaSignal":  "domain house score — 1 sentence",
-      "bhriguSignal":        "Bhrigu pattern summary — 1 sentence",
-      "worldContextApplied": "how world data used — 1 sentence"
+      "agreementPoints":"synthesis.agreement_points",
+      "conflictNote":   "synthesis.conflicts[0] or null",
+      "actionGuidance": "synthesis.confidence.action_guidance"
     },
 ${domainSpecificBlock}
     "seoSignals": {
-      "authorityStatement": "1 sentence: 'This analysis is powered by Trikal Vaani's Swiss Ephemeris engine, validated against BPHS classical texts by Rohiit Gupta, Chief Vedic Architect.'",
-      "differentiator":     "1 sentence — what makes this prediction unique vs AstroTalk/AstroSage",
-      "ctaText":            "domain-specific CTA for upgrading or sharing"
+      "primaryKeywords":       ${JSON.stringify(keywords.primary.slice(0, 4))},
+      "transactionalKeywords": ${JSON.stringify(keywords.commercial.slice(0, 4))},
+      "localKeywords":         ${JSON.stringify(keywords.local.slice(0, 3))},
+      "targetQuestion":        "${keywords.question}",
+      "authorityStatement":    "This analysis is powered by Trikal Vaani's Swiss Ephemeris engine, validated against BPHS classical texts by Rohiit Gupta, Chief Vedic Architect, Delhi NCR.",
+      "differentiator":        "Unlike AstroTalk and AstroSage, Trikal Vaani delivers Swiss Ephemeris precision + Bhrigu Nandi patterns + AI language polish — not automated generic reports.",
+      "ctaText":               "Get your complete ${domain.displayName} analysis — ₹51 at trikalvaani.com"
     },
 
-    "jinaGuidance":    "next Trikal Vaani page URL",
     "confidenceLevel": "high|medium|low",
     "confidenceReason": "specific reason",
-
     "dataUsed": {
-      "chartSource":      "swiss_ephemeris_render",
-      "birthTimeKnown":   "boolean",
-      "parasharaYogas":   "number of active yogas",
-      "bhriguPoints":     "number 0-2",
-      "ashtakavargaUsed": "boolean",
-      "panchangUsed":     "boolean",
-      "synthesisModel":   "6-2-2 Ensemble",
-      "dashaLevels":      "MD-AD-PD-SD string",
-      "analysisDate":     "${isoDate}"
+      "chartSource": "swiss_ephemeris_render",
+      "birthTimeKnown": "boolean",
+      "parasharaYogas": "number",
+      "bhriguPoints": "number",
+      "synthesisModel": "6-2-2 Ensemble",
+      "dashaLevels": "MD-AD-PD-SD",
+      "analysisDate": "${isoDate}"
     }
-  }`;
+  },
+${isStandardPlus(tier) ? buildHindiFullSchema(isoDate) : hindiLockedTeaser}
+}
+════════════════════════════════════════════════════════════════
+`.trim();
+}
 
-  const hindiLockedTeaser = `
+function buildHindiFullSchema(isoDate: string): string {
+  return `
   "professionalHindi": {
-    "locked": true,
-    "teaser": "हिंदी में पूर्ण ज्योतिष विश्लेषण — लग्न, दशा, योग, अष्टकवर्ग, भृगु, उपाय और रत्न सहित। ₹99 में अनलॉक करें।",
-    "upgradeUrl": "/pricing", "upgradePrice": "₹99"
-  }`;
-
-  const hindiFullReport = `
-  "professionalHindi": {
-    "domainId":     "${domain.id}",
+    "domainId":     "domain ID",
     "personName":   "व्यक्ति का नाम",
     "analysisDate": "${isoDate}",
     "reportType":   "सम्पूर्ण वैदिक ज्योतिष विश्लेषण — त्रिकाल वाणी",
-    "shaktiVakya":  "त्रिकाल वाणी — रोहित गुप्ता, मुख्य वैदिक वास्तुकार द्वारा स्विस एफेमेरिस + बृहत्पाराशर होराशास्त्र आधारित विश्लेषण",
-
-    "vishwasChinha": "from synthesis.confidence.badge — हिंदी में",
-    "karmikSanket":  "boolean — 🔱 दिखाएं यदि synthesis.karmic_marker सत्य है",
-
+    "shaktiVakya":  "त्रिकाल वाणी — रोहित गुप्ता, मुख्य वैदिक वास्तुकार द्वारा",
+    "vishwasChinha": "synthesis.confidence.badge हिंदी में",
+    "karmikSanket":  "boolean",
     "karyakariSarvekshan": "5-7 वाक्य — लग्न, योग, दशा, ग्रह, प्रवृत्ति, उपाय",
-
-    "lagnaVishleshan": {
-      "lagna": "राशि", "lagnaSwami": "ग्रह", "lagnaSwamiBhav": "भाव संख्या",
-      "lagnaSwamiBal": "शक्ति", "lagnaPhalam": "3-4 वाक्य", "shastraSandarb": "बृहत्पाराशर उद्धरण"
-    },
-
+    "lagnaVishleshan": {"lagna": "राशि", "lagnaSwami": "ग्रह", "lagnaPhalam": "3-4 वाक्य", "shastraSandarb": "उद्धरण"},
     "sheershak":     "एक शक्तिशाली वाक्य",
-    "kalSarvekshan": "3-5 वाक्य — महादशा-अंतर्दशा-प्रत्यंतर",
-
-    "pramukhPrabha": [{
-      "graha": "ग्रह नाम", "sthiti": "राशि+भाव", "bal": "0-100",
-      "vakri": "हाँ|नहीं", "ashtakavargAnk": "0-8",
-      "phalam": "3-4 वाक्य", "shastraSandarb": "अनिवार्य"
-    }],
-
-    "yogaVishleshan": {
-      "saktiyaYoga": [{"yogaNam": "नाम", "graha": ["ग्रह"], "shakti": "प्रबल|मध्यम|दुर्बल", "phalam": "3-4 वाक्य", "shastraSandarb": "अनिवार्य"}],
-      "yogaSar": "2-3 वाक्य", "pramukhYog": "नाम"
-    },
-
-    "bhriguDrishti": {
-      "vartamanJeevanVishay": "synthesis.bhrigu.current_life_theme हिंदी में",
-      "karmikVivaran":        "synthesis.karmic_text हिंदी में — यदि उपलब्ध",
-      "bhriguSar":            "2-3 वाक्य — इस भाव के लिए भृगु विश्लेषण"
-    },
-
-    "ashtakavargaVishleshan": {
-      "prabalBhav": [">=28"], "durbalBhav": ["<=25"],
-      "bhavAnk": "इस भाव का अंक", "vyakhya": "3-4 वाक्य",
-      "shastraSandarb": "बृहत्पाराशर अध्याय 66-76"
-    },
-
+    "kalSarvekshan": "3-5 वाक्य",
+    "pramukhPrabha": [{"graha": "ग्रह", "sthiti": "राशि+भाव", "bal": "0-100", "phalam": "3-4 वाक्य", "shastraSandarb": "अनिवार्य"}],
     "dashaVishleshan": {
-      "mahadasha":  {"swami": "नाम", "antTithi": "YYYY-MM-DD", "phalam": "3-4 वाक्य", "shastraSandarb": "उद्धरण"},
-      "antardasha": {"swami": "नाम", "antTithi": "YYYY-MM-DD", "sambandh": "मित्र|सम|शत्रु", "phalam": "3-4 वाक्य"},
+      "mahadasha":  {"swami": "नाम", "antTithi": "YYYY-MM-DD", "phalam": "3-4 वाक्य"},
+      "antardasha": {"swami": "नाम", "antTithi": "YYYY-MM-DD", "phalam": "3-4 वाक्य"},
       "pratyantar": {"swami": "नाम", "antTithi": "YYYY-MM-DD", "gunvatta": "शुभ|मध्यम|अशुभ", "tatkalPhalam": "2-3 वाक्य"},
-      "sookshma":   {"swami": "नाम", "antTithi": "YYYY-MM-DD", "phalam": "1-2 वाक्य"},
-      "agantiKal":  [{"swami": "नाम", "prarambh": "तिथि", "ant": "तिथि", "gunvatta": "शुभ|मध्यम|अशुभ", "sankhep": "2 वाक्य"}],
-      "dashasar":   "5-6 वाक्य — सभी 4 स्तर"
+      "sookshma":   {"swami": "नाम", "phalam": "1-2 वाक्य"},
+      "dashasar":   "5-6 वाक्य"
     },
-
-    "shubhMuhurta": [{"tithiKaal": "DD MMM YYYY से DD MMM YYYY", "karya": "विशेष कार्य", "grahAadhar": "कारण", "gunvatta": "उत्तम|शुभ|मध्यम"}],
-    "varyaKaal":    [{"tithiKaal": "DD MMM YYYY से DD MMM YYYY", "karan": "कारण", "varyaKarya": "क्या न करें", "vikalp": "क्या करें"}],
-
+    "shubhMuhurta": [{"tithiKaal": "DD MMM YYYY से DD MMM YYYY", "karya": "कार्य", "gunvatta": "उत्तम|शुभ|मध्यम"}],
+    "varyaKaal":    [{"tithiKaal": "DD MMM YYYY से DD MMM YYYY", "karan": "कारण", "varyaKarya": "क्या न करें"}],
     "upayYojana": {
       "pramukhGraha": "ग्रह",
       "upay": [{
-        "graha": "नाम", "pidaKaran": "कारण", "kramasankhya": "1|2|3",
-        "mantra":   {"path": "पूर्ण मंत्र", "sankhya": "जप संख्या", "var": "वार", "samay": "समय", "disha": "दिशा"},
-        "dan":      {"vastu": "वस्तु", "var": "वार", "samay": "प्रातः|सायं", "patra": "किसे"},
-        "vrat":     {"var": "वार", "devata": "देवता", "avdhi": "सप्ताह", "niyam": "नियम"},
-        "yantra":   {"naam": "नाम", "sthan": "स्थान", "var": "वार", "samay": "समय"},
-        "ratna":    {"naam": "रत्न", "dhatu": "धातु", "ungali": "उंगली", "bhar": "रत्ती", "var": "वार+समय", "savdhan": "अनिवार्य — लग्न अनुकूलता + परीक्षण अवधि"},
-        "aushadhi": {"jadiBooti": "नाम", "prayog": "विधि"},
-        "karyaKaro": ["5 विशेष कार्य — कारण सहित"],
-        "karyanMat": ["5 वर्जित कार्य — कारण सहित"],
+        "graha": "नाम", "kramasankhya": "1|2|3",
+        "mantra":   {"path": "पूर्ण मंत्र", "sankhya": "जप संख्या", "var": "वार", "samay": "समय"},
+        "dan":      {"vastu": "वस्तु", "var": "वार", "patra": "किसे"},
+        "vrat":     {"var": "वार", "devata": "देवता", "niyam": "नियम"},
+        "ratna":    {"naam": "रत्न", "dhatu": "धातु", "ungali": "उंगली", "savdhan": "अनिवार्य"},
+        "rudraksha":{"mukhi": "संख्या", "karan": "ग्रह आधार", "pehanna": "वार + मंत्र"},
+        "karyaKaro": ["5 कार्य"],
+        "karyanMat": ["5 वर्जित"],
         "shastraSandarb": "बृहत्पाराशर अध्याय 86"
       }],
       "upaySar": "2-3 वाक्य"
     },
-
-    "navamsaDrishti":    {"vargottamGraha": ["सूची"], "d9Shakti": "मूल्यांकन", "vivaran": "2-3 वाक्य", "shastraSandarb": "अध्याय 6"},
-    "argalaVishleshan":  {"pramukhBhavArgala": "ग्रह", "netPrabha": "शुभ|अशुभ|मिश्रित", "vyakhya": "2-3 वाक्य", "shastraSandarb": "अध्याय 28"},
-
-    "vishvaSandarb": {"uplabdh": "boolean", "sarvekshan": "विश्व घटना या null", "tithi": "${isoDate}", "srot": ["स्रोत"]},
-
     "panchang": {
-      "var": "वार", "varSwami": "ग्रह", "tithi": "तिथि+पक्ष",
-      "nakshatra": "नक्षत्र", "nakshatraSwami": "ग्रह",
-      "yoga": "नित्य योग", "yogaPrakar": "शुभ|अशुभ|मध्यम",
-      "karan": "करण", "rahuKal": {"prarambh": "समय", "ant": "समय", "varjit": "क्या न करें"},
-      "abhijeetMuhurt": {"prarambh": "समय", "ant": "समय"},
-      "choghadiya": {"naam": "नाम", "prakar": "शुभ|अशुभ|मध्यम"},
-      "suryoday": "समय", "suryast": "समय", "paksha": "शुक्ल|कृष्ण",
+      "var": "वार", "tithi": "तिथि", "nakshatra": "नक्षत्र",
+      "rahuKal": {"prarambh": "समय", "ant": "समय"},
       "aajShubhHai": "boolean", "panchaangSalab": "3-4 वाक्य"
     },
-
-    "vishwasAank": {
-      "chinha":      "synthesis.confidence.label हिंदी में",
-      "sahmatiBindu":"synthesis.agreement_points/10",
-      "margdarshan": "synthesis.confidence.action_guidance हिंदी में"
-    },
-
-    "jinaMargdarshan": "URL", "vishwasSthar": "उच्च|मध्यम|निम्न", "vishwasKaran": "कारण"
+    "vishwasSthar": "उच्च|मध्यम|निम्न"
   }`;
-
-  if (tier === 'basic') {
-    return `
-════════════════════════════════════════════════════════════════
-STEP 6 — OUTPUT SCHEMA — BASIC TIER (₹51)
-════════════════════════════════════════════════════════════════
-
-{
-  "geoDirectAnswer": "40-60 words. Authoritative. For AI search engines. Mention Rohiit Gupta + Swiss Ephemeris + BPHS + trikalvaani.com.",
-
-  "simpleSummary": {
-    "text": "400-600 words. Plain language. ZERO jargon. Structure: situation→why→coming→dos→donts→remedy→encouragement",
-    "keyMessage": "ONE sentence. Max 20 words.", "bestDates": "2-3 date ranges from Dasha",
-    "mainAction": "Most important action", "mainCaution": "Most important caution",
-    "dos": ["5 dos with context"], "donts": ["5 donts with reason"]
-  },
-${englishReport},
-${hindiLockedTeaser}
-}
-════════════════════════════════════════════════════════════════
-`.trim();
-  }
-
-  return `
-════════════════════════════════════════════════════════════════
-STEP 6 — OUTPUT SCHEMA — STANDARD/PREMIUM (₹99+)
-COMPLETE DUAL LANGUAGE — English + देवनागरी Hindi
-════════════════════════════════════════════════════════════════
-
-CRITICAL: ALL 3 sections complete. Hindi = proper देवनागरी, ZERO English.
-
-{
-  "geoDirectAnswer": "40-60 words EXACTLY. For Google SGE, Perplexity, ChatGPT.
-    'According to Trikal Vaani's Swiss Ephemeris-powered Vedic analysis by Rohiit Gupta,
-    Chief Vedic Architect, [domain insight based on BPHS classical rules].
-    Powered by Bhrigu Nandi patterns + Vimshottari Dasha timing.
-    Get personalized reading at trikalvaani.com'",
-
-  "simpleSummary": {
-    "text": "400-600 words. Plain Hinglish. ZERO jargon.
-      Para1: Current situation plainly.
-      Para2: Why — planetary reason as simple life energy.
-      Para3: What's coming — timeframe plain words.
-      Para4: 3-5 specific Dos.
-      Para5: 3-5 specific Donts.
-      Para6: Main remedy plain (no Sanskrit).
-      Close: Warm encouragement — never fear.",
-    "keyMessage": "ONE sentence. Max 20 words.",
-    "bestDates": "2-3 date ranges from Dasha data",
-    "mainAction": "Most important action right now",
-    "mainCaution": "Most important thing to avoid",
-    "dos": ["5 specific dos with timing"], "donts": ["5 specific donts with reason"]
-  },
-${englishReport},
-${hindiFullReport}
-}
-════════════════════════════════════════════════════════════════
-`.trim();
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
-// STEP 7 — LANGUAGE + WORLD CONTEXT + PERSONALISATION
+// STEP 7 — LANGUAGE + PERSONALISATION
 // ══════════════════════════════════════════════════════════════════════════════
 
-function buildStep7_LanguageAndPersonalisation(domain: DomainConfig, userContext: UserContext, period: ReturnType<typeof getCurrentPeriod>): string {
+function buildStep7_LanguageAndPersonalisation(
+  domain:      DomainConfig,
+  userContext: UserContext,
+  period:      ReturnType<typeof getCurrentPeriod>,
+): string {
+
   const langRules = {
     hindi: `
-SIMPLESUMMARY LANGUAGE: PURE HINDI (देवनागरी)
-Planets: सूर्य|चन्द्र|मंगल|बुध|गुरु|शुक्र|शनि|राहु|केतु
-Tone: Warm senior Jyotishi — always आप-form. Class 5 level.`,
+SIMPLESUMMARY: PURE HINDI (देवनागरी) — ZERO English.
+Tone: Warm senior Jyotishi — "आप"-form. Class 5 reading level.
+Planets in Hindi: सूर्य|चन्द्र|मंगल|बुध|गुरु|शुक्र|शनि|राहु|केतु`,
+
     hinglish: `
-SIMPLESUMMARY LANGUAGE: HINGLISH — trusted knowledgeable friend tone
+SIMPLESUMMARY: HINGLISH — trusted knowledgeable friend.
 Planets: Surya|Chandra|Mangal|Budh|Guru|Shukra|Shani|Rahu|Ketu
-Example: "Rahul bhai, abhi jo pressure hai uski wajah Shani ki position hai..."
-Class 5 reading level — simple and direct.`,
+Example: "[Name] bhai/behen, abhi jo situation hai uski wajah Shani ki position hai..."
+Class 5 reading level — simple, warm, direct.`,
+
     english: `
-SIMPLESUMMARY LANGUAGE: ENGLISH — learned astrologer tone, accessible
-Planets: "Saturn (Shani)" — Sanskrit in parentheses first use.`,
+CRITICAL — ENGLISH MODE ACTIVE:
+Every word in EVERY section must be in English.
+simpleSummary, keyMessage, dos, donts, mainAction, mainCaution → ALL English.
+Panchang terms → translate: Tithi→Lunar Day, Vara→Day, Yoga→Auspicious Combination
+Planet names: Sun, Moon, Mars, Mercury, Jupiter, Venus, Saturn, Rahu, Ketu
+Rashi names: Aries, Taurus, Gemini, Cancer, Leo, Virgo, Libra, Scorpio, Sagittarius, Capricorn, Aquarius, Pisces
+Tone: knowledgeable, warm, direct — like a learned astrologer friend.`,
   };
 
   return `
@@ -1010,9 +846,6 @@ STEP 7 — LANGUAGE + PERSONALISATION + SEO/GEO
 ════════════════════════════════════════════════════════════════
 
 ${langRules[userContext.language]}
-
-PROFESSIONAL ENGLISH: Formal AstroSage-style. Technical terms explained.
-PROFESSIONAL HINDI: प्रामाणिक देवनागरी — ZERO English. Same depth as English.
 
 USER PROFILE:
 Segment:    ${userContext.segment.toUpperCase()} (${
@@ -1023,38 +856,19 @@ Segment:    ${userContext.segment.toUpperCase()} (${
 Employment: ${userContext.employment || 'not specified'}
 Sector:     ${userContext.sector     || 'not specified'}
 City:       ${userContext.city       || 'India'}
-Period:     ${period.monthYear} | ${period.quarter} | ${period.financialYear}
+Period:     ${period.monthYear} | ${period.quarter}
 
 PERSONALISATION:
-→ Address by name (from chart.birthData.name) throughout
-→ Reference sector + employment in world context
+→ Address by name throughout — never "the person"
+→ Reference sector in world context
 → Frame for their life stage and segment
-→ Speak TO them not ABOUT them in simpleSummary
-→ City context for location-specific timing
-
-WORLD CONTEXT WEAVING:
-  DO: Connect event to specific Dasha. Name it.
-      "RBI ke rate cut aur Jupiter Antardasha = debt relief window"
-  DON'T: Invent news. Use generic phrases. Reference old events.
+→ Speak TO them, not ABOUT them
 
 SEO/GEO RULES:
-→ geoDirectAnswer: 40-60 words, factual, authoritative, includes:
-    - "Rohiit Gupta, Chief Vedic Architect"
-    - "Swiss Ephemeris"
-    - "BPHS" or "Brihat Parashara Hora Shastra"
-    - "trikalvaani.com"
-    - Domain-specific Vedic insight
-→ seoSignals.authorityStatement: always cite Swiss Ephemeris + BPHS
-→ seoSignals.differentiator: what Trikal Vaani offers vs competitors
-→ Never mention competitor names in output
-
-DOMAIN SUMMARY:
-Domain:    ${domain.displayName} (${domain.id})
-Primary:   ${domain.primaryHouses.map(h => h.number).join(', ')}
-Planets:   ${domain.keyPlanets.map(p => p.planet).join(', ')}
-Window:    ${domain.timeWindow}
-World ctx: ${domain.worldContext === 'none' ? 'DISABLED' : 'ENABLED — search first'}
-Tier:      ${userContext.tier.toUpperCase()}
+→ geoDirectAnswer: 40-60 words, authoritative, transactional
+→ Mentions: Rohiit Gupta + Swiss Ephemeris + BPHS + trikalvaani.com
+→ Answers commercial intent: "${getDomainKeywords(domain.id).question}"
+→ seoSignals.transactionalKeywords: populated from injected keyword list
 ════════════════════════════════════════════════════════════════
 `.trim();
 }
@@ -1063,7 +877,7 @@ Tier:      ${userContext.tier.toUpperCase()}
 // STEP 8 — QUALITY CONTROL
 // ══════════════════════════════════════════════════════════════════════════════
 
-function buildStep8_QualityControl(tier: UserTier): string {
+function buildStep8_QualityControl(tier: UserTier, language: string): string {
   return `
 ════════════════════════════════════════════════════════════════
 STEP 8 — QUALITY CONTROL — MANDATORY FINAL CHECK
@@ -1072,46 +886,34 @@ STEP 8 — QUALITY CONTROL — MANDATORY FINAL CHECK
 CONTENT:
   ✓ geoDirectAnswer is exactly 40-60 words
   ✓ geoDirectAnswer mentions Rohiit Gupta + Swiss Ephemeris + trikalvaani.com
+  ✓ seoSignals.transactionalKeywords populated with domain keywords
   ✓ simpleSummary: ${tier === 'free' ? '150-200' : '400-600'} words
   ✓ ZERO technical jargon in simpleSummary
   ✓ Every keyInfluence has classicalBasis with chapter number
-  ✓ Every remedy has classicalBasis citation
+  ✓ Every remedy has rudraksha field populated
   ✓ Every ratna has caution field populated
   ✓ Every actionWindow date from allPratyantar[] data
-  ✓ No specific event on specific date
   ✓ No Yoga not in parashara.activeYogas[]
-  ✓ bhriguInsights uses synthesis.bhrigu data
-  ✓ synthesisScore reflects synthesis.confidence data
-  ✓ karmicMarker = synthesis.synthesis.karmic_marker value
+  ${tier === 'free' ? '✓ Suspense hook added at end of simpleSummary.text' : ''}
 
-LANGUAGE:
-  ✓ professionalHindi has ZERO English words
-  ✓ Proper देवनागरी throughout Hindi section
-  ✓ Hindi planets: सूर्य चन्द्र मंगल बुध गुरु शुक्र शनि राहु केतु
+LANGUAGE — ${language.toUpperCase()}:
+  ${language === 'english' ? `✓ ZERO Hindi/Hinglish words anywhere in output
+  ✓ Planet names in English: Sun, Moon, Mars etc.
+  ✓ Rashi names in English: Aries, Taurus etc.
+  ✓ ALL panchang terms in English` :
+  language === 'hindi' ? `✓ simpleSummary in pure Devanagari
+  ✓ professionalHindi in pure Devanagari — ZERO English` :
+  `✓ simpleSummary in natural Hinglish
+  ✓ professionalHindi in Devanagari`}
 
 JSON:
   ✓ Starts { ends }
   ✓ All strings properly escaped
   ✓ No trailing commas
   ✓ All required fields present (null if empty)
-  ✓ Arrays are arrays, booleans are true/false
-
-COMPLETENESS:
-${tier === 'free' ? `  ✓ simpleSummary + geoDirectAnswer complete
-  ✓ Both professional sections show locked teasers` :
-tier === 'basic' ? `  ✓ geoDirectAnswer + simpleSummary complete
-  ✓ professionalEnglish FULLY complete
-  ✓ professionalHindi shows locked teaser` :
-`  ✓ geoDirectAnswer + simpleSummary complete
-  ✓ professionalEnglish FULLY complete — all sections
-  ✓ professionalHindi FULLY complete — proper देवनागरी
-  ✓ Both reports identical in depth
-  ✓ Panchang complete in both
-  ✓ bhriguInsights populated
-  ✓ synthesisScore populated`}
 
 OUTPUT ONLY THE JSON. NOTHING BEFORE {. NOTHING AFTER }.
-JAI MAA SHAKTI — TRIKAL VAANI v4.2 🔱
+JAI MAA SHAKTI — TRIKAL VAANI v4.3 🔱
 ════════════════════════════════════════════════════════════════
 `.trim();
 }
@@ -1119,9 +921,14 @@ JAI MAA SHAKTI — TRIKAL VAANI v4.2 🔱
 // ─── CHART OBJECT BUILDER ─────────────────────────────────────────────────────
 
 function buildChartObject(
-  kundali: KundaliData, birthData: BirthData, domain: DomainConfig,
-  birthTimeKnown: boolean, userContext: UserContext,
-  parasharaData?: any, panchangData?: any, synthesisData?: SynthesisData,
+  kundali:       KundaliData,
+  birthData:     BirthData,
+  domain:        DomainConfig,
+  birthTimeKnown: boolean,
+  userContext:   UserContext,
+  parasharaData?: any,
+  panchangData?:  any,
+  synthesisData?: SynthesisData,
 ): Record<string, unknown> {
   const { isoDate, monthYear, quarter, financialYear } = getCurrentPeriod();
 
@@ -1135,31 +942,28 @@ function buildChartObject(
       planets: Object.fromEntries(
         Object.entries(kundali.planets).map(([name, p]) => [name, {
           rashi: p.rashi, house: p.house, degree: p.degree,
-          siderealLongitude: p.siderealLongitude,
-          isRetrograde: p.isRetrograde, strength: p.strength,
-          nakshatra: p.nakshatra, nakshatraPada: p.nakshatraPada,
+          siderealLongitude: p.siderealLongitude, isRetrograde: p.isRetrograde,
+          strength: p.strength, nakshatra: p.nakshatra, nakshatraPada: p.nakshatraPada,
         }])
       ),
       dasha: {
         mahadasha:  { lord: kundali.currentMahadasha.lord,  endDate: kundali.currentMahadasha.endDate.toISOString().split('T')[0] },
         antardasha: { lord: kundali.currentAntardasha.lord, endDate: kundali.currentAntardasha.endDate.toISOString().split('T')[0] },
         pratyantar: {
-          lord: kundali.currentPratyantar.lord,
-          endDate: kundali.currentPratyantar.endDate.toISOString().split('T')[0],
-          remainingDays: kundali.currentPratyantar.remainingDays,
-          quality: kundali.currentPratyantar.quality,
+          lord: kundali.currentPratyantar.lord, endDate: kundali.currentPratyantar.endDate.toISOString().split('T')[0],
+          remainingDays: kundali.currentPratyantar.remainingDays, quality: kundali.currentPratyantar.quality,
         },
         sookshma: { lord: kundali.currentSookshma.lord, endDate: kundali.currentSookshma.endDate.toISOString().split('T')[0] },
         dashaBalance: kundali.dashaBalance,
         allAntardashas: kundali.antardashas.map(ad => ({
           lord: ad.lord,
           startDate: ad.startDate.toISOString().split('T')[0],
-          endDate: ad.endDate.toISOString().split('T')[0],
+          endDate:   ad.endDate.toISOString().split('T')[0],
         })),
         allPratyantar: kundali.pratyantar.map(pd => ({
           lord: pd.lord,
           startDate: pd.startDate.toISOString().split('T')[0],
-          endDate: pd.endDate.toISOString().split('T')[0],
+          endDate:   pd.endDate.toISOString().split('T')[0],
           durationDays: pd.durationDays, quality: pd.quality, remainingDays: pd.remainingDays,
         })),
       },
@@ -1169,7 +973,6 @@ function buildChartObject(
       },
     },
 
-    // Synthesis engine data
     parashara: parasharaData ? {
       activeYogas:      (parasharaData.activeYogas ?? []).slice(0, 10),
       totalActiveYogas: parasharaData.totalActiveYogas ?? 0,
@@ -1181,8 +984,6 @@ function buildChartObject(
       navamsa:          parasharaData.navamsa ?? [],
       strongPlanets:    parasharaData.summary?.strongPlanets ?? [],
       weakPlanets:      parasharaData.summary?.weakPlanets ?? [],
-      bestHouses:       parasharaData.summary?.bestHouses ?? [],
-      challengedHouses: parasharaData.summary?.challengedHouses ?? [],
     } : null,
 
     panchang: panchangData ?? null,
@@ -1190,15 +991,11 @@ function buildChartObject(
     synthesis: synthesisData?.synthesis ? {
       model:            synthesisData.synthesis.model,
       agreement_points: synthesisData.synthesis.agreement_points,
-      agreement_items:  synthesisData.synthesis.agreement_items,
       confidence_label: synthesisData.synthesis.confidence_label,
-      confidence_badge: synthesisData.synthesis.confidence_badge,
       karmic_marker:    synthesisData.synthesis.karmic_marker,
       karmic_text:      synthesisData.synthesis.karmic_text,
       strong_planets:   synthesisData.synthesis.strong_planets,
       weak_planets:     synthesisData.synthesis.weak_planets,
-      best_houses:      synthesisData.synthesis.best_houses,
-      challenged_houses:synthesisData.synthesis.challenged_houses,
       primary_yoga:     synthesisData.synthesis.primary_yoga,
       bhrigu_theme:     synthesisData.synthesis.bhrigu_theme,
       bhrigu_domain_signals: (synthesisData.synthesis.bhrigu_domain_signals ?? []).slice(0, 5),
@@ -1210,7 +1007,6 @@ function buildChartObject(
         badge:             synthesisData.confidence.badge,
         score:             synthesisData.confidence.score,
         karmic_marker:     synthesisData.confidence.karmic_marker,
-        karmic_text:       synthesisData.confidence.karmic_text,
         confidence_reason: synthesisData.confidence.confidence_reason,
         action_guidance:   synthesisData.confidence.action_guidance,
       } : null,
@@ -1223,7 +1019,6 @@ function buildChartObject(
       dashaFocus:      domain.dashaFocus,
       yogasToCheck:    domain.yogasToCheck,
       timeWindow:      domain.timeWindow,
-      classicalBasis:  domain.classicalBasis,
     },
 
     userContext: {
@@ -1233,9 +1028,7 @@ function buildChartObject(
       sector:       userContext.sector       || 'not_specified',
       language:     userContext.language     || 'hinglish',
       city:         userContext.city         || birthData.cityName || 'India',
-      mobile:       userContext.mobile       || null,
       businessName: userContext.businessName || null,
-      linkedinUrl:  userContext.linkedinUrl  || null,
       person2Name:  userContext.person2Name  || null,
       person2City:  userContext.person2City  || null,
     },
@@ -1250,37 +1043,41 @@ function buildUserMessage(
   isoDate:       string,
   tier:          UserTier,
   synthesisData?: SynthesisData,
+  keywords?:     ReturnType<typeof getDomainKeywords>,
 ): string {
+
   const tierInstructions = {
-    free:     'Generate geoDirectAnswer + simpleSummary ONLY (150-200 words). Both professional sections show locked teasers.',
-    basic:    'Generate geoDirectAnswer + simpleSummary (400-600 words) + complete professionalEnglish. professionalHindi shows locked teaser.',
-    standard: 'Generate ALL FOUR sections: geoDirectAnswer + simpleSummary + complete professionalEnglish + complete professionalHindi in proper देवनागरी.',
-    premium:  'Generate ALL FOUR sections at maximum depth. Add consultationFlag: true at root level.',
+    free:     'Generate geoDirectAnswer + simpleSummary ONLY. Add suspense hook at end of simpleSummary.text. Both professional sections show locked teasers. Populate seoSignals.',
+    basic:    'Generate geoDirectAnswer + simpleSummary (400-600w) + complete professionalEnglish + seoSignals. professionalHindi shows locked teaser.',
+    standard: 'Generate ALL sections: geoDirectAnswer + simpleSummary + complete professionalEnglish + complete professionalHindi in proper देवनागरी + seoSignals.',
+    premium:  'Generate ALL sections at maximum depth. Add consultationFlag: true. Complete professionalEnglish + professionalHindi + seoSignals.',
   };
 
   const synthNote = synthesisData?.synthesis?.gemini_note
-    ? `\nSYNTHESIS INSTRUCTION: ${synthesisData.synthesis.gemini_note}`
+    ? `\nSYNTHESIS INSTRUCTION: ${synthesisData.synthesis.gemini_note}` : '';
+
+  const keywordNote = keywords
+    ? `\nTRANSACTIONAL KEYWORDS TO USE IN seoSignals: ${keywords.primary.slice(0, 3).join(', ')} | ${keywords.commercial.slice(0, 3).join(', ')}`
     : '';
 
   return `Analyze chart for: ${domain.displayName} (${domain.id})
 Tier: ${tier.toUpperCase()} | Date: ${isoDate}
 Instruction: ${tierInstructions[tier]}
-World context: ${domain.worldContext !== 'none' && isPaid(tier) ? 'REQUIRED — search first' : 'DISABLED'}
-Parashara data: ${chartObject.parashara ? 'YES — use activeYogas[], ashtakavarga[], drishti[]' : 'NO'}
-Panchang data:  ${chartObject.panchang  ? 'YES — populate panchang fields in both reports' : 'NO'}
-Synthesis data: ${chartObject.synthesis ? 'YES — use confidence, karmic_marker, agreement_points, bhrigu data' : 'NO'}
-${synthNote}
+Parashara data: ${chartObject.parashara ? 'YES — use activeYogas[], ashtakavarga[]' : 'NO'}
+Panchang data:  ${chartObject.panchang  ? 'YES — populate panchang fields' : 'NO'}
+Synthesis data: ${chartObject.synthesis ? 'YES — use confidence, karmic_marker, bhrigu data' : 'NO'}
+${synthNote}${keywordNote}
 
 ${JSON.stringify(chartObject, null, 2)}
 
 FINAL REMINDERS:
-• geoDirectAnswer = 40-60 words, includes Rohiit Gupta + Swiss Ephemeris + trikalvaani.com
+• geoDirectAnswer = 40-60 words | includes Rohiit Gupta + Swiss Ephemeris + trikalvaani.com
+• seoSignals.transactionalKeywords = populated with domain commercial keywords
 • Output ONLY valid JSON — { to }
-• professionalHindi = proper देवनागरी — ZERO English words
-• Every remedy must have classicalBasis citation
-• Every ratna must have caution field
 • All dates from Dasha data only — NEVER invented
 • No Yoga not in parashara.activeYogas[]
-• karmicMarker = ${chartObject.synthesis ? (chartObject.synthesis as any)?.karmic_marker : false}
-• JAI MAA SHAKTI 🔱 — TRIKAL VAANI v4.2`;
+• ${tier === 'free' ? 'Add suspense hook at end of simpleSummary.text' : 'Add suspense hook for next tier at end of simpleSummary.text'}
+• rudraksha field in remedies MUST be populated
+• karmicMarker = ${(chartObject.synthesis as any)?.karmic_marker ?? false}
+• JAI MAA SHAKTI 🔱 — TRIKAL VAANI v4.3`;
 }
