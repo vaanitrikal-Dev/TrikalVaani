@@ -231,7 +231,27 @@ const mainCaution   = simpleSummary?.mainCaution    ?? null;
               {summary ? (
                 <div>
                   {typeof summary === 'string' ? (
-                    <p className="text-slate-300 text-sm leading-relaxed">{summary}</p>
+  <div>
+    <p className="text-slate-300 text-sm leading-relaxed mb-4">{summary}</p>
+    {keyMessage && (
+      <div className="px-3 py-2 rounded-lg mb-2" style={{ background: 'rgba(212,175,55,0.08)', border: '1px solid rgba(212,175,55,0.15)' }}>
+        <p className="text-xs font-semibold mb-1" style={{ color: '#D4AF37' }}>🔑 Key Message</p>
+        <p className="text-white text-sm">{keyMessage}</p>
+      </div>
+    )}
+    {mainAction && (
+      <div className="px-3 py-2 rounded-lg mb-2" style={{ background: 'rgba(74,222,128,0.06)', border: '1px solid rgba(74,222,128,0.15)' }}>
+        <p className="text-green-400 text-xs font-semibold mb-1">✓ Do This</p>
+        <p className="text-slate-300 text-sm">{mainAction}</p>
+      </div>
+    )}
+    {mainCaution && (
+      <div className="px-3 py-2 rounded-lg" style={{ background: 'rgba(239,68,68,0.06)', border: '1px solid rgba(239,68,68,0.15)' }}>
+        <p className="text-red-400 text-xs font-semibold mb-1">✗ Avoid This</p>
+        <p className="text-slate-300 text-sm">{mainCaution}</p>
+      </div>
+    )}
+  </div>
                   ) : (
                     Object.entries(summary).map(([key, val]) => (
                       <div key={key} className="mb-4">
