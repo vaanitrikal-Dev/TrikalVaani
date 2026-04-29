@@ -3,26 +3,32 @@
  * TRIKAL VAANI — Result Client Component
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: components/result/ResultClient.tsx
- * VERSION: 3.3 — Fixed data paths for Planets/Dasha/Remedies tabs
+ * VERSION: 4.0 — Full integration of ALL components
  * SIGNED: ROHIIT GUPTA, CEO
  * 🔒 LOCKED — DO NOT EDIT WITHOUT CEO APPROVAL
  *
- * KEY FIX in v3.3:
- *   - Remedies: reads professionalEnglish.remedyPlan (correct Gemini path)
- *   - Dasha:    reads professionalEnglish.dashaAnalysis
- *   - Planets:  reads _meta.planets (correct path)
- *   - Shadbala: reads planet.shadbala.classification
- *   - isFree = false for testing (all tiers see full prediction)
+ * WIRES IN v4.0:
+ *   ✅ PratayantarDasha — 4-level Dasha with Jini insights
+ *   ✅ PersonalizedPrediction — 3-layer AI prediction
+ *   ✅ NakshatraAnalysis — Loading animation
+ *   ✅ Shadbala table — 6-component classical strength
+ *   ✅ Parashara Yogas — from synthesis data
+ *   ✅ Bhrigu insights — karmic marker + domain signals
+ *   ✅ Remedies — full Mantra/Dana/Vrat/Rudraksha/Ratna
+ *   ✅ isFree = false (testing — all tiers see full)
  * ============================================================
  */
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, RefreshCw, Sun, Moon, Star, Zap, Lock, Clock } from 'lucide-react';
-import SiteNav from '@/components/layout/SiteNav';
+import { ArrowLeft, RefreshCw, Sun, Moon, Star, Zap, Clock } from 'lucide-react';
+import SiteNav    from '@/components/layout/SiteNav';
 import SiteFooter from '@/components/layout/SiteFooter';
+import PratayantarDasha   from '@/components/result/PratayantarDasha';
+import PersonalizedPrediction from '@/components/result/PersonalizedPrediction';
+import NakshatraAnalysis  from '@/components/result/NakshatraAnalysis';
 
 const GOLD      = '#D4AF37';
 const GOLD_RGBA = (a: number) => `rgba(212,175,55,${a})`;
@@ -51,117 +57,107 @@ export interface ResultClientProps {
   meta:           ResultMeta;
 }
 
-// ── Planet helper ─────────────────────────────────────────────────────────────
+// ── Data extractors ───────────────────────────────────────────────────────────
 
-interface PlanetRow {
-  name:           string;
-  rashi:          string;
-  house:          number;
-  nakshatra:      string;
-  retro:          boolean;
-  strength:       number;
-  classification: string;
-}
-
-function extractPlanets(predictionData: Record<string, any>): PlanetRow[] {
+function extractPlanets(p: Record<string, any>) {
   const planets =
-    predictionData?._meta?.planets    ??
-    predictionData?._kundaliPlanets   ??
-    predictionData?._rawChart?.grahas ??
+    p?._meta?.planets ??
+    p?._kundaliPlanets ??
     null;
 
   if (!planets) return [];
 
-  if (Array.isArray(planets)) {
-    return planets.map((p: any) => ({
-      name:           p.name      ?? p.planet ?? '—',
-      rashi:          p.rashi     ?? p.sign   ?? '—',
-      house:          p.house     ?? 0,
-      nakshatra:      p.nakshatra ?? '—',
-      retro:          p.isRetrograde ?? p.retrograde ?? false,
-      strength:       p.strength  ?? 50,
-      classification: p.shadbala?.classification ?? p.classification ?? '—',
-    }));
-  }
+  const arr = Array.isArray(planets)
+    ? planets
+    : Object.entries(planets).map(([name, v]: [string, any]) => ({ name, ...v }));
 
-  return Object.entries(planets).map(([name, p]: [string, any]) => ({
-    name,
-    rashi:          p.rashi     ?? '—',
-    house:          p.house     ?? 0,
-    nakshatra:      p.nakshatra ?? '—',
-    retro:          p.isRetrograde ?? false,
-    strength:       p.strength  ?? 50,
-    classification: p.shadbala?.classification ?? '—',
+  return arr.map((g: any) => ({
+    name:           g.name      ?? g.planet ?? '—',
+    rashi:          g.rashi     ?? g.sign   ?? '—',
+    house:          g.house     ?? 0,
+    nakshatra:      g.nakshatra ?? '—',
+    retro:          g.isRetrograde ?? g.retrograde ?? false,
+    strength:       g.strength  ?? 50,
+    degree:         g.degree    ?? g.degree_in_sign ?? 0,
+    isRetrograde:   g.isRetrograde ?? g.retrograde ?? false,
+    classification: g.shadbala?.classification ?? '—',
+    shadbala:       g.shadbala ?? null,
   }));
 }
 
-// ── Data extractors ───────────────────────────────────────────────────────────
+function extractPratyantar(p: Record<string, any>) {
+  // allPratyantar from dasha in prediction chart object
+  const all =
+    p?._meta?.kundali?.pratyantar ??
+    p?.chart?.dasha?.allPratyantar ??
+    null;
 
-function extractDasha(predictionData: Record<string, any>) {
-  // Gemini stores in professionalEnglish.dashaAnalysis
+  if (!Array.isArray(all) || all.length === 0) return null;
+
+  return all.map((pd: any) => ({
+    lord:         pd.lord,
+    startDate:    pd.startDate,
+    endDate:      pd.endDate,
+    durationDays: pd.durationDays ?? 7,
+    quality:      pd.quality ?? 'Madhyam',
+    remainingDays: pd.remainingDays ?? 0,
+  }));
+}
+
+function findCurrentPratyantar(periods: any[]) {
+  const now = new Date();
+  return periods.find(pd => {
+    const s = new Date(pd.startDate);
+    const e = new Date(pd.endDate);
+    return s <= now && e > now;
+  }) ?? periods[0];
+}
+
+function extractYogas(p: Record<string, any>) {
   return (
-    predictionData?.professionalEnglish?.dashaAnalysis ??
-    predictionData?.dasha_analysis ??
-    predictionData?.dashaAnalysis ??
-    predictionData?.dasha ??
+    p?._meta?.synthesis?.yogas ??
+    p?._meta?.synthesis?.synthesis?.activeYogas ??
+    p?.professionalEnglish?.yogasFound ??
+    []
+  );
+}
+
+function extractBhrigu(p: Record<string, any>) {
+  return (
+    p?._meta?.synthesis?.bhrigu ??
+    p?._meta?.synthesis?.summary ??
     null
   );
 }
 
-function extractRemedies(predictionData: Record<string, any>) {
-  // Gemini stores in professionalEnglish.remedyPlan
+function extractRemedies(p: Record<string, any>) {
   return (
-    predictionData?.professionalEnglish?.remedyPlan ??
-    predictionData?.remedyPlan ??
-    predictionData?.remedies ??
-    predictionData?.remedy_plan ??
+    p?.professionalEnglish?.remedyPlan ??
+    p?.remedyPlan ??
     null
   );
 }
 
-function extractActionWindows(predictionData: Record<string, any>) {
-  return (
-    predictionData?.professionalEnglish?.actionWindows ??
-    predictionData?.actionWindows ??
-    null
-  );
+function extractDasha(p: Record<string, any>) {
+  return p?.professionalEnglish?.dashaAnalysis ?? null;
 }
 
-function extractKeyInfluences(predictionData: Record<string, any>) {
-  return (
-    predictionData?.professionalEnglish?.keyInfluences ??
-    predictionData?.keyInfluences ??
-    null
-  );
+function extractActionWindows(p: Record<string, any>) {
+  return p?.professionalEnglish?.actionWindows ?? null;
 }
 
-// ── Timing Score helpers ──────────────────────────────────────────────────────
-
-function getTimingColor(score: number): string {
-  if (score >= 70) return '#22c55e';
-  if (score >= 40) return GOLD;
-  return '#ef4444';
+function getTimingScore(p: Record<string, any>): number {
+  return (
+    p?._meta?.synthesis?.confidence?.score ??
+    p?._meta?.confidence?.score ??
+    0
+  );
 }
 
 function getTimingPhase(score: number) {
-  if (score >= 70) return {
-    phase:  'Shubh Kaal — Act Now',
-    icon:   '🟢',
-    advice: 'Graha alignment is favorable. Major decisions and new ventures are supported.',
-    color:  '#22c55e',
-  };
-  if (score >= 40) return {
-    phase:  'Madhyam Kaal — Prepare',
-    icon:   '🟡',
-    advice: 'Mixed planetary signals. Plan carefully, avoid impulsive decisions.',
-    color:  GOLD,
-  };
-  return {
-    phase:  'Saavdhani Kaal — Wait & Prepare',
-    icon:   '🔴',
-    advice: 'Current Dasha period advises patience. This is a preparation phase — not an action phase. Your chart foundation is strong; timing will align.',
-    color:  '#ef4444',
-  };
+  if (score >= 70) return { phase: 'Shubh Kaal — Act Now',         icon: '🟢', color: '#22c55e', advice: 'Graha alignment is favorable. Major decisions are supported.' };
+  if (score >= 40) return { phase: 'Madhyam Kaal — Prepare',       icon: '🟡', color: GOLD,      advice: 'Mixed signals. Plan carefully, avoid impulsive decisions.' };
+  return               { phase: 'Saavdhani Kaal — Wait & Prepare', icon: '🔴', color: '#ef4444', advice: 'Patience advised. Preparation phase — your chart foundation is strong.' };
 }
 
 // ── Main Component ────────────────────────────────────────────────────────────
@@ -169,39 +165,65 @@ function getTimingPhase(score: number) {
 export default function ResultClient({ predictionId, predictionData, meta }: ResultClientProps) {
   const [activeTab, setActiveTab] = useState<'summary' | 'planets' | 'dasha' | 'remedies'>('summary');
 
-  const planets       = extractPlanets(predictionData);
-  const dashaData     = extractDasha(predictionData);
-  const remedyData    = extractRemedies(predictionData);
-  const actionWindows = extractActionWindows(predictionData);
-  const keyInfluences = extractKeyInfluences(predictionData);
+  // isFree = false → all tiers see full prediction during testing
+  const isFree = false;
 
-  const isFree = false; // TEMP: All tiers see full prediction during testing
-  const isPaid = !isFree;
+  // Extract all data
+  const planets       = useMemo(() => extractPlanets(predictionData),     [predictionData]);
+  const yogas         = useMemo(() => extractYogas(predictionData),        [predictionData]);
+  const bhrigu        = useMemo(() => extractBhrigu(predictionData),       [predictionData]);
+  const remedyData    = useMemo(() => extractRemedies(predictionData),     [predictionData]);
+  const dashaData     = useMemo(() => extractDasha(predictionData),        [predictionData]);
+  const actionWindows = useMemo(() => extractActionWindows(predictionData),[predictionData]);
+  const pratyantar    = useMemo(() => extractPratyantar(predictionData),   [predictionData]);
+  const currentPD     = useMemo(() => pratyantar ? findCurrentPratyantar(pratyantar) : null, [pratyantar]);
 
-  // ── Extract Gemini fields ──────────────────────────────────────────────────
   const simpleSummary = predictionData?.simpleSummary ?? null;
-  const summaryText   = simpleSummary?.text        ?? predictionData?.summary ?? null;
+  const summaryText   = simpleSummary?.text        ?? null;
   const keyMessage    = simpleSummary?.keyMessage  ?? null;
   const mainAction    = simpleSummary?.mainAction  ?? null;
   const mainCaution   = simpleSummary?.mainCaution ?? null;
-  const dosList       = simpleSummary?.dos         ?? null;
-  const dontsList     = simpleSummary?.donts       ?? null;
+  const dosList       = simpleSummary?.dos         ?? [];
+  const dontsList     = simpleSummary?.donts       ?? [];
   const panchang      = predictionData?._meta?.synthesis?.panchang
     ?? predictionData?.professionalEnglish?.panchang
     ?? null;
 
-  // ── Timing Score ──────────────────────────────────────────────────────────
-  const timingScore: number =
-    predictionData?._meta?.synthesis?.confidence?.score ??
-    predictionData?._meta?.confidence?.score ??
-    0;
+  const timingScore = getTimingScore(predictionData);
+  const timingPhase = getTimingPhase(timingScore);
+  const confidence  = predictionData?._meta?.synthesis?.confidence ?? null;
+  const karmicMarker = predictionData?._meta?.synthesis?.summary?.karmic_marker
+    ?? confidence?.karmic_marker
+    ?? false;
 
-  const timingPhase   = getTimingPhase(timingScore);
-  const timingColor   = getTimingColor(timingScore);
-  const tieBreakerText: string =
-    predictionData?._meta?.synthesis?.confidence?.tie_breaker ??
-    predictionData?._meta?.synthesis?.synthesis?.tie_breaker  ??
-    '';
+  // Build planet props for PersonalizedPrediction
+  const planetProps = planets.map((p: any) => ({
+    name:         p.name,
+    rashi:        p.rashi,
+    house:        p.house,
+    strength:     p.strength,
+    isRetrograde: p.isRetrograde,
+    nakshatra:    p.nakshatra,
+    degree:       p.degree,
+  }));
+
+  const lang = (meta.language ?? 'hinglish') as 'hindi' | 'hinglish' | 'english';
+
+  // Domain segment mapping
+  const segmentMap: Record<string, string> = {
+    genz_ex_back:           'ex_back',
+    genz_toxic_boss:        'toxic_boss',
+    genz_manifestation:     'manifestation',
+    genz_dream_career:      'dream_career',
+    mill_property_yog:      'property_yog',
+    mill_karz_mukti:        'karz_mukti',
+    mill_childs_destiny:    'childs_destiny',
+    mill_parents_wellness:  'parents_wellness',
+    genx_retirement_peace:  'retirement_peace',
+    genx_legacy_inheritance:'legacy_inheritance',
+    genx_spiritual_innings: 'spiritual_innings',
+  };
+  const autoSegment = segmentMap[meta.domainId] ?? 'default';
 
   return (
     <div className="min-h-screen bg-[#080B12]">
@@ -219,17 +241,14 @@ export default function ResultClient({ predictionId, predictionData, meta }: Res
             <span className="text-slate-700">·</span>
             <span className="text-xs text-slate-600">
               {meta.personName}
-              {meta.analysisDate && ` · ${new Date(meta.analysisDate).toLocaleDateString('en-IN', {
-                day: 'numeric', month: 'long', year: 'numeric',
-              })}`}
+              {meta.analysisDate && ` · ${new Date(meta.analysisDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}`}
             </span>
           </div>
 
           {/* Hero */}
           <div className="text-center mb-6 py-6 px-4 rounded-2xl"
             style={{ background: 'rgba(4,8,20,0.75)', border: `1px solid ${GOLD_RGBA(0.1)}` }}>
-            <p className="text-xs font-medium tracking-widest uppercase mb-2"
-              style={{ color: GOLD_RGBA(0.55) }}>
+            <p className="text-xs font-medium tracking-widest uppercase mb-2" style={{ color: GOLD_RGBA(0.55) }}>
               Your Cosmic Report · {meta.domainLabel}
             </p>
             <h1 className="text-2xl sm:text-3xl font-bold" style={{ fontFamily: 'Georgia, serif' }}>
@@ -237,17 +256,28 @@ export default function ResultClient({ predictionId, predictionData, meta }: Res
               <span style={{ color: GOLD }}>{meta.personName?.split(' ')[0] ?? 'Friend'}</span>
             </h1>
             <p className="text-slate-400 text-sm mt-2">
-              {new Date().toLocaleDateString('en-IN', {
-                weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
-              })}
+              {new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
             </p>
-            <div className="mt-3 inline-flex items-center gap-2 px-3 py-1.5 rounded-full"
-              style={{ background: GOLD_RGBA(0.08), border: `1px solid ${GOLD_RGBA(0.2)}` }}>
-              <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: GOLD }} />
-              <span className="text-xs font-semibold" style={{ color: GOLD }}>
-                {meta.domainLabel} · {meta.tier.toUpperCase()}
-              </span>
+            <div className="mt-3 flex items-center justify-center gap-2 flex-wrap">
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full"
+                style={{ background: GOLD_RGBA(0.08), border: `1px solid ${GOLD_RGBA(0.2)}` }}>
+                <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: GOLD }} />
+                <span className="text-xs font-semibold" style={{ color: GOLD }}>
+                  {meta.domainLabel} · {meta.tier.toUpperCase()}
+                </span>
+              </div>
+              {karmicMarker && (
+                <div className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full"
+                  style={{ background: 'rgba(124,58,237,0.1)', border: '1px solid rgba(124,58,237,0.3)' }}>
+                  <span className="text-xs font-semibold text-purple-300">🔱 Karmic Marker</span>
+                </div>
+              )}
             </div>
+          </div>
+
+          {/* Nakshatra Analysis loading animation */}
+          <div className="mb-4">
+            <NakshatraAnalysis name={meta.personName} />
           </div>
 
           {/* Kundali Stats */}
@@ -260,49 +290,55 @@ export default function ResultClient({ predictionId, predictionData, meta }: Res
           </div>
 
           {/* Timing Score */}
-          <div className="rounded-2xl p-4 mb-5"
-            style={{ background: 'rgba(4,8,20,0.8)', border: `1px solid ${timingColor}22` }}>
+          <div className="rounded-2xl p-4 mb-4"
+            style={{ background: 'rgba(4,8,20,0.8)', border: `1px solid ${timingPhase.color}22` }}>
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
-                <Clock className="w-4 h-4" style={{ color: timingColor }} />
+                <Clock className="w-4 h-4" style={{ color: timingPhase.color }} />
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: timingColor }}>
+                  <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: timingPhase.color }}>
                     Graha Timing Score
                   </p>
-                  <p className="text-xs text-slate-500 mt-0.5">
-                    {timingPhase.icon} {timingPhase.phase}
-                  </p>
+                  <p className="text-xs text-slate-500 mt-0.5">{timingPhase.icon} {timingPhase.phase}</p>
                 </div>
               </div>
               <div className="text-right">
-                <span className="text-3xl font-bold" style={{ color: timingColor }}>
-                  {Math.round(timingScore)}
-                </span>
+                <span className="text-3xl font-bold" style={{ color: timingPhase.color }}>{Math.round(timingScore)}</span>
                 <span className="text-sm text-slate-500">/100</span>
               </div>
             </div>
-            <div className="w-full h-2.5 rounded-full overflow-hidden mb-2"
-              style={{ background: 'rgba(255,255,255,0.06)' }}>
+            <div className="w-full h-2.5 rounded-full overflow-hidden mb-2" style={{ background: 'rgba(255,255,255,0.06)' }}>
               <div className="h-full rounded-full transition-all duration-1000"
-                style={{
-                  width:      `${Math.max(4, Math.round(timingScore))}%`,
-                  background: `linear-gradient(90deg, ${timingColor}66, ${timingColor})`,
-                }} />
+                style={{ width: `${Math.max(4, Math.round(timingScore))}%`, background: `linear-gradient(90deg, ${timingPhase.color}66, ${timingPhase.color})` }} />
             </div>
-            <div className="flex justify-between text-xs text-slate-600 mb-3">
-              <span>🔴 Saavdhani</span>
-              <span>🟡 Madhyam</span>
-              <span>🟢 Shubh</span>
+            <div className="flex justify-between text-xs text-slate-600 mb-2">
+              <span>🔴 Saavdhani</span><span>🟡 Madhyam</span><span>🟢 Shubh</span>
             </div>
-            <div className="px-3 py-2.5 rounded-xl text-xs leading-relaxed"
-              style={{
-                background: `${timingColor}0D`,
-                border:     `1px solid ${timingColor}22`,
-                color:      'rgba(255,255,255,0.7)',
-              }}>
+            <p className="text-xs leading-relaxed px-1" style={{ color: 'rgba(255,255,255,0.6)' }}>
               {timingPhase.advice}
-              {tieBreakerText && <span className="text-slate-500"> {tieBreakerText}</span>}
-            </div>
+            </p>
+            {confidence?.action_guidance && (
+              <p className="text-xs mt-2 italic" style={{ color: GOLD_RGBA(0.6) }}>
+                {confidence.action_guidance}
+              </p>
+            )}
+          </div>
+
+          {/* Personalized Prediction — 3-layer AI */}
+          <div className="mb-4">
+            <PersonalizedPrediction
+              name={meta.personName}
+              lagna={meta.lagna}
+              mahadasha={meta.mahadasha}
+              antardasha={meta.antardasha}
+              nakshatra={meta.nakshatra}
+              planets={planetProps}
+              autoSegment={autoSegment}
+              autoSegmentLabel={meta.domainLabel}
+              lang={lang}
+              isPaid={!isFree}
+              onUnlockClick={() => window.location.href = `/upgrade?id=${predictionId}&tier=basic`}
+            />
           </div>
 
           {/* Tabs */}
@@ -322,166 +358,277 @@ export default function ResultClient({ predictionId, predictionData, meta }: Res
 
           {/* ── SUMMARY TAB ── */}
           {activeTab === 'summary' && (
-            <div className="rounded-2xl p-5"
-              style={{ background: 'rgba(4,8,20,0.8)', border: `1px solid ${GOLD_RGBA(0.1)}` }}>
-              {summaryText ? (
-                <div>
+            <div className="space-y-4">
+              <div className="rounded-2xl p-5"
+                style={{ background: 'rgba(4,8,20,0.8)', border: `1px solid ${GOLD_RGBA(0.1)}` }}>
+
+                {summaryText && (
                   <p className="text-slate-300 leading-relaxed mb-4" style={{ fontSize: '0.8rem' }}>
                     {summaryText}
                   </p>
+                )}
 
-                  {keyMessage && (
-                    <div className="px-3 py-2.5 rounded-lg mb-3"
-                      style={{ background: GOLD_RGBA(0.08), border: `1px solid ${GOLD_RGBA(0.2)}` }}>
-                      <p className="text-xs font-semibold mb-1.5" style={{ color: GOLD }}>🔑 Key Message</p>
-                      <p className="text-white text-sm">{keyMessage}</p>
+                {keyMessage && (
+                  <div className="px-3 py-2.5 rounded-lg mb-3"
+                    style={{ background: GOLD_RGBA(0.08), border: `1px solid ${GOLD_RGBA(0.2)}` }}>
+                    <p className="text-xs font-semibold mb-1.5" style={{ color: GOLD }}>🔑 Key Message</p>
+                    <p className="text-white text-sm">{keyMessage}</p>
+                  </div>
+                )}
+
+                {mainAction && (
+                  <div className="px-3 py-2.5 rounded-lg mb-2"
+                    style={{ background: 'rgba(74,222,128,0.06)', border: '1px solid rgba(74,222,128,0.2)' }}>
+                    <p className="text-green-400 text-xs font-semibold mb-1.5">✓ Do This</p>
+                    <p className="text-slate-300 text-sm">{mainAction}</p>
+                  </div>
+                )}
+
+                {mainCaution && (
+                  <div className="px-3 py-2.5 rounded-lg mb-4"
+                    style={{ background: 'rgba(239,68,68,0.06)', border: '1px solid rgba(239,68,68,0.2)' }}>
+                    <p className="text-red-400 text-xs font-semibold mb-1.5">✗ Avoid This</p>
+                    <p className="text-slate-300 text-sm">{mainCaution}</p>
+                  </div>
+                )}
+
+                {dosList.length > 0 && (
+                  <div className="mt-3">
+                    <p className="text-green-400 text-xs font-semibold mb-2">✓ Action Steps</p>
+                    <ul className="space-y-1.5">
+                      {dosList.map((d: string, i: number) => (
+                        <li key={i} className="flex gap-2 text-sm text-slate-300">
+                          <span className="text-green-400 mt-0.5">•</span>{d}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {dontsList.length > 0 && (
+                  <div className="mt-3">
+                    <p className="text-red-400 text-xs font-semibold mb-2">✗ Avoid These</p>
+                    <ul className="space-y-1.5">
+                      {dontsList.map((d: string, i: number) => (
+                        <li key={i} className="flex gap-2 text-sm text-slate-300">
+                          <span className="text-red-400 mt-0.5">•</span>{d}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+
+              {/* Parashara Yogas */}
+              {Array.isArray(yogas) && yogas.length > 0 && (
+                <div className="rounded-2xl p-5"
+                  style={{ background: 'rgba(4,8,20,0.8)', border: `1px solid ${GOLD_RGBA(0.1)}` }}>
+                  <p className="text-xs font-semibold uppercase tracking-wider mb-3"
+                    style={{ color: GOLD_RGBA(0.7) }}>
+                    🏛 Parashara Yogas — BPHS Classical
+                  </p>
+                  <div className="space-y-3">
+                    {yogas.slice(0, 5).map((y: any, i: number) => (
+                      <div key={i} className="px-3 py-3 rounded-xl"
+                        style={{ background: GOLD_RGBA(0.04), border: `1px solid ${GOLD_RGBA(0.1)}` }}>
+                        <div className="flex justify-between items-start mb-1">
+                          <span className="text-sm font-bold" style={{ color: GOLD }}>{y.name}</span>
+                          <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                            y.strength === 'strong' ? 'bg-green-500/10 text-green-400' :
+                            y.strength === 'weak'   ? 'bg-red-500/10 text-red-400' :
+                            'bg-yellow-500/10 text-yellow-400'
+                          }`}>{y.strength}</span>
+                        </div>
+                        <p className="text-xs text-slate-400 mb-1">{y.effect}</p>
+                        {y.classicalBasis && (
+                          <p className="text-xs italic" style={{ color: GOLD_RGBA(0.45) }}>
+                            📖 {y.classicalBasis}
+                          </p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Bhrigu Insights */}
+              {bhrigu && (
+                <div className="rounded-2xl p-5"
+                  style={{ background: 'rgba(4,8,20,0.8)', border: '1px solid rgba(124,58,237,0.2)' }}>
+                  <p className="text-xs font-semibold uppercase tracking-wider mb-3 text-purple-300">
+                    🔱 Bhrigu Nandi Analysis
+                  </p>
+                  {bhrigu.current_life_theme && (
+                    <div className="px-3 py-2.5 rounded-xl mb-3"
+                      style={{ background: 'rgba(124,58,237,0.06)', border: '1px solid rgba(124,58,237,0.15)' }}>
+                      <p className="text-xs text-slate-500 mb-1">Current Life Theme</p>
+                      <p className="text-sm text-purple-200">{bhrigu.current_life_theme}</p>
                     </div>
                   )}
-
-                  {mainAction && (
-                    <div className="px-3 py-2.5 rounded-lg mb-2"
-                      style={{ background: 'rgba(74,222,128,0.06)', border: '1px solid rgba(74,222,128,0.2)' }}>
-                      <p className="text-green-400 text-xs font-semibold mb-1.5">✓ Do This</p>
-                      <p className="text-slate-300 text-sm">{mainAction}</p>
+                  {bhrigu.bhrigu_theme && !bhrigu.current_life_theme && (
+                    <div className="px-3 py-2.5 rounded-xl mb-3"
+                      style={{ background: 'rgba(124,58,237,0.06)', border: '1px solid rgba(124,58,237,0.15)' }}>
+                      <p className="text-xs text-slate-500 mb-1">Bhrigu Theme</p>
+                      <p className="text-sm text-purple-200">{bhrigu.bhrigu_theme}</p>
                     </div>
                   )}
-
-                  {mainCaution && (
-                    <div className="px-3 py-2.5 rounded-lg mb-4"
-                      style={{ background: 'rgba(239,68,68,0.06)', border: '1px solid rgba(239,68,68,0.2)' }}>
-                      <p className="text-red-400 text-xs font-semibold mb-1.5">✗ Avoid This</p>
-                      <p className="text-slate-300 text-sm">{mainCaution}</p>
-                    </div>
-                  )}
-
-                  {isPaid && Array.isArray(dosList) && dosList.length > 0 && (
-                    <div className="mt-3">
-                      <p className="text-green-400 text-xs font-semibold mb-2">✓ Action Steps</p>
-                      <ul className="space-y-1.5">
-                        {dosList.map((d: string, i: number) => (
-                          <li key={i} className="flex gap-2 text-sm text-slate-300">
-                            <span className="text-green-400 mt-0.5">•</span>{d}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-
-                  {isPaid && Array.isArray(dontsList) && dontsList.length > 0 && (
-                    <div className="mt-3">
-                      <p className="text-red-400 text-xs font-semibold mb-2">✗ Avoid These</p>
-                      <ul className="space-y-1.5">
-                        {dontsList.map((d: string, i: number) => (
-                          <li key={i} className="flex gap-2 text-sm text-slate-300">
-                            <span className="text-red-400 mt-0.5">•</span>{d}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-
-                  {/* Key Influences */}
-                  {isPaid && Array.isArray(keyInfluences) && keyInfluences.length > 0 && (
-                    <div className="mt-5">
-                      <p className="text-xs font-semibold uppercase tracking-wider mb-3"
-                        style={{ color: GOLD_RGBA(0.7) }}>⭐ Key Planetary Influences</p>
-                      <div className="space-y-3">
-                        {keyInfluences.map((ki: any, i: number) => (
-                          <div key={i} className="px-3 py-3 rounded-xl"
-                            style={{ background: GOLD_RGBA(0.04), border: `1px solid ${GOLD_RGBA(0.1)}` }}>
-                            <div className="flex justify-between items-start mb-1">
-                              <span className="text-sm font-semibold text-white">{ki.planet}</span>
-                              <span className="text-xs text-slate-500">{ki.position}</span>
-                            </div>
-                            <p className="text-xs text-slate-400 mb-1">{ki.effect}</p>
-                            {ki.classicalBasis && (
-                              <p className="text-xs italic" style={{ color: GOLD_RGBA(0.5) }}>
-                                {ki.classicalBasis}
-                              </p>
-                            )}
+                  {Array.isArray(bhrigu.domain_signals) && bhrigu.domain_signals.length > 0 && (
+                    <div>
+                      <p className="text-xs text-slate-500 mb-2">Domain Signals</p>
+                      <div className="space-y-1.5">
+                        {bhrigu.domain_signals.slice(0, 3).map((s: any, i: number) => (
+                          <div key={i} className="flex gap-2 text-xs text-slate-300">
+                            <span className="text-purple-400">•</span>
+                            {typeof s === 'string' ? s : s.signal ?? s.description ?? JSON.stringify(s)}
                           </div>
                         ))}
                       </div>
                     </div>
                   )}
+                  {bhrigu.karmic_description && (
+                    <p className="text-xs italic mt-3 text-purple-300/70">{bhrigu.karmic_description}</p>
+                  )}
                 </div>
-              ) : (
-                <EmptyState text="Summary loading..." />
               )}
             </div>
           )}
 
-          {/* ── PLANETS TAB ── */}
+          {/* ── PLANETS TAB (with Shadbala) ── */}
           {activeTab === 'planets' && (
-            <div className="rounded-2xl overflow-hidden"
-              style={{ border: `1px solid ${GOLD_RGBA(0.1)}` }}>
-              {planets.length > 0 ? (
-                <table className="w-full text-xs">
-                  <thead>
-                    <tr style={{ background: GOLD_RGBA(0.08) }}>
-                      {['Planet', 'Rashi', 'House', 'Nakshatra', 'R', 'Shadbala', 'Str'].map(h => (
-                        <th key={h} className="py-3 px-2 text-left font-semibold"
-                          style={{ color: GOLD }}>{h}</th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {planets.map((p, i) => (
-                      <tr key={p.name}
-                        style={{ background: i % 2 === 0 ? 'rgba(4,8,20,0.8)' : 'rgba(4,8,20,0.5)' }}>
-                        <td className="py-2.5 px-2 font-medium text-white">{p.name}</td>
-                        <td className="py-2.5 px-2 text-slate-300">{p.rashi}</td>
-                        <td className="py-2.5 px-2 text-slate-300">{p.house || '—'}</td>
-                        <td className="py-2.5 px-2 text-slate-400">{p.nakshatra}</td>
-                        <td className="py-2.5 px-2 text-slate-400">{p.retro ? '℞' : '—'}</td>
-                        <td className="py-2.5 px-2">
-                          <span className="text-xs px-1.5 py-0.5 rounded"
-                            style={{
-                              background: p.classification === 'Exalted' || p.classification === 'Own Sign'
-                                ? 'rgba(34,197,94,0.1)' : 'rgba(255,255,255,0.04)',
-                              color: p.classification === 'Exalted' ? '#22c55e'
-                                : p.classification === 'Debilitated' ? '#ef4444'
-                                : 'rgba(255,255,255,0.4)',
-                              fontSize: '0.65rem',
-                            }}>
-                            {p.classification !== '—' ? p.classification : '—'}
-                          </span>
-                        </td>
-                        <td className="py-2.5 px-2"><StrengthBar value={p.strength} /></td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              ) : (
-                <div className="p-8" style={{ background: 'rgba(4,8,20,0.8)' }}>
-                  <EmptyState text="Planet data not available. Please retry prediction." />
-                </div>
-              )}
+            <div className="space-y-4">
+              {/* Planet table with Shadbala */}
+              <div className="rounded-2xl overflow-hidden"
+                style={{ border: `1px solid ${GOLD_RGBA(0.1)}` }}>
+                {planets.length > 0 ? (
+                  <>
+                    <div className="px-4 py-3"
+                      style={{ background: GOLD_RGBA(0.06), borderBottom: `1px solid ${GOLD_RGBA(0.1)}` }}>
+                      <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: GOLD }}>
+                        ⭐ Shadbala — 6-Component Classical Strength
+                      </p>
+                      <p className="text-xs text-slate-500 mt-0.5">
+                        Per BPHS Ch.27 · Swiss Ephemeris precision
+                      </p>
+                    </div>
+                    <table className="w-full text-xs">
+                      <thead>
+                        <tr style={{ background: GOLD_RGBA(0.04) }}>
+                          {['Planet', 'Rashi', 'H', 'Nakshatra', 'R', 'Classification', 'Str'].map(h => (
+                            <th key={h} className="py-2.5 px-2 text-left font-semibold"
+                              style={{ color: GOLD_RGBA(0.7) }}>{h}</th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {planets.map((p: any, i: number) => (
+                          <tr key={p.name}
+                            style={{ background: i % 2 === 0 ? 'rgba(4,8,20,0.8)' : 'rgba(4,8,20,0.5)' }}>
+                            <td className="py-2.5 px-2 font-bold text-white">{p.name}</td>
+                            <td className="py-2.5 px-2 text-slate-300">{p.rashi}</td>
+                            <td className="py-2.5 px-2 text-slate-400">{p.house || '—'}</td>
+                            <td className="py-2.5 px-2 text-slate-400" style={{ fontSize: '0.65rem' }}>{p.nakshatra}</td>
+                            <td className="py-2.5 px-2 text-slate-500">{p.retro ? '℞' : '—'}</td>
+                            <td className="py-2.5 px-2">
+                              <ClassificationBadge value={p.classification} />
+                            </td>
+                            <td className="py-2.5 px-2">
+                              <StrengthBar value={p.strength} />
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+
+                    {/* Shadbala breakdown for top planets */}
+                    <div className="p-4" style={{ borderTop: `1px solid ${GOLD_RGBA(0.08)}` }}>
+                      <p className="text-xs font-semibold mb-3" style={{ color: GOLD_RGBA(0.6) }}>
+                        📊 Shadbala Breakdown (Shashtiamshas)
+                      </p>
+                      <div className="space-y-3">
+                        {planets.filter((p: any) => p.shadbala).slice(0, 4).map((p: any) => (
+                          <ShadbalaMiniCard key={p.name} planet={p} />
+                        ))}
+                      </div>
+                      <p className="text-xs text-slate-600 mt-3 text-center italic">
+                        Sthana · Dig · Kala · Cheshta · Naisargika · Drik — 6 classical components
+                      </p>
+                    </div>
+                  </>
+                ) : (
+                  <div className="p-8" style={{ background: 'rgba(4,8,20,0.8)' }}>
+                    <EmptyState text="Planet data not available. Please retry prediction." />
+                  </div>
+                )}
+              </div>
             </div>
           )}
 
           {/* ── DASHA TAB ── */}
           {activeTab === 'dasha' && (
-            <div className="rounded-2xl p-5"
-              style={{ background: 'rgba(4,8,20,0.8)', border: `1px solid ${GOLD_RGBA(0.1)}` }}>
+            <div className="space-y-4">
+              {/* PratayantarDasha component — full 4-level */}
+              {pratyantar && currentPD ? (
+                <PratayantarDasha
+                  name={meta.personName}
+                  mahadasha={meta.mahadasha}
+                  antardasha={meta.antardasha}
+                  pratyantar={pratyantar}
+                  currentPratyantar={currentPD}
+                  currentSookshma={currentPD} // approximation if sookshma not available
+                  lang={lang}
+                />
+              ) : (
+                /* Fallback — Panchang + basic dasha */
+                <div className="rounded-2xl p-5"
+                  style={{ background: 'rgba(4,8,20,0.8)', border: `1px solid ${GOLD_RGBA(0.1)}` }}>
 
-              {/* MD / AD cards */}
-              <div className="grid grid-cols-2 gap-3 mb-5">
-                <div className="rounded-xl p-3"
-                  style={{ background: GOLD_RGBA(0.07), border: `1px solid ${GOLD_RGBA(0.15)}` }}>
-                  <p className="text-xs text-slate-500 mb-1">Mahadasha</p>
-                  <p className="text-base font-bold" style={{ color: GOLD }}>{meta.mahadasha || '—'}</p>
+                  <div className="grid grid-cols-2 gap-3 mb-5">
+                    <div className="rounded-xl p-3"
+                      style={{ background: GOLD_RGBA(0.07), border: `1px solid ${GOLD_RGBA(0.15)}` }}>
+                      <p className="text-xs text-slate-500 mb-1">Mahadasha</p>
+                      <p className="text-base font-bold" style={{ color: GOLD }}>{meta.mahadasha || '—'}</p>
+                    </div>
+                    <div className="rounded-xl p-3"
+                      style={{ background: GOLD_RGBA(0.05), border: `1px solid ${GOLD_RGBA(0.1)}` }}>
+                      <p className="text-xs text-slate-500 mb-1">Antardasha</p>
+                      <p className="text-base font-bold text-white">{meta.antardasha || '—'}</p>
+                    </div>
+                  </div>
+
+                  {dashaData?.combinedDashaReading && (
+                    <div className="px-3 py-3 rounded-xl mb-4"
+                      style={{ background: GOLD_RGBA(0.05), border: `1px solid ${GOLD_RGBA(0.1)}` }}>
+                      <p className="text-xs font-semibold mb-2" style={{ color: GOLD }}>🔮 Combined Dasha Reading</p>
+                      <p className="text-slate-300 text-sm leading-relaxed">{dashaData.combinedDashaReading}</p>
+                    </div>
+                  )}
+
+                  {/* Action Windows */}
+                  {Array.isArray(actionWindows) && actionWindows.length > 0 && (
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-wider mb-2 text-green-400">
+                        🟢 Action Windows
+                      </p>
+                      <div className="space-y-2">
+                        {actionWindows.map((w: any, i: number) => (
+                          <div key={i} className="px-3 py-2.5 rounded-xl"
+                            style={{ background: 'rgba(34,197,94,0.05)', border: '1px solid rgba(34,197,94,0.15)' }}>
+                            <p className="text-green-400 text-xs font-semibold">{w.dateRange}</p>
+                            <p className="text-slate-300 text-xs mt-1">{w.action}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  <EmptyState text="Submit a new prediction to see full 4-level Pratyantar Dasha." />
                 </div>
-                <div className="rounded-xl p-3"
-                  style={{ background: GOLD_RGBA(0.05), border: `1px solid ${GOLD_RGBA(0.1)}` }}>
-                  <p className="text-xs text-slate-500 mb-1">Antardasha</p>
-                  <p className="text-base font-bold text-white">{meta.antardasha || '—'}</p>
-                </div>
-              </div>
+              )}
 
               {/* Panchang */}
               {panchang && (
-                <div className="mb-5">
+                <div className="rounded-2xl p-5"
+                  style={{ background: 'rgba(4,8,20,0.8)', border: `1px solid ${GOLD_RGBA(0.1)}` }}>
                   <p className="text-xs font-semibold uppercase tracking-wider mb-3"
                     style={{ color: GOLD_RGBA(0.6) }}>🗓 Aaj Ka Panchang</p>
                   <div className="grid grid-cols-2 gap-2 text-xs">
@@ -492,9 +639,7 @@ export default function ResultClient({ predictionId, predictionData, meta }: Res
                       ['Yoga',       panchang.yoga],
                       ['Sunrise',    panchang.sunrise],
                       ['Sunset',     panchang.sunset],
-                      ['Rahu Kaal',  panchang.rahuKaal
-                        ? `${panchang.rahuKaal.start} – ${panchang.rahuKaal.end}`
-                        : null],
+                      ['Rahu Kaal',  panchang.rahuKaal ? `${panchang.rahuKaal.start} – ${panchang.rahuKaal.end}` : null],
                       ['Choghadiya', panchang.choghadiya?.name ?? null],
                     ].filter(([, v]) => v).map(([label, value]) => (
                       <div key={label as string}
@@ -507,91 +652,6 @@ export default function ResultClient({ predictionId, predictionData, meta }: Res
                   </div>
                 </div>
               )}
-
-              {/* Dasha analysis from Gemini */}
-              {dashaData && typeof dashaData === 'object' ? (
-                <div className="space-y-4">
-                  {dashaData.combinedDashaReading && (
-                    <div className="px-3 py-3 rounded-xl"
-                      style={{ background: GOLD_RGBA(0.05), border: `1px solid ${GOLD_RGBA(0.1)}` }}>
-                      <p className="text-xs font-semibold mb-2" style={{ color: GOLD }}>
-                        🔮 Combined Dasha Reading
-                      </p>
-                      <p className="text-slate-300 text-sm leading-relaxed">
-                        {dashaData.combinedDashaReading}
-                      </p>
-                    </div>
-                  )}
-
-                  {dashaData.pratyantar && (
-                    <div className="px-3 py-3 rounded-xl"
-                      style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
-                      <p className="text-xs font-semibold mb-2 text-slate-400">
-                        ⚡ Pratyantar Dasha (Active Now)
-                      </p>
-                      <div className="flex justify-between text-xs mb-2">
-                        <span className="text-slate-500">Lord</span>
-                        <span className="text-white font-medium">{dashaData.pratyantar.lord}</span>
-                      </div>
-                      <div className="flex justify-between text-xs mb-2">
-                        <span className="text-slate-500">Until</span>
-                        <span className="text-white font-medium">{dashaData.pratyantar.endDate}</span>
-                      </div>
-                      <div className="flex justify-between text-xs mb-2">
-                        <span className="text-slate-500">Quality</span>
-                        <span className={`font-medium ${
-                          dashaData.pratyantar.quality === 'Shubh' ? 'text-green-400' :
-                          dashaData.pratyantar.quality === 'Ashubh' ? 'text-red-400' : 'text-yellow-400'
-                        }`}>{dashaData.pratyantar.quality}</span>
-                      </div>
-                      {dashaData.pratyantar.immediateEffect && (
-                        <p className="text-slate-400 text-xs mt-2 leading-relaxed">
-                          {dashaData.pratyantar.immediateEffect}
-                        </p>
-                      )}
-                    </div>
-                  )}
-
-                  {/* Action Windows */}
-                  {Array.isArray(actionWindows) && actionWindows.length > 0 && (
-                    <div>
-                      <p className="text-xs font-semibold uppercase tracking-wider mb-2"
-                        style={{ color: '#22c55e' }}>🟢 Action Windows</p>
-                      <div className="space-y-2">
-                        {actionWindows.map((w: any, i: number) => (
-                          <div key={i} className="px-3 py-2.5 rounded-xl"
-                            style={{ background: 'rgba(34,197,94,0.05)', border: '1px solid rgba(34,197,94,0.15)' }}>
-                            <p className="text-green-400 text-xs font-semibold">{w.dateRange}</p>
-                            <p className="text-slate-300 text-xs mt-1">{w.action}</p>
-                            {w.planetaryBasis && (
-                              <p className="text-slate-500 text-xs mt-0.5 italic">{w.planetaryBasis}</p>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {dashaData.mahadasha?.domainEffect && (
-                    <div className="px-3 py-3 rounded-xl"
-                      style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
-                      <p className="text-xs font-semibold mb-2 text-slate-400">
-                        📅 Mahadasha Effect
-                      </p>
-                      <p className="text-slate-300 text-sm leading-relaxed">
-                        {dashaData.mahadasha.domainEffect}
-                      </p>
-                      {dashaData.mahadasha.endDate && (
-                        <p className="text-xs text-slate-600 mt-1">Until: {dashaData.mahadasha.endDate}</p>
-                      )}
-                    </div>
-                  )}
-                </div>
-              ) : dashaData && typeof dashaData === 'string' ? (
-                <p className="text-slate-300 text-sm leading-relaxed">{dashaData}</p>
-              ) : (
-                <EmptyState text="Dasha analysis not available. Please submit a new prediction." />
-              )}
             </div>
           )}
 
@@ -601,17 +661,13 @@ export default function ResultClient({ predictionId, predictionData, meta }: Res
               style={{ background: 'rgba(4,8,20,0.8)', border: `1px solid ${GOLD_RGBA(0.1)}` }}>
               {remedyData ? (
                 <div>
-                  {/* Remedy Summary */}
                   {remedyData.remedySummary && (
                     <div className="px-3 py-3 rounded-xl mb-4"
                       style={{ background: GOLD_RGBA(0.05), border: `1px solid ${GOLD_RGBA(0.15)}` }}>
-                      <p className="text-slate-300 text-sm leading-relaxed">
-                        {remedyData.remedySummary}
-                      </p>
+                      <p className="text-slate-300 text-sm leading-relaxed">{remedyData.remedySummary}</p>
                     </div>
                   )}
 
-                  {/* Remedies list */}
                   {Array.isArray(remedyData.remedies) && remedyData.remedies.map((r: any, i: number) => (
                     <div key={i} className="mb-5 rounded-xl p-4"
                       style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid ${GOLD_RGBA(0.08)}` }}>
@@ -619,44 +675,31 @@ export default function ResultClient({ predictionId, predictionData, meta }: Res
                         <p className="text-sm font-bold" style={{ color: GOLD }}>
                           {r.planet} — Priority {r.priority}
                         </p>
-                        {r.affliction && (
-                          <span className="text-xs text-slate-500 italic">{r.affliction}</span>
-                        )}
+                        {r.affliction && <span className="text-xs text-slate-500 italic">{r.affliction}</span>}
                       </div>
 
                       <div className="space-y-2 text-xs">
-                        {r.mantra?.text && (
-                          <RemedyRow emoji="🕉" label="Mantra"
-                            value={`${r.mantra.text} — ${r.mantra.count} times on ${r.mantra.day} facing ${r.mantra.direction ?? 'East'}`} />
-                        )}
-                        {r.dana?.item && (
-                          <RemedyRow emoji="🙏" label="Dana"
-                            value={`${r.dana.item} on ${r.dana.day} ${r.dana.time ?? ''} to ${r.dana.recipient ?? 'needy'}`} />
-                        )}
-                        {r.vrat?.day && (
-                          <RemedyRow emoji="🌙" label="Vrat"
-                            value={`${r.vrat.day} fast for ${r.vrat.deity ?? 'deity'} — ${r.vrat.rules ?? ''}`} />
-                        )}
-                        {r.rudraksha?.mukhi && (
-                          <RemedyRow emoji="📿" label="Rudraksha"
-                            value={`${r.rudraksha.mukhi} Mukhi — ${r.rudraksha.reason ?? ''}`} />
-                        )}
+                        {r.mantra?.text && <RemedyRow emoji="🕉" label="Mantra"
+                          value={`${r.mantra.text} · ${r.mantra.count}x on ${r.mantra.day}, facing ${r.mantra.direction ?? 'East'}`} />}
+                        {r.dana?.item && <RemedyRow emoji="🙏" label="Dana"
+                          value={`${r.dana.item} on ${r.dana.day} to ${r.dana.recipient ?? 'needy person'}`} />}
+                        {r.vrat?.day && <RemedyRow emoji="🌙" label="Vrat"
+                          value={`${r.vrat.day} for ${r.vrat.deity ?? 'deity'} — ${r.vrat.rules ?? ''}`} />}
+                        {r.rudraksha?.mukhi && <RemedyRow emoji="📿" label="Rudraksha"
+                          value={`${r.rudraksha.mukhi} Mukhi — ${r.rudraksha.reason ?? ''}`} />}
                         {r.ratna?.gem && (
                           <div className="flex gap-2 p-2 rounded-lg"
                             style={{ background: 'rgba(239,68,68,0.05)', border: '1px solid rgba(239,68,68,0.1)' }}>
                             <span>💎</span>
                             <div>
                               <p className="text-slate-400 font-medium">Ratna: {r.ratna.gem}</p>
-                              <p className="text-slate-500 mt-0.5">{r.ratna.metal} · {r.ratna.finger}</p>
-                              {r.ratna.caution && (
-                                <p className="text-red-400/70 mt-1 text-xs italic">⚠ {r.ratna.caution}</p>
-                              )}
+                              <p className="text-slate-500 mt-0.5">{r.ratna.metal} · {r.ratna.finger} · {r.ratna.weight}</p>
+                              {r.ratna.caution && <p className="text-red-400/70 mt-1 italic">⚠ {r.ratna.caution}</p>}
                             </div>
                           </div>
                         )}
                       </div>
 
-                      {/* Dos */}
                       {Array.isArray(r.dos) && r.dos.length > 0 && (
                         <div className="mt-3">
                           <p className="text-green-400 text-xs font-semibold mb-1.5">✓ Do This</p>
@@ -670,7 +713,6 @@ export default function ResultClient({ predictionId, predictionData, meta }: Res
                         </div>
                       )}
 
-                      {/* Don'ts */}
                       {Array.isArray(r.donts) && r.donts.length > 0 && (
                         <div className="mt-3">
                           <p className="text-red-400 text-xs font-semibold mb-1.5">✗ Avoid</p>
@@ -717,19 +759,6 @@ export default function ResultClient({ predictionId, predictionData, meta }: Res
 
 // ── Sub-components ─────────────────────────────────────────────────────────────
 
-function RemedyRow({ emoji, label, value }: { emoji: string; label: string; value: string }) {
-  return (
-    <div className="flex gap-2 px-2 py-1.5 rounded-lg"
-      style={{ background: 'rgba(255,255,255,0.03)' }}>
-      <span>{emoji}</span>
-      <div>
-        <span className="text-slate-500 font-medium">{label}: </span>
-        <span className="text-slate-300">{value}</span>
-      </div>
-    </div>
-  );
-}
-
 function KundaliStat({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
     <div className="text-center">
@@ -753,40 +782,76 @@ function StrengthBar({ value }: { value: number }) {
   );
 }
 
-function EmptyState({ text }: { text: string }) {
+function ClassificationBadge({ value }: { value: string }) {
+  const color =
+    value === 'Exalted' || value === 'Exact Exaltation' ? '#22c55e' :
+    value === 'Debilitated' ? '#ef4444' :
+    value === 'Own Sign' || value === 'Moolatrikona' ? GOLD :
+    'rgba(255,255,255,0.3)';
+  const bg =
+    value === 'Exalted' || value === 'Exact Exaltation' ? 'rgba(34,197,94,0.1)' :
+    value === 'Debilitated' ? 'rgba(239,68,68,0.1)' :
+    value === 'Own Sign' || value === 'Moolatrikona' ? GOLD_RGBA(0.1) :
+    'rgba(255,255,255,0.04)';
+
   return (
-    <div className="text-center py-8">
-      <p className="text-slate-500 text-sm">{text}</p>
+    <span className="px-1.5 py-0.5 rounded text-center"
+      style={{ background: bg, color, fontSize: '0.6rem', fontWeight: 600 }}>
+      {value !== '—' ? value.replace(' Sign', '') : '—'}
+    </span>
+  );
+}
+
+function ShadbalaMiniCard({ planet }: { planet: any }) {
+  const sb = planet.shadbala;
+  if (!sb) return null;
+  const color = sb.isStrong ? '#22c55e' : GOLD;
+  return (
+    <div className="rounded-xl p-3"
+      style={{ background: 'rgba(255,255,255,0.02)', border: `1px solid rgba(255,255,255,0.05)` }}>
+      <div className="flex justify-between items-center mb-2">
+        <span className="text-sm font-bold text-white">{planet.name}</span>
+        <div className="flex items-center gap-2">
+          <span className="text-xs" style={{ color }}>{sb.classification}</span>
+          <span className="text-xs text-slate-500">{sb.total?.toFixed(0) ?? '—'} / {sb.minimum ?? '—'} sha</span>
+        </div>
+      </div>
+      {sb.breakdown && (
+        <div className="grid grid-cols-6 gap-1">
+          {[
+            ['St', sb.breakdown.sthana],
+            ['Di', sb.breakdown.dig],
+            ['Ka', sb.breakdown.kala],
+            ['Ch', sb.breakdown.cheshta],
+            ['Na', sb.breakdown.naisargika],
+            ['Dr', sb.breakdown.drik],
+          ].map(([label, val]) => (
+            <div key={label as string} className="text-center">
+              <p className="text-slate-600" style={{ fontSize: '0.55rem' }}>{label}</p>
+              <p className="text-white font-medium" style={{ fontSize: '0.65rem' }}>
+                {typeof val === 'number' ? val.toFixed(0) : '—'}
+              </p>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
 
-function UpgradeBanner({ predictionId }: { predictionId: string }) {
+function RemedyRow({ emoji, label, value }: { emoji: string; label: string; value: string }) {
   return (
-    <div className="mt-5 rounded-xl p-4 text-center"
-      style={{ background: GOLD_RGBA(0.07), border: `1px solid ${GOLD_RGBA(0.2)}` }}>
-      <Lock className="w-5 h-5 mx-auto mb-2" style={{ color: GOLD }} />
-      <p className="text-sm font-semibold text-white mb-1">Unlock Full Prediction</p>
-      <p className="text-xs text-slate-400 mb-3">
-        Complete analysis · Dasha details · Personalised remedies
-      </p>
-      <div className="flex gap-2 justify-center flex-wrap">
-        <a href={`/upgrade?id=${predictionId}&tier=basic`}
-          className="px-4 py-2 rounded-full text-xs font-bold transition-all hover:scale-105"
-          style={{ background: GOLD_RGBA(0.15), color: GOLD, border: `1px solid ${GOLD_RGBA(0.3)}` }}>
-          ₹51 — Basic
-        </a>
-        <a href={`/upgrade?id=${predictionId}&tier=standard`}
-          className="px-4 py-2 rounded-full text-xs font-bold transition-all hover:scale-105"
-          style={{ background: GOLD_RGBA(0.2), color: GOLD, border: `1px solid ${GOLD_RGBA(0.4)}` }}>
-          ₹99 — Standard
-        </a>
-        <a href={`/upgrade?id=${predictionId}&tier=premium`}
-          className="px-4 py-2 rounded-full text-xs font-bold text-[#080B12] transition-all hover:scale-105"
-          style={{ background: `linear-gradient(135deg, ${GOLD}, #F5D76E)` }}>
-          ₹499 — Premium ✦
-        </a>
-      </div>
+    <div className="flex gap-2 px-2 py-1.5 rounded-lg" style={{ background: 'rgba(255,255,255,0.03)' }}>
+      <span>{emoji}</span>
+      <div><span className="text-slate-500 font-medium">{label}: </span><span className="text-slate-300">{value}</span></div>
+    </div>
+  );
+}
+
+function EmptyState({ text }: { text: string }) {
+  return (
+    <div className="text-center py-8">
+      <p className="text-slate-500 text-sm">{text}</p>
     </div>
   );
 }
