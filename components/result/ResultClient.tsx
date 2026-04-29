@@ -131,7 +131,7 @@ export default function ResultClient({ predictionId, predictionData, meta }: Res
   const [activeTab, setActiveTab] = useState<'summary' | 'planets' | 'dasha' | 'remedies'>('summary');
 
   const planets = extractPlanets(predictionData);
-  const isFree  = meta.tier === 'free';
+  const isFree = false; // TEMP: All tiers see full prediction during testing
   const isPaid  = !isFree;
 
   // ── Extract Gemini fields ─────────────────────────────────────────────────
