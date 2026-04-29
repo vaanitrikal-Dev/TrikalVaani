@@ -3,27 +3,17 @@
  * TRIKAL VAANI — Unified Prediction Endpoint
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/api/predict/route.ts
- * VERSION: 8.0 — /synthesize payload fixed to match main.py SynthesizeInput
+ * VERSION: 9.0 — Claude Haiku polish wired at Step 6.5 for ₹51+
  * SIGNED: ROHIIT GUPTA, CEO
  *
- * KEY FIX in v8.0:
- *   /synthesize now sends correct payload shape:
- *     { domainId, birthData, kundaliData, userContext }
- *   matching main.py SynthesizeInput Pydantic model exactly.
- *
- *   main.py expects:
- *     domainId    → string
- *     birthData   → { lat, lng, dob, tob }
- *     kundaliData → { grahas[], lagna{}, dasha{} }
- *     userContext → {}
- *
- * FULL FLOW:
+ * FULL FLOW v9.0:
  *   Step 1 → /kundali       (Render Swiss Ephemeris)
  *   Step 2 → adaptSwissToKundali()
  *   Step 3 → /synthesize    (Render — Bhrigu+Parashara+Panchang+Confidence)
- *   Step 4 → buildPredictionPrompt() with synthesis injected
+ *   Step 4 → buildPredictionPrompt()
  *   Step 5 → Gemini 2.5 Flash
  *   Step 6 → Parse JSON
+ *   Step 6.5 → Claude Haiku polish (₹51+ ONLY) ← NEW WIRED
  *   Step 7 → saveToSupabase()
  *   Step 8 → Return with predictionId
  * ============================================================
@@ -33,6 +23,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { getDomainConfig } from '@/lib/domain-config';
 import { buildPredictionPrompt } from '@/lib/gemini-prompt';
+import { polishPrediction } from '@/lib/claude-polish';
 import {
   calcDasha,
   NAKSHATRA_LORDS,
@@ -52,7 +43,7 @@ const EPHE_API_URL   = process.env.EPHE_API_URL ?? '';
 const EPHE_API_KEY   = process.env.EPHE_API_KEY ?? '';
 
 const MAX_TOKENS: Record<UserTier, number> = {
-  free: 4096, basic: 8192, pro: 8192, premium: 8192,
+  free: 4096, basic: 8192, pro: 8192, premium: 16384,
 };
 
 const supabase = createClient(
@@ -167,86 +158,53 @@ function adaptSwissToKundali(chart: any, birthData: BirthData): KundaliData {
   };
 }
 
-// ── Step 3: /synthesize — CORRECT PAYLOAD SHAPE ───────────────────────────────
-// Matches main.py SynthesizeInput exactly:
-//   domainId:    str
-//   birthData:   { lat, lng, dob, tob }
-//   kundaliData: { grahas[], lagna{}, dasha{} }
-//   userContext: {}
+// ── /synthesize ───────────────────────────────────────────────────────────────
 
 async function callSynthesize(
-  domainId:  string,
-  chart:     any,
-  kundali:   KundaliData,
-  birthData: BirthData,
+  domainId:    string,
+  chart:       any,
+  kundali:     KundaliData,
+  birthData:   BirthData,
   userContext: any,
 ): Promise<any> {
   try {
-    // Build kundaliData shape that main.py _extract_planets() expects
-    const kundaliData = {
-      // grahas array — main.py reads g.get('planet'), g.get('sign'), g.get('house') etc.
-      grahas: chart.grahas ?? [],
-
-      // lagna object
-      lagna: chart.lagna ?? { sign: kundali.lagna },
-
-      // houses array
-      houses: chart.houses ?? [],
-
-      // dasha — for pratyantar quality
-      dasha: {
-        mahadasha:  { lord: kundali.currentMahadasha.lord },
-        antardasha: { lord: kundali.currentAntardasha.lord },
-        pratyantar: {
-          lord:    kundali.currentPratyantar?.lord    ?? '',
-          quality: kundali.currentPratyantar?.quality ?? 'Madhyam',
-        },
-        dashaBalance: kundali.dashaBalance,
-      },
-    };
-
     const payload = {
       domainId,
       birthData: {
-        lat:      birthData.lat,
-        lng:      birthData.lng,
-        dob:      birthData.dob,
-        tob:      birthData.tob,
-        name:     birthData.name,
-        cityName: birthData.cityName,
-        timezone: 5.5,
+        lat: birthData.lat, lng: birthData.lng,
+        dob: birthData.dob, tob: birthData.tob,
+        name: birthData.name, cityName: birthData.cityName, timezone: 5.5,
       },
-      kundaliData,
+      kundaliData: {
+        grahas: chart.grahas ?? [],
+        lagna:  chart.lagna  ?? { sign: kundali.lagna },
+        houses: chart.houses ?? [],
+        dasha: {
+          mahadasha:  { lord: kundali.currentMahadasha.lord },
+          antardasha: { lord: kundali.currentAntardasha.lord },
+          pratyantar: { lord: kundali.currentPratyantar?.lord ?? '', quality: kundali.currentPratyantar?.quality ?? 'Madhyam' },
+          dashaBalance: kundali.dashaBalance,
+        },
+      },
       userContext: userContext ?? {},
     };
 
     const res = await fetch(`${EPHE_API_URL}/synthesize`, {
-      method:  'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(EPHE_API_KEY ? { 'X-Api-Key': EPHE_API_KEY } : {}),
-      },
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...(EPHE_API_KEY ? { 'X-Api-Key': EPHE_API_KEY } : {}) },
       body:   JSON.stringify(payload),
       signal: AbortSignal.timeout(30000),
     });
 
     if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      console.warn(`[TV-Predict] /synthesize ${res.status}: ${err.detail ?? res.statusText}`);
+      console.warn(`[TV-Predict] /synthesize ${res.status}`);
       return null;
     }
 
-    const result = await res.json();
+    const result   = await res.json();
     const enriched = result?.enriched ?? result;
-
-    console.log(
-      '[TV-Predict] /synthesize OK',
-      '| yogas:', enriched?.parashara?.totalActiveYogas ?? 0,
-      '| bhrigu_pts:', enriched?.bhrigu?.bhrigu_points ?? 0,
-      '| confidence:', enriched?.confidence?.label ?? '—',
-      '| tithi:', enriched?.panchang?.tithi ?? '—',
-    );
-
+    console.log('[TV-Predict] /synthesize OK | yogas:', enriched?.parashara?.totalActiveYogas ?? 0,
+      '| confidence:', enriched?.confidence?.label ?? '—');
     return enriched;
 
   } catch (err) {
@@ -274,7 +232,7 @@ async function saveToSupabase(p: {
   sessionId: string; userId?: string; domainId: string; domainLabel: string;
   birthData: BirthData; userContext: UserContext; kundali: KundaliData;
   synthesis: any; prediction: Record<string, unknown>;
-  tier: UserTier; processingMs: number; useSearch: boolean;
+  tier: UserTier; processingMs: number; useSearch: boolean; polished: boolean;
 }): Promise<string | null> {
   try {
     const row = {
@@ -305,6 +263,7 @@ async function saveToSupabase(p: {
           tier:        p.tier,
           chartSource: 'swiss_ephemeris_render',
           model:       GEMINI_MODEL,
+          polished:    p.polished,
           searchUsed:  p.useSearch,
           processingMs: p.processingMs,
           kundali: {
@@ -315,9 +274,7 @@ async function saveToSupabase(p: {
             mahadasha:     p.kundali.currentMahadasha.lord,
             antardasha:    p.kundali.currentAntardasha.lord,
           },
-          // Planet array for ResultClient planet table
-          planets: Object.values(p.kundali.planets),
-          // Full synthesis results
+          planets:   Object.values(p.kundali.planets),
           synthesis: p.synthesis ?? null,
         },
       },
@@ -336,7 +293,7 @@ async function saveToSupabase(p: {
       .select('id').single();
 
     if (error) { console.error('[TV-Predict] Supabase error:', error.message); return null; }
-    console.log(`[TV-Predict] Saved id:${data.id}`);
+    console.log(`[TV-Predict] Saved id:${data.id} | polished:${p.polished}`);
     return data.id as string;
 
   } catch (err) {
@@ -372,24 +329,14 @@ export async function POST(req: NextRequest) {
     let chart: any;
     try {
       const res = await fetch(`${EPHE_API_URL}/kundali`, {
-        method:  'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(EPHE_API_KEY ? { 'X-Api-Key': EPHE_API_KEY } : {}),
-        },
-        body:   JSON.stringify({
-          year, month, day, hour, minute, second: 0,
-          latitude: birthData.lat, longitude: birthData.lng,
-          timezone: 5.5, ayanamsa: 'lahiri',
-        }),
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...(EPHE_API_KEY ? { 'X-Api-Key': EPHE_API_KEY } : {}) },
+        body:   JSON.stringify({ year, month, day, hour, minute, second: 0, latitude: birthData.lat, longitude: birthData.lng, timezone: 5.5, ayanamsa: 'lahiri' }),
         signal: AbortSignal.timeout(240000),
       });
-      if (!res.ok) {
-        const e = await res.json().catch(() => ({}));
-        throw new Error(`${res.status}: ${e.detail ?? res.statusText}`);
-      }
+      if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(`${res.status}: ${e.detail}`); }
       chart = await res.json();
-      console.log(`[TV-Predict] /kundali OK — lagna:${chart.lagna?.sign} grahas:${chart.grahas?.length}`);
+      console.log(`[TV-Predict] /kundali OK — lagna:${chart.lagna?.sign}`);
     } catch (err) {
       console.error('[TV-Predict] /kundali failed:', err);
       return NextResponse.json({ error: 'Chart calculation failed. Please retry.' }, { status: 502 });
@@ -397,48 +344,32 @@ export async function POST(req: NextRequest) {
 
     // ── Step 2: Adapt ─────────────────────────────────────────────────────────
     const localBirthData: BirthData = {
-      name:     birthData.name     || 'User',
-      dob:      birthData.dob,
-      tob:      birthData.tob,
-      lat:      birthData.lat,
-      lng:      birthData.lng,
+      name: birthData.name || 'User', dob: birthData.dob, tob: birthData.tob,
+      lat: birthData.lat, lng: birthData.lng,
       cityName: birthData.cityName || userContext.city || 'India',
     };
     let kundali: KundaliData;
     try {
       kundali = adaptSwissToKundali(chart, localBirthData);
-      console.log(`[TV-Predict] Kundali — Lagna:${kundali.lagna} Maha:${kundali.currentMahadasha.lord}`);
     } catch (err) {
-      console.error('[TV-Predict] Adapter failed:', err);
       return NextResponse.json({ error: 'Chart processing failed. Please retry.' }, { status: 500 });
     }
 
     // ── Step 3: /synthesize ───────────────────────────────────────────────────
-    const synthesis = await callSynthesize(
-      domainId,
-      chart,
-      kundali,
-      localBirthData,
-      userContext,
-    );
+    const synthesis = await callSynthesize(domainId, chart, kundali, localBirthData, userContext);
 
-    // Inject panchang from synthesis into kundali if available
     if (synthesis?.panchang) {
       const p = synthesis.panchang;
       kundali.panchang = {
-        vara:            p.vara            ?? '',
-        tithi:           p.tithi           ?? '',
-        yoga:            p.yoga            ?? '',
-        nakshatra:       p.nakshatra       ?? '',
-        sunrise:         p.sunrise         ?? '',
-        sunset:          p.sunset          ?? '',
+        vara: p.vara ?? '', tithi: p.tithi ?? '', yoga: p.yoga ?? '',
+        nakshatra: p.nakshatra ?? '', sunrise: p.sunrise ?? '', sunset: p.sunset ?? '',
         rahuKaal:        p.rahuKaal        ?? { start: '', end: '' },
         abhijeetMuhurta: p.abhijeetMuhurta ?? { start: '', end: '' },
         choghadiya:      p.choghadiya      ?? { name: '', type: 'Neutral' },
       };
     }
 
-    // ── Step 4: Gemini prompt ─────────────────────────────────────────────────
+    // ── Step 4: Build prompt ──────────────────────────────────────────────────
     const verifiedUserContext: UserContext = {
       tier:         verifiedTier,
       segment:      userContext.segment    || 'millennial',
@@ -483,12 +414,35 @@ export async function POST(req: NextRequest) {
     // ── Step 6: Parse ─────────────────────────────────────────────────────────
     let prediction: Record<string, unknown>;
     try {
-      const cleaned = rawText
-        .replace(/^```json\s*/i, '').replace(/^```\s*/, '').replace(/```\s*$/, '').trim();
+      const cleaned = rawText.replace(/^```json\s*/i, '').replace(/^```\s*/, '').replace(/```\s*$/, '').trim();
       prediction = JSON.parse(cleaned);
     } catch {
       console.error('[TV-Predict] JSON parse failed:', rawText.slice(0, 300));
       return NextResponse.json({ error: 'Invalid prediction format. Please retry.' }, { status: 502 });
+    }
+
+    // ── Step 6.5: Claude Haiku Polish (₹51+) ─────────────────────────────────
+    let polished = false;
+    if (verifiedTier !== 'free') {
+      const polishTier = verifiedTier === 'premium' ? 'premium' :
+                         verifiedTier === 'standard' || verifiedTier === 'pro' ? 'standard' : 'basic';
+      try {
+        const polishResult = await polishPrediction(
+          prediction,
+          verifiedUserContext.language,
+          localBirthData.name ?? 'Friend',
+          domain.label ?? domainId,
+          polishTier as 'basic' | 'standard' | 'premium',
+        );
+        if (polishResult.polished) {
+          prediction = polishResult.prediction;
+          polished   = true;
+          console.log(`[TV-Predict] Claude polish OK — tier:${polishTier} ms:${polishResult.polishMs}`);
+        }
+      } catch (polishErr) {
+        // Non-fatal — continue with Gemini output
+        console.warn('[TV-Predict] Claude polish failed (non-fatal):', polishErr);
+      }
     }
 
     // ── Step 7: Save ──────────────────────────────────────────────────────────
@@ -499,7 +453,7 @@ export async function POST(req: NextRequest) {
       birthData:    localBirthData,
       userContext:  verifiedUserContext,
       kundali, synthesis, prediction,
-      tier: verifiedTier, processingMs, useSearch,
+      tier: verifiedTier, processingMs, useSearch, polished,
     });
 
     // ── Step 8: Return ────────────────────────────────────────────────────────
@@ -508,7 +462,8 @@ export async function POST(req: NextRequest) {
       _meta: {
         domainId, tier: verifiedTier,
         chartSource: 'swiss_ephemeris_render',
-        model: GEMINI_MODEL, searchUsed: useSearch,
+        model:       GEMINI_MODEL,
+        polished,    searchUsed: useSearch,
         processingMs, predictionId,
         kundali: {
           lagna:         kundali.lagna,
@@ -521,9 +476,9 @@ export async function POST(req: NextRequest) {
         synthesis: synthesis ? {
           yogas:      synthesis.parashara?.activeYogas ?? [],
           bhrigu:     synthesis.bhrigu?.domain_signals ?? [],
-          panchang:   synthesis.panchang ?? {},
+          panchang:   synthesis.panchang   ?? {},
           confidence: synthesis.confidence ?? {},
-          summary:    synthesis.synthesis ?? {},
+          summary:    synthesis.synthesis  ?? {},
         } : null,
       },
     });
@@ -537,7 +492,7 @@ export async function POST(req: NextRequest) {
 
 export async function GET() {
   return NextResponse.json({
-    status: 'operational', engine: 'Trikal Vaani Predict v8.0',
-    synthesize: true, domains: 11,
+    status: 'operational', engine: 'Trikal Vaani Predict v9.0',
+    synthesize: true, polish: true, domains: 11,
   });
 }
