@@ -109,9 +109,13 @@ export default function ResultClient({ predictionId, predictionData, meta }: Res
   const planets = extractPlanets(predictionData);
 
   // Safe text extraction from prediction sections
-  const summary   = predictionData?.summary   ?? predictionData?.core_prediction   ?? null;
-  const remedies  = predictionData?.remedies  ?? predictionData?.remedy_plan       ?? null;
-  const dashaText = predictionData?.dasha_analysis ?? predictionData?.dasha        ?? null;
+ const simpleSummary = predictionData?.simpleSummary ?? null;
+const summary       = simpleSummary?.text           ?? predictionData?.summary ?? null;
+const remedies      = simpleSummary?.dos            ?? predictionData?.remedies ?? null;
+const dashaText     = predictionData?.dasha_analysis ?? predictionData?.dasha   ?? null;
+const keyMessage    = simpleSummary?.keyMessage     ?? null;
+const mainAction    = simpleSummary?.mainAction     ?? null;
+const mainCaution   = simpleSummary?.mainCaution    ?? null;
 
   const isFree = meta.tier === 'free';
 
