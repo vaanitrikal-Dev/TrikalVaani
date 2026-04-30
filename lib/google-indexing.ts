@@ -8,8 +8,6 @@
  * ============================================================
  */
 
-'use server'
-
 const GOOGLE_INDEXING_KEY = process.env.GOOGLE_INDEXING_KEY ?? ''
 const INDEXING_API_URL    = 'https://indexing.googleapis.com/v3/urlNotifications:publish'
 
