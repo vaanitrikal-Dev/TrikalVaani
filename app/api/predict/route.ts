@@ -400,9 +400,8 @@ export async function POST(req: NextRequest) {
       person2City:  userContext.person2City,
     };
 
-    const { systemPrompt, userMessage, useSearch } = buildPredictionPrompt(
-      kundali, localBirthData, domain, verifiedUserContext,
-    );
+    const { systemPrompt, userMessage, useSearch: _useSearch } = buildPredictionPrompt(...)
+const useSearch = false; // TEMP: force JSON mode until search parsing fixed
 
     // ── Step 5: Gemini ────────────────────────────────────────────────────────
     // v9.2 FIX: Google Gemini returns HTTP 400 if BOTH are set:
