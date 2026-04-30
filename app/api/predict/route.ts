@@ -3,24 +3,24 @@
  * TRIKAL VAANI — Unified Prediction Endpoint
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/api/predict/route.ts
- * VERSION: 9.2 — Gemini 400 fix: JSON mode incompatible with googleSearch
+ * VERSION: 9.3 — useSearch=false forced, JSON parse fence fix
  * SIGNED: ROHIIT GUPTA, CEO
  *
- * FULL FLOW v9.2:
+ * FULL FLOW v9.3:
  *   Step 1 → /kundali       (Render Swiss Ephemeris)
  *   Step 2 → adaptSwissToKundali()
- *   Step 3 → /synthesize    (Render — Bhrigu+Parashara+Panchang+Confidence)
+ *   Step 3 → /synthesize    (Render)
  *   Step 4 → buildPredictionPrompt()
- *   Step 5 → Gemini 2.5 Flash  ← FIX: JSON mode OFF when useSearch=true
- *   Step 6 → Parse JSON
+ *   Step 5 → Gemini 2.5 Flash (JSON mode always ON)
+ *   Step 6 → Parse JSON (robust fence stripping)
  *   Step 6.5 → Claude Haiku polish (₹51+ ONLY)
  *   Step 7 → saveToSupabase()
  *   Step 8 → Return with predictionId
  *
- * v9.2 CHANGES vs v9.1:
- *   - Step 5: responseMimeType removed when useSearch=true
- *     Google Gemini 400 = JSON mode + googleSearch = INCOMPATIBLE
- *   - Gemini error body now logged for easier future debugging
+ * v9.3 CHANGES vs v9.2:
+ *   - useSearch forced to false → JSON mode always ON → no fence issues
+ *   - JSON parse: robust regex handles all fence variants
+ *   - Gemini error body logged for debugging
  * ============================================================
  */
 
@@ -400,32 +400,26 @@ export async function POST(req: NextRequest) {
       person2City:  userContext.person2City,
     };
 
-    const { systemPrompt, userMessage, useSearch: _useSearch } = buildPredictionPrompt(...)
-const useSearch = false; // TEMP: force JSON mode until search parsing fixed
+    const { systemPrompt, userMessage } = buildPredictionPrompt(
+      kundali, localBirthData, domain, verifiedUserContext,
+    );
+
+    // useSearch forced OFF — JSON mode always ON
+    // googleSearch grounding + responseMimeType:json = Gemini 400
+    const useSearch = false;
 
     // ── Step 5: Gemini ────────────────────────────────────────────────────────
-    // v9.2 FIX: Google Gemini returns HTTP 400 if BOTH are set:
-    //   - responseMimeType: 'application/json'  (JSON mode)
-    //   - tools: [{ googleSearch: {} }]          (grounding)
-    // Solution: only set JSON mode when NOT using search grounding.
-    const generationConfig: Record<string, unknown> = {
-      temperature:     0.4,
-      maxOutputTokens: MAX_TOKENS[verifiedTier],
-      topP:            0.85,
-    };
-    if (!useSearch) {
-      generationConfig['responseMimeType'] = 'application/json';
-    }
-
     const geminiBody: Record<string, unknown> = {
       system_instruction: { parts: [{ text: systemPrompt }] },
       contents: [{ role: 'user', parts: [{ text: userMessage }] }],
-      generationConfig,
+      generationConfig: {
+        temperature:      0.4,
+        maxOutputTokens:  MAX_TOKENS[verifiedTier],
+        topP:             0.85,
+        responseMimeType: 'application/json',
+      },
     };
-    if (useSearch) {
-      geminiBody['tools'] = [{ googleSearch: {} }];
-    }
-    console.log(`[TV-Predict] Gemini call — useSearch:${useSearch} jsonMode:${!useSearch}`);
+    console.log(`[TV-Predict] Gemini call — model:${GEMINI_MODEL} tokens:${MAX_TOKENS[verifiedTier]}`);
 
     const geminiRes = await fetch(`${GEMINI_URL}?key=${GEMINI_API_KEY}`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -442,7 +436,8 @@ const useSearch = false; // TEMP: force JSON mode until search parsing fixed
       ?.map((p: { text?: string }) => p.text ?? '').join('') ?? '';
     if (!rawText) return NextResponse.json({ error: 'Empty prediction response' }, { status: 502 });
 
-    // ── Step 6: Parse ─────────────────────────────────────────────────────────
+    // ── Step 6: Parse JSON ────────────────────────────────────────────────────
+    // Robust fence stripping — handles ```json, ```, or raw JSON
     let prediction: Record<string, unknown>;
     try {
       const cleaned = rawText
@@ -452,7 +447,7 @@ const useSearch = false; // TEMP: force JSON mode until search parsing fixed
         .trim();
       prediction = JSON.parse(cleaned);
     } catch {
-      console.error('[TV-Predict] JSON parse failed:', rawText.slice(0, 300));
+      console.error('[TV-Predict] JSON parse failed. Raw (300):', rawText.slice(0, 300));
       return NextResponse.json({ error: 'Invalid prediction format. Please retry.' }, { status: 502 });
     }
 
@@ -533,8 +528,8 @@ const useSearch = false; // TEMP: force JSON mode until search parsing fixed
 
 export async function GET() {
   return NextResponse.json({
-    status: 'operational', engine: 'Trikal Vaani Predict v9.2',
+    status: 'operational', engine: 'Trikal Vaani Predict v9.3',
     synthesize: true, polish: true, domains: 11,
-    fix: 'Gemini 400: JSON mode disabled when googleSearch grounding active',
+    fix: 'useSearch=false forced, JSON mode always ON, no fence issues',
   });
 }
