@@ -3,22 +3,8 @@
  * TRIKAL VAANI — Public Report Client Component
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/report/[slug]/ReportPublicClient.tsx
- * VERSION: 1.0 — Gated SEO result page UI
+ * VERSION: 2.0 — Fixed TypeScript errors
  * SIGNED: ROHIIT GUPTA, CEO
- *
- * WHAT GOOGLE SEES (indexed):
- *   ✅ geoDirectAnswer (40-60 words — GEO optimized)
- *   ✅ simpleSummary (full text — SEO content)
- *   ✅ Mahadasha + Antardasha + Lagna + Nakshatra
- *   ✅ Domain label + City
- *
- * WHAT IS GATED (blurred):
- *   🔒 professionalEnglish (full analysis)
- *   🔒 remedyPlan
- *   🔒 dashaAnalysis details
- *   🔒 actionWindows
- *
- * CTA: "Unlock Full Report — ₹51 only"
  * ============================================================
  */
 
@@ -32,21 +18,28 @@ import SiteFooter from '@/components/layout/SiteFooter'
 const GOLD      = '#D4AF37'
 const GOLD_RGBA = (a: number) => `rgba(212,175,55,${a})`
 
+interface SeoMeta {
+  title:       string
+  description: string
+  canonical:   string
+}
+
 interface ReportPublicClientProps {
-  report: any
+  report: Record<string, unknown>
   slug:   string
-  meta:   { title: string; description: string; canonical: string }
+  meta:   SeoMeta
 }
 
 export default function ReportPublicClient({ report, slug, meta }: ReportPublicClientProps) {
-  const summary      = report.simple_summary ?? {}
-  const summaryText  = summary.text          ?? ''
-  const keyMessage   = summary.keyMessage    ?? null
-  const mainAction   = summary.mainAction    ?? null
-  const mainCaution  = summary.mainCaution   ?? null
-  const geoAnswer    = report.geo_answer ?? report.geo_direct_answer ?? ''
-  const seoSignals   = report.seo_signals ?? {}
-  const kundali      = report.kundali_meta ?? {}
+  const summary     = (report.simple_summary as Record<string, unknown>) ?? {}
+  const summaryText = (summary.text      as string) ?? ''
+  const keyMessage  = (summary.keyMessage as string) ?? null
+  const mainAction  = (summary.mainAction as string) ?? null
+  const mainCaution = (summary.mainCaution as string) ?? null
+  const geoAnswer   = (report.geo_answer as string)
+    ?? (report.geo_direct_answer as string)
+    ?? ''
+  const kundali     = (report.kundali_meta as Record<string, unknown>) ?? {}
 
   const upgradeUrl = `/upgrade?slug=${slug}&tier=basic`
 
@@ -60,22 +53,22 @@ export default function ReportPublicClient({ report, slug, meta }: ReportPublicC
           <div className="mb-5 flex items-center gap-2 text-xs text-slate-500">
             <Link href="/" className="hover:text-yellow-400/70 transition-colors">Home</Link>
             <span>›</span>
-            <Link href="/report" className="hover:text-yellow-400/70 transition-colors">Reports</Link>
-            <span>›</span>
-            <span className="text-slate-400">{report.domain_label}</span>
+            <span className="text-slate-400">{report.domain_label as string}</span>
           </div>
 
           {/* Hero */}
           <div className="rounded-2xl p-6 mb-5 text-center"
             style={{ background: 'rgba(4,8,20,0.9)', border: `1px solid ${GOLD_RGBA(0.15)}` }}>
-            <p className="text-xs font-medium tracking-widest uppercase mb-2" style={{ color: GOLD_RGBA(0.55) }}>
-              Vedic Astrology Analysis · {report.domain_label}
+            <p className="text-xs font-medium tracking-widest uppercase mb-2"
+              style={{ color: GOLD_RGBA(0.55) }}>
+              Vedic Astrology Analysis · {report.domain_label as string}
             </p>
-            <h1 className="text-xl sm:text-2xl font-bold text-white mb-2" style={{ fontFamily: 'Georgia, serif' }}>
-              {report.mahadasha} Mahadasha · {report.antardasha} Antardasha
+            <h1 className="text-xl sm:text-2xl font-bold text-white mb-2"
+              style={{ fontFamily: 'Georgia, serif' }}>
+              {report.mahadasha as string} Mahadasha · {report.antardasha as string} Antardasha
             </h1>
             <p className="text-slate-400 text-sm">
-              {report.birth_city} · {report.lagna} Lagna · {report.nakshatra} Nakshatra
+              {report.birth_city as string} · {report.lagna as string} Lagna · {report.nakshatra as string} Nakshatra
             </p>
             <div className="mt-3 flex items-center justify-center gap-2 flex-wrap">
               <span className="text-xs px-3 py-1 rounded-full font-medium"
@@ -89,11 +82,12 @@ export default function ReportPublicClient({ report, slug, meta }: ReportPublicC
             </div>
           </div>
 
-          {/* GEO Direct Answer — Google loves this */}
+          {/* GEO Direct Answer */}
           {geoAnswer && (
             <div className="rounded-2xl p-5 mb-5"
               style={{ background: 'rgba(4,8,20,0.8)', border: `1px solid ${GOLD_RGBA(0.12)}` }}>
-              <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: GOLD_RGBA(0.6) }}>
+              <p className="text-xs font-semibold uppercase tracking-wider mb-2"
+                style={{ color: GOLD_RGBA(0.6) }}>
                 🔮 Vedic Analysis Summary
               </p>
               <p className="text-slate-300 text-sm leading-relaxed">{geoAnswer}</p>
@@ -105,12 +99,12 @@ export default function ReportPublicClient({ report, slug, meta }: ReportPublicC
 
           {/* Kundali Stats */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
-            {[
-              ['Lagna',      report.lagna      ?? '—'],
-              ['Nakshatra',  report.nakshatra  ?? '—'],
-              ['Mahadasha',  report.mahadasha  ?? '—'],
-              ['Antardasha', report.antardasha ?? '—'],
-            ].map(([label, value]) => (
+            {([
+              ['Lagna',      report.lagna      as string ?? '—'],
+              ['Nakshatra',  report.nakshatra  as string ?? '—'],
+              ['Mahadasha',  report.mahadasha  as string ?? '—'],
+              ['Antardasha', report.antardasha as string ?? '—'],
+            ] as [string, string][]).map(([label, value]) => (
               <div key={label} className="rounded-xl p-3 text-center"
                 style={{ background: 'rgba(4,8,20,0.8)', border: `1px solid ${GOLD_RGBA(0.1)}` }}>
                 <p className="text-xs text-slate-500 mb-1">{label}</p>
@@ -119,10 +113,11 @@ export default function ReportPublicClient({ report, slug, meta }: ReportPublicC
             ))}
           </div>
 
-          {/* FREE — simpleSummary FULL (Google indexes this) */}
+          {/* Free simpleSummary — Google indexes this */}
           <div className="rounded-2xl p-5 mb-5"
             style={{ background: 'rgba(4,8,20,0.8)', border: `1px solid ${GOLD_RGBA(0.1)}` }}>
-            <p className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: GOLD_RGBA(0.6) }}>
+            <p className="text-xs font-semibold uppercase tracking-wider mb-3"
+              style={{ color: GOLD_RGBA(0.6) }}>
               ✨ Your Prediction
             </p>
 
@@ -161,13 +156,19 @@ export default function ReportPublicClient({ report, slug, meta }: ReportPublicC
           <div className="relative rounded-2xl overflow-hidden mb-5"
             style={{ border: `1px solid ${GOLD_RGBA(0.15)}` }}>
 
-            {/* Blurred preview content */}
-            <div className="p-5 select-none" style={{ filter: 'blur(4px)', pointerEvents: 'none', background: 'rgba(4,8,20,0.8)' }}>
-              <p className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: GOLD_RGBA(0.6) }}>
+            {/* Blurred preview */}
+            <div className="p-5 select-none"
+              style={{ filter: 'blur(4px)', pointerEvents: 'none', background: 'rgba(4,8,20,0.8)' }}>
+              <p className="text-xs font-semibold uppercase tracking-wider mb-3"
+                style={{ color: GOLD_RGBA(0.6) }}>
                 📊 Complete Planetary Analysis
               </p>
               <div className="space-y-2">
-                {['Saturn in 6th house creates karmic debt patterns...', 'Jupiter Mahadasha activates 9th house fortune...', 'Rahu-Ketu axis indicates transformation...'].map((t, i) => (
+                {[
+                  'Saturn in 6th house creates karmic debt patterns...',
+                  'Jupiter Mahadasha activates 9th house fortune...',
+                  'Rahu-Ketu axis indicates transformation...',
+                ].map((t, i) => (
                   <p key={i} className="text-slate-300 text-sm">{t}</p>
                 ))}
               </div>
@@ -191,7 +192,6 @@ export default function ReportPublicClient({ report, slug, meta }: ReportPublicC
                   Complete planetary analysis, remedies, action windows & 30-day roadmap
                 </p>
 
-                {/* What's inside */}
                 <div className="grid grid-cols-2 gap-2 mb-5 text-left max-w-xs mx-auto">
                   {[
                     '✓ Complete Dasha Analysis',
@@ -205,13 +205,12 @@ export default function ReportPublicClient({ report, slug, meta }: ReportPublicC
                   ))}
                 </div>
 
-                {/* CTA */}
                 <Link href={upgradeUrl}
                   className="inline-flex items-center gap-2 px-8 py-3.5 rounded-xl text-sm font-bold transition-all duration-300 hover:scale-105"
                   style={{
                     background: `linear-gradient(135deg, ${GOLD} 0%, #F5D76E 50%, ${GOLD} 100%)`,
-                    color: '#080B12',
-                    boxShadow: `0 0 30px ${GOLD_RGBA(0.3)}`,
+                    color:      '#080B12',
+                    boxShadow:  `0 0 30px ${GOLD_RGBA(0.3)}`,
                   }}>
                   🔓 Unlock Full Report — ₹51 only
                 </Link>
@@ -225,13 +224,13 @@ export default function ReportPublicClient({ report, slug, meta }: ReportPublicC
 
           {/* Trust signals */}
           <div className="grid grid-cols-3 gap-3 mb-6">
-            {[
-              { icon: <Star className="w-4 h-4" />, label: 'Swiss Ephemeris', sub: 'Precision engine' },
-              { icon: <Shield className="w-4 h-4" />, label: 'BPHS Classical', sub: 'Ancient texts' },
-              { icon: <Clock className="w-4 h-4" />, label: 'Instant Access', sub: 'After payment' },
-            ].map((t, i) => (
+            {([
+              { icon: <Star className="w-4 h-4" />,   label: 'Swiss Ephemeris', sub: 'Precision engine' },
+              { icon: <Shield className="w-4 h-4" />, label: 'BPHS Classical',  sub: 'Ancient texts' },
+              { icon: <Clock className="w-4 h-4" />,  label: 'Instant Access',  sub: 'After payment' },
+            ] as { icon: React.ReactNode; label: string; sub: string }[]).map((t, i) => (
               <div key={i} className="rounded-xl p-3 text-center"
-                style={{ background: 'rgba(4,8,20,0.6)', border: `1px solid rgba(255,255,255,0.06)` }}>
+                style={{ background: 'rgba(4,8,20,0.6)', border: '1px solid rgba(255,255,255,0.06)' }}>
                 <div className="flex justify-center mb-1" style={{ color: GOLD_RGBA(0.6) }}>{t.icon}</div>
                 <p className="text-xs font-semibold text-white">{t.label}</p>
                 <p className="text-xs text-slate-600">{t.sub}</p>
@@ -239,13 +238,14 @@ export default function ReportPublicClient({ report, slug, meta }: ReportPublicC
             ))}
           </div>
 
-          {/* Author attribution — E-E-A-T */}
+          {/* Author — E-E-A-T */}
           <div className="rounded-2xl p-4 mb-6"
-            style={{ background: 'rgba(4,8,20,0.6)', border: `1px solid rgba(255,255,255,0.06)` }}>
+            style={{ background: 'rgba(4,8,20,0.6)', border: '1px solid rgba(255,255,255,0.06)' }}>
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0"
                 style={{ border: `1px solid ${GOLD_RGBA(0.3)}` }}>
-                <img src="/images/founder.png" alt="Rohiit Gupta" className="w-full h-full object-cover" />
+                <img src="/images/founder.png" alt="Rohiit Gupta"
+                  className="w-full h-full object-cover" />
               </div>
               <div>
                 <p className="text-sm font-semibold text-white">Rohiit Gupta</p>
@@ -253,8 +253,9 @@ export default function ReportPublicClient({ report, slug, meta }: ReportPublicC
               </div>
             </div>
             <p className="text-xs text-slate-500 mt-3 leading-relaxed">
-              This analysis is powered by Swiss Ephemeris — the same engine used by professional astrologers worldwide —
-              combined with Brihat Parashara Hora Shastra classical rules and Bhrigu Nandi Nadi patterns.
+              This analysis is powered by Swiss Ephemeris — the same engine used by professional
+              astrologers worldwide — combined with Brihat Parashara Hora Shastra classical rules
+              and Bhrigu Nandi Nadi patterns.
             </p>
           </div>
 
