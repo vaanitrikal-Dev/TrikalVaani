@@ -3,24 +3,24 @@
  * TRIKAL VAANI — Unified Prediction Endpoint
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/api/predict/route.ts
- * VERSION: 9.1 — Shadbala fix: astro.py shadbala object now preserved
+ * VERSION: 9.2 — Gemini 400 fix: JSON mode incompatible with googleSearch
  * SIGNED: ROHIIT GUPTA, CEO
  *
- * FULL FLOW v9.1:
+ * FULL FLOW v9.2:
  *   Step 1 → /kundali       (Render Swiss Ephemeris)
- *   Step 2 → adaptSwissToKundali()  ← FIX: shadbala now mapped per planet
+ *   Step 2 → adaptSwissToKundali()
  *   Step 3 → /synthesize    (Render — Bhrigu+Parashara+Panchang+Confidence)
  *   Step 4 → buildPredictionPrompt()
- *   Step 5 → Gemini 2.5 Flash
+ *   Step 5 → Gemini 2.5 Flash  ← FIX: JSON mode OFF when useSearch=true
  *   Step 6 → Parse JSON
  *   Step 6.5 → Claude Haiku polish (₹51+ ONLY)
  *   Step 7 → saveToSupabase()
  *   Step 8 → Return with predictionId
  *
- * v9.1 CHANGES vs v9.0:
- *   - adaptSwissToKundali(): added shadbala field per planet (cast as any)
- *   - _meta.planets now includes shadbala values
- *   - No changes to frozen swiss-ephemeris.ts
+ * v9.2 CHANGES vs v9.1:
+ *   - Step 5: responseMimeType removed when useSearch=true
+ *     Google Gemini 400 = JSON mode + googleSearch = INCOMPATIBLE
+ *   - Gemini error body now logged for easier future debugging
  * ============================================================
  */
 
@@ -121,17 +121,13 @@ function buildPanchangStub() {
 }
 
 // ── adaptSwissToKundali ───────────────────────────────────────────────────────
-// v9.1 FIX: shadbala object from astro.py is now preserved per planet.
-// PlanetPosition interface is frozen — we cast to `any` to attach shadbala
-// without touching swiss-ephemeris.ts (CEO LOCKED).
+
 function adaptSwissToKundali(chart: any, birthData: BirthData): KundaliData {
   const grahas: any[] = Array.isArray(chart.grahas) ? chart.grahas : [];
   const planets: Record<string, PlanetPosition> = {};
 
   for (const g of grahas) {
     const name: string = g.planet;
-
-    // Build base PlanetPosition (matches frozen interface)
     const base: PlanetPosition = {
       name,
       siderealLongitude: g.longitude      ?? 0,
@@ -144,11 +140,7 @@ function adaptSwissToKundali(chart: any, birthData: BirthData): KundaliData {
       house:             g.house          ?? 1,
       strength:          computeStrength(name, g.sign ?? 'Mesh', g.retrograde ?? false),
     };
-
-    // v9.1 FIX: attach shadbala from astro.py response (cast as any — frozen interface)
-    // astro.py v2.0 returns shadbala per graha: { total, sthana, dig, kala, cheshta, naisargika, drik }
     (base as any).shadbala = g.shadbala ?? null;
-
     planets[name] = base;
   }
 
@@ -252,7 +244,6 @@ async function saveToSupabase(p: {
   tier: UserTier; processingMs: number; useSearch: boolean; polished: boolean;
 }): Promise<string | null> {
   try {
-    // Build planets array — shadbala included via cast
     const planetsWithShadbala = Object.values(p.kundali.planets).map(pl => ({
       ...pl,
       shadbala: (pl as any).shadbala ?? null,
@@ -297,7 +288,7 @@ async function saveToSupabase(p: {
             mahadasha:     p.kundali.currentMahadasha.lord,
             antardasha:    p.kundali.currentAntardasha.lord,
           },
-          planets:   planetsWithShadbala,   // v9.1: shadbala included
+          planets:   planetsWithShadbala,
           synthesis: p.synthesis ?? null,
         },
       },
@@ -359,9 +350,9 @@ export async function POST(req: NextRequest) {
       });
       if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(`${res.status}: ${e.detail}`); }
       chart = await res.json();
-      console.log(`[TV-Predict] /kundali OK — lagna:${chart.lagna?.sign} | shadbala planets:${
+      console.log(`[TV-Predict] /kundali OK — lagna:${chart.lagna?.sign} | shadbala:${
         Array.isArray(chart.grahas) ? chart.grahas.filter((g: any) => g.shadbala).length : 0
-      }`);
+      }/9`);
     } catch (err) {
       console.error('[TV-Predict] /kundali failed:', err);
       return NextResponse.json({ error: 'Chart calculation failed. Please retry.' }, { status: 502 });
@@ -376,9 +367,8 @@ export async function POST(req: NextRequest) {
     let kundali: KundaliData;
     try {
       kundali = adaptSwissToKundali(chart, localBirthData);
-      // v9.1 debug: log shadbala preservation
-      const shabdalaCount = Object.values(kundali.planets).filter(p => (p as any).shadbala !== null).length;
-      console.log(`[TV-Predict] adaptSwissToKundali OK — planets with shadbala: ${shabdalaCount}/9`);
+      const cnt = Object.values(kundali.planets).filter(p => (p as any).shadbala !== null).length;
+      console.log(`[TV-Predict] Adapt OK — shadbala preserved: ${cnt}/9`);
     } catch (err) {
       return NextResponse.json({ error: 'Chart processing failed. Please retry.' }, { status: 500 });
     }
@@ -415,22 +405,36 @@ export async function POST(req: NextRequest) {
     );
 
     // ── Step 5: Gemini ────────────────────────────────────────────────────────
+    // v9.2 FIX: Google Gemini returns HTTP 400 if BOTH are set:
+    //   - responseMimeType: 'application/json'  (JSON mode)
+    //   - tools: [{ googleSearch: {} }]          (grounding)
+    // Solution: only set JSON mode when NOT using search grounding.
+    const generationConfig: Record<string, unknown> = {
+      temperature:     0.4,
+      maxOutputTokens: MAX_TOKENS[verifiedTier],
+      topP:            0.85,
+    };
+    if (!useSearch) {
+      generationConfig['responseMimeType'] = 'application/json';
+    }
+
     const geminiBody: Record<string, unknown> = {
       system_instruction: { parts: [{ text: systemPrompt }] },
       contents: [{ role: 'user', parts: [{ text: userMessage }] }],
-      generationConfig: {
-        temperature: 0.4, maxOutputTokens: MAX_TOKENS[verifiedTier],
-        topP: 0.85, responseMimeType: 'application/json',
-      },
+      generationConfig,
     };
-    if (useSearch) geminiBody['tools'] = [{ googleSearch: {} }];
+    if (useSearch) {
+      geminiBody['tools'] = [{ googleSearch: {} }];
+    }
+    console.log(`[TV-Predict] Gemini call — useSearch:${useSearch} jsonMode:${!useSearch}`);
 
     const geminiRes = await fetch(`${GEMINI_URL}?key=${GEMINI_API_KEY}`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(geminiBody),
     });
     if (!geminiRes.ok) {
-      console.error(`[TV-Predict] Gemini ${geminiRes.status}`);
+      const errBody = await geminiRes.json().catch(() => ({}));
+      console.error(`[TV-Predict] Gemini ${geminiRes.status}:`, JSON.stringify(errBody).slice(0, 400));
       return NextResponse.json({ error: 'Prediction engine unavailable' }, { status: 502 });
     }
 
@@ -442,7 +446,11 @@ export async function POST(req: NextRequest) {
     // ── Step 6: Parse ─────────────────────────────────────────────────────────
     let prediction: Record<string, unknown>;
     try {
-      const cleaned = rawText.replace(/^```json\s*/i, '').replace(/^```\s*/, '').replace(/```\s*$/, '').trim();
+      const cleaned = rawText
+        .replace(/^```json\s*/i, '')
+        .replace(/^```\s*/, '')
+        .replace(/```\s*$/, '')
+        .trim();
       prediction = JSON.parse(cleaned);
     } catch {
       console.error('[TV-Predict] JSON parse failed:', rawText.slice(0, 300));
@@ -484,7 +492,6 @@ export async function POST(req: NextRequest) {
     });
 
     // ── Step 8: Return ────────────────────────────────────────────────────────
-    // v9.1: shadbala included in planets array via cast
     const planetsForResponse = Object.values(kundali.planets).map(pl => ({
       ...pl,
       shadbala: (pl as any).shadbala ?? null,
@@ -506,14 +513,14 @@ export async function POST(req: NextRequest) {
           mahadasha:     kundali.currentMahadasha.lord,
           antardasha:    kundali.currentAntardasha.lord,
         },
-        planets: planetsForResponse,    // v9.1: shadbala now flows to ResultClient
+        planets:   planetsForResponse,
         synthesis: synthesis ? {
           yogas:      synthesis.parashara?.activeYogas ?? [],
           bhrigu:     synthesis.bhrigu?.domain_signals ?? [],
           panchang:   synthesis.panchang   ?? {},
           confidence: synthesis.confidence ?? {},
           summary:    synthesis.synthesis  ?? {},
-          shadbala:   synthesis.shadbala   ?? {},  // v9.1: top-level shadbala from synthesize
+          shadbala:   synthesis.shadbala   ?? {},
         } : null,
       },
     });
@@ -527,8 +534,8 @@ export async function POST(req: NextRequest) {
 
 export async function GET() {
   return NextResponse.json({
-    status: 'operational', engine: 'Trikal Vaani Predict v9.1',
+    status: 'operational', engine: 'Trikal Vaani Predict v9.2',
     synthesize: true, polish: true, domains: 11,
-    fix: 'shadbala preserved from astro.py via adaptSwissToKundali',
+    fix: 'Gemini 400: JSON mode disabled when googleSearch grounding active',
   });
 }
