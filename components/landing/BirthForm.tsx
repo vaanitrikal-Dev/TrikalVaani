@@ -3,24 +3,21 @@
  * TRIKAL VAANI — BirthForm Component
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: components/landing/BirthForm.tsx
- * VERSION: 5.0 — Clean merge: Language + Job + Mobile + Dual + Redirect fix
+ * VERSION: 6.0 — Dynamic country code + dark dropdowns + loading messages
  * SIGNED: ROHIIT GUPTA, CEO
  *
- * FEATURES:
- *   - Language selector (Hindi / Hinglish / English)
- *   - Job category dropdown (LinkedIn-style)
- *   - Mobile number field (WhatsApp + Numerology)
- *   - Dual chart support (genz_ex_back, genz_toxic_boss)
- *   - Numerology compatibility (mobile numbers)
- *   - Redirects to /result/[predictionId] after success ← KEY FIX
- *   - Proper tv_ sessionId generation
- *   - Status messages during calculation
+ * v6.0 CHANGES vs v5.0:
+ *   - +91 hardcode removed → dynamic country selector with flag + dial code
+ *   - All <select> dropdowns: dark background fix (text now visible)
+ *   - Loading messages: "Connecting with your energy..." sequence
+ *   - Country auto-detects from place selection (lon-based)
+ *   - Phone validation adapts to selected country digit count
  * ============================================================
  */
 
 "use client"
 
-import { useState, useCallback, useRef } from "react"
+import { useState, useCallback, useRef, useEffect } from "react"
 import { useRouter } from "next/navigation"
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -40,9 +37,11 @@ export interface BirthFormFields {
   language:       "hindi" | "hinglish" | "english"
   jobCategory:    string
   mobile:         string
-  // Person 2 (dual chart domains)
+  countryCode:    string   // e.g. "+91"
+  countryDigits:  number   // expected digit count
   person2Name:    string
   person2Mobile:  string
+  person2CountryCode: string
   person2Dob:     string
   person2Tob:     string
   person2Place:   string
@@ -71,38 +70,94 @@ interface GeoResult {
   lat:          string
   lon:          string
   address?: {
-    city?:    string
-    town?:    string
-    village?: string
-    state?:   string
-    country?: string
+    city?:         string
+    town?:         string
+    village?:      string
+    state?:        string
+    country?:      string
+    country_code?: string
   }
 }
+
+// ── Country Data ──────────────────────────────────────────────────────────────
+
+interface Country {
+  name:   string
+  code:   string   // ISO2 e.g. "IN"
+  dial:   string   // e.g. "+91"
+  digits: number   // expected mobile digits
+  flag:   string   // emoji flag
+}
+
+const COUNTRIES: Country[] = [
+  { name: 'India',          code: 'IN', dial: '+91',  digits: 10, flag: '🇮🇳' },
+  { name: 'USA',            code: 'US', dial: '+1',   digits: 10, flag: '🇺🇸' },
+  { name: 'UK',             code: 'GB', dial: '+44',  digits: 10, flag: '🇬🇧' },
+  { name: 'UAE / Dubai',    code: 'AE', dial: '+971', digits: 9,  flag: '🇦🇪' },
+  { name: 'Canada',         code: 'CA', dial: '+1',   digits: 10, flag: '🇨🇦' },
+  { name: 'Australia',      code: 'AU', dial: '+61',  digits: 9,  flag: '🇦🇺' },
+  { name: 'Singapore',      code: 'SG', dial: '+65',  digits: 8,  flag: '🇸🇬' },
+  { name: 'Nepal',          code: 'NP', dial: '+977', digits: 10, flag: '🇳🇵' },
+  { name: 'Bangladesh',     code: 'BD', dial: '+880', digits: 10, flag: '🇧🇩' },
+  { name: 'Pakistan',       code: 'PK', dial: '+92',  digits: 10, flag: '🇵🇰' },
+  { name: 'Sri Lanka',      code: 'LK', dial: '+94',  digits: 9,  flag: '🇱🇰' },
+  { name: 'Germany',        code: 'DE', dial: '+49',  digits: 10, flag: '🇩🇪' },
+  { name: 'France',         code: 'FR', dial: '+33',  digits: 9,  flag: '🇫🇷' },
+  { name: 'Netherlands',    code: 'NL', dial: '+31',  digits: 9,  flag: '🇳🇱' },
+  { name: 'New Zealand',    code: 'NZ', dial: '+64',  digits: 9,  flag: '🇳🇿' },
+  { name: 'South Africa',   code: 'ZA', dial: '+27',  digits: 9,  flag: '🇿🇦' },
+  { name: 'Malaysia',       code: 'MY', dial: '+60',  digits: 9,  flag: '🇲🇾' },
+  { name: 'Mauritius',      code: 'MU', dial: '+230', digits: 8,  flag: '🇲🇺' },
+  { name: 'Fiji',           code: 'FJ', dial: '+679', digits: 7,  flag: '🇫🇯' },
+  { name: 'Bahrain',        code: 'BH', dial: '+973', digits: 8,  flag: '🇧🇭' },
+  { name: 'Kuwait',         code: 'KW', dial: '+965', digits: 8,  flag: '🇰🇼' },
+  { name: 'Qatar',          code: 'QA', dial: '+974', digits: 8,  flag: '🇶🇦' },
+  { name: 'Oman',           code: 'OM', dial: '+968', digits: 8,  flag: '🇴🇲' },
+  { name: 'Saudi Arabia',   code: 'SA', dial: '+966', digits: 9,  flag: '🇸🇦' },
+  { name: 'Kenya',          code: 'KE', dial: '+254', digits: 9,  flag: '🇰🇪' },
+  { name: 'Nigeria',        code: 'NG', dial: '+234', digits: 10, flag: '🇳🇬' },
+  { name: 'Japan',          code: 'JP', dial: '+81',  digits: 10, flag: '🇯🇵' },
+  { name: 'China',          code: 'CN', dial: '+86',  digits: 11, flag: '🇨🇳' },
+  { name: 'Hong Kong',      code: 'HK', dial: '+852', digits: 8,  flag: '🇭🇰' },
+]
+
+// Map Nominatim country_code (ISO2 lower) → Country
+function getCountryByIso(iso: string): Country {
+  return COUNTRIES.find(c => c.code.toLowerCase() === iso.toLowerCase()) ?? COUNTRIES[0]!
+}
+
+// ── Loading Messages ──────────────────────────────────────────────────────────
+
+const LOADING_STEPS = [
+  'Connecting with your energy...',
+  'Analyzing planetary positions...',
+  'Generating your personalized prediction...',
+]
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
 const DUAL_CHART_DOMAINS = ['genz_ex_back', 'genz_toxic_boss']
 
 const JOB_CATEGORIES = [
-  { value: '',                 label: 'Select your profession' },
-  { value: 'student',          label: '🎓 Student' },
-  { value: 'fresher',          label: '🌱 Fresher / Job Seeker' },
-  { value: 'salaried_it',      label: '💻 Salaried — IT / Tech' },
-  { value: 'salaried_finance', label: '🏦 Salaried — Finance / Banking' },
+  { value: '',                    label: 'Select your profession' },
+  { value: 'student',             label: '🎓 Student' },
+  { value: 'fresher',             label: '🌱 Fresher / Job Seeker' },
+  { value: 'salaried_it',         label: '💻 Salaried — IT / Tech' },
+  { value: 'salaried_finance',    label: '🏦 Salaried — Finance / Banking' },
   { value: 'salaried_healthcare', label: '🏥 Salaried — Healthcare / Medical' },
-  { value: 'salaried_govt',    label: '🏛️ Salaried — Government / PSU' },
-  { value: 'salaried_education', label: '📚 Salaried — Education / Teaching' },
-  { value: 'salaried_legal',   label: '⚖️ Salaried — Legal / Law' },
-  { value: 'salaried_media',   label: '🎬 Salaried — Media / Creative' },
-  { value: 'salaried_other',   label: '💼 Salaried — Other' },
-  { value: 'self_employed',    label: '🚀 Self-Employed / Freelancer' },
-  { value: 'business_owner',   label: '🏢 Business Owner' },
-  { value: 'startup_founder',  label: '⚡ Startup Founder' },
-  { value: 'real_estate',      label: '🏠 Real Estate Professional' },
-  { value: 'trader_investor',  label: '📈 Trader / Investor' },
-  { value: 'homemaker',        label: '🏡 Homemaker' },
-  { value: 'retired',          label: '🌅 Retired' },
-  { value: 'nri',              label: '✈️ NRI / Working Abroad' },
+  { value: 'salaried_govt',       label: '🏛️ Salaried — Government / PSU' },
+  { value: 'salaried_education',  label: '📚 Salaried — Education / Teaching' },
+  { value: 'salaried_legal',      label: '⚖️ Salaried — Legal / Law' },
+  { value: 'salaried_media',      label: '🎬 Salaried — Media / Creative' },
+  { value: 'salaried_other',      label: '💼 Salaried — Other' },
+  { value: 'self_employed',       label: '🚀 Self-Employed / Freelancer' },
+  { value: 'business_owner',      label: '🏢 Business Owner' },
+  { value: 'startup_founder',     label: '⚡ Startup Founder' },
+  { value: 'real_estate',         label: '🏠 Real Estate Professional' },
+  { value: 'trader_investor',     label: '📈 Trader / Investor' },
+  { value: 'homemaker',           label: '🏡 Homemaker' },
+  { value: 'retired',             label: '🌅 Retired' },
+  { value: 'nri',                 label: '✈️ NRI / Working Abroad' },
 ]
 
 const LANGUAGE_OPTIONS = [
@@ -114,7 +169,17 @@ const LANGUAGE_OPTIONS = [
 const GOLD      = '#D4AF37'
 const GOLD_RGBA = (a: number) => `rgba(212,175,55,${a})`
 
-// ── Numerology Helpers ────────────────────────────────────────────────────────
+// ── Dark select style — fixes invisible text on all browsers ──────────────────
+const SELECT_STYLE: React.CSSProperties = {
+  background:      '#0d1120',
+  border:          '1px solid rgba(255,255,255,0.1)',
+  color:           '#e2e8f0',
+  colorScheme:     'dark',
+  WebkitAppearance: 'none' as any,
+  appearance:      'none',
+}
+
+// ── Numerology ────────────────────────────────────────────────────────────────
 
 function getMobileNumber(mobile: string): number {
   const digits = mobile.replace(/\D/g, '')
@@ -180,11 +245,11 @@ function getNumerologyCompatibility(n1: number, n2: number) {
   return COMPAT[key] ?? { score: 65, label: 'Moderate', description: 'Unique combination — balance and understanding is key.', color: '#f59e0b' }
 }
 
-// ── Geo Search ────────────────────────────────────────────────────────────────
+// ── Geo ───────────────────────────────────────────────────────────────────────
 
 async function searchPlace(query: string): Promise<GeoResult[]> {
   const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&addressdetails=1&limit=5`
-  const res = await fetch(url, { headers: { "Accept-Language": "en" } })
+  const res = await fetch(url, { headers: { 'Accept-Language': 'en' } })
   return res.ok ? res.json() : []
 }
 
@@ -226,12 +291,85 @@ const INITIAL: BirthFormFields = {
   placeQuery: '', city: '', latitude: '', longitude: '',
   timezoneOffset: 5.5, ayanamsa: 'lahiri',
   language: 'hinglish', jobCategory: '', mobile: '',
-  person2Name: '', person2Mobile: '', person2Dob: '',
-  person2Tob: '12:00', person2Place: '', person2City: '',
-  person2Lat: '', person2Lng: '',
+  countryCode: '+91', countryDigits: 10,
+  person2Name: '', person2Mobile: '', person2CountryCode: '+91',
+  person2Dob: '', person2Tob: '12:00', person2Place: '',
+  person2City: '', person2Lat: '', person2Lng: '',
 }
 
-// ── Component ─────────────────────────────────────────────────────────────────
+// ── Country Selector Sub-component ────────────────────────────────────────────
+
+function CountrySelector({
+  value, onChange, id,
+}: { value: string; onChange: (dial: string, digits: number) => void; id: string }) {
+  const [open, setOpen]       = useState(false)
+  const [search, setSearch]   = useState('')
+  const ref                   = useRef<HTMLDivElement>(null)
+  const selected              = COUNTRIES.find(c => c.dial === value) ?? COUNTRIES[0]!
+
+  const filtered = search.trim()
+    ? COUNTRIES.filter(c =>
+        c.name.toLowerCase().includes(search.toLowerCase()) ||
+        c.dial.includes(search)
+      )
+    : COUNTRIES
+
+  // Close on outside click
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [])
+
+  return (
+    <div ref={ref} className="relative">
+      <button type="button" id={id}
+        onClick={() => setOpen(o => !o)}
+        className="px-3 py-2.5 rounded-lg text-sm flex items-center gap-1.5 whitespace-nowrap"
+        style={{ background: '#0d1120', border: '1px solid rgba(255,255,255,0.1)', color: '#e2e8f0', minWidth: '80px' }}>
+        <span style={{ fontSize: '1.1rem' }}>{selected.flag}</span>
+        <span>{selected.dial}</span>
+        <span style={{ fontSize: '0.65rem', color: '#64748b', marginLeft: '2px' }}>▾</span>
+      </button>
+
+      {open && (
+        <div className="absolute z-50 mt-1 rounded-lg overflow-hidden shadow-2xl"
+          style={{ background: '#0d1120', border: '1px solid rgba(212,175,55,0.25)', width: '220px', maxHeight: '260px' }}>
+          <div className="p-2" style={{ borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+            <input
+              type="text"
+              placeholder="Search country..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              className="w-full px-3 py-1.5 rounded text-sm outline-none"
+              style={{ background: 'rgba(255,255,255,0.06)', color: '#e2e8f0', border: '1px solid rgba(255,255,255,0.1)' }}
+              autoFocus
+            />
+          </div>
+          <div className="overflow-y-auto" style={{ maxHeight: '200px' }}>
+            {filtered.map(c => (
+              <button key={c.code} type="button"
+                onClick={() => { onChange(c.dial, c.digits); setOpen(false); setSearch('') }}
+                className="w-full flex items-center gap-2.5 px-3 py-2 text-left text-sm transition-colors"
+                style={{
+                  color: c.dial === value ? GOLD : '#cbd5e1',
+                  background: c.dial === value ? GOLD_RGBA(0.08) : 'transparent',
+                }}>
+                <span style={{ fontSize: '1.1rem' }}>{c.flag}</span>
+                <span className="flex-1">{c.name}</span>
+                <span style={{ color: '#64748b', fontSize: '0.75rem' }}>{c.dial}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ── Main Component ────────────────────────────────────────────────────────────
 
 export default function BirthForm({
   selectedCategory,
@@ -242,18 +380,19 @@ export default function BirthForm({
 }: BirthFormProps) {
   const router = useRouter()
 
-  const [fields, setFields]           = useState<BirthFormFields>(INITIAL)
-  const [geoResults, setGeoResults]   = useState<GeoResult[]>([])
-  const [geo2Results, setGeo2Results] = useState<GeoResult[]>([])
-  const [geoLoading, setGeoLoading]   = useState(false)
-  const [geo2Loading, setGeo2Loading] = useState(false)
-  const [errors, setErrors]           = useState<Partial<Record<keyof BirthFormFields, string>>>({})
+  const [fields, setFields]             = useState<BirthFormFields>(INITIAL)
+  const [geoResults, setGeoResults]     = useState<GeoResult[]>([])
+  const [geo2Results, setGeo2Results]   = useState<GeoResult[]>([])
+  const [geoLoading, setGeoLoading]     = useState(false)
+  const [geo2Loading, setGeo2Loading]   = useState(false)
+  const [errors, setErrors]             = useState<Partial<Record<keyof BirthFormFields, string>>>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [apiError, setApiError]       = useState<string | null>(null)
-  const [statusMsg, setStatusMsg]     = useState<string>('')
-  const [numerology, setNumerology]   = useState<ReturnType<typeof getNumerologyCompatibility> | null>(null)
-  const debounceRef  = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const debounce2Ref = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const [apiError, setApiError]         = useState<string | null>(null)
+  const [loadingStep, setLoadingStep]   = useState(0)
+  const [numerology, setNumerology]     = useState<ReturnType<typeof getNumerologyCompatibility> | null>(null)
+  const debounceRef                     = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const debounce2Ref                    = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const loadingIntervalRef              = useRef<ReturnType<typeof setInterval> | null>(null)
 
   const isDualDomain = DUAL_CHART_DOMAINS.includes(selectedCategory?.id ?? '')
 
@@ -262,7 +401,23 @@ export default function BirthForm({
     setErrors(prev => ({ ...prev, [key]: undefined }))
   }, [])
 
-  // ── Mobile numerology ───────────────────────────────────────────────────────
+  // ── Loading step rotator ───────────────────────────────────────────────────
+  const startLoadingMessages = () => {
+    setLoadingStep(0)
+    if (loadingIntervalRef.current) clearInterval(loadingIntervalRef.current)
+    loadingIntervalRef.current = setInterval(() => {
+      setLoadingStep(prev => {
+        if (prev < LOADING_STEPS.length - 1) return prev + 1
+        return prev
+      })
+    }, 18000) // step 1 at 0s, step 2 at 18s, step 3 at 36s
+  }
+
+  const stopLoadingMessages = () => {
+    if (loadingIntervalRef.current) clearInterval(loadingIntervalRef.current)
+  }
+
+  // ── Mobile / numerology ────────────────────────────────────────────────────
   const handleMobileChange = (val: string, isP2 = false) => {
     const key = isP2 ? 'person2Mobile' : 'mobile'
     set(key as keyof BirthFormFields, val as any)
@@ -275,7 +430,7 @@ export default function BirthForm({
     }
   }
 
-  // ── Geo search person 1 ─────────────────────────────────────────────────────
+  // ── Geo person 1 ───────────────────────────────────────────────────────────
   const handlePlaceChange = (query: string) => {
     set('placeQuery', query)
     if (debounceRef.current) clearTimeout(debounceRef.current)
@@ -291,12 +446,23 @@ export default function BirthForm({
     const lat  = parseFloat(r.lat)
     const lon  = parseFloat(r.lon)
     const city = r.address?.city || r.address?.town || r.address?.village || r.display_name.split(',')[0]
-    setFields(prev => ({ ...prev, placeQuery: r.display_name, city, latitude: lat, longitude: lon, timezoneOffset: offsetFromLon(lon) }))
+    // Auto-detect country code from Nominatim result
+    const iso  = r.address?.country_code ?? ''
+    const country = iso ? getCountryByIso(iso) : null
+    setFields(prev => ({
+      ...prev,
+      placeQuery:     r.display_name,
+      city:           city ?? '',
+      latitude:       lat,
+      longitude:      lon,
+      timezoneOffset: offsetFromLon(lon),
+      ...(country ? { countryCode: country.dial, countryDigits: country.digits } : {}),
+    }))
     setGeoResults([])
     setErrors(prev => ({ ...prev, placeQuery: undefined, latitude: undefined }))
   }
 
-  // ── Geo search person 2 ─────────────────────────────────────────────────────
+  // ── Geo person 2 ───────────────────────────────────────────────────────────
   const handlePlace2Change = (query: string) => {
     set('person2Place', query)
     if (debounce2Ref.current) clearTimeout(debounce2Ref.current)
@@ -312,18 +478,30 @@ export default function BirthForm({
     const lat  = parseFloat(r.lat)
     const lon  = parseFloat(r.lon)
     const city = r.address?.city || r.address?.town || r.address?.village || r.display_name.split(',')[0]
-    setFields(prev => ({ ...prev, person2Place: r.display_name, person2City: city, person2Lat: lat, person2Lng: lon }))
+    const iso  = r.address?.country_code ?? ''
+    const country = iso ? getCountryByIso(iso) : null
+    setFields(prev => ({
+      ...prev,
+      person2Place: r.display_name,
+      person2City:  city ?? '',
+      person2Lat:   lat,
+      person2Lng:   lon,
+      ...(country ? { person2CountryCode: country.dial } : {}),
+    }))
     setGeo2Results([])
   }
 
-  // ── Validation ──────────────────────────────────────────────────────────────
+  // ── Validation ─────────────────────────────────────────────────────────────
   const validate = (): boolean => {
     const errs: typeof errors = {}
     if (!fields.name.trim())    errs.name        = 'Name is required'
     if (!fields.dateOfBirth)    errs.dateOfBirth  = 'Date of birth is required'
     if (!fields.unknownTime && !fields.timeOfBirth) errs.timeOfBirth = 'Time of birth is required'
     if (fields.latitude === '') errs.latitude     = 'Place of birth is required'
-    if (!fields.mobile || fields.mobile.replace(/\D/g, '').length < 10) errs.mobile = 'Valid 10-digit mobile required'
+    const mobileDigits = fields.mobile.replace(/\D/g, '').length
+    if (!fields.mobile || mobileDigits < fields.countryDigits) {
+      errs.mobile = `Valid ${fields.countryDigits}-digit mobile required`
+    }
     if (isDualDomain) {
       if (!fields.person2Name.trim()) errs.person2Name = 'Person 2 name required'
       if (!fields.person2Dob)         errs.person2Dob  = 'Person 2 DOB required'
@@ -333,14 +511,14 @@ export default function BirthForm({
     return Object.keys(errs).length === 0
   }
 
-  // ── Submit ──────────────────────────────────────────────────────────────────
+  // ── Submit ─────────────────────────────────────────────────────────────────
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!validate()) return
 
     setIsSubmitting(true)
     setApiError(null)
-    setStatusMsg('Swiss Ephemeris se kundali bana rahe hain...')
+    startLoadingMessages()
 
     try {
       const sessionId = generateSessionId()
@@ -368,7 +546,7 @@ export default function BirthForm({
             sector:      mapJobToSector(fields.jobCategory),
             language:    fields.language,
             city:        fields.city,
-            mobile:      fields.mobile,
+            mobile:      `${fields.countryCode}${fields.mobile}`,
             person2Name: fields.person2Name || null,
             person2City: fields.person2City || null,
           },
@@ -379,7 +557,7 @@ export default function BirthForm({
             lat:      fields.person2Lat as number,
             lng:      fields.person2Lng as number,
             cityName: fields.person2City,
-            mobile:   fields.person2Mobile,
+            mobile:   `${fields.person2CountryCode}${fields.person2Mobile}`,
           } : null,
           numerologyCompatibility: numerology,
         }),
@@ -389,28 +567,24 @@ export default function BirthForm({
 
       if (!res.ok) {
         setApiError(data.error || 'Something went wrong. Please try again.')
-        setStatusMsg('')
+        stopLoadingMessages()
         return
       }
 
       if (onSubmit) await onSubmit(fields)
 
-      // ── REDIRECT TO /result/[id] ── KEY FIX ────────────────────────────────
       const predictionId: string | null = data?._meta?.predictionId ?? null
-
       if (predictionId) {
-        setStatusMsg('Jini taiyaar hai — result page par ja rahe hain...')
         router.push(`/result/${predictionId}`)
       } else {
-        // Fallback: save failed but prediction exists — show error
         setApiError('Prediction ready hai par save nahi hua. Please retry karo.')
-        setStatusMsg('')
+        stopLoadingMessages()
         console.error('[BirthForm] predictionId missing:', data?._meta)
       }
 
     } catch (err) {
       setApiError('Network error. Please check your connection.')
-      setStatusMsg('')
+      stopLoadingMessages()
     } finally {
       setIsSubmitting(false)
     }
@@ -418,13 +592,14 @@ export default function BirthForm({
 
   const isLoading = loading || isSubmitting
 
-  const inputStyle = (hasError?: boolean) => ({
-    background:  'rgba(255,255,255,0.05)',
+  const inputStyle = (hasError?: boolean): React.CSSProperties => ({
+    background:  '#0d1120',
     border:      `1px solid ${hasError ? '#ef4444' : 'rgba(255,255,255,0.1)'}`,
+    color:       '#e2e8f0',
     colorScheme: 'dark' as const,
   })
 
-  // ── Render ──────────────────────────────────────────────────────────────────
+  // ── Render ─────────────────────────────────────────────────────────────────
   return (
     <section id="birth-form" className={`py-16 px-4 ${className}`}>
       <div className="max-w-2xl mx-auto">
@@ -474,44 +649,51 @@ export default function BirthForm({
               </label>
               <input id="tv-name" type="text" placeholder="Enter your full name"
                 value={fields.name} onChange={e => set('name', e.target.value)}
-                className="w-full px-4 py-2.5 rounded-lg text-white text-sm outline-none transition-all"
+                className="w-full px-4 py-2.5 rounded-lg text-sm outline-none transition-all"
                 style={inputStyle(!!errors.name)} />
               {errors.name && <p className="text-red-400 text-xs mt-1">{errors.name}</p>}
             </div>
 
-            {/* ── WhatsApp Mobile ── */}
+            {/* ── WhatsApp Mobile — DYNAMIC COUNTRY CODE ── */}
             <div>
               <label htmlFor="tv-mobile" className="block text-sm font-medium text-slate-300 mb-1.5">
                 WhatsApp Mobile <span className="text-yellow-400">*</span>
                 <span className="text-slate-500 text-xs ml-2">(for follow-up & numerology)</span>
               </label>
               <div className="flex gap-2">
-                <div className="px-3 py-2.5 rounded-lg text-slate-400 text-sm flex items-center"
-                  style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}>
-                  +91
-                </div>
-                <input id="tv-mobile" type="tel" placeholder="10-digit mobile number"
+                <CountrySelector
+                  id="tv-country"
+                  value={fields.countryCode}
+                  onChange={(dial, digits) => setFields(prev => ({ ...prev, countryCode: dial, countryDigits: digits }))}
+                />
+                <input id="tv-mobile" type="tel"
+                  placeholder={`${fields.countryDigits}-digit mobile`}
                   value={fields.mobile} onChange={e => handleMobileChange(e.target.value)}
-                  maxLength={10}
-                  className="flex-1 px-4 py-2.5 rounded-lg text-white text-sm outline-none"
+                  maxLength={fields.countryDigits + 2}
+                  className="flex-1 px-4 py-2.5 rounded-lg text-sm outline-none"
                   style={inputStyle(!!errors.mobile)} />
               </div>
               {errors.mobile && <p className="text-red-400 text-xs mt-1">{errors.mobile}</p>}
             </div>
 
             {/* ── Job Category ── */}
-            <div>
+            <div className="relative">
               <label htmlFor="tv-job" className="block text-sm font-medium text-slate-300 mb-1.5">
                 Profession / Job Category
               </label>
-              <select id="tv-job" value={fields.jobCategory}
-                onChange={e => set('jobCategory', e.target.value)}
-                className="w-full px-4 py-2.5 rounded-lg text-white text-sm outline-none"
-                style={{ ...inputStyle(), colorScheme: 'dark' }}>
-                {JOB_CATEGORIES.map(j => (
-                  <option key={j.value} value={j.value}>{j.label}</option>
-                ))}
-              </select>
+              <div className="relative">
+                <select id="tv-job" value={fields.jobCategory}
+                  onChange={e => set('jobCategory', e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-lg text-sm outline-none appearance-none pr-8"
+                  style={SELECT_STYLE}>
+                  {JOB_CATEGORIES.map(j => (
+                    <option key={j.value} value={j.value} style={{ background: '#0d1120', color: '#e2e8f0' }}>
+                      {j.label}
+                    </option>
+                  ))}
+                </select>
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500">▾</span>
+              </div>
             </div>
 
             {/* ── Date of Birth ── */}
@@ -521,7 +703,7 @@ export default function BirthForm({
               </label>
               <input id="tv-dob" type="date" value={fields.dateOfBirth}
                 onChange={e => set('dateOfBirth', e.target.value)}
-                className="w-full px-4 py-2.5 rounded-lg text-white text-sm outline-none"
+                className="w-full px-4 py-2.5 rounded-lg text-sm outline-none"
                 style={inputStyle(!!errors.dateOfBirth)} />
               {errors.dateOfBirth && <p className="text-red-400 text-xs mt-1">{errors.dateOfBirth}</p>}
             </div>
@@ -541,23 +723,26 @@ export default function BirthForm({
               <input id="tv-tob" type="time" value={fields.timeOfBirth}
                 onChange={e => set('timeOfBirth', e.target.value)}
                 disabled={fields.unknownTime}
-                className="w-full px-4 py-2.5 rounded-lg text-white text-sm outline-none"
+                className="w-full px-4 py-2.5 rounded-lg text-sm outline-none"
                 style={{ ...inputStyle(!!errors.timeOfBirth), opacity: fields.unknownTime ? 0.4 : 1 }} />
               {fields.unknownTime && <p className="text-slate-500 text-xs mt-1">Solar chart will be used (12:00 noon)</p>}
             </div>
 
             {/* ── Gender ── */}
-            <div>
+            <div className="relative">
               <label htmlFor="tv-gender" className="block text-sm font-medium text-slate-300 mb-1.5">Gender</label>
-              <select id="tv-gender" value={fields.gender}
-                onChange={e => set('gender', e.target.value as any)}
-                className="w-full px-4 py-2.5 rounded-lg text-white text-sm outline-none"
-                style={{ ...inputStyle(), colorScheme: 'dark' }}>
-                <option value="">Select gender</option>
-                <option value="male">Male</option>
-                <option value="female">Female</option>
-                <option value="other">Other / Prefer not to say</option>
-              </select>
+              <div className="relative">
+                <select id="tv-gender" value={fields.gender}
+                  onChange={e => set('gender', e.target.value as any)}
+                  className="w-full px-4 py-2.5 rounded-lg text-sm outline-none appearance-none pr-8"
+                  style={SELECT_STYLE}>
+                  <option value="" style={{ background: '#0d1120', color: '#e2e8f0' }}>Select gender</option>
+                  <option value="male" style={{ background: '#0d1120', color: '#e2e8f0' }}>Male</option>
+                  <option value="female" style={{ background: '#0d1120', color: '#e2e8f0' }}>Female</option>
+                  <option value="other" style={{ background: '#0d1120', color: '#e2e8f0' }}>Other / Prefer not to say</option>
+                </select>
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500">▾</span>
+              </div>
             </div>
 
             {/* ── Place of Birth ── */}
@@ -568,16 +753,19 @@ export default function BirthForm({
               <div className="relative">
                 <input id="tv-place" type="search" autoComplete="off" placeholder="Type city name…"
                   value={fields.placeQuery} onChange={e => handlePlaceChange(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-lg text-white text-sm outline-none pr-8"
+                  className="w-full px-4 py-2.5 rounded-lg text-sm outline-none pr-8"
                   style={inputStyle(!!errors.latitude)} />
                 {geoLoading && <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs animate-spin">⟳</span>}
               </div>
               {geoResults.length > 0 && (
                 <ul className="absolute z-50 w-full mt-1 rounded-lg overflow-hidden shadow-xl"
-                  style={{ background: '#1a1f2e', border: '1px solid rgba(212,175,55,0.2)' }}>
+                  style={{ background: '#0d1120', border: '1px solid rgba(212,175,55,0.2)' }}>
                   {geoResults.map((r, i) => (
                     <li key={i} onClick={() => selectPlace(r)}
-                      className="px-4 py-2.5 text-sm text-slate-300 cursor-pointer hover:bg-yellow-400/10 truncate">
+                      className="px-4 py-2.5 text-sm cursor-pointer truncate"
+                      style={{ color: '#cbd5e1' }}
+                      onMouseEnter={e => (e.currentTarget.style.background = GOLD_RGBA(0.08))}
+                      onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
                       {r.display_name}
                     </li>
                   ))}
@@ -586,53 +774,48 @@ export default function BirthForm({
               {errors.latitude && <p className="text-red-400 text-xs mt-1">Please select a place from suggestions</p>}
             </div>
 
-            {/* Lat/Lon */}
+            {/* Lat/Lon display */}
             {fields.latitude !== '' && (
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs text-slate-500 mb-1">Latitude</label>
                   <input type="text" value={fields.latitude} readOnly
-                    className="w-full px-3 py-2 rounded-lg text-slate-400 text-xs font-mono"
-                    style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }} />
+                    className="w-full px-3 py-2 rounded-lg text-xs font-mono"
+                    style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', color: '#64748b' }} />
                 </div>
                 <div>
                   <label className="block text-xs text-slate-500 mb-1">Longitude</label>
                   <input type="text" value={fields.longitude} readOnly
-                    className="w-full px-3 py-2 rounded-lg text-slate-400 text-xs font-mono"
-                    style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }} />
+                    className="w-full px-3 py-2 rounded-lg text-xs font-mono"
+                    style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', color: '#64748b' }} />
                 </div>
               </div>
             )}
 
             {/* ── Timezone ── */}
-            <div>
+            <div className="relative">
               <label htmlFor="tv-timezone" className="block text-sm font-medium text-slate-300 mb-1.5">Time Zone</label>
-              <select id="tv-timezone" value={fields.timezoneOffset}
-                onChange={e => set('timezoneOffset', parseFloat(e.target.value))}
-                className="w-full px-4 py-2.5 rounded-lg text-white text-sm outline-none"
-                style={{ ...inputStyle(), colorScheme: 'dark' }}>
-                <option value={5.5}>IST +5:30 (India)</option>
-                <option value={5.75}>NPT +5:45 (Nepal)</option>
-                <option value={6}>BST +6:00 (Bangladesh)</option>
-                <option value={4}>GST +4:00 (UAE/Dubai)</option>
-                <option value={0}>UTC +0:00</option>
-                <option value={1}>CET +1:00</option>
-                <option value={2}>EET +2:00</option>
-                <option value={3}>MSK +3:00</option>
-                <option value={3.5}>IRST +3:30</option>
-                <option value={4.5}>AFT +4:30</option>
-                <option value={5}>PKT +5:00</option>
-                <option value={6.5}>MMT +6:30</option>
-                <option value={7}>ICT +7:00</option>
-                <option value={8}>SGT +8:00</option>
-                <option value={9}>JST +9:00</option>
-                <option value={9.5}>ACST +9:30</option>
-                <option value={10}>AEST +10:00</option>
-                <option value={-5}>EST -5:00 (USA East)</option>
-                <option value={-6}>CST -6:00 (USA Central)</option>
-                <option value={-7}>MST -7:00 (USA Mountain)</option>
-                <option value={-8}>PST -8:00 (USA West)</option>
-              </select>
+              <div className="relative">
+                <select id="tv-timezone" value={fields.timezoneOffset}
+                  onChange={e => set('timezoneOffset', parseFloat(e.target.value))}
+                  className="w-full px-4 py-2.5 rounded-lg text-sm outline-none appearance-none pr-8"
+                  style={SELECT_STYLE}>
+                  {[
+                    [5.5, 'IST +5:30 (India)'], [5.75, 'NPT +5:45 (Nepal)'], [6, 'BST +6:00 (Bangladesh)'],
+                    [4, 'GST +4:00 (UAE/Dubai)'], [0, 'UTC +0:00'], [1, 'CET +1:00'], [2, 'EET +2:00'],
+                    [3, 'MSK +3:00'], [3.5, 'IRST +3:30'], [4.5, 'AFT +4:30'], [5, 'PKT +5:00'],
+                    [6.5, 'MMT +6:30'], [7, 'ICT +7:00'], [8, 'SGT +8:00'], [9, 'JST +9:00'],
+                    [9.5, 'ACST +9:30'], [10, 'AEST +10:00'],
+                    [-5, 'EST -5:00 (USA East)'], [-6, 'CST -6:00 (USA Central)'],
+                    [-7, 'MST -7:00 (USA Mountain)'], [-8, 'PST -8:00 (USA West)'],
+                  ].map(([val, label]) => (
+                    <option key={val} value={val as number} style={{ background: '#0d1120', color: '#e2e8f0' }}>
+                      {label}
+                    </option>
+                  ))}
+                </select>
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500">▾</span>
+              </div>
             </div>
 
             {/* ── PERSON 2 SECTION ── */}
@@ -655,7 +838,7 @@ export default function BirthForm({
                     </label>
                     <input type="text" placeholder="Enter their full name"
                       value={fields.person2Name} onChange={e => set('person2Name', e.target.value)}
-                      className="w-full px-4 py-2.5 rounded-lg text-white text-sm outline-none"
+                      className="w-full px-4 py-2.5 rounded-lg text-sm outline-none"
                       style={inputStyle(!!errors.person2Name)} />
                     {errors.person2Name && <p className="text-red-400 text-xs mt-1">{errors.person2Name}</p>}
                   </div>
@@ -666,14 +849,15 @@ export default function BirthForm({
                       <span className="text-slate-500 text-xs ml-2">(for numerology compatibility)</span>
                     </label>
                     <div className="flex gap-2">
-                      <div className="px-3 py-2.5 rounded-lg text-slate-400 text-sm flex items-center"
-                        style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}>
-                        +91
-                      </div>
-                      <input type="tel" placeholder="Their 10-digit mobile"
+                      <CountrySelector
+                        id="tv-country2"
+                        value={fields.person2CountryCode}
+                        onChange={(dial, digits) => setFields(prev => ({ ...prev, person2CountryCode: dial }))}
+                      />
+                      <input type="tel" placeholder="Their mobile number"
                         value={fields.person2Mobile} onChange={e => handleMobileChange(e.target.value, true)}
-                        maxLength={10}
-                        className="flex-1 px-4 py-2.5 rounded-lg text-white text-sm outline-none"
+                        maxLength={12}
+                        className="flex-1 px-4 py-2.5 rounded-lg text-sm outline-none"
                         style={inputStyle()} />
                     </div>
                   </div>
@@ -712,7 +896,7 @@ export default function BirthForm({
                       </label>
                       <input type="date" value={fields.person2Dob}
                         onChange={e => set('person2Dob', e.target.value)}
-                        className="w-full px-4 py-2.5 rounded-lg text-white text-sm outline-none"
+                        className="w-full px-4 py-2.5 rounded-lg text-sm outline-none"
                         style={inputStyle(!!errors.person2Dob)} />
                       {errors.person2Dob && <p className="text-red-400 text-xs mt-1">{errors.person2Dob}</p>}
                     </div>
@@ -720,7 +904,7 @@ export default function BirthForm({
                       <label className="block text-sm font-medium text-slate-300 mb-1.5">Their Birth Time</label>
                       <input type="time" value={fields.person2Tob}
                         onChange={e => set('person2Tob', e.target.value)}
-                        className="w-full px-4 py-2.5 rounded-lg text-white text-sm outline-none"
+                        className="w-full px-4 py-2.5 rounded-lg text-sm outline-none"
                         style={inputStyle()} />
                     </div>
                   </div>
@@ -732,16 +916,19 @@ export default function BirthForm({
                     <div className="relative">
                       <input type="search" autoComplete="off" placeholder="Type their city name…"
                         value={fields.person2Place} onChange={e => handlePlace2Change(e.target.value)}
-                        className="w-full px-4 py-2.5 rounded-lg text-white text-sm outline-none pr-8"
+                        className="w-full px-4 py-2.5 rounded-lg text-sm outline-none pr-8"
                         style={inputStyle(!!errors.person2Lat)} />
                       {geo2Loading && <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs">⟳</span>}
                     </div>
                     {geo2Results.length > 0 && (
                       <ul className="absolute z-50 w-full mt-1 rounded-lg overflow-hidden shadow-xl"
-                        style={{ background: '#1a1f2e', border: '1px solid rgba(212,175,55,0.2)' }}>
+                        style={{ background: '#0d1120', border: '1px solid rgba(212,175,55,0.2)' }}>
                         {geo2Results.map((r, i) => (
                           <li key={i} onClick={() => selectPlace2(r)}
-                            className="px-4 py-2.5 text-sm text-slate-300 cursor-pointer hover:bg-yellow-400/10 truncate">
+                            className="px-4 py-2.5 text-sm cursor-pointer truncate"
+                            style={{ color: '#cbd5e1' }}
+                            onMouseEnter={e => (e.currentTarget.style.background = GOLD_RGBA(0.08))}
+                            onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
                             {r.display_name}
                           </li>
                         ))}
@@ -753,11 +940,26 @@ export default function BirthForm({
               </div>
             )}
 
-            {/* ── Status Message ── */}
-            {statusMsg && (
-              <div className="px-4 py-3 rounded-lg text-sm text-yellow-300 text-center"
-                style={{ background: GOLD_RGBA(0.08), border: `1px solid ${GOLD_RGBA(0.2)}` }}>
-                <span className="animate-pulse">✨</span> {statusMsg}
+            {/* ── Loading Message ── */}
+            {isLoading && (
+              <div className="px-4 py-4 rounded-xl text-center"
+                style={{ background: GOLD_RGBA(0.06), border: `1px solid ${GOLD_RGBA(0.2)}` }}>
+                <div className="flex items-center justify-center gap-2 mb-2">
+                  <span className="animate-spin text-base">✨</span>
+                  <span className="text-sm font-medium" style={{ color: GOLD }}>
+                    {LOADING_STEPS[loadingStep]}
+                  </span>
+                </div>
+                <div className="flex justify-center gap-1.5">
+                  {LOADING_STEPS.map((_, i) => (
+                    <div key={i} className="rounded-full transition-all duration-500"
+                      style={{
+                        width:      i === loadingStep ? '20px' : '6px',
+                        height:     '6px',
+                        background: i <= loadingStep ? GOLD : GOLD_RGBA(0.2),
+                      }} />
+                  ))}
+                </div>
               </div>
             )}
 
@@ -777,7 +979,7 @@ export default function BirthForm({
                 color:  isLoading ? 'rgba(255,255,255,0.5)' : '#080B12',
                 cursor: isLoading ? 'not-allowed' : 'pointer',
               }}>
-              {isLoading ? (statusMsg || 'Jini pad rahi hai aapki kundali…') : submitLabel}
+              {isLoading ? LOADING_STEPS[loadingStep] : submitLabel}
             </button>
 
             <p className="text-center text-xs text-slate-600">
