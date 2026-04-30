@@ -3,19 +3,24 @@
  * TRIKAL VAANI — Unified Prediction Endpoint
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/api/predict/route.ts
- * VERSION: 9.0 — Claude Haiku polish wired at Step 6.5 for ₹51+
+ * VERSION: 9.1 — Shadbala fix: astro.py shadbala object now preserved
  * SIGNED: ROHIIT GUPTA, CEO
  *
- * FULL FLOW v9.0:
+ * FULL FLOW v9.1:
  *   Step 1 → /kundali       (Render Swiss Ephemeris)
- *   Step 2 → adaptSwissToKundali()
+ *   Step 2 → adaptSwissToKundali()  ← FIX: shadbala now mapped per planet
  *   Step 3 → /synthesize    (Render — Bhrigu+Parashara+Panchang+Confidence)
  *   Step 4 → buildPredictionPrompt()
  *   Step 5 → Gemini 2.5 Flash
  *   Step 6 → Parse JSON
- *   Step 6.5 → Claude Haiku polish (₹51+ ONLY) ← NEW WIRED
+ *   Step 6.5 → Claude Haiku polish (₹51+ ONLY)
  *   Step 7 → saveToSupabase()
  *   Step 8 → Return with predictionId
+ *
+ * v9.1 CHANGES vs v9.0:
+ *   - adaptSwissToKundali(): added shadbala field per planet (cast as any)
+ *   - _meta.planets now includes shadbala values
+ *   - No changes to frozen swiss-ephemeris.ts
  * ============================================================
  */
 
@@ -115,13 +120,19 @@ function buildPanchangStub() {
   };
 }
 
+// ── adaptSwissToKundali ───────────────────────────────────────────────────────
+// v9.1 FIX: shadbala object from astro.py is now preserved per planet.
+// PlanetPosition interface is frozen — we cast to `any` to attach shadbala
+// without touching swiss-ephemeris.ts (CEO LOCKED).
 function adaptSwissToKundali(chart: any, birthData: BirthData): KundaliData {
   const grahas: any[] = Array.isArray(chart.grahas) ? chart.grahas : [];
   const planets: Record<string, PlanetPosition> = {};
 
   for (const g of grahas) {
     const name: string = g.planet;
-    planets[name] = {
+
+    // Build base PlanetPosition (matches frozen interface)
+    const base: PlanetPosition = {
       name,
       siderealLongitude: g.longitude      ?? 0,
       rashi:             g.sign           ?? 'Mesh',
@@ -133,6 +144,12 @@ function adaptSwissToKundali(chart: any, birthData: BirthData): KundaliData {
       house:             g.house          ?? 1,
       strength:          computeStrength(name, g.sign ?? 'Mesh', g.retrograde ?? false),
     };
+
+    // v9.1 FIX: attach shadbala from astro.py response (cast as any — frozen interface)
+    // astro.py v2.0 returns shadbala per graha: { total, sthana, dig, kala, cheshta, naisargika, drik }
+    (base as any).shadbala = g.shadbala ?? null;
+
+    planets[name] = base;
   }
 
   const lagnaSign     = chart.lagna?.sign      ?? 'Mesh';
@@ -235,6 +252,12 @@ async function saveToSupabase(p: {
   tier: UserTier; processingMs: number; useSearch: boolean; polished: boolean;
 }): Promise<string | null> {
   try {
+    // Build planets array — shadbala included via cast
+    const planetsWithShadbala = Object.values(p.kundali.planets).map(pl => ({
+      ...pl,
+      shadbala: (pl as any).shadbala ?? null,
+    }));
+
     const row = {
       session_id:     p.sessionId,
       user_id:        p.userId ?? null,
@@ -274,7 +297,7 @@ async function saveToSupabase(p: {
             mahadasha:     p.kundali.currentMahadasha.lord,
             antardasha:    p.kundali.currentAntardasha.lord,
           },
-          planets:   Object.values(p.kundali.planets),
+          planets:   planetsWithShadbala,   // v9.1: shadbala included
           synthesis: p.synthesis ?? null,
         },
       },
@@ -336,7 +359,9 @@ export async function POST(req: NextRequest) {
       });
       if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(`${res.status}: ${e.detail}`); }
       chart = await res.json();
-      console.log(`[TV-Predict] /kundali OK — lagna:${chart.lagna?.sign}`);
+      console.log(`[TV-Predict] /kundali OK — lagna:${chart.lagna?.sign} | shadbala planets:${
+        Array.isArray(chart.grahas) ? chart.grahas.filter((g: any) => g.shadbala).length : 0
+      }`);
     } catch (err) {
       console.error('[TV-Predict] /kundali failed:', err);
       return NextResponse.json({ error: 'Chart calculation failed. Please retry.' }, { status: 502 });
@@ -351,6 +376,9 @@ export async function POST(req: NextRequest) {
     let kundali: KundaliData;
     try {
       kundali = adaptSwissToKundali(chart, localBirthData);
+      // v9.1 debug: log shadbala preservation
+      const shabdalaCount = Object.values(kundali.planets).filter(p => (p as any).shadbala !== null).length;
+      console.log(`[TV-Predict] adaptSwissToKundali OK — planets with shadbala: ${shabdalaCount}/9`);
     } catch (err) {
       return NextResponse.json({ error: 'Chart processing failed. Please retry.' }, { status: 500 });
     }
@@ -440,7 +468,6 @@ export async function POST(req: NextRequest) {
           console.log(`[TV-Predict] Claude polish OK — tier:${polishTier} ms:${polishResult.polishMs}`);
         }
       } catch (polishErr) {
-        // Non-fatal — continue with Gemini output
         console.warn('[TV-Predict] Claude polish failed (non-fatal):', polishErr);
       }
     }
@@ -457,6 +484,12 @@ export async function POST(req: NextRequest) {
     });
 
     // ── Step 8: Return ────────────────────────────────────────────────────────
+    // v9.1: shadbala included in planets array via cast
+    const planetsForResponse = Object.values(kundali.planets).map(pl => ({
+      ...pl,
+      shadbala: (pl as any).shadbala ?? null,
+    }));
+
     return NextResponse.json({
       ...prediction,
       _meta: {
@@ -473,12 +506,14 @@ export async function POST(req: NextRequest) {
           mahadasha:     kundali.currentMahadasha.lord,
           antardasha:    kundali.currentAntardasha.lord,
         },
+        planets: planetsForResponse,    // v9.1: shadbala now flows to ResultClient
         synthesis: synthesis ? {
           yogas:      synthesis.parashara?.activeYogas ?? [],
           bhrigu:     synthesis.bhrigu?.domain_signals ?? [],
           panchang:   synthesis.panchang   ?? {},
           confidence: synthesis.confidence ?? {},
           summary:    synthesis.synthesis  ?? {},
+          shadbala:   synthesis.shadbala   ?? {},  // v9.1: top-level shadbala from synthesize
         } : null,
       },
     });
@@ -492,7 +527,8 @@ export async function POST(req: NextRequest) {
 
 export async function GET() {
   return NextResponse.json({
-    status: 'operational', engine: 'Trikal Vaani Predict v9.0',
+    status: 'operational', engine: 'Trikal Vaani Predict v9.1',
     synthesize: true, polish: true, domains: 11,
+    fix: 'shadbala preserved from astro.py via adaptSwissToKundali',
   });
 }
