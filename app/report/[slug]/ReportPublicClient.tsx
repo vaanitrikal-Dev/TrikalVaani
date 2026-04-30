@@ -3,7 +3,7 @@
  * TRIKAL VAANI — Public Report Client Component
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/report/[slug]/ReportPublicClient.tsx
- * VERSION: 2.0 — Fixed TypeScript errors
+ * VERSION: 3.0 — Fully TypeScript clean
  * SIGNED: ROHIIT GUPTA, CEO
  * ============================================================
  */
@@ -19,9 +19,9 @@ const GOLD      = '#D4AF37'
 const GOLD_RGBA = (a: number) => `rgba(212,175,55,${a})`
 
 interface SeoMeta {
-  title:       string
+  title:     string
   description: string
-  canonical:   string
+  canonical: string
 }
 
 interface ReportPublicClientProps {
@@ -30,18 +30,43 @@ interface ReportPublicClientProps {
   meta:   SeoMeta
 }
 
+function str(val: unknown, fallback = '—'): string {
+  return typeof val === 'string' ? val : fallback
+}
+
 export default function ReportPublicClient({ report, slug, meta }: ReportPublicClientProps) {
   const summary     = (report.simple_summary as Record<string, unknown>) ?? {}
-  const summaryText = (summary.text      as string) ?? ''
-  const keyMessage  = (summary.keyMessage as string) ?? null
-  const mainAction  = (summary.mainAction as string) ?? null
-  const mainCaution = (summary.mainCaution as string) ?? null
-  const geoAnswer   = (report.geo_answer as string)
-    ?? (report.geo_direct_answer as string)
-    ?? ''
-  const kundali     = (report.kundali_meta as Record<string, unknown>) ?? {}
+  const summaryText = str(summary.text, '')
+  const keyMessage  = str(summary.keyMessage, '')
+  const mainAction  = str(summary.mainAction, '')
+  const mainCaution = str(summary.mainCaution, '')
+  const geoAnswer   = str(report.geo_answer) !== '—'
+    ? str(report.geo_answer)
+    : str(report.geo_direct_answer, '')
 
   const upgradeUrl = `/upgrade?slug=${slug}&tier=basic`
+
+  const stats: [string, string][] = [
+    ['Lagna',      str(report.lagna)],
+    ['Nakshatra',  str(report.nakshatra)],
+    ['Mahadasha',  str(report.mahadasha)],
+    ['Antardasha', str(report.antardasha)],
+  ]
+
+  const trustItems = [
+    { icon: <Star className="w-4 h-4" />,   label: 'Swiss Ephemeris', sub: 'Precision engine' },
+    { icon: <Shield className="w-4 h-4" />, label: 'BPHS Classical',  sub: 'Ancient texts' },
+    { icon: <Clock className="w-4 h-4" />,  label: 'Instant Access',  sub: 'After payment' },
+  ]
+
+  const gatedItems = [
+    '✓ Complete Dasha Analysis',
+    '✓ Parashara Yogas',
+    '✓ Remedy Plan (Mantra/Dana)',
+    '✓ Action Windows',
+    '✓ Bhrigu Nandi Insights',
+    '✓ 30-Day Roadmap',
+  ]
 
   return (
     <div className="min-h-screen bg-[#080B12]">
@@ -53,7 +78,7 @@ export default function ReportPublicClient({ report, slug, meta }: ReportPublicC
           <div className="mb-5 flex items-center gap-2 text-xs text-slate-500">
             <Link href="/" className="hover:text-yellow-400/70 transition-colors">Home</Link>
             <span>›</span>
-            <span className="text-slate-400">{report.domain_label as string}</span>
+            <span className="text-slate-400">{str(report.domain_label)}</span>
           </div>
 
           {/* Hero */}
@@ -61,14 +86,14 @@ export default function ReportPublicClient({ report, slug, meta }: ReportPublicC
             style={{ background: 'rgba(4,8,20,0.9)', border: `1px solid ${GOLD_RGBA(0.15)}` }}>
             <p className="text-xs font-medium tracking-widest uppercase mb-2"
               style={{ color: GOLD_RGBA(0.55) }}>
-              Vedic Astrology Analysis · {report.domain_label as string}
+              Vedic Astrology Analysis · {str(report.domain_label)}
             </p>
             <h1 className="text-xl sm:text-2xl font-bold text-white mb-2"
               style={{ fontFamily: 'Georgia, serif' }}>
-              {report.mahadasha as string} Mahadasha · {report.antardasha as string} Antardasha
+              {str(report.mahadasha)} Mahadasha · {str(report.antardasha)} Antardasha
             </h1>
             <p className="text-slate-400 text-sm">
-              {report.birth_city as string} · {report.lagna as string} Lagna · {report.nakshatra as string} Nakshatra
+              {str(report.birth_city)} · {str(report.lagna)} Lagna · {str(report.nakshatra)} Nakshatra
             </p>
             <div className="mt-3 flex items-center justify-center gap-2 flex-wrap">
               <span className="text-xs px-3 py-1 rounded-full font-medium"
@@ -99,12 +124,7 @@ export default function ReportPublicClient({ report, slug, meta }: ReportPublicC
 
           {/* Kundali Stats */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
-            {([
-              ['Lagna',      report.lagna      as string ?? '—'],
-              ['Nakshatra',  report.nakshatra  as string ?? '—'],
-              ['Mahadasha',  report.mahadasha  as string ?? '—'],
-              ['Antardasha', report.antardasha as string ?? '—'],
-            ] as [string, string][]).map(([label, value]) => (
+            {stats.map(([label, value]) => (
               <div key={label} className="rounded-xl p-3 text-center"
                 style={{ background: 'rgba(4,8,20,0.8)', border: `1px solid ${GOLD_RGBA(0.1)}` }}>
                 <p className="text-xs text-slate-500 mb-1">{label}</p>
@@ -113,7 +133,7 @@ export default function ReportPublicClient({ report, slug, meta }: ReportPublicC
             ))}
           </div>
 
-          {/* Free simpleSummary — Google indexes this */}
+          {/* Free simpleSummary */}
           <div className="rounded-2xl p-5 mb-5"
             style={{ background: 'rgba(4,8,20,0.8)', border: `1px solid ${GOLD_RGBA(0.1)}` }}>
             <p className="text-xs font-semibold uppercase tracking-wider mb-3"
@@ -152,10 +172,9 @@ export default function ReportPublicClient({ report, slug, meta }: ReportPublicC
             )}
           </div>
 
-          {/* GATED — blurred professional content */}
+          {/* Gated content */}
           <div className="relative rounded-2xl overflow-hidden mb-5"
             style={{ border: `1px solid ${GOLD_RGBA(0.15)}` }}>
-
             {/* Blurred preview */}
             <div className="p-5 select-none"
               style={{ filter: 'blur(4px)', pointerEvents: 'none', background: 'rgba(4,8,20,0.8)' }}>
@@ -164,13 +183,9 @@ export default function ReportPublicClient({ report, slug, meta }: ReportPublicC
                 📊 Complete Planetary Analysis
               </p>
               <div className="space-y-2">
-                {[
-                  'Saturn in 6th house creates karmic debt patterns...',
-                  'Jupiter Mahadasha activates 9th house fortune...',
-                  'Rahu-Ketu axis indicates transformation...',
-                ].map((t, i) => (
-                  <p key={i} className="text-slate-300 text-sm">{t}</p>
-                ))}
+                <p className="text-slate-300 text-sm">Saturn in 6th house creates karmic debt patterns...</p>
+                <p className="text-slate-300 text-sm">Jupiter Mahadasha activates 9th house fortune...</p>
+                <p className="text-slate-300 text-sm">Rahu-Ketu axis indicates transformation...</p>
               </div>
               <div className="mt-4 space-y-2">
                 <p className="text-xs font-semibold text-green-400">🗓 Action Windows</p>
@@ -191,20 +206,11 @@ export default function ReportPublicClient({ report, slug, meta }: ReportPublicC
                 <p className="text-slate-400 text-sm mb-4">
                   Complete planetary analysis, remedies, action windows & 30-day roadmap
                 </p>
-
                 <div className="grid grid-cols-2 gap-2 mb-5 text-left max-w-xs mx-auto">
-                  {[
-                    '✓ Complete Dasha Analysis',
-                    '✓ Parashara Yogas',
-                    '✓ Remedy Plan (Mantra/Dana)',
-                    '✓ Action Windows',
-                    '✓ Bhrigu Nandi Insights',
-                    '✓ 30-Day Roadmap',
-                  ].map((item, i) => (
+                  {gatedItems.map((item, i) => (
                     <p key={i} className="text-xs text-slate-300">{item}</p>
                   ))}
                 </div>
-
                 <Link href={upgradeUrl}
                   className="inline-flex items-center gap-2 px-8 py-3.5 rounded-xl text-sm font-bold transition-all duration-300 hover:scale-105"
                   style={{
@@ -214,7 +220,6 @@ export default function ReportPublicClient({ report, slug, meta }: ReportPublicC
                   }}>
                   🔓 Unlock Full Report — ₹51 only
                 </Link>
-
                 <p className="text-xs text-slate-600 mt-3">
                   One-time payment · Instant access · No subscription
                 </p>
@@ -224,11 +229,7 @@ export default function ReportPublicClient({ report, slug, meta }: ReportPublicC
 
           {/* Trust signals */}
           <div className="grid grid-cols-3 gap-3 mb-6">
-            {([
-              { icon: <Star className="w-4 h-4" />,   label: 'Swiss Ephemeris', sub: 'Precision engine' },
-              { icon: <Shield className="w-4 h-4" />, label: 'BPHS Classical',  sub: 'Ancient texts' },
-              { icon: <Clock className="w-4 h-4" />,  label: 'Instant Access',  sub: 'After payment' },
-            ] as { icon: React.ReactNode; label: string; sub: string }[]).map((t, i) => (
+            {trustItems.map((t, i) => (
               <div key={i} className="rounded-xl p-3 text-center"
                 style={{ background: 'rgba(4,8,20,0.6)', border: '1px solid rgba(255,255,255,0.06)' }}>
                 <div className="flex justify-center mb-1" style={{ color: GOLD_RGBA(0.6) }}>{t.icon}</div>
@@ -238,7 +239,7 @@ export default function ReportPublicClient({ report, slug, meta }: ReportPublicC
             ))}
           </div>
 
-          {/* Author — E-E-A-T */}
+          {/* Author E-E-A-T */}
           <div className="rounded-2xl p-4 mb-6"
             style={{ background: 'rgba(4,8,20,0.6)', border: '1px solid rgba(255,255,255,0.06)' }}>
             <div className="flex items-center gap-3">
@@ -259,7 +260,7 @@ export default function ReportPublicClient({ report, slug, meta }: ReportPublicC
             </p>
           </div>
 
-          {/* New prediction CTA */}
+          {/* CTA */}
           <div className="text-center">
             <Link href="/"
               className="inline-flex items-center gap-2 px-6 py-3 rounded-full text-xs font-medium text-slate-500 hover:text-yellow-400/70 transition-colors"
