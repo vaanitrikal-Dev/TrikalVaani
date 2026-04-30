@@ -3,15 +3,8 @@
  * TRIKAL VAANI — Public SEO Result Page
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/report/[slug]/page.tsx
- * VERSION: 1.0 — SSR + Schema + GEO indexable result page
+ * VERSION: 3.0 — TypeScript clean, Next.js 13.5 compatible
  * SIGNED: ROHIIT GUPTA, CEO
- *
- * SEO STRATEGY:
- *   - Google sees: geoDirectAnswer + simpleSummary + seoSignals
- *   - User sees: teaser + "Unlock ₹51" CTA
- *   - Schema: Article + FAQ + BreadcrumbList + Person
- *   - Canonical: trikalvaani.com/report/[slug]
- *   - Sensitive data: NEVER exposed (no mobile, no exact birth time)
  * ============================================================
  */
 
@@ -21,7 +14,37 @@ import { createClient } from '@supabase/supabase-js'
 import ReportPublicClient from './ReportPublicClient'
 import { generateSeoMeta, isValidSlug } from '@/lib/slug'
 
-// ── Supabase server client ─────────────────────────────────────────────────────
+// ── Types ─────────────────────────────────────────────────────────────────────
+
+type ReportRow = {
+  id:                  string
+  public_slug:         string
+  domain_id:           string
+  domain_label:        string
+  person_name:         string
+  dob:                 string
+  birth_city:          string
+  lagna:               string
+  nakshatra:           string
+  mahadasha:           string
+  antardasha:          string
+  tier:                string
+  language:            string
+  seo_title:           string | null
+  seo_description:     string | null
+  geo_answer:          string | null
+  faq_schema:          unknown
+  geo_direct_answer:   unknown
+  simple_summary:      unknown
+  seo_signals:         unknown
+  professional_english:unknown
+  synthesis:           unknown
+  kundali_meta:        unknown
+  created_at:          string
+  public_views:        number
+}
+
+// ── Supabase ──────────────────────────────────────────────────────────────────
 
 function getSupabase() {
   return createClient(
@@ -30,11 +53,8 @@ function getSupabase() {
   )
 }
 
-// ── Fetch report data ─────────────────────────────────────────────────────────
-
-async function getReport(slug: string) {
+async function getReport(slug: string): Promise<ReportRow | null> {
   const supabase = getSupabase()
-
   const { data, error } = await supabase
     .from('public_report_view')
     .select('*')
@@ -43,14 +63,14 @@ async function getReport(slug: string) {
 
   if (error || !data) return null
 
-  // Increment view count (fire and forget)
+  // Fire and forget view count
   supabase
     .from('predictions')
-    .update({ public_views: (data.public_views ?? 0) + 1 })
+    .update({ public_views: ((data as ReportRow).public_views ?? 0) + 1 })
     .eq('public_slug', slug)
     .then(() => {})
 
-  return data
+  return data as ReportRow
 }
 
 // ── generateMetadata ──────────────────────────────────────────────────────────
@@ -58,10 +78,14 @@ async function getReport(slug: string) {
 export async function generateMetadata(
   { params }: { params: { slug: string } }
 ): Promise<Metadata> {
-  if (!isValidSlug(params.slug)) return { title: 'Report Not Found | Trikal Vaani' }
+  if (!isValidSlug(params.slug)) {
+    return { title: 'Report Not Found | Trikal Vaani' }
+  }
 
   const report = await getReport(params.slug)
   if (!report) return { title: 'Report Not Found | Trikal Vaani' }
+
+  const geoAnswer = report.geo_answer ?? `Vedic astrology ${report.domain_label} analysis for ${report.birth_city}. Powered by Swiss Ephemeris.`
 
   const meta = generateSeoMeta(
     params.slug,
@@ -69,12 +93,8 @@ export async function generateMetadata(
     report.mahadasha,
     report.antardasha,
     report.birth_city ?? 'India',
-    report.geo_answer ?? report.geo_direct_answer,
+    geoAnswer,
   )
-
-  const geoAnswer = report.geo_answer
-    ?? report.geo_direct_answer
-    ?? `Vedic astrology ${report.domain_label} analysis for ${report.birth_city}. Powered by Swiss Ephemeris.`
 
   return {
     title:       meta.title,
@@ -88,9 +108,10 @@ export async function generateMetadata(
       locale:      'en_IN',
       type:        'article',
       images: [{
-        url:   'https://trikalvaani.com/og-report.jpg',
-        width: 1200, height: 630,
-        alt:   `${report.domain_label} Vedic Astrology Report | Trikal Vaani`,
+        url:    'https://trikalvaani.com/og-report.jpg',
+        width:  1200,
+        height: 630,
+        alt:    `${report.domain_label} Vedic Astrology Report | Trikal Vaani`,
       }],
     },
     twitter: {
@@ -101,69 +122,58 @@ export async function generateMetadata(
     robots: {
       index:  true,
       follow: true,
-      googleBot: { index: true, follow: true, 'max-snippet': -1, 'max-image-preview': 'large' },
+      googleBot: {
+        index:               true,
+        follow:              true,
+        'max-snippet':       -1,
+        'max-image-preview': 'large',
+      },
     },
     other: {
-      'geo.region':   'IN-DL',
-      'geo.placename':'Delhi NCR',
+      'geo.region':    'IN-DL',
+      'geo.placename': 'Delhi NCR',
     },
   }
 }
 
-// ── JSON-LD Schema builder ────────────────────────────────────────────────────
+// ── Schema builder ────────────────────────────────────────────────────────────
 
-function buildSchema(report: any, slug: string, meta: ReturnType<typeof generateSeoMeta>) {
-  const url         = meta.canonical
+function buildSchema(report: ReportRow, meta: ReturnType<typeof generateSeoMeta>) {
+  const url          = meta.canonical
   const datePublished = report.created_at ?? new Date().toISOString()
-  const geoAnswer   = report.geo_answer ?? report.geo_direct_answer ?? ''
-  const summary     = report.simple_summary?.text ?? ''
-  const targetQ     = report.seo_signals?.targetQuestion ?? `What does Vedic astrology say about ${report.domain_label}?`
+  const geoAnswer    = report.geo_answer ?? ''
+  const ss           = report.simple_summary as Record<string, unknown> | null
+  const summaryText  = (ss?.text as string) ?? ''
+  const seoSig       = report.seo_signals as Record<string, unknown> | null
+  const targetQ      = (seoSig?.targetQuestion as string) ?? `What does Vedic astrology say about ${report.domain_label}?`
+  const primaryKw    = (seoSig?.primaryKeywords as string[]) ?? []
+  const transKw      = (seoSig?.transactionalKeywords as string[]) ?? []
 
-  // Article Schema
   const articleSchema = {
-    '@context':       'https://schema.org',
-    '@type':          'Article',
-    headline:         meta.title,
-    description:      meta.description,
+    '@context':  'https://schema.org',
+    '@type':     'Article',
+    headline:    meta.title,
+    description: meta.description,
     url,
     datePublished,
-    dateModified:     datePublished,
-    inLanguage:       'en-IN',
+    dateModified: datePublished,
+    inLanguage:  'en-IN',
     author: {
-      '@type': 'Person',
-      name:    'Rohiit Gupta',
-      jobTitle:'Chief Vedic Architect',
-      url:     'https://trikalvaani.com/founder',
-      sameAs:  ['https://trikalvaani.com/founder'],
+      '@type':   'Person',
+      name:      'Rohiit Gupta',
+      jobTitle:  'Chief Vedic Architect',
+      url:       'https://trikalvaani.com/founder',
     },
     publisher: {
       '@type': 'Organization',
       name:    'Trikal Vaani',
       url:     'https://trikalvaani.com',
-      logo: {
-        '@type': 'ImageObject',
-        url:     'https://trikalvaani.com/images/founder.png',
-      },
+      logo: { '@type': 'ImageObject', url: 'https://trikalvaani.com/images/founder.png' },
     },
     mainEntityOfPage: { '@type': 'WebPage', '@id': url },
-    about: {
-      '@type': 'Thing',
-      name:    `${report.domain_label} Vedic Astrology Analysis`,
-    },
-    mentions: [
-      { '@type': 'Thing', name: 'Vedic Astrology' },
-      { '@type': 'Thing', name: 'Swiss Ephemeris' },
-      { '@type': 'Thing', name: 'Brihat Parashara Hora Shastra' },
-      { '@type': 'Thing', name: report.mahadasha + ' Mahadasha' },
-    ],
-    keywords: [
-      ...(report.seo_signals?.primaryKeywords ?? []),
-      ...(report.seo_signals?.transactionalKeywords ?? []),
-      'vedic astrology', 'kundali', 'jyotish', 'trikal vaani',
-    ].join(', '),
+    keywords: [...primaryKw, ...transKw, 'vedic astrology', 'kundali', 'jyotish', 'trikal vaani'].join(', '),
   }
 
-  // FAQ Schema — from geoDirectAnswer + targetQuestion
   const faqSchema = {
     '@context': 'https://schema.org',
     '@type':    'FAQPage',
@@ -173,7 +183,7 @@ function buildSchema(report: any, slug: string, meta: ReturnType<typeof generate
         name:    targetQ,
         acceptedAnswer: {
           '@type': 'Answer',
-          text:    geoAnswer || summary.slice(0, 300),
+          text:    geoAnswer || summaryText.slice(0, 300),
         },
       },
       {
@@ -181,49 +191,30 @@ function buildSchema(report: any, slug: string, meta: ReturnType<typeof generate
         name:    `What is ${report.mahadasha} Mahadasha effect on ${report.domain_label}?`,
         acceptedAnswer: {
           '@type': 'Answer',
-          text:    `According to Vedic astrology (BPHS), ${report.mahadasha} Mahadasha combined with ${report.antardasha} Antardasha creates specific planetary influences on ${report.domain_label}. This analysis by Rohiit Gupta at Trikal Vaani uses Swiss Ephemeris for precise calculations.`,
-        },
-      },
-      {
-        '@type': 'Question',
-        name:    `How accurate is Vedic astrology for ${report.domain_label} prediction?`,
-        acceptedAnswer: {
-          '@type': 'Answer',
-          text:    'Trikal Vaani uses Swiss Ephemeris — the same engine used by professional astrologers worldwide — combined with Brihat Parashara Hora Shastra (BPHS) classical rules for maximum accuracy.',
+          text:    `According to Vedic astrology (BPHS), ${report.mahadasha} Mahadasha combined with ${report.antardasha} Antardasha creates specific planetary influences on ${report.domain_label}. Analyzed by Rohiit Gupta at Trikal Vaani using Swiss Ephemeris.`,
         },
       },
     ],
   }
 
-  // BreadcrumbList Schema
   const breadcrumbSchema = {
     '@context': 'https://schema.org',
     '@type':    'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Home',          item: 'https://trikalvaani.com' },
-      { '@type': 'ListItem', position: 2, name: 'Reports',       item: 'https://trikalvaani.com/report' },
+      { '@type': 'ListItem', position: 1, name: 'Home',    item: 'https://trikalvaani.com' },
+      { '@type': 'ListItem', position: 2, name: 'Reports', item: 'https://trikalvaani.com/report' },
       { '@type': 'ListItem', position: 3, name: report.domain_label, item: url },
     ],
   }
 
-  // Person Schema — Rohiit Gupta authority
   const personSchema = {
-    '@context':  'https://schema.org',
-    '@type':     'Person',
-    name:        'Rohiit Gupta',
-    jobTitle:    'Chief Vedic Architect',
-    description: 'Vedic Astrologer and founder of Trikal Vaani — AI-powered Vedic Astrology platform. Expert in Brihat Parashara Hora Shastra, Swiss Ephemeris, and Bhrigu Nandi Nadi.',
-    url:         'https://trikalvaani.com/founder',
-    worksFor: {
-      '@type': 'Organization',
-      name:    'Trikal Vaani',
-      url:     'https://trikalvaani.com',
-    },
-    address: {
-      '@type':           'PostalAddress',
-      addressLocality:   'Delhi NCR',
-      addressCountry:    'IN',
-    },
+    '@context': 'https://schema.org',
+    '@type':    'Person',
+    name:       'Rohiit Gupta',
+    jobTitle:   'Chief Vedic Architect',
+    url:        'https://trikalvaani.com/founder',
+    worksFor: { '@type': 'Organization', name: 'Trikal Vaani', url: 'https://trikalvaani.com' },
+    address:  { '@type': 'PostalAddress', addressLocality: 'Delhi NCR', addressCountry: 'IN' },
     knowsAbout: ['Vedic Astrology', 'Jyotish', 'BPHS', 'Swiss Ephemeris', 'Bhrigu Nandi Nadi'],
   }
 
@@ -235,26 +226,25 @@ function buildSchema(report: any, slug: string, meta: ReturnType<typeof generate
 export default async function ReportPage(
   { params }: { params: { slug: string } }
 ) {
-  // Validate slug format
   if (!isValidSlug(params.slug)) notFound()
 
   const report = await getReport(params.slug)
   if (!report) notFound()
 
+  const geoAnswer = report.geo_answer ?? ''
   const meta = generateSeoMeta(
     params.slug,
     report.domain_id,
     report.mahadasha,
     report.antardasha,
     report.birth_city ?? 'India',
-    report.geo_answer ?? report.geo_direct_answer,
+    geoAnswer,
   )
 
-  const schemas = buildSchema(report, params.slug, meta)
+  const schemas = buildSchema(report, meta)
 
   return (
     <>
-      {/* JSON-LD Schema injection */}
       {schemas.map((schema, i) => (
         <script
           key={i}
@@ -262,10 +252,8 @@ export default async function ReportPage(
           dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
         />
       ))}
-
-      {/* Public report UI */}
       <ReportPublicClient
-        report={report}
+        report={report as unknown as Record<string, unknown>}
         slug={params.slug}
         meta={meta}
       />
@@ -273,5 +261,4 @@ export default async function ReportPage(
   )
 }
 
-// ── ISR — revalidate every 24 hours ──────────────────────────────────────────
 export const revalidate = 86400
