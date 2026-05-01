@@ -409,9 +409,10 @@ export async function POST(req: NextRequest) {
       person2City:  userContext.person2City,
     };
 
-    const { systemPrompt, userMessage } = buildPredictionPrompt(
-      kundali, localBirthData, domain, verifiedUserContext,
-    );
+    const promptContext = { ...verifiedUserContext, tier: 'basic' as UserTier };
+const { systemPrompt, userMessage } = buildPredictionPrompt(
+  kundali, localBirthData, domain, promptContext,
+);
 
     // useSearch forced OFF — JSON mode always ON
     // googleSearch grounding + responseMimeType:json = Gemini 400
