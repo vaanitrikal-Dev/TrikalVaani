@@ -410,8 +410,8 @@ export async function POST(req: NextRequest) {
     };
 
     const { systemPrompt, userMessage } = buildPredictionPrompt(
-      kundali, localBirthData, domain, verifiedUserContext,
-    );
+  kundali, localBirthData, domain, { ...verifiedUserContext, tier: 'basic' as UserTier },
+);
 
     // useSearch forced OFF — JSON mode always ON
     // googleSearch grounding + responseMimeType:json = Gemini 400
