@@ -574,12 +574,17 @@ export default function BirthForm({
       if (onSubmit) await onSubmit(fields)
 
       const predictionId: string | null = data?._meta?.predictionId ?? null
-      if (predictionId) {
-        router.push(`/result/${predictionId}`)
-      } else {
-        setApiError('Prediction ready hai par save nahi hua. Please retry karo.')
-        stopLoadingMessages()
-        console.error('[BirthForm] predictionId missing:', data?._meta)
+const publicSlug:   string | null = data?._meta?.publicSlug   ?? null
+
+if (publicSlug) {
+  router.push(`/report/${publicSlug}`)
+} else if (predictionId) {
+  router.push(`/result/${predictionId}`)
+} else {
+  setApiError('Prediction ready hai par save nahi hua. Please retry karo.')
+  stopLoadingMessages()
+  console.error('[BirthForm] predictionId missing:', data?._meta)
+}
       }
 
     } catch (err) {
