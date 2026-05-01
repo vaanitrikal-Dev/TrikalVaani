@@ -585,7 +585,6 @@ if (publicSlug) {
   stopLoadingMessages()
   console.error('[BirthForm] predictionId missing:', data?._meta)
 }
-      }
 
     } catch (err) {
       setApiError('Network error. Please check your connection.')
