@@ -50,7 +50,7 @@ const EPHE_API_URL   = process.env.EPHE_API_URL ?? '';
 const EPHE_API_KEY   = process.env.EPHE_API_KEY ?? '';
 
 const MAX_TOKENS: Record<UserTier, number> = {
-  free: 4096, basic: 8192, pro: 8192, premium: 8192,
+  free: 4096, basic: 8192, standard: 8192, premium: 8192,
 };
 
 const supabase = createClient(
