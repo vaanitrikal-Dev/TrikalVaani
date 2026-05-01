@@ -427,7 +427,6 @@ export async function POST(req: NextRequest) {
         topP:             0.85,
         responseMimeType: 'application/json',
       },
-      thinkingConfig: { thinkingBudget: 0 },
     };
     console.log(`[TV-Predict] Gemini call — model:${GEMINI_MODEL} tokens:${MAX_TOKENS[verifiedTier]}`);
 
