@@ -341,7 +341,7 @@ export async function POST(req: NextRequest) {
     if (!GEMINI_API_KEY) return NextResponse.json({ error: 'Prediction engine not configured' }, { status: 500 });
     if (!EPHE_API_URL)   return NextResponse.json({ error: 'Ephemeris API not configured' },     { status: 500 });
 
-    const verifiedTier: UserTier = 'basic'; // TEMP: bypass for testing
+    const verifiedTier: UserTier = 'premium'; // TEMP: bypass for testing
     let domain;
     try { domain = getDomainConfig(domainId); }
     catch { return NextResponse.json({ error: `Unknown domainId: ${domainId}` }, { status: 400 }); }
@@ -409,10 +409,9 @@ export async function POST(req: NextRequest) {
       person2City:  userContext.person2City,
     };
 
-    const promptContext = { ...verifiedUserContext, tier: 'basic' as UserTier };
-const { systemPrompt, userMessage } = buildPredictionPrompt(
-  kundali, localBirthData, domain, promptContext,
-);
+    const { systemPrompt, userMessage } = buildPredictionPrompt(
+      kundali, localBirthData, domain, verifiedUserContext,
+    );
 
     // useSearch forced OFF — JSON mode always ON
     // googleSearch grounding + responseMimeType:json = Gemini 400
@@ -428,6 +427,7 @@ const { systemPrompt, userMessage } = buildPredictionPrompt(
         topP:             0.85,
         responseMimeType: 'application/json',
       },
+      thinkingConfig: { thinkingBudget: 0 },
     };
     console.log(`[TV-Predict] Gemini call — model:${GEMINI_MODEL} tokens:${MAX_TOKENS[verifiedTier]}`);
 
