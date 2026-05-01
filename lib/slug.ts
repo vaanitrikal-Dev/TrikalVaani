@@ -146,3 +146,4 @@ export function isValidSlug(slug: string): boolean {
   // Min 10 chars, max 80 chars
   return /^[a-z0-9-]{10,80}$/.test(slug)
 }
+
