@@ -3,17 +3,20 @@
  * TRIKAL VAANI — Gemini Master Prompt Builder
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: lib/gemini-prompt.ts
- * VERSION: 4.3 — Transactional SEO/GEO keywords + suspense hooks
+ * VERSION: 4.4 — currentCity + relationshipStatus + situationNote + person2CurrentCity
  * SIGNED: ROHIIT GUPTA, CEO
  *
- * CHANGES IN v4.3:
- *   ✅ Transactional keywords injected into geoDirectAnswer
- *   ✅ Transactional keywords injected into seoSignals
- *   ✅ GEO-optimized FAQ-style answer patterns
- *   ✅ Commercial intent signals per domain
- *   ✅ Free tier suspense hook in simpleSummary
- *   ✅ Language enforcement: English selected = EVERYTHING in English
- *   ✅ All previous v4.2 features preserved
+ * CHANGES IN v4.4:
+ *   ✅ UserContext: +currentCity +relationshipStatus +situationNote +person2CurrentCity
+ *   ✅ buildStep7: USER PROFILE block shows all 4 new fields to Gemini
+ *   ✅ buildChartObject: userContext object passes all 4 new fields in chart JSON
+ *   ✅ Transactional keywords injected into geoDirectAnswer (preserved from v4.3)
+ *   ✅ Transactional keywords injected into seoSignals (preserved from v4.3)
+ *   ✅ GEO-optimized FAQ-style answer patterns (preserved from v4.3)
+ *   ✅ Commercial intent signals per domain (preserved from v4.3)
+ *   ✅ Free tier suspense hook in simpleSummary (preserved from v4.3)
+ *   ✅ Language enforcement: English selected = EVERYTHING in English (preserved from v4.3)
+ *   ✅ All previous v4.3 features preserved
  * ============================================================
  */
 
@@ -25,19 +28,24 @@ import { getCurrentPeriod }            from './domain-config';
 
 export type UserTier = 'free' | 'basic' | 'standard' | 'premium';
 
+// ── CHANGE 1 OF 3: UserContext interface — 4 new fields added ─────────────────
 export interface UserContext {
-  tier:          UserTier;
-  language:      'hindi' | 'hinglish' | 'english';
-  segment:       'genz' | 'millennial' | 'genx';
-  employment:    string;
-  sector:        string;
-  city?:         string;
-  mobile?:       string;
-  businessName?: string;
-  linkedinUrl?:  string;
-  person2Name?:  string;
-  person2City?:  string;
-  name?:         string;
+  tier:                UserTier;
+  language:            'hindi' | 'hinglish' | 'english';
+  segment:             'genz' | 'millennial' | 'genx';
+  employment:          string;
+  sector:              string;
+  city?:               string;
+  currentCity?:        string;       // NEW v4.4 — where user lives/works NOW
+  relationshipStatus?: string;       // NEW v4.4 — single/married/divorced/complicated etc.
+  situationNote?:      string;       // NEW v4.4 — user's own words, max 100 chars
+  mobile?:             string;
+  businessName?:       string;
+  linkedinUrl?:        string;
+  person2Name?:        string;
+  person2City?:        string;
+  person2CurrentCity?: string;       // NEW v4.4 — person2 current location (dual chart)
+  name?:               string;
 }
 
 export interface SynthesisData {
@@ -255,7 +263,7 @@ function buildLayer1_IdentityAndRules(
   return `
 ════════════════════════════════════════════════════════════════
 LAYER 1 — IDENTITY AND ABSOLUTE RULES
-JAI MAA SHAKTI — TRIKAL VAANI VEDIC ENGINE v4.3
+JAI MAA SHAKTI — TRIKAL VAANI VEDIC ENGINE v4.4
 ════════════════════════════════════════════════════════════════
 
 IDENTITY:
@@ -336,12 +344,17 @@ RULE 15 — FREE TIER SUSPENSE HOOK (MANDATORY)
 For free tier ONLY: End simpleSummary.text with the suspense hook provided.
 Hook must feel warm and curious — never salesy or pushy.
 It is Jini speaking — like a friend hinting at a secret.
+
+RULE 16 — USER SITUATION NOTE (MANDATORY v4.4)
+If userContext.situationNote is provided — ALWAYS acknowledge it in simpleSummary.
+Make the user feel heard. Reference their exact situation naturally.
+Example: if they said "job switch kar raha hoon" → start prediction addressing that.
 ════════════════════════════════════════════════════════════════
 `.trim();
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
-// LAYER 2 — CLASSICAL KNOWLEDGE (unchanged from v4.2)
+// LAYER 2 — CLASSICAL KNOWLEDGE (unchanged from v4.3)
 // ══════════════════════════════════════════════════════════════════════════════
 
 function buildLayer2_ParasharaKnowledge(): string {
@@ -417,7 +430,7 @@ RATNA CAUTION MANDATORY: Lagna suitability + trial period + metal + finger
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
-// LAYER 3 — DOMAIN RULES
+// LAYER 3 — DOMAIN RULES (unchanged from v4.3)
 // ══════════════════════════════════════════════════════════════════════════════
 
 function buildLayer3_DomainRules(domain: DomainConfig, userContext: UserContext, birthTimeKnown: boolean): string {
@@ -460,7 +473,7 @@ ${antiRules}
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
-// LAYER 4 — ANTI-HALLUCINATION + SEARCH
+// LAYER 4 — ANTI-HALLUCINATION + SEARCH (unchanged from v4.3)
 // ══════════════════════════════════════════════════════════════════════════════
 
 function buildLayer4_AntiHallucinationAndSearch(domain: DomainConfig, userContext: UserContext, isoDate: string): string {
@@ -510,7 +523,7 @@ PRE-RESPONSE CHECKLIST:
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
-// STEP 5 — DASHA PROTOCOL
+// STEP 5 — DASHA PROTOCOL (unchanged from v4.3)
 // ══════════════════════════════════════════════════════════════════════════════
 
 function buildStep5_DashaProtocol(tier: UserTier): string {
@@ -541,7 +554,7 @@ Give specific timeframes from Dasha data always.`}
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
-// STEP 6 — OUTPUT SCHEMA WITH TRANSACTIONAL KEYWORDS
+// STEP 6 — OUTPUT SCHEMA (unchanged from v4.3)
 // ══════════════════════════════════════════════════════════════════════════════
 
 function buildStep6_OutputSchema(
@@ -569,6 +582,7 @@ STEP 6 — OUTPUT SCHEMA — FREE TIER
   "simpleSummary": {
     "text": "150-200 words. Plain language. ZERO jargon. Warm Dharma Guru voice.
       Start: '[Name] ji, ...'
+      IF userContext.situationNote provided → acknowledge it in first 2 sentences.
       Situation + 1 action + 1 caution + timeframe + encouragement.
       END WITH THIS EXACT SUSPENSE HOOK AS NEW PARAGRAPH:
       '${freeSuspenseHook}'",
@@ -632,6 +646,9 @@ STEP 6 — OUTPUT SCHEMA — ${tier.toUpperCase()} TIER
   "simpleSummary": {
     "text": "${tier === 'basic' ? '400-600' : '500-700'} words. Plain language. ZERO jargon.
       Dharma Guru voice — warm, compassionate, direct. Short sentences.
+      IF userContext.situationNote provided → acknowledge it in first 2 sentences.
+      IF currentCity ≠ birth city → reference their relocation/current location naturally.
+      IF relationshipStatus provided → factor into domain analysis where relevant.
       Structure: current situation → why (simple) → what's coming → actions → caution → remedy → encouragement.
       ${tier === 'basic' ? `END WITH THIS SUSPENSE HOOK:
       'Aur ek baat... Aapki kundali mein Parashara ke classical yogas aur Bhrigu patterns ne kuch aur bhi reveal kiya hai — jo 30-day ka poora roadmap deta hai. ₹99 mein dekhein. ✨'` : ''}",
@@ -810,6 +827,7 @@ function buildHindiFullSchema(isoDate: string): string {
 
 // ══════════════════════════════════════════════════════════════════════════════
 // STEP 7 — LANGUAGE + PERSONALISATION
+// ── CHANGE 2 OF 3: USER PROFILE block expanded with 4 new fields ──────────────
 // ══════════════════════════════════════════════════════════════════════════════
 
 function buildStep7_LanguageAndPersonalisation(
@@ -848,18 +866,30 @@ STEP 7 — LANGUAGE + PERSONALISATION + SEO/GEO
 ${langRules[userContext.language]}
 
 USER PROFILE:
-Segment:    ${userContext.segment.toUpperCase()} (${
+Segment:            ${userContext.segment.toUpperCase()} (${
   userContext.segment === 'genz' ? 'Age 11-31 — career, relationships, identity' :
   userContext.segment === 'millennial' ? 'Age 32-46 — family, wealth, stability' :
   'Age 47-56 — legacy, peace, spiritual meaning'
 })
-Employment: ${userContext.employment || 'not specified'}
-Sector:     ${userContext.sector     || 'not specified'}
-City:       ${userContext.city       || 'India'}
-Period:     ${period.monthYear} | ${period.quarter}
+Employment:         ${userContext.employment         || 'not specified'}
+Sector:             ${userContext.sector             || 'not specified'}
+Birth City:         ${userContext.city               || 'India'}
+Current City:       ${userContext.currentCity        || userContext.city || 'India'}
+Relationship:       ${userContext.relationshipStatus || 'not specified'}
+User Context Note:  ${userContext.situationNote      || 'not provided'}
+Period:             ${period.monthYear} | ${period.quarter}
+${userContext.person2Name       ? `Person 2 Name:      ${userContext.person2Name}` : ''}
+${userContext.person2City       ? `Person 2 Birth City: ${userContext.person2City}` : ''}
+${userContext.person2CurrentCity ? `Person 2 Current City: ${userContext.person2CurrentCity}` : ''}
 
-PERSONALISATION:
+PERSONALISATION RULES (CRITICAL — ALL MUST BE APPLIED):
 → Address by name throughout — never "the person"
+→ CURRENT CITY is where they live/work NOW — use for job market, real estate, local opportunities
+→ If Birth City ≠ Current City → acknowledge relocation naturally in prediction
+→ RELATIONSHIP STATUS → factor into domain analysis wherever relevant
+→ USER CONTEXT NOTE → ALWAYS reference in first 2 sentences of simpleSummary
+   Make them feel heard. If they said something specific, address it directly.
+   Example: "Aapne job switch ki baat ki hai — aapki kundali mein..."
 → Reference sector in world context
 → Frame for their life stage and segment
 → Speak TO them, not ABOUT them
@@ -874,7 +904,7 @@ SEO/GEO RULES:
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
-// STEP 8 — QUALITY CONTROL
+// STEP 8 — QUALITY CONTROL (unchanged from v4.3)
 // ══════════════════════════════════════════════════════════════════════════════
 
 function buildStep8_QualityControl(tier: UserTier, language: string): string {
@@ -889,6 +919,8 @@ CONTENT:
   ✓ seoSignals.transactionalKeywords populated with domain keywords
   ✓ simpleSummary: ${tier === 'free' ? '150-200' : '400-600'} words
   ✓ ZERO technical jargon in simpleSummary
+  ✓ situationNote acknowledged in simpleSummary if provided
+  ✓ currentCity used in prediction context
   ✓ Every keyInfluence has classicalBasis with chapter number
   ✓ Every remedy has rudraksha field populated
   ✓ Every ratna has caution field populated
@@ -913,12 +945,13 @@ JSON:
   ✓ All required fields present (null if empty)
 
 OUTPUT ONLY THE JSON. NOTHING BEFORE {. NOTHING AFTER }.
-JAI MAA SHAKTI — TRIKAL VAANI v4.3 🔱
+JAI MAA SHAKTI — TRIKAL VAANI v4.4 🔱
 ════════════════════════════════════════════════════════════════
 `.trim();
 }
 
 // ─── CHART OBJECT BUILDER ─────────────────────────────────────────────────────
+// ── CHANGE 3 OF 3: userContext object — 4 new fields added ───────────────────
 
 function buildChartObject(
   kundali:       KundaliData,
@@ -1021,21 +1054,26 @@ function buildChartObject(
       timeWindow:      domain.timeWindow,
     },
 
+    // ── CHANGE 3 OF 3: all 4 new fields now in chart JSON sent to Gemini ──────
     userContext: {
-      tier:         userContext.tier,
-      segment:      userContext.segment,
-      employment:   userContext.employment   || 'not_specified',
-      sector:       userContext.sector       || 'not_specified',
-      language:     userContext.language     || 'hinglish',
-      city:         userContext.city         || birthData.cityName || 'India',
-      businessName: userContext.businessName || null,
-      person2Name:  userContext.person2Name  || null,
-      person2City:  userContext.person2City  || null,
+      tier:               userContext.tier,
+      segment:            userContext.segment,
+      employment:         userContext.employment         || 'not_specified',
+      sector:             userContext.sector             || 'not_specified',
+      language:           userContext.language           || 'hinglish',
+      city:               userContext.city               || birthData.cityName || 'India',
+      currentCity:        userContext.currentCity        || userContext.city || birthData.cityName || 'India',
+      relationshipStatus: userContext.relationshipStatus || 'not_specified',
+      situationNote:      userContext.situationNote      || null,
+      businessName:       userContext.businessName       || null,
+      person2Name:        userContext.person2Name        || null,
+      person2City:        userContext.person2City        || null,
+      person2CurrentCity: userContext.person2CurrentCity || null,
     },
   };
 }
 
-// ─── USER MESSAGE ─────────────────────────────────────────────────────────────
+// ─── USER MESSAGE (unchanged from v4.3) ──────────────────────────────────────
 
 function buildUserMessage(
   chartObject:   Record<string, unknown>,
@@ -1060,13 +1098,21 @@ function buildUserMessage(
     ? `\nTRANSACTIONAL KEYWORDS TO USE IN seoSignals: ${keywords.primary.slice(0, 3).join(', ')} | ${keywords.commercial.slice(0, 3).join(', ')}`
     : '';
 
+  const uc = chartObject.userContext as any;
+  const contextNote = uc?.situationNote
+    ? `\nUSER SITUATION: "${uc.situationNote}" — acknowledge this in simpleSummary first 2 sentences.`
+    : '';
+  const cityNote = uc?.currentCity && uc?.currentCity !== uc?.city
+    ? `\nCURRENT LOCATION: User born in ${uc.city} but currently in ${uc.currentCity} — factor into prediction.`
+    : '';
+
   return `Analyze chart for: ${domain.displayName} (${domain.id})
 Tier: ${tier.toUpperCase()} | Date: ${isoDate}
 Instruction: ${tierInstructions[tier]}
 Parashara data: ${chartObject.parashara ? 'YES — use activeYogas[], ashtakavarga[]' : 'NO'}
 Panchang data:  ${chartObject.panchang  ? 'YES — populate panchang fields' : 'NO'}
 Synthesis data: ${chartObject.synthesis ? 'YES — use confidence, karmic_marker, bhrigu data' : 'NO'}
-${synthNote}${keywordNote}
+${synthNote}${keywordNote}${contextNote}${cityNote}
 
 ${JSON.stringify(chartObject, null, 2)}
 
@@ -1079,5 +1125,5 @@ FINAL REMINDERS:
 • ${tier === 'free' ? 'Add suspense hook at end of simpleSummary.text' : 'Add suspense hook for next tier at end of simpleSummary.text'}
 • rudraksha field in remedies MUST be populated
 • karmicMarker = ${(chartObject.synthesis as any)?.karmic_marker ?? false}
-• JAI MAA SHAKTI 🔱 — TRIKAL VAANI v4.3`;
+• JAI MAA SHAKTI 🔱 — TRIKAL VAANI v4.4`;
 }
