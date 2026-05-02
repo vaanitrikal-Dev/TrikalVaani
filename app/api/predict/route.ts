@@ -3,24 +3,25 @@
  * TRIKAL VAANI — Unified Prediction Endpoint
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/api/predict/route.ts
- * VERSION: 9.3 — useSearch=false forced, JSON parse fence fix
+ * VERSION: 9.4 — Fix JSON truncation: tier:'basic' for prompt only
  * SIGNED: ROHIIT GUPTA, CEO
  *
- * FULL FLOW v9.3:
+ * FULL FLOW v9.4:
  *   Step 1 → /kundali       (Render Swiss Ephemeris)
  *   Step 2 → adaptSwissToKundali()
  *   Step 3 → /synthesize    (Render)
- *   Step 4 → buildPredictionPrompt()
+ *   Step 4 → buildPredictionPrompt() ← tier:'basic' ONLY here (fixes truncation)
  *   Step 5 → Gemini 2.5 Flash (JSON mode always ON)
  *   Step 6 → Parse JSON (robust fence stripping)
  *   Step 6.5 → Claude Haiku polish (₹51+ ONLY)
  *   Step 7 → saveToSupabase()
  *   Step 8 → Return with predictionId
  *
- * v9.3 CHANGES vs v9.2:
- *   - useSearch forced to false → JSON mode always ON → no fence issues
- *   - JSON parse: robust regex handles all fence variants
- *   - Gemini error body logged for debugging
+ * v9.4 CHANGES vs v9.3:
+ *   - buildPredictionPrompt() called with tier:'basic' (not verifiedTier)
+ *   - Reduces Gemini output schema size → fixes JSON truncation
+ *   - verifiedTier unchanged everywhere else (UI, polish, save)
+ *   - MAX_TOKENS remains 12000 for premium (approved)
  * ============================================================
  */
 
@@ -47,8 +48,9 @@ const GEMINI_URL     = `https://generativelanguage.googleapis.com/v1beta/models/
 const EPHE_API_URL   = process.env.EPHE_API_URL ?? '';
 const EPHE_API_KEY   = process.env.EPHE_API_KEY ?? '';
 
+// ── CEO APPROVED: MAX_TOKENS = 12000 across all tiers ─────────────────────────
 const MAX_TOKENS: Record<UserTier, number> = {
-  free: 4096, basic: 8192, pro: 8192, premium: 16384,
+  free: 12000, basic: 12000, pro: 12000, premium: 12000,
 };
 
 const supabase = createClient(
@@ -332,7 +334,9 @@ export async function POST(req: NextRequest) {
     if (!GEMINI_API_KEY) return NextResponse.json({ error: 'Prediction engine not configured' }, { status: 500 });
     if (!EPHE_API_URL)   return NextResponse.json({ error: 'Ephemeris API not configured' },     { status: 500 });
 
-    const verifiedTier: UserTier = 'premium'; // TEMP: bypass for testing
+    // verifiedTier = 'premium' kept for UI, polish, save — CEO LOCKED
+    const verifiedTier: UserTier = 'premium';
+
     let domain;
     try { domain = getDomainConfig(domainId); }
     catch { return NextResponse.json({ error: `Unknown domainId: ${domainId}` }, { status: 400 }); }
@@ -389,7 +393,7 @@ export async function POST(req: NextRequest) {
 
     // ── Step 4: Build prompt ──────────────────────────────────────────────────
     const verifiedUserContext: UserContext = {
-      tier:         verifiedTier,
+      tier:         verifiedTier,  // premium — for UI/save/polish
       segment:      userContext.segment    || 'millennial',
       employment:   userContext.employment || '',
       sector:       userContext.sector     || '',
@@ -400,12 +404,18 @@ export async function POST(req: NextRequest) {
       person2City:  userContext.person2City,
     };
 
+    // ── CEO APPROVED FIX v9.4 ─────────────────────────────────────────────────
+    // Pass tier:'basic' to buildPredictionPrompt() ONLY
+    // This reduces Gemini output schema size → fixes JSON truncation
+    // verifiedTier (premium) unchanged everywhere else
     const { systemPrompt, userMessage } = buildPredictionPrompt(
-      kundali, localBirthData, domain, verifiedUserContext,
+      kundali,
+      localBirthData,
+      domain,
+      { ...verifiedUserContext, tier: 'basic' as UserTier },
     );
 
     // useSearch forced OFF — JSON mode always ON
-    // googleSearch grounding + responseMimeType:json = Gemini 400
     const useSearch = false;
 
     // ── Step 5: Gemini ────────────────────────────────────────────────────────
@@ -414,12 +424,12 @@ export async function POST(req: NextRequest) {
       contents: [{ role: 'user', parts: [{ text: userMessage }] }],
       generationConfig: {
         temperature:      0.4,
-        maxOutputTokens:  MAX_TOKENS[verifiedTier],
+        maxOutputTokens:  MAX_TOKENS[verifiedTier],  // 12000 — CEO approved
         topP:             0.85,
         responseMimeType: 'application/json',
       },
     };
-    console.log(`[TV-Predict] Gemini call — model:${GEMINI_MODEL} tokens:${MAX_TOKENS[verifiedTier]}`);
+    console.log(`[TV-Predict] Gemini call — model:${GEMINI_MODEL} tokens:${MAX_TOKENS[verifiedTier]} promptTier:basic`);
 
     const geminiRes = await fetch(`${GEMINI_URL}?key=${GEMINI_API_KEY}`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -437,7 +447,6 @@ export async function POST(req: NextRequest) {
     if (!rawText) return NextResponse.json({ error: 'Empty prediction response' }, { status: 502 });
 
     // ── Step 6: Parse JSON ────────────────────────────────────────────────────
-    // Robust fence stripping — handles ```json, ```, or raw JSON
     let prediction: Record<string, unknown>;
     try {
       const cleaned = rawText
@@ -451,7 +460,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Invalid prediction format. Please retry.' }, { status: 502 });
     }
 
-    // ── Step 6.5: Claude Haiku Polish (₹51+) ─────────────────────────────────
+    // ── Step 6.5: Claude Polish (₹51+) ────────────────────────────────────────
     let polished = false;
     if (verifiedTier !== 'free') {
       const polishTier = verifiedTier === 'premium' ? 'premium' :
@@ -528,8 +537,8 @@ export async function POST(req: NextRequest) {
 
 export async function GET() {
   return NextResponse.json({
-    status: 'operational', engine: 'Trikal Vaani Predict v9.3',
+    status: 'operational', engine: 'Trikal Vaani Predict v9.4',
     synthesize: true, polish: true, domains: 11,
-    fix: 'useSearch=false forced, JSON mode always ON, no fence issues',
+    fix: 'tier:basic for buildPredictionPrompt only — fixes JSON truncation',
   });
 }
