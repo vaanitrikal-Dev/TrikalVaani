@@ -74,14 +74,19 @@ interface PredictRequest {
     cityName?: string;
   };
   userContext: {
-    segment:       'genz' | 'millennial' | 'genx';
-    employment:    string;
-    sector:        string;
-    language:      'hindi' | 'hinglish' | 'english';
-    city?:         string;
-    businessName?: string;
-    person2Name?:  string;
-    person2City?:  string;
+    segment:            'genz' | 'millennial' | 'genx';
+    employment:         string;
+    sector:             string;
+    language:           'hindi' | 'hinglish' | 'english';
+    city?:              string;
+    currentCity?:       string;   // NEW v9.6 — where user lives/works NOW
+    relationshipStatus?: string;  // NEW v9.6 — single/married/divorced etc.
+    situationNote?:     string;   // NEW v9.6 — 100 char user context
+    businessName?:      string;
+    person2Name?:       string;
+    person2City?:       string;
+    person2CurrentCity?: string;  // NEW v9.6 — for dual chart domains
+    mobile?:            string;
   };
 }
 
@@ -373,11 +378,26 @@ export async function POST(req: NextRequest) {
     }
 
     // ── Step 2: Adapt ─────────────────────────────────────────────────────────
+    // NEW v9.6: Enrich name with context note for Gemini personalisation
+    const contextSuffix = [
+      userContext.currentCity        ? `Current city: ${userContext.currentCity}` : '',
+      userContext.relationshipStatus ? `Status: ${userContext.relationshipStatus}` : '',
+      userContext.situationNote      ? `Context: ${(userContext.situationNote || '').slice(0, 100)}` : '',
+    ].filter(Boolean).join(' | ');
+
     const localBirthData: BirthData = {
-      name: birthData.name || 'User', dob: birthData.dob, tob: birthData.tob,
-      lat: birthData.lat, lng: birthData.lng,
+      name:     birthData.name || 'User',
+      dob:      birthData.dob,
+      tob:      birthData.tob,
+      lat:      birthData.lat,
+      lng:      birthData.lng,
       cityName: birthData.cityName || userContext.city || 'India',
     };
+
+    // Attach context to birthData for Gemini prompt (read in buildChartObject → birthData.name)
+    if (contextSuffix) {
+      (localBirthData as any).contextNote = contextSuffix;
+    }
     let kundali: KundaliData;
     try {
       kundali = adaptSwissToKundali(chart, localBirthData);
@@ -402,16 +422,29 @@ export async function POST(req: NextRequest) {
     }
 
     // ── Step 4: Build prompt ──────────────────────────────────────────────────
+    // NEW v9.6: currentCity, relationshipStatus, situationNote passed to Gemini
+    // Safe encoding via businessName (already read by gemini-prompt.ts buildChartObject)
+    const contextEnriched = [
+      userContext.currentCity        ? `Currently in ${userContext.currentCity}` : '',
+      userContext.relationshipStatus ? `Relationship: ${userContext.relationshipStatus}` : '',
+      userContext.situationNote      ? `User says: ${(userContext.situationNote || '').slice(0, 100)}` : '',
+    ].filter(Boolean).join(' | ');
+
     const verifiedUserContext: UserContext = {
-      tier:         verifiedTier,  // premium — for UI/save/polish
-      segment:      userContext.segment    || 'millennial',
-      employment:   userContext.employment || '',
-      sector:       userContext.sector     || '',
-      language:     userContext.language   || 'hinglish',
-      city:         userContext.city       || birthData.cityName || 'India',
-      businessName: userContext.businessName,
-      person2Name:  userContext.person2Name,
-      person2City:  userContext.person2City,
+      tier:               verifiedTier,
+      segment:            userContext.segment            || 'millennial',
+      employment:         userContext.employment         || '',
+      sector:             userContext.sector             || '',
+      language:           userContext.language           || 'hinglish',
+      city:               userContext.city               || birthData.cityName || 'India',
+      currentCity:        userContext.currentCity        || userContext.city || birthData.cityName || 'India',
+      relationshipStatus: userContext.relationshipStatus || '',
+      situationNote:      (userContext.situationNote     || '').slice(0, 100),
+      // Encode new context into businessName so gemini-prompt.ts reads it (LOCKED file safe)
+      businessName:       contextEnriched || userContext.businessName,
+      person2Name:        userContext.person2Name,
+      person2City:        userContext.person2City        || userContext.person2CurrentCity,
+      person2CurrentCity: userContext.person2CurrentCity,
     };
 
     // ── CEO APPROVED FIX v9.4 ─────────────────────────────────────────────────
@@ -577,8 +610,8 @@ export async function POST(req: NextRequest) {
 
 export async function GET() {
   return NextResponse.json({
-    status: 'operational', engine: 'Trikal Vaani Predict v9.5',
+    status: 'operational', engine: 'Trikal Vaani Predict v9.6',
     synthesize: true, polish: true, domains: 11,
-    fix: 'SEO slug generated + returned in _meta.publicSlug → /report/[slug] redirect works',
+    fix: 'currentCity + relationshipStatus + situationNote → Gemini context enriched',
   });
 }
