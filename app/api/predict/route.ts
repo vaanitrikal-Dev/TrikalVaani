@@ -3,10 +3,10 @@
  * TRIKAL VAANI — Unified Prediction Endpoint
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/api/predict/route.ts
- * VERSION: 9.4 — Fix JSON truncation: tier:'basic' for prompt only
+ * VERSION: 9.5 — SEO slug generated + returned in _meta.publicSlug
  * SIGNED: ROHIIT GUPTA, CEO
  *
- * FULL FLOW v9.4:
+ * FULL FLOW v9.5:
  *   Step 1 → /kundali       (Render Swiss Ephemeris)
  *   Step 2 → adaptSwissToKundali()
  *   Step 3 → /synthesize    (Render)
@@ -14,14 +14,15 @@
  *   Step 5 → Gemini 2.5 Flash (JSON mode always ON)
  *   Step 6 → Parse JSON (robust fence stripping)
  *   Step 6.5 → Claude Haiku polish (₹51+ ONLY)
- *   Step 7 → saveToSupabase()
- *   Step 8 → Return with predictionId
+ *   Step 7 → saveToSupabase() + generate SEO slug
+ *   Step 8 → Return with predictionId + publicSlug + reportUrl
  *
- * v9.4 CHANGES vs v9.3:
- *   - buildPredictionPrompt() called with tier:'basic' (not verifiedTier)
- *   - Reduces Gemini output schema size → fixes JSON truncation
- *   - verifiedTier unchanged everywhere else (UI, polish, save)
- *   - MAX_TOKENS remains 12000 for premium (approved)
+ * v9.5 CHANGES vs v9.4:
+ *   - generatePredictionSlug() called after save
+ *   - publicSlug saved to Supabase predictions table
+ *   - _meta now includes: publicSlug + reportUrl
+ *   - BirthForm redirect to /report/[slug] now works
+ *   - Slug format: career-rahu-saturn-delhi-2026-x7k2m
  * ============================================================
  */
 
@@ -30,6 +31,8 @@ import { createClient } from '@supabase/supabase-js';
 import { getDomainConfig } from '@/lib/domain-config';
 import { buildPredictionPrompt } from '@/lib/gemini-prompt';
 import { polishPrediction } from '@/lib/claude-polish';
+import { generatePredictionSlug, generateSeoMeta } from '@/lib/slug';
+import { notifyGoogleIndexing } from '@/lib/google-indexing';
 import {
   calcDasha,
   NAKSHATRA_LORDS,
@@ -244,6 +247,7 @@ async function saveToSupabase(p: {
   birthData: BirthData; userContext: UserContext; kundali: KundaliData;
   synthesis: any; prediction: Record<string, unknown>;
   tier: UserTier; processingMs: number; useSearch: boolean; polished: boolean;
+  publicSlug: string; seoTitle: string; seoDescription: string; geoAnswer: string;
 }): Promise<string | null> {
   try {
     const planetsWithShadbala = Object.values(p.kundali.planets).map(pl => ({
@@ -301,6 +305,12 @@ async function saveToSupabase(p: {
       gemini_model:   GEMINI_MODEL,
       search_used:    p.useSearch,
       processing_ms:  p.processingMs,
+      public_slug:    p.publicSlug,
+      is_public:      true,
+      is_indexed:     false,
+      seo_title:      p.seoTitle,
+      seo_description: p.seoDescription,
+      geo_answer:     p.geoAnswer,
     };
 
     const { data, error } = await supabase
@@ -483,8 +493,27 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // ── Step 7: Save ──────────────────────────────────────────────────────────
+    // ── Step 7: Generate SEO Slug + Save ─────────────────────────────────────
     const processingMs = Date.now() - startTime;
+
+    // Generate SEO slug BEFORE save so it's stored in Supabase
+    const publicSlug = generatePredictionSlug({
+      domainId,
+      mahadasha:  kundali.currentMahadasha.lord,
+      antardasha: kundali.currentAntardasha.lord,
+      city:       localBirthData.cityName || userContext.city || 'india',
+      year:       new Date().getFullYear(),
+    });
+
+    const geoAnswer = (prediction?.geoDirectAnswer as string) ?? '';
+    const seoMeta   = generateSeoMeta(
+      publicSlug, domainId,
+      kundali.currentMahadasha.lord,
+      kundali.currentAntardasha.lord,
+      localBirthData.cityName || 'India',
+      geoAnswer,
+    );
+
     const predictionId = await saveToSupabase({
       sessionId, userId, domainId,
       domainLabel:  domain.label ?? domainId,
@@ -492,7 +521,16 @@ export async function POST(req: NextRequest) {
       userContext:  verifiedUserContext,
       kundali, synthesis, prediction,
       tier: verifiedTier, processingMs, useSearch, polished,
+      publicSlug,
+      seoTitle:       seoMeta.title,
+      seoDescription: seoMeta.description,
+      geoAnswer,
     });
+
+    // Ping Google Indexing API (non-blocking, non-fatal)
+    if (predictionId && publicSlug) {
+      notifyGoogleIndexing(publicSlug).catch(() => {});
+    }
 
     // ── Step 8: Return ────────────────────────────────────────────────────────
     const planetsForResponse = Object.values(kundali.planets).map(pl => ({
@@ -508,6 +546,8 @@ export async function POST(req: NextRequest) {
         model:       GEMINI_MODEL,
         polished,    searchUsed: useSearch,
         processingMs, predictionId,
+        publicSlug,
+        reportUrl: `https://trikalvaani.com/report/${publicSlug}`,
         kundali: {
           lagna:         kundali.lagna,
           lagnaLord:     kundali.lagnaLord,
@@ -537,8 +577,8 @@ export async function POST(req: NextRequest) {
 
 export async function GET() {
   return NextResponse.json({
-    status: 'operational', engine: 'Trikal Vaani Predict v9.4',
+    status: 'operational', engine: 'Trikal Vaani Predict v9.5',
     synthesize: true, polish: true, domains: 11,
-    fix: 'tier:basic for buildPredictionPrompt only — fixes JSON truncation',
+    fix: 'SEO slug generated + returned in _meta.publicSlug → /report/[slug] redirect works',
   });
 }
