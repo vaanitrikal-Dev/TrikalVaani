@@ -3,15 +3,15 @@
  * TRIKAL VAANI — BirthForm Component
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: components/landing/BirthForm.tsx
- * VERSION: 6.0 — Dynamic country code + dark dropdowns + loading messages
+ * VERSION: 7.0 — currentCity + relationshipStatus + situationNote added
  * SIGNED: ROHIIT GUPTA, CEO
  *
- * v6.0 CHANGES vs v5.0:
- *   - +91 hardcode removed → dynamic country selector with flag + dial code
- *   - All <select> dropdowns: dark background fix (text now visible)
- *   - Loading messages: "Connecting with your energy..." sequence
- *   - Country auto-detects from place selection (lon-based)
- *   - Phone validation adapts to selected country digit count
+ * v7.0 CHANGES vs v6.0:
+ *   - currentCity field added (where user lives/works NOW)
+ *   - relationshipStatus field (shown for relationship/marriage domains)
+ *   - situationNote field (100 char max, optional, all domains)
+ *   - person2CurrentCity added for dual chart domains
+ *   - All new fields passed to /api/predict userContext
  * ============================================================
  */
 
@@ -23,31 +23,37 @@ import { useRouter } from "next/navigation"
 // ── Types ─────────────────────────────────────────────────────────────────────
 
 export interface BirthFormFields {
-  name:           string
-  dateOfBirth:    string
-  timeOfBirth:    string
-  unknownTime:    boolean
-  gender:         "male" | "female" | "other" | ""
-  placeQuery:     string
-  city:           string
-  latitude:       number | ""
-  longitude:      number | ""
-  timezoneOffset: number
-  ayanamsa:       "lahiri"
-  language:       "hindi" | "hinglish" | "english"
-  jobCategory:    string
-  mobile:         string
-  countryCode:    string   // e.g. "+91"
-  countryDigits:  number   // expected digit count
-  person2Name:    string
-  person2Mobile:  string
-  person2CountryCode: string
-  person2Dob:     string
-  person2Tob:     string
-  person2Place:   string
-  person2City:    string
-  person2Lat:     number | ""
-  person2Lng:     number | ""
+  name:                string
+  dateOfBirth:         string
+  timeOfBirth:         string
+  unknownTime:         boolean
+  gender:              "male" | "female" | "other" | ""
+  placeQuery:          string
+  city:                string
+  latitude:            number | ""
+  longitude:           number | ""
+  timezoneOffset:      number
+  ayanamsa:            "lahiri"
+  language:            "hindi" | "hinglish" | "english"
+  jobCategory:         string
+  mobile:              string
+  countryCode:         string
+  countryDigits:       number
+  // ── NEW v7.0 ──
+  currentCity:         string
+  relationshipStatus:  string
+  situationNote:       string
+  // ── Dual chart ──
+  person2Name:         string
+  person2Mobile:       string
+  person2CountryCode:  string
+  person2Dob:          string
+  person2Tob:          string
+  person2Place:        string
+  person2City:         string
+  person2Lat:          number | ""
+  person2Lng:          number | ""
+  person2CurrentCity:  string  // NEW v7.0
 }
 
 interface SelectedCategory {
@@ -83,10 +89,10 @@ interface GeoResult {
 
 interface Country {
   name:   string
-  code:   string   // ISO2 e.g. "IN"
-  dial:   string   // e.g. "+91"
-  digits: number   // expected mobile digits
-  flag:   string   // emoji flag
+  code:   string
+  dial:   string
+  digits: number
+  flag:   string
 }
 
 const COUNTRIES: Country[] = [
@@ -121,7 +127,6 @@ const COUNTRIES: Country[] = [
   { name: 'Hong Kong',      code: 'HK', dial: '+852', digits: 8,  flag: '🇭🇰' },
 ]
 
-// Map Nominatim country_code (ISO2 lower) → Country
 function getCountryByIso(iso: string): Country {
   return COUNTRIES.find(c => c.code.toLowerCase() === iso.toLowerCase()) ?? COUNTRIES[0]!
 }
@@ -136,7 +141,19 @@ const LOADING_STEPS = [
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
-const DUAL_CHART_DOMAINS = ['genz_ex_back', 'genz_toxic_boss']
+const DUAL_CHART_DOMAINS        = ['genz_ex_back', 'genz_toxic_boss']
+const RELATIONSHIP_DOMAINS      = ['genz_ex_back', 'mill_property_yog', 'genz_manifestation', 'mill_karz_mukti', 'genx_retirement_peace', 'genx_legacy_inheritance', 'genx_spiritual_innings', 'mill_childs_destiny', 'mill_parents_wellness', 'genz_dream_career', 'genz_toxic_boss']
+
+const RELATIONSHIP_STATUS_OPTIONS = [
+  { value: '',            label: 'Select status (optional)' },
+  { value: 'single',      label: '💫 Single' },
+  { value: 'in_relationship', label: '💑 In a Relationship' },
+  { value: 'married',     label: '💍 Married' },
+  { value: 'separated',   label: '🔄 Separated' },
+  { value: 'divorced',    label: '📄 Divorced' },
+  { value: 'widowed',     label: '🕊️ Widowed' },
+  { value: 'complicated', label: '🌀 It\'s Complicated' },
+]
 
 const JOB_CATEGORIES = [
   { value: '',                    label: 'Select your profession' },
@@ -169,14 +186,13 @@ const LANGUAGE_OPTIONS = [
 const GOLD      = '#D4AF37'
 const GOLD_RGBA = (a: number) => `rgba(212,175,55,${a})`
 
-// ── Dark select style — fixes invisible text on all browsers ──────────────────
 const SELECT_STYLE: React.CSSProperties = {
-  background:      '#0d1120',
-  border:          '1px solid rgba(255,255,255,0.1)',
-  color:           '#e2e8f0',
-  colorScheme:     'dark',
+  background:       '#0d1120',
+  border:           '1px solid rgba(255,255,255,0.1)',
+  color:            '#e2e8f0',
+  colorScheme:      'dark',
   WebkitAppearance: 'none' as any,
-  appearance:      'none',
+  appearance:       'none',
 }
 
 // ── Numerology ────────────────────────────────────────────────────────────────
@@ -292,20 +308,24 @@ const INITIAL: BirthFormFields = {
   timezoneOffset: 5.5, ayanamsa: 'lahiri',
   language: 'hinglish', jobCategory: '', mobile: '',
   countryCode: '+91', countryDigits: 10,
+  // NEW v7.0
+  currentCity: '', relationshipStatus: '', situationNote: '',
+  // Dual
   person2Name: '', person2Mobile: '', person2CountryCode: '+91',
   person2Dob: '', person2Tob: '12:00', person2Place: '',
   person2City: '', person2Lat: '', person2Lng: '',
+  person2CurrentCity: '',
 }
 
-// ── Country Selector Sub-component ────────────────────────────────────────────
+// ── Country Selector ──────────────────────────────────────────────────────────
 
 function CountrySelector({
   value, onChange, id,
 }: { value: string; onChange: (dial: string, digits: number) => void; id: string }) {
-  const [open, setOpen]       = useState(false)
-  const [search, setSearch]   = useState('')
-  const ref                   = useRef<HTMLDivElement>(null)
-  const selected              = COUNTRIES.find(c => c.dial === value) ?? COUNTRIES[0]!
+  const [open, setOpen]     = useState(false)
+  const [search, setSearch] = useState('')
+  const ref                 = useRef<HTMLDivElement>(null)
+  const selected            = COUNTRIES.find(c => c.dial === value) ?? COUNTRIES[0]!
 
   const filtered = search.trim()
     ? COUNTRIES.filter(c =>
@@ -314,7 +334,6 @@ function CountrySelector({
       )
     : COUNTRIES
 
-  // Close on outside click
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
@@ -333,20 +352,15 @@ function CountrySelector({
         <span>{selected.dial}</span>
         <span style={{ fontSize: '0.65rem', color: '#64748b', marginLeft: '2px' }}>▾</span>
       </button>
-
       {open && (
         <div className="absolute z-50 mt-1 rounded-lg overflow-hidden shadow-2xl"
           style={{ background: '#0d1120', border: '1px solid rgba(212,175,55,0.25)', width: '220px', maxHeight: '260px' }}>
           <div className="p-2" style={{ borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
-            <input
-              type="text"
-              placeholder="Search country..."
-              value={search}
-              onChange={e => setSearch(e.target.value)}
+            <input type="text" placeholder="Search country..."
+              value={search} onChange={e => setSearch(e.target.value)}
               className="w-full px-3 py-1.5 rounded text-sm outline-none"
               style={{ background: 'rgba(255,255,255,0.06)', color: '#e2e8f0', border: '1px solid rgba(255,255,255,0.1)' }}
-              autoFocus
-            />
+              autoFocus />
           </div>
           <div className="overflow-y-auto" style={{ maxHeight: '200px' }}>
             {filtered.map(c => (
@@ -354,7 +368,7 @@ function CountrySelector({
                 onClick={() => { onChange(c.dial, c.digits); setOpen(false); setSearch('') }}
                 className="w-full flex items-center gap-2.5 px-3 py-2 text-left text-sm transition-colors"
                 style={{
-                  color: c.dial === value ? GOLD : '#cbd5e1',
+                  color:      c.dial === value ? GOLD : '#cbd5e1',
                   background: c.dial === value ? GOLD_RGBA(0.08) : 'transparent',
                 }}>
                 <span style={{ fontSize: '1.1rem' }}>{c.flag}</span>
@@ -401,23 +415,18 @@ export default function BirthForm({
     setErrors(prev => ({ ...prev, [key]: undefined }))
   }, [])
 
-  // ── Loading step rotator ───────────────────────────────────────────────────
   const startLoadingMessages = () => {
     setLoadingStep(0)
     if (loadingIntervalRef.current) clearInterval(loadingIntervalRef.current)
     loadingIntervalRef.current = setInterval(() => {
-      setLoadingStep(prev => {
-        if (prev < LOADING_STEPS.length - 1) return prev + 1
-        return prev
-      })
-    }, 18000) // step 1 at 0s, step 2 at 18s, step 3 at 36s
+      setLoadingStep(prev => prev < LOADING_STEPS.length - 1 ? prev + 1 : prev)
+    }, 18000)
   }
 
   const stopLoadingMessages = () => {
     if (loadingIntervalRef.current) clearInterval(loadingIntervalRef.current)
   }
 
-  // ── Mobile / numerology ────────────────────────────────────────────────────
   const handleMobileChange = (val: string, isP2 = false) => {
     const key = isP2 ? 'person2Mobile' : 'mobile'
     set(key as keyof BirthFormFields, val as any)
@@ -446,7 +455,6 @@ export default function BirthForm({
     const lat  = parseFloat(r.lat)
     const lon  = parseFloat(r.lon)
     const city = r.address?.city || r.address?.town || r.address?.village || r.display_name.split(',')[0]
-    // Auto-detect country code from Nominatim result
     const iso  = r.address?.country_code ?? ''
     const country = iso ? getCountryByIso(iso) : null
     setFields(prev => ({
@@ -541,23 +549,28 @@ export default function BirthForm({
             ayanamsa: 'lahiri',
           },
           userContext: {
-            segment:     detectSegment(fields.dateOfBirth),
-            employment:  fields.jobCategory,
-            sector:      mapJobToSector(fields.jobCategory),
-            language:    fields.language,
-            city:        fields.city,
-            mobile:      `${fields.countryCode}${fields.mobile}`,
-            person2Name: fields.person2Name || null,
-            person2City: fields.person2City || null,
+            segment:            detectSegment(fields.dateOfBirth),
+            employment:         fields.jobCategory,
+            sector:             mapJobToSector(fields.jobCategory),
+            language:           fields.language,
+            city:               fields.city,
+            currentCity:        fields.currentCity || fields.city,  // NEW v7.0
+            relationshipStatus: fields.relationshipStatus,           // NEW v7.0
+            situationNote:      fields.situationNote.slice(0, 100),  // NEW v7.0 — hard cap 100
+            mobile:             `${fields.countryCode}${fields.mobile}`,
+            person2Name:        fields.person2Name  || null,
+            person2City:        fields.person2City  || null,
+            person2CurrentCity: fields.person2CurrentCity || null,   // NEW v7.0
           },
           person2Data: isDualDomain && fields.person2Lat !== '' ? {
-            name:     fields.person2Name,
-            dob:      fields.person2Dob,
-            tob:      fields.person2Tob || '12:00',
-            lat:      fields.person2Lat as number,
-            lng:      fields.person2Lng as number,
-            cityName: fields.person2City,
-            mobile:   `${fields.person2CountryCode}${fields.person2Mobile}`,
+            name:        fields.person2Name,
+            dob:         fields.person2Dob,
+            tob:         fields.person2Tob || '12:00',
+            lat:         fields.person2Lat as number,
+            lng:         fields.person2Lng as number,
+            cityName:    fields.person2City,
+            currentCity: fields.person2CurrentCity || fields.person2City,
+            mobile:      `${fields.person2CountryCode}${fields.person2Mobile}`,
           } : null,
           numerologyCompatibility: numerology,
         }),
@@ -574,17 +587,17 @@ export default function BirthForm({
       if (onSubmit) await onSubmit(fields)
 
       const predictionId: string | null = data?._meta?.predictionId ?? null
-const publicSlug:   string | null = data?._meta?.publicSlug   ?? null
+      const publicSlug:   string | null = data?._meta?.publicSlug   ?? null
 
-if (publicSlug) {
-  router.push(`/report/${publicSlug}`)
-} else if (predictionId) {
-  router.push(`/result/${predictionId}`)
-} else {
-  setApiError('Prediction ready hai par save nahi hua. Please retry karo.')
-  stopLoadingMessages()
-  console.error('[BirthForm] predictionId missing:', data?._meta)
-}
+      if (publicSlug) {
+        router.push(`/report/${publicSlug}`)
+      } else if (predictionId) {
+        router.push(`/result/${predictionId}`)
+      } else {
+        setApiError('Prediction ready hai par save nahi hua. Please retry karo.')
+        stopLoadingMessages()
+        console.error('[BirthForm] predictionId missing:', data?._meta)
+      }
 
     } catch (err) {
       setApiError('Network error. Please check your connection.')
@@ -658,18 +671,15 @@ if (publicSlug) {
               {errors.name && <p className="text-red-400 text-xs mt-1">{errors.name}</p>}
             </div>
 
-            {/* ── WhatsApp Mobile — DYNAMIC COUNTRY CODE ── */}
+            {/* ── WhatsApp Mobile ── */}
             <div>
               <label htmlFor="tv-mobile" className="block text-sm font-medium text-slate-300 mb-1.5">
                 WhatsApp Mobile <span className="text-yellow-400">*</span>
                 <span className="text-slate-500 text-xs ml-2">(for follow-up & numerology)</span>
               </label>
               <div className="flex gap-2">
-                <CountrySelector
-                  id="tv-country"
-                  value={fields.countryCode}
-                  onChange={(dial, digits) => setFields(prev => ({ ...prev, countryCode: dial, countryDigits: digits }))}
-                />
+                <CountrySelector id="tv-country" value={fields.countryCode}
+                  onChange={(dial, digits) => setFields(prev => ({ ...prev, countryCode: dial, countryDigits: digits }))} />
                 <input id="tv-mobile" type="tel"
                   placeholder={`${fields.countryDigits}-digit mobile`}
                   value={fields.mobile} onChange={e => handleMobileChange(e.target.value)}
@@ -741,9 +751,9 @@ if (publicSlug) {
                   className="w-full px-4 py-2.5 rounded-lg text-sm outline-none appearance-none pr-8"
                   style={SELECT_STYLE}>
                   <option value="" style={{ background: '#0d1120', color: '#e2e8f0' }}>Select gender</option>
-                  <option value="male" style={{ background: '#0d1120', color: '#e2e8f0' }}>Male</option>
+                  <option value="male"   style={{ background: '#0d1120', color: '#e2e8f0' }}>Male</option>
                   <option value="female" style={{ background: '#0d1120', color: '#e2e8f0' }}>Female</option>
-                  <option value="other" style={{ background: '#0d1120', color: '#e2e8f0' }}>Other / Prefer not to say</option>
+                  <option value="other"  style={{ background: '#0d1120', color: '#e2e8f0' }}>Other / Prefer not to say</option>
                 </select>
                 <span className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500">▾</span>
               </div>
@@ -776,6 +786,22 @@ if (publicSlug) {
                 </ul>
               )}
               {errors.latitude && <p className="text-red-400 text-xs mt-1">Please select a place from suggestions</p>}
+            </div>
+
+            {/* ── NEW v7.0: Current City ── */}
+            <div>
+              <label htmlFor="tv-current-city" className="block text-sm font-medium text-slate-300 mb-1.5">
+                Current City <span className="text-slate-500 text-xs ml-1">(where you live/work now)</span>
+              </label>
+              <input id="tv-current-city" type="text"
+                placeholder="e.g. Gurugram, Mumbai, Dubai, London..."
+                value={fields.currentCity}
+                onChange={e => set('currentCity', e.target.value)}
+                className="w-full px-4 py-2.5 rounded-lg text-sm outline-none"
+                style={inputStyle()} />
+              <p className="text-slate-600 text-xs mt-1">
+                Helps Jini understand your current job market, real estate, and opportunities
+              </p>
             </div>
 
             {/* Lat/Lon display */}
@@ -822,6 +848,52 @@ if (publicSlug) {
               </div>
             </div>
 
+            {/* ── NEW v7.0: Relationship Status ── */}
+            <div className="relative">
+              <label htmlFor="tv-rel-status" className="block text-sm font-medium text-slate-300 mb-1.5">
+                Relationship Status
+                <span className="text-slate-500 text-xs ml-2">(optional — improves analysis)</span>
+              </label>
+              <div className="relative">
+                <select id="tv-rel-status" value={fields.relationshipStatus}
+                  onChange={e => set('relationshipStatus', e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-lg text-sm outline-none appearance-none pr-8"
+                  style={SELECT_STYLE}>
+                  {RELATIONSHIP_STATUS_OPTIONS.map(o => (
+                    <option key={o.value} value={o.value} style={{ background: '#0d1120', color: '#e2e8f0' }}>
+                      {o.label}
+                    </option>
+                  ))}
+                </select>
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500">▾</span>
+              </div>
+            </div>
+
+            {/* ── NEW v7.0: Situation Note ── */}
+            <div>
+              <label htmlFor="tv-situation" className="block text-sm font-medium text-slate-300 mb-1.5">
+                Tell Jini what's on your mind
+                <span className="text-slate-500 text-xs ml-2">(optional)</span>
+              </label>
+              <div className="relative">
+                <textarea id="tv-situation"
+                  placeholder="e.g. Job switch kar raha hoon, property khareedna hai, relationship mein problem hai..."
+                  value={fields.situationNote}
+                  onChange={e => set('situationNote', e.target.value.slice(0, 100))}
+                  maxLength={100}
+                  rows={2}
+                  className="w-full px-4 py-2.5 rounded-lg text-sm outline-none resize-none"
+                  style={inputStyle()} />
+                <span className="absolute bottom-2 right-3 text-xs"
+                  style={{ color: fields.situationNote.length >= 90 ? '#f59e0b' : '#475569' }}>
+                  {fields.situationNote.length}/100
+                </span>
+              </div>
+              <p className="text-slate-600 text-xs mt-1">
+                Jini uses this to personalise your prediction context
+              </p>
+            </div>
+
             {/* ── PERSON 2 SECTION ── */}
             {isDualDomain && (
               <div className="mt-2 pt-5 border-t border-amber-400/20">
@@ -853,11 +925,8 @@ if (publicSlug) {
                       <span className="text-slate-500 text-xs ml-2">(for numerology compatibility)</span>
                     </label>
                     <div className="flex gap-2">
-                      <CountrySelector
-                        id="tv-country2"
-                        value={fields.person2CountryCode}
-                        onChange={(dial, digits) => setFields(prev => ({ ...prev, person2CountryCode: dial }))}
-                      />
+                      <CountrySelector id="tv-country2" value={fields.person2CountryCode}
+                        onChange={(dial) => setFields(prev => ({ ...prev, person2CountryCode: dial }))} />
                       <input type="tel" placeholder="Their mobile number"
                         value={fields.person2Mobile} onChange={e => handleMobileChange(e.target.value, true)}
                         maxLength={12}
@@ -939,6 +1008,20 @@ if (publicSlug) {
                       </ul>
                     )}
                     {errors.person2Lat && <p className="text-red-400 text-xs mt-1">Please select their place</p>}
+                  </div>
+
+                  {/* ── NEW v7.0: Person 2 Current City ── */}
+                  <div>
+                    <label className="block text-sm font-medium text-slate-300 mb-1.5">
+                      Their Current City
+                      <span className="text-slate-500 text-xs ml-2">(where they live/work now)</span>
+                    </label>
+                    <input type="text"
+                      placeholder="e.g. Bengaluru, Singapore, London..."
+                      value={fields.person2CurrentCity}
+                      onChange={e => set('person2CurrentCity', e.target.value)}
+                      className="w-full px-4 py-2.5 rounded-lg text-sm outline-none"
+                      style={inputStyle()} />
                   </div>
                 </div>
               </div>
