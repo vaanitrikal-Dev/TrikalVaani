@@ -350,7 +350,7 @@ export async function POST(req: NextRequest) {
     if (!EPHE_API_URL)   return NextResponse.json({ error: 'Ephemeris API not configured' },     { status: 500 });
 
     // verifiedTier = 'premium' kept for UI, polish, save — CEO LOCKED
-    const verifiedTier: UserTier = 'premium';
+    const verifiedTier: UserTier = 'free';
 
     let domain;
     try { domain = getDomainConfig(domainId); }
