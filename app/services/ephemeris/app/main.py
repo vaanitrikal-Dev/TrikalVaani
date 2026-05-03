@@ -503,3 +503,19 @@ def _empty_confidence() -> dict:
         'action_guidance': 'Proceed with measured action',
         'conflict_detected': False,
     }
+import sys, os
+sys.path.insert(0, os.path.dirname(__file__))
+from template_engine import build_template, TemplateRequest, DOMAINS
+
+@app.post("/template")
+async def generate_template(req: TemplateRequest):
+    try:
+        result = build_template(domain=req.domain, kundali=req.kundaliData, session_id=req.sessionId, lang=req.lang)
+        return {"success": True, "template": result}
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
+@app.get("/template/domains")
+async def list_domains():
+    from template_engine import DOMAIN_META
+    return {"total": len(DOMAINS), "domains": [{"key": d, "label": DOMAIN_META[d]["label"]} for d in DOMAINS]}
