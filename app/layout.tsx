@@ -2,7 +2,8 @@ import './globals.css';
 import type { Metadata } from 'next';
 import { Inter, Playfair_Display } from 'next/font/google';
 import Script from 'next/script';
-import JiniChat from '@/components/jini/JiniChat';
+import TrikalChat  from '@/components/jini/TrikalChat';
+import TrikalVoice from '@/components/jini/TrikalVoice';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -70,13 +71,15 @@ export const metadata: Metadata = {
   },
 };
 
+// ── SCHEMA.ORG JSON-LD ────────────────────────────────────────────────────────
+
 const organizationSchema = {
   '@context': 'https://schema.org',
   '@type': 'Organization',
   name: 'Trikal Vaani',
   alternateName: 'Trikal Vaani Global',
   description:
-    'Trikal Vaani is the world\'s leading Vedic AI Astrology Research Platform, founded by Rohiit Gupta. We merge 5,000-year-old Parashara Vedic logic with advanced Neural Networks to deliver high-probability life path predictions across Wealth, Career, Love, Health, and Peace.',
+    "Trikal Vaani is India's leading AI-powered Vedic Astrology platform, founded by Rohiit Gupta. We merge 5,000-year-old Parashara Vedic logic with advanced Neural Networks to deliver accurate life predictions across Wealth, Career, Love, Health, and Spirituality.",
   url: 'https://trikalvaani.com',
   logo: 'https://trikalvaani.com/logo.png',
   founder: {
@@ -92,9 +95,7 @@ const organizationSchema = {
   },
   keywords:
     'Accurate AI Astrology, Vedic Shastra AI, Global Destiny Predictions, Jyotish Neural Network, Nakshatra AI Analysis, Parashara Vedic Logic',
-  sameAs: [
-    'https://www.instagram.com/trikalvaani',
-  ],
+  sameAs: ['https://www.instagram.com/trikalvaani'],
   contactPoint: {
     '@type': 'ContactPoint',
     contactType: 'Customer Support',
@@ -107,26 +108,21 @@ const serviceSchema = {
   '@type': 'Service',
   name: 'Trikal Vaani AI Vedic Life Analysis',
   description:
-    'A proprietary Hybrid-AI service that merges 5,000-year-old Parashara Vedic logic with advanced Neural Networks to provide high-probability life path predictions. Analyzes 27 Nakshatras, Vimshottari Dasha cycles, and real-time Gochar transits to produce personalized Daily Energy Scores and six Life Pillar assessments covering Wealth, Career, Love, Health, Student performance, and inner Peace.',
+    'A proprietary Hybrid-AI service that merges 5,000-year-old Parashara Vedic logic with advanced Neural Networks to provide high-probability life path predictions. Analyzes 27 Nakshatras, Vimshottari Dasha cycles, and real-time Gochar transits.',
   provider: {
     '@type': 'Organization',
     name: 'Trikal Vaani',
     url: 'https://trikalvaani.com',
   },
-  serviceType: 'Vedic AI Astrology Research Platform',
+  serviceType: 'Vedic AI Astrology Platform',
   category: 'Spiritual & Wellness Technology',
-  areaServed: {
-    '@type': 'Place',
-    name: 'Worldwide',
-  },
+  areaServed: { '@type': 'Place', name: 'Worldwide' },
   offers: {
     '@type': 'Offer',
     price: '0',
     priceCurrency: 'INR',
     description: 'Free AI-powered Vedic life analysis — no sign-up required.',
   },
-  keywords:
-    'Accurate AI Astrology, Vedic Shastra AI, Global Destiny Predictions, Nakshatra Analysis, Rahu Ketu Transit, Vimshottari Dasha',
 };
 
 const websiteSchema = {
@@ -134,129 +130,12 @@ const websiteSchema = {
   '@type': 'WebSite',
   name: 'Trikal Vaani',
   url: 'https://trikalvaani.com',
-  description:
-    "World's Most Accurate AI Vedic Astrology platform. Decode your Past, Present, and Future.",
+  description: "India's Most Accurate AI Vedic Astrology platform. Decode your Past, Present, and Future.",
   potentialAction: {
     '@type': 'SearchAction',
     target: 'https://trikalvaani.com/blog?q={search_term_string}',
     'query-input': 'required name=search_term_string',
   },
-};
-
-const professionalServiceSchema = {
-  '@context': 'https://schema.org',
-  '@type': 'ProfessionalService',
-  name: 'Trikal Vaani — AI Vedic Life Analysis',
-  description:
-    'Trikal Vaani delivers institutional-grade AI Vedic Astrology. Our proprietary Parashara-Neural hybrid engine analyzes 27 Nakshatras, Vimshottari Dasha cycles, Ashtakavarga, and live Gochar transits to generate personalized Daily Energy Scores, Six Life Pillar assessments, and generation-specific Dard Engine readings. Founded and verified by Rohiit Gupta, Chief Vedic Architect.',
-  url: 'https://trikalvaani.com',
-  logo: 'https://trikalvaani.com/logo.png',
-  image: 'https://trikalvaani.com/og-image.jpg',
-  priceRange: 'Free – ₹₹',
-  currenciesAccepted: 'INR',
-  paymentAccepted: 'Cash, Credit Card, UPI',
-  telephone: '',
-  email: 'vaanitrikal@gmail.com',
-  address: {
-    '@type': 'PostalAddress',
-    addressLocality: 'Delhi NCR',
-    addressCountry: 'IN',
-  },
-  geo: {
-    '@type': 'GeoCoordinates',
-    latitude: '28.6139',
-    longitude: '77.2090',
-  },
-  areaServed: { '@type': 'Place', name: 'Worldwide' },
-  hasOfferCatalog: {
-    '@type': 'OfferCatalog',
-    name: 'Vedic AI Analysis Services',
-    itemListElement: [
-      {
-        '@type': 'Offer',
-        itemOffered: { '@type': 'Service', name: 'Free Daily Vedic Energy Score & Life Pillar Analysis' },
-        price: '0',
-        priceCurrency: 'INR',
-      },
-      {
-        '@type': 'Offer',
-        itemOffered: { '@type': 'Service', name: 'Deep Dive Premium Report (Deepak Level)' },
-        price: '99',
-        priceCurrency: 'INR',
-      },
-      {
-        '@type': 'Offer',
-        itemOffered: { '@type': 'Service', name: 'Full Kundali + Dasha Analysis (Akash Level)' },
-        price: '299',
-        priceCurrency: 'INR',
-      },
-    ],
-  },
-  knowsAbout: [
-    'Vedic Astrology', 'Jyotish Shastra', 'Parashara Methodology', 'Nakshatra Analysis',
-    'Vimshottari Dasha', 'Ashtakavarga', 'Gochar Transits', 'Kundali Reading',
-    'Compatibility Analysis', 'AI-powered Astrology', 'Ex-Back Karmic Analysis',
-  ],
-  founder: {
-    '@type': 'Person',
-    name: 'Rohiit Gupta',
-    jobTitle: 'Chief Vedic Architect',
-  },
-  aggregateRating: {
-    '@type': 'AggregateRating',
-    ratingValue: '4.9',
-    reviewCount: '10247',
-    bestRating: '5',
-    worstRating: '1',
-  },
-};
-
-const reviewSchema = {
-  '@context': 'https://schema.org',
-  '@type': 'ItemList',
-  name: 'Trikal Vaani User Reviews',
-  description: 'Verified seeker reviews of Trikal Vaani AI Vedic Astrology platform.',
-  itemListElement: [
-    {
-      '@type': 'ListItem',
-      position: 1,
-      item: {
-        '@type': 'Review',
-        author: { '@type': 'Person', name: 'Priya S.' },
-        reviewBody:
-          'The Ex-Back karmic closure score was eerily accurate. I had goosebumps reading the Venus-Moon analysis. Trikal Vaani is unlike any astrology platform I have tried.',
-        reviewRating: { '@type': 'Rating', ratingValue: '5', bestRating: '5' },
-        itemReviewed: { '@type': 'ProfessionalService', name: 'Trikal Vaani', url: 'https://trikalvaani.com' },
-        datePublished: '2025-03-15',
-      },
-    },
-    {
-      '@type': 'ListItem',
-      position: 2,
-      item: {
-        '@type': 'Review',
-        author: { '@type': 'Person', name: 'Arjun M.' },
-        reviewBody:
-          'The Toxic Boss Radar dual chart feature is brilliant. Saturn-Sun analysis flagged my manager before I even knew why I felt oppressed. Deeply insightful.',
-        reviewRating: { '@type': 'Rating', ratingValue: '5', bestRating: '5' },
-        itemReviewed: { '@type': 'ProfessionalService', name: 'Trikal Vaani', url: 'https://trikalvaani.com' },
-        datePublished: '2025-02-20',
-      },
-    },
-    {
-      '@type': 'ListItem',
-      position: 3,
-      item: {
-        '@type': 'Review',
-        author: { '@type': 'Person', name: 'Ananya R.' },
-        reviewBody:
-          'I use the Life Pillar scores every morning like a dashboard. The Nakshatra insight is accurate and the Dasha timeline predictions feel genuinely predictive.',
-        reviewRating: { '@type': 'Rating', ratingValue: '5', bestRating: '5' },
-        itemReviewed: { '@type': 'ProfessionalService', name: 'Trikal Vaani', url: 'https://trikalvaani.com' },
-        datePublished: '2025-01-08',
-      },
-    },
-  ],
 };
 
 const expertSchema = {
@@ -267,128 +146,188 @@ const expertSchema = {
   image: 'https://trikalvaani.com/rohiit-gupta.jpg',
   jobTitle: 'Founder & Chief Vedic Architect',
   description:
-    'Rohiit Gupta is the founder of Trikal Vaani and a leading authority in AI-powered Vedic Astrology. He has spent over a decade mapping classical Parashara Jyotish shastra to computational models, making 5,000-year-old Vedic wisdom accessible and actionable for modern seekers worldwide.',
+    'Rohiit Gupta is the founder of Trikal Vaani and a leading authority in AI-powered Vedic Astrology. He has spent over a decade mapping classical Parashara Jyotish shastra to computational models.',
   knowsAbout: [
-    'Vedic Astrology',
-    'Jyotish Shastra',
-    'Parashara Astrology',
-    'Nakshatra Analysis',
-    'Vimshottari Dasha System',
-    'Gochar Transits',
-    'Ashtakavarga',
-    'AI-powered Astrology',
-    'Neural Networks',
-    'Life Path Predictions',
+    'Vedic Astrology', 'Jyotish Shastra', 'Parashara Astrology',
+    'Nakshatra Analysis', 'Vimshottari Dasha System', 'Gochar Transits',
+    'Ashtakavarga', 'AI-powered Astrology', 'Neural Networks', 'Life Path Predictions',
   ],
   hasOccupation: {
     '@type': 'Occupation',
     name: 'Vedic Astrologer & AI Researcher',
-    occupationLocation: {
-      '@type': 'City',
-      name: 'Delhi NCR',
-      addressCountry: 'IN',
-    },
+    occupationLocation: { '@type': 'City', name: 'Delhi NCR', addressCountry: 'IN' },
     skills: 'Vedic Astrology, Jyotish, AI Research, Nakshatra Analysis, Dasha Predictions',
   },
-  worksFor: {
-    '@type': 'Organization',
-    name: 'Trikal Vaani',
-    url: 'https://trikalvaani.com',
+  worksFor: { '@type': 'Organization', name: 'Trikal Vaani', url: 'https://trikalvaani.com' },
+  sameAs: ['https://www.instagram.com/trikalvaani'],
+};
+
+const professionalServiceSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'ProfessionalService',
+  name: 'Trikal Vaani — AI Vedic Life Analysis',
+  description:
+    'Trikal Vaani delivers institutional-grade AI Vedic Astrology. Our proprietary Parashara-Neural hybrid engine analyzes 27 Nakshatras, Vimshottari Dasha cycles, Ashtakavarga, and live Gochar transits.',
+  url: 'https://trikalvaani.com',
+  logo: 'https://trikalvaani.com/logo.png',
+  image: 'https://trikalvaani.com/og-image.jpg',
+  priceRange: 'Free – ₹₹',
+  currenciesAccepted: 'INR',
+  paymentAccepted: 'UPI, Credit Card, Debit Card',
+  email: 'vaanitrikal@gmail.com',
+  address: {
+    '@type': 'PostalAddress',
+    addressLocality: 'Delhi NCR',
+    addressCountry: 'IN',
   },
-  sameAs: [
-    'https://www.instagram.com/trikalvaani',
+  geo: { '@type': 'GeoCoordinates', latitude: '28.6139', longitude: '77.2090' },
+  areaServed: { '@type': 'Place', name: 'Worldwide' },
+  hasOfferCatalog: {
+    '@type': 'OfferCatalog',
+    name: 'Vedic AI Analysis Services',
+    itemListElement: [
+      {
+        '@type': 'Offer',
+        itemOffered: { '@type': 'Service', name: 'Free AI Vedic Prediction — Trikal Ka Sandesh' },
+        price: '0', priceCurrency: 'INR',
+      },
+      {
+        '@type': 'Offer',
+        itemOffered: { '@type': 'Service', name: 'Basic Paid Prediction — Deeper Analysis' },
+        price: '51', priceCurrency: 'INR',
+      },
+      {
+        '@type': 'Offer',
+        itemOffered: { '@type': 'Service', name: 'Pro Prediction — Full Kundali + Dasha + Remedies' },
+        price: '99', priceCurrency: 'INR',
+      },
+      {
+        '@type': 'Offer',
+        itemOffered: { '@type': 'Service', name: 'Premium — Voice Guidance + Priority Analysis' },
+        price: '499', priceCurrency: 'INR',
+      },
+    ],
+  },
+  knowsAbout: [
+    'Vedic Astrology', 'Jyotish Shastra', 'Parashara Methodology', 'Nakshatra Analysis',
+    'Vimshottari Dasha', 'Ashtakavarga', 'Gochar Transits', 'Kundali Reading',
+    'Compatibility Analysis', 'AI-powered Astrology',
   ],
-  alumniOf: {
-    '@type': 'Organization',
-    name: 'Vedic Astrology Research Institute',
+  founder: { '@type': 'Person', name: 'Rohiit Gupta', jobTitle: 'Chief Vedic Architect' },
+  aggregateRating: {
+    '@type': 'AggregateRating',
+    ratingValue: '4.9', reviewCount: '10247', bestRating: '5', worstRating: '1',
   },
+};
+
+const reviewSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'ItemList',
+  name: 'Trikal Vaani User Reviews',
+  description: 'Verified seeker reviews of Trikal Vaani AI Vedic Astrology platform.',
+  itemListElement: [
+    {
+      '@type': 'ListItem', position: 1,
+      item: {
+        '@type': 'Review',
+        author: { '@type': 'Person', name: 'Priya S.' },
+        reviewBody: 'The karmic closure score was eerily accurate. Trikal Vaani is unlike any astrology platform I have tried.',
+        reviewRating: { '@type': 'Rating', ratingValue: '5', bestRating: '5' },
+        itemReviewed: { '@type': 'ProfessionalService', name: 'Trikal Vaani', url: 'https://trikalvaani.com' },
+        datePublished: '2025-03-15',
+      },
+    },
+    {
+      '@type': 'ListItem', position: 2,
+      item: {
+        '@type': 'Review',
+        author: { '@type': 'Person', name: 'Arjun M.' },
+        reviewBody: 'Saturn-Sun analysis flagged my workplace situation before I even knew why I felt oppressed. Deeply insightful.',
+        reviewRating: { '@type': 'Rating', ratingValue: '5', bestRating: '5' },
+        itemReviewed: { '@type': 'ProfessionalService', name: 'Trikal Vaani', url: 'https://trikalvaani.com' },
+        datePublished: '2025-02-20',
+      },
+    },
+    {
+      '@type': 'ListItem', position: 3,
+      item: {
+        '@type': 'Review',
+        author: { '@type': 'Person', name: 'Ananya R.' },
+        reviewBody: 'The Nakshatra insight is accurate and the Dasha timeline predictions feel genuinely predictive.',
+        reviewRating: { '@type': 'Rating', ratingValue: '5', bestRating: '5' },
+        itemReviewed: { '@type': 'ProfessionalService', name: 'Trikal Vaani', url: 'https://trikalvaani.com' },
+        datePublished: '2025-01-08',
+      },
+    },
+  ],
+};
+
+const faqSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: [
+    {
+      '@type': 'Question',
+      name: 'What is Trikal Vaani?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Trikal Vaani is an AI-powered Vedic Astrology platform founded by Rohiit Gupta in Delhi NCR. It merges 5,000 years of Parashara Vedic logic with modern Neural Networks to provide personalized life predictions across Career, Wealth, Love, Health, and Spirituality.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'Is Trikal Vaani free?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Yes. Trikal Vaani offers completely free AI Vedic predictions — no sign-up required. Basic paid tier starts at just ₹51/month for deeper analysis.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'Who is Rohiit Gupta?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Rohiit Gupta is the founder and Chief Vedic Architect of Trikal Vaani, based in Delhi NCR. He has spent over a decade mapping classical Jyotish Shastra into AI computational models.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'How accurate is AI Vedic Astrology on Trikal Vaani?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Trikal Vaani uses Swiss Ephemeris — the same engine used by professional astrologers worldwide — validated against Brihat Parashara Hora Shastra (BPHS) and Bhrigu Nandi Nadi patterns. The platform carries a 4.9-star rating across 10,247+ verified analyses.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'What is Vimshottari Dasha?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Vimshottari Dasha is a 120-year planetary period system in Vedic Astrology. Each of the nine planets governs a specific life period. Your current Mahadasha and Antardasha reveal which planetary energy governs your present life phase — career, wealth, relationships, or health.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'Best astrologer in Delhi NCR for online consultation?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Trikal Vaani, founded by Rohiit Gupta in Delhi NCR, offers AI-powered Vedic astrology predictions instantly online. Get free predictions 24/7 without any appointment at trikalvaani.com.',
+      },
+    },
+  ],
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${inter.variable} ${playfair.variable}`}>
       <head>
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
-        />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceSchema) }}
-        />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
-        />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(expertSchema) }}
-        />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(professionalServiceSchema) }}
-        />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(reviewSchema) }}
-        />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify({
-            '@context': 'https://schema.org',
-            '@type': 'FAQPage',
-            mainEntity: [
-              {
-                '@type': 'Question',
-                name: 'What is Trikal Vaani?',
-                acceptedAnswer: {
-                  '@type': 'Answer',
-                  text: 'Trikal Vaani is an AI-powered Vedic Astrology Research Platform founded by Rohiit Gupta. It merges 5,000 years of Parashara Vedic logic with modern Neural Networks to provide personalised Daily Energy Scores, Six Life Pillar analyses, and generation-specific destiny insights.',
-                },
-              },
-              {
-                '@type': 'Question',
-                name: 'Is Trikal Vaani free?',
-                acceptedAnswer: {
-                  '@type': 'Answer',
-                  text: 'Yes. Trikal Vaani offers a completely free AI Vedic life analysis — no sign-up required. During the inaugural launch window, all premium features are also available at no cost for 30 days.',
-                },
-              },
-              {
-                '@type': 'Question',
-                name: 'Who is Rohiit Gupta?',
-                acceptedAnswer: {
-                  '@type': 'Answer',
-                  text: 'Rohiit Gupta is the founder and Chief Vedic Architect of Trikal Vaani. He has spent over a decade mapping classical Jyotish Shastra (Parashara methodology) into computational models, making 5,000-year-old Vedic wisdom accessible to modern seekers worldwide.',
-                },
-              },
-              {
-                '@type': 'Question',
-                name: 'What is the Dard Engine?',
-                acceptedAnswer: {
-                  '@type': 'Answer',
-                  text: 'The Dard Engine is Trikal Vaani\'s generation-specific life question AI. It provides targeted Vedic insights for Gen Z (Ex-Back, Toxic Boss, Career Pivot), Millennials (Property, Debt, Children), and Gen X (Retirement, Legacy, Spiritual purpose).',
-                },
-              },
-              {
-                '@type': 'Question',
-                name: 'How accurate is AI Vedic Astrology?',
-                acceptedAnswer: {
-                  '@type': 'Answer',
-                  text: 'Trikal Vaani uses the Parashara-Neural Architecture — classical Brihat Parashara Hora Shastra rules encoded into computational algorithms and back-tested against 10,000+ birth charts. The platform carries a 4.9-star rating across 10,247+ verified user analyses.',
-                },
-              },
-              {
-                '@type': 'Question',
-                name: 'What is Vimshottari Dasha?',
-                acceptedAnswer: {
-                  '@type': 'Answer',
-                  text: 'Vimshottari Dasha is a 120-year planetary period system in Vedic Astrology. Each of the nine planets governs a specific period of your life (Sun 6 years, Moon 10 years, Mars 7 years, etc.). Your current Mahadasha and Antardasha reveal which planetary energy governs your present life phase.',
-                },
-              },
-            ],
-          }) }}
-        />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceSchema) }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(expertSchema) }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(professionalServiceSchema) }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(reviewSchema) }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
       </head>
       <Script
         src="https://www.googletagmanager.com/gtag/js?id=G-WCV6MTQM21"
@@ -411,7 +350,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <div className="relative z-10">
           {children}
         </div>
-        <JiniChat />
+        {/* LEFT: TrikalChat — text chat widget */}
+        <TrikalChat />
+        {/* RIGHT: TrikalVoice — voice widget (Phase 4 full activation) */}
+        <TrikalVoice />
       </body>
     </html>
   );
