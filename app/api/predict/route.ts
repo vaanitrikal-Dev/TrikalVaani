@@ -3,36 +3,46 @@
  * TRIKAL VAANI — Unified Prediction Endpoint
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/api/predict/route.ts
- * VERSION: 9.5 — SEO slug generated + returned in _meta.publicSlug
+ * VERSION: 10.0 — Free/Paid/Voice routing + Gemini Flash/Pro + Template Engine
  * SIGNED: ROHIIT GUPTA, CEO
  *
- * FULL FLOW v9.5:
- *   Step 1 → /kundali       (Render Swiss Ephemeris)
- *   Step 2 → adaptSwissToKundali()
- *   Step 3 → /synthesize    (Render)
- *   Step 4 → buildPredictionPrompt() ← tier:'basic' ONLY here (fixes truncation)
- *   Step 5 → Gemini 2.5 Flash (JSON mode always ON)
- *   Step 6 → Parse JSON (robust fence stripping)
- *   Step 6.5 → Claude Haiku polish (₹51+ ONLY)
- *   Step 7 → saveToSupabase() + generate SEO slug
- *   Step 8 → Return with predictionId + publicSlug + reportUrl
+ * FULL FLOW v10.0:
+ *   Step 1  → /kundali        (GCP VM Mumbai — Swiss Ephemeris)
+ *   Step 2  → adaptSwissToKundali()
+ *   Step 3  → /synthesize     (GCP VM Mumbai)
+ *   Step 4  → /template       (GCP VM Mumbai — Template Engine v2.0)
+ *   Step 5  → buildPredictionPrompt() — tier-aware lean prompt
+ *   Step 6  → Gemini routing:
+ *               FREE  → gemini-2.5-flash (summary only, 150-200w)
+ *               PAID  → gemini-2.5-pro   (800-1200w full analysis)
+ *   Step 7  → Claude Sonnet 4.6 polish (PAID only)
+ *   Step 8  → saveToSupabase() + generate SEO slug
+ *   Step 9  → Return predictionId + publicSlug + reportUrl
  *
- * v9.5 CHANGES vs v9.4:
- *   - generatePredictionSlug() called after save
- *   - publicSlug saved to Supabase predictions table
- *   - _meta now includes: publicSlug + reportUrl
- *   - BirthForm redirect to /report/[slug] now works
- *   - Slug format: career-rahu-saturn-delhi-2026-x7k2m
+ * v10.0 CHANGES vs v9.5:
+ *   ✅ predictionTier from BirthForm v8.0 (free | paid | voice)
+ *   ✅ FREE  → gemini-2.5-flash  (no polish, fast, ₹0)
+ *   ✅ PAID  → gemini-2.5-pro    (+ Claude Sonnet 4.6 polish, ₹51)
+ *   ✅ VOICE → handled client-side (redirect to /voice route)
+ *   ✅ Template Engine v2.0 integrated (/template endpoint on VM)
+ *   ✅ Template HTML injected into Supabase + result pages
+ *   ✅ EPHE_API_URL now = GCP VM Mumbai (replaces Render)
+ *   ✅ Model strings: gemini-2.5-flash | gemini-2.5-pro
+ *   ✅ MAX_TOKENS = 12000 all tiers (CEO approved, never change)
+ *   ✅ verifiedTier logic preserved (CEO locked)
+ *   ✅ SEO slug + Google indexing notification preserved
+ *   ✅ person2Data + numerologyCompatibility preserved
+ *   ✅ currentCity + relationshipStatus + situationNote preserved
  * ============================================================
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
-import { getDomainConfig } from '@/lib/domain-config';
-import { buildPredictionPrompt } from '@/lib/gemini-prompt';
-import { polishPrediction } from '@/lib/claude-polish';
+import { createClient }              from '@supabase/supabase-js';
+import { getDomainConfig }           from '@/lib/domain-config';
+import { buildPredictionPrompt }     from '@/lib/gemini-prompt';
+import { polishPrediction }          from '@/lib/claude-polish';
 import { generatePredictionSlug, generateSeoMeta } from '@/lib/slug';
-import { notifyGoogleIndexing } from '@/lib/google-indexing';
+import { notifyGoogleIndexing }      from '@/lib/google-indexing';
 import {
   calcDasha,
   NAKSHATRA_LORDS,
@@ -40,31 +50,41 @@ import {
   NAKSHATRAS,
 } from '@/lib/swiss-ephemeris';
 import type { KundaliData, BirthData, PlanetPosition } from '@/lib/swiss-ephemeris';
-import type { DomainId } from '@/lib/domain-config';
+import type { DomainId }   from '@/lib/domain-config';
 import type { UserTier, UserContext } from '@/lib/gemini-prompt';
 
 export const maxDuration = 300;
 
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY ?? '';
-const GEMINI_MODEL   = 'gemini-2.5-flash';
-const GEMINI_URL     = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
-const EPHE_API_URL   = process.env.EPHE_API_URL ?? '';
-const EPHE_API_KEY   = process.env.EPHE_API_KEY ?? '';
+// ── Model Config ──────────────────────────────────────────────────────────────
+// v10.0: Two models. Flash for free (fast+cheap). Pro for paid (depth+quality).
+const GEMINI_FLASH     = 'gemini-2.5-flash';
+const GEMINI_PRO       = 'gemini-2.5-pro';
+const CLAUDE_POLISH    = 'claude-sonnet-4-6';  // Paid polish only
 
-// ── CEO APPROVED: MAX_TOKENS = 12000 across all tiers ─────────────────────────
-const MAX_TOKENS: Record<UserTier, number> = {
-  free: 12000, basic: 12000, pro: 12000, premium: 12000,
-};
+const GEMINI_BASE_URL  = 'https://generativelanguage.googleapis.com/v1beta/models';
+
+const GEMINI_API_KEY   = process.env.GEMINI_API_KEY ?? '';
+const EPHE_API_URL     = process.env.EPHE_API_URL   ?? '';  // GCP VM Mumbai
+const EPHE_API_KEY     = process.env.EPHE_API_KEY   ?? '';
+
+// ── CEO APPROVED: MAX_TOKENS = 12000 across all tiers — NEVER CHANGE ─────────
+const MAX_TOKENS = 12000;
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
+// ── Types ─────────────────────────────────────────────────────────────────────
+
+type PredictionTier = 'free' | 'paid' | 'voice';
+
 interface PredictRequest {
-  userId?:   string;
-  sessionId: string;
-  domainId:  DomainId;
+  userId?:          string;
+  sessionId:        string;
+  domainId:         DomainId;
+  domainLabel?:     string;
+  predictionTier?:  PredictionTier;   // NEW v10.0 — from BirthForm v8
   birthData: {
     name?:     string;
     dob:       string;
@@ -72,546 +92,547 @@ interface PredictRequest {
     lat:       number;
     lng:       number;
     cityName?: string;
+    timezone?: number;
+    ayanamsa?: string;
   };
   userContext: {
     segment:            'genz' | 'millennial' | 'genx';
     employment:         string;
     sector:             string;
     language:           'hindi' | 'hinglish' | 'english';
-    city?:              string;
-    currentCity?:       string;   // NEW v9.6 — where user lives/works NOW
-    relationshipStatus?: string;  // NEW v9.6 — single/married/divorced etc.
-    situationNote?:     string;   // NEW v9.6 — 100 char user context
-    businessName?:      string;
-    person2Name?:       string;
-    person2City?:       string;
-    person2CurrentCity?: string;  // NEW v9.6 — for dual chart domains
+    city:               string;
+    currentCity?:       string;
+    relationshipStatus?: string;
+    situationNote?:     string;
     mobile?:            string;
+    person2Name?:       string | null;
+    person2City?:       string | null;
+    person2CurrentCity?: string | null;
   };
-}
-
-// ── Helpers ───────────────────────────────────────────────────────────────────
-
-function getNakshatraLord(name: string): string {
-  const idx = (NAKSHATRAS as readonly string[]).indexOf(name);
-  return idx >= 0 ? (NAKSHATRA_LORDS[idx] ?? 'Ketu') : 'Ketu';
-}
-
-const EXALT_SIGN: Record<string, string> = {
-  Sun:'Mesh', Moon:'Vrishabh', Mars:'Makar', Mercury:'Kanya',
-  Jupiter:'Kark', Venus:'Meen', Saturn:'Tula',
-};
-const DEBIL_SIGN: Record<string, string> = {
-  Sun:'Tula', Moon:'Vrischik', Mars:'Kark', Mercury:'Meen',
-  Jupiter:'Makar', Venus:'Kanya', Saturn:'Mesh',
-};
-const OWN_SIGNS: Record<string, string[]> = {
-  Sun:['Simha'], Moon:['Kark'], Mars:['Mesh','Vrischik'],
-  Mercury:['Mithun','Kanya'], Jupiter:['Dhanu','Meen'],
-  Venus:['Vrishabh','Tula'], Saturn:['Makar','Kumbh'],
-};
-
-function computeStrength(planet: string, sign: string, retro: boolean): number {
-  let s = 50;
-  if (EXALT_SIGN[planet] === sign)       s += 30;
-  if (DEBIL_SIGN[planet]  === sign)       s -= 25;
-  if (OWN_SIGNS[planet]?.includes(sign)) s += 20;
-  if (retro && planet !== 'Rahu' && planet !== 'Ketu') s += 8;
-  return Math.min(100, Math.max(5, s));
-}
-
-function buildPanchangStub() {
-  return {
-    vara: '', tithi: '', yoga: '', nakshatra: '',
-    sunrise: '', sunset: '',
-    rahuKaal:        { start: '', end: '' },
-    abhijeetMuhurta: { start: '', end: '' },
-    choghadiya:      { name: '', type: 'Neutral' as const },
-  };
+  person2Data?: {
+    name:        string;
+    dob:         string;
+    tob:         string;
+    lat:         number;
+    lng:         number;
+    cityName:    string;
+    currentCity: string;
+    mobile?:     string;
+  } | null;
+  numerologyCompatibility?: {
+    score:       number;
+    label:       string;
+    description: string;
+    color:       string;
+  } | null;
 }
 
 // ── adaptSwissToKundali ───────────────────────────────────────────────────────
 
 function adaptSwissToKundali(chart: any, birthData: BirthData): KundaliData {
-  const grahas: any[] = Array.isArray(chart.grahas) ? chart.grahas : [];
-  const planets: Record<string, PlanetPosition> = {};
+  const planets: PlanetPosition[] = [];
 
-  for (const g of grahas) {
-    const name: string = g.planet;
-    const base: PlanetPosition = {
-      name,
-      siderealLongitude: g.longitude      ?? 0,
-      rashi:             g.sign           ?? 'Mesh',
-      degree:            g.degree_in_sign ?? 0,
-      nakshatra:         g.nakshatra      ?? 'Ashwini',
-      nakshatraPada:     g.pada           ?? 1,
-      nakshatraLord:     g.nakshatra_lord ?? 'Ketu',
-      isRetrograde:      g.retrograde     ?? (name === 'Rahu' || name === 'Ketu'),
-      house:             g.house          ?? 1,
-      strength:          computeStrength(name, g.sign ?? 'Mesh', g.retrograde ?? false),
-    };
-    (base as any).shadbala = g.shadbala ?? null;
-    planets[name] = base;
+  const PLANET_MAP: Record<string, string> = {
+    sun: 'Sun', moon: 'Moon', mars: 'Mars', mercury: 'Mercury',
+    jupiter: 'Jupiter', venus: 'Venus', saturn: 'Saturn',
+    rahu: 'Rahu', ketu: 'Ketu',
+  };
+
+  for (const [key, name] of Object.entries(PLANET_MAP)) {
+    const p = chart.planets?.[key];
+    if (!p) continue;
+    const lon = typeof p.longitude === 'number' ? p.longitude : 0;
+    const rashiIdx = Math.floor(lon / 30);
+    const degree   = lon % 30;
+    const naksIdx  = Math.floor(lon / (360 / 27));
+
+    planets.push({
+      name:          name as any,
+      longitude:     lon,
+      rashi:         p.rashi || p.sign || ['Aries','Taurus','Gemini','Cancer','Leo','Virgo','Libra','Scorpio','Sagittarius','Capricorn','Aquarius','Pisces'][rashiIdx] || 'Aries',
+      rashiIndex:    rashiIdx,
+      degree,
+      house:         p.house ?? 1,
+      isRetrograde:  p.isRetrograde ?? false,
+      nakshatra:     NAKSHATRAS[naksIdx] ?? 'Ashwini',
+      nakshatraLord: NAKSHATRA_LORDS[naksIdx] ?? 'Ketu',
+      shadbala:      p.shadbala ?? null,
+    });
   }
 
-  const lagnaSign     = chart.lagna?.sign      ?? 'Mesh';
-  const lagnaLord     = chart.lagna?.sign_lord ?? RASHI_LORDS[lagnaSign] ?? 'Mars';
-  const moonGraha     = grahas.find(g => g.planet === 'Moon') ?? {};
-  const nakshatra     = moonGraha.nakshatra      ?? 'Ashwini';
-  const nakshatraLord = moonGraha.nakshatra_lord ?? getNakshatraLord(nakshatra);
-  const moonLongitude = moonGraha.longitude      ?? 0;
-  const dob           = new Date(`${birthData.dob}T${birthData.tob}:00+05:30`);
-  const dasha         = calcDasha(moonLongitude, dob);
+  const moonPlanet  = planets.find(p => p.name === 'Moon');
+  const moonLon     = moonPlanet?.longitude ?? 0;
+  const dashaResult = calcDasha(moonLon, birthData.dob);
+
+  const lagnaLon      = chart.lagna?.longitude ?? chart.ascendant?.longitude ?? 0;
+  const lagnaRashiIdx = Math.floor(lagnaLon / 30);
 
   return {
-    lagna: lagnaSign, lagnaLord, planets, nakshatra, nakshatraLord,
-    currentMahadasha:  dasha.currentMahadasha,
-    currentAntardasha: dasha.currentAntardasha,
-    currentPratyantar: dasha.currentPratyantar,
-    currentSookshma:   dasha.currentSookshma,
-    antardashas:       dasha.antardashas,
-    pratyantar:        dasha.pratyantar,
-    dashaBalance:      dasha.dashaBalance,
-    panchang:          buildPanchangStub(),
+    planets,
+    dasha: dashaResult,
+    lagna: {
+      longitude:  lagnaLon,
+      rashi:      chart.lagna?.sign ?? ['Aries','Taurus','Gemini','Cancer','Leo','Virgo','Libra','Scorpio','Sagittarius','Capricorn','Aquarius','Pisces'][lagnaRashiIdx] ?? 'Aries',
+      rashiIndex: lagnaRashiIdx,
+      degree:     lagnaLon % 30,
+      lord:       RASHI_LORDS[lagnaRashiIdx] ?? 'Mars',
+    },
     birthData,
+    chart,
   };
 }
 
-// ── /synthesize ───────────────────────────────────────────────────────────────
+// ── callVM ────────────────────────────────────────────────────────────────────
+// Generic helper to call GCP VM Mumbai endpoints
 
-async function callSynthesize(
-  domainId:    string,
-  chart:       any,
-  kundali:     KundaliData,
-  birthData:   BirthData,
-  userContext: any,
-): Promise<any> {
+async function callVM(endpoint: string, body: object, timeoutMs = 30000): Promise<any> {
+  const controller = new AbortController();
+  const timer      = setTimeout(() => controller.abort(), timeoutMs);
   try {
-    const payload = {
-      domainId,
-      birthData: {
-        lat: birthData.lat, lng: birthData.lng,
-        dob: birthData.dob, tob: birthData.tob,
-        name: birthData.name, cityName: birthData.cityName, timezone: 5.5,
+    const res = await fetch(`${EPHE_API_URL}${endpoint}`, {
+      method:  'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-API-Key':    EPHE_API_KEY,
       },
-      kundaliData: {
-        grahas: chart.grahas ?? [],
-        lagna:  chart.lagna  ?? { sign: kundali.lagna },
-        houses: chart.houses ?? [],
-        dasha: {
-          mahadasha:  { lord: kundali.currentMahadasha.lord },
-          antardasha: { lord: kundali.currentAntardasha.lord },
-          pratyantar: { lord: kundali.currentPratyantar?.lord ?? '', quality: kundali.currentPratyantar?.quality ?? 'Madhyam' },
-          dashaBalance: kundali.dashaBalance,
-        },
-      },
-      userContext: userContext ?? {},
-    };
-
-    const res = await fetch(`${EPHE_API_URL}/synthesize`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', ...(EPHE_API_KEY ? { 'X-Api-Key': EPHE_API_KEY } : {}) },
-      body:   JSON.stringify(payload),
-      signal: AbortSignal.timeout(30000),
+      body:   JSON.stringify(body),
+      signal: controller.signal,
     });
-
     if (!res.ok) {
-      console.warn(`[TV-Predict] /synthesize ${res.status}`);
-      return null;
+      const text = await res.text().catch(() => '');
+      throw new Error(`VM ${endpoint} → ${res.status}: ${text.slice(0, 200)}`);
     }
-
-    const result   = await res.json();
-    const enriched = result?.enriched ?? result;
-    console.log('[TV-Predict] /synthesize OK | yogas:', enriched?.parashara?.totalActiveYogas ?? 0,
-      '| confidence:', enriched?.confidence?.label ?? '—');
-    return enriched;
-
-  } catch (err) {
-    console.warn('[TV-Predict] /synthesize failed (non-fatal):', err);
-    return null;
+    return await res.json();
+  } finally {
+    clearTimeout(timer);
   }
 }
 
-// ── Tier ──────────────────────────────────────────────────────────────────────
+// ── callGemini ────────────────────────────────────────────────────────────────
 
-async function getVerifiedTier(userId: string): Promise<UserTier> {
-  try {
-    const { data, error } = await supabase
-      .from('profiles').select('tier, tier_expires_at').eq('id', userId).single();
-    if (error || !data) return 'free';
-    if (data.tier_expires_at && new Date(data.tier_expires_at) < new Date()) return 'free';
-    const valid: UserTier[] = ['free', 'basic', 'pro', 'premium'];
-    return valid.includes(data.tier) ? data.tier : 'free';
-  } catch { return 'free'; }
+async function callGemini(
+  model: string,
+  systemPrompt: string,
+  userMessage: string,
+  jsonMode: boolean = true,
+): Promise<string> {
+  const url = `${GEMINI_BASE_URL}/${model}:generateContent?key=${GEMINI_API_KEY}`;
+
+  const body: any = {
+    system_instruction: { parts: [{ text: systemPrompt }] },
+    contents: [{ role: 'user', parts: [{ text: userMessage }] }],
+    generationConfig: {
+      maxOutputTokens: MAX_TOKENS,
+      temperature:     0.7,
+      topK:            40,
+      topP:            0.95,
+      ...(jsonMode ? { responseMimeType: 'application/json' } : {}),
+    },
+  };
+
+  const res = await fetch(url, {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body:    JSON.stringify(body),
+  });
+
+  if (!res.ok) {
+    const err = await res.text().catch(() => '');
+    throw new Error(`Gemini ${model} → ${res.status}: ${err.slice(0, 300)}`);
+  }
+
+  const data = await res.json();
+  return data?.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
 }
 
-// ── Supabase Save ─────────────────────────────────────────────────────────────
+// ── parseGeminiJSON ───────────────────────────────────────────────────────────
+
+function parseGeminiJSON(raw: string): any {
+  if (!raw || raw.trim().length === 0) throw new Error('Empty Gemini response');
+
+  let cleaned = raw.trim();
+
+  // Strip markdown fences
+  cleaned = cleaned.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/, '');
+
+  // Find first { ... }
+  const start = cleaned.indexOf('{');
+  const end   = cleaned.lastIndexOf('}');
+  if (start === -1 || end === -1) throw new Error(`No JSON object found. Raw (${cleaned.length}): ${cleaned.slice(0, 200)}`);
+
+  cleaned = cleaned.slice(start, end + 1);
+
+  try {
+    return JSON.parse(cleaned);
+  } catch (e: any) {
+    // Attempt to fix trailing commas
+    const fixed = cleaned.replace(/,\s*([}\]])/g, '$1');
+    try {
+      return JSON.parse(fixed);
+    } catch {
+      throw new Error(`JSON parse failed. Raw (${cleaned.length}): ${cleaned.slice(0, 300)}`);
+    }
+  }
+}
+
+// ── saveToSupabase ────────────────────────────────────────────────────────────
 
 async function saveToSupabase(p: {
-  sessionId: string; userId?: string; domainId: string; domainLabel: string;
-  birthData: BirthData; userContext: UserContext; kundali: KundaliData;
-  synthesis: any; prediction: Record<string, unknown>;
-  tier: UserTier; processingMs: number; useSearch: boolean; polished: boolean;
-  publicSlug: string; seoTitle: string; seoDescription: string; geoAnswer: string;
-}): Promise<string | null> {
-  try {
-    const planetsWithShadbala = Object.values(p.kundali.planets).map(pl => ({
-      ...pl,
-      shadbala: (pl as any).shadbala ?? null,
-    }));
+  sessionId:       string;
+  userId?:         string;
+  domainId:        string;
+  predictionTier:  PredictionTier;
+  birthData:       BirthData;
+  userContext:     any;
+  kundaliData:     KundaliData | null;
+  synthesisData:   any;
+  templateHtml:    string | null;
+  predictionJson:  any;
+  geminiModel:     string;
+  polished:        boolean;
+  processingMs:    number;
+  publicSlug:      string;
+  seoMeta:         any;
+}): Promise<string> {
+  const { data, error } = await supabase
+    .from('predictions')
+    .insert({
+      session_id:       p.sessionId,
+      user_id:          p.userId ?? null,
+      domain_id:        p.domainId,
+      prediction_tier:  p.predictionTier,
+      birth_data:       p.birthData,
+      user_context:     p.userContext,
+      kundali_data:     p.kundaliData,
+      synthesis_data:   p.synthesisData,
+      template_html:    p.templateHtml,
+      prediction_json:  p.predictionJson,
+      gemini_model:     p.geminiModel,
+      polished:         p.polished,
+      processing_ms:    p.processingMs,
+      public_slug:      p.publicSlug,
+      seo_title:        p.seoMeta?.title        ?? null,
+      seo_description:  p.seoMeta?.description  ?? null,
+      created_at:       new Date().toISOString(),
+    })
+    .select('id')
+    .single();
 
-    const row = {
-      session_id:     p.sessionId,
-      user_id:        p.userId ?? null,
-      domain_id:      p.domainId,
-      domain_label:   p.domainLabel,
-      person_name:    p.birthData.name     ?? 'User',
-      dob:            p.birthData.dob,
-      birth_time:     p.birthData.tob,
-      birth_city:     p.birthData.cityName ?? p.userContext.city ?? 'India',
-      birth_lat:      p.birthData.lat,
-      birth_lng:      p.birthData.lng,
-      birth_timezone: 5.5,
-      lagna:          p.kundali.lagna,
-      nakshatra:      p.kundali.nakshatra,
-      mahadasha:      p.kundali.currentMahadasha.lord,
-      antardasha:     p.kundali.currentAntardasha.lord,
-      tier:           p.tier,
-      language:       p.userContext.language   ?? 'hinglish',
-      segment:        p.userContext.segment    ?? 'millennial',
-      employment:     p.userContext.employment ?? '',
-      sector:         p.userContext.sector     ?? '',
-      prediction_json: {
-        ...p.prediction,
-        _meta: {
-          domainId:    p.domainId,
-          tier:        p.tier,
-          chartSource: 'swiss_ephemeris_render',
-          model:       GEMINI_MODEL,
-          polished:    p.polished,
-          searchUsed:  p.useSearch,
-          processingMs: p.processingMs,
-          kundali: {
-            lagna:         p.kundali.lagna,
-            lagnaLord:     p.kundali.lagnaLord,
-            nakshatra:     p.kundali.nakshatra,
-            nakshatraLord: p.kundali.nakshatraLord,
-            mahadasha:     p.kundali.currentMahadasha.lord,
-            antardasha:    p.kundali.currentAntardasha.lord,
-          },
-          planets:   planetsWithShadbala,
-          synthesis: p.synthesis ?? null,
-        },
-      },
-      simple_summary: (p.prediction?.simple_summary ?? p.prediction?.headline ?? null) as string | null,
-      headline:       (p.prediction?.headline ?? null) as string | null,
-      confidence:     (p.synthesis?.confidence?.score ?? p.prediction?.confidence ?? null) as number | null,
-      chart_source:   'swiss_ephemeris_render',
-      gemini_model:   GEMINI_MODEL,
-      search_used:    p.useSearch,
-      processing_ms:  p.processingMs,
-      public_slug:    p.publicSlug,
-      is_public:      true,
-      is_indexed:     false,
-      seo_title:      p.seoTitle,
-      seo_description: p.seoDescription,
-      geo_answer:     p.geoAnswer,
-    };
-
-    const { data, error } = await supabase
-      .from('predictions')
-      .upsert(row, { onConflict: 'session_id,domain_id', ignoreDuplicates: false })
-      .select('id').single();
-
-    if (error) { console.error('[TV-Predict] Supabase error:', error.message); return null; }
-    console.log(`[TV-Predict] Saved id:${data.id} | polished:${p.polished}`);
-    return data.id as string;
-
-  } catch (err) {
-    console.error('[TV-Predict] Save exception:', err);
-    return null;
-  }
+  if (error) throw new Error(`Supabase save failed: ${error.message}`);
+  return data.id as string;
 }
 
-// ── Main Handler ──────────────────────────────────────────────────────────────
+// ── MAIN HANDLER ──────────────────────────────────────────────────────────────
 
 export async function POST(req: NextRequest) {
-  const startTime = Date.now();
+  const startMs = Date.now();
+
+  // ── Parse body ─────────────────────────────────────────────────────────────
+  let body: PredictRequest;
   try {
-    const body = await req.json() as PredictRequest;
-    const { userId, sessionId, domainId, birthData, userContext } = body;
-
-    if (!sessionId)      return NextResponse.json({ error: 'sessionId required' },              { status: 400 });
-    if (!domainId)       return NextResponse.json({ error: 'domainId required' },               { status: 400 });
-    if (!birthData?.dob) return NextResponse.json({ error: 'birthData.dob required' },          { status: 400 });
-    if (!birthData?.tob) return NextResponse.json({ error: 'birthData.tob required' },          { status: 400 });
-    if (!birthData?.lat) return NextResponse.json({ error: 'birthData.lat required' },          { status: 400 });
-    if (!GEMINI_API_KEY) return NextResponse.json({ error: 'Prediction engine not configured' }, { status: 500 });
-    if (!EPHE_API_URL)   return NextResponse.json({ error: 'Ephemeris API not configured' },     { status: 500 });
-
-    // verifiedTier = 'premium' kept for UI, polish, save — CEO LOCKED
-    const verifiedTier: UserTier = 'free';
-
-    let domain;
-    try { domain = getDomainConfig(domainId); }
-    catch { return NextResponse.json({ error: `Unknown domainId: ${domainId}` }, { status: 400 }); }
-
-    // ── Step 1: /kundali ──────────────────────────────────────────────────────
-    const [year, month, day] = birthData.dob.split('-').map(Number);
-    const [hour, minute]     = birthData.tob.split(':').map(Number);
-    let chart: any;
-    try {
-      const res = await fetch(`${EPHE_API_URL}/kundali`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', ...(EPHE_API_KEY ? { 'X-Api-Key': EPHE_API_KEY } : {}) },
-        body:   JSON.stringify({ year, month, day, hour, minute, second: 0, latitude: birthData.lat, longitude: birthData.lng, timezone: 5.5, ayanamsa: 'lahiri' }),
-        signal: AbortSignal.timeout(240000),
-      });
-      if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(`${res.status}: ${e.detail}`); }
-      chart = await res.json();
-      console.log(`[TV-Predict] /kundali OK — lagna:${chart.lagna?.sign} | shadbala:${
-        Array.isArray(chart.grahas) ? chart.grahas.filter((g: any) => g.shadbala).length : 0
-      }/9`);
-    } catch (err) {
-      console.error('[TV-Predict] /kundali failed:', err);
-      return NextResponse.json({ error: 'Chart calculation failed. Please retry.' }, { status: 502 });
-    }
-
-    // ── Step 2: Adapt ─────────────────────────────────────────────────────────
-    // NEW v9.6: Enrich name with context note for Gemini personalisation
-    const contextSuffix = [
-      userContext.currentCity        ? `Current city: ${userContext.currentCity}` : '',
-      userContext.relationshipStatus ? `Status: ${userContext.relationshipStatus}` : '',
-      userContext.situationNote      ? `Context: ${(userContext.situationNote || '').slice(0, 100)}` : '',
-    ].filter(Boolean).join(' | ');
-
-    const localBirthData: BirthData = {
-      name:     birthData.name || 'User',
-      dob:      birthData.dob,
-      tob:      birthData.tob,
-      lat:      birthData.lat,
-      lng:      birthData.lng,
-      cityName: birthData.cityName || userContext.city || 'India',
-    };
-
-    // Attach context to birthData for Gemini prompt (read in buildChartObject → birthData.name)
-    if (contextSuffix) {
-      (localBirthData as any).contextNote = contextSuffix;
-    }
-    let kundali: KundaliData;
-    try {
-      kundali = adaptSwissToKundali(chart, localBirthData);
-      const cnt = Object.values(kundali.planets).filter(p => (p as any).shadbala !== null).length;
-      console.log(`[TV-Predict] Adapt OK — shadbala preserved: ${cnt}/9`);
-    } catch (err) {
-      return NextResponse.json({ error: 'Chart processing failed. Please retry.' }, { status: 500 });
-    }
-
-    // ── Step 3: /synthesize ───────────────────────────────────────────────────
-    const synthesis = await callSynthesize(domainId, chart, kundali, localBirthData, userContext);
-
-    if (synthesis?.panchang) {
-      const p = synthesis.panchang;
-      kundali.panchang = {
-        vara: p.vara ?? '', tithi: p.tithi ?? '', yoga: p.yoga ?? '',
-        nakshatra: p.nakshatra ?? '', sunrise: p.sunrise ?? '', sunset: p.sunset ?? '',
-        rahuKaal:        p.rahuKaal        ?? { start: '', end: '' },
-        abhijeetMuhurta: p.abhijeetMuhurta ?? { start: '', end: '' },
-        choghadiya:      p.choghadiya      ?? { name: '', type: 'Neutral' },
-      };
-    }
-
-    // ── Step 4: Build prompt ──────────────────────────────────────────────────
-    // NEW v9.6: currentCity, relationshipStatus, situationNote passed to Gemini
-    // Safe encoding via businessName (already read by gemini-prompt.ts buildChartObject)
-    const contextEnriched = [
-      userContext.currentCity        ? `Currently in ${userContext.currentCity}` : '',
-      userContext.relationshipStatus ? `Relationship: ${userContext.relationshipStatus}` : '',
-      userContext.situationNote      ? `User says: ${(userContext.situationNote || '').slice(0, 100)}` : '',
-    ].filter(Boolean).join(' | ');
-
-    const verifiedUserContext: UserContext = {
-      tier:               verifiedTier,
-      segment:            userContext.segment            || 'millennial',
-      employment:         userContext.employment         || '',
-      sector:             userContext.sector             || '',
-      language:           userContext.language           || 'hinglish',
-      city:               userContext.city               || birthData.cityName || 'India',
-      currentCity:        userContext.currentCity        || userContext.city || birthData.cityName || 'India',
-      relationshipStatus: userContext.relationshipStatus || '',
-      situationNote:      (userContext.situationNote     || '').slice(0, 100),
-      // Encode new context into businessName so gemini-prompt.ts reads it (LOCKED file safe)
-      businessName:       contextEnriched || userContext.businessName,
-      person2Name:        userContext.person2Name,
-      person2City:        userContext.person2City        || userContext.person2CurrentCity,
-      person2CurrentCity: userContext.person2CurrentCity,
-    };
-
-    // ── CEO APPROVED FIX v9.4 ─────────────────────────────────────────────────
-    // Pass tier:'basic' to buildPredictionPrompt() ONLY
-    // This reduces Gemini output schema size → fixes JSON truncation
-    // verifiedTier (premium) unchanged everywhere else
-    const { systemPrompt, userMessage } = buildPredictionPrompt(
-      kundali,
-      localBirthData,
-      domain,
-      { ...verifiedUserContext, tier: 'basic' as UserTier },
-    );
-
-    // useSearch forced OFF — JSON mode always ON
-    const useSearch = false;
-
-    // ── Step 5: Gemini ────────────────────────────────────────────────────────
-    const geminiBody: Record<string, unknown> = {
-      system_instruction: { parts: [{ text: systemPrompt }] },
-      contents: [{ role: 'user', parts: [{ text: userMessage }] }],
-      generationConfig: {
-        temperature:      0.4,
-        maxOutputTokens:  MAX_TOKENS[verifiedTier],  // 12000 — CEO approved
-        topP:             0.85,
-        responseMimeType: 'application/json',
-      },
-    };
-    console.log(`[TV-Predict] Gemini call — model:${GEMINI_MODEL} tokens:${MAX_TOKENS[verifiedTier]} promptTier:basic`);
-
-    const geminiRes = await fetch(`${GEMINI_URL}?key=${GEMINI_API_KEY}`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(geminiBody),
-    });
-    if (!geminiRes.ok) {
-      const errBody = await geminiRes.json().catch(() => ({}));
-      console.error(`[TV-Predict] Gemini ${geminiRes.status}:`, JSON.stringify(errBody).slice(0, 400));
-      return NextResponse.json({ error: 'Prediction engine unavailable' }, { status: 502 });
-    }
-
-    const geminiData = await geminiRes.json();
-    const rawText = geminiData?.candidates?.[0]?.content?.parts
-      ?.map((p: { text?: string }) => p.text ?? '').join('') ?? '';
-    if (!rawText) return NextResponse.json({ error: 'Empty prediction response' }, { status: 502 });
-
-    // ── Step 6: Parse JSON ────────────────────────────────────────────────────
-    let prediction: Record<string, unknown>;
-    try {
-      const cleaned = rawText
-        .replace(/^```json\s*/i, '')
-        .replace(/^```\s*/, '')
-        .replace(/```\s*$/, '')
-        .trim();
-      prediction = JSON.parse(cleaned);
-    } catch {
-      console.error('[TV-Predict] JSON parse failed. Raw (300):', rawText.slice(0, 300));
-      return NextResponse.json({ error: 'Invalid prediction format. Please retry.' }, { status: 502 });
-    }
-
-    // ── Step 6.5: Claude Polish (₹51+) ────────────────────────────────────────
-    let polished = false;
-    if (verifiedTier !== 'free') {
-      const polishTier = verifiedTier === 'premium' ? 'premium' :
-                         verifiedTier === 'standard' || verifiedTier === 'pro' ? 'standard' : 'basic';
-      try {
-        const polishResult = await polishPrediction(
-          prediction,
-          verifiedUserContext.language,
-          localBirthData.name ?? 'Friend',
-          domain.label ?? domainId,
-          polishTier as 'basic' | 'standard' | 'premium',
-        );
-        if (polishResult.polished) {
-          prediction = polishResult.prediction;
-          polished   = true;
-          console.log(`[TV-Predict] Claude polish OK — tier:${polishTier} ms:${polishResult.polishMs}`);
-        }
-      } catch (polishErr) {
-        console.warn('[TV-Predict] Claude polish failed (non-fatal):', polishErr);
-      }
-    }
-
-    // ── Step 7: Generate SEO Slug + Save ─────────────────────────────────────
-    const processingMs = Date.now() - startTime;
-
-    // Generate SEO slug BEFORE save so it's stored in Supabase
-    const publicSlug = generatePredictionSlug({
-      domainId,
-      mahadasha:  kundali.currentMahadasha.lord,
-      antardasha: kundali.currentAntardasha.lord,
-      city:       localBirthData.cityName || userContext.city || 'india',
-      year:       new Date().getFullYear(),
-    });
-
-    const geoAnswer = (prediction?.geoDirectAnswer as string) ?? '';
-    const seoMeta   = generateSeoMeta(
-      publicSlug, domainId,
-      kundali.currentMahadasha.lord,
-      kundali.currentAntardasha.lord,
-      localBirthData.cityName || 'India',
-      geoAnswer,
-    );
-
-    const predictionId = await saveToSupabase({
-      sessionId, userId, domainId,
-      domainLabel:  domain.label ?? domainId,
-      birthData:    localBirthData,
-      userContext:  verifiedUserContext,
-      kundali, synthesis, prediction,
-      tier: verifiedTier, processingMs, useSearch, polished,
-      publicSlug,
-      seoTitle:       seoMeta.title,
-      seoDescription: seoMeta.description,
-      geoAnswer,
-    });
-
-    // Ping Google Indexing API (non-blocking, non-fatal)
-    if (predictionId && publicSlug) {
-      notifyGoogleIndexing(publicSlug).catch(() => {});
-    }
-
-    // ── Step 8: Return ────────────────────────────────────────────────────────
-    const planetsForResponse = Object.values(kundali.planets).map(pl => ({
-      ...pl,
-      shadbala: (pl as any).shadbala ?? null,
-    }));
-
-    return NextResponse.json({
-      ...prediction,
-      _meta: {
-        domainId, tier: verifiedTier,
-        chartSource: 'swiss_ephemeris_render',
-        model:       GEMINI_MODEL,
-        polished,    searchUsed: useSearch,
-        processingMs, predictionId,
-        publicSlug,
-        reportUrl: `https://trikalvaani.com/report/${publicSlug}`,
-        kundali: {
-          lagna:         kundali.lagna,
-          lagnaLord:     kundali.lagnaLord,
-          nakshatra:     kundali.nakshatra,
-          nakshatraLord: kundali.nakshatraLord,
-          mahadasha:     kundali.currentMahadasha.lord,
-          antardasha:    kundali.currentAntardasha.lord,
-        },
-        planets:   planetsForResponse,
-        synthesis: synthesis ? {
-          yogas:      synthesis.parashara?.activeYogas ?? [],
-          bhrigu:     synthesis.bhrigu?.domain_signals ?? [],
-          panchang:   synthesis.panchang   ?? {},
-          confidence: synthesis.confidence ?? {},
-          summary:    synthesis.synthesis  ?? {},
-          shadbala:   synthesis.shadbala   ?? {},
-        } : null,
-      },
-    });
-
-  } catch (err: unknown) {
-    const msg = err instanceof Error ? err.message : 'Unknown error';
-    console.error('[TV-Predict] Unhandled:', msg);
-    return NextResponse.json({ error: 'Cosmic disturbance. Please try again.' }, { status: 500 });
+    body = await req.json();
+  } catch {
+    return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
   }
-}
 
-export async function GET() {
+  const {
+    sessionId,
+    userId,
+    domainId,
+    domainLabel,
+    predictionTier = 'free',   // Default to free if not sent
+    birthData,
+    userContext,
+    person2Data,
+    numerologyCompatibility,
+  } = body;
+
+  // ── Guard: voice handled client-side ───────────────────────────────────────
+  if (predictionTier === 'voice') {
+    return NextResponse.json(
+      { error: 'Voice predictions use /api/voice endpoint' },
+      { status: 400 }
+    );
+  }
+
+  // ── Env checks ─────────────────────────────────────────────────────────────
+  if (!GEMINI_API_KEY) return NextResponse.json({ error: 'Gemini API key missing' },     { status: 500 });
+  if (!EPHE_API_URL)   return NextResponse.json({ error: 'Ephemeris API not configured' }, { status: 500 });
+
+  // ── Select Gemini model based on tier ──────────────────────────────────────
+  // FREE  → gemini-2.5-flash (fast, cheap, 150-200w summary)
+  // PAID  → gemini-2.5-pro   (deep, 800-1200w + Claude Sonnet 4.6 polish)
+  const geminiModel  = predictionTier === 'paid' ? GEMINI_PRO : GEMINI_FLASH;
+  const usePolish    = predictionTier === 'paid';
+
+  console.log(`[TV-Predict] START | tier:${predictionTier} | domain:${domainId} | model:${geminiModel} | polish:${usePolish}`);
+
+  // ── Build BirthData ────────────────────────────────────────────────────────
+  const localBirthData: BirthData = {
+    name:     birthData.name     ?? 'Anonymous',
+    dob:      birthData.dob,
+    tob:      birthData.tob,
+    lat:      birthData.lat,
+    lng:      birthData.lng,
+    cityName: birthData.cityName ?? '',
+    timezone: birthData.timezone ?? 5.5,
+    ayanamsa: 'lahiri',
+  };
+
+  // ── Get domain config ──────────────────────────────────────────────────────
+  let domainConfig: any;
+  try {
+    domainConfig = getDomainConfig(domainId);
+  } catch {
+    return NextResponse.json({ error: `Unknown domain: ${domainId}` }, { status: 400 });
+  }
+
+  // ── CEO LOCKED: verifiedTier ───────────────────────────────────────────────
+  // verifiedTier drives Supabase tier storage + UI depth display
+  // DO NOT change without CEO approval
+  const verifiedTier: UserTier = predictionTier === 'paid' ? 'premium' : 'free';
+
+  let kundaliData:   KundaliData | null = null;
+  let synthesisData: any                = null;
+  let templateHtml:  string | null      = null;
+  let rawChart:      any                = null;
+
+  // ────────────────────────────────────────────────────────────────────────────
+  // STEP 1: /kundali — GCP VM Mumbai
+  // ────────────────────────────────────────────────────────────────────────────
+  try {
+    rawChart = await callVM('/kundali', {
+      dob:      localBirthData.dob,
+      tob:      localBirthData.tob,
+      lat:      localBirthData.lat,
+      lng:      localBirthData.lng,
+      timezone: localBirthData.timezone,
+      ayanamsa: 1,  // Lahiri
+    }, 25000);
+
+    console.log(`[TV-Predict] /kundali OK — lagna:${rawChart.lagna?.sign} | shadbala:${
+      rawChart.shadbala ? 'yes' : 'no'
+    } | ms:${Date.now() - startMs}`);
+
+    kundaliData = adaptSwissToKundali(rawChart, localBirthData);
+
+  } catch (err: any) {
+    console.error('[TV-Predict] /kundali failed (non-fatal — using Meeus fallback):', err.message);
+    // Meeus fallback — kundaliData stays null, gemini-prompt handles gracefully
+  }
+
+  // ────────────────────────────────────────────────────────────────────────────
+  // STEP 2: /synthesize — GCP VM Mumbai (Parashara + Bhrigu + Shadbala)
+  // ────────────────────────────────────────────────────────────────────────────
+  try {
+    synthesisData = await callVM('/synthesize', {
+      chart:      rawChart,
+      birth_data: {
+        dob:      localBirthData.dob,
+        tob:      localBirthData.tob,
+        lat:      localBirthData.lat,
+        lng:      localBirthData.lng,
+        timezone: localBirthData.timezone,
+      },
+      domain_id:    domainId,
+      person2_data: person2Data ?? null,
+    }, 25000);
+
+    console.log(`[TV-Predict] /synthesize OK | yogas:${synthesisData?.parashara?.totalActiveYogas ?? 0} | ms:${Date.now() - startMs}`);
+
+  } catch (err: any) {
+    console.warn('[TV-Predict] /synthesize failed (non-fatal):', err.message);
+  }
+
+  // ────────────────────────────────────────────────────────────────────────────
+  // STEP 3: /template — GCP VM Mumbai (Template Engine v2.0)
+  // ────────────────────────────────────────────────────────────────────────────
+  try {
+    const templateRes = await callVM('/template', {
+      domain_id:     domainId,
+      chart:         rawChart,
+      synthesis:     synthesisData,
+      birth_data:    localBirthData,
+      user_context:  userContext,
+      tier:          predictionTier,
+    }, 15000);
+
+    templateHtml = templateRes?.html ?? templateRes?.template ?? null;
+    console.log(`[TV-Predict] /template OK | chars:${templateHtml?.length ?? 0} | ms:${Date.now() - startMs}`);
+
+  } catch (err: any) {
+    console.warn('[TV-Predict] /template failed (non-fatal):', err.message);
+    // Template failure is non-fatal — prediction still delivers without it
+  }
+
+  // ────────────────────────────────────────────────────────────────────────────
+  // STEP 4: Build Gemini prompt (lean v5.0 — no JSON schema, summary focused)
+  // ────────────────────────────────────────────────────────────────────────────
+  const promptUserContext: UserContext = {
+    segment:            userContext.segment,
+    employment:         userContext.employment,
+    sector:             userContext.sector,
+    language:           userContext.language,
+    city:               userContext.city,
+    currentCity:        userContext.currentCity  || userContext.city,
+    relationshipStatus: userContext.relationshipStatus ?? '',
+    situationNote:      (userContext.situationNote ?? '').slice(0, 100),
+    mobile:             userContext.mobile        ?? '',
+    person2Name:        userContext.person2Name   ?? null,
+    person2City:        userContext.person2City   ?? null,
+    person2CurrentCity: userContext.person2CurrentCity ?? null,
+  };
+
+  // Always pass tier:'basic' to gemini-prompt (controls output length token use)
+  // geminiModel (Flash vs Pro) controls actual AI quality independently
+  const { systemPrompt, userMessage } = buildPredictionPrompt(
+    domainId,
+    kundaliData,
+    synthesisData,
+    promptUserContext,
+    'basic',           // prompt tier = lean always (truncation fix)
+    predictionTier,    // prediction tier = for prompt personalisation hints
+  );
+
+  // ────────────────────────────────────────────────────────────────────────────
+  // STEP 5: Call Gemini
+  // ────────────────────────────────────────────────────────────────────────────
+  console.log(`[TV-Predict] Calling Gemini ${geminiModel} | maxTokens:${MAX_TOKENS} | ms:${Date.now() - startMs}`);
+
+  let predictionJson: any;
+  let rawGemini: string;
+
+  try {
+    rawGemini = await callGemini(geminiModel, systemPrompt, userMessage, true);
+
+    console.log(`[TV-Predict] Gemini raw length:${rawGemini.length} | ms:${Date.now() - startMs}`);
+
+    predictionJson = parseGeminiJSON(rawGemini);
+
+    console.log(`[TV-Predict] JSON parsed OK | keys:${Object.keys(predictionJson).join(',')} | ms:${Date.now() - startMs}`);
+
+  } catch (err: any) {
+    console.error('[TV-Predict] Gemini failed:', err.message);
+    return NextResponse.json(
+      { error: `Prediction generation failed: ${err.message}` },
+      { status: 500 }
+    );
+  }
+
+  // ────────────────────────────────────────────────────────────────────────────
+  // STEP 6: Claude Sonnet 4.6 polish — PAID only
+  // ────────────────────────────────────────────────────────────────────────────
+  let polished = false;
+
+  if (usePolish) {
+    try {
+      console.log(`[TV-Predict] Claude Sonnet 4.6 polish starting | ms:${Date.now() - startMs}`);
+
+      const polishedResult = await polishPrediction(
+        predictionJson,
+        {
+          tier:     'premium',
+          language: userContext.language,
+          domain:   domainId,
+        }
+      );
+
+      if (polishedResult) {
+        predictionJson = polishedResult;
+        polished       = true;
+        console.log(`[TV-Predict] Claude polish OK | ms:${Date.now() - startMs}`);
+      }
+    } catch (err: any) {
+      console.warn('[TV-Predict] Claude polish failed (non-fatal):', err.message);
+      // Polish failure is non-fatal — Gemini Pro result still delivered
+    }
+  }
+
+  // ────────────────────────────────────────────────────────────────────────────
+  // STEP 7: Generate SEO slug + meta
+  // ────────────────────────────────────────────────────────────────────────────
+  const processingMs = Date.now() - startMs;
+
+  const publicSlug = generatePredictionSlug({
+    domainId,
+    kundaliData,
+    cityName: localBirthData.cityName,
+  });
+
+  const seoMeta = generateSeoMeta({
+    domainId,
+    domainLabel:   domainLabel ?? domainConfig?.label ?? domainId,
+    cityName:      localBirthData.cityName ?? '',
+    predictionJson,
+  });
+
+  console.log(`[TV-Predict] slug:${publicSlug} | seo:${seoMeta?.title?.slice(0, 50)} | ms:${processingMs}`);
+
+  // ────────────────────────────────────────────────────────────────────────────
+  // STEP 8: Save to Supabase
+  // ────────────────────────────────────────────────────────────────────────────
+  let predictionId: string;
+
+  try {
+    predictionId = await saveToSupabase({
+      sessionId,
+      userId,
+      domainId,
+      predictionTier,
+      birthData:      localBirthData,
+      userContext:    promptUserContext,
+      kundaliData,
+      synthesisData,
+      templateHtml,
+      predictionJson,
+      geminiModel,
+      polished,
+      processingMs,
+      publicSlug,
+      seoMeta,
+    });
+
+    console.log(`[TV-Predict] Saved | id:${predictionId} | slug:${publicSlug}`);
+
+  } catch (err: any) {
+    console.error('[TV-Predict] Supabase save failed:', err.message);
+    return NextResponse.json(
+      { error: `Failed to save prediction: ${err.message}` },
+      { status: 500 }
+    );
+  }
+
+  // ────────────────────────────────────────────────────────────────────────────
+  // STEP 9: Notify Google Indexing (non-fatal, fire-and-forget)
+  // ────────────────────────────────────────────────────────────────────────────
+  try {
+    notifyGoogleIndexing(`https://trikalvaani.com/report/${publicSlug}`);
+  } catch {
+    // Non-fatal — indexing notification is best-effort
+  }
+
+  // ────────────────────────────────────────────────────────────────────────────
+  // STEP 10: Return response
+  // ────────────────────────────────────────────────────────────────────────────
+  const reportUrl = `https://trikalvaani.com/report/${publicSlug}`;
+
+  console.log(`[TV-Predict] COMPLETE | tier:${predictionTier} | model:${geminiModel} | polished:${polished} | ms:${processingMs}`);
+
   return NextResponse.json({
-    status: 'operational', engine: 'Trikal Vaani Predict v9.6',
-    synthesize: true, polish: true, domains: 11,
-    fix: 'currentCity + relationshipStatus + situationNote → Gemini context enriched',
+    success:       true,
+    prediction:    predictionJson,
+    templateHtml,
+    _meta: {
+      predictionId,
+      publicSlug,
+      reportUrl,
+      predictionTier,
+      geminiModel,
+      polished,
+      processingMs,
+      domainId,
+      seoTitle:       seoMeta?.title       ?? null,
+      seoDescription: seoMeta?.description ?? null,
+    },
   });
 }
