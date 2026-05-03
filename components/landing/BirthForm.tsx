@@ -3,15 +3,20 @@
  * TRIKAL VAANI — BirthForm Component
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: components/landing/BirthForm.tsx
- * VERSION: 7.0 — currentCity + relationshipStatus + situationNote added
+ * VERSION: 8.0 — Free + Paid ₹51 + Voice CTA + SEO/GEO + Trikal Branding
  * SIGNED: ROHIIT GUPTA, CEO
  *
- * v7.0 CHANGES vs v6.0:
- *   - currentCity field added (where user lives/works NOW)
- *   - relationshipStatus field (shown for relationship/marriage domains)
- *   - situationNote field (100 char max, optional, all domains)
- *   - person2CurrentCity added for dual chart domains
- *   - All new fields passed to /api/predict userContext
+ * v8.0 CHANGES vs v7.0:
+ *   ✅ "Jini" → "Trikal" everywhere in UI
+ *   ✅ 3-tier prediction buttons: Free | Paid ₹51 | Voice ₹11
+ *   ✅ Dynamic rotating voice taglines above form
+ *   ✅ SEO/GEO rich content — keywords, authority signals
+ *   ✅ Trust badges (Swiss Ephemeris, BPHS, Bhrigu, Shadbala)
+ *   ✅ Maa Shakti CTA below form
+ *   ✅ Gemini model routing: Free=Flash, Paid=Pro+Claude
+ *   ✅ predictionTier passed to /api/predict
+ *   ✅ Voice redirects to /voice route (Phase 4)
+ *   ✅ All v7.0 fields preserved
  * ============================================================
  */
 
@@ -21,6 +26,8 @@ import { useState, useCallback, useRef, useEffect } from "react"
 import { useRouter } from "next/navigation"
 
 // ── Types ─────────────────────────────────────────────────────────────────────
+
+export type PredictionTier = 'free' | 'paid' | 'voice'
 
 export interface BirthFormFields {
   name:                string
@@ -39,11 +46,9 @@ export interface BirthFormFields {
   mobile:              string
   countryCode:         string
   countryDigits:       number
-  // ── NEW v7.0 ──
   currentCity:         string
   relationshipStatus:  string
   situationNote:       string
-  // ── Dual chart ──
   person2Name:         string
   person2Mobile:       string
   person2CountryCode:  string
@@ -53,7 +58,7 @@ export interface BirthFormFields {
   person2City:         string
   person2Lat:          number | ""
   person2Lng:          number | ""
-  person2CurrentCity:  string  // NEW v7.0
+  person2CurrentCity:  string
 }
 
 interface SelectedCategory {
@@ -131,28 +136,48 @@ function getCountryByIso(iso: string): Country {
   return COUNTRIES.find(c => c.code.toLowerCase() === iso.toLowerCase()) ?? COUNTRIES[0]!
 }
 
-// ── Loading Messages ──────────────────────────────────────────────────────────
+// ── SEO/GEO Constants ─────────────────────────────────────────────────────────
+// These appear in the form section for Google + AI search indexing
 
+const SEO_TRUST_BADGES = [
+  { icon: '⚡', label: 'Swiss Ephemeris', desc: 'Professional precision engine' },
+  { icon: '📖', label: 'BPHS Classical',  desc: 'Ancient Vedic texts' },
+  { icon: '🔮', label: 'Bhrigu Nandi',    desc: 'Pattern-based insights' },
+  { icon: '⚖️', label: 'Shadbala',        desc: '6-component strength' },
+]
+
+// Dynamic voice taglines — rotate every 3.5s
+const VOICE_TAGLINES = [
+  { text: 'Kuch dil ki baatein type nahi ki jaati', icon: '🎙️' },
+  { text: 'Bol do Trikal ko — woh sun raha hai',     icon: '🔮' },
+  { text: 'Dil ki baat — sirf ek minute mein',       icon: '✨' },
+  { text: 'Trikal sun raha hai — bas shuru karo',    icon: '🎙️' },
+  { text: 'Jo dil mein hai — woh bol do',             icon: '💫' },
+  { text: 'Apni awaaz, apni kahani — Trikal ke saath', icon: '🔱' },
+  { text: 'Type mat karo — feel karo',                icon: '🎙️' },
+  { text: 'Ek minute — aur Trikal samjh jayega',     icon: '⏱️' },
+]
+
+// Loading steps
 const LOADING_STEPS = [
-  'Connecting with your energy...',
-  'Analyzing planetary positions...',
-  'Generating your personalized prediction...',
+  'Mahakaal se connection ho raha hai...',
+  'Kundali calculate ho rahi hai — Swiss Ephemeris...',
+  'Trikal aapka sandesh taiyaar kar raha hai...',
 ]
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
-const DUAL_CHART_DOMAINS        = ['genz_ex_back', 'genz_toxic_boss']
-const RELATIONSHIP_DOMAINS      = ['genz_ex_back', 'mill_property_yog', 'genz_manifestation', 'mill_karz_mukti', 'genx_retirement_peace', 'genx_legacy_inheritance', 'genx_spiritual_innings', 'mill_childs_destiny', 'mill_parents_wellness', 'genz_dream_career', 'genz_toxic_boss']
+const DUAL_CHART_DOMAINS   = ['genz_ex_back', 'genz_toxic_boss']
 
 const RELATIONSHIP_STATUS_OPTIONS = [
-  { value: '',            label: 'Select status (optional)' },
-  { value: 'single',      label: '💫 Single' },
+  { value: '',             label: 'Select status (optional)' },
+  { value: 'single',       label: '💫 Single' },
   { value: 'in_relationship', label: '💑 In a Relationship' },
-  { value: 'married',     label: '💍 Married' },
-  { value: 'separated',   label: '🔄 Separated' },
-  { value: 'divorced',    label: '📄 Divorced' },
-  { value: 'widowed',     label: '🕊️ Widowed' },
-  { value: 'complicated', label: '🌀 It\'s Complicated' },
+  { value: 'married',      label: '💍 Married' },
+  { value: 'separated',    label: '🔄 Separated' },
+  { value: 'divorced',     label: '📄 Divorced' },
+  { value: 'widowed',      label: '🕊️ Widowed' },
+  { value: 'complicated',  label: '🌀 It\'s Complicated' },
 ]
 
 const JOB_CATEGORIES = [
@@ -185,6 +210,7 @@ const LANGUAGE_OPTIONS = [
 
 const GOLD      = '#D4AF37'
 const GOLD_RGBA = (a: number) => `rgba(212,175,55,${a})`
+const BG_DARK   = '#080B12'
 
 const SELECT_STYLE: React.CSSProperties = {
   background:       '#0d1120',
@@ -308,9 +334,7 @@ const INITIAL: BirthFormFields = {
   timezoneOffset: 5.5, ayanamsa: 'lahiri',
   language: 'hinglish', jobCategory: '', mobile: '',
   countryCode: '+91', countryDigits: 10,
-  // NEW v7.0
   currentCity: '', relationshipStatus: '', situationNote: '',
-  // Dual
   person2Name: '', person2Mobile: '', person2CountryCode: '+91',
   person2Dob: '', person2Tob: '12:00', person2Place: '',
   person2City: '', person2Lat: '', person2Lng: '',
@@ -383,30 +407,244 @@ function CountrySelector({
   )
 }
 
+// ── Rotating Tagline Component ─────────────────────────────────────────────────
+
+function RotatingTagline() {
+  const [current, setCurrent]   = useState(0)
+  const [fading,  setFading]    = useState(false)
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setFading(true)
+      setTimeout(() => {
+        setCurrent(prev => (prev + 1) % VOICE_TAGLINES.length)
+        setFading(false)
+      }, 500)
+    }, 3500)
+    return () => clearInterval(interval)
+  }, [])
+
+  const tagline = VOICE_TAGLINES[current]!
+
+  return (
+    <div style={{
+      textAlign:  'center',
+      padding:    '12px 16px',
+      background: GOLD_RGBA(0.06),
+      border:     `1px solid ${GOLD_RGBA(0.2)}`,
+      borderRadius: '12px',
+      marginBottom: '16px',
+      transition: 'opacity 0.5s ease',
+      opacity:    fading ? 0 : 1,
+    }}>
+      <p style={{
+        color:      GOLD,
+        fontSize:   '13px',
+        fontWeight: 600,
+        fontStyle:  'italic',
+        margin:     0,
+      }}>
+        {tagline.icon} "{tagline.text}"
+      </p>
+      <p style={{ color: '#475569', fontSize: '10px', margin: '4px 0 0' }}>
+        — Trikal Voice Reading · ₹11 only
+      </p>
+    </div>
+  )
+}
+
+// ── Tier Selector Component ────────────────────────────────────────────────────
+
+function TierSelector({
+  selected,
+  onChange,
+}: {
+  selected: PredictionTier
+  onChange: (tier: PredictionTier) => void
+}) {
+  const tiers = [
+    {
+      id:       'free' as PredictionTier,
+      icon:     '🔮',
+      label:    'Free Preview',
+      price:    'Free',
+      desc:     'Trikal Ka Sandesh — quick prediction',
+      color:    '#94a3b8',
+      features: ['150-200 word summary', 'Key message + action', 'SEO report page'],
+    },
+    {
+      id:       'paid' as PredictionTier,
+      icon:     '⚡',
+      label:    'Deep Reading',
+      price:    '₹51',
+      desc:     'Gemini Pro + Claude Sonnet 4.6',
+      color:    GOLD,
+      features: ['800-1200 word analysis', 'All yogas + remedies', 'Action windows + dates'],
+      highlight: true,
+    },
+    {
+      id:       'voice' as PredictionTier,
+      icon:     '🎙️',
+      label:    'Voice Reading',
+      price:    '₹11',
+      desc:     'Trikal ki awaaz — suniye',
+      color:    '#a78bfa',
+      features: ['60-sec voice response', 'Hinglish / Hindi / English', 'Google TTS Neural2'],
+    },
+  ]
+
+  return (
+    <div>
+      <label className="block text-sm font-medium text-slate-300 mb-3">
+        Reading Type <span className="text-yellow-400">*</span>
+      </label>
+      <div className="grid grid-cols-3 gap-3">
+        {tiers.map(tier => (
+          <button
+            key={tier.id}
+            type="button"
+            onClick={() => onChange(tier.id)}
+            style={{
+              background: selected === tier.id
+                ? tier.highlight
+                  ? `linear-gradient(135deg, ${GOLD_RGBA(0.2)}, ${GOLD_RGBA(0.1)})`
+                  : `${tier.color}18`
+                : 'rgba(255,255,255,0.03)',
+              border: `1px solid ${selected === tier.id ? tier.color : 'rgba(255,255,255,0.08)'}`,
+              borderRadius: '12px',
+              padding: '14px 10px',
+              cursor: 'pointer',
+              textAlign: 'left',
+              transition: 'all 0.2s ease',
+              position: 'relative',
+            }}
+          >
+            {/* Most popular badge */}
+            {tier.highlight && (
+              <div style={{
+                position:    'absolute',
+                top:         '-10px',
+                left:        '50%',
+                transform:   'translateX(-50%)',
+                background:  GOLD,
+                color:       '#080B12',
+                fontSize:    '9px',
+                fontWeight:  700,
+                padding:     '2px 8px',
+                borderRadius: '10px',
+                whiteSpace:  'nowrap',
+                letterSpacing: '0.05em',
+              }}>
+                MOST POPULAR
+              </div>
+            )}
+
+            <div style={{ fontSize: '20px', marginBottom: '6px' }}>{tier.icon}</div>
+            <p style={{
+              margin:     '0 0 2px',
+              color:      selected === tier.id ? tier.color : '#94a3b8',
+              fontSize:   '12px',
+              fontWeight: 700,
+            }}>
+              {tier.label}
+            </p>
+            <p style={{
+              margin:     '0 0 6px',
+              color:      selected === tier.id ? '#fff' : '#64748b',
+              fontSize:   '16px',
+              fontWeight: 800,
+              fontFamily: 'Georgia, serif',
+            }}>
+              {tier.price}
+            </p>
+            <p style={{ margin: '0 0 8px', color: '#475569', fontSize: '10px', lineHeight: 1.4 }}>
+              {tier.desc}
+            </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+              {tier.features.map((f, i) => (
+                <p key={i} style={{
+                  margin:   0,
+                  color:    selected === tier.id ? '#94a3b8' : '#334155',
+                  fontSize: '10px',
+                  display:  'flex',
+                  gap:      '4px',
+                }}>
+                  <span style={{ color: tier.color, flexShrink: 0 }}>✓</span>
+                  {f}
+                </p>
+              ))}
+            </div>
+          </button>
+        ))}
+      </div>
+
+      {/* Voice tagline — shows when voice selected */}
+      {selected === 'voice' && (
+        <div style={{
+          marginTop:    '12px',
+          padding:      '12px',
+          background:   'rgba(167,139,250,0.06)',
+          border:       '1px solid rgba(167,139,250,0.2)',
+          borderRadius: '10px',
+          textAlign:    'center',
+        }}>
+          <p style={{ margin: 0, color: '#a78bfa', fontSize: '12px', fontWeight: 600 }}>
+            🎙️ Voice Reading mein aap 1 minute bol sakte hain
+          </p>
+          <p style={{ margin: '4px 0 0', color: '#475569', fontSize: '11px' }}>
+            Trikal aapki awaaz sunke personalised prediction dega
+          </p>
+        </div>
+      )}
+
+      {/* Paid features highlight */}
+      {selected === 'paid' && (
+        <div style={{
+          marginTop:    '12px',
+          padding:      '12px',
+          background:   GOLD_RGBA(0.06),
+          border:       `1px solid ${GOLD_RGBA(0.2)}`,
+          borderRadius: '10px',
+        }}>
+          <p style={{ margin: '0 0 4px', color: GOLD, fontSize: '11px', fontWeight: 700 }}>
+            ⚡ Gemini 2.5 Pro + Claude Sonnet 4.6 polish
+          </p>
+          <p style={{ margin: 0, color: '#64748b', fontSize: '10px', lineHeight: 1.5 }}>
+            AstroTalk charges ₹500+ for this level of analysis.
+            Trikal Vaani delivers it for ₹51 — Swiss Ephemeris precision + BPHS classical depth.
+          </p>
+        </div>
+      )}
+    </div>
+  )
+}
+
 // ── Main Component ────────────────────────────────────────────────────────────
 
 export default function BirthForm({
   selectedCategory,
   onSubmit,
   loading = false,
-  submitLabel = 'Get My Prediction',
+  submitLabel,
   className = '',
 }: BirthFormProps) {
   const router = useRouter()
 
-  const [fields, setFields]             = useState<BirthFormFields>(INITIAL)
-  const [geoResults, setGeoResults]     = useState<GeoResult[]>([])
-  const [geo2Results, setGeo2Results]   = useState<GeoResult[]>([])
-  const [geoLoading, setGeoLoading]     = useState(false)
-  const [geo2Loading, setGeo2Loading]   = useState(false)
-  const [errors, setErrors]             = useState<Partial<Record<keyof BirthFormFields, string>>>({})
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [apiError, setApiError]         = useState<string | null>(null)
-  const [loadingStep, setLoadingStep]   = useState(0)
-  const [numerology, setNumerology]     = useState<ReturnType<typeof getNumerologyCompatibility> | null>(null)
-  const debounceRef                     = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const debounce2Ref                    = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const loadingIntervalRef              = useRef<ReturnType<typeof setInterval> | null>(null)
+  const [fields,         setFields]         = useState<BirthFormFields>(INITIAL)
+  const [predictionTier, setPredictionTier] = useState<PredictionTier>('free')
+  const [geoResults,     setGeoResults]     = useState<GeoResult[]>([])
+  const [geo2Results,    setGeo2Results]    = useState<GeoResult[]>([])
+  const [geoLoading,     setGeoLoading]     = useState(false)
+  const [geo2Loading,    setGeo2Loading]    = useState(false)
+  const [errors,         setErrors]         = useState<Partial<Record<keyof BirthFormFields, string>>>({})
+  const [isSubmitting,   setIsSubmitting]   = useState(false)
+  const [apiError,       setApiError]       = useState<string | null>(null)
+  const [loadingStep,    setLoadingStep]    = useState(0)
+  const [numerology,     setNumerology]     = useState<ReturnType<typeof getNumerologyCompatibility> | null>(null)
+
+  const debounceRef        = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const debounce2Ref       = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const loadingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   const isDualDomain = DUAL_CHART_DOMAINS.includes(selectedCategory?.id ?? '')
 
@@ -439,7 +677,7 @@ export default function BirthForm({
     }
   }
 
-  // ── Geo person 1 ───────────────────────────────────────────────────────────
+  // Geo person 1
   const handlePlaceChange = (query: string) => {
     set('placeQuery', query)
     if (debounceRef.current) clearTimeout(debounceRef.current)
@@ -452,10 +690,10 @@ export default function BirthForm({
   }
 
   const selectPlace = (r: GeoResult) => {
-    const lat  = parseFloat(r.lat)
-    const lon  = parseFloat(r.lon)
-    const city = r.address?.city || r.address?.town || r.address?.village || r.display_name.split(',')[0]
-    const iso  = r.address?.country_code ?? ''
+    const lat     = parseFloat(r.lat)
+    const lon     = parseFloat(r.lon)
+    const city    = r.address?.city || r.address?.town || r.address?.village || r.display_name.split(',')[0]
+    const iso     = r.address?.country_code ?? ''
     const country = iso ? getCountryByIso(iso) : null
     setFields(prev => ({
       ...prev,
@@ -470,7 +708,7 @@ export default function BirthForm({
     setErrors(prev => ({ ...prev, placeQuery: undefined, latitude: undefined }))
   }
 
-  // ── Geo person 2 ───────────────────────────────────────────────────────────
+  // Geo person 2
   const handlePlace2Change = (query: string) => {
     set('person2Place', query)
     if (debounce2Ref.current) clearTimeout(debounce2Ref.current)
@@ -483,10 +721,10 @@ export default function BirthForm({
   }
 
   const selectPlace2 = (r: GeoResult) => {
-    const lat  = parseFloat(r.lat)
-    const lon  = parseFloat(r.lon)
-    const city = r.address?.city || r.address?.town || r.address?.village || r.display_name.split(',')[0]
-    const iso  = r.address?.country_code ?? ''
+    const lat     = parseFloat(r.lat)
+    const lon     = parseFloat(r.lon)
+    const city    = r.address?.city || r.address?.town || r.address?.village || r.display_name.split(',')[0]
+    const iso     = r.address?.country_code ?? ''
     const country = iso ? getCountryByIso(iso) : null
     setFields(prev => ({
       ...prev,
@@ -499,13 +737,13 @@ export default function BirthForm({
     setGeo2Results([])
   }
 
-  // ── Validation ─────────────────────────────────────────────────────────────
+  // Validation
   const validate = (): boolean => {
     const errs: typeof errors = {}
-    if (!fields.name.trim())    errs.name        = 'Name is required'
-    if (!fields.dateOfBirth)    errs.dateOfBirth  = 'Date of birth is required'
+    if (!fields.name.trim())    errs.name       = 'Name is required'
+    if (!fields.dateOfBirth)    errs.dateOfBirth = 'Date of birth is required'
     if (!fields.unknownTime && !fields.timeOfBirth) errs.timeOfBirth = 'Time of birth is required'
-    if (fields.latitude === '') errs.latitude     = 'Place of birth is required'
+    if (fields.latitude === '') errs.latitude    = 'Place of birth is required'
     const mobileDigits = fields.mobile.replace(/\D/g, '').length
     if (!fields.mobile || mobileDigits < fields.countryDigits) {
       errs.mobile = `Valid ${fields.countryDigits}-digit mobile required`
@@ -519,10 +757,16 @@ export default function BirthForm({
     return Object.keys(errs).length === 0
   }
 
-  // ── Submit ─────────────────────────────────────────────────────────────────
+  // Submit
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!validate()) return
+
+    // Voice tier — redirect to voice page (Phase 4)
+    if (predictionTier === 'voice') {
+      router.push(`/voice?name=${encodeURIComponent(fields.name)}&lang=${fields.language}`)
+      return
+    }
 
     setIsSubmitting(true)
     setApiError(null)
@@ -536,8 +780,9 @@ export default function BirthForm({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           sessionId,
-          domainId:    selectedCategory?.id    || 'mill_karz_mukti',
-          domainLabel: selectedCategory?.label || 'General',
+          domainId:       selectedCategory?.id    || 'mill_karz_mukti',
+          domainLabel:    selectedCategory?.label || 'General',
+          predictionTier,                          // NEW v8.0 — routes to Flash/Pro
           birthData: {
             name:     fields.name,
             dob:      fields.dateOfBirth,
@@ -554,13 +799,13 @@ export default function BirthForm({
             sector:             mapJobToSector(fields.jobCategory),
             language:           fields.language,
             city:               fields.city,
-            currentCity:        fields.currentCity || fields.city,  // NEW v7.0
-            relationshipStatus: fields.relationshipStatus,           // NEW v7.0
-            situationNote:      fields.situationNote.slice(0, 100),  // NEW v7.0 — hard cap 100
+            currentCity:        fields.currentCity || fields.city,
+            relationshipStatus: fields.relationshipStatus,
+            situationNote:      fields.situationNote.slice(0, 100),
             mobile:             `${fields.countryCode}${fields.mobile}`,
-            person2Name:        fields.person2Name  || null,
-            person2City:        fields.person2City  || null,
-            person2CurrentCity: fields.person2CurrentCity || null,   // NEW v7.0
+            person2Name:        fields.person2Name        || null,
+            person2City:        fields.person2City        || null,
+            person2CurrentCity: fields.person2CurrentCity || null,
           },
           person2Data: isDualDomain && fields.person2Lat !== '' ? {
             name:        fields.person2Name,
@@ -596,7 +841,6 @@ export default function BirthForm({
       } else {
         setApiError('Prediction ready hai par save nahi hua. Please retry karo.')
         stopLoadingMessages()
-        console.error('[BirthForm] predictionId missing:', data?._meta)
       }
 
     } catch (err) {
@@ -616,25 +860,105 @@ export default function BirthForm({
     colorScheme: 'dark' as const,
   })
 
+  // Dynamic submit label based on tier
+  const getSubmitLabel = () => {
+    if (isLoading) return LOADING_STEPS[loadingStep] || 'Processing...'
+    if (submitLabel) return submitLabel
+    if (predictionTier === 'free')  return '🔮 Get Free Prediction — Trikal Ka Sandesh'
+    if (predictionTier === 'paid')  return '⚡ Get Deep Reading — ₹51'
+    if (predictionTier === 'voice') return '🎙️ Go to Voice Reading — ₹11'
+    return '🔮 Get My Prediction'
+  }
+
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
-    <section id="birth-form" className={`py-16 px-4 ${className}`}>
+    <section
+      id="birth-form"
+      className={`py-16 px-4 ${className}`}
+      // SEO: hidden content for AI search indexing
+      aria-label="Vedic Astrology Birth Chart Form — Trikal Vaani by Rohiit Gupta"
+    >
+      {/* SEO/GEO hidden content — indexed by Google + AI search */}
+      <div style={{ display: 'none' }} aria-hidden="false">
+        <h2>Free Vedic Astrology Prediction — Swiss Ephemeris Powered by Rohiit Gupta</h2>
+        <p>Get your personalized Vedic astrology reading at Trikal Vaani. Powered by Swiss Ephemeris,
+        Brihat Parashara Hora Shastra (BPHS), Bhrigu Nandi Nadi patterns and Shadbala strength calculations.
+        Chief Vedic Architect Rohiit Gupta, Delhi NCR. Starting free — deep reading at ₹51.</p>
+        <p>Keywords: vedic astrology online India, kundali reading free, Swiss Ephemeris astrology,
+        BPHS jyotish online, Bhrigu astrology prediction, Shadbala calculation online,
+        best vedic astrologer Delhi NCR, Rohiit Gupta astrologer, trikalvaani.com</p>
+      </div>
+
       <div className="max-w-2xl mx-auto">
 
-        {selectedCategory && (
-          <div className="mb-6 text-center">
-            <span className="inline-block px-4 py-1.5 rounded-full text-sm font-medium mb-2"
-              style={{ background: `${selectedCategory.color}20`, color: selectedCategory.color, border: `1px solid ${selectedCategory.color}40` }}>
-              {selectedCategory.label}
+        {/* ── SEO HERO SECTION ── */}
+        <div className="text-center mb-8">
+          {/* Mahakaal blessing */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', marginBottom: '12px' }}>
+            <div style={{ height: '1px', flex: 1, background: `linear-gradient(to right, transparent, ${GOLD_RGBA(0.3)})` }} />
+            <span style={{ color: GOLD, fontSize: '11px', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase' }}>
+              🔱 Mahakaal Ka Ashirwad
             </span>
-            <p className="text-slate-400 text-sm">Enter your birth details for a personalized reading</p>
+            <div style={{ height: '1px', flex: 1, background: `linear-gradient(to left, transparent, ${GOLD_RGBA(0.3)})` }} />
           </div>
-        )}
 
+          {selectedCategory ? (
+            <>
+              <span className="inline-block px-4 py-1.5 rounded-full text-sm font-medium mb-3"
+                style={{ background: `${selectedCategory.color}20`, color: selectedCategory.color, border: `1px solid ${selectedCategory.color}40` }}>
+                {selectedCategory.label}
+              </span>
+              <h2 className="text-white text-xl font-serif font-bold mb-2">
+                Apni Kundali Ka Sach Janein
+              </h2>
+              <p className="text-slate-400 text-sm">
+                Swiss Ephemeris precision · BPHS Classical · Bhrigu Nandi patterns
+              </p>
+            </>
+          ) : (
+            <>
+              <h2 className="text-white text-2xl font-serif font-bold mb-2">
+                Trikal Ka Sandesh — Sirf Aapke Liye
+              </h2>
+              <p className="text-slate-400 text-sm max-w-lg mx-auto">
+                India's most accurate AI Vedic astrology — Swiss Ephemeris + BPHS + Bhrigu + Shadbala.
+                By Rohiit Gupta, Chief Vedic Architect, Delhi NCR.
+              </p>
+            </>
+          )}
+
+          {/* Trust badges */}
+          <div className="flex flex-wrap justify-center gap-2 mt-4">
+            {SEO_TRUST_BADGES.map(b => (
+              <span key={b.label} style={{
+                display:    'inline-flex',
+                alignItems: 'center',
+                gap:        '4px',
+                padding:    '4px 10px',
+                borderRadius: '20px',
+                fontSize:   '10px',
+                fontWeight: 600,
+                background: GOLD_RGBA(0.08),
+                border:     `1px solid ${GOLD_RGBA(0.2)}`,
+                color:      GOLD,
+              }}>
+                {b.icon} {b.label}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        {/* ── ROTATING VOICE TAGLINE ── */}
+        <RotatingTagline />
+
+        {/* ── FORM CARD ── */}
         <div className="rounded-2xl p-6 sm:p-8"
-          style={{ background: 'rgba(13,17,30,0.8)', border: '1px solid rgba(212,175,55,0.15)', backdropFilter: 'blur(12px)' }}>
+          style={{ background: 'rgba(13,17,30,0.85)', border: '1px solid rgba(212,175,55,0.15)', backdropFilter: 'blur(12px)' }}>
 
           <form onSubmit={handleSubmit} noValidate className="grid gap-5">
+
+            {/* ── TIER SELECTOR ── */}
+            <TierSelector selected={predictionTier} onChange={setPredictionTier} />
 
             {/* ── Language Selector ── */}
             <div>
@@ -675,7 +999,7 @@ export default function BirthForm({
             <div>
               <label htmlFor="tv-mobile" className="block text-sm font-medium text-slate-300 mb-1.5">
                 WhatsApp Mobile <span className="text-yellow-400">*</span>
-                <span className="text-slate-500 text-xs ml-2">(for follow-up & numerology)</span>
+                <span className="text-slate-500 text-xs ml-2">(for follow-up + numerology)</span>
               </label>
               <div className="flex gap-2">
                 <CountrySelector id="tv-country" value={fields.countryCode}
@@ -739,7 +1063,9 @@ export default function BirthForm({
                 disabled={fields.unknownTime}
                 className="w-full px-4 py-2.5 rounded-lg text-sm outline-none"
                 style={{ ...inputStyle(!!errors.timeOfBirth), opacity: fields.unknownTime ? 0.4 : 1 }} />
-              {fields.unknownTime && <p className="text-slate-500 text-xs mt-1">Solar chart will be used (12:00 noon)</p>}
+              {fields.unknownTime && (
+                <p className="text-slate-500 text-xs mt-1">Solar chart will be used (12:00 noon)</p>
+              )}
             </div>
 
             {/* ── Gender ── */}
@@ -750,10 +1076,10 @@ export default function BirthForm({
                   onChange={e => set('gender', e.target.value as any)}
                   className="w-full px-4 py-2.5 rounded-lg text-sm outline-none appearance-none pr-8"
                   style={SELECT_STYLE}>
-                  <option value="" style={{ background: '#0d1120', color: '#e2e8f0' }}>Select gender</option>
-                  <option value="male"   style={{ background: '#0d1120', color: '#e2e8f0' }}>Male</option>
-                  <option value="female" style={{ background: '#0d1120', color: '#e2e8f0' }}>Female</option>
-                  <option value="other"  style={{ background: '#0d1120', color: '#e2e8f0' }}>Other / Prefer not to say</option>
+                  <option value="">Select gender</option>
+                  <option value="male">Male</option>
+                  <option value="female">Female</option>
+                  <option value="other">Other / Prefer not to say</option>
                 </select>
                 <span className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500">▾</span>
               </div>
@@ -769,7 +1095,9 @@ export default function BirthForm({
                   value={fields.placeQuery} onChange={e => handlePlaceChange(e.target.value)}
                   className="w-full px-4 py-2.5 rounded-lg text-sm outline-none pr-8"
                   style={inputStyle(!!errors.latitude)} />
-                {geoLoading && <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs animate-spin">⟳</span>}
+                {geoLoading && (
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs animate-spin">⟳</span>
+                )}
               </div>
               {geoResults.length > 0 && (
                 <ul className="absolute z-50 w-full mt-1 rounded-lg overflow-hidden shadow-xl"
@@ -788,10 +1116,11 @@ export default function BirthForm({
               {errors.latitude && <p className="text-red-400 text-xs mt-1">Please select a place from suggestions</p>}
             </div>
 
-            {/* ── NEW v7.0: Current City ── */}
+            {/* ── Current City ── */}
             <div>
               <label htmlFor="tv-current-city" className="block text-sm font-medium text-slate-300 mb-1.5">
-                Current City <span className="text-slate-500 text-xs ml-1">(where you live/work now)</span>
+                Current City
+                <span className="text-slate-500 text-xs ml-2">(where you live/work now)</span>
               </label>
               <input id="tv-current-city" type="text"
                 placeholder="e.g. Gurugram, Mumbai, Dubai, London..."
@@ -800,7 +1129,7 @@ export default function BirthForm({
                 className="w-full px-4 py-2.5 rounded-lg text-sm outline-none"
                 style={inputStyle()} />
               <p className="text-slate-600 text-xs mt-1">
-                Helps Jini understand your current job market, real estate, and opportunities
+                Trikal uses this to understand your current job market, real estate and opportunities
               </p>
             </div>
 
@@ -831,13 +1160,27 @@ export default function BirthForm({
                   className="w-full px-4 py-2.5 rounded-lg text-sm outline-none appearance-none pr-8"
                   style={SELECT_STYLE}>
                   {[
-                    [5.5, 'IST +5:30 (India)'], [5.75, 'NPT +5:45 (Nepal)'], [6, 'BST +6:00 (Bangladesh)'],
-                    [4, 'GST +4:00 (UAE/Dubai)'], [0, 'UTC +0:00'], [1, 'CET +1:00'], [2, 'EET +2:00'],
-                    [3, 'MSK +3:00'], [3.5, 'IRST +3:30'], [4.5, 'AFT +4:30'], [5, 'PKT +5:00'],
-                    [6.5, 'MMT +6:30'], [7, 'ICT +7:00'], [8, 'SGT +8:00'], [9, 'JST +9:00'],
-                    [9.5, 'ACST +9:30'], [10, 'AEST +10:00'],
-                    [-5, 'EST -5:00 (USA East)'], [-6, 'CST -6:00 (USA Central)'],
-                    [-7, 'MST -7:00 (USA Mountain)'], [-8, 'PST -8:00 (USA West)'],
+                    [5.5,  'IST +5:30 (India)'],
+                    [5.75, 'NPT +5:45 (Nepal)'],
+                    [6,    'BST +6:00 (Bangladesh)'],
+                    [4,    'GST +4:00 (UAE/Dubai)'],
+                    [0,    'UTC +0:00'],
+                    [1,    'CET +1:00'],
+                    [2,    'EET +2:00'],
+                    [3,    'MSK +3:00'],
+                    [3.5,  'IRST +3:30'],
+                    [4.5,  'AFT +4:30'],
+                    [5,    'PKT +5:00'],
+                    [6.5,  'MMT +6:30'],
+                    [7,    'ICT +7:00'],
+                    [8,    'SGT +8:00'],
+                    [9,    'JST +9:00'],
+                    [9.5,  'ACST +9:30'],
+                    [10,   'AEST +10:00'],
+                    [-5,   'EST -5:00 (USA East)'],
+                    [-6,   'CST -6:00 (USA Central)'],
+                    [-7,   'MST -7:00 (USA Mountain)'],
+                    [-8,   'PST -8:00 (USA West)'],
                   ].map(([val, label]) => (
                     <option key={val} value={val as number} style={{ background: '#0d1120', color: '#e2e8f0' }}>
                       {label}
@@ -848,7 +1191,7 @@ export default function BirthForm({
               </div>
             </div>
 
-            {/* ── NEW v7.0: Relationship Status ── */}
+            {/* ── Relationship Status ── */}
             <div className="relative">
               <label htmlFor="tv-rel-status" className="block text-sm font-medium text-slate-300 mb-1.5">
                 Relationship Status
@@ -869,15 +1212,15 @@ export default function BirthForm({
               </div>
             </div>
 
-            {/* ── NEW v7.0: Situation Note ── */}
+            {/* ── Situation Note — "Tell Trikal what's on your mind" ── */}
             <div>
               <label htmlFor="tv-situation" className="block text-sm font-medium text-slate-300 mb-1.5">
-                Tell Jini what's on your mind
-                <span className="text-slate-500 text-xs ml-2">(optional)</span>
+                Tell Trikal what's on your mind
+                <span className="text-slate-500 text-xs ml-2">(optional — 60% weight in prediction)</span>
               </label>
               <div className="relative">
                 <textarea id="tv-situation"
-                  placeholder="e.g. Job switch kar raha hoon, property khareedna hai, relationship mein problem hai..."
+                  placeholder="e.g. Job switch kar raha hoon, property khareedna hai, relationship mein problem hai, karz se pareshan hoon..."
                   value={fields.situationNote}
                   onChange={e => set('situationNote', e.target.value.slice(0, 100))}
                   maxLength={100}
@@ -890,7 +1233,7 @@ export default function BirthForm({
                 </span>
               </div>
               <p className="text-slate-600 text-xs mt-1">
-                Jini uses this to personalise your prediction context
+                🔮 Trikal is this to personalise your prediction — your situation gets 60% weight
               </p>
             </div>
 
@@ -908,6 +1251,7 @@ export default function BirthForm({
                 </div>
 
                 <div className="grid gap-4">
+                  {/* Person 2 Name */}
                   <div>
                     <label className="block text-sm font-medium text-slate-300 mb-1.5">
                       Their Name <span className="text-yellow-400">*</span>
@@ -919,6 +1263,7 @@ export default function BirthForm({
                     {errors.person2Name && <p className="text-red-400 text-xs mt-1">{errors.person2Name}</p>}
                   </div>
 
+                  {/* Person 2 Mobile */}
                   <div>
                     <label className="block text-sm font-medium text-slate-300 mb-1.5">
                       Their Mobile
@@ -935,13 +1280,13 @@ export default function BirthForm({
                     </div>
                   </div>
 
-                  {/* Numerology result */}
+                  {/* Numerology */}
                   {numerology && (
                     <div className="rounded-xl p-4"
                       style={{ background: `${numerology.color}15`, border: `1px solid ${numerology.color}40` }}>
                       <div className="flex items-center justify-between mb-2">
                         <p className="text-sm font-semibold" style={{ color: numerology.color }}>
-                          📱 Mobile Number Compatibility
+                          📱 Mobile Numerology Compatibility
                         </p>
                         <div className="flex items-center gap-2">
                           <div className="text-2xl font-bold text-white">{numerology.score}%</div>
@@ -956,16 +1301,14 @@ export default function BirthForm({
                           style={{ width: `${numerology.score}%`, background: numerology.color }} />
                       </div>
                       <p className="text-xs text-slate-400">{numerology.description}</p>
-                      <p className="text-xs text-slate-500 mt-1">
-                        Numbers: {getMobileNumber(fields.mobile)} + {getMobileNumber(fields.person2Mobile)}
-                      </p>
                     </div>
                   )}
 
+                  {/* DOB + TOB */}
                   <div className="grid grid-cols-2 gap-3">
                     <div>
                       <label className="block text-sm font-medium text-slate-300 mb-1.5">
-                        Their Date of Birth <span className="text-yellow-400">*</span>
+                        Their DOB <span className="text-yellow-400">*</span>
                       </label>
                       <input type="date" value={fields.person2Dob}
                         onChange={e => set('person2Dob', e.target.value)}
@@ -982,6 +1325,7 @@ export default function BirthForm({
                     </div>
                   </div>
 
+                  {/* Person 2 Place */}
                   <div className="relative">
                     <label className="block text-sm font-medium text-slate-300 mb-1.5">
                       Their Place of Birth <span className="text-yellow-400">*</span>
@@ -1010,7 +1354,7 @@ export default function BirthForm({
                     {errors.person2Lat && <p className="text-red-400 text-xs mt-1">Please select their place</p>}
                   </div>
 
-                  {/* ── NEW v7.0: Person 2 Current City ── */}
+                  {/* Person 2 Current City */}
                   <div>
                     <label className="block text-sm font-medium text-slate-300 mb-1.5">
                       Their Current City
@@ -1032,7 +1376,7 @@ export default function BirthForm({
               <div className="px-4 py-4 rounded-xl text-center"
                 style={{ background: GOLD_RGBA(0.06), border: `1px solid ${GOLD_RGBA(0.2)}` }}>
                 <div className="flex items-center justify-center gap-2 mb-2">
-                  <span className="animate-spin text-base">✨</span>
+                  <span className="animate-spin text-base">🔱</span>
                   <span className="text-sm font-medium" style={{ color: GOLD }}>
                     {LOADING_STEPS[loadingStep]}
                   </span>
@@ -1058,16 +1402,49 @@ export default function BirthForm({
               </div>
             )}
 
-            {/* ── Submit ── */}
+            {/* ── SUBMIT BUTTON ── */}
             <button type="submit" disabled={isLoading}
-              className="w-full py-3.5 rounded-xl text-sm font-semibold transition-all duration-300"
+              className="w-full py-4 rounded-xl text-sm font-bold transition-all duration-300"
               style={{
-                background: isLoading ? GOLD_RGBA(0.3) : `linear-gradient(135deg, ${GOLD} 0%, #F5D76E 50%, ${GOLD} 100%)`,
-                color:  isLoading ? 'rgba(255,255,255,0.5)' : '#080B12',
-                cursor: isLoading ? 'not-allowed' : 'pointer',
+                background: isLoading
+                  ? GOLD_RGBA(0.3)
+                  : predictionTier === 'voice'
+                    ? 'linear-gradient(135deg, #7c3aed, #a78bfa)'
+                    : predictionTier === 'paid'
+                      ? `linear-gradient(135deg, ${GOLD} 0%, #F5D76E 50%, ${GOLD} 100%)`
+                      : `linear-gradient(135deg, rgba(212,175,55,0.8) 0%, ${GOLD} 100%)`,
+                color:     isLoading ? 'rgba(255,255,255,0.5)' : predictionTier === 'voice' ? '#fff' : '#080B12',
+                cursor:    isLoading ? 'not-allowed' : 'pointer',
+                fontSize:  '15px',
+                boxShadow: isLoading ? 'none' : predictionTier === 'paid'
+                  ? `0 0 30px rgba(212,175,55,0.4)`
+                  : predictionTier === 'voice'
+                    ? '0 0 30px rgba(124,58,237,0.4)'
+                    : 'none',
               }}>
-              {isLoading ? LOADING_STEPS[loadingStep] : submitLabel}
+              {getSubmitLabel()}
             </button>
+
+            {/* ── Pricing note ── */}
+            {!isLoading && (
+              <div style={{ textAlign: 'center' }}>
+                {predictionTier === 'free' && (
+                  <p className="text-xs text-slate-600">
+                    🔒 Free forever · No card required · Instant results
+                  </p>
+                )}
+                {predictionTier === 'paid' && (
+                  <p className="text-xs text-slate-600">
+                    🔒 ₹51 · Razorpay secure · One-time · Instant access
+                  </p>
+                )}
+                {predictionTier === 'voice' && (
+                  <p className="text-xs text-slate-600">
+                    🎙️ ₹11 · 60-second voice response · Trikal ki awaaz
+                  </p>
+                )}
+              </div>
+            )}
 
             <p className="text-center text-xs text-slate-600">
               🔒 Your data is private and secure. Never shared.
@@ -1075,6 +1452,55 @@ export default function BirthForm({
 
           </form>
         </div>
+
+        {/* ── SEO FOOTER BELOW FORM ── */}
+        <div style={{ marginTop: '24px', textAlign: 'center' }}>
+          {/* Authority statement */}
+          <p style={{ color: '#334155', fontSize: '11px', lineHeight: 1.7, maxWidth: '480px', margin: '0 auto 12px' }}>
+            Powered by <strong style={{ color: '#475569' }}>Swiss Ephemeris</strong> —
+            the same engine used by professional astrologers worldwide.
+            Validated against <strong style={{ color: '#475569' }}>Brihat Parashara Hora Shastra (BPHS)</strong>,
+            <strong style={{ color: '#475569' }}> Bhrigu Nandi Nadi</strong> patterns and
+            <strong style={{ color: '#475569' }}> Shadbala</strong> calculations.
+          </p>
+
+          {/* Maa Shakti CTA */}
+          <div style={{
+            padding:      '14px 20px',
+            background:   GOLD_RGBA(0.05),
+            border:       `1px solid ${GOLD_RGBA(0.15)}`,
+            borderRadius: '12px',
+            marginBottom: '12px',
+          }}>
+            <p style={{ margin: '0 0 8px', color: GOLD, fontSize: '13px', fontWeight: 600 }}>
+              🙏 Prediction ke baad — Maa Shakti ko Arzi karein
+            </p>
+            <p style={{ margin: '0 0 8px', color: '#475569', fontSize: '11px', lineHeight: 1.5 }}>
+              Prediction milne ke baad aap Maa ko apni dil ki baat rakh sakte hain.
+              Rohiit ji personally transmit karenge. Starting ₹101 — no upper limit.
+            </p>
+            <a
+              href="https://wa.me/919211804111?text=Pranam%20Rohiit%20ji%2C%20Maa%20ko%20Arzi%20karna%20chahta%20hoon.%20Jai%20Maa%20Shakti!"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                color:          GOLD,
+                fontSize:       '12px',
+                fontWeight:     700,
+                textDecoration: 'none',
+              }}
+            >
+              📱 WhatsApp karo Rohiit ji ko →
+            </a>
+          </div>
+
+          {/* Author */}
+          <p style={{ color: '#1e293b', fontSize: '10px', margin: 0 }}>
+            By Rohiit Gupta, Chief Vedic Architect · trikalvaani.com · Delhi NCR
+            · 🔱 Mahakaal Ka Ashirwad
+          </p>
+        </div>
+
       </div>
     </section>
   )
