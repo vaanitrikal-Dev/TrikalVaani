@@ -1,36 +1,30 @@
 /**
  * ============================================================
- * TRIKAL VAANI — JINI CHAT API
+ * TRIKAL VAANI — TRIKAL CHAT API
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/api/jini-chat/route.ts
- * VERSION: 20.0-MASTER (GOD-LEVEL PROTECTION)
+ * VERSION: 21.0-MASTER
  * SIGNED: ROHIIT GUPTA, CEO
  *
  * ⚠️ STRICT CEO ORDER: DO NOT EDIT WITHOUT CEO APPROVAL
  *
- * v20.0 CHANGES (over v19.0):
- *   - CRITICAL FIX: Switched from buildKundali() [Meeus ±2-3° approx]
- *     to buildKundaliFromProkerala() [real Swiss Ephemeris via API]
- *   - buildKundaliFromProkerala is async — properly awaited
- *   - buildPublicIntelligence() now 100% dynamic — NO hardcoded dates,
- *     months, years, or market data. All context is date-stamped
- *     and Gemini is instructed to use web search for live data.
- *   - Dynamic month/year injected into every Gemini prompt automatically
- *   - Sector intel prompts Gemini to fetch fresh data, not use stale training
- *   - All other v19.0 logic preserved: modes, revenue guard, Hindi/Hinglish,
- *     master mode, four_week, deep_prediction, service page links
+ * v21.0 CHANGES (CEO Decision May 2026):
+ *   - Prokerala REMOVED completely — buildKundali() (Meeus) only
+ *   - No external API calls for kundali — zero dependency, zero latency
+ *   - All other v20.0 logic preserved: modes, revenue guard,
+ *     Hindi/Hinglish, master mode, four_week, deep_prediction
  *
  * MODES:
- *   chat             → Jini chat, 280 tokens, revenue guard ON
+ *   chat             → Trikal chat, 280 tokens, revenue guard ON
  *   prediction       → instant hook deepener, 300 tokens
- *   deep_prediction  → full ₹51 reading, 4096 tokens
+ *   deep_prediction  → full paid reading, 4096 tokens
  *   four_week        → 4-week prediction, 4096 tokens
  *   master           → CEO private dashboard only, 8192 tokens
  * ============================================================
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { buildKundaliFromProkerala } from '../../../lib/prokerala';
+import { buildKundali } from '../../../lib/swiss-ephemeris';
 import type { BirthData } from '../../../lib/swiss-ephemeris';
 import { buildJiniSystemPrompt, detectLanguage, JINI_NAMASTE } from '../../../lib/jini-engine';
 
@@ -39,34 +33,30 @@ const GEMINI_URL     =
   'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
 
 // ─── DYNAMIC DATE CONTEXT ─────────────────────────────────────────────────────
-// Never hardcode dates — always compute at runtime
 function getDynamicDateContext(): {
-  monthYear: string;       // e.g. "May 2026"
-  month: string;           // e.g. "May"
-  year: number;            // e.g. 2026
-  quarter: string;         // e.g. "Q2 2026"
-  isoDate: string;         // e.g. "2026-05-15"
-  financialYear: string;   // e.g. "FY 2026-27"
-  season: string;          // e.g. "Summer" (India context)
+  monthYear: string;
+  month: string;
+  year: number;
+  quarter: string;
+  isoDate: string;
+  financialYear: string;
+  season: string;
 } {
-  const now     = new Date();
-  const year    = now.getFullYear();
-  const month   = now.getMonth(); // 0-indexed
-  const day     = now.getDate();
+  const now   = new Date();
+  const year  = now.getFullYear();
+  const month = now.getMonth();
+  const day   = now.getDate();
 
   const MONTH_NAMES = [
     'January','February','March','April','May','June',
     'July','August','September','October','November','December',
   ];
 
-  const monthName  = MONTH_NAMES[month]!;
-  const quarter    = `Q${Math.floor(month / 3) + 1} ${year}`;
-
-  // India financial year: Apr–Mar
-  const fyStart    = month >= 3 ? year : year - 1;
+  const monthName     = MONTH_NAMES[month]!;
+  const quarter       = `Q${Math.floor(month / 3) + 1} ${year}`;
+  const fyStart       = month >= 3 ? year : year - 1;
   const financialYear = `FY ${fyStart}-${String(fyStart + 1).slice(-2)}`;
 
-  // India seasons
   const INDIA_SEASONS: Record<number, string> = {
     0: 'Winter', 1: 'Winter', 2: 'Spring',
     3: 'Summer', 4: 'Summer', 5: 'Summer',
@@ -123,20 +113,9 @@ Write in natural Hinglish — Hindi words with English mixed naturally.
 `;
 
 // ─── DYNAMIC PUBLIC INTELLIGENCE ─────────────────────────────────────────────
-/**
- * NO HARDCODED DATES OR MARKET DATA.
- * This function builds a prompt that instructs Gemini to:
- * 1. Know the current date context (computed dynamically at runtime)
- * 2. Use its knowledge + web grounding for current sector data
- * 3. Connect planetary predictions with real present-day situations
- *
- * Gemini is explicitly told to NOT use stale training data for
- * market prices, policy rates, or employment trends.
- */
 function buildPublicIntelligence(employment: string, sector: string): string {
   const { monthYear, quarter, financialYear, season, isoDate } = getDynamicDateContext();
 
-  // Sector-specific search guidance — Gemini fetches fresh data
   const SECTOR_SEARCH_GUIDE: Record<string, string> = {
     it: `IT & Technology sector in India. Key areas to reference:
 - Current hiring/layoff trends in Indian IT companies
@@ -204,8 +183,8 @@ function buildPublicIntelligence(employment: string, sector: string): string {
     retired:   'Retired professional',
   };
 
-  const sectorGuide  = SECTOR_SEARCH_GUIDE[sector]  ?? '';
-  const empContext   = EMPLOYMENT_CONTEXT[employment] ?? '';
+  const sectorGuide = SECTOR_SEARCH_GUIDE[sector]  ?? '';
+  const empContext  = EMPLOYMENT_CONTEXT[employment] ?? '';
 
   if (!sectorGuide && !empContext) return '';
 
@@ -221,9 +200,9 @@ ${sectorGuide ? `Their sector: ${sectorGuide}
 IMPORTANT INSTRUCTION FOR AI:
 Use your most current knowledge for the above sector as of ${monthYear}.
 Where you have real-time search capability, fetch live data.
-Do NOT use market prices, interest rates, or policy data from your training 
+Do NOT use market prices, interest rates, or policy data from your training
 if it could be outdated — instead state the current trend directionally.
-Connect the person's planetary period with their ACTUAL current life situation 
+Connect the person's planetary period with their ACTUAL current life situation
 in ${monthYear}, not a generic prediction.` : ''}
 
 For example:
@@ -254,17 +233,17 @@ const SERVICE_PAGES: Record<string, { url: string; label: string }> = {
 
 function detectServiceIntent(message: string): { url: string; label: string } | null {
   const lower = message.toLowerCase();
-  if (lower.includes('ex') || lower.includes('वापस') || lower.includes('closure'))     return SERVICE_PAGES['ex_back']!;
-  if (lower.includes('marr') || lower.includes('shaadi') || lower.includes('शादी'))    return SERVICE_PAGES['marriage']!;
-  if (lower.includes('job') || lower.includes('career') || lower.includes('नौकरी'))    return SERVICE_PAGES['job']!;
-  if (lower.includes('business') || lower.includes('व्यापार'))                          return SERVICE_PAGES['business']!;
-  if (lower.includes('property') || lower.includes('house') || lower.includes('मकान')) return SERVICE_PAGES['property']!;
-  if (lower.includes('child') || lower.includes('beta') || lower.includes('बच्चा'))    return SERVICE_PAGES['child']!;
-  if (lower.includes('health') || lower.includes('bimari') || lower.includes('बीमारी'))return SERVICE_PAGES['health']!;
-  if (lower.includes('boss') || lower.includes('office') || lower.includes('toxic'))   return SERVICE_PAGES['boss']!;
-  if (lower.includes('compat') || lower.includes('match') || lower.includes('partner'))return SERVICE_PAGES['compatibility']!;
-  if (lower.includes('wealth') || lower.includes('money') || lower.includes('पैसा'))   return SERVICE_PAGES['wealth']!;
-  if (lower.includes('foreign') || lower.includes('abroad') || lower.includes('विदेश'))return SERVICE_PAGES['foreign']!;
+  if (lower.includes('ex') || lower.includes('वापस') || lower.includes('closure'))      return SERVICE_PAGES['ex_back']!;
+  if (lower.includes('marr') || lower.includes('shaadi') || lower.includes('शादी'))     return SERVICE_PAGES['marriage']!;
+  if (lower.includes('job') || lower.includes('career') || lower.includes('नौकरी'))     return SERVICE_PAGES['job']!;
+  if (lower.includes('business') || lower.includes('व्यापार'))                           return SERVICE_PAGES['business']!;
+  if (lower.includes('property') || lower.includes('house') || lower.includes('मकान'))  return SERVICE_PAGES['property']!;
+  if (lower.includes('child') || lower.includes('beta') || lower.includes('बच्चा'))     return SERVICE_PAGES['child']!;
+  if (lower.includes('health') || lower.includes('bimari') || lower.includes('बीमारी')) return SERVICE_PAGES['health']!;
+  if (lower.includes('boss') || lower.includes('office') || lower.includes('toxic'))    return SERVICE_PAGES['boss']!;
+  if (lower.includes('compat') || lower.includes('match') || lower.includes('partner')) return SERVICE_PAGES['compatibility']!;
+  if (lower.includes('wealth') || lower.includes('money') || lower.includes('पैसा'))    return SERVICE_PAGES['wealth']!;
+  if (lower.includes('foreign') || lower.includes('abroad') || lower.includes('विदेश')) return SERVICE_PAGES['foreign']!;
   if (lower.includes('spiritual') || lower.includes('moksha') || lower.includes('मोक्ष'))return SERVICE_PAGES['spiritual']!;
   return null;
 }
@@ -328,13 +307,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ reply: 'API Key missing.' });
     }
 
-    // Language instruction
     const langInstruction =
       lang === 'hindi'   ? HINDI_PLANET_INSTRUCTION :
       lang === 'english' ? 'Respond in clear, warm English only.' :
                            HINGLISH_PLANET_INSTRUCTION;
 
-    // Dynamic date context — computed once per request, never hardcoded
     const { monthYear, isoDate } = getDynamicDateContext();
     const dateStamp = `\n[Today: ${isoDate} | Period: ${monthYear}]\n`;
 
@@ -354,7 +331,7 @@ export async function POST(req: NextRequest) {
         if (reply.length > 50) return NextResponse.json({ reply });
         return NextResponse.json({ reply: '', error: 'Empty response' });
       } catch (e) {
-        console.error('[TrikalVaani v20] deep_prediction error:', e);
+        console.error('[TrikalVaani v21] deep_prediction error:', e);
         return NextResponse.json({ reply: '', error: String(e) });
       }
     }
@@ -369,17 +346,17 @@ export async function POST(req: NextRequest) {
         const reply = await callGemini(fullPrompt, null, 4096, 0.82);
         return NextResponse.json({ reply });
       } catch (e) {
-        console.error('[TrikalVaani v20] four_week error:', e);
+        console.error('[TrikalVaani v21] four_week error:', e);
         return NextResponse.json({ reply: '', error: String(e) });
       }
     }
 
-    // ── MASTER MODE — CEO PRIVATE DASHBOARD ──────────────────────────────────
+    // ── MASTER MODE ───────────────────────────────────────────────────────────
     if (mode === 'master') {
       const { monthYear: my, quarter, financialYear } = getDynamicDateContext();
       const masterSystem = `You are the Master Intelligence Engine of Trikal Vaani.
 You are providing a PRIVATE briefing to Rohiit Gupta (CEO & Chief Vedic Architect)
-before a ₹499 premium consultation call.
+before a premium consultation call.
 
 This is NOT shown to the client. This is Rohiit Gupta's private preparation tool.
 Be extremely detailed, specific, and actionable. No word limits. Full analysis.
@@ -393,7 +370,7 @@ ${langInstruction}`;
         const reply = await callGemini(message, masterSystem, 8192, 0.75);
         return NextResponse.json({ reply });
       } catch (e) {
-        console.error('[TrikalVaani v20] master error:', e);
+        console.error('[TrikalVaani v21] master error:', e);
         return NextResponse.json({ reply: '', error: String(e) });
       }
     }
@@ -405,78 +382,53 @@ ${langInstruction}`;
         const reply = await callGemini(fullPrompt, null, 300, 0.85);
         return NextResponse.json({ reply });
       } catch (e) {
-        console.error('[TrikalVaani v20] prediction error:', e);
+        console.error('[TrikalVaani v21] prediction error:', e);
         return NextResponse.json({ reply: '' });
       }
     }
 
-    // ── CHAT MODE — with Prokerala Kundali (v20 CRITICAL FIX) ────────────────
+    // ── CHAT MODE — Swiss Ephemeris (Meeus) only — v21 ───────────────────────
     let kundali        = null;
     let kundaliSummary = null;
 
     if (birthData?.dob && birthData?.tob && birthData?.lat) {
       try {
-        // v20 FIX: Using real Swiss Ephemeris via Prokerala API
-        // buildKundaliFromProkerala() is async — must be awaited
-        // Previously was using buildKundali() (Meeus ±2-3° approximation) — NOW FIXED
-        kundali = await buildKundaliFromProkerala(birthData);
+        // v21: Prokerala removed by CEO (May 2026). Using Swiss Ephemeris (Meeus).
+        kundali = buildKundali(birthData);
 
         kundaliSummary = {
-          lagna:            kundali.lagna,
-          lagnaLord:        kundali.lagnaLord,
-          nakshatra:        kundali.nakshatra,
-          nakshatraLord:    kundali.nakshatraLord,
-          mahadasha:        kundali.currentMahadasha.lord,
-          antardasha:       kundali.currentAntardasha.lord,
-          pratyantar:       kundali.currentPratyantar.lord,        // ✅ Level 3
-          pratyantar_ends:  kundali.currentPratyantar.endDate,     // ✅ Exact end date
-          pratyantar_days:  kundali.currentPratyantar.remainingDays, // ✅ Days left
-          sookshma:         kundali.currentSookshma.lord,          // ✅ Level 4
-          dashaQuality:     kundali.currentPratyantar.quality,     // ✅ Shubh/Ashubh
-          dashaBalance:     kundali.dashaBalance,
-          choghadiya:       kundali.panchang.choghadiya,
-          rahuKaal:         kundali.panchang.rahuKaal,
-          abhijeet:         kundali.panchang.abhijeetMuhurta,
-          tithi:            kundali.panchang.tithi,
-          vara:             kundali.panchang.vara,
-          yoga:             kundali.panchang.yoga,
-          calculatedOn:     isoDate,                               // ✅ Dynamic timestamp
+          lagna:           kundali.lagna,
+          lagnaLord:       kundali.lagnaLord,
+          nakshatra:       kundali.nakshatra,
+          nakshatraLord:   kundali.nakshatraLord,
+          mahadasha:       kundali.currentMahadasha.lord,
+          antardasha:      kundali.currentAntardasha.lord,
+          pratyantar:      kundali.currentPratyantar.lord,
+          pratyantar_ends: kundali.currentPratyantar.endDate,
+          pratyantar_days: kundali.currentPratyantar.remainingDays,
+          sookshma:        kundali.currentSookshma.lord,
+          dashaQuality:    kundali.currentPratyantar.quality,
+          dashaBalance:    kundali.dashaBalance,
+          choghadiya:      kundali.panchang.choghadiya,
+          rahuKaal:        kundali.panchang.rahuKaal,
+          abhijeet:        kundali.panchang.abhijeetMuhurta,
+          tithi:           kundali.panchang.tithi,
+          vara:            kundali.panchang.vara,
+          yoga:            kundali.panchang.yoga,
+          calculatedOn:    isoDate,
+          source:          'swiss_ephemeris_meeus',
           planets: Object.values(kundali.planets).map(p => ({
-            name:        p.name,
-            rashi:       p.rashi,
-            house:       p.house,
-            strength:    p.strength,
+            name:         p.name,
+            rashi:        p.rashi,
+            house:        p.house,
+            strength:     p.strength,
             isRetrograde: p.isRetrograde,
-            nakshatra:   p.nakshatra,
-            degree:      p.degree,
+            nakshatra:    p.nakshatra,
+            degree:       p.degree,
           })),
         };
       } catch (calcErr) {
-        console.error('[TrikalVaani v20] Prokerala Kundali error:', calcErr);
-        // Fallback to Meeus if Prokerala API fails (network issue, quota etc.)
-        try {
-          const { buildKundali } = await import('../../../lib/swiss-ephemeris');
-          kundali = buildKundali(birthData);
-          console.warn('[TrikalVaani v20] Fell back to Meeus — Prokerala unavailable');
-          kundaliSummary = {
-            lagna:         kundali.lagna,
-            lagnaLord:     kundali.lagnaLord,
-            nakshatra:     kundali.nakshatra,
-            nakshatraLord: kundali.nakshatraLord,
-            mahadasha:     kundali.currentMahadasha.lord,
-            antardasha:    kundali.currentAntardasha.lord,
-            dashaBalance:  kundali.dashaBalance,
-            calculatedOn:  isoDate,
-            fallback:      true, // ⚠️ Flag so you can monitor in logs
-            planets: Object.values(kundali.planets).map(p => ({
-              name: p.name, rashi: p.rashi, house: p.house,
-              strength: p.strength, isRetrograde: p.isRetrograde,
-              nakshatra: p.nakshatra, degree: p.degree,
-            })),
-          };
-        } catch (fallbackErr) {
-          console.error('[TrikalVaani v20] Fallback also failed:', fallbackErr);
-        }
+        console.error('[TrikalVaani v21] Kundali calculation error:', calcErr);
       }
     }
 
@@ -488,7 +440,7 @@ ${langInstruction}`;
 REVENUE GUARD — CRITICAL RULE:
 When user asks a specific life question (career, marriage, ex-back, health, property, child, boss etc.):
 1. Give ONE teaser sentence hinting at what their chart shows
-2. Say "Is baare mein gehri jaankari ke liye, main aapko hamari specialized reading page par le jaati hoon"
+2. Say "Is baare mein gehri jaankari ke liye, main aapko hamari specialized reading page par le jaata hoon"
 3. End with: [SERVICE_LINK]
 DO NOT give free full answers to specific life questions.
 For general chart questions, greetings, panchang — answer freely.
@@ -505,7 +457,7 @@ Current date for your reference: ${isoDate} (${monthYear})
     try {
       reply = await callGemini(message, systemPrompt, 280, 0.85);
     } catch (e) {
-      console.error('[TrikalVaani v20] chat error:', e);
+      console.error('[TrikalVaani v21] chat error:', e);
       return NextResponse.json({
         reply: 'Cosmic signals weak hain. Ek minute mein dobara try karein. 🙏',
         kundaliSummary,
@@ -525,7 +477,7 @@ Current date for your reference: ${isoDate} (${monthYear})
     return NextResponse.json({ reply, kundaliSummary });
 
   } catch (err: unknown) {
-    console.error('[TrikalVaani v20] Unhandled error:', err);
+    console.error('[TrikalVaani v21] Unhandled error:', err);
     return NextResponse.json({ reply: 'Kuch cosmic disturbance aa gayi. 🙏' });
   }
 }
