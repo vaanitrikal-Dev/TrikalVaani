@@ -366,7 +366,7 @@ async function saveToSupabase(p: {
   return data.id as string;
 }
 
-// ── MAIN HANDLER ──────────────────────────────────────────────────────────────
+// ── MAIN HANDLER (v10.1 — deployed May 5 2026) ──────────────────────────────────
 
 export async function POST(req: NextRequest) {
   const startMs = Date.now();
@@ -563,15 +563,14 @@ export async function POST(req: NextRequest) {
 
       const polishedResult = await polishPrediction(
         predictionJson,
-        {
-          tier:     'premium',
-          language: userContext.language,
-          domain:   domainId,
-        }
+        userContext.language,
+        localBirthData.name ?? 'Anonymous',
+        domainConfig?.label ?? domainId,
+        'premium',
       );
 
-      if (polishedResult) {
-        predictionJson = polishedResult;
+      if (polishedResult?.polished && polishedResult.prediction) {
+        predictionJson = polishedResult.prediction;
         polished       = true;
         console.log(`[TV-Predict] Claude polish OK | ms:${Date.now() - startMs}`);
       }
