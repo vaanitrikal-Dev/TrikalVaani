@@ -584,18 +584,29 @@ export async function POST(req: NextRequest) {
   // ────────────────────────────────────────────────────────────────────────────
   const processingMs = Date.now() - startMs;
 
+  // Extract dasha planets for slug — safe fallbacks if kundali unavailable
+  const mahadashaPlanet  = kundaliData?.dasha?.mahadasha?.planet  ?? 'rahu';
+  const antardashaPlanet = kundaliData?.dasha?.antardasha?.planet ?? 'saturn';
+
   const publicSlug = generatePredictionSlug({
     domainId,
-    kundaliData,
-    cityName: localBirthData.cityName,
+    mahadasha:  mahadashaPlanet,
+    antardasha: antardashaPlanet,
+    city:       localBirthData.cityName ?? 'india',
   });
 
-  const seoMeta = generateSeoMeta({
+  const geoAnswer = predictionJson?.geoDirectAnswer
+                 ?? predictionJson?.simpleSummary?.text?.slice(0, 155)
+                 ?? null;
+
+  const seoMeta = generateSeoMeta(
+    publicSlug,
     domainId,
-    domainLabel:   domainLabel ?? domainConfig?.label ?? domainId,
-    cityName:      localBirthData.cityName ?? '',
-    predictionJson,
-  });
+    mahadashaPlanet,
+    antardashaPlanet,
+    localBirthData.cityName ?? 'India',
+    geoAnswer,
+  );
 
   console.log(`[TV-Predict] slug:${publicSlug} | seo:${seoMeta?.title?.slice(0, 50)} | ms:${processingMs}`);
 
