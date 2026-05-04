@@ -470,7 +470,7 @@ function TierSelector({
       price:    'Free',
       desc:     'Trikal Ka Sandesh — quick prediction',
       color:    '#94a3b8',
-      features: ['150-200 word summary', 'Key message + action', 'SEO report page'],
+      features: ['150-200 word summary', 'Key message + action', 'Instant results'],
     },
     {
       id:       'paid' as PredictionTier,
@@ -489,7 +489,7 @@ function TierSelector({
       price:    '₹11',
       desc:     'Trikal ki awaaz — suniye',
       color:    '#a78bfa',
-      features: ['60-sec voice response', 'Hinglish / Hindi / English', 'Google TTS Neural2'],
+      features: ['60-sec voice response', 'Hinglish / Hindi / English', 'Powered by Trikal AI'],
     },
   ]
 
@@ -1128,9 +1128,6 @@ export default function BirthForm({
                 onChange={e => set('currentCity', e.target.value)}
                 className="w-full px-4 py-2.5 rounded-lg text-sm outline-none"
                 style={inputStyle()} />
-              <p className="text-slate-600 text-xs mt-1">
-                Trikal uses this to understand your current job market, real estate and opportunities
-              </p>
             </div>
 
             {/* Lat/Lon display */}
@@ -1195,7 +1192,7 @@ export default function BirthForm({
             <div className="relative">
               <label htmlFor="tv-rel-status" className="block text-sm font-medium text-slate-300 mb-1.5">
                 Relationship Status
-                <span className="text-slate-500 text-xs ml-2">(optional — improves analysis)</span>
+                Relationship Status
               </label>
               <div className="relative">
                 <select id="tv-rel-status" value={fields.relationshipStatus}
@@ -1216,7 +1213,6 @@ export default function BirthForm({
             <div>
               <label htmlFor="tv-situation" className="block text-sm font-medium text-slate-300 mb-1.5">
                 Tell Trikal what's on your mind
-                <span className="text-slate-500 text-xs ml-2">(optional — 60% weight in prediction)</span>
               </label>
               <div className="relative">
                 <textarea id="tv-situation"
@@ -1232,9 +1228,6 @@ export default function BirthForm({
                   {fields.situationNote.length}/100
                 </span>
               </div>
-              <p className="text-slate-600 text-xs mt-1">
-                🔮 Trikal is this to personalise your prediction — your situation gets 60% weight
-              </p>
             </div>
 
             {/* ── PERSON 2 SECTION ── */}
