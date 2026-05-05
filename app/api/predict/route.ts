@@ -452,11 +452,7 @@ async function saveToSupabase(p: {
     simple_summary:   simpleSummary,
     headline:         p.predictionJson.headline ?? null,
     geo_answer:       p.seoMeta.geoAnswer       ?? null,
-    geo_faq:          geoFaq.length > 0         ? geoFaq        : null,
-    howto_steps:      howtoSteps.length > 0     ? howtoSteps    : null,
-    search_intents:   Object.keys(searchIntents).length > 0 ? searchIntents : null,
-    template_style:   Object.keys(templateStyle).length > 0 ? templateStyle : null,
-
+    
     // ── Confidence ────────────────────────────────────────────────────────
     confidence:       p.predictionJson.confidenceBadge?.score
                    ?? p.predictionJson.confidence
