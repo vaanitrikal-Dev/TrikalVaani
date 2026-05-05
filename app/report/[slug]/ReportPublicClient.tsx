@@ -444,11 +444,12 @@ function LockedSection({ slug }: { slug: string }) {
 export default function ReportPublicClient({ report, slug, meta }: ReportPublicClientProps) {
 
   // Extract data safely
-  const summary      = (report.simple_summary as Record<string, unknown>) ?? {}
-  const summaryText  = str(summary.text, str(report.prediction_text))
-  const keyMessage   = str(summary.keyMessage)
-  const mainAction   = str(summary.mainAction)
-  const mainCaution  = str(summary.mainCaution)
+  const summaryText  = str(report.simple_summary as string)
+  const predJson     = (report.prediction_json as Record<string, unknown>) ?? {}
+  const simpleSummary = (predJson.simpleSummary as Record<string, unknown>) ?? {}
+  const keyMessage   = str(simpleSummary.keyMessage as string)
+  const mainAction   = str(simpleSummary.mainAction as string)
+  const mainCaution  = str(simpleSummary.mainCaution as string)
 
   const geoAnswer    = str(report.geo_answer,
     str(report.geo_direct_answer, ''))
@@ -456,12 +457,13 @@ export default function ReportPublicClient({ report, slug, meta }: ReportPublicC
   const domainLabel  = str(report.domain_label, 'Vedic Reading')
   const personName   = str(report.person_name, 'Seeker')
   const birthCity    = str(report.birth_city, 'India')
-  const lagna        = str(report.lagna)
+  const lagna        = str(report.lagna as string) !== '—' ? str(report.lagna as string) : str((predJson as any)?.lagnaRashi)
   const nakshatra    = str(report.nakshatra)
   const mahadasha    = str(report.mahadasha)
   const antardasha   = str(report.antardasha)
   const tier         = str(report.tier, 'free')
   const language     = str(report.language, 'hinglish')
+  const templateHtml = report.template_html as string | null
 
   const upgradeUrl   = `/upgrade?slug=${slug}&tier=basic`
 
@@ -620,6 +622,17 @@ export default function ReportPublicClient({ report, slug, meta }: ReportPublicC
               </div>
             )}
           </div>
+
+          {/* ── S2.5: TEMPLATE HTML (if available) ──────────────────────── */}
+          {templateHtml && (
+            <div style={{
+              background:   BG_CARD,
+              border:       `1px solid ${GOLD_RGBA(0.12)}`,
+              borderRadius: '16px',
+              padding:      '20px',
+              marginBottom: '14px',
+            }} dangerouslySetInnerHTML={{ __html: templateHtml }} />
+          )}
 
           {/* ── S3: KUNDALI STATS ───────────────────────────────────────── */}
           <div style={{
