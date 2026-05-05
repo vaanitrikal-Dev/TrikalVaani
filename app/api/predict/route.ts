@@ -422,13 +422,16 @@ export async function POST(req: NextRequest) {
   // ────────────────────────────────────────────────────────────────────────────
   try {
     const templateRes = await callVM('/template', {
-      domain_id:    domainId,
-      chart:        rawChart,
-      synthesis:    synthesisData,
-      birth_data:   localBirthData,
-      user_context: userContext,
-      tier:         predictionTier,
-    }, 15000);
+  domain:      domainId,
+  kundaliData: {
+    chart:     rawChart,
+    synthesis: synthesisData,
+    birthData: localBirthData,
+    tier:      predictionTier,
+  },
+  sessionId:   sessionId,
+  lang:        userContext.language === 'english' ? 'en' : 'hi',
+}, 15000);
 
     templateHtml = templateRes?.html ?? templateRes?.template ?? null;
     console.log(`[TV-Predict] /template OK | chars:${templateHtml?.length ?? 0} | ms:${Date.now() - startMs}`);
