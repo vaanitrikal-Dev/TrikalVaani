@@ -386,11 +386,30 @@ export default function ResultClient({ predictionId, predictionData, meta }: Res
   const isPaid    = !isFree;
 
   // Extract prediction data
-  const simpleSummary  = predictionData?.simple_summary ?? predictionData?.simpleSummary;
-  const summaryText    = typeof simpleSummary === 'string' ? simpleSummary : simpleSummary?.text ?? '';
-  const keyMessage     = simpleSummary?.keyMessage ?? '';
-  const mainAction     = simpleSummary?.mainAction ?? '';
-  const mainCaution    = simpleSummary?.mainCaution ?? '';
+// Multi-path extraction — handles all Gemini response structures
+const simpleSummary  = predictionData?.simple_summary 
+                    ?? predictionData?.simpleSummary
+                    ?? predictionData?.trikal_sandesh
+                    ?? predictionData?.trikalkaSandesh;
+
+const summaryText    = typeof simpleSummary === 'string' 
+                     ? simpleSummary 
+                     : simpleSummary?.text 
+                    ?? predictionData?.summary 
+                    ?? predictionData?.geoDirectAnswer 
+                    ?? '';
+
+const keyMessage     = simpleSummary?.keyMessage 
+                    ?? predictionData?.coreMessage
+                    ?? predictionData?.core_message ?? '';
+
+const mainAction     = simpleSummary?.mainAction 
+                    ?? predictionData?.doAction
+                    ?? predictionData?.do_action ?? '';
+
+const mainCaution    = simpleSummary?.mainCaution 
+                    ?? predictionData?.avoidAction
+                    ?? predictionData?.avoid_action ?? '';
   const dos            = simpleSummary?.dos ?? [];
   const donts          = simpleSummary?.donts ?? [];
   const geoAnswer      = predictionData?.geoDirectAnswer ?? predictionData?.geo_direct_answer ?? '';
