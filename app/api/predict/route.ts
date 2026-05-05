@@ -243,7 +243,7 @@ async function saveToSupabase(p: {
 
     // ── Kundali summary (flat columns) ───────────────────────────────────────
     lagna:           p.kundaliData?.lagna?.rashi ?? null,
-    nakshatra:       p.kundaliData?.planets?.find((pl: PlanetPosition) => pl.name === 'Moon')?.nakshatra ?? null,
+    nakshatra:       p.kundaliData?.planets?.['Moon']?.nakshatra ?? null,
     mahadasha:       p.kundaliData?.currentMahadasha?.lord ?? null,
     antardasha:      p.kundaliData?.currentAntardasha?.lord ?? null,
 
