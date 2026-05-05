@@ -137,8 +137,10 @@ function KundaliChart({ lagna, planets }: { lagna:string; planets:PlanetRow[] })
 
   return (
     <div style={{display:'flex',justifyContent:'center'}}>
-      <svg width="360" height="360" viewBox="0 0 400 400" style={{maxWidth:'100%'}}>
-        <rect width="400" height="400" fill="rgba(4,8,20,0.85)" rx="8"/>
+    <svg width="360" height="360" viewBox="0 0 400 400"
+  style={{maxWidth:'100%', background:'#060A14', borderRadius:'8px',
+  border:'1px solid rgba(212,175,55,0.2)'}}>
+  <rect width="400" height="400" fill="#060A14" rx="8"/>
         {/* North Indian diagonal lines */}
         <line x1="100" y1="100" x2="200" y2="200" stroke={G(0.25)} strokeWidth="1"/>
         <line x1="300" y1="100" x2="200" y2="200" stroke={G(0.25)} strokeWidth="1"/>
@@ -181,8 +183,8 @@ function KundaliChart({ lagna, planets }: { lagna:string; planets:PlanetRow[] })
             </g>
           )
         })}
-        <text x="200" y="208" fill={G(0.22)} fontSize="9"
-          textAnchor="middle" fontFamily="Georgia,serif">{lagna} Lagna</text>
+     <text x="200" y="395" fill={G(0.3)} fontSize="9"
+  textAnchor="middle" fontFamily="Georgia,serif">{lagna} Lagna</text>
       </svg>
     </div>
   )
