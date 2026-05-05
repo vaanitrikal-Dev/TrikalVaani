@@ -56,9 +56,10 @@ function getSupabase() {
 async function getReport(slug: string): Promise<ReportRow | null> {
   const supabase = getSupabase()
   const { data, error } = await supabase
-    .from('public_report_view')
+    .from('predictions')
     .select('*')
     .eq('public_slug', slug)
+    .eq('is_public', true)
     .single()
 
   if (error || !data) return null
