@@ -34,14 +34,9 @@ import { buildPredictionPrompt }     from '@/lib/gemini-prompt';
 import { polishPrediction }          from '@/lib/claude-polish';
 import { generatePredictionSlug, generateSeoMeta } from '@/lib/slug';
 import { notifyGoogleIndexing }      from '@/lib/google-indexing';
-import {
-  calcDasha,
-  NAKSHATRA_LORDS,
-  RASHI_LORDS,
-  NAKSHATRAS,
-} from '@/lib/swiss-ephemeris';
+import { buildKundali }             from '@/lib/swiss-ephemeris';
 import type { KundaliData, BirthData, PlanetPosition } from '@/lib/swiss-ephemeris';
-import type { DomainId }   from '@/lib/domain-config';
+import type { DomainConfig, DomainId } from '@/lib/domain-config';
 import type { UserTier, UserContext } from '@/lib/gemini-prompt';
 
 export const maxDuration = 300;
@@ -115,61 +110,6 @@ interface PredictRequest {
     description: string;
     color:       string;
   } | null;
-}
-
-// ── adaptSwissToKundali ───────────────────────────────────────────────────────
-
-function adaptSwissToKundali(chart: any, birthData: BirthData): KundaliData {
-  const planets: PlanetPosition[] = [];
-
-  const PLANET_MAP: Record<string, string> = {
-    sun: 'Sun', moon: 'Moon', mars: 'Mars', mercury: 'Mercury',
-    jupiter: 'Jupiter', venus: 'Venus', saturn: 'Saturn',
-    rahu: 'Rahu', ketu: 'Ketu',
-  };
-
-  for (const [key, name] of Object.entries(PLANET_MAP)) {
-    const p = chart.planets?.[key];
-    if (!p) continue;
-    const lon = typeof p.longitude === 'number' ? p.longitude : 0;
-    const rashiIdx = Math.floor(lon / 30);
-    const degree   = lon % 30;
-    const naksIdx  = Math.floor(lon / (360 / 27));
-
-    planets.push({
-      name:          name as any,
-      longitude:     lon,
-      rashi:         p.rashi || p.sign || ['Aries','Taurus','Gemini','Cancer','Leo','Virgo','Libra','Scorpio','Sagittarius','Capricorn','Aquarius','Pisces'][rashiIdx] || 'Aries',
-      rashiIndex:    rashiIdx,
-      degree,
-      house:         p.house ?? 1,
-      isRetrograde:  p.isRetrograde ?? false,
-      nakshatra:     NAKSHATRAS[naksIdx] ?? 'Ashwini',
-      nakshatraLord: NAKSHATRA_LORDS[naksIdx] ?? 'Ketu',
-      shadbala:      p.shadbala ?? null,
-    });
-  }
-
-  const moonPlanet  = planets.find(p => p.name === 'Moon');
-  const moonLon     = moonPlanet?.longitude ?? 0;
-  const dashaResult = calcDasha(moonLon, birthData.dob);
-
-  const lagnaLon      = chart.lagna?.longitude ?? chart.ascendant?.longitude ?? 0;
-  const lagnaRashiIdx = Math.floor(lagnaLon / 30);
-
-  return {
-    planets,
-    dasha: dashaResult,
-    lagna: {
-      longitude:  lagnaLon,
-      rashi:      chart.lagna?.sign ?? ['Aries','Taurus','Gemini','Cancer','Leo','Virgo','Libra','Scorpio','Sagittarius','Capricorn','Aquarius','Pisces'][lagnaRashiIdx] ?? 'Aries',
-      rashiIndex: lagnaRashiIdx,
-      degree:     lagnaLon % 30,
-      lord:       RASHI_LORDS[lagnaRashiIdx] ?? 'Mars',
-    },
-    birthData,
-    chart,
-  };
 }
 
 // ── callVM ────────────────────────────────────────────────────────────────────
@@ -304,8 +244,8 @@ async function saveToSupabase(p: {
     // ── Kundali summary (flat columns) ───────────────────────────────────────
     lagna:           p.kundaliData?.lagna?.rashi ?? null,
     nakshatra:       p.kundaliData?.planets?.find((pl: PlanetPosition) => pl.name === 'Moon')?.nakshatra ?? null,
-    mahadasha:       p.kundaliData?.dasha?.mahadasha?.planet ?? null,
-    antardasha:      p.kundaliData?.dasha?.antardasha?.planet ?? null,
+    mahadasha:       p.kundaliData?.currentMahadasha?.lord ?? null,
+    antardasha:      p.kundaliData?.currentAntardasha?.lord ?? null,
 
     // ── User context (flat columns) ──────────────────────────────────────────
     language:        p.userContext.language   ?? null,
@@ -417,12 +357,10 @@ export async function POST(req: NextRequest) {
     lat:      birthData.lat,
     lng:      birthData.lng,
     cityName: birthData.cityName ?? '',
-    timezone: birthData.timezone ?? 5.5,
-    ayanamsa: 'lahiri',
   };
 
   // ── Get domain config ──────────────────────────────────────────────────────
-  let domainConfig: any;
+  let domainConfig: DomainConfig;
   try {
     domainConfig = getDomainConfig(domainId);
   } catch {
@@ -432,7 +370,7 @@ export async function POST(req: NextRequest) {
   // ── CEO LOCKED: verifiedTier — DO NOT CHANGE WITHOUT CEO APPROVAL ─────────
   const verifiedTier: UserTier = predictionTier === 'paid' ? 'premium' : 'free';
 
-  let kundaliData:   KundaliData | null = null;
+  const kundaliData: KundaliData = buildKundali(localBirthData);
   let synthesisData: any                = null;
   let templateHtml:  string | null      = null;
   let rawChart:      any                = null;
@@ -446,13 +384,11 @@ export async function POST(req: NextRequest) {
       tob:      localBirthData.tob,
       lat:      localBirthData.lat,
       lng:      localBirthData.lng,
-      timezone: localBirthData.timezone,
+      timezone: birthData.timezone ?? 5.5,
       ayanamsa: 1,
     }, 25000);
 
     console.log(`[TV-Predict] /kundali OK — lagna:${rawChart.lagna?.sign} | ms:${Date.now() - startMs}`);
-
-    kundaliData = adaptSwissToKundali(rawChart, localBirthData);
 
   } catch (err: any) {
     console.error('[TV-Predict] /kundali failed (non-fatal — Meeus fallback):', err.message);
@@ -464,12 +400,12 @@ export async function POST(req: NextRequest) {
   try {
     synthesisData = await callVM('/synthesize', {
       chart:      rawChart,
-      birth_data: {
+        birth_data: {
         dob:      localBirthData.dob,
         tob:      localBirthData.tob,
         lat:      localBirthData.lat,
         lng:      localBirthData.lng,
-        timezone: localBirthData.timezone,
+        timezone: birthData.timezone ?? 5.5,
       },
       domain_id:    domainId,
       person2_data: person2Data ?? null,
@@ -506,6 +442,7 @@ export async function POST(req: NextRequest) {
   // ── IRON RULE: gemini-prompt.ts is NEVER touched without CEO approval ──────
   // ────────────────────────────────────────────────────────────────────────────
   const promptUserContext: UserContext = {
+    tier:               verifiedTier,
     segment:            userContext.segment,
     employment:         userContext.employment,
     sector:             userContext.sector,
@@ -521,12 +458,10 @@ export async function POST(req: NextRequest) {
   };
 
   const { systemPrompt, userMessage } = buildPredictionPrompt(
-    domainId,
     kundaliData,
-    synthesisData,
+    localBirthData,
+    domainConfig,
     promptUserContext,
-    'basic',
-    predictionTier,
   );
 
   // ────────────────────────────────────────────────────────────────────────────
@@ -566,7 +501,7 @@ export async function POST(req: NextRequest) {
         userContext.language,
         localBirthData.name ?? 'Anonymous',
         domainConfig?.label ?? domainId,
-        'premium',
+        verifiedTier,
       );
 
       if (polishedResult?.polished && polishedResult.prediction) {
@@ -585,8 +520,8 @@ export async function POST(req: NextRequest) {
   const processingMs = Date.now() - startMs;
 
   // Extract dasha planets for slug — safe fallbacks if kundali unavailable
-  const mahadashaPlanet  = kundaliData?.dasha?.mahadasha?.planet  ?? 'rahu';
-  const antardashaPlanet = kundaliData?.dasha?.antardasha?.planet ?? 'saturn';
+  const mahadashaPlanet  = kundaliData?.currentMahadasha?.lord  ?? 'rahu';
+  const antardashaPlanet = kundaliData?.currentAntardasha?.lord ?? 'saturn';
 
   const publicSlug = generatePredictionSlug({
     domainId,
