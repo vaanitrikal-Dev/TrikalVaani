@@ -262,4 +262,4 @@ export default async function ReportPage(
   )
 }
 
-export const revalidate = 86400
+export const revalidate = 0
