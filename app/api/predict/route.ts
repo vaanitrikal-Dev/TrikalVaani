@@ -398,18 +398,18 @@ export async function POST(req: NextRequest) {
   // STEP 2: /synthesize — GCP VM Mumbai
   // ────────────────────────────────────────────────────────────────────────────
   try {
-    synthesisData = await callVM('/synthesize', {
-      chart:      rawChart,
-        birth_data: {
-        dob:      localBirthData.dob,
-        tob:      localBirthData.tob,
-        lat:      localBirthData.lat,
-        lng:      localBirthData.lng,
-        timezone: birthData.timezone ?? 5.5,
-      },
-      domain_id:    domainId,
-      person2_data: person2Data ?? null,
-    }, 25000);
+synthesisData = await callVM('/synthesize', {
+  kundaliData:  rawChart,
+  birthData: {
+    dob:      localBirthData.dob,
+    tob:      localBirthData.tob,
+    lat:      localBirthData.lat,
+    lng:      localBirthData.lng,
+    timezone: birthData.timezone ?? 5.5,
+  },
+  domainId:    domainId,
+  person2Data: person2Data ?? null,
+}, 25000);
 
     console.log(`[TV-Predict] /synthesize OK | yogas:${synthesisData?.parashara?.totalActiveYogas ?? 0} | ms:${Date.now() - startMs}`);
 
