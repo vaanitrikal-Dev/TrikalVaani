@@ -480,7 +480,21 @@ const mainCaution    = simpleSummary?.mainCaution
             <Badge label={`✓ ${meta.confidenceLabel}`} color={GOLD} />
           )}
         </div>
-
+{/* ── POLISH DEFERRED BADGE — v12.0 ─────────────────────────────── */}
+        {(meta as any)?.polishDeferred && (
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: '10px',
+            padding: '10px 16px', marginBottom: '12px',
+            borderRadius: '10px',
+            background: 'rgba(212,175,55,0.06)',
+            border: '1px solid rgba(212,175,55,0.2)',
+          }}>
+            <span style={{ fontSize: '16px', animation: 'spin 2s linear infinite' }}>✨</span>
+            <p style={{ margin: 0, color: 'rgba(212,175,55,0.8)', fontSize: '12px', lineHeight: 1.5 }}>
+              Trikal aapki reading ko aur gehri bana raha hai... kuch hi pal mein aur sashakt ho jayegi.
+            </p>
+          </div>
+        )}
         {/* ── SECTION 2: TRIKAL KA SANDESH ──────────────────────────────── */}
         <SectionCard style={{ background: 'rgba(11,16,26,0.95)' }}>
           <SectionTitle icon="✨" title="Trikal Ka Sandesh" subtitle="Aapke liye — seedha dil se" />
