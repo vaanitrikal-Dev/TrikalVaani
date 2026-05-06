@@ -695,7 +695,21 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
               </div>
             )}
           </div>
-
+{/* ── POLISH DEFERRED BADGE — v12.0 ──────────────────────────── */}
+          {(report as any)?._meta?.polishDeferred && (
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: '10px',
+              padding: '10px 16px', marginBottom: '12px',
+              borderRadius: '10px',
+              background: 'rgba(212,175,55,0.06)',
+              border: '1px solid rgba(212,175,55,0.2)',
+            }}>
+              <span style={{ fontSize: '16px' }}>✨</span>
+              <p style={{ margin: 0, color: 'rgba(212,175,55,0.8)', fontSize: '12px', lineHeight: 1.5 }}>
+                Trikal aapki reading ko aur gehri bana raha hai... kuch hi pal mein aur sashakt ho jayegi.
+              </p>
+            </div>
+          )}
           {/* ── S2: TRIKAL KA SANDESH ─────────────────────────────────── */}
           {/* FREE: template coreMessage + Gemini keyMessage + do/avoid cards */}
           {/* PAID: full paid section with 400-600w summary */}
