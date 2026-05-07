@@ -3,16 +3,13 @@
  * TRIKAL VAANI — Unified Prediction Endpoint
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/api/predict/route.ts
- * VERSION: 14.0 — Supabase Edge Function for Pro+Polish (Option B)
+ * VERSION: 14.1 — Fixed Edge Function URL + Google Maps ready
  * SIGNED: ROHIIT GUPTA, CEO
  *
- * CHANGES v14.0 vs v13.0:
- *   ✅ Pro+Polish now calls Supabase Edge Function (never killed)
- *   ✅ Flash response to user in ~10s
- *   ✅ Edge Function runs Pro+Polish independently (permanent fix)
- *   ✅ geoBullets field passed to response for S1 hero
- *   ✅ gemini-prompt-flash.ts v1.1 (5 GEO bullets)
- *   ✅ gemini-prompt-pro.ts v1.1 (10 GEO bullets) — via Edge Function
+ * CHANGES v14.1 vs v14.0:
+ *   ✅ EDGE_FUNCTION_URL used directly from env var
+ *   ✅ No auth header — Edge Function has no auth check
+ *   ✅ Better error logging for Edge Function call
  *   ✅ All iron rules preserved
  *
  * IRON RULES — NEVER VIOLATE:
@@ -27,8 +24,8 @@
 import { NextRequest, NextResponse }   from 'next/server'
 import { createClient }                from '@supabase/supabase-js'
 import { getDomainConfig }             from '@/lib/domain-config'
-import { buildPredictionPrompt }       from '@/lib/gemini-prompt'       // LOCKED
-import { buildFlashPrompt }            from '@/lib/gemini-prompt-flash'  // v1.1
+import { buildPredictionPrompt }       from '@/lib/gemini-prompt'        // LOCKED
+import { buildFlashPrompt }            from '@/lib/gemini-prompt-flash'   // v1.1
 import { generatePredictionSlug }      from '@/lib/slug'
 import { notifyGoogleIndexing }        from '@/lib/google-indexing'
 import { buildKundali }                from '@/lib/swiss-ephemeris'
@@ -45,11 +42,8 @@ const GEMINI_API_KEY  = process.env.GEMINI_API_KEY  ?? ''
 const EPHE_API_URL    = process.env.EPHE_API_URL    ?? ''
 const EPHE_API_KEY    = process.env.EPHE_API_KEY    ?? ''
 
-// Supabase Edge Function URL + secret
-const EDGE_FUNCTION_URL    = process.env.NEXT_PUBLIC_SUPABASE_URL
-  ? `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/pro-polish`
-  : ''
-const EDGE_FUNCTION_SECRET = process.env.FUNCTION_SECRET_KEY ?? ''
+// ── Edge Function — direct URL from env ───────────────────────────────────────
+const EDGE_FUNCTION_URL = process.env.EDGE_FUNCTION_URL ?? ''
 
 // CEO LOCKED
 const MAX_TOKENS = 12000
@@ -154,12 +148,11 @@ function parseGeminiJSON(raw:string): any {
 function mergeTemplateWithGemini(
   templateObj: Record<string,any>|null,
   geminiObj:   Record<string,any>,
-  version = '14.0',
+  version = '14.1',
 ): Record<string,any> {
   if (!templateObj) return { ...geminiObj, _source:'gemini-only', _version:version }
   const ss = geminiObj.simpleSummary ?? {}
   return {
-    // Template Vedic analysis
     planetTable:      templateObj.planetTable      ?? [],
     dashaTimeline:    templateObj.dashaTimeline     ?? {},
     actionWindows:    templateObj.actionWindows     ?? [],
@@ -167,14 +160,13 @@ function mergeTemplateWithGemini(
     remedyPlan:       templateObj.remedyPlan        ?? {},
     panchang:         templateObj.panchang          ?? {},
     geoDirectAnswer:  geminiObj.geoDirectAnswer     ?? templateObj.geoDirectAnswer ?? {},
-    geoBullets:       geminiObj.geoBullets          ?? [],  // NEW — for S1 hero
+    geoBullets:       geminiObj.geoBullets          ?? [],
     geoFaq:           templateObj.geoFaq            ?? [],
     confidenceBadge:  templateObj.confidenceBadge   ?? {},
     domainAnalysis:   templateObj.domainAnalysis    ?? {},
     coreMessage:      templateObj.coreMessage       ?? null,
     doAction:         templateObj.doAction          ?? null,
     avoidAction:      templateObj.avoidAction       ?? null,
-    // Gemini summary
     simpleSummary:    ss,
     summaryText:      ss.text                       ?? null,
     keyMessage:       ss.keyMessage                 ?? null,
@@ -212,14 +204,12 @@ function buildSeoGeoMeta(
   mahadasha:string, antardasha:string, cityName:string,
   mergedJson:Record<string,any>,
 ) {
-  const geoRaw = mergedJson.geoDirectAnswer
+  const geoRaw  = mergedJson.geoDirectAnswer
   const geoText = typeof geoRaw==='object'
-    ? (geoRaw?.text ?? JSON.stringify(geoRaw) ?? '')
+    ? (geoRaw?.text ?? '')
     : (geoRaw ?? '')
 
-  // Clean URL from geo answer for description
   const geoClean = String(geoText)
-    .replace(/trikalvaani\.com/gi,'trikalvaani.com')
     .replace(/Visit\s+trikalvaani\.com[^.]*\./gi,'')
     .trim()
 
@@ -300,40 +290,40 @@ async function saveToSupabase(p:{
     .select('id').single()
 
   if (error||!data) {
-    console.error('[TV-v14] Supabase insert failed:', error?.message)
+    console.error('[TV-v14.1] Supabase insert failed:', error?.message)
     return `temp_${Date.now()}_${Math.random().toString(36).slice(2,8)}`
   }
   return data.id as string
 }
 
 // ── callEdgeFunction ──────────────────────────────────────────────────────────
-// Fire-and-forget call to Supabase Edge Function
-// Edge Function runs independently — never killed by Vercel
+// v14.1: Uses EDGE_FUNCTION_URL directly — no auth header
 
-async function callEdgeFunction(
-  payload: Record<string, any>
-): Promise<void> {
-  if (!EDGE_FUNCTION_URL || !EDGE_FUNCTION_SECRET) {
-    console.warn('[TV-v14] Edge function URL or secret missing — Pro skipped')
+async function callEdgeFunction(payload: Record<string,any>): Promise<void> {
+  if (!EDGE_FUNCTION_URL) {
+    console.error('[TV-v14.1] EDGE_FUNCTION_URL not set in env vars!')
     return
   }
+
+  console.log(`[TV-v14.1] Calling Edge Function | url:${EDGE_FUNCTION_URL} | slug:${payload.publicSlug}`)
+
   try {
     const res = await fetch(EDGE_FUNCTION_URL, {
       method: 'POST',
-      headers: {
-        'Content-Type':    'application/json',
-        'x-function-key':  EDGE_FUNCTION_SECRET,
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
     })
+
+    const responseText = await res.text()
+    console.log(`[TV-v14.1] Edge Function response | status:${res.status} | body:${responseText.slice(0,200)}`)
+
     if (!res.ok) {
-      const err = await res.text()
-      console.error(`[TV-v14] Edge function call failed: ${res.status} ${err.slice(0,200)}`)
+      console.error(`[TV-v14.1] Edge Function failed: ${res.status} ${responseText.slice(0,200)}`)
     } else {
-      console.log(`[TV-v14] Edge function called OK — Pro+Polish running independently`)
+      console.log(`[TV-v14.1] Edge Function called OK — Pro+Polish running on Supabase`)
     }
   } catch (err: any) {
-    console.error(`[TV-v14] Edge function fetch failed: ${err.message}`)
+    console.error(`[TV-v14.1] Edge Function fetch error: ${err.message}`)
   }
 }
 
@@ -355,7 +345,8 @@ export async function POST(req: NextRequest) {
   if (!EPHE_API_URL)   return NextResponse.json({ error:'Ephemeris URL not configured' },{ status:500 })
 
   const useProBackground = predictionTier==='paid'
-  console.log(`[TV-v14] START | tier:${predictionTier} | domain:${domainId}`)
+
+  console.log(`[TV-v14.1] START | tier:${predictionTier} | domain:${domainId} | edge_url_set:${!!EDGE_FUNCTION_URL}`)
 
   const localBirthData: BirthData = {
     name:     birthData.name    ?? 'Anonymous',
@@ -371,6 +362,7 @@ export async function POST(req: NextRequest) {
   try { domainConfig = getDomainConfig(domainId) }
   catch { return NextResponse.json({ error:`Unknown domain: ${domainId}` },{ status:400 }) }
 
+  // CEO LOCKED
   const verifiedTier: UserTier = predictionTier==='paid'?'premium':'free'
 
   const kundaliData: KundaliData = buildKundali(localBirthData)
@@ -378,13 +370,13 @@ export async function POST(req: NextRequest) {
   let synthesisData: any = null
   let templateData:  any = null
 
-  // ── STEP 1: /kundali (immediate) ─────────────────────────────────────────
+  // ── STEP 1: /kundali ─────────────────────────────────────────────────────
   const kundaliPromise = callVM('/kundali', {
     dob:localBirthData.dob, tob:localBirthData.tob,
     lat:localBirthData.lat, lng:localBirthData.lng,
     timezone:birthData.timezone??5.5, ayanamsa:1,
   }, 25000).catch((err:any)=>{
-    console.error(`[TV-v14] /kundali failed: ${err.message}`)
+    console.error(`[TV-v14.1] /kundali failed: ${err.message}`)
     return null
   })
 
@@ -405,7 +397,7 @@ export async function POST(req: NextRequest) {
   }
 
   rawChart = await kundaliPromise
-  console.log(`[TV-v14] /kundali | lagna:${rawChart?.lagna?.sign} | ms:${Date.now()-startMs}`)
+  console.log(`[TV-v14.1] /kundali | lagna:${rawChart?.lagna?.sign} | ms:${Date.now()-startMs}`)
 
   const chartExtract = extractFromRawChart(rawChart)
 
@@ -426,36 +418,36 @@ export async function POST(req: NextRequest) {
 
   if (synthesisResult.status==='fulfilled') {
     synthesisData = synthesisResult.value
-    console.log(`[TV-v14] /synthesize OK | ms:${Date.now()-startMs}`)
+    console.log(`[TV-v14.1] /synthesize OK | ms:${Date.now()-startMs}`)
   }
   if (templateResult.status==='fulfilled') {
     const tr = templateResult.value
     templateData = tr?.template ?? tr?.html ?? null
     if (templateData && typeof templateData!=='object') templateData=null
-    else console.log(`[TV-v14] /template OK | ms:${Date.now()-startMs}`)
+    else console.log(`[TV-v14.1] /template OK | ms:${Date.now()-startMs}`)
   }
 
-  // ── STEP 4: Gemini Flash — instant response ───────────────────────────────
+  // ── STEP 4: Gemini Flash ──────────────────────────────────────────────────
   const { systemPrompt:flashSystem, userMessage:flashUser } = buildFlashPrompt(
     kundaliData, localBirthData, domainConfig, promptUserContext,
   )
 
-  console.log(`[TV-v14] Flash START | ms:${Date.now()-startMs}`)
+  console.log(`[TV-v14.1] Flash START | ms:${Date.now()-startMs}`)
 
   let flashJson: Record<string,any>
   try {
     const rawFlash = await callGemini(GEMINI_FLASH, flashSystem, flashUser, true)
     flashJson      = parseGeminiJSON(rawFlash)
-    console.log(`[TV-v14] Flash OK | ms:${Date.now()-startMs}`)
+    console.log(`[TV-v14.1] Flash OK | ms:${Date.now()-startMs}`)
   } catch (err:any) {
-    console.error(`[TV-v14] Flash failed: ${err.message}`)
+    console.error(`[TV-v14.1] Flash failed: ${err.message}`)
     return NextResponse.json({ error:`Prediction failed: ${err.message}` },{ status:500 })
   }
 
-  // ── STEP 5: Merge Flash + Template ────────────────────────────────────────
-  const flashPrediction = mergeTemplateWithGemini(templateData, flashJson, '14.0-flash')
+  // ── STEP 5: Merge ────────────────────────────────────────────────────────
+  const flashPrediction = mergeTemplateWithGemini(templateData, flashJson, '14.1-flash')
 
-  // ── STEP 6: Slug + SEO meta ───────────────────────────────────────────────
+  // ── STEP 6: Slug + SEO ───────────────────────────────────────────────────
   const processingMs     = Date.now()-startMs
   const mahadashaPlanet  = chartExtract.mahadasha  ?? kundaliData?.currentMahadasha?.lord  ?? 'rahu'
   const antardashaPlanet = chartExtract.antardasha ?? kundaliData?.currentAntardasha?.lord ?? 'saturn'
@@ -471,7 +463,7 @@ export async function POST(req: NextRequest) {
     localBirthData.cityName??'India', flashPrediction,
   )
 
-  // ── STEP 7: Save Flash result (await — needed before redirect) ────────────
+  // ── STEP 7: Save Flash result ─────────────────────────────────────────────
   try {
     await saveToSupabase({
       sessionId, userId, domainId,
@@ -484,14 +476,14 @@ export async function POST(req: NextRequest) {
       polished:       false,
       processingMs, publicSlug, seoMeta, chartExtract,
     })
-    console.log(`[TV-v14] Flash saved | slug:${publicSlug}`)
+    console.log(`[TV-v14.1] Saved | slug:${publicSlug}`)
   } catch (err:any) {
-    console.error(`[TV-v14] Save failed: ${err.message}`)
+    console.error(`[TV-v14.1] Save failed: ${err.message}`)
   }
 
   // ── STEP 8: Call Edge Function for Pro+Polish (PAID only) ─────────────────
   if (useProBackground) {
-    // Fire and forget — Edge Function runs independently on Supabase
+    // Fire and forget — do NOT await
     void callEdgeFunction({
       publicSlug,
       domainId,
@@ -501,7 +493,7 @@ export async function POST(req: NextRequest) {
       personName:       localBirthData.name??'Anonymous',
       situationNote:    userContext.situationNote??'',
       employment:       userContext.employment,
-      sector:           userContext.sector,
+      sector:           userContext.sector??'',
       segment:          userContext.segment,
       city:             userContext.city,
       currentCity:      userContext.currentCity||userContext.city,
@@ -516,28 +508,37 @@ export async function POST(req: NextRequest) {
       flashSummaryText: flashPrediction.summaryText??null,
       processingMsBase: processingMs,
     })
-    console.log(`[TV-v14] Edge Function called — Pro+Polish running on Supabase`)
   }
 
   // ── STEP 9: Google Indexing ───────────────────────────────────────────────
   try { notifyGoogleIndexing(`https://trikalvaani.com/report/${publicSlug}`) }
   catch { /* non-fatal */ }
 
-  // ── STEP 10: Return to user ───────────────────────────────────────────────
-  console.log(`[TV-v14] RESPONSE | ms:${processingMs} | slug:${publicSlug}`)
+  // ── STEP 10: Return ───────────────────────────────────────────────────────
+  console.log(`[TV-v14.1] RESPONSE | ms:${processingMs} | slug:${publicSlug}`)
 
   return NextResponse.json({
     success:      true,
     prediction:   flashPrediction,
     templateHtml: null,
     _meta: {
-      publicSlug, reportUrl:`https://trikalvaani.com/report/${publicSlug}`,
-      predictionTier, geminiModel:GEMINI_FLASH,
-      polished:false, polishDeferred:useProBackground, proDeferred:useProBackground,
-      processingMs, domainId, domainLabel:domainConfig.label??domainId,
-      lagna:chartExtract.lagna, nakshatra:chartExtract.nakshatra,
-      mahadasha:mahadashaPlanet, antardasha:antardashaPlanet,
-      seoTitle:seoMeta.title, seoDescription:seoMeta.description, geoAnswer:seoMeta.geoAnswer,
+      publicSlug,
+      reportUrl:      `https://trikalvaani.com/report/${publicSlug}`,
+      predictionTier,
+      geminiModel:    GEMINI_FLASH,
+      polished:       false,
+      polishDeferred: useProBackground,
+      proDeferred:    useProBackground,
+      processingMs,
+      domainId,
+      domainLabel:    domainConfig.label??domainId,
+      lagna:          chartExtract.lagna,
+      nakshatra:      chartExtract.nakshatra,
+      mahadasha:      mahadashaPlanet,
+      antardasha:     antardashaPlanet,
+      seoTitle:       seoMeta.title,
+      seoDescription: seoMeta.description,
+      geoAnswer:      seoMeta.geoAnswer,
     },
   })
 }
