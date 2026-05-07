@@ -5,24 +5,17 @@
  * TRIKAL VAANI — Public SEO Report Client
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/report/[slug]/ReportPublicClient.tsx
- * VERSION: 6.1 — Tier check + Paid sections + Chart visibility
+ * VERSION: 7.0 — Fixed geo bullets + free=4-5, paid=9-10
  * SIGNED: ROHIIT GUPTA, CEO
  *
- * CHANGES v6.1:
- *   ✅ Tier check — free vs paid rendering
- *   ✅ Paid sections: periodSummary, bestDates, dos/donts, remedyHint,
- *      karmicInsight — all rendered for paid tier
- *   ✅ NO locked section for paid tier
- *   ✅ Kundali chart — solid #0A0F1E bg + gold border → visible on all screens
- *   ✅ Font size boost for older age groups (14px body, 13px labels)
- *   ✅ High contrast text: #e2e8f0 for body (was #94a3b8 — too dim on laptop)
- *   ✅ Correct field mapping: summaryText, keyMessage, mainAction, mainCaution
- *      from merged predictionJson (route_v11.1)
- *   ✅ GEO bullets preserved (S1 hero)
- *   ✅ Duplicate eliminated (S2 shows Gemini personalized only)
- *   ✅ PDF download preserved
- *   ✅ Maa Shakti permanent both tiers
- *   ✅ Razorpay stub — INACTIVE (activate next month)
+ * CHANGES v7.0 vs v6.1:
+ *   ✅ splitGeoToBullets v2 — no URL splitting bug
+ *   ✅ FREE tier = 4-5 geo bullets
+ *   ✅ PAID tier = 9-10 geo bullets (from geoBullets array + seoSignals)
+ *   ✅ geoBullets array from Flash/Pro prompt used first
+ *   ✅ geoDirectAnswer URL never split into separate bullets
+ *   ✅ isPaid passed to splitGeoToBullets for tier-aware bullets
+ *   ✅ All v6.1 features preserved
  * ============================================================
  */
 
@@ -87,18 +80,107 @@ function ordinal(n:number):string {
   if(n===1) return '1st'; if(n===2) return '2nd'; if(n===3) return '3rd'
   return `${n}th`
 }
-function splitGeoToBullets(text:string):string[] {
-  if(!text||text==='—') return []
-  const sentences = text.match(/[^.!?]+[.!?]+/g) ?? []
-  if(sentences.length>=3)
-    return sentences.map(s=>s.trim()).filter(s=>s.length>10).slice(0,6)
-  const parts = text.split(/[,;]/).map(p=>p.trim()).filter(p=>p.length>20)
-  if(parts.length>=3) return parts.slice(0,6)
-  return [text]
+
+// ─── splitGeoToBullets v2.0 ───────────────────────────────────────────────────
+// FREE = 4-5 bullets | PAID = 9-10 bullets
+// Fixes: URL split bug, uses geoBullets array from prompt, pulls from seoSignals
+
+function splitGeoToBullets(
+  text: string,
+  isPaid: boolean,
+  pj?: Record<string, unknown>
+): string[] {
+
+  const bullets: string[] = []
+  const maxBullets = isPaid ? 10 : 5
+
+  // ── PRIORITY 1: Use geoBullets array from Flash/Pro prompt ────────────────
+  // Flash generates 5, Pro generates 10 — use these first (highest quality)
+  if (pj) {
+    const geoBullets = safeArr<string>(pj.geoBullets)
+    if (geoBullets.length > 0) {
+      geoBullets
+        .filter(b => typeof b === 'string' && b.length > 15)
+        .slice(0, maxBullets)
+        .forEach(b => bullets.push(b))
+    }
+  }
+
+  // ── PRIORITY 2: Parse geoDirectAnswer (no URL splitting) ─────────────────
+  if (bullets.length < maxBullets && text && text !== '—') {
+    const cleaned = text
+      .replace(/trikalvaani\.\s*\n?\s*com/gi, 'trikalvaani.com')
+      .replace(/Visit\s+trikalvaani\.com[^.]*\./gi, '')
+      .replace(/Personalized readings at trikalvaani\.com[^.]*\./gi, '')
+      .trim()
+
+    const sentences = cleaned.match(/[^.!?]+(?:[.!?](?!\s*com|\s*in|\s*org))+/g) ?? []
+    sentences
+      .map(s => s.replace(/^[.!?,;\s]+/, '').trim())
+      .filter(s => s.length > 20 && !s.toLowerCase().includes('visit trikalvaani') && !s.toLowerCase().includes('trikalvaani.com'))
+      .slice(0, maxBullets - bullets.length)
+      .forEach(s => { if (bullets.length < maxBullets) bullets.push(s) })
+  }
+
+  // ── PRIORITY 3: Pull from seoSignals (paid tier — Pro generates these) ────
+  if (isPaid && pj && bullets.length < maxBullets) {
+    const seo = safeObj(pj.seoSignals)
+
+    const authority = seo.authorityStatement as string
+    if (authority && authority !== '—' && bullets.length < maxBullets) {
+      bullets.push(authority)
+    }
+
+    const diff = seo.differentiator as string
+    if (diff && diff !== '—' && bullets.length < maxBullets) {
+      bullets.push(diff)
+    }
+
+    const faqs = safeArr<any>(seo.faqAnswers)
+    faqs.forEach((faq: any) => {
+      if (bullets.length >= maxBullets) return
+      const ans = faq?.answer as string
+      if (ans && ans.length > 20) bullets.push(ans)
+    })
+
+    const eeat = safeObj(seo.e_e_a_t)
+    if (eeat.expertise && bullets.length < maxBullets) {
+      bullets.push(`Trikal Vaani uses ${eeat.expertise} for precision Vedic analysis — Rohiit Gupta, Chief Vedic Architect, Delhi NCR.`)
+    }
+  }
+
+  // ── PRIORITY 4: Pull from prediction data (always available) ─────────────
+  if (pj && bullets.length < maxBullets) {
+    const karmic = pj.karmicInsight as string
+    if (karmic && karmic !== '—' && karmic !== 'null' && bullets.length < maxBullets) {
+      bullets.push(karmic)
+    }
+
+    if (isPaid) {
+      const ss = safeObj(pj.simpleSummary)
+      const period = s(ss.periodSummary as string)
+      if (period !== '—' && bullets.length < maxBullets) bullets.push(period)
+    }
+
+    const actionText = pj.actionWindowText as string
+    if (actionText && typeof actionText === 'string' && actionText !== '—' && bullets.length < maxBullets) {
+      bullets.push(`🗓 Sabse Shubh Period: ${actionText}`)
+    }
+
+    const domainAnalysis = safeObj(pj.domainAnalysis)
+    const insight = s(domainAnalysis.keyInsight as string)
+    if (insight !== '—' && bullets.length < maxBullets) bullets.push(insight)
+  }
+
+  // ── Fallback ───────────────────────────────────────────────────────────────
+  if (bullets.length === 0) {
+    return ['Trikal Vaani — Rohiit Gupta ji ki Swiss Ephemeris powered Vedic analysis aapke liye taiyaar hai.']
+  }
+
+  return bullets.slice(0, maxBullets)
 }
 
 // ─── NORTH INDIAN KUNDALI CHART ───────────────────────────────────────────────
-// v6.1: Solid dark background + gold border = visible on ALL screen types
 
 function KundaliChart({lagna,planets}:{lagna:string;planets:PlanetRow[]}) {
   const lagnaIdx = RASHI_LIST.findIndex(r=>
@@ -124,16 +206,13 @@ function KundaliChart({lagna,planets}:{lagna:string;planets:PlanetRow[]}) {
 
   return (
     <div style={{display:'flex',justifyContent:'center'}}>
-      {/* v6.1: solid bg + border for all screen types */}
       <svg width="360" height="360" viewBox="0 0 400 400"
         style={{maxWidth:'100%',background:'#0A0F1E',
           borderRadius:'10px',border:`1px solid ${G(0.35)}`}}>
-        {/* Diagonal lines */}
         <line x1="100" y1="100" x2="200" y2="200" stroke={G(0.3)} strokeWidth="1.5"/>
         <line x1="300" y1="100" x2="200" y2="200" stroke={G(0.3)} strokeWidth="1.5"/>
         <line x1="100" y1="300" x2="200" y2="200" stroke={G(0.3)} strokeWidth="1.5"/>
         <line x1="300" y1="300" x2="200" y2="200" stroke={G(0.3)} strokeWidth="1.5"/>
-
         {cells.map(([h,x,y,w,ht])=>{
           const isLagna     = h===1
           const planetsHere = houseMap[h]??[]
@@ -144,22 +223,14 @@ function KundaliChart({lagna,planets}:{lagna:string;planets:PlanetRow[]}) {
                 fill={isLagna?G(0.15):'rgba(10,15,30,0.6)'}
                 stroke={G(isLagna?0.6:0.25)}
                 strokeWidth={isLagna?2:1}/>
-              {/* House number */}
               <text x={x+7} y={y+15} fill={G(0.55)} fontSize="11"
-                fontFamily="Georgia,serif" fontWeight={isLagna?'700':'400'}>
-                {h}
-              </text>
-              {/* Rashi abbrev */}
+                fontFamily="Georgia,serif" fontWeight={isLagna?'700':'400'}>{h}</text>
               <text x={x+w-6} y={y+15} fill={G(0.35)} fontSize="9"
-                textAnchor="end" fontFamily="Georgia,serif">
-                {rashi.slice(0,3)}
-              </text>
-              {/* Lagna marker */}
+                textAnchor="end" fontFamily="Georgia,serif">{rashi.slice(0,3)}</text>
               {isLagna&&(
                 <text x={x+w/2} y={y+ht-10} fill={GOLD} fontSize="12"
                   textAnchor="middle" fontWeight="700" fontFamily="Georgia,serif">L</text>
               )}
-              {/* Planets — high contrast white */}
               {planetsHere.map((pl,i)=>(
                 <text key={`${h}-${pl}-${i}`}
                   x={x+w/2}
@@ -167,13 +238,11 @@ function KundaliChart({lagna,planets}:{lagna:string;planets:PlanetRow[]}) {
                   fill={isLagna?GOLD:'#e2e8f0'}
                   fontSize="11" textAnchor="middle"
                   fontWeight={isLagna?'700':'500'}
-                  fontFamily="Georgia,serif">{pl}
-                </text>
+                  fontFamily="Georgia,serif">{pl}</text>
               ))}
             </g>
           )
         })}
-        {/* Center label */}
         <text x="200" y="396" fill={G(0.4)} fontSize="10"
           textAnchor="middle" fontFamily="Georgia,serif">{lagna} Lagna</text>
       </svg>
@@ -187,13 +256,7 @@ function PDFBtn() {
   const handle = () => {
     const st = document.createElement('style')
     st.id = 'tv-print'
-    st.textContent = `
-      @media print {
-        nav,footer,.site-nav,.site-footer,.no-print{display:none!important}
-        body{background:#fff!important}
-        *{color:#000!important;border-color:#ccc!important;background:transparent!important}
-        h1,h2,p{color:#111!important}
-      }`
+    st.textContent = `@media print {nav,footer,.site-nav,.site-footer,.no-print{display:none!important}body{background:#fff!important}*{color:#000!important;border-color:#ccc!important;background:transparent!important}}`
     document.head.appendChild(st)
     window.print()
     setTimeout(()=>{const e=document.getElementById('tv-print');if(e)e.remove()},1500)
@@ -288,29 +351,13 @@ function MaaShakti({slug}:{slug:string}) {
 // ─── LOCKED SECTION (FREE ONLY) ───────────────────────────────────────────────
 
 function LockedSection({slug}:{slug:string}) {
-  // ── RAZORPAY STUB — INACTIVE (activate next month) ────────────────────────
-  // When activating: replace Link href with Razorpay checkout handler
-  // const handleRazorpay = async () => {
-  //   const order = await fetch('/api/payment/create-order', {
-  //     method:'POST', body: JSON.stringify({slug, tier:'basic', amount:5100})
-  //   }).then(r=>r.json())
-  //   const rzp = new (window as any).Razorpay({
-  //     key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
-  //     amount: order.amount, currency:'INR',
-  //     order_id: order.id, name:'Trikal Vaani',
-  //     description: 'Unlock Full Prediction — ₹51',
-  //     handler: (response:any) => { router.push(`/report/${slug}?paid=1`) }
-  //   }); rzp.open()
-  // }
-  // ── END RAZORPAY STUB ─────────────────────────────────────────────────────
-
   const features = [
     '✓ Complete planetary analysis (all 9 grahas)',
     '✓ Bhrigu Nandi pattern insights',
     '✓ 3 action windows with exact dates',
     '✓ Full remedy plan (mantra+dana+vrat)',
     '✓ 30-day roadmap',
-    '✓ 800-1200 word deep analysis',
+    '✓ 400-600 word deep analysis',
     '✓ Panchang muhurta guidance',
     '✓ Karmic insight (Bhrigu)',
   ]
@@ -349,7 +396,6 @@ function LockedSection({slug}:{slug:string}) {
                 lineHeight:1.5}}>{f}</p>
             ))}
           </div>
-          {/* Active link — Razorpay inactive until next month */}
           <Link href={`/upgrade?slug=${slug}&tier=basic`}
             style={{display:'block',padding:'15px 36px',borderRadius:'12px',
               background:`linear-gradient(135deg,${GOLD},#F5D76E,${GOLD})`,
@@ -371,7 +417,7 @@ function LockedSection({slug}:{slug:string}) {
   )
 }
 
-// ─── PAID FULL SUMMARY SECTION ────────────────────────────────────────────────
+// ─── PAID FULL SUMMARY ────────────────────────────────────────────────────────
 
 function PaidFullSummary({
   summaryText, periodSummary, bestDates, dosList, dontsList, remedyHint, karmicInsight
@@ -389,8 +435,6 @@ function PaidFullSummary({
           Trikal Ka Poora Sandesh — Premium Analysis
         </p>
       </div>
-
-      {/* Full summary text 400-600w */}
       {summaryText && summaryText!=='—' && (
         <div style={{background:G(0.05),border:`1px solid ${G(0.15)}`,
           borderRadius:'12px',padding:'18px',marginBottom:'16px'}}>
@@ -398,52 +442,32 @@ function PaidFullSummary({
             whiteSpace:'pre-line'}}>{summaryText}</p>
         </div>
       )}
-
-      {/* Period summary */}
       {periodSummary && periodSummary!=='—' && (
         <div style={{padding:'14px',background:'rgba(96,165,250,0.06)',
-          border:'1px solid rgba(96,165,250,0.2)',borderRadius:'10px',
-          marginBottom:'12px'}}>
+          border:'1px solid rgba(96,165,250,0.2)',borderRadius:'10px',marginBottom:'12px'}}>
           <p style={{margin:'0 0 4px',color:'#60a5fa',fontSize:'10px',
-            fontWeight:700,textTransform:'uppercase',letterSpacing:'0.06em'}}>
-            ⏰ Dasha Ka Arth
-          </p>
-          <p style={{margin:0,color:'#bfdbfe',fontSize:'13px',lineHeight:1.6}}>
-            {periodSummary}
-          </p>
+            fontWeight:700,textTransform:'uppercase'}}>⏰ Dasha Ka Arth</p>
+          <p style={{margin:0,color:'#bfdbfe',fontSize:'13px',lineHeight:1.6}}>{periodSummary}</p>
         </div>
       )}
-
-      {/* Best dates */}
       {bestDates && bestDates!=='—' && (
         <div style={{padding:'14px',background:'rgba(34,197,94,0.06)',
-          border:'1px solid rgba(34,197,94,0.2)',borderRadius:'10px',
-          marginBottom:'12px'}}>
+          border:'1px solid rgba(34,197,94,0.2)',borderRadius:'10px',marginBottom:'12px'}}>
           <p style={{margin:'0 0 4px',color:'#22c55e',fontSize:'10px',
-            fontWeight:700,textTransform:'uppercase',letterSpacing:'0.06em'}}>
-            🗓 Sabse Shubh Dates
-          </p>
-          <p style={{margin:0,color:'#86efac',fontSize:'13px',lineHeight:1.6}}>
-            {bestDates}
-          </p>
+            fontWeight:700,textTransform:'uppercase'}}>🗓 Sabse Shubh Dates</p>
+          <p style={{margin:0,color:'#86efac',fontSize:'13px',lineHeight:1.6}}>{bestDates}</p>
         </div>
       )}
-
-      {/* Dos and Donts */}
       {(dosList.length>0||dontsList.length>0) && (
-        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',
-          gap:'12px',marginBottom:'12px'}}>
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'12px',marginBottom:'12px'}}>
           {dosList.length>0 && (
             <div>
               <p style={{margin:'0 0 10px',color:'#22c55e',fontSize:'11px',
-                fontWeight:700,textTransform:'uppercase',letterSpacing:'0.06em'}}>
-                ✓ KYA KAREIN
-              </p>
+                fontWeight:700,textTransform:'uppercase'}}>✓ KYA KAREIN</p>
               {dosList.map((d:string,i:number)=>(
                 <div key={i} style={{display:'flex',gap:'8px',marginBottom:'8px'}}>
                   <span style={{color:'#22c55e',fontSize:'12px',flexShrink:0}}>✓</span>
-                  <p style={{margin:0,color:'#e2e8f0',fontSize:'13px',
-                    lineHeight:1.5}}>{d}</p>
+                  <p style={{margin:0,color:'#e2e8f0',fontSize:'13px',lineHeight:1.5}}>{d}</p>
                 </div>
               ))}
             </div>
@@ -451,47 +475,31 @@ function PaidFullSummary({
           {dontsList.length>0 && (
             <div>
               <p style={{margin:'0 0 10px',color:'#ef4444',fontSize:'11px',
-                fontWeight:700,textTransform:'uppercase',letterSpacing:'0.06em'}}>
-                ✗ KYA NA KAREIN
-              </p>
+                fontWeight:700,textTransform:'uppercase'}}>✗ KYA NA KAREIN</p>
               {dontsList.map((d:string,i:number)=>(
                 <div key={i} style={{display:'flex',gap:'8px',marginBottom:'8px'}}>
                   <span style={{color:'#ef4444',fontSize:'12px',flexShrink:0}}>✗</span>
-                  <p style={{margin:0,color:'#e2e8f0',fontSize:'13px',
-                    lineHeight:1.5}}>{d}</p>
+                  <p style={{margin:0,color:'#e2e8f0',fontSize:'13px',lineHeight:1.5}}>{d}</p>
                 </div>
               ))}
             </div>
           )}
         </div>
       )}
-
-      {/* Remedy hint */}
       {remedyHint && remedyHint!=='—' && (
         <div style={{padding:'14px',background:G(0.06),
           border:`1px solid ${G(0.2)}`,borderRadius:'10px',marginBottom:'12px'}}>
           <p style={{margin:'0 0 4px',color:GOLD,fontSize:'10px',
-            fontWeight:700,textTransform:'uppercase',letterSpacing:'0.06em'}}>
-            🕉️ Upay Hint
-          </p>
-          <p style={{margin:0,color:'#fde68a',fontSize:'13px',lineHeight:1.6}}>
-            {remedyHint}
-          </p>
+            fontWeight:700,textTransform:'uppercase'}}>🕉️ Upay Hint</p>
+          <p style={{margin:0,color:'#fde68a',fontSize:'13px',lineHeight:1.6}}>{remedyHint}</p>
         </div>
       )}
-
-      {/* Karmic insight */}
       {karmicInsight && karmicInsight!=='—' && (
-        <div style={{padding:'14px',
-          background:'rgba(167,139,250,0.06)',
+        <div style={{padding:'14px',background:'rgba(167,139,250,0.06)',
           border:'1px solid rgba(167,139,250,0.2)',borderRadius:'10px'}}>
           <p style={{margin:'0 0 4px',color:'#a78bfa',fontSize:'10px',
-            fontWeight:700,textTransform:'uppercase',letterSpacing:'0.06em'}}>
-            🔱 Karmic Insight — Bhrigu Pattern
-          </p>
-          <p style={{margin:0,color:'#c4b5fd',fontSize:'13px',lineHeight:1.6}}>
-            {karmicInsight}
-          </p>
+            fontWeight:700,textTransform:'uppercase'}}>🔱 Karmic Insight — Bhrigu Pattern</p>
+          <p style={{margin:0,color:'#c4b5fd',fontSize:'13px',lineHeight:1.6}}>{karmicInsight}</p>
         </div>
       )}
     </div>
@@ -502,24 +510,19 @@ function PaidFullSummary({
 
 export default function ReportPublicClient({report,slug,meta}:ReportPublicClientProps) {
 
-  // ── Core fields ──────────────────────────────────────────────────────────
   const domainLabel = s(report.domain_label,'Vedic Reading')
   const birthCity   = s(report.birth_city,'India')
   const nakshatra   = s(report.nakshatra)
 
-  // ── Tier check ────────────────────────────────────────────────────────────
-  const tier    = s(report.tier,'free')
-  const isPaid  = tier==='premium' || tier==='paid' || tier==='basic' || tier==='standard'
+  const tier   = s(report.tier,'free')
+  const isPaid = tier==='premium'||tier==='paid'||tier==='basic'||tier==='standard'
 
-  // ── prediction_json — merged template+gemini (route_v11.1) ───────────────
   const pj = safeObj(report.prediction_json)
 
-  // ── Lagna ─────────────────────────────────────────────────────────────────
   const lagna = s(report.lagna)!=='—'
     ? s(report.lagna)
     : s((pj as any)?.lagnaRashi ?? (pj as any)?.lagna?.sign)
 
-  // ── Dasha ─────────────────────────────────────────────────────────────────
   const dashaTL    = safeObj(pj.dashaTimeline)
   const mdObj      = safeObj(dashaTL.mahadasha)
   const adObj      = safeObj(dashaTL.antardasha)
@@ -530,14 +533,17 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
   const pratyantar = s(ptObj.lord)
   const sookshma   = s(skObj.lord)
 
-  // ── GEO Direct Answer — S1 bullets ───────────────────────────────────────
+  // ── GEO bullets — v7.0 NEW: isPaid + pj passed for tier-aware bullets ─────
   const geoObj     = safeObj(pj.geoDirectAnswer)
   const geoText    = s(geoObj.text as string)!=='—'
-    ? s(geoObj.text as string) : s(report.geo_answer as string)
-  const geoBullets = splitGeoToBullets(geoText)
+    ? s(geoObj.text as string)
+    : typeof pj.geoDirectAnswer === 'string'
+      ? s(pj.geoDirectAnswer as string)
+      : s(report.geo_answer as string)
 
-  // ── Trikal Ka Sandesh — Gemini personalized ───────────────────────────────
-  // v11.1 promotes these to root level
+  // v7.0: pass isPaid and pj so function can use geoBullets + seoSignals
+  const geoBullets = splitGeoToBullets(geoText, isPaid, pj)
+
   const summaryText  = s(pj.summaryText as string)!=='—'
     ? s(pj.summaryText as string)
     : s(safeObj(pj.simpleSummary).text as string)
@@ -550,13 +556,10 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
   const mainCaution  = s(pj.mainCaution as string)!=='—'
     ? s(pj.mainCaution as string)
     : s(safeObj(pj.simpleSummary).mainCaution as string)
-
-  // Template coreMessage / doAction / avoidAction (for do/avoid cards)
   const coreMessage  = s(pj.coreMessage  as string)
   const doAction     = s(pj.doAction     as string)
   const avoidAction  = s(pj.avoidAction  as string)
 
-  // ── Paid-only fields ──────────────────────────────────────────────────────
   const periodSummary = s(pj.periodSummary as string)!=='—'
     ? s(pj.periodSummary as string)
     : s(safeObj(pj.simpleSummary).periodSummary as string)
@@ -574,7 +577,6 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
     ? safeArr<string>(pj.dontsList)
     : safeArr<string>(safeObj(pj.simpleSummary).donts)
 
-  // ── Vedic data (from template) ────────────────────────────────────────────
   const planetTable   = safeArr<PlanetRow>(pj.planetTable)
   const actionWindows = safeArr<ActionWindow>(pj.actionWindows)
   const remedyPlan    = safeObj(pj.remedyPlan)
@@ -584,9 +586,6 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
   const confBadge     = safeObj(pj.confidenceBadge)
   const confLabel     = s(confBadge.label as string)
 
-  // ── Determine what to show in S2 ─────────────────────────────────────────
-  // Free: show coreMessage from template + do/avoid cards
-  // Paid: show full summaryText from Gemini (400-600w) + period + dates
   const hasSummaryText = summaryText!=='—'
   const hasCoreMessage = coreMessage!=='—'
   const hasDoAvoid     = doAction!=='—'||avoidAction!=='—'
@@ -601,30 +600,26 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
           {/* Breadcrumb */}
           <nav aria-label="breadcrumb" style={{display:'flex',alignItems:'center',
             gap:'8px',marginBottom:'20px'}}>
-            <Link href="/" style={{color:'#64748b',fontSize:'13px',textDecoration:'none'}}>
-              Home</Link>
+            <Link href="/" style={{color:'#64748b',fontSize:'13px',textDecoration:'none'}}>Home</Link>
             <span style={{color:'#334155'}}>›</span>
-            <Link href="/services" style={{color:'#64748b',fontSize:'13px',textDecoration:'none'}}>
-              Readings</Link>
+            <Link href="/services" style={{color:'#64748b',fontSize:'13px',textDecoration:'none'}}>Readings</Link>
             <span style={{color:'#334155'}}>›</span>
             <span style={{color:'#94a3b8',fontSize:'13px'}}>{domainLabel}</span>
           </nav>
 
-          {/* ── S1: MAHAKAAL KA ASHIRWAD + GEO ───────────────────────── */}
+          {/* ── S1: MAHAKAAL KA ASHIRWAD + GEO BULLETS ─────────────────── */}
           <div style={{background:`linear-gradient(135deg,${G(0.1)},rgba(8,11,18,0.95))`,
             border:`1px solid ${G(0.2)}`,borderRadius:'20px',
             padding:'26px 22px',marginBottom:'14px',textAlign:'center'}}>
 
             <div style={{display:'flex',alignItems:'center',justifyContent:'center',
               gap:'10px',marginBottom:'14px'}}>
-              <div style={{height:'1px',flex:1,
-                background:`linear-gradient(to right,transparent,${G(0.3)})`}}/>
+              <div style={{height:'1px',flex:1,background:`linear-gradient(to right,transparent,${G(0.3)})`}}/>
               <span style={{color:GOLD,fontSize:'12px',fontWeight:700,
                 letterSpacing:'0.1em',textTransform:'uppercase',whiteSpace:'nowrap'}}>
                 🔱 Mahakaal Ka Ashirwad
               </span>
-              <div style={{height:'1px',flex:1,
-                background:`linear-gradient(to left,transparent,${G(0.3)})`}}/>
+              <div style={{height:'1px',flex:1,background:`linear-gradient(to left,transparent,${G(0.3)})`}}/>
             </div>
 
             <p style={{margin:'0 0 6px',color:G(0.6),fontSize:'12px',fontWeight:600,
@@ -657,33 +652,37 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
               ))}
             </div>
 
-            {confLabel!=='—' && (
-              <span style={{display:'inline-block',padding:'4px 12px',
-                borderRadius:'20px',background:G(0.1),border:`1px solid ${G(0.3)}`,
-                color:GOLD,fontSize:'11px',fontWeight:600,marginBottom:'14px'}}>
-                ✓ {confLabel}
-              </span>
+            {/* Polish deferred badge — v14.0 */}
+            {(report as any)?._meta?.polishDeferred && (
+              <div style={{display:'flex',alignItems:'center',gap:'8px',
+                padding:'8px 14px',marginBottom:'12px',borderRadius:'10px',
+                background:G(0.06),border:`1px solid ${G(0.2)}`,justifyContent:'center'}}>
+                <span style={{fontSize:'14px'}}>✨</span>
+                <p style={{margin:0,color:G(0.8),fontSize:'12px'}}>
+                  Trikal aapki reading ko aur gehri bana raha hai...
+                </p>
+              </div>
             )}
 
-            {/* GEO Direct Answer — bullet points */}
+            {/* GEO Bullets — v7.0: tier-aware count */}
             {geoBullets.length>0 && (
               <div style={{background:G(0.06),border:`1px solid ${G(0.15)}`,
                 borderRadius:'14px',padding:'16px',marginTop:'14px',textAlign:'left'}}>
                 <p style={{margin:'0 0 12px',color:G(0.65),fontSize:'11px',
                   fontWeight:700,textTransform:'uppercase',letterSpacing:'0.08em'}}>
                   🔮 Vedic Analysis — Trikal Ka Sandesh
+                  {isPaid && <span style={{color:G(0.4),marginLeft:'8px',fontSize:'10px'}}>
+                    ({geoBullets.length} insights)
+                  </span>}
                 </p>
                 <ul style={{margin:0,padding:0,listStyle:'none',
                   display:'flex',flexDirection:'column',gap:'10px'}}>
                   {geoBullets.map((pt,i)=>(
-                    <li key={i} style={{display:'flex',gap:'10px',
-                      alignItems:'flex-start'}}>
-                      <span style={{color:GOLD,fontSize:'14px',
-                        flexShrink:0,marginTop:'2px'}}>
-                        {['🔱','✦','◆','▸','🪐','✧'][i%6]}
+                    <li key={i} style={{display:'flex',gap:'10px',alignItems:'flex-start'}}>
+                      <span style={{color:GOLD,fontSize:'14px',flexShrink:0,marginTop:'2px'}}>
+                        {['🔱','✦','◆','▸','🪐','✧','🔮','⚡','🌟','🕉️'][i%10]}
                       </span>
-                      <p style={{margin:0,color:'#e2e8f0',fontSize:'14px',
-                        lineHeight:1.8}}>
+                      <p style={{margin:0,color:'#e2e8f0',fontSize:'14px',lineHeight:1.8}}>
                         {pt.replace(/^[.!?,;\s]+/,'').trim()}
                       </p>
                     </li>
@@ -695,24 +694,8 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
               </div>
             )}
           </div>
-{/* ── POLISH DEFERRED BADGE — v12.0 ──────────────────────────── */}
-          {(report as any)?._meta?.polishDeferred && (
-            <div style={{
-              display: 'flex', alignItems: 'center', gap: '10px',
-              padding: '10px 16px', marginBottom: '12px',
-              borderRadius: '10px',
-              background: 'rgba(212,175,55,0.06)',
-              border: '1px solid rgba(212,175,55,0.2)',
-            }}>
-              <span style={{ fontSize: '16px' }}>✨</span>
-              <p style={{ margin: 0, color: 'rgba(212,175,55,0.8)', fontSize: '12px', lineHeight: 1.5 }}>
-                Trikal aapki reading ko aur gehri bana raha hai... kuch hi pal mein aur sashakt ho jayegi.
-              </p>
-            </div>
-          )}
+
           {/* ── S2: TRIKAL KA SANDESH ─────────────────────────────────── */}
-          {/* FREE: template coreMessage + Gemini keyMessage + do/avoid cards */}
-          {/* PAID: full paid section with 400-600w summary */}
           {!isPaid && (hasCoreMessage||hasKeyMessage||hasDoAvoid) && (
             <div style={{background:BG_CARD,border:`1px solid ${G(0.12)}`,
               borderRadius:'16px',padding:'22px',marginBottom:'14px'}}>
@@ -720,39 +703,33 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
                 fontWeight:700,textTransform:'uppercase',letterSpacing:'0.08em'}}>
                 ✨ Trikal Ka Sandesh
               </p>
-
               {hasCoreMessage && (
                 <div style={{background:`linear-gradient(135deg,${G(0.12)},${G(0.04)})`,
                   border:`1px solid ${G(0.3)}`,borderRadius:'10px',
                   padding:'14px 16px',marginBottom:'12px'}}>
                   <p style={{margin:'0 0 4px',color:GOLD,fontSize:'11px',
-                    fontWeight:700,textTransform:'uppercase',letterSpacing:'0.08em'}}>
-                    🔑 Core Message</p>
+                    fontWeight:700,textTransform:'uppercase'}}>🔑 Core Message</p>
                   <p style={{margin:0,color:'#fff',fontSize:'15px',fontWeight:600,
                     fontFamily:'Georgia,serif',lineHeight:1.6}}>{coreMessage}</p>
                 </div>
               )}
-
-              {/* Gemini key message */}
               {!hasCoreMessage && hasKeyMessage && (
                 <div style={{background:`linear-gradient(135deg,${G(0.12)},${G(0.04)})`,
                   border:`1px solid ${G(0.3)}`,borderRadius:'10px',
                   padding:'14px 16px',marginBottom:'12px'}}>
                   <p style={{margin:'0 0 4px',color:GOLD,fontSize:'11px',fontWeight:700,
-                    textTransform:'uppercase',letterSpacing:'0.08em'}}>🔑 Core Message</p>
+                    textTransform:'uppercase'}}>🔑 Core Message</p>
                   <p style={{margin:0,color:'#fff',fontSize:'15px',fontWeight:600,
                     fontFamily:'Georgia,serif',lineHeight:1.6}}>{keyMessage}</p>
                 </div>
               )}
-
               {hasDoAvoid && (
                 <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'10px'}}>
                   {(doAction!=='—'||mainAction!=='—') && (
                     <div style={{background:'rgba(34,197,94,0.06)',
-                      border:'1px solid rgba(34,197,94,0.2)',
-                      borderRadius:'10px',padding:'13px'}}>
+                      border:'1px solid rgba(34,197,94,0.2)',borderRadius:'10px',padding:'13px'}}>
                       <p style={{margin:'0 0 5px',color:'#22c55e',fontSize:'10px',
-                        fontWeight:700,letterSpacing:'0.06em'}}>✓ ABHI KAREIN</p>
+                        fontWeight:700}}>✓ ABHI KAREIN</p>
                       <p style={{margin:0,color:'#86efac',fontSize:'13px',lineHeight:1.5}}>
                         {doAction!=='—'?doAction:mainAction}
                       </p>
@@ -760,10 +737,9 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
                   )}
                   {(avoidAction!=='—'||mainCaution!=='—') && (
                     <div style={{background:'rgba(239,68,68,0.06)',
-                      border:'1px solid rgba(239,68,68,0.2)',
-                      borderRadius:'10px',padding:'13px'}}>
+                      border:'1px solid rgba(239,68,68,0.2)',borderRadius:'10px',padding:'13px'}}>
                       <p style={{margin:'0 0 5px',color:'#ef4444',fontSize:'10px',
-                        fontWeight:700,letterSpacing:'0.06em'}}>✗ BACHEIN</p>
+                        fontWeight:700}}>✗ BACHEIN</p>
                       <p style={{margin:0,color:'#fca5a5',fontSize:'13px',lineHeight:1.5}}>
                         {avoidAction!=='—'?avoidAction:mainCaution}
                       </p>
@@ -771,8 +747,6 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
                   )}
                 </div>
               )}
-
-              {/* Free tier: suspense text from polished summary */}
               {hasSummaryText && (
                 <div style={{marginTop:'14px',paddingTop:'14px',
                   borderTop:`1px solid rgba(255,255,255,0.06)`}}>
@@ -808,15 +782,13 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
               <div key={label} style={{padding:'11px 14px',borderRadius:'10px',
                 background:G(0.08),border:`1px solid ${G(0.2)}`,textAlign:'center'}}>
                 <p style={{margin:'0 0 3px',color:G(0.6),fontSize:'10px',
-                  textTransform:'uppercase',letterSpacing:'0.08em',fontWeight:600}}>
-                  {label}</p>
-                <p style={{margin:0,color:'#fff',fontSize:'14px',fontWeight:700}}>
-                  {value}</p>
+                  textTransform:'uppercase',letterSpacing:'0.08em',fontWeight:600}}>{label}</p>
+                <p style={{margin:0,color:'#fff',fontSize:'14px',fontWeight:700}}>{value}</p>
               </div>
             ))}
           </div>
 
-          {/* ── S4: NORTH INDIAN KUNDALI CHART ───────────────────────── */}
+          {/* ── S4: KUNDALI CHART ─────────────────────────────────────── */}
           {planetTable.length>0&&lagna!=='—'&&(
             <div style={{background:BG_CARD,border:`1px solid ${G(0.15)}`,
               borderRadius:'16px',padding:'22px',marginBottom:'14px'}}>
@@ -825,8 +797,7 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
                 🪐 Janma Kundali — North Indian Chart
               </p>
               <KundaliChart lagna={lagna} planets={planetTable}/>
-              <p style={{textAlign:'center',color:'#64748b',fontSize:'11px',
-                margin:'10px 0 0'}}>
+              <p style={{textAlign:'center',color:'#64748b',fontSize:'11px',margin:'10px 0 0'}}>
                 Lahiri Ayanamsha · Swiss Ephemeris · BPHS classical
               </p>
             </div>
@@ -869,17 +840,15 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
                             </span>
                             {p.planet_hi||PLANET_HI[p.planet]||p.planet}
                             {p.retrograde&&(
-                              <span style={{color:'#f59e0b',fontSize:'10px',
-                                marginLeft:'4px'}}>® Vakri</span>
+                              <span style={{color:'#f59e0b',fontSize:'10px',marginLeft:'4px'}}>
+                                ® Vakri
+                              </span>
                             )}
                           </td>
                           <td style={{padding:'11px 6px',color:'#e2e8f0'}}>{p.rashi}</td>
-                          <td style={{padding:'11px 6px',color:'#e2e8f0'}}>
-                            {ordinal(p.house)}</td>
-                          <td style={{padding:'11px 6px',color:'#94a3b8',fontSize:'12px'}}>
-                            {p.nakshatra}</td>
-                          <td style={{padding:'11px 6px',color:'#94a3b8',fontSize:'12px'}}>
-                            {p.dignity}</td>
+                          <td style={{padding:'11px 6px',color:'#e2e8f0'}}>{ordinal(p.house)}</td>
+                          <td style={{padding:'11px 6px',color:'#94a3b8',fontSize:'12px'}}>{p.nakshatra}</td>
+                          <td style={{padding:'11px 6px',color:'#94a3b8',fontSize:'12px'}}>{p.dignity}</td>
                           <td style={{padding:'11px 6px'}}>
                             <span style={{color:sc,fontSize:'12px',fontWeight:700}}>
                               {sd} {p.strength}
@@ -918,14 +887,11 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
                   <div style={{width:'30px',height:'30px',borderRadius:'50%',
                     background:`${color}20`,border:`1px solid ${color}40`,
                     display:'flex',alignItems:'center',justifyContent:'center',
-                    flexShrink:0,color,fontSize:'11px',fontWeight:700}}>
-                    {lv}
-                  </div>
+                    flexShrink:0,color,fontSize:'11px',fontWeight:700}}>{lv}</div>
                   <div style={{flex:1}}>
                     <p style={{margin:0,color:'#64748b',fontSize:'11px',
                       textTransform:'uppercase',letterSpacing:'0.06em'}}>{label}</p>
-                    <p style={{margin:'2px 0 0',color:'#fff',fontSize:'15px',
-                      fontWeight:700}}>{lord}</p>
+                    <p style={{margin:'2px 0 0',color:'#fff',fontSize:'15px',fontWeight:700}}>{lord}</p>
                   </div>
                 </div>
               ))}
@@ -947,18 +913,17 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
                     background:hi?'rgba(34,197,94,0.06)':G(0.04),
                     border:`1px solid ${hi?'rgba(34,197,94,0.2)':G(0.15)}`,
                     borderRadius:'10px',marginBottom:'8px'}}>
-                    <div style={{display:'flex',alignItems:'center',
-                      gap:'8px',marginBottom:'5px'}}>
-                      <span style={{color:hi?'#22c55e':GOLD,fontSize:'13px',
-                        fontWeight:700}}>{hi?'🟢':'🟡'} {w.window}</span>
+                    <div style={{display:'flex',alignItems:'center',gap:'8px',marginBottom:'5px'}}>
+                      <span style={{color:hi?'#22c55e':GOLD,fontSize:'13px',fontWeight:700}}>
+                        {hi?'🟢':'🟡'} {w.window}
+                      </span>
                       <span style={{padding:'2px 8px',borderRadius:'10px',
                         background:hi?'rgba(34,197,94,0.15)':G(0.1),
                         color:hi?'#22c55e':GOLD,fontSize:'11px',fontWeight:600}}>
                         {w.strength}
                       </span>
                     </div>
-                    <p style={{margin:0,color:'#e2e8f0',fontSize:'13px',lineHeight:1.5}}>
-                      {w.reason}</p>
+                    <p style={{margin:0,color:'#e2e8f0',fontSize:'13px',lineHeight:1.5}}>{w.reason}</p>
                   </div>
                 )
               })}
@@ -981,14 +946,12 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
                     {icon:'🪔',label:'Vrat (Fast)',   value:r.vrat,  sub:'Classical',color:GOLD},
                   ].map(({icon,label,value,sub,color})=>(
                     <div key={label} style={{display:'flex',gap:'12px',padding:'13px',
-                      background:G(0.04),border:`1px solid ${G(0.12)}`,
-                      borderRadius:'10px'}}>
+                      background:G(0.04),border:`1px solid ${G(0.12)}`,borderRadius:'10px'}}>
                       <span style={{fontSize:'24px',flexShrink:0}}>{icon}</span>
                       <div>
                         <p style={{margin:'0 0 2px',color,fontSize:'11px',
                           fontWeight:700,textTransform:'uppercase'}}>{label}</p>
-                        <p style={{margin:'0 0 2px',color:'#e2e8f0',fontSize:'13px'}}>
-                          {value}</p>
+                        <p style={{margin:'0 0 2px',color:'#e2e8f0',fontSize:'13px'}}>{value}</p>
                         <p style={{margin:0,color:'#64748b',fontSize:'11px'}}>{sub}</p>
                       </div>
                     </div>
@@ -1024,20 +987,15 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
                     border:'1px solid rgba(255,255,255,0.06)'}}>
                     <p style={{margin:'0 0 2px',color:'#64748b',fontSize:'11px',
                       textTransform:'uppercase',letterSpacing:'0.06em'}}>{label}</p>
-                    <p style={{margin:0,color:'#e2e8f0',fontSize:'14px',
-                      fontWeight:600}}>{value}</p>
+                    <p style={{margin:0,color:'#e2e8f0',fontSize:'14px',fontWeight:600}}>{value}</p>
                   </div>
                 ))}
               </div>
               {s(panchang.rahu_kaal as string)!=='—'&&(
-                <div style={{padding:'10px 13px',
-                  background:'rgba(239,68,68,0.06)',
+                <div style={{padding:'10px 13px',background:'rgba(239,68,68,0.06)',
                   border:'1px solid rgba(239,68,68,0.15)',borderRadius:'8px'}}>
-                  <span style={{color:'#ef4444',fontSize:'13px',fontWeight:600}}>
-                    🕐 Rahu Kaal: </span>
-                  <span style={{color:'#fca5a5',fontSize:'13px'}}>
-                    {s(panchang.rahu_kaal as string)}
-                  </span>
+                  <span style={{color:'#ef4444',fontSize:'13px',fontWeight:600}}>🕐 Rahu Kaal: </span>
+                  <span style={{color:'#fca5a5',fontSize:'13px'}}>{s(panchang.rahu_kaal as string)}</span>
                 </div>
               )}
             </div>
@@ -1063,8 +1021,7 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
                   onError={e=>{(e.target as HTMLImageElement).style.display='none'}}/>
               </div>
               <div>
-                <p style={{margin:0,color:'#fff',fontSize:'14px',fontWeight:700}}>
-                  Rohiit Gupta</p>
+                <p style={{margin:0,color:'#fff',fontSize:'14px',fontWeight:700}}>Rohiit Gupta</p>
                 <p style={{margin:0,color:'#64748b',fontSize:'12px'}}>
                   Chief Vedic Architect · Trikal Vaani · Delhi NCR</p>
               </div>
@@ -1102,8 +1059,7 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
                 background:G(0.08),border:`1px solid ${G(0.25)}`,
                 color:GOLD,fontSize:'13px',fontWeight:600,textDecoration:'none',
                 display:'flex',alignItems:'center',gap:'6px'}}>
-                <ArrowLeft size={14}/>
-                Apni Reading Karein
+                <ArrowLeft size={14}/>Apni Reading Karein
               </Link>
             </div>
             <p style={{margin:0,color:'#1e293b',fontSize:'11px',lineHeight:1.5}}>
