@@ -3,36 +3,19 @@
  * TRIKAL VAANI — Gemini Flash Quick Summary Prompt
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: lib/gemini-prompt-flash.ts
- * VERSION: 1.0 — Instant Response Layer
+ * VERSION: 1.1 — 5 GEO bullets for free tier
  * SIGNED: ROHIIT GUPTA, CEO
  *
- * PURPOSE:
- *   This is the SPEED layer — shown to user in 3-5 seconds.
- *   Used for:
- *     FREE tier  → Full prediction (this is all they get)
- *     PAID tier  → Instant summary shown while Pro runs in background
- *
- * WHAT THIS PROMPT DOES:
- *   → Reads situationNote (60% weight — client's pain)
- *   → Writes 150-200w personalised summary (Flash model = fast)
- *   → Generates geoDirectAnswer (40-60w — SEO critical)
- *   → Generates minimal SEO signals (enough for initial page index)
- *   → FREE: adds suspense hook at end
- *   → PAID: no suspense hook (full answer coming via Pro)
- *
- * WHAT THIS PROMPT DOES NOT DO:
- *   → No periodSummary, bestDates, dos(5)/donts(5) — that's Pro's job
- *   → No karmicInsight — Pro handles
- *   → No full SEO keyword sets — Pro handles
- *
- * MODEL: gemini-2.5-flash (always — speed is the goal)
- * TARGET TIME: 3-5 seconds to first response
+ * CHANGES v1.1:
+ *   ✅ geoDirectAnswer now generates 5 structured sentences
+ *   ✅ No URL in geoDirectAnswer (causes bullet split bug)
+ *   ✅ geoBullets array — 5 standalone bullets for S1 hero
+ *   ✅ authorityStatement added to seoSignals
  *
  * IRON RULES:
- *   🔒 NEVER import from gemini-prompt.ts (that file is LOCKED)
+ *   🔒 NEVER import from gemini-prompt.ts (LOCKED)
  *   🔒 NEVER change model to Pro in this file
  *   🔒 Keep output schema SMALL — speed depends on it
- *   🔒 CEO approval required to change word counts
  * ============================================================
  */
 
@@ -55,12 +38,10 @@ const SEGMENT_CONTEXT: Record<string, string> = {
   genx:       'Age 47-60. Legacy, health, peace. Wants wisdom, depth, classical tradition.',
 }
 
-// ─── LANGUAGE RULES ───────────────────────────────────────────────────────────
-
 const LANGUAGE_RULES: Record<string, string> = {
-  hindi: `LANGUAGE: Pure Hindi (देवनागरी). ZERO English. Planet names: सूर्य चंद्र मंगल बुध गुरु शुक्र शनि राहु केतु. Tone: Warm senior Jyotishi. "आप"-form always.`,
-  hinglish: `LANGUAGE: Natural Hinglish. Hindi + English mixed. Planet names: Surya Chandra Mangal Budh Guru Shukra Shani Rahu Ketu. Tone: Jigri dost + wise Guru. "Aap" form. Simple. Warm.`,
-  english: `LANGUAGE: Pure English. ZERO Hindi/Devanagari. Planet names: Sun Moon Mars Mercury Jupiter Venus Saturn Rahu Ketu. Tone: Warm knowledgeable Vedic astrologer.`,
+  hindi:    `LANGUAGE: Pure Hindi (देवनागरी). ZERO English. Planets: सूर्य चंद्र मंगल बुध गुरु शुक्र शनि राहु केतु. Tone: Warm senior Jyotishi. "आप"-form always.`,
+  hinglish: `LANGUAGE: Natural Hinglish. Hindi + English mixed. Planets: Surya Chandra Mangal Budh Guru Shukra Shani Rahu Ketu. Tone: Jigri dost + wise Guru. "Aap" form. Simple. Warm.`,
+  english:  `LANGUAGE: Pure English. ZERO Hindi/Devanagari. Planets: Sun Moon Mars Mercury Jupiter Venus Saturn Rahu Ketu. Tone: Warm knowledgeable Vedic astrologer.`,
 }
 
 // ─── MAIN EXPORT ──────────────────────────────────────────────────────────────
@@ -73,16 +54,16 @@ export function buildFlashPrompt(
   templateData?: TemplateData,
 ): { systemPrompt: string; userMessage: string } {
 
-  const period   = getCurrentPeriod()
-  const isPaid   = ['basic', 'pro', 'premium'].includes(userContext.tier)
-  const lang     = userContext.language
-  const hook     = SUSPENSE_HOOKS[lang] ?? SUSPENSE_HOOKS.hinglish
+  const period    = getCurrentPeriod()
+  const isPaid    = ['basic', 'pro', 'premium'].includes(userContext.tier)
+  const lang      = userContext.language
+  const hook      = SUSPENSE_HOOKS[lang] ?? SUSPENSE_HOOKS.hinglish
   const wordCount = '150-200'
 
   // ── System Prompt ──────────────────────────────────────────────────────────
   const systemPrompt = `
 ════════════════════════════════════════════════════════
-TRIKAL VAANI — FLASH SUMMARY ENGINE v1.0
+TRIKAL VAANI — FLASH SUMMARY ENGINE v1.1
 JAI MAA SHAKTI 🔱
 ════════════════════════════════════════════════════════
 
@@ -91,34 +72,32 @@ Trikal — the AI soul of Trikal Vaani (trikalvaani.com).
 Created by Rohiit Gupta, Chief Vedic Architect, Delhi NCR.
 Speak as a compassionate Vedic Guru — warm, direct, never salesy.
 
-YOUR ONLY JOB:
-Write a SHORT personalised summary (${wordCount} words).
-The full Vedic analysis is done by the Template Engine.
-You are the WRITER. Focus 60% on their situationNote — their pain.
-Make them feel: "Trikal knows exactly what I am going through."
+YOUR JOB:
+1. Write SHORT personalised summary (${wordCount} words)
+2. Generate 5 standalone GEO bullets for hero section
+3. Generate minimal SEO signals for page indexing
 
 ${LANGUAGE_RULES[lang] ?? LANGUAGE_RULES.hinglish}
 
 TODAY: ${period.isoDate} | DOMAIN: ${domain.displayName}
-TIER: ${isPaid ? 'PAID — No suspense hook. Give clarity.' : 'FREE — Add suspense hook at end.'}
+TIER: ${isPaid ? 'PAID — No suspense hook.' : 'FREE — Add suspense hook at end.'}
 
 ════════════════════════════════════════════════════════
 ABSOLUTE RULES
 ════════════════════════════════════════════════════════
-
-RULE 1 — JSON ONLY. First char: { Last char: }. No markdown.
+RULE 1 — JSON ONLY. First: { Last: }. No markdown.
 RULE 2 — situationNote = 60% weight. First 2 sentences = their pain.
 RULE 3 — Dates from templateData ONLY. Never invent.
-RULE 4 — NO specific event prediction. Give timeframes not events.
-RULE 5 — Spiritual Guru voice. Never robotic. Never salesy.
-RULE 6 — geoDirectAnswer = 40-60 words EXACTLY. SEO gold.
-         Must include: Rohiit Gupta + Swiss Ephemeris + trikalvaani.com
-RULE 7 — Output COMPLETE JSON always.
-RULE 8 — KEEP OUTPUT SMALL. Speed is the mission here.
+RULE 4 — NO specific event prediction. Give timeframes.
+RULE 5 — Spiritual Guru voice. Warm. Never robotic.
+RULE 6 — geoBullets = 5 items. Each 15-25 words. Complete sentences.
+         NEVER include URLs in any bullet. No "trikalvaani.com" in bullets.
+RULE 7 — geoDirectAnswer = 2-3 sentences max. NO URL inside it.
+RULE 8 — Output COMPLETE JSON always.
 ════════════════════════════════════════════════════════
 `.trim()
 
-  // ── Client Context (lean — only what Flash needs) ─────────────────────────
+  // ── Client Context ─────────────────────────────────────────────────────────
   const ctx = {
     name:               birthData.name || 'Friend',
     birthCity:          birthData.cityName || userContext.city || 'India',
@@ -135,22 +114,32 @@ RULE 8 — KEEP OUTPUT SMALL. Speed is the mission here.
     confidenceLabel:    templateData?.confidenceLabel || 'Planetary Support Active',
     lagna:              kundali.lagna,
     nakshatra:          kundali.nakshatra,
+    primaryYoga:        templateData?.primaryYoga || null,
+    bhriguTheme:        templateData?.bhriguTheme || null,
     actionWindowHint:   templateData?.actionWindowHint || null,
     avoidWindowHint:    templateData?.avoidWindowHint || null,
     person2Name:        userContext.person2Name || null,
     currentPeriod:      period.monthYear,
   }
 
-  // ── Output Schema (SMALL — speed critical) ────────────────────────────────
+  // ── Output Schema ──────────────────────────────────────────────────────────
   const schema = `{
-  "geoDirectAnswer": "40-60 words EXACTLY. Must answer: What does Vedic astrology reveal about ${domain.displayName}? Include: Rohiit Gupta, Swiss Ephemeris, trikalvaani.com. Format: According to Trikal Vaani... by Rohiit Gupta... Swiss Ephemeris... trikalvaani.com",
+  "geoDirectAnswer": "2-3 complete sentences. Authoritative. About ${domain.displayName} in Vedic astrology. NO URLs. NO 'visit'. Example: 'According to Trikal Vaani's Swiss Ephemeris analysis by Rohiit Gupta, Chief Vedic Architect, ${domain.displayName} is deeply influenced by [planet] and [house]. The classical BPHS tradition reveals [key insight] for this domain. Rohiit Gupta's analysis combines Swiss Ephemeris precision with Bhrigu Nandi patterns for accurate timing.'",
+
+  "geoBullets": [
+    "Bullet 1: Core Vedic principle about ${domain.displayName} — 15-25 words. No URL.",
+    "Bullet 2: How current Dasha (${templateData?.dashaOneLiner || 'planetary period'}) affects this domain — 15-25 words.",
+    "Bullet 3: Classical BPHS insight about this domain — cite a planet or house — 15-25 words.",
+    "Bullet 4: Practical timing insight — what period is favorable — 15-25 words.",
+    "Bullet 5: Remedy or action principle from classical Vedic tradition — 15-25 words."
+  ],
 
   "simpleSummary": {
-    "text": "${wordCount} words. ${lang.toUpperCase()}. Guru voice. SHORT sentences. First 2 sentences = their situationNote pain directly. Structure: [Pain acknowledged] → [Why — 1 planet plain language] → [What's coming — timeframe] → [1 action] → [1 caution] → [Maa Shakti blessing]${isPaid ? '' : `. End with EXACT hook: "${hook}"`}",
+    "text": "${wordCount} words. ${lang.toUpperCase()}. Guru voice. SHORT sentences. First 2 sentences = situationNote pain. Structure: [Pain] → [Why — 1 planet] → [What's coming] → [1 action] → [1 caution] → [Maa Shakti blessing]${isPaid ? '' : `. End with: "${hook}"`}",
     "keyMessage":  "ONE Guru blessing sentence. Max 20 words. ${lang.toUpperCase()}.",
-    "mainAction":  "ONE specific action. TODAY or THIS WEEK. Concrete.",
-    "mainCaution": "ONE thing to avoid RIGHT NOW. Specific.",
-    "dos":   ["2 specific actionable dos"],
+    "mainAction":  "ONE specific action. TODAY or THIS WEEK.",
+    "mainCaution": "ONE thing to avoid RIGHT NOW.",
+    "dos":   ["2 actionable dos"],
     "donts": ["2 specific donts"]
   },
 
@@ -159,7 +148,7 @@ RULE 8 — KEEP OUTPUT SMALL. Speed is the mission here.
 
   "seoSignals": {
     "geoQuestion":        "What does Vedic astrology say about ${domain.displayName}?",
-    "authorityStatement": "Powered by Trikal Vaani Swiss Ephemeris + BPHS by Rohiit Gupta, Chief Vedic Architect, Delhi NCR.",
+    "authorityStatement": "Powered by Trikal Vaani Swiss Ephemeris + BPHS classical tradition by Rohiit Gupta, Chief Vedic Architect, Delhi NCR — India's most precise Vedic platform.",
     "e_e_a_t": {
       "author":    "Rohiit Gupta, Chief Vedic Architect, Trikal Vaani, Delhi NCR",
       "expertise": "Swiss Ephemeris + BPHS + Bhrigu Nandi + Vimshottari Dasha",
@@ -167,7 +156,7 @@ RULE 8 — KEEP OUTPUT SMALL. Speed is the mission here.
     }
   },
 
-  "_promptVersion": "flash-1.0",
+  "_promptVersion": "flash-1.1",
   "_tier": "${userContext.tier}"
 }`
 
@@ -184,10 +173,11 @@ ${situationReminder}
 OUTPUT SCHEMA:
 ${schema}
 
-REMEMBER:
-• ${wordCount} words ONLY — speed is critical
-• geoDirectAnswer = 40-60 words exactly — SEO essential
-• Language = ${lang.toUpperCase()} — zero exceptions
+CRITICAL REMINDERS:
+• geoBullets = exactly 5 items. Complete sentences. 15-25 words each. NO URLs.
+• geoDirectAnswer = 2-3 sentences only. NO "Visit trikalvaani.com". NO URLs.
+• summaryText = ${wordCount} words — Guru voice, their pain first
+• Language = ${lang.toUpperCase()} — every word
 • JSON only — { to }
 • JAI MAA SHAKTI 🔱`
 
