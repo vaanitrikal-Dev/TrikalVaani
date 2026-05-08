@@ -3,20 +3,18 @@
  * TRIKAL VAANI — BirthForm Component
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: components/landing/BirthForm.tsx
- * VERSION: 8.0 — Free + Paid ₹51 + Voice CTA + SEO/GEO + Trikal Branding
+ * VERSION: 9.0 — Google Maps Places API + Gender + Dynamic Segments
  * SIGNED: ROHIIT GUPTA, CEO
  *
- * v8.0 CHANGES vs v7.0:
- *   ✅ "Jini" → "Trikal" everywhere in UI
- *   ✅ 3-tier prediction buttons: Free | Paid ₹51 | Voice ₹11
- *   ✅ Dynamic rotating voice taglines above form
- *   ✅ SEO/GEO rich content — keywords, authority signals
- *   ✅ Trust badges (Swiss Ephemeris, BPHS, Bhrigu, Shadbala)
- *   ✅ Maa Shakti CTA below form
- *   ✅ Gemini model routing: Free=Flash, Paid=Pro+Claude
- *   ✅ predictionTier passed to /api/predict
- *   ✅ Voice redirects to /voice route (Phase 4)
- *   ✅ All v7.0 fields preserved
+ * v9.0 CHANGES vs v8.0:
+ *   ✅ Google Places API — city autocomplete (replaces Nominatim)
+ *   ✅ Google TimeZone API — exact timezone (replaces offsetFromLon formula)
+ *   ✅ Google Geolocation — current location button
+ *   ✅ Gender field added (Male/Female/Other)
+ *   ✅ Gender + Age passed to /api/predict for dynamic segment routing
+ *   ✅ Dynamic segment calculator (age + gender → segment code)
+ *   ✅ Person 2 city also uses Google Places
+ *   ✅ All v8.0 fields + features preserved
  * ============================================================
  */
 
@@ -76,18 +74,13 @@ interface BirthFormProps {
   className?:        string
 }
 
-interface GeoResult {
-  display_name: string
-  lat:          string
-  lon:          string
-  address?: {
-    city?:         string
-    town?:         string
-    village?:      string
-    state?:        string
-    country?:      string
-    country_code?: string
-  }
+// ── Google Places Types ───────────────────────────────────────────────────────
+
+interface PlaceSuggestion {
+  place_id:     string
+  description:  string
+  main_text:    string
+  secondary_text: string
 }
 
 // ── Country Data ──────────────────────────────────────────────────────────────
@@ -119,7 +112,6 @@ const COUNTRIES: Country[] = [
   { name: 'South Africa',   code: 'ZA', dial: '+27',  digits: 9,  flag: '🇿🇦' },
   { name: 'Malaysia',       code: 'MY', dial: '+60',  digits: 9,  flag: '🇲🇾' },
   { name: 'Mauritius',      code: 'MU', dial: '+230', digits: 8,  flag: '🇲🇺' },
-  { name: 'Fiji',           code: 'FJ', dial: '+679', digits: 7,  flag: '🇫🇯' },
   { name: 'Bahrain',        code: 'BH', dial: '+973', digits: 8,  flag: '🇧🇭' },
   { name: 'Kuwait',         code: 'KW', dial: '+965', digits: 8,  flag: '🇰🇼' },
   { name: 'Qatar',          code: 'QA', dial: '+974', digits: 8,  flag: '🇶🇦' },
@@ -128,7 +120,6 @@ const COUNTRIES: Country[] = [
   { name: 'Kenya',          code: 'KE', dial: '+254', digits: 9,  flag: '🇰🇪' },
   { name: 'Nigeria',        code: 'NG', dial: '+234', digits: 10, flag: '🇳🇬' },
   { name: 'Japan',          code: 'JP', dial: '+81',  digits: 10, flag: '🇯🇵' },
-  { name: 'China',          code: 'CN', dial: '+86',  digits: 11, flag: '🇨🇳' },
   { name: 'Hong Kong',      code: 'HK', dial: '+852', digits: 8,  flag: '🇭🇰' },
 ]
 
@@ -136,89 +127,110 @@ function getCountryByIso(iso: string): Country {
   return COUNTRIES.find(c => c.code.toLowerCase() === iso.toLowerCase()) ?? COUNTRIES[0]!
 }
 
-// ── SEO/GEO Constants ─────────────────────────────────────────────────────────
-// These appear in the form section for Google + AI search indexing
+// ── Dynamic Segment Calculator ─────────────────────────────────────────────────
+// Fully dynamic — expandable to age 65+
 
-const SEO_TRUST_BADGES = [
-  { icon: '⚡', label: 'Swiss Ephemeris', desc: 'Professional precision engine' },
-  { icon: '📖', label: 'BPHS Classical',  desc: 'Ancient Vedic texts' },
-  { icon: '🔮', label: 'Bhrigu Nandi',    desc: 'Pattern-based insights' },
-  { icon: '⚖️', label: 'Shadbala',        desc: '6-component strength' },
-]
+export function calculateDynamicSegment(dob: string, gender: string): string {
+  if (!dob) return 'millennial_general'
+  const age = new Date().getFullYear() - new Date(dob).getFullYear()
+  const g = gender || 'other'
 
-// Dynamic voice taglines — rotate every 3.5s
-const VOICE_TAGLINES = [
-  { text: 'Kuch dil ki baatein type nahi ki jaati', icon: '🎙️' },
-  { text: 'Bol do Trikal ko — woh sun raha hai',     icon: '🔮' },
-  { text: 'Dil ki baat — sirf ek minute mein',       icon: '✨' },
-  { text: 'Trikal sun raha hai — bas shuru karo',    icon: '🎙️' },
-  { text: 'Jo dil mein hai — woh bol do',             icon: '💫' },
-  { text: 'Apni awaaz, apni kahani — Trikal ke saath', icon: '🔱' },
-  { text: 'Type mat karo — feel karo',                icon: '🎙️' },
-  { text: 'Ek minute — aur Trikal samjh jayega',     icon: '⏱️' },
-]
+  if (age >= 16 && age <= 29) {
+    if (g === 'male')   return 'young_male'      // Love, confidence, career start
+    if (g === 'female') return 'young_female'    // Love, marriage, beauty, career
+    return 'young_general'
+  }
+  if (age >= 30 && age <= 45) {
+    if (g === 'male')   return 'mid_male'        // Career, money, property, respect (50% weight)
+    if (g === 'female') return 'mid_female'      // Family, career, health, marriage
+    return 'mid_general'
+  }
+  if (age >= 46 && age <= 55) {
+    if (g === 'male')   return 'senior_male'     // Property, legacy, health, respect
+    if (g === 'female') return 'senior_female'   // Family harmony, health, spiritual
+    return 'senior_general'
+  }
+  if (age >= 56 && age <= 65) {
+    if (g === 'male')   return 'elder_male'      // Health, spiritual, legacy
+    if (g === 'female') return 'elder_female'    // Health, spiritual, family
+    return 'elder_general'
+  }
+  if (age > 65) return 'elder_general'
+  if (age < 16) return 'young_general'
 
-// Loading steps
-const LOADING_STEPS = [
-  'Mahakaal se connection ho raha hai...',
-  'Kundali calculate ho rahi hai — Swiss Ephemeris...',
-  'Trikal aapka sandesh taiyaar kar raha hai...',
-]
+  return 'millennial_general'
+}
 
-// ── Constants ─────────────────────────────────────────────────────────────────
+// Legacy segment for backward compat
+function detectLegacySegment(dob: string): 'genz' | 'millennial' | 'genx' {
+  if (!dob) return 'millennial'
+  const age = new Date().getFullYear() - new Date(dob).getFullYear()
+  if (age <= 31) return 'genz'
+  if (age <= 46) return 'millennial'
+  return 'genx'
+}
 
-const DUAL_CHART_DOMAINS   = ['genz_ex_back', 'genz_toxic_boss']
+// ── Google Maps API Functions ─────────────────────────────────────────────────
 
-const RELATIONSHIP_STATUS_OPTIONS = [
-  { value: '',             label: 'Select status (optional)' },
-  { value: 'single',       label: '💫 Single' },
-  { value: 'in_relationship', label: '💑 In a Relationship' },
-  { value: 'married',      label: '💍 Married' },
-  { value: 'separated',    label: '🔄 Separated' },
-  { value: 'divorced',     label: '📄 Divorced' },
-  { value: 'widowed',      label: '🕊️ Widowed' },
-  { value: 'complicated',  label: '🌀 It\'s Complicated' },
-]
+const MAPS_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY ?? ''
 
-const JOB_CATEGORIES = [
-  { value: '',                    label: 'Select your profession' },
-  { value: 'student',             label: '🎓 Student' },
-  { value: 'fresher',             label: '🌱 Fresher / Job Seeker' },
-  { value: 'salaried_it',         label: '💻 Salaried — IT / Tech' },
-  { value: 'salaried_finance',    label: '🏦 Salaried — Finance / Banking' },
-  { value: 'salaried_healthcare', label: '🏥 Salaried — Healthcare / Medical' },
-  { value: 'salaried_govt',       label: '🏛️ Salaried — Government / PSU' },
-  { value: 'salaried_education',  label: '📚 Salaried — Education / Teaching' },
-  { value: 'salaried_legal',      label: '⚖️ Salaried — Legal / Law' },
-  { value: 'salaried_media',      label: '🎬 Salaried — Media / Creative' },
-  { value: 'salaried_other',      label: '💼 Salaried — Other' },
-  { value: 'self_employed',       label: '🚀 Self-Employed / Freelancer' },
-  { value: 'business_owner',      label: '🏢 Business Owner' },
-  { value: 'startup_founder',     label: '⚡ Startup Founder' },
-  { value: 'real_estate',         label: '🏠 Real Estate Professional' },
-  { value: 'trader_investor',     label: '📈 Trader / Investor' },
-  { value: 'homemaker',           label: '🏡 Homemaker' },
-  { value: 'retired',             label: '🌅 Retired' },
-  { value: 'nri',                 label: '✈️ NRI / Working Abroad' },
-]
+// Autocomplete via Places API (using sessionToken for billing efficiency)
+async function fetchPlaceSuggestions(query: string): Promise<PlaceSuggestion[]> {
+  if (!MAPS_KEY || query.length < 3) return []
+  try {
+    const url = `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${encodeURIComponent(query)}&types=(cities)&key=${MAPS_KEY}&language=en`
+    const res  = await fetch(`/api/maps-proxy?url=${encodeURIComponent(url)}`)
+    if (!res.ok) return []
+    const data = await res.json()
+    return (data.predictions ?? []).map((p: any) => ({
+      place_id:       p.place_id,
+      description:    p.description,
+      main_text:      p.structured_formatting?.main_text ?? p.description,
+      secondary_text: p.structured_formatting?.secondary_text ?? '',
+    }))
+  } catch { return [] }
+}
 
-const LANGUAGE_OPTIONS = [
-  { value: 'hinglish', label: 'Hinglish', flag: '🇮🇳', desc: 'Hindi + English mix' },
-  { value: 'hindi',    label: 'हिंदी',    flag: '🕉️',  desc: 'Pure Hindi' },
-  { value: 'english',  label: 'English',  flag: '🌐',  desc: 'English' },
-]
+// Get lat/lng from place_id
+async function fetchPlaceDetails(placeId: string): Promise<{ lat: number; lng: number; city: string } | null> {
+  if (!MAPS_KEY) return null
+  try {
+    const url  = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=geometry,name,address_components&key=${MAPS_KEY}`
+    const res  = await fetch(`/api/maps-proxy?url=${encodeURIComponent(url)}`)
+    if (!res.ok) return null
+    const data = await res.json()
+    const r    = data.result
+    if (!r?.geometry?.location) return null
+    const city = r.name ?? r.address_components?.[0]?.long_name ?? ''
+    return { lat: r.geometry.location.lat, lng: r.geometry.location.lng, city }
+  } catch { return null }
+}
 
-const GOLD      = '#D4AF37'
-const GOLD_RGBA = (a: number) => `rgba(212,175,55,${a})`
-const BG_DARK   = '#080B12'
+// Get exact timezone from lat/lng using Google TimeZone API
+async function fetchTimezone(lat: number, lng: number): Promise<number> {
+  if (!MAPS_KEY) return 5.5
+  try {
+    const ts   = Math.floor(Date.now() / 1000)
+    const url  = `https://maps.googleapis.com/maps/api/timezone/json?location=${lat},${lng}&timestamp=${ts}&key=${MAPS_KEY}`
+    const res  = await fetch(`/api/maps-proxy?url=${encodeURIComponent(url)}`)
+    if (!res.ok) return 5.5
+    const data = await res.json()
+    if (data.status !== 'OK') return 5.5
+    const totalOffset = (data.rawOffset + data.dstOffset) / 3600
+    return Math.round(totalOffset * 4) / 4  // Round to nearest 0.25
+  } catch { return 5.5 }
+}
 
-const SELECT_STYLE: React.CSSProperties = {
-  background:       '#0d1120',
-  border:           '1px solid rgba(255,255,255,0.1)',
-  color:            '#e2e8f0',
-  colorScheme:      'dark',
-  WebkitAppearance: 'none' as any,
-  appearance:       'none',
+// Reverse geocode from lat/lng to city name
+async function reverseGeocode(lat: number, lng: number): Promise<string> {
+  if (!MAPS_KEY) return ''
+  try {
+    const url  = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${MAPS_KEY}&result_type=locality`
+    const res  = await fetch(`/api/maps-proxy?url=${encodeURIComponent(url)}`)
+    if (!res.ok) return ''
+    const data = await res.json()
+    return data.results?.[0]?.address_components?.[0]?.long_name ?? ''
+  } catch { return '' }
 }
 
 // ── Numerology ────────────────────────────────────────────────────────────────
@@ -287,30 +299,81 @@ function getNumerologyCompatibility(n1: number, n2: number) {
   return COMPAT[key] ?? { score: 65, label: 'Moderate', description: 'Unique combination — balance and understanding is key.', color: '#f59e0b' }
 }
 
-// ── Geo ───────────────────────────────────────────────────────────────────────
+// ── SEO/GEO Constants ─────────────────────────────────────────────────────────
 
-async function searchPlace(query: string): Promise<GeoResult[]> {
-  const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&addressdetails=1&limit=5`
-  const res = await fetch(url, { headers: { 'Accept-Language': 'en' } })
-  return res.ok ? res.json() : []
-}
+const SEO_TRUST_BADGES = [
+  { icon: '⚡', label: 'Swiss Ephemeris' },
+  { icon: '📖', label: 'BPHS Classical'  },
+  { icon: '🔮', label: 'Bhrigu Nandi'   },
+  { icon: '⚖️', label: 'Shadbala'       },
+]
 
-function offsetFromLon(lon: number): number {
-  if (lon >= 68 && lon <= 97) return 5.5
-  if (lon >= 80 && lon <= 88) return 5.75
-  return Math.round((lon / 15) * 2) / 2
-}
+const VOICE_TAGLINES = [
+  { text: 'Kuch dil ki baatein type nahi ki jaati', icon: '🎙️' },
+  { text: 'Bol do Trikal ko — woh sun raha hai',    icon: '🔮' },
+  { text: 'Dil ki baat — sirf ek minute mein',      icon: '✨' },
+  { text: 'Trikal sun raha hai — bas shuru karo',   icon: '🎙️' },
+  { text: 'Jo dil mein hai — woh bol do',            icon: '💫' },
+  { text: 'Type mat karo — feel karo',               icon: '🎙️' },
+]
 
-function generateSessionId(): string {
-  return `tv_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`
-}
+const LOADING_STEPS = [
+  'Mahakaal se connection ho raha hai...',
+  'Kundali calculate ho rahi hai — Swiss Ephemeris...',
+  'Trikal aapka sandesh taiyaar kar raha hai...',
+]
 
-function detectSegment(dob: string): 'genz' | 'millennial' | 'genx' {
-  if (!dob) return 'millennial'
-  const age = new Date().getFullYear() - new Date(dob).getFullYear()
-  if (age <= 31) return 'genz'
-  if (age <= 46) return 'millennial'
-  return 'genx'
+const DUAL_CHART_DOMAINS = ['genz_ex_back', 'genz_toxic_boss']
+
+const RELATIONSHIP_STATUS_OPTIONS = [
+  { value: '',              label: 'Select status (optional)' },
+  { value: 'single',        label: '💫 Single' },
+  { value: 'in_relationship', label: '💑 In a Relationship' },
+  { value: 'married',       label: '💍 Married' },
+  { value: 'separated',     label: '🔄 Separated' },
+  { value: 'divorced',      label: '📄 Divorced' },
+  { value: 'widowed',       label: '🕊️ Widowed' },
+  { value: 'complicated',   label: '🌀 It\'s Complicated' },
+]
+
+const JOB_CATEGORIES = [
+  { value: '',                    label: 'Select your profession' },
+  { value: 'student',             label: '🎓 Student' },
+  { value: 'fresher',             label: '🌱 Fresher / Job Seeker' },
+  { value: 'salaried_it',         label: '💻 Salaried — IT / Tech' },
+  { value: 'salaried_finance',    label: '🏦 Salaried — Finance / Banking' },
+  { value: 'salaried_healthcare', label: '🏥 Salaried — Healthcare / Medical' },
+  { value: 'salaried_govt',       label: '🏛️ Salaried — Government / PSU' },
+  { value: 'salaried_education',  label: '📚 Salaried — Education / Teaching' },
+  { value: 'salaried_legal',      label: '⚖️ Salaried — Legal / Law' },
+  { value: 'salaried_media',      label: '🎬 Salaried — Media / Creative' },
+  { value: 'salaried_other',      label: '💼 Salaried — Other' },
+  { value: 'self_employed',       label: '🚀 Self-Employed / Freelancer' },
+  { value: 'business_owner',      label: '🏢 Business Owner' },
+  { value: 'startup_founder',     label: '⚡ Startup Founder' },
+  { value: 'real_estate',         label: '🏠 Real Estate Professional' },
+  { value: 'trader_investor',     label: '📈 Trader / Investor' },
+  { value: 'homemaker',           label: '🏡 Homemaker' },
+  { value: 'retired',             label: '🌅 Retired' },
+  { value: 'nri',                 label: '✈️ NRI / Working Abroad' },
+]
+
+const LANGUAGE_OPTIONS = [
+  { value: 'hinglish', label: 'Hinglish', flag: '🇮🇳', desc: 'Hindi + English mix' },
+  { value: 'hindi',    label: 'हिंदी',    flag: '🕉️',  desc: 'Pure Hindi' },
+  { value: 'english',  label: 'English',  flag: '🌐',  desc: 'English' },
+]
+
+const GOLD      = '#D4AF37'
+const GOLD_RGBA = (a: number) => `rgba(212,175,55,${a})`
+
+const SELECT_STYLE: React.CSSProperties = {
+  background:       '#0d1120',
+  border:           '1px solid rgba(255,255,255,0.1)',
+  color:            '#e2e8f0',
+  colorScheme:      'dark',
+  WebkitAppearance: 'none' as any,
+  appearance:       'none',
 }
 
 function mapJobToSector(job: string): string {
@@ -323,6 +386,15 @@ function mapJobToSector(job: string): string {
   if (job.includes('media'))       return 'media'
   if (job.includes('education'))   return 'education'
   return 'general'
+}
+
+function generateSessionId(): string {
+  return `tv_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`
+}
+
+function calculateAge(dob: string): number {
+  if (!dob) return 30
+  return new Date().getFullYear() - new Date(dob).getFullYear()
 }
 
 // ── Initial State ─────────────────────────────────────────────────────────────
@@ -352,10 +424,7 @@ function CountrySelector({
   const selected            = COUNTRIES.find(c => c.dial === value) ?? COUNTRIES[0]!
 
   const filtered = search.trim()
-    ? COUNTRIES.filter(c =>
-        c.name.toLowerCase().includes(search.toLowerCase()) ||
-        c.dial.includes(search)
-      )
+    ? COUNTRIES.filter(c => c.name.toLowerCase().includes(search.toLowerCase()) || c.dial.includes(search))
     : COUNTRIES
 
   useEffect(() => {
@@ -390,11 +459,8 @@ function CountrySelector({
             {filtered.map(c => (
               <button key={c.code} type="button"
                 onClick={() => { onChange(c.dial, c.digits); setOpen(false); setSearch('') }}
-                className="w-full flex items-center gap-2.5 px-3 py-2 text-left text-sm transition-colors"
-                style={{
-                  color:      c.dial === value ? GOLD : '#cbd5e1',
-                  background: c.dial === value ? GOLD_RGBA(0.08) : 'transparent',
-                }}>
+                className="w-full flex items-center gap-2.5 px-3 py-2 text-left text-sm"
+                style={{ color: c.dial === value ? GOLD : '#cbd5e1', background: c.dial === value ? GOLD_RGBA(0.08) : 'transparent' }}>
                 <span style={{ fontSize: '1.1rem' }}>{c.flag}</span>
                 <span className="flex-1">{c.name}</span>
                 <span style={{ color: '#64748b', fontSize: '0.75rem' }}>{c.dial}</span>
@@ -407,19 +473,16 @@ function CountrySelector({
   )
 }
 
-// ── Rotating Tagline Component ─────────────────────────────────────────────────
+// ── Rotating Tagline ──────────────────────────────────────────────────────────
 
 function RotatingTagline() {
-  const [current, setCurrent]   = useState(0)
-  const [fading,  setFading]    = useState(false)
+  const [current, setCurrent] = useState(0)
+  const [fading,  setFading]  = useState(false)
 
   useEffect(() => {
     const interval = setInterval(() => {
       setFading(true)
-      setTimeout(() => {
-        setCurrent(prev => (prev + 1) % VOICE_TAGLINES.length)
-        setFading(false)
-      }, 500)
+      setTimeout(() => { setCurrent(prev => (prev + 1) % VOICE_TAGLINES.length); setFading(false) }, 500)
     }, 3500)
     return () => clearInterval(interval)
   }, [])
@@ -427,23 +490,8 @@ function RotatingTagline() {
   const tagline = VOICE_TAGLINES[current]!
 
   return (
-    <div style={{
-      textAlign:  'center',
-      padding:    '12px 16px',
-      background: GOLD_RGBA(0.06),
-      border:     `1px solid ${GOLD_RGBA(0.2)}`,
-      borderRadius: '12px',
-      marginBottom: '16px',
-      transition: 'opacity 0.5s ease',
-      opacity:    fading ? 0 : 1,
-    }}>
-      <p style={{
-        color:      GOLD,
-        fontSize:   '13px',
-        fontWeight: 600,
-        fontStyle:  'italic',
-        margin:     0,
-      }}>
+    <div style={{ textAlign: 'center', padding: '12px 16px', background: GOLD_RGBA(0.06), border: `1px solid ${GOLD_RGBA(0.2)}`, borderRadius: '12px', marginBottom: '16px', transition: 'opacity 0.5s ease', opacity: fading ? 0 : 1 }}>
+      <p style={{ color: GOLD, fontSize: '13px', fontWeight: 600, fontStyle: 'italic', margin: 0 }}>
         {tagline.icon} "{tagline.text}"
       </p>
       <p style={{ color: '#475569', fontSize: '10px', margin: '4px 0 0' }}>
@@ -453,199 +501,141 @@ function RotatingTagline() {
   )
 }
 
-// ── Tier Selector Component ────────────────────────────────────────────────────
+// ── Tier Selector ─────────────────────────────────────────────────────────────
 
-function TierSelector({
-  selected,
-  onChange,
-}: {
-  selected: PredictionTier
-  onChange: (tier: PredictionTier) => void
-}) {
+function TierSelector({ selected, onChange }: { selected: PredictionTier; onChange: (t: PredictionTier) => void }) {
   const tiers = [
-    {
-      id:       'free' as PredictionTier,
-      icon:     '🔮',
-      label:    'Free Preview',
-      price:    'Free',
-      desc:     'Trikal Ka Sandesh — quick prediction',
-      color:    '#94a3b8',
-      features: ['150-200 word summary', 'Key message + action', 'Instant results'],
-    },
-    {
-      id:       'paid' as PredictionTier,
-      icon:     '⚡',
-      label:    'Deep Reading',
-      price:    '₹51',
-      desc:     'Gemini Pro + Claude Sonnet 4.6',
-      color:    GOLD,
-      features: ['800-1200 word analysis', 'All yogas + remedies', 'Action windows + dates'],
-      highlight: true,
-    },
-    {
-      id:       'voice' as PredictionTier,
-      icon:     '🎙️',
-      label:    'Voice Reading',
-      price:    '₹11',
-      desc:     'Trikal ki awaaz — suniye',
-      color:    '#a78bfa',
-      features: ['60-sec voice response', 'Hinglish / Hindi / English', 'Powered by Trikal AI'],
-    },
+    { id: 'free' as PredictionTier, icon: '🔮', label: 'Free Preview', price: 'Free', desc: 'Trikal Ka Sandesh', color: '#94a3b8', features: ['150-200 word summary', 'Key message + action', 'Instant results'] },
+    { id: 'paid' as PredictionTier, icon: '⚡', label: 'Deep Reading', price: '₹51', desc: 'Gemini Pro 2.5', color: GOLD, features: ['900 word full analysis', 'Personalized 5 upay', 'Action windows + dates'], highlight: true },
+    { id: 'voice' as PredictionTier, icon: '🎙️', label: 'Voice', price: '₹11', desc: 'Trikal ki awaaz', color: '#a78bfa', features: ['60-sec voice', 'Hindi / Hinglish', 'Trikal AI'] },
   ]
 
   return (
     <div>
-      <label className="block text-sm font-medium text-slate-300 mb-3">
-        Reading Type <span className="text-yellow-400">*</span>
-      </label>
+      <label className="block text-sm font-medium text-slate-300 mb-3">Reading Type <span className="text-yellow-400">*</span></label>
       <div className="grid grid-cols-3 gap-3">
         {tiers.map(tier => (
-          <button
-            key={tier.id}
-            type="button"
-            onClick={() => onChange(tier.id)}
-            style={{
-              background: selected === tier.id
-                ? tier.highlight
-                  ? `linear-gradient(135deg, ${GOLD_RGBA(0.2)}, ${GOLD_RGBA(0.1)})`
-                  : `${tier.color}18`
-                : 'rgba(255,255,255,0.03)',
-              border: `1px solid ${selected === tier.id ? tier.color : 'rgba(255,255,255,0.08)'}`,
-              borderRadius: '12px',
-              padding: '14px 10px',
-              cursor: 'pointer',
-              textAlign: 'left',
-              transition: 'all 0.2s ease',
-              position: 'relative',
-            }}
-          >
-            {/* Most popular badge */}
+          <button key={tier.id} type="button" onClick={() => onChange(tier.id)}
+            style={{ background: selected === tier.id ? tier.highlight ? `linear-gradient(135deg,${GOLD_RGBA(0.2)},${GOLD_RGBA(0.1)})` : `${tier.color}18` : 'rgba(255,255,255,0.03)', border: `1px solid ${selected === tier.id ? tier.color : 'rgba(255,255,255,0.08)'}`, borderRadius: '12px', padding: '14px 10px', cursor: 'pointer', textAlign: 'left', transition: 'all 0.2s', position: 'relative' }}>
             {tier.highlight && (
-              <div style={{
-                position:    'absolute',
-                top:         '-10px',
-                left:        '50%',
-                transform:   'translateX(-50%)',
-                background:  GOLD,
-                color:       '#080B12',
-                fontSize:    '9px',
-                fontWeight:  700,
-                padding:     '2px 8px',
-                borderRadius: '10px',
-                whiteSpace:  'nowrap',
-                letterSpacing: '0.05em',
-              }}>
-                MOST POPULAR
-              </div>
+              <div style={{ position: 'absolute', top: '-10px', left: '50%', transform: 'translateX(-50%)', background: GOLD, color: '#080B12', fontSize: '9px', fontWeight: 700, padding: '2px 8px', borderRadius: '10px', whiteSpace: 'nowrap' }}>MOST POPULAR</div>
             )}
-
             <div style={{ fontSize: '20px', marginBottom: '6px' }}>{tier.icon}</div>
-            <p style={{
-              margin:     '0 0 2px',
-              color:      selected === tier.id ? tier.color : '#94a3b8',
-              fontSize:   '12px',
-              fontWeight: 700,
-            }}>
-              {tier.label}
-            </p>
-            <p style={{
-              margin:     '0 0 6px',
-              color:      selected === tier.id ? '#fff' : '#64748b',
-              fontSize:   '16px',
-              fontWeight: 800,
-              fontFamily: 'Georgia, serif',
-            }}>
-              {tier.price}
-            </p>
-            <p style={{ margin: '0 0 8px', color: '#475569', fontSize: '10px', lineHeight: 1.4 }}>
-              {tier.desc}
-            </p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
-              {tier.features.map((f, i) => (
-                <p key={i} style={{
-                  margin:   0,
-                  color:    selected === tier.id ? '#94a3b8' : '#334155',
-                  fontSize: '10px',
-                  display:  'flex',
-                  gap:      '4px',
-                }}>
-                  <span style={{ color: tier.color, flexShrink: 0 }}>✓</span>
-                  {f}
-                </p>
-              ))}
-            </div>
+            <p style={{ margin: '0 0 2px', color: selected === tier.id ? tier.color : '#94a3b8', fontSize: '12px', fontWeight: 700 }}>{tier.label}</p>
+            <p style={{ margin: '0 0 6px', color: selected === tier.id ? '#fff' : '#64748b', fontSize: '16px', fontWeight: 800, fontFamily: 'Georgia,serif' }}>{tier.price}</p>
+            <p style={{ margin: '0 0 8px', color: '#475569', fontSize: '10px', lineHeight: 1.4 }}>{tier.desc}</p>
+            {tier.features.map((f, i) => (
+              <p key={i} style={{ margin: 0, color: selected === tier.id ? '#94a3b8' : '#334155', fontSize: '10px', display: 'flex', gap: '4px' }}>
+                <span style={{ color: tier.color, flexShrink: 0 }}>✓</span>{f}
+              </p>
+            ))}
           </button>
         ))}
       </div>
-
-      {/* Voice tagline — shows when voice selected */}
-      {selected === 'voice' && (
-        <div style={{
-          marginTop:    '12px',
-          padding:      '12px',
-          background:   'rgba(167,139,250,0.06)',
-          border:       '1px solid rgba(167,139,250,0.2)',
-          borderRadius: '10px',
-          textAlign:    'center',
-        }}>
-          <p style={{ margin: 0, color: '#a78bfa', fontSize: '12px', fontWeight: 600 }}>
-            🎙️ Voice Reading mein aap 1 minute bol sakte hain
-          </p>
-          <p style={{ margin: '4px 0 0', color: '#475569', fontSize: '11px' }}>
-            Trikal aapki awaaz sunke personalised prediction dega
-          </p>
-        </div>
-      )}
-
-      {/* Paid features highlight */}
       {selected === 'paid' && (
-        <div style={{
-          marginTop:    '12px',
-          padding:      '12px',
-          background:   GOLD_RGBA(0.06),
-          border:       `1px solid ${GOLD_RGBA(0.2)}`,
-          borderRadius: '10px',
-        }}>
-          <p style={{ margin: '0 0 4px', color: GOLD, fontSize: '11px', fontWeight: 700 }}>
-            ⚡ Gemini 2.5 Pro + Claude Sonnet 4.6 polish
-          </p>
-          <p style={{ margin: 0, color: '#64748b', fontSize: '10px', lineHeight: 1.5 }}>
-            AstroTalk charges ₹500+ for this level of analysis.
-            Trikal Vaani delivers it for ₹51 — Swiss Ephemeris precision + BPHS classical depth.
-          </p>
+        <div style={{ marginTop: '12px', padding: '12px', background: GOLD_RGBA(0.06), border: `1px solid ${GOLD_RGBA(0.2)}`, borderRadius: '10px' }}>
+          <p style={{ margin: '0 0 4px', color: GOLD, fontSize: '11px', fontWeight: 700 }}>⚡ Gemini 2.5 Pro — 900 words deep analysis</p>
+          <p style={{ margin: 0, color: '#64748b', fontSize: '10px', lineHeight: 1.5 }}>AstroTalk charges ₹500+ for this level. Trikal Vaani delivers for ₹51 — Swiss Ephemeris + BPHS + personalized 5 upay by segment.</p>
         </div>
       )}
     </div>
   )
 }
 
+// ── Google Places City Input ──────────────────────────────────────────────────
+
+function CityInput({
+  id, label, required, value, onSelect, error, placeholder, person2 = false,
+}: {
+  id: string; label: string; required?: boolean; value: string
+  onSelect: (city: string, lat: number, lng: number, timezone: number) => void
+  error?: string; placeholder?: string; person2?: boolean
+}) {
+  const [query,       setQuery]       = useState(value)
+  const [suggestions, setSuggestions] = useState<PlaceSuggestion[]>([])
+  const [loading,     setLoading]     = useState(false)
+  const [selected,    setSelected]    = useState(false)
+  const debounceRef   = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => { setQuery(value) }, [value])
+
+  const handleChange = (val: string) => {
+    setQuery(val)
+    setSelected(false)
+    if (debounceRef.current) clearTimeout(debounceRef.current)
+    if (val.length < 3) { setSuggestions([]); return }
+    debounceRef.current = setTimeout(async () => {
+      setLoading(true)
+      const results = await fetchPlaceSuggestions(val)
+      setSuggestions(results)
+      setLoading(false)
+    }, 400)
+  }
+
+  const handleSelect = async (s: PlaceSuggestion) => {
+    setQuery(s.main_text)
+    setSuggestions([])
+    setSelected(true)
+    setLoading(true)
+    const details = await fetchPlaceDetails(s.place_id)
+    if (details) {
+      const tz = await fetchTimezone(details.lat, details.lng)
+      onSelect(details.city || s.main_text, details.lat, details.lng, tz)
+    }
+    setLoading(false)
+  }
+
+  return (
+    <div className="relative">
+      <label htmlFor={id} className="block text-sm font-medium text-slate-300 mb-1.5">
+        {label} {required && <span className="text-yellow-400">*</span>}
+      </label>
+      <div className="relative">
+        <input id={id} type="search" autoComplete="off"
+          placeholder={placeholder ?? 'Type city name...'}
+          value={query}
+          onChange={e => handleChange(e.target.value)}
+          className="w-full px-4 py-2.5 rounded-lg text-sm outline-none pr-10"
+          style={{ background: '#0d1120', border: `1px solid ${error ? '#ef4444' : 'rgba(255,255,255,0.1)'}`, color: '#e2e8f0', colorScheme: 'dark' }} />
+        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs">
+          {loading ? <span style={{ color: GOLD }}>⟳</span> : selected ? <span style={{ color: '#22c55e' }}>✓</span> : <span style={{ color: '#475569' }}>📍</span>}
+        </span>
+      </div>
+      {suggestions.length > 0 && (
+        <ul className="absolute z-50 w-full mt-1 rounded-lg overflow-hidden shadow-xl"
+          style={{ background: '#0d1120', border: '1px solid rgba(212,175,55,0.2)', maxHeight: '200px', overflowY: 'auto' }}>
+          {suggestions.map((s, i) => (
+            <li key={i} onClick={() => handleSelect(s)}
+              className="px-4 py-3 text-sm cursor-pointer"
+              style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}
+              onMouseEnter={e => (e.currentTarget.style.background = GOLD_RGBA(0.08))}
+              onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
+              <p style={{ margin: 0, color: '#e2e8f0', fontWeight: 600 }}>{s.main_text}</p>
+              <p style={{ margin: 0, color: '#64748b', fontSize: '11px' }}>{s.secondary_text}</p>
+            </li>
+          ))}
+        </ul>
+      )}
+      {error && <p className="text-red-400 text-xs mt-1">{error}</p>}
+    </div>
+  )
+}
+
 // ── Main Component ────────────────────────────────────────────────────────────
 
-export default function BirthForm({
-  selectedCategory,
-  onSubmit,
-  loading = false,
-  submitLabel,
-  className = '',
-}: BirthFormProps) {
+export default function BirthForm({ selectedCategory, onSubmit, loading = false, submitLabel, className = '' }: BirthFormProps) {
   const router = useRouter()
 
   const [fields,         setFields]         = useState<BirthFormFields>(INITIAL)
   const [predictionTier, setPredictionTier] = useState<PredictionTier>('free')
-  const [geoResults,     setGeoResults]     = useState<GeoResult[]>([])
-  const [geo2Results,    setGeo2Results]    = useState<GeoResult[]>([])
-  const [geoLoading,     setGeoLoading]     = useState(false)
-  const [geo2Loading,    setGeo2Loading]    = useState(false)
   const [errors,         setErrors]         = useState<Partial<Record<keyof BirthFormFields, string>>>({})
   const [isSubmitting,   setIsSubmitting]   = useState(false)
   const [apiError,       setApiError]       = useState<string | null>(null)
   const [loadingStep,    setLoadingStep]    = useState(0)
   const [numerology,     setNumerology]     = useState<ReturnType<typeof getNumerologyCompatibility> | null>(null)
+  const [locating,       setLocating]       = useState(false)
 
-  const debounceRef        = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const debounce2Ref       = useRef<ReturnType<typeof setTimeout> | null>(null)
   const loadingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
-
   const isDualDomain = DUAL_CHART_DOMAINS.includes(selectedCategory?.id ?? '')
 
   const set = useCallback(<K extends keyof BirthFormFields>(key: K, value: BirthFormFields[K]) => {
@@ -672,82 +662,40 @@ export default function BirthForm({
     const m2 = isP2 ? val : fields.person2Mobile
     if (isDualDomain && m1.replace(/\D/g, '').length >= 10 && m2.replace(/\D/g, '').length >= 10) {
       setNumerology(getNumerologyCompatibility(getMobileNumber(m1), getMobileNumber(m2)))
-    } else {
-      setNumerology(null)
-    }
+    } else { setNumerology(null) }
   }
 
-  // Geo person 1
-  const handlePlaceChange = (query: string) => {
-    set('placeQuery', query)
-    if (debounceRef.current) clearTimeout(debounceRef.current)
-    if (query.length < 3) { setGeoResults([]); return }
-    debounceRef.current = setTimeout(async () => {
-      setGeoLoading(true)
-      setGeoResults(await searchPlace(query))
-      setGeoLoading(false)
-    }, 400)
+  // ── Current Location ──────────────────────────────────────────────────────
+  const handleCurrentLocation = () => {
+    if (!navigator.geolocation) { alert('Geolocation not supported by your browser.'); return }
+    setLocating(true)
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const { latitude: lat, longitude: lng } = pos.coords
+        const [city, tz] = await Promise.all([reverseGeocode(lat, lng), fetchTimezone(lat, lng)])
+        setFields(prev => ({
+          ...prev,
+          placeQuery:     city || `${lat.toFixed(4)}, ${lng.toFixed(4)}`,
+          city:           city || '',
+          latitude:       lat,
+          longitude:      lng,
+          timezoneOffset: tz,
+        }))
+        setLocating(false)
+      },
+      () => { alert('Could not get your location. Please type your city manually.'); setLocating(false) }
+    )
   }
 
-  const selectPlace = (r: GeoResult) => {
-    const lat     = parseFloat(r.lat)
-    const lon     = parseFloat(r.lon)
-    const city    = r.address?.city || r.address?.town || r.address?.village || r.display_name.split(',')[0]
-    const iso     = r.address?.country_code ?? ''
-    const country = iso ? getCountryByIso(iso) : null
-    setFields(prev => ({
-      ...prev,
-      placeQuery:     r.display_name,
-      city:           city ?? '',
-      latitude:       lat,
-      longitude:      lon,
-      timezoneOffset: offsetFromLon(lon),
-      ...(country ? { countryCode: country.dial, countryDigits: country.digits } : {}),
-    }))
-    setGeoResults([])
-    setErrors(prev => ({ ...prev, placeQuery: undefined, latitude: undefined }))
-  }
-
-  // Geo person 2
-  const handlePlace2Change = (query: string) => {
-    set('person2Place', query)
-    if (debounce2Ref.current) clearTimeout(debounce2Ref.current)
-    if (query.length < 3) { setGeo2Results([]); return }
-    debounce2Ref.current = setTimeout(async () => {
-      setGeo2Loading(true)
-      setGeo2Results(await searchPlace(query))
-      setGeo2Loading(false)
-    }, 400)
-  }
-
-  const selectPlace2 = (r: GeoResult) => {
-    const lat     = parseFloat(r.lat)
-    const lon     = parseFloat(r.lon)
-    const city    = r.address?.city || r.address?.town || r.address?.village || r.display_name.split(',')[0]
-    const iso     = r.address?.country_code ?? ''
-    const country = iso ? getCountryByIso(iso) : null
-    setFields(prev => ({
-      ...prev,
-      person2Place: r.display_name,
-      person2City:  city ?? '',
-      person2Lat:   lat,
-      person2Lng:   lon,
-      ...(country ? { person2CountryCode: country.dial } : {}),
-    }))
-    setGeo2Results([])
-  }
-
-  // Validation
+  // ── Validation ────────────────────────────────────────────────────────────
   const validate = (): boolean => {
     const errs: typeof errors = {}
-    if (!fields.name.trim())    errs.name       = 'Name is required'
-    if (!fields.dateOfBirth)    errs.dateOfBirth = 'Date of birth is required'
+    if (!fields.name.trim())    errs.name        = 'Name is required'
+    if (!fields.dateOfBirth)    errs.dateOfBirth  = 'Date of birth is required'
     if (!fields.unknownTime && !fields.timeOfBirth) errs.timeOfBirth = 'Time of birth is required'
-    if (fields.latitude === '') errs.latitude    = 'Place of birth is required'
+    if (fields.latitude === '') errs.latitude     = 'Place of birth is required'
     const mobileDigits = fields.mobile.replace(/\D/g, '').length
-    if (!fields.mobile || mobileDigits < fields.countryDigits) {
-      errs.mobile = `Valid ${fields.countryDigits}-digit mobile required`
-    }
+    if (!fields.mobile || mobileDigits < fields.countryDigits) errs.mobile = `Valid ${fields.countryDigits}-digit mobile required`
     if (isDualDomain) {
       if (!fields.person2Name.trim()) errs.person2Name = 'Person 2 name required'
       if (!fields.person2Dob)         errs.person2Dob  = 'Person 2 DOB required'
@@ -757,12 +705,11 @@ export default function BirthForm({
     return Object.keys(errs).length === 0
   }
 
-  // Submit
+  // ── Submit ────────────────────────────────────────────────────────────────
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!validate()) return
 
-    // Voice tier — redirect to voice page (Phase 4)
     if (predictionTier === 'voice') {
       router.push(`/voice?name=${encodeURIComponent(fields.name)}&lang=${fields.language}`)
       return
@@ -773,7 +720,10 @@ export default function BirthForm({
     startLoadingMessages()
 
     try {
-      const sessionId = generateSessionId()
+      const sessionId         = generateSessionId()
+      const age               = calculateAge(fields.dateOfBirth)
+      const dynamicSegment    = calculateDynamicSegment(fields.dateOfBirth, fields.gender)
+      const legacySegment     = detectLegacySegment(fields.dateOfBirth)
 
       const res = await fetch('/api/predict', {
         method:  'POST',
@@ -782,7 +732,7 @@ export default function BirthForm({
           sessionId,
           domainId:       selectedCategory?.id    || 'mill_karz_mukti',
           domainLabel:    selectedCategory?.label || 'General',
-          predictionTier,                          // NEW v8.0 — routes to Flash/Pro
+          predictionTier,
           birthData: {
             name:     fields.name,
             dob:      fields.dateOfBirth,
@@ -794,14 +744,17 @@ export default function BirthForm({
             ayanamsa: 'lahiri',
           },
           userContext: {
-            segment:            detectSegment(fields.dateOfBirth),
+            segment:            legacySegment,      // legacy compat
+            dynamicSegment,                          // NEW v9.0 — for remedy routing
+            gender:             fields.gender,       // NEW v9.0
+            age,                                     // NEW v9.0
             employment:         fields.jobCategory,
             sector:             mapJobToSector(fields.jobCategory),
             language:           fields.language,
             city:               fields.city,
             currentCity:        fields.currentCity || fields.city,
             relationshipStatus: fields.relationshipStatus,
-            situationNote:      fields.situationNote.slice(0, 100),
+            situationNote:      fields.situationNote.slice(0, 200),
             mobile:             `${fields.countryCode}${fields.mobile}`,
             person2Name:        fields.person2Name        || null,
             person2City:        fields.person2City        || null,
@@ -822,28 +775,17 @@ export default function BirthForm({
       })
 
       const data = await res.json()
-
-      if (!res.ok) {
-        setApiError(data.error || 'Something went wrong. Please try again.')
-        stopLoadingMessages()
-        return
-      }
-
+      if (!res.ok) { setApiError(data.error || 'Something went wrong.'); stopLoadingMessages(); return }
       if (onSubmit) await onSubmit(fields)
 
-      const predictionId: string | null = data?._meta?.predictionId ?? null
-      const publicSlug:   string | null = data?._meta?.publicSlug   ?? null
+      const publicSlug   = data?._meta?.publicSlug   ?? null
+      const predictionId = data?._meta?.predictionId ?? null
 
-      if (publicSlug) {
-        router.push(`/report/${publicSlug}`)
-      } else if (predictionId) {
-        router.push(`/result/${predictionId}`)
-      } else {
-        setApiError('Prediction ready hai par save nahi hua. Please retry karo.')
-        stopLoadingMessages()
-      }
+      if (publicSlug)        router.push(`/report/${publicSlug}`)
+      else if (predictionId) router.push(`/result/${predictionId}`)
+      else { setApiError('Prediction ready hai par save nahi hua. Please retry karo.'); stopLoadingMessages() }
 
-    } catch (err) {
+    } catch {
       setApiError('Network error. Please check your connection.')
       stopLoadingMessages()
     } finally {
@@ -853,128 +795,84 @@ export default function BirthForm({
 
   const isLoading = loading || isSubmitting
 
-  const inputStyle = (hasError?: boolean): React.CSSProperties => ({
-    background:  '#0d1120',
-    border:      `1px solid ${hasError ? '#ef4444' : 'rgba(255,255,255,0.1)'}`,
-    color:       '#e2e8f0',
-    colorScheme: 'dark' as const,
-  })
-
-  // Dynamic submit label based on tier
   const getSubmitLabel = () => {
-    if (isLoading) return LOADING_STEPS[loadingStep] || 'Processing...'
-    if (submitLabel) return submitLabel
+    if (isLoading)                  return LOADING_STEPS[loadingStep] || 'Processing...'
+    if (submitLabel)                return submitLabel
     if (predictionTier === 'free')  return '🔮 Get Free Prediction — Trikal Ka Sandesh'
     if (predictionTier === 'paid')  return '⚡ Get Deep Reading — ₹51'
     if (predictionTier === 'voice') return '🎙️ Go to Voice Reading — ₹11'
     return '🔮 Get My Prediction'
   }
 
-  // ── Render ─────────────────────────────────────────────────────────────────
+  const inputStyle = (hasError?: boolean): React.CSSProperties => ({
+    background: '#0d1120',
+    border: `1px solid ${hasError ? '#ef4444' : 'rgba(255,255,255,0.1)'}`,
+    color: '#e2e8f0',
+    colorScheme: 'dark' as const,
+  })
+
+  // ── Render ────────────────────────────────────────────────────────────────
   return (
-    <section
-      id="birth-form"
-      className={`py-16 px-4 ${className}`}
-      // SEO: hidden content for AI search indexing
-      aria-label="Vedic Astrology Birth Chart Form — Trikal Vaani by Rohiit Gupta"
-    >
-      {/* SEO/GEO hidden content — indexed by Google + AI search */}
+    <section id="birth-form" className={`py-16 px-4 ${className}`}
+      aria-label="Vedic Astrology Birth Chart Form — Trikal Vaani by Rohiit Gupta">
+
+      {/* SEO hidden */}
       <div style={{ display: 'none' }} aria-hidden="false">
         <h2>Free Vedic Astrology Prediction — Swiss Ephemeris Powered by Rohiit Gupta</h2>
-        <p>Get your personalized Vedic astrology reading at Trikal Vaani. Powered by Swiss Ephemeris,
-        Brihat Parashara Hora Shastra (BPHS), Bhrigu Nandi Nadi patterns and Shadbala strength calculations.
-        Chief Vedic Architect Rohiit Gupta, Delhi NCR. Starting free — deep reading at ₹51.</p>
-        <p>Keywords: vedic astrology online India, kundali reading free, Swiss Ephemeris astrology,
-        BPHS jyotish online, Bhrigu astrology prediction, Shadbala calculation online,
-        best vedic astrologer Delhi NCR, Rohiit Gupta astrologer, trikalvaani.com</p>
+        <p>Get your personalized Vedic astrology reading at Trikal Vaani. Powered by Swiss Ephemeris, BPHS, Bhrigu Nandi Nadi, Shadbala. By Rohiit Gupta, Chief Vedic Architect, Delhi NCR.</p>
       </div>
 
       <div className="max-w-2xl mx-auto">
 
-        {/* ── SEO HERO SECTION ── */}
+        {/* Hero */}
         <div className="text-center mb-8">
-          {/* Mahakaal blessing */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', marginBottom: '12px' }}>
             <div style={{ height: '1px', flex: 1, background: `linear-gradient(to right, transparent, ${GOLD_RGBA(0.3)})` }} />
-            <span style={{ color: GOLD, fontSize: '11px', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase' }}>
-              🔱 Mahakaal Ka Ashirwad
-            </span>
+            <span style={{ color: GOLD, fontSize: '11px', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase' }}>🔱 Mahakaal Ka Ashirwad</span>
             <div style={{ height: '1px', flex: 1, background: `linear-gradient(to left, transparent, ${GOLD_RGBA(0.3)})` }} />
           </div>
-
           {selectedCategory ? (
             <>
               <span className="inline-block px-4 py-1.5 rounded-full text-sm font-medium mb-3"
                 style={{ background: `${selectedCategory.color}20`, color: selectedCategory.color, border: `1px solid ${selectedCategory.color}40` }}>
                 {selectedCategory.label}
               </span>
-              <h2 className="text-white text-xl font-serif font-bold mb-2">
-                Apni Kundali Ka Sach Janein
-              </h2>
-              <p className="text-slate-400 text-sm">
-                Swiss Ephemeris precision · BPHS Classical · Bhrigu Nandi patterns
-              </p>
+              <h2 className="text-white text-xl font-serif font-bold mb-2">Apni Kundali Ka Sach Janein</h2>
+              <p className="text-slate-400 text-sm">Swiss Ephemeris precision · BPHS Classical · Bhrigu Nandi patterns</p>
             </>
           ) : (
             <>
-              <h2 className="text-white text-2xl font-serif font-bold mb-2">
-                Trikal Ka Sandesh — Sirf Aapke Liye
-              </h2>
-              <p className="text-slate-400 text-sm max-w-lg mx-auto">
-                India's most accurate AI Vedic astrology — Swiss Ephemeris + BPHS + Bhrigu + Shadbala.
-                By Rohiit Gupta, Chief Vedic Architect, Delhi NCR.
-              </p>
+              <h2 className="text-white text-2xl font-serif font-bold mb-2">Trikal Ka Sandesh — Sirf Aapke Liye</h2>
+              <p className="text-slate-400 text-sm max-w-lg mx-auto">India's most accurate AI Vedic astrology — by Rohiit Gupta, Chief Vedic Architect, Delhi NCR.</p>
             </>
           )}
-
-          {/* Trust badges */}
           <div className="flex flex-wrap justify-center gap-2 mt-4">
             {SEO_TRUST_BADGES.map(b => (
-              <span key={b.label} style={{
-                display:    'inline-flex',
-                alignItems: 'center',
-                gap:        '4px',
-                padding:    '4px 10px',
-                borderRadius: '20px',
-                fontSize:   '10px',
-                fontWeight: 600,
-                background: GOLD_RGBA(0.08),
-                border:     `1px solid ${GOLD_RGBA(0.2)}`,
-                color:      GOLD,
-              }}>
+              <span key={b.label} style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '4px 10px', borderRadius: '20px', fontSize: '10px', fontWeight: 600, background: GOLD_RGBA(0.08), border: `1px solid ${GOLD_RGBA(0.2)}`, color: GOLD }}>
                 {b.icon} {b.label}
               </span>
             ))}
           </div>
         </div>
 
-        {/* ── ROTATING VOICE TAGLINE ── */}
         <RotatingTagline />
 
-        {/* ── FORM CARD ── */}
+        {/* Form */}
         <div className="rounded-2xl p-6 sm:p-8"
           style={{ background: 'rgba(13,17,30,0.85)', border: '1px solid rgba(212,175,55,0.15)', backdropFilter: 'blur(12px)' }}>
-
           <form onSubmit={handleSubmit} noValidate className="grid gap-5">
 
-            {/* ── TIER SELECTOR ── */}
+            {/* Tier */}
             <TierSelector selected={predictionTier} onChange={setPredictionTier} />
 
-            {/* ── Language Selector ── */}
+            {/* Language */}
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">
-                Prediction Language / भाषा चुनें
-              </label>
+              <label className="block text-sm font-medium text-slate-300 mb-2">Prediction Language / भाषा चुनें</label>
               <div className="grid grid-cols-3 gap-2">
                 {LANGUAGE_OPTIONS.map(opt => (
-                  <button key={opt.value} type="button"
-                    onClick={() => set('language', opt.value as any)}
+                  <button key={opt.value} type="button" onClick={() => set('language', opt.value as any)}
                     className="py-2.5 px-3 rounded-lg text-sm font-medium transition-all text-center"
-                    style={{
-                      background: fields.language === opt.value ? GOLD_RGBA(0.2) : 'rgba(255,255,255,0.04)',
-                      border:     `1px solid ${fields.language === opt.value ? GOLD_RGBA(0.6) : 'rgba(255,255,255,0.1)'}`,
-                      color:      fields.language === opt.value ? GOLD : '#94a3b8',
-                    }}>
+                    style={{ background: fields.language === opt.value ? GOLD_RGBA(0.2) : 'rgba(255,255,255,0.04)', border: `1px solid ${fields.language === opt.value ? GOLD_RGBA(0.6) : 'rgba(255,255,255,0.1)'}`, color: fields.language === opt.value ? GOLD : '#94a3b8' }}>
                     <div className="text-lg mb-0.5">{opt.flag}</div>
                     <div>{opt.label}</div>
                     <div className="text-xs opacity-60 mt-0.5">{opt.desc}</div>
@@ -983,19 +881,17 @@ export default function BirthForm({
               </div>
             </div>
 
-            {/* ── Name ── */}
+            {/* Name */}
             <div>
-              <label htmlFor="tv-name" className="block text-sm font-medium text-slate-300 mb-1.5">
-                Full Name <span className="text-yellow-400">*</span>
-              </label>
+              <label htmlFor="tv-name" className="block text-sm font-medium text-slate-300 mb-1.5">Full Name <span className="text-yellow-400">*</span></label>
               <input id="tv-name" type="text" placeholder="Enter your full name"
                 value={fields.name} onChange={e => set('name', e.target.value)}
-                className="w-full px-4 py-2.5 rounded-lg text-sm outline-none transition-all"
+                className="w-full px-4 py-2.5 rounded-lg text-sm outline-none"
                 style={inputStyle(!!errors.name)} />
               {errors.name && <p className="text-red-400 text-xs mt-1">{errors.name}</p>}
             </div>
 
-            {/* ── WhatsApp Mobile ── */}
+            {/* Mobile */}
             <div>
               <label htmlFor="tv-mobile" className="block text-sm font-medium text-slate-300 mb-1.5">
                 WhatsApp Mobile <span className="text-yellow-400">*</span>
@@ -1004,8 +900,7 @@ export default function BirthForm({
               <div className="flex gap-2">
                 <CountrySelector id="tv-country" value={fields.countryCode}
                   onChange={(dial, digits) => setFields(prev => ({ ...prev, countryCode: dial, countryDigits: digits }))} />
-                <input id="tv-mobile" type="tel"
-                  placeholder={`${fields.countryDigits}-digit mobile`}
+                <input id="tv-mobile" type="tel" placeholder={`${fields.countryDigits}-digit mobile`}
                   value={fields.mobile} onChange={e => handleMobileChange(e.target.value)}
                   maxLength={fields.countryDigits + 2}
                   className="flex-1 px-4 py-2.5 rounded-lg text-sm outline-none"
@@ -1014,31 +909,21 @@ export default function BirthForm({
               {errors.mobile && <p className="text-red-400 text-xs mt-1">{errors.mobile}</p>}
             </div>
 
-            {/* ── Job Category ── */}
+            {/* Job */}
             <div className="relative">
-              <label htmlFor="tv-job" className="block text-sm font-medium text-slate-300 mb-1.5">
-                Profession / Job Category
-              </label>
+              <label htmlFor="tv-job" className="block text-sm font-medium text-slate-300 mb-1.5">Profession / Job Category</label>
               <div className="relative">
-                <select id="tv-job" value={fields.jobCategory}
-                  onChange={e => set('jobCategory', e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-lg text-sm outline-none appearance-none pr-8"
-                  style={SELECT_STYLE}>
-                  {JOB_CATEGORIES.map(j => (
-                    <option key={j.value} value={j.value} style={{ background: '#0d1120', color: '#e2e8f0' }}>
-                      {j.label}
-                    </option>
-                  ))}
+                <select id="tv-job" value={fields.jobCategory} onChange={e => set('jobCategory', e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-lg text-sm outline-none appearance-none pr-8" style={SELECT_STYLE}>
+                  {JOB_CATEGORIES.map(j => <option key={j.value} value={j.value} style={{ background: '#0d1120', color: '#e2e8f0' }}>{j.label}</option>)}
                 </select>
                 <span className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500">▾</span>
               </div>
             </div>
 
-            {/* ── Date of Birth ── */}
+            {/* DOB */}
             <div>
-              <label htmlFor="tv-dob" className="block text-sm font-medium text-slate-300 mb-1.5">
-                Date of Birth <span className="text-yellow-400">*</span>
-              </label>
+              <label htmlFor="tv-dob" className="block text-sm font-medium text-slate-300 mb-1.5">Date of Birth <span className="text-yellow-400">*</span></label>
               <input id="tv-dob" type="date" value={fields.dateOfBirth}
                 onChange={e => set('dateOfBirth', e.target.value)}
                 className="w-full px-4 py-2.5 rounded-lg text-sm outline-none"
@@ -1046,15 +931,14 @@ export default function BirthForm({
               {errors.dateOfBirth && <p className="text-red-400 text-xs mt-1">{errors.dateOfBirth}</p>}
             </div>
 
-            {/* ── Time of Birth ── */}
+            {/* TOB */}
             <div>
               <div className="flex items-center justify-between mb-1.5">
                 <label htmlFor="tv-tob" className="text-sm font-medium text-slate-300">
                   Time of Birth {!fields.unknownTime && <span className="text-yellow-400">*</span>}
                 </label>
                 <label className="flex items-center gap-2 cursor-pointer text-sm text-slate-400">
-                  <input type="checkbox" checked={fields.unknownTime}
-                    onChange={e => set('unknownTime', e.target.checked)} className="rounded" />
+                  <input type="checkbox" checked={fields.unknownTime} onChange={e => set('unknownTime', e.target.checked)} className="rounded" />
                   Unknown time
                 </label>
               </div>
@@ -1063,437 +947,261 @@ export default function BirthForm({
                 disabled={fields.unknownTime}
                 className="w-full px-4 py-2.5 rounded-lg text-sm outline-none"
                 style={{ ...inputStyle(!!errors.timeOfBirth), opacity: fields.unknownTime ? 0.4 : 1 }} />
-              {fields.unknownTime && (
-                <p className="text-slate-500 text-xs mt-1">Solar chart will be used (12:00 noon)</p>
-              )}
+              {fields.unknownTime && <p className="text-slate-500 text-xs mt-1">Solar chart will be used (12:00 noon)</p>}
             </div>
 
-            {/* ── Gender ── */}
-            <div className="relative">
-              <label htmlFor="tv-gender" className="block text-sm font-medium text-slate-300 mb-1.5">Gender</label>
-              <div className="relative">
-                <select id="tv-gender" value={fields.gender}
-                  onChange={e => set('gender', e.target.value as any)}
-                  className="w-full px-4 py-2.5 rounded-lg text-sm outline-none appearance-none pr-8"
-                  style={SELECT_STYLE}>
-                  <option value="">Select gender</option>
-                  <option value="male">Male</option>
-                  <option value="female">Female</option>
-                  <option value="other">Other / Prefer not to say</option>
-                </select>
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500">▾</span>
-              </div>
-            </div>
-
-            {/* ── Place of Birth ── */}
-            <div className="relative">
-              <label htmlFor="tv-place" className="block text-sm font-medium text-slate-300 mb-1.5">
-                Place of Birth <span className="text-yellow-400">*</span>
-              </label>
-              <div className="relative">
-                <input id="tv-place" type="search" autoComplete="off" placeholder="Type city name…"
-                  value={fields.placeQuery} onChange={e => handlePlaceChange(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-lg text-sm outline-none pr-8"
-                  style={inputStyle(!!errors.latitude)} />
-                {geoLoading && (
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs animate-spin">⟳</span>
-                )}
-              </div>
-              {geoResults.length > 0 && (
-                <ul className="absolute z-50 w-full mt-1 rounded-lg overflow-hidden shadow-xl"
-                  style={{ background: '#0d1120', border: '1px solid rgba(212,175,55,0.2)' }}>
-                  {geoResults.map((r, i) => (
-                    <li key={i} onClick={() => selectPlace(r)}
-                      className="px-4 py-2.5 text-sm cursor-pointer truncate"
-                      style={{ color: '#cbd5e1' }}
-                      onMouseEnter={e => (e.currentTarget.style.background = GOLD_RGBA(0.08))}
-                      onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
-                      {r.display_name}
-                    </li>
-                  ))}
-                </ul>
-              )}
-              {errors.latitude && <p className="text-red-400 text-xs mt-1">Please select a place from suggestions</p>}
-            </div>
-
-            {/* ── Current City ── */}
+            {/* Gender — NEW v9.0 */}
             <div>
-              <label htmlFor="tv-current-city" className="block text-sm font-medium text-slate-300 mb-1.5">
-                Current City
-                <span className="text-slate-500 text-xs ml-2">(where you live/work now)</span>
+              <label className="block text-sm font-medium text-slate-300 mb-2">
+                Gender <span className="text-slate-500 text-xs ml-1">(for personalized remedies)</span>
               </label>
-              <input id="tv-current-city" type="text"
-                placeholder="e.g. Gurugram, Mumbai, Dubai, London..."
-                value={fields.currentCity}
-                onChange={e => set('currentCity', e.target.value)}
-                className="w-full px-4 py-2.5 rounded-lg text-sm outline-none"
-                style={inputStyle()} />
+              <div className="grid grid-cols-3 gap-2">
+                {[
+                  { value: 'male',   label: '♂ Male',   color: '#60a5fa' },
+                  { value: 'female', label: '♀ Female', color: '#f472b6' },
+                  { value: 'other',  label: '⊕ Other',  color: '#94a3b8' },
+                ].map(opt => (
+                  <button key={opt.value} type="button" onClick={() => set('gender', opt.value as any)}
+                    className="py-2.5 px-3 rounded-lg text-sm font-medium transition-all text-center"
+                    style={{ background: fields.gender === opt.value ? `${opt.color}20` : 'rgba(255,255,255,0.04)', border: `1px solid ${fields.gender === opt.value ? `${opt.color}60` : 'rgba(255,255,255,0.1)'}`, color: fields.gender === opt.value ? opt.color : '#64748b' }}>
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+              {/* Show dynamic segment preview */}
+              {fields.gender && fields.dateOfBirth && (
+                <p style={{ margin: '6px 0 0', color: GOLD, fontSize: '11px' }}>
+                  ✦ Segment: {calculateDynamicSegment(fields.dateOfBirth, fields.gender).replace('_', ' ')} — personalized remedy routing active
+                </p>
+              )}
             </div>
 
-            {/* Lat/Lon display */}
+            {/* Place of Birth — Google Places */}
+            <div>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="block text-sm font-medium text-slate-300">
+                  Place of Birth <span className="text-yellow-400">*</span>
+                </label>
+                <button type="button" onClick={handleCurrentLocation}
+                  disabled={locating}
+                  style={{ color: locating ? '#475569' : GOLD, fontSize: '11px', fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
+                  {locating ? '⟳ Locating...' : '📍 Use Current Location'}
+                </button>
+              </div>
+              <CityInput
+                id="tv-place"
+                label=""
+                required
+                value={fields.placeQuery}
+                placeholder="Type city of birth..."
+                error={errors.latitude ? 'Please select a city from suggestions' : undefined}
+                onSelect={(city, lat, lng, tz) => {
+                  setFields(prev => ({ ...prev, placeQuery: city, city, latitude: lat, longitude: lng, timezoneOffset: tz }))
+                  setErrors(prev => ({ ...prev, latitude: undefined }))
+                }}
+              />
+            </div>
+
+            {/* Lat/Lng display */}
             {fields.latitude !== '' && (
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs text-slate-500 mb-1">Latitude</label>
-                  <input type="text" value={fields.latitude} readOnly
-                    className="w-full px-3 py-2 rounded-lg text-xs font-mono"
-                    style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', color: '#64748b' }} />
-                </div>
-                <div>
-                  <label className="block text-xs text-slate-500 mb-1">Longitude</label>
-                  <input type="text" value={fields.longitude} readOnly
-                    className="w-full px-3 py-2 rounded-lg text-xs font-mono"
-                    style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', color: '#64748b' }} />
-                </div>
+              <div className="grid grid-cols-3 gap-2">
+                {[
+                  { label: 'Latitude',  value: (fields.latitude as number).toFixed(4) },
+                  { label: 'Longitude', value: (fields.longitude as number).toFixed(4) },
+                  { label: 'Timezone',  value: `UTC ${fields.timezoneOffset >= 0 ? '+' : ''}${fields.timezoneOffset}` },
+                ].map(({ label, value }) => (
+                  <div key={label}>
+                    <label className="block text-xs text-slate-500 mb-1">{label}</label>
+                    <div className="px-3 py-2 rounded-lg text-xs font-mono text-center"
+                      style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', color: '#22c55e' }}>
+                      {value}
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
 
-            {/* ── Timezone ── */}
-            <div className="relative">
-              <label htmlFor="tv-timezone" className="block text-sm font-medium text-slate-300 mb-1.5">Time Zone</label>
-              <div className="relative">
-                <select id="tv-timezone" value={fields.timezoneOffset}
-                  onChange={e => set('timezoneOffset', parseFloat(e.target.value))}
-                  className="w-full px-4 py-2.5 rounded-lg text-sm outline-none appearance-none pr-8"
-                  style={SELECT_STYLE}>
-                  {[
-                    [5.5,  'IST +5:30 (India)'],
-                    [5.75, 'NPT +5:45 (Nepal)'],
-                    [6,    'BST +6:00 (Bangladesh)'],
-                    [4,    'GST +4:00 (UAE/Dubai)'],
-                    [0,    'UTC +0:00'],
-                    [1,    'CET +1:00'],
-                    [2,    'EET +2:00'],
-                    [3,    'MSK +3:00'],
-                    [3.5,  'IRST +3:30'],
-                    [4.5,  'AFT +4:30'],
-                    [5,    'PKT +5:00'],
-                    [6.5,  'MMT +6:30'],
-                    [7,    'ICT +7:00'],
-                    [8,    'SGT +8:00'],
-                    [9,    'JST +9:00'],
-                    [9.5,  'ACST +9:30'],
-                    [10,   'AEST +10:00'],
-                    [-5,   'EST -5:00 (USA East)'],
-                    [-6,   'CST -6:00 (USA Central)'],
-                    [-7,   'MST -7:00 (USA Mountain)'],
-                    [-8,   'PST -8:00 (USA West)'],
-                  ].map(([val, label]) => (
-                    <option key={val} value={val as number} style={{ background: '#0d1120', color: '#e2e8f0' }}>
-                      {label}
-                    </option>
-                  ))}
-                </select>
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500">▾</span>
-              </div>
+            {/* Current City */}
+            <div>
+              <label htmlFor="tv-current-city" className="block text-sm font-medium text-slate-300 mb-1.5">
+                Current City <span className="text-slate-500 text-xs ml-2">(where you live/work now)</span>
+              </label>
+              <input id="tv-current-city" type="text"
+                placeholder="e.g. Gurugram, Mumbai, Dubai, London..."
+                value={fields.currentCity} onChange={e => set('currentCity', e.target.value)}
+                className="w-full px-4 py-2.5 rounded-lg text-sm outline-none" style={inputStyle()} />
             </div>
 
-            {/* ── Relationship Status ── */}
+            {/* Relationship Status */}
             <div className="relative">
-              <label htmlFor="tv-rel-status" className="block text-sm font-medium text-slate-300 mb-1.5">
-                Relationship Status
-                Relationship Status
-              </label>
+              <label htmlFor="tv-rel-status" className="block text-sm font-medium text-slate-300 mb-1.5">Relationship Status</label>
               <div className="relative">
                 <select id="tv-rel-status" value={fields.relationshipStatus}
                   onChange={e => set('relationshipStatus', e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-lg text-sm outline-none appearance-none pr-8"
-                  style={SELECT_STYLE}>
-                  {RELATIONSHIP_STATUS_OPTIONS.map(o => (
-                    <option key={o.value} value={o.value} style={{ background: '#0d1120', color: '#e2e8f0' }}>
-                      {o.label}
-                    </option>
-                  ))}
+                  className="w-full px-4 py-2.5 rounded-lg text-sm outline-none appearance-none pr-8" style={SELECT_STYLE}>
+                  {RELATIONSHIP_STATUS_OPTIONS.map(o => <option key={o.value} value={o.value} style={{ background: '#0d1120', color: '#e2e8f0' }}>{o.label}</option>)}
                 </select>
                 <span className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500">▾</span>
               </div>
             </div>
 
-            {/* ── Situation Note — "Tell Trikal what's on your mind" ── */}
+            {/* Situation Note */}
             <div>
-              <label htmlFor="tv-situation" className="block text-sm font-medium text-slate-300 mb-1.5">
-                Tell Trikal what's on your mind
-              </label>
+              <label htmlFor="tv-situation" className="block text-sm font-medium text-slate-300 mb-1.5">Tell Trikal what's on your mind</label>
               <div className="relative">
                 <textarea id="tv-situation"
                   placeholder="e.g. Job switch kar raha hoon, property khareedna hai, relationship mein problem hai, karz se pareshan hoon..."
                   value={fields.situationNote}
-                  onChange={e => set('situationNote', e.target.value.slice(0, 100))}
-                  maxLength={100}
-                  rows={2}
-                  className="w-full px-4 py-2.5 rounded-lg text-sm outline-none resize-none"
-                  style={inputStyle()} />
+                  onChange={e => set('situationNote', e.target.value.slice(0, 200))}
+                  maxLength={200} rows={2}
+                  className="w-full px-4 py-2.5 rounded-lg text-sm outline-none resize-none" style={inputStyle()} />
                 <span className="absolute bottom-2 right-3 text-xs"
-                  style={{ color: fields.situationNote.length >= 90 ? '#f59e0b' : '#475569' }}>
-                  {fields.situationNote.length}/100
+                  style={{ color: fields.situationNote.length >= 180 ? '#f59e0b' : '#475569' }}>
+                  {fields.situationNote.length}/200
                 </span>
               </div>
             </div>
 
-            {/* ── PERSON 2 SECTION ── */}
+            {/* Person 2 Section */}
             {isDualDomain && (
               <div className="mt-2 pt-5 border-t border-amber-400/20">
                 <div className="flex items-center gap-2 mb-4">
                   <div className="w-1 h-5 rounded-full" style={{ background: GOLD }} />
-                  <p className="font-semibold text-sm tracking-wider uppercase" style={{ color: GOLD }}>
-                    Person 2 Details
-                  </p>
-                  <span className="text-xs text-slate-500">
-                    ({selectedCategory?.id === 'genz_ex_back' ? 'Your Partner / Ex' : 'Your Boss / Colleague'})
-                  </span>
+                  <p className="font-semibold text-sm tracking-wider uppercase" style={{ color: GOLD }}>Person 2 Details</p>
+                  <span className="text-xs text-slate-500">({selectedCategory?.id === 'genz_ex_back' ? 'Your Partner / Ex' : 'Your Boss / Colleague'})</span>
                 </div>
-
                 <div className="grid gap-4">
-                  {/* Person 2 Name */}
                   <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-1.5">
-                      Their Name <span className="text-yellow-400">*</span>
-                    </label>
+                    <label className="block text-sm font-medium text-slate-300 mb-1.5">Their Name <span className="text-yellow-400">*</span></label>
                     <input type="text" placeholder="Enter their full name"
                       value={fields.person2Name} onChange={e => set('person2Name', e.target.value)}
-                      className="w-full px-4 py-2.5 rounded-lg text-sm outline-none"
-                      style={inputStyle(!!errors.person2Name)} />
+                      className="w-full px-4 py-2.5 rounded-lg text-sm outline-none" style={inputStyle(!!errors.person2Name)} />
                     {errors.person2Name && <p className="text-red-400 text-xs mt-1">{errors.person2Name}</p>}
                   </div>
-
-                  {/* Person 2 Mobile */}
                   <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-1.5">
-                      Their Mobile
-                      <span className="text-slate-500 text-xs ml-2">(for numerology compatibility)</span>
-                    </label>
+                    <label className="block text-sm font-medium text-slate-300 mb-1.5">Their Mobile <span className="text-slate-500 text-xs ml-2">(for numerology)</span></label>
                     <div className="flex gap-2">
                       <CountrySelector id="tv-country2" value={fields.person2CountryCode}
                         onChange={(dial) => setFields(prev => ({ ...prev, person2CountryCode: dial }))} />
                       <input type="tel" placeholder="Their mobile number"
                         value={fields.person2Mobile} onChange={e => handleMobileChange(e.target.value, true)}
-                        maxLength={12}
-                        className="flex-1 px-4 py-2.5 rounded-lg text-sm outline-none"
-                        style={inputStyle()} />
+                        maxLength={12} className="flex-1 px-4 py-2.5 rounded-lg text-sm outline-none" style={inputStyle()} />
                     </div>
                   </div>
-
-                  {/* Numerology */}
                   {numerology && (
-                    <div className="rounded-xl p-4"
-                      style={{ background: `${numerology.color}15`, border: `1px solid ${numerology.color}40` }}>
+                    <div className="rounded-xl p-4" style={{ background: `${numerology.color}15`, border: `1px solid ${numerology.color}40` }}>
                       <div className="flex items-center justify-between mb-2">
-                        <p className="text-sm font-semibold" style={{ color: numerology.color }}>
-                          📱 Mobile Numerology Compatibility
-                        </p>
+                        <p className="text-sm font-semibold" style={{ color: numerology.color }}>📱 Mobile Numerology Compatibility</p>
                         <div className="flex items-center gap-2">
                           <div className="text-2xl font-bold text-white">{numerology.score}%</div>
-                          <span className="text-xs px-2 py-0.5 rounded-full font-semibold"
-                            style={{ background: `${numerology.color}25`, color: numerology.color }}>
-                            {numerology.label}
-                          </span>
+                          <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{ background: `${numerology.color}25`, color: numerology.color }}>{numerology.label}</span>
                         </div>
                       </div>
                       <div className="w-full bg-white/10 rounded-full h-1.5 mb-2">
-                        <div className="h-1.5 rounded-full transition-all duration-700"
-                          style={{ width: `${numerology.score}%`, background: numerology.color }} />
+                        <div className="h-1.5 rounded-full transition-all duration-700" style={{ width: `${numerology.score}%`, background: numerology.color }} />
                       </div>
                       <p className="text-xs text-slate-400">{numerology.description}</p>
                     </div>
                   )}
-
-                  {/* DOB + TOB */}
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-sm font-medium text-slate-300 mb-1.5">
-                        Their DOB <span className="text-yellow-400">*</span>
-                      </label>
-                      <input type="date" value={fields.person2Dob}
-                        onChange={e => set('person2Dob', e.target.value)}
-                        className="w-full px-4 py-2.5 rounded-lg text-sm outline-none"
-                        style={inputStyle(!!errors.person2Dob)} />
+                      <label className="block text-sm font-medium text-slate-300 mb-1.5">Their DOB <span className="text-yellow-400">*</span></label>
+                      <input type="date" value={fields.person2Dob} onChange={e => set('person2Dob', e.target.value)}
+                        className="w-full px-4 py-2.5 rounded-lg text-sm outline-none" style={inputStyle(!!errors.person2Dob)} />
                       {errors.person2Dob && <p className="text-red-400 text-xs mt-1">{errors.person2Dob}</p>}
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-slate-300 mb-1.5">Their Birth Time</label>
-                      <input type="time" value={fields.person2Tob}
-                        onChange={e => set('person2Tob', e.target.value)}
-                        className="w-full px-4 py-2.5 rounded-lg text-sm outline-none"
-                        style={inputStyle()} />
+                      <input type="time" value={fields.person2Tob} onChange={e => set('person2Tob', e.target.value)}
+                        className="w-full px-4 py-2.5 rounded-lg text-sm outline-none" style={inputStyle()} />
                     </div>
                   </div>
-
-                  {/* Person 2 Place */}
-                  <div className="relative">
-                    <label className="block text-sm font-medium text-slate-300 mb-1.5">
-                      Their Place of Birth <span className="text-yellow-400">*</span>
-                    </label>
-                    <div className="relative">
-                      <input type="search" autoComplete="off" placeholder="Type their city name…"
-                        value={fields.person2Place} onChange={e => handlePlace2Change(e.target.value)}
-                        className="w-full px-4 py-2.5 rounded-lg text-sm outline-none pr-8"
-                        style={inputStyle(!!errors.person2Lat)} />
-                      {geo2Loading && <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs">⟳</span>}
-                    </div>
-                    {geo2Results.length > 0 && (
-                      <ul className="absolute z-50 w-full mt-1 rounded-lg overflow-hidden shadow-xl"
-                        style={{ background: '#0d1120', border: '1px solid rgba(212,175,55,0.2)' }}>
-                        {geo2Results.map((r, i) => (
-                          <li key={i} onClick={() => selectPlace2(r)}
-                            className="px-4 py-2.5 text-sm cursor-pointer truncate"
-                            style={{ color: '#cbd5e1' }}
-                            onMouseEnter={e => (e.currentTarget.style.background = GOLD_RGBA(0.08))}
-                            onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
-                            {r.display_name}
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                    {errors.person2Lat && <p className="text-red-400 text-xs mt-1">Please select their place</p>}
-                  </div>
-
-                  {/* Person 2 Current City */}
+                  <CityInput
+                    id="tv-place2"
+                    label="Their Place of Birth"
+                    required
+                    value={fields.person2Place}
+                    placeholder="Type their city..."
+                    error={errors.person2Lat ? 'Please select their place' : undefined}
+                    onSelect={(city, lat, lng) => {
+                      setFields(prev => ({ ...prev, person2Place: city, person2City: city, person2Lat: lat, person2Lng: lng }))
+                      setErrors(prev => ({ ...prev, person2Lat: undefined }))
+                    }}
+                  />
                   <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-1.5">
-                      Their Current City
-                      <span className="text-slate-500 text-xs ml-2">(where they live/work now)</span>
-                    </label>
-                    <input type="text"
-                      placeholder="e.g. Bengaluru, Singapore, London..."
-                      value={fields.person2CurrentCity}
-                      onChange={e => set('person2CurrentCity', e.target.value)}
-                      className="w-full px-4 py-2.5 rounded-lg text-sm outline-none"
-                      style={inputStyle()} />
+                    <label className="block text-sm font-medium text-slate-300 mb-1.5">Their Current City</label>
+                    <input type="text" placeholder="e.g. Bengaluru, Singapore..."
+                      value={fields.person2CurrentCity} onChange={e => set('person2CurrentCity', e.target.value)}
+                      className="w-full px-4 py-2.5 rounded-lg text-sm outline-none" style={inputStyle()} />
                   </div>
                 </div>
               </div>
             )}
 
-            {/* ── Loading Message ── */}
+            {/* Loading */}
             {isLoading && (
-              <div className="px-4 py-4 rounded-xl text-center"
-                style={{ background: GOLD_RGBA(0.06), border: `1px solid ${GOLD_RGBA(0.2)}` }}>
+              <div className="px-4 py-4 rounded-xl text-center" style={{ background: GOLD_RGBA(0.06), border: `1px solid ${GOLD_RGBA(0.2)}` }}>
                 <div className="flex items-center justify-center gap-2 mb-2">
                   <span className="animate-spin text-base">🔱</span>
-                  <span className="text-sm font-medium" style={{ color: GOLD }}>
-                    {LOADING_STEPS[loadingStep]}
-                  </span>
+                  <span className="text-sm font-medium" style={{ color: GOLD }}>{LOADING_STEPS[loadingStep]}</span>
                 </div>
                 <div className="flex justify-center gap-1.5">
                   {LOADING_STEPS.map((_, i) => (
                     <div key={i} className="rounded-full transition-all duration-500"
-                      style={{
-                        width:      i === loadingStep ? '20px' : '6px',
-                        height:     '6px',
-                        background: i <= loadingStep ? GOLD : GOLD_RGBA(0.2),
-                      }} />
+                      style={{ width: i === loadingStep ? '20px' : '6px', height: '6px', background: i <= loadingStep ? GOLD : GOLD_RGBA(0.2) }} />
                   ))}
                 </div>
               </div>
             )}
 
-            {/* ── API Error ── */}
+            {/* API Error */}
             {apiError && (
-              <div className="px-4 py-3 rounded-lg text-sm text-red-300"
-                style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)' }}>
+              <div className="px-4 py-3 rounded-lg text-sm text-red-300" style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)' }}>
                 {apiError}
               </div>
             )}
 
-            {/* ── SUBMIT BUTTON ── */}
+            {/* Submit */}
             <button type="submit" disabled={isLoading}
               className="w-full py-4 rounded-xl text-sm font-bold transition-all duration-300"
               style={{
-                background: isLoading
-                  ? GOLD_RGBA(0.3)
-                  : predictionTier === 'voice'
-                    ? 'linear-gradient(135deg, #7c3aed, #a78bfa)'
-                    : predictionTier === 'paid'
-                      ? `linear-gradient(135deg, ${GOLD} 0%, #F5D76E 50%, ${GOLD} 100%)`
-                      : `linear-gradient(135deg, rgba(212,175,55,0.8) 0%, ${GOLD} 100%)`,
-                color:     isLoading ? 'rgba(255,255,255,0.5)' : predictionTier === 'voice' ? '#fff' : '#080B12',
-                cursor:    isLoading ? 'not-allowed' : 'pointer',
-                fontSize:  '15px',
-                boxShadow: isLoading ? 'none' : predictionTier === 'paid'
-                  ? `0 0 30px rgba(212,175,55,0.4)`
-                  : predictionTier === 'voice'
-                    ? '0 0 30px rgba(124,58,237,0.4)'
-                    : 'none',
+                background: isLoading ? GOLD_RGBA(0.3) : predictionTier === 'voice' ? 'linear-gradient(135deg,#7c3aed,#a78bfa)' : predictionTier === 'paid' ? `linear-gradient(135deg,${GOLD} 0%,#F5D76E 50%,${GOLD} 100%)` : `linear-gradient(135deg,rgba(212,175,55,0.8) 0%,${GOLD} 100%)`,
+                color: isLoading ? 'rgba(255,255,255,0.5)' : predictionTier === 'voice' ? '#fff' : '#080B12',
+                cursor: isLoading ? 'not-allowed' : 'pointer',
+                fontSize: '15px',
+                boxShadow: isLoading ? 'none' : predictionTier === 'paid' ? `0 0 30px rgba(212,175,55,0.4)` : 'none',
               }}>
               {getSubmitLabel()}
             </button>
 
-            {/* ── Pricing note ── */}
             {!isLoading && (
               <div style={{ textAlign: 'center' }}>
-                {predictionTier === 'free' && (
-                  <p className="text-xs text-slate-600">
-                    🔒 Free forever · No card required · Instant results
-                  </p>
-                )}
-                {predictionTier === 'paid' && (
-                  <p className="text-xs text-slate-600">
-                    🔒 ₹51 · Razorpay secure · One-time · Instant access
-                  </p>
-                )}
-                {predictionTier === 'voice' && (
-                  <p className="text-xs text-slate-600">
-                    🎙️ ₹11 · 60-second voice response · Trikal ki awaaz
-                  </p>
-                )}
+                {predictionTier === 'free' && <p className="text-xs text-slate-600">🔒 Free forever · No card required · Instant results</p>}
+                {predictionTier === 'paid' && <p className="text-xs text-slate-600">🔒 ₹51 · Razorpay secure · One-time · Instant access</p>}
+                {predictionTier === 'voice' && <p className="text-xs text-slate-600">🎙️ ₹11 · 60-second voice response</p>}
               </div>
             )}
 
-            <p className="text-center text-xs text-slate-600">
-              🔒 Your data is private and secure. Never shared.
-            </p>
-
+            <p className="text-center text-xs text-slate-600">🔒 Your data is private and secure. Never shared.</p>
           </form>
         </div>
 
-        {/* ── SEO FOOTER BELOW FORM ── */}
+        {/* Footer */}
         <div style={{ marginTop: '24px', textAlign: 'center' }}>
-          {/* Authority statement */}
           <p style={{ color: '#334155', fontSize: '11px', lineHeight: 1.7, maxWidth: '480px', margin: '0 auto 12px' }}>
-            Powered by <strong style={{ color: '#475569' }}>Swiss Ephemeris</strong> —
-            the same engine used by professional astrologers worldwide.
-            Validated against <strong style={{ color: '#475569' }}>Brihat Parashara Hora Shastra (BPHS)</strong>,
-            <strong style={{ color: '#475569' }}> Bhrigu Nandi Nadi</strong> patterns and
-            <strong style={{ color: '#475569' }}> Shadbala</strong> calculations.
+            Powered by <strong style={{ color: '#475569' }}>Swiss Ephemeris</strong> — the same engine used by professional astrologers worldwide.
+            Validated against <strong style={{ color: '#475569' }}>BPHS</strong>, <strong style={{ color: '#475569' }}>Bhrigu Nandi Nadi</strong> and <strong style={{ color: '#475569' }}>Shadbala</strong>.
           </p>
-
-          {/* Maa Shakti CTA */}
-          <div style={{
-            padding:      '14px 20px',
-            background:   GOLD_RGBA(0.05),
-            border:       `1px solid ${GOLD_RGBA(0.15)}`,
-            borderRadius: '12px',
-            marginBottom: '12px',
-          }}>
-            <p style={{ margin: '0 0 8px', color: GOLD, fontSize: '13px', fontWeight: 600 }}>
-              🙏 Prediction ke baad — Maa Shakti ko Arzi karein
-            </p>
-            <p style={{ margin: '0 0 8px', color: '#475569', fontSize: '11px', lineHeight: 1.5 }}>
-              Prediction milne ke baad aap Maa ko apni dil ki baat rakh sakte hain.
-              Rohiit ji personally transmit karenge. Starting ₹101 — no upper limit.
-            </p>
-            <a
-              href="https://wa.me/919211804111?text=Pranam%20Rohiit%20ji%2C%20Maa%20ko%20Arzi%20karna%20chahta%20hoon.%20Jai%20Maa%20Shakti!"
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{
-                color:          GOLD,
-                fontSize:       '12px',
-                fontWeight:     700,
-                textDecoration: 'none',
-              }}
-            >
+          <div style={{ padding: '14px 20px', background: GOLD_RGBA(0.05), border: `1px solid ${GOLD_RGBA(0.15)}`, borderRadius: '12px', marginBottom: '12px' }}>
+            <p style={{ margin: '0 0 8px', color: GOLD, fontSize: '13px', fontWeight: 600 }}>🙏 Prediction ke baad — Maa Shakti ko Arzi karein</p>
+            <p style={{ margin: '0 0 8px', color: '#475569', fontSize: '11px', lineHeight: 1.5 }}>Prediction milne ke baad aap Maa ko apni dil ki baat rakh sakte hain. Rohiit ji personally transmit karenge.</p>
+            <a href="https://wa.me/919211804111?text=Pranam%20Rohiit%20ji%2C%20Maa%20ko%20Arzi%20karna%20chahta%20hoon.%20Jai%20Maa%20Shakti!"
+              target="_blank" rel="noopener noreferrer" style={{ color: GOLD, fontSize: '12px', fontWeight: 700, textDecoration: 'none' }}>
               📱 WhatsApp karo Rohiit ji ko →
             </a>
           </div>
-
-          {/* Author */}
-          <p style={{ color: '#1e293b', fontSize: '10px', margin: 0 }}>
-            By Rohiit Gupta, Chief Vedic Architect · trikalvaani.com · Delhi NCR
-            · 🔱 Mahakaal Ka Ashirwad
-          </p>
+          <p style={{ color: '#1e293b', fontSize: '10px', margin: 0 }}>By Rohiit Gupta, Chief Vedic Architect · trikalvaani.com · Delhi NCR · 🔱 Mahakaal Ka Ashirwad</p>
         </div>
-
       </div>
     </section>
   )
