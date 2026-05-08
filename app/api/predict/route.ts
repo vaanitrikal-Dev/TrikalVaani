@@ -181,7 +181,7 @@ async function callEdgeFunction(payload:Record<string,any>): Promise<void> {
   const timer = setTimeout(()=>controller.abort(), 8000) // 8s timeout
 
   try {
-    const res = await fetch(EDGE_FUNCTION_URL, {
+    const res = await fetch(`${EPHE_API_URL}/pro-polish`, {
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify(payload),
