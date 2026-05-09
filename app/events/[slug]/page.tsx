@@ -20,7 +20,7 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import festivalsData from "@/data/festivals.json";
+import festivalsData from "../../../data/festivals.json";
 
 // ── ISR ──────────────────────────────────────────────────────────────
 export const revalidate = 86400;
