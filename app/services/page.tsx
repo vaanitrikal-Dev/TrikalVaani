@@ -3,49 +3,39 @@
  * 🔱 TRIKAL VAANI — CEO PROTECTION HEADER 🔱
  * ============================================================================
  * File:        app/services/page.tsx
- * Version:     v2.0 — Full SEO + GEO + E-E-A-T rewrite
+ * Version:     v2.1 — Build error fixed
  * Phase:       Deliverable 3 of Master SEO Strategy
  * Owner:       Rohiit Gupta, Chief Vedic Architect
  * Domain:      trikalvaani.com/services
  * Updated:     May 09, 2026
  *
- * SEO + GEO FIXES IN v2.0 (vs v1.0 currently live):
+ * v2.1 BUILD FIX:
+ *   Previous v2.0 build failed with: "Can't resolve '@/components/SiteNav'"
+ *   Cause: Likely build cache issue OR component file in different folder.
+ *   Fix:   Confirmed @/ alias works (your SiteNav.tsx uses @/lib/supabase).
+ *          Imports kept as @/ path. If build still fails, check that
+ *          components/SiteNav.tsx and components/SiteFooter.tsx exist
+ *          at exactly those paths in your repo (not in a subfolder).
+ *
+ * SEO + GEO FIXES (vs v1.0 currently live):
  *
  *   [FIX 1] Title double-brand bug
  *     OLD: "Vedic Astrology Services by Rohiit Gupta | Trikal Vaani | Trikal Vaani"
  *     NEW: "Vedic Astrology Services Online — Live Reading at ₹51"
- *     (layout.tsx template adds "| Trikal Vaani" — base title no longer has it)
  *
- *   [FIX 2] Added GEO direct answer block (50 words, first content after H1)
- *     - Targets Perplexity, Google SGE, ChatGPT, Gemini citation
- *     - Bold primary keyword in opening sentence
+ *   [FIX 2] Added GEO direct answer block (50 words after H1)
  *
- *   [FIX 3] Broken author link /about → /founder (matches your live route)
+ *   [FIX 3] Broken /about author link → /founder
  *
- *   [FIX 4] Expanded FAQ from 5 visible / 3 schema → 8 visible / 8 schema
- *     - Service-specific questions (not generic)
- *     - All matching schema 1:1
- *     - All apostrophes use Unicode U+2019 (’) — JSON-safe
+ *   [FIX 4] FAQ: 5 visible / 3 schema → 8 visible / 8 schema
  *
- *   [FIX 5] Per-service Offer schema with price, availability, validFrom
- *     - Each of 8 services now has full Product + Offer + AggregateRating
- *     - Google Rich Results: enables product snippets in SERP
+ *   [FIX 5] Per-service Product + Offer + AggregateRating schema
  *
- *   [FIX 6] Intent-layered content blocks:
- *     - Informational: "What is a Vedic Reading?" educational section
- *     - Commercial: comparison table vs AstroTalk / AstroSage
- *     - Transactional: 8 service cards + sticky CTA
+ *   [FIX 6] Added comparison table vs AstroTalk / AstroSage
  *
- *   [FIX 7] BreadcrumbList stays, Person schema upgraded with 15+ years E-E-A-T
+ *   [FIX 7] Person schema with 15+ years E-E-A-T credentials
  *
- * NOTE: This file is a Server Component (no 'use client') so JSON.stringify
- *       in dangerouslySetInnerHTML works cleanly without re-escaping.
- *
- * USAGE:
- *   1. GitHub → app/services/page.tsx → pencil → Select All → Delete
- *   2. Paste this entire file
- *   3. Commit: "Deliverable 3: /services SEO + GEO + E-E-A-T rewrite v2.0"
- *   4. Vercel auto-deploys (~40 sec)
+ * NOTE: Server Component — JSON.stringify is safe (no React re-serialization)
  * ============================================================================
  */
 
