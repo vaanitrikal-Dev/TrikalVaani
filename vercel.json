@@ -1,47 +1,8 @@
 {
-  "$schema": "https://openapi.vercel.sh/vercel.json",
-  "_comment_header": "🔱 TRIKAL VAANI | vercel.json | v2.0 | Phase C — AI Content Engine",
-  "_comment_owner": "Rohiit Gupta, Chief Vedic Architect | trikalvaani.com",
-  "_comment_warning": "Cron secret auto-injected by Vercel. NEVER commit CRON_SECRET to git.",
-
   "crons": [
     {
       "path": "/api/cron/panchang-generate",
       "schedule": "30 22 * * *"
-    }
-  ],
-
-  "functions": {
-    "app/api/cron/panchang-generate/route.ts": {
-      "maxDuration": 300
-    },
-    "app/api/cron/indexnow/route.ts": {
-      "maxDuration": 60
-    }
-  },
-
-  "headers": [
-    {
-      "source": "/(.*)\\.txt",
-      "headers": [
-        {
-          "key": "Content-Type",
-          "value": "text/plain; charset=utf-8"
-        },
-        {
-          "key": "Cache-Control",
-          "value": "public, max-age=3600, must-revalidate"
-        }
-      ]
-    },
-    {
-      "source": "/api/cron/(.*)",
-      "headers": [
-        {
-          "key": "X-Robots-Tag",
-          "value": "noindex, nofollow"
-        }
-      ]
     }
   ]
 }
