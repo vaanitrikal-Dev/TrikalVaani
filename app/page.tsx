@@ -6,6 +6,8 @@
 
 import SchemaScript from '../components/SchemaScript';
 import HomeFAQ from '../components/HomeFAQ';
+import HomepageSchema from '@/components/seo/HomepageSchema';
+import HomepageGEO from '@/components/seo/HomepageGEO';
 import { useState, useCallback } from 'react';
 import SiteNav from '@/components/layout/SiteNav';
 import SiteFooter from '@/components/layout/SiteFooter';
