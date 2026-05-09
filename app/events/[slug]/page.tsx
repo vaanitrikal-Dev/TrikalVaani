@@ -20,7 +20,13 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import festivalsData from "../../../data/festivals.json";
+const festivalsData = { festivals: [] as any[] };
+try {
+  const fs = require("fs");
+  const path = require("path");
+  const raw = fs.readFileSync(path.join(process.cwd(), "data/festivals.json"), "utf-8");
+  festivalsData.festivals = JSON.parse(raw).festivals;
+} catch {}
 
 // ── ISR ──────────────────────────────────────────────────────────────
 export const revalidate = 86400;
