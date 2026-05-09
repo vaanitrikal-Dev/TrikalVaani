@@ -57,14 +57,9 @@ function isValidDateFormat(s: string): boolean {
 
 // ── Data fetch ───────────────────────────────────────────────────────
 async function fetchPanchang(date: string): Promise<Panchang | null> {
-  const baseUrl =
-    process.env.NEXT_PUBLIC_SITE_URL ||
-    process.env.VERCEL_URL
-      ? `https://${process.env.VERCEL_URL}`
-      : SITE_URL;
-
+  const VM = "http://34.14.164.105:8001";
   try {
-    const res = await fetch(`${baseUrl}/api/panchang/today?date=${date}`, {
+    const res = await fetch(`${VM}/panchang/today?date=${date}`, {
       next: { revalidate: 86400 },
     });
     if (!res.ok) return null;
