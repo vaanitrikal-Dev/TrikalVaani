@@ -15,7 +15,7 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import citiesData from "../data/cities.json";
+import citiesData from "../../data/cities.json";
 
 export const revalidate = 86400;
 export const dynamicParams = true;
