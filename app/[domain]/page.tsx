@@ -547,7 +547,8 @@ interface Props {
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const config = DOMAIN_PAGES[params.domain];
+  if (RESERVED_SLUGS.includes(params.domain)) return {};
+const config = DOMAIN_PAGES[params.domain];
   if (!config) return { title: 'Trikal Vaani' };
 
   return {
