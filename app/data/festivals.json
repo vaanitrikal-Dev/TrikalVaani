@@ -1,0 +1,1095 @@
+{
+  "_meta": {
+    "comment": "TRIKAL VAANI - CEO PROTECTION HEADER - festivals.json v1.0 - Rohiit Gupta - Chief Vedic Architect - 50 festivals for /events/[slug] route - Phase B2",
+    "version": "v1.0",
+    "year": 2026,
+    "total": 50,
+    "owner": "Rohiit Gupta",
+    "domain": "trikalvaani.com"
+  },
+  "festivals": [
+    {
+      "slug": "makar-sankranti-2026",
+      "name": "Makar Sankranti",
+      "name_hindi": "मकर संक्रांति",
+      "date": "2026-01-14",
+      "category": "solar",
+      "planetary_ruler": "Sun (Surya)",
+      "description": "The day Sun enters Capricorn (Makar Rashi), marking Uttarayan — the auspicious northward journey of the Sun.",
+      "significance": "Most powerful day for Surya worship, donation, and spiritual practice. Marks the end of inauspicious Dhanurmas.",
+      "muhurat": "Punya Kaal: Sunrise to 12:30 PM IST",
+      "dos": [
+        "Donate til (sesame) and gud (jaggery)",
+        "Take a holy bath in sacred rivers (Ganga, Yamuna)",
+        "Offer Arghya to Surya at sunrise",
+        "Recite Aditya Hridaya Stotra"
+      ],
+      "donts": [
+        "Avoid non-vegetarian food and alcohol",
+        "Do not engage in conflicts or harsh speech",
+        "Avoid cutting hair or nails"
+      ]
+    },
+    {
+      "slug": "republic-day-panchang-2026",
+      "name": "Republic Day Panchang",
+      "name_hindi": "गणतंत्र दिवस पंचांग",
+      "date": "2026-01-26",
+      "category": "national",
+      "planetary_ruler": "Sun (Surya)",
+      "description": "India's Republic Day. Auspicious day for national prosperity prayers and patriotic spiritual practice.",
+      "significance": "Strong Sun energy day. Ideal for new beginnings related to civic duty and leadership.",
+      "muhurat": "Sunrise to 11:00 AM IST",
+      "dos": [
+        "Hoist the national flag with reverence",
+        "Pray for national peace and prosperity",
+        "Donate to charitable causes"
+      ],
+      "donts": [
+        "Avoid disrespect to national symbols",
+        "Avoid negative speech about the nation"
+      ]
+    },
+    {
+      "slug": "vasant-panchami-2026",
+      "name": "Vasant Panchami",
+      "name_hindi": "वसंत पंचमी",
+      "date": "2026-01-23",
+      "category": "religious",
+      "planetary_ruler": "Mercury (Budh) and Saraswati",
+      "description": "Day dedicated to Maa Saraswati, goddess of knowledge, music, art, and wisdom. Marks the arrival of spring.",
+      "significance": "Best day to begin education, music, art, or any knowledge pursuit. Children's first writing (Akshar Abhyasa) is performed.",
+      "muhurat": "Sunrise to 12:35 PM IST",
+      "dos": [
+        "Wear yellow clothes",
+        "Worship Maa Saraswati with yellow flowers",
+        "Begin new learning, music, or art",
+        "Place books and instruments before the goddess"
+      ],
+      "donts": [
+        "Avoid black clothing",
+        "Do not insult books or knowledge",
+        "Avoid harsh words"
+      ]
+    },
+    {
+      "slug": "maha-shivratri-2026",
+      "name": "Maha Shivratri",
+      "name_hindi": "महा शिवरात्रि",
+      "date": "2026-02-15",
+      "category": "religious",
+      "planetary_ruler": "Saturn (Shani) and Lord Shiva",
+      "description": "The Great Night of Shiva. Most powerful night for Shiva worship, meditation, and spiritual awakening.",
+      "significance": "The night when Shiva performs the Tandava. Fasting and Jaagran on this night brings moksha-level spiritual benefits.",
+      "muhurat": "Nishita Kaal: 11:30 PM Feb 15 to 12:30 AM Feb 16 IST. Four prahar puja through the night.",
+      "dos": [
+        "Observe full-day fast",
+        "Perform Rudrabhishek with milk, water, bel patra",
+        "Chant 'Om Namah Shivaya' 108 times",
+        "Stay awake and meditate during the night"
+      ],
+      "donts": [
+        "Avoid non-vegetarian food",
+        "Do not sleep during the night",
+        "Avoid intoxicants and harsh speech"
+      ]
+    },
+    {
+      "slug": "holika-dahan-2026",
+      "name": "Holika Dahan",
+      "name_hindi": "होलिका दहन",
+      "date": "2026-03-03",
+      "category": "religious",
+      "planetary_ruler": "Mars (Mangal) and Agni",
+      "description": "The bonfire night before Holi, symbolizing the burning of evil and triumph of devotion (Prahlad's victory).",
+      "significance": "Sacred fire ritual that destroys negative karma and protects from evil eye and obstacles.",
+      "muhurat": "Pradosh Kaal: 6:30 PM to 8:45 PM IST",
+      "dos": [
+        "Light Holika fire with family",
+        "Offer coconut, grains, and sweets to the fire",
+        "Circumambulate the fire 3 or 7 times",
+        "Pray for protection from evil"
+      ],
+      "donts": [
+        "Avoid lighting fire at inauspicious time (Bhadra Kaal)",
+        "Do not perform Holika Dahan during Bhadra"
+      ]
+    },
+    {
+      "slug": "holi-2026",
+      "name": "Holi",
+      "name_hindi": "होली",
+      "date": "2026-03-04",
+      "category": "religious",
+      "planetary_ruler": "Mars (Mangal) and Lord Krishna",
+      "description": "The festival of colors celebrating divine love and the arrival of spring.",
+      "significance": "Day to dissolve enmity, embrace joy, and celebrate Krishna's playful spirit. Resets relationships and energy.",
+      "muhurat": "Sunrise to 12:30 PM IST for color play",
+      "dos": [
+        "Play with natural, herbal colors",
+        "Visit temples and seek blessings of elders",
+        "Forgive and reconcile with estranged family",
+        "Eat traditional sweets like gujiya"
+      ],
+      "donts": [
+        "Avoid synthetic chemical colors",
+        "Do not consume bhang excessively",
+        "Avoid disrespecting boundaries of others"
+      ]
+    },
+    {
+      "slug": "chaitra-navratri-2026",
+      "name": "Chaitra Navratri",
+      "name_hindi": "चैत्र नवरात्रि",
+      "date": "2026-03-19",
+      "category": "religious",
+      "planetary_ruler": "Maa Durga and her nine forms",
+      "description": "Nine sacred nights dedicated to nine forms of Maa Durga. Beginning of the Hindu New Year.",
+      "significance": "Most powerful period for spiritual sadhana, fasting, and invoking Shakti energy. Each day worships a different form.",
+      "muhurat": "Ghatasthapana: 6:30 AM to 9:00 AM IST on March 19",
+      "dos": [
+        "Establish Ghatasthapana with Kalash",
+        "Observe fasting (Phalahar)",
+        "Recite Durga Saptashati daily",
+        "Perform Kanya Pujan on Ashtami or Navami"
+      ],
+      "donts": [
+        "Avoid non-vegetarian food, onion, garlic",
+        "Do not cut hair or nails during these 9 days",
+        "Avoid alcohol and harsh speech"
+      ]
+    },
+    {
+      "slug": "ram-navami-2026",
+      "name": "Ram Navami",
+      "name_hindi": "राम नवमी",
+      "date": "2026-03-27",
+      "category": "religious",
+      "planetary_ruler": "Sun (Surya) and Lord Rama",
+      "description": "Birthday of Lord Rama, the seventh avatar of Vishnu. Celebrated on the ninth day of Chaitra Navratri.",
+      "significance": "Marks the descent of dharma into the world. Powerful day for invoking righteousness and family harmony.",
+      "muhurat": "Madhyahna: 11:30 AM to 1:30 PM IST",
+      "dos": [
+        "Recite Sundara Kanda or Ram Raksha Stotra",
+        "Visit Ram temple, offer tulsi",
+        "Perform Ram Janma Aarti at noon",
+        "Donate food to the needy"
+      ],
+      "donts": [
+        "Avoid non-vegetarian food",
+        "Do not engage in family disputes",
+        "Avoid intoxicants"
+      ]
+    },
+    {
+      "slug": "hanuman-jayanti-2026",
+      "name": "Hanuman Jayanti",
+      "name_hindi": "हनुमान जयंती",
+      "date": "2026-04-02",
+      "category": "religious",
+      "planetary_ruler": "Mars (Mangal) and Lord Hanuman",
+      "description": "Birthday of Lord Hanuman, the supreme devotee of Rama and remover of obstacles.",
+      "significance": "Most powerful day to remove enemies, fears, and obstacles. Strengthens Mars in birth chart.",
+      "muhurat": "Sunrise to sunset, especially Tuesday-aligned hours",
+      "dos": [
+        "Recite Hanuman Chalisa 11 or 108 times",
+        "Offer red sindoor, jasmine oil, boondi",
+        "Visit Hanuman temple",
+        "Help those in distress"
+      ],
+      "donts": [
+        "Avoid non-vegetarian food",
+        "Do not consume alcohol",
+        "Avoid speaking ill of devotees"
+      ]
+    },
+    {
+      "slug": "akshaya-tritiya-2026",
+      "name": "Akshaya Tritiya",
+      "name_hindi": "अक्षय तृतीया",
+      "date": "2026-04-19",
+      "category": "religious",
+      "planetary_ruler": "Jupiter (Guru) and Maa Lakshmi",
+      "description": "The 'never-diminishing' day. One of the most auspicious days, where any good deed brings eternal results.",
+      "significance": "Best day for buying gold, starting new ventures, marriage, and major investments. Treasure trove of cosmic blessings.",
+      "muhurat": "Sunrise to 12:30 PM IST is most auspicious",
+      "dos": [
+        "Buy gold or silver",
+        "Begin new business or investment",
+        "Donate generously",
+        "Worship Lakshmi-Narayan"
+      ],
+      "donts": [
+        "Do not lend money on this day",
+        "Avoid harsh speech",
+        "Do not waste resources"
+      ]
+    },
+    {
+      "slug": "buddha-purnima-2026",
+      "name": "Buddha Purnima",
+      "name_hindi": "बुद्ध पूर्णिमा",
+      "date": "2026-05-01",
+      "category": "religious",
+      "planetary_ruler": "Moon (Chandra) and Lord Buddha",
+      "description": "Birth, enlightenment, and Mahaparinirvana of Lord Buddha — all on the same Vaisakha Purnima.",
+      "significance": "Triple-blessed full moon. Powerful day for meditation, compassion, and Vipassana practice.",
+      "muhurat": "Full day, especially moonrise hours",
+      "dos": [
+        "Practice meditation",
+        "Read Buddhist sutras",
+        "Donate to monks and the needy",
+        "Practice ahimsa rigorously"
+      ],
+      "donts": [
+        "Avoid all forms of violence",
+        "Do not consume meat or alcohol",
+        "Avoid harsh thoughts"
+      ]
+    },
+    {
+      "slug": "ganga-saptami-2026",
+      "name": "Ganga Saptami",
+      "name_hindi": "गंगा सप्तमी",
+      "date": "2026-04-23",
+      "category": "religious",
+      "planetary_ruler": "Sun (Surya) and Maa Ganga",
+      "description": "The day Maa Ganga descended to earth from the matted locks of Lord Shiva.",
+      "significance": "Bath in Ganga or sprinkling Ganga jal on this day washes away lifetimes of sins.",
+      "muhurat": "Madhyahna: 11:00 AM to 1:30 PM IST",
+      "dos": [
+        "Take holy bath in Ganga or sprinkle Ganga jal",
+        "Worship Maa Ganga",
+        "Donate water pots to the thirsty",
+        "Recite Ganga Stotra"
+      ],
+      "donts": [
+        "Do not pollute any water body",
+        "Avoid wasting water"
+      ]
+    },
+    {
+      "slug": "vat-savitri-vrat-2026",
+      "name": "Vat Savitri Vrat",
+      "name_hindi": "वट सावित्री व्रत",
+      "date": "2026-05-30",
+      "category": "religious",
+      "planetary_ruler": "Saturn (Shani) and Savitri Mata",
+      "description": "Married women fast and worship the banyan tree (Vat Vriksha) for the long life of their husbands.",
+      "significance": "Commemorates Savitri's victory over Yama to bring her husband Satyavan back to life.",
+      "muhurat": "Sunrise to noon",
+      "dos": [
+        "Married women observe fast",
+        "Tie sacred thread around banyan tree (108 times)",
+        "Listen to Savitri-Satyavan katha",
+        "Pray for husband's long life"
+      ],
+      "donts": [
+        "Do not break the fast prematurely",
+        "Avoid harsh words to husband",
+        "Do not damage banyan tree"
+      ]
+    },
+    {
+      "slug": "rath-yatra-2026",
+      "name": "Jagannath Rath Yatra",
+      "name_hindi": "जगन्नाथ रथ यात्रा",
+      "date": "2026-06-25",
+      "category": "religious",
+      "planetary_ruler": "Lord Jagannath (Vishnu)",
+      "description": "Lord Jagannath, with Balabhadra and Subhadra, travels on chariots from Puri temple to Gundicha temple.",
+      "significance": "The only day Lord Jagannath leaves his sanctum. Pulling the chariot is said to grant moksha.",
+      "muhurat": "Throughout the day, especially during chariot pulling hours",
+      "dos": [
+        "Pull or touch the rath rope if possible",
+        "Sing Jagannath bhajans and Hare Krishna mantra",
+        "Donate food (Mahaprasad)",
+        "Visit Jagannath temple"
+      ],
+      "donts": [
+        "Do not eat food before darshan",
+        "Avoid leather goods near temple"
+      ]
+    },
+    {
+      "slug": "guru-purnima-2026",
+      "name": "Guru Purnima",
+      "name_hindi": "गुरु पूर्णिमा",
+      "date": "2026-07-29",
+      "category": "religious",
+      "planetary_ruler": "Jupiter (Guru) and Sage Vyasa",
+      "description": "Sacred day to honor one's spiritual guru and Maharshi Vyasa, who compiled the Vedas.",
+      "significance": "Most powerful day to receive spiritual transmission from Guru. Strengthens Jupiter in birth chart.",
+      "muhurat": "Full day, especially morning hours",
+      "dos": [
+        "Touch the feet of your Guru",
+        "Offer Guru Dakshina with reverence",
+        "Recite Guru Stotra",
+        "Begin new spiritual practice"
+      ],
+      "donts": [
+        "Do not disrespect any teacher",
+        "Avoid arrogance in learning",
+        "Do not break promises made to Guru"
+      ]
+    },
+    {
+      "slug": "hariyali-teej-2026",
+      "name": "Hariyali Teej",
+      "name_hindi": "हरियाली तीज",
+      "date": "2026-08-16",
+      "category": "religious",
+      "planetary_ruler": "Maa Parvati and Lord Shiva",
+      "description": "Festival celebrating the union of Shiva and Parvati. Married women pray for marital bliss.",
+      "significance": "Welcomes the monsoon and celebrates Parvati's penance to win Shiva. Strengthens Venus and Moon.",
+      "muhurat": "Sunrise to evening",
+      "dos": [
+        "Wear green clothes and bangles",
+        "Apply mehndi",
+        "Worship Shiva-Parvati",
+        "Sing folk songs and dance"
+      ],
+      "donts": [
+        "Avoid black or white clothes",
+        "Do not argue with spouse",
+        "Avoid harsh foods"
+      ]
+    },
+    {
+      "slug": "raksha-bandhan-2026",
+      "name": "Raksha Bandhan",
+      "name_hindi": "रक्षा बंधन",
+      "date": "2026-08-28",
+      "category": "religious",
+      "planetary_ruler": "Mercury (Budh) and sibling bonds",
+      "description": "Sacred bond between brothers and sisters. Sister ties Rakhi for brother's protection.",
+      "significance": "Strengthens family Karma, bond, and mutual protection. Mercury energy peak day.",
+      "muhurat": "Avoid Bhadra Kaal. Best: 1:30 PM to 9:00 PM IST",
+      "dos": [
+        "Sister ties Rakhi on brother's right wrist",
+        "Brother gives gift and protection vow",
+        "Worship family deity together",
+        "Apply tilak with kumkum and rice"
+      ],
+      "donts": [
+        "Do not tie Rakhi during Bhadra Kaal",
+        "Avoid family disputes on this day"
+      ]
+    },
+    {
+      "slug": "krishna-janmashtami-2026",
+      "name": "Krishna Janmashtami",
+      "name_hindi": "कृष्ण जन्माष्टमी",
+      "date": "2026-09-04",
+      "category": "religious",
+      "planetary_ruler": "Moon (Chandra) and Lord Krishna",
+      "description": "Birthday of Lord Krishna, the eighth avatar of Vishnu, born at midnight on Ashtami.",
+      "significance": "Most beloved festival celebrating divine love, dharma, and the supreme personality of Godhead.",
+      "muhurat": "Nishita Kaal: 11:45 PM Sept 4 to 12:30 AM Sept 5 IST",
+      "dos": [
+        "Observe fast and break at midnight",
+        "Sing Krishna bhajans, especially 'Hare Krishna'",
+        "Perform Krishna Janma Aarti at midnight",
+        "Read Bhagavad Gita"
+      ],
+      "donts": [
+        "Avoid grains during fast (eat phalahar only)",
+        "Do not consume non-vegetarian food",
+        "Avoid harsh thoughts about devotees"
+      ]
+    },
+    {
+      "slug": "ganesh-chaturthi-2026",
+      "name": "Ganesh Chaturthi",
+      "name_hindi": "गणेश चतुर्थी",
+      "date": "2026-09-13",
+      "category": "religious",
+      "planetary_ruler": "Ketu and Lord Ganesha",
+      "description": "Birthday of Lord Ganesha, remover of obstacles and lord of beginnings.",
+      "significance": "Most powerful day to invoke success, remove obstacles, and begin new ventures.",
+      "muhurat": "Madhyahna: 11:00 AM to 1:30 PM IST",
+      "dos": [
+        "Establish Ganesha murti at home",
+        "Offer modak, durva grass, red flowers",
+        "Recite Ganesha Atharvashirsha",
+        "Visarjan after 1.5, 3, 5, 7, or 10 days"
+      ],
+      "donts": [
+        "Do not look at the moon on this day (avoids false accusations)",
+        "Avoid Tulsi leaves in Ganesha worship",
+        "Do not break the murti carelessly"
+      ]
+    },
+    {
+      "slug": "pitru-paksha-2026",
+      "name": "Pitru Paksha (Shraddha)",
+      "name_hindi": "पितृ पक्ष",
+      "date": "2026-09-26",
+      "category": "religious",
+      "planetary_ruler": "Sun (Surya) and ancestors",
+      "description": "16-day period dedicated to honoring deceased ancestors through Tarpan and Shraddha rituals.",
+      "significance": "Most powerful period to clear ancestral karma (Pitru Dosha). Departed souls visit during this fortnight.",
+      "muhurat": "Madhyahna: 11:30 AM to 1:30 PM IST daily",
+      "dos": [
+        "Perform Tarpan with til, water, kusha grass",
+        "Feed Brahmins, cows, crows, and dogs",
+        "Donate food and clothes",
+        "Light a south-facing lamp"
+      ],
+      "donts": [
+        "Avoid new purchases or auspicious starts",
+        "Do not cut hair or nails",
+        "Avoid non-vegetarian food, onion, garlic",
+        "Do not refuse food to anyone who asks"
+      ]
+    },
+    {
+      "slug": "sharad-navratri-2026",
+      "name": "Sharad Navratri",
+      "name_hindi": "शारदीय नवरात्रि",
+      "date": "2026-10-12",
+      "category": "religious",
+      "planetary_ruler": "Maa Durga (nine forms)",
+      "description": "Nine-night autumn festival worshipping nine forms of Maa Durga. Most celebrated Navratri.",
+      "significance": "Powerful Shakti period. Each day's color and form brings specific blessings.",
+      "muhurat": "Ghatasthapana: 6:15 AM to 9:30 AM IST on Oct 12",
+      "dos": [
+        "Establish Kalash and Akhand Jyoti",
+        "Observe 9-day fast",
+        "Recite Durga Saptashati",
+        "Perform Kanya Pujan on Ashtami/Navami"
+      ],
+      "donts": [
+        "Avoid non-vegetarian food",
+        "Do not cut hair or shave",
+        "Avoid leather goods",
+        "Do not extinguish Akhand Jyoti"
+      ]
+    },
+    {
+      "slug": "durga-ashtami-2026",
+      "name": "Durga Ashtami",
+      "name_hindi": "दुर्गा अष्टमी",
+      "date": "2026-10-19",
+      "category": "religious",
+      "planetary_ruler": "Maa Mahagauri",
+      "description": "Eighth day of Sharad Navratri, dedicated to Maa Mahagauri.",
+      "significance": "Most powerful day to invoke Maa Durga's protection. Sandhi Puja occurs at the junction of Ashtami-Navami.",
+      "muhurat": "Sandhi Puja: Last 24 minutes of Ashtami + first 24 minutes of Navami",
+      "dos": [
+        "Perform Mahagauri puja",
+        "Conduct Kanya Pujan (worship 9 young girls)",
+        "Offer coconut, kheer, halwa",
+        "Donate clothes to girls"
+      ],
+      "donts": [
+        "Do not break fast before Sandhi Puja",
+        "Avoid disrespecting any female"
+      ]
+    },
+    {
+      "slug": "vijayadashami-2026",
+      "name": "Vijayadashami (Dussehra)",
+      "name_hindi": "विजयादशमी",
+      "date": "2026-10-21",
+      "category": "religious",
+      "planetary_ruler": "Sun (Surya), Apraajita Devi",
+      "description": "Day Lord Rama defeated Ravana. Victory of dharma over adharma. Celebrated as Dussehra.",
+      "significance": "Most auspicious day for new beginnings, weapon worship (Shastra Puja), and burning of ego.",
+      "muhurat": "Vijay Muhurat: 2:00 PM to 2:45 PM IST",
+      "dos": [
+        "Burn Ravana effigy or visit a Ramlila",
+        "Perform Shastra Puja (weapons/tools)",
+        "Begin new ventures, especially during Vijay Muhurat",
+        "Worship Apraajita Devi"
+      ],
+      "donts": [
+        "Avoid procrastination on this day",
+        "Do not engage in adharmic acts"
+      ]
+    },
+    {
+      "slug": "karwa-chauth-2026",
+      "name": "Karwa Chauth",
+      "name_hindi": "करवा चौथ",
+      "date": "2026-10-29",
+      "category": "religious",
+      "planetary_ruler": "Moon (Chandra) and Maa Karwa",
+      "description": "Married women observe Nirjala fast (without water) for the long life of their husbands.",
+      "significance": "Strongest fast for marital bliss. Moon sighting through sieve is essential ritual.",
+      "muhurat": "Moonrise: approximately 8:15 PM IST",
+      "dos": [
+        "Observe Nirjala Vrat (without food/water)",
+        "Listen to Karwa Chauth katha",
+        "Sight moon through sieve, then look at husband",
+        "Husband gives first sip of water"
+      ],
+      "donts": [
+        "Do not break fast before moon sighting",
+        "Avoid arguments with spouse",
+        "Do not wear black or white"
+      ]
+    },
+    {
+      "slug": "dhanteras-2026",
+      "name": "Dhanteras",
+      "name_hindi": "धनतेरस",
+      "date": "2026-11-07",
+      "category": "religious",
+      "planetary_ruler": "Jupiter (Guru), Lord Dhanvantari, Maa Lakshmi",
+      "description": "First day of Diwali festival. Day of wealth, health, and Lord Dhanvantari (god of Ayurveda).",
+      "significance": "Most auspicious day for buying gold, silver, utensils, and starting new financial ventures.",
+      "muhurat": "Pradosh Kaal: 6:00 PM to 8:30 PM IST",
+      "dos": [
+        "Buy gold, silver, or new utensils",
+        "Light Yam deepak at south",
+        "Worship Lord Dhanvantari for health",
+        "Worship Lakshmi-Kuber for wealth"
+      ],
+      "donts": [
+        "Do not lend money on this day",
+        "Avoid empty kitchen",
+        "Do not refuse anyone who comes asking"
+      ]
+    },
+    {
+      "slug": "diwali-2026",
+      "name": "Diwali (Deepawali)",
+      "name_hindi": "दीपावली",
+      "date": "2026-11-09",
+      "category": "religious",
+      "planetary_ruler": "Maa Lakshmi, Lord Ganesha, Lord Kuber",
+      "description": "The festival of lights. Lakshmi Puja night when Maa Lakshmi visits clean, lit homes.",
+      "significance": "Most powerful night for wealth invocation. Marks Lord Rama's return to Ayodhya after 14 years of exile.",
+      "muhurat": "Pradosh Kaal Lakshmi Puja: 5:45 PM to 8:15 PM IST. Mahanishita: 11:30 PM to 12:30 AM IST",
+      "dos": [
+        "Clean and decorate entire home",
+        "Light diyas in every corner",
+        "Perform Lakshmi-Ganesh Puja",
+        "Open windows and doors at midnight to welcome Lakshmi",
+        "Offer kheer and white sweets"
+      ],
+      "donts": [
+        "Do not gamble (despite tradition — it brings Rahu losses)",
+        "Avoid quarrels and harsh speech",
+        "Do not leave dark corners",
+        "Do not lend or borrow money"
+      ]
+    },
+    {
+      "slug": "govardhan-puja-2026",
+      "name": "Govardhan Puja",
+      "name_hindi": "गोवर्धन पूजा",
+      "date": "2026-11-10",
+      "category": "religious",
+      "planetary_ruler": "Lord Krishna, Govardhan",
+      "description": "Day after Diwali. Krishna lifted Govardhan hill to protect Vrindavan from Indra's wrath.",
+      "significance": "Day to honor nature, cows, and the protective principle of Krishna.",
+      "muhurat": "Sunrise to noon",
+      "dos": [
+        "Make Govardhan from cow dung or food",
+        "Offer Annakut (mountain of food) to Krishna",
+        "Worship cows",
+        "Eat together with family"
+      ],
+      "donts": [
+        "Do not harm any cow or bull",
+        "Avoid wasting food"
+      ]
+    },
+    {
+      "slug": "bhai-dooj-2026",
+      "name": "Bhai Dooj",
+      "name_hindi": "भाई दूज",
+      "date": "2026-11-11",
+      "category": "religious",
+      "planetary_ruler": "Yamraj and Yamuna",
+      "description": "Sister applies tilak on brother's forehead and prays for his long life. Yamuna welcomed Yamraj on this day.",
+      "significance": "Strengthens sibling bond. Brothers visiting sisters on this day are protected from untimely death.",
+      "muhurat": "Aparahna: 1:30 PM to 4:00 PM IST",
+      "dos": [
+        "Sister applies tilak on brother",
+        "Brother visits sister's home",
+        "Sister offers food, brother gives gift",
+        "Pray to Yamraj for long life"
+      ],
+      "donts": [
+        "Avoid family disputes",
+        "Brother should not eat at home this day, only at sister's"
+      ]
+    },
+    {
+      "slug": "tulsi-vivah-2026",
+      "name": "Tulsi Vivah",
+      "name_hindi": "तुलसी विवाह",
+      "date": "2026-11-22",
+      "category": "religious",
+      "planetary_ruler": "Lord Vishnu, Tulsi Mata",
+      "description": "Ceremonial marriage of Tulsi (basil) plant with Lord Shaligram (Vishnu form). Marks beginning of marriage season.",
+      "significance": "Auspicious start to wedding season. Brings marital harmony and Vishnu's blessings.",
+      "muhurat": "Pradosh Kaal: 5:30 PM to 8:00 PM IST",
+      "dos": [
+        "Decorate Tulsi plant as bride",
+        "Perform marriage rituals with Shaligram",
+        "Recite Vishnu Sahasranama",
+        "Distribute prasad"
+      ],
+      "donts": [
+        "Do not pluck Tulsi leaves on this day",
+        "Avoid non-vegetarian food"
+      ]
+    },
+    {
+      "slug": "kartik-purnima-2026",
+      "name": "Kartik Purnima",
+      "name_hindi": "कार्तिक पूर्णिमा",
+      "date": "2026-11-25",
+      "category": "religious",
+      "planetary_ruler": "Moon (Chandra), Lord Vishnu, Lord Shiva",
+      "description": "Full moon of Kartik month. Most spiritually charged Purnima of the year.",
+      "significance": "Bath in Ganga, lighting deepdaan, and Satyanarayan Vrat bring multifold blessings. Tripurari Purnima for Shiva devotees.",
+      "muhurat": "Sunrise to moonrise",
+      "dos": [
+        "Take holy bath in Ganga or sacred river",
+        "Light deepdaan in flowing water",
+        "Perform Satyanarayan Vrat",
+        "Donate generously"
+      ],
+      "donts": [
+        "Avoid non-vegetarian food",
+        "Do not engage in harsh speech or thoughts"
+      ]
+    },
+    {
+      "slug": "vivah-panchami-2026",
+      "name": "Vivah Panchami",
+      "name_hindi": "विवाह पंचमी",
+      "date": "2026-12-15",
+      "category": "religious",
+      "planetary_ruler": "Lord Rama and Sita",
+      "description": "Marriage anniversary of Lord Rama and Mata Sita. Celebrated with grand ceremonies in Ayodhya and Janakpur.",
+      "significance": "Powerful day for invoking marital harmony and finding suitable life partner.",
+      "muhurat": "Sunrise to noon",
+      "dos": [
+        "Recite Sita-Ram marriage katha",
+        "Worship Ram-Sita together",
+        "Donate to newlyweds or unmarried girls",
+        "Visit Ram temple"
+      ],
+      "donts": [
+        "Avoid scheduling weddings on this day (controversial in tradition)",
+        "Do not disrespect spouse"
+      ]
+    },
+    {
+      "slug": "geeta-jayanti-2026",
+      "name": "Geeta Jayanti",
+      "name_hindi": "गीता जयंती",
+      "date": "2026-12-21",
+      "category": "religious",
+      "planetary_ruler": "Lord Krishna",
+      "description": "Day Lord Krishna spoke the Bhagavad Gita to Arjuna on the battlefield of Kurukshetra.",
+      "significance": "Most powerful day to read or begin study of Bhagavad Gita. Brings divine wisdom and clarity.",
+      "muhurat": "Full day, especially morning",
+      "dos": [
+        "Read at least one chapter of Bhagavad Gita",
+        "Worship Krishna with Tulsi",
+        "Donate Gita books",
+        "Reflect on dharma in own life"
+      ],
+      "donts": [
+        "Avoid harsh speech",
+        "Do not engage in adharmic actions"
+      ]
+    },
+    {
+      "slug": "amavasya-monthly-2026",
+      "name": "Amavasya (New Moon)",
+      "name_hindi": "अमावस्या",
+      "date": "2026-05-16",
+      "category": "lunar",
+      "planetary_ruler": "Moon (Chandra) and Pitru",
+      "description": "The dark new moon night. Most sacred day for ancestor worship and removing negative karma.",
+      "significance": "Powerful for Tarpan, Pitru rituals, and clearing ancestral debts. Also linked to Tantric sadhana.",
+      "muhurat": "Madhyahna: 11:30 AM to 1:30 PM IST",
+      "dos": [
+        "Perform Tarpan for ancestors",
+        "Take holy bath in sacred river",
+        "Donate til, gold, or food",
+        "Recite Mahamrityunjaya mantra"
+      ],
+      "donts": [
+        "Avoid new ventures or marriages",
+        "Do not travel south",
+        "Avoid haircuts, nail cutting"
+      ]
+    },
+    {
+      "slug": "purnima-monthly-2026",
+      "name": "Purnima (Full Moon)",
+      "name_hindi": "पूर्णिमा",
+      "date": "2026-05-31",
+      "category": "lunar",
+      "planetary_ruler": "Moon (Chandra)",
+      "description": "Full moon night. Peak lunar energy for spiritual practice, fasting, and Satyanarayan Vrat.",
+      "significance": "Most fertile day for manifestation, gratitude, and emotional healing.",
+      "muhurat": "Moonrise to midnight",
+      "dos": [
+        "Observe fast",
+        "Perform Satyanarayan Vrat",
+        "Listen to Vishnu Stotras",
+        "Donate white items (rice, milk, sugar)"
+      ],
+      "donts": [
+        "Avoid non-vegetarian food",
+        "Do not sleep during peak moon hours",
+        "Avoid harsh speech"
+      ]
+    },
+    {
+      "slug": "ekadashi-monthly-2026",
+      "name": "Ekadashi (11th Tithi)",
+      "name_hindi": "एकादशी",
+      "date": "2026-05-23",
+      "category": "lunar",
+      "planetary_ruler": "Lord Vishnu",
+      "description": "Eleventh day of lunar fortnight. Most sacred day of the month for Vishnu devotees.",
+      "significance": "Fasting on Ekadashi grants liberation and clears karma of 1000 lifetimes.",
+      "muhurat": "Sunrise to next day's sunrise",
+      "dos": [
+        "Observe Ekadashi vrat (no grains)",
+        "Recite Vishnu Sahasranama",
+        "Worship Lord Vishnu",
+        "Stay awake at night (Jaagran)"
+      ],
+      "donts": [
+        "Strictly avoid grains, especially rice",
+        "Do not eat onion, garlic",
+        "Avoid sleeping in the daytime"
+      ]
+    },
+    {
+      "slug": "pradosh-vrat-2026",
+      "name": "Pradosh Vrat",
+      "name_hindi": "प्रदोष व्रत",
+      "date": "2026-05-15",
+      "category": "lunar",
+      "planetary_ruler": "Lord Shiva",
+      "description": "Trayodashi tithi. Twilight hour fast for Lord Shiva.",
+      "significance": "Pradosh Kaal worship of Shiva grants 100x merit. Different days have specific benefits (Som Pradosh for marital harmony, Bhaum for debt removal).",
+      "muhurat": "Pradosh Kaal: 1.5 hours before sunset to 1 hour after",
+      "dos": [
+        "Fast from sunrise",
+        "Worship Shiva at Pradosh Kaal",
+        "Offer bel patra, milk, water",
+        "Light diya in temple"
+      ],
+      "donts": [
+        "Do not break fast before Pradosh Kaal",
+        "Avoid harsh speech"
+      ]
+    },
+    {
+      "slug": "shravan-somvar-2026",
+      "name": "Shravan Somvar",
+      "name_hindi": "श्रावण सोमवार",
+      "date": "2026-08-03",
+      "category": "religious",
+      "planetary_ruler": "Lord Shiva, Moon (Chandra)",
+      "description": "Mondays of Shravan month. Most powerful Mondays for Shiva worship.",
+      "significance": "Each Shravan Monday strengthens Moon and Shiva blessings. Fast brings marriage, progeny, prosperity.",
+      "muhurat": "Sunrise to evening",
+      "dos": [
+        "Observe fast",
+        "Perform Rudrabhishek",
+        "Offer water, milk, bel patra to Shivling",
+        "Recite Mahamrityunjaya mantra"
+      ],
+      "donts": [
+        "Avoid non-vegetarian food throughout Shravan",
+        "Do not consume onion or garlic"
+      ]
+    },
+    {
+      "slug": "naga-panchami-2026",
+      "name": "Naga Panchami",
+      "name_hindi": "नाग पंचमी",
+      "date": "2026-08-08",
+      "category": "religious",
+      "planetary_ruler": "Lord Shiva, Naga Devata",
+      "description": "Day to worship serpent deities. Removes Kal Sarpa Dosha and snake-related curses.",
+      "significance": "Most powerful day for Sarpa Dosha remedies. Snakes are seen as Shiva's ornaments.",
+      "muhurat": "Madhyahna: 11:00 AM to 1:30 PM IST",
+      "dos": [
+        "Worship snake idols or images",
+        "Offer milk to anthills (symbolic)",
+        "Recite Naga Stotra",
+        "Donate to snake conservation"
+      ],
+      "donts": [
+        "Do not harm any snake or insect",
+        "Avoid digging earth on this day",
+        "Do not cook on iron tava"
+      ]
+    },
+    {
+      "slug": "chhath-puja-2026",
+      "name": "Chhath Puja",
+      "name_hindi": "छठ पूजा",
+      "date": "2026-11-15",
+      "category": "religious",
+      "planetary_ruler": "Sun (Surya) and Chhathi Maiya",
+      "description": "Four-day festival worshipping the Sun. Most rigorous fast in Hindu tradition (36 hours waterless).",
+      "significance": "Most powerful Surya worship. Grants progeny, health, prosperity. Sacred to Bihar/UP/Jharkhand.",
+      "muhurat": "Sunset (Sandhya Arghya) and Sunrise (Usha Arghya) on Saptami",
+      "dos": [
+        "Observe 36-hour Nirjala fast",
+        "Offer Arghya to Sun at sunset and sunrise",
+        "Stand in water during arghya",
+        "Cook prasad with utmost purity"
+      ],
+      "donts": [
+        "Strictly no impurity during fast",
+        "Do not break Nirjala fast prematurely",
+        "Avoid leather goods near puja area"
+      ]
+    },
+    {
+      "slug": "shivratri-monthly-2026",
+      "name": "Masik Shivratri",
+      "name_hindi": "मासिक शिवरात्रि",
+      "date": "2026-05-14",
+      "category": "lunar",
+      "planetary_ruler": "Lord Shiva",
+      "description": "Monthly Chaturdashi tithi of Krishna Paksha. Mini Shivratri every month.",
+      "significance": "Each monthly Shivratri brings cumulative Shiva blessings, especially when observed for 14 months.",
+      "muhurat": "Nishita Kaal: 11:30 PM to 12:30 AM IST",
+      "dos": [
+        "Observe fast",
+        "Perform Rudrabhishek",
+        "Stay awake during Nishita Kaal",
+        "Recite Shiva Tandava Stotra"
+      ],
+      "donts": [
+        "Avoid non-vegetarian food",
+        "Do not sleep during night puja"
+      ]
+    },
+    {
+      "slug": "jaya-ekadashi-2026",
+      "name": "Jaya Ekadashi",
+      "name_hindi": "जया एकादशी",
+      "date": "2026-01-29",
+      "category": "lunar",
+      "planetary_ruler": "Lord Vishnu",
+      "description": "Special Ekadashi that grants victory (jaya) over enemies and obstacles.",
+      "significance": "Fasting clears curse-karma and grants victory in battles, courts, and competitions.",
+      "muhurat": "Sunrise to next sunrise",
+      "dos": [
+        "Observe complete Ekadashi vrat",
+        "Recite Jaya Ekadashi katha",
+        "Worship Vishnu",
+        "Donate to Brahmins"
+      ],
+      "donts": [
+        "Avoid grains, especially rice",
+        "Do not engage in disputes"
+      ]
+    },
+    {
+      "slug": "putrada-ekadashi-2026",
+      "name": "Putrada Ekadashi",
+      "name_hindi": "पुत्रदा एकादशी",
+      "date": "2026-08-15",
+      "category": "lunar",
+      "planetary_ruler": "Lord Vishnu",
+      "description": "Special Ekadashi for childless couples seeking the boon of progeny.",
+      "significance": "Most powerful Ekadashi for fertility and child blessings. Two occur per year.",
+      "muhurat": "Sunrise to next sunrise",
+      "dos": [
+        "Couples observe joint fast",
+        "Recite Putrada Ekadashi katha",
+        "Worship Vishnu and Lakshmi",
+        "Donate clothes to children"
+      ],
+      "donts": [
+        "Avoid grains",
+        "Do not engage in marital discord"
+      ]
+    },
+    {
+      "slug": "nirjala-ekadashi-2026",
+      "name": "Nirjala Ekadashi",
+      "name_hindi": "निर्जला एकादशी",
+      "date": "2026-06-06",
+      "category": "lunar",
+      "planetary_ruler": "Lord Vishnu",
+      "description": "The most rigorous Ekadashi — observed without water for 24 hours.",
+      "significance": "Single observance grants merit of all 24 yearly Ekadashis. Bhima of Mahabharata kept only this one.",
+      "muhurat": "Sunrise to next sunrise",
+      "dos": [
+        "Observe waterless fast for 24 hours",
+        "Recite Vishnu Sahasranama",
+        "Donate water pots and umbrellas",
+        "Stay in cool, sattvik environment"
+      ],
+      "donts": [
+        "Strictly no water or food",
+        "Avoid exposure to harsh sun",
+        "Do not break vow due to convenience"
+      ]
+    },
+    {
+      "slug": "guru-pradosh-2026",
+      "name": "Guru Pradosh",
+      "name_hindi": "गुरु प्रदोष",
+      "date": "2026-04-09",
+      "category": "lunar",
+      "planetary_ruler": "Lord Shiva, Jupiter (Guru)",
+      "description": "Pradosh Vrat falling on Thursday. Combines Shiva and Jupiter energies.",
+      "significance": "Powerful for Pitru Dosha removal and ancestor blessings. Jupiter strengthens significantly.",
+      "muhurat": "Pradosh Kaal: 6:00 PM to 8:30 PM IST",
+      "dos": [
+        "Fast from sunrise",
+        "Worship Shiva and Brihaspati",
+        "Recite Guru Stotra",
+        "Donate yellow items (turmeric, gold)"
+      ],
+      "donts": [
+        "Do not break fast before Pradosh Kaal",
+        "Avoid disrespecting Guru"
+      ]
+    },
+    {
+      "slug": "shani-jayanti-2026",
+      "name": "Shani Jayanti",
+      "name_hindi": "शनि जयंती",
+      "date": "2026-05-17",
+      "category": "religious",
+      "planetary_ruler": "Lord Shani",
+      "description": "Birthday of Lord Shani, the planet of karma and justice.",
+      "significance": "Most powerful day to remedy Shani Sade Sati, Shani Dhaiya, and bad karma effects.",
+      "muhurat": "Sunrise to sunset, especially Saturday hour",
+      "dos": [
+        "Visit Shani temple, offer mustard oil, til",
+        "Wear black or dark blue",
+        "Donate to laborers, beggars, the poor",
+        "Recite Shani Chalisa or Dasharatha Krit Shani Stotra"
+      ],
+      "donts": [
+        "Avoid harsh treatment of workers",
+        "Do not eat non-vegetarian food",
+        "Avoid alcohol",
+        "Do not buy iron items"
+      ]
+    },
+    {
+      "slug": "hartalika-teej-2026",
+      "name": "Hartalika Teej",
+      "name_hindi": "हरतालिका तीज",
+      "date": "2026-09-12",
+      "category": "religious",
+      "planetary_ruler": "Maa Parvati, Lord Shiva",
+      "description": "Most rigorous fast for unmarried girls and married women. Parvati's fast to win Shiva.",
+      "significance": "Grants ideal husband to unmarried girls. Married women get long-lived spouse and bliss.",
+      "muhurat": "Sunrise to next sunrise (Nirjala)",
+      "dos": [
+        "Observe Nirjala fast",
+        "Worship Shiva-Parvati murti made of clay",
+        "Listen to Hartalika katha",
+        "Stay awake all night singing bhajans"
+      ],
+      "donts": [
+        "Strictly no water or food for 24 hours",
+        "Do not sleep during the night",
+        "Avoid harsh thoughts"
+      ]
+    },
+    {
+      "slug": "anant-chaturdashi-2026",
+      "name": "Anant Chaturdashi",
+      "name_hindi": "अनंत चतुर्दशी",
+      "date": "2026-09-22",
+      "category": "religious",
+      "planetary_ruler": "Lord Vishnu (Anant form)",
+      "description": "Final day of Ganesh Chaturthi (Visarjan day) and dedicated to Anant Vishnu.",
+      "significance": "Tying Anant sutra with 14 knots brings 14 years of protection from troubles.",
+      "muhurat": "Sunrise to noon",
+      "dos": [
+        "Tie Anant sutra (yellow thread, 14 knots)",
+        "Worship Lord Vishnu in Anant form",
+        "Offer 14 items in puja",
+        "Perform Ganesh Visarjan with respect"
+      ],
+      "donts": [
+        "Do not remove Anant sutra carelessly",
+        "Avoid harsh speech"
+      ]
+    },
+    {
+      "slug": "dev-uthani-ekadashi-2026",
+      "name": "Dev Uthani Ekadashi",
+      "name_hindi": "देव उठानी एकादशी",
+      "date": "2026-11-19",
+      "category": "lunar",
+      "planetary_ruler": "Lord Vishnu",
+      "description": "The day Lord Vishnu wakes from his 4-month yogic slumber (Chaturmas ends).",
+      "significance": "Marks the start of marriage season and auspicious activities. Most awaited Ekadashi for weddings.",
+      "muhurat": "Sunrise to next sunrise",
+      "dos": [
+        "Worship Lord Vishnu, wake him with conch and bells",
+        "Begin auspicious activities (weddings, housewarming)",
+        "Light deepak in tulsi plant",
+        "Recite Vishnu Sahasranama"
+      ],
+      "donts": [
+        "Avoid grains during the fast",
+        "Do not engage in adharmic acts"
+      ]
+    },
+    {
+      "slug": "mauni-amavasya-2026",
+      "name": "Mauni Amavasya",
+      "name_hindi": "मौनी अमावस्या",
+      "date": "2026-02-17",
+      "category": "lunar",
+      "planetary_ruler": "Moon, Pitru",
+      "description": "Magh Amavasya observed in silence (Maun). Most powerful Amavasya of the year.",
+      "significance": "Bath in Triveni Sangam at Prayagraj on this day grants moksha. Most sacred during Kumbh Mela years.",
+      "muhurat": "Sunrise to noon",
+      "dos": [
+        "Observe silence (Maun Vrat) the full day",
+        "Take holy bath in Ganga or sacred river",
+        "Perform Tarpan",
+        "Donate til, gold, blankets"
+      ],
+      "donts": [
+        "Strictly no speech if observing Maun",
+        "Avoid harsh thoughts",
+        "Do not engage in worldly affairs"
+      ]
+    },
+    {
+      "slug": "varuthini-ekadashi-2026",
+      "name": "Varuthini Ekadashi",
+      "name_hindi": "वरूथिनी एकादशी",
+      "date": "2026-04-13",
+      "category": "lunar",
+      "planetary_ruler": "Lord Vishnu (Varaha avatar)",
+      "description": "Vaishakh Krishna Ekadashi. Grants protection (varuthini means armor) and prosperity.",
+      "significance": "Equivalent to 1000 years of penance. Removes sins and grants good rebirth.",
+      "muhurat": "Sunrise to next sunrise",
+      "dos": [
+        "Observe complete Ekadashi vrat",
+        "Worship Vishnu in Varaha form",
+        "Recite Varuthini Ekadashi katha",
+        "Donate horse, gold, til"
+      ],
+      "donts": [
+        "Avoid grains",
+        "Do not engage in violence",
+        "Avoid sleeping on bed (sleep on floor)"
+      ]
+    }
+  ]
+}
