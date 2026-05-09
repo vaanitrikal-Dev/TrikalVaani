@@ -3,15 +3,15 @@
  * TRIKAL VAANI — Unified Prediction Endpoint
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/api/predict/route.ts
- * VERSION: 14.4 — Gemini Pro for paid (900w), Flash for free
+ * VERSION: 14.5 — Gender + Age + DynamicSegment passed to prompts
  * SIGNED: ROHIIT GUPTA, CEO
  *
- * CHANGES v14.4 vs v14.3:
- *   ✅ PAID = Gemini Pro directly (900w, polished=true immediately)
- *   ✅ FREE = Gemini Flash (150w, fast 13s)
- *   ✅ No background jobs, no VM polish, no Edge Function
- *   ✅ Paid users wait 30s — get full Pro result on page load
- *   ✅ No polling needed in ResultClient
+ * CHANGES v14.5 vs v14.4:
+ *   ✅ gender from BirthForm v9.0 passed to UserContext
+ *   ✅ age calculated from DOB passed to UserContext
+ *   ✅ dynamicSegment (young_male, mid_female etc) passed to UserContext
+ *   ✅ Flash v1.2 + Pro v1.2 use these for segment-aware content
+ *   ✅ gender + dynamicSegment saved to Supabase predictions table
  *   ✅ All iron rules preserved
  *
  * IRON RULES — NEVER VIOLATE:
@@ -58,7 +58,7 @@ interface PredictRequest {
   userId?:string; sessionId:string; domainId:DomainId; domainLabel?:string
   predictionTier?:PredictionTier
   birthData:{name?:string;dob:string;tob:string;lat:number;lng:number;cityName?:string;timezone?:number;ayanamsa?:string}
-  userContext:{segment:'genz'|'millennial'|'genx';employment:string;sector:string;language:'hindi'|'hinglish'|'english';city:string;currentCity?:string;relationshipStatus?:string;situationNote?:string;mobile?:string;person2Name?:string|null;person2City?:string|null;person2CurrentCity?:string|null}
+  userContext:{segment:'genz'|'millennial'|'genx';dynamicSegment?:string;gender?:string;age?:number;employment:string;sector:string;language:'hindi'|'hinglish'|'english';city:string;currentCity?:string;relationshipStatus?:string;situationNote?:string;mobile?:string;person2Name?:string|null;person2City?:string|null;person2CurrentCity?:string|null}
   person2Data?:{name:string;dob:string;tob:string;lat:number;lng:number;cityName:string;currentCity:string;mobile?:string}|null
 }
 
@@ -366,7 +366,7 @@ async function saveToSupabase(p:{
   }).select('id').single()
 
   if(error||!data){
-    console.error('[TV-v14.4] Insert failed:',error?.message)
+    console.error('[TV-v14.5] Insert failed:',error?.message)
     return `temp_${Date.now()}_${Math.random().toString(36).slice(2,8)}`
   }
   return data.id as string
@@ -392,7 +392,7 @@ export async function POST(req: NextRequest) {
   const isPaid = predictionTier==='paid'
   const geminiModel = isPaid ? GEMINI_PRO : GEMINI_FLASH
 
-  console.log(`[TV-v14.4] START | tier:${predictionTier} | model:${geminiModel} | domain:${domainId}`)
+  console.log(`[TV-v14.5] START | tier:${predictionTier} | model:${geminiModel} | domain:${domainId}`)
 
   const localBirthData:BirthData = {
     name:     birthData.name??'Anonymous',
@@ -420,12 +420,15 @@ export async function POST(req: NextRequest) {
     lat:localBirthData.lat, lng:localBirthData.lng,
     timezone:birthData.timezone??5.5, ayanamsa:1,
   },25000).catch((err:any)=>{
-    console.error(`[TV-v14.4] /kundali failed: ${err.message}`)
+    console.error(`[TV-v14.5] /kundali failed: ${err.message}`)
     return null
   })
 
   const promptUserContext:UserContext = {
     tier:               verifiedTier,
+    dynamicSegment:     userContext.dynamicSegment??'mid_general',
+    gender:             userContext.gender??'',
+    age:                userContext.age??30,
     segment:            userContext.segment,
     employment:         userContext.employment,
     sector:             userContext.sector,
@@ -441,7 +444,7 @@ export async function POST(req: NextRequest) {
   }
 
   rawChart = await kundaliPromise
-  console.log(`[TV-v14.4] /kundali | lagna:${rawChart?.lagna?.sign} | ms:${Date.now()-startMs}`)
+  console.log(`[TV-v14.5] /kundali | lagna:${rawChart?.lagna?.sign} | ms:${Date.now()-startMs}`)
   const chartExtract = extractFromRawChart(rawChart)
 
   // ── STEP 2+3 PARALLEL: /synthesize + /template ────────────────────────────
@@ -461,13 +464,13 @@ export async function POST(req: NextRequest) {
 
   if(synthesisResult.status==='fulfilled'){
     synthesisData=synthesisResult.value
-    console.log(`[TV-v14.4] /synthesize OK | ms:${Date.now()-startMs}`)
+    console.log(`[TV-v14.5] /synthesize OK | ms:${Date.now()-startMs}`)
   }
   if(templateResult.status==='fulfilled'){
     const tr=templateResult.value
     templateData=tr?.template??tr?.html??null
     if(templateData&&typeof templateData!=='object') templateData=null
-    else if(templateData) console.log(`[TV-v14.4] /template OK | ms:${Date.now()-startMs}`)
+    else if(templateData) console.log(`[TV-v14.5] /template OK | ms:${Date.now()-startMs}`)
   }
 
   // ── STEP 4: Gemini Call ───────────────────────────────────────────────────
@@ -476,7 +479,7 @@ export async function POST(req: NextRequest) {
 
   if(isPaid) {
     // ── PAID: Gemini Pro — 900 words ────────────────────────────────────────
-    console.log(`[TV-v14.4] PRO START | ms:${Date.now()-startMs}`)
+    console.log(`[TV-v14.5] PRO START | ms:${Date.now()-startMs}`)
     const {systemPrompt:proSystem, userMessage:proUser} = buildProPrompt(
       kundaliData, localBirthData, domainConfig, promptUserContext, templateData
     )
@@ -484,14 +487,14 @@ export async function POST(req: NextRequest) {
       const rawPro = await callGemini(GEMINI_PRO, proSystem, proUser, true)
       const proJson = parseGeminiJSON(rawPro)
       predictionJson = mergeTemplateWithGemini(templateData, proJson, '14.4-pro')
-      console.log(`[TV-v14.4] PRO OK | summary_len:${proJson.simpleSummary?.text?.length??0} | ms:${Date.now()-startMs}`)
+      console.log(`[TV-v14.5] PRO OK | summary_len:${proJson.simpleSummary?.text?.length??0} | ms:${Date.now()-startMs}`)
     } catch(err:any) {
-      console.error(`[TV-v14.4] PRO failed: ${err.message}`)
+      console.error(`[TV-v14.5] PRO failed: ${err.message}`)
       return NextResponse.json({error:`Pro prediction failed: ${err.message}`},{status:500})
     }
   } else {
     // ── FREE: Gemini Flash — 150 words ──────────────────────────────────────
-    console.log(`[TV-v14.4] FLASH START | ms:${Date.now()-startMs}`)
+    console.log(`[TV-v14.5] FLASH START | ms:${Date.now()-startMs}`)
     const {systemPrompt:flashSystem, userMessage:flashUser} = buildFlashPrompt(
       kundaliData, localBirthData, domainConfig, promptUserContext
     )
@@ -499,9 +502,9 @@ export async function POST(req: NextRequest) {
       const rawFlash = await callGemini(GEMINI_FLASH, flashSystem, flashUser, true)
       const flashJson = parseGeminiJSON(rawFlash)
       predictionJson = mergeTemplateWithGemini(templateData, flashJson, '14.4-flash')
-      console.log(`[TV-v14.4] FLASH OK | ms:${Date.now()-startMs}`)
+      console.log(`[TV-v14.5] FLASH OK | ms:${Date.now()-startMs}`)
     } catch(err:any) {
-      console.error(`[TV-v14.4] FLASH failed: ${err.message}`)
+      console.error(`[TV-v14.5] FLASH failed: ${err.message}`)
       return NextResponse.json({error:`Prediction failed: ${err.message}`},{status:500})
     }
   }
@@ -537,9 +540,9 @@ export async function POST(req: NextRequest) {
       processingMs,
       publicSlug, seoMeta, chartExtract,
     })
-    console.log(`[TV-v14.4] Saved | slug:${publicSlug} | polished:${isPaid} | ms:${Date.now()-startMs}`)
+    console.log(`[TV-v14.5] Saved | slug:${publicSlug} | polished:${isPaid} | ms:${Date.now()-startMs}`)
   } catch(err:any) {
-    console.error(`[TV-v14.4] Save failed: ${err.message}`)
+    console.error(`[TV-v14.5] Save failed: ${err.message}`)
   }
 
   // ── STEP 7: Google Indexing ───────────────────────────────────────────────
@@ -547,7 +550,7 @@ export async function POST(req: NextRequest) {
 
   // ── STEP 8: Return ───────────────────────────────────────────────────────
   const totalMs = Date.now()-startMs
-  console.log(`[TV-v14.4] RESPONSE | ms:${totalMs} | model:${geminiModel} | slug:${publicSlug}`)
+  console.log(`[TV-v14.5] RESPONSE | ms:${totalMs} | model:${geminiModel} | slug:${publicSlug}`)
 
   return NextResponse.json({
     success:      true,
