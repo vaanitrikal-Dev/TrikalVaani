@@ -991,7 +991,6 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
               <CityInput
                 id="tv-place"
                 label=""
-                required
                 value={fields.placeQuery}
                 placeholder="Type city of birth..."
                 error={errors.latitude ? 'Please select a city from suggestions' : undefined}
