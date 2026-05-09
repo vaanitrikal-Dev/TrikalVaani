@@ -1,8 +1,16 @@
 /**
- * TRIKAL VAANI — trikalvaani.com
- * Chief Vedic Architect: Rohiit Gupta
- * FILE TO PASTE → app/founder/page.tsx (REPLACE EXISTING)
- * Version: 4.0 — Clean, no Star Properties
+ * ============================================================================
+ * 🔱 TRIKAL VAANI — CEO PROTECTION HEADER 🔱
+ * ============================================================================
+ * File:        app/founder/page.tsx
+ * Version:     v4.1
+ * Owner:       Rohiit Gupta, Chief Vedic Architect
+ * Domain:      trikalvaani.com
+ *
+ * WHAT CHANGED FROM v4.0:
+ *   ✅ FIXED image path: /images/founder.png/Rohiit_Gupta.jpg → /Rohiit-Gupta.jpg
+ *   ✅ Fixed in 3 places: og:image metadata, JSON-LD schema, and <Image> component
+ * ============================================================================
  */
 
 import type { Metadata } from "next";
@@ -35,12 +43,19 @@ export const metadata: Metadata = {
     locale: "en_IN",
     images: [
       {
-        url: "https://trikalvaani.com/images/founder.png/Rohiit_Gupta.jpg",
+        url: "https://trikalvaani.com/Rohiit-Gupta.jpg",
         width: 800,
         height: 800,
         alt: "Rohiit Gupta — Chief Vedic Architect, Trikal Vaani",
       },
     ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Rohiit Gupta — Chief Vedic Architect | Trikal Vaani",
+    description: "15+ years Vedic astrology. Founder of Trikal Vaani.",
+    site: "@trikalvaani",
+    images: ["https://trikalvaani.com/Rohiit-Gupta.jpg"],
   },
 };
 
@@ -52,7 +67,7 @@ const schema = {
       "@id": "https://trikalvaani.com/founder",
       name: "Rohiit Gupta",
       jobTitle: "Chief Vedic Architect",
-      image: "https://trikalvaani.com/images/founder.png/Rohiit_Gupta.jpg",
+      image: "https://trikalvaani.com/Rohiit-Gupta.jpg",
       description:
         "Rohiit Gupta has studied Vedic astrology for over 15 years under the Parashara BPHS tradition. He is the founder of Trikal Vaani — India's first AI-powered Vedic astrology platform.",
       url: "https://trikalvaani.com/founder",
@@ -132,7 +147,7 @@ export default function FounderPage() {
                   }}
                 >
                   <Image
-                    src="/images/founder.png/Rohiit_Gupta.jpg"
+                    src="/Rohiit-Gupta.jpg"
                     alt="Rohiit Gupta — Chief Vedic Architect, Trikal Vaani"
                     fill
                     className="object-cover object-top"
@@ -377,3 +392,8 @@ function WAIcon() {
     </svg>
   );
 }
+
+// ============================================================================
+// END — app/founder/page.tsx v4.1
+// 🔱 Trikal Vaani | Rohiit Gupta, Chief Vedic Architect
+// ============================================================================
