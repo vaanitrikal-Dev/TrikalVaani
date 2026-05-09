@@ -12,7 +12,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 
-const MAPS_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY ?? ''
+const MAPS_KEY = process.env.GOOGLE_MAPS_KEY ?? process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY ?? ''
 
 const ALLOWED_HOSTS = [
   'maps.googleapis.com',
@@ -45,10 +45,8 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized host' }, { status: 403 })
   }
 
-  // Replace key with server-side key if missing
-  if (!parsedUrl.searchParams.has('key') || parsedUrl.searchParams.get('key') === '') {
-    parsedUrl.searchParams.set('key', MAPS_KEY)
-  }
+  // Always inject server-side key — client never sends key
+  parsedUrl.searchParams.set('key', MAPS_KEY)
 
   try {
     const res  = await fetch(parsedUrl.toString(), { headers: { 'Accept': 'application/json' } })
