@@ -38,7 +38,7 @@ export default function HomePage() {
     }, 80);
   }, []);
 
-  return (
+  <><SchemaScript />
     <div className="min-h-screen bg-[#080B12]">
       <SiteNav />
       <main>
