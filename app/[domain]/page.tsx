@@ -3,7 +3,7 @@
  * TRIKAL VAANI — Upcoming Sacred Events & Festival Calendar
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/upcoming-events/page.tsx
- * VERSION: v2.1 — Canonical Fix
+ * VERSION: v2.1A — Canonical Fix
  * SIGNED: ROHIIT GUPTA, CEO
  * ============================================================
  */
