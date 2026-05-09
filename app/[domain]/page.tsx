@@ -3,8 +3,11 @@
  * TRIKAL VAANI — SEO Domain Pages Generator
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/[domain]/page.tsx (template for all 11 domains)
- * VERSION: 1.0 — GEO + SEO + E-E-A-T + FAQPage Schema
+ * VERSION: 1.1 — Added RESERVED routes protection
  * SIGNED: ROHIIT GUPTA, CEO
+ *
+ * v1.1 CHANGE: Added RESERVED slug guard so catch-all does NOT
+ * swallow /upcoming-events, /panchang, /events, /blog etc.
  *
  * DOMAINS COVERED:
  * /career /wealth /health /relationships /family
@@ -16,13 +19,20 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 
+// ── Reserved routes — catch-all must NOT intercept these ──────────────────────
+const RESERVED_SLUGS = [
+  'upcoming-events', 'panchang', 'events', 'blog', 'services',
+  'report', 'result', 'founder', 'pricing', 'privacy', 'refund',
+  'terms', 'contact', 'about', 'my-cosmic-records', 'hi',
+];
+
 // ── Domain Config ─────────────────────────────────────────────────────────────
 
 interface DomainPageConfig {
   slug:          string;
   title:         string;
   h1:            string;
-  geoAnswer:     string;   // 40-60 words for AI search engines
+  geoAnswer:     string;
   description:   string;
   planet:        string;
   house:         string;
@@ -573,6 +583,9 @@ export async function generateStaticParams() {
 }
 
 export default function DomainPage({ params }: Props) {
+  // ── v1.1 FIX: Block reserved routes from catch-all ──────────────────────
+  if (RESERVED_SLUGS.includes(params.domain)) notFound();
+
   const config = DOMAIN_PAGES[params.domain];
   if (!config) notFound();
 
@@ -581,8 +594,8 @@ export default function DomainPage({ params }: Props) {
     '@context': 'https://schema.org',
     '@type':    'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Home',          item: 'https://trikalvaani.com' },
-      { '@type': 'ListItem', position: 2, name: config.h1,       item: `https://trikalvaani.com/${config.slug}` },
+      { '@type': 'ListItem', position: 1, name: 'Home',    item: 'https://trikalvaani.com' },
+      { '@type': 'ListItem', position: 2, name: config.h1, item: `https://trikalvaani.com/${config.slug}` },
     ],
   };
 
@@ -592,17 +605,17 @@ export default function DomainPage({ params }: Props) {
     headline:          config.h1,
     description:       config.description,
     author: {
-      '@type':         'Person',
-      name:            'Rohiit Gupta',
-      jobTitle:        'Chief Vedic Architect',
-      url:             'https://trikalvaani.com/about',
-      knowsAbout:      ['Vedic Astrology', 'Jyotish Shastra', 'BPHS', 'Swiss Ephemeris', 'Vimshottari Dasha'],
+      '@type':   'Person',
+      name:      'Rohiit Gupta',
+      jobTitle:  'Chief Vedic Architect',
+      url:       'https://trikalvaani.com/about',
+      knowsAbout: ['Vedic Astrology', 'Jyotish Shastra', 'BPHS', 'Swiss Ephemeris', 'Vimshottari Dasha'],
     },
     publisher: {
-      '@type':         'Organization',
-      name:            'Trikal Vaani',
-      url:             'https://trikalvaani.com',
-      logo:            'https://trikalvaani.com/logo.png',
+      '@type': 'Organization',
+      name:    'Trikal Vaani',
+      url:     'https://trikalvaani.com',
+      logo:    'https://trikalvaani.com/logo.png',
     },
     mainEntityOfPage: `https://trikalvaani.com/${config.slug}`,
   };
@@ -611,38 +624,34 @@ export default function DomainPage({ params }: Props) {
     '@context': 'https://schema.org',
     '@type':    'FAQPage',
     mainEntity: config.faqs.map(faq => ({
-      '@type':          'Question',
-      name:              faq.q,
-      acceptedAnswer: {
-        '@type': 'Answer',
-        text:    faq.a,
-      },
+      '@type': 'Question',
+      name:    faq.q,
+      acceptedAnswer: { '@type': 'Answer', text: faq.a },
     })),
   };
 
   const serviceSchema = {
-    '@context':   'https://schema.org',
-    '@type':      'Service',
-    name:          `${config.h1} — Trikal Vaani`,
-    description:   config.description,
+    '@context':  'https://schema.org',
+    '@type':     'Service',
+    name:         `${config.h1} — Trikal Vaani`,
+    description:  config.description,
     provider: {
-      '@type':     'Person',
-      name:        'Rohiit Gupta',
-      jobTitle:    'Chief Vedic Architect',
+      '@type':   'Person',
+      name:      'Rohiit Gupta',
+      jobTitle:  'Chief Vedic Architect',
       address: {
-        '@type':   'PostalAddress',
+        '@type':        'PostalAddress',
         addressRegion:  'Delhi NCR',
         addressCountry: 'IN',
       },
     },
-    serviceType:   'Vedic Astrology Prediction',
-    areaServed:    'India',
-    url:           `https://trikalvaani.com/${config.slug}`,
+    serviceType: 'Vedic Astrology Prediction',
+    areaServed:  'India',
+    url:         `https://trikalvaani.com/${config.slug}`,
   };
 
   return (
     <>
-      {/* JSON-LD Schemas */}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
@@ -650,7 +659,6 @@ export default function DomainPage({ params }: Props) {
 
       <div className="min-h-screen" style={{ background: '#080B12', color: '#e2e8f0' }}>
 
-        {/* Breadcrumb */}
         <div className="max-w-4xl mx-auto px-4 pt-6">
           <nav className="flex items-center gap-2 text-xs text-slate-500">
             <Link href="/" className="hover:text-amber-400 transition-colors">Home</Link>
@@ -659,23 +667,17 @@ export default function DomainPage({ params }: Props) {
           </nav>
         </div>
 
-        {/* Hero */}
         <div className="max-w-4xl mx-auto px-4 py-10">
           <div className="text-center mb-8">
             <div className="text-5xl mb-4">{config.icon}</div>
             <h1 className="text-3xl font-bold text-white mb-3">{config.h1}</h1>
-
-            {/* GEO Direct Answer Block */}
             <div className="max-w-2xl mx-auto mt-4 p-4 rounded-xl text-left"
               style={{ background: 'rgba(212,175,55,0.08)', border: '1px solid rgba(212,175,55,0.2)' }}>
-              <p className="text-xs text-amber-500 font-semibold mb-2 uppercase tracking-wider">
-                Vedic Astrology Answer
-              </p>
+              <p className="text-xs text-amber-500 font-semibold mb-2 uppercase tracking-wider">Vedic Astrology Answer</p>
               <p className="text-sm text-slate-300 leading-relaxed">{config.geoAnswer}</p>
             </div>
           </div>
 
-          {/* Meta Chips */}
           <div className="flex flex-wrap justify-center gap-3 mb-8">
             {[
               { label: 'Key Planet', value: config.planet },
@@ -690,7 +692,6 @@ export default function DomainPage({ params }: Props) {
             ))}
           </div>
 
-          {/* CTA — Top */}
           <div className="text-center mb-10">
             <Link href="/#birth-form"
               className="inline-block px-8 py-3.5 rounded-xl text-sm font-semibold"
@@ -700,7 +701,6 @@ export default function DomainPage({ params }: Props) {
             <p className="text-xs text-slate-500 mt-2">Swiss Ephemeris accuracy | BPHS classical analysis</p>
           </div>
 
-          {/* Main Content */}
           <article className="rounded-2xl p-6 sm:p-8 mb-8"
             style={{ background: 'rgba(13,17,30,0.8)', border: '1px solid rgba(255,255,255,0.07)' }}>
             <div className="flex items-center gap-2 mb-4 pb-4"
@@ -717,11 +717,8 @@ export default function DomainPage({ params }: Props) {
             </div>
           </article>
 
-          {/* FAQs */}
           <section className="mb-8">
-            <h2 className="text-xl font-bold text-white mb-5">
-              Frequently Asked Questions — {config.h1}
-            </h2>
+            <h2 className="text-xl font-bold text-white mb-5">Frequently Asked Questions — {config.h1}</h2>
             <div className="space-y-4">
               {config.faqs.map((faq, i) => (
                 <div key={i} className="rounded-xl overflow-hidden"
@@ -743,13 +740,10 @@ export default function DomainPage({ params }: Props) {
             </div>
           </section>
 
-          {/* CTA — Bottom */}
           <div className="rounded-2xl p-8 text-center"
             style={{ background: 'linear-gradient(135deg, rgba(212,175,55,0.1), rgba(212,175,55,0.03))', border: '1px solid rgba(212,175,55,0.25)' }}>
             <div className="text-3xl mb-3">🔱</div>
-            <h2 className="text-xl font-bold text-white mb-2">
-              Get Your Personal {config.h1} Reading
-            </h2>
+            <h2 className="text-xl font-bold text-white mb-2">Get Your Personal {config.h1} Reading</h2>
             <p className="text-sm text-slate-400 mb-5">
               Swiss Ephemeris accuracy + BPHS classical analysis + Bhrigu Nandi patterns.<br/>
               By Rohiit Gupta, Chief Vedic Architect, Delhi NCR
@@ -759,12 +753,9 @@ export default function DomainPage({ params }: Props) {
               style={{ background: 'linear-gradient(135deg, #D4AF37, #F5D76E)', color: '#080B12' }}>
               {config.ctaText} — Free Reading 🔱
             </Link>
-            <p className="text-xs text-slate-600 mt-3">
-              No credit card. Instant results. Trusted by thousands across India.
-            </p>
+            <p className="text-xs text-slate-600 mt-3">No credit card. Instant results. Trusted by thousands across India.</p>
           </div>
 
-          {/* Internal Links */}
           <div className="mt-8">
             <h3 className="text-sm font-semibold text-slate-400 mb-3">Explore Other Life Domains</h3>
             <div className="flex flex-wrap gap-2">
