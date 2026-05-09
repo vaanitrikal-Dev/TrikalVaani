@@ -67,7 +67,7 @@ export const metadata: Metadata = {
       'Decode your Past, Present, and Future with Trikal Vaani - The independent AI Guru for all life aspects.',
   },
   alternates: {
-    canonical: 'https://trikalvaani.com',
+    metadataBase: new URL('https://trikalvaani.com')
   },
 };
 
