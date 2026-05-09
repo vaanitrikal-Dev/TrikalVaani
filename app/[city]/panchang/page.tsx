@@ -112,7 +112,7 @@ function formatHumanDate(yyyymmdd: string): string {
 
 // ── Metadata ─────────────────────────────────────────────────────────
 export async function generateMetadata(
-  { params }: { params: { city: string } }
+  const c = findCity(params.city);
 ): Promise<Metadata> {
   const c = findCity(params.city);
   if (!c) return { title: "City Not Found | Trikal Vaani" };
