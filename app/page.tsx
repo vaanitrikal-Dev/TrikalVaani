@@ -1,13 +1,18 @@
 'use client';
-// @trikal-v9.2 — cache-bust: 2026-05-09T00:00:00Z
-// 🔱 TRIKAL VAANI | app/page.tsx | v9.2
+// @trikal-v9.3 — cache-bust: 2026-05-09T12:00:00Z
+// 🔱 TRIKAL VAANI | app/page.tsx | v9.3
 // Owner: Rohiit Gupta, Chief Vedic Architect
-// Changes from v9.1: Added <SchemaScript /> and <HomeFAQ /> + fixed missing return statement
+// Changes from v9.2:
+//   - Mounted <HomepageSchema /> — activates Person, WebApp, FAQPage, HowTo, BreadcrumbList, OfferCatalog schemas
+//   - Mounted <HomepageGEO /> — activates GEO direct answer block, E-E-A-T author strip,
+//     internal link hub (8 services + 15 pillars), visible FAQ, Local SEO block
+//   - Position: HomepageSchema at top (before SchemaScript), HomepageGEO after BirthForm
+// LOCKED: gemini-prompt.ts, verifiedTier — NOT TOUCHED
 
-import SchemaScript from '../components/SchemaScript';
-import HomeFAQ from '../components/HomeFAQ';
 import HomepageSchema from '@/components/seo/HomepageSchema';
 import HomepageGEO from '@/components/seo/HomepageGEO';
+import SchemaScript from '../components/SchemaScript';
+import HomeFAQ from '../components/HomeFAQ';
 import { useState, useCallback } from 'react';
 import SiteNav from '@/components/layout/SiteNav';
 import SiteFooter from '@/components/layout/SiteFooter';
@@ -45,10 +50,20 @@ export default function HomePage() {
 
   return (
     <>
+      {/* ── SEO SCHEMAS (invisible, inject into <head>) ──────────────────────
+          HomepageSchema: Person (Rohiit ji E-E-A-T) + WebApplication +
+          FAQPage + HowTo + BreadcrumbList + OfferCatalog — 6 schemas
+          SchemaScript: your existing 7 homepage schemas (Phase C)
+          Combined = 13 schema blocks total on homepage
+      ──────────────────────────────────────────────────────────────────── */}
+      <HomepageSchema />
       <SchemaScript />
+
       <div className="min-h-screen bg-[#080B12]">
         <SiteNav />
         <main>
+
+          {/* ── EXISTING SECTIONS — 100% UNTOUCHED ─────────────────────── */}
           <Hero />
           <LiveTrustBar />
           <SocialProofTicker />
@@ -57,6 +72,19 @@ export default function HomePage() {
             onSelectCategory={handleSelectCategory}
           />
           <BirthForm selectedCategory={selectedCategory} />
+
+          {/* ── GEO CONTENT BLOCK ──────────────────────────────────────────
+              HomepageGEO adds (in order):
+              1. 56-word direct answer block → Perplexity/SGE/ChatGPT extraction
+              2. E-E-A-T author strip (Rohiit ji) → YMYL trust signal
+              3. Internal link hub → 8 services + 15 pillars + 10 city pages
+              4. Visible FAQ (8 Q&As) → Featured snippets + AI Overview
+              5. Local SEO block → "Astrologer in Delhi/Noida/Gurgaon"
+              Position: after BirthForm, before DailyPanchang
+          ──────────────────────────────────────────────────────────────── */}
+          <HomepageGEO />
+
+          {/* ── EXISTING SECTIONS — 100% UNTOUCHED ─────────────────────── */}
           <DailyPanchang />
           <DailyRashifal />
           <PillarsGrid />
@@ -64,6 +92,8 @@ export default function HomePage() {
           <PricingSection />
           <InnerCircleWaitlist />
           <HomeFAQ />
+
+          {/* ── BLOG SECTION — 100% UNTOUCHED ──────────────────────────── */}
           <section className="py-20 px-4">
             <div className="max-w-6xl mx-auto">
               <div className="text-center mb-12">
@@ -99,6 +129,7 @@ export default function HomePage() {
               </div>
             </div>
           </section>
+
         </main>
         <SiteFooter />
       </div>
