@@ -3,18 +3,15 @@
  * TRIKAL VAANI — BirthForm Component
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: components/landing/BirthForm.tsx
- * VERSION: 9.0 — Google Maps Places API + Gender + Dynamic Segments
+ * VERSION: 9.1 — New Places API (fixes REQUEST_DENIED on legacy API)
  * SIGNED: ROHIIT GUPTA, CEO
  *
- * v9.0 CHANGES vs v8.0:
- *   ✅ Google Places API — city autocomplete (replaces Nominatim)
- *   ✅ Google TimeZone API — exact timezone (replaces offsetFromLon formula)
- *   ✅ Google Geolocation — current location button
- *   ✅ Gender field added (Male/Female/Other)
- *   ✅ Gender + Age passed to /api/predict for dynamic segment routing
- *   ✅ Dynamic segment calculator (age + gender → segment code)
- *   ✅ Person 2 city also uses Google Places
- *   ✅ All v8.0 fields + features preserved
+ * v9.1 CHANGES vs v9.0:
+ *   ✅ fetchPlaceSuggestions → New Places API (POST to places.googleapis.com)
+ *   ✅ fetchPlaceDetails → New Places API (GET /v1/places/{placeId})
+ *   ✅ fetchTimezone → unchanged (maps.googleapis.com GET — still works)
+ *   ✅ reverseGeocode → unchanged (maps.googleapis.com GET — still works)
+ *   ✅ All other code identical to v9.0
  * ============================================================
  */
 
@@ -77,9 +74,9 @@ interface BirthFormProps {
 // ── Google Places Types ───────────────────────────────────────────────────────
 
 interface PlaceSuggestion {
-  place_id:     string
-  description:  string
-  main_text:    string
+  place_id:       string
+  description:    string
+  main_text:      string
   secondary_text: string
 }
 
@@ -123,12 +120,7 @@ const COUNTRIES: Country[] = [
   { name: 'Hong Kong',      code: 'HK', dial: '+852', digits: 8,  flag: '🇭🇰' },
 ]
 
-function getCountryByIso(iso: string): Country {
-  return COUNTRIES.find(c => c.code.toLowerCase() === iso.toLowerCase()) ?? COUNTRIES[0]!
-}
-
-// ── Dynamic Segment Calculator ─────────────────────────────────────────────────
-// Fully dynamic — expandable to age 65+
+// ── Dynamic Segment Calculator ────────────────────────────────────────────────
 
 export function calculateDynamicSegment(dob: string, gender: string): string {
   if (!dob) return 'millennial_general'
@@ -136,32 +128,30 @@ export function calculateDynamicSegment(dob: string, gender: string): string {
   const g = gender || 'other'
 
   if (age >= 16 && age <= 29) {
-    if (g === 'male')   return 'young_male'      // Love, confidence, career start
-    if (g === 'female') return 'young_female'    // Love, marriage, beauty, career
+    if (g === 'male')   return 'young_male'
+    if (g === 'female') return 'young_female'
     return 'young_general'
   }
   if (age >= 30 && age <= 45) {
-    if (g === 'male')   return 'mid_male'        // Career, money, property, respect (50% weight)
-    if (g === 'female') return 'mid_female'      // Family, career, health, marriage
+    if (g === 'male')   return 'mid_male'
+    if (g === 'female') return 'mid_female'
     return 'mid_general'
   }
   if (age >= 46 && age <= 55) {
-    if (g === 'male')   return 'senior_male'     // Property, legacy, health, respect
-    if (g === 'female') return 'senior_female'   // Family harmony, health, spiritual
+    if (g === 'male')   return 'senior_male'
+    if (g === 'female') return 'senior_female'
     return 'senior_general'
   }
   if (age >= 56 && age <= 65) {
-    if (g === 'male')   return 'elder_male'      // Health, spiritual, legacy
-    if (g === 'female') return 'elder_female'    // Health, spiritual, family
+    if (g === 'male')   return 'elder_male'
+    if (g === 'female') return 'elder_female'
     return 'elder_general'
   }
   if (age > 65) return 'elder_general'
   if (age < 16) return 'young_general'
-
   return 'millennial_general'
 }
 
-// Legacy segment for backward compat
 function detectLegacySegment(dob: string): 'genz' | 'millennial' | 'genx' {
   if (!dob) return 'millennial'
   const age = new Date().getFullYear() - new Date(dob).getFullYear()
@@ -170,63 +160,75 @@ function detectLegacySegment(dob: string): 'genz' | 'millennial' | 'genx' {
   return 'genx'
 }
 
-// ── Google Maps API Functions ─────────────────────────────────────────────────
+// ── Google Maps API Functions — v9.1 NEW PLACES API ───────────────────────────
 
-// Key handled server-side via maps-proxy
-
-// Autocomplete via Places API (using sessionToken for billing efficiency)
+// CHANGED v9.1: Uses New Places API (POST) — fixes REQUEST_DENIED on legacy API
 async function fetchPlaceSuggestions(query: string): Promise<PlaceSuggestion[]> {
   if (query.length < 3) return []
   try {
-    const url = `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${encodeURIComponent(query)}&types=(cities)&language=en`
-    const res  = await fetch(`/api/maps-proxy?url=${encodeURIComponent(url)}`)
+    const res = await fetch(
+      `/api/maps-proxy?url=${encodeURIComponent('https://places.googleapis.com/v1/places:autocomplete')}`,
+      {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          input:                query,
+          includedPrimaryTypes: ['locality', 'administrative_area_level_3'],
+          languageCode:         'en',
+        }),
+      }
+    )
     if (!res.ok) return []
     const data = await res.json()
-    return (data.predictions ?? []).map((p: any) => ({
-      place_id:       p.place_id,
-      description:    p.description,
-      main_text:      p.structured_formatting?.main_text ?? p.description,
-      secondary_text: p.structured_formatting?.secondary_text ?? '',
-    }))
+    // New API response: data.suggestions[].placePrediction
+    return (data.suggestions ?? [])
+      .filter((s: any) => s.placePrediction)
+      .map((s: any) => ({
+        place_id:       s.placePrediction.placeId ?? '',
+        description:    s.placePrediction.text?.text ?? '',
+        main_text:      s.placePrediction.structuredFormat?.mainText?.text
+                        ?? s.placePrediction.text?.text ?? '',
+        secondary_text: s.placePrediction.structuredFormat?.secondaryText?.text ?? '',
+      }))
   } catch { return [] }
 }
 
-// Get lat/lng from place_id
+// CHANGED v9.1: Uses New Places API (GET /v1/places/{placeId})
 async function fetchPlaceDetails(placeId: string): Promise<{ lat: number; lng: number; city: string } | null> {
   if (!placeId) return null
   try {
-    const url  = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=geometry,name,address_components`
-    const res  = await fetch(`/api/maps-proxy?url=${encodeURIComponent(url)}`)
+    const fields = 'location,displayName'
+    const url    = `https://places.googleapis.com/v1/places/${placeId}?fields=${fields}`
+    const res    = await fetch(`/api/maps-proxy?url=${encodeURIComponent(url)}`)
     if (!res.ok) return null
     const data = await res.json()
-    const r    = data.result
-    if (!r?.geometry?.location) return null
-    const city = r.name ?? r.address_components?.[0]?.long_name ?? ''
-    return { lat: r.geometry.location.lat, lng: r.geometry.location.lng, city }
+    const lat  = data.location?.latitude  ?? null
+    const lng  = data.location?.longitude ?? null
+    const city = data.displayName?.text   ?? ''
+    if (lat === null || lng === null) return null
+    return { lat, lng, city }
   } catch { return null }
 }
 
-// Get exact timezone from lat/lng using Google TimeZone API
+// UNCHANGED — TimeZone API still uses maps.googleapis.com GET
 async function fetchTimezone(lat: number, lng: number): Promise<number> {
-  // proxy handles key
   try {
-    const ts   = Math.floor(Date.now() / 1000)
-    const url  = `https://maps.googleapis.com/maps/api/timezone/json?location=${lat},${lng}&timestamp=${ts}`
-    const res  = await fetch(`/api/maps-proxy?url=${encodeURIComponent(url)}`)
+    const ts  = Math.floor(Date.now() / 1000)
+    const url = `https://maps.googleapis.com/maps/api/timezone/json?location=${lat},${lng}&timestamp=${ts}`
+    const res = await fetch(`/api/maps-proxy?url=${encodeURIComponent(url)}`)
     if (!res.ok) return 5.5
     const data = await res.json()
     if (data.status !== 'OK') return 5.5
     const totalOffset = (data.rawOffset + data.dstOffset) / 3600
-    return Math.round(totalOffset * 4) / 4  // Round to nearest 0.25
+    return Math.round(totalOffset * 4) / 4
   } catch { return 5.5 }
 }
 
-// Reverse geocode from lat/lng to city name
+// UNCHANGED — Geocoding API still uses maps.googleapis.com GET
 async function reverseGeocode(lat: number, lng: number): Promise<string> {
-  // proxy handles key
   try {
-    const url  = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&result_type=locality`
-    const res  = await fetch(`/api/maps-proxy?url=${encodeURIComponent(url)}`)
+    const url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&result_type=locality`
+    const res = await fetch(`/api/maps-proxy?url=${encodeURIComponent(url)}`)
     if (!res.ok) return ''
     const data = await res.json()
     return data.results?.[0]?.address_components?.[0]?.long_name ?? ''
@@ -299,7 +301,7 @@ function getNumerologyCompatibility(n1: number, n2: number) {
   return COMPAT[key] ?? { score: 65, label: 'Moderate', description: 'Unique combination — balance and understanding is key.', color: '#f59e0b' }
 }
 
-// ── SEO/GEO Constants ─────────────────────────────────────────────────────────
+// ── Constants ─────────────────────────────────────────────────────────────────
 
 const SEO_TRUST_BADGES = [
   { icon: '⚡', label: 'Swiss Ephemeris' },
@@ -326,14 +328,14 @@ const LOADING_STEPS = [
 const DUAL_CHART_DOMAINS = ['genz_ex_back', 'genz_toxic_boss']
 
 const RELATIONSHIP_STATUS_OPTIONS = [
-  { value: '',              label: 'Select status (optional)' },
-  { value: 'single',        label: '💫 Single' },
-  { value: 'in_relationship', label: '💑 In a Relationship' },
-  { value: 'married',       label: '💍 Married' },
-  { value: 'separated',     label: '🔄 Separated' },
-  { value: 'divorced',      label: '📄 Divorced' },
-  { value: 'widowed',       label: '🕊️ Widowed' },
-  { value: 'complicated',   label: '🌀 It\'s Complicated' },
+  { value: '',               label: 'Select status (optional)' },
+  { value: 'single',         label: '💫 Single' },
+  { value: 'in_relationship',label: '💑 In a Relationship' },
+  { value: 'married',        label: '💍 Married' },
+  { value: 'separated',      label: '🔄 Separated' },
+  { value: 'divorced',       label: '📄 Divorced' },
+  { value: 'widowed',        label: '🕊️ Widowed' },
+  { value: 'complicated',    label: '🌀 It\'s Complicated' },
 ]
 
 const JOB_CATEGORIES = [
@@ -396,8 +398,6 @@ function calculateAge(dob: string): number {
   if (!dob) return 30
   return new Date().getFullYear() - new Date(dob).getFullYear()
 }
-
-// ── Initial State ─────────────────────────────────────────────────────────────
 
 const INITIAL: BirthFormFields = {
   name: '', dateOfBirth: '', timeOfBirth: '12:00',
@@ -505,9 +505,9 @@ function RotatingTagline() {
 
 function TierSelector({ selected, onChange }: { selected: PredictionTier; onChange: (t: PredictionTier) => void }) {
   const tiers = [
-    { id: 'free' as PredictionTier, icon: '🔮', label: 'Free Preview', price: 'Free', desc: 'Trikal Ka Sandesh', color: '#94a3b8', features: ['150-200 word summary', 'Key message + action', 'Instant results'] },
-    { id: 'paid' as PredictionTier, icon: '⚡', label: 'Deep Reading', price: '₹51', desc: 'Gemini Pro 2.5', color: GOLD, features: ['900 word full analysis', 'Personalized 5 upay', 'Action windows + dates'], highlight: true },
-    { id: 'voice' as PredictionTier, icon: '🎙️', label: 'Voice', price: '₹11', desc: 'Trikal ki awaaz', color: '#a78bfa', features: ['60-sec voice', 'Hindi / Hinglish', 'Trikal AI'] },
+    { id: 'free'  as PredictionTier, icon: '🔮', label: 'Free Preview', price: 'Free', desc: 'Trikal Ka Sandesh', color: '#94a3b8', features: ['150-200 word summary', 'Key message + action', 'Instant results'] },
+    { id: 'paid'  as PredictionTier, icon: '⚡', label: 'Deep Reading',  price: '₹51',  desc: 'Gemini Pro 2.5',   color: GOLD,      features: ['900 word full analysis', 'Personalized 5 upay', 'Action windows + dates'], highlight: true },
+    { id: 'voice' as PredictionTier, icon: '🎙️', label: 'Voice',        price: '₹11',  desc: 'Trikal ki awaaz', color: '#a78bfa', features: ['60-sec voice', 'Hindi / Hinglish', 'Trikal AI'] },
   ]
 
   return (
@@ -516,8 +516,8 @@ function TierSelector({ selected, onChange }: { selected: PredictionTier; onChan
       <div className="grid grid-cols-3 gap-3">
         {tiers.map(tier => (
           <button key={tier.id} type="button" onClick={() => onChange(tier.id)}
-            style={{ background: selected === tier.id ? tier.highlight ? `linear-gradient(135deg,${GOLD_RGBA(0.2)},${GOLD_RGBA(0.1)})` : `${tier.color}18` : 'rgba(255,255,255,0.03)', border: `1px solid ${selected === tier.id ? tier.color : 'rgba(255,255,255,0.08)'}`, borderRadius: '12px', padding: '14px 10px', cursor: 'pointer', textAlign: 'left', transition: 'all 0.2s', position: 'relative' }}>
-            {tier.highlight && (
+            style={{ background: selected === tier.id ? (tier as any).highlight ? `linear-gradient(135deg,${GOLD_RGBA(0.2)},${GOLD_RGBA(0.1)})` : `${tier.color}18` : 'rgba(255,255,255,0.03)', border: `1px solid ${selected === tier.id ? tier.color : 'rgba(255,255,255,0.08)'}`, borderRadius: '12px', padding: '14px 10px', cursor: 'pointer', textAlign: 'left', transition: 'all 0.2s', position: 'relative' }}>
+            {(tier as any).highlight && (
               <div style={{ position: 'absolute', top: '-10px', left: '50%', transform: 'translateX(-50%)', background: GOLD, color: '#080B12', fontSize: '9px', fontWeight: 700, padding: '2px 8px', borderRadius: '10px', whiteSpace: 'nowrap' }}>MOST POPULAR</div>
             )}
             <div style={{ fontSize: '20px', marginBottom: '6px' }}>{tier.icon}</div>
@@ -542,10 +542,10 @@ function TierSelector({ selected, onChange }: { selected: PredictionTier; onChan
   )
 }
 
-// ── Google Places City Input ──────────────────────────────────────────────────
+// ── City Input Component ──────────────────────────────────────────────────────
 
 function CityInput({
-  id, label, required, value, onSelect, error, placeholder, person2 = false,
+  id, label, required, value, onSelect, error, placeholder,
 }: {
   id: string; label: string; required?: boolean; value: string
   onSelect: (city: string, lat: number, lng: number, timezone: number) => void
@@ -555,7 +555,7 @@ function CityInput({
   const [suggestions, setSuggestions] = useState<PlaceSuggestion[]>([])
   const [loading,     setLoading]     = useState(false)
   const [selected,    setSelected]    = useState(false)
-  const debounceRef   = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => { setQuery(value) }, [value])
 
@@ -587,9 +587,11 @@ function CityInput({
 
   return (
     <div className="relative">
-      <label htmlFor={id} className="block text-sm font-medium text-slate-300 mb-1.5">
-        {label} {required && <span className="text-yellow-400">*</span>}
-      </label>
+      {label && (
+        <label htmlFor={id} className="block text-sm font-medium text-slate-300 mb-1.5">
+          {label} {required && <span className="text-yellow-400">*</span>}
+        </label>
+      )}
       <div className="relative">
         <input id={id} type="search" autoComplete="off"
           placeholder={placeholder ?? 'Type city name...'}
@@ -665,7 +667,6 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
     } else { setNumerology(null) }
   }
 
-  // ── Current Location ──────────────────────────────────────────────────────
   const handleCurrentLocation = () => {
     if (!navigator.geolocation) { alert('Geolocation not supported by your browser.'); return }
     setLocating(true)
@@ -675,10 +676,10 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
         const [city, tz] = await Promise.all([reverseGeocode(lat, lng), fetchTimezone(lat, lng)])
         setFields(prev => ({
           ...prev,
-          placeQuery:     city || `${lat.toFixed(4)}, ${lng.toFixed(4)}`,
-          city:           city || '',
-          latitude:       lat,
-          longitude:      lng,
+          placeQuery: city || `${lat.toFixed(4)}, ${lng.toFixed(4)}`,
+          city: city || '',
+          latitude: lat,
+          longitude: lng,
           timezoneOffset: tz,
         }))
         setLocating(false)
@@ -687,13 +688,12 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
     )
   }
 
-  // ── Validation ────────────────────────────────────────────────────────────
   const validate = (): boolean => {
     const errs: typeof errors = {}
-    if (!fields.name.trim())    errs.name        = 'Name is required'
-    if (!fields.dateOfBirth)    errs.dateOfBirth  = 'Date of birth is required'
+    if (!fields.name.trim())    errs.name       = 'Name is required'
+    if (!fields.dateOfBirth)    errs.dateOfBirth = 'Date of birth is required'
     if (!fields.unknownTime && !fields.timeOfBirth) errs.timeOfBirth = 'Time of birth is required'
-    if (fields.latitude === '') errs.latitude     = 'Place of birth is required'
+    if (fields.latitude === '') errs.latitude    = 'Place of birth is required'
     const mobileDigits = fields.mobile.replace(/\D/g, '').length
     if (!fields.mobile || mobileDigits < fields.countryDigits) errs.mobile = `Valid ${fields.countryDigits}-digit mobile required`
     if (isDualDomain) {
@@ -705,7 +705,6 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
     return Object.keys(errs).length === 0
   }
 
-  // ── Submit ────────────────────────────────────────────────────────────────
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!validate()) return
@@ -720,18 +719,18 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
     startLoadingMessages()
 
     try {
-      const sessionId         = generateSessionId()
-      const age               = calculateAge(fields.dateOfBirth)
-      const dynamicSegment    = calculateDynamicSegment(fields.dateOfBirth, fields.gender)
-      const legacySegment     = detectLegacySegment(fields.dateOfBirth)
+      const sessionId      = generateSessionId()
+      const age            = calculateAge(fields.dateOfBirth)
+      const dynamicSegment = calculateDynamicSegment(fields.dateOfBirth, fields.gender)
+      const legacySegment  = detectLegacySegment(fields.dateOfBirth)
 
       const res = await fetch('/api/predict', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           sessionId,
-          domainId:       selectedCategory?.id    || 'mill_karz_mukti',
-          domainLabel:    selectedCategory?.label || 'General',
+          domainId:    selectedCategory?.id    || 'mill_karz_mukti',
+          domainLabel: selectedCategory?.label || 'General',
           predictionTier,
           birthData: {
             name:     fields.name,
@@ -744,10 +743,10 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
             ayanamsa: 'lahiri',
           },
           userContext: {
-            segment:            legacySegment,      // legacy compat
-            dynamicSegment,                          // NEW v9.0 — for remedy routing
-            gender:             fields.gender,       // NEW v9.0
-            age,                                     // NEW v9.0
+            segment:            legacySegment,
+            dynamicSegment,
+            gender:             fields.gender,
+            age,
             employment:         fields.jobCategory,
             sector:             mapJobToSector(fields.jobCategory),
             language:           fields.language,
@@ -811,12 +810,10 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
     colorScheme: 'dark' as const,
   })
 
-  // ── Render ────────────────────────────────────────────────────────────────
   return (
     <section id="birth-form" className={`py-16 px-4 ${className}`}
       aria-label="Vedic Astrology Birth Chart Form — Trikal Vaani by Rohiit Gupta">
 
-      {/* SEO hidden */}
       <div style={{ display: 'none' }} aria-hidden="false">
         <h2>Free Vedic Astrology Prediction — Swiss Ephemeris Powered by Rohiit Gupta</h2>
         <p>Get your personalized Vedic astrology reading at Trikal Vaani. Powered by Swiss Ephemeris, BPHS, Bhrigu Nandi Nadi, Shadbala. By Rohiit Gupta, Chief Vedic Architect, Delhi NCR.</p>
@@ -862,7 +859,6 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
           style={{ background: 'rgba(13,17,30,0.85)', border: '1px solid rgba(212,175,55,0.15)', backdropFilter: 'blur(12px)' }}>
           <form onSubmit={handleSubmit} noValidate className="grid gap-5">
 
-            {/* Tier */}
             <TierSelector selected={predictionTier} onChange={setPredictionTier} />
 
             {/* Language */}
@@ -950,7 +946,7 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
               {fields.unknownTime && <p className="text-slate-500 text-xs mt-1">Solar chart will be used (12:00 noon)</p>}
             </div>
 
-            {/* Gender — NEW v9.0 */}
+            {/* Gender */}
             <div>
               <label className="block text-sm font-medium text-slate-300 mb-2">
                 Gender <span className="text-slate-500 text-xs ml-1">(for personalized remedies)</span>
@@ -968,7 +964,6 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
                   </button>
                 ))}
               </div>
-              {/* Show dynamic segment preview */}
               {fields.gender && fields.dateOfBirth && (
                 <p style={{ margin: '6px 0 0', color: GOLD, fontSize: '11px' }}>
                   ✦ Segment: {calculateDynamicSegment(fields.dateOfBirth, fields.gender).replace('_', ' ')} — personalized remedy routing active
@@ -976,14 +971,13 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
               )}
             </div>
 
-            {/* Place of Birth — Google Places */}
+            {/* Place of Birth */}
             <div>
               <div className="flex items-center justify-between mb-1.5">
                 <label className="block text-sm font-medium text-slate-300">
                   Place of Birth <span className="text-yellow-400">*</span>
                 </label>
-                <button type="button" onClick={handleCurrentLocation}
-                  disabled={locating}
+                <button type="button" onClick={handleCurrentLocation} disabled={locating}
                   style={{ color: locating ? '#475569' : GOLD, fontSize: '11px', fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
                   {locating ? '⟳ Locating...' : '📍 Use Current Location'}
                 </button>
@@ -1175,8 +1169,8 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
 
             {!isLoading && (
               <div style={{ textAlign: 'center' }}>
-                {predictionTier === 'free' && <p className="text-xs text-slate-600">🔒 Free forever · No card required · Instant results</p>}
-                {predictionTier === 'paid' && <p className="text-xs text-slate-600">🔒 ₹51 · Razorpay secure · One-time · Instant access</p>}
+                {predictionTier === 'free'  && <p className="text-xs text-slate-600">🔒 Free forever · No card required · Instant results</p>}
+                {predictionTier === 'paid'  && <p className="text-xs text-slate-600">🔒 ₹51 · Razorpay secure · One-time · Instant access</p>}
                 {predictionTier === 'voice' && <p className="text-xs text-slate-600">🎙️ ₹11 · 60-second voice response</p>}
               </div>
             )}
