@@ -89,7 +89,7 @@ export default function SiteFooter() {
 
             {/* ✅ NEW: WhatsApp CTA in footer */}
             <a
-              href="https://wa.me/919999999999?text=Namaste%20Rohiit%20ji%2C%20I%20want%20to%20book%20a%20personal%20reading"
+              href="https://wa.me/919211804111?text=Namaste%20Rohiit%20ji%2C%20I%20want%20to%20book%20a%20personal%20reading"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold transition-all duration-300 hover:scale-105 mt-2"
