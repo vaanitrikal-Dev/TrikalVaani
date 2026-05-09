@@ -1,6 +1,8 @@
 'use client';
 
 // @trikal-v9.1 — cache-bust: 2026-04-18T00:00:00Z
+import SchemaScript from '../components/SchemaScript';
+import HomeFAQ from '../components/HomeFAQ';
 import { useState, useCallback } from 'react';
 import SiteNav from '@/components/layout/SiteNav';
 import SiteFooter from '@/components/layout/SiteFooter';
