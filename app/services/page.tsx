@@ -3,7 +3,7 @@
  * 🔱 TRIKAL VAANI — CEO PROTECTION HEADER 🔱
  * ============================================================================
  * File:        app/services/page.tsx
- * Version:     v2.1 — Build error fixed
+ * Version:     v2.2 — DEFINITIVE build fix (relative imports)
  * Phase:       Deliverable 3 of Master SEO Strategy
  * Owner:       Rohiit Gupta, Chief Vedic Architect
  * Domain:      trikalvaani.com/services
@@ -42,8 +42,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Script from "next/script";
-import SiteNav from "@/components/SiteNav";
-import SiteFooter from "@/components/SiteFooter";
+import SiteNav from "../components/SiteNav";
+import SiteFooter from "../components/SiteFooter";
 
 // ============================================================================
 // METADATA — SEO foundation
