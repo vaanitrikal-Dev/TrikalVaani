@@ -1,0 +1,141 @@
+{
+  "_meta": {
+    "comment": "TRIKAL VAANI - CEO PROTECTION HEADER - cities.json v1.0 - Rohiit Gupta - Chief Vedic Architect - 10 cities for /[city]/panchang route - Phase B3",
+    "version": "v1.0",
+    "total": 10,
+    "owner": "Rohiit Gupta",
+    "domain": "trikalvaani.com"
+  },
+  "cities": [
+    {
+      "slug": "delhi",
+      "name": "Delhi NCR",
+      "name_hindi": "दिल्ली एनसीआर",
+      "state": "Delhi",
+      "latitude": 28.6139,
+      "longitude": 77.2090,
+      "timezone": "IST",
+      "description": "The capital region of India, including New Delhi, Noida, Gurgaon, and Faridabad. Spiritual hub with ancient temples and historic significance.",
+      "famous_temples": ["Akshardham Temple", "Kalkaji Mandir", "Chhatarpur Mandir", "ISKCON Temple Dwarka"],
+      "language": "Hindi",
+      "population_tier": "metro"
+    },
+    {
+      "slug": "mumbai",
+      "name": "Mumbai",
+      "name_hindi": "मुंबई",
+      "state": "Maharashtra",
+      "latitude": 19.0760,
+      "longitude": 72.8777,
+      "timezone": "IST",
+      "description": "Financial capital of India. Home to Siddhivinayak and Mahalakshmi temples, deeply tied to wealth and prosperity worship.",
+      "famous_temples": ["Siddhivinayak Temple", "Mahalakshmi Temple", "Babulnath Temple", "ISKCON Juhu"],
+      "language": "Marathi",
+      "population_tier": "metro"
+    },
+    {
+      "slug": "noida",
+      "name": "Noida",
+      "name_hindi": "नोएडा",
+      "state": "Uttar Pradesh",
+      "latitude": 28.5355,
+      "longitude": 77.3910,
+      "timezone": "IST",
+      "description": "Modern satellite city of Delhi NCR. Hub for tech professionals seeking Vedic guidance for career and home matters.",
+      "famous_temples": ["ISKCON Noida", "Kalibari Temple Sector 26", "Sai Mandir Sector 61"],
+      "language": "Hindi",
+      "population_tier": "tier-1"
+    },
+    {
+      "slug": "gurgaon",
+      "name": "Gurgaon",
+      "name_hindi": "गुरुग्राम",
+      "state": "Haryana",
+      "latitude": 28.4595,
+      "longitude": 77.0266,
+      "timezone": "IST",
+      "description": "Millennium city named after Guru Dronacharya. Corporate hub with growing demand for spiritual and astrological guidance.",
+      "famous_temples": ["Sheetla Mata Mandir", "ISKCON Gurgaon", "Sai Ka Angan"],
+      "language": "Hindi",
+      "population_tier": "tier-1"
+    },
+    {
+      "slug": "bangalore",
+      "name": "Bangalore",
+      "name_hindi": "बेंगलुरु",
+      "state": "Karnataka",
+      "latitude": 12.9716,
+      "longitude": 77.5946,
+      "timezone": "IST",
+      "description": "Silicon Valley of India and ancient temple city. Pleasant weather and strong Vedic tradition rooted in the Bull Temple and ISKCON.",
+      "famous_temples": ["ISKCON Bangalore", "Bull Temple (Dodda Basavana Gudi)", "Gavi Gangadhareshwara Temple"],
+      "language": "Kannada",
+      "population_tier": "metro"
+    },
+    {
+      "slug": "hyderabad",
+      "name": "Hyderabad",
+      "name_hindi": "हैदराबाद",
+      "state": "Telangana",
+      "latitude": 17.3850,
+      "longitude": 78.4867,
+      "timezone": "IST",
+      "description": "City of Pearls and ancient Bhagyalakshmi blessings. IT hub with deep South Indian Vedic traditions.",
+      "famous_temples": ["Bhagyalakshmi Temple", "Birla Mandir", "Chilkur Balaji Temple"],
+      "language": "Telugu",
+      "population_tier": "metro"
+    },
+    {
+      "slug": "pune",
+      "name": "Pune",
+      "name_hindi": "पुणे",
+      "state": "Maharashtra",
+      "latitude": 18.5204,
+      "longitude": 73.8567,
+      "timezone": "IST",
+      "description": "Cultural capital of Maharashtra. Sacred land of Sant Tukaram and Dnyaneshwar, home to powerful Ganesh and Bhavani temples.",
+      "famous_temples": ["Dagdusheth Halwai Ganpati", "Shrimant Bhausaheb Rangari Ganpati", "Tulja Bhavani Temple"],
+      "language": "Marathi",
+      "population_tier": "tier-1"
+    },
+    {
+      "slug": "kolkata",
+      "name": "Kolkata",
+      "name_hindi": "कोलकाता",
+      "state": "West Bengal",
+      "latitude": 22.5726,
+      "longitude": 88.3639,
+      "timezone": "IST",
+      "description": "City of Joy and home of Maa Kali. Spiritual heart of Bengal with the most powerful Shakti Peetha at Kalighat.",
+      "famous_temples": ["Kalighat Kali Temple", "Dakshineswar Kali Temple", "Belur Math"],
+      "language": "Bengali",
+      "population_tier": "metro"
+    },
+    {
+      "slug": "chennai",
+      "name": "Chennai",
+      "name_hindi": "चेन्नई",
+      "state": "Tamil Nadu",
+      "latitude": 13.0827,
+      "longitude": 80.2707,
+      "timezone": "IST",
+      "description": "Gateway to South India. Home to ancient Dravidian temples and powerful Murugan, Shiva, and Vishnu kshetras.",
+      "famous_temples": ["Kapaleeshwarar Temple", "Parthasarathy Temple", "Marundeeswarar Temple"],
+      "language": "Tamil",
+      "population_tier": "metro"
+    },
+    {
+      "slug": "ahmedabad",
+      "name": "Ahmedabad",
+      "name_hindi": "अहमदाबाद",
+      "state": "Gujarat",
+      "latitude": 23.0225,
+      "longitude": 72.5714,
+      "timezone": "IST",
+      "description": "Largest city of Gujarat and birthplace of Mahatma Gandhi. Strong Jain and Vaishnava traditions.",
+      "famous_temples": ["Jagannath Temple Ahmedabad", "Hutheesing Jain Temple", "ISKCON Ahmedabad"],
+      "language": "Gujarati",
+      "population_tier": "tier-1"
+    }
+  ]
+}
