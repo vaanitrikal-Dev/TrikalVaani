@@ -172,13 +172,13 @@ function detectLegacySegment(dob: string): 'genz' | 'millennial' | 'genx' {
 
 // ── Google Maps API Functions ─────────────────────────────────────────────────
 
-const MAPS_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY ?? ''
+// Key handled server-side via maps-proxy
 
 // Autocomplete via Places API (using sessionToken for billing efficiency)
 async function fetchPlaceSuggestions(query: string): Promise<PlaceSuggestion[]> {
-  if (!MAPS_KEY || query.length < 3) return []
+  if (query.length < 3) return []
   try {
-    const url = `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${encodeURIComponent(query)}&types=(cities)&key=${MAPS_KEY}&language=en`
+    const url = `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${encodeURIComponent(query)}&types=(cities)&language=en`
     const res  = await fetch(`/api/maps-proxy?url=${encodeURIComponent(url)}`)
     if (!res.ok) return []
     const data = await res.json()
@@ -193,9 +193,9 @@ async function fetchPlaceSuggestions(query: string): Promise<PlaceSuggestion[]> 
 
 // Get lat/lng from place_id
 async function fetchPlaceDetails(placeId: string): Promise<{ lat: number; lng: number; city: string } | null> {
-  if (!MAPS_KEY) return null
+  if (!placeId) return null
   try {
-    const url  = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=geometry,name,address_components&key=${MAPS_KEY}`
+    const url  = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=geometry,name,address_components`
     const res  = await fetch(`/api/maps-proxy?url=${encodeURIComponent(url)}`)
     if (!res.ok) return null
     const data = await res.json()
@@ -208,10 +208,10 @@ async function fetchPlaceDetails(placeId: string): Promise<{ lat: number; lng: n
 
 // Get exact timezone from lat/lng using Google TimeZone API
 async function fetchTimezone(lat: number, lng: number): Promise<number> {
-  if (!MAPS_KEY) return 5.5
+  // proxy handles key
   try {
     const ts   = Math.floor(Date.now() / 1000)
-    const url  = `https://maps.googleapis.com/maps/api/timezone/json?location=${lat},${lng}&timestamp=${ts}&key=${MAPS_KEY}`
+    const url  = `https://maps.googleapis.com/maps/api/timezone/json?location=${lat},${lng}&timestamp=${ts}`
     const res  = await fetch(`/api/maps-proxy?url=${encodeURIComponent(url)}`)
     if (!res.ok) return 5.5
     const data = await res.json()
@@ -223,9 +223,9 @@ async function fetchTimezone(lat: number, lng: number): Promise<number> {
 
 // Reverse geocode from lat/lng to city name
 async function reverseGeocode(lat: number, lng: number): Promise<string> {
-  if (!MAPS_KEY) return ''
+  // proxy handles key
   try {
-    const url  = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${MAPS_KEY}&result_type=locality`
+    const url  = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&result_type=locality`
     const res  = await fetch(`/api/maps-proxy?url=${encodeURIComponent(url)}`)
     if (!res.ok) return ''
     const data = await res.json()
