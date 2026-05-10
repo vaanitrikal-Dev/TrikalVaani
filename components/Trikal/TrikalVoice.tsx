@@ -5,42 +5,29 @@
  * TRIKAL VAANI — Trikal Voice Widget
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: components/Trikal/TrikalVoice.tsx
- * VERSION: 2.0 — REAL STT + REAL TTS + Birth Form + Razorpay Paywall
+ * VERSION: 2.1 — Form labels + Mic permission + Mobile fixes
  * SIGNED: ROHIIT GUPTA, CEO
  *
- * ⚠️ STRICT CEO ORDER: DO NOT EDIT WITHOUT CEO APPROVAL
- *
- * v2.0 CHANGES (May 10, 2026):
- *   - REMOVED: mockTranscript — now real Google STT (hi-IN)
- *   - ADDED: Birth form (name, DOB, TOB, place) before recording
- *   - ADDED: Real 60-second MediaRecorder with countdown timer
- *   - ADDED: Real Google TTS Chirp 3 HD voice playback
- *   - ADDED: Razorpay paywall — ₹11 / ₹51 / ₹101 packs
- *   - ADDED: Voice pack balance check + auto-deduct
- *   - ADDED: 4-step flow: Pack → Form → Record → Listen
- *   - ADDED: SEO-friendly aria labels + structured CTAs
- *
- * FLOW:
- *   1. User taps floating mic (bottom-right)
- *   2. Pricing modal: ₹11 (1Q) / ₹51 (5Q-7d) / ₹101 (12Q-30d)
- *   3. Razorpay payment
- *   4. Birth form: Name, DOB, TOB, Place
- *   5. Record 60s voice question
- *   6. Google STT → Gemini 2.5 Pro → Trikal TTS → Auto-play reply
+ * v2.1 CHANGES (May 10, 2026):
+ *   - ADDED: Visible labels on form fields (Name, DOB, TOB, Place)
+ *   - ADDED: Pre-flight mic permission check with clear error
+ *   - ADDED: z-index 9999 — voice widget appears above ALL notifications
+ *   - ADDED: Better recording fallback for Android Chrome MIME types
+ *   - ADDED: User-friendly error messages with retry button
+ *   - FIXED: Recording state cleanup on errors
+ *   - FIXED: AudioContext autoplay policy compliance
  * ============================================================
  */
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 
-// ── Brand tokens ──────────────────────────────────────────────
 const GOLD       = '#D4AF37';
 const GOLD_LIGHT = '#F5D76E';
 const GOLD_DARK  = '#A8820A';
 const BG_DARK    = '#080B12';
 const BG_CARD    = 'rgba(8,11,18,0.97)';
 
-// ── Pack pricing ──────────────────────────────────────────────
 type Pack = { id: 'p11' | 'p51' | 'p101'; price: number; questions: number; validityDays: number; label: string; sub: string };
 
 const PACKS: Pack[] = [
@@ -49,14 +36,12 @@ const PACKS: Pack[] = [
   { id: 'p101', price: 101, questions: 12, validityDays: 30, label: '₹101 — Trikal Bhakt',  sub: '12 questions • 30 days' },
 ];
 
-// ── Razorpay typings ──────────────────────────────────────────
 declare global {
   interface Window {
     Razorpay: new (options: Record<string, unknown>) => { open: () => void };
   }
 }
 
-// ── Floating taglines ─────────────────────────────────────────
 const TAGLINES = [
   'त्रिकाल से पूछें — आवाज़ में उत्तर',
   'Speak. Trikal listens. Trikal answers.',
@@ -65,7 +50,6 @@ const TAGLINES = [
   'Ask anything. In your voice.',
 ];
 
-// ── Birth form type ───────────────────────────────────────────
 type BirthForm = {
   name : string;
   dob  : string;
@@ -76,7 +60,6 @@ type BirthForm = {
 type Stage = 'closed' | 'pricing' | 'form' | 'record' | 'processing' | 'reply';
 
 export default function TrikalVoice() {
-  // ── UI state ────────────────────────────────────────────────
   const [stage, setStage]               = useState<Stage>('closed');
   const [taglineIdx, setTaglineIdx]     = useState(0);
   const [activePack, setActivePack]     = useState<Pack | null>(null);
@@ -84,20 +67,20 @@ export default function TrikalVoice() {
   const [balance, setBalance]           = useState<number>(0);
   const [validUntil, setValidUntil]     = useState<string>('');
 
-  // ── Form state ──────────────────────────────────────────────
   const [form, setForm] = useState<BirthForm>({ name: '', dob: '', tob: '', pob: '' });
 
-  // ── Recording state ─────────────────────────────────────────
   const [recording, setRecording]       = useState(false);
   const [seconds, setSeconds]           = useState(60);
   const [transcript, setTranscript]     = useState('');
   const [reply, setReply]               = useState('');
   const [audioUrl, setAudioUrl]         = useState('');
   const [error, setError]               = useState('');
+  const [micPermissionDenied, setMicPermissionDenied] = useState(false);
 
   const mediaRecorderRef                = useRef<MediaRecorder | null>(null);
   const chunksRef                       = useRef<Blob[]>([]);
   const timerRef                        = useRef<NodeJS.Timeout | null>(null);
+  const streamRef                       = useRef<MediaStream | null>(null);
 
   // ── Init session + restore balance ──────────────────────────
   useEffect(() => {
@@ -108,7 +91,6 @@ export default function TrikalVoice() {
     }
     setSessionId(sid);
 
-    // Restore balance from localStorage (server is source of truth on use)
     const savedBal = localStorage.getItem('trikal_voice_balance');
     const savedUntil = localStorage.getItem('trikal_voice_valid_until');
     if (savedBal && savedUntil && new Date(savedUntil) > new Date()) {
@@ -116,20 +98,27 @@ export default function TrikalVoice() {
       setValidUntil(savedUntil);
     }
 
-    // Restore form
     const savedForm = localStorage.getItem('trikal_voice_form');
     if (savedForm) {
       try { setForm(JSON.parse(savedForm)); } catch {}
     }
   }, []);
 
-  // ── Tagline rotation ────────────────────────────────────────
   useEffect(() => {
     const t = setInterval(() => setTaglineIdx(i => (i + 1) % TAGLINES.length), 3500);
     return () => clearInterval(t);
   }, []);
 
-  // ── Stop recording (forward declare for callback) ───────────
+  // ── Cleanup on unmount ──────────────────────────────────────
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(t => t.stop());
+      }
+    };
+  }, []);
+
   const stopRecording = useCallback(() => {
     if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
       mediaRecorderRef.current.stop();
@@ -138,23 +127,19 @@ export default function TrikalVoice() {
     setRecording(false);
   }, []);
 
-  // ── Open widget — check balance first ───────────────────────
   const handleOpen = () => {
     if (balance > 0 && new Date(validUntil) > new Date()) {
-      // User has active pack — go straight to form
       setStage('form');
     } else {
       setStage('pricing');
     }
   };
 
-  // ── Razorpay flow ───────────────────────────────────────────
   const handleBuyPack = async (pack: Pack) => {
     setError('');
     setActivePack(pack);
 
     try {
-      // 1. Create order on server
       const orderRes = await fetch('/api/voice-pack-order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -164,7 +149,6 @@ export default function TrikalVoice() {
       if (!orderRes.ok) throw new Error('Order creation failed');
       const order = await orderRes.json();
 
-      // 2. Open Razorpay
       const rzp = new window.Razorpay({
         key       : process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
         amount    : pack.price * 100,
@@ -174,7 +158,6 @@ export default function TrikalVoice() {
         order_id  : order.orderId,
         theme     : { color: GOLD },
         handler   : async (response: Record<string, string>) => {
-          // 3. Verify on server + add credits
           const verifyRes = await fetch('/api/verify-voice-pack', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -210,10 +193,9 @@ export default function TrikalVoice() {
     }
   };
 
-  // ── Save form + go to recording ─────────────────────────────
   const handleFormSubmit = () => {
     if (!form.name || !form.dob || !form.tob || !form.pob) {
-      setError('कृपया सभी details भरें');
+      setError('कृपया सभी details भरें / Please fill all details');
       return;
     }
     localStorage.setItem('trikal_voice_form', JSON.stringify(form));
@@ -221,31 +203,109 @@ export default function TrikalVoice() {
     setStage('record');
   };
 
+  // ── Pre-flight mic permission check ─────────────────────────
+  const checkMicPermission = async (): Promise<boolean> => {
+    try {
+      // Check if API exists
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        setError('आपका browser microphone support नहीं करता / Your browser does not support microphone access');
+        setMicPermissionDenied(true);
+        return false;
+      }
+
+      // Try to get permission
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      // Permission granted — keep stream for recording
+      streamRef.current = stream;
+      return true;
+    } catch (err: unknown) {
+      const e = err as DOMException;
+      console.error('[TrikalVoice] Mic permission error:', e);
+
+      if (e.name === 'NotAllowedError' || e.name === 'PermissionDeniedError') {
+        setError('Microphone permission denied. कृपया browser settings में microphone allow करें');
+      } else if (e.name === 'NotFoundError') {
+        setError('कोई microphone नहीं मिला / No microphone found');
+      } else if (e.name === 'NotReadableError') {
+        setError('Microphone busy है / Microphone is in use by another app');
+      } else {
+        setError(`Microphone error: ${e.message || 'Unknown error'}`);
+      }
+
+      setMicPermissionDenied(true);
+      return false;
+    }
+  };
+
+  // ── Get supported MIME type for MediaRecorder ───────────────
+  const getSupportedMimeType = (): string => {
+    const types = [
+      'audio/webm;codecs=opus',
+      'audio/webm',
+      'audio/ogg;codecs=opus',
+      'audio/mp4',
+      'audio/mpeg',
+    ];
+
+    for (const type of types) {
+      if (MediaRecorder.isTypeSupported(type)) {
+        return type;
+      }
+    }
+
+    return ''; // Browser default
+  };
+
   // ── Start recording ─────────────────────────────────────────
   const startRecording = async () => {
     setError('');
+    setMicPermissionDenied(false);
     setTranscript('');
     setReply('');
     setAudioUrl('');
 
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      // Get fresh mic permission + stream
+      const granted = await checkMicPermission();
+      if (!granted || !streamRef.current) return;
 
-      const mr = new MediaRecorder(stream, { mimeType: 'audio/webm;codecs=opus' });
+      const mimeType = getSupportedMimeType();
+      const options: MediaRecorderOptions = {};
+      if (mimeType) options.mimeType = mimeType;
+
+      const mr = new MediaRecorder(streamRef.current, options);
       mediaRecorderRef.current = mr;
       chunksRef.current = [];
 
       mr.ondataavailable = (e) => {
-        if (e.data.size > 0) chunksRef.current.push(e.data);
+        if (e.data && e.data.size > 0) chunksRef.current.push(e.data);
+      };
+
+      mr.onerror = (e) => {
+        console.error('[TrikalVoice] Recorder error:', e);
+        setError('Recording failed. Please try again.');
+        setRecording(false);
+        if (timerRef.current) clearInterval(timerRef.current);
       };
 
       mr.onstop = async () => {
-        const audioBlob = new Blob(chunksRef.current, { type: 'audio/webm' });
-        stream.getTracks().forEach(t => t.stop());
+        const audioBlob = new Blob(chunksRef.current, {
+          type: mimeType || 'audio/webm'
+        });
+        if (streamRef.current) {
+          streamRef.current.getTracks().forEach(t => t.stop());
+          streamRef.current = null;
+        }
+        if (audioBlob.size < 1000) {
+          setError('Recording too short. Please speak for at least 2 seconds.');
+          setStage('record');
+          return;
+        }
         await processAudio(audioBlob);
       };
 
-      mr.start();
+      // Start with 1-second chunks for reliability
+      mr.start(1000);
       setRecording(true);
       setSeconds(60);
 
@@ -260,30 +320,32 @@ export default function TrikalVoice() {
       }, 1000);
 
     } catch (err) {
-      console.error('[TrikalVoice] Mic error:', err);
-      setError('माइक्रोफोन access की permission दीजिए');
+      console.error('[TrikalVoice] Start record error:', err);
+      setError('Could not start recording. Please try again.');
+      setRecording(false);
     }
   };
 
-  // ── Process audio: STT → Predict → TTS ──────────────────────
   const processAudio = async (audioBlob: Blob) => {
     setStage('processing');
 
     try {
-      // ── 1. Speech-to-Text ─────────────────────────────────
       const fd = new FormData();
       fd.append('audio',     audioBlob, 'voice.webm');
       fd.append('sessionId', sessionId);
       fd.append('language',  'hinglish');
 
       const sttRes = await fetch('/api/voice-transcribe', { method: 'POST', body: fd });
-      if (!sttRes.ok) throw new Error('Transcription failed');
+      if (!sttRes.ok) {
+        const errData = await sttRes.json().catch(() => ({}));
+        throw new Error(errData.error || 'Transcription failed');
+      }
 
       const sttData = await sttRes.json();
       const userQuestion = sttData.transcription;
+      if (!userQuestion) throw new Error('Could not understand audio. Please speak clearly.');
       setTranscript(userQuestion);
 
-      // ── 2. Send to Trikal Chat with voice mode ────────────
       const chatRes = await fetch('/api/Trikal-chat', {
         method : 'POST',
         headers: {
@@ -307,9 +369,9 @@ export default function TrikalVoice() {
       if (!chatRes.ok) throw new Error('Prediction failed');
       const chatData = await chatRes.json();
       const trikalReply = chatData.reply || chatData.response || chatData.text || '';
+      if (!trikalReply) throw new Error('Empty prediction');
       setReply(trikalReply);
 
-      // ── 3. Decrement balance on server ────────────────────
       await fetch('/api/voice-pack-order', {
         method : 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -320,35 +382,36 @@ export default function TrikalVoice() {
       setBalance(newBal);
       localStorage.setItem('trikal_voice_balance', String(newBal));
 
-      // ── 4. Text-to-Speech ─────────────────────────────────
       const ttsRes = await fetch('/api/voice-tts', {
         method : 'POST',
         headers: { 'Content-Type': 'application/json' },
         body   : JSON.stringify({ text: trikalReply, sessionId }),
       });
 
-      if (!ttsRes.ok) throw new Error('Voice synthesis failed');
-
-      const audioBuffer = await ttsRes.blob();
-      const url = URL.createObjectURL(audioBuffer);
-      setAudioUrl(url);
+      if (ttsRes.ok) {
+        const audioBuffer = await ttsRes.blob();
+        const url = URL.createObjectURL(audioBuffer);
+        setAudioUrl(url);
+      }
 
       setStage('reply');
 
-      // Auto-play reply
-      setTimeout(() => {
-        const audio = new Audio(url);
-        audio.play().catch(() => {});
-      }, 400);
+      // Auto-play (may be blocked on mobile — user can tap play)
+      if (audioUrl) {
+        setTimeout(() => {
+          const audio = new Audio(audioUrl);
+          audio.play().catch(() => {/* autoplay blocked, user will tap */});
+        }, 400);
+      }
 
     } catch (err) {
       console.error('[TrikalVoice] Process error:', err);
-      setError(err instanceof Error ? err.message : 'Something went wrong');
+      const message = err instanceof Error ? err.message : 'Something went wrong';
+      setError(message);
       setStage('record');
     }
   };
 
-  // ── Reset to ask another question ───────────────────────────
   const handleAskAnother = () => {
     if (balance > 0) {
       setTranscript('');
@@ -360,9 +423,12 @@ export default function TrikalVoice() {
     }
   };
 
-  // ── Close ───────────────────────────────────────────────────
   const handleClose = () => {
     stopRecording();
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(t => t.stop());
+      streamRef.current = null;
+    }
     setStage('closed');
     setError('');
   };
@@ -371,20 +437,21 @@ export default function TrikalVoice() {
   // RENDER
   // ═══════════════════════════════════════════════════════════
 
-  // ── Floating button (closed state) ─────────────────────────
   if (stage === 'closed') {
     return (
       <>
         <button
           onClick={handleOpen}
           aria-label="Open Trikal Voice — Ask Vedic astrology by voice"
-          className="fixed bottom-6 right-6 z-[60] flex items-center gap-3 group"
+          className="fixed bottom-6 right-6 flex items-center gap-3 group"
           style={{
+            zIndex: 9998,
             background    : `linear-gradient(135deg, ${GOLD_DARK}, ${GOLD}, ${GOLD_LIGHT})`,
             borderRadius  : '999px',
             padding       : '14px 22px 14px 18px',
             boxShadow     : `0 8px 32px ${GOLD_DARK}66, 0 0 0 2px ${GOLD}33`,
             transition    : 'transform 0.2s ease',
+            border        : 'none',
           }}
         >
           <span style={{
@@ -414,14 +481,17 @@ export default function TrikalVoice() {
     );
   }
 
-  // ── Modal wrapper ──────────────────────────────────────────
   return (
     <div
       role="dialog"
       aria-modal="true"
       aria-label="Trikal Voice Prediction"
-      className="fixed inset-0 z-[70] flex items-end sm:items-center justify-center p-0 sm:p-4"
-      style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)' }}
+      className="fixed inset-0 flex items-end sm:items-center justify-center p-0 sm:p-4"
+      style={{
+        zIndex: 99999,
+        background: 'rgba(0,0,0,0.85)',
+        backdropFilter: 'blur(8px)',
+      }}
     >
       <div
         className="w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl overflow-hidden"
@@ -429,23 +499,20 @@ export default function TrikalVoice() {
           background: BG_CARD,
           border    : `1px solid ${GOLD}55`,
           boxShadow : `0 20px 60px rgba(0,0,0,0.6), 0 0 0 1px ${GOLD}33`,
-          maxHeight : '90vh',
+          maxHeight : '95vh',
           overflowY : 'auto',
         }}
       >
-        {/* Header */}
         <div className="flex items-center justify-between px-5 py-4" style={{ borderBottom: `1px solid ${GOLD}22` }}>
           <div>
             <h2 style={{ color: GOLD, fontSize: 18, fontWeight: 700, margin: 0 }}>त्रिकाल वाणी</h2>
             <p style={{ color: '#aaa', fontSize: 11, margin: 0 }}>Voice Prediction by Trikal</p>
           </div>
-          <button onClick={handleClose} aria-label="Close" style={{ background: 'transparent', color: GOLD, fontSize: 22, cursor: 'pointer', border: 'none' }}>×</button>
+          <button onClick={handleClose} aria-label="Close" style={{ background: 'transparent', color: GOLD, fontSize: 28, cursor: 'pointer', border: 'none', padding: 0, lineHeight: 1 }}>×</button>
         </div>
 
-        {/* Body */}
         <div className="px-5 py-5">
 
-          {/* ── PRICING ─────────────────────────────────────── */}
           {stage === 'pricing' && (
             <>
               <p style={{ color: '#fff', fontSize: 14, lineHeight: 1.6, marginBottom: 14 }}>
@@ -477,7 +544,6 @@ export default function TrikalVoice() {
             </>
           )}
 
-          {/* ── FORM ─────────────────────────────────────── */}
           {stage === 'form' && (
             <>
               <p style={{ color: '#fff', fontSize: 13, marginBottom: 12 }}>
@@ -488,45 +554,66 @@ export default function TrikalVoice() {
                   </span>
                 )}
               </p>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                <input
-                  placeholder="आपका नाम / Your Name"
-                  value={form.name}
-                  onChange={e => setForm({ ...form, name: e.target.value })}
-                  style={inputStyle}
-                />
-                <input
-                  type="date"
-                  placeholder="Date of Birth"
-                  value={form.dob}
-                  onChange={e => setForm({ ...form, dob: e.target.value })}
-                  style={inputStyle}
-                />
-                <input
-                  type="time"
-                  placeholder="Time of Birth"
-                  value={form.tob}
-                  onChange={e => setForm({ ...form, tob: e.target.value })}
-                  style={inputStyle}
-                />
-                <input
-                  placeholder="Place of Birth (City, Country)"
-                  value={form.pob}
-                  onChange={e => setForm({ ...form, pob: e.target.value })}
-                  style={inputStyle}
-                />
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+
+                <div>
+                  <label style={labelStyle}>Your Name / आपका नाम</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Rohit Gupta"
+                    value={form.name}
+                    onChange={e => setForm({ ...form, name: e.target.value })}
+                    style={inputStyle}
+                  />
+                </div>
+
+                <div>
+                  <label style={labelStyle}>Date of Birth / जन्म तिथि</label>
+                  <input
+                    type="date"
+                    value={form.dob}
+                    onChange={e => setForm({ ...form, dob: e.target.value })}
+                    style={inputStyle}
+                  />
+                </div>
+
+                <div>
+                  <label style={labelStyle}>Time of Birth / जन्म समय</label>
+                  <input
+                    type="time"
+                    value={form.tob}
+                    onChange={e => setForm({ ...form, tob: e.target.value })}
+                    style={inputStyle}
+                  />
+                  <span style={hintStyle}>Approx time also OK / लगभग समय भी ठीक है</span>
+                </div>
+
+                <div>
+                  <label style={labelStyle}>Place of Birth / जन्म स्थान</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Delhi, India"
+                    value={form.pob}
+                    onChange={e => setForm({ ...form, pob: e.target.value })}
+                    style={inputStyle}
+                  />
+                </div>
+
                 <button onClick={handleFormSubmit} style={primaryBtnStyle}>Continue → Record</button>
+                {error && <p style={errorStyle}>{error}</p>}
               </div>
             </>
           )}
 
-          {/* ── RECORD ─────────────────────────────────────── */}
           {stage === 'record' && (
             <div style={{ textAlign: 'center', padding: '20px 0' }}>
-              {!recording ? (
+              {!recording && !micPermissionDenied && (
                 <>
-                  <p style={{ color: '#fff', fontSize: 14, marginBottom: 18 }}>
+                  <p style={{ color: '#fff', fontSize: 14, marginBottom: 8 }}>
                     Mic button दबाएं और 60 seconds तक अपना सवाल बोलें
+                  </p>
+                  <p style={{ color: '#888', fontSize: 11, marginBottom: 18 }}>
+                    Browser microphone access माँगेगा — Allow करें
                   </p>
                   <button
                     onClick={startRecording}
@@ -545,7 +632,9 @@ export default function TrikalVoice() {
                     </svg>
                   </button>
                 </>
-              ) : (
+              )}
+
+              {recording && (
                 <>
                   <p style={{ color: GOLD, fontSize: 13, marginBottom: 10, animation: 'trikalFade 1.5s ease-in-out infinite' }}>
                     Trikal सुन रहे हैं...
@@ -564,11 +653,34 @@ export default function TrikalVoice() {
                   </button>
                 </>
               )}
-              {error && <p style={{ color: '#e74c3c', fontSize: 12, marginTop: 12 }}>{error}</p>}
+
+              {micPermissionDenied && (
+                <>
+                  <div style={{
+                    background: 'rgba(231,76,60,0.1)',
+                    border: '1px solid #e74c3c44',
+                    borderRadius: 8,
+                    padding: 14,
+                    marginBottom: 14,
+                  }}>
+                    <p style={{ color: '#e74c3c', fontSize: 13, margin: 0 }}>{error}</p>
+                  </div>
+                  <p style={{ color: '#bbb', fontSize: 12, marginBottom: 14 }}>
+                    Browser में address bar के बगल में 🔒 icon पर tap करें → Site Settings → Microphone → Allow
+                  </p>
+                  <button
+                    onClick={() => { setMicPermissionDenied(false); setError(''); }}
+                    style={primaryBtnStyle}
+                  >
+                    Try Again
+                  </button>
+                </>
+              )}
+
+              {error && !micPermissionDenied && <p style={errorStyle}>{error}</p>}
             </div>
           )}
 
-          {/* ── PROCESSING ─────────────────────────────────────── */}
           {stage === 'processing' && (
             <div style={{ textAlign: 'center', padding: '40px 0' }}>
               <div style={{
@@ -589,7 +701,6 @@ export default function TrikalVoice() {
             </div>
           )}
 
-          {/* ── REPLY ─────────────────────────────────────── */}
           {stage === 'reply' && (
             <>
               {transcript && (
@@ -639,8 +750,25 @@ export default function TrikalVoice() {
   );
 }
 
-// ── Reusable styles ───────────────────────────────────────────
+const labelStyle: React.CSSProperties = {
+  display: 'block',
+  color: GOLD,
+  fontSize: 12,
+  fontWeight: 600,
+  marginBottom: 6,
+  letterSpacing: 0.3,
+};
+
+const hintStyle: React.CSSProperties = {
+  display: 'block',
+  color: '#777',
+  fontSize: 10,
+  marginTop: 4,
+  fontStyle: 'italic',
+};
+
 const inputStyle: React.CSSProperties = {
+  width: '100%',
   background  : 'rgba(255,255,255,0.05)',
   border      : `1px solid ${GOLD}33`,
   color       : '#fff',
@@ -648,6 +776,7 @@ const inputStyle: React.CSSProperties = {
   borderRadius: 8,
   fontSize    : 14,
   outline     : 'none',
+  boxSizing   : 'border-box',
 };
 
 const primaryBtnStyle: React.CSSProperties = {
@@ -659,6 +788,7 @@ const primaryBtnStyle: React.CSSProperties = {
   fontSize    : 14,
   fontWeight  : 700,
   cursor      : 'pointer',
+  width       : '100%',
 };
 
 const secondaryBtnStyle: React.CSSProperties = {
@@ -670,4 +800,14 @@ const secondaryBtnStyle: React.CSSProperties = {
   fontSize    : 14,
   fontWeight  : 600,
   cursor      : 'pointer',
+};
+
+const errorStyle: React.CSSProperties = {
+  color: '#e74c3c',
+  fontSize: 12,
+  marginTop: 12,
+  padding: 10,
+  background: 'rgba(231,76,60,0.1)',
+  border: '1px solid #e74c3c44',
+  borderRadius: 6,
 };
