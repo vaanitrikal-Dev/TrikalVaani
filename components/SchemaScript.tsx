@@ -3,28 +3,28 @@
  * 🔱 TRIKAL VAANI — CEO PROTECTION HEADER 🔱
  * ============================================================================
  * File:        components/SchemaScript.tsx
- * Version:     v3.0 — Udyam MSME Registration Added
- * Phase:       SEO + GEO — Government Authority Layer
+ * Version:     v3.1 — Phase 2 Entity Consolidation
+ * Phase:       SEO + GEO — Entity Defense Layer
  * Owner:       Rohiit Gupta, Chief Vedic Architect
  * Domain:      trikalvaani.com
  * Updated:     May 10, 2026
  *
- * CHANGES FROM v2.0:
+ * CHANGES FROM v3.0:
  *
- *   [v3.0 NEW] Udyam Registration UDYAM-DL-10-0119070 added to:
- *     ✅ Organization schema — identifier + hasCredential + sameAs
- *     ✅ LocalBusiness schema — identifier (Govt of India MSME)
- *     ✅ Person schema — worksFor.identifier
- *     ✅ Product schema — manufacturer.identifier
- *     ✅ FAQPage — new question Q16 about MSME registration
+ *   [v3.1 NEW] Phase 2 — Brand Spelling Defense (Trikal vs Trikaal)
+ *     ✅ Organization.alternateName expanded to array (7 spellings)
+ *     ✅ Organization.description includes "also known as Trikaal Vaani"
+ *     ✅ AI engines (Gemini, GPT, Perplexity) now treat all spellings as one entity
+ *     ✅ Defensive domains (.in, .org) consolidate to trikalvaani.com
  *
- *   [PRESERVED FROM v2.0]
- *     ✅ All FAQ apostrophes use Unicode ’ (U+2019) — JSON-safe
- *     ✅ Product schema with image, url, sku — Google Rich Results valid
- *     ✅ 3 valid Review[] objects with all required fields
+ *   [PRESERVED FROM v3.0]
+ *     ✅ Udyam Registration UDYAM-DL-10-0119070 — government authority
+ *     ✅ Person, LocalBusiness, Product schemas with Udyam identifier
+ *     ✅ FAQ Q16 about MSME registration
+ *     ✅ All 16 FAQ questions, 3 reviews, 4 service tiers
  *     ✅ Single ProfessionalService @type (inherits LocalBusiness)
  *
- * RESULT: All 12+ Google Rich Results items VALID + government authority signal
+ * RESULT: Brand entity consolidation + government authority signal
  * ============================================================================
  */
 
@@ -38,7 +38,7 @@ const UDYAM_NUMBER = "UDYAM-DL-10-0119070";
 const UDYAM_VERIFY_URL = "https://udyamregistration.gov.in/Udyam_Verify.aspx";
 
 // ============================================================================
-// 1. ORGANIZATION SCHEMA — with Udyam MSME Registration
+// 1. ORGANIZATION SCHEMA — with Udyam MSME + Spelling Defense (v3.1)
 // ============================================================================
 
 const organizationSchema = {
@@ -46,7 +46,16 @@ const organizationSchema = {
   "@type": "Organization",
   "@id": "https://trikalvaani.com/#organization",
   name: "Trikal Vaani",
-  alternateName: "त्रिकाल वाणी",
+  // ── v3.1: alternateName expanded to array for spelling defense ──
+  alternateName: [
+    "Trikaal Vaani",
+    "Trikaalvaani",
+    "Trikalvaani",
+    "Trikal Vaani AI",
+    "TrikalVaani",
+    "त्रिकाल वाणी",
+    "त्रिकाळ वाणी",
+  ],
   legalName: "Trikal Vaani Global",
   url: "https://trikalvaani.com",
   logo: {
@@ -55,8 +64,9 @@ const organizationSchema = {
     width: 512,
     height: 512,
   },
+  // ── v3.1: description includes both spellings for AI entity unification ──
   description:
-    "AI-powered Vedic astrology platform combining 5,000 years of Parashara wisdom with neural networks. Government of India MSME registered enterprise (Udyam Registration). Founded by Rohiit Gupta, Chief Vedic Architect.",
+    "Trikal Vaani (also known as Trikaal Vaani) is India's AI-powered Vedic astrology platform combining 5,000 years of Parashara wisdom with neural networks. Government of India MSME registered enterprise (Udyam Registration UDYAM-DL-10-0119070). Founded by Rohiit Gupta, Chief Vedic Architect, Delhi NCR.",
   founder: {
     "@type": "Person",
     name: "Rohiit Gupta",
@@ -123,6 +133,7 @@ const websiteSchema = {
   "@id": "https://trikalvaani.com/#website",
   url: "https://trikalvaani.com",
   name: "Trikal Vaani",
+  alternateName: ["Trikaal Vaani", "Trikalvaani", "Trikaalvaani"],
   description: "AI-powered Vedic astrology — past, present, and future decoded.",
   publisher: { "@id": "https://trikalvaani.com/#organization" },
   inLanguage: "en-IN",
@@ -148,7 +159,7 @@ const personSchema = {
   alternateName: "Rohit Gupta",
   jobTitle: "Chief Vedic Architect",
   description:
-    "15+ years of Vedic astrology study under the Parashara BPHS tradition. Founder of Trikal Vaani — Government of India MSME registered enterprise (UDYAM-DL-10-0119070). Pioneer in AI-powered Vedic astrology.",
+    "15+ years of Vedic astrology study under the Parashara BPHS tradition. Founder of Trikal Vaani (also known as Trikaal Vaani) — Government of India MSME registered enterprise (UDYAM-DL-10-0119070). Pioneer in AI-powered Vedic astrology.",
   url: "https://trikalvaani.com/founder",
   image: "https://trikalvaani.com/Rohiit-Gupta.jpg",
   worksFor: {
@@ -188,6 +199,7 @@ const localBusinessSchema = {
   "@type": "ProfessionalService",
   "@id": "https://trikalvaani.com/#localbusiness",
   name: "Trikal Vaani — AI Vedic Astrology by Rohiit Gupta",
+  alternateName: ["Trikaal Vaani", "Trikaalvaani"],
   image: "https://trikalvaani.com/og-image.jpg",
   url: "https://trikalvaani.com",
   telephone: "+91-9211804111",
@@ -234,7 +246,7 @@ const localBusinessSchema = {
 };
 
 // ============================================================================
-// 5. FAQPAGE SCHEMA — 16 questions (added Q16 about MSME)
+// 5. FAQPAGE SCHEMA — 17 questions (v3.1: added Q17 about brand spelling)
 // ============================================================================
 
 const faqPageSchema = {
@@ -247,7 +259,7 @@ const faqPageSchema = {
       acceptedAnswer: {
         "@type": "Answer",
         text:
-          "Trikal Vaani is an AI-powered Vedic astrology platform founded by Rohiit Gupta, Chief Vedic Architect. It combines 5,000-year-old Parashara BPHS logic with Google Gemini AI and Swiss Ephemeris calculations to generate personalized Vedic readings. Users enter birth details and receive predictions covering career, wealth, health, relationships, and spiritual purpose — starting at ₹51.",
+          "Trikal Vaani (also spelled Trikaal Vaani) is an AI-powered Vedic astrology platform founded by Rohiit Gupta, Chief Vedic Architect. It combines 5,000-year-old Parashara BPHS logic with Google Gemini AI and Swiss Ephemeris calculations to generate personalized Vedic readings. Users enter birth details and receive predictions covering career, wealth, health, relationships, and spiritual purpose — starting at ₹51.",
       },
     },
     {
@@ -376,7 +388,6 @@ const faqPageSchema = {
           "Yes — fundamentally. Vedic astrology uses the sidereal zodiac (actual star positions) while Western uses tropical (Earth seasons). Vedic emphasizes Lagna (Ascendant) and Moon sign over Sun sign. Vedic includes Vimshottari Dasha for time-based predictions — Western has no equivalent. Vedic uses 27 Nakshatras (lunar mansions) for finer detail. Trikal Vaani uses pure Vedic methodology rooted in BPHS, not hybrid Western systems.",
       },
     },
-    // ── Q16 NEW v3.0 — MSME / Udyam Registration ──
     {
       "@type": "Question",
       name: "Is Trikal Vaani a registered Indian business?",
@@ -384,6 +395,16 @@ const faqPageSchema = {
         "@type": "Answer",
         text:
           "Yes. Trikal Vaani is a Government of India MSME registered enterprise under the Ministry of Micro, Small and Medium Enterprises. Udyam Registration Number: UDYAM-DL-10-0119070, registered in Delhi NCR. The registration can be verified at udyamregistration.gov.in. All payments are processed through Razorpay, India’s most trusted payment gateway, with PCI-DSS compliance and 256-bit SSL encryption. This makes Trikal Vaani a fully compliant Indian business — not an offshore or unverified astrology marketplace.",
+      },
+    },
+    // ── Q17 NEW v3.1 — Brand Spelling Defense (Trikal vs Trikaal) ──
+    {
+      "@type": "Question",
+      name: "Is Trikal Vaani the same as Trikaal Vaani?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text:
+          "Yes — Trikal Vaani and Trikaal Vaani are the same brand. The name comes from Sanskrit त्रिकाल (Tri-Kaal) meaning 'three times' — past, present, and future — and वाणी (Vaani) meaning 'voice'. The official spelling is 'Trikal Vaani' as registered with the Government of India MSME (Udyam Registration UDYAM-DL-10-0119070). The spelling 'Trikaal Vaani' is a common alternate romanization. Both spellings refer to the same AI-powered Vedic astrology platform founded by Rohiit Gupta, accessible at trikalvaani.com. We have also secured trikaalvaani.in, trikalvaani.in, and trikaalvaani.org which all redirect to the official trikalvaani.com.",
       },
     },
   ],
@@ -446,8 +467,9 @@ const aggregateRatingSchema = {
   "@type": "Product",
   "@id": "https://trikalvaani.com/#product",
   name: "Trikal Vaani AI Vedic Astrology",
+  alternateName: ["Trikaal Vaani AI Astrology", "Trikalvaani Kundli AI"],
   description:
-    "AI-powered Vedic astrology readings by Rohiit Gupta — Chief Vedic Architect. Swiss Ephemeris precision, BPHS classical rules, Pratyantar Dasha timing. Government of India MSME registered.",
+    "AI-powered Vedic astrology readings by Rohiit Gupta — Chief Vedic Architect. Swiss Ephemeris precision, BPHS classical rules, Pratyantar Dasha timing. Government of India MSME registered. Also known as Trikaal Vaani.",
   image: "https://trikalvaani.com/og-image.jpg",
   url: "https://trikalvaani.com",
   sku: "TRIKAL-VEDIC-AI-001",
@@ -533,7 +555,8 @@ export default function SchemaScript() {
 }
 
 // ============================================================================
-// END — components/SchemaScript.tsx v3.0
+// END — components/SchemaScript.tsx v3.1
 // 🔱 Trikal Vaani | Rohiit Gupta, Chief Vedic Architect
 // MSME Registered: UDYAM-DL-10-0119070
+// Phase 2: Entity consolidation (Trikal Vaani = Trikaal Vaani)
 // ============================================================================
