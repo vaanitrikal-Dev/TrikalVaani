@@ -74,4 +74,3 @@ Career · Wealth · Health · Relationships · Family · Education · Home & Pro
 ---
 
 © 2026 Trikal Vaani · Rohiit Gupta, Chief Vedic Architect · Delhi NCR, India
-
