@@ -1,111 +1,117 @@
 /**
  * ============================================================
- * TRIKAL VAANI — Dakshina Order Creation API
+ * TRIKAL VAANI — Dakshina Verification API
  * CEO & Chief Vedic Architect: Rohiit Gupta
- * File: app/api/create-dakshina-order/route.ts
+ * File: app/api/verify-dakshina/route.ts
  * VERSION: 1.0
  * SIGNED: ROHIIT GUPTA, CEO
  * ============================================================
- * Maa Shakti Dakshina — variable amount Razorpay flow
- * Validates amount is in allowed Arzi or Dhanyawad list
- * (anti-tamper: user can NOT send arbitrary amounts)
+ * Verifies HMAC-SHA256 signature server-side and saves
+ * dakshina record to Supabase `dakshina` table.
  * ============================================================
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import Razorpay from 'razorpay';
+import { createClient } from '@supabase/supabase-js';
+import crypto from 'crypto';
 
-// ── Allowed amounts (rupees, NOT paise) ──────────────────────
-const ARZI_ALLOWED = [101, 201, 501, 1001, 2101, 5001, 11000, 21000, 51000, 108000];
-const DHANYAWAD_ALLOWED = [101, 251, 501, 1008, 2501, 5001, 10001, 21000, 51000, 108000];
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
 
-// "Apni dakshina" — custom amount within sane limits (₹51 to ₹5,00,000)
-const CUSTOM_MIN = 51;
-const CUSTOM_MAX = 500000;
-
-const razorpay = new Razorpay({
-  key_id: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID!,
-  key_secret: process.env.RAZORPAY_KEY_SECRET!,
-});
-
-interface DakshinaRequest {
+interface DakshinaVerifyRequest {
+  razorpay_order_id: string;
+  razorpay_payment_id: string;
+  razorpay_signature: string;
   type: 'arzi' | 'dhanyawad';
-  amount: number;        // in rupees
-  reportSlug?: string;   // optional — links dakshina to a report
-  isCustom?: boolean;    // true if user picked "Apni dakshina"
+  amount: number;             // rupees
+  reportSlug?: string;
+  devoteeName?: string;
+  devoteeMobile?: string;
+  message?: string;           // optional dil ki baat
 }
 
 export async function POST(req: NextRequest) {
   try {
-    const body: DakshinaRequest = await req.json();
-    const { type, amount, reportSlug, isCustom } = body;
+    const body: DakshinaVerifyRequest = await req.json();
+    const {
+      razorpay_order_id,
+      razorpay_payment_id,
+      razorpay_signature,
+      type,
+      amount,
+      reportSlug,
+      devoteeName,
+      devoteeMobile,
+      message,
+    } = body;
 
-    // ── Validate type ──────────────────────────────────────
-    if (type !== 'arzi' && type !== 'dhanyawad') {
+    if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
       return NextResponse.json(
-        { error: 'Invalid type. Must be "arzi" or "dhanyawad".' },
+        { error: 'Missing payment fields.' },
         { status: 400 }
       );
     }
 
-    // ── Validate amount ────────────────────────────────────
-    if (!Number.isFinite(amount) || amount <= 0) {
+    // ── HMAC-SHA256 signature verification ────────────────
+    const secret = process.env.RAZORPAY_KEY_SECRET!;
+    const payload = `${razorpay_order_id}|${razorpay_payment_id}`;
+    const expected = crypto
+      .createHmac('sha256', secret)
+      .update(payload)
+      .digest('hex');
+
+    if (expected !== razorpay_signature) {
+      console.error('[Trikal] Dakshina signature mismatch');
       return NextResponse.json(
-        { error: 'Invalid amount.' },
+        { error: 'Payment verification failed.' },
         { status: 400 }
       );
     }
 
-    // For "Apni dakshina" — validate within range only
-    if (isCustom) {
-      if (amount < CUSTOM_MIN || amount > CUSTOM_MAX) {
-        return NextResponse.json(
-          { error: `Custom dakshina must be between ₹${CUSTOM_MIN} and ₹${CUSTOM_MAX.toLocaleString('en-IN')}.` },
-          { status: 400 }
-        );
-      }
-    } else {
-      // For preset buttons — must match exact allowed list (anti-tamper)
-      const allowedList = type === 'arzi' ? ARZI_ALLOWED : DHANYAWAD_ALLOWED;
-      if (!allowedList.includes(amount)) {
-        return NextResponse.json(
-          { error: 'Amount not in allowed list. Please choose from preset options or use "Apni dakshina".' },
-          { status: 400 }
-        );
-      }
-    }
-
-    // ── Convert rupees → paise for Razorpay ────────────────
-    const amountPaise = Math.round(amount * 100);
-
-    // ── Create Razorpay Order ──────────────────────────────
-    const order = await razorpay.orders.create({
-      amount: amountPaise,
-      currency: 'INR',
-      receipt: `tv_dak_${type}_${Date.now()}`,
-      notes: {
-        platform: 'Trikal Vaani',
-        purpose: 'Maa Shakti Dakshina',
-        type,
-        is_custom: isCustom ? 'true' : 'false',
-        report_slug: reportSlug ?? '',
-        architect: 'Rohiit Gupta',
-      },
+    // ── Save to Supabase dakshina table ───────────────────
+    const { error } = await supabase.from('dakshina').insert({
+      type,
+      amount_rupees:       amount,
+      amount_paise:        Math.round(amount * 100),
+      razorpay_order_id,
+      razorpay_payment_id,
+      report_slug:         reportSlug ?? null,
+      devotee_name:        devoteeName ?? null,
+      devotee_mobile:      devoteeMobile ?? null,
+      message:             message ? message.slice(0, 500) : null,
+      payment_verified:    true,
+      created_at:          new Date().toISOString(),
     });
 
+    if (error) {
+      console.error('[Trikal] Dakshina save error:', error.message);
+      // Even if save fails, payment IS done — don't fail the user response
+    }
+
+    // ── Build WhatsApp confirmation link to Rohiit ────────
+    const blessing = type === 'arzi'
+      ? '🙏 Maa ne aapki Arzi sweekar kar li hai. Rohiit ji aapko personally connect karenge.'
+      : '🌺 Maa ka Dhanyawad pahunch gaya. Aapki bhakti par Maa ki kripa banaye rakhe.';
+
+    const waMessage = encodeURIComponent(
+      `${type === 'arzi' ? 'Pranam Rohiit ji, Maa ko Arzi karna chahta hoon.' : 'Jai Maa Shakti! Maa ne meri sun li.'}\n\nDakshina: ₹${amount.toLocaleString('en-IN')}\nPayment ID: ${razorpay_payment_id}\n${reportSlug ? `Report: trikalvaani.com/report/${reportSlug}\n` : ''}${message ? `\nDil ki baat: ${message}` : ''}\n\nJai Maa Shakti! 🔱`
+    );
+
     return NextResponse.json({
-      orderId: order.id,
-      amount: order.amount,        // paise
-      amountRupees: amount,        // rupees (for display)
-      currency: order.currency,
-      keyId: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+      success: true,
       type,
+      paymentId: razorpay_payment_id,
+      amount,
+      blessing,
+      whatsappUrl: `https://wa.me/919211804111?text=${waMessage}`,
     });
 
   } catch (err: unknown) {
-    console.error('[Trikal] Dakshina order error:', err);
+    console.error('[Trikal] Verify dakshina error:', err);
     return NextResponse.json(
-      { error: 'Could not create dakshina order. Please try again.' },
+      { error: 'Server error during verification.' },
       { status: 500 }
     );
   }
