@@ -3,7 +3,7 @@
  * TRIKAL VAANI — Voice Prediction API
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/api/voice-predict/route.ts
- * VERSION: 1.2 — Fixed token limit for Hindi/Hinglish
+ * VERSION: 1.4 — CEO order: 6000 tokens for richest predictions
  * SIGNED: ROHIIT GUPTA, CEO
  *
  * ⚠️ STRICT CEO ORDER: DO NOT EDIT WITHOUT CEO APPROVAL
@@ -115,7 +115,7 @@ Write a warm, specific 100-120 word Hinglish voice prediction. Count your words 
         contents: [{ role: 'user', parts: [{ text: userMessage }] }],
         generationConfig: {
           temperature    : 0.85,
-          maxOutputTokens: 800,   // FIX: 250 was too low for Hindi (2-4 tokens/word)
+          maxOutputTokens: 6000,  // CEO ORDER: 6000 tokens for rich complete Devanagari predictions
           topP           : 0.9,
         },
       }),
@@ -167,6 +167,6 @@ export async function GET() {
   return NextResponse.json({
     status  : 'Trikal Voice Predict API is live',
     version : '1.2',
-    fix     : 'maxOutputTokens 800 for full Hindi/Hinglish predictions',
+    fix     : 'maxOutputTokens 6000 — CEO approved for maximum quality',
   });
 }
