@@ -67,7 +67,6 @@ Career · Wealth · Health · Relationships · Family · Education · Home & Pro
 
 ## Brand Slogan
 
-
 > *"Kaal bada balwan hai, sabko nach nachaye; raja ka beta bhi bhiksha mangne jaye."*
 >
 > Time is the most powerful force; it makes everyone dance — even a king's son may end up begging.
@@ -75,3 +74,4 @@ Career · Wealth · Health · Relationships · Family · Education · Home & Pro
 ---
 
 © 2026 Trikal Vaani · Rohiit Gupta, Chief Vedic Architect · Delhi NCR, India
+
