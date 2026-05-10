@@ -1,3 +1,32 @@
+/**
+ * ============================================================================
+ * 🔱 TRIKAL VAANI — CEO PROTECTION HEADER 🔱
+ * ============================================================================
+ * File:        components/SiteFooter.tsx
+ * Version:     v2.1 — Phase 2 Entity Signal Added
+ * Phase:       SEO + GEO — Brand Spelling Defense
+ * Owner:       Rohiit Gupta, Chief Vedic Architect
+ * Domain:      trikalvaani.com
+ * Updated:     May 10, 2026
+ *
+ * CHANGES FROM v2.0:
+ *
+ *   [v2.1 NEW] Phase 2 — Brand Entity Signal
+ *     ✅ Footer entity line: "Trikal Vaani is also searched as Trikaal Vaani"
+ *     ✅ Appears on EVERY page across the site (highest GEO signal)
+ *     ✅ Teaches AI crawlers (Gemini, GPT, Perplexity) entity unification
+ *     ✅ Mention of defensive domains (.in, .org) for spelling capture
+ *
+ *   [PRESERVED FROM v2.0]
+ *     ✅ Dynamic seekers counter (10k+, grows ~8/day)
+ *     ✅ WhatsApp CTA (+91-9211804111)
+ *     ✅ Founder card with Rohiit Gupta photo
+ *     ✅ Email: rohiit@trikalvaani.com
+ *     ✅ All blog/festival/policy links updated to 2026
+ *     ✅ Cyber-luxury gold theme (D4AF37)
+ * ============================================================================
+ */
+
 'use client';
 
 import Link from 'next/link';
@@ -9,7 +38,7 @@ const GOLD = '#D4AF37';
 const GOLD_RGBA = (a: number) => `rgba(212,175,55,${a})`;
 
 export default function SiteFooter() {
-  // ✅ FIXED: Dynamic counter — starts at realistic number, increments naturally
+  // ✅ Dynamic counter — starts at realistic number, increments naturally
   const [count, setCount] = useState(() => {
     // Base count grows over time from launch date
     const launchDate = new Date('2024-01-01').getTime();
@@ -87,7 +116,7 @@ export default function SiteFooter() {
               <span>Delhi NCR, India — Global Platform</span>
             </div>
 
-            {/* ✅ NEW: WhatsApp CTA in footer */}
+            {/* WhatsApp CTA in footer */}
             <a
               href="https://wa.me/919211804111?text=Namaste%20Rohiit%20ji%2C%20I%20want%20to%20book%20a%20personal%20reading"
               target="_blank"
@@ -148,12 +177,15 @@ export default function SiteFooter() {
               <Link href="/blog/vedic-astrology-vs-western-astrology" className="text-xs text-slate-500 hover:text-slate-300 transition-colors">
                 Vedic vs Western Astrology
               </Link>
-              {/* ✅ FIXED: Blog links updated to 2026 */}
               <Link href="/blog/shani-gochar-2026-saturn-transit" className="text-xs text-slate-500 hover:text-slate-300 transition-colors">
                 Shani Gochar 2026
               </Link>
               <Link href="/blog/rahu-ketu-axis-2026-karmic-shift" className="text-xs text-slate-500 hover:text-slate-300 transition-colors">
                 Rahu-Ketu Transit 2026
+              </Link>
+              {/* ✅ v2.1 NEW: Brand spelling capture page link */}
+              <Link href="/trikaal-vaani" className="text-xs text-slate-500 hover:text-slate-300 transition-colors">
+                Trikaal Vaani — Brand Origin
               </Link>
             </nav>
 
@@ -187,7 +219,6 @@ export default function SiteFooter() {
               </p>
               <p className="text-sm leading-relaxed">
                 For queries:{' '}
-                {/* ✅ FIXED: Updated email */}
                 <a
                   href="mailto:rohiit@trikalvaani.com"
                   className="inline-flex items-center gap-1.5 font-bold transition-all duration-200 hover:scale-105 hover:brightness-110"
@@ -225,6 +256,26 @@ export default function SiteFooter() {
           </div>
         </div>
 
+        {/* ✅ v2.1 NEW: ENTITY CONSOLIDATION SIGNAL — appears on every page */}
+        <div
+          className="mb-6 rounded-xl px-5 py-3.5 text-center"
+          style={{
+            background: 'rgba(11,16,26,0.5)',
+            border: `1px solid ${GOLD_RGBA(0.12)}`,
+          }}
+        >
+          <p className="text-xs leading-relaxed" style={{ color: GOLD_RGBA(0.7) }}>
+            <strong style={{ color: GOLD }}>Trikal Vaani</strong> is also searched as{' '}
+            <strong style={{ color: GOLD_RGBA(0.85) }}>Trikaal Vaani</strong>
+            <span className="text-slate-500"> · </span>
+            India&apos;s AI-powered Vedic Astrology platform by Rohiit Gupta.
+            <br />
+            <span className="text-slate-600 text-[11px]">
+              Official domain: trikalvaani.com · Also: trikaalvaani.in · trikalvaani.in · trikaalvaani.org
+            </span>
+          </p>
+        </div>
+
         <div
           className="pt-6 flex flex-col gap-4"
           style={{ borderTop: `1px solid ${GOLD_RGBA(0.07)}` }}
@@ -254,6 +305,8 @@ export default function SiteFooter() {
             <div className="flex flex-wrap items-center gap-4 text-xs text-slate-700">
               <span>&copy; {new Date().getFullYear()} Trikal Vaani Global. All rights reserved.</span>
               <span style={{ color: GOLD_RGBA(0.2) }}>·</span>
+              <span>MSME: UDYAM-DL-10-0119070</span>
+              <span style={{ color: GOLD_RGBA(0.2) }}>·</span>
               <span>Accurate AI Astrology</span>
               <span style={{ color: GOLD_RGBA(0.2) }}>·</span>
               <span>Vedic Shastra AI</span>
@@ -267,3 +320,10 @@ export default function SiteFooter() {
     </footer>
   );
 }
+
+// ============================================================================
+// END — components/SiteFooter.tsx v2.1
+// 🔱 Trikal Vaani | Rohiit Gupta, Chief Vedic Architect
+// MSME Registered: UDYAM-DL-10-0119070
+// Phase 2: Entity consolidation signal added (Trikal = Trikaal)
+// ============================================================================
