@@ -3,22 +3,30 @@
  * TRIKAL VAANI — trikalvaani.com
  * Chief Vedic Architect: Rohiit Gupta
  * FILE: app/layout.tsx
- * Version: 2.1 — Title aligned to "Free AI Kundli & Horoscope Predictions"
+ * VERSION: 2.2 — Adds sitewide TrustStrip + SiteFooter
  * Last Updated: May 2026
  * 🔱 JAI MAA SHAKTI
  *
  * NOTES FOR ROHIIT JI:
- * - REPLACES: existing app/layout.tsx
- * - All metadata threaded with new title for consistent SEO signal
- * - Sitewide schemas: Organization + WebSite (with SearchAction)
- * - Hindi locale alternate + Delhi NCR geo signals
+ * - REPLACES: existing app/layout.tsx (v2.1)
+ * - v2.2 changes vs v2.1:
+ *     ✅ Imports TrustStrip (new)
+ *     ✅ Imports SiteFooter (moved from page.tsx to here)
+ *     ✅ Both render sitewide via {children} wrapper
+ *     ✅ ALL v2.1 metadata + schemas preserved (untouched)
  * - DOES NOT TOUCH: gemini-prompt.ts (LOCKED), verifiedTier, BirthForm
+ * - Action needed in page.tsx: REMOVE the <SiteFooter /> from page.tsx
+ *   if you have it there (now sitewide via this layout).
  * =============================================================
  */
 
 import type { Metadata } from 'next';
 import Script from 'next/script';
-import './globals.css'; // your existing globals — keep path same
+import './globals.css';
+
+// ── Sitewide components ──────────────────────────────────────
+import TrustStrip from '@/components/TrustStrip';
+import SiteFooter from '@/components/SiteFooter';
 
 // ──────────────────────────────────────────────────────────────
 // SITEWIDE METADATA DEFAULTS (overridden per page)
@@ -67,7 +75,7 @@ export const metadata: Metadata = {
       'Get your free AI kundli and horoscope instantly. Swiss Ephemeris Vedic astrology by Rohiit Gupta, Chief Vedic Architect.',
     images: [
       {
-        url: '/og-image.jpg', // place 1200x630 og image at /public/og-image.jpg
+        url: '/og-image.jpg',
         width: 1200,
         height: 630,
         alt: 'Trikal Vaani — Free AI Kundli & Horoscope Predictions by Rohiit Gupta',
@@ -105,7 +113,6 @@ export const metadata: Metadata = {
     'वैदिक ज्योतिष',
   ],
   verification: {
-    // add your verification tokens here
     google: 'YOUR_GOOGLE_SEARCH_CONSOLE_TOKEN',
     yandex: 'YOUR_YANDEX_TOKEN',
     other: {
@@ -116,8 +123,6 @@ export const metadata: Metadata = {
 
 // ──────────────────────────────────────────────────────────────
 // SITEWIDE JSON-LD SCHEMAS (Organization + WebSite + SearchAction)
-// These appear on EVERY page — they verify your brand entity
-// to Google, Bing, Perplexity, ChatGPT, Gemini.
 // ──────────────────────────────────────────────────────────────
 const organizationSchema = {
   '@context': 'https://schema.org',
@@ -183,6 +188,8 @@ const organizationSchema = {
     'Navamsa D9',
     'Kundali Matching',
   ],
+  paymentAccepted: ['UPI', 'Credit Card', 'Debit Card', 'Net Banking', 'Wallet', 'RuPay'],
+  currenciesAccepted: 'INR',
   slogan:
     'Kaal bada balwan hai, sabko nach nachaye — raja ka beta bhi bhiksha mangne jaye.',
 };
@@ -199,7 +206,6 @@ const websiteSchema = {
     '@id': 'https://trikalvaani.com/#organization',
   },
   inLanguage: ['en-IN', 'hi-IN'],
-  // SearchAction gives you a sitelinks search box in Google SERP
   potentialAction: {
     '@type': 'SearchAction',
     target: {
@@ -237,7 +243,7 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
         />
 
-        {/* DNS prefetch for performance — TTFB improvement */}
+        {/* DNS prefetch for performance */}
         <link rel="dns-prefetch" href="https://api.prokerala.com" />
         <link
           rel="dns-prefetch"
@@ -245,13 +251,28 @@ export default function RootLayout({
         />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
 
+        {/* Razorpay checkout script — sitewide preconnect for faster popup */}
+        <link rel="dns-prefetch" href="https://checkout.razorpay.com" />
+        <link rel="preconnect" href="https://checkout.razorpay.com" />
+
         {/* Geo signals for local SEO */}
         <meta name="geo.region" content="IN-DL" />
         <meta name="geo.placename" content="New Delhi" />
         <meta name="geo.position" content="28.6139;77.2090" />
         <meta name="ICBM" content="28.6139, 77.2090" />
       </head>
-      <body className="bg-[#080B12] text-white antialiased">{children}</body>
+      <body className="bg-[#080B12] text-white antialiased">
+
+        {/* ── Page content (homepage, pricing, founder, blog, etc.) ── */}
+        {children}
+
+        {/* ── Sitewide TrustStrip — Razorpay + Vedic + E-E-A-T signals ── */}
+        <TrustStrip />
+
+        {/* ── Sitewide SiteFooter — your existing footer component ── */}
+        <SiteFooter />
+
+      </body>
     </html>
   );
 }
