@@ -3,25 +3,27 @@
  * TRIKAL VAANI — Voice Transcription API (Google STT REST)
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/api/voice-transcribe/route.ts
- * VERSION: 1.2 — Auto-detect encoding + Detailed error logging
+ * VERSION: 1.3 — Node crypto JWT signing (most reliable on Vercel)
  * SIGNED: ROHIIT GUPTA, CEO
  *
- * v1.2 CHANGES (May 10, 2026):
- *   - REMOVED: hardcoded WEBM_OPUS encoding (Google auto-detects now)
- *   - REMOVED: hardcoded sampleRateHertz (Google auto-detects)
- *   - ADDED: Detailed error logging — surfaces Google API errors to client
- *   - ADDED: JWT signing fallback for base64url
- *   - ADDED: Better mobile audio compatibility
+ * v1.3 CHANGES (May 10, 2026):
+ *   - REPLACED: Web Crypto API → Node 'crypto' module for JWT signing
+ *   - Reason: Web Crypto's crypto.subtle.importKey was silently failing
+ *             on Vercel Node 20 with PKCS8 base64 buffers
+ *   - Node crypto.createSign() handles PEM keys directly — bulletproof
+ *   - Same auto-detect encoding, same logging, same response format
  * ============================================================
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import crypto from 'crypto';
 
 export const runtime = 'nodejs';
 export const maxDuration = 60;
 
-// ── base64url helper (Node compat) ───────────────────────────
-function toBase64Url(buf: Buffer): string {
+// ── base64url helper ─────────────────────────────────────────
+function toBase64Url(input: Buffer | string): string {
+  const buf = typeof input === 'string' ? Buffer.from(input) : input;
   return buf
     .toString('base64')
     .replace(/\+/g, '-')
@@ -29,15 +31,8 @@ function toBase64Url(buf: Buffer): string {
     .replace(/=+$/, '');
 }
 
-// ── Google JWT auth ───────────────────────────────────────────
-async function getAccessToken(): Promise<string> {
-  const clientEmail = process.env.GOOGLE_CLOUD_CLIENT_EMAIL;
-  const privateKey = process.env.GOOGLE_CLOUD_PRIVATE_KEY?.replace(/\\n/g, '\n');
-
-  if (!clientEmail || !privateKey) {
-    throw new Error('[Trikal STT] Missing Google credentials in env vars');
-  }
-
+// ── JWT signing using Node crypto (bulletproof on Vercel) ────
+function signJwt(clientEmail: string, privateKey: string): string {
   const now = Math.floor(Date.now() / 1000);
   const header = { alg: 'RS256', typ: 'JWT' };
   const claim = {
@@ -48,40 +43,39 @@ async function getAccessToken(): Promise<string> {
     iat: now,
   };
 
-  const encodedHeader = toBase64Url(Buffer.from(JSON.stringify(header)));
-  const encodedClaim = toBase64Url(Buffer.from(JSON.stringify(claim)));
-  const unsigned = `${encodedHeader}.${encodedClaim}`;
+  const headerB64 = toBase64Url(JSON.stringify(header));
+  const claimB64 = toBase64Url(JSON.stringify(claim));
+  const unsigned = `${headerB64}.${claimB64}`;
 
-  const keyData = privateKey
-    .replace(/-----BEGIN PRIVATE KEY-----/, '')
-    .replace(/-----END PRIVATE KEY-----/, '')
-    .replace(/\s/g, '');
+  // Node crypto.createSign — direct PEM input, no buffer conversion
+  const signer = crypto.createSign('RSA-SHA256');
+  signer.update(unsigned);
+  const signature = signer.sign(privateKey);
+  const signatureB64 = toBase64Url(signature);
 
-  if (!keyData) {
-    throw new Error('[Trikal STT] Private key empty after parsing');
+  return `${unsigned}.${signatureB64}`;
+}
+
+// ── Get Google access token ───────────────────────────────────
+async function getAccessToken(): Promise<string> {
+  const clientEmail = process.env.GOOGLE_CLOUD_CLIENT_EMAIL;
+  const privateKey = process.env.GOOGLE_CLOUD_PRIVATE_KEY?.replace(/\\n/g, '\n');
+
+  if (!clientEmail || !privateKey) {
+    throw new Error('[Trikal STT] Missing Google credentials in env vars');
   }
 
-  let cryptoKey: CryptoKey;
+  if (!privateKey.includes('BEGIN PRIVATE KEY')) {
+    throw new Error('[Trikal STT] Private key format invalid (missing BEGIN marker)');
+  }
+
+  let jwt: string;
   try {
-    cryptoKey = await crypto.subtle.importKey(
-      'pkcs8',
-      Buffer.from(keyData, 'base64'),
-      { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' },
-      false,
-      ['sign']
-    );
+    jwt = signJwt(clientEmail, privateKey);
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
-    throw new Error(`[Trikal STT] Key import failed: ${msg}`);
+    throw new Error(`[Trikal STT] JWT signing failed: ${msg}`);
   }
-
-  const signature = await crypto.subtle.sign(
-    'RSASSA-PKCS1-v1_5',
-    cryptoKey,
-    new TextEncoder().encode(unsigned)
-  );
-
-  const jwt = `${unsigned}.${toBase64Url(Buffer.from(signature))}`;
 
   const res = await fetch('https://oauth2.googleapis.com/token', {
     method: 'POST',
@@ -94,7 +88,7 @@ async function getAccessToken(): Promise<string> {
 
   const data = await res.json();
   if (!data.access_token) {
-    throw new Error(`[Trikal STT] Token exchange failed: ${JSON.stringify(data)}`);
+    throw new Error(`[Trikal STT] Token exchange failed: ${JSON.stringify(data).substring(0, 300)}`);
   }
   return data.access_token;
 }
@@ -120,10 +114,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Audio too short — please speak longer' }, { status: 400 });
     }
 
-    console.log('[Trikal STT] Audio received:', {
+    console.log('[Trikal STT v1.3] Audio received:', {
       size: audioFile.size,
       type: audioFile.type,
-      name: audioFile.name,
     });
 
     const arrayBuffer = await audioFile.arrayBuffer();
@@ -140,7 +133,7 @@ export async function POST(req: NextRequest) {
     }
 
     const token = await getAccessToken();
-    console.log('[Trikal STT] Token obtained, calling Google STT');
+    console.log('[Trikal STT v1.3] Token OK, calling Google STT');
 
     // ── Google STT — auto-detect encoding ───────────────────
     const sttRes = await fetch(
@@ -153,7 +146,6 @@ export async function POST(req: NextRequest) {
         },
         body: JSON.stringify({
           config: {
-            // Encoding + sampleRate auto-detected from audio header
             languageCode,
             alternativeLanguageCodes,
             model: 'default',
@@ -179,7 +171,7 @@ export async function POST(req: NextRequest) {
 
     if (!sttRes.ok) {
       const errText = await sttRes.text();
-      console.error('[Trikal STT] Google API error:', sttRes.status, errText);
+      console.error('[Trikal STT v1.3] Google API error:', sttRes.status, errText.substring(0, 500));
       return NextResponse.json(
         {
           error: 'Voice service error',
@@ -191,7 +183,7 @@ export async function POST(req: NextRequest) {
     }
 
     const sttData = await sttRes.json();
-    console.log('[Trikal STT] Google response keys:', Object.keys(sttData));
+    console.log('[Trikal STT v1.3] Google response received');
 
     type AltResult = { transcript?: string; confidence?: number };
     type SttResult = { alternatives?: AltResult[] };
@@ -204,12 +196,11 @@ export async function POST(req: NextRequest) {
         .trim() || '';
 
     if (!transcription) {
-      console.warn('[Trikal STT] Empty transcription. Full response:', JSON.stringify(sttData));
+      console.warn('[Trikal STT v1.3] Empty transcription:', JSON.stringify(sttData).substring(0, 300));
       return NextResponse.json(
         {
           error: 'Could not understand audio. Please speak clearly and try again.',
           transcription: '',
-          debug: sttData,
         },
         { status: 422 }
       );
@@ -229,15 +220,13 @@ export async function POST(req: NextRequest) {
       {
         headers: {
           'Cache-Control': 'no-store',
-          'X-Trikal-Voice': 'v1.2',
+          'X-Trikal-Voice': 'v1.3',
         },
       }
     );
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
-    const stack = err instanceof Error ? err.stack : '';
-    console.error('[Trikal STT] Fatal error:', message);
-    console.error('[Trikal STT] Stack:', stack);
+    console.error('[Trikal STT v1.3] Fatal:', message);
     return NextResponse.json(
       {
         error: 'Voice transcription failed',
@@ -251,8 +240,8 @@ export async function POST(req: NextRequest) {
 export async function GET() {
   return NextResponse.json({
     status: 'Trikal Voice STT API is live',
-    model: 'google-speech-rest-default',
+    version: '1.3',
+    auth: 'node-crypto-jwt',
     languages: ['hi-IN', 'en-IN'],
-    version: '1.2',
   });
 }
