@@ -3,7 +3,7 @@
  * TRIKAL VAANI — Voice TTS API
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/api/voice-tts/route.ts
- * VERSION: 4.0 — Gemini-TTS for ALL tiers (CEO quality mandate)
+ * VERSION: 4.1 — Gemini-TTS for ALL tiers (CEO quality mandate)
  * SIGNED: ROHIIT GUPTA, CEO
  *
  * ⚠️ STRICT CEO ORDER: DO NOT EDIT WITHOUT CEO APPROVAL
@@ -27,7 +27,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 export const runtime = 'nodejs';
-export const maxDuration = 30;
+export const maxDuration = 60;
 
 const GEMINI_TTS_MODEL = 'gemini-2.5-flash-preview-tts';
 const GEMINI_TTS_VOICE = 'Charon';  // Deep authoritative male
