@@ -1,131 +1,211 @@
 /**
  * ============================================================
- * TRIKAL VAANI — Verify Voice Pack Payment API
+ * TRIKAL VAANI — Voice Transcription API (Google STT REST)
  * CEO & Chief Vedic Architect: Rohiit Gupta
- * File: app/api/verify-voice-pack/route.ts
- * VERSION: 1.0 — Razorpay signature verification + activate pack
+ * File: app/api/voice-transcribe/route.ts
+ * VERSION: 1.1 — Pure REST API, zero npm packages
  * SIGNED: ROHIIT GUPTA, CEO
  *
- * ⚠️ STRICT CEO ORDER: DO NOT EDIT WITHOUT CEO APPROVAL
- *
- * SECURITY:
- *   Verifies HMAC SHA256 signature before activating pack.
- *   NEVER trust razorpay_payment_id alone — always verify signature.
+ * v1.1 CHANGES (May 10, 2026):
+ *   - REMOVED: @google-cloud/speech npm package dependency
+ *   - REPLACED: with direct Google STT REST API + JWT auth
+ *   - SAME: Hindi/Hinglish detection, Vedic vocabulary boost
  * ============================================================
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import crypto from 'crypto';
-import { createClient } from '@supabase/supabase-js';
 
 export const runtime = 'nodejs';
-export const maxDuration = 15;
+export const maxDuration = 60;
 
-function supabaseAdmin() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    { auth: { persistSession: false } }
+// ── Google JWT auth ───────────────────────────────────────────
+async function getAccessToken(): Promise<string> {
+  const clientEmail = process.env.GOOGLE_CLOUD_CLIENT_EMAIL;
+  const privateKey = process.env.GOOGLE_CLOUD_PRIVATE_KEY?.replace(/\\n/g, '\n');
+
+  if (!clientEmail || !privateKey) {
+    throw new Error('[Trikal STT] Missing Google credentials');
+  }
+
+  const now = Math.floor(Date.now() / 1000);
+  const header = { alg: 'RS256', typ: 'JWT' };
+  const claim = {
+    iss: clientEmail,
+    scope: 'https://www.googleapis.com/auth/cloud-platform',
+    aud: 'https://oauth2.googleapis.com/token',
+    exp: now + 3600,
+    iat: now,
+  };
+
+  const encode = (obj: object) =>
+    Buffer.from(JSON.stringify(obj)).toString('base64url');
+  const unsigned = `${encode(header)}.${encode(claim)}`;
+
+  const keyData = privateKey
+    .replace(/-----BEGIN PRIVATE KEY-----/, '')
+    .replace(/-----END PRIVATE KEY-----/, '')
+    .replace(/\s/g, '');
+
+  const cryptoKey = await crypto.subtle.importKey(
+    'pkcs8',
+    Buffer.from(keyData, 'base64'),
+    { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' },
+    false,
+    ['sign']
   );
+
+  const signature = await crypto.subtle.sign(
+    'RSASSA-PKCS1-v1_5',
+    cryptoKey,
+    Buffer.from(unsigned)
+  );
+
+  const jwt = `${unsigned}.${Buffer.from(signature).toString('base64url')}`;
+
+  const res = await fetch('https://oauth2.googleapis.com/token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+      assertion: jwt,
+    }),
+  });
+
+  const data = await res.json();
+  if (!data.access_token) throw new Error('[Trikal STT] Token exchange failed');
+  return data.access_token;
 }
 
+// ── POST handler ──────────────────────────────────────────────
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
-    const {
-      razorpay_order_id,
-      razorpay_payment_id,
-      razorpay_signature,
-      sessionId,
-    } = body;
+    const formData = await req.formData();
+    const audioFile = formData.get('audio') as File | null;
+    const sessionId = formData.get('sessionId') as string | null;
+    const language = (formData.get('language') as string) || 'hinglish';
 
-    // ── Validate inputs ─────────────────────────────────────
-    if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
-      return NextResponse.json(
-        { error: 'Missing payment fields' },
-        { status: 400 }
-      );
+    if (!audioFile) {
+      return NextResponse.json({ error: 'No audio file' }, { status: 400 });
     }
-
     if (!sessionId) {
       return NextResponse.json({ error: 'Session required' }, { status: 401 });
     }
-
-    // ── Verify HMAC signature ───────────────────────────────
-    const payload = `${razorpay_order_id}|${razorpay_payment_id}`;
-    const expected = crypto
-      .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET!)
-      .update(payload)
-      .digest('hex');
-
-    if (expected !== razorpay_signature) {
-      console.warn('[VoicePack Verify] Invalid signature for order:', razorpay_order_id);
-      return NextResponse.json({ error: 'Invalid signature' }, { status: 400 });
+    if (audioFile.size > 5 * 1024 * 1024) {
+      return NextResponse.json({ error: 'Audio too large (max 5MB)' }, { status: 413 });
+    }
+    if (audioFile.size < 1000) {
+      return NextResponse.json({ error: 'Audio too short' }, { status: 400 });
     }
 
-    // ── Activate pack in Supabase ───────────────────────────
-    const sb = supabaseAdmin();
+    const arrayBuffer = await audioFile.arrayBuffer();
+    const audioBytes = Buffer.from(arrayBuffer).toString('base64');
 
-    // Reset valid_until from now (pack starts on payment, not order)
-    const { data: existingPack, error: fetchError } = await sb
-      .from('voice_packs')
-      .select('*')
-      .eq('razorpay_order_id', razorpay_order_id)
-      .eq('session_id', sessionId)
-      .single();
-
-    if (fetchError || !existingPack) {
-      return NextResponse.json({ error: 'Order not found' }, { status: 404 });
+    let languageCode = 'hi-IN';
+    let alternativeLanguageCodes: string[] = ['en-IN'];
+    if (language === 'english') {
+      languageCode = 'en-IN';
+      alternativeLanguageCodes = ['hi-IN'];
+    } else if (language === 'hindi') {
+      languageCode = 'hi-IN';
+      alternativeLanguageCodes = [];
     }
 
-    const validUntil = new Date();
-    validUntil.setDate(validUntil.getDate() + existingPack.validity_days);
+    const token = await getAccessToken();
 
-    const { error: updateError } = await sb
-      .from('voice_packs')
-      .update({
-        razorpay_payment_id,
-        status      : 'active',
-        valid_until : validUntil.toISOString(),
-        updated_at  : new Date().toISOString(),
-      })
-      .eq('id', existingPack.id);
-
-    if (updateError) {
-      console.error('[VoicePack Verify] Activate error:', updateError);
-      return NextResponse.json({ error: 'Activation failed' }, { status: 500 });
-    }
-
-    // ── Calculate total balance across all active packs ─────
-    const { data: allActive } = await sb
-      .from('voice_packs')
-      .select('questions_left, valid_until')
-      .eq('session_id', sessionId)
-      .eq('status', 'active')
-      .gt('valid_until', new Date().toISOString());
-
-    const totalBalance = (allActive || []).reduce(
-      (sum, p) => sum + (p.questions_left || 0),
-      0
+    const sttRes = await fetch(
+      'https://speech.googleapis.com/v1/speech:recognize',
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          config: {
+            encoding: 'WEBM_OPUS',
+            sampleRateHertz: 48000,
+            languageCode,
+            alternativeLanguageCodes,
+            model: 'latest_long',
+            useEnhanced: true,
+            enableAutomaticPunctuation: true,
+            speechContexts: [
+              {
+                phrases: [
+                  'Mahadasha', 'Antardasha', 'Pratyantar', 'Vimshottari',
+                  'kundali', 'rashi', 'nakshatra', 'graha', 'gochar',
+                  'dosha', 'manglik', 'kaal sarp', 'sade sati',
+                  'shani', 'rahu', 'ketu', 'guru', 'shukra', 'mangal',
+                  'budh', 'surya', 'chandra', 'lagna', 'navamsa',
+                  'BPHS', 'Trikal Vaani', 'Jini',
+                ],
+                boost: 15,
+              },
+            ],
+          },
+          audio: { content: audioBytes },
+        }),
+      }
     );
 
-    return NextResponse.json({
-      success    : true,
-      paymentId  : razorpay_payment_id,
-      orderId    : razorpay_order_id,
-      balance    : totalBalance,
-      validUntil : validUntil.toISOString(),
-    });
+    if (!sttRes.ok) {
+      const errText = await sttRes.text();
+      console.error('[Trikal STT] Google API error:', errText);
+      return NextResponse.json({ error: 'STT API call failed' }, { status: 500 });
+    }
 
+    const sttData = await sttRes.json();
+
+    type AltResult = { transcript?: string; confidence?: number };
+    type SttResult = { alternatives?: AltResult[] };
+
+    const transcription =
+      (sttData.results as SttResult[] | undefined)
+        ?.map((r) => r.alternatives?.[0]?.transcript || '')
+        .filter(Boolean)
+        .join(' ')
+        .trim() || '';
+
+    if (!transcription) {
+      return NextResponse.json(
+        { error: 'Could not understand audio. Please speak clearly.', transcription: '' },
+        { status: 422 }
+      );
+    }
+
+    const confidence =
+      (sttData.results as SttResult[] | undefined)?.[0]?.alternatives?.[0]?.confidence || 0;
+
+    return NextResponse.json(
+      {
+        success: true,
+        transcription,
+        confidence,
+        language: languageCode,
+        wordCount: transcription.split(/\s+/).length,
+      },
+      {
+        headers: {
+          'Cache-Control': 'no-store',
+          'X-Trikal-Voice': 'v1.1',
+        },
+      }
+    );
   } catch (err) {
-    console.error('[VoicePack Verify] Error:', err);
-    return NextResponse.json({ error: 'Verification failed' }, { status: 500 });
+    console.error('[Trikal STT] Error:', err);
+    const message = err instanceof Error ? err.message : 'Transcription failed';
+    return NextResponse.json(
+      { error: 'Voice transcription failed', detail: message },
+      { status: 500 }
+    );
   }
 }
 
 export async function GET() {
   return NextResponse.json({
-    status : 'Trikal Voice Pack Verify API is live',
-    version: '1.0',
+    status: 'Trikal Voice STT API is live',
+    model: 'google-speech-rest-latest_long',
+    languages: ['hi-IN', 'en-IN'],
+    version: '1.1',
   });
 }
