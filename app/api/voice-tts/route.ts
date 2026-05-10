@@ -3,7 +3,7 @@
  * TRIKAL VAANI — Voice TTS API (Dual Tier Router)
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/api/voice-tts/route.ts
- * VERSION: 3.0 — Tier 1 (Wavenet-D) + Tier 2 (Gemini-TTS) routing
+ * VERSION: 3.1 — packId direct tier routing + 150 word limit
  * SIGNED: ROHIIT GUPTA, CEO
  *
  * ⚠️ STRICT CEO ORDER: DO NOT EDIT WITHOUT CEO APPROVAL
@@ -213,7 +213,7 @@ async function getTierForSession(sessionId: string): Promise<1 | 2> {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { text, sessionId, forceTier } = body;
+    const { text, sessionId, forceTier, packId } = body;
 
     if (!text || typeof text !== 'string') {
       return NextResponse.json({ error: 'Text required' }, { status: 400 });
@@ -225,16 +225,21 @@ export async function POST(req: NextRequest) {
     // ── Clean text for TTS ───────────────────────────────────
     const words = text.trim().split(/\s+/);
     const trimmedText = words
-      .slice(0, 120)
+      .slice(0, 150)
       .join(' ')
       .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
       .replace(/\*+([^*]+)\*+/g, '$1')
       .replace(/[\u{1F300}-\u{1F9FF}]/gu, '')
       .trim();
 
-    // ── Determine tier ──────────────────────────────────────
+    console.log('[Trikal TTS v3.0] Text words:', words.length, '| packId:', packId || 'none');
+
+    // ── Determine tier (packId direct > forceTier > Supabase lookup) ──
     let tier: 1 | 2;
-    if (forceTier === 1 || forceTier === 2) {
+    if (packId && PACK_TO_TIER[packId as string]) {
+      tier = PACK_TO_TIER[packId as string] as 1 | 2;
+      console.log('[Trikal TTS v3.0] Tier from packId:', packId, '→ Tier', tier);
+    } else if (forceTier === 1 || forceTier === 2) {
       tier = forceTier;
       console.log('[Trikal TTS] Forced tier:', tier);
     } else {
