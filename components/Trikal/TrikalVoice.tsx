@@ -346,7 +346,7 @@ export default function TrikalVoice() {
       if (!userQuestion) throw new Error('Could not understand audio. Please speak clearly.');
       setTranscript(userQuestion);
 
-      const chatRes = await fetch('/api/Trikal-chat', {
+      const chatRes = await fetch('/api/voice-predict', {
         method : 'POST',
         headers: {
           'Content-Type'  : 'application/json',
@@ -368,7 +368,7 @@ export default function TrikalVoice() {
 
       if (!chatRes.ok) throw new Error('Prediction failed');
       const chatData = await chatRes.json();
-      const trikalReply = chatData.reply || chatData.response || chatData.text || '';
+      const trikalReply = chatData.prediction || chatData.reply || chatData.text || '';
       if (!trikalReply) throw new Error('Empty prediction');
       setReply(trikalReply);
 
