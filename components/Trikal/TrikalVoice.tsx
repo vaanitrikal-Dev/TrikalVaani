@@ -270,7 +270,7 @@ export default function TrikalVoice() {
       if (!granted || !streamRef.current) return;
 
       const mimeType = getSupportedMimeType();
-      const options: MediaRecorderOptions = {};
+      const options: MediaRecorderOptions = { audioBitsPerSecond: 128000 };
       if (mimeType) options.mimeType = mimeType;
 
       const mr = new MediaRecorder(streamRef.current, options);
@@ -296,8 +296,8 @@ export default function TrikalVoice() {
           streamRef.current.getTracks().forEach(t => t.stop());
           streamRef.current = null;
         }
-        if (audioBlob.size < 1000) {
-          setError('Recording too short. Please speak for at least 2 seconds.');
+        if (audioBlob.size < 5000) {
+          setError('Recording too short. Please speak for at least 3 seconds and speak louder.');
           setStage('record');
           return;
         }
