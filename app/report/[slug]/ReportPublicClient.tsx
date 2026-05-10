@@ -5,25 +5,32 @@
  * TRIKAL VAANI — Public SEO Report Client
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/report/[slug]/ReportPublicClient.tsx
- * VERSION: 8.0 — 5 Upay cards + segment-aware display
+ * VERSION: 8.1 — Maa Shakti Dakshina via Razorpay
  * SIGNED: ROHIIT GUPTA, CEO
  *
- * CHANGES v8.0 vs v7.0:
- *   ✅ 5 Upay cards: Mantra + Gemstone (2 stones) + Vrat + Dana + Special
- *   ✅ Gemstone card: Lagna stone (lifelong) + Dasha stone (current period)
- *   ✅ All v7.0 features preserved (kundali, planet table, dasha, panchang)
- *   ✅ RemedyItem type extended for new v2 remedy structure
- *   ✅ Free users see 3 cards, Paid see all 5
+ * CHANGES v8.1 vs v8.0:
+ *   ✅ MaaShakti component now uses Razorpay (not WhatsApp links)
+ *   ✅ Server-validated dakshina amounts (anti-tamper)
+ *   ✅ "Apni dakshina" custom amount input (₹51 to ₹5,00,000)
+ *   ✅ Optional dil ki baat message (500 char)
+ *   ✅ Saves to Supabase `dakshina` table
+ *   ✅ Post-payment WhatsApp confirmation flow
+ *   ✅ Beautiful success modal after Maa accepts
+ *   ✅ ALL v8.0 logic preserved 100%:
+ *      - 5 Upay cards, kundali chart, planet table, dasha,
+ *        action windows, panchang, locked section, PDF
  * ============================================================
  */
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import SiteNav    from '@/components/layout/SiteNav'
 import SiteFooter from '@/components/layout/SiteFooter'
-import { ArrowLeft, Lock, Download, Sparkles } from 'lucide-react'
+import { ArrowLeft, Lock, Download, Sparkles, X, Check } from 'lucide-react'
+import { loadRazorpayScript, openRazorpayCheckout } from '@/lib/razorpay-helper'
 
 const GOLD    = '#D4AF37'
+const RAZORPAY_BLUE = '#3395FF'
 const G       = (a: number) => `rgba(212,175,55,${a})`
 const BG_DARK = '#080B12'
 const BG_CARD = 'rgba(6,10,22,0.95)'
@@ -57,7 +64,6 @@ interface PlanetRow {
 }
 interface ActionWindow { window:string; strength:string; reason:string }
 
-// v8.0 — extended remedy types
 interface UpayItem {
   upay_number: number
   type: 'mantra'|'gemstone'|'vrat'|'dana'|'special'
@@ -146,37 +152,569 @@ function PDFBtn() {
   return (<button onClick={handle} style={{display:'inline-flex',alignItems:'center',gap:'6px',padding:'10px 18px',borderRadius:'10px',background:G(0.08),border:`1px solid ${G(0.25)}`,color:GOLD,fontSize:'13px',fontWeight:600,cursor:'pointer'}}><Download size={14}/>PDF Download</button>)
 }
 
+// ─── MAA SHAKTI DAKSHINA — v8.1 RAZORPAY ─────────────────────────────────────
+
+interface DakshinaSuccess {
+  type: 'arzi' | 'dhanyawad'
+  amount: number
+  paymentId: string
+  whatsappUrl: string
+  blessing: string
+}
+
 function MaaShakti({slug}:{slug:string}) {
-  const [tab,setTab] = useState<'arzi'|'dhanyawad'>('arzi')
-  const amts=tab==='arzi'?ARZI_AMT:DHANYAWAD_AMT
-  const waBase=tab==='arzi'?`Pranam%20Rohiit%20ji%2C%20Maa%20ko%20Arzi%20karna%20chahta%20hoon.%20Report:%20${slug}.%20Jai%20Maa%20Shakti!`:`Jai%20Maa%20Shakti!%20Maa%20ne%20meri%20sun%20li.%20Report:%20${slug}.`
-  return (
-    <div style={{background:`linear-gradient(135deg,${G(0.07)},rgba(124,58,237,0.07))`,border:`1px solid ${G(0.25)}`,borderRadius:'20px',padding:'28px 20px',marginBottom:'16px'}}>
-      <div style={{textAlign:'center',marginBottom:'20px'}}>
-        <div style={{fontSize:'38px',marginBottom:'8px'}}>🙏</div>
-        <h2 style={{margin:'0 0 6px',color:GOLD,fontSize:'20px',fontFamily:'Georgia,serif',fontWeight:700}}>Maa Shakti Ki Divya Seva</h2>
-        <p style={{margin:'0 auto',color:G(0.65),fontSize:'13px',lineHeight:1.6,maxWidth:'300px'}}>Yeh fees nahi — yeh dil ki dakshina hai. Koi seema nahi devotion ki.</p>
+  const [tab, setTab] = useState<'arzi'|'dhanyawad'>('arzi')
+  const [customAmount, setCustomAmount] = useState<string>('')
+  const [showCustom, setShowCustom] = useState(false)
+  const [devoteeName, setDevoteeName] = useState('')
+  const [devoteeMobile, setDevoteeMobile] = useState('')
+  const [message, setMessage] = useState('')
+  const [paying, setPaying] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState<DakshinaSuccess | null>(null)
+
+  const amts = tab === 'arzi' ? ARZI_AMT : DHANYAWAD_AMT
+
+  // Pre-load Razorpay script when component mounts
+  useEffect(() => {
+    loadRazorpayScript()
+  }, [])
+
+  const handleDakshinaClick = async (amount: number, isCustom = false) => {
+    setError(null)
+    setPaying(true)
+
+    try {
+      // Step 1: Ensure script loaded
+      const ok = await loadRazorpayScript()
+      if (!ok) {
+        setError('Razorpay SDK load nahi ho saka. Internet check karein.')
+        setPaying(false)
+        return
+      }
+
+      // Step 2: Create order on server
+      const orderRes = await fetch('/api/create-dakshina-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: tab,
+          amount,
+          reportSlug: slug,
+          isCustom,
+        }),
+      })
+
+      if (!orderRes.ok) {
+        const err = await orderRes.json().catch(() => ({}))
+        setError(err.error || 'Order create nahi ho saka.')
+        setPaying(false)
+        return
+      }
+
+      const { orderId, amount: amountPaise, currency, keyId } = await orderRes.json()
+
+      // Step 3: Open Razorpay popup
+      openRazorpayCheckout({
+        keyId,
+        orderId,
+        amount: amountPaise,
+        currency,
+        name: 'Trikal Vaani',
+        description: tab === 'arzi'
+          ? `Maa Ko Arzi — ₹${amount.toLocaleString('en-IN')}`
+          : `Maa Ka Dhanyawad — ₹${amount.toLocaleString('en-IN')}`,
+        prefillName: devoteeName,
+        prefillContact: devoteeMobile,
+        themeColor: '#D4AF37',
+        onSuccess: async (response) => {
+          // Step 4: Verify and save
+          const verifyRes = await fetch('/api/verify-dakshina', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              ...response,
+              type: tab,
+              amount,
+              reportSlug: slug,
+              devoteeName: devoteeName || undefined,
+              devoteeMobile: devoteeMobile || undefined,
+              message: message || undefined,
+            }),
+          })
+
+          if (!verifyRes.ok) {
+            const err = await verifyRes.json().catch(() => ({}))
+            setError(err.error || 'Payment verification fail. Support se contact karein.')
+            setPaying(false)
+            return
+          }
+
+          const data = await verifyRes.json()
+          setSuccess({
+            type: tab,
+            amount,
+            paymentId: data.paymentId,
+            whatsappUrl: data.whatsappUrl,
+            blessing: data.blessing,
+          })
+          setPaying(false)
+        },
+        onDismiss: () => {
+          setPaying(false)
+        },
+      })
+    } catch (err: any) {
+      setError(err.message || 'Kuch problem hui. Phir try karein.')
+      setPaying(false)
+    }
+  }
+
+  const handleCustomSubmit = () => {
+    const amt = parseInt(customAmount.replace(/[^\d]/g, ''), 10)
+    if (!amt || amt < 51) {
+      setError('Minimum dakshina ₹51 hai.')
+      return
+    }
+    if (amt > 500000) {
+      setError('Maximum dakshina ₹5,00,000 hai.')
+      return
+    }
+    handleDakshinaClick(amt, true)
+  }
+
+  const waBase = tab === 'arzi'
+    ? `Pranam%20Rohiit%20ji%2C%20Maa%20ko%20Arzi%20karna%20chahta%20hoon.%20Report:%20${slug}.%20Jai%20Maa%20Shakti!`
+    : `Jai%20Maa%20Shakti!%20Maa%20ne%20meri%20sun%20li.%20Report:%20${slug}.`
+
+  // ── Success Modal ────────────────────────────────────────
+  if (success) {
+    return (
+      <div style={{
+        background: `linear-gradient(135deg,${G(0.12)},rgba(34,197,94,0.08))`,
+        border: `1px solid ${G(0.4)}`,
+        borderRadius: '20px',
+        padding: '32px 24px',
+        marginBottom: '16px',
+        textAlign: 'center',
+      }}>
+        <div style={{
+          width: '72px',
+          height: '72px',
+          margin: '0 auto 18px',
+          borderRadius: '50%',
+          background: `linear-gradient(135deg,${GOLD},#F5D76E)`,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          boxShadow: `0 0 40px ${G(0.5)}`,
+        }}>
+          <Check size={36} color="#080B12" strokeWidth={3}/>
+        </div>
+
+        <h2 style={{
+          margin: '0 0 8px',
+          color: GOLD,
+          fontSize: '22px',
+          fontFamily: 'Georgia,serif',
+          fontWeight: 700,
+        }}>
+          🔱 Jai Maa Shakti
+        </h2>
+
+        <p style={{
+          margin: '0 0 12px',
+          color: '#fff',
+          fontSize: '15px',
+          fontWeight: 600,
+          lineHeight: 1.6,
+        }}>
+          {success.type === 'arzi'
+            ? `Aapki Arzi Maa ke charnon mein pahunch gayi`
+            : `Aapka Dhanyawad Maa ne sweekar kar liya`}
+        </p>
+
+        <p style={{
+          margin: '0 0 18px',
+          color: '#94a3b8',
+          fontSize: '13px',
+          lineHeight: 1.6,
+        }}>
+          Dakshina: <strong style={{color: GOLD}}>₹{success.amount.toLocaleString('en-IN')}</strong>
+          <br/>
+          Payment ID: <code style={{color: '#64748b', fontSize: '11px'}}>{success.paymentId}</code>
+        </p>
+
+        <p style={{
+          margin: '0 0 20px',
+          color: '#cbd5e1',
+          fontSize: '13px',
+          fontStyle: 'italic',
+          lineHeight: 1.7,
+          maxWidth: '340px',
+          marginLeft: 'auto',
+          marginRight: 'auto',
+        }}>
+          {success.blessing}
+        </p>
+
+        <a
+          href={success.whatsappUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '8px',
+            padding: '13px 26px',
+            borderRadius: '12px',
+            background: 'linear-gradient(135deg,#25D366,#1da851)',
+            color: '#fff',
+            fontSize: '14px',
+            fontWeight: 700,
+            textDecoration: 'none',
+            boxShadow: '0 0 25px rgba(37,211,102,0.3)',
+          }}
+        >
+          📱 Rohiit ji ko inform karein
+        </a>
+
+        <p style={{
+          margin: '14px 0 0',
+          color: '#475569',
+          fontSize: '11px',
+        }}>
+          🔒 Secured by <span style={{color: RAZORPAY_BLUE, fontWeight: 600}}>Razorpay</span>
+        </p>
       </div>
-      <div style={{display:'flex',gap:'8px',marginBottom:'16px',background:'rgba(0,0,0,0.3)',padding:'4px',borderRadius:'12px'}}>
-        {(['arzi','dhanyawad'] as const).map(t=>(
-          <button key={t} onClick={()=>setTab(t)} style={{flex:1,padding:'10px',borderRadius:'10px',border:'none',cursor:'pointer',fontWeight:700,fontSize:'13px',transition:'all 0.3s',background:tab===t?`linear-gradient(135deg,${GOLD},#A8820A)`:'transparent',color:tab===t?'#080B12':G(0.55)}}>
-            {t==='arzi'?'🪔 Arzi to Maa':'🌺 Dhanyawad to Maa'}
+    )
+  }
+
+  // ── Main Dakshina UI ─────────────────────────────────────
+  return (
+    <div style={{
+      background: `linear-gradient(135deg,${G(0.07)},rgba(124,58,237,0.07))`,
+      border: `1px solid ${G(0.25)}`,
+      borderRadius: '20px',
+      padding: '28px 20px',
+      marginBottom: '16px',
+    }}>
+      <div style={{textAlign: 'center', marginBottom: '20px'}}>
+        <div style={{fontSize: '38px', marginBottom: '8px'}}>🙏</div>
+        <h2 style={{
+          margin: '0 0 6px',
+          color: GOLD,
+          fontSize: '20px',
+          fontFamily: 'Georgia,serif',
+          fontWeight: 700,
+        }}>
+          Maa Shakti Ki Divya Seva
+        </h2>
+        <p style={{
+          margin: '0 auto',
+          color: G(0.65),
+          fontSize: '13px',
+          lineHeight: 1.6,
+          maxWidth: '320px',
+        }}>
+          Yeh fees nahi — yeh dil ki dakshina hai. Koi seema nahi devotion ki.
+        </p>
+      </div>
+
+      {/* Tab switcher */}
+      <div style={{
+        display: 'flex',
+        gap: '8px',
+        marginBottom: '16px',
+        background: 'rgba(0,0,0,0.3)',
+        padding: '4px',
+        borderRadius: '12px',
+      }}>
+        {(['arzi','dhanyawad'] as const).map(t => (
+          <button
+            key={t}
+            onClick={() => { setTab(t); setShowCustom(false); setError(null) }}
+            disabled={paying}
+            style={{
+              flex: 1,
+              padding: '10px',
+              borderRadius: '10px',
+              border: 'none',
+              cursor: paying ? 'not-allowed' : 'pointer',
+              fontWeight: 700,
+              fontSize: '13px',
+              transition: 'all 0.3s',
+              background: tab === t
+                ? `linear-gradient(135deg,${GOLD},#A8820A)`
+                : 'transparent',
+              color: tab === t ? '#080B12' : G(0.55),
+              opacity: paying ? 0.6 : 1,
+            }}
+          >
+            {t === 'arzi' ? '🪔 Arzi to Maa' : '🌺 Dhanyawad to Maa'}
           </button>
         ))}
       </div>
-      <p style={{color:'#94a3b8',fontSize:'13px',margin:'0 0 14px',lineHeight:1.6,textAlign:'center'}}>{tab==='arzi'?'Apni deepest prayer Maa ke charnon mein rakhein. Rohiit ji personally transmit karenge.':'Maa ka Dhanyawad karein — gratitude hi sabse badi puja hai.'}</p>
-      <div style={{display:'flex',flexWrap:'wrap',gap:'8px',justifyContent:'center',marginBottom:'14px'}}>
-        {amts.map(a=>(<a key={a} href={`https://wa.me/919211804111?text=${waBase}%20Dakshina%20Rs.${a}`} target="_blank" rel="noopener noreferrer" style={{padding:'6px 14px',borderRadius:'20px',border:`1px solid ${G(0.3)}`,color:GOLD,fontSize:'13px',fontWeight:600,textDecoration:'none',background:G(0.08)}}>₹{a.toLocaleString('en-IN')}</a>))}
-        <a href={`https://wa.me/919211804111?text=${waBase}%20(apni%20dakshina%20bataunga)`} target="_blank" rel="noopener noreferrer" style={{padding:'6px 14px',borderRadius:'20px',border:`1px dashed ${G(0.3)}`,color:GOLD,fontSize:'13px',fontWeight:600,textDecoration:'none'}}>Apni dakshina ✦</a>
+
+      <p style={{
+        color: '#94a3b8',
+        fontSize: '13px',
+        margin: '0 0 14px',
+        lineHeight: 1.6,
+        textAlign: 'center',
+      }}>
+        {tab === 'arzi'
+          ? 'Apni deepest prayer Maa ke charnon mein rakhein. Razorpay ke through secure dakshina.'
+          : 'Maa ka Dhanyawad karein — gratitude hi sabse badi puja hai.'}
+      </p>
+
+      {/* Razorpay trust strip */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: '8px',
+        padding: '6px 12px',
+        background: 'rgba(51,149,255,0.06)',
+        border: '1px solid rgba(51,149,255,0.18)',
+        borderRadius: '8px',
+        marginBottom: '16px',
+        flexWrap: 'wrap',
+      }}>
+        <span style={{fontSize: '10px', color: '#94a3b8', fontWeight: 600}}>🔒 Secured by</span>
+        <span style={{color: RAZORPAY_BLUE, fontWeight: 700, fontSize: '11px', fontFamily: 'Georgia,serif'}}>Razorpay</span>
+        <span style={{color: '#475569', fontSize: '10px'}}>·</span>
+        <span style={{fontSize: '9px', color: '#64748b'}}>UPI · Cards · Wallets</span>
       </div>
-      <div style={{display:'flex',justifyContent:'center'}}>
-        <a href={`https://wa.me/919211804111?text=${waBase}`} target="_blank" rel="noopener noreferrer" style={{padding:'14px 32px',borderRadius:'12px',background:`linear-gradient(135deg,${GOLD},#F5D76E,${GOLD})`,color:'#080B12',fontSize:'14px',fontWeight:700,textDecoration:'none',boxShadow:`0 0 25px ${G(0.3)}`}}>{tab==='arzi'?'🙏 Arzi Submit Karein':'🌺 Dhanyawad Dein'}</a>
+
+      {/* Optional devotee details */}
+      <div style={{
+        background: 'rgba(0,0,0,0.2)',
+        border: '1px solid rgba(255,255,255,0.06)',
+        borderRadius: '10px',
+        padding: '12px',
+        marginBottom: '14px',
+      }}>
+        <p style={{margin: '0 0 8px', color: '#94a3b8', fontSize: '11px', fontWeight: 600}}>
+          Optional — Maa tak aapka naam pahunche
+        </p>
+        <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '8px'}}>
+          <input
+            type="text"
+            placeholder="Aapka naam"
+            value={devoteeName}
+            onChange={e => setDevoteeName(e.target.value)}
+            disabled={paying}
+            style={{
+              padding: '8px 10px',
+              borderRadius: '6px',
+              background: '#0d1120',
+              border: '1px solid rgba(255,255,255,0.1)',
+              color: '#e2e8f0',
+              fontSize: '12px',
+              outline: 'none',
+            }}
+          />
+          <input
+            type="tel"
+            placeholder="WhatsApp number"
+            value={devoteeMobile}
+            onChange={e => setDevoteeMobile(e.target.value)}
+            disabled={paying}
+            style={{
+              padding: '8px 10px',
+              borderRadius: '6px',
+              background: '#0d1120',
+              border: '1px solid rgba(255,255,255,0.1)',
+              color: '#e2e8f0',
+              fontSize: '12px',
+              outline: 'none',
+            }}
+          />
+        </div>
+        <textarea
+          placeholder="Dil ki baat (optional, max 500 chars)"
+          value={message}
+          onChange={e => setMessage(e.target.value.slice(0, 500))}
+          disabled={paying}
+          rows={2}
+          style={{
+            width: '100%',
+            padding: '8px 10px',
+            borderRadius: '6px',
+            background: '#0d1120',
+            border: '1px solid rgba(255,255,255,0.1)',
+            color: '#e2e8f0',
+            fontSize: '12px',
+            outline: 'none',
+            resize: 'none',
+            fontFamily: 'inherit',
+          }}
+        />
+        {message && (
+          <p style={{margin: '4px 0 0', color: '#475569', fontSize: '10px', textAlign: 'right'}}>
+            {message.length}/500
+          </p>
+        )}
+      </div>
+
+      {/* Preset amount buttons */}
+      <div style={{
+        display: 'flex',
+        flexWrap: 'wrap',
+        gap: '8px',
+        justifyContent: 'center',
+        marginBottom: '14px',
+      }}>
+        {amts.map(a => (
+          <button
+            key={a}
+            onClick={() => handleDakshinaClick(a)}
+            disabled={paying}
+            style={{
+              padding: '8px 14px',
+              borderRadius: '20px',
+              border: `1px solid ${G(0.3)}`,
+              color: GOLD,
+              fontSize: '13px',
+              fontWeight: 600,
+              background: G(0.08),
+              cursor: paying ? 'not-allowed' : 'pointer',
+              opacity: paying ? 0.5 : 1,
+              transition: 'all 0.2s',
+            }}
+          >
+            ₹{a.toLocaleString('en-IN')}
+          </button>
+        ))}
+        <button
+          onClick={() => { setShowCustom(!showCustom); setError(null) }}
+          disabled={paying}
+          style={{
+            padding: '8px 14px',
+            borderRadius: '20px',
+            border: `1px dashed ${G(0.3)}`,
+            color: GOLD,
+            fontSize: '13px',
+            fontWeight: 600,
+            background: showCustom ? G(0.1) : 'transparent',
+            cursor: paying ? 'not-allowed' : 'pointer',
+            opacity: paying ? 0.5 : 1,
+          }}
+        >
+          ✦ Apni dakshina
+        </button>
+      </div>
+
+      {/* Custom amount input */}
+      {showCustom && (
+        <div style={{
+          display: 'flex',
+          gap: '8px',
+          marginBottom: '14px',
+          padding: '12px',
+          background: G(0.04),
+          border: `1px solid ${G(0.2)}`,
+          borderRadius: '10px',
+        }}>
+          <input
+            type="number"
+            placeholder="Apni dakshina (₹51 to ₹5,00,000)"
+            value={customAmount}
+            onChange={e => setCustomAmount(e.target.value)}
+            disabled={paying}
+            min={51}
+            max={500000}
+            style={{
+              flex: 1,
+              padding: '10px 12px',
+              borderRadius: '8px',
+              background: '#0d1120',
+              border: '1px solid rgba(255,255,255,0.1)',
+              color: '#e2e8f0',
+              fontSize: '14px',
+              fontWeight: 600,
+              outline: 'none',
+            }}
+          />
+          <button
+            onClick={handleCustomSubmit}
+            disabled={paying || !customAmount}
+            style={{
+              padding: '10px 18px',
+              borderRadius: '8px',
+              background: paying || !customAmount
+                ? G(0.15)
+                : `linear-gradient(135deg,${GOLD},#F5D76E)`,
+              color: paying || !customAmount ? G(0.5) : '#080B12',
+              fontSize: '13px',
+              fontWeight: 700,
+              border: 'none',
+              cursor: paying || !customAmount ? 'not-allowed' : 'pointer',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {paying ? '⟳' : 'Submit'}
+          </button>
+        </div>
+      )}
+
+      {/* Error */}
+      {error && (
+        <div style={{
+          padding: '10px 14px',
+          background: 'rgba(239,68,68,0.1)',
+          border: '1px solid rgba(239,68,68,0.25)',
+          borderRadius: '8px',
+          marginBottom: '14px',
+          textAlign: 'center',
+        }}>
+          <p style={{margin: 0, color: '#fca5a5', fontSize: '12px'}}>{error}</p>
+        </div>
+      )}
+
+      {/* Loading */}
+      {paying && (
+        <div style={{
+          padding: '12px',
+          background: G(0.08),
+          border: `1px solid ${G(0.25)}`,
+          borderRadius: '10px',
+          marginBottom: '14px',
+          textAlign: 'center',
+        }}>
+          <p style={{margin: 0, color: GOLD, fontSize: '12px', fontWeight: 600}}>
+            ⟳ Razorpay popup open ho raha hai... Maa ki kripa aapke saath hai.
+          </p>
+        </div>
+      )}
+
+      {/* Fallback WhatsApp link (if Razorpay fails) */}
+      <div style={{
+        marginTop: '8px',
+        paddingTop: '12px',
+        borderTop: `1px solid ${G(0.1)}`,
+        textAlign: 'center',
+      }}>
+        <a
+          href={`https://wa.me/919211804111?text=${waBase}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            color: '#64748b',
+            fontSize: '11px',
+            textDecoration: 'none',
+            fontWeight: 500,
+          }}
+        >
+          Razorpay use nahi karna? → WhatsApp pe Rohiit ji se baat karein
+        </a>
       </div>
     </div>
   )
 }
 
-// ─── 5 UPAY CARDS — v8.0 NEW ─────────────────────────────────────────────────
+// ─── 5 UPAY CARDS — v8.0 (UNCHANGED) ─────────────────────────────────────────
 
 function UpayCards({ remedies, isPaid }: { remedies: UpayItem[]; isPaid: boolean }) {
   const visibleCount = isPaid ? 5 : 3
@@ -211,7 +749,6 @@ function UpayCards({ remedies, isPaid }: { remedies: UpayItem[]; isPaid: boolean
                 </div>
               </div>
 
-              {/* Mantra card */}
               {upay.type === 'mantra' && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                   <p style={{ margin: 0, color: '#e2e8f0', fontSize: '14px', fontWeight: 600, fontFamily: 'Georgia,serif' }}>{upay.mantra}</p>
@@ -225,7 +762,6 @@ function UpayCards({ remedies, isPaid }: { remedies: UpayItem[]; isPaid: boolean
                 </div>
               )}
 
-              {/* Gemstone card — 2 stones */}
               {upay.type === 'gemstone' && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                   {upay.lagna_stone && (
@@ -252,7 +788,6 @@ function UpayCards({ remedies, isPaid }: { remedies: UpayItem[]; isPaid: boolean
                 </div>
               )}
 
-              {/* Vrat card */}
               {upay.type === 'vrat' && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                   <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
@@ -266,7 +801,6 @@ function UpayCards({ remedies, isPaid }: { remedies: UpayItem[]; isPaid: boolean
                 </div>
               )}
 
-              {/* Dana card */}
               {upay.type === 'dana' && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                   {upay.items    && <p style={{ margin: 0, color: '#e2e8f0', fontSize: '13px' }}>🌾 {upay.items}</p>}
@@ -278,7 +812,6 @@ function UpayCards({ remedies, isPaid }: { remedies: UpayItem[]; isPaid: boolean
                 </div>
               )}
 
-              {/* Special upay */}
               {upay.type === 'special' && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                   {upay.text    && <p style={{ margin: 0, color: '#e2e8f0', fontSize: '13px', lineHeight: 1.6 }}>{upay.text}</p>}
@@ -328,7 +861,7 @@ function LockedSection({slug}:{slug:string}) {
           <Link href={`/upgrade?slug=${slug}&tier=basic`} style={{display:'block',padding:'15px 36px',borderRadius:'12px',background:`linear-gradient(135deg,${GOLD},#F5D76E,${GOLD})`,color:'#080B12',fontSize:'15px',fontWeight:700,textDecoration:'none',boxShadow:`0 0 30px ${G(0.4)}`,marginBottom:'10px'}}>
             🔓 Unlock Full Report — ₹51 Only
           </Link>
-          <p style={{margin:'6px 0 0',color:'#475569',fontSize:'11px'}}>One-time · Instant access · Razorpay secure</p>
+          <p style={{margin:'6px 0 0',color:'#475569',fontSize:'11px'}}>One-time · Instant access · <span style={{color: RAZORPAY_BLUE, fontWeight: 600}}>Razorpay</span> secure</p>
         </div>
       </div>
     </div>
@@ -430,12 +963,10 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
   const planetTable = safeArr<PlanetRow>(pj.planetTable)
   const actionWindows = safeArr<ActionWindow>(pj.actionWindows)
 
-  // v8.0 — new remedy structure
   const remedyPlan  = safeObj(pj.remedyPlan)
   const upayItems   = safeArr<UpayItem>(remedyPlan.remedies)
   const genRem      = safeObj(remedyPlan.general)
 
-  // fallback to old remedy structure
   const oldRemedies = safeArr<RemedyItem>(remedyPlan.remedies as any)
   const hasNewUpay  = upayItems.length > 0 && upayItems[0]?.upay_number !== undefined
 
@@ -451,7 +982,6 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
       <main style={{paddingTop:'96px',paddingBottom:'80px',padding:'96px 16px 80px'}}>
         <div style={{maxWidth:'700px',margin:'0 auto'}}>
 
-          {/* Breadcrumb */}
           <nav aria-label="breadcrumb" style={{display:'flex',alignItems:'center',gap:'8px',marginBottom:'20px'}}>
             <Link href="/" style={{color:'#64748b',fontSize:'13px',textDecoration:'none'}}>Home</Link>
             <span style={{color:'#334155'}}>›</span>
@@ -460,7 +990,6 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
             <span style={{color:'#94a3b8',fontSize:'13px'}}>{domainLabel}</span>
           </nav>
 
-          {/* S1: MAHAKAAL KA ASHIRWAD */}
           <div style={{background:`linear-gradient(135deg,${G(0.1)},rgba(8,11,18,0.95))`,border:`1px solid ${G(0.2)}`,borderRadius:'20px',padding:'26px 22px',marginBottom:'14px',textAlign:'center'}}>
             <div style={{display:'flex',alignItems:'center',justifyContent:'center',gap:'10px',marginBottom:'14px'}}>
               <div style={{height:'1px',flex:1,background:`linear-gradient(to right,transparent,${G(0.3)})`}}/>
@@ -484,7 +1013,6 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
             )}
           </div>
 
-          {/* S2: TRIKAL KA SANDESH (FREE) */}
           {!isPaid && (hasCoreMessage||hasKeyMessage||hasDoAvoid) && (
             <div style={{background:BG_CARD,border:`1px solid ${G(0.12)}`,borderRadius:'16px',padding:'22px',marginBottom:'14px'}}>
               <p style={{margin:'0 0 14px',color:GOLD,fontSize:'11px',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.08em'}}>✨ Trikal Ka Sandesh</p>
@@ -504,15 +1032,12 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
             </div>
           )}
 
-          {/* PAID FULL SUMMARY */}
           {isPaid && <PaidFullSummary summaryText={summaryText} periodSummary={periodSummary} bestDates={bestDates} dosList={dosList} dontsList={dontsList} remedyHint={remedyHint} karmicInsight={karmicInsight}/>}
 
-          {/* S3: KUNDALI STATS */}
           <div style={{display:'grid',gridTemplateColumns:'repeat(2,1fr)',gap:'10px',marginBottom:'14px'}}>
             {[{label:'Lagna',value:lagna},{label:'Nakshatra',value:nakshatra},{label:'Mahadasha',value:mahadasha},{label:'Antardasha',value:antardasha}].map(({label,value})=>(<div key={label} style={{padding:'11px 14px',borderRadius:'10px',background:G(0.08),border:`1px solid ${G(0.2)}`,textAlign:'center'}}><p style={{margin:'0 0 3px',color:G(0.6),fontSize:'10px',textTransform:'uppercase',letterSpacing:'0.08em',fontWeight:600}}>{label}</p><p style={{margin:0,color:'#fff',fontSize:'14px',fontWeight:700}}>{value}</p></div>))}
           </div>
 
-          {/* S4: KUNDALI CHART */}
           {planetTable.length>0&&lagna!=='—'&&(
             <div style={{background:BG_CARD,border:`1px solid ${G(0.15)}`,borderRadius:'16px',padding:'22px',marginBottom:'14px'}}>
               <p style={{margin:'0 0 14px',color:GOLD,fontSize:'11px',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.08em'}}>🪐 Janma Kundali — North Indian Chart</p>
@@ -521,7 +1046,6 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
             </div>
           )}
 
-          {/* S5: PLANET TABLE */}
           {planetTable.length>0&&(
             <div style={{background:BG_CARD,border:`1px solid ${G(0.12)}`,borderRadius:'16px',padding:'22px',marginBottom:'14px'}}>
               <p style={{margin:'0 0 14px',color:GOLD,fontSize:'11px',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.08em'}}>⚡ Graha Vishleshan — All 9 Planets</p>
@@ -541,7 +1065,6 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
             </div>
           )}
 
-          {/* S6: DASHA KAAL */}
           <div style={{background:BG_CARD,border:`1px solid ${G(0.12)}`,borderRadius:'16px',padding:'22px',marginBottom:'14px'}}>
             <p style={{margin:'0 0 14px',color:GOLD,fontSize:'11px',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.08em'}}>⏰ Dasha Kaal — Vimshottari System</p>
             <div style={{display:'flex',flexDirection:'column',gap:'10px'}}>
@@ -549,7 +1072,6 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
             </div>
           </div>
 
-          {/* S7: ACTION WINDOWS */}
           {actionWindows.length>0&&(
             <div style={{background:BG_CARD,border:`1px solid ${G(0.12)}`,borderRadius:'16px',padding:'22px',marginBottom:'14px'}}>
               <p style={{margin:'0 0 14px',color:GOLD,fontSize:'11px',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.08em'}}>🗓 Action Windows — Trikal Precision</p>
@@ -557,7 +1079,6 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
             </div>
           )}
 
-          {/* S8: 5 UPAY CARDS — v8.0 NEW */}
           {hasNewUpay ? (
             <UpayCards remedies={upayItems} isPaid={isPaid}/>
           ) : oldRemedies.length > 0 && (
@@ -572,7 +1093,6 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
             </div>
           )}
 
-          {/* S9: PANCHANG */}
           {panchang.tithi&&(
             <div style={{background:BG_CARD,border:`1px solid ${G(0.12)}`,borderRadius:'16px',padding:'22px',marginBottom:'14px'}}>
               <p style={{margin:'0 0 14px',color:GOLD,fontSize:'11px',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.08em'}}>📅 Aaj Ka Panchang</p>
@@ -583,13 +1103,10 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
             </div>
           )}
 
-          {/* S10: LOCKED (FREE ONLY) */}
           {!isPaid&&<LockedSection slug={slug}/>}
 
-          {/* S11: MAA SHAKTI */}
           <MaaShakti slug={slug}/>
 
-          {/* S12: AUTHOR E-E-A-T */}
           <div style={{background:'rgba(8,14,28,0.95)',border:'1px solid rgba(255,255,255,0.06)',borderRadius:'14px',padding:'18px',marginBottom:'14px'}}>
             <div style={{display:'flex',alignItems:'center',gap:'12px',marginBottom:'12px'}}>
               <div style={{width:'46px',height:'46px',borderRadius:'50%',overflow:'hidden',flexShrink:0,border:`1px solid ${G(0.35)}`,background:G(0.1)}}>
@@ -600,13 +1117,12 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
                 <p style={{margin:0,color:'#64748b',fontSize:'12px'}}>Chief Vedic Architect · Trikal Vaani · Delhi NCR</p>
               </div>
             </div>
-            <p style={{margin:'0 0 12px',color:'#94a3b8',fontSize:'13px',lineHeight:1.6}}>This analysis is powered by Swiss Ephemeris — the same engine used by professional astrologers worldwide — combined with Brihat Parashara Hora Shastra, Bhrigu Nandi Nadi patterns, and Shadbala calculations.</p>
+            <p style={{margin:'0 0 12px',color:'#94a3b8',fontSize:'13px',lineHeight:1.6}}>This analysis is powered by Swiss Ephemeris — the same engine used by professional astrologers worldwide — combined with Brihat Parashara Hora Shastra, Bhrigu Nandi Nadi patterns, and Shadbala calculations. Payments secured by <strong style={{color: RAZORPAY_BLUE}}>Razorpay</strong>.</p>
             <div style={{display:'flex',flexWrap:'wrap',gap:'6px'}}>
-              {['15+ Years Vedic Study','Parashara BPHS','Swiss Ephemeris','Delhi NCR'].map(t=>(<span key={t} style={{padding:'4px 9px',borderRadius:'6px',background:'rgba(255,255,255,0.04)',border:'1px solid rgba(255,255,255,0.08)',color:'#64748b',fontSize:'11px'}}>{t}</span>))}
+              {['15+ Years Vedic Study','Parashara BPHS','Swiss Ephemeris','Delhi NCR','Razorpay Secured'].map(t=>(<span key={t} style={{padding:'4px 9px',borderRadius:'6px',background:'rgba(255,255,255,0.04)',border:'1px solid rgba(255,255,255,0.08)',color: t==='Razorpay Secured' ? RAZORPAY_BLUE : '#64748b',fontSize:'11px', fontWeight: t==='Razorpay Secured' ? 600 : 400}}>{t}</span>))}
             </div>
           </div>
 
-          {/* S13: SHARE + PDF + RETURN */}
           <div style={{textAlign:'center',marginBottom:'24px'}}>
             <div style={{display:'flex',gap:'10px',justifyContent:'center',flexWrap:'wrap',marginBottom:'16px'}}>
               <a href={`https://wa.me/?text=Maine%20Trikal%20Vaani%20pe%20kundali%20padhi%20—%20bahut%20accurate!%20${encodeURIComponent('https://trikalvaani.com/report/'+slug)}`} target="_blank" rel="noopener noreferrer" style={{padding:'11px 20px',borderRadius:'10px',background:'rgba(37,211,102,0.08)',border:'1px solid rgba(37,211,102,0.25)',color:'#25D366',fontSize:'13px',fontWeight:600,textDecoration:'none'}}>📱 WhatsApp Share</a>
