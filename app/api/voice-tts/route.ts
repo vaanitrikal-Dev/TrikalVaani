@@ -27,7 +27,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 export const runtime = 'nodejs';
-export const maxDuration = 60;
+export const maxDuration = 60; // CACHE-BUST-v4.1
 
 const GEMINI_TTS_MODEL = 'gemini-2.5-flash-preview-tts';
 const GEMINI_TTS_VOICE = 'Charon';  // Deep authoritative male
