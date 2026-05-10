@@ -1,130 +1,75 @@
 /**
  * ============================================================
- * TRIKAL VAANI — Voice TTS API (Dual Tier Router)
+ * TRIKAL VAANI — Voice TTS API
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/api/voice-tts/route.ts
- * VERSION: 3.1 — packId direct tier routing + 150 word limit
+ * VERSION: 4.0 — Gemini-TTS for ALL tiers (CEO quality mandate)
  * SIGNED: ROHIIT GUPTA, CEO
  *
  * ⚠️ STRICT CEO ORDER: DO NOT EDIT WITHOUT CEO APPROVAL
  *
- * v3.0 ARCHITECTURE (May 10, 2026):
- *   Pack tier-based voice routing:
- *     p11  (₹11)  → Wavenet-D       (cost ₹0.04, slow guru tone)
- *     p51  (₹51)  → Wavenet-D       (cost ₹0.04, slow guru tone)
- *     p101 (₹101) → Gemini-TTS      (cost ₹0.50, premium spiritual consultant)
+ * v4.0 CHANGES (May 10, 2026):
+ *   - CEO MANDATE: Quality over cost — Gemini-TTS for everyone
+ *   - ALL packs (p11/p51/p101) now use Gemini-TTS Charon voice
+ *   - REASON: Wavenet-D sounds robotic at slow speed
+ *   - Gemini-TTS uses natural language style prompt for guru tone
+ *   - Fallback: Neural2-D (better than Wavenet) if Gemini-TTS fails
+ *   - Cost: ~₹1/prediction — CEO approved
  *
- *   Voice personality (BOTH tiers):
- *     - Calm astrologer (NOT customer support bot)
- *     - Slow + lower pitch (authority + trust)
- *     - Premium spiritual consultant tone
- *     - "Ancient wisdom + modern AI"
- *
- * ENV REQUIRED:
- *   GOOGLE_API_KEY  → Cloud TTS (Wavenet-D)
- *   GEMINI_API_KEY  → Gemini-TTS Premium (Charon voice)
+ * VOICE PERSONALITY:
+ *   "Ancient wisdom + modern AI"
+ *   Calm astrologer, NOT call-center bot
+ *   Slow deliberate pace, lower authoritative pitch
+ *   Charon voice = deep, composed, trustworthy
  * ============================================================
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
 
 export const runtime = 'nodejs';
 export const maxDuration = 30;
 
-// ── TIER 1: Wavenet-D (Cloud TTS) ─────────────────────────────
-const TIER1_VOICE = 'hi-IN-Wavenet-D';
-const TIER1_RATE = 0.82;
-const TIER1_PITCH = -2.0;
+const GEMINI_TTS_MODEL = 'gemini-2.5-flash-preview-tts';
+const GEMINI_TTS_VOICE = 'Charon';  // Deep authoritative male
 
-// ── TIER 2: Gemini-TTS Premium ────────────────────────────────
-// Charon = deep authoritative male, ideal for guru tone
-const TIER2_MODEL = 'gemini-2.5-flash-preview-tts';
-const TIER2_VOICE = 'Charon';
+// Neural2-D fallback — much better than Wavenet-D
+const FALLBACK_VOICE   = 'hi-IN-Neural2-D';
 
-// ── Pack → Tier mapping ───────────────────────────────────────
-const PACK_TO_TIER: { [key: string]: 1 | 2 } = {
-  p11 : 1,
-  p51 : 1,
-  p101: 2,  // Premium tier gets Gemini-TTS
-};
+// ── Style prompt for guru persona ─────────────────────────────
+const GURU_STYLE_PROMPT = `Speak as a calm, deeply wise Vedic astrologer in his late 50s — composed, unhurried, authoritative. 
+NOT a customer support bot. NOT a YouTube narrator. NOT energetic or upbeat.
+Use slow, deliberate pacing with natural pauses between insights.
+Slightly lower your pitch for gravitas and trust.
+Pronounce Sanskrit and Hindi words (Shani, Rahu, Ketu, Mahadasha, Antardasha, Pancham bhav) with respectful clarity.
+Sound like an ancient wisdom keeper who has spent decades studying the stars.
+This is a spiritual consultation — treat it with reverence.
 
-// ── Supabase ──────────────────────────────────────────────────
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  { auth: { persistSession: false } }
-);
+Now read this prediction:`;
 
-// ═══════════════════════════════════════════════════════════════
-// TIER 1: Cloud TTS Wavenet-D
-// ═══════════════════════════════════════════════════════════════
-async function synthesizeTier1(text: string): Promise<Buffer | null> {
-  const apiKey = process.env.GOOGLE_API_KEY;
-  if (!apiKey) {
-    console.error('[Trikal TTS Tier1] GOOGLE_API_KEY missing');
-    return null;
-  }
-
-  const res = await fetch(
-    `https://texttospeech.googleapis.com/v1/text:synthesize?key=${apiKey}`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        input: { text },
-        voice: { languageCode: 'hi-IN', name: TIER1_VOICE },
-        audioConfig: {
-          audioEncoding: 'MP3',
-          speakingRate: TIER1_RATE,
-          pitch: TIER1_PITCH,
-          sampleRateHertz: 24000,
-          effectsProfileId: ['headphone-class-device'],
-        },
-      }),
-    }
-  );
-
-  if (!res.ok) {
-    const err = await res.text();
-    console.error('[Trikal TTS Tier1] Wavenet-D failed:', res.status, err.substring(0, 200));
-    return null;
-  }
-
-  const data = await res.json();
-  if (!data.audioContent) return null;
-  return Buffer.from(data.audioContent, 'base64');
-}
-
-// ═══════════════════════════════════════════════════════════════
-// TIER 2: Gemini-TTS Premium (with style prompt)
-// ═══════════════════════════════════════════════════════════════
-async function synthesizeTier2(text: string): Promise<Buffer | null> {
+// ─────────────────────────────────────────────────────────────
+// Gemini-TTS synthesis (Primary — all tiers)
+// ─────────────────────────────────────────────────────────────
+async function synthesizeGeminiTTS(text: string): Promise<{ buffer: Buffer; mime: string } | null> {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
-    console.error('[Trikal TTS Tier2] GEMINI_API_KEY missing');
+    console.error('[Trikal TTS v4.0] GEMINI_API_KEY missing');
     return null;
   }
 
-  // Style prompt — natural language control of delivery
-  const stylePrompt = `Speak the following Vedic astrology prediction as a calm, composed spiritual guide in his late 50s — NOT a customer support agent, NOT a YouTube narrator, NOT an energetic assistant. Use slow, deliberate pacing. Lower your pitch slightly to convey authority. Pause briefly between key insights. Pronounce Sanskrit words (Mahadasha, Antardasha, planets like Shani, Guru, Shukra) with respectful clarity. Sound like an ancient wisdom keeper who has seen many lives.
-
-Read this exactly:
-
-${text}`;
+  const fullPrompt = `${GURU_STYLE_PROMPT}\n\n${text}`;
 
   const res = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/${TIER2_MODEL}:generateContent?key=${apiKey}`,
+    `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_TTS_MODEL}:generateContent?key=${apiKey}`,
     {
-      method: 'POST',
+      method : 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: stylePrompt }] }],
+      body   : JSON.stringify({
+        contents: [{ parts: [{ text: fullPrompt }] }],
         generationConfig: {
           responseModalities: ['AUDIO'],
           speechConfig: {
             voiceConfig: {
-              prebuiltVoiceConfig: { voiceName: TIER2_VOICE },
+              prebuiltVoiceConfig: { voiceName: GEMINI_TTS_VOICE },
             },
           },
         },
@@ -134,39 +79,83 @@ ${text}`;
 
   if (!res.ok) {
     const err = await res.text();
-    console.error('[Trikal TTS Tier2] Gemini-TTS failed:', res.status, err.substring(0, 300));
+    console.error('[Trikal TTS v4.0] Gemini-TTS error:', res.status, err.substring(0, 200));
     return null;
   }
 
   const data = await res.json();
-  const audioBase64 =
-    data.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
+  const audioBase64 = data.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
 
   if (!audioBase64) {
-    console.error('[Trikal TTS Tier2] No audio in Gemini response');
+    console.error('[Trikal TTS v4.0] No audio in Gemini response');
     return null;
   }
 
-  // Gemini returns PCM 16-bit 24kHz raw audio — wrap in WAV header
+  // Gemini returns PCM 16-bit 24kHz — wrap in WAV for browser playback
   const pcmBuffer = Buffer.from(audioBase64, 'base64');
-  return wrapPcmInWav(pcmBuffer, 24000);
+  const wavBuffer = wrapPcmInWav(pcmBuffer, 24000);
+
+  console.log('[Trikal TTS v4.0] Gemini-TTS success:', wavBuffer.length, 'bytes');
+  return { buffer: wavBuffer, mime: 'audio/wav' };
 }
 
-// ── PCM → WAV wrapper for browser playback ───────────────────
+// ─────────────────────────────────────────────────────────────
+// Neural2-D fallback (better than Wavenet)
+// ─────────────────────────────────────────────────────────────
+async function synthesizeNeural2(text: string): Promise<{ buffer: Buffer; mime: string } | null> {
+  const apiKey = process.env.GOOGLE_API_KEY;
+  if (!apiKey) return null;
+
+  const res = await fetch(
+    `https://texttospeech.googleapis.com/v1/text:synthesize?key=${apiKey}`,
+    {
+      method : 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body   : JSON.stringify({
+        input: { text },
+        voice: { languageCode: 'hi-IN', name: FALLBACK_VOICE },
+        audioConfig: {
+          audioEncoding   : 'MP3',
+          speakingRate    : 0.80,
+          pitch           : -3.0,
+          sampleRateHertz : 24000,
+          effectsProfileId: ['headphone-class-device'],
+        },
+      }),
+    }
+  );
+
+  if (!res.ok) {
+    const err = await res.text();
+    console.error('[Trikal TTS v4.0] Neural2 fallback failed:', res.status, err.substring(0, 150));
+    return null;
+  }
+
+  const data = await res.json();
+  if (!data.audioContent) return null;
+
+  const buffer = Buffer.from(data.audioContent, 'base64');
+  console.log('[Trikal TTS v4.0] Neural2 fallback success:', buffer.length, 'bytes');
+  return { buffer, mime: 'audio/mpeg' };
+}
+
+// ─────────────────────────────────────────────────────────────
+// PCM → WAV wrapper
+// ─────────────────────────────────────────────────────────────
 function wrapPcmInWav(pcmData: Buffer, sampleRate: number): Buffer {
   const numChannels = 1;
   const bitsPerSample = 16;
-  const byteRate = sampleRate * numChannels * (bitsPerSample / 8);
+  const byteRate  = sampleRate * numChannels * (bitsPerSample / 8);
   const blockAlign = numChannels * (bitsPerSample / 8);
-  const dataSize = pcmData.length;
+  const dataSize  = pcmData.length;
 
   const header = Buffer.alloc(44);
   header.write('RIFF', 0);
   header.writeUInt32LE(36 + dataSize, 4);
   header.write('WAVE', 8);
   header.write('fmt ', 12);
-  header.writeUInt32LE(16, 16);                    // fmt chunk size
-  header.writeUInt16LE(1, 20);                      // PCM format
+  header.writeUInt32LE(16, 16);
+  header.writeUInt16LE(1, 20);
   header.writeUInt16LE(numChannels, 22);
   header.writeUInt32LE(sampleRate, 24);
   header.writeUInt32LE(byteRate, 28);
@@ -178,42 +167,13 @@ function wrapPcmInWav(pcmData: Buffer, sampleRate: number): Buffer {
   return Buffer.concat([header, pcmData]);
 }
 
-// ═══════════════════════════════════════════════════════════════
-// Detect tier from session's active pack
-// ═══════════════════════════════════════════════════════════════
-async function getTierForSession(sessionId: string): Promise<1 | 2> {
-  try {
-    const { data, error } = await supabase
-      .from('voice_packs')
-      .select('pack_id')
-      .eq('session_id', sessionId)
-      .eq('status', 'active')
-      .gt('valid_until', new Date().toISOString())
-      .order('amount_paid', { ascending: false }) // highest pack wins
-      .limit(1)
-      .single();
-
-    if (error || !data) {
-      console.log('[Trikal TTS] No active pack found, defaulting to Tier 1');
-      return 1;
-    }
-
-    const tier = PACK_TO_TIER[data.pack_id] || 1;
-    console.log('[Trikal TTS] Pack:', data.pack_id, '→ Tier', tier);
-    return tier;
-  } catch (e) {
-    console.error('[Trikal TTS] Tier detection error:', e);
-    return 1;
-  }
-}
-
-// ═══════════════════════════════════════════════════════════════
+// ─────────────────────────────────────────────────────────────
 // POST handler
-// ═══════════════════════════════════════════════════════════════
+// ─────────────────────────────────────────────────────────────
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { text, sessionId, forceTier, packId } = body;
+    const { text, sessionId } = body;
 
     if (!text || typeof text !== 'string') {
       return NextResponse.json({ error: 'Text required' }, { status: 400 });
@@ -232,64 +192,34 @@ export async function POST(req: NextRequest) {
       .replace(/[\u{1F300}-\u{1F9FF}]/gu, '')
       .trim();
 
-    console.log('[Trikal TTS v3.0] Text words:', words.length, '| packId:', packId || 'none');
+    console.log('[Trikal TTS v4.0] Synthesizing:', words.length, 'words for session:', sessionId);
 
-    // ── Determine tier (packId direct > forceTier > Supabase lookup) ──
-    let tier: 1 | 2;
-    if (packId && PACK_TO_TIER[packId as string]) {
-      tier = PACK_TO_TIER[packId as string] as 1 | 2;
-      console.log('[Trikal TTS v3.0] Tier from packId:', packId, '→ Tier', tier);
-    } else if (forceTier === 1 || forceTier === 2) {
-      tier = forceTier;
-      console.log('[Trikal TTS] Forced tier:', tier);
-    } else {
-      tier = await getTierForSession(sessionId);
+    // ── Try Gemini-TTS first (all packs) ────────────────────
+    let result = await synthesizeGeminiTTS(trimmedText);
+
+    // ── Fallback to Neural2-D ────────────────────────────────
+    if (!result) {
+      console.warn('[Trikal TTS v4.0] Gemini-TTS failed, using Neural2 fallback');
+      result = await synthesizeNeural2(trimmedText);
     }
 
-    let audioBuffer: Buffer | null = null;
-    let voiceUsed = '';
-    let mimeType = 'audio/mpeg';
-
-    // ── TIER 2: Try Gemini-TTS first if premium ─────────────
-    if (tier === 2) {
-      audioBuffer = await synthesizeTier2(trimmedText);
-      if (audioBuffer) {
-        voiceUsed = `gemini-tts-${TIER2_VOICE}`;
-        mimeType = 'audio/wav';
-        console.log('[Trikal TTS v3.0] Gemini-TTS success:', audioBuffer.length, 'bytes');
-      } else {
-        console.warn('[Trikal TTS v3.0] Gemini-TTS failed, falling back to Tier 1');
-      }
-    }
-
-    // ── TIER 1: Default OR Gemini-TTS fallback ──────────────
-    if (!audioBuffer) {
-      audioBuffer = await synthesizeTier1(trimmedText);
-      if (audioBuffer) {
-        voiceUsed = TIER1_VOICE;
-        mimeType = 'audio/mpeg';
-        console.log('[Trikal TTS v3.0] Wavenet-D success:', audioBuffer.length, 'bytes');
-      }
-    }
-
-    if (!audioBuffer || audioBuffer.length === 0) {
+    if (!result || result.buffer.length === 0) {
       return NextResponse.json({ error: 'Voice synthesis failed' }, { status: 500 });
     }
 
-    return new NextResponse(audioBuffer, {
-      status: 200,
+    return new NextResponse(result.buffer, {
+      status : 200,
       headers: {
-        'Content-Type'         : mimeType,
-        'Content-Length'       : audioBuffer.length.toString(),
+        'Content-Type'         : result.mime,
+        'Content-Length'       : result.buffer.length.toString(),
         'Cache-Control'        : 'no-store',
-        'X-Trikal-Voice-Engine': voiceUsed,
-        'X-Trikal-Tier'        : String(tier),
-        'X-Trikal-Word-Count'  : words.length.toString(),
+        'X-Trikal-Voice-Engine': result.mime === 'audio/wav' ? `gemini-tts-${GEMINI_TTS_VOICE}` : FALLBACK_VOICE,
       },
     });
+
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
-    console.error('[Trikal TTS v3.0] Fatal:', message);
+    console.error('[Trikal TTS v4.0] Fatal:', message);
     return NextResponse.json({ error: 'Voice synthesis failed', detail: message }, { status: 500 });
   }
 }
@@ -297,11 +227,10 @@ export async function POST(req: NextRequest) {
 export async function GET() {
   return NextResponse.json({
     status         : 'Trikal Voice TTS API is live',
-    version        : '3.0',
-    architecture   : 'Dual-tier voice routing',
-    tier1          : { voice: TIER1_VOICE, rate: TIER1_RATE, pitch: TIER1_PITCH, packs: ['p11', 'p51'] },
-    tier2          : { model: TIER2_MODEL, voice: TIER2_VOICE, packs: ['p101'] },
-    tier1_cost_inr : 0.04,
-    tier2_cost_inr : 0.50,
+    version        : '4.0',
+    voice_primary  : `Gemini-TTS ${GEMINI_TTS_VOICE} (all packs)`,
+    voice_fallback : FALLBACK_VOICE,
+    quality        : 'CEO mandated — maximum quality for all users',
+    cost_per_pred  : '~₹1.00',
   });
 }
