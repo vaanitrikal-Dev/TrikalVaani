@@ -3,7 +3,7 @@
  * TRIKAL VAANI — Voice Transcription API (Google STT)
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/api/voice-transcribe/route.ts
- * VERSION: 2.1 — Chirp model for Hinglish code-switching
+ * VERSION: 2.2 — Chirp model for Hinglish code-switching
  * SIGNED: ROHIIT GUPTA, CEO
  *
  * ⚠️ STRICT CEO ORDER: DO NOT EDIT WITHOUT CEO APPROVAL
@@ -82,7 +82,7 @@ export async function POST(req: NextRequest) {
           config: {
             languageCode,
             alternativeLanguageCodes,
-            model                    : 'chirp',        // Best for Hinglish code-switching
+            model                   : 'latest_long',        // Best for Hinglish code-switching
             enableAutomaticPunctuation: true,
             speechContexts: [
               {
