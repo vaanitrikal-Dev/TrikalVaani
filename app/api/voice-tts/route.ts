@@ -185,7 +185,7 @@ export async function POST(req: NextRequest) {
     // ── Clean text for TTS ───────────────────────────────────
     const words = text.trim().split(/\s+/);
     const trimmedText = words
-      .slice(0, 150)
+      .slice(0, 200)
       .join(' ')
       .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
       .replace(/\*+([^*]+)\*+/g, '$1')
