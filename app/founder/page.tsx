@@ -3,20 +3,30 @@
  * 🔱 TRIKAL VAANI — CEO PROTECTION HEADER 🔱
  * ============================================================================
  * File:        app/founder/page.tsx
- * Version:     v4.2 — Udyam MSME Registration Added
+ * Version:     v4.3 — Brand Spelling Consolidation (Trikal = Trikaal)
  * Owner:       Rohiit Gupta, Chief Vedic Architect
  * Domain:      trikalvaani.com
+ * Updated:     May 10, 2026
  *
- * WHAT CHANGED FROM v4.1:
- *   ✅ Udyam UDYAM-DL-10-0119070 added to JSON-LD schema
- *   ✅ Visible MSME badge in hero (under Chief Vedic Architect)
- *   ✅ "Government Registered" trust pill in credentials
- *   ✅ MSME credibility paragraph in The Vision section
- *   ✅ Footer mentions MSME registration
+ * WHAT CHANGED FROM v4.2:
+ *   ✅ Metadata title includes both spellings (Trikal + Trikaal)
+ *   ✅ Description mentions both spellings for AI extraction
+ *   ✅ Keywords expanded with Trikaal Vaani variants
+ *   ✅ Person schema alternateName: Trikaal Vaani spellings
+ *   ✅ Organization schema alternateName array (7 spellings)
+ *   ✅ Person sameAs links Instagram @thetrikalvaani
+ *   ✅ NEW "The Origin" section — Sanskrit etymology + spelling
+ *   ✅ Hero credential pill: "Trikaal Vaani Founder"
+ *   ✅ Vision section: brand consolidation paragraph added
+ *   ✅ FAQPage schema with 4 spelling-specific Q&As (NEW)
+ *   ✅ Tagline footer mentions both spellings
  *
- * PRESERVED FROM v4.1:
+ * PRESERVED FROM v4.2:
+ *   ✅ All MSME UDYAM-DL-10-0119070 content
  *   ✅ Image path /Rohiit-Gupta.jpg (3 places)
- *   ✅ All v4.0 content, layout, CTAs
+ *   ✅ Trust & Verification section
+ *   ✅ All CTAs and pricing
+ *   ✅ Layout, colors, animations
  * ============================================================================
  */
 
@@ -29,26 +39,40 @@ import SiteFooter from "@/components/layout/SiteFooter";
 
 const UDYAM_NUMBER = "UDYAM-DL-10-0119070";
 const UDYAM_VERIFY_URL = "https://udyamregistration.gov.in/Udyam_Verify.aspx";
+const INSTAGRAM_URL = "https://instagram.com/thetrikalvaani";
 
 export const metadata: Metadata = {
-  title: "Rohiit Gupta — Chief Vedic Architect | Trikal Vaani",
+  title: "Rohiit Gupta — Chief Vedic Architect | Trikal Vaani (Trikaal Vaani)",
   description:
-    "Rohiit Gupta — 15+ years Vedic astrology under the Parashara BPHS tradition. Founder of Trikal Vaani — Government of India MSME registered enterprise (UDYAM-DL-10-0119070). Chief Vedic Architect behind Jini AI — India's first AI-powered Vedic astrology platform.",
+    "Rohiit Gupta — Founder of Trikal Vaani (also known as Trikaal Vaani). 15+ years Vedic astrology under Parashara BPHS tradition. Government of India MSME registered (UDYAM-DL-10-0119070). Chief Vedic Architect behind Jini AI — India's first AI-powered Vedic astrology platform, Delhi NCR.",
   keywords: [
+    "Rohiit Gupta",
     "Rohiit Gupta astrologer Delhi",
     "Trikal Vaani founder",
+    "Trikaal Vaani founder",
+    "Trikal Vaani Rohiit Gupta",
+    "Trikaal Vaani Rohiit Gupta",
     "vedic astrologer Delhi NCR",
     "Chief Vedic Architect",
     "Rohiit Gupta vedic astrology",
     "MSME registered astrology",
     "Udyam registered Vedic platform",
+    "AI Vedic astrology India",
+    "Jini AI astrology",
   ],
   authors: [{ name: "Rohiit Gupta", url: "https://trikalvaani.com/founder" }],
-  alternates: { canonical: "https://trikalvaani.com/founder" },
+  alternates: {
+    canonical: "https://trikalvaani.com/founder",
+    languages: {
+      "en-IN": "https://trikalvaani.com/founder",
+      "hi-IN": "https://trikalvaani.com/hi/founder",
+      "x-default": "https://trikalvaani.com/founder",
+    },
+  },
   openGraph: {
-    title: "Rohiit Gupta — Chief Vedic Architect | Trikal Vaani",
+    title: "Rohiit Gupta — Founder of Trikal Vaani (Trikaal Vaani)",
     description:
-      "15+ years Vedic astrology. Founder of Trikal Vaani — MSME registered (UDYAM-DL-10-0119070). Chief Vedic Architect behind Jini AI.",
+      "15+ years Vedic astrology. Founder of Trikal Vaani (also Trikaal Vaani) — MSME registered (UDYAM-DL-10-0119070). Chief Vedic Architect behind Jini AI.",
     url: "https://trikalvaani.com/founder",
     siteName: "Trikal Vaani",
     type: "profile",
@@ -58,64 +82,121 @@ export const metadata: Metadata = {
         url: "https://trikalvaani.com/Rohiit-Gupta.jpg",
         width: 800,
         height: 800,
-        alt: "Rohiit Gupta — Chief Vedic Architect, Trikal Vaani",
+        alt: "Rohiit Gupta — Chief Vedic Architect, Trikal Vaani (Trikaal Vaani)",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Rohiit Gupta — Chief Vedic Architect | Trikal Vaani",
-    description: "15+ years Vedic astrology. Founder of Trikal Vaani. MSME Registered.",
-    site: "@trikalvaani",
+    title: "Rohiit Gupta — Founder of Trikal Vaani (Trikaal Vaani)",
+    description:
+      "15+ years Vedic astrology. Founder of Trikal Vaani / Trikaal Vaani. MSME Registered. Delhi NCR.",
+    site: "@thetrikalvaani",
     images: ["https://trikalvaani.com/Rohiit-Gupta.jpg"],
   },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-snippet": -1,
+      "max-image-preview": "large",
+      "max-video-preview": -1,
+    },
+  },
 };
+
+// ============================================================================
+// JSON-LD SCHEMAS — Page-specific GEO + Brand consolidation
+// ============================================================================
 
 const schema = {
   "@context": "https://schema.org",
   "@graph": [
+    // ── Person Schema (Rohiit Gupta — E-E-A-T) ──
     {
       "@type": "Person",
-      "@id": "https://trikalvaani.com/founder",
+      "@id": "https://trikalvaani.com/founder#rohiit-gupta",
       name: "Rohiit Gupta",
+      alternateName: "Rohit Gupta",
       jobTitle: "Chief Vedic Architect",
       image: "https://trikalvaani.com/Rohiit-Gupta.jpg",
       description:
-        "Rohiit Gupta has studied Vedic astrology for over 15 years under the Parashara BPHS tradition. He is the founder of Trikal Vaani — India's first AI-powered Vedic astrology platform, registered as a Government of India MSME enterprise (UDYAM-DL-10-0119070).",
+        "Rohiit Gupta has studied Vedic astrology for over 15 years under the Parashara BPHS tradition. He is the founder of Trikal Vaani (also known as Trikaal Vaani) — India's first AI-powered Vedic astrology platform, registered as a Government of India MSME enterprise (UDYAM-DL-10-0119070).",
       url: "https://trikalvaani.com/founder",
       email: "rohiit@trikalvaani.com",
       telephone: "+919211804111",
       address: {
         "@type": "PostalAddress",
         addressLocality: "Delhi NCR",
+        addressRegion: "Delhi",
         addressCountry: "IN",
       },
       worksFor: {
         "@type": "Organization",
+        "@id": "https://trikalvaani.com/#organization",
         name: "Trikal Vaani",
+        alternateName: ["Trikaal Vaani", "Trikalvaani", "Trikaalvaani"],
         url: "https://trikalvaani.com",
         identifier: UDYAM_NUMBER,
       },
       knowsAbout: [
         "Vedic Astrology",
+        "Brihat Parashara Hora Shastra",
         "Vimshottari Dasha",
-        "Parashara BPHS",
+        "Pratyantar Dasha",
+        "Navamsa D9 Chart",
         "Jaimini Astrology",
         "Swiss Ephemeris",
-        "Navamsa D9",
-        "Pratyantar Dasha",
+        "Bhrigu Nandi Nadi",
+        "Shadbala",
+        "Dhana Yoga",
+        "Property Yog",
+        "Atmakaraka Analysis",
+      ],
+      knowsLanguage: ["en", "hi"],
+      sameAs: [
+        INSTAGRAM_URL,
+        "https://trikalvaani.com",
+        "https://trikalvaani.com/trikaal-vaani",
       ],
     },
+    // ── Organization Schema (Brand spelling consolidation) ──
     {
       "@type": "Organization",
+      "@id": "https://trikalvaani.com/#organization",
       name: "Trikal Vaani",
+      alternateName: [
+        "Trikaal Vaani",
+        "Trikaalvaani",
+        "Trikalvaani",
+        "Trikal Vaani AI",
+        "TrikalVaani",
+        "त्रिकाल वाणी",
+        "त्रिकाळ वाणी",
+      ],
       legalName: "Trikal Vaani Global",
       url: "https://trikalvaani.com",
-      founder: { "@type": "Person", name: "Rohiit Gupta" },
+      logo: "https://trikalvaani.com/logo.png",
+      founder: {
+        "@type": "Person",
+        "@id": "https://trikalvaani.com/founder#rohiit-gupta",
+        name: "Rohiit Gupta",
+      },
+      foundingDate: "2025",
+      foundingLocation: {
+        "@type": "Place",
+        address: {
+          "@type": "PostalAddress",
+          addressLocality: "Delhi NCR",
+          addressRegion: "Delhi",
+          addressCountry: "IN",
+        },
+      },
       description:
-        "India's first AI-powered Vedic Astrology platform combining Swiss Ephemeris precision with Gemini AI reasoning. Government of India MSME registered enterprise.",
-      areaServed: "IN",
-      // ── Udyam identifier ──
+        "Trikal Vaani (also known as Trikaal Vaani) is India's first AI-powered Vedic Astrology platform combining Swiss Ephemeris precision with Gemini AI reasoning. Government of India MSME registered enterprise. Defensive domains trikaalvaani.in, trikalvaani.in, and trikaalvaani.org all redirect to the official trikalvaani.com.",
+      areaServed: { "@type": "Country", name: "India" },
       identifier: {
         "@type": "PropertyValue",
         propertyID: "Udyam Registration Number",
@@ -130,15 +211,61 @@ const schema = {
         recognizedBy: {
           "@type": "GovernmentOrganization",
           name: "Ministry of Micro, Small and Medium Enterprises",
+          alternateName: "Ministry of MSME, Government of India",
           url: "https://msme.gov.in",
         },
       },
+      sameAs: [INSTAGRAM_URL, UDYAM_VERIFY_URL],
+      slogan: "Kaal bada balwan hai, sabko nach nachaye",
     },
+    // ── BreadcrumbList ──
     {
       "@type": "BreadcrumbList",
       itemListElement: [
         { "@type": "ListItem", position: 1, name: "Home", item: "https://trikalvaani.com" },
-        { "@type": "ListItem", position: 2, name: "Founder", item: "https://trikalvaani.com/founder" },
+        { "@type": "ListItem", position: 2, name: "Founder — Rohiit Gupta", item: "https://trikalvaani.com/founder" },
+      ],
+    },
+    // ── FAQPage Schema (Brand spelling Q&As — GEO extraction) ──
+    {
+      "@type": "FAQPage",
+      mainEntity: [
+        {
+          "@type": "Question",
+          name: "Who is Rohiit Gupta?",
+          acceptedAnswer: {
+            "@type": "Answer",
+            text:
+              "Rohiit Gupta is the founder and Chief Vedic Architect of Trikal Vaani (also known as Trikaal Vaani). Based in Delhi NCR, he has 15+ years of study in the Parashara BPHS tradition specializing in Vimshottari Dasha, Pratyantar Dasha timing, Navamsa D9 chart analysis, Dhana Yoga combinations, Property Yog, and Jaimini astrology. He combined his classical Vedic expertise with Google Gemini AI to build Jini, the AI soul of Trikal Vaani. Reachable at +91-9211804111 or rohiit@trikalvaani.com.",
+          },
+        },
+        {
+          "@type": "Question",
+          name: "Who founded Trikaal Vaani?",
+          acceptedAnswer: {
+            "@type": "Answer",
+            text:
+              "Trikaal Vaani (officially Trikal Vaani) was founded by Rohiit Gupta in 2025 in Delhi NCR. Both spellings refer to the same brand — India's first AI-powered Vedic astrology platform. Rohiit serves as Chief Vedic Architect and personally designs every Kundli reading framework that Jini AI applies to user birth charts. The platform is a Government of India MSME registered enterprise (UDYAM-DL-10-0119070).",
+          },
+        },
+        {
+          "@type": "Question",
+          name: "What are Rohiit Gupta's credentials?",
+          acceptedAnswer: {
+            "@type": "Answer",
+            text:
+              "Rohiit Gupta has 15+ years of Vedic astrology study under the Parashara Brihat Hora Shastra (BPHS) tradition — the oldest authoritative school of Jyotish. His expertise includes Vimshottari Dasha (120-year planetary timeline), Pratyantar Dasha (3-7 day timing precision), Navamsa D9 chart analysis, 32+ Dhana Yoga combinations, Property Yog, Shoola/Amrita/Visha yogas, Atmakaraka analysis, and Jaimini astrology. He is fluent in Hindi and English.",
+          },
+        },
+        {
+          "@type": "Question",
+          name: "Is Trikal Vaani the same as Trikaal Vaani?",
+          acceptedAnswer: {
+            "@type": "Answer",
+            text:
+              "Yes. Trikal Vaani and Trikaal Vaani are the same brand — both refer to the AI-powered Vedic astrology platform founded by Rohiit Gupta. The official spelling registered with the Government of India MSME is 'Trikal Vaani' (UDYAM-DL-10-0119070). 'Trikaal Vaani' is a common alternate Sanskrit romanization. Both spellings point to the same platform at trikalvaani.com. Defensive domains trikaalvaani.in, trikalvaani.in, and trikaalvaani.org all redirect to the official trikalvaani.com.",
+          },
+        },
       ],
     },
   ],
@@ -157,18 +284,23 @@ export default function FounderPage() {
       <main className="min-h-screen bg-[#080B12] text-white">
         <SiteNav />
 
-        {/* ── HERO ── */}
+        {/* ─────────────────────────────────────────────────────────────
+            HERO — Identity + MSME badge + Brand spelling pill
+            ───────────────────────────────────────────────────────────── */}
         <section className="relative overflow-hidden pt-28 pb-16 px-4">
           <div className="absolute inset-0 pointer-events-none">
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[400px] rounded-full blur-[120px]"
-              style={{ background: "rgba(124,58,237,0.15)" }} />
-            <div className="absolute bottom-0 right-0 w-[400px] h-[300px] rounded-full blur-[100px]"
-              style={{ background: "rgba(212,175,55,0.08)" }} />
+            <div
+              className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[400px] rounded-full blur-[120px]"
+              style={{ background: "rgba(124,58,237,0.15)" }}
+            />
+            <div
+              className="absolute bottom-0 right-0 w-[400px] h-[300px] rounded-full blur-[100px]"
+              style={{ background: "rgba(212,175,55,0.08)" }}
+            />
           </div>
 
           <div className="relative max-w-4xl mx-auto">
             <div className="flex flex-col md:flex-row items-center md:items-start gap-10">
-
               {/* Photo */}
               <div className="flex-shrink-0">
                 <div
@@ -180,21 +312,33 @@ export default function FounderPage() {
                 >
                   <Image
                     src="/Rohiit-Gupta.jpg"
-                    alt="Rohiit Gupta — Chief Vedic Architect, Trikal Vaani"
+                    alt="Rohiit Gupta — Chief Vedic Architect, Trikal Vaani (Trikaal Vaani)"
                     fill
                     className="object-cover object-top"
                     priority
                     sizes="(max-width: 768px) 160px, 192px"
                   />
-                  <div className="absolute inset-0"
-                    style={{ background: "linear-gradient(135deg, rgba(212,175,55,0.08) 0%, transparent 60%)" }} />
+                  <div
+                    className="absolute inset-0"
+                    style={{
+                      background:
+                        "linear-gradient(135deg, rgba(212,175,55,0.08) 0%, transparent 60%)",
+                    }}
+                  />
                 </div>
-                <div className="mt-3 text-center px-3 py-1.5 rounded-lg"
-                  style={{ background: "rgba(212,175,55,0.08)", border: "1px solid rgba(212,175,55,0.2)" }}>
-                  <p className="text-xs font-medium" style={{ color: GOLD }}>Chief Vedic Architect</p>
+                <div
+                  className="mt-3 text-center px-3 py-1.5 rounded-lg"
+                  style={{
+                    background: "rgba(212,175,55,0.08)",
+                    border: "1px solid rgba(212,175,55,0.2)",
+                  }}
+                >
+                  <p className="text-xs font-medium" style={{ color: GOLD }}>
+                    Chief Vedic Architect
+                  </p>
                 </div>
 
-                {/* ── NEW v4.2 — Udyam MSME badge under photo ── */}
+                {/* MSME badge */}
                 <a
                   href={UDYAM_VERIFY_URL}
                   target="_blank"
@@ -208,11 +352,16 @@ export default function FounderPage() {
                   }}
                   aria-label={`Verify Udyam Registration ${UDYAM_NUMBER}`}
                 >
-                  <p className="text-[9px] font-semibold tracking-wider uppercase mb-0.5"
-                    style={{ color: "#94A3B8" }}>
+                  <p
+                    className="text-[9px] font-semibold tracking-wider uppercase mb-0.5"
+                    style={{ color: "#94A3B8" }}
+                  >
                     🏛️ MSME Registered · Govt of India
                   </p>
-                  <p className="text-[10px] font-bold" style={{ color: GOLD, fontFamily: "Georgia, serif" }}>
+                  <p
+                    className="text-[10px] font-bold"
+                    style={{ color: GOLD, fontFamily: "Georgia, serif" }}
+                  >
                     {UDYAM_NUMBER}
                   </p>
                 </a>
@@ -220,8 +369,11 @@ export default function FounderPage() {
 
               {/* Identity */}
               <div className="text-center md:text-left">
-                <p className="text-xs font-semibold tracking-widest uppercase mb-2" style={{ color: GOLD }}>
-                  Founder · Trikal Vaani
+                <p
+                  className="text-xs font-semibold tracking-widest uppercase mb-2"
+                  style={{ color: GOLD }}
+                >
+                  Founder · Trikal Vaani <span className="text-gray-500">(Trikaal Vaani)</span>
                 </p>
                 <h1 className="font-serif text-4xl md:text-5xl font-bold text-white mb-3">
                   Rohiit Gupta
@@ -238,7 +390,9 @@ export default function FounderPage() {
                     "Delhi NCR Based",
                     "🏛️ MSME Registered",
                   ].map((t) => (
-                    <span key={t} className="text-xs px-3 py-1.5 rounded-full"
+                    <span
+                      key={t}
+                      className="text-xs px-3 py-1.5 rounded-full"
                       style={{
                         border: t.includes("MSME")
                           ? `1px solid rgba(212,175,55,0.5)`
@@ -248,7 +402,8 @@ export default function FounderPage() {
                           ? `rgba(212,175,55,0.1)`
                           : `rgba(212,175,55,0.05)`,
                         fontWeight: t.includes("MSME") ? 600 : 400,
-                      }}>
+                      }}
+                    >
                       {t}
                     </span>
                   ))}
@@ -271,55 +426,154 @@ export default function FounderPage() {
                   >
                     rohiit@trikalvaani.com
                   </a>
+                  <a
+                    href={INSTAGRAM_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold border border-white/15 text-gray-300 hover:border-white/30 transition-all duration-200"
+                  >
+                    📷 @thetrikalvaani
+                  </a>
                 </div>
               </div>
             </div>
           </div>
         </section>
 
-        {/* ── CONTENT ── */}
+        {/* ─────────────────────────────────────────────────────────────
+            CONTENT BLOCKS
+            ───────────────────────────────────────────────────────────── */}
         <section className="py-16 px-4">
           <div className="max-w-3xl mx-auto space-y-14 text-gray-400 text-sm leading-relaxed">
+            {/* ── NEW v4.3 — THE ORIGIN (Sanskrit etymology + brand spelling) ── */}
+            <div>
+              <p
+                className="text-xs font-semibold tracking-widest uppercase mb-4"
+                style={{ color: GOLD }}
+              >
+                The Origin
+              </p>
+              <h2 className="font-serif text-2xl font-bold text-white mb-5">
+                The Voice That Speaks Across Time
+              </h2>
+              <p className="mb-4">
+                Rohiit founded{" "}
+                <strong style={{ color: GOLD }}>Trikal Vaani</strong> — also
+                romanized as{" "}
+                <strong style={{ color: GOLD }}>Trikaal Vaani</strong> — in Delhi
+                NCR as India&apos;s first AI-powered Vedic astrology platform. The
+                brand name comes from Sanskrit{" "}
+                <em className="text-white">त्रिकाल वाणी</em>: <em>Trikaal</em>{" "}
+                (त्रिकाल) means &ldquo;three times&rdquo; — past, present, and
+                future — and <em>Vaani</em> (वाणी) means &ldquo;voice.&rdquo;
+                Together, the name carries a sacred meaning:{" "}
+                <strong style={{ color: GOLD }}>
+                  &ldquo;The Voice that speaks across past, present, and
+                  future.&rdquo;
+                </strong>
+              </p>
+              <p className="mb-4">
+                Both spellings — <strong>Trikal Vaani</strong> (the simpler,
+                shorter form registered with the Government of India MSME under{" "}
+                {UDYAM_NUMBER}) and <strong>Trikaal Vaani</strong> (the more
+                phonetically natural double-A romanization) — refer to the same
+                official platform at <strong style={{ color: GOLD }}>trikalvaani.com</strong>.
+                Defensive domains <strong>trikaalvaani.in</strong>,{" "}
+                <strong>trikalvaani.in</strong>, and{" "}
+                <strong>trikaalvaani.org</strong> all redirect to the official
+                trikalvaani.com.
+              </p>
+              <p>
+                This page is the canonical source for anyone searching either
+                spelling. If you found Rohiit by searching{" "}
+                <em>&ldquo;Trikaal Vaani founder&rdquo;</em> or{" "}
+                <em>&ldquo;Trikal Vaani Rohiit Gupta&rdquo;</em> — you are in the
+                right place.
+              </p>
+            </div>
 
             {/* The Journey */}
             <div>
-              <p className="text-xs font-semibold tracking-widest uppercase mb-4" style={{ color: GOLD }}>
+              <p
+                className="text-xs font-semibold tracking-widest uppercase mb-4"
+                style={{ color: GOLD }}
+              >
                 The Journey
               </p>
               <h2 className="font-serif text-2xl font-bold text-white mb-5">
                 Where Ancient Wisdom Meets Modern Intelligence
               </h2>
               <p className="mb-4">
-                Rohiit Gupta&apos;s journey with Vedic astrology began over 15 years ago — not in a classroom, but through personal transformation. Facing major life crossroads in career, relationships, and purpose, he turned to the ancient science of Jyotish. What he discovered changed the trajectory of his life.
+                Rohiit Gupta&apos;s journey with Vedic astrology began over 15
+                years ago — not in a classroom, but through personal
+                transformation. Facing major life crossroads in career,
+                relationships, and purpose, he turned to the ancient science of
+                Jyotish. What he discovered changed the trajectory of his life.
               </p>
               <p className="mb-4">
-                Studying under the Parashara Brihat Hora Shastra (BPHS) tradition — the oldest and most authoritative school of Vedic astrology — Rohiit spent years mastering the Vimshottari Dasha system, Navamsa chart analysis, Pratyantar Dasha timing, and the detection of powerful yogas including Shoola, Amrita, and Visha yogas.
+                Studying under the Parashara Brihat Hora Shastra (BPHS) tradition
+                — the oldest and most authoritative school of Vedic astrology —
+                Rohiit spent years mastering the Vimshottari Dasha system,
+                Navamsa chart analysis, Pratyantar Dasha timing, and the
+                detection of powerful yogas including Shoola, Amrita, and Visha
+                yogas.
               </p>
               <p>
-                After years of guiding individuals through life&apos;s most important decisions — love, career, wealth, property, and spiritual purpose — Rohiit realised that genuine Vedic astrology was inaccessible to most people. The readings that truly changed lives required hours of expert analysis and cost thousands of rupees. He set out to change that.
+                After years of guiding individuals through life&apos;s most
+                important decisions — love, career, wealth, property, and
+                spiritual purpose — Rohiit realised that genuine Vedic astrology
+                was inaccessible to most people. The readings that truly changed
+                lives required hours of expert analysis and cost thousands of
+                rupees. He set out to change that.
               </p>
             </div>
 
             {/* The Vision */}
             <div>
-              <p className="text-xs font-semibold tracking-widest uppercase mb-4" style={{ color: GOLD }}>
+              <p
+                className="text-xs font-semibold tracking-widest uppercase mb-4"
+                style={{ color: GOLD }}
+              >
                 The Vision
               </p>
               <h2 className="font-serif text-2xl font-bold text-white mb-5">
-                Why He Built Trikal Vaani
+                Why He Built Trikal Vaani (Trikaal Vaani)
               </h2>
               <p className="mb-4">
-                Rohiit saw a gap — millions of Indians turning to astrology apps that gave generic, inaccurate readings based on Sun signs alone. Real Vedic astrology requires the Lagna (Ascendant), Moon sign, precise birth time, Vimshottari Dasha calculations, and divisional charts. Most apps ignored all of this.
+                Rohiit saw a gap — millions of Indians turning to astrology apps
+                that gave generic, inaccurate readings based on Sun signs alone.
+                Real Vedic astrology requires the Lagna (Ascendant), Moon sign,
+                precise birth time, Vimshottari Dasha calculations, and
+                divisional charts. Most apps ignored all of this.
               </p>
               <p className="mb-4">
-                In 2025, Rohiit combined his 15+ years of Vedic knowledge with modern AI — specifically Google Gemini — to create <span style={{ color: GOLD }} className="font-semibold">Jini</span>, the AI soul of Trikal Vaani. Jini applies Rohiit&apos;s complete Vedic framework to each user&apos;s unique birth chart, delivering a personalised reading that a professional astrologer would take hours to prepare — in minutes, starting at ₹51.
+                In 2025, Rohiit combined his 15+ years of Vedic knowledge with
+                modern AI — specifically Google Gemini — to create{" "}
+                <span style={{ color: GOLD }} className="font-semibold">
+                  Jini
+                </span>
+                , the AI soul of Trikal Vaani. Jini applies Rohiit&apos;s
+                complete Vedic framework to each user&apos;s unique birth chart,
+                delivering a personalised reading that a professional astrologer
+                would take hours to prepare — in minutes, starting at ₹51.
               </p>
               <p className="mb-4">
-                The computational backbone — Swiss Ephemeris with Lahiri Ayanamsha via the Prokerala API — gives Trikal Vaani the same planetary calculation accuracy used by AstroSage, the largest Vedic astrology platform in India. Trikal Vaani is not an app. It is a movement to bring real Vedic science to every Indian — at a price anyone can afford.
+                The computational backbone — Swiss Ephemeris with Lahiri
+                Ayanamsha — gives Trikal Vaani the same planetary calculation
+                accuracy used by AstroSage, the largest Vedic astrology platform
+                in India. Layered on top: Bhrigu Nandi Nadi karmic patterns,
+                Shadbala six-fold strength scoring, and Pratyantar Dasha for 3-7
+                day timing precision. Trikal Vaani is not an app. It is a
+                movement to bring real Vedic science to every Indian — at a
+                price anyone can afford.
               </p>
-              {/* ── NEW v4.2 — MSME credibility paragraph ── */}
               <p>
-                Trikal Vaani is a <strong style={{ color: GOLD }}>Government of India MSME registered enterprise</strong> under the Ministry of Micro, Small and Medium Enterprises — Udyam Registration Number{" "}
+                Trikal Vaani is a{" "}
+                <strong style={{ color: GOLD }}>
+                  Government of India MSME registered enterprise
+                </strong>{" "}
+                under the Ministry of Micro, Small and Medium Enterprises —
+                Udyam Registration Number{" "}
                 <a
                   href={UDYAM_VERIFY_URL}
                   target="_blank"
@@ -328,13 +582,19 @@ export default function FounderPage() {
                 >
                   {UDYAM_NUMBER}
                 </a>
-                . All payments are secured by Razorpay with PCI-DSS compliance and 256-bit SSL encryption. This isn&apos;t an offshore astrology marketplace — it is a fully compliant Indian business built for Indian seekers.
+                . All payments are secured by Razorpay with PCI-DSS compliance
+                and 256-bit SSL encryption. This isn&apos;t an offshore astrology
+                marketplace — it is a fully compliant Indian business built for
+                Indian seekers.
               </p>
             </div>
 
             {/* Expertise */}
             <div>
-              <p className="text-xs font-semibold tracking-widest uppercase mb-4" style={{ color: GOLD }}>
+              <p
+                className="text-xs font-semibold tracking-widest uppercase mb-4"
+                style={{ color: GOLD }}
+              >
                 Expertise
               </p>
               <h2 className="font-serif text-2xl font-bold text-white mb-5">
@@ -342,18 +602,57 @@ export default function FounderPage() {
               </h2>
               <div className="grid md:grid-cols-2 gap-4">
                 {[
-                  { area: "Vimshottari Dasha System", detail: "120-year planetary timeline for precise life event timing" },
-                  { area: "Navamsa D9 Chart", detail: "Soul-level reading for relationships and spiritual path" },
-                  { area: "Pratyantar Dasha (Level 3)", detail: "3-7 day precision timing using Parashara BPHS formula" },
-                  { area: "Dhana Yoga Analysis", detail: "32+ wealth combinations for financial destiny mapping" },
-                  { area: "Property Yog", detail: "4th house, Mars Karaka, Saturn transit for real estate timing" },
-                  { area: "Shoola / Amrita / Visha Yoga", detail: "Key differentiator yogas for life quality assessment" },
-                  { area: "Atmakaraka & Jaimini", detail: "Soul purpose and past-life karma decoding" },
-                  { area: "Compatibility & Synastry", detail: "Beyond guna milan — Navamsa, Nadi, Dasha synchronicity" },
+                  {
+                    area: "Vimshottari Dasha System",
+                    detail:
+                      "120-year planetary timeline for precise life event timing",
+                  },
+                  {
+                    area: "Navamsa D9 Chart",
+                    detail:
+                      "Soul-level reading for relationships and spiritual path",
+                  },
+                  {
+                    area: "Pratyantar Dasha (Level 3)",
+                    detail:
+                      "3-7 day precision timing using Parashara BPHS formula",
+                  },
+                  {
+                    area: "Dhana Yoga Analysis",
+                    detail:
+                      "32+ wealth combinations for financial destiny mapping",
+                  },
+                  {
+                    area: "Property Yog",
+                    detail:
+                      "4th house, Mars Karaka, Saturn transit for real estate timing",
+                  },
+                  {
+                    area: "Shoola / Amrita / Visha Yoga",
+                    detail:
+                      "Key differentiator yogas for life quality assessment",
+                  },
+                  {
+                    area: "Atmakaraka & Jaimini",
+                    detail: "Soul purpose and past-life karma decoding",
+                  },
+                  {
+                    area: "Compatibility & Synastry",
+                    detail:
+                      "Beyond guna milan — Navamsa, Nadi, Dasha synchronicity",
+                  },
                 ].map((e, i) => (
-                  <div key={i} className="border border-white/10 rounded-xl p-4"
-                    style={{ background: "rgba(255,255,255,0.02)" }}>
-                    <p className="font-semibold text-sm mb-1" style={{ color: GOLD }}>{e.area}</p>
+                  <div
+                    key={i}
+                    className="border border-white/10 rounded-xl p-4"
+                    style={{ background: "rgba(255,255,255,0.02)" }}
+                  >
+                    <p
+                      className="font-semibold text-sm mb-1"
+                      style={{ color: GOLD }}
+                    >
+                      {e.area}
+                    </p>
                     <p className="text-gray-500 text-xs">{e.detail}</p>
                   </div>
                 ))}
@@ -362,33 +661,54 @@ export default function FounderPage() {
 
             {/* What Rohiit offers */}
             <div>
-              <p className="text-xs font-semibold tracking-widest uppercase mb-4" style={{ color: GOLD }}>
+              <p
+                className="text-xs font-semibold tracking-widest uppercase mb-4"
+                style={{ color: GOLD }}
+              >
                 What Rohiit Offers
               </p>
               <h2 className="font-serif text-2xl font-bold text-white mb-5">
                 How to Work with Rohiit Ji
               </h2>
               <div className="space-y-4">
-                <div className="border rounded-xl p-6"
-                  style={{ borderColor: `rgba(212,175,55,0.25)`, background: `rgba(212,175,55,0.05)` }}>
+                <div
+                  className="border rounded-xl p-6"
+                  style={{
+                    borderColor: `rgba(212,175,55,0.25)`,
+                    background: `rgba(212,175,55,0.05)`,
+                  }}
+                >
                   <div className="flex items-start gap-4">
                     <span className="text-3xl">🔮</span>
                     <div>
-                      <h3 className="font-serif text-lg font-bold mb-1" style={{ color: GOLD }}>
+                      <h3
+                        className="font-serif text-lg font-bold mb-1"
+                        style={{ color: GOLD }}
+                      >
                         Jini AI Deep Reading — ₹51
                       </h3>
                       <p className="text-gray-300 text-sm mb-2">
-                        Rohiit&apos;s complete Vedic framework applied to your birth chart by Jini AI. 4096-token personalised reading covering your specific question — love, career, wealth, property, compatibility, child destiny, or spiritual purpose. Razorpay secured payment.
+                        Rohiit&apos;s complete Vedic framework applied to your
+                        birth chart by Jini AI. 4096-token personalised reading
+                        covering your specific question — love, career, wealth,
+                        property, compatibility, child destiny, or spiritual
+                        purpose. Razorpay secured payment.
                       </p>
-                      <Link href="/services" style={{ color: GOLD }} className="text-xs hover:underline">
+                      <Link
+                        href="/services"
+                        style={{ color: GOLD }}
+                        className="text-xs hover:underline"
+                      >
                         View all 8 reading types →
                       </Link>
                     </div>
                   </div>
                 </div>
 
-                <div className="border border-white/10 rounded-xl p-6"
-                  style={{ background: "rgba(255,255,255,0.02)" }}>
+                <div
+                  className="border border-white/10 rounded-xl p-6"
+                  style={{ background: "rgba(255,255,255,0.02)" }}
+                >
                   <div className="flex items-start gap-4">
                     <span className="text-3xl">📞</span>
                     <div>
@@ -396,7 +716,10 @@ export default function FounderPage() {
                         Personal Consultation — ₹499
                       </h3>
                       <p className="text-gray-400 text-sm mb-3">
-                        A live 1-on-1 session with Rohiit Gupta directly. Ideal for complex life situations — marriage decisions, career crossroads, major financial choices, or deep spiritual guidance. Conducted via WhatsApp call.
+                        A live 1-on-1 session with Rohiit Gupta directly. Ideal
+                        for complex life situations — marriage decisions, career
+                        crossroads, major financial choices, or deep spiritual
+                        guidance. Conducted via WhatsApp call.
                       </p>
                       <a
                         href="https://wa.me/919211804111?text=Hi%20Rohiit%20ji%2C%20I%20want%20to%20book%20a%20personal%20consultation%20at%20Rs499"
@@ -413,9 +736,12 @@ export default function FounderPage() {
               </div>
             </div>
 
-            {/* ── NEW v4.2 — TRUST & VERIFICATION SECTION ── */}
+            {/* Trust & Verification */}
             <div>
-              <p className="text-xs font-semibold tracking-widest uppercase mb-4" style={{ color: GOLD }}>
+              <p
+                className="text-xs font-semibold tracking-widest uppercase mb-4"
+                style={{ color: GOLD }}
+              >
                 Trust & Verification
               </p>
               <h2 className="font-serif text-2xl font-bold text-white mb-5">
@@ -443,7 +769,10 @@ export default function FounderPage() {
                   <p className="text-xs text-gray-400 mb-2">
                     Government of India · Ministry of MSME
                   </p>
-                  <p className="text-xs font-bold" style={{ color: GOLD, fontFamily: "Georgia, serif" }}>
+                  <p
+                    className="text-xs font-bold"
+                    style={{ color: GOLD, fontFamily: "Georgia, serif" }}
+                  >
                     {UDYAM_NUMBER}
                   </p>
                   <p className="text-[10px] text-gray-500 mt-2">
@@ -451,11 +780,19 @@ export default function FounderPage() {
                   </p>
                 </a>
 
-                <div className="border rounded-xl p-5"
-                  style={{ borderColor: "rgba(51,149,255,0.3)", background: "rgba(51,149,255,0.04)" }}>
+                <div
+                  className="border rounded-xl p-5"
+                  style={{
+                    borderColor: "rgba(51,149,255,0.3)",
+                    background: "rgba(51,149,255,0.04)",
+                  }}
+                >
                   <div className="flex items-center gap-3 mb-2">
                     <span className="text-2xl">🔒</span>
-                    <p className="font-semibold text-sm" style={{ color: "#3395FF", fontFamily: "Georgia, serif" }}>
+                    <p
+                      className="font-semibold text-sm"
+                      style={{ color: "#3395FF", fontFamily: "Georgia, serif" }}
+                    >
                       Razorpay Secured
                     </p>
                   </div>
@@ -473,19 +810,26 @@ export default function FounderPage() {
             </div>
 
             {/* Tagline */}
-            <div className="rounded-2xl p-8 text-center"
+            <div
+              className="rounded-2xl p-8 text-center"
               style={{
                 border: `1px solid rgba(212,175,55,0.2)`,
                 background: `linear-gradient(135deg, rgba(212,175,55,0.08), rgba(124,58,237,0.08))`,
-              }}>
-              <p className="font-serif text-2xl font-bold mb-3" style={{ color: GOLD }}>
+              }}
+            >
+              <p
+                className="font-serif text-2xl font-bold mb-3"
+                style={{ color: GOLD }}
+              >
                 &ldquo;Kaal bada balwan hai.&rdquo;
               </p>
-              <p className="text-gray-400 text-sm">
-                Time is the greatest force. — Trikal Vaani
+              <p className="text-gray-400 text-sm mb-2">
+                Time is the greatest force.
+              </p>
+              <p className="text-gray-600 text-xs">
+                — Trikal Vaani (Trikaal Vaani)
               </p>
             </div>
-
           </div>
         </section>
 
@@ -496,7 +840,8 @@ export default function FounderPage() {
               Ready for Your <span style={{ color: GOLD }}>Reading?</span>
             </h2>
             <p className="text-gray-400 mb-8 text-sm">
-              Start with your free Kundali or unlock a deep Jini AI reading from ₹51.
+              Start with your free Kundali or unlock a deep Jini AI reading from
+              ₹51.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
@@ -514,7 +859,7 @@ export default function FounderPage() {
               </Link>
             </div>
             <p className="text-[10px] text-gray-600 mt-6">
-              Trikal Vaani · MSME Registered · {UDYAM_NUMBER} · Delhi NCR · 🔱 Mahakaal Ka Ashirwad
+              Trikal Vaani (also: Trikaal Vaani) · MSME Registered · {UDYAM_NUMBER} · Delhi NCR · 🔱 Mahakaal Ka Ashirwad
             </p>
           </div>
         </section>
@@ -534,7 +879,8 @@ function WAIcon() {
 }
 
 // ============================================================================
-// END — app/founder/page.tsx v4.2
+// END — app/founder/page.tsx v4.3
 // 🔱 Trikal Vaani | Rohiit Gupta, Chief Vedic Architect
 // MSME Registered: UDYAM-DL-10-0119070
+// Phase 4: Brand spelling consolidation (Trikal = Trikaal)
 // ============================================================================
