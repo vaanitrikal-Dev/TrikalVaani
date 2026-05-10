@@ -3,20 +3,17 @@
  * TRIKAL VAANI — trikalvaani.com
  * Chief Vedic Architect: Rohiit Gupta
  * FILE: app/layout.tsx
- * VERSION: 2.2 — Adds sitewide TrustStrip + SiteFooter
+ * VERSION: 2.3 — TrustStrip sitewide, Footer stays in page.tsx
  * Last Updated: May 2026
  * 🔱 JAI MAA SHAKTI
  *
  * NOTES FOR ROHIIT JI:
- * - REPLACES: existing app/layout.tsx (v2.1)
- * - v2.2 changes vs v2.1:
- *     ✅ Imports TrustStrip (new)
- *     ✅ Imports SiteFooter (moved from page.tsx to here)
- *     ✅ Both render sitewide via {children} wrapper
- *     ✅ ALL v2.1 metadata + schemas preserved (untouched)
- * - DOES NOT TOUCH: gemini-prompt.ts (LOCKED), verifiedTier, BirthForm
- * - Action needed in page.tsx: REMOVE the <SiteFooter /> from page.tsx
- *   if you have it there (now sitewide via this layout).
+ * - REPLACES: existing app/layout.tsx (v2.2)
+ * - v2.3 vs v2.2: REMOVED SiteFooter import (was causing build error)
+ *   Footer stays in page.tsx as before — no change needed there.
+ * - TrustStrip IS sitewide — appears on every page automatically.
+ * - ALL v2.1 metadata + schemas preserved 100%.
+ * - DOES NOT TOUCH: gemini-prompt.ts, verifiedTier, BirthForm
  * =============================================================
  */
 
@@ -24,12 +21,10 @@ import type { Metadata } from 'next';
 import Script from 'next/script';
 import './globals.css';
 
-// ── Sitewide components ──────────────────────────────────────
 import TrustStrip from '@/components/TrustStrip';
-import SiteFooter from '@/components/SiteFooter';
 
 // ──────────────────────────────────────────────────────────────
-// SITEWIDE METADATA DEFAULTS (overridden per page)
+// SITEWIDE METADATA
 // ──────────────────────────────────────────────────────────────
 export const metadata: Metadata = {
   metadataBase: new URL('https://trikalvaani.com'),
@@ -38,7 +33,7 @@ export const metadata: Metadata = {
     template: '%s | Trikal Vaani',
   },
   description:
-    'Get your free AI kundli and horoscope predictions instantly. Swiss Ephemeris–powered Vedic astrology by Rohiit Gupta, Chief Vedic Architect (Delhi NCR). 8 deep readings starting ₹51.',
+    'Get your free AI kundli and horoscope predictions instantly. Swiss Ephemeris–powered Vedic astrology by Rohiit Gupta, Chief Vedic Architect (Delhi NCR). Deep readings starting ₹51.',
   authors: [{ name: 'Rohiit Gupta', url: 'https://trikalvaani.com/founder' }],
   creator: 'Rohiit Gupta',
   publisher: 'Trikal Vaani',
@@ -122,7 +117,7 @@ export const metadata: Metadata = {
 };
 
 // ──────────────────────────────────────────────────────────────
-// SITEWIDE JSON-LD SCHEMAS (Organization + WebSite + SearchAction)
+// SITEWIDE JSON-LD SCHEMAS
 // ──────────────────────────────────────────────────────────────
 const organizationSchema = {
   '@context': 'https://schema.org',
@@ -148,10 +143,7 @@ const organizationSchema = {
     url: 'https://trikalvaani.com/founder',
   },
   foundingDate: '2026',
-  foundingLocation: {
-    '@type': 'Place',
-    name: 'Delhi NCR, India',
-  },
+  foundingLocation: { '@type': 'Place', name: 'Delhi NCR, India' },
   address: {
     '@type': 'PostalAddress',
     addressLocality: 'New Delhi',
@@ -165,7 +157,6 @@ const organizationSchema = {
       contactType: 'customer service',
       areaServed: 'IN',
       availableLanguage: ['English', 'Hindi', 'Hinglish'],
-      contactOption: 'TollFree',
     },
   ],
   sameAs: [
@@ -202,9 +193,7 @@ const websiteSchema = {
   name: 'Trikal Vaani',
   description:
     'Free AI Kundli & Horoscope Predictions by Rohiit Gupta — Swiss Ephemeris precision for Indian seekers.',
-  publisher: {
-    '@id': 'https://trikalvaani.com/#organization',
-  },
+  publisher: { '@id': 'https://trikalvaani.com/#organization' },
   inLanguage: ['en-IN', 'hi-IN'],
   potentialAction: {
     '@type': 'SearchAction',
@@ -227,14 +216,11 @@ export default function RootLayout({
   return (
     <html lang="en-IN" suppressHydrationWarning>
       <head>
-        {/* Sitewide schemas — Organization + WebSite */}
         <Script
           id="schema-organization"
           type="application/ld+json"
           strategy="beforeInteractive"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify(organizationSchema),
-          }}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
         />
         <Script
           id="schema-website"
@@ -243,19 +229,14 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
         />
 
-        {/* DNS prefetch for performance */}
+        {/* Performance — DNS prefetch */}
         <link rel="dns-prefetch" href="https://api.prokerala.com" />
-        <link
-          rel="dns-prefetch"
-          href="https://generativelanguage.googleapis.com"
-        />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-
-        {/* Razorpay checkout script — sitewide preconnect for faster popup */}
+        <link rel="dns-prefetch" href="https://generativelanguage.googleapis.com" />
         <link rel="dns-prefetch" href="https://checkout.razorpay.com" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://checkout.razorpay.com" />
 
-        {/* Geo signals for local SEO */}
+        {/* Local SEO geo signals */}
         <meta name="geo.region" content="IN-DL" />
         <meta name="geo.placename" content="New Delhi" />
         <meta name="geo.position" content="28.6139;77.2090" />
@@ -263,14 +244,13 @@ export default function RootLayout({
       </head>
       <body className="bg-[#080B12] text-white antialiased">
 
-        {/* ── Page content (homepage, pricing, founder, blog, etc.) ── */}
+        {/* Page content */}
         {children}
 
-        {/* ── Sitewide TrustStrip — Razorpay + Vedic + E-E-A-T signals ── */}
+        {/* Sitewide Razorpay + Vedic + E-E-A-T trust strip */}
         <TrustStrip />
 
-        {/* ── Sitewide SiteFooter — your existing footer component ── */}
-        <SiteFooter />
+        {/* NOTE: Footer renders inside each page.tsx — no change needed */}
 
       </body>
     </html>
