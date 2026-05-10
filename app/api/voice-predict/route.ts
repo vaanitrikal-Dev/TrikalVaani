@@ -3,15 +3,16 @@
  * TRIKAL VAANI — Voice Prediction API
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/api/voice-predict/route.ts
- * VERSION: 1.1 — Flexible request format
+ * VERSION: 1.2 — Fixed token limit for Hindi/Hinglish
  * SIGNED: ROHIIT GUPTA, CEO
  *
  * ⚠️ STRICT CEO ORDER: DO NOT EDIT WITHOUT CEO APPROVAL
  *
- * v1.1 CHANGES (May 10, 2026):
- *   - FIXED: Accepts BOTH old format (message/birthData) AND new format
- *   - FIXED: 400 errors when client sends legacy field names
- *   - SAME: 90-120 word output, no markdown, no emojis, no revenue guard
+ * v1.2 CHANGES (May 10, 2026):
+ *   - FIXED: maxOutputTokens 250 → 800
+ *   - REASON: Hindi script = 2-4 tokens/word, 250 only gave 40-60 words
+ *   - RESULT: Full 90-120 word Hinglish prediction = ~45-60 sec audio
+ *   - SAME: Flexible request format, no revenue guard, no markdown/emojis
  * ============================================================
  */
 
@@ -25,13 +26,11 @@ const GEMINI_URL =
   'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
 
 type FlexibleBody = {
-  // New format
   transcription?: string;
   name?: string;
   dob?: string;
   tob?: string;
   pob?: string;
-  // Old format (TrikalVoice.tsx legacy)
   message?: string;
   userName?: string;
   birthData?: {
@@ -47,7 +46,6 @@ export async function POST(req: NextRequest) {
   try {
     const body: FlexibleBody = await req.json();
 
-    // ── Accept BOTH formats ──────────────────────────────────
     const transcription = body.transcription || body.message || '';
     const name = body.name || body.userName || body.birthData?.name || '';
     const dob  = body.dob  || body.birthData?.dob  || '';
@@ -68,12 +66,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'AI service not configured' }, { status: 500 });
     }
 
-    console.log('[VoicePredict v1.1] Request received:', {
+    console.log('[VoicePredict v1.2] Request:', {
       hasTranscription: !!transcription,
+      transcriptionLength: transcription.length,
       hasName: !!name,
       hasDob : !!dob,
-      hasTob : !!tob,
-      hasPob : !!pob,
     });
 
     const birthInfo = [
@@ -83,33 +80,33 @@ export async function POST(req: NextRequest) {
       pob  && `Place of Birth: ${pob}`,
     ].filter(Boolean).join('\n');
 
-    // ── Voice prediction prompt ──────────────────────────────
+    // ── Voice prediction system prompt ──────────────────────
     const systemPrompt = `You are Trikal — an authoritative Vedic astrologer speaking directly to a seeker.
-The seeker has PAID for this prediction. Give them a REAL, SPECIFIC, HELPFUL answer.
+The seeker has PAID for this voice prediction. Give them a REAL, COMPLETE, HELPFUL answer.
 
-RULES (non-negotiable):
-1. Respond in Hinglish (mix of Hindi and English naturally)
-2. Exactly 90 to 120 words — not more, not less
-3. NO markdown — no bold, no links, no bullet points
+CRITICAL RULES:
+1. Respond in Hinglish (natural mix of Hindi and English)
+2. Write EXACTLY 100 to 120 words — count carefully. Not 40 words. Not 60 words. MINIMUM 100.
+3. NO markdown — no bold, no links, no bullet points, no asterisks
 4. NO emojis — they sound terrible when spoken aloud
-5. NO sales pitch — no "gehri reading ke liye" or service links
-6. NO filler like "Pranaam" opening more than once
-7. Speak directly, warmly, like a wise guru talking to a worried person
-8. Reference their birth details if provided
-9. Give ACTUAL guidance — mention a planet, dasha, or remedy if relevant
-10. End with one specific actionable remedy or insight
+5. NO sales pitch — no service links, no "gehri reading ke liye"
+6. Speak warmly, like a wise compassionate guru to a worried parent
+7. Reference their birth details if provided
+8. Give ACTUAL specific Vedic guidance — mention relevant planet, dasha, or house
+9. Give ONE clear actionable remedy at the end
+10. This will be spoken as audio — write naturally for the ear
 
-This answer will be converted to SPEECH — write for the ear, not the eye.`;
+REMEMBER: 100-120 words is mandatory. Count every word.`;
 
     const userMessage = `Seeker's birth details:
 ${birthInfo || '(not provided)'}
 
-Seeker's question (spoken by voice):
+Seeker's voice question:
 "${transcription}"
 
-Give a warm, specific, 90-120 word Hinglish voice prediction. Real answer only.`;
+Write a warm, specific 100-120 word Hinglish voice prediction. Count your words — minimum 100.`;
 
-    // ── Call Gemini ──────────────────────────────────────────
+    // ── Call Gemini 2.5 Flash ────────────────────────────────
     const geminiRes = await fetch(`${GEMINI_URL}?key=${GEMINI_API_KEY}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -117,24 +114,23 @@ Give a warm, specific, 90-120 word Hinglish voice prediction. Real answer only.`
         system_instruction: { parts: [{ text: systemPrompt }] },
         contents: [{ role: 'user', parts: [{ text: userMessage }] }],
         generationConfig: {
-          temperature: 0.8,
-          maxOutputTokens: 250,
-          topP: 0.9,
+          temperature    : 0.85,
+          maxOutputTokens: 800,   // FIX: 250 was too low for Hindi (2-4 tokens/word)
+          topP           : 0.9,
         },
       }),
     });
 
     if (!geminiRes.ok) {
       const errText = await geminiRes.text();
-      console.error('[VoicePredict v1.1] Gemini error:', geminiRes.status, errText.substring(0, 200));
+      console.error('[VoicePredict v1.2] Gemini error:', geminiRes.status, errText.substring(0, 200));
       return NextResponse.json({ error: 'Prediction failed' }, { status: 500 });
     }
 
     const geminiData = await geminiRes.json();
-    let prediction =
-      geminiData.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    let prediction = geminiData.candidates?.[0]?.content?.parts?.[0]?.text || '';
 
-    // ── Clean for TTS ────────────────────────────────────────
+    // ── Strip all markdown/links/emojis for clean TTS ────────
     prediction = prediction
       .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
       .replace(/\*\*([^*]+)\*\*/g, '$1')
@@ -149,28 +145,28 @@ Give a warm, specific, 90-120 word Hinglish voice prediction. Real answer only.`
       return NextResponse.json({ error: 'Empty prediction' }, { status: 500 });
     }
 
-    console.log('[VoicePredict v1.1] Generated:', prediction.substring(0, 100));
+    const wordCount = prediction.split(/\s+/).length;
+    console.log('[VoicePredict v1.2] Generated:', wordCount, 'words —', prediction.substring(0, 80));
 
-    // ── Return BOTH field names for client compatibility ─────
     return NextResponse.json({
-      success    : true,
+      success   : true,
       prediction,
-      reply      : prediction,  // Legacy field name
-      text       : prediction,  // Legacy field name
-      wordCount  : prediction.split(/\s+/).length,
+      reply     : prediction,
+      text      : prediction,
+      wordCount,
     });
 
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
-    console.error('[VoicePredict v1.1] Fatal:', message);
+    console.error('[VoicePredict v1.2] Fatal:', message);
     return NextResponse.json({ error: 'Prediction failed', detail: message }, { status: 500 });
   }
 }
 
 export async function GET() {
   return NextResponse.json({
-    status : 'Trikal Voice Predict API is live',
-    version: '1.1',
-    accepts: ['transcription | message', 'name | userName | birthData.name', 'dob/tob/pob (flat or nested)'],
+    status  : 'Trikal Voice Predict API is live',
+    version : '1.2',
+    fix     : 'maxOutputTokens 800 for full Hindi/Hinglish predictions',
   });
 }
