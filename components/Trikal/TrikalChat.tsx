@@ -148,7 +148,7 @@ export default function JiniChat() {
     const timeoutId = setTimeout(() => controller.abort(), 12000);
 
     try {
-      const res = await fetch('/api/jini-chat', {
+      const res = await fetch('/api/Trikal-chat', {
         method: 'POST',
         signal: controller.signal,
         headers: {
