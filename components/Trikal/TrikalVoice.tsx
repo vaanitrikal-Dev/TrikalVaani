@@ -372,6 +372,26 @@ export default function TrikalVoice() {
       if (!trikalReply) throw new Error('Empty prediction');
       setReply(trikalReply);
 
+      // ── TTS FIRST (before consume so tier detection works) ──
+      // Pass activePack?.id so TTS knows tier WITHOUT Supabase lookup
+      const ttsRes = await fetch('/api/voice-tts', {
+        method : 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body   : JSON.stringify({
+          text     : trikalReply,
+          sessionId,
+          packId   : activePack?.id || 'p11',  // pass tier hint directly
+        }),
+      });
+
+      let audioUrl = '';
+      if (ttsRes.ok) {
+        const audioBuffer = await ttsRes.blob();
+        audioUrl = URL.createObjectURL(audioBuffer);
+        setAudioUrl(audioUrl);
+      }
+
+      // ── CONSUME AFTER TTS ────────────────────────────────
       await fetch('/api/voice-pack-order', {
         method : 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -382,26 +402,14 @@ export default function TrikalVoice() {
       setBalance(newBal);
       localStorage.setItem('trikal_voice_balance', String(newBal));
 
-      const ttsRes = await fetch('/api/voice-tts', {
-        method : 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body   : JSON.stringify({ text: trikalReply, sessionId }),
-      });
-
-      if (ttsRes.ok) {
-        const audioBuffer = await ttsRes.blob();
-        const url = URL.createObjectURL(audioBuffer);
-        setAudioUrl(url);
-      }
-
       setStage('reply');
 
-      // Auto-play (may be blocked on mobile — user can tap play)
+      // ── Auto-play using local variable (not stale state) ──
       if (audioUrl) {
         setTimeout(() => {
           const audio = new Audio(audioUrl);
-          audio.play().catch(() => {/* autoplay blocked, user will tap */});
-        }, 400);
+          audio.play().catch(() => {/* autoplay blocked — user taps play */});
+        }, 500);
       }
 
     } catch (err) {
