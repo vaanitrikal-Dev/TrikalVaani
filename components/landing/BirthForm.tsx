@@ -3,15 +3,23 @@
  * TRIKAL VAANI — BirthForm Component
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: components/landing/BirthForm.tsx
- * VERSION: 9.1 — New Places API (fixes REQUEST_DENIED on legacy API)
+ * VERSION: 9.2 — Razorpay Payment Flow + Full SEO/GEO
  * SIGNED: ROHIIT GUPTA, CEO
  *
- * v9.1 CHANGES vs v9.0:
- *   ✅ fetchPlaceSuggestions → New Places API (POST to places.googleapis.com)
- *   ✅ fetchPlaceDetails → New Places API (GET /v1/places/{placeId})
- *   ✅ fetchTimezone → unchanged (maps.googleapis.com GET — still works)
- *   ✅ reverseGeocode → unchanged (maps.googleapis.com GET — still works)
- *   ✅ All other code identical to v9.0
+ * v9.2 CHANGES vs v9.1:
+ *   ✅ Razorpay payment flow for ₹51 (paid) and ₹11 (voice) tiers
+ *   ✅ Loads checkout.razorpay.com/v1/checkout.js dynamically
+ *   ✅ Calls /api/create-order → opens popup → /api/verify-payment → /api/predict
+ *   ✅ Razorpay trust strip below tier selector
+ *   ✅ Service + Offer JSON-LD with priceSpecification (₹51, ₹11) for AI search
+ *   ✅ PaymentMethod schema injection
+ *   ✅ Hidden SEO content expanded with Razorpay + PCI-DSS + WhatsApp
+ *   ✅ aria-labels on payment buttons (accessibility + SEO)
+ *   ✅ ALL v9.1 logic preserved 100%:
+ *      - New Places API (POST), reverseGeocode, fetchTimezone
+ *      - Numerology compatibility for dual-chart domains
+ *      - 27 country selector, dynamic segment routing
+ *      - All field validations, dual chart Person 2 section
  * ============================================================
  */
 
@@ -19,6 +27,7 @@
 
 import { useState, useCallback, useRef, useEffect } from "react"
 import { useRouter } from "next/navigation"
+import { loadRazorpayScript, openRazorpayCheckout } from "@/lib/razorpay-helper"
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -71,16 +80,12 @@ interface BirthFormProps {
   className?:        string
 }
 
-// ── Google Places Types ───────────────────────────────────────────────────────
-
 interface PlaceSuggestion {
   place_id:       string
   description:    string
   main_text:      string
   secondary_text: string
 }
-
-// ── Country Data ──────────────────────────────────────────────────────────────
 
 interface Country {
   name:   string
@@ -126,7 +131,6 @@ export function calculateDynamicSegment(dob: string, gender: string): string {
   if (!dob) return 'millennial_general'
   const age = new Date().getFullYear() - new Date(dob).getFullYear()
   const g = gender || 'other'
-
   if (age >= 16 && age <= 29) {
     if (g === 'male')   return 'young_male'
     if (g === 'female') return 'young_female'
@@ -160,9 +164,8 @@ function detectLegacySegment(dob: string): 'genz' | 'millennial' | 'genx' {
   return 'genx'
 }
 
-// ── Google Maps API Functions — v9.1 NEW PLACES API ───────────────────────────
+// ── Google Maps API Functions — v9.1 NEW PLACES API (UNCHANGED) ──────────────
 
-// CHANGED v9.1: Uses New Places API (POST) — fixes REQUEST_DENIED on legacy API
 async function fetchPlaceSuggestions(query: string): Promise<PlaceSuggestion[]> {
   if (query.length < 3) return []
   try {
@@ -180,7 +183,6 @@ async function fetchPlaceSuggestions(query: string): Promise<PlaceSuggestion[]> 
     )
     if (!res.ok) return []
     const data = await res.json()
-    // New API response: data.suggestions[].placePrediction
     return (data.suggestions ?? [])
       .filter((s: any) => s.placePrediction)
       .map((s: any) => ({
@@ -193,7 +195,6 @@ async function fetchPlaceSuggestions(query: string): Promise<PlaceSuggestion[]> 
   } catch { return [] }
 }
 
-// CHANGED v9.1: Uses New Places API (GET /v1/places/{placeId})
 async function fetchPlaceDetails(placeId: string): Promise<{ lat: number; lng: number; city: string } | null> {
   if (!placeId) return null
   try {
@@ -210,7 +211,6 @@ async function fetchPlaceDetails(placeId: string): Promise<{ lat: number; lng: n
   } catch { return null }
 }
 
-// UNCHANGED — TimeZone API still uses maps.googleapis.com GET
 async function fetchTimezone(lat: number, lng: number): Promise<number> {
   try {
     const ts  = Math.floor(Date.now() / 1000)
@@ -224,7 +224,6 @@ async function fetchTimezone(lat: number, lng: number): Promise<number> {
   } catch { return 5.5 }
 }
 
-// UNCHANGED — Geocoding API still uses maps.googleapis.com GET
 async function reverseGeocode(lat: number, lng: number): Promise<string> {
   try {
     const url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&result_type=locality`
@@ -235,7 +234,7 @@ async function reverseGeocode(lat: number, lng: number): Promise<string> {
   } catch { return '' }
 }
 
-// ── Numerology ────────────────────────────────────────────────────────────────
+// ── Numerology (UNCHANGED v9.1) ──────────────────────────────────────────────
 
 function getMobileNumber(mobile: string): number {
   const digits = mobile.replace(/\D/g, '')
@@ -325,6 +324,12 @@ const LOADING_STEPS = [
   'Trikal aapka sandesh taiyaar kar raha hai...',
 ]
 
+const PAYMENT_LOADING_STEPS = [
+  'Razorpay payment verify ho raha hai...',
+  'Mahakaal se connection ho raha hai...',
+  'Trikal aapka deep reading taiyaar kar raha hai...',
+]
+
 const DUAL_CHART_DOMAINS = ['genz_ex_back', 'genz_toxic_boss']
 
 const RELATIONSHIP_STATUS_OPTIONS = [
@@ -367,6 +372,7 @@ const LANGUAGE_OPTIONS = [
 ]
 
 const GOLD      = '#D4AF37'
+const RAZORPAY_BLUE = '#3395FF'
 const GOLD_RGBA = (a: number) => `rgba(212,175,55,${a})`
 
 const SELECT_STYLE: React.CSSProperties = {
@@ -413,7 +419,91 @@ const INITIAL: BirthFormFields = {
   person2CurrentCity: '',
 }
 
-// ── Country Selector ──────────────────────────────────────────────────────────
+// ── Service + Offer JSON-LD for AI Search (GEO) ──────────────────────────────
+const SERVICE_OFFER_SCHEMA = {
+  '@context': 'https://schema.org',
+  '@type': 'Service',
+  '@id': 'https://trikalvaani.com/#service',
+  name: 'Trikal Vaani Vedic Astrology Prediction',
+  serviceType: 'AI Vedic Astrology Reading',
+  provider: {
+    '@type': 'Organization',
+    '@id': 'https://trikalvaani.com/#organization',
+    name: 'Trikal Vaani',
+    url: 'https://trikalvaani.com',
+  },
+  areaServed: { '@type': 'Country', name: 'India' },
+  audience: { '@type': 'Audience', audienceType: 'Indian seekers, NRIs, HNIs' },
+  hasOfferCatalog: {
+    '@type': 'OfferCatalog',
+    name: 'Trikal Vaani Reading Plans',
+    itemListElement: [
+      {
+        '@type': 'Offer',
+        name: 'Free Trikal Ka Sandesh',
+        description: '150-200 word free Vedic preview with Swiss Ephemeris kundali',
+        price: '0',
+        priceCurrency: 'INR',
+        availability: 'https://schema.org/InStock',
+        priceSpecification: {
+          '@type': 'PriceSpecification',
+          price: '0',
+          priceCurrency: 'INR',
+          valueAddedTaxIncluded: true,
+        },
+      },
+      {
+        '@type': 'Offer',
+        name: 'Deep Reading',
+        description: '900-word Vedic analysis with 5 personalized upay, action and avoid windows. Gemini Pro 2.5 + Claude Sonnet polish.',
+        price: '51',
+        priceCurrency: 'INR',
+        availability: 'https://schema.org/InStock',
+        acceptedPaymentMethod: [
+          { '@type': 'PaymentMethod', name: 'UPI' },
+          { '@type': 'PaymentMethod', name: 'CreditCard' },
+          { '@type': 'PaymentMethod', name: 'DebitCard' },
+          { '@type': 'PaymentMethod', name: 'NetBanking' },
+          { '@type': 'PaymentMethod', name: 'Wallet' },
+        ],
+        priceSpecification: {
+          '@type': 'PriceSpecification',
+          price: '51',
+          priceCurrency: 'INR',
+          valueAddedTaxIncluded: true,
+        },
+      },
+      {
+        '@type': 'Offer',
+        name: 'Voice Reading',
+        description: '60-second personalized voice prediction in Hindi or Hinglish',
+        price: '11',
+        priceCurrency: 'INR',
+        availability: 'https://schema.org/InStock',
+        acceptedPaymentMethod: [
+          { '@type': 'PaymentMethod', name: 'UPI' },
+          { '@type': 'PaymentMethod', name: 'CreditCard' },
+          { '@type': 'PaymentMethod', name: 'Wallet' },
+        ],
+        priceSpecification: {
+          '@type': 'PriceSpecification',
+          price: '11',
+          priceCurrency: 'INR',
+          valueAddedTaxIncluded: true,
+        },
+      },
+    ],
+  },
+  termsOfService: 'https://trikalvaani.com/terms',
+  // ── Razorpay payment processor declared (AI search picks this up) ──
+  brand: {
+    '@type': 'Brand',
+    name: 'Trikal Vaani',
+    slogan: 'India\'s Most Accurate AI Vedic Astrology — Razorpay-Secured Payments',
+  },
+}
+
+// ── Country Selector (UNCHANGED v9.1) ────────────────────────────────────────
 
 function CountrySelector({
   value, onChange, id,
@@ -473,12 +563,11 @@ function CountrySelector({
   )
 }
 
-// ── Rotating Tagline ──────────────────────────────────────────────────────────
+// ── Rotating Tagline (UNCHANGED v9.1) ────────────────────────────────────────
 
 function RotatingTagline() {
   const [current, setCurrent] = useState(0)
   const [fading,  setFading]  = useState(false)
-
   useEffect(() => {
     const interval = setInterval(() => {
       setFading(true)
@@ -486,22 +575,74 @@ function RotatingTagline() {
     }, 3500)
     return () => clearInterval(interval)
   }, [])
-
   const tagline = VOICE_TAGLINES[current]!
-
   return (
     <div style={{ textAlign: 'center', padding: '12px 16px', background: GOLD_RGBA(0.06), border: `1px solid ${GOLD_RGBA(0.2)}`, borderRadius: '12px', marginBottom: '16px', transition: 'opacity 0.5s ease', opacity: fading ? 0 : 1 }}>
       <p style={{ color: GOLD, fontSize: '13px', fontWeight: 600, fontStyle: 'italic', margin: 0 }}>
         {tagline.icon} "{tagline.text}"
       </p>
       <p style={{ color: '#475569', fontSize: '10px', margin: '4px 0 0' }}>
-        — Trikal Voice Reading · ₹11 only
+        — Trikal Voice Reading · ₹11 only · Razorpay Secured
       </p>
     </div>
   )
 }
 
-// ── Tier Selector ─────────────────────────────────────────────────────────────
+// ── Razorpay Trust Strip (NEW v9.2) ──────────────────────────────────────────
+
+function RazorpayInlineTrustStrip({ tier }: { tier: PredictionTier }) {
+  if (tier === 'free') return null
+  return (
+    <div
+      role="region"
+      aria-label="Razorpay payment security trust signals"
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        flexWrap: 'wrap',
+        gap: '10px',
+        padding: '10px 12px',
+        background: 'rgba(51,149,255,0.06)',
+        border: '1px solid rgba(51,149,255,0.18)',
+        borderRadius: '10px',
+        marginTop: '4px',
+      }}
+    >
+      <span style={{ fontSize: '11px', display: 'flex', alignItems: 'center', gap: '5px' }}>
+        🔒
+        <span style={{ color: '#94A3B8', fontWeight: 600, fontSize: '10px' }}>Secured by</span>
+        <span style={{ color: RAZORPAY_BLUE, fontWeight: 700, fontSize: '11px', fontFamily: 'Georgia, serif' }}>Razorpay</span>
+      </span>
+      <div style={{ width: '1px', height: '12px', background: 'rgba(255,255,255,0.1)' }} />
+      <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap', justifyContent: 'center' }}>
+        {['UPI', 'Cards', 'NetBanking', 'Wallets', 'RuPay'].map(m => (
+          <span
+            key={m}
+            style={{
+              fontSize: '9px',
+              fontWeight: 600,
+              color: '#64748B',
+              background: 'rgba(255,255,255,0.04)',
+              border: '1px solid rgba(255,255,255,0.08)',
+              borderRadius: '3px',
+              padding: '2px 6px',
+              letterSpacing: '0.04em',
+            }}
+          >
+            {m}
+          </span>
+        ))}
+      </div>
+      <div style={{ width: '1px', height: '12px', background: 'rgba(255,255,255,0.1)' }} />
+      <span style={{ fontSize: '9px', color: '#64748B', fontWeight: 500 }}>
+        🛡️ PCI-DSS · 256-bit SSL
+      </span>
+    </div>
+  )
+}
+
+// ── Tier Selector (UNCHANGED structure, copy refined v9.2) ───────────────────
 
 function TierSelector({ selected, onChange }: { selected: PredictionTier; onChange: (t: PredictionTier) => void }) {
   const tiers = [
@@ -516,6 +657,7 @@ function TierSelector({ selected, onChange }: { selected: PredictionTier; onChan
       <div className="grid grid-cols-3 gap-3">
         {tiers.map(tier => (
           <button key={tier.id} type="button" onClick={() => onChange(tier.id)}
+            aria-label={`Select ${tier.label} for ${tier.price}`}
             style={{ background: selected === tier.id ? (tier as any).highlight ? `linear-gradient(135deg,${GOLD_RGBA(0.2)},${GOLD_RGBA(0.1)})` : `${tier.color}18` : 'rgba(255,255,255,0.03)', border: `1px solid ${selected === tier.id ? tier.color : 'rgba(255,255,255,0.08)'}`, borderRadius: '12px', padding: '14px 10px', cursor: 'pointer', textAlign: 'left', transition: 'all 0.2s', position: 'relative' }}>
             {(tier as any).highlight && (
               <div style={{ position: 'absolute', top: '-10px', left: '50%', transform: 'translateX(-50%)', background: GOLD, color: '#080B12', fontSize: '9px', fontWeight: 700, padding: '2px 8px', borderRadius: '10px', whiteSpace: 'nowrap' }}>MOST POPULAR</div>
@@ -535,14 +677,14 @@ function TierSelector({ selected, onChange }: { selected: PredictionTier; onChan
       {selected === 'paid' && (
         <div style={{ marginTop: '12px', padding: '12px', background: GOLD_RGBA(0.06), border: `1px solid ${GOLD_RGBA(0.2)}`, borderRadius: '10px' }}>
           <p style={{ margin: '0 0 4px', color: GOLD, fontSize: '11px', fontWeight: 700 }}>⚡ Gemini 2.5 Pro — 900 words deep analysis</p>
-          <p style={{ margin: 0, color: '#64748b', fontSize: '10px', lineHeight: 1.5 }}>AstroTalk charges ₹500+ for this level. Trikal Vaani delivers for ₹51 — Swiss Ephemeris + BPHS + personalized 5 upay by segment.</p>
+          <p style={{ margin: 0, color: '#64748b', fontSize: '10px', lineHeight: 1.5 }}>AstroTalk charges ₹500+ for this level. Trikal Vaani delivers for ₹51 — Swiss Ephemeris + BPHS + personalized 5 upay by segment. Razorpay-secured one-time payment.</p>
         </div>
       )}
     </div>
   )
 }
 
-// ── City Input Component ──────────────────────────────────────────────────────
+// ── City Input Component (UNCHANGED v9.1) ────────────────────────────────────
 
 function CityInput({
   id, label, required, value, onSelect, error, placeholder,
@@ -634,6 +776,7 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
   const [isSubmitting,   setIsSubmitting]   = useState(false)
   const [apiError,       setApiError]       = useState<string | null>(null)
   const [loadingStep,    setLoadingStep]    = useState(0)
+  const [paymentLoading, setPaymentLoading] = useState(false)
   const [numerology,     setNumerology]     = useState<ReturnType<typeof getNumerologyCompatibility> | null>(null)
   const [locating,       setLocating]       = useState(false)
 
@@ -645,11 +788,18 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
     setErrors(prev => ({ ...prev, [key]: undefined }))
   }, [])
 
-  const startLoadingMessages = () => {
+  // ── Pre-load Razorpay script when paid/voice selected ───────────────────────
+  useEffect(() => {
+    if (predictionTier === 'paid' || predictionTier === 'voice') {
+      loadRazorpayScript()
+    }
+  }, [predictionTier])
+
+  const startLoadingMessages = (steps: string[] = LOADING_STEPS) => {
     setLoadingStep(0)
     if (loadingIntervalRef.current) clearInterval(loadingIntervalRef.current)
     loadingIntervalRef.current = setInterval(() => {
-      setLoadingStep(prev => prev < LOADING_STEPS.length - 1 ? prev + 1 : prev)
+      setLoadingStep(prev => prev < steps.length - 1 ? prev + 1 : prev)
     }, 18000)
   }
 
@@ -705,76 +855,74 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
     return Object.keys(errs).length === 0
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!validate()) return
+  // ── Build prediction request body ────────────────────────────────────────────
+  const buildPredictionBody = (paymentVerification: any = null) => {
+    const sessionId      = generateSessionId()
+    const age            = calculateAge(fields.dateOfBirth)
+    const dynamicSegment = calculateDynamicSegment(fields.dateOfBirth, fields.gender)
+    const legacySegment  = detectLegacySegment(fields.dateOfBirth)
 
-    if (predictionTier === 'voice') {
-      router.push(`/voice?name=${encodeURIComponent(fields.name)}&lang=${fields.language}`)
-      return
+    return {
+      sessionId,
+      domainId:    selectedCategory?.id    || 'mill_karz_mukti',
+      domainLabel: selectedCategory?.label || 'General',
+      predictionTier,
+      paymentVerification,
+      birthData: {
+        name:     fields.name,
+        dob:      fields.dateOfBirth,
+        tob:      fields.unknownTime ? '12:00' : fields.timeOfBirth,
+        lat:      fields.latitude as number,
+        lng:      fields.longitude as number,
+        cityName: fields.city,
+        timezone: fields.timezoneOffset,
+        ayanamsa: 'lahiri',
+      },
+      userContext: {
+        segment:            legacySegment,
+        dynamicSegment,
+        gender:             fields.gender,
+        age,
+        employment:         fields.jobCategory,
+        sector:             mapJobToSector(fields.jobCategory),
+        language:           fields.language,
+        city:               fields.city,
+        currentCity:        fields.currentCity || fields.city,
+        relationshipStatus: fields.relationshipStatus,
+        situationNote:      fields.situationNote.slice(0, 200),
+        mobile:             `${fields.countryCode}${fields.mobile}`,
+        person2Name:        fields.person2Name        || null,
+        person2City:        fields.person2City        || null,
+        person2CurrentCity: fields.person2CurrentCity || null,
+      },
+      person2Data: isDualDomain && fields.person2Lat !== '' ? {
+        name:        fields.person2Name,
+        dob:         fields.person2Dob,
+        tob:         fields.person2Tob || '12:00',
+        lat:         fields.person2Lat as number,
+        lng:         fields.person2Lng as number,
+        cityName:    fields.person2City,
+        currentCity: fields.person2CurrentCity || fields.person2City,
+        mobile:      `${fields.person2CountryCode}${fields.person2Mobile}`,
+      } : null,
+      numerologyCompatibility: numerology,
     }
+  }
 
-    setIsSubmitting(true)
-    setApiError(null)
-    startLoadingMessages()
-
+  // ── Call /api/predict and handle navigation ─────────────────────────────────
+  const callPredictAPI = async (paymentVerification: any = null) => {
     try {
-      const sessionId      = generateSessionId()
-      const age            = calculateAge(fields.dateOfBirth)
-      const dynamicSegment = calculateDynamicSegment(fields.dateOfBirth, fields.gender)
-      const legacySegment  = detectLegacySegment(fields.dateOfBirth)
-
       const res = await fetch('/api/predict', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          sessionId,
-          domainId:    selectedCategory?.id    || 'mill_karz_mukti',
-          domainLabel: selectedCategory?.label || 'General',
-          predictionTier,
-          birthData: {
-            name:     fields.name,
-            dob:      fields.dateOfBirth,
-            tob:      fields.unknownTime ? '12:00' : fields.timeOfBirth,
-            lat:      fields.latitude as number,
-            lng:      fields.longitude as number,
-            cityName: fields.city,
-            timezone: fields.timezoneOffset,
-            ayanamsa: 'lahiri',
-          },
-          userContext: {
-            segment:            legacySegment,
-            dynamicSegment,
-            gender:             fields.gender,
-            age,
-            employment:         fields.jobCategory,
-            sector:             mapJobToSector(fields.jobCategory),
-            language:           fields.language,
-            city:               fields.city,
-            currentCity:        fields.currentCity || fields.city,
-            relationshipStatus: fields.relationshipStatus,
-            situationNote:      fields.situationNote.slice(0, 200),
-            mobile:             `${fields.countryCode}${fields.mobile}`,
-            person2Name:        fields.person2Name        || null,
-            person2City:        fields.person2City        || null,
-            person2CurrentCity: fields.person2CurrentCity || null,
-          },
-          person2Data: isDualDomain && fields.person2Lat !== '' ? {
-            name:        fields.person2Name,
-            dob:         fields.person2Dob,
-            tob:         fields.person2Tob || '12:00',
-            lat:         fields.person2Lat as number,
-            lng:         fields.person2Lng as number,
-            cityName:    fields.person2City,
-            currentCity: fields.person2CurrentCity || fields.person2City,
-            mobile:      `${fields.person2CountryCode}${fields.person2Mobile}`,
-          } : null,
-          numerologyCompatibility: numerology,
-        }),
+        body:    JSON.stringify(buildPredictionBody(paymentVerification)),
       })
-
       const data = await res.json()
-      if (!res.ok) { setApiError(data.error || 'Something went wrong.'); stopLoadingMessages(); return }
+      if (!res.ok) {
+        setApiError(data.error || 'Something went wrong.')
+        stopLoadingMessages()
+        return
+      }
       if (onSubmit) await onSubmit(fields)
 
       const publicSlug   = data?._meta?.publicSlug   ?? null
@@ -783,23 +931,124 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
       if (publicSlug)        router.push(`/report/${publicSlug}`)
       else if (predictionId) router.push(`/result/${predictionId}`)
       else { setApiError('Prediction ready hai par save nahi hua. Please retry karo.'); stopLoadingMessages() }
-
     } catch {
       setApiError('Network error. Please check your connection.')
       stopLoadingMessages()
-    } finally {
-      setIsSubmitting(false)
     }
   }
 
-  const isLoading = loading || isSubmitting
+  // ── RAZORPAY PAYMENT FLOW (NEW v9.2) ────────────────────────────────────────
+  const handleRazorpayPayment = async (tier: 'paid' | 'voice') => {
+    setApiError(null)
+    setPaymentLoading(true)
+
+    try {
+      // Step 1: Load Razorpay script
+      const scriptLoaded = await loadRazorpayScript()
+      if (!scriptLoaded) {
+        setApiError('Razorpay payment SDK failed to load. Please check your internet connection.')
+        setPaymentLoading(false)
+        return
+      }
+
+      // Step 2: Create Razorpay order on server
+      const orderRes = await fetch('/api/create-order', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ tier: tier === 'paid' ? 'deep' : 'voice' }),
+      })
+      if (!orderRes.ok) {
+        const err = await orderRes.json().catch(() => ({}))
+        setApiError(err.error || 'Could not create payment order. Please try again.')
+        setPaymentLoading(false)
+        return
+      }
+      const { orderId, amount, currency, keyId } = await orderRes.json()
+
+      // Step 3: Open Razorpay checkout popup
+      openRazorpayCheckout({
+        keyId,
+        orderId,
+        amount,
+        currency,
+        name:        'Trikal Vaani',
+        description: tier === 'paid' ? 'Deep Reading — Vedic Astrology' : 'Voice Reading — Trikal Voice',
+        prefillName:    fields.name,
+        prefillContact: `${fields.countryCode}${fields.mobile}`.replace(/\s/g, ''),
+        themeColor:     '#D4AF37',
+        onSuccess: async (response) => {
+          // Step 4: Verify payment server-side
+          const verifyRes = await fetch('/api/verify-payment', {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body:    JSON.stringify(response),
+          })
+          if (!verifyRes.ok) {
+            const err = await verifyRes.json().catch(() => ({}))
+            setApiError(err.error || 'Payment verification failed. Please contact support.')
+            setPaymentLoading(false)
+            return
+          }
+
+          // Step 5: For voice tier, redirect to /voice with payment proof
+          if (tier === 'voice') {
+            const voiceUrl = `/voice?name=${encodeURIComponent(fields.name)}&lang=${fields.language}&pid=${response.razorpay_payment_id}`
+            router.push(voiceUrl)
+            return
+          }
+
+          // Step 6: For paid tier, call /api/predict with payment verification
+          setIsSubmitting(true)
+          startLoadingMessages(PAYMENT_LOADING_STEPS)
+
+          await callPredictAPI({
+            razorpay_order_id:   response.razorpay_order_id,
+            razorpay_payment_id: response.razorpay_payment_id,
+            razorpay_signature:  response.razorpay_signature,
+            amount,
+          })
+          setIsSubmitting(false)
+          setPaymentLoading(false)
+        },
+        onDismiss: () => {
+          setPaymentLoading(false)
+          setApiError(null)
+        },
+      })
+    } catch (err: any) {
+      setApiError(err.message || 'Payment flow error.')
+      setPaymentLoading(false)
+    }
+  }
+
+  // ── MAIN SUBMIT HANDLER ─────────────────────────────────────────────────────
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!validate()) return
+
+    // ── PAID or VOICE → trigger Razorpay flow ──
+    if (predictionTier === 'paid' || predictionTier === 'voice') {
+      await handleRazorpayPayment(predictionTier)
+      return
+    }
+
+    // ── FREE → direct prediction ──
+    setIsSubmitting(true)
+    setApiError(null)
+    startLoadingMessages()
+    await callPredictAPI(null)
+    setIsSubmitting(false)
+  }
+
+  const isLoading = loading || isSubmitting || paymentLoading
 
   const getSubmitLabel = () => {
+    if (paymentLoading)             return '⟳ Razorpay popup khul raha hai...'
     if (isLoading)                  return LOADING_STEPS[loadingStep] || 'Processing...'
     if (submitLabel)                return submitLabel
     if (predictionTier === 'free')  return '🔮 Get Free Prediction — Trikal Ka Sandesh'
-    if (predictionTier === 'paid')  return '⚡ Get Deep Reading — ₹51'
-    if (predictionTier === 'voice') return '🎙️ Go to Voice Reading — ₹11'
+    if (predictionTier === 'paid')  return '⚡ Pay ₹51 with Razorpay — Deep Reading'
+    if (predictionTier === 'voice') return '🎙️ Pay ₹11 with Razorpay — Voice Reading'
     return '🔮 Get My Prediction'
   }
 
@@ -814,9 +1063,17 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
     <section id="birth-form" className={`py-16 px-4 ${className}`}
       aria-label="Vedic Astrology Birth Chart Form — Trikal Vaani by Rohiit Gupta">
 
+      {/* JSON-LD: Service + Offer + PaymentMethod for AI Search (GEO) */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(SERVICE_OFFER_SCHEMA) }}
+      />
+
+      {/* Hidden SEO content (expanded v9.2) */}
       <div style={{ display: 'none' }} aria-hidden="false">
-        <h2>Free Vedic Astrology Prediction — Swiss Ephemeris Powered by Rohiit Gupta</h2>
-        <p>Get your personalized Vedic astrology reading at Trikal Vaani. Powered by Swiss Ephemeris, BPHS, Bhrigu Nandi Nadi, Shadbala. By Rohiit Gupta, Chief Vedic Architect, Delhi NCR.</p>
+        <h2>Free AI Vedic Astrology Prediction — Swiss Ephemeris Powered by Rohiit Gupta</h2>
+        <p>Get your personalized Vedic astrology reading at Trikal Vaani. Powered by Swiss Ephemeris, BPHS, Bhrigu Nandi Nadi, Shadbala. By Rohiit Gupta, Chief Vedic Architect, Delhi NCR. Free Trikal Ka Sandesh preview, ₹51 Deep Reading with 900-word analysis and 5 personalized upay, ₹11 Voice Reading. All paid plans secured by Razorpay — India's most trusted payment gateway. PCI-DSS compliant, 256-bit SSL encrypted. Accepts UPI, Cards, NetBanking, Wallets, RuPay. Customer support via WhatsApp at +91 92118 04111. Refund policy at trikalvaani.com/refund. Terms at trikalvaani.com/terms.</p>
+        <p>Trikal Vaani is India's most accurate AI Vedic astrology platform, competing with AstroTalk and AstroSage at affordable mass-market pricing. Each prediction uses real Swiss Ephemeris planetary calculations validated against BPHS classical sutras, Bhrigu Nandi Nadi pattern matching, and Shadbala planetary strength scoring. Vimshottari Dasha primary, Pratyantar Dasha for 3-7 day precision, Sookshma Dasha hourly. Lahiri Ayanamsha sidereal system. 11 life domains: Career, Wealth, Health, Relationships, Family, Education, Home, Legal, Travel, Spirituality, Well-being.</p>
       </div>
 
       <div className="max-w-2xl mx-auto">
@@ -860,6 +1117,9 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
           <form onSubmit={handleSubmit} noValidate className="grid gap-5">
 
             <TierSelector selected={predictionTier} onChange={setPredictionTier} />
+
+            {/* Razorpay inline trust strip — paid/voice only */}
+            <RazorpayInlineTrustStrip tier={predictionTier} />
 
             {/* Language */}
             <div>
@@ -1136,7 +1396,7 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
               <div className="px-4 py-4 rounded-xl text-center" style={{ background: GOLD_RGBA(0.06), border: `1px solid ${GOLD_RGBA(0.2)}` }}>
                 <div className="flex items-center justify-center gap-2 mb-2">
                   <span className="animate-spin text-base">🔱</span>
-                  <span className="text-sm font-medium" style={{ color: GOLD }}>{LOADING_STEPS[loadingStep]}</span>
+                  <span className="text-sm font-medium" style={{ color: GOLD }}>{getSubmitLabel()}</span>
                 </div>
                 <div className="flex justify-center gap-1.5">
                   {LOADING_STEPS.map((_, i) => (
@@ -1156,6 +1416,7 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
 
             {/* Submit */}
             <button type="submit" disabled={isLoading}
+              aria-label={predictionTier === 'paid' ? 'Pay 51 rupees with Razorpay for Deep Reading' : predictionTier === 'voice' ? 'Pay 11 rupees with Razorpay for Voice Reading' : 'Get free Vedic prediction'}
               className="w-full py-4 rounded-xl text-sm font-bold transition-all duration-300"
               style={{
                 background: isLoading ? GOLD_RGBA(0.3) : predictionTier === 'voice' ? 'linear-gradient(135deg,#7c3aed,#a78bfa)' : predictionTier === 'paid' ? `linear-gradient(135deg,${GOLD} 0%,#F5D76E 50%,${GOLD} 100%)` : `linear-gradient(135deg,rgba(212,175,55,0.8) 0%,${GOLD} 100%)`,
@@ -1170,12 +1431,12 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
             {!isLoading && (
               <div style={{ textAlign: 'center' }}>
                 {predictionTier === 'free'  && <p className="text-xs text-slate-600">🔒 Free forever · No card required · Instant results</p>}
-                {predictionTier === 'paid'  && <p className="text-xs text-slate-600">🔒 ₹51 · Razorpay secure · One-time · Instant access</p>}
-                {predictionTier === 'voice' && <p className="text-xs text-slate-600">🎙️ ₹11 · 60-second voice response</p>}
+                {predictionTier === 'paid'  && <p className="text-xs text-slate-600">🔒 ₹51 one-time · Secured by <span style={{color: RAZORPAY_BLUE, fontWeight: 700}}>Razorpay</span> · UPI / Cards / Wallets · Instant access</p>}
+                {predictionTier === 'voice' && <p className="text-xs text-slate-600">🎙️ ₹11 one-time · Secured by <span style={{color: RAZORPAY_BLUE, fontWeight: 700}}>Razorpay</span> · 60-sec voice response</p>}
               </div>
             )}
 
-            <p className="text-center text-xs text-slate-600">🔒 Your data is private and secure. Never shared.</p>
+            <p className="text-center text-xs text-slate-600">🔒 Your data is private and secure. Never shared. PCI-DSS compliant payments.</p>
           </form>
         </div>
 
@@ -1184,6 +1445,7 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
           <p style={{ color: '#334155', fontSize: '11px', lineHeight: 1.7, maxWidth: '480px', margin: '0 auto 12px' }}>
             Powered by <strong style={{ color: '#475569' }}>Swiss Ephemeris</strong> — the same engine used by professional astrologers worldwide.
             Validated against <strong style={{ color: '#475569' }}>BPHS</strong>, <strong style={{ color: '#475569' }}>Bhrigu Nandi Nadi</strong> and <strong style={{ color: '#475569' }}>Shadbala</strong>.
+            Payments secured by <strong style={{ color: RAZORPAY_BLUE }}>Razorpay</strong>.
           </p>
           <div style={{ padding: '14px 20px', background: GOLD_RGBA(0.05), border: `1px solid ${GOLD_RGBA(0.15)}`, borderRadius: '12px', marginBottom: '12px' }}>
             <p style={{ margin: '0 0 8px', color: GOLD, fontSize: '13px', fontWeight: 600 }}>🙏 Prediction ke baad — Maa Shakti ko Arzi karein</p>
