@@ -956,18 +956,6 @@ export const BLOG_POSTS: BlogPost[] = [
     relatedSlugs: ['pitru-dosh-ke-lakshan-aur-nivaran', '7th-house-weak-marriage-delay-reasons', 'manglik-dosh-shaadi-mein-problem-upay'],
     classicalSources: 'BPHS (Putra Adhyaya, Saptamsha analysis), Bhrigu Nandi Nadi (santan karakatva), Jataka Parijata, Phaladeepika'
   }
-// ============================================================
-// TRIKAL VAANI — BLOG POSTS BATCH 1 (Articles 11-15)
-// CEO: Rohiit Gupta | Chief Vedic Architect
-// Version: 1.1 (Append to BLOG_POSTS array in lib/blog-posts.ts)
-// Date: 2026-05-13
-// ============================================================
-// INSTRUCTIONS:
-// 1. Open lib/blog-posts.ts
-// 2. Find the closing of Article #10 (santan-prapti...) — the `},` after its object
-// 3. Paste everything below BEFORE the `];` that closes BLOG_POSTS array
-// 4. Save, commit, push — Vercel will rebuild and prerender 5 new pages.
-// ============================================================
 
   // ──────────────────────────────────────────────────────────
   // 11. GURU GOCHAR 2026 — DHANU RASHI
