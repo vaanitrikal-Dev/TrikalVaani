@@ -15,7 +15,6 @@ import { Inter } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import SchemaScript from "@/components/SchemaScript";
-import PaymentTrustBar from "@/components/PaymentTrustBar";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -341,7 +340,6 @@ export default function RootLayout({
         {children}
         {/* SchemaScript injects: WebSite, Person, FAQPage, Service, Product (with aggregateRating) */}
         <SchemaScript />
-        <PaymentTrustBar />
       </body>
     </html>
   );
