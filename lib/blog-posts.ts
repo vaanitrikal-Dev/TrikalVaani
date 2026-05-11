@@ -1541,6 +1541,7 @@ export const BLOG_POSTS: BlogPost[] = [
 // Next batch: Articles 16-20 — Surya, Mangal, Guru Mahadashas + Rajyog + Vimshottari calculation
 // ============================================================];
 
+  ];
 // ============================================================
 // HELPER FUNCTIONS — Used by Server Components
 // ============================================================
