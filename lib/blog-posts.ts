@@ -955,7 +955,7 @@ export const BLOG_POSTS: BlogPost[] = [
     ],
     relatedSlugs: ['pitru-dosh-ke-lakshan-aur-nivaran', '7th-house-weak-marriage-delay-reasons', 'manglik-dosh-shaadi-mein-problem-upay'],
     classicalSources: 'BPHS (Putra Adhyaya, Saptamsha analysis), Bhrigu Nandi Nadi (santan karakatva), Jataka Parijata, Phaladeepika'
-  }
+  },
 
   // ──────────────────────────────────────────────────────────
   // 11. GURU GOCHAR 2026 — DHANU RASHI
