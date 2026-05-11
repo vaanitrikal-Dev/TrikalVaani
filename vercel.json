@@ -1,5 +1,12 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "regions": ["bom1"],
+  "crons": [
+    {
+      "path": "/api/cron/panchang-generate",
+      "schedule": "30 22 * * *"
+    }
+  ],
   "redirects": [
     {
       "source": "/(.*)",
