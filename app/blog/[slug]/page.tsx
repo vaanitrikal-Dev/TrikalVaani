@@ -54,7 +54,7 @@ export async function generateMetadata(
   const canonicalUrl = `https://trikalvaani.com/blog/${post.slug}`;
 
   return {
-    title: `${post.title} | Trikal Vaani`,
+    title: post.title,
     description: post.description,
     keywords: post.keywords.join(', '),
     authors: [{ name: 'Rohiit Gupta', url: 'https://trikalvaani.com/founder' }],
