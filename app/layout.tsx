@@ -320,18 +320,7 @@ export default function RootLayout({
           strategy="afterInteractive"
         />
 
-        {/* hreflang */}
-        <link rel="alternate" hrefLang="en-IN" href="https://trikalvaani.com" />
-        <link rel="alternate" hrefLang="hi-IN" href="https://trikalvaani.com/hi" />
-        <link rel="alternate" hrefLang="x-default" href="https://trikalvaani.com" />
-
-        {/* Geo meta */}
-        <meta name="geo.region" content="IN-DL" />
-        <meta name="geo.placename" content="New Delhi" />
-        <meta name="geo.position" content="28.6139;77.2090" />
-        <meta name="ICBM" content="28.6139, 77.2090" />
-
-        {/* Performance */}
+                {/* Performance */}
         <link rel="preconnect" href="https://api.razorpay.com" />
         <link rel="preconnect" href="https://checkout.razorpay.com" />
         <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
