@@ -956,7 +956,602 @@ export const BLOG_POSTS: BlogPost[] = [
     relatedSlugs: ['pitru-dosh-ke-lakshan-aur-nivaran', '7th-house-weak-marriage-delay-reasons', 'manglik-dosh-shaadi-mein-problem-upay'],
     classicalSources: 'BPHS (Putra Adhyaya, Saptamsha analysis), Bhrigu Nandi Nadi (santan karakatva), Jataka Parijata, Phaladeepika'
   }
-];
+// ============================================================
+// TRIKAL VAANI — BLOG POSTS BATCH 1 (Articles 11-15)
+// CEO: Rohiit Gupta | Chief Vedic Architect
+// Version: 1.1 (Append to BLOG_POSTS array in lib/blog-posts.ts)
+// Date: 2026-05-13
+// ============================================================
+// INSTRUCTIONS:
+// 1. Open lib/blog-posts.ts
+// 2. Find the closing of Article #10 (santan-prapti...) — the `},` after its object
+// 3. Paste everything below BEFORE the `];` that closes BLOG_POSTS array
+// 4. Save, commit, push — Vercel will rebuild and prerender 5 new pages.
+// ============================================================
+
+  // ──────────────────────────────────────────────────────────
+  // 11. GURU GOCHAR 2026 — DHANU RASHI
+  // ──────────────────────────────────────────────────────────
+  {
+    slug: 'guru-gochar-2026-dhanu-rashi-effect',
+    title: 'Guru Gochar 2026 Dhanu Rashi — 12 Rashiyon Par Jupiter Transit Ka Sampurna Effect',
+    description: 'Jupiter ka Dhanu Rashi mein gochar 2026 — 12 rashiyon par detailed prediction, career-wealth-marriage timing windows, aur 7 classical upay. Vedic transit decoded by Rohiit Gupta.',
+    directAnswer: 'Guru (Jupiter) ka 2026 mein Dhanu Rashi (Sagittarius — apni own rashi) mein gochar ek 13-mahine ka golden window create karta hai. Jupiter own sign mein uchcha-level strength deta hai — career growth, marriage proposals, wealth expansion, aur dharma-aligned decisions ke liye yeh transit historically most favourable hota hai. Effect rashi-specific hai: Mesh-Simha-Dhanu (Agni tatva) ke liye maximum benefit, baaki rashiyon ke liye mixed but largely positive. Average impact duration: 13 months from entry.',
+    category: 'Planetary Transit',
+    domain: 'wealth',
+    keywords: ['guru gochar 2026', 'jupiter transit sagittarius 2026', 'dhanu rashi guru', 'jupiter dhanu effect', 'guru transit prediction'],
+    publishedAt: '2026-05-13',
+    updatedAt: '2026-05-13',
+    readTimeMinutes: 10,
+    ogImage: '/blog/og/guru-gochar-2026.jpg',
+    ctaService: { label: 'Get ₹51 Wealth Deep Reading', href: '/services/wealth-reading', price: '₹51' },
+    sections: [
+      { type: 'h2', text: 'Guru Gochar Kya Hota Hai — Foundation' },
+      { type: 'p', text: '**Gochar = transit. Guru = Jupiter (Brihaspati).** Jupiter har **12 saal** mein zodiac complete karta hai — yani **1 rashi mein ~13 mahine** rehta hai. Yeh **sabse slow-moving benefic** hai — iska transit aapke chart pe **medium-to-long-term shifts** create karta hai, sirf 2-din ka mood swing nahi.' },
+      { type: 'p', text: 'Vedic astrology mein Jupiter **5 cheezein govern karta hai**: wisdom aur higher education, wealth expansion aur abundance, children (santan), marriage (especially women ke liye primary karak), dharma aur ethical decisions. Jab Jupiter **Dhanu mein** jaata hai — yeh **iska own sign** hai (swarashi). Own-sign Jupiter = **maximum strength**. Iska matlab har rashi pe Jupiter ka effect **strongest possible version** mein deliver hota hai 2026 mein.' },
+
+      { type: 'h2', text: 'Jupiter Dhanu Mein Kab Tak Rahega — 2026 Timing' },
+      { type: 'p', text: 'Jupiter ka 2026 Dhanu Rashi mein gochar **approximate windows**:' },
+      { type: 'ul', items: [
+        '**Entry phase:** Early 2026 — Jupiter Dhanu mein transit start',
+        '**Direct motion phase:** First 4-5 months — fastest growth velocity',
+        '**Retrograde phase:** Mid-year ~120 days — reflection, karmic review',
+        '**Re-direct phase:** Last quarter — implementation of insights',
+        '**Exit phase:** Late 2026 / early 2027 — Jupiter Makar mein move'
+      ]},
+      { type: 'p', text: '**Note:** Exact entry/retrograde dates Drik Panchang based hain. Apne specific chart ke liye, Trikal Vaani ka panchang cron daily update karta hai.' },
+
+      { type: 'h2', text: '12 Rashiyon Par Effect — Detailed Breakdown' },
+      { type: 'h3', text: 'Mesh Rashi (Aries) — 9th House Transit' },
+      { type: 'p', text: '**Bhagya sthan activation.** Yeh **most favourable** position hai Mesh ke liye. Long-distance travel, foreign opportunities, higher education, dharma-aligned career shifts, father ya guru ka blessing. **Action:** Apply for foreign visa, MBA programs, ya consulting roles. **Caution:** Over-confidence se bachein.' },
+
+      { type: 'h3', text: 'Vrishabh Rashi (Taurus) — 8th House Transit' },
+      { type: 'p', text: '**Transformative but challenging.** 8th house mein Jupiter = sudden financial gains (inheritance, insurance, settlements) but bhi expenditure spikes. Occult, research, healing careers favoured. **Action:** Long-pending insurance/legacy matters resolve karein. **Caution:** Surgery decisions postpone if possible.' },
+
+      { type: 'h3', text: 'Mithun Rashi (Gemini) — 7th House Transit' },
+      { type: 'p', text: '**Marriage and partnership year.** Jupiter 7th mein = marriage proposals surge, business partnerships, public-facing roles. Unmarried Mithun-rashi natives ke liye yeh **prime marriage window** hai. **Action:** Matrimony profiles update, partnership agreements sign karein.' },
+
+      { type: 'h3', text: 'Kark Rashi (Cancer) — 6th House Transit' },
+      { type: 'p', text: '**Mixed.** 6th house = enemies, disease, debt. Jupiter yahan good news: enemies neutralize hote hain, debts clear hote hain. But health vigilance zaruri. **Action:** Loan restructuring, legal disputes resolve karein. **Caution:** Weight gain aur diabetes risk.' },
+
+      { type: 'h3', text: 'Simha Rashi (Leo) — 5th House Transit' },
+      { type: 'p', text: '**Children, romance, creativity boom.** Simha-rashi conceiving couples ke liye **best-possible window**. Romance, speculation (stocks, creative work), education ke liye golden. **Action:** Conception planning, creative projects launch, equity investments.' },
+
+      { type: 'h3', text: 'Kanya Rashi (Virgo) — 4th House Transit' },
+      { type: 'p', text: '**Home, property, mother focus.** Real estate purchases, home renovation, mother\'s health priority, vehicle upgrades. **Action:** Property registration auspicious. **Caution:** Mother\'s health regular check-ups.' },
+
+      { type: 'h3', text: 'Tula Rashi (Libra) — 3rd House Transit' },
+      { type: 'p', text: '**Communication, siblings, courage.** Content creation, writing, short journeys, sibling matters mein progress. **Action:** Book/blog/YouTube launch, courageous career moves. Networking peak phase.' },
+
+      { type: 'h3', text: 'Vrishchik Rashi (Scorpio) — 2nd House Transit' },
+      { type: 'p', text: '**Wealth accumulation, family, speech.** Direct Jupiter 2nd house = savings build up, family bonds strengthen, public speaking ability rise. **Action:** SIPs increase, family functions plan karein.' },
+
+      { type: 'h3', text: 'Dhanu Rashi (Sagittarius) — 1st House Transit (LAGNA)' },
+      { type: 'p', text: '**Own-rashi natives ke liye SUPREME year.** Jupiter on Lagna = personality magnetism, leadership opportunities, weight gain, optimism surge. **Action:** Major life decisions favourable. **Caution:** Weight management, ego-balance.' },
+
+      { type: 'h3', text: 'Makar Rashi (Capricorn) — 12th House Transit' },
+      { type: 'p', text: '**Spiritual growth, foreign settlement, hospitalization risk.** Mixed bag — outward losses but inner gains. **Action:** Meditation deepen, foreign opportunities consider. **Caution:** Major investments avoid.' },
+
+      { type: 'h3', text: 'Kumbh Rashi (Aquarius) — 11th House Transit' },
+      { type: 'p', text: '**Income, network, fulfillment.** 11th house Jupiter = **best possible house** for gains. Income jumps, friend circle expands, long-pending wishes fulfill hote hain. **Action:** Salary negotiations, new ventures, networking events.' },
+
+      { type: 'h3', text: 'Meen Rashi (Pisces) — 10th House Transit' },
+      { type: 'p', text: '**Career peak year.** 10th house Jupiter = promotions, recognition, public reputation. Government jobs, teaching, consulting roles favoured. **Action:** Job change consider, promotions push, awards apply.' },
+
+      { type: 'h2', text: 'Jupiter Dhanu Mein — Yog Activation' },
+      { type: 'p', text: 'Specific yogas jo Jupiter Dhanu transit mein activate ho sakte hain (chart-dependent):' },
+      { type: 'table',
+        headers: ['Yog Name', 'Activation Condition', 'Effect'],
+        rows: [
+          ['Hamsa Yog', 'Jupiter in Kendra (1,4,7,10) from Lagna or Moon', 'Wisdom, wealth, fame'],
+          ['Gajakesari Yog', 'Jupiter and Moon in mutual Kendra', 'Intelligence, status'],
+          ['Guru-Mangal Yog', 'Jupiter-Mars conjunction or aspect', 'Real estate, property gains'],
+          ['Guru-Chandal Yog', 'Jupiter-Rahu conjunction (CAUTION)', 'Dharma confusion, scandal risk'],
+          ['Adhi Yog', 'Benefics in 6,7,8 from Moon', 'Leadership, authority']
+        ]
+      },
+
+      { type: 'h2', text: '7 Classical Upay To Maximize Jupiter Transit' },
+      { type: 'h3', text: 'Upay 1: Thursday Vrat' },
+      { type: 'p', text: '**Brihaspativar vrat.** Thursday morning: yellow clothes, yellow food (besan, haldi, gud), banana fruit offering to Vishnu temple, **Guru mantra 108 times**: *"Om Brihaspataye Namah"*. **16 consecutive Thursdays** = solah Brihaspativar — measurable life shift.' },
+
+      { type: 'h3', text: 'Upay 2: Banana Tree Worship' },
+      { type: 'p', text: 'Jupiter ka karak tree = **kela (banana)**. Thursday morning: water + haldi + chana dal at banana tree base, 7 parikrama clockwise, **Guru Gayatri mantra**. **Best in own backyard or local temple courtyard.**' },
+
+      { type: 'h3', text: 'Upay 3: Yellow Item Daan' },
+      { type: 'p', text: 'Thursday before 9 AM: chana dal (1 kg), haldi (250g), banana (5 pieces), yellow cloth (1 piece), gud (250g). Donate to **brahmin priest** ya **vidyarthi** (student). **Direct namaste + dakshina ₹51 ya ₹101.** **40 Thursdays** = full karmic activation.' },
+
+      { type: 'h3', text: 'Upay 4: 5 Mukhi Rudraksha' },
+      { type: 'p', text: '**Jupiter ka specific Rudraksha = 5 Mukhi.** Most common, easily accessible (₹500–₹1500 genuine). Silver chain, Thursday energization with Guru mantra. **Daily wear.** Wisdom, calm, decision-clarity improve hoti hai measurably.' },
+
+      { type: 'h3', text: 'Upay 5: Vishnu Sahasranama' },
+      { type: 'p', text: 'Jupiter = Vishnu\'s closest planet karak. **Vishnu Sahasranama** (1000 names of Vishnu) Thursday evening. Single complete recitation = 45 minutes. **Ekadashi day par mandatory** — Jupiter karma maximum activate hota hai.' },
+
+      { type: 'h3', text: 'Upay 6: Guru Gayatri Mantra' },
+      { type: 'p', text: '*"Om Vrishabhdwajaaya Vidmahe Kriniahastaaya Dheemahi Tanno Guruh Prachodayat"*. **108 times daily** during transit period. Thursday morning peak. Yellow sandalwood paste forehead par. **41-day cycle** = significant Jupiter strengthening.' },
+
+      { type: 'h3', text: 'Upay 7: Knowledge Daan' },
+      { type: 'p', text: 'Jupiter = Guru = teacher = knowledge. **Books donate karein** schools, libraries, poor students ko. **Scholarships sponsor karein** if possible. **Teach without expectation** — knowledge sharing = direct Jupiter karma boost.' },
+
+      { type: 'callout', variant: 'verdict', text: 'Yeh transit har rashi pe alag-alag manifest hota hai. Aapke specific chart mein Jupiter kis house ka swami hai, current Dasha-Antardasha kya hai, aur Jupiter ki natal strength kya hai — yeh 3 factors final result decide karte hain. ₹51 Deep Reading mein personalized Jupiter activation roadmap milta hai.' }
+    ],
+    faqs: [
+      { q: 'Kya Jupiter Dhanu transit sab ke liye good hai?', a: 'Largely yes — Jupiter own sign mein hota hai = inherently benefic. But specific rashis ke liye 6th, 8th, 12th house transit hota hai = mixed effects. Aapki Moon rashi se calculate karein for exact house impact.' },
+      { q: 'Marriage decisions Jupiter Dhanu transit mein favourable hain?', a: 'Yes — especially for women (Jupiter primary marriage karak). Direct motion phase ideal hai. Retrograde period avoid karein major commitments ke liye. Mithun rashi natives ke liye specifically prime year.' },
+      { q: 'Career change Jupiter Dhanu mein safe hai?', a: 'For Meen, Mesh, Simha — strong YES. For Mithun, Kanya — moderate. For Vrishabh, Makar — caution. House transit aur active Dasha decide karte hain final timing.' },
+      { q: 'Jupiter retrograde phase mein kya karna chahiye?', a: 'Reflection, review, replanning. Major new commitments avoid karein retrograde mein. Skill-building, course completion, internal work — yeh phase ideal hai. Forward motion phase mein execute karein.' },
+      { q: 'Children planning Jupiter Dhanu mein?', a: 'YES — especially Simha rashi natives ke liye 5th house Jupiter = best conception window. Other rashis ke liye 5th lord ka transit + Jupiter aspect check karein. Personalized analysis recommended.' }
+    ],
+    relatedSlugs: ['saade-saati-ke-lakshan-aur-upay', 'santan-prapti-mein-deri-astrology-upay', 'business-loss-astrology-kab-tak-chalega'],
+    classicalSources: 'BPHS (Adhyaya 23 — Gochar Phaladhyaya), Saravali (Jupiter karakatva), Phaladeepika (transit effects), Bhrigu Nandi Nadi'
+  },
+
+  // ──────────────────────────────────────────────────────────
+  // 12. KETU MAHADASHA — VAIRAGYA SYMPTOMS
+  // ──────────────────────────────────────────────────────────
+  {
+    slug: 'ketu-mahadasha-vairagya-symptoms',
+    title: 'Ketu Mahadasha Ke 11 Vairagya Symptoms — Detachment Phase Survival Guide',
+    description: 'Ketu Mahadasha ke 7 saal mein sudden vairagya, career drop, relationship detachment ke real reasons. 9 symptoms aur 7 spiritual survival upay by Rohiit Gupta.',
+    directAnswer: 'Ketu Mahadasha 7-year detachment phase hai jisme moksha-karak Ketu apna karma audit karta hai. Symptoms include: sudden career disinterest, relationship withdrawal, spiritual seeking surge, foreign attraction, food-aversion patterns, sleep cycle disruption, family bond loosening, material possessions ka boredom, sudden travel urges, hidden talents surface, aur "kya kar raha hoon main?" wala existential questioning. Ketu past-life skills ko surface karta hai — yeh phase career pivots, spiritual awakening, aur authentic-self discovery ka window hai. Symptoms 18-30 months mein peak karte hain.',
+    category: 'Ketu Astrology',
+    domain: 'career',
+    keywords: ['ketu mahadasha effects', 'ketu dasha symptoms', 'vairagya astrology', 'ketu period spiritual', 'ketu mahadasha remedies'],
+    publishedAt: '2026-05-13',
+    updatedAt: '2026-05-13',
+    readTimeMinutes: 10,
+    ogImage: '/blog/og/ketu-mahadasha.jpg',
+    ctaService: { label: 'Get ₹51 Spiritual Purpose Reading', href: '/services/spiritual-purpose', price: '₹51' },
+    sections: [
+      { type: 'h2', text: 'Ketu Kya Hai — Foundation' },
+      { type: 'p', text: '**Ketu = South Node of Moon = Shadow Planet (Chhaya Graha).** Rahu ki tarah Ketu bhi physical planet nahi hai — yeh mathematical point hai. Iska koi body nahi, sirf significance hai.' },
+      { type: 'p', text: '**Rahu vs Ketu — Critical Difference:** Rahu = forward-pulling desires, material amplification. Ketu = backward-pulling detachment, spiritual liberation. Rahu = "I want more." Ketu = "Kya yeh sab zaruri hai?"' },
+      { type: 'p', text: 'Vimshottari Dasha cycle mein **Ketu Mahadasha = 7 saal**. Yeh aapki life mein **karma-burning phase** hai — past-life skills surface karte hain, material attachments dissolve hote hain, aur soul-direction reset hoti hai.' },
+
+      { type: 'h2', text: '11 Definite Symptoms — Self-Diagnostic' },
+      { type: 'p', text: 'Agar **6+ symptoms** apply ho rahe hain, Ketu Mahadasha active hai:' },
+      { type: 'ol', items: [
+        '**Sudden Career Disinterest** — jo job/business 5 saal se kar rahe ho, achanak interest khatam',
+        '**Relationship Withdrawal** — close logon se bhi distance feel hota hai bina specific reason',
+        '**Spiritual Seeking Surge** — meditation, yoga, ashrams, sadhus mein achanak interest',
+        '**Foreign Attraction** — desh chhodne ka mann, distant places mein peace dhundhna',
+        '**Food Aversion Patterns** — favourite foods tasteless lagte hain, eating becomes mechanical',
+        '**Sleep Cycle Disruption** — 4-5 hours sufficient lagta hai, dreams vivid aur symbolic',
+        '**Family Bond Loosening** — family events skip karne ka mann, emotional distance',
+        '**Material Possessions Boredom** — shopping, gadgets, cars — nothing excites anymore',
+        '**Sudden Travel Urges** — solo trips, unplanned journeys, monasteries visit ka mann',
+        '**Hidden Talents Surface** — past mein chhoda hua art, writing, music achanak revive',
+        '**Existential Questioning** — "Kya kar raha hoon main? Iska kya matlab hai?" daily background mein'
+      ]},
+
+      { type: 'h2', text: 'Ketu Different Houses Mein — Effect Variation' },
+      { type: 'table',
+        headers: ['Ketu Position', 'Mahadasha Effect'],
+        rows: [
+          ['1st House (Lagna)', 'Identity crisis, spiritual awakening, body-detachment'],
+          ['2nd House', 'Speech changes, family ties loosen, wealth indifference'],
+          ['4th House', 'Mother-emotional withdrawal, home unrest, vehicle changes'],
+          ['5th House', 'Children-detachment, creative blocks, education breaks'],
+          ['7th House', 'Marriage strain, partner-distance, separation possibilities'],
+          ['9th House', 'Guru-changes, religious shifts, foreign settlement'],
+          ['10th House', 'Career sudden drop OR sudden recognition; unstable'],
+          ['12th House', 'Best position — moksha, meditation, foreign success, isolation comfort']
+        ]
+      },
+
+      { type: 'h2', text: 'Ketu Antardasha In Different Mahadashas' },
+      { type: 'p', text: 'Ketu sub-period **9 different Mahadashas** mein aata hai. Har case mein effect alag:' },
+      { type: 'ul', items: [
+        '**Sun-Ketu** (7 months): authority issues, government dealings, father-distance',
+        '**Moon-Ketu** (7 months): mother health, emotional turbulence, mood swings',
+        '**Mars-Ketu** (4.9 months): accidents possible, energy collapse, anger episodes',
+        '**Rahu-Ketu** (7.5 months): MAXIMUM confusion, decision paralysis',
+        '**Jupiter-Ketu** (11.2 months): dharma reset, guru-meeting, spiritual breakthrough',
+        '**Saturn-Ketu** (13.3 months): toughest combination, isolation, depression risk',
+        '**Mercury-Ketu** (9.9 months): communication breaks, business confusion',
+        '**Venus-Ketu** (14 months): relationship detachment, art revival',
+        '**Ketu-Ketu** (4.9 months): peak spiritual intensity, hermitage urges'
+      ]},
+
+      { type: 'h2', text: 'Ketu Mahadasha — Positive Outcomes' },
+      { type: 'p', text: 'Yeh phase sirf negative nahi hai. Specific advantages:' },
+      { type: 'ul', items: [
+        '✅ **Spiritual awakening** — kayi great gurus apne Ketu period mein realized hue',
+        '✅ **Past-life skills surface** — natural talents discover karte ho',
+        '✅ **Unconventional career success** — research, occult, healing, IT, foreign',
+        '✅ **Karma debt clearance** — old issues naturally resolve hote hain',
+        '✅ **Authentic self-discovery** — "main actually kaun hoon" answer milta hai',
+        '✅ **Foreign opportunities** — Ketu = isolation = often foreign land karak',
+        '✅ **Research breakthrough** — scientists, scholars often peak in Ketu period',
+        '✅ **Sudden wealth via detachment** — paradox: jab paisa nahi chahiye, tab milta hai'
+      ]},
+
+      { type: 'h2', text: '7 Survival Upay — Ketu Period Navigation' },
+      { type: 'h3', text: 'Upay 1: Ganesh Worship Daily' },
+      { type: 'p', text: '**Ganesh ji Ketu ke deity hain** (Vedic mythology). Daily morning: Ganesh murti pe water + sindoor + durva grass, "Om Gam Ganapataye Namah" 108 times. **Tuesday + Friday peak**. 41-day cycle for measurable stability.' },
+
+      { type: 'h3', text: 'Upay 2: 9 Mukhi Rudraksha' },
+      { type: 'p', text: '**Ketu ka specific Rudraksha = 9 Mukhi.** Durga swaroop, energy protection. Silver chain, Saturday or Tuesday energization. Daily wear. **Cost:** ₹2,000–₹5,000 genuine. Confusion, fear, isolation symptoms measurably reduce hote hain.' },
+
+      { type: 'h3', text: 'Upay 3: Lord Hanuman Worship' },
+      { type: 'p', text: 'Hanuman ji **Ketu-Rahu dono ko balance karte hain**. Daily Hanuman Chalisa 11 paath. Tuesday: 21 paath. Saturday: additional 7 paath. Mental stability ke liye most reliable upay.' },
+
+      { type: 'h3', text: 'Upay 4: Ketu Mantra' },
+      { type: 'p', text: '*"Om Ketave Namah"* 108 times daily. More powerful: *"Om Sraam Sreem Sraum Sah Ketave Namah"* — tantric bija version. Best time: Tuesday or Saturday dusk. 40-day cycle.' },
+
+      { type: 'h3', text: 'Upay 5: Spiritual Practice Anchor' },
+      { type: 'p', text: 'Ketu phase mein meditation NATURAL feel hoti hai. **Don\'t resist — utilize.** Daily 20-30 min meditation, vipassana, ya self-inquiry. Anulom-Vilom 15 min. **Yeh phase apni soul-direction discover karne ka window hai.**' },
+
+      { type: 'h3', text: 'Upay 6: Donate Specific Items' },
+      { type: 'p', text: 'Tuesday morning before 9 AM: brown blanket, kambal, multicoloured cloth, urad dal, sesame seeds. To **sadhu, sanyasi, ya genuine renunciate** — Ketu ke representative log. **Direct karma balance.**' },
+
+      { type: 'h3', text: 'Upay 7: Avoid Major Decisions In Ketu Pratyantar' },
+      { type: 'p', text: 'Ketu-Ketu Pratyantar (first months of any Ketu period) mein: ❌ Job change avoid, ❌ Marriage decisions postpone, ❌ Major investments hold, ❌ Property sales pause. **Wait for Ketu-Jupiter or Ketu-Mercury Pratyantar** for important decisions.' },
+
+      { type: 'callout', variant: 'warn', text: 'Ketu Mahadasha mein agar pre-existing mental health issues hain (depression, anxiety, suicidal ideation), please combine astrology with professional psychological support. Astrology medical treatment ka substitute nahi hai — supplement hai. Severe symptoms mein qualified therapist consult karein.' },
+
+      { type: 'callout', variant: 'verdict', text: 'Ketu Mahadasha ka exact phase aapke chart mein kab start hua, kaun sa Antardasha currently chal raha hai, aur kab end hoga — yeh personalized analysis se hi clarity aati hai. Generic timelines sirf direction dikhati hain.' }
+    ],
+    faqs: [
+      { q: 'Ketu Mahadasha kitne saal ka hota hai?', a: 'Total 7 saal. Vimshottari Dasha system mein har planet ka apna fixed span hota hai — Ketu ka 7 years.' },
+      { q: 'Kya Ketu period mein business start karna chahiye?', a: 'Conditional. Spiritual, healing, research, occult, IT, foreign-related business — YES. Traditional retail, manufacturing — NO. Ketu unconventional success favours karta hai.' },
+      { q: 'Ketu Mahadasha aur depression — connection?', a: 'Possible. Vairagya symptoms aur clinical depression overlap kar sakte hain. Difference: vairagya mein "shaant" feeling hota hai, depression mein "stuck" feeling. Professional help if symptoms severe.' },
+      { q: 'Kya Ketu period mein foreign settle ho sakte hain?', a: 'Often yes — Ketu foreign land karak hai. Ketu-Jupiter ya Ketu-Mercury Pratyantar windows mein foreign moves successful hote hain.' },
+      { q: 'Marriage Ketu Mahadasha mein hogi?', a: 'Depends on Pratyantar. Ketu-Venus Pratyantar mein marriage possible. Ketu-Ketu ya Ketu-Saturn mein avoid. 7th house involvement check karna critical.' }
+    ],
+    relatedSlugs: ['rahu-antardasha-confusion-symptoms', 'saade-saati-ke-lakshan-aur-upay', 'shani-mahadasha-mein-job-kyon-nahi-milti'],
+    classicalSources: 'BPHS (Rahu-Ketu adhyaya), Bhrigu Nandi Nadi (Karakatva), Jaimini Sutras (Atmakaraka analysis)'
+  },
+
+  // ──────────────────────────────────────────────────────────
+  // 13. SHUKRA ANTARDASHA — VIVAH YOG
+  // ──────────────────────────────────────────────────────────
+  {
+    slug: 'shukra-antardasha-vivah-yog',
+    title: 'Shukra Antardasha Mein Vivah Yog — Venus Period Mein Shaadi Ka Exact Timing',
+    description: 'Shukra (Venus) Antardasha mein marriage timing ka detailed analysis. 9 vivah yog activators, gender-specific effects, aur 7 upay to maximize Venus period for marriage.',
+    directAnswer: 'Shukra (Venus) Antardasha vivah ka prime astrological window hai — especially men ke liye Venus primary marriage karak hai. Venus Antardasha mein marriage probability significantly increase hoti hai agar 7th house, 7th lord, ya Venus itself favourable position mein ho. Sub-period within Mahadasha mein Venus 20 saal cycle ka largest portion deta hai. Marriage timing typically Venus Antardasha ke shuruwati ya middle phase mein activate hoti hai. Average timeline: Venus Antardasha start hone ke 6-18 mahine andar matrimony developments visible hote hain.',
+    category: 'Marriage Astrology',
+    domain: 'marriage',
+    keywords: ['shukra antardasha marriage', 'venus dasha vivah', 'venus period shaadi', 'shukra dasha effects', 'vivah yog timing'],
+    publishedAt: '2026-05-13',
+    updatedAt: '2026-05-13',
+    readTimeMinutes: 10,
+    ogImage: '/blog/og/shukra-antardasha.jpg',
+    ctaService: { label: 'Get ₹51 Compatibility Reading', href: '/services/compatibility', price: '₹51' },
+    sections: [
+      { type: 'h2', text: 'Shukra (Venus) Astrology Mein — Foundation' },
+      { type: 'p', text: '**Venus = Shukra = relationships, marriage, luxury, beauty, art, sensuality, comforts.** Vedic astrology mein Venus **men ke liye primary marriage karak** hai (Jupiter women ke liye). Yani aapke chart mein Venus ki position, strength, aur transit directly batate hain ki wife/partner kaisi milegi, kab milegi.' },
+      { type: 'p', text: '**Venus Mahadasha total span = 20 saal** — Vimshottari Dasha cycle ka **sabse lamba period**. Iske andar 9 Antardashas hote hain — 9 different planets ke sub-periods.' },
+
+      { type: 'h2', text: 'Venus Antardasha — 9 Mahadashas Mein Effect' },
+      { type: 'table',
+        headers: ['Parent Mahadasha', 'Venus Antardasha Duration', 'Marriage Probability'],
+        rows: [
+          ['Sun-Venus', '12 months', 'High — government connections, conservative match'],
+          ['Moon-Venus', '20 months', 'Very High — emotional bond, mother-arranged'],
+          ['Mars-Venus', '14 months', 'Moderate — passionate but conflict-prone'],
+          ['Rahu-Venus', '36 months', 'Mixed — unconventional, foreign, inter-caste likely'],
+          ['Jupiter-Venus', '32 months', 'BEST — dharmic, blessed, long-lasting'],
+          ['Saturn-Venus', '38 months', 'Slow but durable — late but stable'],
+          ['Mercury-Venus', '28.5 months', 'Communication-based — colleague-style match'],
+          ['Ketu-Venus', '14 months', 'Spiritual bond — but separation risk'],
+          ['Venus-Venus', '40 months', 'Self-period — strongest Venus activation']
+        ]
+      },
+      { type: 'p', text: '**Critical insight:** Jupiter-Venus aur Venus-Venus periods marriage ke liye **strongest** hote hain.' },
+
+      { type: 'h2', text: '9 Vivah Yog Activators In Venus Period' },
+      { type: 'ol', items: [
+        '**Venus In 7th House** — direct marriage karak in marriage house = strongest possible signature',
+        '**Venus In Own Sign** — Taurus or Libra Venus = own strength, marriage easy',
+        '**Venus Exalted** — Pisces Venus = exalted = highest marriage karak strength',
+        '**7th Lord In Kendra/Trikona** — partnership house lord well-placed',
+        '**Jupiter Aspect On 7th** — wisdom and blessing on marriage house',
+        '**Venus-Moon Mutual Aspect** — emotional + romantic combination',
+        '**5th-7th Lord Exchange** — love-marriage signature, easy unions',
+        '**Saptamsha (D7) Lagna Strong** — divisional chart confirms marriage Yog',
+        '**Auspicious Transits During Antardasha** — Jupiter transit through 7th house = trigger'
+      ]},
+
+      { type: 'h2', text: 'Gender-Specific Venus Effects' },
+      { type: 'h3', text: 'Men Ke Liye:' },
+      { type: 'p', text: 'Venus = **wife karak** primary. Strong Venus = beautiful, supportive wife. Weak Venus = relationship delays, multiple breakups, ya wife-related issues. Venus Antardasha = **prime marriage window** for men.' },
+
+      { type: 'h3', text: 'Women Ke Liye:' },
+      { type: 'p', text: 'Venus = **own beauty, sexuality, art** karak (not husband karak). Husband karak = Jupiter. But Venus Antardasha mein women ke liye: physical attraction peaks, marriage proposals come if 7th lord supports, creative-artistic careers boom, relationships intensify.' },
+
+      { type: 'h2', text: 'Venus Period Mein Marriage Kab — Timing Indicators' },
+      { type: 'h3', text: 'High-Probability Months:' },
+      { type: 'ul', items: [
+        '✅ Venus transit through aapki Janma Rashi from Moon',
+        '✅ Venus transit through 7th house from Lagna',
+        '✅ Jupiter transit through 5th or 7th from Moon',
+        '✅ Shukla Paksha (waxing moon) periods',
+        '✅ Auspicious Nakshatras: Rohini, Magha, Uttara Phalguni, Hasta, Swati, Anuradha, Mool, Uttara Shadha, Uttara Bhadrapada, Revati'
+      ]},
+      { type: 'h3', text: 'Low-Probability Periods:' },
+      { type: 'ul', items: [
+        '❌ Venus combust (within 10° of Sun)',
+        '❌ Venus retrograde',
+        '❌ Saturn transit through 7th',
+        '❌ Rahu transit through 7th (unconventional but unstable matches)',
+        '❌ Eclipse seasons',
+        '❌ Chaturmas (4-month inauspicious period — varies yearly)'
+      ]},
+
+      { type: 'h2', text: '7 Upay To Maximize Venus Antardasha' },
+      { type: 'h3', text: 'Upay 1: Friday Vrat (Shukravar Vrat)' },
+      { type: 'p', text: 'Friday = Venus\'s day. Morning: white clothes, white food (rice, kheer, white sweets), Lakshmi pooja, **Shukra mantra**: *"Om Shukraya Namah"* 108 times. **Santoshi Maa vrat** specifically marriage-attracting hai. **16 consecutive Fridays** = solah Shukravar.' },
+
+      { type: 'h3', text: 'Upay 2: White Item Daan' },
+      { type: 'p', text: 'Friday morning before 9 AM: white sweets (rasgulla, kheer), white rice, white cloth, silver coin (5-10g), white sandalwood. Donate to **young woman** (age 18-30) — Lakshmi swaroop. **Direct namaste + sincere intention.** 40 Fridays = full karma activation.' },
+
+      { type: 'h3', text: 'Upay 3: Lakshmi Mantra Sadhana' },
+      { type: 'p', text: '*"Om Shreem Mahalakshmiyei Namah"* 108 times daily. **Friday peak**. Sphatik (crystal) mala. **41-day cycle.** Wealth + marriage prospects dono activate hote hain.' },
+
+      { type: 'h3', text: 'Upay 4: Specific Rudraksha For Venus' },
+      { type: 'p', text: 'Venus ka direct Rudraksha = **6 Mukhi** (Kartikeya). Combined with **13 Mukhi** (Indra, attraction) = potent marriage attraction combination. Silver chain, Friday energization, daily wear.' },
+
+      { type: 'h3', text: 'Upay 5: Tulsi Worship For Women' },
+      { type: 'p', text: 'Women ke liye Tulsi puja Venus-Jupiter combined activation karta hai. **Tulsi Vivah** (annual Kartik Ekadashi ritual) marriage-blessing. Daily morning water + diya at Tulsi plant.' },
+
+      { type: 'h3', text: 'Upay 6: Annapurna Worship' },
+      { type: 'p', text: 'Annapurna Devi = food-giver = household harmony karak. Morning rasoi mein Annapurna idol/picture, daily bhog before family eats. **Specifically marriage-supportive** kyunki future household ka karma improve hota hai.' },
+
+      { type: 'h3', text: 'Upay 7: Avoid Venus Combust Period' },
+      { type: 'p', text: 'Venus jab Sun ke ~10° andar hota hai = combust = weak phase. Is dauran: marriage decisions postpone, engagement avoid, major shopping (sone-chandi) avoid. Calendar check karein — yearly Venus combust periods varying hote hain.' },
+
+      { type: 'callout', variant: 'verdict', text: 'Venus Antardasha sirf marriage period hai — kya VIVAH HOGI is period mein, yeh aapke specific 7th house, Venus position, aur active sub-periods se decide hota hai. Generic "Venus Mahadasha mein shaadi hoti hai" claim adhoora hai. Personalized analysis exact months identify karta hai.' }
+    ],
+    faqs: [
+      { q: 'Venus Mahadasha mein 100% shaadi hoti hai?', a: 'NO. Probability bahut zyada hoti hai (60-80%) agar Venus aur 7th house favourable hain. But weak Venus ya 7th house affliction mein Venus period mein bhi marriage delay possible. Chart-specific analysis essential.' },
+      { q: 'Mera Venus weak hai — kya marriage problem hogi?', a: 'Not necessarily. Weak Venus = challenges, but not impossibility. Upay + correct timing + compatible partner selection = workable. 7th lord ki strength bhi equally matter karti hai.' },
+      { q: 'Love marriage Venus period mein?', a: '5th-7th lord exchange + Venus-Mars connection + Rahu involvement = love marriage signature. Venus Antardasha mein typically love unions arranged setups se zyada hoti hain.' },
+      { q: 'Second marriage Venus period mein possible?', a: 'Yes. 2nd marriage indicators alag points pe dekhe jaate hain — 2nd house, 8th house, Venus in D9. Venus period second marriage ke liye bhi favourable hai.' },
+      { q: 'Inter-caste marriage Venus mein hoti hai?', a: 'Rahu-Venus combinations specifically inter-caste/inter-religion marriages indicate karte hain. Pure Venus period (without Rahu involvement) traditional matches dene ki tendency rakhta hai.' }
+    ],
+    relatedSlugs: ['7th-house-weak-marriage-delay-reasons', 'manglik-dosh-shaadi-mein-problem-upay', 'ex-wapas-aayega-ya-nahi-astrology'],
+    classicalSources: 'BPHS (Vivaha Adhyaya, Venus karakatva), Saravali (marriage yogas), Jataka Parijata, Phaladeepika'
+  },
+
+  // ──────────────────────────────────────────────────────────
+  // 14. BUDH MAHADASHA — CAREER
+  // ──────────────────────────────────────────────────────────
+  {
+    slug: 'budh-mahadasha-career-mercury',
+    title: 'Budh Mahadasha Career Mein Kya Hota Hai — Mercury 17 Saal Ka Sampurna Impact',
+    description: 'Budh (Mercury) Mahadasha ke 17 saal mein career, business, communication aur intellect par effect. Strong vs weak Mercury, IT-finance-writing career boost.',
+    directAnswer: 'Budh (Mercury) Mahadasha 17-year intellect aur communication-driven period hai. Strong Mercury ke saath yeh career peak ka window hota hai — IT, finance, writing, sales, teaching, accountancy, content creation, aur all communication-heavy careers boom karte hain. Weak Mercury mein decision-making errors, business losses, aur communication conflicts possible hain. Budh natural benefic hai but "company-dependent" — kis planet ke saath baith ke hai chart mein, uske effects mein wahi quality mix ho jaati hai. Career direction aur Atmakaraka analysis Mercury period mein critical hote hain.',
+    category: 'Career Astrology',
+    domain: 'career',
+    keywords: ['budh mahadasha effects', 'mercury dasha career', 'budh dasha business', 'mercury period intellect', 'budh mahadasha remedies'],
+    publishedAt: '2026-05-13',
+    updatedAt: '2026-05-13',
+    readTimeMinutes: 10,
+    ogImage: '/blog/og/budh-mahadasha.jpg',
+    ctaService: { label: 'Get ₹51 Career Deep Reading', href: '/services/career-pivot', price: '₹51' },
+    sections: [
+      { type: 'h2', text: 'Budh (Mercury) Astrology Mein — Foundation' },
+      { type: 'p', text: '**Mercury = Budh = intellect, communication, analysis, commerce, writing, mathematics, networking, short journeys, siblings.** Vedic astrology mein Mercury ko **"Prince"** kaha gaya hai — youngest among planets, sabse versatile, sabse flexible.' },
+      { type: 'p', text: '**Critical concept — Mercury "company effect":** Mercury chart mein **jis planet ke saath hota hai, uske jaisa behave karta hai**. Jupiter ke saath = wise. Mars ke saath = sharp tongue. Saturn ke saath = serious thinker. Rahu ke saath = manipulative.' },
+      { type: 'p', text: '**Budh Mahadasha = 17 saal**. Vimshottari Dasha cycle ka **third largest period** after Venus (20) aur Saturn (19).' },
+
+      { type: 'h2', text: 'Mercury Strong Vs Weak — Career Implications' },
+      { type: 'h3', text: 'Strong Mercury Signs:' },
+      { type: 'ul', items: [
+        '✅ Mercury in Gemini ya Virgo (own signs)',
+        '✅ Mercury in Virgo (also exaltation)',
+        '✅ Mercury in Kendra (1, 4, 7, 10) or Trikona (1, 5, 9)',
+        '✅ Mercury aspected by Jupiter (Guru-Drishti)',
+        '✅ Mercury not combust (10°+ from Sun)',
+        '✅ Mercury direct (not retrograde at birth)'
+      ]},
+      { type: 'h3', text: 'Weak Mercury Signs:' },
+      { type: 'ul', items: [
+        '❌ Mercury in Pisces (debilitation)',
+        '❌ Mercury combust (within 10° Sun)',
+        '❌ Mercury in 6th, 8th, 12th house',
+        '❌ Mercury with Mars/Saturn/Rahu without Jupiter aspect',
+        '❌ Mercury retrograde at birth',
+        '❌ Mercury in enemy signs (Pisces, Sagittarius)'
+      ]},
+
+      { type: 'h2', text: 'Mercury Mahadasha Career Effects By Industry' },
+      { type: 'table',
+        headers: ['Industry', 'Strong Mercury Effect', 'Weak Mercury Effect'],
+        rows: [
+          ['IT/Software', 'Peak performance, promotions, startups', 'Bug-prone code, project failures'],
+          ['Finance/Accounting', 'Auditing breakthroughs, CA/CS success', 'Calculation errors, audit issues'],
+          ['Writing/Content', 'Viral content, book deals, journalism', 'Writer\'s block, plagiarism risk'],
+          ['Sales/Marketing', 'Top performer, big deals close', 'Lost deals, communication gaps'],
+          ['Teaching/Training', 'Influential teacher, course success', 'Student disconnect, low ratings'],
+          ['Trading/Stocks', 'Smart analysis, profitable trades', 'Wrong calls, market losses'],
+          ['Law/Counseling', 'Persuasive arguments, case wins', 'Documentation errors, lost cases'],
+          ['Medicine', 'Diagnosis accuracy, research breakthroughs', 'Misdiagnosis, communication gaps']
+        ]
+      },
+
+      { type: 'h2', text: 'Mercury Antardasha In Different Mahadashas' },
+      { type: 'p', text: 'Mercury sub-period **9 different Mahadashas** mein aata hai:' },
+      { type: 'ul', items: [
+        '**Sun-Mercury** (10.2 months): Government job, father-aligned career',
+        '**Moon-Mercury** (17 months): Emotional intelligence boost, public-facing roles',
+        '**Mars-Mercury** (11.9 months): Sharp communication, debate skills, surgery',
+        '**Rahu-Mercury** (25.5 months): Tech innovation, unconventional careers, foreign',
+        '**Jupiter-Mercury** (27.2 months): BEST — wisdom + intellect = teaching, consulting',
+        '**Saturn-Mercury** (32.3 months): Slow but durable success, government services',
+        '**Mercury-Mercury** (28.9 months): Self-period — full Mercury activation',
+        '**Ketu-Mercury** (11.9 months): Research breakthroughs, technical mastery',
+        '**Venus-Mercury** (28.5 months): Creative-commercial fusion, art-business'
+      ]},
+
+      { type: 'h2', text: 'Career Direction In Mercury Mahadasha — Atmakaraka Connection' },
+      { type: 'p', text: '**Atmakaraka** (highest-degree planet in your D1 chart) Mercury Mahadasha mein critically important hai. Reason: Mercury versatile hai — koi bhi direction le sakta hai. Atmakaraka aapki **soul-direction** batata hai — Mercury us direction mein channel ho jaaye = success peak.' },
+      { type: 'ul', items: [
+        '**Sun Atmakaraka** — Government, leadership, public service careers',
+        '**Moon Atmakaraka** — Hospitality, food, women-focused, water-related',
+        '**Mars Atmakaraka** — Defence, surgery, sports, real estate, engineering',
+        '**Mercury Atmakaraka** — Pure communication careers — writing, sales, IT, teaching',
+        '**Jupiter Atmakaraka** — Teaching, finance, banking, consulting, religion',
+        '**Venus Atmakaraka** — Arts, music, film, fashion, hospitality, jewelry',
+        '**Saturn Atmakaraka** — Mining, oil, labor, government, longevity-businesses',
+        '**Rahu Atmakaraka** — Tech, foreign, digital, unconventional, disruption',
+        '**Ketu Atmakaraka** — Research, occult, healing, foreign, isolation work'
+      ]},
+
+      { type: 'h2', text: '7 Mercury Strengthening Upay' },
+      { type: 'h3', text: 'Upay 1: Wednesday Vrat (Budhwar Vrat)' },
+      { type: 'p', text: 'Wednesday = Mercury\'s day. Morning: green clothes, green food (mint chutney, coriander, green leafy vegetables), Vishnu temple visit, **Budh mantra** *"Om Budhaya Namah"* 108 times. **41 consecutive Wednesdays** = significant intellect activation.' },
+
+      { type: 'h3', text: 'Upay 2: Green Item Daan' },
+      { type: 'p', text: 'Wednesday before 9 AM: green moong dal (250g), green cloth, books, stationery, pens. Donate to **young students** specifically (age 8-25). **Mercury direct karma activation.** 40 Wednesdays = full cycle.' },
+
+      { type: 'h3', text: 'Upay 3: Vishnu Sahasranama' },
+      { type: 'p', text: 'Mercury\'s deity = Vishnu. **Vishnu Sahasranama** Wednesday + Ekadashi recitation. 1000 names = 45 min. **Mercury combined with Vishnu energy = decision clarity, communication breakthrough.**' },
+
+      { type: 'h3', text: 'Upay 4: 4 Mukhi Rudraksha' },
+      { type: 'p', text: '**Mercury ka specific Rudraksha = 4 Mukhi.** Brahma swaroop, knowledge enhancement. Silver chain, Wednesday energization. **Cost:** ₹500–₹1,500 genuine. Daily wear. Communication skills, memory, focus measurably improve.' },
+
+      { type: 'h3', text: 'Upay 5: Sphatik Mala For Japa' },
+      { type: 'p', text: 'Mercury related stone = **Emerald (Panna)** ya **Sphatik (clear crystal)**. Daily mantras Sphatik mala se. **CAUTION on Emerald**: chart-specific, expert consultation before wearing.' },
+
+      { type: 'h3', text: 'Upay 6: Knowledge Daan' },
+      { type: 'p', text: 'Mercury = knowledge planet. **Teach without expectation** — friends, juniors, family ko skills sikhayein. **Books donate karein** schools, libraries. **YouTube/blog par free content create karein**. Mercury karma directly boost hota hai.' },
+
+      { type: 'h3', text: 'Upay 7: Avoid Mercury Retrograde Decisions' },
+      { type: 'p', text: 'Mercury retrograde periods (3-4 times yearly, ~3 weeks each) mein: ❌ Contracts sign avoid, ❌ Major tech purchases postpone, ❌ Big communications delay, ❌ Business launches push back. **Review, refine, redo work mein focus karein** — new launches mein nahi.' },
+
+      { type: 'callout', variant: 'verdict', text: 'Budh Mahadasha mein **Mercury company effect** sabse critical analysis point hai. Aapke chart mein Mercury kis planet ke saath baitha hai, kaun se house mein hai, aur Atmakaraka kaun sa hai — yeh 3 factors career outcome decide karte hain. Generic Mercury advice limited helpful hai.' }
+    ],
+    faqs: [
+      { q: 'Kya Budh Mahadasha mein business start karna chahiye?', a: 'Strong Mercury + favourable Antardasha + Mercury direct (not retrograde) = yes. Communication, IT, finance, writing, trading businesses specifically Mercury-supportive hain. Manufacturing, agriculture, traditional retail less Mercury-aligned.' },
+      { q: 'Mercury retrograde ka effect Mahadasha pe?', a: 'Natal Mercury retrograde + Mahadasha = deep thinking, research-oriented career. NOT bad — different. Decision-making style intuitive vs analytical. Birth retrograde Mercury vs transit retrograde alag concepts hain.' },
+      { q: 'Job change Budh Mahadasha mein safe hai?', a: 'Generally yes — Mercury Mahadasha mein job changes frequent aur successful hote hain. Best Antardashas: Mercury-Mercury, Mercury-Jupiter, Mercury-Venus. Avoid: Mercury-Saturn-Rahu Pratyantar.' },
+      { q: 'IT career Mercury period mein peak hota hai?', a: 'Strong Mercury + Rahu connection = peak IT career. Mercury alone = good but not exceptional. Rahu-Mercury combinations specifically tech industry mein top performers banate hain.' },
+      { q: 'Children\'s education Mercury period mein focus karein?', a: 'Yes — Mercury period mein parents ke children\'s education me investment fruitful hota hai. Specifically green-coloured stationery, science books, math tutoring Wednesday se start karein.' }
+    ],
+    relatedSlugs: ['shani-mahadasha-mein-job-kyon-nahi-milti', 'rahu-antardasha-confusion-symptoms', 'business-loss-astrology-kab-tak-chalega'],
+    classicalSources: 'BPHS (Mercury karakatva, Adhyaya 35), Saravali (Budh effects), Phaladeepika, Bhrigu Nandi Nadi'
+  },
+
+  // ──────────────────────────────────────────────────────────
+  // 15. CHANDRA MAHADASHA — MENTAL HEALTH
+  // ──────────────────────────────────────────────────────────
+  {
+    slug: 'chandra-mahadasha-mental-health',
+    title: 'Chandra Mahadasha Mental Health — Moon 10 Saal Ka Emotional Impact',
+    description: 'Chandra (Moon) Mahadasha mein mental health, emotional cycles, mother-relationship aur intuition par effect. Strong vs weak Moon, depression risk, aur 7 upay.',
+    directAnswer: 'Chandra (Moon) Mahadasha 10-year emotional aur mental health-defining period hai. Moon mann ka karak hai — strong Moon ke saath yeh phase emotional stability, mother support, public popularity, aur intuitive decision-making ka golden window hota hai. Weak Moon mein mood swings, depression episodes, mother-health issues, sleep disorders, aur emotional dependency patterns surface hote hain. Moon ki Paksha strength (waxing vs waning), Nakshatra placement, aur aspecting planets is period ka tone decide karte hain. Mental health vigilance + professional support is Mahadasha mein critical hai agar pre-existing tendencies hain.',
+    category: 'Mental Health Astrology',
+    domain: 'family',
+    keywords: ['chandra mahadasha effects', 'moon dasha mental health', 'chandra dasha depression', 'moon period emotional', 'chandra mahadasha remedies'],
+    publishedAt: '2026-05-13',
+    updatedAt: '2026-05-13',
+    readTimeMinutes: 10,
+    ogImage: '/blog/og/chandra-mahadasha.jpg',
+    ctaService: { label: 'Get ₹51 Spiritual Purpose Reading', href: '/services/spiritual-purpose', price: '₹51' },
+    sections: [
+      { type: 'h2', text: 'Chandra (Moon) Astrology Mein — Foundation' },
+      { type: 'p', text: '**Moon = Chandra = mind, emotions, mother, intuition, public popularity, water element, monthly cycles, comfort, nourishment, memory.** Vedic astrology mein Moon ko **"Queen"** kaha gaya hai — Sun (King) ki rani.' },
+      { type: 'p', text: '**Critical concept — Moon Paksha strength:** Moon ki strength depend karti hai **Sun se distance** par. Full Moon (Purnima) = strongest. New Moon (Amavasya) = weakest. **Shukla Paksha** (waxing) Moon = growing strength. **Krishna Paksha** (waning) = declining strength.' },
+      { type: 'p', text: '**Chandra Mahadasha = 10 saal**. Vimshottari Dasha cycle mein medium-length period.' },
+
+      { type: 'h2', text: 'Strong Moon Vs Weak Moon — Mental Health Impact' },
+      { type: 'h3', text: 'Strong Moon Signatures:' },
+      { type: 'ul', items: [
+        '✅ Moon in Taurus (exaltation) ya Cancer (own sign)',
+        '✅ Moon in Kendra (1, 4, 7, 10) or Trikona (1, 5, 9)',
+        '✅ Moon aspected by Jupiter (Guru-Drishti)',
+        '✅ Moon in Shukla Paksha (waxing fortnight birth)',
+        '✅ Moon not combust (4°+ from Sun)',
+        '✅ Moon not in 6th, 8th, 12th houses'
+      ]},
+      { type: 'h3', text: 'Weak Moon Signatures:' },
+      { type: 'ul', items: [
+        '❌ Moon in Scorpio (debilitation)',
+        '❌ Moon in Krishna Paksha (waning fortnight)',
+        '❌ Moon combust (within 4° Sun)',
+        '❌ Moon with Saturn ya Rahu without Jupiter aspect',
+        '❌ Moon in 6th, 8th, 12th house',
+        '❌ Moon-Saturn (Vish Yog) ya Moon-Mars (Chandra-Mangal Yog with affliction)'
+      ]},
+
+      { type: 'h2', text: '11 Symptoms — Weak Moon Mahadasha Active' },
+      { type: 'p', text: 'Agar **6+ symptoms** apply ho rahe hain, weak Moon Mahadasha effect possible hai:' },
+      { type: 'ol', items: [
+        '**Mood Swings** — same day mein 3-4 emotional extremes',
+        '**Sleep Disorders** — 2-4 AM wake-ups, vivid dreams, insomnia',
+        '**Mother Health Issues** — mother\'s sudden illness, hospitalization',
+        '**Emotional Dependency** — specific person par excessive emotional reliance',
+        '**Memory Issues** — recent events bhul jaana, name recall problems',
+        '**Public Image Volatility** — social media controversies, reputation swings',
+        '**Water-Related Issues** — kidney, bladder, water-borne infections',
+        '**Female Connection Problems** — mother, wife, sisters, daughters mein tension',
+        '**Anxiety Episodes** — palpitations, breathing issues, panic attacks',
+        '**Emotional Eating** — stress eating, weight fluctuations',
+        '**Depression Periods** — bina specific reason ke prolonged sadness'
+      ]},
+
+      { type: 'h2', text: 'Moon Antardasha In Different Mahadashas' },
+      { type: 'table',
+        headers: ['Parent Mahadasha', 'Moon Antardasha Duration', 'Primary Effect'],
+        rows: [
+          ['Sun-Moon', '6 months', 'Mother-father dynamics, government public roles'],
+          ['Moon-Moon', '10 months', 'Self-period, full Moon activation'],
+          ['Mars-Moon', '7 months', 'Emotional outbursts, female conflicts'],
+          ['Rahu-Moon', '18 months', 'Foreign emotional connections, unusual mother dynamics'],
+          ['Jupiter-Moon', '16 months', 'BEST — wisdom + emotion = peace, popularity'],
+          ['Saturn-Moon', '19 months', 'Depression risk, isolation, mother health'],
+          ['Mercury-Moon', '17 months', 'Communication of emotions, writing, teaching'],
+          ['Ketu-Moon', '7 months', 'Detachment from mother, emotional withdrawal'],
+          ['Venus-Moon', '20 months', 'Romance, art, beauty, female connections']
+        ]
+      },
+
+      { type: 'h2', text: 'Mental Health Considerations — Critical Section' },
+      { type: 'callout', variant: 'warn', text: 'CRITICAL: Agar Chandra Mahadasha mein severe depression, suicidal thoughts, persistent anxiety, ya psychotic symptoms experience kar rahe hain — please IMMEDIATELY professional psychiatric help lein. Astrology guidance hai, treatment nahi. Mental health emergency mein qualified doctors first priority hain. Vandrevala Foundation Helpline: 1860-2662-345 (24x7 free).' },
+      { type: 'p', text: 'Astrology Chandra Mahadasha effect explain karti hai — but clinical mental health conditions ka treatment psychiatric medicine + therapy se hota hai. Yeh disclaimer Trikal Vaani ka commitment hai user wellbeing ke liye.' },
+
+      { type: 'h2', text: '7 Moon Strengthening Upay' },
+      { type: 'h3', text: 'Upay 1: Monday Vrat (Somvar Vrat)' },
+      { type: 'p', text: 'Monday = Moon\'s day. Morning: white clothes, white food (rice, kheer, milk, curd), **Shiva temple** visit (Moon adorned in Shiva\'s hair), **Chandra mantra** *"Om Chandraya Namah"* 108 times. **Solah Somvar (16 Mondays)** = significant Moon strengthening.' },
+
+      { type: 'h3', text: 'Upay 2: White Item Daan' },
+      { type: 'p', text: 'Monday morning: white rice (250g), milk, kheer, white sandalwood, white cloth, silver coin (5g+). Donate to **mother-aged woman** (age 45+). **Mother karma direct improvement.** 40 Mondays = full cycle.' },
+
+      { type: 'h3', text: 'Upay 3: Mother Seva (Most Powerful)' },
+      { type: 'p', text: '**Moon = mother karak.** Apni biological mother ki direct seva — daily phone call, monthly visit, financial support, health checkups. **Even if relationship strained — initiate.** Mother seva karne se Moon karma directly activate hota hai measurably 3-6 months mein.' },
+
+      { type: 'h3', text: 'Upay 4: 2 Mukhi Rudraksha' },
+      { type: 'p', text: '**Moon ka specific Rudraksha = 2 Mukhi.** Shiva-Shakti swaroop, emotional balance. Silver chain, Monday energization. **Cost:** ₹500–₹1,500 genuine. Daily wear. Mood stability, sleep quality measurably improve.' },
+
+      { type: 'h3', text: 'Upay 5: Pearl (Moti) — With Caution' },
+      { type: 'p', text: '**Moon\'s primary gemstone = Pearl (Moti).** BUT — chart-specific. Weak Moon ke saath benefic, strong Moon mein backfire. **Always certified astrologer consultation.** Silver setting, right little finger, Monday wearing.' },
+
+      { type: 'h3', text: 'Upay 6: Moon Meditation' },
+      { type: 'p', text: 'Full Moon night (Purnima) — outdoor meditation facing moon, 15-30 minutes. Moonlight absorption visualization. **Monthly Purnima ritual** = direct lunar karma activation. Krishna Paksha (waning) mein indoor meditation. Reflection journaling.' },
+
+      { type: 'h3', text: 'Upay 7: Water Element Activation' },
+      { type: 'p', text: 'Moon = water element. **Daily hydration** (3-4 liters). **Silver utensils** for water storage. **Holy river dips** when possible (Ganga, Yamuna, Kaveri). **Daily morning glass of water on empty stomach** — Moon-balancing routine.' },
+
+      { type: 'callout', variant: 'verdict', text: 'Chandra Mahadasha emotional aur mental health-defining 10 saal hain. Aapke chart mein Moon ki exact strength, current Antardasha, mother-relationship karma, aur professional mental health support needs — yeh sab milkar approach decide karta hai. Astrology + therapy combined approach lein agar symptoms severe hain.' }
+    ],
+    faqs: [
+      { q: 'Kya Chandra Mahadasha hamesha emotional period hota hai?', a: 'YES — emotional intensity bahut zyada hoti hai. But intensity = positive ya negative chart-specific hai. Strong Moon = positive emotions amplify (love, joy, popularity). Weak Moon = negative emotions amplify (anxiety, depression, mood swings).' },
+      { q: 'Marriage decisions Moon Mahadasha mein safe hain?', a: 'Generally yes — especially Jupiter-Moon ya Venus-Moon Antardasha mein. Emotional bonding aur intuition strong hota hai. Saturn-Moon ya Ketu-Moon Antardashas mein avoid major commitments.' },
+      { q: 'Mother health Moon Mahadasha mein worry karna chahiye?', a: 'Vigilance recommended. Regular health checkups, emotional support, time investment important. Weak Moon Antardasha specifically mother health monitoring critical.' },
+      { q: 'Pregnancy Moon Mahadasha mein favourable hai?', a: 'YES — generally Moon Mahadasha conception aur pregnancy-supportive hai. Moon water element = nurturing, fertility. Specifically Moon-Jupiter, Moon-Venus Antardashas mein conception easy hota hai.' },
+      { q: 'Career change Moon Mahadasha mein?', a: 'Public-facing, women-focused, food-water-hospitality, healthcare, education careers Moon period mein peak karte hain. Traditional male-dominated rigid corporate environments less Moon-aligned hote hain.' }
+    ],
+    relatedSlugs: ['saade-saati-ke-lakshan-aur-upay', 'santan-prapti-mein-deri-astrology-upay', 'rahu-antardasha-confusion-symptoms'],
+    classicalSources: 'BPHS (Moon karakatva, Adhyaya 32), Saravali, Phaladeepika, Bhrigu Nandi Nadi (mind-emotion analysis)'
+  },
+
+// ============================================================
+// END OF BATCH 1 (Articles 11-15)
+// Next batch: Articles 16-20 — Surya, Mangal, Guru Mahadashas + Rajyog + Vimshottari calculation
+// ============================================================];
 
 // ============================================================
 // HELPER FUNCTIONS — Used by Server Components
