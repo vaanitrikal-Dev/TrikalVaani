@@ -3,7 +3,7 @@
  * 🔱 TRIKAL VAANI — CEO PROTECTION HEADER 🔱
  * ============================================================================
  * File:        app/api/cron/panchang-generate/route.ts
- * Version:     v2.1 — FIXED (column names match actual Supabase schema)
+ * Version:     v2.2 — FIXED (column names match actual Supabase schema)
  * Owner:       Rohiit Gupta, Chief Vedic Architect
  * Domain:      trikalvaani.com
  * GitHub:      vaanitrikal-Dev/TrikalVaani
