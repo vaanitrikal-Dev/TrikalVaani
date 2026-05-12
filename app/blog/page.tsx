@@ -3,20 +3,22 @@
  * TRIKAL VAANI — Blog Index Page
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/blog/page.tsx
- * VERSION: 2.0 — Supabase Dynamic (auto-loads all published posts)
+ * VERSION: 2.1 — Supabase Dynamic (build-safe, SWC parser fix)
  * SIGNED: ROHIIT GUPTA, CEO
  * ============================================================
  * Reads all published blogs from Supabase via getAllPosts().
- * Add new blogs in Supabase → they appear here instantly. Zero redeploy.
+ * Add new blogs in Supabase → they appear here within 5 min.
+ * Zero redeploy needed.
  * ============================================================
  */
+
 import type { Metadata } from 'next';
 import SiteNav from '@/components/layout/SiteNav';
 import SiteFooter from '@/components/layout/SiteFooter';
 import BlogCard from '@/components/blog/BlogCard';
 import { getAllPosts } from '@/lib/blog-posts';
 
-// ISR — revalidate every 5 min so new Supabase rows go live fast
+// ISR — refresh page every 5 minutes so new Supabase posts go live fast
 export const revalidate = 300;
 
 export const metadata: Metadata = {
@@ -50,8 +52,11 @@ export default async function BlogPage() {
   const featuredPost = allPosts[0];
   const restPosts = allPosts.slice(1);
 
-  // Build dynamic category list from live data
-  const categories = Array.from(new Set(allPosts.map((p) => p.category))).slice(0, 12);
+  const categorySet = new Set<string>();
+  for (const p of allPosts) {
+    if (p.category) categorySet.add(p.category);
+  }
+  const categories = Array.from(categorySet).slice(0, 12);
 
   return (
     <div className="min-h-screen bg-[#030712]">
@@ -71,7 +76,6 @@ export default async function BlogPage() {
             </p>
           </div>
 
-          {/* GEO direct-answer block — helps Google SGE / Perplexity / Gemini */}
           <div
             className="mb-10 rounded-2xl p-6 text-sm leading-relaxed text-slate-300"
             style={{
@@ -87,16 +91,16 @@ export default async function BlogPage() {
             and Parashara tradition.
           </div>
 
-          {featuredPost && (
+          {featuredPost ? (
             <div className="mb-10">
               <p className="text-xs font-medium tracking-widest uppercase text-yellow-400/50 mb-4">
                 Featured Article
               </p>
               <BlogCard post={featuredPost} featured />
             </div>
-          )}
+          ) : null}
 
-          {categories.length > 0 && (
+          {categories.length > 0 ? (
             <div className="mb-8 flex flex-wrap gap-2">
               {categories.map((cat) => (
                 <span
@@ -112,7 +116,7 @@ export default async function BlogPage() {
                 </span>
               ))}
             </div>
-          )}
+          ) : null}
 
           {restPosts.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -138,7 +142,7 @@ export default async function BlogPage() {
               Join 10,000+ seekers receiving daily Gochar alerts, energy scores, and
               Jyotish wisdom.
             </p>
-            
+            <a
               href="/#birth-form"
               className="inline-flex items-center gap-2 px-8 py-3 rounded-full text-sm font-semibold transition-all duration-300"
               style={{
