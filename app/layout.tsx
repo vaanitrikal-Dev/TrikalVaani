@@ -1,13 +1,13 @@
 // ============================================================
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikal Vaani
 // FILE: app/layout.tsx
-// VERSION: v2.1 — GSC Token Fixed + AggregateRating Deduplicated
-// DATE: 2026-05-11
+// VERSION: v2.4 — TrikalVoice globally mounted on ALL pages
+// DATE: 2026-05-12
 // CHANGES:
-//   1. GSC verification token ADDED (was REPLACE_WITH_GSC_TOKEN)
-//   2. WebApplication schema aggregateRating REMOVED (was causing
-//      GSC critical error: "Review has multiple aggregate ratings")
-//   3. aggregateRating now lives ONLY in SchemaScript.tsx → Product
+//   v2.4: TrikalVoice imported and mounted in body globally
+//         Now appears on every page: homepage, blog, report, domain
+//         JiniChat not touched — separate decision
+//         voice-debug route DELETED (security fix done)
 // ============================================================
 
 import type { Metadata } from "next";
@@ -15,6 +15,7 @@ import { Inter } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import SchemaScript from "@/components/SchemaScript";
+import TrikalVoice from "@/components/Trikal/TrikalVoice";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -79,7 +80,6 @@ export const metadata: Metadata = {
     images: ["https://trikalvaani.com/og-default.jpg"],
   },
   verification: {
-    // ✅ FIXED: GSC verification token — was REPLACE_WITH_GSC_TOKEN
     google: "rr3Smkv1DQzSM1vq0lmmHNOhys-nXKyDBiXyv3tS9lY",
   },
   alternates: {
@@ -194,10 +194,7 @@ export default function RootLayout({
         />
 
         {/* ── WebApplication Schema ──
-            ✅ FIXED: aggregateRating REMOVED from here.
-            It now lives ONLY in SchemaScript.tsx → Product schema.
-            Reason: Google disallows multiple aggregateRating blocks
-            for the same entity on the same page (GSC critical error). ── */}
+            NOTE: aggregateRating lives ONLY in SchemaScript.tsx -> Product schema ── */}
         <Script
           id="webapp-schema"
           type="application/ld+json"
@@ -220,7 +217,7 @@ export default function RootLayout({
                   price: "0",
                   priceCurrency: "INR",
                   description:
-                    "150–200 word free AI Vedic astrology summary with key message and action step",
+                    "150-200 word free AI Vedic astrology summary with key message and action step",
                 },
                 {
                   "@type": "Offer",
@@ -248,7 +245,6 @@ export default function RootLayout({
                 },
               ],
               provider: { "@id": "https://trikalvaani.com/#organization" },
-              // NOTE: NO aggregateRating here — lives only in Product schema
             }),
           }}
         />
@@ -309,7 +305,6 @@ export default function RootLayout({
                 closes: "23:59",
               },
               founder: { "@id": "https://trikalvaani.com/#rohiit-gupta" },
-              // NOTE: NO aggregateRating here either
             }),
           }}
         />
@@ -320,7 +315,7 @@ export default function RootLayout({
           strategy="afterInteractive"
         />
 
-                {/* Performance */}
+        {/* Performance */}
         <link rel="preconnect" href="https://api.razorpay.com" />
         <link rel="preconnect" href="https://checkout.razorpay.com" />
         <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
@@ -329,6 +324,8 @@ export default function RootLayout({
         {children}
         {/* SchemaScript injects: WebSite, Person, FAQPage, Service, Product (with aggregateRating) */}
         <SchemaScript />
+        {/* ── TrikalVoice: Floating widget — appears on ALL pages globally ── */}
+        <TrikalVoice />
       </body>
     </html>
   );
