@@ -1,6 +1,5 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "regions": ["bom1"],
   "crons": [
     {
       "path": "/api/cron/panchang-generate",
@@ -10,67 +9,37 @@
   "redirects": [
     {
       "source": "/(.*)",
-      "has": [
-        {
-          "type": "host",
-          "value": "trikaalvaani.in"
-        }
-      ],
+      "has": [{ "type": "host", "value": "trikaalvaani.in" }],
       "destination": "https://trikalvaani.com/$1",
       "permanent": true
     },
     {
       "source": "/(.*)",
-      "has": [
-        {
-          "type": "host",
-          "value": "www.trikaalvaani.in"
-        }
-      ],
+      "has": [{ "type": "host", "value": "www.trikaalvaani.in" }],
       "destination": "https://trikalvaani.com/$1",
       "permanent": true
     },
     {
       "source": "/(.*)",
-      "has": [
-        {
-          "type": "host",
-          "value": "trikalvaani.in"
-        }
-      ],
+      "has": [{ "type": "host", "value": "trikalvaani.in" }],
       "destination": "https://trikalvaani.com/$1",
       "permanent": true
     },
     {
       "source": "/(.*)",
-      "has": [
-        {
-          "type": "host",
-          "value": "www.trikalvaani.in"
-        }
-      ],
+      "has": [{ "type": "host", "value": "www.trikalvaani.in" }],
       "destination": "https://trikalvaani.com/$1",
       "permanent": true
     },
     {
       "source": "/(.*)",
-      "has": [
-        {
-          "type": "host",
-          "value": "trikaalvaani.org"
-        }
-      ],
+      "has": [{ "type": "host", "value": "trikaalvaani.org" }],
       "destination": "https://trikalvaani.com/$1",
       "permanent": true
     },
     {
       "source": "/(.*)",
-      "has": [
-        {
-          "type": "host",
-          "value": "www.trikaalvaani.org"
-        }
-      ],
+      "has": [{ "type": "host", "value": "www.trikaalvaani.org" }],
       "destination": "https://trikalvaani.com/$1",
       "permanent": true
     }
