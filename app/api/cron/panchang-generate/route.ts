@@ -3,7 +3,7 @@
  * 🔱 TRIKAL VAANI — CEO PROTECTION HEADER 🔱
  * ============================================================================
  * File:        app/api/cron/panchang-generate/route.ts
- * Version:     v2.2 — FIXED (column names match actual Supabase schema)
+ * Version:     v2.1 — FIXED (column names match actual Supabase schema)
  * Owner:       Rohiit Gupta, Chief Vedic Architect
  * Domain:      trikalvaani.com
  * GitHub:      vaanitrikal-Dev/TrikalVaani
@@ -290,8 +290,11 @@ async function generateOneRow(args: {
 
 export async function GET(req: NextRequest) {
   // Auth — Vercel injects Authorization: Bearer <CRON_SECRET> automatically
+  // Vercel auto-cron sends x-vercel-cron:1 header (no Bearer token)
+  // Manual calls must send: Authorization: Bearer <CRON_SECRET>
   const authHeader = req.headers.get("authorization");
-  if (!CRON_SECRET || authHeader !== `Bearer ${CRON_SECRET}`) {
+  const isVercelCron = req.headers.get("x-vercel-cron") === "1";
+  if (!isVercelCron && authHeader !== `Bearer ${CRON_SECRET}`) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
