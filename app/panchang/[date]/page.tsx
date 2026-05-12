@@ -2,78 +2,91 @@
 // 🔱 TRIKAL VAANI — CEO PROTECTION HEADER
 // ════════════════════════════════════════════════════════════════════
 // File:        app/panchang/[date]/page.tsx
-// Version:     v1.0
+// Version:     v2.0
 // Owner:       Rohiit Gupta, Chief Vedic Architect
 // Domain:      trikalvaani.com
-// Purpose:     Phase B1 — Daily Panchang Archive (dynamic route)
-//              URL: /panchang/2026-05-09
-//              Target: 365 URLs Year 1
-// Stack:       Next.js 13.5 App Router + ISR (24h)
-// SEO:         FAQPage + BreadcrumbList + Article schema
-//              GEO: 50-word direct answer block at top
-// E-E-A-T:     Author = Rohiit Gupta, Chief Vedic Architect
-// Lock Status: gemini-prompt.ts = PERMANENTLY LOCKED (do not touch)
-// Last Update: 2026-05-09 (Phase B1)
+//
+// FIXES vs v1.0:
+//   1. Reads from Supabase panchang_daily first (primary source)
+//   2. Falls back to GCP VM only if Supabase has no row for that date
+//   3. Title NO LONGER ends with "| Trikal Vaani"
+//      (layout.tsx template adds it automatically → was causing duplication)
+//   4. VM endpoint corrected: /panchang?date= (not /panchang/today?date=)
+//   5. Article schema datePublished uses actual date param (not hardcoded)
+//   6. author url fixed: /founder (not /about)
 // ════════════════════════════════════════════════════════════════════
 
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import { createClient } from "@supabase/supabase-js";
 
 // ── ISR: regenerate every 24 hours ───────────────────────────────────
 export const revalidate = 86400;
 export const dynamicParams = true;
 
-// ── Types ────────────────────────────────────────────────────────────
-type Panchang = {
+// ── Site config ──────────────────────────────────────────────────────
+const SITE_URL = "https://trikalvaani.com";
+const AUTHOR_NAME = "Rohiit Gupta";
+const AUTHOR_TITLE = "Chief Vedic Architect, Trikal Vaani";
+const VM_URL = "http://34.14.164.105:8001";
+
+// ── Supabase client (anon — panchang_daily has public read RLS) ──────
+function getSupabase() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
+}
+
+// ── Normalised shape used by the page ────────────────────────────────
+type PanchangRow = {
   date: string;
-  weekday: string;
-  tithi: { name: string; index: number; paksha: string };
+  tithi: string;
+  nakshatra: string;
+  yoga: string;
+  karana: string;
+  vara: string;
+  sunrise: string;
+  sunset: string;
+  rahu_kaal: string;
+  geo_answer: string | null;
+  seo_title: string | null;
+  seo_description: string | null;
+  faq_schema: object[] | null;
+  gemini_content: string | null;
+};
+
+// ── VM response shape ────────────────────────────────────────────────
+type VMPanchang = {
+  date: string;
+  weekday?: string;
+  vara?: string;
+  tithi: { name: string; paksha: string; index?: number };
   nakshatra: { name: string; pada: number };
   yoga: { name: string };
   karana: { name: string };
   sunrise: string;
   sunset: string;
   rahu_kaal: string;
-  location: { lat: number; lon: number; city: string };
-  ayanamsha: string;
-  engine: string;
-  version: string;
+  ayanamsha?: string;
+  engine?: string;
+  version?: string;
 };
 
-// ── Site config ──────────────────────────────────────────────────────
-const SITE_URL = "https://trikalvaani.com";
-const AUTHOR_NAME = "Rohiit Gupta";
-const AUTHOR_TITLE = "Chief Vedic Architect, Trikal Vaani";
-
 // ── Validation ───────────────────────────────────────────────────────
-function isValidDateFormat(s: string): boolean {
+function isValidDate(s: string): boolean {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) return false;
   const d = new Date(s + "T00:00:00Z");
   if (isNaN(d.getTime())) return false;
   const y = d.getUTCFullYear();
-  return y >= 1950 && y <= 2100;
+  return y >= 2020 && y <= 2100;
 }
 
-// ── Data fetch ───────────────────────────────────────────────────────
-async function fetchPanchang(date: string): Promise<Panchang | null> {
-  const VM = "http://34.14.164.105:8001";
-  try {
-    const res = await fetch(`${VM}/panchang/today?date=${date}`, {
-      next: { revalidate: 86400 },
-    });
-    if (!res.ok) return null;
-    return (await res.json()) as Panchang;
-  } catch {
-    return null;
-  }
-}
-
-// ── Helpers ──────────────────────────────────────────────────────────
-function formatHumanDate(yyyymmdd: string): string {
+// ── Format date for display ───────────────────────────────────────────
+function formatHuman(yyyymmdd: string): string {
   const [y, m, d] = yyyymmdd.split("-").map(Number);
-  const dt = new Date(Date.UTC(y, m - 1, d));
-  return dt.toLocaleDateString("en-IN", {
+  return new Date(Date.UTC(y, m - 1, d)).toLocaleDateString("en-IN", {
     weekday: "long",
     year: "numeric",
     month: "long",
@@ -82,48 +95,115 @@ function formatHumanDate(yyyymmdd: string): string {
   });
 }
 
-// ── Metadata (dynamic) ───────────────────────────────────────────────
+// ── PRIMARY: fetch from Supabase ──────────────────────────────────────
+async function fetchFromSupabase(date: string): Promise<PanchangRow | null> {
+  try {
+    const supabase = getSupabase();
+    const { data, error } = await supabase
+      .from("panchang_daily")
+      .select("date,tithi,nakshatra,yoga,karana,vara,sunrise,sunset,rahu_kaal,geo_answer,seo_title,seo_description,faq_schema,gemini_content")
+      .eq("date", date)
+      .eq("city", "delhi")
+      .single();
+
+    if (error || !data) return null;
+    return data as PanchangRow;
+  } catch {
+    return null;
+  }
+}
+
+// ── FALLBACK: fetch from GCP VM ───────────────────────────────────────
+async function fetchFromVM(date: string): Promise<PanchangRow | null> {
+  try {
+    const res = await fetch(`${VM_URL}/panchang?date=${date}`, {
+      next: { revalidate: 86400 },
+      signal: AbortSignal.timeout(10000),
+    });
+    if (!res.ok) return null;
+    const vm = (await res.json()) as VMPanchang;
+
+    const human = formatHuman(date);
+    return {
+      date,
+      tithi: `${vm.tithi.name} (${vm.tithi.paksha})`,
+      nakshatra: `${vm.nakshatra.name} Pada ${vm.nakshatra.pada}`,
+      yoga: vm.yoga.name,
+      karana: vm.karana.name,
+      vara: vm.weekday ?? vm.vara ?? "",
+      sunrise: vm.sunrise,
+      sunset: vm.sunset,
+      rahu_kaal: vm.rahu_kaal,
+      geo_answer: `On ${human}, Tithi is ${vm.tithi.name} (${vm.tithi.paksha}), Nakshatra is ${vm.nakshatra.name} Pada ${vm.nakshatra.pada}, Yoga ${vm.yoga.name}, Karana ${vm.karana.name}. Sunrise: ${vm.sunrise}, Sunset: ${vm.sunset}, Rahu Kaal: ${vm.rahu_kaal} (Delhi NCR).`,
+      seo_title: null,
+      seo_description: null,
+      faq_schema: null,
+      gemini_content: null,
+    };
+  } catch {
+    return null;
+  }
+}
+
+// ── Main data fetcher (Supabase first, VM fallback) ───────────────────
+async function getPanchang(date: string): Promise<PanchangRow | null> {
+  const dbRow = await fetchFromSupabase(date);
+  if (dbRow) return dbRow;
+  return fetchFromVM(date);
+}
+
+// ── Metadata ─────────────────────────────────────────────────────────
+// FIX: title does NOT end with "| Trikal Vaani"
+// layout.tsx template "%s | Trikal Vaani" adds it automatically
 export async function generateMetadata(
-  { params }: { params: { date: string } },
+  { params }: { params: { date: string } }
 ): Promise<Metadata> {
   const { date } = params;
-  if (!isValidDateFormat(date)) {
-    return { title: "Panchang Not Found | Trikal Vaani" };
-  }
+  if (!isValidDate(date)) return { title: "Panchang Not Found" };
 
-  const human = formatHumanDate(date);
-  const title = `Aaj Ka Panchang ${human} | Tithi, Nakshatra, Rahu Kaal | Trikal Vaani`;
-  const description =
-    `Authentic Vedic Panchang for ${human}. Get accurate Tithi, Nakshatra, ` +
-    `Yoga, Karana, Sunrise, Sunset & Rahu Kaal calculated using Swiss ` +
-    `Ephemeris with Lahiri Ayanamsha. By Rohiit Gupta, Chief Vedic Architect.`;
-
+  const human = formatHuman(date);
   const url = `${SITE_URL}/panchang/${date}`;
+
+  // Use DB seo_title/description if available
+  const db = await fetchFromSupabase(date);
+
+  // FIX: no "| Trikal Vaani" at end — layout template adds it
+  const title = db?.seo_title
+    ? db.seo_title.replace(/\s*\|\s*Trikal Vaani\s*$/i, "")
+    : `Aaj Ka Panchang ${human} | Tithi, Nakshatra, Rahu Kaal`;
+
+  const description = db?.seo_description
+    ?? `Vedic Panchang for ${human}: Tithi, Nakshatra, Yoga, Karana, Sunrise, Sunset & Rahu Kaal by Swiss Ephemeris Lahiri Ayanamsha. By Rohiit Gupta, Chief Vedic Architect.`;
 
   return {
     title,
     description,
+    authors: [{ name: AUTHOR_NAME, url: `${SITE_URL}/founder` }],
     alternates: { canonical: url },
     openGraph: {
-      title,
+      title: `${title} | Trikal Vaani`,
       description,
       url,
       siteName: "Trikal Vaani",
       type: "article",
       locale: "en_IN",
     },
-    twitter: { card: "summary_large_image", title, description },
+    twitter: {
+      card: "summary_large_image",
+      title: `${title} | Trikal Vaani`,
+      description,
+    },
     robots: { index: true, follow: true },
   };
 }
 
-// ── JSON-LD builders ─────────────────────────────────────────────────
-function buildArticleSchema(p: Panchang, url: string) {
+// ── Schema builders ───────────────────────────────────────────────────
+function articleSchema(p: PanchangRow, url: string) {
   return {
     "@context": "https://schema.org",
     "@type": "Article",
-    headline: `Aaj Ka Panchang ${formatHumanDate(p.date)}`,
-    description: `Vedic Panchang for ${p.date}: Tithi ${p.tithi.name}, Nakshatra ${p.nakshatra.name}, Yoga ${p.yoga.name}.`,
+    headline: `Aaj Ka Panchang ${formatHuman(p.date)}`,
+    description: `Vedic Panchang for ${p.date}: Tithi ${p.tithi}, Nakshatra ${p.nakshatra}, Yoga ${p.yoga}.`,
     datePublished: p.date,
     dateModified: p.date,
     mainEntityOfPage: { "@type": "WebPage", "@id": url },
@@ -131,21 +211,18 @@ function buildArticleSchema(p: Panchang, url: string) {
       "@type": "Person",
       name: AUTHOR_NAME,
       jobTitle: AUTHOR_TITLE,
-      url: `${SITE_URL}/about`,
+      url: `${SITE_URL}/founder`,
     },
     publisher: {
       "@type": "Organization",
       name: "Trikal Vaani",
       url: SITE_URL,
-      logo: {
-        "@type": "ImageObject",
-        url: `${SITE_URL}/logo.png`,
-      },
+      logo: { "@type": "ImageObject", url: `${SITE_URL}/logo.png` },
     },
   };
 }
 
-function buildBreadcrumbSchema(date: string) {
+function breadcrumbSchema(date: string) {
   return {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
@@ -157,8 +234,17 @@ function buildBreadcrumbSchema(date: string) {
   };
 }
 
-function buildFAQSchema(p: Panchang) {
-  const human = formatHumanDate(p.date);
+function faqSchema(p: PanchangRow) {
+  // Use DB faq_schema if available
+  if (p.faq_schema && p.faq_schema.length > 0) {
+    return {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      mainEntity: p.faq_schema,
+    };
+  }
+  // Build from fields
+  const human = formatHuman(p.date);
   return {
     "@context": "https://schema.org",
     "@type": "FAQPage",
@@ -166,76 +252,47 @@ function buildFAQSchema(p: Panchang) {
       {
         "@type": "Question",
         name: `What is the Tithi on ${human}?`,
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: `The Tithi on ${human} is ${p.tithi.name} of ${p.tithi.paksha}, calculated using Swiss Ephemeris with Lahiri Ayanamsha.`,
-        },
+        acceptedAnswer: { "@type": "Answer", text: `${p.tithi}, calculated using Swiss Ephemeris with Lahiri Ayanamsha.` },
       },
       {
         "@type": "Question",
         name: `What is the Nakshatra on ${human}?`,
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: `The Nakshatra on ${human} is ${p.nakshatra.name}, Pada ${p.nakshatra.pada}.`,
-        },
+        acceptedAnswer: { "@type": "Answer", text: `${p.nakshatra}.` },
       },
       {
         "@type": "Question",
-        name: `What is the Rahu Kaal on ${human}?`,
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: `Rahu Kaal on ${human} is ${p.rahu_kaal} (Delhi NCR). Avoid starting auspicious work during this period.`,
-        },
+        name: `What is Rahu Kaal on ${human}?`,
+        acceptedAnswer: { "@type": "Answer", text: `Rahu Kaal is ${p.rahu_kaal} (Delhi NCR). Avoid auspicious work during this window.` },
       },
       {
         "@type": "Question",
         name: `What time is sunrise on ${human}?`,
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: `Sunrise on ${human} is at ${p.sunrise} IST and sunset at ${p.sunset} IST (Delhi NCR coordinates).`,
-        },
+        acceptedAnswer: { "@type": "Answer", text: `Sunrise: ${p.sunrise} IST, Sunset: ${p.sunset} IST (Delhi NCR).` },
       },
     ],
   };
 }
 
-// ── Page ─────────────────────────────────────────────────────────────
+// ── Page component ────────────────────────────────────────────────────
 export default async function PanchangDatePage(
-  { params }: { params: { date: string } },
+  { params }: { params: { date: string } }
 ) {
   const { date } = params;
+  if (!isValidDate(date)) notFound();
 
-  if (!isValidDateFormat(date)) notFound();
-
-  const p = await fetchPanchang(date);
+  const p = await getPanchang(date);
   if (!p) notFound();
 
   const url = `${SITE_URL}/panchang/${date}`;
-  const human = formatHumanDate(date);
-
-  // GEO direct-answer block (50 words)
-  const geoAnswer =
-    `On ${human}, the Tithi is ${p.tithi.name} (${p.tithi.paksha}), ` +
-    `Nakshatra is ${p.nakshatra.name} Pada ${p.nakshatra.pada}, Yoga is ` +
-    `${p.yoga.name}, and Karana is ${p.karana.name}. Sunrise: ${p.sunrise}, ` +
-    `Sunset: ${p.sunset}, Rahu Kaal: ${p.rahu_kaal} (Delhi NCR). ` +
-    `Calculated with Swiss Ephemeris, Lahiri Ayanamsha.`;
+  const human = formatHuman(date);
+  const geoAnswer = p.geo_answer
+    ?? `On ${human}, Tithi is ${p.tithi}, Nakshatra is ${p.nakshatra}, Yoga ${p.yoga}, Karana ${p.karana}. Sunrise: ${p.sunrise}, Sunset: ${p.sunset}, Rahu Kaal: ${p.rahu_kaal} (Delhi NCR). Swiss Ephemeris, Lahiri Ayanamsha.`;
 
   return (
     <>
-      {/* JSON-LD schema injection */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(buildArticleSchema(p, url)) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(buildBreadcrumbSchema(date)) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(buildFAQSchema(p)) }}
-      />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema(p, url)) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema(date)) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema(p)) }} />
 
       <main className="min-h-screen bg-gradient-to-b from-amber-50 to-white">
         <div className="mx-auto max-w-4xl px-4 py-8 md:py-12">
@@ -244,7 +301,7 @@ export default async function PanchangDatePage(
           <nav className="mb-4 text-sm text-gray-600" aria-label="Breadcrumb">
             <Link href="/" className="hover:text-amber-700">Home</Link>
             <span className="mx-2">›</span>
-            <Link href="/upcoming-events" className="hover:text-amber-700">Panchang</Link>
+            <Link href="/panchang" className="hover:text-amber-700">Panchang</Link>
             <span className="mx-2">›</span>
             <span className="text-gray-900">{date}</span>
           </nav>
@@ -260,27 +317,32 @@ export default async function PanchangDatePage(
             </p>
           </header>
 
-          {/* GEO direct-answer block */}
-          <section
-            className="mb-8 rounded-xl border border-amber-200 bg-amber-50 p-5"
-            aria-label="Quick answer"
-          >
+          {/* GEO direct-answer */}
+          <section className="mb-8 rounded-xl border border-amber-200 bg-amber-50 p-5" aria-label="Quick answer">
             <p className="text-base leading-relaxed text-gray-800">{geoAnswer}</p>
           </section>
 
           {/* Panchang grid */}
           <section className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2">
-            <Card label="Tithi" value={p.tithi.name} sub={p.tithi.paksha} />
-            <Card label="Nakshatra" value={p.nakshatra.name} sub={`Pada ${p.nakshatra.pada}`} />
-            <Card label="Yoga" value={p.yoga.name} />
-            <Card label="Karana" value={p.karana.name} />
-            <Card label="Sunrise" value={p.sunrise} sub="IST" />
-            <Card label="Sunset" value={p.sunset} sub="IST" />
+            <Card label="Tithi"     value={p.tithi} />
+            <Card label="Nakshatra" value={p.nakshatra} />
+            <Card label="Yoga"      value={p.yoga} />
+            <Card label="Karana"    value={p.karana} />
+            <Card label="Sunrise"   value={p.sunrise}   sub="IST" />
+            <Card label="Sunset"    value={p.sunset}    sub="IST" />
             <Card label="Rahu Kaal" value={p.rahu_kaal} sub="Avoid auspicious work" />
-            <Card label="Weekday" value={p.weekday} />
+            <Card label="Weekday"   value={p.vara} />
           </section>
 
-          {/* Educational Vedic content */}
+          {/* Gemini content if available */}
+          {p.gemini_content && (
+            <section className="mb-8 prose prose-amber max-w-none">
+              <h2 className="text-2xl font-semibold">Today's Vedic Insight</h2>
+              <p>{p.gemini_content}</p>
+            </section>
+          )}
+
+          {/* Static educational content */}
           <section className="mb-8 prose prose-amber max-w-none">
             <h2 className="text-2xl font-semibold">Understanding Today's Panchang</h2>
             <p>
@@ -291,50 +353,43 @@ export default async function PanchangDatePage(
             </p>
             <p>
               On <strong>{human}</strong>, the Moon resides in{" "}
-              <strong>{p.nakshatra.name}</strong> Nakshatra and the Tithi is{" "}
-              <strong>{p.tithi.name}</strong> of <strong>{p.tithi.paksha}</strong>.
-              All calculations on Trikal Vaani use the Swiss Ephemeris engine —
-              the same precision system used by professional astrologers worldwide
-              — anchored to the Lahiri Ayanamsha standard accepted by the
-              Government of India.
+              <strong>{p.nakshatra}</strong> and the Tithi is{" "}
+              <strong>{p.tithi}</strong>. All calculations on Trikal Vaani use
+              the Swiss Ephemeris engine anchored to the Lahiri Ayanamsha
+              standard accepted by the Government of India.
             </p>
           </section>
 
-          {/* CTA — personal prediction */}
+          {/* CTA */}
           <section className="mb-8 rounded-xl bg-gradient-to-r from-amber-600 to-orange-600 p-6 text-white">
             <h2 className="text-xl font-bold">Want a personal reading for today?</h2>
             <p className="mt-2 text-sm opacity-95">
               Get your personalised Vedic prediction based on your birth chart and
               today's planetary positions. Free Tithi insight, ₹51 for full prediction.
             </p>
-            <Link
-              href="/predict"
-              className="mt-4 inline-block rounded-lg bg-white px-6 py-3 font-semibold text-amber-700 hover:bg-amber-50"
-            >
+            <Link href="/predict" className="mt-4 inline-block rounded-lg bg-white px-6 py-3 font-semibold text-amber-700 hover:bg-amber-50">
               Get My Prediction →
             </Link>
           </section>
 
-          {/* FAQ — visible to humans, also schema'd */}
+          {/* FAQ */}
           <section className="mb-8">
-            <h2 className="mb-4 text-2xl font-semibold text-gray-900">
-              Frequently Asked Questions
-            </h2>
+            <h2 className="mb-4 text-2xl font-semibold text-gray-900">Frequently Asked Questions</h2>
             <FAQ q={`What is the Tithi on ${human}?`}
-                 a={`The Tithi is ${p.tithi.name} of ${p.tithi.paksha}, calculated using Swiss Ephemeris with Lahiri Ayanamsha.`} />
+                 a={`${p.tithi}, calculated using Swiss Ephemeris with Lahiri Ayanamsha.`} />
             <FAQ q={`What is the Nakshatra on ${human}?`}
-                 a={`The Nakshatra is ${p.nakshatra.name}, Pada ${p.nakshatra.pada}.`} />
-            <FAQ q={`What is the Rahu Kaal on ${human}?`}
+                 a={`${p.nakshatra}.`} />
+            <FAQ q={`What is Rahu Kaal on ${human}?`}
                  a={`Rahu Kaal is ${p.rahu_kaal} (Delhi NCR). Avoid starting auspicious work during this window.`} />
             <FAQ q={`What time is sunrise on ${human}?`}
                  a={`Sunrise: ${p.sunrise} IST, Sunset: ${p.sunset} IST (Delhi NCR).`} />
           </section>
 
-          {/* Internal link cluster */}
+          {/* Internal links */}
           <section className="border-t border-gray-200 pt-6">
             <h2 className="mb-3 text-lg font-semibold text-gray-900">Explore More</h2>
             <ul className="grid grid-cols-2 gap-2 text-sm md:grid-cols-3">
-              <li><Link href="/upcoming-events" className="text-amber-700 hover:underline">Upcoming Events</Link></li>
+              <li><Link href="/panchang" className="text-amber-700 hover:underline">Panchang Archive</Link></li>
               <li><Link href="/career" className="text-amber-700 hover:underline">Career Astrology</Link></li>
               <li><Link href="/wealth" className="text-amber-700 hover:underline">Wealth Astrology</Link></li>
               <li><Link href="/marriage" className="text-amber-700 hover:underline">Marriage Astrology</Link></li>
@@ -347,19 +402,20 @@ export default async function PanchangDatePage(
           <footer className="mt-8 border-t border-gray-200 pt-4 text-xs text-gray-500">
             <p>
               🔱 Calculated by <strong>{AUTHOR_NAME}</strong>, {AUTHOR_TITLE}.
-              Engine: {p.engine} · Ayanamsha: {p.ayanamsha} · Version: {p.version}
+              Engine: Swiss Ephemeris · Ayanamsha: Lahiri · Version: v2.0
             </p>
             <p className="mt-1 italic">
               "Kaal bada balwan hai, sabko nach nachaye; raja ka beta bhi bhiksha mangne jaye."
             </p>
           </footer>
+
         </div>
       </main>
     </>
   );
 }
 
-// ── Sub-components ───────────────────────────────────────────────────
+// ── Sub-components ────────────────────────────────────────────────────
 function Card({ label, value, sub }: { label: string; value: string; sub?: string }) {
   return (
     <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
