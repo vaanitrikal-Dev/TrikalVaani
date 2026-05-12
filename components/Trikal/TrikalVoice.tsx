@@ -5,17 +5,13 @@
  * TRIKAL VAANI — Trikal Voice Widget
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: components/Trikal/TrikalVoice.tsx
- * VERSION: 2.1 — Form labels + Mic permission + Mobile fixes
- * SIGNED: ROHIIT GUPTA, CEO
- *
- * v2.1 CHANGES (May 10, 2026):
- *   - ADDED: Visible labels on form fields (Name, DOB, TOB, Place)
- *   - ADDED: Pre-flight mic permission check with clear error
- *   - ADDED: z-index 9999 — voice widget appears above ALL notifications
- *   - ADDED: Better recording fallback for Android Chrome MIME types
- *   - ADDED: User-friendly error messages with retry button
- *   - FIXED: Recording state cleanup on errors
- *   - FIXED: AudioContext autoplay policy compliance
+ * VERSION: 2.2 — Kill switch wired (NEXT_PUBLIC_ENABLE_VOICE)
+ * DATE: 2026-05-12
+ * CHANGES:
+ *   v2.2: Added kill switch check at top of component.
+ *         If NEXT_PUBLIC_ENABLE_VOICE !== 'true' → widget hidden.
+ *         Flip in Vercel env vars, redeploy — no code change needed.
+ *         All v2.1 features unchanged.
  * ============================================================
  */
 
@@ -60,6 +56,10 @@ type BirthForm = {
 type Stage = 'closed' | 'pricing' | 'form' | 'record' | 'processing' | 'reply';
 
 export default function TrikalVoice() {
+
+  // ── KILL SWITCH — flip NEXT_PUBLIC_ENABLE_VOICE=false in Vercel to hide ──
+  if (process.env.NEXT_PUBLIC_ENABLE_VOICE !== 'true') return null;
+
   const [stage, setStage]               = useState<Stage>('closed');
   const [taglineIdx, setTaglineIdx]     = useState(0);
   const [activePack, setActivePack]     = useState<Pack | null>(null);
@@ -206,22 +206,17 @@ export default function TrikalVoice() {
   // ── Pre-flight mic permission check ─────────────────────────
   const checkMicPermission = async (): Promise<boolean> => {
     try {
-      // Check if API exists
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
         setError('आपका browser microphone support नहीं करता / Your browser does not support microphone access');
         setMicPermissionDenied(true);
         return false;
       }
-
-      // Try to get permission
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      // Permission granted — keep stream for recording
       streamRef.current = stream;
       return true;
     } catch (err: unknown) {
       const e = err as DOMException;
       console.error('[TrikalVoice] Mic permission error:', e);
-
       if (e.name === 'NotAllowedError' || e.name === 'PermissionDeniedError') {
         setError('Microphone permission denied. कृपया browser settings में microphone allow करें');
       } else if (e.name === 'NotFoundError') {
@@ -231,13 +226,11 @@ export default function TrikalVoice() {
       } else {
         setError(`Microphone error: ${e.message || 'Unknown error'}`);
       }
-
       setMicPermissionDenied(true);
       return false;
     }
   };
 
-  // ── Get supported MIME type for MediaRecorder ───────────────
   const getSupportedMimeType = (): string => {
     const types = [
       'audio/webm;codecs=opus',
@@ -246,17 +239,12 @@ export default function TrikalVoice() {
       'audio/mp4',
       'audio/mpeg',
     ];
-
     for (const type of types) {
-      if (MediaRecorder.isTypeSupported(type)) {
-        return type;
-      }
+      if (MediaRecorder.isTypeSupported(type)) return type;
     }
-
-    return ''; // Browser default
+    return '';
   };
 
-  // ── Start recording ─────────────────────────────────────────
   const startRecording = async () => {
     setError('');
     setMicPermissionDenied(false);
@@ -265,7 +253,6 @@ export default function TrikalVoice() {
     setAudioUrl('');
 
     try {
-      // Get fresh mic permission + stream
       const granted = await checkMicPermission();
       if (!granted || !streamRef.current) return;
 
@@ -289,9 +276,7 @@ export default function TrikalVoice() {
       };
 
       mr.onstop = async () => {
-        const audioBlob = new Blob(chunksRef.current, {
-          type: mimeType || 'audio/webm'
-        });
+        const audioBlob = new Blob(chunksRef.current, { type: mimeType || 'audio/webm' });
         if (streamRef.current) {
           streamRef.current.getTracks().forEach(t => t.stop());
           streamRef.current = null;
@@ -304,17 +289,13 @@ export default function TrikalVoice() {
         await processAudio(audioBlob);
       };
 
-      // Start with 1-second chunks for reliability
       mr.start(1000);
       setRecording(true);
       setSeconds(60);
 
       timerRef.current = setInterval(() => {
         setSeconds(s => {
-          if (s <= 1) {
-            stopRecording();
-            return 0;
-          }
+          if (s <= 1) { stopRecording(); return 0; }
           return s - 1;
         });
       }, 1000);
@@ -356,12 +337,7 @@ export default function TrikalVoice() {
           message  : userQuestion,
           mode     : 'voice',
           userName : form.name,
-          birthData: {
-            name : form.name,
-            dob  : form.dob,
-            tob  : form.tob,
-            pob  : form.pob,
-          },
+          birthData: { name: form.name, dob: form.dob, tob: form.tob, pob: form.pob },
           sessionId,
         }),
       });
@@ -372,16 +348,10 @@ export default function TrikalVoice() {
       if (!trikalReply) throw new Error('Empty prediction');
       setReply(trikalReply);
 
-      // ── TTS FIRST (before consume so tier detection works) ──
-      // Pass activePack?.id so TTS knows tier WITHOUT Supabase lookup
       const ttsRes = await fetch('/api/voice-tts', {
         method : 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body   : JSON.stringify({
-          text     : trikalReply,
-          sessionId,
-          packId   : activePack?.id || 'p11',  // pass tier hint directly
-        }),
+        body   : JSON.stringify({ text: trikalReply, sessionId, packId: activePack?.id || 'p11' }),
       });
 
       let audioUrl = '';
@@ -391,7 +361,6 @@ export default function TrikalVoice() {
         setAudioUrl(audioUrl);
       }
 
-      // ── CONSUME AFTER TTS ────────────────────────────────
       await fetch('/api/voice-pack-order', {
         method : 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -401,14 +370,12 @@ export default function TrikalVoice() {
       const newBal = Math.max(0, balance - 1);
       setBalance(newBal);
       localStorage.setItem('trikal_voice_balance', String(newBal));
-
       setStage('reply');
 
-      // ── Auto-play using local variable (not stale state) ──
       if (audioUrl) {
         setTimeout(() => {
           const audio = new Audio(audioUrl);
-          audio.play().catch(() => {/* autoplay blocked — user taps play */});
+          audio.play().catch(() => {});
         }, 500);
       }
 
@@ -422,10 +389,7 @@ export default function TrikalVoice() {
 
   const handleAskAnother = () => {
     if (balance > 0) {
-      setTranscript('');
-      setReply('');
-      setAudioUrl('');
-      setStage('record');
+      setTranscript(''); setReply(''); setAudioUrl(''); setStage('record');
     } else {
       setStage('pricing');
     }
@@ -478,7 +442,6 @@ export default function TrikalVoice() {
             {TAGLINES[taglineIdx]}
           </span>
         </button>
-
         <style>{`
           @keyframes trikalPulse {
             0%, 100% { box-shadow: 0 0 0 0 ${GOLD}aa; }
@@ -495,11 +458,7 @@ export default function TrikalVoice() {
       aria-modal="true"
       aria-label="Trikal Voice Prediction"
       className="fixed inset-0 flex items-end sm:items-center justify-center p-0 sm:p-4"
-      style={{
-        zIndex: 99999,
-        background: 'rgba(0,0,0,0.85)',
-        backdropFilter: 'blur(8px)',
-      }}
+      style={{ zIndex: 99999, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)' }}
     >
       <div
         className="w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl overflow-hidden"
@@ -563,50 +522,23 @@ export default function TrikalVoice() {
                 )}
               </p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-
                 <div>
                   <label style={labelStyle}>Your Name / आपका नाम</label>
-                  <input
-                    type="text"
-                    placeholder="e.g. Rohit Gupta"
-                    value={form.name}
-                    onChange={e => setForm({ ...form, name: e.target.value })}
-                    style={inputStyle}
-                  />
+                  <input type="text" placeholder="e.g. Rohit Gupta" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} style={inputStyle} />
                 </div>
-
                 <div>
                   <label style={labelStyle}>Date of Birth / जन्म तिथि</label>
-                  <input
-                    type="date"
-                    value={form.dob}
-                    onChange={e => setForm({ ...form, dob: e.target.value })}
-                    style={inputStyle}
-                  />
+                  <input type="date" value={form.dob} onChange={e => setForm({ ...form, dob: e.target.value })} style={inputStyle} />
                 </div>
-
                 <div>
                   <label style={labelStyle}>Time of Birth / जन्म समय</label>
-                  <input
-                    type="time"
-                    value={form.tob}
-                    onChange={e => setForm({ ...form, tob: e.target.value })}
-                    style={inputStyle}
-                  />
+                  <input type="time" value={form.tob} onChange={e => setForm({ ...form, tob: e.target.value })} style={inputStyle} />
                   <span style={hintStyle}>Approx time also OK / लगभग समय भी ठीक है</span>
                 </div>
-
                 <div>
                   <label style={labelStyle}>Place of Birth / जन्म स्थान</label>
-                  <input
-                    type="text"
-                    placeholder="e.g. Delhi, India"
-                    value={form.pob}
-                    onChange={e => setForm({ ...form, pob: e.target.value })}
-                    style={inputStyle}
-                  />
+                  <input type="text" placeholder="e.g. Delhi, India" value={form.pob} onChange={e => setForm({ ...form, pob: e.target.value })} style={inputStyle} />
                 </div>
-
                 <button onClick={handleFormSubmit} style={primaryBtnStyle}>Continue → Record</button>
                 {error && <p style={errorStyle}>{error}</p>}
               </div>
@@ -617,12 +549,8 @@ export default function TrikalVoice() {
             <div style={{ textAlign: 'center', padding: '20px 0' }}>
               {!recording && !micPermissionDenied && (
                 <>
-                  <p style={{ color: '#fff', fontSize: 14, marginBottom: 8 }}>
-                    Mic button दबाएं और 60 seconds तक अपना सवाल बोलें
-                  </p>
-                  <p style={{ color: '#888', fontSize: 11, marginBottom: 18 }}>
-                    Browser microphone access माँगेगा — Allow करें
-                  </p>
+                  <p style={{ color: '#fff', fontSize: 14, marginBottom: 8 }}>Mic button दबाएं और 60 seconds तक अपना सवाल बोलें</p>
+                  <p style={{ color: '#888', fontSize: 11, marginBottom: 18 }}>Browser microphone access माँगेगा — Allow करें</p>
                   <button
                     onClick={startRecording}
                     aria-label="Start recording"
@@ -641,71 +569,31 @@ export default function TrikalVoice() {
                   </button>
                 </>
               )}
-
               {recording && (
                 <>
-                  <p style={{ color: GOLD, fontSize: 13, marginBottom: 10, animation: 'trikalFade 1.5s ease-in-out infinite' }}>
-                    Trikal सुन रहे हैं...
-                  </p>
-                  <div style={{
-                    fontSize: 56, fontWeight: 700, color: GOLD,
-                    fontVariantNumeric: 'tabular-nums', marginBottom: 18,
-                  }}>
-                    {String(seconds).padStart(2, '0')}s
-                  </div>
-                  <button
-                    onClick={stopRecording}
-                    style={{ ...primaryBtnStyle, background: '#c0392b' }}
-                  >
-                    ■ Stop & Submit
-                  </button>
+                  <p style={{ color: GOLD, fontSize: 13, marginBottom: 10, animation: 'trikalFade 1.5s ease-in-out infinite' }}>Trikal सुन रहे हैं...</p>
+                  <div style={{ fontSize: 56, fontWeight: 700, color: GOLD, fontVariantNumeric: 'tabular-nums', marginBottom: 18 }}>{String(seconds).padStart(2, '0')}s</div>
+                  <button onClick={stopRecording} style={{ ...primaryBtnStyle, background: '#c0392b' }}>■ Stop & Submit</button>
                 </>
               )}
-
               {micPermissionDenied && (
                 <>
-                  <div style={{
-                    background: 'rgba(231,76,60,0.1)',
-                    border: '1px solid #e74c3c44',
-                    borderRadius: 8,
-                    padding: 14,
-                    marginBottom: 14,
-                  }}>
+                  <div style={{ background: 'rgba(231,76,60,0.1)', border: '1px solid #e74c3c44', borderRadius: 8, padding: 14, marginBottom: 14 }}>
                     <p style={{ color: '#e74c3c', fontSize: 13, margin: 0 }}>{error}</p>
                   </div>
-                  <p style={{ color: '#bbb', fontSize: 12, marginBottom: 14 }}>
-                    Browser में address bar के बगल में 🔒 icon पर tap करें → Site Settings → Microphone → Allow
-                  </p>
-                  <button
-                    onClick={() => { setMicPermissionDenied(false); setError(''); }}
-                    style={primaryBtnStyle}
-                  >
-                    Try Again
-                  </button>
+                  <p style={{ color: '#bbb', fontSize: 12, marginBottom: 14 }}>Browser में address bar के बगल में 🔒 icon पर tap करें → Site Settings → Microphone → Allow</p>
+                  <button onClick={() => { setMicPermissionDenied(false); setError(''); }} style={primaryBtnStyle}>Try Again</button>
                 </>
               )}
-
               {error && !micPermissionDenied && <p style={errorStyle}>{error}</p>}
             </div>
           )}
 
           {stage === 'processing' && (
             <div style={{ textAlign: 'center', padding: '40px 0' }}>
-              <div style={{
-                width: 56, height: 56, margin: 'auto',
-                border: `3px solid ${GOLD}33`,
-                borderTopColor: GOLD,
-                borderRadius: '50%',
-                animation: 'trikalSpin 1s linear infinite',
-              }} />
-              <p style={{ color: '#fff', fontSize: 13, marginTop: 18 }}>
-                Trikal आपके सवाल पर ध्यान कर रहे हैं...
-              </p>
-              {transcript && (
-                <p style={{ color: '#888', fontSize: 11, marginTop: 12, fontStyle: 'italic' }}>
-                  &quot;{transcript}&quot;
-                </p>
-              )}
+              <div style={{ width: 56, height: 56, margin: 'auto', border: `3px solid ${GOLD}33`, borderTopColor: GOLD, borderRadius: '50%', animation: 'trikalSpin 1s linear infinite' }} />
+              <p style={{ color: '#fff', fontSize: 13, marginTop: 18 }}>Trikal आपके सवाल पर ध्यान कर रहे हैं...</p>
+              {transcript && <p style={{ color: '#888', fontSize: 11, marginTop: 12, fontStyle: 'italic' }}>&quot;{transcript}&quot;</p>}
             </div>
           )}
 
@@ -717,22 +605,13 @@ export default function TrikalVoice() {
                   <div style={{ color: '#bbb', fontSize: 13, marginTop: 4, fontStyle: 'italic' }}>&quot;{transcript}&quot;</div>
                 </div>
               )}
-
               <div style={{ borderTop: `1px solid ${GOLD}33`, paddingTop: 14 }}>
-                <div style={{ color: GOLD, fontSize: 12, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 8 }}>
-                  त्रिकाल का उत्तर
-                </div>
+                <div style={{ color: GOLD, fontSize: 12, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 8 }}>त्रिकाल का उत्तर</div>
                 <p style={{ color: '#fff', fontSize: 14, lineHeight: 1.7 }}>{reply}</p>
               </div>
-
-              {audioUrl && (
-                <audio controls src={audioUrl} style={{ width: '100%', marginTop: 14 }} />
-              )}
-
+              {audioUrl && <audio controls src={audioUrl} style={{ width: '100%', marginTop: 14 }} />}
               <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
-                <button onClick={handleAskAnother} style={{ ...primaryBtnStyle, flex: 1 }}>
-                  {balance > 0 ? `Ask Another (${balance} left)` : 'Buy More Questions'}
-                </button>
+                <button onClick={handleAskAnother} style={{ ...primaryBtnStyle, flex: 1 }}>{balance > 0 ? `Ask Another (${balance} left)` : 'Buy More Questions'}</button>
                 <button onClick={handleClose} style={{ ...secondaryBtnStyle, flex: 1 }}>Close</button>
               </div>
             </>
@@ -759,63 +638,24 @@ export default function TrikalVoice() {
 }
 
 const labelStyle: React.CSSProperties = {
-  display: 'block',
-  color: GOLD,
-  fontSize: 12,
-  fontWeight: 600,
-  marginBottom: 6,
-  letterSpacing: 0.3,
+  display: 'block', color: GOLD, fontSize: 12, fontWeight: 600, marginBottom: 6, letterSpacing: 0.3,
 };
-
 const hintStyle: React.CSSProperties = {
-  display: 'block',
-  color: '#777',
-  fontSize: 10,
-  marginTop: 4,
-  fontStyle: 'italic',
+  display: 'block', color: '#777', fontSize: 10, marginTop: 4, fontStyle: 'italic',
 };
-
 const inputStyle: React.CSSProperties = {
-  width: '100%',
-  background  : 'rgba(255,255,255,0.05)',
-  border      : `1px solid ${GOLD}33`,
-  color       : '#fff',
-  padding     : '11px 14px',
-  borderRadius: 8,
-  fontSize    : 14,
-  outline     : 'none',
-  boxSizing   : 'border-box',
+  width: '100%', background: 'rgba(255,255,255,0.05)', border: `1px solid ${GOLD}33`,
+  color: '#fff', padding: '11px 14px', borderRadius: 8, fontSize: 14, outline: 'none', boxSizing: 'border-box',
 };
-
 const primaryBtnStyle: React.CSSProperties = {
-  background  : `linear-gradient(135deg, ${GOLD_DARK}, ${GOLD})`,
-  color       : BG_DARK,
-  border      : 'none',
-  padding     : '12px 18px',
-  borderRadius: 8,
-  fontSize    : 14,
-  fontWeight  : 700,
-  cursor      : 'pointer',
-  width       : '100%',
+  background: `linear-gradient(135deg, ${GOLD_DARK}, ${GOLD})`, color: BG_DARK, border: 'none',
+  padding: '12px 18px', borderRadius: 8, fontSize: 14, fontWeight: 700, cursor: 'pointer', width: '100%',
 };
-
 const secondaryBtnStyle: React.CSSProperties = {
-  background  : 'transparent',
-  color       : GOLD,
-  border      : `1px solid ${GOLD}66`,
-  padding     : '12px 18px',
-  borderRadius: 8,
-  fontSize    : 14,
-  fontWeight  : 600,
-  cursor      : 'pointer',
+  background: 'transparent', color: GOLD, border: `1px solid ${GOLD}66`,
+  padding: '12px 18px', borderRadius: 8, fontSize: 14, fontWeight: 600, cursor: 'pointer',
 };
-
 const errorStyle: React.CSSProperties = {
-  color: '#e74c3c',
-  fontSize: 12,
-  marginTop: 12,
-  padding: 10,
-  background: 'rgba(231,76,60,0.1)',
-  border: '1px solid #e74c3c44',
-  borderRadius: 6,
+  color: '#e74c3c', fontSize: 12, marginTop: 12, padding: 10,
+  background: 'rgba(231,76,60,0.1)', border: '1px solid #e74c3c44', borderRadius: 6,
 };
