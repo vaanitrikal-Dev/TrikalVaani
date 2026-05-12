@@ -55,7 +55,7 @@ export const metadata: Metadata = {
     },
   },
   icons: {
-  icon: "/favicon.ico",
+  icon: "/Trikal_Vaani_Logo.svg",
 },
   category: "Vedic Astrology",
   openGraph: {
