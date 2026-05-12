@@ -1,13 +1,13 @@
 // ============================================================
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikal Vaani
 // FILE: app/layout.tsx
-// VERSION: v2.4 — TrikalVoice globally mounted on ALL pages
-// DATE: 2026-05-12
-// CHANGES:
-//   v2.4: TrikalVoice imported and mounted in body globally
-//         Now appears on every page: homepage, blog, report, domain
-//         JiniChat not touched — separate decision
-//         voice-debug route DELETED (security fix done)
+// VERSION: v2.6 — SpeedInsights added, font fixed to Inter subset
+// DATE: 2026-05-13
+// CHANGES vs v2.4:
+//   v2.5: SpeedInsights imported and mounted
+//   v2.6: No other changes — title template "%s | Trikal Vaani" is CORRECT
+//         Panchang page title duplication fix is in panchang/[date]/page.tsx
+//         (remove "| Trikal Vaani" from the end of that page's returned title)
 // ============================================================
 
 import type { Metadata } from "next";
@@ -17,6 +17,7 @@ import "./globals.css";
 import SchemaScript from "@/components/SchemaScript";
 import TrikalVoice from "@/components/Trikal/TrikalVoice";
 import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -55,8 +56,8 @@ export const metadata: Metadata = {
     },
   },
   icons: {
-  icon: "/Trikal_Vaani_Logo.svg",
-},
+    icon: "/Trikal_Vaani_Logo.svg",
+  },
   category: "Vedic Astrology",
   openGraph: {
     type: "website",
@@ -197,8 +198,7 @@ export default function RootLayout({
           }}
         />
 
-        {/* ── WebApplication Schema ──
-            NOTE: aggregateRating lives ONLY in SchemaScript.tsx -> Product schema ── */}
+        {/* ── WebApplication Schema ── */}
         <Script
           id="webapp-schema"
           type="application/ld+json"
@@ -319,18 +319,19 @@ export default function RootLayout({
           strategy="afterInteractive"
         />
 
-        {/* Performance */}
+        {/* Performance hints */}
         <link rel="preconnect" href="https://api.razorpay.com" />
         <link rel="preconnect" href="https://checkout.razorpay.com" />
         <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
       </head>
       <body className={`${inter.className} bg-[#080B12] text-white antialiased`}>
         {children}
-        {/* SchemaScript injects: WebSite, Person, FAQPage, Service, Product (with aggregateRating) */}
+        {/* SchemaScript: WebSite, Person, FAQPage, Service, Product + aggregateRating */}
         <SchemaScript />
-        {/* ── TrikalVoice: Floating widget — appears on ALL pages globally ── */}
+        {/* TrikalVoice: floating mic — appears on ALL pages globally */}
         <TrikalVoice />
         <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
