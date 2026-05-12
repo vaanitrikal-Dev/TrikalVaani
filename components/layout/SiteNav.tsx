@@ -108,8 +108,8 @@ export default function SiteNav() {
               <Image
                 src="/Trikal_Vaani_Logo.svg"
                 alt="Trikal Vaani Logo"
-                width={43}
-                height={43}
+                width={60}
+                height={60}
                 priority
               />
             </div>
