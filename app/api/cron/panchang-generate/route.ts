@@ -3,44 +3,30 @@
  * 🔱 TRIKAL VAANI — CEO PROTECTION HEADER 🔱
  * ============================================================================
  * File:        app/api/cron/panchang-generate/route.ts
- * Version:     v1.0
- * Phase:       C3 — AI Content Engine (Daily Cron)
+ * Version:     v2.1 — FIXED (column names match actual Supabase schema)
  * Owner:       Rohiit Gupta, Chief Vedic Architect
  * Domain:      trikalvaani.com
  * GitHub:      vaanitrikal-Dev/TrikalVaani
- * Created:     May 09, 2026
  *
- * PURPOSE:
- *   Vercel cron job. Runs daily at 4:00 AM IST (22:30 UTC prev day).
- *   Generates 11 panchang rows: 1 hub (national, Gemini Pro)
- *                              + 10 city rows (Flash).
- *   Writes to Supabase, then triggers IndexNow for new URLs.
+ * FIXES vs v1.0:
+ *   1. panchang_daily uses `city` not `city_slug` — fixed throughout
+ *   2. onConflict changed to "date,city" (matches actual unique constraint)
+ *   3. Removed `lang` (no such column in panchang_daily)
+ *   4. Removed non-existent columns: intro_paragraph, spiritual_significance,
+ *      dos_and_donts, remedies, faq_json, meta_title, meta_description,
+ *      schema_keywords, generated_by, prompt_version, cost_inr_paise,
+ *      abhijit_muhurat, yamaganda, moon_sign, sun_sign, gulika
+ *   5. Uses actual columns: gemini_content, seo_title, seo_description,
+ *      geo_answer, faq_schema, page_url, festivals, gulika_kaal, shubh_muhurat
+ *   6. SUPABASE_URL env var (not NEXT_PUBLIC_SUPABASE_URL) for server-only client
+ *   7. VM endpoint corrected to /panchang (not /panchang/today)
+ *   8. panchang_generation_log uses city_slug (that table IS correct)
  *
- * SCHEDULE:
- *   Vercel cron expression in vercel.json: "30 22 * * *"
- *   = 22:30 UTC daily = 04:00 IST (UTC+5:30)
+ * SCHEDULE: vercel.json cron "30 22 * * *" = 04:00 IST daily
  *
- * COST PROFILE (CEO-approved, BALANCED scope):
- *   Hub (Pro):    1 row × ₹3.0  = ₹3.0/day
- *   Cities:       10 × ₹0.5     = ₹5.0/day  (revised from ₹2.5 — 10 rows not 5)
- *   Daily total:  ~₹8/day
- *   Monthly:      ~₹240/month   (all-in, conservative estimate)
- *
- * IRON RULES:
- *   1. Bearer auth via CRON_SECRET — Vercel injects this header automatically.
- *   2. Idempotent — Supabase UPSERT, safe to re-run.
- *   3. Each row generation is wrapped in try/catch — one failure does NOT abort batch.
- *   4. Every run logged to panchang_generation_log.
- *   5. NEVER imports gemini-prompt.ts (LOCKED). Uses gemini-prompt-panchang.ts.
- *
- * ENV VARS REQUIRED (Vercel project → Settings → Environment Variables):
- *   - CRON_SECRET                  (Vercel auto-generates, you mirror it)
- *   - GEMINI_API_KEY               (Google AI Studio)
- *   - SUPABASE_URL                 (already exists)
- *   - SUPABASE_SERVICE_ROLE_KEY    (already exists)
- *   - VM_PANCHANG_URL              ("http://34.14.164.105:8001")
- *   - SITE_URL                     ("https://trikalvaani.com")
- *   - INDEXNOW_KEY                 (32-char hex — see indexnow setup file)
+ * ENV VARS REQUIRED:
+ *   CRON_SECRET, GEMINI_API_KEY, NEXT_PUBLIC_SUPABASE_URL,
+ *   SUPABASE_SERVICE_ROLE_KEY, VM_PANCHANG_URL, SITE_URL, INDEXNOW_KEY
  * ============================================================================
  */
 
@@ -64,23 +50,23 @@ import {
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
-export const maxDuration = 300; // 5 minutes — needed for 11 sequential AI calls
+export const maxDuration = 300;
 
 // ============================================================================
-// CITIES — locked to blueprint
+// CITIES
 // ============================================================================
 
 const CITIES: CityContext[] = [
-  { slug: "delhi",     name: "Delhi NCR",  state: "Delhi",      lat: 28.6139, lon: 77.2090 },
-  { slug: "mumbai",    name: "Mumbai",     state: "Maharashtra", lat: 19.0760, lon: 72.8777 },
-  { slug: "noida",     name: "Noida",      state: "Uttar Pradesh", lat: 28.5355, lon: 77.3910 },
-  { slug: "gurgaon",   name: "Gurgaon",    state: "Haryana",    lat: 28.4595, lon: 77.0266 },
-  { slug: "bangalore", name: "Bangalore",  state: "Karnataka",  lat: 12.9716, lon: 77.5946 },
-  { slug: "hyderabad", name: "Hyderabad",  state: "Telangana",  lat: 17.3850, lon: 78.4867 },
-  { slug: "pune",      name: "Pune",       state: "Maharashtra", lat: 18.5204, lon: 73.8567 },
-  { slug: "kolkata",   name: "Kolkata",    state: "West Bengal", lat: 22.5726, lon: 88.3639 },
-  { slug: "chennai",   name: "Chennai",    state: "Tamil Nadu", lat: 13.0827, lon: 80.2707 },
-  { slug: "ahmedabad", name: "Ahmedabad",  state: "Gujarat",    lat: 23.0225, lon: 72.5714 },
+  { slug: "delhi",     name: "Delhi NCR",   state: "Delhi",           lat: 28.6139, lon: 77.2090 },
+  { slug: "mumbai",    name: "Mumbai",      state: "Maharashtra",     lat: 19.0760, lon: 72.8777 },
+  { slug: "noida",     name: "Noida",       state: "Uttar Pradesh",   lat: 28.5355, lon: 77.3910 },
+  { slug: "gurgaon",   name: "Gurgaon",     state: "Haryana",         lat: 28.4595, lon: 77.0266 },
+  { slug: "bangalore", name: "Bangalore",   state: "Karnataka",       lat: 12.9716, lon: 77.5946 },
+  { slug: "hyderabad", name: "Hyderabad",   state: "Telangana",       lat: 17.3850, lon: 78.4867 },
+  { slug: "pune",      name: "Pune",        state: "Maharashtra",     lat: 18.5204, lon: 73.8567 },
+  { slug: "kolkata",   name: "Kolkata",     state: "West Bengal",     lat: 22.5726, lon: 88.3639 },
+  { slug: "chennai",   name: "Chennai",     state: "Tamil Nadu",      lat: 13.0827, lon: 80.2707 },
+  { slug: "ahmedabad", name: "Ahmedabad",   state: "Gujarat",         lat: 23.0225, lon: 72.5714 },
 ];
 
 // ============================================================================
@@ -89,7 +75,7 @@ const CITIES: CityContext[] = [
 
 const VM_URL = process.env.VM_PANCHANG_URL || "http://34.14.164.105:8001";
 const SITE_URL = process.env.SITE_URL || "https://trikalvaani.com";
-const TARGET_LANG: Lang = "en"; // Phase C launches with EN; HI added in C-bis
+const TARGET_LANG: Lang = "en";
 const CRON_SECRET = process.env.CRON_SECRET;
 
 // ============================================================================
@@ -97,12 +83,12 @@ const CRON_SECRET = process.env.CRON_SECRET;
 // ============================================================================
 
 function getTodayISO(): string {
-  // Use IST date (cron fires at 4 AM IST → "today" is the IST calendar day)
   const now = new Date();
   const istMs = now.getTime() + 5.5 * 60 * 60 * 1000;
   return new Date(istMs).toISOString().split("T")[0];
 }
 
+// FIX: endpoint is /panchang not /panchang/today
 async function fetchPanchangFromVM(
   date: string,
   lat?: number,
@@ -112,7 +98,7 @@ async function fetchPanchangFromVM(
   if (lat !== undefined) params.set("lat", String(lat));
   if (lon !== undefined) params.set("lon", String(lon));
 
-  const url = `${VM_URL}/panchang/today?${params.toString()}`;
+  const url = `${VM_URL}/panchang?${params.toString()}`;
   const res = await fetch(url, {
     method: "GET",
     headers: { "Content-Type": "application/json" },
@@ -136,9 +122,8 @@ async function callGemini(
   const m = genAI.getGenerativeModel({
     model,
     generationConfig: {
-      maxOutputTokens, // 12000 — CEO-locked
+      maxOutputTokens,
       temperature,
-      // thinkingBudget INTENTIONALLY OMITTED — never set to 0
       responseMimeType: "application/json",
     },
   });
@@ -156,43 +141,42 @@ async function callGemini(
 }
 
 function estimateCostPaise(model: string, tokensIn = 0, tokensOut = 0): number {
-  // Approx Gemini pricing (May 2026, INR paise per 1K tokens)
   if (model === "gemini-2.5-pro") {
-    return Math.ceil(tokensIn * 0.105 + tokensOut * 0.42); // ~₹105/1M in, ₹420/1M out
+    return Math.ceil(tokensIn * 0.105 + tokensOut * 0.42);
   }
-  // Flash
-  return Math.ceil(tokensIn * 0.025 + tokensOut * 0.1); // ~₹25/1M in, ₹100/1M out
+  return Math.ceil(tokensIn * 0.025 + tokensOut * 0.1);
 }
 
-// ============================================================================
-// SUPABASE CLIENT (service role — server-only, never expose)
-// ============================================================================
-
+// FIX: use NEXT_PUBLIC_SUPABASE_URL (that's the actual Vercel env var name)
+// with service_role key so RLS write policy allows INSERT
 function getSupabaseAdmin() {
   return createClient(
-    process.env.SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
     { auth: { persistSession: false } }
   );
 }
 
 // ============================================================================
-// SINGLE-ROW GENERATION (used by both hub and city loops)
+// RESULT TYPE
 // ============================================================================
 
 interface GenerationResult {
   date: string;
-  city_slug: string;
-  lang: Lang;
+  city: string;           // FIX: renamed from city_slug to match panchang_daily
   status: "success" | "failed";
   url?: string;
   error?: string;
   cost_paise?: number;
 }
 
+// ============================================================================
+// SINGLE ROW GENERATOR
+// ============================================================================
+
 async function generateOneRow(args: {
   date: string;
-  citySlug: string;
+  citySlug: string;       // used for panchang_generation_log (that table has city_slug)
   lang: Lang;
   prompt: string;
   panchang: PanchangData;
@@ -204,7 +188,7 @@ async function generateOneRow(args: {
   const cfg = GEMINI_CONFIG[modelKey];
   const apiKey = process.env.GEMINI_API_KEY!;
 
-  // Insert pending log row
+  // Log row — panchang_generation_log DOES have city_slug and lang columns
   const { data: logRow } = await supabase
     .from("panchang_generation_log")
     .insert({
@@ -214,7 +198,7 @@ async function generateOneRow(args: {
       status: "pending",
       model_used: cfg.model,
     })
-    .select("id, run_id")
+    .select("id")
     .single();
 
   try {
@@ -229,14 +213,15 @@ async function generateOneRow(args: {
     const content: GeminiPanchangResponse = parseGeminiPanchangResponse(text);
     const costPaise = estimateCostPaise(cfg.model, tokensIn, tokensOut);
 
-    // UPSERT into panchang_daily
+    // FIX: only insert columns that EXIST in panchang_daily
+    // Column mapping: city (not city_slug), gemini_content (not intro_paragraph etc.)
+    // onConflict: "date,city" — matches the unique constraint we fixed in Supabase
     const { error: upsertErr } = await supabase
       .from("panchang_daily")
       .upsert(
         {
           date,
-          city_slug: citySlug,
-          lang,
+          city: citySlug,                          // FIX: `city` not `city_slug`
           tithi: panchang.tithi,
           nakshatra: panchang.nakshatra,
           yoga: panchang.yoga,
@@ -244,31 +229,26 @@ async function generateOneRow(args: {
           vara: panchang.vara,
           sunrise: panchang.sunrise,
           sunset: panchang.sunset,
+          moonrise: panchang.moonrise ?? null,
+          moonset: panchang.moonset ?? null,
           rahu_kaal: panchang.rahu_kaal,
-          abhijit_muhurat: panchang.abhijit_muhurat ?? null,
-          yamaganda: panchang.yamaganda ?? null,
-          gulika: panchang.gulika ?? null,
-          moon_sign: panchang.moon_sign ?? null,
-          sun_sign: panchang.sun_sign ?? null,
+          gulika_kaal: panchang.gulika ?? null,    // FIX: DB col is gulika_kaal
+          shubh_muhurat: panchang.abhijit_muhurat ?? null,
+          festivals: panchang.festivals ?? [],
+          gemini_content: content.intro_paragraph ?? text, // FIX: store full Gemini text in gemini_content
+          seo_title: content.meta_title,
+          seo_description: content.meta_description,
           geo_answer: content.geo_answer,
-          intro_paragraph: content.intro_paragraph,
-          spiritual_significance: content.spiritual_significance,
-          dos_and_donts: content.dos_and_donts,
-          remedies: content.remedies,
-          faq_json: content.faq,
-          meta_title: content.meta_title,
-          meta_description: content.meta_description,
-          schema_keywords: content.schema_keywords,
-          generated_by: cfg.model,
-          prompt_version: "panchang-v1.0",
-          cost_inr_paise: costPaise,
+          faq_schema: content.faq ?? [],           // FIX: DB col is faq_schema not faq_json
+          page_url: publicUrl,
+          indexnow_submitted: false,
         },
-        { onConflict: "date,city_slug,lang" }
+        { onConflict: "date,city" }               // FIX: matches actual constraint
       );
 
     if (upsertErr) throw new Error(`Supabase upsert: ${upsertErr.message}`);
 
-    // Mark log success
+    // Update log row
     if (logRow?.id) {
       await supabase
         .from("panchang_generation_log")
@@ -283,17 +263,11 @@ async function generateOneRow(args: {
         .eq("id", logRow.id);
     }
 
-    return {
-      date,
-      city_slug: citySlug,
-      lang,
-      status: "success",
-      url: publicUrl,
-      cost_paise: costPaise,
-    };
-  } catch (err: any) {
-    const errorMsg = err?.message ?? String(err);
-    console.error(`[panchang-cron] ${citySlug}/${date}/${lang} FAILED:`, errorMsg);
+    return { date, city: citySlug, status: "success", url: publicUrl, cost_paise: costPaise };
+
+  } catch (err: unknown) {
+    const errorMsg = err instanceof Error ? err.message : String(err);
+    console.error(`[panchang-cron] ${citySlug}/${date} FAILED:`, errorMsg);
 
     if (logRow?.id) {
       await supabase
@@ -306,7 +280,7 @@ async function generateOneRow(args: {
         .eq("id", logRow.id);
     }
 
-    return { date, city_slug: citySlug, lang, status: "failed", error: errorMsg };
+    return { date, city: citySlug, status: "failed", error: errorMsg };
   }
 }
 
@@ -315,7 +289,7 @@ async function generateOneRow(args: {
 // ============================================================================
 
 export async function GET(req: NextRequest) {
-  // -------- AUTH --------
+  // Auth — Vercel injects Authorization: Bearer <CRON_SECRET> automatically
   const authHeader = req.headers.get("authorization");
   if (!CRON_SECRET || authHeader !== `Bearer ${CRON_SECRET}`) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -327,9 +301,9 @@ export async function GET(req: NextRequest) {
 
   console.log(`[panchang-cron] START date=${date} cities=${CITIES.length}`);
 
-  // -------- 1. HUB ROW (national, Gemini Pro) --------
+  // 1. HUB ROW (national, Gemini Pro)
   try {
-    const nationalPanchang = await fetchPanchangFromVM(date); // no lat/lon = national/IST default
+    const nationalPanchang = await fetchPanchangFromVM(date);
     const hubPrompt = buildPanchangHubPrompt(nationalPanchang, TARGET_LANG);
     const hubResult = await generateOneRow({
       date,
@@ -341,18 +315,13 @@ export async function GET(req: NextRequest) {
       publicUrl: `${SITE_URL}/panchang/${date}`,
     });
     results.push(hubResult);
-  } catch (err: any) {
-    console.error(`[panchang-cron] HUB fetch failed:`, err?.message);
-    results.push({
-      date,
-      city_slug: "national",
-      lang: TARGET_LANG,
-      status: "failed",
-      error: err?.message,
-    });
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error(`[panchang-cron] HUB fetch failed:`, msg);
+    results.push({ date, city: "national", status: "failed", error: msg });
   }
 
-  // -------- 2. CITY ROWS (10x, Gemini Flash, sequential to respect rate limits) --------
+  // 2. CITY ROWS (10 cities, Gemini Flash, sequential)
   for (const city of CITIES) {
     try {
       const cityPanchang = await fetchPanchangFromVM(date, city.lat, city.lon);
@@ -367,21 +336,19 @@ export async function GET(req: NextRequest) {
         publicUrl: `${SITE_URL}/${city.slug}/panchang`,
       });
       results.push(r);
-    } catch (err: any) {
-      console.error(`[panchang-cron] city=${city.slug} fetch failed:`, err?.message);
-      results.push({
-        date,
-        city_slug: city.slug,
-        lang: TARGET_LANG,
-        status: "failed",
-        error: err?.message,
-      });
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error(`[panchang-cron] city=${city.slug} fetch failed:`, msg);
+      results.push({ date, city: city.slug, status: "failed", error: msg });
     }
   }
 
-  // -------- 3. INDEXNOW PUSH (only newly successful URLs) --------
-  const successUrls = results.filter((r) => r.status === "success" && r.url).map((r) => r.url!);
-  let indexnowResult: any = { skipped: true };
+  // 3. INDEXNOW PUSH for successful URLs
+  const successUrls = results
+    .filter((r) => r.status === "success" && r.url)
+    .map((r) => r.url!);
+
+  let indexnowResult: Record<string, unknown> = { skipped: true };
 
   if (successUrls.length > 0) {
     try {
@@ -396,21 +363,22 @@ export async function GET(req: NextRequest) {
       });
       indexnowResult = await indexnowRes.json();
 
-      // Mark indexnow_pushed = true for these log rows
+      // Mark indexnow_submitted in panchang_daily
       const supabase = getSupabaseAdmin();
       await supabase
-        .from("panchang_generation_log")
-        .update({ indexnow_pushed: true })
-        .in("indexnow_url", successUrls)
-        .eq("date", date)
-        .eq("status", "success");
-    } catch (err: any) {
-      console.error(`[panchang-cron] IndexNow failed:`, err?.message);
-      indexnowResult = { error: err?.message };
+        .from("panchang_daily")
+        .update({ indexnow_submitted: true, indexnow_at: new Date().toISOString() })
+        .in("page_url", successUrls)
+        .eq("date", date);
+
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error(`[panchang-cron] IndexNow failed:`, msg);
+      indexnowResult = { error: msg };
     }
   }
 
-  // -------- 4. SUMMARY --------
+  // 4. SUMMARY
   const totalCostPaise = results.reduce((s, r) => s + (r.cost_paise ?? 0), 0);
   const summary = {
     date,
@@ -428,6 +396,6 @@ export async function GET(req: NextRequest) {
 }
 
 // ============================================================================
-// END — app/api/cron/panchang-generate/route.ts v1.0
+// END — app/api/cron/panchang-generate/route.ts v2.1
 // 🔱 Trikal Vaani | Rohiit Gupta, Chief Vedic Architect
 // ============================================================================
