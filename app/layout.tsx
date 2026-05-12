@@ -16,6 +16,7 @@ import Script from "next/script";
 import "./globals.css";
 import SchemaScript from "@/components/SchemaScript";
 import TrikalVoice from "@/components/Trikal/TrikalVoice";
+import { Analytics } from "@vercel/analytics/next";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -326,6 +327,7 @@ export default function RootLayout({
         <SchemaScript />
         {/* ── TrikalVoice: Floating widget — appears on ALL pages globally ── */}
         <TrikalVoice />
+        <Analytics />
       </body>
     </html>
   );
