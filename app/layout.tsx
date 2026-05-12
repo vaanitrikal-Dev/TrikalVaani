@@ -1,11 +1,11 @@
 // ============================================================
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikal Vaani
 // FILE: app/layout.tsx
-// VERSION: v2.6 — SpeedInsights added, font fixed to Inter subset
+// VERSION: v2.6 — Analytics live, SpeedInsights deferred (package not installed)
 // DATE: 2026-05-13
 // CHANGES vs v2.4:
-//   v2.5: SpeedInsights imported and mounted
-//   v2.6: No other changes — title template "%s | Trikal Vaani" is CORRECT
+//   v2.5: Analytics confirmed live
+//   v2.6: SpeedInsights removed — package not in package.json (add separately)
 //         Panchang page title duplication fix is in panchang/[date]/page.tsx
 //         (remove "| Trikal Vaani" from the end of that page's returned title)
 // ============================================================
@@ -17,7 +17,7 @@ import "./globals.css";
 import SchemaScript from "@/components/SchemaScript";
 import TrikalVoice from "@/components/Trikal/TrikalVoice";
 import { Analytics } from "@vercel/analytics/next";
-import { SpeedInsights } from "@vercel/speed-insights/next";
+
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -331,7 +331,7 @@ export default function RootLayout({
         {/* TrikalVoice: floating mic — appears on ALL pages globally */}
         <TrikalVoice />
         <Analytics />
-        <SpeedInsights />
+
       </body>
     </html>
   );
