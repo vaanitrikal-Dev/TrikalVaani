@@ -1,16 +1,8 @@
 // ============================================================
 // TRIKAL VAANI — DYNAMIC BLOG ARTICLE PAGE (SSR)
 // CEO: Rohiit Gupta | Chief Vedic Architect
-// Version: 1.0
-// Date: 2026-05-12
-// ============================================================
-// PURE SERVER COMPONENT — zero client JavaScript for content.
-// Google's crawler receives full HTML on first byte.
-// Uses Next.js 13 App Router features:
-//   - generateStaticParams() → pre-renders all 10 pages at build
-//   - generateMetadata() → per-article title, description, OG tags
-//   - JSON-LD Article schema → injected server-side
-//   - notFound() → returns proper 404 for invalid slugs
+// Version: 2.0 (Supabase Migration)
+// Date: 2026-05-13
 // ============================================================
 
 import { notFound } from 'next/navigation';
@@ -25,24 +17,23 @@ import {
 } from '@/lib/blog-posts';
 
 // ============================================================
-// STATIC PARAMS — Pre-render all 10 pages at build time
-// This is the fastest possible SSR (essentially SSG with on-demand fallback)
+// STATIC PARAMS — Pre-render all pages at build time
 // ============================================================
 export async function generateStaticParams() {
-  return getAllSlugs().map((slug) => ({ slug }));
+  const slugs = await getAllSlugs();           // ← await added
+  return slugs.map((slug) => ({ slug }));
 }
 
-// Revalidate every 24 hours (ISR for future content updates)
+// Revalidate every 24 hours (ISR — new articles appear without redeploy)
 export const revalidate = 86400;
 
 // ============================================================
-// METADATA — Dynamic <title>, <description>, OG tags per article
-// Google reads these from the SSR HTML response
+// METADATA — Dynamic per-article SEO tags
 // ============================================================
 export async function generateMetadata(
   { params }: { params: { slug: string } }
 ): Promise<Metadata> {
-  const post = getPostBySlug(params.slug);
+  const post = await getPostBySlug(params.slug);  // ← await added
 
   if (!post) {
     return {
@@ -111,7 +102,6 @@ export async function generateMetadata(
 
 // ============================================================
 // JSON-LD SCHEMA — Article + FAQ + BreadcrumbList
-// Google rich results require these
 // ============================================================
 function generateJsonLd(post: BlogPost) {
   const canonicalUrl = `https://trikalvaani.com/blog/${post.slug}`;
@@ -178,24 +168,9 @@ function generateJsonLd(post: BlogPost) {
     '@type': 'BreadcrumbList',
     '@id': `${canonicalUrl}#breadcrumb`,
     itemListElement: [
-      {
-        '@type': 'ListItem',
-        position: 1,
-        name: 'Home',
-        item: 'https://trikalvaani.com',
-      },
-      {
-        '@type': 'ListItem',
-        position: 2,
-        name: 'Blog',
-        item: 'https://trikalvaani.com/blog',
-      },
-      {
-        '@type': 'ListItem',
-        position: 3,
-        name: post.title,
-        item: canonicalUrl,
-      },
+      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://trikalvaani.com' },
+      { '@type': 'ListItem', position: 2, name: 'Blog', item: 'https://trikalvaani.com/blog' },
+      { '@type': 'ListItem', position: 3, name: post.title, item: canonicalUrl },
     ],
   };
 
@@ -203,8 +178,7 @@ function generateJsonLd(post: BlogPost) {
 }
 
 // ============================================================
-// MARKDOWN-LITE BOLD PARSER — Renders **text** as <strong>
-// Pure server-side string transform, no client JS
+// MARKDOWN-LITE BOLD PARSER
 // ============================================================
 function renderText(text: string): React.ReactNode {
   const parts = text.split(/(\*\*[^*]+\*\*)/g);
@@ -220,16 +194,13 @@ function renderText(text: string): React.ReactNode {
 }
 
 // ============================================================
-// SECTION RENDERER — Renders each block type server-side
+// SECTION RENDERER
 // ============================================================
 function SectionBlock({ section, index }: { section: BlogSection; index: number }) {
   switch (section.type) {
     case 'h2':
       return (
-        <h2
-          id={`section-${index}`}
-          className="mt-12 mb-4 text-2xl md:text-3xl font-bold text-amber-300 scroll-mt-24"
-        >
+        <h2 id={`section-${index}`} className="mt-12 mb-4 text-2xl md:text-3xl font-bold text-amber-300 scroll-mt-24">
           {section.text}
         </h2>
       );
@@ -320,27 +291,25 @@ function SectionBlock({ section, index }: { section: BlogSection; index: number 
 }
 
 // ============================================================
-// MAIN PAGE COMPONENT — SERVER COMPONENT (default in App Router)
-// All content renders to HTML on Vercel's edge, then served to user
+// MAIN PAGE COMPONENT — async Server Component
 // ============================================================
-export default function BlogArticlePage({
+export default async function BlogArticlePage({   // ← async added
   params,
 }: {
   params: { slug: string };
 }) {
-  const post = getPostBySlug(params.slug);
+  const post = await getPostBySlug(params.slug);   // ← await added
 
   if (!post) {
     notFound();
   }
 
-  const relatedPosts = getRelatedPosts(post.relatedSlugs);
+  const relatedPosts = await getRelatedPosts(post.relatedSlugs);  // ← await added
   const jsonLdSchemas = generateJsonLd(post);
   const canonicalUrl = `https://trikalvaani.com/blog/${post.slug}`;
 
   return (
     <>
-      {/* JSON-LD SCHEMA — Server-rendered in HTML head */}
       {jsonLdSchemas.map((schema, i) => (
         <script
           key={i}
@@ -351,16 +320,13 @@ export default function BlogArticlePage({
 
       <article className="min-h-screen bg-[#080B12] text-white">
         <div className="mx-auto max-w-4xl px-4 py-12 md:py-16">
-          {/* BREADCRUMB — Visible to user + screen readers */}
+
+          {/* BREADCRUMB */}
           <nav aria-label="Breadcrumb" className="mb-8 text-sm text-slate-400">
             <ol className="flex flex-wrap items-center gap-2">
-              <li>
-                <Link href="/" className="hover:text-amber-300 transition">Home</Link>
-              </li>
+              <li><Link href="/" className="hover:text-amber-300 transition">Home</Link></li>
               <li aria-hidden>›</li>
-              <li>
-                <Link href="/blog" className="hover:text-amber-300 transition">Blog</Link>
-              </li>
+              <li><Link href="/blog" className="hover:text-amber-300 transition">Blog</Link></li>
               <li aria-hidden>›</li>
               <li className="text-amber-300 truncate">{post.category}</li>
             </ol>
@@ -373,12 +339,12 @@ export default function BlogArticlePage({
             </span>
           </div>
 
-          {/* H1 — Primary SEO heading */}
+          {/* H1 */}
           <h1 className="mb-4 text-3xl md:text-4xl lg:text-5xl font-bold leading-tight">
             {post.title}
           </h1>
 
-          {/* META — Author, date, read time */}
+          {/* META */}
           <div className="mb-8 flex flex-wrap items-center gap-3 text-sm text-slate-400">
             <Link href="/founder" className="flex items-center gap-2 hover:text-amber-300 transition">
               <span className="font-semibold text-amber-200">Rohiit Gupta</span>
@@ -387,16 +353,14 @@ export default function BlogArticlePage({
             <span aria-hidden>·</span>
             <time dateTime={post.publishedAt}>
               {new Date(post.publishedAt).toLocaleDateString('en-IN', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
+                year: 'numeric', month: 'long', day: 'numeric',
               })}
             </time>
             <span aria-hidden>·</span>
             <span>{post.readTimeMinutes} min read</span>
           </div>
 
-          {/* DIRECT ANSWER BLOCK — GEO/AEO optimized for AI summarization */}
+          {/* DIRECT ANSWER BLOCK — GEO/AEO */}
           <section
             aria-label="Direct Answer"
             className="mb-12 rounded-xl border border-amber-700/40 bg-gradient-to-br from-amber-950/50 to-slate-900/50 p-6 md:p-8"
@@ -410,14 +374,14 @@ export default function BlogArticlePage({
             </p>
           </section>
 
-          {/* ARTICLE BODY — All sections rendered server-side */}
+          {/* ARTICLE BODY */}
           <div className="prose-content">
             {post.sections.map((section, i) => (
               <SectionBlock key={i} section={section} index={i} />
             ))}
           </div>
 
-          {/* PRIMARY CTA — Service link */}
+          {/* PRIMARY CTA */}
           <section className="my-12 rounded-xl border border-amber-700/50 bg-gradient-to-r from-amber-900/30 to-amber-950/30 p-6 md:p-8 text-center">
             <h3 className="mb-3 text-xl md:text-2xl font-bold text-amber-300">
               Apna Personalized Analysis Lein
@@ -449,7 +413,7 @@ export default function BlogArticlePage({
             </div>
           </section>
 
-          {/* FAQ SECTION — Schema-ready Q&A */}
+          {/* FAQ SECTION */}
           <section aria-label="Frequently Asked Questions" className="my-12">
             <h2 className="mb-6 text-2xl md:text-3xl font-bold text-amber-300">
               Frequently Asked Questions
@@ -495,15 +459,19 @@ export default function BlogArticlePage({
             </section>
           )}
 
-          {/* FOOTER — Authority signals */}
+          {/* FOOTER */}
           <footer className="mt-16 border-t border-amber-900/40 pt-8 text-sm text-slate-400">
             <p className="mb-2">
-              <em>Last reviewed by <Link href="/founder" className="text-amber-300 hover:underline">Rohiit Gupta</Link>, Chief Vedic Architect, Trikal Vaani · Delhi NCR · UDYAM-DL-10-0119070</em>
+              <em>Last reviewed by{' '}
+                <Link href="/founder" className="text-amber-300 hover:underline">Rohiit Gupta</Link>,
+                Chief Vedic Architect, Trikal Vaani · Delhi NCR · UDYAM-DL-10-0119070
+              </em>
             </p>
             <p>
               <strong className="text-amber-200">Classical sources:</strong> {post.classicalSources}
             </p>
           </footer>
+
         </div>
       </article>
     </>
