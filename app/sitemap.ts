@@ -3,7 +3,7 @@
  * 🔱 TRIKAL VAANI — CEO PROTECTION HEADER 🔱
  * ============================================================================
  * File:        app/sitemap.ts
- * Version:     v5.0 — FULLY DYNAMIC (ends manual sitemap maintenance forever)
+ * Version:     v5.1 — FULLY DYNAMIC (relative JSON imports for build safety)
  * Owner:       Rohiit Gupta, Chief Vedic Architect
  * Domain:      trikalvaani.com
  * GitHub:      vaanitrikal-Dev/TrikalVaani
@@ -52,8 +52,8 @@
 
 import type { MetadataRoute } from 'next';
 import { getAllPosts } from '@/lib/blog-posts';
-import citiesData from '@/data/cities.json';
-import festivalsData from '@/data/festivals.json';
+import citiesData from '../data/cities.json';
+import festivalsData from '../data/festivals.json';
 
 const BASE = 'https://trikalvaani.com';
 
