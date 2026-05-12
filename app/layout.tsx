@@ -54,6 +54,9 @@ export const metadata: Metadata = {
       "max-snippet": -1,
     },
   },
+  icons: {
+  icon: "/favicon.ico",
+},
   category: "Vedic Astrology",
   openGraph: {
     type: "website",
