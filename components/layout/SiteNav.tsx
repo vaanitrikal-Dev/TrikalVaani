@@ -3,10 +3,11 @@
 // ============================================================
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikal Vaani
 // FILE: components/layout/SiteNav.tsx
-// VERSION: v2.0 — Trikal_Vaani_Logo.svg replaces GoldOwlLogo
-// DATE: 2026-05-12
+// VERSION: v2.1 — Panchang tab added to desktop + mobile nav
+// DATE: 2026-05-13
 // CHANGES:
-//   v2.0: GoldOwlLogo SVG removed. New logo from public/Trikal_Vaani_Logo.svg
+//   v2.1: Added "Panchang" link in desktop nav + mobile nav
+//         Everything else identical to v2.0
 // ============================================================
 
 import Link from 'next/link';
@@ -133,6 +134,14 @@ export default function SiteNav() {
               Services
             </Link>
 
+            {/* ── PANCHANG TAB (NEW) ── */}
+            <Link
+              href="/panchang"
+              className="text-sm text-slate-400 hover:text-slate-200 transition-colors duration-200"
+            >
+              Panchang
+            </Link>
+
             <Link href="/blog" className="text-sm text-slate-400 hover:text-slate-200 transition-colors duration-200">
               Vedic Blog
             </Link>
@@ -196,6 +205,17 @@ export default function SiteNav() {
 
           {/* ── MOBILE NAV ── */}
           <div className="sm:hidden flex items-center gap-2">
+            <Link
+              href="/panchang"
+              className="text-xs font-semibold px-3 py-1.5 rounded-full transition-all duration-200"
+              style={{
+                color: GOLD_RGBA(0.9),
+                border: `1px solid ${GOLD_RGBA(0.25)}`,
+                background: GOLD_RGBA(0.06),
+              }}
+            >
+              Panchang
+            </Link>
             <Link
               href="/services"
               className="text-xs font-semibold px-3 py-1.5 rounded-full transition-all duration-200"
