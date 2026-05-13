@@ -2,7 +2,7 @@
 // 🔱 TRIKAL VAANI — CEO PROTECTION HEADER
 // ════════════════════════════════════════════════════════════════════
 // File:    app/api/admin/panchang-backfill/route.ts
-// Version: v1.0 — ONE-TIME USE
+// Version: v1.1 — ONE-TIME USE
 // Owner:   Rohiit Gupta, Chief Vedic Architect
 //
 // PURPOSE:
