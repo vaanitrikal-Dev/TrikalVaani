@@ -14,7 +14,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@supabase/supabase-js";
 
-export const revalidate = 86400;
+export const revalidate = 0; // Always fresh — content generated dynamically
 export const dynamicParams = true;
 
 const SITE_URL = "https://trikalvaani.com";
