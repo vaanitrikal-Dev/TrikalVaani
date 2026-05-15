@@ -118,9 +118,14 @@ IMPORTANT: Output ONLY raw JSON, no markdown, no explanation.
 
     url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={GEMINI_API_KEY}"
     payload = {
-        "contents": [{"parts": [{"text": prompt}]}],
-        "generationConfig": {"maxOutputTokens": 1500, "temperature": 0.7}
+    "contents": [{"parts": [{"text": prompt}]}],
+    "generationConfig": {
+        "maxOutputTokens": 4000,
+        "temperature": 0.7,
+        "responseMimeType": "application/json",
+        "thinkingConfig": {"thinkingBudget": 0}
     }
+}
     try:
         resp = requests.post(url, json=payload, timeout=30)
         text = resp.json()["candidates"][0]["content"]["parts"][0]["text"]
