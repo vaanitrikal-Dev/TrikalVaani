@@ -3,11 +3,11 @@ import os, json, time, random, requests, subprocess, base64, re
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
-GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
-PEXELS_API_KEY = os.environ.get("PEXELS_API_KEY", "")
-SUPABASE_URL   = os.environ.get("SUPABASE_URL", "")
-SUPABASE_KEY   = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "")
-SITE_URL       = "https://trikalvaani.com"
+GEMINI_API_KEY  = os.environ.get("GEMINI_API_KEY", "")
+PIXABAY_API_KEY = os.environ.get("PIXABAY_API_KEY", "")
+SUPABASE_URL    = os.environ.get("SUPABASE_URL", "")
+SUPABASE_KEY    = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "")
+SITE_URL        = "https://trikalvaani.com"
 
 BASE_DIR   = Path("/home/vaanitrikal/trikal-vaani/content-engine")
 TEMP_DIR   = BASE_DIR / "temp"
@@ -26,7 +26,6 @@ def log(msg): print(f"[{datetime.now(IST).strftime('%H:%M:%S')}] {msg}")
 
 
 def safe_text(t):
-    """Remove all FFmpeg-breaking characters from text."""
     t = str(t)
     for ch in ["'", '"', ":", "{", "}", "[", "]", "\\", "%", "$", "!", "?"]:
         t = t.replace(ch, "")
@@ -35,7 +34,6 @@ def safe_text(t):
 
 
 def extract_json(text):
-    """Robustly extract JSON from Gemini response."""
     text = re.sub(r'```json', '', text)
     text = re.sub(r'```', '', text)
     last_start = text.rfind('{"')
@@ -50,9 +48,7 @@ def extract_json(text):
 
 
 def fetch_upcoming_festivals():
-    """Get upcoming festivals from panchang API or use hardcoded list."""
     log("Fetching upcoming festivals...")
-    # Hardcoded upcoming festivals as fallback (always fresh)
     festivals = [
         {"name": "Shani Jayanti", "date": "2026-05-16", "days_left": 1},
         {"name": "Vat Savitri Vrat", "date": "2026-05-27", "days_left": 12},
@@ -61,22 +57,12 @@ def fetch_upcoming_festivals():
     try:
         resp = requests.get(f"{SITE_URL}/api/panchang/today", timeout=15)
         data = resp.json()
-        # Extract clean panchang fields
         tithi = data.get("tithi", {})
-        if isinstance(tithi, dict):
-            tithi_name = f"{tithi.get('name','')} {tithi.get('paksha','')}"
-        else:
-            tithi_name = str(tithi)
+        tithi_name = f"{tithi.get('name','')} {tithi.get('paksha','')}" if isinstance(tithi, dict) else str(tithi)
         nakshatra = data.get("nakshatra", {})
-        if isinstance(nakshatra, dict):
-            nakshatra_name = nakshatra.get("name", "")
-        else:
-            nakshatra_name = str(nakshatra)
+        nakshatra_name = nakshatra.get("name", "") if isinstance(nakshatra, dict) else str(nakshatra)
         yoga = data.get("yoga", {})
-        if isinstance(yoga, dict):
-            yoga_name = yoga.get("name", "")
-        else:
-            yoga_name = str(yoga)
+        yoga_name = yoga.get("name", "") if isinstance(yoga, dict) else str(yoga)
         panchang_clean = {
             "tithi": tithi_name,
             "nakshatra": nakshatra_name,
@@ -107,25 +93,25 @@ Upcoming Festivals:
 
 Rules:
 - Focus on the nearest festival: {festivals[0]['name']} in {festivals[0]['days_left']} day
-- Hindi lines: simple, spiritual, max 7 words each
-- English lines: conversational, max 8 words each
+- Hindi lines: simple, spiritual, max 7 words each, no special characters
+- English lines: conversational, max 8 words each, no special characters
 - TTS script: 40-50 second warm Hindi narration about this festival and its Vedic significance
 - End with: Trikal Vaani par apni kundali dekhein
-- pexels_query: 3-4 english words for relevant stock video
+- pixabay_query: 3-4 english words for relevant stock video
 
 IMPORTANT: Output ONLY raw JSON, no markdown, no explanation.
-{{"hindi_lines":["line1","line2","line3","line4"],"english_lines":["line1","line2","line3","line4"],"tts_script":"full hindi narration here","pexels_query":"festival celebration india spiritual","video_title":"festival name hindi short"}}"""
+{{"hindi_lines":["line1","line2","line3","line4"],"english_lines":["line1","line2","line3","line4"],"tts_script":"full hindi narration here","pixabay_query":"festival celebration india spiritual","video_title":"festival name hindi short"}}"""
 
     url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={GEMINI_API_KEY}"
     payload = {
-    "contents": [{"parts": [{"text": prompt}]}],
-    "generationConfig": {
-        "maxOutputTokens": 4000,
-        "temperature": 0.7,
-        "responseMimeType": "application/json",
-        "thinkingConfig": {"thinkingBudget": 0}
+        "contents": [{"parts": [{"text": prompt}]}],
+        "generationConfig": {
+            "maxOutputTokens": 4000,
+            "temperature": 0.7,
+            "responseMimeType": "application/json",
+            "thinkingConfig": {"thinkingBudget": 0}
+        }
     }
-}
     try:
         resp = requests.post(url, json=payload, timeout=30)
         text = resp.json()["candidates"][0]["content"]["parts"][0]["text"]
@@ -160,31 +146,27 @@ def generate_tts(tts_script):
         return None
 
 
-def fetch_pexels(query, count=3):
-    log(f"Fetching Pexels: {query}")
-    headers = {"Authorization": PEXELS_API_KEY.strip()}
+def fetch_clips(query, count=3):
+    log(f"Fetching Pixabay: {query}")
+    key = PIXABAY_API_KEY.strip()
     try:
-        resp = requests.get(
-            f"https://api.pexels.com/videos/search?query={query}&per_page=10&orientation=portrait",
-            headers=headers, timeout=15
-        )
-        videos = resp.json().get("videos", [])
+        url = f"https://pixabay.com/api/videos/?key={key}&q={requests.utils.quote(query)}&video_type=film&orientation=vertical&per_page=10"
+        resp = requests.get(url, timeout=15)
+        videos = resp.json().get("hits", [])
         if not videos:
-            resp = requests.get(
-                "https://api.pexels.com/videos/search?query=temple+india+spiritual&per_page=10&orientation=portrait",
-                headers=headers, timeout=15
-            )
-            videos = resp.json().get("videos", [])
+            log("No results, trying fallback...")
+            url = f"https://pixabay.com/api/videos/?key={key}&q=temple+india+spiritual&video_type=film&orientation=vertical&per_page=10"
+            resp = requests.get(url, timeout=15)
+            videos = resp.json().get("hits", [])
         random.shuffle(videos)
         clips = []
         for video in videos[:count*2]:
-            files = video.get("video_files", [])
-            portrait = [f for f in files if f.get("width", 0) < f.get("height", 1)]
-            best = portrait or files
+            sizes = video.get("videos", {})
+            best = sizes.get("medium") or sizes.get("small") or sizes.get("large") or sizes.get("tiny")
             if not best: continue
             clip_path = TEMP_DIR / f"clip_{video['id']}.mp4"
             if not clip_path.exists():
-                r = requests.get(best[0]["link"], timeout=60, stream=True)
+                r = requests.get(best["url"], timeout=60, stream=True)
                 with open(clip_path, "wb") as f:
                     for chunk in r.iter_content(8192): f.write(chunk)
             clips.append(clip_path)
@@ -192,7 +174,7 @@ def fetch_pexels(query, count=3):
         log(f"Got {len(clips)} clips")
         return clips
     except Exception as e:
-        log(f"Pexels failed: {e}")
+        log(f"Pixabay failed: {e}")
         return []
 
 
@@ -240,23 +222,16 @@ def render_video(clips, audio_path, script, festivals):
     fe_opt = f":fontfile='{fe}'" if fe else ""
 
     filters = ["colorchannelmixer=rr=0.4:gg=0.4:bb=0.4"]
-
-    # Top branding
     filters.append(f"drawtext=text='TrikalVaani.com':fontsize=30:fontcolor=gold:x=(w-text_w)/2:y=50{fe_opt}")
-
-    # Festival countdown box
     filters.append(f"drawtext=text='{fest_name}':fontsize=56:fontcolor=white:x=(w-text_w)/2:y=200:shadowcolor=black:shadowx=3:shadowy=3{fh_opt}")
     filters.append(f"drawtext=text='{days_left} Din Baad':fontsize=40:fontcolor=orange:x=(w-text_w)/2:y=280{fe_opt}")
 
-    # Hindi lines
     for i, (line, y) in enumerate(zip(hindi, [400, 490, 580, 670])):
         filters.append(f"drawtext=text='{line}':fontsize=48:fontcolor=white:x=(w-text_w)/2:y={y}:enable='gte(t,{i*8})':shadowcolor=black:shadowx=2:shadowy=2{fh_opt}")
 
-    # English lines
     for i, (line, y) in enumerate(zip(english, [750, 820, 890, 960])):
         filters.append(f"drawtext=text='{line}':fontsize=32:fontcolor=lightyellow:x=(w-text_w)/2:y={y}:enable='gte(t,{i*8})':shadowcolor=black:shadowx=1:shadowy=1{fe_opt}")
 
-    # Bottom credit
     filters.append(f"drawtext=text='Rohiit Gupta - Chief Vedic Architect':fontsize=24:fontcolor=gold:x=(w-text_w)/2:y=h-80{fe_opt}")
 
     vf = ",".join(filters)
@@ -276,7 +251,7 @@ def render_video(clips, audio_path, script, festivals):
                "-movflags", "+faststart", str(output_path)]
 
     res = subprocess.run(cmd, capture_output=True, text=True)
-    if output_path.exists():
+    if output_path.exists() and output_path.stat().st_size > 1000:
         log(f"Video ready: {output_path} ({output_path.stat().st_size/1024/1024:.1f} MB)")
         return output_path
     log(f"FFmpeg error: {res.stderr[-500:]}")
@@ -303,7 +278,7 @@ def cleanup():
 
 def main():
     log("=" * 50)
-    log("TRIKAL VAANI CONTENT ENGINE v2.0")
+    log("TRIKAL VAANI CONTENT ENGINE v2.1")
     log("=" * 50)
 
     festivals, panchang = fetch_upcoming_festivals()
@@ -315,7 +290,8 @@ def main():
     audio = generate_tts(script.get("tts_script", ""))
     if not audio: return
 
-    clips = fetch_pexels(script.get("pexels_query", "indian festival celebration temple"), count=3)
+    query = script.get("pixabay_query", script.get("pexels_query", "indian festival celebration temple"))
+    clips = fetch_clips(query, count=3)
     if not clips: return
 
     video = render_video(clips, audio, script, festivals)
