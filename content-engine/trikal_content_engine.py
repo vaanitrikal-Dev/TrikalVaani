@@ -105,15 +105,28 @@ def safe_text(t):
 def extract_json(text):
     text = re.sub(r'```json', '', text)
     text = re.sub(r'```', '', text)
-    last_start = text.rfind('{"')
-    if last_start == -1:
-        last_start = text.rfind('{')
-    if last_start == -1:
-        raise ValueError("No JSON found")
-    last_end = text.rfind('}')
-    if last_end <= last_start:
-        raise ValueError("Malformed JSON")
-    return json.loads(text[last_start:last_end + 1])
+    text = text.strip()
+    # Try direct parse first
+    try:
+        return json.loads(text)
+    except Exception:
+        pass
+    # Find outermost { } pair
+    depth = 0
+    start = None
+    for i, ch in enumerate(text):
+        if ch == '{':
+            if depth == 0:
+                start = i
+            depth += 1
+        elif ch == '}':
+            depth -= 1
+            if depth == 0 and start is not None:
+                try:
+                    return json.loads(text[start:i+1])
+                except Exception:
+                    continue
+    raise ValueError("No valid JSON found")
 
 
 # STEP 1: SCRIPT + SEO/GEO/AEO PACKAGE
