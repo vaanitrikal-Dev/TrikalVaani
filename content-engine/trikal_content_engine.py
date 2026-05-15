@@ -218,8 +218,15 @@ def generate_tts(tts_script):
     try:
         resp = requests.post(url, json=payload, timeout=120)
         audio_b64 = resp.json()["candidates"][0]["content"]["parts"][0]["inlineData"]["data"]
-        audio_path = TEMP_DIR / f"tts_{int(time.time())}.mp3"
-        audio_path.write_bytes(base64.b64decode(audio_b64))
+raw_pcm = base64.b64decode(audio_b64)
+# Gemini TTS returns 24kHz mono 16-bit PCM — wrap in WAV header
+import wave
+audio_path = TEMP_DIR / f"tts_{int(time.time())}.wav"
+with wave.open(str(audio_path), 'wb') as wf:
+    wf.setnchannels(1)
+    wf.setsampwidth(2)
+    wf.setframerate(24000)
+    wf.writeframes(raw_pcm)
         log(f"TTS saved: {audio_path.name}")
         return audio_path
     except Exception as e:
