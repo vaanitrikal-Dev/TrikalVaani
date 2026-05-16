@@ -446,7 +446,6 @@ def render_video(images, audio_path, script, festival):
     fe_opt = f":fontfile='{fe}'" if fe else ""
 
     filters = []
-    filters.append("drawbox=x=0:y=h-400:w=iw:h=400:color=black@0.35:t=fill")
     filters.append(f"drawtext=text='TrikalVaani.com':fontsize=42:fontcolor=gold:x=(w-text_w)/2:y=80:shadowcolor=black:shadowx=2:shadowy=2{fe_opt}")
     filters.append(f"drawtext=text='{fest_name}':fontsize=58:fontcolor=white:x=(w-text_w)/2:y=160:shadowcolor=black:shadowx=3:shadowy=3{fh_opt}")
 
