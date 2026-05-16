@@ -1,15 +1,19 @@
 #!/usr/bin/env python3
 """
-TRIKAL VAANI - Content Engine v4.1
+TRIKAL VAANI - Content Engine v5.0
 =====================================
-SEO + GEO + AEO Optimized Festival Video Engine
+RESEARCH-GROUNDED + SEO + GEO + AEO + SMART CRON
 =====================================
-FIXES IN v4.1:
-- Proper WAV file creation (wraps Gemini PCM in valid header)
-- import wave at module top (no inline import)
-- Correct indentation throughout
-- ffprobe safety with frame-count math (no zero/inf time_base)
-- Cleanup includes both .mp3 and .wav legacy files
+KEY CHANGES FROM v4.1:
+  1. Reads festival from Supabase festivals_master (not hardcoded)
+  2. Gemini Flash + Google Search grounding for accurate deity/offerings research
+  3. New 5-image flow: Deity 100% / Deity+Offerings 30-70 / Items 100% / Symbolic / Blessing 100%
+  4. NO rectangle box, NO "X Din Baad" countdown
+  5. Specific iconography prompts (e.g. "Shani Dev: dark blue-black skin, holding trident")
+  6. 17-field SEO/GEO/AEO package (added 7 new fields)
+  7. Auto-upload to Supabase Storage (trikal-videos bucket)
+  8. 3-retry logic with WhatsApp alert on final failure
+  9. SEO-optimized filename slug
 =====================================
 CEO: Rohiit Gupta | Chief Vedic Architect | trikalvaani.com
 =====================================
@@ -23,6 +27,7 @@ import subprocess
 import base64
 import re
 import wave
+import sys
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
@@ -30,6 +35,9 @@ from pathlib import Path
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
 SUPABASE_URL = os.environ.get("SUPABASE_URL", "")
 SUPABASE_KEY = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "")
+WHATSAPP_TOKEN = os.environ.get("WHATSAPP_ACCESS_TOKEN", "")
+WHATSAPP_PHONE_ID = os.environ.get("WHATSAPP_PHONE_NUMBER_ID", "")
+ALERT_NUMBER = "919211804111"  # Trikal Vaani WhatsApp
 SITE_URL = "https://trikalvaani.com"
 
 # PATHS
@@ -55,42 +63,25 @@ def log(msg):
     print(f"[{datetime.now(IST).strftime('%H:%M:%S')}] {msg}")
 
 
-# FESTIVAL DATABASE
-FESTIVALS = [
-    {
-        "name": "Shani Jayanti", "date": "2026-05-16", "days_left": 1,
-        "deity": "Shani Dev", "planet": "Saturn", "house": "10th House",
-        "dosha": "Sade Sati, Shani Dosha",
-        "theme": "Saturn ringed planet glowing blue cosmic, ancient Shani temple at twilight"
-    },
-    {
-        "name": "Vat Savitri Vrat", "date": "2026-05-27", "days_left": 12,
-        "deity": "Maa Savitri", "planet": "Venus", "house": "7th House",
-        "dosha": "Mangal Dosha relief",
-        "theme": "Massive sacred banyan tree, married woman in red saree praying, golden hour"
-    },
-    {
-        "name": "Ganga Dussehra", "date": "2026-06-01", "days_left": 17,
-        "deity": "Maa Ganga", "planet": "Moon", "house": "4th House",
-        "dosha": "Pitra Dosha",
-        "theme": "Holy Ganga at Haridwar, evening aarti diyas floating, glowing sunset"
-    },
-]
-
-# STYLE ROTATION
+# STYLES
 STYLES = {
     "Traditional": "traditional devotional Indian art style, warm temple atmosphere, marigold flowers, brass diyas, red and gold color palette, intricate mandala patterns, authentic Hindu iconography",
     "Cosmic": "cosmic mystical style, deep space backdrop, glowing celestial energy, planetary alignment, deity silhouette in galaxy, purple and gold ethereal lighting, sacred geometry",
-    "Cinematic": "cinematic photorealistic style, golden hour natural lighting, real Indian sacred location (Varanasi ghat, Haridwar, Himalayan temple), documentary photography quality, shallow depth of field"
+    "Cinematic": "cinematic photorealistic style, golden hour natural lighting, real Indian sacred location, documentary photography quality, shallow depth of field"
 }
 
-# 5-IMAGE STORY ARC
+# NEW 5-IMAGE FLOW (deity-focused, no generic stock look)
 STORY_ARC = [
-    {"role": "Hook", "style_key": "Cosmic", "scene": "Dramatic reveal of {deity} or {planet}, eye-catching opening shot, mysterious atmosphere, viewer's attention grabbed in first second"},
-    {"role": "Context", "style_key": "Cinematic", "scene": "Sacred location, holy site or symbolic landscape connected to {deity}, establishing the spiritual setting, wide cinematic frame"},
-    {"role": "Ritual", "style_key": "Traditional", "scene": "Close-up of ritual offering, puja items, sacred fire, flowers, lamps being offered for {festival}, hands performing the ritual, no face visible"},
-    {"role": "Devotee", "style_key": "Cinematic", "scene": "Devotee from behind (back to camera) praying with folded hands before sacred space, atmospheric depth, golden light streaming"},
-    {"role": "Blessing", "style_key": "Cosmic", "scene": "Divine light glowing radiating, blessing aftermath, peace and grace visualized, ethereal aura, soft celestial rays"}
+    {"role": "DeityReveal",  "style_key": "Cosmic",      "deity_pct": 100, "items_pct": 0,
+     "scene": "Solo dramatic full-body portrait of {deity_specific}, complete divine iconography, traditional weapons/symbols, traditional vahana if any, glowing aura, mysterious cinematic reveal, viewer captivated"},
+    {"role": "DeityOffering","style_key": "Traditional", "deity_pct": 30,  "items_pct": 70,
+     "scene": "Small {deity_specific} idol in background, foreground filled with traditional offerings: {primary_offerings}, beautiful arrangement, glowing diyas, temple altar setting"},
+    {"role": "Dos",          "style_key": "Traditional", "deity_pct": 0,   "items_pct": 100,
+     "scene": "Close-up arrangement of items to offer on {festival_name}: {primary_offerings}, beautifully composed, no people, sacred altar, golden warm lighting, focus on offerings only"},
+    {"role": "Donts",        "style_key": "Cinematic",   "deity_pct": 20,  "items_pct": 80,
+     "scene": "Symbolic visual of what to AVOID on {festival_name}: {donts_visual}, moody darker lighting, slight warning atmosphere, sacred contrast"},
+    {"role": "Blessing",     "style_key": "Cosmic",      "deity_pct": 100, "items_pct": 0,
+     "scene": "{deity_specific} in full divine glory, blessing posture, divine light radiating outward, ethereal celestial blessing aura, peace and grace, soft golden rays, devotee blessed"}
 ]
 
 
@@ -106,12 +97,10 @@ def extract_json(text):
     text = re.sub(r'```json', '', text)
     text = re.sub(r'```', '', text)
     text = text.strip()
-    # Try direct parse first
     try:
         return json.loads(text)
     except Exception:
         pass
-    # Find outermost { } pair
     depth = 0
     start = None
     for i, ch in enumerate(text):
@@ -129,107 +118,213 @@ def extract_json(text):
     raise ValueError("No valid JSON found")
 
 
-# STEP 1: SCRIPT + SEO/GEO/AEO PACKAGE
-def generate_script(festival):
-    log(f"Generating SEO+GEO+AEO script for {festival['name']}...")
+# ============================================================
+# STEP 0: FETCH TODAY'S FESTIVAL FROM SUPABASE
+# ============================================================
+def fetch_todays_festivals():
+    """
+    Query festivals_master for festivals where today is a publish day.
+    Returns list of festivals to process (multiple allowed same day).
+    """
+    if not SUPABASE_URL:
+        log("SUPABASE_URL not set - cannot fetch festival")
+        return []
 
+    today = datetime.now(IST).date()
+    log(f"Checking publish schedule for {today}...")
+
+    # Get all auto_publish festivals for current year
+    url = f"{SUPABASE_URL}/rest/v1/festivals_master"
+    params = {
+        "year": f"eq.{today.year}",
+        "auto_publish": "eq.true",
+        "select": "*"
+    }
+    headers = {
+        "apikey": SUPABASE_KEY,
+        "Authorization": f"Bearer {SUPABASE_KEY}"
+    }
+    try:
+        resp = requests.get(url, params=params, headers=headers, timeout=30)
+        festivals = resp.json()
+        log(f"Found {len(festivals)} auto-publish festivals in {today.year}")
+    except Exception as e:
+        log(f"Supabase fetch failed: {e}")
+        return []
+
+    # Filter to ones where today matches a publish_day
+    matching = []
+    for fest in festivals:
+        fest_date = datetime.strptime(fest['date'], '%Y-%m-%d').date()
+        days_diff = (fest_date - today).days
+        publish_days = fest.get('publish_days', [-2])
+        if days_diff in publish_days:
+            # Add computed fields
+            fest['_days_left'] = days_diff
+            fest['_publish_day_index'] = publish_days.index(days_diff) + 1
+            fest['_total_publish_days'] = len(publish_days)
+            matching.append(fest)
+            log(f"  MATCH: {fest['festival_name']} (in {days_diff} days, video {fest['_publish_day_index']}/{fest['_total_publish_days']})")
+
+    return matching
+
+
+# ============================================================
+# STEP 1: RESEARCH-GROUNDED SCRIPT + 17-FIELD SEO PACKAGE
+# ============================================================
+def generate_script(festival):
+    log(f"Generating research-grounded SEO+GEO+AEO package for {festival['festival_name']}...")
+
+    deity = festival.get('deity', 'Devta')
+    offerings = festival.get('offerings', []) or []
+    dos = festival.get('dos', []) or []
+    donts = festival.get('donts', []) or []
+    primary_offerings = ", ".join(offerings[:4]) if offerings else "flowers, sweets, water"
+    donts_visual = ", ".join(donts[:2]) if donts else "negative thoughts, anger"
+    fest_slug = festival.get('festival_slug', festival['festival_name'].lower().replace(' ', '-'))
+    planet = festival.get('planet_ruler', 'Sun')
+    maa_form = festival.get('maa_form', '')
+    color = festival.get('color', 'Gold')
+
+    deity_specific = maa_form if maa_form else deity
+
+    # Build image prompts with rich context
     arc_prompts = []
     for stage in STORY_ARC:
         scene = stage["scene"].format(
-            deity=festival["deity"],
-            planet=festival["planet"],
-            festival=festival["name"]
+            deity_specific=deity_specific,
+            primary_offerings=primary_offerings,
+            festival_name=festival['festival_name'],
+            donts_visual=donts_visual
         )
         style_desc = STYLES[stage["style_key"]]
         arc_prompts.append({"role": stage["role"], "scene": scene, "style": style_desc})
 
     prompt = f"""You are Rohiit Gupta, Chief Vedic Architect at Trikal Vaani (trikalvaani.com) - India's premium AI Vedic Astrology platform.
 
-Generate a complete SEO + GEO + AEO optimized Instagram Reel content package for upcoming festival.
+Generate a RESEARCH-GROUNDED, SEO + GEO + AEO optimized complete content package for upcoming festival.
+You have access to Google Search - USE IT to verify accurate deity iconography, traditional offerings, dos and donts.
 
-FESTIVAL: {festival['name']}
-DATE: {festival['date']} ({festival['days_left']} days from today)
-DEITY: {festival['deity']}
-PLANET: {festival['planet']}
-HOUSE: {festival['house']}
-DOSHA RELIEF: {festival['dosha']}
+FESTIVAL: {festival['festival_name']}
+DATE: {festival['date']} ({festival['_days_left']} days from today)
+DEITY: {deity_specific}
+PLANET: {planet}
+COLOR: {color}
+KNOWN OFFERINGS: {primary_offerings}
+KNOWN DOS: {", ".join(dos[:3])}
+KNOWN DONTS: {", ".join(donts[:3])}
+VIDEO IN SERIES: {festival['_publish_day_index']} of {festival['_total_publish_days']}
 
 Output ONLY raw JSON (no markdown fences, no preamble):
 
 {{
-  "video_title": "Hindi title max 6 Devanagari words SEO-optimized",
+  "video_title": "Hindi title max 6 Devanagari words SEO-optimized for {festival['festival_name']}",
+  "slug": "{fest_slug}-video-{festival['_publish_day_index']}-{festival['date']}",
   "hindi_lines": ["Hook 6 words Devanagari", "Line 2 max 6 words", "Line 3 max 6 words", "Line 4 closing max 6 words"],
   "english_lines": ["Hook 7 words English", "Line 2 max 7 words", "Line 3 max 7 words", "Line 4 max 7 words"],
-  "tts_script": "STRICT 120 WORDS MAX Hindi narration (will be spoken in 45-50 seconds). Warm authoritative voice. Structure: 1) Hook about {festival['name']} significance 2) Connection to {festival['planet']} and {festival['house']} 3) One specific ritual to do 4) One thing to avoid 5) Blessing promise. Last sentence MUST be exactly: Trikal Vaani par apni kundali dekhein aur apna bhavishya jaanein. COUNT WORDS BEFORE OUTPUT - must be under 120 words.",
-  "seo_caption": "150 word Instagram/Facebook caption in Hinglish. Front-load primary keyword '{festival['name']} 2026' in first 8 words. Include semantic keywords: {festival['planet']}, {festival['deity']}, kundali, Vedic astrology, remedies. Strong hook line, value-packed middle, CTA: 'Free Kundali on TrikalVaani.com'. Include 5 line breaks for readability. End with 5 emoji line.",
+  "tts_script": "STRICT 120 WORDS MAX Hindi narration (spoken in 45-50 seconds). Warm authoritative voice. Structure: 1) Hook about {festival['festival_name']} significance 2) Connection to {planet} planet 3) ONE specific ritual from offerings list 4) ONE thing to avoid 5) Blessing promise. Last sentence MUST be exactly: Trikal Vaani par apni kundali dekhein aur apna bhavishya jaanein. COUNT WORDS - must be under 120.",
+  "meta_description": "155 character SEO meta description with primary keyword '{festival['festival_name']} 2026' front-loaded. Include date, key benefit, CTA.",
+  "seo_caption": "150 word Instagram/Facebook caption in Hinglish. Primary keyword '{festival['festival_name']} 2026' in first 8 words. Include semantic keywords: {planet}, {deity_specific}, kundali, Vedic astrology, remedies. Strong hook, value-packed middle, CTA: 'Free Kundali on TrikalVaani.com'. 5 line breaks. End with 5 emojis.",
+  "caption_variants": {{
+    "instagram": "120 word IG-optimized caption, emoji-rich, line breaks for readability, hashtag-friendly",
+    "facebook": "180 word FB-optimized caption, longer storytelling, less emojis, community-focused",
+    "threads": "80 word Threads-optimized punchy caption, conversational tone, question at end for engagement"
+  }},
   "aeo_qa": [
-    {{"q": "What is the significance of {festival['name']}?", "a": "40-60 word direct answer optimized for Google SGE, Perplexity, SearchGPT featured snippet. Mention {festival['deity']}, {festival['planet']}, and specific date 2026."}},
-    {{"q": "What rituals to perform on {festival['name']}?", "a": "40-60 word answer listing 3 specific rituals with timing and offerings"}},
-    {{"q": "How does {festival['name']} affect my kundali?", "a": "40-60 word answer connecting {festival['planet']}, {festival['house']}, and {festival['dosha']}. End with CTA to trikalvaani.com"}}
+    {{"q": "What is the significance of {festival['festival_name']} in 2026?", "a": "40-60 word direct answer optimized for Google SGE, Perplexity, SearchGPT. Mention {deity_specific}, {planet}, date {festival['date']}, primary benefit."}},
+    {{"q": "What rituals to perform on {festival['festival_name']}?", "a": "40-60 word answer listing 3 specific rituals from: {", ".join(dos[:3])}"}},
+    {{"q": "What to offer to {deity_specific} on {festival['festival_name']}?", "a": "40-60 word answer listing offerings: {primary_offerings}"}},
+    {{"q": "How does {festival['festival_name']} affect my kundali?", "a": "40-60 word answer connecting {planet} planet impact. End with CTA: Check your free kundali on trikalvaani.com"}}
   ],
   "geo_entities": {{
-    "primary_deity": "{festival['deity']}",
-    "primary_planet": "{festival['planet']}",
-    "primary_house": "{festival['house']}",
-    "dosha_addressed": "{festival['dosha']}",
-    "related_planets": ["list 2 connected planets"],
-    "related_yogas": ["list 2 Vedic yogas relevant to this festival"],
-    "remedy_gemstone": "one gemstone name",
-    "remedy_mantra": "one Sanskrit mantra in Devanagari",
-    "auspicious_color": "color name",
-    "auspicious_direction": "direction name"
+    "primary_deity": "{deity_specific}",
+    "primary_planet": "{planet}",
+    "auspicious_color": "{color}",
+    "primary_offerings": {json.dumps(offerings[:5] if offerings else [])},
+    "primary_mantra": "{festival.get('mantra', '')}",
+    "dosha_relief": "{festival.get('dosha_relief', '')}",
+    "related_planets": ["list 2 connected planets to {planet}"],
+    "related_yogas": ["list 2 Vedic yogas relevant"],
+    "remedy_gemstone": "one gemstone for {planet}",
+    "auspicious_direction": "best direction for puja"
+  }},
+  "voice_search_phrases": [
+    "When is {festival['festival_name']} in 2026",
+    "How to celebrate {festival['festival_name']}",
+    "What to offer on {festival['festival_name']}",
+    "{festival['festival_name']} significance",
+    "{festival['festival_name']} kundali effect"
+  ],
+  "keyword_cluster": {{
+    "primary": "{festival['festival_name']} 2026",
+    "lsi": ["list 5 latent semantic indexing keywords"],
+    "long_tail": ["list 5 long-tail SEO keywords starting with how/what/why/when"]
   }},
   "hashtags": {{
-    "trending": ["15 trending Hindi+English hashtags WITHOUT # symbol"],
-    "niche": ["10 niche Vedic astrology hashtags WITHOUT # symbol"]
+    "trending": ["15 trending Hindi+English hashtags without # symbol"],
+    "niche": ["10 niche Vedic astrology hashtags without # symbol"]
   }},
-  "youtube_description": "300 word YouTube Shorts description. Opening 150 chars MUST contain primary keyword and CTA URL https://trikalvaani.com. Include: festival significance, planet connection, 3 rituals, 1 remedy, kundali CTA. Add timestamps 0:00 Intro, 0:15 Significance, 0:30 Rituals, 0:45 CTA. End with 5 hashtags on new lines.",
-  "whatsapp_broadcast": "60 word punchy WhatsApp broadcast in Hinglish. Hook in first line. Mention {festival['name']} date. One ritual tip. CTA: 'Free kundali check karein - trikalvaani.com'. Use 2 emojis max.",
+  "youtube_description": "300 word YouTube Shorts description. First 150 chars MUST contain primary keyword and CTA URL https://trikalvaani.com. Include: festival significance, {planet} connection, 3 rituals, 1 remedy, kundali CTA. Timestamps 0:00 Intro, 0:15 Significance, 0:30 Rituals, 0:45 CTA. End with 5 hashtags new lines.",
+  "whatsapp_broadcast": "60 word punchy WhatsApp Hinglish. Hook line 1. Mention {festival['festival_name']} date {festival['date']}. One ritual tip from offerings. CTA: 'Free kundali check - trikalvaani.com'. 2 emojis max.",
+  "schema_event": {{
+    "@type": "Event",
+    "name": "{festival['festival_name']} 2026",
+    "startDate": "{festival['date']}",
+    "description": "60 word event schema description with deity and planet"
+  }},
+  "cta_variants": [
+    "Free Kundali Banaye - TrikalVaani.com",
+    "Apna Bhavishya Jaanein Abhi - TrikalVaani.com",
+    "Astrology Help Click - TrikalVaani.com"
+  ],
   "image_prompts": [
-    "Image 1 HOOK: {arc_prompts[0]['scene']}. Style: {arc_prompts[0]['style']}. 9:16 portrait photorealistic no text no watermark cinematic",
-    "Image 2 CONTEXT: {arc_prompts[1]['scene']}. Style: {arc_prompts[1]['style']}. 9:16 portrait photorealistic no text no watermark cinematic",
-    "Image 3 RITUAL: {arc_prompts[2]['scene']}. Style: {arc_prompts[2]['style']}. 9:16 portrait photorealistic no text no watermark cinematic",
-    "Image 4 DEVOTEE: {arc_prompts[3]['scene']}. Style: {arc_prompts[3]['style']}. 9:16 portrait photorealistic no text no watermark cinematic",
-    "Image 5 BLESSING: {arc_prompts[4]['scene']}. Style: {arc_prompts[4]['style']}. 9:16 portrait photorealistic no text no watermark cinematic"
+    "Image 1 DEITY REVEAL (100% deity focus): {arc_prompts[0]['scene']}. Style: {arc_prompts[0]['style']}. CRITICAL: Use authentic Hindu iconography for {deity_specific} - correct skin color, weapons, vahana, clothing. 9:16 portrait, photorealistic, cinematic, no text, no watermark, no captions",
+    "Image 2 DEITY + OFFERINGS (30% deity, 70% items): {arc_prompts[1]['scene']}. Style: {arc_prompts[1]['style']}. 9:16 portrait, photorealistic, no text, no watermark",
+    "Image 3 OFFERINGS CLOSE-UP (100% items): {arc_prompts[2]['scene']}. Style: {arc_prompts[2]['style']}. 9:16 portrait, macro photography style, no people, no text, no watermark",
+    "Image 4 SYMBOLIC DONTS (80% symbolic): {arc_prompts[3]['scene']}. Style: {arc_prompts[3]['style']}. 9:16 portrait, atmospheric, no text, no watermark",
+    "Image 5 BLESSING (100% deity blessing): {arc_prompts[4]['scene']}. Style: {arc_prompts[4]['style']}. 9:16 portrait, divine glow, photorealistic, no text, no watermark"
   ]
 }}
 
 CRITICAL RULES:
+- Use Google Search to verify {deity_specific} iconography is ACCURATE (skin color, weapons, vahana, clothing)
+- Image prompts must be HIGHLY SPECIFIC - not generic temple statues
 - Hindi text in pure Devanagari script only
-- TTS script MUST be under 120 words (count carefully)
+- TTS script MUST be under 120 words
 - All AEO answers 40-60 words exactly
-- SEO caption keyword-rich for Google + Instagram SEO
-- No filler, no fluff, every word must drive engagement or rankings"""
+- No filler - every word drives engagement or rankings"""
 
     url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={GEMINI_API_KEY}"
     payload = {
         "contents": [{"parts": [{"text": prompt}]}],
+        "tools": [{"google_search": {}}],  # Google Search grounding enabled
         "generationConfig": {
-            "maxOutputTokens": 8000,
+            "maxOutputTokens": 10000,
             "temperature": 0.8,
-            "responseMimeType": "application/json",
             "thinkingConfig": {"thinkingBudget": 0}
         }
     }
     try:
-        resp = requests.post(url, json=payload, timeout=60)
+        resp = requests.post(url, json=payload, timeout=90)
         text = resp.json()["candidates"][0]["content"]["parts"][0]["text"]
         log(f"Script raw preview: {repr(text[:200])}")
         result = extract_json(text)
-        log("Script + SEO/GEO/AEO package generated")
+        log("Script + 17-field SEO/GEO/AEO package generated (Google grounded)")
         return result
     except Exception as e:
         log(f"Script failed: {e}")
         return None
 
 
-# STEP 2: TTS AUDIO (SAVED AS PROPER WAV)
+# ============================================================
+# STEP 2: TTS AUDIO (WAV)
+# ============================================================
 def generate_tts(tts_script):
     log("Generating Hindi TTS via Gemini Charon...")
     word_count = len(tts_script.split())
     log(f"TTS script word count: {word_count}")
     if word_count > 130:
-        log(f"WARNING: Script has {word_count} words (target <120). Audio may exceed 50sec.")
+        log(f"WARNING: Script has {word_count} words (target <120).")
 
     url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key={GEMINI_API_KEY}"
     payload = {
@@ -256,7 +351,9 @@ def generate_tts(tts_script):
         return None
 
 
+# ============================================================
 # STEP 3: IMAGES via NANO BANANA 2
+# ============================================================
 def generate_image(prompt, idx):
     log(f"Generating image {idx+1}/5 via Nano Banana 2...")
     url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-image-preview:generateContent?key={GEMINI_API_KEY}"
@@ -294,12 +391,15 @@ def generate_all_images(prompts):
     return images
 
 
-# STEP 4: VIDEO RENDER
+# ============================================================
+# STEP 4: VIDEO RENDER (NO countdown box, clean overlays)
+# ============================================================
 def render_video(images, audio_path, script, festival):
-    log("Rendering video with Ken Burns + dual logo...")
-    output_path = OUTPUT_DIR / f"trikal_{festival['name'].replace(' ','_').lower()}_{today_ist()}.mp4"
+    log("Rendering video with Ken Burns + dual logo (clean - no countdown box)...")
 
-    # Audio duration with safety fallback
+    slug = script.get('slug', f"{festival['festival_slug']}-{festival['date']}")
+    output_path = OUTPUT_DIR / f"{slug}.mp4"
+
     audio_dur = 48.0
     try:
         result = subprocess.run(
@@ -310,16 +410,15 @@ def render_video(images, audio_path, script, festival):
         if "format" in parsed and "duration" in parsed["format"]:
             audio_dur = float(parsed["format"]["duration"])
     except Exception as e:
-        log(f"ffprobe fallback to 48s: {e}")
+        log(f"ffprobe fallback: {e}")
 
     if audio_dur <= 0 or audio_dur > 120:
-        log(f"Invalid duration {audio_dur}, forcing 48s fallback")
         audio_dur = 48.0
 
     log(f"Audio: {audio_dur:.1f}s | Images: {len(images)} | Per image: {audio_dur/len(images):.1f}s")
     img_dur = max(audio_dur / len(images), 5.0)
 
-    # Ken Burns per image
+    # Ken Burns
     processed = []
     for i, img in enumerate(images):
         out = TEMP_DIR / f"kb_{i}.mp4"
@@ -343,7 +442,7 @@ def render_video(images, audio_path, script, festival):
         log("No clips processed")
         return None
 
-    # Concat clips
+    # Concat
     concat_file = TEMP_DIR / "concat.txt"
     concat_file.write_text("\n".join([f"file '{p}'" for p in processed]))
     concat_out = TEMP_DIR / "concat.mp4"
@@ -352,10 +451,9 @@ def render_video(images, audio_path, script, festival):
         "-i", str(concat_file), "-c", "copy", str(concat_out)
     ], capture_output=True, timeout=120)
 
-    # Text overlays
+    # Text overlays - CLEAN, NO RECTANGLE BOX, NO COUNTDOWN
     hindi = [safe_text(l) for l in script.get("hindi_lines", [])]
-    fest_name = safe_text(festival["name"])
-    days_left = str(festival["days_left"])
+    fest_name = safe_text(festival["festival_name"])
 
     fh = str(FONT_HINDI) if FONT_HINDI.exists() else ""
     fe = str(FONT_ENG) if FONT_ENG.exists() else ""
@@ -363,18 +461,24 @@ def render_video(images, audio_path, script, festival):
     fe_opt = f":fontfile='{fe}'" if fe else ""
 
     filters = []
-    filters.append("drawbox=x=0:y=h-500:w=iw:h=500:color=black@0.5:t=fill")
-    filters.append(f"drawtext=text='TrikalVaani.com':fontsize=36:fontcolor=gold:x=(w-text_w)/2:y=70:shadowcolor=black:shadowx=2:shadowy=2{fe_opt}")
-    filters.append(f"drawtext=text='{fest_name}':fontsize=60:fontcolor=white:x=(w-text_w)/2:y=160:shadowcolor=black:shadowx=3:shadowy=3{fh_opt}")
-    filters.append(f"drawtext=text='{days_left} Din Baad':fontsize=42:fontcolor=orange:x=(w-text_w)/2:y=240:shadowcolor=black:shadowx=2:shadowy=2{fe_opt}")
+    # Only bottom gradient for subtitle readability (subtle, not a box)
+    filters.append("drawbox=x=0:y=h-400:w=iw:h=400:color=black@0.35:t=fill")
 
+    # Top brand only (clean)
+    filters.append(f"drawtext=text='TrikalVaani.com':fontsize=42:fontcolor=gold:x=(w-text_w)/2:y=80:shadowcolor=black:shadowx=2:shadowy=2{fe_opt}")
+
+    # Festival name (clean, no box)
+    filters.append(f"drawtext=text='{fest_name}':fontsize=58:fontcolor=white:x=(w-text_w)/2:y=160:shadowcolor=black:shadowx=3:shadowy=3{fh_opt}")
+
+    # Hindi lines staggered (clean, no rectangle box)
     line_time = audio_dur / max(len(hindi) + 1, 1)
     for i, line in enumerate(hindi):
-        y_pos = 1500 + (i * 70)
+        y_pos = 1550 + (i * 75)
         start_t = i * line_time
-        filters.append(f"drawtext=text='{line}':fontsize=46:fontcolor=white:x=(w-text_w)/2:y={y_pos}:enable='gte(t,{start_t:.1f})':shadowcolor=black:shadowx=2:shadowy=2{fh_opt}")
+        filters.append(f"drawtext=text='{line}':fontsize=48:fontcolor=white:x=(w-text_w)/2:y={y_pos}:enable='gte(t,{start_t:.1f})':shadowcolor=black:shadowx=2:shadowy=2{fh_opt}")
 
-    filters.append(f"drawtext=text='Rohiit Gupta - Chief Vedic Architect':fontsize=26:fontcolor=gold:x=(w-text_w)/2:y=h-50:shadowcolor=black:shadowx=2:shadowy=2{fe_opt}")
+    # Bottom credit
+    filters.append(f"drawtext=text='Rohiit Gupta - Chief Vedic Architect':fontsize=28:fontcolor=gold:x=(w-text_w)/2:y=h-60:shadowcolor=black:shadowx=2:shadowy=2{fe_opt}")
 
     vf = ",".join(filters)
 
@@ -411,23 +515,93 @@ def render_video(images, audio_path, script, festival):
     return None
 
 
-# STEP 5: SEO/GEO/AEO SIDECAR
+# ============================================================
+# STEP 5: UPLOAD TO SUPABASE STORAGE
+# ============================================================
+def upload_to_supabase(video_path, json_path, slug):
+    if not video_path or not SUPABASE_URL:
+        return None, None
+
+    log("Uploading to Supabase Storage (trikal-videos bucket)...")
+    video_url = None
+    json_url = None
+
+    # Upload video
+    try:
+        with open(video_path, 'rb') as f:
+            video_bytes = f.read()
+        resp = requests.post(
+            f"{SUPABASE_URL}/storage/v1/object/trikal-videos/{slug}.mp4",
+            headers={
+                "Authorization": f"Bearer {SUPABASE_KEY}",
+                "Content-Type": "video/mp4",
+                "x-upsert": "true"
+            },
+            data=video_bytes,
+            timeout=120
+        )
+        if resp.status_code in [200, 201]:
+            video_url = f"{SUPABASE_URL}/storage/v1/object/public/trikal-videos/{slug}.mp4"
+            log(f"Video uploaded: {video_url}")
+        else:
+            log(f"Video upload failed: {resp.status_code} {resp.text[:200]}")
+    except Exception as e:
+        log(f"Video upload exception: {e}")
+
+    # Upload JSON
+    if json_path and json_path.exists():
+        try:
+            with open(json_path, 'rb') as f:
+                json_bytes = f.read()
+            resp = requests.post(
+                f"{SUPABASE_URL}/storage/v1/object/trikal-videos/{slug}.json",
+                headers={
+                    "Authorization": f"Bearer {SUPABASE_KEY}",
+                    "Content-Type": "application/json",
+                    "x-upsert": "true"
+                },
+                data=json_bytes,
+                timeout=60
+            )
+            if resp.status_code in [200, 201]:
+                json_url = f"{SUPABASE_URL}/storage/v1/object/public/trikal-videos/{slug}.json"
+                log(f"JSON uploaded: {json_url}")
+        except Exception as e:
+            log(f"JSON upload exception: {e}")
+
+    return video_url, json_url
+
+
+# ============================================================
+# STEP 6: SAVE SIDECAR JSON
+# ============================================================
 def save_seo_package(script, video_path, festival):
     if not video_path:
         return None
     json_path = video_path.with_suffix('.json')
     package = {
-        "festival": festival["name"],
-        "date": today_ist(),
+        "festival": festival["festival_name"],
+        "festival_slug": festival.get("festival_slug"),
+        "tier": festival.get("tier"),
+        "date": festival.get("date"),
+        "publish_date": today_ist(),
+        "video_in_series": f"{festival['_publish_day_index']}/{festival['_total_publish_days']}",
         "video_file": video_path.name,
+        "slug": script.get("slug", ""),
         "video_title": script.get("video_title", ""),
+        "meta_description": script.get("meta_description", ""),
         "tts_script": script.get("tts_script", ""),
         "seo_caption": script.get("seo_caption", ""),
+        "caption_variants": script.get("caption_variants", {}),
         "aeo_qa": script.get("aeo_qa", []),
         "geo_entities": script.get("geo_entities", {}),
+        "voice_search_phrases": script.get("voice_search_phrases", []),
+        "keyword_cluster": script.get("keyword_cluster", {}),
         "hashtags": script.get("hashtags", {}),
         "youtube_description": script.get("youtube_description", ""),
         "whatsapp_broadcast": script.get("whatsapp_broadcast", ""),
+        "schema_event": script.get("schema_event", {}),
+        "cta_variants": script.get("cta_variants", []),
         "hindi_lines": script.get("hindi_lines", []),
         "english_lines": script.get("english_lines", []),
         "image_prompts_used": script.get("image_prompts", []),
@@ -438,8 +612,10 @@ def save_seo_package(script, video_path, festival):
     return json_path
 
 
-# STEP 6: SUPABASE LOG
-def log_supabase(script, video_path, festival, success):
+# ============================================================
+# STEP 7: SUPABASE LOGS + ALERTS
+# ============================================================
+def log_supabase(script, video_path, video_url, festival, success, error=None):
     if not SUPABASE_URL:
         return
     try:
@@ -452,19 +628,70 @@ def log_supabase(script, video_path, festival, success):
             },
             json={
                 "date": today_ist(),
-                "tithi": festival["name"],
+                "tithi": festival["festival_name"],
                 "video_title": script.get("video_title", "") if script else "",
                 "video_path": str(video_path) if video_path else None,
                 "status": "success" if success else "failed"
             },
             timeout=10
         )
-        log("Logged to Supabase")
+        log("Logged to content_generation_log")
     except Exception as e:
         log(f"Supabase log skipped: {e}")
 
+    # Insert to social_publish_log for each platform
+    if success and video_url:
+        for platform in ["instagram", "facebook", "threads", "whatsapp", "youtube"]:
+            try:
+                requests.post(
+                    f"{SUPABASE_URL}/rest/v1/social_publish_log",
+                    headers={
+                        "apikey": SUPABASE_KEY,
+                        "Authorization": f"Bearer {SUPABASE_KEY}",
+                        "Content-Type": "application/json"
+                    },
+                    json={
+                        "festival": festival["festival_name"],
+                        "video_date": today_ist(),
+                        "video_path": str(video_path),
+                        "video_public_url": video_url,
+                        "platform": platform,
+                        "status": "pending",
+                        "caption": script.get("caption_variants", {}).get(platform, script.get("seo_caption", "")),
+                        "hashtags": " ".join(["#" + h for h in script.get("hashtags", {}).get("trending", [])[:15]])
+                    },
+                    timeout=10
+                )
+            except Exception as e:
+                log(f"social_publish_log insert failed for {platform}: {e}")
 
+
+def send_whatsapp_alert(message):
+    """Send WhatsApp alert to admin on critical failure."""
+    if not WHATSAPP_TOKEN or not WHATSAPP_PHONE_ID:
+        log("WhatsApp alert skipped - tokens missing")
+        return
+    try:
+        url = f"https://graph.facebook.com/v20.0/{WHATSAPP_PHONE_ID}/messages"
+        payload = {
+            "messaging_product": "whatsapp",
+            "to": ALERT_NUMBER,
+            "type": "text",
+            "text": {"body": message}
+        }
+        headers = {
+            "Authorization": f"Bearer {WHATSAPP_TOKEN}",
+            "Content-Type": "application/json"
+        }
+        resp = requests.post(url, json=payload, headers=headers, timeout=30)
+        log(f"WhatsApp alert sent: {resp.status_code}")
+    except Exception as e:
+        log(f"WhatsApp alert exception: {e}")
+
+
+# ============================================================
 # CLEANUP
+# ============================================================
 def cleanup():
     patterns = ["*.mp4", "*.txt", "img_*.png", "tts_*.wav", "tts_*.mp3"]
     for pat in patterns:
@@ -472,45 +699,115 @@ def cleanup():
             f.unlink(missing_ok=True)
 
 
+# ============================================================
+# PROCESS ONE FESTIVAL (with retry)
+# ============================================================
+def process_festival(festival, max_retries=3):
+    """Run full pipeline for one festival with up to 3 retries."""
+    for attempt in range(1, max_retries + 1):
+        log("=" * 55)
+        log(f"ATTEMPT {attempt}/{max_retries} for {festival['festival_name']}")
+        log("=" * 55)
+
+        try:
+            script = generate_script(festival)
+            if not script:
+                raise Exception("Script generation failed")
+
+            audio = generate_tts(script.get("tts_script", ""))
+            if not audio:
+                raise Exception("TTS failed")
+
+            image_prompts = script.get("image_prompts", [])
+            if len(image_prompts) < 3:
+                raise Exception(f"Only {len(image_prompts)} prompts")
+
+            images = generate_all_images(image_prompts)
+            if len(images) < 3:
+                raise Exception(f"Only {len(images)} images")
+
+            video = render_video(images, audio, script, festival)
+            if not video:
+                raise Exception("Video render failed")
+
+            json_path = save_seo_package(script, video, festival)
+            video_url, json_url = upload_to_supabase(video, json_path, script.get("slug", "video"))
+            log_supabase(script, video, video_url, festival, True)
+            cleanup()
+
+            log(f"SUCCESS: {video}")
+            return True
+
+        except Exception as e:
+            log(f"ATTEMPT {attempt} FAILED: {e}")
+            cleanup()
+            if attempt < max_retries:
+                log(f"Retrying in 60 seconds...")
+                time.sleep(60)
+            else:
+                # All retries exhausted - send alert
+                alert_msg = (
+                    f"🚨 TRIKAL VAANI CONTENT ENGINE FAILED\n\n"
+                    f"Festival: {festival['festival_name']}\n"
+                    f"Date: {today_ist()}\n"
+                    f"Tier: {festival.get('tier')}\n"
+                    f"Video: {festival.get('_publish_day_index')}/{festival.get('_total_publish_days')}\n"
+                    f"All 3 retries exhausted.\n\n"
+                    f"Last error: {str(e)[:200]}\n\n"
+                    f"Check /tmp/cron.log on VM"
+                )
+                send_whatsapp_alert(alert_msg)
+                log_supabase(None, None, None, festival, False, str(e))
+                return False
+    return False
+
+
+# ============================================================
 # MAIN
+# ============================================================
 def main():
     log("=" * 55)
-    log("TRIKAL VAANI CONTENT ENGINE v4.1 - SEO+GEO+AEO")
+    log("TRIKAL VAANI CONTENT ENGINE v5.0 - SMART CRON MODE")
     log("=" * 55)
 
-    festival = FESTIVALS[0]
-    log(f"Target: {festival['name']} in {festival['days_left']} days")
-
-    script = generate_script(festival)
-    if not script:
-        log("FAILED at script generation")
+    # Check for --force mode (manual run for specific festival)
+    if len(sys.argv) > 1 and sys.argv[1] == "--festival":
+        slug = sys.argv[2] if len(sys.argv) > 2 else None
+        log(f"Manual mode: forcing festival {slug}")
+        # Fetch specific festival
+        url = f"{SUPABASE_URL}/rest/v1/festivals_master"
+        params = {"festival_slug": f"eq.{slug}", "select": "*"}
+        headers = {"apikey": SUPABASE_KEY, "Authorization": f"Bearer {SUPABASE_KEY}"}
+        resp = requests.get(url, params=params, headers=headers, timeout=30)
+        fests = resp.json()
+        if not fests:
+            log(f"Festival not found: {slug}")
+            return
+        festival = fests[0]
+        festival['_days_left'] = 0
+        festival['_publish_day_index'] = 1
+        festival['_total_publish_days'] = 1
+        process_festival(festival)
         return
 
-    audio = generate_tts(script.get("tts_script", ""))
-    if not audio:
-        log("FAILED at TTS")
+    # Normal mode: check today's schedule
+    festivals_today = fetch_todays_festivals()
+
+    if not festivals_today:
+        log("No festivals scheduled for publishing today. Exiting cleanly.")
         return
 
-    image_prompts = script.get("image_prompts", [])
-    if len(image_prompts) < 3:
-        log(f"Only {len(image_prompts)} prompts")
-        return
+    log(f"Will process {len(festivals_today)} festival(s) today")
+    results = []
+    for fest in festivals_today:
+        success = process_festival(fest)
+        results.append((fest['festival_name'], success))
 
-    images = generate_all_images(image_prompts)
-    if len(images) < 3:
-        log(f"Only {len(images)} images generated")
-        return
-
-    video = render_video(images, audio, script, festival)
-    save_seo_package(script, video, festival)
-    log_supabase(script, video, festival, video is not None)
-    cleanup()
-
-    if video:
-        log(f"SUCCESS: {video}")
-        log(f"JSON package: {video.with_suffix('.json').name}")
-    else:
-        log("FAILED - check logs")
+    log("=" * 55)
+    log("FINAL SUMMARY:")
+    for name, ok in results:
+        log(f"  {'✓' if ok else '✗'} {name}")
+    log("=" * 55)
 
 
 if __name__ == "__main__":
