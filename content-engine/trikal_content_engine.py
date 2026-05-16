@@ -1,9 +1,14 @@
 #!/usr/bin/env python3
 """
-TRIKAL VAANI - Content Engine v5.0
+TRIKAL VAANI - Content Engine v5.1
 =====================================
-RESEARCH-GROUNDED + SEO + GEO + AEO + SMART CRON
+RESEARCH-GROUNDED + SEO + GEO + AEO + SMART CRON + YOUTUBE AUTO-PUBLISH
 =====================================
+NEW IN v5.1:
+  - YouTube auto-publish via /api/social/publish-youtube on Vercel
+  - 5 new YouTube fields in Gemini output: youtube_chapters, thumbnail_text,
+    youtube_playlist, pinned_comment, spoken_keywords_first_30s
+  - Sidecar JSON now includes all 5 YouTube fields
 KEY CHANGES FROM v4.1:
   1. Reads festival from Supabase festivals_master (not hardcoded)
   2. Gemini Flash + Google Search grounding for accurate deity/offerings research
@@ -37,6 +42,8 @@ SUPABASE_URL = os.environ.get("SUPABASE_URL", "")
 SUPABASE_KEY = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "")
 WHATSAPP_TOKEN = os.environ.get("WHATSAPP_ACCESS_TOKEN", "")
 WHATSAPP_PHONE_ID = os.environ.get("WHATSAPP_PHONE_NUMBER_ID", "")
+CONTENT_ENGINE_SECRET = os.environ.get("CONTENT_ENGINE_SECRET", "trikal-content-engine-2026")
+VERCEL_APP_URL = os.environ.get("VERCEL_APP_URL", "https://trikalvaani.com")
 ALERT_NUMBER = "919211804111"
 SITE_URL = "https://trikalvaani.com"
 
@@ -160,7 +167,7 @@ def fetch_todays_festivals():
 
 
 # ============================================================
-# STEP 1: RESEARCH-GROUNDED SCRIPT + 17-FIELD SEO PACKAGE
+# STEP 1: RESEARCH-GROUNDED SCRIPT + 17-FIELD SEO PACKAGE + YT FIELDS
 # ============================================================
 def generate_script(festival):
     log(f"Generating research-grounded SEO+GEO+AEO package for {festival['festival_name']}...")
@@ -253,6 +260,16 @@ Output ONLY raw JSON (no markdown fences, no preamble):
     "niche": ["10 niche Vedic astrology hashtags without # symbol"]
   }},
   "youtube_description": "300 word YouTube Shorts description. First 150 chars MUST contain primary keyword and CTA URL https://trikalvaani.com. Include: festival significance, {planet} connection, 3 rituals, 1 remedy, kundali CTA. Timestamps 0:00 Intro, 0:15 Significance, 0:30 Rituals, 0:45 CTA. End with 5 hashtags new lines.",
+  "youtube_chapters": [
+    {{"time": "0:00", "title": "Intro - {festival['festival_name']} significance"}},
+    {{"time": "0:15", "title": "{planet} planet connection"}},
+    {{"time": "0:30", "title": "Sacred ritual to perform"}},
+    {{"time": "0:45", "title": "Free Kundali on TrikalVaani.com"}}
+  ],
+  "thumbnail_text": "2-4 word emotionally strong Hindi or English thumbnail text, curiosity-driven, mobile readable",
+  "youtube_playlist": "Best matching playlist from: Horoscope 2026, Saturn Transit, Rahu Ketu Predictions, Vimshottari Dasha, Astrology Remedies, Festival Predictions, Zodiac Predictions, Numerology",
+  "pinned_comment": "80 word Hinglish pinned comment for engagement. Hook line about {festival['festival_name']}. Ask 1 question about user's zodiac. CTA: Free kundali on TrikalVaani.com. End with 2 emojis.",
+  "spoken_keywords_first_30s": ["list 8 keywords that MUST be spoken naturally in first 30 seconds of TTS for YouTube AI indexing - mix of {festival['festival_name']}, {planet}, {deity_specific}, kundali, Vedic astrology, remedies, 2026, rashi"],
   "whatsapp_broadcast": "60 word punchy WhatsApp Hinglish. Hook line 1. Mention {festival['festival_name']} date {festival['date']}. One ritual tip from offerings. CTA: 'Free kundali check - trikalvaani.com'. 2 emojis max.",
   "schema_event": {{
     "@type": "Event",
@@ -297,7 +314,7 @@ CRITICAL RULES:
         text = resp.json()["candidates"][0]["content"]["parts"][0]["text"]
         log(f"Script raw preview: {repr(text[:200])}")
         result = extract_json(text)
-        log("Script + 17-field SEO/GEO/AEO package generated (Google grounded)")
+        log("Script + 17-field SEO/GEO/AEO + 5-field YT package generated (Google grounded)")
         return result
     except Exception as e:
         log(f"Script failed: {e}")
@@ -547,6 +564,48 @@ def upload_to_supabase(video_path, json_path, slug):
 
 
 # ============================================================
+# STEP 5b: PUBLISH TO YOUTUBE (NEW v5.1)
+# ============================================================
+def publish_to_youtube(script, video_url, festival):
+    log("Publishing to YouTube...")
+    if not video_url:
+        log("No video URL - skipping YouTube publish")
+        return None
+
+    tags_trending = script.get("hashtags", {}).get("trending", [])
+    tags_niche = script.get("hashtags", {}).get("niche", [])
+    all_tags = (tags_trending + tags_niche)[:30]
+
+    payload = {
+        "video_url": video_url,
+        "title": script.get("video_title", festival["festival_name"])[:100],
+        "description": script.get("youtube_description", "")[:5000],
+        "tags": all_tags,
+        "pinned_comment": script.get("pinned_comment", ""),
+        "festival_name": festival["festival_name"],
+        "festival_date": festival.get("date", ""),
+    }
+
+    try:
+        resp = requests.post(
+            f"{VERCEL_APP_URL}/api/social/publish-youtube",
+            json=payload,
+            headers={"x-content-engine-secret": CONTENT_ENGINE_SECRET},
+            timeout=300
+        )
+        data = resp.json()
+        if data.get("success"):
+            log(f"YouTube LIVE: {data['youtube_url']}")
+            return data["youtube_url"]
+        else:
+            log(f"YouTube publish failed: {data.get('error')}")
+            return None
+    except Exception as e:
+        log(f"YouTube publish exception: {e}")
+        return None
+
+
+# ============================================================
 # STEP 6: SAVE SIDECAR JSON
 # ============================================================
 def save_seo_package(script, video_path, festival):
@@ -573,6 +632,11 @@ def save_seo_package(script, video_path, festival):
         "keyword_cluster": script.get("keyword_cluster", {}),
         "hashtags": script.get("hashtags", {}),
         "youtube_description": script.get("youtube_description", ""),
+        "youtube_chapters": script.get("youtube_chapters", []),
+        "thumbnail_text": script.get("thumbnail_text", ""),
+        "youtube_playlist": script.get("youtube_playlist", ""),
+        "pinned_comment": script.get("pinned_comment", ""),
+        "spoken_keywords_first_30s": script.get("spoken_keywords_first_30s", []),
         "whatsapp_broadcast": script.get("whatsapp_broadcast", ""),
         "schema_event": script.get("schema_event", {}),
         "cta_variants": script.get("cta_variants", []),
@@ -672,7 +736,7 @@ def cleanup():
 
 
 # ============================================================
-# PROCESS ONE FESTIVAL (with 3 retries)
+# PROCESS ONE FESTIVAL (with 3 retries) — v5.1 with YT publish
 # ============================================================
 def process_festival(festival, max_retries=3):
     for attempt in range(1, max_retries + 1):
@@ -704,8 +768,16 @@ def process_festival(festival, max_retries=3):
             json_path = save_seo_package(script, video, festival)
             video_url, json_url = upload_to_supabase(video, json_path, script.get("slug", "video"))
             log_supabase(script, video, video_url, festival, True)
-            cleanup()
 
+            # NEW v5.1: Auto-publish to YouTube
+            if video_url:
+                yt_url = publish_to_youtube(script, video_url, festival)
+                if yt_url:
+                    log(f"YouTube published: {yt_url}")
+                else:
+                    log("YouTube publish failed — video still saved to Supabase")
+
+            cleanup()
             log(f"SUCCESS: {video}")
             return True
 
@@ -736,7 +808,7 @@ def process_festival(festival, max_retries=3):
 # ============================================================
 def main():
     log("=" * 55)
-    log("TRIKAL VAANI CONTENT ENGINE v5.0 - SMART CRON MODE")
+    log("TRIKAL VAANI CONTENT ENGINE v5.1 - YOUTUBE AUTO-PUBLISH")
     log("=" * 55)
 
     # Manual mode: --festival <slug>
