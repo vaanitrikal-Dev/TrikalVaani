@@ -776,9 +776,11 @@ def main():
         log(f"Manual mode: forcing festival {slug}")
         # Fetch specific festival
         url = f"{SUPABASE_URL}/rest/v1/festivals_master"
-        params = {"festival_slug": f"eq.{slug}", "select": "*"}
         headers = {"apikey": SUPABASE_KEY, "Authorization": f"Bearer {SUPABASE_KEY}"}
-        resp = requests.get(url, params=params, headers=headers, timeout=30)
+resp = requests.get(
+    f"{SUPABASE_URL}/rest/v1/festivals_master?festival_slug=eq.{slug}&select=*",
+    headers=headers, timeout=30
+)
         fests = resp.json()
         if not fests:
             log(f"Festival not found: {slug}")
