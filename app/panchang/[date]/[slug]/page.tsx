@@ -2,11 +2,21 @@
 // 🔱 TRIKAL VAANI — CEO PROTECTION HEADER
 // ════════════════════════════════════════════════════════════════════
 // File:    app/panchang/[date]/[slug]/page.tsx
-// Version: v1.0
+// Version: v1.1
 // Owner:   Rohiit Gupta, Chief Vedic Architect
 // Purpose: Festival panchang page — /panchang/2026-05-16/shani-jayanti-2026
 //          100% dynamic. All content from Supabase + Gemini Flash.
 //          No hardcoded festival data.
+// CHANGES v1.0 → v1.1 (2026-05-17):
+//   FIX 1: revalidate 0→3600 (ISR) — festival data is static once written;
+//           prevents cache-control:private on every Googlebot crawl
+//   FIX 2: Title sanitization — strip trailing '| Trikal Vaani' from
+//           gc.meta_title / seo_title before returning; layout.tsx template
+//           appends brand suffix automatically — was causing double brand
+//   FIX 3: openGraph.title now uses clean title (no manual brand append)
+//           openGraph.images added — was missing, caused og:image absent
+//   FIX 4: Article JSON-LD schema — added required 'image' field;
+//           Google blocks rich results without it (confirmed GSC warning)
 // ════════════════════════════════════════════════════════════════════
 
 import { Metadata } from "next";
@@ -14,7 +24,9 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@supabase/supabase-js";
 
-export const revalidate = 0; // Always fresh — content generated dynamically
+// FIX 1: was 0 — forced cache-control:private,no-store on every request
+// ISR 1hr is safe: festival dates/content never change once generated
+export const revalidate = 3600;
 export const dynamicParams = true;
 
 const SITE_URL = "https://trikalvaani.com";
@@ -149,21 +161,44 @@ export async function generateMetadata(
   const human = formatHuman(date);
   const url = `${SITE_URL}/panchang/${date}/${slug}`;
 
-  const title = gc?.meta_title
-    ?? festival.seo_title
-    ?? `${festival.festival_name} — Date, Muhurat, Puja Vidhi | Trikal Vaani`;
+  // FIX 2: Strip trailing '| Trikal Vaani' (or variants) from stored titles.
+  // layout.tsx title.template = '%s | Trikal Vaani' appends it automatically.
+  // Without this strip, pages render as 'Festival Name | Trikal Vaani | Trikal Vaani'.
+  const rawTitle =
+    gc?.meta_title ??
+    festival.seo_title ??
+    `${festival.festival_name} — Date, Muhurat, Puja Vidhi`;
+  const title = rawTitle
+    .replace(/\s*[|—–-]+\s*Trikal\s*Vaani\s*$/i, "")
+    .trim();
 
-  const description = gc?.meta_description
-    ?? festival.geo_answer
-    ?? `${festival.festival_name} falls on ${human}. Tithi, Nakshatra, Rahu Kaal, Puja Muhurat, Do's & Don'ts by Rohiit Gupta, Chief Vedic Architect.`;
+  const description =
+    gc?.meta_description ??
+    festival.geo_answer ??
+    `${festival.festival_name} falls on ${human}. Tithi, Nakshatra, Rahu Kaal, Puja Muhurat, Do's & Don'ts by Rohiit Gupta, Chief Vedic Architect.`;
 
   return {
-    title, description,
+    title,
+    description,
     authors: [{ name: AUTHOR_NAME, url: `${SITE_URL}/founder` }],
     alternates: { canonical: url },
+    // FIX 3a: title is already clean — do not manually append '| Trikal Vaani'
+    // FIX 3b: added images array — was absent, causing og:image missing on all panchang pages
     openGraph: {
-      title: `${title} | Trikal Vaani`, description, url,
-      siteName: "Trikal Vaani", type: "article", locale: "en_IN",
+      title,
+      description,
+      url,
+      siteName: "Trikal Vaani",
+      type: "article",
+      locale: "en_IN",
+      images: [
+        {
+          url: `${SITE_URL}/og-image.png`,
+          width: 1200,
+          height: 630,
+          alt: festival.festival_name,
+        },
+      ],
     },
     twitter: { card: "summary_large_image", title, description },
     robots: { index: true, follow: true },
@@ -198,6 +233,14 @@ function buildSchemas(
       description: festival.geo_answer ?? `${festival.festival_name} on ${human}`,
       datePublished: date, dateModified: date,
       mainEntityOfPage: { "@type": "WebPage", "@id": url },
+      // FIX 4: Added required 'image' field — Google blocks Article rich results without it.
+      // Confirmed missing via GSC "has issues" warning. og-image.png verified HTTP 200.
+      image: {
+        "@type": "ImageObject",
+        url: `${SITE_URL}/og-image.png`,
+        width: 1200,
+        height: 630,
+      },
       author: { "@type": "Person", name: AUTHOR_NAME, jobTitle: AUTHOR_TITLE, url: `${SITE_URL}/founder` },
       publisher: { "@type": "Organization", name: "Trikal Vaani", url: SITE_URL, logo: { "@type": "ImageObject", url: `${SITE_URL}/logo.png` } },
     },
@@ -406,7 +449,7 @@ export default async function FestivalPage(
           </section>
 
           <footer className="mt-8 border-t border-gray-200 pt-4 text-xs text-gray-500">
-            <p>🔱 By <strong>{AUTHOR_NAME}</strong>, {AUTHOR_TITLE}. Engine: Swiss Ephemeris · Ayanamsha: Lahiri · Version: v1.0</p>
+            <p>🔱 By <strong>{AUTHOR_NAME}</strong>, {AUTHOR_TITLE}. Engine: Swiss Ephemeris · Ayanamsha: Lahiri · Version: v1.1</p>
             <p className="mt-1 italic">&quot;Kaal bada balwan hai, sabko nach nachaye; raja ka beta bhi bhiksha mangne jaye.&quot;</p>
           </footer>
 
