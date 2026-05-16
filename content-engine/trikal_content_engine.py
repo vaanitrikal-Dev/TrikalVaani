@@ -446,16 +446,16 @@ def render_video(images, audio_path, script, festival):
     fe_opt = f":fontfile='{fe}'" if fe else ""
 
     filters = []
-    filters.append(f"drawtext=text='TrikalVaani.com':fontsize=42:fontcolor=gold:x=(w-text_w)/2:y=80:shadowcolor=black:shadowx=2:shadowy=2{fe_opt}")
-    filters.append(f"drawtext=text='{fest_name}':fontsize=58:fontcolor=white:x=(w-text_w)/2:y=160:shadowcolor=black:shadowx=3:shadowy=3{fh_opt}")
+    filters.append(f"drawtext=text='TrikalVaani.com':fontsize=42:fontcolor=gold:box=0:x=(w-text_w)/2:y=80:shadowcolor=black:shadowx=2:shadowy=2{fe_opt}")
+    filters.append(f"drawtext=text='{fest_name}':fontsize=58:fontcolor=white:box=0:x=(w-text_w)/2:y=160:shadowcolor=black:shadowx=3:shadowy=3{fh_opt}")
 
     line_time = audio_dur / max(len(hindi) + 1, 1)
     for i, line in enumerate(hindi):
         y_pos = 1550 + (i * 75)
         start_t = i * line_time
-        filters.append(f"drawtext=text='{line}':fontsize=48:fontcolor=white:x=(w-text_w)/2:y={y_pos}:enable='gte(t,{start_t:.1f})':shadowcolor=black:shadowx=2:shadowy=2{fh_opt}")
+        filters.append(f"drawtext=text='{line}':fontsize=48:fontcolor=white:box=0:x=(w-text_w)/2:y={y_pos}:enable='gte(t,{start_t:.1f})':shadowcolor=black:shadowx=2:shadowy=2{fh_opt}")
 
-    filters.append(f"drawtext=text='Rohiit Gupta - Chief Vedic Architect':fontsize=28:fontcolor=gold:x=(w-text_w)/2:y=h-60:shadowcolor=black:shadowx=2:shadowy=2{fe_opt}")
+    filters.append(f"drawtext=text='Rohiit Gupta - Chief Vedic Architect':fontsize=28:fontcolor=gold:box=0:x=(w-text_w)/2:y=h-60:shadowcolor=black:shadowx=2:shadowy=2{fe_opt}")
 
     vf = ",".join(filters)
 
