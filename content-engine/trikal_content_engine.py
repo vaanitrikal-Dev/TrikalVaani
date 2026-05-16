@@ -37,7 +37,7 @@ SUPABASE_URL = os.environ.get("SUPABASE_URL", "")
 SUPABASE_KEY = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "")
 WHATSAPP_TOKEN = os.environ.get("WHATSAPP_ACCESS_TOKEN", "")
 WHATSAPP_PHONE_ID = os.environ.get("WHATSAPP_PHONE_NUMBER_ID", "")
-ALERT_NUMBER = "919211804111"  # Trikal Vaani WhatsApp
+ALERT_NUMBER = "919211804111"
 SITE_URL = "https://trikalvaani.com"
 
 # PATHS
@@ -70,17 +70,17 @@ STYLES = {
     "Cinematic": "cinematic photorealistic style, golden hour natural lighting, real Indian sacred location, documentary photography quality, shallow depth of field"
 }
 
-# NEW 5-IMAGE FLOW (deity-focused, no generic stock look)
+# NEW 5-IMAGE FLOW
 STORY_ARC = [
-    {"role": "DeityReveal",  "style_key": "Cosmic",      "deity_pct": 100, "items_pct": 0,
+    {"role": "DeityReveal",   "style_key": "Cosmic",      "deity_pct": 100, "items_pct": 0,
      "scene": "Solo dramatic full-body portrait of {deity_specific}, complete divine iconography, traditional weapons/symbols, traditional vahana if any, glowing aura, mysterious cinematic reveal, viewer captivated"},
-    {"role": "DeityOffering","style_key": "Traditional", "deity_pct": 30,  "items_pct": 70,
+    {"role": "DeityOffering", "style_key": "Traditional", "deity_pct": 30,  "items_pct": 70,
      "scene": "Small {deity_specific} idol in background, foreground filled with traditional offerings: {primary_offerings}, beautiful arrangement, glowing diyas, temple altar setting"},
-    {"role": "Dos",          "style_key": "Traditional", "deity_pct": 0,   "items_pct": 100,
+    {"role": "Dos",           "style_key": "Traditional", "deity_pct": 0,   "items_pct": 100,
      "scene": "Close-up arrangement of items to offer on {festival_name}: {primary_offerings}, beautifully composed, no people, sacred altar, golden warm lighting, focus on offerings only"},
-    {"role": "Donts",        "style_key": "Cinematic",   "deity_pct": 20,  "items_pct": 80,
+    {"role": "Donts",         "style_key": "Cinematic",   "deity_pct": 20,  "items_pct": 80,
      "scene": "Symbolic visual of what to AVOID on {festival_name}: {donts_visual}, moody darker lighting, slight warning atmosphere, sacred contrast"},
-    {"role": "Blessing",     "style_key": "Cosmic",      "deity_pct": 100, "items_pct": 0,
+    {"role": "Blessing",      "style_key": "Cosmic",      "deity_pct": 100, "items_pct": 0,
      "scene": "{deity_specific} in full divine glory, blessing posture, divine light radiating outward, ethereal celestial blessing aura, peace and grace, soft golden rays, devotee blessed"}
 ]
 
@@ -122,44 +122,34 @@ def extract_json(text):
 # STEP 0: FETCH TODAY'S FESTIVAL FROM SUPABASE
 # ============================================================
 def fetch_todays_festivals():
-    """
-    Query festivals_master for festivals where today is a publish day.
-    Returns list of festivals to process (multiple allowed same day).
-    """
     if not SUPABASE_URL:
-        log("SUPABASE_URL not set - cannot fetch festival")
+        log("SUPABASE_URL not set")
         return []
 
     today = datetime.now(IST).date()
     log(f"Checking publish schedule for {today}...")
 
-    # Get all auto_publish festivals for current year
-    url = f"{SUPABASE_URL}/rest/v1/festivals_master"
-    params = {
-        "year": f"eq.{today.year}",
-        "auto_publish": "eq.true",
-        "select": "*"
-    }
     headers = {
         "apikey": SUPABASE_KEY,
         "Authorization": f"Bearer {SUPABASE_KEY}"
     }
     try:
-        resp = requests.get(url, params=params, headers=headers, timeout=30)
+        resp = requests.get(
+            f"{SUPABASE_URL}/rest/v1/festivals_master?year=eq.{today.year}&auto_publish=eq.true&select=*",
+            headers=headers, timeout=30
+        )
         festivals = resp.json()
         log(f"Found {len(festivals)} auto-publish festivals in {today.year}")
     except Exception as e:
         log(f"Supabase fetch failed: {e}")
         return []
 
-    # Filter to ones where today matches a publish_day
     matching = []
     for fest in festivals:
         fest_date = datetime.strptime(fest['date'], '%Y-%m-%d').date()
         days_diff = (fest_date - today).days
         publish_days = fest.get('publish_days', [-2])
         if days_diff in publish_days:
-            # Add computed fields
             fest['_days_left'] = days_diff
             fest['_publish_day_index'] = publish_days.index(days_diff) + 1
             fest['_total_publish_days'] = len(publish_days)
@@ -185,10 +175,8 @@ def generate_script(festival):
     planet = festival.get('planet_ruler', 'Sun')
     maa_form = festival.get('maa_form', '')
     color = festival.get('color', 'Gold')
-
     deity_specific = maa_form if maa_form else deity
 
-    # Build image prompts with rich context
     arc_prompts = []
     for stage in STORY_ARC:
         scene = stage["scene"].format(
@@ -297,7 +285,7 @@ CRITICAL RULES:
     url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={GEMINI_API_KEY}"
     payload = {
         "contents": [{"parts": [{"text": prompt}]}],
-        "tools": [{"google_search": {}}],  # Google Search grounding enabled
+        "tools": [{"google_search": {}}],
         "generationConfig": {
             "maxOutputTokens": 10000,
             "temperature": 0.8,
@@ -392,10 +380,10 @@ def generate_all_images(prompts):
 
 
 # ============================================================
-# STEP 4: VIDEO RENDER (NO countdown box, clean overlays)
+# STEP 4: VIDEO RENDER (clean — no box, no countdown)
 # ============================================================
 def render_video(images, audio_path, script, festival):
-    log("Rendering video with Ken Burns + dual logo (clean - no countdown box)...")
+    log("Rendering video with Ken Burns + dual logo...")
 
     slug = script.get('slug', f"{festival['festival_slug']}-{festival['date']}")
     output_path = OUTPUT_DIR / f"{slug}.mp4"
@@ -418,7 +406,6 @@ def render_video(images, audio_path, script, festival):
     log(f"Audio: {audio_dur:.1f}s | Images: {len(images)} | Per image: {audio_dur/len(images):.1f}s")
     img_dur = max(audio_dur / len(images), 5.0)
 
-    # Ken Burns
     processed = []
     for i, img in enumerate(images):
         out = TEMP_DIR / f"kb_{i}.mp4"
@@ -442,7 +429,6 @@ def render_video(images, audio_path, script, festival):
         log("No clips processed")
         return None
 
-    # Concat
     concat_file = TEMP_DIR / "concat.txt"
     concat_file.write_text("\n".join([f"file '{p}'" for p in processed]))
     concat_out = TEMP_DIR / "concat.mp4"
@@ -451,7 +437,6 @@ def render_video(images, audio_path, script, festival):
         "-i", str(concat_file), "-c", "copy", str(concat_out)
     ], capture_output=True, timeout=120)
 
-    # Text overlays - CLEAN, NO RECTANGLE BOX, NO COUNTDOWN
     hindi = [safe_text(l) for l in script.get("hindi_lines", [])]
     fest_name = safe_text(festival["festival_name"])
 
@@ -461,28 +446,20 @@ def render_video(images, audio_path, script, festival):
     fe_opt = f":fontfile='{fe}'" if fe else ""
 
     filters = []
-    # Only bottom gradient for subtitle readability (subtle, not a box)
     filters.append("drawbox=x=0:y=h-400:w=iw:h=400:color=black@0.35:t=fill")
-
-    # Top brand only (clean)
     filters.append(f"drawtext=text='TrikalVaani.com':fontsize=42:fontcolor=gold:x=(w-text_w)/2:y=80:shadowcolor=black:shadowx=2:shadowy=2{fe_opt}")
-
-    # Festival name (clean, no box)
     filters.append(f"drawtext=text='{fest_name}':fontsize=58:fontcolor=white:x=(w-text_w)/2:y=160:shadowcolor=black:shadowx=3:shadowy=3{fh_opt}")
 
-    # Hindi lines staggered (clean, no rectangle box)
     line_time = audio_dur / max(len(hindi) + 1, 1)
     for i, line in enumerate(hindi):
         y_pos = 1550 + (i * 75)
         start_t = i * line_time
         filters.append(f"drawtext=text='{line}':fontsize=48:fontcolor=white:x=(w-text_w)/2:y={y_pos}:enable='gte(t,{start_t:.1f})':shadowcolor=black:shadowx=2:shadowy=2{fh_opt}")
 
-    # Bottom credit
     filters.append(f"drawtext=text='Rohiit Gupta - Chief Vedic Architect':fontsize=28:fontcolor=gold:x=(w-text_w)/2:y=h-60:shadowcolor=black:shadowx=2:shadowy=2{fe_opt}")
 
     vf = ",".join(filters)
 
-    # DUAL LOGO
     if LOGO_PATH.exists():
         fc = (
             f"[0:v]{vf}[txt];"
@@ -526,7 +503,6 @@ def upload_to_supabase(video_path, json_path, slug):
     video_url = None
     json_url = None
 
-    # Upload video
     try:
         with open(video_path, 'rb') as f:
             video_bytes = f.read()
@@ -548,7 +524,6 @@ def upload_to_supabase(video_path, json_path, slug):
     except Exception as e:
         log(f"Video upload exception: {e}")
 
-    # Upload JSON
     if json_path and json_path.exists():
         try:
             with open(json_path, 'rb') as f:
@@ -639,7 +614,6 @@ def log_supabase(script, video_path, video_url, festival, success, error=None):
     except Exception as e:
         log(f"Supabase log skipped: {e}")
 
-    # Insert to social_publish_log for each platform
     if success and video_url:
         for platform in ["instagram", "facebook", "threads", "whatsapp", "youtube"]:
             try:
@@ -667,7 +641,6 @@ def log_supabase(script, video_path, video_url, festival, success, error=None):
 
 
 def send_whatsapp_alert(message):
-    """Send WhatsApp alert to admin on critical failure."""
     if not WHATSAPP_TOKEN or not WHATSAPP_PHONE_ID:
         log("WhatsApp alert skipped - tokens missing")
         return
@@ -700,10 +673,9 @@ def cleanup():
 
 
 # ============================================================
-# PROCESS ONE FESTIVAL (with retry)
+# PROCESS ONE FESTIVAL (with 3 retries)
 # ============================================================
 def process_festival(festival, max_retries=3):
-    """Run full pipeline for one festival with up to 3 retries."""
     for attempt in range(1, max_retries + 1):
         log("=" * 55)
         log(f"ATTEMPT {attempt}/{max_retries} for {festival['festival_name']}")
@@ -745,16 +717,14 @@ def process_festival(festival, max_retries=3):
                 log(f"Retrying in 60 seconds...")
                 time.sleep(60)
             else:
-                # All retries exhausted - send alert
                 alert_msg = (
-                    f"🚨 TRIKAL VAANI CONTENT ENGINE FAILED\n\n"
+                    f"TRIKAL VAANI CONTENT ENGINE FAILED\n\n"
                     f"Festival: {festival['festival_name']}\n"
                     f"Date: {today_ist()}\n"
                     f"Tier: {festival.get('tier')}\n"
-                    f"Video: {festival.get('_publish_day_index')}/{festival.get('_total_publish_days')}\n"
-                    f"All 3 retries exhausted.\n\n"
-                    f"Last error: {str(e)[:200]}\n\n"
-                    f"Check /tmp/cron.log on VM"
+                    f"All 3 retries exhausted.\n"
+                    f"Last error: {str(e)[:200]}\n"
+                    f"Check /tmp/trikal_cron.log on VM"
                 )
                 send_whatsapp_alert(alert_msg)
                 log_supabase(None, None, None, festival, False, str(e))
@@ -770,14 +740,11 @@ def main():
     log("TRIKAL VAANI CONTENT ENGINE v5.0 - SMART CRON MODE")
     log("=" * 55)
 
-    # Check for --force mode (manual run for specific festival)
+    # Manual mode: --festival <slug>
     if len(sys.argv) > 1 and sys.argv[1] == "--festival":
         slug = sys.argv[2] if len(sys.argv) > 2 else None
         log(f"Manual mode: forcing festival {slug}")
-        # Fetch specific festival
-        url = f"{SUPABASE_URL}/rest/v1/festivals_master"
         headers = {"apikey": SUPABASE_KEY, "Authorization": f"Bearer {SUPABASE_KEY}"}
-headers = {"apikey": SUPABASE_KEY, "Authorization": f"Bearer {SUPABASE_KEY}"}
         resp = requests.get(
             f"{SUPABASE_URL}/rest/v1/festivals_master?festival_slug=eq.{slug}&select=*",
             headers=headers, timeout=30
@@ -793,11 +760,10 @@ headers = {"apikey": SUPABASE_KEY, "Authorization": f"Bearer {SUPABASE_KEY}"}
         process_festival(festival)
         return
 
-    # Normal mode: check today's schedule
+    # Cron mode: check today's schedule
     festivals_today = fetch_todays_festivals()
-
     if not festivals_today:
-        log("No festivals scheduled for publishing today. Exiting cleanly.")
+        log("No festivals scheduled for today. Exiting cleanly.")
         return
 
     log(f"Will process {len(festivals_today)} festival(s) today")
@@ -809,7 +775,7 @@ headers = {"apikey": SUPABASE_KEY, "Authorization": f"Bearer {SUPABASE_KEY}"}
     log("=" * 55)
     log("FINAL SUMMARY:")
     for name, ok in results:
-        log(f"  {'✓' if ok else '✗'} {name}")
+        log(f"  {'OK' if ok else 'FAIL'} {name}")
     log("=" * 55)
 
 
