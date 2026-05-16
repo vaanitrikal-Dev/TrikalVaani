@@ -1,14 +1,18 @@
 #!/usr/bin/env python3
 """
-TRIKAL VAANI - Content Engine v5.1
+TRIKAL VAANI - Content Engine v5.2
 =====================================
-RESEARCH-GROUNDED + SEO + GEO + AEO + SMART CRON + YOUTUBE AUTO-PUBLISH
+FULL MULTI-PLATFORM AUTO-PUBLISH: YOUTUBE + FACEBOOK + INSTAGRAM
 =====================================
+NEW IN v5.2:
+  - publish_to_facebook() function
+  - publish_to_instagram() function
+  - All 3 platforms publish automatically after Supabase upload
+  - 22 SEO/GEO/AEO fields preserved (same as v5.1)
 NEW IN v5.1:
   - YouTube auto-publish via /api/social/publish-youtube on Vercel
-  - 5 new YouTube fields in Gemini output: youtube_chapters, thumbnail_text,
-    youtube_playlist, pinned_comment, spoken_keywords_first_30s
-  - Sidecar JSON now includes all 5 YouTube fields
+  - 5 new YouTube fields in Gemini output
+  - Sidecar JSON includes all 5 YouTube fields
 KEY CHANGES FROM v4.1:
   1. Reads festival from Supabase festivals_master (not hardcoded)
   2. Gemini Flash + Google Search grounding for accurate deity/offerings research
@@ -77,7 +81,7 @@ STYLES = {
     "Cinematic": "cinematic photorealistic style, golden hour natural lighting, real Indian sacred location, documentary photography quality, shallow depth of field"
 }
 
-# NEW 5-IMAGE FLOW
+# 5-IMAGE STORY ARC
 STORY_ARC = [
     {"role": "DeityReveal",   "style_key": "Cosmic",      "deity_pct": 100, "items_pct": 0,
      "scene": "Solo dramatic full-body portrait of {deity_specific}, complete divine iconography, traditional weapons/symbols, traditional vahana if any, glowing aura, mysterious cinematic reveal, viewer captivated"},
@@ -167,7 +171,7 @@ def fetch_todays_festivals():
 
 
 # ============================================================
-# STEP 1: RESEARCH-GROUNDED SCRIPT + 17-FIELD SEO PACKAGE + YT FIELDS
+# STEP 1: RESEARCH-GROUNDED SCRIPT + 22 SEO/GEO/AEO FIELDS
 # ============================================================
 def generate_script(festival):
     log(f"Generating research-grounded SEO+GEO+AEO package for {festival['festival_name']}...")
@@ -314,7 +318,7 @@ CRITICAL RULES:
         text = resp.json()["candidates"][0]["content"]["parts"][0]["text"]
         log(f"Script raw preview: {repr(text[:200])}")
         result = extract_json(text)
-        log("Script + 17-field SEO/GEO/AEO + 5-field YT package generated (Google grounded)")
+        log("Script + 22-field SEO/GEO/AEO package generated (Google grounded)")
         return result
     except Exception as e:
         log(f"Script failed: {e}")
@@ -564,7 +568,7 @@ def upload_to_supabase(video_path, json_path, slug):
 
 
 # ============================================================
-# STEP 5b: PUBLISH TO YOUTUBE (NEW v5.1)
+# STEP 5b: PUBLISH TO YOUTUBE
 # ============================================================
 def publish_to_youtube(script, video_url, festival):
     log("Publishing to YouTube...")
@@ -602,6 +606,84 @@ def publish_to_youtube(script, video_url, festival):
             return None
     except Exception as e:
         log(f"YouTube publish exception: {e}")
+        return None
+
+
+# ============================================================
+# STEP 5c: PUBLISH TO FACEBOOK (NEW v5.2)
+# ============================================================
+def publish_to_facebook(script, video_url, festival):
+    log("Publishing to Facebook...")
+    if not video_url:
+        log("No video URL - skipping Facebook publish")
+        return None
+
+    caption = script.get("caption_variants", {}).get("facebook", script.get("seo_caption", ""))
+    hashtags_str = " ".join(["#" + h for h in script.get("hashtags", {}).get("trending", [])[:15]])
+    full_caption = f"{caption}\n\n{hashtags_str}\n\nFree Kundali: https://trikalvaani.com"
+
+    payload = {
+        "video_url": video_url,
+        "caption": full_caption[:5000],
+        "festival_name": festival["festival_name"],
+        "festival_date": festival.get("date", ""),
+    }
+
+    try:
+        resp = requests.post(
+            f"{VERCEL_APP_URL}/api/social/publish-facebook",
+            json=payload,
+            headers={"x-content-engine-secret": CONTENT_ENGINE_SECRET},
+            timeout=300
+        )
+        data = resp.json()
+        if data.get("success"):
+            log(f"Facebook LIVE: {data['facebook_url']}")
+            return data["facebook_url"]
+        else:
+            log(f"Facebook publish failed: {data.get('error')}")
+            return None
+    except Exception as e:
+        log(f"Facebook publish exception: {e}")
+        return None
+
+
+# ============================================================
+# STEP 5d: PUBLISH TO INSTAGRAM (NEW v5.2)
+# ============================================================
+def publish_to_instagram(script, video_url, festival):
+    log("Publishing to Instagram...")
+    if not video_url:
+        log("No video URL - skipping Instagram publish")
+        return None
+
+    caption = script.get("caption_variants", {}).get("instagram", script.get("seo_caption", ""))
+    hashtags_str = " ".join(["#" + h for h in script.get("hashtags", {}).get("trending", [])[:15]])
+    full_caption = f"{caption}\n\n.\n.\n.\n{hashtags_str}"
+
+    payload = {
+        "video_url": video_url,
+        "caption": full_caption[:2200],
+        "festival_name": festival["festival_name"],
+        "festival_date": festival.get("date", ""),
+    }
+
+    try:
+        resp = requests.post(
+            f"{VERCEL_APP_URL}/api/social/publish-instagram",
+            json=payload,
+            headers={"x-content-engine-secret": CONTENT_ENGINE_SECRET},
+            timeout=300
+        )
+        data = resp.json()
+        if data.get("success"):
+            log(f"Instagram LIVE: {data['instagram_url']}")
+            return data["instagram_url"]
+        else:
+            log(f"Instagram publish failed: {data.get('error')}")
+            return None
+    except Exception as e:
+        log(f"Instagram publish exception: {e}")
         return None
 
 
@@ -736,7 +818,7 @@ def cleanup():
 
 
 # ============================================================
-# PROCESS ONE FESTIVAL (with 3 retries) — v5.1 with YT publish
+# PROCESS ONE FESTIVAL (v5.2 — YouTube + Facebook + Instagram)
 # ============================================================
 def process_festival(festival, max_retries=3):
     for attempt in range(1, max_retries + 1):
@@ -769,13 +851,27 @@ def process_festival(festival, max_retries=3):
             video_url, json_url = upload_to_supabase(video, json_path, script.get("slug", "video"))
             log_supabase(script, video, video_url, festival, True)
 
-            # NEW v5.1: Auto-publish to YouTube
+            # v5.2: Auto-publish to ALL 3 platforms
             if video_url:
                 yt_url = publish_to_youtube(script, video_url, festival)
                 if yt_url:
                     log(f"YouTube published: {yt_url}")
                 else:
-                    log("YouTube publish failed — video still saved to Supabase")
+                    log("YouTube publish failed")
+
+                time.sleep(5)
+                fb_url = publish_to_facebook(script, video_url, festival)
+                if fb_url:
+                    log(f"Facebook published: {fb_url}")
+                else:
+                    log("Facebook publish failed")
+
+                time.sleep(5)
+                ig_url = publish_to_instagram(script, video_url, festival)
+                if ig_url:
+                    log(f"Instagram published: {ig_url}")
+                else:
+                    log("Instagram publish failed")
 
             cleanup()
             log(f"SUCCESS: {video}")
@@ -808,7 +904,8 @@ def process_festival(festival, max_retries=3):
 # ============================================================
 def main():
     log("=" * 55)
-    log("TRIKAL VAANI CONTENT ENGINE v5.1 - YOUTUBE AUTO-PUBLISH")
+    log("TRIKAL VAANI CONTENT ENGINE v5.2 - FULL AUTO-PUBLISH")
+    log("YouTube + Facebook + Instagram")
     log("=" * 55)
 
     # Manual mode: --festival <slug>
