@@ -777,10 +777,11 @@ def main():
         # Fetch specific festival
         url = f"{SUPABASE_URL}/rest/v1/festivals_master"
         headers = {"apikey": SUPABASE_KEY, "Authorization": f"Bearer {SUPABASE_KEY}"}
-resp = requests.get(
-    f"{SUPABASE_URL}/rest/v1/festivals_master?festival_slug=eq.{slug}&select=*",
-    headers=headers, timeout=30
-)
+headers = {"apikey": SUPABASE_KEY, "Authorization": f"Bearer {SUPABASE_KEY}"}
+        resp = requests.get(
+            f"{SUPABASE_URL}/rest/v1/festivals_master?festival_slug=eq.{slug}&select=*",
+            headers=headers, timeout=30
+        )
         fests = resp.json()
         if not fests:
             log(f"Festival not found: {slug}")
