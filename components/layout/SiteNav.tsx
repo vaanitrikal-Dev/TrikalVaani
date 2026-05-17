@@ -3,11 +3,12 @@
 // ============================================================
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikal Vaani
 // FILE: components/layout/SiteNav.tsx
-// VERSION: v2.1 — Panchang tab added to desktop + mobile nav
-// DATE: 2026-05-13
+// VERSION: v2.2
+// DATE: 2026-05-17
 // CHANGES:
-//   v2.1: Added "Panchang" link in desktop nav + mobile nav
-//         Everything else identical to v2.0
+//   v2.2: Removed "Events" link (duplicate of Panchang data)
+//         Added "Calculators" link → /calculators
+//         Desktop + Mobile both updated
 // ============================================================
 
 import Link from 'next/link';
@@ -134,7 +135,6 @@ export default function SiteNav() {
               Services
             </Link>
 
-            {/* ── PANCHANG TAB (NEW) ── */}
             <Link
               href="/panchang"
               className="text-sm text-slate-400 hover:text-slate-200 transition-colors duration-200"
@@ -142,12 +142,16 @@ export default function SiteNav() {
               Panchang
             </Link>
 
-            <Link href="/blog" className="text-sm text-slate-400 hover:text-slate-200 transition-colors duration-200">
-              Vedic Blog
+            {/* ── CALCULATORS TAB (NEW v2.2) ── */}
+            <Link
+              href="/calculators"
+              className="text-sm text-slate-400 hover:text-slate-200 transition-colors duration-200"
+            >
+              Calculators
             </Link>
 
-            <Link href="/upcoming-events" className="text-sm text-slate-400 hover:text-slate-200 transition-colors duration-200">
-              Events
+            <Link href="/blog" className="text-sm text-slate-400 hover:text-slate-200 transition-colors duration-200">
+              Vedic Blog
             </Link>
 
             <Link href="/founder" className="text-sm text-slate-400 hover:text-slate-200 transition-colors duration-200">
@@ -206,7 +210,7 @@ export default function SiteNav() {
           {/* ── MOBILE NAV ── */}
           <div className="sm:hidden flex items-center gap-2">
             <Link
-              href="/panchang"
+              href="/calculators"
               className="text-xs font-semibold px-3 py-1.5 rounded-full transition-all duration-200"
               style={{
                 color: GOLD_RGBA(0.9),
@@ -214,7 +218,7 @@ export default function SiteNav() {
                 background: GOLD_RGBA(0.06),
               }}
             >
-              Panchang
+              Calculators
             </Link>
             <Link
               href="/services"
