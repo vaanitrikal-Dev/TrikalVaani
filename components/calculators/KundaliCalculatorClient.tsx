@@ -113,9 +113,7 @@ export default function KundaliCalculatorClient() {
                 boxShadow: `0 0 30px ${GOLD_RGBA(0.5)}, 0 0 60px ${GOLD_RGBA(0.2)}`,
               }}
             >
-              <span>🎙️</span>
-              <span>Trikal Ki Vaani Suniye — ₹51</span>
-              <span>→</span>
+              <span>🔮 Trikal Ka Sandesh — Sirf Aapke Liye — ₹51 →</span>
             </Link>
 
             <p
