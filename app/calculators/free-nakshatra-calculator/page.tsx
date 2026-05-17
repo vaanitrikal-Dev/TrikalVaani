@@ -2,25 +2,33 @@
 
 // ============================================================
 // File: app/calculators/free-nakshatra-calculator/page.tsx
-// Purpose: Free Nakshatra Calculator — working form + result + content
-// Version: v1.1
+// Version: v2.0 — BirthForm v9.2 style + /api/maps-proxy
 // Engine: Swiss Ephemeris + Parashar BPHS + Shadbala + Bhrigu
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikal Vaani
 // ============================================================
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import SiteNav from '@/components/layout/SiteNav';
 
 const GOLD = '#D4AF37';
 const GOLD_RGBA = (a: number) => `rgba(212,175,55,${a})`;
 
+interface PlaceSuggestion {
+  place_id: string;
+  description: string;
+  main_text: string;
+  secondary_text: string;
+}
+
 interface FormData {
   name: string;
   gender: 'male' | 'female' | 'other' | '';
   date: string;
   time: string;
-  place: string;
+  unknownTime: boolean;
+  placeQuery: string;
+  city: string;
   latitude: number | null;
   longitude: number | null;
   timezone: number;
@@ -29,45 +37,177 @@ interface FormData {
 interface ApiResult {
   success: boolean;
   sessionId: string;
-  instant: {
-    nakshatra: string | null;
-    pada: number | null;
-    [key: string]: any;
-  };
+  instant: any;
   kundali: any;
   template: any;
 }
 
-// 27 Nakshatra reference (Parashar BPHS) — fallback enrichment
 const NAKSHATRA_DATA: Record<string, any> = {
-  'Ashwini':       { lord: 'Ketu',    deity: 'Ashwini Kumaras', symbol: 'Horse head',     gana: 'Deva',     yoni: 'Horse',    nadi: 'Aadi',   trait: 'Healer, swift, pioneering' },
-  'Bharani':       { lord: 'Shukra',  deity: 'Yama',            symbol: 'Yoni',           gana: 'Manushya', yoni: 'Elephant', nadi: 'Madhya', trait: 'Bearer, transformative, intense' },
-  'Krittika':      { lord: 'Surya',   deity: 'Agni',            symbol: 'Razor/Flame',    gana: 'Rakshasa', yoni: 'Sheep',    nadi: 'Antya',  trait: 'Sharp, purifying, leader' },
-  'Rohini':        { lord: 'Chandra', deity: 'Brahma',          symbol: 'Chariot',        gana: 'Manushya', yoni: 'Serpent',  nadi: 'Antya',  trait: 'Beautiful, creative, magnetic' },
-  'Mrigashira':    { lord: 'Mangal',  deity: 'Soma',            symbol: 'Deer head',      gana: 'Deva',     yoni: 'Serpent',  nadi: 'Madhya', trait: 'Seeker, curious, gentle' },
-  'Ardra':         { lord: 'Rahu',    deity: 'Rudra',           symbol: 'Teardrop',       gana: 'Manushya', yoni: 'Dog',      nadi: 'Aadi',   trait: 'Stormy, transformative, intense' },
-  'Punarvasu':     { lord: 'Guru',    deity: 'Aditi',           symbol: 'Bow & quiver',   gana: 'Deva',     yoni: 'Cat',      nadi: 'Aadi',   trait: 'Renewer, optimistic, philosophical' },
-  'Pushya':        { lord: 'Shani',   deity: 'Brihaspati',      symbol: 'Cow udder',      gana: 'Deva',     yoni: 'Sheep',    nadi: 'Madhya', trait: 'Nurturing, scholarly, most auspicious' },
-  'Ashlesha':      { lord: 'Budh',    deity: 'Nagas',           symbol: 'Coiled snake',   gana: 'Rakshasa', yoni: 'Cat',      nadi: 'Antya',  trait: 'Mystical, hypnotic, deep wisdom' },
-  'Magha':         { lord: 'Ketu',    deity: 'Pitru',           symbol: 'Throne',         gana: 'Rakshasa', yoni: 'Rat',      nadi: 'Antya',  trait: 'Royal, ancestral, authoritative' },
-  'Purva Phalguni':{ lord: 'Shukra',  deity: 'Bhaga',           symbol: 'Hammock',        gana: 'Manushya', yoni: 'Rat',      nadi: 'Madhya', trait: 'Pleasure-loving, creative, charming' },
-  'Uttara Phalguni':{ lord:'Surya',   deity: 'Aryaman',         symbol: 'Bed',            gana: 'Manushya', yoni: 'Cow',      nadi: 'Aadi',   trait: 'Generous, helpful, leader' },
-  'Hasta':         { lord: 'Chandra', deity: 'Savitar',         symbol: 'Hand/Fist',      gana: 'Deva',     yoni: 'Buffalo',  nadi: 'Aadi',   trait: 'Skilled, dexterous, witty' },
-  'Chitra':        { lord: 'Mangal',  deity: 'Vishwakarma',     symbol: 'Pearl/Jewel',    gana: 'Rakshasa', yoni: 'Tiger',    nadi: 'Madhya', trait: 'Artistic, brilliant, attractive' },
-  'Swati':         { lord: 'Rahu',    deity: 'Vayu',            symbol: 'Sword/Coral',    gana: 'Deva',     yoni: 'Buffalo',  nadi: 'Antya',  trait: 'Independent, diplomatic, restless' },
-  'Vishakha':      { lord: 'Guru',    deity: 'Indra-Agni',      symbol: 'Triumphal arch', gana: 'Rakshasa', yoni: 'Tiger',    nadi: 'Antya',  trait: 'Ambitious, goal-driven, determined' },
-  'Anuradha':      { lord: 'Shani',   deity: 'Mitra',           symbol: 'Lotus',          gana: 'Deva',     yoni: 'Deer',     nadi: 'Madhya', trait: 'Devoted, friendly, balanced' },
-  'Jyeshtha':      { lord: 'Budh',    deity: 'Indra',           symbol: 'Earring',        gana: 'Rakshasa', yoni: 'Deer',     nadi: 'Aadi',   trait: 'Eldest, protective, occult-inclined' },
-  'Mula':          { lord: 'Ketu',    deity: 'Nirriti',         symbol: 'Bundle of roots', gana: 'Rakshasa', yoni: 'Dog',     nadi: 'Aadi',   trait: 'Investigator, root-seeker, intense' },
-  'Purva Ashadha': { lord: 'Shukra',  deity: 'Apah',            symbol: 'Fan/Tusk',       gana: 'Manushya', yoni: 'Monkey',   nadi: 'Madhya', trait: 'Invincible, persuasive, fearless' },
-  'Uttara Ashadha':{ lord: 'Surya',   deity: 'Vishvedevas',     symbol: 'Elephant tusk',  gana: 'Manushya', yoni: 'Mongoose', nadi: 'Antya',  trait: 'Universal leader, righteous, victorious' },
-  'Shravana':      { lord: 'Chandra', deity: 'Vishnu',          symbol: 'Ear',            gana: 'Deva',     yoni: 'Monkey',   nadi: 'Antya',  trait: 'Listener, learned, fame-oriented' },
-  'Dhanishta':     { lord: 'Mangal',  deity: 'Vasus',           symbol: 'Drum/Flute',     gana: 'Rakshasa', yoni: 'Lion',     nadi: 'Madhya', trait: 'Musical, wealthy, rhythmic' },
-  'Shatabhisha':   { lord: 'Rahu',    deity: 'Varuna',          symbol: 'Empty circle',   gana: 'Rakshasa', yoni: 'Horse',    nadi: 'Aadi',   trait: 'Healer, mystic, hundred-physicians' },
-  'Purva Bhadrapada':{lord:'Guru',    deity: 'Aja Ekapada',     symbol: 'Two-faced man',  gana: 'Manushya', yoni: 'Lion',     nadi: 'Aadi',   trait: 'Transformative, fiery, dualistic' },
-  'Uttara Bhadrapada':{lord:'Shani',  deity: 'Ahirbudhnya',     symbol: 'Serpent in deep', gana: 'Manushya', yoni: 'Cow',     nadi: 'Madhya', trait: 'Deep wisdom, mystical, kundalini' },
-  'Revati':        { lord: 'Budh',    deity: 'Pushan',          symbol: 'Fish',           gana: 'Deva',     yoni: 'Elephant', nadi: 'Antya',  trait: 'Wealthy, kind, protector' },
+  'Ashwini': { lord: 'Ketu', deity: 'Ashwini Kumaras', symbol: 'Horse head', gana: 'Deva', yoni: 'Horse', nadi: 'Aadi', trait: 'Healer, swift, pioneering' },
+  'Bharani': { lord: 'Shukra', deity: 'Yama', symbol: 'Yoni', gana: 'Manushya', yoni: 'Elephant', nadi: 'Madhya', trait: 'Bearer, transformative, intense' },
+  'Krittika': { lord: 'Surya', deity: 'Agni', symbol: 'Razor/Flame', gana: 'Rakshasa', yoni: 'Sheep', nadi: 'Antya', trait: 'Sharp, purifying, leader' },
+  'Rohini': { lord: 'Chandra', deity: 'Brahma', symbol: 'Chariot', gana: 'Manushya', yoni: 'Serpent', nadi: 'Antya', trait: 'Beautiful, creative, magnetic' },
+  'Mrigashira': { lord: 'Mangal', deity: 'Soma', symbol: 'Deer head', gana: 'Deva', yoni: 'Serpent', nadi: 'Madhya', trait: 'Seeker, curious, gentle' },
+  'Ardra': { lord: 'Rahu', deity: 'Rudra', symbol: 'Teardrop', gana: 'Manushya', yoni: 'Dog', nadi: 'Aadi', trait: 'Stormy, transformative, intense' },
+  'Punarvasu': { lord: 'Guru', deity: 'Aditi', symbol: 'Bow & quiver', gana: 'Deva', yoni: 'Cat', nadi: 'Aadi', trait: 'Renewer, optimistic, philosophical' },
+  'Pushya': { lord: 'Shani', deity: 'Brihaspati', symbol: 'Cow udder', gana: 'Deva', yoni: 'Sheep', nadi: 'Madhya', trait: 'Nurturing, scholarly, most auspicious' },
+  'Ashlesha': { lord: 'Budh', deity: 'Nagas', symbol: 'Coiled snake', gana: 'Rakshasa', yoni: 'Cat', nadi: 'Antya', trait: 'Mystical, hypnotic, deep wisdom' },
+  'Magha': { lord: 'Ketu', deity: 'Pitru', symbol: 'Throne', gana: 'Rakshasa', yoni: 'Rat', nadi: 'Antya', trait: 'Royal, ancestral, authoritative' },
+  'Purva Phalguni': { lord: 'Shukra', deity: 'Bhaga', symbol: 'Hammock', gana: 'Manushya', yoni: 'Rat', nadi: 'Madhya', trait: 'Pleasure-loving, creative, charming' },
+  'Uttara Phalguni': { lord: 'Surya', deity: 'Aryaman', symbol: 'Bed', gana: 'Manushya', yoni: 'Cow', nadi: 'Aadi', trait: 'Generous, helpful, leader' },
+  'Hasta': { lord: 'Chandra', deity: 'Savitar', symbol: 'Hand/Fist', gana: 'Deva', yoni: 'Buffalo', nadi: 'Aadi', trait: 'Skilled, dexterous, witty' },
+  'Chitra': { lord: 'Mangal', deity: 'Vishwakarma', symbol: 'Pearl/Jewel', gana: 'Rakshasa', yoni: 'Tiger', nadi: 'Madhya', trait: 'Artistic, brilliant, attractive' },
+  'Swati': { lord: 'Rahu', deity: 'Vayu', symbol: 'Sword/Coral', gana: 'Deva', yoni: 'Buffalo', nadi: 'Antya', trait: 'Independent, diplomatic, restless' },
+  'Vishakha': { lord: 'Guru', deity: 'Indra-Agni', symbol: 'Triumphal arch', gana: 'Rakshasa', yoni: 'Tiger', nadi: 'Antya', trait: 'Ambitious, goal-driven, determined' },
+  'Anuradha': { lord: 'Shani', deity: 'Mitra', symbol: 'Lotus', gana: 'Deva', yoni: 'Deer', nadi: 'Madhya', trait: 'Devoted, friendly, balanced' },
+  'Jyeshtha': { lord: 'Budh', deity: 'Indra', symbol: 'Earring', gana: 'Rakshasa', yoni: 'Deer', nadi: 'Aadi', trait: 'Eldest, protective, occult-inclined' },
+  'Mula': { lord: 'Ketu', deity: 'Nirriti', symbol: 'Bundle of roots', gana: 'Rakshasa', yoni: 'Dog', nadi: 'Aadi', trait: 'Investigator, root-seeker, intense' },
+  'Purva Ashadha': { lord: 'Shukra', deity: 'Apah', symbol: 'Fan/Tusk', gana: 'Manushya', yoni: 'Monkey', nadi: 'Madhya', trait: 'Invincible, persuasive, fearless' },
+  'Uttara Ashadha': { lord: 'Surya', deity: 'Vishvedevas', symbol: 'Elephant tusk', gana: 'Manushya', yoni: 'Mongoose', nadi: 'Antya', trait: 'Universal leader, righteous, victorious' },
+  'Shravana': { lord: 'Chandra', deity: 'Vishnu', symbol: 'Ear', gana: 'Deva', yoni: 'Monkey', nadi: 'Antya', trait: 'Listener, learned, fame-oriented' },
+  'Dhanishta': { lord: 'Mangal', deity: 'Vasus', symbol: 'Drum/Flute', gana: 'Rakshasa', yoni: 'Lion', nadi: 'Madhya', trait: 'Musical, wealthy, rhythmic' },
+  'Shatabhisha': { lord: 'Rahu', deity: 'Varuna', symbol: 'Empty circle', gana: 'Rakshasa', yoni: 'Horse', nadi: 'Aadi', trait: 'Healer, mystic, hundred-physicians' },
+  'Purva Bhadrapada': { lord: 'Guru', deity: 'Aja Ekapada', symbol: 'Two-faced man', gana: 'Manushya', yoni: 'Lion', nadi: 'Aadi', trait: 'Transformative, fiery, dualistic' },
+  'Uttara Bhadrapada': { lord: 'Shani', deity: 'Ahirbudhnya', symbol: 'Serpent in deep', gana: 'Manushya', yoni: 'Cow', nadi: 'Madhya', trait: 'Deep wisdom, mystical, kundalini' },
+  'Revati': { lord: 'Budh', deity: 'Pushan', symbol: 'Fish', gana: 'Deva', yoni: 'Elephant', nadi: 'Antya', trait: 'Wealthy, kind, protector' },
 };
+
+// ─── Google Maps via /api/maps-proxy ──────────
+async function fetchPlaceSuggestions(query: string): Promise<PlaceSuggestion[]> {
+  if (query.length < 3) return [];
+  try {
+    const res = await fetch(
+      `/api/maps-proxy?url=${encodeURIComponent('https://places.googleapis.com/v1/places:autocomplete')}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          input: query,
+          includedPrimaryTypes: ['locality', 'administrative_area_level_3'],
+          languageCode: 'en',
+        }),
+      }
+    );
+    if (!res.ok) return [];
+    const data = await res.json();
+    return (data.suggestions ?? [])
+      .filter((s: any) => s.placePrediction)
+      .map((s: any) => ({
+        place_id: s.placePrediction.placeId ?? '',
+        description: s.placePrediction.text?.text ?? '',
+        main_text: s.placePrediction.structuredFormat?.mainText?.text ?? s.placePrediction.text?.text ?? '',
+        secondary_text: s.placePrediction.structuredFormat?.secondaryText?.text ?? '',
+      }));
+  } catch { return []; }
+}
+
+async function fetchPlaceDetails(placeId: string): Promise<{ lat: number; lng: number; city: string } | null> {
+  if (!placeId) return null;
+  try {
+    const fields = 'location,displayName';
+    const url = `https://places.googleapis.com/v1/places/${placeId}?fields=${fields}`;
+    const res = await fetch(`/api/maps-proxy?url=${encodeURIComponent(url)}`);
+    if (!res.ok) return null;
+    const data = await res.json();
+    const lat = data.location?.latitude ?? null;
+    const lng = data.location?.longitude ?? null;
+    const city = data.displayName?.text ?? '';
+    if (lat === null || lng === null) return null;
+    return { lat, lng, city };
+  } catch { return null; }
+}
+
+async function fetchTimezone(lat: number, lng: number): Promise<number> {
+  try {
+    const ts = Math.floor(Date.now() / 1000);
+    const url = `https://maps.googleapis.com/maps/api/timezone/json?location=${lat},${lng}&timestamp=${ts}`;
+    const res = await fetch(`/api/maps-proxy?url=${encodeURIComponent(url)}`);
+    if (!res.ok) return 5.5;
+    const data = await res.json();
+    if (data.status !== 'OK') return 5.5;
+    const totalOffset = (data.rawOffset + data.dstOffset) / 3600;
+    return Math.round(totalOffset * 4) / 4;
+  } catch { return 5.5; }
+}
+
+function CityInput({
+  id, label, required, value, onSelect, error, placeholder,
+}: {
+  id: string; label?: string; required?: boolean; value: string;
+  onSelect: (city: string, lat: number, lng: number, timezone: number) => void;
+  error?: string; placeholder?: string;
+}) {
+  const [query, setQuery] = useState(value);
+  const [suggestions, setSuggestions] = useState<PlaceSuggestion[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [selected, setSelected] = useState(false);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => { setQuery(value); }, [value]);
+
+  const handleChange = (val: string) => {
+    setQuery(val);
+    setSelected(false);
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    if (val.length < 3) { setSuggestions([]); return; }
+    debounceRef.current = setTimeout(async () => {
+      setLoading(true);
+      const results = await fetchPlaceSuggestions(val);
+      setSuggestions(results);
+      setLoading(false);
+    }, 400);
+  };
+
+  const handleSelect = async (s: PlaceSuggestion) => {
+    setQuery(s.main_text);
+    setSuggestions([]);
+    setSelected(true);
+    setLoading(true);
+    const details = await fetchPlaceDetails(s.place_id);
+    if (details) {
+      const tz = await fetchTimezone(details.lat, details.lng);
+      onSelect(details.city || s.main_text, details.lat, details.lng, tz);
+    }
+    setLoading(false);
+  };
+
+  return (
+    <div className="relative">
+      {label && (
+        <label htmlFor={id} className="block text-sm font-medium text-slate-300 mb-1.5">
+          {label} {required && <span className="text-yellow-400">*</span>}
+        </label>
+      )}
+      <div className="relative">
+        <input id={id} type="search" autoComplete="off"
+          placeholder={placeholder ?? 'Type city name...'}
+          value={query}
+          onChange={e => handleChange(e.target.value)}
+          className="w-full px-4 py-2.5 rounded-lg text-sm outline-none pr-10"
+          style={{ background: '#0d1120', border: `1px solid ${error ? '#ef4444' : 'rgba(255,255,255,0.1)'}`, color: '#e2e8f0', colorScheme: 'dark' }} />
+        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs">
+          {loading ? <span style={{ color: GOLD }}>⟳</span> : selected ? <span style={{ color: '#22c55e' }}>✓</span> : <span style={{ color: '#475569' }}>📍</span>}
+        </span>
+      </div>
+      {suggestions.length > 0 && (
+        <ul className="absolute z-50 w-full mt-1 rounded-lg overflow-hidden shadow-xl"
+          style={{ background: '#0d1120', border: '1px solid rgba(212,175,55,0.2)', maxHeight: '200px', overflowY: 'auto' }}>
+          {suggestions.map((s, i) => (
+            <li key={i} onClick={() => handleSelect(s)}
+              className="px-4 py-3 text-sm cursor-pointer"
+              style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}
+              onMouseEnter={e => (e.currentTarget.style.background = GOLD_RGBA(0.08))}
+              onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
+              <p style={{ margin: 0, color: '#e2e8f0', fontWeight: 600 }}>{s.main_text}</p>
+              <p style={{ margin: 0, color: '#64748b', fontSize: '11px' }}>{s.secondary_text}</p>
+            </li>
+          ))}
+        </ul>
+      )}
+      {error && <p className="text-red-400 text-xs mt-1">{error}</p>}
+    </div>
+  );
+}
 
 const FAQS_DISPLAY = [
   { q: 'Nakshatra kya hota hai?', a: 'Nakshatra Vedic Jyotish ka sabse important unit hai. Aakash ko 27 equal divisions mein baata gaya hai. Aapka Janma Nakshatra wahi hai jismein aapke janm samay Chandra (Moon) sthit tha.' },
@@ -80,86 +220,38 @@ const FAQS_DISPLAY = [
 
 export default function FreeNakshatraCalculatorPage() {
   const [form, setForm] = useState<FormData>({
-    name: '', gender: '', date: '', time: '', place: '',
-    latitude: null, longitude: null, timezone: 5.5,
+    name: '', gender: '', date: '', time: '12:00', unknownTime: false,
+    placeQuery: '', city: '', latitude: null, longitude: null, timezone: 5.5,
   });
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<ApiResult | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [mapsReady, setMapsReady] = useState(false);
-  const [mapsError, setMapsError] = useState<string | null>(null);
-
-  const placeInputRef = useRef<HTMLInputElement>(null);
+  const [errors, setErrors] = useState<Partial<Record<string, string>>>({});
   const resultRef = useRef<HTMLDivElement>(null);
-  const apiKeyRef = useRef<string>('');
-  const autocompleteRef = useRef<any>(null);
 
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const w = window as any;
-    if (w.google?.maps?.places) { setMapsReady(true); return; }
-
-    fetch('/api/maps-key')
-      .then((r) => r.json())
-      .then((data) => {
-        if (!data.key) { setMapsError('Maps service unavailable'); return; }
-        apiKeyRef.current = data.key;
-        const existing = document.querySelector('script[data-gmaps]');
-        if (existing) { existing.addEventListener('load', () => setMapsReady(true)); return; }
-        const script = document.createElement('script');
-        script.src = `https://maps.googleapis.com/maps/api/js?key=${data.key}&libraries=places&loading=async`;
-        script.async = true; script.defer = true;
-        script.setAttribute('data-gmaps', 'true');
-        script.onload = () => setMapsReady(true);
-        script.onerror = () => setMapsError('Google Maps failed to load');
-        document.head.appendChild(script);
-      })
-      .catch(() => setMapsError('Failed to load map service'));
+  const set = useCallback((key: keyof FormData, value: any) => {
+    setForm(prev => ({ ...prev, [key]: value }));
+    setErrors(prev => ({ ...prev, [key]: undefined }));
   }, []);
 
-  useEffect(() => {
-    if (!mapsReady || !placeInputRef.current) return;
-    if (autocompleteRef.current) return;
-    const w = window as any;
-    if (!w.google?.maps?.places) return;
-
-    try {
-      const ac = new w.google.maps.places.Autocomplete(placeInputRef.current, {
-        types: ['(cities)'],
-        fields: ['formatted_address', 'name', 'geometry'],
-      });
-      autocompleteRef.current = ac;
-
-      ac.addListener('place_changed', () => {
-        const place = ac.getPlace();
-        if (!place.geometry?.location) return;
-        const lat = place.geometry.location.lat();
-        const lng = place.geometry.location.lng();
-        const placeName = place.formatted_address || place.name || '';
-        const ts = Math.floor(Date.now() / 1000);
-        fetch(`https://maps.googleapis.com/maps/api/timezone/json?location=${lat},${lng}&timestamp=${ts}&key=${apiKeyRef.current}`)
-          .then((r) => r.json())
-          .then((tz) => {
-            let tzHours = 5.5;
-            if (tz?.rawOffset != null) tzHours = ((tz.rawOffset || 0) + (tz.dstOffset || 0)) / 3600;
-            setForm((f) => ({ ...f, place: placeName, latitude: lat, longitude: lng, timezone: tzHours }));
-          })
-          .catch(() => setForm((f) => ({ ...f, place: placeName, latitude: lat, longitude: lng, timezone: 5.5 })));
-      });
-    } catch (e) {
-      console.error('[autocomplete init]', e);
-      setMapsError('Place search failed to initialize');
-    }
-  }, [mapsReady]);
+  const validate = () => {
+    const errs: Record<string, string> = {};
+    if (!form.name.trim()) errs.name = 'Name is required';
+    if (!form.date) errs.date = 'Date of birth is required';
+    if (!form.unknownTime && !form.time) errs.time = 'Time of birth is required';
+    if (form.latitude === null) errs.latitude = 'Please select a city from suggestions';
+    setErrors(errs);
+    return Object.keys(errs).length === 0;
+  };
 
   const handleSubmit = async () => {
     setError(null);
-    if (!form.date || !form.time || form.latitude == null || form.longitude == null) {
-      setError('Please fill date, time, and place of birth — all three are required.');
-      return;
-    }
+    if (!validate()) return;
+
     const [year, month, day] = form.date.split('-').map(Number);
-    const [hour, minute] = form.time.split(':').map(Number);
+    const tob = form.unknownTime ? '12:00' : form.time;
+    const [hour, minute] = tob.split(':').map(Number);
+
     setLoading(true);
     try {
       const res = await fetch('/api/calc/kundali', {
@@ -167,8 +259,11 @@ export default function FreeNakshatraCalculatorPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           year, month, day, hour, minute,
-          latitude: form.latitude, longitude: form.longitude, timezone: form.timezone,
-          name: form.name || null, gender: form.gender || null,
+          latitude: form.latitude,
+          longitude: form.longitude,
+          timezone: form.timezone,
+          name: form.name || null,
+          gender: form.gender || null,
         }),
       });
       if (!res.ok) {
@@ -185,6 +280,7 @@ export default function FreeNakshatraCalculatorPage() {
     }
   };
 
+  // ─── Nakshatra extraction ────────────────────────────────────
   const nakshatra = result?.instant?.nakshatra
     || result?.kundali?.lagna?.nakshatra
     || result?.kundali?.grahas?.find((g: any) => g.planet === 'Moon')?.nakshatra
@@ -210,6 +306,13 @@ export default function FreeNakshatraCalculatorPage() {
   const mantra = remedies?.mantra || remedies?.mantras || template?.mantra;
   const ratna = remedies?.ratna || remedies?.gemstone || template?.ratna;
   const daan = remedies?.daan || remedies?.charity || template?.daan;
+
+  const inputStyle = (hasError?: boolean): React.CSSProperties => ({
+    background: '#0d1120',
+    border: `1px solid ${hasError ? '#ef4444' : 'rgba(255,255,255,0.1)'}`,
+    color: '#e2e8f0',
+    colorScheme: 'dark' as const,
+  });
 
   return (
     <>
@@ -244,64 +347,115 @@ export default function FreeNakshatraCalculatorPage() {
             </div>
           </div>
 
-          {/* FORM */}
-          <div className="rounded-2xl p-5 md:p-7" style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid ${GOLD_RGBA(0.2)}`, boxShadow: `0 0 30px ${GOLD_RGBA(0.08)}` }}>
+          {/* FORM — BirthForm v9.2 style */}
+          <div className="rounded-2xl p-6 sm:p-8" style={{ background: 'rgba(13,17,30,0.85)', border: '1px solid rgba(212,175,55,0.15)', backdropFilter: 'blur(12px)' }}>
             <h2 className="text-xl md:text-2xl font-serif font-bold mb-5" style={{ color: GOLD }}>Find Your Janma Nakshatra (Free)</h2>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid gap-5">
               <div>
-                <label className="block text-sm font-medium mb-1.5 text-slate-300">Name <span className="text-slate-500">(optional)</span></label>
-                <input type="text" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  placeholder="Your name" className="w-full px-4 py-2.5 rounded-lg outline-none text-sm"
-                  style={{ background: 'rgba(2,8,23,0.6)', border: `1px solid ${GOLD_RGBA(0.15)}`, color: '#E5E7EB' }} />
+                <label htmlFor="tv-name" className="block text-sm font-medium text-slate-300 mb-1.5">Full Name <span className="text-yellow-400">*</span></label>
+                <input id="tv-name" type="text" placeholder="Enter your full name"
+                  value={form.name} onChange={e => set('name', e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-lg text-sm outline-none"
+                  style={inputStyle(!!errors.name)} />
+                {errors.name && <p className="text-red-400 text-xs mt-1">{errors.name}</p>}
               </div>
+
               <div>
-                <label className="block text-sm font-medium mb-1.5 text-slate-300">Gender <span className="text-slate-500">(optional)</span></label>
-                <select value={form.gender} onChange={(e) => setForm({ ...form, gender: e.target.value as any })}
-                  className="w-full px-4 py-2.5 rounded-lg outline-none text-sm"
-                  style={{ background: 'rgba(2,8,23,0.6)', border: `1px solid ${GOLD_RGBA(0.15)}`, color: '#E5E7EB' }}>
-                  <option value="">Select</option><option value="male">Male</option>
-                  <option value="female">Female</option><option value="other">Other</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1.5 text-slate-300">Date of Birth <span className="text-red-400">*</span></label>
-                <input type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })}
+                <label htmlFor="tv-dob" className="block text-sm font-medium text-slate-300 mb-1.5">Date of Birth <span className="text-yellow-400">*</span></label>
+                <input id="tv-dob" type="date" value={form.date}
+                  onChange={e => set('date', e.target.value)}
                   max={new Date().toISOString().split('T')[0]}
-                  className="w-full px-4 py-2.5 rounded-lg outline-none text-sm"
-                  style={{ background: 'rgba(2,8,23,0.6)', border: `1px solid ${GOLD_RGBA(0.15)}`, color: '#E5E7EB', colorScheme: 'dark' }} />
+                  className="w-full px-4 py-2.5 rounded-lg text-sm outline-none"
+                  style={inputStyle(!!errors.date)} />
+                {errors.date && <p className="text-red-400 text-xs mt-1">{errors.date}</p>}
               </div>
+
               <div>
-                <label className="block text-sm font-medium mb-1.5 text-slate-300">Time of Birth <span className="text-red-400">*</span></label>
-                <input type="time" value={form.time} onChange={(e) => setForm({ ...form, time: e.target.value })}
-                  className="w-full px-4 py-2.5 rounded-lg outline-none text-sm"
-                  style={{ background: 'rgba(2,8,23,0.6)', border: `1px solid ${GOLD_RGBA(0.15)}`, color: '#E5E7EB', colorScheme: 'dark' }} />
+                <div className="flex items-center justify-between mb-1.5">
+                  <label htmlFor="tv-tob" className="text-sm font-medium text-slate-300">
+                    Time of Birth {!form.unknownTime && <span className="text-yellow-400">*</span>}
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer text-sm text-slate-400">
+                    <input type="checkbox" checked={form.unknownTime} onChange={e => set('unknownTime', e.target.checked)} className="rounded" />
+                    Unknown time
+                  </label>
+                </div>
+                <input id="tv-tob" type="time" value={form.time}
+                  onChange={e => set('time', e.target.value)}
+                  disabled={form.unknownTime}
+                  className="w-full px-4 py-2.5 rounded-lg text-sm outline-none"
+                  style={{ ...inputStyle(!!errors.time), opacity: form.unknownTime ? 0.4 : 1 }} />
+                {form.unknownTime && <p className="text-slate-500 text-xs mt-1">Solar chart will be used (12:00 noon)</p>}
               </div>
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium mb-1.5 text-slate-300">Place of Birth <span className="text-red-400">*</span></label>
-                <input ref={placeInputRef} type="text"
-                  placeholder={mapsReady ? 'Start typing city name (e.g. Delhi, Mumbai, New York)' : mapsError ? `Error: ${mapsError}` : 'Loading location service...'}
-                  autoComplete="off" className="w-full px-4 py-2.5 rounded-lg outline-none text-sm"
-                  style={{ background: 'rgba(2,8,23,0.6)', border: `1px solid ${GOLD_RGBA(0.15)}`, color: '#E5E7EB' }} />
-                {form.latitude != null && form.longitude != null && (
-                  <p className="text-xs text-green-400 mt-1">✓ Location captured: {form.place} (TZ {form.timezone > 0 ? '+' : ''}{form.timezone})</p>
-                )}
-                {!mapsReady && !mapsError && <p className="text-xs text-slate-500 mt-1">Loading Google location search...</p>}
-                {mapsError && <p className="text-xs text-red-400 mt-1">⚠️ {mapsError}. Please refresh the page.</p>}
+
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-2">
+                  Gender <span className="text-slate-500 text-xs ml-1">(for personalized remedies)</span>
+                </label>
+                <div className="grid grid-cols-3 gap-2">
+                  {[
+                    { value: 'male', label: '♂ Male', color: '#60a5fa' },
+                    { value: 'female', label: '♀ Female', color: '#f472b6' },
+                    { value: 'other', label: '⊕ Other', color: '#94a3b8' },
+                  ].map(opt => (
+                    <button key={opt.value} type="button" onClick={() => set('gender', opt.value)}
+                      className="py-2.5 px-3 rounded-lg text-sm font-medium transition-all text-center"
+                      style={{ background: form.gender === opt.value ? `${opt.color}20` : 'rgba(255,255,255,0.04)', border: `1px solid ${form.gender === opt.value ? `${opt.color}60` : 'rgba(255,255,255,0.1)'}`, color: form.gender === opt.value ? opt.color : '#64748b' }}>
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
               </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-1.5">
+                  Place of Birth <span className="text-yellow-400">*</span>
+                </label>
+                <CityInput
+                  id="tv-place"
+                  value={form.placeQuery}
+                  placeholder="Type city of birth..."
+                  error={errors.latitude}
+                  onSelect={(city, lat, lng, tz) => {
+                    setForm(prev => ({ ...prev, placeQuery: city, city, latitude: lat, longitude: lng, timezone: tz }));
+                    setErrors(prev => ({ ...prev, latitude: undefined }));
+                  }}
+                />
+              </div>
+
+              {form.latitude !== null && (
+                <div className="grid grid-cols-3 gap-2">
+                  {[
+                    { label: 'Latitude', value: form.latitude.toFixed(4) },
+                    { label: 'Longitude', value: form.longitude!.toFixed(4) },
+                    { label: 'Timezone', value: `UTC ${form.timezone >= 0 ? '+' : ''}${form.timezone}` },
+                  ].map(({ label, value }) => (
+                    <div key={label}>
+                      <label className="block text-xs text-slate-500 mb-1">{label}</label>
+                      <div className="px-3 py-2 rounded-lg text-xs font-mono text-center"
+                        style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', color: '#22c55e' }}>
+                        {value}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {error && (
+                <div className="px-4 py-3 rounded-lg text-sm text-red-300" style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)' }}>
+                  {error}
+                </div>
+              )}
+
+              <button onClick={handleSubmit} disabled={loading}
+                className="w-full py-4 rounded-xl text-sm font-bold transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{ background: loading ? GOLD_RGBA(0.3) : `linear-gradient(135deg,rgba(212,175,55,0.8) 0%,${GOLD} 100%)`, color: '#080B12', fontSize: '15px' }}>
+                {loading ? '⟳ Finding Nakshatra...' : '⭐ Find My Nakshatra'}
+              </button>
+
+              <p className="text-center text-xs text-slate-600">🔒 100% Free · Swiss Ephemeris · Parashar BPHS · Shadbala · Bhrigu Nandi</p>
             </div>
-
-            {error && (
-              <div className="mt-4 p-3 rounded-lg text-sm" style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', color: '#FCA5A5' }}>{error}</div>
-            )}
-
-            <button onClick={handleSubmit} disabled={loading}
-              className="mt-5 w-full md:w-auto px-8 py-3 rounded-full font-bold text-sm transition-all hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
-              style={{ background: `linear-gradient(135deg, ${GOLD} 0%, #A8820A 100%)`, color: '#080B12' }}>
-              {loading ? 'Finding Nakshatra...' : '⭐ Find My Nakshatra'}
-            </button>
-
-            <p className="text-xs text-slate-500 mt-3">🔒 100% Free · Swiss Ephemeris · Parashar BPHS · Shadbala · Bhrigu Nandi</p>
           </div>
 
           {/* RESULT */}
@@ -366,61 +520,15 @@ export default function FreeNakshatraCalculatorPage() {
           <section className="mt-16 prose prose-invert max-w-none">
             <h2 className="text-2xl font-serif font-bold mb-4" style={{ color: GOLD }}>Janma Nakshatra Kya Hota Hai?</h2>
             <p className="text-slate-300 leading-relaxed mb-4">
-              Vedic Jyotish mein aakash ko 360 degree mein 27 equal divisions mein baata gaya hai — har division 13°20' ka hota hai. In 27 divisions ko Nakshatra kehte hain. Aapka <strong style={{ color: GOLD }}>Janma Nakshatra</strong> wahi hai jismein aapke janm samay Chandra (Moon) sthit tha. Maharishi Parashar ne <em>Brihat Parashara Hora Shastra (BPHS)</em> mein Nakshatra ko Vedic astrology ka <strong>foundation unit</strong> bataya hai — Rashi se bhi zyada important.
+              Vedic Jyotish mein aakash ko 360 degree mein 27 equal divisions mein baata gaya hai — har division 13°20' ka hota hai. In 27 divisions ko Nakshatra kehte hain. Aapka <strong style={{ color: GOLD }}>Janma Nakshatra</strong> wahi hai jismein aapke janm samay Chandra (Moon) sthit tha.
             </p>
-
-            <h2 className="text-2xl font-serif font-bold mb-4 mt-8" style={{ color: GOLD }}>Nakshatra Ke 7 Mahatvapurn Attributes</h2>
-            <p className="text-slate-300 leading-relaxed mb-4">
-              Har Nakshatra ke 7 important attributes hote hain:
-            </p>
-            <ul className="text-slate-300 space-y-2 mb-4 list-disc pl-6">
-              <li><strong style={{ color: GOLD }}>Lord (Ruling Planet):</strong> 9 grahon mein se ek — Vimshottari Dasha decide karta hai.</li>
-              <li><strong style={{ color: GOLD }}>Deity:</strong> Presiding devata — meditation aur worship ke liye.</li>
-              <li><strong style={{ color: GOLD }}>Symbol:</strong> Visual identity — jaise Ashwini ka horse head, Pushya ka cow udder.</li>
-              <li><strong style={{ color: GOLD }}>Gana:</strong> Deva, Manushya ya Rakshasa — swabhav aur compatibility.</li>
-              <li><strong style={{ color: GOLD }}>Yoni:</strong> 14 animal categories — primitive nature aur sexual compatibility.</li>
-              <li><strong style={{ color: GOLD }}>Nadi:</strong> Aadi, Madhya, Antya — marriage compatibility ka sabse zaroori check.</li>
-              <li><strong style={{ color: GOLD }}>Pada:</strong> Har Nakshatra ka 1 of 4 quarters — micro-personality.</li>
-            </ul>
 
             <h2 className="text-2xl font-serif font-bold mb-4 mt-8" style={{ color: GOLD }}>27 Nakshatras Ki List</h2>
             <p className="text-slate-300 leading-relaxed mb-4">
-              Vedic astrology ke 27 Nakshatras hain — Ashwini, Bharani, Krittika, Rohini, Mrigashira, Ardra, Punarvasu, Pushya, Ashlesha, Magha, Purva Phalguni, Uttara Phalguni, Hasta, Chitra, Swati, Vishakha, Anuradha, Jyeshtha, Mula, Purva Ashadha, Uttara Ashadha, Shravana, Dhanishta, Shatabhisha, Purva Bhadrapada, Uttara Bhadrapada, aur Revati. Har Nakshatra ka apna unique blueprint hai — aur har Pada ke 4 alag-alag micro-personalities hote hain.
+              Vedic astrology ke 27 Nakshatras — Ashwini, Bharani, Krittika, Rohini, Mrigashira, Ardra, Punarvasu, Pushya, Ashlesha, Magha, Purva Phalguni, Uttara Phalguni, Hasta, Chitra, Swati, Vishakha, Anuradha, Jyeshtha, Mula, Purva Ashadha, Uttara Ashadha, Shravana, Dhanishta, Shatabhisha, Purva Bhadrapada, Uttara Bhadrapada, aur Revati.
             </p>
-
-            <h2 className="text-2xl font-serif font-bold mb-4 mt-8" style={{ color: GOLD }}>Nakshatra vs Rashi — Antar Kya Hai?</h2>
-            <p className="text-slate-300 leading-relaxed mb-4">
-              <strong style={{ color: GOLD }}>Rashi (Zodiac Sign):</strong> Aakash ka 12-division system — har Rashi 30° ki hoti hai. Chandra Rashi sirf 12 options deti hai.
-            </p>
-            <p className="text-slate-300 leading-relaxed mb-4">
-              <strong style={{ color: GOLD }}>Nakshatra:</strong> Aakash ka 27-division system — har Nakshatra 13°20' ki hoti hai. Nakshatra Pada ke saath 108 micro-divisions deta hai — Rashi se 9 guna zyada precise.
-            </p>
-            <p className="text-slate-300 leading-relaxed mb-4">
-              Yahi reason hai ki Vedic astrology mein Nakshatra-based predictions Rashi-based predictions se zyada accurate maani jaati hain.
-            </p>
-
-            <h2 className="text-2xl font-serif font-bold mb-4 mt-8" style={{ color: GOLD }}>Trikal Vaani vs AstroSage vs AstroTalk Nakshatra Calculator</h2>
-            <div className="not-prose overflow-x-auto mb-6">
-              <table className="w-full text-sm" style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid ${GOLD}33`, borderRadius: '12px' }}>
-                <thead>
-                  <tr style={{ background: 'rgba(212,175,55,0.1)' }}>
-                    <th className="p-3 text-left" style={{ color: GOLD }}>Feature</th>
-                    <th className="p-3 text-left" style={{ color: GOLD }}>Trikal Vaani</th>
-                    <th className="p-3 text-left text-slate-400">Others</th>
-                  </tr>
-                </thead>
-                <tbody className="text-slate-300">
-                  <tr style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }}><td className="p-3">Engine</td><td className="p-3">Swiss Ephemeris (NASA-grade)</td><td className="p-3 text-slate-500">Basic algorithm</td></tr>
-                  <tr style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }}><td className="p-3">All 7 Attributes</td><td className="p-3" style={{ color: GOLD }}>✓ Free</td><td className="p-3 text-slate-500">✗ Paid</td></tr>
-                  <tr style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }}><td className="p-3">Pada Calculation</td><td className="p-3" style={{ color: GOLD }}>✓ Precise</td><td className="p-3 text-slate-500">Partial</td></tr>
-                  <tr style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }}><td className="p-3">Parashar Dos/Donts</td><td className="p-3" style={{ color: GOLD }}>✓ Free</td><td className="p-3 text-slate-500">✗ Missing</td></tr>
-                  <tr style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }}><td className="p-3">3 Free Remedies</td><td className="p-3" style={{ color: GOLD }}>✓ Mantra+Ratna+Daan</td><td className="p-3 text-slate-500">✗ Generic</td></tr>
-                </tbody>
-              </table>
-            </div>
           </section>
 
-          {/* FAQ */}
           <section className="mt-12">
             <h2 className="text-2xl font-serif font-bold mb-6" style={{ color: GOLD }}>Frequently Asked Questions — Nakshatra Calculator</h2>
             <div className="space-y-3">
@@ -433,7 +541,6 @@ export default function FreeNakshatraCalculatorPage() {
             </div>
           </section>
 
-          {/* INTERNAL LINKS */}
           <section className="mt-12">
             <h2 className="text-2xl font-serif font-bold mb-6" style={{ color: GOLD }}>Aur Bhi Free Calculators</h2>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
