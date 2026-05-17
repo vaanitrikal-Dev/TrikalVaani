@@ -290,6 +290,8 @@ export default function KundaliCalculatorClient() {
             <input
               ref={placeInputRef}
               type="text"
+              value={form.place}
+onChange={(e) => setForm({ ...form, place: e.target.value })}
               placeholder={
                 mapsReady
                   ? 'Start typing city name (e.g. Delhi, Mumbai, New York)'
