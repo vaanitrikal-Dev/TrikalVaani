@@ -1,7 +1,7 @@
 // ============================================================
 // File: app/calculators/free-kundali-calculator/page.tsx
 // Purpose: Free AI Kundli Calculator — SEO/GEO/AEO/E-E-A-T page
-// Version: v1.1 — restored
+// Version: v1.2 — restored
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikal Vaani
 // ============================================================
 
