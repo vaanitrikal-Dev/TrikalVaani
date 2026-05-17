@@ -3,7 +3,7 @@
 // ============================================================
 // File: app/calculators/free-dasha-calculator/page.tsx
 // Purpose: Free Dasha Calculator — working form + result + content
-// Version: v1.0
+// Version: v1.1
 // Engine: Swiss Ephemeris + Parashar BPHS + Shadbala + Bhrigu
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikal Vaani
 // ============================================================
