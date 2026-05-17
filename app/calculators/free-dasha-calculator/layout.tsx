@@ -1,6 +1,6 @@
 // ============================================================
 // File: app/calculators/free-dasha-calculator/layout.tsx
-// Version: v2.0 — metadata only, clean passthrough
+// Version: v2.1 — metadata only, clean passthrough
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikal Vaani
 // ============================================================
 
