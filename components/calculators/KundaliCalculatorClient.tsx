@@ -2,9 +2,10 @@
 
 // ============================================================
 // File: components/calculators/KundaliCalculatorClient.tsx
-// Version: v1.0 FINAL
+// Version: v1.1
+// Changes: English form labels, robust autocomplete init,
+//          error states, fields filter for performance
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikal Vaani
-// Uses Google Maps JS library — key fetched securely from /api/maps-key
 // ============================================================
 
 import { useState, useRef, useEffect } from 'react';
@@ -56,10 +57,12 @@ export default function KundaliCalculatorClient() {
   const [result, setResult] = useState<ApiResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [mapsReady, setMapsReady] = useState(false);
+  const [mapsError, setMapsError] = useState<string | null>(null);
 
   const placeInputRef = useRef<HTMLInputElement>(null);
   const resultRef = useRef<HTMLDivElement>(null);
   const apiKeyRef = useRef<string>('');
+  const autocompleteRef = useRef<any>(null);
 
   // Load Google Maps JS
   useEffect(() => {
@@ -74,7 +77,10 @@ export default function KundaliCalculatorClient() {
     fetch('/api/maps-key')
       .then((r) => r.json())
       .then((data) => {
-        if (!data.key) return;
+        if (!data.key) {
+          setMapsError('Maps service unavailable');
+          return;
+        }
         apiKeyRef.current = data.key;
 
         const existing = document.querySelector('script[data-gmaps]');
@@ -84,63 +90,66 @@ export default function KundaliCalculatorClient() {
         }
 
         const script = document.createElement('script');
-        script.src = `https://maps.googleapis.com/maps/api/js?key=${data.key}&libraries=places`;
+        script.src = `https://maps.googleapis.com/maps/api/js?key=${data.key}&libraries=places&loading=async`;
         script.async = true;
         script.defer = true;
         script.setAttribute('data-gmaps', 'true');
         script.onload = () => setMapsReady(true);
+        script.onerror = () => setMapsError('Google Maps failed to load');
         document.head.appendChild(script);
       })
-      .catch((e) => console.error('[maps-key]', e));
+      .catch(() => setMapsError('Failed to load map service'));
   }, []);
 
-  // Init autocomplete
+  // Init autocomplete when maps ready
   useEffect(() => {
     if (!mapsReady || !placeInputRef.current) return;
+    if (autocompleteRef.current) return;
     const w = window as any;
     if (!w.google?.maps?.places) return;
 
-    const ac = new w.google.maps.places.Autocomplete(placeInputRef.current, {
-      types: ['(cities)'],
-    });
+    try {
+      const ac = new w.google.maps.places.Autocomplete(placeInputRef.current, {
+        types: ['(cities)'],
+        fields: ['formatted_address', 'name', 'geometry'],
+      });
+      autocompleteRef.current = ac;
 
-    const listener = ac.addListener('place_changed', () => {
-      const place = ac.getPlace();
-      if (!place.geometry?.location) return;
+      ac.addListener('place_changed', () => {
+        const place = ac.getPlace();
+        if (!place.geometry?.location) return;
 
-      const lat = place.geometry.location.lat();
-      const lng = place.geometry.location.lng();
-      const placeName = place.formatted_address || place.name || '';
-      const ts = Math.floor(Date.now() / 1000);
-      const apiKey = apiKeyRef.current;
+        const lat = place.geometry.location.lat();
+        const lng = place.geometry.location.lng();
+        const placeName = place.formatted_address || place.name || '';
+        const ts = Math.floor(Date.now() / 1000);
+        const apiKey = apiKeyRef.current;
 
-      fetch(
-        `https://maps.googleapis.com/maps/api/timezone/json?location=${lat},${lng}&timestamp=${ts}&key=${apiKey}`
-      )
-        .then((r) => r.json())
-        .then((tz) => {
-          let tzHours = 5.5;
-          if (tz?.rawOffset != null) {
-            tzHours = ((tz.rawOffset || 0) + (tz.dstOffset || 0)) / 3600;
-          }
-          setForm((f) => ({ ...f, place: placeName, latitude: lat, longitude: lng, timezone: tzHours }));
-        })
-        .catch(() => {
-          setForm((f) => ({ ...f, place: placeName, latitude: lat, longitude: lng, timezone: 5.5 }));
-        });
-    });
-
-    return () => {
-      if (w.google?.maps?.event) {
-        w.google.maps.event.removeListener(listener);
-      }
-    };
+        fetch(
+          `https://maps.googleapis.com/maps/api/timezone/json?location=${lat},${lng}&timestamp=${ts}&key=${apiKey}`
+        )
+          .then((r) => r.json())
+          .then((tz) => {
+            let tzHours = 5.5;
+            if (tz?.rawOffset != null) {
+              tzHours = ((tz.rawOffset || 0) + (tz.dstOffset || 0)) / 3600;
+            }
+            setForm((f) => ({ ...f, place: placeName, latitude: lat, longitude: lng, timezone: tzHours }));
+          })
+          .catch(() => {
+            setForm((f) => ({ ...f, place: placeName, latitude: lat, longitude: lng, timezone: 5.5 }));
+          });
+      });
+    } catch (e) {
+      console.error('[autocomplete init]', e);
+      setMapsError('Place search failed to initialize');
+    }
   }, [mapsReady]);
 
   const handleSubmit = async () => {
     setError(null);
     if (!form.date || !form.time || form.latitude == null || form.longitude == null) {
-      setError('Kripya date, time, aur birth place — teeno fill karein.');
+      setError('Please fill date, time, and place of birth — all three are required.');
       return;
     }
 
@@ -171,12 +180,13 @@ export default function KundaliCalculatorClient() {
       setResult(data);
       setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
     } catch (e: any) {
-      setError(e?.message || 'Kuch galat hua. Phir se try karein.');
+      setError(e?.message || 'Something went wrong. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
+  // Extract result data
   const lagna = result?.instant?.lagna || result?.kundali?.lagna?.sign;
   const lagnaLord = result?.instant?.lagna_lord || result?.kundali?.lagna?.sign_lord;
   const nakshatra = result?.instant?.nakshatra || result?.kundali?.lagna?.nakshatra;
@@ -211,56 +221,96 @@ export default function KundaliCalculatorClient() {
       {/* FORM */}
       <div className="rounded-2xl p-5 md:p-7" style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid ${GOLD_RGBA(0.2)}`, boxShadow: `0 0 30px ${GOLD_RGBA(0.08)}` }}>
         <h2 className="text-xl md:text-2xl font-serif font-bold mb-5" style={{ color: GOLD }}>
-          Apni Janm Kundali Banao — Free
+          Generate Your Free Janm Kundali
         </h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium mb-1.5 text-slate-300">Naam <span className="text-slate-500">(optional)</span></label>
-            <input type="text" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Aapka naam"
+            <label className="block text-sm font-medium mb-1.5 text-slate-300">
+              Name <span className="text-slate-500">(optional)</span>
+            </label>
+            <input
+              type="text"
+              value={form.name}
+              onChange={(e) => setForm({ ...form, name: e.target.value })}
+              placeholder="Your name"
               className="w-full px-4 py-2.5 rounded-lg outline-none text-sm"
-              style={{ background: 'rgba(2,8,23,0.6)', border: `1px solid ${GOLD_RGBA(0.15)}`, color: '#E5E7EB' }} />
+              style={{ background: 'rgba(2,8,23,0.6)', border: `1px solid ${GOLD_RGBA(0.15)}`, color: '#E5E7EB' }}
+            />
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1.5 text-slate-300">Gender <span className="text-slate-500">(optional)</span></label>
-            <select value={form.gender} onChange={(e) => setForm({ ...form, gender: e.target.value as any })}
+            <label className="block text-sm font-medium mb-1.5 text-slate-300">
+              Gender <span className="text-slate-500">(optional)</span>
+            </label>
+            <select
+              value={form.gender}
+              onChange={(e) => setForm({ ...form, gender: e.target.value as any })}
               className="w-full px-4 py-2.5 rounded-lg outline-none text-sm"
-              style={{ background: 'rgba(2,8,23,0.6)', border: `1px solid ${GOLD_RGBA(0.15)}`, color: '#E5E7EB' }}>
+              style={{ background: 'rgba(2,8,23,0.6)', border: `1px solid ${GOLD_RGBA(0.15)}`, color: '#E5E7EB' }}
+            >
               <option value="">Select</option>
-              <option value="male">Purush / Male</option>
-              <option value="female">Stri / Female</option>
-              <option value="other">Anya / Other</option>
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+              <option value="other">Other</option>
             </select>
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1.5 text-slate-300">Janm Tareeq <span className="text-red-400">*</span></label>
-            <input type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })}
+            <label className="block text-sm font-medium mb-1.5 text-slate-300">
+              Date of Birth <span className="text-red-400">*</span>
+            </label>
+            <input
+              type="date"
+              value={form.date}
+              onChange={(e) => setForm({ ...form, date: e.target.value })}
               max={new Date().toISOString().split('T')[0]}
               className="w-full px-4 py-2.5 rounded-lg outline-none text-sm"
-              style={{ background: 'rgba(2,8,23,0.6)', border: `1px solid ${GOLD_RGBA(0.15)}`, color: '#E5E7EB', colorScheme: 'dark' }} />
+              style={{ background: 'rgba(2,8,23,0.6)', border: `1px solid ${GOLD_RGBA(0.15)}`, color: '#E5E7EB', colorScheme: 'dark' }}
+            />
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1.5 text-slate-300">Janm Samay <span className="text-red-400">*</span></label>
-            <input type="time" value={form.time} onChange={(e) => setForm({ ...form, time: e.target.value })}
+            <label className="block text-sm font-medium mb-1.5 text-slate-300">
+              Time of Birth <span className="text-red-400">*</span>
+            </label>
+            <input
+              type="time"
+              value={form.time}
+              onChange={(e) => setForm({ ...form, time: e.target.value })}
               className="w-full px-4 py-2.5 rounded-lg outline-none text-sm"
-              style={{ background: 'rgba(2,8,23,0.6)', border: `1px solid ${GOLD_RGBA(0.15)}`, color: '#E5E7EB', colorScheme: 'dark' }} />
+              style={{ background: 'rgba(2,8,23,0.6)', border: `1px solid ${GOLD_RGBA(0.15)}`, color: '#E5E7EB', colorScheme: 'dark' }}
+            />
           </div>
 
           <div className="md:col-span-2">
-            <label className="block text-sm font-medium mb-1.5 text-slate-300">Janm Sthan <span className="text-red-400">*</span></label>
-            <input ref={placeInputRef} type="text" value={form.place}
-              onChange={(e) => setForm({ ...form, place: e.target.value, latitude: null, longitude: null })}
-              placeholder={mapsReady ? 'Sheher ka naam likhein — auto-suggest milega' : 'Loading...'}
-              disabled={!mapsReady}
+            <label className="block text-sm font-medium mb-1.5 text-slate-300">
+              Place of Birth <span className="text-red-400">*</span>
+            </label>
+            <input
+              ref={placeInputRef}
+              type="text"
+              placeholder={
+                mapsReady
+                  ? 'Start typing city name (e.g. Delhi, Mumbai, New York)'
+                  : mapsError
+                  ? `Error: ${mapsError}`
+                  : 'Loading location service...'
+              }
+              autoComplete="off"
               className="w-full px-4 py-2.5 rounded-lg outline-none text-sm"
-              style={{ background: 'rgba(2,8,23,0.6)', border: `1px solid ${GOLD_RGBA(0.15)}`, color: '#E5E7EB' }} />
+              style={{ background: 'rgba(2,8,23,0.6)', border: `1px solid ${GOLD_RGBA(0.15)}`, color: '#E5E7EB' }}
+            />
             {form.latitude != null && form.longitude != null && (
-              <p className="text-xs text-slate-500 mt-1">
-                ✓ Location captured ({form.latitude.toFixed(2)}, {form.longitude.toFixed(2)}, TZ {form.timezone})
+              <p className="text-xs text-green-400 mt-1">
+                ✓ Location captured: {form.place} (TZ {form.timezone > 0 ? '+' : ''}{form.timezone})
               </p>
+            )}
+            {!mapsReady && !mapsError && (
+              <p className="text-xs text-slate-500 mt-1">Loading Google location search...</p>
+            )}
+            {mapsError && (
+              <p className="text-xs text-red-400 mt-1">⚠️ {mapsError}. Please refresh the page.</p>
             )}
           </div>
         </div>
@@ -271,10 +321,13 @@ export default function KundaliCalculatorClient() {
           </div>
         )}
 
-        <button onClick={handleSubmit} disabled={loading}
+        <button
+          onClick={handleSubmit}
+          disabled={loading}
           className="mt-5 w-full md:w-auto px-8 py-3 rounded-full font-bold text-sm transition-all hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
-          style={{ background: `linear-gradient(135deg, ${GOLD} 0%, #A8820A 100%)`, color: '#080B12' }}>
-          {loading ? 'Calculating...' : '🔮 Free Kundli Banao'}
+          style={{ background: `linear-gradient(135deg, ${GOLD} 0%, #A8820A 100%)`, color: '#080B12' }}
+        >
+          {loading ? 'Calculating...' : '🔮 Generate Free Kundli'}
         </button>
 
         <p className="text-xs text-slate-500 mt-3">
@@ -282,17 +335,18 @@ export default function KundaliCalculatorClient() {
         </p>
       </div>
 
+      {/* RESULT */}
       {result && (
         <div ref={resultRef} className="mt-8 space-y-6">
           <div className="rounded-2xl p-5 md:p-7" style={{ background: `linear-gradient(135deg, ${GOLD_RGBA(0.1)} 0%, rgba(2,8,23,0.6) 100%)`, border: `1px solid ${GOLD_RGBA(0.35)}` }}>
             <h3 className="text-xl md:text-2xl font-serif font-bold mb-5" style={{ color: GOLD }}>
-              {form.name ? `${form.name} ki ` : ''}Janm Kundali — Saar
+              {form.name ? `${form.name}'s ` : ''}Janm Kundali — Summary
             </h3>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-              <Cell icon="⬆️" label="Lagna" value={lagna} sub={lagnaLord ? `Swami: ${lagnaLord}` : null} />
+              <Cell icon="⬆️" label="Lagna" value={lagna} sub={lagnaLord ? `Lord: ${lagnaLord}` : null} />
               <Cell icon="⭐" label="Nakshatra" value={nakshatra} sub={pada ? `Pada ${pada}` : null} />
-              <Cell icon="🌙" label="Chandra Rashi" value={chandraRashi} />
-              <Cell icon="☀️" label="Surya Rashi" value={suryaRashi} />
+              <Cell icon="🌙" label="Moon Sign" value={chandraRashi} />
+              <Cell icon="☀️" label="Sun Sign" value={suryaRashi} />
               <Cell icon="🪐" label="Mahadasha" value={currentMahadasha} />
               <Cell icon="🌀" label="Antardasha" value={currentAntardasha} />
             </div>
@@ -301,7 +355,7 @@ export default function KundaliCalculatorClient() {
           {(dos.length > 0 || donts.length > 0) && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="rounded-2xl p-5" style={{ background: 'rgba(34,197,94,0.06)', border: '1px solid rgba(34,197,94,0.25)' }}>
-                <h4 className="text-lg font-serif font-bold mb-3" style={{ color: '#86EFAC' }}>✅ Karo (Parashar Niyam)</h4>
+                <h4 className="text-lg font-serif font-bold mb-3" style={{ color: '#86EFAC' }}>✅ Dos (Parashar Niyam)</h4>
                 {dos.length > 0 ? (
                   <ul className="space-y-2 text-sm text-slate-300">
                     {dos.slice(0, 5).map((d, i) => (
@@ -311,7 +365,7 @@ export default function KundaliCalculatorClient() {
                 ) : <p className="text-sm text-slate-500">Loading...</p>}
               </div>
               <div className="rounded-2xl p-5" style={{ background: 'rgba(239,68,68,0.06)', border: '1px solid rgba(239,68,68,0.25)' }}>
-                <h4 className="text-lg font-serif font-bold mb-3" style={{ color: '#FCA5A5' }}>❌ Mat Karo (Parashar Vivarjan)</h4>
+                <h4 className="text-lg font-serif font-bold mb-3" style={{ color: '#FCA5A5' }}>❌ Donts (Parashar Vivarjan)</h4>
                 {donts.length > 0 ? (
                   <ul className="space-y-2 text-sm text-slate-300">
                     {donts.slice(0, 5).map((d, i) => (
@@ -325,7 +379,7 @@ export default function KundaliCalculatorClient() {
 
           {(mantra || ratna || daan) && (
             <div className="rounded-2xl p-5 md:p-7" style={{ background: 'rgba(212,175,55,0.06)', border: `1px solid ${GOLD_RGBA(0.25)}` }}>
-              <h3 className="text-xl font-serif font-bold mb-5" style={{ color: GOLD }}>🪔 Aapke Liye 3 Free Upay</h3>
+              <h3 className="text-xl font-serif font-bold mb-5" style={{ color: GOLD }}>🪔 Your 3 Free Remedies</h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {mantra && <Remedy icon="🔱" title="Mantra" content={typeof mantra === 'string' ? mantra : JSON.stringify(mantra)} />}
                 {ratna && <Remedy icon="💎" title="Ratna" content={typeof ratna === 'string' ? ratna : JSON.stringify(ratna)} />}
@@ -336,11 +390,14 @@ export default function KundaliCalculatorClient() {
 
           <div className="rounded-2xl p-6 text-center" style={{ background: `linear-gradient(135deg, ${GOLD_RGBA(0.15)} 0%, rgba(2,8,23,0.6) 100%)`, border: `1px solid ${GOLD_RGBA(0.4)}` }}>
             <p className="text-base mb-3 text-slate-200">
-              Yeh toh saar tha. <strong style={{ color: GOLD }}>Puri jeevan bhavishyavani ₹51 mein dekho.</strong>
+              This was just a summary. <strong style={{ color: GOLD }}>Get your full life prediction for ₹51.</strong>
             </p>
-            <Link href="/#birth-form" className="inline-block px-6 py-3 rounded-full font-bold text-sm transition-all hover:scale-105"
-              style={{ background: `linear-gradient(135deg, ${GOLD} 0%, #A8820A 100%)`, color: '#080B12' }}>
-              ₹51 Mein Full Prediction Le →
+            <Link
+              href="/#birth-form"
+              className="inline-block px-6 py-3 rounded-full font-bold text-sm transition-all hover:scale-105"
+              style={{ background: `linear-gradient(135deg, ${GOLD} 0%, #A8820A 100%)`, color: '#080B12' }}
+            >
+              Get Full Prediction for ₹51 →
             </Link>
           </div>
         </div>
