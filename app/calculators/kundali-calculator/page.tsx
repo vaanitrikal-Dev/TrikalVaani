@@ -1,7 +1,7 @@
 // ============================================================
-// File: app/calculators/kundali-calculator/page.tsx
+// File: app/calculators/free-kundali-calculator/page.tsx
 // Purpose: Free AI Kundli Calculator — SEO/GEO/AEO/E-E-A-T page
-// Version: v1.0
+// Version: v1.1 — slug updated to free-kundali-calculator
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikal Vaani
 // ============================================================
 
@@ -13,9 +13,6 @@ import KundaliCalculatorClient from '@/components/calculators/KundaliCalculatorC
 
 const GOLD = '#D4AF37';
 
-// ─────────────────────────────────────────────────────────────
-// METADATA (SEO)
-// ─────────────────────────────────────────────────────────────
 export const metadata: Metadata = {
   title: 'Free AI Kundli Calculator — Janm Kundali Online | Trikal Vaani',
   description:
@@ -33,20 +30,17 @@ export const metadata: Metadata = {
     'kundli by date of birth',
   ],
   alternates: {
-    canonical: 'https://trikalvaani.com/calculators/kundali-calculator',
+    canonical: 'https://trikalvaani.com/calculators/free-kundali-calculator',
   },
   openGraph: {
     title: 'Free AI Kundli Calculator — Janm Kundali Online',
     description:
       'Free, accurate Janm Kundali with Lagna, Nakshatra, Dasha, and Parashar remedies. Powered by Swiss Ephemeris.',
-    url: 'https://trikalvaani.com/calculators/kundali-calculator',
+    url: 'https://trikalvaani.com/calculators/free-kundali-calculator',
     type: 'website',
   },
 };
 
-// ─────────────────────────────────────────────────────────────
-// FAQs (AEO / GEO optimized)
-// ─────────────────────────────────────────────────────────────
 const FAQS = [
   {
     q: 'Kundli kya hoti hai?',
@@ -82,9 +76,6 @@ const FAQS = [
   },
 ];
 
-// ─────────────────────────────────────────────────────────────
-// HowTo Steps (AEO)
-// ─────────────────────────────────────────────────────────────
 const HOWTO_STEPS = [
   {
     name: 'Apni Date of Birth daalo',
@@ -108,15 +99,11 @@ const HOWTO_STEPS = [
   },
 ];
 
-// ─────────────────────────────────────────────────────────────
-// MAIN PAGE
-// ─────────────────────────────────────────────────────────────
 export default function KundaliCalculatorPage() {
   return (
     <>
       <SiteNav />
 
-      {/* ── JSON-LD: SoftwareApplication ── */}
       <Script
         id="kundali-calc-software-schema"
         type="application/ld+json"
@@ -128,27 +115,13 @@ export default function KundaliCalculatorPage() {
             name: 'Trikal Vaani Free AI Kundli Calculator',
             applicationCategory: 'LifestyleApplication',
             operatingSystem: 'Web',
-            offers: {
-              '@type': 'Offer',
-              price: '0',
-              priceCurrency: 'INR',
-            },
-            aggregateRating: {
-              '@type': 'AggregateRating',
-              ratingValue: '4.9',
-              ratingCount: '247',
-            },
-            creator: {
-              '@type': 'Person',
-              name: 'Rohiit Gupta',
-              jobTitle: 'Chief Vedic Architect',
-              url: 'https://trikalvaani.com/founder',
-            },
+            offers: { '@type': 'Offer', price: '0', priceCurrency: 'INR' },
+            aggregateRating: { '@type': 'AggregateRating', ratingValue: '4.9', ratingCount: '247' },
+            creator: { '@type': 'Person', name: 'Rohiit Gupta', jobTitle: 'Chief Vedic Architect', url: 'https://trikalvaani.com/founder' },
           }),
         }}
       />
 
-      {/* ── JSON-LD: FAQPage ── */}
       <Script
         id="kundali-calc-faq-schema"
         type="application/ld+json"
@@ -160,16 +133,12 @@ export default function KundaliCalculatorPage() {
             mainEntity: FAQS.map((f) => ({
               '@type': 'Question',
               name: f.q,
-              acceptedAnswer: {
-                '@type': 'Answer',
-                text: f.a,
-              },
+              acceptedAnswer: { '@type': 'Answer', text: f.a },
             })),
           }),
         }}
       />
 
-      {/* ── JSON-LD: HowTo ── */}
       <Script
         id="kundali-calc-howto-schema"
         type="application/ld+json"
@@ -190,7 +159,6 @@ export default function KundaliCalculatorPage() {
         }}
       />
 
-      {/* ── JSON-LD: BreadcrumbList ── */}
       <Script
         id="kundali-calc-breadcrumb-schema"
         type="application/ld+json"
@@ -202,7 +170,7 @@ export default function KundaliCalculatorPage() {
             itemListElement: [
               { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://trikalvaani.com' },
               { '@type': 'ListItem', position: 2, name: 'Calculators', item: 'https://trikalvaani.com/calculators' },
-              { '@type': 'ListItem', position: 3, name: 'Kundli Calculator', item: 'https://trikalvaani.com/calculators/kundali-calculator' },
+              { '@type': 'ListItem', position: 3, name: 'Free Kundli Calculator', item: 'https://trikalvaani.com/calculators/free-kundali-calculator' },
             ],
           }),
         }}
@@ -211,64 +179,39 @@ export default function KundaliCalculatorPage() {
       <main className="min-h-screen pt-20 pb-16 px-4" style={{ background: '#080B12', color: '#E5E7EB' }}>
         <div className="max-w-4xl mx-auto">
 
-          {/* ── BREADCRUMB ── */}
           <nav className="text-xs text-slate-500 mb-4">
             <Link href="/" className="hover:text-slate-300">Home</Link>
             <span className="mx-2">›</span>
             <Link href="/calculators" className="hover:text-slate-300">Calculators</Link>
             <span className="mx-2">›</span>
-            <span style={{ color: GOLD }}>Kundli Calculator</span>
+            <span style={{ color: GOLD }}>Free Kundli Calculator</span>
           </nav>
 
-          {/* ── H1 ── */}
           <h1 className="text-3xl md:text-5xl font-serif font-bold mb-4" style={{ color: GOLD }}>
             Free AI Kundli Calculator — Janm Kundali Online
           </h1>
 
-          {/* ── GEO DIRECT ANSWER (40-60 words) ── */}
-          <div
-            className="rounded-xl p-5 mb-6"
-            style={{
-              background: 'rgba(212,175,55,0.06)',
-              border: `1px solid rgba(212,175,55,0.2)`,
-            }}
-          >
+          <div className="rounded-xl p-5 mb-6" style={{ background: 'rgba(212,175,55,0.06)', border: `1px solid rgba(212,175,55,0.2)` }}>
             <p className="text-base md:text-lg leading-relaxed">
               <strong style={{ color: GOLD }}>Trikal Vaani ka Free AI Kundli Calculator</strong> aapki Janm Kundali Swiss Ephemeris se calculate karta hai. Sirf date of birth, time, aur place daalo — Lagna, Nakshatra, Chandra Rashi, current Mahadasha, aur Parashar-based remedies (Mantra, Ratna, Daan) turant free milte hain.
             </p>
           </div>
 
-          {/* ── E-E-A-T AUTHOR STRIP ── */}
-          <div
-            className="flex items-center gap-3 mb-8 p-4 rounded-xl"
-            style={{
-              background: 'rgba(255,255,255,0.03)',
-              border: '1px solid rgba(255,255,255,0.08)',
-            }}
-          >
-            <div
-              className="w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg"
-              style={{ background: GOLD, color: '#080B12' }}
-            >
+          <div className="flex items-center gap-3 mb-8 p-4 rounded-xl" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
+            <div className="w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg" style={{ background: GOLD, color: '#080B12' }}>
               RG
             </div>
             <div className="text-sm">
               <div className="font-semibold" style={{ color: GOLD }}>Rohiit Gupta</div>
               <div className="text-slate-400">Chief Vedic Architect · Trikal Vaani · Delhi NCR</div>
-              <div className="text-xs text-slate-500 mt-0.5">
-                Engine: Swiss Ephemeris · Lahiri Ayanamsha · BPHS Classical Rules
-              </div>
+              <div className="text-xs text-slate-500 mt-0.5">Engine: Swiss Ephemeris · Lahiri Ayanamsha · BPHS Classical Rules</div>
             </div>
           </div>
 
-          {/* ── CALCULATOR CLIENT COMPONENT ── */}
           <KundaliCalculatorClient />
 
-          {/* ── EDUCATIONAL CONTENT (800-1200 words) ── */}
           <section className="mt-16 prose prose-invert max-w-none">
-            <h2 className="text-2xl font-serif font-bold mb-4" style={{ color: GOLD }}>
-              Janm Kundali Kya Hoti Hai?
-            </h2>
+            <h2 className="text-2xl font-serif font-bold mb-4" style={{ color: GOLD }}>Janm Kundali Kya Hoti Hai?</h2>
             <p className="text-slate-300 leading-relaxed mb-4">
               Janm Kundali (Birth Chart) Vedic Jyotish ka sabse important tool hai. Jab aapka janm hota hai, us samay aakash mein 9 grah (Sun, Moon, Mars, Mercury, Jupiter, Venus, Saturn, Rahu, Ketu) aur 27 nakshatron ki specific position hoti hai. Yahi position aapki kundli mein dikhti hai — aur isi se aapke jeevan ka blueprint banta hai.
             </p>
@@ -276,9 +219,7 @@ export default function KundaliCalculatorPage() {
               Maharishi Parashar ne <em>Brihat Parashara Hora Shastra (BPHS)</em> mein likha hai ki kundli ke 12 bhava (houses) aapke jeevan ke 12 alag-alag kshetra dikhate hain — janm se lekar moksha tak. Pehla bhav (Lagna) aapka vyaktitva dikhata hai, doosra dhan, saatva vivah, dasvan karma — aur isi tarah har bhav ka apna mahatva hai.
             </p>
 
-            <h2 className="text-2xl font-serif font-bold mb-4 mt-8" style={{ color: GOLD }}>
-              Lagna, Nakshatra aur Rashi — Kya Antar Hai?
-            </h2>
+            <h2 className="text-2xl font-serif font-bold mb-4 mt-8" style={{ color: GOLD }}>Lagna, Nakshatra aur Rashi — Kya Antar Hai?</h2>
             <p className="text-slate-300 leading-relaxed mb-4">
               <strong style={{ color: GOLD }}>Lagna (Ascendant):</strong> Janm samay purvi kshitij pe jo rashi udit ho rahi thi — woh aapka Lagna hai. Yeh aapka physical body, personality, aur jeevan ki disha dikhata hai.
             </p>
@@ -289,9 +230,7 @@ export default function KundaliCalculatorPage() {
               <strong style={{ color: GOLD }}>Nakshatra:</strong> 27 nakshatron mein se ek — jis nakshatra mein Chandra ho. Yeh aapka karma pattern aur emotional makeup decide karta hai. Har nakshatra ka apna devta, swami grah, aur 4 padas hote hain.
             </p>
 
-            <h2 className="text-2xl font-serif font-bold mb-4 mt-8" style={{ color: GOLD }}>
-              Vimshottari Dasha — Jeevan Ke Phase
-            </h2>
+            <h2 className="text-2xl font-serif font-bold mb-4 mt-8" style={{ color: GOLD }}>Vimshottari Dasha — Jeevan Ke Phase</h2>
             <p className="text-slate-300 leading-relaxed mb-4">
               Vimshottari Dasha system 120 saal ka cycle hai, jismein har grah ek specific period ke liye aapke jeevan pe rule karta hai. Jaise Surya ka 6 saal, Chandra ka 10, Mangal ka 7, Rahu ka 18, Guru ka 16, Shani ka 19, Budh ka 17, Ketu ka 7, aur Shukra ka 20.
             </p>
@@ -299,9 +238,7 @@ export default function KundaliCalculatorPage() {
               Aapki current Mahadasha aur Antardasha decide karti hai ki <strong>abhi aapke jeevan mein kya chal raha hai</strong> — career boom hai ya struggle, marriage timing kab hai, financial peak kab aayega. Trikal Vaani ka detailed ₹51 prediction iss timing ko unlock karta hai.
             </p>
 
-            <h2 className="text-2xl font-serif font-bold mb-4 mt-8" style={{ color: GOLD }}>
-              Parashar Remedies — Mantra, Ratna, Daan
-            </h2>
+            <h2 className="text-2xl font-serif font-bold mb-4 mt-8" style={{ color: GOLD }}>Parashar Remedies — Mantra, Ratna, Daan</h2>
             <p className="text-slate-300 leading-relaxed mb-4">
               Maharishi Parashar ne kundli ke har dosh ke liye remedy bhi di hai. Trikal Vaani aapko 3 main categories mein remedies deta hai — bilkul free:
             </p>
@@ -311,33 +248,18 @@ export default function KundaliCalculatorPage() {
               <li><strong style={{ color: GOLD }}>Daan:</strong> Aapke weak grah ko strengthen karne ke liye specific daan — kis din, kya cheez.</li>
             </ul>
 
-            <h2 className="text-2xl font-serif font-bold mb-4 mt-8" style={{ color: GOLD }}>
-              Trikal Vaani vs Doosre Calculators — Antar Kya Hai?
-            </h2>
+            <h2 className="text-2xl font-serif font-bold mb-4 mt-8" style={{ color: GOLD }}>Trikal Vaani vs Doosre Calculators — Antar Kya Hai?</h2>
             <p className="text-slate-300 leading-relaxed mb-4">
               Doosre kundli calculator sirf chart dikhate hain — Trikal Vaani <strong>Parashar ke Dos &amp; Donts</strong> aur <strong>3 personalized remedies</strong> bhi free deta hai. Hamara engine Swiss Ephemeris pe chalta hai (NASA-grade accuracy), Lahiri Ayanamsha use karta hai (Government of India standard), aur Shadbala (6-component planet strength) bhi calculate karta hai.
             </p>
           </section>
 
-          {/* ── HOW IT WORKS ── */}
           <section className="mt-12">
-            <h2 className="text-2xl font-serif font-bold mb-6" style={{ color: GOLD }}>
-              Yeh Calculator Kaise Kaam Karta Hai
-            </h2>
+            <h2 className="text-2xl font-serif font-bold mb-6" style={{ color: GOLD }}>Yeh Calculator Kaise Kaam Karta Hai</h2>
             <div className="space-y-3">
               {HOWTO_STEPS.map((step, i) => (
-                <div
-                  key={i}
-                  className="flex gap-4 p-4 rounded-xl"
-                  style={{
-                    background: 'rgba(255,255,255,0.03)',
-                    border: '1px solid rgba(255,255,255,0.08)',
-                  }}
-                >
-                  <div
-                    className="w-8 h-8 rounded-full flex items-center justify-center font-bold flex-shrink-0"
-                    style={{ background: GOLD, color: '#080B12' }}
-                  >
+                <div key={i} className="flex gap-4 p-4 rounded-xl" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center font-bold flex-shrink-0" style={{ background: GOLD, color: '#080B12' }}>
                     {i + 1}
                   </div>
                   <div>
@@ -349,21 +271,11 @@ export default function KundaliCalculatorPage() {
             </div>
           </section>
 
-          {/* ── FAQs ── */}
           <section className="mt-12">
-            <h2 className="text-2xl font-serif font-bold mb-6" style={{ color: GOLD }}>
-              Frequently Asked Questions
-            </h2>
+            <h2 className="text-2xl font-serif font-bold mb-6" style={{ color: GOLD }}>Frequently Asked Questions</h2>
             <div className="space-y-3">
               {FAQS.map((faq, i) => (
-                <details
-                  key={i}
-                  className="p-4 rounded-xl cursor-pointer"
-                  style={{
-                    background: 'rgba(255,255,255,0.03)',
-                    border: '1px solid rgba(255,255,255,0.08)',
-                  }}
-                >
+                <details key={i} className="p-4 rounded-xl cursor-pointer" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
                   <summary className="font-semibold" style={{ color: GOLD }}>{faq.q}</summary>
                   <p className="mt-3 text-sm text-slate-400 leading-relaxed">{faq.a}</p>
                 </details>
@@ -371,11 +283,8 @@ export default function KundaliCalculatorPage() {
             </div>
           </section>
 
-          {/* ── RELATED CALCULATORS ── */}
           <section className="mt-12">
-            <h2 className="text-2xl font-serif font-bold mb-6" style={{ color: GOLD }}>
-              Aur Bhi Free Calculators
-            </h2>
+            <h2 className="text-2xl font-serif font-bold mb-6" style={{ color: GOLD }}>Aur Bhi Free Calculators</h2>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
               {[
                 { slug: 'dasha-calculator', name: 'Dasha Calculator' },
@@ -385,33 +294,18 @@ export default function KundaliCalculatorPage() {
                 { slug: 'sade-sati-calculator', name: 'Sade Sati Check' },
                 { slug: 'manglik-dosh-calculator', name: 'Manglik Dosh' },
               ].map((c) => (
-                <Link
-                  key={c.slug}
-                  href={`/calculators/${c.slug}`}
+                <Link key={c.slug} href={`/calculators/${c.slug}`}
                   className="p-3 rounded-xl text-center text-sm transition-all hover:scale-105"
-                  style={{
-                    background: 'rgba(212,175,55,0.06)',
-                    border: '1px solid rgba(212,175,55,0.2)',
-                    color: GOLD,
-                  }}
-                >
+                  style={{ background: 'rgba(212,175,55,0.06)', border: '1px solid rgba(212,175,55,0.2)', color: GOLD }}>
                   {c.name}
                 </Link>
               ))}
             </div>
           </section>
 
-          {/* ── CTA: ₹51 PREDICTION ── */}
-          <section
-            className="mt-12 p-6 md:p-8 rounded-2xl text-center"
-            style={{
-              background: `linear-gradient(135deg, rgba(212,175,55,0.12) 0%, rgba(2,8,23,0.6) 100%)`,
-              border: `1px solid rgba(212,175,55,0.35)`,
-            }}
-          >
-            <h3 className="text-xl md:text-2xl font-serif font-bold mb-2" style={{ color: GOLD }}>
-              Free Kundli toh dekh li.
-            </h3>
+          <section className="mt-12 p-6 md:p-8 rounded-2xl text-center"
+            style={{ background: `linear-gradient(135deg, rgba(212,175,55,0.12) 0%, rgba(2,8,23,0.6) 100%)`, border: `1px solid rgba(212,175,55,0.35)` }}>
+            <h3 className="text-xl md:text-2xl font-serif font-bold mb-2" style={{ color: GOLD }}>Free Kundli toh dekh li.</h3>
             <p className="text-slate-300 mb-1">Ab apni puri <strong>Jeevan Bhavishyavani</strong> dekhni hai?</p>
             <ul className="text-sm text-slate-400 my-4 space-y-1">
               <li>✓ 9 Planets ka full analysis</li>
@@ -419,14 +313,9 @@ export default function KundaliCalculatorPage() {
               <li>✓ Career / Marriage / Health timing</li>
               <li>✓ 50+ Personalized Remedies</li>
             </ul>
-            <Link
-              href="/#birth-form"
+            <Link href="/#birth-form"
               className="inline-block mt-2 px-6 py-3 rounded-full font-bold transition-all hover:scale-105"
-              style={{
-                background: `linear-gradient(135deg, ${GOLD} 0%, #A8820A 100%)`,
-                color: '#080B12',
-              }}
-            >
+              style={{ background: `linear-gradient(135deg, ${GOLD} 0%, #A8820A 100%)`, color: '#080B12' }}>
               ₹51 Mein Prediction Le →
             </Link>
           </section>
@@ -436,4 +325,3 @@ export default function KundaliCalculatorPage() {
     </>
   );
 }
-
