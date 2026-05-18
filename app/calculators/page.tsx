@@ -1,8 +1,18 @@
 // ============================================================
 // File: app/calculators/page.tsx
 // Purpose: Calculators Hub — SEO/GEO/AEO landing page
-// Version: v3.0 — ALL 7 calculators LIVE
+// Version: v3.1 — Title double-suffix BUG FIX
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikal Vaani
+// Date: 2026-05-18
+// ============================================================
+// CHANGES vs v3.0:
+//   ✅ FIXED: Title was rendering as "...| Trikal Vaani | Trikal Vaani"
+//      ROOT CAUSE: layout.tsx v2.7 has template: '%s | Trikal Vaani'
+//                  + this page's title already had '| Trikal Vaani' suffix
+//                  = double suffix on every render
+//      SOLUTION: Use title: { absolute: '...' } pattern
+//                → Tells Next.js: "use this title EXACTLY, ignore template"
+//   ✅ ALL OTHER CODE: 100% IDENTICAL TO v3.0 (no logic change)
 // ============================================================
 
 import type { Metadata } from 'next';
@@ -14,7 +24,10 @@ const GOLD = '#D4AF37';
 const GOLD_RGBA = (a: number) => `rgba(212,175,55,${a})`;
 
 export const metadata: Metadata = {
-  title: 'Free Vedic Astrology Calculators — Kundli, Dasha, Nakshatra | Trikal Vaani',
+  // ⬇ FIX: Using title.absolute prevents layout.tsx template from appending suffix
+  title: {
+    absolute: 'Free Vedic Astrology Calculators — Kundli, Dasha, Nakshatra | Trikal Vaani',
+  },
   description:
     'Free Vedic astrology calculators powered by Swiss Ephemeris. Get accurate Kundli, Vimshottari Dasha, Nakshatra, Rashi, Lagna, Sade Sati, and Manglik Dosh results instantly. By Rohiit Gupta, Chief Vedic Architect.',
   keywords: [
