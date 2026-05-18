@@ -273,13 +273,22 @@ export default function FreeNakshatraCalculatorPage() {
   const nakTrait = nakDetails.trait || null;
 
   // ─── Template data ───────────────────────────────────────────
+  // ─── Template data — VM returns template.actionWindows, avoidWindows, remedyPlan ───
   const template = result?.template;
-  const dos: string[] = template?.dos || template?.do_list || template?.do || [];
-  const donts: string[] = template?.donts || template?.dont_list || template?.dont || template?.donot || [];
-  const remedies = template?.remedies || template?.remedy || {};
-  const mantra = remedies?.mantra || remedies?.mantras || template?.mantra;
-  const ratna = remedies?.ratna || remedies?.gemstone || template?.ratna;
-  const daan = remedies?.daan || remedies?.charity || template?.daan;
+  // Dos = actionWindows (with window dates + reasons)
+  const actionWindows: any[] = template?.actionWindows ?? [];
+  const dos: string[] = actionWindows.slice(0, 3).map((w: any) => `${w.window}: ${w.reason}`);
+  // Don'ts = avoidWindows
+  const avoidWindows: any[] = template?.avoidWindows ?? [];
+  const donts: string[] = avoidWindows.slice(0, 3).map((w: any) => `${w.window}: ${w.reason}`);
+  // Remedies = remedyPlan.remedies[]
+  const remedyList: any[] = template?.remedyPlan?.remedies ?? [];
+  const mantraObj = remedyList.find((r: any) => r.type === 'mantra');
+  const gemObj = remedyList.find((r: any) => r.type === 'gemstone');
+  const daanObj = remedyList.find((r: any) => r.type === 'daan' || r.type === 'dana' || r.type === 'charity');
+  const mantra = mantraObj ? `${mantraObj.mantra} — ${mantraObj.count}, ${mantraObj.time}` : null;
+  const ratna = gemObj ? `${gemObj.lagna_stone?.stone || gemObj.dasha_stone?.stone} — ${gemObj.lagna_stone?.metal || 'Gold'}, ${gemObj.lagna_stone?.finger || 'Index finger'}` : null;
+  const daan = daanObj ? (typeof daanObj.item === 'string' ? daanObj.item : daanObj.description || daanObj.what || JSON.stringify(daanObj).slice(0,100)) : null;
 
   const inputStyle = (hasError?: boolean): React.CSSProperties => ({
     background: '#0d1120',
