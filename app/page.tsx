@@ -1,60 +1,110 @@
-'use client';
-// @trikal-v9.3 — cache-bust: 2026-05-09T12:00:00Z
-// 🔱 TRIKAL VAANI | app/page.tsx | v9.3
+// 🔱 TRIKAL VAANI | app/page.tsx | v10.0
 // Owner: Rohiit Gupta, Chief Vedic Architect
-// Changes from v9.2:
-//   - Mounted <HomepageSchema /> — activates Person, WebApp, FAQPage, HowTo, BreadcrumbList, OfferCatalog schemas
-//   - Mounted <HomepageGEO /> — activates GEO direct answer block, E-E-A-T author strip,
-//     internal link hub (8 services + 15 pillars), visible FAQ, Local SEO block
-//   - Position: HomepageSchema at top (before SchemaScript), HomepageGEO after BirthForm
-// LOCKED: gemini-prompt.ts, verifiedTier — NOT TOUCHED
+// Date: 2026-05-18
+// ============================================================================
+// MAJOR ARCHITECTURE CHANGE vs v9.3:
+//   ❌ REMOVED: 'use client' directive
+//      → Homepage is now a SERVER COMPONENT
+//      → All schemas + GEO content render in initial HTML
+//      → Googlebot, Perplexity, SGE, ChatGPT crawlers see EVERYTHING instantly
+//   ❌ REMOVED: useState + handleSelectCategory (moved to app/HomeClient.tsx)
+//   ❌ REMOVED: <HomeFAQ /> import & render in old position
+//      → HomeFAQ v2.0 is now repositioned as DEEP FAQ tier (kept, not killed)
+//   ✅ ADDED: export const metadata — page-specific SEO override
+//      → Overrides layout.tsx v2.7 default with even stronger homepage title
+//   ✅ ADDED: <HomeClient /> import — the ONLY client island on this page
+//   ✅ MOVED: <HomepageGEO /> from middle-of-page to RIGHT AFTER <Hero />
+//      → 56-word direct answer block now in first viewport
+//      → AI crawlers extract brand framing immediately
+//   ✅ KEPT: <HomeFAQ /> as TIER 2 deep FAQ (positioned after Tier 1 HomepageGEO FAQ)
+//
+// PAGE FLOW (top to bottom):
+//   1. Hero                    (H1 + visual hook)
+//   2. HomepageGEO             (GEO direct answer + Tier 1 FAQ + E-E-A-T + local SEO)
+//   3. LiveTrustBar            (social proof)
+//   4. SocialProofTicker       (live ticker)
+//   5. HomeClient              (DardEngine + BirthForm — client island)
+//   6. DailyPanchang
+//   7. DailyRashifal
+//   8. PillarsGrid
+//   9. AIManifesto
+//   10. PricingSection
+//   11. HomeFAQ v2.0           (Tier 2 deep technical FAQ)
+//   12. InnerCircleWaitlist
+//   13. Blog section
+// ============================================================================
 
+import type { Metadata } from 'next';
 import HomepageSchema from '@/components/seo/HomepageSchema';
 import HomepageGEO from '@/components/seo/HomepageGEO';
 import SchemaScript from '../components/SchemaScript';
 import HomeFAQ from '../components/HomeFAQ';
-import { useState, useCallback } from 'react';
 import SiteNav from '@/components/layout/SiteNav';
 import SiteFooter from '@/components/layout/SiteFooter';
 import Hero from '@/components/landing/Hero';
 import PillarsGrid from '@/components/landing/PillarsGrid';
-import BirthForm from '@/components/landing/BirthForm';
 import SocialProofTicker from '@/components/landing/SocialProofTicker';
 import InnerCircleWaitlist from '@/components/landing/InnerCircleWaitlist';
 import AIManifesto from '@/components/landing/AIManifesto';
 import BlogCard from '@/components/blog/BlogCard';
-import DardEngineShowcase from '@/components/landing/DardEngineShowcase';
 import DailyPanchang from '@/components/landing/DailyPanchang';
 import DailyRashifal from '@/components/landing/DailyRashifal';
 import PricingSection from '@/components/landing/PricingSection';
 import LiveTrustBar from '@/components/landing/LiveTrustBar';
+import HomeClient from './HomeClient';
 import { blogPosts } from '@/lib/blog-data';
 
-export type SelectedCategory = {
-  id: string;
-  label: string;
-  color: string;
-} | null;
+// ─────────────────────────────────────────────────────────────
+// PAGE-SPECIFIC METADATA — overrides layout.tsx v2.7 defaults
+// Homepage is the most important page; deserves its own optimized SEO.
+// ─────────────────────────────────────────────────────────────
+export const metadata: Metadata = {
+  title: 'Trikal Vaani | Free Kundli & Accurate AI Vedic Astrology',
+  description:
+    "Get your free AI kundli & accurate Vedic astrology predictions instantly. Personalised readings for career, wealth, marriage, health & legal matters by Rohiit Gupta, Chief Vedic Architect (Delhi NCR). Powered by Swiss Ephemeris. Voice & text readings from ₹11.",
+  alternates: {
+    canonical: 'https://trikalvaani.com/',
+    languages: {
+      'en-IN': 'https://trikalvaani.com/',
+      'hi-IN': 'https://trikalvaani.com/hi',
+    },
+  },
+  openGraph: {
+    title: 'Trikal Vaani | Free Kundli & Accurate AI Vedic Astrology',
+    description:
+      "Free AI kundli & accurate Vedic astrology predictions. Personalised readings by Rohiit Gupta, Chief Vedic Architect. Voice & text from ₹11.",
+    url: 'https://trikalvaani.com/',
+    type: 'website',
+    locale: 'en_IN',
+    siteName: 'Trikal Vaani',
+    images: [
+      {
+        url: 'https://trikalvaani.com/og-default.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'Trikal Vaani — Free Kundli & Accurate AI Vedic Astrology',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Trikal Vaani | Free Kundli & Accurate AI Vedic Astrology',
+    description:
+      'Free AI kundli & accurate Vedic astrology predictions. Voice & text readings from ₹11.',
+    images: ['https://trikalvaani.com/og-default.jpg'],
+  },
+};
 
 export default function HomePage() {
   const latestPosts = blogPosts.slice(0, 3);
-  const [selectedCategory, setSelectedCategory] = useState<SelectedCategory>(null);
-
-  const handleSelectCategory = useCallback((cat: SelectedCategory) => {
-    setSelectedCategory(cat);
-    setTimeout(() => {
-      const el = document.getElementById('birth-form');
-      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 80);
-  }, []);
 
   return (
     <>
-      {/* ── SEO SCHEMAS (invisible, inject into <head>) ──────────────────────
-          HomepageSchema: Person (Rohiit ji E-E-A-T) + WebApplication +
-          FAQPage + HowTo + BreadcrumbList + OfferCatalog — 6 schemas
-          SchemaScript: your existing 7 homepage schemas (Phase C)
-          Combined = 13 schema blocks total on homepage
+      {/* ── SEO SCHEMAS — server-rendered into initial HTML ──────────────────
+          HomepageSchema v1.1: Person (Rohiit ji E-E-A-T) + FAQPage +
+            BreadcrumbList + HowTo + OfferCatalog (5 schemas)
+          SchemaScript: existing WebSite/Service/Product schemas (Phase C)
+          NO duplicate @id values — Session A audit cleaned all collisions.
       ──────────────────────────────────────────────────────────────────── */}
       <HomepageSchema />
       <SchemaScript />
@@ -63,37 +113,50 @@ export default function HomePage() {
         <SiteNav />
         <main>
 
-          {/* ── EXISTING SECTIONS — 100% UNTOUCHED ─────────────────────── */}
+          {/* ── 1. HERO ─────────────────────────────────────────────────── */}
           <Hero />
-          <LiveTrustBar />
-          <SocialProofTicker />
-          <DardEngineShowcase
-            selectedCategory={selectedCategory}
-            onSelectCategory={handleSelectCategory}
-          />
-          <BirthForm selectedCategory={selectedCategory} />
 
-          {/* ── GEO CONTENT BLOCK ──────────────────────────────────────────
-              HomepageGEO adds (in order):
-              1. 56-word direct answer block → Perplexity/SGE/ChatGPT extraction
-              2. E-E-A-T author strip (Rohiit ji) → YMYL trust signal
-              3. Internal link hub → 8 services + 15 pillars + 10 city pages
-              4. Visible FAQ (8 Q&As) → Featured snippets + AI Overview
-              5. Local SEO block → "Astrologer in Delhi/Noida/Gurgaon"
-              Position: after BirthForm, before DailyPanchang
-          ──────────────────────────────────────────────────────────────── */}
+          {/* ── 2. HOMEPAGE GEO — moved to ABOVE-THE-FOLD ─────────────────
+              Critical: 56-word direct answer + E-E-A-T author + visible FAQ
+              must hit AI crawlers in the first viewport for brand citation. */}
           <HomepageGEO />
 
-          {/* ── EXISTING SECTIONS — 100% UNTOUCHED ─────────────────────── */}
+          {/* ── 3. LIVE TRUST BAR ───────────────────────────────────────── */}
+          <LiveTrustBar />
+
+          {/* ── 4. SOCIAL PROOF TICKER ──────────────────────────────────── */}
+          <SocialProofTicker />
+
+          {/* ── 5. CLIENT ISLAND — DardEngine + BirthForm with shared state
+              This is the ONLY client component on the homepage.
+              Holds useState<SelectedCategory> and handleSelectCategory. */}
+          <HomeClient />
+
+          {/* ── 6. DAILY PANCHANG ───────────────────────────────────────── */}
           <DailyPanchang />
+
+          {/* ── 7. DAILY RASHIFAL ───────────────────────────────────────── */}
           <DailyRashifal />
+
+          {/* ── 8. PILLARS GRID ─────────────────────────────────────────── */}
           <PillarsGrid />
+
+          {/* ── 9. AI MANIFESTO ─────────────────────────────────────────── */}
           <AIManifesto />
+
+          {/* ── 10. PRICING SECTION ─────────────────────────────────────── */}
           <PricingSection />
-          <InnerCircleWaitlist />
+
+          {/* ── 11. HOME FAQ v2.0 — TIER 2 DEEP TECHNICAL FAQ ────────────
+              Different from Tier 1 FAQ inside HomepageGEO.
+              Unique schema @id="#homefaq-deep" — no collision.
+              Covers Sade Sati, Manglik Dosha, Pratyantar Dasha, Dhana Yoga. */}
           <HomeFAQ />
 
-          {/* ── BLOG SECTION — 100% UNTOUCHED ──────────────────────────── */}
+          {/* ── 12. INNER CIRCLE WAITLIST ───────────────────────────────── */}
+          <InnerCircleWaitlist />
+
+          {/* ── 13. BLOG SECTION ────────────────────────────────────────── */}
           <section className="py-20 px-4">
             <div className="max-w-6xl mx-auto">
               <div className="text-center mb-12">
@@ -136,3 +199,8 @@ export default function HomePage() {
     </>
   );
 }
+
+// ============================================================================
+// END — app/page.tsx v10.0
+// 🔱 Trikal Vaani | Rohiit Gupta, Chief Vedic Architect
+// ============================================================================
