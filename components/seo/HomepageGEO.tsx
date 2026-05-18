@@ -3,29 +3,15 @@
  * TRIKAL VAANI — trikalvaani.com
  * Chief Vedic Architect: Rohiit Gupta
  * FILE: components/seo/HomepageGEO.tsx
- * Version: 1.2 — Title alignment + FAQ sync + nofollow fixes
+ * Version: 1.3 — Removed broken city links (converted to static tags)
  * Date: 2026-05-18
  * 🔱 JAI MAA SHAKTI
  *
- * CHANGES vs v1.1:
- *   ✅ H2 in GEO direct answer aligned to layout.tsx v2.7 title language:
- *      "Free Kundli & Accurate AI Vedic Astrology" (single phrase across site)
- *   ✅ 56-word direct answer paragraph rewritten to lead with EXACT title phrase
- *      → AI engines (Perplexity, SGE, ChatGPT) will cite with brand framing intact
- *   ✅ Visible FAQ wording SYNCED EXACTLY to HomepageSchema.tsx v1.1 FAQPage schema
- *      → Google requires visible text = schema text (mismatch = schema ignored)
- *   ✅ WhatsApp outbound link: added rel="nofollow" (preserve link equity)
- *   ✅ "8 Deep Vedic Readings" section title: kept (clear value prop)
- *   ✅ E-E-A-T author strip: kept as-is (working)
- *   ✅ Local SEO block: kept as-is (working)
- *
- * GEO/AEO ALIGNMENT (3-way single source of truth):
- *   layout.tsx v2.7 (title)
- *     ↓
- *   HomepageSchema.tsx v1.1 (FAQPage schema)
- *     ↓
- *   THIS FILE v1.2 (visible H2 + visible FAQ)
- *   → All three speak the SAME language. No mixed signals to Google.
+ * CHANGES vs v1.2:
+ *   ✅ REMOVED: 10 city <Link> tags (/astrologer-delhi etc.) — all were 404
+ *   ✅ REPLACED WITH: Static <span> tags (city presence shown, no broken links)
+ *   ✅ WHY: Business is 100% online — city landing pages = doorway page risk
+ *   ✅ ALL OTHER CONTENT: 100% identical to v1.2
  * =============================================================
  */
 
@@ -36,9 +22,6 @@ export default function HomepageGEO() {
     <>
       {/* ═══════════════════════════════════════════════════════════
           GEO ELEMENT 1: DIRECT ANSWER BLOCK (56 words)
-          H2 + paragraph opens with EXACT title phrase from layout.tsx v2.7:
-          "Free Kundli & Accurate AI Vedic Astrology"
-          MUST be the first content block after Hero.
           ═══════════════════════════════════════════════════════════ */}
       <section
         id="what-is-trikal-vaani"
@@ -56,10 +39,6 @@ export default function HomepageGEO() {
             Free Kundli &amp; Accurate AI Vedic Astrology —{' '}
             <span className="text-[#D4AF37]">India&apos;s Trusted Platform</span>
           </h2>
-
-          {/* GEO GOLD — 56 words. Opens with title phrase. Every entity
-              (Swiss Ephemeris, BPHS, Vimshottari, Bhrigu, Shadbala) mentioned
-              for AI extraction. Do not edit without word-count check. */}
           <p className="text-base md:text-lg text-gray-300 leading-relaxed text-center">
             Trikal Vaani delivers <strong>free kundli and accurate AI Vedic astrology predictions</strong>{' '}
             built on Swiss Ephemeris precision and{' '}
@@ -77,8 +56,6 @@ export default function HomepageGEO() {
             patterns, and Shadbala strength — then delivers personalised
             predictions across 15 life domains. Free preview, ₹51 deep readings.
           </p>
-
-          {/* Trust badges — visible E-E-A-T signal */}
           <div className="flex flex-wrap justify-center gap-3 mt-8">
             <span className="text-xs border border-[#D4AF37]/30 text-[#D4AF37] px-3 py-1.5 rounded-full bg-[#D4AF37]/5">
               ⚡ Swiss Ephemeris
@@ -172,57 +149,16 @@ export default function HomepageGEO() {
             </p>
           </div>
 
-          {/* 8 SERVICE CARDS — internal links to /services/* */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
             {[
-              {
-                title: 'Ex-Back Reading',
-                slug: 'ex-back-reading',
-                emoji: '♀',
-                hook: 'Will my ex come back?',
-              },
-              {
-                title: 'Toxic Boss Radar',
-                slug: 'toxic-boss-radar',
-                emoji: '♄',
-                hook: 'Is my boss karmically toxic?',
-              },
-              {
-                title: 'Career Pivot',
-                slug: 'career-pivot',
-                emoji: '♃',
-                hook: 'Wrong career?',
-              },
-              {
-                title: 'Property Yog',
-                slug: 'property-yog',
-                emoji: '🏠',
-                hook: 'Right time to buy?',
-              },
-              {
-                title: 'Compatibility',
-                slug: 'compatibility',
-                emoji: '⚖️',
-                hook: 'Truly compatible?',
-              },
-              {
-                title: 'Child Destiny',
-                slug: 'child-destiny',
-                emoji: '👶',
-                hook: "Child's calling?",
-              },
-              {
-                title: 'Wealth Reading',
-                slug: 'wealth-reading',
-                emoji: '💰',
-                hook: 'When wealth peaks?',
-              },
-              {
-                title: 'Spiritual Purpose',
-                slug: 'spiritual-purpose',
-                emoji: '🕉',
-                hook: "Soul's purpose?",
-              },
+              { title: 'Ex-Back Reading', slug: 'ex-back-reading', emoji: '♀', hook: 'Will my ex come back?' },
+              { title: 'Toxic Boss Radar', slug: 'toxic-boss-radar', emoji: '♄', hook: 'Is my boss karmically toxic?' },
+              { title: 'Career Pivot', slug: 'career-pivot', emoji: '♃', hook: 'Wrong career?' },
+              { title: 'Property Yog', slug: 'property-yog', emoji: '🏠', hook: 'Right time to buy?' },
+              { title: 'Compatibility', slug: 'compatibility', emoji: '⚖️', hook: 'Truly compatible?' },
+              { title: 'Child Destiny', slug: 'child-destiny', emoji: '👶', hook: "Child's calling?" },
+              { title: 'Wealth Reading', slug: 'wealth-reading', emoji: '💰', hook: 'When wealth peaks?' },
+              { title: 'Spiritual Purpose', slug: 'spiritual-purpose', emoji: '🕉', hook: "Soul's purpose?" },
             ].map((s) => (
               <Link
                 key={s.slug}
@@ -241,7 +177,6 @@ export default function HomepageGEO() {
             ))}
           </div>
 
-          {/* CTA to /services index */}
           <div className="text-center">
             <Link
               href="/services"
@@ -251,7 +186,6 @@ export default function HomepageGEO() {
             </Link>
           </div>
 
-          {/* 15 LIFE DOMAIN PILLARS — internal link grid */}
           <div className="mt-16 pt-12 border-t border-white/5">
             <h3 className="font-serif text-xl md:text-2xl font-bold text-white text-center mb-8">
               Or Explore by{' '}
@@ -289,9 +223,7 @@ export default function HomepageGEO() {
       </section>
 
       {/* ═══════════════════════════════════════════════════════════
-          GEO ELEMENT 4: VISIBLE FAQ — SYNCED EXACTLY TO HomepageSchema.tsx v1.1
-          Google requires visible text to match FAQPage schema text 1:1.
-          Any mismatch = schema gets ignored. Source of truth = HomepageSchema.
+          GEO ELEMENT 4: VISIBLE FAQ — SYNCED TO HomepageSchema v1.1
           ═══════════════════════════════════════════════════════════ */}
       <section
         id="faq"
@@ -311,7 +243,6 @@ export default function HomepageGEO() {
               <span className="text-[#D4AF37]">Questions</span>
             </h2>
           </div>
-
           <div className="space-y-3">
             {[
               {
@@ -367,7 +298,9 @@ export default function HomepageGEO() {
       </section>
 
       {/* ═══════════════════════════════════════════════════════════
-          GEO ELEMENT 5: LOCAL SEO BLOCK (Delhi NCR)
+          GEO ELEMENT 5: LOCAL SEO BLOCK
+          City links REMOVED (v1.3) — converted to static display tags
+          Business is 100% online — no physical location visits
           ═══════════════════════════════════════════════════════════ */}
       <section
         aria-labelledby="local-seo-heading"
@@ -391,27 +324,18 @@ export default function HomepageGEO() {
             that Rohiit ji offers in his Delhi NCR consultations.
           </p>
 
-          {/* City links — internal SEO juice */}
+          {/* Static city tags — presence signal without broken links */}
           <div className="flex flex-wrap justify-center gap-2 mb-8">
             {[
-              'Delhi',
-              'Noida',
-              'Gurgaon',
-              'Faridabad',
-              'Ghaziabad',
-              'Mumbai',
-              'Bangalore',
-              'Hyderabad',
-              'Pune',
-              'Kolkata',
+              'Delhi', 'Noida', 'Gurgaon', 'Faridabad', 'Ghaziabad',
+              'Mumbai', 'Bangalore', 'Hyderabad', 'Pune', 'Kolkata',
             ].map((city) => (
-              <Link
+              <span
                 key={city}
-                href={`/astrologer-${city.toLowerCase()}`}
-                className="text-xs border border-white/10 text-gray-400 px-3 py-1.5 rounded-full hover:border-[#D4AF37]/40 hover:text-[#D4AF37] transition-all duration-200"
+                className="text-xs border border-white/10 text-gray-400 px-3 py-1.5 rounded-full"
               >
                 Astrologer in {city}
-              </Link>
+              </span>
             ))}
           </div>
 
