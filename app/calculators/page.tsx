@@ -1,7 +1,7 @@
 // ============================================================
 // File: app/calculators/page.tsx
 // Purpose: Calculators Hub — SEO/GEO/AEO landing page
-// Version: v2.0 — updated slugs to free- prefix
+// Version: v3.0 — ALL 7 calculators LIVE
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikal Vaani
 // ============================================================
 
@@ -62,7 +62,7 @@ const CALCULATORS = [
     name: 'Free Rashi Calculator',
     desc: 'Find your Moon Sign (Chandra Rashi) — the foundation of all Vedic astrology predictions.',
     badge: null,
-    live: false,
+    live: true,
   },
   {
     slug: 'free-lagna-calculator',
@@ -70,7 +70,7 @@ const CALCULATORS = [
     name: 'Free Lagna Calculator',
     desc: 'Calculate your Ascendant (Lagna) — your outer personality, body, and life direction.',
     badge: null,
-    live: false,
+    live: true,
   },
   {
     slug: 'free-sade-sati-calculator',
@@ -78,7 +78,7 @@ const CALCULATORS = [
     name: 'Free Sade Sati Calculator',
     desc: "Check if Saturn's 7.5 year Sade Sati is active for you — Rising, Peak, or Setting phase.",
     badge: 'Trending',
-    live: false,
+    live: true,
   },
   {
     slug: 'free-manglik-dosh-calculator',
@@ -86,7 +86,7 @@ const CALCULATORS = [
     name: 'Free Manglik Dosh Calculator',
     desc: 'Check Mangal Dosha status — severity level, cancellation rules, and Parashar remedies.',
     badge: null,
-    live: false,
+    live: true,
   },
 ];
 
@@ -187,17 +187,7 @@ export default function CalculatorsHubPage() {
                   className="group relative p-5 rounded-2xl transition-all duration-300 hover:scale-[1.02]"
                   style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid ${calc.live ? GOLD_RGBA(0.3) : 'rgba(255,255,255,0.08)'}` }}>
 
-                  {calc.badge && !calc.live && (
-                    <span className="absolute top-3 right-3 text-xs font-bold px-2.5 py-1 rounded-full" style={{ background: GOLD, color: '#080B12' }}>
-                      {calc.badge}
-                    </span>
-                  )}
-                  {!calc.live && !calc.badge && (
-                    <span className="absolute top-3 right-3 text-xs font-medium px-2.5 py-1 rounded-full" style={{ background: 'rgba(148,163,184,0.15)', color: '#94A3B8', border: '1px solid rgba(148,163,184,0.25)' }}>
-                      Coming Soon
-                    </span>
-                  )}
-                  {calc.live && calc.badge && (
+                  {calc.badge && (
                     <span className="absolute top-3 right-3 text-xs font-bold px-2.5 py-1 rounded-full" style={{ background: GOLD, color: '#080B12' }}>
                       {calc.badge}
                     </span>
@@ -207,11 +197,7 @@ export default function CalculatorsHubPage() {
                   <h3 className="text-lg font-serif font-bold mb-2" style={{ color: GOLD }}>{calc.name}</h3>
                   <p className="text-sm text-slate-400 leading-relaxed mb-3">{calc.desc}</p>
                   <div className="text-sm font-medium inline-flex items-center gap-1.5" style={{ color: GOLD_RGBA(0.85) }}>
-                    {calc.live ? (
-                      <><span>Use Calculator</span><span className="transition-transform group-hover:translate-x-1">→</span></>
-                    ) : (
-                      <span className="text-slate-500">Available soon</span>
-                    )}
+                    <span>Use Calculator</span><span className="transition-transform group-hover:translate-x-1">→</span>
                   </div>
                 </Link>
               ))}
