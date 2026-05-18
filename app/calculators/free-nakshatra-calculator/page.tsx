@@ -280,15 +280,24 @@ export default function FreeNakshatraCalculatorPage() {
   const dos: string[] = actionWindows.slice(0, 3).map((w: any) => `${w.window}: ${w.reason}`);
   // Don'ts = avoidWindows
   const avoidWindows: any[] = template?.avoidWindows ?? [];
-  const donts: string[] = avoidWindows.slice(0, 3).map((w: any) => `${w.window}: ${w.reason}`);
+  let donts: string[] = avoidWindows.slice(0, 3).map((w: any) => `${w.window}: ${w.reason}`);
   // Remedies = remedyPlan.remedies[]
   const remedyList: any[] = template?.remedyPlan?.remedies ?? [];
   const mantraObj = remedyList.find((r: any) => r.type === 'mantra');
   const gemObj = remedyList.find((r: any) => r.type === 'gemstone');
   const daanObj = remedyList.find((r: any) => r.type === 'daan' || r.type === 'dana' || r.type === 'charity');
-  const mantra = mantraObj ? `${mantraObj.mantra} — ${mantraObj.count}, ${mantraObj.time}` : null;
-  const ratna = gemObj ? `${gemObj.lagna_stone?.stone || gemObj.dasha_stone?.stone} — ${gemObj.lagna_stone?.metal || 'Gold'}, ${gemObj.lagna_stone?.finger || 'Index finger'}` : null;
-  const daan = daanObj ? (typeof daanObj.item === 'string' ? daanObj.item : daanObj.description || daanObj.what || JSON.stringify(daanObj).slice(0,100)) : null;
+  const vratObj = remedyList.find((r: any) => r.type === 'vrat');
+  const specialObj = remedyList.find((r: any) => r.type === 'special');
+  const mantra = mantraObj ? `${mantraObj.mantra} — ${mantraObj.count}, ${mantraObj.time}. ${mantraObj.special || ''}`.trim() : null;
+  const ratna = gemObj ? `${gemObj.lagna_stone?.stone || gemObj.dasha_stone?.stone} (${gemObj.lagna_stone?.metal || 'Gold'}, ${gemObj.lagna_stone?.finger || 'Index finger'}) — ${gemObj.lagna_stone?.for || gemObj.dasha_stone?.for || ''}` : null;
+  // Daan: items is a plain string + day + recipient
+  const daan = daanObj ? `${daanObj.items} — On ${daanObj.day}, give to ${daanObj.recipient}. ${daanObj.note || ''}`.trim() : null;
+  // Don'ts: use vrat + special + avoid timing as Parashar Vivarjan guidance
+  if (donts.length === 0) {
+    if (vratObj) donts.push(`Vrat (Fast): ${vratObj.name} on ${vratObj.day} — Deity: ${vratObj.deity}. Prasad: ${vratObj.prasad}`);
+    if (specialObj) donts.push(`${specialObj.text || ''} — Focus: ${specialObj.focus || ''}`);
+    if (mantraObj?.special) donts.push(`Avoid: Do not chant mantra after consuming non-veg or alcohol. Best time: ${mantraObj.time}`);
+  }
 
   const inputStyle = (hasError?: boolean): React.CSSProperties => ({
     background: '#0d1120',
