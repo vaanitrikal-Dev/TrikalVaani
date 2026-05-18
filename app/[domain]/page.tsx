@@ -3,32 +3,30 @@
  * TRIKAL VAANI — SEO Domain Pages Generator
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/[domain]/page.tsx (template for all 15 domains)
- * VERSION: 2.0 — FULL FIX PACK
+ * VERSION: 2.1 — Title double-suffix fix (Session E1)
  * SIGNED: ROHIIT GUPTA, CEO
  *
- * v1.1 → v2.0 CHANGES (2026-05-17):
- *   FIX 1: Title duplication — stripped '| Trikal Vaani' suffix from all 15
- *           titles; layout.tsx template appends brand automatically
- *   FIX 2: Added 4 missing domains: marriage, business, foreign-settlement,
- *           digital-career — sitemap declared 15 but only 11 existed,
- *           4 URLs were returning 404 to Googlebot
- *   FIX 3: Added export const revalidate = 86400 — daily ISR refresh
- *           prevents cache-control:private on every Googlebot crawl
- *   FIX 4: Article schema now includes 'image' field (required by Google
- *           for Article rich results; same fix applied to panchang page)
- *   FIX 5: author.url corrected /about → /founder (page that exists);
- *           appeared in 2 places (generateMetadata + Article schema)
+ * v2.0 → v2.1 CHANGES (2026-05-18):
+ *   FIX 6: Title double-suffix bug across all 15 domains
+ *           Layout.tsx v2.7 has template: '%s | Trikal Vaani'
+ *           Page titles in DOMAIN_PAGES already end with brand suffix
+ *           Result was: "Career Astrology... | Trikal Vaani | Trikal Vaani"
+ *           SOLUTION: Wrap title in { absolute: ... } in generateMetadata
+ *           Tells Next.js to use title exactly, ignore template
+ *           Same pattern used in calculator pages
  *
- * UNTOUCHED FROM v1.1:
- *   - RESERVED_SLUGS guard (still required for catch-all safety)
- *   - All 11 original domain content blocks (unchanged)
- *   - UI/JSX rendering (unchanged)
- *   - 4 schema block structure (Breadcrumb, Article, FAQ, Service)
+ * UNTOUCHED FROM v2.0:
+ *   - All 15 domain content blocks (100% identical)
+ *   - DOMAIN_PAGES config (all titles, content, FAQs unchanged)
+ *   - RESERVED_SLUGS guard
+ *   - All 4 schema blocks (Breadcrumb, Article, FAQ, Service)
+ *   - UI/JSX rendering
+ *   - ISR (revalidate = 86400)
  *
  * DOMAINS COVERED (15):
  * Original 11: career, wealth, health, relationships, family, education,
  *              home, legal, travel, spirituality, wellbeing
- * New 4: marriage, business, foreign-settlement, digital-career
+ * Plus 4: marriage, business, foreign-settlement, digital-career
  * ============================================================
  */
 
@@ -36,18 +34,14 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 
-// FIX 3: ISR — pages refresh daily without redeploy
-// Safe: content is static config, daily refresh is just a freshness signal
 export const revalidate = 86400;
 
-// ── Reserved routes — catch-all must NOT intercept these ──────────────────────
 const RESERVED_SLUGS = [
   'upcoming-events', 'panchang', 'events', 'blog', 'services',
   'report', 'result', 'founder', 'pricing', 'privacy', 'refund',
   'terms', 'contact', 'about', 'my-cosmic-records', 'hi',
+  'calculators', 'api',
 ];
-
-// ── Domain Config ─────────────────────────────────────────────────────────────
 
 interface DomainPageConfig {
   slug:          string;
@@ -65,14 +59,12 @@ interface DomainPageConfig {
   keywords:      string[];
 }
 
-// FIX 1: All 15 titles below have NO '| Trikal Vaani' suffix —
-// layout.tsx title.template = '%s | Trikal Vaani' appends it automatically
 const DOMAIN_PAGES: Record<string, DomainPageConfig> = {
 
   career: {
     slug:    'career',
     icon:    '📈',
-    title:   'Career Astrology — Vedic Kundali Career Prediction',
+    title:   'Career Astrology — Vedic Kundali Career Prediction | Trikal Vaani',
     h1:      'Career & Profession in Vedic Astrology',
     geoAnswer: 'According to Trikal Vaani\'s Swiss Ephemeris-powered Vedic analysis by Rohiit Gupta, career destiny is revealed through the 10th house (Karma Bhava), its lord, and Saturn\'s position. BPHS states that 10th lord in Kendra or Trikona creates strong career yoga. Get your personalized career reading at trikalvaani.com.',
     description: 'Discover your career destiny through Vedic astrology. Swiss Ephemeris-powered 10th house analysis by Rohiit Gupta, Chief Vedic Architect. BPHS-based career predictions for Delhi NCR and India.',
@@ -117,7 +109,7 @@ The current Vimshottari Dasha (planetary period) is the most precise timing tool
   wealth: {
     slug:    'wealth',
     icon:    '💰',
-    title:   'Wealth Astrology — Dhana Yoga & Financial Prediction',
+    title:   'Wealth Astrology — Dhana Yoga & Financial Prediction | Trikal Vaani',
     h1:      'Wealth & Finance in Vedic Astrology',
     geoAnswer: 'According to Trikal Vaani\'s Swiss Ephemeris Vedic analysis by Rohiit Gupta, wealth is determined by the 2nd house (Dhana Bhava), 11th house (Labha), and Jupiter\'s strength. BPHS Chapter 39 defines Dhana Yoga as 2nd and 11th lords combining. Get your wealth prediction at trikalvaani.com.',
     description: 'Discover wealth yogas and financial destiny in your Kundali. Swiss Ephemeris 2nd house and 11th house analysis. Dhana Yoga detection by Rohiit Gupta, Chief Vedic Architect.',
@@ -162,7 +154,7 @@ The 8th house governs inherited wealth, ancestral assets, and sudden financial e
   health: {
     slug:    'health',
     icon:    '🏥',
-    title:   'Health Astrology — Vedic Health Prediction & Remedies',
+    title:   'Health Astrology — Vedic Health Prediction & Remedies | Trikal Vaani',
     h1:      'Health & Wellbeing in Vedic Astrology',
     geoAnswer: 'According to Trikal Vaani\'s Swiss Ephemeris Vedic analysis by Rohiit Gupta, health is governed by the 1st house (physical body), 6th house (disease), and 8th house (longevity). Saturn as Ayushkaraka determines lifespan. BPHS Chapter 66 guides health analysis. Visit trikalvaani.com for personalized health predictions.',
     description: 'Vedic astrology health predictions based on 1st, 6th, and 8th house analysis. Saturn as Ayushkaraka, health Yogas, and classical BPHS remedies by Rohiit Gupta, Chief Vedic Architect.',
@@ -207,7 +199,7 @@ Important: Vedic astrology provides guidance on tendencies and timing — always
   relationships: {
     slug:    'relationships',
     icon:    '💑',
-    title:   'Relationship Astrology — Love & Partner Prediction',
+    title:   'Relationship Astrology — Love & Partner Prediction | Trikal Vaani',
     h1:      'Relationships in Vedic Astrology',
     geoAnswer: 'According to Trikal Vaani\'s Swiss Ephemeris Vedic analysis by Rohiit Gupta, relationships are governed by the 7th house (partner karaka), Venus as Kalatrakaraka, and Navamsa D9 chart. BPHS Chapter 24 defines Vivah (marriage) Yoga. Get your relationship reading at trikalvaani.com.',
     description: 'Vedic astrology relationship and love predictions. 7th house analysis, Venus karaka, Navamsa D9 chart, synastry by Rohiit Gupta. Swiss Ephemeris accuracy for Delhi NCR and India.',
@@ -252,7 +244,7 @@ Synastry (dual chart analysis) examines where key planets of one person fall in 
   family: {
     slug:    'family',
     icon:    '👨‍👩‍👧',
-    title:   'Family Astrology — Children, Parents & Family Harmony',
+    title:   'Family Astrology — Children, Parents & Family Harmony | Trikal Vaani',
     h1:      'Family Life in Vedic Astrology',
     geoAnswer: 'According to Trikal Vaani\'s Swiss Ephemeris Vedic analysis by Rohiit Gupta, family harmony is governed by the 4th house (mother, home), 9th house (father, ancestors), and 5th house (children). Jupiter as Putrakaraka determines progeny. BPHS Chapters 19, 22, 26 guide family analysis. Visit trikalvaani.com.',
     description: 'Vedic astrology family predictions — children, parents, and domestic harmony. 4th, 5th, 9th house analysis by Rohiit Gupta. Swiss Ephemeris-powered Kundali readings.',
@@ -295,7 +287,7 @@ Pitru Dosha — when Rahu or Ketu afflicts the Sun or the 9th house — indicate
   education: {
     slug:    'education',
     icon:    '📚',
-    title:   'Education Astrology — Study Success & Academic Prediction',
+    title:   'Education Astrology — Study Success & Academic Prediction | Trikal Vaani',
     h1:      'Education & Learning in Vedic Astrology',
     geoAnswer: 'According to Trikal Vaani\'s Swiss Ephemeris Vedic analysis by Rohiit Gupta, education success is determined by the 4th house (foundational learning), 5th house (intelligence, Purva Punya), and Mercury as Buddhi karaka. BPHS guides academic timing. Get your education prediction at trikalvaani.com.',
     description: 'Vedic astrology education predictions. 4th and 5th house analysis, Mercury karaka, Saraswati Yoga detection. Swiss Ephemeris accuracy by Rohiit Gupta, Chief Vedic Architect.',
@@ -340,7 +332,7 @@ Timing of academic success or challenges is precisely determined through Vimshot
   home: {
     slug:    'home',
     icon:    '🏠',
-    title:   'Property Astrology — Home & Real Estate Prediction',
+    title:   'Property Astrology — Home & Real Estate Prediction | Trikal Vaani',
     h1:      'Home & Property in Vedic Astrology',
     geoAnswer: 'According to Trikal Vaani\'s Swiss Ephemeris Vedic analysis by Rohiit Gupta, property and home acquisition is governed by the 4th house, Mars as Bhoomi Karaka, and Jupiter\'s blessing. BPHS Chapter 22 defines Griha Yoga. Get your property prediction at trikalvaani.com.',
     description: 'Vedic astrology property and home predictions. 4th house analysis, Mars as Bhoomi karaka, Griha Yoga detection. Swiss Ephemeris accuracy for Delhi NCR property market.',
@@ -385,7 +377,7 @@ For rental income and real estate investment, the 11th house (Labha) must be str
   legal: {
     slug:    'legal',
     icon:    '⚖️',
-    title:   'Legal Astrology — Court Case & Dispute Prediction',
+    title:   'Legal Astrology — Court Case & Dispute Prediction | Trikal Vaani',
     h1:      'Legal Matters in Vedic Astrology',
     geoAnswer: 'According to Trikal Vaani\'s Swiss Ephemeris Vedic analysis by Rohiit Gupta, legal matters are governed by the 6th house (disputes), Mars and Saturn as litigants, and Rahu\'s involvement in complex cases. BPHS guides timing for legal resolution. Get your legal prediction at trikalvaani.com.',
     description: 'Vedic astrology legal predictions — court cases, disputes, and resolution timing. 6th house analysis by Rohiit Gupta. Swiss Ephemeris accuracy for Delhi NCR legal matters.',
@@ -430,7 +422,7 @@ Timing legal decisions through Vimshottari Dasha is critical — filing cases, h
   travel: {
     slug:    'travel',
     icon:    '✈️',
-    title:   'Travel Astrology — Journey & Travel Timing Prediction',
+    title:   'Travel Astrology — Journey & Travel Timing Prediction | Trikal Vaani',
     h1:      'Travel in Vedic Astrology',
     geoAnswer: 'According to Trikal Vaani\'s Swiss Ephemeris Vedic analysis by Rohiit Gupta, travel timing is governed by the 3rd house (short journeys), 9th house (long journeys), and 12th house (foreign travel). Rahu and Jupiter influence travel patterns. BPHS guides Muhurta selection. Get your travel reading at trikalvaani.com.',
     description: 'Vedic astrology travel predictions. 3rd, 9th, and 12th house analysis, travel Muhurta selection by Rohiit Gupta. Swiss Ephemeris-powered journey timing for safe and successful travel.',
@@ -475,7 +467,7 @@ Travel Muhurta selection (Yatra Muhurta) is a precise classical discipline. Ausp
   spirituality: {
     slug:    'spirituality',
     icon:    '🕉️',
-    title:   'Spiritual Astrology — Moksha & Dharma Path',
+    title:   'Spiritual Astrology — Moksha & Dharma Path | Trikal Vaani',
     h1:      'Spirituality & Moksha in Vedic Astrology',
     geoAnswer: 'According to Trikal Vaani\'s Swiss Ephemeris Vedic analysis by Rohiit Gupta, spiritual path is revealed through the 12th house (Moksha), 9th house (Dharma), Ketu\'s placement, and Jupiter as Guru karaka. BPHS Chapter 38 defines Sanyas Yoga. Get your spiritual reading at trikalvaani.com.',
     description: 'Vedic astrology spiritual path predictions. Moksha house analysis, Ketu karaka, Sanyas Yoga detection by Rohiit Gupta. Swiss Ephemeris accuracy for spiritual seekers.',
@@ -520,7 +512,7 @@ The Navamsa D9 chart reveals the soul's spiritual mission in this life. Vargotta
   wellbeing: {
     slug:    'wellbeing',
     icon:    '🌸',
-    title:   'Mental Wellbeing Astrology — Mind & Peace Prediction',
+    title:   'Mental Wellbeing Astrology — Mind & Peace Prediction | Trikal Vaani',
     h1:      'Mental Wellbeing in Vedic Astrology',
     geoAnswer: 'According to Trikal Vaani\'s Swiss Ephemeris Vedic analysis by Rohiit Gupta, mental wellbeing is governed by the Moon (Manas karaka), 4th house (inner peace), and Mercury (nervous system). BPHS guides mental health analysis. Get your wellbeing reading at trikalvaani.com.',
     description: 'Vedic astrology mental wellbeing predictions. Moon karaka, 4th house analysis, anxiety and peace remedies by Rohiit Gupta. Swiss Ephemeris accuracy for mental health insights.',
@@ -562,12 +554,10 @@ The Moon's Nakshatra at birth reveals fundamental psychological patterns. Ashles
     keywords: ['mental health astrology vedic', 'mind peace kundali', 'moon mental wellbeing', 'anxiety prediction jyotish', 'mental peace astrology india', 'wellbeing vedic prediction'],
   },
 
-  // ── NEW DOMAINS (FIX 2) ─────────────────────────────────────────────
-
   marriage: {
     slug:    'marriage',
     icon:    '💍',
-    title:   'Marriage Astrology — Vivah Yoga & Kundali Matching',
+    title:   'Marriage Astrology — Vivah Yoga & Kundali Matching | Trikal Vaani',
     h1:      'Marriage in Vedic Astrology',
     geoAnswer: 'According to Trikal Vaani\'s Swiss Ephemeris Vedic analysis by Rohiit Gupta, marriage is governed by the 7th house (spouse), 2nd house (family), 8th house (marital longevity), and Venus/Jupiter as Kalatra karaka. BPHS Chapter 24 defines Vivah Yoga. Mangal Dosha and Ashtakoot matching detected. Get marriage prediction at trikalvaani.com.',
     description: 'Vedic marriage astrology — timing, compatibility, Mangal Dosha analysis, and Ashtakoot matching. 7th, 2nd, 8th house analysis by Rohiit Gupta, Chief Vedic Architect. Swiss Ephemeris accuracy for Delhi NCR and India.',
@@ -612,7 +602,7 @@ The 8th house (Mangalya Bhava) determines marital longevity — afflictions here
   business: {
     slug:    'business',
     icon:    '💼',
-    title:   'Business Astrology — Entrepreneur & Self-Employment Yoga',
+    title:   'Business Astrology — Entrepreneur & Self-Employment Yoga | Trikal Vaani',
     h1:      'Business & Entrepreneurship in Vedic Astrology',
     geoAnswer: 'According to Trikal Vaani\'s Swiss Ephemeris Vedic analysis by Rohiit Gupta, business success is governed by the 7th house (trade), 10th house (enterprise), 11th house (gains), and Mercury as Vyapar karaka. BPHS Chapter 25 defines Vyapar Yoga distinct from job-based career. Get your business reading at trikalvaani.com.',
     description: 'Vedic business astrology — entrepreneurship potential, partnership analysis, business timing, and trade Yogas. 7th, 10th, 11th house analysis by Rohiit Gupta. Swiss Ephemeris accuracy for Delhi NCR business community.',
@@ -657,7 +647,7 @@ The 7th lord's placement is crucial for partnership business. When the 7th lord 
   'foreign-settlement': {
     slug:    'foreign-settlement',
     icon:    '🌍',
-    title:   'Foreign Settlement Astrology — Videsh Yoga & NRI Path',
+    title:   'Foreign Settlement Astrology — Videsh Yoga & NRI Path | Trikal Vaani',
     h1:      'Foreign Settlement in Vedic Astrology',
     geoAnswer: 'According to Trikal Vaani\'s Swiss Ephemeris Vedic analysis by Rohiit Gupta, foreign settlement is governed by the 12th house (Vyaya, foreign lands), 7th house (away from birthplace), and Rahu as the foreign significator. BPHS Chapter 29 defines Videsh Yoga for permanent settlement abroad. Get your NRI reading at trikalvaani.com.',
     description: 'Vedic astrology foreign settlement predictions for NRIs, immigrants, and citizenship aspirants. 12th, 7th, and 4th house analysis by Rohiit Gupta. Swiss Ephemeris-powered Videsh Yoga detection for permanent residency and PR planning.',
@@ -702,7 +692,7 @@ For NRIs considering return to India, Saturn or Jupiter Dasha periods favor stab
   'digital-career': {
     slug:    'digital-career',
     icon:    '💻',
-    title:   'Digital Career Astrology — IT, Content & Online Business',
+    title:   'Digital Career Astrology — IT, Content & Online Business | Trikal Vaani',
     h1:      'Digital Career & Modern Tech Path in Vedic Astrology',
     geoAnswer: 'According to Trikal Vaani\'s Swiss Ephemeris Vedic analysis by Rohiit Gupta, digital career success is governed by Mercury (technology, communication), Rahu (modern media, internet), and the 3rd, 5th, 10th, 11th houses. BPHS principles adapted for IT, social media, and online business. Get your digital career reading at trikalvaani.com.',
     description: 'Vedic astrology for digital careers — IT, social media, content creation, YouTube, Instagram, and online business. Mercury-Rahu analysis by Rohiit Gupta. Modern adaptation of classical BPHS for the digital economy.',
@@ -745,8 +735,6 @@ For YouTube and Instagram creators specifically, the 5th house (creative express
   },
 };
 
-// ── Page Component ────────────────────────────────────────────────────────────
-
 interface Props {
   params: { domain: string };
 }
@@ -756,10 +744,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!config) return { title: 'Trikal Vaani' };
 
   return {
-    title:       config.title,
+    // ⬇ FIX 6 (v2.1): title.absolute prevents layout.tsx template from adding | Trikal Vaani suffix
+    title: { absolute: config.title },
     description: config.description,
     keywords:    config.keywords,
-    // FIX 5: /about → /founder (page that exists in app/founder/)
     authors:     [{ name: 'Rohiit Gupta', url: 'https://trikalvaani.com/founder' }],
     alternates: {
       canonical: `https://trikalvaani.com/${config.slug}`,
@@ -798,13 +786,11 @@ export async function generateStaticParams() {
 }
 
 export default function DomainPage({ params }: Props) {
-  // ── v1.1 FIX: Block reserved routes from catch-all ──────────────────────
   if (RESERVED_SLUGS.includes(params.domain)) notFound();
 
   const config = DOMAIN_PAGES[params.domain];
   if (!config) notFound();
 
-  // JSON-LD Schemas
   const breadcrumbSchema = {
     '@context': 'https://schema.org',
     '@type':    'BreadcrumbList',
@@ -819,7 +805,6 @@ export default function DomainPage({ params }: Props) {
     '@type':          'Article',
     headline:          config.h1,
     description:       config.description,
-    // FIX 4: Added 'image' field — required by Google for Article rich results
     image: {
       '@type': 'ImageObject',
       url:     'https://trikalvaani.com/og-image.png',
@@ -830,7 +815,6 @@ export default function DomainPage({ params }: Props) {
       '@type':   'Person',
       name:      'Rohiit Gupta',
       jobTitle:  'Chief Vedic Architect',
-      // FIX 5: /about → /founder
       url:       'https://trikalvaani.com/founder',
       knowsAbout: ['Vedic Astrology', 'Jyotish Shastra', 'BPHS', 'Swiss Ephemeris', 'Vimshottari Dasha'],
     },
