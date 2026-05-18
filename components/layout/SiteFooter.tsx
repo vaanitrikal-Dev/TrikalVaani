@@ -87,7 +87,7 @@ export default function SiteFooter() {
                 style={{ border: `2px solid ${GOLD_RGBA(0.5)}`, boxShadow: `0 0 16px ${GOLD_RGBA(0.3)}` }}
               >
                 <Image
-                  src="/images/Rohiit_Gupta.jpg"
+                  src="/Rohiit-Gupta.jpg"
                   alt="Rohiit Gupta"
                   fill
                   className="object-cover object-top"
