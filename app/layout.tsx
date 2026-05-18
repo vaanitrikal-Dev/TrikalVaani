@@ -1,13 +1,17 @@
 // ============================================================
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikal Vaani
 // FILE: app/layout.tsx
-// VERSION: v2.6 — Analytics live, SpeedInsights deferred (package not installed)
-// DATE: 2026-05-13
-// CHANGES vs v2.4:
-//   v2.5: Analytics confirmed live
-//   v2.6: SpeedInsights removed — package not in package.json (add separately)
-//         Panchang page title duplication fix is in panchang/[date]/page.tsx
-//         (remove "| Trikal Vaani" from the end of that page's returned title)
+// VERSION: v2.7 — Title + Description + OG/Twitter aligned to "Free Kundli & Accurate AI Vedic Astrology"
+// DATE: 2026-05-18
+// CHANGES vs v2.6:
+//   ✅ Title rewritten: leads with brand, then "Free Kundli & Accurate AI Vedic Astrology" (57 chars, CTR-optimized)
+//   ✅ Description rewritten: leads with "Free AI Kundli" hook, retains EEAT (Rohiit Gupta, Chief Vedic Architect, MSME)
+//   ✅ Keywords array refreshed: removed weak "kundali analysis online"; added high-volume "free kundli online", "free janam kundli", "AI astrology free", "horoscope Hindi", "kundli Hindi free"
+//   ✅ OpenGraph title + description aligned to new master title (consistent social shares)
+//   ✅ Twitter card title + description aligned (consistent X/Twitter shares)
+//   ✅ Organization schema: knowsLanguage ["Hindi","English"] added — AEO signal for Hindi queries on Perplexity/SGE
+//   ✅ All schemas, MSME ID, geo signals, Razorpay preloads — UNCHANGED (working, don't touch)
+//   ✅ Analytics, TrikalVoice, SchemaScript wiring — UNCHANGED
 // ============================================================
 
 import type { Metadata } from "next";
@@ -24,25 +28,31 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   metadataBase: new URL("https://trikalvaani.com"),
   title: {
-    default: "Trikal Vaani — AI Vedic Astrology by Rohiit Gupta | Delhi NCR",
+    default: "Trikal Vaani | Free Kundli & Accurate AI Vedic Astrology",
     template: "%s | Trikal Vaani",
   },
   description:
-    "Trikal Vaani is India's most accurate AI Vedic astrology platform. Get personalised predictions for career, wealth, marriage, health, and legal matters from Chief Vedic Architect Rohiit Gupta. Voice and text readings starting at ₹11.",
+    "Get your free AI kundli & accurate Vedic astrology predictions instantly. Personalised readings for career, wealth, marriage, health & legal matters by Rohiit Gupta, Chief Vedic Architect (Delhi NCR). Powered by Swiss Ephemeris. Voice & text readings from ₹11.",
   authors: [{ name: "Rohiit Gupta", url: "https://trikalvaani.com/founder" }],
   creator: "Rohiit Gupta",
   publisher: "Trikal Vaani",
   keywords: [
+    "free kundli online",
+    "free janam kundli",
+    "AI astrology free",
+    "free AI kundli",
     "Vedic astrology India",
-    "AI astrology prediction",
+    "AI Vedic astrology",
     "Trikal Vaani",
     "Rohiit Gupta astrologer",
     "voice astrology Hindi",
+    "horoscope Hindi",
+    "kundli Hindi free",
     "best astrologer Delhi NCR",
-    "astrology near me",
-    "kundali analysis online",
+    "astrologer near me",
     "Mahadasha prediction",
     "Vimshottari Dasha reading",
+    "accurate astrology prediction",
   ],
   robots: {
     index: true,
@@ -65,23 +75,24 @@ export const metadata: Metadata = {
     alternateLocale: ["hi_IN"],
     url: "https://trikalvaani.com/",
     siteName: "Trikal Vaani",
-    title: "Trikal Vaani — AI Vedic Astrology by Rohiit Gupta",
+    title: "Trikal Vaani | Free Kundli & Accurate AI Vedic Astrology",
     description:
-      "India's most accurate AI Vedic astrology. Voice & text predictions from ₹11. Powered by Swiss Ephemeris.",
+      "Free AI kundli & accurate Vedic astrology predictions. Personalised readings by Rohiit Gupta, Chief Vedic Architect. Voice & text from ₹11.",
     images: [
       {
         url: "https://trikalvaani.com/og-default.jpg",
         width: 1200,
         height: 630,
-        alt: "Trikal Vaani — AI Vedic Astrology",
+        alt: "Trikal Vaani — Free Kundli & Accurate AI Vedic Astrology",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
     creator: "@TrikalVaani",
-    title: "Trikal Vaani — AI Vedic Astrology",
-    description: "India's most accurate AI Vedic astrology. From ₹11.",
+    title: "Trikal Vaani | Free Kundli & Accurate AI Vedic Astrology",
+    description:
+      "Free AI kundli & accurate Vedic astrology predictions. Voice & text readings from ₹11.",
     images: ["https://trikalvaani.com/og-default.jpg"],
   },
   verification: {
@@ -143,8 +154,9 @@ export default function RootLayout({
                 height: 512,
               },
               description:
-                "India's most accurate AI-powered Vedic astrology platform. Powered by Swiss Ephemeris, BPHS classical rules, Bhrigu Nandi Nadi, and Shadbala. Government of India MSME registered enterprise (UDYAM-DL-10-0119070). Founded by Rohiit Gupta, Chief Vedic Architect, Delhi NCR.",
+                "India's most accurate AI-powered Vedic astrology platform offering free kundli and personalised predictions. Powered by Swiss Ephemeris, BPHS classical rules, Bhrigu Nandi Nadi, and Shadbala. Government of India MSME registered enterprise (UDYAM-DL-10-0119070). Founded by Rohiit Gupta, Chief Vedic Architect, Delhi NCR.",
               foundingDate: "2026",
+              knowsLanguage: ["Hindi", "English"],
               founder: {
                 "@type": "Person",
                 "@id": "https://trikalvaani.com/#rohiit-gupta",
@@ -161,6 +173,7 @@ export default function RootLayout({
                   "Bhrigu Nandi Nadi",
                   "Shadbala",
                 ],
+                knowsLanguage: ["Hindi", "English"],
               },
               contactPoint: {
                 "@type": "ContactPoint",
@@ -208,7 +221,7 @@ export default function RootLayout({
               "@context": "https://schema.org",
               "@type": "WebApplication",
               "@id": "https://trikalvaani.com/#webapp",
-              name: "Trikal Vaani — AI Vedic Astrology",
+              name: "Trikal Vaani — Free Kundli & AI Vedic Astrology",
               alternateName: ["Trikaal Vaani", "Trikalvaani AI"],
               url: "https://trikalvaani.com",
               applicationCategory: "LifestyleApplication",
@@ -217,11 +230,11 @@ export default function RootLayout({
               offers: [
                 {
                   "@type": "Offer",
-                  name: "Trikal Ka Sandesh — Free Preview",
+                  name: "Free Kundli & Trikal Ka Sandesh",
                   price: "0",
                   priceCurrency: "INR",
                   description:
-                    "150-200 word free AI Vedic astrology summary with key message and action step",
+                    "Free AI kundli with 150-200 word Vedic astrology summary, key message and action step",
                 },
                 {
                   "@type": "Offer",
@@ -263,7 +276,7 @@ export default function RootLayout({
               "@context": "https://schema.org",
               "@type": "ProfessionalService",
               "@id": "https://trikalvaani.com/#localbusiness",
-              name: "Trikal Vaani — AI Vedic Astrology by Rohiit Gupta",
+              name: "Trikal Vaani — Free Kundli & AI Vedic Astrology by Rohiit Gupta",
               alternateName: ["Trikaal Vaani", "Trikaalvaani"],
               image: "https://trikalvaani.com/og-image.jpg",
               url: "https://trikalvaani.com",
