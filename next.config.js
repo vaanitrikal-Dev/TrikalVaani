@@ -3,7 +3,7 @@
  * 🔱 TRIKAL VAANI — CEO PROTECTION HEADER 🔱
  * ============================================================================
  * File:        next.config.js
- * Version:     v1.1 — 301 redirect added for /upcoming-events → /panchang
+ * Version:     v1.1.1 — 301 redirect added for /upcoming-events → /panchang
  * Date:        2026-05-18
  * Owner:       Rohiit Gupta, Chief Vedic Architect
  *
