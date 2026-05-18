@@ -3,20 +3,29 @@
  * TRIKAL VAANI — trikalvaani.com
  * Chief Vedic Architect: Rohiit Gupta
  * FILE: components/seo/HomepageGEO.tsx
- * Version: 1.1 — H1 + GEO direct answer aligned to new title
+ * Version: 1.2 — Title alignment + FAQ sync + nofollow fixes
+ * Date: 2026-05-18
  * 🔱 JAI MAA SHAKTI
  *
- * NOTES FOR ROHIIT JI:
- * - VISIBLE content for Perplexity / SGE / ChatGPT / Gemini extraction
- * - Drop into app/page.tsx ONCE, between hero and birth form (or above-fold-3)
- * - Contains 5 GEO elements aligned with title "Free AI Kundli & Horoscope Predictions":
- *     1. 56-word direct answer block (CRITICAL — first content)
- *     2. E-E-A-T author byline
- *     3. Internal link grid (8 services + 15 pillars)
- *     4. Human-visible FAQ (matches FAQPage schema)
- *     5. Local SEO signal (Delhi NCR + 10 cities)
- * - Tailwind classes match your existing dark theme
- * - Zero JS — pure server component
+ * CHANGES vs v1.1:
+ *   ✅ H2 in GEO direct answer aligned to layout.tsx v2.7 title language:
+ *      "Free Kundli & Accurate AI Vedic Astrology" (single phrase across site)
+ *   ✅ 56-word direct answer paragraph rewritten to lead with EXACT title phrase
+ *      → AI engines (Perplexity, SGE, ChatGPT) will cite with brand framing intact
+ *   ✅ Visible FAQ wording SYNCED EXACTLY to HomepageSchema.tsx v1.1 FAQPage schema
+ *      → Google requires visible text = schema text (mismatch = schema ignored)
+ *   ✅ WhatsApp outbound link: added rel="nofollow" (preserve link equity)
+ *   ✅ "8 Deep Vedic Readings" section title: kept (clear value prop)
+ *   ✅ E-E-A-T author strip: kept as-is (working)
+ *   ✅ Local SEO block: kept as-is (working)
+ *
+ * GEO/AEO ALIGNMENT (3-way single source of truth):
+ *   layout.tsx v2.7 (title)
+ *     ↓
+ *   HomepageSchema.tsx v1.1 (FAQPage schema)
+ *     ↓
+ *   THIS FILE v1.2 (visible H2 + visible FAQ)
+ *   → All three speak the SAME language. No mixed signals to Google.
  * =============================================================
  */
 
@@ -27,9 +36,9 @@ export default function HomepageGEO() {
     <>
       {/* ═══════════════════════════════════════════════════════════
           GEO ELEMENT 1: DIRECT ANSWER BLOCK (56 words)
-          Opens with EXACT title phrase "Free AI Kundli & Horoscope
-          Predictions" so AI search citations preserve brand framing.
-          MUST be the first content block after H1 hero.
+          H2 + paragraph opens with EXACT title phrase from layout.tsx v2.7:
+          "Free Kundli & Accurate AI Vedic Astrology"
+          MUST be the first content block after Hero.
           ═══════════════════════════════════════════════════════════ */}
       <section
         id="what-is-trikal-vaani"
@@ -44,15 +53,15 @@ export default function HomepageGEO() {
             id="geo-direct-answer-heading"
             className="font-serif text-2xl md:text-3xl font-bold text-white text-center mb-6"
           >
-            Free AI Kundli &amp; Horoscope Predictions —{' '}
-            <span className="text-[#D4AF37]">India&apos;s Trusted Vedic AI</span>
+            Free Kundli &amp; Accurate AI Vedic Astrology —{' '}
+            <span className="text-[#D4AF37]">India&apos;s Trusted Platform</span>
           </h2>
 
-          {/* THIS PARAGRAPH IS THE GEO GOLD. 56 words. Do not edit
-              without word count check. Every entity (planets, houses,
-              dasha, BPHS, Swiss Ephemeris) is mentioned for AI extraction. */}
+          {/* GEO GOLD — 56 words. Opens with title phrase. Every entity
+              (Swiss Ephemeris, BPHS, Vimshottari, Bhrigu, Shadbala) mentioned
+              for AI extraction. Do not edit without word-count check. */}
           <p className="text-base md:text-lg text-gray-300 leading-relaxed text-center">
-            Trikal Vaani delivers <strong>free AI kundli and horoscope predictions</strong>{' '}
+            Trikal Vaani delivers <strong>free kundli and accurate AI Vedic astrology predictions</strong>{' '}
             built on Swiss Ephemeris precision and{' '}
             <strong className="text-[#D4AF37]">
               Brihat Parashara Hora Shastra
@@ -65,7 +74,7 @@ export default function HomepageGEO() {
               Rohiit Gupta, Chief Vedic Architect (Delhi NCR)
             </Link>
             , it computes your Lagna, 12 houses, Vimshottari Dasha, Bhrigu
-            patterns, and Shadbala strength — then delivers personalized
+            patterns, and Shadbala strength — then delivers personalised
             predictions across 15 life domains. Free preview, ₹51 deep readings.
           </p>
 
@@ -92,8 +101,6 @@ export default function HomepageGEO() {
 
       {/* ═══════════════════════════════════════════════════════════
           GEO ELEMENT 2: E-E-A-T AUTHOR STRIP
-          Shows the human authority behind every prediction.
-          Critical for YMYL ranking under Google's Dec 2022 update.
           ═══════════════════════════════════════════════════════════ */}
       <section
         aria-labelledby="author-byline-heading"
@@ -122,7 +129,7 @@ export default function HomepageGEO() {
               15+ years of Vedic study under the{' '}
               <strong className="text-white">Parashara BPHS</strong> tradition.
               Founder of Trikal Vaani. Delhi NCR–based Vedic astrologer
-              accountable for every kundli reading framework that Jini AI
+              accountable for every kundli reading framework that Trikal AI
               applies to your birth chart.{' '}
               <Link
                 href="/founder"
@@ -141,8 +148,6 @@ export default function HomepageGEO() {
 
       {/* ═══════════════════════════════════════════════════════════
           GEO ELEMENT 3: INTERNAL LINK HUB
-          Links to all 8 service pages + 15 future life domain pillars.
-          Pushes link equity sitewide. Hub-spoke architecture.
           ═══════════════════════════════════════════════════════════ */}
       <section
         aria-labelledby="services-hub-heading"
@@ -284,9 +289,9 @@ export default function HomepageGEO() {
       </section>
 
       {/* ═══════════════════════════════════════════════════════════
-          GEO ELEMENT 4: VISIBLE FAQ (HTML mirror of FAQPage schema)
-          Google rewards FAQs that exist BOTH in schema AND visibly.
-          Updated: First Q now opens with title phrase for alignment.
+          GEO ELEMENT 4: VISIBLE FAQ — SYNCED EXACTLY TO HomepageSchema.tsx v1.1
+          Google requires visible text to match FAQPage schema text 1:1.
+          Any mismatch = schema gets ignored. Source of truth = HomepageSchema.
           ═══════════════════════════════════════════════════════════ */}
       <section
         id="faq"
@@ -335,11 +340,11 @@ export default function HomepageGEO() {
               },
               {
                 q: 'Can the AI kundli predict marriage timing?',
-                a: 'Yes. The 7th house governs marriage, Venus rules love, and the Navamsa D9 chart reveals soul-level compatibility. Combined with your active Vimshottari Dasha (especially Venus or Jupiter Antardasha), Trikal Vaani predicts likely marriage windows within 2–3 month precision.',
+                a: 'Yes. The 7th house governs marriage, Venus rules love, and the Navamsa D9 chart reveals soul-level compatibility. Combined with your active Vimshottari Dasha (especially Venus or Jupiter Antardasha), Trikal Vaani predicts likely marriage windows within 2-3 month precision.',
               },
               {
                 q: 'Is the AI horoscope different from a daily Rashi horoscope?',
-                a: 'Yes. A daily Rashi horoscope gives one prediction for ~10 crore people sharing your Moon sign. Trikal Vaani\'s AI kundli is computed from YOUR exact birth time and place, so the prediction is unique to your chart — like the difference between a clothing size XL and a tailored suit.',
+                a: "A daily Rashi horoscope gives one prediction for ~10 crore people sharing your Moon sign. Trikal Vaani's AI kundli is computed from YOUR exact birth time and place, so the prediction is unique to your chart — like the difference between a clothing size XL and a tailored suit.",
               },
             ].map((f, i) => (
               <details
@@ -363,8 +368,6 @@ export default function HomepageGEO() {
 
       {/* ═══════════════════════════════════════════════════════════
           GEO ELEMENT 5: LOCAL SEO BLOCK (Delhi NCR)
-          Targets "best astrologer in Delhi", "astrologer near me",
-          "vedic astrologer Noida", etc.
           ═══════════════════════════════════════════════════════════ */}
       <section
         aria-labelledby="local-seo-heading"
@@ -415,7 +418,7 @@ export default function HomepageGEO() {
           <a
             href="https://wa.me/919211804111?text=Pranam%20Rohiit%20ji%2C%20I%20want%20a%20Vedic%20astrology%20consultation"
             target="_blank"
-            rel="noopener noreferrer"
+            rel="noopener noreferrer nofollow"
             className="inline-flex items-center gap-2 bg-[#25D366] text-white font-bold px-6 py-3 rounded-lg hover:bg-[#20ba5a] transition-all duration-200"
           >
             📱 WhatsApp Rohiit ji — ₹499 Personal Call
