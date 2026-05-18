@@ -3,51 +3,25 @@
  * 🔱 TRIKAL VAANI — CEO PROTECTION HEADER 🔱
  * ============================================================================
  * File:        components/HomeFAQ.tsx
- * Version:     v2.0 — DEEP FAQ LAYER (2-tier funnel architecture)
+ * Version:     v2.1 — Broken calculator URL fix
  * Date:        2026-05-18
  * Owner:       Rohiit Gupta, Chief Vedic Architect
- * Domain:      trikalvaani.com
  *
- * CHANGES vs v1.0:
- *   ❌ REMOVED 3 duplicate Qs (covered by HomepageGEO FAQ):
- *       - "Accuracy vs AstroSage/AstroTalk"
- *       - "Who is Rohiit Gupta"
- *       - "Vedic vs Western astrology"
- *   ✅ KEPT 5 unique high-value Qs:
- *       - Pratyantar Dasha (technical AEO authority)
- *       - Hindi readings (Hindi searcher conversion)
- *       - Best astrologer Delhi NCR (local SEO)
- *       - Dhana Yoga (technical authority)
- *       - 15 life domains (internal link bait)
- *   ✅ ADDED 5 NEW high-volume search questions:
- *       - Sade Sati (~500K monthly searches)
- *       - Manglik Dosha (~300K monthly searches)
- *       - Career growth prediction (commercial intent)
- *       - Kundli vs Horoscope definition (AEO gold)
- *       - How AI improves Vedic predictions (brand moat)
- *   ✅ DARK THEME: Converted from light slate → #080B12 with gold accents
- *      (matches site design system)
- *   ✅ SEPARATE FAQPage SCHEMA: @id = "#homefaq-deep"
- *      (no collision with HomepageSchema #faq)
- *   ✅ EEAT TIMESTAMP: "Last reviewed by Rohiit Gupta · May 2026"
- *   ✅ ROLE: Two-tier FAQ funnel
- *       Tier 1 = HomepageGEO FAQ (beginner / top-of-funnel)
- *       Tier 2 = THIS FILE (technical depth / mid-funnel conversion)
+ * CHANGES vs v2.0:
+ *   ✅ FIXED: Sade Sati link
+ *      OLD: /free-sade-sati-calculator (404 - broken)
+ *      NEW: /calculators/free-sade-sati-calculator (live)
+ *   ✅ FIXED: Manglik Dosha link
+ *      OLD: /free-manglik-dosh-calculator (404 - broken)
+ *      NEW: /calculators/free-manglik-dosh-calculator (live)
  *
- * SCHEMA STRATEGY:
- *   Each FAQ has its own @id to prevent collision with HomepageSchema FAQ.
- *   Both schemas can coexist — Google accepts multiple FAQPage entities
- *   as long as @id values are unique.
+ * ALL OTHER CONTENT IDENTICAL TO v2.0
  * ============================================================================
  */
 
 import Link from "next/link";
 import Script from "next/script";
 
-// ─────────────────────────────────────────────────────────────
-// 10 DEEP FAQs — picked for SEO authority + commercial intent
-// Order matters: most-searched first (AI engines weight top items)
-// ─────────────────────────────────────────────────────────────
 const FAQS = [
   {
     id: 1,
@@ -65,7 +39,7 @@ const FAQS = [
         Ephemeris precision, plus prescribes Shani-specific remedies (Saturday
         vrat, Hanuman Chalisa, blue sapphire considerations).{" "}
         <Link
-          href="/free-sade-sati-calculator"
+          href="/calculators/free-sade-sati-calculator"
           className="text-[#D4AF37] underline hover:text-[#e8c84a]"
         >
           Check your Sade Sati status →
@@ -88,7 +62,7 @@ const FAQS = [
         certain ages (after 28) reduce its impact. Trikal Vaani performs full
         Manglik analysis with classical BPHS cancellation rules.{" "}
         <Link
-          href="/free-manglik-dosh-calculator"
+          href="/calculators/free-manglik-dosh-calculator"
           className="text-[#D4AF37] underline hover:text-[#e8c84a]"
         >
           Free Manglik Dosha check →
@@ -262,9 +236,6 @@ const FAQS = [
   },
 ];
 
-// ─────────────────────────────────────────────────────────────
-// JSON-LD FAQPage Schema (unique @id to avoid collision)
-// ─────────────────────────────────────────────────────────────
 const deepFaqSchema = {
   "@context": "https://schema.org",
   "@type": "FAQPage",
@@ -290,7 +261,6 @@ const deepFaqSchema = {
 export default function HomeFAQ() {
   return (
     <>
-      {/* ── JSON-LD FAQPage Schema (separate @id from HomepageSchema) ── */}
       <Script
         id="schema-homefaq-deep"
         type="application/ld+json"
@@ -303,7 +273,6 @@ export default function HomeFAQ() {
         aria-labelledby="deep-faq-heading"
       >
         <div className="mx-auto max-w-4xl">
-          {/* Section header */}
           <div className="text-center">
             <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-[#D4AF37]">
               Deeper Vedic Questions
@@ -322,7 +291,6 @@ export default function HomeFAQ() {
             </p>
           </div>
 
-          {/* GEO direct-answer block — 50 words, AI extraction optimized */}
           <div className="mx-auto mt-10 max-w-3xl rounded-2xl border border-[#D4AF37]/30 bg-[#D4AF37]/5 p-6 md:p-7">
             <p className="mb-2 text-xs font-bold uppercase tracking-widest text-[#D4AF37]">
               Quick Answer
@@ -337,7 +305,6 @@ export default function HomeFAQ() {
             </p>
           </div>
 
-          {/* FAQ accordion list */}
           <dl className="mt-12 space-y-3">
             {FAQS.map((item) => (
               <details
@@ -362,7 +329,6 @@ export default function HomeFAQ() {
             ))}
           </dl>
 
-          {/* EEAT TIMESTAMP — Last reviewed by named author */}
           <p className="mt-8 text-center text-xs text-gray-500">
             Last reviewed by{" "}
             <Link
@@ -374,7 +340,6 @@ export default function HomeFAQ() {
             · May 2026 · Based on Brihat Parashara Hora Shastra (BPHS)
           </p>
 
-          {/* Conversion CTA */}
           <div className="mt-12 rounded-2xl bg-[#0D1020] border border-[#D4AF37]/20 p-8 text-center md:p-10">
             <h3 className="font-serif text-2xl font-bold text-white md:text-3xl">
               Still have a question?
@@ -405,8 +370,3 @@ export default function HomeFAQ() {
     </>
   );
 }
-
-// ============================================================================
-// END — components/HomeFAQ.tsx v2.0
-// 🔱 Trikal Vaani | Rohiit Gupta, Chief Vedic Architect
-// ============================================================================
