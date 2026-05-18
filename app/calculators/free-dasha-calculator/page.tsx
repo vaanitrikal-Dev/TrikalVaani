@@ -2,8 +2,9 @@
 
 // ============================================================
 // File: app/calculators/free-dasha-calculator/page.tsx
-// Version: v2.0 — BirthForm v9.2 style + /api/maps-proxy
-// Engine: Swiss Ephemeris + Parashar BPHS + Shadbala + Bhrigu
+// Version: v3.0 — Fixed VM response paths
+// VM structure: dasha.maha_dasha[].planet, .start, .end, .antar[]
+// Current detection: date comparison (is_current always false in VM)
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikal Vaani
 // ============================================================
 
@@ -32,14 +33,6 @@ interface FormData {
   latitude: number | null;
   longitude: number | null;
   timezone: number;
-}
-
-interface ApiResult {
-  success: boolean;
-  sessionId: string;
-  instant: any;
-  kundali: any;
-  template: any;
 }
 
 // ─── Google Maps via /api/maps-proxy (BirthForm v9.2 pattern) ──────────
@@ -74,16 +67,14 @@ async function fetchPlaceSuggestions(query: string): Promise<PlaceSuggestion[]> 
 async function fetchPlaceDetails(placeId: string): Promise<{ lat: number; lng: number; city: string } | null> {
   if (!placeId) return null;
   try {
-    const fields = 'location,displayName';
-    const url = `https://places.googleapis.com/v1/places/${placeId}?fields=${fields}`;
+    const url = `https://places.googleapis.com/v1/places/${placeId}?fields=location,displayName`;
     const res = await fetch(`/api/maps-proxy?url=${encodeURIComponent(url)}`);
     if (!res.ok) return null;
     const data = await res.json();
     const lat = data.location?.latitude ?? null;
     const lng = data.location?.longitude ?? null;
-    const city = data.displayName?.text ?? '';
     if (lat === null || lng === null) return null;
-    return { lat, lng, city };
+    return { lat, lng, city: data.displayName?.text ?? '' };
   } catch { return null; }
 }
 
@@ -95,18 +86,65 @@ async function fetchTimezone(lat: number, lng: number): Promise<number> {
     if (!res.ok) return 5.5;
     const data = await res.json();
     if (data.status !== 'OK') return 5.5;
-    const totalOffset = (data.rawOffset + data.dstOffset) / 3600;
-    return Math.round(totalOffset * 4) / 4;
+    return Math.round(((data.rawOffset + data.dstOffset) / 3600) * 4) / 4;
   } catch { return 5.5; }
 }
 
-// ─── CityInput Component (BirthForm v9.2 style) ────────────────────────
-function CityInput({
-  id, label, required, value, onSelect, error, placeholder,
-}: {
-  id: string; label?: string; required?: boolean; value: string;
+// ─── Find current Mahadasha by date comparison ──────────────────────────
+function findCurrentMahadasha(mahaList: any[]): { current: any; antardasha: any; nextFive: any[] } {
+  if (!Array.isArray(mahaList) || mahaList.length === 0) {
+    return { current: null, antardasha: null, nextFive: [] };
+  }
+  const today = new Date();
+  let currentIdx = -1;
+
+  for (let i = 0; i < mahaList.length; i++) {
+    const start = new Date(mahaList[i].start);
+    const end = new Date(mahaList[i].end);
+    if (today >= start && today <= end) {
+      currentIdx = i;
+      break;
+    }
+  }
+
+  // Fallback: last item if nothing found
+  if (currentIdx === -1) currentIdx = mahaList.length - 1;
+
+  const current = mahaList[currentIdx];
+
+  // Find current Antardasha inside current Mahadasha
+  const antarList = current?.antar ?? [];
+  let antardasha = null;
+  for (const a of antarList) {
+    const aStart = new Date(a.start);
+    const aEnd = new Date(a.end);
+    if (today >= aStart && today <= aEnd) {
+      antardasha = a;
+      break;
+    }
+  }
+  if (!antardasha && antarList.length > 0) antardasha = antarList[0];
+
+  // Next 5 Mahadashas after current
+  const nextFive = mahaList.slice(currentIdx + 1, currentIdx + 6);
+
+  return { current, antardasha, nextFive };
+}
+
+function formatDate(d: any): string {
+  if (!d) return '';
+  try {
+    const dt = new Date(d);
+    if (!isNaN(dt.getTime())) return dt.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+  } catch { }
+  return String(d);
+}
+
+// ─── CityInput Component ────────────────────────────────────────────────
+function CityInput({ id, value, onSelect, error }: {
+  id: string; value: string;
   onSelect: (city: string, lat: number, lng: number, timezone: number) => void;
-  error?: string; placeholder?: string;
+  error?: string;
 }) {
   const [query, setQuery] = useState(value);
   const [suggestions, setSuggestions] = useState<PlaceSuggestion[]>([]);
@@ -117,23 +155,18 @@ function CityInput({
   useEffect(() => { setQuery(value); }, [value]);
 
   const handleChange = (val: string) => {
-    setQuery(val);
-    setSelected(false);
+    setQuery(val); setSelected(false);
     if (debounceRef.current) clearTimeout(debounceRef.current);
     if (val.length < 3) { setSuggestions([]); return; }
     debounceRef.current = setTimeout(async () => {
       setLoading(true);
-      const results = await fetchPlaceSuggestions(val);
-      setSuggestions(results);
+      setSuggestions(await fetchPlaceSuggestions(val));
       setLoading(false);
     }, 400);
   };
 
   const handleSelect = async (s: PlaceSuggestion) => {
-    setQuery(s.main_text);
-    setSuggestions([]);
-    setSelected(true);
-    setLoading(true);
+    setQuery(s.main_text); setSuggestions([]); setSelected(true); setLoading(true);
     const details = await fetchPlaceDetails(s.place_id);
     if (details) {
       const tz = await fetchTimezone(details.lat, details.lng);
@@ -144,16 +177,10 @@ function CityInput({
 
   return (
     <div className="relative">
-      {label && (
-        <label htmlFor={id} className="block text-sm font-medium text-slate-300 mb-1.5">
-          {label} {required && <span className="text-yellow-400">*</span>}
-        </label>
-      )}
       <div className="relative">
         <input id={id} type="search" autoComplete="off"
-          placeholder={placeholder ?? 'Type city name...'}
-          value={query}
-          onChange={e => handleChange(e.target.value)}
+          placeholder="Type city of birth..."
+          value={query} onChange={e => handleChange(e.target.value)}
           className="w-full px-4 py-2.5 rounded-lg text-sm outline-none pr-10"
           style={{ background: '#0d1120', border: `1px solid ${error ? '#ef4444' : 'rgba(255,255,255,0.1)'}`, color: '#e2e8f0', colorScheme: 'dark' }} />
         <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs">
@@ -164,8 +191,7 @@ function CityInput({
         <ul className="absolute z-50 w-full mt-1 rounded-lg overflow-hidden shadow-xl"
           style={{ background: '#0d1120', border: '1px solid rgba(212,175,55,0.2)', maxHeight: '200px', overflowY: 'auto' }}>
           {suggestions.map((s, i) => (
-            <li key={i} onClick={() => handleSelect(s)}
-              className="px-4 py-3 text-sm cursor-pointer"
+            <li key={i} onClick={() => handleSelect(s)} className="px-4 py-3 text-sm cursor-pointer"
               style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}
               onMouseEnter={e => (e.currentTarget.style.background = GOLD_RGBA(0.08))}
               onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
@@ -180,11 +206,10 @@ function CityInput({
   );
 }
 
-const FAQS_DISPLAY = [
+const FAQS = [
   { q: 'Dasha calculator kya hai?', a: 'Dasha calculator aapki janm kundali ke aadhar par Vimshottari Dasha system se aapke jeevan ke grah-periods calculate karta hai. Swiss Ephemeris engine se current Mahadasha, Antardasha, aur 120 saal ka full dasha cycle exact dates ke saath milta hai.' },
   { q: 'Vimshottari Dasha kya hai?', a: 'Vimshottari Dasha Maharishi Parashar dwara BPHS Chapter 46-49 mein varnit 120 saal ka grah-period cycle hai. 9 grah baari-baari rule karte hain — Surya 6, Chandra 10, Mangal 7, Rahu 18, Guru 16, Shani 19, Budh 17, Ketu 7, Shukra 20 saal.' },
   { q: 'Mahadasha aur Antardasha mein kya antar hai?', a: 'Mahadasha bada grah-period (jaise Shani 19 saal). Antardasha (Bhukti) Mahadasha ke andar ka sub-period. Har Mahadasha mein 9 Antardashas hoti hain. Combined prediction inhi se hoti hai.' },
-  { q: 'Apni current Dasha kaise pata karein?', a: 'Date of Birth, exact Time of Birth, aur Place of Birth daalo. Calculator 5 second mein current Mahadasha, Antardasha, aur next 5 dasha periods deta hai.' },
   { q: 'Kya Dasha calculator bilkul free hai?', a: 'Haan. 100% free. Current Mahadasha + Antardasha, next 5 Mahadasha timeline, 3 Parashar Dos, 3 Donts, aur 3 remedies (Mantra, Ratna, Daan) — sab free.' },
   { q: 'Dasha ke result kitne accurate hain?', a: 'Swiss Ephemeris (NASA-grade) + Lahiri Ayanamsha + BPHS classical formulas — 99.9% astronomical accuracy.' },
 ];
@@ -195,14 +220,14 @@ export default function FreeDashaCalculatorPage() {
     placeQuery: '', city: '', latitude: null, longitude: null, timezone: 5.5,
   });
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<ApiResult | null>(null);
+  const [result, setResult] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
-  const [errors, setErrors] = useState<Partial<Record<string, string>>>({});
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const resultRef = useRef<HTMLDivElement>(null);
 
   const set = useCallback((key: keyof FormData, value: any) => {
     setForm(prev => ({ ...prev, [key]: value }));
-    setErrors(prev => ({ ...prev, [key]: undefined }));
+    setErrors(prev => { const n = { ...prev }; delete n[key]; return n; });
   }, []);
 
   const validate = () => {
@@ -218,11 +243,9 @@ export default function FreeDashaCalculatorPage() {
   const handleSubmit = async () => {
     setError(null);
     if (!validate()) return;
-
     const [year, month, day] = form.date.split('-').map(Number);
     const tob = form.unknownTime ? '12:00' : form.time;
     const [hour, minute] = tob.split(':').map(Number);
-
     setLoading(true);
     try {
       const res = await fetch('/api/calc/kundali', {
@@ -230,18 +253,15 @@ export default function FreeDashaCalculatorPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           year, month, day, hour, minute,
-          latitude: form.latitude,
-          longitude: form.longitude,
-          timezone: form.timezone,
-          name: form.name || null,
-          gender: form.gender || null,
+          latitude: form.latitude, longitude: form.longitude, timezone: form.timezone,
+          name: form.name || null, gender: form.gender || null,
         }),
       });
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
         throw new Error(err.error || 'Server error');
       }
-      const data: ApiResult = await res.json();
+      const data = await res.json();
       setResult(data);
       setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
     } catch (e: any) {
@@ -251,27 +271,13 @@ export default function FreeDashaCalculatorPage() {
     }
   };
 
-  // ─── Dasha extraction ────────────────────────────────────
-  const dashaObj = result?.kundali?.dasha;
-  const currentMahadasha = result?.instant?.current_dasha
-    || dashaObj?.current?.mahadasha?.lord || dashaObj?.current_mahadasha?.lord
-    || dashaObj?.mahadasha?.current?.lord || dashaObj?.mahadasha?.lord
-    || (Array.isArray(dashaObj?.mahadashas) && dashaObj.mahadashas.find((d: any) => d.active)?.lord) || null;
-  const currentAntardasha = result?.instant?.current_antardasha
-    || dashaObj?.current?.antardasha?.lord || dashaObj?.current_antardasha?.lord || null;
-  const mahaStart = dashaObj?.current?.mahadasha?.start || dashaObj?.current_mahadasha?.start || null;
-  const mahaEnd = dashaObj?.current?.mahadasha?.end || dashaObj?.current_mahadasha?.end || null;
-  const antarStart = dashaObj?.current?.antardasha?.start || dashaObj?.current_antardasha?.start || null;
-  const antarEnd = dashaObj?.current?.antardasha?.end || dashaObj?.current_antardasha?.end || null;
+  // ─── CORRECT Dasha extraction from VM response ──────────────────────
+  // VM structure: result.kundali.dasha.maha_dasha[] 
+  // Each item: { planet, start, end, years, is_current (always false), antar[] }
+  const mahaList: any[] = result?.kundali?.dasha?.maha_dasha ?? [];
+  const { current: currentMaha, antardasha: currentAntar, nextFive } = findCurrentMahadasha(mahaList);
 
-  const allMahadashas: any[] = dashaObj?.mahadashas || dashaObj?.sequence || dashaObj?.timeline || [];
-  let nextFive: any[] = [];
-  if (Array.isArray(allMahadashas) && allMahadashas.length > 0) {
-    const currentIdx = allMahadashas.findIndex((d: any) => d.active || d.lord === currentMahadasha);
-    if (currentIdx >= 0) nextFive = allMahadashas.slice(currentIdx + 1, currentIdx + 6);
-    else nextFive = allMahadashas.slice(0, 5);
-  }
-
+  // ─── Template data (Dos/Don'ts/Remedies) from route's /template call ─
   const template = result?.template;
   const dos: string[] = template?.dos || template?.do_list || template?.do || [];
   const donts: string[] = template?.donts || template?.dont_list || template?.dont || template?.donot || [];
@@ -293,7 +299,7 @@ export default function FreeDashaCalculatorPage() {
       <main className="min-h-screen pt-20 pb-16 px-4" style={{ background: '#080B12', color: '#E5E7EB' }}>
         <div className="max-w-4xl mx-auto">
 
-          <nav className="text-xs text-slate-500 mb-4" aria-label="Breadcrumb">
+          <nav className="text-xs text-slate-500 mb-4">
             <Link href="/" className="hover:text-slate-300">Home</Link>
             <span className="mx-2">›</span>
             <Link href="/calculators" className="hover:text-slate-300">Calculators</Link>
@@ -307,7 +313,7 @@ export default function FreeDashaCalculatorPage() {
 
           <div className="rounded-xl p-5 mb-6" style={{ background: 'rgba(212,175,55,0.06)', border: `1px solid rgba(212,175,55,0.2)` }}>
             <p className="text-base md:text-lg leading-relaxed">
-              <strong style={{ color: GOLD }}>Trikal Vaani ka Free Dasha Calculator</strong> aapki current Vimshottari Mahadasha aur Antardasha Swiss Ephemeris se calculate karta hai. Date of birth, time, aur place daalo — current dasha lord, next 5 mahadasha periods exact dates ke saath, Parashar Dos/Donts, aur 3 free remedies (Mantra, Ratna, Daan) turant milte hain. 100% free, BPHS classical rules ke according.
+              <strong style={{ color: GOLD }}>Trikal Vaani ka Free Dasha Calculator</strong> aapki current Vimshottari Mahadasha aur Antardasha Swiss Ephemeris se calculate karta hai. Date of birth, time, aur place daalo — current dasha lord, next 5 mahadasha periods exact dates ke saath, Parashar Dos/Donts, aur 3 free remedies turant milte hain. 100% free.
             </p>
           </div>
 
@@ -320,33 +326,27 @@ export default function FreeDashaCalculatorPage() {
             </div>
           </div>
 
-          {/* FORM — BirthForm v9.2 style */}
+          {/* FORM */}
           <div className="rounded-2xl p-6 sm:p-8" style={{ background: 'rgba(13,17,30,0.85)', border: '1px solid rgba(212,175,55,0.15)', backdropFilter: 'blur(12px)' }}>
             <h2 className="text-xl md:text-2xl font-serif font-bold mb-5" style={{ color: GOLD }}>Calculate Your Vimshottari Dasha (Free)</h2>
-
             <div className="grid gap-5">
-              {/* Name */}
               <div>
                 <label htmlFor="tv-name" className="block text-sm font-medium text-slate-300 mb-1.5">Full Name <span className="text-yellow-400">*</span></label>
                 <input id="tv-name" type="text" placeholder="Enter your full name"
                   value={form.name} onChange={e => set('name', e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-lg text-sm outline-none"
-                  style={inputStyle(!!errors.name)} />
+                  className="w-full px-4 py-2.5 rounded-lg text-sm outline-none" style={inputStyle(!!errors.name)} />
                 {errors.name && <p className="text-red-400 text-xs mt-1">{errors.name}</p>}
               </div>
 
-              {/* DOB */}
               <div>
                 <label htmlFor="tv-dob" className="block text-sm font-medium text-slate-300 mb-1.5">Date of Birth <span className="text-yellow-400">*</span></label>
                 <input id="tv-dob" type="date" value={form.date}
                   onChange={e => set('date', e.target.value)}
                   max={new Date().toISOString().split('T')[0]}
-                  className="w-full px-4 py-2.5 rounded-lg text-sm outline-none"
-                  style={inputStyle(!!errors.date)} />
+                  className="w-full px-4 py-2.5 rounded-lg text-sm outline-none" style={inputStyle(!!errors.date)} />
                 {errors.date && <p className="text-red-400 text-xs mt-1">{errors.date}</p>}
               </div>
 
-              {/* TOB */}
               <div>
                 <div className="flex items-center justify-between mb-1.5">
                   <label htmlFor="tv-tob" className="text-sm font-medium text-slate-300">
@@ -358,24 +358,16 @@ export default function FreeDashaCalculatorPage() {
                   </label>
                 </div>
                 <input id="tv-tob" type="time" value={form.time}
-                  onChange={e => set('time', e.target.value)}
-                  disabled={form.unknownTime}
+                  onChange={e => set('time', e.target.value)} disabled={form.unknownTime}
                   className="w-full px-4 py-2.5 rounded-lg text-sm outline-none"
                   style={{ ...inputStyle(!!errors.time), opacity: form.unknownTime ? 0.4 : 1 }} />
                 {form.unknownTime && <p className="text-slate-500 text-xs mt-1">Solar chart will be used (12:00 noon)</p>}
               </div>
 
-              {/* Gender */}
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">
-                  Gender <span className="text-slate-500 text-xs ml-1">(for personalized remedies)</span>
-                </label>
+                <label className="block text-sm font-medium text-slate-300 mb-2">Gender <span className="text-slate-500 text-xs ml-1">(for personalized remedies)</span></label>
                 <div className="grid grid-cols-3 gap-2">
-                  {[
-                    { value: 'male', label: '♂ Male', color: '#60a5fa' },
-                    { value: 'female', label: '♀ Female', color: '#f472b6' },
-                    { value: 'other', label: '⊕ Other', color: '#94a3b8' },
-                  ].map(opt => (
+                  {[{ value: 'male', label: '♂ Male', color: '#60a5fa' }, { value: 'female', label: '♀ Female', color: '#f472b6' }, { value: 'other', label: '⊕ Other', color: '#94a3b8' }].map(opt => (
                     <button key={opt.value} type="button" onClick={() => set('gender', opt.value)}
                       className="py-2.5 px-3 rounded-lg text-sm font-medium transition-all text-center"
                       style={{ background: form.gender === opt.value ? `${opt.color}20` : 'rgba(255,255,255,0.04)', border: `1px solid ${form.gender === opt.value ? `${opt.color}60` : 'rgba(255,255,255,0.1)'}`, color: form.gender === opt.value ? opt.color : '#64748b' }}>
@@ -385,24 +377,15 @@ export default function FreeDashaCalculatorPage() {
                 </div>
               </div>
 
-              {/* Place of Birth */}
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-1.5">
-                  Place of Birth <span className="text-yellow-400">*</span>
-                </label>
-                <CityInput
-                  id="tv-place"
-                  value={form.placeQuery}
-                  placeholder="Type city of birth..."
-                  error={errors.latitude}
+                <label className="block text-sm font-medium text-slate-300 mb-1.5">Place of Birth <span className="text-yellow-400">*</span></label>
+                <CityInput id="tv-place" value={form.placeQuery} error={errors.latitude}
                   onSelect={(city, lat, lng, tz) => {
                     setForm(prev => ({ ...prev, placeQuery: city, city, latitude: lat, longitude: lng, timezone: tz }));
-                    setErrors(prev => ({ ...prev, latitude: undefined }));
-                  }}
-                />
+                    setErrors(prev => { const n = { ...prev }; delete n.latitude; return n; });
+                  }} />
               </div>
 
-              {/* Lat/Lng display */}
               {form.latitude !== null && (
                 <div className="grid grid-cols-3 gap-2">
                   {[
@@ -413,22 +396,16 @@ export default function FreeDashaCalculatorPage() {
                     <div key={label}>
                       <label className="block text-xs text-slate-500 mb-1">{label}</label>
                       <div className="px-3 py-2 rounded-lg text-xs font-mono text-center"
-                        style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', color: '#22c55e' }}>
-                        {value}
-                      </div>
+                        style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', color: '#22c55e' }}>{value}</div>
                     </div>
                   ))}
                 </div>
               )}
 
-              {error && (
-                <div className="px-4 py-3 rounded-lg text-sm text-red-300" style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)' }}>
-                  {error}
-                </div>
-              )}
+              {error && <div className="px-4 py-3 rounded-lg text-sm text-red-300" style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)' }}>{error}</div>}
 
               <button onClick={handleSubmit} disabled={loading}
-                className="w-full py-4 rounded-xl text-sm font-bold transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full py-4 rounded-xl font-bold transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                 style={{ background: loading ? GOLD_RGBA(0.3) : `linear-gradient(135deg,rgba(212,175,55,0.8) 0%,${GOLD} 100%)`, color: '#080B12', fontSize: '15px' }}>
                 {loading ? '⟳ Calculating Dasha...' : '🪐 Calculate Free Dasha'}
               </button>
@@ -440,48 +417,62 @@ export default function FreeDashaCalculatorPage() {
           {/* RESULT */}
           {result && (
             <div ref={resultRef} className="mt-8 space-y-6">
+
+              {/* CURRENT DASHA */}
               <div className="rounded-2xl p-5 md:p-7" style={{ background: `linear-gradient(135deg, ${GOLD_RGBA(0.12)} 0%, rgba(2,8,23,0.6) 100%)`, border: `1px solid ${GOLD_RGBA(0.35)}` }}>
-                <h3 className="text-xl md:text-2xl font-serif font-bold mb-5" style={{ color: GOLD }}>🪐 {form.name ? `${form.name}'s ` : ''}Current Dasha</h3>
+                <h3 className="text-xl md:text-2xl font-serif font-bold mb-5" style={{ color: GOLD }}>
+                  🪐 {form.name ? `${form.name}'s ` : ''}Current Dasha
+                </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <DashaCard label="Mahadasha (Major Period)" lord={currentMahadasha} start={mahaStart} end={mahaEnd} icon="🌟" />
-                  <DashaCard label="Antardasha (Sub Period)" lord={currentAntardasha} start={antarStart} end={antarEnd} icon="✨" />
+                  <DashaCard
+                    icon="🌟" label="Mahadasha (Major Period)"
+                    planet={currentMaha?.planet}
+                    start={currentMaha?.start}
+                    end={currentMaha?.end}
+                    years={currentMaha?.years}
+                  />
+                  <DashaCard
+                    icon="✨" label="Antardasha (Sub Period)"
+                    planet={currentAntar?.planet}
+                    start={currentAntar?.start}
+                    end={currentAntar?.end}
+                  />
                 </div>
                 <p className="text-xs text-slate-400 mt-4 italic">Vimshottari Dasha system — 120 saal ka cycle, Parashar BPHS Chapter 46-49 ke aadhar par.</p>
               </div>
 
+              {/* NEXT 5 MAHADASHAS */}
               {nextFive.length > 0 && (
                 <div className="rounded-2xl p-5 md:p-7" style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid ${GOLD_RGBA(0.2)}` }}>
                   <h3 className="text-xl font-serif font-bold mb-5" style={{ color: GOLD }}>📅 Next 5 Mahadasha Periods</h3>
                   <div className="space-y-3">
                     {nextFive.map((d: any, i: number) => (
-                      <TimelineRow key={i} index={i + 1} lord={d.lord || d.planet || d.name} start={d.start || d.start_date} end={d.end || d.end_date} years={d.years || d.duration_years || d.duration} />
+                      <TimelineRow key={i} index={i + 1} planet={d.planet} start={d.start} end={d.end} years={d.years} />
                     ))}
                   </div>
                   <p className="text-xs text-slate-500 mt-4 italic">Surya 6 · Chandra 10 · Mangal 7 · Rahu 18 · Guru 16 · Shani 19 · Budh 17 · Ketu 7 · Shukra 20 (saal)</p>
                 </div>
               )}
 
+              {/* DOS & DONTS */}
               {(dos.length > 0 || donts.length > 0) && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="rounded-2xl p-5" style={{ background: 'rgba(34,197,94,0.06)', border: '1px solid rgba(34,197,94,0.25)' }}>
                     <h4 className="text-lg font-serif font-bold mb-3" style={{ color: '#86EFAC' }}>✅ 3 Dos (Parashar Niyam)</h4>
-                    {dos.length > 0 ? (
-                      <ul className="space-y-2 text-sm text-slate-300">
-                        {dos.slice(0, 3).map((d, i) => <li key={i} className="flex gap-2"><span className="text-green-400">•</span><span>{d}</span></li>)}
-                      </ul>
-                    ) : <p className="text-sm text-slate-500">Loading...</p>}
+                    <ul className="space-y-2 text-sm text-slate-300">
+                      {dos.slice(0, 3).map((d, i) => <li key={i} className="flex gap-2"><span className="text-green-400">•</span><span>{d}</span></li>)}
+                    </ul>
                   </div>
                   <div className="rounded-2xl p-5" style={{ background: 'rgba(239,68,68,0.06)', border: '1px solid rgba(239,68,68,0.25)' }}>
                     <h4 className="text-lg font-serif font-bold mb-3" style={{ color: '#FCA5A5' }}>❌ 3 Donts (Parashar Vivarjan)</h4>
-                    {donts.length > 0 ? (
-                      <ul className="space-y-2 text-sm text-slate-300">
-                        {donts.slice(0, 3).map((d, i) => <li key={i} className="flex gap-2"><span className="text-red-400">•</span><span>{d}</span></li>)}
-                      </ul>
-                    ) : <p className="text-sm text-slate-500">Loading...</p>}
+                    <ul className="space-y-2 text-sm text-slate-300">
+                      {donts.slice(0, 3).map((d, i) => <li key={i} className="flex gap-2"><span className="text-red-400">•</span><span>{d}</span></li>)}
+                    </ul>
                   </div>
                 </div>
               )}
 
+              {/* REMEDIES */}
               {(mantra || ratna || daan) && (
                 <div className="rounded-2xl p-5 md:p-7" style={{ background: 'rgba(212,175,55,0.06)', border: `1px solid ${GOLD_RGBA(0.25)}` }}>
                   <h3 className="text-xl font-serif font-bold mb-5" style={{ color: GOLD }}>🪔 Your 3 Free Remedies (Parashar)</h3>
@@ -492,22 +483,21 @@ export default function FreeDashaCalculatorPage() {
                   </div>
                 </div>
               )}
+
             </div>
           )}
 
           {/* PILLAR CONTENT */}
           <section className="mt-16 prose prose-invert max-w-none">
             <h2 className="text-2xl font-serif font-bold mb-4" style={{ color: GOLD }}>Vimshottari Dasha Kya Hai? — Parashar Ka 120 Saal Ka Chakra</h2>
-            <p className="text-slate-300 leading-relaxed mb-4">
-              Vimshottari Dasha Vedic Jyotish ka sabse precise predictive system hai. Maharishi Parashar ne <em>BPHS Chapter 46-49</em> mein iska poora vivran diya hai. "Vimshottari" ka arth hai "120" — yeh dasha cycle 120 saal ka hota hai, jismein 9 grah baari-baari aapke jeevan par rule karte hain.
-            </p>
+            <p className="text-slate-300 leading-relaxed mb-4">Vimshottari Dasha Vedic Jyotish ka sabse precise predictive system hai. Maharishi Parashar ne <em>BPHS Chapter 46-49</em> mein iska poora vivran diya hai. 9 grah baari-baari aapke jeevan par rule karte hain — total 120 saal ka cycle.</p>
 
             <h2 className="text-2xl font-serif font-bold mb-4 mt-8" style={{ color: GOLD }}>9 Grahon Ki Mahadasha Period</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6 not-prose">
               {[
                 { p: 'Ketu', y: 7, desc: 'Spiritual, vairagya' },
                 { p: 'Shukra', y: 20, desc: 'Love, luxury, marriage' },
-                { p: 'Surya', y: 6, desc: 'Authority, govt' },
+                { p: 'Surya', y: 6, desc: 'Authority, leadership' },
                 { p: 'Chandra', y: 10, desc: 'Mann, mother, emotions' },
                 { p: 'Mangal', y: 7, desc: 'Energy, property' },
                 { p: 'Rahu', y: 18, desc: 'Foreign, sudden rise' },
@@ -521,23 +511,12 @@ export default function FreeDashaCalculatorPage() {
                 </div>
               ))}
             </div>
-
-            <h2 className="text-2xl font-serif font-bold mb-4 mt-8" style={{ color: GOLD }}>Mahadasha vs Antardasha vs Pratyantar — 3 Levels</h2>
-            <p className="text-slate-300 leading-relaxed mb-4">
-              <strong style={{ color: GOLD }}>Mahadasha (L1):</strong> Sabse bada period. Overall life direction.
-            </p>
-            <p className="text-slate-300 leading-relaxed mb-4">
-              <strong style={{ color: GOLD }}>Antardasha / Bhukti (L2):</strong> Mahadasha ke andar sub-period. Year-by-year prediction.
-            </p>
-            <p className="text-slate-300 leading-relaxed mb-4">
-              <strong style={{ color: GOLD }}>Pratyantar (L3):</strong> Antardasha ke andar sub-sub-period. Month-level precision.
-            </p>
           </section>
 
           <section className="mt-12">
-            <h2 className="text-2xl font-serif font-bold mb-6" style={{ color: GOLD }}>Frequently Asked Questions — Dasha Calculator</h2>
+            <h2 className="text-2xl font-serif font-bold mb-6" style={{ color: GOLD }}>Frequently Asked Questions</h2>
             <div className="space-y-3">
-              {FAQS_DISPLAY.map((faq, i) => (
+              {FAQS.map((faq, i) => (
                 <details key={i} className="p-4 rounded-xl cursor-pointer" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
                   <summary className="font-semibold" style={{ color: GOLD }}>{faq.q}</summary>
                   <p className="mt-3 text-sm text-slate-400 leading-relaxed">{faq.a}</p>
@@ -572,27 +551,29 @@ export default function FreeDashaCalculatorPage() {
   );
 }
 
-function DashaCard({ icon, label, lord, start, end }: { icon: string; label: string; lord: any; start: any; end: any }) {
+function DashaCard({ icon, label, planet, start, end, years }: any) {
   return (
     <div className="p-4 rounded-xl" style={{ background: 'rgba(2,8,23,0.4)', border: `1px solid ${GOLD_RGBA(0.2)}` }}>
       <div className="text-xs text-slate-400 mb-2 flex items-center gap-1.5"><span>{icon}</span><span>{label}</span></div>
-      <div className="text-2xl font-bold mb-2" style={{ color: GOLD }}>{lord || '—'}</div>
+      <div className="text-2xl font-bold mb-2" style={{ color: GOLD }}>{planet || '—'}</div>
       {(start || end) && (
         <div className="text-xs text-slate-400 space-y-0.5">
           {start && <div>Start: <span className="text-slate-300">{formatDate(start)}</span></div>}
           {end && <div>End: <span className="text-slate-300">{formatDate(end)}</span></div>}
+          {years && <div>Duration: <span className="text-slate-300">{years} saal</span></div>}
         </div>
       )}
     </div>
   );
 }
 
-function TimelineRow({ index, lord, start, end, years }: { index: number; lord: any; start: any; end: any; years: any }) {
+function TimelineRow({ index, planet, start, end, years }: any) {
   return (
     <div className="flex items-center gap-4 p-3 rounded-lg" style={{ background: 'rgba(2,8,23,0.4)', border: `1px solid ${GOLD_RGBA(0.15)}` }}>
-      <div className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0" style={{ background: GOLD_RGBA(0.2), color: GOLD, border: `1px solid ${GOLD_RGBA(0.4)}` }}>{index}</div>
-      <div className="flex-1 min-w-0">
-        <div className="font-bold text-sm" style={{ color: GOLD }}>{lord || '—'} Mahadasha</div>
+      <div className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0"
+        style={{ background: GOLD_RGBA(0.2), color: GOLD, border: `1px solid ${GOLD_RGBA(0.4)}` }}>{index}</div>
+      <div className="flex-1">
+        <div className="font-bold text-sm" style={{ color: GOLD }}>{planet || '—'} Mahadasha</div>
         <div className="text-xs text-slate-400 mt-0.5">
           {start && <span>{formatDate(start)}</span>}
           {start && end && <span> → </span>}
@@ -616,12 +597,9 @@ function Remedy({ icon, title, content }: { icon: string; title: string; content
 
 function formatDate(d: any): string {
   if (!d) return '';
-  if (typeof d === 'string') {
-    try {
-      const dt = new Date(d);
-      if (!isNaN(dt.getTime())) return dt.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
-      return d;
-    } catch { return d; }
-  }
+  try {
+    const dt = new Date(d);
+    if (!isNaN(dt.getTime())) return dt.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+  } catch { }
   return String(d);
 }
