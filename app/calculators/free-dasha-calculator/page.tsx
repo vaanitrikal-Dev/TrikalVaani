@@ -594,12 +594,3 @@ function Remedy({ icon, title, content }: { icon: string; title: string; content
     </div>
   );
 }
-
-function formatDate(d: any): string {
-  if (!d) return '';
-  try {
-    const dt = new Date(d);
-    if (!isNaN(dt.getTime())) return dt.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
-  } catch { }
-  return String(d);
-}
