@@ -3,24 +3,35 @@
  * TRIKAL VAANI — SEO Domain Pages Generator
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/[domain]/page.tsx (template for all 15 domains)
- * VERSION: 2.1 — Title double-suffix fix (Session E1)
+ * VERSION: 2.3 — Full Session E (Pillar Authority Upgrade)
  * SIGNED: ROHIIT GUPTA, CEO
  *
- * v2.0 → v2.1 CHANGES (2026-05-18):
- *   FIX 6: Title double-suffix bug across all 15 domains
- *           Layout.tsx v2.7 has template: '%s | Trikal Vaani'
- *           Page titles in DOMAIN_PAGES already end with brand suffix
- *           Result was: "Career Astrology... | Trikal Vaani | Trikal Vaani"
- *           SOLUTION: Wrap title in { absolute: ... } in generateMetadata
- *           Tells Next.js to use title exactly, ignore template
- *           Same pattern used in calculator pages
+ * v2.2 → v2.3 CHANGES (2026-05-18):
+ *   E1 (already in v2.1): Title.absolute fix for all 15 domains
+ *   E2 (already in v2.2): HowTo schema added (5th schema per page)
+ *   E3 (NEW v2.3): Calculator internal links per domain
+ *           - CALCULATOR_LINKS map for all 15 domains
+ *           - 3 most relevant calculators linked per domain
+ *           - "Related Free Calculators" section above "Explore Domains"
+ *           - Strengthens hub-spoke SEO architecture
+ *   E4 PARTIAL (NEW v2.3): 5 domains expanded to 1000-1100 words
+ *           - career (1042 words) — BPHS Ch 25, 35, 38 + Phaladeepika, Saravali
+ *           - wealth (1034 words) — BPHS Ch 39, 32 Dhana Yogas, Lakshmi/Kubera
+ *           - health (1089 words) — BPHS Ch 66, Tridosha analysis, Sade Sati
+ *           - relationships (1098 words) — BPHS Ch 24, D9 Navamsa, Ashtakoot
+ *           - family (1098 words) — BPHS Ch 19/22/26, Pitru Dosha, 4th/5th/9th
  *
- * UNTOUCHED FROM v2.0:
- *   - All 15 domain content blocks (100% identical)
- *   - DOMAIN_PAGES config (all titles, content, FAQs unchanged)
+ * PENDING FOR FUTURE SESSIONS:
+ *   - Session 2: Expand domains 6-10 (education, home, legal, travel, spirituality)
+ *   - Session 3: Expand domains 11-15 (wellbeing, marriage, business,
+ *                foreign-settlement, digital-career)
+ *
+ * UNTOUCHED FROM v2.2:
+ *   - 10 domains keep original ~250 word content (career-family expanded)
+ *   - All FAQs (75 total) preserved
+ *   - All 5 schema blocks (Breadcrumb, Article, FAQ, Service, HowTo)
  *   - RESERVED_SLUGS guard
- *   - All 4 schema blocks (Breadcrumb, Article, FAQ, Service)
- *   - UI/JSX rendering
+ *   - UI/JSX structure
  *   - ISR (revalidate = 86400)
  *
  * DOMAINS COVERED (15):
@@ -42,6 +53,87 @@ const RESERVED_SLUGS = [
   'terms', 'contact', 'about', 'my-cosmic-records', 'hi',
   'calculators', 'api',
 ];
+
+// ⬇ SESSION E3: Domain-to-Calculator Mapping for Hub-Spoke Internal SEO
+// Each domain links to its 3 most relevant free calculators
+// Strengthens internal link equity flow + improves topical authority
+const CALCULATOR_LINKS: Record<string, { slug: string; name: string; emoji: string }[]> = {
+  career: [
+    { slug: 'free-dasha-calculator',     name: 'Dasha Calculator',     emoji: '⏳' },
+    { slug: 'free-kundali-calculator',   name: 'Kundali Calculator',   emoji: '🪔' },
+    { slug: 'free-lagna-calculator',     name: 'Lagna Calculator',     emoji: '🌅' },
+  ],
+  wealth: [
+    { slug: 'free-kundali-calculator',   name: 'Kundali Calculator',   emoji: '🪔' },
+    { slug: 'free-dasha-calculator',     name: 'Dasha Calculator',     emoji: '⏳' },
+    { slug: 'free-sade-sati-calculator', name: 'Sade Sati Calculator', emoji: '🪐' },
+  ],
+  health: [
+    { slug: 'free-kundali-calculator',   name: 'Kundali Calculator',   emoji: '🪔' },
+    { slug: 'free-sade-sati-calculator', name: 'Sade Sati Calculator', emoji: '🪐' },
+    { slug: 'free-nakshatra-calculator', name: 'Nakshatra Calculator', emoji: '⭐' },
+  ],
+  relationships: [
+    { slug: 'free-manglik-dosh-calculator', name: 'Manglik Dosh',       emoji: '♂' },
+    { slug: 'free-kundali-calculator',      name: 'Kundali Calculator', emoji: '🪔' },
+    { slug: 'free-nakshatra-calculator',    name: 'Nakshatra Calculator', emoji: '⭐' },
+  ],
+  family: [
+    { slug: 'free-kundali-calculator',   name: 'Kundali Calculator',   emoji: '🪔' },
+    { slug: 'free-rashi-calculator',     name: 'Rashi Calculator',     emoji: '♉' },
+    { slug: 'free-nakshatra-calculator', name: 'Nakshatra Calculator', emoji: '⭐' },
+  ],
+  education: [
+    { slug: 'free-kundali-calculator',   name: 'Kundali Calculator',   emoji: '🪔' },
+    { slug: 'free-nakshatra-calculator', name: 'Nakshatra Calculator', emoji: '⭐' },
+    { slug: 'free-dasha-calculator',     name: 'Dasha Calculator',     emoji: '⏳' },
+  ],
+  home: [
+    { slug: 'free-kundali-calculator',   name: 'Kundali Calculator',   emoji: '🪔' },
+    { slug: 'free-dasha-calculator',     name: 'Dasha Calculator',     emoji: '⏳' },
+    { slug: 'free-rashi-calculator',     name: 'Rashi Calculator',     emoji: '♉' },
+  ],
+  legal: [
+    { slug: 'free-dasha-calculator',     name: 'Dasha Calculator',     emoji: '⏳' },
+    { slug: 'free-kundali-calculator',   name: 'Kundali Calculator',   emoji: '🪔' },
+    { slug: 'free-sade-sati-calculator', name: 'Sade Sati Calculator', emoji: '🪐' },
+  ],
+  travel: [
+    { slug: 'free-kundali-calculator',   name: 'Kundali Calculator',   emoji: '🪔' },
+    { slug: 'free-rashi-calculator',     name: 'Rashi Calculator',     emoji: '♉' },
+    { slug: 'free-dasha-calculator',     name: 'Dasha Calculator',     emoji: '⏳' },
+  ],
+  spirituality: [
+    { slug: 'free-kundali-calculator',   name: 'Kundali Calculator',   emoji: '🪔' },
+    { slug: 'free-nakshatra-calculator', name: 'Nakshatra Calculator', emoji: '⭐' },
+    { slug: 'free-lagna-calculator',     name: 'Lagna Calculator',     emoji: '🌅' },
+  ],
+  wellbeing: [
+    { slug: 'free-nakshatra-calculator', name: 'Nakshatra Calculator', emoji: '⭐' },
+    { slug: 'free-kundali-calculator',   name: 'Kundali Calculator',   emoji: '🪔' },
+    { slug: 'free-sade-sati-calculator', name: 'Sade Sati Calculator', emoji: '🪐' },
+  ],
+  marriage: [
+    { slug: 'free-manglik-dosh-calculator', name: 'Manglik Dosh',       emoji: '♂' },
+    { slug: 'free-kundali-calculator',      name: 'Kundali Calculator', emoji: '🪔' },
+    { slug: 'free-nakshatra-calculator',    name: 'Nakshatra Calculator', emoji: '⭐' },
+  ],
+  business: [
+    { slug: 'free-dasha-calculator',     name: 'Dasha Calculator',     emoji: '⏳' },
+    { slug: 'free-kundali-calculator',   name: 'Kundali Calculator',   emoji: '🪔' },
+    { slug: 'free-rashi-calculator',     name: 'Rashi Calculator',     emoji: '♉' },
+  ],
+  'foreign-settlement': [
+    { slug: 'free-kundali-calculator',   name: 'Kundali Calculator',   emoji: '🪔' },
+    { slug: 'free-dasha-calculator',     name: 'Dasha Calculator',     emoji: '⏳' },
+    { slug: 'free-lagna-calculator',     name: 'Lagna Calculator',     emoji: '🌅' },
+  ],
+  'digital-career': [
+    { slug: 'free-kundali-calculator',   name: 'Kundali Calculator',   emoji: '🪔' },
+    { slug: 'free-dasha-calculator',     name: 'Dasha Calculator',     emoji: '⏳' },
+    { slug: 'free-nakshatra-calculator', name: 'Nakshatra Calculator', emoji: '⭐' },
+  ],
+};
 
 interface DomainPageConfig {
   slug:          string;
@@ -71,15 +163,73 @@ const DOMAIN_PAGES: Record<string, DomainPageConfig> = {
     planet: 'Saturn & Sun',
     house:  '10th House (Karma Bhava)',
     bphsRef:'BPHS Chapter 25 — Karma Bhava Phala',
-    content: `The 10th house in Vedic astrology, called Karma Bhava, is the most powerful indicator of career, profession, and public recognition. According to Brihat Parashara Hora Shastra (BPHS), Chapter 25, the lord of the 10th house and its placement determines the native's professional destiny.
+    content: `The 10th house in Vedic astrology, known as Karma Bhava (the house of action and worldly mission), stands as the supreme indicator of career destiny, public recognition, and professional dharma. According to Brihat Parashara Hora Shastra (BPHS) Chapter 25 — Karma Bhava Phala, Maharishi Parashar establishes that the 10th lord, planets occupying it, and planets aspecting it together determine the native's career path with remarkable precision.
 
-Saturn (Shani) is the primary karaka (significator) of career and discipline. When Saturn occupies its own signs Makar or Kumbh in the 10th house, it creates a Sasa Mahapurusha Yoga — indicating a powerful, authoritative career with mass influence.
+Saturn (Shani) — Master of Career & Discipline
 
-The Sun (Surya) represents authority, government service, and leadership in one's profession. A strong Sun in the 10th house often indicates positions of power, administrative roles, or entrepreneurial success.
+Saturn is the primary Karaka of the 10th house and the planet of structure, perseverance, and long-term effort. When Saturn occupies its own signs Makar (Capricorn) or Kumbh (Aquarius) in the 10th house, it creates Sasa Mahapurusha Yoga — one of the five Pancha Mahapurusha Yogas defined in BPHS Chapter 35. Natives with this yoga rise to positions of authority through sustained effort, becoming leaders in institutions, government, judiciary, or large enterprises. A weak or afflicted Saturn can create career delays, repeated obstacles, or stagnation — but Saturn always rewards consistent effort eventually. Saturn in the 6th house gives fighting spirit in workplace politics; Saturn in the 12th creates karmic service roles, foreign employment, or behind-the-scenes positions.
 
-Rahu in the 10th house gives an unconventional but highly ambitious career path — often in technology, foreign companies, or industries that disrupted their field. This is supported by classical texts like Saravali which states "Rahu in the 10th house gives unorthodox but powerful career success."
+Sun (Surya) — Authority & Government
 
-The current Vimshottari Dasha (planetary period) is the most precise timing tool for career events. Jupiter Mahadasha activates expansion and recognition, while Saturn Dasha tests through hard work before rewarding with stability.`,
+The Sun represents the soul's authority and the highest forms of professional recognition. According to Phaladeepika Chapter 14, a strong Sun in the 10th house — especially exalted in Mesha (Aries) or in its own sign Singh (Leo) — creates natural leaders, government officials, administrators, and self-made authority figures. Sun Mahadasha (6 years) often brings promotions, government recognitions, or major career shifts. When the Sun joins Mercury in the 10th, it creates Budha-Aditya Yoga — powerful for intellectual professions like writing, journalism, law, and academic leadership.
+
+Rahu — Modern, Unconventional Career
+
+Rahu in the 10th house creates a distinctly modern professional path. Saravali Chapter 33 describes Rahu in the 10th as giving unorthodox but powerful career success. This placement is highly favorable for technology entrepreneurs, foreign company employees, mass media professionals, and pioneers in disruptive industries. Rahu's Mahadasha (18 years) often coincides with sudden career rises, viral fame, or unconventional professional success — but requires ethical anchoring to prevent the dramatic falls Rahu can also bring.
+
+Atmakaraka — Soul's Career Mission
+
+In Jaimini Astrology, the Atmakaraka (planet with the highest degree in the chart) reveals the soul's true career mission. When the Atmakaraka occupies or aspects the 10th house from the Karakamsa Lagna, the native experiences deep alignment between work and soul purpose. The D10 Dasamsa divisional chart further refines career analysis — its Lagna, its 10th house, and the placement of the Atmakaraka in D10 together determine specific professional roles, leadership capacity, and recognition timing.
+
+Vimshottari Dasha — The Career Timing Engine
+
+The Vimshottari Dasha system provides the most precise timing for career events. Each planet rules a Mahadasha of fixed years (Ketu 7, Venus 20, Sun 6, Moon 10, Mars 7, Rahu 18, Jupiter 16, Saturn 19, Mercury 17 — total 120 years). When the 10th lord's Mahadasha or Antardasha is active, career events accelerate. Pratyantar Dasha (Level 3 sub-period) provides 3-7 day precision windows for specific events like job offers, promotions, interviews, or business launches — a precision level most modern astrology apps fail to deliver because they stop at Antardasha (month-level accuracy).
+
+Career Yogas Worth Knowing
+
+Several classical Yogas indicate exceptional career success:
+Raj Yoga: Lords of Kendra (1, 4, 7, 10) and Trikona (1, 5, 9) houses conjoin, exchange, or aspect — creating elevated career destiny with authority and respect (BPHS Chapter 38).
+Amala Yoga: A benefic planet (Jupiter, Venus, or unafflicted Mercury) in the 10th from Lagna or Moon creates spotless reputation and lasting fame (Phaladeepika Chapter 7).
+Sasa Mahapurusha Yoga: Saturn in own/exalted sign in a Kendra.
+10th Lord in 11th House: Career directly generates income — strongest indicator of profitable employment (Jataka Parijata).
+Budha-Aditya Yoga: Sun-Mercury together in 10th creates intellectual leadership.
+
+Modern Career Indicators
+
+Adapting classical Vedic principles to contemporary careers:
+IT and Software: Mercury + Rahu combination, especially in 3rd, 5th, or 10th house
+Finance and Banking: Strong 2nd and 11th houses with Mercury and Jupiter
+Medicine: Mars or Sun in 6th house, often with Jupiter aspect
+Law and Legal Services: Jupiter strong in 9th or 10th, often with Mercury aspect
+Government Service: Strong Sun, especially in 10th house or 6th house
+Creative Arts and Media: Venus strong in 3rd, 5th, or 10th house with Mercury support
+Foreign Career: Rahu, 12th house, or 9th house involvement with 10th house
+
+When Career Stalls — Vedic Diagnosis
+
+When a native experiences persistent career stagnation, the diagnostic hierarchy is:
+First, check the current Dasha lord and whether it is favorable for career.
+Second, examine Saturn's transit position — Ashtama Shani (Saturn transit over 8th house from natal Moon) creates 2.5 years of career restructuring.
+Third, identify Sade Sati phase if applicable — the middle phase causes maximum career upheaval.
+Fourth, review the D10 Dasamsa for divisional career insights.
+Fifth, check Pratyantar Dasha for short-term blocked windows.
+
+Classical Career Remedies
+
+Trikal Vaani recommends BPHS-sanctioned remedies based on the afflicted planet:
+Saturn: Donate black sesame and mustard oil on Saturdays; recite Shani Stotra; offer water to Peepal tree.
+Sun: Surya Namaskar at sunrise; donate wheat on Sundays; recite Aditya Hridaya Stotra.
+Mercury: Donate green moong dal on Wednesdays; recite Budh Beej Mantra; emerald with expert consultation.
+Jupiter: Yellow cloth donation on Thursdays; recite Guru mantra; serve teachers and elders.
+Rahu: Donate to disadvantaged; recite Rahu Beej Mantra; charity to charitable institutions.
+
+Get Your Personalized Career Analysis
+
+Trikal Vaani's Swiss Ephemeris-powered analysis applies all these classical principles — 10th lord strength, Saturn placement, Vimshottari Dasha periods, Pratyantar precision timing, classical Yoga detection, and Atmakaraka analysis — to deliver a complete career roadmap personalized to your exact birth time and place. Begin with our free Dasha Calculator to identify your current career period, or get the full reading by Rohiit Gupta, Chief Vedic Architect, Delhi NCR.
+
+Career Across Life Stages
+
+Vedic astrology recognizes that career destiny unfolds in distinct phases. The first major career period typically activates between ages 22-30 during the Saturn return or Jupiter Mahadasha onset. Mid-career transformations (ages 30-45) often coincide with Mars-Saturn dynamics or the Mahadasha of the 10th lord. Late-career fulfillment and legacy building (45+) is shaped by Jupiter's wisdom phase and Saturn's deserved rewards. Each phase has its own karmic signature that the natal chart reveals with precision.`,
     faqs: [
       {
         q: 'Which planet is most important for career in Vedic astrology?',
@@ -116,15 +266,74 @@ The current Vimshottari Dasha (planetary period) is the most precise timing tool
     planet: 'Jupiter & Venus',
     house:  '2nd House (Dhana Bhava) + 11th House (Labha)',
     bphsRef:'BPHS Chapter 39 — Dhana Yoga',
-    content: `Wealth in Vedic astrology is primarily governed by the 2nd house (Dhana Bhava — accumulated wealth), the 11th house (Labha — income and gains), and Jupiter as the natural significator of abundance and prosperity.
+    content: `Wealth in Vedic astrology is governed primarily by three houses working in concert: the 2nd house (Dhana Bhava — accumulated wealth, savings, family assets), the 11th house (Labha Bhava — income, gains, fulfillment of desires), and Jupiter (Guru) as the natural Karaka of abundance and prosperity. According to Brihat Parashara Hora Shastra (BPHS) Chapter 39 — Dhana Yoga Adhyaya, Maharishi Parashar defines wealth-producing yogas with mathematical precision that has guided Vedic financial astrology for over five millennia.
 
-The Brihat Parashara Hora Shastra (BPHS) Chapter 39 defines Dhana Yoga as the combination of 2nd and 11th house lords. When these lords join in a Kendra or Trikona house, it creates powerful wealth accumulation potential.
+The Foundation — Dhana Yoga
 
-Jupiter (Guru) is the Naisargika Karaka for wealth and expansion. A strong Jupiter in the 2nd, 5th, 9th, or 11th house blesses the native with natural prosperity. Jupiter's transit over natal Moon (Guru Chandal period of luck) often coincides with significant financial windfalls.
+Dhana Yoga is the supreme wealth-producing combination, formed when the lord of the 2nd house and the lord of the 11th house join together in a Kendra house (1, 4, 7, 10) or Trikona house (1, 5, 9). When this combination occurs with the additional aspect of Jupiter, the yoga reaches its highest expression — creating natives capable of accumulating substantial wealth across their lifetime. BPHS lists 32 distinct Dhana Yogas, each with its own characteristics and timing patterns. Trikal Vaani's analysis systematically detects all 32 in your chart.
 
-Venus (Shukra) represents luxury wealth — property, vehicles, art, and aesthetic abundance. A strong Venus in the 11th or 2nd house supports consistent income from creative or luxury sectors.
+Jupiter — Natural Karaka of Wealth
 
-The 8th house governs inherited wealth, ancestral assets, and sudden financial events. When the 8th lord connects positively with the 2nd lord, inheritance and windfall income are strongly indicated.`,
+Jupiter is the supreme Naisargika Karaka (natural significator) of wealth, expansion, and divine grace. A strong Jupiter in the 2nd, 5th, 9th, or 11th house blesses the native with natural prosperity. Jupiter's transit over the natal Moon — known as Guru Chandala or the period of expansion over emotional foundation — often coincides with significant financial windfalls, property acquisitions, or business breakthroughs. Jupiter Mahadasha (16 years) is traditionally the most prosperous period in a native's life when Jupiter is well-placed natally.
+
+When Jupiter is debilitated in Makar (Capricorn) or combust by the Sun, wealth growth requires more conscious effort, but remedies like Guru mantra, Thursday fasting, and donation of yellow items significantly strengthen Jupiter's blessing.
+
+Venus — Karaka of Luxury Wealth
+
+Venus (Shukra) represents the luxury dimension of wealth — property, vehicles, art, jewelry, designer goods, and aesthetic abundance. A strong Venus in the 11th or 2nd house supports consistent income from creative industries, luxury sectors, hospitality, fashion, or beauty markets. Venus in its exaltation in Meen (Pisces) or own signs Vrishabh (Taurus) and Tula (Libra) creates natural attraction to financial abundance. Venus Mahadasha (20 years — the longest in Vimshottari) often produces extended wealth accumulation periods.
+
+The 8th House — Inheritance & Sudden Wealth
+
+The 8th house governs inherited wealth, ancestral assets, joint finances, insurance, and sudden financial events. When the 8th lord connects positively with the 2nd lord (in conjunction or mutual aspect), inheritance and windfall income are strongly indicated in the native's life. Rahu in the 8th can bring unexpected wealth through marriage, business partnerships, or speculation — but requires careful ethical anchoring. Saturn in the 8th brings gradual but stable inherited wealth, often delayed until later life.
+
+The 5th House — Speculative Wealth
+
+The 5th house governs Poorva Punya (past life merit) and speculative gains — investments, stock market, lottery, and risk-based wealth. Strong 5th house with Jupiter or Mercury creates intelligent investment ability. The 5th lord in the 11th creates the powerful Bhagya Yoga — past karma directly generating present income. When Jupiter aspects the 5th from the 11th, the native becomes a wise long-term investor rather than a gambler.
+
+11th House — Income & Gain Fulfillment
+
+The 11th house (Labha Bhava) is the primary house of income, gains, and fulfilled desires. Every form of wealth — salary, business profit, investment returns, royalties — eventually flows through the 11th house. A strong 11th lord placed in a Kendra or Trikona creates multiple income streams. The 10th lord placed in the 11th creates the strongest indicator of profitable employment or successful business (Jataka Parijata).
+
+Karz Mukti — Debt Liberation
+
+The 6th house (Rina Bhava) governs debt and financial obligations. When the 6th lord is strong and afflicts the 2nd or 11th house, debt accumulation becomes a pattern in life. Saturn or Rahu transiting the 6th or 12th house during their Dasha period often creates financial pressure, loans, or credit card traps. Classical BPHS remedies for Karz Mukti (debt liberation) include Hanuman Chalisa recitation, Tuesday Mars worship, and specific Jupiter mantras for gradual financial recovery.
+
+Vimshottari Dasha — Wealth Timing
+
+Wealth events follow precise Dasha timing patterns. Jupiter Mahadasha (16 years) is the prime wealth-growth period. Venus Mahadasha (20 years) brings luxury and consistent income. Mercury Mahadasha (17 years) supports business and trade success. The Antardasha and Pratyantar Dasha combinations within these periods determine specific windows — 3-7 day precision timing for major investments, property purchases, business launches, or financial decisions. This level of precision separates Trikal Vaani's analysis from generic Sun-sign predictions.
+
+Wealth Yogas Beyond Dhana Yoga
+
+Several classical Yogas indicate exceptional wealth potential:
+Lakshmi Yoga: 9th lord in own/exalted sign with Venus aspect — divine prosperity.
+Kubera Yoga: 2nd and 11th lords in mutual aspect — accumulation power.
+Gajakesari Yoga: Moon and Jupiter in Kendra — generational wealth and respect.
+Vipreet Raj Yoga: 6th, 8th, or 12th lord placed in another dusthana — paradoxical wealth through overcoming obstacles.
+Chandra Mangal Yoga: Moon-Mars conjunction creates active income through ventures.
+
+Modern Wealth Indicators
+
+For contemporary financial paths:
+Stock Market & Trading: Strong Mercury in 5th or 11th, Rahu support
+Real Estate: Mars in 4th, strong 4th lord, Jupiter aspect on property houses
+Entrepreneurship: Mars + Mercury combination, strong 7th and 10th
+Inherited Family Business: 2nd lord in 10th, Saturn supporting
+Investment Income: Jupiter in 11th or aspecting 5th
+Foreign Income: Rahu connection to 11th house, 12th house wealth markers
+Salary Growth: 10th lord in 11th — career feeds income directly
+
+Wealth Remedies Per Planet
+
+Trikal Vaani recommends BPHS-sanctioned remedies based on the afflicted wealth planet:
+Jupiter: Donate yellow items (turmeric, gram dal, gold) on Thursdays; recite Guru mantra; respect teachers and elders.
+Venus: Friday white items donation; Lakshmi mantra; offer water to Tulsi plant.
+Mercury: Wednesday green moong donation; respect young people and students.
+Saturn (for debt): Saturday oil donation; Shani Chalisa; serve elderly disadvantaged.
+Rahu (for sudden wealth events): Donate to social causes; honor unconventional people.
+
+Personal Wealth Analysis
+
+Trikal Vaani's Swiss Ephemeris-powered Vedic analysis systematically detects all 32 Dhana Yogas, evaluates the strength of Jupiter and Venus, maps your current Vimshottari Dasha alignment with wealth houses, and identifies precise Pratyantar Dasha windows for financial decisions. Begin with our free Kundali Calculator to see your wealth foundation, or get the full reading by Rohiit Gupta, Chief Vedic Architect, Delhi NCR.`,
     faqs: [
       {
         q: 'What is Dhana Yoga in Vedic astrology?',
@@ -161,15 +370,75 @@ The 8th house governs inherited wealth, ancestral assets, and sudden financial e
     planet: 'Saturn & Moon',
     house:  '1st, 6th & 8th Houses',
     bphsRef:'BPHS Chapter 66 — Ayu (Longevity) Bhava',
-    content: `Health in Vedic astrology is analyzed through three primary houses: the 1st house (Tanu Bhava — physical body and constitution), the 6th house (Ari Bhava — disease and health challenges), and the 8th house (Ayu Bhava — longevity and chronic conditions).
+    content: `Health in Vedic astrology is the foundation upon which all other life pursuits rest — for without robust physical and mental health, neither wealth nor relationships nor spiritual progress can be sustained. Brihat Parashara Hora Shastra (BPHS) Chapter 66 — Ayu (Longevity) Bhava establishes the classical framework for health analysis, focusing on three primary houses and the planet Saturn as Ayushkaraka (significator of lifespan).
 
-Saturn (Shani) is the Ayushkaraka — the natural significator of longevity. A strong Saturn in the natal chart indicates robust constitution and long life. When Saturn is afflicted or occupies the 6th or 8th house without benefic support, chronic health conditions may arise during Saturn Dasha.
+The 1st House — Constitution & Vitality
 
-The Moon (Chandra) represents the mind and emotional health. Moon afflicted by Saturn creates depression and anxiety. Moon with Rahu or Ketu can indicate psychosomatic conditions or unusual health patterns.
+The 1st house (Tanu Bhava) represents the physical body, overall constitution, immunity, and life force (Prana). The Lagna's nature determines the native's fundamental health pattern. Lagna lord placement determines vitality — when the Lagna lord is strong and unafflicted, the native enjoys robust health and recovery capacity. When the Lagna lord is in the 6th, 8th, or 12th house, chronic health vulnerabilities may emerge during specific Dasha periods.
 
-The 6th house lord's position determines the nature of health challenges. When the 6th lord is placed in the 8th or 12th house, health issues tend to be hidden or chronic. Classical BPHS remedies including Mahamrityunjaya Mantra, donation of sesame on Saturdays, and Kaal Bhairav worship are traditionally prescribed for health protection.
+According to BPHS, each Lagna sign corresponds to specific body parts and health tendencies: Mesha (Aries) governs the head; Vrishabh (Taurus) the face and throat; Mithun (Gemini) the shoulders and lungs; Karka (Cancer) the chest; Singh (Leo) the heart; Kanya (Virgo) the digestive system; Tula (Libra) the kidneys; Vrishchik (Scorpio) the reproductive system; Dhanu (Sagittarius) the hips and thighs; Makar (Capricorn) the knees; Kumbh (Aquarius) the calves; Meen (Pisces) the feet.
 
-Important: Vedic astrology provides guidance on tendencies and timing — always consult qualified medical professionals for health decisions.`,
+The 6th House — Disease & Daily Health Patterns
+
+The 6th house (Ari Bhava) represents disease, health challenges, enemies of the body, infections, accidents, and daily health routines. The 6th lord's placement determines the type and severity of health challenges throughout life. When malefics like Saturn, Rahu, or Mars occupy the 6th house, recurring health issues may arise — but a strong 6th house also provides fighting power against disease. Paradoxically, a strong 6th house with malefics can create a "warrior immune system" that overcomes illness.
+
+The 8th House — Longevity & Chronic Conditions
+
+The 8th house (Ayu Bhava) governs longevity, chronic conditions, surgeries, and life-threatening health events. Saturn is the Ayushkaraka — the natural significator of lifespan. A strong Saturn in the natal chart indicates robust constitution and long life. When Saturn is afflicted or occupies the 6th or 8th house without benefic support, chronic health conditions may arise during Saturn Dasha. The 8th lord's placement determines hidden health patterns — issues that may not manifest in youth but emerge later.
+
+The Moon — Mental Health Foundation
+
+The Moon (Chandra) represents the mind, emotions, hormonal balance, and psychological health. Moon afflicted by Saturn creates depression, fatigue, and emotional heaviness. Moon afflicted by Rahu can indicate psychosomatic conditions, anxiety, or unusual mental health patterns. Moon in own sign Karka (Cancer) or exalted in Vrishabh (Taurus) provides strong emotional resilience.
+
+The Moon's Nakshatra at birth reveals psychological patterns important for mental health. For example, Ashlesha Nakshatra Moon creates intuitive but anxious minds requiring grounding practices. Rohini Nakshatra Moon creates emotional stability and natural healing capacity. Jyeshtha Nakshatra Moon creates a responsible but sometimes burdened mental state.
+
+Mars — Blood, Surgery & Acute Conditions
+
+Mars governs blood, muscles, surgery, inflammation, accidents, and acute health events. Mars in the 6th or 8th house creates surgical possibilities or acute health crises that respond well to immediate medical intervention. Mangal Dosha can also affect health in addition to marriage matters — when Mars is afflicted in dusthana houses, blood pressure, anger-related health issues, or accident vulnerabilities emerge.
+
+Mercury — Nervous System & Communication Health
+
+Mercury (Budha) rules the nervous system, skin, respiratory pathways, and the sense of touch. Mercury afflicted by Mars creates anxiety and overthinking; Mercury with Saturn creates chronic nervous tension and slow processing. Mercury Dasha can be a critical period for nervous system health, requiring conscious stress management.
+
+Vata-Pitta-Kapha Analysis
+
+Classical Vedic astrology connects deeply with Ayurveda through the Tridosha analysis. Each planet governs specific doshas: Sun governs Pitta (heat, transformation), Moon governs Kapha (water, nourishment) and Vata in early stages, Mars governs Pitta intensely, Mercury governs all three depending on association, Jupiter governs Kapha and balanced wisdom, Venus governs Kapha and Vata, Saturn governs Vata (dryness, depletion). Your strongest planetary signature reveals your dosha constitution, guiding diet, lifestyle, and seasonal adjustments.
+
+Sade Sati & Health
+
+Sade Sati — the 7.5 year period when Saturn transits the 12th, 1st, and 2nd houses from natal Moon — often creates periods of health stress, fatigue, and chronic conditions, especially when Saturn is naturally weak in the chart. The middle phase (Saturn directly on natal Moon, 2.5 years) is the most intense for emotional and physical exhaustion. Regular Shani worship, oil donation on Saturdays, Hanuman Chalisa recitation, and structured health routines significantly mitigate Sade Sati health effects.
+
+Vimshottari Dasha & Health Timing
+
+Health vulnerabilities follow Dasha patterns. The 6th lord's Dasha activates disease-related themes — requiring proactive medical attention and preventive care. The 8th lord's Dasha may bring chronic or hidden health issues to surface. Mars-Saturn or Saturn-Rahu Antardasha combinations can intensify health challenges. Pratyantar Dasha (3-7 day windows) provides precise timing for surgeries, major procedures, and health-related decisions — choosing favorable Muhurta materially improves medical outcomes.
+
+Modern Health Indicators
+
+Adapting classical principles to contemporary health concerns:
+Mental Health: Moon afflictions, especially with Saturn or Rahu, plus Mercury condition
+Heart Health: Sun strength, 5th house condition (Sun's natural domain)
+Diabetes / Endocrine: Jupiter condition, Venus-Saturn dynamics, 6th and 8th houses
+Cancer-related concerns: Moon affliction with Saturn-Rahu in dusthana houses
+Surgical Events: Mars in 6th or 8th, Saturn-Mars combinations
+Chronic Pain: Saturn's long-term influence on Lagna or 1st lord
+Autoimmune: Lagna lord weakness combined with 6th house affliction
+
+Classical Health Remedies
+
+Trikal Vaani recommends BPHS-sanctioned remedies based on the afflicted health planet:
+Saturn (longevity, chronic): Black sesame and mustard oil donation on Saturdays; Mahamrityunjaya Mantra (108 times facing East); Hanuman Chalisa.
+Moon (mental health): Monday milk donation; Om Chandraya Namah mantra; white flower offerings to Shiva.
+Mars (blood, accidents): Tuesday red items donation; Hanuman Chalisa; avoid risk during Mars Antardasha.
+Mercury (nervous system): Wednesday green moong donation; Budh Beej Mantra; respect young learners.
+Sun (vitality): Sunday wheat donation; Aditya Hridaya Stotra; Surya Namaskar at sunrise.
+
+Important Disclaimer
+
+Vedic astrology provides guidance on tendencies, timing, and preventive measures — it is not a substitute for medical diagnosis or treatment. Always consult qualified medical professionals for health decisions. Astrological insights work best as a complementary layer alongside conventional medicine, helping with preventive timing, lifestyle alignment, and emotional understanding.
+
+Personal Health Analysis
+
+Trikal Vaani's Swiss Ephemeris-powered analysis evaluates your Lagna constitution, 6th and 8th house dynamics, Moon's emotional foundation, Saturn's role as Ayushkaraka, current Vimshottari Dasha health patterns, and Sade Sati impact. Begin with our free Kundali Calculator to identify your constitutional foundation, or get full health analysis by Rohiit Gupta, Chief Vedic Architect, Delhi NCR.`,
     faqs: [
       {
         q: 'Which planet controls health in Vedic astrology?',
@@ -206,15 +475,94 @@ Important: Vedic astrology provides guidance on tendencies and timing — always
     planet: 'Venus & Moon',
     house:  '7th House (Yuvati Bhava)',
     bphsRef:'BPHS Chapter 24 — Vivah Bhava',
-    content: `The 7th house (Yuvati Bhava) in Vedic astrology is the primary house of partnerships and significant relationships. According to BPHS Chapter 24, the 7th lord's strength and placement determine the nature and quality of relationships.
+    content: `The 7th house (Yuvati Bhava) in Vedic astrology is the supreme house of partnerships, significant relationships, and the qualities of one's life partner. According to Brihat Parashara Hora Shastra (BPHS) Chapter 24 — Vivah Bhava, Maharishi Parashar establishes that the 7th lord's strength, placement, and dignity determine the nature and quality of all major relationships in life — not just marriage but every deep one-on-one bond.
 
-Venus (Shukra) is the Kalatrakaraka — natural significator of spouse and relationships for men. The Moon (Chandra) plays a crucial role in emotional compatibility and the quality of bonds. For women's charts, Jupiter (Guru) represents the partner as Purusha karaka.
+The 7th House — Foundation of Partnership
 
-The Navamsa (D9) chart is the most important divisional chart for relationships. A planet that is Vargottama (same Rashi in D1 and D9) has exceptional strength and reliability in relationship matters. The 7th lord's placement in D9 reveals the deeper karmic nature of partners.
+The 7th house represents the partner, spouse, business associate, and any significant "other" who balances the self (represented by the 1st house, directly opposite). When the 7th lord is strong, well-placed in a Kendra or Trikona, and unafflicted by malefics, the native attracts harmonious, supportive, long-lasting relationships. Conversely, when the 7th lord is debilitated, combust, or in dusthana houses (6th, 8th, 12th), relationships may face conflict, separation patterns, or repeated karmic challenges.
 
-Rahu in the 7th house creates intense, karmic relationships — often past-life connections that require conscious resolution. Ketu in the 7th indicates spiritual detachment from conventional partnership, sometimes indicating foreign partners or unconventional relationships.
+The nature of the 7th house sign reveals the type of partner one attracts: Mesha Lagna natives often attract dynamic, action-oriented partners; Tula Lagna natives attract diplomatic, beauty-conscious partners; Karka Lagna natives attract emotionally protective partners.
 
-Synastry (dual chart analysis) examines where key planets of one person fall in the other's chart. Venus-Moon synastry creates deep emotional bonds, while Saturn-Moon creates karmic obligation and long-term commitment.`,
+Venus — The Karaka of Relationships
+
+Venus (Shukra) is the Kalatrakaraka — the natural significator of spouse and romantic relationships for men's charts. A strong Venus in own signs Vrishabh (Taurus) or Tula (Libra), or exalted in Meen (Pisces), brings an attractive, harmonious, emotionally intelligent partner. Venus in the 7th house creates natural relationship harmony, though Venus may sometimes give a beautiful but slightly volatile partner depending on aspects.
+
+For women's charts, Jupiter (Guru) represents the husband as Purusha Karaka — the significator of the masculine partner. Jupiter's condition reveals the husband's character: wise, generous, ethical, and providing when strong; restrictive or distant when afflicted by Saturn or Rahu.
+
+The Navamsa D9 — Soul-Level Relationship Chart
+
+The Navamsa (D9) chart is the most important divisional chart for relationships — often considered MORE significant than the natal D1 for marriage analysis. BPHS Chapter 6 establishes that the Navamsa chart should always be read alongside the natal chart for any relationship prediction.
+
+A planet that is Vargottama (in the same Rashi in both D1 and D9) has exceptional strength and reliability in relationship matters. The 7th lord's placement in D9 reveals the deeper karmic nature of the partner. When the D9 Lagna is harmonious with the D1 Lagna, the marriage strengthens both partners. When the D9 7th house is afflicted while D1 appears favorable, the marriage may seem good externally but face internal challenges.
+
+Rahu & Ketu in the 7th — Karmic Partnerships
+
+Rahu in the 7th house creates intense, karmic, often unconventional relationships — frequently past-life connections that require conscious resolution in this life. Rahu in the 7th may bring partners from different cultures, foreign nationalities, or significant age differences. The relationship feels magnetic but karmically heavy, demanding spiritual maturity.
+
+Ketu in the 7th creates spiritual detachment from conventional partnership. Such natives may marry late, marry an unconventional partner, or experience the relationship as more spiritual than emotional. Classical texts mention that Ketu in the 7th can also indicate a previous-life unfinished bond.
+
+Synastry — Two-Chart Analysis
+
+Synastry examines where key planets of one person fall in the other's chart, revealing the karmic compatibility beyond simple Sun-sign matching. Venus-Moon synastry creates deep emotional bonds. Saturn-Moon synastry creates karmic obligation and long-term commitment (often felt as "duty love"). Sun-Moon synastry creates fundamental psychological harmony. Mars-Venus synastry creates passionate attraction.
+
+Ashtakoot Guna Milan — The 8-Point Compatibility System
+
+The classical Vedic compatibility framework evaluates 8 factors with weighted points totaling 36:
+Varna (1 point): Spiritual ego compatibility
+Vashya (2 points): Mutual influence dynamics
+Tara (3 points): Health and birth-star harmony
+Yoni (4 points): Sexual and physical compatibility
+Graha Maitri (5 points): Mental and emotional compatibility
+Gana (6 points): Temperament harmony (deva, manushya, rakshasa)
+Bhakoot (7 points): Love and family welfare
+Nadi (8 points): Genetic and health compatibility
+
+A score above 18/36 is considered acceptable; 24+ is excellent. However, Nadi (8 points) and Bhakoot (7 points) carry the highest weight and require careful analysis — classical cancellations exist for both that experienced astrologers identify before declaring incompatibility.
+
+Marriage Timing — Vimshottari Dasha
+
+Marriage typically occurs during specific Vimshottari Dasha combinations: the Dasha of the 7th lord, Venus Dasha (for men's charts), Jupiter Dasha (for women's charts), planets in the 7th house Dasha, or planets aspecting the 7th house Dasha. The most precise marriage windows are when Jupiter transits over the 7th house cusp or the 7th lord — a transit that occurs every 12 years. Pratyantar Dasha analysis can pinpoint marriage windows within 1-3 month precision.
+
+Delays in Relationships — Common Causes
+
+Relationship delays follow predictable astrological patterns:
+Saturn's influence on 7th house or Venus creates patience-testing delays
+Sade Sati during prime relationship years (mid-20s to mid-30s)
+Rahu-Ketu on the 7th-1st axis creates unconventional timing
+Mangal Dosha (Mars in 1, 4, 7, 8, 12) creates obstacles requiring matching
+12th lord on 7th house creates loss patterns or foreign partnerships
+
+Classical Relationship Yogas
+
+Several powerful Yogas indicate exceptional relationship destiny:
+Sphatika Yoga: 7th lord in own/exalted sign with Venus aspect — beautiful, harmonious marriage
+Soubhagya Yoga: Jupiter in 7th from Venus — long-lasting blessed marriage
+Daridra Yoga (negative): 7th lord in 12th — relationship challenges and losses
+Argala Yoga: Strong planets in 2nd, 4th, 11th from 7th — relationship support from family and resources
+
+Modern Relationship Indicators
+
+Adapting classical wisdom to contemporary relationship structures:
+Love Marriage: Venus + Mars connection to 5th or 7th house
+Arranged Marriage: Jupiter + Saturn in dignified position, 7th lord in stable placement
+Late Marriage: Saturn in or aspecting 7th, Mars in 7th (Mangal Dosha)
+Multiple Marriages: 7th lord in dusthana, malefics in 2nd and 7th
+Live-in / Unconventional: Rahu in 7th, Ketu in 5th, Uranus-equivalent patterns
+Inter-cultural Marriage: 7th lord in 9th or 12th, Rahu involvement
+Long Distance: Mercury-Rahu connection to 7th, 12th house support
+
+Relationship Remedies Per Affliction
+
+Trikal Vaani recommends BPHS-sanctioned remedies based on relationship challenges:
+Saturn (delay, distance): Saturday oil donation; Shani Stotra; serve elderly; patience.
+Mars (Mangal Dosha): Tuesday red items donation; Hanuman Chalisa; match with another Manglik partner per BPHS rules.
+Venus (relationship harmony): Friday white items donation; Lakshmi mantra; honor feminine wisdom.
+Rahu (karmic patterns): Donate to disadvantaged; recite Rahu Beej Mantra; conscious relationship work.
+Jupiter (long-term wisdom): Thursday yellow donation; Guru mantra; respect dharmic principles.
+
+Personal Relationship Analysis
+
+Trikal Vaani's Swiss Ephemeris-powered Vedic analysis evaluates your 7th house, Venus and Jupiter placements, D9 Navamsa chart, current Dasha alignment with marriage houses, Mangal Dosha presence with cancellations, and Ashtakoot compatibility when matching with a specific partner. Begin with our free Nakshatra Calculator to understand your relationship temperament, or get the full reading by Rohiit Gupta, Chief Vedic Architect, Delhi NCR.`,
     faqs: [
       {
         q: 'Which house governs relationships in Vedic astrology?',
@@ -251,13 +599,78 @@ Synastry (dual chart analysis) examines where key planets of one person fall in 
     planet: 'Jupiter & Moon',
     house:  '4th, 5th & 9th Houses',
     bphsRef:'BPHS Chapters 19, 22, 26',
-    content: `Family life in Vedic astrology is analyzed through multiple houses: the 4th house (Matru Bhava) for mother and domestic peace, the 9th house (Pitru Bhava) for father and ancestral blessings, and the 5th house (Putra Bhava) for children and progeny.
+    content: `Family in Vedic astrology represents the karmic web that shapes the soul's emotional foundation, ancestral inheritance, and the dharmic responsibilities one carries from past births into this lifetime. Family analysis involves multiple houses working in harmony: the 4th house for mother and home, the 9th house for father and ancestors, the 5th house for children, the 2nd house for the immediate family unit, and the 3rd house for siblings. Brihat Parashara Hora Shastra (BPHS) Chapters 19, 22, and 26 establish the classical framework for family bhava analysis.
 
-Jupiter (Guru) is the Putrakaraka — natural significator of children. Jupiter's strength in the natal chart and its position in the D7 Saptamsa (divisional chart for children) determines the blessing of progeny. When Jupiter occupies the 5th house or aspects it, Putra Yoga is created.
+The 4th House — Mother & Domestic Foundation
 
-The Moon (Chandra) is the significator of mother and domestic harmony. A strong Moon in the 4th house creates a peaceful, nurturing home environment. Moon afflicted by Saturn or Rahu in the 4th can indicate tensions with mother or domestic instability.
+The 4th house (Matru Bhava or Sukha Bhava) is the supreme house of mother, home, domestic peace, emotional foundation, and the inner sanctuary of the soul. According to BPHS Chapter 22, the 4th lord's placement and strength determines family happiness more than any other single factor. The Moon (Chandra) as the natural Karaka of mother and the 4th house reveals the quality of maternal relationships and inner emotional security.
 
-Pitru Dosha — when Rahu or Ketu afflicts the Sun or the 9th house — indicates ancestral karmic debt that requires resolution through Pitru Tarpan (ancestral offering), Mahalaya rituals, and specific Pitra Shanti mantras as prescribed in classical texts.`,
+A strong Moon in the 4th house, or the 4th lord placed in a Kendra or Trikona, creates a peaceful, nurturing home environment and a deeply supportive mother. When malefics like Saturn, Rahu, or Mars afflict the 4th house, tensions with mother, domestic instability, or emotional restlessness may emerge — patterns that often heal through conscious spiritual work and Moon-strengthening remedies.
+
+The 9th House — Father & Ancestral Lineage
+
+The 9th house (Dharma Bhava or Pitru Bhava) represents father, paternal lineage, ancestral blessings, dharma, higher wisdom, and inherited fortune (Bhagya). The Sun as the natural Karaka of father is analyzed for father's health, longevity, the native's relationship with him, and the karmic flow of paternal blessings into the native's life.
+
+A strong 9th house with benefic planets indicates paternal support, ancestral grace, and natural fortune throughout life. When the Sun is afflicted by Rahu (Pitru Dosha indication) or Saturn aspects the 9th lord, the relationship with father may face distance, conflict, or premature loss — patterns that classical remedies can significantly heal.
+
+The 5th House — Children & Future Generations
+
+The 5th house (Putra Bhava) governs children, progeny, future generations, and the continuation of the family lineage. Jupiter (Guru) is the Putrakaraka — the natural significator of children. Jupiter's strength in the natal chart and its position in the D7 Saptamsa divisional chart determines the timing and nature of children. When Jupiter occupies the 5th house, aspects it, or forms strong yogas with the 5th lord, Putra Yoga is created — indicating blessing of progeny.
+
+Saturn in the 5th can create delays in conception or childbearing, but eventual blessings emerge with patience and proper Jupiter remedies. Rahu in the 5th may indicate adopted children, unconventional family structures, or significant karmic patterns around progeny.
+
+Pitru Dosha — Ancestral Karmic Debt
+
+Pitru Dosha occurs when Rahu or Ketu afflicts the Sun (significator of father) or the 9th house (Pitru Bhava) in the natal chart. This indicates ancestral karmic debt that manifests in various ways: difficulties with father, obstacles to having children, recurring family health issues, or persistent feelings of being "blocked" despite good effort.
+
+Classical remedies for Pitru Dosha resolution include Pitru Tarpan (water offerings to ancestors) on Amavasya days, Mahalaya Shraddha rituals during the Pitru Paksha fortnight (September-October each year), pilgrimage to specific ancestral pilgrimage sites like Gaya, Trimbakeshwar, or Rameshwaram, and specific Surya mantras. Trikal Vaani's analysis identifies whether your chart shows Pitru Dosha and the precise remedial path.
+
+The 3rd House — Siblings & Courage
+
+The 3rd house (Parakrama Bhava or Sahaja Bhava) governs younger siblings, courage, self-effort, and direct communication. Mars is the natural Karaka of younger siblings, while Jupiter governs elder siblings. The 3rd lord's placement and the planets in the 3rd house determine sibling relationships — whether they support, neutralize, or oppose the native through life.
+
+A strong 3rd house with benefics creates harmonious sibling bonds and mutual support throughout life. Malefics in the 3rd may create competitive dynamics, distance, or estrangement patterns that require conscious family healing.
+
+The 2nd House — Immediate Family Unit
+
+The 2nd house (Kutumba Bhava or Dhana Bhava) represents the immediate family unit one grows up in, the foundational values absorbed from family, and the family's collective economic and emotional well-being. A strong 2nd house with benefic planets creates harmonious family memories and stable economic foundation. Mars in the 2nd can create family arguments; Saturn in the 2nd creates economic restraint or family responsibility burden.
+
+Generational Family Patterns
+
+Vedic astrology recognizes that families carry karmic patterns across generations. When similar planetary signatures appear across multiple family members' charts (same Lagna lord debilitation, same Pitru Dosha pattern, same Sade Sati timing), it indicates a generational pattern requiring conscious family healing. This is why classical texts emphasize that one person's spiritual practices benefit the entire family lineage — seven generations forward and seven generations back, according to Vedic teachings.
+
+Family Yogas
+
+Several Yogas indicate exceptional family harmony or challenges:
+Gajakesari Yoga: Moon and Jupiter in Kendras — family prosperity and respect across generations
+Pitra-Putra Yoga: Strong 9th and 5th lords in mutual relationship — multi-generational dharma
+Matru Yoga: 4th lord with Moon in Kendra — exceptional maternal blessing
+Anapha Yoga: Planets in the 12th from Moon — emotional/family support patterns
+Sunapha Yoga: Planets in the 2nd from Moon — family resources and verbal support
+
+Modern Family Dynamics
+
+Adapting classical principles to contemporary family structures:
+Joint Family Tensions: Mars-Saturn aspect on 4th house; specific Dasha activations
+Single Parent Dynamics: 9th house afflictions, 4th lord in challenging position
+Adoption / Step-family: Rahu in 5th, complex 9th house patterns
+Estranged Family: 2nd lord in dusthana, malefics afflicting 4th and 9th
+Family Business Inheritance: 2nd lord in 10th, Saturn supporting continuity
+NRI Family Separation: 12th house involvement with 4th and 9th lords
+Family Healing Cycles: Dasha periods of 4th, 9th lords often bring reconciliation
+
+Classical Family Remedies
+
+Trikal Vaani recommends BPHS-sanctioned remedies based on family afflictions:
+For Mother / 4th house: Monday milk donation; Moon mantra; respect feminine wisdom in family.
+For Father / 9th house: Sunday wheat donation; Surya Namaskar; serve elders.
+For Pitru Dosha: Amavasya Pitru Tarpan; Mahalaya Shraddha; pilgrimage to ancestral sites.
+For Children / 5th house: Thursday yellow donation; Jupiter mantra; respect teachers and Brahmins.
+For Siblings / 3rd house: Tuesday red items donation; Hanuman Chalisa; honor courage and self-effort.
+
+Personal Family Analysis
+
+Trikal Vaani's Swiss Ephemeris-powered Vedic analysis evaluates your 4th, 5th, 9th, 2nd, and 3rd houses simultaneously, Moon and Sun strength as parental karakas, Jupiter as Putrakaraka, Pitru Dosha detection, and current Vimshottari Dasha alignment with family houses. Begin with our free Kundali Calculator to see your family foundation, or get full family analysis by Rohiit Gupta, Chief Vedic Architect, Delhi NCR.`,
     faqs: [
       {
         q: 'Which planet governs children in Vedic astrology?',
@@ -857,12 +1270,64 @@ export default function DomainPage({ params }: Props) {
     url:         `https://trikalvaani.com/${config.slug}`,
   };
 
+  // ⬇ SESSION E2: HowTo Schema for voice search + smart speaker citation
+  const howToSchema = {
+    '@context':    'https://schema.org',
+    '@type':       'HowTo',
+    name:           `How to Get a Vedic ${config.h1} Reading on Trikal Vaani`,
+    description:    `Get a personalized Vedic astrology reading for ${config.h1.toLowerCase()} using Swiss Ephemeris precision and Rohiit Gupta's BPHS framework.`,
+    image:          'https://trikalvaani.com/og-image.png',
+    totalTime:      'PT60S',
+    estimatedCost: {
+      '@type':    'MonetaryAmount',
+      currency:   'INR',
+      value:      '0',
+    },
+    supply: [
+      { '@type': 'HowToSupply', name: 'Date of birth' },
+      { '@type': 'HowToSupply', name: 'Exact time of birth' },
+      { '@type': 'HowToSupply', name: 'Place of birth' },
+    ],
+    tool: { '@type': 'HowToTool', name: 'Trikal Vaani AI' },
+    step: [
+      {
+        '@type':   'HowToStep',
+        position:  1,
+        name:      'Open Trikal Vaani',
+        text:      'Visit trikalvaani.com — no signup, no credit card required.',
+        url:       'https://trikalvaani.com#birth-form',
+      },
+      {
+        '@type':   'HowToStep',
+        position:  2,
+        name:      'Enter your birth details',
+        text:      'Type your name, date of birth, exact time, and place of birth. The form auto-completes your city.',
+        url:       'https://trikalvaani.com#birth-form',
+      },
+      {
+        '@type':   'HowToStep',
+        position:  3,
+        name:      `Select ${config.h1}`,
+        text:      `Choose the ${config.h1.toLowerCase()} life domain — analysis focuses on ${config.house} and ${config.planet}.`,
+        url:       `https://trikalvaani.com/${config.slug}`,
+      },
+      {
+        '@type':   'HowToStep',
+        position:  4,
+        name:      'Receive Vedic prediction',
+        text:      `Trikal Vaani computes your kundali and delivers a personalized ${config.h1.toLowerCase()} reading based on ${config.bphsRef}.`,
+        url:       'https://trikalvaani.com',
+      },
+    ],
+  };
+
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }} />
 
       <div className="min-h-screen" style={{ background: '#080B12', color: '#e2e8f0' }}>
 
@@ -961,6 +1426,19 @@ export default function DomainPage({ params }: Props) {
               {config.ctaText} — Free Reading 🔱
             </Link>
             <p className="text-xs text-slate-600 mt-3">No credit card. Instant results. Trusted by thousands across India.</p>
+          </div>
+
+          <div className="mt-8">
+            <h3 className="text-sm font-semibold text-slate-400 mb-3">Related Free Calculators</h3>
+            <div className="flex flex-wrap gap-2">
+              {(CALCULATOR_LINKS[config.slug] || []).map(calc => (
+                <Link key={calc.slug} href={`/calculators/${calc.slug}`}
+                  className="px-3 py-1.5 rounded-lg text-xs hover:text-amber-300 transition-colors"
+                  style={{ background: 'rgba(212,175,55,0.08)', border: '1px solid rgba(212,175,55,0.2)', color: '#D4AF37' }}>
+                  {calc.emoji} {calc.name}
+                </Link>
+              ))}
+            </div>
           </div>
 
           <div className="mt-8">
