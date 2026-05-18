@@ -121,7 +121,8 @@ export async function POST(req: NextRequest) {
         cache: 'no-store',
       });
       if (tRes.ok) {
-        templateData = await tRes.json();
+        const tJson = await tRes.json();
+        templateData = tJson?.template ?? tJson;
       } else {
         console.warn('[kundali] /template non-200, continuing without it');
       }
