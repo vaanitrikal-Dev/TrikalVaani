@@ -14,8 +14,7 @@ import KundaliCalculatorClient from '@/components/calculators/KundaliCalculatorC
 const GOLD = '#D4AF37';
 
 export const metadata: Metadata = {
-  title: {
-  absolute: 'Free AI Kundli Calculator — Janm Kundali Online | Trikal Vaani',
+  title: 'Free AI Kundli Calculator — Janm Kundali Online | Trikal Vaani',
   description:
     'Free AI Kundli calculator powered by Swiss Ephemeris. Get your accurate Janm Kundali, Lagna, Nakshatra, Chandra Rashi, Mahadasha, and Parashar remedies online instantly. By Rohiit Gupta, Chief Vedic Architect.',
   keywords: [
