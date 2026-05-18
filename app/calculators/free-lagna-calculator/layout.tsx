@@ -7,7 +7,8 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Free Lagna Calculator — Find Your Ascendant (Rising Sign) Online | Trikal Vaani',
+  title: {
+  absolute: 'Free Lagna Calculator — Find Your Ascendant (Rising Sign) Online | Trikal Vaani',
   description:
     'Free Lagna Calculator powered by Swiss Ephemeris. Discover your Ascendant (Lagna Rashi), Lagna lord, body type, personality, element & 3 Parashar remedies instantly. By Rohiit Gupta, Chief Vedic Architect.',
   keywords: [
