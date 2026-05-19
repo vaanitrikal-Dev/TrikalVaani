@@ -1,37 +1,57 @@
-// 🔱 TRIKAL VAANI | app/page.tsx | v10.0
+// 🔱 TRIKAL VAANI | app/page.tsx | v11.0
 // Owner: Rohiit Gupta, Chief Vedic Architect
-// Date: 2026-05-18
+// Date: 2026-05-19
 // ============================================================================
-// MAJOR ARCHITECTURE CHANGE vs v9.3:
-//   ❌ REMOVED: 'use client' directive
-//      → Homepage is now a SERVER COMPONENT
-//      → All schemas + GEO content render in initial HTML
-//      → Googlebot, Perplexity, SGE, ChatGPT crawlers see EVERYTHING instantly
-//   ❌ REMOVED: useState + handleSelectCategory (moved to app/HomeClient.tsx)
-//   ❌ REMOVED: <HomeFAQ /> import & render in old position
-//      → HomeFAQ v2.0 is now repositioned as DEEP FAQ tier (kept, not killed)
-//   ✅ ADDED: export const metadata — page-specific SEO override
-//      → Overrides layout.tsx v2.7 default with even stronger homepage title
-//   ✅ ADDED: <HomeClient /> import — the ONLY client island on this page
-//   ✅ MOVED: <HomepageGEO /> from middle-of-page to RIGHT AFTER <Hero />
-//      → 56-word direct answer block now in first viewport
-//      → AI crawlers extract brand framing immediately
-//   ✅ KEPT: <HomeFAQ /> as TIER 2 deep FAQ (positioned after Tier 1 HomepageGEO FAQ)
+// CEO-APPROVED LAYOUT REORDER (v10.0 → v11.0):
 //
-// PAGE FLOW (top to bottom):
-//   1. Hero                    (H1 + visual hook)
-//   2. HomepageGEO             (GEO direct answer + Tier 1 FAQ + E-E-A-T + local SEO)
-//   3. LiveTrustBar            (social proof)
-//   4. SocialProofTicker       (live ticker)
-//   5. HomeClient              (DardEngine + BirthForm — client island)
-//   6. DailyPanchang
-//   7. DailyRashifal
-//   8. PillarsGrid
-//   9. AIManifesto
-//   10. PricingSection
-//   11. HomeFAQ v2.0           (Tier 2 deep technical FAQ)
-//   12. InnerCircleWaitlist
-//   13. Blog section
+// STRATEGIC GOAL: Move earning sections ABOVE the mobile fold.
+// Current v10.0 order pushed Mahakaal form to slot #5, causing ~50-60% mobile
+// drop-off before any earning component was visible. v11.0 fixes this.
+//
+// ❌ REMOVED from old positions:
+//    - HomepageGEO was at slot #2 (right after Hero) — moved to slot #11
+//    - LiveTrustBar was at slot #3 — moved to slot #4
+//    - SocialProofTicker was at slot #4 — moved to slot #6
+//    - PricingSection was at slot #10 — moved to slot #5
+//
+// ✅ NEW SLOT #3: KundaliMilanTeaser (NEW component, "Launching Soon" earning
+//    placeholder with email capture to Supabase milan_waitlist table)
+//
+// ✅ CRITICAL DESIGN DECISION:
+//    HomeClient (DardEngine + BirthForm) stays INTACT as one component.
+//    Their shared useState<SelectedCategory> + handleSelectCategory flow is
+//    a brilliant funnel — user picks Dard category, BirthForm pre-fills below.
+//    Breaking this would hurt conversions more than reordering helps.
+//
+// ✅ TIERED LOCK POLICY (Iron Rule IR-12):
+//    LOCKED sections (no edits without CEO approval):
+//      #2 HomeClient (Mahakaal form + Dard Engine)
+//      #3 KundaliMilanTeaser
+//      (Maa Shakti lives inside prediction pages, not homepage)
+//    EDITABLE sections:
+//      #1 Hero, #4-13 (all others)
+//
+// ✅ SEO/GEO IMPACT: ZERO loss.
+//    HomepageGEO HTML still renders in the document. Google, Perplexity, SGE,
+//    and ChatGPT crawlers parse the full DOM regardless of visual position.
+//    Schema markup (HomepageSchema + SchemaScript) remains in document head.
+//    Position only affects HUMAN scroll order, not AI extraction.
+//
+// PAGE FLOW v11.0 (top to bottom):
+//   1. Hero                    (H1 + visual hook — compressed)
+//   2. HomeClient              (Mahakaal form + Dard Engine — EARNING LOCKED)
+//   3. KundaliMilanTeaser      (NEW — Launching Soon earning placeholder LOCKED)
+//   4. LiveTrustBar            (social proof — quick trust strip)
+//   5. PricingSection          (commercial trust — show tiers)
+//   6. SocialProofTicker       (live ticker)
+//   7. DailyPanchang           (daily return-visit hook)
+//   8. DailyRashifal           (daily return-visit hook)
+//   9. PillarsGrid             (life domains)
+//   10. AIManifesto            (brand philosophy)
+//   11. HomepageGEO            (GEO direct answer + Tier 1 FAQ + E-E-A-T — CRAWLER ONLY)
+//   12. HomeFAQ v2.0           (Tier 2 deep technical FAQ)
+//   13. InnerCircleWaitlist    (VIP capture)
+//   14. Blog section           (3 latest posts)
 // ============================================================================
 
 import type { Metadata } from 'next';
@@ -51,17 +71,19 @@ import DailyPanchang from '@/components/landing/DailyPanchang';
 import DailyRashifal from '@/components/landing/DailyRashifal';
 import PricingSection from '@/components/landing/PricingSection';
 import LiveTrustBar from '@/components/landing/LiveTrustBar';
+import KundaliMilanTeaser from '@/components/landing/KundaliMilanTeaser';
 import HomeClient from './HomeClient';
 import { blogPosts } from '@/lib/blog-data';
 
 // ─────────────────────────────────────────────────────────────
 // PAGE-SPECIFIC METADATA — overrides layout.tsx v2.7 defaults
-// Homepage is the most important page; deserves its own optimized SEO.
+// v11.0: Updated description to include Kundali Milan keyword
+//        for early SEO indexing window before product launches.
 // ─────────────────────────────────────────────────────────────
 export const metadata: Metadata = {
-  title: 'Trikal Vaani | Free Kundli & Accurate AI Vedic Astrology',
+  title: 'Trikal Vaani | Free Kundli, Kundali Milan & Accurate AI Vedic Astrology',
   description:
-    "Get your free AI kundli & accurate Vedic astrology predictions instantly. Personalised readings for career, wealth, marriage, health & legal matters by Rohiit Gupta, Chief Vedic Architect (Delhi NCR). Powered by Swiss Ephemeris. Voice & text readings from ₹11.",
+    "Get your free AI kundli, Kundali Milan & accurate Vedic astrology predictions. Personalised readings for career, wealth, marriage, health & legal matters by Rohiit Gupta, Chief Vedic Architect (Delhi NCR). Powered by Swiss Ephemeris. Voice & text readings from ₹11.",
   alternates: {
     canonical: 'https://trikalvaani.com/',
     languages: {
@@ -70,9 +92,9 @@ export const metadata: Metadata = {
     },
   },
   openGraph: {
-    title: 'Trikal Vaani | Free Kundli & Accurate AI Vedic Astrology',
+    title: 'Trikal Vaani | Free Kundli, Kundali Milan & Accurate AI Vedic Astrology',
     description:
-      "Free AI kundli & accurate Vedic astrology predictions. Personalised readings by Rohiit Gupta, Chief Vedic Architect. Voice & text from ₹11.",
+      "Free AI kundli, Kundali Milan & accurate Vedic astrology predictions. Personalised readings by Rohiit Gupta, Chief Vedic Architect. Voice & text from ₹11.",
     url: 'https://trikalvaani.com/',
     type: 'website',
     locale: 'en_IN',
@@ -82,15 +104,15 @@ export const metadata: Metadata = {
         url: 'https://trikalvaani.com/og-default.jpg',
         width: 1200,
         height: 630,
-        alt: 'Trikal Vaani — Free Kundli & Accurate AI Vedic Astrology',
+        alt: 'Trikal Vaani — Free Kundli, Kundali Milan & Accurate AI Vedic Astrology',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Trikal Vaani | Free Kundli & Accurate AI Vedic Astrology',
+    title: 'Trikal Vaani | Free Kundli, Kundali Milan & Accurate AI Vedic Astrology',
     description:
-      'Free AI kundli & accurate Vedic astrology predictions. Voice & text readings from ₹11.',
+      'Free AI kundli, Kundali Milan & accurate Vedic astrology predictions. Voice & text readings from ₹11.',
     images: ['https://trikalvaani.com/og-default.jpg'],
   },
 };
@@ -113,50 +135,93 @@ export default function HomePage() {
         <SiteNav />
         <main>
 
-          {/* ── 1. HERO ─────────────────────────────────────────────────── */}
+          {/* ═══════════════════════════════════════════════════════════════
+              EARNING TIER — slots #1 to #3 — TIERED LOCK (IR-12)
+              Mobile users see ALL earning slots before any informational
+              content. This is the revenue zone.
+          ═══════════════════════════════════════════════════════════════ */}
+
+          {/* ── 1. HERO ────────────────────────────────────────────────────
+              Brand recall + single CTA. Compressed for mobile (40vh target).
+              EDITABLE per IR-12. */}
           <Hero />
 
-          {/* ── 2. HOMEPAGE GEO — moved to ABOVE-THE-FOLD ─────────────────
-              Critical: 56-word direct answer + E-E-A-T author + visible FAQ
-              must hit AI crawlers in the first viewport for brand citation. */}
-          <HomepageGEO />
-
-          {/* ── 3. LIVE TRUST BAR ───────────────────────────────────────── */}
-          <LiveTrustBar />
-
-          {/* ── 4. SOCIAL PROOF TICKER ──────────────────────────────────── */}
-          <SocialProofTicker />
-
-          {/* ── 5. CLIENT ISLAND — DardEngine + BirthForm with shared state
-              This is the ONLY client component on the homepage.
-              Holds useState<SelectedCategory> and handleSelectCategory. */}
+          {/* ── 2. HOMECLIENT — MAHAKAAL + DARD ENGINE ─────────────────────
+              🔒 EARNING LOCKED (IR-12)
+              The primary conversion surface. DardEngine selector pre-fills
+              the BirthForm category via shared useState<SelectedCategory>.
+              DO NOT split these two components — the funnel depends on
+              their glued state.
+              Order inside: DardEngine card grid → Mahakaal BirthForm. */}
           <HomeClient />
 
-          {/* ── 6. DAILY PANCHANG ───────────────────────────────────────── */}
-          <DailyPanchang />
+          {/* ── 3. KUNDALI MILAN TEASER — NEW ──────────────────────────────
+              🔒 EARNING LOCKED (IR-12)
+              Day 1 ships "Launching Soon" placeholder with email capture
+              to Supabase milan_waitlist table. Pre-launch waitlist building
+              for Day 8 (Kundali Milan goes LIVE).
+              SEO/GEO indexing window opens immediately so Google starts
+              crawling Kundali Milan content before the product is live. */}
+          <KundaliMilanTeaser />
 
-          {/* ── 7. DAILY RASHIFAL ───────────────────────────────────────── */}
-          <DailyRashifal />
+          {/* ═══════════════════════════════════════════════════════════════
+              TRUST + COMMERCIAL TIER — slots #4 to #6
+              Reinforce trust signals immediately after earning surfaces.
+          ═══════════════════════════════════════════════════════════════ */}
 
-          {/* ── 8. PILLARS GRID ─────────────────────────────────────────── */}
-          <PillarsGrid />
+          {/* ── 4. LIVE TRUST BAR ──────────────────────────────────────── */}
+          <LiveTrustBar />
 
-          {/* ── 9. AI MANIFESTO ─────────────────────────────────────────── */}
-          <AIManifesto />
-
-          {/* ── 10. PRICING SECTION ─────────────────────────────────────── */}
+          {/* ── 5. PRICING SECTION ─────────────────────────────────────────
+              Moved up from slot #10. After someone sees Mahakaal form +
+              Kundali Milan teaser, they want to know the full price ladder. */}
           <PricingSection />
 
-          {/* ── 11. HOME FAQ v2.0 — TIER 2 DEEP TECHNICAL FAQ ────────────
-              Different from Tier 1 FAQ inside HomepageGEO.
-              Unique schema @id="#homefaq-deep" — no collision.
+          {/* ── 6. SOCIAL PROOF TICKER ─────────────────────────────────── */}
+          <SocialProofTicker />
+
+          {/* ═══════════════════════════════════════════════════════════════
+              ENGAGEMENT + RETENTION TIER — slots #7 to #10
+              Daily-return hooks + brand depth content.
+          ═══════════════════════════════════════════════════════════════ */}
+
+          {/* ── 7. DAILY PANCHANG ──────────────────────────────────────── */}
+          <DailyPanchang />
+
+          {/* ── 8. DAILY RASHIFAL ──────────────────────────────────────── */}
+          <DailyRashifal />
+
+          {/* ── 9. PILLARS GRID — life domains ─────────────────────────── */}
+          <PillarsGrid />
+
+          {/* ── 10. AI MANIFESTO — brand philosophy ────────────────────── */}
+          <AIManifesto />
+
+          {/* ═══════════════════════════════════════════════════════════════
+              SEO/GEO/AEO/E-E-A-T TIER — slots #11 to #14
+              These sections exist primarily for Google, Perplexity, SGE,
+              ChatGPT, and Gemini crawlers. Human users may scroll here
+              for deep info, but the earning conversion already happened
+              above. Crawlers parse position-independent — moving these
+              down has ZERO impact on search rankings or AI citations.
+          ═══════════════════════════════════════════════════════════════ */}
+
+          {/* ── 11. HOMEPAGE GEO — moved from slot #2 ──────────────────────
+              56-word direct answer + Tier 1 FAQ + author E-E-A-T + local SEO.
+              CEO DECISION (May 19 2026): "Human will not read HomepageGEO,
+              it's only for SEO/GEO/AEO/E-E-A-T — shift below earning sections."
+              Crawlers extract this content regardless of DOM position. */}
+          <HomepageGEO />
+
+          {/* ── 12. HOME FAQ v2.0 — TIER 2 DEEP TECHNICAL FAQ ──────────────
+              Unique schema @id="#homefaq-deep" — no collision with Tier 1.
               Covers Sade Sati, Manglik Dosha, Pratyantar Dasha, Dhana Yoga. */}
           <HomeFAQ />
 
-          {/* ── 12. INNER CIRCLE WAITLIST ───────────────────────────────── */}
+          {/* ── 13. INNER CIRCLE WAITLIST ──────────────────────────────── */}
           <InnerCircleWaitlist />
 
-          {/* ── 13. BLOG SECTION ────────────────────────────────────────── */}
+          {/* ── 14. BLOG SECTION ───────────────────────────────────────── */}
           <section className="py-20 px-4">
             <div className="max-w-6xl mx-auto">
               <div className="text-center mb-12">
@@ -201,6 +266,7 @@ export default function HomePage() {
 }
 
 // ============================================================================
-// END — app/page.tsx v10.0
+// END — app/page.tsx v11.0
 // 🔱 Trikal Vaani | Rohiit Gupta, Chief Vedic Architect
+// CEO LOCKED: TIERED LAYOUT — earning sections above mobile fold
 // ============================================================================
