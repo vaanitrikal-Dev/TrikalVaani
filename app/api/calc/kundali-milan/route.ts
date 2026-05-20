@@ -1,47 +1,80 @@
-// TRIKAL VAANI - Kundali Milan Compute API - v1.3 - Free save + slug + milanId
+// TRIKAL VAANI - Kundali Milan Compute API
 // CEO: Rohiit Gupta
+// File: app/api/calc/kundali-milan/route.ts
+// VERSION: 1.4 - per-person manglik fix (bride.manglik / groom.manglik paths)
+//
+// CHANGE LOG (v1.3 → v1.4):
+//   manglik_data now saves structured per-person + combined via buildManglikData().
+//   VM returns bride/groom manglik nested under vmData.bride.manglik + vmData.groom.manglik.
+//   Previous save: vmData?.manglik_evaluation only (combined verdict, no per-person).
+//   Now: { bride: {is_manglik, strength}, groom: {is_manglik, strength}, combined: {...} }
+//   Badge on free result page now shows correct per-person status.
+//   All other logic identical to v1.3.
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { z } from 'zod';
 import crypto from 'crypto';
 
-// -- VM endpoint ----------------------------------------------
 const VM_MILAN_ENDPOINT =
   process.env.VM_MILAN_ENDPOINT ?? 'http://34.14.164.105:8001/milan-compute';
 
-// -- Supabase (service role) ----------------------------------
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-// -- Slug generator (matches verify-milan-payment style) ------
 function makeSlug(): string {
   const ts  = Date.now().toString(36);
   const rnd = crypto.randomBytes(4).toString('hex');
   return `m-${ts}-${rnd}`;
 }
 
-// -- Helpers: coerce form field names -> canonical -------------
-// Form (buildMilanBody) sends: lat, lng, cityName, timezone.
-// Accept BOTH lat/lng/cityName AND latitude/longitude/place.
+// ── Build structured manglik_data from VM response ────────────
+// VM returns per-person manglik nested under:
+//   vmData.bride.manglik  → compute_manglik_full for person1
+//   vmData.groom.manglik  → compute_manglik_full for person2
+//   vmData.manglik_evaluation → combined verdict
+function buildManglikData(vmData: any): object | null {
+  if (!vmData) return null;
+
+  const combined = vmData?.manglik_evaluation   ?? null;
+  const bride    = vmData?.bride?.manglik        ?? null;
+  const groom    = vmData?.groom?.manglik        ?? null;
+
+  if (!combined && !bride && !groom) return null;
+
+  return {
+    bride: bride ? {
+      is_manglik: bride.is_manglik ?? false,
+      strength:   bride.strength   ?? 'Not Manglik',
+    } : null,
+    groom: groom ? {
+      is_manglik: groom.is_manglik ?? false,
+      strength:   groom.strength   ?? 'Not Manglik',
+    } : null,
+    combined: combined ? {
+      status:         combined.status         ?? 'NONE',
+      verdict:        combined.verdict        ?? '',
+      verdict_hi:     combined.verdict_hi     ?? '',
+      recommendation: combined.recommendation ?? '',
+    } : null,
+  };
+}
+
+// ── Validation schema ─────────────────────────────────────────
 const partnerSchema = z
   .object({
     name:      z.string().trim().min(1, 'Name required').max(80),
     gender:    z.enum(['male', 'female']).optional(),
     dob:       z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'DOB must be YYYY-MM-DD'),
     tob:       z.string().regex(/^\d{2}:\d{2}$/, 'TOB must be HH:MM'),
-
     place:     z.string().trim().max(160).optional(),
     cityName:  z.string().trim().max(160).optional(),
-
     latitude:  z.number().min(-90).max(90).optional(),
     lat:       z.number().min(-90).max(90).optional(),
-
     longitude: z.number().min(-180).max(180).optional(),
     lng:       z.number().min(-180).max(180).optional(),
-
     timezone:  z.number().min(-12).max(14),
     ayanamsa:  z.string().optional(),
   })
@@ -58,12 +91,12 @@ const partnerSchema = z
 
 const requestSchema = z
   .object({
-    bride:    partnerSchema,
-    groom:    partnerSchema,
-    audience: z.enum(['couple', 'parent', 'both']).optional(),
+    bride:           partnerSchema,
+    groom:           partnerSchema,
+    audience:        z.enum(['couple', 'parent', 'both']).optional(),
     audienceVersion: z.enum(['couple', 'parent', 'both']).optional(),
-    language: z.enum(['hinglish', 'hindi', 'english']).default('hinglish'),
-    tier:     z.string().optional(),
+    language:        z.enum(['hinglish', 'hindi', 'english']).default('hinglish'),
+    tier:            z.string().optional(),
   })
   .passthrough();
 
@@ -71,7 +104,6 @@ export async function POST(req: NextRequest) {
   try {
     const json = await req.json();
 
-    // -- Validate -------------------------------------------
     const parsed = requestSchema.safeParse(json);
     if (!parsed.success) {
       return NextResponse.json(
@@ -87,7 +119,6 @@ export async function POST(req: NextRequest) {
       'couple' | 'parent' | 'both';
     const language = data.language;
 
-    // -- VM expects person1/person2 (v1.1) ------------------
     const vmPayload = {
       person1: {
         name:      bride.name,
@@ -123,11 +154,11 @@ export async function POST(req: NextRequest) {
     let vmRes: Response;
     try {
       vmRes = await fetch(VM_MILAN_ENDPOINT, {
-        method: 'POST',
+        method:  'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(vmPayload),
-        signal: controller.signal,
-        cache: 'no-store',
+        body:    JSON.stringify(vmPayload),
+        signal:  controller.signal,
+        cache:   'no-store',
       });
     } catch (e: unknown) {
       clearTimeout(timeout);
@@ -150,21 +181,16 @@ export async function POST(req: NextRequest) {
 
     const vmData = await vmRes.json();
 
-    const ashtakootScore = vmData?.ashtakoot?.total_score ?? null;
-    const manglikStatus  = vmData?.manglik_evaluation?.status ?? null;
+    const ashtakootScore = vmData?.ashtakoot?.total_score          ?? null;
+    const manglikStatus  = vmData?.manglik_evaluation?.status       ?? null;
 
     const previewHook =
       ashtakootScore !== null && ashtakootScore >= 18
         ? 'Aapki rishtedari mein Mahakaal ki rehmat dikhayi de rahi hai. Poori sachhai dekhne ke liye Deep Reading kholiye.'
         : 'Is rishtedari mein kuch chhupe huye sutra hain jo sirf Deep Reading mein khulenge.';
 
-    // -- v1.3: SAVE free preview to kundali_milan + return milanId --
-    // tier FORCED to 'free'. order_id NULL (no payment).
-    // Free row stores score + ashtakoot + manglik (free shows these).
-    // remedies_data + gemini_narrative LEFT NULL (locked for paid upgrade).
     const slug = makeSlug();
 
-    // Normalise birth data to the shape the result page + PDF expect
     const brideData = {
       name: bride.name, gender: bride.gender ?? 'female',
       dob: bride.dob, tob: bride.tob,
@@ -183,33 +209,29 @@ export async function POST(req: NextRequest) {
     const { error: saveErr } = await supabase
       .from('kundali_milan')
       .insert({
-        order_id:         null,          // free - no payment
+        order_id:         null,
         slug,
-        tier:             'free',        // anti-tamper: always free here
+        tier:             'free',
         audience,
         language,
         bride_data:       brideData,
         groom_data:       groomData,
         ashtakoot_score:  ashtakootScore,
-        ashtakoot_data:   vmData?.ashtakoot ?? null,
-        manglik_data:     vmData?.manglik_evaluation ?? null,
-        remedies_data:    null,          // LOCKED for paid
-        gemini_narrative: null,          // LOCKED for paid
+        ashtakoot_data:   vmData?.ashtakoot        ?? null,
+        manglik_data:     buildManglikData(vmData),       // v1.4: per-person + combined
+        remedies_data:    null,
+        gemini_narrative: null,
         pdf_url:          null,
       });
 
     if (saveErr) {
-      // Save failed - still return preview inline so user sees something,
-      // but no milanId (form will show its inline preview path).
       console.error('[Trikal] Free Milan save error:', saveErr.message);
       savedSlug = null;
     }
 
-    // -- Response -------------------------------------------
     return NextResponse.json({
       success:  true,
       tier:     'free',
-      // milanId drives the form redirect to /milan/[slug]
       milanId:  savedSlug,
       slug:     savedSlug,
       audience,
@@ -222,11 +244,11 @@ export async function POST(req: NextRequest) {
       bride: { name: bride.name, place: bride.place, dob: bride.dob, tob: bride.tob },
       groom: { name: groom.name, place: groom.place, dob: groom.dob, tob: groom.tob },
       locked: {
-        full_ashtakoot:    false,  // free shows score + basic ashtakoot
-        full_manglik:      false,  // free shows manglik status
-        remedies:          true,   // LOCKED
-        gemini_narrative:  true,   // LOCKED
-        pdf_download:      true,   // LOCKED
+        full_ashtakoot:   false,
+        full_manglik:     false,
+        remedies:         true,
+        gemini_narrative: true,
+        pdf_download:     true,
       },
     });
 
