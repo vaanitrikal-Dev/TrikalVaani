@@ -151,7 +151,7 @@ export async function POST(req: NextRequest) {
     const vmData = await vmRes.json();
 
     const ashtakootScore = vmData?.ashtakoot?.total_score ?? null;
-    const manglikStatus  = vmData?.manglik?.status ?? null;
+    const manglikStatus  = vmData?.manglik_evaluation?.status ?? null;
 
     const previewHook =
       ashtakootScore !== null && ashtakootScore >= 18
@@ -192,7 +192,7 @@ export async function POST(req: NextRequest) {
         groom_data:       groomData,
         ashtakoot_score:  ashtakootScore,
         ashtakoot_data:   vmData?.ashtakoot ?? null,
-        manglik_data:     vmData?.manglik   ?? null,
+        manglik_data:     vmData?.manglik_evaluation ?? null,
         remedies_data:    null,          // LOCKED for paid
         gemini_narrative: null,          // LOCKED for paid
         pdf_url:          null,
