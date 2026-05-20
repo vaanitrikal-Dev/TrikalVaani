@@ -814,6 +814,11 @@ export default function KundaliMilanForm() {
   const [loadingStep,    setLoadingStep]    = useState(0)
   const [paymentLoading, setPaymentLoading] = useState(false)
 
+  // v1.2: price tier picker. free / basic_51 / deep_101 / both_151
+  // deep_101 needs an audience (couple|parent). free/basic_51/both_151 do not.
+  type PriceTier = 'free' | 'basic_51' | 'deep_101' | 'both_151'
+  const [priceTier, setPriceTier] = useState<PriceTier>('deep_101')
+
   const loadingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const formTopRef = useRef<HTMLDivElement>(null)
 
@@ -873,7 +878,7 @@ export default function KundaliMilanForm() {
 
   const validateStep3 = (): boolean => {
     const errs: Record<string, string> = {}
-    if (!fields.audience) errs.audience = 'Please select audience'
+    if (needsAudience && !fields.audience) errs.audience = 'Please select audience'
     if (!fields.contactName.trim()) errs.contactName = 'Name required for delivery'
     if (!fields.contactMobile || fields.contactMobile.replace(/\D/g, '').length < fields.contactCountryDigits) {
       errs.contactMobile = `Valid ${fields.contactCountryDigits}-digit mobile required`
@@ -918,25 +923,36 @@ export default function KundaliMilanForm() {
     if (loadingIntervalRef.current) clearInterval(loadingIntervalRef.current)
   }
 
-  // Tier resolution (audience -> tier)
+  // Tier resolution (priceTier + audience -> internal MilanTier)
   const resolveTier = (audience: AudienceVersion, isFreePreview: boolean): MilanTier => {
-    if (isFreePreview) return 'free'
-    if (audience === 'both') return 'deep_both'
-    if (audience === 'couple') return 'deep_couple'
-    return 'deep_parent'
+    if (isFreePreview || priceTier === 'free') return 'free'
+    if (priceTier === 'basic_51') return 'basic'
+    if (priceTier === 'both_151') return 'deep_both'
+    // deep_101 -> couple or parent based on audience
+    if (audience === 'parent') return 'deep_parent'
+    return 'deep_couple'
   }
 
-  const resolvePrice = (audience: AudienceVersion | ''): number => {
-    if (audience === 'both') return 151
+  const resolvePrice = (_audience: AudienceVersion | ''): number => {
+    if (priceTier === 'basic_51') return 51
+    if (priceTier === 'both_151') return 151
     return 101
   }
 
+  // Does the chosen price tier need an audience (couple/parent) choice?
+  const needsAudience = priceTier === 'deep_101'
+
   // Build request body for API
   const buildMilanBody = (paymentVerification: any = null, isFree = false) => {
+    // For basic_51/free: audience is cosmetic (couple default).
+    // For both_151: force 'both'. For deep_101: use selected audience.
+    const effectiveAudience: AudienceVersion =
+      priceTier === 'both_151' ? 'both' :
+      (fields.audience || 'couple') as AudienceVersion
     return {
       sessionId: `milan_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`,
-      tier: resolveTier(fields.audience as AudienceVersion, isFree),
-      audienceVersion: fields.audience,
+      tier: resolveTier(effectiveAudience, isFree),
+      audienceVersion: effectiveAudience,
       paymentVerification,
       language: fields.language,
       bride: {
@@ -1096,10 +1112,13 @@ export default function KundaliMilanForm() {
   const getSubmitLabel = () => {
     if (paymentLoading) return 'Razorpay popup khul raha hai...'
     if (isLoading) return LOADING_STEPS_PAYMENT[loadingStep] || 'Processing...'
-    if (fields.audience === 'both') return 'Pay ₹151 with Razorpay - Both Versions'
-    if (fields.audience === 'couple') return 'Pay ₹101 with Razorpay - Couple Version'
-    if (fields.audience === 'parent') return 'Pay ₹101 with Razorpay - Parent Version'
-    return 'Select audience to continue'
+    if (priceTier === 'free')     return 'Get Free Preview'
+    if (priceTier === 'basic_51') return 'Pay Rs51 with Razorpay - Basic Milan'
+    if (priceTier === 'both_151') return 'Pay Rs151 with Razorpay - Both Versions'
+    // deep_101
+    if (fields.audience === 'couple') return 'Pay Rs101 with Razorpay - Couple Version'
+    if (fields.audience === 'parent') return 'Pay Rs101 with Razorpay - Parent Version'
+    return 'Select Couple or Parent above'
   }
 
   // RENDER
@@ -1208,18 +1227,68 @@ export default function KundaliMilanForm() {
             />
           )}
 
-          {/* STEP 3 - AUDIENCE + CONTACT + PAYMENT */}
+          {/* STEP 3 - TIER + AUDIENCE + CONTACT + PAYMENT */}
           {currentStep === 3 && (
             <div className="grid gap-5">
 
-              <AudienceSelector
-                selected={fields.audience}
-                onChange={(a) => setField('audience', a)}
-              />
-              {errors.audience && (
-                <p style={{ color: '#ef4444', fontSize: '12px', textAlign: 'center', margin: 0 }}>
-                  {errors.audience}
-                </p>
+              {/* v1.2: PRICE TIER PICKER (Free / Rs51 / Rs101 / Rs151) */}
+              <div>
+                <div style={{ textAlign: 'center', marginBottom: '14px' }}>
+                  <p style={{ color: GOLD, fontSize: '12px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', margin: '0 0 6px' }}>
+                    Choose Your Tier
+                  </p>
+                  <h3 style={{ color: '#fff', fontSize: '18px', fontWeight: 700, margin: 0, fontFamily: 'Georgia, serif' }}>
+                    Aapko kaunsa Milan chahiye?
+                  </h3>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  {([
+                    { key: 'free',     label: 'Free Preview', price: 'Rs0',   desc: 'Score + dosha flags' },
+                    { key: 'basic_51', label: 'Basic Milan',  price: 'Rs51',  desc: 'Full 36 Guna + PDF' },
+                    { key: 'deep_101', label: 'Deep Milan',   price: 'Rs101', desc: 'Couple / Parent + remedies' },
+                    { key: 'both_151', label: 'Both Versions',price: 'Rs151', desc: 'Couple + Parent, one PDF' },
+                  ] as { key: PriceTier; label: string; price: string; desc: string }[]).map(t => (
+                    <button
+                      key={t.key}
+                      type="button"
+                      onClick={() => { setPriceTier(t.key); setApiError(null) }}
+                      style={{
+                        padding: '14px',
+                        borderRadius: '12px',
+                        textAlign: 'left',
+                        cursor: 'pointer',
+                        background: priceTier === t.key ? GOLD_RGBA(0.15) : 'rgba(255,255,255,0.03)',
+                        border: `2px solid ${priceTier === t.key ? GOLD : 'rgba(255,255,255,0.08)'}`,
+                        transition: 'all 0.2s',
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '6px' }}>
+                        <span style={{ color: priceTier === t.key ? GOLD : '#e2e8f0', fontWeight: 700, fontSize: '13px' }}>
+                          {t.label}
+                        </span>
+                        <span style={{ color: GOLD, fontWeight: 800, fontSize: '16px', fontFamily: 'Georgia, serif' }}>
+                          {t.price}
+                        </span>
+                      </div>
+                      <p style={{ color: '#94a3b8', fontSize: '11px', margin: '4px 0 0' }}>{t.desc}</p>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Audience selector ONLY for Deep Rs101 (couple vs parent) */}
+              {needsAudience && (
+                <>
+                  <AudienceSelector
+                    selected={fields.audience}
+                    onChange={(a) => setField('audience', a)}
+                  />
+                  {errors.audience && (
+                    <p style={{ color: '#ef4444', fontSize: '12px', textAlign: 'center', margin: 0 }}>
+                      {errors.audience}
+                    </p>
+                  )}
+                </>
               )}
 
               {/* Language */}
@@ -1318,8 +1387,8 @@ export default function KundaliMilanForm() {
                 />
               </div>
 
-              {/* Razorpay Trust Strip */}
-              {fields.audience && (
+              {/* Razorpay Trust Strip - show for any PAID tier */}
+              {priceTier !== 'free' && (
                 <div
                   role="region"
                   aria-label="Razorpay payment security trust signals"
@@ -1386,58 +1455,37 @@ export default function KundaliMilanForm() {
                 </div>
               )}
 
-              {/* Payment Submit Button */}
+              {/* Submit Button - routes by tier (free -> preview, paid -> Razorpay) */}
               <button
                 type="button"
-                disabled={isLoading || !fields.audience}
-                onClick={handlePaymentSubmit}
-                aria-label={
-                  fields.audience === 'both'  ? 'Pay 151 rupees with Razorpay for both versions' :
-                  fields.audience === 'couple' ? 'Pay 101 rupees with Razorpay for couple version' :
-                  fields.audience === 'parent' ? 'Pay 101 rupees with Razorpay for parent version' :
-                  'Select audience to continue'
-                }
+                disabled={isLoading || (needsAudience && !fields.audience)}
+                onClick={priceTier === 'free' ? handleFreePreview : handlePaymentSubmit}
+                aria-label={getSubmitLabel()}
                 className="w-full py-4 rounded-xl text-sm font-bold transition-all duration-300"
                 style={{
-                  background: isLoading || !fields.audience
+                  background: isLoading || (needsAudience && !fields.audience)
                     ? GOLD_RGBA(0.3)
                     : `linear-gradient(135deg, ${GOLD} 0%, #F5D76E 50%, ${GOLD} 100%)`,
-                  color: isLoading || !fields.audience ? 'rgba(255,255,255,0.5)' : '#080B12',
-                  cursor: isLoading || !fields.audience ? 'not-allowed' : 'pointer',
+                  color: isLoading || (needsAudience && !fields.audience) ? 'rgba(255,255,255,0.5)' : '#080B12',
+                  cursor: isLoading || (needsAudience && !fields.audience) ? 'not-allowed' : 'pointer',
                   fontSize: '15px',
-                  boxShadow: isLoading || !fields.audience ? 'none' : `0 0 30px rgba(212,175,55,0.4)`,
+                  boxShadow: isLoading || (needsAudience && !fields.audience) ? 'none' : `0 0 30px rgba(212,175,55,0.4)`,
                 }}
               >
                 {getSubmitLabel()}
               </button>
 
-              {/* Free Preview Option */}
+              {/* Contextual note under button */}
               <div style={{ textAlign: 'center' }}>
-                <div style={{
-                  height: '1px',
-                  background: `linear-gradient(to right, transparent, ${GOLD_RGBA(0.2)}, transparent)`,
-                  margin: '8px 0',
-                }} />
-                <p style={{ color: '#64748b', fontSize: '11px', marginBottom: '12px' }}>
-                  Not sure yet? Try a Free Preview first
-                </p>
-                <button
-                  type="button"
-                  disabled={isLoading}
-                  onClick={handleFreePreview}
-                  className="px-6 py-2.5 rounded-full text-sm font-semibold transition-all"
-                  style={{
-                    background: 'rgba(255,255,255,0.04)',
-                    border: `1px solid ${GOLD_RGBA(0.3)}`,
-                    color: GOLD,
-                    cursor: isLoading ? 'not-allowed' : 'pointer',
-                  }}
-                >
-                  🔮 Get Free Preview First
-                </button>
-                <p style={{ color: '#475569', fontSize: '10px', marginTop: '8px' }}>
-                  Free Preview reveals 36 Guna score + dosha flags only
-                </p>
+                {priceTier === 'free' ? (
+                  <p style={{ color: '#475569', fontSize: '10px', margin: 0 }}>
+                    Free Preview reveals 36 Guna score + dosha flags only. Upgrade anytime.
+                  </p>
+                ) : (
+                  <p style={{ color: '#475569', fontSize: '10px', margin: 0 }}>
+                    Want to try first? Pick Free Preview above - no payment needed.
+                  </p>
+                )}
               </div>
 
               {/* No Refund Disclosure - IR-18 */}
