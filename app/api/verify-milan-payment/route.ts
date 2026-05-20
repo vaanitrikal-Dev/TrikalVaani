@@ -1,12 +1,17 @@
 // TRIKAL VAANI - Kundali Milan Payment Verification API
 // CEO: Rohiit Gupta
 // File: app/api/verify-milan-payment/route.ts
-// VERSION: 1.2 - manglik_data fix
-// v1.2 ONLY CHANGE: vmData?.manglik -> vmData?.manglik_evaluation
-//   VM milan_engine.py returns key "manglik_evaluation" (Section 6 of engine).
-//   v1.1 read vmData?.manglik which was always undefined -> saved NULL.
-//   Now manglik_data saves correctly -> narrative route 500 fixed.
-//   Mangal Dosh shows in every tier result. All other logic identical to v1.1.
+// VERSION: 1.3 - manglik_data now stores per-person + combined verdict
+//
+// CHANGE LOG (v1.2 → v1.3):
+//   manglik_data shape upgraded from flat combined-only to structured:
+//   {
+//     bride:    { is_manglik, strength }          ← from compute_manglik_full(person1)
+//     groom:    { is_manglik, strength }          ← from compute_manglik_full(person2)
+//     combined: { status, verdict, verdict_hi, recommendation } ← from manglik_evaluation
+//   }
+//   This powers per-person badge on result page (all tiers, free + paid).
+//   All other logic identical to v1.2.
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
@@ -30,6 +35,39 @@ function makeSlug(): string {
   const ts  = Date.now().toString(36);
   const rnd = crypto.randomBytes(4).toString('hex');
   return `m-${ts}-${rnd}`;
+}
+
+// ── Build structured manglik_data from VM response ────────────
+// VM returns:
+//   vmData.manglik_evaluation        → combined verdict (CANCELLED/BRIDE_ONLY/GROOM_ONLY/NONE)
+//   vmData.bride_manglik             → compute_manglik_full result for person1
+//   vmData.groom_manglik             → compute_manglik_full result for person2
+// We store all three in one clean object.
+function buildManglikData(vmData: any): object | null {
+  if (!vmData) return null;
+
+  const combined = vmData?.manglik_evaluation ?? null;
+  const bride    = vmData?.bride_manglik      ?? null;
+  const groom    = vmData?.groom_manglik      ?? null;
+
+  if (!combined && !bride && !groom) return null;
+
+  return {
+    bride: bride ? {
+      is_manglik: bride.is_manglik   ?? false,
+      strength:   bride.strength     ?? 'Not Manglik',
+    } : null,
+    groom: groom ? {
+      is_manglik: groom.is_manglik   ?? false,
+      strength:   groom.strength     ?? 'Not Manglik',
+    } : null,
+    combined: combined ? {
+      status:         combined.status         ?? 'NONE',
+      verdict:        combined.verdict        ?? '',
+      verdict_hi:     combined.verdict_hi     ?? '',
+      recommendation: combined.recommendation ?? '',
+    } : null,
+  };
 }
 
 export async function POST(req: NextRequest) {
@@ -139,10 +177,10 @@ export async function POST(req: NextRequest) {
         language:         order.language,
         bride_data:       bride,
         groom_data:       groom,
-        ashtakoot_score:  vmData?.ashtakoot?.total_score    ?? null,
-        ashtakoot_data:   vmData?.ashtakoot                 ?? null,
-        manglik_data:     vmData?.manglik_evaluation        ?? null,  // v1.2 FIX
-        remedies_data:    vmData?.remedies                  ?? null,
+        ashtakoot_score:  vmData?.ashtakoot?.total_score ?? null,
+        ashtakoot_data:   vmData?.ashtakoot              ?? null,
+        manglik_data:     buildManglikData(vmData),           // v1.3: structured per-person + combined
+        remedies_data:    vmData?.remedies                ?? null,
         gemini_narrative: null,
         pdf_url:          null,
       });
@@ -151,7 +189,7 @@ export async function POST(req: NextRequest) {
       console.error('[Trikal] Milan record save error:', saveErr.message);
       return NextResponse.json({
         success: true, paymentId: razorpay_payment_id,
-        warning: 'Payment received. Reading is being prepared  please contact us if result page does not load.',
+        warning: 'Payment received. Reading is being prepared — please contact us if result page does not load.',
       }, { status: 200 });
     }
 
