@@ -3,13 +3,20 @@
  * TRIKAL VAANI — Kundali Milan Compute API
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/api/calc/kundali-milan/route.ts
- * VERSION: 1.0
+ * VERSION: 1.1 — BUGFIX (Day 7)
  * SIGNED: ROHIIT GUPTA, CEO
  * ============================================================
- * Receives bride + groom birth data from KundaliMilanForm.tsx,
- * geocodes places via /api/maps-proxy (if needed), then calls
- * VM endpoint http://34.14.164.105:8001/milan-compute and
- * returns Milan data for the FREE preview tier.
+ * CHANGES v1.1 (BUGFIX):
+ *   ✅ VM /milan-compute payload renamed:
+ *        bride → person1
+ *        groom → person2
+ *      (Day 3 VM milan_engine.py expects person1/person2)
+ *   ✅ Public API + response shape UNCHANGED (client still sends bride/groom)
+ *   ✅ Only the internal VM call is fixed
+ *
+ * v1.0:
+ *   Receives bride + groom birth data from KundaliMilanForm.tsx,
+ *   calls VM endpoint and returns Milan data for the FREE preview tier.
  *
  * Anti-tamper: tier defaults to "free" here; paid tiers must
  * route via /api/create-milan-order + /api/verify-milan-payment.
@@ -32,16 +39,15 @@ const partnerSchema = z.object({
   place:    z.string().trim().min(1, 'Place required').max(160),
   latitude: z.number().min(-90).max(90),
   longitude:z.number().min(-180).max(180),
-  timezone: z.number().min(-12).max(14),  // hours offset
+  timezone: z.number().min(-12).max(14),
 });
 
-// ── Zod schema: full request ─────────────────────────────────
+// ── Zod schema: full request (client API stays bride/groom) ──
 const requestSchema = z.object({
   bride:    partnerSchema,
   groom:    partnerSchema,
   audience: z.enum(['couple', 'parent', 'both']).default('couple'),
   language: z.enum(['hinglish', 'hindi', 'english']).default('hinglish'),
-  // Free preview is the default for this route
   tier:     z.literal('free').default('free'),
 });
 
@@ -63,9 +69,9 @@ export async function POST(req: NextRequest) {
 
     const { bride, groom, audience, language } = parsed.data;
 
-    // ── Call VM /milan-compute ─────────────────────────────
+    // ── BUGFIX v1.1: VM expects person1/person2 ────────────
     const vmPayload = {
-      bride: {
+      person1: {
         name:      bride.name,
         gender:    bride.gender ?? 'female',
         year:      Number(bride.dob.slice(0, 4)),
@@ -78,7 +84,7 @@ export async function POST(req: NextRequest) {
         timezone:  bride.timezone,
         place:     bride.place,
       },
-      groom: {
+      person2: {
         name:      groom.name,
         gender:    groom.gender ?? 'male',
         year:      Number(groom.dob.slice(0, 4)),
@@ -94,7 +100,7 @@ export async function POST(req: NextRequest) {
     };
 
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 25000); // 25s safety
+    const timeout = setTimeout(() => controller.abort(), 25000);
 
     let vmRes: Response;
     try {
@@ -128,7 +134,7 @@ export async function POST(req: NextRequest) {
 
     // ── Build FREE preview response (anti-spoiler) ─────────
     // Free tier: ashtakoot score + manglik flag + 1 hook line
-    // Paid tiers will receive full ashtakoot_data, manglik_data,
+    // Paid tiers receive full ashtakoot_data, manglik_data,
     // remedies_data, gemini_narrative via /verify-milan-payment.
     const ashtakootScore = vmData?.ashtakoot?.total_score ?? null;
     const manglikStatus  = vmData?.manglik?.status ?? null;
@@ -148,10 +154,9 @@ export async function POST(req: NextRequest) {
         manglik_status:  manglikStatus,
         hook:            previewHook,
       },
-      // Echo back partners so client can show summary cards
+      // Echo back partners (client-side names: bride/groom)
       bride: { name: bride.name, place: bride.place, dob: bride.dob, tob: bride.tob },
       groom: { name: groom.name, place: groom.place, dob: groom.dob, tob: groom.tob },
-      // Lock full data behind payment
       locked: {
         full_ashtakoot:    true,
         full_manglik:      true,
