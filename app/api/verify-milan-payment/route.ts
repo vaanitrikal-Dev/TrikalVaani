@@ -1,17 +1,14 @@
 // TRIKAL VAANI - Kundali Milan Payment Verification API
 // CEO: Rohiit Gupta
 // File: app/api/verify-milan-payment/route.ts
-// VERSION: 1.3 - manglik_data now stores per-person + combined verdict
+// VERSION: 1.4 - fixed per-person manglik read path from VM response
 //
-// CHANGE LOG (v1.2 → v1.3):
-//   manglik_data shape upgraded from flat combined-only to structured:
-//   {
-//     bride:    { is_manglik, strength }          ← from compute_manglik_full(person1)
-//     groom:    { is_manglik, strength }          ← from compute_manglik_full(person2)
-//     combined: { status, verdict, verdict_hi, recommendation } ← from manglik_evaluation
-//   }
-//   This powers per-person badge on result page (all tiers, free + paid).
-//   All other logic identical to v1.2.
+// CHANGE LOG (v1.3 → v1.4):
+//   buildManglikData() was reading vmData?.bride_manglik (undefined).
+//   VM actually nests manglik under vmData.bride.manglik / vmData.groom.manglik.
+//   Fixed read path: vmData?.bride?.manglik + vmData?.groom?.manglik.
+//   Now bride + groom per-person Manglik status saves correctly for all new rows.
+//   All other logic identical to v1.3.
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
@@ -39,16 +36,16 @@ function makeSlug(): string {
 
 // ── Build structured manglik_data from VM response ────────────
 // VM returns:
+//   vmData.bride.manglik             → compute_manglik_full result for person1
+//   vmData.groom.manglik             → compute_manglik_full result for person2
 //   vmData.manglik_evaluation        → combined verdict (CANCELLED/BRIDE_ONLY/GROOM_ONLY/NONE)
-//   vmData.bride_manglik             → compute_manglik_full result for person1
-//   vmData.groom_manglik             → compute_manglik_full result for person2
-// We store all three in one clean object.
+// Per-person manglik is NESTED under vmData.bride.manglik / vmData.groom.manglik
 function buildManglikData(vmData: any): object | null {
   if (!vmData) return null;
 
-  const combined = vmData?.manglik_evaluation ?? null;
-  const bride    = vmData?.bride_manglik      ?? null;
-  const groom    = vmData?.groom_manglik      ?? null;
+  const combined = vmData?.manglik_evaluation   ?? null;
+  const bride    = vmData?.bride?.manglik        ?? null;  // v1.4 FIX: nested path
+  const groom    = vmData?.groom?.manglik        ?? null;  // v1.4 FIX: nested path
 
   if (!combined && !bride && !groom) return null;
 
