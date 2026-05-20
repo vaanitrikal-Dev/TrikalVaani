@@ -1053,29 +1053,32 @@ export default function KundaliMilanForm() {
         prefillContact: `${fields.contactCountryCode}${fields.contactMobile}`.replace(/\s/g, ''),
         themeColor: '#D4AF37',
         onSuccess: async (response) => {
+          setIsSubmitting(true)
+          startLoadingMessages(LOADING_STEPS_PAYMENT)
+
           const verifyRes = await fetch('/api/verify-milan-payment', {
             method:  'POST',
             headers: { 'Content-Type': 'application/json' },
             body:    JSON.stringify(response),
           })
+          const verifyData = await verifyRes.json().catch(() => ({}))
+
           if (!verifyRes.ok) {
-            const err = await verifyRes.json().catch(() => ({}))
-            setApiError(err.error || 'Payment verification failed. Please contact support.')
+            setApiError(verifyData.error || 'Payment verification failed. Please contact support.')
+            setIsSubmitting(false)
             setPaymentLoading(false)
             return
           }
 
-          setIsSubmitting(true)
-          startLoadingMessages(LOADING_STEPS_PAYMENT)
-
-          await callMilanAPI({
-            razorpay_order_id:   response.razorpay_order_id,
-            razorpay_payment_id: response.razorpay_payment_id,
-            razorpay_signature:  response.razorpay_signature,
-            amount,
-          }, false)
-          setIsSubmitting(false)
-          setPaymentLoading(false)
+          // Use the PAID slug from verify-payment - do NOT call the free route
+          const paidSlug = verifyData.slug ?? verifyData.milanId
+          if (paidSlug) {
+            router.push(`/milan/${paidSlug}`)
+          } else {
+            setApiError('Payment done but report link missing. WhatsApp +919211804111 with your payment ID.')
+            setIsSubmitting(false)
+            setPaymentLoading(false)
+          }
         },
         onDismiss: () => {
           setPaymentLoading(false)
