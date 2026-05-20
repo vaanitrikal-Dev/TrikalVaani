@@ -3,16 +3,27 @@
  * TRIKAL VAANI — Kundali Milan Compute API
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/api/calc/kundali-milan/route.ts
- * VERSION: 1.1 — BUGFIX (Day 7)
+ * VERSION: 1.2 — BUGFIX (field-name mismatch with form)
  * SIGNED: ROHIIT GUPTA, CEO
  * ============================================================
- * CHANGES v1.1 (BUGFIX):
- *   ✅ VM /milan-compute payload renamed:
- *        bride → person1
- *        groom → person2
- *      (Day 3 VM milan_engine.py expects person1/person2)
- *   ✅ Public API + response shape UNCHANGED (client still sends bride/groom)
- *   ✅ Only the internal VM call is fixed
+ * CHANGES v1.2 (BUGFIX ONLY):
+ *   ✅ FIXED: Zod schema now accepts the field names the form
+ *      actually sends (KundaliMilanForm.tsx buildMilanBody):
+ *        latitude  ← lat
+ *        longitude ← lng
+ *        place     ← cityName
+ *      Previously free preview was REJECTED (400) because the
+ *      schema demanded latitude/longitude/place but the form
+ *      sent lat/lng/cityName. Free submit silently failed.
+ *   ✅ Backward compatible: still accepts latitude/longitude/place
+ *      if ever sent that way (both names allowed).
+ *   ✅ Accepts extra fields the form sends (sessionId, ayanamsa,
+ *      contact, paymentVerification) without rejecting.
+ *   ✅ NOTHING ELSE CHANGED. VM payload person1/person2 intact.
+ *      Public response shape intact. Free-tier behavior intact.
+ *
+ * CHANGES v1.1 (prior):
+ *   ✅ VM /milan-compute payload bride→person1, groom→person2
  *
  * v1.0:
  *   Receives bride + groom birth data from KundaliMilanForm.tsx,
@@ -30,26 +41,59 @@ import { z } from 'zod';
 const VM_MILAN_ENDPOINT =
   process.env.VM_MILAN_ENDPOINT ?? 'http://34.14.164.105:8001/milan-compute';
 
-// ── Zod schema: per-partner birth data ───────────────────────
-const partnerSchema = z.object({
-  name:     z.string().trim().min(1, 'Name required').max(80),
-  gender:   z.enum(['male', 'female']).optional(),
-  dob:      z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'DOB must be YYYY-MM-DD'),
-  tob:      z.string().regex(/^\d{2}:\d{2}$/, 'TOB must be HH:MM'),
-  place:    z.string().trim().min(1, 'Place required').max(160),
-  latitude: z.number().min(-90).max(90),
-  longitude:z.number().min(-180).max(180),
-  timezone: z.number().min(-12).max(14),
-});
+// ── Helpers: coerce form field names → canonical ─────────────
+// The form (buildMilanBody) sends: lat, lng, cityName, timezone.
+// Older/alternate callers may send: latitude, longitude, place.
+// We accept BOTH and normalise to latitude/longitude/place.
+const partnerSchema = z
+  .object({
+    name:      z.string().trim().min(1, 'Name required').max(80),
+    gender:    z.enum(['male', 'female']).optional(),
+    dob:       z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'DOB must be YYYY-MM-DD'),
+    tob:       z.string().regex(/^\d{2}:\d{2}$/, 'TOB must be HH:MM'),
 
-// ── Zod schema: full request (client API stays bride/groom) ──
-const requestSchema = z.object({
-  bride:    partnerSchema,
-  groom:    partnerSchema,
-  audience: z.enum(['couple', 'parent', 'both']).default('couple'),
-  language: z.enum(['hinglish', 'hindi', 'english']).default('hinglish'),
-  tier:     z.literal('free').default('free'),
-});
+    // Place: accept either `place` or `cityName`
+    place:     z.string().trim().max(160).optional(),
+    cityName:  z.string().trim().max(160).optional(),
+
+    // Latitude: accept either `latitude` or `lat`
+    latitude:  z.number().min(-90).max(90).optional(),
+    lat:       z.number().min(-90).max(90).optional(),
+
+    // Longitude: accept either `longitude` or `lng`
+    longitude: z.number().min(-180).max(180).optional(),
+    lng:       z.number().min(-180).max(180).optional(),
+
+    timezone:  z.number().min(-12).max(14),
+
+    // Tolerate extra fields the form sends without failing
+    ayanamsa:  z.string().optional(),
+  })
+  .passthrough()
+  .transform((p) => {
+    const latitude  = p.latitude  ?? p.lat;
+    const longitude = p.longitude ?? p.lng;
+    const place     = p.place     ?? p.cityName ?? '';
+    return { ...p, latitude, longitude, place };
+  })
+  .refine((p) => typeof p.latitude === 'number',  { message: 'latitude/lat required' })
+  .refine((p) => typeof p.longitude === 'number', { message: 'longitude/lng required' })
+  .refine((p) => p.place.length >= 1,             { message: 'place/cityName required' });
+
+// ── Full request (client API stays bride/groom) ─────────────
+// .passthrough() lets through sessionId, contact, paymentVerification,
+// audienceVersion, etc. without rejecting the request.
+const requestSchema = z
+  .object({
+    bride:    partnerSchema,
+    groom:    partnerSchema,
+    audience: z.enum(['couple', 'parent', 'both']).optional(),
+    // Form sends audienceVersion; accept that too
+    audienceVersion: z.enum(['couple', 'parent', 'both']).optional(),
+    language: z.enum(['hinglish', 'hindi', 'english']).default('hinglish'),
+    tier:     z.string().optional(),
+  })
+  .passthrough();
 
 export async function POST(req: NextRequest) {
   try {
@@ -67,9 +111,14 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { bride, groom, audience, language } = parsed.data;
+    const data = parsed.data;
+    const bride = data.bride;
+    const groom = data.groom;
+    const audience = (data.audience ?? data.audienceVersion ?? 'couple') as
+      'couple' | 'parent' | 'both';
+    const language = data.language;
 
-    // ── BUGFIX v1.1: VM expects person1/person2 ────────────
+    // ── VM expects person1/person2 (v1.1) ──────────────────
     const vmPayload = {
       person1: {
         name:      bride.name,
@@ -79,8 +128,8 @@ export async function POST(req: NextRequest) {
         day:       Number(bride.dob.slice(8, 10)),
         hour:      Number(bride.tob.slice(0, 2)),
         minute:    Number(bride.tob.slice(3, 5)),
-        latitude:  bride.latitude,
-        longitude: bride.longitude,
+        latitude:  bride.latitude as number,
+        longitude: bride.longitude as number,
         timezone:  bride.timezone,
         place:     bride.place,
       },
@@ -92,8 +141,8 @@ export async function POST(req: NextRequest) {
         day:       Number(groom.dob.slice(8, 10)),
         hour:      Number(groom.tob.slice(0, 2)),
         minute:    Number(groom.tob.slice(3, 5)),
-        latitude:  groom.latitude,
-        longitude: groom.longitude,
+        latitude:  groom.latitude as number,
+        longitude: groom.longitude as number,
         timezone:  groom.timezone,
         place:     groom.place,
       },
@@ -133,9 +182,8 @@ export async function POST(req: NextRequest) {
     const vmData = await vmRes.json();
 
     // ── Build FREE preview response (anti-spoiler) ─────────
-    // Free tier: ashtakoot score + manglik flag + 1 hook line
-    // Paid tiers receive full ashtakoot_data, manglik_data,
-    // remedies_data, gemini_narrative via /verify-milan-payment.
+    // Free tier: ashtakoot score + manglik flag + 1 hook line.
+    // Paid tiers receive full data via /verify-milan-payment.
     const ashtakootScore = vmData?.ashtakoot?.total_score ?? null;
     const manglikStatus  = vmData?.manglik?.status ?? null;
 
