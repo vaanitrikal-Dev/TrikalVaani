@@ -1,38 +1,38 @@
 /**
  * ============================================================
- * TRIKAL VAANI — Kundali Milan Compute API
+ * TRIKAL VAANI - Kundali Milan Compute API
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/api/calc/kundali-milan/route.ts
- * VERSION: 1.3 — FREE SAVE + SLUG + milanId (fixes "save nahi hua")
+ * VERSION: 1.3 - FREE SAVE + SLUG + milanId (fixes "save nahi hua")
  * SIGNED: ROHIIT GUPTA, CEO
  * ============================================================
  * CHANGES v1.3 (THIS VERSION):
- *   ✅ FIXED "Milan report ready hai par save nahi hua":
+ *   [OK] FIXED "Milan report ready hai par save nahi hua":
  *      The form (callMilanAPI) expects `milanId` in the response so it
  *      can redirect to /milan/[milanId]. v1.2 returned inline preview
- *      with NO milanId → form always hit the error branch.
- *   ✅ NOW: free preview SAVES to kundali_milan table with:
+ *      with NO milanId -> form always hit the error branch.
+ *   [OK] NOW: free preview SAVES to kundali_milan table with:
  *        - a generated slug
  *        - tier='free'
  *        - audience, language, bride_data, groom_data
  *        - ashtakoot_score + ashtakoot_data + manglik_data (free shows these)
  *        - remedies_data + gemini_narrative LEFT NULL (locked for paid)
- *   ✅ Returns { milanId: slug } so the form redirects correctly.
- *   ✅ Still returns inline preview block (backward compatible).
- *   ✅ EVERYTHING v1.2 did is preserved (field-name coercion,
+ *   [OK] Returns { milanId: slug } so the form redirects correctly.
+ *   [OK] Still returns inline preview block (backward compatible).
+ *   [OK] EVERYTHING v1.2 did is preserved (field-name coercion,
  *      passthrough, VM person1/person2 payload).
  *
- * CHANGES v1.2 (prior — preserved):
- *   ✅ Zod accepts lat/lng/cityName (form names) + latitude/longitude/place
- *   ✅ passthrough tolerates sessionId, contact, paymentVerification, etc.
+ * CHANGES v1.2 (prior - preserved):
+ *   [OK] Zod accepts lat/lng/cityName (form names) + latitude/longitude/place
+ *   [OK] passthrough tolerates sessionId, contact, paymentVerification, etc.
  *
- * CHANGES v1.1 (prior — preserved):
- *   ✅ VM /milan-compute payload bride→person1, groom→person2
+ * CHANGES v1.1 (prior - preserved):
+ *   [OK] VM /milan-compute payload bride->person1, groom->person2
  *
  * Anti-tamper: tier is FORCED to 'free' here regardless of what the
  * form sends. Paid tiers MUST route via /api/create-milan-order +
  * /api/verify-milan-payment (which save tier=basic_51/deep_101_*/both_151).
- * A free row can never unlock paid content — the result page checks tier.
+ * A free row can never unlock paid content - the result page checks tier.
  * ============================================================
  */
 
@@ -41,24 +41,24 @@ import { createClient } from '@supabase/supabase-js';
 import { z } from 'zod';
 import crypto from 'crypto';
 
-// ── VM endpoint ──────────────────────────────────────────────
+// -- VM endpoint ----------------------------------------------
 const VM_MILAN_ENDPOINT =
   process.env.VM_MILAN_ENDPOINT ?? 'http://34.14.164.105:8001/milan-compute';
 
-// ── Supabase (service role) ──────────────────────────────────
+// -- Supabase (service role) ----------------------------------
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-// ── Slug generator (matches verify-milan-payment style) ──────
+// -- Slug generator (matches verify-milan-payment style) ------
 function makeSlug(): string {
   const ts  = Date.now().toString(36);
   const rnd = crypto.randomBytes(4).toString('hex');
   return `m-${ts}-${rnd}`;
 }
 
-// ── Helpers: coerce form field names → canonical ─────────────
+// -- Helpers: coerce form field names -> canonical -------------
 // Form (buildMilanBody) sends: lat, lng, cityName, timezone.
 // Accept BOTH lat/lng/cityName AND latitude/longitude/place.
 const partnerSchema = z
@@ -106,7 +106,7 @@ export async function POST(req: NextRequest) {
   try {
     const json = await req.json();
 
-    // ── Validate ───────────────────────────────────────────
+    // -- Validate -------------------------------------------
     const parsed = requestSchema.safeParse(json);
     if (!parsed.success) {
       return NextResponse.json(
@@ -122,7 +122,7 @@ export async function POST(req: NextRequest) {
       'couple' | 'parent' | 'both';
     const language = data.language;
 
-    // ── VM expects person1/person2 (v1.1) ──────────────────
+    // -- VM expects person1/person2 (v1.1) ------------------
     const vmPayload = {
       person1: {
         name:      bride.name,
@@ -193,7 +193,7 @@ export async function POST(req: NextRequest) {
         ? 'Aapki rishtedari mein Mahakaal ki rehmat dikhayi de rahi hai. Poori sachhai dekhne ke liye Deep Reading kholiye.'
         : 'Is rishtedari mein kuch chhupe huye sutra hain jo sirf Deep Reading mein khulenge.';
 
-    // ── v1.3: SAVE free preview to kundali_milan + return milanId ──
+    // -- v1.3: SAVE free preview to kundali_milan + return milanId --
     // tier FORCED to 'free'. order_id NULL (no payment).
     // Free row stores score + ashtakoot + manglik (free shows these).
     // remedies_data + gemini_narrative LEFT NULL (locked for paid upgrade).
@@ -218,7 +218,7 @@ export async function POST(req: NextRequest) {
     const { error: saveErr } = await supabase
       .from('kundali_milan')
       .insert({
-        order_id:         null,          // free — no payment
+        order_id:         null,          // free - no payment
         slug,
         tier:             'free',        // anti-tamper: always free here
         audience,
@@ -234,13 +234,13 @@ export async function POST(req: NextRequest) {
       });
 
     if (saveErr) {
-      // Save failed — still return preview inline so user sees something,
+      // Save failed - still return preview inline so user sees something,
       // but no milanId (form will show its inline preview path).
       console.error('[Trikal] Free Milan save error:', saveErr.message);
       savedSlug = null;
     }
 
-    // ── Response ───────────────────────────────────────────
+    // -- Response -------------------------------------------
     return NextResponse.json({
       success:  true,
       tier:     'free',
