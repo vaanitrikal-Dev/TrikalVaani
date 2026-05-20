@@ -3,48 +3,37 @@
  * 🔱 TRIKAL VAANI — CEO PROTECTION HEADER 🔱
  * ============================================================================
  * File:        app/sitemap.ts
- * Version:     v5.4
+ * Version:     v5.5
  * Owner:       Rohiit Gupta, Chief Vedic Architect
  *
+ * Changes v5.4 → v5.5 (2026-05-20):
+ *   FIX 1: ADDED /compatibility/* programmatic SEO pages (dynamic from Supabase)
+ *           - Pulls all rows from `compatibility_pages` table
+ *           - English: /compatibility/{slug}            (priority 0.8)
+ *           - Hindi:    /compatibility/{slug}?lang=hi    (priority 0.7)
+ *           - Auto-grows as new rows are added (no code change needed)
+ *           - changeFrequency 'monthly' (evergreen rashi content)
+ *
+ *   UNTOUCHED: All v5.4 routes — static, calculators, 15 domains,
+ *              blog, cities, festivals, panchang dates.
+ *
+ *   NOTE: Compatibility pages use ONE shared canonical per slug.
+ *         Hindi variant uses ?lang=hi (hreflang handled in page metadata).
+ * ============================================================================
+ *
  * Changes v5.3 → v5.4 (2026-05-18):
- *   FIX 1: REMOVED '/upcoming-events' from STATIC_ROUTES
- *           - Now 308-redirects to /panchang (per next.config.js)
- *           - Listing redirect URLs in sitemap = SEO leak (Google crawls redirect chain)
- *
- *   FIX 2: ADDED '/calculators' hub page to STATIC_ROUTES (priority 0.9)
- *           - High-value entry point for kundali, dasha, nakshatra etc.
- *
+ *   FIX 1: REMOVED '/upcoming-events' (now 308-redirects to /panchang)
+ *   FIX 2: ADDED '/calculators' hub page (priority 0.9)
  *   FIX 3: ADDED 7 calculator detail pages (priority 0.85)
- *           - /calculators/free-kundali-calculator
- *           - /calculators/free-dasha-calculator
- *           - /calculators/free-nakshatra-calculator
- *           - /calculators/free-rashi-calculator
- *           - /calculators/free-lagna-calculator
- *           - /calculators/free-sade-sati-calculator
- *           - /calculators/free-manglik-dosh-calculator
- *
  *   FIX 4: RAISED 15 domain pages priority 0.85 → 0.9
- *           - All 15 now have 1000-1370 word authority content (Session E complete)
- *           - HowTo + Article + FAQ + Service + Breadcrumb schemas per page
- *           - Deserve higher Googlebot crawl priority
- *
- *   FIX 5: REMOVED '/{domain}/panchang' compound routes
- *           - app/[domain]/panchang/page.tsx does NOT exist in codebase
- *           - 15 URLs were 404 — same issue as v5.2 city×festival block
- *
+ *   FIX 5: REMOVED '/{domain}/panchang' compound routes (404)
  *   FIX 6: Changed 15 domain pages changeFrequency 'weekly' → 'monthly'
- *           - Content is pillar/authority, not transactional — monthly is honest signal
- *
- *   NET: Sitemap 173 → 178 URLs (+8 calculators, -1 upcoming-events,
- *        -15 domain/panchang compound, +0 better priority signaling)
- *   Money page crawl ratio: 24% → 31%
- *
- *   UNTOUCHED: Blog posts, city pages, festival events, panchang dates
  * ============================================================================
  */
 
 import type { MetadataRoute } from 'next';
 import { getAllPosts } from '@/lib/blog-posts';
+import { createClient } from '@supabase/supabase-js';
 import citiesData from './data/cities.json';
 import festivalsData from './data/festivals.json';
 
@@ -107,6 +96,23 @@ function readFestivals(): FestivalRow[] {
   }
 }
 
+// v5.5 FIX 1: pull compatibility slugs from Supabase
+async function readCompatibilitySlugs(): Promise<{ slug: string; lang: string }[]> {
+  try {
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+    const { data, error } = await supabase
+      .from('compatibility_pages')
+      .select('slug, lang');
+    if (error || !data) return [];
+    return data as { slug: string; lang: string }[];
+  } catch {
+    return [];
+  }
+}
+
 function nextNDates(n: number): string[] {
   const dates: string[] = [];
   const today = new Date();
@@ -151,10 +157,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     });
   }
 
-  // ── 15 Pillar Domain Pages (v5.4 FIX 4 + FIX 5 + FIX 6) ────────────
-  // Priority 0.85 → 0.9 (Session E v2.5 — 1000-1370 word authority pages)
-  // Frequency 'weekly' → 'monthly' (pillar content, not transactional)
-  // REMOVED /{domain}/panchang compound routes (page does not exist)
+  // ── 15 Pillar Domain Pages ─────────────────────────────────────────
   for (const d of DOMAINS) {
     entries.push({
       url: `${BASE}/${d}`,
@@ -162,6 +165,26 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'monthly',
       priority: 0.9,
     });
+  }
+
+  // ── v5.5 FIX 1: Compatibility pages (programmatic SEO) ─────────────
+  const compatRows = await readCompatibilitySlugs();
+  for (const row of compatRows) {
+    if (row.lang === 'en') {
+      entries.push({
+        url: `${BASE}/compatibility/${row.slug}`,
+        lastModified: now,
+        changeFrequency: 'monthly',
+        priority: 0.8,
+      });
+    } else if (row.lang === 'hi') {
+      entries.push({
+        url: `${BASE}/compatibility/${row.slug}?lang=hi`,
+        lastModified: now,
+        changeFrequency: 'monthly',
+        priority: 0.7,
+      });
+    }
   }
 
   // ── Blog posts ─────────────────────────────────────────────────────
