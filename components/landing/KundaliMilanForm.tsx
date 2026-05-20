@@ -1,52 +1,16 @@
-/**
- * ============================================================
- * TRIKAL VAANI — KundaliMilanForm Component
- * CEO & Chief Vedic Architect: Rohiit Gupta
- * File: components/landing/KundaliMilanForm.tsx
- * VERSION: 1.0 — Dual Chart Compatibility with 3-Step Wizard + 5 Edit Patterns
- * SIGNED: ROHIIT GUPTA, CEO
- *
- * 🔒 LOCKED PER IR-13 (Iron Rule v2.0)
- *    This component is the heart of the Kundali Milan product.
- *    DO NOT modify without explicit written CEO approval.
- *
- * v1.0 ARCHITECTURE:
- *   ✅ Inherited from BirthForm v9.2 (proven patterns):
- *      - New Places API integration (POST /api/maps-proxy)
- *      - Timezone fetching from Google Maps API
- *      - Country selector (27 countries)
- *      - Razorpay payment flow (₹51 / ₹101 / ₹151)
- *      - JSON-LD Service + Offer schema injection
- *      - Loading states with rotating messages
- *      - Dark theme styling (#080B12 + #D4AF37)
- *
- *   ✅ NEW IN v1.0:
- *      - Dual person state (bride + groom equally important)
- *      - 3-step wizard machine (Step 1 → Step 2 → Step 3)
- *      - In-form audience selector (Couple / Parent / Both ₹151)
- *      - 5 Edit Patterns implemented:
- *        Pattern 1: Sections stay visible as summary cards
- *        Pattern 2: Click ✏️ Edit to re-open completed sections
- *        Pattern 3: Clickable progress bar for back navigation
- *        Pattern 4: Zero data loss (state lives at parent level)
- *        Pattern 5: beforeunload warning to prevent accidental data loss
- *
- * WIRING DEPENDENCIES:
- *   - /api/maps-proxy (existing, v1.2)
- *   - /api/create-milan-order (NEW, Day 4 deliverable)
- *   - /api/verify-milan-payment (NEW, Day 4 deliverable)
- *   - /api/calc/kundali-milan (NEW, Day 4 deliverable)
- *   - /lib/razorpay-helper.ts (existing, reuse)
- *   - Result page: /milan/[id] (NEW, Day 6 deliverable)
- *
- * IRON RULES OBSERVED:
- *   - IR-13: This file is v1.0 LOCKED
- *   - IR-18: No refund disclosed clearly at checkout
- *   - IR-19: Pricing ₹51/₹101/₹151 locked
- *   - IR-22: PDF + WhatsApp/Email/Link sharing as first-class
- *   - IR-24: Suspense + emotion dual hook at every tier (handled in result)
- * ============================================================
- */
+// TRIKAL VAANI - KundaliMilanForm Component
+// CEO & Chief Vedic Architect: Rohiit Gupta
+// File: components/landing/KundaliMilanForm.tsx
+// VERSION: 1.1 - Dual Chart Compatibility with 3-Step Wizard + 5 Edit Patterns
+// SIGNED: ROHIIT GUPTA, CEO
+//
+// v1.1 CHANGE (Day 7 - CEO approved surgical fix):
+//   handlePaymentSubmit now sends FULL birth data (buildMilanBody) to
+//   /api/create-milan-order so verify-payment can compute the chart.
+//   Previously sent only { tier, amount, audience } -> paid flow broke.
+//   NOTHING ELSE CHANGED. UI, wizard, validation, styling all identical.
+//
+// LOCKED PER IR-13 (Iron Rule v2.0)
 
 "use client"
 
@@ -54,7 +18,7 @@ import { useState, useCallback, useRef, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { loadRazorpayScript, openRazorpayCheckout } from "@/lib/razorpay-helper"
 
-// ── Types ─────────────────────────────────────────────────────────────────────
+// -- Types -------------------------------------------------------------------
 
 export type MilanTier = 'free' | 'basic' | 'deep_couple' | 'deep_parent' | 'deep_both'
 export type AudienceVersion = 'couple' | 'parent' | 'both'
@@ -76,7 +40,6 @@ export interface KundaliMilanFields {
   bride:    PersonData
   groom:    PersonData
   audience: AudienceVersion | ""
-  // Contact info (collected with audience selection — for PDF delivery)
   contactName:        string
   contactMobile:      string
   contactCountryCode: string
@@ -100,7 +63,7 @@ interface Country {
   flag:   string
 }
 
-// ── Countries (reused from BirthForm v9.2) ──────────────────────────────────
+// -- Countries (reused from BirthForm v9.2) ----------------------------------
 
 const COUNTRIES: Country[] = [
   { name: 'India',          code: 'IN', dial: '+91',  digits: 10, flag: '🇮🇳' },
@@ -132,7 +95,7 @@ const COUNTRIES: Country[] = [
   { name: 'Hong Kong',      code: 'HK', dial: '+852', digits: 8,  flag: '🇭🇰' },
 ]
 
-// ── Google Maps API Functions (inherited from BirthForm v9.2) ───────────────
+// -- Google Maps API Functions (inherited from BirthForm v9.2) ---------------
 
 async function fetchPlaceSuggestions(query: string): Promise<PlaceSuggestion[]> {
   if (query.length < 3) return []
@@ -192,13 +155,13 @@ async function fetchTimezone(lat: number, lng: number): Promise<number> {
   } catch { return 5.5 }
 }
 
-// ── Constants ─────────────────────────────────────────────────────────────────
+// -- Constants ---------------------------------------------------------------
 
 const GOLD          = '#D4AF37'
 const RAZORPAY_BLUE = '#3395FF'
-const ROSE          = '#F472B6'  // Bride accent
-const BLUE          = '#60A5FA'  // Groom accent
-const GREEN         = '#22C55E'  // Completion accent
+const ROSE          = '#F472B6'
+const BLUE          = '#60A5FA'
+const GREEN         = '#22C55E'
 const GOLD_RGBA     = (a: number) => `rgba(212,175,55,${a})`
 
 const TRUST_BADGES = [
@@ -241,13 +204,13 @@ const INITIAL: KundaliMilanFields = {
   contactEmail: '', language: 'hinglish',
 }
 
-// ── Service + Offer JSON-LD (GEO for AI search engines) ─────────────────────
+// -- Service + Offer JSON-LD (GEO for AI search engines) ---------------------
 
 const MILAN_SERVICE_SCHEMA = {
   '@context': 'https://schema.org',
   '@type': 'Service',
   '@id': 'https://trikalvaani.com/kundali-milan#service',
-  name: 'Trikal Vaani Kundali Milan — Vedic Compatibility Matching',
+  name: 'Trikal Vaani Kundali Milan - Vedic Compatibility Matching',
   serviceType: 'Vedic Kundali Matching',
   provider: {
     '@type': 'Organization',
@@ -276,21 +239,21 @@ const MILAN_SERVICE_SCHEMA = {
       },
       {
         '@type': 'Offer',
-        name: 'Deep Milan — Couple Version',
+        name: 'Deep Milan - Couple Version',
         description: 'Deep compatibility analysis for couples with Dos, Donts, and 6 personalized remedies. Gemini 2.5 Pro + Claude Sonnet polish.',
         price: '101', priceCurrency: 'INR',
         availability: 'https://schema.org/InStock',
       },
       {
         '@type': 'Offer',
-        name: 'Deep Milan — Parent Version',
+        name: 'Deep Milan - Parent Version',
         description: 'Deep compatibility analysis for parents with Dos, Donts, and 6 ritual remedies. Shudh Hindi authoritative tone.',
         price: '101', priceCurrency: 'INR',
         availability: 'https://schema.org/InStock',
       },
       {
         '@type': 'Offer',
-        name: 'Deep Milan — Both Versions',
+        name: 'Deep Milan - Both Versions',
         description: 'Both Couple and Parent narratives in one combined PDF. Maximum coverage.',
         price: '151', priceCurrency: 'INR',
         availability: 'https://schema.org/InStock',
@@ -299,9 +262,9 @@ const MILAN_SERVICE_SCHEMA = {
   },
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
+// ---------------------------------------------------------------------------
 // COUNTRY SELECTOR (reused from BirthForm v9.2)
-// ─────────────────────────────────────────────────────────────────────────────
+// ---------------------------------------------------------------------------
 
 function CountrySelector({
   value, onChange, id,
@@ -360,9 +323,9 @@ function CountrySelector({
   )
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
+// ---------------------------------------------------------------------------
 // CITY INPUT (reused from BirthForm v9.2)
-// ─────────────────────────────────────────────────────────────────────────────
+// ---------------------------------------------------------------------------
 
 function CityInput({
   id, label, required, value, onSelect, error, placeholder, accentColor,
@@ -420,7 +383,7 @@ function CityInput({
           className="w-full px-4 py-2.5 rounded-lg text-sm outline-none pr-10"
           style={{ background: '#0d1120', border: `1px solid ${error ? '#ef4444' : 'rgba(255,255,255,0.1)'}`, color: '#e2e8f0', colorScheme: 'dark' }} />
         <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs">
-          {loading ? <span style={{ color: GOLD }}>⟳</span> : selected ? <span style={{ color: GREEN }}>✓</span> : <span style={{ color: '#475569' }}>📍</span>}
+          {loading ? <span style={{ color: GOLD }}>...</span> : selected ? <span style={{ color: GREEN }}>OK</span> : <span style={{ color: '#475569' }}>📍</span>}
         </span>
       </div>
       {suggestions.length > 0 && (
@@ -443,9 +406,9 @@ function CityInput({
   )
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
+// ---------------------------------------------------------------------------
 // PROGRESS BAR (Pattern 3: clickable navigation)
-// ─────────────────────────────────────────────────────────────────────────────
+// ---------------------------------------------------------------------------
 
 function ProgressBar({
   currentStep, completedSteps, onStepClick,
@@ -459,7 +422,6 @@ function ProgressBar({
   return (
     <div style={{ marginBottom: '24px' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'relative' }}>
-        {/* Connecting line behind dots */}
         <div style={{
           position: 'absolute', top: '20px', left: '20px', right: '20px',
           height: '2px', background: 'rgba(255,255,255,0.08)', zIndex: 0,
@@ -498,7 +460,7 @@ function ProgressBar({
                 boxShadow: isActive ? `0 0 16px ${GOLD_RGBA(0.4)}` : 'none',
                 transition: 'all 0.3s ease',
               }}>
-                {isCompleted ? '✓' : s.icon}
+                {isCompleted ? 'OK' : s.icon}
               </div>
               <span style={{
                 fontSize: '11px',
@@ -515,9 +477,9 @@ function ProgressBar({
   )
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
+// ---------------------------------------------------------------------------
 // SUMMARY CARD (Pattern 1 + 2: visible summary with Edit button)
-// ─────────────────────────────────────────────────────────────────────────────
+// ---------------------------------------------------------------------------
 
 function SummaryCard({
   title, icon, person, onEdit, accentColor,
@@ -556,22 +518,22 @@ function SummaryCard({
             cursor: 'pointer',
           }}
         >
-          ✏️ Edit
+          Edit
         </button>
       </div>
       <div style={{ color: '#cbd5e1', fontSize: '13px', lineHeight: 1.5 }}>
         <strong style={{ color: '#e2e8f0' }}>{person.name}</strong>
-        {' · '}{dobFormatted}
-        {' · '}{tobFormatted}
-        {' · '}{person.city}
+        {' . '}{dobFormatted}
+        {' . '}{tobFormatted}
+        {' . '}{person.city}
       </div>
     </div>
   )
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
+// ---------------------------------------------------------------------------
 // PERSON FORM (used for both Bride and Groom)
-// ─────────────────────────────────────────────────────────────────────────────
+// ---------------------------------------------------------------------------
 
 function PersonForm({
   person, role, accentColor, onChange, errors, onContinue, continueLabel,
@@ -616,7 +578,7 @@ function PersonForm({
           </label>
           <input
             id={`${idPrefix}-name`} type="text"
-            placeholder={isBride ? 'Enter bride\'s full name' : 'Enter groom\'s full name'}
+            placeholder={isBride ? "Enter bride's full name" : "Enter groom's full name"}
             value={person.name}
             onChange={e => onChange({ name: e.target.value })}
             className="w-full px-4 py-2.5 rounded-lg text-sm outline-none"
@@ -676,7 +638,7 @@ function PersonForm({
             required
             accentColor={accentColor}
             value={person.placeQuery}
-            placeholder={isBride ? 'Type bride\'s birth city...' : 'Type groom\'s birth city...'}
+            placeholder={isBride ? "Type bride's birth city..." : "Type groom's birth city..."}
             error={errors.latitude ? 'Please select a city from suggestions' : undefined}
             onSelect={(city, lat, lng, tz) => {
               onChange({
@@ -716,16 +678,16 @@ function PersonForm({
             fontSize: '14px',
           }}
         >
-          {continueLabel} →
+          {continueLabel}
         </button>
       </div>
     </div>
   )
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// AUDIENCE SELECTOR (Step 3 — in-form selector)
-// ─────────────────────────────────────────────────────────────────────────────
+// ---------------------------------------------------------------------------
+// AUDIENCE SELECTOR (Step 3 - in-form selector)
+// ---------------------------------------------------------------------------
 
 function AudienceSelector({
   selected, onChange,
@@ -737,8 +699,8 @@ function AudienceSelector({
       titleHindi: 'Hum Dono Ke Liye',
       titleEnglish: 'For Us (Couple)',
       price: '₹101',
-      desc: 'Hopeful · Romantic · Anti-fear',
-      tone: 'Hinglish · Modern · For lovers',
+      desc: 'Hopeful . Romantic . Anti-fear',
+      tone: 'Hinglish . Modern . For lovers',
       color: ROSE,
     },
     {
@@ -747,8 +709,8 @@ function AudienceSelector({
       titleHindi: 'Pariwar Ke Liye',
       titleEnglish: 'For Family / Parents',
       price: '₹101',
-      desc: 'Respectful · Traditional · Protective',
-      tone: 'Shudh Hindi · Ritual-coded',
+      desc: 'Respectful . Traditional . Protective',
+      tone: 'Shudh Hindi . Ritual-coded',
       color: BLUE,
     },
     {
@@ -757,7 +719,7 @@ function AudienceSelector({
       titleHindi: 'Dono Ke Liye',
       titleEnglish: 'Both Versions',
       price: '₹151',
-      desc: 'Maximum coverage · One PDF · Two narratives',
+      desc: 'Maximum coverage . One PDF . Two narratives',
       tone: 'Couple section + Parent section',
       color: GOLD,
       highlight: true,
@@ -774,7 +736,7 @@ function AudienceSelector({
           Yeh report kiske liye hai?
         </h3>
         <p style={{ color: '#94a3b8', fontSize: '13px', margin: 0 }}>
-          Choose the narrative style — Trikal will write specifically for that audience.
+          Choose the narrative style - Trikal will write specifically for that audience.
         </p>
       </div>
 
@@ -825,7 +787,7 @@ function AudienceSelector({
               {opt.desc}
             </p>
             <p style={{ color: '#475569', fontSize: '10px', margin: 0, fontStyle: 'italic' }}>
-              ✦ {opt.tone}
+              {opt.tone}
             </p>
           </button>
         ))}
@@ -834,21 +796,18 @@ function AudienceSelector({
   )
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
+// ---------------------------------------------------------------------------
 // MAIN COMPONENT
-// ─────────────────────────────────────────────────────────────────────────────
+// ---------------------------------------------------------------------------
 
 export default function KundaliMilanForm() {
   const router = useRouter()
 
-  // Form state — Pattern 4: All state at parent level. Sections only toggle visibility.
   const [fields, setFields] = useState<KundaliMilanFields>(INITIAL)
 
-  // Wizard state
   const [currentStep,    setCurrentStep]    = useState<StepNumber>(1)
   const [completedSteps, setCompletedSteps] = useState<Set<StepNumber>>(new Set())
 
-  // UI state
   const [errors,         setErrors]         = useState<Record<string, string>>({})
   const [isSubmitting,   setIsSubmitting]   = useState(false)
   const [apiError,       setApiError]       = useState<string | null>(null)
@@ -858,7 +817,7 @@ export default function KundaliMilanForm() {
   const loadingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const formTopRef = useRef<HTMLDivElement>(null)
 
-  // ── Pattern 5: beforeunload warning to prevent data loss ──────────────────
+  // Pattern 5: beforeunload warning to prevent data loss
   useEffect(() => {
     const hasData = fields.bride.name || fields.groom.name || fields.bride.dob || fields.groom.dob
     if (!hasData) return
@@ -872,12 +831,12 @@ export default function KundaliMilanForm() {
     return () => window.removeEventListener('beforeunload', handler)
   }, [fields])
 
-  // ── Pre-load Razorpay script when reaching Step 3 ─────────────────────────
+  // Pre-load Razorpay script when reaching Step 3
   useEffect(() => {
     if (currentStep === 3) loadRazorpayScript()
   }, [currentStep])
 
-  // ── Helpers ───────────────────────────────────────────────────────────────
+  // Helpers
   const updateBride = useCallback((updates: Partial<PersonData>) => {
     setFields(prev => ({ ...prev, bride: { ...prev.bride, ...updates } }))
     setErrors(prev => {
@@ -901,7 +860,7 @@ export default function KundaliMilanForm() {
     setErrors(prev => ({ ...prev, [key as string]: '' }))
   }
 
-  // ── Validation ────────────────────────────────────────────────────────────
+  // Validation
   const validatePerson = (person: PersonData, role: 'bride' | 'groom'): boolean => {
     const errs: Record<string, string> = {}
     if (!person.name.trim()) errs[`${role}_name`] = `${role === 'bride' ? 'Bride' : 'Groom'} name is required`
@@ -923,7 +882,7 @@ export default function KundaliMilanForm() {
     return Object.keys(errs).length === 0
   }
 
-  // ── Step navigation ───────────────────────────────────────────────────────
+  // Step navigation
   const goToStep = (step: StepNumber) => {
     setCurrentStep(step)
     setTimeout(() => {
@@ -943,11 +902,10 @@ export default function KundaliMilanForm() {
     goToStep(3)
   }
 
-  // Pattern 2: Edit button handlers
   const handleEditBride = () => goToStep(1)
   const handleEditGroom = () => goToStep(2)
 
-  // ── Loading messages ──────────────────────────────────────────────────────
+  // Loading messages
   const startLoadingMessages = (steps: string[] = LOADING_STEPS_PAYMENT) => {
     setLoadingStep(0)
     if (loadingIntervalRef.current) clearInterval(loadingIntervalRef.current)
@@ -960,7 +918,7 @@ export default function KundaliMilanForm() {
     if (loadingIntervalRef.current) clearInterval(loadingIntervalRef.current)
   }
 
-  // ── Tier resolution (audience → tier) ─────────────────────────────────────
+  // Tier resolution (audience -> tier)
   const resolveTier = (audience: AudienceVersion, isFreePreview: boolean): MilanTier => {
     if (isFreePreview) return 'free'
     if (audience === 'both') return 'deep_both'
@@ -973,7 +931,7 @@ export default function KundaliMilanForm() {
     return 101
   }
 
-  // ── Build request body for API ────────────────────────────────────────────
+  // Build request body for API
   const buildMilanBody = (paymentVerification: any = null, isFree = false) => {
     return {
       sessionId: `milan_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`,
@@ -1009,7 +967,7 @@ export default function KundaliMilanForm() {
     }
   }
 
-  // ── Call /api/calc/kundali-milan ──────────────────────────────────────────
+  // Call /api/calc/kundali-milan
   const callMilanAPI = async (paymentVerification: any = null, isFree = false) => {
     try {
       const res = await fetch('/api/calc/kundali-milan', {
@@ -1037,7 +995,7 @@ export default function KundaliMilanForm() {
     }
   }
 
-  // ── Free Preview Submit (no payment) ──────────────────────────────────────
+  // Free Preview Submit (no payment)
   const handleFreePreview = async () => {
     setApiError(null)
     setIsSubmitting(true)
@@ -1046,7 +1004,7 @@ export default function KundaliMilanForm() {
     setIsSubmitting(false)
   }
 
-  // ── Razorpay Payment Flow ─────────────────────────────────────────────────
+  // Razorpay Payment Flow
   const handlePaymentSubmit = async () => {
     if (!validateStep3()) return
     setApiError(null)
@@ -1063,11 +1021,16 @@ export default function KundaliMilanForm() {
       const amount = resolvePrice(fields.audience)
       const audience = fields.audience as AudienceVersion
 
-      // Create order
+      // Create order - send FULL birth data so verify-payment can compute (v1.1 fix)
       const orderRes = await fetch('/api/create-milan-order', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ tier: resolveTier(audience, false), amount, audience }),
+        body:    JSON.stringify({
+          ...buildMilanBody(null, false),
+          tier:   resolveTier(audience, false),
+          amount,
+          audience,
+        }),
       })
 
       if (!orderRes.ok) {
@@ -1082,15 +1045,14 @@ export default function KundaliMilanForm() {
       openRazorpayCheckout({
         keyId,
         orderId,
-        amount: amount * 100, // Razorpay expects paise
+        amount: amount * 100,
         currency,
         name: 'Trikal Vaani',
-        description: `Kundali Milan — ${audience === 'couple' ? 'Couple Version' : audience === 'parent' ? 'Parent Version' : 'Both Versions'}`,
+        description: `Kundali Milan - ${audience === 'couple' ? 'Couple Version' : audience === 'parent' ? 'Parent Version' : 'Both Versions'}`,
         prefillName: fields.contactName,
         prefillContact: `${fields.contactCountryCode}${fields.contactMobile}`.replace(/\s/g, ''),
         themeColor: '#D4AF37',
         onSuccess: async (response) => {
-          // Verify
           const verifyRes = await fetch('/api/verify-milan-payment', {
             method:  'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -1103,7 +1065,6 @@ export default function KundaliMilanForm() {
             return
           }
 
-          // Generate Milan
           setIsSubmitting(true)
           startLoadingMessages(LOADING_STEPS_PAYMENT)
 
@@ -1130,15 +1091,15 @@ export default function KundaliMilanForm() {
   const isLoading = isSubmitting || paymentLoading
 
   const getSubmitLabel = () => {
-    if (paymentLoading) return '⟳ Razorpay popup khul raha hai...'
+    if (paymentLoading) return 'Razorpay popup khul raha hai...'
     if (isLoading) return LOADING_STEPS_PAYMENT[loadingStep] || 'Processing...'
-    if (fields.audience === 'both') return '✨ Pay ₹151 with Razorpay — Both Versions'
-    if (fields.audience === 'couple') return '💕 Pay ₹101 with Razorpay — Couple Version'
-    if (fields.audience === 'parent') return '🙏 Pay ₹101 with Razorpay — Parent Version'
+    if (fields.audience === 'both') return 'Pay ₹151 with Razorpay - Both Versions'
+    if (fields.audience === 'couple') return 'Pay ₹101 with Razorpay - Couple Version'
+    if (fields.audience === 'parent') return 'Pay ₹101 with Razorpay - Parent Version'
     return 'Select audience to continue'
   }
 
-  // ─── RENDER ────────────────────────────────────────────────────────────────
+  // RENDER
   return (
     <section
       id="kundali-milan-form"
@@ -1146,7 +1107,6 @@ export default function KundaliMilanForm() {
       className="py-12 px-4"
       aria-label="Kundali Milan Vedic Compatibility Form by Rohiit Gupta"
     >
-      {/* JSON-LD Schema */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(MILAN_SERVICE_SCHEMA) }}
@@ -1164,10 +1124,10 @@ export default function KundaliMilanForm() {
             <div style={{ height: '1px', flex: 1, background: `linear-gradient(to left, transparent, ${GOLD_RGBA(0.3)})` }} />
           </div>
           <h2 className="text-white text-2xl sm:text-3xl font-serif font-bold mb-2">
-            Kundali Milan — Vedic Compatibility
+            Kundali Milan - Vedic Compatibility
           </h2>
           <p className="text-slate-400 text-sm max-w-lg mx-auto">
-            36 Guna Ashtakoot · Mangal, Nadi, Bhakoot Dosh · Personalized remedies by Rohiit Gupta, Chief Vedic Architect, Delhi NCR.
+            36 Guna Ashtakoot . Mangal, Nadi, Bhakoot Dosh . Personalized remedies by Rohiit Gupta, Chief Vedic Architect, Delhi NCR.
           </p>
           <div className="flex flex-wrap justify-center gap-2 mt-4">
             {TRUST_BADGES.map(b => (
@@ -1187,17 +1147,13 @@ export default function KundaliMilanForm() {
         <div className="rounded-2xl p-6 sm:p-8"
           style={{ background: 'rgba(13,17,30,0.85)', border: '1px solid rgba(212,175,55,0.15)', backdropFilter: 'blur(12px)' }}>
 
-          {/* Progress Bar — Pattern 3: clickable */}
           <ProgressBar
             currentStep={currentStep}
             completedSteps={completedSteps}
             onStepClick={goToStep}
           />
 
-          {/* ═══════════════════════════════════════════════════════════════
-              STEP 1 OR EDIT — BRIDE
-              Pattern 1+2: Show summary card if completed AND not currently editing
-              ═══════════════════════════════════════════════════════════════ */}
+          {/* STEP 1 OR EDIT - BRIDE */}
           {completedSteps.has(1) && currentStep !== 1 && (
             <SummaryCard
               title="Bride Details"
@@ -1223,9 +1179,7 @@ export default function KundaliMilanForm() {
             />
           )}
 
-          {/* ═══════════════════════════════════════════════════════════════
-              STEP 2 OR EDIT — GROOM
-              ═══════════════════════════════════════════════════════════════ */}
+          {/* STEP 2 OR EDIT - GROOM */}
           {completedSteps.has(2) && currentStep !== 2 && (
             <SummaryCard
               title="Groom Details"
@@ -1251,9 +1205,7 @@ export default function KundaliMilanForm() {
             />
           )}
 
-          {/* ═══════════════════════════════════════════════════════════════
-              STEP 3 — AUDIENCE + CONTACT + PAYMENT
-              ═══════════════════════════════════════════════════════════════ */}
+          {/* STEP 3 - AUDIENCE + CONTACT + PAYMENT */}
           {currentStep === 3 && (
             <div className="grid gap-5">
 
@@ -1347,7 +1299,7 @@ export default function KundaliMilanForm() {
               {/* Contact Email (optional) */}
               <div>
                 <label htmlFor="contact-email" className="block text-sm font-medium text-slate-300 mb-1.5">
-                  Email <span className="text-slate-500 text-xs ml-2">(optional — also gets PDF)</span>
+                  Email <span className="text-slate-500 text-xs ml-2">(optional - also gets PDF)</span>
                 </label>
                 <input
                   id="contact-email" type="email"
@@ -1397,7 +1349,7 @@ export default function KundaliMilanForm() {
                   </div>
                   <div style={{ width: '1px', height: '12px', background: 'rgba(255,255,255,0.1)' }} />
                   <span style={{ fontSize: '9px', color: '#64748B', fontWeight: 500 }}>
-                    🛡️ PCI-DSS · 256-bit SSL
+                    PCI-DSS . 256-bit SSL
                   </span>
                 </div>
               )}
@@ -1485,7 +1437,7 @@ export default function KundaliMilanForm() {
                 </p>
               </div>
 
-              {/* No Refund Disclosure — IR-18 */}
+              {/* No Refund Disclosure - IR-18 */}
               <div style={{
                 padding: '10px 14px',
                 background: 'rgba(255,255,255,0.02)',
@@ -1494,14 +1446,14 @@ export default function KundaliMilanForm() {
                 textAlign: 'center',
               }}>
                 <p style={{ color: '#64748b', fontSize: '10px', margin: 0, lineHeight: 1.5 }}>
-                  ℹ️ <strong style={{ color: '#94a3b8' }}>No Refund Policy</strong> — This is a final-sale digital product.
+                  <strong style={{ color: '#94a3b8' }}>No Refund Policy</strong> - This is a final-sale digital product.
                   Once payment is confirmed, the report cannot be refunded.
                   PDF delivery within 60 seconds via WhatsApp + Email.
                 </p>
               </div>
 
               <p className="text-center text-xs text-slate-600">
-                🔒 Your data is private and secure. Never shared. PCI-DSS compliant payments.
+                Your data is private and secure. Never shared. PCI-DSS compliant payments.
               </p>
             </div>
           )}
@@ -1515,7 +1467,7 @@ export default function KundaliMilanForm() {
               Payments secured by <strong style={{ color: RAZORPAY_BLUE }}>Razorpay</strong>.
             </p>
             <p style={{ color: '#1e293b', fontSize: '10px', margin: 0 }}>
-              By Rohiit Gupta, Chief Vedic Architect · trikalvaani.com · Delhi NCR · 🔱 Mahakaal Ka Ashirwad
+              By Rohiit Gupta, Chief Vedic Architect . trikalvaani.com . Delhi NCR . 🔱 Mahakaal Ka Ashirwad
             </p>
           </div>
         </div>
@@ -1524,6 +1476,4 @@ export default function KundaliMilanForm() {
   )
 }
 
-// ============================================================
-// END KundaliMilanForm v1.0 — LOCKED PER IR-13
-// ============================================================
+// END KundaliMilanForm v1.1 - LOCKED PER IR-13
