@@ -3,15 +3,16 @@
  * TRIKAL VAANI - Kundali Milan Result Page
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/milan/[slug]/page.tsx
- * VERSION: 1.1
+ * VERSION: 1.2
  * SIGNED: ROHIIT GUPTA, CEO
  * ============================================================
- * CHANGE LOG (v1.0 → v1.1):
- *   - Added MilanManglikBadge after score badge (ALL tiers, free + paid).
- *     Badge reads manglik_data: { bride, groom, combined } — pure engine
- *     data, no Gemini, no tier gate.
- *   - MilanRow interface updated: manglik_data typed as ManglikData.
- *   - All other layout, logic, styles identical to v1.0.
+ * CHANGE LOG (v1.1 → v1.2):
+ *   - Added MilanRemediesCard after narrative section (PAID tiers only).
+ *     Renders 10 remedies in 3 structured sections:
+ *     Parashar (4) · Bhrigu Nadi (4) · Shadbala (2)
+ *     Reads directly from remedies_data — no Gemini, pure engine data.
+ *   - MilanRow interface updated: remedies_data typed as RemediesData.
+ *   - All other layout, logic, styles identical to v1.1.
  * ============================================================
  */
 
@@ -20,6 +21,7 @@ import { notFound } from 'next/navigation';
 import { createClient } from '@supabase/supabase-js';
 import MilanShareButtons   from '@/components/milan/MilanShareButtons';
 import MilanManglikBadge   from '@/components/milan/MilanManglikBadge';
+import MilanRemediesCard   from '@/components/milan/MilanRemediesCard';
 
 export const dynamic   = 'force-dynamic';
 export const revalidate = 0;
@@ -29,7 +31,7 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-// ── manglik_data typed shape (v1.3 save format) ───────────────
+// ── Types ─────────────────────────────────────────────────────
 interface PersonManglik {
   is_manglik: boolean;
   strength:   string;
@@ -46,6 +48,13 @@ interface ManglikData {
   combined: CombinedManglik | null;
 }
 
+interface RemediesData {
+  parashar:       unknown[];
+  bhrigu:         unknown[];
+  shadbala:       unknown[];
+  total_remedies: number;
+}
+
 interface MilanRow {
   slug:             string;
   tier:             string;
@@ -56,7 +65,7 @@ interface MilanRow {
   ashtakoot_score:  number | null;
   ashtakoot_data:   unknown;
   manglik_data:     ManglikData | null;
-  remedies_data:    unknown;
+  remedies_data:    RemediesData | null;
   gemini_narrative: string | null;
   pdf_url:          string | null;
   created_at:       string;
@@ -85,6 +94,11 @@ function tierPrice(tier: string): string {
 
 function isFreeTier(tier: string): boolean {
   return tier === 'free';
+}
+
+// basic_51 shows score + narrative tease of remedies only — no remedy cards
+function showRemedies(tier: string): boolean {
+  return ['deep_101_couple', 'deep_101_parent', 'both_151'].includes(tier);
 }
 
 function scoreBand(score: number | null): string {
@@ -241,7 +255,6 @@ export default async function MilanResultPage({ params }: { params: { slug: stri
               Lekin poori sachhai — har dosha ki gehrai, aur 10 vishesh
               upaay jo aapki shaadi safal banayenge — woh Deep Reading mein khulti hai.
             </p>
-
             <div className="mt-7 grid sm:grid-cols-3 gap-3 text-left max-w-2xl mx-auto">
               {[
                 { p: '₹51',  t: 'Basic Milan',  d: 'Full 8 koots + all doshas' },
@@ -255,7 +268,6 @@ export default async function MilanResultPage({ params }: { params: { slug: stri
                 </div>
               ))}
             </div>
-
             <a
               href="/kundali-milan#kundali-milan-form"
               className="inline-block mt-8 px-8 py-3.5 rounded-lg bg-[#D4AF37] hover:bg-[#b8962e] text-[#080B12] font-semibold tracking-wide transition shadow-lg"
@@ -286,6 +298,14 @@ export default async function MilanResultPage({ params }: { params: { slug: stri
             )}
           </article>
         </section>
+      )}
+
+      {/* ─────────── REMEDIES CARDS (deep_101 + both_151 only) ─────────── */}
+      {!free && showRemedies(m.tier) && (
+        <MilanRemediesCard
+          remediesData={m.remedies_data as any}
+          tier={m.tier}
+        />
       )}
 
       {/* ─────────── MAA SHAKTI PERMANENT SECTION ─────────── */}
