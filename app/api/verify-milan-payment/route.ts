@@ -3,20 +3,28 @@
  * TRIKAL VAANI — Kundali Milan Payment Verification API
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/api/verify-milan-payment/route.ts
- * VERSION: 1.0
+ * VERSION: 1.1 — BUGFIX (Day 7)
  * SIGNED: ROHIIT GUPTA, CEO
  * ============================================================
- * 1. Verifies Razorpay HMAC-SHA256 signature
- * 2. Loads order from Supabase (server-trusted tier + birth data)
- * 3. Calls VM /milan-compute with bride + groom data
- * 4. Saves full Milan record to `kundali_milan` table
- * 5. Returns slug for /milan/[slug] result page
- * 6. Builds WhatsApp confirmation link
+ * CHANGES v1.1 (BUGFIX):
+ *   ✅ VM /milan-compute payload renamed:
+ *        bride → person1
+ *        groom → person2
+ *      (Day 3 VM milan_engine.py expects person1/person2)
+ *   ✅ Public API + Supabase save UNCHANGED (still bride_data/groom_data)
+ *   ✅ Only the internal VM call payload is fixed
+ *
+ * v1.0:
+ *   1. Verifies Razorpay HMAC-SHA256 signature
+ *   2. Loads order from Supabase (server-trusted tier + birth data)
+ *   3. Calls VM /milan-compute with bride + groom data
+ *   4. Saves full Milan record to `kundali_milan` table
+ *   5. Returns slug for /milan/[slug] result page
+ *   6. Builds WhatsApp confirmation link
  *
  * NOTE: Gemini narrative generation (Day 5) is intentionally
- * NOT triggered here. This route only persists the engine output
- * and creates the record. A separate /api/milan-narrative route
- * (Day 5) will populate `gemini_narrative` on the result page.
+ * NOT triggered here. A separate /api/milan-narrative route
+ * (Day 5) populates `gemini_narrative` on the result page.
  * ============================================================
  */
 
@@ -121,12 +129,12 @@ export async function POST(req: NextRequest) {
       })
       .eq('id', order.id);
 
-    // ── Build VM payload from server-trusted birth data ────
+    // ── BUGFIX v1.1: VM expects person1/person2 ────────────
     const bride = order.bride_data;
     const groom = order.groom_data;
 
     const vmPayload = {
-      bride: {
+      person1: {
         name:      bride.name,
         gender:    bride.gender ?? 'female',
         year:      Number(bride.dob.slice(0, 4)),
@@ -139,7 +147,7 @@ export async function POST(req: NextRequest) {
         timezone:  bride.timezone,
         place:     bride.place,
       },
-      groom: {
+      person2: {
         name:      groom.name,
         gender:    groom.gender ?? 'male',
         year:      Number(groom.dob.slice(0, 4)),
@@ -172,15 +180,13 @@ export async function POST(req: NextRequest) {
       if (!vmRes.ok) {
         const txt = await vmRes.text().catch(() => '');
         console.error('[Trikal] VM /milan-compute error post-payment:', vmRes.status, txt);
-        // Don't fail the user — we still create the record and let Day 5
-        // narrative route retry. Payment is locked in.
+        // Don't fail the user — record is created, narrative route can retry
       } else {
         vmData = await vmRes.json();
       }
     } catch (e: unknown) {
       clearTimeout(timeout);
       console.error('[Trikal] VM /milan-compute fetch failed post-payment:', e);
-      // Same as above — proceed with record creation.
     }
 
     // ── Save final Milan record ────────────────────────────
@@ -206,8 +212,6 @@ export async function POST(req: NextRequest) {
 
     if (saveErr) {
       console.error('[Trikal] Milan record save error:', saveErr.message);
-      // Critical: payment is verified but record failed.
-      // Return slug-less response so client can show support contact.
       return NextResponse.json(
         {
           success:   true,
