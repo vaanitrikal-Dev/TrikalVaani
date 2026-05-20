@@ -3,25 +3,16 @@
  * TRIKAL VAANI — Milan Narrative Generator API
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/api/milan-narrative/route.ts
- * VERSION: 1.1 — Wired to polishMilanNarrative (claude-polish.ts v2.2)
+ * VERSION: 1.3
  * SIGNED: ROHIIT GUPTA, CEO
  * ============================================================
- * Called from /milan/[slug] result page after payment verification.
- *
- * Flow:
- *   1. Load Milan record by slug from Supabase
- *   2. If gemini_narrative already exists → return cached (idempotent)
- *   3. Pick model by tier:
- *        basic_51         → Gemini 2.5 Flash · MAX_TOKENS=4000  · ~400w
- *        deep_101_couple  → Gemini 2.5 Pro   · MAX_TOKENS=8000  · ~1000w
- *        deep_101_parent  → Gemini 2.5 Pro   · MAX_TOKENS=8000  · ~1000w
- *        both_151         → Gemini 2.5 Pro   · MAX_TOKENS=12000 · ~1500w
- *   4. Pick prompt by audience: couple | parent | both
- *   5. Generate via Gemini → polish via Claude Sonnet 4.6 (polishMilanNarrative)
- *   6. Save to kundali_milan.gemini_narrative
- *   7. Return narrative to result page
- *
- * Iron Rule: NEVER set thinkingBudget:0
+ * CHANGE LOG (v1.1 → v1.3):
+ *   FIX 1: API key order corrected — GEMINI_API_KEY first, GOOGLE_API_KEY second.
+ *           GOOGLE_API_KEY is Maps key, invalid for Gemini → was causing 502 on every call.
+ *   FIX 2: manglik_data removed from hard require gate.
+ *           Old rows with manglik_data=null were 500ing before Gemini ran.
+ *           ashtakoot_data + remedies_data remain required (core data).
+ *           Null manglik_data → safe MANGLIK_FALLBACK stub passed to prompt builders.
  * ============================================================
  */
 
@@ -45,30 +36,18 @@ interface TierConfig {
 }
 
 const TIER_CONFIG: Record<Tier, TierConfig> = {
-  basic_51: {
-    model:      'gemini-2.5-flash',
-    maxTokens:  4000,
-    wordTarget: 400,
-    usePolish:  true,
-  },
-  deep_101_couple: {
-    model:      'gemini-2.5-pro',
-    maxTokens:  8000,
-    wordTarget: 1000,
-    usePolish:  true,
-  },
-  deep_101_parent: {
-    model:      'gemini-2.5-pro',
-    maxTokens:  8000,
-    wordTarget: 1000,
-    usePolish:  true,
-  },
-  both_151: {
-    model:      'gemini-2.5-pro',
-    maxTokens:  12000,
-    wordTarget: 1500,
-    usePolish:  true,
-  },
+  basic_51:        { model: 'gemini-2.5-flash', maxTokens: 4000,  wordTarget: 400,  usePolish: true },
+  deep_101_couple: { model: 'gemini-2.5-pro',   maxTokens: 8000,  wordTarget: 1000, usePolish: true },
+  deep_101_parent: { model: 'gemini-2.5-pro',   maxTokens: 8000,  wordTarget: 1000, usePolish: true },
+  both_151:        { model: 'gemini-2.5-pro',   maxTokens: 12000, wordTarget: 1500, usePolish: true },
+};
+
+// ── Safe fallback for manglik_data when null/missing ─────────
+const MANGLIK_FALLBACK = {
+  evaluated:     false,
+  bride:         { is_manglik: null, strength: 'Not evaluated' },
+  groom:         { is_manglik: null, strength: 'Not evaluated' },
+  combined:      { status: 'NONE', verdict: 'Manglik evaluation not available.', verdict_hi: '', recommendation: '' },
 };
 
 // ── Clients ──────────────────────────────────────────────────
@@ -77,11 +56,11 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
+// FIX 1: GEMINI_API_KEY first — GOOGLE_API_KEY is Maps key, invalid for Gemini
 const genAI = new GoogleGenerativeAI(
-  process.env.GOOGLE_API_KEY ?? process.env.GEMINI_API_KEY ?? ''
+  process.env.GEMINI_API_KEY ?? process.env.GOOGLE_API_KEY ?? ''
 );
 
-// ── Request shape ────────────────────────────────────────────
 interface NarrativeRequest {
   slug: string;
 }
@@ -133,19 +112,25 @@ export async function POST(req: NextRequest) {
 
     const cfg = TIER_CONFIG[tier];
 
-    // ── Engine data sanity ─────────────────────────────────
-    if (!milan.ashtakoot_data || !milan.manglik_data || !milan.remedies_data) {
-      console.error('[Trikal] Milan engine data missing for slug:', slug);
+    // ── Engine data sanity — manglik_data now OPTIONAL ─────
+    // FIX 2: manglik_data removed from hard gate.
+    // Old rows with null manglik_data were 500ing here before reaching Gemini.
+    if (!milan.ashtakoot_data || !milan.remedies_data) {
+      console.error('[Trikal] Milan core engine data missing for slug:', slug);
       return NextResponse.json(
         { error: 'Reading data incomplete. Please contact support.' },
         { status: 500 }
       );
     }
 
+    const manglikData = milan.manglik_data ?? MANGLIK_FALLBACK;
+    if (!milan.manglik_data) {
+      console.warn('[Trikal] manglik_data null for slug — using fallback:', slug);
+    }
+
     // ── Build the prompt by audience ───────────────────────
     const bride = milan.bride_data;
     const groom = milan.groom_data;
-
     let prompt: string;
 
     if (audience === 'couple') {
@@ -156,7 +141,7 @@ export async function POST(req: NextRequest) {
         groom_place:     groom.place,
         ashtakoot_score: milan.ashtakoot_score ?? 0,
         ashtakoot_data:  milan.ashtakoot_data,
-        manglik_data:    milan.manglik_data,
+        manglik_data:    manglikData,
         remedies_data:   milan.remedies_data,
         tier:            tier as 'basic_51' | 'deep_101_couple' | 'both_151',
         word_target:     cfg.wordTarget,
@@ -169,13 +154,12 @@ export async function POST(req: NextRequest) {
         groom_place:     groom.place,
         ashtakoot_score: milan.ashtakoot_score ?? 0,
         ashtakoot_data:  milan.ashtakoot_data,
-        manglik_data:    milan.manglik_data,
+        manglik_data:    manglikData,
         remedies_data:   milan.remedies_data,
         tier:            tier as 'basic_51' | 'deep_101_parent' | 'both_151',
         word_target:     cfg.wordTarget,
       });
     } else {
-      // audience === 'both'
       prompt = buildMilanBothPrompt({
         bride_name:      bride.name,
         groom_name:      groom.name,
@@ -183,7 +167,7 @@ export async function POST(req: NextRequest) {
         groom_place:     groom.place,
         ashtakoot_score: milan.ashtakoot_score ?? 0,
         ashtakoot_data:  milan.ashtakoot_data,
-        manglik_data:    milan.manglik_data,
+        manglik_data:    manglikData,
         remedies_data:   milan.remedies_data,
         word_target:     cfg.wordTarget,
       });
@@ -218,9 +202,9 @@ export async function POST(req: NextRequest) {
     }
 
     // ── Claude Sonnet 4.6 polish via polishMilanNarrative ──
-    let finalText  = geminiText;
-    let polishMs   = 0;
-    let didPolish  = false;
+    let finalText = geminiText;
+    let polishMs  = 0;
+    let didPolish = false;
 
     if (cfg.usePolish) {
       const polishResult = await polishMilanNarrative({
@@ -229,7 +213,7 @@ export async function POST(req: NextRequest) {
         tier,
       });
 
-      finalText = polishResult.narrative;       // graceful: raw if polish failed
+      finalText = polishResult.narrative;
       polishMs  = polishResult.polishMs ?? 0;
       didPolish = polishResult.polished;
 
@@ -249,7 +233,6 @@ export async function POST(req: NextRequest) {
 
     if (saveErr) {
       console.error('[Trikal] Milan narrative save failed:', saveErr.message);
-      // Still return — user shouldn't lose the reading
     }
 
     return NextResponse.json({
