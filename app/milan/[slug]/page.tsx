@@ -3,38 +3,48 @@
  * TRIKAL VAANI - Kundali Milan Result Page
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/milan/[slug]/page.tsx
- * VERSION: 1.0
+ * VERSION: 1.1
  * SIGNED: ROHIIT GUPTA, CEO
  * ============================================================
- * Full-narrative layout per CEO Day 6 brief.
- *
- * Layout:
- *    Hero: Trikal Vaani brand + Bride  Groom names
- *    Ashtakoot score badge
- *    Tier indicator
- *    Full flowing narrative (Couple / Parent / Both)
- *    Maa Shakti permanent section (Arzi + Dhanyawad)
- *    Share buttons (WA / Email / Copy / PDF)
- *
- * SEO: noindex (private reading per slug)
- * Auto-triggers narrative generation if missing.
+ * CHANGE LOG (v1.0 → v1.1):
+ *   - Added MilanManglikBadge after score badge (ALL tiers, free + paid).
+ *     Badge reads manglik_data: { bride, groom, combined } — pure engine
+ *     data, no Gemini, no tier gate.
+ *   - MilanRow interface updated: manglik_data typed as ManglikData.
+ *   - All other layout, logic, styles identical to v1.0.
  * ============================================================
  */
 
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { createClient } from '@supabase/supabase-js';
-import MilanShareButtons from '@/components/milan/MilanShareButtons';
+import MilanShareButtons   from '@/components/milan/MilanShareButtons';
+import MilanManglikBadge   from '@/components/milan/MilanManglikBadge';
 
-// -- Don't cache - readings are fresh per visit ---------------
-export const dynamic = 'force-dynamic';
+export const dynamic   = 'force-dynamic';
 export const revalidate = 0;
 
-// -- Supabase (service role for server component) -------------
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
+
+// ── manglik_data typed shape (v1.3 save format) ───────────────
+interface PersonManglik {
+  is_manglik: boolean;
+  strength:   string;
+}
+interface CombinedManglik {
+  status:         string;
+  verdict:        string;
+  verdict_hi:     string;
+  recommendation: string;
+}
+interface ManglikData {
+  bride:    PersonManglik | null;
+  groom:    PersonManglik | null;
+  combined: CombinedManglik | null;
+}
 
 interface MilanRow {
   slug:             string;
@@ -45,14 +55,14 @@ interface MilanRow {
   groom_data:       { name: string; place: string; dob: string; tob: string };
   ashtakoot_score:  number | null;
   ashtakoot_data:   unknown;
-  manglik_data:     unknown;
+  manglik_data:     ManglikData | null;
   remedies_data:    unknown;
   gemini_narrative: string | null;
   pdf_url:          string | null;
   created_at:       string;
 }
 
-// -- Tier labels ----------------------------------------------
+// ── Helpers ───────────────────────────────────────────────────
 function tierLabel(tier: string): string {
   return {
     free:            'Free Preview',
@@ -86,13 +96,9 @@ function scoreBand(score: number | null): string {
   return 'Serious Doshas · गंभीर';
 }
 
-// -- Trigger narrative generation if missing ------------------
+// ── Trigger narrative generation if missing ───────────────────
 async function ensureNarrative(slug: string, currentNarrative: string | null): Promise<string | null> {
-  if (currentNarrative && currentNarrative.length > 200) {
-    return currentNarrative;
-  }
-
-  // Fire the narrative API server-side
+  if (currentNarrative && currentNarrative.length > 200) return currentNarrative;
   try {
     const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://trikalvaani.com';
     const res = await fetch(`${baseUrl}/api/milan-narrative`, {
@@ -101,9 +107,7 @@ async function ensureNarrative(slug: string, currentNarrative: string | null): P
       body:    JSON.stringify({ slug }),
       cache:   'no-store',
     });
-
     if (!res.ok) return null;
-
     const data = await res.json();
     return data.narrative ?? null;
   } catch {
@@ -111,21 +115,18 @@ async function ensureNarrative(slug: string, currentNarrative: string | null): P
   }
 }
 
-// -- Render narrative HTML (handle BOTH version split) --------
+// ── Render narrative HTML ─────────────────────────────────────
 function renderNarrative(narrative: string, audience: string) {
   if (audience === 'both' && narrative.includes('═══ COUPLE VERSION ═══')) {
     const [, restA] = narrative.split('═══ COUPLE VERSION ═══');
     const [coupleBlock, parentBlock] = restA.split('═══ PARENT VERSION ═══');
-
     return (
       <>
         <div className="narrative-version-label">For The Couple · Hinglish</div>
         {coupleBlock.trim().split('\n\n').filter(Boolean).map((p, i) => (
           <p key={`c-${i}`} className="narrative-para">{p.trim()}</p>
         ))}
-
         <div className="narrative-version-divider" />
-
         <div className="narrative-version-label">माता-पिता के लिए · शुद्ध हिन्दी</div>
         {(parentBlock ?? '').trim().split('\n\n').filter(Boolean).map((p, i) => (
           <p key={`p-${i}`} className="narrative-para">{p.trim()}</p>
@@ -133,7 +134,6 @@ function renderNarrative(narrative: string, audience: string) {
       </>
     );
   }
-
   return (
     <>
       {narrative.split('\n\n').filter(Boolean).map((p, i) => (
@@ -143,7 +143,7 @@ function renderNarrative(narrative: string, audience: string) {
   );
 }
 
-// -- Metadata - noindex (private reading) ---------------------
+// ── Metadata ──────────────────────────────────────────────────
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
   return {
     title:       'Kundali Milan · Trikal Vaani',
@@ -152,32 +152,26 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   };
 }
 
-// -- PAGE -----------------------------------------------------
+// ── PAGE ──────────────────────────────────────────────────────
 export default async function MilanResultPage({ params }: { params: { slug: string } }) {
-
   const { slug } = params;
 
-  // 1. Load Milan
   const { data: milan, error } = await supabase
     .from('kundali_milan')
     .select('*')
     .eq('slug', slug)
     .single();
 
-  if (error || !milan) {
-    notFound();
-  }
+  if (error || !milan) notFound();
 
-  const m = milan as MilanRow;
-
+  const m    = milan as MilanRow;
   const free = isFreeTier(m.tier);
 
-  // 2. Ensure narrative exists (PAID only - free tier never generates narrative)
   const narrative = free ? null : await ensureNarrative(m.slug, m.gemini_narrative);
 
-  const bride = m.bride_data;
-  const groom = m.groom_data;
-  const score = m.ashtakoot_score;
+  const bride     = m.bride_data;
+  const groom     = m.groom_data;
+  const score     = m.ashtakoot_score;
   const resultUrl = `https://trikalvaani.com/milan/${m.slug}`;
 
   return (
@@ -223,6 +217,13 @@ export default async function MilanResultPage({ params }: { params: { slug: stri
         </section>
       )}
 
+      {/* ─────────── MANGLIK BADGE (ALL TIERS) ─────────── */}
+      <MilanManglikBadge
+        manglikData={m.manglik_data}
+        brideName={bride.name}
+        groomName={groom.name}
+      />
+
       {/* ─────────── NARRATIVE (paid) OR UPGRADE BLOCK (free) ─────────── */}
       {free ? (
         <section className="max-w-3xl mx-auto px-5 py-8 sm:py-12">
@@ -235,8 +236,9 @@ export default async function MilanResultPage({ params }: { params: { slug: stri
               This is just a glimpse — the full truth awaits
             </p>
             <p className="mt-5 text-gray-300 text-sm sm:text-base leading-relaxed max-w-xl mx-auto">
-              Aapne dekha {bride.name} aur {groom.name} ka Ashtakoot score{score !== null ? ` (${score}/36)` : ''}.
-              Lekin poori sachhai — har dosha ki gehrai, Mangal aur Nadi ka asar, aur 10 vishesh
+              Aapne dekha {bride.name} aur {groom.name} ka Ashtakoot score
+              {score !== null ? ` (${score}/36)` : ''} aur Mangal Dosh status.
+              Lekin poori sachhai — har dosha ki gehrai, aur 10 vishesh
               upaay jo aapki shaadi safal banayenge — woh Deep Reading mein khulti hai.
             </p>
 
@@ -272,7 +274,6 @@ export default async function MilanResultPage({ params }: { params: { slug: stri
               Aapka Milan Vishleshan
             </h2>
           </div>
-
           <article className="milan-narrative bg-[#0d1120]/60 border border-[#D4AF37]/15 rounded-2xl p-6 sm:p-10">
             {!narrative ? (
               <div className="text-center py-12 text-gray-400">
@@ -315,7 +316,7 @@ export default async function MilanResultPage({ params }: { params: { slug: stri
         </div>
       </section>
 
-      {/* ─────────── SHARE + PDF (paid only — PDF is paid-only per IR-22) ─────────── */}
+      {/* ─────────── SHARE + PDF (paid only) ─────────── */}
       {!free && (
         <section className="max-w-3xl mx-auto px-5 py-10">
           <div className="text-center mb-5">
@@ -343,7 +344,7 @@ export default async function MilanResultPage({ params }: { params: { slug: stri
         </div>
       </footer>
 
-      {/* ─────────── INLINE STYLES (narrative typography) ─────────── */}
+      {/* ─────────── INLINE STYLES ─────────── */}
       <style>{`
         .milan-narrative .narrative-para {
           font-size: 1.05rem;
@@ -353,9 +354,7 @@ export default async function MilanResultPage({ params }: { params: { slug: stri
           text-align: justify;
           font-weight: 400;
         }
-        .milan-narrative .narrative-para:last-child {
-          margin-bottom: 0;
-        }
+        .milan-narrative .narrative-para:last-child { margin-bottom: 0; }
         .milan-narrative .narrative-version-label {
           display: inline-block;
           color: #D4AF37;
