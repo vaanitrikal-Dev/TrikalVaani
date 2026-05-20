@@ -3,48 +3,64 @@
  * TRIKAL VAANI — Kundali Milan Compute API
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/api/calc/kundali-milan/route.ts
- * VERSION: 1.2 — BUGFIX (field-name mismatch with form)
+ * VERSION: 1.3 — FREE SAVE + SLUG + milanId (fixes "save nahi hua")
  * SIGNED: ROHIIT GUPTA, CEO
  * ============================================================
- * CHANGES v1.2 (BUGFIX ONLY):
- *   ✅ FIXED: Zod schema now accepts the field names the form
- *      actually sends (KundaliMilanForm.tsx buildMilanBody):
- *        latitude  ← lat
- *        longitude ← lng
- *        place     ← cityName
- *      Previously free preview was REJECTED (400) because the
- *      schema demanded latitude/longitude/place but the form
- *      sent lat/lng/cityName. Free submit silently failed.
- *   ✅ Backward compatible: still accepts latitude/longitude/place
- *      if ever sent that way (both names allowed).
- *   ✅ Accepts extra fields the form sends (sessionId, ayanamsa,
- *      contact, paymentVerification) without rejecting.
- *   ✅ NOTHING ELSE CHANGED. VM payload person1/person2 intact.
- *      Public response shape intact. Free-tier behavior intact.
+ * CHANGES v1.3 (THIS VERSION):
+ *   ✅ FIXED "Milan report ready hai par save nahi hua":
+ *      The form (callMilanAPI) expects `milanId` in the response so it
+ *      can redirect to /milan/[milanId]. v1.2 returned inline preview
+ *      with NO milanId → form always hit the error branch.
+ *   ✅ NOW: free preview SAVES to kundali_milan table with:
+ *        - a generated slug
+ *        - tier='free'
+ *        - audience, language, bride_data, groom_data
+ *        - ashtakoot_score + ashtakoot_data + manglik_data (free shows these)
+ *        - remedies_data + gemini_narrative LEFT NULL (locked for paid)
+ *   ✅ Returns { milanId: slug } so the form redirects correctly.
+ *   ✅ Still returns inline preview block (backward compatible).
+ *   ✅ EVERYTHING v1.2 did is preserved (field-name coercion,
+ *      passthrough, VM person1/person2 payload).
  *
- * CHANGES v1.1 (prior):
+ * CHANGES v1.2 (prior — preserved):
+ *   ✅ Zod accepts lat/lng/cityName (form names) + latitude/longitude/place
+ *   ✅ passthrough tolerates sessionId, contact, paymentVerification, etc.
+ *
+ * CHANGES v1.1 (prior — preserved):
  *   ✅ VM /milan-compute payload bride→person1, groom→person2
  *
- * v1.0:
- *   Receives bride + groom birth data from KundaliMilanForm.tsx,
- *   calls VM endpoint and returns Milan data for the FREE preview tier.
- *
- * Anti-tamper: tier defaults to "free" here; paid tiers must
- * route via /api/create-milan-order + /api/verify-milan-payment.
+ * Anti-tamper: tier is FORCED to 'free' here regardless of what the
+ * form sends. Paid tiers MUST route via /api/create-milan-order +
+ * /api/verify-milan-payment (which save tier=basic_51/deep_101_*/both_151).
+ * A free row can never unlock paid content — the result page checks tier.
  * ============================================================
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
 import { z } from 'zod';
+import crypto from 'crypto';
 
 // ── VM endpoint ──────────────────────────────────────────────
 const VM_MILAN_ENDPOINT =
   process.env.VM_MILAN_ENDPOINT ?? 'http://34.14.164.105:8001/milan-compute';
 
+// ── Supabase (service role) ──────────────────────────────────
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
+
+// ── Slug generator (matches verify-milan-payment style) ──────
+function makeSlug(): string {
+  const ts  = Date.now().toString(36);
+  const rnd = crypto.randomBytes(4).toString('hex');
+  return `m-${ts}-${rnd}`;
+}
+
 // ── Helpers: coerce form field names → canonical ─────────────
-// The form (buildMilanBody) sends: lat, lng, cityName, timezone.
-// Older/alternate callers may send: latitude, longitude, place.
-// We accept BOTH and normalise to latitude/longitude/place.
+// Form (buildMilanBody) sends: lat, lng, cityName, timezone.
+// Accept BOTH lat/lng/cityName AND latitude/longitude/place.
 const partnerSchema = z
   .object({
     name:      z.string().trim().min(1, 'Name required').max(80),
@@ -52,21 +68,16 @@ const partnerSchema = z
     dob:       z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'DOB must be YYYY-MM-DD'),
     tob:       z.string().regex(/^\d{2}:\d{2}$/, 'TOB must be HH:MM'),
 
-    // Place: accept either `place` or `cityName`
     place:     z.string().trim().max(160).optional(),
     cityName:  z.string().trim().max(160).optional(),
 
-    // Latitude: accept either `latitude` or `lat`
     latitude:  z.number().min(-90).max(90).optional(),
     lat:       z.number().min(-90).max(90).optional(),
 
-    // Longitude: accept either `longitude` or `lng`
     longitude: z.number().min(-180).max(180).optional(),
     lng:       z.number().min(-180).max(180).optional(),
 
     timezone:  z.number().min(-12).max(14),
-
-    // Tolerate extra fields the form sends without failing
     ayanamsa:  z.string().optional(),
   })
   .passthrough()
@@ -80,15 +91,11 @@ const partnerSchema = z
   .refine((p) => typeof p.longitude === 'number', { message: 'longitude/lng required' })
   .refine((p) => p.place.length >= 1,             { message: 'place/cityName required' });
 
-// ── Full request (client API stays bride/groom) ─────────────
-// .passthrough() lets through sessionId, contact, paymentVerification,
-// audienceVersion, etc. without rejecting the request.
 const requestSchema = z
   .object({
     bride:    partnerSchema,
     groom:    partnerSchema,
     audience: z.enum(['couple', 'parent', 'both']).optional(),
-    // Form sends audienceVersion; accept that too
     audienceVersion: z.enum(['couple', 'parent', 'both']).optional(),
     language: z.enum(['hinglish', 'hindi', 'english']).default('hinglish'),
     tier:     z.string().optional(),
@@ -103,17 +110,14 @@ export async function POST(req: NextRequest) {
     const parsed = requestSchema.safeParse(json);
     if (!parsed.success) {
       return NextResponse.json(
-        {
-          error: 'Invalid input.',
-          details: parsed.error.flatten(),
-        },
+        { error: 'Invalid input.', details: parsed.error.flatten() },
         { status: 400 }
       );
     }
 
-    const data = parsed.data;
-    const bride = data.bride;
-    const groom = data.groom;
+    const data     = parsed.data;
+    const bride    = data.bride;
+    const groom    = data.groom;
     const audience = (data.audience ?? data.audienceVersion ?? 'couple') as
       'couple' | 'parent' | 'both';
     const language = data.language;
@@ -181,9 +185,6 @@ export async function POST(req: NextRequest) {
 
     const vmData = await vmRes.json();
 
-    // ── Build FREE preview response (anti-spoiler) ─────────
-    // Free tier: ashtakoot score + manglik flag + 1 hook line.
-    // Paid tiers receive full data via /verify-milan-payment.
     const ashtakootScore = vmData?.ashtakoot?.total_score ?? null;
     const manglikStatus  = vmData?.manglik?.status ?? null;
 
@@ -192,9 +193,60 @@ export async function POST(req: NextRequest) {
         ? 'Aapki rishtedari mein Mahakaal ki rehmat dikhayi de rahi hai. Poori sachhai dekhne ke liye Deep Reading kholiye.'
         : 'Is rishtedari mein kuch chhupe huye sutra hain jo sirf Deep Reading mein khulenge.';
 
+    // ── v1.3: SAVE free preview to kundali_milan + return milanId ──
+    // tier FORCED to 'free'. order_id NULL (no payment).
+    // Free row stores score + ashtakoot + manglik (free shows these).
+    // remedies_data + gemini_narrative LEFT NULL (locked for paid upgrade).
+    const slug = makeSlug();
+
+    // Normalise birth data to the shape the result page + PDF expect
+    const brideData = {
+      name: bride.name, gender: bride.gender ?? 'female',
+      dob: bride.dob, tob: bride.tob,
+      latitude: bride.latitude, longitude: bride.longitude,
+      timezone: bride.timezone, place: bride.place,
+    };
+    const groomData = {
+      name: groom.name, gender: groom.gender ?? 'male',
+      dob: groom.dob, tob: groom.tob,
+      latitude: groom.latitude, longitude: groom.longitude,
+      timezone: groom.timezone, place: groom.place,
+    };
+
+    let savedSlug: string | null = slug;
+
+    const { error: saveErr } = await supabase
+      .from('kundali_milan')
+      .insert({
+        order_id:         null,          // free — no payment
+        slug,
+        tier:             'free',        // anti-tamper: always free here
+        audience,
+        language,
+        bride_data:       brideData,
+        groom_data:       groomData,
+        ashtakoot_score:  ashtakootScore,
+        ashtakoot_data:   vmData?.ashtakoot ?? null,
+        manglik_data:     vmData?.manglik   ?? null,
+        remedies_data:    null,          // LOCKED for paid
+        gemini_narrative: null,          // LOCKED for paid
+        pdf_url:          null,
+      });
+
+    if (saveErr) {
+      // Save failed — still return preview inline so user sees something,
+      // but no milanId (form will show its inline preview path).
+      console.error('[Trikal] Free Milan save error:', saveErr.message);
+      savedSlug = null;
+    }
+
+    // ── Response ───────────────────────────────────────────
     return NextResponse.json({
       success:  true,
       tier:     'free',
+      // milanId drives the form redirect to /milan/[slug]
+      milanId:  savedSlug,
+      slug:     savedSlug,
       audience,
       language,
       preview: {
@@ -202,15 +254,14 @@ export async function POST(req: NextRequest) {
         manglik_status:  manglikStatus,
         hook:            previewHook,
       },
-      // Echo back partners (client-side names: bride/groom)
       bride: { name: bride.name, place: bride.place, dob: bride.dob, tob: bride.tob },
       groom: { name: groom.name, place: groom.place, dob: groom.dob, tob: groom.tob },
       locked: {
-        full_ashtakoot:    true,
-        full_manglik:      true,
-        remedies:          true,
-        gemini_narrative:  true,
-        pdf_download:      true,
+        full_ashtakoot:    false,  // free shows score + basic ashtakoot
+        full_manglik:      false,  // free shows manglik status
+        remedies:          true,   // LOCKED
+        gemini_narrative:  true,   // LOCKED
+        pdf_download:      true,   // LOCKED
       },
     });
 
