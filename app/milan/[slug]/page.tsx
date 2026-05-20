@@ -1,6 +1,6 @@
 /**
  * ============================================================
- * TRIKAL VAANI — Kundali Milan Result Page
+ * TRIKAL VAANI - Kundali Milan Result Page
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/milan/[slug]/page.tsx
  * VERSION: 1.0
@@ -9,12 +9,12 @@
  * Full-narrative layout per CEO Day 6 brief.
  *
  * Layout:
- *   • Hero: Trikal Vaani brand + Bride × Groom names
- *   • Ashtakoot score badge
- *   • Tier indicator
- *   • Full flowing narrative (Couple / Parent / Both)
- *   • Maa Shakti permanent section (Arzi + Dhanyawad)
- *   • Share buttons (WA / Email / Copy / PDF)
+ *    Hero: Trikal Vaani brand + Bride  Groom names
+ *    Ashtakoot score badge
+ *    Tier indicator
+ *    Full flowing narrative (Couple / Parent / Both)
+ *    Maa Shakti permanent section (Arzi + Dhanyawad)
+ *    Share buttons (WA / Email / Copy / PDF)
  *
  * SEO: noindex (private reading per slug)
  * Auto-triggers narrative generation if missing.
@@ -26,11 +26,11 @@ import { notFound } from 'next/navigation';
 import { createClient } from '@supabase/supabase-js';
 import MilanShareButtons from '@/components/milan/MilanShareButtons';
 
-// ── Don't cache — readings are fresh per visit ───────────────
+// -- Don't cache - readings are fresh per visit ---------------
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
-// ── Supabase (service role for server component) ─────────────
+// -- Supabase (service role for server component) -------------
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -52,7 +52,7 @@ interface MilanRow {
   created_at:       string;
 }
 
-// ── Tier labels ──────────────────────────────────────────────
+// -- Tier labels ----------------------------------------------
 function tierLabel(tier: string): string {
   return {
     free:            'Free Preview',
@@ -86,7 +86,7 @@ function scoreBand(score: number | null): string {
   return 'Serious Doshas · गंभीर';
 }
 
-// ── Trigger narrative generation if missing ──────────────────
+// -- Trigger narrative generation if missing ------------------
 async function ensureNarrative(slug: string, currentNarrative: string | null): Promise<string | null> {
   if (currentNarrative && currentNarrative.length > 200) {
     return currentNarrative;
@@ -111,7 +111,7 @@ async function ensureNarrative(slug: string, currentNarrative: string | null): P
   }
 }
 
-// ── Render narrative HTML (handle BOTH version split) ────────
+// -- Render narrative HTML (handle BOTH version split) --------
 function renderNarrative(narrative: string, audience: string) {
   if (audience === 'both' && narrative.includes('═══ COUPLE VERSION ═══')) {
     const [, restA] = narrative.split('═══ COUPLE VERSION ═══');
@@ -143,7 +143,7 @@ function renderNarrative(narrative: string, audience: string) {
   );
 }
 
-// ── Metadata — noindex (private reading) ─────────────────────
+// -- Metadata - noindex (private reading) ---------------------
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
   return {
     title:       'Kundali Milan · Trikal Vaani',
@@ -152,7 +152,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   };
 }
 
-// ── PAGE ─────────────────────────────────────────────────────
+// -- PAGE -----------------------------------------------------
 export default async function MilanResultPage({ params }: { params: { slug: string } }) {
 
   const { slug } = params;
@@ -172,7 +172,7 @@ export default async function MilanResultPage({ params }: { params: { slug: stri
 
   const free = isFreeTier(m.tier);
 
-  // 2. Ensure narrative exists (PAID only — free tier never generates narrative)
+  // 2. Ensure narrative exists (PAID only - free tier never generates narrative)
   const narrative = free ? null : await ensureNarrative(m.slug, m.gemini_narrative);
 
   const bride = m.bride_data;
