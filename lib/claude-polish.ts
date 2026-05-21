@@ -3,26 +3,26 @@
  * TRIKAL VAANI — Claude Polish Layer
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: lib/claude-polish.ts
- * VERSION: 2.2 — Added polishMilanNarrative for Kundali Milan
+ * VERSION: 2.3 — Milan polish is now LANGUAGE-AWARE (kills drift)
  * SIGNED: ROHIIT GUPTA, CEO
  *
- * CHANGES v2.2 (additive — predictions flow untouched):
- *   ✅ NEW: polishMilanNarrative() for Milan flowing-prose narratives
- *   ✅ NEW: Uses Claude Sonnet 4.6 (claude-sonnet-4-5-20250929) for premium Milan polish
- *   ✅ NEW: Preserves Milan's built-in suspense + Maa Shakti dual hooks (no injection)
- *   ✅ NEW: Accepts plain text in, returns plain text out (NOT JSON)
- *   ✅ UNCHANGED: polishPrediction(), SUSPENSE_HOOKS, all prediction polish logic
- *   ✅ UNCHANGED: Haiku 4.5 model + 90s timeout for predictions
+ * CHANGES v2.3 (additive — predictions flow 100% untouched):
+ *   ✅ FIX (drift): polishMilanNarrative() no longer derives language from
+ *      audience. It now accepts an explicit `language` param
+ *      ('hinglish' | 'hindi' | 'english'), default 'hinglish'.
+ *   ✅ The Sonnet system prompt's LANGUAGE guide is driven by `language`,
+ *      not by isParent. This stops Sonnet from translating an English/Hindi
+ *      narrative back toward Hinglish (and vice-versa).
+ *   ✅ `both` audience: both sections now follow the ONE selected language
+ *      (matches kundali-milan-prompt-both.ts v1.1 behaviour).
+ *   ✅ UNCHANGED: all prediction polish logic, Haiku model, Sonnet model,
+ *      timeouts, token budgets, preservation rules.
+ *
+ * CHANGES v2.2:
+ *   ✅ NEW: polishMilanNarrative() for Milan flowing-prose narratives (Sonnet 4.6)
  *
  * CHANGES v2.1:
  *   ✅ AbortSignal.timeout: 45000 → 90000ms
- *   ✅ Model: claude-haiku-4-5-20251001 (unchanged)
- *
- * DHARMA GURU PHILOSOPHY:
- *   - Speaks like a wise, compassionate senior Jyotishi
- *   - Soft, warm, never alarmist
- *   - Free  → suspense hook at end
- *   - Paid  → no hook, full clarity
  *
  * Cost per prediction polish (Haiku 4.5): ~₹0.08
  * Cost per Milan polish (Sonnet 4.6):     ~₹0.50-₹1.20 — premium feel
@@ -34,7 +34,7 @@ const CLAUDE_API_KEY = process.env.ANTHROPIC_API_KEY ?? '';
 // Prediction polish model (UNCHANGED)
 const CLAUDE_MODEL_PREDICTION = 'claude-haiku-4-5-20251001';
 
-// Milan polish model (NEW — premium Sonnet 4.6)
+// Milan polish model (Sonnet 4.6)
 const CLAUDE_MODEL_MILAN      = 'claude-sonnet-4-5-20250929';
 
 const CLAUDE_URL              = 'https://api.anthropic.com/v1/messages';
@@ -253,9 +253,10 @@ export function estimatePolishCost(predictionJson: Record<string, unknown>): {
 }
 
 // ════════════════════════════════════════════════════════════════════════════
-// MILAN POLISH — v2.2 NEW (for Kundali Milan flowing-prose narratives)
+// MILAN POLISH — v2.3 (LANGUAGE-AWARE)
 // Premium Claude Sonnet 4.6 model · plain text in → plain text out
 // Preserves Gemini's built-in suspense + Maa Shakti dual hooks
+// Language is now EXPLICIT (no longer derived from audience) → no drift.
 // ════════════════════════════════════════════════════════════════════════════
 
 export interface MilanPolishResult {
@@ -267,6 +268,7 @@ export interface MilanPolishResult {
 
 export type MilanAudience = 'couple' | 'parent' | 'both';
 export type MilanTier     = 'basic_51' | 'deep_101_couple' | 'deep_101_parent' | 'both_151';
+export type MilanLanguage = 'hinglish' | 'hindi' | 'english';
 
 /**
  * Polish Milan narrative — plain text in, plain text out.
@@ -276,14 +278,16 @@ export type MilanTier     = 'basic_51' | 'deep_101_couple' | 'deep_101_parent' |
  *   - Maa Shakti Arzi + Dhanyawad dual positioning
  *   - Karmic teaser for ₹251 upsell
  *   - Next-tier hook
+ *   - THE LANGUAGE (explicit `language` param — Sonnet must NOT translate)
  */
 export async function polishMilanNarrative(params: {
   rawNarrative: string;
   audience:     MilanAudience;
   tier:         MilanTier;
+  language?:    MilanLanguage;   // v2.3 — explicit, default 'hinglish'
 }): Promise<MilanPolishResult> {
 
-  const { rawNarrative, audience, tier } = params;
+  const { rawNarrative, audience, tier, language = 'hinglish' } = params;
 
   if (!CLAUDE_API_KEY) {
     console.warn('[MilanPolish] No ANTHROPIC_API_KEY — returning raw');
@@ -298,8 +302,8 @@ export async function polishMilanNarrative(params: {
   const startMs = Date.now();
 
   try {
-    const systemPrompt = buildMilanPolishSystemPrompt(audience, tier);
-    const userMessage  = buildMilanPolishUserMessage(rawNarrative, audience, tier);
+    const systemPrompt = buildMilanPolishSystemPrompt(audience, tier, language);
+    const userMessage  = buildMilanPolishUserMessage(rawNarrative, audience, tier, language);
 
     // Token budget by tier (CEO LOCKED)
     const maxTokens =
@@ -344,7 +348,7 @@ export async function polishMilanNarrative(params: {
       .trim();
 
     const polishMs = Date.now() - startMs;
-    console.log(`[MilanPolish] OK | tier:${tier} | audience:${audience} | ms:${polishMs} | model:${CLAUDE_MODEL_MILAN}`);
+    console.log(`[MilanPolish] OK | tier:${tier} | audience:${audience} | lang:${language} | ms:${polishMs} | model:${CLAUDE_MODEL_MILAN}`);
     return { polished: true, narrative: cleaned, polishMs };
 
   } catch (err) {
@@ -355,36 +359,72 @@ export async function polishMilanNarrative(params: {
   }
 }
 
-// ── Milan polish — Dharma Guru system prompt ─────────────────────────────────
+// ── Milan polish — Dharma Guru system prompt (v2.3 language-aware) ────────────
 
-function buildMilanPolishSystemPrompt(audience: MilanAudience, tier: MilanTier): string {
-  const isParent  = audience === 'parent';
-  const isBoth    = audience === 'both';
-  const isHindi   = isParent;        // Parent narrative is Shudh Hindi
-  const isHinglish = !isParent;      // Couple narrative is Hinglish
+function buildMilanPolishSystemPrompt(
+  audience: MilanAudience,
+  tier: MilanTier,
+  language: MilanLanguage,
+): string {
+  const isParent = audience === 'parent';
+  const isBoth   = audience === 'both';
 
+  // v2.3: LANGUAGE GUIDE is driven by the explicit `language` param.
+  // No longer derived from audience — this is what stops drift.
+  const LANG_GUIDE: Record<MilanLanguage, string> = {
+    hinglish: `The narrative is written in HINGLISH (natural Hindi + English mix, modern Indian register).
+PRESERVE HINGLISH EXACTLY. Do NOT shift to pure Hindi or pure English. Do NOT translate.
+Correct register example: "Bhakoot Dosha aapke rishtedari mein hai — yeh financial stress laata hai."`,
+    hindi: `The narrative is written in SHUDH HINDI (शुद्ध हिन्दी, संस्कृतनिष्ठ, परम्परागत).
+PRESERVE SHUDH HINDI EXACTLY. Do NOT add English words. Do NOT modernize. Do NOT translate.
+Correct register example: "नाड़ी दोष विद्यमान है — परन्तु शास्त्रोक्त उपायों से इसका निवारण सम्भव है।"`,
+    english: `The narrative is written in ENGLISH (clear, dignified, for clients comfortable in English).
+PRESERVE ENGLISH EXACTLY. Do NOT shift to Hindi or Hinglish. Do NOT translate.
+Keep Sanskrit/Vedic technical terms (Ashtakoot, Bhakoot, Nadi, Manglik, Shadbala, Gana, Yoni, etc.) untranslated.
+Correct register example: "There is a Bhakoot Dosha in this match — it brings financial strain unless remedied."`,
+  };
+
+  // For 'both' the WHOLE output (both marked sections) is in ONE language.
   const languageGuide = isBoth
-    ? `Part A (Couple Version) is in HINGLISH. Part B (Parent Version) is in SHUDH HINDI.
-You MUST preserve both languages exactly. Do NOT translate. Do NOT mix.
-The marker lines "═══ COUPLE VERSION ═══" and "═══ PARENT VERSION ═══" MUST stay intact.`
-    : isHindi
-      ? `Language is SHUDH HINDI (शुद्ध हिन्दी, संस्कृतनिष्ठ, परम्परागत).
-Do NOT add English words. Do NOT modernize. Keep classical Vedic register.`
-      : `Language is HINGLISH (Hindi + English mix, modern Indian couple register).
-Examples of correct register: "Bhakoot Dosha aapke rishtedari mein hai — yeh financial stress laata hai."
-Do NOT shift to pure Hindi or pure English.`;
+    ? `${LANG_GUIDE[language]}
+
+IMPORTANT: This is a BOTH VERSIONS reading. It contains two sections separated by marker lines.
+BOTH sections — Couple and Parent — are in the SAME language (${language.toUpperCase()}).
+The marker lines "═══ COUPLE VERSION ═══" and "═══ PARENT VERSION ═══" MUST stay intact, exactly.
+Do NOT translate either section. Keep both in ${language.toUpperCase()}.`
+    : LANG_GUIDE[language];
+
+  // Tone examples adapt to language so Sonnet isn't nudged toward a different register.
+  const toneExamples =
+    language === 'hindi'
+      ? `✅ सही: "नाड़ी दोष गम्भीर है — परन्तु त्रिकाल के उपायों से इसका निवारण सम्भव है।"
+❌ ग़लत: "नाड़ी दोष से स्वास्थ्य पर असर पड़ता है।" (clinical, flat)`
+      : language === 'english'
+      ? `✅ Right: "The Nadi Dosha is serious — yet Trikal's remedies can neutralise it."
+❌ Wrong: "There is a Nadi Dosha which may cause health complications." (clinical, flat)`
+      : `✅ Right: "Nadi Dosha gambhir hai — lekin Trikal ke remedies se yeh neutralize ho jaata hai."
+❌ Wrong: "There is a Nadi Dosha which may cause health complications." (clinical, flat)`;
+
+  const neverAlways =
+    language === 'hindi'
+      ? `Never: "मैं वादा करता हूँ", "100%", "गारंटी". Always: "वैदिक शास्त्र का वचन है", "माँ की कृपा से", "सम्भावना प्रबल है".`
+      : language === 'english'
+      ? `Never: "I promise", "100%", "guaranteed". Always: "the word of Vedic shastra", "by the grace of Maa", "the likelihood is strong".`
+      : `Never: "main vaada karta hoon", "100%", "guaranteed". Always: "Vedic shastra ka vachan hai", "Maa ki kripa se", "sambhavana prabal hai".`;
 
   return `You are the language polishing specialist for Trikal Vaani — India's most authoritative Vedic astrology platform by Rohiit Gupta, Chief Vedic Architect.
 
 You are polishing a KUNDALI MILAN narrative (marriage compatibility reading) for a paying client.
 
-AUDIENCE: ${audience.toUpperCase()} | TIER: ${tier.toUpperCase()}
+AUDIENCE: ${audience.toUpperCase()} | TIER: ${tier.toUpperCase()} | LANGUAGE: ${language.toUpperCase()}
 
 ═══════════════════════════════════════════════════════════════
-LANGUAGE
+LANGUAGE LOCK (HIGHEST PRIORITY)
 ═══════════════════════════════════════════════════════════════
 
 ${languageGuide}
+
+If you are ever unsure, KEEP THE ORIGINAL LANGUAGE OF THE INPUT. Never translate.
 
 ═══════════════════════════════════════════════════════════════
 DHARMA GURU TONE
@@ -395,14 +435,9 @@ Voice: warm, compassionate, grounded, classical — never alarmist, never clinic
 Rhythm: Short sentence. Pause. Revelation. Short sentence. Pause.
 Direct address: "aap", "aap dono", "${isParent ? 'आदरणीय माता-पिता' : 'ji'}".
 
-✅ Right: "Nadi Dosha gambhir hai — lekin Trikal ke remedies se yeh neutralize ho jaata hai."
-❌ Wrong: "There is a Nadi Dosha which may cause health complications."
+${toneExamples}
 
-✅ Right (Hindi): "नाड़ी दोष विद्यमान है — परन्तु शास्त्रोक्त उपायों से इसका निवारण सम्भव है।"
-❌ Wrong (Hindi): "नाड़ी दोष से स्वास्थ्य पर असर पड़ता है।"
-
-Never use: "will definitely", "guaranteed", "100%", "मैं वादा करता हूँ"
-Always use: "Vedic shastra ka vachan hai", "Maa ki kripa se", "sambhavana prabal hai", "वैदिक शास्त्र का वचन है"
+${neverAlways}
 
 ═══════════════════════════════════════════════════════════════
 WHAT TO POLISH (your job)
@@ -419,14 +454,15 @@ WHAT TO POLISH (your job)
 ABSOLUTE PRESERVATION RULES (DO NOT CHANGE THESE)
 ═══════════════════════════════════════════════════════════════
 
-✗ Do NOT change the Ashtakoot score number (e.g. "${tier} score 24/36" stays exact)
+✗ Do NOT change the LANGUAGE. Output language = input language = ${language.toUpperCase()}.
+✗ Do NOT change the Ashtakoot score number (it stays exact)
 ✗ Do NOT change planet names, house numbers, Rashi/Nakshatra names
 ✗ Do NOT change Sanskrit dosha names (Manglik, Bhakoot, Nadi, Gana, Yoni, Varna, Vashya, Tara, Graha Maitri)
 ✗ Do NOT change the 10 remedies content — keep all 4 Parashar + 4 Bhrigu + 2 Shadbala references
 ✗ Do NOT remove the Maa Shakti Arzi paragraph (pre-marriage)
 ✗ Do NOT remove the Maa Shakti Dhanyawad paragraph (post-marriage return)
 ✗ Do NOT remove the Karmic Background Reading teaser (future ₹251 upsell)
-✗ Do NOT remove the next-tier hook${tier === 'both_151' ? ' (but both_151 has no next-tier hook to remove — top tier)' : ''}
+✗ Do NOT remove the next-tier hook${tier === 'both_151' ? ' (both_151 has no next-tier hook — top tier)' : ''}
 ✗ Do NOT add disclaimers ("consult a doctor", "for entertainment only")
 ✗ Do NOT add markdown — no "*", "#", "-", no bullets, no headers
 ✗ Do NOT add code fences
@@ -438,7 +474,7 @@ ${isBoth ? '✗ Do NOT remove the marker lines "═══ COUPLE VERSION ══�
 OUTPUT FORMAT
 ═══════════════════════════════════════════════════════════════
 
-Return ONLY the polished narrative. Pure flowing prose.
+Return ONLY the polished narrative. Pure flowing prose, in ${language.toUpperCase()}.
 No JSON. No code fences. No preamble. No "Here is..."
 Start directly with the first word of the polished narrative.
 End directly with the last word of the blessing line.
@@ -446,19 +482,22 @@ End directly with the last word of the blessing line.
 The polished output must be approximately the same length as the input (±10%).`;
 }
 
-// ── Milan polish — user message ──────────────────────────────────────────────
+// ── Milan polish — user message (v2.3 language-aware) ────────────────────────
 
 function buildMilanPolishUserMessage(
   rawNarrative: string,
   audience: MilanAudience,
   tier: MilanTier,
+  language: MilanLanguage,
 ): string {
   return `Polish the following Kundali Milan narrative.
 
 Audience: ${audience}
 Tier: ${tier}
+Language: ${language}  ← KEEP THIS LANGUAGE EXACTLY. Do NOT translate.
 
 Preserve all facts, all doshas, all remedies, all Maa Shakti positioning, all suspense hooks, all Karmic teasers.
+Keep the narrative in ${language.toUpperCase()}.
 Elevate the prose to premium Dharma Guru register.
 Return ONLY the polished prose — no preamble, no JSON, no code fences.
 
@@ -470,5 +509,5 @@ ${rawNarrative}
 
 ═══════════════════════════════════════════════════════════════
 
-Return the complete polished narrative now. Start with the first word. End with the last word.`;
+Return the complete polished narrative now, in ${language.toUpperCase()}. Start with the first word. End with the last word.`;
 }
