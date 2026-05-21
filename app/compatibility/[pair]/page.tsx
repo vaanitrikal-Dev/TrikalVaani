@@ -3,12 +3,20 @@
  * TRIKAL VAANI — Compatibility Page (Programmatic SEO/GEO)
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/compatibility/[pair]/page.tsx
- * VERSION: 1.0
+ * VERSION: 1.1 — Related Rashi Pairs interlinking block activated
  * SIGNED: ROHIIT GUPTA, CEO
  * ============================================================
+ * CHANGE LOG (v1.0 → v1.1):
+ *   Activated the "Related Rashi Pairs" section that v1.0 prepared
+ *   labels (L.relatedTitle) for but never rendered. This interlinks all
+ *   288 compatibility pages into a topical mesh — the missing SEO link
+ *   equity between pages. Pairs shown = others sharing the same first
+ *   rashi (same lang), keeping users inside the cluster.
+ *   NOTHING ELSE CHANGED — CTA, all 3 schemas, GEO block, E-E-A-T,
+ *   hreflang, ISR, layout all identical to v1.0.
+ *
  * Dynamic rashi-pair compatibility page.
  * One row in `compatibility_pages` table = one rendered page.
- * Add 287 more rows → 287 more pages auto-render. No code change.
  *
  * SEO/GEO/AEO/EEAT:
  *   • GEO direct answer (40-60w) at top for AI search extraction
@@ -58,6 +66,17 @@ interface CompatRow {
   meta_desc:     string;
 }
 
+// ── Minimal shape for related-pair links ─────────────────────
+interface RelatedPair {
+  slug:      string;
+  rashi1_en: string;
+  rashi2_en: string;
+  rashi1_hi: string;
+  rashi2_hi: string;
+  score:     number;
+  verdict:   string;
+}
+
 // ── Fetch a page row by slug + lang ──────────────────────────
 async function getPage(slug: string, lang: string): Promise<CompatRow | null> {
   const { data, error } = await supabase
@@ -69,6 +88,26 @@ async function getPage(slug: string, lang: string): Promise<CompatRow | null> {
 
   if (error || !data) return null;
   return data as CompatRow;
+}
+
+// ── Fetch related pairs (same first rashi, same lang) ────────
+// Keeps users inside the topical cluster → builds interlink mesh.
+async function getRelatedPairs(
+  rashi1_en: string,
+  lang: string,
+  excludeSlug: string,
+): Promise<RelatedPair[]> {
+  const { data, error } = await supabase
+    .from('compatibility_pages')
+    .select('slug, rashi1_en, rashi2_en, rashi1_hi, rashi2_hi, score, verdict')
+    .eq('lang', lang)
+    .eq('rashi1_en', rashi1_en)
+    .neq('slug', excludeSlug)
+    .order('score', { ascending: false })
+    .limit(6);
+
+  if (error || !data) return [];
+  return data as RelatedPair[];
 }
 
 // ── Resolve lang from searchParams ───────────────────────────
@@ -134,6 +173,9 @@ export default async function CompatibilityPage(
   const r1 = isHi ? page.rashi1_hi : page.rashi1_en;
   const r2 = isHi ? page.rashi2_hi : page.rashi2_en;
   const canonical = `${SITE}/compatibility/${page.slug}${isHi ? '?lang=hi' : ''}`;
+
+  // v1.1: fetch related pairs for the interlinking mesh
+  const relatedPairs = await getRelatedPairs(page.rashi1_en, lang, page.slug);
 
   // ── Labels by language ─────────────────────────────────────
   const L = isHi ? {
@@ -314,6 +356,34 @@ export default async function CompatibilityPage(
           ))}
         </div>
       </section>
+
+      {/* RELATED RASHI PAIRS — v1.1 interlinking mesh */}
+      {relatedPairs.length > 0 && (
+        <section className="max-w-3xl mx-auto px-5 mb-12">
+          <h2 className="text-xl sm:text-2xl font-semibold text-[#D4AF37] mb-5">{L.relatedTitle}</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {relatedPairs.map((rp) => {
+              const rpR1 = isHi ? rp.rashi1_hi : rp.rashi1_en;
+              const rpR2 = isHi ? rp.rashi2_hi : rp.rashi2_en;
+              const rpColor = scoreColor(rp.score);
+              return (
+                <Link
+                  key={rp.slug}
+                  href={`/compatibility/${rp.slug}${isHi ? '?lang=hi' : ''}`}
+                  className="flex items-center justify-between bg-[#0d1120]/60 border border-[#D4AF37]/15 rounded-xl px-4 py-3 hover:border-[#D4AF37]/40 transition"
+                >
+                  <span className="text-gray-100 text-sm font-medium">
+                    {rpR1} <span className="text-[#D4AF37]">&amp;</span> {rpR2}
+                  </span>
+                  <span className="text-sm font-semibold shrink-0 ml-3" style={{ color: rpColor }}>
+                    {rp.score}/36
+                  </span>
+                </Link>
+              );
+            })}
+          </div>
+        </section>
+      )}
 
       {/* E-E-A-T AUTHOR BLOCK */}
       <section className="max-w-3xl mx-auto px-5 mb-12">
