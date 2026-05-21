@@ -1,29 +1,16 @@
 #!/usr/bin/env python3
 """
-TRIKAL VAANI - Content Engine v5.2
+TRIKAL VAANI - Content Engine v5.3
 =====================================
-FULL MULTI-PLATFORM AUTO-PUBLISH: YOUTUBE + FACEBOOK + INSTAGRAM
+FLOW 1: YouTube Auto-Publish (always runs)
+FLOW 2: Google Drive Caption Kit (video + captions txt → Drive folder)
+Meta (FB/IG/Threads) = REMOVED (post manually via Instagram → auto-pushes to FB+Threads)
 =====================================
-NEW IN v5.2:
-  - publish_to_facebook() function
-  - publish_to_instagram() function
-  - All 3 platforms publish automatically after Supabase upload
-  - 22 SEO/GEO/AEO fields preserved (same as v5.1)
-NEW IN v5.1:
-  - YouTube auto-publish via /api/social/publish-youtube on Vercel
-  - 5 new YouTube fields in Gemini output
-  - Sidecar JSON includes all 5 YouTube fields
-KEY CHANGES FROM v4.1:
-  1. Reads festival from Supabase festivals_master (not hardcoded)
-  2. Gemini Flash + Google Search grounding for accurate deity/offerings research
-  3. New 5-image flow: Deity 100% / Deity+Offerings 30-70 / Items 100% / Symbolic / Blessing 100%
-  4. NO rectangle box, NO "X Din Baad" countdown
-  5. Specific iconography prompts (e.g. "Shani Dev: dark blue-black skin, holding trident")
-  6. 17-field SEO/GEO/AEO package (added 7 new fields)
-  7. Auto-upload to Supabase Storage (trikal-videos bucket)
-  8. 3-retry logic with WhatsApp alert on final failure
-  9. SEO-optimized filename slug
-=====================================
+NEW IN v5.3:
+  - publish_to_youtube() ONLY for auto-publish
+  - upload_to_drive() → uploads MP4 + caption kit TXT to Google Drive
+  - Caption kit TXT contains: Instagram, Facebook, Threads, WhatsApp captions + hashtags
+  - FB/IG/Threads auto-publish REMOVED (manual via Instagram native sharing)
 CEO: Rohiit Gupta | Chief Vedic Architect | trikalvaani.com
 =====================================
 """
@@ -50,6 +37,12 @@ CONTENT_ENGINE_SECRET = os.environ.get("CONTENT_ENGINE_SECRET", "trikal-content-
 VERCEL_APP_URL = os.environ.get("VERCEL_APP_URL", "https://trikalvaani.com")
 ALERT_NUMBER = "919211804111"
 SITE_URL = "https://trikalvaani.com"
+
+# GOOGLE DRIVE CONFIG
+DRIVE_CLIENT_ID = "166374809393-eo1hthqcbh5s0g504ra5ijap9gr930lr.apps.googleusercontent.com"
+DRIVE_CLIENT_SECRET = "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"
+DRIVE_REFRESH_TOKEN = "1//043A--ejqbUGbCgYIARAAGAQSNwF-L9IrW3QqsoW5y_pWrmSt3hhs8ic4iJWGP4jS4_bV2fiD6MFTeBiW4yUt5G27Gzb7iN5VcCY"
+DRIVE_FOLDER_ID = "1CyfhLGXcLs4JITGOPbVU-h6-56jvExYx"
 
 # PATHS
 BASE_DIR = Path("/home/vaanitrikal/trikal-vaani/content-engine")
@@ -81,7 +74,6 @@ STYLES = {
     "Cinematic": "cinematic photorealistic style, golden hour natural lighting, real Indian sacred location, documentary photography quality, shallow depth of field"
 }
 
-# 5-IMAGE STORY ARC
 STORY_ARC = [
     {"role": "DeityReveal",   "style_key": "Cosmic",      "deity_pct": 100, "items_pct": 0,
      "scene": "Solo dramatic full-body portrait of {deity_specific}, complete divine iconography, traditional weapons/symbols, traditional vahana if any, glowing aura, mysterious cinematic reveal, viewer captivated"},
@@ -96,7 +88,6 @@ STORY_ARC = [
 ]
 
 
-# HELPERS
 def safe_text(t):
     t = str(t)
     for ch in ["'", '"', ":", "{", "}", "[", "]", "\\", "%", "$", "!", "?"]:
@@ -127,6 +118,196 @@ def extract_json(text):
                 except Exception:
                     continue
     raise ValueError("No valid JSON found")
+
+
+# ============================================================
+# GOOGLE DRIVE: GET ACCESS TOKEN
+# ============================================================
+def get_drive_access_token():
+    try:
+        resp = requests.post(
+            "https://oauth2.googleapis.com/token",
+            data={
+                "client_id": DRIVE_CLIENT_ID,
+                "client_secret": DRIVE_CLIENT_SECRET,
+                "refresh_token": DRIVE_REFRESH_TOKEN,
+                "grant_type": "refresh_token"
+            },
+            timeout=30
+        )
+        data = resp.json()
+        token = data.get("access_token")
+        if token:
+            log("Drive access token obtained")
+            return token
+        log(f"Drive token error: {data}")
+        return None
+    except Exception as e:
+        log(f"Drive token exception: {e}")
+        return None
+
+
+# ============================================================
+# GOOGLE DRIVE: BUILD CAPTION KIT TXT
+# ============================================================
+def build_caption_kit(script, festival):
+    fest_name = festival["festival_name"]
+    fest_date = festival.get("date", "")
+    hashtags_trending = " ".join(["#" + h for h in script.get("hashtags", {}).get("trending", [])[:15]])
+    hashtags_niche = " ".join(["#" + h for h in script.get("hashtags", {}).get("niche", [])[:10]])
+    all_hashtags = f"{hashtags_trending} {hashtags_niche}"
+
+    ig_caption = script.get("caption_variants", {}).get("instagram", script.get("seo_caption", ""))
+    fb_caption = script.get("caption_variants", {}).get("facebook", script.get("seo_caption", ""))
+    threads_caption = script.get("caption_variants", {}).get("threads", script.get("seo_caption", ""))
+    wa_caption = script.get("whatsapp_broadcast", "")
+
+    kit = f"""
+=====================================
+TRIKAL VAANI — CAPTION KIT
+Festival: {fest_name}
+Date: {fest_date}
+Video: {script.get('video_title', '')}
+Generated: {today_ist()}
+=====================================
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📸 INSTAGRAM CAPTION
+(Post video → Instagram auto-pushes to Facebook + Threads)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+{ig_caption}
+
+.
+.
+.
+{all_hashtags}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📘 FACEBOOK CAPTION (if posting separately)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+{fb_caption}
+
+{hashtags_trending}
+
+Free Kundali: https://trikalvaani.com
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🧵 THREADS CAPTION (if posting separately)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+{threads_caption}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+💬 WHATSAPP BROADCAST
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+{wa_caption}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🎯 AEO Q&A (for blog/website use)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+"""
+    for qa in script.get("aeo_qa", []):
+        kit += f"Q: {qa.get('q', '')}\nA: {qa.get('a', '')}\n\n"
+
+    kit += f"""
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🎬 YOUTUBE DESCRIPTION (already auto-published)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+{script.get('youtube_description', '')}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📌 PINNED COMMENT (copy to YouTube)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+{script.get('pinned_comment', '')}
+
+=====================================
+Jai Trikal Vaani 🙏
+trikalvaani.com
+=====================================
+"""
+    return kit
+
+
+# ============================================================
+# GOOGLE DRIVE: UPLOAD VIDEO + CAPTION KIT
+# ============================================================
+def upload_to_drive(video_path, caption_kit_text, slug, festival_name):
+    log("Uploading to Google Drive...")
+    access_token = get_drive_access_token()
+    if not access_token:
+        log("Drive upload skipped - no access token")
+        return None, None
+
+    headers = {"Authorization": f"Bearer {access_token}"}
+    video_drive_url = None
+    kit_drive_url = None
+
+    # Upload MP4
+    try:
+        metadata = {
+            "name": f"{slug}.mp4",
+            "parents": [DRIVE_FOLDER_ID],
+            "description": f"Trikal Vaani - {festival_name} - {today_ist()}"
+        }
+        with open(video_path, 'rb') as f:
+            video_bytes = f.read()
+
+        boundary = "trikal_boundary_2026"
+        body = (
+            f"--{boundary}\r\n"
+            f"Content-Type: application/json; charset=UTF-8\r\n\r\n"
+            f"{json.dumps(metadata)}\r\n"
+            f"--{boundary}\r\n"
+            f"Content-Type: video/mp4\r\n\r\n"
+        ).encode() + video_bytes + f"\r\n--{boundary}--".encode()
+
+        resp = requests.post(
+            "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart",
+            headers={**headers, "Content-Type": f"multipart/related; boundary={boundary}"},
+            data=body,
+            timeout=300
+        )
+        if resp.status_code in [200, 201]:
+            file_id = resp.json().get("id")
+            video_drive_url = f"https://drive.google.com/file/d/{file_id}/view"
+            log(f"Video on Drive: {video_drive_url}")
+        else:
+            log(f"Drive video upload failed: {resp.status_code} {resp.text[:200]}")
+    except Exception as e:
+        log(f"Drive video exception: {e}")
+
+    # Upload Caption Kit TXT
+    try:
+        kit_bytes = caption_kit_text.encode('utf-8')
+        kit_metadata = {
+            "name": f"{slug}_CAPTIONS.txt",
+            "parents": [DRIVE_FOLDER_ID],
+            "description": f"Caption kit - {festival_name}"
+        }
+        boundary2 = "trikal_boundary_txt_2026"
+        body2 = (
+            f"--{boundary2}\r\n"
+            f"Content-Type: application/json; charset=UTF-8\r\n\r\n"
+            f"{json.dumps(kit_metadata)}\r\n"
+            f"--{boundary2}\r\n"
+            f"Content-Type: text/plain; charset=utf-8\r\n\r\n"
+        ).encode() + kit_bytes + f"\r\n--{boundary2}--".encode()
+
+        resp2 = requests.post(
+            "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart",
+            headers={**headers, "Content-Type": f"multipart/related; boundary={boundary2}"},
+            data=body2,
+            timeout=60
+        )
+        if resp2.status_code in [200, 201]:
+            kit_id = resp2.json().get("id")
+            kit_drive_url = f"https://drive.google.com/file/d/{kit_id}/view"
+            log(f"Caption kit on Drive: {kit_drive_url}")
+        else:
+            log(f"Drive kit upload failed: {resp2.status_code} {resp2.text[:200]}")
+    except Exception as e:
+        log(f"Drive kit exception: {e}")
+
+    return video_drive_url, kit_drive_url
 
 
 # ============================================================
@@ -171,10 +352,10 @@ def fetch_todays_festivals():
 
 
 # ============================================================
-# STEP 1: RESEARCH-GROUNDED SCRIPT + 22 SEO/GEO/AEO FIELDS
+# STEP 1: SCRIPT + 22 SEO/GEO/AEO FIELDS
 # ============================================================
 def generate_script(festival):
-    log(f"Generating research-grounded SEO+GEO+AEO package for {festival['festival_name']}...")
+    log(f"Generating SEO+GEO+AEO package for {festival['festival_name']}...")
 
     deity = festival.get('deity', 'Devta')
     offerings = festival.get('offerings', []) or []
@@ -202,7 +383,7 @@ def generate_script(festival):
     prompt = f"""You are Rohiit Gupta, Chief Vedic Architect at Trikal Vaani (trikalvaani.com) - India's premium AI Vedic Astrology platform.
 
 Generate a RESEARCH-GROUNDED, SEO + GEO + AEO optimized complete content package for upcoming festival.
-You have access to Google Search - USE IT to verify accurate deity iconography, traditional offerings, dos and donts.
+Use Google Search to verify accurate deity iconography, traditional offerings, dos and donts.
 
 FESTIVAL: {festival['festival_name']}
 DATE: {festival['date']} ({festival['_days_left']} days from today)
@@ -217,23 +398,23 @@ VIDEO IN SERIES: {festival['_publish_day_index']} of {festival['_total_publish_d
 Output ONLY raw JSON (no markdown fences, no preamble):
 
 {{
-  "video_title": "Hindi title max 6 Devanagari words SEO-optimized for {festival['festival_name']}",
+  "video_title": "Hindi title max 6 Devanagari words SEO-optimized",
   "slug": "{fest_slug}-video-{festival['_publish_day_index']}-{festival['date']}",
-  "hindi_lines": ["Hook 6 words Devanagari", "Line 2 max 6 words", "Line 3 max 6 words", "Line 4 closing max 6 words"],
-  "english_lines": ["Hook 7 words English", "Line 2 max 7 words", "Line 3 max 7 words", "Line 4 max 7 words"],
-  "tts_script": "STRICT 120 WORDS MAX Hindi narration (spoken in 45-50 seconds). Warm authoritative voice. Structure: 1) Hook about {festival['festival_name']} significance 2) Connection to {planet} planet 3) ONE specific ritual from offerings list 4) ONE thing to avoid 5) Blessing promise. Last sentence MUST be exactly: Trikal Vaani par apni kundali dekhein aur apna bhavishya jaanein. COUNT WORDS - must be under 120.",
-  "meta_description": "155 character SEO meta description with primary keyword '{festival['festival_name']} 2026' front-loaded. Include date, key benefit, CTA.",
-  "seo_caption": "150 word Instagram/Facebook caption in Hinglish. Primary keyword '{festival['festival_name']} 2026' in first 8 words. Include semantic keywords: {planet}, {deity_specific}, kundali, Vedic astrology, remedies. Strong hook, value-packed middle, CTA: 'Free Kundali on TrikalVaani.com'. 5 line breaks. End with 5 emojis.",
+  "hindi_lines": ["Hook 6 words Devanagari", "Line 2", "Line 3", "Line 4 closing"],
+  "english_lines": ["Hook 7 words", "Line 2", "Line 3", "Line 4"],
+  "tts_script": "STRICT 120 WORDS MAX Hindi narration. Hook about {festival['festival_name']} significance. Connection to {planet}. ONE specific ritual. ONE thing to avoid. Blessing promise. Last sentence MUST be: Trikal Vaani par apni kundali dekhein aur apna bhavishya jaanein.",
+  "meta_description": "155 char SEO meta with '{festival['festival_name']} 2026' front-loaded",
+  "seo_caption": "150 word Hinglish caption with keyword in first 8 words. CTA: Free Kundali on TrikalVaani.com",
   "caption_variants": {{
-    "instagram": "120 word IG-optimized caption, emoji-rich, line breaks for readability, hashtag-friendly",
-    "facebook": "180 word FB-optimized caption, longer storytelling, less emojis, community-focused",
-    "threads": "80 word Threads-optimized punchy caption, conversational tone, question at end for engagement"
+    "instagram": "120 word IG caption, emoji-rich, line breaks, hashtag-friendly",
+    "facebook": "180 word FB caption, storytelling, community-focused",
+    "threads": "80 word Threads caption, conversational, question at end"
   }},
   "aeo_qa": [
-    {{"q": "What is the significance of {festival['festival_name']} in 2026?", "a": "40-60 word direct answer optimized for Google SGE, Perplexity, SearchGPT. Mention {deity_specific}, {planet}, date {festival['date']}, primary benefit."}},
-    {{"q": "What rituals to perform on {festival['festival_name']}?", "a": "40-60 word answer listing 3 specific rituals from: {", ".join(dos[:3])}"}},
-    {{"q": "What to offer to {deity_specific} on {festival['festival_name']}?", "a": "40-60 word answer listing offerings: {primary_offerings}"}},
-    {{"q": "How does {festival['festival_name']} affect my kundali?", "a": "40-60 word answer connecting {planet} planet impact. End with CTA: Check your free kundali on trikalvaani.com"}}
+    {{"q": "What is the significance of {festival['festival_name']} in 2026?", "a": "40-60 word direct answer mentioning {deity_specific}, {planet}, date {festival['date']}"}},
+    {{"q": "What rituals to perform on {festival['festival_name']}?", "a": "40-60 word answer with 3 specific rituals"}},
+    {{"q": "What to offer to {deity_specific} on {festival['festival_name']}?", "a": "40-60 word answer listing offerings"}},
+    {{"q": "How does {festival['festival_name']} affect my kundali?", "a": "40-60 word answer connecting {planet} impact. End: Check free kundali on trikalvaani.com"}}
   ],
   "geo_entities": {{
     "primary_deity": "{deity_specific}",
@@ -241,10 +422,7 @@ Output ONLY raw JSON (no markdown fences, no preamble):
     "auspicious_color": "{color}",
     "primary_offerings": {json.dumps(offerings[:5] if offerings else [])},
     "primary_mantra": "{festival.get('mantra', '')}",
-    "dosha_relief": "{festival.get('dosha_relief', '')}",
-    "related_planets": ["list 2 connected planets to {planet}"],
-    "related_yogas": ["list 2 Vedic yogas relevant"],
-    "remedy_gemstone": "one gemstone for {planet}",
+    "remedy_gemstone": "gemstone for {planet}",
     "auspicious_direction": "best direction for puja"
   }},
   "voice_search_phrases": [
@@ -256,30 +434,30 @@ Output ONLY raw JSON (no markdown fences, no preamble):
   ],
   "keyword_cluster": {{
     "primary": "{festival['festival_name']} 2026",
-    "lsi": ["list 5 latent semantic indexing keywords"],
-    "long_tail": ["list 5 long-tail SEO keywords starting with how/what/why/when"]
+    "lsi": ["5 latent semantic keywords"],
+    "long_tail": ["5 long-tail keywords"]
   }},
   "hashtags": {{
-    "trending": ["15 trending Hindi+English hashtags without # symbol"],
+    "trending": ["15 trending hashtags without # symbol"],
     "niche": ["10 niche Vedic astrology hashtags without # symbol"]
   }},
-  "youtube_description": "300 word YouTube Shorts description. First 150 chars MUST contain primary keyword and CTA URL https://trikalvaani.com. Include: festival significance, {planet} connection, 3 rituals, 1 remedy, kundali CTA. Timestamps 0:00 Intro, 0:15 Significance, 0:30 Rituals, 0:45 CTA. End with 5 hashtags new lines.",
+  "youtube_description": "300 word YouTube description. First 150 chars must have primary keyword + CTA URL https://trikalvaani.com. Timestamps: 0:00 Intro, 0:15 Significance, 0:30 Rituals, 0:45 CTA.",
   "youtube_chapters": [
-    {{"time": "0:00", "title": "Intro - {festival['festival_name']} significance"}},
+    {{"time": "0:00", "title": "Intro"}},
     {{"time": "0:15", "title": "{planet} planet connection"}},
-    {{"time": "0:30", "title": "Sacred ritual to perform"}},
+    {{"time": "0:30", "title": "Sacred ritual"}},
     {{"time": "0:45", "title": "Free Kundali on TrikalVaani.com"}}
   ],
-  "thumbnail_text": "2-4 word emotionally strong Hindi or English thumbnail text, curiosity-driven, mobile readable",
-  "youtube_playlist": "Best matching playlist from: Horoscope 2026, Saturn Transit, Rahu Ketu Predictions, Vimshottari Dasha, Astrology Remedies, Festival Predictions, Zodiac Predictions, Numerology",
-  "pinned_comment": "80 word Hinglish pinned comment for engagement. Hook line about {festival['festival_name']}. Ask 1 question about user's zodiac. CTA: Free kundali on TrikalVaani.com. End with 2 emojis.",
-  "spoken_keywords_first_30s": ["list 8 keywords that MUST be spoken naturally in first 30 seconds of TTS for YouTube AI indexing - mix of {festival['festival_name']}, {planet}, {deity_specific}, kundali, Vedic astrology, remedies, 2026, rashi"],
-  "whatsapp_broadcast": "60 word punchy WhatsApp Hinglish. Hook line 1. Mention {festival['festival_name']} date {festival['date']}. One ritual tip from offerings. CTA: 'Free kundali check - trikalvaani.com'. 2 emojis max.",
+  "thumbnail_text": "2-4 word emotionally strong Hindi/English thumbnail text",
+  "youtube_playlist": "Best playlist from: Horoscope 2026, Saturn Transit, Rahu Ketu Predictions, Vimshottari Dasha, Astrology Remedies, Festival Predictions, Zodiac Predictions",
+  "pinned_comment": "80 word Hinglish pinned comment. Hook about festival. Ask about zodiac. CTA: Free kundali on TrikalVaani.com",
+  "spoken_keywords_first_30s": ["8 keywords for YouTube AI indexing"],
+  "whatsapp_broadcast": "60 word WhatsApp Hinglish. Festival date {festival['date']}. One ritual tip. CTA: trikalvaani.com. 2 emojis max.",
   "schema_event": {{
     "@type": "Event",
     "name": "{festival['festival_name']} 2026",
     "startDate": "{festival['date']}",
-    "description": "60 word event schema description with deity and planet"
+    "description": "60 word event schema description"
   }},
   "cta_variants": [
     "Free Kundali Banaye - TrikalVaani.com",
@@ -287,21 +465,13 @@ Output ONLY raw JSON (no markdown fences, no preamble):
     "Astrology Help Click - TrikalVaani.com"
   ],
   "image_prompts": [
-    "Image 1 DEITY REVEAL (100% deity focus): {arc_prompts[0]['scene']}. Style: {arc_prompts[0]['style']}. CRITICAL: Use authentic Hindu iconography for {deity_specific} - correct skin color, weapons, vahana, clothing. 9:16 portrait, photorealistic, cinematic, no text, no watermark, no captions",
-    "Image 2 DEITY + OFFERINGS (30% deity, 70% items): {arc_prompts[1]['scene']}. Style: {arc_prompts[1]['style']}. 9:16 portrait, photorealistic, no text, no watermark",
-    "Image 3 OFFERINGS CLOSE-UP (100% items): {arc_prompts[2]['scene']}. Style: {arc_prompts[2]['style']}. 9:16 portrait, macro photography style, no people, no text, no watermark",
-    "Image 4 SYMBOLIC DONTS (80% symbolic): {arc_prompts[3]['scene']}. Style: {arc_prompts[3]['style']}. 9:16 portrait, atmospheric, no text, no watermark",
-    "Image 5 BLESSING (100% deity blessing): {arc_prompts[4]['scene']}. Style: {arc_prompts[4]['style']}. 9:16 portrait, divine glow, photorealistic, no text, no watermark"
+    "Image 1 DEITY REVEAL: {arc_prompts[0]['scene']}. Style: {arc_prompts[0]['style']}. 9:16 portrait, no text, no watermark",
+    "Image 2 DEITY + OFFERINGS: {arc_prompts[1]['scene']}. Style: {arc_prompts[1]['style']}. 9:16 portrait, no text",
+    "Image 3 OFFERINGS CLOSE-UP: {arc_prompts[2]['scene']}. Style: {arc_prompts[2]['style']}. 9:16 portrait, no people, no text",
+    "Image 4 SYMBOLIC DONTS: {arc_prompts[3]['scene']}. Style: {arc_prompts[3]['style']}. 9:16 portrait, no text",
+    "Image 5 BLESSING: {arc_prompts[4]['scene']}. Style: {arc_prompts[4]['style']}. 9:16 portrait, no text"
   ]
-}}
-
-CRITICAL RULES:
-- Use Google Search to verify {deity_specific} iconography is ACCURATE (skin color, weapons, vahana, clothing)
-- Image prompts must be HIGHLY SPECIFIC - not generic temple statues
-- Hindi text in pure Devanagari script only
-- TTS script MUST be under 120 words
-- All AEO answers 40-60 words exactly
-- No filler - every word drives engagement or rankings"""
+}}"""
 
     url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={GEMINI_API_KEY}"
     payload = {
@@ -316,9 +486,8 @@ CRITICAL RULES:
     try:
         resp = requests.post(url, json=payload, timeout=90)
         text = resp.json()["candidates"][0]["content"]["parts"][0]["text"]
-        log(f"Script raw preview: {repr(text[:200])}")
         result = extract_json(text)
-        log("Script + 22-field SEO/GEO/AEO package generated (Google grounded)")
+        log("Script + 22-field package generated")
         return result
     except Exception as e:
         log(f"Script failed: {e}")
@@ -326,15 +495,10 @@ CRITICAL RULES:
 
 
 # ============================================================
-# STEP 2: TTS AUDIO (WAV)
+# STEP 2: TTS
 # ============================================================
 def generate_tts(tts_script):
     log("Generating Hindi TTS via Gemini Charon...")
-    word_count = len(tts_script.split())
-    log(f"TTS script word count: {word_count}")
-    if word_count > 130:
-        log(f"WARNING: Script has {word_count} words (target <120).")
-
     url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key={GEMINI_API_KEY}"
     payload = {
         "contents": [{"parts": [{"text": tts_script}]}],
@@ -353,7 +517,7 @@ def generate_tts(tts_script):
             wf.setsampwidth(2)
             wf.setframerate(24000)
             wf.writeframes(raw_pcm)
-        log(f"TTS saved: {audio_path.name} ({audio_path.stat().st_size/1024:.0f} KB)")
+        log(f"TTS saved: {audio_path.name}")
         return audio_path
     except Exception as e:
         log(f"TTS failed: {e}")
@@ -361,10 +525,10 @@ def generate_tts(tts_script):
 
 
 # ============================================================
-# STEP 3: IMAGES via NANO BANANA 2
+# STEP 3: IMAGES
 # ============================================================
 def generate_image(prompt, idx):
-    log(f"Generating image {idx+1}/5 via Nano Banana 2...")
+    log(f"Generating image {idx+1}/5...")
     url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-image-preview:generateContent?key={GEMINI_API_KEY}"
     payload = {
         "contents": [{"parts": [{"text": prompt}]}],
@@ -401,10 +565,10 @@ def generate_all_images(prompts):
 
 
 # ============================================================
-# STEP 4: VIDEO RENDER (clean — no box, no countdown)
+# STEP 4: VIDEO RENDER
 # ============================================================
 def render_video(images, audio_path, script, festival):
-    log("Rendering video with Ken Burns + dual logo...")
+    log("Rendering video with Ken Burns...")
 
     slug = script.get('slug', f"{festival['festival_slug']}-{festival['date']}")
     output_path = OUTPUT_DIR / f"{slug}.mp4"
@@ -424,7 +588,6 @@ def render_video(images, audio_path, script, festival):
     if audio_dur <= 0 or audio_dur > 120:
         audio_dur = 48.0
 
-    log(f"Audio: {audio_dur:.1f}s | Images: {len(images)} | Per image: {audio_dur/len(images):.1f}s")
     img_dur = max(audio_dur / len(images), 5.0)
 
     processed = []
@@ -460,7 +623,6 @@ def render_video(images, audio_path, script, festival):
 
     hindi = [safe_text(l) for l in script.get("hindi_lines", [])]
     fest_name = safe_text(festival["festival_name"])
-
     fh = str(FONT_HINDI) if FONT_HINDI.exists() else ""
     fe = str(FONT_ENG) if FONT_ENG.exists() else ""
     fh_opt = f":fontfile='{fh}'" if fh else ""
@@ -477,7 +639,6 @@ def render_video(images, audio_path, script, festival):
         filters.append(f"drawtext=text='{line}':fontsize=48:fontcolor=white:box=0:x=(w-text_w)/2:y={y_pos}:enable='gte(t,{start_t:.1f})':shadowcolor=black:shadowx=2:shadowy=2{fh_opt}")
 
     filters.append(f"drawtext=text='Rohiit Gupta - Chief Vedic Architect':fontsize=28:fontcolor=gold:box=0:x=(w-text_w)/2:y=h-60:shadowcolor=black:shadowx=2:shadowy=2{fe_opt}")
-
     vf = ",".join(filters)
 
     if LOGO_PATH.exists():
@@ -519,7 +680,7 @@ def upload_to_supabase(video_path, json_path, slug):
     if not video_path or not SUPABASE_URL:
         return None, None
 
-    log("Uploading to Supabase Storage (trikal-videos bucket)...")
+    log("Uploading to Supabase Storage...")
     video_url = None
     json_url = None
 
@@ -538,11 +699,11 @@ def upload_to_supabase(video_path, json_path, slug):
         )
         if resp.status_code in [200, 201]:
             video_url = f"{SUPABASE_URL}/storage/v1/object/public/trikal-videos/{slug}.mp4"
-            log(f"Video uploaded: {video_url}")
+            log(f"Video uploaded to Supabase: {video_url}")
         else:
-            log(f"Video upload failed: {resp.status_code} {resp.text[:200]}")
+            log(f"Supabase upload failed: {resp.status_code}")
     except Exception as e:
-        log(f"Video upload exception: {e}")
+        log(f"Supabase upload exception: {e}")
 
     if json_path and json_path.exists():
         try:
@@ -560,7 +721,6 @@ def upload_to_supabase(video_path, json_path, slug):
             )
             if resp.status_code in [200, 201]:
                 json_url = f"{SUPABASE_URL}/storage/v1/object/public/trikal-videos/{slug}.json"
-                log(f"JSON uploaded: {json_url}")
         except Exception as e:
             log(f"JSON upload exception: {e}")
 
@@ -568,23 +728,20 @@ def upload_to_supabase(video_path, json_path, slug):
 
 
 # ============================================================
-# STEP 5b: PUBLISH TO YOUTUBE
+# STEP 6: PUBLISH TO YOUTUBE (FLOW 1 - AUTO)
 # ============================================================
 def publish_to_youtube(script, video_url, festival):
-    log("Publishing to YouTube...")
+    log("Publishing to YouTube (Flow 1 - Auto)...")
     if not video_url:
-        log("No video URL - skipping YouTube publish")
+        log("No video URL - skipping YouTube")
         return None
 
-    tags_trending = script.get("hashtags", {}).get("trending", [])
-    tags_niche = script.get("hashtags", {}).get("niche", [])
-    all_tags = (tags_trending + tags_niche)[:30]
-
+    tags = (script.get("hashtags", {}).get("trending", []) + script.get("hashtags", {}).get("niche", []))[:30]
     payload = {
         "video_url": video_url,
         "title": script.get("video_title", festival["festival_name"])[:100],
         "description": script.get("youtube_description", "")[:5000],
-        "tags": all_tags,
+        "tags": tags,
         "pinned_comment": script.get("pinned_comment", ""),
         "festival_name": festival["festival_name"],
         "festival_date": festival.get("date", ""),
@@ -602,93 +759,15 @@ def publish_to_youtube(script, video_url, festival):
             log(f"YouTube LIVE: {data['youtube_url']}")
             return data["youtube_url"]
         else:
-            log(f"YouTube publish failed: {data.get('error')}")
+            log(f"YouTube failed: {data.get('error')}")
             return None
     except Exception as e:
-        log(f"YouTube publish exception: {e}")
+        log(f"YouTube exception: {e}")
         return None
 
 
 # ============================================================
-# STEP 5c: PUBLISH TO FACEBOOK (NEW v5.2)
-# ============================================================
-def publish_to_facebook(script, video_url, festival):
-    log("Publishing to Facebook...")
-    if not video_url:
-        log("No video URL - skipping Facebook publish")
-        return None
-
-    caption = script.get("caption_variants", {}).get("facebook", script.get("seo_caption", ""))
-    hashtags_str = " ".join(["#" + h for h in script.get("hashtags", {}).get("trending", [])[:15]])
-    full_caption = f"{caption}\n\n{hashtags_str}\n\nFree Kundali: https://trikalvaani.com"
-
-    payload = {
-        "video_url": video_url,
-        "caption": full_caption[:5000],
-        "festival_name": festival["festival_name"],
-        "festival_date": festival.get("date", ""),
-    }
-
-    try:
-        resp = requests.post(
-            f"{VERCEL_APP_URL}/api/social/publish-facebook",
-            json=payload,
-            headers={"x-content-engine-secret": CONTENT_ENGINE_SECRET},
-            timeout=300
-        )
-        data = resp.json()
-        if data.get("success"):
-            log(f"Facebook LIVE: {data['facebook_url']}")
-            return data["facebook_url"]
-        else:
-            log(f"Facebook publish failed: {data.get('error')}")
-            return None
-    except Exception as e:
-        log(f"Facebook publish exception: {e}")
-        return None
-
-
-# ============================================================
-# STEP 5d: PUBLISH TO INSTAGRAM (NEW v5.2)
-# ============================================================
-def publish_to_instagram(script, video_url, festival):
-    log("Publishing to Instagram...")
-    if not video_url:
-        log("No video URL - skipping Instagram publish")
-        return None
-
-    caption = script.get("caption_variants", {}).get("instagram", script.get("seo_caption", ""))
-    hashtags_str = " ".join(["#" + h for h in script.get("hashtags", {}).get("trending", [])[:15]])
-    full_caption = f"{caption}\n\n.\n.\n.\n{hashtags_str}"
-
-    payload = {
-        "video_url": video_url,
-        "caption": full_caption[:2200],
-        "festival_name": festival["festival_name"],
-        "festival_date": festival.get("date", ""),
-    }
-
-    try:
-        resp = requests.post(
-            f"{VERCEL_APP_URL}/api/social/publish-instagram",
-            json=payload,
-            headers={"x-content-engine-secret": CONTENT_ENGINE_SECRET},
-            timeout=300
-        )
-        data = resp.json()
-        if data.get("success"):
-            log(f"Instagram LIVE: {data['instagram_url']}")
-            return data["instagram_url"]
-        else:
-            log(f"Instagram publish failed: {data.get('error')}")
-            return None
-    except Exception as e:
-        log(f"Instagram publish exception: {e}")
-        return None
-
-
-# ============================================================
-# STEP 6: SAVE SIDECAR JSON
+# STEP 7: SAVE SIDECAR JSON
 # ============================================================
 def save_seo_package(script, video_path, festival):
     if not video_path:
@@ -696,36 +775,26 @@ def save_seo_package(script, video_path, festival):
     json_path = video_path.with_suffix('.json')
     package = {
         "festival": festival["festival_name"],
-        "festival_slug": festival.get("festival_slug"),
-        "tier": festival.get("tier"),
         "date": festival.get("date"),
         "publish_date": today_ist(),
         "video_in_series": f"{festival['_publish_day_index']}/{festival['_total_publish_days']}",
-        "video_file": video_path.name,
         "slug": script.get("slug", ""),
         "video_title": script.get("video_title", ""),
         "meta_description": script.get("meta_description", ""),
         "tts_script": script.get("tts_script", ""),
-        "seo_caption": script.get("seo_caption", ""),
         "caption_variants": script.get("caption_variants", {}),
         "aeo_qa": script.get("aeo_qa", []),
         "geo_entities": script.get("geo_entities", {}),
-        "voice_search_phrases": script.get("voice_search_phrases", []),
         "keyword_cluster": script.get("keyword_cluster", {}),
         "hashtags": script.get("hashtags", {}),
         "youtube_description": script.get("youtube_description", ""),
         "youtube_chapters": script.get("youtube_chapters", []),
         "thumbnail_text": script.get("thumbnail_text", ""),
-        "youtube_playlist": script.get("youtube_playlist", ""),
         "pinned_comment": script.get("pinned_comment", ""),
-        "spoken_keywords_first_30s": script.get("spoken_keywords_first_30s", []),
         "whatsapp_broadcast": script.get("whatsapp_broadcast", ""),
         "schema_event": script.get("schema_event", {}),
-        "cta_variants": script.get("cta_variants", []),
-        "hindi_lines": script.get("hindi_lines", []),
-        "english_lines": script.get("english_lines", []),
-        "image_prompts_used": script.get("image_prompts", []),
-        "platforms_to_publish": ["instagram", "facebook", "threads", "youtube_shorts", "whatsapp"]
+        "platforms_published": ["youtube"],
+        "platforms_manual": ["instagram", "facebook", "threads", "whatsapp"]
     }
     json_path.write_text(json.dumps(package, ensure_ascii=False, indent=2), encoding='utf-8')
     log(f"SEO sidecar saved: {json_path.name}")
@@ -733,7 +802,7 @@ def save_seo_package(script, video_path, festival):
 
 
 # ============================================================
-# STEP 7: SUPABASE LOGS + ALERTS
+# SUPABASE LOG + WHATSAPP ALERT
 # ============================================================
 def log_supabase(script, video_path, video_url, festival, success, error=None):
     if not SUPABASE_URL:
@@ -750,80 +819,51 @@ def log_supabase(script, video_path, video_url, festival, success, error=None):
                 "date": today_ist(),
                 "tithi": festival["festival_name"],
                 "video_title": script.get("video_title", "") if script else "",
-                "video_path": str(video_path) if video_path else None,
                 "status": "success" if success else "failed"
             },
             timeout=10
         )
-        log("Logged to content_generation_log")
     except Exception as e:
         log(f"Supabase log skipped: {e}")
-
-    if success and video_url:
-        for platform in ["instagram", "facebook", "threads", "whatsapp", "youtube"]:
-            try:
-                requests.post(
-                    f"{SUPABASE_URL}/rest/v1/social_publish_log",
-                    headers={
-                        "apikey": SUPABASE_KEY,
-                        "Authorization": f"Bearer {SUPABASE_KEY}",
-                        "Content-Type": "application/json"
-                    },
-                    json={
-                        "festival": festival["festival_name"],
-                        "video_date": today_ist(),
-                        "video_path": str(video_path),
-                        "video_public_url": video_url,
-                        "platform": platform,
-                        "status": "pending",
-                        "caption": script.get("caption_variants", {}).get(platform, script.get("seo_caption", "")),
-                        "hashtags": " ".join(["#" + h for h in script.get("hashtags", {}).get("trending", [])[:15]])
-                    },
-                    timeout=10
-                )
-            except Exception as e:
-                log(f"social_publish_log insert failed for {platform}: {e}")
 
 
 def send_whatsapp_alert(message):
     if not WHATSAPP_TOKEN or not WHATSAPP_PHONE_ID:
-        log("WhatsApp alert skipped - tokens missing")
         return
     try:
-        url = f"https://graph.facebook.com/v20.0/{WHATSAPP_PHONE_ID}/messages"
-        payload = {
-            "messaging_product": "whatsapp",
-            "to": ALERT_NUMBER,
-            "type": "text",
-            "text": {"body": message}
-        }
-        headers = {
-            "Authorization": f"Bearer {WHATSAPP_TOKEN}",
-            "Content-Type": "application/json"
-        }
-        resp = requests.post(url, json=payload, headers=headers, timeout=30)
-        log(f"WhatsApp alert sent: {resp.status_code}")
+        resp = requests.post(
+            f"https://graph.facebook.com/v20.0/{WHATSAPP_PHONE_ID}/messages",
+            json={
+                "messaging_product": "whatsapp",
+                "to": ALERT_NUMBER,
+                "type": "text",
+                "text": {"body": message}
+            },
+            headers={
+                "Authorization": f"Bearer {WHATSAPP_TOKEN}",
+                "Content-Type": "application/json"
+            },
+            timeout=30
+        )
+        log(f"WhatsApp alert: {resp.status_code}")
     except Exception as e:
         log(f"WhatsApp alert exception: {e}")
 
 
-# ============================================================
-# CLEANUP
-# ============================================================
 def cleanup():
-    patterns = ["*.mp4", "*.txt", "img_*.png", "tts_*.wav", "tts_*.mp3"]
+    patterns = ["*.mp4", "*.txt", "img_*.png", "tts_*.wav"]
     for pat in patterns:
         for f in TEMP_DIR.glob(pat):
             f.unlink(missing_ok=True)
 
 
 # ============================================================
-# PROCESS ONE FESTIVAL (v5.2 — YouTube + Facebook + Instagram)
+# PROCESS ONE FESTIVAL (v5.3)
 # ============================================================
 def process_festival(festival, max_retries=3):
     for attempt in range(1, max_retries + 1):
         log("=" * 55)
-        log(f"ATTEMPT {attempt}/{max_retries} for {festival['festival_name']}")
+        log(f"ATTEMPT {attempt}/{max_retries} — {festival['festival_name']}")
         log("=" * 55)
 
         try:
@@ -835,11 +875,7 @@ def process_festival(festival, max_retries=3):
             if not audio:
                 raise Exception("TTS failed")
 
-            image_prompts = script.get("image_prompts", [])
-            if len(image_prompts) < 3:
-                raise Exception(f"Only {len(image_prompts)} prompts")
-
-            images = generate_all_images(image_prompts)
+            images = generate_all_images(script.get("image_prompts", []))
             if len(images) < 3:
                 raise Exception(f"Only {len(images)} images")
 
@@ -851,49 +887,47 @@ def process_festival(festival, max_retries=3):
             video_url, json_url = upload_to_supabase(video, json_path, script.get("slug", "video"))
             log_supabase(script, video, video_url, festival, True)
 
-            # v5.2: Auto-publish to ALL 3 platforms
-            if video_url:
-                yt_url = publish_to_youtube(script, video_url, festival)
-                if yt_url:
-                    log(f"YouTube published: {yt_url}")
-                else:
-                    log("YouTube publish failed")
+            # FLOW 1: YouTube Auto-Publish
+            yt_url = publish_to_youtube(script, video_url, festival)
 
-                time.sleep(5)
-                fb_url = publish_to_facebook(script, video_url, festival)
-                if fb_url:
-                    log(f"Facebook published: {fb_url}")
-                else:
-                    log("Facebook publish failed")
+            # FLOW 2: Google Drive Caption Kit
+            caption_kit = build_caption_kit(script, festival)
+            drive_video_url, drive_kit_url = upload_to_drive(
+                video, caption_kit, script.get("slug", "video"), festival["festival_name"]
+            )
 
-                time.sleep(5)
-                ig_url = publish_to_instagram(script, video_url, festival)
-                if ig_url:
-                    log(f"Instagram published: {ig_url}")
-                else:
-                    log("Instagram publish failed")
+            # WhatsApp Success Alert
+            alert = (
+                f"✅ TRIKAL VAANI VIDEO READY\n\n"
+                f"Festival: {festival['festival_name']}\n"
+                f"YouTube: {yt_url or 'FAILED'}\n\n"
+                f"📁 Google Drive:\n"
+                f"Video: {drive_video_url or 'FAILED'}\n"
+                f"Captions: {drive_kit_url or 'FAILED'}\n\n"
+                f"📸 Post to Instagram now → auto-pushes to FB + Threads\n"
+                f"trikalvaani.com"
+            )
+            send_whatsapp_alert(alert)
 
             cleanup()
-            log(f"SUCCESS: {video}")
+            log(f"SUCCESS: {festival['festival_name']}")
+            log(f"YouTube: {yt_url}")
+            log(f"Drive Video: {drive_video_url}")
+            log(f"Drive Captions: {drive_kit_url}")
             return True
 
         except Exception as e:
             log(f"ATTEMPT {attempt} FAILED: {e}")
             cleanup()
             if attempt < max_retries:
-                log(f"Retrying in 60 seconds...")
+                log("Retrying in 60 seconds...")
                 time.sleep(60)
             else:
-                alert_msg = (
-                    f"TRIKAL VAANI CONTENT ENGINE FAILED\n\n"
+                send_whatsapp_alert(
+                    f"❌ CONTENT ENGINE FAILED\n"
                     f"Festival: {festival['festival_name']}\n"
-                    f"Date: {today_ist()}\n"
-                    f"Tier: {festival.get('tier')}\n"
-                    f"All 3 retries exhausted.\n"
-                    f"Last error: {str(e)[:200]}\n"
-                    f"Check /tmp/trikal_cron.log on VM"
+                    f"Error: {str(e)[:200]}"
                 )
-                send_whatsapp_alert(alert_msg)
                 log_supabase(None, None, None, festival, False, str(e))
                 return False
     return False
@@ -904,14 +938,13 @@ def process_festival(festival, max_retries=3):
 # ============================================================
 def main():
     log("=" * 55)
-    log("TRIKAL VAANI CONTENT ENGINE v5.2 - FULL AUTO-PUBLISH")
-    log("YouTube + Facebook + Instagram")
+    log("TRIKAL VAANI CONTENT ENGINE v5.3")
+    log("Flow 1: YouTube Auto | Flow 2: Drive Caption Kit")
     log("=" * 55)
 
-    # Manual mode: --festival <slug>
     if len(sys.argv) > 1 and sys.argv[1] == "--festival":
         slug = sys.argv[2] if len(sys.argv) > 2 else None
-        log(f"Manual mode: forcing festival {slug}")
+        log(f"Manual mode: {slug}")
         headers = {"apikey": SUPABASE_KEY, "Authorization": f"Bearer {SUPABASE_KEY}"}
         resp = requests.get(
             f"{SUPABASE_URL}/rest/v1/festivals_master?festival_slug=eq.{slug}&select=*",
@@ -928,23 +961,13 @@ def main():
         process_festival(festival)
         return
 
-    # Cron mode: check today's schedule
     festivals_today = fetch_todays_festivals()
     if not festivals_today:
-        log("No festivals scheduled for today. Exiting cleanly.")
+        log("No festivals today. Exiting.")
         return
 
-    log(f"Will process {len(festivals_today)} festival(s) today")
-    results = []
     for fest in festivals_today:
-        success = process_festival(fest)
-        results.append((fest['festival_name'], success))
-
-    log("=" * 55)
-    log("FINAL SUMMARY:")
-    for name, ok in results:
-        log(f"  {'OK' if ok else 'FAIL'} {name}")
-    log("=" * 55)
+        process_festival(fest)
 
 
 if __name__ == "__main__":
