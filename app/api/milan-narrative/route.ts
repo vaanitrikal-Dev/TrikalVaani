@@ -3,14 +3,18 @@
  * TRIKAL VAANI — Milan Narrative Generator API
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/api/milan-narrative/route.ts
- * VERSION: 1.4
+ * VERSION: 1.5
  * SIGNED: ROHIIT GUPTA, CEO
  * ============================================================
+ * CHANGE LOG (v1.4 → v1.5):
+ *   Pass `language` into polishMilanNarrative() so Claude Sonnet preserves
+ *   the language and never translates/drifts. Closes the language chain
+ *   end-to-end (builders → Gemini → Sonnet polish all language-locked).
+ *
  * CHANGE LOG (v1.3 → v1.4):
  *   WIRE LANGUAGE: read milan.language ('hinglish' | 'hindi' | 'english'),
- *   default 'hinglish', and pass it into all 3 prompt builders.
- *   Also pass `tier` into buildMilanBothPrompt (builder now accepts it for
- *   the defensive basic_51 gate). No other logic changed.
+ *   default 'hinglish', pass into all 3 prompt builders. Pass `tier` into
+ *   buildMilanBothPrompt.
  *
  * CHANGE LOG (v1.1 → v1.3):
  *   FIX 1: API key order corrected — GEMINI_API_KEY first, GOOGLE_API_KEY second.
@@ -225,6 +229,7 @@ export async function POST(req: NextRequest) {
         rawNarrative: geminiText,
         audience,
         tier,
+        language,           // v1.5 — preserve language, no drift in polish
       });
 
       finalText = polishResult.narrative;
