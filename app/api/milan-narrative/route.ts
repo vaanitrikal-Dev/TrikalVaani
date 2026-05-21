@@ -3,16 +3,18 @@
  * TRIKAL VAANI — Milan Narrative Generator API
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/api/milan-narrative/route.ts
- * VERSION: 1.3
+ * VERSION: 1.4
  * SIGNED: ROHIIT GUPTA, CEO
  * ============================================================
+ * CHANGE LOG (v1.3 → v1.4):
+ *   WIRE LANGUAGE: read milan.language ('hinglish' | 'hindi' | 'english'),
+ *   default 'hinglish', and pass it into all 3 prompt builders.
+ *   Also pass `tier` into buildMilanBothPrompt (builder now accepts it for
+ *   the defensive basic_51 gate). No other logic changed.
+ *
  * CHANGE LOG (v1.1 → v1.3):
  *   FIX 1: API key order corrected — GEMINI_API_KEY first, GOOGLE_API_KEY second.
- *           GOOGLE_API_KEY is Maps key, invalid for Gemini → was causing 502 on every call.
- *   FIX 2: manglik_data removed from hard require gate.
- *           Old rows with manglik_data=null were 500ing before Gemini ran.
- *           ashtakoot_data + remedies_data remain required (core data).
- *           Null manglik_data → safe MANGLIK_FALLBACK stub passed to prompt builders.
+ *   FIX 2: manglik_data removed from hard require gate (null → safe fallback).
  * ============================================================
  */
 
@@ -27,6 +29,7 @@ import { polishMilanNarrative }   from '@/lib/claude-polish';
 // ── Tier configuration (CEO LOCKED) ──────────────────────────
 type Tier      = 'basic_51' | 'deep_101_couple' | 'deep_101_parent' | 'both_151';
 type Audience  = 'couple' | 'parent' | 'both';
+type Language  = 'hinglish' | 'hindi' | 'english';
 
 interface TierConfig {
   model:       string;
@@ -41,6 +44,9 @@ const TIER_CONFIG: Record<Tier, TierConfig> = {
   deep_101_parent: { model: 'gemini-2.5-pro',   maxTokens: 8000,  wordTarget: 1000, usePolish: true },
   both_151:        { model: 'gemini-2.5-pro',   maxTokens: 12000, wordTarget: 1500, usePolish: true },
 };
+
+// ── Valid language whitelist (defensive) ─────────────────────
+const VALID_LANGUAGES: Language[] = ['hinglish', 'hindi', 'english'];
 
 // ── Safe fallback for manglik_data when null/missing ─────────
 const MANGLIK_FALLBACK = {
@@ -110,11 +116,15 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Invalid audience on record.' }, { status: 500 });
     }
 
+    // ── Resolve language (WIRE v1.4) ───────────────────────
+    // DB column has a CHECK constraint, but we defend here too.
+    const language: Language = VALID_LANGUAGES.includes(milan.language as Language)
+      ? (milan.language as Language)
+      : 'hinglish';
+
     const cfg = TIER_CONFIG[tier];
 
     // ── Engine data sanity — manglik_data now OPTIONAL ─────
-    // FIX 2: manglik_data removed from hard gate.
-    // Old rows with null manglik_data were 500ing here before reaching Gemini.
     if (!milan.ashtakoot_data || !milan.remedies_data) {
       console.error('[Trikal] Milan core engine data missing for slug:', slug);
       return NextResponse.json(
@@ -145,6 +155,7 @@ export async function POST(req: NextRequest) {
         remedies_data:   milan.remedies_data,
         tier:            tier as 'basic_51' | 'deep_101_couple' | 'both_151',
         word_target:     cfg.wordTarget,
+        language,
       });
     } else if (audience === 'parent') {
       prompt = buildMilanParentPrompt({
@@ -158,6 +169,7 @@ export async function POST(req: NextRequest) {
         remedies_data:   milan.remedies_data,
         tier:            tier as 'basic_51' | 'deep_101_parent' | 'both_151',
         word_target:     cfg.wordTarget,
+        language,
       });
     } else {
       prompt = buildMilanBothPrompt({
@@ -170,6 +182,8 @@ export async function POST(req: NextRequest) {
         manglik_data:    manglikData,
         remedies_data:   milan.remedies_data,
         word_target:     cfg.wordTarget,
+        tier:            tier as 'basic_51' | 'both_151',
+        language,
       });
     }
 
@@ -240,6 +254,7 @@ export async function POST(req: NextRequest) {
       slug,
       tier,
       audience,
+      language,
       narrative: finalText,
       cached:    false,
       polished:  didPolish,
