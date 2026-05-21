@@ -1,17 +1,15 @@
 'use client';
 
-// 🔱 TRIKAL VAANI | components/landing/KundaliMilanTeaser.tsx | v2.0
+// 🔱 TRIKAL VAANI | components/landing/KundaliMilanTeaser.tsx | v2.1
 // Owner: Rohiit Gupta, Chief Vedic Architect
 // ============================================================================
-// CHANGE LOG (v1.0 → v2.0):
-//   LIVE — Day 8 launch. "Coming Soon" teaser replaced with full LIVE state.
-//   - Badge: "New Service · Launching Soon" → "Now Live · Try Free"
-//   - Headline: "Coming Soon" → "Try It Free Today"
-//   - Email waitlist form REMOVED — replaced with 2 CTAs:
-//       Primary: "Start Free Kundali Milan →" → /kundali-milan
-//       Secondary: "See Pricing" → /kundali-milan#pricing
-//   - Pricing cards, feature strip, trust line unchanged.
-//   - All brand colors, layout, IR-12 slot unchanged.
+// CHANGE LOG (v2.0 → v2.1):
+//   Established-feature framing — removed all "live / new / launch / Day 8" tags.
+//   - Badge: "Now Live · Try Free" → "India's Trusted Kundali Milan"
+//   - Headline: "Try It Free Today" → "Trusted Vedic Compatibility"
+//   - Subhead reworded to confident, evergreen tone (no "try" urgency).
+//   - CTAs, pricing cards, feature strip, trust line, colors, IR-12 slot unchanged.
+//   - Footer note de-dated.
 // ============================================================================
 
 import { Heart, Sparkles, FileText, Share2, ShieldCheck, ArrowRight } from 'lucide-react';
@@ -39,14 +37,14 @@ export default function KundaliMilanTeaser() {
             }}
           >
             <Sparkles className="w-3.5 h-3.5" />
-            Now Live · Try Free
+            India&apos;s Trusted Kundali Milan
           </span>
         </div>
 
         {/* ── HEADLINE ────────────────────────────────────────────────── */}
         <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl font-bold text-white text-center leading-tight">
           Kundali Milan —{' '}
-          <span style={{ color: GOLD }}>Try It Free Today</span>
+          <span style={{ color: GOLD }}>Trusted Vedic Compatibility</span>
         </h2>
 
         <p className="text-center text-slate-400 mt-4 max-w-2xl mx-auto text-base sm:text-lg leading-relaxed">
@@ -165,7 +163,7 @@ export default function KundaliMilanTeaser() {
             </div>
           </div>
 
-          {/* ── LIVE CTAs ─────────────────────────────────────────────── */}
+          {/* ── CTAs ──────────────────────────────────────────────────── */}
           <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
             <a
               href="/kundali-milan"
@@ -175,7 +173,7 @@ export default function KundaliMilanTeaser() {
                 color: '#080B12',
               }}
             >
-              Start Free Kundali Milan
+              Start Your Kundali Milan
               <ArrowRight className="w-4 h-4" />
             </a>
             <a
@@ -209,7 +207,7 @@ export default function KundaliMilanTeaser() {
 }
 
 // ============================================================================
-// END — components/landing/KundaliMilanTeaser.tsx v2.0
+// END — components/landing/KundaliMilanTeaser.tsx v2.1
 // 🔱 Trikal Vaani | Rohiit Gupta, Chief Vedic Architect
-// 🔒 EARNING LOCKED (IR-12) — LIVE as of Day 8
+// 🔒 EARNING LOCKED (IR-12)
 // ============================================================================
