@@ -3,22 +3,26 @@
  * 🔱 TRIKAL VAANI — CEO PROTECTION HEADER 🔱
  * ============================================================================
  * File:        app/sitemap.ts
- * Version:     v5.5
+ * Version:     v5.6
  * Owner:       Rohiit Gupta, Chief Vedic Architect
+ *
+ * Changes v5.5 → v5.6 (2026-05-22):
+ *   FIX 1: REMOVED /astrologer-{city} entries — violates IR-20 / Plan §5.9
+ *           (no LocalBusiness, no /astrologer-* pages; national + AI-search
+ *           authority only). City pages (/{slug}) and /{slug}/panchang RETAINED.
+ *   NOTE: This only removes them from the sitemap. If the /astrologer-{city}
+ *         route still renders, kill or 308-redirect it separately so the URLs
+ *         drop out of the index.
+ *
+ *   UNTOUCHED: All v5.5 routes — static, calculators, 15 domains,
+ *              compatibility pages, blog, cities, festivals, panchang dates.
+ * ============================================================================
  *
  * Changes v5.4 → v5.5 (2026-05-20):
  *   FIX 1: ADDED /compatibility/* programmatic SEO pages (dynamic from Supabase)
- *           - Pulls all rows from `compatibility_pages` table
  *           - English: /compatibility/{slug}            (priority 0.8)
  *           - Hindi:    /compatibility/{slug}?lang=hi    (priority 0.7)
  *           - Auto-grows as new rows are added (no code change needed)
- *           - changeFrequency 'monthly' (evergreen rashi content)
- *
- *   UNTOUCHED: All v5.4 routes — static, calculators, 15 domains,
- *              blog, cities, festivals, panchang dates.
- *
- *   NOTE: Compatibility pages use ONE shared canonical per slug.
- *         Hindi variant uses ?lang=hi (hreflang handled in page metadata).
  * ============================================================================
  *
  * Changes v5.3 → v5.4 (2026-05-18):
@@ -41,7 +45,6 @@ const BASE = 'https://trikalvaani.com';
 
 export const revalidate = 3600;
 
-// v5.4 FIX 1 + FIX 2: removed /upcoming-events, added /calculators
 const STATIC_ROUTES = [
   '',
   '/voice-pricing',
@@ -57,7 +60,6 @@ const STATIC_ROUTES = [
   '/panchang',
 ];
 
-// v5.4 FIX 3: 7 calculator detail pages — all 200 OK as of 2026-05-18
 const CALCULATORS = [
   'free-kundali-calculator',
   'free-dasha-calculator',
@@ -68,7 +70,6 @@ const CALCULATORS = [
   'free-manglik-dosh-calculator',
 ];
 
-// 15 pillar authority pages — all expanded to 1000-1370 words (Session E v2.5)
 const DOMAINS = [
   'career', 'wealth', 'health', 'relationships', 'family',
   'education', 'home', 'legal', 'travel', 'spirituality',
@@ -96,7 +97,6 @@ function readFestivals(): FestivalRow[] {
   }
 }
 
-// v5.5 FIX 1: pull compatibility slugs from Supabase
 async function readCompatibilitySlugs(): Promise<{ slug: string; lang: string }[]> {
   try {
     const supabase = createClient(
@@ -137,7 +137,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     let priority = 0.8;
     if (path === '') priority = 1.0;
     else if (path === '/voice-pricing') priority = 0.95;
-    else if (path === '/calculators') priority = 0.9; // v5.4 FIX 2
+    else if (path === '/calculators') priority = 0.9;
 
     entries.push({
       url: `${BASE}${path}`,
@@ -147,7 +147,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     });
   }
 
-  // ── v5.4 FIX 3: Calculator detail pages ────────────────────────────
+  // ── Calculator detail pages ────────────────────────────────────────
   for (const calc of CALCULATORS) {
     entries.push({
       url: `${BASE}/calculators/${calc}`,
@@ -167,7 +167,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     });
   }
 
-  // ── v5.5 FIX 1: Compatibility pages (programmatic SEO) ─────────────
+  // ── Compatibility pages (programmatic SEO) ─────────────────────────
   const compatRows = await readCompatibilitySlugs();
   for (const row of compatRows) {
     if (row.lang === 'en') {
@@ -187,7 +187,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }
   }
 
-  // ── Blog posts ─────────────────────────────────────────────────────
+  // ── Blog posts (auto-includes the 5 new Milan spokes) ──────────────
   try {
     const posts = await getAllPosts();
     for (const post of posts) {
@@ -203,11 +203,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }
 
   // ── City pages ─────────────────────────────────────────────────────
+  // v5.6 FIX 1: /astrologer-{city} REMOVED (IR-20 / Plan §5.9).
+  // City landing + panchang RETAINED.
   const cities = readCities();
   for (const c of cities) {
     entries.push({ url: `${BASE}/${c.slug}`, lastModified: now, changeFrequency: 'weekly', priority: 0.85 });
     entries.push({ url: `${BASE}/${c.slug}/panchang`, lastModified: now, changeFrequency: 'daily', priority: 0.8 });
-    entries.push({ url: `${BASE}/astrologer-${c.slug}`, lastModified: now, changeFrequency: 'weekly', priority: 0.9 });
   }
 
   // ── Festival/event pages ───────────────────────────────────────────
