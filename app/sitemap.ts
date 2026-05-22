@@ -3,8 +3,14 @@
  * 🔱 TRIKAL VAANI — CEO PROTECTION HEADER 🔱
  * ============================================================================
  * File:        app/sitemap.ts
- * Version:     v5.6
+ * Version:     v5.7
  * Owner:       Rohiit Gupta, Chief Vedic Architect
+ *
+ * Changes v5.6 → v5.7 (2026-05-22):
+ *   FIX 1: ADDED /kundali-milan (Milan pillar) to STATIC_ROUTES.
+ *   FIX 2: ADDED /karmic-background-reading (Karmic pillar) to STATIC_ROUTES.
+ *          Both now crawlable/indexable. priority 0.8, weekly.
+ *   UNTOUCHED: all v5.6 routes and logic.
  *
  * Changes v5.5 → v5.6 (2026-05-22):
  *   FIX 1: REMOVED /astrologer-{city} entries — violates IR-20 / Plan §5.9
@@ -58,6 +64,8 @@ const STATIC_ROUTES = [
   '/services',
   '/calculators',
   '/panchang',
+  '/kundali-milan',               // v5.7: Milan pillar
+  '/karmic-background-reading',   // v5.7: Karmic Background Reading pillar
 ];
 
 const CALCULATORS = [
