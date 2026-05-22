@@ -1,15 +1,18 @@
 #!/usr/bin/env python3
 """
-TRIKAL VAANI - Content Engine v5.3
+TRIKAL VAANI - Content Engine v5.4
 =====================================
-FLOW 1: YouTube Auto-Publish (always runs)
+FLOW 1: YouTube DIRECT upload from VM (no Vercel, no Supabase)
 FLOW 2: Google Drive Caption Kit (video + captions txt → Drive folder)
 Meta (FB/IG/Threads) = REMOVED (post manually via Instagram → auto-pushes to FB+Threads)
 =====================================
+NEW IN v5.4:
+  - publish_to_youtube_direct() → uploads MP4 straight from VM via YouTube Data API
+  - Supabase Storage REMOVED (was failing with new sb_secret key format)
+  - Vercel dependency REMOVED for YouTube
+  - Everything self-contained on VM
 NEW IN v5.3:
-  - publish_to_youtube() ONLY for auto-publish
   - upload_to_drive() → uploads MP4 + caption kit TXT to Google Drive
-  - Caption kit TXT contains: Instagram, Facebook, Threads, WhatsApp captions + hashtags
   - FB/IG/Threads auto-publish REMOVED (manual via Instagram native sharing)
 CEO: Rohiit Gupta | Chief Vedic Architect | trikalvaani.com
 =====================================
@@ -37,6 +40,11 @@ CONTENT_ENGINE_SECRET = os.environ.get("CONTENT_ENGINE_SECRET", "trikal-content-
 VERCEL_APP_URL = os.environ.get("VERCEL_APP_URL", "https://trikalvaani.com")
 ALERT_NUMBER = "919211804111"
 SITE_URL = "https://trikalvaani.com"
+
+# YOUTUBE CONFIG (direct upload from VM)
+YOUTUBE_CLIENT_ID = "166374809393-eo1hthqcbh5s0g504ra5ijap9gr930lr.apps.googleusercontent.com"
+YOUTUBE_CLIENT_SECRET = "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"
+YOUTUBE_REFRESH_TOKEN = os.environ.get("YOUTUBE_REFRESH_TOKEN", "")
 
 # GOOGLE DRIVE CONFIG
 DRIVE_CLIENT_ID = "166374809393-eo1hthqcbh5s0g504ra5ijap9gr930lr.apps.googleusercontent.com"
@@ -728,41 +736,90 @@ def upload_to_supabase(video_path, json_path, slug):
 
 
 # ============================================================
-# STEP 6: PUBLISH TO YOUTUBE (FLOW 1 - AUTO)
+# STEP 6: PUBLISH TO YOUTUBE DIRECT FROM VM (v5.4)
 # ============================================================
-def publish_to_youtube(script, video_url, festival):
-    log("Publishing to YouTube (Flow 1 - Auto)...")
-    if not video_url:
-        log("No video URL - skipping YouTube")
+def publish_to_youtube_direct(script, video_path, festival):
+    """Upload video DIRECTLY from VM to YouTube. No Vercel, no Supabase."""
+    log("Publishing to YouTube DIRECT from VM (Flow 1)...")
+
+    if not video_path or not Path(video_path).exists():
+        log("No local video file - skipping YouTube")
         return None
 
-    tags = (script.get("hashtags", {}).get("trending", []) + script.get("hashtags", {}).get("niche", []))[:30]
-    payload = {
-        "video_url": video_url,
-        "title": script.get("video_title", festival["festival_name"])[:100],
-        "description": script.get("youtube_description", "")[:5000],
-        "tags": tags,
-        "pinned_comment": script.get("pinned_comment", ""),
-        "festival_name": festival["festival_name"],
-        "festival_date": festival.get("date", ""),
-    }
+    if not YOUTUBE_REFRESH_TOKEN:
+        log("YOUTUBE_REFRESH_TOKEN not set - skipping YouTube")
+        return None
 
     try:
-        resp = requests.post(
-            f"{VERCEL_APP_URL}/api/social/publish-youtube",
-            json=payload,
-            headers={"x-content-engine-secret": CONTENT_ENGINE_SECRET},
-            timeout=300
+        from googleapiclient.discovery import build
+        from googleapiclient.http import MediaFileUpload
+        from google.oauth2.credentials import Credentials
+
+        creds = Credentials(
+            token=None,
+            refresh_token=YOUTUBE_REFRESH_TOKEN,
+            token_uri="https://oauth2.googleapis.com/token",
+            client_id=YOUTUBE_CLIENT_ID,
+            client_secret=YOUTUBE_CLIENT_SECRET
         )
-        data = resp.json()
-        if data.get("success"):
-            log(f"YouTube LIVE: {data['youtube_url']}")
-            return data["youtube_url"]
-        else:
-            log(f"YouTube failed: {data.get('error')}")
-            return None
+
+        youtube = build("youtube", "v3", credentials=creds)
+
+        tags = (script.get("hashtags", {}).get("trending", []) +
+                script.get("hashtags", {}).get("niche", []))[:30]
+
+        title = script.get("video_title", festival["festival_name"])[:100]
+        description = script.get("youtube_description", "")[:4900]
+
+        body = {
+            "snippet": {
+                "title": title,
+                "description": description,
+                "tags": tags,
+                "categoryId": "22"
+            },
+            "status": {
+                "privacyStatus": "public",
+                "selfDeclaredMadeForKids": False
+            }
+        }
+
+        media = MediaFileUpload(str(video_path), chunksize=-1, resumable=True, mimetype="video/mp4")
+        request = youtube.videos().insert(part="snippet,status", body=body, media_body=media)
+
+        response = None
+        while response is None:
+            status, response = request.next_chunk()
+            if status:
+                log(f"  YouTube upload {int(status.progress() * 100)}%")
+
+        video_id = response["id"]
+        youtube_url = f"https://www.youtube.com/shorts/{video_id}"
+        log(f"YouTube LIVE: {youtube_url}")
+
+        # Pinned comment
+        pinned = script.get("pinned_comment", "")
+        if pinned:
+            try:
+                youtube.commentThreads().insert(
+                    part="snippet",
+                    body={
+                        "snippet": {
+                            "videoId": video_id,
+                            "topLevelComment": {
+                                "snippet": {"textOriginal": pinned[:9000]}
+                            }
+                        }
+                    }
+                ).execute()
+                log("  Pinned comment posted")
+            except Exception as e:
+                log(f"  Pinned comment skipped: {e}")
+
+        return youtube_url
+
     except Exception as e:
-        log(f"YouTube exception: {e}")
+        log(f"YouTube direct upload exception: {e}")
         return None
 
 
@@ -884,11 +941,10 @@ def process_festival(festival, max_retries=3):
                 raise Exception("Video render failed")
 
             json_path = save_seo_package(script, video, festival)
-            video_url, json_url = upload_to_supabase(video, json_path, script.get("slug", "video"))
-            log_supabase(script, video, video_url, festival, True)
+            log_supabase(script, video, None, festival, True)
 
-            # FLOW 1: YouTube Auto-Publish
-            yt_url = publish_to_youtube(script, video_url, festival)
+            # FLOW 1: YouTube DIRECT upload from VM (no Supabase, no Vercel)
+            yt_url = publish_to_youtube_direct(script, video, festival)
 
             # FLOW 2: Google Drive Caption Kit
             caption_kit = build_caption_kit(script, festival)
@@ -938,8 +994,8 @@ def process_festival(festival, max_retries=3):
 # ============================================================
 def main():
     log("=" * 55)
-    log("TRIKAL VAANI CONTENT ENGINE v5.3")
-    log("Flow 1: YouTube Auto | Flow 2: Drive Caption Kit")
+    log("TRIKAL VAANI CONTENT ENGINE v5.4")
+    log("Flow 1: YouTube DIRECT (VM) | Flow 2: Drive Caption Kit")
     log("=" * 55)
 
     if len(sys.argv) > 1 and sys.argv[1] == "--festival":
