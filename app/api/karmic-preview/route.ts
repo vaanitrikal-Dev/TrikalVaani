@@ -99,13 +99,14 @@ export async function POST(req: NextRequest) {
     const lagnaSignEn = data?.lagna?.sign_en ?? data?.lagna?.sign    ?? null;
 
     // Moon sign — find Moon in grahas list
+    // VM field name is `planet` (e.g. "Moon"), with sign + sign_en + nakshatra.
     let moonSign: string | null = null;
     let moonNakshatra: string | null = null;
     if (Array.isArray(data?.grahas)) {
-      const moon = data.grahas.find((g: any) =>
-        (g?.name ?? g?.graha ?? '').toString().toLowerCase().startsWith('moon') ||
-        (g?.name ?? '').toString().toLowerCase().includes('chandra')
-      );
+      const moon = data.grahas.find((g: any) => {
+        const label = (g?.planet ?? g?.name ?? g?.graha ?? '').toString().toLowerCase();
+        return label.startsWith('moon') || label.includes('chandra');
+      });
       if (moon) {
         moonSign      = moon.sign ?? moon.sign_en ?? moon.rashi ?? null;
         moonNakshatra = moon.nakshatra ?? null;
