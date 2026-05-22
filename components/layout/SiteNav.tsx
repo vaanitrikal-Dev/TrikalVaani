@@ -3,18 +3,19 @@
 // ============================================================
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikal Vaani
 // FILE: components/layout/SiteNav.tsx
-// VERSION: v2.3
+// VERSION: v2.4
 // DATE: 2026-05-22
 // CHANGES:
-//   v2.3: Added "Kundali Milan" link → /kundali-milan (desktop + mobile)
-//         Added "Karmic Reading" link → /karmic-background-reading (desktop)
-//         These are the two newest revenue products — now discoverable.
-//   v2.2: Removed "Events" link; added "Calculators" → /calculators.
+//   v2.4: MOBILE HAMBURGER MENU. Top bar now shows logo + Start + ☰.
+//         Tapping ☰ opens a full dropdown with ALL links + Sign In.
+//         Scales as new products are added. Desktop nav UNCHANGED.
+//   v2.3: Added "Kundali Milan" + "Karmic Reading" links (desktop + mobile).
+//   v2.2: Removed "Events"; added "Calculators" → /calculators.
 // ============================================================
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { Mail, User, ChevronDown } from 'lucide-react';
+import { Mail, User, ChevronDown, Menu, X } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
 import AuthModal from '@/components/auth/AuthModal';
@@ -23,6 +24,18 @@ import type { User as SupabaseUser } from '@supabase/supabase-js';
 
 const GOLD = '#D4AF37';
 const GOLD_RGBA = (a: number) => `rgba(212,175,55,${a})`;
+
+// Single source of truth for nav links (desktop + mobile share this)
+const NAV_LINKS: { href: string; label: string; highlight?: boolean }[] = [
+  { href: '/#pillars',                 label: 'Life Pillars' },
+  { href: '/services',                 label: 'Services', highlight: true },
+  { href: '/kundali-milan',            label: 'Kundali Milan' },
+  { href: '/karmic-background-reading', label: 'Karmic Reading' },
+  { href: '/panchang',                 label: 'Panchang' },
+  { href: '/calculators',              label: 'Calculators' },
+  { href: '/blog',                     label: 'Vedic Blog' },
+  { href: '/founder',                  label: 'Founder' },
+];
 
 function LangSwitcher({ lang, setLang }: { lang: Lang; setLang: (l: Lang) => void }) {
   const [open, setOpen] = useState(false);
@@ -71,6 +84,7 @@ export default function SiteNav() {
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const [showAuth, setShowAuth] = useState(false);
   const [lang, setLang] = useState<Lang>('en');
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -83,6 +97,12 @@ export default function SiteNav() {
 
     return () => subscription.unsubscribe();
   }, []);
+
+  // Lock body scroll when mobile menu is open
+  useEffect(() => {
+    document.body.style.overflow = mobileOpen ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [mobileOpen]);
 
   return (
     <>
@@ -97,7 +117,7 @@ export default function SiteNav() {
         <div className="max-w-6xl mx-auto h-16 flex items-center justify-between">
 
           {/* ── LOGO ── */}
-          <Link href="/" className="flex items-center gap-2.5 group">
+          <Link href="/" className="flex items-center gap-2.5 group" onClick={() => setMobileOpen(false)}>
             <div
               className="rounded-full flex items-center justify-center transition-all duration-300 group-hover:scale-105 overflow-hidden"
               style={{
@@ -121,59 +141,23 @@ export default function SiteNav() {
             </span>
           </Link>
 
-          {/* ── DESKTOP NAV ── */}
+          {/* ── DESKTOP NAV (unchanged) ── */}
           <nav className="hidden sm:flex items-center gap-4">
 
-            <Link href="/#pillars" className="text-sm text-slate-400 hover:text-slate-200 transition-colors duration-200">
-              Life Pillars
-            </Link>
-
-            <Link
-              href="/services"
-              className="text-sm font-semibold transition-colors duration-200"
-              style={{ color: GOLD_RGBA(0.85) }}
-            >
-              Services
-            </Link>
-
-            {/* ── KUNDALI MILAN (NEW v2.3) ── */}
-            <Link
-              href="/kundali-milan"
-              className="text-sm text-slate-400 hover:text-slate-200 transition-colors duration-200"
-            >
-              Kundali Milan
-            </Link>
-
-            {/* ── KARMIC READING (NEW v2.3) ── */}
-            <Link
-              href="/karmic-background-reading"
-              className="text-sm text-slate-400 hover:text-slate-200 transition-colors duration-200"
-            >
-              Karmic Reading
-            </Link>
-
-            <Link
-              href="/panchang"
-              className="text-sm text-slate-400 hover:text-slate-200 transition-colors duration-200"
-            >
-              Panchang
-            </Link>
-
-            {/* ── CALCULATORS TAB (v2.2) ── */}
-            <Link
-              href="/calculators"
-              className="text-sm text-slate-400 hover:text-slate-200 transition-colors duration-200"
-            >
-              Calculators
-            </Link>
-
-            <Link href="/blog" className="text-sm text-slate-400 hover:text-slate-200 transition-colors duration-200">
-              Vedic Blog
-            </Link>
-
-            <Link href="/founder" className="text-sm text-slate-400 hover:text-slate-200 transition-colors duration-200">
-              Founder
-            </Link>
+            {NAV_LINKS.map((l) => (
+              <Link
+                key={l.href}
+                href={l.href}
+                className="text-sm transition-colors duration-200"
+                style={
+                  l.highlight
+                    ? { color: GOLD_RGBA(0.85), fontWeight: 600 }
+                    : { color: '#94a3b8' }
+                }
+              >
+                {l.label}
+              </Link>
+            ))}
 
             <a
               href="mailto:rohiit@trikalvaani.com"
@@ -224,31 +208,8 @@ export default function SiteNav() {
             </Link>
           </nav>
 
-          {/* ── MOBILE NAV ── */}
+          {/* ── MOBILE: Start button + hamburger ── */}
           <div className="sm:hidden flex items-center gap-2">
-            <Link
-              href="/kundali-milan"
-              className="text-xs font-semibold px-3 py-1.5 rounded-full transition-all duration-200"
-              style={{
-                color: GOLD_RGBA(0.9),
-                border: `1px solid ${GOLD_RGBA(0.25)}`,
-                background: GOLD_RGBA(0.06),
-              }}
-            >
-              Milan
-            </Link>
-            <Link
-              href="/calculators"
-              className="text-xs font-semibold px-3 py-1.5 rounded-full transition-all duration-200"
-              style={{
-                color: GOLD_RGBA(0.9),
-                border: `1px solid ${GOLD_RGBA(0.25)}`,
-                background: GOLD_RGBA(0.06),
-              }}
-            >
-              Calculators
-            </Link>
-            <LangSwitcher lang={lang} setLang={setLang} />
             <Link
               href="/#birth-form"
               className="text-sm font-medium px-4 py-2 rounded-full transition-all duration-300"
@@ -256,13 +217,103 @@ export default function SiteNav() {
                 background: `linear-gradient(135deg, ${GOLD} 0%, #A8820A 100%)`,
                 color: '#080B12',
               }}
+              onClick={() => setMobileOpen(false)}
             >
               Start
             </Link>
+            <button
+              aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
+              onClick={() => setMobileOpen((o) => !o)}
+              className="flex items-center justify-center rounded-lg transition-colors"
+              style={{
+                width: '40px',
+                height: '40px',
+                color: GOLD,
+                border: `1px solid ${GOLD_RGBA(0.25)}`,
+                background: GOLD_RGBA(0.06),
+              }}
+            >
+              {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </button>
           </div>
 
         </div>
       </header>
+
+      {/* ── MOBILE DROPDOWN MENU ── */}
+      {mobileOpen && (
+        <>
+          {/* backdrop */}
+          <div
+            className="fixed inset-0 z-40 sm:hidden"
+            style={{ background: 'rgba(0,0,0,0.6)', top: '64px' }}
+            onClick={() => setMobileOpen(false)}
+          />
+          {/* panel */}
+          <nav
+            className="fixed left-0 right-0 z-40 sm:hidden px-4 pb-6 pt-2"
+            style={{
+              top: '64px',
+              background: 'rgba(2,8,23,0.98)',
+              backdropFilter: 'blur(16px)',
+              borderBottom: `1px solid ${GOLD_RGBA(0.15)}`,
+              boxShadow: '0 12px 32px rgba(0,0,0,0.5)',
+              maxHeight: 'calc(100vh - 64px)',
+              overflowY: 'auto',
+            }}
+          >
+            <div className="flex flex-col">
+              {NAV_LINKS.map((l) => (
+                <Link
+                  key={l.href}
+                  href={l.href}
+                  onClick={() => setMobileOpen(false)}
+                  className="py-3.5 text-base transition-colors"
+                  style={{
+                    color: l.highlight ? GOLD : '#cbd5e1',
+                    fontWeight: l.highlight ? 600 : 400,
+                    borderBottom: `1px solid ${GOLD_RGBA(0.08)}`,
+                  }}
+                >
+                  {l.label}
+                </Link>
+              ))}
+
+              {/* Sign In / My Vault */}
+              {user ? (
+                <Link
+                  href="/my-cosmic-records"
+                  onClick={() => setMobileOpen(false)}
+                  className="py-3.5 text-base flex items-center gap-2"
+                  style={{ color: GOLD, fontWeight: 600 }}
+                >
+                  <User className="w-4 h-4" /> My Vault
+                </Link>
+              ) : (
+                <button
+                  onClick={() => { setMobileOpen(false); setShowAuth(true); }}
+                  className="py-3.5 text-base text-left"
+                  style={{ color: '#cbd5e1', borderBottom: `1px solid ${GOLD_RGBA(0.08)}` }}
+                >
+                  Sign In
+                </button>
+              )}
+
+              {/* Language + email */}
+              <div className="flex items-center justify-between pt-4">
+                <LangSwitcher lang={lang} setLang={setLang} />
+                <a
+                  href="mailto:rohiit@trikalvaani.com"
+                  className="flex items-center gap-1.5 text-xs text-slate-500"
+                >
+                  <Mail className="w-3.5 h-3.5" style={{ color: GOLD_RGBA(0.5) }} />
+                  rohiit@trikalvaani.com
+                </a>
+              </div>
+            </div>
+          </nav>
+        </>
+      )}
 
       {showAuth && (
         <AuthModal
