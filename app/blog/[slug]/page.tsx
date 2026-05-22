@@ -1,8 +1,12 @@
 // ============================================================
 // TRIKAL VAANI — DYNAMIC BLOG ARTICLE PAGE (SSR)
 // CEO: Rohiit Gupta | Chief Vedic Architect
-// Version: 2.0 (Supabase Migration)
-// Date: 2026-05-13
+// Version: 2.1 (renderText now parses [text](url) links)
+// Date: 2026-05-22
+// CHANGE v2.1: renderText() now also parses Markdown-style links
+//   [label](url) → internal <Link> (url starts with /) or external <a>.
+//   Enables real clickable internal links inside blog body (SEO interlink).
+//   All other logic/layout/schema UNCHANGED from v2.0.
 // ============================================================
 
 import { notFound } from 'next/navigation';
@@ -20,7 +24,7 @@ import {
 // STATIC PARAMS — Pre-render all pages at build time
 // ============================================================
 export async function generateStaticParams() {
-  const slugs = await getAllSlugs();           // ← await added
+  const slugs = await getAllSlugs();
   return slugs.map((slug) => ({ slug }));
 }
 
@@ -33,7 +37,7 @@ export const revalidate = 86400;
 export async function generateMetadata(
   { params }: { params: { slug: string } }
 ): Promise<Metadata> {
-  const post = await getPostBySlug(params.slug);  // ← await added
+  const post = await getPostBySlug(params.slug);
 
   if (!post) {
     return {
@@ -178,18 +182,50 @@ function generateJsonLd(post: BlogPost) {
 }
 
 // ============================================================
-// MARKDOWN-LITE BOLD PARSER
+// MARKDOWN-LITE PARSER — bold, italic, AND links (v2.1)
+// Supports: **bold**, *italic*, [label](url)
+//   url starting with "/" → internal Next <Link>
+//   otherwise            → external <a> (new tab)
 // ============================================================
 function renderText(text: string): React.ReactNode {
+  // Split on links first, then bold/italic within non-link parts.
+  const linkRegex = /(\[[^\]]+\]\([^)]+\))/g;
+  const linkParts = text.split(linkRegex);
+
+  return linkParts.map((part, i) => {
+    const linkMatch = part.match(/^\[([^\]]+)\]\(([^)]+)\)$/);
+    if (linkMatch) {
+      const label = linkMatch[1];
+      const url   = linkMatch[2];
+      if (url.startsWith('/')) {
+        return (
+          <Link key={`l-${i}`} href={url} className="text-amber-300 font-semibold underline underline-offset-2 hover:text-amber-200 transition">
+            {label}
+          </Link>
+        );
+      }
+      return (
+        <a key={`l-${i}`} href={url} target="_blank" rel="noopener noreferrer" className="text-amber-300 font-semibold underline underline-offset-2 hover:text-amber-200 transition">
+          {label}
+        </a>
+      );
+    }
+    // Non-link part → parse bold/italic (original behaviour)
+    return renderEmphasis(part, i);
+  });
+}
+
+// Bold/italic parser (extracted from original renderText, unchanged behaviour)
+function renderEmphasis(text: string, keyBase: number): React.ReactNode {
   const parts = text.split(/(\*\*[^*]+\*\*)/g);
   return parts.map((part, i) => {
     if (part.startsWith('**') && part.endsWith('**')) {
-      return <strong key={i} className="text-amber-300 font-semibold">{part.slice(2, -2)}</strong>;
+      return <strong key={`${keyBase}-b-${i}`} className="text-amber-300 font-semibold">{part.slice(2, -2)}</strong>;
     }
     if (part.startsWith('*') && part.endsWith('*') && part.length > 2) {
-      return <em key={i} className="italic text-amber-200">{part.slice(1, -1)}</em>;
+      return <em key={`${keyBase}-i-${i}`} className="italic text-amber-200">{part.slice(1, -1)}</em>;
     }
-    return <span key={i}>{part}</span>;
+    return <span key={`${keyBase}-s-${i}`}>{part}</span>;
   });
 }
 
@@ -293,18 +329,18 @@ function SectionBlock({ section, index }: { section: BlogSection; index: number 
 // ============================================================
 // MAIN PAGE COMPONENT — async Server Component
 // ============================================================
-export default async function BlogArticlePage({   // ← async added
+export default async function BlogArticlePage({
   params,
 }: {
   params: { slug: string };
 }) {
-  const post = await getPostBySlug(params.slug);   // ← await added
+  const post = await getPostBySlug(params.slug);
 
   if (!post) {
     notFound();
   }
 
-  const relatedPosts = await getRelatedPosts(post.relatedSlugs);  // ← await added
+  const relatedPosts = await getRelatedPosts(post.relatedSlugs);
   const jsonLdSchemas = generateJsonLd(post);
   const canonicalUrl = `https://trikalvaani.com/blog/${post.slug}`;
 
