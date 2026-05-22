@@ -169,6 +169,11 @@ export default function FreeChildBirthMuhuratPage() {
   const [lat, setLat] = useState<number | null>(null);
   const [lng, setLng] = useState<number | null>(null);
   const [timezone, setTimezone] = useState(5.5);
+  // Hospital (optional) — overrides city coords when provided
+  const [hospital, setHospital] = useState('');
+  const [hospLat, setHospLat] = useState<number | null>(null);
+  const [hospLng, setHospLng] = useState<number | null>(null);
+  const [hospTz, setHospTz] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
@@ -193,6 +198,10 @@ export default function FreeChildBirthMuhuratPage() {
     const [year, month, day] = date.split('-').map(Number);
     const [sh, sm] = startTime.split(':').map(Number);
     const [eh, em] = endTime.split(':').map(Number);
+    // Hospital coords override city coords for precision when available
+    const useLat = hospLat ?? lat;
+    const useLng = hospLng ?? lng;
+    const useTz = hospTz ?? timezone;
     setLoading(true);
     try {
       const res = await fetch('/api/calc/muhurat', {
@@ -202,7 +211,7 @@ export default function FreeChildBirthMuhuratPage() {
           year, month, day,
           window_start_hour: sh, window_start_minute: sm,
           window_end_hour: eh, window_end_minute: em,
-          latitude: lat, longitude: lng, timezone,
+          latitude: useLat, longitude: useLng, timezone: useTz,
           full_day: true,
         }),
       });
@@ -300,21 +309,41 @@ export default function FreeChildBirthMuhuratPage() {
               </div>
               <p className="text-xs text-slate-500 -mt-3">⏱️ Enter the time window your doctor has cleared as safe (e.g. 9:00 AM to 1:00 PM).</p>
 
+              {/* WHY WE ASK — trust + accuracy explainer */}
+              <div className="rounded-lg p-3" style={{ background: 'rgba(212,175,55,0.05)', border: '1px solid rgba(212,175,55,0.15)' }}>
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  📍 <strong style={{ color: GOLD }}>Why we ask for location:</strong> The ascendant (Lagna) — the most important factor in the muhurat — changes with exact birth coordinates. A precise hospital location gives the most accurate result. City alone works too.
+                </p>
+              </div>
+
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-1.5">Hospital / City <span className="text-yellow-400">*</span> <span className="text-slate-500 text-xs">(for exact location accuracy)</span></label>
-                <PlaceInput id="m-place" placeholder="Type hospital or city name..." error={errors.place}
+                <label className="block text-sm font-medium text-slate-300 mb-1.5">City of Birth <span className="text-yellow-400">*</span></label>
+                <PlaceInput id="m-city" placeholder="Type city name..." error={errors.place}
                   onSelect={(c, la, ln, tz) => {
                     setCity(c); setLat(la); setLng(ln); setTimezone(tz);
                     setErrors(prev => { const n = { ...prev }; delete n.place; return n; });
                   }} />
               </div>
 
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-1.5">
+                  Hospital / Clinic <span className="text-slate-500 text-xs">(optional — for pinpoint accuracy)</span>
+                </label>
+                <PlaceInput id="m-hospital" placeholder="Type hospital or clinic name..."
+                  onSelect={(c, la, ln, tz) => {
+                    setHospital(c); setHospLat(la); setHospLng(ln); setHospTz(tz);
+                  }} />
+                {hospLat !== null && (
+                  <p className="text-xs mt-1" style={{ color: '#22c55e' }}>✓ Using exact hospital location for maximum precision</p>
+                )}
+              </div>
+
               {lat !== null && (
                 <div className="grid grid-cols-3 gap-2">
                   {[
-                    { label: 'Latitude', value: lat.toFixed(4) },
-                    { label: 'Longitude', value: lng!.toFixed(4) },
-                    { label: 'Timezone', value: `UTC ${timezone >= 0 ? '+' : ''}${timezone}` },
+                    { label: 'Latitude', value: (hospLat ?? lat).toFixed(4) },
+                    { label: 'Longitude', value: (hospLng ?? lng!).toFixed(4) },
+                    { label: 'Timezone', value: `UTC ${(hospTz ?? timezone) >= 0 ? '+' : ''}${hospTz ?? timezone}` },
                   ].map(({ label, value }) => (
                     <div key={label}>
                       <label className="block text-xs text-slate-500 mb-1">{label}</label>
