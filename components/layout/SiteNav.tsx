@@ -3,12 +3,13 @@
 // ============================================================
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikal Vaani
 // FILE: components/layout/SiteNav.tsx
-// VERSION: v2.2
-// DATE: 2026-05-17
+// VERSION: v2.3
+// DATE: 2026-05-22
 // CHANGES:
-//   v2.2: Removed "Events" link (duplicate of Panchang data)
-//         Added "Calculators" link → /calculators
-//         Desktop + Mobile both updated
+//   v2.3: Added "Kundali Milan" link → /kundali-milan (desktop + mobile)
+//         Added "Karmic Reading" link → /karmic-background-reading (desktop)
+//         These are the two newest revenue products — now discoverable.
+//   v2.2: Removed "Events" link; added "Calculators" → /calculators.
 // ============================================================
 
 import Link from 'next/link';
@@ -135,6 +136,22 @@ export default function SiteNav() {
               Services
             </Link>
 
+            {/* ── KUNDALI MILAN (NEW v2.3) ── */}
+            <Link
+              href="/kundali-milan"
+              className="text-sm text-slate-400 hover:text-slate-200 transition-colors duration-200"
+            >
+              Kundali Milan
+            </Link>
+
+            {/* ── KARMIC READING (NEW v2.3) ── */}
+            <Link
+              href="/karmic-background-reading"
+              className="text-sm text-slate-400 hover:text-slate-200 transition-colors duration-200"
+            >
+              Karmic Reading
+            </Link>
+
             <Link
               href="/panchang"
               className="text-sm text-slate-400 hover:text-slate-200 transition-colors duration-200"
@@ -142,7 +159,7 @@ export default function SiteNav() {
               Panchang
             </Link>
 
-            {/* ── CALCULATORS TAB (NEW v2.2) ── */}
+            {/* ── CALCULATORS TAB (v2.2) ── */}
             <Link
               href="/calculators"
               className="text-sm text-slate-400 hover:text-slate-200 transition-colors duration-200"
@@ -210,6 +227,17 @@ export default function SiteNav() {
           {/* ── MOBILE NAV ── */}
           <div className="sm:hidden flex items-center gap-2">
             <Link
+              href="/kundali-milan"
+              className="text-xs font-semibold px-3 py-1.5 rounded-full transition-all duration-200"
+              style={{
+                color: GOLD_RGBA(0.9),
+                border: `1px solid ${GOLD_RGBA(0.25)}`,
+                background: GOLD_RGBA(0.06),
+              }}
+            >
+              Milan
+            </Link>
+            <Link
               href="/calculators"
               className="text-xs font-semibold px-3 py-1.5 rounded-full transition-all duration-200"
               style={{
@@ -219,17 +247,6 @@ export default function SiteNav() {
               }}
             >
               Calculators
-            </Link>
-            <Link
-              href="/services"
-              className="text-xs font-semibold px-3 py-1.5 rounded-full transition-all duration-200"
-              style={{
-                color: GOLD_RGBA(0.9),
-                border: `1px solid ${GOLD_RGBA(0.25)}`,
-                background: GOLD_RGBA(0.06),
-              }}
-            >
-              Services
             </Link>
             <LangSwitcher lang={lang} setLang={setLang} />
             <Link
