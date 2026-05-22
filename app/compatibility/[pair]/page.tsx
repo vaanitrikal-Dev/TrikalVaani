@@ -3,30 +3,19 @@
  * TRIKAL VAANI — Compatibility Page (Programmatic SEO/GEO)
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/compatibility/[pair]/page.tsx
- * VERSION: 1.1 — Related Rashi Pairs interlinking block activated
+ * VERSION: 1.2 — Karmic Background Reading CTA block (all 288 pages)
  * SIGNED: ROHIIT GUPTA, CEO
  * ============================================================
+ * CHANGE LOG (v1.1 → v1.2):
+ *   Added a Karmic Background Reading CTA block after the Milan CTA,
+ *   before the FAQ. Language-aware (Hindi on ?lang=hi). Real <Link> to
+ *   /karmic-background-reading → interlinks ALL 288 compatibility pages
+ *   to the Karmic pillar (SEO mesh + revenue funnel). One edit = 288 pages.
+ *   NOTHING ELSE CHANGED — all v1.1 logic/schemas/related-pairs/hreflang
+ *   identical.
+ *
  * CHANGE LOG (v1.0 → v1.1):
- *   Activated the "Related Rashi Pairs" section that v1.0 prepared
- *   labels (L.relatedTitle) for but never rendered. This interlinks all
- *   288 compatibility pages into a topical mesh — the missing SEO link
- *   equity between pages. Pairs shown = others sharing the same first
- *   rashi (same lang), keeping users inside the cluster.
- *   NOTHING ELSE CHANGED — CTA, all 3 schemas, GEO block, E-E-A-T,
- *   hreflang, ISR, layout all identical to v1.0.
- *
- * Dynamic rashi-pair compatibility page.
- * One row in `compatibility_pages` table = one rendered page.
- *
- * SEO/GEO/AEO/EEAT:
- *   • GEO direct answer (40-60w) at top for AI search extraction
- *   • FAQPage schema (JSON-LD) for AEO
- *   • Article + BreadcrumbList schema
- *   • E-E-A-T author block (Rohiit Gupta, Chief Vedic Architect)
- *   • Internal links to /kundali-milan pillar + related pairs
- *   • CTA to paid Kundali Milan (₹51)
- *   • Indexed (NOT noindex — generic rashi data, no real people)
- *   • Hindi (?lang=hi) + English versions
+ *   Activated the "Related Rashi Pairs" interlinking section.
  * ============================================================
  */
 
@@ -91,7 +80,6 @@ async function getPage(slug: string, lang: string): Promise<CompatRow | null> {
 }
 
 // ── Fetch related pairs (same first rashi, same lang) ────────
-// Keeps users inside the topical cluster → builds interlink mesh.
 async function getRelatedPairs(
   rashi1_en: string,
   lang: string,
@@ -196,6 +184,9 @@ export default async function CompatibilityPage(
     relatedTitle:   'संबंधित राशि जोड़ियाँ',
     pillarLink:     'कुंडली मिलान के बारे में जानें',
     homeCrumb:      'होम',
+    karmicTitle:    'अनुकूलता से आगे — वह इंसान असल में कैसा है?',
+    karmicText:     'राशि अनुकूलता दो राशियों का मेल दिखाती है। पर विवाह दो इंसानों का रिश्ता है। किसी की कुंडली से उनके 6 कार्मिक पैटर्न — स्वभाव, निष्ठा, धन, परिवार का सम्मान, छुपी प्रवृत्ति और विवाह का भविष्य — भृगु नाड़ी के आधार पर जानें। किसी पर निर्णय नहीं, केवल समझ।',
+    karmicButton:   'कार्मिक बैकग्राउंड रीडिंग ₹251 →',
   } : {
     compatibility:  'Compatibility',
     ashtakootScore: 'Ashtakoot Milan',
@@ -214,6 +205,9 @@ export default async function CompatibilityPage(
     relatedTitle:   'Related Rashi Pairs',
     pillarLink:     'Learn about Kundali Milan',
     homeCrumb:      'Home',
+    karmicTitle:    'Beyond Compatibility — Who Is This Person Really?',
+    karmicText:     'Rashi compatibility shows how two signs match. But marriage is a bond between two people. A Karmic Background Reading reveals a person\'s 6 karmic patterns — personality, fidelity, money, family respect, hidden tendencies, and marriage outlook — read from their birth chart via Bhrigu Nandi Nadi. Patterns, not verdicts.',
+    karmicButton:   'Karmic Background Reading ₹251 →',
   };
 
   // ── JSON-LD: FAQPage + Article + BreadcrumbList ────────────
@@ -338,6 +332,26 @@ export default async function CompatibilityPage(
           >
             {L.ctaButton}
           </Link>
+        </div>
+      </section>
+
+      {/* KARMIC UPSELL — v1.2 (all 288 pages → Karmic pillar) */}
+      <section className="max-w-3xl mx-auto px-5 mb-12">
+        <div className="relative overflow-hidden bg-gradient-to-br from-[#1a1326] via-[#0d1120] to-[#080B12] border border-[#D4AF37]/30 rounded-2xl p-7 sm:p-9">
+          <div className="absolute top-0 right-0 text-[110px] opacity-[0.04] leading-none select-none pointer-events-none">🔱</div>
+          <div className="relative text-center">
+            <div className="inline-block mb-3 px-3 py-1 rounded-full bg-[#D4AF37]/10 border border-[#D4AF37]/30 text-[#D4AF37] text-[10px] tracking-[0.25em] uppercase">
+              Bhrigu Nandi Nadi
+            </div>
+            <h2 className="text-xl sm:text-2xl font-semibold text-white leading-snug">{L.karmicTitle}</h2>
+            <p className="mt-3 text-gray-300 text-sm sm:text-base max-w-xl mx-auto leading-relaxed">{L.karmicText}</p>
+            <Link
+              href="/karmic-background-reading"
+              className="inline-block mt-6 px-8 py-3 rounded-lg bg-[#D4AF37] hover:bg-[#b8962e] text-[#080B12] font-semibold tracking-wide transition shadow-lg"
+            >
+              {L.karmicButton}
+            </Link>
+          </div>
         </div>
       </section>
 
