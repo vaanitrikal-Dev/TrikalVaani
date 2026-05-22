@@ -3,16 +3,18 @@
  * TRIKAL VAANI - Kundali Milan Result Page
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/milan/[slug]/page.tsx
- * VERSION: 1.2
+ * VERSION: 1.3
  * SIGNED: ROHIIT GUPTA, CEO
  * ============================================================
+ * CHANGE LOG (v1.2 → v1.3):
+ *   - Added Karmic Background Reading UPSELL block after the reading
+ *     (narrative/remedies), BEFORE Maa Shakti. Shown on ALL tiers.
+ *     Catches the buyer mid-emotion: "compatibility dekh li, par woh
+ *     asliyat mein kaise insaan hain?" → CTA to /karmic-background-reading.
+ *   - Pure addition. All existing logic/layout/styles UNCHANGED.
+ *
  * CHANGE LOG (v1.1 → v1.2):
  *   - Added MilanRemediesCard after narrative section (PAID tiers only).
- *     Renders 10 remedies in 3 structured sections:
- *     Parashar (4) · Bhrigu Nadi (4) · Shadbala (2)
- *     Reads directly from remedies_data — no Gemini, pure engine data.
- *   - MilanRow interface updated: remedies_data typed as RemediesData.
- *   - All other layout, logic, styles identical to v1.1.
  * ============================================================
  */
 
@@ -307,6 +309,63 @@ export default async function MilanResultPage({ params }: { params: { slug: stri
           tier={m.tier}
         />
       )}
+
+      {/* ─────────── KARMIC UPSELL (ALL TIERS — v1.3) ─────────── */}
+      {/* Catches the buyer mid-emotion: compatibility dekh li, par woh
+          asliyat mein kaise insaan hain? → /karmic-background-reading */}
+      <section className="max-w-3xl mx-auto px-5 py-8">
+        <div className="relative overflow-hidden bg-gradient-to-br from-[#1a1326] via-[#0d1120] to-[#080B12] border border-[#D4AF37]/30 rounded-2xl p-6 sm:p-10">
+          <div className="absolute top-0 right-0 text-[120px] opacity-[0.04] leading-none select-none pointer-events-none">🔱</div>
+          <div className="relative">
+            <div className="inline-block mb-3 px-3 py-1 rounded-full bg-[#D4AF37]/10 border border-[#D4AF37]/30 text-[#D4AF37] text-[10px] tracking-[0.25em] uppercase">
+              Ek aur gehra sawaal
+            </div>
+            <h3 className="text-xl sm:text-2xl font-semibold text-white leading-snug">
+              Compatibility toh aap dekh chuke...
+              <span className="block text-[#D4AF37] mt-1">par woh asliyat mein kaise insaan hain?</span>
+            </h3>
+            <p className="mt-4 text-sm sm:text-base text-gray-300 leading-relaxed">
+              Shaadi sirf do kundaliyon ka milan nahi — do insaano ka milan hai.
+              {' '}{bride.name} ya {groom.name} ki kundali unke andar ke 6 karmic patterns kholti hai:
+              unka swabhav, nibhaane ki aadat, paison se rishta, parivaar ka samman,
+              chhupi pravritti, aur vivah ka asli bhavishya.
+            </p>
+
+            {/* 6 dimension chips */}
+            <div className="mt-5 grid grid-cols-2 gap-2 text-xs">
+              {[
+                '🪔 Core Personality',
+                '💗 Fidelity & Conduct',
+                '🪙 Financial Behaviour',
+                '🏠 Family & Respect',
+                '🌑 Hidden Tendencies',
+                '🔱 Marriage Outlook',
+              ].map((d, i) => (
+                <div key={i} className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-[#080B12]/50 border border-[#D4AF37]/10 text-gray-300">
+                  {d}
+                </div>
+              ))}
+            </div>
+
+            <p className="mt-5 text-xs text-gray-400 italic">
+              Bhrigu Nandi Nadi se padhe gaye karmic patterns — kisi par faisla nahi,
+              sirf samajh taaki aap taiyaar reh sakein.
+            </p>
+
+            <div className="mt-6 flex flex-col sm:flex-row items-center gap-3">
+              <a
+                href="/karmic-background-reading"
+                className="inline-block px-7 py-3.5 rounded-lg bg-[#D4AF37] hover:bg-[#b8962e] text-[#080B12] font-semibold tracking-wide transition shadow-lg w-full sm:w-auto text-center"
+              >
+                Karmic Background Reading Kholiye — ₹251 →
+              </a>
+              <span className="text-xs text-gray-500">
+                Free Lagna &amp; Moon jhalak · PDF on WhatsApp
+              </span>
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* ─────────── MAA SHAKTI PERMANENT SECTION ─────────── */}
       <section className="max-w-3xl mx-auto px-5 py-8">
