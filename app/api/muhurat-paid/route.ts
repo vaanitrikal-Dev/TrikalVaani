@@ -3,7 +3,7 @@
  * TRIKAL VAANI — Child Birth Muhurat Paid Report — Generate API
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/api/muhurat-paid/route.ts
- * VERSION: 1.1 — Added background PDF generation (VM /muhurat-pdf)
+ * VERSION: 1.2 — Added background PDF generation + strict script lock (no mid-word Roman/Devanagari mixing)
  * ============================================================
  * PIPELINE (parent's CHOSEN delivery time):
  *   VM /muhurat-paid (kundali + slot + doshas + 10 remedies)
@@ -116,10 +116,16 @@ function buildMuhuratPrompt(params: {
 
   const langInstruction =
     language === 'hindi'
-      ? 'Write the ENTIRE report in SHUDH HINDI (शुद्ध हिन्दी). No English words except Vedic terms.'
+      ? `Write the ENTIRE report in SHUDH HINDI using pure Devanagari script (शुद्ध हिन्दी, देवनागरी लिपि).
+CRITICAL SCRIPT RULE: Every Hindi word must be written FULLY in Devanagari — never mix Roman letters
+inside a Hindi word. WRONG: "viकल्प", "praकट", "suझाई". RIGHT: "विकल्प", "प्रकट", "सुझाई".
+Only globally-known Vedic terms (Lagna, Nakshatra, Tithi) may stay in Roman if needed, but prefer Devanagari.`
       : language === 'english'
       ? 'Write the ENTIRE report in clear, warm ENGLISH. Keep Vedic terms (Lagna, Nakshatra, etc.) untranslated.'
-      : 'Write the ENTIRE report in HINGLISH (natural Hindi + English mix, modern Indian register).';
+      : `Write the ENTIRE report in HINGLISH — Hindi words written in ROMAN (English) letters, mixed naturally with English words.
+CRITICAL SCRIPT RULE: Write Hindi words phonetically in Roman script ONLY — never use Devanagari, and never
+mix Roman and Devanagari inside a single word. WRONG: "viकल्प", "praकट", "suझाई". RIGHT: "vikalp", "prakat", "sujhaai".
+Every single word must be in one script only. This is modern Indian Hinglish (e.g. "Yeh ek shubh muhurat hai").`;
 
   return `You are Trikal — the wise Vedic soul of Trikal Vaani, by Rohiit Gupta, Chief Vedic Architect.
 A pair of expecting parents have chosen an auspicious delivery muhurat (WITHIN their doctor-approved window)
