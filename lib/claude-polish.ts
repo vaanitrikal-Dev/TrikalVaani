@@ -3,20 +3,19 @@
  * TRIKAL VAANI — Claude Polish Layer
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: lib/claude-polish.ts
- * VERSION: 2.4 — Adds Karmic Background Reading polish (language-aware)
+ * VERSION: 2.5 — Adds Child Birth Muhurat report polish (language-aware)
  * SIGNED: ROHIIT GUPTA, CEO
  *
- * CHANGES v2.4 (additive — predictions + Milan flows 100% untouched):
- *   NEW: polishKarmicNarrative() for Karmic Background Reading (Rs251).
- *        Sonnet 4.6, language-aware (hinglish|hindi|english), preserves the
- *        6 dimension markers + "MAA SHAKTI" marker, and ENFORCES the
- *        CEO-locked tone rule: patterns/tendencies only, never verdicts,
- *        never suggest rejecting the person (DPDP + defamation shield).
- *   UNCHANGED: polishPrediction(), polishMilanNarrative(), all models,
- *        timeouts, token budgets, SUSPENSE_HOOKS, cost estimator.
+ * CHANGES v2.5 (additive — predictions + Milan + Karmic flows 100% untouched):
+ *   NEW: polishMuhuratNarrative() for Child Birth Muhurat paid report (Rs101/151).
+ *        Sonnet 4.6, language-aware (hinglish|hindi|english). Hopeful, blessing,
+ *        parents-facing tone. Preserves dimension markers + MAA SHAKTI marker.
+ *        Medical-safety: never overrides doctor; muhurat is WITHIN doctor window.
+ *   UNCHANGED: polishPrediction(), polishMilanNarrative(), polishKarmicNarrative(),
+ *        all models, timeouts, token budgets, SUSPENSE_HOOKS, cost estimator.
  *
- * CHANGES v2.3:
- *   FIX (drift): polishMilanNarrative() takes explicit `language` param.
+ * CHANGES v2.4: polishKarmicNarrative() (Karmic Rs251, patterns-not-verdicts).
+ * CHANGES v2.3: polishMilanNarrative() takes explicit `language` param.
  * CHANGES v2.2: polishMilanNarrative() added (Sonnet 4.6).
  * CHANGES v2.1: prediction polish timeout 45000 -> 90000ms.
  * ============================================================
@@ -27,15 +26,17 @@ const CLAUDE_API_KEY = process.env.ANTHROPIC_API_KEY ?? '';
 // Prediction polish model (UNCHANGED)
 const CLAUDE_MODEL_PREDICTION = 'claude-haiku-4-5-20251001';
 
-// Milan + Karmic polish model (Sonnet 4.6)
+// Milan + Karmic + Muhurat polish model (Sonnet 4.6)
 const CLAUDE_MODEL_MILAN      = 'claude-sonnet-4-5-20250929';
 const CLAUDE_MODEL_KARMIC     = 'claude-sonnet-4-5-20250929';
+const CLAUDE_MODEL_MUHURAT    = 'claude-sonnet-4-5-20250929';
 
 const CLAUDE_URL              = 'https://api.anthropic.com/v1/messages';
 
-const POLISH_TIMEOUT_MS        = 90000;
-const MILAN_POLISH_TIMEOUT_MS  = 120000;
-const KARMIC_POLISH_TIMEOUT_MS = 120000;
+const POLISH_TIMEOUT_MS         = 90000;
+const MILAN_POLISH_TIMEOUT_MS   = 120000;
+const KARMIC_POLISH_TIMEOUT_MS  = 120000;
+const MUHURAT_POLISH_TIMEOUT_MS = 120000;
 
 export interface PolishResult {
   polished:   boolean;
@@ -245,7 +246,7 @@ export function estimatePolishCost(predictionJson: Record<string, unknown>): {
 }
 
 // ============================================================================
-// MILAN POLISH — v2.3 (LANGUAGE-AWARE)  [UNCHANGED IN v2.4]
+// MILAN POLISH — v2.3 (LANGUAGE-AWARE)  [UNCHANGED IN v2.4 / v2.5]
 // ============================================================================
 
 export interface MilanPolishResult {
@@ -481,7 +482,7 @@ Return the complete polished narrative now, in ${language.toUpperCase()}. Start 
 }
 
 // ============================================================================
-// KARMIC POLISH — v2.4 NEW (Karmic Background Reading Rs251)
+// KARMIC POLISH — v2.4 (Karmic Background Reading Rs251)  [UNCHANGED IN v2.5]
 // Sonnet 4.6 . language-aware . preserves 6 dimension markers + MAA SHAKTI
 // ENFORCES the CEO tone rule: patterns not verdicts (DPDP + defamation shield)
 // ============================================================================
@@ -667,4 +668,203 @@ ${rawNarrative}
 ═══════════════════════════════════════════════════════════════
 
 Return the complete polished reading now, in ${language.toUpperCase()}. Start with the first word. End with the last word.`;
+}
+
+// ============================================================================
+// MUHURAT POLISH — v2.5 NEW (Child Birth Muhurat paid report Rs101/151)
+// Sonnet 4.6 . language-aware . hopeful, blessing, parents-facing tone
+// MEDICAL-SAFETY: muhurat is WITHIN the doctor-approved window, never overrides
+// ============================================================================
+
+export interface MuhuratPolishResult {
+  polished:  boolean;
+  narrative: string;
+  polishMs?: number;
+  error?:    string;
+}
+
+export type MuhuratLanguage = 'hinglish' | 'hindi' | 'english';
+
+export async function polishMuhuratNarrative(params: {
+  rawNarrative: string;
+  language?:    MuhuratLanguage;
+}): Promise<MuhuratPolishResult> {
+
+  const { rawNarrative, language = 'hinglish' } = params;
+
+  if (!CLAUDE_API_KEY) {
+    console.warn('[MuhuratPolish] No ANTHROPIC_API_KEY — returning raw');
+    return { polished: false, narrative: rawNarrative };
+  }
+
+  if (!rawNarrative || rawNarrative.trim().length < 200) {
+    console.warn('[MuhuratPolish] Raw narrative too short — skipping polish');
+    return { polished: false, narrative: rawNarrative, error: 'Input too short' };
+  }
+
+  const startMs = Date.now();
+
+  try {
+    const systemPrompt = buildMuhuratPolishSystemPrompt(language);
+    const userMessage  = buildMuhuratPolishUserMessage(rawNarrative, language);
+
+    const res = await fetch(CLAUDE_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type':      'application/json',
+        'x-api-key':         CLAUDE_API_KEY,
+        'anthropic-version': '2023-06-01',
+      },
+      body: JSON.stringify({
+        model:      CLAUDE_MODEL_MUHURAT,
+        max_tokens: 14000,
+        system:     systemPrompt,
+        messages:   [{ role: 'user', content: userMessage }],
+      }),
+      signal: AbortSignal.timeout(MUHURAT_POLISH_TIMEOUT_MS),
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(`Claude API ${res.status}: ${JSON.stringify(err)}`);
+    }
+
+    const data    = await res.json();
+    const rawText = data?.content
+      ?.map((c: { type: string; text?: string }) => c.text ?? '')
+      .join('') ?? '';
+
+    if (!rawText || rawText.trim().length < 200) {
+      throw new Error('Empty or too-short Claude response');
+    }
+
+    const cleaned = rawText
+      .replace(/^```[a-z]*\s*/i, '')
+      .replace(/```\s*$/, '')
+      .trim();
+
+    const polishMs = Date.now() - startMs;
+    console.log(`[MuhuratPolish] OK | lang:${language} | ms:${polishMs} | model:${CLAUDE_MODEL_MUHURAT}`);
+    return { polished: true, narrative: cleaned, polishMs };
+
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'Unknown error';
+    console.error('[MuhuratPolish] Error:', msg);
+    return { polished: false, narrative: rawNarrative, error: msg };
+  }
+}
+
+function buildMuhuratPolishSystemPrompt(language: MuhuratLanguage): string {
+  const LANG_GUIDE: Record<MuhuratLanguage, string> = {
+    hinglish: `The report is written in HINGLISH (natural Hindi + English mix, modern Indian register).
+PRESERVE HINGLISH EXACTLY. Do NOT shift to pure Hindi or pure English. Do NOT translate.`,
+    hindi: `The report is written in SHUDH HINDI (शुद्ध हिन्दी, संस्कृतनिष्ठ, परम्परागत).
+PRESERVE SHUDH HINDI EXACTLY. Do NOT add English words. Do NOT translate.`,
+    english: `The report is written in ENGLISH (clear, dignified, warm).
+PRESERVE ENGLISH EXACTLY. Do NOT shift to Hindi or Hinglish. Do NOT translate.
+Keep Sanskrit/Vedic terms (Lagna, Nakshatra, Tithi, Naamakshar, Rashi, etc.) untranslated.`,
+  };
+
+  const toneSeal =
+    language === 'hindi'
+      ? `✅ सही: "इस शुभ मुहूर्त में जन्मे शिशु की कुंडली में नेतृत्व का प्रबल योग दिखता है।" ❌ ग़लत: "यह बच्चा अमीर बनेगा।"`
+      : language === 'english'
+      ? `✅ Right: "A child born in this auspicious muhurat shows a strong leadership inclination in the chart." ❌ Wrong: "This child will definitely become rich."`
+      : `✅ Right: "Is shubh muhurat mein janme bachche ki kundali mein leadership ka strong yog dikhta hai." ❌ Wrong: "Yeh bachcha ameer banega."`;
+
+  return `You are the language polishing specialist for Trikal Vaani — India's most authoritative Vedic astrology platform by Rohiit Gupta, Chief Vedic Architect.
+
+You are polishing a premium CHILD BIRTH MUHURAT REPORT (Rs101/151) for expecting parents
+who have chosen an auspicious delivery time WITHIN their doctor-approved window.
+The report describes the life potential of a child born at the chosen muhurat, plus doshas to be
+aware of and remedies. The tone is HOPEFUL, BLESSING, and PARENTS-FACING.
+
+LANGUAGE: ${language.toUpperCase()}
+
+═══════════════════════════════════════════════════════════════
+LANGUAGE LOCK (HIGHEST PRIORITY)
+═══════════════════════════════════════════════════════════════
+
+${LANG_GUIDE[language]}
+
+If unsure, KEEP THE ORIGINAL LANGUAGE OF THE INPUT. Never translate.
+
+═══════════════════════════════════════════════════════════════
+MEDICAL-SAFETY RULE — NON-NEGOTIABLE
+═══════════════════════════════════════════════════════════════
+
+✗ Do NOT override, contradict, or second-guess the doctor.
+✗ Do NOT tell parents to change the delivery date or time outside medical advice.
+✗ Do NOT remove any line that says the muhurat is WITHIN the doctor-approved window.
+The muhurat is guidance to discuss WITH the doctor — never a medical instruction.
+
+═══════════════════════════════════════════════════════════════
+TONE RULE — TENDENCIES, NOT GUARANTEES
+═══════════════════════════════════════════════════════════════
+
+Findings are CHART INDICATIONS about a child's potential, never guarantees about a real future.
+
+${toneSeal}
+
+✗ Never "will definitely", "guaranteed", "100%", "this child will be rich/famous".
+✓ Always "the chart indicates", "a strong inclination toward", "the potential for", "shubh yog dikhta hai".
+Keep it warm and hopeful — these are joyful expecting parents, never alarm them.
+
+═══════════════════════════════════════════════════════════════
+DHARMA GURU TONE
+═══════════════════════════════════════════════════════════════
+
+Wise, warm, blessing Jyotishi speaking to expecting parents. Never clinical, never alarmist.
+Rhythm: short sentence, pause, revelation. Elevate flow, vary sentence length.
+
+═══════════════════════════════════════════════════════════════
+ABSOLUTE PRESERVATION RULES (DO NOT CHANGE THESE)
+═══════════════════════════════════════════════════════════════
+
+✗ Do NOT change the LANGUAGE. Output language = input language = ${language.toUpperCase()}.
+✗ Do NOT change the chosen muhurat time, Lagna, Nakshatra, Tithi, score, or Naamakshar (lucky letter).
+✗ Do NOT change planet names, house numbers, Rashi/Nakshatra names, or Vedic terms.
+✗ Do NOT remove or rename any section marker headings — keep them VERBATIM.
+✗ Do NOT remove the "═══ MAA SHAKTI ═══" marker, the Arzi paragraph, or the Dhanyawad paragraph if present.
+✗ Do NOT change the doshas content or the remedies content (keep all remedy references intact).
+✗ Do NOT change the boy/girl name suggestions tied to the Naamakshar.
+✗ Do NOT claim "100%" / "guaranteed" / "I promise".
+✗ Do NOT add markdown — no "*", "#", "-", no bullets. Pure flowing prose under each marker.
+✗ Do NOT add disclaimers beyond the medical-safety line already present.
+✗ Do NOT add code fences, preamble, or meta-commentary ("Here is the polished report:").
+
+═══════════════════════════════════════════════════════════════
+OUTPUT FORMAT
+═══════════════════════════════════════════════════════════════
+
+Return ONLY the polished report, in ${language.toUpperCase()}, with all section markers intact.
+No JSON, no code fences, no preamble.
+Approximately the same length as the input (±10%).`;
+}
+
+function buildMuhuratPolishUserMessage(
+  rawNarrative: string,
+  language: MuhuratLanguage,
+): string {
+  return `Polish the following Child Birth Muhurat report.
+
+Language: ${language}  ← KEEP THIS LANGUAGE EXACTLY. Do NOT translate.
+
+Preserve: the chosen muhurat time, Lagna, Nakshatra, Tithi, score, Naamakshar (lucky letter),
+boy/girl name suggestions, all doshas, all remedies, the MAA SHAKTI marker if present, and the
+medical-safety line (muhurat is within the doctor-approved window).
+Enforce the tone rule: chart indications and potential — never guarantees. Keep it warm and hopeful.
+Never override the doctor.
+Elevate the prose to premium Dharma Guru register.
+Return ONLY the polished prose — no preamble, no JSON, no code fences.
+
+═══════════════════════════════════════════════════════════════
+RAW REPORT TO POLISH:
+═══════════════════════════════════════════════════════════════
+
+${rawNarrative}
+
+═══════════════════════════════════════════════════════════════
+
+Return the complete polished report now, in ${language.toUpperCase()}. Start with the first word. End with the last word.`;
 }
