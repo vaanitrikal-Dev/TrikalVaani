@@ -1,7 +1,9 @@
 // TRIKAL VAANI - Child Birth Muhurat Paid Report - Order Creation API
 // CEO: Rohiit Gupta
 // File: app/api/calc/create-muhurat-order/route.ts
-// VERSION: 1.0
+// VERSION: 1.1 — FIX: preserve all 3 languages (hinglish/hindi/english).
+//                 Previously every language collapsed to "hi", which made the
+//                 report engine default everything to Hinglish.
 // Tiers: report_101 (Rs101) / remedies_151 (Rs151). Mirrors create-karmic-order.
 // Pay-first flow: creates Razorpay order + saves pending muhurat_orders row.
 
@@ -56,6 +58,18 @@ function normaliseMuhurat(m: any) {
   };
 }
 
+// Language: keep the user's full choice (hinglish | hindi | english).
+// The report engine + Sonnet polish need the exact 3-way value.
+// We also accept the legacy 2-letter codes (hi/en) and old field names.
+function normaliseLanguage(raw: unknown): 'hinglish' | 'hindi' | 'english' {
+  const v = String(raw ?? '').toLowerCase().trim();
+  if (v === 'english' || v === 'en') return 'english';
+  if (v === 'hindi') return 'hindi';
+  if (v === 'hinglish') return 'hinglish';
+  if (v === 'hi') return 'hinglish'; // legacy: hi historically meant Hinglish default
+  return 'hinglish';
+}
+
 export async function POST(req: NextRequest) {
   try {
     const body: any = await req.json();
@@ -73,9 +87,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Invalid muhurat data.' }, { status: 400 });
     }
 
-    // Language: muhurat uses hi/en (matching VM)
-    const lang = body.language ?? 'hi';
-    const language = ['hi', 'en'].includes(lang) ? lang : 'hi';
+    // Language: preserve full 3-way choice (FIX v1.1)
+    const language = normaliseLanguage(body.language);
 
     // Contact (form: contact.{name,mobile,email})
     const contact = body.contact ?? {};
