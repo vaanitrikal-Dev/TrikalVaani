@@ -3,7 +3,9 @@
  * TRIKAL VAANI — Child Birth Muhurat — Paid Result Page
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/muhurat/[slug]/page.tsx
- * VERSION: 1.0
+ * VERSION: 1.1 — Adds premium MuhuratRemediesCard (remedies_151 tier)
+ *                and removes the in-narrative UPAY text block so the 10
+ *                remedies render ONLY as the styled card (no duplication).
  * ============================================================
  * Renders the muhurat report from the marker-delimited narrative
  * produced by /api/muhurat-paid. Display-only (payment already done).
@@ -11,13 +13,14 @@
  * Private page (noindex). Mirrors Karmic result page pattern:
  *   force-dynamic, ensure-generation-on-load, Maa Shakti block, share.
  *
- * Tiers:  report_101 (no remedy section) | remedies_151 (10 remedies)
+ * Tiers:  report_101 (no remedy section) | remedies_151 (10 remedies card)
  * ============================================================
  */
 
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { createClient } from '@supabase/supabase-js';
+import MuhuratRemediesCard from '@/components/muhurat/MuhuratRemediesCard';
 
 export const dynamic    = 'force-dynamic';
 export const revalidate = 0;
@@ -33,6 +36,7 @@ interface MuhuratRow {
   language:         string;
   muhurat_data:     { year?: number; month?: number; day?: number; hour?: number; minute?: number; city?: string; hospital?: string };
   vm_data:          any;
+  remedies_data:    any;
   gemini_narrative: string | null;
   geo_answer:       string | null;
   pdf_url:          string | null;
@@ -40,14 +44,17 @@ interface MuhuratRow {
 }
 
 // ── Section marker headings (must match the prompt EXACTLY) ──
+// NOTE: The UPAY (remedies) marker is intentionally NOT rendered as text —
+// the 10 remedies are shown via the styled MuhuratRemediesCard instead.
 const SECTION_MARKERS: { marker: string; title: string; icon: string }[] = [
   { marker: '═══ SHUBH MUHURAT ═══',                                         title: 'Shubh Muhurat',                 icon: '🕉️' },
   { marker: "═══ BACHCHE KA SWABHAV (Child's Nature & Potential) ═══",        title: "Child's Nature & Potential",    icon: '🌟' },
   { marker: '═══ JEEVAN KE YOG (Life Path Indications) ═══',                  title: 'Life Path Indications',         icon: '🛤️' },
   { marker: '═══ NAAMAKSHAR & SHUBH NAAM (Lucky Letter & Name Suggestions) ═══', title: 'Lucky Letter & Name Suggestions', icon: '🔤' },
   { marker: '═══ DHYAN DENE YOGYA (Points of Awareness) ═══',                 title: 'Points of Awareness',           icon: '⚠️' },
-  { marker: '═══ UPAY (10 Remedies) ═══',                                     title: '10 Remedies',                   icon: '🪔' },
 ];
+// Markers that exist in the narrative but must NOT be rendered as prose here.
+const UPAY_MARKER       = '═══ UPAY (10 Remedies) ═══';
 const MAA_SHAKTI_MARKER = '═══ MAA SHAKTI ═══';
 
 // ── Trigger generation if missing ─────────────────────────────
@@ -70,6 +77,7 @@ async function ensureReport(slug: string, current: string | null): Promise<strin
 }
 
 // ── Split narrative into sections + opening + Maa Shakti ──
+// The UPAY block is stripped out entirely (rendered as a card instead).
 function parseReport(narrative: string): {
   opening: string;
   sections: { title: string; icon: string; body: string }[];
@@ -82,6 +90,13 @@ function parseReport(narrative: string): {
     const [before, after] = working.split(MAA_SHAKTI_MARKER);
     working   = before;
     maaShakti = (after ?? '').trim();
+  }
+
+  // Strip the UPAY (remedies) block — everything from the UPAY marker up to
+  // the next known marker (MAA SHAKTI was already removed above, so UPAY runs
+  // to the end of `working`). Remedies are shown via the card component.
+  if (working.includes(UPAY_MARKER)) {
+    working = working.split(UPAY_MARKER)[0];
   }
 
   // Opening = text before the first section marker
@@ -154,7 +169,8 @@ export default async function MuhuratResultPage({ params }: { params: { slug: st
   const nakshatra   = vm.lagna_nakshatra ?? '';
   const naamakshar  = vm.naamakshar ?? '';
 
-  const tierLabel = r.tier === 'remedies_151'
+  const isRemediesTier = r.tier === 'remedies_151';
+  const tierLabel = isRemediesTier
     ? 'Full Report + 10 Remedies · ₹151'
     : 'Full Muhurat Report · ₹101';
 
@@ -251,6 +267,11 @@ export default async function MuhuratResultPage({ params }: { params: { slug: st
         </section>
       )}
 
+      {/* ─────────── REMEDIES CARD (remedies_151 tier only) ─────────── */}
+      {narrative && isRemediesTier && (
+        <MuhuratRemediesCard remediesData={r.remedies_data} />
+      )}
+
       {/* ─────────── MAA SHAKTI ─────────── */}
       <section className="max-w-3xl mx-auto px-5 py-8">
         <div className="bg-gradient-to-br from-[#1a1a2e] to-[#0d1120] border border-[#D4AF37]/30 rounded-2xl p-6 sm:p-10 text-center">
@@ -306,6 +327,11 @@ export default async function MuhuratResultPage({ params }: { params: { slug: st
               </a>
             )}
           </div>
+          {!r.pdf_url && (
+            <p className="text-center text-xs text-gray-500 mt-3">
+              📄 Aapki PDF taiyaar ho rahi hai — kuch der baad is page ko refresh karein.
+            </p>
+          )}
         </section>
       )}
 
