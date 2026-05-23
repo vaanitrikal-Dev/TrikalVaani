@@ -2,7 +2,7 @@
 
 // ============================================================
 // File: app/calculators/free-child-birth-muhurat-calculator/page.tsx
-// Version: v1.1 — Added paid report flow (Razorpay ₹101/₹151 + language)
+// Version: v1.2 — Added post-payment progress wait-screen (anti-anxiety UX)
 // VM endpoint: /muhurat-finder (free) | paid via /api/create-muhurat-order
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikal Vaani
 // ============================================================
@@ -162,6 +162,16 @@ interface SlotData {
   cautions: string[];
 }
 
+// ─── Post-payment progress steps (anti-anxiety wait-screen) ───
+const REPORT_STEPS = [
+  '✓ Payment safal — dhanyawad 🙏',
+  '🪐 Grahon ki sookshma ganana ho rahi hai...',
+  '🌙 Lagna aur Nakshatra nikaale ja rahe hain...',
+  '📜 Trikal aapke bachche ki kundli padh rahe hain...',
+  '🔱 Maa Shakti ka aashirwad jod rahe hain...',
+  '✨ Aapki report taiyaar ho rahi hai...',
+];
+
 export default function FreeChildBirthMuhuratPage() {
   const [date, setDate] = useState('');
   const [startTime, setStartTime] = useState('09:00');
@@ -187,6 +197,18 @@ export default function FreeChildBirthMuhuratPage() {
   const [payTier, setPayTier] = useState<'report_101' | 'remedies_151'>('report_101');
   const [payLoading, setPayLoading] = useState(false);
   const [payError, setPayError] = useState<string | null>(null);
+  // ── Post-payment "generating report" overlay ──
+  const [generating, setGenerating] = useState(false);
+  const [stepIdx, setStepIdx] = useState(0);
+
+  // Rotate progress messages while the report is being generated
+  useEffect(() => {
+    if (!generating) { setStepIdx(0); return; }
+    const t = setInterval(() => {
+      setStepIdx((i) => (i < REPORT_STEPS.length - 1 ? i + 1 : i));
+    }, 3500);
+    return () => clearInterval(t);
+  }, [generating]);
 
   const validate = () => {
     const e: Record<string, string> = {};
@@ -289,6 +311,9 @@ export default function FreeChildBirthMuhuratPage() {
         description: order.label,
         themeColor:  GOLD,
         onSuccess: async (resp) => {
+          // Payment captured — immediately show the calming progress overlay
+          setPayLoading(false);
+          setGenerating(true);
           try {
             const verifyRes = await fetch('/api/verify-muhurat-payment', {
               method: 'POST',
@@ -303,12 +328,12 @@ export default function FreeChildBirthMuhuratPage() {
             if (vd.success && vd.slug) {
               window.location.href = `/muhurat/${vd.slug}`;
             } else {
+              setGenerating(false);
               setPayError(vd.error || 'Payment verified but report could not be created. Please contact us on WhatsApp.');
-              setPayLoading(false);
             }
           } catch {
+            setGenerating(false);
             setPayError('Payment done, but verification failed. Please contact us on WhatsApp — your payment is safe.');
-            setPayLoading(false);
           }
         },
         onDismiss: () => setPayLoading(false),
@@ -332,6 +357,47 @@ export default function FreeChildBirthMuhuratPage() {
   return (
     <>
       <SiteNav />
+
+      {/* ─── POST-PAYMENT GENERATING OVERLAY (anti-anxiety) ─── */}
+      {generating && (
+        <div
+          role="status"
+          aria-live="polite"
+          className="fixed inset-0 z-[100] flex flex-col items-center justify-center px-6"
+          style={{ background: 'rgba(8,11,18,0.94)', backdropFilter: 'blur(8px)' }}
+        >
+          {/* Spinning halo ring */}
+          <div
+            style={{
+              width: 92, height: 92, borderRadius: '50%',
+              border: `3px solid ${GOLD_RGBA(0.15)}`,
+              borderTopColor: GOLD,
+              animation: 'tvspin 1s linear infinite',
+            }}
+          />
+          <div className="text-2xl mt-6 mb-2" style={{ color: GOLD }}>🔱</div>
+          <p className="text-lg md:text-xl font-serif text-center" style={{ color: GOLD, minHeight: '2.4em' }}>
+            {REPORT_STEPS[stepIdx]}
+          </p>
+          <p className="text-xs text-slate-400 mt-3 text-center max-w-xs">
+            Aapka payment safe hai. Kripya yeh page band na karein — report 1–2 minute mein khul jayegi.
+          </p>
+
+          {/* Step dots */}
+          <div className="flex gap-2 mt-6">
+            {REPORT_STEPS.map((_, i) => (
+              <span key={i} style={{
+                width: 7, height: 7, borderRadius: '50%',
+                background: i <= stepIdx ? GOLD : GOLD_RGBA(0.2),
+                transition: 'background 0.4s',
+              }} />
+            ))}
+          </div>
+
+          <style>{`@keyframes tvspin { to { transform: rotate(360deg); } }`}</style>
+        </div>
+      )}
+
       <main className="min-h-screen pt-20 pb-16 px-4" style={{ background: '#080B12', color: '#E5E7EB' }}>
         <div className="max-w-4xl mx-auto">
 
@@ -565,7 +631,7 @@ export default function FreeChildBirthMuhuratPage() {
                 )}
 
                 <div className="text-center">
-                  <button onClick={handleBuyReport} disabled={payLoading}
+                  <button onClick={handleBuyReport} disabled={payLoading || generating}
                     className="px-8 py-3 rounded-xl font-bold transition disabled:opacity-50 disabled:cursor-not-allowed"
                     style={{ background: GOLD, color: '#080B12' }}>
                     {payLoading ? '⟳ Opening payment...' : `Get Full Report · ${payTier === 'remedies_151' ? '₹151' : '₹101'}`}
