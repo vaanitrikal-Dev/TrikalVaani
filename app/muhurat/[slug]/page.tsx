@@ -3,6 +3,7 @@
  * TRIKAL VAANI — Child Birth Muhurat — Paid Result Page
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/muhurat/[slug]/page.tsx
+ * VERSION: 1.2 — Adds full-day backup best-slot box (both paid tiers)
  * VERSION: 1.1 — Adds premium MuhuratRemediesCard (remedies_151 tier)
  *                and removes the in-narrative UPAY text block so the 10
  *                remedies render ONLY as the styled card (no duplication).
@@ -34,7 +35,7 @@ interface MuhuratRow {
   slug:             string;
   tier:             string;
   language:         string;
-  muhurat_data:     { year?: number; month?: number; day?: number; hour?: number; minute?: number; city?: string; hospital?: string };
+  muhurat_data:     { year?: number; month?: number; day?: number; hour?: number; minute?: number; city?: string; hospital?: string; latitude?: number; longitude?: number; timezone?: number };
   vm_data:          any;
   remedies_data:    any;
   gemini_narrative: string | null;
@@ -71,6 +72,52 @@ async function ensureReport(slug: string, current: string | null): Promise<strin
     if (!res.ok) return null;
     const data = await res.json();
     return data.narrative ?? null;
+  } catch {
+    return null;
+  }
+}
+
+// ── Backup best slot: scan the FULL day for the single best muhurat ──
+// If the chosen delivery window is missed (operation delayed), this gives
+// the parents the most auspicious alternative time across the whole day.
+interface BackupSlot {
+  time:           string;
+  score:          number;
+  band:           string;
+  lagna_sign?:    string;
+  lagna_nakshatra?: string;
+}
+
+async function fetchBackupSlot(md: MuhuratRow['muhurat_data']): Promise<BackupSlot | null> {
+  const { year, month, day, latitude, longitude } = md;
+  if (!year || !month || !day || typeof latitude !== 'number' || typeof longitude !== 'number') {
+    return null;
+  }
+  try {
+    const vmUrl = process.env.MUHURAT_VM_URL ?? 'http://34.14.164.105:8001';
+    const res = await fetch(`${vmUrl}/muhurat-finder`, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        year, month, day,
+        window_start_hour: 0,  window_start_minute: 0,
+        window_end_hour: 23,   window_end_minute: 59,
+        latitude, longitude,
+        timezone: typeof md.timezone === 'number' ? md.timezone : 5.5,
+      }),
+      cache: 'no-store',
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    const best = data.best_slot;
+    if (!best || typeof best.score !== 'number') return null;
+    return {
+      time:            best.time ?? '',
+      score:           best.score,
+      band:            data.best_band ?? '',
+      lagna_sign:      best.lagna_sign,
+      lagna_nakshatra: best.lagna_nakshatra,
+    };
   } catch {
     return null;
   }
@@ -177,6 +224,14 @@ export default async function MuhuratResultPage({ params }: { params: { slug: st
   const narrative = await ensureReport(r.slug, r.gemini_narrative);
   const parsed = narrative ? parseReport(narrative) : null;
 
+  // Best alternative slot across the whole day (backup if window is missed)
+  const backupSlot = await fetchBackupSlot(md);
+  // Only worth showing if it actually beats / differs from the chosen slot
+  const chosenScore = typeof score === 'number' ? score : Number(score) || 0;
+  const showBackup = !!backupSlot
+    && backupSlot.time !== ''
+    && (backupSlot.time !== timeStr || backupSlot.score > chosenScore);
+
   const resultUrl = `https://trikalvaani.com/muhurat/${r.slug}`;
   const waText = encodeURIComponent(
     `Jai Mahakaal! Mera Child Birth Muhurat Report dekho — Trikal Vaani.\n${resultUrl}\n\nJai Maa Shakti!`
@@ -264,6 +319,54 @@ export default async function MuhuratResultPage({ params }: { params: { slug: st
               ))}
             </article>
           ))}
+        </section>
+      )}
+
+      {/* ─────────── BACKUP BEST SLOT (paid — both tiers) ─────────── */}
+      {narrative && showBackup && backupSlot && (
+        <section className="max-w-3xl mx-auto px-5 py-2">
+          <div className="bg-gradient-to-br from-[#1a1530] to-[#0d1120] border border-[#D4AF37]/40 rounded-2xl p-6 sm:p-7 shadow-xl">
+            <div className="flex items-center gap-2 mb-3">
+              <span className="text-xl">⏳</span>
+              <h2 className="text-base sm:text-lg font-semibold text-[#D4AF37]">
+                Is pure din ka sabse uttam muhurat
+              </h2>
+            </div>
+            <p className="text-sm text-gray-300 leading-relaxed mb-4">
+              Agar aapka chuna gaya samay kisi karan se miss ho jaye (operation mein deri, etc.),
+              toh ghabrayein nahi. Iss pure din mein sabse shubh vaikalpik samay yeh hai —
+              ise apne doctor se charcha karke backup ke roop mein rakh sakte hain.
+            </p>
+            <div className="flex flex-wrap items-center gap-x-6 gap-y-2 rounded-xl bg-[#080B12]/60 border border-[#D4AF37]/20 px-5 py-4">
+              <div>
+                <div className="text-[10px] text-gray-500 uppercase tracking-widest">Best Time</div>
+                <div className="text-2xl font-semibold text-white">{backupSlot.time}</div>
+              </div>
+              <div className="h-8 w-px bg-[#D4AF37]/20" />
+              <div>
+                <div className="text-[10px] text-gray-500 uppercase tracking-widest">Score</div>
+                <div className="text-2xl font-semibold text-[#D4AF37]">
+                  {backupSlot.score}<span className="text-sm text-gray-500">/100</span>
+                </div>
+              </div>
+              {backupSlot.lagna_sign && (
+                <>
+                  <div className="h-8 w-px bg-[#D4AF37]/20" />
+                  <div>
+                    <div className="text-[10px] text-gray-500 uppercase tracking-widest">Lagna</div>
+                    <div className="text-base text-gray-200 mt-1">
+                      {backupSlot.lagna_sign}
+                      {backupSlot.lagna_nakshatra ? ` · ${backupSlot.lagna_nakshatra}` : ''}
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+            <p className="text-[11px] text-gray-500 mt-3 leading-relaxed">
+              🩺 Yeh sirf jyotishiya margdarshan hai. Koi bhi samay apne doctor ki salah aur surakshit
+              window ke andar hi chunein.
+            </p>
+          </div>
         </section>
       )}
 
