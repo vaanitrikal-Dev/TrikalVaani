@@ -3,7 +3,7 @@
  * TRIKAL VAANI — Child Birth Muhurat Paid Report — Generate API
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/api/muhurat-paid/route.ts
- * VERSION: 1.2 — Added background PDF generation + strict script lock (no mid-word Roman/Devanagari mixing)
+ * VERSION: 1.2.1 — Added background PDF generation + strict script lock (no mid-word Roman/Devanagari mixing)
  * ============================================================
  * PIPELINE (parent's CHOSEN delivery time):
  *   VM /muhurat-paid (kundali + slot + doshas + 10 remedies)
