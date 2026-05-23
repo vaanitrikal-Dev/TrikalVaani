@@ -1,18 +1,16 @@
 // ============================================================
 // File: app/calculators/page.tsx
 // Purpose: Calculators Hub — SEO/GEO/AEO landing page
-// Version: v3.1 — Title double-suffix BUG FIX
+// Version: v3.2 — DYNAMIC count + Child Birth Muhurat card added
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikal Vaani
-// Date: 2026-05-18
+// Date: 2026-05-23
 // ============================================================
-// CHANGES vs v3.0:
-//   ✅ FIXED: Title was rendering as "...| Trikal Vaani | Trikal Vaani"
-//      ROOT CAUSE: layout.tsx v2.7 has template: '%s | Trikal Vaani'
-//                  + this page's title already had '| Trikal Vaani' suffix
-//                  = double suffix on every render
-//      SOLUTION: Use title: { absolute: '...' } pattern
-//                → Tells Next.js: "use this title EXACTLY, ignore template"
-//   ✅ ALL OTHER CODE: 100% IDENTICAL TO v3.0 (no logic change)
+// CHANGES vs v3.1:
+//   ✅ Added Child Birth Muhurat Calculator (after Kundli — paid funnel)
+//   ✅ DYNAMIC: count now reads CALCULATORS.length everywhere
+//      (h1 subtitle, GEO box, FAQ). Add a calculator = add ONE array line.
+//   ✅ Card list auto-generates names dynamically for GEO/FAQ text
+//   ✅ ALL OTHER LOGIC: identical to v3.1
 // ============================================================
 
 import type { Metadata } from 'next';
@@ -24,26 +22,27 @@ const GOLD = '#D4AF37';
 const GOLD_RGBA = (a: number) => `rgba(212,175,55,${a})`;
 
 export const metadata: Metadata = {
-  // ⬇ FIX: Using title.absolute prevents layout.tsx template from appending suffix
   title: {
-    absolute: 'Free Vedic Astrology Calculators — Kundli, Dasha, Nakshatra | Trikal Vaani',
+    absolute: 'Free Vedic Astrology Calculators — Kundli, Dasha, Nakshatra, Muhurat | Trikal Vaani',
   },
   description:
-    'Free Vedic astrology calculators powered by Swiss Ephemeris. Get accurate Kundli, Vimshottari Dasha, Nakshatra, Rashi, Lagna, Sade Sati, and Manglik Dosh results instantly. By Rohiit Gupta, Chief Vedic Architect.',
+    'Free Vedic astrology calculators powered by Swiss Ephemeris. Get accurate Kundli, Vimshottari Dasha, Nakshatra, Rashi, Lagna, Sade Sati, Manglik Dosh, and Child Birth Muhurat results instantly. By Rohiit Gupta, Chief Vedic Architect.',
   keywords: [
     'vedic astrology calculator', 'free kundli calculator', 'dasha calculator',
     'nakshatra calculator', 'rashi calculator', 'lagna calculator',
-    'sade sati calculator', 'manglik dosh calculator', 'jyotish calculator', 'birth chart calculator',
+    'sade sati calculator', 'manglik dosh calculator', 'child birth muhurat calculator',
+    'jyotish calculator', 'birth chart calculator',
   ],
   alternates: { canonical: 'https://trikalvaani.com/calculators' },
   openGraph: {
     title: 'Free Vedic Astrology Calculators | Trikal Vaani',
-    description: '7 free Vedic astrology calculators powered by Swiss Ephemeris. Accurate, instant, 100% free.',
+    description: 'Free Vedic astrology calculators powered by Swiss Ephemeris. Accurate, instant, 100% free.',
     url: 'https://trikalvaani.com/calculators',
     type: 'website',
   },
 };
 
+// ── Single source of truth. Add a calculator = add ONE entry here. ──
 const CALCULATORS = [
   {
     slug: 'free-kundali-calculator',
@@ -51,6 +50,14 @@ const CALCULATORS = [
     name: 'Free Kundli Calculator',
     desc: 'Get your complete Janm Kundali — Lagna, Nakshatra, all 9 planets, Dasha, and Parashar remedies.',
     badge: 'Most Popular',
+    live: true,
+  },
+  {
+    slug: 'free-child-birth-muhurat-calculator',
+    emoji: '🍼',
+    name: 'Free Child Birth Muhurat Calculator',
+    desc: 'Find the most auspicious C-section or delivery time within your doctor-approved window — Lagna, Nakshatra & lucky name letter.',
+    badge: 'New',
     live: true,
   },
   {
@@ -103,10 +110,19 @@ const CALCULATORS = [
   },
 ];
 
+// ── Dynamic helpers (auto-update when CALCULATORS changes) ──
+const CALC_COUNT = CALCULATORS.length;
+// Short names for GEO/FAQ prose, e.g. "Kundli, Dasha, ... and Child Birth Muhurat"
+const CALC_SHORT_NAMES = CALCULATORS.map((c) =>
+  c.name.replace(/^Free\s+/, '').replace(/\s+Calculator$/, '')
+);
+const CALC_LIST_TEXT =
+  CALC_SHORT_NAMES.slice(0, -1).join(', ') + ', and ' + CALC_SHORT_NAMES[CALC_SHORT_NAMES.length - 1];
+
 const FAQS = [
   {
     q: 'Are these calculators really free?',
-    a: 'Yes, 100% free. All 7 calculators give complete results without any payment, signup, or hidden charges.',
+    a: `Yes, 100% free. All ${CALC_COUNT} calculators give complete results without any payment, signup, or hidden charges.`,
   },
   {
     q: 'How accurate are Trikal Vaani calculators?',
@@ -135,7 +151,7 @@ export default function CalculatorsHubPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify({
           '@context': 'https://schema.org', '@type': 'CollectionPage',
           name: 'Free Vedic Astrology Calculators',
-          description: '7 free Vedic astrology calculators powered by Swiss Ephemeris',
+          description: `${CALC_COUNT} free Vedic astrology calculators powered by Swiss Ephemeris`,
           url: 'https://trikalvaani.com/calculators',
           creator: { '@type': 'Person', name: 'Rohiit Gupta', jobTitle: 'Chief Vedic Architect', url: 'https://trikalvaani.com/founder' },
           hasPart: CALCULATORS.map((c) => ({
@@ -174,12 +190,12 @@ export default function CalculatorsHubPage() {
           </h1>
 
           <p className="text-base md:text-lg text-slate-300 mb-6">
-            7 free calculators · Swiss Ephemeris accuracy · BPHS classical rules · 100% free, forever.
+            {CALC_COUNT} free calculators · Swiss Ephemeris accuracy · BPHS classical rules · 100% free, forever.
           </p>
 
           <div className="rounded-xl p-5 mb-8" style={{ background: 'rgba(212,175,55,0.06)', border: `1px solid ${GOLD_RGBA(0.2)}` }}>
             <p className="text-base md:text-lg leading-relaxed">
-              <strong style={{ color: GOLD }}>Trikal Vaani offers 7 free Vedic astrology calculators</strong> — Kundli, Dasha, Nakshatra, Rashi, Lagna, Sade Sati, and Manglik Dosh. All powered by Swiss Ephemeris (NASA-grade accuracy), Lahiri Ayanamsha, and BPHS classical rules. No signup. No payment. Instant results.
+              <strong style={{ color: GOLD }}>Trikal Vaani offers {CALC_COUNT} free Vedic astrology calculators</strong> — {CALC_LIST_TEXT}. All powered by Swiss Ephemeris (NASA-grade accuracy), Lahiri Ayanamsha, and BPHS classical rules. No signup. No payment. Instant results.
             </p>
           </div>
 
