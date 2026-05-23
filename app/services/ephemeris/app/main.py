@@ -3,7 +3,7 @@
   TRIKAL VAANI — Swiss Ephemeris Vedic Astrology API
   File: app/main.py
   Author: Rohiit Gupta, Chief Vedic Architect
-  Version: 3.0 — Added /synthesize endpoint (Parashari + Bhrigu + Panchang + Confidence)
+  Version: 3.1 — Added /muhurat-finder + /muhurat-paid endpoints
   JAI MAA SHAKTI
 =============================================================
 """
@@ -62,9 +62,32 @@ except Exception as e:
     print(f'[Synthesize] Panchang import failed: {e}')
     PANCHANG_AVAILABLE = False
 
+# ── Import Muhurat Engine ─────────────────────────────────────────────────────
+try:
+    from .muhurat_engine import find_muhurat
+    MUHURAT_AVAILABLE = True
+except Exception as e:
+    print(f'[Muhurat] Import failed: {e}')
+    MUHURAT_AVAILABLE = False
+
+# ── Import Master Engines (remedy + dosha) ────────────────────────────────────
+try:
+    from .remedy_master import build_master_remedies
+    REMEDY_AVAILABLE = True
+except Exception as e:
+    print(f'[Remedy] Import failed: {e}')
+    REMEDY_AVAILABLE = False
+
+try:
+    from .dosha_checker import check_all_doshas
+    DOSHA_AVAILABLE = True
+except Exception as e:
+    print(f'[Dosha] Import failed: {e}')
+    DOSHA_AVAILABLE = False
+
 # ── App Setup ─────────────────────────────────────────────────────────────────
 
-app = FastAPI(title="Trikal Vaani Ephemeris API", version="3.0.0")
+app = FastAPI(title="Trikal Vaani Ephemeris API", version="3.1.0")
 
 ALLOWED_ORIGINS = os.getenv(
     "ALLOWED_ORIGINS",
@@ -115,11 +138,46 @@ class SynthesizeInput(BaseModel):
         extra = "allow"
 
 
+class MuhuratInput(BaseModel):
+    year:                 int   = Field(default=2026)
+    month:                int   = Field(default=1)
+    day:                  int   = Field(default=1)
+    window_start_hour:    int   = Field(default=9)
+    window_start_minute:  int   = Field(default=0)
+    window_end_hour:      int   = Field(default=13)
+    window_end_minute:    int   = Field(default=0)
+    latitude:             float = Field(default=28.6)
+    longitude:            float = Field(default=77.2)
+    timezone:             float = Field(default=5.5)
+    step_minutes:         int   = Field(default=10)
+    ayanamsa:             str   = Field(default="lahiri")
+    full_day:             bool  = Field(default=True)
+
+    class Config:
+        extra = "allow"
+
+
+class MuhuratPaidInput(BaseModel):
+    """Input for paid muhurat report — parent's chosen delivery time."""
+    year:      int   = Field(default=2026)
+    month:     int   = Field(default=1)
+    day:       int   = Field(default=1)
+    hour:      int   = Field(default=10)
+    minute:    int   = Field(default=0)
+    latitude:  float = Field(default=28.6)
+    longitude: float = Field(default=77.2)
+    timezone:  float = Field(default=5.5)
+    lang:      str   = Field(default="hi")  # "hi" or "en"
+
+    class Config:
+        extra = "allow"
+
+
 # ── Existing Endpoints (unchanged) ───────────────────────────────────────────
 
 @app.get("/")
 def root():
-    return {"status": "ok", "service": "Trikal Vaani Ephemeris API v3.0"}
+    return {"status": "ok", "service": "Trikal Vaani Ephemeris API v3.1"}
 
 
 @app.get("/health")
@@ -130,6 +188,9 @@ def health():
         "parashara_available":  PARASHARA_AVAILABLE,
         "panchang_available":   PANCHANG_AVAILABLE,
         "confidence_available": CONFIDENCE_AVAILABLE,
+        "muhurat_available":    MUHURAT_AVAILABLE,
+        "remedy_available":     REMEDY_AVAILABLE,
+        "dosha_available":      DOSHA_AVAILABLE,
     }
 
 
@@ -194,6 +255,107 @@ def get_rashi(data: BirthInput):
     try:
         return compute_rashi(data)
     except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# ── /muhurat-finder Endpoint ──────────────────────────────────────────────────
+
+@app.post("/muhurat-finder")
+def get_muhurat(data: MuhuratInput):
+    if not MUHURAT_AVAILABLE:
+        raise HTTPException(status_code=503, detail="Muhurat engine unavailable")
+    try:
+        return find_muhurat(data)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# ── /muhurat-paid Endpoint ────────────────────────────────────────────────────
+
+@app.post("/muhurat-paid")
+def get_muhurat_paid(data: MuhuratPaidInput):
+    """
+    Paid muhurat report for parent's chosen delivery time.
+    Returns: kundali of chosen slot + doshas + 10 remedies + naamakshar slot data.
+    Vercel then sends this to Gemini Pro + Sonnet for the 600w child-life prediction.
+    """
+    if not MUHURAT_AVAILABLE:
+        raise HTTPException(status_code=503, detail="Muhurat engine unavailable")
+
+    try:
+        lang = data.lang if data.lang in ("hi", "en") else "hi"
+
+        # ── Step 1: Compute kundali for the chosen delivery time ──────────────
+        birth = BirthInput(
+            year=data.year,
+            month=data.month,
+            day=data.day,
+            hour=data.hour,
+            minute=data.minute,
+            second=0,
+            latitude=data.latitude,
+            longitude=data.longitude,
+            timezone=data.timezone,
+            ayanamsa="lahiri",
+            house_system="P",
+        )
+        kundali = compute_kundali(birth)
+
+        # ── Step 2: Muhurat slot score for the chosen time ────────────────────
+        # Scan a 10-min window around the chosen time so we get score + naamakshar
+        slot_input = MuhuratInput(
+            year=data.year,
+            month=data.month,
+            day=data.day,
+            window_start_hour=data.hour,
+            window_start_minute=max(0, data.minute - 5),
+            window_end_hour=data.hour,
+            window_end_minute=min(59, data.minute + 10),
+            latitude=data.latitude,
+            longitude=data.longitude,
+            timezone=data.timezone,
+            step_minutes=5,
+            full_day=False,
+        )
+        muhurat_result = find_muhurat(slot_input)
+        chosen_slot = muhurat_result.get("best_slot") or {}
+
+        # ── Step 3: Dosha check ───────────────────────────────────────────────
+        doshas = []
+        if DOSHA_AVAILABLE:
+            try:
+                doshas = check_all_doshas(kundali, lang)
+            except Exception as e:
+                print(f"[MuhuratPaid] Dosha error: {e}")
+
+        # ── Step 4: 10 Remedies ───────────────────────────────────────────────
+        remedies = []
+        if REMEDY_AVAILABLE:
+            try:
+                remedies = build_master_remedies(kundali, "child", lang)
+            except Exception as e:
+                print(f"[MuhuratPaid] Remedy error: {e}")
+
+        # ── Step 5: Build response for Vercel → Gemini ────────────────────────
+        return {
+            "status": "success",
+            "chosen_time": f"{data.hour:02d}:{data.minute:02d}",
+            "chosen_slot": chosen_slot,
+            "kundali": kundali,
+            "doshas": doshas,
+            "remedies": remedies,
+            "naamakshar": chosen_slot.get("naamakshar", ""),
+            "lagna_sign": chosen_slot.get("lagna_sign", ""),
+            "lagna_nakshatra": chosen_slot.get("lagna_nakshatra", ""),
+            "score": chosen_slot.get("score", 0),
+            "band": muhurat_result.get("best_band", ""),
+            "lang": lang,
+            "engine": "Trikal Vaani Muhurat Paid v1.0 | Swiss Ephemeris | BPHS",
+        }
+
+    except Exception as e:
+        print(f"[MuhuratPaid] UNHANDLED ERROR: {e}")
+        print(traceback.format_exc())
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -503,6 +665,7 @@ def _empty_confidence() -> dict:
         'action_guidance': 'Proceed with measured action',
         'conflict_detected': False,
     }
+
 import sys, os
 sys.path.insert(0, os.path.dirname(__file__))
 from template_engine import build_template, TemplateRequest, DOMAINS
