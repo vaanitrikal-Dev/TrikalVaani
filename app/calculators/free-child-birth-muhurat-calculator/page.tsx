@@ -2,14 +2,15 @@
 
 // ============================================================
 // File: app/calculators/free-child-birth-muhurat-calculator/page.tsx
-// Version: v1.0 — Free Child Birth Muhurat Calculator
-// VM endpoint: /muhurat-finder (master-grade)
+// Version: v1.1 — Added paid report flow (Razorpay ₹101/₹151 + language)
+// VM endpoint: /muhurat-finder (free) | paid via /api/create-muhurat-order
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikal Vaani
 // ============================================================
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import SiteNav from '@/components/layout/SiteNav';
+import { loadRazorpayScript, openRazorpayCheckout } from '@/lib/razorpay-helper';
 
 const GOLD = '#D4AF37';
 const GOLD_RGBA = (a: number) => `rgba(212,175,55,${a})`;
@@ -181,6 +182,12 @@ export default function FreeChildBirthMuhuratPage() {
   const [showFullDay, setShowFullDay] = useState(false);
   const resultRef = useRef<HTMLDivElement>(null);
 
+  // ── Paid flow state ──
+  const [payLang, setPayLang] = useState<'hinglish' | 'hindi' | 'english'>('hinglish');
+  const [payTier, setPayTier] = useState<'report_101' | 'remedies_151'>('report_101');
+  const [payLoading, setPayLoading] = useState(false);
+  const [payError, setPayError] = useState<string | null>(null);
+
   const validate = () => {
     const e: Record<string, string> = {};
     if (!date) e.date = 'Delivery date is required';
@@ -198,7 +205,6 @@ export default function FreeChildBirthMuhuratPage() {
     const [year, month, day] = date.split('-').map(Number);
     const [sh, sm] = startTime.split(':').map(Number);
     const [eh, em] = endTime.split(':').map(Number);
-    // Hospital coords override city coords for precision when available
     const useLat = hospLat ?? lat;
     const useLng = hospLng ?? lng;
     const useTz = hospTz ?? timezone;
@@ -226,6 +232,90 @@ export default function FreeChildBirthMuhuratPage() {
       setError(e?.message || 'Something went wrong. Please try again.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  // ── Paid report: create order → Razorpay → verify → redirect ──
+  const handleBuyReport = async () => {
+    setPayError(null);
+    if (!result || !best) return;
+
+    const [year, month, day] = date.split('-').map(Number);
+    // Use the best slot's time as the parent's CHOSEN delivery moment
+    const [bh, bm] = (best.time || '00:00').split(':').map((n: string) => parseInt(n, 10));
+    const useLat = hospLat ?? lat;
+    const useLng = hospLng ?? lng;
+    const useTz = hospTz ?? timezone;
+
+    if (useLat === null || useLng === null) {
+      setPayError('Location missing. Please re-run the calculator.');
+      return;
+    }
+
+    setPayLoading(true);
+    try {
+      // 1) Load Razorpay script
+      const ok = await loadRazorpayScript();
+      if (!ok) throw new Error('Could not load payment gateway. Please try again.');
+
+      // 2) Create order
+      const orderRes = await fetch('/api/create-muhurat-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          tier: payTier,
+          language: payLang,
+          muhurat: {
+            year, month, day,
+            hour: bh, minute: bm,
+            latitude: useLat, longitude: useLng, timezone: useTz,
+            city, hospital,
+          },
+        }),
+      });
+      if (!orderRes.ok) {
+        const err = await orderRes.json().catch(() => ({}));
+        throw new Error(err.error || 'Could not create order.');
+      }
+      const order = await orderRes.json();
+
+      // 3) Open Razorpay popup
+      openRazorpayCheckout({
+        keyId:       order.keyId,
+        orderId:     order.orderId,
+        amount:      order.amount,
+        currency:    order.currency,
+        name:        'Trikal Vaani',
+        description: order.label,
+        themeColor:  GOLD,
+        onSuccess: async (resp) => {
+          try {
+            const verifyRes = await fetch('/api/verify-muhurat-payment', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                razorpay_order_id:   resp.razorpay_order_id,
+                razorpay_payment_id: resp.razorpay_payment_id,
+                razorpay_signature:  resp.razorpay_signature,
+              }),
+            });
+            const vd = await verifyRes.json();
+            if (vd.success && vd.slug) {
+              window.location.href = `/muhurat/${vd.slug}`;
+            } else {
+              setPayError(vd.error || 'Payment verified but report could not be created. Please contact us on WhatsApp.');
+              setPayLoading(false);
+            }
+          } catch {
+            setPayError('Payment done, but verification failed. Please contact us on WhatsApp — your payment is safe.');
+            setPayLoading(false);
+          }
+        },
+        onDismiss: () => setPayLoading(false),
+      });
+    } catch (e: any) {
+      setPayError(e?.message || 'Payment could not start. Please try again.');
+      setPayLoading(false);
     }
   };
 
@@ -426,15 +516,62 @@ export default function FreeChildBirthMuhuratPage() {
                 </div>
               )}
 
-              {/* PAID CTA — ₹101 */}
-              <div className="rounded-2xl p-6 text-center" style={{ background: `linear-gradient(135deg, rgba(212,175,55,0.12), rgba(2,8,23,0.5))`, border: `1px solid ${GOLD_RGBA(0.3)}` }}>
-                <h3 className="text-xl font-serif font-bold mb-2" style={{ color: GOLD }}>🔮 Unlock the Full Muhurat Report — ₹101</h3>
-                <p className="text-sm text-slate-300 mb-4 max-w-xl mx-auto">
-                  Get a detailed life prediction for a child born at this time, the lucky name letter with boy & girl name suggestions, full slot-by-slot ranking, and a downloadable PDF to share with your family and doctor.
+              {/* PAID CTA — ₹101 / ₹151 with Razorpay */}
+              <div className="rounded-2xl p-6" style={{ background: `linear-gradient(135deg, rgba(212,175,55,0.12), rgba(2,8,23,0.5))`, border: `1px solid ${GOLD_RGBA(0.3)}` }}>
+                <h3 className="text-xl font-serif font-bold mb-2 text-center" style={{ color: GOLD }}>🔮 Unlock the Full Muhurat Report</h3>
+                <p className="text-sm text-slate-300 mb-5 max-w-xl mx-auto text-center">
+                  A detailed life prediction for a child born at <strong style={{ color: GOLD }}>{best.time}</strong>, the lucky name letter with boy &amp; girl name suggestions, doshas to be aware of, and a downloadable report to share with your family.
                 </p>
-                <button className="px-8 py-3 rounded-xl font-bold" style={{ background: GOLD, color: '#080B12' }}>
-                  Get Full Report · ₹101
-                </button>
+
+                {/* Tier selector */}
+                <div className="grid grid-cols-2 gap-3 mb-4 max-w-md mx-auto">
+                  <button onClick={() => setPayTier('report_101')}
+                    className="rounded-xl p-4 text-left transition"
+                    style={{
+                      background: payTier === 'report_101' ? GOLD_RGBA(0.15) : 'rgba(2,8,23,0.4)',
+                      border: `1px solid ${payTier === 'report_101' ? GOLD : GOLD_RGBA(0.2)}`,
+                    }}>
+                    <div className="font-bold text-lg" style={{ color: GOLD }}>₹101</div>
+                    <div className="text-xs text-slate-400 mt-1">Full report + prediction + boy/girl names</div>
+                  </button>
+                  <button onClick={() => setPayTier('remedies_151')}
+                    className="rounded-xl p-4 text-left transition relative"
+                    style={{
+                      background: payTier === 'remedies_151' ? GOLD_RGBA(0.15) : 'rgba(2,8,23,0.4)',
+                      border: `1px solid ${payTier === 'remedies_151' ? GOLD : GOLD_RGBA(0.2)}`,
+                    }}>
+                    <div className="font-bold text-lg" style={{ color: GOLD }}>₹151</div>
+                    <div className="text-xs text-slate-400 mt-1">Everything + all 10 personalised remedies</div>
+                  </button>
+                </div>
+
+                {/* Language selector */}
+                <div className="flex justify-center gap-2 mb-5">
+                  {(['hinglish', 'hindi', 'english'] as const).map((l) => (
+                    <button key={l} onClick={() => setPayLang(l)}
+                      className="px-4 py-1.5 rounded-full text-xs font-semibold capitalize transition"
+                      style={{
+                        background: payLang === l ? GOLD : 'rgba(255,255,255,0.05)',
+                        color: payLang === l ? '#080B12' : '#94a3b8',
+                        border: `1px solid ${payLang === l ? GOLD : 'rgba(255,255,255,0.1)'}`,
+                      }}>
+                      {l}
+                    </button>
+                  ))}
+                </div>
+
+                {payError && (
+                  <div className="px-4 py-3 rounded-lg text-sm text-red-300 mb-4 max-w-md mx-auto" style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)' }}>{payError}</div>
+                )}
+
+                <div className="text-center">
+                  <button onClick={handleBuyReport} disabled={payLoading}
+                    className="px-8 py-3 rounded-xl font-bold transition disabled:opacity-50 disabled:cursor-not-allowed"
+                    style={{ background: GOLD, color: '#080B12' }}>
+                    {payLoading ? '⟳ Opening payment...' : `Get Full Report · ${payTier === 'remedies_151' ? '₹151' : '₹101'}`}
+                  </button>
+                  <p className="text-center text-xs text-slate-600 mt-3">🔒 Secure payment via Razorpay · No refund policy</p>
+                </div>
               </div>
 
               {/* FULL DAY — EDUCATIONAL, collapsed by default */}
