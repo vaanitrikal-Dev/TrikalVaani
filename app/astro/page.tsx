@@ -1,8 +1,7 @@
-// TRIKAL VAANI | app/astro/page.tsx | v1.1
-// v1.1 FIX: logo was cropping (non-square source forced into 84x84 next/image).
-//   Switched to plain <img> with height:96px, width:auto, object-fit:contain,
-//   maxWidth:180px so the full owl logo shows at correct aspect ratio.
-//   Removed unused next/image import. NOTHING ELSE CHANGED.
+// TRIKAL VAANI | app/astro/page.tsx | v1.2
+// v1.2 FIX: switched logo from Trikal_Logo.png (1440x1440 with heavy transparent
+//   padding causing tiny visible owl) to Trikal_Vaani_Logo.svg (already used as
+//   favicon sitewide, scales perfectly, no padding issues). 100x100 display size.
 // Owner: Rohiit Gupta, Chief Vedic Architect
 // Date: 2026-05-23
 // ============================================================================
@@ -112,16 +111,14 @@ export default function AstroPage() {
       >
         {/* ── Logo + Hook ── */}
         <div className="w-full max-w-md text-center">
-          <div className="flex justify-center mb-5">
+          <div className="flex justify-center mb-3">
             <img
-              src="/Trikal_Logo.png"
+              src="/Trikal_Vaani_Logo.svg"
               alt="Trikal Vaani"
               style={{
-                width: 'auto',
-                height: '96px',
-                maxWidth: '180px',
+                width: '100px',
+                height: '100px',
                 objectFit: 'contain',
-                borderRadius: '16px',
               }}
             />
           </div>
