@@ -3,7 +3,7 @@
  * TRIKAL VAANI — Child Birth Muhurat — Paid Result Page
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/muhurat/[slug]/page.tsx
- * VERSION: 1.2 — Adds full-day backup best-slot box (both paid tiers)
+ * VERSION: 1.3 — Moved backup best-slot box to top (after medical safety, before report)
  * VERSION: 1.1 — Adds premium MuhuratRemediesCard (remedies_151 tier)
  *                and removes the in-narrative UPAY text block so the 10
  *                remedies render ONLY as the styled card (no duplication).
@@ -280,51 +280,9 @@ export default async function MuhuratResultPage({ params }: { params: { slug: st
         </div>
       </section>
 
-      {/* ─────────── OPENING / GEO ─────────── */}
-      {parsed?.opening && (
-        <section className="max-w-3xl mx-auto px-5 pt-6">
-          <div className="bg-[#0d1120]/60 border-l-4 border-[#D4AF37] rounded-r-xl p-5 sm:p-6">
-            {paras(parsed.opening).map((p, i) => (
-              <p key={i} className="text-base sm:text-lg leading-relaxed text-gray-100 mb-3 last:mb-0">{p}</p>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* ─────────── GENERATING STATE ─────────── */}
-      {!narrative && (
-        <section className="max-w-3xl mx-auto px-5 py-16">
-          <div className="text-center text-gray-400">
-            <p className="text-3xl mb-3">🕉️</p>
-            <p className="text-lg">Aapka Muhurat Report taiyaar ho raha hai...</p>
-            <p className="text-sm mt-2 text-gray-500">Trikal aapke chune hue shubh muhurat ki kundali padh raha hai. Please refresh in 30-40 seconds.</p>
-          </div>
-        </section>
-      )}
-
-      {/* ─────────── SECTIONS ─────────── */}
-      {parsed && parsed.sections.length > 0 && (
-        <section className="max-w-3xl mx-auto px-5 py-8 sm:py-10 space-y-6">
-          {parsed.sections.map((sec, i) => (
-            <article
-              key={i}
-              className="muhurat-sec bg-[#0d1120]/60 border border-[#D4AF37]/15 rounded-2xl p-6 sm:p-8"
-            >
-              <div className="flex items-center gap-3 mb-4">
-                <span className="text-2xl">{sec.icon}</span>
-                <h2 className="text-lg sm:text-xl font-semibold text-[#D4AF37]">{sec.title}</h2>
-              </div>
-              {paras(sec.body).map((p, j) => (
-                <p key={j} className="muhurat-para">{p}</p>
-              ))}
-            </article>
-          ))}
-        </section>
-      )}
-
       {/* ─────────── BACKUP BEST SLOT (paid — both tiers) ─────────── */}
       {narrative && showBackup && backupSlot && (
-        <section className="max-w-3xl mx-auto px-5 py-2">
+        <section className="max-w-3xl mx-auto px-5 pt-6">
           <div className="bg-gradient-to-br from-[#1a1530] to-[#0d1120] border border-[#D4AF37]/40 rounded-2xl p-6 sm:p-7 shadow-xl">
             <div className="flex items-center gap-2 mb-3">
               <span className="text-xl">⏳</span>
@@ -367,6 +325,48 @@ export default async function MuhuratResultPage({ params }: { params: { slug: st
               window ke andar hi chunein.
             </p>
           </div>
+        </section>
+      )}
+
+      {/* ─────────── OPENING / GEO ─────────── */}
+      {parsed?.opening && (
+        <section className="max-w-3xl mx-auto px-5 pt-6">
+          <div className="bg-[#0d1120]/60 border-l-4 border-[#D4AF37] rounded-r-xl p-5 sm:p-6">
+            {paras(parsed.opening).map((p, i) => (
+              <p key={i} className="text-base sm:text-lg leading-relaxed text-gray-100 mb-3 last:mb-0">{p}</p>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* ─────────── GENERATING STATE ─────────── */}
+      {!narrative && (
+        <section className="max-w-3xl mx-auto px-5 py-16">
+          <div className="text-center text-gray-400">
+            <p className="text-3xl mb-3">🕉️</p>
+            <p className="text-lg">Aapka Muhurat Report taiyaar ho raha hai...</p>
+            <p className="text-sm mt-2 text-gray-500">Trikal aapke chune hue shubh muhurat ki kundali padh raha hai. Please refresh in 30-40 seconds.</p>
+          </div>
+        </section>
+      )}
+
+      {/* ─────────── SECTIONS ─────────── */}
+      {parsed && parsed.sections.length > 0 && (
+        <section className="max-w-3xl mx-auto px-5 py-8 sm:py-10 space-y-6">
+          {parsed.sections.map((sec, i) => (
+            <article
+              key={i}
+              className="muhurat-sec bg-[#0d1120]/60 border border-[#D4AF37]/15 rounded-2xl p-6 sm:p-8"
+            >
+              <div className="flex items-center gap-3 mb-4">
+                <span className="text-2xl">{sec.icon}</span>
+                <h2 className="text-lg sm:text-xl font-semibold text-[#D4AF37]">{sec.title}</h2>
+              </div>
+              {paras(sec.body).map((p, j) => (
+                <p key={j} className="muhurat-para">{p}</p>
+              ))}
+            </article>
+          ))}
         </section>
       )}
 
