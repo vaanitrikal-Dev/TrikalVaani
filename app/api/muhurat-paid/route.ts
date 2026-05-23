@@ -3,7 +3,7 @@
  * TRIKAL VAANI — Child Birth Muhurat Paid Report — Generate API
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/api/muhurat-paid/route.ts
- * VERSION: 1.0
+ * VERSION: 1.1 — Added background PDF generation (VM /muhurat-pdf)
  * ============================================================
  * PIPELINE (parent's CHOSEN delivery time):
  *   VM /muhurat-paid (kundali + slot + doshas + 10 remedies)
@@ -11,6 +11,7 @@
  *     -> Gemini 2.5 Pro
  *     -> polishMuhuratNarrative() [Claude Sonnet 4.6, language-locked]
  *     -> save to muhurat_readings
+ *     -> fire-and-forget VM /muhurat-pdf (generates PDF, saves pdf_url)
  *
  * Input: { slug } — slug of a PAID muhurat order's reading row.
  * The reading row already holds muhurat_data + tier + language.
@@ -31,6 +32,10 @@ import { polishMuhuratNarrative, type MuhuratLanguage } from '@/lib/claude-polis
 // VM paid-muhurat endpoint (kundali + slot + doshas + 10 remedies)
 const VM_MUHURAT_PAID_ENDPOINT =
   process.env.VM_MUHURAT_PAID_ENDPOINT ?? 'http://34.14.164.105:8001/muhurat-paid';
+
+// VM PDF endpoint (generates branded PDF, uploads to Supabase, saves pdf_url)
+const VM_MUHURAT_PDF_ENDPOINT =
+  process.env.VM_MUHURAT_PDF_ENDPOINT ?? 'http://34.14.164.105:8001/muhurat-pdf';
 
 // Generation config (CEO LOCKED)
 const GEMINI_MODEL   = 'gemini-2.5-pro';
@@ -55,6 +60,44 @@ interface MuhuratPaidRequest {
 // VM /muhurat-paid only accepts hi|en. Map for the VM remedy call only.
 function langForVM(lang: string): 'hi' | 'en' {
   return lang === 'english' ? 'en' : 'hi'; // hinglish + hindi -> hi remedies
+}
+
+// ── Fire-and-forget PDF generation on the VM ──────────────────
+// Called after the narrative is saved. The VM reads the reading row
+// (incl. the just-saved narrative) from Supabase, builds the PDF,
+// uploads it to the muhurat-pdfs bucket, and writes pdf_url back.
+// We do NOT await this — the result page shows immediately, and the
+// Download PDF button appears on the next load/refresh.
+function triggerMuhuratPdf(slug: string): void {
+  try {
+    const controller = new AbortController();
+    // Generous timeout — WeasyPrint + upload can take a few seconds.
+    const timeout = setTimeout(() => controller.abort(), 60000);
+
+    fetch(VM_MUHURAT_PDF_ENDPOINT, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ slug }),
+      signal:  controller.signal,
+      cache:   'no-store',
+    })
+      .then(async (res) => {
+        clearTimeout(timeout);
+        if (!res.ok) {
+          const txt = await res.text().catch(() => '');
+          console.error('[Trikal] Muhurat PDF gen non-OK:', res.status, txt.slice(0, 200));
+        } else {
+          console.log('[Trikal] Muhurat PDF generation triggered OK for', slug);
+        }
+      })
+      .catch((e) => {
+        clearTimeout(timeout);
+        console.error('[Trikal] Muhurat PDF gen failed (non-fatal):', e);
+      });
+  } catch (e) {
+    // Never let PDF generation break the main report flow.
+    console.error('[Trikal] Muhurat PDF trigger error (non-fatal):', e);
+  }
 }
 
 function buildMuhuratPrompt(params: {
@@ -170,6 +213,10 @@ export async function POST(req: NextRequest) {
 
     // Idempotency: return cached narrative if already generated
     if (reading.gemini_narrative && reading.gemini_narrative.length > 200) {
+      // If the narrative exists but the PDF was never made, trigger it now.
+      if (!reading.pdf_url) {
+        triggerMuhuratPdf(slug);
+      }
       return NextResponse.json({
         success:   true,
         slug,
@@ -331,6 +378,11 @@ export async function POST(req: NextRequest) {
     if (saveErr) {
       console.error('[Trikal] Muhurat narrative save failed:', saveErr.message);
     }
+
+    // 7) Fire-and-forget PDF generation (non-blocking).
+    //    The narrative is now saved, so the VM PDF engine will include it.
+    //    The Download PDF button appears once pdf_url is written (next load).
+    triggerMuhuratPdf(slug);
 
     return NextResponse.json({
       success:   true,
