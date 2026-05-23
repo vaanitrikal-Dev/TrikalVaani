@@ -1,0 +1,140 @@
+// TRIKAL VAANI - Child Birth Muhurat Paid Report - Payment Verification API
+// CEO: Rohiit Gupta
+// File: app/api/calc/verify-muhurat-payment/route.ts
+// VERSION: 1.0
+// Mirrors verify-karmic-payment. Does NOT generate the report here —
+// creates the muhurat_readings row (status paid) and returns the slug.
+// The VM call + Gemini + Sonnet prediction run in /api/calc/muhurat-paid
+// (called by the result page). Keeps verification fast, AI work separate.
+
+import { NextRequest, NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
+import crypto from 'crypto';
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
+
+interface MuhuratVerifyRequest {
+  razorpay_order_id:   string;
+  razorpay_payment_id: string;
+  razorpay_signature:  string;
+}
+
+function makeSlug(): string {
+  const ts  = Date.now().toString(36);
+  const rnd = crypto.randomBytes(4).toString('hex');
+  return `m-${ts}-${rnd}`;
+}
+
+export async function POST(req: NextRequest) {
+  try {
+    const body: MuhuratVerifyRequest = await req.json();
+    const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = body;
+
+    if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
+      return NextResponse.json({ error: 'Missing payment fields.' }, { status: 400 });
+    }
+
+    // Verify HMAC signature
+    const secret   = process.env.RAZORPAY_KEY_SECRET!;
+    const payload  = `${razorpay_order_id}|${razorpay_payment_id}`;
+    const expected = crypto.createHmac('sha256', secret).update(payload).digest('hex');
+
+    if (expected !== razorpay_signature) {
+      console.error('[Trikal] Muhurat signature mismatch:', razorpay_order_id);
+      return NextResponse.json({ error: 'Payment verification failed.' }, { status: 400 });
+    }
+
+    // Load the pending order
+    const { data: order, error: orderErr } = await supabase
+      .from('muhurat_orders')
+      .select('*')
+      .eq('razorpay_order_id', razorpay_order_id)
+      .single();
+
+    if (orderErr || !order) {
+      console.error('[Trikal] Muhurat order not found:', razorpay_order_id, orderErr?.message);
+      return NextResponse.json({ error: 'Order not found.' }, { status: 404 });
+    }
+
+    // Idempotency replay — if already verified, return existing reading slug
+    if (order.payment_verified === true) {
+      const { data: existing } = await supabase
+        .from('muhurat_readings')
+        .select('slug')
+        .eq('order_id', order.id)
+        .maybeSingle();
+      if (existing?.slug) {
+        return NextResponse.json({
+          success: true, slug: existing.slug, paymentId: razorpay_payment_id,
+          resultUrl: `https://trikalvaani.com/muhurat/${existing.slug}`, replay: true,
+        });
+      }
+    }
+
+    // Mark order paid
+    await supabase
+      .from('muhurat_orders')
+      .update({
+        razorpay_payment_id, razorpay_signature,
+        status: 'paid', payment_verified: true, paid_at: new Date().toISOString(),
+      })
+      .eq('id', order.id);
+
+    // Create the reading row (VM data + narrative generated later by /api/calc/muhurat-paid)
+    const slug = makeSlug();
+
+    const { error: saveErr } = await supabase
+      .from('muhurat_readings')
+      .insert({
+        order_id:         order.id,
+        slug,
+        tier:             order.tier,
+        language:         order.language,
+        muhurat_data:     order.muhurat_data,
+        vm_data:          null,
+        doshas_data:      null,
+        remedies_data:    null,
+        gemini_narrative: null,
+        geo_answer:       null,
+        pdf_url:          null,
+        is_public:        false,
+      });
+
+    if (saveErr) {
+      console.error('[Trikal] Muhurat reading row save error:', saveErr.message);
+      return NextResponse.json({
+        success: true, paymentId: razorpay_payment_id,
+        warning: 'Payment received. Report is being prepared — please contact us if the result page does not load.',
+      }, { status: 200 });
+    }
+
+    const tierLabel = order.tier === 'remedies_151'
+      ? 'Full Report + 10 Remedies'
+      : 'Full Muhurat Report';
+
+    const waText = encodeURIComponent(
+      `Jai Mahakaal! Trikal Vaani Child Birth Muhurat Report confirm ho gaya.\n\n` +
+      `Tier: ${tierLabel}\n` +
+      `Payment ID: ${razorpay_payment_id}\n` +
+      `Result: trikalvaani.com/muhurat/${slug}\n\nJai Maa Shakti!`
+    );
+
+    return NextResponse.json({
+      success:     true,
+      slug,
+      tier:        order.tier,
+      language:    order.language,
+      paymentId:   razorpay_payment_id,
+      amount:      order.amount_rupees,
+      resultUrl:   `https://trikalvaani.com/muhurat/${slug}`,
+      whatsappUrl: `https://wa.me/919211804111?text=${waText}`,
+    });
+
+  } catch (err: unknown) {
+    console.error('[Trikal] Verify Muhurat payment error:', err);
+    return NextResponse.json({ error: 'Server error during verification.' }, { status: 500 });
+  }
+}
