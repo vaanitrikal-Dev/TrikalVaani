@@ -3,8 +3,15 @@
  * 🔱 TRIKAL VAANI — CEO PROTECTION HEADER 🔱
  * ============================================================================
  * File:        app/sitemap.ts
- * Version:     v5.7
+ * Version:     v5.8
  * Owner:       Rohiit Gupta, Chief Vedic Architect
+ *
+ * Changes v5.7 → v5.8 (2026-05-23):
+ *   FIX 1: ADDED 'free-child-birth-muhurat-calculator' to CALCULATORS.
+ *          Free muhurat calculator now crawlable. priority 0.85, monthly.
+ *   NOTE: The paid /muhurat/[slug] result pages stay noindex (private),
+ *         so they are intentionally NOT in the sitemap.
+ *   UNTOUCHED: all v5.7 routes and logic.
  *
  * Changes v5.6 → v5.7 (2026-05-22):
  *   FIX 1: ADDED /kundali-milan (Milan pillar) to STATIC_ROUTES.
@@ -70,6 +77,7 @@ const STATIC_ROUTES = [
 
 const CALCULATORS = [
   'free-kundali-calculator',
+  'free-child-birth-muhurat-calculator',  // v5.8: Child Birth Muhurat (free)
   'free-dasha-calculator',
   'free-nakshatra-calculator',
   'free-rashi-calculator',
