@@ -87,10 +87,32 @@ export default function KarmicResultClient({ initialRow }: { initialRow: KarmicR
   const [error, setError]         = useState<string | null>(null)
 
   const slug        = initialRow.slug
+  // Auto-trigger PDF if narrative ready but pdf_url missing (handles existing readings)
   const personName  = initialRow.person_data?.name ?? 'This Soul'
   const personPlace = initialRow.person_data?.place ?? initialRow.person_data?.cityName ?? ''
 
+  // ── Auto-trigger PDF on load if narrative ready but no pdf_url ─────────────
+  useEffect(() => {
+    if (initialRow.gemini_narrative && initialRow.gemini_narrative.length > 200 && !initialRow.pdf_url) {
+      // Small delay so page renders first
+      const t = setTimeout(() => triggerPdfGeneration(), 2000)
+      return () => clearTimeout(t)
+    }
+  }, []) // eslint-disable-line
+
   // ── Poll for narrative ───────────────────────────────────────────────────────
+  const triggerPdfGeneration = useCallback(async () => {
+    if (pdfUrl) return // already have PDF
+    try {
+      const res = await fetch('/api/karmic-pdf', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ slug }), cache: 'no-store',
+      })
+      const data = await res.json()
+      if (data.pdf_url) setPdfUrl(data.pdf_url)
+    } catch { /* silent — PDF is optional */ }
+  }, [slug, pdfUrl])
+
   const poll = useCallback(async () => {
     try {
       const res  = await fetch('/api/karmic-reading', {
@@ -101,6 +123,8 @@ export default function KarmicResultClient({ initialRow }: { initialRow: KarmicR
       if (data.narrative && data.narrative.length > 200) {
         setNarrative(prev => prev && prev.length > 200 ? prev : data.narrative)
         setPolling(false)
+        // Auto-trigger PDF generation once narrative is ready
+        triggerPdfGeneration()
       }
     } catch {
       // silently retry
