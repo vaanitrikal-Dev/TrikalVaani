@@ -3,8 +3,13 @@
  * TRIKAL VAANI — BirthForm Component
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: components/landing/BirthForm.tsx
- * VERSION: 9.3 — Lead Capture (userId stamp) + Field Reorder
+ * VERSION: 9.4 — Current City Google Places Dropdown
  * SIGNED: ROHIIT GUPTA, CEO
+ *
+ * v9.4 CHANGES vs v9.3:
+ *   ✅ Current City now uses Google Places autocomplete dropdown
+ *      (same CityInput component as Place of Birth). Stores city
+ *      name into currentCity. Everything else identical to v9.3.
  *
  * v9.3 CHANGES vs v9.2:
  *   ✅ buildPredictionBody now async — fetches logged-in user's
@@ -1286,15 +1291,18 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
               )}
             </div>
 
-            {/* Current City */}
+            {/* Current City — Google Places dropdown (v9.4) */}
             <div>
-              <label htmlFor="tv-current-city" className="block text-sm font-medium text-slate-300 mb-1.5">
-                Current City <span className="text-slate-500 text-xs ml-2">(where you live/work now)</span>
-              </label>
-              <input id="tv-current-city" type="text"
+              <CityInput
+                id="tv-current-city"
+                label="Current City"
+                value={fields.currentCity}
                 placeholder="e.g. Gurugram, Mumbai, Dubai, London..."
-                value={fields.currentCity} onChange={e => set('currentCity', e.target.value)}
-                className="w-full px-4 py-2.5 rounded-lg text-sm outline-none" style={inputStyle()} />
+                onSelect={(city) => {
+                  setFields(prev => ({ ...prev, currentCity: city }))
+                }}
+              />
+              <p className="text-slate-500 text-xs mt-1">(where you live/work now)</p>
             </div>
 
             {/* Relationship Status */}
