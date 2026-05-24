@@ -83,7 +83,7 @@ export default function KarmicResultClient({ initialRow }: { initialRow: KarmicR
   const [pdfUrl, setPdfUrl]       = useState<string | null>(initialRow.pdf_url)
   const [waitIdx, setWaitIdx]     = useState(0)
   const [elapsed, setElapsed]     = useState(0)
-  const [polling, setPolling]     = useState(!initialRow.gemini_narrative)
+  const [polling, setPolling]     = useState(!initialRow.gemini_narrative || initialRow.gemini_narrative.length < 200)
   const [error, setError]         = useState<string | null>(null)
 
   const slug        = initialRow.slug
@@ -99,7 +99,7 @@ export default function KarmicResultClient({ initialRow }: { initialRow: KarmicR
       })
       const data = await res.json()
       if (data.narrative && data.narrative.length > 200) {
-        setNarrative(data.narrative)
+        setNarrative(prev => prev && prev.length > 200 ? prev : data.narrative)
         setPolling(false)
       }
     } catch {
