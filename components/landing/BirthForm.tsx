@@ -3,8 +3,19 @@
  * TRIKAL VAANI — BirthForm Component
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: components/landing/BirthForm.tsx
- * VERSION: 9.2 — Razorpay Payment Flow + Full SEO/GEO
+ * VERSION: 9.3 — Lead Capture (userId stamp) + Field Reorder
  * SIGNED: ROHIIT GUPTA, CEO
+ *
+ * v9.3 CHANGES vs v9.2:
+ *   ✅ buildPredictionBody now async — fetches logged-in user's
+ *      Supabase session and stamps userId on the prediction
+ *      (so saved reports appear in the user's Vault).
+ *   ✅ callPredictAPI awaits buildPredictionBody.
+ *   ✅ FIELD ORDER changed: Place of Birth → WhatsApp Mobile →
+ *      Profession/Job Category → Gender. (Mobile + Profession
+ *      moved below Place of Birth, above Gender.)
+ *   ✅ Everything else identical to v9.2 — Razorpay flow, schema,
+ *      numerology, dual chart, validations all preserved 100%.
  *
  * v9.2 CHANGES vs v9.1:
  *   ✅ Razorpay payment flow for ₹51 (paid) and ₹11 (voice) tiers
@@ -12,14 +23,6 @@
  *   ✅ Calls /api/create-order → opens popup → /api/verify-payment → /api/predict
  *   ✅ Razorpay trust strip below tier selector
  *   ✅ Service + Offer JSON-LD with priceSpecification (₹51, ₹11) for AI search
- *   ✅ PaymentMethod schema injection
- *   ✅ Hidden SEO content expanded with Razorpay + PCI-DSS + WhatsApp
- *   ✅ aria-labels on payment buttons (accessibility + SEO)
- *   ✅ ALL v9.1 logic preserved 100%:
- *      - New Places API (POST), reverseGeocode, fetchTimezone
- *      - Numerology compatibility for dual-chart domains
- *      - 27 country selector, dynamic segment routing
- *      - All field validations, dual chart Person 2 section
  * ============================================================
  */
 
@@ -28,6 +31,8 @@
 import { useState, useCallback, useRef, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { loadRazorpayScript, openRazorpayCheckout } from "@/lib/razorpay-helper"
+import { supabase } from "@/lib/supabase"
+import { getMobileUser } from "@/lib/firebase-auth"
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -495,7 +500,6 @@ const SERVICE_OFFER_SCHEMA = {
     ],
   },
   termsOfService: 'https://trikalvaani.com/terms',
-  // ── Razorpay payment processor declared (AI search picks this up) ──
   brand: {
     '@type': 'Brand',
     name: 'Trikal Vaani',
@@ -855,8 +859,23 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
     return Object.keys(errs).length === 0
   }
 
-  // ── Build prediction request body ────────────────────────────────────────────
-  const buildPredictionBody = (paymentVerification: any = null) => {
+  // ── Build prediction request body (v9.3 — async + userId stamp) ─────────────
+  const buildPredictionBody = async (paymentVerification: any = null) => {
+    // ── v9.3 NEW: capture logged-in user's id so the report lands in Vault ──
+    // Gmail users -> Supabase session. Mobile users -> Firebase localStorage profileId.
+    let userId: string | undefined = undefined
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (session?.user?.id) {
+        userId = session.user.id
+      } else {
+        const mobileUser = getMobileUser()
+        if (mobileUser?.profileId) userId = mobileUser.profileId
+      }
+    } catch {
+      userId = undefined  // never block prediction if auth check fails
+    }
+
     const sessionId      = generateSessionId()
     const age            = calculateAge(fields.dateOfBirth)
     const dynamicSegment = calculateDynamicSegment(fields.dateOfBirth, fields.gender)
@@ -864,6 +883,7 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
 
     return {
       sessionId,
+      userId,
       domainId:    selectedCategory?.id    || 'mill_karz_mukti',
       domainLabel: selectedCategory?.label || 'General',
       predictionTier,
@@ -915,7 +935,7 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
       const res = await fetch('/api/predict', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify(buildPredictionBody(paymentVerification)),
+        body:    JSON.stringify(await buildPredictionBody(paymentVerification)),
       })
       const data = await res.json()
       if (!res.ok) {
@@ -943,7 +963,6 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
     setPaymentLoading(true)
 
     try {
-      // Step 1: Load Razorpay script
       const scriptLoaded = await loadRazorpayScript()
       if (!scriptLoaded) {
         setApiError('Razorpay payment SDK failed to load. Please check your internet connection.')
@@ -951,7 +970,6 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
         return
       }
 
-      // Step 2: Create Razorpay order on server
       const orderRes = await fetch('/api/create-order', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -965,7 +983,6 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
       }
       const { orderId, amount, currency, keyId } = await orderRes.json()
 
-      // Step 3: Open Razorpay checkout popup
       openRazorpayCheckout({
         keyId,
         orderId,
@@ -977,7 +994,6 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
         prefillContact: `${fields.countryCode}${fields.mobile}`.replace(/\s/g, ''),
         themeColor:     '#D4AF37',
         onSuccess: async (response) => {
-          // Step 4: Verify payment server-side
           const verifyRes = await fetch('/api/verify-payment', {
             method:  'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -990,14 +1006,12 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
             return
           }
 
-          // Step 5: For voice tier, redirect to /voice with payment proof
           if (tier === 'voice') {
             const voiceUrl = `/voice?name=${encodeURIComponent(fields.name)}&lang=${fields.language}&pid=${response.razorpay_payment_id}`
             router.push(voiceUrl)
             return
           }
 
-          // Step 6: For paid tier, call /api/predict with payment verification
           setIsSubmitting(true)
           startLoadingMessages(PAYMENT_LOADING_STEPS)
 
@@ -1026,13 +1040,11 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
     e.preventDefault()
     if (!validate()) return
 
-    // ── PAID or VOICE → trigger Razorpay flow ──
     if (predictionTier === 'paid' || predictionTier === 'voice') {
       await handleRazorpayPayment(predictionTier)
       return
     }
 
-    // ── FREE → direct prediction ──
     setIsSubmitting(true)
     setApiError(null)
     startLoadingMessages()
@@ -1147,36 +1159,6 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
               {errors.name && <p className="text-red-400 text-xs mt-1">{errors.name}</p>}
             </div>
 
-            {/* Mobile */}
-            <div>
-              <label htmlFor="tv-mobile" className="block text-sm font-medium text-slate-300 mb-1.5">
-                WhatsApp Mobile <span className="text-yellow-400">*</span>
-                <span className="text-slate-500 text-xs ml-2">(for follow-up + numerology)</span>
-              </label>
-              <div className="flex gap-2">
-                <CountrySelector id="tv-country" value={fields.countryCode}
-                  onChange={(dial, digits) => setFields(prev => ({ ...prev, countryCode: dial, countryDigits: digits }))} />
-                <input id="tv-mobile" type="tel" placeholder={`${fields.countryDigits}-digit mobile`}
-                  value={fields.mobile} onChange={e => handleMobileChange(e.target.value)}
-                  maxLength={fields.countryDigits + 2}
-                  className="flex-1 px-4 py-2.5 rounded-lg text-sm outline-none"
-                  style={inputStyle(!!errors.mobile)} />
-              </div>
-              {errors.mobile && <p className="text-red-400 text-xs mt-1">{errors.mobile}</p>}
-            </div>
-
-            {/* Job */}
-            <div className="relative">
-              <label htmlFor="tv-job" className="block text-sm font-medium text-slate-300 mb-1.5">Profession / Job Category</label>
-              <div className="relative">
-                <select id="tv-job" value={fields.jobCategory} onChange={e => set('jobCategory', e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-lg text-sm outline-none appearance-none pr-8" style={SELECT_STYLE}>
-                  {JOB_CATEGORIES.map(j => <option key={j.value} value={j.value} style={{ background: '#0d1120', color: '#e2e8f0' }}>{j.label}</option>)}
-                </select>
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500">▾</span>
-              </div>
-            </div>
-
             {/* DOB */}
             <div>
               <label htmlFor="tv-dob" className="block text-sm font-medium text-slate-300 mb-1.5">Date of Birth <span className="text-yellow-400">*</span></label>
@@ -1204,31 +1186,6 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
                 className="w-full px-4 py-2.5 rounded-lg text-sm outline-none"
                 style={{ ...inputStyle(!!errors.timeOfBirth), opacity: fields.unknownTime ? 0.4 : 1 }} />
               {fields.unknownTime && <p className="text-slate-500 text-xs mt-1">Solar chart will be used (12:00 noon)</p>}
-            </div>
-
-            {/* Gender */}
-            <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">
-                Gender <span className="text-slate-500 text-xs ml-1">(for personalized remedies)</span>
-              </label>
-              <div className="grid grid-cols-3 gap-2">
-                {[
-                  { value: 'male',   label: '♂ Male',   color: '#60a5fa' },
-                  { value: 'female', label: '♀ Female', color: '#f472b6' },
-                  { value: 'other',  label: '⊕ Other',  color: '#94a3b8' },
-                ].map(opt => (
-                  <button key={opt.value} type="button" onClick={() => set('gender', opt.value as any)}
-                    className="py-2.5 px-3 rounded-lg text-sm font-medium transition-all text-center"
-                    style={{ background: fields.gender === opt.value ? `${opt.color}20` : 'rgba(255,255,255,0.04)', border: `1px solid ${fields.gender === opt.value ? `${opt.color}60` : 'rgba(255,255,255,0.1)'}`, color: fields.gender === opt.value ? opt.color : '#64748b' }}>
-                    {opt.label}
-                  </button>
-                ))}
-              </div>
-              {fields.gender && fields.dateOfBirth && (
-                <p style={{ margin: '6px 0 0', color: GOLD, fontSize: '11px' }}>
-                  ✦ Segment: {calculateDynamicSegment(fields.dateOfBirth, fields.gender).replace('_', ' ')} — personalized remedy routing active
-                </p>
-              )}
             </div>
 
             {/* Place of Birth */}
@@ -1273,6 +1230,61 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
                 ))}
               </div>
             )}
+
+            {/* Mobile */}
+            <div>
+              <label htmlFor="tv-mobile" className="block text-sm font-medium text-slate-300 mb-1.5">
+                WhatsApp Mobile <span className="text-yellow-400">*</span>
+                <span className="text-slate-500 text-xs ml-2">(for follow-up + numerology)</span>
+              </label>
+              <div className="flex gap-2">
+                <CountrySelector id="tv-country" value={fields.countryCode}
+                  onChange={(dial, digits) => setFields(prev => ({ ...prev, countryCode: dial, countryDigits: digits }))} />
+                <input id="tv-mobile" type="tel" placeholder={`${fields.countryDigits}-digit mobile`}
+                  value={fields.mobile} onChange={e => handleMobileChange(e.target.value)}
+                  maxLength={fields.countryDigits + 2}
+                  className="flex-1 px-4 py-2.5 rounded-lg text-sm outline-none"
+                  style={inputStyle(!!errors.mobile)} />
+              </div>
+              {errors.mobile && <p className="text-red-400 text-xs mt-1">{errors.mobile}</p>}
+            </div>
+
+            {/* Job */}
+            <div className="relative">
+              <label htmlFor="tv-job" className="block text-sm font-medium text-slate-300 mb-1.5">Profession / Job Category</label>
+              <div className="relative">
+                <select id="tv-job" value={fields.jobCategory} onChange={e => set('jobCategory', e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-lg text-sm outline-none appearance-none pr-8" style={SELECT_STYLE}>
+                  {JOB_CATEGORIES.map(j => <option key={j.value} value={j.value} style={{ background: '#0d1120', color: '#e2e8f0' }}>{j.label}</option>)}
+                </select>
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500">▾</span>
+              </div>
+            </div>
+
+            {/* Gender */}
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-2">
+                Gender <span className="text-slate-500 text-xs ml-1">(for personalized remedies)</span>
+              </label>
+              <div className="grid grid-cols-3 gap-2">
+                {[
+                  { value: 'male',   label: '♂ Male',   color: '#60a5fa' },
+                  { value: 'female', label: '♀ Female', color: '#f472b6' },
+                  { value: 'other',  label: '⊕ Other',  color: '#94a3b8' },
+                ].map(opt => (
+                  <button key={opt.value} type="button" onClick={() => set('gender', opt.value as any)}
+                    className="py-2.5 px-3 rounded-lg text-sm font-medium transition-all text-center"
+                    style={{ background: fields.gender === opt.value ? `${opt.color}20` : 'rgba(255,255,255,0.04)', border: `1px solid ${fields.gender === opt.value ? `${opt.color}60` : 'rgba(255,255,255,0.1)'}`, color: fields.gender === opt.value ? opt.color : '#64748b' }}>
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+              {fields.gender && fields.dateOfBirth && (
+                <p style={{ margin: '6px 0 0', color: GOLD, fontSize: '11px' }}>
+                  ✦ Segment: {calculateDynamicSegment(fields.dateOfBirth, fields.gender).replace('_', ' ')} — personalized remedy routing active
+                </p>
+              )}
+            </div>
 
             {/* Current City */}
             <div>
