@@ -3,7 +3,7 @@
 TRIKAL VAANI — Content Engine PRO
 =============================================================
 File:    content-engine/pro_engine.py
-Version: v1.0
+Version: v1.2 — pinned comment after YT upload, caption kit wired
 Owner:   Rohiit Gupta, Chief Vedic Architect
 Date:    2026-05-25
 =============================================================
@@ -732,6 +732,35 @@ def upload_to_youtube(video_path: Path, script_data: dict) -> Optional[str]:
         video_id = response["id"]
         url = f"https://www.youtube.com/shorts/{video_id}"
         log(f"YouTube live: {url}")
+
+        # ── Pinned comment ────────────────────────────────────
+        pinned = script_data.get("caption", "")
+        if not pinned:
+            pinned = (
+                "🔮 Trikal Vaani — AI-powered Vedic Astrology\n"
+                "Free Kundali, Kundali Milan & Life Predictions\n"
+                "👉 trikalvaani.com\n"
+                "#VedicAstrology #FreeKundali #TrikalVaani"
+            )
+        try:
+            youtube.commentThreads().insert(
+                part="snippet",
+                body={
+                    "snippet": {
+                        "videoId": video_id,
+                        "topLevelComment": {
+                            "snippet": {
+                                "textOriginal": pinned[:9000]
+                            }
+                        }
+                    }
+                }
+            ).execute()
+            log("  Pinned comment posted")
+        except Exception as ce:
+            log(f"  Pinned comment skipped: {ce}")
+        # ─────────────────────────────────────────────────────
+
         return url
     except Exception as e:
         log(f"YouTube exception: {e}")
@@ -984,3 +1013,99 @@ def run_flow_stitch(text: str, flow_video_bytes: bytes,
         log(f"Pipeline 3b error: {e}\n{traceback.format_exc()}")
         cleanup_pro(slug)
         return {"success": False, "error": str(e)[:300]}
+
+# =============================================================
+# CAPTION KIT — for manual Instagram/Facebook/WhatsApp posting
+# Added post v1.0 to support manual social posting workflow
+# =============================================================
+def build_pro_caption_kit(script_data: dict, slug: str, pipeline: str) -> str:
+    title = script_data.get("title", "")
+    caption = script_data.get("caption", "")
+    hashtags = " ".join(["#" + h for h in script_data.get("hashtags", [])[:25]])
+    yt_desc = script_data.get("yt_description", "")
+
+    kit = f"""
+=====================================
+TRIKAL VAANI — PRO CAPTION KIT
+Pipeline: {pipeline.upper()}
+Slug: {slug}
+Generated: {today_ist()}
+=====================================
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📸 INSTAGRAM CAPTION
+(Post → auto-pushes to Facebook + Threads)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+{caption}
+
+.
+.
+.
+{hashtags}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📘 FACEBOOK CAPTION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+{caption}
+
+{hashtags[:200]}
+
+Free Kundali: https://trikalvaani.com
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+💬 WHATSAPP BROADCAST
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+{caption[:200]}
+
+trikalvaani.com 🙏
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🎬 YOUTUBE DESCRIPTION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+{yt_desc}
+
+=====================================
+Jai Trikal Vaani 🙏
+trikalvaani.com
+=====================================
+"""
+    return kit
+
+def upload_caption_to_drive(caption_text: str, slug: str, title: str) -> Optional[str]:
+    """Upload caption kit TXT to Drive."""
+    log("Uploading caption kit to Drive...")
+    token = get_drive_token()
+    if not token:
+        return None
+    try:
+        kit_bytes = caption_text.encode('utf-8')
+        metadata = {
+            "name": f"{slug}_CAPTIONS.txt",
+            "parents": [DRIVE_FOLDER_ID],
+            "description": f"Caption kit — {title}"
+        }
+        boundary = "trikal_caption_boundary"
+        body = (
+            f"--{boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n"
+            f"{json.dumps(metadata)}\r\n"
+            f"--{boundary}\r\nContent-Type: text/plain; charset=utf-8\r\n\r\n"
+        ).encode() + kit_bytes + f"\r\n--{boundary}--".encode()
+
+        resp = requests.post(
+            "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart",
+            headers={
+                "Authorization": f"Bearer {token}",
+                "Content-Type": f"multipart/related; boundary={boundary}"
+            },
+            data=body, timeout=60
+        )
+        if resp.status_code in [200, 201]:
+            file_id = resp.json().get("id")
+            url = f"https://drive.google.com/file/d/{file_id}/view"
+            log(f"Caption kit on Drive: {url}")
+            return url
+        log(f"Caption upload failed: {resp.status_code}")
+        return None
+    except Exception as e:
+        log(f"Caption upload exception: {e}")
+        return None
