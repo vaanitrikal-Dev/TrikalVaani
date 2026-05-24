@@ -1,11 +1,22 @@
 #!/usr/bin/env python3
 """
-TRIKAL VAANI - Content Engine v5.4
+TRIKAL VAANI - Content Engine v5.5
 =====================================
 FLOW 1: YouTube DIRECT upload from VM (no Vercel, no Supabase)
 FLOW 2: Google Drive Caption Kit (video + captions txt → Drive folder)
 Meta (FB/IG/Threads) = REMOVED (post manually via Instagram → auto-pushes to FB+Threads)
 =====================================
+NEW IN v5.5:
+  - render_video() upgraded: replaced simple alternating zoom with
+    MOOD-MATCHED 8-effect FFmpeg library keyed to STORY_ARC roles:
+      DeityReveal   → punch_in      (fast zoom, attention grab, hook feel)
+      DeityOffering → slow_zoom_in  (gentle center zoom, divine meditative)
+      Dos           → top_to_bottom (y-pan downward, divine flow, blessings)
+      Donts         → zoom_out      (pull back reveal, dramatic warning)
+      Blessing      → slow_drift    (slow zoom + x drift, warmth, grace)
+    Any additional images beyond 5 → diagonal pan (energy, forward motion)
+  - Version bumped v5.4 → v5.5
+  - NOTHING ELSE CHANGED from v5.4
 NEW IN v5.4:
   - publish_to_youtube_direct() → uploads MP4 straight from VM via YouTube Data API
   - Supabase Storage REMOVED (was failing with new sb_secret key format)
@@ -573,18 +584,135 @@ def generate_all_images(prompts):
 
 
 # ============================================================
-# STEP 4: VIDEO RENDER
+# STEP 4: VIDEO RENDER — v5.5 MOOD-MATCHED EFFECT LIBRARY
 # ============================================================
+
+# ── Effect library ──────────────────────────────────────────
+# Each function returns a zoompan/vf filter string for FFmpeg.
+# d_frames = total frames for this clip (img_dur * 25)
+# All output: 1080x1920 (9:16 portrait), 25fps
+# ────────────────────────────────────────────────────────────
+
+def effect_punch_in(d_frames):
+    """
+    DeityReveal — Fast zoom in from 1.0 to 1.4, centered.
+    Creates attention-grabbing hook feel, like a cinematic push.
+    """
+    return (
+        f"zoompan="
+        f"z='min(1.0+({d_frames}-on)*0.016/{d_frames},1.4)':"
+        f"x='iw/2-(iw/zoom/2)':"
+        f"y='ih/2-(ih/zoom/2)':"
+        f"d={d_frames}:s=1080x1920:fps=25"
+    )
+
+
+def effect_slow_zoom_in(d_frames):
+    """
+    DeityOffering — Very gentle zoom in 1.0 → 1.18, centered.
+    Divine meditative feel, calm and reverent.
+    """
+    return (
+        f"zoompan="
+        f"z='min(1.0+on*0.18/{d_frames},1.18)':"
+        f"x='iw/2-(iw/zoom/2)':"
+        f"y='ih/2-(ih/zoom/2)':"
+        f"d={d_frames}:s=1080x1920:fps=25"
+    )
+
+
+def effect_top_to_bottom(d_frames):
+    """
+    Dos — Fixed 1.1 zoom, camera pans slowly top to bottom.
+    Represents divine blessings flowing downward, sacred flow.
+    """
+    return (
+        f"zoompan="
+        f"z='1.1':"
+        f"x='iw/2-(iw/zoom/2)':"
+        f"y='on*(ih-(ih/zoom))/{d_frames}':"
+        f"d={d_frames}:s=1080x1920:fps=25"
+    )
+
+
+def effect_zoom_out(d_frames):
+    """
+    Donts — Starts zoomed in at 1.35, pulls back to 1.0.
+    Dramatic reveal feel, warning/consequence atmosphere.
+    """
+    return (
+        f"zoompan="
+        f"z='max(1.35-on*0.35/{d_frames},1.0)':"
+        f"x='iw/2-(iw/zoom/2)':"
+        f"y='ih/2-(ih/zoom/2)':"
+        f"d={d_frames}:s=1080x1920:fps=25"
+    )
+
+
+def effect_slow_drift(d_frames):
+    """
+    Blessing — Slow zoom 1.0 → 1.12 + gentle horizontal drift left to right.
+    Warmth, grace, peaceful conclusion feel.
+    """
+    return (
+        f"zoompan="
+        f"z='min(1.0+on*0.12/{d_frames},1.12)':"
+        f"x='on*(iw/8)/{d_frames}':"
+        f"y='ih/2-(ih/zoom/2)':"
+        f"d={d_frames}:s=1080x1920:fps=25"
+    )
+
+
+def effect_diagonal(d_frames):
+    """
+    Extra images — Zoom 1.0 → 1.2 + diagonal pan (x and y both move).
+    Energy, momentum, cinematic forward motion.
+    """
+    return (
+        f"zoompan="
+        f"z='min(1.0+on*0.2/{d_frames},1.2)':"
+        f"x='on*(iw/6)/{d_frames}':"
+        f"y='on*(ih/8)/{d_frames}':"
+        f"d={d_frames}:s=1080x1920:fps=25"
+    )
+
+
+# ── Role → Effect mapping ────────────────────────────────────
+# Keyed to STORY_ARC roles. Any image beyond the 5-arc roles
+# gets diagonal (energy/forward motion) as safe default.
+# ────────────────────────────────────────────────────────────
+ROLE_TO_EFFECT = {
+    "DeityReveal":   effect_punch_in,       # fast zoom → hook, attention grab
+    "DeityOffering": effect_slow_zoom_in,   # gentle zoom → divine, meditative
+    "Dos":           effect_top_to_bottom,  # y-pan down → blessings flowing
+    "Donts":         effect_zoom_out,       # pull back → dramatic, warning
+    "Blessing":      effect_slow_drift,     # slow drift → warmth, grace
+}
+
+
+def get_effect_for_index(idx):
+    """Return the effect function for image at position idx."""
+    if idx < len(STORY_ARC):
+        role = STORY_ARC[idx]["role"]
+        fn = ROLE_TO_EFFECT.get(role, effect_diagonal)
+        log(f"  Image {idx+1} role={role} → {fn.__name__}")
+        return fn
+    log(f"  Image {idx+1} (extra) → effect_diagonal")
+    return effect_diagonal
+
+
 def render_video(images, audio_path, script, festival):
-    log("Rendering video with Ken Burns...")
+    log("Rendering video — v5.5 mood-matched effects...")
 
     slug = script.get('slug', f"{festival['festival_slug']}-{festival['date']}")
     output_path = OUTPUT_DIR / f"{slug}.mp4"
 
+    # ── Get audio duration ───────────────────────────────────
     audio_dur = 48.0
     try:
         result = subprocess.run(
-            ["ffprobe", "-v", "quiet", "-print_format", "json", "-show_format", str(audio_path)],
+            ["ffprobe", "-v", "quiet", "-print_format", "json",
+             "-show_format", str(audio_path)],
             capture_output=True, text=True, timeout=30
         )
         parsed = json.loads(result.stdout)
@@ -597,30 +725,42 @@ def render_video(images, audio_path, script, festival):
         audio_dur = 48.0
 
     img_dur = max(audio_dur / len(images), 5.0)
+    d_frames = max(int(img_dur * 25), 125)
 
+    # ── Render each clip with mood-matched effect ────────────
     processed = []
     for i, img in enumerate(images):
-        out = TEMP_DIR / f"kb_{i}.mp4"
-        d_frames = max(int(img_dur * 25), 125)
-        if i % 2 == 0:
-            zoom = f"zoompan=z='min(zoom+0.0012,1.25)':d={d_frames}:x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':s=1080x1920:fps=25"
-        else:
-            zoom = f"zoompan=z='if(lte(zoom,1.0),1.25,max(1.001,zoom-0.0012))':d={d_frames}:x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':s=1080x1920:fps=25"
+        out = TEMP_DIR / f"clip_{i}.mp4"
 
-        subprocess.run([
+        effect_fn = get_effect_for_index(i)
+        zoompan_filter = effect_fn(d_frames)
+
+        vf_chain = (
+            f"scale=1080:1920:force_original_aspect_ratio=increase,"
+            f"crop=1080:1920,"
+            f"{zoompan_filter}"
+        )
+
+        res = subprocess.run([
             "ffmpeg", "-y", "-loop", "1", "-i", str(img),
-            "-vf", f"scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,{zoom}",
-            "-t", str(img_dur), "-c:v", "libx264", "-preset", "fast",
-            "-crf", "20", "-pix_fmt", "yuv420p", "-r", "25", str(out)
+            "-vf", vf_chain,
+            "-t", str(img_dur),
+            "-c:v", "libx264", "-preset", "fast",
+            "-crf", "20", "-pix_fmt", "yuv420p", "-r", "25",
+            str(out)
         ], capture_output=True, timeout=180)
+
         if out.exists() and out.stat().st_size > 1000:
             processed.append(out)
-            log(f"  Ken Burns clip {i+1}/{len(images)} OK")
+            log(f"  Clip {i+1}/{len(images)} OK → {effect_fn.__name__}")
+        else:
+            log(f"  Clip {i+1} FAILED: {res.stderr[-200:]}")
 
     if not processed:
         log("No clips processed")
         return None
 
+    # ── Concatenate clips ────────────────────────────────────
     concat_file = TEMP_DIR / "concat.txt"
     concat_file.write_text("\n".join([f"file '{p}'" for p in processed]))
     concat_out = TEMP_DIR / "concat.mp4"
@@ -629,6 +769,7 @@ def render_video(images, audio_path, script, festival):
         "-i", str(concat_file), "-c", "copy", str(concat_out)
     ], capture_output=True, timeout=120)
 
+    # ── Overlay text + logo ──────────────────────────────────
     hindi = [safe_text(l) for l in script.get("hindi_lines", [])]
     fest_name = safe_text(festival["festival_name"])
     fh = str(FONT_HINDI) if FONT_HINDI.exists() else ""
@@ -637,16 +778,30 @@ def render_video(images, audio_path, script, festival):
     fe_opt = f":fontfile='{fe}'" if fe else ""
 
     filters = []
-    filters.append(f"drawtext=text='TrikalVaani.com':fontsize=42:fontcolor=gold:box=0:x=(w-text_w)/2:y=80:shadowcolor=black:shadowx=2:shadowy=2{fe_opt}")
-    filters.append(f"drawtext=text='{fest_name}':fontsize=58:fontcolor=white:box=0:x=(w-text_w)/2:y=160:shadowcolor=black:shadowx=3:shadowy=3{fh_opt}")
+    filters.append(
+        f"drawtext=text='TrikalVaani.com':fontsize=42:fontcolor=gold:box=0"
+        f":x=(w-text_w)/2:y=80:shadowcolor=black:shadowx=2:shadowy=2{fe_opt}"
+    )
+    filters.append(
+        f"drawtext=text='{fest_name}':fontsize=58:fontcolor=white:box=0"
+        f":x=(w-text_w)/2:y=160:shadowcolor=black:shadowx=3:shadowy=3{fh_opt}"
+    )
 
     line_time = audio_dur / max(len(hindi) + 1, 1)
     for i, line in enumerate(hindi):
         y_pos = 1550 + (i * 75)
         start_t = i * line_time
-        filters.append(f"drawtext=text='{line}':fontsize=48:fontcolor=white:box=0:x=(w-text_w)/2:y={y_pos}:enable='gte(t,{start_t:.1f})':shadowcolor=black:shadowx=2:shadowy=2{fh_opt}")
+        filters.append(
+            f"drawtext=text='{line}':fontsize=48:fontcolor=white:box=0"
+            f":x=(w-text_w)/2:y={y_pos}:enable='gte(t,{start_t:.1f})'"
+            f":shadowcolor=black:shadowx=2:shadowy=2{fh_opt}"
+        )
 
-    filters.append(f"drawtext=text='Rohiit Gupta - Chief Vedic Architect':fontsize=28:fontcolor=gold:box=0:x=(w-text_w)/2:y=h-60:shadowcolor=black:shadowx=2:shadowy=2{fe_opt}")
+    filters.append(
+        f"drawtext=text='Rohiit Gupta - Chief Vedic Architect':fontsize=28"
+        f":fontcolor=gold:box=0:x=(w-text_w)/2:y=h-60"
+        f":shadowcolor=black:shadowx=2:shadowy=2{fe_opt}"
+    )
     vf = ",".join(filters)
 
     if LOGO_PATH.exists():
@@ -658,19 +813,27 @@ def render_video(images, audio_path, script, festival):
             f"[v1][logo_wm]overlay=(W-w)/2:(H-h)/2[out]"
         )
         cmd = [
-            "ffmpeg", "-y", "-i", str(concat_out), "-i", str(LOGO_PATH), "-i", str(audio_path),
-            "-filter_complex", fc, "-map", "[out]", "-map", "2:a",
+            "ffmpeg", "-y",
+            "-i", str(concat_out), "-i", str(LOGO_PATH), "-i", str(audio_path),
+            "-filter_complex", fc,
+            "-map", "[out]", "-map", "2:a",
             "-c:v", "libx264", "-preset", "fast", "-crf", "21",
-            "-c:a", "aac", "-b:a", "128k", "-t", str(audio_dur),
-            "-movflags", "+faststart", "-pix_fmt", "yuv420p", str(output_path)
+            "-c:a", "aac", "-b:a", "128k",
+            "-t", str(audio_dur),
+            "-movflags", "+faststart", "-pix_fmt", "yuv420p",
+            str(output_path)
         ]
     else:
         cmd = [
-            "ffmpeg", "-y", "-i", str(concat_out), "-i", str(audio_path),
-            "-vf", vf, "-map", "0:v", "-map", "1:a",
+            "ffmpeg", "-y",
+            "-i", str(concat_out), "-i", str(audio_path),
+            "-vf", vf,
+            "-map", "0:v", "-map", "1:a",
             "-c:v", "libx264", "-preset", "fast", "-crf", "21",
-            "-c:a", "aac", "-b:a", "128k", "-t", str(audio_dur),
-            "-movflags", "+faststart", "-pix_fmt", "yuv420p", str(output_path)
+            "-c:a", "aac", "-b:a", "128k",
+            "-t", str(audio_dur),
+            "-movflags", "+faststart", "-pix_fmt", "yuv420p",
+            str(output_path)
         ]
 
     res = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
@@ -784,8 +947,12 @@ def publish_to_youtube_direct(script, video_path, festival):
             }
         }
 
-        media = MediaFileUpload(str(video_path), chunksize=-1, resumable=True, mimetype="video/mp4")
-        request = youtube.videos().insert(part="snippet,status", body=body, media_body=media)
+        media = MediaFileUpload(
+            str(video_path), chunksize=-1, resumable=True, mimetype="video/mp4"
+        )
+        request = youtube.videos().insert(
+            part="snippet,status", body=body, media_body=media
+        )
 
         response = None
         while response is None:
@@ -853,7 +1020,9 @@ def save_seo_package(script, video_path, festival):
         "platforms_published": ["youtube"],
         "platforms_manual": ["instagram", "facebook", "threads", "whatsapp"]
     }
-    json_path.write_text(json.dumps(package, ensure_ascii=False, indent=2), encoding='utf-8')
+    json_path.write_text(
+        json.dumps(package, ensure_ascii=False, indent=2), encoding='utf-8'
+    )
     log(f"SEO sidecar saved: {json_path.name}")
     return json_path
 
@@ -908,14 +1077,14 @@ def send_whatsapp_alert(message):
 
 
 def cleanup():
-    patterns = ["*.mp4", "*.txt", "img_*.png", "tts_*.wav"]
+    patterns = ["clip_*.mp4", "concat*", "*.txt", "img_*.png", "tts_*.wav"]
     for pat in patterns:
         for f in TEMP_DIR.glob(pat):
             f.unlink(missing_ok=True)
 
 
 # ============================================================
-# PROCESS ONE FESTIVAL (v5.3)
+# PROCESS ONE FESTIVAL
 # ============================================================
 def process_festival(festival, max_retries=3):
     for attempt in range(1, max_retries + 1):
@@ -943,16 +1112,17 @@ def process_festival(festival, max_retries=3):
             json_path = save_seo_package(script, video, festival)
             log_supabase(script, video, None, festival, True)
 
-            # FLOW 1: YouTube DIRECT upload from VM (no Supabase, no Vercel)
+            # FLOW 1: YouTube DIRECT upload from VM
             yt_url = publish_to_youtube_direct(script, video, festival)
 
             # FLOW 2: Google Drive Caption Kit
             caption_kit = build_caption_kit(script, festival)
             drive_video_url, drive_kit_url = upload_to_drive(
-                video, caption_kit, script.get("slug", "video"), festival["festival_name"]
+                video, caption_kit,
+                script.get("slug", "video"),
+                festival["festival_name"]
             )
 
-            # WhatsApp Success Alert
             alert = (
                 f"✅ TRIKAL VAANI VIDEO READY\n\n"
                 f"Festival: {festival['festival_name']}\n"
@@ -964,8 +1134,8 @@ def process_festival(festival, max_retries=3):
                 f"trikalvaani.com"
             )
             send_whatsapp_alert(alert)
-
             cleanup()
+
             log(f"SUCCESS: {festival['festival_name']}")
             log(f"YouTube: {yt_url}")
             log(f"Drive Video: {drive_video_url}")
@@ -994,14 +1164,18 @@ def process_festival(festival, max_retries=3):
 # ============================================================
 def main():
     log("=" * 55)
-    log("TRIKAL VAANI CONTENT ENGINE v5.4")
+    log("TRIKAL VAANI CONTENT ENGINE v5.5")
     log("Flow 1: YouTube DIRECT (VM) | Flow 2: Drive Caption Kit")
+    log("Render: 5-effect mood-matched FFmpeg library")
     log("=" * 55)
 
     if len(sys.argv) > 1 and sys.argv[1] == "--festival":
         slug = sys.argv[2] if len(sys.argv) > 2 else None
         log(f"Manual mode: {slug}")
-        headers = {"apikey": SUPABASE_KEY, "Authorization": f"Bearer {SUPABASE_KEY}"}
+        headers = {
+            "apikey": SUPABASE_KEY,
+            "Authorization": f"Bearer {SUPABASE_KEY}"
+        }
         resp = requests.get(
             f"{SUPABASE_URL}/rest/v1/festivals_master?festival_slug=eq.{slug}&select=*",
             headers=headers, timeout=30
