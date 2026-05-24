@@ -3,17 +3,16 @@
 // ============================================================
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikal Vaani
 // FILE: components/layout/SiteNav.tsx
-// VERSION: v2.5
+// VERSION: v2.6
 // DATE: 2026-05-24
 // CHANGES:
-//   v2.5: "My Vault" is now a DROPDOWN (desktop) with two items:
-//         "My Vault" (-> /my-cosmic-records) and "Sign Out".
-//         Mobile menu gets an explicit "Sign Out" row too.
-//         Sign Out uses signOut() from lib/auth and refreshes state.
-//         Everything else identical to v2.4.
-//   v2.4: MOBILE HAMBURGER MENU. Top bar now shows logo + Start + ☰.
-//   v2.3: Added "Kundali Milan" + "Karmic Reading" links.
-//   v2.2: Removed "Events"; added "Calculators" → /calculators.
+//   v2.6: Nav now detects BOTH login types:
+//         - Gmail (Supabase session) — existing
+//         - Mobile OTP (Firebase, stored in localStorage tv_mobile_user) — NEW
+//         If either is present, shows "My Vault" dropdown.
+//         Sign Out clears both sessions.
+//   v2.5: "My Vault" dropdown with Sign Out.
+//   v2.4: Mobile hamburger menu.
 // ============================================================
 
 import Link from 'next/link';
@@ -22,6 +21,7 @@ import { Mail, User, ChevronDown, Menu, X, LogOut } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
 import { signOut } from '@/lib/auth';
+import { signOutMobile, getMobileUser } from '@/lib/firebase-auth';
 import AuthModal from '@/components/auth/AuthModal';
 import { LANG_LABELS, LANG_NAMES, type Lang } from '@/lib/lang';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
@@ -29,16 +29,15 @@ import type { User as SupabaseUser } from '@supabase/supabase-js';
 const GOLD = '#D4AF37';
 const GOLD_RGBA = (a: number) => `rgba(212,175,55,${a})`;
 
-// Single source of truth for nav links (desktop + mobile share this)
 const NAV_LINKS: { href: string; label: string; highlight?: boolean }[] = [
-  { href: '/#pillars',                 label: 'Life Pillars' },
-  { href: '/services',                 label: 'Services', highlight: true },
-  { href: '/kundali-milan',            label: 'Kundali Milan' },
+  { href: '/#pillars',                  label: 'Life Pillars' },
+  { href: '/services',                  label: 'Services', highlight: true },
+  { href: '/kundali-milan',             label: 'Kundali Milan' },
   { href: '/karmic-background-reading', label: 'Karmic Reading' },
-  { href: '/panchang',                 label: 'Panchang' },
-  { href: '/calculators',              label: 'Calculators' },
-  { href: '/blog',                     label: 'Vedic Blog' },
-  { href: '/founder',                  label: 'Founder' },
+  { href: '/panchang',                  label: 'Panchang' },
+  { href: '/calculators',               label: 'Calculators' },
+  { href: '/blog',                      label: 'Vedic Blog' },
+  { href: '/founder',                   label: 'Founder' },
 ];
 
 function LangSwitcher({ lang, setLang }: { lang: Lang; setLang: (l: Lang) => void }) {
@@ -84,7 +83,6 @@ function LangSwitcher({ lang, setLang }: { lang: Lang; setLang: (l: Lang) => voi
   );
 }
 
-// Desktop "My Vault" dropdown (Vault + Sign Out)
 function VaultMenu({ onSignOut }: { onSignOut: () => void }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -140,11 +138,13 @@ function VaultMenu({ onSignOut }: { onSignOut: () => void }) {
 
 export default function SiteNav() {
   const [user, setUser] = useState<SupabaseUser | null>(null);
+  const [mobileLoggedIn, setMobileLoggedIn] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
   const [lang, setLang] = useState<Lang>('en');
   const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
+    // Check Supabase session (Gmail login)
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
     });
@@ -153,20 +153,28 @@ export default function SiteNav() {
       setUser(session?.user ?? null);
     });
 
+    // Check Firebase mobile session (localStorage)
+    const mobileUser = getMobileUser();
+    setMobileLoggedIn(!!mobileUser);
+
     return () => subscription.unsubscribe();
   }, []);
 
-  // Lock body scroll when mobile menu is open
+  // Either Gmail or mobile = logged in
+  const isLoggedIn = !!user || mobileLoggedIn;
+
   useEffect(() => {
     document.body.style.overflow = mobileOpen ? 'hidden' : '';
     return () => { document.body.style.overflow = ''; };
   }, [mobileOpen]);
 
   const handleSignOut = async () => {
-    await signOut();
+    // Sign out from whichever session is active
+    if (user) await signOut();
+    if (mobileLoggedIn) await signOutMobile();
     setUser(null);
+    setMobileLoggedIn(false);
     setMobileOpen(false);
-    // Send user home after logout.
     if (typeof window !== 'undefined') window.location.href = '/';
   };
 
@@ -194,13 +202,7 @@ export default function SiteNav() {
                 boxShadow: `0 0 22px ${GOLD_RGBA(0.38)}, 0 0 8px ${GOLD_RGBA(0.55)}`,
               }}
             >
-              <Image
-                src="/Trikal_Vaani_Logo.svg"
-                alt="Trikal Vaani Logo"
-                width={60}
-                height={60}
-                priority
-              />
+              <Image src="/Trikal_Vaani_Logo.svg" alt="Trikal Vaani Logo" width={60} height={60} priority />
             </div>
             <span className="font-serif font-bold text-lg text-gradient-gold tracking-wide">
               Trikal Vaani
@@ -209,17 +211,12 @@ export default function SiteNav() {
 
           {/* ── DESKTOP NAV ── */}
           <nav className="hidden sm:flex items-center gap-4">
-
             {NAV_LINKS.map((l) => (
               <Link
                 key={l.href}
                 href={l.href}
                 className="text-sm transition-colors duration-200"
-                style={
-                  l.highlight
-                    ? { color: GOLD_RGBA(0.85), fontWeight: 600 }
-                    : { color: '#94a3b8' }
-                }
+                style={l.highlight ? { color: GOLD_RGBA(0.85), fontWeight: 600 } : { color: '#94a3b8' }}
               >
                 {l.label}
               </Link>
@@ -235,7 +232,7 @@ export default function SiteNav() {
 
             <LangSwitcher lang={lang} setLang={setLang} />
 
-            {user ? (
+            {isLoggedIn ? (
               <VaultMenu onSignOut={handleSignOut} />
             ) : (
               <button
@@ -263,15 +260,12 @@ export default function SiteNav() {
             </Link>
           </nav>
 
-          {/* ── MOBILE: Start button + hamburger ── */}
+          {/* ── MOBILE: Start + hamburger ── */}
           <div className="sm:hidden flex items-center gap-2">
             <Link
               href="/#birth-form"
-              className="text-sm font-medium px-4 py-2 rounded-full transition-all duration-300"
-              style={{
-                background: `linear-gradient(135deg, ${GOLD} 0%, #A8820A 100%)`,
-                color: '#080B12',
-              }}
+              className="text-sm font-medium px-4 py-2 rounded-full"
+              style={{ background: `linear-gradient(135deg, ${GOLD} 0%, #A8820A 100%)`, color: '#080B12' }}
               onClick={() => setMobileOpen(false)}
             >
               Start
@@ -280,13 +274,7 @@ export default function SiteNav() {
               aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
               onClick={() => setMobileOpen((o) => !o)}
               className="flex items-center justify-center rounded-lg transition-colors"
-              style={{
-                width: '40px',
-                height: '40px',
-                color: GOLD,
-                border: `1px solid ${GOLD_RGBA(0.25)}`,
-                background: GOLD_RGBA(0.06),
-              }}
+              style={{ width: '40px', height: '40px', color: GOLD, border: `1px solid ${GOLD_RGBA(0.25)}`, background: GOLD_RGBA(0.06) }}
             >
               {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
@@ -298,13 +286,11 @@ export default function SiteNav() {
       {/* ── MOBILE DROPDOWN MENU ── */}
       {mobileOpen && (
         <>
-          {/* backdrop */}
           <div
             className="fixed inset-0 z-40 sm:hidden"
             style={{ background: 'rgba(0,0,0,0.6)', top: '64px' }}
             onClick={() => setMobileOpen(false)}
           />
-          {/* panel */}
           <nav
             className="fixed left-0 right-0 z-40 sm:hidden px-4 pb-6 pt-2"
             style={{
@@ -334,8 +320,7 @@ export default function SiteNav() {
                 </Link>
               ))}
 
-              {/* Sign In / My Vault + Sign Out */}
-              {user ? (
+              {isLoggedIn ? (
                 <>
                   <Link
                     href="/my-cosmic-records"
@@ -363,13 +348,9 @@ export default function SiteNav() {
                 </button>
               )}
 
-              {/* Language + email */}
               <div className="flex items-center justify-between pt-4">
                 <LangSwitcher lang={lang} setLang={setLang} />
-                <a
-                  href="mailto:rohiit@trikalvaani.com"
-                  className="flex items-center gap-1.5 text-xs text-slate-500"
-                >
+                <a href="mailto:rohiit@trikalvaani.com" className="flex items-center gap-1.5 text-xs text-slate-500">
                   <Mail className="w-3.5 h-3.5" style={{ color: GOLD_RGBA(0.5) }} />
                   rohiit@trikalvaani.com
                 </a>
@@ -382,7 +363,7 @@ export default function SiteNav() {
       {showAuth && (
         <AuthModal
           onClose={() => setShowAuth(false)}
-          onSuccess={() => setShowAuth(false)}
+          onSuccess={() => { setShowAuth(false); setMobileLoggedIn(!!getMobileUser()); }}
         />
       )}
     </>
