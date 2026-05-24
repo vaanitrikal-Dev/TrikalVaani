@@ -1,22 +1,25 @@
 'use client';
 
 // ============================================================
-// CEO: Rohiit Gupta | Chief Vedic Architect | Trikal Vaani
+// CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
 // FILE: components/layout/SiteNav.tsx
-// VERSION: v2.6
-// DATE: 2026-05-24
+// VERSION: v2.7
+// DATE: 2026-05-25
 // CHANGES:
-//   v2.6: Nav now detects BOTH login types:
-//         - Gmail (Supabase session) — existing
-//         - Mobile OTP (Firebase, stored in localStorage tv_mobile_user) — NEW
-//         If either is present, shows "My Vault" dropdown.
-//         Sign Out clears both sessions.
+//   v2.7: ✅ Brand wordmark flipped "Trikal Vaani" → "Trikaal Vaani" (visible).
+//         ✅ Logo alt flipped to "Trikaal Vaani Logo".
+//         ✅ Added SiteNavigationElement JSON-LD (built from NAV_LINKS) to
+//            help Google map site structure / earn sitelinks.
+//         🔒 UNCHANGED: rohiit@trikalvaani.com email, /Trikal_Vaani_Logo.svg
+//            logo path, all nav hrefs, all auth/vault logic.
+//   v2.6: Nav detects BOTH login types (Gmail Supabase + Mobile OTP Firebase).
 //   v2.5: "My Vault" dropdown with Sign Out.
 //   v2.4: Mobile hamburger menu.
 // ============================================================
 
 import Link from 'next/link';
 import Image from 'next/image';
+import Script from 'next/script';
 import { Mail, User, ChevronDown, Menu, X, LogOut } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
@@ -180,6 +183,27 @@ export default function SiteNav() {
 
   return (
     <>
+      {/* ── SiteNavigationElement schema — helps Google map site structure ──
+          Built from NAV_LINKS so it stays in sync if nav items change.
+          @id is unique; URLs stay on trikalvaani.com (domain unchanged). */}
+      <Script
+        id="sitenav-schema"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'SiteNavigationElement',
+            '@id': 'https://trikalvaani.com/#sitenav',
+            name: NAV_LINKS.map((l) => l.label),
+            url: NAV_LINKS.map((l) =>
+              l.href.startsWith('http')
+                ? l.href
+                : `https://trikalvaani.com${l.href}`
+            ),
+          }),
+        }}
+      />
+
       <header
         className="fixed top-0 left-0 right-0 z-50 px-4"
         style={{
@@ -202,10 +226,10 @@ export default function SiteNav() {
                 boxShadow: `0 0 22px ${GOLD_RGBA(0.38)}, 0 0 8px ${GOLD_RGBA(0.55)}`,
               }}
             >
-              <Image src="/Trikal_Vaani_Logo.svg" alt="Trikal Vaani Logo" width={60} height={60} priority />
+              <Image src="/Trikal_Vaani_Logo.svg" alt="Trikaal Vaani Logo" width={60} height={60} priority />
             </div>
             <span className="font-serif font-bold text-lg text-gradient-gold tracking-wide">
-              Trikal Vaani
+              Trikaal Vaani
             </span>
           </Link>
 
@@ -369,3 +393,9 @@ export default function SiteNav() {
     </>
   );
 }
+
+// ============================================================
+// END — components/layout/SiteNav.tsx v2.7
+// 🔱 Trikaal Vaani | Rohiit Gupta, Chief Vedic Architect
+// Brand wordmark=Trikaal · email/logo-path/hrefs=unchanged
+// ============================================================
