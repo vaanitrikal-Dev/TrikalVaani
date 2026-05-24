@@ -1,12 +1,15 @@
 // TRIKAL VAANI - Kundali Milan Compute API
 // CEO: Rohiit Gupta
 // File: app/api/calc/kundali-milan/route.ts
-// VERSION: 1.5 - Added TRIKAL_VM_KEY security header on VM call
+// VERSION: 1.4 - per-person manglik fix (bride.manglik / groom.manglik paths)
 //
-// CHANGE LOG (v1.4 → v1.5):
-//   Added X-Trikal-Key header to VM /milan-compute fetch call.
-//   Key read from process.env.TRIKAL_VM_KEY (already in Vercel env).
-//   No logic changes. All other behaviour identical to v1.4.
+// CHANGE LOG (v1.3 → v1.4):
+//   manglik_data now saves structured per-person + combined via buildManglikData().
+//   VM returns bride/groom manglik nested under vmData.bride.manglik + vmData.groom.manglik.
+//   Previous save: vmData?.manglik_evaluation only (combined verdict, no per-person).
+//   Now: { bride: {is_manglik, strength}, groom: {is_manglik, strength}, combined: {...} }
+//   Badge on free result page now shows correct per-person status.
+//   All other logic identical to v1.3.
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
@@ -15,8 +18,6 @@ import crypto from 'crypto';
 
 const VM_MILAN_ENDPOINT =
   process.env.VM_MILAN_ENDPOINT ?? 'http://34.14.164.105:8001/milan-compute';
-
-const TRIKAL_VM_KEY = process.env.TRIKAL_VM_KEY || '';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -30,6 +31,10 @@ function makeSlug(): string {
 }
 
 // ── Build structured manglik_data from VM response ────────────
+// VM returns per-person manglik nested under:
+//   vmData.bride.manglik  → compute_manglik_full for person1
+//   vmData.groom.manglik  → compute_manglik_full for person2
+//   vmData.manglik_evaluation → combined verdict
 function buildManglikData(vmData: any): object | null {
   if (!vmData) return null;
 
@@ -150,10 +155,7 @@ export async function POST(req: NextRequest) {
     try {
       vmRes = await fetch(VM_MILAN_ENDPOINT, {
         method:  'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Trikal-Key': TRIKAL_VM_KEY,          // v1.5: VM lock key
-        },
+        headers: { 'Content-Type': 'application/json' },
         body:    JSON.stringify(vmPayload),
         signal:  controller.signal,
         cache:   'no-store',
@@ -216,7 +218,7 @@ export async function POST(req: NextRequest) {
         groom_data:       groomData,
         ashtakoot_score:  ashtakootScore,
         ashtakoot_data:   vmData?.ashtakoot        ?? null,
-        manglik_data:     buildManglikData(vmData),
+        manglik_data:     buildManglikData(vmData),       // v1.4: per-person + combined
         remedies_data:    null,
         gemini_narrative: null,
         pdf_url:          null,
