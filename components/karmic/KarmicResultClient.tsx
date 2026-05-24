@@ -330,29 +330,15 @@ export default function KarmicResultClient({ initialRow }: { initialRow: KarmicR
           </a>
           {pdfUrl ? (
             <a href={pdfUrl} target="_blank" rel="noopener noreferrer"
-              className="px-6 py-3 rounded-lg font-semibold tracking-wide transition"
-              style={{ background: '#D4AF37', color: '#080B12' }}>
-              Download PDF
-            </a>
-          ) : (
-            <button
-              onClick={async () => {
-                try {
-                  const res = await fetch('/api/karmic-pdf', {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ slug }),
-                  })
-                  const data = await res.json()
-                  if (data.pdf_url) {
-                    setPdfUrl(data.pdf_url)
-                    window.open(data.pdf_url, '_blank')
-                  }
-                } catch { /* silent */ }
-              }}
               className="px-6 py-3 rounded-lg font-semibold tracking-wide transition hover:opacity-90"
               style={{ background: '#D4AF37', color: '#080B12' }}>
               Download PDF
-            </button>
+            </a>
+          ) : null}
+          {!pdfUrl && (
+            <p className="text-xs text-gray-500 mt-1 text-center w-full">
+              📄 PDF taiyaar ho rahi hai — kuch der baad refresh karein.
+            </p>
           )}
         </div>
       </section>
