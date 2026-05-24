@@ -1,20 +1,15 @@
 // ============================================================
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikal Vaani
 // FILE: app/api/auth/mobile-sync/route.ts
-// VERSION: v1.0
+// VERSION: v1.1
 // DATE: 2026-05-24
-// PURPOSE:
-//   After Firebase verifies the phone OTP, this secure endpoint
-//   creates or finds the matching profile in Supabase profiles table.
-//   Uses service role — server-side only, never exposed to browser.
-//   Mobile users land in the SAME profiles table as Gmail users.
-// ENV REQUIRED:
-//   NEXT_PUBLIC_SUPABASE_URL
-//   SUPABASE_SERVICE_ROLE_KEY
+// FIX: v1.1 — generate UUID for new mobile user profiles.
+//      profiles.id has no default, must be supplied on insert.
 // ============================================================
 
 import { createClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
+import { randomUUID } from 'crypto';
 
 export async function POST(request: Request) {
   try {
@@ -32,7 +27,7 @@ export async function POST(request: Request) {
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     );
 
-    // Check if a profile already exists for this mobile number
+    // Check if profile already exists for this mobile number
     const { data: existing } = await admin
       .from('profiles')
       .select('id, name, tier')
@@ -40,7 +35,6 @@ export async function POST(request: Request) {
       .maybeSingle();
 
     if (existing) {
-      // Returning mobile user — profile already exists
       return NextResponse.json({
         ok: true,
         profileId: existing.id,
@@ -49,13 +43,13 @@ export async function POST(request: Request) {
       });
     }
 
-    // New mobile user — create a profile row
-    // Use firebase uid as a stable reference (stored in notes field)
+    // New mobile user — generate UUID and create profile
+    const newId = randomUUID();
+
     const { data: created, error } = await admin
       .from('profiles')
       .insert({
-        // id must be a UUID — generate one for mobile users
-        // since they don't have a Supabase auth.users row
+        id: newId,
         mobile,
         name: 'Seeker',
         tier: 'free',
