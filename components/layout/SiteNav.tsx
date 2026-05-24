@@ -3,21 +3,25 @@
 // ============================================================
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikal Vaani
 // FILE: components/layout/SiteNav.tsx
-// VERSION: v2.4
-// DATE: 2026-05-22
+// VERSION: v2.5
+// DATE: 2026-05-24
 // CHANGES:
+//   v2.5: "My Vault" is now a DROPDOWN (desktop) with two items:
+//         "My Vault" (-> /my-cosmic-records) and "Sign Out".
+//         Mobile menu gets an explicit "Sign Out" row too.
+//         Sign Out uses signOut() from lib/auth and refreshes state.
+//         Everything else identical to v2.4.
 //   v2.4: MOBILE HAMBURGER MENU. Top bar now shows logo + Start + ☰.
-//         Tapping ☰ opens a full dropdown with ALL links + Sign In.
-//         Scales as new products are added. Desktop nav UNCHANGED.
-//   v2.3: Added "Kundali Milan" + "Karmic Reading" links (desktop + mobile).
+//   v2.3: Added "Kundali Milan" + "Karmic Reading" links.
 //   v2.2: Removed "Events"; added "Calculators" → /calculators.
 // ============================================================
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { Mail, User, ChevronDown, Menu, X } from 'lucide-react';
+import { Mail, User, ChevronDown, Menu, X, LogOut } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
+import { signOut } from '@/lib/auth';
 import AuthModal from '@/components/auth/AuthModal';
 import { LANG_LABELS, LANG_NAMES, type Lang } from '@/lib/lang';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
@@ -80,6 +84,60 @@ function LangSwitcher({ lang, setLang }: { lang: Lang; setLang: (l: Lang) => voi
   );
 }
 
+// Desktop "My Vault" dropdown (Vault + Sign Out)
+function VaultMenu({ onSignOut }: { onSignOut: () => void }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handler(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    }
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        onClick={() => setOpen(!open)}
+        className="flex items-center gap-1.5 text-sm font-medium px-3 py-2 rounded-full transition-all duration-300 hover:scale-105"
+        style={{
+          background: GOLD_RGBA(0.1),
+          border: `1px solid ${GOLD_RGBA(0.28)}`,
+          color: GOLD,
+        }}
+      >
+        <User className="w-3.5 h-3.5" />
+        My Vault
+        <ChevronDown className="w-3 h-3" />
+      </button>
+      {open && (
+        <div
+          className="absolute right-0 top-full mt-1.5 rounded-xl overflow-hidden z-50 min-w-[150px]"
+          style={{ background: 'rgba(11,16,26,0.98)', border: `1px solid ${GOLD_RGBA(0.2)}`, boxShadow: `0 8px 32px rgba(0,0,0,0.5)` }}
+        >
+          <Link
+            href="/my-cosmic-records"
+            onClick={() => setOpen(false)}
+            className="flex items-center gap-2 px-4 py-2.5 text-sm transition-colors hover:bg-white/5"
+            style={{ color: GOLD }}
+          >
+            <User className="w-3.5 h-3.5" /> My Vault
+          </Link>
+          <button
+            onClick={() => { setOpen(false); onSignOut(); }}
+            className="w-full text-left flex items-center gap-2 px-4 py-2.5 text-sm transition-colors hover:bg-white/5"
+            style={{ color: '#94a3b8', borderTop: `1px solid ${GOLD_RGBA(0.1)}` }}
+          >
+            <LogOut className="w-3.5 h-3.5" /> Sign Out
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function SiteNav() {
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const [showAuth, setShowAuth] = useState(false);
@@ -103,6 +161,14 @@ export default function SiteNav() {
     document.body.style.overflow = mobileOpen ? 'hidden' : '';
     return () => { document.body.style.overflow = ''; };
   }, [mobileOpen]);
+
+  const handleSignOut = async () => {
+    await signOut();
+    setUser(null);
+    setMobileOpen(false);
+    // Send user home after logout.
+    if (typeof window !== 'undefined') window.location.href = '/';
+  };
 
   return (
     <>
@@ -141,7 +207,7 @@ export default function SiteNav() {
             </span>
           </Link>
 
-          {/* ── DESKTOP NAV (unchanged) ── */}
+          {/* ── DESKTOP NAV ── */}
           <nav className="hidden sm:flex items-center gap-4">
 
             {NAV_LINKS.map((l) => (
@@ -170,18 +236,7 @@ export default function SiteNav() {
             <LangSwitcher lang={lang} setLang={setLang} />
 
             {user ? (
-              <Link
-                href="/my-cosmic-records"
-                className="flex items-center gap-1.5 text-sm font-medium px-3 py-2 rounded-full transition-all duration-300 hover:scale-105"
-                style={{
-                  background: GOLD_RGBA(0.1),
-                  border: `1px solid ${GOLD_RGBA(0.28)}`,
-                  color: GOLD,
-                }}
-              >
-                <User className="w-3.5 h-3.5" />
-                My Vault
-              </Link>
+              <VaultMenu onSignOut={handleSignOut} />
             ) : (
               <button
                 onClick={() => setShowAuth(true)}
@@ -279,16 +334,25 @@ export default function SiteNav() {
                 </Link>
               ))}
 
-              {/* Sign In / My Vault */}
+              {/* Sign In / My Vault + Sign Out */}
               {user ? (
-                <Link
-                  href="/my-cosmic-records"
-                  onClick={() => setMobileOpen(false)}
-                  className="py-3.5 text-base flex items-center gap-2"
-                  style={{ color: GOLD, fontWeight: 600 }}
-                >
-                  <User className="w-4 h-4" /> My Vault
-                </Link>
+                <>
+                  <Link
+                    href="/my-cosmic-records"
+                    onClick={() => setMobileOpen(false)}
+                    className="py-3.5 text-base flex items-center gap-2"
+                    style={{ color: GOLD, fontWeight: 600, borderBottom: `1px solid ${GOLD_RGBA(0.08)}` }}
+                  >
+                    <User className="w-4 h-4" /> My Vault
+                  </Link>
+                  <button
+                    onClick={handleSignOut}
+                    className="py-3.5 text-base text-left flex items-center gap-2"
+                    style={{ color: '#cbd5e1', borderBottom: `1px solid ${GOLD_RGBA(0.08)}` }}
+                  >
+                    <LogOut className="w-4 h-4" /> Sign Out
+                  </button>
+                </>
               ) : (
                 <button
                   onClick={() => { setMobileOpen(false); setShowAuth(true); }}
