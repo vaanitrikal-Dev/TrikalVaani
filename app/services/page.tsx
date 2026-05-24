@@ -3,34 +3,26 @@
  * 🔱 TRIKAL VAANI — CEO PROTECTION HEADER 🔱
  * ============================================================================
  * File:        app/services/page.tsx
- * Version:     v2.4 — JINI → TRIKAL sitewide name sweep
+ * Version:     v2.5 — HONESTY CLEANUP (CEO-approved May 25, 2026)
  * Phase:       Deliverable 3 of Master SEO Strategy
  * Owner:       Rohiit Gupta, Chief Vedic Architect
  * Domain:      trikalvaani.com/services
- * Updated:     May 23, 2026
  *
- * v2.4 CHANGE (ONLY change vs v2.3):
- *   ✅ Removed "Jini" everywhere. Jini is retired — Trikal is the AI soul
- *      of the platform sitewide. All "Jini AI" → "Trikal" in matching voice.
- *   ✅ Affected spots: hero copy, GEO direct-answer block, service-card
- *      descriptions logic, FAQ schema text (Q1, Q3), final CTA copy.
- *   ✅ NOTHING ELSE TOUCHED — SEO, all 4 JSON-LD schemas, structure,
- *      pricing, comparison table, design tokens (#080B12 / #D4AF37) all
- *      byte-identical to v2.3.
+ * v2.5 CHANGES (vs v2.4) — TRUST / HONESTY ALIGNMENT WITH HOMEPAGE:
+ *   ❌ REMOVED struck-through "₹499" anchor on all 8 service cards.
+ *   ❌ REMOVED fake aggregateRating (4.9 / 1250 reviews) from Product schema.
+ *      → No review system exists yet; fake AggregateRating is a Google
+ *        manual-penalty risk. Will be re-added when real reviews are wired.
+ *   ❌ REMOVED the ₹499 "Personal WhatsApp call" CTA block entirely.
+ *   ❌ REMOVED / rewrote all ₹499 references in FAQ (Q3, Q5, Q6) around the
+ *      REAL ladder: ₹51 reading, deeper paid tiers, ₹11 voice.
+ *   ✅ Comparison table: removed the fake-anchored framing; rows now compare
+ *      honestly. "Book Personal Call" CTA replaced with WhatsApp question
+ *      link (no price promised).
+ *   ✅ Everything else (8 readings, GEO block, Person E-E-A-T, design tokens
+ *      #080B12 / #D4AF37, ItemList/Person/FAQ/Breadcrumb schemas) preserved.
  *
- * --- inherited from v2.3 ---
- * v2.1 BUILD FIX: confirmed @/ alias works; no SiteNav/SiteFooter imports.
- *
- * SEO + GEO FIXES (vs v1.0):
- *   [FIX 1] Title double-brand bug removed
- *   [FIX 2] GEO direct answer block (50 words after H1)
- *   [FIX 3] Broken /about author link → /founder
- *   [FIX 4] FAQ: 8 visible / 8 schema
- *   [FIX 5] Per-service Product + Offer + AggregateRating schema
- *   [FIX 6] Comparison table vs AstroTalk / AstroSage
- *   [FIX 7] Person schema with 15+ years E-E-A-T credentials
- *
- * NOTE: Server Component — JSON.stringify is safe (no React re-serialization)
+ * NOTE: Server Component — JSON.stringify is safe.
  * ============================================================================
  */
 
@@ -40,14 +32,6 @@ import Script from "next/script";
 
 // ============================================================================
 // METADATA — SEO foundation
-// ============================================================================
-//
-// Title: "Vedic Astrology Services Online — Live Reading at ₹51"
-//   → ~52 chars, layout.tsx template appends " | Trikal Vaani" = 70 chars (SERP-safe)
-//   → Targets winnable keyword "vedic astrology services online" + price hook
-//   → No double-brand
-//
-// Description: 158 chars — under 160 limit, has CTA, has price anchor
 // ============================================================================
 
 export const metadata: Metadata = {
@@ -194,8 +178,8 @@ const services = [
 // JSON-LD SCHEMAS
 // ============================================================================
 //
-// All apostrophes use Unicode U+2019 (’) for JSON-safety
-// Server Component → JSON.stringify is safe (no React re-serialization issue)
+// v2.5: aggregateRating removed from each Product (no real review system).
+// All apostrophes use Unicode U+2019 (’) for JSON-safety.
 // ============================================================================
 
 const itemListSchema = {
@@ -225,13 +209,7 @@ const itemListSchema = {
         availability: "https://schema.org/InStock",
         seller: { "@id": "https://trikalvaani.com/#organization" },
       },
-      aggregateRating: {
-        "@type": "AggregateRating",
-        ratingValue: "4.9",
-        reviewCount: "1250",
-        bestRating: "5",
-        worstRating: "1",
-      },
+      // aggregateRating intentionally OMITTED until a real review system exists.
     },
   })),
 };
@@ -291,10 +269,10 @@ const faqPageSchema = {
     },
     {
       "@type": "Question",
-      name: "What is the difference between the ₹51 reading and the ₹499 personal call?",
+      name: "How much does a Trikal Vaani reading cost?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "The ₹51 Trikal reading delivers a 900-word personalized analysis with 5 upay (remedies) for one specific question — instant delivery via the website. The ₹499 Personal Consultation connects you live on WhatsApp with Rohiit Gupta for 30-45 minutes — ideal for marriage decisions, career pivots, complex chart cross-referencing, or follow-up questions. AI handles calculation; humans add wisdom for major life decisions.",
+        text: "Each of the 8 deep readings starts at ₹51 and delivers a personalized analysis with upay (remedies) for one specific life question — generated instantly on the website. A free Trikal Ka Sandesh preview is available before you pay. Voice guidance starts at ₹11. There are no hidden charges and no fake discounts — honest, transparent pricing throughout.",
       },
     },
     {
@@ -310,7 +288,7 @@ const faqPageSchema = {
       name: "Are Trikal Vaani readings available in Hindi?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "Yes. Trikal Vaani offers readings in three languages: pure Hindi (शुद्ध हिंदी), Hinglish (Hindi-English mix — most popular in India), and English. The Voice Reading at ₹11 is delivered as a 60-second Hindi or Hinglish audio. The Personal Consultation at ₹499 is conducted in Hindi or English by Rohiit Gupta directly. All written reports use native Hindi phrasing — not machine translation.",
+        text: "Yes. Trikal Vaani offers readings in three languages: pure Hindi (शुद्ध हिंदी), Hinglish (Hindi-English mix — most popular in India), and English. The Voice Reading at ₹11 is delivered as a short Hindi or Hinglish audio. All written reports use native Hindi phrasing — not machine translation.",
       },
     },
     {
@@ -318,7 +296,7 @@ const faqPageSchema = {
       name: "How quickly will I receive my reading?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "AI-generated readings (₹51 Deep Reading and ₹11 Voice Reading) are delivered instantly — within 30-90 seconds of payment. The Free Trikal Ka Sandesh preview generates in under 10 seconds. The ₹499 Personal Consultation with Rohiit Gupta is scheduled within 24-48 hours via WhatsApp at +91-9211804111.",
+        text: "AI-generated readings are delivered instantly — typically within 30-90 seconds of payment. The free Trikal Ka Sandesh preview generates in under 10 seconds, and the ₹11 Voice Reading is delivered as a short spoken audio moments after you ask.",
       },
     },
     {
@@ -326,7 +304,7 @@ const faqPageSchema = {
       name: "Is Trikal Vaani safe and is my birth data private?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "Yes. Birth data is encrypted with 256-bit TLS during transmission and stored securely on Supabase (SOC 2 Type II compliant). Trikal Vaani never sells, shares, or markets your birth details to third parties. Payments are processed via Razorpay with PCI-DSS Level 1 compliance — Trikal Vaani never sees your card details. You can request data deletion anytime by emailing rohiit@trikalvaani.com.",
+        text: "Yes. Birth data is encrypted with 256-bit TLS during transmission and stored securely on Supabase. Trikal Vaani never sells, shares, or markets your birth details to third parties. Payments are processed via Razorpay with PCI-DSS Level 1 compliance — Trikal Vaani never sees your card details. You can request data deletion anytime by emailing rohiit@trikalvaani.com.",
       },
     },
     {
@@ -334,7 +312,7 @@ const faqPageSchema = {
       name: "What if the reading is wrong or I am not satisfied?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "Vedic astrology is interpretive — it maps probabilities, not certainties. If your reading does not feel relevant within the first 24 hours, email rohiit@trikalvaani.com with your concern and Rohiit Gupta personally reviews the chart. Refunds are processed for AI readings if a calculation error is identified. The ₹499 personal consultation includes one free follow-up question within 7 days.",
+        text: "Vedic astrology is interpretive — it maps probabilities, not certainties. If your reading does not feel relevant, email rohiit@trikalvaani.com with your concern and Rohiit Gupta personally reviews the chart. Refunds are processed for AI readings if a calculation error is identified.",
       },
     },
   ],
@@ -449,7 +427,6 @@ export default function ServicesPage() {
 
         {/* ================================================================ */}
         {/* GEO DIRECT ANSWER BLOCK — for Perplexity / SGE / ChatGPT citation */}
-        {/* 50 words, opens with bold primary keyword                        */}
         {/* ================================================================ */}
         <section className="px-4 pb-8">
           <div className="max-w-3xl mx-auto">
@@ -472,8 +449,7 @@ export default function ServicesPage() {
                 Destiny), and spirituality (Soul Purpose). Each reading is generated by
                 Trikal using Swiss Ephemeris precision and reviewed against Brihat
                 Parashara Hora Shastra rules. Pricing starts at ₹51 with instant
-                delivery; personal WhatsApp consultations with Rohiit Gupta are
-                available at ₹499.
+                delivery, and voice guidance is available from ₹11.
               </p>
             </div>
           </div>
@@ -547,7 +523,6 @@ export default function ServicesPage() {
                         </div>
                       </div>
                       <div className="text-right flex-shrink-0">
-                        <p className="text-gray-500 text-xs line-through">₹499</p>
                         <p className="text-[#D4AF37] text-xl font-bold">₹{s.price}</p>
                       </div>
                     </div>
@@ -586,22 +561,21 @@ export default function ServicesPage() {
               ))}
             </div>
 
-            {/* Personal call CTA */}
+            {/* Have a question? — honest WhatsApp link, NO price promised */}
             <div className="mt-12 border border-[#D4AF37]/25 rounded-3xl p-8 md:p-10 bg-gradient-to-br from-[#D4AF37]/8 to-[#7C3AED]/8 text-center">
               <div className="text-4xl mb-4">🙏</div>
               <h3 className="font-serif text-2xl md:text-3xl font-bold text-white mb-3">
-                Need a Personal Reading with{" "}
-                <span className="text-[#D4AF37]">Rohiit Gupta?</span>
+                Not sure which reading{" "}
+                <span className="text-[#D4AF37]">is right for you?</span>
               </h3>
               <p className="text-gray-400 max-w-xl mx-auto mb-6 text-sm leading-relaxed">
-                For complex life situations — marriage decisions, career crossroads,
-                major property purchases, or spiritual guidance — book a direct 1-on-1
-                WhatsApp call with Rohiit ji. He brings 15+ years of Vedic study and
-                Delhi NCR expertise to every session.
+                Every reading is framed around 15+ years of Rohiit Gupta’s Vedic study.
+                If you are unsure which question to ask first, message us on WhatsApp and
+                we will point you to the reading that fits your situation.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <a
-                  href="https://wa.me/919211804111?text=Hi%20Rohiit%20ji%2C%20I%20want%20to%20book%20a%20personal%20astrology%20consultation"
+                  href="https://wa.me/919211804111?text=Namaste%20Rohiit%20ji%2C%20I%20need%20help%20choosing%20a%20reading"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center justify-center gap-2 bg-[#25D366] text-white font-bold px-8 py-4 rounded-lg text-base hover:bg-[#20ba5a] transition-all duration-200"
@@ -609,7 +583,7 @@ export default function ServicesPage() {
                   <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
                   </svg>
-                  Book Personal Call — ₹499
+                  Ask on WhatsApp
                 </a>
                 <Link
                   href="/founder"
@@ -676,7 +650,7 @@ export default function ServicesPage() {
                       "No",
                     ],
                     [
-                      "5 personalized upay (remedies)",
+                      "Personalized upay (remedies)",
                       "Yes",
                       "Generic",
                       "Generic",
@@ -778,6 +752,7 @@ export default function ServicesPage() {
 }
 
 // ============================================================================
-// END — app/services/page.tsx v2.4
+// END — app/services/page.tsx v2.5
 // 🔱 Trikal Vaani | Rohiit Gupta, Chief Vedic Architect
+// Honest pricing · no fake MRP · no fake ratings · no ₹499 phantom product
 // ============================================================================
