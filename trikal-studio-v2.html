@@ -1,0 +1,1606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Trikal Studio — Content Command Center</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,400&family=DM+Mono:wght@300;400;500&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --gold: #D4AF37;
+  --gold-dim: rgba(212,175,55,0.12);
+  --gold-border: rgba(212,175,55,0.25);
+  --gold-glow: rgba(212,175,55,0.15);
+  --bg: #070A10;
+  --bg-card: #0D1018;
+  --bg-input: #0F1420;
+  --text: #E2E8F0;
+  --text-dim: #4A5568;
+  --text-mid: #94A3B8;
+  --green: #10B981;
+  --red: #EF4444;
+  --blue: #3B82F6;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Outfit', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Atmosphere */
+body::before {
+  content:'';
+  position:fixed;
+  top:-300px; left:50%;
+  transform:translateX(-50%);
+  width:900px; height:600px;
+  background:radial-gradient(ellipse, rgba(212,175,55,0.03) 0%, transparent 70%);
+  pointer-events:none; z-index:0;
+}
+
+.container {
+  max-width:880px;
+  margin:0 auto;
+  padding:36px 20px 100px;
+  position:relative; z-index:1;
+}
+
+/* ── HEADER ── */
+.header {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:40px;
+  gap:16px;
+}
+
+.header-left {
+  display:flex;
+  align-items:center;
+  gap:16px;
+}
+
+.logo-top {
+  width:52px; height:52px;
+  border-radius:12px;
+  object-fit:contain;
+  border:1px solid var(--gold-border);
+  background: rgba(212,175,55,0.05);
+}
+
+.brand-block {}
+
+.brand-name {
+  font-family:'Cormorant Garamond', serif;
+  font-size:22px; font-weight:700;
+  color:var(--gold);
+  letter-spacing:0.02em;
+  line-height:1.2;
+}
+
+.brand-person {
+  font-size:11px;
+  color:var(--text-mid);
+  font-family:'DM Mono', monospace;
+  letter-spacing:0.04em;
+  margin-top:2px;
+}
+
+.brand-cta {
+  font-size:10px;
+  color:var(--text-dim);
+  font-family:'DM Mono', monospace;
+  letter-spacing:0.03em;
+  margin-top:3px;
+}
+
+.brand-cta a {
+  color:var(--gold);
+  text-decoration:none;
+  opacity:0.8;
+}
+
+.brand-cta a:hover { opacity:1; }
+
+.header-right {
+  display:flex;
+  flex-direction:column;
+  align-items:flex-end;
+  gap:6px;
+}
+
+.vm-pill {
+  display:flex; align-items:center; gap:6px;
+  padding:6px 12px;
+  border-radius:20px;
+  background:rgba(16,185,129,0.07);
+  border:1px solid rgba(16,185,129,0.2);
+  font-size:11px; color:var(--green);
+  font-family:'DM Mono', monospace;
+  white-space:nowrap;
+}
+
+.vm-dot {
+  width:6px; height:6px;
+  border-radius:50%;
+  background:var(--green);
+  animation:pulse 2s ease-in-out infinite;
+}
+
+.vm-pill.offline {
+  background:rgba(239,68,68,0.07);
+  border-color:rgba(239,68,68,0.2);
+  color:var(--red);
+}
+
+.vm-pill.offline .vm-dot { background:var(--red); animation:none; }
+
+@keyframes pulse {
+  0%,100%{opacity:1} 50%{opacity:0.4}
+}
+
+/* ── DIVIDER ── */
+.divider {
+  height:1px;
+  background:linear-gradient(90deg, transparent, var(--gold-border), transparent);
+  margin-bottom:32px;
+}
+
+/* ── TAB BAR ── */
+.tab-bar {
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  gap:3px;
+  background:rgba(255,255,255,0.03);
+  border:1px solid rgba(255,255,255,0.06);
+  border-radius:14px;
+  padding:4px;
+  margin-bottom:28px;
+}
+
+.tab {
+  padding:14px 10px;
+  border-radius:10px;
+  cursor:pointer;
+  text-align:center;
+  border:1px solid transparent;
+  background:transparent;
+  color:var(--text-dim);
+  font-family:'Outfit', sans-serif;
+  transition:all 0.2s;
+}
+
+.tab:not(.locked):hover {
+  background:rgba(255,255,255,0.03);
+  color:var(--text-mid);
+}
+
+.tab.active {
+  background:var(--gold-dim);
+  border-color:var(--gold-border);
+  color:var(--gold);
+}
+
+.tab.locked { cursor:not-allowed; opacity:0.35; }
+
+.tab-name {
+  display:block;
+  font-size:13px; font-weight:600;
+  letter-spacing:0.01em;
+}
+
+.tab-meta {
+  display:block;
+  font-size:10px;
+  font-family:'DM Mono', monospace;
+  letter-spacing:0.05em;
+  margin-top:3px;
+  opacity:0.7;
+}
+
+/* ── PANELS ── */
+.panel { display:none; animation:fadeUp 0.2s ease; }
+.panel.active { display:block; }
+
+@keyframes fadeUp {
+  from{opacity:0;transform:translateY(5px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+/* ── SECTION LABEL ── */
+.sec-label {
+  font-size:10px;
+  font-family:'DM Mono', monospace;
+  letter-spacing:0.12em;
+  text-transform:uppercase;
+  color:var(--text-dim);
+  margin-bottom:9px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+.sec-label::after {
+  content:'';
+  flex:1; height:1px;
+  background:rgba(255,255,255,0.05);
+}
+
+/* ── TEXT AREA ── */
+.text-block { margin-bottom:24px; }
+
+textarea {
+  width:100%;
+  min-height:200px;
+  background:var(--bg-input);
+  border:1px solid rgba(255,255,255,0.07);
+  border-radius:12px;
+  padding:16px 18px;
+  color:var(--text);
+  font-family:'Outfit', sans-serif;
+  font-size:14px; line-height:1.7;
+  resize:vertical; outline:none;
+  transition:border-color 0.2s;
+}
+
+textarea:focus { border-color:var(--gold-border); background:#111826; }
+textarea::placeholder { color:var(--text-dim); }
+
+.word-row {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-top:7px;
+  font-size:11px;
+  font-family:'DM Mono', monospace;
+}
+
+.wc { color:var(--text-dim); transition:color 0.2s; }
+.wc.warn { color:#F59E0B; }
+.wc.over { color:var(--red); }
+.wc-hint { color:var(--text-dim); font-size:10px; }
+
+/* ── IMAGE UPLOAD ── */
+.img-block { margin-bottom:24px; }
+
+.drop-zone {
+  border:1px dashed rgba(212,175,55,0.18);
+  border-radius:12px;
+  padding:28px 20px;
+  text-align:center;
+  cursor:pointer;
+  background:var(--bg-input);
+  position:relative;
+  transition:all 0.2s;
+}
+
+.drop-zone:hover, .drop-zone.drag-over {
+  border-color:var(--gold-border);
+  background:var(--gold-dim);
+}
+
+.drop-zone input[type=file] {
+  position:absolute; inset:0;
+  opacity:0; cursor:pointer;
+  width:100%; height:100%;
+}
+
+.drop-icon { font-size:24px; margin-bottom:8px; display:block; }
+.drop-title { font-size:13px; font-weight:500; color:var(--text-mid); margin-bottom:3px; }
+.drop-sub { font-size:10px; font-family:'DM Mono', monospace; color:var(--text-dim); letter-spacing:0.04em; }
+
+.img-previews {
+  display:grid;
+  grid-template-columns:repeat(auto-fill, minmax(88px, 1fr));
+  gap:8px;
+  margin-top:12px;
+}
+
+.prev-item {
+  position:relative;
+  border-radius:8px;
+  overflow:hidden;
+  border:1px solid rgba(255,255,255,0.07);
+  aspect-ratio:1;
+  background:var(--bg-input);
+}
+
+.prev-item img { width:100%; height:100%; object-fit:cover; }
+
+.prev-item .pdf-thumb {
+  width:100%; height:100%;
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  gap:4px; font-size:20px;
+  background:rgba(212,175,55,0.06);
+}
+
+.prev-item .pdf-name {
+  font-size:8px; color:var(--text-dim);
+  font-family:'DM Mono', monospace;
+  text-align:center; padding:0 3px;
+  word-break:break-all;
+}
+
+.prev-rm {
+  position:absolute; top:3px; right:3px;
+  width:18px; height:18px;
+  background:rgba(0,0,0,0.75);
+  border:none; border-radius:50%;
+  color:#fff; font-size:10px;
+  cursor:pointer; display:flex;
+  align-items:center; justify-content:center;
+  transition:background 0.15s;
+}
+
+.prev-rm:hover { background:var(--red); }
+
+.img-count-row {
+  display:flex; justify-content:space-between;
+  align-items:center; margin-top:7px;
+  font-size:10px; font-family:'DM Mono', monospace;
+  color:var(--text-dim);
+}
+
+.img-count.warn { color:#F59E0B; }
+.img-count.max { color:var(--red); }
+
+/* ── VIDEO UPLOAD (hook) ── */
+.video-block { margin-bottom:24px; }
+
+.video-upload-zone {
+  border:1px dashed rgba(59,130,246,0.3);
+  border-radius:12px;
+  padding:24px 20px;
+  text-align:center;
+  cursor:pointer;
+  background:rgba(59,130,246,0.04);
+  position:relative;
+  transition:all 0.2s;
+}
+
+.video-upload-zone:hover, .video-upload-zone.drag-over {
+  border-color:rgba(59,130,246,0.5);
+  background:rgba(59,130,246,0.08);
+}
+
+.video-upload-zone input[type=file] {
+  position:absolute; inset:0;
+  opacity:0; cursor:pointer;
+  width:100%; height:100%;
+}
+
+.video-ready {
+  display:none;
+  align-items:center;
+  gap:12px;
+  padding:14px 16px;
+  background:rgba(16,185,129,0.07);
+  border:1px solid rgba(16,185,129,0.2);
+  border-radius:10px;
+  margin-top:10px;
+}
+
+.video-ready.show { display:flex; }
+.video-ready-name { font-size:12px; font-family:'DM Mono', monospace; color:var(--green); flex:1; }
+.video-ready-rm { background:none; border:none; color:var(--red); cursor:pointer; font-size:16px; }
+
+/* ── POWER REEL OPTIONS ── */
+.power-opts {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:14px;
+  margin-bottom:24px;
+}
+
+.opt-block {}
+
+.opt-label {
+  font-size:10px;
+  font-family:'DM Mono', monospace;
+  letter-spacing:0.1em;
+  text-transform:uppercase;
+  color:var(--text-dim);
+  margin-bottom:8px;
+  display:block;
+}
+
+.toggle-row { display:flex; gap:6px; }
+
+.tog {
+  flex:1; padding:10px 8px;
+  border-radius:8px;
+  border:1px solid rgba(255,255,255,0.07);
+  background:var(--bg-input);
+  color:var(--text-dim);
+  font-family:'Outfit', sans-serif;
+  font-size:12px; font-weight:500;
+  cursor:pointer; text-align:center;
+  transition:all 0.15s;
+}
+
+.tog:hover { border-color:var(--gold-border); color:var(--text-mid); }
+
+.tog.sel {
+  background:var(--gold-dim);
+  border-color:var(--gold);
+  color:var(--gold);
+}
+
+.tog.sel-blue {
+  background:rgba(59,130,246,0.12);
+  border-color:rgba(59,130,246,0.4);
+  color:var(--blue);
+}
+
+.tog-sub {
+  display:block;
+  font-size:9px;
+  font-family:'DM Mono', monospace;
+  margin-top:2px; opacity:0.7;
+}
+
+/* ── FLOW MODE STEPS ── */
+.flow-step {
+  display:none;
+  border:1px solid rgba(255,255,255,0.06);
+  border-radius:12px;
+  padding:20px;
+  margin-bottom:16px;
+  background:rgba(255,255,255,0.02);
+}
+
+.flow-step.show { display:block; }
+
+.flow-step-header {
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-bottom:14px;
+}
+
+.flow-step-num {
+  width:26px; height:26px;
+  border-radius:50%;
+  background:var(--gold-dim);
+  border:1px solid var(--gold-border);
+  color:var(--gold);
+  font-size:12px; font-weight:700;
+  display:flex; align-items:center; justify-content:center;
+  font-family:'DM Mono', monospace;
+  flex-shrink:0;
+}
+
+.flow-step-num.done {
+  background:rgba(16,185,129,0.1);
+  border-color:rgba(16,185,129,0.3);
+  color:var(--green);
+}
+
+.flow-step-title {
+  font-size:13px; font-weight:600;
+  color:var(--text-mid);
+}
+
+.flow-prompt-box {
+  display:none;
+  background:rgba(212,175,55,0.04);
+  border:1px solid var(--gold-border);
+  border-radius:10px;
+  padding:16px;
+  margin-bottom:14px;
+}
+
+.flow-prompt-box.show { display:block; }
+
+.flow-prompt-label {
+  font-size:10px;
+  font-family:'DM Mono', monospace;
+  color:var(--gold);
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+  margin-bottom:8px;
+}
+
+.flow-prompt-text {
+  font-size:14px;
+  color:var(--text);
+  line-height:1.6;
+  font-style:italic;
+  margin-bottom:12px;
+}
+
+.flow-topic {
+  font-size:11px;
+  font-family:'DM Mono', monospace;
+  color:var(--text-dim);
+  margin-bottom:10px;
+}
+
+.copy-btn {
+  padding:8px 18px;
+  border-radius:8px;
+  background:var(--gold-dim);
+  border:1px solid var(--gold-border);
+  color:var(--gold);
+  font-family:'DM Mono', monospace;
+  font-size:11px; font-weight:500;
+  cursor:pointer;
+  transition:all 0.15s;
+}
+
+.copy-btn:hover { background:rgba(212,175,55,0.2); }
+.copy-btn.copied { background:rgba(16,185,129,0.1); border-color:rgba(16,185,129,0.3); color:var(--green); }
+
+.flow-instructions {
+  font-size:11px;
+  font-family:'DM Mono', monospace;
+  color:var(--text-dim);
+  line-height:1.8;
+  background:rgba(255,255,255,0.02);
+  border-radius:8px;
+  padding:12px 14px;
+  margin-top:8px;
+}
+
+/* ── COST BAR ── */
+.cost-bar {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:14px 18px;
+  background:rgba(212,175,55,0.04);
+  border:1px solid var(--gold-border);
+  border-radius:10px;
+  margin-bottom:24px;
+}
+
+.cost-label {
+  font-size:10px;
+  font-family:'DM Mono', monospace;
+  color:var(--text-dim);
+  letter-spacing:0.08em;
+}
+
+.cost-right { text-align:right; }
+
+.cost-value {
+  font-family:'Cormorant Garamond', serif;
+  font-size:26px; font-weight:600;
+  color:var(--gold);
+  line-height:1;
+}
+
+.cost-breakdown {
+  font-size:10px;
+  font-family:'DM Mono', monospace;
+  color:var(--text-dim);
+  margin-top:3px;
+}
+
+/* ── GENERATE BUTTON ── */
+.gen-btn {
+  width:100%;
+  padding:17px 28px;
+  border-radius:12px;
+  border:none;
+  background:linear-gradient(135deg, #D4AF37 0%, #A8820A 100%);
+  color:#070A10;
+  font-family:'Outfit', sans-serif;
+  font-size:15px; font-weight:700;
+  cursor:pointer;
+  transition:all 0.2s;
+  letter-spacing:0.02em;
+}
+
+.gen-btn:hover { transform:translateY(-1px); box-shadow:0 8px 30px rgba(212,175,55,0.25); }
+.gen-btn:active { transform:translateY(0); }
+.gen-btn:disabled { opacity:0.45; cursor:not-allowed; transform:none; box-shadow:none; }
+
+.gen-btn-sub {
+  display:block;
+  font-size:10px; font-weight:400;
+  opacity:0.7; margin-top:3px;
+  font-family:'DM Mono', monospace;
+  letter-spacing:0.06em;
+}
+
+/* ── PROGRESS ── */
+.prog-block { display:none; margin-top:20px; }
+.prog-block.show { display:block; }
+
+.prog-header {
+  display:flex; justify-content:space-between;
+  align-items:center; margin-bottom:9px;
+}
+
+.prog-label {
+  font-size:11px;
+  font-family:'DM Mono', monospace;
+  color:var(--text-mid); letter-spacing:0.06em;
+}
+
+.prog-pct {
+  font-size:11px;
+  font-family:'DM Mono', monospace;
+  color:var(--gold);
+}
+
+.prog-track {
+  height:2px;
+  background:rgba(255,255,255,0.05);
+  border-radius:2px; overflow:hidden;
+  margin-bottom:14px;
+}
+
+.prog-fill {
+  height:100%;
+  background:linear-gradient(90deg, #D4AF37, #F5D76E);
+  border-radius:2px;
+  transition:width 0.6s ease;
+  width:0%;
+}
+
+.prog-steps { display:flex; flex-direction:column; gap:7px; }
+
+.prog-step {
+  display:flex; align-items:center; gap:9px;
+  font-size:11px; color:var(--text-dim);
+  font-family:'DM Mono', monospace;
+  transition:color 0.3s;
+}
+
+.prog-step.done { color:var(--green); }
+.prog-step.active { color:var(--text); }
+
+.step-ic {
+  width:16px; height:16px;
+  border-radius:50%;
+  border:1px solid currentColor;
+  display:flex; align-items:center; justify-content:center;
+  font-size:9px; flex-shrink:0;
+}
+
+.prog-step.done .step-ic { background:var(--green); border-color:var(--green); color:#fff; }
+.prog-step.active .step-ic { border-color:var(--gold); animation:spin 1s linear infinite; }
+
+@keyframes spin { from{transform:rotate(0)} to{transform:rotate(360deg)} }
+
+/* ── RESULT ── */
+.result-block {
+  display:none; margin-top:20px;
+  padding:18px; border-radius:12px;
+  border:1px solid rgba(16,185,129,0.25);
+  background:rgba(16,185,129,0.05);
+  animation:fadeUp 0.3s ease;
+}
+
+.result-block.show { display:block; }
+.result-block.err { border-color:rgba(239,68,68,0.25); background:rgba(239,68,68,0.05); }
+
+.result-title {
+  font-size:13px; font-weight:600;
+  color:var(--green); margin-bottom:8px;
+  display:flex; align-items:center; gap:8px;
+}
+
+.result-block.err .result-title { color:var(--red); }
+
+.result-detail {
+  font-size:11px;
+  font-family:'DM Mono', monospace;
+  color:var(--text-dim); line-height:1.7;
+}
+
+.result-links { display:flex; gap:8px; margin-top:12px; flex-wrap:wrap; }
+
+.result-link {
+  padding:7px 14px;
+  border-radius:8px;
+  font-size:11px;
+  font-family:'DM Mono', monospace;
+  text-decoration:none;
+  border:1px solid rgba(16,185,129,0.3);
+  color:var(--green);
+  transition:all 0.15s;
+}
+
+.result-link:hover { background:rgba(16,185,129,0.1); }
+
+/* ── LOCKED PANEL ── */
+.locked-panel {
+  border:1px solid rgba(255,255,255,0.04);
+  border-radius:16px;
+  padding:60px 28px;
+  text-align:center;
+  background:rgba(255,255,255,0.01);
+}
+
+.locked-icon { font-size:32px; margin-bottom:14px; }
+
+.locked-title {
+  font-family:'Cormorant Garamond', serif;
+  font-size:26px; color:var(--text-mid);
+  margin-bottom:8px;
+}
+
+.locked-sub {
+  font-size:13px; color:var(--text-dim);
+  line-height:1.7; max-width:320px;
+  margin:0 auto 20px;
+}
+
+.locked-badge {
+  display:inline-block;
+  padding:6px 16px; border-radius:20px;
+  background:rgba(255,255,255,0.03);
+  border:1px solid rgba(255,255,255,0.07);
+  font-size:10px;
+  font-family:'DM Mono', monospace;
+  color:var(--text-dim); letter-spacing:0.06em;
+}
+
+/* ── FOOTER ── */
+.footer {
+  margin-top:48px;
+  padding-top:20px;
+  border-top:1px solid rgba(255,255,255,0.04);
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:12px;
+  position:relative;
+}
+
+.footer-left {
+  font-size:10px;
+  font-family:'DM Mono', monospace;
+  color:var(--text-dim);
+}
+
+.footer-right {
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+
+/* Bottom-right watermark logo */
+.wm-logo {
+  width:36px; height:36px;
+  border-radius:8px;
+  object-fit:contain;
+  opacity:0.35;
+  border:1px solid rgba(212,175,55,0.1);
+}
+
+/* ── MOBILE ── */
+@media(max-width:600px){
+  .container { padding:20px 14px 80px; }
+  .header { flex-direction:column; align-items:flex-start; }
+  .header-right { flex-direction:row; align-items:center; }
+  .power-opts { grid-template-columns:1fr; }
+  .tab-name { font-size:12px; }
+  .tab-meta { display:none; }
+  .tab { padding:12px 6px; }
+  .cost-bar { flex-direction:column; align-items:flex-start; gap:6px; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-left">
+      <img
+        src="https://trikalvaani.com/Trikal_Logo.png"
+        alt="Trikal Vaani"
+        class="logo-top"
+      >
+      <div class="brand-block">
+        <div class="brand-name">Trikal Studio</div>
+        <div class="brand-person">Rohiit Gupta · Chief Vedic Architect</div>
+        <div class="brand-cta">
+          <a href="https://trikalvaani.com" target="_blank">
+            trikalvaani.com
+          </a>
+          &nbsp;·&nbsp; Free Kundli · Kundali Milan · AI Vedic Predictions
+        </div>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="vm-pill" id="vmPill">
+        <div class="vm-dot" id="vmDot"></div>
+        <span id="vmText">Checking VM...</span>
+      </div>
+      <div style="font-size:9px;font-family:'DM Mono',monospace;color:var(--text-dim);text-align:right;">
+        34.14.164.105:8001
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- TAB BAR -->
+  <div class="tab-bar">
+    <button class="tab active" onclick="switchTab('rozka',this)">
+      <span class="tab-name">Roz Ka Content</span>
+      <span class="tab-meta">₹15 · DAILY ENGINE</span>
+    </button>
+    <button class="tab" onclick="switchTab('power',this)">
+      <span class="tab-name">Power Reel</span>
+      <span class="tab-meta">₹15–70 · AI HOOK</span>
+    </button>
+    <button class="tab locked" title="Coming soon — Phase 2">
+      <span class="tab-name">Full Cinematic 🔒</span>
+      <span class="tab-meta">COMING SOON</span>
+    </button>
+  </div>
+
+  <!-- ══════════════════════════════════════════ -->
+  <!-- PANEL 1: ROZ KA CONTENT                   -->
+  <!-- ══════════════════════════════════════════ -->
+  <div class="panel active" id="panel-rozka">
+
+    <div class="text-block">
+      <div class="sec-label">Content Brief</div>
+      <textarea id="txt-rozka"
+        placeholder="Paste your content here — festival details, astrology topic, occasion, product brief.&#10;&#10;Example: Shani Jayanti 2026 falls on June 2. Shani Dev governs karma, discipline and justice. People should do Shani puja, light sesame oil diya, chant Shani Chalisa 108 times. Connect to free Kundali to check Sade Sati status. Colour: black and blue..."
+        oninput="updateWC(this,'wc-rozka')"
+      ></textarea>
+      <div class="word-row">
+        <span class="wc" id="wc-rozka">0 / 800 words</span>
+        <span class="wc-hint">GEMINI FLASH → TTS CHARON → NANO BANANA → FFMPEG</span>
+      </div>
+    </div>
+
+    <div class="img-block">
+      <div class="sec-label">Reference Images <span style="font-size:9px;margin-left:4px;color:var(--text-dim);">UP TO 8 FILES</span></div>
+      <div class="drop-zone" id="dz-rozka"
+        ondragover="onDragOver(event)"
+        ondragleave="onDragLeave(event,'dz-rozka')"
+        ondrop="onDrop(event,'rozka')">
+        <input type="file" multiple accept=".jpg,.jpeg,.png,.pdf"
+          onchange="onFiles(this.files,'rozka')">
+        <span class="drop-icon">⬆</span>
+        <div class="drop-title">Drop images or click to browse</div>
+        <div class="drop-sub">JPG · PNG · JPEG · PDF · Max 8 files</div>
+      </div>
+      <div class="img-previews" id="prev-rozka"></div>
+      <div class="img-count-row">
+        <span class="img-count" id="ic-rozka">No files selected</span>
+        <span>PDF pages auto-extracted on VM</span>
+      </div>
+    </div>
+
+    <div class="cost-bar">
+      <div>
+        <div class="cost-label">ESTIMATED COST</div>
+      </div>
+      <div class="cost-right">
+        <div class="cost-value">₹15</div>
+        <div class="cost-breakdown">Gemini Flash + TTS Charon + Nano Banana + FFmpeg</div>
+      </div>
+    </div>
+
+    <button class="gen-btn" id="btn-rozka" onclick="generate('rozka')">
+      Generate Video
+      <span class="gen-btn-sub">AUTO-POSTS TO YOUTUBE + GOOGLE DRIVE</span>
+    </button>
+
+    <div class="prog-block" id="prog-rozka">
+      <div class="prog-header">
+        <span class="prog-label" id="plabel-rozka">INITIALISING</span>
+        <span class="prog-pct" id="ppct-rozka">0%</span>
+      </div>
+      <div class="prog-track"><div class="prog-fill" id="pfill-rozka"></div></div>
+      <div class="prog-steps">
+        <div class="prog-step" id="ps-rozka-0"><div class="step-ic">1</div><span>Gemini Flash — generating script + scenes</span></div>
+        <div class="prog-step" id="ps-rozka-1"><div class="step-ic">2</div><span>TTS Charon — rendering Hinglish voiceover</span></div>
+        <div class="prog-step" id="ps-rozka-2"><div class="step-ic">3</div><span>Nano Banana — generating image slides</span></div>
+        <div class="prog-step" id="ps-rozka-3"><div class="step-ic">4</div><span>FFmpeg — mood-matched effects assembly</span></div>
+        <div class="prog-step" id="ps-rozka-4"><div class="step-ic">5</div><span>Uploading to YouTube + Google Drive</span></div>
+      </div>
+    </div>
+
+    <div class="result-block" id="res-rozka"></div>
+  </div>
+
+  <!-- ══════════════════════════════════════════ -->
+  <!-- PANEL 2: POWER REEL                       -->
+  <!-- ══════════════════════════════════════════ -->
+  <div class="panel" id="panel-power">
+
+    <div class="text-block">
+      <div class="sec-label">Content Brief</div>
+      <textarea id="txt-power"
+        placeholder="Paste your content here — this reel carries a direct link, so focus on ONE sharp pain point.&#10;&#10;Example: Kundali Milan — parents worried their child is marrying the wrong person. Mangal Dosh is active in the girl's chart. Show how Trikal's 36 Guna analysis catches what generic apps miss. Strong emotional hook needed..."
+        oninput="updateWC(this,'wc-power')"
+      ></textarea>
+      <div class="word-row">
+        <span class="wc" id="wc-power">0 / 800 words</span>
+        <span class="wc-hint" id="power-pipe-hint">FLOW MODE → GEMINI VISION → TTS → NANO BANANA → FFMPEG</span>
+      </div>
+    </div>
+
+    <div class="img-block">
+      <div class="sec-label">Reference Images <span style="font-size:9px;margin-left:4px;color:var(--text-dim);">UP TO 8 FILES</span></div>
+      <div class="drop-zone" id="dz-power"
+        ondragover="onDragOver(event)"
+        ondragleave="onDragLeave(event,'dz-power')"
+        ondrop="onDrop(event,'power')">
+        <input type="file" multiple accept=".jpg,.jpeg,.png,.pdf"
+          onchange="onFiles(this.files,'power')">
+        <span class="drop-icon">⬆</span>
+        <div class="drop-title">Drop images or click to browse</div>
+        <div class="drop-sub">JPG · PNG · JPEG · PDF · Max 8 files</div>
+      </div>
+      <div class="img-previews" id="prev-power"></div>
+      <div class="img-count-row">
+        <span class="img-count" id="ic-power">No files selected</span>
+        <span>PDF pages auto-extracted on VM</span>
+      </div>
+    </div>
+
+    <!-- Hook Mode + Duration -->
+    <div class="power-opts">
+      <div class="opt-block">
+        <span class="opt-label">Hook Mode</span>
+        <div class="toggle-row">
+          <button class="tog sel-blue" onclick="selectMode('flow',this)" id="mode-flow">
+            🆓 Flow
+            <span class="tog-sub">FREE · 2 steps</span>
+          </button>
+          <button class="tog" onclick="selectMode('seedance',this)" id="mode-seedance">
+            Seedance
+            <span class="tog-sub">₹22 / 10s</span>
+          </button>
+          <button class="tog" onclick="selectMode('wan',this)" id="mode-wan">
+            Wan 2.6
+            <span class="tog-sub">₹50 / 10s</span>
+          </button>
+        </div>
+      </div>
+      <div class="opt-block" id="dur-block">
+        <span class="opt-label">Hook Duration</span>
+        <div class="toggle-row">
+          <button class="tog" onclick="selectDur(5,this)">
+            5 sec
+            <span class="tog-sub">₹11 / ₹25</span>
+          </button>
+          <button class="tog sel" onclick="selectDur(10,this)">
+            10 sec
+            <span class="tog-sub">₹22 / ₹50</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Flow Mode: Step 1 -->
+    <div class="flow-step show" id="flow-s1">
+      <div class="flow-step-header">
+        <div class="flow-step-num" id="fs1-num">1</div>
+        <div class="flow-step-title">Generate your Google Flow prompt</div>
+      </div>
+      <button class="gen-btn" id="btn-flowprompt" onclick="getFlowPrompt()"
+        style="background:rgba(59,130,246,0.15);color:#93C5FD;border:1px solid rgba(59,130,246,0.3);box-shadow:none;">
+        Get Flow Prompt
+        <span class="gen-btn-sub">GEMINI FLASH READS YOUR BRIEF → RETURNS 20-30 WORD CINEMATIC PROMPT</span>
+      </button>
+      <div class="flow-prompt-box" id="flow-prompt-box">
+        <div class="flow-prompt-label">Your Google Flow Prompt</div>
+        <div class="flow-prompt-text" id="flow-prompt-text"></div>
+        <div class="flow-topic" id="flow-topic"></div>
+        <button class="copy-btn" id="copy-btn" onclick="copyPrompt()">Copy Prompt</button>
+        <div class="flow-instructions">
+          1. Open <strong style="color:var(--text)">flow.google.com</strong><br>
+          2. Set resolution: <strong style="color:var(--text)">720p</strong>, duration: <strong style="color:var(--text)">10 seconds</strong><br>
+          3. Paste the prompt above → Generate<br>
+          4. Download the MP4<br>
+          5. Upload it below in Step 2 ↓
+        </div>
+      </div>
+    </div>
+
+    <!-- Flow Mode: Step 2 -->
+    <div class="flow-step" id="flow-s2">
+      <div class="flow-step-header">
+        <div class="flow-step-num" id="fs2-num">2</div>
+        <div class="flow-step-title">Upload your Flow video → Gemini analyses it → Stitch</div>
+      </div>
+      <div class="video-block">
+        <div class="sec-label">Your Google Flow Video (720p MP4)</div>
+        <div class="video-upload-zone" id="vuz"
+          ondragover="onDragOver(event)"
+          ondragleave="onDragLeave(event,'vuz')"
+          ondrop="onVideoDrop(event)">
+          <input type="file" accept=".mp4,.mov,video/mp4,video/quicktime"
+            onchange="onVideoFile(this.files[0])" id="video-input">
+          <span class="drop-icon">🎬</span>
+          <div class="drop-title">Drop your Flow video or click to browse</div>
+          <div class="drop-sub">MP4 · MOV · 720p · 10 seconds</div>
+        </div>
+        <div class="video-ready" id="video-ready">
+          <span>✓</span>
+          <span class="video-ready-name" id="video-ready-name"></span>
+          <button class="video-ready-rm" onclick="clearVideo()">✕</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hook upload for Seedance/Wan -->
+    <div class="flow-step" id="api-hook-upload">
+      <div class="flow-step-header">
+        <div class="flow-step-num" style="background:var(--gold-dim);border-color:var(--gold-border);color:var(--gold);">↑</div>
+        <div class="flow-step-title">Upload your AI-generated hook clip</div>
+      </div>
+      <div class="video-block">
+        <div class="sec-label">Hook Clip (Seedance / Wan MP4)</div>
+        <div class="video-upload-zone" id="vuz-api"
+          ondragover="onDragOver(event)"
+          ondragleave="onDragLeave(event,'vuz-api')"
+          ondrop="onApiVideoDrop(event)">
+          <input type="file" accept=".mp4,.mov,video/mp4,video/quicktime"
+            onchange="onApiVideoFile(this.files[0])" id="api-video-input">
+          <span class="drop-icon">⚡</span>
+          <div class="drop-title">Drop your Seedance/Wan clip or click to browse</div>
+          <div class="drop-sub">MP4 · MOV · max 50MB</div>
+        </div>
+        <div class="video-ready" id="api-video-ready">
+          <span>✓</span>
+          <span class="video-ready-name" id="api-video-ready-name"></span>
+          <button class="video-ready-rm" onclick="clearApiVideo()">✕</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="cost-bar">
+      <div>
+        <div class="cost-label">ESTIMATED COST</div>
+      </div>
+      <div class="cost-right">
+        <div class="cost-value" id="power-cost">₹15</div>
+        <div class="cost-breakdown" id="power-breakdown">Flow Mode — hook free + Gemini vision (₹2) + Images (₹20) + TTS (₹3)</div>
+      </div>
+    </div>
+
+    <button class="gen-btn" id="btn-power" onclick="generatePower()">
+      Generate Power Reel
+      <span class="gen-btn-sub" id="btn-power-sub">FLOW VIDEO ANALYSIS → AI-MATCHED SLIDES → YOUTUBE + DRIVE</span>
+    </button>
+
+    <div class="prog-block" id="prog-power">
+      <div class="prog-header">
+        <span class="prog-label" id="plabel-power">INITIALISING</span>
+        <span class="prog-pct" id="ppct-power">0%</span>
+      </div>
+      <div class="prog-track"><div class="prog-fill" id="pfill-power"></div></div>
+      <div class="prog-steps" id="psteps-power">
+        <!-- Steps injected by JS based on mode -->
+      </div>
+    </div>
+
+    <div class="result-block" id="res-power"></div>
+  </div>
+
+  <!-- ══════════════════════════════════════════ -->
+  <!-- PANEL 3: FULL CINEMATIC (LOCKED)          -->
+  <!-- ══════════════════════════════════════════ -->
+  <div class="panel" id="panel-cinematic">
+    <div class="locked-panel">
+      <div class="locked-icon">🎬</div>
+      <div class="locked-title">Full Cinematic</div>
+      <div class="locked-sub">
+        Pure AI video — no static image slides. Kling 3.0 or Veo 3 end-to-end generation. Reserved for hero campaigns and premium launches.
+      </div>
+      <div class="locked-badge">PHASE 2 — COMING SOON</div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <div class="footer-left">
+      Trikal Vaani · Rohiit Gupta · Chief Vedic Architect ·
+      <a href="https://trikalvaani.com" target="_blank"
+        style="color:var(--gold);text-decoration:none;opacity:0.8;">
+        trikalvaani.com
+      </a>
+      · Free Kundli · Kundali Milan · AI Vedic Predictions
+    </div>
+    <div class="footer-right">
+      <img
+        src="https://trikalvaani.com/Trikal_Logo.png"
+        alt="Trikal Vaani"
+        class="wm-logo"
+      >
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ── State ────────────────────────────────────────────────────
+const S = {
+  files: { rozka: [], power: [] },
+  mode: 'flow',       // flow | seedance | wan
+  duration: 10,
+  flowPrompt: '',
+  flowVideo: null,    // File object (Flow mode)
+  apiVideo: null,     // File object (Seedance/Wan mode)
+  generating: false,
+  flowStep1Done: false,
+}
+
+const VM = 'http://34.14.164.105:8001'
+
+// ── VM health ping ───────────────────────────────────────────
+async function pingVM() {
+  try {
+    const r = await fetch(`${VM}/pro/health`, { signal: AbortSignal.timeout(6000) })
+    if (r.ok) {
+      const d = await r.json()
+      setVMStatus(d.engine_loaded ? 'online' : 'partial')
+    } else throw new Error()
+  } catch {
+    setVMStatus('offline')
+  }
+}
+
+function setVMStatus(status) {
+  const pill = document.getElementById('vmPill')
+  const dot  = document.getElementById('vmDot')
+  const txt  = document.getElementById('vmText')
+  if (status === 'online') {
+    pill.className = 'vm-pill'
+    txt.textContent = 'Pro Engine Live'
+  } else if (status === 'partial') {
+    pill.className = 'vm-pill'
+    dot.style.background = '#F59E0B'
+    txt.textContent = 'Engine Loading'
+    txt.style.color = '#F59E0B'
+  } else {
+    pill.className = 'vm-pill offline'
+    txt.textContent = 'VM Offline'
+  }
+}
+
+pingVM()
+
+// ── Tab switching ────────────────────────────────────────────
+function switchTab(tab, btn) {
+  if (tab === 'cinematic') return
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'))
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'))
+  btn.classList.add('active')
+  document.getElementById(`panel-${tab}`).classList.add('active')
+}
+
+// ── Word counter ─────────────────────────────────────────────
+function updateWC(el, id) {
+  const w = el.value.trim() === '' ? 0 : el.value.trim().split(/\s+/).length
+  const el2 = document.getElementById(id)
+  el2.textContent = `${w} / 800 words`
+  el2.className = 'wc' + (w > 800 ? ' over' : w > 700 ? ' warn' : '')
+}
+
+// ── Drag & drop helpers ──────────────────────────────────────
+function onDragOver(e) { e.preventDefault(); e.currentTarget.classList.add('drag-over') }
+function onDragLeave(e, id) { document.getElementById(id)?.classList.remove('drag-over') }
+function onDrop(e, tab) {
+  e.preventDefault()
+  e.currentTarget.classList.remove('drag-over')
+  onFiles(e.dataTransfer.files, tab)
+}
+function onVideoDrop(e) {
+  e.preventDefault()
+  e.currentTarget.classList.remove('drag-over')
+  if (e.dataTransfer.files[0]) onVideoFile(e.dataTransfer.files[0])
+}
+function onApiVideoDrop(e) {
+  e.preventDefault()
+  e.currentTarget.classList.remove('drag-over')
+  if (e.dataTransfer.files[0]) onApiVideoFile(e.dataTransfer.files[0])
+}
+
+// ── File handling ────────────────────────────────────────────
+function onFiles(files, tab) {
+  const allowed = ['image/jpeg','image/jpg','image/png','application/pdf']
+  for (let f of files) {
+    if (!allowed.includes(f.type)) continue
+    if (S.files[tab].length >= 8) break
+    S.files[tab].push(f)
+  }
+  renderPreviews(tab)
+}
+
+function renderPreviews(tab) {
+  const c = document.getElementById(`prev-${tab}`)
+  c.innerHTML = ''
+  S.files[tab].forEach((f, i) => {
+    const item = document.createElement('div')
+    item.className = 'prev-item'
+    if (f.type === 'application/pdf') {
+      item.innerHTML = `<div class="pdf-thumb"><span>📄</span><span class="pdf-name">${f.name.slice(0,10)}</span></div>`
+    } else {
+      const url = URL.createObjectURL(f)
+      item.innerHTML = `<img src="${url}" alt="${f.name}">`
+    }
+    const rm = document.createElement('button')
+    rm.className = 'prev-rm'
+    rm.innerHTML = '✕'
+    rm.onclick = () => { S.files[tab].splice(i,1); renderPreviews(tab) }
+    item.appendChild(rm)
+    c.appendChild(item)
+  })
+  const n = S.files[tab].length
+  const ic = document.getElementById(`ic-${tab}`)
+  ic.textContent = n ? `${n} file${n>1?'s':''} selected` : 'No files selected'
+  ic.className = 'img-count' + (n >= 8 ? ' max' : n >= 6 ? ' warn' : '')
+}
+
+// ── Video file handling ──────────────────────────────────────
+function onVideoFile(file) {
+  if (!file) return
+  S.flowVideo = file
+  const r = document.getElementById('video-ready')
+  document.getElementById('video-ready-name').textContent =
+    `${file.name} (${(file.size/1024/1024).toFixed(1)} MB)`
+  r.classList.add('show')
+}
+
+function clearVideo() {
+  S.flowVideo = null
+  document.getElementById('video-ready').classList.remove('show')
+  document.getElementById('video-input').value = ''
+}
+
+function onApiVideoFile(file) {
+  if (!file) return
+  S.apiVideo = file
+  const r = document.getElementById('api-video-ready')
+  document.getElementById('api-video-ready-name').textContent =
+    `${file.name} (${(file.size/1024/1024).toFixed(1)} MB)`
+  r.classList.add('show')
+}
+
+function clearApiVideo() {
+  S.apiVideo = null
+  document.getElementById('api-video-ready').classList.remove('show')
+  document.getElementById('api-video-input').value = ''
+}
+
+// ── Mode / Duration toggles ──────────────────────────────────
+function selectMode(mode, btn) {
+  S.mode = mode
+  // Reset all mode buttons
+  document.querySelectorAll('#panel-power .power-opts .toggle-row')[0]
+    .querySelectorAll('.tog').forEach(b => { b.classList.remove('sel','sel-blue') })
+  btn.classList.add(mode === 'flow' ? 'sel-blue' : 'sel')
+
+  const durBlock = document.getElementById('dur-block')
+  const flowS1   = document.getElementById('flow-s1')
+  const flowS2   = document.getElementById('flow-s2')
+  const apiHook  = document.getElementById('api-hook-upload')
+  const hint     = document.getElementById('power-pipe-hint')
+  const btnSub   = document.getElementById('btn-power-sub')
+
+  if (mode === 'flow') {
+    durBlock.style.display = 'none'
+    flowS1.classList.add('show')
+    flowS2.classList.add('show')
+    apiHook.classList.remove('show')
+    hint.textContent = 'FLOW MODE → GEMINI VISION → TTS → NANO BANANA → FFMPEG'
+    btnSub.textContent = 'FLOW VIDEO ANALYSIS → AI-MATCHED SLIDES → YOUTUBE + DRIVE'
+  } else {
+    durBlock.style.display = ''
+    flowS1.classList.remove('show')
+    flowS2.classList.remove('show')
+    apiHook.classList.add('show')
+    const name = mode === 'seedance' ? 'SEEDANCE' : 'WAN 2.6'
+    hint.textContent = `${name} HOOK → GEMINI FLASH → TTS → NANO BANANA → FFMPEG STITCH`
+    btnSub.textContent = 'AI HOOK + SLIDES → AUTO-POSTS TO YOUTUBE + DRIVE'
+  }
+  updatePowerCost()
+}
+
+function selectDur(sec, btn) {
+  S.duration = sec
+  btn.closest('.toggle-row').querySelectorAll('.tog')
+    .forEach(b => b.classList.remove('sel'))
+  btn.classList.add('sel')
+  updatePowerCost()
+}
+
+function updatePowerCost() {
+  let cost, breakdown
+  if (S.mode === 'flow') {
+    cost = 25
+    breakdown = 'Flow hook FREE + Gemini vision (₹2) + Images (₹20) + TTS (₹3)'
+  } else {
+    const mc = S.mode === 'seedance'
+      ? (S.duration === 5 ? 11 : 22)
+      : (S.duration === 5 ? 25 : 50)
+    cost = mc + 20 + 3
+    const mn = S.mode === 'seedance' ? 'Seedance' : 'Wan 2.6'
+    breakdown = `${mn} ${S.duration}s (₹${mc}) + Images (₹20) + TTS (₹3)`
+  }
+  document.getElementById('power-cost').textContent = `₹${cost}`
+  document.getElementById('power-breakdown').textContent = breakdown
+}
+
+// Initialise mode display
+selectMode('flow', document.getElementById('mode-flow'))
+
+// ── Flow Prompt: Step 1 ──────────────────────────────────────
+async function getFlowPrompt() {
+  const text = document.getElementById('txt-power').value.trim()
+  if (!text) { alert('Please add your content brief first.'); return }
+
+  const btn = document.getElementById('btn-flowprompt')
+  btn.disabled = true
+  btn.textContent = 'Generating prompt...'
+
+  try {
+    const r = await fetch(`${VM}/pro/flow-prompt`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text })
+    })
+    const d = await r.json()
+    if (d.success) {
+      S.flowPrompt = d.flow_prompt
+      S.flowStep1Done = true
+
+      document.getElementById('flow-prompt-text').textContent = d.flow_prompt
+      document.getElementById('flow-topic').textContent =
+        `Topic: ${d.topic_summary || ''}`
+      document.getElementById('flow-prompt-box').classList.add('show')
+      document.getElementById('flow-s2').classList.add('show')
+
+      // Mark step 1 done
+      document.getElementById('fs1-num').className = 'flow-step-num done'
+      document.getElementById('fs1-num').textContent = '✓'
+    } else {
+      alert('Error: ' + (d.detail || d.error || 'Failed'))
+    }
+  } catch(e) {
+    alert('VM error: ' + e.message)
+  } finally {
+    btn.disabled = false
+    btn.innerHTML = 'Get Flow Prompt <span class="gen-btn-sub">GEMINI FLASH READS YOUR BRIEF → RETURNS 20-30 WORD CINEMATIC PROMPT</span>'
+  }
+}
+
+// ── Copy prompt ──────────────────────────────────────────────
+function copyPrompt() {
+  navigator.clipboard.writeText(S.flowPrompt).then(() => {
+    const btn = document.getElementById('copy-btn')
+    btn.textContent = '✓ Copied!'
+    btn.classList.add('copied')
+    setTimeout(() => {
+      btn.textContent = 'Copy Prompt'
+      btn.classList.remove('copied')
+    }, 2000)
+  })
+}
+
+// ── Progress helpers ─────────────────────────────────────────
+function resetProgress(tab, steps) {
+  const fill  = document.getElementById(`pfill-${tab}`)
+  const label = document.getElementById(`plabel-${tab}`)
+  const pct   = document.getElementById(`ppct-${tab}`)
+  fill.style.width = '0%'
+  pct.textContent = '0%'
+  label.textContent = 'INITIALISING'
+
+  if (tab === 'power') {
+    const c = document.getElementById('psteps-power')
+    c.innerHTML = steps.map((s,i) =>
+      `<div class="prog-step" id="ps-power-${i}">
+        <div class="step-ic">${i+1}</div>
+        <span>${s.label}</span>
+      </div>`
+    ).join('')
+  } else {
+    for (let i = 0; i < 5; i++) {
+      const el = document.getElementById(`ps-rozka-${i}`)
+      if (el) { el.className = 'prog-step'; el.querySelector('.step-ic').textContent = i+1 }
+    }
+  }
+}
+
+function advanceProgress(tab, steps, current) {
+  const fill  = document.getElementById(`pfill-${tab}`)
+  const label = document.getElementById(`plabel-${tab}`)
+  const pct   = document.getElementById(`ppct-${tab}`)
+
+  if (current > 0) {
+    const prev = document.getElementById(`ps-${tab}-${current-1}`)
+    if (prev) {
+      prev.className = 'prog-step done'
+      prev.querySelector('.step-ic').textContent = '✓'
+    }
+  }
+  const cur = document.getElementById(`ps-${tab}-${current}`)
+  if (cur) cur.className = 'prog-step active'
+
+  const p = Math.round(((current + 1) / steps.length) * 88)
+  fill.style.width = p + '%'
+  pct.textContent = p + '%'
+  label.textContent = steps[current].label
+}
+
+function finishProgress(tab, steps) {
+  const fill  = document.getElementById(`pfill-${tab}`)
+  const label = document.getElementById(`plabel-${tab}`)
+  const pct   = document.getElementById(`ppct-${tab}`)
+  fill.style.width = '100%'
+  pct.textContent = '100%'
+  label.textContent = 'COMPLETE'
+  const last = document.getElementById(`ps-${tab}-${steps.length-1}`)
+  if (last) {
+    last.className = 'prog-step done'
+    last.querySelector('.step-ic').textContent = '✓'
+  }
+}
+
+function showResult(tab, data) {
+  const el = document.getElementById(`res-${tab}`)
+  if (data.success) {
+    el.className = 'result-block show'
+    el.innerHTML = `
+      <div class="result-title">✓ Video Generated Successfully</div>
+      <div class="result-detail">
+        ${data.title ? `<strong>${data.title}</strong><br><br>` : ''}
+        ${data.youtube_url ? `YouTube: ${data.youtube_url}<br>` : ''}
+        ${data.drive_url ? `Drive: ${data.drive_url}<br>` : ''}
+        ${data.caption ? `<br><em style="color:var(--text-mid)">${data.caption.slice(0,120)}...</em>` : ''}
+      </div>
+      <div class="result-links">
+        ${data.youtube_url ? `<a class="result-link" href="${data.youtube_url}" target="_blank">Open YouTube →</a>` : ''}
+        ${data.drive_url ? `<a class="result-link" href="${data.drive_url}" target="_blank">Open Drive →</a>` : ''}
+      </div>`
+  } else {
+    el.className = 'result-block show err'
+    el.innerHTML = `
+      <div class="result-title">✕ Generation Failed</div>
+      <div class="result-detail">${data.error || data.detail || 'Unknown error'}</div>`
+  }
+}
+
+// ── GENERATE: Pipeline 1 — Natural Flow ─────────────────────
+async function generate(tab) {
+  if (S.generating) return
+  const text = document.getElementById(`txt-${tab}`).value.trim()
+  if (!text) { alert('Please add your content brief first.'); return }
+  if (text.split(/\s+/).length > 800) { alert('Please keep under 800 words.'); return }
+
+  S.generating = true
+  const btn = document.getElementById(`btn-${tab}`)
+  const prog = document.getElementById(`prog-${tab}`)
+  const res  = document.getElementById(`res-${tab}`)
+
+  btn.disabled = true
+  res.className = 'result-block'
+  prog.className = 'prog-block show'
+
+  const steps = [
+    { label: 'GENERATING SCRIPT + SCENES', dur: 9000 },
+    { label: 'RENDERING TTS VOICEOVER',    dur: 12000 },
+    { label: 'GENERATING IMAGE SLIDES',    dur: 18000 },
+    { label: 'ASSEMBLING VIDEO',           dur: 14000 },
+    { label: 'UPLOADING YT + DRIVE',       dur: 8000 },
+  ]
+  resetProgress(tab, steps)
+
+  // Simulate step advances
+  let cur = 0
+  advanceProgress(tab, steps, cur)
+  const timer = setInterval(() => {
+    cur++
+    if (cur < steps.length) advanceProgress(tab, steps, cur)
+    else clearInterval(timer)
+  }, steps[cur]?.dur || 10000)
+
+  try {
+    const fd = new FormData()
+    fd.append('text', text)
+    S.files[tab].forEach((f,i) => fd.append('images', f))
+
+    const r = await fetch(`${VM}/pro/natural`, { method:'POST', body:fd })
+    const d = await r.json()
+    clearInterval(timer)
+    finishProgress(tab, steps)
+    showResult(tab, r.ok ? d : { success:false, error: d.detail || 'Failed' })
+  } catch(e) {
+    clearInterval(timer)
+    showResult(tab, { success:false, error: e.message })
+  } finally {
+    S.generating = false
+    btn.disabled = false
+  }
+}
+
+// ── GENERATE: Pipeline 2 & 3 — Power Reel ───────────────────
+async function generatePower() {
+  if (S.generating) return
+  const text = document.getElementById('txt-power').value.trim()
+  if (!text) { alert('Please add your content brief first.'); return }
+
+  // Validate mode requirements
+  if (S.mode === 'flow' && !S.flowVideo) {
+    alert('Please upload your Google Flow video in Step 2 first.'); return
+  }
+  if ((S.mode === 'seedance' || S.mode === 'wan') && !S.apiVideo) {
+    alert(`Please upload your ${S.mode === 'seedance' ? 'Seedance' : 'Wan 2.6'} hook clip first.`); return
+  }
+
+  S.generating = true
+  const btn  = document.getElementById('btn-power')
+  const prog = document.getElementById('prog-power')
+  const res  = document.getElementById('res-power')
+
+  btn.disabled = true
+  res.className = 'result-block'
+  prog.className = 'prog-block show'
+
+  let steps, endpoint
+  const fd = new FormData()
+  fd.append('text', text)
+  S.files.power.forEach(f => fd.append('images', f))
+
+  if (S.mode === 'flow') {
+    steps = [
+      { label: 'UPLOADING FLOW VIDEO TO GEMINI',   dur: 8000 },
+      { label: 'GEMINI ANALYSES HOOK VIDEO',        dur: 10000 },
+      { label: 'GENERATING MATCHED SCRIPT',         dur: 8000 },
+      { label: 'TTS + IMAGE SLIDES',                dur: 20000 },
+      { label: 'STITCHING HOOK + SLIDES',           dur: 12000 },
+      { label: 'UPLOADING YT + DRIVE',              dur: 8000 },
+    ]
+    endpoint = `${VM}/pro/flow-stitch`
+    fd.append('flow_video', S.flowVideo)
+  } else {
+    steps = [
+      { label: 'GENERATING MATCHED SCRIPT',  dur: 8000 },
+      { label: 'TTS VOICEOVER',              dur: 12000 },
+      { label: 'GENERATING IMAGE SLIDES',    dur: 18000 },
+      { label: 'STITCHING HOOK + SLIDES',    dur: 12000 },
+      { label: 'UPLOADING YT + DRIVE',       dur: 8000 },
+    ]
+    endpoint = `${VM}/pro/ai-video`
+    fd.append('hook_clip', S.apiVideo)
+  }
+
+  resetProgress('power', steps)
+  let cur = 0
+  advanceProgress('power', steps, cur)
+  const timer = setInterval(() => {
+    cur++
+    if (cur < steps.length) advanceProgress('power', steps, cur)
+    else clearInterval(timer)
+  }, steps[cur]?.dur || 10000)
+
+  try {
+    const r = await fetch(endpoint, { method:'POST', body:fd })
+    const d = await r.json()
+    clearInterval(timer)
+    finishProgress('power', steps)
+    showResult('power', r.ok ? d : { success:false, error: d.detail || 'Failed' })
+  } catch(e) {
+    clearInterval(timer)
+    showResult('power', { success:false, error: e.message })
+  } finally {
+    S.generating = false
+    btn.disabled = false
+  }
+}
+</script>
+</body>
+</html>
