@@ -1,22 +1,21 @@
 /**
  * ============================================================================
- * 🔱 TRIKAL VAANI — CEO PROTECTION HEADER 🔱
+ * 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER 🔱
  * ============================================================================
  * File:        components/SiteFooter.tsx
- * Version:     v2.2 — Real Supabase counter + Calculators link + Link fixes
+ * Version:     v2.3 — Brand flip + Instagram handle fix
  * Owner:       Rohiit Gupta, Chief Vedic Architect
- * Date:        2026-05-18
+ * Date:        2026-05-25
  *
- * CHANGES vs v2.1:
- *   ✅ ADDED: /calculators link in Explore nav
- *   ✅ FIXED: /upcoming-events → /panchang (2 places: Explore nav + legal footer)
- *   ✅ FIXED: Fake counter replaced with real Supabase predictions count
- *      → Fetches live from /api/stats (or falls back to 72 if API unavailable)
- *      → Honest number, grows organically with every real prediction
- *   ✅ FIXED: Broken founder image path
- *      OLD: /images/founder.png/Rohiit_Gupta.jpg (invalid)
- *      NEW: /images/Rohiit_Gupta.jpg
- *   ✅ ALL OTHER CONTENT: 100% identical to v2.1
+ * CHANGES vs v2.2:
+ *   ✅ BRAND FLIP: visible "Trikal Vaani" → "Trikaal Vaani" (wordmark +
+ *      entity-signal block). Dual-spelling logic preserved (both rank).
+ *   ⚖️ LEGAL NAME kept: "Trikal Vaani Global" in copyright (matches UDYAM).
+ *   ✅ INSTAGRAM FIXED: @trikalvaani → @thetrikalvaani (handle text + href).
+ *   🔒 UNCHANGED: rohiit@trikalvaani.com, trikalvaani.com domain refs,
+ *      real Supabase counter, all routes/paths, founder image.
+ *   ℹ️ No X/Twitter account present in this file — nothing to remove here.
+ *   ✅ ALL OTHER CONTENT: identical to v2.2.
  * ============================================================================
  */
 
@@ -70,7 +69,7 @@ export default function SiteFooter() {
                 <Star className="w-4 h-4" style={{ color: GOLD }} />
               </div>
               <span className="font-serif font-bold text-lg text-gradient-gold">
-                Trikal Vaani
+                Trikaal Vaani
               </span>
             </Link>
             <p className="text-xs text-slate-400 leading-relaxed max-w-xs mb-4">
@@ -140,7 +139,6 @@ export default function SiteFooter() {
               <Link href="/#birth-form" className="text-xs transition-colors hover:text-white" style={{ color: GOLD_RGBA(0.65) }}>
                 Free Analysis
               </Link>
-              {/* ✅ v2.2 NEW: Calculators link added */}
               <Link href="/calculators" className="text-xs transition-colors hover:text-white" style={{ color: GOLD_RGBA(0.65) }}>
                 Free Calculators
               </Link>
@@ -150,7 +148,6 @@ export default function SiteFooter() {
               <Link href="/founder" className="text-xs transition-colors hover:text-white" style={{ color: GOLD_RGBA(0.65) }}>
                 About Rohiit Gupta
               </Link>
-              {/* ✅ v2.2 FIX: /upcoming-events → /panchang */}
               <Link href="/panchang" className="text-xs transition-colors hover:text-white" style={{ color: GOLD_RGBA(0.65) }}>
                 Festival Calendar
               </Link>
@@ -193,13 +190,13 @@ export default function SiteFooter() {
               Connect
             </p>
             <a
-              href="https://www.instagram.com/trikalvaani"
+              href="https://www.instagram.com/thetrikalvaani"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 text-xs text-slate-500 hover:text-slate-300 transition-colors"
             >
               <Instagram className="w-3.5 h-3.5" />
-              @trikalvaani
+              @thetrikalvaani
             </a>
           </div>
         </div>
@@ -266,8 +263,8 @@ export default function SiteFooter() {
           }}
         >
           <p className="text-xs leading-relaxed" style={{ color: GOLD_RGBA(0.7) }}>
-            <strong style={{ color: GOLD }}>Trikal Vaani</strong> is also searched as{' '}
-            <strong style={{ color: GOLD_RGBA(0.85) }}>Trikaal Vaani</strong>
+            <strong style={{ color: GOLD }}>Trikaal Vaani</strong> is also searched as{' '}
+            <strong style={{ color: GOLD_RGBA(0.85) }}>Trikal Vaani</strong>
             <span className="text-slate-500"> · </span>
             India&apos;s AI-powered Vedic Astrology platform by Rohiit Gupta.
             <br />
@@ -295,7 +292,6 @@ export default function SiteFooter() {
               Refund Policy
             </Link>
             <span style={{ color: GOLD_RGBA(0.3) }} className="text-xs">·</span>
-            {/* ✅ v2.2 FIX: /upcoming-events → /panchang in legal footer too */}
             <Link href="/panchang" className="text-xs font-bold transition-all duration-200 hover:text-white hover:scale-105" style={{ color: GOLD }}>
               Festival Calendar
             </Link>
@@ -306,6 +302,7 @@ export default function SiteFooter() {
           </div>
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
             <div className="flex flex-wrap items-center gap-4 text-xs text-slate-700">
+              {/* Legal name — matches UDYAM registration, kept as "Trikal Vaani Global" */}
               <span>&copy; {new Date().getFullYear()} Trikal Vaani Global. All rights reserved.</span>
               <span style={{ color: GOLD_RGBA(0.2) }}>·</span>
               <span>MSME: UDYAM-DL-10-0119070</span>
@@ -326,7 +323,7 @@ export default function SiteFooter() {
 }
 
 // ============================================================================
-// END — components/SiteFooter.tsx v2.2
-// 🔱 Trikal Vaani | Rohiit Gupta, Chief Vedic Architect
-// MSME Registered: UDYAM-DL-10-0119070
+// END — components/SiteFooter.tsx v2.3
+// 🔱 Trikaal Vaani | Rohiit Gupta, Chief Vedic Architect
+// Brand=Trikaal · Legal="Trikal Vaani Global" (UDYAM) · IG=@thetrikalvaani
 // ============================================================================
