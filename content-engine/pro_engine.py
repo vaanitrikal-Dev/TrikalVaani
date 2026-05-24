@@ -739,6 +739,7 @@ def upload_to_youtube(video_path: Path, script_data: dict) -> Optional[str]:
 
 
 def cleanup_pro(slug: str):
+    auto_delete_old_outputs(7)
     """Remove temp files for this slug."""
     patterns = [
         f"pro_tts_*.wav", f"pro_img_*.png",
@@ -1080,3 +1081,21 @@ def upload_caption_to_drive(caption_text: str, slug: str, title: str) -> Optiona
     except Exception as e:
         log(f"Caption upload exception: {e}")
         return None
+
+# =============================================================
+# AUTO-DELETE: Remove output files older than 7 days
+# Called at end of each pipeline run
+# =============================================================
+def auto_delete_old_outputs(days: int = 7):
+    import time
+    cutoff = time.time() - (days * 86400)
+    deleted = 0
+    for f in OUTPUT_DIR.glob("*"):
+        if f.is_file() and f.stat().st_mtime < cutoff:
+            f.unlink(missing_ok=True)
+            deleted += 1
+            log(f"Auto-deleted: {f.name}")
+    if deleted:
+        log(f"Auto-delete: {deleted} files removed (older than {days} days)")
+    else:
+        log(f"Auto-delete: nothing to remove")

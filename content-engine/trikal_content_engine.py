@@ -1077,6 +1077,7 @@ def send_whatsapp_alert(message):
 
 
 def cleanup():
+    auto_delete_old_outputs(7)
     patterns = ["clip_*.mp4", "concat*", "*.txt", "img_*.png", "tts_*.wav"]
     for pat in patterns:
         for f in TEMP_DIR.glob(pat):
@@ -1202,3 +1203,15 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+def auto_delete_old_outputs(days=7):
+    """Remove output files older than N days. Runs after every generation."""
+    import time
+    cutoff = time.time() - (days * 86400)
+    deleted = 0
+    for f in OUTPUT_DIR.glob("*"):
+        if f.is_file() and f.stat().st_mtime < cutoff:
+            f.unlink(missing_ok=True)
+            deleted += 1
+    if deleted:
+        log(f"Auto-deleted {deleted} files older than {days} days")
