@@ -3,18 +3,21 @@
 // ============================================================
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikal Vaani
 // FILE: components/auth/AuthModal.tsx
-// VERSION: v2.0
+// VERSION: v3.0
 // DATE: 2026-05-24
 // CHANGES:
-//   v2.0: Added "Continue with Google" (Gmail login) at the top,
-//         wired to signInWithGoogle() in lib/auth.ts. On click it
-//         redirects to Google and returns the user to the SAME page.
-//         Email/password flow kept fully intact below a divider.
+//   v3.0: Added "Login with Mobile" button (Firebase Phone OTP).
+//         Opens PhoneAuthModal when clicked. After mobile login
+//         success, user returns to same page. Both Google + Mobile
+//         login options now visible side by side.
+//   v2.0: Added "Continue with Google" button.
+//   v1.0: Email/password login only.
 // ============================================================
 
 import { useState } from 'react';
-import { X, Mail, Lock, User, Eye, EyeOff } from 'lucide-react';
+import { X, Mail, Lock, User, Eye, EyeOff, Phone } from 'lucide-react';
 import { signInWithEmail, signUpWithEmail, signInWithGoogle } from '@/lib/auth';
+import PhoneAuthModal from './PhoneAuthModal';
 
 const GOLD = '#D4AF37';
 const GOLD_RGBA = (a: number) => `rgba(212,175,55,${a})`;
@@ -32,6 +35,7 @@ export default function AuthModal({ onClose, onSuccess }: AuthModalProps) {
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [showPhone, setShowPhone] = useState(false);
   const [error, setError] = useState('');
 
   const handleGoogle = async () => {
@@ -43,7 +47,6 @@ export default function AuthModal({ onClose, onSuccess }: AuthModalProps) {
         setError(err.message);
         setGoogleLoading(false);
       }
-      // On success the browser redirects to Google, so no further code runs.
     } catch {
       setError('Could not start Google sign-in. Please try again.');
       setGoogleLoading(false);
@@ -54,7 +57,6 @@ export default function AuthModal({ onClose, onSuccess }: AuthModalProps) {
     e.preventDefault();
     setLoading(true);
     setError('');
-
     try {
       if (mode === 'login') {
         const { error: err } = await signInWithEmail(email, password);
@@ -70,6 +72,19 @@ export default function AuthModal({ onClose, onSuccess }: AuthModalProps) {
     }
   };
 
+  // Show PhoneAuthModal on top when mobile login clicked
+  if (showPhone) {
+    return (
+      <PhoneAuthModal
+        onClose={() => setShowPhone(false)}
+        onSuccess={(mobile) => {
+          setShowPhone(false);
+          onSuccess();
+        }}
+      />
+    );
+  }
+
   return (
     <div
       className="fixed inset-0 z-[200] flex items-center justify-center p-4"
@@ -84,6 +99,7 @@ export default function AuthModal({ onClose, onSuccess }: AuthModalProps) {
           boxShadow: `0 0 80px ${GOLD_RGBA(0.12)}`,
         }}
       >
+        {/* Header */}
         <div
           className="px-6 py-4 flex items-center justify-between"
           style={{ borderBottom: `1px solid ${GOLD_RGBA(0.12)}` }}
@@ -104,8 +120,9 @@ export default function AuthModal({ onClose, onSuccess }: AuthModalProps) {
           </button>
         </div>
 
-        <div className="px-6 pt-5">
-          {/* ── CONTINUE WITH GOOGLE (Gmail login) ── */}
+        <div className="px-6 pt-5 space-y-3">
+
+          {/* ── CONTINUE WITH GOOGLE ── */}
           <button
             type="button"
             onClick={handleGoogle}
@@ -122,15 +139,32 @@ export default function AuthModal({ onClose, onSuccess }: AuthModalProps) {
             {googleLoading ? 'Connecting…' : 'Continue with Google'}
           </button>
 
-          {/* ── divider ── */}
-          <div className="flex items-center gap-3 my-4">
+          {/* ── LOGIN WITH MOBILE (Firebase OTP) ── */}
+          <button
+            type="button"
+            onClick={() => setShowPhone(true)}
+            disabled={googleLoading || loading}
+            className="w-full py-2.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2.5 transition-all duration-300 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
+            style={{
+              background: 'transparent',
+              border: `1px solid ${GOLD_RGBA(0.35)}`,
+              color: GOLD,
+            }}
+          >
+            <Phone className="w-4 h-4" />
+            Login with Mobile OTP
+          </button>
+
+          {/* ── Divider ── */}
+          <div className="flex items-center gap-3 pt-1">
             <div className="flex-1 h-px" style={{ background: GOLD_RGBA(0.12) }} />
             <span className="text-[11px] text-slate-500">or with email</span>
             <div className="flex-1 h-px" style={{ background: GOLD_RGBA(0.12) }} />
           </div>
         </div>
 
-        <form onSubmit={handle} className="px-6 pb-5 space-y-4">
+        {/* ── EMAIL / PASSWORD FORM ── */}
+        <form onSubmit={handle} className="px-6 pb-5 pt-3 space-y-4">
           {mode === 'register' && (
             <div>
               <label className="text-xs text-slate-400 block mb-1.5">Full Name</label>
@@ -142,10 +176,7 @@ export default function AuthModal({ onClose, onSuccess }: AuthModalProps) {
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Your name"
                   className="w-full pl-9 pr-4 py-2.5 rounded-xl text-sm text-white placeholder:text-slate-600 outline-none transition-all"
-                  style={{
-                    background: 'rgba(255,255,255,0.04)',
-                    border: `1px solid ${GOLD_RGBA(0.15)}`,
-                  }}
+                  style={{ background: 'rgba(255,255,255,0.04)', border: `1px solid ${GOLD_RGBA(0.15)}` }}
                   required
                 />
               </div>
@@ -162,10 +193,7 @@ export default function AuthModal({ onClose, onSuccess }: AuthModalProps) {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com"
                 className="w-full pl-9 pr-4 py-2.5 rounded-xl text-sm text-white placeholder:text-slate-600 outline-none transition-all"
-                style={{
-                  background: 'rgba(255,255,255,0.04)',
-                  border: `1px solid ${GOLD_RGBA(0.15)}`,
-                }}
+                style={{ background: 'rgba(255,255,255,0.04)', border: `1px solid ${GOLD_RGBA(0.15)}` }}
                 required
               />
             </div>
@@ -181,10 +209,7 @@ export default function AuthModal({ onClose, onSuccess }: AuthModalProps) {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Min. 8 characters"
                 className="w-full pl-9 pr-10 py-2.5 rounded-xl text-sm text-white placeholder:text-slate-600 outline-none transition-all"
-                style={{
-                  background: 'rgba(255,255,255,0.04)',
-                  border: `1px solid ${GOLD_RGBA(0.15)}`,
-                }}
+                style={{ background: 'rgba(255,255,255,0.04)', border: `1px solid ${GOLD_RGBA(0.15)}` }}
                 minLength={8}
                 required
               />
@@ -199,7 +224,8 @@ export default function AuthModal({ onClose, onSuccess }: AuthModalProps) {
           </div>
 
           {error && (
-            <div className="rounded-xl px-3 py-2.5 text-xs text-red-300" style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)' }}>
+            <div className="rounded-xl px-3 py-2.5 text-xs text-red-300"
+              style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)' }}>
               {error}
             </div>
           )}
