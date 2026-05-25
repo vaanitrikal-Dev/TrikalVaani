@@ -3,11 +3,9 @@
 // Version: v1.0 — metadata only
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikal Vaani
 // ============================================================
-
 import type { Metadata } from 'next';
-
 export const metadata: Metadata = {
-  title: 'Free Rashi Calculator — Find Your Moon Sign (Chandra Rashi) Online | Trikal Vaani',
+  title: 'Free Rashi Calculator — Find Your Moon Sign (Chandra Rashi) Online | Trikaal Vaani',
   description:
     'Free Rashi Calculator powered by Swiss Ephemeris. Discover your Chandra Rashi (Moon Sign), ruling planet, element, favorable colors, days & 3 Parashar remedies instantly. By Rohiit Gupta, Chief Vedic Architect.',
   keywords: [
@@ -30,7 +28,7 @@ export const metadata: Metadata = {
     description: 'Find your Chandra Rashi, ruling planet, element, favorable colors, days & 3 Parashar remedies — free.',
     url: 'https://trikalvaani.com/calculators/free-rashi-calculator',
     type: 'website',
-    siteName: 'Trikal Vaani',
+    siteName: 'Trikaal Vaani',
   },
   twitter: {
     card: 'summary_large_image',
@@ -39,7 +37,6 @@ export const metadata: Metadata = {
   },
   robots: { index: true, follow: true },
 };
-
 export default function RashiCalculatorLayout({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
