@@ -1,57 +1,19 @@
-// 🔱 TRIKAL VAANI | app/page.tsx | v11.0
+// 🔱 TRIKAL VAANI | app/page.tsx | v12.0
 // Owner: Rohiit Gupta, Chief Vedic Architect
-// Date: 2026-05-19
+// Date: 2026-05-25
 // ============================================================================
-// CEO-APPROVED LAYOUT REORDER (v10.0 → v11.0):
+// CHANGE LOG (v11.0 → v12.0):
 //
-// STRATEGIC GOAL: Move earning sections ABOVE the mobile fold.
-// Current v10.0 order pushed Mahakaal form to slot #5, causing ~50-60% mobile
-// drop-off before any earning component was visible. v11.0 fixes this.
+// ❌ REMOVED: PricingSection (was slot #5)
+//    - Removed import:  import PricingSection from '@/components/landing/PricingSection';
+//    - Removed render:  <PricingSection />
+//    - Reason: CEO decision (May 25 2026) — pricing section pulled from homepage.
+//    - All following slots renumbered (#6→#5, #7→#6, ... #14→#13).
 //
-// ❌ REMOVED from old positions:
-//    - HomepageGEO was at slot #2 (right after Hero) — moved to slot #11
-//    - LiveTrustBar was at slot #3 — moved to slot #4
-//    - SocialProofTicker was at slot #4 — moved to slot #6
-//    - PricingSection was at slot #10 — moved to slot #5
-//
-// ✅ NEW SLOT #3: KundaliMilanTeaser (NEW component, "Launching Soon" earning
-//    placeholder with email capture to Supabase milan_waitlist table)
-//
-// ✅ CRITICAL DESIGN DECISION:
-//    HomeClient (DardEngine + BirthForm) stays INTACT as one component.
-//    Their shared useState<SelectedCategory> + handleSelectCategory flow is
-//    a brilliant funnel — user picks Dard category, BirthForm pre-fills below.
-//    Breaking this would hurt conversions more than reordering helps.
-//
-// ✅ TIERED LOCK POLICY (Iron Rule IR-12):
-//    LOCKED sections (no edits without CEO approval):
-//      #2 HomeClient (Mahakaal form + Dard Engine)
-//      #3 KundaliMilanTeaser
-//      (Maa Shakti lives inside prediction pages, not homepage)
-//    EDITABLE sections:
-//      #1 Hero, #4-13 (all others)
-//
-// ✅ SEO/GEO IMPACT: ZERO loss.
-//    HomepageGEO HTML still renders in the document. Google, Perplexity, SGE,
-//    and ChatGPT crawlers parse the full DOM regardless of visual position.
-//    Schema markup (HomepageSchema + SchemaScript) remains in document head.
-//    Position only affects HUMAN scroll order, not AI extraction.
-//
-// PAGE FLOW v11.0 (top to bottom):
-//   1. Hero                    (H1 + visual hook — compressed)
-//   2. HomeClient              (Mahakaal form + Dard Engine — EARNING LOCKED)
-//   3. KundaliMilanTeaser      (NEW — Launching Soon earning placeholder LOCKED)
-//   4. LiveTrustBar            (social proof — quick trust strip)
-//   5. PricingSection          (commercial trust — show tiers)
-//   6. SocialProofTicker       (live ticker)
-//   7. DailyPanchang           (daily return-visit hook)
-//   8. DailyRashifal           (daily return-visit hook)
-//   9. PillarsGrid             (life domains)
-//   10. AIManifesto            (brand philosophy)
-//   11. HomepageGEO            (GEO direct answer + Tier 1 FAQ + E-E-A-T — CRAWLER ONLY)
-//   12. HomeFAQ v2.0           (Tier 2 deep technical FAQ)
-//   13. InnerCircleWaitlist    (VIP capture)
-//   14. Blog section           (3 latest posts)
+// NOTE: The "INAUGURAL OFFER: 100% FREE FOR 30 DAYS" banner is NOT in this
+//       file. It lives inside a child component (likely Hero or PricingSection).
+//       If it was inside PricingSection, it is now gone with this removal.
+//       If it was inside Hero, it still needs separate removal in Hero.tsx.
 // ============================================================================
 
 import type { Metadata } from 'next';
@@ -69,7 +31,6 @@ import AIManifesto from '@/components/landing/AIManifesto';
 import BlogCard from '@/components/blog/BlogCard';
 import DailyPanchang from '@/components/landing/DailyPanchang';
 import DailyRashifal from '@/components/landing/DailyRashifal';
-import PricingSection from '@/components/landing/PricingSection';
 import LiveTrustBar from '@/components/landing/LiveTrustBar';
 import KundaliMilanTeaser from '@/components/landing/KundaliMilanTeaser';
 import HomeClient from './HomeClient';
@@ -77,8 +38,6 @@ import { blogPosts } from '@/lib/blog-data';
 
 // ─────────────────────────────────────────────────────────────
 // PAGE-SPECIFIC METADATA — overrides layout.tsx v2.7 defaults
-// v11.0: Updated description to include Kundali Milan keyword
-//        for early SEO indexing window before product launches.
 // ─────────────────────────────────────────────────────────────
 export const metadata: Metadata = {
   title: 'Trikal Vaani | Free Kundli, Kundali Milan & Accurate AI Vedic Astrology',
@@ -122,12 +81,7 @@ export default function HomePage() {
 
   return (
     <>
-      {/* ── SEO SCHEMAS — server-rendered into initial HTML ──────────────────
-          HomepageSchema v1.1: Person (Rohiit ji E-E-A-T) + FAQPage +
-            BreadcrumbList + HowTo + OfferCatalog (5 schemas)
-          SchemaScript: existing WebSite/Service/Product schemas (Phase C)
-          NO duplicate @id values — Session A audit cleaned all collisions.
-      ──────────────────────────────────────────────────────────────────── */}
+      {/* ── SEO SCHEMAS — server-rendered into initial HTML ──────────────── */}
       <HomepageSchema />
       <SchemaScript />
 
@@ -137,91 +91,53 @@ export default function HomePage() {
 
           {/* ═══════════════════════════════════════════════════════════════
               EARNING TIER — slots #1 to #3 — TIERED LOCK (IR-12)
-              Mobile users see ALL earning slots before any informational
-              content. This is the revenue zone.
           ═══════════════════════════════════════════════════════════════ */}
 
-          {/* ── 1. HERO ────────────────────────────────────────────────────
-              Brand recall + single CTA. Compressed for mobile (40vh target).
-              EDITABLE per IR-12. */}
+          {/* ── 1. HERO ──────────────────────────────────────────────────── */}
           <Hero />
 
-          {/* ── 2. HOMECLIENT — MAHAKAAL + DARD ENGINE ─────────────────────
-              🔒 EARNING LOCKED (IR-12)
-              The primary conversion surface. DardEngine selector pre-fills
-              the BirthForm category via shared useState<SelectedCategory>.
-              DO NOT split these two components — the funnel depends on
-              their glued state.
-              Order inside: DardEngine card grid → Mahakaal BirthForm. */}
+          {/* ── 2. HOMECLIENT — MAHAKAAL + DARD ENGINE — 🔒 EARNING LOCKED ── */}
           <HomeClient />
 
-          {/* ── 3. KUNDALI MILAN TEASER — NEW ──────────────────────────────
-              🔒 EARNING LOCKED (IR-12)
-              Day 1 ships "Launching Soon" placeholder with email capture
-              to Supabase milan_waitlist table. Pre-launch waitlist building
-              for Day 8 (Kundali Milan goes LIVE).
-              SEO/GEO indexing window opens immediately so Google starts
-              crawling Kundali Milan content before the product is live. */}
+          {/* ── 3. KUNDALI MILAN TEASER — 🔒 EARNING LOCKED ───────────────── */}
           <KundaliMilanTeaser />
 
           {/* ═══════════════════════════════════════════════════════════════
-              TRUST + COMMERCIAL TIER — slots #4 to #6
-              Reinforce trust signals immediately after earning surfaces.
+              TRUST + ENGAGEMENT TIER
           ═══════════════════════════════════════════════════════════════ */}
 
           {/* ── 4. LIVE TRUST BAR ──────────────────────────────────────── */}
           <LiveTrustBar />
 
-          {/* ── 5. PRICING SECTION ─────────────────────────────────────────
-              Moved up from slot #10. After someone sees Mahakaal form +
-              Kundali Milan teaser, they want to know the full price ladder. */}
-          <PricingSection />
-
-          {/* ── 6. SOCIAL PROOF TICKER ─────────────────────────────────── */}
+          {/* ── 5. SOCIAL PROOF TICKER ─────────────────────────────────── */}
           <SocialProofTicker />
 
-          {/* ═══════════════════════════════════════════════════════════════
-              ENGAGEMENT + RETENTION TIER — slots #7 to #10
-              Daily-return hooks + brand depth content.
-          ═══════════════════════════════════════════════════════════════ */}
-
-          {/* ── 7. DAILY PANCHANG ──────────────────────────────────────── */}
+          {/* ── 6. DAILY PANCHANG ──────────────────────────────────────── */}
           <DailyPanchang />
 
-          {/* ── 8. DAILY RASHIFAL ──────────────────────────────────────── */}
+          {/* ── 7. DAILY RASHIFAL ──────────────────────────────────────── */}
           <DailyRashifal />
 
-          {/* ── 9. PILLARS GRID — life domains ─────────────────────────── */}
+          {/* ── 8. PILLARS GRID — life domains ─────────────────────────── */}
           <PillarsGrid />
 
-          {/* ── 10. AI MANIFESTO — brand philosophy ────────────────────── */}
+          {/* ── 9. AI MANIFESTO — brand philosophy ─────────────────────── */}
           <AIManifesto />
 
           {/* ═══════════════════════════════════════════════════════════════
-              SEO/GEO/AEO/E-E-A-T TIER — slots #11 to #14
-              These sections exist primarily for Google, Perplexity, SGE,
-              ChatGPT, and Gemini crawlers. Human users may scroll here
-              for deep info, but the earning conversion already happened
-              above. Crawlers parse position-independent — moving these
-              down has ZERO impact on search rankings or AI citations.
+              SEO/GEO/AEO/E-E-A-T TIER — crawler-facing, position-independent
           ═══════════════════════════════════════════════════════════════ */}
 
-          {/* ── 11. HOMEPAGE GEO — moved from slot #2 ──────────────────────
-              56-word direct answer + Tier 1 FAQ + author E-E-A-T + local SEO.
-              CEO DECISION (May 19 2026): "Human will not read HomepageGEO,
-              it's only for SEO/GEO/AEO/E-E-A-T — shift below earning sections."
-              Crawlers extract this content regardless of DOM position. */}
+          {/* ── 10. HOMEPAGE GEO ───────────────────────────────────────── */}
           <HomepageGEO />
 
-          {/* ── 12. HOME FAQ v2.0 — TIER 2 DEEP TECHNICAL FAQ ──────────────
-              Unique schema @id="#homefaq-deep" — no collision with Tier 1.
-              Covers Sade Sati, Manglik Dosha, Pratyantar Dasha, Dhana Yoga. */}
+          {/* ── 11. HOME FAQ v2.0 — TIER 2 DEEP TECHNICAL FAQ ──────────── */}
           <HomeFAQ />
 
-          {/* ── 13. INNER CIRCLE WAITLIST ──────────────────────────────── */}
+          {/* ── 12. INNER CIRCLE WAITLIST ──────────────────────────────── */}
           <InnerCircleWaitlist />
 
-          {/* ── 14. BLOG SECTION ───────────────────────────────────────── */}
+          {/* ── 13. BLOG SECTION ───────────────────────────────────────── */}
           <section className="py-20 px-4">
             <div className="max-w-6xl mx-auto">
               <div className="text-center mb-12">
@@ -266,7 +182,7 @@ export default function HomePage() {
 }
 
 // ============================================================================
-// END — app/page.tsx v11.0
+// END — app/page.tsx v12.0
 // 🔱 Trikal Vaani | Rohiit Gupta, Chief Vedic Architect
-// CEO LOCKED: TIERED LAYOUT — earning sections above mobile fold
+// CEO LOCKED: PricingSection removed; slots renumbered.
 // ============================================================================

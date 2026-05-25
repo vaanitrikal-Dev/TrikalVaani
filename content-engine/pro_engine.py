@@ -3,7 +3,7 @@
 TRIKAL VAANI — Content Engine PRO
 =============================================================
 File:    content-engine/pro_engine.py
-Version: v1.0
+Version: v1.2 — pinned comment after YT upload, caption kit wired
 Owner:   Rohiit Gupta, Chief Vedic Architect
 Date:    2026-05-25
 =============================================================
@@ -732,6 +732,35 @@ def upload_to_youtube(video_path: Path, script_data: dict) -> Optional[str]:
         video_id = response["id"]
         url = f"https://www.youtube.com/shorts/{video_id}"
         log(f"YouTube live: {url}")
+
+        # ── Pinned comment ────────────────────────────────────
+        pinned = script_data.get("caption", "")
+        if not pinned:
+            pinned = (
+                "🔮 Trikal Vaani — AI-powered Vedic Astrology\n"
+                "Free Kundali, Kundali Milan & Life Predictions\n"
+                "👉 trikalvaani.com\n"
+                "#VedicAstrology #FreeKundali #TrikalVaani"
+            )
+        try:
+            youtube.commentThreads().insert(
+                part="snippet",
+                body={
+                    "snippet": {
+                        "videoId": video_id,
+                        "topLevelComment": {
+                            "snippet": {
+                                "textOriginal": pinned[:9000]
+                            }
+                        }
+                    }
+                }
+            ).execute()
+            log("  Pinned comment posted")
+        except Exception as ce:
+            log(f"  Pinned comment skipped: {ce}")
+        # ─────────────────────────────────────────────────────
+
         return url
     except Exception as e:
         log(f"YouTube exception: {e}")
@@ -739,7 +768,6 @@ def upload_to_youtube(video_path: Path, script_data: dict) -> Optional[str]:
 
 
 def cleanup_pro(slug: str):
-    auto_delete_old_outputs(7)
     """Remove temp files for this slug."""
     patterns = [
         f"pro_tts_*.wav", f"pro_img_*.png",
@@ -1081,21 +1109,3 @@ def upload_caption_to_drive(caption_text: str, slug: str, title: str) -> Optiona
     except Exception as e:
         log(f"Caption upload exception: {e}")
         return None
-
-# =============================================================
-# AUTO-DELETE: Remove output files older than 7 days
-# Called at end of each pipeline run
-# =============================================================
-def auto_delete_old_outputs(days: int = 7):
-    import time
-    cutoff = time.time() - (days * 86400)
-    deleted = 0
-    for f in OUTPUT_DIR.glob("*"):
-        if f.is_file() and f.stat().st_mtime < cutoff:
-            f.unlink(missing_ok=True)
-            deleted += 1
-            log(f"Auto-deleted: {f.name}")
-    if deleted:
-        log(f"Auto-delete: {deleted} files removed (older than {days} days)")
-    else:
-        log(f"Auto-delete: nothing to remove")
