@@ -1,6 +1,6 @@
 /**
  * ============================================================
- * TRIKAL VAANI — Blog Index Page
+ * TRIKAAL VAANI — Blog Index Page
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/blog/page.tsx
  * VERSION: 2.1 — Supabase Dynamic (build-safe, SWC parser fix)
@@ -22,7 +22,7 @@ import { getAllPosts } from '@/lib/blog-posts';
 export const revalidate = 300;
 
 export const metadata: Metadata = {
-  title: 'Vedic Astrology Blog — Gochar, Kundali & Jyotish | Trikal Vaani',
+  title: 'Vedic Astrology Blog — Gochar, Kundali & Jyotish | Trikaal Vaani',
   description:
     'Expert articles on Vedic astrology — planetary transits (Gochar), Kundali analysis, Dashas, and the science of Jyotish explained for the modern seeker.',
   keywords: [
@@ -40,7 +40,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: 'https://trikalvaani.com/blog' },
   openGraph: {
-    title: 'Vedic Astrology Blog | Trikal Vaani',
+    title: 'Vedic Astrology Blog | Trikaal Vaani',
     description: 'Planetary transits, Kundali secrets, and Jyotish decoded.',
     url: 'https://trikalvaani.com/blog',
     type: 'website',
@@ -68,7 +68,7 @@ export default async function BlogPage() {
               Vedic Knowledge Base
             </p>
             <h1 className="font-serif text-4xl sm:text-5xl md:text-6xl font-bold mb-4">
-              <span className="text-gradient-gold">Trikal Blog</span>
+              <span className="text-gradient-gold">Trikaal Blog</span>
             </h1>
             <p className="text-slate-400 max-w-lg mx-auto text-base leading-relaxed">
               Planetary transits, Kundali secrets, and the eternal wisdom of Jyotish —
@@ -83,7 +83,7 @@ export default async function BlogPage() {
               border: '1px solid rgba(250,204,21,0.10)',
             }}
           >
-            <strong className="text-yellow-400">Trikal Vaani Blog</strong> publishes
+            <strong className="text-yellow-400">Trikaal Vaani Blog</strong> publishes
             classical Vedic astrology guides authored by{' '}
             <strong>Rohiit Gupta, Chief Vedic Architect</strong>. Topics include
             Vimshottari Dasha, Mahadasha–Antardasha effects, Manglik Dosh, Sade Sati,
