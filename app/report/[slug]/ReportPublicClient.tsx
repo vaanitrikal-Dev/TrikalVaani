@@ -2,11 +2,19 @@
 
 /**
  * ============================================================
- * Trikaal VAANI — Public SEO Report Client
+ * TRIKAAL VAANI — Public SEO Report Client
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/report/[slug]/ReportPublicClient.tsx
- * VERSION: 8.1 — Maa Shakti Dakshina via Razorpay
+ * VERSION: 8.2 — Brand flip Trikal→Trikaal (display only)
  * SIGNED: ROHIIT GUPTA, CEO
+ *
+ * CHANGES v8.2 vs v8.1:
+ *   ✅ Visible brand "Trikal Vaani" → "Trikaal Vaani"
+ *   ✅ Product/persona "Trikal Ka Sandesh/Ne Aur Bhi Dekha/Precision" → "Trikaal"
+ *   ✅ Razorpay checkout merchant name → "Trikaal Vaani"
+ *   ✅ ALL trikalvaani.com URLs UNCHANGED (domain/links protected)
+ *   ✅ splitGeoToBullets URL-cleaning regex UNCHANGED (functional)
+ *   ✅ wa.me/919211804111 number UNCHANGED
  *
  * CHANGES v8.1 vs v8.0:
  *   ✅ MaaShakti component now uses Razorpay (not WhatsApp links)
@@ -103,9 +111,9 @@ function splitGeoToBullets(text:string, isPaid:boolean, pj?:Record<string,unknow
     }
   }
   if (bullets.length < maxBullets && text && text !== '—') {
-    const cleaned = text.replace(/Trikaalvaani\.\s*\n?\s*com/gi,'Trikaalvaani.com').replace(/Visit\s+Trikaalvaani\.com[^.]*\./gi,'').trim()
+    const cleaned = text.replace(/trikalvaani\.\s*\n?\s*com/gi,'trikalvaani.com').replace(/Visit\s+trikalvaani\.com[^.]*\./gi,'').trim()
     const sentences = cleaned.match(/[^.!?]+(?:[.!?](?!\s*com|\s*in|\s*org))+/g) ?? []
-    sentences.map(s=>s.replace(/^[.!?,;\s]+/,'').trim()).filter(s=>s.length>20&&!s.toLowerCase().includes('Trikaalvaani.com')).slice(0,maxBullets-bullets.length).forEach(s=>{if(bullets.length<maxBullets)bullets.push(s)})
+    sentences.map(s=>s.replace(/^[.!?,;\s]+/,'').trim()).filter(s=>s.length>20&&!s.toLowerCase().includes('trikalvaani.com')).slice(0,maxBullets-bullets.length).forEach(s=>{if(bullets.length<maxBullets)bullets.push(s)})
   }
   if (isPaid && pj && bullets.length < maxBullets) {
     const seo = safeObj(pj.seoSignals)
@@ -1008,7 +1016,7 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
                 <ul style={{margin:0,padding:0,listStyle:'none',display:'flex',flexDirection:'column',gap:'10px'}}>
                   {geoBullets.map((pt,i)=>(<li key={i} style={{display:'flex',gap:'10px',alignItems:'flex-start'}}><span style={{color:GOLD,fontSize:'14px',flexShrink:0,marginTop:'2px'}}>{['🔱','✦','◆','▸','🪐','✧','🔮','⚡','🌟','🕉️'][i%10]}</span><p style={{margin:0,color:'#e2e8f0',fontSize:'14px',lineHeight:1.8}}>{pt.replace(/^[.!?,;\s]+/,'').trim()}</p></li>))}
                 </ul>
-                <p style={{margin:'12px 0 0',color:'#475569',fontSize:'11px'}}>By Rohiit Gupta, Chief Vedic Architect · Trikaalvaani.com</p>
+                <p style={{margin:'12px 0 0',color:'#475569',fontSize:'11px'}}>By Rohiit Gupta, Chief Vedic Architect · trikalvaani.com</p>
               </div>
             )}
           </div>
@@ -1125,11 +1133,11 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
 
           <div style={{textAlign:'center',marginBottom:'24px'}}>
             <div style={{display:'flex',gap:'10px',justifyContent:'center',flexWrap:'wrap',marginBottom:'16px'}}>
-              <a href={`https://wa.me/?text=Maine%20Trikaal%20Vaani%20pe%20kundali%20padhi%20—%20bahut%20accurate!%20${encodeURIComponent('https://Trikaalvaani.com/report/'+slug)}`} target="_blank" rel="noopener noreferrer" style={{padding:'11px 20px',borderRadius:'10px',background:'rgba(37,211,102,0.08)',border:'1px solid rgba(37,211,102,0.25)',color:'#25D366',fontSize:'13px',fontWeight:600,textDecoration:'none'}}>📱 WhatsApp Share</a>
+              <a href={`https://wa.me/?text=Maine%20Trikaal%20Vaani%20pe%20kundali%20padhi%20—%20bahut%20accurate!%20${encodeURIComponent('https://trikalvaani.com/report/'+slug)}`} target="_blank" rel="noopener noreferrer" style={{padding:'11px 20px',borderRadius:'10px',background:'rgba(37,211,102,0.08)',border:'1px solid rgba(37,211,102,0.25)',color:'#25D366',fontSize:'13px',fontWeight:600,textDecoration:'none'}}>📱 WhatsApp Share</a>
               <PDFBtn/>
               <Link href="/" style={{padding:'11px 20px',borderRadius:'10px',background:G(0.08),border:`1px solid ${G(0.25)}`,color:GOLD,fontSize:'13px',fontWeight:600,textDecoration:'none',display:'flex',alignItems:'center',gap:'6px'}}><ArrowLeft size={14}/>Apni Reading Karein</Link>
             </div>
-            <p style={{margin:0,color:'#1e293b',fontSize:'11px',lineHeight:1.5}}>🔱 Trikaal Vaani — Kaal bada balwan hai, sabko nach nachaye<br/>Trikaalvaani.com · Rohiit Gupta, Chief Vedic Architect, Delhi NCR</p>
+            <p style={{margin:0,color:'#1e293b',fontSize:'11px',lineHeight:1.5}}>🔱 Trikaal Vaani — Kaal bada balwan hai, sabko nach nachaye<br/>trikalvaani.com · Rohiit Gupta, Chief Vedic Architect, Delhi NCR</p>
           </div>
 
         </div>
