@@ -3,11 +3,9 @@
 // Version: v1.0 — metadata only
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikal Vaani
 // ============================================================
-
 import type { Metadata } from 'next';
-
 export const metadata: Metadata = {
-  title: 'Free Manglik Dosh Calculator — Check Mangal Dosha Online | Trikal Vaani',
+  title: 'Free Manglik Dosh Calculator — Check Mangal Dosha Online | Trikaal Vaani',
   description:
     'Free Manglik Dosh Calculator powered by Swiss Ephemeris. Find out if you are Manglik, severity (High/Medium/Low), Mars house position, cancellation rules & 3 Parashar remedies. By Rohiit Gupta, Chief Vedic Architect.',
   keywords: [
@@ -30,7 +28,7 @@ export const metadata: Metadata = {
     description: 'Find Manglik status, severity, Mars position & 3 Parashar remedies — free.',
     url: 'https://trikalvaani.com/calculators/free-manglik-dosh-calculator',
     type: 'website',
-    siteName: 'Trikal Vaani',
+    siteName: 'Trikaal Vaani',
   },
   twitter: {
     card: 'summary_large_image',
@@ -39,7 +37,6 @@ export const metadata: Metadata = {
   },
   robots: { index: true, follow: true },
 };
-
 export default function ManglikDoshCalculatorLayout({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
