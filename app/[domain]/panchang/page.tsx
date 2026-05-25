@@ -1,15 +1,15 @@
 // ════════════════════════════════════════════════════════════════════
-// 🔱 TRIKAL VAANI — CEO PROTECTION HEADER
+// 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER
 // ════════════════════════════════════════════════════════════════════
 // File:        app/[domain]/panchang/page.tsx
-// Version:     v1.1
+// Version:     v1.2
 // Owner:       Rohiit Gupta, Chief Vedic Architect
 // Domain:      trikalvaani.com
 // Purpose:     Phase B3 — City Panchang Pages
 //              URL: /delhi/panchang, /mumbai/panchang
 //              Uses [domain] param (matches existing app/[domain] folder)
 // Lock Status: gemini-prompt.ts = PERMANENTLY LOCKED (do not touch)
-// Last Update: 2026-05-09 (Phase B3)
+// Last Update: 2026-05-25 (brand display name → Trikaal Vaani; /predict → /#birth-form)
 // ════════════════════════════════════════════════════════════════════
 
 import { Metadata } from "next";
@@ -47,7 +47,7 @@ type Panchang = {
 const SITE_URL = "https://trikalvaani.com";
 const VM_BASE = "http://34.14.164.105:8001";
 const AUTHOR_NAME = "Rohiit Gupta";
-const AUTHOR_TITLE = "Chief Vedic Architect, Trikal Vaani";
+const AUTHOR_TITLE = "Chief Vedic Architect, Trikaal Vaani";
 
 // Only match known city slugs — ignore all other [domain] routes
 const CITY_SLUGS = new Set([
@@ -89,13 +89,13 @@ export async function generateMetadata(
 ): Promise<Metadata> {
   const c = findCity(params.domain);
   if (!c) return { title: "Not Found" };
-  const title = `Aaj Ka Panchang ${c.name} | Tithi, Nakshatra, Rahu Kaal Today | Trikal Vaani`;
+  const title = `Aaj Ka Panchang ${c.name} | Tithi, Nakshatra, Rahu Kaal Today | Trikaal Vaani`;
   const description = `Today's Vedic Panchang for ${c.name} (${c.name_hindi}), ${c.state}. Accurate Tithi, Nakshatra, Yoga, Karana, Sunrise, Sunset & Rahu Kaal. Swiss Ephemeris · Lahiri Ayanamsha. By Rohiit Gupta.`;
   const url = `${SITE_URL}/${c.slug}/panchang`;
   return {
     title, description,
     alternates: { canonical: url },
-    openGraph: { title, description, url, siteName: "Trikal Vaani", type: "article", locale: "en_IN" },
+    openGraph: { title, description, url, siteName: "Trikaal Vaani", type: "article", locale: "en_IN" },
     twitter: { card: "summary_large_image", title, description },
     robots: { index: true, follow: true },
   };
@@ -202,7 +202,7 @@ export default async function CityPanchangPage(
           <section className="mb-8 rounded-xl bg-gradient-to-r from-amber-600 to-orange-600 p-6 text-white">
             <h2 className="text-xl font-bold">Get your personal Vedic reading — {c.name}</h2>
             <p className="mt-2 text-sm opacity-95">Personalised predictions based on today's planets + your birth chart. Free Tithi insight, ₹51 for full report.</p>
-            <Link href="/predict" className="mt-4 inline-block rounded-lg bg-white px-6 py-3 font-semibold text-amber-700 hover:bg-amber-50">
+            <Link href="/#birth-form" className="mt-4 inline-block rounded-lg bg-white px-6 py-3 font-semibold text-amber-700 hover:bg-amber-50">
               Get My Prediction →
             </Link>
           </section>
