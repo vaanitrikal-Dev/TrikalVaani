@@ -1,4 +1,4 @@
-// 🔱 TRIKAL VAANI | app/page.tsx | v12.0
+// 🔱 TRIKAAL VAANI | app/page.tsx | v12.0
 // Owner: Rohiit Gupta, Chief Vedic Architect
 // Date: 2026-05-25
 // ============================================================================
@@ -40,7 +40,7 @@ import { blogPosts } from '@/lib/blog-data';
 // PAGE-SPECIFIC METADATA — overrides layout.tsx v2.7 defaults
 // ─────────────────────────────────────────────────────────────
 export const metadata: Metadata = {
-  title: 'Trikal Vaani | Free Kundli, Kundali Milan & Accurate AI Vedic Astrology',
+  title: 'Trikaal Vaani | Free Kundli, Kundali Milan & Accurate AI Vedic Astrology',
   description:
     "Get your free AI kundli, Kundali Milan & accurate Vedic astrology predictions. Personalised readings for career, wealth, marriage, health & legal matters by Rohiit Gupta, Chief Vedic Architect (Delhi NCR). Powered by Swiss Ephemeris. Voice & text readings from ₹11.",
   alternates: {
@@ -51,28 +51,21 @@ export const metadata: Metadata = {
     },
   },
   openGraph: {
-    title: 'Trikal Vaani | Free Kundli, Kundali Milan & Accurate AI Vedic Astrology',
+    title: 'Trikaal Vaani | Free Kundli, Kundali Milan & Accurate AI Vedic Astrology',
     description:
       "Free AI kundli, Kundali Milan & accurate Vedic astrology predictions. Personalised readings by Rohiit Gupta, Chief Vedic Architect. Voice & text from ₹11.",
     url: 'https://trikalvaani.com/',
     type: 'website',
     locale: 'en_IN',
-    siteName: 'Trikal Vaani',
+    siteName: 'Trikaal Vaani',
     images: [
       {
         url: 'https://trikalvaani.com/og-default.jpg',
         width: 1200,
         height: 630,
-        alt: 'Trikal Vaani — Free Kundli, Kundali Milan & Accurate AI Vedic Astrology',
+        alt: 'Trikaal Vaani — Free Kundli, Kundali Milan & Accurate AI Vedic Astrology',
       },
     ],
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Trikal Vaani | Free Kundli, Kundali Milan & Accurate AI Vedic Astrology',
-    description:
-      'Free AI kundli, Kundali Milan & accurate Vedic astrology predictions. Voice & text readings from ₹11.',
-    images: ['https://trikalvaani.com/og-default.jpg'],
   },
 };
 
@@ -146,7 +139,7 @@ export default function HomePage() {
                 </p>
                 <h2 className="font-serif text-3xl sm:text-4xl font-bold text-white">
                   Latest from the{' '}
-                  <span className="text-gradient-gold">Trikal Blog</span>
+                  <span className="text-gradient-gold">Trikaal Blog</span>
                 </h2>
                 <p className="text-slate-400 mt-3 max-w-md mx-auto text-sm leading-relaxed">
                   Deep dives into Gochar transits, Kundali analysis, and the timeless
@@ -183,6 +176,6 @@ export default function HomePage() {
 
 // ============================================================================
 // END — app/page.tsx v12.0
-// 🔱 Trikal Vaani | Rohiit Gupta, Chief Vedic Architect
+// 🔱 Trikaal Vaani | Rohiit Gupta, Chief Vedic Architect
 // CEO LOCKED: PricingSection removed; slots renumbered.
 // ============================================================================
