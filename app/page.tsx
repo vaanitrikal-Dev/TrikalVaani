@@ -25,8 +25,8 @@ import SiteNav from '@/components/layout/SiteNav';
 import SiteFooter from '@/components/layout/SiteFooter';
 import Hero from '@/components/landing/Hero';
 import PillarsGrid from '@/components/landing/PillarsGrid';
-import SocialProofTicker from '@/components/landing/SocialProofTicker';
 import InnerCircleWaitlist from '@/components/landing/InnerCircleWaitlist';
+import SocialProofTicker from '@/components/landing/SocialProofTicker';
 import AIManifesto from '@/components/landing/AIManifesto';
 import BlogCard from '@/components/blog/BlogCard';
 import DailyPanchang from '@/components/landing/DailyPanchang';
@@ -104,7 +104,6 @@ export default function HomePage() {
 
           {/* ── 5. SOCIAL PROOF TICKER ─────────────────────────────────── */}
           <SocialProofTicker />
-
           {/* ── 6. DAILY PANCHANG ──────────────────────────────────────── */}
           <DailyPanchang />
 
