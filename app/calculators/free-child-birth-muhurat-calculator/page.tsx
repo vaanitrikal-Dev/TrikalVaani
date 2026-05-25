@@ -136,12 +136,12 @@ function PlaceInput({ id, placeholder, onSelect, error }: {
 }
 
 const FAQS = [
-  { q: 'C-section ke liye shubh muhurat kaise nikalta hai?', a: 'C-section ya planned delivery ka muhurat aapke doctor dwara di gayi safe time window ke ANDAR nikala jaata hai. Trikal Vaani har 10 minute ka Lagna, Nakshatra, Tithi, Yoga, aur 8th house check karke sabse auspicious slot batata hai — sirf us window mein jo doctor ne approve ki hai. Medical safety pehle, muhurat uske andar.' },
+  { q: 'C-section ke liye shubh muhurat kaise nikalta hai?', a: 'C-section ya planned delivery ka muhurat aapke doctor dwara di gayi safe time window ke ANDAR nikala jaata hai. Trikaal Vaani har 10 minute ka Lagna, Nakshatra, Tithi, Yoga, aur 8th house check karke sabse auspicious slot batata hai — sirf us window mein jo doctor ne approve ki hai. Medical safety pehle, muhurat uske andar.' },
   { q: 'Kya yeh tool doctor ki advice replace karta hai?', a: 'Bilkul nahi. Delivery date aur safe time window 100% aapke doctor decide karte hain — maa aur bachche ki health ke according. Yeh tool sirf us approved window ke andar sabse shubh moment dhoondta hai. Yeh medical advice nahi hai.' },
-  { q: 'Best nakshatra for baby birth kaunse hain?', a: 'Classical Jyotish ke according Pushya, Rohini, Hasta, Anuradha, aur Swati nakshatra child birth ke liye sabse auspicious mane jaate hain. Trikal Vaani in sabhi ko score karta hai aur strong Lagna lord + clean 8th house ko bhi check karta hai.' },
+  { q: 'Best nakshatra for baby birth kaunse hain?', a: 'Classical Jyotish ke according Pushya, Rohini, Hasta, Anuradha, aur Swati nakshatra child birth ke liye sabse auspicious mane jaate hain. Trikaal Vaani in sabhi ko score karta hai aur strong Lagna lord + clean 8th house ko bhi check karta hai.' },
   { q: 'Naamakshar (lucky name letter) kya hota hai?', a: 'Jis nakshatra aur pada mein bachcha paida hota hai, uske according ek shubh starting syllable (Naamakshar) milta hai — jaise "Cho", "La", "Mi". Iss syllable se shuru hone wala naam bachche ke liye auspicious mana jaata hai. Paid report mein hum boy + girl naam suggestions bhi dete hain.' },
   { q: 'Kya yeh IVF delivery ke liye bhi kaam karta hai?', a: 'Haan. Chahe C-section ho ya IVF embryo transfer/planned delivery — jab bhi date aur time pehle se decide ho sakti ho, yeh tool us window mein sabse shubh moment batata hai.' },
-  { q: 'Result kitne accurate hain?', a: 'Trikal Vaani Swiss Ephemeris (NASA-grade) + Lahiri Ayanamsha use karta hai, aur master-grade Muhurta logic se 9 factors check karta hai: Lagna nakshatra, Lagna lord ka house + dignity, 8th house affliction, kendra/trikona benefics, Moon strength, Yoga, Tithi, Karana, aur Rahu Kaal. Yeh wahi method hai jo experienced astrologers use karte hain.' },
+  { q: 'Result kitne accurate hain?', a: 'Trikaal Vaani Swiss Ephemeris (NASA-grade) + Lahiri Ayanamsha use karta hai, aur master-grade Muhurta logic se 9 factors check karta hai: Lagna nakshatra, Lagna lord ka house + dignity, 8th house affliction, kendra/trikona benefics, Moon strength, Yoga, Tithi, Karana, aur Rahu Kaal. Yeh wahi method hai jo experienced astrologers use karte hain.' },
 ];
 
 interface SlotData {
@@ -167,7 +167,7 @@ const REPORT_STEPS = [
   '✓ Payment safal — dhanyawad 🙏',
   '🪐 Grahon ki sookshma ganana ho rahi hai...',
   '🌙 Lagna aur Nakshatra nikaale ja rahe hain...',
-  '📜 Trikal aapke bachche ki kundli padh rahe hain...',
+  '📜 Trikaal aapke bachche ki kundli padh rahe hain...',
   '🔱 Maa Shakti ka aashirwad jod rahe hain...',
   '✨ Aapki report taiyaar ho rahi hai...',
 ];
@@ -307,7 +307,7 @@ export default function FreeChildBirthMuhuratPage() {
         orderId:     order.orderId,
         amount:      order.amount,
         currency:    order.currency,
-        name:        'Trikal Vaani',
+        name:        'Trikaal Vaani',
         description: order.label,
         themeColor:  GOLD,
         onSuccess: async (resp) => {
@@ -416,7 +416,7 @@ export default function FreeChildBirthMuhuratPage() {
           {/* GEO DIRECT ANSWER (40-60w) */}
           <div className="rounded-xl p-5 mb-6" style={{ background: 'rgba(212,175,55,0.06)', border: `1px solid rgba(212,175,55,0.2)` }}>
             <p className="text-base md:text-lg leading-relaxed">
-              A <strong style={{ color: GOLD }}>child birth muhurat</strong> is the most auspicious moment to deliver a baby, chosen using Vedic astrology. For a planned C-section or IVF delivery, the muhurat is selected <strong>within the safe time window your doctor approves</strong> — based on a strong Lagna (ascendant), favourable Nakshatra and Tithi, and a clean 8th house. Trikal Vaani finds the best slot inside that window using Swiss Ephemeris and BPHS classical rules.
+              A <strong style={{ color: GOLD }}>child birth muhurat</strong> is the most auspicious moment to deliver a baby, chosen using Vedic astrology. For a planned C-section or IVF delivery, the muhurat is selected <strong>within the safe time window your doctor approves</strong> — based on a strong Lagna (ascendant), favourable Nakshatra and Tithi, and a clean 8th house. Trikaal Vaani finds the best slot inside that window using Swiss Ephemeris and BPHS classical rules.
             </p>
           </div>
 
@@ -433,7 +433,7 @@ export default function FreeChildBirthMuhuratPage() {
             <div className="w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg" style={{ background: GOLD, color: '#080B12' }}>RG</div>
             <div className="text-sm">
               <div className="font-semibold" style={{ color: GOLD }}>Rohiit Gupta</div>
-              <div className="text-slate-400">Chief Vedic Architect · Trikal Vaani · Delhi NCR</div>
+              <div className="text-slate-400">Chief Vedic Architect · Trikaal Vaani · Delhi NCR</div>
               <div className="text-xs text-slate-500 mt-0.5">Engine: Swiss Ephemeris · BPHS Muhurta · Lahiri Ayanamsha · 9-Factor Master Analysis</div>
             </div>
           </div>
@@ -680,21 +680,21 @@ export default function FreeChildBirthMuhuratPage() {
 
             <h2 className="text-2xl font-serif font-bold mb-4 mt-8" style={{ color: GOLD }}>Muhurat Kis Cheez Par Depend Karta Hai? (9 Factors)</h2>
             <p className="text-slate-300 leading-relaxed mb-4">
-              Trikal Vaani master-grade analysis karta hai: (1) Lagna Nakshatra ki quality — Pushya, Rohini, Hasta jaise auspicious nakshatra. (2) Lagna lord ka house — kendra/trikona mein strong. (3) Lagna lord ki dignity — exalted ya own sign. (4) 8th house affliction — malefic 8th house mein ho toh avoid. (5) Kendra/trikona mein benefics. (6) Moon ki strength. (7) Shubh Yoga. (8) Purna Tithi. (9) Rahu Kaal avoidance. Yeh sab milkar 0-100 ka muhurat score banate hain.
+              Trikaal Vaani master-grade analysis karta hai: (1) Lagna Nakshatra ki quality — Pushya, Rohini, Hasta jaise auspicious nakshatra. (2) Lagna lord ka house — kendra/trikona mein strong. (3) Lagna lord ki dignity — exalted ya own sign. (4) 8th house affliction — malefic 8th house mein ho toh avoid. (5) Kendra/trikona mein benefics. (6) Moon ki strength. (7) Shubh Yoga. (8) Purna Tithi. (9) Rahu Kaal avoidance. Yeh sab milkar 0-100 ka muhurat score banate hain.
             </p>
 
             <h2 className="text-2xl font-serif font-bold mb-4 mt-8" style={{ color: GOLD }}>Naamakshar — Bachche Ka Lucky Naam Letter</h2>
             <p className="text-slate-300 leading-relaxed mb-4">
-              Har nakshatra ke 4 pada hote hain, aur har pada ka ek shubh starting syllable hota hai. Jaise Pushya nakshatra ke padas se "Hu", "He", "Ho", "Da" aate hain. Jis muhurat mein bachcha paida hota hai, uska Lagna nakshatra-pada bachche ke naam ka lucky letter decide karta hai. Trikal Vaani ki paid report mein hum is letter se shuru hone wale auspicious boy aur girl names suggest karte hain.
+              Har nakshatra ke 4 pada hote hain, aur har pada ka ek shubh starting syllable hota hai. Jaise Pushya nakshatra ke padas se "Hu", "He", "Ho", "Da" aate hain. Jis muhurat mein bachcha paida hota hai, uska Lagna nakshatra-pada bachche ke naam ka lucky letter decide karta hai. Trikaal Vaani ki paid report mein hum is letter se shuru hone wale auspicious boy aur girl names suggest karte hain.
             </p>
 
-            <h2 className="text-2xl font-serif font-bold mb-4 mt-8" style={{ color: GOLD }}>Trikal Vaani vs Other Muhurat Sites</h2>
+            <h2 className="text-2xl font-serif font-bold mb-4 mt-8" style={{ color: GOLD }}>Trikaal Vaani vs Other Muhurat Sites</h2>
             <div className="not-prose overflow-x-auto mb-6">
               <table className="w-full text-sm" style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid ${GOLD}33`, borderRadius: '12px' }}>
                 <thead>
                   <tr style={{ background: 'rgba(212,175,55,0.1)' }}>
                     <th className="p-3 text-left" style={{ color: GOLD }}>Feature</th>
-                    <th className="p-3 text-left" style={{ color: GOLD }}>Trikal Vaani</th>
+                    <th className="p-3 text-left" style={{ color: GOLD }}>Trikaal Vaani</th>
                     <th className="p-3 text-left text-slate-400">Others</th>
                   </tr>
                 </thead>

@@ -3,11 +3,9 @@
 // Version: v2.1 — metadata only, clean passthrough
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikal Vaani
 // ============================================================
-
 import type { Metadata } from 'next';
-
 export const metadata: Metadata = {
-  title: 'Free Nakshatra Calculator — Find Your Janma Nakshatra Online | Trikal Vaani',
+  title: 'Free Nakshatra Calculator — Find Your Janma Nakshatra Online | Trikaal Vaani',
   description:
     'Free Nakshatra Calculator powered by Swiss Ephemeris. Discover your Janma Nakshatra, Pada, ruling planet, deity, gana, yoni, nadi & 3 Parashar remedies instantly. By Rohiit Gupta, Chief Vedic Architect.',
   keywords: [
@@ -21,7 +19,7 @@ export const metadata: Metadata = {
     title: 'Free Nakshatra Calculator — Find Your Janma Nakshatra Online',
     description: 'Find your Janma Nakshatra, Pada, lord, deity, gana, yoni, nadi & 3 Parashar remedies — free.',
     url: 'https://trikalvaani.com/calculators/free-nakshatra-calculator',
-    type: 'website', siteName: 'Trikal Vaani',
+    type: 'website', siteName: 'Trikaal Vaani',
   },
   twitter: {
     card: 'summary_large_image',
@@ -30,7 +28,6 @@ export const metadata: Metadata = {
   },
   robots: { index: true, follow: true },
 };
-
 export default function NakshatraCalculatorLayout({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }

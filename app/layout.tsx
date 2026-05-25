@@ -91,14 +91,6 @@ export const metadata: Metadata = {
       },
     ],
   },
-  twitter: {
-    card: "summary_large_image",
-    creator: "@TrikalVaani",
-    title: "Trikaal Vaani | Free Kundli & Accurate AI Vedic Astrology",
-    description:
-      "Free AI kundli & accurate Vedic astrology predictions. Voice & text readings from ₹11.",
-    images: ["https://trikalvaani.com/og-default.jpg"],
-  },
   verification: {
     google: "rr3Smkv1DQzSM1vq0lmmHNOhys-nXKyDBiXyv3tS9lY",
   },
@@ -197,9 +189,8 @@ export default function RootLayout({
               ],
               areaServed: { "@type": "Country", name: "India" },
               sameAs: [
-                "https://www.instagram.com/trikalvaani",
-                "https://www.youtube.com/@trikalvaani",
-                "https://twitter.com/trikalvaani",
+                "https://www.instagram.com/thetrikalvaani",
+                "https://www.youtube.com/@TheTrikalVaani",
                 "https://udyamregistration.gov.in/Udyam_Verify.aspx",
               ],
               paymentAccepted: [
@@ -234,7 +225,7 @@ export default function RootLayout({
               offers: [
                 {
                   "@type": "Offer",
-                  name: "Free Kundli & Trikal Ka Sandesh",
+                  name: "Free Kundli & Trikaal Ka Sandesh",
                   price: "0",
                   priceCurrency: "INR",
                   description:

@@ -14,7 +14,7 @@ import KundaliCalculatorClient from '@/components/calculators/KundaliCalculatorC
 const GOLD = '#D4AF37';
 
 export const metadata: Metadata = {
-  title: 'Free AI Kundli Calculator — Janm Kundali Online | Trikal Vaani',
+  title: 'Free AI Kundli Calculator — Janm Kundali Online | Trikaal Vaani',
   description:
     'Free AI Kundli calculator powered by Swiss Ephemeris. Get your accurate Janm Kundali, Lagna, Nakshatra, Chandra Rashi, Mahadasha, and Parashar remedies online instantly. By Rohiit Gupta, Chief Vedic Architect.',
   keywords: [
@@ -33,8 +33,8 @@ export const metadata: Metadata = {
 
 const FAQS = [
   { q: 'Kundli kya hoti hai?', a: 'Kundli (Janm Kundali) ek Vedic birth chart hai jo aapke janm samay grahon aur nakshatron ki position dikhata hai. Iska use Vedic astrology mein future predictions, character analysis, aur remedies ke liye hota hai.' },
-  { q: 'Free Kundli Calculator kaise kaam karta hai?', a: 'Aap apni date of birth, time of birth, aur birth place enter karte ho. Trikal Vaani ka Swiss Ephemeris engine sab grahon ki exact position calculate karta hai aur aapko Lagna, Nakshatra, Chandra Rashi, Mahadasha, aur Parashar-based remedies turant dikhata hai.' },
-  { q: 'Kya yeh kundli accurate hai?', a: 'Haan. Trikal Vaani Swiss Ephemeris use karta hai — wahi astronomical library jo NASA aur world-class astrology software use karte hain. Calculations Lahiri Ayanamsha pe based hain, BPHS ke classical rules ke according.' },
+  { q: 'Free Kundli Calculator kaise kaam karta hai?', a: 'Aap apni date of birth, time of birth, aur birth place enter karte ho. Trikaal Vaani ka Swiss Ephemeris engine sab grahon ki exact position calculate karta hai aur aapko Lagna, Nakshatra, Chandra Rashi, Mahadasha, aur Parashar-based remedies turant dikhata hai.' },
+  { q: 'Kya yeh kundli accurate hai?', a: 'Haan. Trikaal Vaani Swiss Ephemeris use karta hai — wahi astronomical library jo NASA aur world-class astrology software use karte hain. Calculations Lahiri Ayanamsha pe based hain, BPHS ke classical rules ke according.' },
   { q: 'Mujhe apna exact birth time nahi pata, kya phir bhi kundli ban sakti hai?', a: 'Approximate time se bhi kundli ban sakti hai, lekin Lagna aur Bhava positions ke liye exact time important hai. Best — birth certificate ya parents se confirm karein.' },
   { q: 'Kundli ke baad kya milta hai?', a: 'Aapko milta hai: (1) Lagna aur Nakshatra, (2) Chandra Rashi aur Surya Rashi, (3) Current Mahadasha + Antardasha, (4) Sab 9 grahon ki position aur Shadbala, (5) Parashar-based Dos & Donts, (6) 3 personalized remedies — Mantra, Ratna, Daan.' },
   { q: 'Yeh service kya free hai?', a: 'Haan. Basic kundli calculation, Lagna, Nakshatra, Dasha, aur Parashar remedies bilkul free hain. Detailed life prediction (career, marriage, health timing) ₹51 mein available hai.' },
@@ -58,9 +58,8 @@ export default function KundaliCalculatorPage() {
       <Script id="kundali-calc-software-schema" type="application/ld+json" strategy="beforeInteractive"
         dangerouslySetInnerHTML={{ __html: JSON.stringify({
           '@context': 'https://schema.org', '@type': 'SoftwareApplication',
-          name: 'Trikal Vaani Free AI Kundli Calculator', applicationCategory: 'LifestyleApplication', operatingSystem: 'Web',
+          name: 'Trikaal Vaani Free AI Kundli Calculator', applicationCategory: 'LifestyleApplication', operatingSystem: 'Web',
           offers: { '@type': 'Offer', price: '0', priceCurrency: 'INR' },
-          aggregateRating: { '@type': 'AggregateRating', ratingValue: '4.9', ratingCount: '247' },
           creator: { '@type': 'Person', name: 'Rohiit Gupta', jobTitle: 'Chief Vedic Architect', url: 'https://trikalvaani.com/founder' },
         }) }} />
 
@@ -74,7 +73,7 @@ export default function KundaliCalculatorPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify({
           '@context': 'https://schema.org', '@type': 'HowTo',
           name: 'Free AI Kundli Kaise Banayein',
-          description: 'Trikal Vaani ke free AI Kundli Calculator se apni Janm Kundali kaise banayein — step by step.',
+          description: 'Trikaal Vaani ke free AI Kundli Calculator se apni Janm Kundali kaise banayein — step by step.',
           step: HOWTO_STEPS.map((s, i) => ({ '@type': 'HowToStep', position: i + 1, name: s.name, text: s.text })),
         }) }} />
 
@@ -105,7 +104,7 @@ export default function KundaliCalculatorPage() {
 
           <div className="rounded-xl p-5 mb-6" style={{ background: 'rgba(212,175,55,0.06)', border: `1px solid rgba(212,175,55,0.2)` }}>
             <p className="text-base md:text-lg leading-relaxed">
-              <strong style={{ color: GOLD }}>Trikal Vaani ka Free AI Kundli Calculator</strong> aapki Janm Kundali Swiss Ephemeris se calculate karta hai. Sirf date of birth, time, aur place daalo — Lagna, Nakshatra, Chandra Rashi, current Mahadasha, aur Parashar-based remedies (Mantra, Ratna, Daan) turant free milte hain.
+              <strong style={{ color: GOLD }}>Trikaal Vaani ka Free AI Kundli Calculator</strong> aapki Janm Kundali Swiss Ephemeris se calculate karta hai. Sirf date of birth, time, aur place daalo — Lagna, Nakshatra, Chandra Rashi, current Mahadasha, aur Parashar-based remedies (Mantra, Ratna, Daan) turant free milte hain.
             </p>
           </div>
 
@@ -113,7 +112,7 @@ export default function KundaliCalculatorPage() {
             <div className="w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg" style={{ background: GOLD, color: '#080B12' }}>RG</div>
             <div className="text-sm">
               <div className="font-semibold" style={{ color: GOLD }}>Rohiit Gupta</div>
-              <div className="text-slate-400">Chief Vedic Architect · Trikal Vaani · Delhi NCR</div>
+              <div className="text-slate-400">Chief Vedic Architect · Trikaal Vaani · Delhi NCR</div>
               <div className="text-xs text-slate-500 mt-0.5">Engine: Swiss Ephemeris · Lahiri Ayanamsha · BPHS Classical Rules</div>
             </div>
           </div>

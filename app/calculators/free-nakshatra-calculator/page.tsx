@@ -187,7 +187,7 @@ function CityInput({ id, value, onSelect, error }: {
 
 const FAQS = [
   { q: 'Nakshatra kya hota hai?', a: 'Nakshatra Vedic Jyotish ka sabse important unit hai. Aakash ko 27 equal divisions mein baata gaya hai. Aapka Janma Nakshatra wahi hai jismein aapke janm samay Chandra (Moon) sthit tha — NOT the Lagna (Ascendant).' },
-  { q: 'Janma Nakshatra kaise pata karein?', a: 'Date of Birth, exact Time of Birth, aur Place of Birth chahiye. Trikal Vaani Calculator Swiss Ephemeris se Moon ki exact position calculate karta hai aur usse aapka Janma Nakshatra + Pada nikalta hai.' },
+  { q: 'Janma Nakshatra kaise pata karein?', a: 'Date of Birth, exact Time of Birth, aur Place of Birth chahiye. Trikaal Vaani Calculator Swiss Ephemeris se Moon ki exact position calculate karta hai aur usse aapka Janma Nakshatra + Pada nikalta hai.' },
   { q: 'Pada kya hota hai?', a: 'Har Nakshatra 4 equal parts mein divide hota hai — inhe Pada kehte hain. 27 nakshatras × 4 padas = 108 micro-divisions. Aapka Pada aapke exact karma blueprint ko identify karta hai.' },
   { q: 'Gana, Yoni, aur Nadi kya hai?', a: 'Gana (Deva, Manushya, Rakshasa) — swabhav. Yoni — primitive nature aur compatibility. Nadi (Aadi, Madhya, Antya) — marriage compatibility ka sabse zaroori check.' },
   { q: 'Kya Nakshatra Calculator free hai?', a: 'Haan, 100% free. Nakshatra, Pada, lord, deity, symbol, gana, yoni, nadi, personality traits, 3 Dos, 3 Donts, aur 3 remedies — sab free.' },
@@ -326,7 +326,7 @@ export default function FreeNakshatraCalculatorPage() {
 
           <div className="rounded-xl p-5 mb-6" style={{ background: 'rgba(212,175,55,0.06)', border: `1px solid rgba(212,175,55,0.2)` }}>
             <p className="text-base md:text-lg leading-relaxed">
-              <strong style={{ color: GOLD }}>Trikal Vaani ka Free Nakshatra Calculator</strong> aapka Janma Nakshatra Swiss Ephemeris se calculate karta hai — Chandra (Moon) ki exact position se, Lagna se nahi. Date, time, aur place daalo — Nakshatra, Pada, lord, deity, gana, yoni, nadi, aur 3 free Parashar remedies turant milte hain.
+              <strong style={{ color: GOLD }}>Trikaal Vaani ka Free Nakshatra Calculator</strong> aapka Janma Nakshatra Swiss Ephemeris se calculate karta hai — Chandra (Moon) ki exact position se, Lagna se nahi. Date, time, aur place daalo — Nakshatra, Pada, lord, deity, gana, yoni, nadi, aur 3 free Parashar remedies turant milte hain.
             </p>
           </div>
 
@@ -334,7 +334,7 @@ export default function FreeNakshatraCalculatorPage() {
             <div className="w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg" style={{ background: GOLD, color: '#080B12' }}>RG</div>
             <div className="text-sm">
               <div className="font-semibold" style={{ color: GOLD }}>Rohiit Gupta</div>
-              <div className="text-slate-400">Chief Vedic Architect · Trikal Vaani · Delhi NCR</div>
+              <div className="text-slate-400">Chief Vedic Architect · Trikaal Vaani · Delhi NCR</div>
               <div className="text-xs text-slate-500 mt-0.5">Engine: Swiss Ephemeris · Parashar BPHS · Lahiri Ayanamsha · Shadbala · Bhrigu Nandi</div>
             </div>
           </div>
@@ -518,7 +518,7 @@ export default function FreeNakshatraCalculatorPage() {
               <strong style={{ color: GOLD }}>Janma Nakshatra</strong> = Moon ka nakshatra — aapka Mann, emotions, karma pattern. Yahi asli Janma Nakshatra hai.
             </p>
             <p className="text-slate-300 leading-relaxed mb-4">
-              Rohiit Gupta (DOB: 23 Sep 1975) ka example: Lagna Nakshatra = Shatabhisha (Kumbha Lagna). Janma Nakshatra = <strong style={{ color: GOLD }}>Ashwini</strong> (Mesha mein Chandra). Trikal Vaani ka calculator hamesha Moon ka nakshatra dikhata hai — classical Parashar BPHS ke according.
+              Rohiit Gupta (DOB: 23 Sep 1975) ka example: Lagna Nakshatra = Shatabhisha (Kumbha Lagna). Janma Nakshatra = <strong style={{ color: GOLD }}>Ashwini</strong> (Mesha mein Chandra). Trikaal Vaani ka calculator hamesha Moon ka nakshatra dikhata hai — classical Parashar BPHS ke according.
             </p>
           </section>
 
