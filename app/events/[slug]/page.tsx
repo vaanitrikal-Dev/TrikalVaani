@@ -44,7 +44,7 @@ type Festival = {
 // ── Site config ──────────────────────────────────────────────────────
 const SITE_URL = "https://trikalvaani.com";
 const AUTHOR_NAME = "Rohiit Gupta";
-const AUTHOR_TITLE = "Chief Vedic Architect, Trikal Vaani";
+const AUTHOR_TITLE = "Chief Vedic Architect, Trikaal Vaani";
 
 // ── Static params ────────────────────────────────────────────────────
 export async function generateStaticParams() {
@@ -80,10 +80,10 @@ export async function generateMetadata(
   { params }: { params: { slug: string } }
 ): Promise<Metadata> {
   const f = findFestival(params.slug);
-  if (!f) return { title: "Festival Not Found | Trikal Vaani" };
+  if (!f) return { title: "Festival Not Found | Trikaal Vaani" };
 
   const human = formatHumanDate(f.date);
-  const title = `${f.name} 2026 | ${human} | Date, Muhurat, Puja Vidhi | Trikal Vaani`;
+  const title = `${f.name} 2026 | ${human} | Date, Muhurat, Puja Vidhi | Trikaal Vaani`;
   const description =
     `${f.name} (${f.name_hindi}) 2026 falls on ${human}. ` +
     `Planetary ruler: ${f.planetary_ruler}. ${f.description} ` +
@@ -94,7 +94,7 @@ export async function generateMetadata(
     title,
     description,
     alternates: { canonical: url },
-    openGraph: { title, description, url, siteName: "Trikal Vaani", type: "article", locale: "en_IN" },
+    openGraph: { title, description, url, siteName: "Trikaal Vaani", type: "article", locale: "en_IN" },
     twitter: { card: "summary_large_image", title, description },
     robots: { index: true, follow: true },
   };
@@ -113,7 +113,7 @@ function buildEventSchema(f: Festival, url: string) {
     eventAttendanceMode: "https://schema.org/MixedEventAttendanceMode",
     description: f.description,
     location: { "@type": "Place", name: "Pan-India", address: { "@type": "PostalAddress", addressCountry: "IN" } },
-    organizer: { "@type": "Organization", name: "Trikal Vaani", url: SITE_URL },
+    organizer: { "@type": "Organization", name: "Trikaal Vaani", url: SITE_URL },
     url,
   };
 }
