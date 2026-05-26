@@ -21,22 +21,21 @@ const SITE_URL = "https://trikalvaani.com";
 const VM_URL = "http://34.14.164.105:8001";
 
 export const metadata: Metadata = {
-  title: "Aaj Ka Panchang 2026 | Daily Tithi Nakshatra Rahu Kaal | Trikal Vaani",
+  title: "Aaj Ka Panchang 2026 | Daily Tithi Nakshatra Rahu Kaal | Trikaal Vaani",
   description:
     "Daily Vedic Panchang. Today's Tithi, Nakshatra, Yoga, Karana, Rahu Kaal, Sunrise & upcoming festivals including Diwali, Navratri, Janmashtami. Swiss Ephemeris, Lahiri Ayanamsha. By Rohiit Gupta.",
   alternates: { canonical: `${SITE_URL}/panchang` },
   openGraph: {
-    title: "Aaj Ka Panchang | Trikal Vaani",
+    title: "Aaj Ka Panchang | Trikaal Vaani",
     description: "Daily Tithi, Nakshatra, Rahu Kaal & upcoming Vedic festivals. Swiss Ephemeris.",
     url: `${SITE_URL}/panchang`,
-    siteName: "Trikal Vaani",
+    siteName: "Trikaal Vaani",
     locale: "en_IN",
     type: "website",
   },
   robots: { index: true, follow: true },
 };
 
-// ── Types ─────────────────────────────────────────────────────────────
 type PanchangRow = {
   date: string;
   tithi: string;
@@ -70,7 +69,6 @@ type VMPanchang = {
   rahu_kaal: string;
 };
 
-// ── Helpers ───────────────────────────────────────────────────────────
 function getSupabase() {
   return createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -118,13 +116,11 @@ function getLast7Days(today: string): string[] {
   });
 }
 
-// ── Page ─────────────────────────────────────────────────────────────
 export default async function PanchangHubPage() {
   const today = getISTToday();
   const ahead = getISTDate60DaysAhead();
   const supabase = getSupabase();
 
-  // 1. Today's panchang from Supabase
   let todayRow: PanchangRow | null = null;
   try {
     const { data } = await supabase
@@ -136,7 +132,6 @@ export default async function PanchangHubPage() {
     todayRow = data as PanchangRow | null;
   } catch {}
 
-  // Fallback to VM if not in DB
   if (!todayRow) {
     try {
       const res = await fetch(`${VM_URL}/panchang?date=${today}`, {
@@ -157,7 +152,6 @@ export default async function PanchangHubPage() {
     } catch {}
   }
 
-  // 2. Upcoming festivals — DYNAMIC from festivals_master
   let upcomingFestivals: FestivalRow[] = [];
   try {
     const { data } = await supabase
@@ -175,11 +169,11 @@ export default async function PanchangHubPage() {
   const schema = {
     "@context": "https://schema.org",
     "@type": "WebPage",
-    name: "Aaj Ka Panchang | Daily Vedic Panchang | Trikal Vaani",
+    name: "Aaj Ka Panchang | Daily Vedic Panchang | Trikaal Vaani",
     url: `${SITE_URL}/panchang`,
     description: "Daily Vedic Panchang with Tithi, Nakshatra, Yoga, Karana, Rahu Kaal and upcoming festivals.",
     author: { "@type": "Person", name: "Rohiit Gupta", jobTitle: "Chief Vedic Architect", url: `${SITE_URL}/founder` },
-    publisher: { "@type": "Organization", name: "Trikal Vaani", url: SITE_URL },
+    publisher: { "@type": "Organization", name: "Trikaal Vaani", url: SITE_URL },
   };
 
   return (
@@ -189,7 +183,6 @@ export default async function PanchangHubPage() {
       <main className="min-h-screen bg-gradient-to-b from-amber-50 to-white pt-20">
         <div className="mx-auto max-w-4xl px-4 py-8">
 
-          {/* Header */}
           <header className="mb-8 text-center">
             <p className="text-xs font-semibold uppercase tracking-widest text-amber-600 mb-2">
               Swiss Ephemeris · Lahiri Ayanamsha
@@ -205,7 +198,6 @@ export default async function PanchangHubPage() {
             </p>
           </header>
 
-          {/* Today's Panchang */}
           {todayRow ? (
             <section className="mb-8 rounded-2xl border border-amber-200 bg-white shadow-sm overflow-hidden">
               <div className="bg-gradient-to-r from-amber-600 to-orange-500 px-6 py-4">
@@ -244,7 +236,6 @@ export default async function PanchangHubPage() {
 
           <div className="grid md:grid-cols-2 gap-6">
 
-            {/* Upcoming Festivals — Dynamic from Supabase */}
             <section>
               <h2 className="text-xl font-bold text-gray-900 mb-4">
                 🪔 Upcoming Festivals & Occasions
@@ -284,7 +275,6 @@ export default async function PanchangHubPage() {
               </div>
             </section>
 
-            {/* Recent Panchang Archive */}
             <section>
               <h2 className="text-xl font-bold text-gray-900 mb-4">📅 Recent Panchang</h2>
               <div className="space-y-2">
@@ -321,7 +311,6 @@ export default async function PanchangHubPage() {
             </section>
           </div>
 
-          {/* SEO Content */}
           <section className="mt-8 prose prose-amber max-w-none">
             <h2 className="text-xl font-semibold text-gray-900">What is Panchang?</h2>
             <p className="text-gray-600 text-sm leading-relaxed">
@@ -329,12 +318,11 @@ export default async function PanchangHubPage() {
               Tithi (lunar day), Nakshatra (moon&apos;s star), Yoga (sun-moon combination), Karana
               (half-day), and Vara (weekday). Together they reveal the energetic quality of each
               day and guide auspicious timing (Muhurta) for marriages, business launches, travel,
-              and spiritual practices. All calculations on Trikal Vaani use Swiss Ephemeris with
+              and spiritual practices. All calculations on Trikaal Vaani use Swiss Ephemeris with
               Lahiri Ayanamsha — the standard accepted by the Government of India.
             </p>
           </section>
 
-          {/* Internal Links */}
           <section className="mt-6 border-t border-gray-200 pt-6">
             <p className="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-3">
               Explore Life Domains

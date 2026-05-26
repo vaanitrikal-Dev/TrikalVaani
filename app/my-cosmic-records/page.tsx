@@ -5,24 +5,23 @@ import { useRouter } from 'next/navigation';
 import SiteNav from '@/components/layout/SiteNav';
 import SiteFooter from '@/components/layout/SiteFooter';
 import { supabase } from '@/lib/supabase';
-import { getSavedCharts, getUserProfile, deleteChart } from '@/lib/auth';
-import { Trash2, Star, Clock, MapPin, Sparkles, LogOut, User } from 'lucide-react';
+import { getMyReports, getUserProfile } from '@/lib/auth';
+import { Star, Clock, Sparkles, LogOut, User } from 'lucide-react';
 import Link from 'next/link';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 
 const GOLD = '#D4AF37';
 const GOLD_RGBA = (a: number) => `rgba(212,175,55,${a})`;
 
-type Chart = {
+type Report = {
   id: string;
-  name: string;
+  person_name: string;
+  domain_label: string;
   dob: string;
-  birth_time: string;
-  city: string;
-  energy_score: number;
-  pillar_scores: Record<string, number>;
-  selected_question: string;
-  analysis_summary: string;
+  tier: string;
+  headline: string;
+  simple_summary: string;
+  public_slug: string;
   created_at: string;
 };
 
@@ -36,17 +35,16 @@ export default function MyCosmicRecordsPage() {
   const router = useRouter();
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [charts, setCharts] = useState<Chart[]>([]);
+  const [reports, setReports] = useState<Report[]>([]);
   const [loading, setLoading] = useState(true);
-  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const loadData = useCallback(async (userId: string) => {
-    const [profileData, chartsData] = await Promise.all([
+    const [profileData, reportsData] = await Promise.all([
       getUserProfile(userId),
-      getSavedCharts(userId),
+      getMyReports(userId),
     ]);
     setProfile(profileData as Profile);
-    setCharts(chartsData as Chart[]);
+    setReports(reportsData as Report[]);
     setLoading(false);
   }, []);
 
@@ -68,13 +66,6 @@ export default function MyCosmicRecordsPage() {
 
     return () => subscription.unsubscribe();
   }, [router, loadData]);
-
-  const handleDelete = async (id: string) => {
-    setDeletingId(id);
-    await deleteChart(id);
-    setCharts((prev) => prev.filter((c) => c.id !== id));
-    setDeletingId(null);
-  };
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
@@ -146,7 +137,7 @@ export default function MyCosmicRecordsPage() {
               <h1 className="font-serif text-2xl sm:text-3xl font-bold text-white">
                 My Cosmic <span style={{ color: GOLD }}>Records</span>
               </h1>
-              <p className="text-slate-500 text-sm mt-1">{charts.length} saved chart{charts.length !== 1 ? 's' : ''} in your vault</p>
+              <p className="text-slate-500 text-sm mt-1">{reports.length} saved report{reports.length !== 1 ? 's' : ''} in your vault</p>
             </div>
             <Link
               href="/#birth-form"
@@ -161,7 +152,7 @@ export default function MyCosmicRecordsPage() {
             </Link>
           </div>
 
-          {charts.length === 0 ? (
+          {reports.length === 0 ? (
             <div
               className="rounded-2xl py-16 text-center"
               style={{ background: 'rgba(11,16,26,0.8)', border: `1px solid ${GOLD_RGBA(0.1)}` }}
@@ -182,10 +173,11 @@ export default function MyCosmicRecordsPage() {
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {charts.map((chart) => (
-                <div
-                  key={chart.id}
-                  className="rounded-2xl overflow-hidden"
+              {reports.map((report) => (
+                <Link
+                  key={report.id}
+                  href={report.public_slug ? `/report/${report.public_slug}` : '/#birth-form'}
+                  className="rounded-2xl overflow-hidden block transition-all hover:scale-[1.02]"
                   style={{
                     background: 'rgba(11,16,26,0.85)',
                     border: `1px solid ${GOLD_RGBA(0.15)}`,
@@ -195,60 +187,38 @@ export default function MyCosmicRecordsPage() {
                     className="px-4 py-3 flex items-center justify-between"
                     style={{ borderBottom: `1px solid ${GOLD_RGBA(0.08)}`, background: GOLD_RGBA(0.04) }}
                   >
-                    <p className="font-serif font-semibold text-white">{chart.name}</p>
-                    <div className="flex items-center gap-2">
+                    <p className="font-serif font-semibold text-white">{report.person_name}</p>
+                    {report.tier && (
                       <div
-                        className="px-2.5 py-1 rounded-full text-xs font-bold"
+                        className="px-2.5 py-1 rounded-full text-xs font-bold capitalize"
                         style={{ background: GOLD_RGBA(0.12), color: GOLD }}
                       >
-                        {chart.energy_score}
+                        {report.tier}
                       </div>
-                      <button
-                        onClick={() => handleDelete(chart.id)}
-                        disabled={deletingId === chart.id}
-                        className="w-7 h-7 rounded-full flex items-center justify-center transition-colors hover:bg-red-500/10 disabled:opacity-50"
-                      >
-                        <Trash2 className="w-3.5 h-3.5 text-slate-500 hover:text-red-400" />
-                      </button>
-                    </div>
+                    )}
                   </div>
                   <div className="px-4 py-3 space-y-2">
                     <div className="flex items-center gap-4 text-xs text-slate-500">
                       <span className="flex items-center gap-1">
                         <Clock className="w-3 h-3" />
-                        {chart.dob}{chart.birth_time ? ` · ${chart.birth_time}` : ''}
+                        {report.dob}
                       </span>
-                      <span className="flex items-center gap-1">
-                        <MapPin className="w-3 h-3" />
-                        {chart.city}
-                      </span>
+                      {report.domain_label && (
+                        <span style={{ color: GOLD_RGBA(0.7) }}>{report.domain_label}</span>
+                      )}
                     </div>
-                    {chart.selected_question && (
-                      <p className="text-xs" style={{ color: GOLD_RGBA(0.7) }}>
-                        Q: {chart.selected_question}
-                      </p>
+                    {report.headline && (
+                      <p className="text-sm font-medium text-slate-200 leading-snug">{report.headline}</p>
                     )}
-                    {chart.analysis_summary && (
-                      <p className="text-xs text-slate-400 leading-relaxed line-clamp-2">{chart.analysis_summary}</p>
-                    )}
-                    {chart.pillar_scores && Object.keys(chart.pillar_scores).length > 0 && (
-                      <div className="flex flex-wrap gap-1.5 pt-1">
-                        {Object.entries(chart.pillar_scores).slice(0, 4).map(([key, val]) => (
-                          <span
-                            key={key}
-                            className="text-xs px-2 py-0.5 rounded-full capitalize"
-                            style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: '#94a3b8' }}
-                          >
-                            {key}: {val}
-                          </span>
-                        ))}
-                      </div>
+                    {report.simple_summary && (
+                      <p className="text-xs text-slate-400 leading-relaxed line-clamp-2">{report.simple_summary}</p>
                     )}
                     <p className="text-xs text-slate-600 pt-1">
-                      {new Date(chart.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                      {new Date(report.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                      <span className="ml-2" style={{ color: GOLD_RGBA(0.6) }}>→ View report</span>
                     </p>
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
           )}

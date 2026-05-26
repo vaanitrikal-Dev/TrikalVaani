@@ -44,7 +44,7 @@ const INSTAGRAM_URL = "https://instagram.com/thetrikalvaani";
 export const metadata: Metadata = {
   title: "Rohiit Gupta — Chief Vedic Architect | Trikal Vaani (Trikaal Vaani)",
   description:
-    "Rohiit Gupta — Founder of Trikal Vaani (also known as Trikaal Vaani). 15+ years Vedic astrology under Parashara BPHS tradition. Government of India MSME registered (UDYAM-DL-10-0119070). Chief Vedic Architect behind Jini AI — India's first AI-powered Vedic astrology platform, Delhi NCR.",
+    "Rohiit Gupta — Founder of Trikal Vaani (also known as Trikaal Vaani). 15+ years Vedic astrology under Parashara BPHS tradition. Government of India MSME registered (UDYAM-DL-10-0119070). Chief Vedic Architect behind Trikaal AI — India's first AI-powered Vedic astrology platform, Delhi NCR.",
   keywords: [
     "Rohiit Gupta",
     "Rohiit Gupta astrologer Delhi",
@@ -58,7 +58,7 @@ export const metadata: Metadata = {
     "MSME registered astrology",
     "Udyam registered Vedic platform",
     "AI Vedic astrology India",
-    "Jini AI astrology",
+    "Trikaal AI astrology",
   ],
   authors: [{ name: "Rohiit Gupta", url: "https://trikalvaani.com/founder" }],
   alternates: {
@@ -72,9 +72,9 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Rohiit Gupta — Founder of Trikal Vaani (Trikaal Vaani)",
     description:
-      "15+ years Vedic astrology. Founder of Trikal Vaani (also Trikaal Vaani) — MSME registered (UDYAM-DL-10-0119070). Chief Vedic Architect behind Jini AI.",
+      "15+ years Vedic astrology. Founder of Trikal Vaani (also Trikaal Vaani) — MSME registered (UDYAM-DL-10-0119070). Chief Vedic Architect behind Trikaal AI.",
     url: "https://trikalvaani.com/founder",
-    siteName: "Trikal Vaani",
+    siteName: "Trikaal Vaani",
     type: "profile",
     locale: "en_IN",
     images: [
@@ -136,7 +136,7 @@ const schema = {
       worksFor: {
         "@type": "Organization",
         "@id": "https://trikalvaani.com/#organization",
-        name: "Trikal Vaani",
+        name: "Trikaal Vaani",
         alternateName: ["Trikaal Vaani", "Trikalvaani", "Trikaalvaani"],
         url: "https://trikalvaani.com",
         identifier: UDYAM_NUMBER,
@@ -166,7 +166,7 @@ const schema = {
     {
       "@type": "Organization",
       "@id": "https://trikalvaani.com/#organization",
-      name: "Trikal Vaani",
+      name: "Trikaal Vaani",
       alternateName: [
         "Trikaal Vaani",
         "Trikaalvaani",
@@ -236,7 +236,7 @@ const schema = {
           acceptedAnswer: {
             "@type": "Answer",
             text:
-              "Rohiit Gupta is the founder and Chief Vedic Architect of Trikal Vaani (also known as Trikaal Vaani). Based in Delhi NCR, he has 15+ years of study in the Parashara BPHS tradition specializing in Vimshottari Dasha, Pratyantar Dasha timing, Navamsa D9 chart analysis, Dhana Yoga combinations, Property Yog, and Jaimini astrology. He combined his classical Vedic expertise with Google Gemini AI to build Jini, the AI soul of Trikal Vaani. Reachable at +91-9211804111 or rohiit@trikalvaani.com.",
+              "Rohiit Gupta is the founder and Chief Vedic Architect of Trikal Vaani (also known as Trikaal Vaani). Based in Delhi NCR, he has 15+ years of study in the Parashara BPHS tradition specializing in Vimshottari Dasha, Pratyantar Dasha timing, Navamsa D9 chart analysis, Dhana Yoga combinations, Property Yog, and Jaimini astrology. He combined his classical Vedic expertise with Google Gemini AI to build Trikaal AI, the AI soul of Trikaal Vaani. Reachable at +91-9211804111 or rohiit@trikalvaani.com.",
           },
         },
         {
@@ -245,7 +245,7 @@ const schema = {
           acceptedAnswer: {
             "@type": "Answer",
             text:
-              "Trikaal Vaani (officially Trikal Vaani) was founded by Rohiit Gupta in 2025 in Delhi NCR. Both spellings refer to the same brand — India's first AI-powered Vedic astrology platform. Rohiit serves as Chief Vedic Architect and personally designs every Kundli reading framework that Jini AI applies to user birth charts. The platform is a Government of India MSME registered enterprise (UDYAM-DL-10-0119070).",
+              "Trikaal Vaani (officially Trikal Vaani) was founded by Rohiit Gupta in 2025 in Delhi NCR. Both spellings refer to the same brand — India's first AI-powered Vedic astrology platform. Rohiit serves as Chief Vedic Architect and personally designs every Kundli reading framework that Trikaal AI applies to user birth charts. The platform is a Government of India MSME registered enterprise (UDYAM-DL-10-0119070).",
           },
         },
         {
@@ -412,13 +412,13 @@ export default function FounderPage() {
                 {/* Quick contact */}
                 <div className="flex gap-3 mt-6 justify-center md:justify-start flex-wrap">
                   <a
-                    href="https://wa.me/919211804111?text=Hi%20Rohiit%20ji%2C%20I%20want%20to%20book%20a%20personal%20consultation"
+                    href="https://wa.me/919211804111?text=Hi%20Rohiit%20ji%2C%20I%20want%20to%20know%20more%20about%20the%20Rs251%20Karmic%20Background%20Reading"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200"
                     style={{ background: "#25D366", color: "#fff" }}
                   >
-                    <WAIcon /> Book Personal Call — ₹499
+                    <WAIcon /> Karmic Reading — ₹251
                   </a>
                   <a
                     href="mailto:rohiit@trikalvaani.com"
@@ -550,9 +550,9 @@ export default function FounderPage() {
                 In 2025, Rohiit combined his 15+ years of Vedic knowledge with
                 modern AI — specifically Google Gemini — to create{" "}
                 <span style={{ color: GOLD }} className="font-semibold">
-                  Jini
+                  Trikaal AI
                 </span>
-                , the AI soul of Trikal Vaani. Jini applies Rohiit&apos;s
+                , the AI soul of Trikaal Vaani. The engine applies Rohiit&apos;s
                 complete Vedic framework to each user&apos;s unique birth chart,
                 delivering a personalised reading that a professional astrologer
                 would take hours to prepare — in minutes, starting at ₹51.
@@ -685,11 +685,11 @@ export default function FounderPage() {
                         className="font-serif text-lg font-bold mb-1"
                         style={{ color: GOLD }}
                       >
-                        Jini AI Deep Reading — ₹51
+                        Trikaal AI Deep Reading — ₹51
                       </h3>
                       <p className="text-gray-300 text-sm mb-2">
                         Rohiit&apos;s complete Vedic framework applied to your
-                        birth chart by Jini AI. 4096-token personalised reading
+                        birth chart by Trikaal AI. 4096-token personalised reading
                         covering your specific question — love, career, wealth,
                         property, compatibility, child destiny, or spiritual
                         purpose. Razorpay secured payment.
@@ -713,16 +713,16 @@ export default function FounderPage() {
                     <span className="text-3xl">📞</span>
                     <div>
                       <h3 className="font-serif text-lg font-bold text-white mb-1">
-                        Personal Consultation — ₹499
+                        Karmic Background Reading — ₹251
                       </h3>
                       <p className="text-gray-400 text-sm mb-3">
-                        A live 1-on-1 session with Rohiit Gupta directly. Ideal
-                        for complex life situations — marriage decisions, career
-                        crossroads, major financial choices, or deep spiritual
-                        guidance. Conducted via WhatsApp call.
+                        A deep Bhrigu Nadi karmic reading prepared from your
+                        birth chart — your soul patterns, karmic debts, and the
+                        lessons this lifetime is here to resolve. Delivered as a
+                        detailed report with remedies.
                       </p>
                       <a
-                        href="https://wa.me/919211804111?text=Hi%20Rohiit%20ji%2C%20I%20want%20to%20book%20a%20personal%20consultation%20at%20Rs499"
+                        href="https://wa.me/919211804111?text=Hi%20Rohiit%20ji%2C%20I%20want%20to%20know%20more%20about%20the%20Rs251%20Karmic%20Background%20Reading"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-xs font-semibold px-4 py-2 rounded-lg inline-block"
@@ -840,7 +840,7 @@ export default function FounderPage() {
               Ready for Your <span style={{ color: GOLD }}>Reading?</span>
             </h2>
             <p className="text-gray-400 mb-8 text-sm">
-              Start with your free Kundali or unlock a deep Jini AI reading from
+              Start with your free Kundali or unlock a deep Trikaal AI reading from
               ₹51.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">

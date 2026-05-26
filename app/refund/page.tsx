@@ -2,7 +2,8 @@
  * TRIKAL VAANI — trikalvaani.com
  * Chief Vedic Architect: Rohiit Gupta
  * FILE TO PASTE → app/refund/page.tsx (REPLACE EXISTING)
- * Version: 2.0 — Full SEO + EEAT + Razorpay compliant
+ * Version: 2.1 — Brand → Trikaal Vaani; phantom Rs499 consult replaced with
+ *                real Rs251 Karmic Reading; Rs99 removed; prices aligned to live ladder
  */
 
 import type { Metadata } from "next";
@@ -11,11 +12,11 @@ import SiteNav from "@/components/layout/SiteNav";
 import SiteFooter from "@/components/layout/SiteFooter";
 
 export const metadata: Metadata = {
-  title: "Refund & Cancellation Policy | Trikal Vaani",
-  description: "Refund and Cancellation Policy for Trikal Vaani. Understand when refunds apply for astrology readings and personal consultations.",
+  title: "Refund & Cancellation Policy | Trikaal Vaani",
+  description: "Refund and Cancellation Policy for Trikaal Vaani. Understand when refunds apply for astrology readings, Kundali Milan, and Karmic Background Readings.",
   authors: [{ name: "Rohiit Gupta", url: "https://trikalvaani.com/founder" }],
   alternates: { canonical: "https://trikalvaani.com/refund" },
-  openGraph: { title: "Refund Policy | Trikal Vaani", url: "https://trikalvaani.com/refund", siteName: "Trikal Vaani", locale: "en_IN", type: "website" },
+  openGraph: { title: "Refund Policy | Trikaal Vaani", url: "https://trikalvaani.com/refund", siteName: "Trikaal Vaani", locale: "en_IN", type: "website" },
 };
 
 const GOLD = "#D4AF37";
@@ -32,7 +33,7 @@ export default function RefundPage() {
             <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: GOLD }}>Legal</p>
             <h1 className="font-serif text-4xl font-bold text-white mb-4">Refund & Cancellation Policy</h1>
             <p className="text-gray-500 text-sm">Effective: 1 January 2025 · Last Updated: April 2025</p>
-            <p className="text-gray-500 text-sm mt-1">Operated by: <span style={{ color: GOLD }}>Rohiit Gupta</span> — Trikal Vaani, Delhi NCR, India</p>
+            <p className="text-gray-500 text-sm mt-1">Operated by: <span style={{ color: GOLD }}>Rohiit Gupta</span> — Trikaal Vaani, Delhi NCR, India</p>
             <div className="mt-6 h-px w-16" style={{ background: `linear-gradient(90deg, ${GOLD}, transparent)` }} />
           </div>
 
@@ -45,9 +46,9 @@ export default function RefundPage() {
                 {[
                   { icon: "✅", text: "Technical failure preventing delivery → Full refund within 5-7 days" },
                   { icon: "✅", text: "Payment captured but reading not generated → Full refund" },
-                  { icon: "✅", text: "Personal call (₹499) cancelled 24hrs before → Full refund" },
+                  { icon: "✅", text: "Charged twice for the same order → Full refund of the duplicate" },
                   { icon: "❌", text: "Reading delivered successfully → No refund" },
-                  { icon: "❌", text: "Personal call (₹499) cancelled less than 24hrs → No refund" },
+                  { icon: "❌", text: "Incorrect birth details provided by you → No refund" },
                   { icon: "❌", text: "Maa Shakti dakshina → Non-refundable once prayer transmitted" },
                 ].map((item, i) => (
                   <li key={i} className="flex items-start gap-2 list-none">
@@ -58,8 +59,8 @@ export default function RefundPage() {
             </div>
 
             <div>
-              <h2 className="font-serif text-xl font-bold mb-4" style={{ color: GOLD }}>1. Digital Readings (₹51 and ₹99)</h2>
-              <p className="mb-4">Digital astrology readings are personalised content generated specifically for your birth chart. Due to the nature of digital goods:</p>
+              <h2 className="font-serif text-xl font-bold mb-4" style={{ color: GOLD }}>1. Digital Readings (₹51 onwards)</h2>
+              <p className="mb-4">All digital readings — predictions (from ₹51), Kundali Milan (₹51 / ₹101 / ₹151), and Child Birth Muhurat (₹101 / ₹151) — are personalised content generated specifically for your birth chart. Due to the nature of digital goods:</p>
               <ul className="space-y-3">
                 {[
                   { icon: "✅", strong: "Eligible for refund:", text: "Technical error on our side prevents reading generation and delivery after successful payment." },
@@ -76,13 +77,14 @@ export default function RefundPage() {
             </div>
 
             <div>
-              <h2 className="font-serif text-xl font-bold mb-4" style={{ color: GOLD }}>2. Personal Consultation with Rohiit Gupta (₹499)</h2>
+              <h2 className="font-serif text-xl font-bold mb-4" style={{ color: GOLD }}>2. Karmic Background Reading (₹251)</h2>
+              <p className="mb-4">The Karmic Background Reading is a Bhrigu Nandi Nadi analysis generated from the birth chart you provide. As a personalised digital reading:</p>
               <ul className="space-y-3">
                 {[
-                  { icon: "✅", strong: "Full refund:", text: "You cancel your booking more than 24 hours before the scheduled consultation." },
-                  { icon: "✅", strong: "Full refund:", text: "Rohiit Gupta is unable to conduct the consultation for any reason on our end." },
-                  { icon: "❌", strong: "No refund:", text: "You cancel less than 24 hours before the scheduled consultation." },
-                  { icon: "❌", strong: "No refund:", text: "You do not attend the scheduled consultation without prior notice." },
+                  { icon: "✅", strong: "Eligible for refund:", text: "Technical error on our side prevents the reading from being generated or delivered after successful payment." },
+                  { icon: "✅", strong: "Eligible for refund:", text: "Payment was captured but the reading was never generated due to a system failure." },
+                  { icon: "❌", strong: "Not eligible for refund:", text: "Reading was successfully generated and delivered, regardless of whether you agree with the content." },
+                  { icon: "❌", strong: "Not eligible for refund:", text: "Incorrect birth details were provided by the user." },
                 ].map((item, i) => (
                   <li key={i} className="flex items-start gap-2 list-none">
                     <span className="flex-shrink-0">{item.icon}</span>
@@ -90,7 +92,6 @@ export default function RefundPage() {
                   </li>
                 ))}
               </ul>
-              <p className="mt-4">To cancel or reschedule, WhatsApp: <a href="https://wa.me/919211804111" target="_blank" rel="noopener noreferrer" style={{ color: GOLD }} className="hover:underline">+91 92118 04111</a></p>
             </div>
 
             <div>

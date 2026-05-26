@@ -20,14 +20,14 @@ const SITE = 'https://trikalvaani.com';
 const URL  = `${SITE}/karmic-background-reading`;
 
 export const metadata: Metadata = {
-  title: 'Karmic Background Reading — Vedic Personality, Fidelity & Character Patterns | Trikal Vaani',
+  title: 'Karmic Background Reading — Vedic Personality, Fidelity & Character Patterns | Trikaal Vaani',
   description:
     'Reveal a person\'s karmic patterns — personality, fidelity tendencies, financial behaviour, family conduct, hidden tendencies and marriage outlook — from their birth chart alone. Bhrigu Nandi Nadi analysis by Rohiit Gupta. No personal data, purely Vedic.',
   alternates: { canonical: URL },
   openGraph: {
-    title: 'Karmic Background Reading — Trikal Vaani',
+    title: 'Karmic Background Reading — Trikaal Vaani',
     description: 'Bhrigu Nandi Nadi reading of 6 karmic dimensions from the birth chart. Patterns, not verdicts.',
-    url: URL, siteName: 'Trikal Vaani', type: 'website',
+    url: URL, siteName: 'Trikaal Vaani', type: 'website',
   },
   robots: { index: true, follow: true },
 };
@@ -54,11 +54,11 @@ const FAQS = [
   { q: 'Is a Vedic karmic background reading legal?',
     a: 'Yes. It reads only the birth chart — planetary positions and karmic patterns — and uses no private or personal data about any individual. It is a Vedic astrological analysis, not an investigation or background check.' },
   { q: 'Can a kundali really show personality and fidelity tendencies?',
-    a: 'Classical Vedic texts (BPHS, Bhrigu Nandi Nadi) map planets and houses to character traits and life tendencies. Trikal reads these as karmic patterns and inclinations — never as verdicts about a person.' },
+    a: 'Classical Vedic texts (BPHS, Bhrigu Nandi Nadi) map planets and houses to character traits and life tendencies. Trikaal reads these as karmic patterns and inclinations — never as verdicts about a person.' },
   { q: 'How is this different from a detective or background check?',
     a: 'A detective gathers private real-world data. A Karmic Background Reading interprets only the birth chart using Vedic principles. It reveals karmic patterns to help you understand and prepare — it never judges or verifies facts about a person.' },
   { q: 'What do I need to get a reading?',
-    a: 'Only the person\'s date of birth, time of birth, and place of birth. From this, Trikal computes the chart (Swiss Ephemeris) and reads the six karmic dimensions.' },
+    a: 'Only the person\'s date of birth, time of birth, and place of birth. From this, Trikaal computes the chart (Swiss Ephemeris) and reads the six karmic dimensions.' },
   { q: 'What are the 6 dimensions covered?',
     a: 'Core Personality, Fidelity & Relationship Conduct, Financial Behaviour, Family & Parental Respect, Hidden Tendencies & Karmic Baggage, and Marriage Outlook & Longevity.' },
   { q: 'How much does it cost and how is it delivered?',
@@ -75,7 +75,7 @@ export default function KarmicLandingPage() {
     '@id': `${URL}#service`,
     name: 'Karmic Background Reading — Vedic Character & Patterns Analysis',
     serviceType: 'Vedic Astrology Reading (Bhrigu Nandi Nadi)',
-    provider: { '@type': 'Organization', '@id': `${SITE}/#organization`, name: 'Trikal Vaani', url: SITE },
+    provider: { '@type': 'Organization', '@id': `${SITE}/#organization`, name: 'Trikaal Vaani', url: SITE },
     areaServed: { '@type': 'Country', name: 'India' },
     description: 'A Bhrigu Nandi Nadi reading of six karmic dimensions from a person\'s birth chart: personality, fidelity tendencies, financial behaviour, family respect, hidden tendencies, and marriage outlook.',
     offers: { '@type': 'Offer', price: '251', priceCurrency: 'INR', availability: 'https://schema.org/InStock', url: URL },
@@ -83,7 +83,7 @@ export default function KarmicLandingPage() {
   const personSchema = {
     '@context': 'https://schema.org', '@type': 'Person',
     name: 'Rohiit Gupta', jobTitle: 'Chief Vedic Architect', url: SITE,
-    worksFor: { '@type': 'Organization', name: 'Trikal Vaani', url: SITE },
+    worksFor: { '@type': 'Organization', name: 'Trikaal Vaani', url: SITE },
   };
 
   return (
@@ -97,7 +97,7 @@ export default function KarmicLandingPage() {
         <div className="absolute inset-0 bg-gradient-to-b from-[#0d1120] via-[#080B12] to-[#080B12] opacity-90" />
         <div className="relative max-w-3xl mx-auto px-5 py-14 sm:py-20 text-center">
           <div className="inline-block mb-4 px-4 py-1 rounded-full bg-[#D4AF37]/10 border border-[#D4AF37]/30 text-[#D4AF37] text-[10px] tracking-[0.25em] uppercase">
-            Trikal Vaani · Bhrigu Nandi Nadi
+            Trikaal Vaani · Bhrigu Nandi Nadi
           </div>
           <h1 className="text-3xl sm:text-5xl font-semibold leading-tight">
             Karmic Background <span style={{ color: GOLD }}>Reading</span>
@@ -147,7 +147,7 @@ export default function KarmicLandingPage() {
         <div className="bg-gradient-to-br from-[#1a1a2e] to-[#0d1120] border border-[#D4AF37]/30 rounded-2xl p-6 sm:p-8 text-center">
           <h2 className="text-xl font-semibold text-white mb-3">Patterns, Not Verdicts</h2>
           <p className="text-gray-300 text-sm sm:text-base leading-relaxed max-w-xl mx-auto">
-            Trikal does not judge — Trikal reveals patterns so you can prepare. Every finding is a karmic
+            Trikaal does not judge — Trikaal reveals patterns so you can prepare. Every finding is a karmic
             tendency drawn from the birth chart, with guidance on how to work with it. This reading uses no
             private data and makes no claim about a person’s real-world conduct.
           </p>
@@ -177,7 +177,7 @@ export default function KarmicLandingPage() {
             <div className="font-semibold text-white">Rohiit Gupta</div>
             <div className="text-[#D4AF37] text-xs mb-2">Chief Vedic Architect</div>
             <p className="text-gray-400 text-sm leading-relaxed">
-              Rohiit Gupta is the founder and Chief Vedic Architect of Trikal Vaani. Karmic readings are grounded
+              Rohiit Gupta is the founder and Chief Vedic Architect of Trikaal Vaani. Karmic readings are grounded
               in Brihat Parashara Hora Shastra (BPHS), Bhrigu Nandi Nadi, and Shadbala, computed with Swiss Ephemeris precision.
             </p>
           </div>
@@ -187,7 +187,7 @@ export default function KarmicLandingPage() {
       {/* FOOTER */}
       <footer className="border-t border-[#D4AF37]/10">
         <div className="max-w-3xl mx-auto px-5 py-8 text-center text-xs text-gray-500">
-          <p className="text-[#D4AF37] tracking-[0.3em] uppercase">Trikal Vaani</p>
+          <p className="text-[#D4AF37] tracking-[0.3em] uppercase">Trikaal Vaani</p>
           <p className="mt-2">AI-Powered Vedic Astrology · Rohiit Gupta, Chief Vedic Architect</p>
           <p className="mt-1">MSME · UDYAM-DL-10-0119070 · trikalvaani.com</p>
         </div>

@@ -113,7 +113,7 @@ export async function generateMetadata(
   const page = await getPage(params.pair, lang);
 
   if (!page) {
-    return { title: 'Compatibility — Trikal Vaani', robots: { index: false } };
+    return { title: 'Compatibility — Trikaal Vaani', robots: { index: false } };
   }
 
   const canonical = `${SITE}/compatibility/${page.slug}${lang === 'hi' ? '?lang=hi' : ''}`;
@@ -132,7 +132,7 @@ export async function generateMetadata(
       title:       page.meta_title,
       description: page.meta_desc,
       url:         canonical,
-      siteName:    'Trikal Vaani',
+      siteName:    'Trikaal Vaani',
       type:        'article',
     },
     robots: { index: true, follow: true },
@@ -201,7 +201,7 @@ export default async function CompatibilityPage(
     ctaText:        'This is general rashi compatibility. Your complete matching based on exact birth charts — Manglik, Nadi, all 8 koots, and 10 remedies — for just ₹51.',
     ctaButton:      'Get Kundali Milan ₹51 →',
     authorRole:     'Chief Vedic Architect',
-    authorBio:      'Rohiit Gupta is the founder and Chief Vedic Architect of Trikal Vaani. His predictions are grounded in Brihat Parashara Hora Shastra (BPHS), Bhrigu Nadi, and Shadbala.',
+    authorBio:      'Rohiit Gupta is the founder and Chief Vedic Architect of Trikaal Vaani. His predictions are grounded in Brihat Parashara Hora Shastra (BPHS), Bhrigu Nadi, and Shadbala.',
     relatedTitle:   'Related Rashi Pairs',
     pillarLink:     'Learn about Kundali Milan',
     homeCrumb:      'Home',
@@ -234,7 +234,7 @@ export default async function CompatibilityPage(
     },
     publisher: {
       '@type': 'Organization',
-      name: 'Trikal Vaani',
+      name: 'Trikaal Vaani',
       url: SITE,
     },
     mainEntityOfPage: canonical,
@@ -275,7 +275,7 @@ export default async function CompatibilityPage(
       {/* HERO */}
       <header className="max-w-3xl mx-auto px-5 pt-8 pb-6 text-center">
         <div className="inline-block mb-4 px-4 py-1 rounded-full bg-[#D4AF37]/10 border border-[#D4AF37]/30 text-[#D4AF37] text-[10px] tracking-[0.25em] uppercase">
-          Trikal Vaani · {L.compatibility}
+          Trikaal Vaani · {L.compatibility}
         </div>
         <h1 className="text-3xl sm:text-5xl font-semibold leading-tight">
           {r1} <span className="text-[#D4AF37]">&amp;</span> {r2}
@@ -423,7 +423,7 @@ export default async function CompatibilityPage(
       {/* FOOTER */}
       <footer className="border-t border-[#D4AF37]/10">
         <div className="max-w-3xl mx-auto px-5 py-8 text-center text-xs text-gray-500">
-          <p className="text-[#D4AF37] tracking-[0.3em] uppercase">Trikal Vaani</p>
+          <p className="text-[#D4AF37] tracking-[0.3em] uppercase">Trikaal Vaani</p>
           <p className="mt-2">AI-Powered Vedic Astrology · Rohiit Gupta, {L.authorRole}</p>
           <p className="mt-1">MSME · UDYAM-DL-10-0119070 · trikalvaani.com</p>
         </div>

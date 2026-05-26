@@ -31,10 +31,9 @@ export const dynamicParams = true;
 
 const SITE_URL = "https://trikalvaani.com";
 const AUTHOR_NAME = "Rohiit Gupta";
-const AUTHOR_TITLE = "Chief Vedic Architect, Trikal Vaani";
+const AUTHOR_TITLE = "Chief Vedic Architect, Trikaal Vaani";
 const VM_URL = "http://34.14.164.105:8001";
 
-// ── Types ─────────────────────────────────────────────────────────────
 type FestivalRow = {
   id: number;
   date: string;
@@ -85,7 +84,6 @@ type VMPanchang = {
   rahu_kaal: string;
 };
 
-// ── Helpers ───────────────────────────────────────────────────────────
 function getSupabase() {
   return createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -129,7 +127,6 @@ async function getPanchang(date: string): Promise<PanchangRow | null> {
       .eq("date", date).eq("city", "delhi").single();
     if (data) return data as PanchangRow;
   } catch {}
-  // Fallback to VM
   try {
     const res = await fetch(`${VM_URL}/panchang?date=${date}`, {
       next: { revalidate: 86400 }, signal: AbortSignal.timeout(10000)
@@ -147,7 +144,6 @@ async function getPanchang(date: string): Promise<PanchangRow | null> {
   } catch { return null; }
 }
 
-// ── Metadata ──────────────────────────────────────────────────────────
 export async function generateMetadata(
   { params }: { params: { date: string; slug: string } }
 ): Promise<Metadata> {
@@ -162,14 +158,14 @@ export async function generateMetadata(
   const url = `${SITE_URL}/panchang/${date}/${slug}`;
 
   // FIX 2: Strip trailing '| Trikal Vaani' (or variants) from stored titles.
-  // layout.tsx title.template = '%s | Trikal Vaani' appends it automatically.
-  // Without this strip, pages render as 'Festival Name | Trikal Vaani | Trikal Vaani'.
+  // layout.tsx title.template = '%s | Trikaal Vaani' appends it automatically.
+  // Without this strip, pages render as 'Festival Name | Trikaal Vaani | Trikaal Vaani'.
   const rawTitle =
     gc?.meta_title ??
     festival.seo_title ??
     `${festival.festival_name} — Date, Muhurat, Puja Vidhi`;
   const title = rawTitle
-    .replace(/\s*[|—–-]+\s*Trikal\s*Vaani\s*$/i, "")
+    .replace(/\s*[|—–-]+\s*Trika+l\s*Vaani\s*$/i, "")
     .trim();
 
   const description =
@@ -182,13 +178,13 @@ export async function generateMetadata(
     description,
     authors: [{ name: AUTHOR_NAME, url: `${SITE_URL}/founder` }],
     alternates: { canonical: url },
-    // FIX 3a: title is already clean — do not manually append '| Trikal Vaani'
+    // FIX 3a: title is already clean — do not manually append '| Trikaal Vaani'
     // FIX 3b: added images array — was absent, causing og:image missing on all panchang pages
     openGraph: {
       title,
       description,
       url,
-      siteName: "Trikal Vaani",
+      siteName: "Trikaal Vaani",
       type: "article",
       locale: "en_IN",
       images: [
@@ -205,7 +201,6 @@ export async function generateMetadata(
   };
 }
 
-// ── Schemas ───────────────────────────────────────────────────────────
 function buildSchemas(
   festival: FestivalRow,
   panchang: PanchangRow | null,
@@ -233,8 +228,6 @@ function buildSchemas(
       description: festival.geo_answer ?? `${festival.festival_name} on ${human}`,
       datePublished: date, dateModified: date,
       mainEntityOfPage: { "@type": "WebPage", "@id": url },
-      // FIX 4: Added required 'image' field — Google blocks Article rich results without it.
-      // Confirmed missing via GSC "has issues" warning. og-image.png verified HTTP 200.
       image: {
         "@type": "ImageObject",
         url: `${SITE_URL}/og-image.png`,
@@ -242,7 +235,7 @@ function buildSchemas(
         height: 630,
       },
       author: { "@type": "Person", name: AUTHOR_NAME, jobTitle: AUTHOR_TITLE, url: `${SITE_URL}/founder` },
-      publisher: { "@type": "Organization", name: "Trikal Vaani", url: SITE_URL, logo: { "@type": "ImageObject", url: `${SITE_URL}/logo.png` } },
+      publisher: { "@type": "Organization", name: "Trikaal Vaani", url: SITE_URL, logo: { "@type": "ImageObject", url: `${SITE_URL}/logo.png` } },
     },
     {
       "@context": "https://schema.org", "@type": "BreadcrumbList",
@@ -260,12 +253,11 @@ function buildSchemas(
       startDate: date, endDate: date,
       description: gc?.spiritual_significance ?? festival.geo_answer ?? festival.festival_name,
       location: { "@type": "Place", name: "India", address: { "@type": "PostalAddress", addressCountry: "IN" } },
-      organizer: { "@type": "Organization", name: "Trikal Vaani", url: SITE_URL },
+      organizer: { "@type": "Organization", name: "Trikaal Vaani", url: SITE_URL },
     },
   ];
 }
 
-// ── Page ──────────────────────────────────────────────────────────────
 export default async function FestivalPage(
   { params }: { params: { date: string; slug: string } }
 ) {
@@ -297,7 +289,6 @@ export default async function FestivalPage(
       <main className="min-h-screen bg-gradient-to-b from-amber-50 to-white">
         <div className="mx-auto max-w-4xl px-4 py-8 md:py-12">
 
-          {/* Breadcrumb */}
           <nav className="mb-4 text-sm text-gray-600" aria-label="Breadcrumb">
             <Link href="/" className="hover:text-amber-700">Home</Link>
             <span className="mx-2">›</span>
@@ -308,7 +299,6 @@ export default async function FestivalPage(
             <span className="text-gray-900">{festival.festival_name}</span>
           </nav>
 
-          {/* Header */}
           <header className="mb-6">
             <h1 className="text-3xl md:text-4xl font-bold text-gray-900">
               {festival.festival_name}
@@ -324,12 +314,10 @@ export default async function FestivalPage(
             )}
           </header>
 
-          {/* GEO Answer Block */}
           <section className="mb-8 rounded-xl border border-amber-200 bg-amber-50 p-5" aria-label="Quick answer">
             <p className="text-base leading-relaxed text-gray-800">{geoAnswer}</p>
           </section>
 
-          {/* Gemini Content — Significance */}
           {gc?.spiritual_significance ? (
             <section className="mb-8">
               <h2 className="text-2xl font-semibold text-gray-900 mb-3">Significance</h2>
@@ -350,7 +338,6 @@ export default async function FestivalPage(
             </section>
           )}
 
-          {/* Do's & Don'ts */}
           {gc?.dos_and_donts && (
             <div className="mb-8 grid md:grid-cols-2 gap-6">
               <section className="rounded-xl bg-emerald-50 border border-emerald-200 p-5">
@@ -376,7 +363,6 @@ export default async function FestivalPage(
             </div>
           )}
 
-          {/* Remedies */}
           {gc?.remedies && gc.remedies.length > 0 && (
             <section className="mb-8 rounded-xl bg-purple-50 border border-purple-200 p-5">
               <h2 className="text-lg font-bold text-purple-900 mb-3">🔮 Vedic Remedies</h2>
@@ -390,7 +376,6 @@ export default async function FestivalPage(
             </section>
           )}
 
-          {/* Panchang Grid */}
           {panchang && (
             <section className="mb-8">
               <h2 className="text-xl font-semibold text-gray-900 mb-4">
@@ -409,7 +394,6 @@ export default async function FestivalPage(
             </section>
           )}
 
-          {/* CTA */}
           <section className="mb-8 rounded-xl bg-gradient-to-r from-amber-600 to-orange-600 p-6 text-white">
             <h2 className="text-xl font-bold">
               How does {festival.festival_name} affect YOUR kundali?
@@ -425,7 +409,6 @@ export default async function FestivalPage(
             </Link>
           </section>
 
-          {/* FAQ */}
           {gc?.faq && gc.faq.length > 0 && (
             <section className="mb-8">
               <h2 className="mb-4 text-2xl font-semibold text-gray-900">Frequently Asked Questions</h2>
@@ -435,7 +418,6 @@ export default async function FestivalPage(
             </section>
           )}
 
-          {/* Explore More */}
           <section className="border-t border-gray-200 pt-6">
             <h2 className="mb-3 text-lg font-semibold text-gray-900">Explore More</h2>
             <ul className="grid grid-cols-2 gap-2 text-sm md:grid-cols-3">
