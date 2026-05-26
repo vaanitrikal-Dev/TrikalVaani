@@ -11,11 +11,11 @@ import SiteNav from "@/components/layout/SiteNav";
 import SiteFooter from "@/components/layout/SiteFooter";
 
 export const metadata: Metadata = {
-  title: "What Is My Soul Purpose? Vedic Spiritual Purpose Reading | Trikal Vaani",
+  title: "What Is My Soul Purpose? Vedic Spiritual Purpose Reading | Trikaal Vaani",
   description: "Chief Vedic Architect Rohiit Gupta reads your Ketu, Atmakaraka and 12th House to reveal past-life karma, your dharmic mission, and the soul lesson you were born to complete. Rs 51 reading.",
   keywords: ["soul purpose astrology vedic", "spiritual path astrology India", "Ketu astrology past life", "12th house spiritual astrology", "Atmakaraka soul purpose", "moksha astrology reading"],
   authors: [{ name: "Rohiit Gupta", url: "https://trikalvaani.com/about" }],
-  openGraph: { title: "What Is My Soul Purpose? | Trikal Vaani", description: "Rohiit Gupta decodes your Ketu, Atmakaraka and past-life karma.", url: "https://trikalvaani.com/services/spiritual-purpose", siteName: "Trikal Vaani", type: "website", locale: "en_IN" },
+  openGraph: { title: "What Is My Soul Purpose? | Trikaal Vaani", description: "Rohiit Gupta decodes your Ketu, Atmakaraka and past-life karma.", url: "https://trikalvaani.com/services/spiritual-purpose", siteName: "Trikaal Vaani", type: "website", locale: "en_IN" },
   alternates: { canonical: "https://trikalvaani.com/services/spiritual-purpose" },
 };
 
@@ -49,11 +49,11 @@ export default function SpiritualPurposePage() {
               <span className="text-[#D4AF37] text-sm font-medium tracking-widest uppercase">Soul Purpose Intelligence · by Rohiit Gupta</span>
             </div>
             <h1 className="font-serif text-4xl md:text-6xl font-bold leading-tight mb-6">What Is Your <span className="text-[#D4AF37]">Soul&apos;s Purpose</span><br />in This Lifetime?</h1>
-            <p className="text-lg md:text-xl text-gray-300 max-w-2xl mx-auto mb-3 leading-relaxed">Jini AI reads your Ketu, Atmakaraka and 12th House to decode your past-life karma, present dharmic mission, and the <span className="text-[#D4AF37] font-semibold">soul lesson</span> you were born to complete.</p>
-            <p className="text-sm text-gray-500 mb-10">Reading designed by <Link href="/about" className="text-[#D4AF37] hover:underline">Rohiit Gupta</Link> — Chief Vedic Architect · Swiss Ephemeris + Prokerala API</p>
+            <p className="text-lg md:text-xl text-gray-300 max-w-2xl mx-auto mb-3 leading-relaxed">Trikaal AI reads your Ketu, Atmakaraka and 12th House to decode your past-life karma, present dharmic mission, and the <span className="text-[#D4AF37] font-semibold">soul lesson</span> you were born to complete.</p>
+            <p className="text-sm text-gray-500 mb-10">Reading designed by <Link href="/about" className="text-[#D4AF37] hover:underline">Rohiit Gupta</Link> — Chief Vedic Architect · Swiss Ephemeris (self-hosted on Render)</p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/?segment=spiritual-purpose" className="bg-[#D4AF37] text-[#080B12] font-bold px-8 py-4 rounded-lg text-lg hover:bg-[#e8c84a] transition-all duration-200 shadow-[0_0_30px_rgba(212,175,55,0.3)]">Get My Soul Purpose Reading — ₹51</Link>
-              <a href="https://wa.me/919211804111?text=Hi%20Rohiit%20ji%2C%20I%20want%20a%20spiritual%20purpose%20reading" target="_blank" rel="noopener noreferrer" className="border border-[#25D366] text-[#25D366] font-semibold px-8 py-4 rounded-lg text-lg hover:bg-[#25D366]/10 transition-all duration-200 flex items-center justify-center gap-2"><WAIcon /> Talk to Rohiit Ji — ₹499</a>
+              <a href="https://wa.me/919211804111?text=Pranam%20Rohiit%20ji%2C%20I%20want%20the%20Karmic%20Background%20Reading%20(%E2%82%B9251)" target="_blank" rel="noopener noreferrer" className="border border-[#25D366] text-[#25D366] font-semibold px-8 py-4 rounded-lg text-lg hover:bg-[#25D366]/10 transition-all duration-200 flex items-center justify-center gap-2"><WAIcon /> Karmic Background Reading — ₹251</a>
             </div>
           </div>
         </section>
@@ -85,9 +85,9 @@ export default function SpiritualPurposePage() {
               <div className="space-y-6">
                 {[
                   { step: "01", title: "Enter Your Birth Details", desc: "Date, exact time, and place. Your Atmakaraka degree is calculated to the arc-minute — precision is essential for soul-level readings." },
-                  { step: "02", title: "Jini Reads Your Soul Blueprint", desc: "Atmakaraka identification, Ketu house and sign past-life analysis, 12th house spiritual indicators, and Rahu growth direction mapping." },
+                  { step: "02", title: "Trikaal AI Reads Your Soul Blueprint", desc: "Atmakaraka identification, Ketu house and sign past-life analysis, 12th house spiritual indicators, and Rahu growth direction mapping." },
                   { step: "03", title: "Receive Your Soul Curriculum", desc: "Rs 51 reading: Your soul's past-life mastery, present dharmic mission, spiritual path (Bhakti, Jnana, Karma, Raja), and moksha indicators." },
-                  { step: "04", title: "Deep Spiritual Consultation", desc: "Rs 499 call with Rohiit ji — for those at crossroads between worldly life and spiritual calling, or seeking Vedic remedies to align with dharma faster." },
+                  { step: "04", title: "Go Deeper — Karmic Background Reading", desc: "₹251 Karmic Background Reading (Bhrigu Nadi) reveals the karmic root behind your soul\u2019s journey — the deeper why behind your dharmic calling, with Vedic remedies." },
                 ].map((s, i) => (
                   <div key={i} className="flex gap-5">
                     <div className="flex-shrink-0 w-12 h-12 rounded-full border border-[#D4AF37]/50 flex items-center justify-center text-[#D4AF37] font-bold text-sm">{s.step}</div>
@@ -100,7 +100,7 @@ export default function SpiritualPurposePage() {
           </div>
         </section>
         <TestimonialsSection label="What Seekers Are" items={[
-          { name: "Swati Bhardwaj", city: "Rishikesh", date: "December 2024", text: "I left a Rs 40L corporate job to teach yoga. Everyone thought I was crazy. Jini showed my Ketu in the 10th house and Jupiter in the 12th. It all made sense." },
+          { name: "Swati Bhardwaj", city: "Rishikesh", date: "December 2024", text: "I left a Rs 40L corporate job to teach yoga. Everyone thought I was crazy. Trikaal AI showed my Ketu in the 10th house and Jupiter in the 12th. It all made sense." },
           { name: "Arun Kumar", city: "Varanasi", date: "October 2024", text: "I have always felt I had a purpose beyond money. My reading showed Moon-Ketu conjunction in the 9th house — a soul that came to teach. I now run a free Vedic study group of 200 people." },
           { name: "Lakshmi Prasad", city: "Mysore", date: "February 2025", text: "The Atmakaraka reading was the most profound thing anyone has ever told me about myself. Rohiit ji described my past life pattern so accurately my mother started crying." },
         ]} />
@@ -134,8 +134,8 @@ function AuthorStrip() {
         <div className="flex-shrink-0 w-20 h-20 rounded-full bg-[#D4AF37]/20 border border-[#D4AF37]/40 flex items-center justify-center text-3xl font-serif text-[#D4AF37] font-bold">RG</div>
         <div>
           <p className="text-[#D4AF37] text-xs uppercase tracking-widest font-medium mb-1">About Your Vedic Architect</p>
-          <h2 className="font-serif text-xl font-bold text-white mb-2">Rohiit Gupta — Chief Vedic Architect, Trikal Vaani</h2>
-          <p className="text-gray-400 text-sm leading-relaxed">Rohiit Gupta has studied Vedic astrology for over 15 years under the Parashara BPHS tradition. As founder of Trikal Vaani, he built India&apos;s first AI-powered Vedic platform combining Swiss Ephemeris precision with Gemini AI reasoning. All readings are designed by Rohiit — Jini AI applies his framework to your unique birth chart.</p>
+          <h2 className="font-serif text-xl font-bold text-white mb-2">Rohiit Gupta — Chief Vedic Architect, Trikaal Vaani</h2>
+          <p className="text-gray-400 text-sm leading-relaxed">Rohiit Gupta has studied Vedic astrology for over 15 years under the Parashara BPHS tradition. As founder of Trikaal Vaani, he built India&apos;s first AI-powered Vedic platform combining Swiss Ephemeris precision with Gemini AI reasoning. All readings are designed by Rohiit — Trikaal AI applies his framework to your unique birth chart.</p>
           <div className="flex gap-3 mt-3 flex-wrap">
             {["15+ Years Vedic Study", "Parashara BPHS Tradition", "Swiss Ephemeris Precision", "Delhi NCR Based"].map((t) => (
               <span key={t} className="text-xs border border-[#D4AF37]/30 text-[#D4AF37] px-3 py-1 rounded-full">{t}</span>
@@ -161,9 +161,8 @@ function DeliverableCard({ segment, items }: { segment: string; items: string[] 
       </ul>
       <div className="mt-8 pt-6 border-t border-white/10 flex items-center justify-between">
         <div>
-          <p className="text-gray-500 text-xs line-through">₹499</p>
           <p className="text-[#D4AF37] text-2xl font-bold">₹51</p>
-          <p className="text-gray-500 text-xs">Introductory price</p>
+          <p className="text-gray-500 text-xs">Deep soul purpose reading</p>
         </div>
         <Link href={`/?segment=${segment}`} className="bg-[#D4AF37] text-[#080B12] font-bold px-6 py-3 rounded-lg hover:bg-[#e8c84a] transition-all duration-200">Unlock Now</Link>
       </div>
@@ -211,7 +210,7 @@ function MaaDivineSeva() {
           <p className="text-[#D4AF37] uppercase tracking-widest text-sm font-medium mb-3">Divya Seva · Divine Offering</p>
           <h2 className="font-serif text-3xl md:text-4xl font-bold mb-4">Maa Shakti Ki <span className="text-[#D4AF37]">Divya Seva</span></h2>
           <p className="text-gray-400 max-w-2xl mx-auto text-sm leading-relaxed">
-            These are not fees. They are <span className="text-[#D4AF37] font-semibold">dakshina</span> — an offering from the heart, placed at Maa Shakti&apos;s feet through Trikal Vaani. <span className="text-white font-semibold">There is no ceiling on devotion.</span> Starting ₹101, with absolutely no upper limit.
+            These are not fees. They are <span className="text-[#D4AF37] font-semibold">dakshina</span> — an offering from the heart, placed at Maa Shakti&apos;s feet through Trikaal Vaani. <span className="text-white font-semibold">There is no ceiling on devotion.</span> Starting ₹101, with absolutely no upper limit.
           </p>
         </div>
         <div className="grid md:grid-cols-2 gap-8">
@@ -271,7 +270,7 @@ function MaaDivineSeva() {
           </div>
         </div>
         <div className="text-center mt-10 border-t border-white/5 pt-8">
-          <p className="text-gray-600 text-xs leading-relaxed max-w-lg mx-auto">Trikal Vaani does not profit from dakshina offerings. All Arzi and Dhanyewaad dakshinas are used for Vedic puja samagri, mantra recitation costs, and charitable givings in Maa Shakti&apos;s name. Rohiit Gupta is the intermediary — Maa is the recipient.</p>
+          <p className="text-gray-600 text-xs leading-relaxed max-w-lg mx-auto">Trikaal Vaani does not profit from dakshina offerings. All Arzi and Dhanyewaad dakshinas are used for Vedic puja samagri, mantra recitation costs, and charitable givings in Maa Shakti&apos;s name. Rohiit Gupta is the intermediary — Maa is the recipient.</p>
         </div>
       </div>
     </section>
@@ -313,9 +312,9 @@ function CtaSection({ headline, highlight, body, segment, waText }: { headline: 
         <p className="text-gray-400 mb-10 leading-relaxed">{body}</p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Link href={`/?segment=${segment}`} className="bg-[#D4AF37] text-[#080B12] font-bold px-8 py-4 rounded-lg text-lg hover:bg-[#e8c84a] transition-all duration-200 shadow-[0_0_40px_rgba(212,175,55,0.25)]">Enter Birth Details → Get Reading</Link>
-          <a href={`https://wa.me/919211804111?text=Hi%20Rohiit%20ji%2C%20${waText}`} target="_blank" rel="noopener noreferrer" className="border border-white/20 text-white px-8 py-4 rounded-lg text-lg hover:bg-white/5 transition-all duration-200">WhatsApp ₹499 Call</a>
+          <a href={`https://wa.me/919211804111?text=Pranam%20Rohiit%20ji%2C%20${waText}`} target="_blank" rel="noopener noreferrer" className="border border-white/20 text-white px-8 py-4 rounded-lg text-lg hover:bg-white/5 transition-all duration-200">Karmic Background Reading — ₹251</a>
         </div>
-        <p className="text-gray-600 text-xs mt-6">Powered by Swiss Ephemeris · Lahiri Ayanamsha · Prokerala API · Reading framework by Rohiit Gupta</p>
+        <p className="text-gray-600 text-xs mt-6">Powered by Swiss Ephemeris (self-hosted on Render) · Lahiri Ayanamsha · Reading framework by Rohiit Gupta</p>
       </div>
     </section>
   );
