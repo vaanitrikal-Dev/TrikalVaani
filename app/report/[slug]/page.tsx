@@ -80,11 +80,11 @@ export async function generateMetadata(
   { params }: { params: { slug: string } }
 ): Promise<Metadata> {
   if (!isValidSlug(params.slug)) {
-    return { title: 'Report Not Found | Trikal Vaani' }
+    return { title: 'Report Not Found | Trikaal Vaani' }
   }
 
   const report = await getReport(params.slug)
-  if (!report) return { title: 'Report Not Found | Trikal Vaani' }
+  if (!report) return { title: 'Report Not Found | Trikaal Vaani' }
 
   const geoAnswer = report.geo_answer ?? `Vedic astrology ${report.domain_label} analysis for ${report.birth_city}. Powered by Swiss Ephemeris.`
 
@@ -105,14 +105,14 @@ export async function generateMetadata(
       title:       meta.title,
       description: meta.description,
       url:         meta.canonical,
-      siteName:    'Trikal Vaani',
+      siteName:    'Trikaal Vaani',
       locale:      'en_IN',
       type:        'article',
       images: [{
         url:    'https://trikalvaani.com/og-report.jpg',
         width:  1200,
         height: 630,
-        alt:    `${report.domain_label} Vedic Astrology Report | Trikal Vaani`,
+        alt:    `${report.domain_label} Vedic Astrology Report | Trikaal Vaani`,
       }],
     },
     twitter: {
@@ -167,7 +167,7 @@ function buildSchema(report: ReportRow, meta: ReturnType<typeof generateSeoMeta>
     },
     publisher: {
       '@type': 'Organization',
-      name:    'Trikal Vaani',
+      name:    'Trikaal Vaani',
       url:     'https://trikalvaani.com',
       logo: { '@type': 'ImageObject', url: 'https://trikalvaani.com/images/founder.png' },
     },
@@ -192,7 +192,7 @@ function buildSchema(report: ReportRow, meta: ReturnType<typeof generateSeoMeta>
         name:    `What is ${report.mahadasha} Mahadasha effect on ${report.domain_label}?`,
         acceptedAnswer: {
           '@type': 'Answer',
-          text:    `According to Vedic astrology (BPHS), ${report.mahadasha} Mahadasha combined with ${report.antardasha} Antardasha creates specific planetary influences on ${report.domain_label}. Analyzed by Rohiit Gupta at Trikal Vaani using Swiss Ephemeris.`,
+          text:    `According to Vedic astrology (BPHS), ${report.mahadasha} Mahadasha combined with ${report.antardasha} Antardasha creates specific planetary influences on ${report.domain_label}. Analyzed by Rohiit Gupta at Trikaal Vaani using Swiss Ephemeris.`,
         },
       },
     ],
@@ -214,7 +214,7 @@ function buildSchema(report: ReportRow, meta: ReturnType<typeof generateSeoMeta>
     name:       'Rohiit Gupta',
     jobTitle:   'Chief Vedic Architect',
     url:        'https://trikalvaani.com/founder',
-    worksFor: { '@type': 'Organization', name: 'Trikal Vaani', url: 'https://trikalvaani.com' },
+    worksFor: { '@type': 'Organization', name: 'Trikaal Vaani', url: 'https://trikalvaani.com' },
     address:  { '@type': 'PostalAddress', addressLocality: 'Delhi NCR', addressCountry: 'IN' },
     knowsAbout: ['Vedic Astrology', 'Jyotish', 'BPHS', 'Swiss Ephemeris', 'Bhrigu Nandi Nadi'],
   }
