@@ -5,9 +5,13 @@
  * TRIKAL VAANI — Trikal Voice Widget
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: components/Trikal/TrikalVoice.tsx
- * VERSION: 2.2 — Kill switch wired (NEXT_PUBLIC_ENABLE_VOICE)
+ * VERSION: 2.3 — Brand/persona display flip (Trikaal). Logic unchanged.
  * DATE: 2026-05-12
  * CHANGES:
+ *   v2.3: Flipped visible persona/brand text "Trikal" → "Trikaal"
+ *         (pack labels, taglines, UI copy, Razorpay name, aria-labels).
+ *         localStorage keys, CSS animation names, API paths, log tags,
+ *         and X-Vedic-Engine header are UNCHANGED (functional identifiers).
  *   v2.2: Added kill switch check at top of component.
  *         If NEXT_PUBLIC_ENABLE_VOICE !== 'true' → widget hidden.
  *         Flip in Vercel env vars, redeploy — no code change needed.
@@ -27,9 +31,9 @@ const BG_CARD    = 'rgba(8,11,18,0.97)';
 type Pack = { id: 'p11' | 'p51' | 'p101'; price: number; questions: number; validityDays: number; label: string; sub: string };
 
 const PACKS: Pack[] = [
-  { id: 'p11',  price: 11,  questions: 1,  validityDays: 1,  label: '₹11 — Try Trikal',     sub: '1 voice question'  },
+  { id: 'p11',  price: 11,  questions: 1,  validityDays: 1,  label: '₹11 — Try Trikaal',    sub: '1 voice question'  },
   { id: 'p51',  price: 51,  questions: 5,  validityDays: 7,  label: '₹51 — Sapt Darshan',   sub: '5 questions • 7 days'  },
-  { id: 'p101', price: 101, questions: 12, validityDays: 30, label: '₹101 — Trikal Bhakt',  sub: '12 questions • 30 days' },
+  { id: 'p101', price: 101, questions: 12, validityDays: 30, label: '₹101 — Trikaal Bhakt', sub: '12 questions • 30 days' },
 ];
 
 declare global {
@@ -40,7 +44,7 @@ declare global {
 
 const TAGLINES = [
   'त्रिकाल से पूछें — आवाज़ में उत्तर',
-  'Speak. Trikal listens. Trikal answers.',
+  'Speak. Trikaal listens. Trikaal answers.',
   'Voice prediction in 60 seconds',
   'सच्चा ज्योतिष • असली आवाज़',
   'Ask anything. In your voice.',
@@ -153,7 +157,7 @@ export default function TrikalVoice() {
         key       : process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
         amount    : pack.price * 100,
         currency  : 'INR',
-        name      : 'Trikal Vaani',
+        name      : 'Trikaal Vaani',
         description: pack.label,
         order_id  : order.orderId,
         theme     : { color: GOLD },
@@ -414,7 +418,7 @@ export default function TrikalVoice() {
       <>
         <button
           onClick={handleOpen}
-          aria-label="Open Trikal Voice — Ask Vedic astrology by voice"
+          aria-label="Open Trikaal Voice — Ask Vedic astrology by voice"
           className="fixed bottom-6 right-6 flex items-center gap-3 group"
           style={{
             zIndex: 9998,
@@ -456,7 +460,7 @@ export default function TrikalVoice() {
     <div
       role="dialog"
       aria-modal="true"
-      aria-label="Trikal Voice Prediction"
+      aria-label="Trikaal Voice Prediction"
       className="fixed inset-0 flex items-end sm:items-center justify-center p-0 sm:p-4"
       style={{ zIndex: 99999, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)' }}
     >
@@ -473,7 +477,7 @@ export default function TrikalVoice() {
         <div className="flex items-center justify-between px-5 py-4" style={{ borderBottom: `1px solid ${GOLD}22` }}>
           <div>
             <h2 style={{ color: GOLD, fontSize: 18, fontWeight: 700, margin: 0 }}>त्रिकाल वाणी</h2>
-            <p style={{ color: '#aaa', fontSize: 11, margin: 0 }}>Voice Prediction by Trikal</p>
+            <p style={{ color: '#aaa', fontSize: 11, margin: 0 }}>Voice Prediction by Trikaal</p>
           </div>
           <button onClick={handleClose} aria-label="Close" style={{ background: 'transparent', color: GOLD, fontSize: 28, cursor: 'pointer', border: 'none', padding: 0, lineHeight: 1 }}>×</button>
         </div>
@@ -483,7 +487,7 @@ export default function TrikalVoice() {
           {stage === 'pricing' && (
             <>
               <p style={{ color: '#fff', fontSize: 14, lineHeight: 1.6, marginBottom: 14 }}>
-                ₹11 में अपनी आवाज़ से सवाल पूछें — Trikal अपनी आवाज़ में जवाब देंगे।
+                ₹11 में अपनी आवाज़ से सवाल पूछें — Trikaal अपनी आवाज़ में जवाब देंगे।
               </p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                 {PACKS.map(pack => (
@@ -514,7 +518,7 @@ export default function TrikalVoice() {
           {stage === 'form' && (
             <>
               <p style={{ color: '#fff', fontSize: 13, marginBottom: 12 }}>
-                Trikal को आपकी जन्म details चाहिए — accuracy के लिए।
+                Trikaal को आपकी जन्म details चाहिए — accuracy के लिए।
                 {balance > 0 && (
                   <span style={{ color: GOLD, fontSize: 12, display: 'block', marginTop: 4 }}>
                     Balance: {balance} question{balance > 1 ? 's' : ''} remaining
@@ -571,7 +575,7 @@ export default function TrikalVoice() {
               )}
               {recording && (
                 <>
-                  <p style={{ color: GOLD, fontSize: 13, marginBottom: 10, animation: 'trikalFade 1.5s ease-in-out infinite' }}>Trikal सुन रहे हैं...</p>
+                  <p style={{ color: GOLD, fontSize: 13, marginBottom: 10, animation: 'trikalFade 1.5s ease-in-out infinite' }}>Trikaal सुन रहे हैं...</p>
                   <div style={{ fontSize: 56, fontWeight: 700, color: GOLD, fontVariantNumeric: 'tabular-nums', marginBottom: 18 }}>{String(seconds).padStart(2, '0')}s</div>
                   <button onClick={stopRecording} style={{ ...primaryBtnStyle, background: '#c0392b' }}>■ Stop & Submit</button>
                 </>
@@ -592,7 +596,7 @@ export default function TrikalVoice() {
           {stage === 'processing' && (
             <div style={{ textAlign: 'center', padding: '40px 0' }}>
               <div style={{ width: 56, height: 56, margin: 'auto', border: `3px solid ${GOLD}33`, borderTopColor: GOLD, borderRadius: '50%', animation: 'trikalSpin 1s linear infinite' }} />
-              <p style={{ color: '#fff', fontSize: 13, marginTop: 18 }}>Trikal आपके सवाल पर ध्यान कर रहे हैं...</p>
+              <p style={{ color: '#fff', fontSize: 13, marginTop: 18 }}>Trikaal आपके सवाल पर ध्यान कर रहे हैं...</p>
               {transcript && <p style={{ color: '#888', fontSize: 11, marginTop: 12, fontStyle: 'italic' }}>&quot;{transcript}&quot;</p>}
             </div>
           )}
