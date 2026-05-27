@@ -1,7 +1,18 @@
-// 🔱 TRIKAAL VAANI | app/page.tsx | v12.1
+// 🔱 TRIKAAL VAANI | app/page.tsx | v12.2
 // Owner: Rohiit Gupta, Chief Vedic Architect
 // Date: 2026-05-27
 // ============================================================================
+// CHANGE LOG (v12.1 → v12.2):
+//
+// ❌ REMOVED: InnerCircleWaitlist (was slot #11)
+//    - Removed import:  import InnerCircleWaitlist from '@/components/landing/InnerCircleWaitlist';
+//    - Removed render:  <InnerCircleWaitlist />
+//    - Reason: CEO decision (May 27 2026) — static, non-working waitlist with
+//      hardcoded fake scarcity (SPOTS_TAKEN = 8247) + "Live" badge. Pulled until
+//      a real Supabase-backed waitlist count is wired. No fake scarcity on the
+//      homepage — accuracy & trust is the brand promise.
+//    - Blog section renumbered #12 -> #11.
+//
 // CHANGE LOG (v12.0 → v12.1):
 //
 // ❌ REMOVED: DailyRashifal (was slot #7)
@@ -39,7 +50,6 @@ import SiteNav from '@/components/layout/SiteNav';
 import SiteFooter from '@/components/layout/SiteFooter';
 import Hero from '@/components/landing/Hero';
 import PillarsGrid from '@/components/landing/PillarsGrid';
-import InnerCircleWaitlist from '@/components/landing/InnerCircleWaitlist';
 import SocialProofTicker from '@/components/landing/SocialProofTicker';
 import AIManifesto from '@/components/landing/AIManifesto';
 import BlogCard from '@/components/blog/BlogCard';
@@ -137,10 +147,7 @@ export default function HomePage() {
           {/* ── 10. HOME FAQ v2.0 — TIER 2 DEEP TECHNICAL FAQ ──────────── */}
           <HomeFAQ />
 
-          {/* ── 11. INNER CIRCLE WAITLIST ──────────────────────────────── */}
-          <InnerCircleWaitlist />
-
-          {/* ── 12. BLOG SECTION ───────────────────────────────────────── */}
+          {/* ── 11. BLOG SECTION ───────────────────────────────────────── */}
           <section className="py-20 px-4">
             <div className="max-w-6xl mx-auto">
               <div className="text-center mb-12">
@@ -185,7 +192,8 @@ export default function HomePage() {
 }
 
 // ============================================================================
-// END — app/page.tsx v12.1
+// END — app/page.tsx v12.2
 // 🔱 Trikaal Vaani | Rohiit Gupta, Chief Vedic Architect
-// CEO LOCKED: PricingSection removed (v12.0); DailyRashifal removed (v12.1).
+// CEO LOCKED: PricingSection removed (v12.0); DailyRashifal removed (v12.1);
+//             InnerCircleWaitlist removed (v12.2).
 // ============================================================================
