@@ -23,7 +23,7 @@ const GOLD_RGBA = (a: number) => `rgba(212,175,55,${a})`;
 
 export const metadata: Metadata = {
   title: {
-    absolute: 'Free Vedic Astrology Calculators — Kundli, Dasha, Nakshatra, Muhurat | Trikaal Vaani',
+    absolute: 'Free Vedic Astrology Calculators — Kundli, Dasha, Nakshatra, Muhurat | Trikal Vaani',
   },
   description:
     'Free Vedic astrology calculators powered by Swiss Ephemeris. Get accurate Kundli, Vimshottari Dasha, Nakshatra, Rashi, Lagna, Sade Sati, Manglik Dosh, and Child Birth Muhurat results instantly. By Rohiit Gupta, Chief Vedic Architect.',
@@ -35,7 +35,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: 'https://trikalvaani.com/calculators' },
   openGraph: {
-    title: 'Free Vedic Astrology Calculators | Trikaal Vaani',
+    title: 'Free Vedic Astrology Calculators | Trikal Vaani',
     description: 'Free Vedic astrology calculators powered by Swiss Ephemeris. Accurate, instant, 100% free.',
     url: 'https://trikalvaani.com/calculators',
     type: 'website',
@@ -125,7 +125,7 @@ const FAQS = [
     a: `Yes, 100% free. All ${CALC_COUNT} calculators give complete results without any payment, signup, or hidden charges.`,
   },
   {
-    q: 'How accurate are Trikaal Vaani calculators?',
+    q: 'How accurate are Trikal Vaani calculators?',
     a: 'All calculators use Swiss Ephemeris — the same astronomical library used by NASA and world-class astrology software. Calculations are based on Lahiri Ayanamsha (Government of India standard) and BPHS classical rules.',
   },
   {
@@ -195,7 +195,7 @@ export default function CalculatorsHubPage() {
 
           <div className="rounded-xl p-5 mb-8" style={{ background: 'rgba(212,175,55,0.06)', border: `1px solid ${GOLD_RGBA(0.2)}` }}>
             <p className="text-base md:text-lg leading-relaxed">
-              <strong style={{ color: GOLD }}>Trikaal Vaani offers {CALC_COUNT} free Vedic astrology calculators</strong> — {CALC_LIST_TEXT}. All powered by Swiss Ephemeris (NASA-grade accuracy), Lahiri Ayanamsha, and BPHS classical rules. No signup. No payment. Instant results.
+              <strong style={{ color: GOLD }}>Trikal Vaani offers {CALC_COUNT} free Vedic astrology calculators</strong> — {CALC_LIST_TEXT}. All powered by Swiss Ephemeris (NASA-grade accuracy), Lahiri Ayanamsha, and BPHS classical rules. No signup. No payment. Instant results.
             </p>
           </div>
 
@@ -203,7 +203,7 @@ export default function CalculatorsHubPage() {
             <div className="w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg" style={{ background: GOLD, color: '#080B12' }}>RG</div>
             <div className="text-sm">
               <div className="font-semibold" style={{ color: GOLD }}>Rohiit Gupta</div>
-              <div className="text-slate-400">Chief Vedic Architect · Trikaal Vaani · Delhi NCR</div>
+              <div className="text-slate-400">Chief Vedic Architect · Trikal Vaani · Delhi NCR</div>
               <div className="text-xs text-slate-500 mt-0.5">Engine: Swiss Ephemeris · Lahiri Ayanamsha · BPHS Classical Rules</div>
             </div>
           </div>
@@ -234,7 +234,7 @@ export default function CalculatorsHubPage() {
           </section>
 
           <section className="mb-12">
-            <h2 className="text-2xl font-serif font-bold mb-6" style={{ color: GOLD }}>Why Trikaal Vaani Calculators?</h2>
+            <h2 className="text-2xl font-serif font-bold mb-6" style={{ color: GOLD }}>Why Trikal Vaani Calculators?</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <Pillar emoji="🎯" title="NASA-Grade Accuracy" desc="Swiss Ephemeris engine — the same astronomical library used by professional astrology software worldwide." />
               <Pillar emoji="📚" title="BPHS Classical Rules" desc="Every calculation follows Brihat Parashara Hora Shastra — the foundation text of Vedic astrology by Maharishi Parashar." />
@@ -265,7 +265,7 @@ export default function CalculatorsHubPage() {
             </ul>
             <Link href="/#birth-form" className="inline-block mt-2 px-6 py-3 rounded-full font-bold transition-all hover:scale-105"
               style={{ background: `linear-gradient(135deg, ${GOLD} 0%, #A8820A 100%)`, color: '#080B12' }}>
-              🔮 Trikaal Ka Sandesh — Sirf Aapke Liye — ₹51 →
+              🔮 Trikal Ka Sandesh — Sirf Aapke Liye — ₹51 →
             </Link>
           </section>
 

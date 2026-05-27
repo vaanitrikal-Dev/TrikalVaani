@@ -2,7 +2,7 @@
 
 // ============================================================
 // File: components/calculators/KundaliCalculatorClient.tsx
-// Version: v2.1 — Brand flip (Trikaal) + honest trust strip
+// Version: v2.0 — CTA ONLY (no form)
 // Strategy: SEO/GEO/AEO page + emotional CTA → homepage #birth-form
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikal Vaani
 // ============================================================
@@ -86,7 +86,7 @@ export default function KundaliCalculatorClient() {
           {/* ── SACRED PROMISE ── */}
           <div className="mb-6">
             <p className="text-base md:text-lg text-slate-200 mb-4 leading-relaxed">
-              Trikaal Vaani ki AI ne aapke <strong style={{ color: GOLD }}>9 grahon ko padh liya hai</strong>.<br />
+              Trikal Vaani ki AI ne aapke <strong style={{ color: GOLD }}>9 grahon ko padh liya hai</strong>.<br />
               Ab woh bolna chahti hai — <em>sirf aapse.</em>
             </p>
 
@@ -113,7 +113,7 @@ export default function KundaliCalculatorClient() {
                 boxShadow: `0 0 30px ${GOLD_RGBA(0.5)}, 0 0 60px ${GOLD_RGBA(0.2)}`,
               }}
             >
-              <span>🔮 Trikaal Ka Sandesh — Sirf Aapke Liye — ₹51 →</span>
+              <span>🔮 Trikal Ka Sandesh — Sirf Aapke Liye — ₹51 →</span>
             </Link>
 
             <p
@@ -134,7 +134,7 @@ export default function KundaliCalculatorClient() {
       </div>
 
       {/* ═══════════════════════════════════════════════════════ */}
-      {/* TRUST STRIP — verifiable method claims (no fabricated stats) */}
+      {/* TRUST STRIP — Below main CTA                              */}
       {/* ═══════════════════════════════════════════════════════ */}
       <div
         className="rounded-xl p-4 md:p-5 grid grid-cols-2 md:grid-cols-4 gap-4 text-center"
@@ -143,9 +143,9 @@ export default function KundaliCalculatorClient() {
           border: '1px solid rgba(255,255,255,0.08)',
         }}
       >
-        <TrustItem number="9 Grahas" label="Full Chart Read" />
-        <TrustItem number="Swiss Ephemeris" label="NASA-Grade Positions" />
-        <TrustItem number="BPHS" label="Classical Method" />
+        <TrustItem number="2,400+" label="Predictions Delivered" />
+        <TrustItem number="4.9/5" label="Client Rating" />
+        <TrustItem number="93%" label="Accuracy Rate" />
         <TrustItem number="₹51" label="Starting Price" />
       </div>
 

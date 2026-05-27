@@ -1,7 +1,7 @@
 // TRIKAL VAANI - KarmicForm Component
 // CEO & Chief Vedic Architect: Rohiit Gupta
 // File: components/karmic/KarmicForm.tsx
-// VERSION: 1.1 — Brand/persona display flip (Trikaal). Logic unchanged.
+// VERSION: 1.0
 // Single-person form for Karmic Background Reading (Rs251).
 // Flow: birth details -> FREE teaser (Lagna/Moon + hook) -> Rs251 Razorpay -> /karmic/[slug]
 // Reuses BirthForm/KundaliMilanForm patterns: CountrySelector, CityInput (maps-proxy), Razorpay.
@@ -368,7 +368,7 @@ export default function KarmicForm() {
         keyId, orderId,
         amount: (amount ?? 25100),
         currency: currency ?? 'INR',
-        name: 'Trikaal Vaani',
+        name: 'Trikal Vaani',
         description: 'Karmic Background Reading',
         prefillName: fields.contactName,
         prefillContact: `${fields.contactCountryCode}${fields.contactMobile}`.replace(/\s/g, ''),
@@ -449,7 +449,7 @@ export default function KarmicForm() {
               <button type="button" onClick={handlePreview} disabled={previewLoading}
                 className="w-full py-3.5 rounded-xl text-sm font-bold transition-all"
                 style={{ background: previewLoading ? GOLD_RGBA(0.3) : `linear-gradient(135deg, ${GOLD} 0%, #F5D76E 50%, ${GOLD} 100%)`, color: '#080B12', fontSize: '15px' }}>
-                {previewLoading ? 'Trikaal aapki kundali padh raha hai...' : 'Free Jhalak Dekhein →'}
+                {previewLoading ? 'Trikal aapki kundali padh raha hai...' : 'Free Jhalak Dekhein →'}
               </button>
               <p className="text-center text-[10px] text-slate-500">Free glimpse — no payment needed to see your Lagna &amp; Moon sign.</p>
             </div>
@@ -554,7 +554,7 @@ export default function KarmicForm() {
               </div>
 
               <p className="text-center text-[10px] text-slate-600 leading-relaxed">
-                Trikaal reveals karmic patterns from the birth chart for self-understanding — never a judgement on any person.
+                Trikal reveals karmic patterns from the birth chart for self-understanding — never a judgement on any person.
               </p>
             </div>
           )}

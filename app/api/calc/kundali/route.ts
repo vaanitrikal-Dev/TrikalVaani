@@ -1,13 +1,15 @@
 // ============================================================
 // File: app/api/calc/kundali/route.ts
 // Purpose: VM bridge for Kundali Calculator (FREE forever)
-// Version: v1.1 — Fixed instant.nakshatra + current_dasha paths
+// Version: v1.2 — Added TRIKAL_VM_KEY security header
 // Calls: VM /kundali + VM /template (domain="kundali")
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikal Vaani
 // ============================================================
 import { NextRequest, NextResponse } from 'next/server';
 
 const VM_BASE = 'http://34.14.164.105:8001';
+const TRIKAL_VM_KEY = process.env.TRIKAL_VM_KEY || '';
+
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
@@ -91,10 +93,16 @@ export async function POST(req: NextRequest) {
       house_system: 'P',
     };
 
+    // VM headers — includes secret key to pass the lock
+    const vmHeaders = {
+      'Content-Type': 'application/json',
+      'X-Trikal-Key': TRIKAL_VM_KEY,
+    };
+
     // 1) Call VM /kundali
     const kRes = await fetch(`${VM_BASE}/kundali`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: vmHeaders,
       body: JSON.stringify(vmPayload),
       cache: 'no-store',
     });
@@ -111,7 +119,7 @@ export async function POST(req: NextRequest) {
     try {
       const tRes = await fetch(`${VM_BASE}/template`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: vmHeaders,
         body: JSON.stringify({
           domain: 'career',
           kundaliData,
@@ -131,16 +139,13 @@ export async function POST(req: NextRequest) {
     }
 
     // ─── Get current dasha via date comparison ───────────────────────────────
-    // VM structure: kundaliData.dasha.maha_dasha[] with .planet, .start, .end, .antar[]
-    // is_current is always false in VM — must compare dates
     const mahaList = kundaliData?.dasha?.maha_dasha ?? [];
     const { mahadasha: currentMahadasha, antardasha: currentAntardasha } = getCurrentDasha(mahaList);
 
     // ─── Moon graha for correct nakshatra ───────────────────────────────────
-    // Janma Nakshatra = Moon's nakshatra (NOT Lagna nakshatra)
     const moonGraha = kundaliData?.grahas?.find((g: any) => g.planet === 'Moon');
 
-    // Build clean response for frontend
+    // ─── Build clean response — only fields frontend needs (Leak 2 fix) ──────
     const result = {
       success: true,
       sessionId,
@@ -149,26 +154,36 @@ export async function POST(req: NextRequest) {
         gender: body.gender || null,
       },
       instant: {
-        // Lagna fields (for Kundali calculator)
         lagna: kundaliData.lagna?.sign || null,
         lagna_en: kundaliData.lagna?.sign_en || null,
         lagna_lord: kundaliData.lagna?.sign_lord || null,
-
-        // ✅ FIXED: Janma Nakshatra = Moon's nakshatra (not Lagna)
         nakshatra: moonGraha?.nakshatra || null,
         nakshatra_lord: moonGraha?.nakshatra_lord || null,
         pada: moonGraha?.pada || null,
-
-        // Moon + Sun signs
         chandra_rashi: moonGraha?.sign || null,
         surya_rashi: kundaliData.grahas?.find((g: any) => g.planet === 'Sun')?.sign || null,
-
-        // ✅ FIXED: Current dasha via date comparison (is_current always false in VM)
         current_dasha: currentMahadasha,
         current_antardasha: currentAntardasha,
       },
-      // Full data
-      kundali: kundaliData,
+      // Planets — only display fields, no internal engine data
+      planets: (kundaliData.grahas || []).map((g: any) => ({
+        planet: g.planet,
+        sign: g.sign,
+        house: g.house,
+        nakshatra: g.nakshatra,
+        is_retrograde: g.is_retrograde || false,
+        dignity: g.dignity || null,
+      })),
+      // Houses — only sign per house
+      houses: (kundaliData.houses || []).map((h: any) => ({
+        house: h.house,
+        sign: h.sign,
+      })),
+      // Dasha — current period only, not full 120-year list
+      dasha: {
+        mahadasha: currentMahadasha,
+        antardasha: currentAntardasha,
+      },
       // Dos/Don'ts + Remedies
       template: templateData,
     };

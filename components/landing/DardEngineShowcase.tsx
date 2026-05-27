@@ -93,7 +93,7 @@ export default function DardEngineShowcase({ selectedCategory, onSelectCategory 
           </h2>
           <p className="text-slate-400 max-w-xl mx-auto text-base leading-relaxed">
             Tap your life stage. Pick the question that&apos;s been gnawing at you.
-            Trikaal Guru reads your chart specifically for it — not a generic horoscope.
+            Trikal Guru reads your chart specifically for it — not a generic horoscope.
           </p>
         </div>
 

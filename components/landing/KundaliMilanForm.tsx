@@ -1,19 +1,8 @@
 // TRIKAL VAANI - KundaliMilanForm Component
 // CEO & Chief Vedic Architect: Rohiit Gupta
 // File: components/landing/KundaliMilanForm.tsx
-// VERSION: 1.2 - Brand flip + Delhi NCR removal + AI vendor names removed
+// VERSION: 1.1 - Dual Chart Compatibility with 3-Step Wizard + 5 Edit Patterns
 // SIGNED: ROHIIT GUPTA, CEO
-//
-// v1.2 CHANGE (Brand-flip session - CEO approved, checklist-verified):
-//   - Visible brand "Trikal Vaani" -> "Trikaal Vaani" (3 spots: schema service
-//     name, schema provider name, Razorpay checkout name).
-//   - Persona "Trikal" -> "Trikaal" (2 spots: payment loading message,
-//     audience selector subtext).
-//   - "Delhi NCR" location credential REMOVED (2 spots: hero subline, footer).
-//   - AI vendor names "Gemini 2.5 Pro + Claude Sonnet polish" removed from
-//     OfferCatalog schema description -> "Premium AI engine with expert polish".
-//   PROTECTED (untouched): all trikalvaani.com URLs/@id, +919211804111,
-//   every /api route path, and the v1.1 handlePaymentSubmit logic.
 //
 // v1.1 CHANGE (Day 7 - CEO approved surgical fix):
 //   handlePaymentSubmit now sends FULL birth data (buildMilanBody) to
@@ -187,7 +176,7 @@ const LOADING_STEPS_PAYMENT = [
   'Bride + Groom kundali compute ho rahi hai...',
   '36 Guna Ashtakoot calculate ho raha hai...',
   'Mangal, Nadi, Bhakoot Dosh check ho raha hai...',
-  'Trikaal aapka Milan report taiyaar kar raha hai...',
+  'Trikal aapka Milan report taiyaar kar raha hai...',
 ]
 
 const LOADING_STEPS_FREE = [
@@ -221,12 +210,12 @@ const MILAN_SERVICE_SCHEMA = {
   '@context': 'https://schema.org',
   '@type': 'Service',
   '@id': 'https://trikalvaani.com/kundali-milan#service',
-  name: 'Trikaal Vaani Kundali Milan - Vedic Compatibility Matching',
+  name: 'Trikal Vaani Kundali Milan - Vedic Compatibility Matching',
   serviceType: 'Vedic Kundali Matching',
   provider: {
     '@type': 'Organization',
     '@id': 'https://trikalvaani.com/#organization',
-    name: 'Trikaal Vaani',
+    name: 'Trikal Vaani',
     url: 'https://trikalvaani.com',
   },
   areaServed: { '@type': 'Country', name: 'India' },
@@ -251,7 +240,7 @@ const MILAN_SERVICE_SCHEMA = {
       {
         '@type': 'Offer',
         name: 'Deep Milan - Couple Version',
-        description: 'Deep compatibility analysis for couples with Dos, Donts, and 6 personalized remedies. Premium AI engine with expert polish.',
+        description: 'Deep compatibility analysis for couples with Dos, Donts, and 6 personalized remedies. Gemini 2.5 Pro + Claude Sonnet polish.',
         price: '101', priceCurrency: 'INR',
         availability: 'https://schema.org/InStock',
       },
@@ -747,7 +736,7 @@ function AudienceSelector({
           Yeh report kiske liye hai?
         </h3>
         <p style={{ color: '#94a3b8', fontSize: '13px', margin: 0 }}>
-          Choose the narrative style - Trikaal will write specifically for that audience.
+          Choose the narrative style - Trikal will write specifically for that audience.
         </p>
       </div>
 
@@ -1074,7 +1063,7 @@ export default function KundaliMilanForm() {
         orderId,
         amount: amount * 100,
         currency,
-        name: 'Trikaal Vaani',
+        name: 'Trikal Vaani',
         description: `Kundali Milan - ${audience === 'couple' ? 'Couple Version' : audience === 'parent' ? 'Parent Version' : 'Both Versions'}`,
         prefillName: fields.contactName,
         prefillContact: `${fields.contactCountryCode}${fields.contactMobile}`.replace(/\s/g, ''),
@@ -1160,7 +1149,7 @@ export default function KundaliMilanForm() {
             Kundali Milan - Vedic Compatibility
           </h2>
           <p className="text-slate-400 text-sm max-w-lg mx-auto">
-            36 Guna Ashtakoot . Mangal, Nadi, Bhakoot Dosh . Personalized remedies by Rohiit Gupta, Chief Vedic Architect.
+            36 Guna Ashtakoot . Mangal, Nadi, Bhakoot Dosh . Personalized remedies by Rohiit Gupta, Chief Vedic Architect, Delhi NCR.
           </p>
           <div className="flex flex-wrap justify-center gap-2 mt-4">
             {TRUST_BADGES.map(b => (
@@ -1529,7 +1518,7 @@ export default function KundaliMilanForm() {
               Payments secured by <strong style={{ color: RAZORPAY_BLUE }}>Razorpay</strong>.
             </p>
             <p style={{ color: '#1e293b', fontSize: '10px', margin: 0 }}>
-              By Rohiit Gupta, Chief Vedic Architect . trikalvaani.com . 🔱 Mahakaal Ka Ashirwad
+              By Rohiit Gupta, Chief Vedic Architect . trikalvaani.com . Delhi NCR . 🔱 Mahakaal Ka Ashirwad
             </p>
           </div>
         </div>
@@ -1538,4 +1527,4 @@ export default function KundaliMilanForm() {
   )
 }
 
-// END KundaliMilanForm v1.2 - LOCKED PER IR-13
+// END KundaliMilanForm v1.1 - LOCKED PER IR-13

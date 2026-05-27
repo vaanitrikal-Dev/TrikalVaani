@@ -1,140 +1,154 @@
-// TRIKAL VAANI - Child Birth Muhurat Paid Report - Payment Verification API
+// TRIKAL VAANI - Child Birth Muhurat Paid Report - Order Creation API
 // CEO: Rohiit Gupta
-// File: app/api/calc/verify-muhurat-payment/route.ts
-// VERSION: 1.0
-// Mirrors verify-karmic-payment. Does NOT generate the report here —
-// creates the muhurat_readings row (status paid) and returns the slug.
-// The VM call + Gemini + Sonnet prediction run in /api/calc/muhurat-paid
-// (called by the result page). Keeps verification fast, AI work separate.
+// File: app/api/calc/create-muhurat-order/route.ts
+// VERSION: 1.1 — FIX: preserve all 3 languages (hinglish/hindi/english).
+//                 Previously every language collapsed to "hi", which made the
+//                 report engine default everything to Hinglish.
+// Tiers: report_101 (Rs101) / remedies_151 (Rs151). Mirrors create-karmic-order.
+// Pay-first flow: creates Razorpay order + saves pending muhurat_orders row.
 
 import { NextRequest, NextResponse } from 'next/server';
+import Razorpay from 'razorpay';
 import { createClient } from '@supabase/supabase-js';
-import crypto from 'crypto';
+
+// CEO LOCKED pricing
+const TIERS: Record<string, { rupees: number; paise: number; label: string }> = {
+  report_101:   { rupees: 101, paise: 10100, label: 'Full Muhurat Report' },
+  remedies_151: { rupees: 151, paise: 15100, label: 'Full Report + 10 Remedies' },
+};
+
+const razorpay = new Razorpay({
+  key_id:     process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID!,
+  key_secret: process.env.RAZORPAY_KEY_SECRET!,
+});
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-interface MuhuratVerifyRequest {
-  razorpay_order_id:   string;
-  razorpay_payment_id: string;
-  razorpay_signature:  string;
+// Validate the parent's CHOSEN delivery moment + location.
+// Form may send lat/lng or latitude/longitude. Returns null if invalid.
+function normaliseMuhurat(m: any) {
+  if (!m || typeof m !== 'object') return null;
+
+  const year   = Number(m.year);
+  const month  = Number(m.month);
+  const day    = Number(m.day);
+  const hour   = Number(m.hour);
+  const minute = Number(m.minute);
+
+  const latitude  = typeof m.latitude  === 'number' ? m.latitude  : (typeof m.lat === 'number' ? m.lat : null);
+  const longitude = typeof m.longitude === 'number' ? m.longitude : (typeof m.lng === 'number' ? m.lng : null);
+
+  if (!Number.isInteger(year) || year < 2024 || year > 2030) return null;
+  if (!Number.isInteger(month) || month < 1 || month > 12) return null;
+  if (!Number.isInteger(day) || day < 1 || day > 31) return null;
+  if (!Number.isInteger(hour) || hour < 0 || hour > 23) return null;
+  if (!Number.isInteger(minute) || minute < 0 || minute > 59) return null;
+  if (typeof latitude !== 'number' || Math.abs(latitude) > 90) return null;
+  if (typeof longitude !== 'number' || Math.abs(longitude) > 180) return null;
+
+  return {
+    year, month, day, hour, minute,
+    latitude, longitude,
+    timezone: typeof m.timezone === 'number' ? m.timezone : 5.5,
+    city:     m.city     ?? m.cityName ?? '',
+    hospital: m.hospital ?? '',
+  };
 }
 
-function makeSlug(): string {
-  const ts  = Date.now().toString(36);
-  const rnd = crypto.randomBytes(4).toString('hex');
-  return `m-${ts}-${rnd}`;
+// Language: keep the user's full choice (hinglish | hindi | english).
+// The report engine + Sonnet polish need the exact 3-way value.
+// We also accept the legacy 2-letter codes (hi/en) and old field names.
+function normaliseLanguage(raw: unknown): 'hinglish' | 'hindi' | 'english' {
+  const v = String(raw ?? '').toLowerCase().trim();
+  if (v === 'english' || v === 'en') return 'english';
+  if (v === 'hindi') return 'hindi';
+  if (v === 'hinglish') return 'hinglish';
+  if (v === 'hi') return 'hinglish'; // legacy: hi historically meant Hinglish default
+  return 'hinglish';
 }
 
 export async function POST(req: NextRequest) {
   try {
-    const body: MuhuratVerifyRequest = await req.json();
-    const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = body;
+    const body: any = await req.json();
 
-    if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
-      return NextResponse.json({ error: 'Missing payment fields.' }, { status: 400 });
+    // Tier
+    const tierKey = body.tier ?? 'report_101';
+    const tier = TIERS[tierKey];
+    if (!tier) {
+      return NextResponse.json({ error: 'Invalid tier.' }, { status: 400 });
     }
 
-    // Verify HMAC signature
-    const secret   = process.env.RAZORPAY_KEY_SECRET!;
-    const payload  = `${razorpay_order_id}|${razorpay_payment_id}`;
-    const expected = crypto.createHmac('sha256', secret).update(payload).digest('hex');
-
-    if (expected !== razorpay_signature) {
-      console.error('[Trikal] Muhurat signature mismatch:', razorpay_order_id);
-      return NextResponse.json({ error: 'Payment verification failed.' }, { status: 400 });
+    // The parent's chosen delivery moment (form may send body.muhurat OR top-level)
+    const muhurat = normaliseMuhurat(body.muhurat ?? body);
+    if (!muhurat) {
+      return NextResponse.json({ error: 'Invalid muhurat data.' }, { status: 400 });
     }
 
-    // Load the pending order
-    const { data: order, error: orderErr } = await supabase
+    // Language: preserve full 3-way choice (FIX v1.1)
+    const language = normaliseLanguage(body.language);
+
+    // Contact (form: contact.{name,mobile,email})
+    const contact = body.contact ?? {};
+    const userName   = contact.name   ?? body.userName   ?? null;
+    const userMobile = contact.mobile ?? body.userMobile ?? null;
+    const userEmail  = contact.email  ?? body.userEmail  ?? null;
+
+    // Create Razorpay order
+    const order = await razorpay.orders.create({
+      amount:   tier.paise,
+      currency: 'INR',
+      receipt:  `tv_muhurat_${Date.now()}`,
+      notes: {
+        platform:  'Trikal Vaani',
+        purpose:   'Child Birth Muhurat Report',
+        tier:      tierKey,
+        language,
+        architect: 'Rohiit Gupta',
+      },
+    });
+
+    // Save pending order (muhurat_data stored here for verify-payment)
+    const { error: dbErr } = await supabase
       .from('muhurat_orders')
-      .select('*')
-      .eq('razorpay_order_id', razorpay_order_id)
-      .single();
-
-    if (orderErr || !order) {
-      console.error('[Trikal] Muhurat order not found:', razorpay_order_id, orderErr?.message);
-      return NextResponse.json({ error: 'Order not found.' }, { status: 404 });
-    }
-
-    // Idempotency replay — if already verified, return existing reading slug
-    if (order.payment_verified === true) {
-      const { data: existing } = await supabase
-        .from('muhurat_readings')
-        .select('slug')
-        .eq('order_id', order.id)
-        .maybeSingle();
-      if (existing?.slug) {
-        return NextResponse.json({
-          success: true, slug: existing.slug, paymentId: razorpay_payment_id,
-          resultUrl: `https://trikalvaani.com/muhurat/${existing.slug}`, replay: true,
-        });
-      }
-    }
-
-    // Mark order paid
-    await supabase
-      .from('muhurat_orders')
-      .update({
-        razorpay_payment_id, razorpay_signature,
-        status: 'paid', payment_verified: true, paid_at: new Date().toISOString(),
-      })
-      .eq('id', order.id);
-
-    // Create the reading row (VM data + narrative generated later by /api/calc/muhurat-paid)
-    const slug = makeSlug();
-
-    const { error: saveErr } = await supabase
-      .from('muhurat_readings')
       .insert({
-        order_id:         order.id,
-        slug,
-        tier:             order.tier,
-        language:         order.language,
-        muhurat_data:     order.muhurat_data,
-        vm_data:          null,
-        doshas_data:      null,
-        remedies_data:    null,
-        gemini_narrative: null,
-        geo_answer:       null,
-        pdf_url:          null,
-        is_public:        false,
+        razorpay_order_id: order.id,
+        amount_rupees:     tier.rupees,
+        amount_paise:      tier.paise,
+        currency:          'INR',
+        tier:              tierKey,
+        language,
+        muhurat_data:      muhurat,
+        user_name:         userName,
+        user_mobile:       userMobile,
+        user_email:        userEmail,
+        status:            'created',
+        payment_verified:  false,
       });
 
-    if (saveErr) {
-      console.error('[Trikal] Muhurat reading row save error:', saveErr.message);
-      return NextResponse.json({
-        success: true, paymentId: razorpay_payment_id,
-        warning: 'Payment received. Report is being prepared — please contact us if the result page does not load.',
-      }, { status: 200 });
+    if (dbErr) {
+      console.error('[Trikal] Muhurat order save error:', dbErr.message);
+      // Order created on Razorpay; verify route can still proceed.
     }
 
-    const tierLabel = order.tier === 'remedies_151'
-      ? 'Full Report + 10 Remedies'
-      : 'Full Muhurat Report';
-
-    const waText = encodeURIComponent(
-      `Jai Mahakaal! Trikaal Vaani Child Birth Muhurat Report confirm ho gaya.\n\n` +
-      `Tier: ${tierLabel}\n` +
-      `Payment ID: ${razorpay_payment_id}\n` +
-      `Result: trikalvaani.com/muhurat/${slug}\n\nJai Maa Shakti!`
-    );
-
     return NextResponse.json({
-      success:     true,
-      slug,
-      tier:        order.tier,
-      language:    order.language,
-      paymentId:   razorpay_payment_id,
-      amount:      order.amount_rupees,
-      resultUrl:   `https://trikalvaani.com/muhurat/${slug}`,
-      whatsappUrl: `https://wa.me/919211804111?text=${waText}`,
+      orderId:      order.id,
+      amount:       order.amount,
+      amountRupees: tier.rupees,
+      currency:     order.currency,
+      keyId:        process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+      tier:         tierKey,
+      language,
+      label:        tier.label,
     });
 
   } catch (err: unknown) {
-    console.error('[Trikal] Verify Muhurat payment error:', err);
-    return NextResponse.json({ error: 'Server error during verification.' }, { status: 500 });
+    console.error('[Trikal] Muhurat order error:', err);
+    return NextResponse.json(
+      { error: 'Could not create Muhurat order. Please try again.' },
+      { status: 500 }
+    );
   }
 }

@@ -1,5 +1,5 @@
 // ============================================================
-// TRIKAAL VAANI — DYNAMIC BLOG ARTICLE PAGE (SSR)
+// TRIKAL VAANI — DYNAMIC BLOG ARTICLE PAGE (SSR)
 // CEO: Rohiit Gupta | Chief Vedic Architect
 // Version: 2.1 (renderText now parses [text](url) links)
 // Date: 2026-05-22
@@ -41,7 +41,7 @@ export async function generateMetadata(
 
   if (!post) {
     return {
-      title: 'Article Not Found | Trikaal Vaani',
+      title: 'Article Not Found | Trikal Vaani',
       description: 'The requested article could not be found.',
     };
   }
@@ -54,7 +54,7 @@ export async function generateMetadata(
     keywords: post.keywords.join(', '),
     authors: [{ name: 'Rohiit Gupta', url: 'https://trikalvaani.com/founder' }],
     creator: 'Rohiit Gupta',
-    publisher: 'Trikaal Vaani',
+    publisher: 'Trikal Vaani',
     category: post.category,
     alternates: {
       canonical: canonicalUrl,
@@ -67,7 +67,7 @@ export async function generateMetadata(
       title: post.title,
       description: post.description,
       url: canonicalUrl,
-      siteName: 'Trikaal Vaani',
+      siteName: 'Trikal Vaani',
       locale: 'en_IN',
       type: 'article',
       publishedTime: post.publishedAt,
@@ -81,6 +81,14 @@ export async function generateMetadata(
           alt: post.title,
         },
       ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      site: '@TrikalVaani',
+      creator: '@TrikalVaani',
+      title: post.title,
+      description: post.description,
+      images: [`https://trikalvaani.com${post.ogImage}`],
     },
     robots: {
       index: true,
@@ -122,7 +130,7 @@ function generateJsonLd(post: BlogPost) {
     publisher: {
       '@type': 'Organization',
       '@id': 'https://trikalvaani.com/#organization',
-      name: 'Trikaal Vaani',
+      name: 'Trikal Vaani',
       logo: {
         '@type': 'ImageObject',
         url: 'https://trikalvaani.com/logo.png',
@@ -300,7 +308,7 @@ function SectionBlock({ section, index }: { section: BlogSection; index: number 
       const variantLabels = {
         tip: '💡 Tip',
         warn: '⚠️ Caution',
-        verdict: '🔱 Trikaal Vaani Verdict',
+        verdict: '🔱 Trikal Vaani Verdict',
       };
       return (
         <aside className={`my-6 rounded-lg border-l-4 px-5 py-4 ${variantStyles[section.variant]}`}>
@@ -395,7 +403,7 @@ export default async function BlogArticlePage({
           >
             <div className="mb-3 flex items-center gap-2">
               <span className="text-2xl" aria-hidden>🎯</span>
-              <h2 className="text-lg font-bold text-amber-300">Trikaal Sandesh — Direct Answer</h2>
+              <h2 className="text-lg font-bold text-amber-300">Trikal Sandesh — Direct Answer</h2>
             </div>
             <p className="text-base md:text-lg leading-relaxed text-amber-50">
               {post.directAnswer}
@@ -422,7 +430,7 @@ export default async function BlogArticlePage({
                 href="/#birth-form"
                 className="rounded-lg bg-amber-600 px-6 py-3 font-semibold text-slate-900 hover:bg-amber-500 transition"
               >
-                Free Trikaal Sandesh
+                Free Trikal Sandesh
               </Link>
               <Link
                 href={post.ctaService.href}
@@ -492,7 +500,7 @@ export default async function BlogArticlePage({
             <p className="mb-2">
               <em>Last reviewed by{' '}
                 <Link href="/founder" className="text-amber-300 hover:underline">Rohiit Gupta</Link>,
-                Chief Vedic Architect, Trikaal Vaani · Delhi NCR · UDYAM-DL-10-0119070
+                Chief Vedic Architect, Trikal Vaani · Delhi NCR · UDYAM-DL-10-0119070
               </em>
             </p>
             <p>

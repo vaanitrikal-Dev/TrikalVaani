@@ -3,9 +3,11 @@
 // Version: v1.0 — metadata only
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikal Vaani
 // ============================================================
+
 import type { Metadata } from 'next';
+
 export const metadata: Metadata = {
-  title: 'Free Sade Sati Calculator — Check Your Saturn 7.5 Year Period Online | Trikaal Vaani',
+  title: 'Free Sade Sati Calculator — Check Your Saturn 7.5 Year Period Online | Trikal Vaani',
   description:
     'Free Sade Sati Calculator powered by Swiss Ephemeris. Find out if you are in Sade Sati, current phase (Rising/Peak/Setting), exact start-end dates, all life cycles & 3 Parashar remedies. By Rohiit Gupta.',
   keywords: [
@@ -28,7 +30,7 @@ export const metadata: Metadata = {
     description: 'Find Sade Sati status, phase, dates & 3 Parashar remedies — free.',
     url: 'https://trikalvaani.com/calculators/free-sade-sati-calculator',
     type: 'website',
-    siteName: 'Trikaal Vaani',
+    siteName: 'Trikal Vaani',
   },
   twitter: {
     card: 'summary_large_image',
@@ -37,6 +39,7 @@ export const metadata: Metadata = {
   },
   robots: { index: true, follow: true },
 };
+
 export default function SadeSatiCalculatorLayout({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }

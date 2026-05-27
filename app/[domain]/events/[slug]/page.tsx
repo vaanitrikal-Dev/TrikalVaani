@@ -1,8 +1,8 @@
 // ════════════════════════════════════════════════════════════════════
-// 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER
+// 🔱 TRIKAL VAANI — CEO PROTECTION HEADER
 // ════════════════════════════════════════════════════════════════════
 // File:        app/[domain]/events/[slug]/page.tsx
-// Version:     v1.1
+// Version:     v1.0
 // Owner:       Rohiit Gupta, Chief Vedic Architect
 // Domain:      trikalvaani.com
 // Purpose:     Phase B4 — City + Festival Combo Pages
@@ -10,12 +10,12 @@
 //                   /mumbai/events/maha-shivratri-2026
 //              Target: 10 cities × 50 festivals = 500 URLs
 // Data:        cities.json + festivals.json (both already deployed)
-// SEO:         Event + FAQPage + BreadcrumbList schema
+// SEO:         Event + LocalBusiness + FAQPage + BreadcrumbList schema
 //              GEO: 60-word direct answer block
 //              Local intent: "diwali 2026 [city]", "muhurat in [city]"
 // E-E-A-T:     Author = Rohiit Gupta, Chief Vedic Architect
 // Lock Status: gemini-prompt.ts = PERMANENTLY LOCKED (do not touch)
-// Last Update: 2026-05-25 (brand display name → Trikaal Vaani; /predict → /#birth-form)
+// Last Update: 2026-05-09 (Phase B4)
 // ════════════════════════════════════════════════════════════════════
 
 import { Metadata } from "next";
@@ -55,7 +55,7 @@ type Festival = {
 
 const SITE_URL = "https://trikalvaani.com";
 const AUTHOR_NAME = "Rohiit Gupta";
-const AUTHOR_TITLE = "Chief Vedic Architect, Trikaal Vaani";
+const AUTHOR_TITLE = "Chief Vedic Architect, Trikal Vaani";
 
 const CITY_SLUGS = new Set([
   "delhi", "mumbai", "noida", "gurgaon", "bangalore",
@@ -96,10 +96,10 @@ export async function generateMetadata(
 ): Promise<Metadata> {
   const c = findCity(params.domain);
   const f = findFestival(params.slug);
-  if (!c || !f) return { title: "Not Found | Trikaal Vaani" };
+  if (!c || !f) return { title: "Not Found | Trikal Vaani" };
 
   const human = formatDate(f.date);
-  const title = `${f.name} 2026 in ${c.name} | ${human} | Muhurat, Puja Vidhi, Temples | Trikaal Vaani`;
+  const title = `${f.name} 2026 in ${c.name} | ${human} | Muhurat, Puja Vidhi, Temples | Trikal Vaani`;
   const description =
     `${f.name} (${f.name_hindi}) 2026 in ${c.name}, ${c.state} — ${human}. ` +
     `Muhurat: ${f.muhurat}. Famous temples: ${c.famous_temples.slice(0, 2).join(", ")}. ` +
@@ -109,7 +109,7 @@ export async function generateMetadata(
   return {
     title, description,
     alternates: { canonical: url },
-    openGraph: { title, description, url, siteName: "Trikaal Vaani", type: "article", locale: "en_IN" },
+    openGraph: { title, description, url, siteName: "Trikal Vaani", type: "article", locale: "en_IN" },
     twitter: { card: "summary_large_image", title, description },
     robots: { index: true, follow: true },
   };
@@ -158,7 +158,7 @@ export default async function CityFestivalPage(
         longitude: c.longitude,
       },
     },
-    organizer: { "@type": "Organization", name: "Trikaal Vaani", url: SITE_URL },
+    organizer: { "@type": "Organization", name: "Trikal Vaani", url: SITE_URL },
     url,
   };
 
@@ -326,7 +326,7 @@ export default async function CityFestivalPage(
               predictions calibrated to your birth city. Free Tithi insight, ₹51
               for full prediction.
             </p>
-            <Link href="/#birth-form" className="mt-4 inline-block rounded-lg bg-white px-6 py-3 font-semibold text-amber-700 hover:bg-amber-50">
+            <Link href="/predict" className="mt-4 inline-block rounded-lg bg-white px-6 py-3 font-semibold text-amber-700 hover:bg-amber-50">
               Get My {f.name} Prediction →
             </Link>
           </section>

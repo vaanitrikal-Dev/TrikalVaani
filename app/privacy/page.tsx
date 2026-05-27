@@ -2,7 +2,7 @@
  * TRIKAL VAANI — trikalvaani.com
  * Chief Vedic Architect: Rohiit Gupta
  * FILE TO PASTE → app/privacy/page.tsx (REPLACE EXISTING)
- * Version: 2.1 — Brand → Trikaal Vaani; Jini → Trikaal AI; Prokerala → Swiss Ephemeris (Render)
+ * Version: 2.0 — Full SEO + EEAT + Razorpay compliant
  */
 
 import type { Metadata } from "next";
@@ -11,11 +11,11 @@ import SiteNav from "@/components/layout/SiteNav";
 import SiteFooter from "@/components/layout/SiteFooter";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy | Trikaal Vaani",
-  description: "Privacy Policy for Trikaal Vaani — AI-powered Vedic Astrology platform by Rohiit Gupta. How we collect, use, and protect your personal data.",
+  title: "Privacy Policy | Trikal Vaani",
+  description: "Privacy Policy for Trikal Vaani — AI-powered Vedic Astrology platform by Rohiit Gupta. How we collect, use, and protect your personal data.",
   authors: [{ name: "Rohiit Gupta", url: "https://trikalvaani.com/founder" }],
   alternates: { canonical: "https://trikalvaani.com/privacy" },
-  openGraph: { title: "Privacy Policy | Trikaal Vaani", url: "https://trikalvaani.com/privacy", siteName: "Trikaal Vaani", locale: "en_IN", type: "website" },
+  openGraph: { title: "Privacy Policy | Trikal Vaani", url: "https://trikalvaani.com/privacy", siteName: "Trikal Vaani", locale: "en_IN", type: "website" },
 };
 
 const GOLD = "#D4AF37";
@@ -32,7 +32,7 @@ export default function PrivacyPage() {
             <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: GOLD }}>Legal</p>
             <h1 className="font-serif text-4xl font-bold text-white mb-4">Privacy Policy</h1>
             <p className="text-gray-500 text-sm">Effective: 1 January 2025 · Last Updated: April 2025</p>
-            <p className="text-gray-500 text-sm mt-1">Operated by: <span style={{ color: GOLD }}>Rohiit Gupta</span> — Trikaal Vaani, Delhi NCR, India</p>
+            <p className="text-gray-500 text-sm mt-1">Operated by: <span style={{ color: GOLD }}>Rohiit Gupta</span> — Trikal Vaani, Delhi NCR, India</p>
             <div className="mt-6 h-px w-16" style={{ background: `linear-gradient(90deg, ${GOLD}, transparent)` }} />
           </div>
 
@@ -40,7 +40,7 @@ export default function PrivacyPage() {
 
             <div>
               <h2 className="font-serif text-xl font-bold mb-4" style={{ color: GOLD }}>1. Information We Collect</h2>
-              <p className="mb-3">When you use Trikaal Vaani, we collect the following information:</p>
+              <p className="mb-3">When you use Trikal Vaani, we collect the following information:</p>
               <ul className="space-y-2">
                 {[
                   "Date, time, and place of birth — required for Vedic astrology calculations",
@@ -61,11 +61,11 @@ export default function PrivacyPage() {
               <h2 className="font-serif text-xl font-bold mb-4" style={{ color: GOLD }}>2. How We Use Your Information</h2>
               <ul className="space-y-2">
                 {[
-                  "To generate your personalised Vedic astrology reading using Trikaal AI",
+                  "To generate your personalised Vedic astrology reading using Jini AI",
                   "To deliver your reading via email or WhatsApp",
                   "To process payments and send receipts",
                   "To create and manage your account",
-                  "To send confirmations and updates about the readings you have purchased",
+                  "To send booking confirmations for personal consultations with Rohiit Gupta",
                   "To improve our platform and services",
                   "To comply with legal obligations",
                 ].map((item, i) => (
@@ -95,7 +95,7 @@ export default function PrivacyPage() {
 
             <div>
               <h2 className="font-serif text-xl font-bold mb-4" style={{ color: GOLD }}>4. Payment Data</h2>
-              <p>All payments are processed by <strong className="text-white">Razorpay</strong> — a PCI DSS compliant payment gateway. Trikaal Vaani does not store, process, or transmit your card number, CVV, or banking credentials. Razorpay&apos;s privacy policy applies to payment data: <a href="https://razorpay.com/privacy/" target="_blank" rel="noopener noreferrer" style={{ color: GOLD }} className="hover:underline">razorpay.com/privacy</a></p>
+              <p>All payments are processed by <strong className="text-white">Razorpay</strong> — a PCI DSS compliant payment gateway. Trikal Vaani does not store, process, or transmit your card number, CVV, or banking credentials. Razorpay&apos;s privacy policy applies to payment data: <a href="https://razorpay.com/privacy/" target="_blank" rel="noopener noreferrer" style={{ color: GOLD }} className="hover:underline">razorpay.com/privacy</a></p>
             </div>
 
             <div>
@@ -104,8 +104,8 @@ export default function PrivacyPage() {
                 {[
                   "Razorpay — payment processing",
                   "Supabase — database and authentication",
-                  "Swiss Ephemeris (self-hosted on Render) — Vedic astrology calculations (Lahiri Ayanamsha)",
-                  "Google Gemini AI — Trikaal AI reading generation",
+                  "Prokerala API — Vedic astrology calculations (Lahiri Ayanamsha)",
+                  "Google Gemini AI — Jini AI reading generation",
                   "Vercel — website hosting",
                   "OpenStreetMap / Nominatim — birth place geocoding",
                   "WhatsApp / Interakt — reading and booking delivery",
@@ -137,7 +137,7 @@ export default function PrivacyPage() {
 
             <div>
               <h2 className="font-serif text-xl font-bold mb-4" style={{ color: GOLD }}>7. Cookies</h2>
-              <p>Trikaal Vaani uses essential cookies only — for authentication, session management, and security. We do not use advertising or tracking cookies.</p>
+              <p>Trikal Vaani uses essential cookies only — for authentication, session management, and security. We do not use advertising or tracking cookies.</p>
             </div>
 
             <div>
@@ -147,14 +147,14 @@ export default function PrivacyPage() {
 
             <div>
               <h2 className="font-serif text-xl font-bold mb-4" style={{ color: GOLD }}>9. Children&apos;s Privacy</h2>
-              <p>Trikaal Vaani is not directed at children under 13. We do not knowingly collect personal data from children.</p>
+              <p>Trikal Vaani is not directed at children under 13. We do not knowingly collect personal data from children.</p>
             </div>
 
             <div>
               <h2 className="font-serif text-xl font-bold mb-4" style={{ color: GOLD }}>10. Contact Us</h2>
               <div className="border border-white/10 rounded-xl p-5 space-y-2" style={{ background: `rgba(212,175,55,0.04)` }}>
                 <p><span className="text-white font-semibold">Rohiit Gupta</span> — Chief Vedic Architect</p>
-                <p>Trikaal Vaani — trikalvaani.com · Delhi NCR, India</p>
+                <p>Trikal Vaani — trikalvaani.com · Delhi NCR, India</p>
                 <p>Email: <a href="mailto:rohiit@trikalvaani.com" style={{ color: GOLD }} className="hover:underline">rohiit@trikalvaani.com</a></p>
                 <p>WhatsApp: <a href="https://wa.me/919211804111" target="_blank" rel="noopener noreferrer" style={{ color: GOLD }} className="hover:underline">+91 92118 04111</a></p>
               </div>

@@ -3,17 +3,14 @@
  * TRIKAL VAANI — Pricing Page
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/pricing/page.tsx
- * VERSION: 2.1
+ * VERSION: 2.0
  * SIGNED: ROHIIT GUPTA, CEO
  * ============================================================
- * v2.1 changes vs v2.0:
- * - Brand display name → Trikaal Vaani (legal/domain unchanged)
- * - Plans rebuilt to REAL one-time product ladder:
- *     Prediction (Free/₹51), Kundali Milan (₹51/101/151),
- *     Karmic Background Reading (₹251), Child Birth Muhurat (₹101/151)
- * - Removed phantom monthly Pro/Premium, 1-on-1, API access
- * - OfferCatalog schema rewritten to real purchasable products
- * - 11 domains → 15 life domains
+ * v2.0 changes vs v1.0:
+ * - Razorpay trust badge on every paid plan card
+ * - Header subline mentions Razorpay security
+ * - Trust footer row includes "Payments via Razorpay" + PCI-DSS
+ * - Service + Offer JSON-LD schema for Google SGE / AI search
  * ============================================================
  */
 
@@ -22,9 +19,9 @@ import Link from 'next/link';
 import { Check, Sparkles, Zap, Crown, Star } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'Pricing — Trikaal Vaani Vedic AI Astrology',
+  title: 'Pricing — Trikal Vaani Vedic AI Astrology',
   description:
-    'Choose your Trikaal Vaani reading. Free Vedic AI analysis, deep predictions from ₹51, Kundali Milan from ₹51, Karmic Background Reading ₹251, Child Birth Muhurat from ₹101. Swiss Ephemeris powered, Parashara classical system. Payments secured by Razorpay.',
+    'Choose your Trikal Vaani plan. Free Vedic AI analysis, or unlock deep predictions from ₹51. Swiss Ephemeris powered, Parashara classical system. Payments secured by Razorpay.',
   alternates: { canonical: 'https://trikalvaani.com/pricing' },
 };
 
@@ -32,94 +29,98 @@ const GOLD = '#D4AF37';
 
 const PLANS = [
   {
-    name: 'Prediction',
-    price: 'Free',
-    period: 'free preview · ₹51 deep',
-    tagline: 'Your personal Vedic reading',
+    name: 'Free',
+    price: '₹0',
+    period: 'forever',
+    tagline: 'Your first cosmic glimpse',
     icon: Sparkles,
     color: '#94A3B8',
-    paid: true,
+    paid: false,
     features: [
-      'Free: 150–200 word plain-language summary',
+      '150–200 word plain-language summary',
+      'Key message + Do this + Avoid this',
       'Swiss Ephemeris chart calculation',
-      'All 15 life domains covered',
+      'All 11 Dard Engine domains',
       'Hinglish / Hindi / English output',
-      '₹51 Deep: 800–1200 word full analysis',
-      'Full planetary analysis with citations',
-      'Action & Avoid windows with exact dates',
-      'Classical Parashara (BPHS) remedies',
+      'Upgrade prompt with locked insights',
     ],
-    locked: [],
-    cta: 'Start Free → ₹51 Deep',
+    locked: [
+      'Full planetary analysis',
+      'Action & Avoid windows with dates',
+      'Classical remedies (Parashara)',
+      'Yoga detection',
+    ],
+    cta: 'Start Free',
     ctaHref: '/#birth-form',
     highlight: false,
   },
   {
-    name: 'Kundali Milan',
-    price: 'from ₹51',
-    period: 'one-time · 3 tiers',
-    tagline: '36 Guna Vedic compatibility',
+    name: 'Basic',
+    price: '₹51',
+    period: 'one-time',
+    tagline: 'Deep dive into your karma',
     icon: Zap,
     color: GOLD,
     paid: true,
     features: [
-      '₹51 Basic: full 36 Guna Ashtakoot',
-      'Mangal, Nadi & Bhakoot Dosh analysis',
-      '₹101 Deep: Couple OR Parent narrative',
-      'Personalised Dos & Donts + 6 remedies',
-      'Navamsa D9 + Dashakoot comparison',
-      'Auspicious muhurat windows',
-      '₹151 Both: Couple + Parent versions',
-      'PDF + WhatsApp + Email sharing',
+      '900 word full Vedic analysis',
+      'Full planetary analysis with citations',
+      'Action windows with exact dates',
+      'Avoid windows — what to skip & when',
+      'Classical remedies (Parashara BPHS)',
+      '5 personalised Upay (remedies)',
+      'Yoga detection with classical basis',
+      'All 11 Dard Engine domains',
     ],
     locked: [],
-    cta: 'Match Kundalis — from ₹51',
-    ctaHref: '/kundali-milan',
+    cta: 'Unlock Deep Reading — ₹51',
+    ctaHref: '/#birth-form',
     highlight: true,
   },
   {
-    name: 'Karmic Reading',
-    price: '₹251',
-    period: 'one-time',
-    tagline: 'Bhrigu Nandi Nadi karmic patterns',
+    name: 'Pro',
+    price: '₹99',
+    period: 'per month',
+    tagline: 'Full Vedic intelligence system',
     icon: Crown,
     color: '#A78BFA',
     paid: true,
     features: [
-      '6 karmic dimensions from the birth chart',
-      'Core personality & inner nature',
-      'Fidelity & relationship conduct patterns',
-      'Financial behaviour & family respect',
-      'Hidden tendencies & karmic baggage',
-      'Marriage outlook & longevity',
-      'Patterns, not verdicts — compassionate framing',
-      'PDF on WhatsApp + Email',
+      'Everything in Basic',
+      'Domain-specific extra insights',
+      'Full reasoning audit trail',
+      'WhatsApp weekly forecast',
+      'Jini AI unlimited conversations',
+      'Priority support',
+      'Pratyantar Dasha precision (3–7 day)',
+      'Sookshma Dasha (hourly precision)',
     ],
     locked: [],
-    cta: 'Open Karmic Reading — ₹251',
-    ctaHref: '/karmic-background-reading',
+    cta: 'Go Pro — ₹99/mo',
+    ctaHref: '/#birth-form',
     highlight: false,
   },
   {
-    name: 'Child Birth Muhurat',
-    price: 'from ₹101',
-    period: 'one-time · 2 tiers',
-    tagline: 'Auspicious birth timing',
+    name: 'Premium',
+    price: '₹499',
+    period: 'per month',
+    tagline: 'Personal Vedic architect on call',
     icon: Star,
     color: '#F472B6',
     paid: true,
     features: [
-      'Best muhurat within your doctor-approved window',
-      '₹101: full muhurat report',
-      "Child's nature, life path & lucky name letter",
-      'Backup best-slot across the full day',
-      '₹151: report + 10 personalised remedies',
-      'Medical safety always comes first',
-      'PDF on WhatsApp + Email',
+      'Everything in Pro',
+      '1-on-1 session with Rohiit Gupta (1hr/mo)',
+      'Custom Muhurta calculations',
+      'Business astrology reports',
+      'API access (500 calls/month)',
+      'NRI & international support',
+      'Dedicated WhatsApp line',
     ],
     locked: [],
-    cta: 'Find Muhurat — from ₹101',
-    ctaHref: '/calculators/free-child-birth-muhurat-calculator',
+    cta: 'Book Premium — ₹499/mo',
+    ctaHref:
+      'https://wa.me/919211804111?text=Namaste%20Rohiit%20ji%2C%20I%20want%20Premium%20plan',
     highlight: false,
   },
 ];
@@ -157,67 +158,39 @@ const pricingSchema = {
   serviceType: 'Vedic Astrology Prediction',
   provider: {
     '@type': 'Organization',
-    name: 'Trikaal Vaani',
+    name: 'Trikal Vaani',
     url: 'https://trikalvaani.com',
   },
   areaServed: { '@type': 'Country', name: 'India' },
   hasOfferCatalog: {
     '@type': 'OfferCatalog',
-    name: 'Trikaal Vaani Plans',
+    name: 'Trikal Vaani Plans',
     itemListElement: [
       {
         '@type': 'Offer',
-        name: 'Free Vedic Prediction',
+        name: 'Free Vedic Analysis',
         price: '0',
         priceCurrency: 'INR',
         availability: 'https://schema.org/InStock',
       },
       {
         '@type': 'Offer',
-        name: 'Deep Prediction',
+        name: 'Deep Reading',
         price: '51',
         priceCurrency: 'INR',
         availability: 'https://schema.org/InStock',
       },
       {
         '@type': 'Offer',
-        name: 'Kundali Milan — Basic',
-        price: '51',
+        name: 'Pro Plan',
+        price: '99',
         priceCurrency: 'INR',
         availability: 'https://schema.org/InStock',
       },
       {
         '@type': 'Offer',
-        name: 'Kundali Milan — Deep',
-        price: '101',
-        priceCurrency: 'INR',
-        availability: 'https://schema.org/InStock',
-      },
-      {
-        '@type': 'Offer',
-        name: 'Kundali Milan — Both Versions',
-        price: '151',
-        priceCurrency: 'INR',
-        availability: 'https://schema.org/InStock',
-      },
-      {
-        '@type': 'Offer',
-        name: 'Karmic Background Reading',
-        price: '251',
-        priceCurrency: 'INR',
-        availability: 'https://schema.org/InStock',
-      },
-      {
-        '@type': 'Offer',
-        name: 'Child Birth Muhurat — Report',
-        price: '101',
-        priceCurrency: 'INR',
-        availability: 'https://schema.org/InStock',
-      },
-      {
-        '@type': 'Offer',
-        name: 'Child Birth Muhurat — Report + Remedies',
-        price: '151',
+        name: 'Premium Plan',
+        price: '499',
         priceCurrency: 'INR',
         availability: 'https://schema.org/InStock',
       },
@@ -272,14 +245,14 @@ export default function PricingPage() {
           </h1>
           <p className="text-slate-400 text-base max-w-xl mx-auto leading-relaxed">
             Powered by Swiss Ephemeris — the same engine used by professional
-            astrologers worldwide. Every reading is a one-time payment. No subscriptions.
+            astrologers worldwide. Start free, upgrade when you need deeper answers.
           </p>
 
           <div className="mt-5 flex items-center justify-center gap-2 flex-wrap">
             <div className="flex items-center gap-2">
               <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
               <span className="text-xs text-slate-500">
-                Start free · Paid readings secured by{' '}
+                100% free during launch · Paid plans secured by{' '}
                 <span style={{ color: '#3395FF', fontWeight: 600 }}>Razorpay</span>
                 {' '}— India&apos;s most trusted payment gateway
               </span>
@@ -398,7 +371,7 @@ export default function PricingPage() {
         {/* Trust footer row */}
         <div className="mt-14 text-center">
           <p className="text-xs text-slate-600 mb-4">
-            Tier verified from Supabase — cannot be spoofed · One-time payment · No auto-renewal
+            Tier verified from Supabase — cannot be spoofed · Expires automatically if not renewed
           </p>
           <div className="flex items-center justify-center gap-6 flex-wrap">
             {[
@@ -436,7 +409,7 @@ export default function PricingPage() {
             href="/"
             className="text-xs text-slate-600 hover:text-yellow-400/70 transition-colors"
           >
-            ← Back to Trikaal Vaani
+            ← Back to Trikal Vaani
           </Link>
         </div>
       </div>
