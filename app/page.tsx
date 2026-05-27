@@ -1,14 +1,28 @@
-// 🔱 TRIKAAL VAANI | app/page.tsx | v12.0
+// 🔱 TRIKAAL VAANI | app/page.tsx | v12.1
 // Owner: Rohiit Gupta, Chief Vedic Architect
-// Date: 2026-05-25
+// Date: 2026-05-27
 // ============================================================================
+// CHANGE LOG (v12.0 → v12.1):
+//
+// ❌ REMOVED: DailyRashifal (was slot #7)
+//    - Removed import:  import DailyRashifal from '@/components/landing/DailyRashifal';
+//    - Removed render:  <DailyRashifal />
+//    - Reason: CEO decision (May 27 2026) — homepage rashifal showed the same
+//      static predictions every day while claiming "Daily / Verified". Pulled
+//      until a real Moon-transit (Gochar) rashifal engine is wired. Accuracy
+//      is the brand promise — no fake "daily" content on the homepage.
+//    - Following slots renumbered (#8->#7, ... #13->#12).
+//
+// 🧹 Removed "Delhi NCR" location credential from page metadata description
+//    (online/worldwide positioning — no location credential).
+//
 // CHANGE LOG (v11.0 → v12.0):
 //
 // ❌ REMOVED: PricingSection (was slot #5)
 //    - Removed import:  import PricingSection from '@/components/landing/PricingSection';
 //    - Removed render:  <PricingSection />
 //    - Reason: CEO decision (May 25 2026) — pricing section pulled from homepage.
-//    - All following slots renumbered (#6→#5, #7→#6, ... #14→#13).
+//    - All following slots renumbered (#6->#5, #7->#6, ... #14->#13).
 //
 // NOTE: The "INAUGURAL OFFER: 100% FREE FOR 30 DAYS" banner is NOT in this
 //       file. It lives inside a child component (likely Hero or PricingSection).
@@ -30,7 +44,6 @@ import SocialProofTicker from '@/components/landing/SocialProofTicker';
 import AIManifesto from '@/components/landing/AIManifesto';
 import BlogCard from '@/components/blog/BlogCard';
 import DailyPanchang from '@/components/landing/DailyPanchang';
-import DailyRashifal from '@/components/landing/DailyRashifal';
 import LiveTrustBar from '@/components/landing/LiveTrustBar';
 import KundaliMilanTeaser from '@/components/landing/KundaliMilanTeaser';
 import HomeClient from './HomeClient';
@@ -42,7 +55,7 @@ import { blogPosts } from '@/lib/blog-data';
 export const metadata: Metadata = {
   title: 'Trikaal Vaani | Free Kundli, Kundali Milan & Accurate AI Vedic Astrology',
   description:
-    "Get your free AI kundli, Kundali Milan & accurate Vedic astrology predictions. Personalised readings for career, wealth, marriage, health & legal matters by Rohiit Gupta, Chief Vedic Architect (Delhi NCR). Powered by Swiss Ephemeris. Voice & text readings from ₹11.",
+    "Get your free AI kundli, Kundali Milan & accurate Vedic astrology predictions. Personalised readings for career, wealth, marriage, health & legal matters by Rohiit Gupta, Chief Vedic Architect. Powered by Swiss Ephemeris. Voice & text readings from ₹11.",
   alternates: {
     canonical: 'https://trikalvaani.com/',
     languages: {
@@ -104,32 +117,30 @@ export default function HomePage() {
 
           {/* ── 5. SOCIAL PROOF TICKER ─────────────────────────────────── */}
           <SocialProofTicker />
-          {/* ── 6. DAILY PANCHANG ──────────────────────────────────────── */}
+
+          {/* ── 6. DAILY PANCHANG (real Swiss Ephemeris via /api/panchang/today) ── */}
           <DailyPanchang />
 
-          {/* ── 7. DAILY RASHIFAL ──────────────────────────────────────── */}
-          <DailyRashifal />
-
-          {/* ── 8. PILLARS GRID — life domains ─────────────────────────── */}
+          {/* ── 7. PILLARS GRID — life domains ─────────────────────────── */}
           <PillarsGrid />
 
-          {/* ── 9. AI MANIFESTO — brand philosophy ─────────────────────── */}
+          {/* ── 8. AI MANIFESTO — brand philosophy ─────────────────────── */}
           <AIManifesto />
 
           {/* ═══════════════════════════════════════════════════════════════
               SEO/GEO/AEO/E-E-A-T TIER — crawler-facing, position-independent
           ═══════════════════════════════════════════════════════════════ */}
 
-          {/* ── 10. HOMEPAGE GEO ───────────────────────────────────────── */}
+          {/* ── 9. HOMEPAGE GEO ────────────────────────────────────────── */}
           <HomepageGEO />
 
-          {/* ── 11. HOME FAQ v2.0 — TIER 2 DEEP TECHNICAL FAQ ──────────── */}
+          {/* ── 10. HOME FAQ v2.0 — TIER 2 DEEP TECHNICAL FAQ ──────────── */}
           <HomeFAQ />
 
-          {/* ── 12. INNER CIRCLE WAITLIST ──────────────────────────────── */}
+          {/* ── 11. INNER CIRCLE WAITLIST ──────────────────────────────── */}
           <InnerCircleWaitlist />
 
-          {/* ── 13. BLOG SECTION ───────────────────────────────────────── */}
+          {/* ── 12. BLOG SECTION ───────────────────────────────────────── */}
           <section className="py-20 px-4">
             <div className="max-w-6xl mx-auto">
               <div className="text-center mb-12">
@@ -174,7 +185,7 @@ export default function HomePage() {
 }
 
 // ============================================================================
-// END — app/page.tsx v12.0
+// END — app/page.tsx v12.1
 // 🔱 Trikaal Vaani | Rohiit Gupta, Chief Vedic Architect
-// CEO LOCKED: PricingSection removed; slots renumbered.
+// CEO LOCKED: PricingSection removed (v12.0); DailyRashifal removed (v12.1).
 // ============================================================================
