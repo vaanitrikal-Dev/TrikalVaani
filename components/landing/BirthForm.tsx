@@ -3,8 +3,17 @@
  * TRIKAL VAANI — BirthForm Component
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: components/landing/BirthForm.tsx
- * VERSION: 9.4 — Current City Google Places Dropdown
+ * VERSION: 9.5 — Mobile optional + Delhi NCR removed + vendor names reworded
  * SIGNED: ROHIIT GUPTA, CEO
+ *
+ * v9.5 CHANGES vs v9.4:
+ *   ✅ WhatsApp Mobile is now OPTIONAL (removed required validation +
+ *      updated label/helper). Reduces form friction. If left blank,
+ *      mobile sends empty; numerology still only triggers if entered.
+ *   ✅ "Delhi NCR" credential removed from hidden-SEO, hero, footer.
+ *   ✅ AI vendor names (Gemini/Claude) removed from customer-visible
+ *      copy + JSON-LD; reframed as "Premium / Advanced AI Engine".
+ *   ✅ Everything else identical to v9.4.
  *
  * v9.4 CHANGES vs v9.3:
  *   ✅ Current City now uses Google Places autocomplete dropdown
@@ -465,7 +474,7 @@ const SERVICE_OFFER_SCHEMA = {
       {
         '@type': 'Offer',
         name: 'Deep Reading',
-        description: '900-word Vedic analysis with 5 personalized upay, action and avoid windows. Gemini Pro 2.5 + Claude Sonnet polish.',
+        description: '900-word Vedic analysis with 5 personalized upay, action and avoid windows.',
         price: '51',
         priceCurrency: 'INR',
         availability: 'https://schema.org/InStock',
@@ -656,7 +665,7 @@ function RazorpayInlineTrustStrip({ tier }: { tier: PredictionTier }) {
 function TierSelector({ selected, onChange }: { selected: PredictionTier; onChange: (t: PredictionTier) => void }) {
   const tiers = [
     { id: 'free'  as PredictionTier, icon: '🔮', label: 'Free Preview', price: 'Free', desc: 'Trikaal Ka Sandesh', color: '#94a3b8', features: ['150-200 word summary', 'Key message + action', 'Instant results'] },
-    { id: 'paid'  as PredictionTier, icon: '⚡', label: 'Deep Reading',  price: '₹51',  desc: 'Gemini Pro 2.5',   color: GOLD,      features: ['900 word full analysis', 'Personalized 5 upay', 'Action windows + dates'], highlight: true },
+    { id: 'paid'  as PredictionTier, icon: '⚡', label: 'Deep Reading',  price: '₹51',  desc: 'Premium AI Engine', color: GOLD,      features: ['900 word full analysis', 'Personalized 5 upay', 'Action windows + dates'], highlight: true },
     { id: 'voice' as PredictionTier, icon: '🎙️', label: 'Voice',        price: '₹11',  desc: 'Trikaal ki awaaz', color: '#a78bfa', features: ['60-sec voice', 'Hindi / Hinglish', 'Trikaal AI'] },
   ]
 
@@ -685,7 +694,7 @@ function TierSelector({ selected, onChange }: { selected: PredictionTier; onChan
       </div>
       {selected === 'paid' && (
         <div style={{ marginTop: '12px', padding: '12px', background: GOLD_RGBA(0.06), border: `1px solid ${GOLD_RGBA(0.2)}`, borderRadius: '10px' }}>
-          <p style={{ margin: '0 0 4px', color: GOLD, fontSize: '11px', fontWeight: 700 }}>⚡ Gemini 2.5 Pro — 900 words deep analysis</p>
+          <p style={{ margin: '0 0 4px', color: GOLD, fontSize: '11px', fontWeight: 700 }}>⚡ Advanced AI — 900 words deep analysis</p>
           <p style={{ margin: 0, color: '#64748b', fontSize: '10px', lineHeight: 1.5 }}>AstroTalk charges ₹500+ for this level. Trikaal Vaani delivers for ₹51 — Swiss Ephemeris + BPHS + personalized 5 upay by segment. Razorpay-secured one-time payment.</p>
         </div>
       )}
@@ -853,8 +862,10 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
     if (!fields.dateOfBirth)    errs.dateOfBirth = 'Date of birth is required'
     if (!fields.unknownTime && !fields.timeOfBirth) errs.timeOfBirth = 'Time of birth is required'
     if (fields.latitude === '') errs.latitude    = 'Place of birth is required'
-    const mobileDigits = fields.mobile.replace(/\D/g, '').length
-    if (!fields.mobile || mobileDigits < fields.countryDigits) errs.mobile = `Valid ${fields.countryDigits}-digit mobile required`
+    // v9.5: WhatsApp mobile is now OPTIONAL — only validate format IF a value is entered.
+    if (fields.mobile && fields.mobile.replace(/\D/g, '').length < fields.countryDigits) {
+      errs.mobile = `Valid ${fields.countryDigits}-digit mobile required`
+    }
     if (isDualDomain) {
       if (!fields.person2Name.trim()) errs.person2Name = 'Person 2 name required'
       if (!fields.person2Dob)         errs.person2Dob  = 'Person 2 DOB required'
@@ -1089,7 +1100,7 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
       {/* Hidden SEO content (expanded v9.2) */}
       <div style={{ display: 'none' }} aria-hidden="false">
         <h2>Free AI Vedic Astrology Prediction — Swiss Ephemeris Powered by Rohiit Gupta</h2>
-        <p>Get your personalized Vedic astrology reading at Trikaal Vaani. Powered by Swiss Ephemeris, BPHS, Bhrigu Nandi Nadi, Shadbala. By Rohiit Gupta, Chief Vedic Architect, Delhi NCR. Free Trikaal Ka Sandesh preview, ₹51 Deep Reading with 900-word analysis and 5 personalized upay, ₹11 Voice Reading. All paid plans secured by Razorpay — India's most trusted payment gateway. PCI-DSS compliant, 256-bit SSL encrypted. Accepts UPI, Cards, NetBanking, Wallets, RuPay. Customer support via WhatsApp at +91 92118 04111. Refund policy at trikalvaani.com/refund. Terms at trikalvaani.com/terms.</p>
+        <p>Get your personalized Vedic astrology reading at Trikaal Vaani. Powered by Swiss Ephemeris, BPHS, Bhrigu Nandi Nadi, Shadbala. By Rohiit Gupta, Chief Vedic Architect. Free Trikaal Ka Sandesh preview, ₹51 Deep Reading with 900-word analysis and 5 personalized upay, ₹11 Voice Reading. All paid plans secured by Razorpay — India's most trusted payment gateway. PCI-DSS compliant, 256-bit SSL encrypted. Accepts UPI, Cards, NetBanking, Wallets, RuPay. Customer support via WhatsApp at +91 92118 04111. Refund policy at trikalvaani.com/refund. Terms at trikalvaani.com/terms.</p>
         <p>Trikaal Vaani is India's most accurate AI Vedic astrology platform, competing with AstroTalk and AstroSage at affordable mass-market pricing. Each prediction uses real Swiss Ephemeris planetary calculations validated against BPHS classical sutras, Bhrigu Nandi Nadi pattern matching, and Shadbala planetary strength scoring. Vimshottari Dasha primary, Pratyantar Dasha for 3-7 day precision, Sookshma Dasha hourly. Lahiri Ayanamsha sidereal system. 11 life domains: Career, Wealth, Health, Relationships, Family, Education, Home, Legal, Travel, Spirituality, Well-being.</p>
       </div>
 
@@ -1114,7 +1125,7 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
           ) : (
             <>
               <h2 className="text-white text-2xl font-serif font-bold mb-2">Trikaal Ka Sandesh — Sirf Aapke Liye</h2>
-              <p className="text-slate-400 text-sm max-w-lg mx-auto">India's most accurate AI Vedic astrology — by Rohiit Gupta, Chief Vedic Architect, Delhi NCR.</p>
+              <p className="text-slate-400 text-sm max-w-lg mx-auto">India's most accurate AI Vedic astrology — by Rohiit Gupta, Chief Vedic Architect.</p>
             </>
           )}
           <div className="flex flex-wrap justify-center gap-2 mt-4">
@@ -1236,16 +1247,16 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
               </div>
             )}
 
-            {/* Mobile */}
+            {/* Mobile — OPTIONAL (v9.5) */}
             <div>
               <label htmlFor="tv-mobile" className="block text-sm font-medium text-slate-300 mb-1.5">
-                WhatsApp Mobile <span className="text-yellow-400">*</span>
-                <span className="text-slate-500 text-xs ml-2">(for follow-up + numerology)</span>
+                WhatsApp Mobile
+                <span className="text-slate-500 text-xs ml-2">(optional — for follow-up + numerology)</span>
               </label>
               <div className="flex gap-2">
                 <CountrySelector id="tv-country" value={fields.countryCode}
                   onChange={(dial, digits) => setFields(prev => ({ ...prev, countryCode: dial, countryDigits: digits }))} />
-                <input id="tv-mobile" type="tel" placeholder={`${fields.countryDigits}-digit mobile`}
+                <input id="tv-mobile" type="tel" placeholder={`${fields.countryDigits}-digit mobile (optional)`}
                   value={fields.mobile} onChange={e => handleMobileChange(e.target.value)}
                   maxLength={fields.countryDigits + 2}
                   className="flex-1 px-4 py-2.5 rounded-lg text-sm outline-none"
@@ -1475,7 +1486,7 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
               📱 WhatsApp karo Rohiit ji ko →
             </a>
           </div>
-          <p style={{ color: '#1e293b', fontSize: '10px', margin: 0 }}>By Rohiit Gupta, Chief Vedic Architect · trikalvaani.com · Delhi NCR · 🔱 Mahakaal Ka Ashirwad</p>
+          <p style={{ color: '#1e293b', fontSize: '10px', margin: 0 }}>By Rohiit Gupta, Chief Vedic Architect · trikalvaani.com · 🔱 Mahakaal Ka Ashirwad</p>
         </div>
       </div>
     </section>
