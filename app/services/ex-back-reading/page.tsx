@@ -12,11 +12,11 @@ import SiteNav from "@/components/layout/SiteNav";
 import SiteFooter from "@/components/layout/SiteFooter";
 
 export const metadata: Metadata = {
-  title: "Will My Ex Come Back? Vedic Astrology Reunion Reading | Trikaal Vaani",
+  title: "Will My Ex Come Back? Vedic Astrology Reunion Reading | Trikal Vaani",
   description: "Chief Vedic Architect Rohiit Gupta reads your Venus, 7th House & Vimshottari Dasha to reveal if reunion energy is active — and exactly when the window opens. ₹51 deep reading.",
   keywords: ["will my ex come back astrology", "ex back vedic astrology", "reunion prediction astrology", "7th house ex partner astrology", "Rohiit Gupta vedic astrologer Delhi"],
   authors: [{ name: "Rohiit Gupta", url: "https://trikalvaani.com/about" }],
-  openGraph: { title: "Will My Ex Come Back? | Trikaal Vaani", description: "Rohiit Gupta decodes your Venus, Dasha & 7th House for a reunion prediction.", url: "https://trikalvaani.com/services/ex-back-reading", siteName: "Trikaal Vaani", type: "website", locale: "en_IN" },
+  openGraph: { title: "Will My Ex Come Back? | Trikal Vaani", description: "Rohiit Gupta decodes your Venus, Dasha & 7th House for a reunion prediction.", url: "https://trikalvaani.com/services/ex-back-reading", siteName: "Trikal Vaani", type: "website", locale: "en_IN" },
   alternates: { canonical: "https://trikalvaani.com/services/ex-back-reading" },
 };
 
@@ -55,17 +55,17 @@ export default function ExBackReadingPage() {
               Will Your Ex <span className="text-[#D4AF37]">Come Back?</span><br />Your Stars Know the Answer.
             </h1>
             <p className="text-lg md:text-xl text-gray-300 max-w-2xl mx-auto mb-3 leading-relaxed">
-              Trikaal AI reads your Venus, 7th House & Vimshottari Dasha to reveal if reunion energy is active — and <span className="text-[#D4AF37] font-semibold">exactly when</span> the window opens.
+              Jini AI reads your Venus, 7th House & Vimshottari Dasha to reveal if reunion energy is active — and <span className="text-[#D4AF37] font-semibold">exactly when</span> the window opens.
             </p>
             <p className="text-sm text-gray-500 mb-10">
-              Reading designed by <Link href="/about" className="text-[#D4AF37] hover:underline">Rohiit Gupta</Link> — Chief Vedic Architect · Swiss Ephemeris (self-hosted on Render)
+              Reading designed by <Link href="/about" className="text-[#D4AF37] hover:underline">Rohiit Gupta</Link> — Chief Vedic Architect · Swiss Ephemeris + Prokerala API
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/?segment=ex-back" className="bg-[#D4AF37] text-[#080B12] font-bold px-8 py-4 rounded-lg text-lg hover:bg-[#e8c84a] transition-all duration-200 shadow-[0_0_30px_rgba(212,175,55,0.3)]">
                 Get My Ex-Back Reading — ₹51
               </Link>
-              <a href="https://wa.me/919211804111?text=Pranam%20Rohiit%20ji%2C%20I%20want%20the%20Karmic%20Background%20Reading%20(%E2%82%B9251)" target="_blank" rel="noopener noreferrer" className="border border-[#25D366] text-[#25D366] font-semibold px-8 py-4 rounded-lg text-lg hover:bg-[#25D366]/10 transition-all duration-200 flex items-center justify-center gap-2">
-                <WAIcon /> Karmic Background Reading — ₹251
+              <a href="https://wa.me/919211804111?text=Hi%20Rohiit%20ji%2C%20I%20want%20an%20ex-back%20reading" target="_blank" rel="noopener noreferrer" className="border border-[#25D366] text-[#25D366] font-semibold px-8 py-4 rounded-lg text-lg hover:bg-[#25D366]/10 transition-all duration-200 flex items-center justify-center gap-2">
+                <WAIcon /> Talk to Rohiit Ji — ₹499
               </a>
             </div>
           </div>
@@ -102,10 +102,10 @@ export default function ExBackReadingPage() {
             <div className="grid md:grid-cols-2 gap-10 items-center">
               <div className="space-y-6">
                 {[
-                  { step: "01", title: "Enter Your Birth Details", desc: "Date, time, and place. We use our own Swiss Ephemeris (self-hosted on Render) with Lahiri Ayanamsha for precise calculations." },
-                  { step: "02", title: "Trikaal AI Reads Your Chart", desc: "Gemini-powered analysis of Venus, 7th house lord, Navamsa D9, and current Mahadasha for love timing." },
+                  { step: "01", title: "Enter Your Birth Details", desc: "Date, time, and place. We use Prokerala API (Lahiri Ayanamsha) — same engine as AstroSage." },
+                  { step: "02", title: "Jini AI Reads Your Chart", desc: "Gemini-powered analysis of Venus, 7th house lord, Navamsa D9, and current Mahadasha for love timing." },
                   { step: "03", title: "Get Your Reunion Window", desc: "₹51 deep reading (4096 tokens): Is reunion possible? When is the window? What karmic lesson is at play?" },
-                  { step: "04", title: "Go Deeper — Karmic Background Reading", desc: "₹251 Karmic Background Reading (Bhrigu Nadi) reveals the karmic root behind the bond — the deeper why behind the connection and its timing." },
+                  { step: "04", title: "Talk to Rohiit Ji if Needed", desc: "For complex cases — blocked numbers, marriage, children — book a ₹499 personal call directly." },
                 ].map((s, i) => (
                   <div key={i} className="flex gap-5">
                     <div className="flex-shrink-0 w-12 h-12 rounded-full border border-[#D4AF37]/50 flex items-center justify-center text-[#D4AF37] font-bold text-sm">{s.step}</div>
@@ -123,8 +123,8 @@ export default function ExBackReadingPage() {
 
         {/* TESTIMONIALS */}
         <TestimonialsSection label="What People Are" items={[
-          { name: "Priya Sharma", city: "Delhi", date: "March 2025", text: "I was heartbroken for 7 months. Trikaal AI told me my Venus Mahadasha starts in March — and my ex texted me in February end. The accuracy shocked me." },
-          { name: "Karan Mehta", city: "Mumbai", date: "January 2025", text: "I didn't believe in astrology but my sister insisted. Trikaal Vaani predicted a communication window in my 3rd house transit. He called exactly then." },
+          { name: "Priya Sharma", city: "Delhi", date: "March 2025", text: "I was heartbroken for 7 months. Jini told me my Venus Mahadasha starts in March — and my ex texted me in February end. The accuracy shocked me." },
+          { name: "Karan Mehta", city: "Mumbai", date: "January 2025", text: "I didn't believe in astrology but my sister insisted. Trikal Vaani predicted a communication window in my 3rd house transit. He called exactly then." },
           { name: "Ananya Iyer", city: "Bangalore", date: "February 2025", text: "Rohiit ji's reading gave me clarity I couldn't find in therapy. Whether he returns or not — I finally know what to do with my life." },
         ]} />
 
@@ -134,9 +134,9 @@ export default function ExBackReadingPage() {
         <FaqSection items={[
           { q: "Can Vedic astrology predict if my ex will come back?", a: "Yes. The 7th house governs partnerships and reconciliation. Venus rules love and reunion energy. Vimshottari Dasha pinpoints when reconciliation windows open or close. Rohiit Gupta analyzes all three together." },
           { q: "What birth details do I need for this reading?", a: "Date of birth, exact time of birth (ideally within 30 minutes), and place of birth. The more precise the birth time, the more accurate the house placements and Dasha timing." },
-          { q: "Difference between the ₹51 reading and the ₹251 Karmic Background Reading?", a: "The ₹51 Trikaal AI reading gives a deep analysis with a reunion window prediction. The ₹251 Karmic Background Reading (Bhrigu Nadi) goes deeper into the karmic root of the bond — ideal for complex cases involving marriage or blocked communication." },
+          { q: "Difference between ₹51 AI reading and ₹499 personal call?", a: "The ₹51 Jini AI reading gives a 4096-token deep analysis with reunion window prediction. The ₹499 call connects you directly with Rohiit Gupta — ideal for complex cases involving marriage or blocked communication." },
           { q: "What is Navamsa D9 and why does it matter?", a: "The Navamsa (D9) chart is the soul chart in Vedic astrology. It reveals whether a connection carries past-life karma and whether reconciliation is truly supported at the soul level." },
-          { q: "How accurate is Trikaal Vaani's reading?", a: "Trikaal Vaani uses its own Swiss Ephemeris (self-hosted on Render) with Lahiri Ayanamsha — the same astronomical standard trusted across professional Vedic astrology. Readings with birth times accurate to within 15 minutes are most reliable." },
+          { q: "How accurate is Trikal Vaani's reading?", a: "Trikal Vaani uses the Prokerala API with Lahiri Ayanamsha — the same engine used by AstroSage. Readings with birth times accurate to within 15 minutes are most reliable." },
         ]} />
 
         {/* CTA */}
@@ -171,8 +171,8 @@ function AuthorStrip() {
         <div className="flex-shrink-0 w-20 h-20 rounded-full bg-[#D4AF37]/20 border border-[#D4AF37]/40 flex items-center justify-center text-3xl font-serif text-[#D4AF37] font-bold">RG</div>
         <div>
           <p className="text-[#D4AF37] text-xs uppercase tracking-widest font-medium mb-1">About Your Vedic Architect</p>
-          <h2 className="font-serif text-xl font-bold text-white mb-2">Rohiit Gupta — Chief Vedic Architect, Trikaal Vaani</h2>
-          <p className="text-gray-400 text-sm leading-relaxed">Rohiit Gupta has studied Vedic astrology for over 15 years under the Parashara BPHS tradition. As founder of Trikaal Vaani, he built India&apos;s first AI-powered Vedic platform combining Swiss Ephemeris precision with Gemini AI reasoning. All readings are designed by Rohiit — Trikaal AI applies his framework to your unique birth chart.</p>
+          <h2 className="font-serif text-xl font-bold text-white mb-2">Rohiit Gupta — Chief Vedic Architect, Trikal Vaani</h2>
+          <p className="text-gray-400 text-sm leading-relaxed">Rohiit Gupta has studied Vedic astrology for over 15 years under the Parashara BPHS tradition. As founder of Trikal Vaani, he built India&apos;s first AI-powered Vedic platform combining Swiss Ephemeris precision with Gemini AI reasoning. All readings are designed by Rohiit — Jini AI applies his framework to your unique birth chart.</p>
           <div className="flex gap-3 mt-3 flex-wrap">
             {["15+ Years Vedic Study", "Parashara BPHS Tradition", "Swiss Ephemeris Precision", "Delhi NCR Based"].map((t) => (
               <span key={t} className="text-xs border border-[#D4AF37]/30 text-[#D4AF37] px-3 py-1 rounded-full">{t}</span>
@@ -198,8 +198,9 @@ function DeliverableCard({ segment, items }: { segment: string; items: string[] 
       </ul>
       <div className="mt-8 pt-6 border-t border-white/10 flex items-center justify-between">
         <div>
+          <p className="text-gray-500 text-xs line-through">₹499</p>
           <p className="text-[#D4AF37] text-2xl font-bold">₹51</p>
-          <p className="text-gray-500 text-xs">Deep ex-back reading</p>
+          <p className="text-gray-500 text-xs">Introductory price</p>
         </div>
         <Link href={`/?segment=${segment}`} className="bg-[#D4AF37] text-[#080B12] font-bold px-6 py-3 rounded-lg hover:bg-[#e8c84a] transition-all duration-200">Unlock Now</Link>
       </div>
@@ -247,7 +248,7 @@ function MaaDivineSeva() {
           <p className="text-[#D4AF37] uppercase tracking-widest text-sm font-medium mb-3">Divya Seva · Divine Offering</p>
           <h2 className="font-serif text-3xl md:text-4xl font-bold mb-4">Maa Shakti Ki <span className="text-[#D4AF37]">Divya Seva</span></h2>
           <p className="text-gray-400 max-w-2xl mx-auto text-sm leading-relaxed">
-            These are not fees. They are <span className="text-[#D4AF37] font-semibold">dakshina</span> — an offering from the heart, placed at Maa Shakti&apos;s feet through Trikaal Vaani. <span className="text-white font-semibold">There is no ceiling on devotion.</span> Starting ₹101, with absolutely no upper limit.
+            These are not fees. They are <span className="text-[#D4AF37] font-semibold">dakshina</span> — an offering from the heart, placed at Maa Shakti&apos;s feet through Trikal Vaani. <span className="text-white font-semibold">There is no ceiling on devotion.</span> Starting ₹101, with absolutely no upper limit.
           </p>
         </div>
         <div className="grid md:grid-cols-2 gap-8">
@@ -307,7 +308,7 @@ function MaaDivineSeva() {
           </div>
         </div>
         <div className="text-center mt-10 border-t border-white/5 pt-8">
-          <p className="text-gray-600 text-xs leading-relaxed max-w-lg mx-auto">Trikaal Vaani does not profit from dakshina offerings. All Arzi and Dhanyewaad dakshinas are used for Vedic puja samagri, mantra recitation costs, and charitable givings in Maa Shakti&apos;s name. Rohiit Gupta is the intermediary — Maa is the recipient.</p>
+          <p className="text-gray-600 text-xs leading-relaxed max-w-lg mx-auto">Trikal Vaani does not profit from dakshina offerings. All Arzi and Dhanyewaad dakshinas are used for Vedic puja samagri, mantra recitation costs, and charitable givings in Maa Shakti&apos;s name. Rohiit Gupta is the intermediary — Maa is the recipient.</p>
         </div>
       </div>
     </section>
@@ -349,9 +350,9 @@ function CtaSection({ headline, highlight, body, segment, waText }: { headline: 
         <p className="text-gray-400 mb-10 leading-relaxed">{body}</p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Link href={`/?segment=${segment}`} className="bg-[#D4AF37] text-[#080B12] font-bold px-8 py-4 rounded-lg text-lg hover:bg-[#e8c84a] transition-all duration-200 shadow-[0_0_40px_rgba(212,175,55,0.25)]">Enter Birth Details → Get Reading</Link>
-          <a href={`https://wa.me/919211804111?text=Pranam%20Rohiit%20ji%2C%20${waText}`} target="_blank" rel="noopener noreferrer" className="border border-white/20 text-white px-8 py-4 rounded-lg text-lg hover:bg-white/5 transition-all duration-200">Karmic Background Reading — ₹251</a>
+          <a href={`https://wa.me/919211804111?text=Hi%20Rohiit%20ji%2C%20${waText}`} target="_blank" rel="noopener noreferrer" className="border border-white/20 text-white px-8 py-4 rounded-lg text-lg hover:bg-white/5 transition-all duration-200">WhatsApp ₹499 Call</a>
         </div>
-        <p className="text-gray-600 text-xs mt-6">Powered by Swiss Ephemeris (self-hosted on Render) · Lahiri Ayanamsha · Reading framework by Rohiit Gupta</p>
+        <p className="text-gray-600 text-xs mt-6">Powered by Swiss Ephemeris · Lahiri Ayanamsha · Prokerala API · Reading framework by Rohiit Gupta</p>
       </div>
     </section>
   );

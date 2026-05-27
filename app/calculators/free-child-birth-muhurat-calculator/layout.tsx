@@ -4,8 +4,9 @@
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikal Vaani
 // ============================================================
 import type { Metadata } from 'next';
+
 export const metadata: Metadata = {
-  title: 'Free Child Birth Muhurat Calculator — Auspicious C-Section & Delivery Time by Date | Trikaal Vaani',
+  title: 'Free Child Birth Muhurat Calculator — Auspicious C-Section & Delivery Time by Date | Trikal Vaani',
   description:
     'Free Child Birth Muhurat Calculator powered by Swiss Ephemeris. Find the most auspicious time for C-section or planned delivery WITHIN your doctor-approved window. Master-grade analysis of Lagna, Nakshatra, Tithi, 8th house & lucky name letter (Naamakshar). By Rohiit Gupta.',
   keywords: [
@@ -33,7 +34,7 @@ export const metadata: Metadata = {
       'Find the most auspicious delivery time within your doctor-approved window. Master-grade Vedic muhurat analysis — free.',
     url: 'https://trikalvaani.com/calculators/free-child-birth-muhurat-calculator',
     type: 'website',
-    siteName: 'Trikaal Vaani',
+    siteName: 'Trikal Vaani',
   },
   twitter: {
     card: 'summary_large_image',
@@ -42,6 +43,7 @@ export const metadata: Metadata = {
   },
   robots: { index: true, follow: true },
 };
+
 export default function MuhuratCalculatorLayout({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }

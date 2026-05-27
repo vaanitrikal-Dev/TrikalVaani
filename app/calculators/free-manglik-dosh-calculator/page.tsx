@@ -165,11 +165,11 @@ function CityInput({ id, value, onSelect, error }: {
 
 const FAQS = [
   { q: 'Manglik Dosh kya hota hai?', a: 'Manglik Dosh (Mangal Dosha / Kuja Dosha / Bhauma Dosha) Vedic Jyotish ka woh dosha hai jab Mangal (Mars) janm kundali ke 1st, 2nd, 4th, 7th, 8th, ya 12th house mein sthit ho. Ye dosha mukhya roop se marriage compatibility ko affect karta hai per Parashar BPHS.' },
-  { q: 'Manglik kaise check karein?', a: 'Date of Birth, exact Time of Birth, aur Place of Birth chahiye. Trikaal Vaani Calculator Swiss Ephemeris se Mangal ki exact house position calculate karta hai aur 6 Manglik houses (1,2,4,7,8,12) se compare karke verdict deta hai with severity.' },
+  { q: 'Manglik kaise check karein?', a: 'Date of Birth, exact Time of Birth, aur Place of Birth chahiye. Trikal Vaani Calculator Swiss Ephemeris se Mangal ki exact house position calculate karta hai aur 6 Manglik houses (1,2,4,7,8,12) se compare karke verdict deta hai with severity.' },
   { q: 'Manglik Dosh ki severity kya hoti hai?', a: '(1) High Severity — Mars in 7th house (most affects marriage). (2) Medium — Mars in 1st, 4th, or 8th house. (3) Low — Mars in 2nd or 12th house. Severity zyada hai toh remedies aur cancellation check zaroori hai.' },
   { q: 'Manglik Dosh ka shadi par kya effect hai?', a: 'Manglik dosh mukhya roop se 4 areas affect karta hai — (1) Marriage delay, (2) Spouse health issues, (3) Marital conflicts/divorce risk, (4) Spouse longevity concerns. Yeh effects severity aur cancellation rules pe depend karte hain.' },
-  { q: 'Manglik Dosh kab cancel hota hai?', a: 'Cancellation rules per Parashar: (1) Both partners Manglik hain — dosh cancels each other. (2) Mars in own sign (Mesha/Vrishchika) — dosh weakens. (3) Mars in exaltation (Makara) — dosh nullifies. (4) Mars aspected by Jupiter or Moon — dosh reduces. (5) After age 28 — dosh effect minimal. Trikaal Calculator auto-detects active cancellations.' },
-  { q: 'Manglik Dosh ke remedies kya hain?', a: '(1) Mangal Mantra "Om Mangalaya Namah" 108 times Tuesday. (2) Hanuman Chalisa daily — Hanuman ji Mars ke malik. (3) Coral (Moonga) gemstone after expert consultation. (4) Kumbh Vivah ritual (marriage with pot/tree) for unmarried Manglik. (5) Red lentils, jaggery daan on Tuesday. Trikaal 3 personalized remedies free deta hai.' },
+  { q: 'Manglik Dosh kab cancel hota hai?', a: 'Cancellation rules per Parashar: (1) Both partners Manglik hain — dosh cancels each other. (2) Mars in own sign (Mesha/Vrishchika) — dosh weakens. (3) Mars in exaltation (Makara) — dosh nullifies. (4) Mars aspected by Jupiter or Moon — dosh reduces. (5) After age 28 — dosh effect minimal. Trikal Calculator auto-detects active cancellations.' },
+  { q: 'Manglik Dosh ke remedies kya hain?', a: '(1) Mangal Mantra "Om Mangalaya Namah" 108 times Tuesday. (2) Hanuman Chalisa daily — Hanuman ji Mars ke malik. (3) Coral (Moonga) gemstone after expert consultation. (4) Kumbh Vivah ritual (marriage with pot/tree) for unmarried Manglik. (5) Red lentils, jaggery daan on Tuesday. Trikal 3 personalized remedies free deta hai.' },
   { q: 'Kya Manglik aur non-Manglik ki shadi ho sakti hai?', a: 'Haan, ho sakti hai per Parashar — bashart ki dosha cancellation rules apply hon ya proper Kumbh Vivah ritual perform ho. Modern times mein medical compatibility, emotional connection, aur dosha cancellations zyada important hote hain than blind dosha matching.' },
   { q: 'Kya Manglik Calculator bilkul free hai?', a: 'Haan. 100% free. Manglik Yes/No verdict, severity (High/Medium/Low), Mars house + sign + degree, all 6 affected houses, cancellation conditions, aur 3 Parashar remedies (Mantra, Ratna, Daan) — sab free, koi signup nahi.' },
 ];
@@ -293,7 +293,7 @@ export default function FreeManglikDoshCalculatorPage() {
 
           <div className="rounded-xl p-5 mb-6" style={{ background: 'rgba(212,175,55,0.06)', border: `1px solid rgba(212,175,55,0.2)` }}>
             <p className="text-base md:text-lg leading-relaxed">
-              <strong style={{ color: GOLD }}>Trikaal Vaani ka Free Manglik Dosh Calculator</strong> aapki Manglik status Swiss Ephemeris se calculate karta hai. Date, time, place daalo — Yes/No verdict, severity (High/Medium/Low), Mars house + sign, all 6 affected houses, cancellation conditions, aur 3 Parashar remedies turant milte hain. 100% free, BPHS classical rules ke according.
+              <strong style={{ color: GOLD }}>Trikal Vaani ka Free Manglik Dosh Calculator</strong> aapki Manglik status Swiss Ephemeris se calculate karta hai. Date, time, place daalo — Yes/No verdict, severity (High/Medium/Low), Mars house + sign, all 6 affected houses, cancellation conditions, aur 3 Parashar remedies turant milte hain. 100% free, BPHS classical rules ke according.
             </p>
           </div>
 
@@ -301,7 +301,7 @@ export default function FreeManglikDoshCalculatorPage() {
             <div className="w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg" style={{ background: GOLD, color: '#080B12' }}>RG</div>
             <div className="text-sm">
               <div className="font-semibold" style={{ color: GOLD }}>Rohiit Gupta</div>
-              <div className="text-slate-400">Chief Vedic Architect · Trikaal Vaani · Delhi NCR</div>
+              <div className="text-slate-400">Chief Vedic Architect · Trikal Vaani · Delhi NCR</div>
               <div className="text-xs text-slate-500 mt-0.5">Engine: Swiss Ephemeris · Parashar BPHS · Lahiri Ayanamsha · Mars House Logic</div>
             </div>
           </div>
@@ -585,13 +585,13 @@ export default function FreeManglikDoshCalculatorPage() {
               <li><strong style={{ color: GOLD }}>Anger Management:</strong> Mars rules aggression — yoga, meditation, peaceful environment.</li>
             </ol>
 
-            <h2 className="text-2xl font-serif font-bold mb-4 mt-8" style={{ color: GOLD }}>Trikaal Vaani vs AstroSage vs AstroTalk Manglik Calculator</h2>
+            <h2 className="text-2xl font-serif font-bold mb-4 mt-8" style={{ color: GOLD }}>Trikal Vaani vs AstroSage vs AstroTalk Manglik Calculator</h2>
             <div className="not-prose overflow-x-auto mb-6">
               <table className="w-full text-sm" style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid ${GOLD}33`, borderRadius: '12px' }}>
                 <thead>
                   <tr style={{ background: 'rgba(212,175,55,0.1)' }}>
                     <th className="p-3 text-left" style={{ color: GOLD }}>Feature</th>
-                    <th className="p-3 text-left" style={{ color: GOLD }}>Trikaal Vaani</th>
+                    <th className="p-3 text-left" style={{ color: GOLD }}>Trikal Vaani</th>
                     <th className="p-3 text-left text-slate-400">Others</th>
                   </tr>
                 </thead>

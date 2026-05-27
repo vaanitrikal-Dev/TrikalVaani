@@ -21,9 +21,10 @@ export const dynamicParams = true;
 
 const SITE_URL = "https://trikalvaani.com";
 const AUTHOR_NAME = "Rohiit Gupta";
-const AUTHOR_TITLE = "Chief Vedic Architect, Trikaal Vaani";
+const AUTHOR_TITLE = "Chief Vedic Architect, Trikal Vaani";
 const VM_URL = "http://34.14.164.105:8001";
 
+// ── Types ─────────────────────────────────────────────────────────────
 type PanchangRow = {
   date: string;
   tithi: string;
@@ -56,6 +57,7 @@ type VMPanchang = {
   rahu_kaal: string;
 };
 
+// ── Helpers ───────────────────────────────────────────────────────────
 function getSupabase() {
   return createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -96,6 +98,7 @@ async function fetchFromVM(date: string): Promise<PanchangRow | null> {
     if (!res.ok) return null;
     const vm = (await res.json()) as VMPanchang;
 
+    // Also check festivals_master for this date
     const { data: festData } = await getSupabase()
       .from("festivals_master")
       .select("festival_name,festival_slug")
@@ -125,6 +128,7 @@ async function getPanchang(date: string): Promise<PanchangRow | null> {
   return (await fetchFromSupabase(date)) ?? (await fetchFromVM(date));
 }
 
+// ── Metadata ──────────────────────────────────────────────────────────
 export async function generateMetadata(
   { params }: { params: { date: string } }
 ): Promise<Metadata> {
@@ -135,7 +139,7 @@ export async function generateMetadata(
   const human = formatHuman(date);
   const url = `${SITE_URL}/panchang/${date}`;
 
-  const title = p?.seo_title?.replace(/\s*\|\s*Trika+l Vaani\s*$/i, "")
+  const title = p?.seo_title?.replace(/\s*\|\s*Trikal Vaani\s*$/i, "")
     ?? `Aaj Ka Panchang ${human} | Tithi, Nakshatra, Rahu Kaal`;
 
   const description = p?.seo_description
@@ -145,12 +149,13 @@ export async function generateMetadata(
     title, description,
     authors: [{ name: AUTHOR_NAME, url: `${SITE_URL}/founder` }],
     alternates: { canonical: url },
-    openGraph: { title: `${title} | Trikaal Vaani`, description, url, siteName: "Trikaal Vaani", type: "article", locale: "en_IN" },
+    openGraph: { title: `${title} | Trikal Vaani`, description, url, siteName: "Trikal Vaani", type: "article", locale: "en_IN" },
     twitter: { card: "summary_large_image", title, description },
     robots: { index: true, follow: true },
   };
 }
 
+// ── Page ──────────────────────────────────────────────────────────────
 export default async function PanchangDatePage(
   { params }: { params: { date: string } }
 ) {
@@ -159,6 +164,7 @@ export default async function PanchangDatePage(
 
   const p = await getPanchang(date);
 
+  // ── REDIRECT: If festival exists → go to slug page (301) ──────────
   if (p?.festival_slug) {
     redirect(`/panchang/${date}/${p.festival_slug}`);
   }
@@ -166,6 +172,7 @@ export default async function PanchangDatePage(
   const url = `${SITE_URL}/panchang/${date}`;
   const human = formatHuman(date);
 
+  // No data + no festival
   if (!p) {
     return (
       <main className="min-h-screen bg-gradient-to-b from-amber-50 to-white pt-20">
@@ -191,6 +198,7 @@ export default async function PanchangDatePage(
     );
   }
 
+  // ── Schemas ───────────────────────────────────────────────────────
   const faqItems = p.faq_schema?.length ? p.faq_schema : [
     { "@type": "Question", name: `What is the Tithi on ${human}?`, acceptedAnswer: { "@type": "Answer", text: `${p.tithi}, Swiss Ephemeris, Lahiri Ayanamsha.` } },
     { "@type": "Question", name: `What is Rahu Kaal on ${human}?`, acceptedAnswer: { "@type": "Answer", text: `Rahu Kaal is ${p.rahu_kaal} (Delhi NCR). Avoid auspicious work during this window.` } },
@@ -206,7 +214,7 @@ export default async function PanchangDatePage(
       datePublished: date, dateModified: date,
       mainEntityOfPage: { "@type": "WebPage", "@id": url },
       author: { "@type": "Person", name: AUTHOR_NAME, jobTitle: AUTHOR_TITLE, url: `${SITE_URL}/founder` },
-      publisher: { "@type": "Organization", name: "Trikaal Vaani", url: SITE_URL, logo: { "@type": "ImageObject", url: `${SITE_URL}/logo.png` } },
+      publisher: { "@type": "Organization", name: "Trikal Vaani", url: SITE_URL, logo: { "@type": "ImageObject", url: `${SITE_URL}/logo.png` } },
     },
     {
       "@context": "https://schema.org", "@type": "BreadcrumbList",
@@ -252,6 +260,7 @@ export default async function PanchangDatePage(
             <p className="text-base leading-relaxed text-gray-800">{geoAnswer}</p>
           </section>
 
+          {/* Panchang Grid */}
           <section className="mb-8">
             <h2 className="text-xl font-semibold text-gray-900 mb-4">Panchang Details</h2>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">

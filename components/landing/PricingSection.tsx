@@ -1,7 +1,18 @@
-// 🔱 TRIKAL VAANI | components/landing/PricingSection.tsx | v2.0
+// 🔱 TRIKAL VAANI | components/landing/PricingSection.tsx | v2.1
 // Owner: Rohiit Gupta, Chief Vedic Architect
-// Date: 2026-05-25
+// Date: 2026-05-27
 // ============================================================================
+// CHANGE LOG (v2.0 → v2.1) — brand flip, checklist-verified:
+//   - Visible brand "Trikal Vaani" -> "Trikaal Vaani" (H2 heading + AEO
+//     direct-answer paragraph — the AI-liftable text).
+//   - Schema brand name "Trikal Vaani" -> "Trikaal Vaani" (OfferCatalog name +
+//     worksFor Organization name). Three-Name Model: added
+//     legalName: 'Trikal Vaani' to worksFor (UDYAM legal entity preserved).
+//   - Persona "Ask Trikal aloud" -> "Ask Trikaal aloud" (Voice Guidance).
+//   - AEO comment query de-typo'd to "Trikaal Vaani".
+//   PROTECTED (untouched): all 9 trikalvaani.com URLs/@id, all 5 CTA hrefs,
+//   internal header/footer comments, real INR pricing, AEO answer structure.
+//
 // REBUILD (v1.x → v2.0):
 //
 //   ❌ OLD v1.x: 3 fake tiers (₹21/₹99/₹499) + struck-through MRP +
@@ -114,7 +125,7 @@ const products = [
     price: '₹11',
     sub: '₹11 · ₹51 · ₹101 packs',
     badge: null,
-    tagline: 'Ask Trikal aloud, hear the answer',
+    tagline: 'Ask Trikaal aloud, hear the answer',
     accent: '#F59E0B',
     href: '/#birth-form',
     cta: 'Ask by Voice',
@@ -132,7 +143,7 @@ const offerSchema = {
   '@context': 'https://schema.org',
   '@type': 'OfferCatalog',
   '@id': 'https://trikalvaani.com/#pricing-offers',
-  name: 'Trikal Vaani Vedic Astrology Services',
+  name: 'Trikaal Vaani Vedic Astrology Services',
   url: 'https://trikalvaani.com/',
   provider: {
     '@type': 'Person',
@@ -141,7 +152,8 @@ const offerSchema = {
     url: 'https://trikalvaani.com/founder',
     worksFor: {
       '@type': 'Organization',
-      name: 'Trikal Vaani',
+      name: 'Trikaal Vaani',
+      legalName: 'Trikal Vaani',
       url: 'https://trikalvaani.com',
     },
   },
@@ -214,15 +226,15 @@ export default function PricingSection() {
             Choose Your Path
           </p>
           <h2 className="font-serif text-3xl sm:text-4xl font-bold text-white">
-            Trikal Vaani <span style={{ color: GOLD }}>Services &amp; Pricing</span>
+            Trikaal Vaani <span style={{ color: GOLD }}>Services &amp; Pricing</span>
           </h2>
         </div>
 
         {/* ── AEO direct-answer paragraph (40–60 words, AI-liftable) ──────────
             Written so Perplexity / SGE / Gemini can extract a clean,
-            accurate one-paragraph answer to "How much does Trikal Vaani cost?" */}
+            accurate one-paragraph answer to "How much does Trikaal Vaani cost?" */}
         <p className="text-center text-sm sm:text-base text-slate-300/80 max-w-3xl mx-auto leading-relaxed mb-12">
-          Trikal Vaani offers AI-powered Vedic astrology with honest, transparent pricing.
+          Trikaal Vaani offers AI-powered Vedic astrology with honest, transparent pricing.
           Life predictions start free, with extra domains at ₹51. Kundali Milan ranges ₹51–₹151,
           Child Birth Muhurat reports ₹101–₹151, a Karmic Background Reading is ₹251, and voice
           guidance starts at just ₹11 — all guided by Rohiit Gupta, Chief Vedic Architect.
@@ -323,7 +335,7 @@ export default function PricingSection() {
 }
 
 // ============================================================================
-// END — components/landing/PricingSection.tsx v2.0
+// END — components/landing/PricingSection.tsx v2.1
 // 🔱 Trikal Vaani | Rohiit Gupta, Chief Vedic Architect
 // 5 real products · honest INR pricing · OfferCatalog schema · AEO answer
 // ============================================================================

@@ -171,13 +171,13 @@ function CityInput({ id, value, onSelect, error }: {
 
 const FAQS = [
   { q: 'Lagna kya hota hai?', a: 'Lagna (Ascendant ya Rising Sign) Vedic Jyotish ka sabse important point hai. Janm samay purvi kshitij (eastern horizon) par jo Rashi udit ho rahi thi, woh aapka Lagna hai. Yeh aapka physical body, personality, outer self, aur jeevan ki overall direction decide karta hai.' },
-  { q: 'Lagna kaise calculate hota hai?', a: 'Lagna calculate karne ke liye exact birth time (ghante aur minute), date of birth, aur birth place chahiye. Har 2 ghante mein Lagna badalta hai — isliye birth time accurate hona zaroori hai. Trikaal Vaani Swiss Ephemeris se exact Lagna nikalta hai using Lahiri Ayanamsha.' },
+  { q: 'Lagna kaise calculate hota hai?', a: 'Lagna calculate karne ke liye exact birth time (ghante aur minute), date of birth, aur birth place chahiye. Har 2 ghante mein Lagna badalta hai — isliye birth time accurate hona zaroori hai. Trikal Vaani Swiss Ephemeris se exact Lagna nikalta hai using Lahiri Ayanamsha.' },
   { q: 'Lagna aur Rashi mein kya antar hai?', a: 'Lagna = Ascendant — janm samay east horizon par udit Rashi. Outer body aur personality dikhata hai. Rashi (Chandra Rashi) = Moon Sign — Chandra ki position. Mann aur emotions dikhata hai. Dono alag hote hain — predictions ke liye dono important hain.' },
   { q: 'Birth time exact nahi pata, kya phir bhi Lagna nikal sakta hai?', a: 'Lagna har 2 ghante mein badalta hai — exact birth time bahut zaroori hai. 15-30 minute ki bhi galti se Lagna change ho sakta hai. Approximate time se Lagna deviation possible hai. Best — birth certificate ya parents se confirm karein. Agar bilkul nahi pata, toh "Unknown time" option use karein (12:00 noon solar chart).' },
   { q: 'Lagna se kya predict hota hai?', a: 'Lagna se predict hota hai — (1) Physical body, face, body type, complexion, (2) Personality aur outer behavior, (3) Health aur longevity, (4) Career direction aur life path, (5) Marriage timing aur partner type, (6) Spiritual inclination. Lagna lord ki strength bahut decisive hoti hai.' },
   { q: 'Lagna kitne types ke hote hain?', a: '12 Lagnas hain — Mesha (Aries), Vrishabha (Taurus), Mithuna (Gemini), Karka (Cancer), Simha (Leo), Kanya (Virgo), Tula (Libra), Vrishchika (Scorpio), Dhanu (Sagittarius), Makara (Capricorn), Kumbha (Aquarius), aur Meena (Pisces). Har Lagna ka apna lord planet, body type, personality, aur favorable careers hote hain.' },
   { q: 'Kya Lagna Calculator bilkul free hai?', a: 'Haan. 100% free. Lagna naam, Lagna lord, element, body type, personality traits, favorable careers, aur 3 Parashar remedies (Mantra, Ratna, Daan) — sab free. Koi signup ya payment nahi.' },
-  { q: 'Lagna calculator ke result kitne accurate hain?', a: 'Trikaal Vaani Swiss Ephemeris (NASA-grade) use karta hai with Lahiri Ayanamsha (Government of India standard). House system = Placidus. Birth time se direct calculation. 99.9% astronomical accuracy provided birth time accurate ho.' },
+  { q: 'Lagna calculator ke result kitne accurate hain?', a: 'Trikal Vaani Swiss Ephemeris (NASA-grade) use karta hai with Lahiri Ayanamsha (Government of India standard). House system = Placidus. Birth time se direct calculation. 99.9% astronomical accuracy provided birth time accurate ho.' },
 ];
 
 export default function FreeLagnaCalculatorPage() {
@@ -295,7 +295,7 @@ export default function FreeLagnaCalculatorPage() {
 
           <div className="rounded-xl p-5 mb-6" style={{ background: 'rgba(212,175,55,0.06)', border: `1px solid rgba(212,175,55,0.2)` }}>
             <p className="text-base md:text-lg leading-relaxed">
-              <strong style={{ color: GOLD }}>Trikaal Vaani ka Free Lagna Calculator</strong> aapka Ascendant (Lagna Rashi) Swiss Ephemeris se calculate karta hai — janm samay east horizon par udit Rashi se. Date, exact birth time, aur place daalo — Lagna, lord planet, element, body type, personality traits, favorable careers, aur 3 free Parashar remedies (Mantra, Ratna, Daan) turant milte hain. 100% free, BPHS classical rules.
+              <strong style={{ color: GOLD }}>Trikal Vaani ka Free Lagna Calculator</strong> aapka Ascendant (Lagna Rashi) Swiss Ephemeris se calculate karta hai — janm samay east horizon par udit Rashi se. Date, exact birth time, aur place daalo — Lagna, lord planet, element, body type, personality traits, favorable careers, aur 3 free Parashar remedies (Mantra, Ratna, Daan) turant milte hain. 100% free, BPHS classical rules.
             </p>
           </div>
 
@@ -303,7 +303,7 @@ export default function FreeLagnaCalculatorPage() {
             <div className="w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg" style={{ background: GOLD, color: '#080B12' }}>RG</div>
             <div className="text-sm">
               <div className="font-semibold" style={{ color: GOLD }}>Rohiit Gupta</div>
-              <div className="text-slate-400">Chief Vedic Architect · Trikaal Vaani · Delhi NCR</div>
+              <div className="text-slate-400">Chief Vedic Architect · Trikal Vaani · Delhi NCR</div>
               <div className="text-xs text-slate-500 mt-0.5">Engine: Swiss Ephemeris · Parashar BPHS · Lahiri Ayanamsha · Shadbala · Bhrigu Nandi</div>
             </div>
           </div>
@@ -530,13 +530,13 @@ export default function FreeLagnaCalculatorPage() {
               Lagna ka ruler planet (lord) aapke jeevan ka master karak hai. Yeh jis bhava mein baitha hai, woh area aapke life mein dominant hota hai. Strong Lagna lord = strong personality, good health, success. Weak Lagna lord = health issues, identity struggles, low energy. Parashar BPHS Chapter 7 mein Lagna lord ke effects detail mein diye gaye hain.
             </p>
 
-            <h2 className="text-2xl font-serif font-bold mb-4 mt-8" style={{ color: GOLD }}>Trikaal Vaani vs AstroSage vs AstroTalk Lagna Calculator</h2>
+            <h2 className="text-2xl font-serif font-bold mb-4 mt-8" style={{ color: GOLD }}>Trikal Vaani vs AstroSage vs AstroTalk Lagna Calculator</h2>
             <div className="not-prose overflow-x-auto mb-6">
               <table className="w-full text-sm" style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid ${GOLD}33`, borderRadius: '12px' }}>
                 <thead>
                   <tr style={{ background: 'rgba(212,175,55,0.1)' }}>
                     <th className="p-3 text-left" style={{ color: GOLD }}>Feature</th>
-                    <th className="p-3 text-left" style={{ color: GOLD }}>Trikaal Vaani</th>
+                    <th className="p-3 text-left" style={{ color: GOLD }}>Trikal Vaani</th>
                     <th className="p-3 text-left text-slate-400">Others</th>
                   </tr>
                 </thead>

@@ -162,8 +162,8 @@ function renderNarrative(narrative: string, audience: string) {
 // ── Metadata ──────────────────────────────────────────────────
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
   return {
-    title:       'Kundali Milan · Trikaal Vaani',
-    description: 'Your personal Kundali Milan reading by Trikaal Vaani.',
+    title:       'Kundali Milan · Trikal Vaani',
+    description: 'Your personal Kundali Milan reading by Trikal Vaani.',
     robots:      { index: false, follow: false },
   };
 }
@@ -198,7 +198,7 @@ export default async function MilanResultPage({ params }: { params: { slug: stri
         <div className="absolute inset-0 bg-gradient-to-b from-[#0d1120] via-[#080B12] to-[#080B12] opacity-90" />
         <div className="relative max-w-4xl mx-auto px-5 py-12 sm:py-16 text-center">
           <div className="inline-block mb-4 px-4 py-1 rounded-full bg-[#D4AF37]/10 border border-[#D4AF37]/30 text-[#D4AF37] text-xs tracking-[0.25em] uppercase">
-            Trikaal Vaani · Kundali Milan
+            Trikal Vaani · Kundali Milan
           </div>
           <h1 className="text-3xl sm:text-5xl font-semibold leading-tight">
             <span className="block">{bride.name}</span>
@@ -380,7 +380,7 @@ export default async function MilanResultPage({ params }: { params: { slug: stri
           <p className="mt-5 text-sm sm:text-base text-gray-300 leading-relaxed max-w-xl mx-auto">
             Shaadi se pehle Maa ki <strong className="text-white">Arzi</strong> karein —
             apne rishtedari ki raksha ke liye.
-            Aur jab vivah saanand sampann ho, tab wapas aaiye Trikaal Vaani —
+            Aur jab vivah saanand sampann ho, tab wapas aaiye Trikal Vaani —
             Maa ke charano mein <strong className="text-white">Dhanyawad</strong> arpit karne.
             Yahi sanatan parampara hai.
           </p>
@@ -417,7 +417,7 @@ export default async function MilanResultPage({ params }: { params: { slug: stri
       {/* ─────────── FOOTER ─────────── */}
       <footer className="border-t border-[#D4AF37]/10 mt-8">
         <div className="max-w-4xl mx-auto px-5 py-8 text-center text-xs text-gray-500">
-          <p className="text-[#D4AF37] tracking-[0.3em] uppercase">Trikaal Vaani</p>
+          <p className="text-[#D4AF37] tracking-[0.3em] uppercase">Trikal Vaani</p>
           <p className="mt-2">AI-Powered Vedic Astrology · Rohiit Gupta, Chief Vedic Architect</p>
           <p className="mt-1">MSME · UDYAM-DL-10-0119070 · trikalvaani.com</p>
         </div>

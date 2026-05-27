@@ -331,7 +331,7 @@ export default function FreeDashaCalculatorPage() {
 
           <div className="rounded-xl p-5 mb-6" style={{ background: 'rgba(212,175,55,0.06)', border: `1px solid rgba(212,175,55,0.2)` }}>
             <p className="text-base md:text-lg leading-relaxed">
-              <strong style={{ color: GOLD }}>Trikaal Vaani ka Free Dasha Calculator</strong> aapki current Vimshottari Mahadasha aur Antardasha Swiss Ephemeris se calculate karta hai. Date of birth, time, aur place daalo — current dasha lord, next 5 mahadasha periods exact dates ke saath, Parashar Dos/Donts, aur 3 free remedies turant milte hain. 100% free.
+              <strong style={{ color: GOLD }}>Trikal Vaani ka Free Dasha Calculator</strong> aapki current Vimshottari Mahadasha aur Antardasha Swiss Ephemeris se calculate karta hai. Date of birth, time, aur place daalo — current dasha lord, next 5 mahadasha periods exact dates ke saath, Parashar Dos/Donts, aur 3 free remedies turant milte hain. 100% free.
             </p>
           </div>
 
@@ -339,7 +339,7 @@ export default function FreeDashaCalculatorPage() {
             <div className="w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg" style={{ background: GOLD, color: '#080B12' }}>RG</div>
             <div className="text-sm">
               <div className="font-semibold" style={{ color: GOLD }}>Rohiit Gupta</div>
-              <div className="text-slate-400">Chief Vedic Architect · Trikaal Vaani · Delhi NCR</div>
+              <div className="text-slate-400">Chief Vedic Architect · Trikal Vaani · Delhi NCR</div>
               <div className="text-xs text-slate-500 mt-0.5">Engine: Swiss Ephemeris · Parashar BPHS Ch.46-49 · Lahiri Ayanamsha · Shadbala · Bhrigu Nandi</div>
             </div>
           </div>

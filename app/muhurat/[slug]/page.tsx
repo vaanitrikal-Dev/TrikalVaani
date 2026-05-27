@@ -181,8 +181,8 @@ function paras(text: string) {
 // ── Metadata (private — noindex) ──────────────────────────────
 export async function generateMetadata(): Promise<Metadata> {
   return {
-    title:       'Child Birth Muhurat Report · Trikaal Vaani',
-    description: 'Your private Child Birth Muhurat report by Trikaal Vaani.',
+    title:       'Child Birth Muhurat Report · Trikal Vaani',
+    description: 'Your private Child Birth Muhurat report by Trikal Vaani.',
     robots:      { index: false, follow: false },
   };
 }
@@ -234,7 +234,7 @@ export default async function MuhuratResultPage({ params }: { params: { slug: st
 
   const resultUrl = `https://trikalvaani.com/muhurat/${r.slug}`;
   const waText = encodeURIComponent(
-    `Jai Mahakaal! Mera Child Birth Muhurat Report dekho — Trikaal Vaani.\n${resultUrl}\n\nJai Maa Shakti!`
+    `Jai Mahakaal! Mera Child Birth Muhurat Report dekho — Trikal Vaani.\n${resultUrl}\n\nJai Maa Shakti!`
   );
 
   return (
@@ -245,7 +245,7 @@ export default async function MuhuratResultPage({ params }: { params: { slug: st
         <div className="absolute inset-0 bg-gradient-to-b from-[#0d1120] via-[#080B12] to-[#080B12] opacity-90" />
         <div className="relative max-w-4xl mx-auto px-5 py-12 sm:py-16 text-center">
           <div className="inline-block mb-4 px-4 py-1 rounded-full bg-[#D4AF37]/10 border border-[#D4AF37]/30 text-[#D4AF37] text-xs tracking-[0.25em] uppercase">
-            Trikaal Vaani · Child Birth Muhurat
+            Trikal Vaani · Child Birth Muhurat
           </div>
           {timeStr && (
             <h1 className="text-4xl sm:text-6xl font-semibold leading-tight text-[#D4AF37]">
@@ -345,7 +345,7 @@ export default async function MuhuratResultPage({ params }: { params: { slug: st
           <div className="text-center text-gray-400">
             <p className="text-3xl mb-3">🕉️</p>
             <p className="text-lg">Aapka Muhurat Report taiyaar ho raha hai...</p>
-            <p className="text-sm mt-2 text-gray-500">Trikaal aapke chune hue shubh muhurat ki kundali padh raha hai. Please refresh in 30-40 seconds.</p>
+            <p className="text-sm mt-2 text-gray-500">Trikal aapke chune hue shubh muhurat ki kundali padh raha hai. Please refresh in 30-40 seconds.</p>
           </div>
         </section>
       )}
@@ -441,7 +441,7 @@ export default async function MuhuratResultPage({ params }: { params: { slug: st
       {/* ─────────── FOOTER ─────────── */}
       <footer className="border-t border-[#D4AF37]/10 mt-8">
         <div className="max-w-4xl mx-auto px-5 py-8 text-center text-xs text-gray-500">
-          <p className="text-[#D4AF37] tracking-[0.3em] uppercase">Trikaal Vaani</p>
+          <p className="text-[#D4AF37] tracking-[0.3em] uppercase">Trikal Vaani</p>
           <p className="mt-2">AI-Powered Vedic Astrology · Rohiit Gupta, Chief Vedic Architect</p>
           <p className="mt-1">MSME · UDYAM-DL-10-0119070 · trikalvaani.com</p>
           <p className="mt-3 text-[10px] text-gray-600 max-w-lg mx-auto leading-relaxed">

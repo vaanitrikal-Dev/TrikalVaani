@@ -3,24 +3,8 @@
  * TRIKAL VAANI — BirthForm Component
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: components/landing/BirthForm.tsx
- * VERSION: 9.4 — Current City Google Places Dropdown
+ * VERSION: 9.2 — Razorpay Payment Flow + Full SEO/GEO
  * SIGNED: ROHIIT GUPTA, CEO
- *
- * v9.4 CHANGES vs v9.3:
- *   ✅ Current City now uses Google Places autocomplete dropdown
- *      (same CityInput component as Place of Birth). Stores city
- *      name into currentCity. Everything else identical to v9.3.
- *
- * v9.3 CHANGES vs v9.2:
- *   ✅ buildPredictionBody now async — fetches logged-in user's
- *      Supabase session and stamps userId on the prediction
- *      (so saved reports appear in the user's Vault).
- *   ✅ callPredictAPI awaits buildPredictionBody.
- *   ✅ FIELD ORDER changed: Place of Birth → WhatsApp Mobile →
- *      Profession/Job Category → Gender. (Mobile + Profession
- *      moved below Place of Birth, above Gender.)
- *   ✅ Everything else identical to v9.2 — Razorpay flow, schema,
- *      numerology, dual chart, validations all preserved 100%.
  *
  * v9.2 CHANGES vs v9.1:
  *   ✅ Razorpay payment flow for ₹51 (paid) and ₹11 (voice) tiers
@@ -28,6 +12,14 @@
  *   ✅ Calls /api/create-order → opens popup → /api/verify-payment → /api/predict
  *   ✅ Razorpay trust strip below tier selector
  *   ✅ Service + Offer JSON-LD with priceSpecification (₹51, ₹11) for AI search
+ *   ✅ PaymentMethod schema injection
+ *   ✅ Hidden SEO content expanded with Razorpay + PCI-DSS + WhatsApp
+ *   ✅ aria-labels on payment buttons (accessibility + SEO)
+ *   ✅ ALL v9.1 logic preserved 100%:
+ *      - New Places API (POST), reverseGeocode, fetchTimezone
+ *      - Numerology compatibility for dual-chart domains
+ *      - 27 country selector, dynamic segment routing
+ *      - All field validations, dual chart Person 2 section
  * ============================================================
  */
 
@@ -36,8 +28,6 @@
 import { useState, useCallback, useRef, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { loadRazorpayScript, openRazorpayCheckout } from "@/lib/razorpay-helper"
-import { supabase } from "@/lib/supabase"
-import { getMobileUser } from "@/lib/firebase-auth"
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -321,9 +311,9 @@ const SEO_TRUST_BADGES = [
 
 const VOICE_TAGLINES = [
   { text: 'Kuch dil ki baatein type nahi ki jaati', icon: '🎙️' },
-  { text: 'Bol do Trikaal ko — woh sun raha hai',    icon: '🔮' },
+  { text: 'Bol do Trikal ko — woh sun raha hai',    icon: '🔮' },
   { text: 'Dil ki baat — sirf ek minute mein',      icon: '✨' },
-  { text: 'Trikaal sun raha hai — bas shuru karo',   icon: '🎙️' },
+  { text: 'Trikal sun raha hai — bas shuru karo',   icon: '🎙️' },
   { text: 'Jo dil mein hai — woh bol do',            icon: '💫' },
   { text: 'Type mat karo — feel karo',               icon: '🎙️' },
 ]
@@ -331,13 +321,13 @@ const VOICE_TAGLINES = [
 const LOADING_STEPS = [
   'Mahakaal se connection ho raha hai...',
   'Kundali calculate ho rahi hai — Swiss Ephemeris...',
-  'Trikaal aapka sandesh taiyaar kar raha hai...',
+  'Trikal aapka sandesh taiyaar kar raha hai...',
 ]
 
 const PAYMENT_LOADING_STEPS = [
   'Razorpay payment verify ho raha hai...',
   'Mahakaal se connection ho raha hai...',
-  'Trikaal aapka deep reading taiyaar kar raha hai...',
+  'Trikal aapka deep reading taiyaar kar raha hai...',
 ]
 
 const DUAL_CHART_DOMAINS = ['genz_ex_back', 'genz_toxic_boss']
@@ -434,23 +424,23 @@ const SERVICE_OFFER_SCHEMA = {
   '@context': 'https://schema.org',
   '@type': 'Service',
   '@id': 'https://trikalvaani.com/#service',
-  name: 'Trikaal Vaani Vedic Astrology Prediction',
+  name: 'Trikal Vaani Vedic Astrology Prediction',
   serviceType: 'AI Vedic Astrology Reading',
   provider: {
     '@type': 'Organization',
     '@id': 'https://trikalvaani.com/#organization',
-    name: 'Trikaal Vaani',
+    name: 'Trikal Vaani',
     url: 'https://trikalvaani.com',
   },
   areaServed: { '@type': 'Country', name: 'India' },
   audience: { '@type': 'Audience', audienceType: 'Indian seekers, NRIs, HNIs' },
   hasOfferCatalog: {
     '@type': 'OfferCatalog',
-    name: 'Trikaal Vaani Reading Plans',
+    name: 'Trikal Vaani Reading Plans',
     itemListElement: [
       {
         '@type': 'Offer',
-        name: 'Free Trikaal Ka Sandesh',
+        name: 'Free Trikal Ka Sandesh',
         description: '150-200 word free Vedic preview with Swiss Ephemeris kundali',
         price: '0',
         priceCurrency: 'INR',
@@ -505,9 +495,10 @@ const SERVICE_OFFER_SCHEMA = {
     ],
   },
   termsOfService: 'https://trikalvaani.com/terms',
+  // ── Razorpay payment processor declared (AI search picks this up) ──
   brand: {
     '@type': 'Brand',
-    name: 'Trikaal Vaani',
+    name: 'Trikal Vaani',
     slogan: 'India\'s Most Accurate AI Vedic Astrology — Razorpay-Secured Payments',
   },
 }
@@ -591,7 +582,7 @@ function RotatingTagline() {
         {tagline.icon} "{tagline.text}"
       </p>
       <p style={{ color: '#475569', fontSize: '10px', margin: '4px 0 0' }}>
-        — Trikaal Voice Reading · ₹11 only · Razorpay Secured
+        — Trikal Voice Reading · ₹11 only · Razorpay Secured
       </p>
     </div>
   )
@@ -655,9 +646,9 @@ function RazorpayInlineTrustStrip({ tier }: { tier: PredictionTier }) {
 
 function TierSelector({ selected, onChange }: { selected: PredictionTier; onChange: (t: PredictionTier) => void }) {
   const tiers = [
-    { id: 'free'  as PredictionTier, icon: '🔮', label: 'Free Preview', price: 'Free', desc: 'Trikaal Ka Sandesh', color: '#94a3b8', features: ['150-200 word summary', 'Key message + action', 'Instant results'] },
+    { id: 'free'  as PredictionTier, icon: '🔮', label: 'Free Preview', price: 'Free', desc: 'Trikal Ka Sandesh', color: '#94a3b8', features: ['150-200 word summary', 'Key message + action', 'Instant results'] },
     { id: 'paid'  as PredictionTier, icon: '⚡', label: 'Deep Reading',  price: '₹51',  desc: 'Gemini Pro 2.5',   color: GOLD,      features: ['900 word full analysis', 'Personalized 5 upay', 'Action windows + dates'], highlight: true },
-    { id: 'voice' as PredictionTier, icon: '🎙️', label: 'Voice',        price: '₹11',  desc: 'Trikaal ki awaaz', color: '#a78bfa', features: ['60-sec voice', 'Hindi / Hinglish', 'Trikaal AI'] },
+    { id: 'voice' as PredictionTier, icon: '🎙️', label: 'Voice',        price: '₹11',  desc: 'Trikal ki awaaz', color: '#a78bfa', features: ['60-sec voice', 'Hindi / Hinglish', 'Trikal AI'] },
   ]
 
   return (
@@ -686,7 +677,7 @@ function TierSelector({ selected, onChange }: { selected: PredictionTier; onChan
       {selected === 'paid' && (
         <div style={{ marginTop: '12px', padding: '12px', background: GOLD_RGBA(0.06), border: `1px solid ${GOLD_RGBA(0.2)}`, borderRadius: '10px' }}>
           <p style={{ margin: '0 0 4px', color: GOLD, fontSize: '11px', fontWeight: 700 }}>⚡ Gemini 2.5 Pro — 900 words deep analysis</p>
-          <p style={{ margin: 0, color: '#64748b', fontSize: '10px', lineHeight: 1.5 }}>AstroTalk charges ₹500+ for this level. Trikaal Vaani delivers for ₹51 — Swiss Ephemeris + BPHS + personalized 5 upay by segment. Razorpay-secured one-time payment.</p>
+          <p style={{ margin: 0, color: '#64748b', fontSize: '10px', lineHeight: 1.5 }}>AstroTalk charges ₹500+ for this level. Trikal Vaani delivers for ₹51 — Swiss Ephemeris + BPHS + personalized 5 upay by segment. Razorpay-secured one-time payment.</p>
         </div>
       )}
     </div>
@@ -864,23 +855,8 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
     return Object.keys(errs).length === 0
   }
 
-  // ── Build prediction request body (v9.3 — async + userId stamp) ─────────────
-  const buildPredictionBody = async (paymentVerification: any = null) => {
-    // ── v9.3 NEW: capture logged-in user's id so the report lands in Vault ──
-    // Gmail users -> Supabase session. Mobile users -> Firebase localStorage profileId.
-    let userId: string | undefined = undefined
-    try {
-      const { data: { session } } = await supabase.auth.getSession()
-      if (session?.user?.id) {
-        userId = session.user.id
-      } else {
-        const mobileUser = getMobileUser()
-        if (mobileUser?.profileId) userId = mobileUser.profileId
-      }
-    } catch {
-      userId = undefined  // never block prediction if auth check fails
-    }
-
+  // ── Build prediction request body ────────────────────────────────────────────
+  const buildPredictionBody = (paymentVerification: any = null) => {
     const sessionId      = generateSessionId()
     const age            = calculateAge(fields.dateOfBirth)
     const dynamicSegment = calculateDynamicSegment(fields.dateOfBirth, fields.gender)
@@ -888,7 +864,6 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
 
     return {
       sessionId,
-      userId,
       domainId:    selectedCategory?.id    || 'mill_karz_mukti',
       domainLabel: selectedCategory?.label || 'General',
       predictionTier,
@@ -940,7 +915,7 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
       const res = await fetch('/api/predict', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify(await buildPredictionBody(paymentVerification)),
+        body:    JSON.stringify(buildPredictionBody(paymentVerification)),
       })
       const data = await res.json()
       if (!res.ok) {
@@ -968,6 +943,7 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
     setPaymentLoading(true)
 
     try {
+      // Step 1: Load Razorpay script
       const scriptLoaded = await loadRazorpayScript()
       if (!scriptLoaded) {
         setApiError('Razorpay payment SDK failed to load. Please check your internet connection.')
@@ -975,6 +951,7 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
         return
       }
 
+      // Step 2: Create Razorpay order on server
       const orderRes = await fetch('/api/create-order', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -988,17 +965,19 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
       }
       const { orderId, amount, currency, keyId } = await orderRes.json()
 
+      // Step 3: Open Razorpay checkout popup
       openRazorpayCheckout({
         keyId,
         orderId,
         amount,
         currency,
-        name:        'Trikaal Vaani',
-        description: tier === 'paid' ? 'Deep Reading — Vedic Astrology' : 'Voice Reading — Trikaal Voice',
+        name:        'Trikal Vaani',
+        description: tier === 'paid' ? 'Deep Reading — Vedic Astrology' : 'Voice Reading — Trikal Voice',
         prefillName:    fields.name,
         prefillContact: `${fields.countryCode}${fields.mobile}`.replace(/\s/g, ''),
         themeColor:     '#D4AF37',
         onSuccess: async (response) => {
+          // Step 4: Verify payment server-side
           const verifyRes = await fetch('/api/verify-payment', {
             method:  'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -1011,12 +990,14 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
             return
           }
 
+          // Step 5: For voice tier, redirect to /voice with payment proof
           if (tier === 'voice') {
             const voiceUrl = `/voice?name=${encodeURIComponent(fields.name)}&lang=${fields.language}&pid=${response.razorpay_payment_id}`
             router.push(voiceUrl)
             return
           }
 
+          // Step 6: For paid tier, call /api/predict with payment verification
           setIsSubmitting(true)
           startLoadingMessages(PAYMENT_LOADING_STEPS)
 
@@ -1045,11 +1026,13 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
     e.preventDefault()
     if (!validate()) return
 
+    // ── PAID or VOICE → trigger Razorpay flow ──
     if (predictionTier === 'paid' || predictionTier === 'voice') {
       await handleRazorpayPayment(predictionTier)
       return
     }
 
+    // ── FREE → direct prediction ──
     setIsSubmitting(true)
     setApiError(null)
     startLoadingMessages()
@@ -1063,7 +1046,7 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
     if (paymentLoading)             return '⟳ Razorpay popup khul raha hai...'
     if (isLoading)                  return LOADING_STEPS[loadingStep] || 'Processing...'
     if (submitLabel)                return submitLabel
-    if (predictionTier === 'free')  return '🔮 Get Free Prediction — Trikaal Ka Sandesh'
+    if (predictionTier === 'free')  return '🔮 Get Free Prediction — Trikal Ka Sandesh'
     if (predictionTier === 'paid')  return '⚡ Pay ₹51 with Razorpay — Deep Reading'
     if (predictionTier === 'voice') return '🎙️ Pay ₹11 with Razorpay — Voice Reading'
     return '🔮 Get My Prediction'
@@ -1078,7 +1061,7 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
 
   return (
     <section id="birth-form" className={`py-16 px-4 ${className}`}
-      aria-label="Vedic Astrology Birth Chart Form — Trikaal Vaani by Rohiit Gupta">
+      aria-label="Vedic Astrology Birth Chart Form — Trikal Vaani by Rohiit Gupta">
 
       {/* JSON-LD: Service + Offer + PaymentMethod for AI Search (GEO) */}
       <script
@@ -1089,8 +1072,8 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
       {/* Hidden SEO content (expanded v9.2) */}
       <div style={{ display: 'none' }} aria-hidden="false">
         <h2>Free AI Vedic Astrology Prediction — Swiss Ephemeris Powered by Rohiit Gupta</h2>
-        <p>Get your personalized Vedic astrology reading at Trikaal Vaani. Powered by Swiss Ephemeris, BPHS, Bhrigu Nandi Nadi, Shadbala. By Rohiit Gupta, Chief Vedic Architect, Delhi NCR. Free Trikaal Ka Sandesh preview, ₹51 Deep Reading with 900-word analysis and 5 personalized upay, ₹11 Voice Reading. All paid plans secured by Razorpay — India's most trusted payment gateway. PCI-DSS compliant, 256-bit SSL encrypted. Accepts UPI, Cards, NetBanking, Wallets, RuPay. Customer support via WhatsApp at +91 92118 04111. Refund policy at trikalvaani.com/refund. Terms at trikalvaani.com/terms.</p>
-        <p>Trikaal Vaani is India's most accurate AI Vedic astrology platform, competing with AstroTalk and AstroSage at affordable mass-market pricing. Each prediction uses real Swiss Ephemeris planetary calculations validated against BPHS classical sutras, Bhrigu Nandi Nadi pattern matching, and Shadbala planetary strength scoring. Vimshottari Dasha primary, Pratyantar Dasha for 3-7 day precision, Sookshma Dasha hourly. Lahiri Ayanamsha sidereal system. 11 life domains: Career, Wealth, Health, Relationships, Family, Education, Home, Legal, Travel, Spirituality, Well-being.</p>
+        <p>Get your personalized Vedic astrology reading at Trikal Vaani. Powered by Swiss Ephemeris, BPHS, Bhrigu Nandi Nadi, Shadbala. By Rohiit Gupta, Chief Vedic Architect, Delhi NCR. Free Trikal Ka Sandesh preview, ₹51 Deep Reading with 900-word analysis and 5 personalized upay, ₹11 Voice Reading. All paid plans secured by Razorpay — India's most trusted payment gateway. PCI-DSS compliant, 256-bit SSL encrypted. Accepts UPI, Cards, NetBanking, Wallets, RuPay. Customer support via WhatsApp at +91 92118 04111. Refund policy at trikalvaani.com/refund. Terms at trikalvaani.com/terms.</p>
+        <p>Trikal Vaani is India's most accurate AI Vedic astrology platform, competing with AstroTalk and AstroSage at affordable mass-market pricing. Each prediction uses real Swiss Ephemeris planetary calculations validated against BPHS classical sutras, Bhrigu Nandi Nadi pattern matching, and Shadbala planetary strength scoring. Vimshottari Dasha primary, Pratyantar Dasha for 3-7 day precision, Sookshma Dasha hourly. Lahiri Ayanamsha sidereal system. 11 life domains: Career, Wealth, Health, Relationships, Family, Education, Home, Legal, Travel, Spirituality, Well-being.</p>
       </div>
 
       <div className="max-w-2xl mx-auto">
@@ -1113,7 +1096,7 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
             </>
           ) : (
             <>
-              <h2 className="text-white text-2xl font-serif font-bold mb-2">Trikaal Ka Sandesh — Sirf Aapke Liye</h2>
+              <h2 className="text-white text-2xl font-serif font-bold mb-2">Trikal Ka Sandesh — Sirf Aapke Liye</h2>
               <p className="text-slate-400 text-sm max-w-lg mx-auto">India's most accurate AI Vedic astrology — by Rohiit Gupta, Chief Vedic Architect, Delhi NCR.</p>
             </>
           )}
@@ -1164,6 +1147,36 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
               {errors.name && <p className="text-red-400 text-xs mt-1">{errors.name}</p>}
             </div>
 
+            {/* Mobile */}
+            <div>
+              <label htmlFor="tv-mobile" className="block text-sm font-medium text-slate-300 mb-1.5">
+                WhatsApp Mobile <span className="text-yellow-400">*</span>
+                <span className="text-slate-500 text-xs ml-2">(for follow-up + numerology)</span>
+              </label>
+              <div className="flex gap-2">
+                <CountrySelector id="tv-country" value={fields.countryCode}
+                  onChange={(dial, digits) => setFields(prev => ({ ...prev, countryCode: dial, countryDigits: digits }))} />
+                <input id="tv-mobile" type="tel" placeholder={`${fields.countryDigits}-digit mobile`}
+                  value={fields.mobile} onChange={e => handleMobileChange(e.target.value)}
+                  maxLength={fields.countryDigits + 2}
+                  className="flex-1 px-4 py-2.5 rounded-lg text-sm outline-none"
+                  style={inputStyle(!!errors.mobile)} />
+              </div>
+              {errors.mobile && <p className="text-red-400 text-xs mt-1">{errors.mobile}</p>}
+            </div>
+
+            {/* Job */}
+            <div className="relative">
+              <label htmlFor="tv-job" className="block text-sm font-medium text-slate-300 mb-1.5">Profession / Job Category</label>
+              <div className="relative">
+                <select id="tv-job" value={fields.jobCategory} onChange={e => set('jobCategory', e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-lg text-sm outline-none appearance-none pr-8" style={SELECT_STYLE}>
+                  {JOB_CATEGORIES.map(j => <option key={j.value} value={j.value} style={{ background: '#0d1120', color: '#e2e8f0' }}>{j.label}</option>)}
+                </select>
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500">▾</span>
+              </div>
+            </div>
+
             {/* DOB */}
             <div>
               <label htmlFor="tv-dob" className="block text-sm font-medium text-slate-300 mb-1.5">Date of Birth <span className="text-yellow-400">*</span></label>
@@ -1191,6 +1204,31 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
                 className="w-full px-4 py-2.5 rounded-lg text-sm outline-none"
                 style={{ ...inputStyle(!!errors.timeOfBirth), opacity: fields.unknownTime ? 0.4 : 1 }} />
               {fields.unknownTime && <p className="text-slate-500 text-xs mt-1">Solar chart will be used (12:00 noon)</p>}
+            </div>
+
+            {/* Gender */}
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-2">
+                Gender <span className="text-slate-500 text-xs ml-1">(for personalized remedies)</span>
+              </label>
+              <div className="grid grid-cols-3 gap-2">
+                {[
+                  { value: 'male',   label: '♂ Male',   color: '#60a5fa' },
+                  { value: 'female', label: '♀ Female', color: '#f472b6' },
+                  { value: 'other',  label: '⊕ Other',  color: '#94a3b8' },
+                ].map(opt => (
+                  <button key={opt.value} type="button" onClick={() => set('gender', opt.value as any)}
+                    className="py-2.5 px-3 rounded-lg text-sm font-medium transition-all text-center"
+                    style={{ background: fields.gender === opt.value ? `${opt.color}20` : 'rgba(255,255,255,0.04)', border: `1px solid ${fields.gender === opt.value ? `${opt.color}60` : 'rgba(255,255,255,0.1)'}`, color: fields.gender === opt.value ? opt.color : '#64748b' }}>
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+              {fields.gender && fields.dateOfBirth && (
+                <p style={{ margin: '6px 0 0', color: GOLD, fontSize: '11px' }}>
+                  ✦ Segment: {calculateDynamicSegment(fields.dateOfBirth, fields.gender).replace('_', ' ')} — personalized remedy routing active
+                </p>
+              )}
             </div>
 
             {/* Place of Birth */}
@@ -1236,73 +1274,15 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
               </div>
             )}
 
-            {/* Mobile */}
+            {/* Current City */}
             <div>
-              <label htmlFor="tv-mobile" className="block text-sm font-medium text-slate-300 mb-1.5">
-                WhatsApp Mobile <span className="text-yellow-400">*</span>
-                <span className="text-slate-500 text-xs ml-2">(for follow-up + numerology)</span>
+              <label htmlFor="tv-current-city" className="block text-sm font-medium text-slate-300 mb-1.5">
+                Current City <span className="text-slate-500 text-xs ml-2">(where you live/work now)</span>
               </label>
-              <div className="flex gap-2">
-                <CountrySelector id="tv-country" value={fields.countryCode}
-                  onChange={(dial, digits) => setFields(prev => ({ ...prev, countryCode: dial, countryDigits: digits }))} />
-                <input id="tv-mobile" type="tel" placeholder={`${fields.countryDigits}-digit mobile`}
-                  value={fields.mobile} onChange={e => handleMobileChange(e.target.value)}
-                  maxLength={fields.countryDigits + 2}
-                  className="flex-1 px-4 py-2.5 rounded-lg text-sm outline-none"
-                  style={inputStyle(!!errors.mobile)} />
-              </div>
-              {errors.mobile && <p className="text-red-400 text-xs mt-1">{errors.mobile}</p>}
-            </div>
-
-            {/* Job */}
-            <div className="relative">
-              <label htmlFor="tv-job" className="block text-sm font-medium text-slate-300 mb-1.5">Profession / Job Category</label>
-              <div className="relative">
-                <select id="tv-job" value={fields.jobCategory} onChange={e => set('jobCategory', e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-lg text-sm outline-none appearance-none pr-8" style={SELECT_STYLE}>
-                  {JOB_CATEGORIES.map(j => <option key={j.value} value={j.value} style={{ background: '#0d1120', color: '#e2e8f0' }}>{j.label}</option>)}
-                </select>
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500">▾</span>
-              </div>
-            </div>
-
-            {/* Gender */}
-            <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">
-                Gender <span className="text-slate-500 text-xs ml-1">(for personalized remedies)</span>
-              </label>
-              <div className="grid grid-cols-3 gap-2">
-                {[
-                  { value: 'male',   label: '♂ Male',   color: '#60a5fa' },
-                  { value: 'female', label: '♀ Female', color: '#f472b6' },
-                  { value: 'other',  label: '⊕ Other',  color: '#94a3b8' },
-                ].map(opt => (
-                  <button key={opt.value} type="button" onClick={() => set('gender', opt.value as any)}
-                    className="py-2.5 px-3 rounded-lg text-sm font-medium transition-all text-center"
-                    style={{ background: fields.gender === opt.value ? `${opt.color}20` : 'rgba(255,255,255,0.04)', border: `1px solid ${fields.gender === opt.value ? `${opt.color}60` : 'rgba(255,255,255,0.1)'}`, color: fields.gender === opt.value ? opt.color : '#64748b' }}>
-                    {opt.label}
-                  </button>
-                ))}
-              </div>
-              {fields.gender && fields.dateOfBirth && (
-                <p style={{ margin: '6px 0 0', color: GOLD, fontSize: '11px' }}>
-                  ✦ Segment: {calculateDynamicSegment(fields.dateOfBirth, fields.gender).replace('_', ' ')} — personalized remedy routing active
-                </p>
-              )}
-            </div>
-
-            {/* Current City — Google Places dropdown (v9.4) */}
-            <div>
-              <CityInput
-                id="tv-current-city"
-                label="Current City"
-                value={fields.currentCity}
+              <input id="tv-current-city" type="text"
                 placeholder="e.g. Gurugram, Mumbai, Dubai, London..."
-                onSelect={(city) => {
-                  setFields(prev => ({ ...prev, currentCity: city }))
-                }}
-              />
-              <p className="text-slate-500 text-xs mt-1">(where you live/work now)</p>
+                value={fields.currentCity} onChange={e => set('currentCity', e.target.value)}
+                className="w-full px-4 py-2.5 rounded-lg text-sm outline-none" style={inputStyle()} />
             </div>
 
             {/* Relationship Status */}
@@ -1320,7 +1300,7 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
 
             {/* Situation Note */}
             <div>
-              <label htmlFor="tv-situation" className="block text-sm font-medium text-slate-300 mb-1.5">Tell Trikaal what's on your mind</label>
+              <label htmlFor="tv-situation" className="block text-sm font-medium text-slate-300 mb-1.5">Tell Trikal what's on your mind</label>
               <div className="relative">
                 <textarea id="tv-situation"
                   placeholder="e.g. Job switch kar raha hoon, property khareedna hai, relationship mein problem hai, karz se pareshan hoon..."

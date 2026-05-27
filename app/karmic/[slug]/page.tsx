@@ -30,8 +30,8 @@ const supabase = createClient(
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
-    title:  'Karmic Background Reading · Trikaal Vaani',
-    description: 'Your private Karmic Background Reading by Trikaal Vaani.',
+    title:  'Karmic Background Reading · Trikal Vaani',
+    description: 'Your private Karmic Background Reading by Trikal Vaani.',
     robots: { index: false, follow: false },
   };
 }

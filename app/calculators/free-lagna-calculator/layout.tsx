@@ -3,9 +3,11 @@
 // Version: v1.0 — metadata only
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikal Vaani
 // ============================================================
+
 import type { Metadata } from 'next';
+
 export const metadata: Metadata = {
-  title: 'Free Lagna Calculator — Find Your Ascendant (Rising Sign) Online | Trikaal Vaani',
+  title: 'Free Lagna Calculator — Find Your Ascendant (Rising Sign) Online | Trikal Vaani',
   description:
     'Free Lagna Calculator powered by Swiss Ephemeris. Discover your Ascendant (Lagna Rashi), Lagna lord, body type, personality, element & 3 Parashar remedies instantly. By Rohiit Gupta, Chief Vedic Architect.',
   keywords: [
@@ -28,7 +30,7 @@ export const metadata: Metadata = {
     description: 'Find your Lagna (Ascendant), lord planet, body type, personality & 3 Parashar remedies — free.',
     url: 'https://trikalvaani.com/calculators/free-lagna-calculator',
     type: 'website',
-    siteName: 'Trikaal Vaani',
+    siteName: 'Trikal Vaani',
   },
   twitter: {
     card: 'summary_large_image',
@@ -37,6 +39,7 @@ export const metadata: Metadata = {
   },
   robots: { index: true, follow: true },
 };
+
 export default function LagnaCalculatorLayout({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
