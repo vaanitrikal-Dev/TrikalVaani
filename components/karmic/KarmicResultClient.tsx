@@ -1,7 +1,7 @@
 // TRIKAL VAANI — Karmic Result Client Component
 // CEO & Chief Vedic Architect: Rohiit Gupta
 // File: components/karmic/KarmicResultClient.tsx
-// VERSION: 1.0
+// VERSION: 1.1 — Brand/persona flip (Trikaal) + vendor name removed from public copy
 // Handles: animated waiting screen, auto-polling, 6-dim render, PDF, share.
 
 'use client'
@@ -31,14 +31,14 @@ const MAA_SHAKTI_MARKER = '═══ MAA SHAKTI ═══'
 
 // ── Animated waiting lines ─────────────────────────────────────────────────────
 const WAIT_LINES = [
-  'Trikal aapki kundali ke 6 karmic aayam padh raha hai...',
+  'Trikaal aapki kundali ke 6 karmic aayam padh raha hai...',
   'Bhrigu Nandi Nadi ke sutra khul rahe hain...',
   'Shadbala aur Navamsa ka vishleshan ho raha hai...',
   'Lagna lord aur chandra ki gehrai mein utar rahe hain...',
   'Rahu-Ketu ke karmic baggage ko samjha ja raha hai...',
   'Aapke vivah bhavishya ke sutra decode ho rahe hain...',
-  'Claude Sonnet reading ko polish kar raha hai...',
-  'Bas thodi der aur — Trikal Maa ki kripa se...',
+  'Reading ko ant roop diya ja raha hai...',
+  'Bas thodi der aur — Trikaal Maa ki kripa se...',
 ]
 
 // ── Narrative parser ───────────────────────────────────────────────────────────
@@ -158,7 +158,7 @@ export default function KarmicResultClient({ initialRow }: { initialRow: KarmicR
 
   const resultUrl = `https://trikalvaani.com/karmic/${slug}`
   const waText    = encodeURIComponent(
-    `Jai Mahakaal! Meri Karmic Background Reading dekho — Trikal Vaani.\n${resultUrl}\n\nJai Maa Shakti!`
+    `Jai Mahakaal! Meri Karmic Background Reading dekho — Trikaal Vaani.\n${resultUrl}\n\nJai Maa Shakti!`
   )
 
   // ── WAITING STATE ──────────────────────────────────────────────────────────────
@@ -276,7 +276,7 @@ export default function KarmicResultClient({ initialRow }: { initialRow: KarmicR
         <div className="absolute inset-0 bg-gradient-to-b from-[#0d1120] via-[#080B12] to-[#080B12] opacity-90" />
         <div className="relative max-w-4xl mx-auto px-5 py-12 sm:py-16 text-center">
           <div className="inline-block mb-4 px-4 py-1 rounded-full bg-[#D4AF37]/10 border border-[#D4AF37]/30 text-[#D4AF37] text-[10px] tracking-[0.25em] uppercase">
-            Trikal Vaani · Karmic Background Reading
+            Trikaal Vaani · Karmic Background Reading
           </div>
           <h1 className="text-3xl sm:text-5xl font-semibold">{personName}</h1>
           {personPlace && <p className="mt-4 text-sm text-gray-400">{personPlace}</p>}
@@ -370,12 +370,12 @@ export default function KarmicResultClient({ initialRow }: { initialRow: KarmicR
       {/* FOOTER */}
       <footer className="border-t border-[#D4AF37]/10 mt-8">
         <div className="max-w-4xl mx-auto px-5 py-8 text-center text-xs text-gray-500">
-          <p className="text-[#D4AF37] tracking-[0.3em] uppercase">Trikal Vaani</p>
+          <p className="text-[#D4AF37] tracking-[0.3em] uppercase">Trikaal Vaani</p>
           <p className="mt-2">AI-Powered Vedic Astrology · Rohiit Gupta, Chief Vedic Architect</p>
           <p className="mt-1">MSME · UDYAM-DL-10-0119070 · trikalvaani.com</p>
           <p className="mt-3 text-[10px] text-gray-600 max-w-lg mx-auto leading-relaxed">
             This reading reveals karmic patterns from the birth chart for self-understanding.
-            Trikal reveals patterns — it does not pass judgement on any person.
+            Trikaal reveals patterns — it does not pass judgement on any person.
           </p>
         </div>
       </footer>
