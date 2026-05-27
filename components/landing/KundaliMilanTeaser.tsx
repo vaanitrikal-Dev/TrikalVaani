@@ -1,8 +1,14 @@
 'use client';
 
-// 🔱 TRIKAL VAANI | components/landing/KundaliMilanTeaser.tsx | v2.1
+// 🔱 TRIKAL VAANI | components/landing/KundaliMilanTeaser.tsx | v2.2
 // Owner: Rohiit Gupta, Chief Vedic Architect
 // ============================================================================
+// CHANGE LOG (v2.1 → v2.2):
+//   - "Delhi NCR" location credential REMOVED from visible trust line
+//     (online/worldwide positioning — no location credential).
+//   - Nothing else changed. Pricing, "10 Remedies", CTAs, feature strip,
+//     colors, IR-12 EARNING LOCK all identical.
+//
 // CHANGE LOG (v2.0 → v2.1):
 //   Established-feature framing — removed all "live / new / launch / Day 8" tags.
 //   - Badge: "Now Live · Try Free" → "India's Trusted Kundali Milan"
@@ -197,7 +203,7 @@ export default function KundaliMilanTeaser() {
 
         {/* ── TRUST LINE ──────────────────────────────────────────────── */}
         <p className="text-center text-xs text-slate-500 mt-6">
-          Reading framework by Rohiit Gupta, Chief Vedic Architect · Delhi NCR ·
+          Reading framework by Rohiit Gupta, Chief Vedic Architect ·
           Powered by Swiss Ephemeris &amp; BPHS Classical rules
         </p>
 
@@ -207,7 +213,7 @@ export default function KundaliMilanTeaser() {
 }
 
 // ============================================================================
-// END — components/landing/KundaliMilanTeaser.tsx v2.1
+// END — components/landing/KundaliMilanTeaser.tsx v2.2
 // 🔱 Trikal Vaani | Rohiit Gupta, Chief Vedic Architect
 // 🔒 EARNING LOCKED (IR-12)
 // ============================================================================
