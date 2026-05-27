@@ -3,9 +3,20 @@
  * 🔱 TRIKAL VAANI — CEO PROTECTION HEADER 🔱
  * ============================================================================
  * File:        components/HomeFAQ.tsx
- * Version:     v2.1 — Broken calculator URL fix
- * Date:        2026-05-18
+ * Version:     v3.0 — Brand flip + Q8 global reframe + IR-0 GEO/AEO refresh
+ * Date:        2026-05-27
  * Owner:       Rohiit Gupta, Chief Vedic Architect
+ *
+ * CHANGES vs v2.1 (CEO-approved, IR-0 compliant):
+ *   ✅ BRAND FLIP: "Trikal Vaani" -> "Trikaal Vaani" (18 spots, visible + schema).
+ *   ✅ Q8 REFRAMED local -> global: "Who is behind Trikaal Vaani & why trustworthy?"
+ *      Showcases full engine stack (Swiss Ephemeris + BPHS Parashara + Bhrigu
+ *      Nandi Nadi + Shadbala). Delhi NCR + ₹499 phantom REMOVED. India+worldwide.
+ *   ✅ Q6 AI vendor names removed (Gemini 2.5 Pro + Claude -> "premium AI engine
+ *      with expert polish") in both visible + schema text.
+ *   ✅ FRESHNESS: dateModified -> 2026-05-27; footer "Last reviewed" -> "Last updated".
+ *   PROTECTED: trikalvaani.com @id/about/author cross-links, +919211804111,
+ *      all /calculators/* + /career + /wealth + /founder routes, entity graph.
  *
  * CHANGES vs v2.0:
  *   ✅ FIXED: Sade Sati link
@@ -27,14 +38,14 @@ const FAQS = [
     id: 1,
     q: "What is Sade Sati and how long does it last?",
     aText:
-      "Sade Sati is the 7.5-year period when Saturn (Shani) transits the 12th, 1st, and 2nd houses from your Moon sign. It is divided into three phases of approximately 2.5 years each. It does not always bring misfortune — Saturn rewards discipline and tests weak karmic patterns. Trikal Vaani calculates your exact Sade Sati start and end dates using Swiss Ephemeris precision, plus prescribes Shani-specific remedies (Saturday vrat, Hanuman Chalisa, blue sapphire considerations).",
+      "Sade Sati is the 7.5-year period when Saturn (Shani) transits the 12th, 1st, and 2nd houses from your Moon sign. It is divided into three phases of approximately 2.5 years each. It does not always bring misfortune — Saturn rewards discipline and tests weak karmic patterns. Trikaal Vaani calculates your exact Sade Sati start and end dates using Swiss Ephemeris precision, plus prescribes Shani-specific remedies (Saturday vrat, Hanuman Chalisa, blue sapphire considerations).",
     aJsx: (
       <>
         Sade Sati is the <strong>7.5-year period when Saturn (Shani) transits the 12th, 1st, and 2nd houses</strong>{" "}
         from your Moon sign. It is divided into{" "}
         <strong>three phases of approximately 2.5 years each</strong>. It does
         not always bring misfortune — Saturn rewards discipline and tests weak
-        karmic patterns. Trikal Vaani calculates your{" "}
+        karmic patterns. Trikaal Vaani calculates your{" "}
         <strong>exact Sade Sati start and end dates</strong> using Swiss
         Ephemeris precision, plus prescribes Shani-specific remedies (Saturday
         vrat, Hanuman Chalisa, blue sapphire considerations).{" "}
@@ -51,7 +62,7 @@ const FAQS = [
     id: 2,
     q: "What is Manglik Dosha and does it affect marriage?",
     aText:
-      "Manglik Dosha is the presence of Mars (Mangal) in the 1st, 2nd, 4th, 7th, 8th, or 12th house of your kundali. It is traditionally believed to cause friction in marriage when one partner is Manglik and the other is not. However, many cancellations exist — Manglik-to-Manglik matches neutralize the dosha, and certain ages (after 28) reduce its impact. Trikal Vaani performs full Manglik analysis with classical BPHS cancellation rules.",
+      "Manglik Dosha is the presence of Mars (Mangal) in the 1st, 2nd, 4th, 7th, 8th, or 12th house of your kundali. It is traditionally believed to cause friction in marriage when one partner is Manglik and the other is not. However, many cancellations exist — Manglik-to-Manglik matches neutralize the dosha, and certain ages (after 28) reduce its impact. Trikaal Vaani performs full Manglik analysis with classical BPHS cancellation rules.",
     aJsx: (
       <>
         Manglik Dosha is the presence of <strong>Mars (Mangal) in the 1st, 2nd, 4th, 7th, 8th, or 12th house</strong>{" "}
@@ -59,7 +70,7 @@ const FAQS = [
         marriage when one partner is Manglik and the other is not. However,
         many cancellations exist —{" "}
         <strong>Manglik-to-Manglik matches neutralize the dosha</strong>, and
-        certain ages (after 28) reduce its impact. Trikal Vaani performs full
+        certain ages (after 28) reduce its impact. Trikaal Vaani performs full
         Manglik analysis with classical BPHS cancellation rules.{" "}
         <Link
           href="/calculators/free-manglik-dosh-calculator"
@@ -74,14 +85,14 @@ const FAQS = [
     id: 3,
     q: "What is Pratyantar Dasha and why does it matter for timing?",
     aText:
-      "Pratyantar Dasha is Level 3 of the Vimshottari Dasha system (after Mahadasha and Antardasha) and provides 3-7 day timing precision for life events. Most astrology apps stop at Antardasha (months-level accuracy). Trikal Vaani uses Pratyantar Dasha to predict exact windows for marriage, job change, property buying, and major financial decisions — a key differentiator from generic Sun-sign horoscope apps.",
+      "Pratyantar Dasha is Level 3 of the Vimshottari Dasha system (after Mahadasha and Antardasha) and provides 3-7 day timing precision for life events. Most astrology apps stop at Antardasha (months-level accuracy). Trikaal Vaani uses Pratyantar Dasha to predict exact windows for marriage, job change, property buying, and major financial decisions — a key differentiator from generic Sun-sign horoscope apps.",
     aJsx: (
       <>
         Pratyantar Dasha is{" "}
         <strong>Level 3 of the Vimshottari Dasha system</strong> (after
         Mahadasha and Antardasha) and provides{" "}
         <strong>3-7 day timing precision</strong> for life events. Most
-        astrology apps stop at Antardasha (months-level accuracy). Trikal Vaani
+        astrology apps stop at Antardasha (months-level accuracy). Trikaal Vaani
         uses Pratyantar Dasha to predict exact windows for{" "}
         <strong>marriage, job change, property buying, and major financial decisions</strong>{" "}
         — a key differentiator from generic Sun-sign horoscope apps.
@@ -92,14 +103,14 @@ const FAQS = [
     id: 4,
     q: "Can Vedic astrology predict career growth and job change timing?",
     aText:
-      "Yes. Career growth is analyzed through the 10th house (profession), 6th house (service/employment), and 11th house (gains). Key planets are Saturn (discipline, long-term work), Sun (authority), and Mercury (skill). Trikal Vaani identifies when your 10th-lord Mahadasha or favorable Antardasha activates — these windows historically correlate with promotions, job changes, and business launches within 3-7 day precision via Pratyantar Dasha.",
+      "Yes. Career growth is analyzed through the 10th house (profession), 6th house (service/employment), and 11th house (gains). Key planets are Saturn (discipline, long-term work), Sun (authority), and Mercury (skill). Trikaal Vaani identifies when your 10th-lord Mahadasha or favorable Antardasha activates — these windows historically correlate with promotions, job changes, and business launches within 3-7 day precision via Pratyantar Dasha.",
     aJsx: (
       <>
         Yes. Career growth is analyzed through the{" "}
         <strong>10th house (profession)</strong>,{" "}
         <strong>6th house (service/employment)</strong>, and{" "}
         <strong>11th house (gains)</strong>. Key planets are Saturn (discipline,
-        long-term work), Sun (authority), and Mercury (skill). Trikal Vaani
+        long-term work), Sun (authority), and Mercury (skill). Trikaal Vaani
         identifies when your{" "}
         <strong>10th-lord Mahadasha or favorable Antardasha activates</strong> —
         these windows historically correlate with promotions, job changes, and
@@ -135,14 +146,14 @@ const FAQS = [
     id: 6,
     q: "How does AI improve Vedic astrology predictions?",
     aText:
-      "AI does not replace Vedic astrology — it scales human expertise. At Trikal Vaani, Rohiit Gupta's reading framework (built on BPHS rules, Bhrigu Nandi patterns, and Shadbala strength) is encoded into a Gemini 2.5 Pro + Claude pipeline. The AI applies the same logic Rohiit ji would, but for thousands of users simultaneously — with consistent depth, zero fatigue, and instant delivery. Swiss Ephemeris handles planetary math; AI handles personalized interpretation and remedy selection.",
+      "AI does not replace Vedic astrology — it scales human expertise. At Trikaal Vaani, Rohiit Gupta's reading framework (built on BPHS rules, Bhrigu Nandi patterns, and Shadbala strength) is encoded into a premium AI engine with expert polish. The AI applies the same logic Rohiit ji would, but for thousands of users simultaneously — with consistent depth, zero fatigue, and instant delivery. Swiss Ephemeris handles planetary math; AI handles personalized interpretation and remedy selection.",
     aJsx: (
       <>
         AI does not replace Vedic astrology —{" "}
-        <strong>it scales human expertise</strong>. At Trikal Vaani, Rohiit
+        <strong>it scales human expertise</strong>. At Trikaal Vaani, Rohiit
         Gupta&apos;s reading framework (built on BPHS rules, Bhrigu Nandi
         patterns, and Shadbala strength) is encoded into a{" "}
-        <strong>Gemini 2.5 Pro + Claude pipeline</strong>. The AI applies the
+        <strong>premium AI engine with expert polish</strong>. The AI applies the
         same logic Rohiit ji would, but for thousands of users simultaneously —
         with consistent depth, zero fatigue, and instant delivery. Swiss
         Ephemeris handles planetary math; AI handles personalized interpretation
@@ -152,7 +163,7 @@ const FAQS = [
   },
   {
     id: 7,
-    q: "Does Trikal Vaani offer Vedic readings in Hindi?",
+    q: "Does Trikaal Vaani offer Vedic readings in Hindi?",
     aText:
       "Yes. Vedic readings are available in three languages: pure Hindi (शुद्ध हिंदी), Hinglish (Hindi + English mix — most popular), and English. The Voice Reading at ₹11 is delivered as a 60-second Hindi or Hinglish audio. All four prediction tiers support all three languages with native phrasing — never machine-translated text.",
     aJsx: (
@@ -169,16 +180,22 @@ const FAQS = [
   },
   {
     id: 8,
-    q: "Who is the best Vedic astrologer in Delhi NCR?",
+    q: "Who is behind Trikaal Vaani and what makes its predictions trustworthy?",
     aText:
-      "Rohiit Gupta, Chief Vedic Architect at Trikal Vaani, offers Vedic astrology consultations from Delhi NCR. With 15+ years in the Parashara BPHS tradition, he provides personal WhatsApp consultations starting at ₹499 and AI-powered readings starting at ₹51. Reachable at +91-9211804111. Specializations include Vimshottari Dasha, Navamsa, Dhana Yoga, Property Yog, and Pratyantar Dasha precision timing.",
+      "Trikaal Vaani is founded by Rohiit Gupta, Chief Vedic Architect, with 15+ years in the Parashara BPHS tradition. Its accuracy comes from a layered engine stack: Swiss Ephemeris for precise planetary math, Brihat Parashara Hora Shastra (BPHS) classical rules, Bhrigu Nandi Nadi karmic pattern logic, and Shadbala six-fold planetary strength — all applied through a reading framework Rohiit personally designs. This serves seekers across India and worldwide in English, Hindi and Hinglish. AI-powered readings start at ₹51, with deeper Kundali Milan, Child Birth Muhurat and Karmic readings available. Reachable on WhatsApp at +91-9211804111.",
     aJsx: (
       <>
-        <strong>Rohiit Gupta, Chief Vedic Architect at Trikal Vaani</strong>,
-        offers Vedic astrology consultations from Delhi NCR. With 15+ years in
-        the Parashara BPHS tradition, he provides personal WhatsApp
-        consultations starting at ₹499 and AI-powered readings starting at ₹51.
-        Reachable at{" "}
+        <strong>Trikaal Vaani is founded by Rohiit Gupta, Chief Vedic Architect</strong>,
+        with 15+ years in the Parashara BPHS tradition. Its accuracy comes from a
+        layered engine stack:{" "}
+        <strong>Swiss Ephemeris</strong> for precise planetary math,{" "}
+        <strong>Brihat Parashara Hora Shastra (BPHS)</strong> classical rules,{" "}
+        <strong>Bhrigu Nandi Nadi</strong> karmic pattern logic, and{" "}
+        <strong>Shadbala</strong> six-fold planetary strength — all applied
+        through a reading framework Rohiit personally designs. This serves
+        seekers across India and worldwide in Hindi, Hinglish and English.
+        AI-powered readings start at ₹51, with deeper Kundali Milan, Child Birth
+        Muhurat and Karmic readings available. Reachable on WhatsApp at{" "}
         <a
           href="https://wa.me/919211804111"
           rel="noopener noreferrer nofollow"
@@ -187,8 +204,7 @@ const FAQS = [
         >
           +91-9211804111
         </a>
-        . Specializations include Vimshottari Dasha, Navamsa, Dhana Yoga,
-        Property Yog, and Pratyantar Dasha precision timing.
+        .
       </>
     ),
   },
@@ -196,7 +212,7 @@ const FAQS = [
     id: 9,
     q: "What is a Dhana Yoga and how does it indicate wealth?",
     aText:
-      "Dhana Yoga is a combination of planetary placements that indicates wealth potential. Classical BPHS lists 32+ Dhana Yogas. Examples: Lakshmi Yoga (Venus + Jupiter + 9th lord strong), Kubera Yoga (2nd and 11th lords in mutual aspect), Gajakesari Yoga (Moon and Jupiter in kendra). Trikal Vaani analyzes all 32 Dhana Yogas in your chart to map your true financial destiny — not just predict short-term gains.",
+      "Dhana Yoga is a combination of planetary placements that indicates wealth potential. Classical BPHS lists 32+ Dhana Yogas. Examples: Lakshmi Yoga (Venus + Jupiter + 9th lord strong), Kubera Yoga (2nd and 11th lords in mutual aspect), Gajakesari Yoga (Moon and Jupiter in kendra). Trikaal Vaani analyzes all 32 Dhana Yogas in your chart to map your true financial destiny — not just predict short-term gains.",
     aJsx: (
       <>
         Dhana Yoga is a combination of planetary placements that indicates
@@ -219,12 +235,12 @@ const FAQS = [
   },
   {
     id: 10,
-    q: "What life areas can Trikal Vaani provide Vedic predictions for?",
+    q: "What life areas can Trikaal Vaani provide Vedic predictions for?",
     aText:
-      "Trikal Vaani covers 15 life domains: Career, Wealth, Health, Relationships, Family, Education, Home, Legal matters, Travel, Spirituality, Wellbeing, Marriage, Business, Foreign Settlement, and Digital Career. Each domain uses the relevant houses, dasha lords, and yogas — for example, Career uses 10th house + Saturn + Sun, while Marriage uses 7th house + Venus + Navamsa D9 chart.",
+      "Trikaal Vaani covers 15 life domains: Career, Wealth, Health, Relationships, Family, Education, Home, Legal matters, Travel, Spirituality, Wellbeing, Marriage, Business, Foreign Settlement, and Digital Career. Each domain uses the relevant houses, dasha lords, and yogas — for example, Career uses 10th house + Saturn + Sun, while Marriage uses 7th house + Venus + Navamsa D9 chart.",
     aJsx: (
       <>
-        Trikal Vaani covers <strong>15 life domains</strong>: Career, Wealth,
+        Trikaal Vaani covers <strong>15 life domains</strong>: Career, Wealth,
         Health, Relationships, Family, Education, Home, Legal matters, Travel,
         Spirituality, Wellbeing, Marriage, Business, Foreign Settlement, and
         Digital Career. Each domain uses the relevant houses, dasha lords, and
@@ -247,7 +263,7 @@ const deepFaqSchema = {
   author: {
     "@id": "https://trikalvaani.com/#rohiit-gupta",
   },
-  dateModified: "2026-05-18",
+  dateModified: "2026-05-27",
   mainEntity: FAQS.map((f) => ({
     "@type": "Question",
     name: f.q,
@@ -296,7 +312,7 @@ export default function HomeFAQ() {
               Quick Answer
             </p>
             <p className="text-base leading-relaxed text-gray-200 md:text-lg">
-              Trikal Vaani answers technical Vedic astrology questions —{" "}
+              Trikaal Vaani answers technical Vedic astrology questions —{" "}
               <strong>Sade Sati timing, Manglik Dosha cancellations,
               Pratyantar Dasha precision, Dhana Yoga combinations</strong>, and
               kundli vs horoscope differences — using classical Brihat Parashara
@@ -330,14 +346,14 @@ export default function HomeFAQ() {
           </dl>
 
           <p className="mt-8 text-center text-xs text-gray-500">
-            Last reviewed by{" "}
+            Last updated by{" "}
             <Link
               href="/founder"
               className="text-[#D4AF37] hover:underline"
             >
               Rohiit Gupta, Chief Vedic Architect
             </Link>{" "}
-            · May 2026 · Based on Brihat Parashara Hora Shastra (BPHS)
+            · May 27, 2026 · Based on Brihat Parashara Hora Shastra (BPHS)
           </p>
 
           <div className="mt-12 rounded-2xl bg-[#0D1020] border border-[#D4AF37]/20 p-8 text-center md:p-10">
