@@ -3,15 +3,27 @@
  * TRIKAL VAANI — trikalvaani.com
  * Chief Vedic Architect: Rohiit Gupta
  * FILE: components/seo/HomepageGEO.tsx
- * Version: 1.3 — Removed broken city links (converted to static tags)
- * Date: 2026-05-18
+ * Version: 2.0 — Global repositioning + brand flip + 2026 GEO/AEO refresh
+ * Date: 2026-05-27
  * 🔱 JAI MAA SHAKTI
  *
- * CHANGES vs v1.2:
- *   ✅ REMOVED: 10 city <Link> tags (/astrologer-delhi etc.) — all were 404
- *   ✅ REPLACED WITH: Static <span> tags (city presence shown, no broken links)
- *   ✅ WHY: Business is 100% online — city landing pages = doorway page risk
- *   ✅ ALL OTHER CONTENT: 100% identical to v1.2
+ * CHANGES vs v1.3 (CEO-approved, checklist-verified):
+ *   ✅ BRAND FLIP: "Trikal Vaani" -> "Trikaal Vaani" (all visible + FAQ text).
+ *   ✅ PERSONA: "Trikal AI" / "Jini AI" -> "Trikaal AI"; "Trikal Ka Sandesh"
+ *      -> "Trikaal Ka Sandesh".
+ *   ✅ LOCAL SEO REMOVED (CEO Decision #6): deleted the "Best Astrologer in
+ *      Delhi NCR" block + 10 city tags. Removed Delhi NCR credential (5 spots)
+ *      + the 📍 Delhi NCR pill. No doorway pages, no LocalBusiness signal.
+ *   ✅ GLOBAL REPOSITION: national India + worldwide diaspora + AI-search
+ *      (GEO/AEO) framing. New "Worldwide / NRI" reach block replaces local SEO.
+ *   ✅ ₹499 phantom personal-call CTA REMOVED -> honest free-analysis CTA.
+ *   ✅ 2026 GEO: above-the-fold direct-answer kept tight & quotable, entity-rich
+ *      facts (9 grahas, 12 houses, 27 nakshatras, 15 domains), visible
+ *      "Last updated" freshness date, prompt-aligned FAQ retained.
+ *   ⚠️ FAQ wording kept structurally in sync with HomepageSchema FAQPage —
+ *      only brand/persona/Delhi-NCR edits applied; align schema file next.
+ *   PROTECTED (untouched): trikalvaani.com, wa.me/919211804111, all /services
+ *      + /[domain] route slugs, internal comments.
  * =============================================================
  */
 
@@ -24,23 +36,24 @@ export default function HomepageGEO() {
           GEO ELEMENT 1: DIRECT ANSWER BLOCK (56 words)
           ═══════════════════════════════════════════════════════════ */}
       <section
-        id="what-is-trikal-vaani"
+        id="what-is-trikaal-vaani"
         aria-labelledby="geo-direct-answer-heading"
         className="px-4 py-16 bg-[#0A0D18] border-y border-white/5"
       >
         <div className="max-w-3xl mx-auto">
           <p className="text-[#D4AF37] uppercase tracking-widest text-xs font-medium mb-3 text-center">
-            What is Trikal Vaani
+            What is Trikaal Vaani
           </p>
           <h2
             id="geo-direct-answer-heading"
             className="font-serif text-2xl md:text-3xl font-bold text-white text-center mb-6"
           >
             Free Kundli &amp; Accurate AI Vedic Astrology —{' '}
-            <span className="text-[#D4AF37]">India&apos;s Trusted Platform</span>
+            <span className="text-[#D4AF37]">Trusted Worldwide</span>
           </h2>
           <p className="text-base md:text-lg text-gray-300 leading-relaxed text-center">
-            Trikal Vaani delivers <strong>free kundli and accurate AI Vedic astrology predictions</strong>{' '}
+            Trikaal Vaani is an AI-powered Vedic astrology platform delivering{' '}
+            <strong>free kundli and accurate predictions</strong>{' '}
             built on Swiss Ephemeris precision and{' '}
             <strong className="text-[#D4AF37]">
               Brihat Parashara Hora Shastra
@@ -50,11 +63,13 @@ export default function HomepageGEO() {
               href="/founder"
               className="text-[#D4AF37] hover:underline font-semibold"
             >
-              Rohiit Gupta, Chief Vedic Architect (Delhi NCR)
+              Rohiit Gupta, Chief Vedic Architect
             </Link>
-            , it computes your Lagna, 12 houses, Vimshottari Dasha, Bhrigu
-            patterns, and Shadbala strength — then delivers personalised
-            predictions across 15 life domains. Free preview, ₹51 deep readings.
+            , it computes your Lagna, all 12 houses, 9 grahas, 27 nakshatras,
+            Vimshottari Dasha, Bhrigu Nandi patterns and Shadbala strength — then
+            delivers personalised predictions across 15 life domains, in English,
+            Hindi and Hinglish, for seekers across India and worldwide. Free
+            preview, ₹51 deep readings.
           </p>
           <div className="flex flex-wrap justify-center gap-3 mt-8">
             <span className="text-xs border border-[#D4AF37]/30 text-[#D4AF37] px-3 py-1.5 rounded-full bg-[#D4AF37]/5">
@@ -70,7 +85,7 @@ export default function HomepageGEO() {
               ⚖️ Shadbala
             </span>
             <span className="text-xs border border-[#D4AF37]/30 text-[#D4AF37] px-3 py-1.5 rounded-full bg-[#D4AF37]/5">
-              📍 Delhi NCR
+              🌍 India &amp; Worldwide
             </span>
           </div>
         </div>
@@ -105,8 +120,8 @@ export default function HomepageGEO() {
             <p className="text-gray-400 text-sm md:text-base leading-relaxed">
               15+ years of Vedic study under the{' '}
               <strong className="text-white">Parashara BPHS</strong> tradition.
-              Founder of Trikal Vaani. Delhi NCR–based Vedic astrologer
-              accountable for every kundli reading framework that Trikal AI
+              Founder of Trikaal Vaani — the named Vedic astrologer
+              accountable for every kundli reading framework that Trikaal AI
               applies to your birth chart.{' '}
               <Link
                 href="/founder"
@@ -116,7 +131,7 @@ export default function HomepageGEO() {
               </Link>
             </p>
             <p className="text-gray-500 text-xs mt-3">
-              Last reviewed: May 2026 · Verified by Rohiit Gupta · Powered by
+              Last updated: May 2026 · Verified by Rohiit Gupta · Powered by
               Swiss Ephemeris
             </p>
           </div>
@@ -246,20 +261,20 @@ export default function HomepageGEO() {
           <div className="space-y-3">
             {[
               {
-                q: 'How do I get a free AI kundli and horoscope on Trikal Vaani?',
-                a: 'Open trikalvaani.com, enter your name, date of birth, exact time of birth, and place of birth in the free analysis form. Trikal Vaani computes your Lagna, all 12 houses, planetary positions, current Mahadasha, and gives you a Vedic kundli summary instantly — no signup or credit card required.',
+                q: 'How do I get a free AI kundli and horoscope on Trikaal Vaani?',
+                a: 'Open trikalvaani.com, enter your name, date of birth, exact time of birth, and place of birth in the free analysis form. Trikaal Vaani computes your Lagna, all 12 houses, planetary positions, current Mahadasha, and gives you a Vedic kundli summary instantly — no signup or credit card required.',
               },
               {
-                q: 'Is Trikal Vaani free to use?',
-                a: 'Yes. The Trikal Ka Sandesh free preview gives you a 150–200 word AI kundli and horoscope summary with key message and action. Deep readings start at ₹51 and voice readings at ₹11. Free analysis is unlimited.',
+                q: 'Is Trikaal Vaani free to use?',
+                a: 'Yes. The Trikaal Ka Sandesh free preview gives you a 150–200 word AI kundli and horoscope summary with key message and action. Deep readings start at ₹51 and voice readings at ₹11. Free analysis is unlimited.',
               },
               {
-                q: 'How accurate are Trikal Vaani horoscope predictions vs AstroSage and AstroTalk?',
-                a: 'Trikal Vaani uses the same Swiss Ephemeris engine as AstroSage with Lahiri Ayanamsha. The difference is depth — Trikal Vaani layers Bhrigu Nandi Nadi pattern logic and Shadbala six-fold strength on top, plus a named Chief Vedic Architect (Rohiit Gupta) accountable for every reading.',
+                q: 'How accurate are Trikaal Vaani horoscope predictions vs AstroSage and AstroTalk?',
+                a: 'Trikaal Vaani uses the same Swiss Ephemeris engine as AstroSage with Lahiri Ayanamsha. The difference is depth — Trikaal Vaani layers Bhrigu Nandi Nadi pattern logic and Shadbala six-fold strength on top, plus a named Chief Vedic Architect (Rohiit Gupta) accountable for every reading.',
               },
               {
                 q: 'Who is Rohiit Gupta?',
-                a: 'Rohiit Gupta is the Chief Vedic Architect and founder of Trikal Vaani. He has 15+ years of Vedic astrology study under the Parashara BPHS tradition, is based in Delhi NCR, and personally designs every kundli reading framework that Jini AI applies to your birth chart.',
+                a: 'Rohiit Gupta is the Chief Vedic Architect and founder of Trikaal Vaani. He has 15+ years of Vedic astrology study under the Parashara BPHS tradition, and personally designs every kundli reading framework that Trikaal AI applies to your birth chart.',
               },
               {
                 q: 'What birth details do I need for an AI kundli reading?',
@@ -271,11 +286,11 @@ export default function HomepageGEO() {
               },
               {
                 q: 'Can the AI kundli predict marriage timing?',
-                a: 'Yes. The 7th house governs marriage, Venus rules love, and the Navamsa D9 chart reveals soul-level compatibility. Combined with your active Vimshottari Dasha (especially Venus or Jupiter Antardasha), Trikal Vaani predicts likely marriage windows within 2-3 month precision.',
+                a: 'Yes. The 7th house governs marriage, Venus rules love, and the Navamsa D9 chart reveals soul-level compatibility. Combined with your active Vimshottari Dasha (especially Venus or Jupiter Antardasha), Trikaal Vaani predicts likely marriage windows within 2-3 month precision.',
               },
               {
                 q: 'Is the AI horoscope different from a daily Rashi horoscope?',
-                a: "A daily Rashi horoscope gives one prediction for ~10 crore people sharing your Moon sign. Trikal Vaani's AI kundli is computed from YOUR exact birth time and place, so the prediction is unique to your chart — like the difference between a clothing size XL and a tailored suit.",
+                a: "A daily Rashi horoscope gives one prediction for ~10 crore people sharing your Moon sign. Trikaal Vaani's AI kundli is computed from YOUR exact birth time and place, so the prediction is unique to your chart — like the difference between a clothing size XL and a tailored suit.",
               },
             ].map((f, i) => (
               <details
@@ -298,54 +313,58 @@ export default function HomepageGEO() {
       </section>
 
       {/* ═══════════════════════════════════════════════════════════
-          GEO ELEMENT 5: LOCAL SEO BLOCK
-          City links REMOVED (v1.3) — converted to static display tags
-          Business is 100% online — no physical location visits
+          GEO ELEMENT 5: GLOBAL REACH BLOCK (replaces local SEO, v2.0)
+          CEO Decision #6 — 100% online, national + worldwide + AI-search.
+          No city doorway tags, no LocalBusiness signal, no ₹499 phantom.
           ═══════════════════════════════════════════════════════════ */}
       <section
-        aria-labelledby="local-seo-heading"
+        aria-labelledby="global-reach-heading"
         className="px-4 py-16 bg-[#0D1020] border-t border-white/5"
       >
         <div className="max-w-4xl mx-auto text-center">
           <p className="text-[#D4AF37] uppercase tracking-widest text-xs font-medium mb-3">
-            Delhi NCR&apos;s Trusted Vedic Astrologer
+            Vedic Astrology, Anywhere You Are
           </p>
           <h2
-            id="local-seo-heading"
+            id="global-reach-heading"
             className="font-serif text-2xl md:text-3xl font-bold text-white mb-6"
           >
-            Best Vedic Astrologer in{' '}
-            <span className="text-[#D4AF37]">Delhi NCR</span>
+            One Platform for{' '}
+            <span className="text-[#D4AF37]">India &amp; the World</span>
           </h2>
           <p className="text-gray-400 text-base leading-relaxed max-w-2xl mx-auto mb-8">
-            Trikal Vaani serves Delhi, Noida, Gurgaon, Faridabad, and Ghaziabad
-            — combining traditional Parashara wisdom with AI kundli precision.
-            For pan-India seekers, the platform delivers the same depth online
-            that Rohiit ji offers in his Delhi NCR consultations.
+            Trikaal Vaani is a fully online Vedic astrology platform. Your kundli
+            is computed from your exact birth coordinates and time zone, so the
+            reading is identical in depth whether you are in India or anywhere
+            across the global diaspora. Birth places are supported worldwide with
+            automatic time-zone and latitude–longitude resolution — the same
+            Swiss Ephemeris precision and Parashara BPHS framework for every
+            seeker, in English, Hindi or Hinglish.
           </p>
 
-          {/* Static city tags — presence signal without broken links */}
+          {/* Honest capability signals — what the platform genuinely offers */}
           <div className="flex flex-wrap justify-center gap-2 mb-8">
             {[
-              'Delhi', 'Noida', 'Gurgaon', 'Faridabad', 'Ghaziabad',
-              'Mumbai', 'Bangalore', 'Hyderabad', 'Pune', 'Kolkata',
-            ].map((city) => (
+              'Any birth place worldwide',
+              'Auto time-zone resolution',
+              'NRI &amp; global diaspora',
+              'English · Hindi · Hinglish',
+              'PDF on WhatsApp &amp; Email',
+              '15 life domains',
+            ].map((tag) => (
               <span
-                key={city}
-                className="text-xs border border-white/10 text-gray-400 px-3 py-1.5 rounded-full"
-              >
-                Astrologer in {city}
-              </span>
+                key={tag}
+                className="text-xs border border-[#D4AF37]/20 text-gray-300 px-3 py-1.5 rounded-full bg-[#D4AF37]/[0.03]"
+                dangerouslySetInnerHTML={{ __html: tag }}
+              />
             ))}
           </div>
 
           <a
-            href="https://wa.me/919211804111?text=Pranam%20Rohiit%20ji%2C%20I%20want%20a%20Vedic%20astrology%20consultation"
-            target="_blank"
-            rel="noopener noreferrer nofollow"
-            className="inline-flex items-center gap-2 bg-[#25D366] text-white font-bold px-6 py-3 rounded-lg hover:bg-[#20ba5a] transition-all duration-200"
+            href="/#birth-form"
+            className="inline-flex items-center gap-2 bg-[#D4AF37] text-[#080B12] font-bold px-8 py-3 rounded-lg hover:bg-[#e8c84a] transition-all duration-200"
           >
-            📱 WhatsApp Rohiit ji — ₹499 Personal Call
+            Start Your Free Kundli Analysis →
           </a>
         </div>
       </section>
