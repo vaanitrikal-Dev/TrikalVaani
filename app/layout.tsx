@@ -1,17 +1,33 @@
 // ============================================================
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikal Vaani
 // FILE: app/layout.tsx
-// VERSION: v2.7 — Title + Description + OG/Twitter aligned to "Free Kundli & Accurate AI Vedic Astrology"
-// DATE: 2026-05-18
-// CHANGES vs v2.6:
-//   ✅ Title rewritten: leads with brand, then "Free Kundli & Accurate AI Vedic Astrology" (57 chars, CTR-optimized)
-//   ✅ Description rewritten: leads with "Free AI Kundli" hook, retains EEAT (Rohiit Gupta, Chief Vedic Architect, MSME)
-//   ✅ Keywords array refreshed: removed weak "kundali analysis online"; added high-volume "free kundli online", "free janam kundli", "AI astrology free", "horoscope Hindi", "kundli Hindi free"
-//   ✅ OpenGraph title + description aligned to new master title (consistent social shares)
-//   ✅ Twitter card title + description aligned (consistent X/Twitter shares)
-//   ✅ Organization schema: knowsLanguage ["Hindi","English"] added — AEO signal for Hindi queries on Perplexity/SGE
-//   ✅ All schemas, MSME ID, geo signals, Razorpay preloads — UNCHANGED (working, don't touch)
-//   ✅ Analytics, TrikalVoice, SchemaScript wiring — UNCHANGED
+// VERSION: v3.0 — Brand flip + LocalBusiness removed + global IR-0 cleanup
+// DATE: 2026-05-27
+// CHANGES vs v2.7 (CEO-approved, IR-0 compliant):
+//   ✅ BRAND FLIP: visible "Trikal Vaani" -> "Trikaal Vaani" (titles, OG, twitter,
+//      siteName, publisher, meta-publisher, OG image alt, all schema name fields).
+//      legalName "Trikal Vaani Global" KEPT. alternateName arrays keep both spellings.
+//   ✅ LOCALBUSINESS SCHEMA DELETED (CEO Decision #6): the entire
+//      #localbusiness ProfessionalService block (New Delhi address, geo coords,
+//      5 NCR cities, opening hours) removed. ProfessionalService is a
+//      LocalBusiness subtype — banned. MSME ID retained in Organization schema.
+//   ✅ ₹499 PHANTOM REMOVED: "Personal Consultation ₹499" offer deleted from
+//      WebApplication offers. Free / ₹11 / ₹51 (real tiers) kept.
+//   ✅ FAKE STAT REMOVED: Org description "India's most accurate" -> honest
+//      global description. "Delhi NCR" removed.
+//   ✅ GLOBAL (IR-0): Org areaServed -> [India, Worldwide].
+//   ✅ GEO META REMOVED: geo.region, geo.placename, geo.position, ICBM (Delhi
+//      targeting) deleted from `other`. "(Delhi NCR)" removed from description.
+//   ✅ KEYWORDS: "best astrologer Delhi NCR" + "astrologer near me" removed;
+//      added "online astrology consultation", "kundli matching online".
+//   ✅ sameAs FIXED: real handles instagram.com/thetrikalvaani,
+//      youtube.com/@TheTrikalVaani, facebook Trikal-Vaani-Voice. X/Twitter
+//      dropped (master plan §5.3) — twitter.creator line also removed.
+//   ✅ PERSONA: "Trikal Ka Sandesh" -> "Trikaal Ka Sandesh", "Trikal AI" -> "Trikaal AI".
+//   PROTECTED (untouched): all trikalvaani.com URLs/@id (#organization +
+//   #rohiit-gupta referenced by HomepageSchema + TrustStrip), /founder, /hi,
+//   canonical, metadataBase, Google verification token, MSME number, phone,
+//   Razorpay preloads, SchemaScript/TrikalVoice/Analytics wiring.
 // ============================================================
 
 import type { Metadata } from "next";
@@ -28,14 +44,14 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   metadataBase: new URL("https://trikalvaani.com"),
   title: {
-    default: "Trikal Vaani | Free Kundli & Accurate AI Vedic Astrology",
-    template: "%s | Trikal Vaani",
+    default: "Trikaal Vaani | Free Kundli & Accurate AI Vedic Astrology",
+    template: "%s | Trikaal Vaani",
   },
   description:
-    "Get your free AI kundli & accurate Vedic astrology predictions instantly. Personalised readings for career, wealth, marriage, health & legal matters by Rohiit Gupta, Chief Vedic Architect (Delhi NCR). Powered by Swiss Ephemeris. Voice & text readings from ₹11.",
+    "Get your free AI kundli & accurate Vedic astrology predictions instantly. Personalised readings for career, wealth, marriage, health & legal matters by Rohiit Gupta, Chief Vedic Architect. Powered by Swiss Ephemeris. Voice & text readings from ₹11.",
   authors: [{ name: "Rohiit Gupta", url: "https://trikalvaani.com/founder" }],
   creator: "Rohiit Gupta",
-  publisher: "Trikal Vaani",
+  publisher: "Trikaal Vaani",
   keywords: [
     "free kundli online",
     "free janam kundli",
@@ -43,13 +59,14 @@ export const metadata: Metadata = {
     "free AI kundli",
     "Vedic astrology India",
     "AI Vedic astrology",
+    "Trikaal Vaani",
     "Trikal Vaani",
     "Rohiit Gupta astrologer",
     "voice astrology Hindi",
     "horoscope Hindi",
     "kundli Hindi free",
-    "best astrologer Delhi NCR",
-    "astrologer near me",
+    "online astrology consultation",
+    "kundli matching online",
     "Mahadasha prediction",
     "Vimshottari Dasha reading",
     "accurate astrology prediction",
@@ -74,8 +91,8 @@ export const metadata: Metadata = {
     locale: "en_IN",
     alternateLocale: ["hi_IN"],
     url: "https://trikalvaani.com/",
-    siteName: "Trikal Vaani",
-    title: "Trikal Vaani | Free Kundli & Accurate AI Vedic Astrology",
+    siteName: "Trikaal Vaani",
+    title: "Trikaal Vaani | Free Kundli & Accurate AI Vedic Astrology",
     description:
       "Free AI kundli & accurate Vedic astrology predictions. Personalised readings by Rohiit Gupta, Chief Vedic Architect. Voice & text from ₹11.",
     images: [
@@ -83,14 +100,13 @@ export const metadata: Metadata = {
         url: "https://trikalvaani.com/og-default.jpg",
         width: 1200,
         height: 630,
-        alt: "Trikal Vaani — Free Kundli & Accurate AI Vedic Astrology",
+        alt: "Trikaal Vaani — Free Kundli & Accurate AI Vedic Astrology",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    creator: "@TrikalVaani",
-    title: "Trikal Vaani | Free Kundli & Accurate AI Vedic Astrology",
+    title: "Trikaal Vaani | Free Kundli & Accurate AI Vedic Astrology",
     description:
       "Free AI kundli & accurate Vedic astrology predictions. Voice & text readings from ₹11.",
     images: ["https://trikalvaani.com/og-default.jpg"],
@@ -106,14 +122,10 @@ export const metadata: Metadata = {
     },
   },
   other: {
-    "geo.region": "IN-DL",
-    "geo.placename": "New Delhi",
-    "geo.position": "28.6139;77.2090",
-    "ICBM": "28.6139, 77.2090",
     "meta-author": "Rohiit Gupta",
     "meta-category": "Vedic Astrology",
     "meta-creator": "Rohiit Gupta",
-    "meta-publisher": "Trikal Vaani",
+    "meta-publisher": "Trikaal Vaani",
   },
 };
 
@@ -135,12 +147,12 @@ export default function RootLayout({
               "@context": "https://schema.org",
               "@type": "Organization",
               "@id": "https://trikalvaani.com/#organization",
-              name: "Trikal Vaani",
+              name: "Trikaal Vaani",
               alternateName: [
                 "Trikaal Vaani",
                 "Trikaalvaani",
                 "Trikalvaani",
-                "Trikal Vaani AI",
+                "Trikaal Vaani AI",
                 "TrikalVaani",
                 "त्रिकाल वाणी",
                 "त्रिकाळ वाणी",
@@ -154,7 +166,7 @@ export default function RootLayout({
                 height: 512,
               },
               description:
-                "India's most accurate AI-powered Vedic astrology platform offering free kundli and personalised predictions. Powered by Swiss Ephemeris, BPHS classical rules, Bhrigu Nandi Nadi, and Shadbala. Government of India MSME registered enterprise (UDYAM-DL-10-0119070). Founded by Rohiit Gupta, Chief Vedic Architect, Delhi NCR.",
+                "AI-powered Vedic astrology platform offering free kundli and personalised predictions across India and worldwide. Powered by Swiss Ephemeris, BPHS Parashara classical rules, Bhrigu Nandi Nadi, and Shadbala. Government of India MSME registered enterprise (UDYAM-DL-10-0119070). Founded by Rohiit Gupta, Chief Vedic Architect.",
               foundingDate: "2026",
               knowsLanguage: ["Hindi", "English"],
               founder: {
@@ -191,11 +203,14 @@ export default function RootLayout({
                   url: "https://udyamregistration.gov.in/Udyam_Verify.aspx",
                 },
               ],
-              areaServed: { "@type": "Country", name: "India" },
+              areaServed: [
+                { "@type": "Country", name: "India" },
+                { "@type": "Place", name: "Worldwide" },
+              ],
               sameAs: [
-                "https://www.instagram.com/trikalvaani",
-                "https://www.youtube.com/@trikalvaani",
-                "https://twitter.com/trikalvaani",
+                "https://www.instagram.com/thetrikalvaani",
+                "https://www.youtube.com/@TheTrikalVaani",
+                "https://www.facebook.com/people/Trikal-Vaani-Voice",
                 "https://udyamregistration.gov.in/Udyam_Verify.aspx",
               ],
               paymentAccepted: [
@@ -221,8 +236,8 @@ export default function RootLayout({
               "@context": "https://schema.org",
               "@type": "WebApplication",
               "@id": "https://trikalvaani.com/#webapp",
-              name: "Trikal Vaani — Free Kundli & AI Vedic Astrology",
-              alternateName: ["Trikaal Vaani", "Trikalvaani AI"],
+              name: "Trikaal Vaani — Free Kundli & AI Vedic Astrology",
+              alternateName: ["Trikaal Vaani", "Trikaalvaani AI"],
               url: "https://trikalvaani.com",
               applicationCategory: "LifestyleApplication",
               operatingSystem: "Web, iOS, Android",
@@ -230,7 +245,7 @@ export default function RootLayout({
               offers: [
                 {
                   "@type": "Offer",
-                  name: "Free Kundli & Trikal Ka Sandesh",
+                  name: "Free Kundli & Trikaal Ka Sandesh",
                   price: "0",
                   priceCurrency: "INR",
                   description:
@@ -242,7 +257,7 @@ export default function RootLayout({
                   price: "11",
                   priceCurrency: "INR",
                   description:
-                    "60-second Hindi/Hinglish voice reading by Trikal AI",
+                    "60-second Hindi/Hinglish voice reading by Trikaal AI",
                 },
                 {
                   "@type": "Offer",
@@ -252,76 +267,8 @@ export default function RootLayout({
                   description:
                     "900-word full analysis with 5 personalised upay and action windows",
                 },
-                {
-                  "@type": "Offer",
-                  name: "Personal Consultation",
-                  price: "499",
-                  priceCurrency: "INR",
-                  description:
-                    "1:1 WhatsApp consultation with Rohiit Gupta, Chief Vedic Architect",
-                },
               ],
               provider: { "@id": "https://trikalvaani.com/#organization" },
-            }),
-          }}
-        />
-
-        {/* ── LocalBusiness / ProfessionalService Schema ── */}
-        <Script
-          id="localbusiness-schema"
-          type="application/ld+json"
-          strategy="beforeInteractive"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "ProfessionalService",
-              "@id": "https://trikalvaani.com/#localbusiness",
-              name: "Trikal Vaani — Free Kundli & AI Vedic Astrology by Rohiit Gupta",
-              alternateName: ["Trikaal Vaani", "Trikaalvaani"],
-              image: "https://trikalvaani.com/og-image.jpg",
-              url: "https://trikalvaani.com",
-              telephone: "+91-9211804111",
-              priceRange: "₹0 - ₹499",
-              identifier: {
-                "@type": "PropertyValue",
-                propertyID: "Udyam Registration Number",
-                value: "UDYAM-DL-10-0119070",
-              },
-              address: {
-                "@type": "PostalAddress",
-                addressLocality: "New Delhi",
-                addressRegion: "Delhi",
-                postalCode: "110001",
-                addressCountry: "IN",
-              },
-              geo: {
-                "@type": "GeoCoordinates",
-                latitude: 28.6139,
-                longitude: 77.209,
-              },
-              areaServed: [
-                { "@type": "City", name: "New Delhi" },
-                { "@type": "City", name: "Gurugram" },
-                { "@type": "City", name: "Noida" },
-                { "@type": "City", name: "Faridabad" },
-                { "@type": "City", name: "Ghaziabad" },
-                { "@type": "Country", name: "India" },
-              ],
-              openingHoursSpecification: {
-                "@type": "OpeningHoursSpecification",
-                dayOfWeek: [
-                  "Monday",
-                  "Tuesday",
-                  "Wednesday",
-                  "Thursday",
-                  "Friday",
-                  "Saturday",
-                  "Sunday",
-                ],
-                opens: "00:00",
-                closes: "23:59",
-              },
-              founder: { "@id": "https://trikalvaani.com/#rohiit-gupta" },
             }),
           }}
         />
