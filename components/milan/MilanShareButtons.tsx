@@ -3,9 +3,13 @@
  * TRIKAL VAANI — Milan Share Buttons
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: components/milan/MilanShareButtons.tsx
- * VERSION: 1.0
+ * VERSION: 1.1 — Brand flip (Trikaal Vaani in share text)
  * SIGNED: ROHIIT GUPTA, CEO
  * ============================================================
+ * v1.1: "Trikal Vaani" -> "Trikaal Vaani" in WhatsApp + Email share
+ * copy (customer-facing text users forward to family). Domain
+ * trikalvaani.com + /api/milan-pdf route untouched.
+ *
  * First-class sharing per IR-22:
  *   • WhatsApp (wa.me deep link)
  *   • Email (mailto with subject + body)
@@ -44,27 +48,27 @@ export default function MilanShareButtons({
   // ── WhatsApp share ──────────────────────────────────────
   const whatsappText = encodeURIComponent(
     `🙏 Jai Mahakaal!\n\n` +
-    `Hamare rishtedari ka Trikal Vaani Kundali Milan complete ho gaya.\n\n` +
+    `Hamare rishtedari ka Trikaal Vaani Kundali Milan complete ho gaya.\n\n` +
     `${brideName} × ${groomName}\n` +
     (ashtakoot !== null ? `Ashtakoot: ${ashtakoot}/36\n\n` : '\n') +
     `Poori reading dekhein:\n${resultUrl}\n\n` +
-    `Trikal Vaani · trikalvaani.com 🔱`
+    `Trikaal Vaani · trikalvaani.com 🔱`
   );
   const whatsappUrl = `https://wa.me/?text=${whatsappText}`;
 
   // ── Email share ─────────────────────────────────────────
   const emailSubject = encodeURIComponent(
-    `Kundali Milan — ${brideName} × ${groomName} — Trikal Vaani`
+    `Kundali Milan — ${brideName} × ${groomName} — Trikaal Vaani`
   );
   const emailBody = encodeURIComponent(
     `Pranam,\n\n` +
-    `Hamne Trikal Vaani par hamari rishtedari ka Kundali Milan karwaya hai. ` +
+    `Hamne Trikaal Vaani par hamari rishtedari ka Kundali Milan karwaya hai. ` +
     `Aap bhi dekh sakte hain:\n\n` +
     `Bride: ${brideName}\n` +
     `Groom: ${groomName}\n` +
     (ashtakoot !== null ? `Ashtakoot Score: ${ashtakoot}/36\n` : '') +
     `\nPoori reading is link par:\n${resultUrl}\n\n` +
-    `Trikal Vaani — AI-Powered Vedic Astrology\n` +
+    `Trikaal Vaani — AI-Powered Vedic Astrology\n` +
     `Rohiit Gupta, Chief Vedic Architect\n` +
     `trikalvaani.com 🔱`
   );
