@@ -40,6 +40,8 @@ import wave
 import sys
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
+from dotenv import load_dotenv
+load_dotenv("/home/vaanitrikal/trikal-vaani/content-engine/.env")
 
 # ENV
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
@@ -60,7 +62,7 @@ YOUTUBE_REFRESH_TOKEN = os.environ.get("YOUTUBE_REFRESH_TOKEN", "")
 # GOOGLE DRIVE CONFIG
 DRIVE_CLIENT_ID = "166374809393-eo1hthqcbh5s0g504ra5ijap9gr930lr.apps.googleusercontent.com"
 DRIVE_CLIENT_SECRET = "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"
-DRIVE_REFRESH_TOKEN = "1//043A--ejqbUGbCgYIARAAGAQSNwF-L9IrW3QqsoW5y_pWrmSt3hhs8ic4iJWGP4jS4_bV2fiD6MFTeBiW4yUt5G27Gzb7iN5VcCY"
+DRIVE_REFRESH_TOKEN = os.environ.get("GOOGLE_DRIVE_REFRESH_TOKEN", "")
 DRIVE_FOLDER_ID = "1CyfhLGXcLs4JITGOPbVU-h6-56jvExYx"
 
 # PATHS

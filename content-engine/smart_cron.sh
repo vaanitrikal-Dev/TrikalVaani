@@ -58,7 +58,7 @@ echo "================================================" >> "$LOG_FILE"
 # Source env vars (cron doesn't inherit user bashrc by default)
 if [ -f "/home/vaanitrikal/.bashrc" ]; then
   set +u
-  source /home/vaanitrikal/.bashrc
+  source /home/vaanitrikal/trikal-vaani/content-engine/.env.cron
   set -u
 fi
 
