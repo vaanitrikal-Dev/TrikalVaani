@@ -1,13 +1,36 @@
 // ============================================================
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikal Vaani
 // FILE: components/SchemaScript.tsx
-// VERSION: v2.1 — AggregateRating Canonical + Duplicate @id Fixed
-// DATE: 2026-05-11
-// CHANGES:
-//   1. Product schema is the SOLE holder of aggregateRating (4.9 / 10666)
-//   2. Removed duplicate Service schema (was two blocks with same @id)
-//   3. Service schema now has unique @id: #service-readings
-//   4. All schemas cross-reference via @id for knowledge graph coherence
+// VERSION: v3.0 — Fake rating removed + brand flip + global GEO/AEO/E-E-A-T
+// DATE: 2026-05-27
+// CHANGES vs v2.1 (CEO-approved, IR-0 compliant):
+//   REMOVED (landmines):
+//     ❌ Fake aggregateRating (4.9 / 10666) — DELETED. No fake stats (IR-0).
+//        Re-add only with real Razorpay-verified reviews.
+//     ❌ FAQPage block — REMOVED. Owned by HomepageSchema v2.0 (#faq,
+//        homepage-only). Keeping it here duplicated the @id sitewide AND
+//        re-injected Delhi NCR + ₹499 + vendor names on every page.
+//     ❌ ₹499 Personal Consultation offer — removed from Service catalog.
+//     ❌ Delhi NCR PostalAddress pin — removed from Person.
+//     ❌ Vendor names (Gemini Pro 2.5 / Google Gemini / Trikal AI engine)
+//        — replaced with "premium AI engine with expert polish".
+//   ADDED (SEO/GEO/AEO/E-E-A-T firepower):
+//     ✅ BRAND FLIP "Trikal Vaani" -> "Trikaal Vaani" (WebSite, Service,
+//        Product, brand names). alternateName arrays keep both spellings.
+//     ✅ GLOBAL: Service + Product areaServed/description -> India + Worldwide.
+//     ✅ E-E-A-T: Person hasCredential (15+ yrs BPHS), nationality India,
+//        knowsLanguage, expanded knowsAbout, real sameAs (IG/YT/FB).
+//     ✅ Service: dateModified freshness, availableChannel, author cross-link
+//        to #rohiit-gupta, 3-language availability, entity-rich description.
+//     ✅ WebSite: SearchAction kept, global description, both brand spellings.
+//   SCHEMA OWNERSHIP (no sitewide collisions):
+//     SchemaScript (sitewide) → WebSite + Service + Product
+//     HomepageSchema (homepage) → Person + FAQPage + HowTo + Breadcrumb
+//     layout.tsx → Organization + WebApplication
+//   NOTE: Person #rohiit-gupta kept here as the sitewide author entity;
+//   it matches HomepageSchema's #rohiit-gupta exactly (same @id, consistent
+//   data) so the two reinforce rather than conflict.
+//   All schemas cross-reference via @id for knowledge graph coherence.
 // ============================================================
 
 "use client";
@@ -23,9 +46,9 @@ export default function SchemaScript() {
       "@type": "WebSite",
       "@id": "https://trikalvaani.com/#website",
       url: "https://trikalvaani.com",
-      name: "Trikal Vaani",
-      alternateName: ["Trikaal Vaani", "Trikalvaani", "Trikaalvaani"],
-      description: "AI-powered Vedic astrology — past, present, and future decoded.",
+      name: "Trikaal Vaani",
+      alternateName: ["Trikal Vaani", "Trikalvaani", "Trikaalvaani"],
+      description: "AI-powered Vedic astrology — past, present, and future decoded. Free kundli and accurate predictions across India and worldwide.",
       publisher: { "@id": "https://trikalvaani.com/#organization" },
       inLanguage: ["en-IN", "hi-IN"],
       potentialAction: {
@@ -44,16 +67,18 @@ export default function SchemaScript() {
       "@type": "Person",
       "@id": "https://trikalvaani.com/#rohiit-gupta",
       name: "Rohiit Gupta",
-      alternateName: "Rohit Gupta",
+      alternateName: ["Rohit Gupta", "रोहित गुप्ता"],
       jobTitle: "Chief Vedic Architect",
       description:
-        "15+ years of Vedic astrology study under the Parashara BPHS tradition. Founder of Trikal Vaani (also known as Trikaal Vaani) — Government of India MSME registered enterprise (UDYAM-DL-10-0119070). Pioneer in AI-powered Vedic astrology and Bhrigu Nandi Nadi research.",
+        "15+ years of Vedic astrology study under the Parashara BPHS tradition. Founder of Trikaal Vaani (legally Trikal Vaani Global) — a Government of India MSME registered enterprise (UDYAM-DL-10-0119070) serving seekers across India and worldwide. Specialist in Bhrigu Nandi Nadi karmic analysis, Shadbala six-fold strength, and AI-powered Vedic astrology.",
       url: "https://trikalvaani.com/founder",
       image: "https://trikalvaani.com/images/founder.png",
-      worksFor: {
-        "@type": "Organization",
-        "@id": "https://trikalvaani.com/#organization",
-        name: "Trikal Vaani",
+      worksFor: { "@id": "https://trikalvaani.com/#organization" },
+      nationality: { "@type": "Country", name: "India" },
+      hasCredential: {
+        "@type": "EducationalOccupationalCredential",
+        credentialCategory: "Professional Experience",
+        name: "15+ years of Vedic astrology practice (Parashara BPHS tradition)",
       },
       knowsAbout: [
         "Vedic Astrology",
@@ -66,129 +91,47 @@ export default function SchemaScript() {
         "Pratyantar Dasha",
         "Navamsa D9 Chart",
         "Dhana Yoga",
+        "Kundali Matching",
+        "Muhurat Selection",
         "AI Astrology Systems",
       ],
-      address: {
-        "@type": "PostalAddress",
-        addressLocality: "Delhi NCR",
-        addressRegion: "Delhi",
-        addressCountry: "IN",
-      },
+      knowsLanguage: ["Hindi", "English"],
       sameAs: [
-        "https://www.instagram.com/trikalvaani",
+        "https://www.instagram.com/thetrikalvaani",
+        "https://www.youtube.com/@TheTrikalVaani",
+        "https://www.facebook.com/people/Trikal-Vaani-Voice",
         "https://trikalvaani.com/founder",
       ],
     },
 
-    // ── 3. FAQPage Schema ─────────────────────────────────────
-    {
-      "@context": "https://schema.org",
-      "@type": "FAQPage",
-      "@id": "https://trikalvaani.com/#faq",
-      mainEntity: [
-        {
-          "@type": "Question",
-          name: "What is Trikal Vaani and how does it work?",
-          acceptedAnswer: {
-            "@type": "Answer",
-            text: "Trikal Vaani (also spelled Trikaal Vaani) is an AI-powered Vedic astrology platform founded by Rohiit Gupta, Chief Vedic Architect, Delhi NCR. It combines 5,000-year-old Parashara BPHS logic with Google Gemini AI and Swiss Ephemeris calculations to generate personalized Vedic predictions across 15 life domains. Free preview available; paid readings from ₹11.",
-          },
-        },
-        {
-          "@type": "Question",
-          name: "How accurate are Trikal Vaani predictions vs AstroSage and AstroTalk?",
-          acceptedAnswer: {
-            "@type": "Answer",
-            text: "Trikal Vaani uses Swiss Ephemeris with Lahiri Ayanamsha — the same engine as AstroSage. The difference is depth: Trikal Vaani layers Bhrigu Nandi Nadi pattern logic and Shadbala six-fold strength on top, plus Pratyantar Dasha for 3-7 day timing precision (most apps only reach Antardasha, months-level accuracy). Every framework is verified by Rohiit Gupta, Chief Vedic Architect.",
-          },
-        },
-        {
-          "@type": "Question",
-          name: "What is Pratyantar Dasha and why does it matter?",
-          acceptedAnswer: {
-            "@type": "Answer",
-            text: "Pratyantar Dasha is Level 3 of the Vimshottari Dasha system (after Mahadasha and Antardasha) and provides 3-7 day timing precision for life events. Most astrology apps stop at Antardasha (months-level accuracy). Trikal Vaani uses Pratyantar to predict exact windows for marriage, job change, property buying, and major decisions.",
-          },
-        },
-        {
-          "@type": "Question",
-          name: "What does a ₹51 Deep Reading include?",
-          acceptedAnswer: {
-            "@type": "Answer",
-            text: "The ₹51 Deep Reading includes a 900-word full Vedic analysis powered by Gemini Pro 2.5, 5 personalised upay (remedies) with action steps, timing windows based on your active Pratyantar Dasha, and planet-specific guidance for your most pressing life question. Secured by Razorpay, PCI-DSS compliant.",
-          },
-        },
-        {
-          "@type": "Question",
-          name: "Who is Rohiit Gupta?",
-          acceptedAnswer: {
-            "@type": "Answer",
-            text: "Rohiit Gupta is the founder and Chief Vedic Architect of Trikal Vaani, based in Delhi NCR. He has 15+ years of Vedic astrology study under the Parashara BPHS tradition and personally designs every kundli reading framework that Jini AI applies. He combined his expertise with Google Gemini AI to build the Trikal AI engine. MSME registered: UDYAM-DL-10-0119070.",
-          },
-        },
-        {
-          "@type": "Question",
-          name: "Is Trikal Vaani free to use?",
-          acceptedAnswer: {
-            "@type": "Answer",
-            text: "Yes. The Trikal Ka Sandesh free preview gives a 150–200 word AI kundli and horoscope summary with key message and action — no signup or credit card required. Paid tiers start at ₹11 for Voice Reading and ₹51 for Deep Reading. The ₹499 tier includes a 1:1 consultation with Rohiit Gupta.",
-          },
-        },
-        {
-          "@type": "Question",
-          name: "Who is the best Vedic astrologer in Delhi NCR?",
-          acceptedAnswer: {
-            "@type": "Answer",
-            text: "Rohiit Gupta, Chief Vedic Architect at Trikal Vaani, offers Vedic astrology consultations from Delhi NCR. With 15+ years in the Parashara BPHS tradition, he provides personal WhatsApp consultations at ₹499 and AI-powered readings from ₹51. Reachable at +91-9211804111. Specialisations: Vimshottari Dasha, Navamsa D9, Dhana Yoga, Property Yog, and Pratyantar Dasha timing.",
-          },
-        },
-        {
-          "@type": "Question",
-          name: "What is the difference between Vedic and Western astrology?",
-          acceptedAnswer: {
-            "@type": "Answer",
-            text: "Vedic astrology uses the sidereal zodiac (actual star positions) with Lahiri Ayanamsha, while Western uses the tropical zodiac (Earth seasons). Vedic emphasises Lagna and Moon sign over Sun sign, uses Vimshottari Dasha for time-based predictions, and analyses 27 Nakshatras for finer detail. Trikal Vaani uses pure Vedic methodology rooted in BPHS.",
-          },
-        },
-        {
-          "@type": "Question",
-          name: "What life areas can Trikal Vaani predict?",
-          acceptedAnswer: {
-            "@type": "Answer",
-            text: "Trikal Vaani covers 15 life domains: Career, Wealth, Health, Relationships, Family, Education, Home, Legal matters, Travel, Spirituality, Wellbeing, Marriage, Business, Foreign Settlement, and Digital Career. Each domain uses the relevant houses, dasha lords, and yogas from your personal kundli.",
-          },
-        },
-        {
-          "@type": "Question",
-          name: "Is my birth data safe with Trikal Vaani?",
-          acceptedAnswer: {
-            "@type": "Answer",
-            text: "Yes. Trikal Vaani is MSME registered (UDYAM-DL-10-0119070), and all payments are secured by Razorpay with PCI-DSS compliance and 256-bit SSL encryption. Birth data is used only for generating your reading and is never shared with third parties.",
-          },
-        },
-      ],
-    },
-
-    // ── 4. Service Schema ─────────────────────────────────────
-    // ✅ FIXED: Unique @id #service-readings (was duplicate @id #service)
+    // ── 3. Service Schema (sitewide) ──────────────────────────
+    // Owns #service-readings. Person + FAQPage are owned by HomepageSchema
+    // (homepage-only) to avoid sitewide @id collision.
     {
       "@context": "https://schema.org",
       "@type": "Service",
       "@id": "https://trikalvaani.com/#service-readings",
-      name: "Trikal Vaani Vedic Astrology Prediction Service",
+      name: "Trikaal Vaani Vedic Astrology Prediction Service",
       serviceType: "AI Vedic Astrology Reading",
-      provider: {
-        "@type": "Organization",
-        "@id": "https://trikalvaani.com/#organization",
-        name: "Trikal Vaani",
-        url: "https://trikalvaani.com",
-      },
-      areaServed: { "@type": "Country", name: "India" },
+      description:
+        "AI-powered Vedic astrology: free kundli, accurate predictions across 15 life domains, Kundali Milan, Child Birth Muhurat, Karmic Reading and voice guidance — computed with Swiss Ephemeris precision and Brihat Parashara Hora Shastra classical rules, in English, Hindi and Hinglish.",
+      provider: { "@id": "https://trikalvaani.com/#organization" },
+      author: { "@id": "https://trikalvaani.com/#rohiit-gupta" },
+      url: "https://trikalvaani.com",
+      dateModified: "2026-05-27",
+      areaServed: [
+        { "@type": "Country", name: "India" },
+        { "@type": "Place", name: "Worldwide" },
+      ],
       audience: {
         "@type": "Audience",
         audienceType:
           "Individuals seeking Vedic astrology guidance on career, marriage, wealth, health, and legal matters",
-        geographicArea: { "@type": "Country", name: "India" },
+      },
+      availableChannel: {
+        "@type": "ServiceChannel",
+        serviceUrl: "https://trikalvaani.com",
+        availableLanguage: ["en", "hi"],
       },
       availableLanguage: [
         { "@type": "Language", name: "Hindi" },
@@ -197,11 +140,11 @@ export default function SchemaScript() {
       ],
       hasOfferCatalog: {
         "@type": "OfferCatalog",
-        name: "Trikal Vaani Vedic Reading Tiers",
+        name: "Trikaal Vaani Vedic Reading Tiers",
         itemListElement: [
           {
             "@type": "Offer",
-            name: "Trikal Ka Sandesh — Free Preview",
+            name: "Trikaal Ka Sandesh — Free Preview",
             price: "0",
             priceCurrency: "INR",
             description:
@@ -209,11 +152,11 @@ export default function SchemaScript() {
           },
           {
             "@type": "Offer",
-            name: "Voice Reading — Trikal ki Awaaz",
+            name: "Voice Reading — Trikaal ki Awaaz",
             price: "11",
             priceCurrency: "INR",
             description:
-              "60-second Hindi/Hinglish voice reading by Trikal AI",
+              "60-second Hindi/Hinglish voice reading by Trikaal AI",
           },
           {
             "@type": "Offer",
@@ -221,59 +164,42 @@ export default function SchemaScript() {
             price: "51",
             priceCurrency: "INR",
             description:
-              "900-word analysis with 5 personalised upay and action windows, powered by Gemini Pro 2.5",
-          },
-          {
-            "@type": "Offer",
-            name: "Personal Consultation with Rohiit Gupta",
-            price: "499",
-            priceCurrency: "INR",
-            description:
-              "1:1 WhatsApp consultation with Rohiit Gupta, Chief Vedic Architect",
+              "900-word analysis with 5 personalised upay and action windows, premium AI engine with expert polish",
           },
         ],
       },
     },
 
-    // ── 5. Product Schema ─────────────────────────────────────
-    // ✅ THIS IS THE ONE AND ONLY aggregateRating in the entire site.
-    // Do NOT add aggregateRating anywhere else.
+    // ── 4. Product Schema ─────────────────────────────────────
+    // NOTE: aggregateRating intentionally REMOVED — no fake ratings.
+    // Re-add ONLY when real Razorpay-verified reviews accumulate.
     {
       "@context": "https://schema.org",
       "@type": "Product",
       "@id": "https://trikalvaani.com/#product",
-      name: "Trikal Vaani AI Vedic Astrology",
+      name: "Trikaal Vaani AI Vedic Astrology",
       alternateName: [
         "Trikaal Vaani AI Astrology",
         "Trikalvaani Kundli AI",
-        "Trikal Vaani Jyotish AI",
+        "Trikaal Vaani Jyotish AI",
       ],
       description:
-        "AI-powered Vedic astrology readings by Rohiit Gupta — Chief Vedic Architect. Swiss Ephemeris precision, BPHS classical rules, Pratyantar Dasha timing. Government of India MSME registered (UDYAM-DL-10-0119070). Also known as Trikaal Vaani.",
+        "AI-powered Vedic astrology readings by Rohiit Gupta — Chief Vedic Architect. Swiss Ephemeris precision, BPHS Parashara classical rules, Bhrigu Nandi Nadi, Shadbala, and Pratyantar Dasha timing. Serving India and worldwide. Government of India MSME registered (UDYAM-DL-10-0119070).",
       image: "https://trikalvaani.com/og-default.jpg",
       url: "https://trikalvaani.com",
       brand: {
         "@type": "Brand",
-        name: "Trikal Vaani",
+        name: "Trikaal Vaani",
         "@id": "https://trikalvaani.com/#organization",
       },
       manufacturer: { "@id": "https://trikalvaani.com/#organization" },
       offers: {
         "@type": "AggregateOffer",
         lowPrice: "0",
-        highPrice: "499",
+        highPrice: "251",
         priceCurrency: "INR",
-        offerCount: "4",
+        offerCount: "6",
         availability: "https://schema.org/InStock",
-      },
-      // ✅ CANONICAL aggregateRating — the ONLY one on the entire site
-      aggregateRating: {
-        "@type": "AggregateRating",
-        ratingValue: "4.9",
-        bestRating: "5",
-        worstRating: "1",
-        ratingCount: "10666",
-        reviewCount: "10666",
       },
     },
 
