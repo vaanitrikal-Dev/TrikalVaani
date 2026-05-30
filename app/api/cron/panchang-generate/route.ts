@@ -2,10 +2,17 @@
  * ============================================================================
  * TRIKAL VAANI — CEO PROTECTION HEADER
  * File:    app/api/cron/panchang-generate/route.ts
- * Version: v2.2 — VM normalization fix
+ * Version: v2.3 — VM call routed through lib/callVM.ts (X-Trikal-Key auto)
  * Owner:   Rohiit Gupta, Chief Vedic Architect
  *
- * ROOT CAUSE FIXED:
+ * CHANGE v2.3:
+ *   Only the VM panchang fetch (fetchVM -> VM_URL/panchang) now goes through
+ *   lib/callVM.ts so the X-Trikal-Key auth header is injected automatically.
+ *   The 15s AbortSignal.timeout is preserved. Gemini SDK calls, the IndexNow
+ *   call (own site + CRON_SECRET), the cron authorization check, and all
+ *   Supabase writes are byte-for-byte identical to v2.2.
+ *
+ * ROOT CAUSE FIXED (v2.2):
  *   VM returns: { tithi: { name: "Ekadashi", paksha: "Krishna" } }
  *   Gemini needs: { tithi: "Ekadashi (Krishna Paksha)" }
  *   Without fix: Gemini got "[object Object]" -> parse fail -> gemini_content empty
@@ -16,6 +23,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { callVM } from "@/lib/callVM";
 import {
   buildPanchangHubPrompt,
   buildPanchangCityPrompt,
@@ -108,7 +116,8 @@ async function fetchVM(date: string, lat?: number, lon?: number): Promise<{ raw:
   const p = new URLSearchParams({ date });
   if (lat !== undefined) p.set("lat", String(lat));
   if (lon !== undefined) p.set("lon", String(lon));
-  const res = await fetch(VM_URL + "/panchang?" + p.toString(), {
+  const res = await callVM(VM_URL + "/panchang?" + p.toString(), {
+    method: "GET",
     signal: AbortSignal.timeout(15000),
   });
   if (!res.ok) throw new Error("VM " + res.status);
@@ -189,7 +198,7 @@ export async function GET(req: NextRequest) {
   const t0 = Date.now();
   const date = getTodayISO();
   const results: Result[] = [];
-  console.log("[panchang-cron] START v2.2 date=" + date);
+  console.log("[panchang-cron] START v2.3 date=" + date);
 
   // 1. HUB — national, Gemini Pro
   try {
@@ -253,4 +262,4 @@ export async function GET(req: NextRequest) {
   return NextResponse.json(summary);
 }
 
-// END — route.ts v2.2 | Trikal Vaani | Rohiit Gupta, Chief Vedic Architect
+// END — route.ts v2.3 | Trikal Vaani | Rohiit Gupta, Chief Vedic Architect
