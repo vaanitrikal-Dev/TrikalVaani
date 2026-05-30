@@ -72,7 +72,7 @@ done
 
 # Pull latest code from GitHub (optional - comment if not wanted)
 cd /home/vaanitrikal/trikal-vaani 2>>"$LOG_FILE"
-git pull origin main >> "$LOG_FILE" 2>&1
+git pull origin master >> "$LOG_FILE" 2>&1
 
 # Run engine
 cd "$ENGINE_DIR"
