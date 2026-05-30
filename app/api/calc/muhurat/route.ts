@@ -1,21 +1,21 @@
 // ============================================================
 // File: app/api/calc/muhurat/route.ts
-// Version: v1.0 — Muhurat Finder API proxy
+// Version: v1.1 — VM call routed through lib/callVM.ts (X-Trikal-Key auto)
 // Proxies to VM /muhurat-finder endpoint
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikal Vaani
 // ============================================================
-
+// CHANGE v1.1: /muhurat-finder call now goes through lib/callVM.ts so the
+// X-Trikal-Key auth header is injected automatically. The 45s
+// AbortSignal.timeout, validation, and payload are byte-for-byte identical.
+// ============================================================
 import { NextRequest, NextResponse } from 'next/server';
-
+import { callVM } from '@/lib/callVM';
 const VM_URL = process.env.VM_ENGINE_URL || 'http://34.14.164.105:8001';
-
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
-
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-
     // Basic validation — all required for a meaningful muhurat
     const required = ['year', 'month', 'day', 'latitude', 'longitude'];
     for (const f of required) {
@@ -23,7 +23,6 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: `Missing field: ${f}` }, { status: 400 });
       }
     }
-
     const payload = {
       year: Number(body.year),
       month: Number(body.month),
@@ -38,15 +37,12 @@ export async function POST(req: NextRequest) {
       step_minutes: Number(body.step_minutes ?? 10),
       full_day: body.full_day !== false, // default true
     };
-
-    const res = await fetch(`${VM_URL}/muhurat-finder`, {
+    const res = await callVM(`${VM_URL}/muhurat-finder`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
       // muhurat scan can take a few seconds (many slots)
       signal: AbortSignal.timeout(45000),
     });
-
     if (!res.ok) {
       const errText = await res.text().catch(() => '');
       return NextResponse.json(
@@ -54,7 +50,6 @@ export async function POST(req: NextRequest) {
         { status: 502 }
       );
     }
-
     const data = await res.json();
     return NextResponse.json(data, { status: 200 });
   } catch (e: any) {
