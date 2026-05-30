@@ -2,11 +2,16 @@
 // 🔱 TRIKAL VAANI — CEO PROTECTION HEADER
 // ════════════════════════════════════════════════════════════════════
 // File:    app/panchang/[date]/[slug]/page.tsx
-// Version: v1.1
+// Version: v1.2
 // Owner:   Rohiit Gupta, Chief Vedic Architect
 // Purpose: Festival panchang page — /panchang/2026-05-16/shani-jayanti-2026
 //          100% dynamic. All content from Supabase + Gemini Flash.
 //          No hardcoded festival data.
+// CHANGES v1.1 → v1.2 (2026-05-30):
+//   VM fallback fetch (inside getPanchang) now routes through lib/callVM.ts
+//   so the X-Trikal-Key auth header is injected automatically. ISR
+//   (next: { revalidate: 86400 }) and the 10s timeout are preserved.
+//   All festival logic, schemas, SEO fixes, and JSX are unchanged.
 // CHANGES v1.0 → v1.1 (2026-05-17):
 //   FIX 1: revalidate 0→3600 (ISR) — festival data is static once written;
 //           prevents cache-control:private on every Googlebot crawl
@@ -23,6 +28,7 @@ import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@supabase/supabase-js";
+import { callVM } from "@/lib/callVM";
 
 // FIX 1: was 0 — forced cache-control:private,no-store on every request
 // ISR 1hr is safe: festival dates/content never change once generated
@@ -131,9 +137,10 @@ async function getPanchang(date: string): Promise<PanchangRow | null> {
   } catch {}
   // Fallback to VM
   try {
-    const res = await fetch(`${VM_URL}/panchang?date=${date}`, {
+    const res = await callVM(`${VM_URL}/panchang?date=${date}`, {
+      method: "GET",
       next: { revalidate: 86400 }, signal: AbortSignal.timeout(10000)
-    });
+    } as RequestInit);
     if (!res.ok) return null;
     const vm = (await res.json()) as VMPanchang;
     return {
@@ -449,7 +456,7 @@ export default async function FestivalPage(
           </section>
 
           <footer className="mt-8 border-t border-gray-200 pt-4 text-xs text-gray-500">
-            <p>🔱 By <strong>{AUTHOR_NAME}</strong>, {AUTHOR_TITLE}. Engine: Swiss Ephemeris · Ayanamsha: Lahiri · Version: v1.1</p>
+            <p>🔱 By <strong>{AUTHOR_NAME}</strong>, {AUTHOR_TITLE}. Engine: Swiss Ephemeris · Ayanamsha: Lahiri · Version: v1.2</p>
             <p className="mt-1 italic">&quot;Kaal bada balwan hai, sabko nach nachaye; raja ka beta bhi bhiksha mangne jaye.&quot;</p>
           </footer>
 
