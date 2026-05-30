@@ -1,11 +1,16 @@
 // ============================================================
 // File: app/api/calc/manglik-dosh/route.ts
 // Purpose: VM bridge for Manglik Dosh Calculator (FREE forever)
-// Version: v1.0
-// Calls: VM /manglik-dosh + VM /template (domain="relationships")
+// Version: v1.1 — VM calls routed through lib/callVM.ts (X-Trikal-Key auto)
+// Calls: VM /manglik-dosh + VM /kundali + VM /template (domain="relationships")
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikal Vaani
 // ============================================================
+// CHANGE v1.1: All three VM calls (/manglik-dosh, /kundali, /template) now go
+// through lib/callVM.ts so the X-Trikal-Key auth header is injected
+// automatically. House/severity logic and response shaping unchanged.
+// ============================================================
 import { NextRequest, NextResponse } from 'next/server';
+import { callVM } from '@/lib/callVM';
 
 const VM_BASE = 'http://34.14.164.105:8001';
 export const runtime = 'nodejs';
@@ -71,11 +76,9 @@ export async function POST(req: NextRequest) {
     };
 
     // 1) Call VM /manglik-dosh
-    const mdRes = await fetch(`${VM_BASE}/manglik-dosh`, {
+    const mdRes = await callVM(`${VM_BASE}/manglik-dosh`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(vmPayload),
-      cache: 'no-store',
     });
     if (!mdRes.ok) {
       const errText = await mdRes.text();
@@ -85,11 +88,9 @@ export async function POST(req: NextRequest) {
     const manglikData = await mdRes.json();
 
     // 2) Call VM /kundali — needed for template engine
-    const kRes = await fetch(`${VM_BASE}/kundali`, {
+    const kRes = await callVM(`${VM_BASE}/kundali`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ ...vmPayload, house_system: 'P' }),
-      cache: 'no-store',
     });
     const kundaliData = kRes.ok ? await kRes.json() : {};
 
@@ -97,16 +98,14 @@ export async function POST(req: NextRequest) {
     const sessionId = `calc_md_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
     let templateData: any = null;
     try {
-      const tRes = await fetch(`${VM_BASE}/template`, {
+      const tRes = await callVM(`${VM_BASE}/template`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           domain: 'relationships',
           kundaliData,
           sessionId,
           lang: 'hi',
         }),
-        cache: 'no-store',
       });
       if (tRes.ok) {
         const tJson = await tRes.json();
