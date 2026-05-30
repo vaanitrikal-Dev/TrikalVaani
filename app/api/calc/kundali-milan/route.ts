@@ -1,22 +1,23 @@
 // TRIKAL VAANI - Kundali Milan Compute API
 // CEO: Rohiit Gupta
 // File: app/api/calc/kundali-milan/route.ts
-// VERSION: 1.5 - Added TRIKAL_VM_KEY security header on VM call
+// VERSION: 1.6 - Switched inline TRIKAL_VM_KEY header to shared lib/callVM.ts
 //
-// CHANGE LOG (v1.4 → v1.5):
-//   Added X-Trikal-Key header to VM /milan-compute fetch call.
-//   Key read from process.env.TRIKAL_VM_KEY (already in Vercel env).
-//   No logic changes. All other behaviour identical to v1.4.
+// CHANGE LOG (v1.5 → v1.6):
+//   Removed the inline X-Trikal-Key header + TRIKAL_VM_KEY constant.
+//   The VM /milan-compute call now goes through lib/callVM.ts, which injects
+//   the X-Trikal-Key header automatically. The 25s timeout/abort, Zod
+//   validation, manglik build, and Supabase save are byte-for-byte identical
+//   to v1.5.
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { z } from 'zod';
 import crypto from 'crypto';
+import { callVM } from '@/lib/callVM';
 
 const VM_MILAN_ENDPOINT =
   process.env.VM_MILAN_ENDPOINT ?? 'http://34.14.164.105:8001/milan-compute';
-
-const TRIKAL_VM_KEY = process.env.TRIKAL_VM_KEY || '';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -148,15 +149,10 @@ export async function POST(req: NextRequest) {
 
     let vmRes: Response;
     try {
-      vmRes = await fetch(VM_MILAN_ENDPOINT, {
+      vmRes = await callVM(VM_MILAN_ENDPOINT, {
         method:  'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Trikal-Key': TRIKAL_VM_KEY,          // v1.5: VM lock key
-        },
         body:    JSON.stringify(vmPayload),
         signal:  controller.signal,
-        cache:   'no-store',
       });
     } catch (e: unknown) {
       clearTimeout(timeout);
