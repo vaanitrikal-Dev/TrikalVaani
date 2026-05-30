@@ -2,20 +2,24 @@
 // 🔱 TRIKAL VAANI — CEO PROTECTION HEADER
 // ════════════════════════════════════════════════════════════════════
 // File:        app/api/panchang/today/route.ts
-// Version:     v1.1
+// Version:     v1.2
 // Owner:       Rohiit Gupta, Chief Vedic Architect
 // Domain:      trikalvaani.com
 // Purpose:     Vercel proxy → GCP VM panchang engine (port 8001)
 //              v1.0 → today only
 //              v1.1 → forwards ?date=YYYY-MM-DD&lat=&lon= to VM
 //                     for /panchang/[date] archive (Phase B1)
+//              v1.2 → VM call routed through lib/callVM.ts so the
+//                     X-Trikal-Key auth header is injected automatically.
+//                     8s timeout, validation, ISR cache headers unchanged.
 // Stack:       Next.js 13.5 App Router + Vercel Pro
 // VM:          34.14.164.105:8001
 // Lock Status: gemini-prompt.ts = PERMANENTLY LOCKED (do not touch)
-// Last Update: 2026-05-09 (Phase B1)
+// Last Update: 2026-05-30
 // ════════════════════════════════════════════════════════════════════
 
 import { NextRequest, NextResponse } from "next/server";
+import { callVM } from "@/lib/callVM";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic"; // never cache the proxy itself
@@ -77,11 +81,10 @@ export async function GET(req: NextRequest) {
   const t = setTimeout(() => controller.abort(), TIMEOUT_MS);
 
   try {
-    const vmRes = await fetch(url, {
+    const vmRes = await callVM(url, {
       method: "GET",
       headers: { Accept: "application/json" },
       signal: controller.signal,
-      cache: "no-store",
     });
     clearTimeout(t);
 
