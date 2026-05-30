@@ -1,12 +1,16 @@
 // TRIKAL VAANI - Karmic Background Reading - Free Preview API
 // CEO: Rohiit Gupta
 // File: app/api/karmic-preview/route.ts
-// VERSION: 1.0
+// VERSION: 1.1
 // Light teaser ONLY: calls VM /kundali, returns Lagna sign + Moon sign.
 // NO Gemini, NO save, near-zero cost. Builds trust before the Rs251 unlock.
+//
+// CHANGE v1.1: VM call routes through lib/callVM.ts so X-Trikal-Key is
+// injected automatically. 20s timeout/abort preserved. Logic unchanged.
 
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
+import { callVM } from '@/lib/callVM';
 
 const VM_KUNDALI_ENDPOINT =
   process.env.VM_KUNDALI_ENDPOINT ?? 'http://34.14.164.105:8001/kundali';
@@ -66,12 +70,10 @@ export async function POST(req: NextRequest) {
 
     let vmRes: Response;
     try {
-      vmRes = await fetch(VM_KUNDALI_ENDPOINT, {
+      vmRes = await callVM(VM_KUNDALI_ENDPOINT, {
         method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
         body:    JSON.stringify(vmPayload),
         signal:  controller.signal,
-        cache:   'no-store',
       });
     } catch (e: unknown) {
       clearTimeout(timeout);
