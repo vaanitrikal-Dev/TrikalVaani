@@ -2,8 +2,13 @@
 // 🔱 TRIKAL VAANI — CEO PROTECTION HEADER
 // ════════════════════════════════════════════════════════════════════
 // File:    app/panchang/[date]/page.tsx
-// Version: v3.0
+// Version: v3.1
 // Owner:   Rohiit Gupta, Chief Vedic Architect
+// Changes vs v3.0:
+//   1. fetchFromVM() now routes through lib/callVM.ts so the X-Trikal-Key
+//      auth header is injected automatically. ISR (next: { revalidate: 86400 })
+//      and the 10s timeout are preserved exactly. Redirect logic, Supabase
+//      festival lookup, schemas, metadata, and JSX are unchanged.
 // Changes vs v2.1:
 //   1. If date has a festival → 301 redirect to /panchang/[date]/[slug]
 //   2. All FESTIVALS hardcoded record REMOVED — fully dynamic from Supabase
@@ -15,6 +20,7 @@ import { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@supabase/supabase-js";
+import { callVM } from "@/lib/callVM";
 
 export const revalidate = 86400;
 export const dynamicParams = true;
@@ -92,9 +98,10 @@ async function fetchFromSupabase(date: string): Promise<PanchangRow | null> {
 
 async function fetchFromVM(date: string): Promise<PanchangRow | null> {
   try {
-    const res = await fetch(`${VM_URL}/panchang?date=${date}`, {
+    const res = await callVM(`${VM_URL}/panchang?date=${date}`, {
+      method: "GET",
       next: { revalidate: 86400 }, signal: AbortSignal.timeout(10000)
-    });
+    } as RequestInit);
     if (!res.ok) return null;
     const vm = (await res.json()) as VMPanchang;
 
@@ -323,7 +330,7 @@ export default async function PanchangDatePage(
           </section>
 
           <footer className="mt-8 border-t border-gray-200 pt-4 text-xs text-gray-500">
-            <p>🔱 Calculated by <strong>{AUTHOR_NAME}</strong>, {AUTHOR_TITLE}. Engine: Swiss Ephemeris · Ayanamsha: Lahiri · Version: v3.0</p>
+            <p>🔱 Calculated by <strong>{AUTHOR_NAME}</strong>, {AUTHOR_TITLE}. Engine: Swiss Ephemeris · Ayanamsha: Lahiri · Version: v3.1</p>
             <p className="mt-1 italic">&quot;Kaal bada balwan hai, sabko nach nachaye; raja ka beta bhi bhiksha mangne jaye.&quot;</p>
           </footer>
 
