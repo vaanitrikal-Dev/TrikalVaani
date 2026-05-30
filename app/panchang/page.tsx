@@ -2,8 +2,13 @@
 // 🔱 TRIKAL VAANI — CEO PROTECTION HEADER
 // ════════════════════════════════════════════════════════════════════
 // File:    app/panchang/page.tsx
-// Version: v2.0
+// Version: v2.1
 // Owner:   Rohiit Gupta, Chief Vedic Architect
+// Changes vs v2.0:
+//   1. VM fallback fetch routed through lib/callVM.ts so the X-Trikal-Key
+//      auth header is injected automatically.
+//   2. ISR caching (next: { revalidate: 3600 }) and the 8s timeout are
+//      preserved exactly. All Supabase queries, schema, and JSX unchanged.
 // Changes vs v1.0:
 //   1. FESTIVALS_2026 hardcoded array REMOVED
 //   2. Upcoming festivals fetched DYNAMICALLY from festivals_master table
@@ -14,6 +19,7 @@
 import { Metadata } from "next";
 import Link from "next/link";
 import { createClient } from "@supabase/supabase-js";
+import { callVM } from "@/lib/callVM";
 
 export const revalidate = 3600;
 
@@ -139,9 +145,10 @@ export default async function PanchangHubPage() {
   // Fallback to VM if not in DB
   if (!todayRow) {
     try {
-      const res = await fetch(`${VM_URL}/panchang?date=${today}`, {
+      const res = await callVM(`${VM_URL}/panchang?date=${today}`, {
+        method: "GET",
         next: { revalidate: 3600 }, signal: AbortSignal.timeout(8000)
-      });
+      } as RequestInit);
       if (res.ok) {
         const vm = (await res.json()) as VMPanchang;
         todayRow = {
