@@ -2,20 +2,25 @@
 // 🔱 TRIKAL VAANI — CEO PROTECTION HEADER
 // ════════════════════════════════════════════════════════════════════
 // File:        app/[domain]/panchang/page.tsx
-// Version:     v1.1
+// Version:     v1.2
 // Owner:       Rohiit Gupta, Chief Vedic Architect
 // Domain:      trikalvaani.com
 // Purpose:     Phase B3 — City Panchang Pages
 //              URL: /delhi/panchang, /mumbai/panchang
 //              Uses [domain] param (matches existing app/[domain] folder)
+// CHANGES v1.1 → v1.2 (2026-05-30):
+//   fetchPanchang() now routes through lib/callVM.ts so the X-Trikal-Key
+//   auth header is injected automatically. ISR (next: { revalidate: 86400 })
+//   is preserved exactly. City lookup, schemas, FAQ, and JSX unchanged.
 // Lock Status: gemini-prompt.ts = PERMANENTLY LOCKED (do not touch)
-// Last Update: 2026-05-09 (Phase B3)
+// Last Update: 2026-05-30
 // ════════════════════════════════════════════════════════════════════
 
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import citiesData from "../../data/cities.json";
+import { callVM } from "@/lib/callVM";
 
 export const revalidate = 86400;
 export const dynamicParams = true;
@@ -66,9 +71,9 @@ function findCity(slug: string): City | null {
 
 async function fetchPanchang(city: City): Promise<Panchang | null> {
   try {
-    const res = await fetch(
+    const res = await callVM(
       `${VM_BASE}/panchang/today?lat=${city.latitude}&lon=${city.longitude}`,
-      { next: { revalidate: 86400 } }
+      { method: "GET", next: { revalidate: 86400 } } as RequestInit
     );
     if (!res.ok) return null;
     return (await res.json()) as Panchang;
