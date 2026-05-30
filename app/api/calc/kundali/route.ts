@@ -1,14 +1,19 @@
 // ============================================================
 // File: app/api/calc/kundali/route.ts
 // Purpose: VM bridge for Kundali Calculator (FREE forever)
-// Version: v1.2 — Added TRIKAL_VM_KEY security header
+// Version: v1.3 — Switched inline TRIKAL_VM_KEY header to shared lib/callVM.ts
 // Calls: VM /kundali + VM /template (domain="kundali")
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikal Vaani
 // ============================================================
+// CHANGE v1.3: Removed the inline vmHeaders / TRIKAL_VM_KEY block. Both VM
+// calls (/kundali, /template) now go through lib/callVM.ts, which injects the
+// X-Trikal-Key header automatically. Dasha detection and response shaping are
+// byte-for-byte identical to v1.2.
+// ============================================================
 import { NextRequest, NextResponse } from 'next/server';
+import { callVM } from '@/lib/callVM';
 
 const VM_BASE = 'http://34.14.164.105:8001';
-const TRIKAL_VM_KEY = process.env.TRIKAL_VM_KEY || '';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -93,18 +98,10 @@ export async function POST(req: NextRequest) {
       house_system: 'P',
     };
 
-    // VM headers — includes secret key to pass the lock
-    const vmHeaders = {
-      'Content-Type': 'application/json',
-      'X-Trikal-Key': TRIKAL_VM_KEY,
-    };
-
     // 1) Call VM /kundali
-    const kRes = await fetch(`${VM_BASE}/kundali`, {
+    const kRes = await callVM(`${VM_BASE}/kundali`, {
       method: 'POST',
-      headers: vmHeaders,
       body: JSON.stringify(vmPayload),
-      cache: 'no-store',
     });
     if (!kRes.ok) {
       const errText = await kRes.text();
@@ -117,16 +114,14 @@ export async function POST(req: NextRequest) {
     const sessionId = `calc_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
     let templateData: any = null;
     try {
-      const tRes = await fetch(`${VM_BASE}/template`, {
+      const tRes = await callVM(`${VM_BASE}/template`, {
         method: 'POST',
-        headers: vmHeaders,
         body: JSON.stringify({
           domain: 'career',
           kundaliData,
           sessionId,
           lang: 'hi',
         }),
-        cache: 'no-store',
       });
       if (tRes.ok) {
         const tJson = await tRes.json();
