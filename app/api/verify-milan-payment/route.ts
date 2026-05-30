@@ -1,7 +1,14 @@
 // TRIKAL VAANI - Kundali Milan Payment Verification API
 // CEO: Rohiit Gupta
 // File: app/api/verify-milan-payment/route.ts
-// VERSION: 1.4 - fixed per-person manglik read path from VM response
+// VERSION: 1.5 - VM call routed through lib/callVM.ts (X-Trikal-Key auto)
+//
+// CHANGE LOG (v1.4 → v1.5):
+//   The post-payment VM /milan-compute call now goes through lib/callVM.ts
+//   so the X-Trikal-Key auth header is injected automatically. The 30s
+//   timeout/abort, Razorpay HMAC signature verification, order lookup,
+//   replay handling, manglik build, Supabase insert, and WhatsApp text
+//   are all byte-for-byte identical to v1.4.
 //
 // CHANGE LOG (v1.3 → v1.4):
 //   buildManglikData() was reading vmData?.bride_manglik (undefined).
@@ -13,6 +20,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import crypto from 'crypto';
+import { callVM } from '@/lib/callVM';
 
 const VM_MILAN_ENDPOINT =
   process.env.VM_MILAN_ENDPOINT ?? 'http://34.14.164.105:8001/milan-compute';
@@ -146,9 +154,9 @@ export async function POST(req: NextRequest) {
 
     let vmData: any = null;
     try {
-      const vmRes = await fetch(VM_MILAN_ENDPOINT, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(vmPayload), signal: controller.signal, cache: 'no-store',
+      const vmRes = await callVM(VM_MILAN_ENDPOINT, {
+        method: 'POST',
+        body: JSON.stringify(vmPayload), signal: controller.signal,
       });
       clearTimeout(timeout);
       if (!vmRes.ok) {
