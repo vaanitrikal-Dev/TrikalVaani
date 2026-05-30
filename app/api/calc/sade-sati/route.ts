@@ -1,11 +1,16 @@
 // ============================================================
 // File: app/api/calc/sade-sati/route.ts
 // Purpose: VM bridge for Sade Sati Calculator (FREE forever)
-// Version: v1.0
-// Calls: VM /sade-sati + VM /template (domain="career")
+// Version: v1.1 — VM calls routed through lib/callVM.ts (X-Trikal-Key auto)
+// Calls: VM /sade-sati + VM /kundali + VM /template (domain="career")
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikal Vaani
 // ============================================================
+// CHANGE v1.1: All three VM calls (/sade-sati, /kundali, /template) now go
+// through lib/callVM.ts so the X-Trikal-Key auth header is injected
+// automatically. Phase logic, validation, and response shaping unchanged.
+// ============================================================
 import { NextRequest, NextResponse } from 'next/server';
+import { callVM } from '@/lib/callVM';
 
 const VM_BASE = 'http://34.14.164.105:8001';
 export const runtime = 'nodejs';
@@ -81,11 +86,9 @@ export async function POST(req: NextRequest) {
     };
 
     // 1) Call VM /sade-sati
-    const ssRes = await fetch(`${VM_BASE}/sade-sati`, {
+    const ssRes = await callVM(`${VM_BASE}/sade-sati`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(vmPayload),
-      cache: 'no-store',
     });
     if (!ssRes.ok) {
       const errText = await ssRes.text();
@@ -95,11 +98,9 @@ export async function POST(req: NextRequest) {
     const sadeSatiData = await ssRes.json();
 
     // 2) Call VM /kundali — needed for template engine
-    const kRes = await fetch(`${VM_BASE}/kundali`, {
+    const kRes = await callVM(`${VM_BASE}/kundali`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ ...vmPayload, house_system: 'P' }),
-      cache: 'no-store',
     });
     const kundaliData = kRes.ok ? await kRes.json() : {};
 
@@ -107,16 +108,14 @@ export async function POST(req: NextRequest) {
     const sessionId = `calc_ss_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
     let templateData: any = null;
     try {
-      const tRes = await fetch(`${VM_BASE}/template`, {
+      const tRes = await callVM(`${VM_BASE}/template`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           domain: 'career',
           kundaliData,
           sessionId,
           lang: 'hi',
         }),
-        cache: 'no-store',
       });
       if (tRes.ok) {
         const tJson = await tRes.json();
