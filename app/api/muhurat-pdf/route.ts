@@ -3,9 +3,12 @@
  * TRIKAL VAANI — Muhurat PDF Proxy API
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/api/muhurat-pdf/route.ts
- * VERSION: 1.0
+ * VERSION: 1.1
  * ============================================================
  * On-demand PDF generation for paid Child Birth Muhurat reports.
+ *
+ * CHANGE v1.1: VM call routes through lib/callVM.ts so X-Trikal-Key
+ * is injected automatically. 60s timeout/abort preserved. Logic same.
  *
  * Flow:
  *   1. Receive { slug } from result page
@@ -21,6 +24,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { callVM } from '@/lib/callVM';
 
 const VM_MUHURAT_PDF_ENDPOINT =
   process.env.VM_MUHURAT_PDF_ENDPOINT ?? 'http://34.14.164.105:8001/muhurat-pdf';
@@ -95,12 +99,10 @@ export async function POST(req: NextRequest) {
 
     let vmRes: Response;
     try {
-      vmRes = await fetch(VM_MUHURAT_PDF_ENDPOINT, {
+      vmRes = await callVM(VM_MUHURAT_PDF_ENDPOINT, {
         method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
         body:    JSON.stringify({ slug }),
         signal:  controller.signal,
-        cache:   'no-store',
       });
     } catch (e: unknown) {
       clearTimeout(timeout);
