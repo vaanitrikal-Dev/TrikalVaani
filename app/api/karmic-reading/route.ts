@@ -3,9 +3,13 @@
  * TRIKAL VAANI — Karmic Background Reading — Generate API
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/api/karmic-reading/route.ts
- * VERSION: 1.1
+ * VERSION: 1.2
  * SIGNED: ROHIIT GUPTA, CEO
  * ============================================================
+ * CHANGE v1.2:
+ *   VM call now routes through lib/callVM.ts so the X-Trikal-Key
+ *   auth header is injected automatically. Timeout/abort logic
+ *   and all other behaviour are byte-for-byte identical to v1.1.
  * CHANGE v1.1:
  *   WORD_TARGET 1600 → 1000 (cuts generation from ~3.5min to ~90s).
  *   6 dims still deeply personal — ~167w per dimension.
@@ -18,6 +22,7 @@ import { createClient } from '@supabase/supabase-js';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { buildKarmicReadingPrompt } from '@/lib/karmic-reading-prompt';
 import { polishKarmicNarrative }    from '@/lib/claude-polish';
+import { callVM }                   from '@/lib/callVM';
 
 const VM_KUNDALI_ENDPOINT =
   process.env.VM_KUNDALI_ENDPOINT ?? 'http://34.14.164.105:8001/kundali';
@@ -109,10 +114,10 @@ export async function POST(req: NextRequest) {
       const timeout = setTimeout(() => controller.abort(), 25000);
       let vmRes: Response;
       try {
-        vmRes = await fetch(VM_KUNDALI_ENDPOINT, {
-          method: 'POST', headers: { 'Content-Type': 'application/json' },
+        vmRes = await callVM(VM_KUNDALI_ENDPOINT, {
+          method: 'POST',
           body: JSON.stringify(buildKundaliPayload(person)),
-          signal: controller.signal, cache: 'no-store',
+          signal: controller.signal,
         });
       } catch (e) {
         clearTimeout(timeout);
