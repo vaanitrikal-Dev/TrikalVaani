@@ -3,9 +3,25 @@
 TRIKAAL VAANI - Content Engine PRO
 =============================================================
 File:    content-engine/pro_engine.py
-Version: v3.0.1 - MOTION FIX (overlay froze video; now transparent text)
+Version: v3.2.0 - MOOD ROUTER + SHOT-VARIETY GRID + FAQ PINNED COMMENT
 Owner:   Rohiit Gupta, Chief Vedic Architect
-Date:    2026-05-28
+Date:    2026-05-30
+
+WHAT CHANGED IN v3.2.0 (visual variety + SEO):
+  - MOOD ROUTER: BRAND_SPINE (constant) + MOOD_LIBRARY (6 moods) +
+    mood_block(). Director now picks a mood_key per topic (mystery / hope /
+    celebration / power / wisdom / love). Palette + energy rotate by topic
+    so the channel is no longer one endless dark trailer.
+  - CINEMATIC_LAWS softened: warmth/brightness now ALLOWED; only cheapness
+    (calendar-art, HDR halos, stock-photo, AI sheen) is forbidden.
+  - SHOT-VARIETY GRID injected into creative pass: each of 5 scenes forced
+    onto a distinct shot distance + subject + location + time-of-day, plus
+    a re-run diversity rule so repeat topics never look the same.
+  - FAQ now appended to the YouTube PINNED COMMENT (AEO/GEO — answer engines
+    extract pinned-comment Q&A). FAQ was already in description + caption kit.
+  - (Pending, intentionally deferred: thumbnail-as-1s-intro-frame for IG
+    cover — touches render timing, doing it as an isolated next step.)
+=============================================================
 
 WHAT CHANGED FROM v2.8 (5 upgrades):
   D1. VEO REMOVED. Black-bar (16:9 inherited) + subtle motion + cost.
@@ -381,13 +397,11 @@ GEMINI_TEXT_MODEL  = "gemini-2.5-flash"    # TTS + video-analysis only now
 GEMINI_TTS_MODEL   = "gemini-2.5-flash-preview-tts"
 GEMINI_IMAGE_MODEL = "gemini-3.1-flash-image-preview"  # matches live daily cron (verified)
 
-# v2.7.1: Veo 3.1 is the SOLE image-to-video motion engine.
-# Kling (fal.ai) fully removed — RBI standing instruction rule
-# blocked foreign card auto-debit. Restore from git history if
-# RBI policy ever changes.
-MOTION_MODEL       = "veo-3.1-generate-preview"
-MOTION_DURATION    = 4     # seconds (Veo 3.1 min=4, max=8; 4s = cost-optimal hero shot)
-MOTION_ASPECT      = "9:16"
+# v3.1.0: VEO + KLING FULLY REMOVED. There is NO AI-video motion
+# engine anymore. ALL motion comes from FFmpeg Ken Burns (zoompan)
+# on still images — zero cost, zero external video API, reliable.
+# Hero (slot 0) = effect_punch_in (bold full-screen zoom). If you
+# ever want AI video again, restore veo_motion() from git history.
 
 ANTHROPIC_URL = "https://api.anthropic.com/v1/messages"
 
@@ -395,11 +409,10 @@ IST = timezone(timedelta(hours=5, minutes=30))
 
 
 # =============================================================
-# v2.7 NEW — DEITY VISUAL LIBRARY
-# Forces correct classical Vedic visual signature for each graha
-# (planet-deity) so Veo 3.1 renders the RIGHT deity, not generic
-# sadhu/sage. Used by creative_pass() + veo_motion() when Director
-# classifies topic as planet_deity.
+# DEITY VISUAL LIBRARY
+# Correct classical Vedic visual signature for each graha
+# (planet-deity), available for image/scene prompts and the status
+# endpoint. (No longer used for AI video — Veo removed in v3.1.0.)
 # Each entry: classical iconography + vahana + color + attributes.
 # =============================================================
 DEITY_VISUAL_LIBRARY = {
@@ -633,11 +646,72 @@ CINEMATIC_LAWS = """NON-NEGOTIABLE CINEMATIC LAWS (obey every one):
   shallow depth of field, practical lighting, handheld realism,
   Kodak Vision3 color grade, analog film grain, realistic skin/fabric
   texture, atmospheric fog/haze. Documentary realism, NOT poster art.
-- FORBIDDEN: glowing auras, heavenly rays, oversaturated reds/oranges,
-  glossy skin, fantasy HDR lighting, celestial glow, stock-photo look,
-  devotional calendar-art aesthetics.
+- The PALETTE and ENERGY are set by the MOOD block for this video — obey it.
+  A 'celebration' or 'hope' or 'love' video SHOULD be warm and bright; a
+  'mystery' video SHOULD be dark. Do NOT force every video dark. Variety of
+  mood across the channel is required.
+- FORBIDDEN (these cheapen the frame in ANY mood): glossy plastic skin,
+  fantasy HDR halos, oversaturated calendar-art, stock-photo lighting, flat
+  devotional-poster look, AI sheen. Brightness and warmth are ALLOWED;
+  cheapness is not.
 - Target feel: a frame from a high-budget spiritual documentary film.
 - Every scene is 9:16 vertical portrait, NO text overlay, NO watermark."""
+
+
+# =============================================================
+# v3.2 — BRAND SPINE (constant) + MOOD ROUTER (varies by topic)
+# Brand recognition now comes from GRAIN + FRAMING + REALISM,
+# not from a single dark palette. Palette/energy rotate by mood
+# so the channel stops feeling like one long horror trailer.
+# Director picks mood_key; mood_block() injects the palette.
+# =============================================================
+BRAND_SPINE = (
+    "Trikaal Vaani brand spine (CONSTANT across all videos): shot on ARRI "
+    "Alexa, anamorphic lens character, shallow depth of field, real analog "
+    "film grain, atmospheric haze, documentary realism — NOT poster art, "
+    "NOT calendar-art. Authentic skin and fabric texture. 9:16 vertical."
+)
+
+MOOD_LIBRARY = {
+    "mystery": (  # doshas, Sade Sati, Rahu/Ketu, karmic — the classic dark look
+        "PALETTE: deep indigo and blue-black with a single warm amber "
+        "practical light. LIGHTING: low-key, long shadows, one source. "
+        "ENERGY: still, heavy, suspenseful. Sacred-thriller mood."
+    ),
+    "hope": (  # remedies, upay, solutions, 'how to fix' topics
+        "PALETTE: pre-dawn blue lifting into warm gold, soft teal shadows. "
+        "LIGHTING: soft directional sunrise, gentle rim light, hopeful glow "
+        "WITHOUT fantasy HDR. ENERGY: rising, calm, reassuring, a turn toward "
+        "light. The feeling of a burden lifting."
+    ),
+    "celebration": (  # festivals, Navratri, Diwali, auspicious muhurat
+        "PALETTE: warm marigold orange, temple gold, festive crimson, candle "
+        "and diya warmth. LIGHTING: layered practical flames, glowing but "
+        "still cinematic and real (not oversaturated poster art). ENERGY: "
+        "alive, abundant, joyful, communal warmth."
+    ),
+    "power": (  # Mangal, Surya, success, career, wealth, strength
+        "PALETTE: bronze, copper, deep red and gold, controlled firelight. "
+        "LIGHTING: strong dramatic key light, bold contrast, heroic. ENERGY: "
+        "confident, rising, commanding, victorious."
+    ),
+    "wisdom": (  # Guru, education, spirituality, knowledge, peace
+        "PALETTE: warm sandstone, saffron, soft daylight, parchment tones. "
+        "LIGHTING: natural window light, serene, clear. ENERGY: calm, "
+        "grounded, scholarly, peaceful clarity."
+    ),
+    "love": (  # marriage, relationships, Shukra, family, Venus topics
+        "PALETTE: rose, soft rust, warm dusk pink and gold. LIGHTING: golden "
+        "hour, soft and intimate, gentle glow. ENERGY: tender, warm, "
+        "emotionally open, longing-to-fulfilment."
+    ),
+}
+
+
+def mood_block(mood_key: str) -> str:
+    """Return the palette/lighting/energy block for a mood. Safe default."""
+    return MOOD_LIBRARY.get((mood_key or "mystery").lower(),
+                            MOOD_LIBRARY["mystery"])
 
 
 # =============================================================
@@ -780,6 +854,17 @@ def director_pass(topic: str) -> dict:
         "Match the emotional arc to the topic: fear topics get low-key "
         "shadow and slow push-in; hope/blessing topics get warm rim-light "
         "and a rising tilt; warning topics get hard contrast and zoom-out. "
+        "\n\nMOOD SELECTION (this drives the whole palette — choose deliberately, "
+        "do NOT default everything to dark): pick ONE mood_key that fits the "
+        "topic's emotional truth:\n"
+        "- 'mystery' = doshas, Sade Sati, Rahu/Ketu, karmic warnings (dark, suspense)\n"
+        "- 'hope' = remedies, upay, solutions, 'how to fix / kaise bachein' (dawn, rising)\n"
+        "- 'celebration' = festivals, auspicious days, muhurat, good news (warm, festive)\n"
+        "- 'power' = Mangal, Surya, success, career, wealth, strength (bronze, heroic)\n"
+        "- 'wisdom' = Guru, education, spirituality, peace, knowledge (serene daylight)\n"
+        "- 'love' = marriage, relationships, Shukra, family (golden-hour warmth)\n"
+        "A remedy or solution video must NOT be pure dread — it should TURN "
+        "toward 'hope'. Reserve 'mystery' for genuine warning topics. "
         "Respond ONLY with raw JSON, no markdown fences, no preamble."
     )
     user = (
@@ -787,6 +872,7 @@ def director_pass(topic: str) -> dict:
         "Design the cinematic treatment. Return JSON:\n"
         "{\n"
         '  "topic_type": "concept OR planet_deity OR festival_deity",\n'
+        '  "mood_key": "ONE of: mystery, hope, celebration, power, wisdom, love — chosen per the mood selection guidance",\n'
         '  "emotional_arc": "one sentence describing the feeling journey",\n'
         '  "hero_shot_concept": "the single most striking frame — the scroll-stopper. If topic_type is planet_deity or festival_deity, the hero frame MUST feature the deity inspired by the topic. Full cinematic description following the laws.",\n'
         '  "variety_plan": "one line stating how each slide differs (which distinct subject/composition per beat), per the topic-type rule",\n'
@@ -798,7 +884,11 @@ def director_pass(topic: str) -> dict:
     )
     raw = claude_text(system, user, max_tokens=1700, temperature=0.95)
     treatment = extract_json(raw)
+    # v3.2: ensure a mood_key always exists (safe default = mystery)
+    if not treatment.get("mood_key"):
+        treatment["mood_key"] = "mystery"
     log(f"Director: type={treatment.get('topic_type','?')} | "
+        f"mood={treatment.get('mood_key','mystery')} | "
         f"arc={treatment.get('emotional_arc','')[:50]}...")
     return treatment
 
@@ -950,6 +1040,28 @@ def creative_pass(topic: str, treatment: dict, image_count: int,
         "\n"
         "Each scene description you write MUST follow these cinematic laws:\n"
         + CINEMATIC_LAWS +
+        "\n\nMOOD FOR THIS VIDEO (obey this palette/energy in EVERY scene — "
+        "this is what makes the channel feel varied, not one endless dark "
+        "trailer):\n" + mood_block(treatment.get("mood_key", "mystery")) +
+        "\n\nSHOT-VARIETY GRID (MANDATORY — no two scenes may feel alike; "
+        "each scene differs on shot distance, subject AND location):\n"
+        "  Scene 1 (HERO): extreme/medium close-up of the main figure's "
+        "face or eyes — the tightest, most arresting shot of the set.\n"
+        "  Scene 2: WIDE environmental — figure small in a vast landscape "
+        "(mountains / river ghat / night field / temple courtyard).\n"
+        "  Scene 3: SYMBOLIC OBJECT macro — NO full human; a Vedic object "
+        "tied to the topic (iron danda, rudraksha, copper vessel, lamp, "
+        "manuscript, planetary symbol) in extreme detail.\n"
+        "  Scene 4: HANDS or OVER-THE-SHOULDER — human action not face "
+        "(hands offering, walking away, lighting a diya, holding a thread).\n"
+        "  Scene 5: CELESTIAL / SKY wide — planet, cosmos, horizon, dawn or "
+        "night sky; the figure a silhouette or absent.\n"
+        "RULES: never repeat a camera distance; never the same person at the "
+        "same angle twice; vary TIME OF DAY and LOCATION across scenes within "
+        "the mood; the MOOD palette unifies, the COMPOSITION must differ.\n"
+        "RE-RUN DIVERSITY: assume the viewer saw your last video on this exact "
+        "topic — deliberately choose a different setting, figure age, and "
+        "time-of-day from the obvious choice, keeping the mood palette.\n"
         f"\nAppend this realism block to every scene: {HUMAN_REALISM_BLOCK}.\n"
         "Respond ONLY with raw JSON. No markdown fences. No preamble. "
         "No commentary after the closing brace. JUST the JSON object."
@@ -1353,7 +1465,7 @@ FILTER_MOTION_BLUR = "tblend=all_mode=average,framerate=fps=25"
 def apply_cinema_post(clip_path: Path, slug: str, slot_idx: int,
                       skip_color_grade: bool = False) -> Path:
     """Apply cinema look chain on a clip: color_grade + grain + vignette.
-    Optionally skip color grade (e.g. for Veo output which already has grade).
+    Optionally skip color grade if a clip is already graded.
     Returns NEW path; original kept intact for safety."""
     filters = []
     if not skip_color_grade:
@@ -1513,7 +1625,7 @@ def crossfade_concat(clip_paths: list, slug: str,
 # =============================================================
 # SLOT ASSIGNMENT — v2.8 Honey Trap-aware mapping
 # 18 effects available, mapped to story beats:
-#   slot 0 (HOOK)        -> Veo first, else punch_in (snap attention)
+#   slot 0 (HOOK)        -> punch_in (bold full-screen zoom, snap attention)
 #   slot 1 (LURE)        -> ken_burns_eye_to_wide (intimate -> reveal)
 #   slot 2 (PULL)        -> top_to_bottom (descent of truth)
 #   slot 3 (WITHHOLD)    -> zoom_out (pullback to BPHS context)
@@ -1524,7 +1636,7 @@ def crossfade_concat(clip_paths: list, slug: str,
 #   slot 8+ (extra)      -> ken_burns_breathe (meditative)
 # =============================================================
 SLOT_EFFECTS = [
-    effect_punch_in,                # 0 HOOK - fallback (Veo tries first)
+    effect_punch_in,                # 0 HOOK - bold full-screen punch zoom
     effect_ken_burns_eye_to_wide,   # 1 LURE - intimate to reveal
     effect_top_to_bottom,           # 2 PULL - descent of truth
     effect_zoom_out,                # 3 WITHHOLD - pullback context
@@ -1752,167 +1864,12 @@ def generate_images(scenes: list, retries: int = 2) -> list:
 
 
 # =============================================================
-# KLING 2.5 TURBO PRO MOTION via fal.ai (v2.5 NEW)
-# Animates the HERO SHOT (slot 0) with real cinematic motion.
-# Returns a Path to an MP4 clip (1080x1920, ~5 sec), or None
-# on any failure -> caller falls back to FFmpeg zoompan.
-# Cost: ~$0.07/sec * 5s = ~$0.35 (~Rs 29) per video.
+# v3.1.0 — AI VIDEO MOTION ENGINE REMOVED (Kling + Veo deleted).
+# Motion is now 100% FFmpeg Ken Burns (zoompan) on still images.
+# No Gemini/Veo video calls, no fal.ai, no external video API,
+# no per-clip video cost. veo_motion() deleted; restore from git
+# history if AI video is ever wanted again.
 # =============================================================
-# =============================================================
-# v2.7 NEW — VEO 3.1 MOTION (replaces Kling)
-# Uses Gemini API (same GEMINI_API_KEY) + veo-3.1-generate-preview.
-# Generates a 4-second cinematic hero shot from a still image.
-# Audio is STRIPPED (-an) because Veo 3.1 bundles AI ambient audio
-# that would collide with the Gemini Charon TTS voiceover.
-# Fail-safe: returns None on any error -> caller uses FFmpeg fallback.
-#
-# v2.7.1: Kling code FULLY REMOVED. Veo 3.1 is sole motion engine.
-# topic_type parameter added so deity_signature() can apply
-# Director's classification gate (planet_deity only).
-# =============================================================
-def veo_motion(image_path: Path, motion_prompt: str,
-               slug: str, topic_text: str = "",
-               topic_type: str = "") -> Optional[Path]:
-    """Animate a still image into a 4s cinematic clip via Veo 3.1.
-    Fail-safe: returns None on any error so caller uses FFmpeg fallback.
-
-    Pipeline:
-      1. Build motion prompt (motion_prompt + deity injection if applicable)
-      2. POST to Veo 3.1 predictLongRunning -> operation ID
-      3. Poll operation every 5s, max ~120s
-      4. Download generated MP4 from Gemini files API
-      5. Strip audio (-an) + normalize to 1080x1920 25fps for stitch
-    """
-    if not GEMINI_API_KEY:
-        log("Veo motion: GEMINI_API_KEY missing — skipping, FFmpeg fallback")
-        return None
-    if not image_path.exists():
-        log("Veo motion: hero image missing — skipping, FFmpeg fallback")
-        return None
-
-    log(f"Veo motion: animating hero shot via {MOTION_MODEL}...")
-
-    # Build the final motion prompt with deity injection
-    prompt = (motion_prompt or "").strip()
-    if not prompt:
-        prompt = ("slow cinematic camera move toward subject, "
-                  "subtle atmospheric drift, practical lighting, "
-                  "documentary realism, 9:16 vertical")
-    # v2.7.1: deity_signature now requires Director gate. If Director
-    # said planet_deity AND topic mentions a graha, inject classical
-    # visual. Otherwise topic stays as-is (no drift).
-    deity_sig = deity_signature(topic_text, topic_type)
-    if deity_sig:
-        prompt = f"{deity_sig}. {prompt}"
-        log(f"  Deity signature injected ({topic_type}): {deity_sig[:60]}...")
-    else:
-        log(f"  No deity injection (topic_type={topic_type or 'unknown'}) — topic stays pure")
-
-    # Note: Veo 3.1 image-to-video uses both prompt + image reference.
-    # We pass the image as base64-encoded inline data (Gemini API style).
-    try:
-        # Step 1: encode image to base64
-        import base64
-        img_bytes = image_path.read_bytes()
-        img_b64 = base64.standard_b64encode(img_bytes).decode("utf-8")
-        # detect mime type from file extension
-        ext = image_path.suffix.lower().lstrip(".")
-        mime = "image/png" if ext == "png" else "image/jpeg"
-
-        # Step 2: submit long-running operation
-        submit_url = (
-            f"https://generativelanguage.googleapis.com/v1beta/"
-            f"models/{MOTION_MODEL}:predictLongRunning?key={GEMINI_API_KEY}"
-        )
-        payload = {
-            "instances": [{
-                "prompt": prompt[:1200],
-                "image": {
-                    "bytesBase64Encoded": img_b64,
-                    "mimeType": mime,
-                },
-            }],
-            "parameters": {
-                "aspectRatio": MOTION_ASPECT,
-                "durationSeconds": MOTION_DURATION,
-                "sampleCount": 1,
-            },
-        }
-        log("  Submitting Veo 3.1 job...")
-        sub_r = requests.post(submit_url, json=payload, timeout=60)
-        if sub_r.status_code != 200:
-            log(f"  Veo submit failed ({sub_r.status_code}): "
-                f"{sub_r.text[:200]} — FFmpeg fallback")
-            return None
-        op_name = sub_r.json().get("name", "")
-        if not op_name:
-            log("  Veo: no operation name in response — FFmpeg fallback")
-            return None
-        log(f"  Veo operation: {op_name.split('/')[-1]}")
-
-        # Step 3: poll operation (Veo 3.1 takes ~30-60s typically)
-        poll_url = (
-            f"https://generativelanguage.googleapis.com/v1beta/"
-            f"{op_name}?key={GEMINI_API_KEY}"
-        )
-        video_uri = None
-        max_polls = 24  # 24 * 5s = 120s max wait
-        for poll_n in range(max_polls):
-            time.sleep(5)
-            pr = requests.get(poll_url, timeout=30)
-            if pr.status_code != 200:
-                log(f"  Veo poll #{poll_n+1} HTTP {pr.status_code} — retry")
-                continue
-            pj = pr.json()
-            if pj.get("done"):
-                # Extract video URI from response
-                resp = pj.get("response", {})
-                gen = resp.get("generateVideoResponse", {})
-                samples = gen.get("generatedSamples", [])
-                if samples:
-                    video_uri = samples[0].get("video", {}).get("uri", "")
-                if video_uri:
-                    log(f"  Veo done in ~{(poll_n+1)*5}s")
-                    break
-                log(f"  Veo done but no video URI — FFmpeg fallback")
-                return None
-        if not video_uri:
-            log("  Veo timed out after 120s — FFmpeg fallback")
-            return None
-
-        # Step 4: download the video file (Gemini files API)
-        log("  Downloading Veo MP4...")
-        # video_uri already contains alt=media; append key
-        sep = "&" if "?" in video_uri else "?"
-        dl_url = f"{video_uri}{sep}key={GEMINI_API_KEY}"
-        dl_r = requests.get(dl_url, timeout=180)
-        if dl_r.status_code != 200 or len(dl_r.content) < 10000:
-            log(f"  Veo download failed ({dl_r.status_code}, "
-                f"{len(dl_r.content)} bytes) — FFmpeg fallback")
-            return None
-        raw_path = TEMP_DIR / f"pro_veo_raw_{slug}.mp4"
-        raw_path.write_bytes(dl_r.content)
-        log(f"  Veo raw saved: {len(dl_r.content)//1024} KB")
-
-        # Step 5: strip audio + normalize to 1080x1920 25fps for stitch
-        norm = TEMP_DIR / f"pro_veonorm_{slug}.mp4"
-        subprocess.run([
-            "ffmpeg", "-y", "-i", str(raw_path),
-            "-vf", "scale=1080:1920:force_original_aspect_ratio=increase,"
-                   "crop=1080:1920,fps=25",
-            "-c:v", "libx264", "-preset", "fast", "-crf", "20",
-            "-an",                       # STRIP AUDIO (Veo's AI audio collides with TTS)
-            "-pix_fmt", "yuv420p", str(norm)
-        ], capture_output=True, timeout=180)
-        if norm.exists() and norm.stat().st_size > 10000:
-            log(f"  Veo clip normalized: {norm.name} "
-                f"({norm.stat().st_size//1024} KB, audio stripped, 1080p)")
-            return norm
-        log("  Veo normalize failed — using raw")
-        return raw_path
-    except Exception as e:
-        log(f"  Veo exception ({type(e).__name__}: {e}) — FFmpeg fallback")
-        return None
 
 
 def get_audio_duration(audio_path: Path) -> float:
@@ -2651,11 +2608,23 @@ def upload_to_youtube(video_path: Path, script_data: dict) -> Optional[str]:
             "Trikaal Vaani - AI-powered Vedic Astrology\n"
             "Free Kundali, Kundali Milan & Life Predictions\n"
             "trikalvaani.com\n#VedicAstrology #FreeKundali #TrikaalVaani")
+        # v3.2: append FAQ Q&A to pinned comment (AEO — Google/AI engines
+        # extract pinned-comment Q&A for featured answers).
+        pin_faqs = script_data.get("faq", []) or []
+        if isinstance(pin_faqs, list) and pin_faqs:
+            pin_lines = ["", "—— Aksar Pooche Jaane Wale Sawaal ——"]
+            for item in pin_faqs[:4]:
+                if isinstance(item, dict) and item.get("q"):
+                    pin_lines.append(f"Q: {item.get('q','')}")
+                    pin_lines.append(f"A: {item.get('a','')}")
+            pin_lines.append("")
+            pin_lines.append("Apni kundali dekhein: trikalvaani.com")
+            pinned = pinned + "\n".join(pin_lines)
         try:
             youtube.commentThreads().insert(part="snippet", body={"snippet": {
                 "videoId": video_id, "topLevelComment": {"snippet": {
                     "textOriginal": pinned[:9000]}}}}).execute()
-            log("  Pinned comment posted")
+            log("  Pinned comment posted (with FAQ)")
         except Exception as ce:
             log(f"  Pinned comment skipped: {ce}")
         return {"url": url, "video_id": video_id}
@@ -2883,10 +2852,10 @@ def _finish_and_upload(script_data, images, audio, slug, pipeline,
                        hook_path: Optional[Path] = None,
                        treatment: Optional[dict] = None,
                        topic: str = "") -> dict:
-    # v2.7: pass topic_text into render_slides so veo_motion() can inject
-    # the deity visual signature into the hero motion prompt.
-    # v2.7.1: ALSO pass topic_type from Director's treatment so the deity
-    # injection respects Director's classification (no topic drift).
+    # topic_type / emotional_arc are read from the Director's treatment.
+    # emotional_arc drives the synthetic ambient bed mood. topic_text /
+    # topic_type are still threaded into render_slides for forward-compat
+    # (image/scene context); no AI-video motion call uses them anymore.
     topic_type = (treatment or {}).get("topic_type", "")
     emotional_arc = (treatment or {}).get("emotional_arc", "")
     slides = render_slides(images, audio, script_data, slug,
