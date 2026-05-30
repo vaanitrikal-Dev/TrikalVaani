@@ -3,8 +3,13 @@
  * TRIKAL VAANI — Child Birth Muhurat Paid Report — Generate API
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/api/muhurat-paid/route.ts
- * VERSION: 1.2.1 — Added background PDF generation + strict script lock (no mid-word Roman/Devanagari mixing)
+ * VERSION: 1.2.2 — VM calls routed through lib/callVM.ts (X-Trikal-Key auto)
  * ============================================================
+ * CHANGE v1.2.2: Both VM calls (/muhurat-paid + fire-and-forget /muhurat-pdf)
+ *   now go through lib/callVM.ts so the X-Trikal-Key auth header is injected
+ *   automatically. Timeouts/abort, tiers, prompt, Gemini, polish, and the
+ *   fire-and-forget PDF behaviour are byte-for-byte identical to v1.2.1.
+ *
  * PIPELINE (parent's CHOSEN delivery time):
  *   VM /muhurat-paid (kundali + slot + doshas + 10 remedies)
  *     -> build 600-word child-life prediction prompt
@@ -28,6 +33,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { polishMuhuratNarrative, type MuhuratLanguage } from '@/lib/claude-polish';
+import { callVM } from '@/lib/callVM';
 
 // VM paid-muhurat endpoint (kundali + slot + doshas + 10 remedies)
 const VM_MUHURAT_PAID_ENDPOINT =
@@ -74,12 +80,10 @@ function triggerMuhuratPdf(slug: string): void {
     // Generous timeout — WeasyPrint + upload can take a few seconds.
     const timeout = setTimeout(() => controller.abort(), 60000);
 
-    fetch(VM_MUHURAT_PDF_ENDPOINT, {
+    callVM(VM_MUHURAT_PDF_ENDPOINT, {
       method:  'POST',
-      headers: { 'Content-Type': 'application/json' },
       body:    JSON.stringify({ slug }),
       signal:  controller.signal,
-      cache:   'no-store',
     })
       .then(async (res) => {
         clearTimeout(timeout);
@@ -260,9 +264,8 @@ export async function POST(req: NextRequest) {
 
       let vmRes: Response;
       try {
-        vmRes = await fetch(VM_MUHURAT_PAID_ENDPOINT, {
+        vmRes = await callVM(VM_MUHURAT_PAID_ENDPOINT, {
           method:  'POST',
-          headers: { 'Content-Type': 'application/json' },
           body:    JSON.stringify({
             year:      muhuratData.year,
             month:     muhuratData.month,
@@ -275,7 +278,6 @@ export async function POST(req: NextRequest) {
             lang:      langForVM(language),
           }),
           signal: controller.signal,
-          cache:  'no-store',
         });
       } catch (e: unknown) {
         clearTimeout(timeout);
