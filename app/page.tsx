@@ -1,7 +1,16 @@
-// 🔱 TRIKAL VAANI | app/page.tsx | v11.1
+// 🔱 TRIKAL VAANI | app/page.tsx | v11.2
 // Owner: Rohiit Gupta, Chief Vedic Architect
 // Date: 2026-06-01
 // ============================================================================
+// v11.1 → v11.2 — META DESCRIPTION REWRITE (SERP CTR, metadata only):
+//   ✅ description tightened from ~250 chars (truncated by Google at ~155)
+//      to 136 chars so the full line shows. Angle = Free + accuracy
+//      (mass-market) + problem domains (career/marriage/wealth/health) +
+//      EEAT (Rohiit Gupta, Chief Vedic Architect) + entity-rich (kundli,
+//      Kundali Milan, Vedic) for GEO/AEO. Dropped "Swiss Ephemeris" + "₹11"
+//      from the meta line to fit; ₹11 hook retained in OG/Twitter (social).
+//   PROTECTED: title, OG, twitter, canonical, page body — all unchanged.
+// ----------------------------------------------------------------------------
 // v11.0 → v11.1 — BRAND FLIP + IR-0 CLEANUP (metadata only, CEO-approved):
 //   ✅ BRAND FLIP: every visible "Trikal Vaani" -> "Trikaal Vaani" in this
 //      file's metadata block — page <title>, openGraph.title, openGraph.siteName,
@@ -38,14 +47,14 @@ import HomeClient from './HomeClient';
 import { blogPosts } from '@/lib/blog-data';
 
 // ─────────────────────────────────────────────────────────────
-// PAGE-SPECIFIC METADATA — overrides layout.tsx v3.0 defaults
-// v11.1: Brand flipped to "Trikaal Vaani" (double-a) across all visible
-//        metadata; Delhi NCR removed (IR-0). Kundali Milan keyword retained.
+// PAGE-SPECIFIC METADATA — overrides layout.tsx v3.0+ defaults
+// v11.2: description tightened to 136 chars (Free + accuracy + problem
+//        domains + EEAT). v11.1: brand flipped to Trikaal; Delhi NCR removed.
 // ─────────────────────────────────────────────────────────────
 export const metadata: Metadata = {
   title: 'Trikaal Vaani | Free Kundli, Kundali Milan & Accurate AI Vedic Astrology',
   description:
-    "Get your free AI kundli, Kundali Milan & accurate Vedic astrology predictions. Personalised readings for career, wealth, marriage, health & legal matters by Rohiit Gupta, Chief Vedic Architect. Powered by Swiss Ephemeris. Voice & text readings from ₹11.",
+    "Free AI kundli, Kundali Milan & accurate Vedic predictions for career, marriage, wealth & health by Rohiit Gupta, Chief Vedic Architect.",
   alternates: {
     canonical: 'https://trikalvaani.com/',
     languages: {
@@ -228,7 +237,7 @@ export default function HomePage() {
 }
 
 // ============================================================================
-// END — app/page.tsx v11.1
+// END — app/page.tsx v11.2
 // 🔱 Trikal Vaani | Rohiit Gupta, Chief Vedic Architect
 // CEO LOCKED: TIERED LAYOUT — earning sections above mobile fold
 // ============================================================================
