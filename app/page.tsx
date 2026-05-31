@@ -1,57 +1,19 @@
-// 🔱 TRIKAL VAANI | app/page.tsx | v11.0
+// 🔱 TRIKAL VAANI | app/page.tsx | v11.1
 // Owner: Rohiit Gupta, Chief Vedic Architect
-// Date: 2026-05-19
+// Date: 2026-06-01
 // ============================================================================
-// CEO-APPROVED LAYOUT REORDER (v10.0 → v11.0):
-//
-// STRATEGIC GOAL: Move earning sections ABOVE the mobile fold.
-// Current v10.0 order pushed Mahakaal form to slot #5, causing ~50-60% mobile
-// drop-off before any earning component was visible. v11.0 fixes this.
-//
-// ❌ REMOVED from old positions:
-//    - HomepageGEO was at slot #2 (right after Hero) — moved to slot #11
-//    - LiveTrustBar was at slot #3 — moved to slot #4
-//    - SocialProofTicker was at slot #4 — moved to slot #6
-//    - PricingSection was at slot #10 — moved to slot #5
-//
-// ✅ NEW SLOT #3: KundaliMilanTeaser (NEW component, "Launching Soon" earning
-//    placeholder with email capture to Supabase milan_waitlist table)
-//
-// ✅ CRITICAL DESIGN DECISION:
-//    HomeClient (DardEngine + BirthForm) stays INTACT as one component.
-//    Their shared useState<SelectedCategory> + handleSelectCategory flow is
-//    a brilliant funnel — user picks Dard category, BirthForm pre-fills below.
-//    Breaking this would hurt conversions more than reordering helps.
-//
-// ✅ TIERED LOCK POLICY (Iron Rule IR-12):
-//    LOCKED sections (no edits without CEO approval):
-//      #2 HomeClient (Mahakaal form + Dard Engine)
-//      #3 KundaliMilanTeaser
-//      (Maa Shakti lives inside prediction pages, not homepage)
-//    EDITABLE sections:
-//      #1 Hero, #4-13 (all others)
-//
-// ✅ SEO/GEO IMPACT: ZERO loss.
-//    HomepageGEO HTML still renders in the document. Google, Perplexity, SGE,
-//    and ChatGPT crawlers parse the full DOM regardless of visual position.
-//    Schema markup (HomepageSchema + SchemaScript) remains in document head.
-//    Position only affects HUMAN scroll order, not AI extraction.
-//
-// PAGE FLOW v11.0 (top to bottom):
-//   1. Hero                    (H1 + visual hook — compressed)
-//   2. HomeClient              (Mahakaal form + Dard Engine — EARNING LOCKED)
-//   3. KundaliMilanTeaser      (NEW — Launching Soon earning placeholder LOCKED)
-//   4. LiveTrustBar            (social proof — quick trust strip)
-//   5. PricingSection          (commercial trust — show tiers)
-//   6. SocialProofTicker       (live ticker)
-//   7. DailyPanchang           (daily return-visit hook)
-//   8. DailyRashifal           (daily return-visit hook)
-//   9. PillarsGrid             (life domains)
-//   10. AIManifesto            (brand philosophy)
-//   11. HomepageGEO            (GEO direct answer + Tier 1 FAQ + E-E-A-T — CRAWLER ONLY)
-//   12. HomeFAQ v2.0           (Tier 2 deep technical FAQ)
-//   13. InnerCircleWaitlist    (VIP capture)
-//   14. Blog section           (3 latest posts)
+// v11.0 → v11.1 — BRAND FLIP + IR-0 CLEANUP (metadata only, CEO-approved):
+//   ✅ BRAND FLIP: every visible "Trikal Vaani" -> "Trikaal Vaani" in this
+//      file's metadata block — page <title>, openGraph.title, openGraph.siteName,
+//      openGraph.images[].alt, twitter.title. This is what fixes the single-a
+//      "Trikal Vaani" title showing in Google for the homepage (page-level
+//      metadata overrides layout.tsx, so layout's correct Trikaal title was
+//      never reaching the homepage SERP).
+//   ✅ IR-0: "(Delhi NCR)" removed from the meta description (banned local
+//      targeting — same cleanup already done in layout.tsx v3.0).
+//   ✅ KEPT: "Kundali Milan" keyword in title/desc (CEO request).
+//   PROTECTED (untouched): entire page body, all 14 slots, IR-12 locked
+//      sections, canonical, languages, og-default.jpg, all component imports.
 // ============================================================================
 
 import type { Metadata } from 'next';
@@ -76,14 +38,14 @@ import HomeClient from './HomeClient';
 import { blogPosts } from '@/lib/blog-data';
 
 // ─────────────────────────────────────────────────────────────
-// PAGE-SPECIFIC METADATA — overrides layout.tsx v2.7 defaults
-// v11.0: Updated description to include Kundali Milan keyword
-//        for early SEO indexing window before product launches.
+// PAGE-SPECIFIC METADATA — overrides layout.tsx v3.0 defaults
+// v11.1: Brand flipped to "Trikaal Vaani" (double-a) across all visible
+//        metadata; Delhi NCR removed (IR-0). Kundali Milan keyword retained.
 // ─────────────────────────────────────────────────────────────
 export const metadata: Metadata = {
-  title: 'Trikal Vaani | Free Kundli, Kundali Milan & Accurate AI Vedic Astrology',
+  title: 'Trikaal Vaani | Free Kundli, Kundali Milan & Accurate AI Vedic Astrology',
   description:
-    "Get your free AI kundli, Kundali Milan & accurate Vedic astrology predictions. Personalised readings for career, wealth, marriage, health & legal matters by Rohiit Gupta, Chief Vedic Architect (Delhi NCR). Powered by Swiss Ephemeris. Voice & text readings from ₹11.",
+    "Get your free AI kundli, Kundali Milan & accurate Vedic astrology predictions. Personalised readings for career, wealth, marriage, health & legal matters by Rohiit Gupta, Chief Vedic Architect. Powered by Swiss Ephemeris. Voice & text readings from ₹11.",
   alternates: {
     canonical: 'https://trikalvaani.com/',
     languages: {
@@ -92,25 +54,25 @@ export const metadata: Metadata = {
     },
   },
   openGraph: {
-    title: 'Trikal Vaani | Free Kundli, Kundali Milan & Accurate AI Vedic Astrology',
+    title: 'Trikaal Vaani | Free Kundli, Kundali Milan & Accurate AI Vedic Astrology',
     description:
       "Free AI kundli, Kundali Milan & accurate Vedic astrology predictions. Personalised readings by Rohiit Gupta, Chief Vedic Architect. Voice & text from ₹11.",
     url: 'https://trikalvaani.com/',
     type: 'website',
     locale: 'en_IN',
-    siteName: 'Trikal Vaani',
+    siteName: 'Trikaal Vaani',
     images: [
       {
         url: 'https://trikalvaani.com/og-default.jpg',
         width: 1200,
         height: 630,
-        alt: 'Trikal Vaani — Free Kundli, Kundali Milan & Accurate AI Vedic Astrology',
+        alt: 'Trikaal Vaani — Free Kundli, Kundali Milan & Accurate AI Vedic Astrology',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Trikal Vaani | Free Kundli, Kundali Milan & Accurate AI Vedic Astrology',
+    title: 'Trikaal Vaani | Free Kundli, Kundali Milan & Accurate AI Vedic Astrology',
     description:
       'Free AI kundli, Kundali Milan & accurate Vedic astrology predictions. Voice & text readings from ₹11.',
     images: ['https://trikalvaani.com/og-default.jpg'],
@@ -207,7 +169,7 @@ export default function HomePage() {
           ═══════════════════════════════════════════════════════════════ */}
 
           {/* ── 11. HOMEPAGE GEO — moved from slot #2 ──────────────────────
-              56-word direct answer + Tier 1 FAQ + author E-E-A-T + local SEO.
+              56-word direct answer + Tier 1 FAQ + author E-E-A-T.
               CEO DECISION (May 19 2026): "Human will not read HomepageGEO,
               it's only for SEO/GEO/AEO/E-E-A-T — shift below earning sections."
               Crawlers extract this content regardless of DOM position. */}
@@ -266,7 +228,7 @@ export default function HomePage() {
 }
 
 // ============================================================================
-// END — app/page.tsx v11.0
+// END — app/page.tsx v11.1
 // 🔱 Trikal Vaani | Rohiit Gupta, Chief Vedic Architect
 // CEO LOCKED: TIERED LAYOUT — earning sections above mobile fold
 // ============================================================================
