@@ -1,33 +1,25 @@
 // ============================================================
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikal Vaani
 // FILE: app/layout.tsx
-// VERSION: v3.0 — Brand flip + LocalBusiness removed + global IR-0 cleanup
-// DATE: 2026-05-27
-// CHANGES vs v2.7 (CEO-approved, IR-0 compliant):
-//   ✅ BRAND FLIP: visible "Trikal Vaani" -> "Trikaal Vaani" (titles, OG, twitter,
-//      siteName, publisher, meta-publisher, OG image alt, all schema name fields).
-//      legalName "Trikal Vaani Global" KEPT. alternateName arrays keep both spellings.
-//   ✅ LOCALBUSINESS SCHEMA DELETED (CEO Decision #6): the entire
-//      #localbusiness ProfessionalService block (New Delhi address, geo coords,
-//      5 NCR cities, opening hours) removed. ProfessionalService is a
-//      LocalBusiness subtype — banned. MSME ID retained in Organization schema.
-//   ✅ ₹499 PHANTOM REMOVED: "Personal Consultation ₹499" offer deleted from
-//      WebApplication offers. Free / ₹11 / ₹51 (real tiers) kept.
-//   ✅ FAKE STAT REMOVED: Org description "India's most accurate" -> honest
-//      global description. "Delhi NCR" removed.
-//   ✅ GLOBAL (IR-0): Org areaServed -> [India, Worldwide].
-//   ✅ GEO META REMOVED: geo.region, geo.placename, geo.position, ICBM (Delhi
-//      targeting) deleted from `other`. "(Delhi NCR)" removed from description.
-//   ✅ KEYWORDS: "best astrologer Delhi NCR" + "astrologer near me" removed;
-//      added "online astrology consultation", "kundli matching online".
-//   ✅ sameAs FIXED: real handles instagram.com/thetrikalvaani,
-//      youtube.com/@TheTrikalVaani, facebook Trikal-Vaani-Voice. X/Twitter
-//      dropped (master plan §5.3) — twitter.creator line also removed.
-//   ✅ PERSONA: "Trikal Ka Sandesh" -> "Trikaal Ka Sandesh", "Trikal AI" -> "Trikaal AI".
-//   PROTECTED (untouched): all trikalvaani.com URLs/@id (#organization +
-//   #rohiit-gupta referenced by HomepageSchema + TrustStrip), /founder, /hi,
-//   canonical, metadataBase, Google verification token, MSME number, phone,
-//   Razorpay preloads, SchemaScript/TrikalVoice/Analytics wiring.
+// VERSION: v3.1 — Favicon fix + Organization logo URL corrected
+// DATE: 2026-06-01
+// CHANGES vs v3.0 (CEO-approved):
+//   ✅ FAVICON FIX (root cause of grey-globe in Google): the single
+//      icon: "/Trikal_Vaani_Logo.svg" (a RECTANGULAR wordmark — non-square,
+//      so Google rejected it and fell back to the default globe) is REPLACED
+//      with a proper SQUARE icon set served from /public:
+//        - /favicon.ico  (multi-size 16/32/48/64)
+//        - /icon-192.png, /icon-512.png
+//        - /apple-touch-icon.png (180)
+//      Source art = cropped owl + third-eye mark from Trikal_Logo.png.
+//   ✅ ORG LOGO URL FIXED: schema logo pointed to /logo.png (404 — file does
+//      not exist in /public). Now points to the real /Trikal_Logo.png
+//      (1440x1440 square). Helps brand/knowledge-panel signals.
+//   NOTE: Trikal_Vaani_Logo.svg stays in /public (still referenced elsewhere);
+//      it is simply no longer used as the favicon.
+//   PROTECTED (untouched): all metadata copy, titles, OG/twitter, keywords,
+//      verification token, canonical/languages, Organization + WebApplication
+//      schema bodies, Razorpay preloads, SchemaScript/TrikalVoice/Analytics.
 // ============================================================
 
 import type { Metadata } from "next";
@@ -83,7 +75,13 @@ export const metadata: Metadata = {
     },
   },
   icons: {
-    icon: "/Trikal_Vaani_Logo.svg",
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/icon-192.png", type: "image/png", sizes: "192x192" },
+      { url: "/icon-512.png", type: "image/png", sizes: "512x512" },
+    ],
+    shortcut: "/favicon.ico",
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
   },
   category: "Vedic Astrology",
   openGraph: {
@@ -161,9 +159,9 @@ export default function RootLayout({
               url: "https://trikalvaani.com",
               logo: {
                 "@type": "ImageObject",
-                url: "https://trikalvaani.com/logo.png",
-                width: 512,
-                height: 512,
+                url: "https://trikalvaani.com/Trikal_Logo.png",
+                width: 1440,
+                height: 1440,
               },
               description:
                 "AI-powered Vedic astrology platform offering free kundli and personalised predictions across India and worldwide. Powered by Swiss Ephemeris, BPHS Parashara classical rules, Bhrigu Nandi Nadi, and Shadbala. Government of India MSME registered enterprise (UDYAM-DL-10-0119070). Founded by Rohiit Gupta, Chief Vedic Architect.",
