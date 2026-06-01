@@ -1,22 +1,27 @@
 /**
  * ============================================================================
- * 🔱 TRIKAL VAANI — CEO PROTECTION HEADER 🔱
+ * 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER 🔱
  * ============================================================================
  * File:        components/SiteFooter.tsx
- * Version:     v2.2 — Real Supabase counter + Calculators link + Link fixes
+ * Version:     v2.3 — IR-0 cleanup (branding + local signal)
  * Owner:       Rohiit Gupta, Chief Vedic Architect
- * Date:        2026-05-18
+ * Date:        2026-06-01
  *
- * CHANGES vs v2.1:
- *   ✅ ADDED: /calculators link in Explore nav
- *   ✅ FIXED: /upcoming-events → /panchang (2 places: Explore nav + legal footer)
- *   ✅ FIXED: Fake counter replaced with real Supabase predictions count
- *      → Fetches live from /api/stats (or falls back to 72 if API unavailable)
- *      → Honest number, grows organically with every real prediction
- *   ✅ FIXED: Broken founder image path
- *      OLD: /images/founder.png/Rohiit_Gupta.jpg (invalid)
- *      NEW: /images/Rohiit_Gupta.jpg
- *   ✅ ALL OTHER CONTENT: 100% identical to v2.1
+ * CHANGES vs v2.2 (CEO approved):
+ *   ✅ Visible logo text "Trikal Vaani" -> "Trikaal Vaani".
+ *   ✅ REMOVED the "Delhi NCR, India — Global Platform" location row
+ *      (local-business signal — violates IR-0). Replaced with a
+ *      national/global scope line, no city.
+ *   ✅ Copyright "© Trikal Vaani Global" -> "© Trikaal Vaani Global".
+ *   ✅ Entity-consolidation block kept AS-IS on purpose (it deliberately
+ *      links the single-a + double-a spellings + alt domains for SEO).
+ *   ✅ ALL OTHER CONTENT + logic from v2.2: 100% identical.
+ *
+ * CHANGES vs v2.1 (carried over):
+ *   ✅ /calculators link in Explore nav
+ *   ✅ /upcoming-events → /panchang (Explore + legal footer)
+ *   ✅ Real Supabase predictions count via /api/stats (fallback 72)
+ *   ✅ Founder image path fixed
  * ============================================================================
  */
 
@@ -70,7 +75,7 @@ export default function SiteFooter() {
                 <Star className="w-4 h-4" style={{ color: GOLD }} />
               </div>
               <span className="font-serif font-bold text-lg text-gradient-gold">
-                Trikal Vaani
+                Trikaal Vaani
               </span>
             </Link>
             <p className="text-xs text-slate-400 leading-relaxed max-w-xs mb-4">
@@ -109,7 +114,7 @@ export default function SiteFooter() {
 
             <div className="flex items-center gap-1.5 text-xs text-slate-500 mb-2">
               <MapPin className="w-3.5 h-3.5 flex-shrink-0" style={{ color: GOLD_RGBA(0.5) }} />
-              <span>Delhi NCR, India — Global Platform</span>
+              <span>Serving India &amp; the World — Online Vedic Platform</span>
             </div>
 
             <a
@@ -140,7 +145,6 @@ export default function SiteFooter() {
               <Link href="/#birth-form" className="text-xs transition-colors hover:text-white" style={{ color: GOLD_RGBA(0.65) }}>
                 Free Analysis
               </Link>
-              {/* ✅ v2.2 NEW: Calculators link added */}
               <Link href="/calculators" className="text-xs transition-colors hover:text-white" style={{ color: GOLD_RGBA(0.65) }}>
                 Free Calculators
               </Link>
@@ -150,7 +154,6 @@ export default function SiteFooter() {
               <Link href="/founder" className="text-xs transition-colors hover:text-white" style={{ color: GOLD_RGBA(0.65) }}>
                 About Rohiit Gupta
               </Link>
-              {/* ✅ v2.2 FIX: /upcoming-events → /panchang */}
               <Link href="/panchang" className="text-xs transition-colors hover:text-white" style={{ color: GOLD_RGBA(0.65) }}>
                 Festival Calendar
               </Link>
@@ -257,7 +260,7 @@ export default function SiteFooter() {
           </div>
         </div>
 
-        {/* Entity Consolidation Signal */}
+        {/* Entity Consolidation Signal — kept AS-IS (deliberate single-a + double-a link) */}
         <div
           className="mb-6 rounded-xl px-5 py-3.5 text-center"
           style={{
@@ -295,7 +298,6 @@ export default function SiteFooter() {
               Refund Policy
             </Link>
             <span style={{ color: GOLD_RGBA(0.3) }} className="text-xs">·</span>
-            {/* ✅ v2.2 FIX: /upcoming-events → /panchang in legal footer too */}
             <Link href="/panchang" className="text-xs font-bold transition-all duration-200 hover:text-white hover:scale-105" style={{ color: GOLD }}>
               Festival Calendar
             </Link>
@@ -306,7 +308,7 @@ export default function SiteFooter() {
           </div>
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
             <div className="flex flex-wrap items-center gap-4 text-xs text-slate-700">
-              <span>&copy; {new Date().getFullYear()} Trikal Vaani Global. All rights reserved.</span>
+              <span>&copy; {new Date().getFullYear()} Trikaal Vaani Global. All rights reserved.</span>
               <span style={{ color: GOLD_RGBA(0.2) }}>·</span>
               <span>MSME: UDYAM-DL-10-0119070</span>
               <span style={{ color: GOLD_RGBA(0.2) }}>·</span>
@@ -326,7 +328,7 @@ export default function SiteFooter() {
 }
 
 // ============================================================================
-// END — components/SiteFooter.tsx v2.2
-// 🔱 Trikal Vaani | Rohiit Gupta, Chief Vedic Architect
+// END — components/SiteFooter.tsx v2.3
+// 🔱 Trikaal Vaani | Rohiit Gupta, Chief Vedic Architect
 // MSME Registered: UDYAM-DL-10-0119070
 // ============================================================================
