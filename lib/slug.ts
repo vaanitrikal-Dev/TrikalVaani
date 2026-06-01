@@ -1,18 +1,26 @@
 /**
  * ============================================================
- * TRIKAL VAANI — SEO Slug Generator
+ * TRIKAAL VAANI — SEO Slug Generator
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: lib/slug.ts
- * VERSION: 1.0 — SEO-friendly prediction URL slugs
+ * VERSION: 1.1 — IR-0 cleanup (no local signal in title)
  * SIGNED: ROHIIT GUPTA, CEO
  *
- * FORMAT: [domain]-[mahadasha]-[antardasha]-[city]-[5char-uid]
- * EXAMPLE: career-rahu-saturn-delhi-x7k2m
+ * v1.0 -> v1.1 CHANGES (CEO approved):
+ *   - SEO <title> no longer ends with "| {City} | Trikal Vaani".
+ *     City (local-SEO signal) REMOVED from the visible title;
+ *     replaced with "India & Global". Brand -> "Trikaal Vaani".
+ *   - The slug FORMAT still keeps city (it is a URL token, not a
+ *     visible local-business signal) — URLs stay stable, unchanged.
+ *   - description text + canonical + domain trikalvaani.com: UNTOUCHED.
+ *
+ * FORMAT: [domain]-[mahadasha]-[antardasha]-[city]-[year]-[5char-uid]
+ * EXAMPLE: career-rahu-saturn-delhi-2026-x7k2m
  *
  * SEO STRATEGY:
  *   - Domain keyword first (career, wealth, health...)
  *   - Planetary lords (Rahu, Saturn...) = searchable Vedic terms
- *   - City = local SEO signal
+ *   - City retained in URL slug for uniqueness (not a local signal)
  *   - 5-char uid = uniqueness guarantee
  * ============================================================
  */
@@ -126,13 +134,13 @@ export function generateSeoMeta(
 ): SeoMeta {
   const domainSlug    = DOMAIN_SLUG_MAP[domainId] ?? 'astrology'
   const domainDisplay = DOMAIN_DISPLAY[domainSlug] ?? 'Vedic Astrology'
-  const cityDisplay   = city.split(',')[0]?.trim() ?? 'India'
 
-  const title = `${domainDisplay} Prediction — ${mahadasha}-${antardasha} Dasha | ${cityDisplay} | Trikal Vaani`
+  // v1.1: no city in visible title — national + global scope, double-a brand.
+  const title = `${domainDisplay} Prediction — ${mahadasha}-${antardasha} Dasha | India & Global | Trikaal Vaani`
 
   const description = geoAnswer
     ? geoAnswer.slice(0, 155)
-    : `Vedic astrology ${domainDisplay.toLowerCase()} prediction for ${cityDisplay}. ${mahadasha} Mahadasha, ${antardasha} Antardasha analysis by Rohiit Gupta, Chief Vedic Architect. Powered by Swiss Ephemeris.`
+    : `Vedic astrology ${domainDisplay.toLowerCase()} prediction. ${mahadasha} Mahadasha, ${antardasha} Antardasha analysis by Rohiit Gupta, Chief Vedic Architect. Powered by Swiss Ephemeris.`
 
   const canonical = `https://trikalvaani.com/report/${slug}`
 
@@ -146,4 +154,3 @@ export function isValidSlug(slug: string): boolean {
   // Min 10 chars, max 80 chars
   return /^[a-z0-9-]{10,80}$/.test(slug)
 }
-
