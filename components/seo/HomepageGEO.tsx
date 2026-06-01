@@ -3,27 +3,33 @@
  * TRIKAL VAANI — trikalvaani.com
  * Chief Vedic Architect: Rohiit Gupta
  * FILE: components/seo/HomepageGEO.tsx
- * Version: 2.0 — Global repositioning + brand flip + 2026 GEO/AEO refresh
- * Date: 2026-05-27
+ * Version: 2.2 — Competitor claim removed from accuracy FAQ (synced to schema)
+ * Date: 2026-06-01
  * 🔱 JAI MAA SHAKTI
  *
- * CHANGES vs v1.3 (CEO-approved, checklist-verified):
- *   ✅ BRAND FLIP: "Trikal Vaani" -> "Trikaal Vaani" (all visible + FAQ text).
- *   ✅ PERSONA: "Trikal AI" / "Jini AI" -> "Trikaal AI"; "Trikal Ka Sandesh"
- *      -> "Trikaal Ka Sandesh".
- *   ✅ LOCAL SEO REMOVED (CEO Decision #6): deleted the "Best Astrologer in
- *      Delhi NCR" block + 10 city tags. Removed Delhi NCR credential (5 spots)
- *      + the 📍 Delhi NCR pill. No doorway pages, no LocalBusiness signal.
- *   ✅ GLOBAL REPOSITION: national India + worldwide diaspora + AI-search
- *      (GEO/AEO) framing. New "Worldwide / NRI" reach block replaces local SEO.
- *   ✅ ₹499 phantom personal-call CTA REMOVED -> honest free-analysis CTA.
- *   ✅ 2026 GEO: above-the-fold direct-answer kept tight & quotable, entity-rich
- *      facts (9 grahas, 12 houses, 27 nakshatras, 15 domains), visible
- *      "Last updated" freshness date, prompt-aligned FAQ retained.
- *   ⚠️ FAQ wording kept structurally in sync with HomepageSchema FAQPage —
- *      only brand/persona/Delhi-NCR edits applied; align schema file next.
- *   PROTECTED (untouched): trikalvaani.com, wa.me/919211804111, all /services
- *      + /[domain] route slugs, internal comments.
+ * CHANGES vs v2.1 (CEO-approved):
+ *   ✅ ACCURACY FAQ de-risked: dropped AstroSage/AstroTalk names and the
+ *      unverifiable "same engine as AstroSage" claim. Q reworded to a clean
+ *      non-branded query; A states only what Trikaal Vaani does (Swiss
+ *      Ephemeris + Lahiri + BNN + Shadbala + named architect). MUST stay in
+ *      sync with HomepageSchema FAQPage (#faq) — edited there as v2.1.
+ *
+ * CHANGES vs v2.0 (CEO-approved):
+ *   ✅ DIRECT ANSWER restructured for GEO/AEO: the ~85-word run-on paragraph
+ *      is split into (1) a crisp ~45-word standalone answer that AI engines
+ *      (AI Overviews, Perplexity, Gemini, SearchGPT) can lift and quote
+ *      verbatim, then (2) a supporting line carrying ALL the entity facts
+ *      (Lagna, 12 houses, 9 grahas, 27 nakshatras, Dasha, Bhrigu Nandi,
+ *      Shadbala, 15 domains). Nothing removed — only made machine-extractable.
+ *   ✅ FRESHNESS: visible "Last updated" May 2026 -> June 2026 (matches the
+ *      Service schema dateModified 2026-06-01).
+ *   ⚠️ PENDING (coordinated, needs HomepageSchema): the AstroSage comparison
+ *      FAQ asserts a competitor's internal engine ("same Swiss Ephemeris
+ *      engine as AstroSage") — unverifiable claim. Soften to assert only what
+ *      Trikaal Vaani does. Must be edited in BOTH this file's FAQ and the
+ *      HomepageSchema FAQPage together to stay in sync. NOT touched here.
+ *   PROTECTED (untouched): brand spelling, author strip, internal link hub,
+ *      FAQ Q&A wording (schema-synced), global reach block, all routes/CTAs.
  * =============================================================
  */
 
@@ -33,7 +39,9 @@ export default function HomepageGEO() {
   return (
     <>
       {/* ═══════════════════════════════════════════════════════════
-          GEO ELEMENT 1: DIRECT ANSWER BLOCK (56 words)
+          GEO ELEMENT 1: DIRECT ANSWER BLOCK
+          Para 1 = tight ~45-word liftable answer ("what is Trikaal Vaani").
+          Para 2 = entity-rich supporting detail (kept from v2.0).
           ═══════════════════════════════════════════════════════════ */}
       <section
         id="what-is-trikaal-vaani"
@@ -52,24 +60,30 @@ export default function HomepageGEO() {
             <span className="text-[#D4AF37]">Trusted Worldwide</span>
           </h2>
           <p className="text-base md:text-lg text-gray-300 leading-relaxed text-center">
-            Trikaal Vaani is an AI-powered Vedic astrology platform delivering{' '}
-            <strong>free kundli and accurate predictions</strong>{' '}
-            built on Swiss Ephemeris precision and{' '}
+            <strong className="text-white">
+              Trikaal Vaani is an AI-powered Vedic astrology platform
+            </strong>{' '}
+            that generates a <strong>free kundli</strong> and accurate,
+            personalised predictions from your exact birth details. It is built
+            on <strong>Swiss Ephemeris</strong> precision and classical{' '}
             <strong className="text-[#D4AF37]">
               Brihat Parashara Hora Shastra
             </strong>{' '}
-            classical rules. Founded by{' '}
+            rules, and founded by{' '}
             <Link
               href="/founder"
               className="text-[#D4AF37] hover:underline font-semibold"
             >
               Rohiit Gupta, Chief Vedic Architect
             </Link>
-            , it computes your Lagna, all 12 houses, 9 grahas, 27 nakshatras,
-            Vimshottari Dasha, Bhrigu Nandi patterns and Shadbala strength — then
-            delivers personalised predictions across 15 life domains, in English,
-            Hindi and Hinglish, for seekers across India and worldwide. Free
-            preview, ₹51 deep readings.
+            .
+          </p>
+          <p className="text-sm md:text-base text-gray-400 leading-relaxed text-center mt-4">
+            It computes your Lagna, all 12 houses, 9 grahas, 27 nakshatras,
+            Vimshottari Dasha, Bhrigu Nandi patterns and Shadbala strength, then
+            delivers personalised predictions across 15 life domains — in
+            English, Hindi and Hinglish, for seekers across India and worldwide.
+            Free preview; deep readings from ₹51.
           </p>
           <div className="flex flex-wrap justify-center gap-3 mt-8">
             <span className="text-xs border border-[#D4AF37]/30 text-[#D4AF37] px-3 py-1.5 rounded-full bg-[#D4AF37]/5">
@@ -131,7 +145,7 @@ export default function HomepageGEO() {
               </Link>
             </p>
             <p className="text-gray-500 text-xs mt-3">
-              Last updated: May 2026 · Verified by Rohiit Gupta · Powered by
+              Last updated: June 2026 · Verified by Rohiit Gupta · Powered by
               Swiss Ephemeris
             </p>
           </div>
@@ -238,7 +252,7 @@ export default function HomepageGEO() {
       </section>
 
       {/* ═══════════════════════════════════════════════════════════
-          GEO ELEMENT 4: VISIBLE FAQ — SYNCED TO HomepageSchema v1.1
+          GEO ELEMENT 4: VISIBLE FAQ — SYNCED TO HomepageSchema v2.1
           ═══════════════════════════════════════════════════════════ */}
       <section
         id="faq"
@@ -269,8 +283,8 @@ export default function HomepageGEO() {
                 a: 'Yes. The Trikaal Ka Sandesh free preview gives you a 150–200 word AI kundli and horoscope summary with key message and action. Deep readings start at ₹51 and voice readings at ₹11. Free analysis is unlimited.',
               },
               {
-                q: 'How accurate are Trikaal Vaani horoscope predictions vs AstroSage and AstroTalk?',
-                a: 'Trikaal Vaani uses the same Swiss Ephemeris engine as AstroSage with Lahiri Ayanamsha. The difference is depth — Trikaal Vaani layers Bhrigu Nandi Nadi pattern logic and Shadbala six-fold strength on top, plus a named Chief Vedic Architect (Rohiit Gupta) accountable for every reading.',
+                q: "How accurate are Trikaal Vaani's AI horoscope predictions?",
+                a: 'Trikaal Vaani computes your chart with the Swiss Ephemeris engine and Lahiri Ayanamsha — the astronomical standard for sidereal Vedic calculation. Accuracy comes from depth: it layers Bhrigu Nandi Nadi pattern logic and Shadbala six-fold planetary strength on top of classical BPHS rules, and every reading framework is designed by a named Chief Vedic Architect, Rohiit Gupta, who is accountable for it.',
               },
               {
                 q: 'Who is Rohiit Gupta?',
