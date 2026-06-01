@@ -1,11 +1,51 @@
 #!/usr/bin/env python3
 """
-TRIKAL VAANI - Content Engine v5.6
+TRIKAL VAANI - Content Engine v5.8
 =====================================
 FLOW 1: YouTube DIRECT upload from VM (no Vercel, no Supabase)
 FLOW 2: Google Drive Caption Kit (video + captions txt → Drive folder)
 Meta (FB/IG/Threads) = REMOVED (post manually via Instagram → auto-pushes to FB+Threads)
 =====================================
+NEW IN v5.8 (delivery parity with pro_engine — content unchanged):
+  - UPGRADE 1 (YouTube description): publish_to_youtube_direct() now builds a
+    rich description like pro_engine: site link on the first line, then the
+    Gemini description, then a GEO direct-answer (first aeo_qa answer), an AEO
+    FAQ block (aeo_qa Q&A), an EEAT authority line (Rohiit Gupta / 15+ yrs /
+    BPHS), and a trailing SEO keyword line from keyword_cluster. Capped 4900.
+  - UPGRADE 2 (YT tag sanitizer): tags were raw trending+niche[:30] which can
+    trigger YouTube 'invalidTags' (HTTP 400). Now sanitized exactly like
+    pro_engine: <=28 chars/tag, <=480 total, strip < > " and commas, collapse
+    whitespace, dedupe case-insensitive, cap 25. Pulls from hashtags + keyword_cluster.
+  - UPGRADE 3 (Drive resumable upload): upload_to_drive() VIDEO leg switched
+    from single-POST multipart (loaded whole file in memory -> silently failed/
+    timed out on larger videos) to resumable chunked MediaFileUpload (5MB chunks)
+    via googleapiclient, same as pro_engine. Caption-kit TXT stays small multipart.
+  - UPGRADE 4 (pinned comment FAQ): pinned comment now appends aeo_qa Q&A under
+    a '—— Aksar Pooche Jaane Wale Sawaal ——' header so answer engines extract it.
+  - Version bumped v5.7 → v5.8. Content/script pipeline UNCHANGED from v5.7.
+NEW IN v5.7:
+  - FIX A (null deity / "None" in image prompts): generate_script() used
+        festival.get('deity', 'Devta')
+    The default 'Devta' only applies when the KEY is MISSING. Postgres returns
+    the key present with value None (JSON null), so .get() returned None, which
+    leaked the literal "None" into the image prompts ("portrait of None") and
+    let Gemini invent an arbitrary/wrong deity. 15 of 43 auto-publish 2026
+    festivals have null deity AND null maa_form, so 15 future cron videos would
+    have hit this. Now every DB field that feeds a prompt is coerced with `or`
+    (None/empty -> safe value), and deity_specific resolves through a guaranteed
+    non-empty fallback chain: maa_form -> deity -> cleaned festival_name ->
+    generic. Prompts can never say "None" again. Filling the deity column per
+    festival still gives the BEST image, but the engine now self-protects.
+  - FIX B (hardcoded year -> DYNAMIC year, works 2026..2050+): the SEO/GEO/AEO
+    prompt had "2026" hardcoded in meta_description, aeo_qa, voice_search_phrases,
+    keyword_cluster, youtube_playlist and schema_event. Future-year festivals
+    would have generated wrong-year content, and because festival_name already
+    embeds the year it also produced "... 2026 2026" duplication. Now:
+      fest_year       = derived from festival['date'][:4]  (fallback: current yr)
+      fest_name_clean = festival_name with any 20xx stripped via regex
+    All SEO fields use {{fest_name_clean}} {{fest_year}} -> correct year for any
+    festival in any year, no duplication. No DB change required.
+  - Version bumped v5.6 → v5.7. NOTHING ELSE CHANGED from v5.6.
 NEW IN v5.6:
   - FIX 1 (publish scheduling sign bug): fetch_todays_festivals() now computes
         days_diff = (today - fest_date).days   [was (fest_date - today).days]
@@ -273,48 +313,52 @@ trikalvaani.com
 # ============================================================
 def upload_to_drive(video_path, caption_kit_text, slug, festival_name):
     log("Uploading to Google Drive...")
-    access_token = get_drive_access_token()
-    if not access_token:
-        log("Drive upload skipped - no access token")
-        return None, None
-
-    headers = {"Authorization": f"Bearer {access_token}"}
     video_drive_url = None
     kit_drive_url = None
 
-    # Upload MP4
-    try:
-        metadata = {
-            "name": f"{slug}.mp4",
-            "parents": [DRIVE_FOLDER_ID],
-            "description": f"Trikal Vaani - {festival_name} - {today_ist()}"
-        }
-        with open(video_path, 'rb') as f:
-            video_bytes = f.read()
+    # ── v5.8 UPGRADE 3: VIDEO via RESUMABLE chunked upload (ported from
+    #    pro_engine). Old single-POST multipart loaded the whole file into
+    #    memory and silently failed/timed out on larger videos. Resumable
+    #    (5MB chunks) handles any size reliably. ──
+    if DRIVE_REFRESH_TOKEN and video_path and Path(video_path).exists():
+        try:
+            from googleapiclient.discovery import build
+            from googleapiclient.http import MediaFileUpload
+            from google.oauth2.credentials import Credentials
+            creds = Credentials(
+                token=None, refresh_token=DRIVE_REFRESH_TOKEN,
+                token_uri="https://oauth2.googleapis.com/token",
+                client_id=DRIVE_CLIENT_ID, client_secret=DRIVE_CLIENT_SECRET
+            )
+            drive = build("drive", "v3", credentials=creds)
+            metadata = {
+                "name": f"{slug}.mp4",
+                "parents": [DRIVE_FOLDER_ID],
+                "description": f"Trikal Vaani - {festival_name} - {today_ist()}"
+            }
+            media = MediaFileUpload(str(video_path), mimetype="video/mp4",
+                                    resumable=True, chunksize=5 * 1024 * 1024)
+            req = drive.files().create(body=metadata, media_body=media, fields="id")
+            resp = None
+            while resp is None:
+                status, resp = req.next_chunk()
+            file_id = resp.get("id")
+            if file_id:
+                video_drive_url = f"https://drive.google.com/file/d/{file_id}/view"
+                log(f"Video on Drive: {video_drive_url}")
+            else:
+                log("Drive video upload: no file id returned")
+        except Exception as e:
+            log(f"Drive video exception ({type(e).__name__}): {e}")
+    else:
+        log("Drive video skipped - no refresh token or file missing")
 
-        boundary = "trikal_boundary_2026"
-        body = (
-            f"--{boundary}\r\n"
-            f"Content-Type: application/json; charset=UTF-8\r\n\r\n"
-            f"{json.dumps(metadata)}\r\n"
-            f"--{boundary}\r\n"
-            f"Content-Type: video/mp4\r\n\r\n"
-        ).encode() + video_bytes + f"\r\n--{boundary}--".encode()
-
-        resp = requests.post(
-            "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart",
-            headers={**headers, "Content-Type": f"multipart/related; boundary={boundary}"},
-            data=body,
-            timeout=300
-        )
-        if resp.status_code in [200, 201]:
-            file_id = resp.json().get("id")
-            video_drive_url = f"https://drive.google.com/file/d/{file_id}/view"
-            log(f"Video on Drive: {video_drive_url}")
-        else:
-            log(f"Drive video upload failed: {resp.status_code} {resp.text[:200]}")
-    except Exception as e:
-        log(f"Drive video exception: {e}")
+    # ── Caption Kit TXT via small multipart (tiny text, reliable) ──
+    access_token = get_drive_access_token()
+    if not access_token:
+        log("Drive caption-kit skipped - no access token")
+        return video_drive_url, kit_drive_url
+    headers = {"Authorization": f"Bearer {access_token}"}
 
     # Upload Caption Kit TXT
     try:
@@ -403,24 +447,41 @@ def fetch_todays_festivals():
 def generate_script(festival):
     log(f"Generating SEO+GEO+AEO package for {festival['festival_name']}...")
 
-    deity = festival.get('deity', 'Devta')
-    offerings = festival.get('offerings', []) or []
-    dos = festival.get('dos', []) or []
-    donts = festival.get('donts', []) or []
-    primary_offerings = ", ".join(offerings[:4]) if offerings else "flowers, sweets, water"
+    # v5.7 FIX (null-safe + dynamic year): Postgres returns JSON null as None,
+    # and dict.get(key, default) does NOT use the default when the key exists
+    # with value None -> null DB columns leaked the literal "None" into prompts.
+    # Every field that feeds a prompt is now coerced with `or` to a safe value.
+    fest_name_full = festival.get('festival_name') or ''
+    # Year derived DYNAMICALLY from the festival date (works 2026..2050+), never
+    # hardcoded. Festival names often already embed the year, so we strip any
+    # 4-digit 20xx from the name and re-attach the dynamic year in SEO fields ->
+    # no "... 2026 2026" duplication and no wrong-year content in future years.
+    fest_year = (festival.get('date') or '')[:4] or str(datetime.now(IST).year)
+    fest_name_clean = re.sub(r'\b20\d{2}\b', '', fest_name_full).strip()
+
+    deity = festival.get('deity') or ''
+    maa_form = festival.get('maa_form') or ''
+    offerings = festival.get('offerings') or []
+    dos = festival.get('dos') or []
+    donts = festival.get('donts') or []
+    planet = festival.get('planet_ruler') or 'Sun'
+    color = festival.get('color') or 'Gold'
+    mantra = festival.get('mantra') or ''
+
+    primary_offerings = ", ".join(offerings[:4]) if offerings else "flowers, sweets, water, incense"
     donts_visual = ", ".join(donts[:2]) if donts else "negative thoughts, anger"
-    fest_slug = festival.get('festival_slug', festival['festival_name'].lower().replace(' ', '-'))
-    planet = festival.get('planet_ruler', 'Sun')
-    maa_form = festival.get('maa_form', '')
-    color = festival.get('color', 'Gold')
-    deity_specific = maa_form if maa_form else deity
+    fest_slug = festival.get('festival_slug') or fest_name_full.lower().replace(' ', '-')
+
+    # Guaranteed non-empty deity: maa_form -> deity -> cleaned festival name ->
+    # generic. Prompts can never render "None".
+    deity_specific = (maa_form or deity or fest_name_clean or "the presiding Hindu deity").strip()
 
     arc_prompts = []
     for stage in STORY_ARC:
         scene = stage["scene"].format(
             deity_specific=deity_specific,
             primary_offerings=primary_offerings,
-            festival_name=festival['festival_name'],
+            festival_name=fest_name_clean,
             donts_visual=donts_visual
         )
         style_desc = STYLES[stage["style_key"]]
@@ -431,7 +492,7 @@ def generate_script(festival):
 Generate a RESEARCH-GROUNDED, SEO + GEO + AEO optimized complete content package for upcoming festival.
 Use Google Search to verify accurate deity iconography, traditional offerings, dos and donts.
 
-FESTIVAL: {festival['festival_name']}
+FESTIVAL: {fest_name_clean} {fest_year}
 DATE: {festival['date']} ({festival['_days_left']} days from today)
 DEITY: {deity_specific}
 PLANET: {planet}
@@ -448,8 +509,8 @@ Output ONLY raw JSON (no markdown fences, no preamble):
   "slug": "{fest_slug}-video-{festival['_publish_day_index']}-{festival['date']}",
   "hindi_lines": ["Hook 6 words Devanagari", "Line 2", "Line 3", "Line 4 closing"],
   "english_lines": ["Hook 7 words", "Line 2", "Line 3", "Line 4"],
-  "tts_script": "STRICT 120 WORDS MAX Hindi narration. Hook about {festival['festival_name']} significance. Connection to {planet}. ONE specific ritual. ONE thing to avoid. Blessing promise. Last sentence MUST be: Trikal Vaani par apni kundali dekhein aur apna bhavishya jaanein.",
-  "meta_description": "155 char SEO meta with '{festival['festival_name']} 2026' front-loaded",
+  "tts_script": "STRICT 120 WORDS MAX Hindi narration. Hook about {fest_name_clean} significance. Connection to {planet}. ONE specific ritual. ONE thing to avoid. Blessing promise. Last sentence MUST be: Trikal Vaani par apni kundali dekhein aur apna bhavishya jaanein.",
+  "meta_description": "155 char SEO meta with '{fest_name_clean} {fest_year}' front-loaded",
   "seo_caption": "150 word Hinglish caption with keyword in first 8 words. CTA: Free Kundali on TrikalVaani.com",
   "caption_variants": {{
     "instagram": "120 word IG caption, emoji-rich, line breaks, hashtag-friendly",
@@ -457,29 +518,29 @@ Output ONLY raw JSON (no markdown fences, no preamble):
     "threads": "80 word Threads caption, conversational, question at end"
   }},
   "aeo_qa": [
-    {{"q": "What is the significance of {festival['festival_name']} in 2026?", "a": "40-60 word direct answer mentioning {deity_specific}, {planet}, date {festival['date']}"}},
-    {{"q": "What rituals to perform on {festival['festival_name']}?", "a": "40-60 word answer with 3 specific rituals"}},
-    {{"q": "What to offer to {deity_specific} on {festival['festival_name']}?", "a": "40-60 word answer listing offerings"}},
-    {{"q": "How does {festival['festival_name']} affect my kundali?", "a": "40-60 word answer connecting {planet} impact. End: Check free kundali on trikalvaani.com"}}
+    {{"q": "What is the significance of {fest_name_clean} in {fest_year}?", "a": "40-60 word direct answer mentioning {deity_specific}, {planet}, date {festival['date']}"}},
+    {{"q": "What rituals to perform on {fest_name_clean}?", "a": "40-60 word answer with 3 specific rituals"}},
+    {{"q": "What to offer to {deity_specific} on {fest_name_clean}?", "a": "40-60 word answer listing offerings"}},
+    {{"q": "How does {fest_name_clean} affect my kundali?", "a": "40-60 word answer connecting {planet} impact. End: Check free kundali on trikalvaani.com"}}
   ],
   "geo_entities": {{
     "primary_deity": "{deity_specific}",
     "primary_planet": "{planet}",
     "auspicious_color": "{color}",
     "primary_offerings": {json.dumps(offerings[:5] if offerings else [])},
-    "primary_mantra": "{festival.get('mantra', '')}",
+    "primary_mantra": "{mantra}",
     "remedy_gemstone": "gemstone for {planet}",
     "auspicious_direction": "best direction for puja"
   }},
   "voice_search_phrases": [
-    "When is {festival['festival_name']} in 2026",
-    "How to celebrate {festival['festival_name']}",
-    "What to offer on {festival['festival_name']}",
-    "{festival['festival_name']} significance",
-    "{festival['festival_name']} kundali effect"
+    "When is {fest_name_clean} in {fest_year}",
+    "How to celebrate {fest_name_clean}",
+    "What to offer on {fest_name_clean}",
+    "{fest_name_clean} significance",
+    "{fest_name_clean} kundali effect"
   ],
   "keyword_cluster": {{
-    "primary": "{festival['festival_name']} 2026",
+    "primary": "{fest_name_clean} {fest_year}",
     "lsi": ["5 latent semantic keywords"],
     "long_tail": ["5 long-tail keywords"]
   }},
@@ -495,13 +556,13 @@ Output ONLY raw JSON (no markdown fences, no preamble):
     {{"time": "0:45", "title": "Free Kundali on TrikalVaani.com"}}
   ],
   "thumbnail_text": "2-4 word emotionally strong Hindi/English thumbnail text",
-  "youtube_playlist": "Best playlist from: Horoscope 2026, Saturn Transit, Rahu Ketu Predictions, Vimshottari Dasha, Astrology Remedies, Festival Predictions, Zodiac Predictions",
+  "youtube_playlist": "Best playlist from: Horoscope {fest_year}, Saturn Transit, Rahu Ketu Predictions, Vimshottari Dasha, Astrology Remedies, Festival Predictions, Zodiac Predictions",
   "pinned_comment": "80 word Hinglish pinned comment. Hook about festival. Ask about zodiac. CTA: Free kundali on TrikalVaani.com",
   "spoken_keywords_first_30s": ["8 keywords for YouTube AI indexing"],
   "whatsapp_broadcast": "60 word WhatsApp Hinglish. Festival date {festival['date']}. One ritual tip. CTA: trikalvaani.com. 2 emojis max.",
   "schema_event": {{
     "@type": "Event",
-    "name": "{festival['festival_name']} 2026",
+    "name": "{fest_name_clean} {fest_year}",
     "startDate": "{festival['date']}",
     "description": "60 word event schema description"
   }},
@@ -951,11 +1012,86 @@ def publish_to_youtube_direct(script, video_path, festival):
 
         youtube = build("youtube", "v3", credentials=creds)
 
-        tags = (script.get("hashtags", {}).get("trending", []) +
-                script.get("hashtags", {}).get("niche", []))[:30]
+        # ── v5.8 UPGRADE 2: YT TAG SANITIZER (ported from pro_engine) ──
+        # YT rules: <=30 chars/tag (use 28), <=500 total (cap 480), no < > "
+        # chars, dedupe case-insensitive, cap 25. Pull hashtags + keyword_cluster.
+        kc = script.get("keyword_cluster", {}) or {}
+        raw_tags = (script.get("hashtags", {}).get("trending", []) +
+                    script.get("hashtags", {}).get("niche", []) +
+                    (kc.get("lsi", []) or []) +
+                    (kc.get("long_tail", []) or []))
+        seen = set(); tags = []; total_len = 0
+        for t in raw_tags:
+            if not isinstance(t, str):
+                continue
+            cleaned = t.strip().replace("<", "").replace(">", "").replace('"', "").replace(",", " ")
+            cleaned = " ".join(cleaned.split())
+            if not cleaned:
+                continue
+            if len(cleaned) > 28:
+                cleaned = cleaned[:28].rstrip()
+            tl = cleaned.lower()
+            if tl in seen:
+                continue
+            if total_len + len(cleaned) + 2 > 480:
+                break
+            seen.add(tl)
+            tags.append(cleaned)
+            total_len += len(cleaned) + 2
+        tags = tags[:25]
+        log(f"  YT tags: {len(tags)} clean tags ({total_len} chars)")
 
         title = script.get("video_title", festival["festival_name"])[:100]
-        description = script.get("youtube_description", "")[:4900]
+
+        # ── v5.8 UPGRADE 1: RICH YT DESCRIPTION (ported from pro_engine) ──
+        # link first line -> Gemini desc -> GEO answer -> FAQ -> EEAT -> keywords
+        SITE = "https://www.trikalvaani.com"
+        raw_desc = (script.get("youtube_description", "") or "").strip()
+        aeo = script.get("aeo_qa", []) or []
+
+        # GEO direct-answer = first aeo_qa answer (AI-search citation bait)
+        geo = ""
+        if aeo and isinstance(aeo[0], dict):
+            geo = (aeo[0].get("a", "") or "").strip()
+        geo_block = f"\n\n{geo}" if geo else ""
+
+        # AEO FAQ block (answer-engine extractable Q&A)
+        faq_block = ""
+        if aeo:
+            flines = ["", "", "FAQ:"]
+            for item in aeo[:4]:
+                if isinstance(item, dict):
+                    q = (item.get("q", "") or "").strip()
+                    a = (item.get("a", "") or "").strip()
+                    if q and a:
+                        flines.append(f"Q: {q}")
+                        flines.append(f"A: {a}")
+            faq_block = "\n".join(flines)
+
+        # EEAT authority block
+        eeat_block = (
+            "\n\nAbout: Rohiit Gupta, Chief Vedic Architect | "
+            "15+ years Vedic astrology & Jyotish Shastra | "
+            "Source: Brihat Parashara Hora Shastra (BPHS)."
+        )
+
+        # SEO keyword tail line
+        kw = []
+        if kc.get("primary"):
+            kw.append(kc["primary"])
+        kw += (kc.get("lsi", []) or []) + (kc.get("long_tail", []) or [])
+        kw_block = ("\n\n" + ", ".join([k for k in kw if isinstance(k, str)][:15])) if kw else ""
+
+        description = (
+            f"{SITE}\n\n"
+            f"{raw_desc}"
+            f"{geo_block}"
+            f"{faq_block}"
+            f"{eeat_block}\n\n"
+            f"Apni FREE Kundli yahan dekhein:\n{SITE}"
+            f"{kw_block}\n\n"
+            f"#TrikaalVaani #VedicAstrology #FreeKundli"
+        )[:4900]
 
         body = {
             "snippet": {
@@ -987,8 +1123,18 @@ def publish_to_youtube_direct(script, video_path, festival):
         youtube_url = f"https://www.youtube.com/shorts/{video_id}"
         log(f"YouTube LIVE: {youtube_url}")
 
-        # Pinned comment
-        pinned = script.get("pinned_comment", "")
+        # ── v5.8 UPGRADE 4: PINNED COMMENT + FAQ (AEO — answer engines
+        #    extract pinned-comment Q&A for featured answers) ──
+        pinned = script.get("pinned_comment", "") or ""
+        if aeo:
+            pin_lines = ["", "—— Aksar Pooche Jaane Wale Sawaal ——"]
+            for item in aeo[:4]:
+                if isinstance(item, dict) and item.get("q") and item.get("a"):
+                    pin_lines.append(f"Q: {item.get('q','')}")
+                    pin_lines.append(f"A: {item.get('a','')}")
+            pin_lines.append("")
+            pin_lines.append("Apni kundali dekhein: trikalvaani.com")
+            pinned = (pinned + "\n".join(pin_lines)).strip()
         if pinned:
             try:
                 youtube.commentThreads().insert(
@@ -1002,7 +1148,7 @@ def publish_to_youtube_direct(script, video_path, festival):
                         }
                     }
                 ).execute()
-                log("  Pinned comment posted")
+                log("  Pinned comment posted (with FAQ)")
             except Exception as e:
                 log(f"  Pinned comment skipped: {e}")
 
@@ -1187,7 +1333,7 @@ def process_festival(festival, max_retries=3):
 # ============================================================
 def main():
     log("=" * 55)
-    log("TRIKAL VAANI CONTENT ENGINE v5.6")
+    log("TRIKAL VAANI CONTENT ENGINE v5.8")
     log("Flow 1: YouTube DIRECT (VM) | Flow 2: Drive Caption Kit")
     log("Render: 5-effect mood-matched FFmpeg library")
     log("=" * 55)
