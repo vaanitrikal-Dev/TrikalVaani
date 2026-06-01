@@ -1,10 +1,20 @@
 /**
  * ============================================================
- * TRIKAL VAANI — Public SEO Result Page
+ * TRIKAAL VAANI — Public SEO Result Page
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/report/[slug]/page.tsx
- * VERSION: 3.0 — TypeScript clean, Next.js 13.5 compatible
+ * VERSION: 3.1 — IR-0 CLEANUP (local-business + branding)
  * SIGNED: ROHIIT GUPTA, CEO
+ * ============================================================
+ * v3.0 -> v3.1 CHANGES (CEO approved):
+ *   - REMOVED `other: { geo.region: 'IN-DL', geo.placename: 'Delhi NCR' }`
+ *     (local-business geo-targeting signal — violates IR-0).
+ *   - REMOVED PostalAddress block from personSchema (LocalBusiness signal).
+ *   - Visible brand "Trikal Vaani" -> "Trikaal Vaani" in OG siteName,
+ *     publisher name, worksFor name, OG image alt, not-found titles.
+ *   - keywords token 'trikal vaani' -> 'trikaal vaani'.
+ *   - Domain/URLs trikalvaani.com, logo & founder URLs: UNTOUCHED.
+ *   - All v3.0 data-fetch, schema, and render logic preserved.
  * ============================================================
  */
 
@@ -80,11 +90,11 @@ export async function generateMetadata(
   { params }: { params: { slug: string } }
 ): Promise<Metadata> {
   if (!isValidSlug(params.slug)) {
-    return { title: 'Report Not Found | Trikal Vaani' }
+    return { title: 'Report Not Found | Trikaal Vaani' }
   }
 
   const report = await getReport(params.slug)
-  if (!report) return { title: 'Report Not Found | Trikal Vaani' }
+  if (!report) return { title: 'Report Not Found | Trikaal Vaani' }
 
   const geoAnswer = report.geo_answer ?? `Vedic astrology ${report.domain_label} analysis for ${report.birth_city}. Powered by Swiss Ephemeris.`
 
@@ -105,14 +115,14 @@ export async function generateMetadata(
       title:       meta.title,
       description: meta.description,
       url:         meta.canonical,
-      siteName:    'Trikal Vaani',
+      siteName:    'Trikaal Vaani',
       locale:      'en_IN',
       type:        'article',
       images: [{
         url:    'https://trikalvaani.com/og-report.jpg',
         width:  1200,
         height: 630,
-        alt:    `${report.domain_label} Vedic Astrology Report | Trikal Vaani`,
+        alt:    `${report.domain_label} Vedic Astrology Report | Trikaal Vaani`,
       }],
     },
     twitter: {
@@ -129,10 +139,6 @@ export async function generateMetadata(
         'max-snippet':       -1,
         'max-image-preview': 'large',
       },
-    },
-    other: {
-      'geo.region':    'IN-DL',
-      'geo.placename': 'Delhi NCR',
     },
   }
 }
@@ -167,12 +173,12 @@ function buildSchema(report: ReportRow, meta: ReturnType<typeof generateSeoMeta>
     },
     publisher: {
       '@type': 'Organization',
-      name:    'Trikal Vaani',
+      name:    'Trikaal Vaani',
       url:     'https://trikalvaani.com',
       logo: { '@type': 'ImageObject', url: 'https://trikalvaani.com/images/founder.png' },
     },
     mainEntityOfPage: { '@type': 'WebPage', '@id': url },
-    keywords: [...primaryKw, ...transKw, 'vedic astrology', 'kundali', 'jyotish', 'trikal vaani'].join(', '),
+    keywords: [...primaryKw, ...transKw, 'vedic astrology', 'kundali', 'jyotish', 'trikaal vaani'].join(', '),
   }
 
   const faqSchema = {
@@ -192,7 +198,7 @@ function buildSchema(report: ReportRow, meta: ReturnType<typeof generateSeoMeta>
         name:    `What is ${report.mahadasha} Mahadasha effect on ${report.domain_label}?`,
         acceptedAnswer: {
           '@type': 'Answer',
-          text:    `According to Vedic astrology (BPHS), ${report.mahadasha} Mahadasha combined with ${report.antardasha} Antardasha creates specific planetary influences on ${report.domain_label}. Analyzed by Rohiit Gupta at Trikal Vaani using Swiss Ephemeris.`,
+          text:    `According to Vedic astrology (BPHS), ${report.mahadasha} Mahadasha combined with ${report.antardasha} Antardasha creates specific planetary influences on ${report.domain_label}. Analyzed by Rohiit Gupta at Trikaal Vaani using Swiss Ephemeris.`,
         },
       },
     ],
@@ -214,8 +220,7 @@ function buildSchema(report: ReportRow, meta: ReturnType<typeof generateSeoMeta>
     name:       'Rohiit Gupta',
     jobTitle:   'Chief Vedic Architect',
     url:        'https://trikalvaani.com/founder',
-    worksFor: { '@type': 'Organization', name: 'Trikal Vaani', url: 'https://trikalvaani.com' },
-    address:  { '@type': 'PostalAddress', addressLocality: 'Delhi NCR', addressCountry: 'IN' },
+    worksFor: { '@type': 'Organization', name: 'Trikaal Vaani', url: 'https://trikalvaani.com' },
     knowsAbout: ['Vedic Astrology', 'Jyotish', 'BPHS', 'Swiss Ephemeris', 'Bhrigu Nandi Nadi'],
   }
 
