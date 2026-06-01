@@ -3,41 +3,45 @@
  * TRIKAL VAANI — trikalvaani.com
  * Chief Vedic Architect: Rohiit Gupta
  * FILE: components/seo/HomepageSchema.tsx
- * Version: 2.0 — Global GEO/AEO/E-E-A-T rebuild + brand flip + FAQ sync
- * Date: 2026-05-27
+ * Version: 2.1 — Accuracy FAQ de-risked (competitor names dropped, schema-synced)
+ * Date: 2026-06-01
  * 🔱 JAI MAA SHAKTI
  *
- * CHANGES vs v1.1 (CEO-approved, checklist-verified):
- *   ✅ BRAND FLIP: "Trikal Vaani" -> "Trikaal Vaani" in all schema text/names.
- *   ✅ PERSONA: "Jini AI" -> "Trikaal AI"; "Trikal Ka Sandesh" -> "Trikaal Ka Sandesh".
- *   ✅ FAQ SYNCED EXACTLY to HomepageGEO.tsx v2.0 (same 8 Q&A strings — AEO needs
- *      visible text and schema text to match). Delhi NCR removed from Q4.
- *   ✅ LOCAL SEO REMOVED (CEO Decision #6): deleted PostalAddress (New Delhi /
- *      Delhi NCR) + occupationLocation pin from Person. Removed "Based in Delhi
- *      NCR" from description. nationality: India KEPT (global-friendly, authentic).
- *   ✅ knowsAbout cleaned: removed "Real Estate Astrology" credential ->
- *      added real live offerings (Muhurat Selection, Karmic Reading, Panchang).
- *   ✅ GLOBAL SIGNAL ADDED: new Service schema with areaServed [Worldwide, India]
- *      — AI engines extract global reach as a STRUCTURED fact, not just prose
- *      (2026 GEO: a claim only in body text is missed; it must be in areaServed).
- *   ✅ ENTITY GRAPH: Person <-> Organization cross-linked by @id; Service +
- *      OfferCatalog reference both. AI knowledge graphs dedupe brands by these.
- *   ✅ E-E-A-T: added hasCredential (15+ yrs BPHS) to Person.
- *   ✅ FRESHNESS: dateModified added to FAQPage + Service (AI freshness signal).
- *   ✅ VOICE: speakable added to Person (voice-assistant citation).
- *   ✅ sameAs fixed to REAL handles: IG @thetrikalvaani, YT TheTrikalVaani,
- *      FB Trikal Vaani Voice, LinkedIn. X/Twitter REMOVED (master plan §5.3).
- *   ❌ aggregateRating still NOT added — no fake stars. Re-add only when real
- *      Razorpay-verified reviews accumulate (Google/AI penalty risk avoided).
- *   ⚠️ FAQPage rich result was deprecated by Google 7 May 2026, but FAQPage is
- *      KEPT — it remains a strong AEO citation-extraction signal for AI engines.
+ * CHANGES vs v2.0 (CEO-approved):
+ *   ✅ FAQPage Q3 reworded to match HomepageGEO v2.2: dropped AstroSage /
+ *      AstroTalk names + the unverifiable "same engine as AstroSage" claim.
+ *      New Q is non-branded; new A states only what Trikaal Vaani does. Visible
+ *      FAQ (HomepageGEO #faq) and this FAQPage schema remain byte-identical in
+ *      Q&A text (AEO requires visible == structured).
+ *   ✅ FAQPage dateModified bumped to 2026-06-01.
+ *   (Service dateModified also bumped to 2026-06-01 for freshness consistency.)
+ *
+ *   ⚠️ KNOWN ISSUES TO RESOLVE NEXT (not touched here):
+ *      - #rohiit-gupta Person is fully defined in BOTH this file AND
+ *        SchemaScript.tsx, and the two DISAGREE (different knowsAbout lists;
+ *        sameAs has LinkedIn here but /founder there). Same @id with conflicting
+ *        data can muddy the entity graph — pick ONE canonical Person, make the
+ *        other a bare {@id} reference.
+ *      - sameAs LinkedIn (/in/rohiit-gupta) must point to a REAL, live profile,
+ *        else it weakens entity trust. Verify or remove.
+ *      - HowTo image uses /og-image.jpg while OG/Product use /og-default.jpg —
+ *        confirm /og-image.jpg exists (possible 404).
+ *
+ * CHANGES vs v1.1 (carried from v2.0, CEO-approved):
+ *   ✅ Brand flip Trikaal Vaani; persona Trikaal AI / Trikaal Ka Sandesh.
+ *   ✅ Local SEO removed (Delhi NCR PostalAddress + occupationLocation).
+ *   ✅ Service schema with areaServed [India, Worldwide] (structured global signal).
+ *   ✅ E-E-A-T: hasCredential; speakable; entity graph cross-linked by @id.
+ *   ❌ aggregateRating NOT added — no fake stars.
+ *   ⚠️ FAQPage rich result deprecated 7 May 2026; FAQPage KEPT for AEO citation.
  *
  * SCHEMA OWNERSHIP MAP (no duplicates across site):
  *   - Organization → layout.tsx (#organization) — referenced here by @id only
  *   - WebApplication → layout.tsx (#webapp)
  *   - Person (Rohiit ji) → THIS FILE (#rohiit-gupta) — homepage authority
+ *     (NOTE: also defined in SchemaScript.tsx — see Known Issues above)
  *   - FAQPage → THIS FILE (#faq) — homepage FAQ
- *   - Service (areaServed: global) → THIS FILE (#service) — NEW v2.0
+ *   - Service (areaServed: global) → THIS FILE (#service)
  *   - BreadcrumbList → THIS FILE
  *   - HowTo → THIS FILE (#howto)
  *   - OfferCatalog (services) → THIS FILE (#services)
@@ -48,9 +52,6 @@ import Script from 'next/script';
 
 // ──────────────────────────────────────────────────────────────
 // SCHEMA 1: PERSON (Rohiit Gupta) — E-E-A-T AUTHORITY
-// CRITICAL for YMYL (astrology = YMYL category).
-// @id unified to #rohiit-gupta to match layout.tsx Organization.founder reference.
-// Local pins removed (v2.0); nationality kept; credential + speakable added.
 // ──────────────────────────────────────────────────────────────
 const personSchema = {
   '@context': 'https://schema.org',
@@ -115,10 +116,7 @@ const personSchema = {
 };
 
 // ──────────────────────────────────────────────────────────────
-// SCHEMA 2: SERVICE — GLOBAL REACH (NEW v2.0)
-// The key global GEO signal: areaServed expresses worldwide reach as a
-// STRUCTURED fact AI engines can extract (prose alone gets missed).
-// provider + author cross-linked to Organization + Person by @id.
+// SCHEMA 2: SERVICE — GLOBAL REACH
 // ──────────────────────────────────────────────────────────────
 const serviceGlobalSchema = {
   '@context': 'https://schema.org',
@@ -135,7 +133,7 @@ const serviceGlobalSchema = {
     '@id': 'https://trikalvaani.com/#rohiit-gupta',
   },
   url: 'https://trikalvaani.com',
-  dateModified: '2026-05-27',
+  dateModified: '2026-06-01',
   availableChannel: {
     '@type': 'ServiceChannel',
     serviceUrl: 'https://trikalvaani.com',
@@ -152,17 +150,15 @@ const serviceGlobalSchema = {
 };
 
 // ──────────────────────────────────────────────────────────────
-// SCHEMA 3: FAQPAGE — AEO citation extraction (AI Overviews / Perplexity / Gemini)
-// SYNCED EXACTLY to visible FAQ in HomepageGEO.tsx v2.0.
-// NOTE: Google deprecated FAQ rich results 7 May 2026 — kept for AEO citations.
-// dateModified added for freshness signal.
+// SCHEMA 3: FAQPAGE — AEO citation extraction
+// SYNCED EXACTLY to visible FAQ in HomepageGEO.tsx v2.2.
 // ──────────────────────────────────────────────────────────────
 const faqSchema = {
   '@context': 'https://schema.org',
   '@type': 'FAQPage',
   '@id': 'https://trikalvaani.com/#faq',
   inLanguage: ['en-IN', 'hi-IN'],
-  dateModified: '2026-05-27',
+  dateModified: '2026-06-01',
   mainEntity: [
     {
       '@type': 'Question',
@@ -182,10 +178,10 @@ const faqSchema = {
     },
     {
       '@type': 'Question',
-      name: 'How accurate are Trikaal Vaani horoscope predictions vs AstroSage and AstroTalk?',
+      name: "How accurate are Trikaal Vaani's AI horoscope predictions?",
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'Trikaal Vaani uses the same Swiss Ephemeris engine as AstroSage with Lahiri Ayanamsha. The difference is depth — Trikaal Vaani layers Bhrigu Nandi Nadi pattern logic and Shadbala six-fold strength on top, plus a named Chief Vedic Architect (Rohiit Gupta) accountable for every reading.',
+        text: 'Trikaal Vaani computes your chart with the Swiss Ephemeris engine and Lahiri Ayanamsha — the astronomical standard for sidereal Vedic calculation. Accuracy comes from depth: it layers Bhrigu Nandi Nadi pattern logic and Shadbala six-fold planetary strength on top of classical BPHS rules, and every reading framework is designed by a named Chief Vedic Architect, Rohiit Gupta, who is accountable for it.',
       },
     },
     {
@@ -232,7 +228,7 @@ const faqSchema = {
 };
 
 // ──────────────────────────────────────────────────────────────
-// SCHEMA 4: BREADCRUMBLIST — taxonomy clarity for AI + SERP
+// SCHEMA 4: BREADCRUMBLIST
 // ──────────────────────────────────────────────────────────────
 const breadcrumbSchema = {
   '@context': 'https://schema.org',
@@ -248,9 +244,7 @@ const breadcrumbSchema = {
 };
 
 // ──────────────────────────────────────────────────────────────
-// SCHEMA 5: HOWTO — Voice search + smart speaker citation
-// Note: Google deprecated HowTo desktop rich results in Sept 2023.
-// Still functions on mobile + AI voice. Kept minimal.
+// SCHEMA 5: HOWTO — voice / AI parsing (no rich result since 2024; kept for AEO)
 // ──────────────────────────────────────────────────────────────
 const howToSchema = {
   '@context': 'https://schema.org',
@@ -305,9 +299,7 @@ const howToSchema = {
 };
 
 // ──────────────────────────────────────────────────────────────
-// SCHEMA 6: OFFERCATALOG — Service prices for AI search citation
-// provider cross-linked to Organization + Person (entity graph).
-// Cross-verified against live /services/* pages.
+// SCHEMA 6: OFFERCATALOG — service prices
 // ──────────────────────────────────────────────────────────────
 const serviceSchema = {
   '@context': 'https://schema.org',
@@ -379,7 +371,6 @@ const serviceSchema = {
 
 // ──────────────────────────────────────────────────────────────
 // EXPORT — Drop-in component
-// 6 schemas total (Organization owned by layout.tsx; Service is new v2.0)
 // ──────────────────────────────────────────────────────────────
 export default function HomepageSchema() {
   return (
