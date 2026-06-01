@@ -2,23 +2,24 @@
 
 /**
  * ============================================================
- * TRIKAL VAANI — Public SEO Report Client
+ * TRIKAAL VAANI — Public SEO Report Client
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/report/[slug]/ReportPublicClient.tsx
- * VERSION: 8.1 — Maa Shakti Dakshina via Razorpay
+ * VERSION: 8.2 — IR-0 CLEANUP (branding + local-business)
  * SIGNED: ROHIIT GUPTA, CEO
  *
- * CHANGES v8.1 vs v8.0:
- *   ✅ MaaShakti component now uses Razorpay (not WhatsApp links)
- *   ✅ Server-validated dakshina amounts (anti-tamper)
- *   ✅ "Apni dakshina" custom amount input (₹51 to ₹5,00,000)
- *   ✅ Optional dil ki baat message (500 char)
- *   ✅ Saves to Supabase `dakshina` table
- *   ✅ Post-payment WhatsApp confirmation flow
- *   ✅ Beautiful success modal after Maa accepts
- *   ✅ ALL v8.0 logic preserved 100%:
- *      - 5 Upay cards, kundali chart, planet table, dasha,
- *        action windows, panchang, locked section, PDF
+ * CHANGES v8.1 -> v8.2 (CEO approved):
+ *   - Visible brand "Trikal Vaani" -> "Trikaal Vaani" everywhere
+ *     (Razorpay popup name, founder card, footer tagline, WhatsApp share,
+ *      geo-answer fallback bullet).
+ *   - Visible persona "Trikal Ka Sandesh" -> "Trikaal Ka Sandesh",
+ *     "Trikal Ka Poora Sandesh" -> "Trikaal Ka Poora Sandesh",
+ *     "Trikal Ne Aur Bhi Dekha" -> "Trikaal Ne Aur Bhi Dekha".
+ *   - REMOVED every "Delhi NCR" mention (founder card, trust badge, footer).
+ *   - Domain trikalvaani.com, wa.me links, all logic: UNTOUCHED.
+ *   - ALL v8.1 functionality preserved 100% (Razorpay dakshina, 5 upay,
+ *     kundali chart, planet table, dasha, action windows, panchang,
+ *     locked section, PDF, share).
  * ============================================================
  */
 
@@ -114,7 +115,7 @@ function splitGeoToBullets(text:string, isPaid:boolean, pj?:Record<string,unknow
     const diff = seo.differentiator as string
     if (diff && diff!=='—' && bullets.length<maxBullets) bullets.push(diff)
   }
-  if (bullets.length === 0) return ['Trikal Vaani — Rohiit Gupta ji ki Swiss Ephemeris powered Vedic analysis aapke liye taiyaar hai.']
+  if (bullets.length === 0) return ['Trikaal Vaani — Rohiit Gupta ji ki Swiss Ephemeris powered Vedic analysis aapke liye taiyaar hai.']
   return bullets.slice(0,maxBullets)
 }
 
@@ -220,7 +221,7 @@ function MaaShakti({slug}:{slug:string}) {
         orderId,
         amount: amountPaise,
         currency,
-        name: 'Trikal Vaani',
+        name: 'Trikaal Vaani',
         description: tab === 'arzi'
           ? `Maa Ko Arzi — ₹${amount.toLocaleString('en-IN')}`
           : `Maa Ka Dhanyawad — ₹${amount.toLocaleString('en-IN')}`,
@@ -853,7 +854,7 @@ function LockedSection({slug}:{slug:string}) {
           <div style={{width:'52px',height:'52px',borderRadius:'50%',background:G(0.1),border:`1px solid ${G(0.35)}`,display:'flex',alignItems:'center',justifyContent:'center',margin:'0 auto 14px'}}>
             <Lock size={22} style={{color:GOLD}}/>
           </div>
-          <p style={{margin:'0 0 4px',color:'#fff',fontSize:'18px',fontWeight:700,fontFamily:'Georgia,serif'}}>Trikal Ne Aur Bhi Dekha Hai</p>
+          <p style={{margin:'0 0 4px',color:'#fff',fontSize:'18px',fontWeight:700,fontFamily:'Georgia,serif'}}>Trikaal Ne Aur Bhi Dekha Hai</p>
           <p style={{margin:'0 0 14px',color:'#94a3b8',fontSize:'13px',lineHeight:1.6,maxWidth:'280px'}}>Complete analysis, yogas, 5 upay remedies aur 900-word deep reading taiyaar hai</p>
           <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'6px',marginBottom:'18px',maxWidth:'340px',margin:'0 auto 18px',textAlign:'left'}}>
             {features.map((f,i)=>(<p key={i} style={{margin:0,color:'#94a3b8',fontSize:'12px',lineHeight:1.5}}>{f}</p>))}
@@ -876,7 +877,7 @@ function PaidFullSummary({ summaryText, periodSummary, bestDates, dosList, donts
     <div style={{background:BG_CARD,border:`1px solid ${G(0.2)}`,borderRadius:'16px',padding:'24px',marginBottom:'14px'}}>
       <div style={{display:'flex',alignItems:'center',gap:'8px',marginBottom:'16px'}}>
         <Sparkles size={16} style={{color:GOLD}}/>
-        <p style={{margin:0,color:GOLD,fontSize:'11px',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.08em'}}>Trikal Ka Poora Sandesh — Premium Analysis</p>
+        <p style={{margin:0,color:GOLD,fontSize:'11px',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.08em'}}>Trikaal Ka Poora Sandesh — Premium Analysis</p>
       </div>
       {summaryText && summaryText!=='—' && (
         <div style={{background:G(0.05),border:`1px solid ${G(0.15)}`,borderRadius:'12px',padding:'18px',marginBottom:'16px'}}>
@@ -1004,7 +1005,7 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
             </div>
             {geoBullets.length>0 && (
               <div style={{background:G(0.06),border:`1px solid ${G(0.15)}`,borderRadius:'14px',padding:'16px',marginTop:'14px',textAlign:'left'}}>
-                <p style={{margin:'0 0 12px',color:G(0.65),fontSize:'11px',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.08em'}}>🔮 Vedic Analysis — Trikal Ka Sandesh {isPaid && <span style={{color:G(0.4),marginLeft:'8px',fontSize:'10px'}}>({geoBullets.length} insights)</span>}</p>
+                <p style={{margin:'0 0 12px',color:G(0.65),fontSize:'11px',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.08em'}}>🔮 Vedic Analysis — Trikaal Ka Sandesh {isPaid && <span style={{color:G(0.4),marginLeft:'8px',fontSize:'10px'}}>({geoBullets.length} insights)</span>}</p>
                 <ul style={{margin:0,padding:0,listStyle:'none',display:'flex',flexDirection:'column',gap:'10px'}}>
                   {geoBullets.map((pt,i)=>(<li key={i} style={{display:'flex',gap:'10px',alignItems:'flex-start'}}><span style={{color:GOLD,fontSize:'14px',flexShrink:0,marginTop:'2px'}}>{['🔱','✦','◆','▸','🪐','✧','🔮','⚡','🌟','🕉️'][i%10]}</span><p style={{margin:0,color:'#e2e8f0',fontSize:'14px',lineHeight:1.8}}>{pt.replace(/^[.!?,;\s]+/,'').trim()}</p></li>))}
                 </ul>
@@ -1015,7 +1016,7 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
 
           {!isPaid && (hasCoreMessage||hasKeyMessage||hasDoAvoid) && (
             <div style={{background:BG_CARD,border:`1px solid ${G(0.12)}`,borderRadius:'16px',padding:'22px',marginBottom:'14px'}}>
-              <p style={{margin:'0 0 14px',color:GOLD,fontSize:'11px',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.08em'}}>✨ Trikal Ka Sandesh</p>
+              <p style={{margin:'0 0 14px',color:GOLD,fontSize:'11px',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.08em'}}>✨ Trikaal Ka Sandesh</p>
               {(hasCoreMessage||hasKeyMessage) && (
                 <div style={{background:`linear-gradient(135deg,${G(0.12)},${G(0.04)})`,border:`1px solid ${G(0.3)}`,borderRadius:'10px',padding:'14px 16px',marginBottom:'12px'}}>
                   <p style={{margin:'0 0 4px',color:GOLD,fontSize:'11px',fontWeight:700,textTransform:'uppercase'}}>🔑 Core Message</p>
@@ -1114,22 +1115,22 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
               </div>
               <div>
                 <p style={{margin:0,color:'#fff',fontSize:'14px',fontWeight:700}}>Rohiit Gupta</p>
-                <p style={{margin:0,color:'#64748b',fontSize:'12px'}}>Chief Vedic Architect · Trikal Vaani · Delhi NCR</p>
+                <p style={{margin:0,color:'#64748b',fontSize:'12px'}}>Chief Vedic Architect · Trikaal Vaani</p>
               </div>
             </div>
             <p style={{margin:'0 0 12px',color:'#94a3b8',fontSize:'13px',lineHeight:1.6}}>This analysis is powered by Swiss Ephemeris — the same engine used by professional astrologers worldwide — combined with Brihat Parashara Hora Shastra, Bhrigu Nandi Nadi patterns, and Shadbala calculations. Payments secured by <strong style={{color: RAZORPAY_BLUE}}>Razorpay</strong>.</p>
             <div style={{display:'flex',flexWrap:'wrap',gap:'6px'}}>
-              {['15+ Years Vedic Study','Parashara BPHS','Swiss Ephemeris','Delhi NCR','Razorpay Secured'].map(t=>(<span key={t} style={{padding:'4px 9px',borderRadius:'6px',background:'rgba(255,255,255,0.04)',border:'1px solid rgba(255,255,255,0.08)',color: t==='Razorpay Secured' ? RAZORPAY_BLUE : '#64748b',fontSize:'11px', fontWeight: t==='Razorpay Secured' ? 600 : 400}}>{t}</span>))}
+              {['15+ Years Vedic Study','Parashara BPHS','Swiss Ephemeris','Razorpay Secured'].map(t=>(<span key={t} style={{padding:'4px 9px',borderRadius:'6px',background:'rgba(255,255,255,0.04)',border:'1px solid rgba(255,255,255,0.08)',color: t==='Razorpay Secured' ? RAZORPAY_BLUE : '#64748b',fontSize:'11px', fontWeight: t==='Razorpay Secured' ? 600 : 400}}>{t}</span>))}
             </div>
           </div>
 
           <div style={{textAlign:'center',marginBottom:'24px'}}>
             <div style={{display:'flex',gap:'10px',justifyContent:'center',flexWrap:'wrap',marginBottom:'16px'}}>
-              <a href={`https://wa.me/?text=Maine%20Trikal%20Vaani%20pe%20kundali%20padhi%20—%20bahut%20accurate!%20${encodeURIComponent('https://trikalvaani.com/report/'+slug)}`} target="_blank" rel="noopener noreferrer" style={{padding:'11px 20px',borderRadius:'10px',background:'rgba(37,211,102,0.08)',border:'1px solid rgba(37,211,102,0.25)',color:'#25D366',fontSize:'13px',fontWeight:600,textDecoration:'none'}}>📱 WhatsApp Share</a>
+              <a href={`https://wa.me/?text=Maine%20Trikaal%20Vaani%20pe%20kundali%20padhi%20—%20bahut%20accurate!%20${encodeURIComponent('https://trikalvaani.com/report/'+slug)}`} target="_blank" rel="noopener noreferrer" style={{padding:'11px 20px',borderRadius:'10px',background:'rgba(37,211,102,0.08)',border:'1px solid rgba(37,211,102,0.25)',color:'#25D366',fontSize:'13px',fontWeight:600,textDecoration:'none'}}>📱 WhatsApp Share</a>
               <PDFBtn/>
               <Link href="/" style={{padding:'11px 20px',borderRadius:'10px',background:G(0.08),border:`1px solid ${G(0.25)}`,color:GOLD,fontSize:'13px',fontWeight:600,textDecoration:'none',display:'flex',alignItems:'center',gap:'6px'}}><ArrowLeft size={14}/>Apni Reading Karein</Link>
             </div>
-            <p style={{margin:0,color:'#1e293b',fontSize:'11px',lineHeight:1.5}}>🔱 Trikal Vaani — Kaal bada balwan hai, sabko nach nachaye<br/>trikalvaani.com · Rohiit Gupta, Chief Vedic Architect, Delhi NCR</p>
+            <p style={{margin:0,color:'#1e293b',fontSize:'11px',lineHeight:1.5}}>🔱 Trikaal Vaani — Kaal bada balwan hai, sabko nach nachaye<br/>trikalvaani.com · Rohiit Gupta, Chief Vedic Architect</p>
           </div>
 
         </div>
