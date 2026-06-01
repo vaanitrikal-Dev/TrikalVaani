@@ -1,11 +1,14 @@
 'use client';
 
 // ============================================================
-// CEO: Rohiit Gupta | Chief Vedic Architect | Trikal Vaani
+// CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
 // FILE: components/layout/SiteNav.tsx
-// VERSION: v2.4
-// DATE: 2026-05-22
+// VERSION: v2.5
+// DATE: 2026-06-01
 // CHANGES:
+//   v2.5: IR-0 cleanup — visible logo text "Trikal Vaani" -> "Trikaal Vaani".
+//         Image src/alt, email, domain trikalvaani.com: UNTOUCHED.
+//         All v2.4 nav/menu logic preserved 100%.
 //   v2.4: MOBILE HAMBURGER MENU. Top bar now shows logo + Start + ☰.
 //         Tapping ☰ opens a full dropdown with ALL links + Sign In.
 //         Scales as new products are added. Desktop nav UNCHANGED.
@@ -130,14 +133,14 @@ export default function SiteNav() {
             >
               <Image
                 src="/Trikal_Vaani_Logo.svg"
-                alt="Trikal Vaani Logo"
+                alt="Trikaal Vaani Logo"
                 width={60}
                 height={60}
                 priority
               />
             </div>
             <span className="font-serif font-bold text-lg text-gradient-gold tracking-wide">
-              Trikal Vaani
+              Trikaal Vaani
             </span>
           </Link>
 
