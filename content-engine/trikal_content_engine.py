@@ -1,11 +1,33 @@
 #!/usr/bin/env python3
 """
-TRIKAL VAANI - Content Engine v5.5
+TRIKAL VAANI - Content Engine v5.6
 =====================================
 FLOW 1: YouTube DIRECT upload from VM (no Vercel, no Supabase)
 FLOW 2: Google Drive Caption Kit (video + captions txt → Drive folder)
 Meta (FB/IG/Threads) = REMOVED (post manually via Instagram → auto-pushes to FB+Threads)
 =====================================
+NEW IN v5.6:
+  - FIX 1 (publish scheduling sign bug): fetch_todays_festivals() now computes
+        days_diff = (today - fest_date).days   [was (fest_date - today).days]
+    The festivals_master.publish_days values are stored as NEGATIVE offsets
+    meaning "days BEFORE festival" (e.g. [-7,-5,-2]). The old formula produced
+    a POSITIVE number for upcoming festivals, so the match `days_diff in
+    publish_days` only fired AFTER a festival had already passed — generating
+    videos for past festivals (e.g. Jyeshtha Purnima, Vat Savitri on 01 Jun).
+    Flipping the subtraction order makes "2 days before" evaluate to -2 and
+    correctly match the existing DB values. NO Supabase data change needed.
+    _publish_day_index still maps correctly (days_diff is now negative on match,
+    same sign as the stored publish_days entries).
+  - FIX 2 (top festival name = boxes): the festival_name overlay in
+    render_video() was drawn with the Hindi (Devanagari) font {fh_opt}, but
+    festival_name is stored in Latin/English text → Devanagari font rendered
+    Latin letters as boxes. Switched that single drawtext to the English
+    font {fe_opt}. Now renders cleanly e.g. "Jyeshtha Purnima 2026".
+  - FIX 3 (broken Hindi subtitle): removed the per-line hindi_lines subtitle
+    overlay block entirely (FFmpeg drawtext does not shape Devanagari conjuncts
+    / matras correctly → spelling corruption). TTS narration is unaffected
+    (it comes from tts_script, not the subtitle).
+  - Version bumped v5.5 → v5.6. NOTHING ELSE CHANGED from v5.5.
 NEW IN v5.5:
   - render_video() upgraded: replaced simple alternating zoom with
     MOOD-MATCHED 8-effect FFmpeg library keyed to STORY_ARC roles:
@@ -15,8 +37,6 @@ NEW IN v5.5:
       Donts         → zoom_out      (pull back reveal, dramatic warning)
       Blessing      → slow_drift    (slow zoom + x drift, warmth, grace)
     Any additional images beyond 5 → diagonal pan (energy, forward motion)
-  - Version bumped v5.4 → v5.5
-  - NOTHING ELSE CHANGED from v5.4
 NEW IN v5.4:
   - publish_to_youtube_direct() → uploads MP4 straight from VM via YouTube Data API
   - Supabase Storage REMOVED (was failing with new sb_secret key format)
@@ -360,14 +380,19 @@ def fetch_todays_festivals():
     matching = []
     for fest in festivals:
         fest_date = datetime.strptime(fest['date'], '%Y-%m-%d').date()
-        days_diff = (fest_date - today).days
+        # v5.6 FIX 1: publish_days are NEGATIVE "days before" offsets ([-7,-5,-2]).
+        # Compute (today - fest_date) so a day 2 days BEFORE the festival = -2,
+        # which correctly matches the stored negative offsets. The old
+        # (fest_date - today) produced positives and only matched AFTER the
+        # festival had passed -> generated videos for past festivals.
+        days_diff = (today - fest_date).days
         publish_days = fest.get('publish_days', [-2])
         if days_diff in publish_days:
             fest['_days_left'] = days_diff
             fest['_publish_day_index'] = publish_days.index(days_diff) + 1
             fest['_total_publish_days'] = len(publish_days)
             matching.append(fest)
-            log(f"  MATCH: {fest['festival_name']} (in {days_diff} days, video {fest['_publish_day_index']}/{fest['_total_publish_days']})")
+            log(f"  MATCH: {fest['festival_name']} (offset {days_diff}, video {fest['_publish_day_index']}/{fest['_total_publish_days']})")
 
     return matching
 
@@ -704,7 +729,7 @@ def get_effect_for_index(idx):
 
 
 def render_video(images, audio_path, script, festival):
-    log("Rendering video — v5.5 mood-matched effects...")
+    log("Rendering video — v5.6 mood-matched effects...")
 
     slug = script.get('slug', f"{festival['festival_slug']}-{festival['date']}")
     output_path = OUTPUT_DIR / f"{slug}.mp4"
@@ -772,7 +797,10 @@ def render_video(images, audio_path, script, festival):
     ], capture_output=True, timeout=120)
 
     # ── Overlay text + logo ──────────────────────────────────
-    hindi = [safe_text(l) for l in script.get("hindi_lines", [])]
+    # v5.6 FIX 3: Hindi per-line subtitle overlay REMOVED. FFmpeg drawtext does
+    # not shape Devanagari conjuncts/matras correctly, producing broken/misspelt
+    # text. TTS narration is unaffected (comes from tts_script). Only the
+    # English-rendered brand line, festival name, and credit line remain.
     fest_name = safe_text(festival["festival_name"])
     fh = str(FONT_HINDI) if FONT_HINDI.exists() else ""
     fe = str(FONT_ENG) if FONT_ENG.exists() else ""
@@ -784,20 +812,13 @@ def render_video(images, audio_path, script, festival):
         f"drawtext=text='TrikalVaani.com':fontsize=42:fontcolor=gold:box=0"
         f":x=(w-text_w)/2:y=80:shadowcolor=black:shadowx=2:shadowy=2{fe_opt}"
     )
+    # v5.6 FIX 2: festival_name is Latin/English text → render with the ENGLISH
+    # font (fe_opt). Previously used the Devanagari font (fh_opt), which rendered
+    # Latin letters as empty boxes.
     filters.append(
         f"drawtext=text='{fest_name}':fontsize=58:fontcolor=white:box=0"
-        f":x=(w-text_w)/2:y=160:shadowcolor=black:shadowx=3:shadowy=3{fh_opt}"
+        f":x=(w-text_w)/2:y=160:shadowcolor=black:shadowx=3:shadowy=3{fe_opt}"
     )
-
-    line_time = audio_dur / max(len(hindi) + 1, 1)
-    for i, line in enumerate(hindi):
-        y_pos = 1550 + (i * 75)
-        start_t = i * line_time
-        filters.append(
-            f"drawtext=text='{line}':fontsize=48:fontcolor=white:box=0"
-            f":x=(w-text_w)/2:y={y_pos}:enable='gte(t,{start_t:.1f})'"
-            f":shadowcolor=black:shadowx=2:shadowy=2{fh_opt}"
-        )
 
     filters.append(
         f"drawtext=text='Rohiit Gupta - Chief Vedic Architect':fontsize=28"
@@ -1166,7 +1187,7 @@ def process_festival(festival, max_retries=3):
 # ============================================================
 def main():
     log("=" * 55)
-    log("TRIKAL VAANI CONTENT ENGINE v5.5")
+    log("TRIKAL VAANI CONTENT ENGINE v5.6")
     log("Flow 1: YouTube DIRECT (VM) | Flow 2: Drive Caption Kit")
     log("Render: 5-effect mood-matched FFmpeg library")
     log("=" * 55)
