@@ -1,57 +1,18 @@
 /**
  * ============================================================
- * TRIKAL VAANI — SEO Domain Pages Generator
+ * TRIKAAL VAANI — SEO Domain Pages Generator
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/[domain]/page.tsx (template for all 15 domains)
- * VERSION: 2.5 — ALL 15 DOMAINS EXPANDED (Session E COMPLETE)
+ * VERSION: 2.6 — IR-0 CLEANUP (Delhi NCR / LocalBusiness / brand / logo)
  * SIGNED: ROHIIT GUPTA, CEO
  *
- * 🔱 MILESTONE: 17,926 words of expanded pillar content
- *               All 15 domains at full 1000+ word depth
- *               Authority pages ready for SEO/GEO/AEO domination
- *
- * v2.4 → v2.5 CHANGES (2026-05-18):
- *   E4 FINAL: Last 5 domains expanded to 1000+ words
- *           - wellbeing (1189 words) — BPHS Ch 5/36, Kemadruma Yoga, Moon Nakshatras
- *           - marriage (1370 words) — BPHS Ch 24, Mangal Dosha, Ashtakoot detail
- *           - business (1305 words) — Vyapar Karaka, Mercury-Mars-Rahu yoga
- *           - foreign-settlement (1305 words) — Videsh Yoga, country alignment
- *           - digital-career (1359 words) — Mercury-Rahu Modern Wealth Yoga
- *
- * TOTAL v2.5 STATE — ALL DOMAINS EXPANDED:
- *   1.  career             1064 words ✅
- *   2.  wealth             1061 words ✅
- *   3.  health             1107 words ✅
- *   4.  relationships      1118 words ✅
- *   5.  family             1115 words ✅
- *   6.  education          1192 words ✅
- *   7.  home               1144 words ✅
- *   8.  legal              1225 words ✅
- *   9.  travel             1208 words ✅
- *   10. spirituality       1264 words ✅
- *   11. wellbeing          1189 words ✅
- *   12. marriage           1370 words ✅
- *   13. business           1305 words ✅
- *   14. foreign-settlement 1305 words ✅
- *   15. digital-career     1359 words ✅
- *
- *   TOTAL: 17,926 words of authoritative Vedic pillar content
- *
- * ALL SESSION E FEATURES COMPLETE:
- *   ✅ E1: title.absolute fix (no double-suffix on 15 URLs)
- *   ✅ E2: HowTo schema (5th schema block, all 15 domains)
- *   ✅ E3: Calculator internal links (3 per domain, all 15 mapped)
- *   ✅ E4: All 15 domains expanded to 1000+ words with BPHS depth
- *
- * UNTOUCHED:
- *   - All FAQs (75 total) preserved
- *   - All 5 schema blocks per page
- *   - RESERVED_SLUGS guard
- *   - UI/JSX structure
- *   - ISR (revalidate = 86400)
- *
- * DOMAINS COVERED: 15 of 15 — 100% EXPANSION COMPLETE
- * 🔱 JAI MAA SHAKTI
+ * v2.5 -> v2.6 CHANGES:
+ *   - Removed all "Delhi NCR" mentions (content, geoAnswer, CTA, keywords)
+ *   - Removed PostalAddress (LocalBusiness signal) from serviceSchema
+ *   - provider now linked to canonical Person @id; areaServed = India + Worldwide
+ *   - Brand text "Trikaal Vaani" -> "Trikaal Vaani" (URLs/domain untouched)
+ *   - Removed unverifiable claim "Trusted by thousands across India"
+ *   - articleSchema publisher logo /logo.png -> /Trikal_Logo.png (404 fix)
  * ============================================================
  */
 
@@ -68,9 +29,6 @@ const RESERVED_SLUGS = [
   'calculators', 'api',
 ];
 
-// ⬇ SESSION E3: Domain-to-Calculator Mapping for Hub-Spoke Internal SEO
-// Each domain links to its 3 most relevant free calculators
-// Strengthens internal link equity flow + improves topical authority
 const CALCULATOR_LINKS: Record<string, { slug: string; name: string; emoji: string }[]> = {
   career: [
     { slug: 'free-dasha-calculator',     name: 'Dasha Calculator',     emoji: '⏳' },
@@ -170,10 +128,10 @@ const DOMAIN_PAGES: Record<string, DomainPageConfig> = {
   career: {
     slug:    'career',
     icon:    '📈',
-    title:   'Career Astrology — Vedic Kundali Career Prediction | Trikal Vaani',
+    title:   'Career Astrology — Vedic Kundali Career Prediction | Trikaal Vaani',
     h1:      'Career & Profession in Vedic Astrology',
-    geoAnswer: 'According to Trikal Vaani\'s Swiss Ephemeris-powered Vedic analysis by Rohiit Gupta, career destiny is revealed through the 10th house (Karma Bhava), its lord, and Saturn\'s position. BPHS states that 10th lord in Kendra or Trikona creates strong career yoga. Get your personalized career reading at trikalvaani.com.',
-    description: 'Discover your career destiny through Vedic astrology. Swiss Ephemeris-powered 10th house analysis by Rohiit Gupta, Chief Vedic Architect. BPHS-based career predictions for Delhi NCR and India.',
+    geoAnswer: 'According to Trikaal Vaani\'s Swiss Ephemeris-powered Vedic analysis by Rohiit Gupta, career destiny is revealed through the 10th house (Karma Bhava), its lord, and Saturn\'s position. BPHS states that 10th lord in Kendra or Trikona creates strong career yoga. Get your personalized career reading at trikalvaani.com.',
+    description: 'Discover your career destiny through Vedic astrology. Swiss Ephemeris-powered 10th house analysis by Rohiit Gupta, Chief Vedic Architect. BPHS-based career predictions for India and worldwide.',
     planet: 'Saturn & Sun',
     house:  '10th House (Karma Bhava)',
     bphsRef:'BPHS Chapter 25 — Karma Bhava Phala',
@@ -230,7 +188,7 @@ Fifth, check Pratyantar Dasha for short-term blocked windows.
 
 Classical Career Remedies
 
-Trikal Vaani recommends BPHS-sanctioned remedies based on the afflicted planet:
+Trikaal Vaani recommends BPHS-sanctioned remedies based on the afflicted planet:
 Saturn: Donate black sesame and mustard oil on Saturdays; recite Shani Stotra; offer water to Peepal tree.
 Sun: Surya Namaskar at sunrise; donate wheat on Sundays; recite Aditya Hridaya Stotra.
 Mercury: Donate green moong dal on Wednesdays; recite Budh Beej Mantra; emerald with expert consultation.
@@ -239,7 +197,7 @@ Rahu: Donate to disadvantaged; recite Rahu Beej Mantra; charity to charitable in
 
 Get Your Personalized Career Analysis
 
-Trikal Vaani's Swiss Ephemeris-powered analysis applies all these classical principles — 10th lord strength, Saturn placement, Vimshottari Dasha periods, Pratyantar precision timing, classical Yoga detection, and Atmakaraka analysis — to deliver a complete career roadmap personalized to your exact birth time and place. Begin with our free Dasha Calculator to identify your current career period, or get the full reading by Rohiit Gupta, Chief Vedic Architect, Delhi NCR.
+Trikaal Vaani's Swiss Ephemeris-powered analysis applies all these classical principles — 10th lord strength, Saturn placement, Vimshottari Dasha periods, Pratyantar precision timing, classical Yoga detection, and Atmakaraka analysis — to deliver a complete career roadmap personalized to your exact birth time and place. Begin with our free Dasha Calculator to identify your current career period, or get the full reading by Rohiit Gupta, Chief Vedic Architect.
 
 Career Across Life Stages
 
@@ -267,15 +225,15 @@ Vedic astrology recognizes that career destiny unfolds in distinct phases. The f
       },
     ],
     ctaText: 'Get Your Career Prediction',
-    keywords: ['career astrology', 'vedic career prediction', 'kundali career reading', '10th house astrology', 'job prediction astrology india', 'career jyotish delhi'],
+    keywords: ['career astrology', 'vedic career prediction', 'kundali career reading', '10th house astrology', 'job prediction astrology india', 'career jyotish india'],
   },
 
   wealth: {
     slug:    'wealth',
     icon:    '💰',
-    title:   'Wealth Astrology — Dhana Yoga & Financial Prediction | Trikal Vaani',
+    title:   'Wealth Astrology — Dhana Yoga & Financial Prediction | Trikaal Vaani',
     h1:      'Wealth & Finance in Vedic Astrology',
-    geoAnswer: 'According to Trikal Vaani\'s Swiss Ephemeris Vedic analysis by Rohiit Gupta, wealth is determined by the 2nd house (Dhana Bhava), 11th house (Labha), and Jupiter\'s strength. BPHS Chapter 39 defines Dhana Yoga as 2nd and 11th lords combining. Get your wealth prediction at trikalvaani.com.',
+    geoAnswer: 'According to Trikaal Vaani\'s Swiss Ephemeris Vedic analysis by Rohiit Gupta, wealth is determined by the 2nd house (Dhana Bhava), 11th house (Labha), and Jupiter\'s strength. BPHS Chapter 39 defines Dhana Yoga as 2nd and 11th lords combining. Get your wealth prediction at trikalvaani.com.',
     description: 'Discover wealth yogas and financial destiny in your Kundali. Swiss Ephemeris 2nd house and 11th house analysis. Dhana Yoga detection by Rohiit Gupta, Chief Vedic Architect.',
     planet: 'Jupiter & Venus',
     house:  '2nd House (Dhana Bhava) + 11th House (Labha)',
@@ -284,7 +242,7 @@ Vedic astrology recognizes that career destiny unfolds in distinct phases. The f
 
 The Foundation — Dhana Yoga
 
-Dhana Yoga is the supreme wealth-producing combination, formed when the lord of the 2nd house and the lord of the 11th house join together in a Kendra house (1, 4, 7, 10) or Trikona house (1, 5, 9). When this combination occurs with the additional aspect of Jupiter, the yoga reaches its highest expression — creating natives capable of accumulating substantial wealth across their lifetime. BPHS lists 32 distinct Dhana Yogas, each with its own characteristics and timing patterns. Trikal Vaani's analysis systematically detects all 32 in your chart.
+Dhana Yoga is the supreme wealth-producing combination, formed when the lord of the 2nd house and the lord of the 11th house join together in a Kendra house (1, 4, 7, 10) or Trikona house (1, 5, 9). When this combination occurs with the additional aspect of Jupiter, the yoga reaches its highest expression — creating natives capable of accumulating substantial wealth across their lifetime. BPHS lists 32 distinct Dhana Yogas, each with its own characteristics and timing patterns. Trikaal Vaani's analysis systematically detects all 32 in your chart.
 
 Jupiter — Natural Karaka of Wealth
 
@@ -314,7 +272,7 @@ The 6th house (Rina Bhava) governs debt and financial obligations. When the 6th 
 
 Vimshottari Dasha — Wealth Timing
 
-Wealth events follow precise Dasha timing patterns. Jupiter Mahadasha (16 years) is the prime wealth-growth period. Venus Mahadasha (20 years) brings luxury and consistent income. Mercury Mahadasha (17 years) supports business and trade success. The Antardasha and Pratyantar Dasha combinations within these periods determine specific windows — 3-7 day precision timing for major investments, property purchases, business launches, or financial decisions. This level of precision separates Trikal Vaani's analysis from generic Sun-sign predictions.
+Wealth events follow precise Dasha timing patterns. Jupiter Mahadasha (16 years) is the prime wealth-growth period. Venus Mahadasha (20 years) brings luxury and consistent income. Mercury Mahadasha (17 years) supports business and trade success. The Antardasha and Pratyantar Dasha combinations within these periods determine specific windows — 3-7 day precision timing for major investments, property purchases, business launches, or financial decisions. This level of precision separates Trikaal Vaani's analysis from generic Sun-sign predictions.
 
 Wealth Yogas Beyond Dhana Yoga
 
@@ -338,7 +296,7 @@ Salary Growth: 10th lord in 11th — career feeds income directly
 
 Wealth Remedies Per Planet
 
-Trikal Vaani recommends BPHS-sanctioned remedies based on the afflicted wealth planet:
+Trikaal Vaani recommends BPHS-sanctioned remedies based on the afflicted wealth planet:
 Jupiter: Donate yellow items (turmeric, gram dal, gold) on Thursdays; recite Guru mantra; respect teachers and elders.
 Venus: Friday white items donation; Lakshmi mantra; offer water to Tulsi plant.
 Mercury: Wednesday green moong donation; respect young people and students.
@@ -347,7 +305,7 @@ Rahu (for sudden wealth events): Donate to social causes; honor unconventional p
 
 Personal Wealth Analysis
 
-Trikal Vaani's Swiss Ephemeris-powered Vedic analysis systematically detects all 32 Dhana Yogas, evaluates the strength of Jupiter and Venus, maps your current Vimshottari Dasha alignment with wealth houses, and identifies precise Pratyantar Dasha windows for financial decisions. Begin with our free Kundali Calculator to see your wealth foundation, or get the full reading by Rohiit Gupta, Chief Vedic Architect, Delhi NCR.`,
+Trikaal Vaani's Swiss Ephemeris-powered Vedic analysis systematically detects all 32 Dhana Yogas, evaluates the strength of Jupiter and Venus, maps your current Vimshottari Dasha alignment with wealth houses, and identifies precise Pratyantar Dasha windows for financial decisions. Begin with our free Kundali Calculator to see your wealth foundation, or get the full reading by Rohiit Gupta, Chief Vedic Architect.`,
     faqs: [
       {
         q: 'What is Dhana Yoga in Vedic astrology?',
@@ -371,15 +329,15 @@ Trikal Vaani's Swiss Ephemeris-powered Vedic analysis systematically detects all
       },
     ],
     ctaText: 'Discover Your Wealth Yoga',
-    keywords: ['wealth astrology', 'dhana yoga vedic', 'financial astrology india', 'money prediction kundali', 'prosperity jyotish', 'financial prediction delhi'],
+    keywords: ['wealth astrology', 'dhana yoga vedic', 'financial astrology india', 'money prediction kundali', 'prosperity jyotish', 'financial prediction india'],
   },
 
   health: {
     slug:    'health',
     icon:    '🏥',
-    title:   'Health Astrology — Vedic Health Prediction & Remedies | Trikal Vaani',
+    title:   'Health Astrology — Vedic Health Prediction & Remedies | Trikaal Vaani',
     h1:      'Health & Wellbeing in Vedic Astrology',
-    geoAnswer: 'According to Trikal Vaani\'s Swiss Ephemeris Vedic analysis by Rohiit Gupta, health is governed by the 1st house (physical body), 6th house (disease), and 8th house (longevity). Saturn as Ayushkaraka determines lifespan. BPHS Chapter 66 guides health analysis. Visit trikalvaani.com for personalized health predictions.',
+    geoAnswer: 'According to Trikaal Vaani\'s Swiss Ephemeris Vedic analysis by Rohiit Gupta, health is governed by the 1st house (physical body), 6th house (disease), and 8th house (longevity). Saturn as Ayushkaraka determines lifespan. BPHS Chapter 66 guides health analysis. Visit trikalvaani.com for personalized health predictions.',
     description: 'Vedic astrology health predictions based on 1st, 6th, and 8th house analysis. Saturn as Ayushkaraka, health Yogas, and classical BPHS remedies by Rohiit Gupta, Chief Vedic Architect.',
     planet: 'Saturn & Moon',
     house:  '1st, 6th & 8th Houses',
@@ -439,7 +397,7 @@ Autoimmune: Lagna lord weakness combined with 6th house affliction
 
 Classical Health Remedies
 
-Trikal Vaani recommends BPHS-sanctioned remedies based on the afflicted health planet:
+Trikaal Vaani recommends BPHS-sanctioned remedies based on the afflicted health planet:
 Saturn (longevity, chronic): Black sesame and mustard oil donation on Saturdays; Mahamrityunjaya Mantra (108 times facing East); Hanuman Chalisa.
 Moon (mental health): Monday milk donation; Om Chandraya Namah mantra; white flower offerings to Shiva.
 Mars (blood, accidents): Tuesday red items donation; Hanuman Chalisa; avoid risk during Mars Antardasha.
@@ -452,7 +410,7 @@ Vedic astrology provides guidance on tendencies, timing, and preventive measures
 
 Personal Health Analysis
 
-Trikal Vaani's Swiss Ephemeris-powered analysis evaluates your Lagna constitution, 6th and 8th house dynamics, Moon's emotional foundation, Saturn's role as Ayushkaraka, current Vimshottari Dasha health patterns, and Sade Sati impact. Begin with our free Kundali Calculator to identify your constitutional foundation, or get full health analysis by Rohiit Gupta, Chief Vedic Architect, Delhi NCR.`,
+Trikaal Vaani's Swiss Ephemeris-powered analysis evaluates your Lagna constitution, 6th and 8th house dynamics, Moon's emotional foundation, Saturn's role as Ayushkaraka, current Vimshottari Dasha health patterns, and Sade Sati impact. Begin with our free Kundali Calculator to identify your constitutional foundation, or get full health analysis by Rohiit Gupta, Chief Vedic Architect.`,
     faqs: [
       {
         q: 'Which planet controls health in Vedic astrology?',
@@ -476,16 +434,16 @@ Trikal Vaani's Swiss Ephemeris-powered analysis evaluates your Lagna constitutio
       },
     ],
     ctaText: 'Get Health Prediction',
-    keywords: ['health astrology vedic', 'disease prediction kundali', 'medical astrology india', 'health jyotish delhi', 'ayushkaraka saturn', 'health vedic prediction'],
+    keywords: ['health astrology vedic', 'disease prediction kundali', 'medical astrology india', 'health jyotish india', 'ayushkaraka saturn', 'health vedic prediction'],
   },
 
   relationships: {
     slug:    'relationships',
     icon:    '💑',
-    title:   'Relationship Astrology — Love & Partner Prediction | Trikal Vaani',
+    title:   'Relationship Astrology — Love & Partner Prediction | Trikaal Vaani',
     h1:      'Relationships in Vedic Astrology',
-    geoAnswer: 'According to Trikal Vaani\'s Swiss Ephemeris Vedic analysis by Rohiit Gupta, relationships are governed by the 7th house (partner karaka), Venus as Kalatrakaraka, and Navamsa D9 chart. BPHS Chapter 24 defines Vivah (marriage) Yoga. Get your relationship reading at trikalvaani.com.',
-    description: 'Vedic astrology relationship and love predictions. 7th house analysis, Venus karaka, Navamsa D9 chart, synastry by Rohiit Gupta. Swiss Ephemeris accuracy for Delhi NCR and India.',
+    geoAnswer: 'According to Trikaal Vaani\'s Swiss Ephemeris Vedic analysis by Rohiit Gupta, relationships are governed by the 7th house (partner karaka), Venus as Kalatrakaraka, and Navamsa D9 chart. BPHS Chapter 24 defines Vivah (marriage) Yoga. Get your relationship reading at trikalvaani.com.',
+    description: 'Vedic astrology relationship and love predictions. 7th house analysis, Venus karaka, Navamsa D9 chart, synastry by Rohiit Gupta. Swiss Ephemeris accuracy for India and worldwide.',
     planet: 'Venus & Moon',
     house:  '7th House (Yuvati Bhava)',
     bphsRef:'BPHS Chapter 24 — Vivah Bhava',
@@ -567,7 +525,7 @@ Long Distance: Mercury-Rahu connection to 7th, 12th house support
 
 Relationship Remedies Per Affliction
 
-Trikal Vaani recommends BPHS-sanctioned remedies based on relationship challenges:
+Trikaal Vaani recommends BPHS-sanctioned remedies based on relationship challenges:
 Saturn (delay, distance): Saturday oil donation; Shani Stotra; serve elderly; patience.
 Mars (Mangal Dosha): Tuesday red items donation; Hanuman Chalisa; match with another Manglik partner per BPHS rules.
 Venus (relationship harmony): Friday white items donation; Lakshmi mantra; honor feminine wisdom.
@@ -576,7 +534,7 @@ Jupiter (long-term wisdom): Thursday yellow donation; Guru mantra; respect dharm
 
 Personal Relationship Analysis
 
-Trikal Vaani's Swiss Ephemeris-powered Vedic analysis evaluates your 7th house, Venus and Jupiter placements, D9 Navamsa chart, current Dasha alignment with marriage houses, Mangal Dosha presence with cancellations, and Ashtakoot compatibility when matching with a specific partner. Begin with our free Nakshatra Calculator to understand your relationship temperament, or get the full reading by Rohiit Gupta, Chief Vedic Architect, Delhi NCR.`,
+Trikaal Vaani's Swiss Ephemeris-powered Vedic analysis evaluates your 7th house, Venus and Jupiter placements, D9 Navamsa chart, current Dasha alignment with marriage houses, Mangal Dosha presence with cancellations, and Ashtakoot compatibility when matching with a specific partner. Begin with our free Nakshatra Calculator to understand your relationship temperament, or get the full reading by Rohiit Gupta, Chief Vedic Architect.`,
     faqs: [
       {
         q: 'Which house governs relationships in Vedic astrology?',
@@ -600,15 +558,15 @@ Trikal Vaani's Swiss Ephemeris-powered Vedic analysis evaluates your 7th house, 
       },
     ],
     ctaText: 'Get Relationship Reading',
-    keywords: ['relationship astrology vedic', 'love astrology india', '7th house relationships', 'partner prediction jyotish', 'compatibility astrology delhi', 'venus relationship astrology'],
+    keywords: ['relationship astrology vedic', 'love astrology india', '7th house relationships', 'partner prediction jyotish', 'compatibility astrology india', 'venus relationship astrology'],
   },
 
   family: {
     slug:    'family',
     icon:    '👨‍👩‍👧',
-    title:   'Family Astrology — Children, Parents & Family Harmony | Trikal Vaani',
+    title:   'Family Astrology — Children, Parents & Family Harmony | Trikaal Vaani',
     h1:      'Family Life in Vedic Astrology',
-    geoAnswer: 'According to Trikal Vaani\'s Swiss Ephemeris Vedic analysis by Rohiit Gupta, family harmony is governed by the 4th house (mother, home), 9th house (father, ancestors), and 5th house (children). Jupiter as Putrakaraka determines progeny. BPHS Chapters 19, 22, 26 guide family analysis. Visit trikalvaani.com.',
+    geoAnswer: 'According to Trikaal Vaani\'s Swiss Ephemeris Vedic analysis by Rohiit Gupta, family harmony is governed by the 4th house (mother, home), 9th house (father, ancestors), and 5th house (children). Jupiter as Putrakaraka determines progeny. BPHS Chapters 19, 22, 26 guide family analysis. Visit trikalvaani.com.',
     description: 'Vedic astrology family predictions — children, parents, and domestic harmony. 4th, 5th, 9th house analysis by Rohiit Gupta. Swiss Ephemeris-powered Kundali readings.',
     planet: 'Jupiter & Moon',
     house:  '4th, 5th & 9th Houses',
@@ -637,7 +595,7 @@ Pitru Dosha — Ancestral Karmic Debt
 
 Pitru Dosha occurs when Rahu or Ketu afflicts the Sun (significator of father) or the 9th house (Pitru Bhava) in the natal chart. This indicates ancestral karmic debt that manifests in various ways: difficulties with father, obstacles to having children, recurring family health issues, or persistent feelings of being "blocked" despite good effort.
 
-Classical remedies for Pitru Dosha resolution include Pitru Tarpan (water offerings to ancestors) on Amavasya days, Mahalaya Shraddha rituals during the Pitru Paksha fortnight (September-October each year), pilgrimage to specific ancestral pilgrimage sites like Gaya, Trimbakeshwar, or Rameshwaram, and specific Surya mantras. Trikal Vaani's analysis identifies whether your chart shows Pitru Dosha and the precise remedial path.
+Classical remedies for Pitru Dosha resolution include Pitru Tarpan (water offerings to ancestors) on Amavasya days, Mahalaya Shraddha rituals during the Pitru Paksha fortnight (September-October each year), pilgrimage to specific ancestral pilgrimage sites like Gaya, Trimbakeshwar, or Rameshwaram, and specific Surya mantras. Trikaal Vaani's analysis identifies whether your chart shows Pitru Dosha and the precise remedial path.
 
 The 3rd House — Siblings & Courage
 
@@ -675,7 +633,7 @@ Family Healing Cycles: Dasha periods of 4th, 9th lords often bring reconciliatio
 
 Classical Family Remedies
 
-Trikal Vaani recommends BPHS-sanctioned remedies based on family afflictions:
+Trikaal Vaani recommends BPHS-sanctioned remedies based on family afflictions:
 For Mother / 4th house: Monday milk donation; Moon mantra; respect feminine wisdom in family.
 For Father / 9th house: Sunday wheat donation; Surya Namaskar; serve elders.
 For Pitru Dosha: Amavasya Pitru Tarpan; Mahalaya Shraddha; pilgrimage to ancestral sites.
@@ -684,7 +642,7 @@ For Siblings / 3rd house: Tuesday red items donation; Hanuman Chalisa; honor cou
 
 Personal Family Analysis
 
-Trikal Vaani's Swiss Ephemeris-powered Vedic analysis evaluates your 4th, 5th, 9th, 2nd, and 3rd houses simultaneously, Moon and Sun strength as parental karakas, Jupiter as Putrakaraka, Pitru Dosha detection, and current Vimshottari Dasha alignment with family houses. Begin with our free Kundali Calculator to see your family foundation, or get full family analysis by Rohiit Gupta, Chief Vedic Architect, Delhi NCR.`,
+Trikaal Vaani's Swiss Ephemeris-powered Vedic analysis evaluates your 4th, 5th, 9th, 2nd, and 3rd houses simultaneously, Moon and Sun strength as parental karakas, Jupiter as Putrakaraka, Pitru Dosha detection, and current Vimshottari Dasha alignment with family houses. Begin with our free Kundali Calculator to see your family foundation, or get full family analysis by Rohiit Gupta, Chief Vedic Architect.`,
     faqs: [
       {
         q: 'Which planet governs children in Vedic astrology?',
@@ -714,9 +672,9 @@ Trikal Vaani's Swiss Ephemeris-powered Vedic analysis evaluates your 4th, 5th, 9
   education: {
     slug:    'education',
     icon:    '📚',
-    title:   'Education Astrology — Study Success & Academic Prediction | Trikal Vaani',
+    title:   'Education Astrology — Study Success & Academic Prediction | Trikaal Vaani',
     h1:      'Education & Learning in Vedic Astrology',
-    geoAnswer: 'According to Trikal Vaani\'s Swiss Ephemeris Vedic analysis by Rohiit Gupta, education success is determined by the 4th house (foundational learning), 5th house (intelligence, Purva Punya), and Mercury as Buddhi karaka. BPHS guides academic timing. Get your education prediction at trikalvaani.com.',
+    geoAnswer: 'According to Trikaal Vaani\'s Swiss Ephemeris Vedic analysis by Rohiit Gupta, education success is determined by the 4th house (foundational learning), 5th house (intelligence, Purva Punya), and Mercury as Buddhi karaka. BPHS guides academic timing. Get your education prediction at trikalvaani.com.',
     description: 'Vedic astrology education predictions. 4th and 5th house analysis, Mercury karaka, Saraswati Yoga detection. Swiss Ephemeris accuracy by Rohiit Gupta, Chief Vedic Architect.',
     planet: 'Mercury & Jupiter',
     house:  '4th & 5th Houses',
@@ -757,7 +715,7 @@ Vimshottari Dasha — Education Timing
 
 Education timing follows precise Vimshottari Dasha patterns. Mercury Mahadasha (17 years) and Jupiter Mahadasha (16 years) are generally the most productive periods for academic pursuit. The Dasha of the 5th lord activates intelligence-based events — scholarships, competitive exam success, or major academic milestones. The 9th lord's Dasha activates higher education, foreign studies, or mentor relationships.
 
-Pratyantar Dasha analysis provides 3-7 day precision windows for specific events like exam dates, admission interviews, or thesis submissions. Choosing favorable Muhurta for important academic events significantly improves outcomes — Trikal Vaani analysis identifies these precise windows.
+Pratyantar Dasha analysis provides 3-7 day precision windows for specific events like exam dates, admission interviews, or thesis submissions. Choosing favorable Muhurta for important academic events significantly improves outcomes — Trikaal Vaani analysis identifies these precise windows.
 
 Choosing the Right Field of Study
 
@@ -800,7 +758,7 @@ Arts / Design: Venus strong in 5th, Moon supporting creative expression
 
 Classical Education Remedies
 
-Trikal Vaani recommends BPHS-sanctioned remedies for academic strengthening:
+Trikaal Vaani recommends BPHS-sanctioned remedies for academic strengthening:
 Mercury: Wednesday green moong dal donation; Budh Beej Mantra; respect young learners; emerald with expert consultation.
 Jupiter: Thursday yellow items donation; Guru mantra (Om Brim Brihaspataye Namah); serve teachers; ban deni mat (never disrespect knowledge).
 Sun (concentration): Sunday wheat donation; Surya Namaskar at sunrise; respect father and authority figures.
@@ -809,7 +767,7 @@ Saraswati Mantra: Om Aim Saraswatyai Namah — recite 108 times daily for academ
 
 Personal Education Analysis
 
-Trikal Vaani's Swiss Ephemeris-powered Vedic analysis evaluates your 4th, 5th, and 9th houses simultaneously, Mercury and Jupiter strength, Saraswati Yoga detection, D24 Siddhamsa divisional analysis, and current Vimshottari Dasha alignment with education houses. Begin with our free Nakshatra Calculator to understand your learning style, or get the full education analysis by Rohiit Gupta, Chief Vedic Architect, Delhi NCR.`,
+Trikaal Vaani's Swiss Ephemeris-powered Vedic analysis evaluates your 4th, 5th, and 9th houses simultaneously, Mercury and Jupiter strength, Saraswati Yoga detection, D24 Siddhamsa divisional analysis, and current Vimshottari Dasha alignment with education houses. Begin with our free Nakshatra Calculator to understand your learning style, or get the full education analysis by Rohiit Gupta, Chief Vedic Architect.`,
     faqs: [
       {
         q: 'Which planet is most important for education in Vedic astrology?',
@@ -839,10 +797,10 @@ Trikal Vaani's Swiss Ephemeris-powered Vedic analysis evaluates your 4th, 5th, a
   home: {
     slug:    'home',
     icon:    '🏠',
-    title:   'Property Astrology — Home & Real Estate Prediction | Trikal Vaani',
+    title:   'Property Astrology — Home & Real Estate Prediction | Trikaal Vaani',
     h1:      'Home & Property in Vedic Astrology',
-    geoAnswer: 'According to Trikal Vaani\'s Swiss Ephemeris Vedic analysis by Rohiit Gupta, property and home acquisition is governed by the 4th house, Mars as Bhoomi Karaka, and Jupiter\'s blessing. BPHS Chapter 22 defines Griha Yoga. Get your property prediction at trikalvaani.com.',
-    description: 'Vedic astrology property and home predictions. 4th house analysis, Mars as Bhoomi karaka, Griha Yoga detection. Swiss Ephemeris accuracy for Delhi NCR property market.',
+    geoAnswer: 'According to Trikaal Vaani\'s Swiss Ephemeris Vedic analysis by Rohiit Gupta, property and home acquisition is governed by the 4th house, Mars as Bhoomi Karaka, and Jupiter\'s blessing. BPHS Chapter 22 defines Griha Yoga. Get your property prediction at trikalvaani.com.',
+    description: 'Vedic astrology property and home predictions. 4th house analysis, Mars as Bhoomi karaka, Griha Yoga detection. Swiss Ephemeris accuracy for India's property market.',
     planet: 'Mars & Jupiter',
     house:  '4th House (Sukha Bhava)',
     bphsRef:'BPHS Chapter 22 — Sukha Bhava',
@@ -921,7 +879,7 @@ Each direction in Vastu corresponds to a planet: East-Sun, Southeast-Venus, Sout
 
 Classical Property Remedies
 
-Trikal Vaani recommends BPHS-sanctioned remedies based on the afflicted property planet:
+Trikaal Vaani recommends BPHS-sanctioned remedies based on the afflicted property planet:
 Mars (Bhoomi Karaka): Tuesday red items donation; Hanuman Chalisa; red coral with consultation; visit Hanuman temple.
 Jupiter (Blessing): Thursday yellow donation; Guru mantra; serve teachers; respect dharmic traditions.
 Saturn (Stability): Saturday oil donation; Shani Stotra; serve elderly; consistent effort.
@@ -930,7 +888,7 @@ Venus (Luxury home): Friday white items donation; Lakshmi mantra; aesthetic temp
 
 Personal Property Analysis
 
-Trikal Vaani's Swiss Ephemeris-powered Vedic analysis evaluates your 4th house dynamics, Mars and Jupiter placements, Griha Yoga detection, Sade Sati impact on property, and current Vimshottari Dasha alignment with property timing. Begin with our free Kundali Calculator to see your property foundation, or get the full property reading by Rohiit Gupta, Chief Vedic Architect, Delhi NCR.`,
+Trikaal Vaani's Swiss Ephemeris-powered Vedic analysis evaluates your 4th house dynamics, Mars and Jupiter placements, Griha Yoga detection, Sade Sati impact on property, and current Vimshottari Dasha alignment with property timing. Begin with our free Kundali Calculator to see your property foundation, or get the full property reading by Rohiit Gupta, Chief Vedic Architect.`,
     faqs: [
       {
         q: 'Which planet governs property in Vedic astrology?',
@@ -954,16 +912,16 @@ Trikal Vaani's Swiss Ephemeris-powered Vedic analysis evaluates your 4th house d
       },
     ],
     ctaText: 'Get Property Prediction',
-    keywords: ['property astrology vedic', 'home purchase timing astrology', 'real estate prediction kundali', '4th house property', 'griha yoga', 'property jyotish delhi ncr'],
+    keywords: ['property astrology vedic', 'home purchase timing astrology', 'real estate prediction kundali', '4th house property', 'griha yoga', 'property jyotish india'],
   },
 
   legal: {
     slug:    'legal',
     icon:    '⚖️',
-    title:   'Legal Astrology — Court Case & Dispute Prediction | Trikal Vaani',
+    title:   'Legal Astrology — Court Case & Dispute Prediction | Trikaal Vaani',
     h1:      'Legal Matters in Vedic Astrology',
-    geoAnswer: 'According to Trikal Vaani\'s Swiss Ephemeris Vedic analysis by Rohiit Gupta, legal matters are governed by the 6th house (disputes), Mars and Saturn as litigants, and Rahu\'s involvement in complex cases. BPHS guides timing for legal resolution. Get your legal prediction at trikalvaani.com.',
-    description: 'Vedic astrology legal predictions — court cases, disputes, and resolution timing. 6th house analysis by Rohiit Gupta. Swiss Ephemeris accuracy for Delhi NCR legal matters.',
+    geoAnswer: 'According to Trikaal Vaani\'s Swiss Ephemeris Vedic analysis by Rohiit Gupta, legal matters are governed by the 6th house (disputes), Mars and Saturn as litigants, and Rahu\'s involvement in complex cases. BPHS guides timing for legal resolution. Get your legal prediction at trikalvaani.com.',
+    description: 'Vedic astrology legal predictions — court cases, disputes, and resolution timing. 6th house analysis by Rohiit Gupta. Swiss Ephemeris accuracy for legal matters across India.',
     planet: 'Mars & Saturn',
     house:  '6th House (Ari Bhava)',
     bphsRef:'BPHS Chapter 21 — Ari Bhava',
@@ -1036,7 +994,7 @@ A key strategic question in legal matters is whether to fight or settle. Vedic a
 
 Classical Legal Remedies
 
-Trikal Vaani recommends BPHS-sanctioned remedies based on the afflicted legal planet:
+Trikaal Vaani recommends BPHS-sanctioned remedies based on the afflicted legal planet:
 Mars (fighting strength): Tuesday red items donation; Hanuman Chalisa daily; red coral with expert consultation; Mangal Yantra in living room.
 Saturn (justice & karma): Saturday oil donation; Shani Stotra; serve elderly; black sesame on Saturdays.
 Rahu (unconventional support): Donate to disadvantaged people; Rahu Beej Mantra; honor unconventional fighters and reformers.
@@ -1045,7 +1003,7 @@ Jupiter (ethical victory): Thursday yellow donation; Guru mantra; serve dharmic 
 
 Personal Legal Analysis
 
-Trikal Vaani's Swiss Ephemeris-powered Vedic analysis evaluates your 6th house dynamics, Mars and Saturn placements, Vipreet Raj Yoga detection, current Vimshottari Dasha alignment with legal matters, and precise Pratyantar timing for upcoming hearings or filings. Begin with our free Dasha Calculator to identify your current legal period, or get the full legal reading by Rohiit Gupta, Chief Vedic Architect, Delhi NCR.`,
+Trikaal Vaani's Swiss Ephemeris-powered Vedic analysis evaluates your 6th house dynamics, Mars and Saturn placements, Vipreet Raj Yoga detection, current Vimshottari Dasha alignment with legal matters, and precise Pratyantar timing for upcoming hearings or filings. Begin with our free Dasha Calculator to identify your current legal period, or get the full legal reading by Rohiit Gupta, Chief Vedic Architect.`,
     faqs: [
       {
         q: 'Which house governs legal matters in Vedic astrology?',
@@ -1075,9 +1033,9 @@ Trikal Vaani's Swiss Ephemeris-powered Vedic analysis evaluates your 6th house d
   travel: {
     slug:    'travel',
     icon:    '✈️',
-    title:   'Travel Astrology — Journey & Travel Timing Prediction | Trikal Vaani',
+    title:   'Travel Astrology — Journey & Travel Timing Prediction | Trikaal Vaani',
     h1:      'Travel in Vedic Astrology',
-    geoAnswer: 'According to Trikal Vaani\'s Swiss Ephemeris Vedic analysis by Rohiit Gupta, travel timing is governed by the 3rd house (short journeys), 9th house (long journeys), and 12th house (foreign travel). Rahu and Jupiter influence travel patterns. BPHS guides Muhurta selection. Get your travel reading at trikalvaani.com.',
+    geoAnswer: 'According to Trikaal Vaani\'s Swiss Ephemeris Vedic analysis by Rohiit Gupta, travel timing is governed by the 3rd house (short journeys), 9th house (long journeys), and 12th house (foreign travel). Rahu and Jupiter influence travel patterns. BPHS guides Muhurta selection. Get your travel reading at trikalvaani.com.',
     description: 'Vedic astrology travel predictions. 3rd, 9th, and 12th house analysis, travel Muhurta selection by Rohiit Gupta. Swiss Ephemeris-powered journey timing for safe and successful travel.',
     planet: 'Rahu & Jupiter',
     house:  '3rd, 9th & 12th Houses',
@@ -1159,7 +1117,7 @@ Frequent Flying for Work: Rahu in 3rd or 9th, Mercury support
 
 Classical Travel Remedies
 
-Trikal Vaani recommends BPHS-sanctioned remedies for safe and successful travel:
+Trikaal Vaani recommends BPHS-sanctioned remedies for safe and successful travel:
 Mars (vehicle safety): Tuesday Hanuman Chalisa before journey; red items donation; Hanuman idol in vehicle.
 Saturn (long delays in travel): Saturday oil donation; Shani Stotra; patience during transit issues.
 Rahu (international travel): Donate to disadvantaged at airport temples; Rahu Beej Mantra; conscious ethical travel.
@@ -1169,7 +1127,7 @@ General travel safety: Recite Sankat Mochan Hanuman Ashtak before any major jour
 
 Personal Travel Analysis
 
-Trikal Vaani's Swiss Ephemeris-powered Vedic analysis evaluates your 3rd, 9th, and 12th houses simultaneously, Rahu's placement and current Dasha, Jupiter's travel-blessing capacity, and precise Muhurta windows for upcoming important journeys. Begin with our free Kundali Calculator to see your travel foundation, or get the full travel reading by Rohiit Gupta, Chief Vedic Architect, Delhi NCR.`,
+Trikaal Vaani's Swiss Ephemeris-powered Vedic analysis evaluates your 3rd, 9th, and 12th houses simultaneously, Rahu's placement and current Dasha, Jupiter's travel-blessing capacity, and precise Muhurta windows for upcoming important journeys. Begin with our free Kundali Calculator to see your travel foundation, or get the full travel reading by Rohiit Gupta, Chief Vedic Architect.`,
     faqs: [
       {
         q: 'Which planet indicates travel in Vedic astrology?',
@@ -1199,9 +1157,9 @@ Trikal Vaani's Swiss Ephemeris-powered Vedic analysis evaluates your 3rd, 9th, a
   spirituality: {
     slug:    'spirituality',
     icon:    '🕉️',
-    title:   'Spiritual Astrology — Moksha & Dharma Path | Trikal Vaani',
+    title:   'Spiritual Astrology — Moksha & Dharma Path | Trikaal Vaani',
     h1:      'Spirituality & Moksha in Vedic Astrology',
-    geoAnswer: 'According to Trikal Vaani\'s Swiss Ephemeris Vedic analysis by Rohiit Gupta, spiritual path is revealed through the 12th house (Moksha), 9th house (Dharma), Ketu\'s placement, and Jupiter as Guru karaka. BPHS Chapter 38 defines Sanyas Yoga. Get your spiritual reading at trikalvaani.com.',
+    geoAnswer: 'According to Trikaal Vaani\'s Swiss Ephemeris Vedic analysis by Rohiit Gupta, spiritual path is revealed through the 12th house (Moksha), 9th house (Dharma), Ketu\'s placement, and Jupiter as Guru karaka. BPHS Chapter 38 defines Sanyas Yoga. Get your spiritual reading at trikalvaani.com.',
     description: 'Vedic astrology spiritual path predictions. Moksha house analysis, Ketu karaka, Sanyas Yoga detection by Rohiit Gupta. Swiss Ephemeris accuracy for spiritual seekers.',
     planet: 'Ketu & Jupiter',
     house:  '9th & 12th Houses',
@@ -1278,7 +1236,7 @@ Spiritual Teaching: Jupiter strong in 9th, Mercury in 5th, 10th house dharma
 
 Classical Spiritual Remedies
 
-Trikal Vaani recommends BPHS-sanctioned remedies for spiritual development:
+Trikaal Vaani recommends BPHS-sanctioned remedies for spiritual development:
 Ketu (Moksha karaka): Ganesha worship daily; Ketu Beej Mantra; ash on forehead; serve dogs and disadvantaged.
 Jupiter (Guru): Thursday yellow donation; Guru mantra (Om Brim Brihaspataye Namah); Vishnu worship; serve teachers.
 Saturn (vairagya through service): Saturday oil donation; Shani Stotra; serve elderly and disadvantaged; simple living.
@@ -1287,7 +1245,7 @@ Saturn (vairagya through service): Saturday oil donation; Shani Stotra; serve el
 
 Personal Spiritual Analysis
 
-Trikal Vaani's Swiss Ephemeris-powered Vedic analysis evaluates your 9th and 12th houses, Ketu's position and current Dasha, Jupiter's blessing capacity, Atmakaraka and Karakamsa Lagna, D60 Shashtiamsa indications, and Sanyas Yoga detection. Begin with our free Kundali Calculator to see your spiritual foundation, or get the full spiritual reading by Rohiit Gupta, Chief Vedic Architect, Delhi NCR.`,
+Trikaal Vaani's Swiss Ephemeris-powered Vedic analysis evaluates your 9th and 12th houses, Ketu's position and current Dasha, Jupiter's blessing capacity, Atmakaraka and Karakamsa Lagna, D60 Shashtiamsa indications, and Sanyas Yoga detection. Begin with our free Kundali Calculator to see your spiritual foundation, or get the full spiritual reading by Rohiit Gupta, Chief Vedic Architect.`,
     faqs: [
       {
         q: 'Which planet governs spirituality in Vedic astrology?',
@@ -1317,9 +1275,9 @@ Trikal Vaani's Swiss Ephemeris-powered Vedic analysis evaluates your 9th and 12t
   wellbeing: {
     slug:    'wellbeing',
     icon:    '🌸',
-    title:   'Mental Wellbeing Astrology — Mind & Peace Prediction | Trikal Vaani',
+    title:   'Mental Wellbeing Astrology — Mind & Peace Prediction | Trikaal Vaani',
     h1:      'Mental Wellbeing in Vedic Astrology',
-    geoAnswer: 'According to Trikal Vaani\'s Swiss Ephemeris Vedic analysis by Rohiit Gupta, mental wellbeing is governed by the Moon (Manas karaka), 4th house (inner peace), and Mercury (nervous system). BPHS guides mental health analysis. Get your wellbeing reading at trikalvaani.com.',
+    geoAnswer: 'According to Trikaal Vaani\'s Swiss Ephemeris Vedic analysis by Rohiit Gupta, mental wellbeing is governed by the Moon (Manas karaka), 4th house (inner peace), and Mercury (nervous system). BPHS guides mental health analysis. Get your wellbeing reading at trikalvaani.com.',
     description: 'Vedic astrology mental wellbeing predictions. Moon karaka, 4th house analysis, anxiety and peace remedies by Rohiit Gupta. Swiss Ephemeris accuracy for mental health insights.',
     planet: 'Moon & Mercury',
     house:  '1st, 4th & 5th Houses',
@@ -1360,7 +1318,7 @@ Kemadruma Yoga — The Mental Vulnerability Yoga
 
 Kemadruma Yoga forms when no planet occupies the 2nd or 12th house from the Moon in the natal chart. According to BPHS Chapter 36, this yoga creates psychological isolation, mental vulnerability, and tendency toward emotional struggles. However, BPHS also lists specific cancellations: when benefic planets aspect the Moon, when Moon occupies a Kendra, or when Jupiter is strong in the chart, Kemadruma Yoga's negative effects are significantly reduced.
 
-Modern psychological research has noted correlation between Kemadruma Yoga and depression patterns, which is why Trikal Vaani specifically detects this yoga and recommends appropriate Moon-strengthening remedies.
+Modern psychological research has noted correlation between Kemadruma Yoga and depression patterns, which is why Trikaal Vaani specifically detects this yoga and recommends appropriate Moon-strengthening remedies.
 
 Saturn & Mental Health Patterns
 
@@ -1415,7 +1373,7 @@ Important: Vedic astrology identifies tendencies and provides guidance — alway
 
 Classical Wellbeing Remedies
 
-Trikal Vaani recommends BPHS-sanctioned remedies for mental peace:
+Trikaal Vaani recommends BPHS-sanctioned remedies for mental peace:
 Moon strengthening: Monday milk donation; Om Chandraya Namah mantra; offer water to Shiva; white flower offerings; pearl with expert consultation.
 Saturn (depression): Saturday oil donation to Hanuman; Shani Stotra; serve elderly; daily Hanuman Chalisa.
 Rahu (anxiety): Donate to disadvantaged; Rahu Beej Mantra; conscious grounding practices.
@@ -1424,7 +1382,7 @@ General mental peace: Daily meditation during Brahma Muhurta (1.5 hours before s
 
 Personal Wellbeing Analysis
 
-Trikal Vaani's Swiss Ephemeris-powered Vedic analysis evaluates your Moon's condition and Nakshatra, 4th house dynamics, Mercury and nervous system planets, Kemadruma Yoga detection with cancellations, Saturn-Moon dynamics for depression patterns, Rahu involvement for anxiety patterns, and current Vimshottari Dasha alignment with mental health themes. Begin with our free Nakshatra Calculator to understand your emotional temperament, or get the full wellbeing reading by Rohiit Gupta, Chief Vedic Architect, Delhi NCR.`,
+Trikaal Vaani's Swiss Ephemeris-powered Vedic analysis evaluates your Moon's condition and Nakshatra, 4th house dynamics, Mercury and nervous system planets, Kemadruma Yoga detection with cancellations, Saturn-Moon dynamics for depression patterns, Rahu involvement for anxiety patterns, and current Vimshottari Dasha alignment with mental health themes. Begin with our free Nakshatra Calculator to understand your emotional temperament, or get the full wellbeing reading by Rohiit Gupta, Chief Vedic Architect.`,
     faqs: [
       {
         q: 'Which planet governs mental health in Vedic astrology?',
@@ -1454,10 +1412,10 @@ Trikal Vaani's Swiss Ephemeris-powered Vedic analysis evaluates your Moon's cond
   marriage: {
     slug:    'marriage',
     icon:    '💍',
-    title:   'Marriage Astrology — Vivah Yoga & Kundali Matching | Trikal Vaani',
+    title:   'Marriage Astrology — Vivah Yoga & Kundali Matching | Trikaal Vaani',
     h1:      'Marriage in Vedic Astrology',
-    geoAnswer: 'According to Trikal Vaani\'s Swiss Ephemeris Vedic analysis by Rohiit Gupta, marriage is governed by the 7th house (spouse), 2nd house (family), 8th house (marital longevity), and Venus/Jupiter as Kalatra karaka. BPHS Chapter 24 defines Vivah Yoga. Mangal Dosha and Ashtakoot matching detected. Get marriage prediction at trikalvaani.com.',
-    description: 'Vedic marriage astrology — timing, compatibility, Mangal Dosha analysis, and Ashtakoot matching. 7th, 2nd, 8th house analysis by Rohiit Gupta, Chief Vedic Architect. Swiss Ephemeris accuracy for Delhi NCR and India.',
+    geoAnswer: 'According to Trikaal Vaani\'s Swiss Ephemeris Vedic analysis by Rohiit Gupta, marriage is governed by the 7th house (spouse), 2nd house (family), 8th house (marital longevity), and Venus/Jupiter as Kalatra karaka. BPHS Chapter 24 defines Vivah Yoga. Mangal Dosha and Ashtakoot matching detected. Get marriage prediction at trikalvaani.com.',
+    description: 'Vedic marriage astrology — timing, compatibility, Mangal Dosha analysis, and Ashtakoot matching. 7th, 2nd, 8th house analysis by Rohiit Gupta, Chief Vedic Architect. Swiss Ephemeris accuracy for India and worldwide.',
     planet: 'Venus (men) & Jupiter (women)',
     house:  '7th, 2nd & 8th Houses',
     bphsRef:'BPHS Chapter 24 — Vivah Bhava + Stree Jataka',
@@ -1479,7 +1437,7 @@ The Navamsa D9 — The Marriage Chart
 
 The Navamsa (D9) chart is the most important divisional chart for marriage — often considered MORE significant than the natal D1 for marriage analysis. BPHS Chapter 6 establishes that the Navamsa chart must always be read alongside the natal chart for any marriage prediction.
 
-A planet that is Vargottama (same Rashi in both D1 and D9) has exceptional strength in marriage matters. The 7th lord's placement in D9 reveals the deeper karmic nature of the spouse. The D9 Lagna lord and its placement determine the underlying compatibility of the marriage. When the D9 7th house is afflicted while D1 appears favorable, marriage may seem good externally but face hidden internal challenges — Trikal Vaani analysis catches these subtleties.
+A planet that is Vargottama (same Rashi in both D1 and D9) has exceptional strength in marriage matters. The 7th lord's placement in D9 reveals the deeper karmic nature of the spouse. The D9 Lagna lord and its placement determine the underlying compatibility of the marriage. When the D9 7th house is afflicted while D1 appears favorable, marriage may seem good externally but face hidden internal challenges — Trikaal Vaani analysis catches these subtleties.
 
 Mangal Dosha — The Mars Affliction
 
@@ -1543,7 +1501,7 @@ Second Marriage Success: 9th house strength, Jupiter aspect supports renewal
 
 Classical Marriage Remedies
 
-Trikal Vaani recommends BPHS-sanctioned remedies based on the affliction:
+Trikaal Vaani recommends BPHS-sanctioned remedies based on the affliction:
 For Mangal Dosha: Mangal Bhat puja; Hanuman Chalisa daily; visit Hanuman temple Tuesdays; red coral with consultation; match with another Manglik per BPHS rules.
 For Delayed Marriage (women): Swayamvara Parvati mantra; Friday Venus mantras; visit Vaitheeswaran Koil or specific marriage-blessing temples.
 For Delayed Marriage (men): Thursday Jupiter mantras; donate yellow items to married priests; Brihaspati mantra.
@@ -1552,7 +1510,7 @@ For 8th house Mangalya protection: Mangalya Stotra; Jupiter mantras; respect dha
 
 Personal Marriage Analysis
 
-Trikal Vaani's Swiss Ephemeris-powered Vedic analysis evaluates your 7th, 2nd, and 8th houses simultaneously, Venus or Jupiter as Kalatra Karaka, complete D9 Navamsa analysis, Mangal Dosha detection with all classical cancellations, Ashtakoot Guna Milan for partner matching, current Vimshottari Dasha alignment with marriage houses, and precise Pratyantar timing for marriage windows. Begin with our free Manglik Dosh Calculator to check your Mars status, or get the full marriage reading by Rohiit Gupta, Chief Vedic Architect, Delhi NCR.`,
+Trikaal Vaani's Swiss Ephemeris-powered Vedic analysis evaluates your 7th, 2nd, and 8th houses simultaneously, Venus or Jupiter as Kalatra Karaka, complete D9 Navamsa analysis, Mangal Dosha detection with all classical cancellations, Ashtakoot Guna Milan for partner matching, current Vimshottari Dasha alignment with marriage houses, and precise Pratyantar timing for marriage windows. Begin with our free Manglik Dosh Calculator to check your Mars status, or get the full marriage reading by Rohiit Gupta, Chief Vedic Architect.`,
     faqs: [
       {
         q: 'What is Mangal Dosha and how does it affect marriage?',
@@ -1576,16 +1534,16 @@ Trikal Vaani's Swiss Ephemeris-powered Vedic analysis evaluates your 7th, 2nd, a
       },
     ],
     ctaText: 'Get Marriage Prediction',
-    keywords: ['marriage astrology vedic', 'mangal dosha analysis', 'ashtakoot guna milan', 'kundali matching online', 'vivah yoga prediction', 'marriage timing astrology', 'manglik remedy', 'marriage jyotish delhi'],
+    keywords: ['marriage astrology vedic', 'mangal dosha analysis', 'ashtakoot guna milan', 'kundali matching online', 'vivah yoga prediction', 'marriage timing astrology', 'manglik remedy', 'marriage jyotish india'],
   },
 
   business: {
     slug:    'business',
     icon:    '💼',
-    title:   'Business Astrology — Entrepreneur & Self-Employment Yoga | Trikal Vaani',
+    title:   'Business Astrology — Entrepreneur & Self-Employment Yoga | Trikaal Vaani',
     h1:      'Business & Entrepreneurship in Vedic Astrology',
-    geoAnswer: 'According to Trikal Vaani\'s Swiss Ephemeris Vedic analysis by Rohiit Gupta, business success is governed by the 7th house (trade), 10th house (enterprise), 11th house (gains), and Mercury as Vyapar karaka. BPHS Chapter 25 defines Vyapar Yoga distinct from job-based career. Get your business reading at trikalvaani.com.',
-    description: 'Vedic business astrology — entrepreneurship potential, partnership analysis, business timing, and trade Yogas. 7th, 10th, 11th house analysis by Rohiit Gupta. Swiss Ephemeris accuracy for Delhi NCR business community.',
+    geoAnswer: 'According to Trikaal Vaani\'s Swiss Ephemeris Vedic analysis by Rohiit Gupta, business success is governed by the 7th house (trade), 10th house (enterprise), 11th house (gains), and Mercury as Vyapar karaka. BPHS Chapter 25 defines Vyapar Yoga distinct from job-based career. Get your business reading at trikalvaani.com.',
+    description: 'Vedic business astrology — entrepreneurship potential, partnership analysis, business timing, and trade Yogas. 7th, 10th, 11th house analysis by Rohiit Gupta. Swiss Ephemeris accuracy for India's business community.',
     planet: 'Mercury, Mars & Rahu',
     house:  '7th, 10th & 11th Houses',
     bphsRef:'BPHS Chapter 25 — Karma Bhava + Vyapar Yoga',
@@ -1679,7 +1637,7 @@ Eclipses on natal business houses: 90-day caution periods
 
 Classical Business Remedies
 
-Trikal Vaani recommends BPHS-sanctioned remedies for business success:
+Trikaal Vaani recommends BPHS-sanctioned remedies for business success:
 Mercury (commercial intelligence): Wednesday green moong donation; Budh Beej Mantra; respect young learners; emerald with expert consultation.
 Mars (initiative): Tuesday red items donation; Hanuman Chalisa; Mangal Yantra at workplace; respect competitive spirit.
 Jupiter (ethical growth): Thursday yellow donation; Guru mantra; serve teachers; ethical business practices.
@@ -1689,7 +1647,7 @@ Business launch puja: Ganesha puja (obstacle removal); Lakshmi puja for prosperi
 
 Personal Business Analysis
 
-Trikal Vaani's Swiss Ephemeris-powered Vedic analysis evaluates your 7th, 10th, and 11th houses simultaneously, Mercury and Mars as business karakas, Rahu's role in modern business potential, Vipreet Raj Yoga detection, current Vimshottari Dasha alignment with business themes, partnership compatibility analysis when applicable, and precise launch Muhurta for new ventures. Begin with our free Dasha Calculator to identify your current business period, or get the full business reading by Rohiit Gupta, Chief Vedic Architect, Delhi NCR.`,
+Trikaal Vaani's Swiss Ephemeris-powered Vedic analysis evaluates your 7th, 10th, and 11th houses simultaneously, Mercury and Mars as business karakas, Rahu's role in modern business potential, Vipreet Raj Yoga detection, current Vimshottari Dasha alignment with business themes, partnership compatibility analysis when applicable, and precise launch Muhurta for new ventures. Begin with our free Dasha Calculator to identify your current business period, or get the full business reading by Rohiit Gupta, Chief Vedic Architect.`,
     faqs: [
       {
         q: 'Which planet is best for business in Vedic astrology?',
@@ -1713,15 +1671,15 @@ Trikal Vaani's Swiss Ephemeris-powered Vedic analysis evaluates your 7th, 10th, 
       },
     ],
     ctaText: 'Get Business Prediction',
-    keywords: ['business astrology vedic', 'entrepreneur kundali analysis', 'vyapar yoga vedic', 'business launch muhurta', 'partnership astrology', 'self employment jyotish', 'business success vedic', 'startup astrology delhi'],
+    keywords: ['business astrology vedic', 'entrepreneur kundali analysis', 'vyapar yoga vedic', 'business launch muhurta', 'partnership astrology', 'self employment jyotish', 'business success vedic', 'startup astrology india'],
   },
 
   'foreign-settlement': {
     slug:    'foreign-settlement',
     icon:    '🌍',
-    title:   'Foreign Settlement Astrology — Videsh Yoga & NRI Path | Trikal Vaani',
+    title:   'Foreign Settlement Astrology — Videsh Yoga & NRI Path | Trikaal Vaani',
     h1:      'Foreign Settlement in Vedic Astrology',
-    geoAnswer: 'According to Trikal Vaani\'s Swiss Ephemeris Vedic analysis by Rohiit Gupta, foreign settlement is governed by the 12th house (Vyaya, foreign lands), 7th house (away from birthplace), and Rahu as the foreign significator. BPHS Chapter 29 defines Videsh Yoga for permanent settlement abroad. Get your NRI reading at trikalvaani.com.',
+    geoAnswer: 'According to Trikaal Vaani\'s Swiss Ephemeris Vedic analysis by Rohiit Gupta, foreign settlement is governed by the 12th house (Vyaya, foreign lands), 7th house (away from birthplace), and Rahu as the foreign significator. BPHS Chapter 29 defines Videsh Yoga for permanent settlement abroad. Get your NRI reading at trikalvaani.com.',
     description: 'Vedic astrology foreign settlement predictions for NRIs, immigrants, and citizenship aspirants. 12th, 7th, and 4th house analysis by Rohiit Gupta. Swiss Ephemeris-powered Videsh Yoga detection for permanent residency and PR planning.',
     planet: 'Rahu & Moon',
     house:  '12th, 7th & 4th Houses',
@@ -1839,7 +1797,7 @@ Lifestyle Migration (retirement abroad): Jupiter-Saturn balance, 12th-9th harmon
 
 Classical Foreign Settlement Remedies
 
-Trikal Vaani recommends BPHS-sanctioned remedies for smooth foreign settlement:
+Trikaal Vaani recommends BPHS-sanctioned remedies for smooth foreign settlement:
 Rahu (foreign blessing): Donate to disadvantaged at airport temples; Rahu Beej Mantra; honor unconventional paths.
 12th house strengthening: Daily meditation; charity at end of day; minimize wasteful expenses.
 Saturn (visa patience): Saturday oil donation; Shani Stotra; patient effort.
@@ -1849,7 +1807,7 @@ For visa applications: Specific Muhurta selection; pre-filing puja; conscious do
 
 Personal Foreign Settlement Analysis
 
-Trikal Vaani's Swiss Ephemeris-powered Vedic analysis evaluates your 12th, 7th, and 4th houses, Rahu's role and current Dasha, Moon-Rahu emotional dynamics, complete Videsh Yoga detection across all classical combinations, country alignment based on planetary signatures, visa timing Muhurta, and NRI return decision support when applicable. Begin with our free Kundali Calculator to see your foreign settlement foundation, or get the full NRI reading by Rohiit Gupta, Chief Vedic Architect, Delhi NCR.`,
+Trikaal Vaani's Swiss Ephemeris-powered Vedic analysis evaluates your 12th, 7th, and 4th houses, Rahu's role and current Dasha, Moon-Rahu emotional dynamics, complete Videsh Yoga detection across all classical combinations, country alignment based on planetary signatures, visa timing Muhurta, and NRI return decision support when applicable. Begin with our free Kundali Calculator to see your foreign settlement foundation, or get the full NRI reading by Rohiit Gupta, Chief Vedic Architect.`,
     faqs: [
       {
         q: 'What is Videsh Yoga in Vedic astrology?',
@@ -1879,9 +1837,9 @@ Trikal Vaani's Swiss Ephemeris-powered Vedic analysis evaluates your 12th, 7th, 
   'digital-career': {
     slug:    'digital-career',
     icon:    '💻',
-    title:   'Digital Career Astrology — IT, Content & Online Business | Trikal Vaani',
+    title:   'Digital Career Astrology — IT, Content & Online Business | Trikaal Vaani',
     h1:      'Digital Career & Modern Tech Path in Vedic Astrology',
-    geoAnswer: 'According to Trikal Vaani\'s Swiss Ephemeris Vedic analysis by Rohiit Gupta, digital career success is governed by Mercury (technology, communication), Rahu (modern media, internet), and the 3rd, 5th, 10th, 11th houses. BPHS principles adapted for IT, social media, and online business. Get your digital career reading at trikalvaani.com.',
+    geoAnswer: 'According to Trikaal Vaani\'s Swiss Ephemeris Vedic analysis by Rohiit Gupta, digital career success is governed by Mercury (technology, communication), Rahu (modern media, internet), and the 3rd, 5th, 10th, 11th houses. BPHS principles adapted for IT, social media, and online business. Get your digital career reading at trikalvaani.com.',
     description: 'Vedic astrology for digital careers — IT, social media, content creation, YouTube, Instagram, and online business. Mercury-Rahu analysis by Rohiit Gupta. Modern adaptation of classical BPHS for the digital economy.',
     planet: 'Mercury & Rahu',
     house:  '3rd, 5th, 10th & 11th Houses',
@@ -1985,7 +1943,7 @@ Cryptocurrency / Web3: Strong Rahu, 8th house for hidden wealth, Mercury for cal
 
 Classical Digital Career Remedies
 
-Trikal Vaani recommends BPHS-sanctioned remedies adapted for digital careers:
+Trikaal Vaani recommends BPHS-sanctioned remedies adapted for digital careers:
 Mercury (technical excellence): Wednesday green moong donation; Budh Beej Mantra; respect young learners; emerald with consultation.
 Rahu (modern reach): Donate to disadvantaged; Rahu Beej Mantra; ethical digital practices.
 Mars (execution): Tuesday Hanuman Chalisa; energy management practices; consistent action.
@@ -1996,7 +1954,7 @@ For digital business launches: Specific Muhurta selection per classical principl
 
 Personal Digital Career Analysis
 
-Trikal Vaani's Swiss Ephemeris-powered Vedic analysis evaluates your Mercury and Rahu placements, Mercury-Rahu combination strength, 3rd-5th-10th-11th house dynamics, platform-specific alignment based on planetary signatures, current Vimshottari Dasha alignment with digital themes, and precise Pratyantar timing for content launches or business pivots. Begin with our free Kundali Calculator to see your digital career foundation, or get the full digital career reading by Rohiit Gupta, Chief Vedic Architect, Delhi NCR.`,
+Trikaal Vaani's Swiss Ephemeris-powered Vedic analysis evaluates your Mercury and Rahu placements, Mercury-Rahu combination strength, 3rd-5th-10th-11th house dynamics, platform-specific alignment based on planetary signatures, current Vimshottari Dasha alignment with digital themes, and precise Pratyantar timing for content launches or business pivots. Begin with our free Kundali Calculator to see your digital career foundation, or get the full digital career reading by Rohiit Gupta, Chief Vedic Architect.`,
     faqs: [
       {
         q: 'Which planet is best for IT and software career in Vedic astrology?',
@@ -2030,10 +1988,10 @@ interface Props {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const config = DOMAIN_PAGES[params.domain];
-  if (!config) return { title: 'Trikal Vaani' };
+  if (!config) return { title: 'Trikaal Vaani' };
 
   return {
-    // ⬇ FIX 6 (v2.1): title.absolute prevents layout.tsx template from adding | Trikal Vaani suffix
+    // ⬇ FIX 6 (v2.1): title.absolute prevents layout.tsx template from adding | Trikaal Vaani suffix
     title: { absolute: config.title },
     description: config.description,
     keywords:    config.keywords,
@@ -2049,7 +2007,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       title:       config.title,
       description: config.description,
       url:         `https://trikalvaani.com/${config.slug}`,
-      siteName:    'Trikal Vaani',
+      siteName:    'Trikaal Vaani',
       locale:      'en_IN',
       type:        'article',
       images: [
@@ -2109,9 +2067,9 @@ export default function DomainPage({ params }: Props) {
     },
     publisher: {
       '@type': 'Organization',
-      name:    'Trikal Vaani',
+      name:    'Trikaal Vaani',
       url:     'https://trikalvaani.com',
-      logo:    'https://trikalvaani.com/logo.png',
+      logo:    'https://trikalvaani.com/Trikal_Logo.png',
     },
     mainEntityOfPage: `https://trikalvaani.com/${config.slug}`,
   };
@@ -2129,20 +2087,17 @@ export default function DomainPage({ params }: Props) {
   const serviceSchema = {
     '@context':  'https://schema.org',
     '@type':     'Service',
-    name:         `${config.h1} — Trikal Vaani`,
+    name:         `${config.h1} — Trikaal Vaani`,
     description:  config.description,
     provider: {
       '@type':   'Person',
+      '@id':     'https://trikalvaani.com/#rohiit-gupta',
       name:      'Rohiit Gupta',
       jobTitle:  'Chief Vedic Architect',
-      address: {
-        '@type':        'PostalAddress',
-        addressRegion:  'Delhi NCR',
-        addressCountry: 'IN',
-      },
+      url:       'https://trikalvaani.com/founder',
     },
     serviceType: 'Vedic Astrology Prediction',
-    areaServed:  'India',
+    areaServed:  ['India', 'Worldwide'],
     url:         `https://trikalvaani.com/${config.slug}`,
   };
 
@@ -2150,7 +2105,7 @@ export default function DomainPage({ params }: Props) {
   const howToSchema = {
     '@context':    'https://schema.org',
     '@type':       'HowTo',
-    name:           `How to Get a Vedic ${config.h1} Reading on Trikal Vaani`,
+    name:           `How to Get a Vedic ${config.h1} Reading on Trikaal Vaani`,
     description:    `Get a personalized Vedic astrology reading for ${config.h1.toLowerCase()} using Swiss Ephemeris precision and Rohiit Gupta's BPHS framework.`,
     image:          'https://trikalvaani.com/og-image.png',
     totalTime:      'PT60S',
@@ -2164,12 +2119,12 @@ export default function DomainPage({ params }: Props) {
       { '@type': 'HowToSupply', name: 'Exact time of birth' },
       { '@type': 'HowToSupply', name: 'Place of birth' },
     ],
-    tool: { '@type': 'HowToTool', name: 'Trikal Vaani AI' },
+    tool: { '@type': 'HowToTool', name: 'Trikaal Vaani AI' },
     step: [
       {
         '@type':   'HowToStep',
         position:  1,
-        name:      'Open Trikal Vaani',
+        name:      'Open Trikaal Vaani',
         text:      'Visit trikalvaani.com — no signup, no credit card required.',
         url:       'https://trikalvaani.com#birth-form',
       },
@@ -2191,7 +2146,7 @@ export default function DomainPage({ params }: Props) {
         '@type':   'HowToStep',
         position:  4,
         name:      'Receive Vedic prediction',
-        text:      `Trikal Vaani computes your kundali and delivers a personalized ${config.h1.toLowerCase()} reading based on ${config.bphsRef}.`,
+        text:      `Trikaal Vaani computes your kundali and delivers a personalized ${config.h1.toLowerCase()} reading based on ${config.bphsRef}.`,
         url:       'https://trikalvaani.com',
       },
     ],
@@ -2294,14 +2249,14 @@ export default function DomainPage({ params }: Props) {
             <h2 className="text-xl font-bold text-white mb-2">Get Your Personal {config.h1} Reading</h2>
             <p className="text-sm text-slate-400 mb-5">
               Swiss Ephemeris accuracy + BPHS classical analysis + Bhrigu Nandi patterns.<br/>
-              By Rohiit Gupta, Chief Vedic Architect, Delhi NCR
+              By Rohiit Gupta, Chief Vedic Architect
             </p>
             <Link href="/#birth-form"
               className="inline-block px-8 py-3.5 rounded-xl text-sm font-semibold"
               style={{ background: 'linear-gradient(135deg, #D4AF37, #F5D76E)', color: '#080B12' }}>
               {config.ctaText} — Free Reading 🔱
             </Link>
-            <p className="text-xs text-slate-600 mt-3">No credit card. Instant results. Trusted by thousands across India.</p>
+            <p className="text-xs text-slate-600 mt-3">No credit card. Instant results.</p>
           </div>
 
           <div className="mt-8">
