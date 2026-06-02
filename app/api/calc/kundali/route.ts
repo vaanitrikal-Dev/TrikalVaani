@@ -2,7 +2,12 @@
 // File: app/api/calc/kundali/route.ts
 // Purpose: VM bridge for Kundali / Nakshatra / Rashi / Lagna /
 //          Dasha + NEW Shadbala-based Calculators
-// Version: v1.6
+// Version: v1.7
+// Changelog v1.7:
+//   - graha-bal now targets the WEAKEST planet for its remedy/Dos
+//     template (Graha Bal page strengthens the weak graha). The
+//     strongest planet is still surfaced via top-level
+//     `strongestPlanet` for the showcase/ranking. No other change.
 // Changelog v1.6:
 //   - Added new calcTypes: graha-bal, lucky-day, weak-planet,
 //     kundali-strength, lagna-bal, shadbala, gemstone.
@@ -104,7 +109,7 @@ function resolveTargetPlanet(
     case 'kundali':          return mahadasha || null;
     case 'dasha':            return mahadasha || null;
     // ── New calcTypes (v1.6) ──
-    case 'graha-bal':        return strongestPlanet || mahadasha || null;
+    case 'graha-bal':        return weakestPlanet || strongestPlanet || mahadasha || null;
     case 'lucky-day':        return strongestPlanet || mahadasha || null;
     case 'weak-planet':      return weakestPlanet || null;
     case 'kundali-strength': return mahadasha || null;
