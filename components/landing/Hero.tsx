@@ -45,7 +45,7 @@ export default function Hero() {
             className="font-serif text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-bold tracking-tight leading-none"
             style={{ animation: 'glow-pulse 3s ease-in-out infinite' }}
           >
-            <span className="text-gradient-gold">Trikal</span>
+            <span className="text-gradient-gold">Trikaal</span>
             <br />
             <span className="text-gradient-gold">Vaani</span>
           </h1>
