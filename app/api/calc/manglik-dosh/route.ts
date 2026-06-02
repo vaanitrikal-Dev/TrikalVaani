@@ -1,10 +1,9 @@
 // ============================================================
 // File: app/api/calc/manglik-dosh/route.ts
 // Purpose: VM bridge for Manglik Dosh Calculator (FREE forever)
-// Version: v1.3
-// Changelog v1.3: Fixed callVM signature (method+body in init object).
-//   v1.2 was calling callVM('/manglik-dosh', vmPayload) — wrong.
-//   Correct: callVM('/manglik-dosh', { method:'POST', body: JSON.stringify(vmPayload) })
+// Version: v1.4
+// Changelog v1.4: Pass full VM remedies object to buildTemplateFromVMRemedies
+//   so actionWindows (Dos) from remedy_master are included in response.
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikal Vaani
 // ============================================================
 import { NextRequest, NextResponse } from 'next/server';
@@ -46,9 +45,10 @@ function getSeverityColor(severity: string): string {
   return '#94a3b8';
 }
 
-// ─── Map VM remedy list to frontend remedyPlan format ───────────────────────
-function buildTemplateFromVMRemedies(vmRemedies: any[]): any {
-  if (!vmRemedies?.length) return null;
+// ─── Map VM remedy object to frontend template format ───────────────────────
+function buildTemplateFromVMRemedies(vmRemediesObj: any): any {
+  const vmRemedies: any[] = vmRemediesObj?.remedies ?? [];
+  if (!vmRemedies.length) return null;
   return {
     remedyPlan: {
       remedies: vmRemedies.map((r: any) => {
@@ -68,8 +68,8 @@ function buildTemplateFromVMRemedies(vmRemedies: any[]): any {
         return { ...base, text: r.detail };
       }),
     },
-    actionWindows: [],
-    avoidWindows: [],
+    actionWindows: vmRemediesObj?.actionWindows ?? [],
+    avoidWindows: vmRemediesObj?.avoidWindows ?? [],
   };
 }
 
@@ -85,7 +85,6 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Build VM payload
     const vmPayload = {
       year: body.year,
       month: body.month,
@@ -99,7 +98,7 @@ export async function POST(req: NextRequest) {
       ayanamsa: 'lahiri',
     };
 
-    // 1) Call VM /manglik-dosh — returns Mars-specific remedies via remedy_master v1.1
+    // 1) Call VM /manglik-dosh — Mars-specific remedies + actionWindows via remedy_master v1.1
     const mdRes = await callVM('/manglik-dosh', {
       method: 'POST',
       body: JSON.stringify(vmPayload),
@@ -111,24 +110,19 @@ export async function POST(req: NextRequest) {
     }
     const manglikData = await mdRes.json();
 
-    // Enrich house meaning
     const houseEffect = manglikData?.is_manglik && manglikData?.mars_house
       ? getHouseEffect(manglikData.mars_house)
       : null;
 
-    // Build templateData from VM Mars remedies
-    const vmRemedies: any[] = manglikData?.remedies?.remedies ?? [];
-    const templateData = buildTemplateFromVMRemedies(vmRemedies);
+    // Pass full remedies object — includes remedies array + actionWindows
+    const templateData = buildTemplateFromVMRemedies(manglikData?.remedies ?? {});
 
     const sessionId = `calc_md_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
 
     return NextResponse.json({
       success: true,
       sessionId,
-      input: {
-        name: body.name || null,
-        gender: body.gender || null,
-      },
+      input: { name: body.name || null, gender: body.gender || null },
       manglik: {
         isManglik: manglikData?.is_manglik || false,
         severity: manglikData?.severity || null,
