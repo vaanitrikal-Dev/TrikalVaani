@@ -3,10 +3,21 @@
  * TRIKAAL VAANI — BirthForm Component
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: components/landing/BirthForm.tsx
- * VERSION: 9.3 — Brand "Trikal" → "Trikaal" visible-text sweep
+ * VERSION: 9.5 — ALL city fields now Google Places autocomplete
  * SIGNED: ROHIIT GUPTA, CEO
  *
- * v9.3 CHANGES vs v9.2:
+ * v9.5 CHANGES vs v9.4:
+ *   ✅ Person 2 "Their Current City" now uses CityInput (Google Places)
+ *   ✅ ALL 4 city fields now consistent: Place of Birth, Current City,
+ *      Person 2 Place of Birth, Person 2 Current City — all autocomplete
+ *   ✅ maps-proxy LOCKED & unchanged; ALL v9.4 logic preserved 100%
+ *
+ * v9.4 CHANGES vs v9.3:
+ *   ✅ Current City now uses CityInput (same Google Places API as Place of Birth)
+ *   ✅ Autocomplete dropdown, city suggestions, ✓ confirmation tick
+ *   ✅ Zero new API calls — reuses existing maps-proxy (LOCKED, unchanged)
+ *   ✅ onSelect stores only city name (lat/lng/tz not needed for currentCity)
+ *   ✅ ALL v9.3 logic preserved 100%
  *   ✅ All VISIBLE/persona "Trikal" → "Trikaal" (Trikaal Ka Sandesh,
  *      Trikaal ki Awaaz, Trikaal Voice/AI, "Tell Trikaal", submit button,
  *      hidden SEO copy, Service/Offer JSON-LD name & brand fields)
@@ -1282,15 +1293,18 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
               </div>
             )}
 
-            {/* Current City */}
+            {/* Current City — v9.4: Google Places autocomplete (same as Place of Birth) */}
             <div>
-              <label htmlFor="tv-current-city" className="block text-sm font-medium text-slate-300 mb-1.5">
+              <label className="block text-sm font-medium text-slate-300 mb-1.5">
                 Current City <span className="text-slate-500 text-xs ml-2">(where you live/work now)</span>
               </label>
-              <input id="tv-current-city" type="text"
+              <CityInput
+                id="tv-current-city"
+                label=""
+                value={fields.currentCity}
                 placeholder="e.g. Gurugram, Mumbai, Dubai, London..."
-                value={fields.currentCity} onChange={e => set('currentCity', e.target.value)}
-                className="w-full px-4 py-2.5 rounded-lg text-sm outline-none" style={inputStyle()} />
+                onSelect={(city) => set('currentCity', city)}
+              />
             </div>
 
             {/* Relationship Status */}
@@ -1391,9 +1405,13 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
                   />
                   <div>
                     <label className="block text-sm font-medium text-slate-300 mb-1.5">Their Current City</label>
-                    <input type="text" placeholder="e.g. Bengaluru, Singapore..."
-                      value={fields.person2CurrentCity} onChange={e => set('person2CurrentCity', e.target.value)}
-                      className="w-full px-4 py-2.5 rounded-lg text-sm outline-none" style={inputStyle()} />
+                    <CityInput
+                      id="tv-current-city2"
+                      label=""
+                      value={fields.person2CurrentCity}
+                      placeholder="e.g. Bengaluru, Singapore..."
+                      onSelect={(city) => set('person2CurrentCity', city)}
+                    />
                   </div>
                 </div>
               </div>
