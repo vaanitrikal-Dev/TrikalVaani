@@ -1,16 +1,21 @@
 // ============================================================
 // File: app/calculators/page.tsx
 // Purpose: Calculators Hub — SEO/GEO/AEO landing page
-// Version: v3.2 — DYNAMIC count + Child Birth Muhurat card added
-// CEO: Rohiit Gupta | Chief Vedic Architect | Trikal Vaani
-// Date: 2026-05-23
+// Version: v3.3 — 10 NEW calculators added (total 18) + brand + EEAT
+// CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
+// Date: 2026-06-02
 // ============================================================
-// CHANGES vs v3.1:
-//   ✅ Added Child Birth Muhurat Calculator (after Kundli — paid funnel)
-//   ✅ DYNAMIC: count now reads CALCULATORS.length everywhere
-//      (h1 subtitle, GEO box, FAQ). Add a calculator = add ONE array line.
-//   ✅ Card list auto-generates names dynamically for GEO/FAQ text
-//   ✅ ALL OTHER LOGIC: identical to v3.1
+// CHANGES vs v3.2:
+//   ✅ Added 10 new calculators to CALCULATORS array:
+//      Lucky Day, Weak Planet Finder, Graha Bal, Kundali Strength,
+//      Lagna Bal, Kaal Sarp Dosh, Gemstone, Pitra Dosh, Numerology,
+//      Baby Name by Nakshatra. (Count/GEO/FAQ auto-update — dynamic.)
+//   ✅ BRAND FIX: visible text + schema name/title/OG now "Trikaal Vaani"
+//      (double-a). Per CEO-locked rule — legalName stays "Trikal Vaani".
+//   ✅ EEAT: CollectionPage creator now @id-linked to #organization +
+//      worksFor; added publisher Organization with REAL sameAs
+//      (Instagram / YouTube / Facebook — verified from homepage).
+//   ✅ ALL OTHER LOGIC: identical to v3.2.
 // ============================================================
 
 import type { Metadata } from 'next';
@@ -21,21 +26,31 @@ import SiteNav from '@/components/layout/SiteNav';
 const GOLD = '#D4AF37';
 const GOLD_RGBA = (a: number) => `rgba(212,175,55,${a})`;
 
+// Real, verified brand entities (from homepage JSON-LD)
+const ORG_ID = 'https://trikalvaani.com/#organization';
+const REAL_SAMEAS = [
+  'https://www.instagram.com/thetrikalvaani',
+  'https://www.youtube.com/@TheTrikalVaani',
+  'https://www.facebook.com/people/Trikal-Vaani-Voice',
+];
+
 export const metadata: Metadata = {
   title: {
-    absolute: 'Free Vedic Astrology Calculators — Kundli, Dasha, Nakshatra, Muhurat | Trikal Vaani',
+    absolute: 'Free Vedic Astrology Calculators — Kundli, Dasha, Nakshatra, Dosha & More | Trikaal Vaani',
   },
   description:
-    'Free Vedic astrology calculators powered by Swiss Ephemeris. Get accurate Kundli, Vimshottari Dasha, Nakshatra, Rashi, Lagna, Sade Sati, Manglik Dosh, and Child Birth Muhurat results instantly. By Rohiit Gupta, Chief Vedic Architect.',
+    'Free Vedic astrology calculators powered by Swiss Ephemeris. Get accurate Kundli, Dasha, Nakshatra, Rashi, Lagna, Sade Sati, Manglik & Kaal Sarp Dosh, Gemstone, Numerology and Baby Name results instantly. By Rohiit Gupta, Chief Vedic Architect.',
   keywords: [
     'vedic astrology calculator', 'free kundli calculator', 'dasha calculator',
     'nakshatra calculator', 'rashi calculator', 'lagna calculator',
-    'sade sati calculator', 'manglik dosh calculator', 'child birth muhurat calculator',
+    'sade sati calculator', 'manglik dosh calculator', 'kaal sarp dosh calculator',
+    'pitra dosh calculator', 'gemstone calculator', 'numerology calculator',
+    'baby name by nakshatra', 'kundali strength', 'graha bal calculator',
     'jyotish calculator', 'birth chart calculator',
   ],
   alternates: { canonical: 'https://trikalvaani.com/calculators' },
   openGraph: {
-    title: 'Free Vedic Astrology Calculators | Trikal Vaani',
+    title: 'Free Vedic Astrology Calculators | Trikaal Vaani',
     description: 'Free Vedic astrology calculators powered by Swiss Ephemeris. Accurate, instant, 100% free.',
     url: 'https://trikalvaani.com/calculators',
     type: 'website',
@@ -108,6 +123,87 @@ const CALCULATORS = [
     badge: null,
     live: true,
   },
+  // ── 10 NEW calculators (v3.3) ──
+  {
+    slug: 'free-kaal-sarp-dosh-calculator',
+    emoji: '🐍',
+    name: 'Free Kaal Sarp Dosh Calculator',
+    desc: 'Check Kaal Sarp Dosh by exact Rahu-Ketu axis, find its type (Anant–Sheshnag) & free Naag-puja remedies.',
+    badge: 'New',
+    live: true,
+  },
+  {
+    slug: 'free-pitra-dosh-calculator',
+    emoji: '🪔',
+    name: 'Free Pitra Dosh Calculator',
+    desc: 'Check Pitra Dosh from your birth chart (Sun / 9th house affliction) with causes, signs & Pitru-Tarpan remedies.',
+    badge: 'New',
+    live: true,
+  },
+  {
+    slug: 'free-gemstone-calculator',
+    emoji: '💎',
+    name: 'Free Gemstone Calculator',
+    desc: 'Find your lucky life gemstone (ratna) by ascendant lord — with metal, finger, day, mantra & safety caution.',
+    badge: 'New',
+    live: true,
+  },
+  {
+    slug: 'free-numerology-calculator',
+    emoji: '🔢',
+    name: 'Free Numerology Calculator',
+    desc: 'Find your Mulank, Bhagyank & Naamank — with ruling planet, lucky number, color, day & friendly numbers.',
+    badge: 'New',
+    live: true,
+  },
+  {
+    slug: 'free-baby-name-by-nakshatra',
+    emoji: '👶',
+    name: 'Free Baby Name by Nakshatra',
+    desc: "Find baby's lucky starting letter by nakshatra & pada — with name suggestions and meanings (boy/girl).",
+    badge: 'New',
+    live: true,
+  },
+  {
+    slug: 'free-lucky-day-calculator',
+    emoji: '🍀',
+    name: 'Free Lucky Day Calculator',
+    desc: 'Discover your luckiest day, color, number, metal & direction based on your strongest planet.',
+    badge: null,
+    live: true,
+  },
+  {
+    slug: 'free-weak-planet-finder',
+    emoji: '📉',
+    name: 'Free Weak Planet Finder',
+    desc: 'Identify your weakest planet (Shadbala), the life areas it affects, and targeted strengthening remedies.',
+    badge: null,
+    live: true,
+  },
+  {
+    slug: 'free-graha-bal-calculator',
+    emoji: '⚖️',
+    name: 'Free Graha Bal Calculator',
+    desc: 'See the Shadbala strength of all 9 planets with an interactive 6-fold bala breakdown.',
+    badge: null,
+    live: true,
+  },
+  {
+    slug: 'free-kundali-strength-calculator',
+    emoji: '💪',
+    name: 'Free Kundali Strength Calculator',
+    desc: 'Get your overall birth-chart strength score with strongest & weakest planets and lagna/dasha strength.',
+    badge: null,
+    live: true,
+  },
+  {
+    slug: 'free-lagna-bal-calculator',
+    emoji: '🛡️',
+    name: 'Free Lagna Bal Calculator',
+    desc: "Check your Ascendant lord's placement & strength, and the planets sitting in your 1st house.",
+    badge: null,
+    live: true,
+  },
 ];
 
 // ── Dynamic helpers (auto-update when CALCULATORS changes) ──
@@ -125,12 +221,12 @@ const FAQS = [
     a: `Yes, 100% free. All ${CALC_COUNT} calculators give complete results without any payment, signup, or hidden charges.`,
   },
   {
-    q: 'How accurate are Trikal Vaani calculators?',
+    q: 'How accurate are Trikaal Vaani calculators?',
     a: 'All calculators use Swiss Ephemeris — the same astronomical library used by NASA and world-class astrology software. Calculations are based on Lahiri Ayanamsha (Government of India standard) and BPHS classical rules.',
   },
   {
     q: 'What information do I need?',
-    a: 'Date of birth, Time of birth (as exact as possible), and Place of birth (city name — auto-suggested via Google Maps).',
+    a: 'Date of birth, Time of birth (as exact as possible), and Place of birth (city name — auto-suggested via Google Maps). Numerology needs only your date of birth.',
   },
   {
     q: 'Why is birth time so important?',
@@ -153,7 +249,15 @@ export default function CalculatorsHubPage() {
           name: 'Free Vedic Astrology Calculators',
           description: `${CALC_COUNT} free Vedic astrology calculators powered by Swiss Ephemeris`,
           url: 'https://trikalvaani.com/calculators',
-          creator: { '@type': 'Person', name: 'Rohiit Gupta', jobTitle: 'Chief Vedic Architect', url: 'https://trikalvaani.com/founder' },
+          publisher: {
+            '@type': 'Organization', '@id': ORG_ID,
+            name: 'Trikaal Vaani', legalName: 'Trikal Vaani',
+            url: 'https://trikalvaani.com', sameAs: REAL_SAMEAS,
+          },
+          creator: {
+            '@type': 'Person', name: 'Rohiit Gupta', jobTitle: 'Chief Vedic Architect',
+            url: 'https://trikalvaani.com/founder', worksFor: { '@id': ORG_ID },
+          },
           hasPart: CALCULATORS.map((c) => ({
             '@type': 'SoftwareApplication', name: c.name, applicationCategory: 'LifestyleApplication',
             url: `https://trikalvaani.com/calculators/${c.slug}`,
@@ -195,7 +299,7 @@ export default function CalculatorsHubPage() {
 
           <div className="rounded-xl p-5 mb-8" style={{ background: 'rgba(212,175,55,0.06)', border: `1px solid ${GOLD_RGBA(0.2)}` }}>
             <p className="text-base md:text-lg leading-relaxed">
-              <strong style={{ color: GOLD }}>Trikal Vaani offers {CALC_COUNT} free Vedic astrology calculators</strong> — {CALC_LIST_TEXT}. All powered by Swiss Ephemeris (NASA-grade accuracy), Lahiri Ayanamsha, and BPHS classical rules. No signup. No payment. Instant results.
+              <strong style={{ color: GOLD }}>Trikaal Vaani offers {CALC_COUNT} free Vedic astrology calculators</strong> — {CALC_LIST_TEXT}. All powered by Swiss Ephemeris (NASA-grade accuracy), Lahiri Ayanamsha, and BPHS classical rules. No signup. No payment. Instant results.
             </p>
           </div>
 
@@ -203,7 +307,7 @@ export default function CalculatorsHubPage() {
             <div className="w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg" style={{ background: GOLD, color: '#080B12' }}>RG</div>
             <div className="text-sm">
               <div className="font-semibold" style={{ color: GOLD }}>Rohiit Gupta</div>
-              <div className="text-slate-400">Chief Vedic Architect · Trikal Vaani · Delhi NCR</div>
+              <div className="text-slate-400">Chief Vedic Architect · Trikaal Vaani · Delhi NCR</div>
               <div className="text-xs text-slate-500 mt-0.5">Engine: Swiss Ephemeris · Lahiri Ayanamsha · BPHS Classical Rules</div>
             </div>
           </div>
@@ -234,7 +338,7 @@ export default function CalculatorsHubPage() {
           </section>
 
           <section className="mb-12">
-            <h2 className="text-2xl font-serif font-bold mb-6" style={{ color: GOLD }}>Why Trikal Vaani Calculators?</h2>
+            <h2 className="text-2xl font-serif font-bold mb-6" style={{ color: GOLD }}>Why Trikaal Vaani Calculators?</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <Pillar emoji="🎯" title="NASA-Grade Accuracy" desc="Swiss Ephemeris engine — the same astronomical library used by professional astrology software worldwide." />
               <Pillar emoji="📚" title="BPHS Classical Rules" desc="Every calculation follows Brihat Parashara Hora Shastra — the foundation text of Vedic astrology by Maharishi Parashar." />
@@ -265,7 +369,7 @@ export default function CalculatorsHubPage() {
             </ul>
             <Link href="/#birth-form" className="inline-block mt-2 px-6 py-3 rounded-full font-bold transition-all hover:scale-105"
               style={{ background: `linear-gradient(135deg, ${GOLD} 0%, #A8820A 100%)`, color: '#080B12' }}>
-              🔮 Trikal Ka Sandesh — Sirf Aapke Liye — ₹51 →
+              🔮 Trikaal Ka Sandesh — Sirf Aapke Liye — ₹51 →
             </Link>
           </section>
 
