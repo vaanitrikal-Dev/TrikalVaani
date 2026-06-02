@@ -2,16 +2,24 @@
 
 // ============================================================
 // File: app/calculators/free-baby-name-by-nakshatra/page.tsx
-// Version: v1.0 — Free Baby Name by Nakshatra Calculator
+// Version: v1.1 — Free Baby Name by Nakshatra Calculator
 // API: /api/calc/kundali (calcType: 'nakshatra') — already live
 // Core (nakshatra+pada→akshar) is exact from VM; name list is a
 // curated suggestion set (no fabricated meanings).
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
+// Changelog:
+//   v1.1 (2026-06-02) — Gold-standard JSON-LD: swapped inline 4-node
+//        @graph for buildCalcJsonLd() helper (8 @id-linked nodes:
+//        Organization+real sameAs, WebSite, linkable Person /founder,
+//        WebPage isPartOf #website [no longer dangling], BreadcrumbList,
+//        WebApplication, HowTo, FAQPage). No logic/UI/form/API change.
+//   v1.0 — initial build.
 // ============================================================
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import SiteNav from '@/components/layout/SiteNav';
+import { buildCalcJsonLd } from '@/lib/seo/calcJsonLd';
 
 const GOLD = '#D4AF37';
 const GOLD_RGBA = (a: number) => `rgba(212,175,55,${a})`;
@@ -379,60 +387,24 @@ export default function FreeBabyNameByNakshatraPage() {
     colorScheme: 'dark' as const,
   });
 
-  // ─── JSON-LD ────────────────────────────────────────────────
+  // ─── JSON-LD (gold-standard 8-node @graph via shared helper) ─
   const PAGE_URL = 'https://trikalvaani.com/calculators/free-baby-name-by-nakshatra';
-  const jsonLd = {
-    '@context': 'https://schema.org',
-    '@graph': [
-      {
-        '@type': 'WebPage',
-        '@id': `${PAGE_URL}#webpage`,
-        url: PAGE_URL,
-        name: 'Free Baby Name by Nakshatra — Lucky Starting Letter & Names',
-        description: "Find your baby's birth nakshatra, pada and the auspicious starting syllable (Naamakshar), with suggested names and meanings. Free Vedic calculator by Trikaal Vaani.",
-        inLanguage: 'en-IN',
-        dateModified: '2026-06-02',
-        isPartOf: { '@id': 'https://trikalvaani.com/#website' },
-        breadcrumb: { '@id': `${PAGE_URL}#breadcrumb` },
-        author: {
-          '@type': 'Person',
-          name: 'Rohiit Gupta',
-          jobTitle: 'Chief Vedic Architect',
-          worksFor: { '@type': 'Organization', name: 'Trikaal Vaani', legalName: 'Trikal Vaani' },
-        },
-        speakable: { '@type': 'SpeakableSpecification', cssSelector: ['h1', '.tv-aeo-answer'] },
-      },
-      {
-        '@type': 'BreadcrumbList',
-        '@id': `${PAGE_URL}#breadcrumb`,
-        itemListElement: [
-          { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://trikalvaani.com' },
-          { '@type': 'ListItem', position: 2, name: 'Calculators', item: 'https://trikalvaani.com/calculators' },
-          { '@type': 'ListItem', position: 3, name: 'Free Baby Name by Nakshatra', item: PAGE_URL },
-        ],
-      },
-      {
-        '@type': 'WebApplication',
-        '@id': `${PAGE_URL}#app`,
-        name: 'Free Baby Name by Nakshatra Calculator',
-        url: PAGE_URL,
-        applicationCategory: 'LifestyleApplication',
-        operatingSystem: 'All',
-        browserRequirements: 'Requires JavaScript',
-        offers: { '@type': 'Offer', price: '0', priceCurrency: 'INR' },
-        provider: { '@type': 'Organization', name: 'Trikaal Vaani', legalName: 'Trikal Vaani', url: 'https://trikalvaani.com' },
-      },
-      {
-        '@type': 'FAQPage',
-        '@id': `${PAGE_URL}#faq`,
-        mainEntity: FAQS.map(f => ({
-          '@type': 'Question',
-          name: f.q,
-          acceptedAnswer: { '@type': 'Answer', text: f.a },
-        })),
-      },
+  const jsonLd = buildCalcJsonLd({
+    pageUrl: PAGE_URL,
+    name: 'Free Baby Name by Nakshatra — Lucky Starting Letter & Names',
+    description:
+      "Find your baby's birth nakshatra, pada and the auspicious starting syllable (Naamakshar), with suggested names and meanings. Free Vedic calculator by Trikaal Vaani.",
+    breadcrumbName: 'Free Baby Name by Nakshatra',
+    aboutEntities: ['Nakshatra', 'Pada', 'Naamakshar', 'Chandra (Moon)'],
+    knowsAbout: ['Vedic Astrology', 'Jyotish Shastra', 'Nakshatra & Pada', 'Naamakshar (Vedic Naming)'],
+    howToName: "How to find your baby's lucky starting letter (Naamakshar) by nakshatra",
+    howToSteps: [
+      { name: 'Enter birth details', text: "Enter your baby's date of birth, exact time of birth and place of birth." },
+      { name: 'Calculate the nakshatra', text: "The calculator computes the Moon's nakshatra and pada using Swiss Ephemeris with Lahiri Ayanamsha." },
+      { name: 'Get the lucky letter', text: "See your baby's lucky starting syllable (Naamakshar) along with suggested names and their meanings." },
     ],
-  };
+    faqs: FAQS,
+  });
 
   return (
     <>
