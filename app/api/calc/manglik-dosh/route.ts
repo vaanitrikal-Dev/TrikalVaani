@@ -1,18 +1,15 @@
 // ============================================================
 // File: app/api/calc/manglik-dosh/route.ts
 // Purpose: VM bridge for Manglik Dosh Calculator (FREE forever)
-// Version: v1.1 — VM calls routed through lib/callVM.ts (X-Trikal-Key auto)
-// Calls: VM /manglik-dosh + VM /kundali + VM /template (domain="relationships")
+// Version: v1.2
+// Changelog v1.2: Removed /kundali + /template calls (returned wrong
+//   Dasha-lord remedies). Now uses VM /manglik-dosh remedies directly —
+//   Mars-specific (mantra, daan, vrat) via remedy_master.py v1.1
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikal Vaani
-// ============================================================
-// CHANGE v1.1: All three VM calls (/manglik-dosh, /kundali, /template) now go
-// through lib/callVM.ts so the X-Trikal-Key auth header is injected
-// automatically. House/severity logic and response shaping unchanged.
 // ============================================================
 import { NextRequest, NextResponse } from 'next/server';
 import { callVM } from '@/lib/callVM';
 
-const VM_BASE = 'http://34.14.164.105:8001';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
@@ -29,7 +26,7 @@ interface CalcInput {
   gender?: 'male' | 'female' | 'other';
 }
 
-// ─── House meaning per Parashar BPHS ──────────────────────────
+// ─── House meaning per Parashar BPHS ────────────────────────────────────────
 function getHouseEffect(house: number): string {
   const effects: Record<number, string> = {
     1: 'Lagna (Self) — Personality, body, temperament. Mars here = aggressive, dominant nature.',
@@ -47,6 +44,33 @@ function getSeverityColor(severity: string): string {
   if (severity === 'Medium') return '#FBBF24';
   if (severity === 'Low') return '#86EFAC';
   return '#94a3b8';
+}
+
+// ─── Map VM remedy list to frontend remedyPlan format ───────────────────────
+function buildTemplateFromVMRemedies(vmRemedies: any[]): any {
+  if (!vmRemedies?.length) return null;
+  return {
+    remedyPlan: {
+      remedies: vmRemedies.map((r: any) => {
+        const base = { type: r.type, planet: r.planet ?? 'Mars' };
+        if (r.type === 'mantra') {
+          return { ...base, mantra: 'ॐ अंगारकाय नमः', count: '108', time: 'मंगलवार सुबह', special: r.detail };
+        }
+        if (r.type === 'daan') {
+          return { ...base, items: 'मसूर दाल, गुड़, तांबा, लाल वस्त्र', day: 'मंगलवार', recipient: 'गरीब या जरूरतमंद', note: r.detail };
+        }
+        if (r.type === 'vrat') {
+          return { ...base, name: 'मंगलवार व्रत', day: 'Tuesday', deity: 'Hanuman ji', prasad: 'Red lentils, jaggery, red flowers' };
+        }
+        if (r.type === 'gemstone') {
+          return { ...base, lagna_stone: { stone: 'Red Coral (Moonga)', metal: 'Gold', finger: 'Ring finger', for: r.detail } };
+        }
+        return { ...base, text: r.detail };
+      }),
+    },
+    actionWindows: [],
+    avoidWindows: [],
+  };
 }
 
 export async function POST(req: NextRequest) {
@@ -75,11 +99,8 @@ export async function POST(req: NextRequest) {
       ayanamsa: 'lahiri',
     };
 
-    // 1) Call VM /manglik-dosh
-    const mdRes = await callVM(`${VM_BASE}/manglik-dosh`, {
-      method: 'POST',
-      body: JSON.stringify(vmPayload),
-    });
+    // 1) Call VM /manglik-dosh — returns Mars-specific remedies via remedy_master v1.1
+    const mdRes = await callVM('/manglik-dosh', vmPayload);
     if (!mdRes.ok) {
       const errText = await mdRes.text();
       console.error('[manglik-dosh] VM /manglik-dosh failed:', errText);
@@ -87,41 +108,18 @@ export async function POST(req: NextRequest) {
     }
     const manglikData = await mdRes.json();
 
-    // 2) Call VM /kundali — needed for template engine
-    const kRes = await callVM(`${VM_BASE}/kundali`, {
-      method: 'POST',
-      body: JSON.stringify({ ...vmPayload, house_system: 'P' }),
-    });
-    const kundaliData = kRes.ok ? await kRes.json() : {};
-
-    // 3) Call VM /template — use 'relationships' domain for Manglik (marriage-focused)
-    const sessionId = `calc_md_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-    let templateData: any = null;
-    try {
-      const tRes = await callVM(`${VM_BASE}/template`, {
-        method: 'POST',
-        body: JSON.stringify({
-          domain: 'relationships',
-          kundaliData,
-          sessionId,
-          lang: 'hi',
-        }),
-      });
-      if (tRes.ok) {
-        const tJson = await tRes.json();
-        templateData = tJson?.template ?? tJson;
-      }
-    } catch (e) {
-      console.warn('[manglik-dosh] /template error, continuing:', e);
-    }
-
     // Enrich house meaning
     const houseEffect = manglikData?.is_manglik && manglikData?.mars_house
       ? getHouseEffect(manglikData.mars_house)
       : null;
 
-    // Build clean response
-    const result = {
+    // Build templateData from VM Mars remedies
+    const vmRemedies: any[] = manglikData?.remedies?.remedies ?? [];
+    const templateData = buildTemplateFromVMRemedies(vmRemedies);
+
+    const sessionId = `calc_md_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+
+    return NextResponse.json({
       success: true,
       sessionId,
       input: {
@@ -140,9 +138,7 @@ export async function POST(req: NextRequest) {
         manglikHousesAffected: manglikData?.manglik_houses_affected || [1, 2, 4, 7, 8, 12],
       },
       template: templateData,
-    };
-
-    return NextResponse.json(result, { status: 200 });
+    }, { status: 200 });
 
   } catch (err: any) {
     console.error('[manglik-dosh] Fatal:', err);
