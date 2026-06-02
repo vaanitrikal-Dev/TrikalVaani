@@ -3,29 +3,24 @@
  * 🔱 TRIKAL VAANI — CEO PROTECTION HEADER 🔱
  * ============================================================================
  * File:        app/sitemap.ts
- * Version:     v5.9
+ * Version:     v6.0
  * Owner:       Rohiit Gupta, Chief Vedic Architect
  *
- * Changes v5.8 → v5.9 (2026-06-01):
- *   GOAL: Make the sitemap fully DYNAMIC and cover every live indexable URL
- *         so GSC + Bing can refresh the whole site after recent changes.
- *
- *   FIX 1: 15 DOMAIN pages now DYNAMIC from Supabase `domain_pages` table
- *          (auto-grows as new domains are added). Hardcoded DOMAINS_FALLBACK
- *          kept as a safety net if the DB read returns nothing.
- *   FIX 2: PANCHANG date pages now pulled from `panchang_daily` (every date
- *          that actually has a page — ~365), instead of only the next 30.
- *          Falls back to next-30 generated dates if the DB read is empty.
- *   FIX 3: ADDED public report pages — `/report/{public_slug}` for every row
- *          where is_public = true AND public_slug IS NOT NULL (read via the
- *          public-read RLS policy on `predictions`). priority 0.6, monthly,
- *          lastModified = row.updated_at.
- *
- *   UNTOUCHED: static routes, calculators, compatibility, blog (getAllPosts),
- *              city pages (cities.json), festival pages (festivals.json),
- *              and all v5.8 priorities/changeFrequencies.
+ * Changes v5.9 → v6.0 (2026-06-02):
+ *   GOAL: Index the 10 new free calculators so GSC + Bing discover them.
+ *   FIX:  ADDED 10 calculator slugs to CALCULATORS (now 18 total):
+ *           free-kaal-sarp-dosh-calculator, free-pitra-dosh-calculator,
+ *           free-gemstone-calculator, free-numerology-calculator,
+ *           free-baby-name-by-nakshatra, free-lucky-day-calculator,
+ *           free-weak-planet-finder, free-graha-bal-calculator,
+ *           free-kundali-strength-calculator, free-lagna-bal-calculator.
+ *   UNTOUCHED: everything else — static routes, dynamic domains/panchang/
+ *              compatibility/blog/cities/festivals/reports, all priorities
+ *              and changeFrequencies from v5.9.
  *
  * ── Earlier history (unchanged) ─────────────────────────────────────────────
+ *   v5.9: DYNAMIC domains (domain_pages), panchang (panchang_daily, ~365),
+ *         public reports (/report/{slug}).
  *   v5.8: ADDED 'free-child-birth-muhurat-calculator' to CALCULATORS.
  *   v5.7: ADDED /kundali-milan + /karmic-background-reading to STATIC_ROUTES.
  *   v5.6: REMOVED /astrologer-{city} entries (IR-20 / Plan §5.9).
@@ -70,6 +65,17 @@ const CALCULATORS = [
   'free-lagna-calculator',
   'free-sade-sati-calculator',
   'free-manglik-dosh-calculator',
+  // ── v6.0: 10 new free calculators ──
+  'free-kaal-sarp-dosh-calculator',
+  'free-pitra-dosh-calculator',
+  'free-gemstone-calculator',
+  'free-numerology-calculator',
+  'free-baby-name-by-nakshatra',
+  'free-lucky-day-calculator',
+  'free-weak-planet-finder',
+  'free-graha-bal-calculator',
+  'free-kundali-strength-calculator',
+  'free-lagna-bal-calculator',
 ];
 
 // v5.9: kept ONLY as a safety fallback. Live list now comes from domain_pages.
