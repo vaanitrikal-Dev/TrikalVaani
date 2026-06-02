@@ -1,14 +1,17 @@
 // ============================================================
 // File: app/calculators/free-dasha-calculator/layout.tsx
-// Version: v2.1 — metadata only, clean passthrough
-// CEO: Rohiit Gupta | Chief Vedic Architect | Trikal Vaani
+// Version: v2.2 — metadata only, clean passthrough
+// CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
+// Changelog:
+//   v2.2 (2026-06-02) — Brand fix: visible brand normalised to the
+//        double-a spelling in page <title> and openGraph siteName.
+//        No other change.
+//   v2.1 — metadata only, clean passthrough.
 // ============================================================
-
 import type { Metadata } from 'next';
-
 export const metadata: Metadata = {
   title: {
-  absolute: 'Free Dasha Calculator — Vimshottari Mahadasha & Antardasha Online | Trikal Vaani',
+  absolute: 'Free Dasha Calculator — Vimshottari Mahadasha & Antardasha Online | Trikaal Vaani',
 },
   description:
     'Free Dasha Calculator powered by Swiss Ephemeris. Get accurate Vimshottari Mahadasha, Antardasha, next 5 dasha periods, Parashar Dos/Donts & 3 remedies instantly. By Rohiit Gupta, Chief Vedic Architect.',
@@ -23,7 +26,7 @@ export const metadata: Metadata = {
     title: 'Free Dasha Calculator — Vimshottari Mahadasha & Antardasha Online',
     description: 'Accurate Mahadasha, Antardasha, next 5 dasha periods, Parashar Dos/Donts & 3 free remedies.',
     url: 'https://trikalvaani.com/calculators/free-dasha-calculator',
-    type: 'website', siteName: 'Trikal Vaani',
+    type: 'website', siteName: 'Trikaal Vaani',
   },
   twitter: {
     card: 'summary_large_image',
@@ -32,7 +35,6 @@ export const metadata: Metadata = {
   },
   robots: { index: true, follow: true },
 };
-
 export default function DashaCalculatorLayout({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
