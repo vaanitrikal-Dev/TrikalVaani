@@ -3,8 +3,37 @@
  * TRIKAAL VAANI — BirthForm Component
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: components/landing/BirthForm.tsx
- * VERSION: 9.5 — ALL city fields now Google Places autocomplete
+ * VERSION: 9.7 — Delhi NCR removed (CEO Decision #6, global positioning)
  * SIGNED: ROHIIT GUPTA, CEO
+ *
+ * v9.7 CHANGES vs v9.6 (CEO-approved):
+ *   ✅ "Delhi NCR" REMOVED from all 3 visible/SEO spots per CEO
+ *      Decision #6 (global positioning): hero subtitle, hidden SEO
+ *      author line, and footer author line. Rohiit Gupta + Chief
+ *      Vedic Architect retained as E-E-A-T author entity.
+ *
+ * v9.6 CHANGES vs v9.5 (CEO-approved, IR-0 + brand compliant):
+ *   ✅ MODEL NAMES REMOVED (tech-stack leak): "Gemini 2.5 Pro",
+ *      "Gemini Pro 2.5", and "Claude Sonnet polish" stripped from
+ *      (a) TierSelector paid info box, (b) paid tier card `desc`,
+ *      (c) SERVICE_OFFER_SCHEMA Deep Reading description. User /
+ *      AI search should never see the underlying model stack.
+ *   ✅ COMPETITOR NAMES REMOVED: "AstroTalk" (paid info box) and
+ *      "AstroTalk and AstroSage" (hidden SEO) reframed to neutral
+ *      value comparison — no competitor named on-site.
+ *   ✅ FAKE SUPERLATIVES REMOVED (IR-0): "India's Most Accurate" /
+ *      "India's most accurate" deleted from schema brand slogan,
+ *      hero subtitle, and hidden SEO copy. Replaced with honest,
+ *      defensible positioning (Swiss Ephemeris precision, BPHS).
+ *   ✅ ALL v9.5 logic preserved 100%: Razorpay flow, maps-proxy
+ *      (LOCKED, untouched), 4-field Google Places autocomplete,
+ *      numerology, Person 2 section, validations, segment routing.
+ *
+ *   ⚠️ FLAGGED (NOT changed — needs CEO call): "Delhi NCR" still
+ *      appears in hero subtitle + hidden SEO. Memory shows CEO
+ *      Decision #6 removed visible Delhi NCR (TrustStrip), but the
+ *      local-SEO brief wants Delhi NCR dominance. Conflict — left
+ *      as-is pending your decision.
  *
  * v9.5 CHANGES vs v9.4:
  *   ✅ Person 2 "Their Current City" now uses CityInput (Google Places)
@@ -474,7 +503,7 @@ const SERVICE_OFFER_SCHEMA = {
       {
         '@type': 'Offer',
         name: 'Deep Reading',
-        description: '900-word Vedic analysis with 5 personalized upay, action and avoid windows. Gemini Pro 2.5 + Claude Sonnet polish.',
+        description: '900-word Vedic analysis with 5 personalized upay, action and avoid windows. Swiss Ephemeris precision validated against BPHS classical method.',
         price: '51',
         priceCurrency: 'INR',
         availability: 'https://schema.org/InStock',
@@ -518,7 +547,7 @@ const SERVICE_OFFER_SCHEMA = {
   brand: {
     '@type': 'Brand',
     name: 'Trikaal Vaani',
-    slogan: 'India\'s Most Accurate AI Vedic Astrology — Razorpay-Secured Payments',
+    slogan: 'AI-Powered Vedic Astrology on Swiss Ephemeris — Razorpay-Secured Payments',
   },
 }
 
@@ -661,13 +690,13 @@ function RazorpayInlineTrustStrip({ tier }: { tier: PredictionTier }) {
   )
 }
 
-// ── Tier Selector (UNCHANGED structure, copy refined v9.2) ───────────────────
+// ── Tier Selector (UNCHANGED structure, copy refined v9.6) ───────────────────
 
 function TierSelector({ selected, onChange }: { selected: PredictionTier; onChange: (t: PredictionTier) => void }) {
   const tiers = [
-    { id: 'free'  as PredictionTier, icon: '🔮', label: 'Free Preview', price: 'Free', desc: 'Trikaal Ka Sandesh', color: '#94a3b8', features: ['150-200 word summary', 'Key message + action', 'Instant results'] },
-    { id: 'paid'  as PredictionTier, icon: '⚡', label: 'Deep Reading',  price: '₹51',  desc: 'Gemini Pro 2.5',   color: GOLD,      features: ['900 word full analysis', 'Personalized 5 upay', 'Action windows + dates'], highlight: true },
-    { id: 'voice' as PredictionTier, icon: '🎙️', label: 'Voice',        price: '₹11',  desc: 'Trikaal ki awaaz', color: '#a78bfa', features: ['60-sec voice', 'Hindi / Hinglish', 'Trikaal AI'] },
+    { id: 'free'  as PredictionTier, icon: '🔮', label: 'Free Preview', price: 'Free', desc: 'Trikaal Ka Sandesh',  color: '#94a3b8', features: ['150-200 word summary', 'Key message + action', 'Instant results'] },
+    { id: 'paid'  as PredictionTier, icon: '⚡', label: 'Deep Reading',  price: '₹51',  desc: 'Full Vedic Analysis', color: GOLD,      features: ['900 word full analysis', 'Personalized 5 upay', 'Action windows + dates'], highlight: true },
+    { id: 'voice' as PredictionTier, icon: '🎙️', label: 'Voice',        price: '₹11',  desc: 'Trikaal ki awaaz',    color: '#a78bfa', features: ['60-sec voice', 'Hindi / Hinglish', 'Trikaal AI'] },
   ]
 
   return (
@@ -695,8 +724,8 @@ function TierSelector({ selected, onChange }: { selected: PredictionTier; onChan
       </div>
       {selected === 'paid' && (
         <div style={{ marginTop: '12px', padding: '12px', background: GOLD_RGBA(0.06), border: `1px solid ${GOLD_RGBA(0.2)}`, borderRadius: '10px' }}>
-          <p style={{ margin: '0 0 4px', color: GOLD, fontSize: '11px', fontWeight: 700 }}>⚡ Gemini 2.5 Pro — 900 words deep analysis</p>
-          <p style={{ margin: 0, color: '#64748b', fontSize: '10px', lineHeight: 1.5 }}>AstroTalk charges ₹500+ for this level. Trikaal Vaani delivers for ₹51 — Swiss Ephemeris + BPHS + personalized 5 upay by segment. Razorpay-secured one-time payment.</p>
+          <p style={{ margin: '0 0 4px', color: GOLD, fontSize: '11px', fontWeight: 700 }}>⚡ 900-Word Deep Vedic Analysis</p>
+          <p style={{ margin: 0, color: '#64748b', fontSize: '10px', lineHeight: 1.5 }}>Premium-grade reading that elsewhere costs ₹500+ — Trikaal Vaani delivers it for ₹51. Swiss Ephemeris + BPHS + personalized 5 upay by segment. Razorpay-secured one-time payment.</p>
         </div>
       )}
     </div>
@@ -1088,11 +1117,11 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
         dangerouslySetInnerHTML={{ __html: JSON.stringify(SERVICE_OFFER_SCHEMA) }}
       />
 
-      {/* Hidden SEO content (expanded v9.2) */}
+      {/* Hidden SEO content (expanded v9.2, IR-0 cleaned v9.6) */}
       <div style={{ display: 'none' }} aria-hidden="false">
         <h2>Free AI Vedic Astrology Prediction — Swiss Ephemeris Powered by Rohiit Gupta</h2>
-        <p>Get your personalized Vedic astrology reading at Trikaal Vaani. Powered by Swiss Ephemeris, BPHS, Bhrigu Nandi Nadi, Shadbala. By Rohiit Gupta, Chief Vedic Architect, Delhi NCR. Free Trikaal Ka Sandesh preview, ₹51 Deep Reading with 900-word analysis and 5 personalized upay, ₹11 Voice Reading. All paid plans secured by Razorpay — India's most trusted payment gateway. PCI-DSS compliant, 256-bit SSL encrypted. Accepts UPI, Cards, NetBanking, Wallets, RuPay. Customer support via WhatsApp at +91 92118 04111. Refund policy at trikalvaani.com/refund. Terms at trikalvaani.com/terms.</p>
-        <p>Trikaal Vaani is India's most accurate AI Vedic astrology platform, competing with AstroTalk and AstroSage at affordable mass-market pricing. Each prediction uses real Swiss Ephemeris planetary calculations validated against BPHS classical sutras, Bhrigu Nandi Nadi pattern matching, and Shadbala planetary strength scoring. Vimshottari Dasha primary, Pratyantar Dasha for 3-7 day precision, Sookshma Dasha hourly. Lahiri Ayanamsha sidereal system. 11 life domains: Career, Wealth, Health, Relationships, Family, Education, Home, Legal, Travel, Spirituality, Well-being.</p>
+        <p>Get your personalized Vedic astrology reading at Trikaal Vaani. Powered by Swiss Ephemeris, BPHS, Bhrigu Nandi Nadi, Shadbala. By Rohiit Gupta, Chief Vedic Architect. Free Trikaal Ka Sandesh preview, ₹51 Deep Reading with 900-word analysis and 5 personalized upay, ₹11 Voice Reading. All paid plans secured by Razorpay. PCI-DSS compliant, 256-bit SSL encrypted. Accepts UPI, Cards, NetBanking, Wallets, RuPay. Customer support via WhatsApp at +91 92118 04111. Refund policy at trikalvaani.com/refund. Terms at trikalvaani.com/terms.</p>
+        <p>Trikaal Vaani is an AI Vedic astrology platform offering professional-grade readings at affordable mass-market pricing. Each prediction uses real Swiss Ephemeris planetary calculations validated against BPHS classical sutras, Bhrigu Nandi Nadi pattern matching, and Shadbala planetary strength scoring. Vimshottari Dasha primary, Pratyantar Dasha for 3-7 day precision, Sookshma Dasha hourly. Lahiri Ayanamsha sidereal system. 11 life domains: Career, Wealth, Health, Relationships, Family, Education, Home, Legal, Travel, Spirituality, Well-being.</p>
       </div>
 
       <div className="max-w-2xl mx-auto">
@@ -1116,7 +1145,7 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
           ) : (
             <>
               <h2 className="text-white text-2xl font-serif font-bold mb-2">Trikaal Ka Sandesh — Sirf Aapke Liye</h2>
-              <p className="text-slate-400 text-sm max-w-lg mx-auto">India's most accurate AI Vedic astrology — by Rohiit Gupta, Chief Vedic Architect, Delhi NCR.</p>
+              <p className="text-slate-400 text-sm max-w-lg mx-auto">AI Vedic astrology on Swiss Ephemeris precision — by Rohiit Gupta, Chief Vedic Architect.</p>
             </>
           )}
           <div className="flex flex-wrap justify-center gap-2 mt-4">
@@ -1481,7 +1510,7 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
               📱 WhatsApp karo Rohiit ji ko →
             </a>
           </div>
-          <p style={{ color: '#1e293b', fontSize: '10px', margin: 0 }}>By Rohiit Gupta, Chief Vedic Architect · trikalvaani.com · Delhi NCR · 🔱 Mahakaal Ka Ashirwad</p>
+          <p style={{ color: '#1e293b', fontSize: '10px', margin: 0 }}>By Rohiit Gupta, Chief Vedic Architect · trikalvaani.com · 🔱 Mahakaal Ka Ashirwad</p>
         </div>
       </div>
     </section>
