@@ -1,0 +1,50 @@
+name: Brand Guard — block stray "Trikal"
+
+# 🔱 Trikaal Vaani — automatic brand protection
+# Runs on every push to main. If anyone (or any tool) ever introduces a
+# stray VISIBLE "Trikal" (it should always be "Trikaal", double-a), this
+# check turns RED ❌ and GitHub emails the repo owner immediately.
+#
+# Auto-allowed (never flagged): trikalvaani.com URLs, legalName "Trikal Vaani",
+# meta-keyword alt-spellings, code identifiers (TrikalVaani, X-Trikal-Key,
+# trikal-engines, etc.), and internal [Trikal] log tags.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  brand-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Scan for stray visible "Trikal"
+        shell: bash
+        run: |
+          echo "🔱 Trikaal Vaani brand guard — scanning for stray visible 'Trikal'..."
+          HITS=$(grep -rnE '\bTrikal\b' \
+            --include='*.ts' --include='*.tsx' --include='*.js' --include='*.jsx' \
+            --exclude-dir=node_modules --exclude-dir=.next --exclude-dir=.git . 2>/dev/null \
+          | grep -v 'trikalvaani' \
+          | grep -vE '\[Trikal' \
+          | grep -v 'console\.' \
+          | grep -vE '→' \
+          | grep -viE 'legalName|alternateName|also (known|searched)|Sanskrit|double|transliteration|keyword' \
+          | grep -vE 'X-Trikal|Trikal-|Trikal_|_Trikal|TrikalVaani|TrikalVoice|trikal-engines' \
+          || true)
+          if [ -n "$HITS" ]; then
+            echo ""
+            echo "❌ STRAY 'Trikal' FOUND — brand must be 'Trikaal' (double-a) in visible/schema text."
+            echo "----------------------------------------------------------------------"
+            echo "$HITS"
+            echo "----------------------------------------------------------------------"
+            echo "FIX: change the visible 'Trikal Vaani' to 'Trikaal Vaani' in the file(s) above."
+            echo "(URLs trikalvaani.com, legalName, and code identifiers are allowed & auto-skipped.)"
+            exit 1
+          fi
+          echo "✅ PASS — no stray visible 'Trikal'. Brand is consistent. Jai Maa Shakti 🔱"
