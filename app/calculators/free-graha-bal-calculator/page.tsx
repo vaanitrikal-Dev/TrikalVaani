@@ -2,15 +2,23 @@
 
 // ============================================================
 // File: app/calculators/free-graha-bal-calculator/page.tsx
-// Version: v1.0 — Free Graha Bal Calculator (Shadbala showcase)
+// Version: v1.1 — Free Graha Bal Calculator (Shadbala showcase)
 // API: /api/calc/kundali (calcType: 'graha-bal')  [route v1.7+]
 // Logic: strongest + weakest planet, full Shadbala 6-bala breakdown
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
+// Changelog:
+//   v1.1 (2026-06-02) — Gold-standard JSON-LD: swapped inline 4-node
+//        @graph for buildCalcJsonLd() helper (8 @id-linked nodes:
+//        Organization+real sameAs, WebSite, linkable Person /founder,
+//        WebPage isPartOf #website [no longer dangling], BreadcrumbList,
+//        WebApplication, HowTo, FAQPage). No logic/UI/form/API change.
+//   v1.0 — initial build.
 // ============================================================
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import SiteNav from '@/components/layout/SiteNav';
+import { buildCalcJsonLd } from '@/lib/seo/calcJsonLd';
 
 const GOLD = '#D4AF37';
 const GOLD_RGBA = (a: number) => `rgba(212,175,55,${a})`;
@@ -322,60 +330,24 @@ export default function FreeGrahaBalCalculatorPage() {
     colorScheme: 'dark' as const,
   });
 
-  // ─── JSON-LD ────────────────────────────────────────────────
+  // ─── JSON-LD (gold-standard 8-node @graph via shared helper) ─
   const PAGE_URL = 'https://trikalvaani.com/calculators/free-graha-bal-calculator';
-  const jsonLd = {
-    '@context': 'https://schema.org',
-    '@graph': [
-      {
-        '@type': 'WebPage',
-        '@id': `${PAGE_URL}#webpage`,
-        url: PAGE_URL,
-        name: 'Free Graha Bal Calculator — Find Your Strongest & Weakest Planet (Shadbala)',
-        description: 'Find your strongest and weakest planet with full Shadbala 6-fold breakdown (Sthana, Dig, Kala, Cheshta, Naisargika, Drik Bal) and free remedies. Vedic calculator by Trikaal Vaani.',
-        inLanguage: 'en-IN',
-        dateModified: '2026-06-02',
-        isPartOf: { '@id': 'https://trikalvaani.com/#website' },
-        breadcrumb: { '@id': `${PAGE_URL}#breadcrumb` },
-        author: {
-          '@type': 'Person',
-          name: 'Rohiit Gupta',
-          jobTitle: 'Chief Vedic Architect',
-          worksFor: { '@type': 'Organization', name: 'Trikaal Vaani', legalName: 'Trikal Vaani' },
-        },
-        speakable: { '@type': 'SpeakableSpecification', cssSelector: ['h1', '.tv-aeo-answer'] },
-      },
-      {
-        '@type': 'BreadcrumbList',
-        '@id': `${PAGE_URL}#breadcrumb`,
-        itemListElement: [
-          { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://trikalvaani.com' },
-          { '@type': 'ListItem', position: 2, name: 'Calculators', item: 'https://trikalvaani.com/calculators' },
-          { '@type': 'ListItem', position: 3, name: 'Free Graha Bal Calculator', item: PAGE_URL },
-        ],
-      },
-      {
-        '@type': 'WebApplication',
-        '@id': `${PAGE_URL}#app`,
-        name: 'Free Graha Bal Calculator',
-        url: PAGE_URL,
-        applicationCategory: 'LifestyleApplication',
-        operatingSystem: 'All',
-        browserRequirements: 'Requires JavaScript',
-        offers: { '@type': 'Offer', price: '0', priceCurrency: 'INR' },
-        provider: { '@type': 'Organization', name: 'Trikaal Vaani', legalName: 'Trikal Vaani', url: 'https://trikalvaani.com' },
-      },
-      {
-        '@type': 'FAQPage',
-        '@id': `${PAGE_URL}#faq`,
-        mainEntity: FAQS.map(f => ({
-          '@type': 'Question',
-          name: f.q,
-          acceptedAnswer: { '@type': 'Answer', text: f.a },
-        })),
-      },
+  const jsonLd = buildCalcJsonLd({
+    pageUrl: PAGE_URL,
+    name: 'Free Graha Bal Calculator — Find Your Strongest & Weakest Planet (Shadbala)',
+    description:
+      'Find your strongest and weakest planet with full Shadbala 6-fold breakdown (Sthana, Dig, Kala, Cheshta, Naisargika, Drik Bal) and free remedies. Vedic calculator by Trikaal Vaani.',
+    breadcrumbName: 'Free Graha Bal Calculator',
+    aboutEntities: ['Shadbala', 'Sthana Bala', 'Dig Bala', 'Graha Bala', 'Planetary Strength'],
+    knowsAbout: ['Vedic Astrology', 'Jyotish Shastra', 'Shadbala', 'Planetary Strength Analysis'],
+    howToName: 'How to find your strongest and weakest planet using Shadbala',
+    howToSteps: [
+      { name: 'Enter birth details', text: 'Enter your name, date of birth, exact time of birth and place of birth.' },
+      { name: 'Calculate Shadbala', text: 'The calculator computes full Shadbala for every planet using Swiss Ephemeris with Lahiri Ayanamsha.' },
+      { name: 'Get your result', text: 'See your strongest and weakest planet, all-planet strength ranking and the 6-fold Shadbala breakdown with free remedies.' },
     ],
-  };
+    faqs: FAQS,
+  });
 
   return (
     <>
