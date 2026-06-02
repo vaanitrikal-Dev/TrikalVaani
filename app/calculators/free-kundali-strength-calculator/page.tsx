@@ -2,15 +2,23 @@
 
 // ============================================================
 // File: app/calculators/free-kundali-strength-calculator/page.tsx
-// Version: v1.0 — Free Kundali Strength Score Calculator
+// Version: v1.1 — Free Kundali Strength Score Calculator
 // API: /api/calc/kundali (calcType: 'kundali-strength')  [route v1.6+]
 // Logic: overall score from Shadbala ratios + grade + lagna/dasha strength
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
+// Changelog:
+//   v1.1 (2026-06-02) — Gold-standard JSON-LD: swapped inline 4-node
+//        @graph for buildCalcJsonLd() helper (8 @id-linked nodes:
+//        Organization+real sameAs, WebSite, linkable Person /founder,
+//        WebPage isPartOf #website [no longer dangling], BreadcrumbList,
+//        WebApplication, HowTo, FAQPage). No logic/UI/form/API change.
+//   v1.0 — initial build.
 // ============================================================
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import SiteNav from '@/components/layout/SiteNav';
+import { buildCalcJsonLd } from '@/lib/seo/calcJsonLd';
 
 const GOLD = '#D4AF37';
 const GOLD_RGBA = (a: number) => `rgba(212,175,55,${a})`;
@@ -301,60 +309,24 @@ export default function FreeKundaliStrengthCalculatorPage() {
     colorScheme: 'dark' as const,
   });
 
-  // ─── JSON-LD ────────────────────────────────────────────────
+  // ─── JSON-LD (gold-standard 8-node @graph via shared helper) ─
   const PAGE_URL = 'https://trikalvaani.com/calculators/free-kundali-strength-calculator';
-  const jsonLd = {
-    '@context': 'https://schema.org',
-    '@graph': [
-      {
-        '@type': 'WebPage',
-        '@id': `${PAGE_URL}#webpage`,
-        url: PAGE_URL,
-        name: 'Free Kundali Strength Calculator — Overall Horoscope Score',
-        description: 'Get your overall Kundali strength score (0-100%) based on Shadbala, with planet-wise ranking, lagna & dasha strength and free remedies. Vedic calculator by Trikaal Vaani.',
-        inLanguage: 'en-IN',
-        dateModified: '2026-06-02',
-        isPartOf: { '@id': 'https://trikalvaani.com/#website' },
-        breadcrumb: { '@id': `${PAGE_URL}#breadcrumb` },
-        author: {
-          '@type': 'Person',
-          name: 'Rohiit Gupta',
-          jobTitle: 'Chief Vedic Architect',
-          worksFor: { '@type': 'Organization', name: 'Trikaal Vaani', legalName: 'Trikal Vaani' },
-        },
-        speakable: { '@type': 'SpeakableSpecification', cssSelector: ['h1', '.tv-aeo-answer'] },
-      },
-      {
-        '@type': 'BreadcrumbList',
-        '@id': `${PAGE_URL}#breadcrumb`,
-        itemListElement: [
-          { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://trikalvaani.com' },
-          { '@type': 'ListItem', position: 2, name: 'Calculators', item: 'https://trikalvaani.com/calculators' },
-          { '@type': 'ListItem', position: 3, name: 'Free Kundali Strength Calculator', item: PAGE_URL },
-        ],
-      },
-      {
-        '@type': 'WebApplication',
-        '@id': `${PAGE_URL}#app`,
-        name: 'Free Kundali Strength Calculator',
-        url: PAGE_URL,
-        applicationCategory: 'LifestyleApplication',
-        operatingSystem: 'All',
-        browserRequirements: 'Requires JavaScript',
-        offers: { '@type': 'Offer', price: '0', priceCurrency: 'INR' },
-        provider: { '@type': 'Organization', name: 'Trikaal Vaani', legalName: 'Trikal Vaani', url: 'https://trikalvaani.com' },
-      },
-      {
-        '@type': 'FAQPage',
-        '@id': `${PAGE_URL}#faq`,
-        mainEntity: FAQS.map(f => ({
-          '@type': 'Question',
-          name: f.q,
-          acceptedAnswer: { '@type': 'Answer', text: f.a },
-        })),
-      },
+  const jsonLd = buildCalcJsonLd({
+    pageUrl: PAGE_URL,
+    name: 'Free Kundali Strength Calculator — Overall Horoscope Score',
+    description:
+      'Get your overall Kundali strength score (0-100%) based on Shadbala, with planet-wise ranking, lagna & dasha strength and free remedies. Vedic calculator by Trikaal Vaani.',
+    breadcrumbName: 'Free Kundali Strength Calculator',
+    aboutEntities: ['Kundali Strength', 'Shadbala', 'Lagna', 'Mahadasha'],
+    knowsAbout: ['Vedic Astrology', 'Jyotish Shastra', 'Shadbala', 'Kundali Analysis'],
+    howToName: 'How to check your overall Kundali strength score',
+    howToSteps: [
+      { name: 'Enter birth details', text: 'Enter your name, date of birth, exact time of birth and place of birth.' },
+      { name: 'Calculate the score', text: 'The calculator averages the Shadbala ratio of all seven planets using Swiss Ephemeris with Lahiri Ayanamsha.' },
+      { name: 'Get your result', text: 'See your overall strength score and grade, planet-wise ranking, lagna and dasha strength, and free remedies.' },
     ],
-  };
+    faqs: FAQS,
+  });
 
   return (
     <>
