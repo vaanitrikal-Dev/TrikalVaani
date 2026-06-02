@@ -1,11 +1,9 @@
 // ============================================================
 // File: app/api/calc/kundali/route.ts
 // Purpose: VM bridge for Kundali/Nakshatra/Rashi/Lagna Calculators
-// Version: v1.4
-// Changelog v1.4: Removed /template call (wrong Dasha-lord remedies).
-//   Added calcType param — nakshatra/rashi → Moon, lagna → lagna lord,
-//   kundali/dasha → Mahadasha lord. VM remedies used directly.
-//   Fixed callVM signature — method+body in init object.
+// Version: v1.5
+// Changelog v1.5: Pass full VM remedies object to buildTemplateFromVMRemedies
+//   so actionWindows (Dos) from remedy_master are included in response.
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikal Vaani
 // ============================================================
 import { NextRequest, NextResponse } from 'next/server';
@@ -84,9 +82,10 @@ const PLANET_REMEDY: Record<string, { mantra_hi: string; daan_hi: string; day_hi
   Ketu:    { mantra_hi: 'ॐ केतवे नमः',         daan_hi: 'बहुरंगी वस्त्र, तिल, कंबल',             day_hi: 'मंगलवार',  day: 'Tuesday',   stone: "Cat's Eye (Lehsunia)",      metal: 'Silver', finger: 'Little finger', deity: 'Ganesh ji',   vrat: 'Ketu Shanti'    },
 };
 
-// ─── Map VM remedy list to frontend remedyPlan format ────────────────────────
-function buildTemplateFromVMRemedies(vmRemedies: any[], planet: string | null): any {
-  if (!vmRemedies?.length) return null;
+// ─── Map VM remedy object to frontend template format ────────────────────────
+function buildTemplateFromVMRemedies(vmRemediesObj: any, planet: string | null): any {
+  const vmRemedies: any[] = vmRemediesObj?.remedies ?? [];
+  if (!vmRemedies.length) return null;
   const pd = PLANET_REMEDY[planet ?? ''] ?? PLANET_REMEDY['Jupiter'];
   return {
     remedyPlan: {
@@ -107,8 +106,8 @@ function buildTemplateFromVMRemedies(vmRemedies: any[], planet: string | null): 
         return { ...base, text: r.detail };
       }),
     },
-    actionWindows: [],
-    avoidWindows: [],
+    actionWindows: vmRemediesObj?.actionWindows ?? [],
+    avoidWindows: vmRemediesObj?.avoidWindows ?? [],
   };
 }
 
@@ -117,7 +116,6 @@ export async function POST(req: NextRequest) {
     const body: CalcInput = await req.json();
     const calcType = body.calcType ?? 'kundali';
 
-    // Validate
     const required = ['year', 'month', 'day', 'hour', 'minute', 'latitude', 'longitude', 'timezone'];
     for (const f of required) {
       if (body[f as keyof CalcInput] === undefined || body[f as keyof CalcInput] === null) {
@@ -139,7 +137,7 @@ export async function POST(req: NextRequest) {
       house_system: 'P',
     };
 
-    // 1) Call VM /kundali — correct callVM signature
+    // 1) Call VM /kundali — remedies + actionWindows via remedy_master v1.1
     const kRes = await callVM('/kundali', {
       method: 'POST',
       body: JSON.stringify(vmPayload),
@@ -151,16 +149,15 @@ export async function POST(req: NextRequest) {
     }
     const kundaliData = await kRes.json();
 
-    // ─── Dasha + Lagna ───────────────────────────────────────────────────────
     const mahaList = kundaliData?.dasha?.maha_dasha ?? [];
     const { mahadasha: currentMahadasha, antardasha: currentAntardasha } = getCurrentDasha(mahaList);
     const moonGraha = kundaliData?.grahas?.find((g: any) => g.planet === 'Moon');
     const lagnaLord = kundaliData?.lagna?.sign_lord ?? null;
 
-    // ─── Resolve planet + build template ────────────────────────────────────
     const targetPlanet = resolveTargetPlanet(calcType, lagnaLord, currentMahadasha);
-    const vmRemedies: any[] = kundaliData?.remedies?.remedies ?? [];
-    const templateData = buildTemplateFromVMRemedies(vmRemedies, targetPlanet);
+
+    // Pass full remedies object — includes remedies array + actionWindows
+    const templateData = buildTemplateFromVMRemedies(kundaliData?.remedies ?? {}, targetPlanet);
 
     const sessionId = `calc_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
 
