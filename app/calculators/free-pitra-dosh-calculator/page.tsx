@@ -2,14 +2,22 @@
 
 // ============================================================
 // File: app/calculators/free-pitra-dosh-calculator/page.tsx
-// Version: v1.0 — Free Pitra Dosh Calculator
+// Version: v1.1 — Free Pitra Dosh Calculator
 // API: /api/calc/doshas (VM /doshas — birth-chart dosha engine)
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
+// Changelog:
+//   v1.1 (2026-06-02) — Gold-standard JSON-LD: swapped inline 4-node
+//        @graph for buildCalcJsonLd() helper (8 @id-linked nodes:
+//        Organization+real sameAs, WebSite, linkable Person /founder,
+//        WebPage isPartOf #website [no longer dangling], BreadcrumbList,
+//        WebApplication, HowTo, FAQPage). No logic/UI/form/API change.
+//   v1.0 — initial build.
 // ============================================================
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import SiteNav from '@/components/layout/SiteNav';
+import { buildCalcJsonLd } from '@/lib/seo/calcJsonLd';
 
 const GOLD = '#D4AF37';
 const GOLD_RGBA = (a: number) => `rgba(212,175,55,${a})`;
@@ -259,60 +267,24 @@ export default function FreePitraDoshCalculatorPage() {
     colorScheme: 'dark' as const,
   });
 
-  // ─── JSON-LD ────────────────────────────────────────────────
+  // ─── JSON-LD (gold-standard 8-node @graph via shared helper) ─
   const PAGE_URL = 'https://trikalvaani.com/calculators/free-pitra-dosh-calculator';
-  const jsonLd = {
-    '@context': 'https://schema.org',
-    '@graph': [
-      {
-        '@type': 'WebPage',
-        '@id': `${PAGE_URL}#webpage`,
-        url: PAGE_URL,
-        name: 'Free Pitra Dosh Calculator — Check & Remedies',
-        description: 'Check if you have Pitra Dosh from your birth chart (Sun / 9th house affliction by Rahu, Ketu or Saturn) and get free Pitru-Tarpan remedies. Vedic calculator by Trikaal Vaani.',
-        inLanguage: 'en-IN',
-        dateModified: '2026-06-02',
-        isPartOf: { '@id': 'https://trikalvaani.com/#website' },
-        breadcrumb: { '@id': `${PAGE_URL}#breadcrumb` },
-        author: {
-          '@type': 'Person',
-          name: 'Rohiit Gupta',
-          jobTitle: 'Chief Vedic Architect',
-          worksFor: { '@type': 'Organization', name: 'Trikaal Vaani', legalName: 'Trikal Vaani' },
-        },
-        speakable: { '@type': 'SpeakableSpecification', cssSelector: ['h1', '.tv-aeo-answer'] },
-      },
-      {
-        '@type': 'BreadcrumbList',
-        '@id': `${PAGE_URL}#breadcrumb`,
-        itemListElement: [
-          { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://trikalvaani.com' },
-          { '@type': 'ListItem', position: 2, name: 'Calculators', item: 'https://trikalvaani.com/calculators' },
-          { '@type': 'ListItem', position: 3, name: 'Free Pitra Dosh Calculator', item: PAGE_URL },
-        ],
-      },
-      {
-        '@type': 'WebApplication',
-        '@id': `${PAGE_URL}#app`,
-        name: 'Free Pitra Dosh Calculator',
-        url: PAGE_URL,
-        applicationCategory: 'LifestyleApplication',
-        operatingSystem: 'All',
-        browserRequirements: 'Requires JavaScript',
-        offers: { '@type': 'Offer', price: '0', priceCurrency: 'INR' },
-        provider: { '@type': 'Organization', name: 'Trikaal Vaani', legalName: 'Trikal Vaani', url: 'https://trikalvaani.com' },
-      },
-      {
-        '@type': 'FAQPage',
-        '@id': `${PAGE_URL}#faq`,
-        mainEntity: FAQS.map(f => ({
-          '@type': 'Question',
-          name: f.q,
-          acceptedAnswer: { '@type': 'Answer', text: f.a },
-        })),
-      },
+  const jsonLd = buildCalcJsonLd({
+    pageUrl: PAGE_URL,
+    name: 'Free Pitra Dosh Calculator — Check & Remedies',
+    description:
+      'Check if you have Pitra Dosh from your birth chart (Sun / 9th house affliction by Rahu, Ketu or Saturn) and get free Pitru-Tarpan remedies. Vedic calculator by Trikaal Vaani.',
+    breadcrumbName: 'Free Pitra Dosh Calculator',
+    aboutEntities: ['Pitra Dosh', 'Sun', 'Ninth House', 'Pitru Tarpan'],
+    knowsAbout: ['Vedic Astrology', 'Jyotish Shastra', 'Pitra Dosh', 'Dosha Remedies'],
+    howToName: 'How to check Pitra Dosh in your kundali',
+    howToSteps: [
+      { name: 'Enter birth details', text: 'Enter your name, date of birth, exact time of birth and place of birth.' },
+      { name: 'Analyse Sun and 9th house', text: 'The calculator checks the Sun and the ninth house for affliction by Rahu, Ketu or Saturn using Swiss Ephemeris with Lahiri Ayanamsha.' },
+      { name: 'Get your result', text: 'See a Yes/No Pitra Dosh verdict, the cause, likely signs and free Pitru-Tarpan remedies.' },
     ],
-  };
+    faqs: FAQS,
+  });
 
   return (
     <>
