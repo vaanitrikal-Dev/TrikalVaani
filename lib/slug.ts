@@ -7,7 +7,7 @@
  * SIGNED: ROHIIT GUPTA, CEO
  *
  * v1.0 -> v1.1 CHANGES (CEO approved):
- *   - SEO <title> no longer ends with "| {City} | Trikal Vaani".
+ *   - SEO <title> no longer ends with "| {City} | Trikaal Vaani".
  *     City (local-SEO signal) REMOVED from the visible title;
  *     replaced with "India & Global". Brand -> "Trikaal Vaani".
  *   - The slug FORMAT still keeps city (it is a URL token, not a

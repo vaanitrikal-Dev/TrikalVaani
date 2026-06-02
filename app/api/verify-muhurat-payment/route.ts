@@ -116,7 +116,7 @@ export async function POST(req: NextRequest) {
       : 'Full Muhurat Report';
 
     const waText = encodeURIComponent(
-      `Jai Mahakaal! Trikal Vaani Child Birth Muhurat Report confirm ho gaya.\n\n` +
+      `Jai Mahakaal! Trikaal Vaani Child Birth Muhurat Report confirm ho gaya.\n\n` +
       `Tier: ${tierLabel}\n` +
       `Payment ID: ${razorpay_payment_id}\n` +
       `Result: trikalvaani.com/muhurat/${slug}\n\nJai Maa Shakti!`

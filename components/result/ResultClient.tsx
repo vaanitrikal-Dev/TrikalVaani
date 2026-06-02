@@ -10,14 +10,14 @@
  *
  * LAYOUT (11 Sections):
  *   S1  → Mahakaal Ka Ashirwad (Identity Bar)
- *   S2  → Trikal Ka Sandesh (Gemini Summary)
+ *   S2  → Trikaal Ka Sandesh (Gemini Summary)
  *   S3  → Kundali Chart (Full — both tiers)
  *   S4  → Planet Table (All 9 + Shadbala — both tiers)
  *   S5  → Dasha Timeline (MD+AD+PD+SD)
  *   S6  → Domain Analysis (Yogas + Ashtakavarga)
  *   S7  → Remedy Plan
  *   S8  → Panchang Today
- *   S9  → Conversion CTA (FREE only — "Trikal ne aur bhi dekha")
+ *   S9  → Conversion CTA (FREE only — "Trikaal ne aur bhi dekha")
  *   S10 → Maa Shakti Section (BOTH tiers — PERMANENT)
  *   S11 → Share + Return
  *
@@ -491,13 +491,13 @@ const mainCaution    = simpleSummary?.mainCaution
           }}>
             <span style={{ fontSize: '16px', animation: 'spin 2s linear infinite' }}>✨</span>
             <p style={{ margin: 0, color: 'rgba(212,175,55,0.8)', fontSize: '12px', lineHeight: 1.5 }}>
-              Trikal aapki reading ko aur gehri bana raha hai... kuch hi pal mein aur sashakt ho jayegi.
+              Trikaal aapki reading ko aur gehri bana raha hai... kuch hi pal mein aur sashakt ho jayegi.
             </p>
           </div>
         )}
         {/* ── SECTION 2: TRIKAL KA SANDESH ──────────────────────────────── */}
         <SectionCard style={{ background: 'rgba(11,16,26,0.95)' }}>
-          <SectionTitle icon="✨" title="Trikal Ka Sandesh" subtitle="Aapke liye — seedha dil se" />
+          <SectionTitle icon="✨" title="Trikaal Ka Sandesh" subtitle="Aapke liye — seedha dil se" />
 
           {/* GEO Answer (hidden visually but in DOM for SEO) */}
           {geoAnswer && (
@@ -531,7 +531,7 @@ const mainCaution    = simpleSummary?.mainCaution
               marginBottom: '12px',
             }}>
               <p style={{ margin: '0 0 4px', color: GOLD, fontSize: '10px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
-                🔑 Trikal Ka Core Message
+                🔑 Trikaal Ka Core Message
               </p>
               <p style={{ margin: 0, color: '#fff', fontSize: '15px', fontWeight: 600, fontFamily: 'Georgia, serif', lineHeight: 1.5 }}>
                 {keyMessage}
@@ -871,7 +871,7 @@ const mainCaution    = simpleSummary?.mainCaution
           }}>
             <div style={{ fontSize: '36px', marginBottom: '12px' }}>🔮</div>
             <h3 style={{ margin: '0 0 8px', color: '#fff', fontSize: '18px', fontFamily: 'Georgia, serif', fontWeight: 700 }}>
-              Trikal Ne Aur Bhi Dekha Hai...
+              Trikaal Ne Aur Bhi Dekha Hai...
             </h3>
             <p style={{ margin: '0 0 20px', color: '#94a3b8', fontSize: '13px', lineHeight: 1.7, maxWidth: '380px', marginLeft: 'auto', marginRight: 'auto' }}>
               Aapki kundali mein 3 aur yogas hain jo seedha aapke sawal ka jawab dete hain.

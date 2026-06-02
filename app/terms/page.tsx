@@ -11,11 +11,11 @@ import SiteNav from "@/components/layout/SiteNav";
 import SiteFooter from "@/components/layout/SiteFooter";
 
 export const metadata: Metadata = {
-  title: "Terms of Service | Trikal Vaani",
-  description: "Terms of Service for Trikal Vaani — AI-powered Vedic Astrology platform by Rohiit Gupta. Read before using our services.",
+  title: "Terms of Service | Trikaal Vaani",
+  description: "Terms of Service for Trikaal Vaani — AI-powered Vedic Astrology platform by Rohiit Gupta. Read before using our services.",
   authors: [{ name: "Rohiit Gupta", url: "https://trikalvaani.com/founder" }],
   alternates: { canonical: "https://trikalvaani.com/terms" },
-  openGraph: { title: "Terms of Service | Trikal Vaani", url: "https://trikalvaani.com/terms", siteName: "Trikal Vaani", locale: "en_IN", type: "website" },
+  openGraph: { title: "Terms of Service | Trikaal Vaani", url: "https://trikalvaani.com/terms", siteName: "Trikaal Vaani", locale: "en_IN", type: "website" },
 };
 
 const GOLD = "#D4AF37";
@@ -32,7 +32,7 @@ export default function TermsPage() {
             <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: GOLD }}>Legal</p>
             <h1 className="font-serif text-4xl font-bold text-white mb-4">Terms of Service</h1>
             <p className="text-gray-500 text-sm">Effective: 1 January 2025 · Last Updated: April 2025</p>
-            <p className="text-gray-500 text-sm mt-1">Operated by: <span style={{ color: GOLD }}>Rohiit Gupta</span> — Trikal Vaani, Delhi NCR, India</p>
+            <p className="text-gray-500 text-sm mt-1">Operated by: <span style={{ color: GOLD }}>Rohiit Gupta</span> — Trikaal Vaani, Delhi NCR, India</p>
             <div className="mt-6 h-px w-16" style={{ background: `linear-gradient(90deg, ${GOLD}, transparent)` }} />
           </div>
 
@@ -40,13 +40,13 @@ export default function TermsPage() {
 
             <div>
               <h2 className="font-serif text-xl font-bold mb-4" style={{ color: GOLD }}>1. Acceptance of Terms</h2>
-              <p className="mb-3">By accessing or using Trikal Vaani (trikalvaani.com), you agree to be bound by these Terms of Service. If you do not agree, please do not use our platform. These terms apply to all visitors, users, and paying customers.</p>
+              <p className="mb-3">By accessing or using Trikaal Vaani (trikalvaani.com), you agree to be bound by these Terms of Service. If you do not agree, please do not use our platform. These terms apply to all visitors, users, and paying customers.</p>
               <p>We reserve the right to update these terms at any time. Continued use of the platform after changes constitutes acceptance of the revised terms.</p>
             </div>
 
             <div>
               <h2 className="font-serif text-xl font-bold mb-4" style={{ color: GOLD }}>2. About Our Services</h2>
-              <p className="mb-3">Trikal Vaani provides AI-powered Vedic astrology readings and consultations including:</p>
+              <p className="mb-3">Trikaal Vaani provides AI-powered Vedic astrology readings and consultations including:</p>
               <ul className="space-y-2">
                 {[
                   "Free Kundali and Panchang generation",
@@ -69,7 +69,7 @@ export default function TermsPage() {
                 {[
                   "Vedic astrology readings are provided for guidance, entertainment, and self-reflection purposes only",
                   "Readings do not constitute professional financial, medical, legal, or psychological advice",
-                  "Trikal Vaani does not guarantee specific outcomes based on astrology readings",
+                  "Trikaal Vaani does not guarantee specific outcomes based on astrology readings",
                   "You are solely responsible for decisions made based on readings provided",
                   "Accuracy of readings depends on the accuracy of birth details provided by you",
                 ].map((item, i) => (
@@ -121,7 +121,7 @@ export default function TermsPage() {
 
             <div>
               <h2 className="font-serif text-xl font-bold mb-4" style={{ color: GOLD }}>7. Intellectual Property</h2>
-              <p>All content on Trikal Vaani — including the Jini AI reading framework, Vedic methodology designed by Rohiit Gupta, website design, text, and graphics — is the intellectual property of Trikal Vaani. Reproduction or redistribution without written permission is strictly prohibited.</p>
+              <p>All content on Trikaal Vaani — including the Jini AI reading framework, Vedic methodology designed by Rohiit Gupta, website design, text, and graphics — is the intellectual property of Trikaal Vaani. Reproduction or redistribution without written permission is strictly prohibited.</p>
             </div>
 
             <div>
@@ -136,7 +136,7 @@ export default function TermsPage() {
 
             <div>
               <h2 className="font-serif text-xl font-bold mb-4" style={{ color: GOLD }}>10. Limitation of Liability</h2>
-              <p>To the maximum extent permitted by applicable law, Trikal Vaani and Rohiit Gupta shall not be liable for any indirect, incidental, special, or consequential damages arising from your use of our services, including decisions made based on astrology readings.</p>
+              <p>To the maximum extent permitted by applicable law, Trikaal Vaani and Rohiit Gupta shall not be liable for any indirect, incidental, special, or consequential damages arising from your use of our services, including decisions made based on astrology readings.</p>
             </div>
 
             <div>
@@ -148,7 +148,7 @@ export default function TermsPage() {
               <h2 className="font-serif text-xl font-bold mb-4" style={{ color: GOLD }}>12. Contact</h2>
               <div className="border border-white/10 rounded-xl p-5 space-y-2" style={{ background: `rgba(212,175,55,0.04)` }}>
                 <p><span className="text-white font-semibold">Rohiit Gupta</span> — Chief Vedic Architect</p>
-                <p>Trikal Vaani — trikalvaani.com · Delhi NCR, India</p>
+                <p>Trikaal Vaani — trikalvaani.com · Delhi NCR, India</p>
                 <p>Email: <a href="mailto:rohiit@trikalvaani.com" style={{ color: GOLD }} className="hover:underline">rohiit@trikalvaani.com</a></p>
                 <p>WhatsApp: <a href="https://wa.me/919211804111" target="_blank" rel="noopener noreferrer" style={{ color: GOLD }} className="hover:underline">+91 92118 04111</a></p>
               </div>

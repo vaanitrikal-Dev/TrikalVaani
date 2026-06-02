@@ -93,20 +93,20 @@ export function buildMilanBothPrompt(input: MilanBothPromptInput): string {
       name: 'HINGLISH',
       outputRule: 'HINGLISH only (natural Hindi + English mix). No fully-English and no fully-Hindi paragraphs.',
       coupleVoice: 'Hinglish, romantic but truthful, warm but not flattering. Address them as "${bride} ji" / "${groom} ji".',
-      coupleTone: 'Trikal poori sachhai bataayega — chhupayega nahi.',
+      coupleTone: 'Trikaal poori sachhai bataayega — chhupayega nahi.',
       coupleArzi: 'Shaadi se pehle aap dono Maa Shakti ke charano mein ek Arzi karein — apne rishtedari ki raksha ke liye.',
       coupleDhanyawad: 'Jab vivah saanand sampann ho, jab pehla ghar bas jaaye — tab wapas aaiye. Maa ke charano mein Dhanyawad arpit karna na bhooliye. Yeh circle complete hona zaroori hai.',
-      coupleKarmic: 'Ek aur baat — yeh doshas sirf is janam ke nahi hain. Pichhle janam ka koi karmic karz bhi judega ho sakta hai aap dono ke beech. Woh kahani Trikal Vaani ki Karmic Background Reading mein khulegi, jab samay sahi hoga.',
-      coupleClosing: 'Trikal aapke saath hai. Maa ki kripa banee rahe.',
+      coupleKarmic: 'Ek aur baat — yeh doshas sirf is janam ke nahi hain. Pichhle janam ka koi karmic karz bhi judega ho sakta hai aap dono ke beech. Woh kahani Trikaal Vaani ki Karmic Background Reading mein khulegi, jab samay sahi hoga.',
+      coupleClosing: 'Trikaal aapke saath hai. Maa ki kripa banee rahe.',
       parentVoice: 'Hinglish but respectful and elder-appropriate — addressing parents, grave trustworthy-advisor tone.',
       parentGreeting: 'Aadarniya maata-pita',
       parentArzi: 'Vivah se pehle yeh parivaar Maa Shakti ke charano mein ek Arzi arpit kare — aane waali bahu/nayi grihalakshmi ki raksha ke liye. Yeh aapki shraddha ka pratham sankalp hai.',
-      parentDhanyawad: 'Jab vivah saanand sampann ho — tab lautkar aaiye. Trikal Vaani aapka apna ghar hai. Maa ke charano mein Dhanyawad arpan karna na bhooliye. Yeh chakra poora hona zaroori hai.',
-      parentKarmic: 'Ek aur gambhir vishay — yeh dosh sirf is janam ke nahi hain. Poorva janam ka koi karmic karz bhi in dono ke beech juda ho sakta hai. Woh kahani Bhrigu Nadi ki gehri parton mein chhupi hai — woh Trikal Vaani ki Karmic Background Reading mein khulegi.',
-      parentClosing: 'Trikal aapke parivaar ke saath hai. Maa ki kripa banee rahe. Shubhamastu.',
-      remediesIntro: 'Trikal Vaani ne aap (dono / aapke parivaar) ke liye 10 vishesh remedies select kiye hain — 4 Maharishi Parashar se, 4 Bhrigu Nadi se, aur 2 Shadbala-based. Ye SIRF isi kundali-jodi ke liye chune gaye hain.',
-      remediesPromise: 'Agar yeh 10 remedies dil se follow kiye jaayein — pooja sahi din ko, mantra sahi sankhya mein, daan sahi vyakti ko — toh Trikal vishwas dilata hai ki vivahit jeevan safal hoga. Yeh Vedic shastra ka vachan hai.',
-      teaseIntro: 'Trikal Vaani ne 10 vishesh remedies identify ki hain — 4 Parashar, 4 Bhrigu Nadi, 2 Shadbala-based — sirf isi kundali-jodi ke liye.',
+      parentDhanyawad: 'Jab vivah saanand sampann ho — tab lautkar aaiye. Trikaal Vaani aapka apna ghar hai. Maa ke charano mein Dhanyawad arpan karna na bhooliye. Yeh chakra poora hona zaroori hai.',
+      parentKarmic: 'Ek aur gambhir vishay — yeh dosh sirf is janam ke nahi hain. Poorva janam ka koi karmic karz bhi in dono ke beech juda ho sakta hai. Woh kahani Bhrigu Nadi ki gehri parton mein chhupi hai — woh Trikaal Vaani ki Karmic Background Reading mein khulegi.',
+      parentClosing: 'Trikaal aapke parivaar ke saath hai. Maa ki kripa banee rahe. Shubhamastu.',
+      remediesIntro: 'Trikaal Vaani ne aap (dono / aapke parivaar) ke liye 10 vishesh remedies select kiye hain — 4 Maharishi Parashar se, 4 Bhrigu Nadi se, aur 2 Shadbala-based. Ye SIRF isi kundali-jodi ke liye chune gaye hain.',
+      remediesPromise: 'Agar yeh 10 remedies dil se follow kiye jaayein — pooja sahi din ko, mantra sahi sankhya mein, daan sahi vyakti ko — toh Trikaal vishwas dilata hai ki vivahit jeevan safal hoga. Yeh Vedic shastra ka vachan hai.',
+      teaseIntro: 'Trikaal Vaani ne 10 vishesh remedies identify ki hain — 4 Parashar, 4 Bhrigu Nadi, 2 Shadbala-based — sirf isi kundali-jodi ke liye.',
       teaseClose: 'Lekin yeh remedies itni specific hain ki poora reveal sirf Deep/Full Reading mein hota hai. Diagnosis ho gayi — samadhan ke liye full reading kholiye.',
     },
 
@@ -135,20 +135,20 @@ export function buildMilanBothPrompt(input: MilanBothPromptInput): string {
       name: 'ENGLISH',
       outputRule: 'ENGLISH only. Keep Sanskrit/Vedic technical terms (Ashtakoot, Bhakoot, Nadi, Manglik, Shadbala, etc.) untranslated.',
       coupleVoice: 'Clear warm English for a modern couple; dignified, not casual. Keep Vedic terms untranslated.',
-      coupleTone: 'Trikal will tell you the complete truth — nothing will be hidden.',
+      coupleTone: 'Trikaal will tell you the complete truth — nothing will be hidden.',
       coupleArzi: 'Before the marriage, both of you should offer an Arzi at the feet of Maa Shakti — for the protection of your union.',
       coupleDhanyawad: 'When the marriage is joyfully complete, when the first home is settled — return again. Do not forget to offer Dhanyawad at Her feet. This circle must be completed.',
-      coupleKarmic: 'One more thing — these doshas are not of this birth alone. A karmic debt from a past life may bind the two of you. That story will be revealed in Trikal Vaani\u2019s Karmic Background Reading, when the time is right.',
-      coupleClosing: 'Trikal is with you. May the grace of Maa remain upon you.',
+      coupleKarmic: 'One more thing — these doshas are not of this birth alone. A karmic debt from a past life may bind the two of you. That story will be revealed in Trikaal Vaani\u2019s Karmic Background Reading, when the time is right.',
+      coupleClosing: 'Trikaal is with you. May the grace of Maa remain upon you.',
       parentVoice: 'Clear dignified English for educated parents; grave, respectful, trustworthy-advisor tone. Keep Vedic terms untranslated.',
       parentGreeting: 'Respected Parents',
       parentArzi: 'Before the marriage, let this family offer an Arzi at the feet of Maa Shakti — for the protection of the incoming bride / new Grihalakshmi. It is the first resolve of your devotion.',
-      parentDhanyawad: 'When the marriage is joyfully complete — return again. Trikal Vaani is your own home. Do not forget to offer Dhanyawad at Her feet. This cycle must be completed.',
-      parentKarmic: 'One more grave matter — these doshas are not of this birth alone. A karmic debt from a past life may bind these two. That story lies hidden in the deeper layers of Bhrigu Nadi — it will be revealed in Trikal Vaani\u2019s Karmic Background Reading.',
-      parentClosing: 'Trikal is with your family. May the grace of Maa remain upon you. Shubhamastu.',
-      remediesIntro: 'Trikal Vaani has selected 10 specific remedies for this Kundali pairing — 4 from Maharishi Parashar, 4 from Bhrigu Nadi, and 2 Shadbala-based.',
-      remediesPromise: 'If these 10 remedies are followed with sincerity — the pooja on the right day, the mantra in the prescribed count, the daan to the right recipient — then Trikal assures that the married life will be successful. This is the word of Vedic shastra.',
-      teaseIntro: 'Trikal Vaani has identified 10 specific remedies — 4 Parashar, 4 Bhrigu Nadi, 2 Shadbala-based — for this Kundali pairing alone.',
+      parentDhanyawad: 'When the marriage is joyfully complete — return again. Trikaal Vaani is your own home. Do not forget to offer Dhanyawad at Her feet. This cycle must be completed.',
+      parentKarmic: 'One more grave matter — these doshas are not of this birth alone. A karmic debt from a past life may bind these two. That story lies hidden in the deeper layers of Bhrigu Nadi — it will be revealed in Trikaal Vaani\u2019s Karmic Background Reading.',
+      parentClosing: 'Trikaal is with your family. May the grace of Maa remain upon you. Shubhamastu.',
+      remediesIntro: 'Trikaal Vaani has selected 10 specific remedies for this Kundali pairing — 4 from Maharishi Parashar, 4 from Bhrigu Nadi, and 2 Shadbala-based.',
+      remediesPromise: 'If these 10 remedies are followed with sincerity — the pooja on the right day, the mantra in the prescribed count, the daan to the right recipient — then Trikaal assures that the married life will be successful. This is the word of Vedic shastra.',
+      teaseIntro: 'Trikaal Vaani has identified 10 specific remedies — 4 Parashar, 4 Bhrigu Nadi, 2 Shadbala-based — for this Kundali pairing alone.',
       teaseClose: 'But these remedies are so specific that full revelation comes only in the Deep/Full Reading. The diagnosis is complete — for the solution, open the full reading.',
     },
   };
@@ -169,7 +169,7 @@ ${remediesJSON}
 After all 10, deliver the promise: "${L.remediesPromise}"`;
 
   return `
-You are Trikal — the AI soul of Trikal Vaani, founded by Rohiit Gupta (Chief Vedic Architect, Delhi NCR).
+You are Trikaal — the AI soul of Trikaal Vaani, founded by Rohiit Gupta (Chief Vedic Architect, Delhi NCR).
 
 This is the HIGHEST-VALUE Milan reading (Both Versions). The client wants BOTH perspectives in one delivery:
   • Part A → for the couple themselves (post-marriage fear anchor — Real Fear B)

@@ -9,12 +9,12 @@
  * SIGNED: ROHIIT GUPTA, CEO
  *
  * CHANGES v8.1 -> v8.2 (CEO approved):
- *   - Visible brand "Trikal Vaani" -> "Trikaal Vaani" everywhere
+ *   - Visible brand "Trikaal Vaani" -> "Trikaal Vaani" everywhere
  *     (Razorpay popup name, founder card, footer tagline, WhatsApp share,
  *      geo-answer fallback bullet).
- *   - Visible persona "Trikal Ka Sandesh" -> "Trikaal Ka Sandesh",
- *     "Trikal Ka Poora Sandesh" -> "Trikaal Ka Poora Sandesh",
- *     "Trikal Ne Aur Bhi Dekha" -> "Trikaal Ne Aur Bhi Dekha".
+ *   - Visible persona "Trikaal Ka Sandesh" -> "Trikaal Ka Sandesh",
+ *     "Trikaal Ka Poora Sandesh" -> "Trikaal Ka Poora Sandesh",
+ *     "Trikaal Ne Aur Bhi Dekha" -> "Trikaal Ne Aur Bhi Dekha".
  *   - REMOVED every "Delhi NCR" mention (founder card, trust badge, footer).
  *   - Domain trikalvaani.com, wa.me links, all logic: UNTOUCHED.
  *   - ALL v8.1 functionality preserved 100% (Razorpay dakshina, 5 upay,
@@ -1075,7 +1075,7 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
 
           {actionWindows.length>0&&(
             <div style={{background:BG_CARD,border:`1px solid ${G(0.12)}`,borderRadius:'16px',padding:'22px',marginBottom:'14px'}}>
-              <p style={{margin:'0 0 14px',color:GOLD,fontSize:'11px',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.08em'}}>🗓 Action Windows — Trikal Precision</p>
+              <p style={{margin:'0 0 14px',color:GOLD,fontSize:'11px',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.08em'}}>🗓 Action Windows — Trikaal Precision</p>
               {actionWindows.map((w,i)=>{const hi=w.strength==='High';return(<div key={i} style={{padding:'13px',background:hi?'rgba(34,197,94,0.06)':G(0.04),border:`1px solid ${hi?'rgba(34,197,94,0.2)':G(0.15)}`,borderRadius:'10px',marginBottom:'8px'}}><div style={{display:'flex',alignItems:'center',gap:'8px',marginBottom:'5px'}}><span style={{color:hi?'#22c55e':GOLD,fontSize:'13px',fontWeight:700}}>{hi?'🟢':'🟡'} {w.window}</span><span style={{padding:'2px 8px',borderRadius:'10px',background:hi?'rgba(34,197,94,0.15)':G(0.1),color:hi?'#22c55e':GOLD,fontSize:'11px',fontWeight:600}}>{w.strength}</span></div><p style={{margin:0,color:'#e2e8f0',fontSize:'13px',lineHeight:1.5}}>{w.reason}</p></div>)})}
             </div>
           )}

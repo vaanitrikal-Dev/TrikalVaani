@@ -45,7 +45,7 @@ export async function POST(req: NextRequest) {
       success: true,
       paymentId: razorpay_payment_id,
       orderId: razorpay_order_id,
-      message: 'Payment verified. Trikal Ka Sandesh unlocked.',
+      message: 'Payment verified. Trikaal Ka Sandesh unlocked.',
     });
 
   } catch (err: unknown) {

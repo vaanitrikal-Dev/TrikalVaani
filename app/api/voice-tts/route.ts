@@ -226,7 +226,7 @@ export async function POST(req: NextRequest) {
 
 export async function GET() {
   return NextResponse.json({
-    status         : 'Trikal Voice TTS API is live',
+    status         : 'Trikaal Voice TTS API is live',
     version        : '4.0',
     voice_primary  : `Gemini-TTS ${GEMINI_TTS_VOICE} (all packs)`,
     voice_fallback : FALLBACK_VOICE,

@@ -14,7 +14,7 @@
  *   Swiss Ephemeris → Gemini 2.5 Pro → Claude Sonnet 4.6 polish.
  *
  * CEO-LOCKED TONE RULE (Plan §4.4) — NON-NEGOTIABLE:
- *   "Trikal does not judge — Trikal reveals patterns so you can prepare."
+ *   "Trikaal does not judge — Trikaal reveals patterns so you can prepare."
  *   • Findings are KARMIC PATTERNS / TENDENCIES, never verdicts.
  *   • NEVER label the person "good" / "bad" / "unfaithful" / "dishonest".
  *   • Every dimension ENDS with how to WORK WITH the pattern (remedy/awareness),
@@ -70,7 +70,7 @@ export function buildKarmicReadingPrompt(input: KarmicPromptInput): string {
       outputRule:
         'HINGLISH only. No fully-English and no fully-Hindi paragraphs.',
       opening:
-        'Trikal kisi ka faisla nahi karta — Trikal sirf karmic patterns dikhata hai, taaki aap taiyaar reh sakein.',
+        'Trikaal kisi ka faisla nahi karta — Trikaal sirf karmic patterns dikhata hai, taaki aap taiyaar reh sakein.',
       toneSeal:
         'Yaad rakhein — yeh kisi vyakti ke acche ya bure hone ka faisla nahi hai. Yeh sirf kundali mein dikhne wale karmic jhukav (tendencies) hain, jinke saath samajhdaari se kaam liya ja sakta hai.',
       workWith:
@@ -80,7 +80,7 @@ export function buildKarmicReadingPrompt(input: KarmicPromptInput): string {
       dhanyawad:
         'Aur jab samay sahi ho, jab baat aage badhe — tab Maa ke charano mein Dhanyawad arpit karna na bhooliye. Yahi sanatan parampara hai.',
       closing:
-        'Trikal aapke saath hai. Maa ki kripa banee rahe.',
+        'Trikaal aapke saath hai. Maa ki kripa banee rahe.',
     },
     hindi: {
       name: 'SHUDH HINDI',
@@ -108,7 +108,7 @@ export function buildKarmicReadingPrompt(input: KarmicPromptInput): string {
       outputRule:
         'ENGLISH only. Keep Sanskrit/Vedic technical terms untranslated.',
       opening:
-        'Trikal does not judge — Trikal reveals karmic patterns, so that you may prepare.',
+        'Trikaal does not judge — Trikaal reveals karmic patterns, so that you may prepare.',
       toneSeal:
         'Remember — this is not a verdict on whether a person is good or bad. These are only the karmic tendencies visible in the birth chart, which can be worked with through awareness and wisdom.',
       workWith:
@@ -118,14 +118,14 @@ export function buildKarmicReadingPrompt(input: KarmicPromptInput): string {
       dhanyawad:
         'And when the time is right, when the matter moves forward — do not forget to offer Dhanyawad at Her feet. This is the Sanatan tradition.',
       closing:
-        'Trikal is with you. May the grace of Maa remain upon you.',
+        'Trikaal is with you. May the grace of Maa remain upon you.',
     },
   };
 
   const L = PACKS[language];
 
   return `
-You are Trikal — the AI soul of Trikal Vaani, founded by Rohiit Gupta (Chief Vedic
+You are Trikaal — the AI soul of Trikaal Vaani, founded by Rohiit Gupta (Chief Vedic
 Architect, Delhi NCR). You are a wise, calm, classical Jyotishi performing a premium
 KARMIC BACKGROUND READING based on Bhrigu Nandi Nadi and BPHS karaka principles.
 
@@ -142,7 +142,7 @@ facts about a person. You read karmic PATTERNS, never private data, never verdic
 
 ╔══════════════════════════════════════════════════════════════╗
 ║ CEO-LOCKED TONE RULE (Plan §4.4) — NON-NEGOTIABLE             ║
-║ "Trikal does not judge — Trikal reveals patterns so you can   ║
+║ "Trikaal does not judge — Trikaal reveals patterns so you can   ║
 ║  prepare." Findings are KARMIC PATTERNS / TENDENCIES only.    ║
 ║ NEVER call the person good/bad/unfaithful/dishonest/greedy.   ║
 ║ NEVER state a real-world fact about the person as certain.    ║

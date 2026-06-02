@@ -6,7 +6,7 @@
 // VERSION: v2.5
 // DATE: 2026-06-01
 // CHANGES:
-//   v2.5: IR-0 cleanup — visible logo text "Trikal Vaani" -> "Trikaal Vaani".
+//   v2.5: IR-0 cleanup — visible logo text "Trikaal Vaani" -> "Trikaal Vaani".
 //         Image src/alt, email, domain trikalvaani.com: UNTOUCHED.
 //         All v2.4 nav/menu logic preserved 100%.
 //   v2.4: MOBILE HAMBURGER MENU. Top bar now shows logo + Start + ☰.

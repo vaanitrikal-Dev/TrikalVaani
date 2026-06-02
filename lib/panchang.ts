@@ -1,6 +1,6 @@
 /**
  * FILE: lib/panchang.ts
- * Trikal Vaani — Real Panchang Calculator
+ * Trikaal Vaani — Real Panchang Calculator
  * CEO: Rohiit Gupta | Chief Vedic Architect
  * Version: 1.0 | Date: 2026-04-27
  *

@@ -15,7 +15,7 @@
  *     Hindi/Hinglish, master mode, four_week, deep_prediction
  *
  * MODES:
- *   chat             → Trikal chat, 280 tokens, revenue guard ON
+ *   chat             → Trikaal chat, 280 tokens, revenue guard ON
  *   prediction       → instant hook deepener, 300 tokens
  *   deep_prediction  → full paid reading, 4096 tokens
  *   four_week        → 4-week prediction, 4096 tokens
@@ -354,7 +354,7 @@ export async function POST(req: NextRequest) {
     // ── MASTER MODE ───────────────────────────────────────────────────────────
     if (mode === 'master') {
       const { monthYear: my, quarter, financialYear } = getDynamicDateContext();
-      const masterSystem = `You are the Master Intelligence Engine of Trikal Vaani.
+      const masterSystem = `You are the Master Intelligence Engine of Trikaal Vaani.
 You are providing a PRIVATE briefing to Rohiit Gupta (CEO & Chief Vedic Architect)
 before a premium consultation call.
 

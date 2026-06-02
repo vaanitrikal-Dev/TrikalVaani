@@ -120,7 +120,7 @@ export async function POST(req: NextRequest) {
       currency: 'INR',
       receipt:  `tv_milan_${tier}_${Date.now()}`,
       notes: {
-        platform:   'Trikal Vaani',
+        platform:   'Trikaal Vaani',
         purpose:    'Kundali Milan',
         tier,
         audience:   tierAudience,

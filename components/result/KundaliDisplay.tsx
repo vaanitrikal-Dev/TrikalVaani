@@ -145,7 +145,7 @@ export default function KundaliDisplay({
               {dob} · {city}
             </div>
             <div style={{ fontSize: 10, color: GOLD_RGBA(0.55), marginTop: 2 }}>
-              Trikal Engine V15 · Lahiri Ayanamsha
+              Trikaal Engine V15 · Lahiri Ayanamsha
             </div>
           </div>
         </div>
@@ -352,7 +352,7 @@ export default function KundaliDisplay({
           fontSize: 13, color: 'rgba(167,139,250,0.85)',
           marginBottom: 8, fontStyle: 'italic', lineHeight: 1.6,
         }}>
-          "Rohiit Gupta ji ka Trikal framework kehta hai — aapki Kundali mein bahut kuch hai jo sirf aap ke liye likha hai. Kaal ka ek aur raaz abhi baki hai..."
+          "Rohiit Gupta ji ka Trikaal framework kehta hai — aapki Kundali mein bahut kuch hai jo sirf aap ke liye likha hai. Kaal ka ek aur raaz abhi baki hai..."
         </div>
         <div style={{
           fontSize: 11, color: 'rgba(148,163,184,0.45)',

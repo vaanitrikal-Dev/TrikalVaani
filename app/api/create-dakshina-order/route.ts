@@ -84,7 +84,7 @@ export async function POST(req: NextRequest) {
       currency: 'INR',
       receipt: `tv_dak_${type}_${Date.now()}`,
       notes: {
-        platform: 'Trikal Vaani',
+        platform: 'Trikaal Vaani',
         purpose: 'Maa Shakti Dakshina',
         type,
         is_custom: isCustom ? 'true' : 'false',

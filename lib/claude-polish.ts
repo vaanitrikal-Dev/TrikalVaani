@@ -166,7 +166,7 @@ DHARMA GURU TONE — ENGLISH: Warm, wise, never clinical.
     : `ADD THIS SUSPENSE HOOK at end of simpleSummary.text:
 "${SUSPENSE_HOOKS.basic[language as keyof typeof SUSPENSE_HOOKS.basic] ?? SUSPENSE_HOOKS.basic.hinglish}"`;
 
-  return `You are the language polishing specialist for Trikal Vaani — India's most precise Vedic astrology platform by Rohiit Gupta, Chief Vedic Architect.
+  return `You are the language polishing specialist for Trikaal Vaani — India's most precise Vedic astrology platform by Rohiit Gupta, Chief Vedic Architect.
 
 DOMAIN: ${domainLabel} | LANGUAGE: ${language.toUpperCase()} | TIER: ${tier.toUpperCase()}
 
@@ -177,7 +177,7 @@ WHAT TO POLISH:
 2. simpleSummary.keyMessage → One powerful Guru sentence
 3. simpleSummary.dos + donts → Specific, actionable
 4. simpleSummary.mainAction + mainCaution → Clear, specific
-${tier !== 'basic' ? `5. professionalEnglish.executiveSummary → Authoritative Trikal Vaani voice` : ''}
+${tier !== 'basic' ? `5. professionalEnglish.executiveSummary → Authoritative Trikaal Vaani voice` : ''}
 
 ${suspenseInstruction}
 
@@ -371,9 +371,9 @@ Do NOT translate either section. Keep both in ${language.toUpperCase()}.`
       ? `✅ सही: "नाड़ी दोष गम्भीर है — परन्तु त्रिकाल के उपायों से इसका निवारण सम्भव है।"
 ❌ ग़लत: "नाड़ी दोष से स्वास्थ्य पर असर पड़ता है।" (clinical, flat)`
       : language === 'english'
-      ? `✅ Right: "The Nadi Dosha is serious — yet Trikal's remedies can neutralise it."
+      ? `✅ Right: "The Nadi Dosha is serious — yet Trikaal's remedies can neutralise it."
 ❌ Wrong: "There is a Nadi Dosha which may cause health complications." (clinical, flat)`
-      : `✅ Right: "Nadi Dosha gambhir hai — lekin Trikal ke remedies se yeh neutralize ho jaata hai."
+      : `✅ Right: "Nadi Dosha gambhir hai — lekin Trikaal ke remedies se yeh neutralize ho jaata hai."
 ❌ Wrong: "There is a Nadi Dosha which may cause health complications." (clinical, flat)`;
 
   const neverAlways =
@@ -383,7 +383,7 @@ Do NOT translate either section. Keep both in ${language.toUpperCase()}.`
       ? `Never: "I promise", "100%", "guaranteed". Always: "the word of Vedic shastra", "by the grace of Maa", "the likelihood is strong".`
       : `Never: "main vaada karta hoon", "100%", "guaranteed". Always: "Vedic shastra ka vachan hai", "Maa ki kripa se", "sambhavana prabal hai".`;
 
-  return `You are the language polishing specialist for Trikal Vaani — India's most authoritative Vedic astrology platform by Rohiit Gupta, Chief Vedic Architect.
+  return `You are the language polishing specialist for Trikaal Vaani — India's most authoritative Vedic astrology platform by Rohiit Gupta, Chief Vedic Architect.
 
 You are polishing a KUNDALI MILAN narrative (marriage compatibility reading) for a paying client.
 
@@ -583,7 +583,7 @@ Keep Sanskrit/Vedic terms (Lagna, Navamsa, Rahu, Ketu, dasha, karaka, etc.) untr
       ? `✅ Right: "The chart indicates a cautious tendency toward money." ❌ Wrong: "This person is stingy."`
       : `✅ Right: "Chart mein paise ke prati ek cautious jhukav dikhta hai." ❌ Wrong: "Yeh vyakti kanjoos hai."`;
 
-  return `You are the language polishing specialist for Trikal Vaani — India's most authoritative Vedic astrology platform by Rohiit Gupta, Chief Vedic Architect.
+  return `You are the language polishing specialist for Trikaal Vaani — India's most authoritative Vedic astrology platform by Rohiit Gupta, Chief Vedic Architect.
 
 You are polishing a premium KARMIC BACKGROUND READING (Rs251) — a Bhrigu Nandi Nadi analysis
 of ONE person's birth chart across 6 karmic dimensions, for a paying client.
@@ -602,7 +602,7 @@ If unsure, KEEP THE ORIGINAL LANGUAGE OF THE INPUT. Never translate.
 CEO-LOCKED TONE RULE — NON-NEGOTIABLE (legal shield)
 ═══════════════════════════════════════════════════════════════
 
-"Trikal does not judge — Trikal reveals patterns so you can prepare."
+"Trikaal does not judge — Trikaal reveals patterns so you can prepare."
 Findings are KARMIC PATTERNS / TENDENCIES, never verdicts about a real person.
 
 ${toneSeal}
@@ -772,7 +772,7 @@ Keep Sanskrit/Vedic terms (Lagna, Nakshatra, Tithi, Naamakshar, Rashi, etc.) unt
       ? `✅ Right: "A child born in this auspicious muhurat shows a strong leadership inclination in the chart." ❌ Wrong: "This child will definitely become rich."`
       : `✅ Right: "Is shubh muhurat mein janme bachche ki kundali mein leadership ka strong yog dikhta hai." ❌ Wrong: "Yeh bachcha ameer banega."`;
 
-  return `You are the language polishing specialist for Trikal Vaani — India's most authoritative Vedic astrology platform by Rohiit Gupta, Chief Vedic Architect.
+  return `You are the language polishing specialist for Trikaal Vaani — India's most authoritative Vedic astrology platform by Rohiit Gupta, Chief Vedic Architect.
 
 You are polishing a premium CHILD BIRTH MUHURAT REPORT (Rs101/151) for expecting parents
 who have chosen an auspicious delivery time WITHIN their doctor-approved window.

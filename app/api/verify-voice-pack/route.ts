@@ -124,7 +124,7 @@ export async function POST(req: NextRequest) {
 
 export async function GET() {
   return NextResponse.json({
-    status: 'Trikal Voice Pack Verify API is live',
+    status: 'Trikaal Voice Pack Verify API is live',
     version: '1.0',
   });
 }

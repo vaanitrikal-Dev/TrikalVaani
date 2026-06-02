@@ -434,7 +434,7 @@ export default function PredictionDisplay({
 
       {/* ══════════════════════════════════════════════════
           SECTION 2 — JINI PLAIN LANGUAGE PREDICTION
-          The USP — what users love about Trikal Vaani
+          The USP — what users love about Trikaal Vaani
       ══════════════════════════════════════════════════ */}
       <Card highlight>
         <SectionHeader icon={Sparkles} title="Jini ka Analysis" subtitle="Plain language — zero jargon" />

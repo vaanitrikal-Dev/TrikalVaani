@@ -129,7 +129,7 @@ export async function POST(req: NextRequest) {
 
     const personName = (order.person_data?.name ?? '').toString();
     const waText = encodeURIComponent(
-      `Jai Mahakaal! Trikal Vaani Karmic Background Reading confirm ho gaya.\n\n` +
+      `Jai Mahakaal! Trikaal Vaani Karmic Background Reading confirm ho gaya.\n\n` +
       `Reading for: ${personName}\n` +
       `Payment ID: ${razorpay_payment_id}\n` +
       `Result: trikalvaani.com/karmic/${slug}\n\nJai Maa Shakti!`

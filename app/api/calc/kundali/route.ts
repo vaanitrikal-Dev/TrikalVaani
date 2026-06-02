@@ -22,7 +22,7 @@
 //     to the new calcTypes. Existing calcTypes (kundali, dasha,
 //     nakshatra, rashi, lagna) behave EXACTLY as v1.5 (zero
 //     regression).
-// CEO: Rohiit Gupta | Chief Vedic Architect | Trikal Vaani
+// CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
 // ============================================================
 import { NextRequest, NextResponse } from 'next/server';
 import { callVM } from '@/lib/callVM';

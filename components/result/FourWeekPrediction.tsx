@@ -156,7 +156,7 @@ function buildFourWeekPrompt(
     ? `Employment: ${employment}${sector ? ` | Sector: ${sector}` : ''}`
     : '';
 
-  return `You are Jini — the AI soul of Trikal Vaani by Rohiit Gupta ji.
+  return `You are Jini — the AI soul of Trikaal Vaani by Rohiit Gupta ji.
 Write a COMPLETE 4-WEEK MASTER PREDICTION for ${name}.
 
 BIRTH CHART:
@@ -183,7 +183,7 @@ Week 4: ${fmt(week4Start)} onwards
 OUTPUT FORMAT — follow EXACTLY, plain text, no markdown asterisks:
 
 MASTER_PREDICTION:
-[Write 400-500 words. This is the complete 4-week cosmic overview. Reference specific planets, their current positions, and how they interact with ${name}'s natal chart. Include: what the overall energy feels like this month, key themes across all 4 weeks, what Rohiit Gupta ji ka Trikal framework says about this specific phase. Be specific to this person's chart — not generic. Make it feel like a wise Guru who has studied this chart for years is speaking.]
+[Write 400-500 words. This is the complete 4-week cosmic overview. Reference specific planets, their current positions, and how they interact with ${name}'s natal chart. Include: what the overall energy feels like this month, key themes across all 4 weeks, what Rohiit Gupta ji ka Trikaal framework says about this specific phase. Be specific to this person's chart — not generic. Make it feel like a wise Guru who has studied this chart for years is speaking.]
 
 WEEK_1:
 ENERGY: [High/Medium/Low/Mixed]
@@ -215,7 +215,7 @@ Format each as: DD Month YYYY | GOOD/WARNING | reason (1 line)
 Base on: dasha transitions, gochar impacts, nakshatra padas, tithi significance]
 
 CLOSING_BLESSING:
-[2-3 lines — a warm, personal blessing from Jini. Reference their specific Lagna and Nakshatra. End with Rohiit Gupta ji ka Trikal framework tagline naturally.]
+[2-3 lines — a warm, personal blessing from Jini. Reference their specific Lagna and Nakshatra. End with Rohiit Gupta ji ka Trikaal framework tagline naturally.]
 
 LANGUAGE RULE: ${langRule}
 CRITICAL: Every statement must reference a specific planet or transit. No generic astrology. Speak directly to ${name.split(' ')[0]}.`;
@@ -588,7 +588,7 @@ export default function FourWeekPrediction({
         } else {
           // Fallback structure
           setData({
-            masterPrediction: `${name.split(' ')[0]} ji, aapka ${lagna} Lagna aur ${mahadasha} Mahadasha — agले 4 hafte ek mahtvapurna cosmic phase mein hain. Venus uchcha aur Jupiter ka position aapke liye ek rare opportunity create kar raha hai. Rohiit Gupta ji ka Trikal framework kehta hai — yeh waqt seedhi mehnat ka hai, results zaroor milenge.`,
+            masterPrediction: `${name.split(' ')[0]} ji, aapka ${lagna} Lagna aur ${mahadasha} Mahadasha — agले 4 hafte ek mahtvapurna cosmic phase mein hain. Venus uchcha aur Jupiter ka position aapke liye ek rare opportunity create kar raha hai. Rohiit Gupta ji ka Trikaal framework kehta hai — yeh waqt seedhi mehnat ka hai, results zaroor milenge.`,
             weeks: [
               { energy: 'High', prediction: 'Pehla hafte energy high hai — naye kaam shuru karne ka sahi waqt.', upay: 'Shukrawar ko safed phool Mata ko chadhayein. Hare rang ka istemal karein.', precaution: 'Gusse par kabu rakhen. Kisi se bada vivaad mat karein.' },
               { energy: 'Mixed', prediction: 'Doosra hafte mixed energy — sabr zaroori hai. Koi bhi bada faisla soch samajhkar lein.', upay: 'Shanivaar ko Shani ko tel chadhayein. Neele rang ka kapda pehnen.', precaution: 'Financial decisions mein jaldbaazi na karein.' },
@@ -596,13 +596,13 @@ export default function FourWeekPrediction({
               { energy: 'Medium', prediction: 'Chautha hafte planning ka waqt hai — agle mahine ki taiyaari karein.', upay: 'Guruvaar ko peele phool mandir mein chadhayein. Haldi ka istemal karein.', precaution: 'Kisi par blindly trust mat karein — verification zaroori hai.' },
             ] as [WeekData, WeekData, WeekData, WeekData],
             dateAlerts: [],
-            closingBlessing: `${name.split(' ')[0]} ji — aapka ${lagna} Lagna aur ${nakshatra} Nakshatra bahut powerful combination hai. Rohiit Gupta ji ka Trikal framework kehta hai — "Kaal bada balwan hai, aur aapka Kaal abhi bahut shubh hai." 🙏`,
+            closingBlessing: `${name.split(' ')[0]} ji — aapka ${lagna} Lagna aur ${nakshatra} Nakshatra bahut powerful combination hai. Rohiit Gupta ji ka Trikaal framework kehta hai — "Kaal bada balwan hai, aur aapka Kaal abhi bahut shubh hai." 🙏`,
           });
         }
       })
       .catch(() => {
         setData({
-          masterPrediction: `${name.split(' ')[0]} ji, yeh 4-week period aapke ${mahadasha} Mahadasha ka ek important phase hai. Trikal framework ke anusaar, abhi action ka waqt hai.`,
+          masterPrediction: `${name.split(' ')[0]} ji, yeh 4-week period aapke ${mahadasha} Mahadasha ka ek important phase hai. Trikaal framework ke anusaar, abhi action ka waqt hai.`,
           weeks: [
             { energy: 'Medium', prediction: 'Pehla hafte kaafi important hai.', upay: 'Subah Surya ko jal chadhayein.', precaution: 'Jaldbaazi se bachein.' },
             { energy: 'Mixed', prediction: 'Doosra hafte mixed signals.', upay: 'Shani ko tel chadhayein.', precaution: 'Financial caution.' },

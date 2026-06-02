@@ -8,11 +8,11 @@
  * Date:        2026-06-01
  *
  * CHANGES vs v2.2 (CEO approved):
- *   ✅ Visible logo text "Trikal Vaani" -> "Trikaal Vaani".
+ *   ✅ Visible logo text "Trikaal Vaani" -> "Trikaal Vaani".
  *   ✅ REMOVED the "Delhi NCR, India — Global Platform" location row
  *      (local-business signal — violates IR-0). Replaced with a
  *      national/global scope line, no city.
- *   ✅ Copyright "© Trikal Vaani Global" -> "© Trikaal Vaani Global".
+ *   ✅ Copyright "© Trikaal Vaani Global" -> "© Trikaal Vaani Global".
  *   ✅ Entity-consolidation block kept AS-IS on purpose (it deliberately
  *      links the single-a + double-a spellings + alt domains for SEO).
  *   ✅ ALL OTHER CONTENT + logic from v2.2: 100% identical.

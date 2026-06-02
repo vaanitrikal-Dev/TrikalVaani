@@ -15,7 +15,7 @@ const GOLD_RGBA = (a: number) => `rgba(212,175,55,${a})`;
 export default function ShareButtons({ score, name, segmentWhatsapp }: Props) {
   const [copied, setCopied] = useState(false);
 
-  const defaultText = `${name.split(' ')[0]}'s Trikal Energy Score is ${score}/100 today — powered by 5000 years of Vedic wisdom. Check yours free at TrikalVaani.com`;
+  const defaultText = `${name.split(' ')[0]}'s Trikaal Energy Score is ${score}/100 today — powered by 5000 years of Vedic wisdom. Check yours free at TrikalVaani.com`;
   const shareText = segmentWhatsapp || defaultText;
   const whatsAppUrl = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
 
@@ -89,7 +89,7 @@ export default function ShareButtons({ score, name, segmentWhatsapp }: Props) {
       >
         <Users className="w-4 h-4" />
         <div className="text-left">
-          <div className="text-sm font-semibold leading-tight">Join Trikal VIP Community</div>
+          <div className="text-sm font-semibold leading-tight">Join Trikaal VIP Community</div>
           <div className="text-xs opacity-60">Free daily cosmic updates &amp; live Guru Q&amp;A</div>
         </div>
       </a>

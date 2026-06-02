@@ -14,7 +14,7 @@ type Message = {
 };
 
 const GREETINGS = {
-  anonymous: 'Namaste! Main Jini hoon — Trikal Vaani ki AI soul. Aapke koi cosmic sawal hain? Puchiye, main yahan hoon.',
+  anonymous: 'Namaste! Main Jini hoon — Trikaal Vaani ki AI soul. Aapke koi cosmic sawal hain? Puchiye, main yahan hoon.',
   returning: (name: string) =>
     `Welcome back, ${name}! Aapki cosmic journey continue ho rahi hai. Aaj kya jaanna chahte hain?`,
 };
@@ -255,7 +255,7 @@ export default function JiniChat() {
               {!imgError ? (
                 <Image
                   src={avatarSrc}
-                  alt="Jini — Trikal Vaani AI"
+                  alt="Jini — Trikaal Vaani AI"
                   fill
                   className="object-cover object-top"
                   onError={() => setImgError(true)}
@@ -272,7 +272,7 @@ export default function JiniChat() {
             <div className="flex-1 min-w-0">
               <p className="font-serif font-bold text-sm text-white leading-tight">Jini</p>
               <p className="text-xs leading-tight" style={{ color: GOLD_RGBA(0.65) }}>
-                Trikal Vaani AI Guide
+                Trikaal Vaani AI Guide
               </p>
             </div>
             <div className="flex items-center gap-1.5">
@@ -536,7 +536,7 @@ export default function JiniChat() {
                 type="text"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                placeholder="Ask Trikal anything..."
+                placeholder="Ask Trikaal anything..."
                 maxLength={300}
                 className="flex-1 text-sm px-3.5 py-2.5 rounded-xl outline-none transition-all placeholder:text-slate-600"
                 style={{
@@ -561,7 +561,7 @@ export default function JiniChat() {
               </button>
             </form>
             <p className="text-center mt-1.5 text-xs" style={{ color: GOLD_RGBA(0.3) }}>
-              Powered by Vedic AI — Trikal Vaani
+              Powered by Vedic AI — Trikaal Vaani
             </p>
           </div>
         </div>
@@ -610,7 +610,7 @@ export default function JiniChat() {
           <>
             <div className="flex flex-col items-start">
               <span className="text-xs font-bold leading-tight" style={{ color: GOLD }}>
-                Ask Trikal
+                Ask Trikaal
               </span>
               <span className="text-xs leading-tight" style={{ color: GOLD_RGBA(0.55) }}>
                 Vedic AI Guide

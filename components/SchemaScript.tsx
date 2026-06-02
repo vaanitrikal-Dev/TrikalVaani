@@ -1,5 +1,5 @@
 // ============================================================
-// CEO: Rohiit Gupta | Chief Vedic Architect | Trikal Vaani
+// CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
 // FILE: components/SchemaScript.tsx
 // VERSION: v3.0 — Fake rating removed + brand flip + global GEO/AEO/E-E-A-T
 // DATE: 2026-05-27
@@ -12,10 +12,10 @@
 //        re-injected Delhi NCR + ₹499 + vendor names on every page.
 //     ❌ ₹499 Personal Consultation offer — removed from Service catalog.
 //     ❌ Delhi NCR PostalAddress pin — removed from Person.
-//     ❌ Vendor names (Gemini Pro 2.5 / Google Gemini / Trikal AI engine)
+//     ❌ Vendor names (Gemini Pro 2.5 / Google Gemini / Trikaal AI engine)
 //        — replaced with "premium AI engine with expert polish".
 //   ADDED (SEO/GEO/AEO/E-E-A-T firepower):
-//     ✅ BRAND FLIP "Trikal Vaani" -> "Trikaal Vaani" (WebSite, Service,
+//     ✅ BRAND FLIP "Trikaal Vaani" -> "Trikaal Vaani" (WebSite, Service,
 //        Product, brand names). alternateName arrays keep both spellings.
 //     ✅ GLOBAL: Service + Product areaServed/description -> India + Worldwide.
 //     ✅ E-E-A-T: Person hasCredential (15+ yrs BPHS), nationality India,
@@ -70,7 +70,7 @@ export default function SchemaScript() {
       alternateName: ["Rohit Gupta", "रोहित गुप्ता"],
       jobTitle: "Chief Vedic Architect",
       description:
-        "15+ years of Vedic astrology study under the Parashara BPHS tradition. Founder of Trikaal Vaani (legally Trikal Vaani Global) — a Government of India MSME registered enterprise (UDYAM-DL-10-0119070) serving seekers across India and worldwide. Specialist in Bhrigu Nandi Nadi karmic analysis, Shadbala six-fold strength, and AI-powered Vedic astrology.",
+        "15+ years of Vedic astrology study under the Parashara BPHS tradition. Founder of Trikaal Vaani (legally Trikaal Vaani Global) — a Government of India MSME registered enterprise (UDYAM-DL-10-0119070) serving seekers across India and worldwide. Specialist in Bhrigu Nandi Nadi karmic analysis, Shadbala six-fold strength, and AI-powered Vedic astrology.",
       url: "https://trikalvaani.com/founder",
       image: "https://trikalvaani.com/images/founder.png",
       worksFor: { "@id": "https://trikalvaani.com/#organization" },

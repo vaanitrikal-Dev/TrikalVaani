@@ -262,4 +262,4 @@ export async function GET(req: NextRequest) {
   return NextResponse.json(summary);
 }
 
-// END — route.ts v2.3 | Trikal Vaani | Rohiit Gupta, Chief Vedic Architect
+// END — route.ts v2.3 | Trikaal Vaani | Rohiit Gupta, Chief Vedic Architect

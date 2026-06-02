@@ -18,7 +18,7 @@ import Razorpay from 'razorpay';
 // Server controls price, NOT client. Stops users from sending ₹1.
 const ALLOWED_AMOUNTS: Record<string, number> = {
   deep: 5100,   // ₹51 Deep Reading (Gemini Pro + Claude polish)
-  voice: 1100,  // ₹11 Voice Reading (Trikal Voice)
+  voice: 1100,  // ₹11 Voice Reading (Trikaal Voice)
 };
 
 const razorpay = new Razorpay({
@@ -45,7 +45,7 @@ export async function POST(req: NextRequest) {
       currency: 'INR',
       receipt: `tv_${tier}_${Date.now()}`,
       notes: {
-        platform: 'Trikal Vaani',
+        platform: 'Trikaal Vaani',
         tier,
         architect: 'Rohiit Gupta',
       },

@@ -47,7 +47,7 @@ Gochar refers to the real-time movement of planets through the zodiac as observe
 - Practice voluntary service (Seva) without expectation of reward
 - Wear a Blue Sapphire (Neelam) only after expert gemologist consultation
 
-Rohiit Gupta ji ka Trikal framework kehta hai — Saturn does not punish; it purifies. Those who work with Shani's energy in 2026 will emerge stronger and more authentic.
+Rohiit Gupta ji ka Trikaal framework kehta hai — Saturn does not punish; it purifies. Those who work with Shani's energy in 2026 will emerge stronger and more authentic.
     `,
   },
   {
@@ -83,7 +83,7 @@ Medical and healthcare sectors face unusual disruptions. Traditional healing met
 
 ## What This Means for Your Chart in 2026
 
-Rohiit Gupta ji ka Trikal framework kehta hai — the house where Rahu sits in your natal chart is where life is pushing you forward most forcefully in 2026. Resist it and suffer; embrace it and transform.
+Rohiit Gupta ji ka Trikaal framework kehta hai — the house where Rahu sits in your natal chart is where life is pushing you forward most forcefully in 2026. Resist it and suffer; embrace it and transform.
 
 The sign hosting Ketu in your chart is where life is asking you to let go of old patterns, even beloved ones.
     `,
@@ -117,7 +117,7 @@ Taurus is an earth sign ruled by Venus, the planet of beauty, comfort, and mater
 
 The Jupiter in Taurus period rewards slow, steady builders. Real estate decisions made before Jupiter moves to Gemini carry extraordinary long-term potential.
 
-Rohiit Gupta ji ka Trikal framework kehta hai — when the cosmic guru blesses the sign of wealth and beauty, the universe is literally opening doors. The wise seeker walks through them with deliberate steps, not impulsive leaps.
+Rohiit Gupta ji ka Trikaal framework kehta hai — when the cosmic guru blesses the sign of wealth and beauty, the universe is literally opening doors. The wise seeker walks through them with deliberate steps, not impulsive leaps.
 
 Invest in real assets. Avoid debt-based consumption. Develop skills that have enduring value.
     `,
@@ -155,7 +155,7 @@ Many astrologers estimate that genuine, uncancelled Mangal Dosha affects only 5-
 
 With Venus exalted in Pisces and Jupiter in Taurus through 2026, many Mangal Dosha effects are being softened by these powerful benefic transits. Those born with Mars in traditionally challenging positions are finding 2026 to be a year of unexpected relationship harmony.
 
-Rohiit Gupta ji ka Trikal framework kehta hai — no single yoga or dosha defines your destiny. The full chart tells the story. Get a complete reading before making any marriage decisions based on Mangal Dosha fear alone.
+Rohiit Gupta ji ka Trikaal framework kehta hai — no single yoga or dosha defines your destiny. The full chart tells the story. Get a complete reading before making any marriage decisions based on Mangal Dosha fear alone.
     `,
   },
   {
@@ -167,7 +167,7 @@ Rohiit Gupta ji ka Trikal framework kehta hai — no single yoga or dosha define
     publishedAt: '2026-05-01',
     tags: ['Vedic', 'Western', 'Jyotish', 'Zodiac', 'Comparison', 'Basics', 'AI', '2026'],
     content: `
-The question "Which astrology is more accurate — Vedic or Western?" misses the point entirely. Each system is a self-consistent, internally coherent tradition with different emphases, tools, and philosophical roots. In 2026, with AI-powered platforms like Trikal Vaani making both traditions more accessible, understanding their differences is more important than ever.
+The question "Which astrology is more accurate — Vedic or Western?" misses the point entirely. Each system is a self-consistent, internally coherent tradition with different emphases, tools, and philosophical roots. In 2026, with AI-powered platforms like Trikaal Vaani making both traditions more accessible, understanding their differences is more important than ever.
 
 ## The Core Difference: Two Zodiacs
 
@@ -191,9 +191,9 @@ This layered system allows for extraordinary precision in specific life domains 
 
 ## Predictive Systems: Dasha
 
-Vedic astrology's Vimshottari Dasha system — a 120-year cycle of planetary periods — provides a unique predictive tool. The precision for major life events timing is among Jyotish's most celebrated strengths and the backbone of platforms like Trikal Vaani.
+Vedic astrology's Vimshottari Dasha system — a 120-year cycle of planetary periods — provides a unique predictive tool. The precision for major life events timing is among Jyotish's most celebrated strengths and the backbone of platforms like Trikaal Vaani.
 
-Rohiit Gupta ji ka Trikal framework kehta hai — the best approach in 2026 is to use Vedic Jyotish for karmic timing and life prediction, while using Western psychology for self-understanding. They complement; they do not compete.
+Rohiit Gupta ji ka Trikaal framework kehta hai — the best approach in 2026 is to use Vedic Jyotish for karmic timing and life prediction, while using Western psychology for self-understanding. They complement; they do not compete.
     `,
   },
 ];

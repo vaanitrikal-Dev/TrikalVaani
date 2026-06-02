@@ -85,7 +85,7 @@ export interface GeminiPanchangResponse {
 // ============================================================================
 
 const BRAND_VOICE = `
-BRAND: Trikal Vaani (trikalvaani.com)
+BRAND: Trikaal Vaani (trikalvaani.com)
 AUTHOR: Rohiit Gupta, Chief Vedic Architect
 TAGLINE: "Kaal bada balwan hai, sabko nach nachaye; raja ka beta bhi bhiksha mangne jaye."
 TONE: Authoritative, classical Vedic, accessible to mass-market Indian readers.
@@ -135,7 +135,7 @@ export function buildPanchangHubPrompt(
       : "Write ALL output in English. Use English with native Vedic Sanskrit terms transliterated (e.g. 'Tithi', 'Nakshatra', 'Rahu Kaal').";
 
   return `
-You are Rohiit Gupta, Chief Vedic Architect of Trikal Vaani.
+You are Rohiit Gupta, Chief Vedic Architect of Trikaal Vaani.
 You are writing the AUTHORITATIVE national panchang content for ${panchang.date}.
 This page must outrank AstroSage and AstroTalk for "aaj ka panchang" and "today's panchang".
 
@@ -167,7 +167,7 @@ ADDITIONAL HUB-SPECIFIC RULES:
 - dos_and_donts: 4 dos, 4 donts. Tied to the specific Tithi + Nakshatra of the day.
 - remedies: 3-5 remedies SPECIFIC to today's planetary lords.
   Format: "Action — Why (planetary reason)". Example: "Light til oil diya facing south — Shani is the karaka of ${panchang.vara}".
-- meta_title: Format "Aaj Ka Panchang ${panchang.date} — [unique hook] | Trikal Vaani"
+- meta_title: Format "Aaj Ka Panchang ${panchang.date} — [unique hook] | Trikaal Vaani"
 - meta_description: Include Tithi + Nakshatra + a benefit promise. 150-160 chars.
 - faq questions MUST include: shubh muhurat today, what to avoid today, best time for puja today, Rahu Kaal meaning today, remedies for today.
 
@@ -190,7 +190,7 @@ export function buildPanchangCityPrompt(
       : `Write ALL output in English. Use city name '${city.name}' naturally — local SEO target keyword.`;
 
   return `
-You are Rohiit Gupta, Chief Vedic Architect of Trikal Vaani.
+You are Rohiit Gupta, Chief Vedic Architect of Trikaal Vaani.
 You are writing the LOCAL panchang for ${city.name} on ${panchang.date}.
 TARGET KEYWORDS: "aaj ka panchang ${city.slug}", "panchang ${city.slug} today", "${city.slug} muhurat today".
 This page MUST outrank AstroSage's city pages.
@@ -221,7 +221,7 @@ CITY-SPECIFIC RULES:
   (Delhi → Chhatarpur, Mumbai → Siddhivinayak, Hyderabad → Birla Mandir, etc. Only if genuinely relevant.)
 - dos_and_donts: 3 dos, 3 donts. Practical, actionable.
 - remedies: 3 remedies. Mention nearest sacred direction or local-context practice.
-- meta_title: "Aaj Ka Panchang ${city.name} ${panchang.date} | Trikal Vaani"
+- meta_title: "Aaj Ka Panchang ${city.name} ${panchang.date} | Trikaal Vaani"
 - meta_description: Local sunrise + tithi + benefit. 150-160 chars. Include "${city.name}".
 - faq MUST include 1 question about local sunrise/sunset difference.
 - KEEP TOTAL LENGTH MODERATE — Flash model, ~600-800 words total content.
@@ -247,7 +247,7 @@ export function buildPanchangFestivalPrompt(
       : "Write in English. Use Hindi festival name with English explanation in parentheses on first mention.";
 
   return `
-You are Rohiit Gupta, Chief Vedic Architect of Trikal Vaani.
+You are Rohiit Gupta, Chief Vedic Architect of Trikaal Vaani.
 You are writing the AUTHORITATIVE astrological guide for ${festivalName} on ${panchang.date}.
 TARGET KEYWORDS: "${festivalSlug} ${new Date(panchang.date).getFullYear()} astrology", "${festivalSlug} muhurat", "${festivalSlug} puja vidhi".
 
@@ -275,7 +275,7 @@ FESTIVAL-SPECIFIC RULES:
 - spiritual_significance: 200 words on ${planetaryRuler}'s influence and how the day's Tithi+Nakshatra amplifies the festival's energy.
 - dos_and_donts: Puja-specific. 5 dos, 5 donts.
 - remedies: 3-5 personal remedies linked to ${planetaryRuler}.
-- meta_title: "${festivalName} ${new Date(panchang.date).getFullYear()} — Date, Muhurat, Puja Vidhi | Trikal Vaani"
+- meta_title: "${festivalName} ${new Date(panchang.date).getFullYear()} — Date, Muhurat, Puja Vidhi | Trikaal Vaani"
 - meta_description: Date + muhurat + ruling planet + benefit. 150-160 chars.
 - faq MUST include: when is ${festivalName}, what to do, what to avoid, which planet rules, who should observe.
 
@@ -338,5 +338,5 @@ export function parseGeminiPanchangResponse(
 
 // ============================================================================
 // END — gemini-prompt-panchang.ts v1.0
-// 🔱 Trikal Vaani | Rohiit Gupta, Chief Vedic Architect
+// 🔱 Trikaal Vaani | Rohiit Gupta, Chief Vedic Architect
 // ============================================================================

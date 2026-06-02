@@ -128,7 +128,7 @@ export async function POST(req: NextRequest) {
       },
       // suspense hook shown under the teaser (Hinglish default; UI can localize)
       hook:
-        'Trikal ne aapki kundali mein 6 gehre karmic patterns dekhe hain — ' +
+        'Trikaal ne aapki kundali mein 6 gehre karmic patterns dekhe hain — ' +
         'personality, nibhaane ki aadat, paisa, parivaar, chhupi pravritti, aur vivah ka bhavishya. ' +
         'Poori sachhai ₹251 mein khulegi.',
     });

@@ -162,7 +162,7 @@ export async function POST(req: NextRequest) {
 
 export async function GET() {
   return NextResponse.json({
-    status  : 'Trikal Voice STT API is live',
+    status  : 'Trikaal Voice STT API is live',
     version : '3.0',
     model   : 'gpt-4o-transcribe',
     quality : 'World best — handles crying, soft voice, Hinglish',

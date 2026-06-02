@@ -27,7 +27,7 @@ export const dynamicParams = true;
 
 const SITE_URL = "https://trikalvaani.com";
 const AUTHOR_NAME = "Rohiit Gupta";
-const AUTHOR_TITLE = "Chief Vedic Architect, Trikal Vaani";
+const AUTHOR_TITLE = "Chief Vedic Architect, Trikaal Vaani";
 const VM_URL = "http://34.14.164.105:8001";
 
 // ── Types ─────────────────────────────────────────────────────────────
@@ -146,7 +146,7 @@ export async function generateMetadata(
   const human = formatHuman(date);
   const url = `${SITE_URL}/panchang/${date}`;
 
-  const title = p?.seo_title?.replace(/\s*\|\s*Trikal Vaani\s*$/i, "")
+  const title = p?.seo_title?.replace(/\s*\|\s*Trikaal Vaani\s*$/i, "")
     ?? `Aaj Ka Panchang ${human} | Tithi, Nakshatra, Rahu Kaal`;
 
   const description = p?.seo_description
@@ -156,7 +156,7 @@ export async function generateMetadata(
     title, description,
     authors: [{ name: AUTHOR_NAME, url: `${SITE_URL}/founder` }],
     alternates: { canonical: url },
-    openGraph: { title: `${title} | Trikal Vaani`, description, url, siteName: "Trikal Vaani", type: "article", locale: "en_IN" },
+    openGraph: { title: `${title} | Trikaal Vaani`, description, url, siteName: "Trikaal Vaani", type: "article", locale: "en_IN" },
     twitter: { card: "summary_large_image", title, description },
     robots: { index: true, follow: true },
   };
@@ -221,7 +221,7 @@ export default async function PanchangDatePage(
       datePublished: date, dateModified: date,
       mainEntityOfPage: { "@type": "WebPage", "@id": url },
       author: { "@type": "Person", name: AUTHOR_NAME, jobTitle: AUTHOR_TITLE, url: `${SITE_URL}/founder` },
-      publisher: { "@type": "Organization", name: "Trikal Vaani", url: SITE_URL, logo: { "@type": "ImageObject", url: `${SITE_URL}/logo.png` } },
+      publisher: { "@type": "Organization", name: "Trikaal Vaani", url: SITE_URL, logo: { "@type": "ImageObject", url: `${SITE_URL}/logo.png` } },
     },
     {
       "@context": "https://schema.org", "@type": "BreadcrumbList",

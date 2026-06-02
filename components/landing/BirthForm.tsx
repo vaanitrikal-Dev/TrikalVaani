@@ -1,10 +1,18 @@
 /**
  * ============================================================
- * TRIKAL VAANI — BirthForm Component
+ * TRIKAAL VAANI — BirthForm Component
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: components/landing/BirthForm.tsx
- * VERSION: 9.2 — Razorpay Payment Flow + Full SEO/GEO
+ * VERSION: 9.3 — Brand "Trikal" → "Trikaal" visible-text sweep
  * SIGNED: ROHIIT GUPTA, CEO
+ *
+ * v9.3 CHANGES vs v9.2:
+ *   ✅ All VISIBLE/persona "Trikal" → "Trikaal" (Trikaal Ka Sandesh,
+ *      Trikaal ki Awaaz, Trikaal Voice/AI, "Tell Trikaal", submit button,
+ *      hidden SEO copy, Service/Offer JSON-LD name & brand fields)
+ *   ✅ PROTECTED (unchanged): trikalvaani.com URLs, legalName "Trikal Vaani",
+ *      meta keywords alt-spelling, code identifiers
+ *   ✅ ALL v9.2 logic preserved 100%
  *
  * v9.2 CHANGES vs v9.1:
  *   ✅ Razorpay payment flow for ₹51 (paid) and ₹11 (voice) tiers
@@ -311,9 +319,9 @@ const SEO_TRUST_BADGES = [
 
 const VOICE_TAGLINES = [
   { text: 'Kuch dil ki baatein type nahi ki jaati', icon: '🎙️' },
-  { text: 'Bol do Trikal ko — woh sun raha hai',    icon: '🔮' },
+  { text: 'Bol do Trikaal ko — woh sun raha hai',    icon: '🔮' },
   { text: 'Dil ki baat — sirf ek minute mein',      icon: '✨' },
-  { text: 'Trikal sun raha hai — bas shuru karo',   icon: '🎙️' },
+  { text: 'Trikaal sun raha hai — bas shuru karo',   icon: '🎙️' },
   { text: 'Jo dil mein hai — woh bol do',            icon: '💫' },
   { text: 'Type mat karo — feel karo',               icon: '🎙️' },
 ]
@@ -321,13 +329,13 @@ const VOICE_TAGLINES = [
 const LOADING_STEPS = [
   'Mahakaal se connection ho raha hai...',
   'Kundali calculate ho rahi hai — Swiss Ephemeris...',
-  'Trikal aapka sandesh taiyaar kar raha hai...',
+  'Trikaal aapka sandesh taiyaar kar raha hai...',
 ]
 
 const PAYMENT_LOADING_STEPS = [
   'Razorpay payment verify ho raha hai...',
   'Mahakaal se connection ho raha hai...',
-  'Trikal aapka deep reading taiyaar kar raha hai...',
+  'Trikaal aapka deep reading taiyaar kar raha hai...',
 ]
 
 const DUAL_CHART_DOMAINS = ['genz_ex_back', 'genz_toxic_boss']
@@ -424,23 +432,23 @@ const SERVICE_OFFER_SCHEMA = {
   '@context': 'https://schema.org',
   '@type': 'Service',
   '@id': 'https://trikalvaani.com/#service',
-  name: 'Trikal Vaani Vedic Astrology Prediction',
+  name: 'Trikaal Vaani Vedic Astrology Prediction',
   serviceType: 'AI Vedic Astrology Reading',
   provider: {
     '@type': 'Organization',
     '@id': 'https://trikalvaani.com/#organization',
-    name: 'Trikal Vaani',
+    name: 'Trikaal Vaani',
     url: 'https://trikalvaani.com',
   },
   areaServed: { '@type': 'Country', name: 'India' },
   audience: { '@type': 'Audience', audienceType: 'Indian seekers, NRIs, HNIs' },
   hasOfferCatalog: {
     '@type': 'OfferCatalog',
-    name: 'Trikal Vaani Reading Plans',
+    name: 'Trikaal Vaani Reading Plans',
     itemListElement: [
       {
         '@type': 'Offer',
-        name: 'Free Trikal Ka Sandesh',
+        name: 'Free Trikaal Ka Sandesh',
         description: '150-200 word free Vedic preview with Swiss Ephemeris kundali',
         price: '0',
         priceCurrency: 'INR',
@@ -498,7 +506,7 @@ const SERVICE_OFFER_SCHEMA = {
   // ── Razorpay payment processor declared (AI search picks this up) ──
   brand: {
     '@type': 'Brand',
-    name: 'Trikal Vaani',
+    name: 'Trikaal Vaani',
     slogan: 'India\'s Most Accurate AI Vedic Astrology — Razorpay-Secured Payments',
   },
 }
@@ -582,7 +590,7 @@ function RotatingTagline() {
         {tagline.icon} "{tagline.text}"
       </p>
       <p style={{ color: '#475569', fontSize: '10px', margin: '4px 0 0' }}>
-        — Trikal Voice Reading · ₹11 only · Razorpay Secured
+        — Trikaal Voice Reading · ₹11 only · Razorpay Secured
       </p>
     </div>
   )
@@ -646,9 +654,9 @@ function RazorpayInlineTrustStrip({ tier }: { tier: PredictionTier }) {
 
 function TierSelector({ selected, onChange }: { selected: PredictionTier; onChange: (t: PredictionTier) => void }) {
   const tiers = [
-    { id: 'free'  as PredictionTier, icon: '🔮', label: 'Free Preview', price: 'Free', desc: 'Trikal Ka Sandesh', color: '#94a3b8', features: ['150-200 word summary', 'Key message + action', 'Instant results'] },
+    { id: 'free'  as PredictionTier, icon: '🔮', label: 'Free Preview', price: 'Free', desc: 'Trikaal Ka Sandesh', color: '#94a3b8', features: ['150-200 word summary', 'Key message + action', 'Instant results'] },
     { id: 'paid'  as PredictionTier, icon: '⚡', label: 'Deep Reading',  price: '₹51',  desc: 'Gemini Pro 2.5',   color: GOLD,      features: ['900 word full analysis', 'Personalized 5 upay', 'Action windows + dates'], highlight: true },
-    { id: 'voice' as PredictionTier, icon: '🎙️', label: 'Voice',        price: '₹11',  desc: 'Trikal ki awaaz', color: '#a78bfa', features: ['60-sec voice', 'Hindi / Hinglish', 'Trikal AI'] },
+    { id: 'voice' as PredictionTier, icon: '🎙️', label: 'Voice',        price: '₹11',  desc: 'Trikaal ki awaaz', color: '#a78bfa', features: ['60-sec voice', 'Hindi / Hinglish', 'Trikaal AI'] },
   ]
 
   return (
@@ -677,7 +685,7 @@ function TierSelector({ selected, onChange }: { selected: PredictionTier; onChan
       {selected === 'paid' && (
         <div style={{ marginTop: '12px', padding: '12px', background: GOLD_RGBA(0.06), border: `1px solid ${GOLD_RGBA(0.2)}`, borderRadius: '10px' }}>
           <p style={{ margin: '0 0 4px', color: GOLD, fontSize: '11px', fontWeight: 700 }}>⚡ Gemini 2.5 Pro — 900 words deep analysis</p>
-          <p style={{ margin: 0, color: '#64748b', fontSize: '10px', lineHeight: 1.5 }}>AstroTalk charges ₹500+ for this level. Trikal Vaani delivers for ₹51 — Swiss Ephemeris + BPHS + personalized 5 upay by segment. Razorpay-secured one-time payment.</p>
+          <p style={{ margin: 0, color: '#64748b', fontSize: '10px', lineHeight: 1.5 }}>AstroTalk charges ₹500+ for this level. Trikaal Vaani delivers for ₹51 — Swiss Ephemeris + BPHS + personalized 5 upay by segment. Razorpay-secured one-time payment.</p>
         </div>
       )}
     </div>
@@ -971,8 +979,8 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
         orderId,
         amount,
         currency,
-        name:        'Trikal Vaani',
-        description: tier === 'paid' ? 'Deep Reading — Vedic Astrology' : 'Voice Reading — Trikal Voice',
+        name:        'Trikaal Vaani',
+        description: tier === 'paid' ? 'Deep Reading — Vedic Astrology' : 'Voice Reading — Trikaal Voice',
         prefillName:    fields.name,
         prefillContact: `${fields.countryCode}${fields.mobile}`.replace(/\s/g, ''),
         themeColor:     '#D4AF37',
@@ -1046,7 +1054,7 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
     if (paymentLoading)             return '⟳ Razorpay popup khul raha hai...'
     if (isLoading)                  return LOADING_STEPS[loadingStep] || 'Processing...'
     if (submitLabel)                return submitLabel
-    if (predictionTier === 'free')  return '🔮 Get Free Prediction — Trikal Ka Sandesh'
+    if (predictionTier === 'free')  return '🔮 Get Free Prediction — Trikaal Ka Sandesh'
     if (predictionTier === 'paid')  return '⚡ Pay ₹51 with Razorpay — Deep Reading'
     if (predictionTier === 'voice') return '🎙️ Pay ₹11 with Razorpay — Voice Reading'
     return '🔮 Get My Prediction'
@@ -1061,7 +1069,7 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
 
   return (
     <section id="birth-form" className={`py-16 px-4 ${className}`}
-      aria-label="Vedic Astrology Birth Chart Form — Trikal Vaani by Rohiit Gupta">
+      aria-label="Vedic Astrology Birth Chart Form — Trikaal Vaani by Rohiit Gupta">
 
       {/* JSON-LD: Service + Offer + PaymentMethod for AI Search (GEO) */}
       <script
@@ -1072,8 +1080,8 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
       {/* Hidden SEO content (expanded v9.2) */}
       <div style={{ display: 'none' }} aria-hidden="false">
         <h2>Free AI Vedic Astrology Prediction — Swiss Ephemeris Powered by Rohiit Gupta</h2>
-        <p>Get your personalized Vedic astrology reading at Trikal Vaani. Powered by Swiss Ephemeris, BPHS, Bhrigu Nandi Nadi, Shadbala. By Rohiit Gupta, Chief Vedic Architect, Delhi NCR. Free Trikal Ka Sandesh preview, ₹51 Deep Reading with 900-word analysis and 5 personalized upay, ₹11 Voice Reading. All paid plans secured by Razorpay — India's most trusted payment gateway. PCI-DSS compliant, 256-bit SSL encrypted. Accepts UPI, Cards, NetBanking, Wallets, RuPay. Customer support via WhatsApp at +91 92118 04111. Refund policy at trikalvaani.com/refund. Terms at trikalvaani.com/terms.</p>
-        <p>Trikal Vaani is India's most accurate AI Vedic astrology platform, competing with AstroTalk and AstroSage at affordable mass-market pricing. Each prediction uses real Swiss Ephemeris planetary calculations validated against BPHS classical sutras, Bhrigu Nandi Nadi pattern matching, and Shadbala planetary strength scoring. Vimshottari Dasha primary, Pratyantar Dasha for 3-7 day precision, Sookshma Dasha hourly. Lahiri Ayanamsha sidereal system. 11 life domains: Career, Wealth, Health, Relationships, Family, Education, Home, Legal, Travel, Spirituality, Well-being.</p>
+        <p>Get your personalized Vedic astrology reading at Trikaal Vaani. Powered by Swiss Ephemeris, BPHS, Bhrigu Nandi Nadi, Shadbala. By Rohiit Gupta, Chief Vedic Architect, Delhi NCR. Free Trikaal Ka Sandesh preview, ₹51 Deep Reading with 900-word analysis and 5 personalized upay, ₹11 Voice Reading. All paid plans secured by Razorpay — India's most trusted payment gateway. PCI-DSS compliant, 256-bit SSL encrypted. Accepts UPI, Cards, NetBanking, Wallets, RuPay. Customer support via WhatsApp at +91 92118 04111. Refund policy at trikalvaani.com/refund. Terms at trikalvaani.com/terms.</p>
+        <p>Trikaal Vaani is India's most accurate AI Vedic astrology platform, competing with AstroTalk and AstroSage at affordable mass-market pricing. Each prediction uses real Swiss Ephemeris planetary calculations validated against BPHS classical sutras, Bhrigu Nandi Nadi pattern matching, and Shadbala planetary strength scoring. Vimshottari Dasha primary, Pratyantar Dasha for 3-7 day precision, Sookshma Dasha hourly. Lahiri Ayanamsha sidereal system. 11 life domains: Career, Wealth, Health, Relationships, Family, Education, Home, Legal, Travel, Spirituality, Well-being.</p>
       </div>
 
       <div className="max-w-2xl mx-auto">
@@ -1096,7 +1104,7 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
             </>
           ) : (
             <>
-              <h2 className="text-white text-2xl font-serif font-bold mb-2">Trikal Ka Sandesh — Sirf Aapke Liye</h2>
+              <h2 className="text-white text-2xl font-serif font-bold mb-2">Trikaal Ka Sandesh — Sirf Aapke Liye</h2>
               <p className="text-slate-400 text-sm max-w-lg mx-auto">India's most accurate AI Vedic astrology — by Rohiit Gupta, Chief Vedic Architect, Delhi NCR.</p>
             </>
           )}
@@ -1300,7 +1308,7 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
 
             {/* Situation Note */}
             <div>
-              <label htmlFor="tv-situation" className="block text-sm font-medium text-slate-300 mb-1.5">Tell Trikal what's on your mind</label>
+              <label htmlFor="tv-situation" className="block text-sm font-medium text-slate-300 mb-1.5">Tell Trikaal what's on your mind</label>
               <div className="relative">
                 <textarea id="tv-situation"
                   placeholder="e.g. Job switch kar raha hoon, property khareedna hai, relationship mein problem hai, karz se pareshan hoon..."

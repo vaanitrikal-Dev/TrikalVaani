@@ -4,7 +4,7 @@
 // File: components/calculators/KundaliCalculatorClient.tsx
 // Version: v2.0 — CTA ONLY (no form)
 // Strategy: SEO/GEO/AEO page + emotional CTA → homepage #birth-form
-// CEO: Rohiit Gupta | Chief Vedic Architect | Trikal Vaani
+// CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
 // ============================================================
 
 import Link from 'next/link';
@@ -86,7 +86,7 @@ export default function KundaliCalculatorClient() {
           {/* ── SACRED PROMISE ── */}
           <div className="mb-6">
             <p className="text-base md:text-lg text-slate-200 mb-4 leading-relaxed">
-              Trikal Vaani ki AI ne aapke <strong style={{ color: GOLD }}>9 grahon ko padh liya hai</strong>.<br />
+              Trikaal Vaani ki AI ne aapke <strong style={{ color: GOLD }}>9 grahon ko padh liya hai</strong>.<br />
               Ab woh bolna chahti hai — <em>sirf aapse.</em>
             </p>
 
@@ -113,7 +113,7 @@ export default function KundaliCalculatorClient() {
                 boxShadow: `0 0 30px ${GOLD_RGBA(0.5)}, 0 0 60px ${GOLD_RGBA(0.2)}`,
               }}
             >
-              <span>🔮 Trikal Ka Sandesh — Sirf Aapke Liye — ₹51 →</span>
+              <span>🔮 Trikaal Ka Sandesh — Sirf Aapke Liye — ₹51 →</span>
             </Link>
 
             <p

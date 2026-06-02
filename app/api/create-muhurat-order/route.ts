@@ -102,7 +102,7 @@ export async function POST(req: NextRequest) {
       currency: 'INR',
       receipt:  `tv_muhurat_${Date.now()}`,
       notes: {
-        platform:  'Trikal Vaani',
+        platform:  'Trikaal Vaani',
         purpose:   'Child Birth Muhurat Report',
         tier:      tierKey,
         language,

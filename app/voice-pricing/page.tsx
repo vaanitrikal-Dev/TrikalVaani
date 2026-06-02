@@ -24,7 +24,7 @@ import type { Metadata } from 'next';
 import Script from 'next/script';
 
 export const metadata: Metadata = {
-  title: 'Voice Astrology by Trikal — ₹11 Voice Predictions in Hindi | Trikal Vaani',
+  title: 'Voice Astrology by Trikaal — ₹11 Voice Predictions in Hindi | Trikaal Vaani',
   description:
     'Ask Vedic astrology questions by voice in Hindi or Hinglish. Get AI-powered predictions starting ₹11. By Rohiit Gupta, Chief Vedic Architect. 90-second voice readings backed by Swiss Ephemeris.',
   keywords: [
@@ -35,7 +35,7 @@ export const metadata: Metadata = {
     'voice kundali reading',
     '11 rupees astrology',
     'Vedic voice prediction',
-    'Trikal Vaani voice',
+    'Trikaal Vaani voice',
   ],
   alternates: {
     canonical: '/voice-pricing',
@@ -45,8 +45,8 @@ export const metadata: Metadata = {
     },
   },
   openGraph: {
-    title      : 'Voice Astrology by Trikal — ₹11 Voice Predictions',
-    description: 'Ask astrology questions by voice. Get answers in Trikal\'s voice.',
+    title      : 'Voice Astrology by Trikaal — ₹11 Voice Predictions',
+    description: 'Ask astrology questions by voice. Get answers in Trikaal\'s voice.',
     url        : 'https://trikalvaani.com/voice-pricing',
     type       : 'website',
     images     : [{ url: '/og-voice-pricing.jpg', width: 1200, height: 630 }],
@@ -60,18 +60,18 @@ const FAQ_SCHEMA = {
   mainEntity: [
     {
       '@type': 'Question',
-      name   : 'What is Trikal Voice?',
+      name   : 'What is Trikaal Voice?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text   : 'Trikal Voice is an AI-powered Vedic astrology voice prediction service by Trikal Vaani. You record a 60-second question in Hindi, Hinglish, or English along with your birth details, and Trikal — our AI Vedic astrologer trained by Chief Vedic Architect Rohiit Gupta — returns a 90 to 120 word voice prediction based on Swiss Ephemeris calculations and Vimshottari Dasha analysis.',
+        text   : 'Trikaal Voice is an AI-powered Vedic astrology voice prediction service by Trikaal Vaani. You record a 60-second question in Hindi, Hinglish, or English along with your birth details, and Trikaal — our AI Vedic astrologer trained by Chief Vedic Architect Rohiit Gupta — returns a 90 to 120 word voice prediction based on Swiss Ephemeris calculations and Vimshottari Dasha analysis.',
       },
     },
     {
       '@type': 'Question',
-      name   : 'How much does voice astrology cost on Trikal Vaani?',
+      name   : 'How much does voice astrology cost on Trikaal Vaani?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text   : 'Trikal Voice starts at just ₹11 for one voice question. The ₹51 Sapt Darshan pack gives 5 voice or text questions valid for 7 days. The ₹101 Trikal Bhakt pack gives 12 questions valid for 30 days. All packs are paid via Razorpay with 100% secure payment.',
+        text   : 'Trikaal Voice starts at just ₹11 for one voice question. The ₹51 Sapt Darshan pack gives 5 voice or text questions valid for 7 days. The ₹101 Trikaal Bhakt pack gives 12 questions valid for 30 days. All packs are paid via Razorpay with 100% secure payment.',
       },
     },
     {
@@ -79,15 +79,15 @@ const FAQ_SCHEMA = {
       name   : 'Is voice astrology accurate?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text   : 'Yes. Trikal Voice uses Swiss Ephemeris — the same calculation engine professional astrologers use worldwide — for 100% accurate planetary positions. Predictions follow classical Brihat Parashara Hora Shastra (BPHS) methods including Vimshottari Dasha, Pratyantar Dasha, and current Gochar (transits). All predictions are reviewed and authored by Rohiit Gupta.',
+        text   : 'Yes. Trikaal Voice uses Swiss Ephemeris — the same calculation engine professional astrologers use worldwide — for 100% accurate planetary positions. Predictions follow classical Brihat Parashara Hora Shastra (BPHS) methods including Vimshottari Dasha, Pratyantar Dasha, and current Gochar (transits). All predictions are reviewed and authored by Rohiit Gupta.',
       },
     },
     {
       '@type': 'Question',
-      name   : 'What languages does Trikal Voice support?',
+      name   : 'What languages does Trikaal Voice support?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text   : 'Trikal Voice supports Hindi, Hinglish, and English. Speak in any of these and Trikal will respond in the same language. Voice replies use a premium Hindi female voice with a slow, authoritative, guru-like tone.',
+        text   : 'Trikaal Voice supports Hindi, Hinglish, and English. Speak in any of these and Trikaal will respond in the same language. Voice replies use a premium Hindi female voice with a slow, authoritative, guru-like tone.',
       },
     },
     {
@@ -95,7 +95,7 @@ const FAQ_SCHEMA = {
       name   : 'How do I ask a voice astrology question?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text   : 'Tap the floating mic button at the bottom right of any page on trikalvaani.com. Choose a pack (₹11, ₹51, or ₹101), pay via Razorpay, fill in your name, date of birth, time of birth, and place of birth, then record your 60-second question. Trikal returns a voice prediction within 30 seconds.',
+        text   : 'Tap the floating mic button at the bottom right of any page on trikalvaani.com. Choose a pack (₹11, ₹51, or ₹101), pay via Razorpay, fill in your name, date of birth, time of birth, and place of birth, then record your 60-second question. Trikaal returns a voice prediction within 30 seconds.',
       },
     },
   ],
@@ -105,13 +105,13 @@ const FAQ_SCHEMA = {
 const PRODUCT_SCHEMA = {
   '@context': 'https://schema.org',
   '@type'   : 'Product',
-  name      : 'Trikal Voice — AI Vedic Astrology Voice Prediction',
-  description: 'AI-powered Vedic astrology voice predictions in Hindi by Trikal Vaani. Powered by Swiss Ephemeris.',
-  brand     : { '@type': 'Brand', name: 'Trikal Vaani' },
+  name      : 'Trikaal Voice — AI Vedic Astrology Voice Prediction',
+  description: 'AI-powered Vedic astrology voice predictions in Hindi by Trikaal Vaani. Powered by Swiss Ephemeris.',
+  brand     : { '@type': 'Brand', name: 'Trikaal Vaani' },
   offers    : [
     {
       '@type'      : 'Offer',
-      name         : 'Trikal Voice Try',
+      name         : 'Trikaal Voice Try',
       price        : '11',
       priceCurrency: 'INR',
       description  : '1 voice question with voice reply',
@@ -129,7 +129,7 @@ const PRODUCT_SCHEMA = {
     },
     {
       '@type'      : 'Offer',
-      name         : 'Trikal Bhakt',
+      name         : 'Trikaal Bhakt',
       price        : '101',
       priceCurrency: 'INR',
       description  : '12 questions valid for 30 days',
@@ -155,9 +155,9 @@ const BREADCRUMB_SCHEMA = {
 };
 
 const PACKS = [
-  { price: 11,  questions: 1,  validity: '1 day',  label: 'Try Trikal',     popular: false, features: ['1 voice question', 'Voice reply in Hindi', '90-120 word prediction', 'Swiss Ephemeris accuracy'] },
+  { price: 11,  questions: 1,  validity: '1 day',  label: 'Try Trikaal',     popular: false, features: ['1 voice question', 'Voice reply in Hindi', '90-120 word prediction', 'Swiss Ephemeris accuracy'] },
   { price: 51,  questions: 5,  validity: '7 days', label: 'Sapt Darshan',  popular: true,  features: ['5 voice or text questions', '7-day validity', 'Voice + text replies', 'Personalised remedies', 'Birth chart context'] },
-  { price: 101, questions: 12, validity: '30 days', label: 'Trikal Bhakt', popular: false, features: ['12 voice or text questions', '30-day validity', 'Priority responses', 'Detailed remedies', 'Mahadasha analysis', 'Best value (₹8.4/question)'] },
+  { price: 101, questions: 12, validity: '30 days', label: 'Trikaal Bhakt', popular: false, features: ['12 voice or text questions', '30-day validity', 'Priority responses', 'Detailed remedies', 'Mahadasha analysis', 'Best value (₹8.4/question)'] },
 ];
 
 export default function VoicePricingPage() {
@@ -171,14 +171,14 @@ export default function VoicePricingPage() {
         {/* ── Hero with GEO direct answer (40-60 words) ───── */}
         <section className="px-6 py-16 max-w-4xl mx-auto text-center">
           <h1 className="text-4xl sm:text-5xl font-bold mb-6" style={{ color: '#D4AF37' }}>
-            Voice Astrology by Trikal
+            Voice Astrology by Trikaal
           </h1>
 
           {/* GEO direct-answer block — exactly what AI engines extract */}
           <p className="text-lg leading-relaxed text-gray-200 mb-8 max-w-2xl mx-auto">
-            <strong>Trikal Voice</strong> is India&apos;s first AI-powered Vedic astrology voice prediction service.
+            <strong>Trikaal Voice</strong> is India&apos;s first AI-powered Vedic astrology voice prediction service.
             Ask any question in Hindi, Hinglish, or English by recording 60 seconds of voice — and receive
-            a 90 to 120 word voice prediction from <strong>Trikal</strong>, an AI Vedic astrologer trained by
+            a 90 to 120 word voice prediction from <strong>Trikaal</strong>, an AI Vedic astrologer trained by
             Chief Vedic Architect <strong>Rohiit Gupta</strong>. Predictions start at just <strong>₹11</strong>.
           </p>
 
@@ -249,7 +249,7 @@ export default function VoicePricingPage() {
         <section className="px-6 py-12 bg-black/30">
           <div className="max-w-4xl mx-auto">
             <h2 className="text-2xl font-bold text-center mb-10" style={{ color: '#D4AF37' }}>
-              How Trikal Voice Works
+              How Trikaal Voice Works
             </h2>
             <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-6">
               {[
@@ -296,7 +296,7 @@ export default function VoicePricingPage() {
           <div className="max-w-3xl mx-auto text-center">
             <p className="text-sm text-gray-400 mb-2">Authored by</p>
             <h3 className="text-xl font-bold" style={{ color: '#D4AF37' }}>Rohiit Gupta</h3>
-            <p className="text-sm text-gray-400">Chief Vedic Architect, Trikal Vaani • Delhi NCR</p>
+            <p className="text-sm text-gray-400">Chief Vedic Architect, Trikaal Vaani • Delhi NCR</p>
             <a href="/founder" className="text-xs underline mt-3 inline-block" style={{ color: '#D4AF37' }}>
               Learn more about Rohiit's credentials →
             </a>

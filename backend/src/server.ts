@@ -21,7 +21,7 @@ app.use(express.json());
 app.get("/health", (_req, res) => {
   res.status(200).json({
     status: "ok",
-    service: "Trikal Vaani Backend",
+    service: "Trikaal Vaani Backend",
     timestamp: new Date().toISOString(),
   });
 });
@@ -30,7 +30,7 @@ app.use("/api/webhooks", webhookRouter);
 
 app.get("/", (_req, res) => {
   res.json({
-    name: "Trikal Vaani Backend",
+    name: "Trikaal Vaani Backend",
     architect: "Rohiit Gupta — Chief Vedic Architect",
     version: "1.0.0",
     status: "running",

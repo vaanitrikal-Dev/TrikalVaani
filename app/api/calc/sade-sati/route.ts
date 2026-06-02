@@ -4,7 +4,7 @@
 // Version: v1.4
 // Changelog v1.4: Pass full VM remedies object to buildTemplateFromVMRemedies
 //   so actionWindows (Dos) from remedy_master are included in response.
-// CEO: Rohiit Gupta | Chief Vedic Architect | Trikal Vaani
+// CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
 // ============================================================
 import { NextRequest, NextResponse } from 'next/server';
 import { callVM } from '@/lib/callVM';

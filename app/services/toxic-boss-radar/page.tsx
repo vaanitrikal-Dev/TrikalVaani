@@ -12,11 +12,11 @@ import SiteNav from "@/components/layout/SiteNav";
 import SiteFooter from "@/components/layout/SiteFooter";
 
 export const metadata: Metadata = {
-  title: "Is My Boss Toxic? Vedic Astrology Workplace Reading | Trikal Vaani",
+  title: "Is My Boss Toxic? Vedic Astrology Workplace Reading | Trikaal Vaani",
   description: "Chief Vedic Architect Rohiit Gupta reads your 10th House, Saturn & Rahu to reveal if your toxic boss is a karmic lesson with an end date — or a sign to leave now. ₹51 deep reading.",
   keywords: ["toxic boss astrology", "workplace astrology vedic", "10th house boss karma", "Saturn career astrology India", "Rohiit Gupta vedic astrologer Delhi"],
   authors: [{ name: "Rohiit Gupta", url: "https://trikalvaani.com/about" }],
-  openGraph: { title: "Is My Boss Toxic? | Trikal Vaani", description: "Rohiit Gupta decodes your 10th House, Saturn & authority karma.", url: "https://trikalvaani.com/services/toxic-boss-radar", siteName: "Trikal Vaani", type: "website", locale: "en_IN" },
+  openGraph: { title: "Is My Boss Toxic? | Trikaal Vaani", description: "Rohiit Gupta decodes your 10th House, Saturn & authority karma.", url: "https://trikalvaani.com/services/toxic-boss-radar", siteName: "Trikaal Vaani", type: "website", locale: "en_IN" },
   alternates: { canonical: "https://trikalvaani.com/services/toxic-boss-radar" },
 };
 
@@ -149,8 +149,8 @@ function AuthorStrip() {
         <div className="flex-shrink-0 w-20 h-20 rounded-full bg-[#D4AF37]/20 border border-[#D4AF37]/40 flex items-center justify-center text-3xl font-serif text-[#D4AF37] font-bold">RG</div>
         <div>
           <p className="text-[#D4AF37] text-xs uppercase tracking-widest font-medium mb-1">About Your Vedic Architect</p>
-          <h2 className="font-serif text-xl font-bold text-white mb-2">Rohiit Gupta — Chief Vedic Architect, Trikal Vaani</h2>
-          <p className="text-gray-400 text-sm leading-relaxed">Rohiit Gupta has studied Vedic astrology for over 15 years under the Parashara BPHS tradition. As founder of Trikal Vaani, he built India&apos;s first AI-powered Vedic platform combining Swiss Ephemeris precision with Gemini AI reasoning. All readings are designed by Rohiit — Jini AI applies his framework to your unique birth chart.</p>
+          <h2 className="font-serif text-xl font-bold text-white mb-2">Rohiit Gupta — Chief Vedic Architect, Trikaal Vaani</h2>
+          <p className="text-gray-400 text-sm leading-relaxed">Rohiit Gupta has studied Vedic astrology for over 15 years under the Parashara BPHS tradition. As founder of Trikaal Vaani, he built India&apos;s first AI-powered Vedic platform combining Swiss Ephemeris precision with Gemini AI reasoning. All readings are designed by Rohiit — Jini AI applies his framework to your unique birth chart.</p>
           <div className="flex gap-3 mt-3 flex-wrap">
             {["15+ Years Vedic Study", "Parashara BPHS Tradition", "Swiss Ephemeris Precision", "Delhi NCR Based"].map((t) => (
               <span key={t} className="text-xs border border-[#D4AF37]/30 text-[#D4AF37] px-3 py-1 rounded-full">{t}</span>
@@ -226,7 +226,7 @@ function MaaDivineSeva() {
           <p className="text-[#D4AF37] uppercase tracking-widest text-sm font-medium mb-3">Divya Seva · Divine Offering</p>
           <h2 className="font-serif text-3xl md:text-4xl font-bold mb-4">Maa Shakti Ki <span className="text-[#D4AF37]">Divya Seva</span></h2>
           <p className="text-gray-400 max-w-2xl mx-auto text-sm leading-relaxed">
-            These are not fees. They are <span className="text-[#D4AF37] font-semibold">dakshina</span> — an offering from the heart, placed at Maa Shakti&apos;s feet through Trikal Vaani. <span className="text-white font-semibold">There is no ceiling on devotion.</span> Starting ₹101, with absolutely no upper limit.
+            These are not fees. They are <span className="text-[#D4AF37] font-semibold">dakshina</span> — an offering from the heart, placed at Maa Shakti&apos;s feet through Trikaal Vaani. <span className="text-white font-semibold">There is no ceiling on devotion.</span> Starting ₹101, with absolutely no upper limit.
           </p>
         </div>
         <div className="grid md:grid-cols-2 gap-8">
@@ -286,7 +286,7 @@ function MaaDivineSeva() {
           </div>
         </div>
         <div className="text-center mt-10 border-t border-white/5 pt-8">
-          <p className="text-gray-600 text-xs leading-relaxed max-w-lg mx-auto">Trikal Vaani does not profit from dakshina offerings. All Arzi and Dhanyewaad dakshinas are used for Vedic puja samagri, mantra recitation costs, and charitable givings in Maa Shakti&apos;s name. Rohiit Gupta is the intermediary — Maa is the recipient.</p>
+          <p className="text-gray-600 text-xs leading-relaxed max-w-lg mx-auto">Trikaal Vaani does not profit from dakshina offerings. All Arzi and Dhanyewaad dakshinas are used for Vedic puja samagri, mantra recitation costs, and charitable givings in Maa Shakti&apos;s name. Rohiit Gupta is the intermediary — Maa is the recipient.</p>
         </div>
       </div>
     </section>

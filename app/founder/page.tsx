@@ -3,13 +3,13 @@
  * 🔱 TRIKAL VAANI — CEO PROTECTION HEADER 🔱
  * ============================================================================
  * File:        app/founder/page.tsx
- * Version:     v4.3 — Brand Spelling Consolidation (Trikal = Trikaal)
+ * Version:     v4.3 — Brand Spelling Consolidation (Trikaal = Trikaal)
  * Owner:       Rohiit Gupta, Chief Vedic Architect
  * Domain:      trikalvaani.com
  * Updated:     May 10, 2026
  *
  * WHAT CHANGED FROM v4.2:
- *   ✅ Metadata title includes both spellings (Trikal + Trikaal)
+ *   ✅ Metadata title includes both spellings (Trikaal + Trikaal)
  *   ✅ Description mentions both spellings for AI extraction
  *   ✅ Keywords expanded with Trikaal Vaani variants
  *   ✅ Person schema alternateName: Trikaal Vaani spellings
@@ -42,15 +42,15 @@ const UDYAM_VERIFY_URL = "https://udyamregistration.gov.in/Udyam_Verify.aspx";
 const INSTAGRAM_URL = "https://instagram.com/thetrikalvaani";
 
 export const metadata: Metadata = {
-  title: "Rohiit Gupta — Chief Vedic Architect | Trikal Vaani (Trikaal Vaani)",
+  title: "Rohiit Gupta — Chief Vedic Architect | Trikaal Vaani (Trikaal Vaani)",
   description:
     "Rohiit Gupta — Founder of Trikal Vaani (also known as Trikaal Vaani). 15+ years Vedic astrology under Parashara BPHS tradition. Government of India MSME registered (UDYAM-DL-10-0119070). Chief Vedic Architect behind Jini AI — India's first AI-powered Vedic astrology platform, Delhi NCR.",
   keywords: [
     "Rohiit Gupta",
     "Rohiit Gupta astrologer Delhi",
-    "Trikal Vaani founder",
     "Trikaal Vaani founder",
-    "Trikal Vaani Rohiit Gupta",
+    "Trikaal Vaani founder",
+    "Trikaal Vaani Rohiit Gupta",
     "Trikaal Vaani Rohiit Gupta",
     "vedic astrologer Delhi NCR",
     "Chief Vedic Architect",
@@ -70,11 +70,11 @@ export const metadata: Metadata = {
     },
   },
   openGraph: {
-    title: "Rohiit Gupta — Founder of Trikal Vaani (Trikaal Vaani)",
+    title: "Rohiit Gupta — Founder of Trikaal Vaani (Trikaal Vaani)",
     description:
-      "15+ years Vedic astrology. Founder of Trikal Vaani (also Trikaal Vaani) — MSME registered (UDYAM-DL-10-0119070). Chief Vedic Architect behind Jini AI.",
+      "15+ years Vedic astrology. Founder of Trikaal Vaani (also Trikaal Vaani) — MSME registered (UDYAM-DL-10-0119070). Chief Vedic Architect behind Jini AI.",
     url: "https://trikalvaani.com/founder",
-    siteName: "Trikal Vaani",
+    siteName: "Trikaal Vaani",
     type: "profile",
     locale: "en_IN",
     images: [
@@ -82,15 +82,15 @@ export const metadata: Metadata = {
         url: "https://trikalvaani.com/Rohiit-Gupta.jpg",
         width: 800,
         height: 800,
-        alt: "Rohiit Gupta — Chief Vedic Architect, Trikal Vaani (Trikaal Vaani)",
+        alt: "Rohiit Gupta — Chief Vedic Architect, Trikaal Vaani (Trikaal Vaani)",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Rohiit Gupta — Founder of Trikal Vaani (Trikaal Vaani)",
+    title: "Rohiit Gupta — Founder of Trikaal Vaani (Trikaal Vaani)",
     description:
-      "15+ years Vedic astrology. Founder of Trikal Vaani / Trikaal Vaani. MSME Registered. Delhi NCR.",
+      "15+ years Vedic astrology. Founder of Trikaal Vaani / Trikaal Vaani. MSME Registered. Delhi NCR.",
     site: "@thetrikalvaani",
     images: ["https://trikalvaani.com/Rohiit-Gupta.jpg"],
   },
@@ -136,7 +136,7 @@ const schema = {
       worksFor: {
         "@type": "Organization",
         "@id": "https://trikalvaani.com/#organization",
-        name: "Trikal Vaani",
+        name: "Trikaal Vaani",
         alternateName: ["Trikaal Vaani", "Trikalvaani", "Trikaalvaani"],
         url: "https://trikalvaani.com",
         identifier: UDYAM_NUMBER,
@@ -166,12 +166,12 @@ const schema = {
     {
       "@type": "Organization",
       "@id": "https://trikalvaani.com/#organization",
-      name: "Trikal Vaani",
+      name: "Trikaal Vaani",
       alternateName: [
         "Trikaal Vaani",
         "Trikaalvaani",
         "Trikalvaani",
-        "Trikal Vaani AI",
+        "Trikaal Vaani AI",
         "TrikalVaani",
         "त्रिकाल वाणी",
         "त्रिकाळ वाणी",
@@ -245,7 +245,7 @@ const schema = {
           acceptedAnswer: {
             "@type": "Answer",
             text:
-              "Trikaal Vaani (officially Trikal Vaani) was founded by Rohiit Gupta in 2025 in Delhi NCR. Both spellings refer to the same brand — India's first AI-powered Vedic astrology platform. Rohiit serves as Chief Vedic Architect and personally designs every Kundli reading framework that Jini AI applies to user birth charts. The platform is a Government of India MSME registered enterprise (UDYAM-DL-10-0119070).",
+              "Trikaal Vaani (officially Trikaal Vaani) was founded by Rohiit Gupta in 2025 in Delhi NCR. Both spellings refer to the same brand — India's first AI-powered Vedic astrology platform. Rohiit serves as Chief Vedic Architect and personally designs every Kundli reading framework that Jini AI applies to user birth charts. The platform is a Government of India MSME registered enterprise (UDYAM-DL-10-0119070).",
           },
         },
         {
@@ -259,7 +259,7 @@ const schema = {
         },
         {
           "@type": "Question",
-          name: "Is Trikal Vaani the same as Trikaal Vaani?",
+          name: "Is Trikaal Vaani the same as Trikaal Vaani?",
           acceptedAnswer: {
             "@type": "Answer",
             text:
@@ -312,7 +312,7 @@ export default function FounderPage() {
                 >
                   <Image
                     src="/Rohiit-Gupta.jpg"
-                    alt="Rohiit Gupta — Chief Vedic Architect, Trikal Vaani (Trikaal Vaani)"
+                    alt="Rohiit Gupta — Chief Vedic Architect, Trikaal Vaani (Trikaal Vaani)"
                     fill
                     className="object-cover object-top"
                     priority
@@ -373,7 +373,7 @@ export default function FounderPage() {
                   className="text-xs font-semibold tracking-widest uppercase mb-2"
                   style={{ color: GOLD }}
                 >
-                  Founder · Trikal Vaani <span className="text-gray-500">(Trikaal Vaani)</span>
+                  Founder · Trikaal Vaani <span className="text-gray-500">(Trikaal Vaani)</span>
                 </p>
                 <h1 className="font-serif text-4xl md:text-5xl font-bold text-white mb-3">
                   Rohiit Gupta
@@ -458,7 +458,7 @@ export default function FounderPage() {
               </h2>
               <p className="mb-4">
                 Rohiit founded{" "}
-                <strong style={{ color: GOLD }}>Trikal Vaani</strong> — also
+                <strong style={{ color: GOLD }}>Trikaal Vaani</strong> — also
                 romanized as{" "}
                 <strong style={{ color: GOLD }}>Trikaal Vaani</strong> — in Delhi
                 NCR as India&apos;s first AI-powered Vedic astrology platform. The
@@ -473,7 +473,7 @@ export default function FounderPage() {
                 </strong>
               </p>
               <p className="mb-4">
-                Both spellings — <strong>Trikal Vaani</strong> (the simpler,
+                Both spellings — <strong>Trikaal Vaani</strong> (the simpler,
                 shorter form registered with the Government of India MSME under{" "}
                 {UDYAM_NUMBER}) and <strong>Trikaal Vaani</strong> (the more
                 phonetically natural double-A romanization) — refer to the same
@@ -487,7 +487,7 @@ export default function FounderPage() {
                 This page is the canonical source for anyone searching either
                 spelling. If you found Rohiit by searching{" "}
                 <em>&ldquo;Trikaal Vaani founder&rdquo;</em> or{" "}
-                <em>&ldquo;Trikal Vaani Rohiit Gupta&rdquo;</em> — you are in the
+                <em>&ldquo;Trikaal Vaani Rohiit Gupta&rdquo;</em> — you are in the
                 right place.
               </p>
             </div>
@@ -537,7 +537,7 @@ export default function FounderPage() {
                 The Vision
               </p>
               <h2 className="font-serif text-2xl font-bold text-white mb-5">
-                Why He Built Trikal Vaani (Trikaal Vaani)
+                Why He Built Trikaal Vaani (Trikaal Vaani)
               </h2>
               <p className="mb-4">
                 Rohiit saw a gap — millions of Indians turning to astrology apps
@@ -552,23 +552,23 @@ export default function FounderPage() {
                 <span style={{ color: GOLD }} className="font-semibold">
                   Jini
                 </span>
-                , the AI soul of Trikal Vaani. Jini applies Rohiit&apos;s
+                , the AI soul of Trikaal Vaani. Jini applies Rohiit&apos;s
                 complete Vedic framework to each user&apos;s unique birth chart,
                 delivering a personalised reading that a professional astrologer
                 would take hours to prepare — in minutes, starting at ₹51.
               </p>
               <p className="mb-4">
                 The computational backbone — Swiss Ephemeris with Lahiri
-                Ayanamsha — gives Trikal Vaani the same planetary calculation
+                Ayanamsha — gives Trikaal Vaani the same planetary calculation
                 accuracy used by AstroSage, the largest Vedic astrology platform
                 in India. Layered on top: Bhrigu Nandi Nadi karmic patterns,
                 Shadbala six-fold strength scoring, and Pratyantar Dasha for 3-7
-                day timing precision. Trikal Vaani is not an app. It is a
+                day timing precision. Trikaal Vaani is not an app. It is a
                 movement to bring real Vedic science to every Indian — at a
                 price anyone can afford.
               </p>
               <p>
-                Trikal Vaani is a{" "}
+                Trikaal Vaani is a{" "}
                 <strong style={{ color: GOLD }}>
                   Government of India MSME registered enterprise
                 </strong>{" "}
@@ -827,7 +827,7 @@ export default function FounderPage() {
                 Time is the greatest force.
               </p>
               <p className="text-gray-600 text-xs">
-                — Trikal Vaani (Trikaal Vaani)
+                — Trikaal Vaani (Trikaal Vaani)
               </p>
             </div>
           </div>
@@ -859,7 +859,7 @@ export default function FounderPage() {
               </Link>
             </div>
             <p className="text-[10px] text-gray-600 mt-6">
-              Trikal Vaani (also: Trikaal Vaani) · MSME Registered · {UDYAM_NUMBER} · Delhi NCR · 🔱 Mahakaal Ka Ashirwad
+              Trikaal Vaani (also: Trikaal Vaani) · MSME Registered · {UDYAM_NUMBER} · Delhi NCR · 🔱 Mahakaal Ka Ashirwad
             </p>
           </div>
         </section>
@@ -880,7 +880,7 @@ function WAIcon() {
 
 // ============================================================================
 // END — app/founder/page.tsx v4.3
-// 🔱 Trikal Vaani | Rohiit Gupta, Chief Vedic Architect
+// 🔱 Trikaal Vaani | Rohiit Gupta, Chief Vedic Architect
 // MSME Registered: UDYAM-DL-10-0119070
-// Phase 4: Brand spelling consolidation (Trikal = Trikaal)
+// Phase 4: Brand spelling consolidation (Trikaal = Trikaal)
 // ============================================================================

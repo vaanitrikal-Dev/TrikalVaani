@@ -205,7 +205,7 @@ export async function POST(req: NextRequest) {
       order.tier === 'both_151'        ? 'Both Versions (Rs151)'         : order.tier;
 
     const waText = encodeURIComponent(
-      `Jai Mahakaal! Trikal Vaani Kundali Milan confirm ho gaya.\n\n` +
+      `Jai Mahakaal! Trikaal Vaani Kundali Milan confirm ho gaya.\n\n` +
       `Tier: ${tierLabel}\nBride: ${bride.name}\nGroom: ${groom.name}\n` +
       `Payment ID: ${razorpay_payment_id}\n` +
       `Result: trikalvaani.com/milan/${slug}\n\nJai Maa Shakti!`

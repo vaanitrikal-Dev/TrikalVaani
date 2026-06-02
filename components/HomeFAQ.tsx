@@ -8,7 +8,7 @@
  * Owner:       Rohiit Gupta, Chief Vedic Architect
  *
  * CHANGES vs v2.1 (CEO-approved, IR-0 compliant):
- *   ✅ BRAND FLIP: "Trikal Vaani" -> "Trikaal Vaani" (18 spots, visible + schema).
+ *   ✅ BRAND FLIP: "Trikaal Vaani" -> "Trikaal Vaani" (18 spots, visible + schema).
  *   ✅ Q8 REFRAMED local -> global: "Who is behind Trikaal Vaani & why trustworthy?"
  *      Showcases full engine stack (Swiss Ephemeris + BPHS Parashara + Bhrigu
  *      Nandi Nadi + Shadbala). Delhi NCR + ₹499 phantom REMOVED. India+worldwide.
@@ -220,7 +220,7 @@ const FAQS = [
         <strong>32+ Dhana Yogas</strong>. Examples:{" "}
         <strong>Lakshmi Yoga</strong> (Venus + Jupiter + 9th lord strong),{" "}
         <strong>Kubera Yoga</strong> (2nd and 11th lords in mutual aspect),{" "}
-        <strong>Gajakesari Yoga</strong> (Moon and Jupiter in kendra). Trikal
+        <strong>Gajakesari Yoga</strong> (Moon and Jupiter in kendra). Trikaal
         Vaani analyzes all 32 Dhana Yogas in your chart to map your{" "}
         <strong>true financial destiny</strong> — not just predict short-term
         gains.{" "}

@@ -188,5 +188,5 @@ export async function GET(req: NextRequest) {
 
 // ============================================================================
 // END — app/api/cron/indexnow/route.ts v1.0
-// 🔱 Trikal Vaani | Rohiit Gupta, Chief Vedic Architect
+// 🔱 Trikaal Vaani | Rohiit Gupta, Chief Vedic Architect
 // ============================================================================

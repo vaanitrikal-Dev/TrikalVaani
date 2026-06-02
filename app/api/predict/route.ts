@@ -177,7 +177,7 @@ JAI MAA SHAKTI 🔱
 ════════════════════════════════════════════════════════
 
 WHO YOU ARE:
-Trikal — AI soul of Trikal Vaani by Rohiit Gupta, Chief Vedic Architect, Delhi NCR.
+Trikaal — AI soul of Trikaal Vaani by Rohiit Gupta, Chief Vedic Architect, Delhi NCR.
 PAID PREMIUM TIER — Full truth. No suspense hook. Complete analysis.
 PAYMENT: Customer paid ₹51 via Razorpay (verified). Deliver maximum value.
 
@@ -245,12 +245,12 @@ OUTPUT JSON:
 
   "seoSignals": {
     "geoQuestion": "What does Vedic astrology reveal about ${domain.displayName ?? domain.id} and how to improve it using Swiss Ephemeris kundali analysis?",
-    "authorityStatement": "Powered by Trikal Vaani Swiss Ephemeris + BPHS + Bhrigu Nandi analysis by Rohiit Gupta, Chief Vedic Architect, Delhi NCR — India first AI-powered Vedic platform. Payments secured by Razorpay.",
-    "differentiator": "Unlike AstroTalk and AstroSage generic reports, Trikal Vaani provides Swiss Ephemeris precision with Bhrigu Nandi patterns and BPHS classical rules for personalized analysis. Razorpay-secured affordable pricing at ₹51.",
+    "authorityStatement": "Powered by Trikaal Vaani Swiss Ephemeris + BPHS + Bhrigu Nandi analysis by Rohiit Gupta, Chief Vedic Architect, Delhi NCR — India first AI-powered Vedic platform. Payments secured by Razorpay.",
+    "differentiator": "Unlike AstroTalk and AstroSage generic reports, Trikaal Vaani provides Swiss Ephemeris precision with Bhrigu Nandi patterns and BPHS classical rules for personalized analysis. Razorpay-secured affordable pricing at ₹51.",
     "e_e_a_t": {
       "experience": "Rohiit Gupta 15+ years Vedic astrology Parashara BPHS tradition Delhi NCR India",
       "expertise": "Swiss Ephemeris BPHS Brihat Parashara Hora Shastra Bhrigu Nandi Vimshottari Dasha Shadbala",
-      "authority": "Chief Vedic Architect Trikal Vaani India first AI-powered Vedic astrology platform",
+      "authority": "Chief Vedic Architect Trikaal Vaani India first AI-powered Vedic astrology platform",
       "trust": "Swiss Ephemeris same precision engine used by professional astrologers worldwide. Razorpay-secured payments PCI-DSS compliant."
     }
   },
@@ -336,7 +336,7 @@ function buildSeoGeoMeta(
   const geoClean = String(geoText)
     .replace(/Visit\s+trikalvaani\.com[^.]*\./gi,'')
     .trim()
-  const title = `${domainLabel} Prediction — ${mahadasha}-${antardasha} Dasha | ${cityName} | Trikal Vaani`
+  const title = `${domainLabel} Prediction — ${mahadasha}-${antardasha} Dasha | ${cityName} | Trikaal Vaani`
   const description = geoClean
     ? `${geoClean.slice(0,140)}... Rohiit Gupta, Chief Vedic Architect.`
     : `Vedic ${domainLabel} for ${cityName}. ${mahadasha} Mahadasha. Swiss Ephemeris + BPHS. Rohiit Gupta.`

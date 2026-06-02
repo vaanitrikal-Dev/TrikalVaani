@@ -5,9 +5,9 @@
 // SIGNED: ROHIIT GUPTA, CEO
 //
 // v1.2 CHANGE (Brand-flip session, CEO approved, IR-0 compliant):
-//   - Visible brand "Trikal Vaani" -> "Trikaal Vaani" (schema service name,
+//   - Visible brand "Trikaal Vaani" -> "Trikaal Vaani" (schema service name,
 //     schema provider name, Razorpay checkout name).
-//   - Persona "Trikal" -> "Trikaal" (loading message + audience subtext).
+//   - Persona "Trikaal" -> "Trikaal" (loading message + audience subtext).
 //   - "Delhi NCR" REMOVED (hero subline + footer).
 //   - AI vendor "Gemini 2.5 Pro + Claude Sonnet polish" -> "Premium AI engine
 //     with expert polish" (Couple offer schema).

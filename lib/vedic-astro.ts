@@ -227,7 +227,7 @@ export function calculateVedicTimings(
   dayOfWeek: number  // 0=Sun, 1=Mon, 2=Tue, 3=Wed, 4=Thu, 5=Fri, 6=Sat
 ) {
   if (dayOfWeek < 0 || dayOfWeek > 6) {
-    throw new Error(`[Trikal Engine] Invalid dayOfWeek: ${dayOfWeek}. Must be 0–6.`);
+    throw new Error(`[Trikaal Engine] Invalid dayOfWeek: ${dayOfWeek}. Must be 0–6.`);
   }
   const toMin = (t: string) => { const [h, m] = t.split(':').map(Number); return h * 60 + m; };
   const fmt   = (min: number) => {

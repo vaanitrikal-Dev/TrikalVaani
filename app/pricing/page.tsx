@@ -17,7 +17,7 @@
  *   Kundali Milan (₹51/₹101/₹151) · Birth Muhurat (Free/₹101/₹151) ·
  *   Karmic Reading ₹251.
  * - Removed "Jini AI" line (Jini permanently off roadmap → Trikaal AI).
- * - IR-0 fixes: visible brand "Trikal Vaani" -> "Trikaal Vaani" (title,
+ * - IR-0 fixes: visible brand "Trikaal Vaani" -> "Trikaal Vaani" (title,
  *   schema name, back link); domain/URL trikalvaani.com untouched.
  * - "11 Dard Engine domains" -> "15 life domains".
  * - areaServed: India -> India + Worldwide.

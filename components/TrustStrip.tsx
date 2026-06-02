@@ -13,7 +13,7 @@
  *      and SchemaScript (WebSite). TrustStrip was duplicating + splitting
  *      the entity graph (mismatched Person @id `/founder#rohiit-gupta` vs
  *      layout's `/#rohiit-gupta`). Now a pure visible component.
- *   ✅ BRAND FLIP: "Trikal Vaani" -> "Trikaal Vaani" in visible aria-label.
+ *   ✅ BRAND FLIP: "Trikaal Vaani" -> "Trikaal Vaani" in visible aria-label.
  *   ✅ FAKE STATS REMOVED (IR-0): no "World's most accurate", no
  *      "15,000+ seekers", no "India's Most Accurate". Kept "5,000 Years
  *      of Parashara Wisdom" — true tradition claim, not fabricated stat.

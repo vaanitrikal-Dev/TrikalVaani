@@ -29,9 +29,9 @@ import type { UserContext, TemplateData } from './gemini-prompt'
 // ─── SUSPENSE HOOKS (FREE only) ───────────────────────────────────────────────
 
 const SUSPENSE_HOOKS: Record<string, string> = {
-  hinglish: 'Lekin... Trikal ne aapki kundali mein kuch aur bhi dekha hai — ek pattern jo seedha aapke sawal ka jawab deta hai. Yeh sirf aapke liye hai. Poori baat ₹51 mein khulegi. Maa Shakti ka ashirwad hai. 🔮',
+  hinglish: 'Lekin... Trikaal ne aapki kundali mein kuch aur bhi dekha hai — ek pattern jo seedha aapke sawal ka jawab deta hai. Yeh sirf aapke liye hai. Poori baat ₹51 mein khulegi. Maa Shakti ka ashirwad hai. 🔮',
   hindi:    'परंतु... त्रिकाल ने आपकी कुंडली में कुछ और भी देखा है — एक ऐसा रहस्य जो सीधे आपके प्रश्न का उत्तर देता है। यह केवल आपके लिए है। ₹51 में पूर्ण सत्य प्रकट होगा। मां शक्ति का आशीर्वाद। 🔮',
-  english:  "But Trikal has seen something more in your chart — a deeper pattern that speaks directly to your question. This answer is yours alone. The complete truth unlocks at ₹51. Maa Shakti's blessings. 🔮",
+  english:  "But Trikaal has seen something more in your chart — a deeper pattern that speaks directly to your question. This answer is yours alone. The complete truth unlocks at ₹51. Maa Shakti's blessings. 🔮",
 }
 
 const LANGUAGE_RULES: Record<string, string> = {
@@ -95,7 +95,7 @@ JAI MAA SHAKTI 🔱
 ════════════════════════════════════════════════════════
 
 WHO YOU ARE:
-Trikal — AI soul of Trikal Vaani (trikalvaani.com).
+Trikaal — AI soul of Trikaal Vaani (trikalvaani.com).
 Created by Rohiit Gupta, Chief Vedic Architect, Delhi NCR.
 You are also a Senior SEO + GEO Architect building content that ranks on
 Google SGE, Perplexity, Gemini, and SearchGPT simultaneously.
@@ -193,10 +193,10 @@ RULE 9 — seoSignals MUST include trending 2026 keywords for this domain.
   "seoSignals": {
     "geoQuestion":        "What does Vedic astrology predict about ${domain.displayName} in 2026?",
     "trendingKeywords":   ["${domain.displayName} vedic astrology 2026", "${domain.displayName} kundali prediction", "best astrologer ${domain.displayName} India", "${domain.displayName} jyotish online", "swiss ephemeris ${domain.displayName} analysis"],
-    "authorityStatement": "Powered by Trikal Vaani Swiss Ephemeris + BPHS classical by Rohiit Gupta, Chief Vedic Architect, Delhi NCR — India first AI Vedic platform.",
+    "authorityStatement": "Powered by Trikaal Vaani Swiss Ephemeris + BPHS classical by Rohiit Gupta, Chief Vedic Architect, Delhi NCR — India first AI Vedic platform.",
     "geoOptimized":       "Direct answer: [What does Vedic astrology say about ${domain.displayName}] + [How Swiss Ephemeris calculates] + [Classical BPHS insight] — indexed by Google SGE Perplexity SearchGPT",
     "e_e_a_t": {
-      "author":    "Rohiit Gupta, Chief Vedic Architect, Trikal Vaani, Delhi NCR",
+      "author":    "Rohiit Gupta, Chief Vedic Architect, Trikaal Vaani, Delhi NCR",
       "expertise": "Swiss Ephemeris + BPHS + Bhrigu Nandi + Vimshottari Dasha",
       "trust":     "Swiss Ephemeris — used by professional astrologers worldwide"
     }

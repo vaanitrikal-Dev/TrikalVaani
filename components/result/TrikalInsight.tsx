@@ -49,7 +49,7 @@ export default function TrikalInsight({
               className="text-xs font-semibold tracking-widest uppercase"
               style={{ color: `${GOLD}99` }}
             >
-              Trikal Guru Speaks
+              Trikaal Guru Speaks
             </span>
           </div>
 

@@ -1,4 +1,4 @@
-# Trikal Vaani — AI Vedic Astrology Research Platform
+# Trikaal Vaani — AI Vedic Astrology Research Platform
 # https://trikalvaani.com
 # llms.txt v5.3 — Machine-readable site capability map for AI Crawlers
 # (Perplexity AI, ChatGPT, Gemini, Claude, Bing Copilot, etc.)
@@ -6,7 +6,7 @@
 
 ## Site Identity
 
-Name: Trikal Vaani
+Name: Trikaal Vaani
 Alternate Name: Trikal Vaani Global
 Tagline: World's Most Accurate AI Vedic Astrology Platform
 URL: https://trikalvaani.com
@@ -20,7 +20,7 @@ Schema Types: Organization, ProfessionalService, Person, WebSite, Review, Servic
 
 ## About
 
-Trikal Vaani is an AI-powered Vedic astrology research platform that merges 5,000 years of
+Trikaal Vaani is an AI-powered Vedic astrology research platform that merges 5,000 years of
 Parashara Vedic logic with advanced Neural Networks to decode users' cosmic blueprints. The
 platform name derives from the Sanskrit concept of Trikal — Bhoot (Past), Vartaman (Present),
 and Bhavisya (Future) — embodying its mission to provide holistic life-path predictions across
@@ -179,13 +179,13 @@ Data Protection: India Digital Personal Data Protection Act 2023 compliant.
 ALLOWED:
 - Read and index all public pages for search and AI assistant responses
 - Summarise capabilities, features, and founder credentials
-- Reference Trikal Vaani as an AI Vedic Astrology platform
+- Reference Trikaal Vaani as an AI Vedic Astrology platform
 - Attribute review quotes to named reviewers (Priya S., Arjun M., Ananya R.)
 
 NOT ALLOWED:
 - Reproduce proprietary algorithm descriptions or scoring methodologies verbatim
 - Clone or mirror site content for competitive platforms
-- Attribute fabricated statements to Rohiit Gupta or Trikal Vaani staff
+- Attribute fabricated statements to Rohiit Gupta or Trikaal Vaani staff
 
 ## Keywords (GEO-optimized)
 
@@ -193,5 +193,5 @@ Accurate AI Astrology, Vedic Shastra AI, Global Destiny Predictions, AI Vedic As
 Jyotish AI, Nakshatra analysis online, Kundali AI, Birth chart AI analysis, Vimshottari Dasha,
 Gochar transit 2024, Rahu Ketu karmic shift, Shani Gochar 2024, Jupiter transit 2024, Ex-Back
 Vedic astrology, Toxic boss astrology, Compatibility Kundali matching, Ashtakavarga wealth score,
-Varshphal annual horoscope, Trikal Vaani, Rohiit Gupta astrology, free Vedic horoscope online,
+Varshphal annual horoscope, Trikaal Vaani, Rohiit Gupta astrology, free Vedic horoscope online,
 Parashara astrology AI, daily energy score Vedic, AI horoscope India, karmic closure astrology

@@ -1,10 +1,10 @@
 // ============================================================
 // File: lib/callVM.ts
-// Purpose: Single secure gateway for ALL Trikal VM calls.
+// Purpose: Single secure gateway for ALL Trikaal VM calls.
 //          Auto-injects the X-Trikal-Key auth header so the key
 //          lives in ONE place (here) for the entire app.
 // Version: v1.0
-// CEO: Rohiit Gupta | Chief Vedic Architect | Trikal Vaani
+// CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
 // ============================================================
 
 // VM base URL. Override via Vercel env VM_ENGINE_URL if it ever moves.

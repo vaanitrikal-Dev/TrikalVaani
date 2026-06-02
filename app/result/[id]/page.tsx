@@ -30,14 +30,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     .eq('id', params.id)
     .single();
 
-  if (!data) return { title: 'Trikal Vaani Prediction' };
+  if (!data) return { title: 'Trikaal Vaani Prediction' };
 
   return {
-    title: `${data.person_name}'s ${data.domain_label} Reading — Trikal Vaani`,
+    title: `${data.person_name}'s ${data.domain_label} Reading — Trikaal Vaani`,
     description: `Personalized Vedic astrology prediction. Lagna: ${data.lagna ?? '—'}, Nakshatra: ${data.nakshatra ?? '—'}. Powered by Swiss Ephemeris + BPHS.`,
     robots: { index: false, follow: false },
     openGraph: {
-      title:       `${data.person_name}'s Vedic Prediction — Trikal Vaani`,
+      title:       `${data.person_name}'s Vedic Prediction — Trikaal Vaani`,
       description: `AI-powered Vedic astrology reading by Rohiit Gupta, Chief Vedic Architect.`,
       url:         `https://trikalvaani.com/result/${params.id}`,
     },

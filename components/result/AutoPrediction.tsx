@@ -126,7 +126,7 @@ function generateBriefPrediction(
       ? `${firstName} ji, Saturn aapke chart mein strong hai — yeh retirement peace ka strong indicator hai. ${mahadasha} Mahadasha mein ek spiritual clarity aayegi. Aapka 12th house bata raha hai ki peace ka waqt aa raha hai.`
       : `${firstName} ji, ${nakshatra} Nakshatra spiritual journey ke liye bahut powerful hai. ${mahadasha} Mahadasha ek life review ka waqt hai. Is phase mein liye gaye spiritual decisions lifelong peace dete hain.`,
 
-    default: `${firstName} ji, aapka ${lagna} Lagna aur ${nakshatra} Nakshatra ek unique cosmic blueprint banata hai. ${mahadasha} Mahadasha ke is phase mein ek important life window khul rahi hai. Rohiit Gupta ji ka Trikal framework kehta hai — yeh waqt action ka hai, intezaar ka nahi.`,
+    default: `${firstName} ji, aapka ${lagna} Lagna aur ${nakshatra} Nakshatra ek unique cosmic blueprint banata hai. ${mahadasha} Mahadasha ke is phase mein ek important life window khul rahi hai. Rohiit Gupta ji ka Trikaal framework kehta hai — yeh waqt action ka hai, intezaar ka nahi.`,
   };
 
   return predictions[segment] ?? predictions['default']!;
@@ -194,7 +194,7 @@ export default function AutoPrediction({
           </div>
           <div>
             <div style={{ fontSize: 13, fontWeight: 700, color: '#C4B5FD' }}>
-              Jini — Trikal Vaani
+              Jini — Trikaal Vaani
             </div>
             <div style={{ fontSize: 11, color: 'rgba(148,163,184,0.5)' }}>
               {segmentLabel} · {lagna} Lagna · {mahadasha} Mahadasha

@@ -81,7 +81,7 @@ export async function POST(req: NextRequest) {
     ].filter(Boolean).join('\n');
 
     // ── Voice prediction system prompt ──────────────────────
-    const systemPrompt = `You are Trikal — an authoritative Vedic astrologer speaking directly to a seeker.
+    const systemPrompt = `You are Trikaal — an authoritative Vedic astrologer speaking directly to a seeker.
 The seeker has PAID for this voice prediction. Give them a REAL, COMPLETE, HELPFUL answer.
 
 CRITICAL RULES:
@@ -165,7 +165,7 @@ Write a warm, specific 100-120 word Hinglish voice prediction. Count your words 
 
 export async function GET() {
   return NextResponse.json({
-    status  : 'Trikal Voice Predict API is live',
+    status  : 'Trikaal Voice Predict API is live',
     version : '1.2',
     fix     : 'maxOutputTokens 6000 — CEO approved for maximum quality',
   });

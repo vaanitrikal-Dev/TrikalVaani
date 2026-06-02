@@ -22,7 +22,7 @@ const PILLARS = [
   {
     icon: ShieldCheck,
     title: 'Transparent Methodology',
-    body: 'We publish our scoring methodology, Nakshatra weights, and Dasha calculation logic openly. Trikal Vaani is not a black box — every insight is traceable to a classical Jyotish source or a documented statistical model.',
+    body: 'We publish our scoring methodology, Nakshatra weights, and Dasha calculation logic openly. Trikaal Vaani is not a black box — every insight is traceable to a classical Jyotish source or a documented statistical model.',
   },
 ];
 
@@ -30,7 +30,7 @@ export default function AIManifesto() {
   return (
     <section
       id="about"
-      aria-label="About Trikal Vaani AI — Research and Methodology"
+      aria-label="About Trikaal Vaani AI — Research and Methodology"
       className="relative py-24 px-4"
     >
       <div
@@ -49,7 +49,7 @@ export default function AIManifesto() {
           </p>
           <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl font-bold mb-5 text-white">
             The{' '}
-            <span className="text-gradient-gold">Trikal AI</span>
+            <span className="text-gradient-gold">Trikaal AI</span>
             {' '}Engine
           </h2>
 
@@ -62,7 +62,7 @@ export default function AIManifesto() {
           >
             <p className="text-sm sm:text-base text-slate-300 leading-relaxed">
               <strong className="font-semibold" style={{ color: GOLD }}>
-                Trikal Vaani uses a proprietary Hybrid-AI model
+                Trikaal Vaani uses a proprietary Hybrid-AI model
               </strong>{' '}
               that merges 5,000-year-old Parashara Vedic logic with advanced Neural Networks
               to provide high-probability life path predictions. By cross-referencing the
@@ -118,7 +118,7 @@ export default function AIManifesto() {
           </p>
           <p className="text-sm text-slate-400 mb-1">Chief Vedic Architect &amp; AI Researcher</p>
           <p className="text-xs text-slate-600">
-            Trikal Vaani Global Headquarters · Delhi NCR, India
+            Trikaal Vaani Global Headquarters · Delhi NCR, India
           </p>
 
           <div

@@ -11,7 +11,7 @@
  *
  * PURPOSE:
  *   Capture all branded misspelling traffic ("Trikaal Vaani")
- *   Consolidate AI entity understanding (Trikal = Trikaal)
+ *   Consolidate AI entity understanding (Trikaal = Trikaal)
  *   Rank #1 on Google for "Trikaal Vaani" branded searches
  *   Educate Gemini, GPT, Perplexity, ChatGPT about brand identity
  *
@@ -47,12 +47,12 @@ import SiteFooter from '@/components/layout/SiteFooter';
 // ============================================================================
 
 export const metadata: Metadata = {
-  title: 'Trikaal Vaani — Official AI Vedic Astrology Platform | Trikal Vaani',
+  title: 'Trikaal Vaani — Official AI Vedic Astrology Platform | Trikaal Vaani',
   description:
-    "Trikaal Vaani (officially spelled Trikal Vaani) is India's AI-powered Vedic astrology platform founded by Rohiit Gupta in Delhi NCR. Get free Kundli readings, ₹51 deep analysis, and personal consultations. Government of India MSME registered (UDYAM-DL-10-0119070).",
+    "Trikaal Vaani (officially spelled Trikaal Vaani) is India's AI-powered Vedic astrology platform founded by Rohiit Gupta in Delhi NCR. Get free Kundli readings, ₹51 deep analysis, and personal consultations. Government of India MSME registered (UDYAM-DL-10-0119070).",
   keywords: [
     'Trikaal Vaani',
-    'Trikal Vaani',
+    'Trikaal Vaani',
     'Trikaalvaani',
     'Trikalvaani',
     'AI Vedic Astrology',
@@ -60,7 +60,7 @@ export const metadata: Metadata = {
     'Rohiit Gupta',
     'Vedic AI Platform',
     'Trikaal Vaani Astrology',
-    'Trikal Vaani AI',
+    'Trikaal Vaani AI',
     'त्रिकाल वाणी',
     'Best AI Astrology India',
     'Vedic Astrology Delhi NCR',
@@ -76,9 +76,9 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Trikaal Vaani — Official AI Vedic Astrology Platform',
     description:
-      "Trikaal Vaani (Trikal Vaani) is India's most accurate AI-powered Vedic astrology platform. Founded by Rohiit Gupta, Chief Vedic Architect, Delhi NCR. Free Kundli readings start at ₹0.",
+      "Trikaal Vaani (Trikaal Vaani) is India's most accurate AI-powered Vedic astrology platform. Founded by Rohiit Gupta, Chief Vedic Architect, Delhi NCR. Free Kundli readings start at ₹0.",
     url: 'https://trikalvaani.com/trikaal-vaani',
-    siteName: 'Trikal Vaani',
+    siteName: 'Trikaal Vaani',
     locale: 'en_IN',
     type: 'website',
     images: [
@@ -92,9 +92,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Trikaal Vaani — Official AI Vedic Astrology | Trikal Vaani',
+    title: 'Trikaal Vaani — Official AI Vedic Astrology | Trikaal Vaani',
     description:
-      "India's AI-powered Vedic astrology platform by Rohiit Gupta. Trikaal Vaani = Trikal Vaani. Free readings, ₹51 deep analysis. Government MSME registered.",
+      "India's AI-powered Vedic astrology platform by Rohiit Gupta. Trikaal Vaani = Trikaal Vaani. Free readings, ₹51 deep analysis. Government MSME registered.",
     images: ['https://trikalvaani.com/og-image.jpg'],
   },
   robots: {
@@ -110,7 +110,7 @@ export const metadata: Metadata = {
   },
   authors: [{ name: 'Rohiit Gupta', url: 'https://trikalvaani.com/founder' }],
   creator: 'Rohiit Gupta',
-  publisher: 'Trikal Vaani',
+  publisher: 'Trikaal Vaani',
 };
 
 // ============================================================================
@@ -125,7 +125,7 @@ const breadcrumbSchema = {
     {
       '@type': 'ListItem',
       position: 1,
-      name: 'Trikal Vaani',
+      name: 'Trikaal Vaani',
       item: 'https://trikalvaani.com',
     },
     {
@@ -180,7 +180,7 @@ const spellingFAQSchema = {
     },
     {
       '@type': 'Question',
-      name: 'Is Trikaal Vaani and Trikal Vaani the same?',
+      name: 'Is Trikaal Vaani and Trikaal Vaani the same?',
       acceptedAnswer: {
         '@type': 'Answer',
         text:
@@ -193,7 +193,7 @@ const spellingFAQSchema = {
       acceptedAnswer: {
         '@type': 'Answer',
         text:
-          "Trikaal Vaani (Trikal Vaani) was founded by Rohiit Gupta, Chief Vedic Architect, in Delhi NCR. He has 15+ years of study under the Parashara BPHS tradition specializing in Vimshottari Dasha, Pratyantar Dasha timing, Navamsa D9 chart analysis, Dhana Yoga, Property Yog, and Jaimini astrology. He combined his classical Vedic expertise with Google Gemini AI to build Jini, the AI soul of Trikaal Vaani. He can be reached at +91-9211804111 or rohiit@trikalvaani.com.",
+          "Trikaal Vaani (Trikaal Vaani) was founded by Rohiit Gupta, Chief Vedic Architect, in Delhi NCR. He has 15+ years of study under the Parashara BPHS tradition specializing in Vimshottari Dasha, Pratyantar Dasha timing, Navamsa D9 chart analysis, Dhana Yoga, Property Yog, and Jaimini astrology. He combined his classical Vedic expertise with Google Gemini AI to build Jini, the AI soul of Trikaal Vaani. He can be reached at +91-9211804111 or rohiit@trikalvaani.com.",
       },
     },
     {
@@ -207,7 +207,7 @@ const spellingFAQSchema = {
     },
     {
       '@type': 'Question',
-      name: 'Why are there two spellings — Trikaal Vaani and Trikal Vaani?',
+      name: 'Why are there two spellings — Trikaal Vaani and Trikaal Vaani?',
       acceptedAnswer: {
         '@type': 'Answer',
         text:
@@ -220,7 +220,7 @@ const spellingFAQSchema = {
       acceptedAnswer: {
         '@type': 'Answer',
         text:
-          "Yes. Trikaal Vaani offers a free 150-200 word Vedic preview called Trikal Ka Sandesh — no signup or credit card required. Paid tiers include the Voice Reading at ₹11 (60-second Hindi/Hinglish audio), Deep Reading at ₹51 (900-word personalized analysis with 5 upay/remedies), and Personal Consultation with founder Rohiit Gupta at ₹499 (live WhatsApp consultation). All payments are secured by Razorpay with PCI-DSS compliance and 256-bit SSL encryption.",
+          "Yes. Trikaal Vaani offers a free 150-200 word Vedic preview called Trikaal Ka Sandesh — no signup or credit card required. Paid tiers include the Voice Reading at ₹11 (60-second Hindi/Hinglish audio), Deep Reading at ₹51 (900-word personalized analysis with 5 upay/remedies), and Personal Consultation with founder Rohiit Gupta at ₹499 (live WhatsApp consultation). All payments are secured by Razorpay with PCI-DSS compliance and 256-bit SSL encryption.",
       },
     },
     {
@@ -238,7 +238,7 @@ const spellingFAQSchema = {
       acceptedAnswer: {
         '@type': 'Answer',
         text:
-          "Yes. Trikaal Vaani (Trikal Vaani) is a Government of India MSME registered enterprise under the Ministry of Micro, Small and Medium Enterprises. The Udyam Registration Number is UDYAM-DL-10-0119070, registered in Delhi NCR. The registration is verifiable at udyamregistration.gov.in. All payments process through Razorpay (PCI-DSS compliant, 256-bit SSL encryption). This makes Trikaal Vaani a fully compliant Indian business — not an offshore platform or unverified astrology marketplace.",
+          "Yes. Trikaal Vaani (Trikaal Vaani) is a Government of India MSME registered enterprise under the Ministry of Micro, Small and Medium Enterprises. The Udyam Registration Number is UDYAM-DL-10-0119070, registered in Delhi NCR. The registration is verifiable at udyamregistration.gov.in. All payments process through Razorpay (PCI-DSS compliant, 256-bit SSL encryption). This makes Trikaal Vaani a fully compliant Indian business — not an offshore platform or unverified astrology marketplace.",
       },
     },
   ],
@@ -283,7 +283,7 @@ export default function TrikaalVaaniPage() {
                 className="text-xs mb-6 text-slate-500 flex items-center gap-2"
               >
                 <Link href="/" className="hover:text-yellow-400 transition-colors">
-                  Trikal Vaani
+                  Trikaal Vaani
                 </Link>
                 <span style={{ color: 'rgba(212,175,55,0.4)' }}>›</span>
                 <span style={{ color: GOLD }}>Trikaal Vaani — Brand Origin</span>
@@ -303,7 +303,7 @@ export default function TrikaalVaaniPage() {
                 <span className="text-gradient-gold">Trikaal Vaani</span>
                 <span className="text-white text-2xl sm:text-3xl md:text-4xl block mt-3">
                   is officially{' '}
-                  <span style={{ color: GOLD }}>Trikal Vaani</span>
+                  <span style={{ color: GOLD }}>Trikaal Vaani</span>
                 </span>
               </h1>
 
@@ -323,7 +323,7 @@ export default function TrikaalVaaniPage() {
                 </p>
                 <p className="text-base md:text-lg text-slate-200 leading-relaxed">
                   <strong style={{ color: GOLD }}>Trikaal Vaani</strong> (officially
-                  spelled <strong style={{ color: GOLD }}>Trikal Vaani</strong>) is
+                  spelled <strong style={{ color: GOLD }}>Trikaal Vaani</strong>) is
                   India&apos;s AI-powered Vedic astrology platform founded by{' '}
                   <Link
                     href="/founder"
@@ -498,7 +498,7 @@ export default function TrikaalVaaniPage() {
                   &quot;
                 </p>
                 <p className="text-sm text-slate-400 italic">
-                  This is the meaning Trikaal Vaani — and Trikal Vaani — carries.
+                  This is the meaning Trikaal Vaani — and Trikaal Vaani — carries.
                 </p>
                 <p className="text-xs text-slate-500 mt-4">
                   Brand Slogan:{' '}
@@ -537,7 +537,7 @@ export default function TrikaalVaaniPage() {
                     }}
                   >
                     <p className="text-sm leading-relaxed text-slate-300">
-                      <strong style={{ color: GOLD }}>Trikal Vaani</strong>{' '}
+                      <strong style={{ color: GOLD }}>Trikaal Vaani</strong>{' '}
                       <span
                         className="text-xs font-bold ml-2 px-2 py-0.5 rounded"
                         style={{
@@ -586,7 +586,7 @@ export default function TrikaalVaaniPage() {
                 <span className="text-gradient-gold">Built on BPHS</span>
               </h2>
               <p className="text-slate-400 text-center max-w-2xl mx-auto mb-12">
-                Trikaal Vaani (Trikal Vaani) combines 5,000-year-old Parashara
+                Trikaal Vaani (Trikaal Vaani) combines 5,000-year-old Parashara
                 wisdom with Google Gemini AI to deliver Kundli readings that match
                 what a master Vedic astrologer would compute by hand.
               </p>
@@ -652,11 +652,11 @@ export default function TrikaalVaaniPage() {
                 Trikaal Vaani Pricing
               </h3>
               <p className="text-sm text-slate-500 text-center mb-8">
-                Same pricing on Trikal Vaani — both spellings, same platform
+                Same pricing on Trikaal Vaani — both spellings, same platform
               </p>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-12">
                 {[
-                  { price: '₹0', label: 'Trikal Ka Sandesh', desc: 'Free preview' },
+                  { price: '₹0', label: 'Trikaal Ka Sandesh', desc: 'Free preview' },
                   { price: '₹11', label: 'Voice Reading', desc: '60-sec Hindi audio' },
                   {
                     price: '₹51',
@@ -759,10 +759,10 @@ export default function TrikaalVaaniPage() {
                 {[
                   {
                     q: 'What is Trikaal Vaani?',
-                    a: "Trikaal Vaani (officially Trikal Vaani) is India's AI-powered Vedic astrology platform founded by Rohiit Gupta in Delhi NCR. It uses Swiss Ephemeris and Brihat Parashara Hora Shastra (BPHS) classical rules combined with Google Gemini AI to deliver personalized Kundli readings. Government of India MSME registered (UDYAM-DL-10-0119070).",
+                    a: "Trikaal Vaani (officially Trikaal Vaani) is India's AI-powered Vedic astrology platform founded by Rohiit Gupta in Delhi NCR. It uses Swiss Ephemeris and Brihat Parashara Hora Shastra (BPHS) classical rules combined with Google Gemini AI to deliver personalized Kundli readings. Government of India MSME registered (UDYAM-DL-10-0119070).",
                   },
                   {
-                    q: 'Is Trikaal Vaani and Trikal Vaani the same?',
+                    q: 'Is Trikaal Vaani and Trikaal Vaani the same?',
                     a: "Yes, Trikaal Vaani and Trikal Vaani are the same brand. Both spellings refer to the AI-powered Vedic astrology platform founded by Rohiit Gupta. The official spelling is 'Trikal Vaani' — registered with the Government of India MSME. 'Trikaal Vaani' is a common alternate Sanskrit romanization. Both point to trikalvaani.com.",
                   },
                   {
@@ -779,7 +779,7 @@ export default function TrikaalVaaniPage() {
                   },
                   {
                     q: 'Is Trikaal Vaani free?',
-                    a: 'Yes. The Trikal Ka Sandesh free preview gives a 150-200 word AI Vedic summary — no signup or credit card. Paid tiers: ₹11 Voice Reading, ₹51 Deep Reading (900-word + 5 upay), ₹499 Personal Consultation with Rohiit Gupta. All payments Razorpay-secured.',
+                    a: 'Yes. The Trikaal Ka Sandesh free preview gives a 150-200 word AI Vedic summary — no signup or credit card. Paid tiers: ₹11 Voice Reading, ₹51 Deep Reading (900-word + 5 upay), ₹499 Personal Consultation with Rohiit Gupta. All payments Razorpay-secured.',
                   },
                   {
                     q: 'How is Trikaal Vaani different from AstroSage and AstroTalk?',
@@ -862,7 +862,7 @@ export default function TrikaalVaaniPage() {
                   </h2>
                   <p className="text-sm text-slate-400 leading-relaxed mb-3">
                     15+ years of Parashara BPHS study. Founder of Trikaal Vaani
-                    (Trikal Vaani). Delhi NCR–based Vedic astrologer accountable
+                    (Trikaal Vaani). Delhi NCR–based Vedic astrologer accountable
                     for every Kundli reading framework on this platform.
                   </p>
                   <p className="text-xs text-slate-500">
@@ -928,7 +928,7 @@ export default function TrikaalVaaniPage() {
                   className="text-xs uppercase tracking-widest font-medium mb-4"
                   style={{ color: 'rgba(212,175,55,0.55)' }}
                 >
-                  Explore Trikal Vaani
+                  Explore Trikaal Vaani
                 </p>
                 <div className="flex flex-wrap justify-center gap-3">
                   <Link
@@ -989,7 +989,7 @@ export default function TrikaalVaaniPage() {
 
 // ============================================================================
 // END — app/trikaal-vaani/page.tsx v1.0
-// 🔱 Trikal Vaani | Rohiit Gupta, Chief Vedic Architect
+// 🔱 Trikaal Vaani | Rohiit Gupta, Chief Vedic Architect
 // MSME Registered: UDYAM-DL-10-0119070
-// Phase 3: Brand spelling capture page (Trikal = Trikaal)
+// Phase 3: Brand spelling capture page (Trikaal = Trikaal)
 // ============================================================================

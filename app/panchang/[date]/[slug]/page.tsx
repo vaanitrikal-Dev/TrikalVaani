@@ -15,7 +15,7 @@
 // CHANGES v1.0 → v1.1 (2026-05-17):
 //   FIX 1: revalidate 0→3600 (ISR) — festival data is static once written;
 //           prevents cache-control:private on every Googlebot crawl
-//   FIX 2: Title sanitization — strip trailing '| Trikal Vaani' from
+//   FIX 2: Title sanitization — strip trailing '| Trikaal Vaani' from
 //           gc.meta_title / seo_title before returning; layout.tsx template
 //           appends brand suffix automatically — was causing double brand
 //   FIX 3: openGraph.title now uses clean title (no manual brand append)
@@ -37,7 +37,7 @@ export const dynamicParams = true;
 
 const SITE_URL = "https://trikalvaani.com";
 const AUTHOR_NAME = "Rohiit Gupta";
-const AUTHOR_TITLE = "Chief Vedic Architect, Trikal Vaani";
+const AUTHOR_TITLE = "Chief Vedic Architect, Trikaal Vaani";
 const VM_URL = "http://34.14.164.105:8001";
 
 // ── Types ─────────────────────────────────────────────────────────────
@@ -168,15 +168,15 @@ export async function generateMetadata(
   const human = formatHuman(date);
   const url = `${SITE_URL}/panchang/${date}/${slug}`;
 
-  // FIX 2: Strip trailing '| Trikal Vaani' (or variants) from stored titles.
-  // layout.tsx title.template = '%s | Trikal Vaani' appends it automatically.
-  // Without this strip, pages render as 'Festival Name | Trikal Vaani | Trikal Vaani'.
+  // FIX 2: Strip trailing '| Trikaal Vaani' (or variants) from stored titles.
+  // layout.tsx title.template = '%s | Trikaal Vaani' appends it automatically.
+  // Without this strip, pages render as 'Festival Name | Trikaal Vaani | Trikaal Vaani'.
   const rawTitle =
     gc?.meta_title ??
     festival.seo_title ??
     `${festival.festival_name} — Date, Muhurat, Puja Vidhi`;
   const title = rawTitle
-    .replace(/\s*[|—–-]+\s*Trikal\s*Vaani\s*$/i, "")
+    .replace(/\s*[|—–-]+\s*Trikaa?l\s*Vaani\s*$/i, "")
     .trim();
 
   const description =
@@ -189,13 +189,13 @@ export async function generateMetadata(
     description,
     authors: [{ name: AUTHOR_NAME, url: `${SITE_URL}/founder` }],
     alternates: { canonical: url },
-    // FIX 3a: title is already clean — do not manually append '| Trikal Vaani'
+    // FIX 3a: title is already clean — do not manually append '| Trikaal Vaani'
     // FIX 3b: added images array — was absent, causing og:image missing on all panchang pages
     openGraph: {
       title,
       description,
       url,
-      siteName: "Trikal Vaani",
+      siteName: "Trikaal Vaani",
       type: "article",
       locale: "en_IN",
       images: [
@@ -249,7 +249,7 @@ function buildSchemas(
         height: 630,
       },
       author: { "@type": "Person", name: AUTHOR_NAME, jobTitle: AUTHOR_TITLE, url: `${SITE_URL}/founder` },
-      publisher: { "@type": "Organization", name: "Trikal Vaani", url: SITE_URL, logo: { "@type": "ImageObject", url: `${SITE_URL}/logo.png` } },
+      publisher: { "@type": "Organization", name: "Trikaal Vaani", url: SITE_URL, logo: { "@type": "ImageObject", url: `${SITE_URL}/logo.png` } },
     },
     {
       "@context": "https://schema.org", "@type": "BreadcrumbList",
@@ -267,7 +267,7 @@ function buildSchemas(
       startDate: date, endDate: date,
       description: gc?.spiritual_significance ?? festival.geo_answer ?? festival.festival_name,
       location: { "@type": "Place", name: "India", address: { "@type": "PostalAddress", addressCountry: "IN" } },
-      organizer: { "@type": "Organization", name: "Trikal Vaani", url: SITE_URL },
+      organizer: { "@type": "Organization", name: "Trikaal Vaani", url: SITE_URL },
     },
   ];
 }

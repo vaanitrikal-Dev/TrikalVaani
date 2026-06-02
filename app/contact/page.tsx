@@ -11,11 +11,11 @@ import SiteNav from "@/components/layout/SiteNav";
 import SiteFooter from "@/components/layout/SiteFooter";
 
 export const metadata: Metadata = {
-  title: "Contact Us | Trikal Vaani",
-  description: "Contact Rohiit Gupta and the Trikal Vaani team. WhatsApp, email, and booking details for Vedic astrology consultations. Delhi NCR, India.",
+  title: "Contact Us | Trikaal Vaani",
+  description: "Contact Rohiit Gupta and the Trikaal Vaani team. WhatsApp, email, and booking details for Vedic astrology consultations. Delhi NCR, India.",
   authors: [{ name: "Rohiit Gupta", url: "https://trikalvaani.com/founder" }],
   alternates: { canonical: "https://trikalvaani.com/contact" },
-  openGraph: { title: "Contact Us | Trikal Vaani", url: "https://trikalvaani.com/contact", siteName: "Trikal Vaani", locale: "en_IN", type: "website" },
+  openGraph: { title: "Contact Us | Trikaal Vaani", url: "https://trikalvaani.com/contact", siteName: "Trikaal Vaani", locale: "en_IN", type: "website" },
 };
 
 const GOLD = "#D4AF37";
@@ -70,7 +70,7 @@ export default function ContactPage() {
               <div className="space-y-3">
                 <div>
                   <p className="text-gray-500 text-xs uppercase tracking-wider mb-1">Platform</p>
-                  <p className="text-white font-semibold">Trikal Vaani</p>
+                  <p className="text-white font-semibold">Trikaal Vaani</p>
                 </div>
                 <div>
                   <p className="text-gray-500 text-xs uppercase tracking-wider mb-1">Founder & Chief Vedic Architect</p>

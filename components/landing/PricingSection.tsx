@@ -3,12 +3,12 @@
 // Date: 2026-05-27
 // ============================================================================
 // CHANGE LOG (v2.0 → v2.1) — brand flip, checklist-verified:
-//   - Visible brand "Trikal Vaani" -> "Trikaal Vaani" (H2 heading + AEO
+//   - Visible brand "Trikaal Vaani" -> "Trikaal Vaani" (H2 heading + AEO
 //     direct-answer paragraph — the AI-liftable text).
-//   - Schema brand name "Trikal Vaani" -> "Trikaal Vaani" (OfferCatalog name +
+//   - Schema brand name "Trikaal Vaani" -> "Trikaal Vaani" (OfferCatalog name +
 //     worksFor Organization name). Three-Name Model: added
 //     legalName: 'Trikal Vaani' to worksFor (UDYAM legal entity preserved).
-//   - Persona "Ask Trikal aloud" -> "Ask Trikaal aloud" (Voice Guidance).
+//   - Persona "Ask Trikaal aloud" -> "Ask Trikaal aloud" (Voice Guidance).
 //   - AEO comment query de-typo'd to "Trikaal Vaani".
 //   PROTECTED (untouched): all 9 trikalvaani.com URLs/@id, all 5 CTA hrefs,
 //   internal header/footer comments, real INR pricing, AEO answer structure.
@@ -336,6 +336,6 @@ export default function PricingSection() {
 
 // ============================================================================
 // END — components/landing/PricingSection.tsx v2.1
-// 🔱 Trikal Vaani | Rohiit Gupta, Chief Vedic Architect
+// 🔱 Trikaal Vaani | Rohiit Gupta, Chief Vedic Architect
 // 5 real products · honest INR pricing · OfferCatalog schema · AEO answer
 // ============================================================================

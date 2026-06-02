@@ -6,7 +6,7 @@
  * VERSION: 1.1 — Brand flip (Trikaal Vaani in share text)
  * SIGNED: ROHIIT GUPTA, CEO
  * ============================================================
- * v1.1: "Trikal Vaani" -> "Trikaal Vaani" in WhatsApp + Email share
+ * v1.1: "Trikaal Vaani" -> "Trikaal Vaani" in WhatsApp + Email share
  * copy (customer-facing text users forward to family). Domain
  * trikalvaani.com + /api/milan-pdf route untouched.
  *

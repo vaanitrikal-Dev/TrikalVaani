@@ -12,10 +12,10 @@
 //   PROTECTED: title, OG, twitter, canonical, page body — all unchanged.
 // ----------------------------------------------------------------------------
 // v11.0 → v11.1 — BRAND FLIP + IR-0 CLEANUP (metadata only, CEO-approved):
-//   ✅ BRAND FLIP: every visible "Trikal Vaani" -> "Trikaal Vaani" in this
+//   ✅ BRAND FLIP: every visible "Trikaal Vaani" -> "Trikaal Vaani" in this
 //      file's metadata block — page <title>, openGraph.title, openGraph.siteName,
 //      openGraph.images[].alt, twitter.title. This is what fixes the single-a
-//      "Trikal Vaani" title showing in Google for the homepage (page-level
+//      "Trikaal Vaani" title showing in Google for the homepage (page-level
 //      metadata overrides layout.tsx, so layout's correct Trikaal title was
 //      never reaching the homepage SERP).
 //   ✅ IR-0: "(Delhi NCR)" removed from the meta description (banned local
@@ -201,7 +201,7 @@ export default function HomePage() {
                 </p>
                 <h2 className="font-serif text-3xl sm:text-4xl font-bold text-white">
                   Latest from the{' '}
-                  <span className="text-gradient-gold">Trikal Blog</span>
+                  <span className="text-gradient-gold">Trikaal Blog</span>
                 </h2>
                 <p className="text-slate-400 mt-3 max-w-md mx-auto text-sm leading-relaxed">
                   Deep dives into Gochar transits, Kundali analysis, and the timeless
@@ -238,6 +238,6 @@ export default function HomePage() {
 
 // ============================================================================
 // END — app/page.tsx v11.2
-// 🔱 Trikal Vaani | Rohiit Gupta, Chief Vedic Architect
+// 🔱 Trikaal Vaani | Rohiit Gupta, Chief Vedic Architect
 // CEO LOCKED: TIERED LAYOUT — earning sections above mobile fold
 // ============================================================================

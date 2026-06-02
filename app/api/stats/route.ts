@@ -1,7 +1,7 @@
 // ============================================================
 // File: app/api/stats/route.ts
 // Version: v1.0 — Real predictions count from Supabase
-// CEO: Rohiit Gupta | Chief Vedic Architect | Trikal Vaani
+// CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
 // ============================================================
 // Returns real prediction count for SiteFooter honest counter.
 // Cached for 1 hour — no performance impact.

@@ -82,7 +82,7 @@ export async function POST(req: NextRequest) {
       currency: 'INR',
       receipt:  `tv_karmic_${Date.now()}`,
       notes: {
-        platform:    'Trikal Vaani',
+        platform:    'Trikaal Vaani',
         purpose:     'Karmic Background Reading',
         language,
         person_name: person.name,

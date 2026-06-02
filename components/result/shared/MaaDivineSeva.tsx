@@ -58,7 +58,7 @@ export default function MaaDivineSeva() {
           <p className="text-gray-400 max-w-2xl mx-auto text-sm leading-relaxed">
             These are not fees. They are{" "}
             <span className="text-[#D4AF37] font-semibold">dakshina</span> — an offering
-            from the heart, placed at Maa Shakti's feet through Trikal Vaani.{" "}
+            from the heart, placed at Maa Shakti's feet through Trikaal Vaani.{" "}
             <span className="text-white font-semibold">
               There is no ceiling on devotion.
             </span>{" "}
@@ -232,7 +232,7 @@ export default function MaaDivineSeva() {
         {/* Transparency footer */}
         <div className="text-center mt-10 border-t border-white/5 pt-8">
           <p className="text-gray-600 text-xs leading-relaxed max-w-lg mx-auto">
-            Trikal Vaani does not profit from dakshina offerings. All Arzi and
+            Trikaal Vaani does not profit from dakshina offerings. All Arzi and
             Dhanyewaad dakshinas are used for Vedic puja samagri, mantra recitation
             costs, and charitable givings in Maa Shakti's name. Rohiit Gupta is the
             intermediary — Maa is the recipient.

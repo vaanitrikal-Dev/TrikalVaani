@@ -27,15 +27,15 @@ const SITE_URL = "https://trikalvaani.com";
 const VM_URL = "http://34.14.164.105:8001";
 
 export const metadata: Metadata = {
-  title: "Aaj Ka Panchang 2026 | Daily Tithi Nakshatra Rahu Kaal | Trikal Vaani",
+  title: "Aaj Ka Panchang 2026 | Daily Tithi Nakshatra Rahu Kaal | Trikaal Vaani",
   description:
     "Daily Vedic Panchang. Today's Tithi, Nakshatra, Yoga, Karana, Rahu Kaal, Sunrise & upcoming festivals including Diwali, Navratri, Janmashtami. Swiss Ephemeris, Lahiri Ayanamsha. By Rohiit Gupta.",
   alternates: { canonical: `${SITE_URL}/panchang` },
   openGraph: {
-    title: "Aaj Ka Panchang | Trikal Vaani",
+    title: "Aaj Ka Panchang | Trikaal Vaani",
     description: "Daily Tithi, Nakshatra, Rahu Kaal & upcoming Vedic festivals. Swiss Ephemeris.",
     url: `${SITE_URL}/panchang`,
-    siteName: "Trikal Vaani",
+    siteName: "Trikaal Vaani",
     locale: "en_IN",
     type: "website",
   },
@@ -182,11 +182,11 @@ export default async function PanchangHubPage() {
   const schema = {
     "@context": "https://schema.org",
     "@type": "WebPage",
-    name: "Aaj Ka Panchang | Daily Vedic Panchang | Trikal Vaani",
+    name: "Aaj Ka Panchang | Daily Vedic Panchang | Trikaal Vaani",
     url: `${SITE_URL}/panchang`,
     description: "Daily Vedic Panchang with Tithi, Nakshatra, Yoga, Karana, Rahu Kaal and upcoming festivals.",
     author: { "@type": "Person", name: "Rohiit Gupta", jobTitle: "Chief Vedic Architect", url: `${SITE_URL}/founder` },
-    publisher: { "@type": "Organization", name: "Trikal Vaani", url: SITE_URL },
+    publisher: { "@type": "Organization", name: "Trikaal Vaani", url: SITE_URL },
   };
 
   return (
@@ -336,7 +336,7 @@ export default async function PanchangHubPage() {
               Tithi (lunar day), Nakshatra (moon&apos;s star), Yoga (sun-moon combination), Karana
               (half-day), and Vara (weekday). Together they reveal the energetic quality of each
               day and guide auspicious timing (Muhurta) for marriages, business launches, travel,
-              and spiritual practices. All calculations on Trikal Vaani use Swiss Ephemeris with
+              and spiritual practices. All calculations on Trikaal Vaani use Swiss Ephemeris with
               Lahiri Ayanamsha — the standard accepted by the Government of India.
             </p>
           </section>

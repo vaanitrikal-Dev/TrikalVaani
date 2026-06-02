@@ -1,5 +1,5 @@
 // ============================================================
-// CEO: Rohiit Gupta | Chief Vedic Architect | Trikal Vaani
+// CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
 // FILE: app/layout.tsx
 // VERSION: v3.1 — Favicon fix + Organization logo URL corrected
 // DATE: 2026-06-01
@@ -52,7 +52,7 @@ export const metadata: Metadata = {
     "Vedic astrology India",
     "AI Vedic astrology",
     "Trikaal Vaani",
-    "Trikal Vaani",
+    "Trikaal Vaani",
     "Rohiit Gupta astrologer",
     "voice astrology Hindi",
     "horoscope Hindi",

@@ -89,7 +89,7 @@ function TabContent({ tab, prediction }: { tab: typeof TABS[number]; prediction:
         style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)' }}
       >
         <p className="text-xs font-semibold tracking-widest uppercase text-slate-500 mb-3">
-          Trikal Guru Analysis
+          Trikaal Guru Analysis
         </p>
         <p className="text-sm text-slate-300 leading-relaxed">{prediction.depth}</p>
       </div>
@@ -231,7 +231,7 @@ export default function PredictiveModules({ data, loading, varshphalFocus, ashta
           <div className="flex items-center gap-2 mb-2">
             <Sparkles className="w-3.5 h-3.5" style={{ color: GOLD }} />
             <span className="text-xs font-semibold tracking-widest uppercase" style={{ color: `${GOLD}80` }}>
-              Trikal Guru Blessing
+              Trikaal Guru Blessing
             </span>
           </div>
           <p className="text-sm italic leading-relaxed" style={{ color: `${GOLD}cc` }}>

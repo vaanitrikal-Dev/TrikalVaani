@@ -10,8 +10,8 @@
  * Updated:     May 23, 2026
  *
  * v2.4 CHANGE (ONLY change vs v2.3):
- *   ✅ Removed "Jini" everywhere. Jini is retired — Trikal is the AI soul
- *      of the platform sitewide. All "Jini AI" → "Trikal" in matching voice.
+ *   ✅ Removed "Jini" everywhere. Jini is retired — Trikaal is the AI soul
+ *      of the platform sitewide. All "Jini AI" → "Trikaal" in matching voice.
  *   ✅ Affected spots: hero copy, GEO direct-answer block, service-card
  *      descriptions logic, FAQ schema text (Q1, Q3), final CTA copy.
  *   ✅ NOTHING ELSE TOUCHED — SEO, all 4 JSON-LD schemas, structure,
@@ -43,7 +43,7 @@ import Script from "next/script";
 // ============================================================================
 //
 // Title: "Vedic Astrology Services Online — Live Reading at ₹51"
-//   → ~52 chars, layout.tsx template appends " | Trikal Vaani" = 70 chars (SERP-safe)
+//   → ~52 chars, layout.tsx template appends " | Trikaal Vaani" = 70 chars (SERP-safe)
 //   → Targets winnable keyword "vedic astrology services online" + price hook
 //   → No double-brand
 //
@@ -62,7 +62,7 @@ export const metadata: Metadata = {
     "ai vedic astrology reading",
     "online astrology consultation India",
     "Rohiit Gupta astrologer",
-    "Trikal Vaani services",
+    "Trikaal Vaani services",
     "free kundli reading online",
     "horoscope predictions India",
     "Swiss Ephemeris astrology",
@@ -74,7 +74,7 @@ export const metadata: Metadata = {
     description:
       "AI-powered Vedic readings by Rohiit Gupta. Career, wealth, marriage, property, child destiny — Swiss Ephemeris precision. Instant delivery.",
     url: "https://trikalvaani.com/services",
-    siteName: "Trikal Vaani",
+    siteName: "Trikaal Vaani",
     locale: "en_IN",
     type: "website",
     images: [
@@ -82,7 +82,7 @@ export const metadata: Metadata = {
         url: "https://trikalvaani.com/og-image.jpg",
         width: 1200,
         height: 630,
-        alt: "Trikal Vaani — Vedic Astrology Services by Rohiit Gupta",
+        alt: "Trikaal Vaani — Vedic Astrology Services by Rohiit Gupta",
       },
     ],
   },
@@ -106,7 +106,7 @@ const services = [
     glyph: "♀",
     title: "Ex-Back Reading",
     question: "Will my ex come back?",
-    desc: "Trikal reads your Venus, 7th House and Vimshottari Dasha to reveal if reunion energy is active — and exactly when the window opens.",
+    desc: "Trikaal reads your Venus, 7th House and Vimshottari Dasha to reveal if reunion energy is active — and exactly when the window opens.",
     tags: ["Venus Analysis", "7th House", "Reunion Timing"],
     gradient: "from-rose-900/20",
     price: 51,
@@ -150,7 +150,7 @@ const services = [
     glyph: "⚖️",
     title: "Compatibility Reading",
     question: "Are we truly compatible?",
-    desc: "Beyond 36 gunas — Trikal reads both charts for Navamsa D9, Mangal Dosha, Nadi Dosha and Dasha synchronicity to reveal the soul-level truth.",
+    desc: "Beyond 36 gunas — Trikaal reads both charts for Navamsa D9, Mangal Dosha, Nadi Dosha and Dasha synchronicity to reveal the soul-level truth.",
     tags: ["Navamsa D9", "Mangal Dosha", "Dasha Sync"],
     gradient: "from-rose-900/15",
     price: 51,
@@ -202,7 +202,7 @@ const itemListSchema = {
   "@context": "https://schema.org",
   "@type": "ItemList",
   "@id": "https://trikalvaani.com/services#itemlist",
-  name: "Vedic Astrology Services by Rohiit Gupta — Trikal Vaani",
+  name: "Vedic Astrology Services by Rohiit Gupta — Trikaal Vaani",
   description:
     "8 deep AI-powered Vedic astrology readings designed by Chief Vedic Architect Rohiit Gupta. Swiss Ephemeris precision, BPHS classical rules, instant delivery from ₹51.",
   numberOfItems: services.length,
@@ -245,7 +245,7 @@ const personSchema = {
   url: "https://trikalvaani.com/founder",
   image: "https://trikalvaani.com/Rohiit-Gupta.jpg",
   description:
-    "Rohiit Gupta is the Chief Vedic Architect of Trikal Vaani with 15+ years of study in the Parashara BPHS tradition. Specializes in Vimshottari Dasha, Navamsa D9, Pratyantar Dasha precision timing, and Dhana Yoga combinations. Based in Delhi NCR.",
+    "Rohiit Gupta is the Chief Vedic Architect of Trikaal Vaani with 15+ years of study in the Parashara BPHS tradition. Specializes in Vimshottari Dasha, Navamsa D9, Pratyantar Dasha precision timing, and Dhana Yoga combinations. Based in Delhi NCR.",
   worksFor: { "@id": "https://trikalvaani.com/#organization" },
   knowsAbout: [
     "Vedic Astrology",
@@ -275,18 +275,18 @@ const faqPageSchema = {
   mainEntity: [
     {
       "@type": "Question",
-      name: "What Vedic astrology services does Trikal Vaani offer?",
+      name: "What Vedic astrology services does Trikaal Vaani offer?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "Trikal Vaani offers 8 deep AI-powered Vedic readings: Ex-Back Reading (love reunion timing), Toxic Boss Radar (workplace karma), Career Pivot (dharmic career window), Property Yog (real estate timing), Compatibility Reading (Navamsa-level kundali matching), Child Destiny (5th house talent map), Wealth Reading (Dhana Yoga analysis), and Spiritual Purpose (Atmakaraka + past-life karma). Each reading is generated by Trikal using Swiss Ephemeris precision and reviewed against BPHS classical rules. All readings start at ₹51 with instant delivery.",
+        text: "Trikaal Vaani offers 8 deep AI-powered Vedic readings: Ex-Back Reading (love reunion timing), Toxic Boss Radar (workplace karma), Career Pivot (dharmic career window), Property Yog (real estate timing), Compatibility Reading (Navamsa-level kundali matching), Child Destiny (5th house talent map), Wealth Reading (Dhana Yoga analysis), and Spiritual Purpose (Atmakaraka + past-life karma). Each reading is generated by Trikaal using Swiss Ephemeris precision and reviewed against BPHS classical rules. All readings start at ₹51 with instant delivery.",
       },
     },
     {
       "@type": "Question",
-      name: "How accurate are Trikal Vaani readings compared to AstroSage and AstroTalk?",
+      name: "How accurate are Trikaal Vaani readings compared to AstroSage and AstroTalk?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "Trikal Vaani uses Swiss Ephemeris with Lahiri Ayanamsha — the same NASA-grade planetary calculation engine used by AstroSage and professional astrologers globally. Unlike AstroTalk’s marketplace model (random astrologer quality), every Trikal Vaani reading framework is personally designed by Rohiit Gupta using BPHS, Bhrigu Nandi Nadi, and Shadbala. Birth time accuracy within 15 minutes ensures Lagna and Pratyantar Dasha precision down to 3-7 day windows.",
+        text: "Trikaal Vaani uses Swiss Ephemeris with Lahiri Ayanamsha — the same NASA-grade planetary calculation engine used by AstroSage and professional astrologers globally. Unlike AstroTalk’s marketplace model (random astrologer quality), every Trikaal Vaani reading framework is personally designed by Rohiit Gupta using BPHS, Bhrigu Nandi Nadi, and Shadbala. Birth time accuracy within 15 minutes ensures Lagna and Pratyantar Dasha precision down to 3-7 day windows.",
       },
     },
     {
@@ -294,7 +294,7 @@ const faqPageSchema = {
       name: "What is the difference between the ₹51 reading and the ₹499 personal call?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "The ₹51 Trikal reading delivers a 900-word personalized analysis with 5 upay (remedies) for one specific question — instant delivery via the website. The ₹499 Personal Consultation connects you live on WhatsApp with Rohiit Gupta for 30-45 minutes — ideal for marriage decisions, career pivots, complex chart cross-referencing, or follow-up questions. AI handles calculation; humans add wisdom for major life decisions.",
+        text: "The ₹51 Trikaal reading delivers a 900-word personalized analysis with 5 upay (remedies) for one specific question — instant delivery via the website. The ₹499 Personal Consultation connects you live on WhatsApp with Rohiit Gupta for 30-45 minutes — ideal for marriage decisions, career pivots, complex chart cross-referencing, or follow-up questions. AI handles calculation; humans add wisdom for major life decisions.",
       },
     },
     {
@@ -302,15 +302,15 @@ const faqPageSchema = {
       name: "What birth details do I need for any Vedic reading?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "Three details: full date of birth, exact time of birth (within 15-30 minutes ideally), and place of birth. The more precise your birth time, the more accurate your Lagna (Ascendant) — which determines house lordships, dasha sequences, and yogas. If birth time is unknown, Trikal Vaani offers a Moon-chart-based reading at the same price, but Lagna-based predictions are recommended for life-decision queries.",
+        text: "Three details: full date of birth, exact time of birth (within 15-30 minutes ideally), and place of birth. The more precise your birth time, the more accurate your Lagna (Ascendant) — which determines house lordships, dasha sequences, and yogas. If birth time is unknown, Trikaal Vaani offers a Moon-chart-based reading at the same price, but Lagna-based predictions are recommended for life-decision queries.",
       },
     },
     {
       "@type": "Question",
-      name: "Are Trikal Vaani readings available in Hindi?",
+      name: "Are Trikaal Vaani readings available in Hindi?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "Yes. Trikal Vaani offers readings in three languages: pure Hindi (शुद्ध हिंदी), Hinglish (Hindi-English mix — most popular in India), and English. The Voice Reading at ₹11 is delivered as a 60-second Hindi or Hinglish audio. The Personal Consultation at ₹499 is conducted in Hindi or English by Rohiit Gupta directly. All written reports use native Hindi phrasing — not machine translation.",
+        text: "Yes. Trikaal Vaani offers readings in three languages: pure Hindi (शुद्ध हिंदी), Hinglish (Hindi-English mix — most popular in India), and English. The Voice Reading at ₹11 is delivered as a 60-second Hindi or Hinglish audio. The Personal Consultation at ₹499 is conducted in Hindi or English by Rohiit Gupta directly. All written reports use native Hindi phrasing — not machine translation.",
       },
     },
     {
@@ -318,15 +318,15 @@ const faqPageSchema = {
       name: "How quickly will I receive my reading?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "AI-generated readings (₹51 Deep Reading and ₹11 Voice Reading) are delivered instantly — within 30-90 seconds of payment. The Free Trikal Ka Sandesh preview generates in under 10 seconds. The ₹499 Personal Consultation with Rohiit Gupta is scheduled within 24-48 hours via WhatsApp at +91-9211804111.",
+        text: "AI-generated readings (₹51 Deep Reading and ₹11 Voice Reading) are delivered instantly — within 30-90 seconds of payment. The Free Trikaal Ka Sandesh preview generates in under 10 seconds. The ₹499 Personal Consultation with Rohiit Gupta is scheduled within 24-48 hours via WhatsApp at +91-9211804111.",
       },
     },
     {
       "@type": "Question",
-      name: "Is Trikal Vaani safe and is my birth data private?",
+      name: "Is Trikaal Vaani safe and is my birth data private?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "Yes. Birth data is encrypted with 256-bit TLS during transmission and stored securely on Supabase (SOC 2 Type II compliant). Trikal Vaani never sells, shares, or markets your birth details to third parties. Payments are processed via Razorpay with PCI-DSS Level 1 compliance — Trikal Vaani never sees your card details. You can request data deletion anytime by emailing rohiit@trikalvaani.com.",
+        text: "Yes. Birth data is encrypted with 256-bit TLS during transmission and stored securely on Supabase (SOC 2 Type II compliant). Trikaal Vaani never sells, shares, or markets your birth details to third parties. Payments are processed via Razorpay with PCI-DSS Level 1 compliance — Trikaal Vaani never sees your card details. You can request data deletion anytime by emailing rohiit@trikalvaani.com.",
       },
     },
     {
@@ -421,7 +421,7 @@ export default function ServicesPage() {
               >
                 Rohiit Gupta
               </Link>{" "}
-              — Chief Vedic Architect. Each reading uses Swiss Ephemeris precision and Trikal to give you answers no generic astrology app can.
+              — Chief Vedic Architect. Each reading uses Swiss Ephemeris precision and Trikaal to give you answers no generic astrology app can.
             </p>
 
             <p className="text-sm text-gray-500 mb-8">
@@ -465,12 +465,12 @@ export default function ServicesPage() {
               </p>
               <p className="text-base md:text-lg text-gray-200 leading-relaxed">
                 <strong className="text-white">
-                  Trikal Vaani offers 8 specialized Vedic astrology services online
+                  Trikaal Vaani offers 8 specialized Vedic astrology services online
                 </strong>{" "}
                 — covering love (Ex-Back, Compatibility), career (Toxic Boss, Career
                 Pivot), wealth (Dhana Yoga), property (Property Yog), children (Child
                 Destiny), and spirituality (Soul Purpose). Each reading is generated by
-                Trikal using Swiss Ephemeris precision and reviewed against Brihat
+                Trikaal using Swiss Ephemeris precision and reviewed against Brihat
                 Parashara Hora Shastra rules. Pricing starts at ₹51 with instant
                 delivery; personal WhatsApp consultations with Rohiit Gupta are
                 available at ₹499.
@@ -623,13 +623,13 @@ export default function ServicesPage() {
         </section>
 
         {/* ================================================================ */}
-        {/* COMMERCIAL INTENT — Why Trikal Vaani vs AstroTalk / AstroSage    */}
+        {/* COMMERCIAL INTENT — Why Trikaal Vaani vs AstroTalk / AstroSage    */}
         {/* ================================================================ */}
         <section className="py-16 px-4 bg-[#0D1020]">
           <div className="max-w-5xl mx-auto">
             <div className="text-center mb-10">
               <p className="text-[#D4AF37] uppercase tracking-widest text-sm font-medium mb-3">
-                Why Trikal Vaani
+                Why Trikaal Vaani
               </p>
               <h2 className="font-serif text-3xl font-bold">
                 Built Different from{" "}
@@ -645,7 +645,7 @@ export default function ServicesPage() {
                       What You Get
                     </th>
                     <th className="text-center p-4 font-semibold text-[#D4AF37]">
-                      Trikal Vaani
+                      Trikaal Vaani
                     </th>
                     <th className="text-center p-4 font-semibold text-gray-500">
                       AstroTalk
@@ -757,7 +757,7 @@ export default function ServicesPage() {
             </h2>
             <p className="text-gray-400 mb-10 leading-relaxed">
               Pick the question that matters most to you right now. Enter your birth
-              details. Let Trikal — powered by 15+ years of Rohiit Gupta’s Vedic
+              details. Let Trikaal — powered by 15+ years of Rohiit Gupta’s Vedic
               wisdom — give you the clarity you have been looking for.
             </p>
             <Link
@@ -779,5 +779,5 @@ export default function ServicesPage() {
 
 // ============================================================================
 // END — app/services/page.tsx v2.4
-// 🔱 Trikal Vaani | Rohiit Gupta, Chief Vedic Architect
+// 🔱 Trikaal Vaani | Rohiit Gupta, Chief Vedic Architect
 // ============================================================================

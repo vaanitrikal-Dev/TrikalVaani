@@ -55,7 +55,7 @@ export interface RazorpayCheckoutOptions {
   orderId: string;
   amount: number;          // in paise
   currency: string;        // 'INR'
-  name: string;            // 'Trikal Vaani'
+  name: string;            // 'Trikaal Vaani'
   description: string;     // 'Deep Reading' | 'Voice Reading'
   prefillName?: string;
   prefillEmail?: string;
@@ -90,7 +90,7 @@ export function openRazorpayCheckout(opts: RazorpayCheckoutOptions): void {
       contact: opts.prefillContact ?? '',
     },
     notes: {
-      platform: 'Trikal Vaani',
+      platform: 'Trikaal Vaani',
       architect: 'Rohiit Gupta',
     },
     theme: {

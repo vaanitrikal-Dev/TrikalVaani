@@ -55,7 +55,7 @@ type Festival = {
 
 const SITE_URL = "https://trikalvaani.com";
 const AUTHOR_NAME = "Rohiit Gupta";
-const AUTHOR_TITLE = "Chief Vedic Architect, Trikal Vaani";
+const AUTHOR_TITLE = "Chief Vedic Architect, Trikaal Vaani";
 
 const CITY_SLUGS = new Set([
   "delhi", "mumbai", "noida", "gurgaon", "bangalore",
@@ -96,10 +96,10 @@ export async function generateMetadata(
 ): Promise<Metadata> {
   const c = findCity(params.domain);
   const f = findFestival(params.slug);
-  if (!c || !f) return { title: "Not Found | Trikal Vaani" };
+  if (!c || !f) return { title: "Not Found | Trikaal Vaani" };
 
   const human = formatDate(f.date);
-  const title = `${f.name} 2026 in ${c.name} | ${human} | Muhurat, Puja Vidhi, Temples | Trikal Vaani`;
+  const title = `${f.name} 2026 in ${c.name} | ${human} | Muhurat, Puja Vidhi, Temples | Trikaal Vaani`;
   const description =
     `${f.name} (${f.name_hindi}) 2026 in ${c.name}, ${c.state} — ${human}. ` +
     `Muhurat: ${f.muhurat}. Famous temples: ${c.famous_temples.slice(0, 2).join(", ")}. ` +
@@ -109,7 +109,7 @@ export async function generateMetadata(
   return {
     title, description,
     alternates: { canonical: url },
-    openGraph: { title, description, url, siteName: "Trikal Vaani", type: "article", locale: "en_IN" },
+    openGraph: { title, description, url, siteName: "Trikaal Vaani", type: "article", locale: "en_IN" },
     twitter: { card: "summary_large_image", title, description },
     robots: { index: true, follow: true },
   };
@@ -158,7 +158,7 @@ export default async function CityFestivalPage(
         longitude: c.longitude,
       },
     },
-    organizer: { "@type": "Organization", name: "Trikal Vaani", url: SITE_URL },
+    organizer: { "@type": "Organization", name: "Trikaal Vaani", url: SITE_URL },
     url,
   };
 

@@ -2,7 +2,7 @@
 // File: app/api/calc/muhurat/route.ts
 // Version: v1.1 — VM call routed through lib/callVM.ts (X-Trikal-Key auto)
 // Proxies to VM /muhurat-finder endpoint
-// CEO: Rohiit Gupta | Chief Vedic Architect | Trikal Vaani
+// CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
 // ============================================================
 // CHANGE v1.1: /muhurat-finder call now goes through lib/callVM.ts so the
 // X-Trikal-Key auth header is injected automatically. The 45s

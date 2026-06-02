@@ -10,7 +10,7 @@
  *   - REMOVED `other: { geo.region: 'IN-DL', geo.placename: 'Delhi NCR' }`
  *     (local-business geo-targeting signal — violates IR-0).
  *   - REMOVED PostalAddress block from personSchema (LocalBusiness signal).
- *   - Visible brand "Trikal Vaani" -> "Trikaal Vaani" in OG siteName,
+ *   - Visible brand "Trikaal Vaani" -> "Trikaal Vaani" in OG siteName,
  *     publisher name, worksFor name, OG image alt, not-found titles.
  *   - keywords token 'trikal vaani' -> 'trikaal vaani'.
  *   - Domain/URLs trikalvaani.com, logo & founder URLs: UNTOUCHED.

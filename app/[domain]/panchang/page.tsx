@@ -52,7 +52,7 @@ type Panchang = {
 const SITE_URL = "https://trikalvaani.com";
 const VM_BASE = "http://34.14.164.105:8001";
 const AUTHOR_NAME = "Rohiit Gupta";
-const AUTHOR_TITLE = "Chief Vedic Architect, Trikal Vaani";
+const AUTHOR_TITLE = "Chief Vedic Architect, Trikaal Vaani";
 
 // Only match known city slugs — ignore all other [domain] routes
 const CITY_SLUGS = new Set([
@@ -94,13 +94,13 @@ export async function generateMetadata(
 ): Promise<Metadata> {
   const c = findCity(params.domain);
   if (!c) return { title: "Not Found" };
-  const title = `Aaj Ka Panchang ${c.name} | Tithi, Nakshatra, Rahu Kaal Today | Trikal Vaani`;
+  const title = `Aaj Ka Panchang ${c.name} | Tithi, Nakshatra, Rahu Kaal Today | Trikaal Vaani`;
   const description = `Today's Vedic Panchang for ${c.name} (${c.name_hindi}), ${c.state}. Accurate Tithi, Nakshatra, Yoga, Karana, Sunrise, Sunset & Rahu Kaal. Swiss Ephemeris · Lahiri Ayanamsha. By Rohiit Gupta.`;
   const url = `${SITE_URL}/${c.slug}/panchang`;
   return {
     title, description,
     alternates: { canonical: url },
-    openGraph: { title, description, url, siteName: "Trikal Vaani", type: "article", locale: "en_IN" },
+    openGraph: { title, description, url, siteName: "Trikaal Vaani", type: "article", locale: "en_IN" },
     twitter: { card: "summary_large_image", title, description },
     robots: { index: true, follow: true },
   };

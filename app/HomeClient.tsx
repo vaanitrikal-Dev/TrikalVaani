@@ -67,5 +67,5 @@ export default function HomeClient() {
 
 // ============================================================================
 // END — app/HomeClient.tsx v1.0
-// 🔱 Trikal Vaani | Rohiit Gupta, Chief Vedic Architect
+// 🔱 Trikaal Vaani | Rohiit Gupta, Chief Vedic Architect
 // ============================================================================

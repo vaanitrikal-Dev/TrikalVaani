@@ -32,19 +32,19 @@ const PACKS: { [key: string]: PackInfo } = {
     price: 11,
     questions: 1,
     validityDays: 1,
-    label: 'Trikal Voice — Try',
+    label: 'Trikaal Voice — Try',
   },
   p51: {
     price: 51,
     questions: 5,
     validityDays: 7,
-    label: 'Trikal Voice — Sapt Darshan',
+    label: 'Trikaal Voice — Sapt Darshan',
   },
   p101: {
     price: 101,
     questions: 12,
     validityDays: 30,
-    label: 'Trikal Voice — Bhakt',
+    label: 'Trikaal Voice — Bhakt',
   },
 };
 

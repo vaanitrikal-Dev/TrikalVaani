@@ -283,7 +283,7 @@ export default function DardEngine({ generation, name, onAnalyze, analysis, load
           What&apos;s on your mind, <span style={{ color: GOLD }}>{name.split(' ')[0]}</span>?
         </h3>
         <p className="text-xs text-slate-500 mb-5">
-          Tap the question that&apos;s been living rent-free in your head — Trikal Guru will read your chart specifically for it.
+          Tap the question that&apos;s been living rent-free in your head — Trikaal Guru will read your chart specifically for it.
         </p>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -373,9 +373,9 @@ export default function DardEngine({ generation, name, onAnalyze, analysis, load
             </div>
             <p className="text-xs text-slate-500 mb-0">
               {isToxicBoss
-                ? "Trikal Guru will analyze Sun–Saturn authority axis & workplace power dynamics."
+                ? "Trikaal Guru will analyze Sun–Saturn authority axis & workplace power dynamics."
                 : isExBack
-                ? "Trikal Guru will run the Karmic Closure Algorithm on Venus-Ketu axis & 7th house."
+                ? "Trikaal Guru will run the Karmic Closure Algorithm on Venus-Ketu axis & 7th house."
                 : "Both charts will be compared using Ashta-Koota Vedic matching."}
             </p>
             <DualPartnerForm
@@ -429,7 +429,7 @@ function AnalysisPanel({
       <div className="flex items-center gap-2 mb-1">
         <div className="w-1.5 h-1.5 rounded-full" style={{ background: segment.color }} />
         <span className="text-xs font-semibold tracking-widest uppercase" style={{ color: `${segment.color}80` }}>
-          Trikal Guru on: {segment.label}
+          Trikaal Guru on: {segment.label}
         </span>
       </div>
 

@@ -199,9 +199,9 @@ export default function DualPartnerForm({ userName, userDob = '', userBirthTime 
         <PartnerHeaderIcon className="w-4 h-4 mt-0.5 flex-shrink-0" style={{ color: accentColor }} />
         <p className="text-xs text-slate-400 leading-relaxed">
           {isToxicBoss
-            ? `Enter your Boss's details. Trikal Guru will analyze the Sun–Saturn authority axis, career karma, and workplace power dynamics between both charts.`
+            ? `Enter your Boss's details. Trikaal Guru will analyze the Sun–Saturn authority axis, career karma, and workplace power dynamics between both charts.`
             : isExBack
-            ? `Enter their details below. Trikal Guru will analyze the Venus-Ketu axis, 7th house karma, and your Karmic Closure path.`
+            ? `Enter their details below. Trikaal Guru will analyze the Venus-Ketu axis, 7th house karma, and your Karmic Closure path.`
             : `Enter your partner's details. Both charts will be compared using Ashta-Koota Vedic matching.`}
         </p>
       </div>

@@ -35,7 +35,7 @@ const GOLD = '#D4AF37'
 const GOLD_RGBA = (a: number) => `rgba(212,175,55,${a})`
 
 export const metadata: Metadata = {
-  title: 'Start Here — Trikal Vaani | Free Kundali, Shaadi Milan & Life Answers',
+  title: 'Start Here — Trikaal Vaani | Free Kundali, Shaadi Milan & Life Answers',
   description:
     'Aap sahi jagah aaye hain. Free Kundali aur 8 calculators, Shaadi ka 36 Guna Milan, aur aapke jeevan ke sawaalon ke jawaab — sab kuch ek jagah. By Rohiit Gupta, Chief Vedic Architect.',
   alternates: { canonical: 'https://trikalvaani.com/astro' },
@@ -44,12 +44,12 @@ export const metadata: Metadata = {
   // of the index so it never competes with those canonical pages.
   robots: { index: false, follow: true },
   openGraph: {
-    title: 'Start Here — Trikal Vaani',
+    title: 'Start Here — Trikaal Vaani',
     description: 'Free Kundali, Shaadi Milan & Life Answers — sab ek jagah.',
     url: 'https://trikalvaani.com/astro',
     type: 'website',
-    siteName: 'Trikal Vaani',
-    images: [{ url: 'https://trikalvaani.com/Trikal_Logo.png', width: 512, height: 512, alt: 'Trikal Vaani' }],
+    siteName: 'Trikaal Vaani',
+    images: [{ url: 'https://trikalvaani.com/Trikal_Logo.png', width: 512, height: 512, alt: 'Trikaal Vaani' }],
   },
 }
 
@@ -91,10 +91,10 @@ export default function AstroPage() {
           __html: JSON.stringify({
             '@context': 'https://schema.org',
             '@type': 'WebPage',
-            name: 'Start Here — Trikal Vaani',
+            name: 'Start Here — Trikaal Vaani',
             url: 'https://trikalvaani.com/astro',
             description:
-              'Free Kundali & calculators, Shaadi ka 36 Guna Milan, and life answers by Trikal Vaani.',
+              'Free Kundali & calculators, Shaadi ka 36 Guna Milan, and life answers by Trikaal Vaani.',
             publisher: {
               '@type': 'Person',
               name: 'Rohiit Gupta',
@@ -114,7 +114,7 @@ export default function AstroPage() {
           <div className="flex justify-center mb-3">
             <img
               src="/Trikal_Vaani_Logo.svg"
-              alt="Trikal Vaani"
+              alt="Trikaal Vaani"
               style={{
                 width: '100px',
                 height: '100px',
@@ -131,7 +131,7 @@ export default function AstroPage() {
           </h1>
 
           <p className="text-sm mb-1" style={{ color: '#cbd5e1', lineHeight: 1.6 }}>
-            Trikal aapke sawaalon ke jawaab dega — sitaron ki bhasha mein.
+            Trikaal aapke sawaalon ke jawaab dega — sitaron ki bhasha mein.
           </p>
           <p className="text-xs mb-8" style={{ color: '#64748b' }}>
             Swiss Ephemeris accuracy · BPHS classical rules · Rohiit Gupta

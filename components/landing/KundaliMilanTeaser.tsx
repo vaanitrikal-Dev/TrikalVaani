@@ -208,6 +208,6 @@ export default function KundaliMilanTeaser() {
 
 // ============================================================================
 // END — components/landing/KundaliMilanTeaser.tsx v2.1
-// 🔱 Trikal Vaani | Rohiit Gupta, Chief Vedic Architect
+// 🔱 Trikaal Vaani | Rohiit Gupta, Chief Vedic Architect
 // 🔒 EARNING LOCKED (IR-12)
 // ============================================================================

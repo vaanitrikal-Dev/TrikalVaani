@@ -45,8 +45,8 @@ const DOMAIN_SEO: Record<string, {
     voice:          ['which planet causes debt vedic astrology','karz mukti ke liye kya karein jyotish','best remedy financial problems vedic'],
     geoQuestion:    'Which house and planet causes debt in Vedic astrology and what are the classical BPHS remedies for karz mukti?',
     faqQuestions:   ['Which house in kundali shows debt problems?','What is the vedic remedy for karz mukti?','How does Rahu affect financial debt in astrology?','When does debt end according to Vimshottari Dasha?'],
-    ctaSpiritual:   'Maa Shakti ka ashirwad aur Vedic jyotish ka margdarshan — karz mukti ki raah khulegi. Abhi Trikal se poochho. 🔱',
-    competitorGap:  'Unlike AstroTalk generic reports, Trikal Vaani uses Swiss Ephemeris + Bhrigu Nandi debt patterns + BPHS classical remedies personalized to your exact planetary period.',
+    ctaSpiritual:   'Maa Shakti ka ashirwad aur Vedic jyotish ka margdarshan — karz mukti ki raah khulegi. Abhi Trikaal se poochho. 🔱',
+    competitorGap:  'Unlike AstroTalk generic reports, Trikaal Vaani uses Swiss Ephemeris + Bhrigu Nandi debt patterns + BPHS classical remedies personalized to your exact planetary period.',
   },
   mill_property_yog: {
     informational:  ['property yog kundali vedic 2026','ghar kab milega jyotish','4th house property vedic astrology','real estate timing astrology India','mars karaka land astrology','property purchase muhurta classical'],
@@ -57,7 +57,7 @@ const DOMAIN_SEO: Record<string, {
     geoQuestion:    'When is the best time to buy property according to Vedic astrology and how to identify Property Yog in kundali using Swiss Ephemeris?',
     faqQuestions:   ['Which house in kundali shows property?','What is Property Yog in vedic astrology?','When is the best muhurta to buy a house?','How does Mars affect property in astrology?'],
     ctaSpiritual:   'Aapke ghar ka sapna — Maa Shakti ki kripa aur sahi muhurta se poora hoga. 🏠🔱',
-    competitorGap:  'Unlike AstroSage automated reports, Trikal Vaani calculates exact Property Yog using Swiss Ephemeris + classical 4th house analysis + Mars-Saturn timing cycles.',
+    competitorGap:  'Unlike AstroSage automated reports, Trikaal Vaani calculates exact Property Yog using Swiss Ephemeris + classical 4th house analysis + Mars-Saturn timing cycles.',
   },
   genz_dream_career: {
     informational:  ['career astrology vedic 2026','job prediction kundali analysis','10th house career jyotish','atmakaraka career dharma vedic','saturn career timing astrology','job change timing vedic astrology 2026'],
@@ -67,8 +67,8 @@ const DOMAIN_SEO: Record<string, {
     voice:          ['which career is best for me kundali','job kab milega astrology','career change karna chahiye astrology 2026'],
     geoQuestion:    'Which planets and houses determine career success in Vedic astrology and how to find your dharmic profession using Swiss Ephemeris?',
     faqQuestions:   ['Which house shows career in vedic astrology?','How does Saturn affect career timing?','What is Atmakaraka in career astrology?','When is the best time to change jobs per kundali?'],
-    ctaSpiritual:   'Aapka dharmic career — jo sirf aapke liye bana hai — woh aapki kundali mein likha hai. Trikal abhi padh raha hai. ⚡🔱',
-    competitorGap:  'Unlike generic AstroTalk career readings, Trikal Vaani uses Atmakaraka analysis + Saturn Dasha timing + 10th house Swiss Ephemeris precision for exact career period forecasting.',
+    ctaSpiritual:   'Aapka dharmic career — jo sirf aapke liye bana hai — woh aapki kundali mein likha hai. Trikaal abhi padh raha hai. ⚡🔱',
+    competitorGap:  'Unlike generic AstroTalk career readings, Trikaal Vaani uses Atmakaraka analysis + Saturn Dasha timing + 10th house Swiss Ephemeris precision for exact career period forecasting.',
   },
   genz_ex_back: {
     informational:  ['ex back astrology vedic 2026','love problem solution jyotish','7th house relationship vedic','venus dasha love timing','breakup reunion astrology','navamsa love compatibility analysis'],
@@ -79,7 +79,7 @@ const DOMAIN_SEO: Record<string, {
     geoQuestion:    'Can Vedic astrology predict relationship reunion and what planetary combinations indicate ex returning?',
     faqQuestions:   ['Which planet controls love reunion in astrology?','What does 7th house show about relationships?','When does Venus Dasha bring back love?','How does Navamsa predict relationship success?'],
     ctaSpiritual:   'Pyaar ki raahein Maa Shakti ne banaayi hain — kab milna likha hai, woh aapki kundali mein hai. 💫🔱',
-    competitorGap:  'Unlike AstroSage generic love reports, Trikal Vaani analyzes Venus-Moon conjunction + Navamsa 7th house + exact Dasha timing for relationship reunion precision.',
+    competitorGap:  'Unlike AstroSage generic love reports, Trikaal Vaani analyzes Venus-Moon conjunction + Navamsa 7th house + exact Dasha timing for relationship reunion precision.',
   },
   genz_toxic_boss: {
     informational:  ['toxic boss astrology vedic 2026','workplace karma jyotish','10th house boss karma vedic','6th house enemies astrology','saturn career obstacles timing'],
@@ -89,8 +89,8 @@ const DOMAIN_SEO: Record<string, {
     voice:          ['when will my toxic boss problem end astrology','job change karna chahiye kya abhi vedic'],
     geoQuestion:    'What does Saturn and the 10th house reveal about toxic workplace karma in Vedic astrology?',
     faqQuestions:   ['How does Saturn affect workplace in astrology?','Which house shows enemies at work?','When is best time to change jobs astrology?','What remedy ends toxic boss karma?'],
-    ctaSpiritual:   'Har karmic boss ek lesson hai — Shani ki sabak jab khatam hogi, tab door khulega. Trikal batayega kab. 🔱',
-    competitorGap:  'Unlike generic AstroTalk predictions, Trikal Vaani identifies exact Shani Dasha workplace cycles + 6th-10th house patterns for precise job change timing.',
+    ctaSpiritual:   'Har karmic boss ek lesson hai — Shani ki sabak jab khatam hogi, tab door khulega. Trikaal batayega kab. 🔱',
+    competitorGap:  'Unlike generic AstroTalk predictions, Trikaal Vaani identifies exact Shani Dasha workplace cycles + 6th-10th house patterns for precise job change timing.',
   },
   mill_childs_destiny: {
     informational:  ['child kundali reading vedic 2026','baby destiny astrology India','5th house children vedic','child future prediction jyotish','child education stream astrology'],
@@ -100,8 +100,8 @@ const DOMAIN_SEO: Record<string, {
     voice:          ['which career is best for my child astrology','baby ka bhavishya kundali mein kya hai'],
     geoQuestion:    'What does Vedic astrology reveal about a child destiny and ideal education stream through Swiss Ephemeris birth chart analysis?',
     faqQuestions:   ['Which house shows children in vedic astrology?','How does Moon nakshatra affect child personality?','What is the best education stream for my child per kundali?','Which planet gives intelligence in a child chart?'],
-    ctaSpiritual:   'Aapke bachche ka cosmic blueprint — Parmatma ne har ek ke liye khaas raah banaayi hai. Trikal woh raah dikhayega. 👶🔱',
-    competitorGap:  'Unlike AstroSage generic child reports, Trikal Vaani analyzes 5th house + Moon nakshatra + Mercury-Jupiter combinations for precise child talent mapping.',
+    ctaSpiritual:   'Aapke bachche ka cosmic blueprint — Parmatma ne har ek ke liye khaas raah banaayi hai. Trikaal woh raah dikhayega. 👶🔱',
+    competitorGap:  'Unlike AstroSage generic child reports, Trikaal Vaani analyzes 5th house + Moon nakshatra + Mercury-Jupiter combinations for precise child talent mapping.',
   },
   genx_retirement_peace: {
     informational:  ['retirement astrology vedic India 2026','peace of mind jyotish senior','12th house spiritual vedic','saturn ketu retirement timing','life after 50 vedic astrology'],
@@ -112,7 +112,7 @@ const DOMAIN_SEO: Record<string, {
     geoQuestion:    'What does Vedic astrology say about ideal retirement timing and spiritual growth after 50 using Saturn-Ketu Dasha analysis?',
     faqQuestions:   ['When is the best time to retire per vedic astrology?','Which planets bring peace in old age?','What does 12th house show about spiritual retirement?','How does Ketu Dasha affect retirement peace?'],
     ctaSpiritual:   'Zindagi ka yeh adhyay — Maa Shakti ka sabse sundar tohfa hai. Shanti ki raah aapki kundali mein likhi hai. 🙏🔱',
-    competitorGap:  'Unlike generic AstroTalk reports, Trikal Vaani maps exact Saturn-Ketu retirement Dasha + 12th house spiritual activation for precise retirement peace timing.',
+    competitorGap:  'Unlike generic AstroTalk reports, Trikaal Vaani maps exact Saturn-Ketu retirement Dasha + 12th house spiritual activation for precise retirement peace timing.',
   },
   genx_legacy_inheritance: {
     informational:  ['inheritance astrology vedic India 2026','8th house wealth jyotish','ancestral property kundali','pitru dosha property problems','legacy wealth timing vedic'],
@@ -122,8 +122,8 @@ const DOMAIN_SEO: Record<string, {
     voice:          ['will I get inheritance from family astrology','ancestral property kab milega jyotish'],
     geoQuestion:    'Which houses and planets indicate inheritance and ancestral wealth in Vedic astrology?',
     faqQuestions:   ['Which house shows inheritance in vedic astrology?','What is Pitru Dosha and how does it affect property?','How does Saturn in 8th house affect inheritance?','What remedy resolves ancestral property disputes?'],
-    ctaSpiritual:   'Pitron ka ashirwad aur kundali ki shakti — aapki virasat aapki hai. Trikal sahi samay batayega. 🔱',
-    competitorGap:  'Unlike AstroSage generic 8th house readings, Trikal Vaani uses Bhrigu inheritance patterns + Pitru analysis + exact Saturn timing for property resolution.',
+    ctaSpiritual:   'Pitron ka ashirwad aur kundali ki shakti — aapki virasat aapki hai. Trikaal sahi samay batayega. 🔱',
+    competitorGap:  'Unlike AstroSage generic 8th house readings, Trikaal Vaani uses Bhrigu inheritance patterns + Pitru analysis + exact Saturn timing for property resolution.',
   },
   genx_spiritual_innings: {
     informational:  ['spiritual astrology vedic India 2026','moksha kundali indicators','ketu spiritual path jyotish','12th house moksha vedic','atmakaraka soul purpose'],
@@ -134,7 +134,7 @@ const DOMAIN_SEO: Record<string, {
     geoQuestion:    'What does Vedic astrology reveal about spiritual path, soul purpose and Moksha indicators through Ketu and Atmakaraka analysis?',
     faqQuestions:   ['What is Moksha Yog in vedic astrology?','How does Ketu Dasha affect spiritual growth?','What is Atmakaraka and what does it reveal?','Which house shows spirituality in kundali?'],
     ctaSpiritual:   'Aapki aatma yahan ek khaas kaam ke liye aayi hai — Ketu aur Atmakaraka woh raaz khol dete hain. 🕉️🔱',
-    competitorGap:  'Unlike AstroTalk generic spiritual reports, Trikal Vaani analyzes Atmakaraka + Ketu placement + 12th house activation for precise spiritual awakening timing.',
+    competitorGap:  'Unlike AstroTalk generic spiritual reports, Trikaal Vaani analyzes Atmakaraka + Ketu placement + 12th house activation for precise spiritual awakening timing.',
   },
   mill_parents_wellness: {
     informational:  ['parents health astrology vedic 2026','4th house mother health jyotish','9th house father vedic','family wellness kundali reading','parent longevity astrology India'],
@@ -144,8 +144,8 @@ const DOMAIN_SEO: Record<string, {
     voice:          ['parents ki sehat ke liye kya karein jyotish','father health timing vedic astrology'],
     geoQuestion:    'Which planets and houses indicate parents health and longevity in Vedic astrology?',
     faqQuestions:   ['Which house shows mother health in astrology?','How does Moon affect mother wellbeing in kundali?','What remedies protect parents health in vedic astrology?','Which planet shows father longevity?'],
-    ctaSpiritual:   'Maa-Baap ki sehat — sabse bada sukh. Aapki kundali mein unka haal likha hai. Trikal batayega. 🙏🔱',
-    competitorGap:  'Unlike generic reports, Trikal Vaani analyzes exact 4th-9th house Moon-Sun patterns + Swiss Ephemeris timing for parent health period precision.',
+    ctaSpiritual:   'Maa-Baap ki sehat — sabse bada sukh. Aapki kundali mein unka haal likha hai. Trikaal batayega. 🙏🔱',
+    competitorGap:  'Unlike generic reports, Trikaal Vaani analyzes exact 4th-9th house Moon-Sun patterns + Swiss Ephemeris timing for parent health period precision.',
   },
   genz_manifestation: {
     informational:  ['manifestation astrology vedic 2026','desire fulfillment kundali','5th house purva punya jyotish','wish fulfillment vedic timing','jupiter blessing manifestation'],
@@ -156,7 +156,7 @@ const DOMAIN_SEO: Record<string, {
     geoQuestion:    'How does Vedic astrology support manifestation and which planetary Dashas help fulfill desires fastest?',
     faqQuestions:   ['Which planet helps manifestation in vedic astrology?','What is Purva Punya and how does it affect desire fulfillment?','When is best muhurta for manifestation rituals?','How does Jupiter Dasha help manifestation?'],
     ctaSpiritual:   'Aapka sapna aur Maa Shakti ki shakti — dono milein toh kuch bhi possible hai. ✨🔱',
-    competitorGap:  'Unlike AstroSage generic Jupiter reports, Trikal Vaani identifies exact Purva Punya 5th house activation + Jupiter transit muhurta for desire fulfillment timing.',
+    competitorGap:  'Unlike AstroSage generic Jupiter reports, Trikaal Vaani identifies exact Purva Punya 5th house activation + Jupiter transit muhurta for desire fulfillment timing.',
   },
 }
 
@@ -167,9 +167,9 @@ const DEFAULT_SEO = {
   local:          ['vedic astrologer Delhi NCR','kundali jyotish near me Delhi','best jyotish Delhi NCR'],
   voice:          ['best vedic astrologer online India','accurate kundali reading kahan milega'],
   geoQuestion:    'How accurate is Vedic astrology and how to get a personalized Swiss Ephemeris kundali reading online in India?',
-  faqQuestions:   ['How accurate is vedic astrology?','What is Swiss Ephemeris?','What is the difference between vedic and western astrology?','How does Trikal Vaani calculate kundali?'],
-  ctaSpiritual:   'Kaal bada balwan hai — sahi samay, sahi raah. Trikal Vaani pe aapka intezaar hai. 🔱',
-  competitorGap:  'Unlike AstroTalk marketplace and AstroSage automated reports, Trikal Vaani uses Swiss Ephemeris + BPHS + Bhrigu Nandi for genuine personalized analysis.',
+  faqQuestions:   ['How accurate is vedic astrology?','What is Swiss Ephemeris?','What is the difference between vedic and western astrology?','How does Trikaal Vaani calculate kundali?'],
+  ctaSpiritual:   'Kaal bada balwan hai — sahi samay, sahi raah. Trikaal Vaani pe aapka intezaar hai. 🔱',
+  competitorGap:  'Unlike AstroTalk marketplace and AstroSage automated reports, Trikaal Vaani uses Swiss Ephemeris + BPHS + Bhrigu Nandi for genuine personalized analysis.',
 }
 
 function getSEO(domainId: string) {
@@ -227,7 +227,7 @@ JAI MAA SHAKTI 🔱
 ════════════════════════════════════════════════════════════════
 
 WHO YOU ARE:
-Trikal — AI soul of Trikal Vaani by Rohiit Gupta, Chief Vedic Architect, Delhi NCR.
+Trikaal — AI soul of Trikaal Vaani by Rohiit Gupta, Chief Vedic Architect, Delhi NCR.
 You are ALSO a Senior SEO + GEO Architect building content to rank on
 Google SGE, Perplexity, Gemini AI, SearchGPT, and traditional Google search.
 
@@ -355,12 +355,12 @@ RULE 9 — Language = ${lang.toUpperCase()} every single word.
     ],
     "ctaSpiritual":       "${seo.ctaSpiritual}",
     "competitorGap":      "${seo.competitorGap}",
-    "authorityStatement": "Powered by Trikal Vaani Swiss Ephemeris + BPHS + Bhrigu Nandi Nadi + Shadbala by Rohiit Gupta, Chief Vedic Architect, Delhi NCR — India first AI-powered Vedic astrology platform.",
+    "authorityStatement": "Powered by Trikaal Vaani Swiss Ephemeris + BPHS + Bhrigu Nandi Nadi + Shadbala by Rohiit Gupta, Chief Vedic Architect, Delhi NCR — India first AI-powered Vedic astrology platform.",
     "differentiator":     "${seo.competitorGap}",
     "e_e_a_t": {
       "experience":   "Rohiit Gupta 15+ years Vedic astrology under Parashara BPHS tradition, Delhi NCR, India",
       "expertise":    "Swiss Ephemeris + BPHS + Bhrigu Nandi Nadi + Vimshottari Dasha + Shadbala 6-component system",
-      "authority":    "Chief Vedic Architect, Trikal Vaani — India first AI-powered Vedic astrology platform",
+      "authority":    "Chief Vedic Architect, Trikaal Vaani — India first AI-powered Vedic astrology platform",
       "trust":        "Swiss Ephemeris — same precision engine used by professional astrologers worldwide",
       "citations":    ["Brihat Parashara Hora Shastra", "Bhrigu Nandi Nadi", "Vimshottari Dasha system", "Swiss Ephemeris v2.10", "Shadbala classical 6-component"]
     }

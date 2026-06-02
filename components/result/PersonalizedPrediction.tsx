@@ -224,7 +224,7 @@ GREEN_FLAG_SCORE: [0-10]
 FLAG_SUMMARY: [1 crisp line]
 ` : '';
 
-  return `You are Jini — AI soul of Trikal Vaani by Rohiit Gupta ji. You are a wise, warm Vedic Guru.
+  return `You are Jini — AI soul of Trikaal Vaani by Rohiit Gupta ji. You are a wise, warm Vedic Guru.
 
 NATAL CHART:
 Name: ${name} | Lagna: ${lagna} | Mahadasha: ${mahadasha} | Antardasha: ${antardasha} | Nakshatra: ${nakshatra}
@@ -242,7 +242,7 @@ ${isDual ? `RED_FLAG_SCORE: [number]
 GREEN_FLAG_SCORE: [number]
 FLAG_SUMMARY: [one line]
 ` : ''}MAIN_PREDICTION:
-[120-150 words. Reference minimum 3 natal planets + 2 gochar transits. Include "Rohiit Gupta ji ka Trikal framework kehta hai" naturally. Personal, specific, no generic astrology.]
+[120-150 words. Reference minimum 3 natal planets + 2 gochar transits. Include "Rohiit Gupta ji ka Trikaal framework kehta hai" naturally. Personal, specific, no generic astrology.]
 
 KEY_DATES:
 [2-3 specific upcoming dates/timeframes based on dasha + gochar. Format: Month YYYY — reason]
@@ -420,7 +420,7 @@ export default function PersonalizedPrediction({
           fontSize: 17,
         }}>🔮</div>
         <div>
-          <div style={{ fontSize: 13, fontWeight: 700, color: GOLD }}>Jini — Trikal Vaani</div>
+          <div style={{ fontSize: 13, fontWeight: 700, color: GOLD }}>Jini — Trikaal Vaani</div>
           <div style={{ fontSize: 10, color: 'rgba(148,163,184,0.5)', marginTop: 1 }}>{subtitle}</div>
         </div>
       </div>
@@ -544,7 +544,7 @@ export default function PersonalizedPrediction({
         <div style={cardStyle}>
           {shimmer}
           {jiniHeader(
-            `${segLabel} · 3-Layer Trikal Analysis`,
+            `${segLabel} · 3-Layer Trikaal Analysis`,
             <div style={{
               padding: '3px 9px', background: PURPLE_RGBA(0.12),
               border: `1px solid ${PURPLE_RGBA(0.3)}`, borderRadius: 20,
@@ -637,7 +637,7 @@ export default function PersonalizedPrediction({
              : '"Kaal bada balwan hai — aur aapka Kaal, aapki Kundali mein likha hai"'}
           </p>
           <p style={{ fontSize: 10, color: 'rgba(100,116,139,0.5)', marginTop: 3 }}>
-            Rohiit Gupta · Chief Vedic Architect · Trikal Vaani
+            Rohiit Gupta · Chief Vedic Architect · Trikaal Vaani
           </p>
         </div>
       </div>
@@ -745,7 +745,7 @@ export default function PersonalizedPrediction({
            : '"Kaal bada balwan hai — aur aapka Kaal, aapki Kundali mein likha hai"'}
         </p>
         <p style={{ fontSize: 10, color: 'rgba(100,116,139,0.5)', marginTop: 3 }}>
-          Rohiit Gupta · Chief Vedic Architect · Trikal Vaani
+          Rohiit Gupta · Chief Vedic Architect · Trikaal Vaani
         </p>
       </div>
 
