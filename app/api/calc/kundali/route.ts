@@ -5,6 +5,7 @@
 // Changelog v1.4: Removed /template call (wrong Dasha-lord remedies).
 //   Added calcType param — nakshatra/rashi → Moon, lagna → lagna lord,
 //   kundali/dasha → Mahadasha lord. VM remedies used directly.
+//   Fixed callVM signature — method+body in init object.
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikal Vaani
 // ============================================================
 import { NextRequest, NextResponse } from 'next/server';
@@ -54,7 +55,7 @@ function getCurrentDasha(mahaList: any[]): { mahadasha: string | null; antardash
   };
 }
 
-// ─── Resolve target planet based on calcType ────────────────────────────────
+// ─── Resolve correct target planet per calcType ──────────────────────────────
 function resolveTargetPlanet(
   calcType: string,
   lagnaLord: string | null,
@@ -70,25 +71,23 @@ function resolveTargetPlanet(
   }
 }
 
-// ─── Map VM remedy list to frontend remedyPlan format ───────────────────────
+// ─── Planet remedy details lookup ────────────────────────────────────────────
+const PLANET_REMEDY: Record<string, { mantra_hi: string; daan_hi: string; day_hi: string; day: string; stone: string; metal: string; finger: string; deity: string; vrat: string }> = {
+  Moon:    { mantra_hi: 'ॐ चंद्राय नमः',       daan_hi: 'चावल, दूध, चांदी, सफेद वस्त्र',        day_hi: 'सोमवार',   day: 'Monday',    stone: 'Pearl (Moti)',              metal: 'Silver', finger: 'Little finger', deity: 'Lord Shiva',  vrat: 'Somvar Vrat'    },
+  Mars:    { mantra_hi: 'ॐ अंगारकाय नमः',      daan_hi: 'मसूर दाल, गुड़, तांबा, लाल वस्त्र',    day_hi: 'मंगलवार',  day: 'Tuesday',   stone: 'Red Coral (Moonga)',        metal: 'Gold',   finger: 'Ring finger',   deity: 'Hanuman ji',  vrat: 'Mangalvar Vrat' },
+  Mercury: { mantra_hi: 'ॐ बुधाय नमः',         daan_hi: 'हरी मूंग, हरा वस्त्र, पुस्तकें',        day_hi: 'बुधवार',   day: 'Wednesday', stone: 'Emerald (Panna)',           metal: 'Gold',   finger: 'Little finger', deity: 'Ganesh ji',   vrat: 'Budhvar Vrat'   },
+  Jupiter: { mantra_hi: 'ॐ गुरवे नमः',         daan_hi: 'पीला चना, हल्दी, पुस्तकें',             day_hi: 'गुरुवार',  day: 'Thursday',  stone: 'Yellow Sapphire (Pukhraj)', metal: 'Gold',   finger: 'Index finger',  deity: 'Lord Vishnu', vrat: 'Guruvar Vrat'   },
+  Venus:   { mantra_hi: 'ॐ शुक्राय नमः',       daan_hi: 'सफेद मिठाई, घी, चांदी',                 day_hi: 'शुक्रवार', day: 'Friday',    stone: 'Diamond (Heera)',           metal: 'Gold',   finger: 'Middle finger', deity: 'Maa Lakshmi', vrat: 'Shukravar Vrat' },
+  Saturn:  { mantra_hi: 'ॐ शनैश्चराय नमः',     daan_hi: 'काला तिल, उड़द दाल, लोहा, सरसों तेल',  day_hi: 'शनिवार',   day: 'Saturday',  stone: 'Blue Sapphire (Neelam)',    metal: 'Silver', finger: 'Middle finger', deity: 'Shani Dev',   vrat: 'Shanivar Vrat'  },
+  Sun:     { mantra_hi: 'ॐ सूर्याय नमः',       daan_hi: 'गेहूं, गुड़, लाल वस्त्र',               day_hi: 'रविवार',   day: 'Sunday',    stone: 'Ruby (Manik)',              metal: 'Gold',   finger: 'Ring finger',   deity: 'Surya Dev',   vrat: 'Ravivar Vrat'   },
+  Rahu:    { mantra_hi: 'ॐ राहवे नमः',         daan_hi: 'नारियल, नीला वस्त्र, उड़द दाल',         day_hi: 'शनिवार',   day: 'Saturday',  stone: 'Hessonite (Gomed)',         metal: 'Silver', finger: 'Middle finger', deity: 'Maa Durga',   vrat: 'Rahu Shanti'    },
+  Ketu:    { mantra_hi: 'ॐ केतवे नमः',         daan_hi: 'बहुरंगी वस्त्र, तिल, कंबल',             day_hi: 'मंगलवार',  day: 'Tuesday',   stone: "Cat's Eye (Lehsunia)",      metal: 'Silver', finger: 'Little finger', deity: 'Ganesh ji',   vrat: 'Ketu Shanti'    },
+};
+
+// ─── Map VM remedy list to frontend remedyPlan format ────────────────────────
 function buildTemplateFromVMRemedies(vmRemedies: any[], planet: string | null): any {
   if (!vmRemedies?.length) return null;
-
-  // Planet-specific remedy details
-  const PLANET_REMEDY_DETAILS: Record<string, { mantra: string; mantra_hi: string; daan: string; daan_hi: string; day: string; day_hi: string; stone: string; metal: string; finger: string; deity: string; vrat: string }> = {
-    Moon:    { mantra: 'Om Chandraya Namah',    mantra_hi: 'ॐ चंद्राय नमः',       daan: 'rice, milk, silver, white cloth', daan_hi: 'चावल, दूध, चांदी, सफेद वस्त्र', day: 'Monday',    day_hi: 'सोमवार',   stone: 'Pearl (Moti)',              metal: 'Silver', finger: 'Little finger', deity: 'Lord Shiva',   vrat: 'Somvar Vrat'    },
-    Mars:    { mantra: 'Om Angarakaya Namah',   mantra_hi: 'ॐ अंगारकाय नमः',      daan: 'red lentils, jaggery, copper',   daan_hi: 'मसूर दाल, गुड़, तांबा, लाल वस्त्र', day: 'Tuesday',   day_hi: 'मंगलवार',  stone: 'Red Coral (Moonga)',        metal: 'Gold',   finger: 'Ring finger',   deity: 'Hanuman ji',   vrat: 'Mangalvar Vrat' },
-    Mercury: { mantra: 'Om Budhaya Namah',      mantra_hi: 'ॐ बुधाय नमः',         daan: 'green moong, green cloth, books',daan_hi: 'हरी मूंग, हरा वस्त्र, पुस्तकें',  day: 'Wednesday', day_hi: 'बुधवार',   stone: 'Emerald (Panna)',           metal: 'Gold',   finger: 'Little finger', deity: 'Ganesh ji',    vrat: 'Budhvar Vrat'   },
-    Jupiter: { mantra: 'Om Gurave Namah',       mantra_hi: 'ॐ गुरवे नमः',         daan: 'yellow chana, turmeric, books',  daan_hi: 'पीला चना, हल्दी, पुस्तकें',       day: 'Thursday',  day_hi: 'गुरुवार',  stone: 'Yellow Sapphire (Pukhraj)', metal: 'Gold',   finger: 'Index finger',  deity: 'Lord Vishnu',  vrat: 'Guruvar Vrat'   },
-    Venus:   { mantra: 'Om Shukraya Namah',     mantra_hi: 'ॐ शुक्राय नमः',       daan: 'white sweets, ghee, silver',     daan_hi: 'सफेद मिठाई, घी, चांदी',           day: 'Friday',    day_hi: 'शुक्रवार', stone: 'Diamond (Heera)',           metal: 'Gold',   finger: 'Middle finger', deity: 'Maa Lakshmi',  vrat: 'Shukravar Vrat' },
-    Saturn:  { mantra: 'Om Shanaye Namah',      mantra_hi: 'ॐ शनैश्चराय नमः',     daan: 'black sesame, urad dal, iron',   daan_hi: 'काला तिल, उड़द दाल, लोहा',         day: 'Saturday',  day_hi: 'शनिवार',   stone: 'Blue Sapphire (Neelam)',    metal: 'Silver', finger: 'Middle finger', deity: 'Shani Dev',    vrat: 'Shanivar Vrat'  },
-    Sun:     { mantra: 'Om Suryaya Namah',      mantra_hi: 'ॐ सूर्याय नमः',       daan: 'wheat, jaggery, red cloth',      daan_hi: 'गेहूं, गुड़, लाल वस्त्र',          day: 'Sunday',    day_hi: 'रविवार',   stone: 'Ruby (Manik)',              metal: 'Gold',   finger: 'Ring finger',   deity: 'Surya Dev',    vrat: 'Ravivar Vrat'   },
-    Rahu:    { mantra: 'Om Rahave Namah',       mantra_hi: 'ॐ राहवे नमः',         daan: 'coconut, blue cloth, urad dal',  daan_hi: 'नारियल, नीला वस्त्र, उड़द दाल',   day: 'Saturday',  day_hi: 'शनिवार',   stone: 'Hessonite (Gomed)',         metal: 'Silver', finger: 'Middle finger', deity: 'Maa Durga',    vrat: 'Rahu Shanti'    },
-    Ketu:    { mantra: 'Om Ketave Namah',       mantra_hi: 'ॐ केतवे नमः',         daan: 'multi-colour cloth, sesame',     daan_hi: 'बहुरंगी वस्त्र, तिल, कंबल',       day: 'Tuesday',   day_hi: 'मंगलवार',  stone: "Cat's Eye (Lehsunia)",      metal: 'Silver', finger: 'Little finger', deity: 'Ganesh ji',    vrat: 'Ketu Shanti'    },
-  };
-
-  const pd = PLANET_REMEDY_DETAILS[planet ?? ''] ?? PLANET_REMEDY_DETAILS['Jupiter'];
-
+  const pd = PLANET_REMEDY[planet ?? ''] ?? PLANET_REMEDY['Jupiter'];
   return {
     remedyPlan: {
       remedies: vmRemedies.map((r: any) => {
@@ -100,7 +99,7 @@ function buildTemplateFromVMRemedies(vmRemedies: any[], planet: string | null): 
           return { ...base, items: pd.daan_hi, day: pd.day_hi, recipient: 'गरीब या जरूरतमंद', note: r.detail };
         }
         if (r.type === 'vrat') {
-          return { ...base, name: pd.vrat, day: pd.day, deity: pd.deity, prasad: pd.daan };
+          return { ...base, name: pd.vrat, day: pd.day, deity: pd.deity, prasad: pd.daan_hi };
         }
         if (r.type === 'gemstone') {
           return { ...base, lagna_stone: { stone: pd.stone, metal: pd.metal, finger: pd.finger, for: r.detail } };
@@ -126,7 +125,6 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Build VM payload
     const vmPayload = {
       year: body.year,
       month: body.month,
@@ -141,8 +139,11 @@ export async function POST(req: NextRequest) {
       house_system: 'P',
     };
 
-    // 1) Call VM /kundali — returns chart + remedies via remedy_master v1.1
-    const kRes = await callVM('/kundali', vmPayload);
+    // 1) Call VM /kundali — correct callVM signature
+    const kRes = await callVM('/kundali', {
+      method: 'POST',
+      body: JSON.stringify(vmPayload),
+    });
     if (!kRes.ok) {
       const errText = await kRes.text();
       console.error('[kundali] VM /kundali failed:', errText);
@@ -150,18 +151,14 @@ export async function POST(req: NextRequest) {
     }
     const kundaliData = await kRes.json();
 
-    // ─── Dasha detection ────────────────────────────────────────────────────
+    // ─── Dasha + Lagna ───────────────────────────────────────────────────────
     const mahaList = kundaliData?.dasha?.maha_dasha ?? [];
     const { mahadasha: currentMahadasha, antardasha: currentAntardasha } = getCurrentDasha(mahaList);
-
-    // ─── Moon + Lagna ────────────────────────────────────────────────────────
     const moonGraha = kundaliData?.grahas?.find((g: any) => g.planet === 'Moon');
     const lagnaLord = kundaliData?.lagna?.sign_lord ?? null;
 
-    // ─── Resolve correct target planet for this calcType ────────────────────
+    // ─── Resolve planet + build template ────────────────────────────────────
     const targetPlanet = resolveTargetPlanet(calcType, lagnaLord, currentMahadasha);
-
-    // ─── Build templateData from VM remedies ─────────────────────────────────
     const vmRemedies: any[] = kundaliData?.remedies?.remedies ?? [];
     const templateData = buildTemplateFromVMRemedies(vmRemedies, targetPlanet);
 
@@ -170,10 +167,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       success: true,
       sessionId,
-      input: {
-        name: body.name || null,
-        gender: body.gender || null,
-      },
+      input: { name: body.name || null, gender: body.gender || null },
       instant: {
         lagna: kundaliData.lagna?.sign || null,
         lagna_en: kundaliData.lagna?.sign_en || null,
