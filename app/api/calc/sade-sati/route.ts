@@ -1,10 +1,9 @@
 // ============================================================
 // File: app/api/calc/sade-sati/route.ts
 // Purpose: VM bridge for Sade Sati Calculator (FREE forever)
-// Version: v1.3
-// Changelog v1.3: Fixed callVM signature — method+body passed in init object.
-//   v1.2 was calling callVM('/sade-sati', vmPayload) — wrong.
-//   Correct: callVM('/sade-sati', { method:'POST', body: JSON.stringify(vmPayload) })
+// Version: v1.4
+// Changelog v1.4: Pass full VM remedies object to buildTemplateFromVMRemedies
+//   so actionWindows (Dos) from remedy_master are included in response.
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikal Vaani
 // ============================================================
 import { NextRequest, NextResponse } from 'next/server';
@@ -55,9 +54,10 @@ function getCurrentPhase(currentCycle: any): { phase: string; progress: number; 
   return { phase, progress: Math.round(progress), daysRemaining, phaseDescription };
 }
 
-// ─── Map VM remedy list to frontend remedyPlan format ───────────────────────
-function buildTemplateFromVMRemedies(vmRemedies: any[]): any {
-  if (!vmRemedies?.length) return null;
+// ─── Map VM remedy object to frontend template format ───────────────────────
+function buildTemplateFromVMRemedies(vmRemediesObj: any): any {
+  const vmRemedies: any[] = vmRemediesObj?.remedies ?? [];
+  if (!vmRemedies.length) return null;
   return {
     remedyPlan: {
       remedies: vmRemedies.map((r: any) => {
@@ -77,8 +77,8 @@ function buildTemplateFromVMRemedies(vmRemedies: any[]): any {
         return { ...base, text: r.detail };
       }),
     },
-    actionWindows: [],
-    avoidWindows: [],
+    actionWindows: vmRemediesObj?.actionWindows ?? [],
+    avoidWindows: vmRemediesObj?.avoidWindows ?? [],
   };
 }
 
@@ -86,7 +86,6 @@ export async function POST(req: NextRequest) {
   try {
     const body: CalcInput = await req.json();
 
-    // Validate
     const required = ['year', 'month', 'day', 'hour', 'minute', 'latitude', 'longitude', 'timezone'];
     for (const f of required) {
       if (body[f as keyof CalcInput] === undefined || body[f as keyof CalcInput] === null) {
@@ -107,7 +106,7 @@ export async function POST(req: NextRequest) {
       ayanamsa: 'lahiri',
     };
 
-    // 1) Call VM /sade-sati — Saturn-specific remedies via remedy_master v1.1
+    // 1) Call VM /sade-sati — Saturn-specific remedies + actionWindows via remedy_master v1.1
     const ssRes = await callVM('/sade-sati', {
       method: 'POST',
       body: JSON.stringify(vmPayload),
@@ -123,8 +122,8 @@ export async function POST(req: NextRequest) {
       ? getCurrentPhase(sadeSatiData.current_cycle)
       : null;
 
-    const vmRemedies: any[] = sadeSatiData?.remedies?.remedies ?? [];
-    const templateData = buildTemplateFromVMRemedies(vmRemedies);
+    // Pass full remedies object — includes remedies array + actionWindows
+    const templateData = buildTemplateFromVMRemedies(sadeSatiData?.remedies ?? {});
 
     const sessionId = `calc_ss_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
 
