@@ -2,14 +2,25 @@
 
 // ============================================================
 // File: app/calculators/free-sade-sati-calculator/page.tsx
-// Version: v1.0 — Free Sade Sati Calculator
+// Version: v1.1 — Free Sade Sati Calculator
 // VM endpoint: /sade-sati (dedicated, 100% accurate)
-// CEO: Rohiit Gupta | Chief Vedic Architect | Trikal Vaani
+// CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
+// Changelog:
+//   v1.1 (2026-06-02) — Gold-standard JSON-LD ADDED (page had none):
+//        buildCalcJsonLd() helper emits 8 @id-linked nodes (Organization
+//        +real sameAs, WebSite, linkable Person /founder, WebPage
+//        isPartOf #website, BreadcrumbList, WebApplication, HowTo,
+//        FAQPage). Added `.tv-aeo-answer` class to above-fold answer for
+//        speakable. Brand fix: visible/schema brand normalised to the
+//        double-a spelling; legal single-a kept inside helper only. No
+//        logic/UI/form/API change.
+//   v1.0 — initial build.
 // ============================================================
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import SiteNav from '@/components/layout/SiteNav';
+import { buildCalcJsonLd } from '@/lib/seo/calcJsonLd';
 
 const GOLD = '#D4AF37';
 const GOLD_RGBA = (a: number) => `rgba(212,175,55,${a})`;
@@ -165,12 +176,12 @@ function formatDate(d: any): string {
 const FAQS = [
   { q: 'Sade Sati kya hoti hai?', a: 'Sade Sati Shani (Saturn) ka 7.5 saal ka transit period hai. Jab Shani aapki Chandra Rashi se 12th, 1st, aur 2nd house mein transit karta hai — har house mein 2.5 saal — total 7.5 saal. Yeh aapke jeevan ka sabse important Saturn period hota hai per Parashar BPHS.' },
   { q: 'Sade Sati ke 3 phases kya hain?', a: '(1) Rising/Aaroh (12th from Moon, 2.5 saal) — losses, expenses, foreign travel. (2) Peak/Madhya (Moon sign, 2.5 saal) — most intense, health/relationships test. (3) Setting/Avaroh (2nd from Moon, 2.5 saal) — financial recovery, family matters.' },
-  { q: 'Apni Sade Sati kaise check karein?', a: 'Date of Birth, exact Time of Birth, aur Place of Birth chahiye. Trikal Vaani Calculator Swiss Ephemeris se Saturn ki current transit position calculate karta hai aur Chandra Rashi se compare karke status, phase, aur dates deta hai — bilkul free.' },
+  { q: 'Apni Sade Sati kaise check karein?', a: 'Date of Birth, exact Time of Birth, aur Place of Birth chahiye. Trikaal Vaani Calculator Swiss Ephemeris se Saturn ki current transit position calculate karta hai aur Chandra Rashi se compare karke status, phase, aur dates deta hai — bilkul free.' },
   { q: 'Sade Sati hamesha bura hota hai?', a: 'Nahi. Sade Sati transformation ka period hai, sirf bura nahi. Strong Saturn = career growth, discipline, spiritual gain. Weak Saturn = challenges. Yeh aapke chart mein Saturn ki position pe depend karta hai. Parashar ke according — Sade Sati karma ka time hai, lessons ka period.' },
-  { q: 'Sade Sati mein kya karna chahiye?', a: '(1) Daily Hanuman Chalisa path. (2) Shani mantra "Om Sham Shanaicharaya Namah" 108 times. (3) Black sesame, mustard oil, iron daan on Saturday. (4) Old age home/poor ki seva. (5) Discipline maintain karein, shortcuts avoid. (6) Anger control. Trikal Vaani 3 personalized remedies free deta hai.' },
-  { q: 'Sade Sati kab aati hai jeevan mein?', a: 'Sade Sati har 30 saal mein ek baar aati hai (Saturn 30 saal mein zodiac complete karta hai). Average life mein 2-3 Sade Sati cycles hote hain — childhood, mid-life, old age. Trikal Calculator aapke poore jeevan ke saare Sade Sati cycles past + future dikhata hai.' },
+  { q: 'Sade Sati mein kya karna chahiye?', a: '(1) Daily Hanuman Chalisa path. (2) Shani mantra "Om Sham Shanaicharaya Namah" 108 times. (3) Black sesame, mustard oil, iron daan on Saturday. (4) Old age home/poor ki seva. (5) Discipline maintain karein, shortcuts avoid. (6) Anger control. Trikaal Vaani 3 personalized remedies free deta hai.' },
+  { q: 'Sade Sati kab aati hai jeevan mein?', a: 'Sade Sati har 30 saal mein ek baar aati hai (Saturn 30 saal mein zodiac complete karta hai). Average life mein 2-3 Sade Sati cycles hote hain — childhood, mid-life, old age. Trikaal Vaani Calculator aapke poore jeevan ke saare Sade Sati cycles past + future dikhata hai.' },
   { q: 'Kya Sade Sati Calculator bilkul free hai?', a: 'Haan. 100% free. Current Sade Sati status (Yes/No), active phase (Rising/Peak/Setting), exact start-end dates, days remaining, past + future cycles, aur 3 Parashar remedies (Mantra, Ratna, Daan) — sab free.' },
-  { q: 'Sade Sati result kitne accurate hain?', a: 'Trikal Vaani VM par dedicated /sade-sati endpoint hai jo Swiss Ephemeris (NASA-grade) se Saturn ki exact transit position calculate karta hai with Lahiri Ayanamsha. 99.9% astronomical accuracy. Same engine professional astrologers worldwide use karte hain.' },
+  { q: 'Sade Sati result kitne accurate hain?', a: 'Trikaal Vaani VM par dedicated /sade-sati endpoint hai jo Swiss Ephemeris (NASA-grade) se Saturn ki exact transit position calculate karta hai with Lahiri Ayanamsha. 99.9% astronomical accuracy. Same engine professional astrologers worldwide use karte hain.' },
 ];
 
 export default function FreeSadeSatiCalculatorPage() {
@@ -271,9 +282,29 @@ export default function FreeSadeSatiCalculatorPage() {
     colorScheme: 'dark' as const,
   });
 
+  // ─── JSON-LD (gold-standard 8-node @graph via shared helper) ─
+  const PAGE_URL = 'https://trikalvaani.com/calculators/free-sade-sati-calculator';
+  const jsonLd = buildCalcJsonLd({
+    pageUrl: PAGE_URL,
+    name: "Free Sade Sati Calculator — Check Saturn's 7.5 Year Period Online",
+    description:
+      "Check your current Sade Sati status, active phase (Rising/Peak/Setting), exact start-end dates, all life cycles and 3 free Parashar remedies. Free Vedic Saturn calculator by Trikaal Vaani.",
+    breadcrumbName: 'Free Sade Sati Calculator',
+    aboutEntities: ['Sade Sati', 'Saturn', 'Moon Sign', 'Saturn Transit'],
+    knowsAbout: ['Vedic Astrology', 'Jyotish Shastra', 'Sade Sati', 'Saturn Transit'],
+    howToName: 'How to check your Sade Sati period',
+    howToSteps: [
+      { name: 'Enter birth details', text: 'Enter your name, date of birth, exact time of birth and place of birth.' },
+      { name: 'Analyse the Saturn transit', text: "The calculator finds Saturn's current transit relative to your Moon sign using Swiss Ephemeris with Lahiri Ayanamsha." },
+      { name: 'Get your result', text: 'See your Sade Sati status, active phase, exact dates, days remaining, all life cycles and 3 free Parashar remedies.' },
+    ],
+    faqs: FAQS,
+  });
+
   return (
     <>
       <SiteNav />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <main className="min-h-screen pt-20 pb-16 px-4" style={{ background: '#080B12', color: '#E5E7EB' }}>
         <div className="max-w-4xl mx-auto">
 
@@ -289,9 +320,9 @@ export default function FreeSadeSatiCalculatorPage() {
             Free Sade Sati Calculator — Check Saturn's 7.5 Year Period Online
           </h1>
 
-          <div className="rounded-xl p-5 mb-6" style={{ background: 'rgba(212,175,55,0.06)', border: `1px solid rgba(212,175,55,0.2)` }}>
+          <div className="tv-aeo-answer rounded-xl p-5 mb-6" style={{ background: 'rgba(212,175,55,0.06)', border: `1px solid rgba(212,175,55,0.2)` }}>
             <p className="text-base md:text-lg leading-relaxed">
-              <strong style={{ color: GOLD }}>Trikal Vaani ka Free Sade Sati Calculator</strong> aapki current Sade Sati status Swiss Ephemeris se calculate karta hai. Date, time, place daalo — Yes/No verdict, active phase (Rising/Peak/Setting), exact start-end dates, days remaining, past + future cycles, aur 3 Parashar remedies turant milte hain. 100% free, BPHS classical rules ke according.
+              <strong style={{ color: GOLD }}>Trikaal Vaani ka Free Sade Sati Calculator</strong> aapki current Sade Sati status Swiss Ephemeris se calculate karta hai. Date, time, place daalo — Yes/No verdict, active phase (Rising/Peak/Setting), exact start-end dates, days remaining, past + future cycles, aur 3 Parashar remedies turant milte hain. 100% free, BPHS classical rules ke according.
             </p>
           </div>
 
@@ -299,7 +330,7 @@ export default function FreeSadeSatiCalculatorPage() {
             <div className="w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg" style={{ background: GOLD, color: '#080B12' }}>RG</div>
             <div className="text-sm">
               <div className="font-semibold" style={{ color: GOLD }}>Rohiit Gupta</div>
-              <div className="text-slate-400">Chief Vedic Architect · Trikal Vaani · Delhi NCR</div>
+              <div className="text-slate-400">Chief Vedic Architect · Trikaal Vaani · Delhi NCR</div>
               <div className="text-xs text-slate-500 mt-0.5">Engine: Swiss Ephemeris · Parashar BPHS · Lahiri Ayanamsha · Saturn Transit Logic</div>
             </div>
           </div>
@@ -567,13 +598,13 @@ export default function FreeSadeSatiCalculatorPage() {
               <li><strong style={{ color: GOLD }}>Discipline & honesty</strong> — Saturn rewards integrity, punishes shortcuts.</li>
             </ol>
 
-            <h2 className="text-2xl font-serif font-bold mb-4 mt-8" style={{ color: GOLD }}>Trikal Vaani vs AstroSage vs AstroTalk Sade Sati Calculator</h2>
+            <h2 className="text-2xl font-serif font-bold mb-4 mt-8" style={{ color: GOLD }}>Trikaal Vaani vs AstroSage vs AstroTalk Sade Sati Calculator</h2>
             <div className="not-prose overflow-x-auto mb-6">
               <table className="w-full text-sm" style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid ${GOLD}33`, borderRadius: '12px' }}>
                 <thead>
                   <tr style={{ background: 'rgba(212,175,55,0.1)' }}>
                     <th className="p-3 text-left" style={{ color: GOLD }}>Feature</th>
-                    <th className="p-3 text-left" style={{ color: GOLD }}>Trikal Vaani</th>
+                    <th className="p-3 text-left" style={{ color: GOLD }}>Trikaal Vaani</th>
                     <th className="p-3 text-left text-slate-400">Others</th>
                   </tr>
                 </thead>
