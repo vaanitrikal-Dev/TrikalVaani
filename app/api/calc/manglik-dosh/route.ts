@@ -1,10 +1,10 @@
 // ============================================================
 // File: app/api/calc/manglik-dosh/route.ts
 // Purpose: VM bridge for Manglik Dosh Calculator (FREE forever)
-// Version: v1.2
-// Changelog v1.2: Removed /kundali + /template calls (returned wrong
-//   Dasha-lord remedies). Now uses VM /manglik-dosh remedies directly —
-//   Mars-specific (mantra, daan, vrat) via remedy_master.py v1.1
+// Version: v1.3
+// Changelog v1.3: Fixed callVM signature (method+body in init object).
+//   v1.2 was calling callVM('/manglik-dosh', vmPayload) — wrong.
+//   Correct: callVM('/manglik-dosh', { method:'POST', body: JSON.stringify(vmPayload) })
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikal Vaani
 // ============================================================
 import { NextRequest, NextResponse } from 'next/server';
@@ -100,7 +100,10 @@ export async function POST(req: NextRequest) {
     };
 
     // 1) Call VM /manglik-dosh — returns Mars-specific remedies via remedy_master v1.1
-    const mdRes = await callVM('/manglik-dosh', vmPayload);
+    const mdRes = await callVM('/manglik-dosh', {
+      method: 'POST',
+      body: JSON.stringify(vmPayload),
+    });
     if (!mdRes.ok) {
       const errText = await mdRes.text();
       console.error('[manglik-dosh] VM /manglik-dosh failed:', errText);
