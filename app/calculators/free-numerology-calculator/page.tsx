@@ -2,14 +2,23 @@
 
 // ============================================================
 // File: app/calculators/free-numerology-calculator/page.tsx
-// Version: v1.0 — Free Numerology Calculator (Mulank / Bhagyank / Naamank)
+// Version: v1.1 — Free Numerology Calculator (Mulank / Bhagyank / Naamank)
 // NO VM, NO API — pure client-side date/name math (Cheiro / Vedic numerology)
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
+// Changelog:
+//   v1.1 (2026-06-02) — Gold-standard JSON-LD: swapped inline 4-node
+//        @graph for buildCalcJsonLd() helper (8 @id-linked nodes:
+//        Organization+real sameAs, WebSite, linkable Person /founder,
+//        WebPage isPartOf #website [no longer dangling], BreadcrumbList,
+//        WebApplication, HowTo, FAQPage). HowTo uses name+DOB only (no
+//        time/place). No logic/UI/form change.
+//   v1.0 — initial build.
 // ============================================================
 
 import { useState, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import SiteNav from '@/components/layout/SiteNav';
+import { buildCalcJsonLd } from '@/lib/seo/calcJsonLd';
 
 const GOLD = '#D4AF37';
 const GOLD_RGBA = (a: number) => `rgba(212,175,55,${a})`;
@@ -126,60 +135,24 @@ export default function FreeNumerologyCalculatorPage() {
             : { txt: 'Mulank aur Bhagyank thode different hain — awareness aur balance se behtar results.', color: GOLD }))
     : null;
 
-  // ─── JSON-LD ────────────────────────────────────────────────
+  // ─── JSON-LD (gold-standard 8-node @graph via shared helper) ─
   const PAGE_URL = 'https://trikalvaani.com/calculators/free-numerology-calculator';
-  const jsonLd = {
-    '@context': 'https://schema.org',
-    '@graph': [
-      {
-        '@type': 'WebPage',
-        '@id': `${PAGE_URL}#webpage`,
-        url: PAGE_URL,
-        name: 'Free Numerology Calculator — Mulank, Bhagyank & Lucky Number',
-        description: 'Find your Mulank (root number), Bhagyank (destiny number) and Naamank from your date of birth & name, with ruling planet, lucky numbers, colors & days. Free numerology calculator by Trikaal Vaani.',
-        inLanguage: 'en-IN',
-        dateModified: '2026-06-02',
-        isPartOf: { '@id': 'https://trikalvaani.com/#website' },
-        breadcrumb: { '@id': `${PAGE_URL}#breadcrumb` },
-        author: {
-          '@type': 'Person',
-          name: 'Rohiit Gupta',
-          jobTitle: 'Chief Vedic Architect',
-          worksFor: { '@type': 'Organization', name: 'Trikaal Vaani', legalName: 'Trikal Vaani' },
-        },
-        speakable: { '@type': 'SpeakableSpecification', cssSelector: ['h1', '.tv-aeo-answer'] },
-      },
-      {
-        '@type': 'BreadcrumbList',
-        '@id': `${PAGE_URL}#breadcrumb`,
-        itemListElement: [
-          { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://trikalvaani.com' },
-          { '@type': 'ListItem', position: 2, name: 'Calculators', item: 'https://trikalvaani.com/calculators' },
-          { '@type': 'ListItem', position: 3, name: 'Free Numerology Calculator', item: PAGE_URL },
-        ],
-      },
-      {
-        '@type': 'WebApplication',
-        '@id': `${PAGE_URL}#app`,
-        name: 'Free Numerology Calculator',
-        url: PAGE_URL,
-        applicationCategory: 'LifestyleApplication',
-        operatingSystem: 'All',
-        browserRequirements: 'Requires JavaScript',
-        offers: { '@type': 'Offer', price: '0', priceCurrency: 'INR' },
-        provider: { '@type': 'Organization', name: 'Trikaal Vaani', legalName: 'Trikal Vaani', url: 'https://trikalvaani.com' },
-      },
-      {
-        '@type': 'FAQPage',
-        '@id': `${PAGE_URL}#faq`,
-        mainEntity: FAQS.map(f => ({
-          '@type': 'Question',
-          name: f.q,
-          acceptedAnswer: { '@type': 'Answer', text: f.a },
-        })),
-      },
+  const jsonLd = buildCalcJsonLd({
+    pageUrl: PAGE_URL,
+    name: 'Free Numerology Calculator — Mulank, Bhagyank & Lucky Number',
+    description:
+      'Find your Mulank (root number), Bhagyank (destiny number) and Naamank from your date of birth & name, with ruling planet, lucky numbers, colors & days. Free numerology calculator by Trikaal Vaani.',
+    breadcrumbName: 'Free Numerology Calculator',
+    aboutEntities: ['Numerology', 'Mulank', 'Bhagyank', 'Naamank'],
+    knowsAbout: ['Vedic Astrology', 'Jyotish Shastra', 'Numerology', 'Cheiro Numerology'],
+    howToName: 'How to find your Mulank, Bhagyank and lucky number',
+    howToSteps: [
+      { name: 'Enter name and date of birth', text: 'Enter your full name (optional, for Naamank) and your date of birth.' },
+      { name: 'Calculate the numbers', text: 'The calculator reduces your date of birth and name using classical Cheiro / Vedic numerology rules.' },
+      { name: 'Get your result', text: 'See your Mulank, Bhagyank and Naamank with ruling planet, lucky numbers, colors and days.' },
     ],
-  };
+    faqs: FAQS,
+  });
 
   return (
     <>
