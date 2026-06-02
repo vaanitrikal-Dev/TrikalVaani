@@ -1,10 +1,10 @@
 // ============================================================
 // File: app/api/calc/sade-sati/route.ts
 // Purpose: VM bridge for Sade Sati Calculator (FREE forever)
-// Version: v1.2
-// Changelog v1.2: Removed /kundali + /template calls (returned wrong
-//   Dasha-lord remedies). Now uses VM /sade-sati remedies directly —
-//   Saturn-specific (mantra, daan, vrat) via remedy_master.py v1.1
+// Version: v1.3
+// Changelog v1.3: Fixed callVM signature — method+body passed in init object.
+//   v1.2 was calling callVM('/sade-sati', vmPayload) — wrong.
+//   Correct: callVM('/sade-sati', { method:'POST', body: JSON.stringify(vmPayload) })
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikal Vaani
 // ============================================================
 import { NextRequest, NextResponse } from 'next/server';
@@ -56,7 +56,7 @@ function getCurrentPhase(currentCycle: any): { phase: string; progress: number; 
 }
 
 // ─── Map VM remedy list to frontend remedyPlan format ───────────────────────
-function buildTemplatFromVMRemedies(vmRemedies: any[]): any {
+function buildTemplateFromVMRemedies(vmRemedies: any[]): any {
   if (!vmRemedies?.length) return null;
   return {
     remedyPlan: {
@@ -94,7 +94,6 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Build VM payload
     const vmPayload = {
       year: body.year,
       month: body.month,
@@ -108,8 +107,11 @@ export async function POST(req: NextRequest) {
       ayanamsa: 'lahiri',
     };
 
-    // 1) Call VM /sade-sati — returns Saturn-specific remedies via remedy_master v1.1
-    const ssRes = await callVM('/sade-sati', vmPayload);
+    // 1) Call VM /sade-sati — Saturn-specific remedies via remedy_master v1.1
+    const ssRes = await callVM('/sade-sati', {
+      method: 'POST',
+      body: JSON.stringify(vmPayload),
+    });
     if (!ssRes.ok) {
       const errText = await ssRes.text();
       console.error('[sade-sati] VM /sade-sati failed:', errText);
@@ -117,24 +119,19 @@ export async function POST(req: NextRequest) {
     }
     const sadeSatiData = await ssRes.json();
 
-    // Calculate phase
     const phaseInfo = sadeSatiData?.currently_in_sade_sati && sadeSatiData?.current_cycle
       ? getCurrentPhase(sadeSatiData.current_cycle)
       : null;
 
-    // Build templateData from VM Saturn remedies
     const vmRemedies: any[] = sadeSatiData?.remedies?.remedies ?? [];
-    const templateData = buildTemplatFromVMRemedies(vmRemedies);
+    const templateData = buildTemplateFromVMRemedies(vmRemedies);
 
     const sessionId = `calc_ss_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
 
     return NextResponse.json({
       success: true,
       sessionId,
-      input: {
-        name: body.name || null,
-        gender: body.gender || null,
-      },
+      input: { name: body.name || null, gender: body.gender || null },
       sadeSati: {
         moonRashi: sadeSatiData?.moon_rashi || null,
         currentlyInSadeSati: sadeSatiData?.currently_in_sade_sati || false,
