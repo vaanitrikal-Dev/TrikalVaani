@@ -3,8 +3,13 @@
  * TRIKAAL VAANI — Unified Prediction Endpoint
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/api/predict/route.ts
- * VERSION: 14.8 — Option C: real-world sector/city grounding (PAID only)
+ * VERSION: 14.9 — Real-world context moved to Para 2 of paid summary
  * SIGNED: ROHIIT GUPTA, CEO
+ *
+ * CHANGES v14.9 vs v14.8:
+ *   ✅ Real-world sector/city context now appears as the SECOND paragraph (Para 2)
+ *   ✅ Para budget rebalanced (Para 1 pain → Para 2 real-world → planets/timing) — still ~650 words
+ *   ✅ All v14.8 grounding/fallback/privacy/kill-switch logic preserved
  *
  * CHANGES v14.8 vs v14.7:
  *   ✅ PAID predictions use live Google Search grounding (sector + current-city trends)
@@ -198,7 +203,7 @@ function buildProPrompt(
 
   const systemPrompt = `
 ════════════════════════════════════════════════════════
-TRIKAAL VAANI — PRO DEEP ANALYSIS ENGINE v14.8
+TRIKAAL VAANI — PRO DEEP ANALYSIS ENGINE v14.9
 JAI MAA SHAKTI 🔱
 ════════════════════════════════════════════════════════
 
@@ -220,12 +225,12 @@ ABSOLUTE RULES:
 7. Language = ${lang.toUpperCase()} every single word
 8. All seoSignals fields populated
 9. REAL-WORLD CONTEXT: Where current information about the client's profession/sector
-   and current city is available to you, weave in 1-2 concrete present-day facts
+   and current city is available to you, write 1-2 concrete present-day facts
    (industry/job-market climate, hiring/demand trend, local economic factor) and connect
    them to the planetary timing. Keep it GENERAL and sector-level.
    STRICT PRIVACY: NEVER search for, name, or identify this individual person. NEVER use
    their name. Only general sector/city/market trends — no private-person lookup.
-   This context goes INSIDE simpleSummary.text and relevant geoBullets — DO NOT add new JSON keys.
+   This context is the SECOND paragraph (Para 2) of simpleSummary.text — DO NOT add new JSON keys.
 10. OUTPUT = RAW JSON ONLY. No markdown fences, no preamble, no text after the final }.
     Escape every double-quote inside string values. First char { — last char }.
 ════════════════════════════════════════════════════════`.trim()
@@ -252,8 +257,8 @@ REAL-WORLD CONTEXT (use current web knowledge — sector + city only):
 - Lives/works in: ${userContext.currentCity ?? userContext.city}
 - Gender (for remedy personalization only): ${(userContext as any).gender || 'not specified'}
 Find the CURRENT (today's) real-world climate for this profession/sector and this city —
-e.g. hiring vs layoffs, demand, salary/growth trend, or local economic factor. Weave 1-2
-concrete present-day facts into the timing paragraphs (Para 5-8) and connect them to the
+e.g. hiring vs layoffs, demand, salary/growth trend, or local economic factor. Place 1-2
+concrete present-day facts as the SECOND paragraph (Para 2) of simpleSummary.text and connect them to the
 ${mahadasha} Mahadasha period — so the guidance feels grounded in real life, not only planets.
 NEVER identify or name this person. Sector + city trends ONLY. No private-person search.
 
@@ -275,7 +280,7 @@ OUTPUT JSON:
   ],
 
   "simpleSummary": {
-    "text": "WRITE EXACTLY 650 WORDS in ${lang.toUpperCase()}. Structure: [Para 1-2: Address situation pain directly — make them feel deeply understood — 120 words] [Para 3-4: Why this is happening — explain key planets in simple language — 110 words] [Para 5-6: What current ${mahadasha} Mahadasha + ${antardasha} Antardasha means for their life right now — 110 words] [Para 7-8: What is coming — specific timeframe, what to expect, hope — 110 words] [Para 9: Three priority actions they must take now in order of importance — 80 words] [Para 10: Two critical things to avoid with brief classical reason — 55 words] [Para 11: Specific remedy — exact mantra with count OR exact dana with day and time — 40 words] [Para 12: Maa Shakti blessing and hope — 25 words]. Spiritual Guru voice. Short sentences. Tighter paragraphs — the reader must finish till the end. NO suspense hook. FULL complete answer.",
+    "text": "WRITE EXACTLY 650 WORDS in ${lang.toUpperCase()}. Structure: [Para 1: Address their situation/pain directly — make them feel deeply understood — 90 words] [Para 2: REAL-WORLD GROUND REALITY — today's actual climate for their profession/sector (${userContext.employment}) and current city (hiring/demand/salary/market trend), connected to their situation; sector + city level only, NEVER name the person — 90 words] [Para 3-4: Why this is happening — explain key planets in simple language — 105 words] [Para 5-6: What current ${mahadasha} Mahadasha + ${antardasha} Antardasha means for their life right now — 105 words] [Para 7-8: What is coming — specific timeframe, what to expect, hope — 95 words] [Para 9: Three priority actions they must take now in order of importance — 65 words] [Para 10: Two critical things to avoid with brief classical reason — 45 words] [Para 11: Specific remedy — exact mantra with count OR exact dana with day and time — 30 words] [Para 12: Maa Shakti blessing and hope — 25 words]. Spiritual Guru voice. Short sentences. Tighter paragraphs — the reader must finish till the end. NO suspense hook. FULL complete answer.",
     "keyMessage": "ONE powerful Guru sentence that captures their life truth. Max 25 words.",
     "periodSummary": "3-4 sentences explaining what current Dasha combination means for their daily life in plain simple language.",
     "bestDates": "3-4 specific favorable date ranges or windows from dasha calculations.",
@@ -300,7 +305,7 @@ OUTPUT JSON:
     }
   },
 
-  "_promptVersion": "pro-v14.8",
+  "_promptVersion": "pro-v14.9",
   "_tier": "premium"
 }
 
@@ -632,7 +637,7 @@ export async function POST(req: NextRequest) {
         proJson = parseGeminiJSON(rawPro)
         console.log(`[TV-v14.8] PRO OK (search off) | summary_len:${proJson.simpleSummary?.text?.length??0} | ms:${Date.now()-startMs}`)
       }
-      predictionJson = mergeTemplateWithGemini(templateData, proJson, '14.8-pro')
+      predictionJson = mergeTemplateWithGemini(templateData, proJson, '14.9-pro')
     } catch(err:any) {
       console.error(`[TV-v14.8] PRO failed: ${err.message}`)
       return NextResponse.json({error:`Pro prediction failed: ${err.message}`},{status:500})
