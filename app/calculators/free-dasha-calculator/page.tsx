@@ -2,15 +2,26 @@
 
 // ============================================================
 // File: app/calculators/free-dasha-calculator/page.tsx
-// Version: v3.0 — Fixed VM response paths
+// Version: v3.1 — VM response paths + gold-standard JSON-LD
 // VM structure: dasha.maha_dasha[].planet, .start, .end, .antar[]
 // Current detection: date comparison (is_current always false in VM)
-// CEO: Rohiit Gupta | Chief Vedic Architect | Trikal Vaani
+// CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
+// Changelog:
+//   v3.1 (2026-06-02) — Gold-standard JSON-LD ADDED (page had none):
+//        buildCalcJsonLd() helper emits 8 @id-linked nodes (Organization
+//        +real sameAs, WebSite, linkable Person /founder, WebPage
+//        isPartOf #website, BreadcrumbList, WebApplication, HowTo,
+//        FAQPage). Added `.tv-aeo-answer` class to above-fold answer for
+//        speakable. Brand fix: visible/schema brand normalised to the
+//        double-a spelling; legal single-a kept inside helper only. No
+//        logic/UI/form/API change.
+//   v3.0 — Fixed VM response paths.
 // ============================================================
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import SiteNav from '@/components/layout/SiteNav';
+import { buildCalcJsonLd } from '@/lib/seo/calcJsonLd';
 
 const GOLD = '#D4AF37';
 const GOLD_RGBA = (a: number) => `rgba(212,175,55,${a})`;
@@ -311,9 +322,29 @@ export default function FreeDashaCalculatorPage() {
     colorScheme: 'dark' as const,
   });
 
+  // ─── JSON-LD (gold-standard 8-node @graph via shared helper) ─
+  const PAGE_URL = 'https://trikalvaani.com/calculators/free-dasha-calculator';
+  const jsonLd = buildCalcJsonLd({
+    pageUrl: PAGE_URL,
+    name: 'Free Dasha Calculator — Vimshottari Mahadasha & Antardasha Online',
+    description:
+      'Calculate your current Vimshottari Mahadasha and Antardasha from your birth chart, with the next 5 mahadasha periods on exact dates and 3 free Parashar remedies. Free Vedic calculator by Trikaal Vaani.',
+    breadcrumbName: 'Free Dasha Calculator',
+    aboutEntities: ['Vimshottari Dasha', 'Mahadasha', 'Antardasha', 'Moon'],
+    knowsAbout: ['Vedic Astrology', 'Jyotish Shastra', 'Vimshottari Dasha', 'Mahadasha'],
+    howToName: 'How to calculate your Vimshottari Dasha',
+    howToSteps: [
+      { name: 'Enter birth details', text: 'Enter your name, date of birth, exact time of birth and place of birth.' },
+      { name: 'Compute the dasha cycle', text: "The calculator finds the Moon's Nakshatra using Swiss Ephemeris with Lahiri Ayanamsha and builds the 120-year Vimshottari cycle per BPHS." },
+      { name: 'Get your result', text: 'See your current Mahadasha and Antardasha, the next 5 mahadasha periods on exact dates and 3 free Parashar remedies.' },
+    ],
+    faqs: FAQS,
+  });
+
   return (
     <>
       <SiteNav />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <main className="min-h-screen pt-20 pb-16 px-4" style={{ background: '#080B12', color: '#E5E7EB' }}>
         <div className="max-w-4xl mx-auto">
 
@@ -329,9 +360,9 @@ export default function FreeDashaCalculatorPage() {
             Free Dasha Calculator — Vimshottari Mahadasha & Antardasha Online
           </h1>
 
-          <div className="rounded-xl p-5 mb-6" style={{ background: 'rgba(212,175,55,0.06)', border: `1px solid rgba(212,175,55,0.2)` }}>
+          <div className="tv-aeo-answer rounded-xl p-5 mb-6" style={{ background: 'rgba(212,175,55,0.06)', border: `1px solid rgba(212,175,55,0.2)` }}>
             <p className="text-base md:text-lg leading-relaxed">
-              <strong style={{ color: GOLD }}>Trikal Vaani ka Free Dasha Calculator</strong> aapki current Vimshottari Mahadasha aur Antardasha Swiss Ephemeris se calculate karta hai. Date of birth, time, aur place daalo — current dasha lord, next 5 mahadasha periods exact dates ke saath, Parashar Dos/Donts, aur 3 free remedies turant milte hain. 100% free.
+              <strong style={{ color: GOLD }}>Trikaal Vaani ka Free Dasha Calculator</strong> aapki current Vimshottari Mahadasha aur Antardasha Swiss Ephemeris se calculate karta hai. Date of birth, time, aur place daalo — current dasha lord, next 5 mahadasha periods exact dates ke saath, Parashar Dos/Donts, aur 3 free remedies turant milte hain. 100% free.
             </p>
           </div>
 
@@ -339,7 +370,7 @@ export default function FreeDashaCalculatorPage() {
             <div className="w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg" style={{ background: GOLD, color: '#080B12' }}>RG</div>
             <div className="text-sm">
               <div className="font-semibold" style={{ color: GOLD }}>Rohiit Gupta</div>
-              <div className="text-slate-400">Chief Vedic Architect · Trikal Vaani · Delhi NCR</div>
+              <div className="text-slate-400">Chief Vedic Architect · Trikaal Vaani · Delhi NCR</div>
               <div className="text-xs text-slate-500 mt-0.5">Engine: Swiss Ephemeris · Parashar BPHS Ch.46-49 · Lahiri Ayanamsha · Shadbala · Bhrigu Nandi</div>
             </div>
           </div>
