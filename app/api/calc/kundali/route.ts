@@ -1,9 +1,22 @@
 // ============================================================
 // File: app/api/calc/kundali/route.ts
-// Purpose: VM bridge for Kundali/Nakshatra/Rashi/Lagna Calculators
-// Version: v1.5
-// Changelog v1.5: Pass full VM remedies object to buildTemplateFromVMRemedies
-//   so actionWindows (Dos) from remedy_master are included in response.
+// Purpose: VM bridge for Kundali / Nakshatra / Rashi / Lagna /
+//          Dasha + NEW Shadbala-based Calculators
+// Version: v1.6
+// Changelog v1.6:
+//   - Added new calcTypes: graha-bal, lucky-day, weak-planet,
+//     kundali-strength, lagna-bal, shadbala, gemstone.
+//   - resolveTargetPlanet() now resolves strongest/weakest planet.
+//   - Response now passes through (for new calcs):
+//       planets[].strength, planets[].shadbala,
+//       top-level shadbala, strongestPlanet, weakestPlanet,
+//       strengthAvailable.
+//   - SYNTHESIZED REMEDY FALLBACK: if VM /kundali returns no
+//     remedies, the route builds 3 remedies + 3 Dos from the
+//     PLANET_REMEDY table for the target planet — applied ONLY
+//     to the new calcTypes. Existing calcTypes (kundali, dasha,
+//     nakshatra, rashi, lagna) behave EXACTLY as v1.5 (zero
+//     regression).
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikal Vaani
 // ============================================================
 import { NextRequest, NextResponse } from 'next/server';
@@ -11,6 +24,17 @@ import { callVM } from '@/lib/callVM';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
+
+// New calc types that may rely on synthesized remedies + strength data
+const NEW_CALC_TYPES = [
+  'graha-bal',
+  'lucky-day',
+  'weak-planet',
+  'kundali-strength',
+  'lagna-bal',
+  'shadbala',
+  'gemstone',
+];
 
 interface CalcInput {
   year: number;
@@ -23,7 +47,19 @@ interface CalcInput {
   timezone: number;
   name?: string;
   gender?: 'male' | 'female' | 'other';
-  calcType?: 'kundali' | 'nakshatra' | 'rashi' | 'lagna' | 'dasha';
+  calcType?:
+    | 'kundali'
+    | 'nakshatra'
+    | 'rashi'
+    | 'lagna'
+    | 'dasha'
+    | 'graha-bal'
+    | 'lucky-day'
+    | 'weak-planet'
+    | 'kundali-strength'
+    | 'lagna-bal'
+    | 'shadbala'
+    | 'gemstone';
 }
 
 // ─── Find current Mahadasha by date comparison ───────────────────────────────
@@ -57,15 +93,25 @@ function getCurrentDasha(mahaList: any[]): { mahadasha: string | null; antardash
 function resolveTargetPlanet(
   calcType: string,
   lagnaLord: string | null,
-  mahadasha: string | null
+  mahadasha: string | null,
+  strongestPlanet: string | null,
+  weakestPlanet: string | null
 ): string | null {
   switch (calcType) {
-    case 'nakshatra': return 'Moon';
-    case 'rashi':     return 'Moon';
-    case 'lagna':     return lagnaLord || null;
-    case 'kundali':   return mahadasha || null;
-    case 'dasha':     return mahadasha || null;
-    default:          return mahadasha || null;
+    case 'nakshatra':        return 'Moon';
+    case 'rashi':            return 'Moon';
+    case 'lagna':            return lagnaLord || null;
+    case 'kundali':          return mahadasha || null;
+    case 'dasha':            return mahadasha || null;
+    // ── New calcTypes (v1.6) ──
+    case 'graha-bal':        return strongestPlanet || mahadasha || null;
+    case 'lucky-day':        return strongestPlanet || mahadasha || null;
+    case 'weak-planet':      return weakestPlanet || null;
+    case 'kundali-strength': return mahadasha || null;
+    case 'lagna-bal':        return lagnaLord || null;
+    case 'shadbala':         return weakestPlanet || null;
+    case 'gemstone':         return lagnaLord || mahadasha || null;
+    default:                 return mahadasha || null;
   }
 }
 
@@ -111,10 +157,52 @@ function buildTemplateFromVMRemedies(vmRemediesObj: any, planet: string | null):
   };
 }
 
+// ─── v1.6: Synthesize a template from PLANET_REMEDY when VM sends none ────────
+// Used ONLY for new calcTypes so the remedy section is never blank.
+function synthesizeTemplate(planet: string | null): any {
+  const pd = PLANET_REMEDY[planet ?? ''] ?? PLANET_REMEDY['Jupiter'];
+  const p = planet || 'Graha';
+  return {
+    remedyPlan: {
+      remedies: [
+        {
+          type: 'mantra', planet: p,
+          mantra: pd.mantra_hi, count: '108', time: `${pd.day_hi} सुबह`,
+          special: `${p} ko strong karne ke liye ${pd.day_hi} ko jaap karein`,
+        },
+        {
+          type: 'gemstone', planet: p,
+          lagna_stone: { stone: pd.stone, metal: pd.metal, finger: pd.finger, for: `${p} strengthening` },
+        },
+        {
+          type: 'daan', planet: p,
+          items: pd.daan_hi, day: pd.day_hi, recipient: 'गरीब या जरूरतमंद',
+          note: `${pd.day_hi} ko shraddha se daan karein`,
+        },
+      ],
+    },
+    actionWindows: [
+      { window: pd.day_hi,        reason: `${p} ka vaar — is din puja, daan aur mantra se graha balwan hota hai` },
+      { window: 'सूर्योदय (सुबह)', reason: `${pd.deity} ki upasana ke liye sabse shubh samay` },
+      { window: pd.vrat,          reason: `${p} ke liye ${pd.vrat} rakhne se shubh phal milta hai` },
+    ],
+    avoidWindows: [],
+  };
+}
+
+// ─── v1.6: Effective strength for ranking (prefers VM strength) ───────────────
+function planetStrength(g: any): number | null {
+  if (typeof g?.strength === 'number') return g.strength;
+  const ratio = g?.shadbala?.ratio;
+  if (typeof ratio === 'number') return ratio; // relative ranking still valid
+  return null;
+}
+
 export async function POST(req: NextRequest) {
   try {
     const body: CalcInput = await req.json();
     const calcType = body.calcType ?? 'kundali';
+    const isNewCalc = NEW_CALC_TYPES.includes(calcType);
 
     const required = ['year', 'month', 'day', 'hour', 'minute', 'latitude', 'longitude', 'timezone'];
     for (const f of required) {
@@ -154,10 +242,25 @@ export async function POST(req: NextRequest) {
     const moonGraha = kundaliData?.grahas?.find((g: any) => g.planet === 'Moon');
     const lagnaLord = kundaliData?.lagna?.sign_lord ?? null;
 
-    const targetPlanet = resolveTargetPlanet(calcType, lagnaLord, currentMahadasha);
+    // ── v1.6: Strongest / weakest planet (excludes Rahu/Ketu) ──
+    const grahas = kundaliData?.grahas ?? [];
+    const realPlanets = grahas.filter((g: any) => !['Rahu', 'Ketu'].includes(g.planet));
+    const sorted = [...realPlanets].sort((a, b) => (planetStrength(b) ?? 0) - (planetStrength(a) ?? 0));
+    const strongestPlanet: string | null = sorted[0]?.planet ?? null;
+    const weakestPlanet: string | null = sorted.length ? sorted[sorted.length - 1]?.planet ?? null : null;
+    const strengthAvailable: boolean = realPlanets.some((g: any) => typeof g?.strength === 'number');
+
+    const targetPlanet = resolveTargetPlanet(
+      calcType, lagnaLord, currentMahadasha, strongestPlanet, weakestPlanet
+    );
 
     // Pass full remedies object — includes remedies array + actionWindows
-    const templateData = buildTemplateFromVMRemedies(kundaliData?.remedies ?? {}, targetPlanet);
+    let templateData = buildTemplateFromVMRemedies(kundaliData?.remedies ?? {}, targetPlanet);
+
+    // v1.6: synthesize remedies for NEW calc types if VM returned none
+    if (!templateData && isNewCalc) {
+      templateData = synthesizeTemplate(targetPlanet);
+    }
 
     const sessionId = `calc_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
 
@@ -184,6 +287,9 @@ export async function POST(req: NextRequest) {
         nakshatra: g.nakshatra,
         is_retrograde: g.is_retrograde || false,
         dignity: g.dignity || null,
+        // ── v1.6 passthrough ──
+        strength: typeof g.strength === 'number' ? g.strength : null,
+        shadbala: g.shadbala ?? null,
       })),
       houses: (kundaliData.houses || []).map((h: any) => ({
         house: h.house,
@@ -193,6 +299,11 @@ export async function POST(req: NextRequest) {
         mahadasha: currentMahadasha,
         antardasha: currentAntardasha,
       },
+      // ── v1.6 top-level additions ──
+      shadbala: kundaliData?.shadbala ?? {},
+      strongestPlanet,
+      weakestPlanet,
+      strengthAvailable,
       template: templateData,
     }, { status: 200 });
 
