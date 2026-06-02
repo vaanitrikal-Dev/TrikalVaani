@@ -3,8 +3,17 @@
  * TRIKAAL VAANI — Unified Prediction Endpoint
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/api/predict/route.ts
- * VERSION: 14.7 — Paid summary 900w → 650w (readability)
+ * VERSION: 14.8 — Option C: real-world sector/city grounding (PAID only)
  * SIGNED: ROHIIT GUPTA, CEO
+ *
+ * CHANGES v14.8 vs v14.7:
+ *   ✅ PAID predictions use live Google Search grounding (sector + current-city trends)
+ *   ✅ Real-world climate woven into summary + geoBullets (NO new JSON keys, no frontend change)
+ *   ✅ STRICT privacy: sector/city trends only — never identifies the individual person
+ *   ✅ Gemini 2.5 constraint handled: json-mime auto-dropped when grounding on
+ *   ✅ Auto-fallback to no-search call if grounded JSON fails (customer always gets prediction)
+ *   ✅ CEO kill-switch PRO_REALWORLD_SEARCH (set false to disable grounding instantly)
+ *   ✅ FREE Flash tier unchanged — zero grounding cost on free
  *
  * CHANGES v14.7 vs v14.6:
  *   ✅ Paid simpleSummary.text reduced 900 → 650 words (users not finishing long reads)
@@ -60,6 +69,11 @@ const EPHE_API_URL    = process.env.EPHE_API_URL    ?? ''
 const EPHE_API_KEY    = process.env.EPHE_API_KEY    ?? ''
 const RAZORPAY_SECRET = process.env.RAZORPAY_KEY_SECRET ?? ''
 const MAX_TOKENS      = 12000  // CEO LOCKED
+
+// ── Option C (v14.8): Real-world sector/city grounding for PAID only ─────────
+// true  = paid predictions use live Google Search grounding (sector + city trends)
+// false = disable instantly (no grounding cost) — CEO kill-switch
+const PRO_REALWORLD_SEARCH = true
 
 // ── Allowed paid amounts (paise) — anti-tamper ───────────────────────────────
 const ALLOWED_PAID_AMOUNTS: Record<string, number> = {
@@ -126,8 +140,12 @@ async function callVM(endpoint:string, body:object, timeoutMs=25000): Promise<an
 }
 
 // ── callGemini ────────────────────────────────────────────────────────────────
-async function callGemini(model:string, systemPrompt:string, userMessage:string, jsonMode=true): Promise<string> {
+// useSearch=true → enable Google Search grounding (real-world context).
+// NOTE: Gemini 2.5 cannot combine google_search with responseMimeType:'application/json',
+// so when useSearch is on we DROP json mime and let parseGeminiJSON extract the JSON.
+async function callGemini(model:string, systemPrompt:string, userMessage:string, jsonMode=true, useSearch=false): Promise<string> {
   const url = `${GEMINI_BASE_URL}/${model}:generateContent?key=${GEMINI_API_KEY}`
+  const wantJsonMime = jsonMode && !useSearch
   const body:any = {
     system_instruction:{parts:[{text:systemPrompt}]},
     contents:[{role:'user',parts:[{text:userMessage}]}],
@@ -136,8 +154,9 @@ async function callGemini(model:string, systemPrompt:string, userMessage:string,
       temperature:0.7,
       topK:40,
       topP:0.95,
-      ...(jsonMode?{responseMimeType:'application/json'}:{}),
+      ...(wantJsonMime?{responseMimeType:'application/json'}:{}),
     },
+    ...(useSearch?{tools:[{google_search:{}}]}:{}),
   }
   const res = await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)})
   if(!res.ok){const err=await res.text().catch(()=>'');throw new Error(`Gemini ${model} → ${res.status}: ${err.slice(0,300)}`)}
@@ -179,7 +198,7 @@ function buildProPrompt(
 
   const systemPrompt = `
 ════════════════════════════════════════════════════════
-TRIKAAL VAANI — PRO DEEP ANALYSIS ENGINE v14.7
+TRIKAAL VAANI — PRO DEEP ANALYSIS ENGINE v14.8
 JAI MAA SHAKTI 🔱
 ════════════════════════════════════════════════════════
 
@@ -200,6 +219,15 @@ ABSOLUTE RULES:
 6. NO suspense hook — paid user gets full truth immediately
 7. Language = ${lang.toUpperCase()} every single word
 8. All seoSignals fields populated
+9. REAL-WORLD CONTEXT: Where current information about the client's profession/sector
+   and current city is available to you, weave in 1-2 concrete present-day facts
+   (industry/job-market climate, hiring/demand trend, local economic factor) and connect
+   them to the planetary timing. Keep it GENERAL and sector-level.
+   STRICT PRIVACY: NEVER search for, name, or identify this individual person. NEVER use
+   their name. Only general sector/city/market trends — no private-person lookup.
+   This context goes INSIDE simpleSummary.text and relevant geoBullets — DO NOT add new JSON keys.
+10. OUTPUT = RAW JSON ONLY. No markdown fences, no preamble, no text after the final }.
+    Escape every double-quote inside string values. First char { — last char }.
 ════════════════════════════════════════════════════════`.trim()
 
   const userMessage = `Generate PAID PREMIUM FULL ANALYSIS for: ${domain.displayName ?? domain.id}
@@ -218,6 +246,16 @@ CLIENT DETAILS:
 SITUATION NOTE (60% FOCUS — MANDATORY):
 "${userContext.situationNote ?? 'domain challenges and growth'}"
 First 3 sentences MUST directly address this pain. Make them feel deeply understood.
+
+REAL-WORLD CONTEXT (use current web knowledge — sector + city only):
+- Profession/Sector: ${userContext.employment}${userContext.sector ? ` (${userContext.sector})` : ''}
+- Lives/works in: ${userContext.currentCity ?? userContext.city}
+- Gender (for remedy personalization only): ${(userContext as any).gender || 'not specified'}
+Find the CURRENT (today's) real-world climate for this profession/sector and this city —
+e.g. hiring vs layoffs, demand, salary/growth trend, or local economic factor. Weave 1-2
+concrete present-day facts into the timing paragraphs (Para 5-8) and connect them to the
+${mahadasha} Mahadasha period — so the guidance feels grounded in real life, not only planets.
+NEVER identify or name this person. Sector + city trends ONLY. No private-person search.
 
 OUTPUT JSON:
 {
@@ -262,7 +300,7 @@ OUTPUT JSON:
     }
   },
 
-  "_promptVersion": "pro-v14.7",
+  "_promptVersion": "pro-v14.8",
   "_tier": "premium"
 }
 
@@ -569,18 +607,34 @@ export async function POST(req: NextRequest) {
   let predictionJson: Record<string,any>
 
   if(isPaid) {
-    // ── PAID: Gemini Pro — 650 words ────────────────────────────────────────
-    console.log(`[TV-v14.6] PRO START | ms:${Date.now()-startMs}`)
+    // ── PAID: Gemini Pro — 650 words + real-world grounding (Option C) ───────
+    console.log(`[TV-v14.8] PRO START | grounding:${PRO_REALWORLD_SEARCH} | ms:${Date.now()-startMs}`)
     const {systemPrompt:proSystem, userMessage:proUser} = buildProPrompt(
       kundaliData, localBirthData, domainConfig, promptUserContext, templateData
     )
     try {
-      const rawPro = await callGemini(GEMINI_PRO, proSystem, proUser, true)
-      const proJson = parseGeminiJSON(rawPro)
-      predictionJson = mergeTemplateWithGemini(templateData, proJson, '14.6-pro')
-      console.log(`[TV-v14.6] PRO OK | summary_len:${proJson.simpleSummary?.text?.length??0} | ms:${Date.now()-startMs}`)
+      let proJson:any
+      if(PRO_REALWORLD_SEARCH){
+        try {
+          // Attempt 1: WITH Google Search grounding (sector + city real-world context)
+          const rawPro = await callGemini(GEMINI_PRO, proSystem, proUser, true, true)
+          proJson = parseGeminiJSON(rawPro)
+          console.log(`[TV-v14.8] PRO grounded OK | summary_len:${proJson.simpleSummary?.text?.length??0} | ms:${Date.now()-startMs}`)
+        } catch(searchErr:any) {
+          // Fallback: WITHOUT grounding (reliable JSON mode) — customer always gets a prediction
+          console.error(`[TV-v14.8] PRO grounded attempt failed (${searchErr.message}) — falling back to no-search`)
+          const rawPro2 = await callGemini(GEMINI_PRO, proSystem, proUser, true, false)
+          proJson = parseGeminiJSON(rawPro2)
+          console.log(`[TV-v14.8] PRO fallback OK | summary_len:${proJson.simpleSummary?.text?.length??0} | ms:${Date.now()-startMs}`)
+        }
+      } else {
+        const rawPro = await callGemini(GEMINI_PRO, proSystem, proUser, true, false)
+        proJson = parseGeminiJSON(rawPro)
+        console.log(`[TV-v14.8] PRO OK (search off) | summary_len:${proJson.simpleSummary?.text?.length??0} | ms:${Date.now()-startMs}`)
+      }
+      predictionJson = mergeTemplateWithGemini(templateData, proJson, '14.8-pro')
     } catch(err:any) {
-      console.error(`[TV-v14.6] PRO failed: ${err.message}`)
+      console.error(`[TV-v14.8] PRO failed: ${err.message}`)
       return NextResponse.json({error:`Pro prediction failed: ${err.message}`},{status:500})
     }
   } else {
