@@ -1,10 +1,17 @@
 /**
  * ============================================================
- * TRIKAL VAANI — Unified Prediction Endpoint
+ * TRIKAAL VAANI — Unified Prediction Endpoint
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/api/predict/route.ts
- * VERSION: 14.6 — Razorpay Payment Verification Gate
+ * VERSION: 14.7 — Paid summary 900w → 650w (readability)
  * SIGNED: ROHIIT GUPTA, CEO
+ *
+ * CHANGES v14.7 vs v14.6:
+ *   ✅ Paid simpleSummary.text reduced 900 → 650 words (users not finishing long reads)
+ *   ✅ Per-paragraph word budget rebalanced to total ~650
+ *   ✅ Tighter paragraphs for higher read-completion
+ *   ✅ ALL v14.6 logic preserved 100% (payment gate, schema, routing, geoBullets untouched)
+ *   ✅ FREE Flash tier unchanged (150-200w)
  *
  * CHANGES v14.6 vs v14.5:
  *   ✅ paymentVerification gate for paid + voice tiers
@@ -149,7 +156,7 @@ function parseGeminiJSON(raw:string): any {
 }
 
 // ── buildProPrompt ────────────────────────────────────────────────────────────
-// Paid tier — 900 words, deep analysis, full GEO signals
+// Paid tier — 650 words, deep analysis, full GEO signals
 function buildProPrompt(
   kundali: KundaliData,
   birthData: BirthData,
@@ -172,7 +179,7 @@ function buildProPrompt(
 
   const systemPrompt = `
 ════════════════════════════════════════════════════════
-TRIKAL VAANI — PRO DEEP ANALYSIS ENGINE v14.6
+TRIKAAL VAANI — PRO DEEP ANALYSIS ENGINE v14.7
 JAI MAA SHAKTI 🔱
 ════════════════════════════════════════════════════════
 
@@ -189,7 +196,7 @@ ABSOLUTE RULES:
 2. situationNote = 60% weight — first 3 sentences address pain directly
 3. geoBullets = EXACTLY 10 items — 25-40 words each — NO URLs
 4. geoDirectAnswer = 4-5 sentences — NO URLs — NO "Visit trikalvaani"
-5. simpleSummary.text = EXACTLY 900 WORDS — count carefully
+5. simpleSummary.text = EXACTLY 650 WORDS — count carefully
 6. NO suspense hook — paid user gets full truth immediately
 7. Language = ${lang.toUpperCase()} every single word
 8. All seoSignals fields populated
@@ -230,7 +237,7 @@ OUTPUT JSON:
   ],
 
   "simpleSummary": {
-    "text": "WRITE EXACTLY 900 WORDS in ${lang.toUpperCase()}. Structure: [Para 1-2: Address situation pain directly — make them feel deeply understood — 150 words] [Para 3-4: Why this is happening — explain key planets in simple language — 150 words] [Para 5-6: What current ${mahadasha} Mahadasha + ${antardasha} Antardasha means for their life right now — 150 words] [Para 7-8: What is coming — specific timeframe, what to expect, hope — 150 words] [Para 9: Three priority actions they must take now in order of importance — 100 words] [Para 10: Two critical things to avoid with brief classical reason — 75 words] [Para 11: Specific remedy — exact mantra with count OR exact dana with day and time — 75 words] [Para 12: Maa Shakti blessing and hope — 50 words]. Spiritual Guru voice. Short sentences. NO suspense hook. FULL complete answer.",
+    "text": "WRITE EXACTLY 650 WORDS in ${lang.toUpperCase()}. Structure: [Para 1-2: Address situation pain directly — make them feel deeply understood — 120 words] [Para 3-4: Why this is happening — explain key planets in simple language — 110 words] [Para 5-6: What current ${mahadasha} Mahadasha + ${antardasha} Antardasha means for their life right now — 110 words] [Para 7-8: What is coming — specific timeframe, what to expect, hope — 110 words] [Para 9: Three priority actions they must take now in order of importance — 80 words] [Para 10: Two critical things to avoid with brief classical reason — 55 words] [Para 11: Specific remedy — exact mantra with count OR exact dana with day and time — 40 words] [Para 12: Maa Shakti blessing and hope — 25 words]. Spiritual Guru voice. Short sentences. Tighter paragraphs — the reader must finish till the end. NO suspense hook. FULL complete answer.",
     "keyMessage": "ONE powerful Guru sentence that captures their life truth. Max 25 words.",
     "periodSummary": "3-4 sentences explaining what current Dasha combination means for their daily life in plain simple language.",
     "bestDates": "3-4 specific favorable date ranges or windows from dasha calculations.",
@@ -255,12 +262,12 @@ OUTPUT JSON:
     }
   },
 
-  "_promptVersion": "pro-v14.6",
+  "_promptVersion": "pro-v14.7",
   "_tier": "premium"
 }
 
 CRITICAL FINAL CHECKLIST:
-- simpleSummary.text MUST be 900 WORDS — count carefully before returning
+- simpleSummary.text MUST be 650 WORDS — count carefully before returning
 - geoBullets MUST have exactly 10 items — 25-40 words each
 - NO URLs anywhere in geoBullets or geoDirectAnswer
 - Language = ${lang.toUpperCase()} every single word throughout
@@ -562,7 +569,7 @@ export async function POST(req: NextRequest) {
   let predictionJson: Record<string,any>
 
   if(isPaid) {
-    // ── PAID: Gemini Pro — 900 words ────────────────────────────────────────
+    // ── PAID: Gemini Pro — 650 words ────────────────────────────────────────
     console.log(`[TV-v14.6] PRO START | ms:${Date.now()-startMs}`)
     const {systemPrompt:proSystem, userMessage:proUser} = buildProPrompt(
       kundaliData, localBirthData, domainConfig, promptUserContext, templateData
