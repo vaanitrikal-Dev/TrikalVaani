@@ -2,14 +2,25 @@
 
 // ============================================================
 // File: app/calculators/free-rashi-calculator/page.tsx
-// Version: v1.0 — Free Rashi (Moon Sign) Calculator
+// Version: v1.1 — Free Rashi (Moon Sign) Calculator
 // Engine: Swiss Ephemeris + Parashar BPHS + Shadbala + Bhrigu
-// CEO: Rohiit Gupta | Chief Vedic Architect | Trikal Vaani
+// CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
+// Changelog:
+//   v1.1 (2026-06-02) — Gold-standard JSON-LD ADDED (page had none):
+//        buildCalcJsonLd() helper emits 8 @id-linked nodes (Organization
+//        +real sameAs, WebSite, linkable Person /founder, WebPage
+//        isPartOf #website, BreadcrumbList, WebApplication, HowTo,
+//        FAQPage). Added `.tv-aeo-answer` class to above-fold answer for
+//        speakable. Brand fix: visible/schema brand normalised to the
+//        double-a spelling; legal single-a kept inside helper only. No
+//        logic/UI/form/API change.
+//   v1.0 — initial build.
 // ============================================================
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import SiteNav from '@/components/layout/SiteNav';
+import { buildCalcJsonLd } from '@/lib/seo/calcJsonLd';
 
 const GOLD = '#D4AF37';
 const GOLD_RGBA = (a: number) => `rgba(212,175,55,${a})`;
@@ -172,11 +183,11 @@ function CityInput({ id, value, onSelect, error }: {
 const FAQS = [
   { q: 'Rashi kya hoti hai?', a: 'Rashi (Moon Sign / Chandra Rashi) Vedic Jyotish ka sabse important zodiac sign hai. Aakash ko 12 equal divisions mein baata gaya hai — har 30° ka ek Rashi. Aapki Chandra Rashi wahi hai jismein aapke janm samay Chandra (Moon) sthit tha. Indian astrology mein predictions zyadatar Chandra Rashi pe based hoti hain.' },
   { q: 'Chandra Rashi aur Surya Rashi mein kya antar hai?', a: 'Chandra Rashi = Moon Sign — aapka mann, emotions, mother. Vedic astrology ka primary sign. Surya Rashi = Sun Sign — Western astrology mein use hota hai, identity aur ego dikhata hai. India mein "Rashi" ka matlab aksar Chandra Rashi hota hai.' },
-  { q: 'Apni Rashi kaise pata karein?', a: 'Apni Chandra Rashi jaanne ke liye Date of Birth, exact Time of Birth, aur Place of Birth chahiye. Trikal Vaani Calculator Swiss Ephemeris se Moon ki exact position calculate karta hai aur aapki Chandra Rashi turant nikalta hai — bilkul free.' },
+  { q: 'Apni Rashi kaise pata karein?', a: 'Apni Chandra Rashi jaanne ke liye Date of Birth, exact Time of Birth, aur Place of Birth chahiye. Trikaal Vaani Calculator Swiss Ephemeris se Moon ki exact position calculate karta hai aur aapki Chandra Rashi turant nikalta hai — bilkul free.' },
   { q: '12 Rashis kaun se hain?', a: '12 Rashis hain — Mesha (Aries), Vrishabha (Taurus), Mithuna (Gemini), Karka (Cancer), Simha (Leo), Kanya (Virgo), Tula (Libra), Vrishchika (Scorpio), Dhanu (Sagittarius), Makara (Capricorn), Kumbha (Aquarius), aur Meena (Pisces). Har Rashi ka apna lord planet, element, aur swabhav hai.' },
   { q: 'Rashi se kya predict hota hai?', a: 'Aapki Chandra Rashi se predict hota hai — (1) Emotional patterns aur mann ki state, (2) Mother ke saath rishta, (3) Marriage compatibility (rashi koot matching), (4) Sade Sati aur Saturn transit ka effect, (5) Daily horoscope aur muhurta. Vimshottari Dasha bhi Janma Nakshatra (jo Chandra Rashi mein hi hota hai) se calculate hoti hai.' },
   { q: 'Kya Rashi Calculator bilkul free hai?', a: 'Haan. 100% free. Chandra Rashi naam, ruling planet, element, symbol, favorable colors, lucky days, mantra, personality traits, 3 Parashar Dos, 3 Donts, aur 3 personalized remedies (Mantra, Ratna, Daan) — sab free.' },
-  { q: 'Rashi ke result kitne accurate hain?', a: 'Trikal Vaani Swiss Ephemeris use karta hai — NASA-grade astronomical library. Lahiri Ayanamsha (Government of India standard) + BPHS classical rules — 99.9% astronomical accuracy. Same engine professional astrologers worldwide use karte hain.' },
+  { q: 'Rashi ke result kitne accurate hain?', a: 'Trikaal Vaani Swiss Ephemeris use karta hai — NASA-grade astronomical library. Lahiri Ayanamsha (Government of India standard) + BPHS classical rules — 99.9% astronomical accuracy. Same engine professional astrologers worldwide use karte hain.' },
 ];
 
 export default function FreeRashiCalculatorPage() {
@@ -276,9 +287,29 @@ export default function FreeRashiCalculatorPage() {
     colorScheme: 'dark' as const,
   });
 
+  // ─── JSON-LD (gold-standard 8-node @graph via shared helper) ─
+  const PAGE_URL = 'https://trikalvaani.com/calculators/free-rashi-calculator';
+  const jsonLd = buildCalcJsonLd({
+    pageUrl: PAGE_URL,
+    name: 'Free Rashi Calculator — Find Your Moon Sign (Chandra Rashi) Online',
+    description:
+      'Find your Chandra Rashi (Moon Sign) from your birth chart — ruling planet, element, symbol, favorable colors, lucky days, mantra, personality traits and 3 free Parashar remedies. Free Vedic calculator by Trikaal Vaani.',
+    breadcrumbName: 'Free Rashi Calculator',
+    aboutEntities: ['Rashi', 'Moon', 'Chandra Rashi', 'Moon Sign'],
+    knowsAbout: ['Vedic Astrology', 'Jyotish Shastra', 'Moon Sign', 'Rashi'],
+    howToName: 'How to find your Chandra Rashi (Moon Sign)',
+    howToSteps: [
+      { name: 'Enter birth details', text: 'Enter your name, date of birth, exact time of birth and place of birth.' },
+      { name: 'Locate the Moon', text: "The calculator computes the Moon's exact zodiac position using Swiss Ephemeris with Lahiri Ayanamsha to find your Chandra Rashi." },
+      { name: 'Get your result', text: 'See your Moon sign, ruling planet, element, symbol, favorable colors, lucky days, mantra and 3 free Parashar remedies.' },
+    ],
+    faqs: FAQS,
+  });
+
   return (
     <>
       <SiteNav />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <main className="min-h-screen pt-20 pb-16 px-4" style={{ background: '#080B12', color: '#E5E7EB' }}>
         <div className="max-w-4xl mx-auto">
 
@@ -294,9 +325,9 @@ export default function FreeRashiCalculatorPage() {
             Free Rashi Calculator — Find Your Moon Sign (Chandra Rashi) Online
           </h1>
 
-          <div className="rounded-xl p-5 mb-6" style={{ background: 'rgba(212,175,55,0.06)', border: `1px solid rgba(212,175,55,0.2)` }}>
+          <div className="tv-aeo-answer rounded-xl p-5 mb-6" style={{ background: 'rgba(212,175,55,0.06)', border: `1px solid rgba(212,175,55,0.2)` }}>
             <p className="text-base md:text-lg leading-relaxed">
-              <strong style={{ color: GOLD }}>Trikal Vaani ka Free Rashi Calculator</strong> aapki Chandra Rashi (Moon Sign) Swiss Ephemeris se calculate karta hai — Chandra ki exact position se. Date, time, aur place daalo — Rashi, ruling planet, element, symbol, favorable colors, lucky days, personality traits, aur 3 free Parashar remedies (Mantra, Ratna, Daan) turant milte hain. 100% free, BPHS classical rules ke according.
+              <strong style={{ color: GOLD }}>Trikaal Vaani ka Free Rashi Calculator</strong> aapki Chandra Rashi (Moon Sign) Swiss Ephemeris se calculate karta hai — Chandra ki exact position se. Date, time, aur place daalo — Rashi, ruling planet, element, symbol, favorable colors, lucky days, personality traits, aur 3 free Parashar remedies (Mantra, Ratna, Daan) turant milte hain. 100% free, BPHS classical rules ke according.
             </p>
           </div>
 
@@ -304,7 +335,7 @@ export default function FreeRashiCalculatorPage() {
             <div className="w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg" style={{ background: GOLD, color: '#080B12' }}>RG</div>
             <div className="text-sm">
               <div className="font-semibold" style={{ color: GOLD }}>Rohiit Gupta</div>
-              <div className="text-slate-400">Chief Vedic Architect · Trikal Vaani · Delhi NCR</div>
+              <div className="text-slate-400">Chief Vedic Architect · Trikaal Vaani · Delhi NCR</div>
               <div className="text-xs text-slate-500 mt-0.5">Engine: Swiss Ephemeris · Parashar BPHS · Lahiri Ayanamsha · Shadbala · Bhrigu Nandi</div>
             </div>
           </div>
@@ -509,16 +540,16 @@ export default function FreeRashiCalculatorPage() {
               <strong style={{ color: GOLD }}>Lagna Rashi (Ascendant):</strong> Janm samay purvi kshitij pe udit ho rahi rashi. Physical body, personality, life direction.
             </p>
             <p className="text-slate-300 leading-relaxed mb-4">
-              <strong>Trikal Vaani calculator</strong> hamesha Chandra Rashi dikhata hai — Parashar BPHS ke according primary sign yahi hai.
+              <strong>Trikaal Vaani calculator</strong> hamesha Chandra Rashi dikhata hai — Parashar BPHS ke according primary sign yahi hai.
             </p>
 
-            <h2 className="text-2xl font-serif font-bold mb-4 mt-8" style={{ color: GOLD }}>Trikal Vaani vs AstroSage vs AstroTalk Rashi Calculator</h2>
+            <h2 className="text-2xl font-serif font-bold mb-4 mt-8" style={{ color: GOLD }}>Trikaal Vaani vs AstroSage vs AstroTalk Rashi Calculator</h2>
             <div className="not-prose overflow-x-auto mb-6">
               <table className="w-full text-sm" style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid ${GOLD}33`, borderRadius: '12px' }}>
                 <thead>
                   <tr style={{ background: 'rgba(212,175,55,0.1)' }}>
                     <th className="p-3 text-left" style={{ color: GOLD }}>Feature</th>
-                    <th className="p-3 text-left" style={{ color: GOLD }}>Trikal Vaani</th>
+                    <th className="p-3 text-left" style={{ color: GOLD }}>Trikaal Vaani</th>
                     <th className="p-3 text-left text-slate-400">Others</th>
                   </tr>
                 </thead>
