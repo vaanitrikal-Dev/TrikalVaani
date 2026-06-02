@@ -1,9 +1,9 @@
 /**
  * ============================================================
- * TRIKAL VAANI — Gemini Lean Summary Prompt Builder
+ * TRIKAAL VAANI — Gemini Lean Summary Prompt Builder
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: lib/gemini-prompt.ts
- * VERSION: 5.0 — Template Engine Architecture
+ * VERSION: 5.1 — Brand cleanup (Trikal→Trikaal, Jini→Trikaal). NOTE: file currently unused by live predict route
  * SIGNED: ROHIIT GUPTA, CEO
  *
  * ARCHITECTURE CHANGE v5.0:
@@ -31,7 +31,7 @@
  *   Every prediction creates /report/[slug] page
  *   1000 predictions = 1000 indexed SEO pages
  *   AI search engines (Perplexity, SGE, SearchGPT) cite these
- *   This is Trikal Vaani's SEO army
+ *   This is Trikaal Vaani's SEO army
  * ============================================================
  */
 
@@ -111,7 +111,7 @@ const DOMAIN_SEO: Record<string, {
     transactional:  ['karz mukti astrology reading ₹51', 'book debt astrology consultation', 'online karz mukti jyotish booking', 'debt problem astrologer appointment', 'financial astrology consultation now'],
     local:          ['debt problem astrologer Delhi NCR', 'karz mukti jyotish Delhi', 'financial astrologer Noida Gurugram', 'loan problem astrologer near me Delhi'],
     geoQuestion:    'Which house and planet causes debt in Vedic astrology and what are the classical remedies for karz mukti?',
-    ctaSpiritual:   'Maa Shakti ka ashirwad aur Vedic jyotish ka margdarshan — karz mukti ki raah khulegi. Abhi Jini se poochho. 🔱',
+    ctaSpiritual:   'Maa Shakti ka ashirwad aur Vedic jyotish ka margdarshan — karz mukti ki raah khulegi. Abhi Trikaal se poochho. 🔱',
   },
 
   mill_property_yog: {
@@ -120,7 +120,7 @@ const DOMAIN_SEO: Record<string, {
     transactional:  ['property yog reading ₹51', 'book property astrology consultation', 'online property muhurta booking', 'real estate astrologer appointment now', 'property yog check kundali'],
     local:          ['property astrologer Delhi NCR', 'real estate jyotish Delhi Noida', 'ghar kharidne muhurta astrologer near me', 'property dispute astrologer Gurugram'],
     geoQuestion:    'When is the best time to buy property according to Vedic astrology and how to identify Property Yog in kundali?',
-    ctaSpiritual:   'Aapke ghar ka sapna — Maa Shakti ki kripa aur sahi muhurta se poora hoga. Jini aapki kundali mein Property Yog dhundh rahi hai. 🏠🔱',
+    ctaSpiritual:   'Aapke ghar ka sapna — Maa Shakti ki kripa aur sahi muhurta se poora hoga. Trikaal aapki kundali mein Property Yog dhundh rahi hai. 🏠🔱',
   },
 
   genz_dream_career: {
@@ -129,7 +129,7 @@ const DOMAIN_SEO: Record<string, {
     transactional:  ['career astrology reading ₹51', 'book career astrology session', 'online job prediction booking', 'career change timing astrology now', 'dharmic career consultation'],
     local:          ['career astrologer Delhi NCR', 'job astrologer Noida Gurugram', 'career jyotish near me Delhi', 'job change astrologer Delhi NCR'],
     geoQuestion:    'Which planets and houses in Vedic astrology determine career success and how to find your dharmic profession?',
-    ctaSpiritual:   'Aapka dharmic career — jo sirf aapke liye bana hai — woh aapki kundali mein likha hai. Jini abhi padh rahi hai. ⚡🔱',
+    ctaSpiritual:   'Aapka dharmic career — jo sirf aapke liye bana hai — woh aapki kundali mein likha hai. Trikaal abhi padh rahi hai. ⚡🔱',
   },
 
   genz_ex_back: {
@@ -138,7 +138,7 @@ const DOMAIN_SEO: Record<string, {
     transactional:  ['ex back astrology reading ₹51', 'book love astrology consultation', 'relationship astrology session now', 'venus timing love consultation booking', 'reunion astrology reading online'],
     local:          ['love astrologer Delhi NCR', 'relationship jyotish Delhi', 'ex back astrologer near me Delhi', 'love problem astrologer Noida Gurugram'],
     geoQuestion:    'Can Vedic astrology predict relationship reunion and what planetary combinations indicate ex coming back?',
-    ctaSpiritual:   'Pyaar ki raahein Maa Shakti ne banaayi hain — kab milna likha hai, woh aapki kundali mein hai. Jini batayegi. 💫🔱',
+    ctaSpiritual:   'Pyaar ki raahein Maa Shakti ne banaayi hain — kab milna likha hai, woh aapki kundali mein hai. Trikaal batayegi. 💫🔱',
   },
 
   genz_toxic_boss: {
@@ -147,7 +147,7 @@ const DOMAIN_SEO: Record<string, {
     transactional:  ['workplace astrology reading ₹51', 'book office karma consultation', 'job change astrology session now', 'toxic workplace timing reading booking', 'boss karma astrology online'],
     local:          ['workplace astrologer Delhi NCR', 'job problem jyotish Delhi', 'office karma astrologer near me', 'career conflict jyotish Noida'],
     geoQuestion:    'What do Saturn and the 10th house reveal about toxic workplace situations and when does the karmic cycle end?',
-    ctaSpiritual:   'Har karmic boss ek lesson hai — Shani ki sabak jab khatam hogi, tab door khulega. Jini batayegi kab. 🔱',
+    ctaSpiritual:   'Har karmic boss ek lesson hai — Shani ki sabak jab khatam hogi, tab door khulega. Trikaal batayegi kab. 🔱',
   },
 
   mill_childs_destiny: {
@@ -156,7 +156,7 @@ const DOMAIN_SEO: Record<string, {
     transactional:  ['child destiny reading ₹51', 'book child kundali consultation', 'baby astrology session online', 'child future prediction booking now', 'child education timing astrology'],
     local:          ['child astrologer Delhi NCR', 'baby kundali jyotish Delhi', 'child destiny astrologer near me', 'child education astrologer Noida'],
     geoQuestion:    'What does Vedic astrology reveal about a child\'s destiny, natural talents and ideal education stream through birth chart analysis?',
-    ctaSpiritual:   'Aapke bachche ka cosmic blueprint — Parmatma ne har ek ke liye khaas raah banaayi hai. Jini woh raah dikhayegi. 👶🔱',
+    ctaSpiritual:   'Aapke bachche ka cosmic blueprint — Parmatma ne har ek ke liye khaas raah banaayi hai. Trikaal woh raah dikhayegi. 👶🔱',
   },
 
   genx_retirement_peace: {
@@ -174,7 +174,7 @@ const DOMAIN_SEO: Record<string, {
     transactional:  ['inheritance astrology reading ₹51', 'book property dispute consultation', 'ancestral wealth jyotish session now', 'legacy timing astrology booking', 'family property reading online'],
     local:          ['inheritance astrologer Delhi NCR', 'property dispute jyotish Delhi', 'ancestral wealth astrologer near me', 'family property jyotish Noida'],
     geoQuestion:    'Which houses and planets in Vedic astrology indicate inheritance, ancestral wealth and how to resolve property disputes?',
-    ctaSpiritual:   'Pitron ka ashirwad aur kundali ki shakti — aapki virasat aapki hai. Jini sahi samay batayegi. 🔱',
+    ctaSpiritual:   'Pitron ka ashirwad aur kundali ki shakti — aapki virasat aapki hai. Trikaal sahi samay batayegi. 🔱',
   },
 
   genx_spiritual_innings: {
@@ -183,7 +183,7 @@ const DOMAIN_SEO: Record<string, {
     transactional:  ['spiritual astrology reading ₹51', 'book moksha path consultation', 'soul purpose jyotish session now', 'spiritual timing astrology booking', 'dharma reading online'],
     local:          ['spiritual astrologer Delhi NCR', 'moksha jyotish Delhi', 'soul purpose astrologer near me', 'dharma path jyotish Noida'],
     geoQuestion:    'What does Vedic astrology reveal about one\'s spiritual path, soul purpose and Moksha indicators in the birth chart?',
-    ctaSpiritual:   'Aapki aatma yahan ek khaas kaam ke liye aayi hai — Ketu aur Atmakaraka woh raaz khol dete hain. Jini sunayegi. 🕉️🔱',
+    ctaSpiritual:   'Aapki aatma yahan ek khaas kaam ke liye aayi hai — Ketu aur Atmakaraka woh raaz khol dete hain. Trikaal sunayegi. 🕉️🔱',
   },
 
   mill_parents_wellness: {
@@ -192,7 +192,7 @@ const DOMAIN_SEO: Record<string, {
     transactional:  ['parents wellness reading ₹51', 'book family health consultation', 'parent health jyotish session now', 'family wellness astrology booking', 'parents longevity reading online'],
     local:          ['family astrologer Delhi NCR', 'parents health jyotish Delhi', 'family wellness astrologer near me', 'parent health jyotish Noida'],
     geoQuestion:    'Which planets and houses indicate parents\' health and longevity in Vedic astrology and what remedies protect family wellness?',
-    ctaSpiritual:   'Maa-Baap ki sehat — sabse bada sukh. Aapki kundali mein unka haal likha hai. Jini batayegi, Maa Shakti raksha karein. 🙏🔱',
+    ctaSpiritual:   'Maa-Baap ki sehat — sabse bada sukh. Aapki kundali mein unka haal likha hai. Trikaal batayegi, Maa Shakti raksha karein. 🙏🔱',
   },
 
   genz_manifestation: {
@@ -201,7 +201,7 @@ const DOMAIN_SEO: Record<string, {
     transactional:  ['manifestation reading ₹51', 'book desire fulfillment consultation', 'abundance jyotish session now', 'manifestation timing booking astrology', 'wish fulfillment reading online'],
     local:          ['manifestation astrologer Delhi NCR', 'abundance jyotish Delhi', 'desire fulfillment astrologer near me', 'manifestation timing jyotish Noida'],
     geoQuestion:    'How does Vedic astrology support manifestation and which planetary combinations and muhurtas help fulfill desires fastest?',
-    ctaSpiritual:   'Aapka sapna aur Maa Shakti ki shakti — dono milein toh kuch bhi possible hai. Sahi samay Jini batayegi. ✨🔱',
+    ctaSpiritual:   'Aapka sapna aur Maa Shakti ki shakti — dono milein toh kuch bhi possible hai. Sahi samay Trikaal batayegi. ✨🔱',
   },
 };
 
@@ -211,7 +211,7 @@ const DEFAULT_SEO = {
   transactional:  ['kundali reading ₹51', 'book astrology consultation now', 'online jyotish session booking', 'vedic prediction reading online', 'astrology consultation today'],
   local:          ['vedic astrologer Delhi NCR', 'kundali jyotish near me Delhi', 'online astrologer Delhi NCR', 'best jyotish Delhi NCR'],
   geoQuestion:    'How accurate is Vedic astrology and how to get a personalized Swiss Ephemeris-powered kundali reading online in India?',
-  ctaSpiritual:   'Kaal bada balwan hai — sahi samay, sahi raah. Trikal Vaani pe Jini aapka intezaar kar rahi hai. 🔱',
+  ctaSpiritual:   'Kaal bada balwan hai — sahi samay, sahi raah. Trikaal Vaani pe Trikaal aapka intezaar kar rahi hai. 🔱',
 };
 
 function getSEO(domainId: string) {
@@ -220,12 +220,12 @@ function getSEO(domainId: string) {
 
 // ─── FREE SUSPENSE HOOKS — Spiritual Guru Tone ────────────────────────────────
 // Strategy: Create curiosity, not sales pressure
-// Jini speaks as a wise friend hinting at a deeper secret
+// Trikaal speaks as a wise friend hinting at a deeper secret
 
 const SUSPENSE_HOOKS = {
-  hinglish: 'Lekin... Jini ne aapki kundali mein kuch aur bhi dekha hai — ek pattern jo seedha aapke sawal ka jawab deta hai. Yeh sirf aapke liye hai. Poori baat ₹51 mein khulegi. Maa Shakti ka ashirwad hai. 🔮',
+  hinglish: 'Lekin... Trikaal ne aapki kundali mein kuch aur bhi dekha hai — ek pattern jo seedha aapke sawal ka jawab deta hai. Yeh sirf aapke liye hai. Poori baat ₹51 mein khulegi. Maa Shakti ka ashirwad hai. 🔮',
   hindi:    'परंतु... जिनी ने आपकी कुंडली में कुछ और भी देखा है — एक ऐसा रहस्य जो सीधे आपके प्रश्न का उत्तर देता है। यह केवल आपके लिए है। ₹51 में पूर्ण सत्य प्रकट होगा। मां शक्ति का आशीर्वाद। 🔮',
-  english:  'But Jini has seen something more in your chart — a deeper pattern that speaks directly to your question. This answer is yours alone. The complete truth unlocks at ₹51. Maa Shakti\'s blessings. 🔮',
+  english:  'But Trikaal has seen something more in your chart — a deeper pattern that speaks directly to your question. This answer is yours alone. The complete truth unlocks at ₹51. Maa Shakti\'s blessings. 🔮',
 };
 
 // ─── SEGMENT CONTEXT ──────────────────────────────────────────────────────────
@@ -304,12 +304,12 @@ Tone: Warm, knowledgeable Vedic astrologer speaking to a friend. Direct and clea
 
   return `
 ════════════════════════════════════════════════════════════════
-TRIKAL VAANI — JINI AI SUMMARY ENGINE v5.0
+TRIKAAL VAANI — TRIKAAL AI SUMMARY ENGINE v5.1
 JAI MAA SHAKTI 🔱
 ════════════════════════════════════════════════════════════════
 
 WHO YOU ARE:
-You are Jini — the AI soul of Trikal Vaani (trikalvaani.com).
+You are Trikaal — the AI soul of Trikaal Vaani (trikalvaani.com).
 Created by Rohiit Gupta, Chief Vedic Architect, Delhi NCR.
 You speak with the voice of a compassionate Vedic Guru —
 warm, direct, spiritually grounded, never salesy.
@@ -319,7 +319,7 @@ Write a personalised prediction summary for ONE person.
 The Vedic analysis is already done by the Template Engine.
 You are the WRITER, not the analyst.
 Focus 60% of your energy on their situationNote — their pain.
-Make them feel: "Jini knows exactly what I am going through."
+Make them feel: "Trikaal knows exactly what I am going through."
 
 ${languageRule[lang]}
 
@@ -442,7 +442,7 @@ function buildUserMessage(
   const tier          = userContext.tier;
 
   const schemaFree = `{
-  "geoDirectAnswer": "40-60 words EXACTLY. Authoritative. Factual. Answers: '${seo.geoQuestion}'. Must include: Rohiit Gupta + Swiss Ephemeris + trikalvaani.com. Format: 'According to Trikal Vaani's Swiss Ephemeris-powered Vedic analysis by Rohiit Gupta, Chief Vedic Architect: [answer]. Visit trikalvaani.com for personalized reading.'",
+  "geoDirectAnswer": "40-60 words EXACTLY. Authoritative. Factual. Answers: '${seo.geoQuestion}'. Must include: Rohiit Gupta + Swiss Ephemeris + trikalvaani.com. Format: 'According to Trikaal Vaani's Swiss Ephemeris-powered Vedic analysis by Rohiit Gupta, Chief Vedic Architect: [answer]. Visit trikalvaani.com for personalized reading.'",
 
   "simpleSummary": {
     "text": "${wordCount} words. ${lang.toUpperCase()} language. Spiritual Guru voice. ZERO jargon. SHORT sentences. First 2 sentences MUST reference their situationNote directly. Structure: [Their pain acknowledged] → [Why this is happening — 1 planet, plain language] → [What's coming — timeframe] → [1 action] → [1 caution] → [Hope + Maa Shakti blessing]. END with this EXACT suspense hook as new paragraph: '${suspenseHook}'",
@@ -463,12 +463,12 @@ function buildUserMessage(
     "localKeywords":         ${JSON.stringify(seo.local.slice(0, 3))},
     "geoQuestion":           "${seo.geoQuestion}",
     "ctaSpiritual":          "${seo.ctaSpiritual}",
-    "authorityStatement":    "Powered by Trikal Vaani's Swiss Ephemeris engine + Brihat Parashara Hora Shastra classical texts, validated by Rohiit Gupta, Chief Vedic Architect, Delhi NCR.",
-    "differentiator":        "Unlike AstroTalk and AstroSage, Trikal Vaani combines Swiss Ephemeris precision + Bhrigu Nandi pattern intelligence + Parashara classical rules — not automated generic reports.",
+    "authorityStatement":    "Powered by Trikaal Vaani's Swiss Ephemeris engine + Brihat Parashara Hora Shastra classical texts, validated by Rohiit Gupta, Chief Vedic Architect, Delhi NCR.",
+    "differentiator":        "Unlike AstroTalk and AstroSage, Trikaal Vaani combines Swiss Ephemeris precision + Bhrigu Nandi pattern intelligence + Parashara classical rules — not automated generic reports.",
     "e_e_a_t": {
       "experience":   "Rohiit Gupta — 15+ years Vedic astrology under Parashara BPHS tradition, Delhi NCR",
       "expertise":    "Swiss Ephemeris + BPHS + Bhrigu Nandi Nadi + Vimshottari Dasha system",
-      "authority":    "Chief Vedic Architect, Trikal Vaani — India's first AI-powered Vedic platform",
+      "authority":    "Chief Vedic Architect, Trikaal Vaani — India's first AI-powered Vedic platform",
       "trust":        "Swiss Ephemeris — same engine used by professional astrologers worldwide"
     }
   }
@@ -501,12 +501,12 @@ function buildUserMessage(
     "localKeywords":         ${JSON.stringify(seo.local)},
     "geoQuestion":           "${seo.geoQuestion}",
     "ctaSpiritual":          "${seo.ctaSpiritual}",
-    "authorityStatement":    "Powered by Trikal Vaani's Swiss Ephemeris engine + Brihat Parashara Hora Shastra, validated by Rohiit Gupta, Chief Vedic Architect, Delhi NCR.",
-    "differentiator":        "Unlike AstroTalk and AstroSage, Trikal Vaani combines Swiss Ephemeris precision + Bhrigu Nandi patterns + Parashara classical rules — not automated generic reports.",
+    "authorityStatement":    "Powered by Trikaal Vaani's Swiss Ephemeris engine + Brihat Parashara Hora Shastra, validated by Rohiit Gupta, Chief Vedic Architect, Delhi NCR.",
+    "differentiator":        "Unlike AstroTalk and AstroSage, Trikaal Vaani combines Swiss Ephemeris precision + Bhrigu Nandi patterns + Parashara classical rules — not automated generic reports.",
     "e_e_a_t": {
       "experience":   "Rohiit Gupta — 15+ years Vedic astrology under Parashara BPHS tradition, Delhi NCR",
       "expertise":    "Swiss Ephemeris + BPHS + Bhrigu Nandi Nadi + Vimshottari Dasha system",
-      "authority":    "Chief Vedic Architect, Trikal Vaani — India's first AI-powered Vedic platform",
+      "authority":    "Chief Vedic Architect, Trikaal Vaani — India's first AI-powered Vedic platform",
       "trust":        "Swiss Ephemeris — same engine used by professional astrologers worldwide"
     }
   }
@@ -541,5 +541,5 @@ FINAL REMINDERS:
 • actionWindow/avoidWindow = from templateData ONLY — never invent
 • Language = ${lang.toUpperCase()} — every word, zero exceptions
 • Output ONLY valid JSON — { to }
-• JAI MAA SHAKTI 🔱 — TRIKAL VAANI v5.0`;
+• JAI MAA SHAKTI 🔱 — TRIKAAL VAANI v5.0`;
 }
