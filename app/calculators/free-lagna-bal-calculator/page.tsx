@@ -2,15 +2,23 @@
 
 // ============================================================
 // File: app/calculators/free-lagna-bal-calculator/page.tsx
-// Version: v1.0 — Free Lagna Bal Calculator
+// Version: v1.1 — Free Lagna Bal Calculator
 // API: /api/calc/kundali (calcType: 'lagna-bal')  [route v1.6+]
 // Logic: lagna lord placement + strength (= personality strength)
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
+// Changelog:
+//   v1.1 (2026-06-02) — Gold-standard JSON-LD: swapped inline 4-node
+//        @graph for buildCalcJsonLd() helper (8 @id-linked nodes:
+//        Organization+real sameAs, WebSite, linkable Person /founder,
+//        WebPage isPartOf #website [no longer dangling], BreadcrumbList,
+//        WebApplication, HowTo, FAQPage). No logic/UI/form/API change.
+//   v1.0 — initial build.
 // ============================================================
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import SiteNav from '@/components/layout/SiteNav';
+import { buildCalcJsonLd } from '@/lib/seo/calcJsonLd';
 
 const GOLD = '#D4AF37';
 const GOLD_RGBA = (a: number) => `rgba(212,175,55,${a})`;
@@ -294,60 +302,24 @@ export default function FreeLagnaBalCalculatorPage() {
     colorScheme: 'dark' as const,
   });
 
-  // ─── JSON-LD ────────────────────────────────────────────────
+  // ─── JSON-LD (gold-standard 8-node @graph via shared helper) ─
   const PAGE_URL = 'https://trikalvaani.com/calculators/free-lagna-bal-calculator';
-  const jsonLd = {
-    '@context': 'https://schema.org',
-    '@graph': [
-      {
-        '@type': 'WebPage',
-        '@id': `${PAGE_URL}#webpage`,
-        url: PAGE_URL,
-        name: 'Free Lagna Bal Calculator — Ascendant & Lagna Lord Strength',
-        description: 'Find your lagna (ascendant), lagna lord, its house placement & strength, and the planets in your 1st house — with free remedies. Vedic calculator by Trikaal Vaani.',
-        inLanguage: 'en-IN',
-        dateModified: '2026-06-02',
-        isPartOf: { '@id': 'https://trikalvaani.com/#website' },
-        breadcrumb: { '@id': `${PAGE_URL}#breadcrumb` },
-        author: {
-          '@type': 'Person',
-          name: 'Rohiit Gupta',
-          jobTitle: 'Chief Vedic Architect',
-          worksFor: { '@type': 'Organization', name: 'Trikaal Vaani', legalName: 'Trikal Vaani' },
-        },
-        speakable: { '@type': 'SpeakableSpecification', cssSelector: ['h1', '.tv-aeo-answer'] },
-      },
-      {
-        '@type': 'BreadcrumbList',
-        '@id': `${PAGE_URL}#breadcrumb`,
-        itemListElement: [
-          { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://trikalvaani.com' },
-          { '@type': 'ListItem', position: 2, name: 'Calculators', item: 'https://trikalvaani.com/calculators' },
-          { '@type': 'ListItem', position: 3, name: 'Free Lagna Bal Calculator', item: PAGE_URL },
-        ],
-      },
-      {
-        '@type': 'WebApplication',
-        '@id': `${PAGE_URL}#app`,
-        name: 'Free Lagna Bal Calculator',
-        url: PAGE_URL,
-        applicationCategory: 'LifestyleApplication',
-        operatingSystem: 'All',
-        browserRequirements: 'Requires JavaScript',
-        offers: { '@type': 'Offer', price: '0', priceCurrency: 'INR' },
-        provider: { '@type': 'Organization', name: 'Trikaal Vaani', legalName: 'Trikal Vaani', url: 'https://trikalvaani.com' },
-      },
-      {
-        '@type': 'FAQPage',
-        '@id': `${PAGE_URL}#faq`,
-        mainEntity: FAQS.map(f => ({
-          '@type': 'Question',
-          name: f.q,
-          acceptedAnswer: { '@type': 'Answer', text: f.a },
-        })),
-      },
+  const jsonLd = buildCalcJsonLd({
+    pageUrl: PAGE_URL,
+    name: 'Free Lagna Bal Calculator — Ascendant & Lagna Lord Strength',
+    description:
+      'Find your lagna (ascendant), lagna lord, its house placement & strength, and the planets in your 1st house — with free remedies. Vedic calculator by Trikaal Vaani.',
+    breadcrumbName: 'Free Lagna Bal Calculator',
+    aboutEntities: ['Ascendant', 'Lagna Lord', 'First House', 'Shadbala'],
+    knowsAbout: ['Vedic Astrology', 'Jyotish Shastra', 'Lagna Analysis', 'Shadbala'],
+    howToName: 'How to find your lagna lord placement and strength',
+    howToSteps: [
+      { name: 'Enter birth details', text: 'Enter your name, date of birth, exact time of birth and place of birth.' },
+      { name: 'Calculate the lagna', text: 'The calculator finds your ascendant and lagna lord with Shadbala using Swiss Ephemeris with Lahiri Ayanamsha.' },
+      { name: 'Get your result', text: "See your lagna, the lagna lord's house placement and strength, 1st-house planets and free remedies." },
     ],
-  };
+    faqs: FAQS,
+  });
 
   return (
     <>
