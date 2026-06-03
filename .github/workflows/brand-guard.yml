@@ -1,17 +1,21 @@
 name: IR Guard — auto-fix IRs + protect against fake ratings
 
-# 🔱 Trikaal Vaani — IR (Iron Rule) Guard  v2
+# 🔱 Trikaal Vaani — IR (Iron Rule) Guard  v3
 # Runs on every push to main (and can be run manually from the Actions tab).
 #
 #  PART 1 — AUTO-FIX (bot corrects + commits automatically):
-#     • Brand spelling : any standalone "Trikal"            -> "Trikaal"
-#     • Location        : "Delhi NCR"                        -> "India"
-#     • AI vendor names : "Gemini 2.5 Pro / Claude Sonnet"   -> "premium AI engine"
+#     • Brand spelling : "Trikal"                            -> "Trikaal"
+#     • Location        : "Delhi NCR"                         -> "India"
+#     • AI vendor names : "Gemini 2.5 Pro / Claude Sonnet"    -> "premium AI engine"
+#     •                   "Gemini AI"                         -> "premium AI"
+#     • Retired persona : "Jini"                              -> "Trikaal"
+#     • False tech claim: "Prokerala API"                     -> "self-hosted Swiss Ephemeris"
 #     These are content-text rules — they CANNOT break the build.
 #
 #  PART 2 — WARN ONLY (bot turns RED + emails, never auto-changes):
-#     • Fake ratings (aggregateRating / "4.9/5" / 5-stars / "average rating")
+#     • Fake ratings / star reviews (aggregateRating / "4.9/5" / "★★★★★" / "average rating")
 #       Structural blocks — remove by hand (share just those few files).
+#       NOTE: phantom ₹499 is NOT auto-handled — remove ₹499 by hand too.
 #
 #  ALWAYS PROTECTED (never touched): trikalvaani.com URLs, legalName,
 #  meta-keyword alt-spellings, code identifiers (X-Trikal-Key, trikal-engines,
@@ -34,11 +38,11 @@ jobs:
         uses: actions/checkout@v4
 
       # ── PART 1: AUTO-FIX ──────────────────────────────────────────
-      - name: Auto-fix IRs (brand, location, AI vendor names)
+      - name: Auto-fix IRs (brand, location, vendor, Jini, Prokerala)
         shell: bash
         run: |
-          echo "IR Guard — scanning & auto-fixing content IRs..."
-          FILES=$(grep -rlE 'Trikal|Delhi NCR|Gemini|Claude Sonnet' \
+          echo "IR Guard v3 — scanning & auto-fixing content IRs..."
+          FILES=$(grep -rlE 'Trikal|Delhi NCR|Gemini|Claude Sonnet|Jini|Prokerala' \
             --include='*.ts' --include='*.tsx' --include='*.js' --include='*.jsx' --include='*.html' \
             --exclude-dir=node_modules --exclude-dir=.next --exclude-dir=.git . 2>/dev/null || true)
           for f in $FILES; do
@@ -52,7 +56,12 @@ jobs:
               unless ($skip) {
                 s/Gemini[^"'"'"']{0,30}\+\s*Claude Sonnet(\s*polish)?/premium AI engine/g;
                 s/Gemini\s*(Pro\s*)?2\.5(\s*Pro)?(\s*Flash)?/premium AI engine/g;
+                s/Gemini AI/premium AI/g;
                 s/Claude Sonnet(\s*polish)?/premium AI engine/g;
+                s/Swiss Ephemeris \+ Prokerala API/Swiss Ephemeris (self-hosted)/g;
+                s/ · Prokerala API//g;
+                s/Prokerala API/self-hosted Swiss Ephemeris/g;
+                s/\bJini\b/Trikaal/g;
                 s/Delhi NCR/India/g;
                 s/\bTrikal\b/Trikaal/g;
               }
@@ -66,7 +75,7 @@ jobs:
             git config user.name  "Trikaal IR Bot"
             git config user.email "ir-bot@users.noreply.github.com"
             git add -A
-            git commit -m "IR Guard: auto-fix brand/location/AI-vendor names [skip ci]"
+            git commit -m "IR Guard: auto-fix brand/location/vendor/Jini/Prokerala [skip ci]"
             git push
             echo "Auto-fixed IR violations and pushed the correction."
           else
