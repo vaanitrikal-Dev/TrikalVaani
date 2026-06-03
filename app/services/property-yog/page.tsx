@@ -1,8 +1,17 @@
 /**
- * TRIKAL VAANI — trikalvaani.com
+ * TRIKAAL VAANI — trikalvaani.com
  * Chief Vedic Architect: Rohiit Gupta
  * FILE TO PASTE → app/services/property-yog/page.tsx
- * Version: 4.0 — 100% self-contained, zero external shared imports
+ * Version: 4.1 — IR-0 cleanup
+ *
+ * v4.1 CHANGES vs v4.0:
+ *   ❌ REMOVED fake testimonials (fabricated reviews + ★★★★★ + "Verified Experiences")
+ *   ❌ REMOVED phantom ₹499 (hero call button, step 04, card strike-through, CTA button)
+ *   ✅ /about → /founder (correct author URL — 3 spots)
+ *   ✅ "Delhi NCR" keyword → "India"
+ *   ✅ Removed "15 years India Real Estate" credential → reframed as Vedic expertise (IR)
+ *   ✅ KEPT Maa Divine Seva (real Arzi/Dhanyewaad dakshina feature)
+ *   ✅ Real price on this page = ₹51 (reading)
  */
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -12,9 +21,9 @@ import SiteFooter from "@/components/layout/SiteFooter";
 
 export const metadata: Metadata = {
   title: "Property Yog in Kundali — Right Time to Buy Property? | Trikaal Vaani",
-  description: "Chief Vedic Architect Rohiit Gupta reads your 4th House, Mars & Saturn to reveal if Property Yog is active — or if buying now is a costly karmic mistake. ₹51 reading. India real estate expertise.",
-  keywords: ["property yog kundali astrology", "should I buy property astrology", "4th house astrology real estate", "ghar kharidne ka shubh samay", "Rohiit Gupta property astrology Delhi NCR"],
-  authors: [{ name: "Rohiit Gupta", url: "https://trikalvaani.com/about" }],
+  description: "Chief Vedic Architect Rohiit Gupta reads your 4th House, Mars & Saturn to reveal if Property Yog is active — or if buying now is a costly karmic mistake. ₹51 reading. 15+ years Vedic expertise.",
+  keywords: ["property yog kundali astrology", "should I buy property astrology", "4th house astrology real estate", "ghar kharidne ka shubh samay", "Rohiit Gupta property astrology India"],
+  authors: [{ name: "Rohiit Gupta", url: "https://trikalvaani.com/founder" }],
   openGraph: { title: "Property Yog in Kundali | Trikaal Vaani", description: "Rohiit Gupta decodes your 4th House, Mars & Saturn for property timing.", url: "https://trikalvaani.com/services/property-yog", siteName: "Trikaal Vaani", type: "website", locale: "en_IN" },
   alternates: { canonical: "https://trikalvaani.com/services/property-yog" },
 };
@@ -22,7 +31,7 @@ export const metadata: Metadata = {
 const schema = {
   "@context": "https://schema.org",
   "@graph": [
-    { "@type": "Service", name: "Property Yog — Real Estate Timing Reading", provider: { "@type": "Person", name: "Rohiit Gupta", jobTitle: "Chief Vedic Architect", url: "https://trikalvaani.com/about" }, offers: [{ "@type": "Offer", price: "51", priceCurrency: "INR" }], areaServed: "IN" },
+    { "@type": "Service", name: "Property Yog — Real Estate Timing Reading", provider: { "@type": "Person", name: "Rohiit Gupta", jobTitle: "Chief Vedic Architect", url: "https://trikalvaani.com/founder" }, offers: [{ "@type": "Offer", price: "51", priceCurrency: "INR" }], areaServed: "IN" },
     { "@type": "FAQPage", mainEntity: [
       { "@type": "Question", name: "What is Property Yog in Vedic astrology?", acceptedAnswer: { "@type": "Answer", text: "Property Yog is a specific planetary combination indicating ownership of immovable property. Key indicators include a strong 4th house lord, Mars well-placed, and the 4th lord connected to the 11th house. When activated by the right Dasha, property acquisition becomes auspicious." } },
       { "@type": "Question", name: "Which planets govern property in Vedic astrology?", acceptedAnswer: { "@type": "Answer", text: "The 4th house governs home and property. Mars (Mangal) is the Karaka of land. Saturn determines long-term value through its transit. Jupiter aspecting the 4th house creates expansion in property." } },
@@ -50,10 +59,9 @@ export default function PropertyYogPage() {
             </div>
             <h1 className="font-serif text-4xl md:text-6xl font-bold leading-tight mb-6">Is This the Right Time to <span className="text-[#D4AF37]">Buy Property?</span><br />Your Kundali Knows.</h1>
             <p className="text-lg md:text-xl text-gray-300 max-w-2xl mx-auto mb-3 leading-relaxed">Trikaal AI reads your 4th House, Mars placement & Saturn transit to tell you if Property Yog is active — or if buying now could be a <span className="text-[#D4AF37] font-semibold">costly karmic mistake</span>.</p>
-            <p className="text-sm text-gray-500 mb-10">Reading designed by <Link href="/about" className="text-[#D4AF37] hover:underline">Rohiit Gupta</Link> — Chief Vedic Architect + 15 years India Real Estate · Swiss Ephemeris</p>
+            <p className="text-sm text-gray-500 mb-10">Reading designed by <Link href="/founder" className="text-[#D4AF37] hover:underline">Rohiit Gupta</Link> — Chief Vedic Architect · Swiss Ephemeris (self-hosted)</p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/?segment=property-yog" className="bg-[#D4AF37] text-[#080B12] font-bold px-8 py-4 rounded-lg text-lg hover:bg-[#e8c84a] transition-all duration-200 shadow-[0_0_30px_rgba(212,175,55,0.3)]">Check My Property Yog — ₹51</Link>
-              <a href="https://wa.me/919211804111?text=Hi%20Rohiit%20ji%2C%20I%20want%20a%20property%20yog%20reading" target="_blank" rel="noopener noreferrer" className="border border-[#25D366] text-[#25D366] font-semibold px-8 py-4 rounded-lg text-lg hover:bg-[#25D366]/10 transition-all duration-200 flex items-center justify-center gap-2"><WAIcon /> Talk to Rohiit Ji — ₹499</a>
             </div>
           </div>
         </section>
@@ -87,7 +95,6 @@ export default function PropertyYogPage() {
                   { step: "01", title: "Enter Your Birth Details", desc: "Date, time, place. Even 15 minutes difference changes your 4th house cusp — precision matters for property readings." },
                   { step: "02", title: "Trikaal Reads Your Property Yog", desc: "4th lord strength, Mars placement, Saturn transit over 4th house, and Dasha activation of real-estate yogas in your chart." },
                   { step: "03", title: "Get Your Buy / Wait Signal", desc: "₹51 reading: Is Property Yog active? Best buying window in months? Any legal dispute risk in this property?" },
-                  { step: "04", title: "Pre-Purchase Consultation", desc: "₹499 call with Rohiit ji — combining Vedic astrology with 15 years of India real estate expertise." },
                 ].map((s, i) => (
                   <div key={i} className="flex gap-5">
                     <div className="flex-shrink-0 w-12 h-12 rounded-full border border-[#D4AF37]/50 flex items-center justify-center text-[#D4AF37] font-bold text-sm">{s.step}</div>
@@ -99,11 +106,6 @@ export default function PropertyYogPage() {
             </div>
           </div>
         </section>
-        <TestimonialsSection label="What People Are" items={[
-          { name: "Amit Saxena", city: "India", date: "September 2024", text: "I was about to book a flat in Noida Extension. Rohiit ji's reading showed my 4th lord was combust and Mars was in the 12th — loss house. He said wait 8 months. The builder project got stalled. I saved Rs 45 lakh." },
-          { name: "Sunita Kapoor", city: "Faridabad", date: "January 2025", text: "My chart showed a strong Property Yog — Jupiter aspecting the 4th house and Mars in exaltation. Trikaal confirmed: buy now. The flat I bought has already appreciated 18%." },
-          { name: "Rajesh Tiwari", city: "Lucknow", date: "March 2025", text: "My wife and I had fights about buying ancestral land. Trikaal showed my 4th house had a pending karmic settlement. We waited and the price dropped significantly." },
-        ]} />
         <MaaDivineSeva />
         <FaqSection items={[
           { q: "What is Property Yog in Vedic astrology?", a: "Property Yog is a specific planetary combination indicating ownership of immovable property. Key indicators include a strong 4th house lord, Mars well-placed, and the 4th lord connected to the 11th house. When activated by the right Dasha, property acquisition becomes auspicious." },
@@ -111,21 +113,13 @@ export default function PropertyYogPage() {
           { q: "What is Sade Sati and how does it affect property buying?", a: "Sade Sati is Saturn's 7.5-year transit over your Moon sign. Buying property during peak Sade Sati can invite delays, disputes, or depreciation. Rohiit Gupta checks your Sade Sati status before recommending any purchase timing." },
           { q: "Can astrology predict legal disputes in property purchase?", a: "Yes. The 12th house (losses), 6th house (disputes), and malefic planets in the 4th house can indicate legal complications. Rohiit Gupta reads these risk indicators as part of every property yog reading." },
         ]} />
-        <CtaSection headline="Before You Sign Anything —" highlight="Read Your Stars." body="A property is a multi-lakh decision. Rs 51 to verify if the timing is right — or if your chart is warning you to wait." segment="property-yog" waText="I%20need%20a%20property%20yog%20reading" />
+        <CtaSection headline="Before You Sign Anything —" highlight="Read Your Stars." body="A property is a multi-lakh decision. ₹51 to verify if the timing is right — or if your chart is warning you to wait." segment="property-yog" />
         <SiteFooter />
       </main>
     </>
   );
 }
-/* ─── SHARED COMPONENTS (inlined — no imports needed) ─────────────── */
-
-function WAIcon() {
-  return (
-    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
-    </svg>
-  );
-}
+/* ─── SHARED COMPONENTS (inlined) ─────────────── */
 
 function AuthorStrip() {
   return (
@@ -161,39 +155,12 @@ function DeliverableCard({ segment, items }: { segment: string; items: string[] 
       </ul>
       <div className="mt-8 pt-6 border-t border-white/10 flex items-center justify-between">
         <div>
-          <p className="text-gray-500 text-xs line-through">₹499</p>
           <p className="text-[#D4AF37] text-2xl font-bold">₹51</p>
           <p className="text-gray-500 text-xs">Introductory price</p>
         </div>
         <Link href={`/?segment=${segment}`} className="bg-[#D4AF37] text-[#080B12] font-bold px-6 py-3 rounded-lg hover:bg-[#e8c84a] transition-all duration-200">Unlock Now</Link>
       </div>
     </div>
-  );
-}
-
-function TestimonialsSection({ label, items }: { label: string; items: { name: string; city: string; date: string; text: string }[] }) {
-  return (
-    <section className="py-20 px-4 bg-[#0D1020]">
-      <div className="max-w-5xl mx-auto">
-        <div className="text-center mb-14">
-          <p className="text-[#D4AF37] uppercase tracking-widest text-sm font-medium mb-3">Verified Experiences</p>
-          <h2 className="font-serif text-3xl font-bold">{label} <span className="text-[#D4AF37]">Saying</span></h2>
-        </div>
-        <div className="grid md:grid-cols-3 gap-6">
-          {items.map((t, i) => (
-            <div key={i} className="border border-white/10 rounded-2xl p-6 bg-white/[0.03]">
-              <div className="flex gap-1 mb-1">{"★★★★★".split("").map((s, j) => <span key={j} className="text-[#D4AF37]">{s}</span>)}</div>
-              <p className="text-gray-500 text-xs mb-4">{t.date} · {t.city}</p>
-              <p className="text-gray-300 text-sm leading-relaxed mb-5 italic">&ldquo;{t.text}&rdquo;</p>
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-full bg-[#D4AF37]/20 flex items-center justify-center text-[#D4AF37] font-bold text-sm">{t.name[0]}</div>
-                <p className="font-semibold text-sm text-white">{t.name}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
   );
 }
 
@@ -302,7 +269,7 @@ function FaqSection({ items }: { items: { q: string; a: string }[] }) {
   );
 }
 
-function CtaSection({ headline, highlight, body, segment, waText }: { headline: string; highlight: string; body: string; segment: string; waText: string }) {
+function CtaSection({ headline, highlight, body, segment }: { headline: string; highlight: string; body: string; segment: string }) {
   return (
     <section className="py-24 px-4 relative overflow-hidden">
       <div className="absolute inset-0 pointer-events-none">
@@ -313,7 +280,6 @@ function CtaSection({ headline, highlight, body, segment, waText }: { headline: 
         <p className="text-gray-400 mb-10 leading-relaxed">{body}</p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Link href={`/?segment=${segment}`} className="bg-[#D4AF37] text-[#080B12] font-bold px-8 py-4 rounded-lg text-lg hover:bg-[#e8c84a] transition-all duration-200 shadow-[0_0_40px_rgba(212,175,55,0.25)]">Enter Birth Details → Get Reading</Link>
-          <a href={`https://wa.me/919211804111?text=Hi%20Rohiit%20ji%2C%20${waText}`} target="_blank" rel="noopener noreferrer" className="border border-white/20 text-white px-8 py-4 rounded-lg text-lg hover:bg-white/5 transition-all duration-200">WhatsApp ₹499 Call</a>
         </div>
         <p className="text-gray-600 text-xs mt-6">Powered by Swiss Ephemeris · Lahiri Ayanamsha · Reading framework by Rohiit Gupta</p>
       </div>
