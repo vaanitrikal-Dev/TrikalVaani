@@ -1,26 +1,44 @@
-name: IR Guard — auto-fix IRs + protect against fake ratings
+name: IR Guard — auto-fix IRs + alert on violations + SEO/GEO/AEO/EEAT gaps
 
-# 🔱 Trikaal Vaani — IR (Iron Rule) Guard  v3
+# 🔱 Trikaal Vaani — IR (Iron Rule) Guard  v4
 # Runs on every push to main (and can be run manually from the Actions tab).
 #
-#  PART 1 — AUTO-FIX (bot corrects + commits automatically):
-#     • Brand spelling : "Trikal"                            -> "Trikaal"
-#     • Location        : "Delhi NCR"                         -> "India"
-#     • AI vendor names : "Gemini 2.5 Pro / Claude Sonnet"    -> "premium AI engine"
-#     •                   "Gemini AI"                         -> "premium AI"
-#     • Retired persona : "Jini"                              -> "Trikaal"
-#     • False tech claim: "Prokerala API"                     -> "self-hosted Swiss Ephemeris"
-#     These are content-text rules — they CANNOT break the build.
+# ─────────────────────────────────────────────────────────────────────────
+#  PART 1 — AUTO-FIX  (bot corrects + commits automatically; build-safe)
+#     • Brand spelling : "Trikal"                         -> "Trikaal"
+#     • Location        : "Delhi NCR"                      -> "India"
+#     • AI vendor names : "Gemini 2.5 Pro / Claude Sonnet" -> "premium AI engine"
+#     •                   "Gemini AI"                      -> "premium AI"
+#     • Retired persona : "Jini"                           -> "Trikaal"
+#     • False tech claim: "Prokerala API"                  -> "self-hosted Swiss Ephemeris"
+#     • Broken link     : href/url "/about"               -> "/founder"
+#     These are mechanical text swaps — they CANNOT break the build.
 #
-#  PART 2 — WARN ONLY (bot turns RED + emails, never auto-changes):
-#     • Fake ratings / star reviews (aggregateRating / "4.9/5" / "★★★★★" / "average rating")
-#       Structural blocks — remove by hand (share just those few files).
-#       NOTE: phantom ₹499 is NOT auto-handled — remove ₹499 by hand too.
+#  PART 2 — VIOLATION ALERTS  (turns the run RED ❌; GitHub emails you on failure)
+#     The bot NEVER auto-deletes these — they are structural/contextual and a
+#     blind delete could corrupt the file. It prints the exact FILE:LINE so you
+#     can fix by hand. Covered:
+#       • Fake ratings / star reviews (aggregateRating, "4.9/5", "★★★★★", "Client Rating")
+#       • Fake testimonial label ("Verified Experiences")
+#       • Phantom price (literal 499, and any strike-through "line-through" price anchor)
+#       • Fake counters ("10,000+ seekers", "2,400+ predictions", etc.)
+#       • Real-estate credential ("real estate ... expertise / experience", "India Real Estate")
+#       • Recurring monthly pricing ("/month", "per month", "₹99", "monthly plan/subscription")
+#       • LocalBusiness schema (IR: none allowed)
+#       • "/astrologer-delhi" route (IR: dropped local positioning)
+#
+#  PART 3 — SEO / GEO / AEO / EEAT COMPLETENESS  (⚠️ advisory, NON-blocking)
+#     Scans every app/**/page.tsx and lists MISSING items per file so you can
+#     ADD real content. It NEVER auto-inserts schema (IR-0: never fabricate).
+#       • JSON-LD schema, FAQPage, BreadcrumbList   (AEO / rich results)
+#       • canonical, openGraph                       (technical SEO)
+#       • speakable                                  (GEO / voice answers)
+#       • sameAs, dateModified, /founder author link (EEAT authority + freshness)
 #
 #  ALWAYS PROTECTED (never touched): trikalvaani.com URLs, legalName,
 #  meta-keyword alt-spellings, code identifiers (X-Trikal-Key, trikal-engines,
-#  TrikalVaani), [Trikal] log tags, comment/changelog lines, and the REAL API
-#  model strings (gemini-2.5-pro, claude-sonnet, GEMINI_MODEL=...).
+#  TrikalVaani, TrikalVoice), [Trikal] log tags, comment/changelog lines, and the
+#  REAL API model strings (gemini-2.5-pro, claude-sonnet, GEMINI_MODEL=...).
 
 on:
   push:
@@ -37,12 +55,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # ── PART 1: AUTO-FIX ──────────────────────────────────────────
-      - name: Auto-fix IRs (brand, location, vendor, Jini, Prokerala)
+      # ══ PART 1: AUTO-FIX ══════════════════════════════════════════════
+      - name: Auto-fix IRs (brand, location, vendor, Jini, Prokerala, about)
         shell: bash
         run: |
-          echo "IR Guard v3 — scanning & auto-fixing content IRs..."
-          FILES=$(grep -rlE 'Trikal|Delhi NCR|Gemini|Claude Sonnet|Jini|Prokerala' \
+          echo "IR Guard v4 — scanning & auto-fixing content IRs..."
+          FILES=$(grep -rlE 'Trikal|Delhi NCR|Gemini|Claude Sonnet|Jini|Prokerala|/about"' \
             --include='*.ts' --include='*.tsx' --include='*.js' --include='*.jsx' --include='*.html' \
             --exclude-dir=node_modules --exclude-dir=.next --exclude-dir=.git . 2>/dev/null || true)
           for f in $FILES; do
@@ -66,6 +84,10 @@ jobs:
                 s/\bTrikal\b/Trikaal/g;
               }
             ' "$f"
+            perl -i -pe '
+              next if (m{^\s*//} || m{^\s*\*} || m{/\*});
+              s{/about"}{/founder"}g;
+            ' "$f"
           done
 
       - name: Commit auto-fixes (if any)
@@ -75,27 +97,91 @@ jobs:
             git config user.name  "Trikaal IR Bot"
             git config user.email "ir-bot@users.noreply.github.com"
             git add -A
-            git commit -m "IR Guard: auto-fix brand/location/vendor/Jini/Prokerala [skip ci]"
+            git commit -m "IR Guard: auto-fix brand/location/vendor/Jini/Prokerala/about [skip ci]"
             git push
             echo "Auto-fixed IR violations and pushed the correction."
           else
             echo "All auto-fix IRs already clean."
           fi
 
-      # ── PART 2: WARN on fake ratings (never auto-deleted) ─────────
-      - name: Warn on fake ratings / reviews
+      # ══ PART 3: SEO/GEO/AEO/EEAT COMPLETENESS (advisory; runs before the
+      #    blocking gate so it always prints) ═════════════════════════════
+      - name: Advisory — SEO / GEO / AEO / EEAT completeness
         shell: bash
         run: |
-          HITS=$(grep -rnE 'aggregateRating|AggregateRating|ratingValue|reviewCount|ratingCount|[0-9]\.[0-9]\s*/\s*5|★★★|average rating|Client Rating' \
-            --include='*.ts' --include='*.tsx' --include='*.js' --include='*.jsx' \
-            --exclude-dir=node_modules --exclude-dir=.next --exclude-dir=.git . 2>/dev/null \
-            | grep -viE 'remov|delet|no fake|not added|intentional|❌' || true)
-          if [ -n "$HITS" ]; then
-            echo "FAKE RATING(S) FOUND — must be removed by hand (IR-0: no fake stats):"
+          echo "## 🔎 SEO / GEO / AEO / EEAT completeness (advisory — add real content, never auto-filled)" >> "$GITHUB_STEP_SUMMARY"
+          PAGES=$(find app -name 'page.tsx' 2>/dev/null || true)
+          ANY=0
+          for p in $PAGES; do
+            MISS=""
+            if grep -q 'application/ld+json' "$p"; then
+              grep -q 'FAQPage'        "$p" || MISS="$MISS FAQPage;"
+              grep -q 'BreadcrumbList' "$p" || MISS="$MISS BreadcrumbList;"
+              grep -qE 'dateModified|datePublished' "$p" || MISS="$MISS dateModified(freshness);"
+              grep -q 'speakable'      "$p" || MISS="$MISS speakable(GEO/AEO);"
+              if grep -qE '"@type":[[:space:]]*"(Person|Organization)"' "$p"; then
+                grep -q 'sameAs' "$p" || MISS="$MISS sameAs(EEAT);"
+              fi
+              if grep -qE '"@type":[[:space:]]*"Person"' "$p"; then
+                grep -q '/founder' "$p" || MISS="$MISS /founder-author-link;"
+              fi
+            else
+              MISS="$MISS JSON-LD-schema;"
+            fi
+            grep -q 'canonical' "$p" || MISS="$MISS canonical;"
+            grep -q 'openGraph' "$p" || MISS="$MISS openGraph;"
+            if [ -n "$MISS" ]; then
+              ANY=1
+              echo "  $p  ->$MISS"
+              echo "- \`$p\` —$MISS" >> "$GITHUB_STEP_SUMMARY"
+              echo "::warning file=$p::IR SEO/GEO/AEO/EEAT missing:$MISS"
+            fi
+          done
+          if [ "$ANY" = "0" ]; then
+            echo "All pages carry the full IR-0 SEO/GEO/AEO/EEAT suite."
+            echo "All pages complete." >> "$GITHUB_STEP_SUMMARY"
+          fi
+          echo "Advisory scan complete (non-blocking)."
+
+      # ══ PART 2: VIOLATION ALERTS (blocking ❌ — fix by hand) ═══════════
+      - name: Alert on IR violations (fake content / phantom price / banned schema)
+        shell: bash
+        run: |
+          EXCL='remov|delet|no fake|not added|intentional|❌|^\s*\*|^\s*//'
+          : > /tmp/ir_found.txt
+          add () {
+            local label="$1"; local pat="$2"; local hits
+            hits=$(grep -rnE "$pat" \
+              --include='*.ts' --include='*.tsx' --include='*.js' --include='*.jsx' --include='*.html' \
+              --exclude-dir=node_modules --exclude-dir=.next --exclude-dir=.git . 2>/dev/null \
+              | grep -viE "$EXCL" || true)
+            if [ -n "$hits" ]; then
+              { echo "=== ${label} ==="; echo "$hits"; echo; } >> /tmp/ir_found.txt
+            fi
+          }
+
+          add "Fake ratings / star reviews"   'aggregateRating|AggregateRating|ratingValue|reviewCount|ratingCount|[0-9]\.[0-9]\s*/\s*5|★★★|average rating|Client Rating'
+          add "Fake testimonial label"        'Verified Experiences'
+          add "Phantom price (499 / strike)"  '(₹|Rs\.?\s*)499|line-through'
+          add "Fake counters"                 '[0-9][0-9,]*\+?\s*(seekers|predictions|clients|consultations|readings)'
+          add "Real-estate credential"        'real estate (and|background|experience|expertise)|(years|expertise|experience)[^.]{0,20}real estate|India Real Estate'
+          add "Recurring monthly pricing"     '/month|per month|monthly (plan|subscription|fee|price)|₹\s*99\b'
+          add "LocalBusiness schema (banned)" 'LocalBusiness'
+          add "Banned local route"            'astrologer-delhi'
+
+          if [ -s /tmp/ir_found.txt ]; then
+            echo "❌ IR VIOLATION(S) FOUND — fix by hand (bot never auto-deletes these):"
             echo "----------------------------------------------------------------------"
-            echo "$HITS"
+            cat /tmp/ir_found.txt
             echo "----------------------------------------------------------------------"
-            echo "These are structural blocks — share just these files and they'll be cleaned."
+            echo "Share just the listed file(s); these are structural and need a manual fix."
+            {
+              echo "## ❌ IR violations (blocking — fix by hand)"
+              echo '```'
+              cat /tmp/ir_found.txt
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
             exit 1
           fi
-          echo "No fake ratings. Jai Maa Shakti"
+          echo "✅ No IR violations. Jai Maa Shakti 🔱"
+          echo "## ✅ No IR violations" >> "$GITHUB_STEP_SUMMARY"
