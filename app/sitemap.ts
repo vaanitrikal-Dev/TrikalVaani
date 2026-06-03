@@ -3,22 +3,18 @@
  * 🔱 TRIKAL VAANI — CEO PROTECTION HEADER 🔱
  * ============================================================================
  * File:        app/sitemap.ts
- * Version:     v6.0
+ * Version:     v7.0
  * Owner:       Rohiit Gupta, Chief Vedic Architect
  *
- * Changes v5.9 → v6.0 (2026-06-02):
- *   GOAL: Index the 10 new free calculators so GSC + Bing discover them.
- *   FIX:  ADDED 10 calculator slugs to CALCULATORS (now 18 total):
- *           free-kaal-sarp-dosh-calculator, free-pitra-dosh-calculator,
- *           free-gemstone-calculator, free-numerology-calculator,
- *           free-baby-name-by-nakshatra, free-lucky-day-calculator,
- *           free-weak-planet-finder, free-graha-bal-calculator,
- *           free-kundali-strength-calculator, free-lagna-bal-calculator.
- *   UNTOUCHED: everything else — static routes, dynamic domains/panchang/
- *              compatibility/blog/cities/festivals/reports, all priorities
- *              and changeFrequencies from v5.9.
+ * Changes v6.0 → v7.0 (2026-06-03):
+ *   GOAL: Index all 90 /learn/[slug] SEO pages + /learn hub in sitemap.
+ *   ADD:  readSeoLearnSlugs() — live from seo_pillar_pages (published=true).
+ *         /learn hub page at priority 0.9.
+ *         90 × /learn/{slug} entries, priority mapped from DB column.
+ *   UNTOUCHED: every entry, priority, changeFrequency, and helper from v6.0.
  *
  * ── Earlier history (unchanged) ─────────────────────────────────────────────
+ *   v6.0: 10 new free calculators added (18 total).
  *   v5.9: DYNAMIC domains (domain_pages), panchang (panchang_daily, ~365),
  *         public reports (/report/{slug}).
  *   v5.8: ADDED 'free-child-birth-muhurat-calculator' to CALCULATORS.
@@ -58,7 +54,7 @@ const STATIC_ROUTES = [
 
 const CALCULATORS = [
   'free-kundali-calculator',
-  'free-child-birth-muhurat-calculator',  // v5.8: Child Birth Muhurat (free)
+  'free-child-birth-muhurat-calculator',  // v5.8
   'free-dasha-calculator',
   'free-nakshatra-calculator',
   'free-rashi-calculator',
@@ -156,7 +152,7 @@ async function readPanchangDates(): Promise<string[]> {
     const set = new Set<string>();
     for (const row of data as { date: string }[]) {
       if (typeof row.date === 'string' && row.date.length >= 10) {
-        set.add(row.date.slice(0, 10)); // normalise to YYYY-MM-DD
+        set.add(row.date.slice(0, 10));
       }
     }
     const dates = Array.from(set).sort();
@@ -184,6 +180,26 @@ async function readReportSlugs(): Promise<{ slug: string; updatedAt: string | nu
   }
 }
 
+// ── v7.0: /learn SEO hub pages — live from seo_pillar_pages ─────────────────
+type SeoPageRow = { slug: string; category: string; priority: number };
+
+async function readSeoLearnSlugs(): Promise<SeoPageRow[]> {
+  try {
+    const supabase = anonClient();
+    const { data, error } = await supabase
+      .from('seo_pillar_pages')
+      .select('slug, category, priority')
+      .eq('published', true)
+      .order('priority', { ascending: false });
+    if (error || !data) return [];
+    return (data as SeoPageRow[]).filter(
+      (r) => typeof r.slug === 'string' && r.slug.length > 0
+    );
+  } catch {
+    return [];
+  }
+}
+
 function nextNDates(n: number): string[] {
   const dates: string[] = [];
   const today = new Date();
@@ -197,6 +213,14 @@ function nextNDates(n: number): string[] {
     dates.push(`${yyyy}-${mm}-${dd}`);
   }
   return dates;
+}
+
+// ── changeFrequency helper for /learn pages ─────────────────────────────────
+function learnChangeFreq(category: string): MetadataRoute.Sitemap[0]['changeFrequency'] {
+  if (category === 'transit') return 'weekly';
+  if (category === 'festival') return 'yearly';
+  if (category === 'trending') return 'monthly';
+  return 'monthly'; // prediction + knowledge
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -259,7 +283,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }
   }
 
-  // ── Blog posts (auto-includes the 5 new Milan spokes) ──────────────
+  // ── Blog posts ─────────────────────────────────────────────────────
   try {
     const posts = await getAllPosts();
     for (const post of posts) {
@@ -275,8 +299,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }
 
   // ── City pages ─────────────────────────────────────────────────────
-  // v5.6 FIX 1: /astrologer-{city} REMOVED (IR-20 / Plan §5.9).
-  // City landing + panchang RETAINED.
   const cities = readCities();
   for (const c of cities) {
     entries.push({ url: `${BASE}/${c.slug}`, lastModified: now, changeFrequency: 'weekly', priority: 0.85 });
@@ -289,13 +311,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     entries.push({ url: `${BASE}/events/${f.slug}`, lastModified: now, changeFrequency: 'monthly', priority: 0.75 });
   }
 
-  // ── Panchang date pages (v5.9: every date that has a page) ─────────
+  // ── Panchang date pages (v5.9) ─────────────────────────────────────
   const panchangDates = await readPanchangDates();
   for (const date of panchangDates) {
     entries.push({ url: `${BASE}/panchang/${date}`, lastModified: now, changeFrequency: 'daily', priority: 0.5 });
   }
 
-  // ── Public report pages (v5.9: /report/{slug}) ─────────────────────
+  // ── Public report pages (v5.9) ─────────────────────────────────────
   const reports = await readReportSlugs();
   for (const r of reports) {
     entries.push({
@@ -303,6 +325,26 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: r.updatedAt ? new Date(r.updatedAt) : now,
       changeFrequency: 'monthly',
       priority: 0.6,
+    });
+  }
+
+  // ── v7.0: /learn hub + 90 SEO knowledge pages ─────────────────────
+  // Hub index page
+  entries.push({
+    url: `${BASE}/learn`,
+    lastModified: now,
+    changeFrequency: 'weekly',
+    priority: 0.9,
+  });
+
+  // Individual /learn/[slug] pages — priority from DB column
+  const seoPages = await readSeoLearnSlugs();
+  for (const page of seoPages) {
+    entries.push({
+      url: `${BASE}/learn/${page.slug}`,
+      lastModified: now,
+      changeFrequency: learnChangeFreq(page.category),
+      priority: page.priority ?? 0.8,
     });
   }
 
