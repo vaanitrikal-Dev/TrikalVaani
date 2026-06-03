@@ -1,8 +1,17 @@
 /**
- * TRIKAL VAANI — trikalvaani.com
+ * TRIKAAL VAANI — trikalvaani.com
  * Chief Vedic Architect: Rohiit Gupta
  * FILE TO PASTE → app/services/wealth-reading/page.tsx
- * Version: 4.0 — 100% self-contained, zero external shared imports
+ * Version: 4.1 — IR-0 cleanup
+ *
+ * v4.1 CHANGES vs v4.0:
+ *   ❌ REMOVED fake testimonials (fabricated reviews + ★★★★★ + "Verified Experiences")
+ *   ❌ REMOVED phantom ₹499 (hero call button, step 04, card strike-through, CTA button)
+ *   ✅ /about → /founder (correct author URL — 3 spots)
+ *   ✅ Removed "real estate and investment expertise" credential (with step 04) — IR
+ *   ✅ KEPT Maa Divine Seva (real Arzi/Dhanyewaad dakshina feature)
+ *   ✅ Brand/Jini/Prokerala/vendor already clean — left intact
+ *   ✅ Real price on this page = ₹51 (reading)
  */
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -12,9 +21,9 @@ import SiteFooter from "@/components/layout/SiteFooter";
 
 export const metadata: Metadata = {
   title: "Dhana Yoga in Kundali — When Will I Get Rich? | Trikaal Vaani",
-  description: "Chief Vedic Architect Rohiit Gupta reads your 2nd House, Jupiter and Dhana Yoga to reveal your wealth timeline, peak earning years, and investment sectors your chart favors. Rs 51 deep reading.",
+  description: "Chief Vedic Architect Rohiit Gupta reads your 2nd House, Jupiter and Dhana Yoga to reveal your wealth timeline, peak earning years, and investment sectors your chart favors. ₹51 deep reading.",
   keywords: ["dhana yoga kundali astrology", "when will I get rich astrology", "wealth astrology vedic India", "2nd house money astrology", "Lakshmi yoga astrology"],
-  authors: [{ name: "Rohiit Gupta", url: "https://trikalvaani.com/about" }],
+  authors: [{ name: "Rohiit Gupta", url: "https://trikalvaani.com/founder" }],
   openGraph: { title: "Dhana Yoga — When Will I Get Rich? | Trikaal Vaani", description: "Rohiit Gupta decodes your 2nd House, Jupiter and Dhana Yoga for your wealth timeline.", url: "https://trikalvaani.com/services/wealth-reading", siteName: "Trikaal Vaani", type: "website", locale: "en_IN" },
   alternates: { canonical: "https://trikalvaani.com/services/wealth-reading" },
 };
@@ -22,7 +31,7 @@ export const metadata: Metadata = {
 const schema = {
   "@context": "https://schema.org",
   "@graph": [
-    { "@type": "Service", name: "Dhana Yoga — Wealth and Prosperity Reading", provider: { "@type": "Person", name: "Rohiit Gupta", jobTitle: "Chief Vedic Architect", url: "https://trikalvaani.com/about" }, offers: [{ "@type": "Offer", price: "51", priceCurrency: "INR" }], areaServed: "IN" },
+    { "@type": "Service", name: "Dhana Yoga — Wealth and Prosperity Reading", provider: { "@type": "Person", name: "Rohiit Gupta", jobTitle: "Chief Vedic Architect", url: "https://trikalvaani.com/founder" }, offers: [{ "@type": "Offer", price: "51", priceCurrency: "INR" }], areaServed: "IN" },
     { "@type": "FAQPage", mainEntity: [
       { "@type": "Question", name: "What is Dhana Yoga in Vedic astrology?", acceptedAnswer: { "@type": "Answer", text: "Dhana Yoga is a specific planetary combination indicating significant wealth accumulation. The most powerful include the 2nd and 11th lord exchanging signs, Jupiter aspecting the 2nd house, and the presence of Lakshmi Yoga or Gaja Kesari Yoga." } },
       { "@type": "Question", name: "Which planets indicate wealth in Vedic astrology?", acceptedAnswer: { "@type": "Answer", text: "Jupiter is the primary significator of wealth. The 2nd house lord governs earned wealth. The 11th lord governs gains. Venus rules luxury. When these align in a positive Dasha, significant wealth accumulation occurs." } },
@@ -50,10 +59,9 @@ export default function WealthReadingPage() {
             </div>
             <h1 className="font-serif text-4xl md:text-6xl font-bold leading-tight mb-6">When Will You <span className="text-[#D4AF37]">Get Rich?</span><br />Your Dhana Yoga Knows.</h1>
             <p className="text-lg md:text-xl text-gray-300 max-w-2xl mx-auto mb-3 leading-relaxed">Trikaal AI reads your 2nd House, Jupiter and Dhana Yoga combinations to reveal your wealth timeline, peak earning years, and which sectors your chart <span className="text-[#D4AF37] font-semibold">cosmically favors</span>.</p>
-            <p className="text-sm text-gray-500 mb-10">Reading designed by <Link href="/about" className="text-[#D4AF37] hover:underline">Rohiit Gupta</Link> — Chief Vedic Architect · Swiss Ephemeris (self-hosted)</p>
+            <p className="text-sm text-gray-500 mb-10">Reading designed by <Link href="/founder" className="text-[#D4AF37] hover:underline">Rohiit Gupta</Link> — Chief Vedic Architect · Swiss Ephemeris (self-hosted)</p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/?segment=wealth" className="bg-[#D4AF37] text-[#080B12] font-bold px-8 py-4 rounded-lg text-lg hover:bg-[#e8c84a] transition-all duration-200 shadow-[0_0_30px_rgba(212,175,55,0.3)]">Check My Dhana Yoga — ₹51</Link>
-              <a href="https://wa.me/919211804111?text=Hi%20Rohiit%20ji%2C%20I%20want%20a%20wealth%20reading" target="_blank" rel="noopener noreferrer" className="border border-[#25D366] text-[#25D366] font-semibold px-8 py-4 rounded-lg text-lg hover:bg-[#25D366]/10 transition-all duration-200 flex items-center justify-center gap-2"><WAIcon /> Talk to Rohiit Ji — ₹499</a>
             </div>
           </div>
         </section>
@@ -86,8 +94,7 @@ export default function WealthReadingPage() {
                 {[
                   { step: "01", title: "Enter Your Birth Details", desc: "Date, time, place. The 2nd house cusp degree changes every 2 hours — precision is critical for wealth analysis." },
                   { step: "02", title: "Trikaal Scans Your Dhana Yogas", desc: "2nd and 11th house lords, Jupiter placement, Lakshmi Yoga check, Chandra-Mangala Yoga, and Dasha activation analysis." },
-                  { step: "03", title: "Get Your Wealth Timeline", desc: "Rs 51 deep reading: Do you have Dhana Yoga? When are your peak earning years? Which sectors does your chart favor?" },
-                  { step: "04", title: "Investment Strategy Call", desc: "Rs 499 personal call with Rohiit ji — combining Vedic wealth astrology with real estate and investment expertise." },
+                  { step: "03", title: "Get Your Wealth Timeline", desc: "₹51 deep reading: Do you have Dhana Yoga? When are your peak earning years? Which sectors does your chart favor?" },
                 ].map((s, i) => (
                   <div key={i} className="flex gap-5">
                     <div className="flex-shrink-0 w-12 h-12 rounded-full border border-[#D4AF37]/50 flex items-center justify-center text-[#D4AF37] font-bold text-sm">{s.step}</div>
@@ -99,11 +106,6 @@ export default function WealthReadingPage() {
             </div>
           </div>
         </section>
-        <TestimonialsSection label="What People Are" items={[
-          { name: "Gaurav Taneja", city: "Noida", date: "January 2025", text: "My reading showed Dhana Yoga in the 2nd house with Jupiter aspecting it. Rohiit ji said my peak earning window was 2024 to 2027. I started a business in 2024. Revenue crossed Rs 1 Cr in year one." },
-          { name: "Nirmala Devi", city: "Varanasi", date: "October 2024", text: "I was doing everything right but money wasn't accumulating. Trikaal showed Saturn in the 2nd house — delayed wealth, not denied. And that my 38th year would be my breakout. I'm 38 now." },
-          { name: "Harish Menon", city: "Bangalore", date: "February 2025", text: "The reading identified I have a Lakshmi Yoga suppressed by Rahu. Rohiit ji gave me specific remedies. Six months later, my startup got its first significant investor." },
-        ]} />
         <MaaDivineSeva />
         <FaqSection items={[
           { q: "What is Dhana Yoga in Vedic astrology?", a: "Dhana Yoga is a specific planetary combination indicating significant wealth accumulation. The most powerful include the 2nd and 11th lord exchanging signs, Jupiter aspecting the 2nd house, and the presence of Lakshmi Yoga or Gaja Kesari Yoga." },
@@ -111,21 +113,13 @@ export default function WealthReadingPage() {
           { q: "What is Lakshmi Yoga in astrology?", a: "Lakshmi Yoga is formed when the 9th lord is in its own sign or exaltation and conjuncts or aspects the Lagna lord. It is associated with prosperity and material abundance — but must be activated by the right Mahadasha to manifest." },
           { q: "Can astrology predict the best sectors for investment?", a: "Yes. The 2nd house sign and planets aspecting it reveal which domains generate wealth for you. Mars-ruled charts do well in real estate. Jupiter-ruled charts excel in finance and consulting. Venus-ruled charts profit from luxury industries." },
         ]} />
-        <CtaSection headline="Your Wealth Timeline Is Already" highlight="Written." body="Stop working harder. Start working in alignment. Rs 51 to know your Dhana Yoga and peak earning window." segment="wealth" waText="I%20need%20a%20wealth%20reading" />
+        <CtaSection headline="Your Wealth Timeline Is Already" highlight="Written." body="Stop working harder. Start working in alignment. ₹51 to know your Dhana Yoga and peak earning window." segment="wealth" />
         <SiteFooter />
       </main>
     </>
   );
 }
-/* ─── SHARED COMPONENTS (inlined — no imports needed) ─────────────── */
-
-function WAIcon() {
-  return (
-    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
-    </svg>
-  );
-}
+/* ─── SHARED COMPONENTS (inlined) ─────────────── */
 
 function AuthorStrip() {
   return (
@@ -161,39 +155,12 @@ function DeliverableCard({ segment, items }: { segment: string; items: string[] 
       </ul>
       <div className="mt-8 pt-6 border-t border-white/10 flex items-center justify-between">
         <div>
-          <p className="text-gray-500 text-xs line-through">₹499</p>
           <p className="text-[#D4AF37] text-2xl font-bold">₹51</p>
           <p className="text-gray-500 text-xs">Introductory price</p>
         </div>
         <Link href={`/?segment=${segment}`} className="bg-[#D4AF37] text-[#080B12] font-bold px-6 py-3 rounded-lg hover:bg-[#e8c84a] transition-all duration-200">Unlock Now</Link>
       </div>
     </div>
-  );
-}
-
-function TestimonialsSection({ label, items }: { label: string; items: { name: string; city: string; date: string; text: string }[] }) {
-  return (
-    <section className="py-20 px-4 bg-[#0D1020]">
-      <div className="max-w-5xl mx-auto">
-        <div className="text-center mb-14">
-          <p className="text-[#D4AF37] uppercase tracking-widest text-sm font-medium mb-3">Verified Experiences</p>
-          <h2 className="font-serif text-3xl font-bold">{label} <span className="text-[#D4AF37]">Saying</span></h2>
-        </div>
-        <div className="grid md:grid-cols-3 gap-6">
-          {items.map((t, i) => (
-            <div key={i} className="border border-white/10 rounded-2xl p-6 bg-white/[0.03]">
-              <div className="flex gap-1 mb-1">{"★★★★★".split("").map((s, j) => <span key={j} className="text-[#D4AF37]">{s}</span>)}</div>
-              <p className="text-gray-500 text-xs mb-4">{t.date} · {t.city}</p>
-              <p className="text-gray-300 text-sm leading-relaxed mb-5 italic">&ldquo;{t.text}&rdquo;</p>
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-full bg-[#D4AF37]/20 flex items-center justify-center text-[#D4AF37] font-bold text-sm">{t.name[0]}</div>
-                <p className="font-semibold text-sm text-white">{t.name}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
   );
 }
 
@@ -302,7 +269,7 @@ function FaqSection({ items }: { items: { q: string; a: string }[] }) {
   );
 }
 
-function CtaSection({ headline, highlight, body, segment, waText }: { headline: string; highlight: string; body: string; segment: string; waText: string }) {
+function CtaSection({ headline, highlight, body, segment }: { headline: string; highlight: string; body: string; segment: string }) {
   return (
     <section className="py-24 px-4 relative overflow-hidden">
       <div className="absolute inset-0 pointer-events-none">
@@ -313,7 +280,6 @@ function CtaSection({ headline, highlight, body, segment, waText }: { headline: 
         <p className="text-gray-400 mb-10 leading-relaxed">{body}</p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Link href={`/?segment=${segment}`} className="bg-[#D4AF37] text-[#080B12] font-bold px-8 py-4 rounded-lg text-lg hover:bg-[#e8c84a] transition-all duration-200 shadow-[0_0_40px_rgba(212,175,55,0.25)]">Enter Birth Details → Get Reading</Link>
-          <a href={`https://wa.me/919211804111?text=Hi%20Rohiit%20ji%2C%20${waText}`} target="_blank" rel="noopener noreferrer" className="border border-white/20 text-white px-8 py-4 rounded-lg text-lg hover:bg-white/5 transition-all duration-200">WhatsApp ₹499 Call</a>
         </div>
         <p className="text-gray-600 text-xs mt-6">Powered by Swiss Ephemeris · Lahiri Ayanamsha · Reading framework by Rohiit Gupta</p>
       </div>
