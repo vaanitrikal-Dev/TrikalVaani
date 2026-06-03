@@ -54,9 +54,9 @@ export default function ToxicBossRadarPage() {
               Is Your Boss <span className="text-[#D4AF37]">Karmically Toxic</span><br />— or Just Temporarily Difficult?
             </h1>
             <p className="text-lg md:text-xl text-gray-300 max-w-2xl mx-auto mb-3 leading-relaxed">
-              Jini AI reads your 10th House, Saturn placement & current Dasha to tell you if this work situation is a karmic lesson with an end date — or a sign to <span className="text-[#D4AF37] font-semibold">leave now</span>.
+              Trikaal AI reads your 10th House, Saturn placement & current Dasha to tell you if this work situation is a karmic lesson with an end date — or a sign to <span className="text-[#D4AF37] font-semibold">leave now</span>.
             </p>
-            <p className="text-sm text-gray-500 mb-10">Reading designed by <Link href="/about" className="text-[#D4AF37] hover:underline">Rohiit Gupta</Link> — Chief Vedic Architect · Swiss Ephemeris + Prokerala API</p>
+            <p className="text-sm text-gray-500 mb-10">Reading designed by <Link href="/about" className="text-[#D4AF37] hover:underline">Rohiit Gupta</Link> — Chief Vedic Architect · Swiss Ephemeris (self-hosted)</p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/?segment=toxic-boss" className="bg-[#D4AF37] text-[#080B12] font-bold px-8 py-4 rounded-lg text-lg hover:bg-[#e8c84a] transition-all duration-200 shadow-[0_0_30px_rgba(212,175,55,0.3)]">Get My Workplace Reading — ₹51</Link>
               <a href="https://wa.me/919211804111?text=Hi%20Rohiit%20ji%2C%20I%20want%20a%20toxic%20boss%20reading" target="_blank" rel="noopener noreferrer" className="border border-[#25D366] text-[#25D366] font-semibold px-8 py-4 rounded-lg text-lg hover:bg-[#25D366]/10 transition-all duration-200 flex items-center justify-center gap-2"><WAIcon /> Talk to Rohiit Ji — ₹499</a>
@@ -94,7 +94,7 @@ export default function ToxicBossRadarPage() {
               <div className="space-y-6">
                 {[
                   { step: "01", title: "Enter Your Birth Details", desc: "Date, time, and place. Even a 10-minute difference shifts house cusps and changes your workplace karma reading." },
-                  { step: "02", title: "Jini Scans Your Work Karma", desc: "10th lord placement, Saturn transit, 6th house enemies, and Rahu/Ketu impact on career authority dynamics." },
+                  { step: "02", title: "Trikaal Scans Your Work Karma", desc: "10th lord placement, Saturn transit, 6th house enemies, and Rahu/Ketu impact on career authority dynamics." },
                   { step: "03", title: "Get Your Exit Window or Stay Signal", desc: "₹51 reading: Is this situation karmic and temporary? Or is your chart screaming to leave? Exact months revealed." },
                   { step: "04", title: "Book a ₹499 Strategy Call", desc: "For sensitive situations — promotion denied, false accusations — Rohiit ji gives you a personalized action plan." },
                 ].map((s, i) => (
@@ -110,7 +110,7 @@ export default function ToxicBossRadarPage() {
         </section>
 
         <TestimonialsSection label="What People Are" items={[
-          { name: "Rahul Verma", city: "Noida", date: "October 2024", text: "I was gaslit by my manager for 2 years. Jini told me my Saturn return was triggering authority conflicts — and that October would bring a resolution. I got a new offer in October." },
+          { name: "Rahul Verma", city: "Noida", date: "October 2024", text: "I was gaslit by my manager for 2 years. Trikaal told me my Saturn return was triggering authority conflicts — and that October would bring a resolution. I got a new offer in October." },
           { name: "Divya Nair", city: "Hyderabad", date: "December 2024", text: "The reading showed I had a weak 10th house lord in the 6th house — enemy zone. It explained exactly why every boss becomes my adversary. The awareness itself was healing." },
           { name: "Suresh Pillai", city: "Chennai", date: "February 2025", text: "Rohiit ji told me to hold on until my Rahu Antardasha ends. I waited. My toxic boss left the company. He was right to the month." },
         ]} />
@@ -150,7 +150,7 @@ function AuthorStrip() {
         <div>
           <p className="text-[#D4AF37] text-xs uppercase tracking-widest font-medium mb-1">About Your Vedic Architect</p>
           <h2 className="font-serif text-xl font-bold text-white mb-2">Rohiit Gupta — Chief Vedic Architect, Trikaal Vaani</h2>
-          <p className="text-gray-400 text-sm leading-relaxed">Rohiit Gupta has studied Vedic astrology for over 15 years under the Parashara BPHS tradition. As founder of Trikaal Vaani, he built India&apos;s first AI-powered Vedic platform combining Swiss Ephemeris precision with Gemini AI reasoning. All readings are designed by Rohiit — Jini AI applies his framework to your unique birth chart.</p>
+          <p className="text-gray-400 text-sm leading-relaxed">Rohiit Gupta has studied Vedic astrology for over 15 years under the Parashara BPHS tradition. As founder of Trikaal Vaani, he built India&apos;s first AI-powered Vedic platform combining Swiss Ephemeris precision with premium AI reasoning. All readings are designed by Rohiit — Trikaal AI applies his framework to your unique birth chart.</p>
           <div className="flex gap-3 mt-3 flex-wrap">
             {["15+ Years Vedic Study", "Parashara BPHS Tradition", "Swiss Ephemeris Precision", "India Based"].map((t) => (
               <span key={t} className="text-xs border border-[#D4AF37]/30 text-[#D4AF37] px-3 py-1 rounded-full">{t}</span>
@@ -330,7 +330,7 @@ function CtaSection({ headline, highlight, body, segment, waText }: { headline: 
           <Link href={`/?segment=${segment}`} className="bg-[#D4AF37] text-[#080B12] font-bold px-8 py-4 rounded-lg text-lg hover:bg-[#e8c84a] transition-all duration-200 shadow-[0_0_40px_rgba(212,175,55,0.25)]">Enter Birth Details → Get Reading</Link>
           <a href={`https://wa.me/919211804111?text=Hi%20Rohiit%20ji%2C%20${waText}`} target="_blank" rel="noopener noreferrer" className="border border-white/20 text-white px-8 py-4 rounded-lg text-lg hover:bg-white/5 transition-all duration-200">WhatsApp ₹499 Call</a>
         </div>
-        <p className="text-gray-600 text-xs mt-6">Powered by Swiss Ephemeris · Lahiri Ayanamsha · Prokerala API · Reading framework by Rohiit Gupta</p>
+        <p className="text-gray-600 text-xs mt-6">Powered by Swiss Ephemeris · Lahiri Ayanamsha · Reading framework by Rohiit Gupta</p>
       </div>
     </section>
   );

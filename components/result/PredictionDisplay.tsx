@@ -437,7 +437,7 @@ export default function PredictionDisplay({
           The USP — what users love about Trikaal Vaani
       ══════════════════════════════════════════════════ */}
       <Card highlight>
-        <SectionHeader icon={Sparkles} title="Jini ka Analysis" subtitle="Plain language — zero jargon" />
+        <SectionHeader icon={Sparkles} title="Trikaal ka Analysis" subtitle="Plain language — zero jargon" />
 
         {/* Headline */}
         {professional?.headline && (

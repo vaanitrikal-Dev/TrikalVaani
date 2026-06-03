@@ -61,7 +61,7 @@ export default function PrivacyPage() {
               <h2 className="font-serif text-xl font-bold mb-4" style={{ color: GOLD }}>2. How We Use Your Information</h2>
               <ul className="space-y-2">
                 {[
-                  "To generate your personalised Vedic astrology reading using Jini AI",
+                  "To generate your personalised Vedic astrology reading using Trikaal AI",
                   "To deliver your reading via email or WhatsApp",
                   "To process payments and send receipts",
                   "To create and manage your account",
@@ -104,8 +104,8 @@ export default function PrivacyPage() {
                 {[
                   "Razorpay — payment processing",
                   "Supabase — database and authentication",
-                  "Prokerala API — Vedic astrology calculations (Lahiri Ayanamsha)",
-                  "Google Gemini AI — Jini AI reading generation",
+                  "self-hosted Swiss Ephemeris — Vedic astrology calculations (Lahiri Ayanamsha)",
+                  "Google premium AI — Trikaal AI reading generation",
                   "Vercel — website hosting",
                   "OpenStreetMap / Nominatim — birth place geocoding",
                   "WhatsApp / Interakt — reading and booking delivery",

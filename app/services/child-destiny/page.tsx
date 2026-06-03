@@ -49,8 +49,8 @@ export default function ChildDestinyPage() {
               <span className="text-[#D4AF37] text-sm font-medium tracking-widest uppercase">Child Destiny Intelligence · by Rohiit Gupta</span>
             </div>
             <h1 className="font-serif text-4xl md:text-6xl font-bold leading-tight mb-6">What Is Your Child <span className="text-[#D4AF37]">Born to Become?</span><br />Their Stars Know.</h1>
-            <p className="text-lg md:text-xl text-gray-300 max-w-2xl mx-auto mb-3 leading-relaxed">Jini AI reads your child's 5th House, Moon sign, Mercury and Lagna to reveal hidden talents, ideal education stream, and <span className="text-[#D4AF37] font-semibold">cosmic calling</span> — before society tells them who to be.</p>
-            <p className="text-sm text-gray-500 mb-10">Reading designed by <Link href="/about" className="text-[#D4AF37] hover:underline">Rohiit Gupta</Link> — Chief Vedic Architect · Swiss Ephemeris + Prokerala API</p>
+            <p className="text-lg md:text-xl text-gray-300 max-w-2xl mx-auto mb-3 leading-relaxed">Trikaal AI reads your child's 5th House, Moon sign, Mercury and Lagna to reveal hidden talents, ideal education stream, and <span className="text-[#D4AF37] font-semibold">cosmic calling</span> — before society tells them who to be.</p>
+            <p className="text-sm text-gray-500 mb-10">Reading designed by <Link href="/about" className="text-[#D4AF37] hover:underline">Rohiit Gupta</Link> — Chief Vedic Architect · Swiss Ephemeris (self-hosted)</p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/?segment=child-destiny" className="bg-[#D4AF37] text-[#080B12] font-bold px-8 py-4 rounded-lg text-lg hover:bg-[#e8c84a] transition-all duration-200 shadow-[0_0_30px_rgba(212,175,55,0.3)]">Get Child Destiny Reading — ₹51</Link>
               <a href="https://wa.me/919211804111?text=Hi%20Rohiit%20ji%2C%20I%20want%20a%20child%20destiny%20reading" target="_blank" rel="noopener noreferrer" className="border border-[#25D366] text-[#25D366] font-semibold px-8 py-4 rounded-lg text-lg hover:bg-[#25D366]/10 transition-all duration-200 flex items-center justify-center gap-2"><WAIcon /> Talk to Rohiit Ji — ₹499</a>
@@ -85,7 +85,7 @@ export default function ChildDestinyPage() {
               <div className="space-y-6">
                 {[
                   { step: "01", title: "Enter Child's Birth Details", desc: "Date, exact time, and place of birth. Even 10-minute precision is important for the Lagna and Moon sign." },
-                  { step: "02", title: "Jini Maps Their Cosmic Blueprint", desc: "5th house lord analysis, Moon nakshatra learning style, Mercury and Jupiter education domain, Dasha timeline for peak talent years." },
+                  { step: "02", title: "Trikaal Maps Their Cosmic Blueprint", desc: "5th house lord analysis, Moon nakshatra learning style, Mercury and Jupiter education domain, Dasha timeline for peak talent years." },
                   { step: "03", title: "Get Their Talent and Career Map", desc: "Rs 51 reading: Top 3 talent domains, ideal education stream, which ages bring peak growth, which careers are cosmically supported." },
                   { step: "04", title: "Book a Family Consultation", desc: "Rs 499 call with Rohiit ji for a comprehensive child development plan — including remedies for challenged placements." },
                 ].map((s, i) => (
@@ -100,7 +100,7 @@ export default function ChildDestinyPage() {
           </div>
         </section>
         <TestimonialsSection label="What Parents Are" items={[
-          { name: "Anita Sharma", city: "Gurgaon", date: "November 2024", text: "My son was forced into science stream. Jini's reading showed his Mercury in 12th house with strong Venus — a creative communicator, not an engineer. He's now thriving in journalism." },
+          { name: "Anita Sharma", city: "Gurgaon", date: "November 2024", text: "My son was forced into science stream. Trikaal's reading showed his Mercury in 12th house with strong Venus — a creative communicator, not an engineer. He's now thriving in journalism." },
           { name: "Prashant Nanda", city: "Bhubaneswar", date: "January 2025", text: "We were pushing our daughter toward medicine. Her chart showed Jupiter in 5th in Sagittarius — a natural teacher. She's pursuing philosophy at DU and has never been happier." },
           { name: "Kavya Reddy", city: "Hyderabad", date: "March 2025", text: "My 7-year-old son has anger issues. Rohiit ji read his chart and showed Mars conjunct the Ascendant — he's a natural leader, not a problem child. The framing changed everything for our family." },
         ]} />
@@ -135,7 +135,7 @@ function AuthorStrip() {
         <div>
           <p className="text-[#D4AF37] text-xs uppercase tracking-widest font-medium mb-1">About Your Vedic Architect</p>
           <h2 className="font-serif text-xl font-bold text-white mb-2">Rohiit Gupta — Chief Vedic Architect, Trikaal Vaani</h2>
-          <p className="text-gray-400 text-sm leading-relaxed">Rohiit Gupta has studied Vedic astrology for over 15 years under the Parashara BPHS tradition. As founder of Trikaal Vaani, he built India&apos;s first AI-powered Vedic platform combining Swiss Ephemeris precision with Gemini AI reasoning. All readings are designed by Rohiit — Jini AI applies his framework to your unique birth chart.</p>
+          <p className="text-gray-400 text-sm leading-relaxed">Rohiit Gupta has studied Vedic astrology for over 15 years under the Parashara BPHS tradition. As founder of Trikaal Vaani, he built India&apos;s first AI-powered Vedic platform combining Swiss Ephemeris precision with premium AI reasoning. All readings are designed by Rohiit — Trikaal AI applies his framework to your unique birth chart.</p>
           <div className="flex gap-3 mt-3 flex-wrap">
             {["15+ Years Vedic Study", "Parashara BPHS Tradition", "Swiss Ephemeris Precision", "India Based"].map((t) => (
               <span key={t} className="text-xs border border-[#D4AF37]/30 text-[#D4AF37] px-3 py-1 rounded-full">{t}</span>
@@ -315,7 +315,7 @@ function CtaSection({ headline, highlight, body, segment, waText }: { headline: 
           <Link href={`/?segment=${segment}`} className="bg-[#D4AF37] text-[#080B12] font-bold px-8 py-4 rounded-lg text-lg hover:bg-[#e8c84a] transition-all duration-200 shadow-[0_0_40px_rgba(212,175,55,0.25)]">Enter Birth Details → Get Reading</Link>
           <a href={`https://wa.me/919211804111?text=Hi%20Rohiit%20ji%2C%20${waText}`} target="_blank" rel="noopener noreferrer" className="border border-white/20 text-white px-8 py-4 rounded-lg text-lg hover:bg-white/5 transition-all duration-200">WhatsApp ₹499 Call</a>
         </div>
-        <p className="text-gray-600 text-xs mt-6">Powered by Swiss Ephemeris · Lahiri Ayanamsha · Prokerala API · Reading framework by Rohiit Gupta</p>
+        <p className="text-gray-600 text-xs mt-6">Powered by Swiss Ephemeris · Lahiri Ayanamsha · Reading framework by Rohiit Gupta</p>
       </div>
     </section>
   );

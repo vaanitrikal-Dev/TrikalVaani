@@ -50,7 +50,7 @@ export default function TermsPage() {
               <ul className="space-y-2">
                 {[
                   "Free Kundali and Panchang generation",
-                  "Jini AI deep readings (₹51) — powered by Gemini AI and Swiss Ephemeris",
+                  "Trikaal AI deep readings (₹51) — powered by premium AI and Swiss Ephemeris",
                   "Premium PDF readings with 4-week forecast (₹99)",
                   "Personal consultation with Rohiit Gupta (₹499)",
                   "Maa Shakti Arzi and Dhanyewaad dakshina offerings (₹101 onwards)",
@@ -121,7 +121,7 @@ export default function TermsPage() {
 
             <div>
               <h2 className="font-serif text-xl font-bold mb-4" style={{ color: GOLD }}>7. Intellectual Property</h2>
-              <p>All content on Trikaal Vaani — including the Jini AI reading framework, Vedic methodology designed by Rohiit Gupta, website design, text, and graphics — is the intellectual property of Trikaal Vaani. Reproduction or redistribution without written permission is strictly prohibited.</p>
+              <p>All content on Trikaal Vaani — including the Trikaal AI reading framework, Vedic methodology designed by Rohiit Gupta, website design, text, and graphics — is the intellectual property of Trikaal Vaani. Reproduction or redistribution without written permission is strictly prohibited.</p>
             </div>
 
             <div>

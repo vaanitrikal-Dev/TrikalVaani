@@ -55,10 +55,10 @@ export default function ExBackReadingPage() {
               Will Your Ex <span className="text-[#D4AF37]">Come Back?</span><br />Your Stars Know the Answer.
             </h1>
             <p className="text-lg md:text-xl text-gray-300 max-w-2xl mx-auto mb-3 leading-relaxed">
-              Jini AI reads your Venus, 7th House & Vimshottari Dasha to reveal if reunion energy is active — and <span className="text-[#D4AF37] font-semibold">exactly when</span> the window opens.
+              Trikaal AI reads your Venus, 7th House & Vimshottari Dasha to reveal if reunion energy is active — and <span className="text-[#D4AF37] font-semibold">exactly when</span> the window opens.
             </p>
             <p className="text-sm text-gray-500 mb-10">
-              Reading designed by <Link href="/about" className="text-[#D4AF37] hover:underline">Rohiit Gupta</Link> — Chief Vedic Architect · Swiss Ephemeris + Prokerala API
+              Reading designed by <Link href="/about" className="text-[#D4AF37] hover:underline">Rohiit Gupta</Link> — Chief Vedic Architect · Swiss Ephemeris (self-hosted)
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/?segment=ex-back" className="bg-[#D4AF37] text-[#080B12] font-bold px-8 py-4 rounded-lg text-lg hover:bg-[#e8c84a] transition-all duration-200 shadow-[0_0_30px_rgba(212,175,55,0.3)]">
@@ -102,8 +102,8 @@ export default function ExBackReadingPage() {
             <div className="grid md:grid-cols-2 gap-10 items-center">
               <div className="space-y-6">
                 {[
-                  { step: "01", title: "Enter Your Birth Details", desc: "Date, time, and place. We use Prokerala API (Lahiri Ayanamsha) — same engine as AstroSage." },
-                  { step: "02", title: "Jini AI Reads Your Chart", desc: "Gemini-powered analysis of Venus, 7th house lord, Navamsa D9, and current Mahadasha for love timing." },
+                  { step: "01", title: "Enter Your Birth Details", desc: "Date, time, and place. We use self-hosted Swiss Ephemeris (Lahiri Ayanamsha) — same engine as AstroSage." },
+                  { step: "02", title: "Trikaal AI Reads Your Chart", desc: "Gemini-powered analysis of Venus, 7th house lord, Navamsa D9, and current Mahadasha for love timing." },
                   { step: "03", title: "Get Your Reunion Window", desc: "₹51 deep reading (4096 tokens): Is reunion possible? When is the window? What karmic lesson is at play?" },
                   { step: "04", title: "Talk to Rohiit Ji if Needed", desc: "For complex cases — blocked numbers, marriage, children — book a ₹499 personal call directly." },
                 ].map((s, i) => (
@@ -123,7 +123,7 @@ export default function ExBackReadingPage() {
 
         {/* TESTIMONIALS */}
         <TestimonialsSection label="What People Are" items={[
-          { name: "Priya Sharma", city: "Delhi", date: "March 2025", text: "I was heartbroken for 7 months. Jini told me my Venus Mahadasha starts in March — and my ex texted me in February end. The accuracy shocked me." },
+          { name: "Priya Sharma", city: "Delhi", date: "March 2025", text: "I was heartbroken for 7 months. Trikaal told me my Venus Mahadasha starts in March — and my ex texted me in February end. The accuracy shocked me." },
           { name: "Karan Mehta", city: "Mumbai", date: "January 2025", text: "I didn't believe in astrology but my sister insisted. Trikaal Vaani predicted a communication window in my 3rd house transit. He called exactly then." },
           { name: "Ananya Iyer", city: "Bangalore", date: "February 2025", text: "Rohiit ji's reading gave me clarity I couldn't find in therapy. Whether he returns or not — I finally know what to do with my life." },
         ]} />
@@ -134,9 +134,9 @@ export default function ExBackReadingPage() {
         <FaqSection items={[
           { q: "Can Vedic astrology predict if my ex will come back?", a: "Yes. The 7th house governs partnerships and reconciliation. Venus rules love and reunion energy. Vimshottari Dasha pinpoints when reconciliation windows open or close. Rohiit Gupta analyzes all three together." },
           { q: "What birth details do I need for this reading?", a: "Date of birth, exact time of birth (ideally within 30 minutes), and place of birth. The more precise the birth time, the more accurate the house placements and Dasha timing." },
-          { q: "Difference between ₹51 AI reading and ₹499 personal call?", a: "The ₹51 Jini AI reading gives a 4096-token deep analysis with reunion window prediction. The ₹499 call connects you directly with Rohiit Gupta — ideal for complex cases involving marriage or blocked communication." },
+          { q: "Difference between ₹51 AI reading and ₹499 personal call?", a: "The ₹51 Trikaal AI reading gives a 4096-token deep analysis with reunion window prediction. The ₹499 call connects you directly with Rohiit Gupta — ideal for complex cases involving marriage or blocked communication." },
           { q: "What is Navamsa D9 and why does it matter?", a: "The Navamsa (D9) chart is the soul chart in Vedic astrology. It reveals whether a connection carries past-life karma and whether reconciliation is truly supported at the soul level." },
-          { q: "How accurate is Trikaal Vaani's reading?", a: "Trikaal Vaani uses the Prokerala API with Lahiri Ayanamsha — the same engine used by AstroSage. Readings with birth times accurate to within 15 minutes are most reliable." },
+          { q: "How accurate is Trikaal Vaani's reading?", a: "Trikaal Vaani uses the self-hosted Swiss Ephemeris with Lahiri Ayanamsha — the same engine used by AstroSage. Readings with birth times accurate to within 15 minutes are most reliable." },
         ]} />
 
         {/* CTA */}
@@ -172,7 +172,7 @@ function AuthorStrip() {
         <div>
           <p className="text-[#D4AF37] text-xs uppercase tracking-widest font-medium mb-1">About Your Vedic Architect</p>
           <h2 className="font-serif text-xl font-bold text-white mb-2">Rohiit Gupta — Chief Vedic Architect, Trikaal Vaani</h2>
-          <p className="text-gray-400 text-sm leading-relaxed">Rohiit Gupta has studied Vedic astrology for over 15 years under the Parashara BPHS tradition. As founder of Trikaal Vaani, he built India&apos;s first AI-powered Vedic platform combining Swiss Ephemeris precision with Gemini AI reasoning. All readings are designed by Rohiit — Jini AI applies his framework to your unique birth chart.</p>
+          <p className="text-gray-400 text-sm leading-relaxed">Rohiit Gupta has studied Vedic astrology for over 15 years under the Parashara BPHS tradition. As founder of Trikaal Vaani, he built India&apos;s first AI-powered Vedic platform combining Swiss Ephemeris precision with premium AI reasoning. All readings are designed by Rohiit — Trikaal AI applies his framework to your unique birth chart.</p>
           <div className="flex gap-3 mt-3 flex-wrap">
             {["15+ Years Vedic Study", "Parashara BPHS Tradition", "Swiss Ephemeris Precision", "India Based"].map((t) => (
               <span key={t} className="text-xs border border-[#D4AF37]/30 text-[#D4AF37] px-3 py-1 rounded-full">{t}</span>
@@ -352,7 +352,7 @@ function CtaSection({ headline, highlight, body, segment, waText }: { headline: 
           <Link href={`/?segment=${segment}`} className="bg-[#D4AF37] text-[#080B12] font-bold px-8 py-4 rounded-lg text-lg hover:bg-[#e8c84a] transition-all duration-200 shadow-[0_0_40px_rgba(212,175,55,0.25)]">Enter Birth Details → Get Reading</Link>
           <a href={`https://wa.me/919211804111?text=Hi%20Rohiit%20ji%2C%20${waText}`} target="_blank" rel="noopener noreferrer" className="border border-white/20 text-white px-8 py-4 rounded-lg text-lg hover:bg-white/5 transition-all duration-200">WhatsApp ₹499 Call</a>
         </div>
-        <p className="text-gray-600 text-xs mt-6">Powered by Swiss Ephemeris · Lahiri Ayanamsha · Prokerala API · Reading framework by Rohiit Gupta</p>
+        <p className="text-gray-600 text-xs mt-6">Powered by Swiss Ephemeris · Lahiri Ayanamsha · Reading framework by Rohiit Gupta</p>
       </div>
     </section>
   );

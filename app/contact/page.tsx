@@ -103,7 +103,7 @@ export default function ContactPage() {
             <h2 className="font-serif text-xl font-bold text-white mb-6">How Can We Help?</h2>
             <div className="space-y-3">
               {[
-                { icon: "🔮", title: "Reading Support", desc: "Issues with accessing or understanding your Jini AI reading", wa: "I%20need%20help%20with%20my%20reading" },
+                { icon: "🔮", title: "Reading Support", desc: "Issues with accessing or understanding your Trikaal AI reading", wa: "I%20need%20help%20with%20my%20reading" },
                 { icon: "📞", title: "Book Personal Consultation", desc: "Schedule a ₹499 personal call with Rohiit Gupta", wa: "I%20want%20to%20book%20a%20personal%20consultation%20at%20Rs499" },
                 { icon: "💳", title: "Payment Issue", desc: "Payment failed, double charge, or refund request", wa: "I%20have%20a%20payment%20issue" },
                 { icon: "🙏", title: "Maa Shakti Arzi / Dhanyewaad", desc: "Submit your prayer or gratitude offering to Maa Shakti", wa: "I%20want%20to%20submit%20my%20Arzi%20to%20Maa%20Shakti" },

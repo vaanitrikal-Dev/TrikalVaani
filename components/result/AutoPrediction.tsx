@@ -194,7 +194,7 @@ export default function AutoPrediction({
           </div>
           <div>
             <div style={{ fontSize: 13, fontWeight: 700, color: '#C4B5FD' }}>
-              Jini — Trikaal Vaani
+              Trikaal — Trikaal Vaani
             </div>
             <div style={{ fontSize: 11, color: 'rgba(148,163,184,0.5)' }}>
               {segmentLabel} · {lagna} Lagna · {mahadasha} Mahadasha

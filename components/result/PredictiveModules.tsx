@@ -153,7 +153,7 @@ export default function PredictiveModules({ data, loading, varshphalFocus, ashta
           Deep Forecast for <span style={{ color: GOLD }}>{name.split(' ')[0]}</span>
         </h3>
         <p className="text-xs text-slate-500 mb-4">
-          Powered by Gemini AI · Dasha + Gochar + Ashtakvarga analysis
+          Powered by premium AI · Dasha + Gochar + Ashtakvarga analysis
         </p>
 
         <div

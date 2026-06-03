@@ -49,8 +49,8 @@ export default function SpiritualPurposePage() {
               <span className="text-[#D4AF37] text-sm font-medium tracking-widest uppercase">Soul Purpose Intelligence · by Rohiit Gupta</span>
             </div>
             <h1 className="font-serif text-4xl md:text-6xl font-bold leading-tight mb-6">What Is Your <span className="text-[#D4AF37]">Soul&apos;s Purpose</span><br />in This Lifetime?</h1>
-            <p className="text-lg md:text-xl text-gray-300 max-w-2xl mx-auto mb-3 leading-relaxed">Jini AI reads your Ketu, Atmakaraka and 12th House to decode your past-life karma, present dharmic mission, and the <span className="text-[#D4AF37] font-semibold">soul lesson</span> you were born to complete.</p>
-            <p className="text-sm text-gray-500 mb-10">Reading designed by <Link href="/about" className="text-[#D4AF37] hover:underline">Rohiit Gupta</Link> — Chief Vedic Architect · Swiss Ephemeris + Prokerala API</p>
+            <p className="text-lg md:text-xl text-gray-300 max-w-2xl mx-auto mb-3 leading-relaxed">Trikaal AI reads your Ketu, Atmakaraka and 12th House to decode your past-life karma, present dharmic mission, and the <span className="text-[#D4AF37] font-semibold">soul lesson</span> you were born to complete.</p>
+            <p className="text-sm text-gray-500 mb-10">Reading designed by <Link href="/about" className="text-[#D4AF37] hover:underline">Rohiit Gupta</Link> — Chief Vedic Architect · Swiss Ephemeris (self-hosted)</p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/?segment=spiritual-purpose" className="bg-[#D4AF37] text-[#080B12] font-bold px-8 py-4 rounded-lg text-lg hover:bg-[#e8c84a] transition-all duration-200 shadow-[0_0_30px_rgba(212,175,55,0.3)]">Get My Soul Purpose Reading — ₹51</Link>
               <a href="https://wa.me/919211804111?text=Hi%20Rohiit%20ji%2C%20I%20want%20a%20spiritual%20purpose%20reading" target="_blank" rel="noopener noreferrer" className="border border-[#25D366] text-[#25D366] font-semibold px-8 py-4 rounded-lg text-lg hover:bg-[#25D366]/10 transition-all duration-200 flex items-center justify-center gap-2"><WAIcon /> Talk to Rohiit Ji — ₹499</a>
@@ -85,7 +85,7 @@ export default function SpiritualPurposePage() {
               <div className="space-y-6">
                 {[
                   { step: "01", title: "Enter Your Birth Details", desc: "Date, exact time, and place. Your Atmakaraka degree is calculated to the arc-minute — precision is essential for soul-level readings." },
-                  { step: "02", title: "Jini Reads Your Soul Blueprint", desc: "Atmakaraka identification, Ketu house and sign past-life analysis, 12th house spiritual indicators, and Rahu growth direction mapping." },
+                  { step: "02", title: "Trikaal Reads Your Soul Blueprint", desc: "Atmakaraka identification, Ketu house and sign past-life analysis, 12th house spiritual indicators, and Rahu growth direction mapping." },
                   { step: "03", title: "Receive Your Soul Curriculum", desc: "Rs 51 reading: Your soul's past-life mastery, present dharmic mission, spiritual path (Bhakti, Jnana, Karma, Raja), and moksha indicators." },
                   { step: "04", title: "Deep Spiritual Consultation", desc: "Rs 499 call with Rohiit ji — for those at crossroads between worldly life and spiritual calling, or seeking Vedic remedies to align with dharma faster." },
                 ].map((s, i) => (
@@ -100,7 +100,7 @@ export default function SpiritualPurposePage() {
           </div>
         </section>
         <TestimonialsSection label="What Seekers Are" items={[
-          { name: "Swati Bhardwaj", city: "Rishikesh", date: "December 2024", text: "I left a Rs 40L corporate job to teach yoga. Everyone thought I was crazy. Jini showed my Ketu in the 10th house and Jupiter in the 12th. It all made sense." },
+          { name: "Swati Bhardwaj", city: "Rishikesh", date: "December 2024", text: "I left a Rs 40L corporate job to teach yoga. Everyone thought I was crazy. Trikaal showed my Ketu in the 10th house and Jupiter in the 12th. It all made sense." },
           { name: "Arun Kumar", city: "Varanasi", date: "October 2024", text: "I have always felt I had a purpose beyond money. My reading showed Moon-Ketu conjunction in the 9th house — a soul that came to teach. I now run a free Vedic study group of 200 people." },
           { name: "Lakshmi Prasad", city: "Mysore", date: "February 2025", text: "The Atmakaraka reading was the most profound thing anyone has ever told me about myself. Rohiit ji described my past life pattern so accurately my mother started crying." },
         ]} />
@@ -135,7 +135,7 @@ function AuthorStrip() {
         <div>
           <p className="text-[#D4AF37] text-xs uppercase tracking-widest font-medium mb-1">About Your Vedic Architect</p>
           <h2 className="font-serif text-xl font-bold text-white mb-2">Rohiit Gupta — Chief Vedic Architect, Trikaal Vaani</h2>
-          <p className="text-gray-400 text-sm leading-relaxed">Rohiit Gupta has studied Vedic astrology for over 15 years under the Parashara BPHS tradition. As founder of Trikaal Vaani, he built India&apos;s first AI-powered Vedic platform combining Swiss Ephemeris precision with Gemini AI reasoning. All readings are designed by Rohiit — Jini AI applies his framework to your unique birth chart.</p>
+          <p className="text-gray-400 text-sm leading-relaxed">Rohiit Gupta has studied Vedic astrology for over 15 years under the Parashara BPHS tradition. As founder of Trikaal Vaani, he built India&apos;s first AI-powered Vedic platform combining Swiss Ephemeris precision with premium AI reasoning. All readings are designed by Rohiit — Trikaal AI applies his framework to your unique birth chart.</p>
           <div className="flex gap-3 mt-3 flex-wrap">
             {["15+ Years Vedic Study", "Parashara BPHS Tradition", "Swiss Ephemeris Precision", "India Based"].map((t) => (
               <span key={t} className="text-xs border border-[#D4AF37]/30 text-[#D4AF37] px-3 py-1 rounded-full">{t}</span>
@@ -315,7 +315,7 @@ function CtaSection({ headline, highlight, body, segment, waText }: { headline: 
           <Link href={`/?segment=${segment}`} className="bg-[#D4AF37] text-[#080B12] font-bold px-8 py-4 rounded-lg text-lg hover:bg-[#e8c84a] transition-all duration-200 shadow-[0_0_40px_rgba(212,175,55,0.25)]">Enter Birth Details → Get Reading</Link>
           <a href={`https://wa.me/919211804111?text=Hi%20Rohiit%20ji%2C%20${waText}`} target="_blank" rel="noopener noreferrer" className="border border-white/20 text-white px-8 py-4 rounded-lg text-lg hover:bg-white/5 transition-all duration-200">WhatsApp ₹499 Call</a>
         </div>
-        <p className="text-gray-600 text-xs mt-6">Powered by Swiss Ephemeris · Lahiri Ayanamsha · Prokerala API · Reading framework by Rohiit Gupta</p>
+        <p className="text-gray-600 text-xs mt-6">Powered by Swiss Ephemeris · Lahiri Ayanamsha · Reading framework by Rohiit Gupta</p>
       </div>
     </section>
   );

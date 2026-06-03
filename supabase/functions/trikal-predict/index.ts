@@ -9,7 +9,7 @@ const corsHeaders = {
 const GEMINI_URL =
   "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent";
 
-const JINI_IDENTITY = `You are Jini — the AI soul of Trikaal Vaani, created by Rohiit Gupta (Chief Vedic Architect, 10+ years of Vedic research). Answer based on Vedic astrology data provided. Founder is Rohiit Gupta. Tone: warm, witty, diplomatic, Hinglish (blend English and Hindi naturally). Never predict doom — frame challenges as karmic opportunities.`;
+const JINI_IDENTITY = `You are Trikaal — the AI soul of Trikaal Vaani, created by Rohiit Gupta (Chief Vedic Architect, 10+ years of Vedic research). Answer based on Vedic astrology data provided. Founder is Rohiit Gupta. Tone: warm, witty, diplomatic, Hinglish (blend English and Hindi naturally). Never predict doom — frame challenges as karmic opportunities.`;
 
 interface PredictRequest {
   mode: "predict" | "segment" | "compatibility";
@@ -102,7 +102,7 @@ IMPORTANT: End each section with a CLIFFHANGER hook about a specific locked plan
 Return ONLY valid JSON — no markdown, no commentary:
 {
   "career": {
-    "headline": "one powerful Jini-voice sentence about career window",
+    "headline": "one powerful Trikaal-voice sentence about career window",
     "window": "e.g. May–Sept ${currentYear}",
     "depth": "3–4 sentences citing ${activeDasha?.planet || "current Dasha"} Dasha and 10th house. End with cliffhanger.",
     "remedies": [
@@ -112,7 +112,7 @@ Return ONLY valid JSON — no markdown, no commentary:
     ]
   },
   "love": {
-    "headline": "one powerful Jini-voice sentence about relationship window",
+    "headline": "one powerful Trikaal-voice sentence about relationship window",
     "window": "e.g. July–Nov ${currentYear}",
     "depth": "3–4 sentences citing Venus/Jupiter and 7th house. End with cliffhanger.",
     "remedies": [
@@ -122,7 +122,7 @@ Return ONLY valid JSON — no markdown, no commentary:
     ]
   },
   "wealth": {
-    "headline": "one powerful Jini-voice sentence about wealth window",
+    "headline": "one powerful Trikaal-voice sentence about wealth window",
     "window": "e.g. Apr–Dec ${currentYear}",
     "depth": "3–4 sentences citing Ashtakvarga ${req.ashtakvargaWealth} bindus and 2nd/11th house. End with cliffhanger.",
     "remedies": [
@@ -134,7 +134,7 @@ Return ONLY valid JSON — no markdown, no commentary:
   "monthlyTimeline": [
     {"month":"MONTH_NAME","year":${currentYear},"vibe":"specific planetary event for ${req.name.split(" ")[0]} this month","category":"career","intensity":"high"}
   ],
-  "guruMessage": "warm 2–3 sentence personal blessing from Jini for ${req.name.split(" ")[0]} tying career+love+wealth with a Vedic mantra. End with a cliffhanger about the premium reading."
+  "guruMessage": "warm 2–3 sentence personal blessing from Trikaal for ${req.name.split(" ")[0]} tying career+love+wealth with a Vedic mantra. End with a cliffhanger about the premium reading."
 }
 Generate 12 monthlyTimeline entries starting month ${currentMonth} year ${currentYear}. Customize each entry for ${req.name.split(" ")[0]}'s dasha and scores.`;
 }
@@ -312,7 +312,7 @@ Return ONLY valid JSON:
     {"type":"red","label":"flag name","explanation":"one sentence about challenge to watch for"}
   ],
   "vibe": "2 sentences describing the energy and attraction dynamic — poetic but specific. End with a cliffhanger about a locked planetary clash.",
-  "verdict": "2–3 sentences of Jini's personal verdict on their compatibility — include one actionable remedy",
+  "verdict": "2–3 sentences of Trikaal's personal verdict on their compatibility — include one actionable remedy",
   "whatsappText": "Guru says ${req.name.split(" ")[0]} and ${p.name.split(" ")[0]}'s Vedic compatibility score is [score]/100! Check yours free at TrikalVaani.com"
 }`;
 }

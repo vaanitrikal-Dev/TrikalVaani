@@ -364,7 +364,7 @@ export default function KundaliDisplay({
             boxShadow: '0 0 6px #22C55E',
             display: 'inline-block',
           }} />
-          Jini online hai — apna sawaal neeche type karein 👇
+          Trikaal online hai — apna sawaal neeche type karein 👇
         </div>
       </div>
 

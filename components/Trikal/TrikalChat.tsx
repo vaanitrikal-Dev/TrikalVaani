@@ -14,7 +14,7 @@ type Message = {
 };
 
 const GREETINGS = {
-  anonymous: 'Namaste! Main Jini hoon — Trikaal Vaani ki AI soul. Aapke koi cosmic sawal hain? Puchiye, main yahan hoon.',
+  anonymous: 'Namaste! Main Trikaal hoon — Trikaal Vaani ki AI soul. Aapke koi cosmic sawal hain? Puchiye, main yahan hoon.',
   returning: (name: string) =>
     `Welcome back, ${name}! Aapki cosmic journey continue ho rahi hai. Aaj kya jaanna chahte hain?`,
 };
@@ -255,7 +255,7 @@ export default function JiniChat() {
               {!imgError ? (
                 <Image
                   src={avatarSrc}
-                  alt="Jini — Trikaal Vaani AI"
+                  alt="Trikaal — Trikaal Vaani AI"
                   fill
                   className="object-cover object-top"
                   onError={() => setImgError(true)}
@@ -270,7 +270,7 @@ export default function JiniChat() {
               )}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="font-serif font-bold text-sm text-white leading-tight">Jini</p>
+              <p className="font-serif font-bold text-sm text-white leading-tight">Trikaal</p>
               <p className="text-xs leading-tight" style={{ color: GOLD_RGBA(0.65) }}>
                 Trikaal Vaani AI Guide
               </p>
@@ -305,7 +305,7 @@ export default function JiniChat() {
                     {!imgError ? (
                       <Image
                         src={avatarSrc}
-                        alt="Jini"
+                        alt="Trikaal"
                         fill
                         className="object-cover object-top"
                         onError={() => setImgError(true)}
@@ -350,7 +350,7 @@ export default function JiniChat() {
                   style={{ border: `1px solid ${GOLD_RGBA(0.4)}` }}
                 >
                   {!imgError ? (
-                    <Image src={avatarSrc} alt="Jini" fill className="object-cover object-top" onError={() => setImgError(true)} />
+                    <Image src={avatarSrc} alt="Trikaal" fill className="object-cover object-top" onError={() => setImgError(true)} />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center" style={{ background: GOLD_RGBA(0.15) }}>
                       <Sparkles className="w-3 h-3" style={{ color: GOLD }} />
@@ -480,7 +480,7 @@ export default function JiniChat() {
                         border: `1px solid ${GOLD_RGBA(0.25)}`,
                       }}
                     >
-                      Send to Jini
+                      Send to Trikaal
                     </button>
                     <button
                       type="button"
@@ -589,7 +589,7 @@ export default function JiniChat() {
           {!imgError ? (
             <Image
               src={avatarSrc}
-              alt="Jini"
+              alt="Trikaal"
               fill
               className="object-cover object-top"
               onError={() => setImgError(true)}

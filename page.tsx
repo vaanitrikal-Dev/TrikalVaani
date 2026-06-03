@@ -587,7 +587,7 @@ export default function TrikaalVaaniPage() {
               </h2>
               <p className="text-slate-400 text-center max-w-2xl mx-auto mb-12">
                 Trikaal Vaani (Trikaal Vaani) combines 5,000-year-old Parashara
-                wisdom with Google Gemini AI to deliver Kundli readings that match
+                wisdom with Google premium AI to deliver Kundli readings that match
                 what a master Vedic astrologer would compute by hand.
               </p>
 
@@ -620,7 +620,7 @@ export default function TrikaalVaaniPage() {
                   },
                   {
                     icon: '🤖',
-                    title: 'Jini AI Polish',
+                    title: 'Trikaal AI Polish',
                     text: 'Google premium AI engine 4.6 dual-AI processing. Predictions are personal, not generic horoscope.',
                   },
                 ].map((f) => (
@@ -759,7 +759,7 @@ export default function TrikaalVaaniPage() {
                 {[
                   {
                     q: 'What is Trikaal Vaani?',
-                    a: "Trikaal Vaani (officially Trikaal Vaani) is India's AI-powered Vedic astrology platform founded by Rohiit Gupta in India. It uses Swiss Ephemeris and Brihat Parashara Hora Shastra (BPHS) classical rules combined with Google Gemini AI to deliver personalized Kundli readings. Government of India MSME registered (UDYAM-DL-10-0119070).",
+                    a: "Trikaal Vaani (officially Trikaal Vaani) is India's AI-powered Vedic astrology platform founded by Rohiit Gupta in India. It uses Swiss Ephemeris and Brihat Parashara Hora Shastra (BPHS) classical rules combined with Google premium AI to deliver personalized Kundli readings. Government of India MSME registered (UDYAM-DL-10-0119070).",
                   },
                   {
                     q: 'Is Trikaal Vaani and Trikaal Vaani the same?',

@@ -484,7 +484,7 @@ function PratayantarInsight({
       <span style={{ fontSize: 18, flexShrink: 0 }}>🔮</span>
       <div>
         <div style={{ fontSize: 10, fontWeight: 700, color: GOLD_RGBA(0.55), textTransform: 'uppercase' as const, letterSpacing: '0.05em', marginBottom: 5 }}>
-          Jini — Pratyantar Insight
+          Trikaal — Pratyantar Insight
         </div>
         <p style={{ fontSize: 13, color: 'rgba(226,232,240,0.85)', lineHeight: 1.7, margin: 0 }}>
           {insight}

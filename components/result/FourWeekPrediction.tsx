@@ -156,7 +156,7 @@ function buildFourWeekPrompt(
     ? `Employment: ${employment}${sector ? ` | Sector: ${sector}` : ''}`
     : '';
 
-  return `You are Jini — the AI soul of Trikaal Vaani by Rohiit Gupta ji.
+  return `You are Trikaal — the AI soul of Trikaal Vaani by Rohiit Gupta ji.
 Write a COMPLETE 4-WEEK MASTER PREDICTION for ${name}.
 
 BIRTH CHART:
@@ -215,7 +215,7 @@ Format each as: DD Month YYYY | GOOD/WARNING | reason (1 line)
 Base on: dasha transitions, gochar impacts, nakshatra padas, tithi significance]
 
 CLOSING_BLESSING:
-[2-3 lines — a warm, personal blessing from Jini. Reference their specific Lagna and Nakshatra. End with Rohiit Gupta ji ka Trikaal framework tagline naturally.]
+[2-3 lines — a warm, personal blessing from Trikaal. Reference their specific Lagna and Nakshatra. End with Rohiit Gupta ji ka Trikaal framework tagline naturally.]
 
 LANGUAGE RULE: ${langRule}
 CRITICAL: Every statement must reference a specific planet or transit. No generic astrology. Speak directly to ${name.split(' ')[0]}.`;
@@ -516,8 +516,8 @@ function LoadingSkeleton({ lang }: { lang: Lang }) {
       </div>
       <p style={{ fontSize: 16, fontWeight: 700, color: GOLD, marginBottom: 6 }}>
         {lang === 'hindi' ? 'जिनी 4-सप्ताह का विश्लेषण तैयार कर रही है...'
-         : lang === 'english' ? 'Jini is preparing your 4-week forecast...'
-         : 'Jini 4-week analysis taiyaar kar rahi hai...'}
+         : lang === 'english' ? 'Trikaal is preparing your 4-week forecast...'
+         : 'Trikaal 4-week analysis taiyaar kar rahi hai...'}
       </p>
       <p style={{ fontSize: 12, color: 'rgba(148,163,184,0.5)', marginBottom: 20 }}>
         {lang === 'hindi' ? 'ग्रह स्थिति + दशा + गोचर + उपाय = संपूर्ण मार्गदर्शन'

@@ -183,7 +183,7 @@ export default function DailyRashifal() {
               style={{ background: `${rashi.color}0d`, border: `1px solid ${rashi.color}33` }}
             >
               <p className="text-xs font-semibold mb-1" style={{ color: rashi.color }}>
-                Jini Tip (जिनी टिप)
+                Trikaal Tip (जिनी टिप)
               </p>
               <p className="text-sm text-slate-300 leading-relaxed">{rashi.tip}</p>
             </div>

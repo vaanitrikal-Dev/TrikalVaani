@@ -49,7 +49,7 @@ export default function PropertyYogPage() {
               <span className="text-[#D4AF37] text-sm font-medium tracking-widest uppercase">Real Estate Karma Intelligence · by Rohiit Gupta</span>
             </div>
             <h1 className="font-serif text-4xl md:text-6xl font-bold leading-tight mb-6">Is This the Right Time to <span className="text-[#D4AF37]">Buy Property?</span><br />Your Kundali Knows.</h1>
-            <p className="text-lg md:text-xl text-gray-300 max-w-2xl mx-auto mb-3 leading-relaxed">Jini AI reads your 4th House, Mars placement & Saturn transit to tell you if Property Yog is active — or if buying now could be a <span className="text-[#D4AF37] font-semibold">costly karmic mistake</span>.</p>
+            <p className="text-lg md:text-xl text-gray-300 max-w-2xl mx-auto mb-3 leading-relaxed">Trikaal AI reads your 4th House, Mars placement & Saturn transit to tell you if Property Yog is active — or if buying now could be a <span className="text-[#D4AF37] font-semibold">costly karmic mistake</span>.</p>
             <p className="text-sm text-gray-500 mb-10">Reading designed by <Link href="/about" className="text-[#D4AF37] hover:underline">Rohiit Gupta</Link> — Chief Vedic Architect + 15 years India Real Estate · Swiss Ephemeris</p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/?segment=property-yog" className="bg-[#D4AF37] text-[#080B12] font-bold px-8 py-4 rounded-lg text-lg hover:bg-[#e8c84a] transition-all duration-200 shadow-[0_0_30px_rgba(212,175,55,0.3)]">Check My Property Yog — ₹51</Link>
@@ -85,7 +85,7 @@ export default function PropertyYogPage() {
               <div className="space-y-6">
                 {[
                   { step: "01", title: "Enter Your Birth Details", desc: "Date, time, place. Even 15 minutes difference changes your 4th house cusp — precision matters for property readings." },
-                  { step: "02", title: "Jini Reads Your Property Yog", desc: "4th lord strength, Mars placement, Saturn transit over 4th house, and Dasha activation of real-estate yogas in your chart." },
+                  { step: "02", title: "Trikaal Reads Your Property Yog", desc: "4th lord strength, Mars placement, Saturn transit over 4th house, and Dasha activation of real-estate yogas in your chart." },
                   { step: "03", title: "Get Your Buy / Wait Signal", desc: "₹51 reading: Is Property Yog active? Best buying window in months? Any legal dispute risk in this property?" },
                   { step: "04", title: "Pre-Purchase Consultation", desc: "₹499 call with Rohiit ji — combining Vedic astrology with 15 years of India real estate expertise." },
                 ].map((s, i) => (
@@ -101,8 +101,8 @@ export default function PropertyYogPage() {
         </section>
         <TestimonialsSection label="What People Are" items={[
           { name: "Amit Saxena", city: "India", date: "September 2024", text: "I was about to book a flat in Noida Extension. Rohiit ji's reading showed my 4th lord was combust and Mars was in the 12th — loss house. He said wait 8 months. The builder project got stalled. I saved Rs 45 lakh." },
-          { name: "Sunita Kapoor", city: "Faridabad", date: "January 2025", text: "My chart showed a strong Property Yog — Jupiter aspecting the 4th house and Mars in exaltation. Jini confirmed: buy now. The flat I bought has already appreciated 18%." },
-          { name: "Rajesh Tiwari", city: "Lucknow", date: "March 2025", text: "My wife and I had fights about buying ancestral land. Jini showed my 4th house had a pending karmic settlement. We waited and the price dropped significantly." },
+          { name: "Sunita Kapoor", city: "Faridabad", date: "January 2025", text: "My chart showed a strong Property Yog — Jupiter aspecting the 4th house and Mars in exaltation. Trikaal confirmed: buy now. The flat I bought has already appreciated 18%." },
+          { name: "Rajesh Tiwari", city: "Lucknow", date: "March 2025", text: "My wife and I had fights about buying ancestral land. Trikaal showed my 4th house had a pending karmic settlement. We waited and the price dropped significantly." },
         ]} />
         <MaaDivineSeva />
         <FaqSection items={[
@@ -135,7 +135,7 @@ function AuthorStrip() {
         <div>
           <p className="text-[#D4AF37] text-xs uppercase tracking-widest font-medium mb-1">About Your Vedic Architect</p>
           <h2 className="font-serif text-xl font-bold text-white mb-2">Rohiit Gupta — Chief Vedic Architect, Trikaal Vaani</h2>
-          <p className="text-gray-400 text-sm leading-relaxed">Rohiit Gupta has studied Vedic astrology for over 15 years under the Parashara BPHS tradition. As founder of Trikaal Vaani, he built India&apos;s first AI-powered Vedic platform combining Swiss Ephemeris precision with Gemini AI reasoning. All readings are designed by Rohiit — Jini AI applies his framework to your unique birth chart.</p>
+          <p className="text-gray-400 text-sm leading-relaxed">Rohiit Gupta has studied Vedic astrology for over 15 years under the Parashara BPHS tradition. As founder of Trikaal Vaani, he built India&apos;s first AI-powered Vedic platform combining Swiss Ephemeris precision with premium AI reasoning. All readings are designed by Rohiit — Trikaal AI applies his framework to your unique birth chart.</p>
           <div className="flex gap-3 mt-3 flex-wrap">
             {["15+ Years Vedic Study", "Parashara BPHS Tradition", "Swiss Ephemeris Precision", "India Based"].map((t) => (
               <span key={t} className="text-xs border border-[#D4AF37]/30 text-[#D4AF37] px-3 py-1 rounded-full">{t}</span>
@@ -315,7 +315,7 @@ function CtaSection({ headline, highlight, body, segment, waText }: { headline: 
           <Link href={`/?segment=${segment}`} className="bg-[#D4AF37] text-[#080B12] font-bold px-8 py-4 rounded-lg text-lg hover:bg-[#e8c84a] transition-all duration-200 shadow-[0_0_40px_rgba(212,175,55,0.25)]">Enter Birth Details → Get Reading</Link>
           <a href={`https://wa.me/919211804111?text=Hi%20Rohiit%20ji%2C%20${waText}`} target="_blank" rel="noopener noreferrer" className="border border-white/20 text-white px-8 py-4 rounded-lg text-lg hover:bg-white/5 transition-all duration-200">WhatsApp ₹499 Call</a>
         </div>
-        <p className="text-gray-600 text-xs mt-6">Powered by Swiss Ephemeris · Lahiri Ayanamsha · Prokerala API · Reading framework by Rohiit Gupta</p>
+        <p className="text-gray-600 text-xs mt-6">Powered by Swiss Ephemeris · Lahiri Ayanamsha · Reading framework by Rohiit Gupta</p>
       </div>
     </section>
   );

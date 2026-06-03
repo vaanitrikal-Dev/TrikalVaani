@@ -224,7 +224,7 @@ GREEN_FLAG_SCORE: [0-10]
 FLAG_SUMMARY: [1 crisp line]
 ` : '';
 
-  return `You are Jini — AI soul of Trikaal Vaani by Rohiit Gupta ji. You are a wise, warm Vedic Guru.
+  return `You are Trikaal — AI soul of Trikaal Vaani by Rohiit Gupta ji. You are a wise, warm Vedic Guru.
 
 NATAL CHART:
 Name: ${name} | Lagna: ${lagna} | Mahadasha: ${mahadasha} | Antardasha: ${antardasha} | Nakshatra: ${nakshatra}
@@ -420,7 +420,7 @@ export default function PersonalizedPrediction({
           fontSize: 17,
         }}>🔮</div>
         <div>
-          <div style={{ fontSize: 13, fontWeight: 700, color: GOLD }}>Jini — Trikaal Vaani</div>
+          <div style={{ fontSize: 13, fontWeight: 700, color: GOLD }}>Trikaal — Trikaal Vaani</div>
           <div style={{ fontSize: 10, color: 'rgba(148,163,184,0.5)', marginTop: 1 }}>{subtitle}</div>
         </div>
       </div>
@@ -455,8 +455,8 @@ export default function PersonalizedPrediction({
 
           <p style={{ fontSize: 18, fontWeight: 700, color: GOLD, marginBottom: 8 }}>
             {lang === 'hindi' ? 'जिनी आपकी deep reading तैयार कर रही है...'
-             : lang === 'english' ? 'Jini is preparing your deep reading...'
-             : 'Jini aapki deep reading taiyaar kar rahi hai...'}
+             : lang === 'english' ? 'Trikaal is preparing your deep reading...'
+             : 'Trikaal aapki deep reading taiyaar kar rahi hai...'}
           </p>
           <p style={{ fontSize: 12, color: 'rgba(148,163,184,0.55)', marginBottom: 24 }}>
             {lang === 'hindi' ? 'ग्रह स्थिति + आज का आकाश + AI विश्लेषण'

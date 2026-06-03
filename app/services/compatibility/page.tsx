@@ -49,8 +49,8 @@ export default function CompatibilityPage() {
               <span className="text-[#D4AF37] text-sm font-medium tracking-widest uppercase">Deep Compatibility Intelligence · by Rohiit Gupta</span>
             </div>
             <h1 className="font-serif text-4xl md:text-6xl font-bold leading-tight mb-6">Are You <span className="text-[#D4AF37]">Truly Compatible?</span><br />Beyond 36 Gunas.</h1>
-            <p className="text-lg md:text-xl text-gray-300 max-w-2xl mx-auto mb-3 leading-relaxed">Jini AI reads both charts — Navamsa, Mangal Dosha, Nadi Dosha, Dasha sync — to reveal the <span className="text-[#D4AF37] font-semibold">soul-level truth</span> of your compatibility. Not just a number.</p>
-            <p className="text-sm text-gray-500 mb-10">Reading designed by <Link href="/about" className="text-[#D4AF37] hover:underline">Rohiit Gupta</Link> — Chief Vedic Architect · Swiss Ephemeris + Prokerala API</p>
+            <p className="text-lg md:text-xl text-gray-300 max-w-2xl mx-auto mb-3 leading-relaxed">Trikaal AI reads both charts — Navamsa, Mangal Dosha, Nadi Dosha, Dasha sync — to reveal the <span className="text-[#D4AF37] font-semibold">soul-level truth</span> of your compatibility. Not just a number.</p>
+            <p className="text-sm text-gray-500 mb-10">Reading designed by <Link href="/about" className="text-[#D4AF37] hover:underline">Rohiit Gupta</Link> — Chief Vedic Architect · Swiss Ephemeris (self-hosted)</p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/?segment=compatibility" className="bg-[#D4AF37] text-[#080B12] font-bold px-8 py-4 rounded-lg text-lg hover:bg-[#e8c84a] transition-all duration-200 shadow-[0_0_30px_rgba(212,175,55,0.3)]">Get Compatibility Reading — ₹51</Link>
               <a href="https://wa.me/919211804111?text=Hi%20Rohiit%20ji%2C%20I%20want%20a%20kundali%20compatibility%20reading" target="_blank" rel="noopener noreferrer" className="border border-[#25D366] text-[#25D366] font-semibold px-8 py-4 rounded-lg text-lg hover:bg-[#25D366]/10 transition-all duration-200 flex items-center justify-center gap-2"><WAIcon /> Talk to Rohiit Ji — ₹499</a>
@@ -85,7 +85,7 @@ export default function CompatibilityPage() {
               <div className="space-y-6">
                 {[
                   { step: "01", title: "Enter Your Birth Details", desc: "Start with your birth date, time, and place. Enter your partner's details too for a dual-chart analysis." },
-                  { step: "02", title: "Jini Reads Both Charts", desc: "Full Ashtakoot + Navamsa D9 + Mangal/Nadi Dosha check + Dasha synchronicity across both charts." },
+                  { step: "02", title: "Trikaal Reads Both Charts", desc: "Full Ashtakoot + Navamsa D9 + Mangal/Nadi Dosha check + Dasha synchronicity across both charts." },
                   { step: "03", title: "Get Your Compatibility Truth", desc: "Rs 51 reading: What works, what clashes, remedies, and what your combined chart predicts for the next 5 years." },
                   { step: "04", title: "Rohiit Ji Personal Session", desc: "Rs 499 call for pre-wedding guidance, family decision support, or live-in vs marriage question with Vedic remedies." },
                 ].map((s, i) => (
@@ -101,8 +101,8 @@ export default function CompatibilityPage() {
         </section>
         <TestimonialsSection label="What People Are" items={[
           { name: "Deepak Malhotra", city: "Delhi", date: "December 2024", text: "Our families said 28/36 gunas — perfect match. But Rohiit ji's reading showed Nadi Dosha and conflicting Venus placements. We did remedies before marriage. Two years in, no conflicts. We are grateful." },
-          { name: "Pooja Gupta", city: "Jaipur", date: "October 2024", text: "I was rejected by a family due to Mangal Dosha. Jini showed my Mangal is in Aries in the 7th — actually auspicious for a strong partner. I shared the report and they reconsidered." },
-          { name: "Sanjay Arora", city: "Chandigarh", date: "February 2025", text: "The Dasha sync analysis was mind-blowing. Jini showed both our Jupiter Dashas run parallel for the next 7 years. That gave us confidence to commit." },
+          { name: "Pooja Gupta", city: "Jaipur", date: "October 2024", text: "I was rejected by a family due to Mangal Dosha. Trikaal showed my Mangal is in Aries in the 7th — actually auspicious for a strong partner. I shared the report and they reconsidered." },
+          { name: "Sanjay Arora", city: "Chandigarh", date: "February 2025", text: "The Dasha sync analysis was mind-blowing. Trikaal showed both our Jupiter Dashas run parallel for the next 7 years. That gave us confidence to commit." },
         ]} />
         <MaaDivineSeva />
         <FaqSection items={[
@@ -135,7 +135,7 @@ function AuthorStrip() {
         <div>
           <p className="text-[#D4AF37] text-xs uppercase tracking-widest font-medium mb-1">About Your Vedic Architect</p>
           <h2 className="font-serif text-xl font-bold text-white mb-2">Rohiit Gupta — Chief Vedic Architect, Trikaal Vaani</h2>
-          <p className="text-gray-400 text-sm leading-relaxed">Rohiit Gupta has studied Vedic astrology for over 15 years under the Parashara BPHS tradition. As founder of Trikaal Vaani, he built India&apos;s first AI-powered Vedic platform combining Swiss Ephemeris precision with Gemini AI reasoning. All readings are designed by Rohiit — Jini AI applies his framework to your unique birth chart.</p>
+          <p className="text-gray-400 text-sm leading-relaxed">Rohiit Gupta has studied Vedic astrology for over 15 years under the Parashara BPHS tradition. As founder of Trikaal Vaani, he built India&apos;s first AI-powered Vedic platform combining Swiss Ephemeris precision with premium AI reasoning. All readings are designed by Rohiit — Trikaal AI applies his framework to your unique birth chart.</p>
           <div className="flex gap-3 mt-3 flex-wrap">
             {["15+ Years Vedic Study", "Parashara BPHS Tradition", "Swiss Ephemeris Precision", "India Based"].map((t) => (
               <span key={t} className="text-xs border border-[#D4AF37]/30 text-[#D4AF37] px-3 py-1 rounded-full">{t}</span>
@@ -315,7 +315,7 @@ function CtaSection({ headline, highlight, body, segment, waText }: { headline: 
           <Link href={`/?segment=${segment}`} className="bg-[#D4AF37] text-[#080B12] font-bold px-8 py-4 rounded-lg text-lg hover:bg-[#e8c84a] transition-all duration-200 shadow-[0_0_40px_rgba(212,175,55,0.25)]">Enter Birth Details → Get Reading</Link>
           <a href={`https://wa.me/919211804111?text=Hi%20Rohiit%20ji%2C%20${waText}`} target="_blank" rel="noopener noreferrer" className="border border-white/20 text-white px-8 py-4 rounded-lg text-lg hover:bg-white/5 transition-all duration-200">WhatsApp ₹499 Call</a>
         </div>
-        <p className="text-gray-600 text-xs mt-6">Powered by Swiss Ephemeris · Lahiri Ayanamsha · Prokerala API · Reading framework by Rohiit Gupta</p>
+        <p className="text-gray-600 text-xs mt-6">Powered by Swiss Ephemeris · Lahiri Ayanamsha · Reading framework by Rohiit Gupta</p>
       </div>
     </section>
   );
