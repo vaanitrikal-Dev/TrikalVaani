@@ -1,8 +1,17 @@
 /**
- * TRIKAL VAANI — trikalvaani.com
+ * TRIKAAL VAANI — trikalvaani.com
  * Chief Vedic Architect: Rohiit Gupta
  * FILE TO PASTE → app/services/toxic-boss-radar/page.tsx
- * Version: 4.0 — 100% self-contained, zero external shared imports
+ * Version: 4.1 — IR-0 cleanup
+ *
+ * v4.1 CHANGES vs v4.0:
+ *   ❌ REMOVED fake testimonials (fabricated reviews + ★★★★★ + "Verified Experiences")
+ *   ❌ REMOVED phantom ₹499 (hero call button, step 04, card strike-through, CTA button)
+ *   ✅ /about → /founder (correct author URL — 3 spots)
+ *   ✅ keyword "vedic astrologer Delhi" → "India"
+ *   ✅ KEPT Maa Divine Seva (real Arzi/Dhanyewaad dakshina feature)
+ *   ✅ Brand/Jini/Prokerala/vendor already clean — left intact
+ *   ✅ Real price on this page = ₹51 (reading)
  */
 
 import type { Metadata } from "next";
@@ -14,8 +23,8 @@ import SiteFooter from "@/components/layout/SiteFooter";
 export const metadata: Metadata = {
   title: "Is My Boss Toxic? Vedic Astrology Workplace Reading | Trikaal Vaani",
   description: "Chief Vedic Architect Rohiit Gupta reads your 10th House, Saturn & Rahu to reveal if your toxic boss is a karmic lesson with an end date — or a sign to leave now. ₹51 deep reading.",
-  keywords: ["toxic boss astrology", "workplace astrology vedic", "10th house boss karma", "Saturn career astrology India", "Rohiit Gupta vedic astrologer Delhi"],
-  authors: [{ name: "Rohiit Gupta", url: "https://trikalvaani.com/about" }],
+  keywords: ["toxic boss astrology", "workplace astrology vedic", "10th house boss karma", "Saturn career astrology India", "Rohiit Gupta vedic astrologer India"],
+  authors: [{ name: "Rohiit Gupta", url: "https://trikalvaani.com/founder" }],
   openGraph: { title: "Is My Boss Toxic? | Trikaal Vaani", description: "Rohiit Gupta decodes your 10th House, Saturn & authority karma.", url: "https://trikalvaani.com/services/toxic-boss-radar", siteName: "Trikaal Vaani", type: "website", locale: "en_IN" },
   alternates: { canonical: "https://trikalvaani.com/services/toxic-boss-radar" },
 };
@@ -23,7 +32,7 @@ export const metadata: Metadata = {
 const schema = {
   "@context": "https://schema.org",
   "@graph": [
-    { "@type": "Service", name: "Toxic Boss Radar — Workplace Karma Reading", provider: { "@type": "Person", name: "Rohiit Gupta", jobTitle: "Chief Vedic Architect", url: "https://trikalvaani.com/about" }, offers: [{ "@type": "Offer", price: "51", priceCurrency: "INR" }], areaServed: "IN" },
+    { "@type": "Service", name: "Toxic Boss Radar — Workplace Karma Reading", provider: { "@type": "Person", name: "Rohiit Gupta", jobTitle: "Chief Vedic Architect", url: "https://trikalvaani.com/founder" }, offers: [{ "@type": "Offer", price: "51", priceCurrency: "INR" }], areaServed: "IN" },
     { "@type": "FAQPage", mainEntity: [
       { "@type": "Question", name: "Can astrology tell if my boss is truly toxic or if I should leave?", acceptedAnswer: { "@type": "Answer", text: "Yes. The 10th house governs career and authority figures. Saturn's transit determines whether the friction is temporary karma or a karmic exit signal. Rohiit Gupta reads both to give you a clear answer with timing." } },
       { "@type": "Question", name: "What is the 6th house in Vedic astrology?", acceptedAnswer: { "@type": "Answer", text: "The 6th house governs enemies, obstacles, disputes, and workplace conflict. When your 10th lord sits in the 6th house, workplace adversity intensifies. This pattern is karmic, not personal — and it has an end date." } },
@@ -56,10 +65,9 @@ export default function ToxicBossRadarPage() {
             <p className="text-lg md:text-xl text-gray-300 max-w-2xl mx-auto mb-3 leading-relaxed">
               Trikaal AI reads your 10th House, Saturn placement & current Dasha to tell you if this work situation is a karmic lesson with an end date — or a sign to <span className="text-[#D4AF37] font-semibold">leave now</span>.
             </p>
-            <p className="text-sm text-gray-500 mb-10">Reading designed by <Link href="/about" className="text-[#D4AF37] hover:underline">Rohiit Gupta</Link> — Chief Vedic Architect · Swiss Ephemeris (self-hosted)</p>
+            <p className="text-sm text-gray-500 mb-10">Reading designed by <Link href="/founder" className="text-[#D4AF37] hover:underline">Rohiit Gupta</Link> — Chief Vedic Architect · Swiss Ephemeris (self-hosted)</p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/?segment=toxic-boss" className="bg-[#D4AF37] text-[#080B12] font-bold px-8 py-4 rounded-lg text-lg hover:bg-[#e8c84a] transition-all duration-200 shadow-[0_0_30px_rgba(212,175,55,0.3)]">Get My Workplace Reading — ₹51</Link>
-              <a href="https://wa.me/919211804111?text=Hi%20Rohiit%20ji%2C%20I%20want%20a%20toxic%20boss%20reading" target="_blank" rel="noopener noreferrer" className="border border-[#25D366] text-[#25D366] font-semibold px-8 py-4 rounded-lg text-lg hover:bg-[#25D366]/10 transition-all duration-200 flex items-center justify-center gap-2"><WAIcon /> Talk to Rohiit Ji — ₹499</a>
             </div>
           </div>
         </section>
@@ -96,7 +104,6 @@ export default function ToxicBossRadarPage() {
                   { step: "01", title: "Enter Your Birth Details", desc: "Date, time, and place. Even a 10-minute difference shifts house cusps and changes your workplace karma reading." },
                   { step: "02", title: "Trikaal Scans Your Work Karma", desc: "10th lord placement, Saturn transit, 6th house enemies, and Rahu/Ketu impact on career authority dynamics." },
                   { step: "03", title: "Get Your Exit Window or Stay Signal", desc: "₹51 reading: Is this situation karmic and temporary? Or is your chart screaming to leave? Exact months revealed." },
-                  { step: "04", title: "Book a ₹499 Strategy Call", desc: "For sensitive situations — promotion denied, false accusations — Rohiit ji gives you a personalized action plan." },
                 ].map((s, i) => (
                   <div key={i} className="flex gap-5">
                     <div className="flex-shrink-0 w-12 h-12 rounded-full border border-[#D4AF37]/50 flex items-center justify-center text-[#D4AF37] font-bold text-sm">{s.step}</div>
@@ -109,12 +116,6 @@ export default function ToxicBossRadarPage() {
           </div>
         </section>
 
-        <TestimonialsSection label="What People Are" items={[
-          { name: "Rahul Verma", city: "Noida", date: "October 2024", text: "I was gaslit by my manager for 2 years. Trikaal told me my Saturn return was triggering authority conflicts — and that October would bring a resolution. I got a new offer in October." },
-          { name: "Divya Nair", city: "Hyderabad", date: "December 2024", text: "The reading showed I had a weak 10th house lord in the 6th house — enemy zone. It explained exactly why every boss becomes my adversary. The awareness itself was healing." },
-          { name: "Suresh Pillai", city: "Chennai", date: "February 2025", text: "Rohiit ji told me to hold on until my Rahu Antardasha ends. I waited. My toxic boss left the company. He was right to the month." },
-        ]} />
-
         <MaaDivineSeva />
 
         <FaqSection items={[
@@ -124,7 +125,7 @@ export default function ToxicBossRadarPage() {
           { q: "What birth details do I need?", a: "Date of birth, exact time of birth, and place of birth. Even a 10-minute shift changes your 10th house cusp — precision matters for workplace karma readings." },
         ]} />
 
-        <CtaSection headline="Stay and Fight — or Leave with" highlight="Cosmic Timing?" body="Stop suffering in silence. Your chart knows whether this boss is a temporary Saturn lesson or a karmic exit signal. ₹51 gives you the answer." segment="toxic-boss" waText="I%20need%20a%20toxic%20boss%20reading" />
+        <CtaSection headline="Stay and Fight — or Leave with" highlight="Cosmic Timing?" body="Stop suffering in silence. Your chart knows whether this boss is a temporary Saturn lesson or a karmic exit signal. ₹51 gives you the answer." segment="toxic-boss" />
 
         <SiteFooter />
       </main>
@@ -132,15 +133,7 @@ export default function ToxicBossRadarPage() {
   );
 }
 
-/* ─── SHARED COMPONENTS (inlined — no imports needed) ─────────────── */
-
-function WAIcon() {
-  return (
-    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
-    </svg>
-  );
-}
+/* ─── SHARED COMPONENTS (inlined) ─────────────── */
 
 function AuthorStrip() {
   return (
@@ -176,39 +169,12 @@ function DeliverableCard({ segment, items }: { segment: string; items: string[] 
       </ul>
       <div className="mt-8 pt-6 border-t border-white/10 flex items-center justify-between">
         <div>
-          <p className="text-gray-500 text-xs line-through">₹499</p>
           <p className="text-[#D4AF37] text-2xl font-bold">₹51</p>
           <p className="text-gray-500 text-xs">Introductory price</p>
         </div>
         <Link href={`/?segment=${segment}`} className="bg-[#D4AF37] text-[#080B12] font-bold px-6 py-3 rounded-lg hover:bg-[#e8c84a] transition-all duration-200">Unlock Now</Link>
       </div>
     </div>
-  );
-}
-
-function TestimonialsSection({ label, items }: { label: string; items: { name: string; city: string; date: string; text: string }[] }) {
-  return (
-    <section className="py-20 px-4 bg-[#0D1020]">
-      <div className="max-w-5xl mx-auto">
-        <div className="text-center mb-14">
-          <p className="text-[#D4AF37] uppercase tracking-widest text-sm font-medium mb-3">Verified Experiences</p>
-          <h2 className="font-serif text-3xl font-bold">{label} <span className="text-[#D4AF37]">Saying</span></h2>
-        </div>
-        <div className="grid md:grid-cols-3 gap-6">
-          {items.map((t, i) => (
-            <div key={i} className="border border-white/10 rounded-2xl p-6 bg-white/[0.03]">
-              <div className="flex gap-1 mb-1">{"★★★★★".split("").map((s, j) => <span key={j} className="text-[#D4AF37]">{s}</span>)}</div>
-              <p className="text-gray-500 text-xs mb-4">{t.date} · {t.city}</p>
-              <p className="text-gray-300 text-sm leading-relaxed mb-5 italic">&ldquo;{t.text}&rdquo;</p>
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-full bg-[#D4AF37]/20 flex items-center justify-center text-[#D4AF37] font-bold text-sm">{t.name[0]}</div>
-                <p className="font-semibold text-sm text-white">{t.name}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
   );
 }
 
@@ -317,7 +283,7 @@ function FaqSection({ items }: { items: { q: string; a: string }[] }) {
   );
 }
 
-function CtaSection({ headline, highlight, body, segment, waText }: { headline: string; highlight: string; body: string; segment: string; waText: string }) {
+function CtaSection({ headline, highlight, body, segment }: { headline: string; highlight: string; body: string; segment: string }) {
   return (
     <section className="py-24 px-4 relative overflow-hidden">
       <div className="absolute inset-0 pointer-events-none">
@@ -328,7 +294,6 @@ function CtaSection({ headline, highlight, body, segment, waText }: { headline: 
         <p className="text-gray-400 mb-10 leading-relaxed">{body}</p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Link href={`/?segment=${segment}`} className="bg-[#D4AF37] text-[#080B12] font-bold px-8 py-4 rounded-lg text-lg hover:bg-[#e8c84a] transition-all duration-200 shadow-[0_0_40px_rgba(212,175,55,0.25)]">Enter Birth Details → Get Reading</Link>
-          <a href={`https://wa.me/919211804111?text=Hi%20Rohiit%20ji%2C%20${waText}`} target="_blank" rel="noopener noreferrer" className="border border-white/20 text-white px-8 py-4 rounded-lg text-lg hover:bg-white/5 transition-all duration-200">WhatsApp ₹499 Call</a>
         </div>
         <p className="text-gray-600 text-xs mt-6">Powered by Swiss Ephemeris · Lahiri Ayanamsha · Reading framework by Rohiit Gupta</p>
       </div>
