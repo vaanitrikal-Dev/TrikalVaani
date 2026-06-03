@@ -1,50 +1,92 @@
-name: Brand Guard — block stray "Trikal"
+name: IR Guard — auto-fix IRs + protect against fake ratings
 
-# 🔱 Trikaal Vaani — automatic brand protection
-# Runs on every push to main. If anyone (or any tool) ever introduces a
-# stray VISIBLE "Trikal" (it should always be "Trikaal", double-a), this
-# check turns RED ❌ and GitHub emails the repo owner immediately.
+# 🔱 Trikaal Vaani — IR (Iron Rule) Guard  v2
+# Runs on every push to main (and can be run manually from the Actions tab).
 #
-# Auto-allowed (never flagged): trikalvaani.com URLs, legalName "Trikal Vaani",
-# meta-keyword alt-spellings, code identifiers (TrikalVaani, X-Trikal-Key,
-# trikal-engines, etc.), and internal [Trikal] log tags.
+#  PART 1 — AUTO-FIX (bot corrects + commits automatically):
+#     • Brand spelling : any standalone "Trikal"            -> "Trikaal"
+#     • Location        : "Delhi NCR"                        -> "India"
+#     • AI vendor names : "Gemini 2.5 Pro / Claude Sonnet"   -> "premium AI engine"
+#     These are content-text rules — they CANNOT break the build.
+#
+#  PART 2 — WARN ONLY (bot turns RED + emails, never auto-changes):
+#     • Fake ratings (aggregateRating / "4.9/5" / 5-stars / "average rating")
+#       Structural blocks — remove by hand (share just those few files).
+#
+#  ALWAYS PROTECTED (never touched): trikalvaani.com URLs, legalName,
+#  meta-keyword alt-spellings, code identifiers (X-Trikal-Key, trikal-engines,
+#  TrikalVaani), [Trikal] log tags, comment/changelog lines, and the REAL API
+#  model strings (gemini-2.5-pro, claude-sonnet, GEMINI_MODEL=...).
 
 on:
   push:
     branches: [main]
-  pull_request:
-    branches: [main]
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
-  brand-check:
+  ir-guard:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Scan for stray visible "Trikal"
+      # ── PART 1: AUTO-FIX ──────────────────────────────────────────
+      - name: Auto-fix IRs (brand, location, AI vendor names)
         shell: bash
         run: |
-          echo "🔱 Trikaal Vaani brand guard — scanning for stray visible 'Trikal'..."
-          HITS=$(grep -rnE '\bTrikal\b' \
+          echo "IR Guard — scanning & auto-fixing content IRs..."
+          FILES=$(grep -rlE 'Trikal|Delhi NCR|Gemini|Claude Sonnet' \
+            --include='*.ts' --include='*.tsx' --include='*.js' --include='*.jsx' --include='*.html' \
+            --exclude-dir=node_modules --exclude-dir=.next --exclude-dir=.git . 2>/dev/null || true)
+          for f in $FILES; do
+            perl -i -pe '
+              $skip = (m{^\s*//} || m{^\s*\*} || m{/\*}
+                    || /gemini-2\.5|claude-sonnet|GEMINI_|CLAUDE_|model:\s*.gemini/
+                    || /trikalvaani/i
+                    || /legalName|alternateName|also (known|searched)|Sanskrit|double|transliteration|keyword/i
+                    || /\[Trikal/ || /console\./
+                    || /X-Trikal|Trikal-|Trikal_|_Trikal|TrikalVaani|TrikalVoice|trikal-engines/);
+              unless ($skip) {
+                s/Gemini[^"'"'"']{0,30}\+\s*Claude Sonnet(\s*polish)?/premium AI engine/g;
+                s/Gemini\s*(Pro\s*)?2\.5(\s*Pro)?(\s*Flash)?/premium AI engine/g;
+                s/Claude Sonnet(\s*polish)?/premium AI engine/g;
+                s/Delhi NCR/India/g;
+                s/\bTrikal\b/Trikaal/g;
+              }
+            ' "$f"
+          done
+
+      - name: Commit auto-fixes (if any)
+        shell: bash
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            git config user.name  "Trikaal IR Bot"
+            git config user.email "ir-bot@users.noreply.github.com"
+            git add -A
+            git commit -m "IR Guard: auto-fix brand/location/AI-vendor names [skip ci]"
+            git push
+            echo "Auto-fixed IR violations and pushed the correction."
+          else
+            echo "All auto-fix IRs already clean."
+          fi
+
+      # ── PART 2: WARN on fake ratings (never auto-deleted) ─────────
+      - name: Warn on fake ratings / reviews
+        shell: bash
+        run: |
+          HITS=$(grep -rnE 'aggregateRating|AggregateRating|ratingValue|reviewCount|ratingCount|[0-9]\.[0-9]\s*/\s*5|★★★|average rating|Client Rating' \
             --include='*.ts' --include='*.tsx' --include='*.js' --include='*.jsx' \
             --exclude-dir=node_modules --exclude-dir=.next --exclude-dir=.git . 2>/dev/null \
-          | grep -v 'trikalvaani' \
-          | grep -vE '\[Trikal' \
-          | grep -v 'console\.' \
-          | grep -vE '→' \
-          | grep -viE 'legalName|alternateName|also (known|searched)|Sanskrit|double|transliteration|keyword' \
-          | grep -vE 'X-Trikal|Trikal-|Trikal_|_Trikal|TrikalVaani|TrikalVoice|trikal-engines' \
-          || true)
+            | grep -viE 'remov|delet|no fake|not added|intentional|❌' || true)
           if [ -n "$HITS" ]; then
-            echo ""
-            echo "❌ STRAY 'Trikal' FOUND — brand must be 'Trikaal' (double-a) in visible/schema text."
+            echo "FAKE RATING(S) FOUND — must be removed by hand (IR-0: no fake stats):"
             echo "----------------------------------------------------------------------"
             echo "$HITS"
             echo "----------------------------------------------------------------------"
-            echo "FIX: change the visible 'Trikal Vaani' to 'Trikaal Vaani' in the file(s) above."
-            echo "(URLs trikalvaani.com, legalName, and code identifiers are allowed & auto-skipped.)"
+            echo "These are structural blocks — share just these files and they'll be cleaned."
             exit 1
           fi
-          echo "✅ PASS — no stray visible 'Trikal'. Brand is consistent. Jai Maa Shakti 🔱"
+          echo "No fake ratings. Jai Maa Shakti"
