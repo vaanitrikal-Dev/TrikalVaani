@@ -149,7 +149,7 @@ export default function DailyPanchang() {
           </div>
           <div className="px-5 py-3" style={{ background: GOLD_RGBA(0.03), borderTop: `1px solid ${GOLD_RGBA(0.1)}` }}>
             <p className="text-xs text-slate-600 text-center">
-              Panchang computed using Parashara Vedic methodology for Delhi NCR (IST). Verified by Rohiit Gupta.
+              Panchang computed using Parashara Vedic methodology for India (IST). Verified by Rohiit Gupta.
             </p>
           </div>
         </div>

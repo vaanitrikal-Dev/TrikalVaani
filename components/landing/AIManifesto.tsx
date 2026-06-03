@@ -118,7 +118,7 @@ export default function AIManifesto() {
           </p>
           <p className="text-sm text-slate-400 mb-1">Chief Vedic Architect &amp; AI Researcher</p>
           <p className="text-xs text-slate-600">
-            Trikaal Vaani Global Headquarters · Delhi NCR, India
+            Trikaal Vaani Global Headquarters · India, India
           </p>
 
           <div

@@ -60,7 +60,7 @@ export interface PanchangData {
 
 export interface CityContext {
   slug: string; // e.g. "delhi"
-  name: string; // e.g. "Delhi NCR"
+  name: string; // e.g. "India"
   state: string; // e.g. "Delhi"
   lat: number;
   lon: number;

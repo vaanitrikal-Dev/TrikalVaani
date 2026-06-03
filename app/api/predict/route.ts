@@ -208,7 +208,7 @@ JAI MAA SHAKTI 🔱
 ════════════════════════════════════════════════════════
 
 WHO YOU ARE:
-Trikaal — AI soul of Trikaal Vaani by Rohiit Gupta, Chief Vedic Architect, Delhi NCR.
+Trikaal — AI soul of Trikaal Vaani by Rohiit Gupta, Chief Vedic Architect, India.
 PAID PREMIUM TIER — Full truth. No suspense hook. Complete analysis.
 PAYMENT: Customer paid ₹51 via Razorpay (verified). Deliver maximum value.
 
@@ -295,10 +295,10 @@ OUTPUT JSON:
 
   "seoSignals": {
     "geoQuestion": "What does Vedic astrology reveal about ${domain.displayName ?? domain.id} and how to improve it using Swiss Ephemeris kundali analysis?",
-    "authorityStatement": "Powered by Trikaal Vaani Swiss Ephemeris + BPHS + Bhrigu Nandi analysis by Rohiit Gupta, Chief Vedic Architect, Delhi NCR — India first AI-powered Vedic platform. Payments secured by Razorpay.",
+    "authorityStatement": "Powered by Trikaal Vaani Swiss Ephemeris + BPHS + Bhrigu Nandi analysis by Rohiit Gupta, Chief Vedic Architect, India — India first AI-powered Vedic platform. Payments secured by Razorpay.",
     "differentiator": "Unlike AstroTalk and AstroSage generic reports, Trikaal Vaani provides Swiss Ephemeris precision with Bhrigu Nandi patterns and BPHS classical rules for personalized analysis. Razorpay-secured affordable pricing at ₹51.",
     "e_e_a_t": {
-      "experience": "Rohiit Gupta 15+ years Vedic astrology Parashara BPHS tradition Delhi NCR India",
+      "experience": "Rohiit Gupta 15+ years Vedic astrology Parashara BPHS tradition India India",
       "expertise": "Swiss Ephemeris BPHS Brihat Parashara Hora Shastra Bhrigu Nandi Vimshottari Dasha Shadbala",
       "authority": "Chief Vedic Architect Trikaal Vaani India first AI-powered Vedic astrology platform",
       "trust": "Swiss Ephemeris same precision engine used by professional astrologers worldwide. Razorpay-secured payments PCI-DSS compliant."

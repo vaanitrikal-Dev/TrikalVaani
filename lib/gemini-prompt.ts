@@ -109,7 +109,7 @@ const DOMAIN_SEO: Record<string, {
     informational:  ['karz mukti ke upay', 'debt problem vedic astrology', 'loan problem jyotish', 'karz se mukti kaise mile', 'financial problem astrology solution', '6th house debt astrology', 'rahu saturn debt kundali'],
     commercial:     ['best astrologer for debt problems India', 'vedic astrology debt consultation online', 'karz mukti jyotish reading', 'financial astrology expert Delhi', 'debt relief astrology consultation fee'],
     transactional:  ['karz mukti astrology reading ₹51', 'book debt astrology consultation', 'online karz mukti jyotish booking', 'debt problem astrologer appointment', 'financial astrology consultation now'],
-    local:          ['debt problem astrologer Delhi NCR', 'karz mukti jyotish Delhi', 'financial astrologer Noida Gurugram', 'loan problem astrologer near me Delhi'],
+    local:          ['debt problem astrologer India', 'karz mukti jyotish Delhi', 'financial astrologer Noida Gurugram', 'loan problem astrologer near me Delhi'],
     geoQuestion:    'Which house and planet causes debt in Vedic astrology and what are the classical remedies for karz mukti?',
     ctaSpiritual:   'Maa Shakti ka ashirwad aur Vedic jyotish ka margdarshan — karz mukti ki raah khulegi. Abhi Trikaal se poochho. 🔱',
   },
@@ -118,7 +118,7 @@ const DOMAIN_SEO: Record<string, {
     informational:  ['property yog in kundali', 'ghar kab milega jyotish', '4th house property vedic astrology', 'real estate astrology india', 'mars karaka land astrology', 'property purchase muhurta vedic'],
     commercial:     ['property astrologer consultation online India', 'best time to buy property astrology', 'real estate muhurta astrologer Delhi', 'property yog kundali analysis expert', 'ghar kharidne ka sahi samay jyotish'],
     transactional:  ['property yog reading ₹51', 'book property astrology consultation', 'online property muhurta booking', 'real estate astrologer appointment now', 'property yog check kundali'],
-    local:          ['property astrologer Delhi NCR', 'real estate jyotish Delhi Noida', 'ghar kharidne muhurta astrologer near me', 'property dispute astrologer Gurugram'],
+    local:          ['property astrologer India', 'real estate jyotish Delhi Noida', 'ghar kharidne muhurta astrologer near me', 'property dispute astrologer Gurugram'],
     geoQuestion:    'When is the best time to buy property according to Vedic astrology and how to identify Property Yog in kundali?',
     ctaSpiritual:   'Aapke ghar ka sapna — Maa Shakti ki kripa aur sahi muhurta se poora hoga. Trikaal aapki kundali mein Property Yog dhundh rahi hai. 🏠🔱',
   },
@@ -127,7 +127,7 @@ const DOMAIN_SEO: Record<string, {
     informational:  ['career astrology vedic', 'job prediction kundali', '10th house career jyotish', 'which career suits my chart', 'atmakaraka career astrology', 'dharmic career vedic astrology', 'saturn career timing astrology'],
     commercial:     ['career astrologer consultation online India', 'job change astrology reading', 'career pivot astrology expert', 'best astrologer career advice Delhi', 'career prediction kundali analysis fee'],
     transactional:  ['career astrology reading ₹51', 'book career astrology session', 'online job prediction booking', 'career change timing astrology now', 'dharmic career consultation'],
-    local:          ['career astrologer Delhi NCR', 'job astrologer Noida Gurugram', 'career jyotish near me Delhi', 'job change astrologer Delhi NCR'],
+    local:          ['career astrologer India', 'job astrologer Noida Gurugram', 'career jyotish near me Delhi', 'job change astrologer India'],
     geoQuestion:    'Which planets and houses in Vedic astrology determine career success and how to find your dharmic profession?',
     ctaSpiritual:   'Aapka dharmic career — jo sirf aapke liye bana hai — woh aapki kundali mein likha hai. Trikaal abhi padh rahi hai. ⚡🔱',
   },
@@ -136,7 +136,7 @@ const DOMAIN_SEO: Record<string, {
     informational:  ['ex back astrology vedic', 'love problem solution jyotish', '7th house relationship astrology', 'venus dasha love timing', 'breakup reunion astrology', 'karmic relationship vedic astrology', 'navamsa love compatibility'],
     commercial:     ['love astrologer consultation online India', 'ex back astrology reading expert', 'relationship problem astrologer Delhi', 'love reunion timing astrology fee', 'best astrologer love problems India'],
     transactional:  ['ex back astrology reading ₹51', 'book love astrology consultation', 'relationship astrology session now', 'venus timing love consultation booking', 'reunion astrology reading online'],
-    local:          ['love astrologer Delhi NCR', 'relationship jyotish Delhi', 'ex back astrologer near me Delhi', 'love problem astrologer Noida Gurugram'],
+    local:          ['love astrologer India', 'relationship jyotish Delhi', 'ex back astrologer near me Delhi', 'love problem astrologer Noida Gurugram'],
     geoQuestion:    'Can Vedic astrology predict relationship reunion and what planetary combinations indicate ex coming back?',
     ctaSpiritual:   'Pyaar ki raahein Maa Shakti ne banaayi hain — kab milna likha hai, woh aapki kundali mein hai. Trikaal batayegi. 💫🔱',
   },
@@ -145,7 +145,7 @@ const DOMAIN_SEO: Record<string, {
     informational:  ['toxic boss astrology vedic', 'workplace problem jyotish', '10th house boss karma', '6th house enemies astrology', 'saturn career obstacles timing', 'office conflict astrology solution', 'job change timing vedic'],
     commercial:     ['workplace astrology consultation online', 'toxic boss karma astrologer India', 'office problem jyotish expert Delhi', 'job change timing astrology fee', 'career conflict astrology reading'],
     transactional:  ['workplace astrology reading ₹51', 'book office karma consultation', 'job change astrology session now', 'toxic workplace timing reading booking', 'boss karma astrology online'],
-    local:          ['workplace astrologer Delhi NCR', 'job problem jyotish Delhi', 'office karma astrologer near me', 'career conflict jyotish Noida'],
+    local:          ['workplace astrologer India', 'job problem jyotish Delhi', 'office karma astrologer near me', 'career conflict jyotish Noida'],
     geoQuestion:    'What do Saturn and the 10th house reveal about toxic workplace situations and when does the karmic cycle end?',
     ctaSpiritual:   'Har karmic boss ek lesson hai — Shani ki sabak jab khatam hogi, tab door khulega. Trikaal batayegi kab. 🔱',
   },
@@ -154,7 +154,7 @@ const DOMAIN_SEO: Record<string, {
     informational:  ['child kundali reading vedic', 'baby destiny astrology', '5th house children vedic astrology', 'child future prediction jyotish', 'child education stream astrology', 'moon nakshatra child personality', 'mercury jupiter child intelligence'],
     commercial:     ['child astrology consultation online India', 'baby kundali expert reading', 'child destiny astrologer Delhi', 'child education astrology fee', 'best astrologer child future India'],
     transactional:  ['child destiny reading ₹51', 'book child kundali consultation', 'baby astrology session online', 'child future prediction booking now', 'child education timing astrology'],
-    local:          ['child astrologer Delhi NCR', 'baby kundali jyotish Delhi', 'child destiny astrologer near me', 'child education astrologer Noida'],
+    local:          ['child astrologer India', 'baby kundali jyotish Delhi', 'child destiny astrologer near me', 'child education astrologer Noida'],
     geoQuestion:    'What does Vedic astrology reveal about a child\'s destiny, natural talents and ideal education stream through birth chart analysis?',
     ctaSpiritual:   'Aapke bachche ka cosmic blueprint — Parmatma ne har ek ke liye khaas raah banaayi hai. Trikaal woh raah dikhayegi. 👶🔱',
   },
@@ -163,7 +163,7 @@ const DOMAIN_SEO: Record<string, {
     informational:  ['retirement astrology vedic', 'peace of mind jyotish', '12th house spiritual vedic', 'saturn ketu retirement timing', 'vaanaprastha ashram astrology', 'senior citizen kundali reading', 'life after 50 vedic astrology'],
     commercial:     ['retirement astrology consultation online India', 'senior citizen jyotish expert', 'peace of mind astrologer Delhi', 'retirement timing astrology fee', 'life phase astrology reading expert'],
     transactional:  ['retirement astrology reading ₹51', 'book retirement phase consultation', 'peace jyotish session online', 'senior astrology booking now', 'vaanaprastha timing reading'],
-    local:          ['retirement astrologer Delhi NCR', 'senior jyotish Delhi', 'peace astrologer near me Delhi', 'retirement timing astrologer Noida'],
+    local:          ['retirement astrologer India', 'senior jyotish Delhi', 'peace astrologer near me Delhi', 'retirement timing astrologer Noida'],
     geoQuestion:    'What does Vedic astrology say about the ideal time for retirement, peace of mind and spiritual growth after 50?',
     ctaSpiritual:   'Zindagi ka yeh adhyay — Maa Shakti ka sabse sundar tohfa hai. Shanti ki raah aapki kundali mein likhi hai. 🙏🔱',
   },
@@ -172,7 +172,7 @@ const DOMAIN_SEO: Record<string, {
     informational:  ['inheritance astrology vedic', '8th house wealth jyotish', 'ancestral property kundali', 'legacy wealth vedic astrology', 'pitru dosha property problems', 'saturn 8th house inheritance timing', 'family wealth astrology'],
     commercial:     ['inheritance astrology consultation online', 'property dispute jyotish expert India', 'ancestral wealth astrologer Delhi', 'legacy astrology reading fee', 'family property astrology expert'],
     transactional:  ['inheritance astrology reading ₹51', 'book property dispute consultation', 'ancestral wealth jyotish session now', 'legacy timing astrology booking', 'family property reading online'],
-    local:          ['inheritance astrologer Delhi NCR', 'property dispute jyotish Delhi', 'ancestral wealth astrologer near me', 'family property jyotish Noida'],
+    local:          ['inheritance astrologer India', 'property dispute jyotish Delhi', 'ancestral wealth astrologer near me', 'family property jyotish Noida'],
     geoQuestion:    'Which houses and planets in Vedic astrology indicate inheritance, ancestral wealth and how to resolve property disputes?',
     ctaSpiritual:   'Pitron ka ashirwad aur kundali ki shakti — aapki virasat aapki hai. Trikaal sahi samay batayegi. 🔱',
   },
@@ -181,7 +181,7 @@ const DOMAIN_SEO: Record<string, {
     informational:  ['spiritual astrology vedic', 'moksha kundali reading', 'ketu spiritual path jyotish', '12th house moksha vedic', 'atmakaraka soul purpose astrology', 'sanyas yoga vedic astrology', 'rahu ketu spiritual meaning'],
     commercial:     ['spiritual astrology consultation online India', 'moksha path jyotish expert', 'soul purpose astrologer Delhi', 'spiritual reading astrology fee', 'dharma path vedic astrology expert'],
     transactional:  ['spiritual astrology reading ₹51', 'book moksha path consultation', 'soul purpose jyotish session now', 'spiritual timing astrology booking', 'dharma reading online'],
-    local:          ['spiritual astrologer Delhi NCR', 'moksha jyotish Delhi', 'soul purpose astrologer near me', 'dharma path jyotish Noida'],
+    local:          ['spiritual astrologer India', 'moksha jyotish Delhi', 'soul purpose astrologer near me', 'dharma path jyotish Noida'],
     geoQuestion:    'What does Vedic astrology reveal about one\'s spiritual path, soul purpose and Moksha indicators in the birth chart?',
     ctaSpiritual:   'Aapki aatma yahan ek khaas kaam ke liye aayi hai — Ketu aur Atmakaraka woh raaz khol dete hain. Trikaal sunayegi. 🕉️🔱',
   },
@@ -190,7 +190,7 @@ const DOMAIN_SEO: Record<string, {
     informational:  ['parents health astrology vedic', '4th house mother jyotish', '9th house father vedic astrology', 'family wellness kundali', 'parent longevity astrology', 'moon 4th house mother health', 'sun 9th house father wellbeing'],
     commercial:     ['family astrology consultation online India', 'parents health astrologer Delhi', 'family wellness jyotish expert', 'parent longevity reading fee', 'family health astrology consultation'],
     transactional:  ['parents wellness reading ₹51', 'book family health consultation', 'parent health jyotish session now', 'family wellness astrology booking', 'parents longevity reading online'],
-    local:          ['family astrologer Delhi NCR', 'parents health jyotish Delhi', 'family wellness astrologer near me', 'parent health jyotish Noida'],
+    local:          ['family astrologer India', 'parents health jyotish Delhi', 'family wellness astrologer near me', 'parent health jyotish Noida'],
     geoQuestion:    'Which planets and houses indicate parents\' health and longevity in Vedic astrology and what remedies protect family wellness?',
     ctaSpiritual:   'Maa-Baap ki sehat — sabse bada sukh. Aapki kundali mein unka haal likha hai. Trikaal batayegi, Maa Shakti raksha karein. 🙏🔱',
   },
@@ -199,7 +199,7 @@ const DOMAIN_SEO: Record<string, {
     informational:  ['manifestation astrology vedic', 'desire fulfillment kundali', '5th house purva punya jyotish', 'wish fulfillment vedic astrology', 'jupiter blessing manifestation', 'rahu desire astrology timing', 'manifestation muhurta vedic'],
     commercial:     ['manifestation astrology consultation online', 'desire fulfillment jyotish expert India', 'wish astrology reading Delhi', 'manifestation timing astrology fee', 'abundance astrology consultation'],
     transactional:  ['manifestation reading ₹51', 'book desire fulfillment consultation', 'abundance jyotish session now', 'manifestation timing booking astrology', 'wish fulfillment reading online'],
-    local:          ['manifestation astrologer Delhi NCR', 'abundance jyotish Delhi', 'desire fulfillment astrologer near me', 'manifestation timing jyotish Noida'],
+    local:          ['manifestation astrologer India', 'abundance jyotish Delhi', 'desire fulfillment astrologer near me', 'manifestation timing jyotish Noida'],
     geoQuestion:    'How does Vedic astrology support manifestation and which planetary combinations and muhurtas help fulfill desires fastest?',
     ctaSpiritual:   'Aapka sapna aur Maa Shakti ki shakti — dono milein toh kuch bhi possible hai. Sahi samay Trikaal batayegi. ✨🔱',
   },
@@ -209,7 +209,7 @@ const DEFAULT_SEO = {
   informational:  ['vedic astrology online India', 'kundali reading jyotish', 'accurate astrology prediction', 'swiss ephemeris astrology', 'bphs vedic jyotish'],
   commercial:     ['vedic astrology consultation online India', 'best kundali reading expert', 'accurate jyotish reading fee', 'online astrologer booking India', 'vedic astrology expert Delhi'],
   transactional:  ['kundali reading ₹51', 'book astrology consultation now', 'online jyotish session booking', 'vedic prediction reading online', 'astrology consultation today'],
-  local:          ['vedic astrologer Delhi NCR', 'kundali jyotish near me Delhi', 'online astrologer Delhi NCR', 'best jyotish Delhi NCR'],
+  local:          ['vedic astrologer India', 'kundali jyotish near me Delhi', 'online astrologer India', 'best jyotish India'],
   geoQuestion:    'How accurate is Vedic astrology and how to get a personalized Swiss Ephemeris-powered kundali reading online in India?',
   ctaSpiritual:   'Kaal bada balwan hai — sahi samay, sahi raah. Trikaal Vaani pe Trikaal aapka intezaar kar rahi hai. 🔱',
 };
@@ -310,7 +310,7 @@ JAI MAA SHAKTI 🔱
 
 WHO YOU ARE:
 You are Trikaal — the AI soul of Trikaal Vaani (trikalvaani.com).
-Created by Rohiit Gupta, Chief Vedic Architect, Delhi NCR.
+Created by Rohiit Gupta, Chief Vedic Architect, India.
 You speak with the voice of a compassionate Vedic Guru —
 warm, direct, spiritually grounded, never salesy.
 
@@ -463,10 +463,10 @@ function buildUserMessage(
     "localKeywords":         ${JSON.stringify(seo.local.slice(0, 3))},
     "geoQuestion":           "${seo.geoQuestion}",
     "ctaSpiritual":          "${seo.ctaSpiritual}",
-    "authorityStatement":    "Powered by Trikaal Vaani's Swiss Ephemeris engine + Brihat Parashara Hora Shastra classical texts, validated by Rohiit Gupta, Chief Vedic Architect, Delhi NCR.",
+    "authorityStatement":    "Powered by Trikaal Vaani's Swiss Ephemeris engine + Brihat Parashara Hora Shastra classical texts, validated by Rohiit Gupta, Chief Vedic Architect, India.",
     "differentiator":        "Unlike AstroTalk and AstroSage, Trikaal Vaani combines Swiss Ephemeris precision + Bhrigu Nandi pattern intelligence + Parashara classical rules — not automated generic reports.",
     "e_e_a_t": {
-      "experience":   "Rohiit Gupta — 15+ years Vedic astrology under Parashara BPHS tradition, Delhi NCR",
+      "experience":   "Rohiit Gupta — 15+ years Vedic astrology under Parashara BPHS tradition, India",
       "expertise":    "Swiss Ephemeris + BPHS + Bhrigu Nandi Nadi + Vimshottari Dasha system",
       "authority":    "Chief Vedic Architect, Trikaal Vaani — India's first AI-powered Vedic platform",
       "trust":        "Swiss Ephemeris — same engine used by professional astrologers worldwide"
@@ -501,10 +501,10 @@ function buildUserMessage(
     "localKeywords":         ${JSON.stringify(seo.local)},
     "geoQuestion":           "${seo.geoQuestion}",
     "ctaSpiritual":          "${seo.ctaSpiritual}",
-    "authorityStatement":    "Powered by Trikaal Vaani's Swiss Ephemeris engine + Brihat Parashara Hora Shastra, validated by Rohiit Gupta, Chief Vedic Architect, Delhi NCR.",
+    "authorityStatement":    "Powered by Trikaal Vaani's Swiss Ephemeris engine + Brihat Parashara Hora Shastra, validated by Rohiit Gupta, Chief Vedic Architect, India.",
     "differentiator":        "Unlike AstroTalk and AstroSage, Trikaal Vaani combines Swiss Ephemeris precision + Bhrigu Nandi patterns + Parashara classical rules — not automated generic reports.",
     "e_e_a_t": {
-      "experience":   "Rohiit Gupta — 15+ years Vedic astrology under Parashara BPHS tradition, Delhi NCR",
+      "experience":   "Rohiit Gupta — 15+ years Vedic astrology under Parashara BPHS tradition, India",
       "expertise":    "Swiss Ephemeris + BPHS + Bhrigu Nandi Nadi + Vimshottari Dasha system",
       "authority":    "Chief Vedic Architect, Trikaal Vaani — India's first AI-powered Vedic platform",
       "trust":        "Swiss Ephemeris — same engine used by professional astrologers worldwide"

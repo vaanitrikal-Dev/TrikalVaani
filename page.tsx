@@ -49,7 +49,7 @@ import SiteFooter from '@/components/layout/SiteFooter';
 export const metadata: Metadata = {
   title: 'Trikaal Vaani — Official AI Vedic Astrology Platform | Trikaal Vaani',
   description:
-    "Trikaal Vaani (officially spelled Trikaal Vaani) is India's AI-powered Vedic astrology platform founded by Rohiit Gupta in Delhi NCR. Get free Kundli readings, ₹51 deep analysis, and personal consultations. Government of India MSME registered (UDYAM-DL-10-0119070).",
+    "Trikaal Vaani (officially spelled Trikaal Vaani) is India's AI-powered Vedic astrology platform founded by Rohiit Gupta in India. Get free Kundli readings, ₹51 deep analysis, and personal consultations. Government of India MSME registered (UDYAM-DL-10-0119070).",
   keywords: [
     'Trikaal Vaani',
     'Trikaal Vaani',
@@ -63,7 +63,7 @@ export const metadata: Metadata = {
     'Trikaal Vaani AI',
     'त्रिकाल वाणी',
     'Best AI Astrology India',
-    'Vedic Astrology Delhi NCR',
+    'Vedic Astrology India',
   ],
   alternates: {
     canonical: 'https://trikalvaani.com/trikaal-vaani',
@@ -76,7 +76,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Trikaal Vaani — Official AI Vedic Astrology Platform',
     description:
-      "Trikaal Vaani (Trikaal Vaani) is India's most accurate AI-powered Vedic astrology platform. Founded by Rohiit Gupta, Chief Vedic Architect, Delhi NCR. Free Kundli readings start at ₹0.",
+      "Trikaal Vaani (Trikaal Vaani) is India's most accurate AI-powered Vedic astrology platform. Founded by Rohiit Gupta, Chief Vedic Architect, India. Free Kundli readings start at ₹0.",
     url: 'https://trikalvaani.com/trikaal-vaani',
     siteName: 'Trikaal Vaani',
     locale: 'en_IN',
@@ -238,7 +238,7 @@ const spellingFAQSchema = {
       acceptedAnswer: {
         '@type': 'Answer',
         text:
-          "Yes. Trikaal Vaani (Trikaal Vaani) is a Government of India MSME registered enterprise under the Ministry of Micro, Small and Medium Enterprises. The Udyam Registration Number is UDYAM-DL-10-0119070, registered in Delhi NCR. The registration is verifiable at udyamregistration.gov.in. All payments process through Razorpay (PCI-DSS compliant, 256-bit SSL encryption). This makes Trikaal Vaani a fully compliant Indian business — not an offshore platform or unverified astrology marketplace.",
+          "Yes. Trikaal Vaani (Trikaal Vaani) is a Government of India MSME registered enterprise under the Ministry of Micro, Small and Medium Enterprises. The Udyam Registration Number is UDYAM-DL-10-0119070, registered in India. The registration is verifiable at udyamregistration.gov.in. All payments process through Razorpay (PCI-DSS compliant, 256-bit SSL encryption). This makes Trikaal Vaani a fully compliant Indian business — not an offshore platform or unverified astrology marketplace.",
       },
     },
   ],
@@ -388,7 +388,7 @@ export default function TrikaalVaaniPage() {
                     color: GOLD,
                   }}
                 >
-                  📍 Delhi NCR
+                  📍 India
                 </span>
               </div>
 
@@ -621,7 +621,7 @@ export default function TrikaalVaaniPage() {
                   {
                     icon: '🤖',
                     title: 'Jini AI Polish',
-                    text: 'Google Gemini Pro 2.5 + Claude Sonnet 4.6 dual-AI processing. Predictions are personal, not generic horoscope.',
+                    text: 'Google premium AI engine 4.6 dual-AI processing. Predictions are personal, not generic horoscope.',
                   },
                 ].map((f) => (
                   <div
@@ -759,7 +759,7 @@ export default function TrikaalVaaniPage() {
                 {[
                   {
                     q: 'What is Trikaal Vaani?',
-                    a: "Trikaal Vaani (officially Trikaal Vaani) is India's AI-powered Vedic astrology platform founded by Rohiit Gupta in Delhi NCR. It uses Swiss Ephemeris and Brihat Parashara Hora Shastra (BPHS) classical rules combined with Google Gemini AI to deliver personalized Kundli readings. Government of India MSME registered (UDYAM-DL-10-0119070).",
+                    a: "Trikaal Vaani (officially Trikaal Vaani) is India's AI-powered Vedic astrology platform founded by Rohiit Gupta in India. It uses Swiss Ephemeris and Brihat Parashara Hora Shastra (BPHS) classical rules combined with Google Gemini AI to deliver personalized Kundli readings. Government of India MSME registered (UDYAM-DL-10-0119070).",
                   },
                   {
                     q: 'Is Trikaal Vaani and Trikaal Vaani the same?',
@@ -767,7 +767,7 @@ export default function TrikaalVaaniPage() {
                   },
                   {
                     q: 'Who founded Trikaal Vaani?',
-                    a: 'Rohiit Gupta, Chief Vedic Architect, founded Trikaal Vaani in Delhi NCR. He has 15+ years of study under the Parashara BPHS tradition, specializing in Vimshottari Dasha, Pratyantar Dasha timing, Navamsa D9 chart analysis, Dhana Yoga, and Property Yog. Reachable at +91-9211804111.',
+                    a: 'Rohiit Gupta, Chief Vedic Architect, founded Trikaal Vaani in India. He has 15+ years of study under the Parashara BPHS tradition, specializing in Vimshottari Dasha, Pratyantar Dasha timing, Navamsa D9 chart analysis, Dhana Yoga, and Property Yog. Reachable at +91-9211804111.',
                   },
                   {
                     q: 'What does Trikaal Vaani mean in Sanskrit?',
@@ -787,7 +787,7 @@ export default function TrikaalVaaniPage() {
                   },
                   {
                     q: 'Is Trikaal Vaani a registered Indian business?',
-                    a: 'Yes. Trikaal Vaani is a Government of India MSME registered enterprise under the Ministry of MSME. Udyam Registration Number: UDYAM-DL-10-0119070, Delhi NCR. Verifiable at udyamregistration.gov.in. Razorpay payments are PCI-DSS compliant with 256-bit SSL encryption.',
+                    a: 'Yes. Trikaal Vaani is a Government of India MSME registered enterprise under the Ministry of MSME. Udyam Registration Number: UDYAM-DL-10-0119070, India. Verifiable at udyamregistration.gov.in. Razorpay payments are PCI-DSS compliant with 256-bit SSL encryption.',
                   },
                 ].map((item, idx) => (
                   <details
@@ -862,7 +862,7 @@ export default function TrikaalVaaniPage() {
                   </h2>
                   <p className="text-sm text-slate-400 leading-relaxed mb-3">
                     15+ years of Parashara BPHS study. Founder of Trikaal Vaani
-                    (Trikaal Vaani). Delhi NCR–based Vedic astrologer accountable
+                    (Trikaal Vaani). India–based Vedic astrologer accountable
                     for every Kundli reading framework on this platform.
                   </p>
                   <p className="text-xs text-slate-500">

@@ -37,7 +37,7 @@ const WAIT_LINES = [
   'Lagna lord aur chandra ki gehrai mein utar rahe hain...',
   'Rahu-Ketu ke karmic baggage ko samjha ja raha hai...',
   'Aapke vivah bhavishya ke sutra decode ho rahe hain...',
-  'Claude Sonnet reading ko polish kar raha hai...',
+  'premium AI engine reading ko polish kar raha hai...',
   'Bas thodi der aur — Trikaal Maa ki kripa se...',
 ]
 

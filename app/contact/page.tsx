@@ -12,7 +12,7 @@ import SiteFooter from "@/components/layout/SiteFooter";
 
 export const metadata: Metadata = {
   title: "Contact Us | Trikaal Vaani",
-  description: "Contact Rohiit Gupta and the Trikaal Vaani team. WhatsApp, email, and booking details for Vedic astrology consultations. Delhi NCR, India.",
+  description: "Contact Rohiit Gupta and the Trikaal Vaani team. WhatsApp, email, and booking details for Vedic astrology consultations. India, India.",
   authors: [{ name: "Rohiit Gupta", url: "https://trikalvaani.com/founder" }],
   alternates: { canonical: "https://trikalvaani.com/contact" },
   openGraph: { title: "Contact Us | Trikaal Vaani", url: "https://trikalvaani.com/contact", siteName: "Trikaal Vaani", locale: "en_IN", type: "website" },
@@ -84,7 +84,7 @@ export default function ContactPage() {
               <div className="space-y-3">
                 <div>
                   <p className="text-gray-500 text-xs uppercase tracking-wider mb-1">Location</p>
-                  <p className="text-white">Delhi NCR, India</p>
+                  <p className="text-white">India, India</p>
                 </div>
                 <div>
                   <p className="text-gray-500 text-xs uppercase tracking-wider mb-1">Services</p>

@@ -66,7 +66,7 @@ export const metadata: Metadata = {
     "free kundli reading online",
     "horoscope predictions India",
     "Swiss Ephemeris astrology",
-    "vedic astrology Delhi NCR",
+    "vedic astrology India",
     "BPHS astrology reading",
   ],
   openGraph: {
@@ -245,7 +245,7 @@ const personSchema = {
   url: "https://trikalvaani.com/founder",
   image: "https://trikalvaani.com/Rohiit-Gupta.jpg",
   description:
-    "Rohiit Gupta is the Chief Vedic Architect of Trikaal Vaani with 15+ years of study in the Parashara BPHS tradition. Specializes in Vimshottari Dasha, Navamsa D9, Pratyantar Dasha precision timing, and Dhana Yoga combinations. Based in Delhi NCR.",
+    "Rohiit Gupta is the Chief Vedic Architect of Trikaal Vaani with 15+ years of study in the Parashara BPHS tradition. Specializes in Vimshottari Dasha, Navamsa D9, Pratyantar Dasha precision timing, and Dhana Yoga combinations. Based in India.",
   worksFor: { "@id": "https://trikalvaani.com/#organization" },
   knowsAbout: [
     "Vedic Astrology",
@@ -434,7 +434,7 @@ export default function ServicesPage() {
                 "Parashara BPHS Tradition",
                 "Swiss Ephemeris Precision",
                 "AstroSage-Level Accuracy",
-                "Delhi NCR Based",
+                "India Based",
               ].map((badge) => (
                 <span
                   key={badge}
@@ -597,7 +597,7 @@ export default function ServicesPage() {
                 For complex life situations — marriage decisions, career crossroads,
                 major property purchases, or spiritual guidance — book a direct 1-on-1
                 WhatsApp call with Rohiit ji. He brings 15+ years of Vedic study and
-                Delhi NCR expertise to every session.
+                India expertise to every session.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <a

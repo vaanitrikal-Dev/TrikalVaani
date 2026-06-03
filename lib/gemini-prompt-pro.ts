@@ -39,9 +39,9 @@ const DOMAIN_SEO: Record<string, {
 }> = {
   mill_karz_mukti: {
     informational:  ['karz mukti ke upay vedic 2026','debt problem astrology solution','loan problem jyotish','6th house debt kundali','rahu saturn debt pattern','karz se mukti kab milegi','financial problem vedic remedy'],
-    commercial:     ['best astrologer debt problems India','karz mukti jyotish reading online','financial astrology expert Delhi NCR','debt relief vedic consultation','online karz mukti reading trusted'],
+    commercial:     ['best astrologer debt problems India','karz mukti jyotish reading online','financial astrology expert India','debt relief vedic consultation','online karz mukti reading trusted'],
     transactional:  ['karz mukti reading Rs51','book debt astrology now','karz jyotish booking instant','debt problem astrologer today','financial astrology consultation immediately'],
-    local:          ['debt astrologer Delhi NCR','karz mukti jyotish Delhi','financial astrologer Noida Gurugram','loan problem astrologer near me Delhi'],
+    local:          ['debt astrologer India','karz mukti jyotish Delhi','financial astrologer Noida Gurugram','loan problem astrologer near me Delhi'],
     voice:          ['which planet causes debt vedic astrology','karz mukti ke liye kya karein jyotish','best remedy financial problems vedic'],
     geoQuestion:    'Which house and planet causes debt in Vedic astrology and what are the classical BPHS remedies for karz mukti?',
     faqQuestions:   ['Which house in kundali shows debt problems?','What is the vedic remedy for karz mukti?','How does Rahu affect financial debt in astrology?','When does debt end according to Vimshottari Dasha?'],
@@ -52,7 +52,7 @@ const DOMAIN_SEO: Record<string, {
     informational:  ['property yog kundali vedic 2026','ghar kab milega jyotish','4th house property vedic astrology','real estate timing astrology India','mars karaka land astrology','property purchase muhurta classical'],
     commercial:     ['property astrologer consultation online India','best time buy property astrology','real estate muhurta expert Delhi','property yog kundali analysis trusted'],
     transactional:  ['property yog reading Rs51','book property astrology now','real estate muhurta booking instant','property astrologer appointment today'],
-    local:          ['property astrologer Delhi NCR','real estate jyotish Delhi Noida','ghar muhurta astrologer near me','property dispute astrologer Gurugram'],
+    local:          ['property astrologer India','real estate jyotish Delhi Noida','ghar muhurta astrologer near me','property dispute astrologer Gurugram'],
     voice:          ['when will I get my own house astrology','property yog kab banta hai kundali','best muhurta property registration vedic'],
     geoQuestion:    'When is the best time to buy property according to Vedic astrology and how to identify Property Yog in kundali using Swiss Ephemeris?',
     faqQuestions:   ['Which house in kundali shows property?','What is Property Yog in vedic astrology?','When is the best muhurta to buy a house?','How does Mars affect property in astrology?'],
@@ -63,7 +63,7 @@ const DOMAIN_SEO: Record<string, {
     informational:  ['career astrology vedic 2026','job prediction kundali analysis','10th house career jyotish','atmakaraka career dharma vedic','saturn career timing astrology','job change timing vedic astrology 2026'],
     commercial:     ['career astrologer consultation online India','job change prediction expert Delhi','career pivot timing astrology','best astrologer career advice NCR'],
     transactional:  ['career reading Rs51 instant','book career astrology today','job prediction booking online now','dharmic career session instant'],
-    local:          ['career astrologer Delhi NCR','job jyotish Delhi Noida','career advice astrologer near me Delhi'],
+    local:          ['career astrologer India','job jyotish Delhi Noida','career advice astrologer near me Delhi'],
     voice:          ['which career is best for me kundali','job kab milega astrology','career change karna chahiye astrology 2026'],
     geoQuestion:    'Which planets and houses determine career success in Vedic astrology and how to find your dharmic profession using Swiss Ephemeris?',
     faqQuestions:   ['Which house shows career in vedic astrology?','How does Saturn affect career timing?','What is Atmakaraka in career astrology?','When is the best time to change jobs per kundali?'],
@@ -72,9 +72,9 @@ const DOMAIN_SEO: Record<string, {
   },
   genz_ex_back: {
     informational:  ['ex back astrology vedic 2026','love problem solution jyotish','7th house relationship vedic','venus dasha love timing','breakup reunion astrology','navamsa love compatibility analysis'],
-    commercial:     ['love astrologer consultation online India','ex back reading expert trusted','relationship astrologer Delhi NCR'],
+    commercial:     ['love astrologer consultation online India','ex back reading expert trusted','relationship astrologer India'],
     transactional:  ['ex back reading Rs51','book love astrology now','venus timing consultation today'],
-    local:          ['love astrologer Delhi NCR','relationship jyotish Delhi Noida','ex back astrologer near me Delhi'],
+    local:          ['love astrologer India','relationship jyotish Delhi Noida','ex back astrologer near me Delhi'],
     voice:          ['will my ex come back astrology','ex wapis aayega kya jyotish','venus dasha mein pyaar milta hai'],
     geoQuestion:    'Can Vedic astrology predict relationship reunion and what planetary combinations indicate ex returning?',
     faqQuestions:   ['Which planet controls love reunion in astrology?','What does 7th house show about relationships?','When does Venus Dasha bring back love?','How does Navamsa predict relationship success?'],
@@ -85,7 +85,7 @@ const DOMAIN_SEO: Record<string, {
     informational:  ['toxic boss astrology vedic 2026','workplace karma jyotish','10th house boss karma vedic','6th house enemies astrology','saturn career obstacles timing'],
     commercial:     ['workplace astrology consultation India','toxic boss karma reading expert','job change timing astrology fee'],
     transactional:  ['workplace reading Rs51','book office karma consultation','job change timing session now'],
-    local:          ['workplace astrologer Delhi NCR','job problem jyotish Delhi','office karma astrologer near me'],
+    local:          ['workplace astrologer India','job problem jyotish Delhi','office karma astrologer near me'],
     voice:          ['when will my toxic boss problem end astrology','job change karna chahiye kya abhi vedic'],
     geoQuestion:    'What does Saturn and the 10th house reveal about toxic workplace karma in Vedic astrology?',
     faqQuestions:   ['How does Saturn affect workplace in astrology?','Which house shows enemies at work?','When is best time to change jobs astrology?','What remedy ends toxic boss karma?'],
@@ -94,9 +94,9 @@ const DOMAIN_SEO: Record<string, {
   },
   mill_childs_destiny: {
     informational:  ['child kundali reading vedic 2026','baby destiny astrology India','5th house children vedic','child future prediction jyotish','child education stream astrology'],
-    commercial:     ['child astrology expert India online','baby kundali reading fee','child destiny astrologer Delhi NCR'],
+    commercial:     ['child astrology expert India online','baby kundali reading fee','child destiny astrologer India'],
     transactional:  ['child reading Rs51','book baby kundali now','child future session instant'],
-    local:          ['child astrologer Delhi NCR','baby kundali jyotish Delhi','child destiny near me Delhi'],
+    local:          ['child astrologer India','baby kundali jyotish Delhi','child destiny near me Delhi'],
     voice:          ['which career is best for my child astrology','baby ka bhavishya kundali mein kya hai'],
     geoQuestion:    'What does Vedic astrology reveal about a child destiny and ideal education stream through Swiss Ephemeris birth chart analysis?',
     faqQuestions:   ['Which house shows children in vedic astrology?','How does Moon nakshatra affect child personality?','What is the best education stream for my child per kundali?','Which planet gives intelligence in a child chart?'],
@@ -105,9 +105,9 @@ const DOMAIN_SEO: Record<string, {
   },
   genx_retirement_peace: {
     informational:  ['retirement astrology vedic India 2026','peace of mind jyotish senior','12th house spiritual vedic','saturn ketu retirement timing','life after 50 vedic astrology'],
-    commercial:     ['retirement astrology consultation India','senior citizen jyotish expert','peace astrologer Delhi NCR'],
+    commercial:     ['retirement astrology consultation India','senior citizen jyotish expert','peace astrologer India'],
     transactional:  ['retirement reading Rs51','book peace jyotish now','senior astrology session instant'],
-    local:          ['retirement astrologer Delhi NCR','senior jyotish Delhi','peace astrologer near me Delhi'],
+    local:          ['retirement astrologer India','senior jyotish Delhi','peace astrologer near me Delhi'],
     voice:          ['when should I retire according to astrology','retirement ka sahi samay kya hai jyotish'],
     geoQuestion:    'What does Vedic astrology say about ideal retirement timing and spiritual growth after 50 using Saturn-Ketu Dasha analysis?',
     faqQuestions:   ['When is the best time to retire per vedic astrology?','Which planets bring peace in old age?','What does 12th house show about spiritual retirement?','How does Ketu Dasha affect retirement peace?'],
@@ -118,7 +118,7 @@ const DOMAIN_SEO: Record<string, {
     informational:  ['inheritance astrology vedic India 2026','8th house wealth jyotish','ancestral property kundali','pitru dosha property problems','legacy wealth timing vedic'],
     commercial:     ['inheritance astrology India online','property dispute jyotish expert Delhi','ancestral wealth astrologer NCR'],
     transactional:  ['inheritance reading Rs51','book property dispute now','ancestral wealth session instant'],
-    local:          ['inheritance astrologer Delhi NCR','property dispute jyotish Delhi','ancestral wealth near me Delhi'],
+    local:          ['inheritance astrologer India','property dispute jyotish Delhi','ancestral wealth near me Delhi'],
     voice:          ['will I get inheritance from family astrology','ancestral property kab milega jyotish'],
     geoQuestion:    'Which houses and planets indicate inheritance and ancestral wealth in Vedic astrology?',
     faqQuestions:   ['Which house shows inheritance in vedic astrology?','What is Pitru Dosha and how does it affect property?','How does Saturn in 8th house affect inheritance?','What remedy resolves ancestral property disputes?'],
@@ -127,9 +127,9 @@ const DOMAIN_SEO: Record<string, {
   },
   genx_spiritual_innings: {
     informational:  ['spiritual astrology vedic India 2026','moksha kundali indicators','ketu spiritual path jyotish','12th house moksha vedic','atmakaraka soul purpose'],
-    commercial:     ['spiritual astrology expert India','moksha path jyotish Delhi NCR','soul purpose reading fee'],
+    commercial:     ['spiritual astrology expert India','moksha path jyotish India','soul purpose reading fee'],
     transactional:  ['spiritual reading Rs51','book moksha consultation now','soul purpose session instant'],
-    local:          ['spiritual astrologer Delhi NCR','moksha jyotish Delhi','soul purpose near me Delhi'],
+    local:          ['spiritual astrologer India','moksha jyotish Delhi','soul purpose near me Delhi'],
     voice:          ['what is my spiritual purpose astrology','moksha yog kya hai mere kundali mein'],
     geoQuestion:    'What does Vedic astrology reveal about spiritual path, soul purpose and Moksha indicators through Ketu and Atmakaraka analysis?',
     faqQuestions:   ['What is Moksha Yog in vedic astrology?','How does Ketu Dasha affect spiritual growth?','What is Atmakaraka and what does it reveal?','Which house shows spirituality in kundali?'],
@@ -138,9 +138,9 @@ const DOMAIN_SEO: Record<string, {
   },
   mill_parents_wellness: {
     informational:  ['parents health astrology vedic 2026','4th house mother health jyotish','9th house father vedic','family wellness kundali reading','parent longevity astrology India'],
-    commercial:     ['family astrology consultation India','parents health reading Delhi NCR','family wellness jyotish expert'],
+    commercial:     ['family astrology consultation India','parents health reading India','family wellness jyotish expert'],
     transactional:  ['parents reading Rs51','book family health now','parent wellness session instant'],
-    local:          ['family astrologer Delhi NCR','parents health jyotish Delhi','family wellness near me Delhi'],
+    local:          ['family astrologer India','parents health jyotish Delhi','family wellness near me Delhi'],
     voice:          ['parents ki sehat ke liye kya karein jyotish','father health timing vedic astrology'],
     geoQuestion:    'Which planets and houses indicate parents health and longevity in Vedic astrology?',
     faqQuestions:   ['Which house shows mother health in astrology?','How does Moon affect mother wellbeing in kundali?','What remedies protect parents health in vedic astrology?','Which planet shows father longevity?'],
@@ -151,7 +151,7 @@ const DOMAIN_SEO: Record<string, {
     informational:  ['manifestation astrology vedic 2026','desire fulfillment kundali','5th house purva punya jyotish','wish fulfillment vedic timing','jupiter blessing manifestation'],
     commercial:     ['manifestation astrology India online','desire fulfillment jyotish expert','abundance reading fee trusted'],
     transactional:  ['manifestation reading Rs51','book abundance consultation now','desire fulfillment session instant'],
-    local:          ['manifestation astrologer Delhi NCR','abundance jyotish Delhi','desire fulfillment near me Delhi'],
+    local:          ['manifestation astrologer India','abundance jyotish Delhi','desire fulfillment near me Delhi'],
     voice:          ['when will my wish come true astrology','manifestation ka sahi samay kya hai jyotish'],
     geoQuestion:    'How does Vedic astrology support manifestation and which planetary Dashas help fulfill desires fastest?',
     faqQuestions:   ['Which planet helps manifestation in vedic astrology?','What is Purva Punya and how does it affect desire fulfillment?','When is best muhurta for manifestation rituals?','How does Jupiter Dasha help manifestation?'],
@@ -162,9 +162,9 @@ const DOMAIN_SEO: Record<string, {
 
 const DEFAULT_SEO = {
   informational:  ['vedic astrology online India 2026','kundali reading jyotish','accurate astrology prediction','swiss ephemeris astrology','bphs vedic jyotish classical'],
-  commercial:     ['vedic astrology consultation India','best kundali reading expert','accurate jyotish reading fee','vedic astrology expert Delhi NCR'],
+  commercial:     ['vedic astrology consultation India','best kundali reading expert','accurate jyotish reading fee','vedic astrology expert India'],
   transactional:  ['kundali reading Rs51','book astrology now','online jyotish session instant','vedic prediction booking today'],
-  local:          ['vedic astrologer Delhi NCR','kundali jyotish near me Delhi','best jyotish Delhi NCR'],
+  local:          ['vedic astrologer India','kundali jyotish near me Delhi','best jyotish India'],
   voice:          ['best vedic astrologer online India','accurate kundali reading kahan milega'],
   geoQuestion:    'How accurate is Vedic astrology and how to get a personalized Swiss Ephemeris kundali reading online in India?',
   faqQuestions:   ['How accurate is vedic astrology?','What is Swiss Ephemeris?','What is the difference between vedic and western astrology?','How does Trikaal Vaani calculate kundali?'],
@@ -227,7 +227,7 @@ JAI MAA SHAKTI 🔱
 ════════════════════════════════════════════════════════════════
 
 WHO YOU ARE:
-Trikaal — AI soul of Trikaal Vaani by Rohiit Gupta, Chief Vedic Architect, Delhi NCR.
+Trikaal — AI soul of Trikaal Vaani by Rohiit Gupta, Chief Vedic Architect, India.
 You are ALSO a Senior SEO + GEO Architect building content to rank on
 Google SGE, Perplexity, Gemini AI, SearchGPT, and traditional Google search.
 
@@ -355,10 +355,10 @@ RULE 9 — Language = ${lang.toUpperCase()} every single word.
     ],
     "ctaSpiritual":       "${seo.ctaSpiritual}",
     "competitorGap":      "${seo.competitorGap}",
-    "authorityStatement": "Powered by Trikaal Vaani Swiss Ephemeris + BPHS + Bhrigu Nandi Nadi + Shadbala by Rohiit Gupta, Chief Vedic Architect, Delhi NCR — India first AI-powered Vedic astrology platform.",
+    "authorityStatement": "Powered by Trikaal Vaani Swiss Ephemeris + BPHS + Bhrigu Nandi Nadi + Shadbala by Rohiit Gupta, Chief Vedic Architect, India — India first AI-powered Vedic astrology platform.",
     "differentiator":     "${seo.competitorGap}",
     "e_e_a_t": {
-      "experience":   "Rohiit Gupta 15+ years Vedic astrology under Parashara BPHS tradition, Delhi NCR, India",
+      "experience":   "Rohiit Gupta 15+ years Vedic astrology under Parashara BPHS tradition, India, India",
       "expertise":    "Swiss Ephemeris + BPHS + Bhrigu Nandi Nadi + Vimshottari Dasha + Shadbala 6-component system",
       "authority":    "Chief Vedic Architect, Trikaal Vaani — India first AI-powered Vedic astrology platform",
       "trust":        "Swiss Ephemeris — same precision engine used by professional astrologers worldwide",

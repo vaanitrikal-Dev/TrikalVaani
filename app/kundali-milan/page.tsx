@@ -23,7 +23,7 @@ import SiteFooter from '@/components/layout/SiteFooter'
 export const metadata: Metadata = {
   title: 'Kundali Milan - Free 36 Guna Matching & Vedic Compatibility | Trikaal Vaani',
   description:
-    'Free Kundali Milan with 36 Guna Ashtakoot, Mangal Dosh, Nadi Dosh check. Rs51 Basic Milan, Rs101 Deep Milan with Dos, Donts & 6 personalized remedies. By Rohiit Gupta, Chief Vedic Architect, Delhi NCR. Swiss Ephemeris + BPHS classical rules.',
+    'Free Kundali Milan with 36 Guna Ashtakoot, Mangal Dosh, Nadi Dosh check. Rs51 Basic Milan, Rs101 Deep Milan with Dos, Donts & 6 personalized remedies. By Rohiit Gupta, Chief Vedic Architect, India. Swiss Ephemeris + BPHS classical rules.',
   keywords: 'kundali matching, kundli milan, 36 guna milan, free kundali matching, ashtakoot, mangal dosh, nadi dosh, vedic compatibility, marriage matching, jyotish milan',
   alternates: {
     canonical: 'https://trikalvaani.com/kundali-milan',
@@ -139,7 +139,7 @@ const FAQ_SCHEMA = {
       name: 'Who is Rohiit Gupta?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'Rohiit Gupta is the Chief Vedic Architect and founder of Trikaal Vaani. He has 15+ years of Vedic astrology study under the Parashara BPHS tradition, is based in Delhi NCR, and personally designs every Kundali Milan reading framework that Trikaal AI applies to your charts.',
+        text: 'Rohiit Gupta is the Chief Vedic Architect and founder of Trikaal Vaani. He has 15+ years of Vedic astrology study under the Parashara BPHS tradition, is based in India, and personally designs every Kundali Milan reading framework that Trikaal AI applies to your charts.',
       },
     },
   ],
@@ -419,7 +419,7 @@ export default function KundaliMilanPage() {
                   </h3>
                   <p style={{ color: '#94a3b8', fontSize: '13px', lineHeight: 1.6, margin: 0 }}>
                     15+ years of Vedic study under the <strong style={{ color: '#cbd5e1' }}>Parashara BPHS</strong> tradition.
-                    Founder of Trikaal Vaani. Delhi NCR-based Vedic astrologer accountable for every
+                    Founder of Trikaal Vaani. India-based Vedic astrologer accountable for every
                     Kundali Milan reading framework that Trikaal AI applies to your charts.{' '}
                     <a href="/founder" style={{ color: GOLD, textDecoration: 'none' }}>Read full credentials -&gt;</a>
                   </p>

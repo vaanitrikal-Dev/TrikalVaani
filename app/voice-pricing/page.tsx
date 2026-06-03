@@ -31,7 +31,7 @@ export const metadata: Metadata = {
     'voice astrology India',
     'Hindi voice astrology',
     'AI voice astrology prediction',
-    'voice astrologer Delhi NCR',
+    'voice astrologer India',
     'voice kundali reading',
     '11 rupees astrology',
     'Vedic voice prediction',
@@ -189,7 +189,7 @@ export default function VoicePricingPage() {
             <span>•</span>
             <span>🔒 Razorpay secure</span>
             <span>•</span>
-            <span>📍 Delhi NCR based</span>
+            <span>📍 India based</span>
           </div>
         </section>
 
@@ -296,7 +296,7 @@ export default function VoicePricingPage() {
           <div className="max-w-3xl mx-auto text-center">
             <p className="text-sm text-gray-400 mb-2">Authored by</p>
             <h3 className="text-xl font-bold" style={{ color: '#D4AF37' }}>Rohiit Gupta</h3>
-            <p className="text-sm text-gray-400">Chief Vedic Architect, Trikaal Vaani • Delhi NCR</p>
+            <p className="text-sm text-gray-400">Chief Vedic Architect, Trikaal Vaani • India</p>
             <a href="/founder" className="text-xs underline mt-3 inline-block" style={{ color: '#D4AF37' }}>
               Learn more about Rohiit's credentials →
             </a>

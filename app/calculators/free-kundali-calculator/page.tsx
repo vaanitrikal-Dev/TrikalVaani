@@ -110,7 +110,7 @@ export default function KundaliCalculatorPage() {
             <div className="w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg" style={{ background: GOLD, color: '#080B12' }}>RG</div>
             <div className="text-sm">
               <div className="font-semibold" style={{ color: GOLD }}>Rohiit Gupta</div>
-              <div className="text-slate-400">Chief Vedic Architect · Trikaal Vaani · Delhi NCR</div>
+              <div className="text-slate-400">Chief Vedic Architect · Trikaal Vaani · India</div>
               <div className="text-xs text-slate-500 mt-0.5">Engine: Swiss Ephemeris · Lahiri Ayanamsha · BPHS Classical Rules</div>
             </div>
           </div>

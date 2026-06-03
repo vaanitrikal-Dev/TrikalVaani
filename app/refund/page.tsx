@@ -32,7 +32,7 @@ export default function RefundPage() {
             <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: GOLD }}>Legal</p>
             <h1 className="font-serif text-4xl font-bold text-white mb-4">Refund & Cancellation Policy</h1>
             <p className="text-gray-500 text-sm">Effective: 1 January 2025 · Last Updated: April 2025</p>
-            <p className="text-gray-500 text-sm mt-1">Operated by: <span style={{ color: GOLD }}>Rohiit Gupta</span> — Trikaal Vaani, Delhi NCR, India</p>
+            <p className="text-gray-500 text-sm mt-1">Operated by: <span style={{ color: GOLD }}>Rohiit Gupta</span> — Trikaal Vaani, India, India</p>
             <div className="mt-6 h-px w-16" style={{ background: `linear-gradient(90deg, ${GOLD}, transparent)` }} />
           </div>
 

@@ -78,7 +78,7 @@ const PLANS = [
       'Classical remedies (Parashara BPHS)',
       '5 personalised Upay (remedies)',
       'Yoga detection with classical basis',
-      'Gemini Pro 2.5 + expert polish',
+      'premium AI engine + expert polish',
     ],
     locked: [],
     cta: 'Unlock Deep Reading — ₹51',

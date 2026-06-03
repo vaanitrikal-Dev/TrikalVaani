@@ -595,7 +595,7 @@ const mainCaution    = simpleSummary?.mainCaution
             }}>
               <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#22c55e', flexShrink: 0 }} />
               <p style={{ margin: 0, color: '#64748b', fontSize: '11px' }}>
-                Complete 800-1200 word analysis below — Powered by Gemini 2.5 Pro + Claude Sonnet 4.6
+                Complete 800-1200 word analysis below — Powered by premium AI engine 4.6
               </p>
             </div>
           )}
@@ -875,7 +875,7 @@ const mainCaution    = simpleSummary?.mainCaution
             </h3>
             <p style={{ margin: '0 0 20px', color: '#94a3b8', fontSize: '13px', lineHeight: 1.7, maxWidth: '380px', marginLeft: 'auto', marginRight: 'auto' }}>
               Aapki kundali mein 3 aur yogas hain jo seedha aapke sawal ka jawab dete hain.
-              Gemini 2.5 Pro + Claude Sonnet 4.6 ne poora vishleshan kiya hai — sirf aapke liye.
+              premium AI engine 4.6 ne poora vishleshan kiya hai — sirf aapke liye.
             </p>
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px', marginBottom: '20px', maxWidth: '360px', margin: '0 auto 20px' }}>

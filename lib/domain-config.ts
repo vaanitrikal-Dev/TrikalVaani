@@ -293,7 +293,7 @@ const DOMAINS: Record<DomainId, DomainConfig> = {
       'If Mars is debilitated, clearly mention delays',
     ],
     worldContext: 'general',
-    worldContextSearchTerms: ['real estate India current prices', 'home loan rates India 2026', 'property market Delhi NCR'],
+    worldContextSearchTerms: ['real estate India current prices', 'home loan rates India 2026', 'property market India'],
     extraOutputFields: {
       propertyYogScore:  'strength of property yoga in chart 1-10',
       bestBuyWindow:     'most favorable Pratyantar for property purchase',

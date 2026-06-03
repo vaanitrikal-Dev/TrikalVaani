@@ -501,7 +501,7 @@ export default function PredictionDisplay({
         <div className="flex items-center justify-between flex-wrap gap-2">
           <ConfidenceBadge level={professional?.confidenceLevel ?? 'high'} />
           <span className="text-xs text-slate-600">
-            Swiss Ephemeris · {_meta?.model ?? 'Gemini 2.5 Flash'}
+            Swiss Ephemeris · {_meta?.model ?? 'premium AI engine'}
           </span>
         </div>
       </Card>

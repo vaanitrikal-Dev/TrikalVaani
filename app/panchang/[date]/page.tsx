@@ -123,7 +123,7 @@ async function fetchFromVM(date: string): Promise<PanchangRow | null> {
       yoga: vm.yoga.name, karana: vm.karana.name,
       vara: vm.weekday ?? vm.vara ?? "",
       sunrise: vm.sunrise, sunset: vm.sunset, rahu_kaal: vm.rahu_kaal,
-      geo_answer: `On ${human}, Tithi is ${vm.tithi.name} (${vm.tithi.paksha}), Nakshatra is ${vm.nakshatra.name} Pada ${vm.nakshatra.pada}, Yoga ${vm.yoga.name}. Sunrise: ${vm.sunrise}, Sunset: ${vm.sunset}, Rahu Kaal: ${vm.rahu_kaal} (Delhi NCR). Swiss Ephemeris, Lahiri Ayanamsha.`,
+      geo_answer: `On ${human}, Tithi is ${vm.tithi.name} (${vm.tithi.paksha}), Nakshatra is ${vm.nakshatra.name} Pada ${vm.nakshatra.pada}, Yoga ${vm.yoga.name}. Sunrise: ${vm.sunrise}, Sunset: ${vm.sunset}, Rahu Kaal: ${vm.rahu_kaal} (India). Swiss Ephemeris, Lahiri Ayanamsha.`,
       seo_title: null, seo_description: null, faq_schema: null, gemini_content: null,
       festival_slug: festData?.festival_slug ?? null,
       festival_name: festData?.festival_name ?? null,
@@ -208,9 +208,9 @@ export default async function PanchangDatePage(
   // ── Schemas ───────────────────────────────────────────────────────
   const faqItems = p.faq_schema?.length ? p.faq_schema : [
     { "@type": "Question", name: `What is the Tithi on ${human}?`, acceptedAnswer: { "@type": "Answer", text: `${p.tithi}, Swiss Ephemeris, Lahiri Ayanamsha.` } },
-    { "@type": "Question", name: `What is Rahu Kaal on ${human}?`, acceptedAnswer: { "@type": "Answer", text: `Rahu Kaal is ${p.rahu_kaal} (Delhi NCR). Avoid auspicious work during this window.` } },
+    { "@type": "Question", name: `What is Rahu Kaal on ${human}?`, acceptedAnswer: { "@type": "Answer", text: `Rahu Kaal is ${p.rahu_kaal} (India). Avoid auspicious work during this window.` } },
     { "@type": "Question", name: `What is the Nakshatra on ${human}?`, acceptedAnswer: { "@type": "Answer", text: `${p.nakshatra}.` } },
-    { "@type": "Question", name: `What time is sunrise on ${human}?`, acceptedAnswer: { "@type": "Answer", text: `Sunrise: ${p.sunrise} IST, Sunset: ${p.sunset} IST (Delhi NCR).` } },
+    { "@type": "Question", name: `What time is sunrise on ${human}?`, acceptedAnswer: { "@type": "Answer", text: `Sunrise: ${p.sunrise} IST, Sunset: ${p.sunset} IST (India).` } },
   ];
 
   const schemas = [
@@ -313,8 +313,8 @@ export default async function PanchangDatePage(
             <h2 className="mb-4 text-2xl font-semibold text-gray-900">Frequently Asked Questions</h2>
             <FAQ q={`What is the Tithi on ${human}?`} a={`${p.tithi}, calculated using Swiss Ephemeris with Lahiri Ayanamsha.`} />
             <FAQ q={`What is the Nakshatra on ${human}?`} a={`${p.nakshatra}.`} />
-            <FAQ q={`What is Rahu Kaal on ${human}?`} a={`Rahu Kaal is ${p.rahu_kaal} (Delhi NCR). Avoid auspicious work during this window.`} />
-            <FAQ q={`What time is sunrise on ${human}?`} a={`Sunrise: ${p.sunrise} IST, Sunset: ${p.sunset} IST (Delhi NCR).`} />
+            <FAQ q={`What is Rahu Kaal on ${human}?`} a={`Rahu Kaal is ${p.rahu_kaal} (India). Avoid auspicious work during this window.`} />
+            <FAQ q={`What time is sunrise on ${human}?`} a={`Sunrise: ${p.sunrise} IST, Sunset: ${p.sunset} IST (India).`} />
           </section>
 
           <section className="border-t border-gray-200 pt-6">

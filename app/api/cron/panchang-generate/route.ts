@@ -40,7 +40,7 @@ export const runtime = "nodejs";
 export const maxDuration = 300;
 
 const CITIES: CityContext[] = [
-  { slug: "delhi",     name: "Delhi NCR",   state: "Delhi",           lat: 28.6139, lon: 77.2090 },
+  { slug: "delhi",     name: "India",   state: "Delhi",           lat: 28.6139, lon: 77.2090 },
   { slug: "mumbai",    name: "Mumbai",      state: "Maharashtra",     lat: 19.0760, lon: 72.8777 },
   { slug: "noida",     name: "Noida",       state: "Uttar Pradesh",   lat: 28.5355, lon: 77.3910 },
   { slug: "gurgaon",   name: "Gurgaon",     state: "Haryana",         lat: 28.4595, lon: 77.0266 },

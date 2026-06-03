@@ -500,7 +500,7 @@ export default async function BlogArticlePage({
             <p className="mb-2">
               <em>Last reviewed by{' '}
                 <Link href="/founder" className="text-amber-300 hover:underline">Rohiit Gupta</Link>,
-                Chief Vedic Architect, Trikaal Vaani · Delhi NCR · UDYAM-DL-10-0119070
+                Chief Vedic Architect, Trikaal Vaani · India · UDYAM-DL-10-0119070
               </em>
             </p>
             <p>

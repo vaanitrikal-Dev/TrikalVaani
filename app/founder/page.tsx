@@ -52,7 +52,7 @@ export const metadata: Metadata = {
     "Trikaal Vaani founder",
     "Trikaal Vaani Rohiit Gupta",
     "Trikaal Vaani Rohiit Gupta",
-    "vedic astrologer Delhi NCR",
+    "vedic astrologer India",
     "Chief Vedic Architect",
     "Rohiit Gupta vedic astrology",
     "MSME registered astrology",
@@ -90,7 +90,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Rohiit Gupta — Founder of Trikaal Vaani (Trikaal Vaani)",
     description:
-      "15+ years Vedic astrology. Founder of Trikaal Vaani / Trikaal Vaani. MSME Registered. Delhi NCR.",
+      "15+ years Vedic astrology. Founder of Trikaal Vaani / Trikaal Vaani. MSME Registered. India.",
     site: "@thetrikalvaani",
     images: ["https://trikalvaani.com/Rohiit-Gupta.jpg"],
   },
@@ -129,7 +129,7 @@ const schema = {
       telephone: "+919211804111",
       address: {
         "@type": "PostalAddress",
-        addressLocality: "Delhi NCR",
+        addressLocality: "India",
         addressRegion: "Delhi",
         addressCountry: "IN",
       },
@@ -189,7 +189,7 @@ const schema = {
         "@type": "Place",
         address: {
           "@type": "PostalAddress",
-          addressLocality: "Delhi NCR",
+          addressLocality: "India",
           addressRegion: "Delhi",
           addressCountry: "IN",
         },
@@ -245,7 +245,7 @@ const schema = {
           acceptedAnswer: {
             "@type": "Answer",
             text:
-              "Trikaal Vaani (officially Trikaal Vaani) was founded by Rohiit Gupta in 2025 in Delhi NCR. Both spellings refer to the same brand — India's first AI-powered Vedic astrology platform. Rohiit serves as Chief Vedic Architect and personally designs every Kundli reading framework that Jini AI applies to user birth charts. The platform is a Government of India MSME registered enterprise (UDYAM-DL-10-0119070).",
+              "Trikaal Vaani (officially Trikaal Vaani) was founded by Rohiit Gupta in 2025 in India. Both spellings refer to the same brand — India's first AI-powered Vedic astrology platform. Rohiit serves as Chief Vedic Architect and personally designs every Kundli reading framework that Jini AI applies to user birth charts. The platform is a Government of India MSME registered enterprise (UDYAM-DL-10-0119070).",
           },
         },
         {
@@ -379,7 +379,7 @@ export default function FounderPage() {
                   Rohiit Gupta
                 </h1>
                 <p className="text-gray-400 text-base mb-6">
-                  Chief Vedic Architect · AI Vedic Astrology Pioneer · Delhi NCR
+                  Chief Vedic Architect · AI Vedic Astrology Pioneer · India
                 </p>
                 <div className="flex flex-wrap gap-3 justify-center md:justify-start">
                   {[
@@ -387,7 +387,7 @@ export default function FounderPage() {
                     "Parashara BPHS Tradition",
                     "Swiss Ephemeris",
                     "Jaimini Astrology",
-                    "Delhi NCR Based",
+                    "India Based",
                     "🏛️ MSME Registered",
                   ].map((t) => (
                     <span
@@ -859,7 +859,7 @@ export default function FounderPage() {
               </Link>
             </div>
             <p className="text-[10px] text-gray-600 mt-6">
-              Trikaal Vaani (also: Trikaal Vaani) · MSME Registered · {UDYAM_NUMBER} · Delhi NCR · 🔱 Mahakaal Ka Ashirwad
+              Trikaal Vaani (also: Trikaal Vaani) · MSME Registered · {UDYAM_NUMBER} · India · 🔱 Mahakaal Ka Ashirwad
             </p>
           </div>
         </section>

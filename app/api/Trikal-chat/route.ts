@@ -133,7 +133,7 @@ function buildPublicIntelligence(employment: string, sector: string): string {
 
     realestate: `Real Estate sector in India. Key areas:
 - Current home loan interest rates (SBI, HDFC, ICICI)
-- Property price trend in major cities especially Delhi NCR
+- Property price trend in major cities especially India
 - RERA and regulatory environment
 - Demand in affordable vs luxury segment right now
 - Commercial real estate vacancy trends`,

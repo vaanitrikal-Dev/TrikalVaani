@@ -197,7 +197,7 @@ export default function KundaliMilanTeaser() {
 
         {/* ── TRUST LINE ──────────────────────────────────────────────── */}
         <p className="text-center text-xs text-slate-500 mt-6">
-          Reading framework by Rohiit Gupta, Chief Vedic Architect · Delhi NCR ·
+          Reading framework by Rohiit Gupta, Chief Vedic Architect · India ·
           Powered by Swiss Ephemeris &amp; BPHS Classical rules
         </p>
 
