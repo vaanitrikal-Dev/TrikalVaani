@@ -2,9 +2,16 @@
 
 // ============================================================
 // File: components/calculators/KundaliCalculatorClient.tsx
-// Version: v2.0 — CTA ONLY (no form)
+// Version: v2.1 — IR-0 cleanup: fake trust stats removed
 // Strategy: SEO/GEO/AEO page + emotional CTA → homepage #birth-form
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
+//
+// v2.1 CHANGES vs v2.0:
+//   ❌ REMOVED "2,400+ Predictions Delivered" (fabricated count)
+//   ❌ REMOVED "4.9/5 Client Rating"          (no real review system — fake)
+//   ❌ REMOVED "93% Accuracy Rate"            (unverifiable accuracy claim)
+//   ✅ KEPT "₹51 Starting Price" (true) + replaced 3 fakes with verifiable facts
+//   ✅ CTA block unchanged
 // ============================================================
 
 import Link from 'next/link';
@@ -134,7 +141,7 @@ export default function KundaliCalculatorClient() {
       </div>
 
       {/* ═══════════════════════════════════════════════════════ */}
-      {/* TRUST STRIP — Below main CTA                              */}
+      {/* TRUST STRIP — Below main CTA (v2.1: verifiable facts only) */}
       {/* ═══════════════════════════════════════════════════════ */}
       <div
         className="rounded-xl p-4 md:p-5 grid grid-cols-2 md:grid-cols-4 gap-4 text-center"
@@ -143,10 +150,10 @@ export default function KundaliCalculatorClient() {
           border: '1px solid rgba(255,255,255,0.08)',
         }}
       >
-        <TrustItem number="2,400+" label="Predictions Delivered" />
-        <TrustItem number="4.9/5" label="Client Rating" />
-        <TrustItem number="93%" label="Accuracy Rate" />
         <TrustItem number="₹51" label="Starting Price" />
+        <TrustItem number="9 Grahas" label="Full Kundali Analysis" />
+        <TrustItem number="Swiss Ephemeris" label="Precision Engine" />
+        <TrustItem number="Razorpay" label="Secure Payment" />
       </div>
 
     </div>
