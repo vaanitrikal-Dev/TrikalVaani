@@ -253,7 +253,7 @@ export function parseFestivalContent(raw: string): FestivalContent {
   // Brand-leak guard — fail loud if single-a slips through
   const blob = JSON.stringify(parsed).toLowerCase();
   if (/\btrikal\s+vaani\b/.test(blob)) {
-    throw new Error("Brand leak: 'Trikal Vaani' (single-a) found — must be 'Trikaal Vaani'");
+    throw new Error("Brand leak: 'Trikaal Vaani' (single-a) found — must be 'Trikaal Vaani'");
   }
   return parsed;
 }
