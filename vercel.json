@@ -6,6 +6,10 @@
       "schedule": "30 23 * * *"
     },
     {
+      "path": "/api/cron/festival-generate",
+      "schedule": "0 1 * * 1"
+    },
+    {
       "path": "/api/push/daily?slot=festival",
       "schedule": "0 2 * * *"
     },
