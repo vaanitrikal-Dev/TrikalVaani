@@ -2,9 +2,16 @@
 // 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER
 // ════════════════════════════════════════════════════════════════════
 // File:        app/[domain]/events/[slug]/page.tsx
-// Version:     v2.2
+// Version:     v2.3
 // Owner:       Rohiit Gupta, Chief Vedic Architect
 // Domain:      trikalvaani.com
+//
+// ── Changes vs v2.2 ────────────────────────────────────────────────
+//   1. REMOVED the "Where to celebrate {festival} in {city}" temples box
+//      (CEO request — was rendering empty bullets for cities with no temple
+//      data).
+//   2. Temple data now filtered to non-empty strings (defensive), so the
+//      geo line / temple FAQ never render broken empty entries.
 //
 // ── Changes vs v2.1 ────────────────────────────────────────────────
 //   1. PUJA VIDHI box (Layer 1) — renders festivals_master.puja_vidhi.
@@ -252,7 +259,7 @@ export default async function CityFestivalPage(
   const ruler = f.planet_ruler || "";
   const category = f.festival_type || "festival";
 
-  const temples = c.famous_temples ?? [];
+  const temples = (c.famous_temples ?? []).filter((t) => typeof t === "string" && t.trim().length > 0);
   const dos = f.dos ?? [];
   const donts = f.donts ?? [];
   const pujaVidhi = f.puja_vidhi ?? [];
@@ -421,23 +428,6 @@ export default async function CityFestivalPage(
                   <li key={i}>{step}</li>
                 ))}
               </ol>
-            </section>
-          )}
-
-          {/* Famous temples */}
-          {temples.length > 0 && (
-            <section className="mb-8 rounded-xl border border-amber-200 bg-white p-5">
-              <h2 className="mb-3 text-xl font-bold text-gray-900">
-                🛕 Where to celebrate {name} in {c.name}
-              </h2>
-              <ul className="grid grid-cols-1 gap-2 text-sm md:grid-cols-2">
-                {temples.map((temple, i) => (
-                  <li key={i} className="flex items-start">
-                    <span className="mr-2 text-amber-600">●</span>
-                    <span>{temple}</span>
-                  </li>
-                ))}
-              </ul>
             </section>
           )}
 
