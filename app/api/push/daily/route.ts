@@ -1,23 +1,19 @@
 // ============================================================
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
 // FILE: app/api/push/daily/route.ts
-// VERSION: v1.0 — Scheduled web-push engine (Vercel Cron → OneSignal)
+// VERSION: v1.2 — CEO-final 5-slot themes
 // DATE: 2026-06-04
-// WHAT IT DOES:
-//   Called automatically by Vercel Cron at fixed times. Each cron entry
-//   passes ?slot=<id>. The route looks up that slot's title/message/link
-//   from the SLOTS map and sends a web push to ALL subscribers via the
-//   OneSignal REST API. Fully hands-off — no dashboard work needed.
-// SECURITY:
-//   Protected by CRON_SECRET. Vercel Cron auto-sends
-//   "Authorization: Bearer <CRON_SECRET>". Anyone without it gets 401,
-//   so the public cannot trigger spam blasts.
-// ENV REQUIRED (already in Vercel: APP_ID + REST_API_KEY; add CRON_SECRET):
-//   ONESIGNAL_APP_ID
-//   ONESIGNAL_REST_API_KEY
-//   CRON_SECRET
-// EDIT COPY: change titles/messages/links in the SLOTS map below, then
-//   redeploy. (Later step: move copy to Supabase so no redeploy needed.)
+// SLOT SCHEDULE (IST):
+//   07:30  festival  -> Festival/Ekadashi/Amavasya + Do's & Don'ts
+//   10:00  muhurat   -> Shubh Muhurat / Rahu Kaal
+//   13:00  rashifal  -> Aaj ka Rashifal
+//   19:30  panchang  -> Kal ka Panchang / bade nakshatra gochar
+//   21:00  cta       -> Kundali CTA for nakshatra movement + Do's & Don'ts
+// NOTE: 'festival' & 'panchang' copy is generic for v1. Next step: make
+//   these dynamic by pulling tithi/festival/nakshatra from Supabase.
+// SECURITY: CRON_SECRET (Vercel Cron sends Bearer header). No secret = 401.
+// ENV (all already in Vercel): ONESIGNAL_APP_ID, ONESIGNAL_REST_API_KEY, CRON_SECRET
+// EDIT COPY: change SLOTS below, then redeploy.
 // ============================================================
 
 import { NextRequest, NextResponse } from "next/server";
@@ -27,41 +23,53 @@ export const runtime = "nodejs";
 
 const SITE = "https://trikalvaani.com";
 
-// ── Notification slots ──────────────────────────────────────
-// Add / remove / edit freely. Each key is referenced by ?slot=<key>
-// from vercel.json cron entries.
 const SLOTS: Record<
   string,
   { title: string; message: string; url: string }
 > = {
-  morning: {
-    title: "🌞 Aaj ka Rashifal taiyaar hai",
+  // 07:30 AM IST
+  festival: {
+    title: "🪔 Aaj ka Vrat, Tithi & Niyam",
     message:
-      "Trikaal Vaani par aaj ke graha aapke liye kya kehte hain — abhi dekhiye.",
-    url: `${SITE}/`,
-  },
-  evening: {
-    title: "🕉️ Kal ka Panchang & Shubh Muhurat",
-    message:
-      "Kal ke shubh-ashubh samay, Rahu Kaal aur tithi — pehle se jaan lijiye.",
+      "Aaj kya karein, kya na karein — Ekadashi/Amavasya/Purnima ke shubh niyam jaaniye.",
     url: `${SITE}/panchang`,
   },
-  // Example optional 3rd slot — keep disabled in vercel.json unless needed:
-  // midday: {
-  //   title: "⏳ Aaj ka Rahu Kaal",
-  //   message: "Aaj kaun se samay naya kaam shuru na karein — abhi check karein.",
-  //   url: `${SITE}/panchang`,
-  // },
+  // 10:00 AM IST
+  muhurat: {
+    title: "🕉️ Aaj ka Shubh Muhurat & Rahu Kaal",
+    message:
+      "Naya kaam shuru karne se pehle aaj ka shubh-ashubh samay jaan lijiye.",
+    url: `${SITE}/panchang`,
+  },
+  // 01:00 PM IST
+  rashifal: {
+    title: "🌞 Aaj ka Rashifal taiyaar hai",
+    message:
+      "Aaj ke graha aapke liye kya kehte hain — Trikaal Vaani par abhi dekhiye.",
+    url: `${SITE}/`,
+  },
+  // 07:30 PM IST
+  panchang: {
+    title: "🔔 Kal ka Panchang & Nakshatra Gochar",
+    message:
+      "Kal ka tithi, shubh muhurat aur bade graha-nakshatra badlaav — pehle se taiyaar rahiye.",
+    url: `${SITE}/panchang`,
+  },
+  // 09:00 PM IST
+  cta: {
+    title: "🌙 Nakshatra badal raha hai — aap taiyaar hain?",
+    message:
+      "Is gochar ka aap par kya asar? Apni free kundali se do's & don'ts jaaniye.",
+    url: `${SITE}/`,
+  },
 };
 
 export async function GET(req: NextRequest) {
-  // 1) Auth — only Vercel Cron (or holder of CRON_SECRET) can fire this
   const auth = req.headers.get("authorization");
   if (!process.env.CRON_SECRET || auth !== `Bearer ${process.env.CRON_SECRET}`) {
     return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
   }
 
-  // 2) Which slot?
   const slot = req.nextUrl.searchParams.get("slot") || "";
   const payload = SLOTS[slot];
   if (!payload) {
@@ -71,7 +79,6 @@ export async function GET(req: NextRequest) {
     );
   }
 
-  // 3) Env check
   const appId = process.env.ONESIGNAL_APP_ID;
   const apiKey = process.env.ONESIGNAL_REST_API_KEY;
   if (!appId || !apiKey) {
@@ -81,7 +88,6 @@ export async function GET(req: NextRequest) {
     );
   }
 
-  // 4) Send to all subscribers via OneSignal REST API
   try {
     const res = await fetch("https://api.onesignal.com/notifications", {
       method: "POST",
