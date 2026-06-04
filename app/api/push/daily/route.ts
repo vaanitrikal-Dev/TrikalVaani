@@ -1,19 +1,19 @@
 // ============================================================
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
 // FILE: app/api/push/daily/route.ts
-// VERSION: v1.3 — Robust OneSignal auth (Key + Basic fallback) + error logging
-// DATE: 2026-06-04
-// CHANGES vs v1.2:
-//   ✅ FIX: cron fired but OneSignal returned non-2xx (502 in our logs).
-//      Root cause: auth header format mismatch. New OneSignal keys use
-//      "Authorization: Key <key>"; legacy REST API keys use
-//      "Authorization: Basic <key>". We now TRY "Key" first and, on
-//      401/403, automatically RETRY with "Basic" — works with either key.
-//   ✅ console.error logs the exact OneSignal status + body so failures
-//      are visible in Vercel runtime logs.
-//   Slots/schedule unchanged from v1.2.
+// VERSION: v1.4 — Segment fix + clearer error logging
+// DATE: 2026-06-05
+// CHANGES vs v1.3:
+//   ✅ included_segments "Total Subscriptions" -> "Subscribed Users"
+//      (the standard send-to-all-subscribers segment; "Total Subscriptions"
+//      was likely being rejected -> 400 -> our 502).
+//   ✅ Removed target_channel (not needed when using included_segments;
+//      reduces 400 surface).
+//   ✅ Error log now leads with STATUS so it is readable even when truncated:
+//      "PUSH_ERR slot=cta status=400 body=..."
+//   Auth fallback (Key -> Basic) retained.
 // SECURITY: CRON_SECRET (Vercel Cron sends Bearer header). No secret = 401.
-// ENV (all already in Vercel): ONESIGNAL_APP_ID, ONESIGNAL_REST_API_KEY, CRON_SECRET
+// ENV (all in Vercel): ONESIGNAL_APP_ID, ONESIGNAL_REST_API_KEY, CRON_SECRET
 // ============================================================
 
 import { NextRequest, NextResponse } from "next/server";
@@ -62,12 +62,10 @@ const SLOTS: Record<
 async function sendOneSignal(appId: string, apiKey: string, payload: { title: string; message: string; url: string }) {
   const body = JSON.stringify({
     app_id: appId,
-    included_segments: ["Total Subscriptions"],
-    target_channel: "push",
+    included_segments: ["Subscribed Users"],
     headings: { en: payload.title },
     contents: { en: payload.message },
     url: payload.url,
-    web_url: payload.url,
   });
 
   const doFetch = (scheme: "Key" | "Basic") =>
@@ -80,9 +78,7 @@ async function sendOneSignal(appId: string, apiKey: string, payload: { title: st
       body,
     });
 
-  // Try modern "Key" auth first
   let res = await doFetch("Key");
-  // Legacy keys need "Basic" — retry on auth failure
   if (res.status === 401 || res.status === 403) {
     res = await doFetch("Basic");
   }
@@ -112,14 +108,14 @@ export async function GET(req: NextRequest) {
     const data = await res.json().catch(() => ({}));
 
     if (!res.ok) {
-      console.error(`[push/${slot}] OneSignal FAILED status=${res.status} body=${JSON.stringify(data)}`);
+      console.error(`PUSH_ERR slot=${slot} status=${res.status} body=${JSON.stringify(data)}`);
       return NextResponse.json({ ok: false, slot, status: res.status, onesignal: data }, { status: 502 });
     }
 
-    console.log(`[push/${slot}] OneSignal OK id=${data?.id ?? "?"} recipients=${data?.recipients ?? "?"}`);
+    console.log(`PUSH_OK slot=${slot} id=${data?.id ?? "?"} recipients=${data?.recipients ?? "?"}`);
     return NextResponse.json({ ok: true, slot, onesignal: data });
   } catch (err: any) {
-    console.error(`[push/${slot}] ERROR ${String(err?.message || err)}`);
+    console.error(`PUSH_ERR slot=${slot} EXCEPTION ${String(err?.message || err)}`);
     return NextResponse.json({ ok: false, slot, error: String(err?.message || err) }, { status: 500 });
   }
 }
