@@ -2,8 +2,18 @@
 // 🔱 TRIKAL VAANI — CEO PROTECTION HEADER
 // ════════════════════════════════════════════════════════════════════
 // File:    app/panchang/page.tsx
-// Version: v2.1
+// Version: v2.2
 // Owner:   Rohiit Gupta, Chief Vedic Architect
+// Changes vs v2.1:
+//   1. UI text + metadata converted to DEVANAGARI (Hindi) — Hindi-first test.
+//   2. og:locale en_IN → hi_IN. Date formatters en-IN → hi-IN so weekday/
+//      month render in Hindi (e.g. सोम, 16 मई).
+//   3. Schema name/description now Hindi. AUTHOR ENTITY (Rohiit Gupta /
+//      Chief Vedic Architect), BRAND (Trikaal Vaani) and ALL URLs are
+//      kept UNCHANGED for entity consistency across the site.
+//   4. ZERO logic change — Supabase queries, callVM VM fallback, ISR
+//      (revalidate 3600), 8s timeout, types, and full JSX structure are
+//      identical to v2.1. Only human-visible strings translated.
 // Changes vs v2.0:
 //   1. VM fallback fetch routed through lib/callVM.ts so the X-Trikal-Key
 //      auth header is injected automatically.
@@ -27,16 +37,16 @@ const SITE_URL = "https://trikalvaani.com";
 const VM_URL = "http://34.14.164.105:8001";
 
 export const metadata: Metadata = {
-  title: "Aaj Ka Panchang 2026 | Daily Tithi Nakshatra Rahu Kaal | Trikaal Vaani",
+  title: "आज का पंचांग 2026 | आज की तिथि, नक्षत्र, राहु काल और शुभ मुहूर्त | Trikaal Vaani",
   description:
-    "Daily Vedic Panchang. Today's Tithi, Nakshatra, Yoga, Karana, Rahu Kaal, Sunrise & upcoming festivals including Diwali, Navratri, Janmashtami. Swiss Ephemeris, Lahiri Ayanamsha. By Rohiit Gupta.",
+    "रोज़ का वैदिक पंचांग। आज की तिथि, नक्षत्र, योग, करण, राहु काल, सूर्योदय और दिवाली, नवरात्रि, जन्माष्टमी जैसे आने वाले त्योहार। Swiss Ephemeris और लाहिरी अयनांश पर आधारित। Rohiit Gupta द्वारा।",
   alternates: { canonical: `${SITE_URL}/panchang` },
   openGraph: {
-    title: "Aaj Ka Panchang | Trikaal Vaani",
-    description: "Daily Tithi, Nakshatra, Rahu Kaal & upcoming Vedic festivals. Swiss Ephemeris.",
+    title: "आज का पंचांग | Trikaal Vaani",
+    description: "आज की तिथि, नक्षत्र, राहु काल और आने वाले वैदिक त्योहार। Swiss Ephemeris पर आधारित।",
     url: `${SITE_URL}/panchang`,
     siteName: "Trikaal Vaani",
-    locale: "en_IN",
+    locale: "hi_IN",
     type: "website",
   },
   robots: { index: true, follow: true },
@@ -98,14 +108,14 @@ function getISTDate60DaysAhead(): string {
 
 function formatShort(yyyymmdd: string): string {
   const [y, m, d] = yyyymmdd.split("-").map(Number);
-  return new Date(Date.UTC(y, m - 1, d)).toLocaleDateString("en-IN", {
+  return new Date(Date.UTC(y, m - 1, d)).toLocaleDateString("hi-IN", {
     weekday: "short", day: "numeric", month: "short", timeZone: "UTC",
   });
 }
 
 function formatFull(yyyymmdd: string): string {
   const [y, m, d] = yyyymmdd.split("-").map(Number);
-  return new Date(Date.UTC(y, m - 1, d)).toLocaleDateString("en-IN", {
+  return new Date(Date.UTC(y, m - 1, d)).toLocaleDateString("hi-IN", {
     weekday: "long", day: "numeric", month: "long", year: "numeric", timeZone: "UTC",
   });
 }
@@ -154,7 +164,7 @@ export default async function PanchangHubPage() {
         todayRow = {
           date: today,
           tithi: `${vm.tithi.name} (${vm.tithi.paksha})`,
-          nakshatra: `${vm.nakshatra.name} Pada ${vm.nakshatra.pada}`,
+          nakshatra: `${vm.nakshatra.name} पाद ${vm.nakshatra.pada}`,
           yoga: vm.yoga.name, karana: vm.karana.name,
           vara: vm.weekday ?? vm.vara ?? "",
           sunrise: vm.sunrise, sunset: vm.sunset, rahu_kaal: vm.rahu_kaal,
@@ -182,9 +192,10 @@ export default async function PanchangHubPage() {
   const schema = {
     "@context": "https://schema.org",
     "@type": "WebPage",
-    name: "Aaj Ka Panchang | Daily Vedic Panchang | Trikaal Vaani",
+    name: "आज का पंचांग | रोज़ का वैदिक पंचांग | Trikaal Vaani",
     url: `${SITE_URL}/panchang`,
-    description: "Daily Vedic Panchang with Tithi, Nakshatra, Yoga, Karana, Rahu Kaal and upcoming festivals.",
+    description: "आज की तिथि, नक्षत्र, योग, करण, राहु काल और आने वाले त्योहारों के साथ रोज़ का वैदिक पंचांग।",
+    inLanguage: "hi-IN",
     author: { "@type": "Person", name: "Rohiit Gupta", jobTitle: "Chief Vedic Architect", url: `${SITE_URL}/founder` },
     publisher: { "@type": "Organization", name: "Trikaal Vaani", url: SITE_URL },
   };
@@ -199,15 +210,15 @@ export default async function PanchangHubPage() {
           {/* Header */}
           <header className="mb-8 text-center">
             <p className="text-xs font-semibold uppercase tracking-widest text-amber-600 mb-2">
-              Swiss Ephemeris · Lahiri Ayanamsha
+              Swiss Ephemeris · लाहिरी अयनांश
             </p>
             <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
-              Aaj Ka Panchang
+              आज का पंचांग
             </h1>
             <p className="text-gray-500 text-sm">
-              {formatFull(today)} · By{" "}
+              {formatFull(today)} · लेखक —{" "}
               <Link href="/founder" className="text-amber-700 hover:underline">
-                Rohiit Gupta, Chief Vedic Architect
+                Rohiit Gupta, मुख्य वैदिक आर्किटेक्ट
               </Link>
             </p>
           </header>
@@ -217,35 +228,35 @@ export default async function PanchangHubPage() {
             <section className="mb-8 rounded-2xl border border-amber-200 bg-white shadow-sm overflow-hidden">
               <div className="bg-gradient-to-r from-amber-600 to-orange-500 px-6 py-4">
                 <h2 className="text-white font-bold text-lg">
-                  Today&apos;s Panchang — {formatShort(today)}
+                  आज का पंचांग — {formatShort(today)}
                 </h2>
                 {todayRow.geo_answer && (
                   <p className="text-amber-100 text-sm mt-1 leading-relaxed">{todayRow.geo_answer}</p>
                 )}
               </div>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-0 divide-x divide-y divide-gray-100">
-                <PCard label="Tithi"     value={todayRow.tithi} />
-                <PCard label="Nakshatra" value={todayRow.nakshatra} />
-                <PCard label="Yoga"      value={todayRow.yoga} />
-                <PCard label="Karana"    value={todayRow.karana} />
-                <PCard label="Sunrise"   value={todayRow.sunrise + " IST"} />
-                <PCard label="Sunset"    value={todayRow.sunset + " IST"} />
-                <PCard label="Rahu Kaal" value={todayRow.rahu_kaal} />
-                <PCard label="Weekday"   value={todayRow.vara} />
+                <PCard label="तिथि"      value={todayRow.tithi} />
+                <PCard label="नक्षत्र"    value={todayRow.nakshatra} />
+                <PCard label="योग"       value={todayRow.yoga} />
+                <PCard label="करण"       value={todayRow.karana} />
+                <PCard label="सूर्योदय"   value={todayRow.sunrise + " IST"} />
+                <PCard label="सूर्यास्त"  value={todayRow.sunset + " IST"} />
+                <PCard label="राहु काल"   value={todayRow.rahu_kaal} />
+                <PCard label="वार"        value={todayRow.vara} />
               </div>
               <div className="px-6 py-4 bg-amber-50">
                 <Link
                   href={`/panchang/${today}`}
                   className="inline-block rounded-lg bg-amber-600 text-white px-5 py-2.5 text-sm font-semibold hover:bg-amber-700 transition-colors"
                 >
-                  Full Details + Personal Reading →
+                  पूरी जानकारी + व्यक्तिगत भविष्यवाणी →
                 </Link>
               </div>
             </section>
           ) : (
             <section className="mb-8 rounded-2xl border border-amber-200 bg-amber-50 p-6 text-center">
-              <p className="text-amber-800 font-medium">Today&apos;s panchang is being computed...</p>
-              <p className="text-amber-600 text-sm mt-1">Check back in a few minutes.</p>
+              <p className="text-amber-800 font-medium">आज का पंचांग तैयार हो रहा है...</p>
+              <p className="text-amber-600 text-sm mt-1">कुछ मिनटों में फिर देखें।</p>
             </section>
           )}
 
@@ -254,15 +265,15 @@ export default async function PanchangHubPage() {
             {/* Upcoming Festivals — Dynamic from Supabase */}
             <section>
               <h2 className="text-xl font-bold text-gray-900 mb-4">
-                🪔 Upcoming Festivals & Occasions
+                🪔 आने वाले त्योहार और शुभ अवसर
               </h2>
               <div className="space-y-2">
                 {upcomingFestivals.length === 0 ? (
-                  <p className="text-gray-500 text-sm">No upcoming festivals found.</p>
+                  <p className="text-gray-500 text-sm">कोई आने वाला त्योहार नहीं मिला।</p>
                 ) : (
                   upcomingFestivals.map((f) => {
                     const diff = daysFromToday(f.date, today);
-                    const label = diff === 0 ? "Today" : diff === 1 ? "Tomorrow" : `In ${diff} days`;
+                    const label = diff === 0 ? "आज" : diff === 1 ? "कल" : `${diff} दिन बाद`;
                     return (
                       <Link
                         key={`${f.date}-${f.festival_slug}`}
@@ -293,7 +304,7 @@ export default async function PanchangHubPage() {
 
             {/* Recent Panchang Archive */}
             <section>
-              <h2 className="text-xl font-bold text-gray-900 mb-4">📅 Recent Panchang</h2>
+              <h2 className="text-xl font-bold text-gray-900 mb-4">📅 पिछले दिनों का पंचांग</h2>
               <div className="space-y-2">
                 {last7.map((d) => (
                   <Link
@@ -306,7 +317,7 @@ export default async function PanchangHubPage() {
                     </span>
                     {d === today && (
                       <span className="text-xs bg-amber-100 text-amber-700 font-semibold px-2 py-1 rounded-full">
-                        Today
+                        आज
                       </span>
                     )}
                   </Link>
@@ -314,15 +325,15 @@ export default async function PanchangHubPage() {
               </div>
 
               <div className="mt-6 rounded-xl bg-gradient-to-r from-amber-600 to-orange-600 p-5 text-white">
-                <h3 className="font-bold text-base">Get Personal Reading</h3>
+                <h3 className="font-bold text-base">अपनी व्यक्तिगत भविष्यवाणी पाएं</h3>
                 <p className="text-amber-100 text-sm mt-1">
-                  Based on your birth chart + today&apos;s planetary positions.
+                  आपकी जन्म कुंडली और आज की ग्रह स्थिति के आधार पर।
                 </p>
                 <Link
                   href="/predict"
                   className="mt-3 inline-block rounded-lg bg-white px-4 py-2 text-sm font-semibold text-amber-700 hover:bg-amber-50 transition-colors"
                 >
-                  Start Free →
+                  मुफ़्त शुरू करें →
                 </Link>
               </div>
             </section>
@@ -330,33 +341,33 @@ export default async function PanchangHubPage() {
 
           {/* SEO Content */}
           <section className="mt-8 prose prose-amber max-w-none">
-            <h2 className="text-xl font-semibold text-gray-900">What is Panchang?</h2>
+            <h2 className="text-xl font-semibold text-gray-900">पंचांग क्या है?</h2>
             <p className="text-gray-600 text-sm leading-relaxed">
-              Panchang (पंचांग) is the traditional Vedic almanac tracking five cosmic elements —
-              Tithi (lunar day), Nakshatra (moon&apos;s star), Yoga (sun-moon combination), Karana
-              (half-day), and Vara (weekday). Together they reveal the energetic quality of each
-              day and guide auspicious timing (Muhurta) for marriages, business launches, travel,
-              and spiritual practices. All calculations on Trikaal Vaani use Swiss Ephemeris with
-              Lahiri Ayanamsha — the standard accepted by the Government of India.
+              पंचांग (पंचांग) पाँच मुख्य तत्वों पर आधारित पारंपरिक वैदिक कैलेंडर है —
+              तिथि (चंद्र दिवस), नक्षत्र (चंद्रमा का तारा), योग (सूर्य-चंद्र संयोग), करण
+              (आधा तिथि), और वार (सप्ताह का दिन)। ये पाँचों मिलकर हर दिन की ऊर्जा बताते हैं
+              और विवाह, व्यापार आरंभ, यात्रा तथा धार्मिक कार्यों के लिए शुभ मुहूर्त तय करने में
+              मार्गदर्शन करते हैं। Trikaal Vaani पर सभी गणनाएँ Swiss Ephemeris और लाहिरी
+              अयनांश से की जाती हैं — जो भारत सरकार द्वारा मान्य मानक है।
             </p>
           </section>
 
           {/* Internal Links */}
           <section className="mt-6 border-t border-gray-200 pt-6">
             <p className="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-3">
-              Explore Life Domains
+              जीवन के क्षेत्र देखें
             </p>
             <div className="flex flex-wrap gap-2">
               {[
-                ["Career", "/career"], ["Wealth", "/wealth"], ["Marriage", "/marriage"],
-                ["Health", "/health"], ["Spirituality", "/spirituality"], ["Legal", "/legal"],
+                ["करियर", "/career"], ["धन", "/wealth"], ["विवाह", "/marriage"],
+                ["स्वास्थ्य", "/health"], ["अध्यात्म", "/spirituality"], ["कानूनी", "/legal"],
               ].map(([label, href]) => (
                 <Link
                   key={href}
                   href={href}
                   className="text-xs px-3 py-1.5 rounded-full border border-amber-200 text-amber-700 hover:bg-amber-50 transition-colors"
                 >
-                  {label} Astrology
+                  {label} ज्योतिष
                 </Link>
               ))}
             </div>
