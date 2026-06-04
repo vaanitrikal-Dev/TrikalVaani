@@ -1,25 +1,21 @@
 // ============================================================
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
 // FILE: app/layout.tsx
-// VERSION: v3.1 — Favicon fix + Organization logo URL corrected
-// DATE: 2026-06-01
-// CHANGES vs v3.0 (CEO-approved):
-//   ✅ FAVICON FIX (root cause of grey-globe in Google): the single
-//      icon: "/Trikal_Vaani_Logo.svg" (a RECTANGULAR wordmark — non-square,
-//      so Google rejected it and fell back to the default globe) is REPLACED
-//      with a proper SQUARE icon set served from /public:
-//        - /favicon.ico  (multi-size 16/32/48/64)
-//        - /icon-192.png, /icon-512.png
-//        - /apple-touch-icon.png (180)
-//      Source art = cropped owl + third-eye mark from Trikal_Logo.png.
-//   ✅ ORG LOGO URL FIXED: schema logo pointed to /logo.png (404 — file does
-//      not exist in /public). Now points to the real /Trikal_Logo.png
-//      (1440x1440 square). Helps brand/knowledge-panel signals.
-//   NOTE: Trikal_Vaani_Logo.svg stays in /public (still referenced elsewhere);
-//      it is simply no longer used as the favicon.
+// VERSION: v3.2 — OneSignal Web Push initializer wired in
+// DATE: 2026-06-04
+// CHANGES vs v3.1 (CEO-approved):
+//   ✅ ADDED: import OneSignalInit from "@/components/OneSignalInit";
+//   ✅ ADDED: <OneSignalInit /> rendered inside <body> (loads OneSignal v16
+//      Web SDK + init on every page so visitors can opt into push).
+//      Requires: components/OneSignalInit.tsx (v1.0) and
+//                public/OneSignalSDKWorker.js (v1.0) to be present.
 //   PROTECTED (untouched): all metadata copy, titles, OG/twitter, keywords,
-//      verification token, canonical/languages, Organization + WebApplication
-//      schema bodies, Razorpay preloads, SchemaScript/TrikalVoice/Analytics.
+//      icons/favicon set, verification token, canonical/languages,
+//      Organization + WebApplication schema bodies, Razorpay preloads,
+//      performance hints, SchemaScript/TrikalVoice/Analytics.
+// ------------------------------------------------------------
+// Prior — v3.1 (2026-06-01): Favicon fix (square icon set) + Org logo URL
+//   corrected to /Trikal_Logo.png (1440x1440).
 // ============================================================
 
 import type { Metadata } from "next";
@@ -28,6 +24,7 @@ import Script from "next/script";
 import "./globals.css";
 import SchemaScript from "@/components/SchemaScript";
 import TrikalVoice from "@/components/Trikal/TrikalVoice";
+import OneSignalInit from "@/components/OneSignalInit";
 import { Analytics } from "@vercel/analytics/next";
 
 
@@ -288,6 +285,8 @@ export default function RootLayout({
         <SchemaScript />
         {/* TrikalVoice: floating mic — appears on ALL pages globally */}
         <TrikalVoice />
+        {/* OneSignalInit: loads OneSignal v16 Web Push SDK + init globally */}
+        <OneSignalInit />
         <Analytics />
 
       </body>
