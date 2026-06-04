@@ -3,71 +3,35 @@
  * TRIKAAL VAANI — BirthForm Component
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: components/landing/BirthForm.tsx
- * VERSION: 9.7 — Delhi NCR removed (CEO Decision #6, global positioning)
+ * VERSION: 9.8 — OneSignal abandoned-kundali tagging
  * SIGNED: ROHIIT GUPTA, CEO
+ *
+ * v9.8 CHANGES vs v9.7 (CEO-approved):
+ *   ✅ OneSignal web-push tagging added for "abandoned kundali"
+ *      re-engagement automation:
+ *      - tagOneSignal() helper (deferred, safe, no-op on server)
+ *      - When user enters NAME + DOB → tag kundali_status=started
+ *        (fires once via startedTaggedRef)
+ *      - When prediction succeeds (free + paid + voice) →
+ *        tag kundali_status=completed
+ *      OneSignal Journey then sends a 1-hour reminder ONLY to
+ *      users still tagged "started" (i.e. did not complete).
+ *   ✅ ALL v9.7 logic preserved 100%: Razorpay flow, maps-proxy
+ *      (LOCKED, untouched), 4-field Google Places autocomplete,
+ *      numerology, Person 2 section, validations, segment routing,
+ *      schema, hidden SEO, hero/footer copy — nothing else changed.
  *
  * v9.7 CHANGES vs v9.6 (CEO-approved):
  *   ✅ "Delhi NCR" REMOVED from all 3 visible/SEO spots per CEO
- *      Decision #6 (global positioning): hero subtitle, hidden SEO
- *      author line, and footer author line. Rohiit Gupta + Chief
- *      Vedic Architect retained as E-E-A-T author entity.
+ *      Decision #6 (global positioning).
  *
  * v9.6 CHANGES vs v9.5 (CEO-approved, IR-0 + brand compliant):
- *   ✅ MODEL NAMES REMOVED (tech-stack leak): "Gemini 2.5 Pro",
- *      "Gemini Pro 2.5", and "Claude Sonnet polish" stripped from
- *      (a) TierSelector paid info box, (b) paid tier card `desc`,
- *      (c) SERVICE_OFFER_SCHEMA Deep Reading description. User /
- *      AI search should never see the underlying model stack.
- *   ✅ COMPETITOR NAMES REMOVED: "AstroTalk" (paid info box) and
- *      "AstroTalk and AstroSage" (hidden SEO) reframed to neutral
- *      value comparison — no competitor named on-site.
- *   ✅ FAKE SUPERLATIVES REMOVED (IR-0): "India's Most Accurate" /
- *      "India's most accurate" deleted from schema brand slogan,
- *      hero subtitle, and hidden SEO copy. Replaced with honest,
- *      defensible positioning (Swiss Ephemeris precision, BPHS).
- *   ✅ ALL v9.5 logic preserved 100%: Razorpay flow, maps-proxy
- *      (LOCKED, untouched), 4-field Google Places autocomplete,
- *      numerology, Person 2 section, validations, segment routing.
+ *   ✅ MODEL NAMES REMOVED (tech-stack leak)
+ *   ✅ COMPETITOR NAMES REMOVED
+ *   ✅ FAKE SUPERLATIVES REMOVED (IR-0)
+ *   ✅ ALL v9.5 logic preserved 100%
  *
- *   ⚠️ FLAGGED (NOT changed — needs CEO call): "Delhi NCR" still
- *      appears in hero subtitle + hidden SEO. Memory shows CEO
- *      Decision #6 removed visible Delhi NCR (TrustStrip), but the
- *      local-SEO brief wants Delhi NCR dominance. Conflict — left
- *      as-is pending your decision.
- *
- * v9.5 CHANGES vs v9.4:
- *   ✅ Person 2 "Their Current City" now uses CityInput (Google Places)
- *   ✅ ALL 4 city fields now consistent: Place of Birth, Current City,
- *      Person 2 Place of Birth, Person 2 Current City — all autocomplete
- *   ✅ maps-proxy LOCKED & unchanged; ALL v9.4 logic preserved 100%
- *
- * v9.4 CHANGES vs v9.3:
- *   ✅ Current City now uses CityInput (same Google Places API as Place of Birth)
- *   ✅ Autocomplete dropdown, city suggestions, ✓ confirmation tick
- *   ✅ Zero new API calls — reuses existing maps-proxy (LOCKED, unchanged)
- *   ✅ onSelect stores only city name (lat/lng/tz not needed for currentCity)
- *   ✅ ALL v9.3 logic preserved 100%
- *   ✅ All VISIBLE/persona "Trikal" → "Trikaal" (Trikaal Ka Sandesh,
- *      Trikaal ki Awaaz, Trikaal Voice/AI, "Tell Trikaal", submit button,
- *      hidden SEO copy, Service/Offer JSON-LD name & brand fields)
- *   ✅ PROTECTED (unchanged): trikalvaani.com URLs, legalName "Trikal Vaani",
- *      meta keywords alt-spelling, code identifiers
- *   ✅ ALL v9.2 logic preserved 100%
- *
- * v9.2 CHANGES vs v9.1:
- *   ✅ Razorpay payment flow for ₹51 (paid) and ₹11 (voice) tiers
- *   ✅ Loads checkout.razorpay.com/v1/checkout.js dynamically
- *   ✅ Calls /api/create-order → opens popup → /api/verify-payment → /api/predict
- *   ✅ Razorpay trust strip below tier selector
- *   ✅ Service + Offer JSON-LD with priceSpecification (₹51, ₹11) for AI search
- *   ✅ PaymentMethod schema injection
- *   ✅ Hidden SEO content expanded with Razorpay + PCI-DSS + WhatsApp
- *   ✅ aria-labels on payment buttons (accessibility + SEO)
- *   ✅ ALL v9.1 logic preserved 100%:
- *      - New Places API (POST), reverseGeocode, fetchTimezone
- *      - Numerology compatibility for dual-chart domains
- *      - 27 country selector, dynamic segment routing
- *      - All field validations, dual chart Person 2 section
+ * v9.5 / v9.4 / v9.2 / v9.1: see git history — all logic preserved.
  * ============================================================
  */
 
@@ -76,6 +40,17 @@
 import { useState, useCallback, useRef, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { loadRazorpayScript, openRazorpayCheckout } from "@/lib/razorpay-helper"
+
+// ── OneSignal tagging helper (v9.8) ──────────────────────────────────────────
+// Safe, deferred. Does nothing on server. Used for abandoned-kundali Journey.
+function tagOneSignal(tags: Record<string, string>) {
+  if (typeof window === 'undefined') return
+  const w = window as any
+  w.OneSignalDeferred = w.OneSignalDeferred || []
+  w.OneSignalDeferred.push(async (OneSignal: any) => {
+    try { await OneSignal.User.addTags(tags) } catch { /* no-op */ }
+  })
+}
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -829,12 +804,21 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
   const [locating,       setLocating]       = useState(false)
 
   const loadingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const startedTaggedRef   = useRef(false)   // v9.8: ensures kundali_status=started fires once
   const isDualDomain = DUAL_CHART_DOMAINS.includes(selectedCategory?.id ?? '')
 
   const set = useCallback(<K extends keyof BirthFormFields>(key: K, value: BirthFormFields[K]) => {
     setFields(prev => ({ ...prev, [key]: value }))
     setErrors(prev => ({ ...prev, [key]: undefined }))
   }, [])
+
+  // ── v9.8: tag "started" once user shows intent (name + DOB filled) ──────────
+  useEffect(() => {
+    if (!startedTaggedRef.current && fields.name.trim() && fields.dateOfBirth) {
+      startedTaggedRef.current = true
+      tagOneSignal({ kundali_status: 'started', kundali_started_at: String(Date.now()) })
+    }
+  }, [fields.name, fields.dateOfBirth])
 
   // ── Pre-load Razorpay script when paid/voice selected ───────────────────────
   useEffect(() => {
@@ -973,6 +957,9 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
       }
       if (onSubmit) await onSubmit(fields)
 
+      // v9.8: prediction succeeded → mark completed so abandoned-reminder won't fire
+      tagOneSignal({ kundali_status: 'completed' })
+
       const publicSlug   = data?._meta?.publicSlug   ?? null
       const predictionId = data?._meta?.predictionId ?? null
 
@@ -1040,6 +1027,8 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
 
           // Step 5: For voice tier, redirect to /voice with payment proof
           if (tier === 'voice') {
+            // v9.8: voice purchase done → mark completed
+            tagOneSignal({ kundali_status: 'completed' })
             const voiceUrl = `/voice?name=${encodeURIComponent(fields.name)}&lang=${fields.language}&pid=${response.razorpay_payment_id}`
             router.push(voiceUrl)
             return
