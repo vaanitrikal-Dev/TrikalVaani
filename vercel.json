@@ -3,7 +3,7 @@
   "crons": [
     {
       "path": "/api/cron/panchang-generate",
-      "schedule": "30 22 * * *"
+      "schedule": "30 23 * * *"
     },
     {
       "path": "/api/push/daily?slot=festival",
