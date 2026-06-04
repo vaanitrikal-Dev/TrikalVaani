@@ -1,19 +1,19 @@
 // ============================================================
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
 // FILE: app/api/push/daily/route.ts
-// VERSION: v1.2 — CEO-final 5-slot themes
+// VERSION: v1.3 — Robust OneSignal auth (Key + Basic fallback) + error logging
 // DATE: 2026-06-04
-// SLOT SCHEDULE (IST):
-//   07:30  festival  -> Festival/Ekadashi/Amavasya + Do's & Don'ts
-//   10:00  muhurat   -> Shubh Muhurat / Rahu Kaal
-//   13:00  rashifal  -> Aaj ka Rashifal
-//   19:30  panchang  -> Kal ka Panchang / bade nakshatra gochar
-//   21:00  cta       -> Kundali CTA for nakshatra movement + Do's & Don'ts
-// NOTE: 'festival' & 'panchang' copy is generic for v1. Next step: make
-//   these dynamic by pulling tithi/festival/nakshatra from Supabase.
+// CHANGES vs v1.2:
+//   ✅ FIX: cron fired but OneSignal returned non-2xx (502 in our logs).
+//      Root cause: auth header format mismatch. New OneSignal keys use
+//      "Authorization: Key <key>"; legacy REST API keys use
+//      "Authorization: Basic <key>". We now TRY "Key" first and, on
+//      401/403, automatically RETRY with "Basic" — works with either key.
+//   ✅ console.error logs the exact OneSignal status + body so failures
+//      are visible in Vercel runtime logs.
+//   Slots/schedule unchanged from v1.2.
 // SECURITY: CRON_SECRET (Vercel Cron sends Bearer header). No secret = 401.
 // ENV (all already in Vercel): ONESIGNAL_APP_ID, ONESIGNAL_REST_API_KEY, CRON_SECRET
-// EDIT COPY: change SLOTS below, then redeploy.
 // ============================================================
 
 import { NextRequest, NextResponse } from "next/server";
@@ -27,35 +27,30 @@ const SLOTS: Record<
   string,
   { title: string; message: string; url: string }
 > = {
-  // 07:30 AM IST
   festival: {
     title: "🪔 Aaj ka Vrat, Tithi & Niyam",
     message:
       "Aaj kya karein, kya na karein — Ekadashi/Amavasya/Purnima ke shubh niyam jaaniye.",
     url: `${SITE}/panchang`,
   },
-  // 10:00 AM IST
   muhurat: {
     title: "🕉️ Aaj ka Shubh Muhurat & Rahu Kaal",
     message:
       "Naya kaam shuru karne se pehle aaj ka shubh-ashubh samay jaan lijiye.",
     url: `${SITE}/panchang`,
   },
-  // 01:00 PM IST
   rashifal: {
     title: "🌞 Aaj ka Rashifal taiyaar hai",
     message:
       "Aaj ke graha aapke liye kya kehte hain — Trikaal Vaani par abhi dekhiye.",
     url: `${SITE}/`,
   },
-  // 07:30 PM IST
   panchang: {
     title: "🔔 Kal ka Panchang & Nakshatra Gochar",
     message:
       "Kal ka tithi, shubh muhurat aur bade graha-nakshatra badlaav — pehle se taiyaar rahiye.",
     url: `${SITE}/panchang`,
   },
-  // 09:00 PM IST
   cta: {
     title: "🌙 Nakshatra badal raha hai — aap taiyaar hain?",
     message:
@@ -63,6 +58,36 @@ const SLOTS: Record<
     url: `${SITE}/`,
   },
 };
+
+async function sendOneSignal(appId: string, apiKey: string, payload: { title: string; message: string; url: string }) {
+  const body = JSON.stringify({
+    app_id: appId,
+    included_segments: ["Total Subscriptions"],
+    target_channel: "push",
+    headings: { en: payload.title },
+    contents: { en: payload.message },
+    url: payload.url,
+    web_url: payload.url,
+  });
+
+  const doFetch = (scheme: "Key" | "Basic") =>
+    fetch("https://api.onesignal.com/notifications", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json; charset=utf-8",
+        Authorization: `${scheme} ${apiKey}`,
+      },
+      body,
+    });
+
+  // Try modern "Key" auth first
+  let res = await doFetch("Key");
+  // Legacy keys need "Basic" — retry on auth failure
+  if (res.status === 401 || res.status === 403) {
+    res = await doFetch("Basic");
+  }
+  return res;
+}
 
 export async function GET(req: NextRequest) {
   const auth = req.headers.get("authorization");
@@ -73,51 +98,28 @@ export async function GET(req: NextRequest) {
   const slot = req.nextUrl.searchParams.get("slot") || "";
   const payload = SLOTS[slot];
   if (!payload) {
-    return NextResponse.json(
-      { ok: false, error: `Unknown slot: ${slot}` },
-      { status: 400 }
-    );
+    return NextResponse.json({ ok: false, error: `Unknown slot: ${slot}` }, { status: 400 });
   }
 
   const appId = process.env.ONESIGNAL_APP_ID;
   const apiKey = process.env.ONESIGNAL_REST_API_KEY;
   if (!appId || !apiKey) {
-    return NextResponse.json(
-      { ok: false, error: "Missing OneSignal env vars" },
-      { status: 500 }
-    );
+    return NextResponse.json({ ok: false, error: "Missing OneSignal env vars" }, { status: 500 });
   }
 
   try {
-    const res = await fetch("https://api.onesignal.com/notifications", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json; charset=utf-8",
-        Authorization: `Key ${apiKey}`,
-      },
-      body: JSON.stringify({
-        app_id: appId,
-        included_segments: ["Total Subscriptions"],
-        headings: { en: payload.title },
-        contents: { en: payload.message },
-        url: payload.url,
-        web_url: payload.url,
-      }),
-    });
+    const res = await sendOneSignal(appId, apiKey, payload);
+    const data = await res.json().catch(() => ({}));
 
-    const data = await res.json();
     if (!res.ok) {
-      return NextResponse.json(
-        { ok: false, slot, status: res.status, onesignal: data },
-        { status: 502 }
-      );
+      console.error(`[push/${slot}] OneSignal FAILED status=${res.status} body=${JSON.stringify(data)}`);
+      return NextResponse.json({ ok: false, slot, status: res.status, onesignal: data }, { status: 502 });
     }
 
+    console.log(`[push/${slot}] OneSignal OK id=${data?.id ?? "?"} recipients=${data?.recipients ?? "?"}`);
     return NextResponse.json({ ok: true, slot, onesignal: data });
   } catch (err: any) {
-    return NextResponse.json(
-      { ok: false, slot, error: String(err?.message || err) },
-      { status: 500 }
-    );
+    console.error(`[push/${slot}] ERROR ${String(err?.message || err)}`);
+    return NextResponse.json({ ok: false, slot, error: String(err?.message || err) }, { status: 500 });
   }
 }
