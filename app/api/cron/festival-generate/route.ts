@@ -3,20 +3,31 @@
  * 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER 🔱
  * ============================================================================
  * File:    app/api/cron/festival-generate/route.ts
- * Version: v1.0
+ * Version: v1.1
  * Owner:   Rohiit Gupta, Chief Vedic Architect
  * Domain:  trikalvaani.com
  *
  * PURPOSE:
  *   Generates CLEAN festival page content into festivals_master using the
- *   locked template prompt (lib/gemini-prompt-festival.ts). This is the
- *   "Golden Engine" Layer-1 generator. Replaces the old one-time fill.
+ *   locked template prompt (lib/gemini-prompt-festival.ts). "Golden Engine"
+ *   Layer-1 generator.
  *
- * HOW TO RUN:
- *   • One festival (testing):  GET /api/cron/festival-generate?slug=diwali-2026&key=<CRON_SECRET>
- *   • Next 90 days (default):  GET /api/cron/festival-generate?key=<CRON_SECRET>
- *   • Everything:              GET /api/cron/festival-generate?force=all&key=<CRON_SECRET>
- *   • Tune window/cap:         &days=120 &limit=20
+ * ── Changes vs v1.0 ────────────────────────────────────────────────
+ *   1. Simple MANUAL_KEY ("trikaal-engine-2026") so it can be triggered from
+ *      a browser without the Vercel CRON_SECRET. (Vercel's scheduled cron
+ *      still auto-authenticates via its own Bearer CRON_SECRET — no key needed.)
+ *   2. Default/cron mode now only fills MISSING festivals (is_indexed=false)
+ *      inside the window — cheap, self-healing. force=all regenerates all.
+ *
+ * HOW TO RUN (manual, browser/mobile):
+ *   • Everything now:   /api/cron/festival-generate?force=all&limit=50&key=trikaal-engine-2026
+ *   • One festival:     /api/cron/festival-generate?slug=diwali-2026&key=trikaal-engine-2026
+ *   • Fill only new:    /api/cron/festival-generate?key=trikaal-engine-2026
+ *
+ * AUTO (Vercel cron): add to vercel.json crons →
+ *   { "path": "/api/cron/festival-generate", "schedule": "0 1 * * 1" }   // weekly
+ *   Vercel injects Authorization: Bearer CRON_SECRET automatically; the cron
+ *   run fills only missing upcoming festivals (cheap).
  *
  * IRON RULES:
  *   - Uses gemini-prompt-festival.ts ONLY. Never touches gemini-prompt.ts or
@@ -45,6 +56,7 @@ export const maxDuration = 300;
 
 const SITE_URL = process.env.SITE_URL || "https://trikalvaani.com";
 const CRON_SECRET = process.env.CRON_SECRET;
+const MANUAL_KEY = "trikaal-engine-2026"; // simple browser-trigger key (rotate later if you like)
 const DEFAULT_DAYS = 90; // rich-content window
 const DEFAULT_LIMIT = 12; // cap per run to stay under maxDuration
 
@@ -75,6 +87,7 @@ function isAuthorized(req: NextRequest): boolean {
   const auth = req.headers.get("authorization");
   if (CRON_SECRET && auth === "Bearer " + CRON_SECRET) return true;
   const key = req.nextUrl.searchParams.get("key");
+  if (key && key === MANUAL_KEY) return true;
   if (CRON_SECRET && key === CRON_SECRET) return true;
   return false;
 }
@@ -188,7 +201,7 @@ export async function GET(req: NextRequest) {
         const end = new Date(Date.now() + 5.5 * 60 * 60 * 1000 + days * 86400 * 1000)
           .toISOString()
           .split("T")[0];
-        q = q.gte("date", today).lte("date", end);
+        q = q.gte("date", today).lte("date", end).eq("is_indexed", false); // only fill missing
       }
       const { data } = await q.order("date", { ascending: true }).limit(limit);
       rows = (data as FestivalRow[]) ?? [];
