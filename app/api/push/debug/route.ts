@@ -1,14 +1,11 @@
 // ============================================================
 // CEO: Rohiit Gupta | Trikaal Vaani
 // FILE: app/api/push/debug/route.ts
-// VERSION: v1.0 — TEMPORARY diagnostic. DELETE after we fix the cron.
-// PURPOSE: Open in browser to see the EXACT OneSignal response.
-//   Tries auth schemes (Key, Basic) x segments (Subscribed Users,
-//   Total Subscriptions) and reports each attempt's status + body,
-//   stopping at the first success. Sends a real (small) test push
-//   to your own subscribers only.
+// VERSION: v2.0 — TEMPORARY diagnostic. DELETE after fix confirmed.
+// PURPOSE: Try real send to each EXISTING segment and report the
+//   recipients count + errors. Success = a notification with a real id
+//   and recipients > 0 (NOT just HTTP 200).
 // USAGE: https://trikalvaani.com/api/push/debug?t=trikaal_debug_2026
-// SECURITY: guarded by a fixed token ?t=. Remove this file once fixed.
 // ============================================================
 
 import { NextRequest, NextResponse } from "next/server";
@@ -26,48 +23,45 @@ export async function GET(req: NextRequest) {
   const appId = process.env.ONESIGNAL_APP_ID;
   const apiKey = process.env.ONESIGNAL_REST_API_KEY;
   if (!appId || !apiKey) {
-    return NextResponse.json({ ok: false, error: "Missing env vars", hasAppId: !!appId, hasKey: !!apiKey });
+    return NextResponse.json({ ok: false, error: "Missing env vars" });
   }
 
-  const schemes: Array<"Key" | "Basic"> = ["Key", "Basic"];
-  const segments = ["Subscribed Users", "Total Subscriptions"];
+  // Segments that actually exist in this OneSignal app
+  const segments = ["Total Subscriptions", "Active Subscriptions", "Subscribed Users"];
   const attempts: any[] = [];
+  let working: string | null = null;
 
   for (const seg of segments) {
-    for (const scheme of schemes) {
-      const body = JSON.stringify({
-        app_id: appId,
-        included_segments: [seg],
-        headings: { en: "🔧 Trikaal debug test" },
-        contents: { en: "Debug push — sab theek ho to ye notification aayegi." },
-        url: "https://trikalvaani.com",
+    const body = JSON.stringify({
+      app_id: appId,
+      included_segments: [seg],
+      headings: { en: "🔧 Trikaal debug" },
+      contents: { en: `Debug push via segment: ${seg}` },
+      url: "https://trikalvaani.com",
+    });
+
+    try {
+      const res = await fetch("https://api.onesignal.com/notifications", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json; charset=utf-8",
+          Authorization: `Key ${apiKey}`,
+        },
+        body,
       });
-
-      try {
-        const res = await fetch("https://api.onesignal.com/notifications", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json; charset=utf-8",
-            Authorization: `${scheme} ${apiKey}`,
-          },
-          body,
-        });
-        const data = await res.json().catch(() => ({}));
-        attempts.push({ segment: seg, scheme, status: res.status, ok: res.ok, body: data });
-
-        if (res.ok) {
-          return NextResponse.json({
-            result: "SUCCESS",
-            workingCombo: { segment: seg, scheme },
-            successResponse: data,
-            allAttempts: attempts,
-          });
-        }
-      } catch (err: any) {
-        attempts.push({ segment: seg, scheme, error: String(err?.message || err) });
-      }
+      const data = await res.json().catch(() => ({}));
+      const recipients = data?.recipients ?? 0;
+      const realSuccess = !!data?.id && recipients > 0;
+      attempts.push({ segment: seg, status: res.status, id: data?.id || "", recipients, errors: data?.errors || null });
+      if (realSuccess && !working) working = seg;
+    } catch (err: any) {
+      attempts.push({ segment: seg, error: String(err?.message || err) });
     }
   }
 
-  return NextResponse.json({ result: "ALL_FAILED", appIdLen: appId.length, keyPrefix: apiKey.slice(0, 8), allAttempts: attempts });
+  return NextResponse.json({
+    workingSegment: working,
+    verdict: working ? `USE THIS SEGMENT: ${working}` : "NO SEGMENT DELIVERED — devices may need re-subscribe",
+    attempts,
+  });
 }
