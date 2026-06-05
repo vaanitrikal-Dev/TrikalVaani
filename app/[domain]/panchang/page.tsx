@@ -50,7 +50,7 @@ type Panchang = {
 };
 
 const SITE_URL = "https://trikalvaani.com";
-const VM_BASE = "http://34.14.164.105:8001";
+const VM_BASE = "http://34.47.182.227:8001";
 const AUTHOR_NAME = "Rohiit Gupta";
 const AUTHOR_TITLE = "Chief Vedic Architect, Trikaal Vaani";
 

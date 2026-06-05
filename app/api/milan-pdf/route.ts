@@ -26,7 +26,7 @@ import { createClient } from '@supabase/supabase-js';
 import { callVM } from '@/lib/callVM';
 
 const VM_MILAN_PDF_ENDPOINT =
-  process.env.VM_MILAN_PDF_ENDPOINT ?? 'http://34.14.164.105:8001/milan-pdf';
+  process.env.VM_MILAN_PDF_ENDPOINT ?? 'http://34.47.182.227:8001/milan-pdf';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,

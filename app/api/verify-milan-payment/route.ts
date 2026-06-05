@@ -23,7 +23,7 @@ import crypto from 'crypto';
 import { callVM } from '@/lib/callVM';
 
 const VM_MILAN_ENDPOINT =
-  process.env.VM_MILAN_ENDPOINT ?? 'http://34.14.164.105:8001/milan-compute';
+  process.env.VM_MILAN_ENDPOINT ?? 'http://34.47.182.227:8001/milan-compute';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,

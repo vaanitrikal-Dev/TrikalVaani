@@ -94,7 +94,7 @@ async function fetchBackupSlot(md: MuhuratRow['muhurat_data']): Promise<BackupSl
     return null;
   }
   try {
-    const vmUrl = process.env.MUHURAT_VM_URL ?? 'http://34.14.164.105:8001';
+    const vmUrl = process.env.MUHURAT_VM_URL ?? 'http://34.47.182.227:8001';
     const res = await fetch(`${vmUrl}/muhurat-finder`, {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },

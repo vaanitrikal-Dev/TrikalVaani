@@ -52,7 +52,7 @@ const CITIES: CityContext[] = [
   { slug: "ahmedabad", name: "Ahmedabad",   state: "Gujarat",         lat: 23.0225, lon: 72.5714 },
 ];
 
-const VM_URL = process.env.VM_PANCHANG_URL || "http://34.14.164.105:8001";
+const VM_URL = process.env.VM_PANCHANG_URL || "http://34.47.182.227:8001";
 const SITE_URL = process.env.SITE_URL || "https://trikalvaani.com";
 const TARGET_LANG: Lang = "en";
 const CRON_SECRET = process.env.CRON_SECRET;

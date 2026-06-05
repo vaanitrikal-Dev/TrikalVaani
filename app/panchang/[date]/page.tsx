@@ -28,7 +28,7 @@ export const dynamicParams = true;
 const SITE_URL = "https://trikalvaani.com";
 const AUTHOR_NAME = "Rohiit Gupta";
 const AUTHOR_TITLE = "Chief Vedic Architect, Trikaal Vaani";
-const VM_URL = "http://34.14.164.105:8001";
+const VM_URL = "http://34.47.182.227:8001";
 
 // ── Types ─────────────────────────────────────────────────────────────
 type PanchangRow = {

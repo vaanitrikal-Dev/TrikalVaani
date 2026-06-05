@@ -34,7 +34,7 @@ import { callVM } from "@/lib/callVM";
 export const revalidate = 3600;
 
 const SITE_URL = "https://trikalvaani.com";
-const VM_URL = "http://34.14.164.105:8001";
+const VM_URL = "http://34.47.182.227:8001";
 
 export const metadata: Metadata = {
   title: "आज का पंचांग 2026 | आज की तिथि, नक्षत्र, राहु काल और शुभ मुहूर्त | Trikaal Vaani",

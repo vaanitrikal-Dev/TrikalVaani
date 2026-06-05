@@ -37,11 +37,11 @@ import { callVM } from '@/lib/callVM';
 
 // VM paid-muhurat endpoint (kundali + slot + doshas + 10 remedies)
 const VM_MUHURAT_PAID_ENDPOINT =
-  process.env.VM_MUHURAT_PAID_ENDPOINT ?? 'http://34.14.164.105:8001/muhurat-paid';
+  process.env.VM_MUHURAT_PAID_ENDPOINT ?? 'http://34.47.182.227:8001/muhurat-paid';
 
 // VM PDF endpoint (generates branded PDF, uploads to Supabase, saves pdf_url)
 const VM_MUHURAT_PDF_ENDPOINT =
-  process.env.VM_MUHURAT_PDF_ENDPOINT ?? 'http://34.14.164.105:8001/muhurat-pdf';
+  process.env.VM_MUHURAT_PDF_ENDPOINT ?? 'http://34.47.182.227:8001/muhurat-pdf';
 
 // Generation config (CEO LOCKED)
 const GEMINI_MODEL   = 'gemini-2.5-pro';

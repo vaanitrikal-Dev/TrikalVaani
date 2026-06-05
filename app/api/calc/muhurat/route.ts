@@ -10,7 +10,7 @@
 // ============================================================
 import { NextRequest, NextResponse } from 'next/server';
 import { callVM } from '@/lib/callVM';
-const VM_URL = process.env.VM_ENGINE_URL || 'http://34.14.164.105:8001';
+const VM_URL = process.env.VM_ENGINE_URL || 'http://34.47.182.227:8001';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 export async function POST(req: NextRequest) {

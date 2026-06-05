@@ -13,7 +13,7 @@
 //                     X-Trikal-Key auth header is injected automatically.
 //                     8s timeout, validation, ISR cache headers unchanged.
 // Stack:       Next.js 13.5 App Router + Vercel Pro
-// VM:          34.14.164.105:8001
+// VM:          34.47.182.227:8001
 // Lock Status: gemini-prompt.ts = PERMANENTLY LOCKED (do not touch)
 // Last Update: 2026-05-30
 // ════════════════════════════════════════════════════════════════════
@@ -25,7 +25,7 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic"; // never cache the proxy itself
 export const revalidate = 0;
 
-const VM_BASE = process.env.VM_PANCHANG_BASE || "http://34.14.164.105:8001";
+const VM_BASE = process.env.VM_PANCHANG_BASE || "http://34.47.182.227:8001";
 const TIMEOUT_MS = 8000;
 
 // ── Validation ───────────────────────────────────────────────────────

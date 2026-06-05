@@ -8,7 +8,7 @@
 // ============================================================
 
 // VM base URL. Override via Vercel env VM_ENGINE_URL if it ever moves.
-const VM_BASE = process.env.VM_ENGINE_URL || 'http://34.14.164.105:8001';
+const VM_BASE = process.env.VM_ENGINE_URL || 'http://34.47.182.227:8001';
 
 // Secret key that matches the lock on the VM. Set in Vercel env.
 const TRIKAL_VM_KEY = process.env.TRIKAL_VM_KEY || '';

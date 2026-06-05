@@ -25,7 +25,7 @@ import { polishKarmicNarrative }    from '@/lib/claude-polish';
 import { callVM }                   from '@/lib/callVM';
 
 const VM_KUNDALI_ENDPOINT =
-  process.env.VM_KUNDALI_ENDPOINT ?? 'http://34.14.164.105:8001/kundali';
+  process.env.VM_KUNDALI_ENDPOINT ?? 'http://34.47.182.227:8001/kundali';
 
 const GEMINI_MODEL   = 'gemini-2.5-pro';
 const GEMINI_MAX_TOK = 12000;

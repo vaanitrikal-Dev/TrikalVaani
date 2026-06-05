@@ -13,7 +13,7 @@ import { z } from 'zod';
 import { callVM } from '@/lib/callVM';
 
 const VM_KUNDALI_ENDPOINT =
-  process.env.VM_KUNDALI_ENDPOINT ?? 'http://34.14.164.105:8001/kundali';
+  process.env.VM_KUNDALI_ENDPOINT ?? 'http://34.47.182.227:8001/kundali';
 
 // Single-person birth input (form sends lat/lng/cityName OR canonical)
 const previewSchema = z

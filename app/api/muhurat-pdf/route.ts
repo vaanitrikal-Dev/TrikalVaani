@@ -27,7 +27,7 @@ import { createClient } from '@supabase/supabase-js';
 import { callVM } from '@/lib/callVM';
 
 const VM_MUHURAT_PDF_ENDPOINT =
-  process.env.VM_MUHURAT_PDF_ENDPOINT ?? 'http://34.14.164.105:8001/muhurat-pdf';
+  process.env.VM_MUHURAT_PDF_ENDPOINT ?? 'http://34.47.182.227:8001/muhurat-pdf';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
