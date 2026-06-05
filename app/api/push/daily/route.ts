@@ -1,17 +1,14 @@
 // ============================================================
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
 // FILE: app/api/push/daily/route.ts
-// VERSION: v1.4 — Segment fix + clearer error logging
+// VERSION: v1.5 — Correct segment "Total Subscriptions" (exists in this app)
 // DATE: 2026-06-05
-// CHANGES vs v1.3:
-//   ✅ included_segments "Total Subscriptions" -> "Subscribed Users"
-//      (the standard send-to-all-subscribers segment; "Total Subscriptions"
-//      was likely being rejected -> 400 -> our 502).
-//   ✅ Removed target_channel (not needed when using included_segments;
-//      reduces 400 surface).
-//   ✅ Error log now leads with STATUS so it is readable even when truncated:
-//      "PUSH_ERR slot=cta status=400 body=..."
-//   Auth fallback (Key -> Basic) retained.
+// CHANGES vs v1.4:
+//   ✅ included_segments -> "Total Subscriptions" (this app's DEFAULT
+//      segment that actually contains the push subscribers). "Subscribed
+//      Users" does NOT exist in this account, which caused
+//      "All included players are not subscribed" -> 0 recipients.
+//   Auth: "Key" confirmed working (debug returned 200). Basic fallback kept.
 // SECURITY: CRON_SECRET (Vercel Cron sends Bearer header). No secret = 401.
 // ENV (all in Vercel): ONESIGNAL_APP_ID, ONESIGNAL_REST_API_KEY, CRON_SECRET
 // ============================================================
@@ -22,6 +19,7 @@ export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
 const SITE = "https://trikalvaani.com";
+const SEGMENT = "Total Subscriptions";
 
 const SLOTS: Record<
   string,
@@ -62,7 +60,7 @@ const SLOTS: Record<
 async function sendOneSignal(appId: string, apiKey: string, payload: { title: string; message: string; url: string }) {
   const body = JSON.stringify({
     app_id: appId,
-    included_segments: ["Subscribed Users"],
+    included_segments: [SEGMENT],
     headings: { en: payload.title },
     contents: { en: payload.message },
     url: payload.url,
@@ -107,12 +105,15 @@ export async function GET(req: NextRequest) {
     const res = await sendOneSignal(appId, apiKey, payload);
     const data = await res.json().catch(() => ({}));
 
-    if (!res.ok) {
+    // Treat "0 recipients / not subscribed" as a real failure too
+    const noRecipients = !data?.id || (Array.isArray(data?.errors) && data.errors.length > 0);
+
+    if (!res.ok || noRecipients) {
       console.error(`PUSH_ERR slot=${slot} status=${res.status} body=${JSON.stringify(data)}`);
-      return NextResponse.json({ ok: false, slot, status: res.status, onesignal: data }, { status: 502 });
+      return NextResponse.json({ ok: false, slot, status: res.status, onesignal: data }, { status: res.ok ? 200 : 502 });
     }
 
-    console.log(`PUSH_OK slot=${slot} id=${data?.id ?? "?"} recipients=${data?.recipients ?? "?"}`);
+    console.log(`PUSH_OK slot=${slot} id=${data?.id} recipients=${data?.recipients ?? "?"}`);
     return NextResponse.json({ ok: true, slot, onesignal: data });
   } catch (err: any) {
     console.error(`PUSH_ERR slot=${slot} EXCEPTION ${String(err?.message || err)}`);
