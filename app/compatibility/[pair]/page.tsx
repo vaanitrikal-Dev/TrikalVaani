@@ -3,9 +3,26 @@
  * TRIKAL VAANI — Compatibility Page (Programmatic SEO/GEO)
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/compatibility/[pair]/page.tsx
- * VERSION: 1.2 — Karmic Background Reading CTA block (all 288 pages)
+ * VERSION: 1.3 — Logo + Accuracy reframe + Internal link mesh
  * SIGNED: ROHIIT GUPTA, CEO
  * ============================================================
+ * CHANGE LOG (v1.2 → v1.3):
+ *   1) LOGO: Visible Trikaal Vaani logo (/Trikal_Logo.png) added to
+ *      the hero header, linked to "/". Uses next/image (no lint warning,
+ *      auto-optimized). Fixes "logo missing" across ALL 288 pages.
+ *   2) ACCURACY REFRAME (CEO Decision A): Score-badge label changed from
+ *      "Ashtakoot Milan / अष्टकूट मिलान" → "Rashi Compatibility Score /
+ *      राशि अनुकूलता स्कोर". A page keyed only by Rashi cannot present a
+ *      definitive 36-guna Ashtakoot score (that needs both Nakshatras).
+ *      Score /36 visual kept (no data migration); the exact-Ashtakoot
+ *      clarification lives in geo_answer (DB) → routes to /kundali-milan.
+ *      L key renamed ashtakootScore → scoreLabel for clarity.
+ *   3) INTERNAL LINK MESH: New "Explore More" section (language-aware)
+ *      interlinking every page to calculators, authority articles,
+ *      life-domain pillars, and both products. One edit = 288 pages.
+ *   NOTHING ELSE CHANGED — all v1.2 logic/schemas/related-pairs/hreflang/
+ *   Milan CTA/Karmic CTA identical.
+ *
  * CHANGE LOG (v1.1 → v1.2):
  *   Added a Karmic Background Reading CTA block after the Milan CTA,
  *   before the FAQ. Language-aware (Hindi on ?lang=hi). Real <Link> to
@@ -22,6 +39,7 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { createClient } from '@supabase/supabase-js';
 
 // ── ISR: regenerate pages periodically, cache aggressively ───
@@ -168,7 +186,7 @@ export default async function CompatibilityPage(
   // ── Labels by language ─────────────────────────────────────
   const L = isHi ? {
     compatibility:  'राशि अनुकूलता',
-    ashtakootScore: 'अष्टकूट मिलान',
+    scoreLabel:     'राशि अनुकूलता स्कोर',
     outOf:          'में से',
     emotional:      'भावनात्मक अनुकूलता',
     communication:  'संवाद शैली',
@@ -187,9 +205,27 @@ export default async function CompatibilityPage(
     karmicTitle:    'अनुकूलता से आगे — वह इंसान असल में कैसा है?',
     karmicText:     'राशि अनुकूलता दो राशियों का मेल दिखाती है। पर विवाह दो इंसानों का रिश्ता है। किसी की कुंडली से उनके 6 कार्मिक पैटर्न — स्वभाव, निष्ठा, धन, परिवार का सम्मान, छुपी प्रवृत्ति और विवाह का भविष्य — भृगु नाड़ी के आधार पर जानें। किसी पर निर्णय नहीं, केवल समझ।',
     karmicButton:   'कार्मिक बैकग्राउंड रीडिंग ₹251 →',
+    exploreTitle:   'और जानें — मुफ़्त ज्योतिष टूल्स और सेवाएँ',
+    exploreLinks: [
+      { href: '/kundali-milan',                              label: 'पूर्ण कुंडली मिलान (₹51)' },
+      { href: '/calculators/free-rashi-calculator',          label: 'मुफ़्त राशि कैलकुलेटर' },
+      { href: '/calculators/free-kundali-calculator',        label: 'मुफ़्त कुंडली कैलकुलेटर' },
+      { href: '/calculators/free-nakshatra-calculator',      label: 'नक्षत्र कैलकुलेटर' },
+      { href: '/calculators/free-manglik-dosh-calculator',   label: 'मांगलिक दोष कैलकुलेटर' },
+      { href: '/blog/36-guna-milan-explained',               label: '36 गुण मिलान क्या है?' },
+      { href: '/blog/bhakoot-dosh-explained',                label: 'भकूट दोष की जानकारी' },
+      { href: '/blog/manglik-dosh-shaadi-mein-problem-upay', label: 'मांगलिक दोष: समस्या व उपाय' },
+      { href: '/learn/kundli-matching-online',               label: 'ऑनलाइन कुंडली मिलान गाइड' },
+      { href: '/relationships',                              label: 'रिश्ते व प्रेम ज्योतिष' },
+      { href: '/marriage',                                   label: 'विवाह ज्योतिष' },
+      { href: '/family',                                     label: 'परिवार ज्योतिष' },
+      { href: '/karmic-background-reading',                  label: 'कार्मिक बैकग्राउंड रीडिंग (₹251)' },
+      { href: '/calculators',                                label: 'सभी मुफ़्त कैलकुलेटर' },
+      { href: '/services',                                   label: 'सभी सेवाएँ' },
+    ],
   } : {
     compatibility:  'Compatibility',
-    ashtakootScore: 'Ashtakoot Milan',
+    scoreLabel:     'Rashi Compatibility Score',
     outOf:          'out of',
     emotional:      'Emotional Compatibility',
     communication:  'Communication Style',
@@ -208,6 +244,24 @@ export default async function CompatibilityPage(
     karmicTitle:    'Beyond Compatibility — Who Is This Person Really?',
     karmicText:     'Rashi compatibility shows how two signs match. But marriage is a bond between two people. A Karmic Background Reading reveals a person\'s 6 karmic patterns — personality, fidelity, money, family respect, hidden tendencies, and marriage outlook — read from their birth chart via Bhrigu Nandi Nadi. Patterns, not verdicts.',
     karmicButton:   'Karmic Background Reading ₹251 →',
+    exploreTitle:   'Explore More — Free Tools & Services',
+    exploreLinks: [
+      { href: '/kundali-milan',                              label: 'Full Kundali Milan (₹51)' },
+      { href: '/calculators/free-rashi-calculator',          label: 'Free Rashi Calculator' },
+      { href: '/calculators/free-kundali-calculator',        label: 'Free Kundali Calculator' },
+      { href: '/calculators/free-nakshatra-calculator',      label: 'Nakshatra Calculator' },
+      { href: '/calculators/free-manglik-dosh-calculator',   label: 'Manglik Dosh Calculator' },
+      { href: '/blog/36-guna-milan-explained',               label: 'What is 36 Guna Milan?' },
+      { href: '/blog/bhakoot-dosh-explained',                label: 'Bhakoot Dosh Explained' },
+      { href: '/blog/manglik-dosh-shaadi-mein-problem-upay', label: 'Manglik Dosh: Problems & Remedies' },
+      { href: '/learn/kundli-matching-online',               label: 'Online Kundli Matching Guide' },
+      { href: '/relationships',                              label: 'Relationships & Love Astrology' },
+      { href: '/marriage',                                   label: 'Marriage Astrology' },
+      { href: '/family',                                     label: 'Family Astrology' },
+      { href: '/karmic-background-reading',                  label: 'Karmic Background Reading (₹251)' },
+      { href: '/calculators',                                label: 'All Free Calculators' },
+      { href: '/services',                                   label: 'All Services' },
+    ],
   };
 
   // ── JSON-LD: FAQPage + Article + BreadcrumbList ────────────
@@ -274,6 +328,17 @@ export default async function CompatibilityPage(
 
       {/* HERO */}
       <header className="max-w-3xl mx-auto px-5 pt-8 pb-6 text-center">
+        {/* v1.3: visible brand logo (links to home) */}
+        <Link href="/" className="inline-block mb-4" aria-label="Trikaal Vaani">
+          <Image
+            src="/Trikal_Logo.png"
+            alt="Trikaal Vaani"
+            width={64}
+            height={64}
+            priority
+            className="mx-auto h-16 w-16 rounded-full"
+          />
+        </Link>
         <div className="inline-block mb-4 px-4 py-1 rounded-full bg-[#D4AF37]/10 border border-[#D4AF37]/30 text-[#D4AF37] text-[10px] tracking-[0.25em] uppercase">
           Trikaal Vaani · {L.compatibility}
         </div>
@@ -287,7 +352,7 @@ export default async function CompatibilityPage(
       <section className="max-w-3xl mx-auto px-5 mb-8">
         <div className="bg-gradient-to-br from-[#0d1120] to-[#1a1a2e] border rounded-2xl p-6 sm:p-8 text-center"
              style={{ borderColor: `${sColor}55` }}>
-          <div className="text-[10px] text-[#D4AF37] tracking-[0.4em] uppercase mb-2">{L.ashtakootScore}</div>
+          <div className="text-[10px] text-[#D4AF37] tracking-[0.4em] uppercase mb-2">{L.scoreLabel}</div>
           <div className="text-5xl sm:text-6xl font-bold" style={{ color: sColor }}>
             {page.score}<span className="text-2xl text-gray-500 font-normal"> / 36</span>
           </div>
@@ -315,7 +380,7 @@ export default async function CompatibilityPage(
             <h2 className="text-xl sm:text-2xl font-semibold text-[#D4AF37] mb-3 border-l-3 border-[#D4AF37] pl-3">
               {block.title}
             </h2>
-            <p className="text-gray-200 leading-relaxed text-[15px] sm:text-base">{block.body}</p>
+            <p className="text-gray-200 leading-relaxed text-[15px] sm:text-base whitespace-pre-line">{block.body}</p>
           </div>
         ))}
       </section>
@@ -365,7 +430,7 @@ export default async function CompatibilityPage(
                 {f.q}
                 <span className="text-[#D4AF37] group-open:rotate-45 transition">+</span>
               </summary>
-              <p className="mt-3 text-gray-300 text-sm leading-relaxed">{f.a}</p>
+              <p className="mt-3 text-gray-300 text-sm leading-relaxed whitespace-pre-line">{f.a}</p>
             </details>
           ))}
         </div>
@@ -398,6 +463,22 @@ export default async function CompatibilityPage(
           </div>
         </section>
       )}
+
+      {/* INTERNAL LINK MESH — v1.3 (services / calculators / products / authority) */}
+      <section className="max-w-3xl mx-auto px-5 mb-12">
+        <h2 className="text-xl sm:text-2xl font-semibold text-[#D4AF37] mb-5">{L.exploreTitle}</h2>
+        <div className="flex flex-wrap gap-2">
+          {L.exploreLinks.map((lnk) => (
+            <Link
+              key={lnk.href}
+              href={lnk.href}
+              className="text-sm px-3 py-2 rounded-lg bg-[#0d1120]/60 border border-[#D4AF37]/15 text-gray-200 hover:border-[#D4AF37]/40 hover:text-[#D4AF37] transition"
+            >
+              {lnk.label}
+            </Link>
+          ))}
+        </div>
+      </section>
 
       {/* E-E-A-T AUTHOR BLOCK */}
       <section className="max-w-3xl mx-auto px-5 mb-12">
