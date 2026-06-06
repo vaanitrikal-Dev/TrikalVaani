@@ -3,33 +3,32 @@
  * TRIKAL VAANI — Compatibility Page (Programmatic SEO/GEO)
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/compatibility/[pair]/page.tsx
- * VERSION: 1.3 — Logo + Accuracy reframe + Internal link mesh
+ * VERSION: 1.4 — Deep-dive aspect sections (love, married life,
+ *                intimacy, trust, finance, family, graha maitri)
  * SIGNED: ROHIIT GUPTA, CEO
  * ============================================================
+ * CHANGE LOG (v1.3 → v1.4):
+ *   DEEP-DIVE SECTIONS: A new OPTIONAL jsonb column `sections`
+ *   (array of { title, body }) is now rendered between Challenges
+ *   and Remedies. This lets each page cover every compatibility
+ *   aspect — प्रेम/रोमांस, विवाहित जीवन, घनिष्ठता, विश्वास/निष्ठा,
+ *   धन/जीवनशैली, परिवार/संतान, तत्व व ग्रह मैत्री — as dedicated H2s.
+ *   FULLY NULL-SAFE: pages whose `sections` is empty (all EN pages
+ *   and any un-migrated row) render EXACTLY as before — no regression.
+ *   Body order is built dynamically and empty fields are filtered.
+ *   NOTHING ELSE CHANGED — all v1.3 logo / score-reframe / internal
+ *   link mesh / Milan CTA / Karmic CTA / related-pairs / schemas /
+ *   hreflang identical.
+ *
  * CHANGE LOG (v1.2 → v1.3):
- *   1) LOGO: Visible Trikaal Vaani logo (/Trikal_Logo.png) added to
- *      the hero header, linked to "/". Uses next/image (no lint warning,
- *      auto-optimized). Fixes "logo missing" across ALL 288 pages.
- *   2) ACCURACY REFRAME (CEO Decision A): Score-badge label changed from
- *      "Ashtakoot Milan / अष्टकूट मिलान" → "Rashi Compatibility Score /
- *      राशि अनुकूलता स्कोर". A page keyed only by Rashi cannot present a
- *      definitive 36-guna Ashtakoot score (that needs both Nakshatras).
- *      Score /36 visual kept (no data migration); the exact-Ashtakoot
- *      clarification lives in geo_answer (DB) → routes to /kundali-milan.
- *      L key renamed ashtakootScore → scoreLabel for clarity.
- *   3) INTERNAL LINK MESH: New "Explore More" section (language-aware)
- *      interlinking every page to calculators, authority articles,
- *      life-domain pillars, and both products. One edit = 288 pages.
- *   NOTHING ELSE CHANGED — all v1.2 logic/schemas/related-pairs/hreflang/
- *   Milan CTA/Karmic CTA identical.
+ *   1) LOGO in hero header (next/image, links to "/").
+ *   2) Score-badge label reframed: "Ashtakoot Milan" → "Rashi
+ *      Compatibility Score" (Decision A). L key ashtakootScore → scoreLabel.
+ *   3) Internal link mesh "Explore More" (calculators / authority /
+ *      life-domains / both products). One edit = 288 pages.
  *
  * CHANGE LOG (v1.1 → v1.2):
- *   Added a Karmic Background Reading CTA block after the Milan CTA,
- *   before the FAQ. Language-aware (Hindi on ?lang=hi). Real <Link> to
- *   /karmic-background-reading → interlinks ALL 288 compatibility pages
- *   to the Karmic pillar (SEO mesh + revenue funnel). One edit = 288 pages.
- *   NOTHING ELSE CHANGED — all v1.1 logic/schemas/related-pairs/hreflang
- *   identical.
+ *   Karmic Background Reading CTA block (all 288 pages → Karmic pillar).
  *
  * CHANGE LOG (v1.0 → v1.1):
  *   Activated the "Related Rashi Pairs" interlinking section.
@@ -68,6 +67,7 @@ interface CompatRow {
   strengths:     string;
   challenges:    string;
   remedies:      string;
+  sections:      { title: string; body: string }[] | null; // v1.4 — optional deep-dive sections
   faq:           { q: string; a: string }[];
   meta_title:    string;
   meta_desc:     string;
@@ -264,6 +264,20 @@ export default async function CompatibilityPage(
     ],
   };
 
+  // v1.4: build the ordered body blocks.
+  // Fixed sections + dynamic deep-dive sections (DB jsonb) + remedies.
+  // Empty bodies are filtered out → EN / un-migrated rows render exactly
+  // as before (deep-dive sections simply do not appear).
+  const deepSections = Array.isArray(page.sections) ? page.sections : [];
+  const bodyBlocks = [
+    { title: L.emotional,     body: page.emotional },
+    { title: L.communication, body: page.communication },
+    { title: L.strengths,     body: page.strengths },
+    { title: L.challenges,    body: page.challenges },
+    ...deepSections.map((s) => ({ title: s?.title ?? '', body: s?.body ?? '' })),
+    { title: L.remedies,      body: page.remedies },
+  ].filter((b) => b.title && b.body && String(b.body).trim().length > 0);
+
   // ── JSON-LD: FAQPage + Article + BreadcrumbList ────────────
   const faqSchema = {
     '@context': 'https://schema.org',
@@ -367,15 +381,9 @@ export default async function CompatibilityPage(
         </div>
       </section>
 
-      {/* EDUCATIONAL CONTENT */}
+      {/* EDUCATIONAL CONTENT (v1.4: dynamic body blocks incl. deep-dive sections) */}
       <section className="max-w-3xl mx-auto px-5 space-y-8">
-        {[
-          { title: L.emotional,     body: page.emotional },
-          { title: L.communication, body: page.communication },
-          { title: L.strengths,     body: page.strengths },
-          { title: L.challenges,    body: page.challenges },
-          { title: L.remedies,      body: page.remedies },
-        ].map((block, i) => (
+        {bodyBlocks.map((block, i) => (
           <div key={i}>
             <h2 className="text-xl sm:text-2xl font-semibold text-[#D4AF37] mb-3 border-l-3 border-[#D4AF37] pl-3">
               {block.title}
