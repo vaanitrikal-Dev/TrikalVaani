@@ -214,7 +214,7 @@ export default function DailyRashifal() {
             <p className="text-slate-300 text-sm leading-relaxed mb-5">{rashi.prediction}</p>
 
             {/* ── v1.1 FIX: "जिनी टिप" → "ट्रिकाल टिप"
-                IR rule: Jini removed from ALL visible text ── */}
+                IR rule: Trikaal removed from ALL visible text ── */}
             <div
               className="rounded-xl px-4 py-3"
               style={{ background: `${rashi.color}0d`, border: `1px solid ${rashi.color}33` }}
