@@ -2,18 +2,18 @@
 // 🔱 TRIKAL VAANI — CEO PROTECTION HEADER
 // ════════════════════════════════════════════════════════════════════
 // File:        app/[domain]/panchang/page.tsx
-// Version:     v1.2
+// Version:     v1.3 — Broken link fix (Claude audit June 2026)
 // Owner:       Rohiit Gupta, Chief Vedic Architect
-// Domain:      trikalvaani.com
-// Purpose:     Phase B3 — City Panchang Pages
-//              URL: /delhi/panchang, /mumbai/panchang
-//              Uses [domain] param (matches existing app/[domain] folder)
+// CHANGES v1.2 → v1.3 (CEO-approved):
+//   ✅ FIX: /upcoming-events → /panchang (was 404 in Vercel logs)
+//      "Upcoming Festivals" link now points to /panchang which exists.
+//   NOTE: cache conflict (no-store + revalidate) is fixed in
+//      lib/callVM.ts v1.1 — no change needed here. fetchPanchang()
+//      already correctly passes only next: { revalidate: 86400 }.
+//   PROTECTED (untouched): all schemas, FAQ, ISR, city lookup,
+//      fetchPanchang, generateMetadata, generateStaticParams, JSX.
 // CHANGES v1.1 → v1.2 (2026-05-30):
-//   fetchPanchang() now routes through lib/callVM.ts so the X-Trikal-Key
-//   auth header is injected automatically. ISR (next: { revalidate: 86400 })
-//   is preserved exactly. City lookup, schemas, FAQ, and JSX unchanged.
-// Lock Status: gemini-prompt.ts = PERMANENTLY LOCKED (do not touch)
-// Last Update: 2026-05-30
+//   fetchPanchang() routes through lib/callVM.ts (X-Trikal-Key auto).
 // ════════════════════════════════════════════════════════════════════
 
 import { Metadata } from "next";
@@ -54,7 +54,6 @@ const VM_BASE = "http://34.47.182.227:8001";
 const AUTHOR_NAME = "Rohiit Gupta";
 const AUTHOR_TITLE = "Chief Vedic Architect, Trikaal Vaani";
 
-// Only match known city slugs — ignore all other [domain] routes
 const CITY_SLUGS = new Set([
   "delhi", "mumbai", "noida", "gurgaon", "bangalore",
   "hyderabad", "pune", "kolkata", "chennai", "ahmedabad",
@@ -73,6 +72,8 @@ async function fetchPanchang(city: City): Promise<Panchang | null> {
   try {
     const res = await callVM(
       `${VM_BASE}/panchang/today?lat=${city.latitude}&lon=${city.longitude}`,
+      // v1.3 NOTE: cache conflict fixed in callVM.ts v1.1
+      // next: { revalidate: 86400 } is now the only cache directive
       { method: "GET", next: { revalidate: 86400 } } as RequestInit
     );
     if (!res.ok) return null;
@@ -245,7 +246,8 @@ export default async function CityPanchangPage(
           <section className="mt-6 border-t border-gray-200 pt-6">
             <h2 className="mb-3 text-lg font-semibold text-gray-900">Explore More</h2>
             <ul className="grid grid-cols-2 gap-2 text-sm md:grid-cols-3">
-              <li><Link href="/upcoming-events" className="text-amber-700 hover:underline">Upcoming Festivals</Link></li>
+              {/* v1.3 FIX: /upcoming-events → /panchang (was 404) */}
+              <li><Link href="/panchang" className="text-amber-700 hover:underline">Upcoming Festivals</Link></li>
               <li><Link href="/career" className="text-amber-700 hover:underline">Career Astrology</Link></li>
               <li><Link href="/wealth" className="text-amber-700 hover:underline">Wealth Astrology</Link></li>
               <li><Link href="/marriage" className="text-amber-700 hover:underline">Marriage</Link></li>
