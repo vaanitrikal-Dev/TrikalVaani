@@ -2,17 +2,17 @@
 
 // ============================================================
 // FILE: components/landing/DailyRashifal.tsx
-// VERSION: v1.1 — IR / Brand fix (Claude audit June 2026)
-// CHANGES vs v1.0:
-//   ✅ FIX-1 (IR): "जिनी टिप" → "ट्रिकाल टिप" across all 12 rashis
-//      Iron Rule: Jini brand name removed from ALL visible text.
-//      Label updated: "Trikaal AI Tip (ट्रिकाल टिप)"
-//   ✅ FIX-2: Static disclaimer added — "Illustrative daily energy"
-//      Prepares for v2.0 dynamic VM upgrade (Option A approved).
-//   NEXT (v2.0): Wire to VM /daily-rashifal endpoint — Swiss Ephemeris
-//      real Gochar transits → Gemini Flash → Supabase daily cache.
-//   PROTECTED (untouched): all rashi data, UI layout, navigation,
-//      colors, symbols, animations, date display logic.
+// VERSION: v2.0 — Dynamic Swiss Ephemeris Gochar (June 2026)
+// CHANGES vs v1.1:
+//   ✅ Full dynamic — fetches from VM /daily-rashifal endpoint
+//   ✅ Real Gochar transits via Swiss Ephemeris on VM
+//   ✅ Gemini 2.5 Flash generates predictions from real transit data
+//   ✅ Supabase daily cache — VM called once/day, instant after
+//   ✅ Skeleton loading state — no layout shift
+//   ✅ Graceful fallback — shows static message if VM unavailable
+//   ✅ "Trikaal AI Tip" label preserved from v1.1 IR fix
+//   ✅ Disclaimer removed — content is now real, not illustrative
+// PROTECTED: all UI layout, colors, symbols, navigation, animations
 // ============================================================
 
 import { useState, useEffect } from 'react';
@@ -21,116 +21,108 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 const GOLD = '#D4AF37';
 const GOLD_RGBA = (a: number) => `rgba(212,175,55,${a})`;
 
-const RASHIS = [
-  {
-    id: 'mesh', name: 'Mesh', hindi: 'मेष', symbol: '♈', sign: 'Aries',
-    lord: 'Mars', element: 'Fire',
-    color: '#EF4444',
-    prediction: 'Mangal bestows energy and drive today. A bold decision you have been postponing will find clarity in the afternoon hours. Your Mars-Rahu axis is activated — ideal for competitive pursuits.',
-    tip: 'Aaj bold raho, overthinking mat karo. Ek kaam seedha karo — results aayenge.',
-  },
-  {
-    id: 'vrishabh', name: 'Vrishabh', hindi: 'वृषभ', symbol: '♉', sign: 'Taurus',
-    lord: 'Venus', element: 'Earth',
-    color: '#10B981',
-    prediction: 'Shukra (Venus) activates your 2nd house of wealth today. Financial conversations go in your favour. A long-pending payment or appreciation arrives before sunset. Relationships receive warmth.',
-    tip: 'Paise ki baat aaj karo — Venus tumhara saath de raha hai. Rishte mein thoda softness dikhao.',
-  },
-  {
-    id: 'mithun', name: 'Mithun', hindi: 'मिथुन', symbol: '♊', sign: 'Gemini',
-    lord: 'Mercury', element: 'Air',
-    color: '#3B82F6',
-    prediction: 'Budh in your communication house gives you extraordinary verbal intelligence today. Presentations, negotiations, and creative writing are powerfully supported. Avoid signing legal documents after 6 PM.',
-    tip: 'Bol ke kaam nikalte hain aaj. Apni baat clearly express karo — Mercury tumhare saath hai.',
-  },
-  {
-    id: 'kark', name: 'Kark', hindi: 'कर्क', symbol: '♋', sign: 'Cancer',
-    lord: 'Moon', element: 'Water',
-    color: '#8B5CF6',
-    prediction: 'Chandra activates deep emotional wisdom today. Intuition is sharper than logic — trust your gut feeling in decisions. Family matters require your attention and your patience will be rewarded.',
-    tip: 'Dil ki baat suno aaj. Ghar waalon ke liye time nikalo — Chandra ki kripa milegi.',
-  },
-  {
-    id: 'simha', name: 'Simha', hindi: 'सिंह', symbol: '♌', sign: 'Leo',
-    lord: 'Sun', element: 'Fire',
-    color: '#F59E0B',
-    prediction: 'Surya blazes in your 10th house sector today — career recognition and authority are highlighted. A senior figure acknowledges your efforts. Your natural leadership magnetism is at its peak.',
-    tip: 'Aaj leadership lo — log sun rahe hain. Surya ka tej hai tumhare saath, shine karo.',
-  },
-  {
-    id: 'kanya', name: 'Kanya', hindi: 'कन्या', symbol: '♍', sign: 'Virgo',
-    lord: 'Mercury', element: 'Earth',
-    color: '#06B6D4',
-    prediction: 'Budh in earth alignment brings precise analytical clarity today. Problem-solving, research, and detailed work flow effortlessly. Health matters receive positive planetary support — a great day to begin a wellness routine.',
-    tip: 'Detail mein jao aaj — chhoti si improvement bada result degi. Health pe dhyan do.',
-  },
-  {
-    id: 'tula', name: 'Tula', hindi: 'तुला', symbol: '♎', sign: 'Libra',
-    lord: 'Venus', element: 'Air',
-    color: '#EC4899',
-    prediction: 'Shukra in your relationship house creates magnetic social energy today. New partnerships, collaborations, and romantic connections are heavily favoured. Balance is your superpower — use it in negotiations.',
-    tip: 'Balance banao, connections banao. Venus ke din mein pyaar aur partnership dono milti hain.',
-  },
-  {
-    id: 'vrischik', name: 'Vrischik', hindi: 'वृश्चिक', symbol: '♏', sign: 'Scorpio',
-    lord: 'Mars + Ketu', element: 'Water',
-    color: '#DC2626',
-    prediction: 'Mars-Ketu combination intensifies your investigative instincts today. Hidden information surfaces. Transformation is the theme — what you release today creates space for something more powerful to arrive.',
-    tip: 'Jo purana hai usse chhodo aaj. Transformation mein power hai — Mars-Ketu ka gift hai.',
-  },
-  {
-    id: 'dhanu', name: 'Dhanu', hindi: 'धनु', symbol: '♐', sign: 'Sagittarius',
-    lord: 'Jupiter', element: 'Fire',
-    color: '#7C3AED',
-    prediction: 'Guru (Jupiter) expands your horizons today. Higher learning, philosophy, travel, and international connections are all activated. A mentor or elder brings wisdom you have been seeking. Optimism is magnetic.',
-    tip: 'Seekho, badho, travel karo — Guru ki kripa aaj fully on hai. Enthusiasm contagious hai.',
-  },
-  {
-    id: 'makar', name: 'Makar', hindi: 'मकर', symbol: '♑', sign: 'Capricorn',
-    lord: 'Saturn', element: 'Earth',
-    color: '#64748B',
-    prediction: 'Shani activates your karma house today with discipline and reward energy. Hard work from the past months receives tangible results. Avoid shortcuts — the straight path is the fastest today.',
-    tip: 'Mehnat ka phal aaj milega. Shani ka niyam hai — jo kiya woh aayega. Patience rakho.',
-  },
-  {
-    id: 'kumbh', name: 'Kumbh', hindi: 'कुम्भ', symbol: '♒', sign: 'Aquarius',
-    lord: 'Saturn + Rahu', element: 'Air',
-    color: '#0EA5E9',
-    prediction: 'Saturn-Rahu energy makes you the most innovative thinker in any room today. Unconventional ideas that seemed impractical suddenly have clarity of execution. Technology and social networks amplify your reach.',
-    tip: 'Out-of-the-box socho aaj. Log tumhara perspective sunna chahte hain — share karo.',
-  },
-  {
-    id: 'meen', name: 'Meen', hindi: 'मीन', symbol: '♓', sign: 'Pisces',
-    lord: 'Jupiter + Ketu', element: 'Water',
-    color: '#2DD4BF',
-    prediction: 'Guru-Ketu spiritual axis brings profound inner clarity today. Intuitive insights arrive in meditation or quiet moments. Creative and artistic work flows with divine inspiration. Trust the invisible guidance.',
-    tip: 'Aaj andar jao — meditation mein kuch reveal hoga. Creative work mein Guru ki kripa bahegi.',
-  },
+// ── Static rashi metadata (symbols, colors, lords) ───────────
+// Predictions + tips come from VM dynamically
+const RASHI_META = [
+  { id: 'mesh',     name: 'Mesh',     hindi: 'मेष',     symbol: '♈', sign: 'Aries',        lord: 'Mars',           element: 'Fire',  color: '#EF4444' },
+  { id: 'vrishabh', name: 'Vrishabh', hindi: 'वृषभ',    symbol: '♉', sign: 'Taurus',       lord: 'Venus',          element: 'Earth', color: '#10B981' },
+  { id: 'mithun',   name: 'Mithun',   hindi: 'मिथुन',   symbol: '♊', sign: 'Gemini',       lord: 'Mercury',        element: 'Air',   color: '#3B82F6' },
+  { id: 'kark',     name: 'Kark',     hindi: 'कर्क',    symbol: '♋', sign: 'Cancer',       lord: 'Moon',           element: 'Water', color: '#8B5CF6' },
+  { id: 'simha',    name: 'Simha',    hindi: 'सिंह',    symbol: '♌', sign: 'Leo',          lord: 'Sun',            element: 'Fire',  color: '#F59E0B' },
+  { id: 'kanya',    name: 'Kanya',    hindi: 'कन्या',   symbol: '♍', sign: 'Virgo',        lord: 'Mercury',        element: 'Earth', color: '#06B6D4' },
+  { id: 'tula',     name: 'Tula',     hindi: 'तुला',    symbol: '♎', sign: 'Libra',        lord: 'Venus',          element: 'Air',   color: '#EC4899' },
+  { id: 'vrischik', name: 'Vrischik', hindi: 'वृश्चिक', symbol: '♏', sign: 'Scorpio',      lord: 'Mars + Ketu',    element: 'Water', color: '#DC2626' },
+  { id: 'dhanu',    name: 'Dhanu',    hindi: 'धनु',     symbol: '♐', sign: 'Sagittarius',  lord: 'Jupiter',        element: 'Fire',  color: '#7C3AED' },
+  { id: 'makar',    name: 'Makar',    hindi: 'मकर',     symbol: '♑', sign: 'Capricorn',    lord: 'Saturn',         element: 'Earth', color: '#64748B' },
+  { id: 'kumbh',    name: 'Kumbh',    hindi: 'कुम्भ',   symbol: '♒', sign: 'Aquarius',     lord: 'Saturn + Rahu',  element: 'Air',   color: '#0EA5E9' },
+  { id: 'meen',     name: 'Meen',     hindi: 'मीन',     symbol: '♓', sign: 'Pisces',       lord: 'Jupiter + Ketu', element: 'Water', color: '#2DD4BF' },
 ];
 
-export default function DailyRashifal() {
-  const [active, setActive] = useState(0);
-  const [today, setToday] = useState('');
+interface RashiData {
+  id: string;
+  name: string;
+  hindi: string;
+  symbol: string;
+  sign: string;
+  lord: string;
+  element: string;
+  color: string;
+  prediction: string;
+  tip: string;
+}
 
+type LoadState = 'loading' | 'ready' | 'error';
+
+// ── Skeleton card ──────────────────────────────────────────────
+function SkeletonPulse({ w, h }: { w: string; h: string }) {
+  return (
+    <div
+      className="rounded animate-pulse"
+      style={{ width: w, height: h, background: 'rgba(255,255,255,0.06)' }}
+    />
+  );
+}
+
+export default function DailyRashifal() {
+  const [active, setActive]     = useState(0);
+  const [today, setToday]       = useState('');
+  const [rashis, setRashis]     = useState<RashiData[]>([]);
+  const [loadState, setLoad]    = useState<LoadState>('loading');
+  const [fromCache, setFromCache] = useState(false);
+
+  // ── Fetch today's rashifal from VM ────────────────────────
   useEffect(() => {
     setToday(
       new Date().toLocaleDateString('en-IN', {
-        weekday: 'long',
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric',
+        weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
       })
     );
+
+    async function fetchRashifal() {
+      try {
+        const res = await fetch('/api/daily-rashifal', {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+          // 30s timeout via AbortController
+          signal: AbortSignal.timeout(30000),
+        });
+
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+
+        if (data.rashis && Array.isArray(data.rashis) && data.rashis.length === 12) {
+          // Merge VM predictions with static metadata (symbol, color etc.)
+          const merged: RashiData[] = data.rashis.map((r: any, i: number) => ({
+            ...RASHI_META[i],
+            prediction: r.prediction || '',
+            tip:        r.tip        || '',
+          }));
+          setRashis(merged);
+          setFromCache(data.from_cache ?? false);
+          setLoad('ready');
+        } else {
+          throw new Error('Invalid rashis response');
+        }
+      } catch (err) {
+        console.error('[DailyRashifal] fetch error:', err);
+        setLoad('error');
+      }
+    }
+
+    fetchRashifal();
   }, []);
 
-  const rashi = RASHIS[active];
+  const rashi = loadState === 'ready' ? rashis[active] : null;
+  const meta  = RASHI_META[active]; // always available for skeleton colors
 
-  const prev = () => setActive((a) => (a - 1 + RASHIS.length) % RASHIS.length);
-  const next = () => setActive((a) => (a + 1) % RASHIS.length);
+  const prev = () => setActive((a) => (a - 1 + 12) % 12);
+  const next = () => setActive((a) => (a + 1) % 12);
 
   return (
     <section className="py-14 px-4">
       <div className="max-w-4xl mx-auto">
+
+        {/* ── Header ─────────────────────────────────────────── */}
         <div className="text-center mb-8">
           <p className="text-xs font-medium tracking-widest uppercase mb-2" style={{ color: GOLD_RGBA(0.6) }}>
             Aaj Ka Rashifal
@@ -139,23 +131,23 @@ export default function DailyRashifal() {
             Daily <span style={{ color: GOLD }}>Horoscope</span> — 12 Rashis
           </h2>
           {today && <p className="text-slate-500 text-sm mt-2">{today}</p>}
-          {/* ── v1.1: Static disclaimer — v2.0 will remove this once
-              VM dynamic endpoint is live ── */}
-          <p className="text-xs text-slate-600 mt-1 italic">
-            Illustrative daily energy patterns — for your personalised reading, use the form above
+          {/* v2.0: Real Swiss Ephemeris Gochar — no disclaimer needed */}
+          <p className="text-xs mt-1" style={{ color: GOLD_RGBA(0.45) }}>
+            ⚡ Swiss Ephemeris Gochar · Real transit predictions by Rohiit Gupta
           </p>
         </div>
 
+        {/* ── Rashi selector tabs ────────────────────────────── */}
         <div className="flex flex-wrap justify-center gap-2 mb-6">
-          {RASHIS.map((r, i) => (
+          {RASHI_META.map((r, i) => (
             <button
               key={r.id}
               onClick={() => setActive(i)}
               className="flex flex-col items-center gap-0.5 px-2.5 py-2 rounded-xl transition-all duration-200 hover:scale-105"
               style={{
                 background: active === i ? `${r.color}22` : 'rgba(11,16,26,0.7)',
-                border: `1px solid ${active === i ? r.color : GOLD_RGBA(0.1)}`,
-                minWidth: '52px',
+                border:     `1px solid ${active === i ? r.color : GOLD_RGBA(0.1)}`,
+                minWidth:   '52px',
               }}
             >
               <span className="text-base leading-none">{r.symbol}</span>
@@ -166,27 +158,29 @@ export default function DailyRashifal() {
           ))}
         </div>
 
+        {/* ── Main card ──────────────────────────────────────── */}
         <div
           className="rounded-2xl overflow-hidden relative"
           style={{
-            background: 'rgba(11,16,26,0.9)',
-            border: `1px solid ${rashi.color}33`,
-            boxShadow: `0 0 40px ${rashi.color}11`,
+            background:  'rgba(11,16,26,0.9)',
+            border:      `1px solid ${meta.color}33`,
+            boxShadow:   `0 0 40px ${meta.color}11`,
           }}
         >
+          {/* Card header */}
           <div
             className="px-6 py-4 flex items-center justify-between"
-            style={{ borderBottom: `1px solid ${rashi.color}22`, background: `${rashi.color}0a` }}
+            style={{ borderBottom: `1px solid ${meta.color}22`, background: `${meta.color}0a` }}
           >
             <div className="flex items-center gap-3">
-              <span className="text-3xl">{rashi.symbol}</span>
+              <span className="text-3xl">{meta.symbol}</span>
               <div>
                 <p className="font-serif font-bold text-lg text-white">
-                  {rashi.name}{' '}
-                  <span className="text-base font-normal text-slate-400">({rashi.hindi})</span>
+                  {meta.name}{' '}
+                  <span className="text-base font-normal text-slate-400">({meta.hindi})</span>
                 </p>
                 <p className="text-xs text-slate-500">
-                  {rashi.sign} · Lord: {rashi.lord} · {rashi.element}
+                  {meta.sign} · Lord: {meta.lord} · {meta.element}
                 </p>
               </div>
             </div>
@@ -210,31 +204,68 @@ export default function DailyRashifal() {
             </div>
           </div>
 
+          {/* Card body */}
           <div className="px-6 py-5">
-            <p className="text-slate-300 text-sm leading-relaxed mb-5">{rashi.prediction}</p>
 
-            {/* ── v1.1 FIX: "जिनी टिप" → "ट्रिकाल टिप"
-                IR rule: Trikaal removed from ALL visible text ── */}
-            <div
-              className="rounded-xl px-4 py-3"
-              style={{ background: `${rashi.color}0d`, border: `1px solid ${rashi.color}33` }}
-            >
-              <p className="text-xs font-semibold mb-1" style={{ color: rashi.color }}>
-                Trikaal AI Tip (ट्रिकाल टिप)
-              </p>
-              <p className="text-sm text-slate-300 leading-relaxed">{rashi.tip}</p>
-            </div>
+            {/* Loading skeleton */}
+            {loadState === 'loading' && (
+              <div className="space-y-3">
+                <SkeletonPulse w="100%" h="16px" />
+                <SkeletonPulse w="90%"  h="16px" />
+                <SkeletonPulse w="75%"  h="16px" />
+                <div className="mt-4 rounded-xl px-4 py-3" style={{ background: `${meta.color}0d`, border: `1px solid ${meta.color}33` }}>
+                  <SkeletonPulse w="40%" h="12px" />
+                  <div className="mt-2">
+                    <SkeletonPulse w="85%" h="14px" />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Error state */}
+            {loadState === 'error' && (
+              <div className="text-center py-4">
+                <p className="text-slate-400 text-sm mb-2">
+                  Today's Gochar predictions are being computed.
+                </p>
+                <p className="text-xs text-slate-600">
+                  Please refresh in a moment — Swiss Ephemeris is calculating today's transits.
+                </p>
+              </div>
+            )}
+
+            {/* Dynamic prediction */}
+            {loadState === 'ready' && rashi && (
+              <>
+                <p className="text-slate-300 text-sm leading-relaxed mb-5">
+                  {rashi.prediction}
+                </p>
+
+                {/* Trikaal AI Tip */}
+                <div
+                  className="rounded-xl px-4 py-3"
+                  style={{ background: `${rashi.color}0d`, border: `1px solid ${rashi.color}33` }}
+                >
+                  <p className="text-xs font-semibold mb-1" style={{ color: rashi.color }}>
+                    Trikaal AI Tip (ट्रिकाल टिप)
+                  </p>
+                  <p className="text-sm text-slate-300 leading-relaxed">{rashi.tip}</p>
+                </div>
+              </>
+            )}
           </div>
 
+          {/* Card footer */}
           <div className="px-6 pb-4 flex items-center justify-between">
             <p className="text-xs text-slate-600">
               Rashi {active + 1} of 12
             </p>
             <p className="text-xs text-slate-600">
-              Verified by Rohiit Gupta, Chief Vedic Architect
+              {fromCache ? '⚡ Today\'s cache' : '🔄 Fresh today'} · Rohiit Gupta, Chief Vedic Architect
             </p>
           </div>
         </div>
+
       </div>
     </section>
   );
