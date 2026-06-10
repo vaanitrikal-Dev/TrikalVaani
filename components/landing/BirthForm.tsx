@@ -560,7 +560,7 @@ function CountrySelector({
       </button>
       {open && (
         <div className="absolute z-50 mt-1 rounded-lg overflow-hidden shadow-2xl"
-          style={{ background: '#0d1120', border: '1px solid rgba(212,175,55,0.25)', width: '220px', maxHeight: '260px' }}>
+          style={{ background: '#0d1120', border: '1px solid rgba(212,175,55,0.25)', width: 'min(220px, calc(100vw - 40px))', maxHeight: '260px' }}>
           <div className="p-2" style={{ borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
             <input type="text" placeholder="Search country..."
               value={search} onChange={e => setSearch(e.target.value)}
@@ -677,11 +677,11 @@ function TierSelector({ selected, onChange }: { selected: PredictionTier; onChan
   return (
     <div>
       <label className="block text-sm font-medium text-slate-300 mb-3">Reading Type <span className="text-yellow-400">*</span></label>
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-3 gap-1.5">
         {tiers.map(tier => (
           <button key={tier.id} type="button" onClick={() => onChange(tier.id)}
             aria-label={`Select ${tier.label} for ${tier.price}`}
-            style={{ background: selected === tier.id ? (tier as any).highlight ? `linear-gradient(135deg,${GOLD_RGBA(0.2)},${GOLD_RGBA(0.1)})` : `${tier.color}18` : 'rgba(255,255,255,0.03)', border: `1px solid ${selected === tier.id ? tier.color : 'rgba(255,255,255,0.08)'}`, borderRadius: '12px', padding: '14px 10px', cursor: 'pointer', textAlign: 'left', transition: 'all 0.2s', position: 'relative' }}>
+            style={{ background: selected === tier.id ? (tier as any).highlight ? `linear-gradient(135deg,${GOLD_RGBA(0.2)},${GOLD_RGBA(0.1)})` : `${tier.color}18` : 'rgba(255,255,255,0.03)', border: `1px solid ${selected === tier.id ? tier.color : 'rgba(255,255,255,0.08)'}`, borderRadius: '12px', padding: '10px 7px', cursor: 'pointer', textAlign: 'left', transition: 'all 0.2s', position: 'relative' }}>
             {(tier as any).highlight && (
               <div style={{ position: 'absolute', top: '-10px', left: '50%', transform: 'translateX(-50%)', background: GOLD, color: '#080B12', fontSize: '9px', fontWeight: 700, padding: '2px 8px', borderRadius: '10px', whiteSpace: 'nowrap' }}>MOST POPULAR</div>
             )}
@@ -1097,7 +1097,7 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
   })
 
   return (
-    <section id="birth-form" className={`py-16 px-4 ${className}`}
+    <section id="birth-form" className={`py-16 px-4 pb-28 sm:pb-16 ${className}`}
       aria-label="Vedic Astrology Birth Chart Form — Trikaal Vaani by Rohiit Gupta">
 
       {/* JSON-LD: Service + Offer + PaymentMethod for AI Search (GEO) */}
