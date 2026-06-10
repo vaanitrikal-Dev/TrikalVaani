@@ -1,10 +1,20 @@
 // ============================================================
 // File: lib/callVM.ts
-// Purpose: Single secure gateway for ALL Trikaal VM calls.
-//          Auto-injects the X-Trikal-Key auth header so the key
-//          lives in ONE place (here) for the entire app.
-// Version: v1.0
+// Version: v1.1 — Cache conflict fix (Claude audit June 2026)
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
+// ============================================================
+// CHANGES vs v1.0 (CEO-approved):
+//   ✅ FIX: cache: 'no-store' removed as hardcoded default.
+//      v1.0 always sent cache: 'no-store' which conflicted with
+//      callers that pass next: { revalidate: N } — Next.js build
+//      warning: "specified cache: no-store and revalidate: 86400,
+//      only one should be specified."
+//      FIX: cache behaviour now controlled entirely by the caller
+//      via init options. Dynamic endpoints (no revalidate) get
+//      no-store from their own call. ISR pages get revalidate: N.
+//      If caller passes nothing, fetch uses Next.js default (force-cache).
+//   PROTECTED (untouched): VM_BASE, TRIKAL_VM_KEY, X-Trikal-Key
+//      header injection, Content-Type, URL resolution logic.
 // ============================================================
 
 // VM base URL. Override via Vercel env VM_ENGINE_URL if it ever moves.
@@ -18,14 +28,25 @@ const TRIKAL_VM_KEY = process.env.TRIKAL_VM_KEY || '';
  *
  * @param pathOrUrl  Endpoint path ('/kundali') OR a full URL
  *                   (works with your existing VM_*_ENDPOINT env vars).
- * @param init       Standard fetch options (method, body, headers...).
+ * @param init       Standard fetch options (method, body, headers,
+ *                   cache, next...). Caller controls caching behaviour:
+ *                   - Dynamic/real-time: pass { cache: 'no-store' }
+ *                   - ISR pages: pass { next: { revalidate: N } }
+ *                   - Default (no option): Next.js force-cache applies
  * @returns          The raw fetch Response (caller handles .ok / .json()).
  *
- * Usage:
- *   import { callVM } from '@/lib/callVM';
+ * Usage examples:
+ *   // Dynamic — always fresh (predictions, readings):
  *   const res = await callVM('/kundali', {
  *     method: 'POST',
  *     body: JSON.stringify(payload),
+ *     cache: 'no-store',
+ *   });
+ *
+ *   // ISR — revalidate daily (city panchang pages):
+ *   const res = await callVM('/panchang/today?lat=28.6&lon=77.2', {
+ *     method: 'GET',
+ *     next: { revalidate: 86400 },
  *   });
  */
 export async function callVM(
@@ -42,8 +63,8 @@ export async function callVM(
     ...((init.headers as Record<string, string>) || {}),
   };
 
+  // v1.1: cache behaviour controlled by caller — no default override
   return fetch(url, {
-    cache: 'no-store',
     ...init,
     headers,
   });
