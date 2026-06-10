@@ -3,48 +3,25 @@
  * TRIKAL VAANI — Marketing CTA Ticker (Visible-Only)
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: components/SocialProofTicker.tsx
- * VERSION: 2.0 — Fake activity feed REMOVED, converted to
- *                honest marketing CTA ticker (IR-0 compliant)
- * SIGNED: ROHIIT GUPTA, CEO
- * DATE: 2026-06-03
+ * VERSION: 2.1 — 256-bit false claim removed (Claude audit June 2026)
  * ============================================================
- * v2.0 changes vs v1.x (CEO-approved, IR-0 compliant):
- *   ✅ FAKE SOCIAL PROOF REMOVED (IR-0): all 15 fabricated
- *      "Rohit from Delhi / Anjali from Noida..." named-person
- *      activities deleted. With 2–3 real clients/day, a feed
- *      claiming live named activity is fabricated proof and a
- *      brand-credibility risk for a premium positioning.
- *   ✅ CONVERTED TO MARKETING CTA TICKER: every line is now a
- *      real, defensible offer / USP / call-to-action. Covers
- *      all CTA types — offer, scarcity, authority, value-
- *      compare, feature, action, guarantee.
- *   ✅ All claims true: ₹51 pricing, Swiss Ephemeris (self-
- *      hosted), BPHS classical, personalized 5-upay by segment,
- *      Razorpay-secured one-time payment, MSME registered.
- *   ✅ No competitor brand named on-site. Value framing only.
- *   ✅ Component name kept (SocialProofTicker) so existing
- *      imports in parent layout/page do NOT break. Display
- *      label / intent is now marketing.
- *   ✅ Animation, edge gradient masks, GOLD palette, dot
- *      colours — all preserved 1:1 from prior file.
- *
- * NOTE: filename + export unchanged on purpose (no parent edit
- *       needed). If you want a cleaner name later, rename the
- *       file + its single import together in one commit.
+ * v2.1 changes vs v2.0 (CEO-approved):
+ *   ✅ FIX: "256-bit SSL · PCI-DSS compliant checkout" removed — false claim.
+ *      Razorpay is PCI-DSS certified; Trikaal Vaani platform itself is not.
+ *      Replaced with: "Secured by Razorpay · MSME Registered · One-time payment"
+ *      — 100% verifiable, E-E-A-T compliant.
+ *   PROTECTED (untouched): all other CTA_LINES, animation logic, gold palette,
+ *      dot colours, fade masks, component name/export.
+ * ============================================================
+ * v2.0 changes (CEO-approved, IR-0 compliant):
+ *   ✅ FAKE SOCIAL PROOF REMOVED: all fabricated named-person activities deleted.
+ *   ✅ CONVERTED TO MARKETING CTA TICKER: every line is a real, defensible claim.
  * ============================================================
  */
 
 'use client';
 import { useEffect, useRef } from 'react';
 
-/**
- * Marketing CTA lines.
- * Each entry: { text, cta } — cta drives the dot colour accent:
- *   'offer'   -> gold
- *   'action'  -> green (go / book)
- *   'value'   -> pink (highlight / hook)
- * Mix is intentional for visual rhythm.
- */
 const CTA_LINES: { text: string; type: 'offer' | 'action' | 'value' }[] = [
   // ── OFFER CTAs ──────────────────────────────────────────
   { text: 'Your full Vedic life-reading — launch price just ₹51', type: 'offer' },
@@ -67,11 +44,13 @@ const CTA_LINES: { text: string; type: 'offer' | 'action' | 'value' }[] = [
   { text: 'Talk to us on WhatsApp +91 92118 04111 — anytime', type: 'action' },
 
   // ── SCARCITY / URGENCY CTAs ─────────────────────────────
-  { text: 'Limited launch pricing — ₹51 won’t last forever', type: 'offer' },
+  { text: 'Limited launch pricing — ₹51 won\'t last forever', type: 'offer' },
   { text: 'Daily readings are capped — secure your slot today', type: 'value' },
 
   // ── GUARANTEE / REASSURANCE CTAs ────────────────────────
-  { text: '256-bit SSL · PCI-DSS compliant checkout · your data stays private', type: 'action' },
+  // v2.1 FIX: "256-bit SSL · PCI-DSS compliant checkout" removed — false claim
+  // Razorpay is PCI-DSS certified; Trikaal Vaani platform is not independently certified
+  { text: 'Secured by Razorpay · MSME Registered · One-time payment', type: 'action' },
 ];
 
 const GOLD = '#D4AF37';
@@ -97,7 +76,6 @@ export default function SocialProofTicker() {
     return () => cancelAnimationFrame(raf);
   }, []);
 
-  // Duplicate for seamless infinite loop
   const items = [...CTA_LINES, ...CTA_LINES];
 
   const dotColor = (type: 'offer' | 'action' | 'value') =>
@@ -113,12 +91,10 @@ export default function SocialProofTicker() {
       }}
       aria-label="Trikaal Vaani offers and highlights"
     >
-      {/* Left fade mask */}
       <div
         className="absolute left-0 top-0 bottom-0 w-16 z-10 pointer-events-none"
         style={{ background: 'linear-gradient(to right, #030712 0%, transparent 100%)' }}
       />
-      {/* Right fade mask */}
       <div
         className="absolute right-0 top-0 bottom-0 w-16 z-10 pointer-events-none"
         style={{ background: 'linear-gradient(to left, #030712 0%, transparent 100%)' }}
@@ -141,3 +117,8 @@ export default function SocialProofTicker() {
     </div>
   );
 }
+
+// ============================================================
+// END — components/SocialProofTicker.tsx v2.1
+// 🔱 Trikaal Vaani | Rohiit Gupta, Chief Vedic Architect
+// ============================================================
