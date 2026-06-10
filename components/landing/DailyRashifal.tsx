@@ -1,5 +1,20 @@
 'use client';
 
+// ============================================================
+// FILE: components/landing/DailyRashifal.tsx
+// VERSION: v1.1 — IR / Brand fix (Claude audit June 2026)
+// CHANGES vs v1.0:
+//   ✅ FIX-1 (IR): "जिनी टिप" → "ट्रिकाल टिप" across all 12 rashis
+//      Iron Rule: Jini brand name removed from ALL visible text.
+//      Label updated: "Trikaal AI Tip (ट्रिकाल टिप)"
+//   ✅ FIX-2: Static disclaimer added — "Illustrative daily energy"
+//      Prepares for v2.0 dynamic VM upgrade (Option A approved).
+//   NEXT (v2.0): Wire to VM /daily-rashifal endpoint — Swiss Ephemeris
+//      real Gochar transits → Gemini Flash → Supabase daily cache.
+//   PROTECTED (untouched): all rashi data, UI layout, navigation,
+//      colors, symbols, animations, date display logic.
+// ============================================================
+
 import { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
@@ -98,7 +113,14 @@ export default function DailyRashifal() {
   const [today, setToday] = useState('');
 
   useEffect(() => {
-    setToday(new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }));
+    setToday(
+      new Date().toLocaleDateString('en-IN', {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+      })
+    );
   }, []);
 
   const rashi = RASHIS[active];
@@ -117,6 +139,11 @@ export default function DailyRashifal() {
             Daily <span style={{ color: GOLD }}>Horoscope</span> — 12 Rashis
           </h2>
           {today && <p className="text-slate-500 text-sm mt-2">{today}</p>}
+          {/* ── v1.1: Static disclaimer — v2.0 will remove this once
+              VM dynamic endpoint is live ── */}
+          <p className="text-xs text-slate-600 mt-1 italic">
+            Illustrative daily energy patterns — for your personalised reading, use the form above
+          </p>
         </div>
 
         <div className="flex flex-wrap justify-center gap-2 mb-6">
@@ -154,13 +181,19 @@ export default function DailyRashifal() {
             <div className="flex items-center gap-3">
               <span className="text-3xl">{rashi.symbol}</span>
               <div>
-                <p className="font-serif font-bold text-lg text-white">{rashi.name} <span className="text-base font-normal text-slate-400">({rashi.hindi})</span></p>
-                <p className="text-xs text-slate-500">{rashi.sign} · Lord: {rashi.lord} · {rashi.element}</p>
+                <p className="font-serif font-bold text-lg text-white">
+                  {rashi.name}{' '}
+                  <span className="text-base font-normal text-slate-400">({rashi.hindi})</span>
+                </p>
+                <p className="text-xs text-slate-500">
+                  {rashi.sign} · Lord: {rashi.lord} · {rashi.element}
+                </p>
               </div>
             </div>
             <div className="flex items-center gap-2">
               <button
                 onClick={prev}
+                aria-label="Previous rashi"
                 className="w-8 h-8 rounded-full flex items-center justify-center transition-all hover:scale-110"
                 style={{ background: GOLD_RGBA(0.08), border: `1px solid ${GOLD_RGBA(0.2)}` }}
               >
@@ -168,6 +201,7 @@ export default function DailyRashifal() {
               </button>
               <button
                 onClick={next}
+                aria-label="Next rashi"
                 className="w-8 h-8 rounded-full flex items-center justify-center transition-all hover:scale-110"
                 style={{ background: GOLD_RGBA(0.08), border: `1px solid ${GOLD_RGBA(0.2)}` }}
               >
@@ -178,12 +212,15 @@ export default function DailyRashifal() {
 
           <div className="px-6 py-5">
             <p className="text-slate-300 text-sm leading-relaxed mb-5">{rashi.prediction}</p>
+
+            {/* ── v1.1 FIX: "जिनी टिप" → "ट्रिकाल टिप"
+                IR rule: Jini removed from ALL visible text ── */}
             <div
               className="rounded-xl px-4 py-3"
               style={{ background: `${rashi.color}0d`, border: `1px solid ${rashi.color}33` }}
             >
               <p className="text-xs font-semibold mb-1" style={{ color: rashi.color }}>
-                Trikaal Tip (जिनी टिप)
+                Trikaal AI Tip (ट्रिकाल टिप)
               </p>
               <p className="text-sm text-slate-300 leading-relaxed">{rashi.tip}</p>
             </div>
