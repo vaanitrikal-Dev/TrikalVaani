@@ -25,10 +25,8 @@ export default function StickyMobileCTA() {
 
   useEffect(() => {
     // Don't show if already dismissed this session
-    if (typeof window !== 'undefined') {
-      const d = sessionStorage.getItem('trikal-sticky-dismissed');
-      if (d) { setDismissed(true); return; }
-    }
+    const d = sessionStorage.getItem('trikal-sticky-dismissed');
+    if (d) { setDismissed(true); return; }
 
     // IntersectionObserver — hide when birth-form is visible
     const target = document.querySelector('#birth-form');
@@ -70,41 +68,40 @@ export default function StickyMobileCTA() {
   if (dismissed || !visible) return null;
 
   return (
-    // sm:hidden — desktop pe bilkul nahi dikhega
-    // bottom-4 left-4 — left side, TrikalVoice right side pe hai
-    <div
-      className="sm:hidden fixed bottom-6 left-4 z-40 flex items-center gap-2"
-      style={{ maxWidth: 'calc(100vw - 80px)' }} // right mein TrikalVoice ke liye 80px space
-    >
-      <Link
-        href="/#birth-form"
-        className="flex items-center gap-2.5 px-4 py-3 rounded-2xl text-sm font-bold shadow-lg transition-all duration-200 active:scale-95"
-        style={{
-          background: `linear-gradient(135deg, ${GOLD} 0%, #A8862A 100%)`,
-          color: '#080B12',
-          boxShadow: `0 4px 24px ${GOLD_RGBA(0.45)}, 0 0 0 1px ${GOLD_RGBA(0.3)}`,
-        }}
-      >
-        <span className="text-base leading-none">🔮</span>
-        <span className="leading-tight">
-          Free Kundali Dekho
-          <span className="block text-xs font-medium opacity-75">Swiss Ephemeris · ₹0</span>
-        </span>
-      </Link>
+    // sm:hidden — desktop pe nahi dikhega
+    // bottom-24 — TrikalVoice pill (bottom-6, ~72px) ke UPAR — zero overlap
+    <div className="sm:hidden fixed bottom-24 left-0 right-0 z-40 flex justify-center px-4">
+      <div className="flex items-center gap-2 w-full max-w-sm">
+        <Link
+          href="/#birth-form"
+          className="flex-1 flex items-center justify-center gap-2.5 px-4 py-3 rounded-2xl text-sm font-bold shadow-lg transition-all duration-200 active:scale-95"
+          style={{
+            background: `linear-gradient(135deg, ${GOLD} 0%, #A8862A 100%)`,
+            color: '#080B12',
+            boxShadow: `0 4px 24px ${GOLD_RGBA(0.45)}, 0 0 0 1px ${GOLD_RGBA(0.3)}`,
+          }}
+        >
+          <span className="text-base leading-none">🔮</span>
+          <span className="leading-tight">
+            Free Kundali Dekho
+            <span className="block text-xs font-medium opacity-75">Swiss Ephemeris · ₹0</span>
+          </span>
+        </Link>
 
-      {/* Dismiss button */}
-      <button
-        onClick={handleDismiss}
-        aria-label="Dismiss"
-        className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 transition-colors"
-        style={{
-          background: 'rgba(6,10,24,0.85)',
-          border: `1px solid ${GOLD_RGBA(0.25)}`,
-          color: GOLD_RGBA(0.7),
-        }}
-      >
-        <X className="w-3.5 h-3.5" />
-      </button>
+        {/* Dismiss button */}
+        <button
+          onClick={handleDismiss}
+          aria-label="Dismiss"
+          className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 transition-colors"
+          style={{
+            background: 'rgba(6,10,24,0.85)',
+            border: `1px solid ${GOLD_RGBA(0.25)}`,
+            color: GOLD_RGBA(0.7),
+          }}
+        >
+          <X className="w-3.5 h-3.5" />
+        </button>
+      </div>
     </div>
   );
 }
