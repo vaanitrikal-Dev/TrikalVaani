@@ -1,6 +1,24 @@
 import Link from 'next/link';
 import { Sparkles, ChevronDown } from 'lucide-react';
 
+// ============================================================
+// FILE: components/landing/Hero.tsx
+// VERSION: v2.0 — SEO/EEAT/GEO fixes (Claude audit June 2026)
+// CHANGES vs v1.x:
+//   ✅ FIX-1: Added sr-only H1 with full keyword phrase for Google
+//      Visual Trikaal/Vaani heading unchanged (aria-hidden)
+//      Google now reads: "Free AI Vedic Astrology — Accurate Kundli
+//      & Life Predictions by Rohiit Gupta, Chief Vedic Architect"
+//   ✅ FIX-2: Removed fake/unverified social proof (E-E-A-T violation)
+//      "Trusted by 10,000+ seekers" → capability badge (Swiss Ephemeris
+//      · BPHS · Bhrigu Nadi) — 100% verifiable, zero number claims
+//      "10K+ Analyses Done" → "Swiss Ephemeris Powered"
+//      "100% Free Forever" → "Free to Start" (accurate — paid tiers exist)
+//      "5000 Years of Wisdom" → kept (historical fact, verifiable)
+//   PROTECTED (untouched): all animations, gradients, CTA buttons,
+//      scroll arrow, layout, colors, font sizes, mobile breakpoints.
+// ============================================================
+
 const GOLD = '#D4AF37';
 const GOLD_RGBA = (a: number) => `rgba(212,175,55,${a})`;
 
@@ -26,6 +44,12 @@ export default function Hero() {
       />
 
       <div className="relative z-10 flex flex-col items-center text-center max-w-4xl mx-auto">
+
+        {/* ── CAPABILITY BADGE ─────────────────────────────────────────────
+            v2.0: Replaced "Trusted by 10,000+ seekers" (unverified number =
+            E-E-A-T violation) with verifiable technical capability signals.
+            Swiss Ephemeris + BPHS + Bhrigu Nadi = 100% factual claims.
+        ──────────────────────────────────────────────────────────────────── */}
         <div
           className="flex items-center gap-2 mb-8 px-4 py-2 rounded-full"
           style={{
@@ -35,20 +59,42 @@ export default function Hero() {
         >
           <Sparkles className="w-4 h-4" style={{ color: GOLD }} />
           <span className="text-xs font-medium tracking-widest uppercase" style={{ color: `${GOLD}cc` }}>
-            Trusted by 10,000+ seekers
+            Swiss Ephemeris · BPHS · Bhrigu Nadi
           </span>
           <Sparkles className="w-4 h-4" style={{ color: GOLD }} />
         </div>
 
+        {/* ── H1 — SEO / GEO / AEO / E-E-A-T ─────────────────────────────
+            v2.0 FIX: sr-only H1 carries the full keyword-rich headline that
+            Google, Perplexity, SGE, and ChatGPT index as the primary page
+            signal. Placed BEFORE the visual heading so DOM order is correct.
+
+            Google reads:
+              "Free AI Vedic Astrology — Accurate Kundli & Life Predictions
+               by Rohiit Gupta, Chief Vedic Architect"
+
+            Entities covered: Free AI, Vedic Astrology, Kundli, Life
+            Predictions, Rohiit Gupta, Chief Vedic Architect.
+            Matches Person schema @id in layout.tsx + HomepageSchema.
+
+            Visual heading below is aria-hidden — screen readers get the
+            sr-only H1 instead (better accessibility too).
+        ──────────────────────────────────────────────────────────────────── */}
+        <h1 className="sr-only">
+          Free AI Vedic Astrology — Accurate Kundli &amp; Life Predictions by Rohiit Gupta, Chief Vedic Architect
+        </h1>
+
         <div className="relative mb-6">
-          <h1
+          {/* aria-hidden: screen readers use sr-only H1 above instead */}
+          <p
+            aria-hidden="true"
             className="font-serif text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-bold tracking-tight leading-none"
             style={{ animation: 'glow-pulse 3s ease-in-out infinite' }}
           >
             <span className="text-gradient-gold">Trikaal</span>
             <br />
             <span className="text-gradient-gold">Vaani</span>
-          </h1>
+          </p>
           <div
             className="absolute inset-0 -z-10 blur-3xl opacity-25"
             aria-hidden="true"
@@ -67,7 +113,7 @@ export default function Hero() {
 
         <p className="text-base sm:text-lg md:text-xl text-slate-300/80 max-w-2xl mb-3 leading-relaxed">
           Free AI Life Analysis.{' '}
-          <span className="font-medium" style={{ color: `${GOLD}e6` }}>Trusted by thousands,</span>{' '}
+          <span className="font-medium" style={{ color: `${GOLD}e6` }}>Rooted in classical Jyotish,</span>{' '}
           guided by 5000 years of Vedic wisdom.
         </p>
 
@@ -105,11 +151,18 @@ export default function Hero() {
           </Link>
         </div>
 
+        {/* ── STATS BAR ────────────────────────────────────────────────────
+            v2.0: Replaced unverified/inaccurate numbers with factual claims:
+            "10K+ Analyses Done" → "Swiss Ephemeris Powered" (verifiable tech)
+            "100% Free Forever" → "Free to Start" (accurate — paid tiers exist)
+            "5000 Years of Wisdom" → kept (historical fact)
+            Rule: Never show a stat that cannot be verified by Google/user.
+        ──────────────────────────────────────────────────────────────────── */}
         <div className="mt-8 flex items-center gap-6">
           {[
-            { value: '10K+', label: 'Analyses Done' },
+            { value: '⚡', label: 'Swiss Ephemeris Powered' },
             { value: '5000', label: 'Years of Wisdom' },
-            { value: '100%', label: 'Free Forever' },
+            { value: '✓', label: 'Free to Start' },
           ].map((stat, i) => (
             <div key={stat.label} className="flex items-center gap-6">
               {i > 0 && <div className="w-px h-8 bg-white/10" />}
@@ -120,13 +173,14 @@ export default function Hero() {
             </div>
           ))}
         </div>
+
       </div>
 
       <a
         href="#pillars"
         className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-slate-500 transition-colors duration-300"
         style={{ ['--hover-color' as string]: GOLD }}
-        aria-label="Scroll down"
+        aria-label="Scroll down to explore"
       >
         <span className="text-xs tracking-widest uppercase">Explore</span>
         <ChevronDown className="w-5 h-5 animate-bounce" />
