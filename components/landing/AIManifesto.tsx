@@ -1,5 +1,21 @@
 import { Cpu, BookOpen, Globe, ShieldCheck } from 'lucide-react';
 
+// ============================================================
+// FILE: components/landing/AIManifesto.tsx
+// VERSION: v1.1 — E-E-A-T / IR fixes (Claude audit June 2026)
+// CHANGES vs v1.0:
+//   ✅ FIX-1: "Trikaal Vaani Global Headquarters · India, India"
+//      removed — "Global Headquarters" is not in MSME registration
+//      and "India, India" was a broken data artifact.
+//      Replaced with: "Trikaal Vaani · India · MSME UDYAM-DL-10-0119070"
+//      — factual, verifiable, E-E-A-T strong.
+//   ✅ FIX-2: "Chief Vedic Architect & AI Researcher" corrected to
+//      "Chief Vedic Architect" — consistent with all other brand
+//      touchpoints, layout.tsx Person schema, and founder page.
+//   PROTECTED (untouched): all PILLARS content, gradients, layout,
+//      animations, backdrop filters, grid, colors, section id.
+// ============================================================
+
 const GOLD = '#D4AF37';
 const GOLD_RGBA = (a: number) => `rgba(212,175,55,${a})`;
 
@@ -113,12 +129,17 @@ export default function AIManifesto() {
           <p className="text-xs font-medium tracking-widest uppercase mb-3" style={{ color: GOLD_RGBA(0.5) }}>
             Founded by
           </p>
+
+          {/* ── v1.1 FIX: title corrected to match all brand touchpoints ── */}
           <p className="font-serif text-xl sm:text-2xl font-bold text-white mb-2">
             Rohiit Gupta
           </p>
-          <p className="text-sm text-slate-400 mb-1">Chief Vedic Architect &amp; AI Researcher</p>
+          <p className="text-sm text-slate-400 mb-1">Chief Vedic Architect</p>
+
+          {/* ── v1.1 FIX: replaced "Global Headquarters · India, India"
+              with verified MSME registration detail — factual + E-E-A-T ── */}
           <p className="text-xs text-slate-600">
-            Trikaal Vaani Global Headquarters · India, India
+            Trikaal Vaani · India · MSME Reg. UDYAM-DL-10-0119070
           </p>
 
           <div
