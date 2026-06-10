@@ -1,7 +1,7 @@
 // ============================================================
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
 // FILE: app/layout.tsx
-// VERSION: v3.3 — SEO/EEAT/GEO audit fixes (Claude, June 2026)
+// VERSION: v3.4 — StickyMobileCTA added (Phase 2, June 2026)
 // CHANGES vs v3.2 (CEO-approved):
 //   ✅ FIX-1: legalName corrected from "Trikal Vaani Global" →
 //      "Trikal Vaani" — matches UDYAM-DL-10-0119070 exactly.
@@ -33,6 +33,7 @@ import "./globals.css";
 import SchemaScript from "@/components/SchemaScript";
 import TrikalVoice from "@/components/Trikal/TrikalVoice";
 import OneSignalInit from "@/components/OneSignalInit";
+import StickyMobileCTA from "@/components/landing/StickyMobileCTA";
 import { Analytics } from "@vercel/analytics/next";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -404,6 +405,8 @@ export default function RootLayout({
         <TrikalVoice />
         {/* OneSignalInit: loads OneSignal v16 Web Push SDK + init globally */}
         <OneSignalInit />
+        {/* v3.4: StickyMobileCTA — mobile-only bottom-left bar, hides when #birth-form visible */}
+        <StickyMobileCTA />
         <Analytics />
       </body>
     </html>
