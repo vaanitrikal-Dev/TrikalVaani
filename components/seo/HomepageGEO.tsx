@@ -3,50 +3,40 @@
  * TRIKAL VAANI — trikalvaani.com
  * Chief Vedic Architect: Rohiit Gupta
  * FILE: components/seo/HomepageGEO.tsx
- * Version: 2.2 — Competitor claim removed from accuracy FAQ (synced to schema)
- * Date: 2026-06-01
+ * Version: 2.3 — Speakable classes + author photo (Claude audit June 2026)
+ * Date: 2026-06-10
  * 🔱 JAI MAA SHAKTI
  *
- * CHANGES vs v2.1 (CEO-approved):
- *   ✅ ACCURACY FAQ de-risked: dropped AstroSage/AstroTalk names and the
- *      unverifiable "same engine as AstroSage" claim. Q reworded to a clean
- *      non-branded query; A states only what Trikaal Vaani does (Swiss
- *      Ephemeris + Lahiri + BNN + Shadbala + named architect). MUST stay in
- *      sync with HomepageSchema FAQPage (#faq) — edited there as v2.1.
- *
- * CHANGES vs v2.0 (CEO-approved):
- *   ✅ DIRECT ANSWER restructured for GEO/AEO: the ~85-word run-on paragraph
- *      is split into (1) a crisp ~45-word standalone answer that AI engines
- *      (AI Overviews, Perplexity, Gemini, SearchGPT) can lift and quote
- *      verbatim, then (2) a supporting line carrying ALL the entity facts
- *      (Lagna, 12 houses, 9 grahas, 27 nakshatras, Dasha, Bhrigu Nandi,
- *      Shadbala, 15 domains). Nothing removed — only made machine-extractable.
- *   ✅ FRESHNESS: visible "Last updated" May 2026 -> June 2026 (matches the
- *      Service schema dateModified 2026-06-01).
- *   ⚠️ PENDING (coordinated, needs HomepageSchema): the AstroSage comparison
- *      FAQ asserts a competitor's internal engine ("same Swiss Ephemeris
- *      engine as AstroSage") — unverifiable claim. Soften to assert only what
- *      Trikaal Vaani does. Must be edited in BOTH this file's FAQ and the
- *      HomepageSchema FAQPage together to stay in sync. NOT touched here.
- *   PROTECTED (untouched): brand spelling, author strip, internal link hub,
- *      FAQ Q&A wording (schema-synced), global reach block, all routes/CTAs.
+ * CHANGES vs v2.2 (CEO-approved):
+ *   ✅ FIX-1: className="geo-direct-answer" added to direct answer section.
+ *      layout.tsx speakable selector targets '.geo-direct-answer' — without
+ *      this class, Google SGE / voice search cannot extract the direct answer.
+ *   ✅ FIX-2: className="faq-speakable" added to FAQ section.
+ *      layout.tsx speakable selector targets '.faq-speakable' — without this,
+ *      Google SGE cannot extract FAQ answers for voice / AI overviews.
+ *   ✅ FIX-3: Author strip 'RG' text placeholder replaced with actual
+ *      Rohiit Gupta photo (Next/Image, same src as SiteFooter).
+ *      Real author photo = stronger E-E-A-T signal for Google.
+ *   PROTECTED (untouched): all content, FAQ Q&A, internal links, global
+ *      reach block, all IDs, routes, CTAs, brand spelling, gold palette.
  * =============================================================
  */
 
 import Link from 'next/link';
+import Image from 'next/image';
 
 export default function HomepageGEO() {
   return (
     <>
       {/* ═══════════════════════════════════════════════════════════
           GEO ELEMENT 1: DIRECT ANSWER BLOCK
-          Para 1 = tight ~45-word liftable answer ("what is Trikaal Vaani").
-          Para 2 = entity-rich supporting detail (kept from v2.0).
+          v2.3 FIX-1: className="geo-direct-answer" added for speakable.
+          layout.tsx speakable cssSelector: [".geo-direct-answer", "h1", "h2"]
           ═══════════════════════════════════════════════════════════ */}
       <section
         id="what-is-trikaal-vaani"
         aria-labelledby="geo-direct-answer-heading"
-        className="px-4 py-16 bg-[#0A0D18] border-y border-white/5"
+        className="geo-direct-answer px-4 py-16 bg-[#0A0D18] border-y border-white/5"
       >
         <div className="max-w-3xl mx-auto">
           <p className="text-[#D4AF37] uppercase tracking-widest text-xs font-medium mb-3 text-center">
@@ -107,14 +97,29 @@ export default function HomepageGEO() {
 
       {/* ═══════════════════════════════════════════════════════════
           GEO ELEMENT 2: E-E-A-T AUTHOR STRIP
+          v2.3 FIX-3: 'RG' text replaced with actual author photo.
+          Real photo = stronger E-E-A-T signal. Same src as SiteFooter.
           ═══════════════════════════════════════════════════════════ */}
       <section
         aria-labelledby="author-byline-heading"
         className="px-4 py-12 bg-[#080B12]"
       >
         <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-center gap-8">
-          <div className="flex-shrink-0 w-24 h-24 rounded-full bg-[#D4AF37]/20 border-2 border-[#D4AF37]/40 flex items-center justify-center text-4xl font-serif text-[#D4AF37] font-bold">
-            RG
+          {/* v2.3: Real photo replaces 'RG' text placeholder */}
+          <div
+            className="flex-shrink-0 relative w-24 h-24 rounded-full overflow-hidden"
+            style={{
+              border: '2px solid rgba(212,175,55,0.4)',
+              boxShadow: '0 0 24px rgba(212,175,55,0.2)',
+            }}
+          >
+            <Image
+              src="/Rohiit-Gupta.jpg"
+              alt="Rohiit Gupta, Chief Vedic Architect, Trikaal Vaani"
+              fill
+              className="object-cover object-top"
+              loading="lazy"
+            />
           </div>
           <div className="flex-1">
             <p className="text-[#D4AF37] text-xs uppercase tracking-widest font-medium mb-1">
@@ -252,12 +257,14 @@ export default function HomepageGEO() {
       </section>
 
       {/* ═══════════════════════════════════════════════════════════
-          GEO ELEMENT 4: VISIBLE FAQ — SYNCED TO HomepageSchema v2.1
+          GEO ELEMENT 4: VISIBLE FAQ
+          v2.3 FIX-2: className="faq-speakable" added for speakable.
+          layout.tsx speakable cssSelector: [".faq-speakable"]
           ═══════════════════════════════════════════════════════════ */}
       <section
         id="faq"
         aria-labelledby="faq-heading"
-        className="px-4 py-16 bg-[#080B12]"
+        className="faq-speakable px-4 py-16 bg-[#080B12]"
       >
         <div className="max-w-3xl mx-auto">
           <div className="text-center mb-12">
@@ -327,9 +334,7 @@ export default function HomepageGEO() {
       </section>
 
       {/* ═══════════════════════════════════════════════════════════
-          GEO ELEMENT 5: GLOBAL REACH BLOCK (replaces local SEO, v2.0)
-          CEO Decision #6 — 100% online, national + worldwide + AI-search.
-          No city doorway tags, no LocalBusiness signal, no ₹499 phantom.
+          GEO ELEMENT 5: GLOBAL REACH BLOCK
           ═══════════════════════════════════════════════════════════ */}
       <section
         aria-labelledby="global-reach-heading"
@@ -356,7 +361,6 @@ export default function HomepageGEO() {
             seeker, in English, Hindi or Hinglish.
           </p>
 
-          {/* Honest capability signals — what the platform genuinely offers */}
           <div className="flex flex-wrap justify-center gap-2 mb-8">
             {[
               'Any birth place worldwide',
@@ -385,3 +389,8 @@ export default function HomepageGEO() {
     </>
   );
 }
+
+// =============================================================
+// END — components/seo/HomepageGEO.tsx v2.3
+// 🔱 Trikaal Vaani | Rohiit Gupta, Chief Vedic Architect
+// =============================================================
