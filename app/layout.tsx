@@ -1,21 +1,29 @@
 // ============================================================
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
 // FILE: app/layout.tsx
-// VERSION: v3.2 — OneSignal Web Push initializer wired in
-// DATE: 2026-06-04
-// CHANGES vs v3.1 (CEO-approved):
-//   ✅ ADDED: import OneSignalInit from "@/components/OneSignalInit";
-//   ✅ ADDED: <OneSignalInit /> rendered inside <body> (loads OneSignal v16
-//      Web SDK + init on every page so visitors can opt into push).
-//      Requires: components/OneSignalInit.tsx (v1.0) and
-//                public/OneSignalSDKWorker.js (v1.0) to be present.
-//   PROTECTED (untouched): all metadata copy, titles, OG/twitter, keywords,
-//      icons/favicon set, verification token, canonical/languages,
-//      Organization + WebApplication schema bodies, Razorpay preloads,
-//      performance hints, SchemaScript/TrikalVoice/Analytics.
+// VERSION: v3.3 — SEO/EEAT/GEO audit fixes (Claude, June 2026)
+// CHANGES vs v3.2 (CEO-approved):
+//   ✅ FIX-1: legalName corrected from "Trikal Vaani Global" →
+//      "Trikal Vaani" — matches UDYAM-DL-10-0119070 exactly.
+//      "Global" suffix was never in the MSME registration and
+//      creates a trust mismatch for schema validators.
+//   ✅ FIX-2: AstrologicalService schema added (id: astro-service-schema)
+//      strategy="beforeInteractive" = SSR head injection.
+//      Replaces parked LocalBusiness (GBP not yet approved).
+//      Covers: serviceType, areaServed (India + Worldwide),
+//      provider linked to Rohiit Gupta Person @id,
+//      priceRange, availableLanguage, speakable.
+//      No address/geo = safe without GBP approval.
+//   ✅ FIX-3: speakable schema added inside AstrologicalService
+//      for Google SGE / voice search direct-answer extraction.
+//   PROTECTED (untouched): org-schema, webapp-schema, all metadata
+//      copy, titles, OG/twitter, keywords, icons/favicon set,
+//      verification token, canonical/languages, Razorpay preloads,
+//      performance hints, SchemaScript, TrikalVoice, OneSignalInit,
+//      Analytics, Inter font, body className.
 // ------------------------------------------------------------
-// Prior — v3.1 (2026-06-01): Favicon fix (square icon set) + Org logo URL
-//   corrected to /Trikal_Logo.png (1440x1440).
+// Prior — v3.2 (2026-06-04): OneSignalInit wired in.
+// Prior — v3.1 (2026-06-01): Favicon fix + Org logo URL corrected.
 // ============================================================
 
 import type { Metadata } from "next";
@@ -26,7 +34,6 @@ import SchemaScript from "@/components/SchemaScript";
 import TrikalVoice from "@/components/Trikal/TrikalVoice";
 import OneSignalInit from "@/components/OneSignalInit";
 import { Analytics } from "@vercel/analytics/next";
-
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -48,7 +55,6 @@ export const metadata: Metadata = {
     "free AI kundli",
     "Vedic astrology India",
     "AI Vedic astrology",
-    "Trikaal Vaani",
     "Trikaal Vaani",
     "Rohiit Gupta astrologer",
     "voice astrology Hindi",
@@ -132,7 +138,12 @@ export default function RootLayout({
   return (
     <html lang="en-IN" suppressHydrationWarning>
       <head>
-        {/* ── Organization Schema ── */}
+
+        {/* ── Organization Schema ──────────────────────────────────────────
+            v3.3 FIX: legalName corrected to "Trikal Vaani" — matches
+            UDYAM-DL-10-0119070 exactly. "Global" suffix removed.
+            All other fields untouched.
+        ──────────────────────────────────────────────────────────────────── */}
         <Script
           id="org-schema"
           type="application/ld+json"
@@ -152,7 +163,7 @@ export default function RootLayout({
                 "त्रिकाल वाणी",
                 "त्रिकाळ वाणी",
               ],
-              legalName: "Trikal Vaani Global",
+              legalName: "Trikal Vaani",
               url: "https://trikalvaani.com",
               logo: {
                 "@type": "ImageObject",
@@ -221,7 +232,7 @@ export default function RootLayout({
           }}
         />
 
-        {/* ── WebApplication Schema ── */}
+        {/* ── WebApplication Schema ─────────────────────────────────────── */}
         <Script
           id="webapp-schema"
           type="application/ld+json"
@@ -268,6 +279,112 @@ export default function RootLayout({
           }}
         />
 
+        {/* ── AstrologicalService Schema ────────────────────────────────────
+            v3.3 NEW: Replaces parked LocalBusiness (GBP not yet approved).
+            Safe to use without GBP — no address/geo required.
+            Covers service intent for "Vedic astrology online India",
+            "AI kundli prediction", "astrology reading Hindi" queries.
+            speakable: targets Google SGE direct-answer box + voice search.
+            @id linked to Organization and Person for full graph integrity.
+        ──────────────────────────────────────────────────────────────────── */}
+        <Script
+          id="astro-service-schema"
+          type="application/ld+json"
+          strategy="beforeInteractive"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "Service",
+              "@id": "https://trikalvaani.com/#astro-service",
+              name: "Trikaal Vaani — AI Vedic Astrology Predictions",
+              alternateName: [
+                "Free Kundli Online",
+                "AI Jyotish Reading",
+                "Vedic Astrology Prediction India",
+                "Online Astrology Hindi",
+              ],
+              serviceType: "Vedic Astrology Reading",
+              description:
+                "Trikaal Vaani offers free AI-powered Vedic astrology predictions using Swiss Ephemeris, Brihat Parashara Hora Shastra (BPHS), Bhrigu Nandi Nadi, and Shadbala. Personalised kundli, Kundali Milan, Mahadasha readings, and life domain analysis across career, wealth, marriage, health, and legal matters — in Hindi and English.",
+              url: "https://trikalvaani.com",
+              inLanguage: ["en-IN", "hi-IN"],
+              provider: {
+                "@type": "Person",
+                "@id": "https://trikalvaani.com/#rohiit-gupta",
+                name: "Rohiit Gupta",
+                jobTitle: "Chief Vedic Architect",
+                url: "https://trikalvaani.com/founder",
+              },
+              brand: {
+                "@id": "https://trikalvaani.com/#organization",
+              },
+              areaServed: [
+                { "@type": "Country", name: "India" },
+                { "@type": "Place", name: "Worldwide" },
+              ],
+              availableLanguage: [
+                { "@type": "Language", name: "Hindi" },
+                { "@type": "Language", name: "English" },
+              ],
+              hasOfferCatalog: {
+                "@type": "OfferCatalog",
+                name: "Trikaal Vaani Reading Plans",
+                itemListElement: [
+                  {
+                    "@type": "Offer",
+                    "@id": "https://trikalvaani.com/#offer-free",
+                    name: "Free Trikaal Ka Sandesh",
+                    price: "0",
+                    priceCurrency: "INR",
+                    description:
+                      "Free AI kundli with 150–200 word Vedic astrology preview, key planetary message and one action step. Powered by Swiss Ephemeris.",
+                    eligibleRegion: { "@type": "Place", name: "Worldwide" },
+                  },
+                  {
+                    "@type": "Offer",
+                    "@id": "https://trikalvaani.com/#offer-voice",
+                    name: "Trikaal Ki Awaaz — Voice Reading",
+                    price: "11",
+                    priceCurrency: "INR",
+                    description:
+                      "60-second personalised Hindi/Hinglish voice reading by Trikaal AI, cloned from Rohiit Gupta's voice.",
+                    eligibleRegion: { "@type": "Place", name: "Worldwide" },
+                  },
+                  {
+                    "@type": "Offer",
+                    "@id": "https://trikalvaani.com/#offer-deep",
+                    name: "Deep Reading",
+                    price: "51",
+                    priceCurrency: "INR",
+                    description:
+                      "900-word full Vedic analysis with 5 personalised upay, Pratyantar Dasha windows, and Shadbala strength scoring.",
+                    eligibleRegion: { "@type": "Place", name: "Worldwide" },
+                  },
+                  {
+                    "@type": "Offer",
+                    "@id": "https://trikalvaani.com/#offer-karmic",
+                    name: "Karmic Background Reading",
+                    price: "251",
+                    priceCurrency: "INR",
+                    description:
+                      "Deep Bhrigu Nadi karmic pattern analysis — past-life karmic debt, current-life dharma path, and Nadi-specific remedies.",
+                    eligibleRegion: { "@type": "Place", name: "Worldwide" },
+                  },
+                ],
+              },
+              speakable: {
+                "@type": "SpeakableSpecification",
+                cssSelector: [
+                  ".geo-direct-answer",
+                  ".faq-speakable",
+                  "h1",
+                  "h2",
+                ],
+              },
+            }),
+          }}
+        />
+
         {/* Razorpay preload */}
         <Script
           src="https://checkout.razorpay.com/v1/checkout.js"
@@ -288,7 +405,6 @@ export default function RootLayout({
         {/* OneSignalInit: loads OneSignal v16 Web Push SDK + init globally */}
         <OneSignalInit />
         <Analytics />
-
       </body>
     </html>
   );
