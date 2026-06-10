@@ -3,25 +3,26 @@
  * 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER 🔱
  * ============================================================================
  * File:        components/SiteFooter.tsx
- * Version:     v2.3 — IR-0 cleanup (branding + local signal)
+ * Version:     v2.4 — E-E-A-T fixes (Claude audit June 2026)
  * Owner:       Rohiit Gupta, Chief Vedic Architect
- * Date:        2026-06-01
  *
- * CHANGES vs v2.2 (CEO approved):
- *   ✅ Visible logo text "Trikaal Vaani" -> "Trikaal Vaani".
- *   ✅ REMOVED the "Delhi NCR, India — Global Platform" location row
- *      (local-business signal — violates IR-0). Replaced with a
- *      national/global scope line, no city.
- *   ✅ Copyright "© Trikaal Vaani Global" -> "© Trikaal Vaani Global".
- *   ✅ Entity-consolidation block kept AS-IS on purpose (it deliberately
- *      links the single-a + double-a spellings + alt domains for SEO).
- *   ✅ ALL OTHER CONTENT + logic from v2.2: 100% identical.
- *
- * CHANGES vs v2.1 (carried over):
- *   ✅ /calculators link in Explore nav
- *   ✅ /upcoming-events → /panchang (Explore + legal footer)
- *   ✅ Real Supabase predictions count via /api/stats (fallback 72)
- *   ✅ Founder image path fixed
+ * CHANGES vs v2.3 (CEO-approved):
+ *   ✅ FIX-1: "256-bit Encrypted AI Prediction" removed — false/misleading
+ *      claim. AI predictions are not user-encrypted at 256-bit. Google
+ *      E-E-A-T flags fake security badges as trust violations.
+ *      Replaced with: "MSME Registered · Swiss Ephemeris Verified"
+ *      — 100% verifiable, factual, EEAT-strong.
+ *   ✅ FIX-2: "The world's leading Vedic AI Astrology Research Platform"
+ *      removed — unverified superlative. AstroSage/AstroTalk are larger.
+ *      Google penalises unverifiable claims in footer description.
+ *      Replaced with: "AI-powered Vedic Astrology platform by Rohiit
+ *      Gupta, India." — accurate, entity-rich, E-E-A-T compliant.
+ *   ✅ FIX-3: "© Trikaal Vaani Global" → "© Trikaal Vaani" — "Global"
+ *      not in MSME UDYAM-DL-10-0119070 registration. Same fix applied
+ *      to layout.tsx v3.3 legalName.
+ *   PROTECTED (untouched): all nav links, Rohiit Gupta card, WhatsApp
+ *      CTA, email, entity consolidation block, Supabase count logic,
+ *      MSME number, legal footer links, Instagram, all styling.
  * ============================================================================
  */
 
@@ -78,9 +79,12 @@ export default function SiteFooter() {
                 Trikaal Vaani
               </span>
             </Link>
+
+            {/* ── v2.4 FIX-2: "world's leading" removed — unverified superlative
+                Replaced with accurate, entity-rich, E-E-A-T compliant description ── */}
             <p className="text-xs text-slate-400 leading-relaxed max-w-xs mb-4">
-              The world&apos;s leading Vedic AI Astrology Research Platform. Merging 5,000 years
-              of Parashara wisdom with Neural Networks to decode your cosmic blueprint.
+              AI-powered Vedic Astrology platform by Rohiit Gupta, India. Merging 5,000 years
+              of Parashara wisdom with Swiss Ephemeris precision to decode your cosmic blueprint.
             </p>
 
             <div
@@ -247,14 +251,17 @@ export default function SiteFooter() {
                 <Link href="/founder" style={{ color: GOLD_RGBA(0.75) }} className="font-semibold hover:text-white transition-colors">Rohiit Gupta</Link>
               </p>
             </div>
+
+            {/* ── v2.4 FIX-1: "256-bit Encrypted AI Prediction" removed — false claim.
+                Replaced with verifiable MSME + Swiss Ephemeris trust badge. ── */}
             <div
               className="flex items-center gap-2.5 px-4 py-3 rounded-xl flex-shrink-0"
               style={{ background: 'rgba(34,197,94,0.06)', border: '1px solid rgba(34,197,94,0.18)' }}
             >
               <ShieldCheck className="w-4 h-4 text-emerald-400 flex-shrink-0" />
               <div>
-                <p className="text-xs font-semibold text-emerald-300 leading-tight">256-bit Encrypted AI Prediction</p>
-                <p className="text-xs text-slate-500 leading-tight mt-0.5">Verified by Rohiit Gupta</p>
+                <p className="text-xs font-semibold text-emerald-300 leading-tight">MSME Registered · Swiss Ephemeris Verified</p>
+                <p className="text-xs text-slate-500 leading-tight mt-0.5">Rohiit Gupta, Chief Vedic Architect</p>
               </div>
             </div>
           </div>
@@ -308,7 +315,8 @@ export default function SiteFooter() {
           </div>
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
             <div className="flex flex-wrap items-center gap-4 text-xs text-slate-700">
-              <span>&copy; {new Date().getFullYear()} Trikaal Vaani Global. All rights reserved.</span>
+              {/* ── v2.4 FIX-3: "Global" removed — not in MSME registration ── */}
+              <span>&copy; {new Date().getFullYear()} Trikaal Vaani. All rights reserved.</span>
               <span style={{ color: GOLD_RGBA(0.2) }}>·</span>
               <span>MSME: UDYAM-DL-10-0119070</span>
               <span style={{ color: GOLD_RGBA(0.2) }}>·</span>
@@ -328,7 +336,7 @@ export default function SiteFooter() {
 }
 
 // ============================================================================
-// END — components/SiteFooter.tsx v2.3
+// END — components/SiteFooter.tsx v2.4
 // 🔱 Trikaal Vaani | Rohiit Gupta, Chief Vedic Architect
 // MSME Registered: UDYAM-DL-10-0119070
 // ============================================================================
