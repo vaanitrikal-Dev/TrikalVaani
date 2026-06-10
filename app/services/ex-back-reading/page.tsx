@@ -1,23 +1,27 @@
 /**
  * TRIKAAL VAANI — trikalvaani.com
  * Chief Vedic Architect: Rohiit Gupta
- * FILE TO PASTE → app/services/ex-back-reading/page.tsx
- * Version: 4.1 — IR-0 cleanup
+ * FILE: app/services/ex-back-reading/page.tsx
+ * Version: 4.2 — IR/EEAT fixes (Claude audit June 2026)
  *
- * v4.1 CHANGES vs v4.0:
- *   ❌ REMOVED fake testimonials (fabricated reviews + ★★★★★ + "Verified Experiences")
- *   ❌ REMOVED phantom ₹499 (hero call button, step 04, card strike-through, CTA button, FAQ Q3)
- *   ✅ /about → /founder (correct author URL — 3 spots)
- *   ✅ keyword "vedic astrologer Delhi" → "India"
- *   ✅ "Gemini-powered analysis" → "Deep analysis" (vendor name hidden)
- *   ✅ Removed "(4096 tokens)" technical detail
- *   ✅ FAQ now 4 (removed ₹51-vs-₹499 question)
- *   ✅ KEPT Maa Divine Seva (real Arzi/Dhanyewaad dakshina feature)
- *   ✅ Real price on this page = ₹51 (reading)
+ * v4.2 CHANGES vs v4.1 (CEO-approved):
+ *   ✅ FIX-1: "same engine as AstroSage" removed from Step 01 visible text
+ *      IR rule: no competitor names in user-visible content
+ *   ✅ FIX-2: "same engine used by AstroSage" removed from FAQ Q4 answer
+ *      Same IR rule — competitor comparison in FAQ = trust risk
+ *   ✅ FIX-3: AuthorStrip 'RG' text → real Rohiit Gupta photo
+ *      Matches HomepageGEO v2.3 EEAT upgrade — real photo stronger signal
+ *   PROTECTED (untouched): all schema, FAQ questions, pricing, MaaDivineSeva,
+ *      Maa Shakti content, CTA, metadata, hero, deliverables.
+ *
+ * v4.1 CHANGES:
+ *   ✅ Fake testimonials removed, phantom ₹499 removed
+ *   ✅ /about → /founder, vendor name hidden, Delhi NCR → India
  */
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import Script from "next/script";
 import SiteNav from "@/components/layout/SiteNav";
 import SiteFooter from "@/components/layout/SiteFooter";
@@ -110,7 +114,12 @@ export default function ExBackReadingPage() {
             <div className="grid md:grid-cols-2 gap-10 items-center">
               <div className="space-y-6">
                 {[
-                  { step: "01", title: "Enter Your Birth Details", desc: "Date, time, and place. We use self-hosted Swiss Ephemeris (Lahiri Ayanamsha) — same engine as AstroSage." },
+                  {
+                    step: "01",
+                    title: "Enter Your Birth Details",
+                    // v4.2 FIX-1: "same engine as AstroSage" removed — IR competitor claim
+                    desc: "Date, time, and place. We use self-hosted Swiss Ephemeris (Lahiri Ayanamsha) — the astronomical standard for sidereal Vedic calculation.",
+                  },
                   { step: "02", title: "Trikaal AI Reads Your Chart", desc: "Deep analysis of Venus, 7th house lord, Navamsa D9, and current Mahadasha for love timing." },
                   { step: "03", title: "Get Your Reunion Window", desc: "₹51 deep reading: Is reunion possible? When is the window? What karmic lesson is at play?" },
                 ].map((s, i) => (
@@ -135,7 +144,11 @@ export default function ExBackReadingPage() {
           { q: "Can Vedic astrology predict if my ex will come back?", a: "Yes. The 7th house governs partnerships and reconciliation. Venus rules love and reunion energy. Vimshottari Dasha pinpoints when reconciliation windows open or close. Rohiit Gupta analyzes all three together." },
           { q: "What birth details do I need for this reading?", a: "Date of birth, exact time of birth (ideally within 30 minutes), and place of birth. The more precise the birth time, the more accurate the house placements and Dasha timing." },
           { q: "What is Navamsa D9 and why does it matter?", a: "The Navamsa (D9) chart is the soul chart in Vedic astrology. It reveals whether a connection carries past-life karma and whether reconciliation is truly supported at the soul level." },
-          { q: "How accurate is Trikaal Vaani's reading?", a: "Trikaal Vaani uses the self-hosted Swiss Ephemeris with Lahiri Ayanamsha — the same engine used by AstroSage. Readings with birth times accurate to within 15 minutes are most reliable." },
+          {
+            q: "How accurate is Trikaal Vaani's reading?",
+            // v4.2 FIX-2: "the same engine used by AstroSage" removed — IR competitor claim
+            a: "Trikaal Vaani uses self-hosted Swiss Ephemeris with Lahiri Ayanamsha — the astronomical standard for sidereal Vedic calculation. Readings with birth times accurate to within 15 minutes are most reliable.",
+          },
         ]} />
 
         {/* CTA */}
@@ -152,13 +165,28 @@ export default function ExBackReadingPage() {
   );
 }
 
-/* ─── SHARED COMPONENTS (inlined) ─────────────── */
+/* ─── SHARED COMPONENTS ─────────────── */
 
 function AuthorStrip() {
   return (
     <section className="py-12 px-4 border-y border-white/5 bg-[#0A0D18]">
       <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-center gap-8">
-        <div className="flex-shrink-0 w-20 h-20 rounded-full bg-[#D4AF37]/20 border border-[#D4AF37]/40 flex items-center justify-center text-3xl font-serif text-[#D4AF37] font-bold">RG</div>
+        {/* v4.2 FIX-3: 'RG' text → real photo for stronger EEAT signal */}
+        <div
+          className="flex-shrink-0 relative w-20 h-20 rounded-full overflow-hidden"
+          style={{
+            border: '2px solid rgba(212,175,55,0.4)',
+            boxShadow: '0 0 20px rgba(212,175,55,0.2)',
+          }}
+        >
+          <Image
+            src="/Rohiit-Gupta.jpg"
+            alt="Rohiit Gupta, Chief Vedic Architect, Trikaal Vaani"
+            fill
+            className="object-cover object-top"
+            loading="lazy"
+          />
+        </div>
         <div>
           <p className="text-[#D4AF37] text-xs uppercase tracking-widest font-medium mb-1">About Your Vedic Architect</p>
           <h2 className="font-serif text-xl font-bold text-white mb-2">Rohiit Gupta — Chief Vedic Architect, Trikaal Vaani</h2>
@@ -319,3 +347,8 @@ function CtaSection({ headline, highlight, body, segment }: { headline: string; 
     </section>
   );
 }
+
+// ============================================================
+// END — app/services/ex-back-reading/page.tsx v4.2
+// 🔱 Trikaal Vaani | Rohiit Gupta, Chief Vedic Architect
+// ============================================================
