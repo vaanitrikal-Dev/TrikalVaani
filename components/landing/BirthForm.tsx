@@ -3,8 +3,22 @@
  * TRIKAAL VAANI — BirthForm Component
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: components/landing/BirthForm.tsx
- * VERSION: 9.9 — Mobile horizontal-overflow fix
+ * VERSION: 10.0 — Free tier: mobile number OPTIONAL (funnel fix)
  * SIGNED: ROHIIT GUPTA, CEO
+ *
+ * v10.0 CHANGES vs v9.9 (CEO-approved, conversion audit Fix #1):
+ *   ✅ MOBILE OPTIONAL FOR FREE TIER — requiring a phone number for
+ *      a free reading was the #1 funnel drop-off. Now:
+ *      - FREE tier: mobile is optional. If left blank → no error.
+ *        If user types something, format is still validated.
+ *      - PAID / VOICE tiers: mobile remains REQUIRED (Razorpay
+ *        receipt + WhatsApp delivery need it).
+ *      - Label adapts per tier: "(optional — WhatsApp par report
+ *        ke liye)" on free, required * on paid/voice.
+ *   ✅ Gender, Profession, Current City, Relationship Status all
+ *      KEPT — required for Gemini prediction-context quality
+ *      (e.g. "Male, IT sector, living in Pune, born in Bihar").
+ *   ✅ ALL v9.9 logic preserved 100%.
  *
  * v9.9 CHANGES vs v9.8 (CEO-approved):
  *   ✅ MOBILE OVERFLOW FIX — form, pricing cards, and field boxes
@@ -921,8 +935,13 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
     if (!fields.dateOfBirth)    errs.dateOfBirth = 'Date of birth is required'
     if (!fields.unknownTime && !fields.timeOfBirth) errs.timeOfBirth = 'Time of birth is required'
     if (fields.latitude === '') errs.latitude    = 'Place of birth is required'
+    // v10.0: mobile OPTIONAL for free tier, REQUIRED for paid/voice
     const mobileDigits = fields.mobile.replace(/\D/g, '').length
-    if (!fields.mobile || mobileDigits < fields.countryDigits) errs.mobile = `Valid ${fields.countryDigits}-digit mobile required`
+    if (predictionTier === 'free') {
+      if (fields.mobile && mobileDigits < fields.countryDigits) errs.mobile = `Valid ${fields.countryDigits}-digit mobile required — ya blank chhod do`
+    } else {
+      if (!fields.mobile || mobileDigits < fields.countryDigits) errs.mobile = `Valid ${fields.countryDigits}-digit mobile required`
+    }
     if (isDualDomain) {
       if (!fields.person2Name.trim()) errs.person2Name = 'Person 2 name required'
       if (!fields.person2Dob)         errs.person2Dob  = 'Person 2 DOB required'
@@ -1235,8 +1254,8 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
             {/* Mobile */}
             <div>
               <label htmlFor="tv-mobile" className="block text-sm font-medium text-slate-300 mb-1.5">
-                WhatsApp Mobile <span className="text-yellow-400">*</span>
-                <span className="text-slate-500 text-xs ml-2">(for follow-up + numerology)</span>
+                WhatsApp Mobile {predictionTier !== 'free' && <span className="text-yellow-400">*</span>}
+                <span className="text-slate-500 text-xs ml-2">{predictionTier === 'free' ? '(optional — WhatsApp par report chahiye toh do)' : '(required — receipt + delivery)'}</span>
               </label>
               <div className="flex gap-2">
                 <CountrySelector id="tv-country" value={fields.countryCode}
