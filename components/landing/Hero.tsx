@@ -3,20 +3,21 @@ import { Sparkles, ChevronDown } from 'lucide-react';
 
 // ============================================================
 // FILE: components/landing/Hero.tsx
-// VERSION: v2.0 — SEO/EEAT/GEO fixes (Claude audit June 2026)
-// CHANGES vs v1.x:
-//   ✅ FIX-1: Added sr-only H1 with full keyword phrase for Google
-//      Visual Trikaal/Vaani heading unchanged (aria-hidden)
-//      Google now reads: "Free AI Vedic Astrology — Accurate Kundli
-//      & Life Predictions by Rohiit Gupta, Chief Vedic Architect"
-//   ✅ FIX-2: Removed fake/unverified social proof (E-E-A-T violation)
-//      "Trusted by 10,000+ seekers" → capability badge (Swiss Ephemeris
-//      · BPHS · Bhrigu Nadi) — 100% verifiable, zero number claims
-//      "10K+ Analyses Done" → "Swiss Ephemeris Powered"
-//      "100% Free Forever" → "Free to Start" (accurate — paid tiers exist)
-//      "5000 Years of Wisdom" → kept (historical fact, verifiable)
-//   PROTECTED (untouched): all animations, gradients, CTA buttons,
-//      scroll arrow, layout, colors, font sizes, mobile breakpoints.
+// VERSION: v3.0 — Conversion fix (CEO-approved, June 2026)
+// CHANGES vs v2.0:
+//   ✅ FIX-1: "Reveal My Cosmic Score" REMOVED — promise/product
+//      mismatch (no cosmic score is published). CTA now matches
+//      what the form actually delivers.
+//   ✅ FIX-2: ONE human promise line added (CEO copy):
+//      "Apni kundali ka sach — 60 second mein, free."
+//      Replaces "Uncover your daily cosmic energy, life pillar
+//      scores..." (pillar scores also not published).
+//   ✅ FIX-3: ONE CTA only — "Explore Vedic Wisdom" secondary
+//      button REMOVED (was splitting clicks away from the form).
+//      Blog remains reachable via navbar + footer.
+//   PROTECTED (untouched): sr-only SEO H1 (v2.0 FIX-1), capability
+//      badge, stats bar (verifiable claims only), all animations,
+//      gradients, aura, scroll arrow, layout, mobile breakpoints.
 // ============================================================
 
 const GOLD = '#D4AF37';
@@ -45,11 +46,7 @@ export default function Hero() {
 
       <div className="relative z-10 flex flex-col items-center text-center max-w-4xl mx-auto">
 
-        {/* ── CAPABILITY BADGE ─────────────────────────────────────────────
-            v2.0: Replaced "Trusted by 10,000+ seekers" (unverified number =
-            E-E-A-T violation) with verifiable technical capability signals.
-            Swiss Ephemeris + BPHS + Bhrigu Nadi = 100% factual claims.
-        ──────────────────────────────────────────────────────────────────── */}
+        {/* ── CAPABILITY BADGE (v2.0 — verifiable claims only) ──────────── */}
         <div
           className="flex items-center gap-2 mb-8 px-4 py-2 rounded-full"
           style={{
@@ -64,21 +61,9 @@ export default function Hero() {
           <Sparkles className="w-4 h-4" style={{ color: GOLD }} />
         </div>
 
-        {/* ── H1 — SEO / GEO / AEO / E-E-A-T ─────────────────────────────
-            v2.0 FIX: sr-only H1 carries the full keyword-rich headline that
-            Google, Perplexity, SGE, and ChatGPT index as the primary page
-            signal. Placed BEFORE the visual heading so DOM order is correct.
-
-            Google reads:
-              "Free AI Vedic Astrology — Accurate Kundli & Life Predictions
-               by Rohiit Gupta, Chief Vedic Architect"
-
-            Entities covered: Free AI, Vedic Astrology, Kundli, Life
-            Predictions, Rohiit Gupta, Chief Vedic Architect.
-            Matches Person schema @id in layout.tsx + HomepageSchema.
-
-            Visual heading below is aria-hidden — screen readers get the
-            sr-only H1 instead (better accessibility too).
+        {/* ── H1 — SEO / GEO / AEO / E-E-A-T (v2.0 — LOCKED, untouched) ──
+            sr-only H1 carries the full keyword-rich headline indexed by
+            Google, Perplexity, SGE, ChatGPT. Visual heading is aria-hidden.
         ──────────────────────────────────────────────────────────────────── */}
         <h1 className="sr-only">
           Free AI Vedic Astrology — Accurate Kundli &amp; Life Predictions by Rohiit Gupta, Chief Vedic Architect
@@ -111,53 +96,36 @@ export default function Hero() {
           त्रिकाल — Past, Present &amp; Future
         </p>
 
-        <p className="text-base sm:text-lg md:text-xl text-slate-300/80 max-w-2xl mb-3 leading-relaxed">
-          Free AI Life Analysis.{' '}
-          <span className="font-medium" style={{ color: `${GOLD}e6` }}>Rooted in classical Jyotish,</span>{' '}
-          guided by 5000 years of Vedic wisdom.
+        {/* ── v3.0 HUMAN PROMISE — one line, one promise (CEO copy) ────── */}
+        <p
+          className="font-serif text-xl sm:text-2xl md:text-3xl font-semibold mb-3 leading-relaxed"
+          style={{ color: `${GOLD}e6` }}
+        >
+          Apni kundali ka sach — 60 second mein, free.
         </p>
 
-        <p className="text-sm text-slate-400/60 mb-10 max-w-md">
-          Uncover your daily cosmic energy, life pillar scores, and Jyotish insights — in seconds.
+        <p className="text-sm sm:text-base text-slate-400/70 mb-10 max-w-md leading-relaxed">
+          Rooted in classical Jyotish — Swiss Ephemeris precision, 5000 years of Vedic wisdom.
         </p>
 
-        <div className="flex flex-col sm:flex-row gap-4 items-center">
-          <a
-            href="#birth-form"
-            className="group relative px-8 py-4 rounded-full text-sm font-semibold tracking-wide transition-all duration-300 overflow-hidden"
-            style={{
-              background: `linear-gradient(135deg, ${GOLD} 0%, #A8862A 100%)`,
-              color: '#020817',
-              boxShadow: `0 0 32px ${GOLD_RGBA(0.4)}`,
-            }}
-          >
-            <span className="relative z-10">Reveal My Cosmic Score</span>
-            <div
-              className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-              style={{ background: 'linear-gradient(135deg, #E8CC6A 0%, #D4AF37 100%)' }}
-            />
-          </a>
+        {/* ── v3.0 SINGLE CTA — matches the promise, goes to the form ──── */}
+        <a
+          href="#birth-form"
+          className="group relative px-10 py-4 rounded-full text-base font-bold tracking-wide transition-all duration-300 overflow-hidden"
+          style={{
+            background: `linear-gradient(135deg, ${GOLD} 0%, #A8862A 100%)`,
+            color: '#020817',
+            boxShadow: `0 0 32px ${GOLD_RGBA(0.4)}`,
+          }}
+        >
+          <span className="relative z-10">🔮 Apni Kundali Ka Sach Janein — Free</span>
+          <div
+            className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+            style={{ background: 'linear-gradient(135deg, #E8CC6A 0%, #D4AF37 100%)' }}
+          />
+        </a>
 
-          <Link
-            href="/blog"
-            className="px-8 py-4 rounded-full text-sm font-medium tracking-wide transition-all duration-300"
-            style={{
-              border: `1px solid ${GOLD_RGBA(0.28)}`,
-              background: GOLD_RGBA(0.05),
-              color: `${GOLD}cc`,
-            }}
-          >
-            Explore Vedic Wisdom
-          </Link>
-        </div>
-
-        {/* ── STATS BAR ────────────────────────────────────────────────────
-            v2.0: Replaced unverified/inaccurate numbers with factual claims:
-            "10K+ Analyses Done" → "Swiss Ephemeris Powered" (verifiable tech)
-            "100% Free Forever" → "Free to Start" (accurate — paid tiers exist)
-            "5000 Years of Wisdom" → kept (historical fact)
-            Rule: Never show a stat that cannot be verified by Google/user.
-        ──────────────────────────────────────────────────────────────────── */}
+        {/* ── STATS BAR (v2.0 — verifiable claims only, untouched) ─────── */}
         <div className="mt-8 flex items-center gap-6">
           {[
             { value: '⚡', label: 'Swiss Ephemeris Powered' },
