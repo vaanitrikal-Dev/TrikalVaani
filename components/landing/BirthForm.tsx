@@ -3,8 +3,28 @@
  * TRIKAAL VAANI — BirthForm Component
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: components/landing/BirthForm.tsx
- * VERSION: 9.8 — OneSignal abandoned-kundali tagging
+ * VERSION: 9.9 — Mobile horizontal-overflow fix
  * SIGNED: ROHIIT GUPTA, CEO
+ *
+ * v9.9 CHANGES vs v9.8 (CEO-approved):
+ *   ✅ MOBILE OVERFLOW FIX — form, pricing cards, and field boxes
+ *      were bleeding outside the mobile viewport. Root cause:
+ *      native <input type="date">, <select>, and 3-column grid
+ *      children carry an intrinsic min-width (min-width:auto on
+ *      grid/flex items) that blows out the container on narrow
+ *      Android screens, pushing the whole form wider than 100vw.
+ *      Fixes (CSS-only, zero logic change):
+ *      - Scoped <style> inside #birth-form forcing
+ *        min-width:0 / max-width:100% on all inputs, selects,
+ *        textareas, buttons and direct grid children
+ *      - overflow-x: clip on the #birth-form section
+ *      - minWidth: 0 + width: 100% added inline to TierSelector
+ *        cards (the 3-col pricing grid)
+ *      - box-sizing: border-box enforced inside the form
+ *   ✅ ALL v9.8 logic preserved 100%: OneSignal tagging, Razorpay
+ *      flow, maps-proxy (LOCKED, untouched), autocomplete,
+ *      numerology, Person 2, validations, segment routing,
+ *      schema, hidden SEO, hero/footer copy — nothing else changed.
  *
  * v9.8 CHANGES vs v9.7 (CEO-approved):
  *   ✅ OneSignal web-push tagging added for "abandoned kundali"
@@ -16,10 +36,6 @@
  *        tag kundali_status=completed
  *      OneSignal Journey then sends a 1-hour reminder ONLY to
  *      users still tagged "started" (i.e. did not complete).
- *   ✅ ALL v9.7 logic preserved 100%: Razorpay flow, maps-proxy
- *      (LOCKED, untouched), 4-field Google Places autocomplete,
- *      numerology, Person 2 section, validations, segment routing,
- *      schema, hidden SEO, hero/footer copy — nothing else changed.
  *
  * v9.7 CHANGES vs v9.6 (CEO-approved):
  *   ✅ "Delhi NCR" REMOVED from all 3 visible/SEO spots per CEO
@@ -442,6 +458,34 @@ const INITIAL: BirthFormFields = {
   person2CurrentCity: '',
 }
 
+// ── v9.9: Scoped mobile-overflow fix CSS ─────────────────────────────────────
+// Native date/time inputs, selects, and grid children have an intrinsic
+// min-width on Android Chrome that blows the form out beyond 100vw.
+// This forces every control to shrink within its column. CSS-only.
+const MOBILE_OVERFLOW_FIX_CSS = `
+  #birth-form, #birth-form * { box-sizing: border-box; }
+  #birth-form { overflow-x: clip; }
+  #birth-form form { max-width: 100%; }
+  #birth-form input,
+  #birth-form select,
+  #birth-form textarea,
+  #birth-form button {
+    min-width: 0;
+    max-width: 100%;
+  }
+  #birth-form input[type="date"],
+  #birth-form input[type="time"] {
+    width: 100%;
+    min-width: 0;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  #birth-form .grid > * { min-width: 0; }
+  #birth-form .flex > * { min-width: 0; }
+  /* Country selector button must keep its natural width */
+  #birth-form .flex > div.relative:first-child > button { min-width: 80px; }
+`
+
 // ── Service + Offer JSON-LD for AI Search (GEO) ──────────────────────────────
 const SERVICE_OFFER_SCHEMA = {
   '@context': 'https://schema.org',
@@ -630,6 +674,7 @@ function RazorpayInlineTrustStrip({ tier }: { tier: PredictionTier }) {
         border: '1px solid rgba(51,149,255,0.18)',
         borderRadius: '10px',
         marginTop: '4px',
+        maxWidth: '100%',
       }}
     >
       <span style={{ fontSize: '11px', display: 'flex', alignItems: 'center', gap: '5px' }}>
@@ -665,7 +710,7 @@ function RazorpayInlineTrustStrip({ tier }: { tier: PredictionTier }) {
   )
 }
 
-// ── Tier Selector (UNCHANGED structure, copy refined v9.6) ───────────────────
+// ── Tier Selector (v9.9: minWidth:0 + width:100% on cards — overflow fix) ────
 
 function TierSelector({ selected, onChange }: { selected: PredictionTier; onChange: (t: PredictionTier) => void }) {
   const tiers = [
@@ -677,11 +722,11 @@ function TierSelector({ selected, onChange }: { selected: PredictionTier; onChan
   return (
     <div>
       <label className="block text-sm font-medium text-slate-300 mb-3">Reading Type <span className="text-yellow-400">*</span></label>
-      <div className="grid grid-cols-3 gap-1.5">
+      <div className="grid grid-cols-3 gap-1.5" style={{ maxWidth: '100%' }}>
         {tiers.map(tier => (
           <button key={tier.id} type="button" onClick={() => onChange(tier.id)}
             aria-label={`Select ${tier.label} for ${tier.price}`}
-            style={{ background: selected === tier.id ? (tier as any).highlight ? `linear-gradient(135deg,${GOLD_RGBA(0.2)},${GOLD_RGBA(0.1)})` : `${tier.color}18` : 'rgba(255,255,255,0.03)', border: `1px solid ${selected === tier.id ? tier.color : 'rgba(255,255,255,0.08)'}`, borderRadius: '12px', padding: '10px 7px', cursor: 'pointer', textAlign: 'left', transition: 'all 0.2s', position: 'relative' }}>
+            style={{ background: selected === tier.id ? (tier as any).highlight ? `linear-gradient(135deg,${GOLD_RGBA(0.2)},${GOLD_RGBA(0.1)})` : `${tier.color}18` : 'rgba(255,255,255,0.03)', border: `1px solid ${selected === tier.id ? tier.color : 'rgba(255,255,255,0.08)'}`, borderRadius: '12px', padding: '10px 7px', cursor: 'pointer', textAlign: 'left', transition: 'all 0.2s', position: 'relative', minWidth: 0, width: '100%', overflowWrap: 'break-word' }}>
             {(tier as any).highlight && (
               <div style={{ position: 'absolute', top: '-10px', left: '50%', transform: 'translateX(-50%)', background: GOLD, color: '#080B12', fontSize: '9px', fontWeight: 700, padding: '2px 8px', borderRadius: '10px', whiteSpace: 'nowrap' }}>MOST POPULAR</div>
             )}
@@ -1100,6 +1145,9 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
     <section id="birth-form" className={`py-16 px-4 pb-28 sm:pb-16 ${className}`}
       aria-label="Vedic Astrology Birth Chart Form — Trikaal Vaani by Rohiit Gupta">
 
+      {/* v9.9: Scoped mobile-overflow fix — forces all controls to shrink within viewport */}
+      <style dangerouslySetInnerHTML={{ __html: MOBILE_OVERFLOW_FIX_CSS }} />
+
       {/* JSON-LD: Service + Offer + PaymentMethod for AI Search (GEO) */}
       <script
         type="application/ld+json"
@@ -1113,7 +1161,7 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
         <p>Trikaal Vaani is an AI Vedic astrology platform offering professional-grade readings at affordable mass-market pricing. Each prediction uses real Swiss Ephemeris planetary calculations validated against BPHS classical sutras, Bhrigu Nandi Nadi pattern matching, and Shadbala planetary strength scoring. Vimshottari Dasha primary, Pratyantar Dasha for 3-7 day precision, Sookshma Dasha hourly. Lahiri Ayanamsha sidereal system. 11 life domains: Career, Wealth, Health, Relationships, Family, Education, Home, Legal, Travel, Spirituality, Well-being.</p>
       </div>
 
-      <div className="max-w-2xl mx-auto">
+      <div className="max-w-2xl mx-auto w-full" style={{ maxWidth: 'min(42rem, 100%)' }}>
 
         {/* Hero */}
         <div className="text-center mb-8">
@@ -1150,7 +1198,7 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
 
         {/* Form */}
         <div className="rounded-2xl p-6 sm:p-8"
-          style={{ background: 'rgba(13,17,30,0.85)', border: '1px solid rgba(212,175,55,0.15)', backdropFilter: 'blur(12px)' }}>
+          style={{ background: 'rgba(13,17,30,0.85)', border: '1px solid rgba(212,175,55,0.15)', backdropFilter: 'blur(12px)', maxWidth: '100%', overflow: 'hidden' }}>
           <form onSubmit={handleSubmit} noValidate className="grid gap-5">
 
             <TierSelector selected={predictionTier} onChange={setPredictionTier} />
@@ -1165,7 +1213,7 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
                 {LANGUAGE_OPTIONS.map(opt => (
                   <button key={opt.value} type="button" onClick={() => set('language', opt.value as any)}
                     className="py-2.5 px-3 rounded-lg text-sm font-medium transition-all text-center"
-                    style={{ background: fields.language === opt.value ? GOLD_RGBA(0.2) : 'rgba(255,255,255,0.04)', border: `1px solid ${fields.language === opt.value ? GOLD_RGBA(0.6) : 'rgba(255,255,255,0.1)'}`, color: fields.language === opt.value ? GOLD : '#94a3b8' }}>
+                    style={{ background: fields.language === opt.value ? GOLD_RGBA(0.2) : 'rgba(255,255,255,0.04)', border: `1px solid ${fields.language === opt.value ? GOLD_RGBA(0.6) : 'rgba(255,255,255,0.1)'}`, color: fields.language === opt.value ? GOLD : '#94a3b8', minWidth: 0, overflowWrap: 'break-word' }}>
                     <div className="text-lg mb-0.5">{opt.flag}</div>
                     <div>{opt.label}</div>
                     <div className="text-xs opacity-60 mt-0.5">{opt.desc}</div>
@@ -1256,7 +1304,7 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
                 ].map(opt => (
                   <button key={opt.value} type="button" onClick={() => set('gender', opt.value as any)}
                     className="py-2.5 px-3 rounded-lg text-sm font-medium transition-all text-center"
-                    style={{ background: fields.gender === opt.value ? `${opt.color}20` : 'rgba(255,255,255,0.04)', border: `1px solid ${fields.gender === opt.value ? `${opt.color}60` : 'rgba(255,255,255,0.1)'}`, color: fields.gender === opt.value ? opt.color : '#64748b' }}>
+                    style={{ background: fields.gender === opt.value ? `${opt.color}20` : 'rgba(255,255,255,0.04)', border: `1px solid ${fields.gender === opt.value ? `${opt.color}60` : 'rgba(255,255,255,0.1)'}`, color: fields.gender === opt.value ? opt.color : '#64748b', minWidth: 0 }}>
                     {opt.label}
                   </button>
                 ))}
@@ -1300,10 +1348,10 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
                   { label: 'Longitude', value: (fields.longitude as number).toFixed(4) },
                   { label: 'Timezone',  value: `UTC ${fields.timezoneOffset >= 0 ? '+' : ''}${fields.timezoneOffset}` },
                 ].map(({ label, value }) => (
-                  <div key={label}>
+                  <div key={label} style={{ minWidth: 0 }}>
                     <label className="block text-xs text-slate-500 mb-1">{label}</label>
                     <div className="px-3 py-2 rounded-lg text-xs font-mono text-center"
-                      style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', color: '#22c55e' }}>
+                      style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', color: '#22c55e', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                       {value}
                     </div>
                   </div>
