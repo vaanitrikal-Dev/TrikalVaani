@@ -3,59 +3,39 @@
  * 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER 🔱
  * ============================================================================
  * File:        components/SiteFooter.tsx
- * Version:     v2.4 — E-E-A-T fixes (Claude audit June 2026)
+ * Version:     v2.5 — "72+ seekers" counter removed (CEO conversion audit)
  * Owner:       Rohiit Gupta, Chief Vedic Architect
  *
- * CHANGES vs v2.3 (CEO-approved):
- *   ✅ FIX-1: "256-bit Encrypted AI Prediction" removed — false/misleading
- *      claim. AI predictions are not user-encrypted at 256-bit. Google
- *      E-E-A-T flags fake security badges as trust violations.
- *      Replaced with: "MSME Registered · Swiss Ephemeris Verified"
- *      — 100% verifiable, factual, EEAT-strong.
- *   ✅ FIX-2: "The world's leading Vedic AI Astrology Research Platform"
- *      removed — unverified superlative. AstroSage/AstroTalk are larger.
- *      Google penalises unverifiable claims in footer description.
- *      Replaced with: "AI-powered Vedic Astrology platform by Rohiit
- *      Gupta, India." — accurate, entity-rich, E-E-A-T compliant.
- *   ✅ FIX-3: "© Trikaal Vaani Global" → "© Trikaal Vaani" — "Global"
- *      not in MSME UDYAM-DL-10-0119070 registration. Same fix applied
- *      to layout.tsx v3.3 legalName.
- *   PROTECTED (untouched): all nav links, Rohiit Gupta card, WhatsApp
- *      CTA, email, entity consolidation block, Supabase count logic,
- *      MSME number, legal footer links, Instagram, all styling.
+ * CHANGES vs v2.4 (CEO-approved):
+ *   ✅ FIX-1: "{count}+ seekers" badge REMOVED from the Rohiit Gupta
+ *      card. A small visible number (72) signals "new/unproven" to a
+ *      visitor deciding whether to pay — it was hurting trust, not
+ *      building it. Counter can return later once the real number is
+ *      impressive (1,000+).
+ *      Also removed: /api/stats fetch, useState/useEffect, Users icon
+ *      import, and 'use client' directive (no client hooks remain —
+ *      footer is now a pure server component = less JS shipped).
+ *      Replaced badge line with verifiable credential:
+ *      "15+ years · Parashara BPHS tradition".
+ *   PROTECTED (untouched): all nav links, Rohiit Gupta card photo,
+ *      WhatsApp CTA, email block, entity consolidation block, MSME
+ *      number, legal footer links, Instagram, all styling, v2.4 fixes.
+ *
+ * CHANGES vs v2.3 (v2.4, retained):
+ *   ✅ "256-bit Encrypted AI Prediction" removed — false claim.
+ *   ✅ "world's leading" superlative removed.
+ *   ✅ "© Trikaal Vaani Global" → "© Trikaal Vaani".
  * ============================================================================
  */
 
-'use client';
-
 import Link from 'next/link';
 import Image from 'next/image';
-import { Star, MapPin, Instagram, ExternalLink, Mail, ShieldCheck, Users, MessageCircle } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { Star, MapPin, Instagram, ExternalLink, Mail, ShieldCheck, MessageCircle } from 'lucide-react';
 
 const GOLD = '#D4AF37';
 const GOLD_RGBA = (a: number) => `rgba(212,175,55,${a})`;
 
 export default function SiteFooter() {
-  // ✅ Real Supabase predictions count — honest number, grows organically
-  const [count, setCount] = useState<number>(72); // fallback = real count as of today
-
-  useEffect(() => {
-    async function fetchCount() {
-      try {
-        const res = await fetch('/api/stats');
-        if (!res.ok) return;
-        const data = await res.json();
-        if (data?.predictions_count && typeof data.predictions_count === 'number') {
-          setCount(data.predictions_count);
-        }
-      } catch {
-        // Silently fallback to default — no error shown to user
-      }
-    }
-    fetchCount();
-  }, []);
-
   return (
     <footer
       className="px-4 pt-14 pb-8"
@@ -107,12 +87,10 @@ export default function SiteFooter() {
                   Rohiit Gupta
                 </Link>
                 <p className="text-xs text-slate-500 truncate">Chief Vedic Architect</p>
-                <div className="flex items-center gap-1 mt-0.5">
-                  <Users className="w-3 h-3 flex-shrink-0" style={{ color: GOLD_RGBA(0.55) }} />
-                  <span className="text-xs font-semibold" style={{ color: GOLD_RGBA(0.85) }}>
-                    {count.toLocaleString('en-IN')}+ seekers
-                  </span>
-                </div>
+                {/* ── v2.5 FIX-1: seekers counter removed → verifiable credential ── */}
+                <p className="text-xs font-semibold mt-0.5" style={{ color: GOLD_RGBA(0.85) }}>
+                  15+ years · Parashara BPHS tradition
+                </p>
               </div>
             </div>
 
@@ -336,7 +314,7 @@ export default function SiteFooter() {
 }
 
 // ============================================================================
-// END — components/SiteFooter.tsx v2.4
+// END — components/SiteFooter.tsx v2.5
 // 🔱 Trikaal Vaani | Rohiit Gupta, Chief Vedic Architect
 // MSME Registered: UDYAM-DL-10-0119070
 // ============================================================================
