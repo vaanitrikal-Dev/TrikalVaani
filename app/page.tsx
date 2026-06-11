@@ -1,31 +1,31 @@
-// 🔱 TRIKAL VAANI | app/page.tsx | v11.2
+// 🔱 TRIKAL VAANI | app/page.tsx | v11.3
 // Owner: Rohiit Gupta, Chief Vedic Architect
-// Date: 2026-06-01
+// Date: 2026-06-12
 // ============================================================================
-// v11.1 → v11.2 — META DESCRIPTION REWRITE (SERP CTR, metadata only):
-//   ✅ description tightened from ~250 chars (truncated by Google at ~155)
-//      to 136 chars so the full line shows. Angle = Free + accuracy
-//      (mass-market) + problem domains (career/marriage/wealth/health) +
-//      EEAT (Rohiit Gupta, Chief Vedic Architect) + entity-rich (kundli,
-//      Kundali Milan, Vedic) for GEO/AEO. Dropped "Swiss Ephemeris" + "₹11"
-//      from the meta line to fit; ₹11 hook retained in OG/Twitter (social).
-//   PROTECTED: title, OG, twitter, canonical, page body — all unchanged.
+// v11.2 → v11.3 — DYNAMIC BLOG SECTION (Supabase, CEO-approved):
+//   ✅ FIX-1: "Latest from the Trikaal Blog" was rendering 3 HARDCODED
+//      posts from lib/blog-data.ts (Jan–Mar 2026, stale). Now fetches the
+//      3 most recent is_published=true rows from Supabase `blog_posts`
+//      (ordered by published_at DESC) server-side at build/revalidate.
+//   ✅ FIX-2: export const revalidate = 3600 — homepage blog refreshes
+//      every hour via ISR. New article published in Supabase → appears
+//      on homepage automatically within 1 hour. Zero manual work.
+//   ✅ FIX-3: Safe fallback — if the Supabase query fails or returns
+//      empty, a static 3-post fallback list renders (never a blank
+//      section, never a build crash).
+//   ✅ FIX-4: BlogCard + lib/blog-data imports removed from this page —
+//      blog cards are now rendered by a local HomeBlogCard (same visual
+//      design: category tag, title, excerpt, read time, date, Read →).
+//   PROTECTED (untouched): all metadata (v11.2), all 13 other slots,
+//      IR-12 tiered layout + locks, schemas, canonical, components.
 // ----------------------------------------------------------------------------
-// v11.0 → v11.1 — BRAND FLIP + IR-0 CLEANUP (metadata only, CEO-approved):
-//   ✅ BRAND FLIP: every visible "Trikaal Vaani" -> "Trikaal Vaani" in this
-//      file's metadata block — page <title>, openGraph.title, openGraph.siteName,
-//      openGraph.images[].alt, twitter.title. This is what fixes the single-a
-//      "Trikaal Vaani" title showing in Google for the homepage (page-level
-//      metadata overrides layout.tsx, so layout's correct Trikaal title was
-//      never reaching the homepage SERP).
-//   ✅ IR-0: "(Delhi NCR)" removed from the meta description (banned local
-//      targeting — same cleanup already done in layout.tsx v3.0).
-//   ✅ KEPT: "Kundali Milan" keyword in title/desc (CEO request).
-//   PROTECTED (untouched): entire page body, all 14 slots, IR-12 locked
-//      sections, canonical, languages, og-default.jpg, all component imports.
+// v11.1 → v11.2 — META DESCRIPTION REWRITE (SERP CTR, metadata only):
+//   ✅ description tightened to 136 chars. PROTECTED: title, OG, twitter.
+// v11.0 → v11.1 — BRAND FLIP + IR-0 CLEANUP (metadata only).
 // ============================================================================
 
 import type { Metadata } from 'next';
+import { createClient } from '@supabase/supabase-js';
 import HomepageSchema from '@/components/seo/HomepageSchema';
 import HomepageGEO from '@/components/seo/HomepageGEO';
 import SchemaScript from '../components/SchemaScript';
@@ -37,19 +37,19 @@ import PillarsGrid from '@/components/landing/PillarsGrid';
 import SocialProofTicker from '@/components/landing/SocialProofTicker';
 import InnerCircleWaitlist from '@/components/landing/InnerCircleWaitlist';
 import AIManifesto from '@/components/landing/AIManifesto';
-import BlogCard from '@/components/blog/BlogCard';
 import DailyPanchang from '@/components/landing/DailyPanchang';
 import DailyRashifal from '@/components/landing/DailyRashifal';
 import PricingSection from '@/components/landing/PricingSection';
 import LiveTrustBar from '@/components/landing/LiveTrustBar';
 import KundaliMilanTeaser from '@/components/landing/KundaliMilanTeaser';
 import HomeClient from './HomeClient';
-import { blogPosts } from '@/lib/blog-data';
+
+// ── v11.3: ISR — homepage (incl. blog section) revalidates every hour ──
+export const revalidate = 3600;
 
 // ─────────────────────────────────────────────────────────────
 // PAGE-SPECIFIC METADATA — overrides layout.tsx v3.0+ defaults
-// v11.2: description tightened to 136 chars (Free + accuracy + problem
-//        domains + EEAT). v11.1: brand flipped to Trikaal; Delhi NCR removed.
+// v11.2: description tightened to 136 chars. v11.1: brand flipped.
 // ─────────────────────────────────────────────────────────────
 export const metadata: Metadata = {
   title: 'Trikaal Vaani | Free Kundli, Kundali Milan & Accurate AI Vedic Astrology',
@@ -88,8 +88,120 @@ export const metadata: Metadata = {
   },
 };
 
-export default function HomePage() {
-  const latestPosts = blogPosts.slice(0, 3);
+// ─────────────────────────────────────────────────────────────
+// v11.3: HOMEPAGE BLOG — Supabase fetch + local card
+// ─────────────────────────────────────────────────────────────
+
+interface HomeBlogPost {
+  slug: string;
+  title: string;
+  description: string;
+  category: string;
+  published_at: string;
+  read_time_minutes: number;
+}
+
+// Safe fallback — renders only if Supabase query fails/empty (never blank)
+const FALLBACK_POSTS: HomeBlogPost[] = [
+  {
+    slug: 'shani-gochar-2026-saturn-transit',
+    title: "Shani Gochar 2026: What Saturn's Transit Through Aquarius Means for Your Rashi",
+    description: 'Saturn — the great teacher of karma — continues its powerful 2.5-year transit through Aquarius. Understand how this Gochar affects all 12 Rashis in 2026.',
+    category: 'Gochar / Transits',
+    published_at: '2026-01-15',
+    read_time_minutes: 8,
+  },
+  {
+    slug: 'rahu-ketu-axis-2026-karmic-shift',
+    title: 'Rahu-Ketu Axis 2026: The Pisces-Virgo Karmic Shift and What It Means for India',
+    description: 'The shadow planets Rahu and Ketu are now deeply embedded in the Pisces-Virgo axis — the most spiritually significant transit of the decade.',
+    category: 'Gochar / Transits',
+    published_at: '2026-02-20',
+    read_time_minutes: 10,
+  },
+  {
+    slug: 'guru-gochar-taurus-2026-wealth-growth',
+    title: "Guru Gochar 2026: Jupiter's Promise of Wealth, Property & Spiritual Abundance",
+    description: 'Jupiter — Brihaspati, the cosmic guru — continues its journey through Taurus in early 2026 before moving to Gemini. A rare window for wealth building.',
+    category: 'Gochar / Transits',
+    published_at: '2026-03-10',
+    read_time_minutes: 7,
+  },
+];
+
+async function getLatestPosts(): Promise<HomeBlogPost[]> {
+  try {
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    );
+    const { data, error } = await supabase
+      .from('blog_posts')
+      .select('slug, title, description, category, published_at, read_time_minutes')
+      .eq('is_published', true)
+      .order('published_at', { ascending: false })
+      .limit(3);
+    if (error || !data || data.length === 0) return FALLBACK_POSTS;
+    return data as HomeBlogPost[];
+  } catch {
+    return FALLBACK_POSTS;
+  }
+}
+
+function formatPostDate(iso: string): string {
+  try {
+    return new Date(iso).toLocaleDateString('en-GB', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+    });
+  } catch {
+    return '';
+  }
+}
+
+function HomeBlogCard({ post }: { post: HomeBlogPost }) {
+  return (
+    <a
+      href={`/blog/${post.slug}`}
+      className="block rounded-2xl p-6 transition-all duration-300 hover:-translate-y-1 group"
+      style={{
+        background: 'rgba(11,16,26,0.7)',
+        border: '1px solid rgba(212,175,55,0.12)',
+      }}
+    >
+      <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: '#D4AF37' }}>
+        🏷 {post.category}
+      </p>
+      <h3 className="font-serif text-lg font-bold text-white leading-snug mb-3 group-hover:text-yellow-200 transition-colors">
+        {post.title}
+      </h3>
+      <p
+        className="text-sm text-slate-400 leading-relaxed mb-4"
+        style={{
+          display: '-webkit-box',
+          WebkitLineClamp: 3,
+          WebkitBoxOrient: 'vertical',
+          overflow: 'hidden',
+        }}
+      >
+        {post.description}
+      </p>
+      <div className="flex items-center justify-between text-xs text-slate-500">
+        <span>
+          🕐 {post.read_time_minutes} min read &nbsp;·&nbsp; {formatPostDate(post.published_at)}
+        </span>
+        <span className="font-semibold" style={{ color: '#D4AF37' }}>
+          Read &rarr;
+        </span>
+      </div>
+    </a>
+  );
+}
+
+export default async function HomePage() {
+  // v11.3: latest 3 published posts from Supabase (ISR-cached 1h)
+  const latestPosts = await getLatestPosts();
 
   return (
     <>
@@ -192,7 +304,10 @@ export default function HomePage() {
           {/* ── 13. INNER CIRCLE WAITLIST ──────────────────────────────── */}
           <InnerCircleWaitlist />
 
-          {/* ── 14. BLOG SECTION ───────────────────────────────────────── */}
+          {/* ── 14. BLOG SECTION — v11.3 DYNAMIC (Supabase blog_posts) ─────
+              Latest 3 is_published=true posts, published_at DESC.
+              ISR revalidate=3600 → new articles appear within 1 hour.
+              Falls back to FALLBACK_POSTS if query fails (never blank). */}
           <section className="py-20 px-4">
             <div className="max-w-6xl mx-auto">
               <div className="text-center mb-12">
@@ -210,7 +325,7 @@ export default function HomePage() {
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                 {latestPosts.map((post) => (
-                  <BlogCard key={post.slug} post={post} />
+                  <HomeBlogCard key={post.slug} post={post} />
                 ))}
               </div>
               <div className="mt-10 text-center">
@@ -237,7 +352,7 @@ export default function HomePage() {
 }
 
 // ============================================================================
-// END — app/page.tsx v11.2
+// END — app/page.tsx v11.3
 // 🔱 Trikaal Vaani | Rohiit Gupta, Chief Vedic Architect
 // CEO LOCKED: TIERED LAYOUT — earning sections above mobile fold
 // ============================================================================
