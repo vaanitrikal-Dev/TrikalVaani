@@ -1,12 +1,27 @@
 'use client';
 
 import { useState } from 'react';
-import { Check, Sparkles, Lock, TrendingUp, Mail, Loader as Loader2, Crown } from 'lucide-react';
+import { Check, Sparkles, Lock, Mail, Loader as Loader2, Crown } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
+
+// ============================================================
+// FILE: components/landing/InnerCircleWaitlist.tsx
+// VERSION: v2.0 — Fake social-proof counters REMOVED (CEO-approved)
+// CHANGES vs v1.x:
+//   ✅ FIX-1: "8,247 members joined", "1,753 spots left", "82%
+//      filled" + progress bar REMOVED — unverifiable numbers
+//      contradicted other site stats and destroyed payment trust
+//      (IR-0 / E-E-A-T violation).
+//   ✅ FIX-2: Subtitle changed from "First 10,000 Members Only"
+//      (implied counter) → "Founding Member Access" (honest).
+//   ✅ FIX-3: Unused imports removed (TrendingUp, CRIMSON).
+//   PROTECTED (untouched): Supabase waitlist insert logic, email
+//      validation, success/error states, all 8 feature bullets,
+//      form UI, button, colors, layout.
+// ============================================================
 
 const GOLD = '#D4AF37';
 const GOLD_RGBA = (a: number) => `rgba(212,175,55,${a})`;
-const CRIMSON = '#DC2626';
 
 const PREMIUM_FEATURES = [
   '20-page personalized Vedic Deep Report',
@@ -18,10 +33,6 @@ const PREMIUM_FEATURES = [
   'Ashta-Koota partner compatibility (full)',
   'Audio reading by certified Jyotishi',
 ];
-
-const SPOTS_TAKEN = 8247;
-const SPOTS_TOTAL = 10000;
-const pct = Math.round((SPOTS_TAKEN / SPOTS_TOTAL) * 100);
 
 export default function InnerCircleWaitlist() {
   const [email, setEmail] = useState('');
@@ -72,65 +83,26 @@ export default function InnerCircleWaitlist() {
           />
 
           <div className="relative z-10">
-            <div className="flex items-start justify-between mb-7 flex-wrap gap-4">
-              <div>
-                <div className="flex items-center gap-2 mb-2.5">
-                  <div
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold tracking-wide"
-                    style={{
-                      background: GOLD_RGBA(0.12),
-                      border: `1px solid ${GOLD_RGBA(0.35)}`,
-                      color: GOLD,
-                    }}
-                  >
-                    <Crown className="w-3.5 h-3.5" />
-                    Inner Circle
-                  </div>
-                  <div
-                    className="flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold animate-pulse"
-                    style={{ background: 'rgba(220,38,38,0.15)', color: '#FCA5A5', border: '1px solid rgba(220,38,38,0.3)' }}
-                  >
-                    <div className="w-1.5 h-1.5 rounded-full bg-red-400" />
-                    Live
-                  </div>
-                </div>
-                <h3 className="font-serif text-2xl sm:text-3xl font-bold text-white leading-tight">
-                  Join the Inner Circle
-                </h3>
-                <p className="text-sm mt-1" style={{ color: `${GOLD}80` }}>
-                  20-Page Deep Report — First 10,000 Members Only
-                </p>
-              </div>
-
-              <div
-                className="rounded-2xl px-4 py-3 text-center flex-shrink-0"
-                style={{ background: GOLD_RGBA(0.06), border: `1px solid ${GOLD_RGBA(0.2)}` }}
-              >
-                <div className="text-2xl font-bold" style={{ color: GOLD }}>
-                  {(SPOTS_TOTAL - SPOTS_TAKEN).toLocaleString()}
-                </div>
-                <div className="text-xs text-slate-500">spots left</div>
-              </div>
-            </div>
-
-            <div className="mb-6">
-              <div className="flex items-center justify-between mb-2 text-xs">
-                <span className="text-slate-500">{SPOTS_TAKEN.toLocaleString()} members joined</span>
-                <span style={{ color: GOLD }}>{pct}% filled</span>
-              </div>
-              <div
-                className="h-2 rounded-full overflow-hidden"
-                style={{ background: GOLD_RGBA(0.1) }}
-              >
+            <div className="mb-7">
+              <div className="flex items-center gap-2 mb-2.5">
                 <div
-                  className="h-full rounded-full transition-all duration-1000"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold tracking-wide"
                   style={{
-                    width: `${pct}%`,
-                    background: `linear-gradient(90deg, ${GOLD}80 0%, ${GOLD} 100%)`,
-                    boxShadow: `0 0 8px ${GOLD_RGBA(0.4)}`,
+                    background: GOLD_RGBA(0.12),
+                    border: `1px solid ${GOLD_RGBA(0.35)}`,
+                    color: GOLD,
                   }}
-                />
+                >
+                  <Crown className="w-3.5 h-3.5" />
+                  Inner Circle
+                </div>
               </div>
+              <h3 className="font-serif text-2xl sm:text-3xl font-bold text-white leading-tight">
+                Join the Inner Circle
+              </h3>
+              <p className="text-sm mt-1" style={{ color: `${GOLD}80` }}>
+                20-Page Deep Report — Founding Member Access
+              </p>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mb-7">
