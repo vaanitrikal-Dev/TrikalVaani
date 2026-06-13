@@ -1,16 +1,27 @@
-// TRIKAL VAANI | app/kundali-milan/page.tsx | v1.1
+// TRIKAL VAANI | app/kundali-milan/page.tsx | v1.2
 // Owner: Rohiit Gupta, Chief Vedic Architect
-// Date: 2026-05-20
+// Date: 2026-06-13
 // ============================================================================
-// v1.1 CHANGE: Reordered sections so "What's Included" (tier cards) appears
-//   directly after the form, BEFORE "The Eight Koots" educational section.
-//   New order: GEO -> Form -> What's Included -> Eight Koots -> FAQ -> EEAT.
-//   Note: tier SELECTION happens in the form's audience picker (Section 2).
-//   The "What's Included" cards are an informational comparison, not clickable.
-//   NOTHING ELSE CHANGED.
+// v1.2 CHANGES (CEO conversion audit — page only, FORM UNTOUCHED):
+//   ✅ FIX-1: Tier cards were dead-ends (informational, not clickable, no way
+//      back to the form). Each card now has a CTA button that smooth-scrolls
+//      to the form via #milan-form anchor. Form component itself NOT modified
+//      — only wrapped in <div id="milan-form"> (IR-13 respected).
+//   ✅ FIX-2: CLOSING CTA section added after the E-E-A-T block. Users who
+//      read till FAQ/EEAT are the warmest leads — they now get a final
+//      "Free mein shuru karo" button back to the form.
+//   ✅ FIX-3: Visible "Rs51/Rs101/Rs151/Rs0" → "₹51/₹101/₹151/Free" on tier
+//      cards (₹ symbol = native + premium). METADATA LEFT UNTOUCHED.
+//   ✅ FIX-4: Service + OfferCatalog JSON-LD added with all 4 tiers
+//      (Free/₹51/₹101/₹151 — IR-19 prices exact) for GEO/AI-search pricing
+//      extraction (Perplexity, SGE, ChatGPT).
+//   NOTHING ELSE CHANGED — v1.1 section order, FAQ, koots, EEAT preserved.
+//
+// v1.1 CHANGE (retained): Reordered sections so "What's Included" appears
+//   directly after the form, BEFORE "The Eight Koots".
 //
 // IRON RULES OBSERVED:
-//   - IR-13: KundaliMilanForm v1.0 LOCKED
+//   - IR-13: KundaliMilanForm v1.0 LOCKED (not modified, only anchor-wrapped)
 //   - IR-19: Pricing locked Free/Rs51/Rs101/Rs151
 //   - IR-22: PDF + WA/Email/Link sharing as first-class
 // ============================================================================
@@ -155,11 +166,64 @@ const BREADCRUMB_SCHEMA = {
   ],
 }
 
+// ── v1.2 FIX-4: Service + OfferCatalog schema — AI search extracts pricing
+//    (IR-19 prices exact: Free / ₹51 / ₹101 / ₹151) ──────────────────────────
+const MILAN_SERVICE_SCHEMA = {
+  '@context': 'https://schema.org',
+  '@type': 'Service',
+  '@id': 'https://trikalvaani.com/kundali-milan#service',
+  name: 'Trikaal Vaani Kundali Milan',
+  serviceType: '36 Guna Ashtakoot Vedic Compatibility Matching',
+  url: 'https://trikalvaani.com/kundali-milan',
+  provider: {
+    '@type': 'Organization',
+    '@id': 'https://trikalvaani.com/#organization',
+    name: 'Trikaal Vaani',
+    url: 'https://trikalvaani.com',
+  },
+  areaServed: { '@type': 'Country', name: 'India' },
+  hasOfferCatalog: {
+    '@type': 'OfferCatalog',
+    name: 'Kundali Milan Plans',
+    itemListElement: [
+      {
+        '@type': 'Offer',
+        name: 'Free Milan Preview',
+        description: '36 Guna numeric score, dosha flags, emotional teaser',
+        price: '0', priceCurrency: 'INR',
+        availability: 'https://schema.org/InStock',
+      },
+      {
+        '@type': 'Offer',
+        name: 'Basic Milan',
+        description: 'Full 36 Guna breakdown, Mangal + Nadi + Bhakoot analysis, compatibility verdict, PDF download, WhatsApp and Email share',
+        price: '51', priceCurrency: 'INR',
+        availability: 'https://schema.org/InStock',
+      },
+      {
+        '@type': 'Offer',
+        name: 'Deep Milan',
+        description: 'Everything in Basic plus Couple or Parent narrative, personalized Dos and Donts, 6 ritual remedies, Navamsa D9, Dashakoot, auspicious muhurat windows',
+        price: '101', priceCurrency: 'INR',
+        availability: 'https://schema.org/InStock',
+      },
+      {
+        '@type': 'Offer',
+        name: 'Deep Milan — Both Narratives',
+        description: 'Deep Milan with both Couple and Parent narrative versions',
+        price: '151', priceCurrency: 'INR',
+        availability: 'https://schema.org/InStock',
+      },
+    ],
+  },
+}
+
 export default function KundaliMilanPage() {
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(FAQ_SCHEMA) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(BREADCRUMB_SCHEMA) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(MILAN_SERVICE_SCHEMA) }} />
 
       <div className="min-h-screen bg-[#080B12]">
         <SiteNav />
@@ -192,10 +256,14 @@ export default function KundaliMilanPage() {
             </div>
           </section>
 
-          {/* SECTION 2 - THE FORM (conversion surface + tier SELECTION happens here) */}
-          <KundaliMilanForm />
+          {/* SECTION 2 - THE FORM (conversion surface + tier SELECTION happens here)
+              v1.2: wrapped in #milan-form anchor — form component itself UNTOUCHED (IR-13) */}
+          <div id="milan-form" style={{ scrollMarginTop: '90px' }}>
+            <KundaliMilanForm />
+          </div>
 
-          {/* SECTION 3 - WHAT'S INCLUDED (tier comparison) - MOVED UP per v1.1 */}
+          {/* SECTION 3 - WHAT'S INCLUDED (tier comparison) - MOVED UP per v1.1
+              v1.2: each card now has a CTA back to the form (#milan-form) */}
           <section className="py-16 px-4" style={{ background: 'rgba(13,17,30,0.4)' }}>
             <div className="max-w-4xl mx-auto">
               <div className="text-center mb-12">
@@ -217,35 +285,46 @@ export default function KundaliMilanPage() {
                   padding: '24px', borderRadius: '16px',
                   background: 'rgba(255,255,255,0.03)',
                   border: '1px solid rgba(255,255,255,0.08)',
+                  display: 'flex', flexDirection: 'column',
                 }}>
                   <p style={{ color: '#94a3b8', fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', margin: 0 }}>
                     Free Preview
                   </p>
                   <p style={{ color: '#fff', fontSize: '32px', fontWeight: 800, fontFamily: 'Georgia, serif', margin: '8px 0' }}>
-                    Rs0
+                    Free
                   </p>
-                  <ul style={{ margin: '16px 0 0', padding: 0, listStyle: 'none' }}>
+                  <ul style={{ margin: '16px 0 0', padding: 0, listStyle: 'none', flex: 1 }}>
                     {['36 Guna score (numeric)', 'Dosha flags (yes/no)', 'Emotional teaser', 'No PDF download'].map(f => (
                       <li key={f} style={{ display: 'flex', gap: '8px', alignItems: 'flex-start', marginBottom: '8px', color: '#cbd5e1', fontSize: '13px' }}>
                         <span style={{ color: '#94a3b8', flexShrink: 0 }}>+</span>{f}
                       </li>
                     ))}
                   </ul>
+                  {/* v1.2 FIX-1: card CTA → form */}
+                  <a href="#milan-form" style={{
+                    display: 'block', marginTop: '18px', padding: '11px 16px',
+                    borderRadius: '10px', textAlign: 'center', textDecoration: 'none',
+                    background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.15)',
+                    color: '#cbd5e1', fontSize: '13px', fontWeight: 700,
+                  }}>
+                    Start Free ↑
+                  </a>
                 </div>
 
-                {/* Basic Rs51 */}
+                {/* Basic ₹51 */}
                 <div style={{
                   padding: '24px', borderRadius: '16px',
                   background: GOLD_RGBA(0.06),
                   border: `1px solid ${GOLD_RGBA(0.3)}`,
+                  display: 'flex', flexDirection: 'column',
                 }}>
                   <p style={{ color: GOLD, fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', margin: 0 }}>
                     Basic Milan
                   </p>
                   <p style={{ color: GOLD, fontSize: '32px', fontWeight: 800, fontFamily: 'Georgia, serif', margin: '8px 0' }}>
-                    Rs51
+                    ₹51
                   </p>
-                  <ul style={{ margin: '16px 0 0', padding: 0, listStyle: 'none' }}>
+                  <ul style={{ margin: '16px 0 0', padding: 0, listStyle: 'none', flex: 1 }}>
                     {[
                       'Full 36 Guna breakdown',
                       'Mangal + Nadi + Bhakoot analysis',
@@ -258,14 +337,24 @@ export default function KundaliMilanPage() {
                       </li>
                     ))}
                   </ul>
+                  {/* v1.2 FIX-1: card CTA → form */}
+                  <a href="#milan-form" style={{
+                    display: 'block', marginTop: '18px', padding: '11px 16px',
+                    borderRadius: '10px', textAlign: 'center', textDecoration: 'none',
+                    background: GOLD_RGBA(0.12), border: `1px solid ${GOLD_RGBA(0.45)}`,
+                    color: GOLD, fontSize: '13px', fontWeight: 700,
+                  }}>
+                    Choose Basic — ₹51 ↑
+                  </a>
                 </div>
 
-                {/* Deep Rs101 */}
+                {/* Deep ₹101 */}
                 <div style={{
                   padding: '24px', borderRadius: '16px',
                   background: `linear-gradient(135deg, ${GOLD_RGBA(0.12)}, ${GOLD_RGBA(0.04)})`,
                   border: `2px solid ${GOLD}`,
                   position: 'relative',
+                  display: 'flex', flexDirection: 'column',
                 }}>
                   <div style={{
                     position: 'absolute', top: '-10px', left: '50%', transform: 'translateX(-50%)',
@@ -279,9 +368,9 @@ export default function KundaliMilanPage() {
                     Deep Milan
                   </p>
                   <p style={{ color: '#fff', fontSize: '32px', fontWeight: 800, fontFamily: 'Georgia, serif', margin: '8px 0' }}>
-                    Rs101 <span style={{ color: '#94a3b8', fontSize: '14px' }}>/ Rs151 both</span>
+                    ₹101 <span style={{ color: '#94a3b8', fontSize: '14px' }}>/ ₹151 both</span>
                   </p>
-                  <ul style={{ margin: '16px 0 0', padding: 0, listStyle: 'none' }}>
+                  <ul style={{ margin: '16px 0 0', padding: 0, listStyle: 'none', flex: 1 }}>
                     {[
                       'Everything in Basic',
                       'Couple OR Parent narrative',
@@ -295,6 +384,16 @@ export default function KundaliMilanPage() {
                       </li>
                     ))}
                   </ul>
+                  {/* v1.2 FIX-1: card CTA → form */}
+                  <a href="#milan-form" style={{
+                    display: 'block', marginTop: '18px', padding: '12px 16px',
+                    borderRadius: '10px', textAlign: 'center', textDecoration: 'none',
+                    background: `linear-gradient(135deg, ${GOLD} 0%, #F5D76E 50%, ${GOLD} 100%)`,
+                    color: '#080B12', fontSize: '13px', fontWeight: 700,
+                    boxShadow: `0 0 24px ${GOLD_RGBA(0.35)}`,
+                  }}>
+                    Choose Deep — ₹101 ↑
+                  </a>
                 </div>
 
               </div>
@@ -428,6 +527,36 @@ export default function KundaliMilanPage() {
             </div>
           </section>
 
+          {/* SECTION 7 - CLOSING CTA (v1.2 FIX-2) — warmest leads reach here,
+              give them a path back to the form */}
+          <section className="pb-20 px-4">
+            <div className="max-w-3xl mx-auto">
+              <div style={{
+                textAlign: 'center', padding: '32px 24px', borderRadius: '20px',
+                background: `linear-gradient(135deg, ${GOLD_RGBA(0.1)}, rgba(8,11,18,0.95))`,
+                border: `1px solid ${GOLD_RGBA(0.3)}`,
+              }}>
+                <h2 className="text-white text-2xl font-serif font-bold mb-2">
+                  Apni Jodi Ka Sach Janein
+                </h2>
+                <p style={{ color: '#94a3b8', fontSize: '14px', margin: '0 0 20px', lineHeight: 1.6 }}>
+                  36 Guna score, Mangal aur Nadi Dosh check — free mein, 60 second ke andar.
+                </p>
+                <a href="#milan-form" style={{
+                  display: 'inline-block', padding: '15px 36px', borderRadius: '12px',
+                  background: `linear-gradient(135deg, ${GOLD} 0%, #F5D76E 50%, ${GOLD} 100%)`,
+                  color: '#080B12', fontSize: '15px', fontWeight: 700, textDecoration: 'none',
+                  boxShadow: `0 0 30px ${GOLD_RGBA(0.4)}`,
+                }}>
+                  🔱 Free Milan Shuru Karein ↑
+                </a>
+                <p style={{ margin: '12px 0 0', color: '#475569', fontSize: '11px' }}>
+                  Free preview · No card required · Swiss Ephemeris + BPHS
+                </p>
+              </div>
+            </div>
+          </section>
+
         </main>
         <SiteFooter />
       </div>
@@ -435,4 +564,4 @@ export default function KundaliMilanPage() {
   )
 }
 
-// END app/kundali-milan/page.tsx v1.1
+// END app/kundali-milan/page.tsx v1.2
