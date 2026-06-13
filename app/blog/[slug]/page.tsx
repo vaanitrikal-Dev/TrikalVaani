@@ -1,12 +1,15 @@
 // ============================================================
 // TRIKAL VAANI — DYNAMIC BLOG ARTICLE PAGE (SSR)
 // CEO: Rohiit Gupta | Chief Vedic Architect
-// Version: 2.1 (renderText now parses [text](url) links)
-// Date: 2026-05-22
+// Version: 2.2
+// Date: 2026-06-13
+// CHANGE v2.2: Renders 5 new Playbook body columns —
+//   emotional, communication, strengths, challenges, remedies —
+//   as structured prose sections between directAnswer and sections[].
+//   Each renders only if non-empty (safe for older blog rows).
+//   All other logic/layout/schema UNCHANGED from v2.1.
 // CHANGE v2.1: renderText() now also parses Markdown-style links
-//   [label](url) → internal <Link> (url starts with /) or external <a>.
-//   Enables real clickable internal links inside blog body (SEO interlink).
-//   All other logic/layout/schema UNCHANGED from v2.0.
+//   [label](url) → internal <Link> or external <a>.
 // ============================================================
 
 import { notFound } from 'next/navigation';
@@ -21,18 +24,17 @@ import {
 } from '@/lib/blog-posts';
 
 // ============================================================
-// STATIC PARAMS — Pre-render all pages at build time
+// STATIC PARAMS
 // ============================================================
 export async function generateStaticParams() {
   const slugs = await getAllSlugs();
   return slugs.map((slug) => ({ slug }));
 }
 
-// Revalidate every 24 hours (ISR — new articles appear without redeploy)
 export const revalidate = 86400;
 
 // ============================================================
-// METADATA — Dynamic per-article SEO tags
+// METADATA
 // ============================================================
 export async function generateMetadata(
   { params }: { params: { slug: string } }
@@ -182,13 +184,9 @@ function generateJsonLd(post: BlogPost) {
 }
 
 // ============================================================
-// MARKDOWN-LITE PARSER — bold, italic, AND links (v2.1)
-// Supports: **bold**, *italic*, [label](url)
-//   url starting with "/" → internal Next <Link>
-//   otherwise            → external <a> (new tab)
+// MARKDOWN-LITE PARSER — bold, italic, links (v2.1 unchanged)
 // ============================================================
 function renderText(text: string): React.ReactNode {
-  // Split on links first, then bold/italic within non-link parts.
   const linkRegex = /(\[[^\]]+\]\([^)]+\))/g;
   const linkParts = text.split(linkRegex);
 
@@ -210,12 +208,10 @@ function renderText(text: string): React.ReactNode {
         </a>
       );
     }
-    // Non-link part → parse bold/italic (original behaviour)
     return renderEmphasis(part, i);
   });
 }
 
-// Bold/italic parser (extracted from original renderText, unchanged behaviour)
 function renderEmphasis(text: string, keyBase: number): React.ReactNode {
   const parts = text.split(/(\*\*[^*]+\*\*)/g);
   return parts.map((part, i) => {
@@ -230,7 +226,7 @@ function renderEmphasis(text: string, keyBase: number): React.ReactNode {
 }
 
 // ============================================================
-// SECTION RENDERER
+// SECTION RENDERER (unchanged from v2.1)
 // ============================================================
 function SectionBlock({ section, index }: { section: BlogSection; index: number }) {
   switch (section.type) {
@@ -301,13 +297,13 @@ function SectionBlock({ section, index }: { section: BlogSection; index: number 
       );
     case 'callout': {
       const variantStyles = {
-        tip: 'bg-emerald-950/40 border-emerald-700/50 text-emerald-100',
-        warn: 'bg-rose-950/40 border-rose-700/50 text-rose-100',
+        tip:     'bg-emerald-950/40 border-emerald-700/50 text-emerald-100',
+        warn:    'bg-rose-950/40 border-rose-700/50 text-rose-100',
         verdict: 'bg-amber-950/40 border-amber-700/50 text-amber-100',
       };
       const variantLabels = {
-        tip: '💡 Tip',
-        warn: '⚠️ Caution',
+        tip:     '💡 Tip',
+        warn:    '⚠️ Caution',
         verdict: '🔱 Trikaal Vaani Verdict',
       };
       return (
@@ -327,7 +323,47 @@ function SectionBlock({ section, index }: { section: BlogSection; index: number 
 }
 
 // ============================================================
-// MAIN PAGE COMPONENT — async Server Component
+// v2.2: PLAYBOOK BODY SECTION RENDERER
+// Renders emotional / communication / strengths / challenges / remedies
+// Only renders if the field is non-empty (safe for old rows).
+// ============================================================
+const BODY_SECTIONS: {
+  key: keyof Pick<BlogPost, 'emotional' | 'communication' | 'strengths' | 'challenges' | 'remedies'>;
+  heading: string;
+  icon: string;
+}[] = [
+  { key: 'emotional',      heading: 'The Emotional Dimension',        icon: '🌕' },
+  { key: 'communication',  heading: 'Communication & Relationships',   icon: '🪐' },
+  { key: 'strengths',      heading: 'Strengths This Period Builds',    icon: '✨' },
+  { key: 'challenges',     heading: 'Real Challenges to Anticipate',   icon: '⚖️' },
+  { key: 'remedies',       heading: 'Remedies — What Actually Works',  icon: '🔱' },
+];
+
+function PlaybookBodySection({
+  heading,
+  icon,
+  text,
+}: {
+  heading: string;
+  icon: string;
+  text: string;
+}) {
+  if (!text || !text.trim()) return null;
+  return (
+    <section className="my-10">
+      <h2 className="mt-12 mb-4 text-2xl md:text-3xl font-bold text-amber-300 scroll-mt-24 flex items-center gap-2">
+        <span aria-hidden>{icon}</span>
+        {heading}
+      </h2>
+      <p className="text-base md:text-lg leading-relaxed text-slate-200">
+        {renderText(text)}
+      </p>
+    </section>
+  );
+}
+
+// ============================================================
+// MAIN PAGE COMPONENT
 // ============================================================
 export default async function BlogArticlePage({
   params,
@@ -340,9 +376,8 @@ export default async function BlogArticlePage({
     notFound();
   }
 
-  const relatedPosts = await getRelatedPosts(post.relatedSlugs);
+  const relatedPosts  = await getRelatedPosts(post.relatedSlugs);
   const jsonLdSchemas = generateJsonLd(post);
-  const canonicalUrl = `https://trikalvaani.com/blog/${post.slug}`;
 
   return (
     <>
@@ -396,7 +431,7 @@ export default async function BlogArticlePage({
             <span>{post.readTimeMinutes} min read</span>
           </div>
 
-          {/* DIRECT ANSWER BLOCK — GEO/AEO */}
+          {/* DIRECT ANSWER — GEO/AEO */}
           <section
             aria-label="Direct Answer"
             className="mb-12 rounded-xl border border-amber-700/40 bg-gradient-to-br from-amber-950/50 to-slate-900/50 p-6 md:p-8"
@@ -410,12 +445,27 @@ export default async function BlogArticlePage({
             </p>
           </section>
 
-          {/* ARTICLE BODY */}
-          <div className="prose-content">
-            {post.sections.map((section, i) => (
-              <SectionBlock key={i} section={section} index={i} />
-            ))}
-          </div>
+          {/* ── v2.2: PLAYBOOK BODY SECTIONS ── */}
+          {BODY_SECTIONS.map(({ key, heading, icon }) => (
+            <PlaybookBodySection
+              key={key}
+              heading={heading}
+              icon={icon}
+              text={post[key]}
+            />
+          ))}
+
+          {/* DEEP-DIVE SECTIONS (sections[] JSONB) */}
+          {post.sections.length > 0 && (
+            <div className="prose-content mt-10">
+              <h2 className="mt-12 mb-6 text-2xl md:text-3xl font-bold text-amber-300">
+                Deep Dive Analysis
+              </h2>
+              {post.sections.map((section, i) => (
+                <SectionBlock key={i} section={section} index={i} />
+              ))}
+            </div>
+          )}
 
           {/* PRIMARY CTA */}
           <section className="my-12 rounded-xl border border-amber-700/50 bg-gradient-to-r from-amber-900/30 to-amber-950/30 p-6 md:p-8 text-center">
