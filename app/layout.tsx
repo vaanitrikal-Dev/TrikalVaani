@@ -1,27 +1,22 @@
 // ============================================================
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
 // FILE: app/layout.tsx
-// VERSION: v3.4 — StickyMobileCTA added (Phase 2, June 2026)
-// CHANGES vs v3.2 (CEO-approved):
-//   ✅ FIX-1: legalName corrected from "Trikal Vaani Global" →
-//      "Trikal Vaani" — matches UDYAM-DL-10-0119070 exactly.
-//      "Global" suffix was never in the MSME registration and
-//      creates a trust mismatch for schema validators.
-//   ✅ FIX-2: AstrologicalService schema added (id: astro-service-schema)
-//      strategy="beforeInteractive" = SSR head injection.
-//      Replaces parked LocalBusiness (GBP not yet approved).
-//      Covers: serviceType, areaServed (India + Worldwide),
-//      provider linked to Rohiit Gupta Person @id,
-//      priceRange, availableLanguage, speakable.
-//      No address/geo = safe without GBP approval.
-//   ✅ FIX-3: speakable schema added inside AstrologicalService
-//      for Google SGE / voice search direct-answer extraction.
-//   PROTECTED (untouched): org-schema, webapp-schema, all metadata
-//      copy, titles, OG/twitter, keywords, icons/favicon set,
-//      verification token, canonical/languages, Razorpay preloads,
+// VERSION: v3.5 — Microsoft Clarity analytics wired (June 2026)
+// CHANGES vs v3.4 (CEO-approved):
+//   ✅ FIX-1: ClarityAnalytics component added to <body> —
+//      Microsoft Clarity (project x5li8xd59b) for heatmaps,
+//      scroll-depth, rage-click detection, session recordings.
+//      Component is production-only (no localhost/preview junk)
+//      and loads afterInteractive (zero LCP impact).
+//      Requires: components/analytics/ClarityAnalytics.tsx v1.0.
+//   PROTECTED (untouched): ALL v3.4 content — org-schema,
+//      webapp-schema, astro-service-schema, metadata, OG/twitter,
+//      keywords, icons, verification, canonical, Razorpay preload,
 //      performance hints, SchemaScript, TrikalVoice, OneSignalInit,
-//      Analytics, Inter font, body className.
+//      StickyMobileCTA, Vercel Analytics, Inter font, body className.
 // ------------------------------------------------------------
+// Prior — v3.4: StickyMobileCTA added (Phase 2).
+// Prior — v3.3: legalName fix + AstrologicalService schema + speakable.
 // Prior — v3.2 (2026-06-04): OneSignalInit wired in.
 // Prior — v3.1 (2026-06-01): Favicon fix + Org logo URL corrected.
 // ============================================================
@@ -34,6 +29,7 @@ import SchemaScript from "@/components/SchemaScript";
 import TrikalVoice from "@/components/Trikal/TrikalVoice";
 import OneSignalInit from "@/components/OneSignalInit";
 import StickyMobileCTA from "@/components/landing/StickyMobileCTA";
+import ClarityAnalytics from "@/components/analytics/ClarityAnalytics";
 import { Analytics } from "@vercel/analytics/next";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -407,6 +403,8 @@ export default function RootLayout({
         <OneSignalInit />
         {/* v3.4: StickyMobileCTA — mobile-only bottom-left bar, hides when #birth-form visible */}
         <StickyMobileCTA />
+        {/* v3.5: Microsoft Clarity — heatmaps + session recordings (production only) */}
+        <ClarityAnalytics />
         <Analytics />
       </body>
     </html>
