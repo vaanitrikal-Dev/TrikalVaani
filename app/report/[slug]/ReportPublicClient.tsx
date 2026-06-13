@@ -5,21 +5,30 @@
  * TRIKAAL VAANI — Public SEO Report Client
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/report/[slug]/ReportPublicClient.tsx
- * VERSION: 8.2 — IR-0 CLEANUP (branding + local-business)
+ * VERSION: 8.3 — FREE→PAID CONVERSION FIXES (CEO audit June 2026)
  * SIGNED: ROHIIT GUPTA, CEO
  *
- * CHANGES v8.1 -> v8.2 (CEO approved):
- *   - Visible brand "Trikaal Vaani" -> "Trikaal Vaani" everywhere
- *     (Razorpay popup name, founder card, footer tagline, WhatsApp share,
- *      geo-answer fallback bullet).
- *   - Visible persona "Trikaal Ka Sandesh" -> "Trikaal Ka Sandesh",
- *     "Trikaal Ka Poora Sandesh" -> "Trikaal Ka Poora Sandesh",
- *     "Trikaal Ne Aur Bhi Dekha" -> "Trikaal Ne Aur Bhi Dekha".
- *   - REMOVED every "Delhi NCR" mention (founder card, trust badge, footer).
- *   - Domain trikalvaani.com, wa.me links, all logic: UNTOUCHED.
- *   - ALL v8.1 functionality preserved 100% (Razorpay dakshina, 5 upay,
- *     kundali chart, planet table, dasha, action windows, panchang,
- *     locked section, PDF, share).
+ * CHANGES v8.2 -> v8.3 (CEO approved):
+ *   ✅ FIX-1 (BUG): UpayCards upsell "Get Full Reading — ₹51" linked
+ *      to "/" (homepage) — user had to refill the ENTIRE birth form
+ *      to pay. Now links to /upgrade?slug={slug}&tier=basic (same as
+ *      LockedSection). UpayCards now receives slug prop.
+ *   ✅ FIX-2: STICKY UPGRADE BAR (free tier only) — slim fixed bottom
+ *      bar with "🔓 Full Reading ₹51" CTA → /upgrade. The LockedSection
+ *      sits below chart/table/dasha/upay/panchang; many free users
+ *      never scrolled that far. Now the unlock CTA is always visible.
+ *      className="no-print" → hidden in PDF. Extra bottom padding
+ *      added for free tier so the bar never covers content.
+ *   ✅ FIX-3: LockedSection PERSONALIZED — generic teaser replaced
+ *      with the user's own {mahadasha} Mahadasha + {domainLabel}
+ *      ("Aapki Shani Mahadasha mein Trikaal ne kuch aur dekha hai...").
+ *      Personal curiosity converts; generic blur does not.
+ *   ✅ ALL v8.2 functionality preserved 100% (Razorpay dakshina,
+ *      5 upay, kundali chart, planet table, dasha, action windows,
+ *      panchang, PDF, share, schemas untouched server-side).
+ *
+ * CHANGES v8.1 -> v8.2 (retained): brand flip Trikaal, Delhi NCR
+ *   removed, persona names flipped. Domain/links/logic untouched.
  * ============================================================
  */
 
@@ -151,6 +160,46 @@ function PDFBtn() {
     setTimeout(()=>{const e=document.getElementById('tv-print');if(e)e.remove()},1500)
   }
   return (<button onClick={handle} style={{display:'inline-flex',alignItems:'center',gap:'6px',padding:'10px 18px',borderRadius:'10px',background:G(0.08),border:`1px solid ${G(0.25)}`,color:GOLD,fontSize:'13px',fontWeight:600,cursor:'pointer'}}><Download size={14}/>PDF Download</button>)
+}
+
+// ─── STICKY UPGRADE BAR — v8.3 NEW (free tier only) ──────────────────────────
+// The LockedSection sits far down the page; free users often bounce before
+// reaching it. This slim bar keeps the ₹51 unlock visible at all times.
+
+function StickyUpgradeBar({slug}:{slug:string}) {
+  return (
+    <div
+      className="no-print"
+      style={{
+        position:'fixed', bottom:0, left:0, right:0, zIndex:50,
+        background:'rgba(8,11,18,0.97)',
+        borderTop:`1px solid ${G(0.35)}`,
+        backdropFilter:'blur(12px)',
+        padding:'10px 14px',
+        boxShadow:`0 -8px 30px rgba(0,0,0,0.5)`,
+      }}
+    >
+      <div style={{maxWidth:'700px',margin:'0 auto',display:'flex',alignItems:'center',gap:'12px',justifyContent:'space-between'}}>
+        <div style={{minWidth:0}}>
+          <p style={{margin:0,color:'#fff',fontSize:'13px',fontWeight:700,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>Trikaal ne aur bhi dekha hai 🔱</p>
+          <p style={{margin:0,color:'#94a3b8',fontSize:'11px',whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>900-word analysis · 5 upay · exact dates</p>
+        </div>
+        <Link
+          href={`/upgrade?slug=${slug}&tier=basic`}
+          style={{
+            flexShrink:0,
+            padding:'11px 20px', borderRadius:'10px',
+            background:`linear-gradient(135deg,${GOLD},#F5D76E,${GOLD})`,
+            color:'#080B12', fontSize:'13px', fontWeight:700,
+            textDecoration:'none', whiteSpace:'nowrap',
+            boxShadow:`0 0 22px ${G(0.4)}`,
+          }}
+        >
+          🔓 Unlock — ₹51
+        </Link>
+      </div>
+    </div>
+  )
 }
 
 // ─── MAA SHAKTI DAKSHINA — v8.1 RAZORPAY ─────────────────────────────────────
@@ -715,9 +764,9 @@ function MaaShakti({slug}:{slug:string}) {
   )
 }
 
-// ─── 5 UPAY CARDS — v8.0 (UNCHANGED) ─────────────────────────────────────────
+// ─── 5 UPAY CARDS — v8.3 (slug prop added, upsell link fixed) ────────────────
 
-function UpayCards({ remedies, isPaid }: { remedies: UpayItem[]; isPaid: boolean }) {
+function UpayCards({ remedies, isPaid, slug }: { remedies: UpayItem[]; isPaid: boolean; slug: string }) {
   const visibleCount = isPaid ? 5 : 3
   const visible = remedies.slice(0, visibleCount)
 
@@ -829,7 +878,8 @@ function UpayCards({ remedies, isPaid }: { remedies: UpayItem[]; isPaid: boolean
       {!isPaid && remedies.length > 3 && (
         <div style={{ marginTop: '12px', padding: '12px', background: G(0.06), border: `1px solid ${G(0.2)}`, borderRadius: '10px', textAlign: 'center' }}>
           <p style={{ margin: '0 0 8px', color: GOLD, fontSize: '12px', fontWeight: 600 }}>🔒 2 more upay (Gemstone + Special) unlocked in Deep Reading</p>
-          <Link href="/" style={{ color: GOLD, fontSize: '12px', fontWeight: 700, textDecoration: 'none' }}>⚡ Get Full Reading — ₹51</Link>
+          {/* v8.3 FIX-1: was href="/" (homepage — user had to refill the form). Now goes straight to upgrade. */}
+          <Link href={`/upgrade?slug=${slug}&tier=basic`} style={{ color: GOLD, fontSize: '12px', fontWeight: 700, textDecoration: 'none' }}>⚡ Get Full Reading — ₹51</Link>
         </div>
       )}
 
@@ -840,13 +890,20 @@ function UpayCards({ remedies, isPaid }: { remedies: UpayItem[]; isPaid: boolean
   )
 }
 
-function LockedSection({slug}:{slug:string}) {
+// ─── LOCKED SECTION — v8.3 PERSONALIZED ──────────────────────────────────────
+
+function LockedSection({slug, mahadasha, domainLabel}:{slug:string; mahadasha:string; domainLabel:string}) {
   const features = ['✓ Complete planetary analysis (all 9 grahas)','✓ Bhrigu Nandi pattern insights','✓ 4 action windows with exact dates','✓ Full 5 upay plan (mantra+gemstone+vrat+dana+special)','✓ 900 word deep analysis','✓ Panchang muhurta guidance','✓ Lagna + Dasha gemstone recommendation','✓ Karmic insight (Bhrigu)']
+  // v8.3 FIX-3: teaser personalized with the user's own dasha + domain
+  const hasMd = mahadasha && mahadasha !== '—'
+  const teaserLine = hasMd
+    ? `Aapki ${mahadasha} Mahadasha mein ${domainLabel} ko lekar Trikaal ne kuch aur bhi dekha hai...`
+    : `${domainLabel} ko lekar Trikaal ne kuch aur bhi dekha hai...`
   return (
     <div style={{position:'relative',borderRadius:'16px',overflow:'hidden',marginBottom:'16px',border:`1px solid ${G(0.15)}`}}>
       <div style={{padding:'20px',filter:'blur(5px)',pointerEvents:'none',userSelect:'none',background:BG_CARD}}>
         <p style={{color:GOLD,fontSize:'12px',fontWeight:700,marginBottom:'8px',textTransform:'uppercase'}}>📊 Complete Analysis</p>
-        <p style={{color:'#e2e8f0',fontSize:'14px',margin:'0 0 8px'}}>Graha yogas aur dasha periods ka poora vishleshan...</p>
+        <p style={{color:'#e2e8f0',fontSize:'14px',margin:'0 0 8px'}}>{hasMd ? `${mahadasha} Mahadasha ke graha yogas aur dasha periods ka poora vishleshan...` : 'Graha yogas aur dasha periods ka poora vishleshan...'}</p>
         <p style={{color:'#22c55e',fontSize:'12px',fontWeight:600}}>💎 Gemstone + 4 Action Windows...</p>
       </div>
       <div style={{position:'absolute',inset:0,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',padding:'24px',background:'linear-gradient(to bottom,rgba(8,11,18,0.1) 0%,rgba(8,11,18,0.98) 28%)'}}>
@@ -855,7 +912,7 @@ function LockedSection({slug}:{slug:string}) {
             <Lock size={22} style={{color:GOLD}}/>
           </div>
           <p style={{margin:'0 0 4px',color:'#fff',fontSize:'18px',fontWeight:700,fontFamily:'Georgia,serif'}}>Trikaal Ne Aur Bhi Dekha Hai</p>
-          <p style={{margin:'0 0 14px',color:'#94a3b8',fontSize:'13px',lineHeight:1.6,maxWidth:'280px'}}>Complete analysis, yogas, 5 upay remedies aur 900-word deep reading taiyaar hai</p>
+          <p style={{margin:'0 0 14px',color:'#94a3b8',fontSize:'13px',lineHeight:1.6,maxWidth:'300px'}}>{teaserLine} Complete analysis, yogas, 5 upay aur 900-word deep reading taiyaar hai.</p>
           <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'6px',marginBottom:'18px',maxWidth:'340px',margin:'0 auto 18px',textAlign:'left'}}>
             {features.map((f,i)=>(<p key={i} style={{margin:0,color:'#94a3b8',fontSize:'12px',lineHeight:1.5}}>{f}</p>))}
           </div>
@@ -980,7 +1037,8 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
   return (
     <div style={{minHeight:'100vh',background:BG_DARK}}>
       <SiteNav/>
-      <main style={{paddingTop:'96px',paddingBottom:'80px',padding:'96px 16px 80px'}}>
+      {/* v8.3: extra bottom padding for free tier so StickyUpgradeBar never covers content */}
+      <main style={{paddingTop:'96px',paddingBottom:isPaid?'80px':'150px',padding:isPaid?'96px 16px 80px':'96px 16px 150px'}}>
         <div style={{maxWidth:'700px',margin:'0 auto'}}>
 
           <nav aria-label="breadcrumb" style={{display:'flex',alignItems:'center',gap:'8px',marginBottom:'20px'}}>
@@ -1081,7 +1139,7 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
           )}
 
           {hasNewUpay ? (
-            <UpayCards remedies={upayItems} isPaid={isPaid}/>
+            <UpayCards remedies={upayItems} isPaid={isPaid} slug={slug}/>
           ) : oldRemedies.length > 0 && (
             <div style={{background:BG_CARD,border:`1px solid ${G(0.12)}`,borderRadius:'16px',padding:'22px',marginBottom:'14px'}}>
               <p style={{margin:'0 0 14px',color:GOLD,fontSize:'11px',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.08em'}}>🙏 Upay — Remedy Plan (BPHS Classical)</p>
@@ -1104,7 +1162,7 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
             </div>
           )}
 
-          {!isPaid&&<LockedSection slug={slug}/>}
+          {!isPaid&&<LockedSection slug={slug} mahadasha={mahadasha} domainLabel={domainLabel}/>}
 
           <MaaShakti slug={slug}/>
 
@@ -1135,6 +1193,10 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
 
         </div>
       </main>
+
+      {/* v8.3 FIX-2: always-visible ₹51 unlock bar — free tier only */}
+      {!isPaid && <StickyUpgradeBar slug={slug}/>}
+
       <SiteFooter/>
     </div>
   )
