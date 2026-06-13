@@ -1,8 +1,9 @@
 // ============================================================
 // TRIKAL VAANI — BLOG POSTS — SUPABASE VERSION
 // CEO: Rohiit Gupta | Chief Vedic Architect
-// Version: 3.0 (Supabase Migration — Infinite Scale)
-// Date: 2026-05-13
+// Version: 3.1 (Added body columns: emotional, communication,
+//               strengths, challenges, remedies)
+// Date: 2026-06-13
 // ============================================================
 // HOW TO ADD NEW ARTICLES:
 //   1. Go to Supabase dashboard → Table Editor → blog_posts
@@ -15,7 +16,7 @@
 import { createClient } from '@supabase/supabase-js';
 
 // ============================================================
-// TYPES — Same interface as before, zero breaking changes
+// TYPES — v3.1: 5 new body fields added
 // ============================================================
 export interface BlogPost {
   slug: string;
@@ -34,6 +35,13 @@ export interface BlogPost {
     href: string;
     price: string;
   };
+  // ── v3.1: Playbook body columns ──────────────────────────
+  emotional: string;
+  communication: string;
+  strengths: string;
+  challenges: string;
+  remedies: string;
+  // ─────────────────────────────────────────────────────────
   sections: BlogSection[];
   faqs: { q: string; a: string }[];
   relatedSlugs: string[];
@@ -59,7 +67,7 @@ const supabase = createClient(
 );
 
 // ============================================================
-// ROW → BlogPost mapper
+// ROW → BlogPost mapper — v3.1: 5 new fields mapped
 // ============================================================
 function mapRow(row: Record<string, unknown>): BlogPost {
   return {
@@ -79,6 +87,13 @@ function mapRow(row: Record<string, unknown>): BlogPost {
       href:  row.cta_href as string,
       price: row.cta_price as string,
     },
+    // ── v3.1: Playbook body columns ──────────────────────────
+    emotional:        (row.emotional as string) ?? '',
+    communication:    (row.communication as string) ?? '',
+    strengths:        (row.strengths as string) ?? '',
+    challenges:       (row.challenges as string) ?? '',
+    remedies:         (row.remedies as string) ?? '',
+    // ─────────────────────────────────────────────────────────
     sections:         (row.sections as BlogSection[]) ?? [],
     faqs:             (row.faqs as { q: string; a: string }[]) ?? [],
     relatedSlugs:     (row.related_slugs as string[]) ?? [],
@@ -87,8 +102,7 @@ function mapRow(row: Record<string, unknown>): BlogPost {
 }
 
 // ============================================================
-// PUBLIC API — Same function signatures as before
-// All Server Components continue to work with zero changes
+// PUBLIC API — Same function signatures, zero breaking changes
 // ============================================================
 
 export async function getAllPosts(): Promise<BlogPost[]> {
