@@ -5,15 +5,15 @@
  * TRIKAL VAANI — Trikaal Voice Widget
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: components/Trikal/TrikalVoice.tsx
- * VERSION: 2.9 — PTT via raw touch/mouse events (Android-reliable)
+ * VERSION: 3.0 — Stale-closure fix: prediction now gets the birth details
  * DATE: 2026-06-14
  * CHANGES:
- *   v2.9: Dropped pointer events entirely — onPointerUp was not firing
- *         reliably on Android Chrome, so recordings never stopped on
- *         release. Switched to raw onTouchStart/onTouchEnd (+ onMouseDown/
- *         Up for desktop). This is the WhatsApp-style mechanism and is
- *         the most reliable hold-to-record path on mobile browsers.
- *         e.preventDefault() on touch stops the 300ms ghost-click + scroll.
+ *   v3.0: FIX for prediction arriving with blank birth details despite the
+ *         form being filled. handlePttDown is memoized ([]), so its onstop
+ *         closure froze the mount-time (empty) `form`. processAudio now reads
+ *         formRef.current / balanceRef.current / activePackRef.current —
+ *         always-current refs synced via effects + set on form submit.
+ *   v2.9: PTT via raw touch/mouse events (Android-reliable hold-to-record).
  *   v2.8: Details mic made a single persistent button (no unmount on record).
  *   v2.7: Shared-phone safety (voice-fill = full field reset + confirm).
  *   v2.6: setPointerCapture PTT fix — finger drift no longer cuts record.
@@ -95,6 +95,11 @@ export default function TrikalVoice() {
   const streamRef        = useRef<MediaStream | null>(null);
   const mimeTypeRef      = useRef<string>('');
   const sessionIdRef     = useRef<string>('');   // synchronous — fixes "Session required" race
+  // Latest-value refs — processAudio is invoked from a frozen onstop
+  // closure, so reading state directly there is STALE. Refs stay current.
+  const formRef          = useRef<BirthForm>({ name: '', dob: '', tob: '', pob: '' });
+  const balanceRef       = useRef<number>(0);
+  const activePackRef    = useRef<Pack | null>(null);
 
   // ── Init session + restore balance ──────────────────────────
   useEffect(() => {
@@ -128,6 +133,11 @@ export default function TrikalVoice() {
       streamRef.current?.getTracks().forEach(t => t.stop());
     };
   }, []);
+
+  // Keep latest-value refs in sync (read by processAudio's frozen closure)
+  useEffect(() => { formRef.current       = form;       }, [form]);
+  useEffect(() => { balanceRef.current    = balance;    }, [balance]);
+  useEffect(() => { activePackRef.current = activePack; }, [activePack]);
 
   // ── Helpers ──────────────────────────────────────────────────
   const getSupportedMimeType = (): string => {
@@ -324,14 +334,15 @@ export default function TrikalVoice() {
       if (!userQuestion) throw new Error('Could not understand audio. Please speak clearly.');
       setTranscript(userQuestion);
 
+      const bd = formRef.current;   // latest form (not stale state)
       const chatRes = await fetch('/api/voice-predict', {
         method : 'POST',
         headers: { 'Content-Type': 'application/json', 'X-Vedic-Engine': 'Rohiit-Gupta-Vedic-Engine-v2' },
         body   : JSON.stringify({
           message  : userQuestion,
           mode     : 'voice',
-          userName : form.name,
-          birthData: { name: form.name, dob: form.dob, tob: form.tob, pob: form.pob },
+          userName : bd.name,
+          birthData: { name: bd.name, dob: bd.dob, tob: bd.tob, pob: bd.pob },
           sessionId: sessionIdRef.current,
         }),
       });
@@ -344,7 +355,7 @@ export default function TrikalVoice() {
       const ttsRes = await fetch('/api/voice-tts', {
         method : 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body   : JSON.stringify({ text: trikalReply, sessionId: sessionIdRef.current, packId: activePack?.id || 'p11' }),
+        body   : JSON.stringify({ text: trikalReply, sessionId: sessionIdRef.current, packId: activePackRef.current?.id || 'p11' }),
       });
       let finalAudioUrl = '';
       if (ttsRes.ok) {
@@ -358,7 +369,7 @@ export default function TrikalVoice() {
         headers: { 'Content-Type': 'application/json' },
         body   : JSON.stringify({ sessionId: sessionIdRef.current, action: 'consume' }),
       });
-      const newBal = Math.max(0, balance - 1);
+      const newBal = Math.max(0, balanceRef.current - 1);
       setBalance(newBal);
       localStorage.setItem('trikal_voice_balance', String(newBal));
 
@@ -426,6 +437,7 @@ export default function TrikalVoice() {
       return;
     }
     localStorage.setItem('trikal_voice_form', JSON.stringify(form));
+    formRef.current = form;   // guarantee processAudio reads the confirmed form
     setError('');
     setFillStatus('idle');
     setVoiceFilled(false);
