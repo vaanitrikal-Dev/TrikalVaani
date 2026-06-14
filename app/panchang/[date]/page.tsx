@@ -2,8 +2,16 @@
 // 🔱 TRIKAL VAANI — CEO PROTECTION HEADER
 // ════════════════════════════════════════════════════════════════════
 // File:    app/panchang/[date]/page.tsx
-// Version: v3.1
+// Version: v3.2
 // Owner:   Rohiit Gupta, Chief Vedic Architect
+// Changes vs v3.1 (Discover optimization — Claude, June 2026):
+//   1. OG image added (og-default.jpg 1200×630) to openGraph + twitter.
+//   2. robots expanded with googleBot max-image-preview:large + max-snippet
+//      (required for Google Discover large-image cards).
+//   3. Article schema publisher logo FIXED: /logo.png (404) → /Trikal_Logo.png
+//      (1440×1440, matches layout.tsx org schema).
+//   PROTECTED (untouched): fetchFromVM/callVM, ISR, 10s timeout, redirect
+//      logic, Supabase festival lookup, all schemas, JSX, Card/FAQ.
 // Changes vs v3.0:
 //   1. fetchFromVM() now routes through lib/callVM.ts so the X-Trikal-Key
 //      auth header is injected automatically. ISR (next: { revalidate: 86400 })
@@ -29,6 +37,7 @@ const SITE_URL = "https://trikalvaani.com";
 const AUTHOR_NAME = "Rohiit Gupta";
 const AUTHOR_TITLE = "Chief Vedic Architect, Trikaal Vaani";
 const VM_URL = "http://34.47.182.227:8001";
+const OG_IMAGE = `${SITE_URL}/og-default.jpg`;
 
 // ── Types ─────────────────────────────────────────────────────────────
 type PanchangRow = {
@@ -156,9 +165,9 @@ export async function generateMetadata(
     title, description,
     authors: [{ name: AUTHOR_NAME, url: `${SITE_URL}/founder` }],
     alternates: { canonical: url },
-    openGraph: { title: `${title} | Trikaal Vaani`, description, url, siteName: "Trikaal Vaani", type: "article", locale: "en_IN" },
-    twitter: { card: "summary_large_image", title, description },
-    robots: { index: true, follow: true },
+    openGraph: { title: `${title} | Trikaal Vaani`, description, url, siteName: "Trikaal Vaani", type: "article", locale: "en_IN", images: [{ url: OG_IMAGE, width: 1200, height: 630, alt: title }] },
+    twitter: { card: "summary_large_image", title, description, images: [OG_IMAGE] },
+    robots: { index: true, follow: true, googleBot: { index: true, follow: true, "max-video-preview": -1, "max-image-preview": "large", "max-snippet": -1 } },
   };
 }
 
@@ -218,10 +227,11 @@ export default async function PanchangDatePage(
       "@context": "https://schema.org", "@type": "Article",
       headline: `Aaj Ka Panchang ${human}`,
       description: p.geo_answer ?? `Vedic Panchang for ${date}`,
+      image: [OG_IMAGE],
       datePublished: date, dateModified: date,
       mainEntityOfPage: { "@type": "WebPage", "@id": url },
       author: { "@type": "Person", name: AUTHOR_NAME, jobTitle: AUTHOR_TITLE, url: `${SITE_URL}/founder` },
-      publisher: { "@type": "Organization", name: "Trikaal Vaani", url: SITE_URL, logo: { "@type": "ImageObject", url: `${SITE_URL}/logo.png` } },
+      publisher: { "@type": "Organization", name: "Trikaal Vaani", url: SITE_URL, logo: { "@type": "ImageObject", url: `${SITE_URL}/Trikal_Logo.png`, width: 1440, height: 1440 } },
     },
     {
       "@context": "https://schema.org", "@type": "BreadcrumbList",
@@ -330,7 +340,7 @@ export default async function PanchangDatePage(
           </section>
 
           <footer className="mt-8 border-t border-gray-200 pt-4 text-xs text-gray-500">
-            <p>🔱 Calculated by <strong>{AUTHOR_NAME}</strong>, {AUTHOR_TITLE}. Engine: Swiss Ephemeris · Ayanamsha: Lahiri · Version: v3.1</p>
+            <p>🔱 Calculated by <strong>{AUTHOR_NAME}</strong>, {AUTHOR_TITLE}. Engine: Swiss Ephemeris · Ayanamsha: Lahiri · Version: v3.2</p>
             <p className="mt-1 italic">&quot;Kaal bada balwan hai, sabko nach nachaye; raja ka beta bhi bhiksha mangne jaye.&quot;</p>
           </footer>
 
