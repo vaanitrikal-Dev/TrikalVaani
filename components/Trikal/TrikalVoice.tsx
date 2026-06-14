@@ -5,14 +5,15 @@
  * TRIKAL VAANI — Trikaal Voice Widget
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: components/Trikal/TrikalVoice.tsx
- * VERSION: 2.6 — PTT pointer-capture fix (mobile hold-record reliable)
+ * VERSION: 2.7 — Shared-phone safety (Option A: voice-fill = full reset)
  * DATE: 2026-06-14
  * CHANGES:
- *   v2.6: setPointerCapture locks pointer to button — finger drift no
- *         longer cuts the recording. Removed onPointerLeave (the villain).
- *         Added pttStateRef state machine (idle/starting/recording) to
- *         guard the async getUserMedia gap (release-early no longer breaks).
- *         Fixes hold-to-record on Android Chrome for BOTH details + question.
+ *   v2.7: Voice-fill now CLEARS all 4 fields first, then sets only
+ *         spoken values. Stops a different person on a shared phone
+ *         (child on parent's phone, etc.) from inheriting old pre-filled
+ *         birth details → wrong prediction. Adds a "ye details aapki
+ *         apni hain?" confirm line before Continue when voice was used.
+ *   v2.6: setPointerCapture PTT fix — finger drift no longer cuts record.
  *   v2.5: Voice-fill birth details (Option A) + "Session required" race fix.
  *   v2.4: PTT (Press & Hold) mic — WhatsApp style.
  *         onPointerDown → start; onPointerUp/Cancel/Leave → stop + submit.
@@ -80,6 +81,7 @@ export default function TrikalVoice() {
 
   // Voice-fill state
   const [fillStatus, setFillStatus] = useState<FillStatus>('idle');
+  const [voiceFilled, setVoiceFilled] = useState(false);  // true after a voice-fill (shared-phone safety)
 
   // Refs
   const pttStateRef      = useRef<'idle' | 'starting' | 'recording'>('idle');
@@ -159,6 +161,11 @@ export default function TrikalVoice() {
       setReply('');
       setAudioUrl('');
     } else {
+      // Option A: voice-fill = FULL RESET. A spoken fill signals a
+      // (possibly different) person on a shared phone. Wipe any
+      // pre-filled localStorage data so old details never mix in.
+      setForm({ name: '', dob: '', tob: '', pob: '' });
+      setVoiceFilled(true);
       setFillStatus('idle');
     }
 
@@ -290,13 +297,15 @@ export default function TrikalVoice() {
       if (!parseRes.ok) throw new Error('Details nikaal nahi paaye — manually bhar dein');
       const { fields, filledCount } = await parseRes.json();
 
-      // 3. Merge — only overwrite when we got a value; keep existing otherwise
-      setForm(prev => ({
-        name: fields.name || prev.name,
-        dob : fields.dob  || prev.dob,
-        tob : fields.tob  || prev.tob,
-        pob : fields.pob  || prev.pob,
-      }));
+      // Fields were already cleared on voice-fill start (Option A),
+      // so set spoken values directly. Anything not spoken stays ''
+      // — user sees the blank and fills it. NO old data carries over.
+      setForm({
+        name: fields.name || '',
+        dob : fields.dob  || '',
+        tob : fields.tob  || '',
+        pob : fields.pob  || '',
+      });
 
       setFillStatus(filledCount >= 4 ? 'done' : 'partial');
     } catch (err) {
@@ -428,6 +437,7 @@ export default function TrikalVoice() {
     localStorage.setItem('trikal_voice_form', JSON.stringify(form));
     setError('');
     setFillStatus('idle');
+    setVoiceFilled(false);
     setStage('record');
   };
 
@@ -443,6 +453,7 @@ export default function TrikalVoice() {
     setStage('closed');
     setError('');
     setFillStatus('idle');
+    setVoiceFilled(false);
   };
 
   // ═══════════════════════════════════════════════════════════
@@ -667,6 +678,13 @@ export default function TrikalVoice() {
                   <label style={labelStyle}>Place of Birth / जन्म स्थान</label>
                   <input type="text" placeholder="e.g. Delhi, India" value={form.pob} onChange={e => setForm({ ...form, pob: e.target.value })} style={inputStyle} />
                 </div>
+                {voiceFilled && (
+                  <p style={{ color: GOLD, fontSize: 11, textAlign: 'center', lineHeight: 1.5, marginTop: 2 }}>
+                    ⚠️ Confirm karein: ye details <strong>aapki apni</strong> hain?
+                    <br/>
+                    <span style={{ color: '#999' }}>Galat janm-details = galat bhavishyavani.</span>
+                  </p>
+                )}
                 <button onClick={handleFormSubmit} style={primaryBtnStyle}>Continue → Record</button>
                 {error && <p style={errorStyle}>{error}</p>}
               </div>
