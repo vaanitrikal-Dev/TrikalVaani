@@ -5,16 +5,15 @@
  * TRIKAL VAANI — Trikaal Voice Widget
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: components/Trikal/TrikalVoice.tsx
- * VERSION: 2.5 — Voice-fill birth details (Option A) + PTT + session fix
+ * VERSION: 2.6 — PTT pointer-capture fix (mobile hold-record reliable)
  * DATE: 2026-06-14
  * CHANGES:
- *   v2.5: FORM stage now has "🎙️ बोलकर भरें" PTT button.
- *         Flow: hold & speak details → OpenAI STT (/voice-transcribe)
- *               → Gemini parse (/voice-parse-details) → form auto-fills
- *               → user VERIFIES & corrects → Continue.
- *         Accuracy intact: nothing submits without user confirmation.
- *         FIX: sessionId now held in sessionIdRef (synchronous) —
- *              kills the "Session required" race on fast record.
+ *   v2.6: setPointerCapture locks pointer to button — finger drift no
+ *         longer cuts the recording. Removed onPointerLeave (the villain).
+ *         Added pttStateRef state machine (idle/starting/recording) to
+ *         guard the async getUserMedia gap (release-early no longer breaks).
+ *         Fixes hold-to-record on Android Chrome for BOTH details + question.
+ *   v2.5: Voice-fill birth details (Option A) + "Session required" race fix.
  *   v2.4: PTT (Press & Hold) mic — WhatsApp style.
  *         onPointerDown → start; onPointerUp/Cancel/Leave → stop + submit.
  *         touch-action: none on mic button (mobile scroll fix).
@@ -83,7 +82,7 @@ export default function TrikalVoice() {
   const [fillStatus, setFillStatus] = useState<FillStatus>('idle');
 
   // Refs
-  const pttActiveRef     = useRef(false);
+  const pttStateRef      = useRef<'idle' | 'starting' | 'recording'>('idle');
   const recordPurposeRef = useRef<RecordPurpose>('question');
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef        = useRef<Blob[]>([]);
@@ -136,11 +135,21 @@ export default function TrikalVoice() {
     streamRef.current = null;
   };
 
-  // ── PTT: pointer DOWN → start (purpose = question | details) ─
+  // ── PTT state machine: 'idle' → 'starting' → 'recording' ────
+  //    setPointerCapture locks the pointer to the button so the
+  //    recording does NOT cut when the finger drifts off the edge.
+  //    pttStateRef guards the async getUserMedia gap (release-early).
   const handlePttDown = useCallback(async (e: React.PointerEvent, purpose: RecordPurpose) => {
     e.preventDefault();
-    if (recording || pttActiveRef.current) return;
+    if (pttStateRef.current !== 'idle') return;
 
+    // Lock pointer to this button — finger can move anywhere, only
+    // a real pointerup/cancel on THIS element will stop the record.
+    const targetEl = e.currentTarget as HTMLElement;
+    const pid      = e.pointerId;
+    try { targetEl.setPointerCapture(pid); } catch {}
+
+    pttStateRef.current      = 'starting';
     recordPurposeRef.current = purpose;
     setError('');
     setMicPermissionDenied(false);
@@ -157,10 +166,18 @@ export default function TrikalVoice() {
       if (!navigator.mediaDevices?.getUserMedia) {
         setError('Browser microphone support नहीं है');
         setMicPermissionDenied(true);
+        pttStateRef.current = 'idle';
         return;
       }
 
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+      // User may have RELEASED during the await — abort cleanly.
+      if (pttStateRef.current !== 'starting') {
+        stream.getTracks().forEach(t => t.stop());
+        pttStateRef.current = 'idle';
+        return;
+      }
       streamRef.current = stream;
 
       const mimeType = getSupportedMimeType();
@@ -178,14 +195,14 @@ export default function TrikalVoice() {
         setError('Recording failed. Please try again.');
         setRecording(false);
         if (timerRef.current) clearInterval(timerRef.current);
-        pttActiveRef.current = false;
+        pttStateRef.current = 'idle';
       };
 
       mr.onstop = async () => {
         stopStream();
         const blob = new Blob(chunksRef.current, { type: mimeTypeRef.current || 'audio/webm' });
         if (blob.size < 3000) {
-          setError('Too short — hold the button longer and speak clearly.');
+          setError('Bahut chhota — button thoda zyada der dabaye rakhein aur saaf bolein.');
           if (recordPurposeRef.current === 'details') setFillStatus('idle');
           return;
         }
@@ -194,7 +211,7 @@ export default function TrikalVoice() {
       };
 
       mr.start(250);
-      pttActiveRef.current = true;
+      pttStateRef.current = 'recording';
       setRecording(true);
       setSeconds(0);
 
@@ -203,7 +220,7 @@ export default function TrikalVoice() {
           if (s >= 59) {
             if (mediaRecorderRef.current?.state !== 'inactive') mediaRecorderRef.current?.stop();
             if (timerRef.current) clearInterval(timerRef.current);
-            pttActiveRef.current = false;
+            pttStateRef.current = 'idle';
             setRecording(false);
             return 60;
           }
@@ -213,7 +230,7 @@ export default function TrikalVoice() {
 
     } catch (err: unknown) {
       const ex = err as DOMException;
-      pttActiveRef.current = false;
+      pttStateRef.current = 'idle';
       setMicPermissionDenied(true);
       if (ex.name === 'NotAllowedError' || ex.name === 'PermissionDeniedError') {
         setError('Microphone permission denied. Browser settings में microphone Allow करें।');
@@ -223,15 +240,27 @@ export default function TrikalVoice() {
         setError(`Microphone error: ${ex.message || 'Unknown'}`);
       }
     }
-  }, [recording]);
+  }, []);
 
-  // ── PTT: pointer UP / LEAVE / CANCEL → stop ─────────────────
-  const handlePttUp = useCallback(() => {
-    if (!pttActiveRef.current) return;
-    pttActiveRef.current = false;
+  // ── PTT: pointer UP / CANCEL → stop + submit ────────────────
+  const handlePttUp = useCallback((e?: React.PointerEvent) => {
+    // Release the pointer capture if we have it
+    if (e) {
+      try { (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId); } catch {}
+    }
+
+    // Released DURING startup (before recording actually began) →
+    // mark idle; the down-handler's guard will tear down the stream.
+    if (pttStateRef.current === 'starting') {
+      pttStateRef.current = 'idle';
+      return;
+    }
+    if (pttStateRef.current !== 'recording') return;
+
+    pttStateRef.current = 'idle';
     if (timerRef.current) clearInterval(timerRef.current);
     if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
-      mediaRecorderRef.current.stop();
+      mediaRecorderRef.current.stop(); // → mr.onstop → process
     }
     setRecording(false);
   }, []);
@@ -554,9 +583,8 @@ export default function TrikalVoice() {
                     </p>
                     <button
                       onPointerDown={(e) => handlePttDown(e, 'details')}
-                      onPointerUp={handlePttUp}
-                      onPointerLeave={handlePttUp}
-                      onPointerCancel={handlePttUp}
+                      onPointerUp={(e) => handlePttUp(e)}
+                      onPointerCancel={(e) => handlePttUp(e)}
                       aria-label="Hold to speak your birth details"
                       style={{
                         width: 64, height: 64, borderRadius: '50%', margin: '0 auto',
@@ -678,9 +706,8 @@ export default function TrikalVoice() {
               {!micPermissionDenied && (
                 <button
                   onPointerDown={(e) => handlePttDown(e, 'question')}
-                  onPointerUp={handlePttUp}
-                  onPointerLeave={handlePttUp}
-                  onPointerCancel={handlePttUp}
+                  onPointerUp={(e) => handlePttUp(e)}
+                  onPointerCancel={(e) => handlePttUp(e)}
                   aria-label={recording ? 'Release to submit' : 'Hold to record'}
                   style={{
                     width: 104, height: 104, borderRadius: '50%', cursor: 'pointer',
