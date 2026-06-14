@@ -2,9 +2,15 @@
 // 🔱 TRIKAL VAANI — CEO PROTECTION HEADER
 // ════════════════════════════════════════════════════════════════════
 // File:        app/[domain]/panchang/page.tsx
-// Version:     v1.3 — Broken link fix (Claude audit June 2026)
+// Version:     v1.4 — Discover optimization (Claude, June 2026)
 // Owner:       Rohiit Gupta, Chief Vedic Architect
-// CHANGES v1.2 → v1.3 (CEO-approved):
+// CHANGES v1.3 → v1.4 (CEO-approved):
+//   ✅ OG image added (og-default.jpg 1200×630) to openGraph + twitter.
+//   ✅ robots expanded with googleBot max-image-preview:large + max-snippet
+//      (required for Google Discover large-image cards).
+//   PROTECTED (untouched): all schemas, FAQ, ISR, city lookup,
+//      fetchPanchang, generateStaticParams, JSX.
+// CHANGES v1.2 → v1.3:
 //   ✅ FIX: /upcoming-events → /panchang (was 404 in Vercel logs)
 //      "Upcoming Festivals" link now points to /panchang which exists.
 //   NOTE: cache conflict (no-store + revalidate) is fixed in
@@ -53,6 +59,7 @@ const SITE_URL = "https://trikalvaani.com";
 const VM_BASE = "http://34.47.182.227:8001";
 const AUTHOR_NAME = "Rohiit Gupta";
 const AUTHOR_TITLE = "Chief Vedic Architect, Trikaal Vaani";
+const OG_IMAGE = `${SITE_URL}/og-default.jpg`;
 
 const CITY_SLUGS = new Set([
   "delhi", "mumbai", "noida", "gurgaon", "bangalore",
@@ -101,9 +108,9 @@ export async function generateMetadata(
   return {
     title, description,
     alternates: { canonical: url },
-    openGraph: { title, description, url, siteName: "Trikaal Vaani", type: "article", locale: "en_IN" },
-    twitter: { card: "summary_large_image", title, description },
-    robots: { index: true, follow: true },
+    openGraph: { title, description, url, siteName: "Trikaal Vaani", type: "article", locale: "en_IN", images: [{ url: OG_IMAGE, width: 1200, height: 630, alt: title }] },
+    twitter: { card: "summary_large_image", title, description, images: [OG_IMAGE] },
+    robots: { index: true, follow: true, googleBot: { index: true, follow: true, "max-video-preview": -1, "max-image-preview": "large", "max-snippet": -1 } },
   };
 }
 
