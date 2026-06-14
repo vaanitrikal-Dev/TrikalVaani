@@ -5,20 +5,21 @@
  * TRIKAL VAANI — Trikaal Voice Widget
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: components/Trikal/TrikalVoice.tsx
- * VERSION: 2.8 — Details mic single-button fix (release now stops record)
+ * VERSION: 2.9 — PTT via raw touch/mouse events (Android-reliable)
  * DATE: 2026-06-14
  * CHANGES:
- *   v2.8: ROOT-CAUSE FIX for details voice-fill not stopping on release.
- *         The details mic was TWO swapped blocks (button → div) — on
- *         record-start the captured <button> unmounted, so pointerup had
- *         no target and recording never stopped. Now ONE persistent
- *         button (gold↔red by state), matching the question recorder.
- *         Added onLostPointerCapture as a safety stop on both buttons.
+ *   v2.9: Dropped pointer events entirely — onPointerUp was not firing
+ *         reliably on Android Chrome, so recordings never stopped on
+ *         release. Switched to raw onTouchStart/onTouchEnd (+ onMouseDown/
+ *         Up for desktop). This is the WhatsApp-style mechanism and is
+ *         the most reliable hold-to-record path on mobile browsers.
+ *         e.preventDefault() on touch stops the 300ms ghost-click + scroll.
+ *   v2.8: Details mic made a single persistent button (no unmount on record).
  *   v2.7: Shared-phone safety (voice-fill = full field reset + confirm).
  *   v2.6: setPointerCapture PTT fix — finger drift no longer cuts record.
  *   v2.5: Voice-fill birth details (Option A) + "Session required" race fix.
  *   v2.4: PTT (Press & Hold) mic — WhatsApp style.
- *         onPointerDown → start; onPointerUp/Cancel/Leave → stop + submit.
+ *         onTouchStart → start; onTouchEnd/Cancel → stop + submit.
  *         touch-action: none on mic button (mobile scroll fix).
  *   v2.2: Kill switch (NEXT_PUBLIC_ENABLE_VOICE) — unchanged.
  * ============================================================
@@ -140,18 +141,11 @@ export default function TrikalVoice() {
   };
 
   // ── PTT state machine: 'idle' → 'starting' → 'recording' ────
-  //    setPointerCapture locks the pointer to the button so the
-  //    recording does NOT cut when the finger drifts off the edge.
+  //    Uses raw touch/mouse events (NOT pointer events) — most reliable
+  //    on Android Chrome. start() begins recording, stop() ends it.
   //    pttStateRef guards the async getUserMedia gap (release-early).
-  const handlePttDown = useCallback(async (e: React.PointerEvent, purpose: RecordPurpose) => {
-    e.preventDefault();
+  const handlePttDown = useCallback(async (purpose: RecordPurpose) => {
     if (pttStateRef.current !== 'idle') return;
-
-    // Lock pointer to this button — finger can move anywhere, only
-    // a real pointerup/cancel on THIS element will stop the record.
-    const targetEl = e.currentTarget as HTMLElement;
-    const pid      = e.pointerId;
-    try { targetEl.setPointerCapture(pid); } catch {}
 
     pttStateRef.current      = 'starting';
     recordPurposeRef.current = purpose;
@@ -251,13 +245,8 @@ export default function TrikalVoice() {
     }
   }, []);
 
-  // ── PTT: pointer UP / CANCEL → stop + submit ────────────────
-  const handlePttUp = useCallback((e?: React.PointerEvent) => {
-    // Release the pointer capture if we have it
-    if (e) {
-      try { (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId); } catch {}
-    }
-
+  // ── PTT: touch end / mouse up → stop + submit ───────────────
+  const handlePttUp = useCallback(() => {
     // Released DURING startup (before recording actually began) →
     // mark idle; the down-handler's guard will tear down the stream.
     if (pttStateRef.current === 'starting') {
@@ -604,13 +593,16 @@ export default function TrikalVoice() {
                 )}
 
                 {/* SINGLE persistent button — never unmounts while held,
-                    so setPointerCapture + release work reliably. */}
+                    so touch start/end fire on the same element reliably. */}
                 {fillStatus !== 'parsing' && (
                   <button
-                    onPointerDown={(e) => handlePttDown(e, 'details')}
-                    onPointerUp={(e) => handlePttUp(e)}
-                    onPointerCancel={(e) => handlePttUp(e)}
-                    onLostPointerCapture={() => handlePttUp()}
+                    onTouchStart={(e) => { e.preventDefault(); handlePttDown('details'); }}
+                    onTouchEnd={(e) => { e.preventDefault(); handlePttUp(); }}
+                    onTouchCancel={(e) => { e.preventDefault(); handlePttUp(); }}
+                    onMouseDown={() => handlePttDown('details')}
+                    onMouseUp={() => handlePttUp()}
+                    onMouseLeave={() => { if (pttStateRef.current === 'recording') handlePttUp(); }}
+                    onContextMenu={(e) => e.preventDefault()}
                     aria-label={recording ? 'Release to fill details' : 'Hold to speak your birth details'}
                     style={{
                       width: 64, height: 64, borderRadius: '50%', margin: '0 auto',
@@ -733,10 +725,13 @@ export default function TrikalVoice() {
 
               {!micPermissionDenied && (
                 <button
-                  onPointerDown={(e) => handlePttDown(e, 'question')}
-                  onPointerUp={(e) => handlePttUp(e)}
-                  onPointerCancel={(e) => handlePttUp(e)}
-                  onLostPointerCapture={() => handlePttUp()}
+                  onTouchStart={(e) => { e.preventDefault(); handlePttDown('question'); }}
+                  onTouchEnd={(e) => { e.preventDefault(); handlePttUp(); }}
+                  onTouchCancel={(e) => { e.preventDefault(); handlePttUp(); }}
+                  onMouseDown={() => handlePttDown('question')}
+                  onMouseUp={() => handlePttUp()}
+                  onMouseLeave={() => { if (pttStateRef.current === 'recording') handlePttUp(); }}
+                  onContextMenu={(e) => e.preventDefault()}
                   aria-label={recording ? 'Release to submit' : 'Hold to record'}
                   style={{
                     width: 104, height: 104, borderRadius: '50%', cursor: 'pointer',
