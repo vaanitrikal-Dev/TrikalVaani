@@ -1,7 +1,18 @@
-// 🔱 TRIKAL VAANI | app/page.tsx | v11.3
+// 🔱 TRIKAL VAANI | app/page.tsx | v11.4
 // Owner: Rohiit Gupta, Chief Vedic Architect
-// Date: 2026-06-12
+// Date: 2026-06-14
 // ============================================================================
+// v11.3 → v11.4 — VOICE ASTROLOGY TEASER (CEO-approved, promotion):
+//   ✅ ADD: New inline "Trikaal Voice" teaser section between slot #6
+//      (SocialProofTicker) and slot #7 (DailyPanchang). Gives the voice
+//      product a home-page entry point — kills the /voice-pricing
+//      orphan-page problem (internal link authority) AND makes visitors
+//      aware of voice instead of only the floating widget.
+//   ✅ Single CTA → /voice-pricing. Pure inline JSX — NO new imports,
+//      NO locked component touched, IR-12 tiered layout preserved.
+//   PROTECTED (untouched): all metadata, all 14 original slots, blog
+//      ISR fetch (v11.3), schemas, canonical, components, HomeBlogCard.
+// ----------------------------------------------------------------------------
 // v11.2 → v11.3 — DYNAMIC BLOG SECTION (Supabase, CEO-approved):
 //   ✅ FIX-1: "Latest from the Trikaal Blog" was rendering 3 HARDCODED
 //      posts from lib/blog-data.ts (Jan–Mar 2026, stale). Now fetches the
@@ -263,6 +274,60 @@ export default async function HomePage() {
           {/* ── 6. SOCIAL PROOF TICKER ─────────────────────────────────── */}
           <SocialProofTicker />
 
+          {/* ── 6.5 VOICE ASTROLOGY TEASER — v11.4 — links to /voice-pricing ──
+              Gives the voice product a home-page entry point: kills the
+              /voice-pricing orphan-page problem (passes internal-link
+              authority) and surfaces voice to visitors who would otherwise
+              only notice the floating widget. Pure inline JSX — no imports,
+              no locked component touched. Single CTA → /voice-pricing. */}
+          <section className="py-20 px-4">
+            <div className="max-w-4xl mx-auto">
+              <div
+                className="rounded-3xl px-6 py-12 sm:px-12 text-center"
+                style={{
+                  background: 'linear-gradient(135deg, rgba(212,175,55,0.10), rgba(212,175,55,0.03))',
+                  border: '1px solid rgba(212,175,55,0.25)',
+                }}
+              >
+                <p className="text-xs font-medium tracking-widest uppercase text-yellow-400/60 mb-4">
+                  Trikaal Voice • असली आवाज़ में उत्तर
+                </p>
+
+                <h2 className="font-serif text-3xl sm:text-4xl font-bold text-white leading-snug mb-4">
+                  अपनी आवाज़ में पूछें —{' '}
+                  <span className="text-gradient-gold">₹11 में</span>
+                </h2>
+
+                <p className="text-slate-300 max-w-xl mx-auto text-base leading-relaxed mb-3">
+                  टाइप करने की ज़रूरत नहीं। Mic दबाकर अपना सवाल बोलिए, और
+                  Rohiit Gupta की अपनी आवाज़ में Vedic उत्तर सुनिए — Swiss
+                  Ephemeris पर आधारित, सिर्फ़ 60 सेकंड में।
+                </p>
+
+                <p className="text-slate-500 text-sm mb-8">
+                  Hindi • Hinglish • English &nbsp;·&nbsp; Press &amp; hold to speak
+                  &nbsp;·&nbsp; Razorpay secure
+                </p>
+
+                <a
+                  href="/voice-pricing"
+                  className="inline-flex items-center gap-2 px-8 py-4 rounded-full text-sm font-bold transition-all duration-300 hover:-translate-y-0.5"
+                  style={{
+                    background: 'linear-gradient(135deg, #A8820A, #D4AF37)',
+                    color: '#080B12',
+                    boxShadow: '0 8px 32px rgba(168,130,10,0.35)',
+                  }}
+                >
+                  🎙️ Voice Astrology शुरू करें &rarr;
+                </a>
+
+                <p className="text-slate-500 text-xs mt-5">
+                  1 question ₹11 &nbsp;·&nbsp; 5 questions ₹51 &nbsp;·&nbsp; 12 questions ₹101
+                </p>
+              </div>
+            </div>
+          </section>
+
           {/* ═══════════════════════════════════════════════════════════════
               ENGAGEMENT + RETENTION TIER — slots #7 to #10
               Daily-return hooks + brand depth content.
@@ -352,7 +417,7 @@ export default async function HomePage() {
 }
 
 // ============================================================================
-// END — app/page.tsx v11.3
+// END — app/page.tsx v11.4
 // 🔱 Trikaal Vaani | Rohiit Gupta, Chief Vedic Architect
 // CEO LOCKED: TIERED LAYOUT — earning sections above mobile fold
 // ============================================================================
