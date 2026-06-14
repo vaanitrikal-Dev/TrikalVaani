@@ -5,14 +5,16 @@
  * TRIKAL VAANI — Trikaal Voice Widget
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: components/Trikal/TrikalVoice.tsx
- * VERSION: 2.7 — Shared-phone safety (Option A: voice-fill = full reset)
+ * VERSION: 2.8 — Details mic single-button fix (release now stops record)
  * DATE: 2026-06-14
  * CHANGES:
- *   v2.7: Voice-fill now CLEARS all 4 fields first, then sets only
- *         spoken values. Stops a different person on a shared phone
- *         (child on parent's phone, etc.) from inheriting old pre-filled
- *         birth details → wrong prediction. Adds a "ye details aapki
- *         apni hain?" confirm line before Continue when voice was used.
+ *   v2.8: ROOT-CAUSE FIX for details voice-fill not stopping on release.
+ *         The details mic was TWO swapped blocks (button → div) — on
+ *         record-start the captured <button> unmounted, so pointerup had
+ *         no target and recording never stopped. Now ONE persistent
+ *         button (gold↔red by state), matching the question recorder.
+ *         Added onLostPointerCapture as a safety stop on both buttons.
+ *   v2.7: Shared-phone safety (voice-fill = full field reset + confirm).
  *   v2.6: setPointerCapture PTT fix — finger drift no longer cuts record.
  *   v2.5: Voice-fill birth details (Option A) + "Session required" race fix.
  *   v2.4: PTT (Press & Hold) mic — WhatsApp style.
@@ -584,6 +586,7 @@ export default function TrikalVoice() {
                 marginBottom: 16,
                 textAlign   : 'center',
               }}>
+                {/* Instructional text — switches by state, but the BUTTON below stays mounted */}
                 {!recording && fillStatus !== 'parsing' && (
                   <>
                     <p style={{ color: GOLD, fontSize: 13, fontWeight: 700, marginBottom: 2 }}>
@@ -592,52 +595,59 @@ export default function TrikalVoice() {
                     <p style={{ color: '#aaa', fontSize: 11, marginBottom: 12 }}>
                       Button दबाकर रखें और बोलें: नाम, जन्म तारीख, समय, और जगह
                     </p>
-                    <button
-                      onPointerDown={(e) => handlePttDown(e, 'details')}
-                      onPointerUp={(e) => handlePttUp(e)}
-                      onPointerCancel={(e) => handlePttUp(e)}
-                      aria-label="Hold to speak your birth details"
-                      style={{
-                        width: 64, height: 64, borderRadius: '50%', margin: '0 auto',
-                        background: `radial-gradient(circle, ${GOLD}, ${GOLD_DARK})`,
-                        border: `3px solid ${GOLD_LIGHT}`, cursor: 'pointer',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        boxShadow: `0 0 0 5px ${GOLD}22`,
-                        userSelect: 'none', WebkitUserSelect: 'none', touchAction: 'none',
-                      }}
-                    >
-                      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke={BG_DARK} strokeWidth="2.2" style={{ pointerEvents: 'none' }}>
-                        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
-                        <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
-                        <line x1="12" y1="19" x2="12" y2="23"/>
-                        <line x1="8" y1="23" x2="16" y2="23"/>
-                      </svg>
-                    </button>
-                    <p style={{ color: '#666', fontSize: 10, marginTop: 8 }}>
-                      e.g. &quot;मेरा नाम रोहित है, 15 अगस्त 1990, सुबह साढ़े पाँच बजे, दिल्ली&quot;
-                    </p>
                   </>
                 )}
-
                 {recording && recordPurposeRef.current === 'details' && (
-                  <>
-                    <p style={{ color: GOLD, fontSize: 13, marginBottom: 8, animation: 'trikalFade 1.5s ease-in-out infinite' }}>
-                      🎙️ सुन रहे हैं... बोलते रहें ({String(seconds).padStart(2, '0')}s)
-                    </p>
-                    <div style={{
+                  <p style={{ color: GOLD, fontSize: 13, marginBottom: 12, animation: 'trikalFade 1.5s ease-in-out infinite' }}>
+                    🎙️ सुन रहे हैं... बोलते रहें ({String(seconds).padStart(2, '0')}s)
+                  </p>
+                )}
+
+                {/* SINGLE persistent button — never unmounts while held,
+                    so setPointerCapture + release work reliably. */}
+                {fillStatus !== 'parsing' && (
+                  <button
+                    onPointerDown={(e) => handlePttDown(e, 'details')}
+                    onPointerUp={(e) => handlePttUp(e)}
+                    onPointerCancel={(e) => handlePttUp(e)}
+                    onLostPointerCapture={() => handlePttUp()}
+                    aria-label={recording ? 'Release to fill details' : 'Hold to speak your birth details'}
+                    style={{
                       width: 64, height: 64, borderRadius: '50%', margin: '0 auto',
-                      background: 'radial-gradient(circle, #c0392b, #922b21)',
-                      border: '3px solid #e74c3c',
+                      background: (recording && recordPurposeRef.current === 'details')
+                        ? 'radial-gradient(circle, #c0392b, #922b21)'
+                        : `radial-gradient(circle, ${GOLD}, ${GOLD_DARK})`,
+                      border: (recording && recordPurposeRef.current === 'details')
+                        ? '3px solid #e74c3c'
+                        : `3px solid ${GOLD_LIGHT}`,
+                      cursor: 'pointer',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      animation: 'trikalPulseRed 0.8s ease-in-out infinite',
-                    }}>
-                      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2">
-                        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
-                        <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
-                      </svg>
-                    </div>
-                    <p style={{ color: '#888', fontSize: 10, marginTop: 8 }}>Release करें जब बोल चुकें</p>
-                  </>
+                      boxShadow: (recording && recordPurposeRef.current === 'details')
+                        ? '0 0 0 8px rgba(192,57,43,0.25)'
+                        : `0 0 0 5px ${GOLD}22`,
+                      animation: (recording && recordPurposeRef.current === 'details')
+                        ? 'trikalPulseRed 0.8s ease-in-out infinite' : 'none',
+                      userSelect: 'none', WebkitUserSelect: 'none', touchAction: 'none',
+                    }}
+                  >
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none"
+                      stroke={(recording && recordPurposeRef.current === 'details') ? '#fff' : BG_DARK}
+                      strokeWidth="2.2" style={{ pointerEvents: 'none' }}>
+                      <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+                      <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                      <line x1="12" y1="19" x2="12" y2="23"/>
+                      <line x1="8" y1="23" x2="16" y2="23"/>
+                    </svg>
+                  </button>
+                )}
+
+                {!recording && fillStatus !== 'parsing' && (
+                  <p style={{ color: '#666', fontSize: 10, marginTop: 8 }}>
+                    e.g. &quot;मेरा नाम रोहित है, 15 अगस्त 1990, सुबह साढ़े पाँच बजे, दिल्ली&quot;
+                  </p>
+                )}
+                {recording && recordPurposeRef.current === 'details' && (
+                  <p style={{ color: '#888', fontSize: 10, marginTop: 8 }}>Release करें जब बोल चुकें</p>
                 )}
 
                 {fillStatus === 'parsing' && (
@@ -726,6 +736,7 @@ export default function TrikalVoice() {
                   onPointerDown={(e) => handlePttDown(e, 'question')}
                   onPointerUp={(e) => handlePttUp(e)}
                   onPointerCancel={(e) => handlePttUp(e)}
+                  onLostPointerCapture={() => handlePttUp()}
                   aria-label={recording ? 'Release to submit' : 'Hold to record'}
                   style={{
                     width: 104, height: 104, borderRadius: '50%', cursor: 'pointer',
