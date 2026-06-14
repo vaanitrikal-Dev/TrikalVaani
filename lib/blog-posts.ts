@@ -1,9 +1,8 @@
 // ============================================================
 // TRIKAL VAANI — BLOG POSTS — SUPABASE VERSION
 // CEO: Rohiit Gupta | Chief Vedic Architect
-// Version: 3.1 (Added body columns: emotional, communication,
-//               strengths, challenges, remedies)
-// Date: 2026-06-13
+// Version: 3.2 (sections[] transform fix — {title,body} → BlogSection[])
+// Date: 2026-06-14
 // ============================================================
 // HOW TO ADD NEW ARTICLES:
 //   1. Go to Supabase dashboard → Table Editor → blog_posts
@@ -16,7 +15,7 @@
 import { createClient } from '@supabase/supabase-js';
 
 // ============================================================
-// TYPES — v3.1: 5 new body fields added
+// TYPES — v3.2: sections now correctly typed + transformed
 // ============================================================
 export interface BlogPost {
   slug: string;
@@ -67,7 +66,29 @@ const supabase = createClient(
 );
 
 // ============================================================
-// ROW → BlogPost mapper — v3.1: 5 new fields mapped
+// SECTIONS TRANSFORM — v3.2
+// Supabase sections column format: [{ title: string, body: string }]
+// BlogSection format:              [{ type: 'h2'|'p', text: string }]
+// Each DB section → h2 heading + p paragraph block
+// ============================================================
+function transformSections(
+  raw: unknown
+): BlogSection[] {
+  if (!Array.isArray(raw)) return [];
+  return (raw as { title?: string; body?: string }[]).flatMap((s) => {
+    const blocks: BlogSection[] = [];
+    if (s.title?.trim()) {
+      blocks.push({ type: 'h2', text: s.title.trim() });
+    }
+    if (s.body?.trim()) {
+      blocks.push({ type: 'p', text: s.body.trim() });
+    }
+    return blocks;
+  });
+}
+
+// ============================================================
+// ROW → BlogPost mapper — v3.2: sections correctly transformed
 // ============================================================
 function mapRow(row: Record<string, unknown>): BlogPost {
   return {
@@ -94,7 +115,9 @@ function mapRow(row: Record<string, unknown>): BlogPost {
     challenges:       (row.challenges as string) ?? '',
     remedies:         (row.remedies as string) ?? '',
     // ─────────────────────────────────────────────────────────
-    sections:         (row.sections as BlogSection[]) ?? [],
+    // ── v3.2: Transform {title,body}[] → BlogSection[] ───────
+    sections:         transformSections(row.sections),
+    // ─────────────────────────────────────────────────────────
     faqs:             (row.faqs as { q: string; a: string }[]) ?? [],
     relatedSlugs:     (row.related_slugs as string[]) ?? [],
     classicalSources: row.classical_sources as string,
