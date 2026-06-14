@@ -2,9 +2,17 @@
 // 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER
 // ════════════════════════════════════════════════════════════════════
 // File:        app/[domain]/events/[slug]/page.tsx
-// Version:     v2.3
+// Version:     v2.4
 // Owner:       Rohiit Gupta, Chief Vedic Architect
 // Domain:      trikalvaani.com
+//
+// ── Changes vs v2.3 (Discover optimization — Claude, June 2026) ────
+//   1. OG image added (og-default.jpg 1200×630) to openGraph + twitter.
+//   2. robots expanded with googleBot max-image-preview:large + max-snippet
+//      (required for Google Discover large-image cards).
+//   3. Event schema now carries image:[OG_IMAGE] for Rich Results.
+//   PROTECTED (untouched): all data fetching, scope logic, puja vidhi,
+//      remedies, regional customs, FAQ build, JSX, footer.
 //
 // ── Changes vs v2.2 ────────────────────────────────────────────────
 //   1. REMOVED the "Where to celebrate {festival} in {city}" temples box
@@ -91,6 +99,7 @@ type PlanetRemedy = {
 const SITE_URL = "https://trikalvaani.com";
 const AUTHOR_NAME = "Rohiit Gupta";
 const AUTHOR_TITLE = "Chief Vedic Architect, Trikaal Vaani";
+const OG_IMAGE = `${SITE_URL}/og-default.jpg`;
 
 const CITY_SLUGS = new Set([
   "delhi", "mumbai", "noida", "gurgaon", "bangalore",
@@ -238,9 +247,9 @@ export async function generateMetadata(
   return {
     title, description,
     alternates: { canonical: url },
-    openGraph: { title, description, url, siteName: "Trikaal Vaani", type: "article", locale: "en_IN" },
-    twitter: { card: "summary_large_image", title, description },
-    robots: { index: true, follow: true },
+    openGraph: { title, description, url, siteName: "Trikaal Vaani", type: "article", locale: "en_IN", images: [{ url: OG_IMAGE, width: 1200, height: 630, alt: title }] },
+    twitter: { card: "summary_large_image", title, description, images: [OG_IMAGE] },
+    robots: { index: true, follow: true, googleBot: { index: true, follow: true, "max-video-preview": -1, "max-image-preview": "large", "max-snippet": -1 } },
   };
 }
 
@@ -303,6 +312,7 @@ export default async function CityFestivalPage(
     eventStatus: "https://schema.org/EventScheduled",
     eventAttendanceMode: "https://schema.org/MixedEventAttendanceMode",
     description: significance || f.geo_answer || `${name} ${yr} in ${c.name}.`,
+    image: [OG_IMAGE],
     location: {
       "@type": "Place",
       name: c.name,
