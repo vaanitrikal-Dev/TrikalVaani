@@ -3,29 +3,28 @@
  * 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER 🔱
  * ============================================================================
  * File:        app/sitemap.ts
- * Version:     v7.1
+ * Version:     v7.2
  * Owner:       Rohiit Gupta, Chief Vedic Architect
  *
- * Changes v7.0 → v7.1 (2026-06-04):
- *   GOAL: Index the city-festival "golden engine" pages.
- *   ADD:  readFestivalsFromDB() — festivals now live from festivals_master
- *         (was static festivals.json).
- *         /[city]/events/{slug} entries, gated on is_indexed=true (only
- *         festivals with generated content) and scope-aware (regional
- *         festivals fan out ONLY to their home_states cities).
- *   KEEP: /events/{slug} (all-India) for every festival. festivals.json kept
- *         as a fallback if DB is unavailable. Everything else from v7.0 intact.
+ * Changes v7.1 → v7.2 (2026-06-14):
+ *   WIN 1: Compatibility Hindi — proper /hi/compatibility/[slug] URLs instead
+ *          of ?lang=hi query params. Google indexes clean URLs reliably.
+ *   WIN 3: Panchang — only future dates (today + 365 days). Past dates removed
+ *          from sitemap to save crawl budget. DB still has 545 rows but we
+ *          filter to future only via date >= today.
+ *   ALSO:  festivals_master is_indexed now 35 (was 24) after DB update.
+ *          City fan-out now 350 URLs (was 240).
  *
  * ── Earlier history (unchanged) ─────────────────────────────────────────────
+ *   v7.1: festivals live from festivals_master + city fan-out.
  *   v7.0: /learn hub + 90 /learn/[slug] SEO pages from seo_pillar_pages.
  *   v6.0: 10 new free calculators added (18 total).
- *   v5.9: DYNAMIC domains (domain_pages), panchang (panchang_daily, ~365),
- *         public reports (/report/{slug}).
- *   v5.8: ADDED 'free-child-birth-muhurat-calculator' to CALCULATORS.
- *   v5.7: ADDED /kundali-milan + /karmic-background-reading to STATIC_ROUTES.
- *   v5.6: REMOVED /astrologer-{city} entries (IR-20 / Plan §5.9).
- *   v5.5: ADDED /compatibility/* programmatic SEO pages (dynamic).
- *   v5.4: calculators hub + 7 calc pages; domains priority 0.9; panchang 30d.
+ *   v5.9: DYNAMIC domains, panchang, public reports.
+ *   v5.8: 'free-child-birth-muhurat-calculator' added.
+ *   v5.7: /kundali-milan + /karmic-background-reading added.
+ *   v5.6: REMOVED /astrologer-{city} entries (IR-20).
+ *   v5.5: /compatibility/* programmatic SEO pages.
+ *   v5.4: calculators hub + 7 calc pages.
  * ============================================================================
  */
 
@@ -52,20 +51,19 @@ const STATIC_ROUTES = [
   '/services',
   '/calculators',
   '/panchang',
-  '/kundali-milan',               // v5.7: Milan pillar
-  '/karmic-background-reading',   // v5.7: Karmic Background Reading pillar
+  '/kundali-milan',
+  '/karmic-background-reading',
 ];
 
 const CALCULATORS = [
   'free-kundali-calculator',
-  'free-child-birth-muhurat-calculator',  // v5.8
+  'free-child-birth-muhurat-calculator',
   'free-dasha-calculator',
   'free-nakshatra-calculator',
   'free-rashi-calculator',
   'free-lagna-calculator',
   'free-sade-sati-calculator',
   'free-manglik-dosh-calculator',
-  // ── v6.0: 10 new free calculators ──
   'free-kaal-sarp-dosh-calculator',
   'free-pitra-dosh-calculator',
   'free-gemstone-calculator',
@@ -78,7 +76,6 @@ const CALCULATORS = [
   'free-lagna-bal-calculator',
 ];
 
-// v5.9: kept ONLY as a safety fallback. Live list now comes from domain_pages.
 const DOMAINS_FALLBACK = [
   'career', 'wealth', 'health', 'relationships', 'family',
   'education', 'home', 'legal', 'travel', 'spirituality',
@@ -88,7 +85,6 @@ const DOMAINS_FALLBACK = [
 type CityRow = { slug: string; state: string };
 type FestivalRow = { slug: string; date?: string };
 
-// v7.1: live festival rows from festivals_master
 type DbFestivalRow = {
   festival_slug: string;
   date: string;
@@ -97,7 +93,6 @@ type DbFestivalRow = {
   is_indexed: boolean | null;
 };
 
-// ── Shared anon Supabase client (public-read only) ──────────────────────────
 function anonClient() {
   return createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -123,7 +118,6 @@ function readFestivals(): FestivalRow[] {
   }
 }
 
-// v7.1: festivals live from festivals_master (slug, scope, home_states, is_indexed)
 async function readFestivalsFromDB(): Promise<DbFestivalRow[]> {
   try {
     const supabase = anonClient();
@@ -137,7 +131,6 @@ async function readFestivalsFromDB(): Promise<DbFestivalRow[]> {
   }
 }
 
-// v7.1: regional festivals only belong to their home_states; pan_india everywhere
 function festivalInState(scope: string | null, homeStates: string[] | null, state: string): boolean {
   if (scope === 'regional' && Array.isArray(homeStates) && homeStates.length > 0) {
     return homeStates.includes(state);
@@ -145,6 +138,9 @@ function festivalInState(scope: string | null, homeStates: string[] | null, stat
   return true;
 }
 
+// WIN 1: Returns both EN and HI slug rows
+// EN → /compatibility/[slug]
+// HI → /hi/compatibility/[slug]  (clean URL, not ?lang=hi)
 async function readCompatibilitySlugs(): Promise<{ slug: string; lang: string }[]> {
   try {
     const supabase = anonClient();
@@ -158,7 +154,6 @@ async function readCompatibilitySlugs(): Promise<{ slug: string; lang: string }[
   }
 }
 
-// v5.9: 15 domain pages, dynamic from domain_pages (fallback to hardcoded list)
 async function readDomainSlugs(): Promise<string[]> {
   try {
     const supabase = anonClient();
@@ -176,13 +171,26 @@ async function readDomainSlugs(): Promise<string[]> {
   }
 }
 
-// v5.9: every panchang date that actually has a page (fallback to next-30)
+// WIN 3: Only future dates — today onwards, max 365 days
+// Saves crawl budget — past panchang pages have no search intent value
 async function readPanchangDates(): Promise<string[]> {
   try {
     const supabase = anonClient();
+    const today = new Date();
+    today.setUTCHours(0, 0, 0, 0);
+    const todayStr = today.toISOString().split('T')[0];
+
+    const futureLimit = new Date(today);
+    futureLimit.setUTCDate(today.getUTCDate() + 365);
+    const futureLimitStr = futureLimit.toISOString().split('T')[0];
+
     const { data, error } = await supabase
       .from('panchang_daily')
-      .select('date');
+      .select('date')
+      .gte('date', todayStr)
+      .lte('date', futureLimitStr)
+      .order('date', { ascending: true });
+
     if (error || !data || data.length === 0) return nextNDates(30);
     const set = new Set<string>();
     for (const row of data as { date: string }[]) {
@@ -197,7 +205,6 @@ async function readPanchangDates(): Promise<string[]> {
   }
 }
 
-// v5.9: public report pages — /report/{public_slug}
 async function readReportSlugs(): Promise<{ slug: string; updatedAt: string | null }[]> {
   try {
     const supabase = anonClient();
@@ -215,7 +222,6 @@ async function readReportSlugs(): Promise<{ slug: string; updatedAt: string | nu
   }
 }
 
-// ── v7.0: /learn SEO hub pages — live from seo_pillar_pages ─────────────────
 type SeoPageRow = { slug: string; category: string; priority: number };
 
 async function readSeoLearnSlugs(): Promise<SeoPageRow[]> {
@@ -250,12 +256,11 @@ function nextNDates(n: number): string[] {
   return dates;
 }
 
-// ── changeFrequency helper for /learn pages ─────────────────────────────────
 function learnChangeFreq(category: string): MetadataRoute.Sitemap[0]['changeFrequency'] {
   if (category === 'transit') return 'weekly';
   if (category === 'festival') return 'yearly';
   if (category === 'trending') return 'monthly';
-  return 'monthly'; // prediction + knowledge
+  return 'monthly';
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -287,7 +292,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     });
   }
 
-  // ── 15 Pillar Domain Pages (v5.9: dynamic from domain_pages) ───────
+  // ── 15 Pillar Domain Pages ─────────────────────────────────────────
   const domainSlugs = await readDomainSlugs();
   for (const d of domainSlugs) {
     entries.push({
@@ -298,7 +303,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     });
   }
 
-  // ── Compatibility pages (programmatic SEO) ─────────────────────────
+  // ── WIN 1: Compatibility pages ─────────────────────────────────────
+  // EN: /compatibility/[slug]          — priority 0.8
+  // HI: /hi/compatibility/[slug]       — clean URL, priority 0.7
+  // NOTE: /hi/compatibility/[slug] route must exist in Next.js app dir
   const compatRows = await readCompatibilitySlugs();
   for (const row of compatRows) {
     if (row.lang === 'en') {
@@ -310,7 +318,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       });
     } else if (row.lang === 'hi') {
       entries.push({
-        url: `${BASE}/compatibility/${row.slug}?lang=hi`,
+        url: `${BASE}/hi/compatibility/${row.slug}`,
         lastModified: now,
         changeFrequency: 'monthly',
         priority: 0.7,
@@ -340,18 +348,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     entries.push({ url: `${BASE}/${c.slug}/panchang`, lastModified: now, changeFrequency: 'daily', priority: 0.8 });
   }
 
-  // ── Festival/event pages (v7.1: live from festivals_master + city fan-out) ──
+  // ── Festival/event pages ───────────────────────────────────────────
   const dbFestivals = await readFestivalsFromDB();
   if (dbFestivals.length > 0) {
     for (const f of dbFestivals) {
-      // All-India single page — always indexed
+      // All-India single page
       entries.push({
         url: `${BASE}/events/${f.festival_slug}`,
         lastModified: now,
         changeFrequency: 'monthly',
         priority: 0.75,
       });
-      // City fan-out ONLY when content is generated (is_indexed) + scope-aware
+      // City fan-out — only is_indexed=true festivals with content
       if (f.is_indexed) {
         for (const c of cities) {
           if (festivalInState(f.festival_scope, f.home_states, c.state)) {
@@ -366,20 +374,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       }
     }
   } else {
-    // Fallback: static festivals.json (all-India only) if DB unavailable
     const festivals = readFestivals();
     for (const f of festivals) {
       entries.push({ url: `${BASE}/events/${f.slug}`, lastModified: now, changeFrequency: 'monthly', priority: 0.75 });
     }
   }
 
-  // ── Panchang date pages (v5.9) ─────────────────────────────────────
+  // ── WIN 3: Panchang — future dates only (today + 365 days) ────────
+  // Past dates removed — zero search intent, wastes crawl budget
   const panchangDates = await readPanchangDates();
   for (const date of panchangDates) {
     entries.push({ url: `${BASE}/panchang/${date}`, lastModified: now, changeFrequency: 'daily', priority: 0.5 });
   }
 
-  // ── Public report pages (v5.9) ─────────────────────────────────────
+  // ── Public report pages ────────────────────────────────────────────
   const reports = await readReportSlugs();
   for (const r of reports) {
     entries.push({
@@ -390,7 +398,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     });
   }
 
-  // ── v7.0: /learn hub + 90 SEO knowledge pages ─────────────────────
+  // ── /learn hub + 90 SEO knowledge pages ───────────────────────────
   entries.push({
     url: `${BASE}/learn`,
     lastModified: now,
