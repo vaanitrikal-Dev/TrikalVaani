@@ -3,8 +3,16 @@
  * 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER 🔱
  * ============================================================================
  * File:        app/sitemap.ts
- * Version:     v7.2
+ * Version:     v7.3
  * Owner:       Rohiit Gupta, Chief Vedic Architect
+ *
+ * Changes v7.2 → v7.3 (2026-06-16):
+ *   GEMSTONE: Added the Gemstone Suitability ecosystem (10 new URLs) to the
+ *             CALCULATORS array — 1 main suitability calculator + 9 stone-
+ *             specific "should I wear X" pages (neelam, cats-eye, pukhraj,
+ *             gomed, moonga, panna, moti, manik, heera). Calculator total 18 → 28.
+ *   NOTE:     CALCULATORS is a manual list — every NEW calculator must be added
+ *             here or it will be missing from the sitemap.
  *
  * Changes v7.1 → v7.2 (2026-06-14):
  *   WIN 1: Compatibility Hindi — proper /hi/compatibility/[slug] URLs instead
@@ -67,6 +75,18 @@ const CALCULATORS = [
   'free-kaal-sarp-dosh-calculator',
   'free-pitra-dosh-calculator',
   'free-gemstone-calculator',
+  // ── Gemstone Suitability ecosystem (v7.3) ──
+  'free-gemstone-suitability-calculator',
+  'free-should-i-wear-neelam',
+  'free-should-i-wear-cats-eye',
+  'free-should-i-wear-pukhraj',
+  'free-should-i-wear-gomed',
+  'free-should-i-wear-moonga',
+  'free-should-i-wear-panna',
+  'free-should-i-wear-moti',
+  'free-should-i-wear-manik',
+  'free-should-i-wear-heera',
+  // ────────────────────────────────────────────
   'free-numerology-calculator',
   'free-baby-name-by-nakshatra',
   'free-lucky-day-calculator',
