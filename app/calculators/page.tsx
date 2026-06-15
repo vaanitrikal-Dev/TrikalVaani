@@ -1,21 +1,19 @@
 // ============================================================
 // File: app/calculators/page.tsx
 // Purpose: Calculators Hub — SEO/GEO/AEO landing page
-// Version: v3.3 — 10 NEW calculators added (total 18) + brand + EEAT
+// Version: v3.4 — Gemstone Suitability ecosystem added (total 28)
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
-// Date: 2026-06-02
+// Date: 2026-06-16
 // ============================================================
-// CHANGES vs v3.2:
-//   ✅ Added 10 new calculators to CALCULATORS array:
-//      Lucky Day, Weak Planet Finder, Graha Bal, Kundali Strength,
-//      Lagna Bal, Kaal Sarp Dosh, Gemstone, Pitra Dosh, Numerology,
-//      Baby Name by Nakshatra. (Count/GEO/FAQ auto-update — dynamic.)
-//   ✅ BRAND FIX: visible text + schema name/title/OG now "Trikaal Vaani"
-//      (double-a). Per CEO-locked rule — legalName stays "Trikal Vaani".
-//   ✅ EEAT: CollectionPage creator now @id-linked to #organization +
-//      worksFor; added publisher Organization with REAL sameAs
-//      (Instagram / YouTube / Facebook — verified from homepage).
-//   ✅ ALL OTHER LOGIC: identical to v3.2.
+// CHANGES vs v3.3:
+//   ✅ Added 10 Gemstone Suitability calculators to CALCULATORS array:
+//      Gemstone Suitability (main) + 9 "Should I Wear X" pages
+//      (Neelam, Cat's Eye, Pukhraj, Gomed, Moonga, Panna, Moti, Manik, Heera).
+//      Count / schema hasPart / cards auto-update (dynamic). 18 → 28.
+//   ✅ GEO intro prose now EXCLUDES the granular "Should I Wear X" pages
+//      (via PROSE_CALCULATORS filter) so the intro sentence stays clean —
+//      the count (28) and schema still include all 28.
+//   ✅ ALL OTHER LOGIC: identical to v3.3.
 // ============================================================
 
 import type { Metadata } from 'next';
@@ -36,15 +34,16 @@ const REAL_SAMEAS = [
 
 export const metadata: Metadata = {
   title: {
-    absolute: 'Free Vedic Astrology Calculators — Kundli, Dasha, Nakshatra, Dosha & More | Trikaal Vaani',
+    absolute: 'Free Vedic Astrology Calculators — Kundli, Dasha, Nakshatra, Dosha, Gemstone & More | Trikaal Vaani',
   },
   description:
-    'Free Vedic astrology calculators powered by Swiss Ephemeris. Get accurate Kundli, Dasha, Nakshatra, Rashi, Lagna, Sade Sati, Manglik & Kaal Sarp Dosh, Gemstone, Numerology and Baby Name results instantly. By Rohiit Gupta, Chief Vedic Architect.',
+    'Free Vedic astrology calculators powered by Swiss Ephemeris. Get accurate Kundli, Dasha, Nakshatra, Rashi, Lagna, Sade Sati, Manglik & Kaal Sarp Dosh, Gemstone Suitability, Numerology and Baby Name results instantly. By Rohiit Gupta, Chief Vedic Architect.',
   keywords: [
     'vedic astrology calculator', 'free kundli calculator', 'dasha calculator',
     'nakshatra calculator', 'rashi calculator', 'lagna calculator',
     'sade sati calculator', 'manglik dosh calculator', 'kaal sarp dosh calculator',
-    'pitra dosh calculator', 'gemstone calculator', 'numerology calculator',
+    'pitra dosh calculator', 'gemstone calculator', 'gemstone suitability calculator',
+    'should i wear neelam', 'should i wear pukhraj', 'numerology calculator',
     'baby name by nakshatra', 'kundali strength', 'graha bal calculator',
     'jyotish calculator', 'birth chart calculator',
   ],
@@ -123,7 +122,7 @@ const CALCULATORS = [
     badge: null,
     live: true,
   },
-  // ── 10 NEW calculators (v3.3) ──
+  // ── 10 calculators (v3.3) ──
   {
     slug: 'free-kaal-sarp-dosh-calculator',
     emoji: '🐍',
@@ -148,6 +147,88 @@ const CALCULATORS = [
     badge: 'New',
     live: true,
   },
+  // ── Gemstone Suitability ecosystem (v3.4) ──
+  {
+    slug: 'free-gemstone-suitability-calculator',
+    emoji: '💠',
+    name: 'Free Gemstone Suitability Calculator',
+    desc: 'Score all 9 gemstones 0–100 for your exact chart — functional benefic, Shadbala, dignity & afflictions — with a clear should-you-wear-it verdict.',
+    badge: 'New',
+    live: true,
+  },
+  {
+    slug: 'free-should-i-wear-neelam',
+    emoji: '🔵',
+    name: 'Should I Wear Neelam? (Blue Sapphire)',
+    desc: 'Free Vedic check for Blue Sapphire (Shani) — suitability score, risk level & verdict based on your Lagna.',
+    badge: null,
+    live: true,
+  },
+  {
+    slug: 'free-should-i-wear-cats-eye',
+    emoji: '🐈',
+    name: "Should I Wear Cat's Eye? (Lehsunia)",
+    desc: "Free Vedic check for Cat's Eye (Ketu) — node-based suitability, very-high-risk caution & expert verdict.",
+    badge: null,
+    live: true,
+  },
+  {
+    slug: 'free-should-i-wear-pukhraj',
+    emoji: '🟡',
+    name: 'Should I Wear Pukhraj? (Yellow Sapphire)',
+    desc: 'Free Vedic check for Yellow Sapphire (Guru) — is Jupiter a benefic for your Lagna? Score, risk & verdict.',
+    badge: null,
+    live: true,
+  },
+  {
+    slug: 'free-should-i-wear-gomed',
+    emoji: '🟠',
+    name: 'Should I Wear Gomed? (Hessonite)',
+    desc: 'Free Vedic check for Hessonite (Rahu) — node-based suitability, very-high-risk caution & verdict.',
+    badge: null,
+    live: true,
+  },
+  {
+    slug: 'free-should-i-wear-moonga',
+    emoji: '🔴',
+    name: 'Should I Wear Moonga? (Red Coral)',
+    desc: 'Free Vedic check for Red Coral (Mangal) — Mars suitability by your Lagna, with score, risk & verdict.',
+    badge: null,
+    live: true,
+  },
+  {
+    slug: 'free-should-i-wear-panna',
+    emoji: '🟢',
+    name: 'Should I Wear Panna? (Emerald)',
+    desc: 'Free Vedic check for Emerald (Budh) — Mercury suitability by your Lagna, with score & verdict.',
+    badge: null,
+    live: true,
+  },
+  {
+    slug: 'free-should-i-wear-moti',
+    emoji: '⚪',
+    name: 'Should I Wear Moti? (Pearl)',
+    desc: 'Free Vedic check for Pearl (Chandra) — Moon suitability by your Lagna, with score & verdict.',
+    badge: null,
+    live: true,
+  },
+  {
+    slug: 'free-should-i-wear-manik',
+    emoji: '❤️',
+    name: 'Should I Wear Manik? (Ruby)',
+    desc: 'Free Vedic check for Ruby (Surya) — Sun suitability by your Lagna, with score & verdict.',
+    badge: null,
+    live: true,
+  },
+  {
+    slug: 'free-should-i-wear-heera',
+    emoji: '💍',
+    name: 'Should I Wear Heera? (Diamond)',
+    desc: 'Free Vedic check for Diamond (Shukra) — Venus suitability by your Lagna, with score & verdict.',
+    badge: null,
+    live: true,
+  },
+  // ────────────────────────────────────────────
   {
     slug: 'free-numerology-calculator',
     emoji: '🔢',
@@ -208,8 +289,10 @@ const CALCULATORS = [
 
 // ── Dynamic helpers (auto-update when CALCULATORS changes) ──
 const CALC_COUNT = CALCULATORS.length;
-// Short names for GEO/FAQ prose, e.g. "Kundli, Dasha, ... and Child Birth Muhurat"
-const CALC_SHORT_NAMES = CALCULATORS.map((c) =>
+// Prose list excludes the granular "Should I Wear X" pages so the GEO intro
+// stays clean. They still render as cards + appear in schema + count.
+const PROSE_CALCULATORS = CALCULATORS.filter((c) => !c.slug.startsWith('free-should-i-wear-'));
+const CALC_SHORT_NAMES = PROSE_CALCULATORS.map((c) =>
   c.name.replace(/^Free\s+/, '').replace(/\s+Calculator$/, '')
 );
 const CALC_LIST_TEXT =
@@ -299,7 +382,7 @@ export default function CalculatorsHubPage() {
 
           <div className="rounded-xl p-5 mb-8" style={{ background: 'rgba(212,175,55,0.06)', border: `1px solid ${GOLD_RGBA(0.2)}` }}>
             <p className="text-base md:text-lg leading-relaxed">
-              <strong style={{ color: GOLD }}>Trikaal Vaani offers {CALC_COUNT} free Vedic astrology calculators</strong> — {CALC_LIST_TEXT}. All powered by Swiss Ephemeris (NASA-grade accuracy), Lahiri Ayanamsha, and BPHS classical rules. No signup. No payment. Instant results.
+              <strong style={{ color: GOLD }}>Trikaal Vaani offers {CALC_COUNT} free Vedic astrology calculators</strong> — {CALC_LIST_TEXT}, plus dedicated "Should I Wear" suitability checks for all 9 gemstones. All powered by Swiss Ephemeris (NASA-grade accuracy), Lahiri Ayanamsha, and BPHS classical rules. No signup. No payment. Instant results.
             </p>
           </div>
 
