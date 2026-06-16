@@ -135,6 +135,11 @@ export default function FocusedStonePage({ config }: { config: FocusedStoneConfi
                     <DetailCell icon="🕉️" label="Mantra" value={target.info.mantra} />
                   </div>
                 )}
+                {target.gate !== 'M' && target.info.upratna && (
+                  <p className="mt-3 text-xs text-slate-400 text-left">
+                    💠 <strong style={{ color: GOLD }}>Upratna (sasta / milder vikalp):</strong> {target.info.upratna}
+                  </p>
+                )}
                 {target.risk >= 15 && (
                   <div className="mt-4 text-xs rounded-lg p-3 text-left" style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', color: '#FCA5A5' }}>
                     ⚠️ Yeh ek strong ratna hai. Score chahe jo ho, ise bina jaankaar astrologer ki salaah aur 3-din trial ke NA pehnein.
