@@ -141,6 +141,11 @@ export default function GemstoneSuitabilityPage() {
                     <DetailCell icon="📅" label="Day" value={primary.info.day} />
                     <DetailCell icon="🕉️" label="Mantra" value={primary.info.mantra} />
                   </div>
+                  {primary.info.upratna && (
+                    <p className="mt-3 text-xs text-slate-400 text-left">
+                      💠 <strong style={{ color: GOLD }}>Upratna (sasta / milder vikalp):</strong> {primary.info.upratna}
+                    </p>
+                  )}
                 </div>
               ) : (
                 <div className="rounded-2xl p-6 text-center" style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid ${GOLD_RGBA(0.25)}` }}>
