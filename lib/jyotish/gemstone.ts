@@ -1,6 +1,6 @@
 // ============================================================
 // File: lib/jyotish/gemstone.ts
-// Version: v2.0 — Gemologist Brain (pure chart-based, no user feedback)
+// Version: v2.1 — Gemologist Brain + Rule 8 Combustion (pure chart-based)
 // Single source of truth for all gemstone pages.
 //
 // LOGICAL BASE: strength (Shadbala ratio, inverted) + dignity + house + dasha.
@@ -17,8 +17,11 @@
 //   7. Papakartari             — planet hemmed by malefics → mild (skipped if YK).
 //   RISK is a VERDICT CAP, not a score penalty (strong stones → Expert Review).
 // Validated against a full 9-stone real-life test chart (all 9 matched).
-// NOTE: Combustion / temporal-friendship / avastha need planetary DEGREES,
-//       which the API does not yet expose → planned for v2.1 (VM passthrough).
+//   8. Combustion (astangata)  — planet too close to Sun (degree-gap) → burnt,
+//      its stone weakened → penalty + Trial cap. Retro limits handled.
+// NOTE: Combustion needs planetary DEGREES → requires route v1.8 passthrough
+//       (planets[].longitude). If absent, combustion safely skips (no change).
+//       Temporal-friendship / avastha = future v2.2.
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
 // ============================================================
 
@@ -55,6 +58,11 @@ const NAT_BEN = ['Jupiter', 'Venus', 'Mercury', 'Moon'];
 const NAT_MAL = ['Sun', 'Mars', 'Saturn', 'Rahu', 'Ketu'];
 const MKS: Record<string, number> = { Sun: 12, Moon: 8, Mars: 7, Mercury: 7, Jupiter: 3, Venus: 6, Saturn: 1, Rahu: 9 };
 const MA: Record<string, number[]> = { Sun: [6], Mars: [3, 6, 7], Saturn: [2, 6, 9], Rahu: [4, 6, 8], Ketu: [4, 6, 8] };
+// Rule 8: combustion (astangata) limits — degree-gap from Sun; retro = tighter
+const COMBUST: Record<string, { normal: number; retro: number }> = {
+  Moon: { normal: 12, retro: 12 }, Mars: { normal: 17, retro: 17 }, Mercury: { normal: 14, retro: 12 },
+  Jupiter: { normal: 11, retro: 11 }, Venus: { normal: 10, retro: 8 }, Saturn: { normal: 15, retro: 15 },
+};
 
 function houseOf(signEn: string, lagnaEn: string): number {
   return ((SIGNS.indexOf(signEn) - SIGNS.indexOf(lagnaEn) + 12) % 12) + 1;
@@ -173,6 +181,8 @@ export function runEngine(data: any): EngineResult | null {
   const planets: any[] = (data?.planets || []).map((p: any) => ({ ...p, signEn: toEn(p.sign) }));
   const rahu = planets.find((p) => p.planet === 'Rahu');
   const ketu = planets.find((p) => p.planet === 'Ketu');
+  const sun = planets.find((p) => p.planet === 'Sun');
+  const sunLon = typeof sun?.longitude === 'number' ? sun.longitude : null;
 
   const stones: StoneResult[] = [];
   for (const graha of Object.keys(STONE)) {
@@ -209,6 +219,13 @@ export function runEngine(data: any): EngineResult | null {
       if (rahu && p.signEn === rahu.signEn) { score -= 10; flags.push('Rahu-conjunct'); }
       if (ketu && p.signEn === ketu.signEn) { score -= 10; flags.push('Ketu-conjunct'); }
       if (maleficAspectCount(p.house, planets) >= 2) { score -= 8; flags.push('malefic aspects'); }
+      // Rule 8: combustion (astangata) — only if degrees available (route v1.8+)
+      if (graha !== 'Sun' && sunLon != null && typeof p.longitude === 'number' && COMBUST[graha]) {
+        let gap = Math.abs(p.longitude - sunLon) % 360;
+        if (gap > 180) gap = 360 - gap;
+        const thr = p.is_retrograde ? COMBUST[graha].retro : COMBUST[graha].normal;
+        if (gap < thr) { score -= 15; caps.push('trial'); flags.push(`combust (${gap.toFixed(1)}° from Sun)`); }
+      }
     }
     if (graha === MD) { score += 8; flags.push('Mahadasha'); }         // S6
     if (graha === AD) { score += 4; flags.push('Antardasha'); }
@@ -254,7 +271,7 @@ export function reasonHi(s: StoneResult, lagna: string): string {
   const dl = f.find((x) => x.startsWith('dispositor'));
   if (dl) bits.push(dl);
   let txt = bits.join(', ') + '. ';
-  const aff = f.filter((x) => ['Rahu-conjunct', 'Ketu-conjunct', 'malefic aspects', 'maraka', 'badhakesh', 'papakartari', '12th (vyaya) lord', '6th (ripu) lord'].some((k) => x.includes(k)));
+  const aff = f.filter((x) => ['Rahu-conjunct', 'Ketu-conjunct', 'malefic aspects', 'maraka', 'badhakesh', 'papakartari', 'combust', '12th (vyaya) lord', '6th (ripu) lord'].some((k) => x.includes(k)));
   if (aff.length) txt += `Dhyaan: ${aff.join(', ')}. `;
   if (s.risk >= 15) txt += `Yeh strong ratna hai — verdict suraksha ke liye "Expert Review" tak seemit. `;
   txt += `Final: ${s.score}/100 — ${s.verdictLabel}.`;
