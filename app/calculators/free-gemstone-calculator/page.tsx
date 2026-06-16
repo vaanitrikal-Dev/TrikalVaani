@@ -2,12 +2,13 @@
 
 // ============================================================
 // File: app/calculators/free-gemstone-calculator/page.tsx
-// Version: v1.0 — Free Gemstone (Ratna) Calculator
+// Version: v1.1 — Free Gemstone (Ratna) Calculator
+//   v1.1: BRIDGE to the new Gemstone Suitability Calculator —
+//         result now carries a prominent "is this safe?" banner +
+//         CTA, Life Stone overclaim softened, related grid + 1 FAQ
+//         added. Resolves the contradiction between this (Lagna-swami
+//         overview) and the deep 8-niyam suitability engine.
 // API: /api/calc/kundali (calcType: 'gemstone') — already live
-// ⭐ GOLD-STANDARD SEO/GEO/AEO/EEAT TEMPLATE:
-//   Full @graph: Organization(real sameAs) + WebSite + Person(@id, linkable
-//   author) + WebPage(isPartOf→#website) + BreadcrumbList + WebApplication
-//   + HowTo + FAQPage. Use this schema pattern for all calculators.
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
 // ============================================================
 
@@ -18,7 +19,6 @@ import SiteNav from '@/components/layout/SiteNav';
 const GOLD = '#D4AF37';
 const GOLD_RGBA = (a: number) => `rgba(212,175,55,${a})`;
 
-// Shared brand entities (real, verified from homepage)
 const ORG_ID = 'https://trikalvaani.com/#organization';
 const WEBSITE_ID = 'https://trikalvaani.com/#website';
 const AUTHOR_ID = 'https://trikalvaani.com/#rohiit-gupta';
@@ -212,13 +212,14 @@ function CityInput({ id, value, onSelect, error }: {
 
 const FAQS = [
   { q: 'Mera lucky gemstone (ratna) kaunsa hai?', a: 'Aapka mukhya "Life Stone" aapke Lagna (ascendant) ke swami graha ka ratna hota hai. Trikaal Vaani Swiss Ephemeris se aapka lagna aur lagna-swami nikaalta hai, phir uska ratna (jaise Lagna swami Guru ho to Pukhraj) batata hai — saath mein metal, ungli, din aur mantra.' },
-  { q: 'Life Stone (Lagna Ratna) kya hota hai?', a: 'Life Stone aapke Lagna ke swami graha ka ratna hai — ise jeevan-bhar dharan kiya ja sakta hai kyunki yeh aapke lagna (self, vyaktitva, swasthya) ko balshali karta hai. Yeh sabse surakshit aur mukhya ratna sujhav mana jaata hai.' },
+  { q: 'Is calculator aur "Gemstone Suitability Calculator" mein kya farak hai?', a: 'Yeh calculator aapka mukhya Life Stone (Lagna-swami ka ratna) batata hai — ek quick overview. Gemstone Suitability Calculator usse aage jaakar har ratna ko 0–100 score deta hai: functional benefic/malefic, Shadbala, dushthana (8th lord), combustion aur risk check karke batata hai ki konsa ratna aapke liye safe hai ya avoid karein. Ratna pehnne se pehle suitability calculator zaroor use karein.' },
+  { q: 'Life Stone (Lagna Ratna) kya hota hai?', a: 'Life Stone aapke Lagna ke swami graha ka ratna hai — aam taur par yeh sabse mukhya sujhav mana jaata hai kyunki yeh aapke lagna (self, vyaktitva, swasthya) ko balshali karta hai. Phir bhi, pehnne se pehle suitability (functional nature, bal, dushthana, combustion) check karna zaroori hai.' },
   { q: 'Konsa ratna kis graha ka hai?', a: 'Surya–Manik (Ruby), Chandra–Moti (Pearl), Mangal–Moonga (Red Coral), Budh–Panna (Emerald), Guru–Pukhraj (Yellow Sapphire), Shukra–Heera (Diamond), Shani–Neelam (Blue Sapphire), Rahu–Gomed (Hessonite), Ketu–Lehsunia (Cat\'s Eye).' },
-  { q: 'Kya Neelam (Blue Sapphire) pehnana safe hai?', a: 'Neelam (Shani), Gomed (Rahu) aur Lehsunia (Ketu) bahut "strong" ratna hain — yeh bina jaankaar astrologer ki salaah ke nahi pehne jaate, aur 3 din ka trial zaroori hai. Galat dharan haani kar sakta hai. Pukhraj, Manik, Moti, Moonga, Panna aam taur par shubh aur surakshit mane jaate hain.' },
+  { q: 'Kya Neelam (Blue Sapphire) pehnana safe hai?', a: 'Neelam (Shani), Gomed (Rahu) aur Lehsunia (Ketu) bahut "strong" ratna hain — yeh bina jaankaar astrologer ki salaah ke nahi pehne jaate, aur 3 din ka trial zaroori hai. Galat dharan haani kar sakta hai. Apne liye check karne ke liye Gemstone Suitability Calculator use karein.' },
   { q: 'Gemstone kaise pehnein — metal, ungli, din?', a: 'Har ratna ka apna metal (jaise Pukhraj-sona), ungli (Pukhraj-tarjani/index), aur din (Pukhraj-guruvar) hota hai. Shukla paksha mein, us graha ke din, subah snan ke baad, ratna ko doodh/gangajal se shuddh karke, mantra jaap ke saath dharan karte hain. Calculator aapko aapke ratna ke ye details deta hai.' },
   { q: 'Kitne carat / ratti ka ratna pehnein?', a: 'Aam taur par body-weight aur ratna ke hisaab se ~1 ratti per 10-12 kg (motbhed hai) sujhaya jaata hai, par sahi weight individual chart par nirbhar karta hai. Original, certified (lab-tested), bina daag wala stone hi lein, aur weight expert se confirm karein.' },
   { q: 'Kya ye Gemstone Calculator free hai?', a: 'Haan, 100% free. Aapka Lagna, Lagna swami, Life Stone, current mahadasha ka ratna, metal/ungli/din/mantra aur caution — sab bilkul free.' },
-  { q: 'Result kitne accurate hain?', a: 'Trikaal Vaani Swiss Ephemeris (NASA-grade) se Lahiri Ayanamsha ke saath aapka lagna aur graha positions exact nikaalta hai — 99.9% astronomical accuracy. Ratna sujhav classical Jyotish niyamon (Lagna swami + Mahadasha) par aadharit hain.' },
+  { q: 'Result kitne accurate hain?', a: 'Trikaal Vaani Swiss Ephemeris (NASA-grade) se Lahiri Ayanamsha ke saath aapka lagna aur graha positions exact nikaalta hai — 99.9% astronomical accuracy. Yeh page Lagna-swami aadharit overview deta hai; deep suitability ke liye Gemstone Suitability Calculator use karein.' },
 ];
 
 export default function FreeGemstoneCalculatorPage() {
@@ -278,7 +279,6 @@ export default function FreeGemstoneCalculatorPage() {
     }
   };
 
-  // ─── Result extraction ──────────────────────────────────────
   const lagna: string | null = result?.instant?.lagna || null;
   const lagnaLordRaw: string | null = result?.instant?.lagna_lord || null;
   const mahadashaRaw: string | null = result?.dasha?.mahadasha || result?.instant?.current_dasha || null;
@@ -297,97 +297,38 @@ export default function FreeGemstoneCalculatorPage() {
     colorScheme: 'dark' as const,
   });
 
-  // ─── JSON-LD (GOLD-STANDARD @graph) ─────────────────────────
   const PAGE_URL = 'https://trikalvaani.com/calculators/free-gemstone-calculator';
   const jsonLd = {
     '@context': 'https://schema.org',
     '@graph': [
-      {
-        '@type': 'Organization',
-        '@id': ORG_ID,
-        name: 'Trikaal Vaani',
-        legalName: 'Trikal Vaani',
-        url: 'https://trikalvaani.com',
-        sameAs: REAL_SAMEAS,
-      },
-      {
-        '@type': 'WebSite',
-        '@id': WEBSITE_ID,
-        name: 'Trikaal Vaani',
-        url: 'https://trikalvaani.com',
-        publisher: { '@id': ORG_ID },
-        inLanguage: 'en-IN',
-      },
-      {
-        '@type': 'Person',
-        '@id': AUTHOR_ID,
-        name: 'Rohiit Gupta',
-        url: 'https://trikalvaani.com',
-        jobTitle: 'Chief Vedic Architect',
-        worksFor: { '@id': ORG_ID },
-        knowsAbout: ['Vedic Astrology', 'Jyotish Shastra', 'Gemstone Astrology (Ratna Vigyan)', 'Kundali Analysis', 'Lal Kitab'],
-      },
-      {
-        '@type': 'WebPage',
-        '@id': `${PAGE_URL}#webpage`,
-        url: PAGE_URL,
+      { '@type': 'Organization', '@id': ORG_ID, name: 'Trikaal Vaani', legalName: 'Trikal Vaani', url: 'https://trikalvaani.com', sameAs: REAL_SAMEAS },
+      { '@type': 'WebSite', '@id': WEBSITE_ID, name: 'Trikaal Vaani', url: 'https://trikalvaani.com', publisher: { '@id': ORG_ID }, inLanguage: 'en-IN' },
+      { '@type': 'Person', '@id': AUTHOR_ID, name: 'Rohiit Gupta', url: 'https://trikalvaani.com', jobTitle: 'Chief Vedic Architect', worksFor: { '@id': ORG_ID },
+        knowsAbout: ['Vedic Astrology', 'Jyotish Shastra', 'Gemstone Astrology (Ratna Vigyan)', 'Kundali Analysis', 'Lal Kitab'] },
+      { '@type': 'WebPage', '@id': `${PAGE_URL}#webpage`, url: PAGE_URL,
         name: 'Free Gemstone Calculator — Your Lucky Ratna by Date of Birth',
         description: 'Find your lucky gemstone (life stone) based on your ascendant lord, with metal, finger, day and mantra to wear it. Free Vedic Ratna calculator by Trikaal Vaani.',
-        inLanguage: 'en-IN',
-        dateModified: '2026-06-02',
-        isPartOf: { '@id': WEBSITE_ID },
-        author: { '@id': AUTHOR_ID },
-        publisher: { '@id': ORG_ID },
+        inLanguage: 'en-IN', dateModified: '2026-06-17', isPartOf: { '@id': WEBSITE_ID }, author: { '@id': AUTHOR_ID }, publisher: { '@id': ORG_ID },
         breadcrumb: { '@id': `${PAGE_URL}#breadcrumb` },
-        about: [
-          { '@type': 'Thing', name: 'Gemstone Astrology' },
-          { '@type': 'Thing', name: 'Yellow Sapphire' },
-          { '@type': 'Thing', name: 'Ascendant Lord' },
-        ],
-        speakable: { '@type': 'SpeakableSpecification', cssSelector: ['h1', '.tv-aeo-answer'] },
-      },
-      {
-        '@type': 'BreadcrumbList',
-        '@id': `${PAGE_URL}#breadcrumb`,
-        itemListElement: [
-          { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://trikalvaani.com' },
-          { '@type': 'ListItem', position: 2, name: 'Calculators', item: 'https://trikalvaani.com/calculators' },
-          { '@type': 'ListItem', position: 3, name: 'Free Gemstone Calculator', item: PAGE_URL },
-        ],
-      },
-      {
-        '@type': 'WebApplication',
-        '@id': `${PAGE_URL}#app`,
-        name: 'Free Gemstone (Ratna) Calculator',
-        url: PAGE_URL,
-        applicationCategory: 'LifestyleApplication',
-        operatingSystem: 'All',
-        browserRequirements: 'Requires JavaScript',
-        offers: { '@type': 'Offer', price: '0', priceCurrency: 'INR' },
-        provider: { '@id': ORG_ID },
-        featureList: 'Life stone by ascendant lord, mahadasha gemstone, metal, finger, day & mantra',
-      },
-      {
-        '@type': 'HowTo',
-        '@id': `${PAGE_URL}#howto`,
-        name: 'How to find your lucky gemstone by date of birth',
-        description: 'Find your Vedic life gemstone using your birth details and ascendant lord.',
-        totalTime: 'PT1M',
+        about: [{ '@type': 'Thing', name: 'Gemstone Astrology' }, { '@type': 'Thing', name: 'Yellow Sapphire' }, { '@type': 'Thing', name: 'Ascendant Lord' }],
+        speakable: { '@type': 'SpeakableSpecification', cssSelector: ['h1', '.tv-aeo-answer'] } },
+      { '@type': 'BreadcrumbList', '@id': `${PAGE_URL}#breadcrumb`, itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://trikalvaani.com' },
+        { '@type': 'ListItem', position: 2, name: 'Calculators', item: 'https://trikalvaani.com/calculators' },
+        { '@type': 'ListItem', position: 3, name: 'Free Gemstone Calculator', item: PAGE_URL },
+      ] },
+      { '@type': 'WebApplication', '@id': `${PAGE_URL}#app`, name: 'Free Gemstone (Ratna) Calculator', url: PAGE_URL,
+        applicationCategory: 'LifestyleApplication', operatingSystem: 'All', browserRequirements: 'Requires JavaScript',
+        offers: { '@type': 'Offer', price: '0', priceCurrency: 'INR' }, provider: { '@id': ORG_ID },
+        featureList: 'Life stone by ascendant lord, mahadasha gemstone, metal, finger, day & mantra' },
+      { '@type': 'HowTo', '@id': `${PAGE_URL}#howto`, name: 'How to find your lucky gemstone by date of birth',
+        description: 'Find your Vedic life gemstone using your birth details and ascendant lord.', totalTime: 'PT1M',
         step: [
           { '@type': 'HowToStep', position: 1, name: 'Enter birth details', text: 'Enter your full name, date of birth, exact time of birth and place of birth.' },
           { '@type': 'HowToStep', position: 2, name: 'Calculate the chart', text: 'The calculator computes your ascendant (lagna) and its ruling planet using Swiss Ephemeris with Lahiri Ayanamsha.' },
           { '@type': 'HowToStep', position: 3, name: 'Get your gemstone', text: 'See your life gemstone (the ascendant lord\'s stone) along with the metal, finger, day and mantra recommended to wear it.' },
-        ],
-      },
-      {
-        '@type': 'FAQPage',
-        '@id': `${PAGE_URL}#faq`,
-        mainEntity: FAQS.map(f => ({
-          '@type': 'Question',
-          name: f.q,
-          acceptedAnswer: { '@type': 'Answer', text: f.a },
-        })),
-      },
+        ] },
+      { '@type': 'FAQPage', '@id': `${PAGE_URL}#faq`, mainEntity: FAQS.map(f => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })) },
     ],
   };
 
@@ -535,7 +476,7 @@ export default function FreeGemstoneCalculatorPage() {
                   <div className="text-xs uppercase tracking-widest text-slate-400 mb-2">Your Life Stone (Lagna Ratna)</div>
                   <div className="text-5xl mb-2">💎</div>
                   <div className="text-3xl md:text-4xl font-serif font-bold mb-1" style={{ color: GOLD }}>{lifeGem.stone} <span className="text-2xl text-slate-300">({lifeGem.hi})</span></div>
-                  <div className="text-sm text-slate-300">Lagna swami <strong style={{ color: GOLD }}>{lagnaLordRaw} ({lifeGem.planet_hi})</strong> ka ratna — jeevan-bhar dharan ke liye sabse uttam aur surakshit.</div>
+                  <div className="text-sm text-slate-300">Lagna swami <strong style={{ color: GOLD }}>{lagnaLordRaw} ({lifeGem.planet_hi})</strong> ka ratna — aam taur par sabse mukhya sujhav. <span style={{ color: '#fbbf24' }}>Pehnne se pehle suitability zaroor check karein.</span></div>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-5 text-left">
                     <DetailCell icon="🔗" label="Metal" value={lifeGem.metal} />
                     <DetailCell icon="✋" label="Finger" value={lifeGem.finger} />
@@ -552,6 +493,17 @@ export default function FreeGemstoneCalculatorPage() {
                 </div>
               )}
 
+              {/* BRIDGE → Gemstone Suitability Calculator (resolves the "is it safe?" gap) */}
+              <div className="rounded-2xl p-5 md:p-6 text-center" style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.35)' }}>
+                <p className="text-sm text-amber-200/90 mb-1">⚠️ Yeh sujhav sirf aapke <strong>Lagna-swami</strong> par aadharit hai — yeh nahi batata ki yeh ratna aapke liye <strong>safe</strong> hai ya nahi.</p>
+                <p className="text-sm text-slate-300 mb-3">Kya aapko yeh ratna <strong>pehnna chahiye</strong>? Functional benefic/malefic, dushthana (8th lord), combustion aur risk — sab 0–100 score ke saath check karein:</p>
+                <Link href="/calculators/free-gemstone-suitability-calculator"
+                  className="inline-block px-6 py-3 rounded-xl font-bold text-sm"
+                  style={{ background: `linear-gradient(135deg,rgba(212,175,55,0.85) 0%,${GOLD} 100%)`, color: '#080B12' }}>
+                  💠 Check Gemstone Suitability (0–100) →
+                </Link>
+              </div>
+
               {/* PERIOD STONE */}
               {periodGem && (
                 <div className="rounded-2xl p-5 md:p-7" style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid ${GOLD_RGBA(0.25)}` }}>
@@ -559,7 +511,7 @@ export default function FreeGemstoneCalculatorPage() {
                     {samePlanet ? '✨ Bonus: Yahi ratna aapke current period ke liye bhi' : '⏳ Current Period Stone (Mahadasha Ratna)'}
                   </h3>
                   {samePlanet ? (
-                    <p className="text-sm text-slate-300">Sanyog se aapki current Mahadasha bhi <strong style={{ color: GOLD }}>{mahadashaRaw}</strong> ki hai — yani <strong style={{ color: GOLD }}>{periodGem.stone} ({periodGem.hi})</strong> aapke Life Stone aur current period dono ke liye uttam hai. Double benefit. 💎</p>
+                    <p className="text-sm text-slate-300">Sanyog se aapki current Mahadasha bhi <strong style={{ color: GOLD }}>{mahadashaRaw}</strong> ki hai — yani <strong style={{ color: GOLD }}>{periodGem.stone} ({periodGem.hi})</strong> aapke Life Stone aur current period dono ke liye sujhaya jaata hai. 💎</p>
                   ) : (
                     <>
                       <p className="text-sm text-slate-300 mb-3">
@@ -582,7 +534,7 @@ export default function FreeGemstoneCalculatorPage() {
               {/* GLOBAL CAUTION */}
               {anyHighCaution && (
                 <div className="rounded-xl p-4 text-sm" style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.3)', color: '#FCA5A5' }}>
-                  ⚠️ <strong>Mahatvapurna:</strong> Aapke sujhav mein ek "strong" ratna (Neelam/Gomed/Lehsunia) hai. Aise ratna kabhi bhi bina jaankaar astrologer ki salaah aur 3-din trial ke nahi pehne jaate. Trikaal Vaani se poora gemstone consultation lekar hi dharan karein.
+                  ⚠️ <strong>Mahatvapurna:</strong> Aapke sujhav mein ek "strong" ratna (Neelam/Gomed/Lehsunia) hai. Aise ratna kabhi bhi bina jaankaar astrologer ki salaah aur 3-din trial ke nahi pehne jaate. Pehle Gemstone Suitability Calculator se check karein.
                 </div>
               )}
 
@@ -603,10 +555,10 @@ export default function FreeGemstoneCalculatorPage() {
           <section className="mt-16 prose prose-invert max-w-none">
             <h2 className="text-2xl font-serif font-bold mb-4" style={{ color: GOLD }}>Lucky Gemstone Kaise Chuna Jaata Hai?</h2>
             <p className="text-slate-300 leading-relaxed mb-4">
-              Vedic Jyotish mein sabse mukhya ratna <strong style={{ color: GOLD }}>Life Stone (Lagna Ratna)</strong> hota hai — yeh aapke <strong>Lagna (ascendant) ke swami graha</strong> ka ratna hai. Kyunki Lagna self, swasthya aur poore jeevan ka aadhar hai, iska swami balshali hone par poori kundali ko sahara milta hai. Isliye Lagna swami ka ratna jeevan-bhar dharan kiya ja sakta hai aur sabse surakshit mana jaata hai.
+              Vedic Jyotish mein sabse mukhya ratna <strong style={{ color: GOLD }}>Life Stone (Lagna Ratna)</strong> hota hai — yeh aapke <strong>Lagna (ascendant) ke swami graha</strong> ka ratna hai. Kyunki Lagna self, swasthya aur poore jeevan ka aadhar hai, iska swami balshali hone par poori kundali ko sahara milta hai. Isliye Lagna swami ka ratna aam taur par sabse mukhya sujhav mana jaata hai.
             </p>
             <p className="text-slate-300 leading-relaxed mb-4">
-              Doosra tareeka chalti <strong style={{ color: GOLD }}>Mahadasha</strong> ke swami ka ratna hai — par yeh tabhi shubh hai jab wo graha aapki kundali mein shubh ho. Isliye dasha-ratna ya koi bhi "strong" ratna expert salaah ke baad hi pehnein.
+              Lekin sirf Lagna-swami kaafi nahi. Wo graha aapke liye <strong>functional benefic hai ya malefic</strong>, kisi <strong>dushthana (6/8/12)</strong> ka swami toh nahi, <strong>combust</strong> toh nahi — yeh sab dekhna zaroori hai. Isi liye ratna pehnne se pehle hamare <Link href="/calculators/free-gemstone-suitability-calculator" style={{ color: GOLD }}>Gemstone Suitability Calculator</Link> se poora 0–100 suitability check karein.
             </p>
 
             <h2 className="text-2xl font-serif font-bold mb-4 mt-8" style={{ color: GOLD }}>Navagraha — Ratna Table</h2>
@@ -654,7 +606,7 @@ export default function FreeGemstoneCalculatorPage() {
                   </tr>
                 </thead>
                 <tbody className="text-slate-300">
-                  <tr style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }}><td className="p-3">Basis</td><td className="p-3">Lagna swami + Mahadasha</td><td className="p-3 text-slate-500">Sun-sign / generic</td></tr>
+                  <tr style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }}><td className="p-3">Basis</td><td className="p-3">Lagna swami + Suitability engine</td><td className="p-3 text-slate-500">Sun-sign / generic</td></tr>
                   <tr style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }}><td className="p-3">Engine</td><td className="p-3">Swiss Ephemeris (NASA-grade)</td><td className="p-3 text-slate-500">Basic algorithm</td></tr>
                   <tr style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }}><td className="p-3">Safety Caution</td><td className="p-3" style={{ color: GOLD }}>✓ Strong-stone warnings</td><td className="p-3 text-slate-500">✗ Often missing</td></tr>
                   <tr style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }}><td className="p-3">Wearing Method</td><td className="p-3" style={{ color: GOLD }}>✓ Metal/finger/day/mantra</td><td className="p-3 text-slate-500">~ Partial</td></tr>
@@ -680,11 +632,11 @@ export default function FreeGemstoneCalculatorPage() {
             <h2 className="text-2xl font-serif font-bold mb-6" style={{ color: GOLD }}>Aur Bhi Free Calculators</h2>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
               {[
-                { slug: 'free-lagna-calculator', name: 'Lagna Calculator' },
+                { slug: 'free-gemstone-suitability-calculator', name: 'Gemstone Suitability' },
+                { slug: 'free-should-i-wear-neelam', name: 'Should I Wear Neelam?' },
+                { slug: 'free-should-i-wear-pukhraj', name: 'Should I Wear Pukhraj?' },
                 { slug: 'free-weak-planet-finder', name: 'Weak Planet Finder' },
                 { slug: 'free-graha-bal-calculator', name: 'Graha Bal Calculator' },
-                { slug: 'free-lucky-day-calculator', name: 'Lucky Day Calculator' },
-                { slug: 'free-kundali-strength-calculator', name: 'Kundali Strength' },
                 { slug: 'free-kundali-calculator', name: 'Kundli Calculator' },
               ].map((c) => (
                 <Link key={c.slug} href={`/calculators/${c.slug}`}
