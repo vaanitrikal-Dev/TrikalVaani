@@ -1,27 +1,27 @@
 // ============================================================
 // File: app/api/calc/kundali/route.ts
 // Purpose: VM bridge for Kundali / Nakshatra / Rashi / Lagna /
-//          Dasha + NEW Shadbala-based Calculators
-// Version: v1.7
+//          Dasha + Shadbala-based Calculators
+// Version: v1.8
+// Changelog v1.8 (2026-06-17):
+//   - Pass through planetary DEGREES for the Gemstone Engine v2.1
+//     (combustion / astangata): planets[].longitude + degree_in_sign.
+//     VM already returns these (confirmed) — pure passthrough.
+//   - FIX: VM returns `retrograde` (not `is_retrograde`). The old
+//     mapping read g.is_retrograde → always false. Now reads
+//     g.retrograde with fallback. Needed for retro combustion limits.
+//   - Also passes planets[].sign_en (English sign) for robustness.
+//   - Zero change to any other logic / calcType.
 // Changelog v1.7:
 //   - graha-bal now targets the WEAKEST planet for its remedy/Dos
-//     template (Graha Bal page strengthens the weak graha). The
-//     strongest planet is still surfaced via top-level
-//     `strongestPlanet` for the showcase/ranking. No other change.
+//     template. Strongest planet still surfaced via `strongestPlanet`.
 // Changelog v1.6:
-//   - Added new calcTypes: graha-bal, lucky-day, weak-planet,
+//   - Added calcTypes: graha-bal, lucky-day, weak-planet,
 //     kundali-strength, lagna-bal, shadbala, gemstone.
-//   - resolveTargetPlanet() now resolves strongest/weakest planet.
-//   - Response now passes through (for new calcs):
-//       planets[].strength, planets[].shadbala,
-//       top-level shadbala, strongestPlanet, weakestPlanet,
-//       strengthAvailable.
-//   - SYNTHESIZED REMEDY FALLBACK: if VM /kundali returns no
-//     remedies, the route builds 3 remedies + 3 Dos from the
-//     PLANET_REMEDY table for the target planet — applied ONLY
-//     to the new calcTypes. Existing calcTypes (kundali, dasha,
-//     nakshatra, rashi, lagna) behave EXACTLY as v1.5 (zero
-//     regression).
+//   - resolveTargetPlanet() resolves strongest/weakest planet.
+//   - Passthrough: planets[].strength, planets[].shadbala,
+//     top-level shadbala, strongestPlanet, weakestPlanet, strengthAvailable.
+//   - SYNTHESIZED REMEDY FALLBACK for new calcTypes only (zero regression).
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
 // ============================================================
 import { NextRequest, NextResponse } from 'next/server';
@@ -162,8 +162,7 @@ function buildTemplateFromVMRemedies(vmRemediesObj: any, planet: string | null):
   };
 }
 
-// ─── v1.6: Synthesize a template from PLANET_REMEDY when VM sends none ────────
-// Used ONLY for new calcTypes so the remedy section is never blank.
+// ─── Synthesize a template from PLANET_REMEDY when VM sends none ──────────────
 function synthesizeTemplate(planet: string | null): any {
   const pd = PLANET_REMEDY[planet ?? ''] ?? PLANET_REMEDY['Jupiter'];
   const p = planet || 'Graha';
@@ -195,11 +194,11 @@ function synthesizeTemplate(planet: string | null): any {
   };
 }
 
-// ─── v1.6: Effective strength for ranking (prefers VM strength) ───────────────
+// ─── Effective strength for ranking (prefers VM strength) ─────────────────────
 function planetStrength(g: any): number | null {
   if (typeof g?.strength === 'number') return g.strength;
   const ratio = g?.shadbala?.ratio;
-  if (typeof ratio === 'number') return ratio; // relative ranking still valid
+  if (typeof ratio === 'number') return ratio;
   return null;
 }
 
@@ -247,7 +246,7 @@ export async function POST(req: NextRequest) {
     const moonGraha = kundaliData?.grahas?.find((g: any) => g.planet === 'Moon');
     const lagnaLord = kundaliData?.lagna?.sign_lord ?? null;
 
-    // ── v1.6: Strongest / weakest planet (excludes Rahu/Ketu) ──
+    // ── Strongest / weakest planet (excludes Rahu/Ketu) ──
     const grahas = kundaliData?.grahas ?? [];
     const realPlanets = grahas.filter((g: any) => !['Rahu', 'Ketu'].includes(g.planet));
     const sorted = [...realPlanets].sort((a, b) => (planetStrength(b) ?? 0) - (planetStrength(a) ?? 0));
@@ -262,7 +261,7 @@ export async function POST(req: NextRequest) {
     // Pass full remedies object — includes remedies array + actionWindows
     let templateData = buildTemplateFromVMRemedies(kundaliData?.remedies ?? {}, targetPlanet);
 
-    // v1.6: synthesize remedies for NEW calc types if VM returned none
+    // synthesize remedies for NEW calc types if VM returned none
     if (!templateData && isNewCalc) {
       templateData = synthesizeTemplate(targetPlanet);
     }
@@ -288,13 +287,17 @@ export async function POST(req: NextRequest) {
       planets: (kundaliData.grahas || []).map((g: any) => ({
         planet: g.planet,
         sign: g.sign,
+        sign_en: g.sign_en ?? null,
         house: g.house,
         nakshatra: g.nakshatra,
-        is_retrograde: g.is_retrograde || false,
+        // v1.8 FIX: VM field is `retrograde` (was reading is_retrograde → always false)
+        is_retrograde: g.retrograde ?? g.is_retrograde ?? false,
         dignity: g.dignity || null,
-        // ── v1.6 passthrough ──
         strength: typeof g.strength === 'number' ? g.strength : null,
         shadbala: g.shadbala ?? null,
+        // ── v1.8: degrees for combustion (Gemstone Engine v2.1) ──
+        longitude: typeof g.longitude === 'number' ? g.longitude : null,
+        degree_in_sign: typeof g.degree_in_sign === 'number' ? g.degree_in_sign : null,
       })),
       houses: (kundaliData.houses || []).map((h: any) => ({
         house: h.house,
@@ -304,7 +307,6 @@ export async function POST(req: NextRequest) {
         mahadasha: currentMahadasha,
         antardasha: currentAntardasha,
       },
-      // ── v1.6 top-level additions ──
       shadbala: kundaliData?.shadbala ?? {},
       strongestPlanet,
       weakestPlanet,
