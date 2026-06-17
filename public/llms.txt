@@ -8,7 +8,7 @@ Readings are provided for guidance, education and self-reflection, and are not a
 
 ## Start Here
 - [Trikaal Vaani — Home](https://trikalvaani.com/): Free AI kundli and accurate Vedic astrology predictions.
-- [Get Your Free Kundli & Reading](https://trikalvaani.com/predict): Generate a free AI Janam Kundli and personalised Vedic reading from your birth details.
+- [Get Your Free Kundli & Reading](https://trikalvaani.com/#birth-form): Generate a free AI Janam Kundli and personalised Vedic reading from your birth details.
 - [Rohiit Gupta — Founder & Chief Vedic Architect](https://trikalvaani.com/founder): Background, experience and methodology of the founder.
 - [Services Overview](https://trikalvaani.com/services): All Vedic astrology services offered by Trikaal Vaani.
 - [Contact](https://trikalvaani.com/contact): Reach the Trikaal Vaani team.
@@ -91,12 +91,9 @@ Readings are provided for guidance, education and self-reflection, and are not a
 
 ## Panchang & Festivals
 - [Daily Panchang](https://trikalvaani.com/panchang): Today's tithi, nakshatra, yoga, karana and muhurat.
-- [Jagannath Rath Yatra 2026](https://trikalvaani.com/events/jagannath-rath-yatra-2026)
-- [Devshayani Ekadashi 2026](https://trikalvaani.com/events/devshayani-ekadashi-2026)
+- [Jagannath Rath Yatra 2026](https://trikalvaani.com/events/rath-yatra-2026)
 - [Guru Purnima 2026](https://trikalvaani.com/events/guru-purnima-2026)
-- [Ashadha Amavasya 2026](https://trikalvaani.com/events/ashadha-amavasya-2026)
 - [Raksha Bandhan 2026](https://trikalvaani.com/events/raksha-bandhan-2026)
-- [Janmashtami 2026](https://trikalvaani.com/events/janmashtami-2026)
 - [Ganesh Chaturthi 2026](https://trikalvaani.com/events/ganesh-chaturthi-2026)
 - [Hartalika Teej 2026](https://trikalvaani.com/events/hartalika-teej-2026)
 
