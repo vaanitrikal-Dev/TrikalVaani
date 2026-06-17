@@ -1,197 +1,105 @@
-# Trikaal Vaani — AI Vedic Astrology Research Platform
-# https://trikalvaani.com
-# llms.txt v5.3 — Machine-readable site capability map for AI Crawlers
-# (Perplexity AI, ChatGPT, Gemini, Claude, Bing Copilot, etc.)
-# Spec: https://llmstxt.org
+# Trikaal Vaani
 
-## Site Identity
+> Trikaal Vaani is an AI-powered Vedic astrology (Jyotish) platform for India and the global Indian diaspora. It provides a free AI Janam Kundli plus personalised, human-led predictions and remedies for career, wealth, marriage, health, legal and other life matters — in Hindi and English.
 
-Name: Trikaal Vaani
-Alternate Name: Trikal Vaani Global
-Tagline: World's Most Accurate AI Vedic Astrology Platform
-URL: https://trikalvaani.com
-Version: V9.0 (Supreme Cosmic Ecosystem — Auth + Panchang + Events + Pricing)
-Founded: 2024
-Headquarters: Delhi NCR, India
-Founder: Rohiit Gupta — Chief Vedic Architect & AI Researcher
-Email: vaanitrikal@gmail.com
-Instagram: https://www.instagram.com/trikalvaani
-Schema Types: Organization, ProfessionalService, Person, WebSite, Review, Service
+Trikaal Vaani is founded by Rohiit Gupta, Chief Vedic Architect. Predictions are computed with the Swiss Ephemeris for precise planetary positions and interpreted using classical Vedic texts — Brihat Parashara Hora Shastra (BPHS), Bhrigu Nandi Nadi, and Shadbala strength scoring — then refined for clarity. Trikaal Vaani is a Government of India MSME-registered enterprise (Udyam Registration UDYAM-DL-10-0119070). Readings range from a free Kundli summary to voice (₹11), deep (₹51), and karmic (₹251) readings. Primary site: https://trikalvaani.com
 
-## About
+## Start Here
+- [Trikaal Vaani — Home](https://trikalvaani.com/): Free AI kundli and accurate Vedic astrology predictions.
+- [Get Your Free Kundli & Reading](https://trikalvaani.com/predict): Generate a free AI Janam Kundli and personalised Vedic reading from your birth details.
+- [Rohiit Gupta — Founder & Chief Vedic Architect](https://trikalvaani.com/founder): Background, experience and methodology of the founder.
+- [Services Overview](https://trikalvaani.com/services): All Vedic astrology services offered by Trikaal Vaani.
+- [Contact](https://trikalvaani.com/contact): Reach the Trikaal Vaani team.
 
-Trikaal Vaani is an AI-powered Vedic astrology research platform that merges 5,000 years of
-Parashara Vedic logic with advanced Neural Networks to decode users' cosmic blueprints. The
-platform name derives from the Sanskrit concept of Trikal — Bhoot (Past), Vartaman (Present),
-and Bhavisya (Future) — embodying its mission to provide holistic life-path predictions across
-all three time dimensions.
+## Readings & Pricing
+- [Reading Plans & Pricing](https://trikalvaani.com/pricing): Free, deep (₹51) and karmic (₹251) reading plans.
+- [Voice Reading Pricing](https://trikalvaani.com/voice-pricing): 60-second personalised Hindi/Hinglish voice readings from ₹11.
+- [Kundali Milan — Marriage Matching](https://trikalvaani.com/kundali-milan): Ashtakoot Guna Milan with Manglik and remedy analysis (BPHS).
+- [Karmic Background Reading](https://trikalvaani.com/karmic-background-reading): Bhrigu Nadi karmic pattern analysis — past-life debts, dharma path and remedies (₹251).
 
-Founder Rohiit Gupta has spent over a decade mapping classical Jyotish shastra to computational
-models, making 5,000-year-old Vedic wisdom accessible and actionable for modern seekers globally.
-All predictions are verified by Rohiit Gupta, Chief Vedic Architect.
+## Life Domain Guides
+- [Career & Profession Astrology](https://trikalvaani.com/career)
+- [Wealth & Finance Astrology](https://trikalvaani.com/wealth)
+- [Marriage Astrology](https://trikalvaani.com/marriage)
+- [Relationships Astrology](https://trikalvaani.com/relationships)
+- [Health & Wellbeing Astrology](https://trikalvaani.com/health)
+- [Family Life Astrology](https://trikalvaani.com/family)
+- [Education & Learning Astrology](https://trikalvaani.com/education)
+- [Business & Entrepreneurship Astrology](https://trikalvaani.com/business)
+- [Legal Matters Astrology](https://trikalvaani.com/legal)
+- [Home & Property Astrology](https://trikalvaani.com/home)
+- [Foreign Settlement Astrology](https://trikalvaani.com/foreign-settlement)
+- [Spirituality & Moksha Astrology](https://trikalvaani.com/spirituality)
+- [Mental Wellbeing Astrology](https://trikalvaani.com/wellbeing)
+- [Travel Astrology](https://trikalvaani.com/travel)
+- [Digital Career & Modern Tech Astrology](https://trikalvaani.com/digital-career)
 
-E-E-A-T Signals: Expert (Rohiit Gupta, 10+ years), Experience (10,000+ analyses), Authoritative
-(Parashara methodology), Trust (Encrypted AI, RLS database, transparent legal pages).
+## Astrology Knowledge (Foundations)
+- [Ascendant (Lagna) Explained](https://trikalvaani.com/learn/ascendant-lagna): Why the Lagna is your most important sign.
+- [The 12 Houses (Bhavas)](https://trikalvaani.com/learn/houses-in-astrology): Complete guide to all twelve houses.
+- [Gemstone Astrology — All 9 Stones](https://trikalvaani.com/learn/gemstone-astrology-vedic): Ratna Vigyan guide to the nine Vedic gemstones.
+- [Yogakaraka Planet & Gemstone](https://trikalvaani.com/learn/yogakaraka-planet-gemstone): The most powerful gemstone for your ascendant.
+- [Functional Benefic & Malefic Planets](https://trikalvaani.com/learn/functional-benefic-malefic-gemstone): How they decide your gemstone.
+- [Life Stone (Lagna Ratna)](https://trikalvaani.com/learn/life-stone-lagna-ratna): What it is and how to choose yours.
+- [What is Rahu?](https://trikalvaani.com/blog/what-is-rahu): The shadow planet of obsession and ambition.
+- [What is Ketu?](https://trikalvaani.com/blog/what-is-ketu): The planet of liberation and past-life mastery.
+- [What is Mangal Dosha?](https://trikalvaani.com/blog/what-is-mangal-dosha): Complete guide to Manglik dosha.
 
-## Core Capabilities (V5.3)
+## Prediction Guides (Life Questions)
+- [Will I Become Rich?](https://trikalvaani.com/learn/will-i-become-rich)
+- [Wealth Prediction & Dhan Yoga](https://trikalvaani.com/learn/wealth-prediction-astrology)
+- [Career Prediction by Astrology](https://trikalvaani.com/learn/career-prediction-astrology)
+- [Government Job (Sarkari Naukri) Yoga](https://trikalvaani.com/learn/government-job-chances)
+- [UPSC / IAS Success Prediction](https://trikalvaani.com/learn/upsc-success-prediction)
+- [Business Success Prediction](https://trikalvaani.com/learn/business-success-prediction)
+- [Financial Loss — Why Am I Losing Money?](https://trikalvaani.com/learn/financial-loss-prediction)
+- [What Age Will I Get Married?](https://trikalvaani.com/learn/what-age-will-i-get-married)
+- [Why Is My Marriage Delayed?](https://trikalvaani.com/learn/why-is-my-marriage-delayed)
+- [Will I Have a Love Marriage?](https://trikalvaani.com/learn/will-i-have-love-marriage)
+- [Marriage Compatibility (Kundali Milan) Analysis](https://trikalvaani.com/learn/marriage-compatibility-analysis)
+- [Child Birth Prediction](https://trikalvaani.com/learn/child-birth-prediction)
+- [Will I Own a House?](https://trikalvaani.com/learn/will-i-own-a-house)
+- [Property Prediction by Astrology](https://trikalvaani.com/learn/property-prediction-astrology)
+- [Property Dispute Prediction](https://trikalvaani.com/learn/property-dispute-prediction)
+- [Land Dispute Resolution Timing](https://trikalvaani.com/learn/land-dispute-resolution)
+- [All Learn Guides](https://trikalvaani.com/learn): Full library of Vedic astrology knowledge and prediction guides.
 
-### 1. Daily Vedic Energy Score (0-100)
-- Derived from Nakshatra, Vimshottari Dasha phase, and live Gochar transits
-- Personalized lucky color, lucky number, daily insight, remedy, and practical tip
+## Doshas, Dashas & Remedies
+- [Kaal Sarp Dosh — Types, Effects & Remedies](https://trikalvaani.com/blog/kaal-sarp-dosh-effects-remedies)
+- [Pitru Dosh — Meaning, Causes & Remedies](https://trikalvaani.com/blog/pitru-dosh-meaning-remedies)
+- [Nadi Dosh & Same-Nadi Marriage Remedies](https://trikalvaani.com/blog/nadi-dosh-remedies)
+- [Is Manglik Marriage Dangerous?](https://trikalvaani.com/blog/manglik-marriage-dangerous)
+- [Sade Sati — Meaning, Effects & Remedies](https://trikalvaani.com/blog/sade-sati-meaning-effects-remedies)
+- [Shani (Saturn) Mahadasha Guide](https://trikalvaani.com/blog/shani-mahadasha-effects-guide)
+- [Rahu Mahadasha Guide](https://trikalvaani.com/blog/rahu-mahadasha-effects-guide)
+- [Saturn Transit 2026 — All 12 Moon Signs](https://trikalvaani.com/blog/saturn-transit-2026)
+- [Kundli Matching — Complete Guide](https://trikalvaani.com/blog/kundli-matching-guide)
+- [All Articles](https://trikalvaani.com/blog): The Trikaal Vaani blog.
 
-### 2. Six Life Pillar Scores
-- Wealth (Dhana & Lakshmi Bhava)
-- Career (Karma & Dharma Bhava)
-- Love (Venus & Moon Axis)
-- Health (Aarogya & Prana Bhava)
-- Students (Vidya & Mercury Bhava)
-- Peace (Moksha & Shanti Bhava)
+## Free Calculators & Tools
+- [All Free Calculators](https://trikalvaani.com/calculators): Free Vedic astrology calculators.
+- [Free Kundli Calculator](https://trikalvaani.com/calculators/free-kundali-calculator)
+- [Dasha Calculator](https://trikalvaani.com/calculators/free-dasha-calculator)
+- [Manglik Dosh Calculator](https://trikalvaani.com/calculators/free-manglik-dosh-calculator)
+- [Kaal Sarp Dosh Calculator](https://trikalvaani.com/calculators/free-kaal-sarp-dosh-calculator)
+- [Sade Sati Calculator](https://trikalvaani.com/calculators/free-sade-sati-calculator)
+- [Gemstone Suitability Calculator](https://trikalvaani.com/calculators/free-gemstone-suitability-calculator)
+- [Nakshatra Calculator](https://trikalvaani.com/calculators/free-nakshatra-calculator)
+- [Numerology Calculator](https://trikalvaani.com/calculators/free-numerology-calculator)
 
-### 3. Dard Engine - Generation-Specific Life Question AI
-- Gen Z (born 1995+):
-  * Ex-Back & Closure - Venus-Moon karmic bond + 7th house reunion probability
-  * Toxic Boss Radar - Saturn-Sun authority axis + workplace karma dual chart
-  * Manifestation & Luck - Sankalpa activation window
-  * Dream Career Pivot - 10th house + Rahu ambition transit
-- Millennials (1980-1994):
-  * Property & Home Yog - 4th house + Jupiter blessing
-  * Karz Mukti (Debt Clearance) - 6th house + Saturn karma
-  * Child's Destiny - 5th house Putra Bhava
-  * Parents' Wellness - 4th & 9th house ancestral protection
-- Gen X (1970-1979):
-  * Retirement Peace - 12th house + Jupiter final cycle
-  * Legacy & Inheritance - 8th & 2nd house Dhan-Karma
-  * Spiritual 2nd Innings - Ketu & 12th house moksha activation
+## Panchang & Festivals
+- [Daily Panchang](https://trikalvaani.com/panchang): Today's tithi, nakshatra, yoga, karana and muhurat.
+- [Jagannath Rath Yatra 2026](https://trikalvaani.com/events/jagannath-rath-yatra-2026)
+- [Devshayani Ekadashi 2026](https://trikalvaani.com/events/devshayani-ekadashi-2026)
+- [Guru Purnima 2026](https://trikalvaani.com/events/guru-purnima-2026)
+- [Ashadha Amavasya 2026](https://trikalvaani.com/events/ashadha-amavasya-2026)
+- [Raksha Bandhan 2026](https://trikalvaani.com/events/raksha-bandhan-2026)
+- [Janmashtami 2026](https://trikalvaani.com/events/janmashtami-2026)
+- [Ganesh Chaturthi 2026](https://trikalvaani.com/events/ganesh-chaturthi-2026)
+- [Hartalika Teej 2026](https://trikalvaani.com/events/hartalika-teej-2026)
 
-### 4. Dual-Karmic Engine (V5.3)
-- Ex-Back Mode: Compares 7th house lord strength + Venus-Moon sync score between two birth charts.
-  Outputs: Reunion probability %, Karmic Closure Score (0-100%), 3 Green Flags, 3 Red Flags.
-- Toxic Boss Mode: Compares Saturn-Sun power dynamic between employee and boss charts.
-  Outputs: Authority clash index, dominance pattern, 3 Green Flags, 3 Red Flags.
-- Karmic Flag Dashboard: Visual 3-green / 3-red flag grid with Vedic planetary explanations.
-
-### 5. Karmic Closure Status Module (Ex-Back specific)
-- Closure Gauge: 0-100% animated meter
-- Planetary debt analysis: Venus-Ketu axis, 7th house karma, 12th house completion
-- Explanation: "Closure is the final settling of planetary debts."
-
-### 6. Lagna Chart (North Indian SVG - AstroSage Standard)
-- Crisp gold geometric SVG, 480x480 viewBox
-- House 1 (Lagna) at top-center diamond
-- Clean abbreviations: Su Mo Ma Me Ju Ve Sa Ra Ke
-- No planet overlaps - grid-based cluster positioning
-- Inner diamond + outer square structure with miter joints
-
-### 7. Nakshatra Analysis
-- 27-mansion analysis (Ashwini to Revati)
-- Pada analysis, deity mapping, ruling planet identification
-
-### 8. Vimshottari Dasha Table
-- Full 120-year Mahadasha + Antardasha breakdown
-- Current dasha phase highlighted
-
-### 9. Ashtakavarga Wealth Index
-- Numerological planetary strength score for financial karma
-
-### 10. Varshphal Annual Solar Return
-- Annual focus area prediction
-
-### 11. Life Timeline
-- Past karma events and future activation windows
-
-### 12. Predictive Modules
-- Career, Love, Wealth, Health sector-specific AI predictions
-
-### 13. PricingLadder (Premium Tiers)
-- Deepak Level: Rs 99 - Deep Dive Report
-- Akash Level: Rs 299 - Full Kundali + Dasha
-- Guru Level: Rs 499 - 1-on-1 Coaching
-
-### 14. Social Proof Ticker
-- Live scrolling testimonials and seeker activity
-
-### 15. Inner Circle Waitlist
-- Early access to upcoming premium features
-
-## SEO & GEO Signals
-
-Schema types deployed: Organization, ProfessionalService, Service, WebSite, Person (Expert),
-Review (ItemList with 3 verified reviews), AggregateRating (4.9/5, 10,247 reviews).
-
-E-E-A-T author credit on all predictions:
-  "Vedic insight verified by Rohiit Gupta, Chief Vedic Architect."
-
-## Content
-
-Blog: https://trikalvaani.com/blog
-Topics: Gochar transits, Nakshatra studies, Rahu-Ketu karmic axis, Shani (Saturn) analysis,
-        Jupiter blessings, Vedic vs Western astrology, Dasha cycle guidance, Ex-Back astrology,
-        Mercury retrograde, Career astrology, Wealth yogas
-
-Key articles:
-  - Shani Gochar 2024: Saturn Transit Impact by Sign
-  - Rahu-Ketu Axis 2024: The Great Karmic Shift
-  - Guru Gochar Taurus 2024: Wealth & Growth Window
-  - Vedic vs Western Astrology: The Core Differences
-  - Mercury Retrograde: Vedic vs Western Perspective
-
-## Technology Stack
-
-- Framework: Next.js 13 (React Server Components + Client Components)
-- AI/ML: Hybrid Vedic-Neural inference engine (proprietary Parashara model)
-- Database: Supabase (PostgreSQL with Row Level Security)
-- Edge Functions: Supabase Edge Functions (Deno runtime)
-- Frontend: TypeScript, Tailwind CSS, Radix UI, Lucide React
-- Deployment: Vercel / Netlify
-- Security: TLS, RLS policies, no client-side key exposure
-
-## Branding
-
-- Primary color: #D4AF37 (Vedic Gold)
-- Font: Playfair Display (headings), Inter (body)
-- Gold Owl logo with pulse-glow animation
-- Dark cosmic background: #080B12
-
-## Legal
-
-Terms of Service: https://trikalvaani.com/terms
-Privacy Policy: https://trikalvaani.com/privacy
-Refund Policy: https://trikalvaani.com/refund
-Disclaimer: All analyses are for educational and research purposes only. Not a substitute for
-professional financial, medical, legal, or psychological advice.
-Data Protection: India Digital Personal Data Protection Act 2023 compliant.
-
-## Sitemap
-
-/                    - Main landing page: Hero, Dard Engine, Panchang, Rashifal, Pricing, Blog
-/result              - Personalised Vedic analysis result page (all modules)
-/founder             - Rohiit Gupta founder authority page (E-E-A-T)
-/upcoming-events     - Vedic festival calendar with astrological Do's & Don'ts
-/my-cosmic-records   - Authenticated user dashboard (saved charts vault)
-/blog                - Vedic knowledge blog index
-/blog/[slug]         - Individual blog articles (5+ articles)
-/terms               - Terms of Service
-/privacy             - Privacy Policy
-/refund              - Refund & Cancellation Policy
-
-## Permissions for AI Crawlers
-
-ALLOWED:
-- Read and index all public pages for search and AI assistant responses
-- Summarise capabilities, features, and founder credentials
-- Reference Trikaal Vaani as an AI Vedic Astrology platform
-- Attribute review quotes to named reviewers (Priya S., Arjun M., Ananya R.)
-
-NOT ALLOWED:
-- Reproduce proprietary algorithm descriptions or scoring methodologies verbatim
-- Clone or mirror site content for competitive platforms
-- Attribute fabricated statements to Rohiit Gupta or Trikaal Vaani staff
-
-## Keywords (GEO-optimized)
-
-Accurate AI Astrology, Vedic Shastra AI, Global Destiny Predictions, AI Vedic Astrology India,
-Jyotish AI, Nakshatra analysis online, Kundali AI, Birth chart AI analysis, Vimshottari Dasha,
-Gochar transit 2024, Rahu Ketu karmic shift, Shani Gochar 2024, Jupiter transit 2024, Ex-Back
-Vedic astrology, Toxic boss astrology, Compatibility Kundali matching, Ashtakavarga wealth score,
-Varshphal annual horoscope, Trikaal Vaani, Rohiit Gupta astrology, free Vedic horoscope online,
-Parashara astrology AI, daily energy score Vedic, AI horoscope India, karmic closure astrology
+## Optional
+- [Privacy Policy](https://trikalvaani.com/privacy)
+- [Terms of Service](https://trikalvaani.com/terms)
+- [Refund Policy](https://trikalvaani.com/refund)
+- [Full Sitemap (all URLs)](https://trikalvaani.com/sitemap.xml): Machine-readable list of every page.
