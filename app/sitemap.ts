@@ -3,8 +3,17 @@
  * 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER 🔱
  * ============================================================================
  * File:        app/sitemap.ts
- * Version:     v7.3
+ * Version:     v7.4
  * Owner:       Rohiit Gupta, Chief Vedic Architect
+ *
+ * Changes v7.3 → v7.4 (2026-06-19):
+ *   FESTIVAL 404 FIX: the festival loop now emits URLs ONLY for is_indexed=true
+ *     festivals. Previously the all-India /events/{slug} URL was pushed for EVERY
+ *     row — including is_indexed=false festivals (pongal, ugadi, navratri
+ *     day-1..9, durga-puja) that have no content and return 404. Those ~12 dead
+ *     URLs are no longer submitted to Google (saves crawl budget + quality
+ *     signal). The city fan-out was already is_indexed-gated; the all-India URL
+ *     is now gated too via a single `if (!f.is_indexed) continue;`.
  *
  * Changes v7.2 → v7.3 (2026-06-16):
  *   GEMSTONE: Added the Gemstone Suitability ecosystem (10 new URLs) to the
@@ -369,9 +378,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }
 
   // ── Festival/event pages ───────────────────────────────────────────
+  // v7.4 FIX: emit URLs ONLY for is_indexed=true festivals. is_indexed=false
+  // rows (pongal, ugadi, navratri day-1..9, durga-puja…) have no generated
+  // content and 404 — keeping them out of the sitemap stops Google crawling
+  // dead pages and wasting crawl budget. This now gates BOTH the all-India
+  // page and the city fan-out (single guard below).
   const dbFestivals = await readFestivalsFromDB();
   if (dbFestivals.length > 0) {
     for (const f of dbFestivals) {
+      if (!f.is_indexed) continue; // skip no-content festivals entirely
+
       // All-India single page
       entries.push({
         url: `${BASE}/events/${f.festival_slug}`,
@@ -379,17 +395,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         changeFrequency: 'monthly',
         priority: 0.75,
       });
-      // City fan-out — only is_indexed=true festivals with content
-      if (f.is_indexed) {
-        for (const c of cities) {
-          if (festivalInState(f.festival_scope, f.home_states, c.state)) {
-            entries.push({
-              url: `${BASE}/${c.slug}/events/${f.festival_slug}`,
-              lastModified: now,
-              changeFrequency: 'monthly',
-              priority: 0.8,
-            });
-          }
+      // City fan-out (scope-aware)
+      for (const c of cities) {
+        if (festivalInState(f.festival_scope, f.home_states, c.state)) {
+          entries.push({
+            url: `${BASE}/${c.slug}/events/${f.festival_slug}`,
+            lastModified: now,
+            changeFrequency: 'monthly',
+            priority: 0.8,
+          });
         }
       }
     }
