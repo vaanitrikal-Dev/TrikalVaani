@@ -2,9 +2,18 @@
 // 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER
 // ════════════════════════════════════════════════════════════════════
 // File:        app/[domain]/events/[slug]/page.tsx
-// Version:     v2.4
+// Version:     v2.5 — SOFT CTA + /predict cleanup (Claude, June 2026)
 // Owner:       Rohiit Gupta, Chief Vedic Architect
 // Domain:      trikalvaani.com
+//
+// ── Changes vs v2.4 ────────────────────────────────────────────────
+//   1. SOFT CTA — slim value-first free-kundali bar under the quick-answer
+//      block → /#birth-form (FREE, no payment/signup). The ₹51 HARD CTA
+//      stays lower down. Free nudge early, paid ask late (honey-trap).
+//   2. CLEANUP — the 2 remaining /predict links (remedies funnel + bottom
+//      CTA) now point directly to /#birth-form (no redirect hop).
+//   PROTECTED (untouched): all data fetching, scope logic, puja vidhi,
+//      remedies content, regional customs, FAQ, schema, footer.
 //
 // ── Changes vs v2.3 (Discover optimization — Claude, June 2026) ────
 //   1. OG image added (og-default.jpg 1200×630) to openGraph + twitter.
@@ -388,6 +397,18 @@ export default async function CityFestivalPage(
             <p className="text-base leading-relaxed text-gray-800">{geoAnswer}</p>
           </section>
 
+          {/* SOFT CTA (v2.5) — value-first free-kundali nudge, early in the page.
+              The ₹51 HARD CTA stays lower down. Free now, paid later. */}
+          <div className="mb-8 flex flex-col gap-2 rounded-xl border border-amber-300 bg-amber-100/60 p-4 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-sm font-medium text-amber-900">
+              ✨ Curious what {name} means for YOUR chart?{" "}
+              <span className="text-amber-700">Start free — no payment, no signup.</span>
+            </p>
+            <Link href="/#birth-form" className="inline-block shrink-0 rounded-lg bg-amber-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-amber-700">
+              See my free kundali →
+            </Link>
+          </div>
+
           <section className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2">
             <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
               <div className="text-xs uppercase tracking-wide text-gray-500">Date</div>
@@ -490,7 +511,7 @@ export default async function CityFestivalPage(
               </div>
               <p className="mt-3 text-sm text-gray-700">
                 These are general {ruler || "planetary"} remedies. For remedies based on YOUR birth chart —{" "}
-                <Link href="/predict" className="font-semibold text-amber-700 hover:underline">
+                <Link href="/#birth-form" className="font-semibold text-amber-700 hover:underline">
                   get your personalised reading →
                 </Link>
               </p>
@@ -525,7 +546,7 @@ export default async function CityFestivalPage(
               How will {name} affect YOUR birth chart? Get a personalised reading with
               remedies tailored to your kundali. Free Tithi insight, ₹51 for full prediction.
             </p>
-            <Link href="/predict" className="mt-4 inline-block rounded-lg bg-white px-6 py-3 font-semibold text-amber-700 hover:bg-amber-50">
+            <Link href="/#birth-form" className="mt-4 inline-block rounded-lg bg-white px-6 py-3 font-semibold text-amber-700 hover:bg-amber-50">
               Get My {name} Prediction →
             </Link>
           </section>
