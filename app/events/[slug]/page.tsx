@@ -2,9 +2,16 @@
 // 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER
 // ════════════════════════════════════════════════════════════════════
 // File:        app/events/[slug]/page.tsx
-// Version:     v2.0 — SUPABASE MIGRATION (festival 404 root-cause fix, Jun 2026)
+// Version:     v2.1 — SOFT CTA (value-first free-kundali nudge, Jun 2026)
 // Owner:       Rohiit Gupta, Chief Vedic Architect
 // Domain:      trikalvaani.com
+//
+// ── Changes v2.0 → v2.1 ────────────────────────────────────────────
+//   Added a slim, value-first SOFT CTA bar right under the quick-answer
+//   block → /#birth-form (FREE kundali, no payment/signup). The existing
+//   ₹51 HARD CTA stays lower down. Funnel = free nudge early, paid ask late
+//   (honey-trap doctrine). Goal: give the festival-traffic visitor an
+//   immediate, low-friction next step instead of a dead-end read.
 //
 // ── Why v2.0 (the real fix) ────────────────────────────────────────
 //   v1.1 read festivals from the STATIC app/data/festivals.json file.
@@ -271,6 +278,18 @@ export default async function EventDetailPage(
           <section className="mb-8 rounded-xl border border-amber-200 bg-amber-50 p-5" aria-label="Quick answer">
             <p className="text-base leading-relaxed text-gray-800">{geoAnswer}</p>
           </section>
+
+          {/* SOFT CTA (v2.1) — value-first free-kundali nudge, early in the page.
+              The ₹51 HARD CTA stays lower down. Free now, paid later. */}
+          <div className="mb-8 flex flex-col gap-2 rounded-xl border border-amber-300 bg-amber-100/60 p-4 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-sm font-medium text-amber-900">
+              ✨ Curious what {name} means for YOUR chart?{" "}
+              <span className="text-amber-700">Start free — no payment, no signup.</span>
+            </p>
+            <Link href="/#birth-form" className="inline-block shrink-0 rounded-lg bg-amber-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-amber-700">
+              See my free kundali →
+            </Link>
+          </div>
 
           <section className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2">
             <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
