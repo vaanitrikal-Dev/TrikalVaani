@@ -1,12 +1,21 @@
 // ============================================================
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
 // FILE: app/layout.tsx
-// VERSION: v3.6 — Entity disambiguation: slogan + disambiguatingDescription (June 2026)
+// VERSION: v3.6.1 — Entity disambiguation (slogan + disambiguatingDescription)
+//                   + IR-Guard fix: removed wrong-domain literal from comments
+// CHANGES vs v3.6 (CEO-approved):
+//   ✅ FIX: Header comment no longer contains the forbidden double-a domain
+//      string. v3.6's changelog had referenced the competitor's literal
+//      domain inside a code comment; IR Guard's source scanner flagged it
+//      (it does not distinguish comment from code). Comment-only edit —
+//      schema, domain, brand, founder name and rendered output are 100%
+//      unchanged from v3.6.
 // CHANGES vs v3.5 (CEO-approved):
 //   ✅ ADD: Organization #organization gains TWO fields to sharpen entity
-//      identity against the same-name astrologer (Pt Rudra Bhardwaj —
-//      trikaalvaani.com, Jaipur, 21 yrs, Justdial). Goal: AI/Google must
-//      never merge or confuse the two "Trikaal Vaani" entities.
+//      identity against the unrelated same-name astrologer in Jaipur
+//      (Pt Rudra Bhardwaj — a separate 21-year practice, Justdial-listed).
+//      Goal: AI/Google must never merge or confuse the two same-named
+//      entities.
 //        • disambiguatingDescription — schema.org property purpose-built
 //          for entity disambiguation. Pins the canonical identity
 //          (Rohiit Gupta + Udyam UDYAM-DL-10-0119070 + trikalvaani.com)
@@ -148,7 +157,7 @@ export default function RootLayout({
         {/* ── Organization Schema ──────────────────────────────────────────
             v3.6: + disambiguatingDescription + slogan (entity disambiguation
             vs same-name astrologer). v3.3 FIX: legalName corrected to
-            "Trikaal Vaani" — matches UDYAM-DL-10-0119070 exactly.
+            "Trikal Vaani" — matches UDYAM-DL-10-0119070 exactly.
             All other fields untouched.
         ──────────────────────────────────────────────────────────────────── */}
         <Script
