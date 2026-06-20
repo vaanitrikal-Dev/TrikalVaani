@@ -3,8 +3,38 @@
  * 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER 🔱
  * ============================================================================
  * File:        app/sitemap.ts
- * Version:     v7.4
+ * Version:     v7.5
  * Owner:       Rohiit Gupta, Chief Vedic Architect
+ *
+ * Changes v7.4 → v7.5 (2026-06-20):
+ *   CONTENT CLUSTERS CONFIRMED — NO CODE CHANGE REQUIRED:
+ *   All new /learn/[slug] pages are auto-picked up by readSeoLearnSlugs()
+ *   which queries seo_pillar_pages WHERE published = true. Zero manual sitemap
+ *   edits needed for new content — just INSERT with published=true.
+ *
+ *   Clusters now live in seo_pillar_pages (all published: true):
+ *   ┌─────────────────────────────────────┬───────┬────────────────────────────┐
+ *   │ Cluster                             │ Pages │ URL Pattern                │
+ *   ├─────────────────────────────────────┼───────┼────────────────────────────┤
+ *   │ Guru Singh Rashi Gochar 2026        │  14   │ /learn/jupiter-*           │
+ *   │   — 1 pillar + 1 summary + 12 rashi │       │ /learn/guru-gochar-2026-*  │
+ *   ├─────────────────────────────────────┼───────┼────────────────────────────┤
+ *   │ Budh Vakri (Mercury Retrograde)     │  14   │ /learn/mercury-retrograde- │
+ *   │   June 2026                         │       │ /learn/budh-vakri-2026-*   │
+ *   │   — 1 pillar + 12 rashi + 1 upay   │       │                            │
+ *   ├─────────────────────────────────────┼───────┼────────────────────────────┤
+ *   │ Other transit pages (saturn, rahu-  │   5   │ /learn/saturn-transit-*    │
+ *   │ ketu, older clusters)               │       │ /learn/rahu-ketu-*  etc.   │
+ *   └─────────────────────────────────────┴───────┴────────────────────────────┘
+ *   Total seo_pillar_pages published: 33 pages → all at /learn/[slug]
+ *
+ *   Blog posts (blog_posts table, is_published=true): auto-picked via
+ *   getAllPosts() → /blog/[slug]. No redeployment needed for new blogs.
+ *
+ *   ⚠️  VERCEL REDEPLOYMENT NOTE:
+ *   /learn/[slug] uses generateStaticParams → new slugs need ONE Vercel
+ *   redeploy to generate static HTML. After redeployment, slugs are live
+ *   and sitemap auto-includes them on next revalidation (3600s).
  *
  * Changes v7.3 → v7.4 (2026-06-19):
  *   FESTIVAL 404 FIX: the festival loop now emits URLs ONLY for is_indexed=true
@@ -253,6 +283,20 @@ async function readReportSlugs(): Promise<{ slug: string; updatedAt: string | nu
 
 type SeoPageRow = { slug: string; category: string; priority: number };
 
+// ─────────────────────────────────────────────────────────────────────────────
+// AUTO-PICKUP: All rows in seo_pillar_pages WHERE published = true are served
+// at /learn/[slug] and included in the sitemap automatically.
+//
+// Current clusters (as of v7.5 — 2026-06-20):
+//   transit   → Jupiter Gochar 2026 (14 pages) + Budh Vakri June 2026 (14 pages)
+//               + Saturn Transit + Rahu-Ketu Transit (5 pages)
+//   knowledge → Vedic astrology reference pages
+//   trending  → Trending astrology topics
+//   festival  → Festival-specific SEO pages
+//
+// To add new /learn pages: INSERT into seo_pillar_pages with published=true.
+// Then trigger ONE Vercel redeploy for generateStaticParams to pick up new slugs.
+// ─────────────────────────────────────────────────────────────────────────────
 async function readSeoLearnSlugs(): Promise<SeoPageRow[]> {
   try {
     const supabase = anonClient();
@@ -432,7 +476,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     });
   }
 
-  // ── /learn hub + 90 SEO knowledge pages ───────────────────────────
+  // ── /learn hub + SEO knowledge pages ──────────────────────────────
+  // v7.5: 33 published pages auto-picked up from seo_pillar_pages.
+  // Clusters: Guru Singh Rashi 2026 (14) + Budh Vakri June 2026 (14)
+  //           + Saturn/Rahu-Ketu/other transit (5).
+  // New clusters: INSERT with published=true → auto-included next revalidation.
   entries.push({
     url: `${BASE}/learn`,
     lastModified: now,
