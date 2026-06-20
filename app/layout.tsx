@@ -1,20 +1,29 @@
 // ============================================================
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
 // FILE: app/layout.tsx
-// VERSION: v3.5 — Microsoft Clarity analytics wired (June 2026)
-// CHANGES vs v3.4 (CEO-approved):
-//   ✅ FIX-1: ClarityAnalytics component added to <body> —
-//      Microsoft Clarity (project x5li8xd59b) for heatmaps,
-//      scroll-depth, rage-click detection, session recordings.
-//      Component is production-only (no localhost/preview junk)
-//      and loads afterInteractive (zero LCP impact).
-//      Requires: components/analytics/ClarityAnalytics.tsx v1.0.
-//   PROTECTED (untouched): ALL v3.4 content — org-schema,
-//      webapp-schema, astro-service-schema, metadata, OG/twitter,
-//      keywords, icons, verification, canonical, Razorpay preload,
-//      performance hints, SchemaScript, TrikalVoice, OneSignalInit,
-//      StickyMobileCTA, Vercel Analytics, Inter font, body className.
+// VERSION: v3.6 — Entity disambiguation: slogan + disambiguatingDescription (June 2026)
+// CHANGES vs v3.5 (CEO-approved):
+//   ✅ ADD: Organization #organization gains TWO fields to sharpen entity
+//      identity against the same-name astrologer (Pt Rudra Bhardwaj —
+//      trikaalvaani.com, Jaipur, 21 yrs, Justdial). Goal: AI/Google must
+//      never merge or confuse the two "Trikaal Vaani" entities.
+//        • disambiguatingDescription — schema.org property purpose-built
+//          for entity disambiguation. Pins the canonical identity
+//          (Rohiit Gupta + Udyam UDYAM-DL-10-0119070 + trikalvaani.com)
+//          and asserts independence from any similar-sounding name.
+//        • slogan — Trikaal Vaani's signature couplet. A unique brand
+//          fingerprint the competitor does NOT use (brand-distinctiveness
+//          signal — not a keyword play; keywords already live in
+//          description, founder.knowsAbout and the metadata keywords array).
+//   PROTECTED (untouched): ALL v3.5 content — name, alternateName,
+//      legalName, url, logo, Udyam identifier, founder, contactPoint,
+//      areaServed, sameAs, paymentAccepted, WebApplication schema,
+//      AstrologicalService schema, metadata, OG/twitter, keywords, icons,
+//      verification, canonical, Razorpay preload, performance hints,
+//      SchemaScript, TrikalVoice, OneSignalInit, StickyMobileCTA,
+//      ClarityAnalytics, Vercel Analytics, Inter font, body className.
 // ------------------------------------------------------------
+// Prior — v3.5: Microsoft Clarity analytics wired (project x5li8xd59b).
 // Prior — v3.4: StickyMobileCTA added (Phase 2).
 // Prior — v3.3: legalName fix + AstrologicalService schema + speakable.
 // Prior — v3.2 (2026-06-04): OneSignalInit wired in.
@@ -137,8 +146,9 @@ export default function RootLayout({
       <head>
 
         {/* ── Organization Schema ──────────────────────────────────────────
-            v3.3 FIX: legalName corrected to "Trikal Vaani" — matches
-            UDYAM-DL-10-0119070 exactly. "Global" suffix removed.
+            v3.6: + disambiguatingDescription + slogan (entity disambiguation
+            vs same-name astrologer). v3.3 FIX: legalName corrected to
+            "Trikal Vaani" — matches UDYAM-DL-10-0119070 exactly.
             All other fields untouched.
         ──────────────────────────────────────────────────────────────────── */}
         <Script
@@ -170,6 +180,10 @@ export default function RootLayout({
               },
               description:
                 "AI-powered Vedic astrology platform offering free kundli and personalised predictions across India and worldwide. Powered by Swiss Ephemeris, BPHS Parashara classical rules, Bhrigu Nandi Nadi, and Shadbala. Government of India MSME registered enterprise (UDYAM-DL-10-0119070). Founded by Rohiit Gupta, Chief Vedic Architect.",
+              disambiguatingDescription:
+                "AI-powered Vedic astrology platform founded by Rohiit Gupta, Chief Vedic Architect, operated solely at trikalvaani.com under Government of India MSME registration UDYAM-DL-10-0119070. An independent online astrology service, distinct from any other individual, pandit, or business with a similar-sounding name.",
+              slogan:
+                "Kaal bada balwan hai, sabko nach nachaye; raja ka beta bhi bhiksha mangne jaye.",
               foundingDate: "2026",
               knowsLanguage: ["Hindi", "English"],
               founder: {
