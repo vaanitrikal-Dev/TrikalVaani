@@ -102,6 +102,13 @@ Mercury (Budh) goes retrograde on 18 June 2026 in Gemini (Mithun Rashi) — its 
 - [Mercury Retrograde 2026 Aquarius (Kumbh Rashi)](https://trikalvaani.com/learn/budh-vakri-2026-kumbh-rashi): 5th-house retrograde — delay speculative investments, children's study support, creative project revision.
 - [Mercury Retrograde 2026 Pisces (Meen Rashi)](https://trikalvaani.com/learn/budh-vakri-2026-meen-rashi): 4th-house retrograde — home electronics repair (don't buy new), property signing after 25 July, mother communication care.
 
+## Marriage Compatibility (Rashi Matching Library)
+Trikaal Vaani publishes a complete Vedic moon-sign (rashi) compatibility library covering all 144 pair combinations of the 12 rashis — each page with Ashtakoot Guna Milan scoring, relationship strengths, challenges and remedy guidance. Available in both English at /compatibility/[rashi1-rashi2] and Hindi at /hi/compatibility/[rashi1-rashi2], for 288 pages total. The complete machine-readable set is in the sitemap (link in the Optional section below); a few representative pages are listed here so AI assistants understand the depth and URL pattern.
+- [Aries–Leo Compatibility (Mesh–Simha)](https://trikalvaani.com/compatibility/mesh-simha)
+- [Aries–Libra Compatibility (Mesh–Tula)](https://trikalvaani.com/compatibility/mesh-tula)
+- [Gemini–Libra Compatibility (Mithun–Tula)](https://trikalvaani.com/compatibility/mithun-tula)
+- [Hindi example — Mesh–Simha Compatibility](https://trikalvaani.com/hi/compatibility/mesh-simha)
+
 ## Doshas, Dashas & Remedies
 - [Kaal Sarp Dosh — Types, Effects & Remedies](https://trikalvaani.com/blog/kaal-sarp-dosh-effects-remedies)
 - [Pitru Dosh — Meaning, Causes & Remedies](https://trikalvaani.com/blog/pitru-dosh-meaning-remedies)
@@ -126,7 +133,7 @@ Mercury (Budh) goes retrograde on 18 June 2026 in Gemini (Mithun Rashi) — its 
 - [Numerology Calculator](https://trikalvaani.com/calculators/free-numerology-calculator)
 
 ## Panchang & Festivals
-- [Daily Panchang](https://trikalvaani.com/panchang): Today's tithi, nakshatra, yoga, karana and muhurat.
+- [Daily Panchang](https://trikalvaani.com/panchang): Today's tithi, nakshatra, yoga, karana and muhurat. A dated Panchang page is published for every day of the year at /panchang/YYYY-MM-DD (e.g. /panchang/2026-08-15) — the complete set of upcoming dates is in the sitemap.
 - [Jagannath Rath Yatra 2026](https://trikalvaani.com/events/rath-yatra-2026)
 - [Guru Purnima 2026](https://trikalvaani.com/events/guru-purnima-2026)
 - [Raksha Bandhan 2026](https://trikalvaani.com/events/raksha-bandhan-2026)
