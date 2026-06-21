@@ -3,120 +3,63 @@
  * TRIKAL VAANI — trikalvaani.com
  * Chief Vedic Architect: Rohiit Gupta
  * FILE: components/seo/HomepageSchema.tsx
- * Version: 2.1 — Accuracy FAQ de-risked (competitor names dropped, schema-synced)
- * Date: 2026-06-01
+ * Version: 2.2 — Person de-dup: #rohiit-gupta now lives ONLY in the
+ *               single canonical author entity (SchemaScript.tsx)
  * 🔱 JAI MAA SHAKTI
  *
- * CHANGES vs v2.0 (CEO-approved):
- *   ✅ FAQPage Q3 reworded to match HomepageGEO v2.2: dropped AstroSage /
- *      AstroTalk names + the unverifiable "same engine as AstroSage" claim.
- *      New Q is non-branded; new A states only what Trikaal Vaani does. Visible
- *      FAQ (HomepageGEO #faq) and this FAQPage schema remain byte-identical in
- *      Q&A text (AEO requires visible == structured).
- *   ✅ FAQPage dateModified bumped to 2026-06-01.
- *   (Service dateModified also bumped to 2026-06-01 for freshness consistency.)
+ * CHANGES vs v2.1 (CEO-approved):
+ *   ✅ REMOVED the full Person (#rohiit-gupta) definition from this file.
+ *      It is now owned solely by SchemaScript.tsx (sitewide canonical).
+ *      Why this was a problem before:
+ *        • The SAME @id was fully defined here AND in SchemaScript with
+ *          DIFFERENT data (different knowsAbout, different sameAs). One @id
+ *          with conflicting data muddies the entity graph and weakens
+ *          disambiguation — the exact opposite of what we want.
+ *        • This file's Person carried a WRONG LinkedIn vanity URL
+ *          (/in/rohiit-gupta). The real, verified profile lives in the
+ *          canonical: /in/rohiit-gupta-918268415.
+ *      Nothing is lost: the canonical holds the full E-E-A-T data
+ *      (knowsAbout union, hasOccupation, speakable, hasCredential, correct
+ *      LinkedIn, 16+ yrs). The #service author reference below still
+ *      resolves to it by @id across the page's JSON-LD graph.
  *
- *   ⚠️ KNOWN ISSUES TO RESOLVE NEXT (not touched here):
- *      - #rohiit-gupta Person is fully defined in BOTH this file AND
- *        SchemaScript.tsx, and the two DISAGREE (different knowsAbout lists;
- *        sameAs has LinkedIn here but /founder there). Same @id with conflicting
- *        data can muddy the entity graph — pick ONE canonical Person, make the
- *        other a bare {@id} reference.
- *      - sameAs LinkedIn (/in/rohiit-gupta) must point to a REAL, live profile,
- *        else it weakens entity trust. Verify or remove.
- *      - HowTo image uses /og-image.jpg while OG/Product use /og-default.jpg —
- *        confirm /og-image.jpg exists (possible 404).
+ *   ⚠️ STILL TO VERIFY (not blockers):
+ *      - Founder image: canonical Person uses /images/founder.png; this file
+ *        previously used /Rohiit-Gupta.jpg. Confirm which path is actually
+ *        live so the canonical does not 404.
+ *      - HowTo image uses /og-image.jpg while OG/Product use /og-default.jpg
+ *        — confirm /og-image.jpg exists (possible 404).
+ *      - FAQ "Who is Rohiit Gupta?" answer still says "15+ years". To match
+ *        the new 16+ everywhere, update it in BOTH HomepageGEO.tsx (visible)
+ *        AND this FAQPage together — they must stay byte-identical for AEO.
  *
- * CHANGES vs v1.1 (carried from v2.0, CEO-approved):
+ * CHANGES carried from v2.1 / v2.0 (CEO-approved):
  *   ✅ Brand flip Trikaal Vaani; persona Trikaal AI / Trikaal Ka Sandesh.
- *   ✅ Local SEO removed (Delhi NCR PostalAddress + occupationLocation).
- *   ✅ Service schema with areaServed [India, Worldwide] (structured global signal).
- *   ✅ E-E-A-T: hasCredential; speakable; entity graph cross-linked by @id.
+ *   ✅ FAQ Q3 non-branded (competitor brand names dropped); visible == schema.
+ *   ✅ Local geo schema removed (no PostalAddress / occupationLocation).
+ *   ✅ Service areaServed [India, Worldwide] (structured global signal).
  *   ❌ aggregateRating NOT added — no fake stars.
- *   ⚠️ FAQPage rich result deprecated 7 May 2026; FAQPage KEPT for AEO citation.
+ *   ⚠️ FAQPage rich result deprecated 7 May 2026; FAQPage KEPT for AEO.
  *
  * SCHEMA OWNERSHIP MAP (no duplicates across site):
- *   - Organization → layout.tsx (#organization) — referenced here by @id only
+ *   - Organization → layout.tsx (#organization) — referenced here by @id
  *   - WebApplication → layout.tsx (#webapp)
- *   - Person (Rohiit ji) → THIS FILE (#rohiit-gupta) — homepage authority
- *     (NOTE: also defined in SchemaScript.tsx — see Known Issues above)
- *   - FAQPage → THIS FILE (#faq) — homepage FAQ
- *   - Service (areaServed: global) → THIS FILE (#service)
+ *   - Person (Rohiit) → SchemaScript.tsx (#rohiit-gupta) — SINGLE canonical
+ *   - WebSite / Service(#service-readings) / Product → SchemaScript.tsx
+ *   - FAQPage → THIS FILE (#faq)
+ *   - Service (#service, homepage) → THIS FILE
  *   - BreadcrumbList → THIS FILE
  *   - HowTo → THIS FILE (#howto)
- *   - OfferCatalog (services) → THIS FILE (#services)
+ *   - OfferCatalog (#services) → THIS FILE
  * =============================================================
  */
 
 import Script from 'next/script';
 
 // ──────────────────────────────────────────────────────────────
-// SCHEMA 1: PERSON (Rohiit Gupta) — E-E-A-T AUTHORITY
-// ──────────────────────────────────────────────────────────────
-const personSchema = {
-  '@context': 'https://schema.org',
-  '@type': 'Person',
-  '@id': 'https://trikalvaani.com/#rohiit-gupta',
-  name: 'Rohiit Gupta',
-  alternateName: ['Rohit Gupta', 'रोहित गुप्ता'],
-  jobTitle: 'Chief Vedic Architect',
-  description:
-    'Vedic astrologer with 15+ years of study under the Parashara BPHS tradition. Founder of Trikaal Vaani — an AI-powered Vedic astrology platform offering free kundli and accurate predictions to seekers across India and worldwide.',
-  url: 'https://trikalvaani.com/founder',
-  image: 'https://trikalvaani.com/Rohiit-Gupta.jpg',
-  sameAs: [
-    'https://www.instagram.com/thetrikalvaani',
-    'https://www.youtube.com/@TheTrikalVaani',
-    'https://www.facebook.com/people/Trikal-Vaani-Voice',
-    'https://www.linkedin.com/in/rohiit-gupta',
-  ],
-  worksFor: {
-    '@id': 'https://trikalvaani.com/#organization',
-  },
-  knowsAbout: [
-    'Vedic Astrology',
-    'Brihat Parashara Hora Shastra',
-    'Vimshottari Dasha',
-    'Bhrigu Nandi Nadi',
-    'Shadbala Calculation',
-    'Navamsa D9 Analysis',
-    'Mangal Dosha Analysis',
-    'Kundali Matching',
-    'Atmakaraka System',
-    'Saturn Sade Sati',
-    'Muhurat Selection',
-    'Karmic Background Reading',
-    'Panchang & Gochar',
-  ],
-  knowsLanguage: ['Hindi', 'English'],
-  nationality: {
-    '@type': 'Country',
-    name: 'India',
-  },
-  hasCredential: {
-    '@type': 'EducationalOccupationalCredential',
-    credentialCategory: 'Professional Experience',
-    name: '15+ years of Vedic astrology practice (Parashara BPHS tradition)',
-  },
-  hasOccupation: {
-    '@type': 'Occupation',
-    name: 'Vedic Astrologer',
-    skills: [
-      'Vedic Birth Chart Analysis',
-      'Vimshottari Dasha Prediction',
-      'Kundali Matching',
-      'Muhurat Selection',
-      'Karmic Pattern Reading',
-    ],
-  },
-  speakable: {
-    '@type': 'SpeakableSpecification',
-    cssSelector: ['#author-byline-heading'],
-  },
-};
-
-// ──────────────────────────────────────────────────────────────
-// SCHEMA 2: SERVICE — GLOBAL REACH
+// SCHEMA 1: SERVICE — GLOBAL REACH
+// (Person #rohiit-gupta is referenced by @id only — defined canonically
+//  in SchemaScript.tsx, never re-defined here.)
 // ──────────────────────────────────────────────────────────────
 const serviceGlobalSchema = {
   '@context': 'https://schema.org',
@@ -150,7 +93,7 @@ const serviceGlobalSchema = {
 };
 
 // ──────────────────────────────────────────────────────────────
-// SCHEMA 3: FAQPAGE — AEO citation extraction
+// SCHEMA 2: FAQPAGE — AEO citation extraction
 // SYNCED EXACTLY to visible FAQ in HomepageGEO.tsx v2.2.
 // ──────────────────────────────────────────────────────────────
 const faqSchema = {
@@ -228,7 +171,7 @@ const faqSchema = {
 };
 
 // ──────────────────────────────────────────────────────────────
-// SCHEMA 4: BREADCRUMBLIST
+// SCHEMA 3: BREADCRUMBLIST
 // ──────────────────────────────────────────────────────────────
 const breadcrumbSchema = {
   '@context': 'https://schema.org',
@@ -244,7 +187,7 @@ const breadcrumbSchema = {
 };
 
 // ──────────────────────────────────────────────────────────────
-// SCHEMA 5: HOWTO — voice / AI parsing (no rich result since 2024; kept for AEO)
+// SCHEMA 4: HOWTO — voice / AI parsing (no rich result since 2024; kept for AEO)
 // ──────────────────────────────────────────────────────────────
 const howToSchema = {
   '@context': 'https://schema.org',
@@ -299,7 +242,7 @@ const howToSchema = {
 };
 
 // ──────────────────────────────────────────────────────────────
-// SCHEMA 6: OFFERCATALOG — service prices
+// SCHEMA 5: OFFERCATALOG — service prices
 // ──────────────────────────────────────────────────────────────
 const serviceSchema = {
   '@context': 'https://schema.org',
@@ -371,15 +314,12 @@ const serviceSchema = {
 
 // ──────────────────────────────────────────────────────────────
 // EXPORT — Drop-in component
+// Person (#rohiit-gupta) is intentionally NOT emitted here — it is the
+// single canonical author entity in SchemaScript.tsx (sitewide).
 // ──────────────────────────────────────────────────────────────
 export default function HomepageSchema() {
   return (
     <>
-      <Script
-        id="schema-person-rohiit"
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(personSchema) }}
-      />
       <Script
         id="schema-service-global"
         type="application/ld+json"
