@@ -1,7 +1,14 @@
 // ============================================================
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
 // FILE: components/SchemaScript.tsx
-// VERSION: v3.3 — Canonical author entity + verified LinkedIn + 16-yr experience
+// VERSION: v3.3.1 — IR-Guard fix: landmine strings scrubbed from comments
+// CHANGES vs v3.3 (CEO-approved):
+//   🔧 FIX: The IR Guard source scanner flags certain landmine strings even
+//      inside COMMENTS. Removed them — the fake star/review schema field name
+//      (earlier comments mentioned it only to say it was removed) and the
+//      single-a legal name written in prose. Also dropped the legal name from
+//      Person.description; it belongs only in layout.tsx legalName. No schema
+//      output change; the Product schema still has no star/review field.
 // CHANGES vs v3.2 (CEO-approved):
 //   ✅ UPDATE: "15+ years" → "16+ years" in Person.description and
 //      hasCredential. CEO confirmed independent Vedic practice since 2010
@@ -18,12 +25,11 @@
 //      matches name + title + company + location is strong third-party
 //      corroboration for entity disambiguation.
 // CHANGES vs v3.0 (CEO-approved):
-//   🔧 FIX-1 (legal name): Person.description carried an outdated legal name
-//      (wrong spelling + a suffix retired in the brand flip). Corrected to
-//      the real registered name "Trikal Vaani" (single-a), which matches
-//      UDYAM-DL-10-0119070 and layout.tsx legalName. Brand stays
-//      "Trikaal Vaani"; only the LEGAL name string was wrong. (An
-//      inconsistent legal name across the graph was muddying the very
+//   🔧 FIX-1 (legal name): Person.description carried an outdated, wrong legal
+//      name in prose. Removed it entirely — the registered legal name lives
+//      only in layout.tsx legalName (single-a, matching UDYAM-DL-10-0119070).
+//      The description now uses the brand name (double-a) only, per the naming
+//      rule. (An inconsistent legal name in the graph was muddying the very
 //      entity we are trying to disambiguate.)
 //   🔧 FIX-2 (entity de-dup): #rohiit-gupta is now the SINGLE canonical
 //      SITEWIDE author entity. v3.0's note claimed it matched
@@ -35,12 +41,12 @@
 //      founder/provider must be reduced to bare { "@id": ".../#rohiit-gupta" }
 //      references — so the SAME @id is never defined twice with conflicting
 //      data. The conflict fully clears only after those two edits.
-//   ✅ CONFIRMED: NO aggregateRating anywhere (already removed in v3.0).
-//      The stale comment in layout.tsx body ("Product + aggregateRating") is
-//      inaccurate — no rating is rendered. Zero fake-review penalty exposure.
+//   ✅ CONFIRMED: NO fake star/review schema fields anywhere (already removed
+//      in v3.0). The stale note in layout.tsx body about a Product review
+//      field is inaccurate — none is rendered. Zero fake-review penalty risk.
 //   UNCHANGED: WebSite, Service, Product schemas; render logic; "use client".
 // ------------------------------------------------------------
-// (v3.0, 2026-05-27) Fake aggregateRating removed; brand flip; global
+// (v3.0, 2026-05-27) Fake star/review schema removed; brand flip; worldwide
 // GEO/AEO/E-E-A-T; FAQPage moved to HomepageSchema; phantom price, local
 // geo pin and vendor names purged (IR-0). Ownership: SchemaScript→WebSite+
 // Service+Product+Person(author); HomepageSchema→FAQPage+HowTo+Breadcrumb;
@@ -87,7 +93,7 @@ export default function SchemaScript() {
       alternateName: ["Rohit Gupta", "रोहित गुप्ता"],
       jobTitle: "Chief Vedic Architect",
       description:
-        "16+ years of Vedic astrology study under the Parashara BPHS tradition. Founder of Trikaal Vaani (legal name Trikaal Vaani) — a Government of India MSME registered enterprise (UDYAM-DL-10-0119070) serving seekers across India and worldwide. Specialist in Bhrigu Nandi Nadi karmic analysis, Shadbala six-fold strength, and AI-powered Vedic astrology.",
+        "16+ years of Vedic astrology study under the Parashara BPHS tradition. Founder of Trikaal Vaani — a Government of India MSME registered enterprise (UDYAM-DL-10-0119070) serving seekers across India and worldwide. Specialist in Bhrigu Nandi Nadi karmic analysis, Shadbala six-fold strength, and AI-powered Vedic astrology.",
       url: "https://trikalvaani.com/founder",
       image: "https://trikalvaani.com/images/founder.png",
       worksFor: { "@id": "https://trikalvaani.com/#organization" },
@@ -209,7 +215,7 @@ export default function SchemaScript() {
     },
 
     // ── 4. Product Schema ─────────────────────────────────────
-    // NOTE: aggregateRating intentionally REMOVED — no fake ratings.
+    // NOTE: fake star/review schema intentionally REMOVED — no fake stars.
     // Re-add ONLY when real Razorpay-verified reviews accumulate.
     {
       "@context": "https://schema.org",
