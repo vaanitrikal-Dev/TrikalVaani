@@ -1,36 +1,50 @@
 // ============================================================
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
 // FILE: components/SchemaScript.tsx
-// VERSION: v3.0 — Fake rating removed + brand flip + global GEO/AEO/E-E-A-T
-// DATE: 2026-05-27
-// CHANGES vs v2.1 (CEO-approved, IR-0 compliant):
-//   REMOVED (landmines):
-//     ❌ Fake aggregateRating (4.9 / 10666) — DELETED. No fake stats (IR-0).
-//        Re-add only with real Razorpay-verified reviews.
-//     ❌ FAQPage block — REMOVED. Owned by HomepageSchema v2.0 (#faq,
-//        homepage-only). Keeping it here duplicated the @id sitewide AND
-//        re-injected Delhi NCR + ₹499 + vendor names on every page.
-//     ❌ ₹499 Personal Consultation offer — removed from Service catalog.
-//     ❌ Delhi NCR PostalAddress pin — removed from Person.
-//     ❌ Vendor names (Gemini Pro 2.5 / Google Gemini / Trikaal AI engine)
-//        — replaced with "premium AI engine with expert polish".
-//   ADDED (SEO/GEO/AEO/E-E-A-T firepower):
-//     ✅ BRAND FLIP "Trikaal Vaani" -> "Trikaal Vaani" (WebSite, Service,
-//        Product, brand names). alternateName arrays keep both spellings.
-//     ✅ GLOBAL: Service + Product areaServed/description -> India + Worldwide.
-//     ✅ E-E-A-T: Person hasCredential (15+ yrs BPHS), nationality India,
-//        knowsLanguage, expanded knowsAbout, real sameAs (IG/YT/FB).
-//     ✅ Service: dateModified freshness, availableChannel, author cross-link
-//        to #rohiit-gupta, 3-language availability, entity-rich description.
-//     ✅ WebSite: SearchAction kept, global description, both brand spellings.
-//   SCHEMA OWNERSHIP (no sitewide collisions):
-//     SchemaScript (sitewide) → WebSite + Service + Product
-//     HomepageSchema (homepage) → Person + FAQPage + HowTo + Breadcrumb
-//     layout.tsx → Organization + WebApplication
-//   NOTE: Person #rohiit-gupta kept here as the sitewide author entity;
-//   it matches HomepageSchema's #rohiit-gupta exactly (same @id, consistent
-//   data) so the two reinforce rather than conflict.
-//   All schemas cross-reference via @id for knowledge graph coherence.
+// VERSION: v3.3 — Canonical author entity + verified LinkedIn + 16-yr experience
+// CHANGES vs v3.2 (CEO-approved):
+//   ✅ UPDATE: "15+ years" → "16+ years" in Person.description and
+//      hasCredential. CEO confirmed independent Vedic practice since 2010
+//      (16+ yrs); Trikaal Vaani the COMPANY was founded May 2026. Schema now
+//      tells the SAME story as the corrected LinkedIn: 16+ yrs of practice,
+//      company since 2026 — no contradiction across the entity graph.
+// CHANGES vs v3.2 (CEO-approved):
+//   ✅ ADD: Verified LinkedIn added to Person.sameAs —
+//      https://www.linkedin.com/in/rohiit-gupta-918268415 (confirmed live:
+//      Rohiit Gupta · Chief Vedic Architect at Trikaal Vaani · Delhi). This
+//      is the CORRECT profile; the old vanity URL (/in/rohiit-gupta) sitting
+//      in HomepageSchema's Person was wrong and disappears when that Person
+//      becomes an @id reference (pending dedup step). A real LinkedIn that
+//      matches name + title + company + location is strong third-party
+//      corroboration for entity disambiguation.
+// CHANGES vs v3.0 (CEO-approved):
+//   🔧 FIX-1 (legal name): Person.description carried an outdated legal name
+//      (wrong spelling + a suffix retired in the brand flip). Corrected to
+//      the real registered name "Trikal Vaani" (single-a), which matches
+//      UDYAM-DL-10-0119070 and layout.tsx legalName. Brand stays
+//      "Trikaal Vaani"; only the LEGAL name string was wrong. (An
+//      inconsistent legal name across the graph was muddying the very
+//      entity we are trying to disambiguate.)
+//   🔧 FIX-2 (entity de-dup): #rohiit-gupta is now the SINGLE canonical
+//      SITEWIDE author entity. v3.0's note claimed it matched
+//      HomepageSchema's Person "exactly" — it did NOT (different knowsAbout,
+//      sameAs and image). This Person is now the superset source of truth:
+//      union of knowsAbout, plus hasOccupation + speakable carried over from
+//      HomepageSchema, so nothing is lost when the others become references.
+//      ➡️ NEXT (separate edits): HomepageSchema #rohiit-gupta and layout.tsx
+//      founder/provider must be reduced to bare { "@id": ".../#rohiit-gupta" }
+//      references — so the SAME @id is never defined twice with conflicting
+//      data. The conflict fully clears only after those two edits.
+//   ✅ CONFIRMED: NO aggregateRating anywhere (already removed in v3.0).
+//      The stale comment in layout.tsx body ("Product + aggregateRating") is
+//      inaccurate — no rating is rendered. Zero fake-review penalty exposure.
+//   UNCHANGED: WebSite, Service, Product schemas; render logic; "use client".
+// ------------------------------------------------------------
+// (v3.0, 2026-05-27) Fake aggregateRating removed; brand flip; global
+// GEO/AEO/E-E-A-T; FAQPage moved to HomepageSchema; phantom price, local
+// geo pin and vendor names purged (IR-0). Ownership: SchemaScript→WebSite+
+// Service+Product+Person(author); HomepageSchema→FAQPage+HowTo+Breadcrumb;
+// layout.tsx→Organization+WebApplication. Cross-referenced via @id.
 // ============================================================
 
 "use client";
@@ -62,6 +76,9 @@ export default function SchemaScript() {
     },
 
     // ── 2. Person Schema — Rohiit Gupta ───────────────────────
+    // CANONICAL sitewide author entity (#rohiit-gupta). Single source of
+    // truth — HomepageSchema and layout.tsx must reference this @id only,
+    // never re-define it with different data.
     {
       "@context": "https://schema.org",
       "@type": "Person",
@@ -70,7 +87,7 @@ export default function SchemaScript() {
       alternateName: ["Rohit Gupta", "रोहित गुप्ता"],
       jobTitle: "Chief Vedic Architect",
       description:
-        "15+ years of Vedic astrology study under the Parashara BPHS tradition. Founder of Trikaal Vaani (legally Trikaal Vaani Global) — a Government of India MSME registered enterprise (UDYAM-DL-10-0119070) serving seekers across India and worldwide. Specialist in Bhrigu Nandi Nadi karmic analysis, Shadbala six-fold strength, and AI-powered Vedic astrology.",
+        "16+ years of Vedic astrology study under the Parashara BPHS tradition. Founder of Trikaal Vaani (legal name Trikal Vaani) — a Government of India MSME registered enterprise (UDYAM-DL-10-0119070) serving seekers across India and worldwide. Specialist in Bhrigu Nandi Nadi karmic analysis, Shadbala six-fold strength, and AI-powered Vedic astrology.",
       url: "https://trikalvaani.com/founder",
       image: "https://trikalvaani.com/images/founder.png",
       worksFor: { "@id": "https://trikalvaani.com/#organization" },
@@ -78,7 +95,18 @@ export default function SchemaScript() {
       hasCredential: {
         "@type": "EducationalOccupationalCredential",
         credentialCategory: "Professional Experience",
-        name: "15+ years of Vedic astrology practice (Parashara BPHS tradition)",
+        name: "16+ years of Vedic astrology practice (Parashara BPHS tradition)",
+      },
+      hasOccupation: {
+        "@type": "Occupation",
+        name: "Vedic Astrologer",
+        skills: [
+          "Vedic Birth Chart Analysis",
+          "Vimshottari Dasha Prediction",
+          "Kundali Matching",
+          "Muhurat Selection",
+          "Karmic Pattern Reading",
+        ],
       },
       knowsAbout: [
         "Vedic Astrology",
@@ -92,7 +120,12 @@ export default function SchemaScript() {
         "Navamsa D9 Chart",
         "Dhana Yoga",
         "Kundali Matching",
+        "Mangal Dosha Analysis",
+        "Atmakaraka System",
+        "Saturn Sade Sati",
         "Muhurat Selection",
+        "Karmic Background Reading",
+        "Panchang & Gochar",
         "AI Astrology Systems",
       ],
       knowsLanguage: ["Hindi", "English"],
@@ -100,8 +133,13 @@ export default function SchemaScript() {
         "https://www.instagram.com/thetrikalvaani",
         "https://www.youtube.com/@TheTrikalVaani",
         "https://www.facebook.com/people/Trikal-Vaani-Voice",
+        "https://www.linkedin.com/in/rohiit-gupta-918268415",
         "https://trikalvaani.com/founder",
       ],
+      speakable: {
+        "@type": "SpeakableSpecification",
+        cssSelector: ["#author-byline-heading"],
+      },
     },
 
     // ── 3. Service Schema (sitewide) ──────────────────────────
