@@ -87,7 +87,7 @@ export default function SchemaScript() {
       alternateName: ["Rohit Gupta", "रोहित गुप्ता"],
       jobTitle: "Chief Vedic Architect",
       description:
-        "16+ years of Vedic astrology study under the Parashara BPHS tradition. Founder of Trikaal Vaani (legal name Trikal Vaani) — a Government of India MSME registered enterprise (UDYAM-DL-10-0119070) serving seekers across India and worldwide. Specialist in Bhrigu Nandi Nadi karmic analysis, Shadbala six-fold strength, and AI-powered Vedic astrology.",
+        "16+ years of Vedic astrology study under the Parashara BPHS tradition. Founder of Trikaal Vaani (legal name Trikaal Vaani) — a Government of India MSME registered enterprise (UDYAM-DL-10-0119070) serving seekers across India and worldwide. Specialist in Bhrigu Nandi Nadi karmic analysis, Shadbala six-fold strength, and AI-powered Vedic astrology.",
       url: "https://trikalvaani.com/founder",
       image: "https://trikalvaani.com/images/founder.png",
       worksFor: { "@id": "https://trikalvaani.com/#organization" },
