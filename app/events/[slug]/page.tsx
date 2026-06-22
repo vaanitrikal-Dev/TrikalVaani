@@ -2,9 +2,17 @@
 // 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER
 // ════════════════════════════════════════════════════════════════════
 // File:        app/events/[slug]/page.tsx
-// Version:     v2.1 — SOFT CTA (value-first free-kundali nudge, Jun 2026)
+// Version:     v2.2 — Calculator internal links (Claude, June 2026)
 // Owner:       Rohiit Gupta, Chief Vedic Architect
 // Domain:      trikalvaani.com
+//
+// ── Changes v2.1 → v2.2 ────────────────────────────────────────────
+//   INTERNAL LINKING — added <CalculatorLinks /> (components/seo/
+//   CalculatorLinks.tsx) just before the footer. Flows authority from
+//   festival pages → priority calculators (Kundli, Manglik, Dasha, Sade
+//   Sati, Gemstone…), which were near-orphaned internally. Calculator list
+//   lives in ONE place (the component) — no scattered hardcoded lists.
+//   PROTECTED (untouched): data fetching, schema, CTAs, FAQ, footer.
 //
 // ── Changes v2.0 → v2.1 ────────────────────────────────────────────
 //   Added a slim, value-first SOFT CTA bar right under the quick-answer
@@ -38,6 +46,7 @@ import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@supabase/supabase-js";
+import CalculatorLinks from "@/components/seo/CalculatorLinks";
 
 export const revalidate = 86400;
 export const dynamicParams = true;
@@ -404,6 +413,8 @@ export default async function EventDetailPage(
               <li><Link href="/career" className="text-amber-700 hover:underline">Career</Link></li>
             </ul>
           </section>
+
+          <CalculatorLinks />
 
           <footer className="mt-8 border-t border-gray-200 pt-4 text-xs text-gray-500">
             <p>🔱 Curated by <strong>{AUTHOR_NAME}</strong>, {AUTHOR_TITLE}. Source: Vedic shastras (BPHS, Surya Siddhanta) · Swiss Ephemeris.</p>
