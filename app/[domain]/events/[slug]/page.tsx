@@ -2,9 +2,20 @@
 // 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER
 // ════════════════════════════════════════════════════════════════════
 // File:        app/[domain]/events/[slug]/page.tsx
-// Version:     v2.5 — SOFT CTA + /predict cleanup (Claude, June 2026)
+// Version:     v2.6 — Calculator internal links (Claude, June 2026)
 // Owner:       Rohiit Gupta, Chief Vedic Architect
 // Domain:      trikalvaani.com
+//
+// ── Changes vs v2.5 ────────────────────────────────────────────────
+//   1. INTERNAL LINKING — added <CalculatorLinks /> (components/seo/
+//      CalculatorLinks.tsx) just before the footer. Flows authority from
+//      high-traffic festival pages → priority calculators (Kundli, Manglik,
+//      Dasha, Sade Sati, Gemstone…). These calculators were near-orphaned;
+//      this is the biggest internal-authority injection available.
+//      Calculator list is managed in ONE place (the component) — no
+//      scattered hardcoded link lists.
+//   PROTECTED (untouched): all data fetching, scope logic, puja vidhi,
+//      remedies, regional customs, FAQ, schema, CTAs, footer.
 //
 // ── Changes vs v2.4 ────────────────────────────────────────────────
 //   1. SOFT CTA — slim value-first free-kundali bar under the quick-answer
@@ -54,6 +65,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@supabase/supabase-js";
 import citiesData from "../../../data/cities.json";
+import CalculatorLinks from "@/components/seo/CalculatorLinks";
 
 export const revalidate = 86400;
 export const dynamicParams = true;
@@ -614,6 +626,8 @@ export default async function CityFestivalPage(
               <li><Link href="/marriage" className="text-amber-700 hover:underline">Marriage</Link></li>
             </ul>
           </section>
+
+          <CalculatorLinks />
 
           <footer className="mt-8 border-t border-gray-200 pt-4 text-xs text-gray-500">
             <p>
