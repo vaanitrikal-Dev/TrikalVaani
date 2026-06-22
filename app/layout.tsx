@@ -163,7 +163,7 @@ export default function RootLayout({
         {/* ── Organization Schema ──────────────────────────────────────────
             v3.6: + disambiguatingDescription + slogan (entity disambiguation
             vs same-name astrologer). v3.3 FIX: legalName corrected to
-            "Trikal Vaani" — matches UDYAM-DL-10-0119070 exactly.
+            "Trikaal Vaani" — matches UDYAM-DL-10-0119070 exactly.
             All other fields untouched.
         ──────────────────────────────────────────────────────────────────── */}
         <Script
