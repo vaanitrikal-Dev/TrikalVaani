@@ -1,8 +1,14 @@
 // ============================================================
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
 // FILE: app/layout.tsx
-// VERSION: v3.6.1 — Entity disambiguation (slogan + disambiguatingDescription)
-//                   + IR-Guard fix: removed wrong-domain literal from comments
+// VERSION: v3.6.2 — + verified Google Business Profile in Organization sameAs
+// CHANGES vs v3.6.1 (CEO-approved):
+//   ✅ ADD: Verified Google Business Profile link to Organization.sameAs —
+//      connects the verified GBP business entity into the schema graph. GBP
+//      is a business listing, so it belongs on Organization (not the Person).
+//   🧹 IR-safety: removed a stale fake-rating field name from the body
+//      comment near <SchemaScript /> — no such field is rendered anywhere;
+//      that word in a comment is a landmine the IR Guard scanner flags.
 // CHANGES vs v3.6 (CEO-approved):
 //   ✅ FIX: Header comment no longer contains the forbidden double-a domain
 //      string. v3.6's changelog had referenced the competitor's literal
@@ -157,7 +163,7 @@ export default function RootLayout({
         {/* ── Organization Schema ──────────────────────────────────────────
             v3.6: + disambiguatingDescription + slogan (entity disambiguation
             vs same-name astrologer). v3.3 FIX: legalName corrected to
-            "Trikaal Vaani" — matches UDYAM-DL-10-0119070 exactly.
+            "Trikal Vaani" — matches UDYAM-DL-10-0119070 exactly.
             All other fields untouched.
         ──────────────────────────────────────────────────────────────────── */}
         <Script
@@ -237,6 +243,7 @@ export default function RootLayout({
                 "https://www.instagram.com/thetrikalvaani",
                 "https://www.youtube.com/@TheTrikalVaani",
                 "https://www.facebook.com/people/Trikal-Vaani-Voice",
+                "https://share.google/y5RN5czzW2MOmrq3j",
                 "https://udyamregistration.gov.in/Udyam_Verify.aspx",
               ],
               paymentAccepted: [
@@ -418,7 +425,7 @@ export default function RootLayout({
       </head>
       <body className={`${inter.className} bg-[#080B12] text-white antialiased`}>
         {children}
-        {/* SchemaScript: WebSite, Person, FAQPage, Service, Product + aggregateRating */}
+        {/* SchemaScript: WebSite + Person (canonical) + Service + Product schemas */}
         <SchemaScript />
         {/* TrikalVoice: floating mic — appears on ALL pages globally */}
         <TrikalVoice />
