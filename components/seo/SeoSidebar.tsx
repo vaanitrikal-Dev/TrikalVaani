@@ -9,9 +9,23 @@ interface Props {
   cluster: string
 }
 
+/* ── Cluster → CTA map ──
+   Keep this in sync with the cta_href values stored in the
+   seo_pillar_pages table. Clusters with a matching ₹51 themed
+   Deep Reading point there; everything else falls back to the
+   free Kundli lead magnet. */
+const SIDEBAR_CTA: Record<string, { href: string; label: string }> = {
+  career:   { href: '/services/career-pivot',   label: 'Get My Career Reading — ₹51' },
+  wealth:   { href: '/services/wealth-reading',  label: 'Get My Wealth Reading — ₹51' },
+  property: { href: '/services/property-yog',    label: 'Get My Property Reading — ₹51' },
+}
+
+const DEFAULT_CTA = { href: '/#birth-form', label: 'Get My Free Kundli →' }
+
 export default function SeoSidebar({ pages, currentSlug, cluster }: Props) {
   const pillar = pages.find(p => p.page_type === 'pillar')
   const clusters = pages.filter(p => p.page_type === 'cluster')
+  const cta = SIDEBAR_CTA[cluster] || DEFAULT_CTA
 
   return (
     <nav style={{
@@ -130,14 +144,14 @@ export default function SeoSidebar({ pages, currentSlug, cluster }: Props) {
         )
       })}
 
-      {/* CTA in sidebar */}
+      {/* CTA in sidebar — cluster-aware */}
       <div style={{
         marginTop: '1.25rem',
         paddingTop: '1rem',
         borderTop: '1px solid rgba(200,144,45,0.15)',
       }}>
         <Link
-          href="/birth-form"
+          href={cta.href}
           style={{
             display: 'block',
             background: 'linear-gradient(135deg, #C8902D, #A0700F)',
@@ -152,7 +166,7 @@ export default function SeoSidebar({ pages, currentSlug, cluster }: Props) {
             letterSpacing: '0.02em',
           }}
         >
-          ✦ Get Reading — ₹251
+          ✦ {cta.label}
         </Link>
         <p style={{
           fontSize: '0.7rem',
