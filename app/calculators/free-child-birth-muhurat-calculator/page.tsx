@@ -2,10 +2,26 @@
 
 // ============================================================
 // File: app/calculators/free-child-birth-muhurat-calculator/page.tsx
-// Version: v1.3 — Gold-standard JSON-LD + brand normalisation
+// Version: v1.5 — full_day OFF on main scan (timeout fix) + v1.4 time-parse fix
 // VM endpoint: /muhurat-finder (free) | paid via /api/create-muhurat-order
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
 // Changelog:
+//   v1.5 (2026-06-24) — PERF/BUGFIX: the main muhurat scan no longer
+//        requests full_day. The VM was scanning the chosen window PLUS a
+//        full 24h (~144 extra slots) on every submit, just to populate the
+//        collapsed "whole day" educational block — ~7x heavier, which
+//        intermittently exceeded the 45s timeout ("Calculation timed
+//        out"). Window-only scan now. The educational block won't render
+//        until we wire it as a lazy on-open second call. (Builds on v1.4.)
+//   v1.4 (2026-06-24) — BUGFIX (paid flow): the chosen muhurat time was
+//        parsed via best.time.split(':') + parseInt, which silently
+//        dropped the AM/PM suffix. The VM returns a 12-hour string
+//        ("9:30 AM" / "2:35 PM"), so every PM muhurat was sent to the
+//        paid report API as its AM equivalent (2:35 PM -> hour 2 = 02:35).
+//        Added parseTimeTo24h() which correctly converts BOTH 12-hour
+//        ("h:mm AM/PM") and 24-hour ("HH:mm") strings to 24-hour numbers.
+//        Only the paid-order time parse changed; no UI/payment/free-calc
+//        logic touched.
 //   v1.3 (2026-06-02) — Replaced standalone 1-node FAQPage script with
 //        buildCalcJsonLd() helper (8 @id-linked nodes: Organization+real
 //        sameAs, WebSite, linkable Person /founder, WebPage isPartOf
@@ -146,6 +162,23 @@ function PlaceInput({ id, placeholder, onSelect, error }: {
   );
 }
 
+// ─── Robust 12h / 24h time parser ─────────────────────────────
+// The VM returns the display time as a 12-hour string e.g. "9:30 AM"
+// or "2:35 PM". Splitting on ":" and parseInt() silently dropped the
+// AM/PM, so every PM muhurat was sent to the paid report as its AM
+// twin. This converts BOTH "h:mm AM/PM" and 24-hour "HH:mm" strings
+// to correct 24-hour numbers (handles 12 AM -> 0 and 12 PM -> 12).
+function parseTimeTo24h(timeStr: string | undefined | null): { hour: number; minute: number } {
+  const m = (timeStr || '').trim().match(/^(\d{1,2}):(\d{2})\s*(AM|PM)?$/i);
+  if (!m) return { hour: 0, minute: 0 };
+  let hour = parseInt(m[1], 10);
+  const minute = parseInt(m[2], 10);
+  const ampm = (m[3] || '').toUpperCase();
+  if (ampm === 'PM' && hour !== 12) hour += 12;
+  if (ampm === 'AM' && hour === 12) hour = 0;
+  return { hour, minute };
+}
+
 const FAQS = [
   { q: 'C-section ke liye shubh muhurat kaise nikalta hai?', a: 'C-section ya planned delivery ka muhurat aapke doctor dwara di gayi safe time window ke ANDAR nikala jaata hai. Trikaal Vaani har 10 minute ka Lagna, Nakshatra, Tithi, Yoga, aur 8th house check karke sabse auspicious slot batata hai — sirf us window mein jo doctor ne approve ki hai. Medical safety pehle, muhurat uske andar.' },
   { q: 'Kya yeh tool doctor ki advice replace karta hai?', a: 'Bilkul nahi. Delivery date aur safe time window 100% aapke doctor decide karte hain — maa aur bachche ki health ke according. Yeh tool sirf us approved window ke andar sabse shubh moment dhoondta hai. Yeh medical advice nahi hai.' },
@@ -251,7 +284,11 @@ export default function FreeChildBirthMuhuratPage() {
           window_start_hour: sh, window_start_minute: sm,
           window_end_hour: eh, window_end_minute: em,
           latitude: useLat, longitude: useLng, timezone: useTz,
-          full_day: true,
+          // full_day OFF on the main scan. The VM was also scanning a full
+          // 24h day (~144 extra slots) on every submit just to populate the
+          // collapsed "whole day" educational block — that ~7x heavier load
+          // intermittently exceeded the 45s timeout. Window-only scan now.
+          full_day: false,
         }),
       });
       if (!res.ok) {
@@ -275,7 +312,8 @@ export default function FreeChildBirthMuhuratPage() {
 
     const [year, month, day] = date.split('-').map(Number);
     // Use the best slot's time as the parent's CHOSEN delivery moment
-    const [bh, bm] = (best.time || '00:00').split(':').map((n: string) => parseInt(n, 10));
+    // (parseTimeTo24h handles the VM's 12-hour "h:mm AM/PM" format)
+    const { hour: bh, minute: bm } = parseTimeTo24h(best.time);
     const useLat = hospLat ?? lat;
     const useLng = hospLng ?? lng;
     const useTz = hospTz ?? timezone;
