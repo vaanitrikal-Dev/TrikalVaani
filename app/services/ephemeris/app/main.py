@@ -3,7 +3,7 @@
   TRIKAL VAANI — Swiss Ephemeris Vedic Astrology API
   File: app/main.py
   Author: Rohiit Gupta, Chief Vedic Architect
-  Version: 3.1 — Added /muhurat-finder + /muhurat-paid endpoints
+  Version: 3.2 — Added /vivah-muhurat (strict-classical marriage muhurat)
   JAI MAA SHAKTI
 =============================================================
 """
@@ -69,6 +69,14 @@ try:
 except Exception as e:
     print(f'[Muhurat] Import failed: {e}')
     MUHURAT_AVAILABLE = False
+
+# ── Import Vivah Muhurat Engine ───────────────────────────────────────────────
+try:
+    from .vivah_engine import find_vivah_muhurats
+    VIVAH_AVAILABLE = True
+except Exception as e:
+    print(f'[Vivah] Import failed: {e}')
+    VIVAH_AVAILABLE = False
 
 # ── Import Master Engines (remedy + dosha) ────────────────────────────────────
 try:
@@ -173,6 +181,22 @@ class MuhuratPaidInput(BaseModel):
         extra = "allow"
 
 
+class VivahMuhuratInput(BaseModel):
+    """Input for the strict-classical Vivah muhurat date finder.
+    forbidden_ranges = [[start_iso, end_iso], ...] from the Supabase
+    muhurat_windows table (DrikPanchang-calibrated: Kharmas, Shukra/Guru
+    Ast, Adhik Maas, Chaturmas, Holashtak). month=None -> whole year."""
+    year:             int           = Field(default=2026)
+    month:            Optional[int] = Field(default=None)
+    latitude:         float         = Field(default=28.6139)
+    longitude:        float         = Field(default=77.2090)
+    timezone:         float         = Field(default=5.5)
+    forbidden_ranges: list          = Field(default=[])
+
+    class Config:
+        extra = "allow"
+
+
 # ── Existing Endpoints (unchanged) ───────────────────────────────────────────
 
 @app.get("/")
@@ -189,6 +213,7 @@ def health():
         "panchang_available":   PANCHANG_AVAILABLE,
         "confidence_available": CONFIDENCE_AVAILABLE,
         "muhurat_available":    MUHURAT_AVAILABLE,
+        "vivah_available":      VIVAH_AVAILABLE,
         "remedy_available":     REMEDY_AVAILABLE,
         "dosha_available":      DOSHA_AVAILABLE,
     }
@@ -266,6 +291,36 @@ def get_muhurat(data: MuhuratInput):
         raise HTTPException(status_code=503, detail="Muhurat engine unavailable")
     try:
         return find_muhurat(data)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# ── /vivah-muhurat Endpoint ───────────────────────────────────────────────────
+
+@app.post("/vivah-muhurat")
+def get_vivah_muhurat(data: VivahMuhuratInput):
+    """Strict-classical Vivah muhurat dates for a month (or whole year).
+    forbidden_ranges come from the caller (Supabase muhurat_windows)."""
+    if not VIVAH_AVAILABLE:
+        raise HTTPException(status_code=503, detail="Vivah engine unavailable")
+    try:
+        ranges = [tuple(r) for r in (data.forbidden_ranges or [])]
+        muhurats = find_vivah_muhurats(
+            year=data.year,
+            month=data.month,
+            latitude=data.latitude,
+            longitude=data.longitude,
+            timezone=data.timezone,
+            forbidden_ranges=ranges,
+        )
+        return {
+            "status":   "success",
+            "year":     data.year,
+            "month":    data.month,
+            "count":    len(muhurats),
+            "muhurats": muhurats,
+            "engine":   "Trikal Vaani Vivah Muhurat v1.0 | Swiss Ephemeris | Strict BPHS",
+        }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
