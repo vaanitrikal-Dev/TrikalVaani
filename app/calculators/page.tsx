@@ -1,19 +1,16 @@
 // ============================================================
 // File: app/calculators/page.tsx
 // Purpose: Calculators Hub — SEO/GEO/AEO landing page
-// Version: v3.4 — Gemstone Suitability ecosystem added (total 28)
+// Version: v3.5 — Vivah Muhurat (year-dynamic) card added (total 29)
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
-// Date: 2026-06-16
+// Date: 2026-06-25
 // ============================================================
-// CHANGES vs v3.3:
-//   ✅ Added 10 Gemstone Suitability calculators to CALCULATORS array:
-//      Gemstone Suitability (main) + 9 "Should I Wear X" pages
-//      (Neelam, Cat's Eye, Pukhraj, Gomed, Moonga, Panna, Moti, Manik, Heera).
-//      Count / schema hasPart / cards auto-update (dynamic). 18 → 28.
-//   ✅ GEO intro prose now EXCLUDES the granular "Should I Wear X" pages
-//      (via PROSE_CALCULATORS filter) so the intro sentence stays clean —
-//      the count (28) and schema still include all 28.
-//   ✅ ALL OTHER LOGIC: identical to v3.3.
+// CHANGES vs v3.4:
+//   ✅ Added "Free Vivah Muhurat" card. Unlike other calculators it links to
+//      /vivah-muhurat (year-dynamic index → current year), NOT /calculators/…
+//      Done via an optional `href` field on the entry (CalcEntry type) that
+//      the card <Link> and schema hasPart now respect. Count 28 → 29 (dynamic).
+//   ✅ ALL OTHER LOGIC: identical to v3.4.
 // ============================================================
 
 import type { Metadata } from 'next';
@@ -56,8 +53,20 @@ export const metadata: Metadata = {
   },
 };
 
+// Calculator card shape. `href` (optional) overrides the default
+// /calculators/{slug} link — used by tools that live elsewhere (e.g. Vivah).
+type CalcEntry = {
+  slug: string;
+  emoji: string;
+  name: string;
+  desc: string;
+  badge: string | null;
+  live: boolean;
+  href?: string;
+};
+
 // ── Single source of truth. Add a calculator = add ONE entry here. ──
-const CALCULATORS = [
+const CALCULATORS: CalcEntry[] = [
   {
     slug: 'free-kundali-calculator',
     emoji: '🔮',
@@ -71,6 +80,15 @@ const CALCULATORS = [
     emoji: '🍼',
     name: 'Free Child Birth Muhurat Calculator',
     desc: 'Find the most auspicious C-section or delivery time within your doctor-approved window — Lagna, Nakshatra & lucky name letter.',
+    badge: 'New',
+    live: true,
+  },
+  {
+    slug: 'vivah-muhurat',
+    href: '/vivah-muhurat',
+    emoji: '💍',
+    name: 'Free Vivah Muhurat',
+    desc: 'Strict-classical shubh marriage dates for the year — exact muhurat time, nakshatra, tithi & lagna. Excludes Kharmas, Adhik Maas & Chaturmas.',
     badge: 'New',
     live: true,
   },
@@ -343,7 +361,7 @@ export default function CalculatorsHubPage() {
           },
           hasPart: CALCULATORS.map((c) => ({
             '@type': 'SoftwareApplication', name: c.name, applicationCategory: 'LifestyleApplication',
-            url: `https://trikalvaani.com/calculators/${c.slug}`,
+            url: c.href ? `https://trikalvaani.com${c.href}` : `https://trikalvaani.com/calculators/${c.slug}`,
             offers: { '@type': 'Offer', price: '0', priceCurrency: 'INR' },
           })),
         }) }} />
@@ -399,7 +417,7 @@ export default function CalculatorsHubPage() {
             <h2 className="text-2xl font-serif font-bold mb-6" style={{ color: GOLD }}>Choose Your Calculator</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {CALCULATORS.map((calc) => (
-                <Link key={calc.slug} href={`/calculators/${calc.slug}`}
+                <Link key={calc.slug} href={calc.href ?? `/calculators/${calc.slug}`}
                   className="group relative p-5 rounded-2xl transition-all duration-300 hover:scale-[1.02]"
                   style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid ${calc.live ? GOLD_RGBA(0.3) : 'rgba(255,255,255,0.08)'}` }}>
 
