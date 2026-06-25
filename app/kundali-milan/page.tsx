@@ -1,24 +1,16 @@
-// TRIKAL VAANI | app/kundali-milan/page.tsx | v1.2
+// TRIKAL VAANI | app/kundali-milan/page.tsx | v1.3
 // Owner: Rohiit Gupta, Chief Vedic Architect
-// Date: 2026-06-13
+// Date: 2026-06-25
 // ============================================================================
-// v1.2 CHANGES (CEO conversion audit — page only, FORM UNTOUCHED):
-//   ✅ FIX-1: Tier cards were dead-ends (informational, not clickable, no way
-//      back to the form). Each card now has a CTA button that smooth-scrolls
-//      to the form via #milan-form anchor. Form component itself NOT modified
-//      — only wrapped in <div id="milan-form"> (IR-13 respected).
-//   ✅ FIX-2: CLOSING CTA section added after the E-E-A-T block. Users who
-//      read till FAQ/EEAT are the warmest leads — they now get a final
-//      "Free mein shuru karo" button back to the form.
-//   ✅ FIX-3: Visible "Rs51/Rs101/Rs151/Rs0" → "₹51/₹101/₹151/Free" on tier
-//      cards (₹ symbol = native + premium). METADATA LEFT UNTOUCHED.
-//   ✅ FIX-4: Service + OfferCatalog JSON-LD added with all 4 tiers
-//      (Free/₹51/₹101/₹151 — IR-19 prices exact) for GEO/AI-search pricing
-//      extraction (Perplexity, SGE, ChatGPT).
-//   NOTHING ELSE CHANGED — v1.1 section order, FAQ, koots, EEAT preserved.
+// v1.3 CHANGES (interlink — page only, FORM UNTOUCHED):
+//   ✅ Added Vivah Muhurat interlink banner after the "What's Included" tier
+//      section — natural funnel: once a couple confirms compatibility, the next
+//      step is choosing the wedding date. Links to /vivah-muhurat (year-dynamic).
+//      No form/schema/pricing change. IR-13 + IR-19 respected.
 //
-// v1.1 CHANGE (retained): Reordered sections so "What's Included" appears
-//   directly after the form, BEFORE "The Eight Koots".
+// v1.2 CHANGES (CEO conversion audit — page only, FORM UNTOUCHED):
+//   ✅ FIX-1: Tier cards CTA → #milan-form. FIX-2: closing CTA. FIX-3: ₹ symbol.
+//   ✅ FIX-4: Service + OfferCatalog JSON-LD (Free/₹51/₹101/₹151).
 //
 // IRON RULES OBSERVED:
 //   - IR-13: KundaliMilanForm v1.0 LOCKED (not modified, only anchor-wrapped)
@@ -400,6 +392,33 @@ export default function KundaliMilanPage() {
             </div>
           </section>
 
+          {/* SECTION 3.5 - VIVAH MUHURAT INTERLINK (v1.3) — natural funnel:
+              compatible couple → next step is choosing the wedding date.
+              Links to /vivah-muhurat (year-dynamic). No form/pricing change. */}
+          <section className="pt-2 pb-10 px-4" style={{ background: 'rgba(13,17,30,0.4)' }}>
+            <div className="max-w-4xl mx-auto">
+              <a href="/vivah-muhurat" style={{
+                display: 'flex', flexWrap: 'wrap', gap: '12px',
+                alignItems: 'center', justifyContent: 'space-between',
+                padding: '18px 22px', borderRadius: '14px', textDecoration: 'none',
+                background: `linear-gradient(135deg, ${GOLD_RGBA(0.1)}, ${GOLD_RGBA(0.03)})`,
+                border: `1px solid ${GOLD_RGBA(0.3)}`,
+              }}>
+                <span style={{ color: '#e2e8f0', fontSize: '15px', fontWeight: 600 }}>
+                  💍 Jodi mil gayi? Ab shubh <span style={{ color: GOLD }}>Vivah Muhurat</span> bhi dekh lo —
+                  exact shaadi ki tareekh, nakshatra &amp; lagna ke saath.
+                </span>
+                <span style={{
+                  flexShrink: 0, color: '#080B12', fontWeight: 700, fontSize: '13px',
+                  padding: '9px 18px', borderRadius: '10px',
+                  background: `linear-gradient(135deg, ${GOLD} 0%, #F5D76E 50%, ${GOLD} 100%)`,
+                }}>
+                  See Vivah Muhurat →
+                </span>
+              </a>
+            </div>
+          </section>
+
           {/* SECTION 4 - EDUCATIONAL CONTENT (36 Guna explained) */}
           <section className="py-16 px-4">
             <div className="max-w-4xl mx-auto">
@@ -564,4 +583,4 @@ export default function KundaliMilanPage() {
   )
 }
 
-// END app/kundali-milan/page.tsx v1.2
+// END app/kundali-milan/page.tsx v1.3
