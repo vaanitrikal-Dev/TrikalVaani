@@ -3,16 +3,15 @@
 // ============================================================
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
 // FILE: components/layout/SiteNav.tsx
-// VERSION: v2.5
-// DATE: 2026-06-01
+// VERSION: v2.6
+// DATE: 2026-06-25
 // CHANGES:
-//   v2.5: IR-0 cleanup — visible logo text "Trikaal Vaani" -> "Trikaal Vaani".
-//         Image src/alt, email, domain trikalvaani.com: UNTOUCHED.
-//         All v2.4 nav/menu logic preserved 100%.
-//   v2.4: MOBILE HAMBURGER MENU. Top bar now shows logo + Start + ☰.
-//         Tapping ☰ opens a full dropdown with ALL links + Sign In.
-//         Scales as new products are added. Desktop nav UNCHANGED.
-//   v2.3: Added "Kundali Milan" + "Karmic Reading" links (desktop + mobile).
+//   v2.6: Added "Vivah Muhurat" nav link (→ /vivah-muhurat, year-dynamic
+//         index that redirects to the current year). Desktop + mobile both
+//         (shared NAV_LINKS). No other logic changed.
+//   v2.5: IR-0 cleanup — visible logo text "Trikaal Vaani".
+//   v2.4: MOBILE HAMBURGER MENU.
+//   v2.3: Added "Kundali Milan" + "Karmic Reading" links.
 //   v2.2: Removed "Events"; added "Calculators" → /calculators.
 // ============================================================
 
@@ -33,6 +32,7 @@ const NAV_LINKS: { href: string; label: string; highlight?: boolean }[] = [
   { href: '/#pillars',                 label: 'Life Pillars' },
   { href: '/services',                 label: 'Services', highlight: true },
   { href: '/kundali-milan',            label: 'Kundali Milan' },
+  { href: '/vivah-muhurat',            label: 'Vivah Muhurat' },
   { href: '/karmic-background-reading', label: 'Karmic Reading' },
   { href: '/panchang',                 label: 'Panchang' },
   { href: '/calculators',              label: 'Calculators' },
