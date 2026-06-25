@@ -3,8 +3,15 @@
  * 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER 🔱
  * ============================================================================
  * File:        app/sitemap.ts
- * Version:     v7.5
+ * Version:     v7.6
  * Owner:       Rohiit Gupta, Chief Vedic Architect
+ *
+ * Changes v7.5 → v7.6 (2026-06-25):
+ *   VIVAH MUHURAT (year-dynamic) added. New helper readVivahYears() queries
+ *   DISTINCT years from muhurat_windows; emits /vivah-muhurat (index) plus
+ *   /vivah-muhurat/{year} for every seeded year. Zero hardcode — seed a new
+ *   year in muhurat_windows + ONE Vercel redeploy (generateStaticParams) and
+ *   the sitemap auto-includes it on next revalidation.
  *
  * Changes v7.4 → v7.5 (2026-06-20):
  *   CONTENT CLUSTERS CONFIRMED — NO CODE CHANGE REQUIRED:
@@ -314,6 +321,27 @@ async function readSeoLearnSlugs(): Promise<SeoPageRow[]> {
   }
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// VIVAH MUHURAT (v7.6) — year-dynamic. Returns the DISTINCT years present in
+// muhurat_windows. Each becomes /vivah-muhurat/{year}; plus the /vivah-muhurat
+// index (auto-redirects to the current year). Seed a new year + ONE Vercel
+// redeploy → auto-included on next revalidation. No hardcode.
+// ─────────────────────────────────────────────────────────────────────────────
+async function readVivahYears(): Promise<number[]> {
+  try {
+    const supabase = anonClient();
+    const { data, error } = await supabase
+      .from('muhurat_windows')
+      .select('year');
+    if (error || !data) return [];
+    return Array.from(
+      new Set((data as { year: number }[]).map((r) => r.year))
+    ).sort((a, b) => a - b);
+  } catch {
+    return [];
+  }
+}
+
 function nextNDates(n: number): string[] {
   const dates: string[] = [];
   const today = new Date();
@@ -363,6 +391,26 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'monthly',
       priority: 0.85,
     });
+  }
+
+  // ── Vivah Muhurat (year-dynamic) — v7.6 ────────────────────────────
+  // /vivah-muhurat (index → current year) + /vivah-muhurat/{year} per seeded year.
+  const vivahYears = await readVivahYears();
+  if (vivahYears.length > 0) {
+    entries.push({
+      url: `${BASE}/vivah-muhurat`,
+      lastModified: now,
+      changeFrequency: 'monthly',
+      priority: 0.85,
+    });
+    for (const y of vivahYears) {
+      entries.push({
+        url: `${BASE}/vivah-muhurat/${y}`,
+        lastModified: now,
+        changeFrequency: 'weekly',
+        priority: 0.9,
+      });
+    }
   }
 
   // ── 15 Pillar Domain Pages ─────────────────────────────────────────
