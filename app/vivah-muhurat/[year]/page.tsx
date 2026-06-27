@@ -3,8 +3,9 @@
 //  File: app/vivah-muhurat/[year]/page.tsx
 //  Author: Rohiit Gupta, Chief Vedic Architect
 //  Type:  Server Component (SSR + ISR) — SEO + GEO optimised
-//  Data:  Supabase muhurat_windows (forbidden) + VM /vivah-muhurat
-//  v2.0 — YEAR-DYNAMIC. Any seeded year auto-generates. No hardcode.
+//  v3.0 — PERMANENT AUTO. DB-override for hand-validated years,
+//         VM auto-compute for all future years. Rolling params.
+//  Data:  Supabase muhurat_windows (override) + VM /vivah-muhurat
 // ============================================================
 
 import Link from 'next/link';
@@ -19,9 +20,10 @@ const GOLD_RGBA = (a: number) => `rgba(212,175,55,${a})`;
 const BG = '#080B12';
 const SITE = 'https://trikalvaani.com';
 const VM_URL = process.env.VM_ENGINE_URL || 'http://34.47.182.227:8001';
+const VIVAH_START = 2026;
 
 export const revalidate = 86400;
-export const dynamicParams = false; // only seeded years render; others 404
+export const dynamicParams = true; // any year renders on-demand (auto-computed)
 
 const MONTHS = [
   'January', 'February', 'March', 'April', 'May', 'June',
@@ -33,7 +35,8 @@ interface Muhurat {
   muhurat_start: string; muhurat_end: string; lagna: string; lagna_quality: string;
 }
 interface WindowRow {
-  start_date: string; end_date: string; window_type: string; label: string; applies_to: string[] | null;
+  start_date: string; end_date: string; window_type: string; label: string;
+  applies_to?: string[] | null;
 }
 
 function anonClient() {
@@ -43,20 +46,17 @@ function anonClient() {
   );
 }
 
-// Which years exist in the table → which pages to build
-async function getSeededYears(): Promise<number[]> {
-  try {
-    const { data } = await anonClient().from('muhurat_windows').select('year');
-    const years = Array.from(new Set((data ?? []).map((r: any) => Number(r.year))));
-    return years.sort((a, b) => a - b);
-  } catch {
-    return [2026];
-  }
+// Rolling set of years to pre-build: 2026 .. (current year + 6).
+// dynamicParams=true means any other year still renders on demand.
+function rollingYears(): number[] {
+  const end = new Date().getFullYear() + 6;
+  const ys: number[] = [];
+  for (let y = VIVAH_START; y <= end; y++) ys.push(y);
+  return ys;
 }
 
 export async function generateStaticParams() {
-  const years = await getSeededYears();
-  return (years.length ? years : [2026]).map((y) => ({ year: String(y) }));
+  return rollingYears().map((y) => ({ year: String(y) }));
 }
 
 export async function generateMetadata(
@@ -82,8 +82,9 @@ export async function generateMetadata(
   };
 }
 
-async function getData(year: number): Promise<{ muhurats: Muhurat[]; windows: WindowRow[] }> {
-  let windows: WindowRow[] = [];
+async function getData(year: number): Promise<{ muhurats: Muhurat[]; windows: WindowRow[]; source: string }> {
+  // 1 — DB override (hand-validated years: 2026/27/28). If rows exist, they win.
+  let dbWindows: WindowRow[] = [];
   let forbidden_ranges: string[][] = [];
   try {
     const { data } = await anonClient()
@@ -91,26 +92,33 @@ async function getData(year: number): Promise<{ muhurats: Muhurat[]; windows: Wi
       .select('start_date,end_date,window_type,label,applies_to')
       .eq('year', year)
       .order('start_date', { ascending: true });
-    windows = (data as WindowRow[]) ?? [];
-    forbidden_ranges = windows
+    dbWindows = (data as WindowRow[]) ?? [];
+    forbidden_ranges = dbWindows
       .filter((w) => !w.applies_to || w.applies_to.includes('vivah'))
       .map((w) => [w.start_date, w.end_date]);
-  } catch { /* render content even if windows fail */ }
+  } catch { /* fall through to auto-compute */ }
 
+  // 2 — VM: empty ranges => VM auto-computes windows for ANY year.
   let muhurats: Muhurat[] = [];
+  let vmWindows: WindowRow[] = [];
+  let source = dbWindows.length ? 'override' : 'computed';
   try {
     const res = await callVM(`${VM_URL}/vivah-muhurat`, {
       method: 'POST',
-      body: JSON.stringify({ year, month: 0, forbidden_ranges }),
+      body: JSON.stringify({ year, month: 0, forbidden_ranges, auto_windows: true }),
       signal: AbortSignal.timeout(30000),
     });
     if (res.ok) {
       const json = await res.json();
       muhurats = (json?.muhurats as Muhurat[]) ?? [];
+      vmWindows = (json?.windows as WindowRow[]) ?? [];
+      if (json?.source) source = json.source as string;
     }
-  } catch { /* VM unreachable — page still renders */ }
+  } catch { /* VM unreachable — page still renders content */ }
 
-  return { muhurats, windows };
+  // Display windows: DB rows (rich labels) when present, else VM-computed.
+  const windows = dbWindows.length ? dbWindows : vmWindows;
+  return { muhurats, windows, source };
 }
 
 function fmtDate(iso: string) {
@@ -134,7 +142,8 @@ export default async function VivahMuhuratYearPage(
   const year = parseInt(params.year, 10);
   if (!year || year < 2020 || year > 2100) notFound();
 
-  const [{ muhurats, windows }, allYears] = await Promise.all([getData(year), getSeededYears()]);
+  const { muhurats, windows } = await getData(year);
+  const allYears = rollingYears();
 
   const byMonth: Record<number, Muhurat[]> = {};
   for (const m of muhurats) {
@@ -145,7 +154,6 @@ export default async function VivahMuhuratYearPage(
   const total = muhurats.length;
   const sthiraCount = muhurats.filter((m) => m.lagna_quality.startsWith('Sthira')).length;
 
-  // dynamic open-season sentence
   const hasAdhik = windows.some((w) => w.window_type === 'adhik_maas');
   const pausedList = ['Kharmas', hasAdhik ? 'Adhik Maas' : null, 'Chaturmas'].filter(Boolean).join(', ');
   const firstLong = total ? fmtLong(muhurats[0].date) : '';
@@ -184,9 +192,9 @@ export default async function VivahMuhuratYearPage(
         name: 'Trikaal Vaani', legalName: 'Trikal Vaani', url: SITE, logo: `${SITE}/og-default.jpg`,
         founder: { '@id': `${SITE}/#rohiit` },
         sameAs: [
-          'https://www.instagram.com/trikaalvaani',
+          'https://www.instagram.com/thetrikalvaani',
           'https://www.youtube.com/@TrikaalVaani',
-          'https://www.facebook.com/trikaalvaani',
+          'https://www.facebook.com/trikaalvaanivoice',
         ],
       },
       {
@@ -223,14 +231,12 @@ export default async function VivahMuhuratYearPage(
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
       <div style={{ maxWidth: 1080, margin: '0 auto', padding: '32px 20px 80px' }}>
-        {/* Breadcrumb */}
         <nav style={{ fontSize: 13, color: GOLD_RGBA(0.7), marginBottom: 24 }}>
           <Link href="/" style={{ color: GOLD_RGBA(0.7), textDecoration: 'none' }}>Home</Link>
           <span style={{ margin: '0 8px' }}>/</span>
           <span style={{ color: '#94A3B8' }}>Vivah Muhurat {year}</span>
         </nav>
 
-        {/* Hero */}
         <header style={{ textAlign: 'center', marginBottom: 24 }}>
           <div style={{ fontSize: 13, letterSpacing: 2, color: GOLD, textTransform: 'uppercase', marginBottom: 12 }}>
             🔱 Shubh Vivah Muhurat
@@ -243,7 +249,6 @@ export default async function VivahMuhuratYearPage(
           </p>
         </header>
 
-        {/* Year switcher */}
         {allYears.length > 1 && (
           <div style={{ display: 'flex', gap: 10, justifyContent: 'center', marginBottom: 34, flexWrap: 'wrap' }}>
             {allYears.map((y) => (
@@ -260,7 +265,6 @@ export default async function VivahMuhuratYearPage(
           </div>
         )}
 
-        {/* GEO direct answer */}
         <section className="tv-aeo-answer"
           style={{ background: `linear-gradient(135deg, ${GOLD_RGBA(0.08)}, ${GOLD_RGBA(0.02)})`, border: `1px solid ${GOLD_RGBA(0.25)}`, borderRadius: 16, padding: '24px 26px', marginBottom: 40 }}>
           <p style={{ margin: 0, fontSize: 16.5, lineHeight: 1.7, color: '#E2E8F0' }}>
@@ -280,7 +284,6 @@ export default async function VivahMuhuratYearPage(
           </p>
         </section>
 
-        {/* Quick stats */}
         <section style={{ display: 'flex', gap: 14, flexWrap: 'wrap', marginBottom: 44 }}>
           {[
             { n: total, l: 'Total Shubh Dates' },
@@ -295,7 +298,6 @@ export default async function VivahMuhuratYearPage(
           ))}
         </section>
 
-        {/* Month-wise dates */}
         {total === 0 ? (
           <div style={{ textAlign: 'center', padding: 40, border: `1px dashed ${GOLD_RGBA(0.25)}`, borderRadius: 14, color: '#94A3B8', marginBottom: 44 }}>
             Muhurat dates for {year} are being prepared. Please check back shortly.
@@ -347,7 +349,6 @@ export default async function VivahMuhuratYearPage(
           ))
         )}
 
-        {/* Personalised CTA → Milan interlink */}
         <section style={{ background: `linear-gradient(135deg, ${GOLD_RGBA(0.12)}, ${GOLD_RGBA(0.03)})`, border: `1px solid ${GOLD_RGBA(0.3)}`, borderRadius: 16, padding: '28px 26px', textAlign: 'center', margin: '12px 0 48px' }}>
           <h3 style={{ fontFamily: 'Georgia, serif', fontSize: 22, color: '#F8FAFC', margin: '0 0 10px' }}>
             Want the perfect date for <em>your</em> wedding?
@@ -361,7 +362,6 @@ export default async function VivahMuhuratYearPage(
           </Link>
         </section>
 
-        {/* Forbidden periods */}
         {windows.length > 0 && (
           <section style={{ marginBottom: 48 }}>
             <h2 style={{ fontFamily: 'Georgia, serif', fontSize: 26, color: '#F8FAFC', marginBottom: 8 }}>
@@ -383,7 +383,6 @@ export default async function VivahMuhuratYearPage(
           </section>
         )}
 
-        {/* Pillar content */}
         <article style={{ fontSize: 15.5, lineHeight: 1.8, color: '#CBD5E1', marginBottom: 48 }}>
           <h2 style={{ fontFamily: 'Georgia, serif', fontSize: 26, color: '#F8FAFC', marginBottom: 14 }}>
             What is a Vivah Muhurat?
@@ -413,7 +412,6 @@ export default async function VivahMuhuratYearPage(
           </p>
         </article>
 
-        {/* FAQ */}
         <section style={{ marginBottom: 48 }}>
           <h2 style={{ fontFamily: 'Georgia, serif', fontSize: 26, color: '#F8FAFC', marginBottom: 18 }}>
             Frequently Asked Questions
@@ -428,7 +426,6 @@ export default async function VivahMuhuratYearPage(
           </div>
         </section>
 
-        {/* EEAT author */}
         <section style={{ display: 'flex', gap: 16, alignItems: 'flex-start', background: GOLD_RGBA(0.05), border: `1px solid ${GOLD_RGBA(0.18)}`, borderRadius: 14, padding: '20px 22px', marginBottom: 40 }}>
           <div style={{ width: 52, height: 52, borderRadius: '50%', background: GOLD_RGBA(0.15), display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24, flexShrink: 0 }}>🔱</div>
           <div>
@@ -441,7 +438,6 @@ export default async function VivahMuhuratYearPage(
           </div>
         </section>
 
-        {/* Internal links */}
         <section>
           <h3 style={{ fontFamily: 'Georgia, serif', fontSize: 20, color: '#F8FAFC', marginBottom: 14 }}>
             Related Free Tools
