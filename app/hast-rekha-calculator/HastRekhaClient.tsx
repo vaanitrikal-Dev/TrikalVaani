@@ -52,7 +52,7 @@ const ANALYZING_MSGS = [
   'OpenCV से रेखाएं sharp की जा रही हैं...',
   'Gemini Vision palm lines read कर रही है...',
   'Samudrika Shastra नियम लागू हो रहे हैं...',
-  'Jini आपकी रिपोर्ट तैयार कर रही है...',
+  'Trikaal आपकी रिपोर्ट तैयार कर रही है...',
 ];
 
 const GEO_ANSWER = `Samudrika Shastra mein haath ki 6 mukhya rekhaen — Jeevan, Mastishk, Hriday, Bhagya, Surya aur Budh — aur 8 parvat (Jupiter se Chandra tak) vyakti ke career, swasthya, prem aur adhyatma ka maarg dikhate hain. Trikaal Vaani ka AI engine MediaPipe + Gemini Vision se in sab ko scan karta hai.`;
@@ -291,7 +291,7 @@ export default function HastRekhaClient() {
           🖐️ AI Hast Rekha Calculator
         </h1>
         <p className="text-gray-300 max-w-xl mx-auto text-base leading-relaxed">
-          Photo upload karein — Jini AI aapki Hast Rekhaon ka complete Samudrika Shastra vishleshan karti hai.
+          Photo upload karein — Trikaal AI aapki Hast Rekhaon ka complete Samudrika Shastra vishleshan karti hai.
           PDF report milti hai — ek baar ke liye, seved rakhne layak.
         </p>
 
@@ -380,7 +380,7 @@ export default function HastRekhaClient() {
               '8 Dimension Scores', 'Mukhya Rekhaen Analysis', 'Vyaktitva Vishleshan',
               'Vyavsay + Dhan Yoga', 'Prem + Vivah Sanket', 'Swasthya + Adhyatma',
               'Samudrika Upay (4)', 'Shubh Ratna Suggestion',
-              'Jini ka Vyaktigat Sandesh', 'PDF Download ✓'
+              'Trikaal ka Vyaktigat Sandesh', 'PDF Download ✓'
             ].map((item, i) => (
               <div key={i} className="flex gap-2 text-xs text-gray-400">
                 <span className="text-amber-500">◈</span><span>{item}</span>
@@ -406,7 +406,7 @@ export default function HastRekhaClient() {
           },
           {
             q: 'AI palmistry kitni accurate hai?',
-            a: 'Achhi lighting aur clear palm photo ke saath MediaPipe 90%+ accuracy se 21 hand landmarks detect karta hai. Gemini Vision 6 mukhya rekhaon aur 8 parvaton ko scan karta hai. Claude Sonnet Samudrika niyamon se final report banata hai. Yeh ek AI-assisted reading hai — ek starting point, final nirnay hamesha aapka.'
+            a: 'Achhi lighting aur clear palm photo ke saath MediaPipe 90%+ accuracy se 21 hand landmarks detect karta hai. Gemini Vision 6 mukhya rekhaon aur 8 parvaton ko scan karta hai. premium AI engine Samudrika niyamon se final report banata hai. Yeh ek AI-assisted reading hai — ek starting point, final nirnay hamesha aapka.'
           },
           {
             q: 'Kaun sa haath upload karein — seedha ya ulta?',
@@ -414,7 +414,7 @@ export default function HastRekhaClient() {
           },
           {
             q: 'Hast Rekha Report mein kya milega?',
-            a: '8 dimension scores (career, wealth, health, relationships, vitality, leadership, creativity, spirituality), 7 detailed sections in Hindi/English/Hinglish, 4 Samudrika upay, shubh ratna suggestion, Jini ka personal sandesh, aur ek downloadable PDF report.'
+            a: '8 dimension scores (career, wealth, health, relationships, vitality, leadership, creativity, spirituality), 7 detailed sections in Hindi/English/Hinglish, 4 Samudrika upay, shubh ratna suggestion, Trikaal ka personal sandesh, aur ek downloadable PDF report.'
           },
           {
             q: 'Kya meri palm image save hoti hai?',
@@ -458,7 +458,7 @@ export default function HastRekhaClient() {
   if (step === 'analyzing') return (
     <main className="min-h-screen bg-[#0a0a0f] text-white flex flex-col items-center justify-center px-4 text-center">
       <div className="text-7xl mb-8 animate-pulse">🔮</div>
-      <h2 className="text-2xl font-bold mb-3">Jini Vishleshan Kar Rahi Hai...</h2>
+      <h2 className="text-2xl font-bold mb-3">Trikaal Vishleshan Kar Rahi Hai...</h2>
       <p className="text-amber-400 max-w-sm min-h-[2rem]">{ANALYZING_MSGS[msgIdx]}</p>
       <div className="flex gap-2 mt-8">
         {ANALYZING_MSGS.map((_, i) => (
