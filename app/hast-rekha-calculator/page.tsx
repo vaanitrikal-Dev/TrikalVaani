@@ -22,7 +22,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Free AI Hast Rekha Calculator — Trikaal Vaani',
     description:
-      'Upload palm photo. Get instant Samudrika Shastra analysis — career, wealth, love, health, remedies by Jini AI.',
+      'Upload palm photo. Get instant Samudrika Shastra analysis — career, wealth, love, health, remedies by Trikaal AI.',
     url: 'https://trikalvaani.com/hast-rekha-calculator',
     siteName: 'Trikaal Vaani',
     type: 'website',
