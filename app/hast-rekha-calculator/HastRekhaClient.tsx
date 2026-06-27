@@ -131,7 +131,7 @@ function UploadZone({
       >
         {image ? (
           <>
-            <img src={image.preview} alt={label} className="max-h-40 rounded-lg object-cover" />
+            <img src={image.preview} alt={`${label} — Hast Rekha palm photo`} className="max-h-40 rounded-lg object-cover" />
             <p className="text-green-400 text-sm mt-2">✓ Upload successful</p>
           </>
         ) : (
@@ -210,7 +210,7 @@ export default function HastRekhaClient() {
           currency:    'INR',
           name:        'Trikaal Vaani',
           description: 'AI Hast Rekha Report — Samudrika Shastra',
-          image:       '/logo.png',
+          image:       '/Trikal_Logo.png',
           prefill: {
             name: form.userName,
           },
@@ -306,7 +306,8 @@ export default function HastRekhaClient() {
       {/* EEAT — Author Signal */}
       <div className="max-w-4xl mx-auto px-4">
         <div className="flex items-center gap-3 bg-gray-900/40 border border-gray-800 rounded-xl px-4 py-3 mb-6 text-sm text-gray-400">
-          <span className="text-lg">🕉️</span>
+          <img src="/Rohiit-Gupta.jpg" alt="Rohiit Gupta, Chief Vedic Architect, Trikaal Vaani"
+            className="w-12 h-12 rounded-full object-cover border border-amber-700/40 shrink-0" />
           <span>
             <strong className="text-gray-300">Rohiit Gupta</strong>, Chief Vedic Architect — 16+ saal ka Samudrika Shastra anubhav.
             Parashara BPHS tradition mein trained. Lahiri Ayanamsa + classical texts ke aadhar par AI engine.
