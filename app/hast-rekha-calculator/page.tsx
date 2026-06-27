@@ -65,6 +65,7 @@ const softwareSchema = {
     name:    'Rohiit Gupta',
     jobTitle: 'Chief Vedic Architect',
     url:     'https://trikalvaani.com',
+    image:   'https://trikalvaani.com/Rohiit-Gupta.jpg',
     knowsAbout: ['Samudrika Shastra', 'Vedic Astrology', 'Parashara BPHS', 'Indian Palmistry'],
     hasCredential: '16+ years Vedic Astrology practice, Parashara BPHS tradition',
   },
@@ -72,7 +73,7 @@ const softwareSchema = {
     '@type': 'Organization',
     name:    'Trikaal Vaani',
     url:     'https://trikalvaani.com',
-    logo:    'https://trikalvaani.com/logo.png',
+    logo:    'https://trikalvaani.com/Trikal_Vaani_Logo.svg',
   },
   inLanguage:    ['hi', 'en'],
   datePublished: '2026-06-27',
@@ -112,7 +113,7 @@ const faqSchema = {
       name:             'Hast Rekha report mein kya milega?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text:    '8 dimension scores (career, wealth, health, relationships, vitality, leadership, creativity, spirituality), haath ka Samudrika parichay, 6 rekhaon ka vishleshan, vyaktitva analysis, career aur dhan sanket, prem aur vivah tendencies, swasthya, adhyatma, 4 Samudrika upay, shubh ratna suggestion, Trikaal ka personal sandesh, aur downloadable PDF report.',
+        text:    '8 dimension scores (career, wealth, health, relationships, vitality, leadership, creativity, spirituality), haath ka Samudrika parichay, 6 rekhaon ka vishleshan, vyaktitva analysis, career aur dhan sanket, prem aur vivah tendencies, swasthya, adhyatma, 4 Samudrika upay, shubh ratna suggestion, Trikaal AI ka personal sandesh, aur downloadable PDF report.',
       },
     },
     {
@@ -157,6 +158,7 @@ const webPageSchema = {
     name:       'Rohiit Gupta',
     jobTitle:   'Chief Vedic Architect',
     url:        'https://trikalvaani.com',
+    image:      'https://trikalvaani.com/Rohiit-Gupta.jpg',
     sameAs:     ['https://www.instagram.com/thetrikalvaani'],
     knowsAbout: ['Samudrika Shastra', 'Vedic Astrology', 'Jyotish Shastra', 'Indian Palmistry'],
   },
