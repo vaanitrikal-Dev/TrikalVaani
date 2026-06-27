@@ -39,7 +39,7 @@ const softwareSchema = {
   '@type':           'SoftwareApplication',
   name:              'AI Hast Rekha Calculator',
   alternateName:     ['AI Palmistry Calculator India', 'Samudrika Shastra AI Tool'],
-  description:       'AI-powered Indian palmistry calculator that uses MediaPipe hand landmark detection, OpenCV image enhancement, Gemini Vision palm line extraction, and Claude AI Samudrika Shastra rules to generate personalized Hast Rekha reports in Hindi, English, and Hinglish.',
+  description:       'AI-powered Indian palmistry calculator using advanced computer vision for hand landmark detection, palm line extraction, and Samudrika Shastra rule-based analysis. Personalized Hast Rekha reports in Hindi, English, and Hinglish.',
   url:               'https://trikalvaani.com/hast-rekha-calculator',
   applicationCategory: 'LifestyleApplication',
   operatingSystem:   'Web Browser',
@@ -51,11 +51,11 @@ const softwareSchema = {
     availability:  'https://schema.org/InStock',
   },
   featureList: [
-    'MediaPipe 21-point hand landmark detection',
-    'OpenCV CLAHE contrast enhancement for palm lines',
-    'Gemini Vision palm line extraction (6 lines + 8 mounts)',
+    'AI 21-point hand landmark detection',
+    'Advanced palm line enhancement',
+    'AI vision palm line extraction (6 lines + 8 mounts)',
     'Samudrika Shastra rule engine (40+ niyam)',
-    'Claude AI personalized report generation',
+    'AI-powered personalized report generation',
     '8 life dimension scores',
     'PDF report download',
     'Hindi, English, Hinglish support',
@@ -104,7 +104,7 @@ const faqSchema = {
       name:             'AI palm reading kitni accurate hoti hai?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text:    'Achhi lighting aur clear palm photo ke saath MediaPipe 90%+ accuracy se 21 hand landmarks detect karta hai. Gemini Vision palm lines aur mounts extract karta hai. Claude AI Samudrika Shastra ke 40+ classical niyamon se final report banata hai. Yeh ek AI-assisted reading hai jo traditional palmistry principles par based hai.',
+        text:    'Achhi lighting aur clear palm photo ke saath hamara AI engine 90%+ accuracy se haath ke 21 landmarks detect karta hai, palm lines aur mounts extract karta hai, aur Samudrika Shastra ke 40+ classical niyamon se final report banata hai. Yeh ek AI-assisted reading hai jo traditional palmistry principles par based hai.',
       },
     },
     {
@@ -112,7 +112,7 @@ const faqSchema = {
       name:             'Hast Rekha report mein kya milega?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text:    '8 dimension scores (career, wealth, health, relationships, vitality, leadership, creativity, spirituality), haath ka Samudrika parichay, 6 rekhaon ka vishleshan, vyaktitva analysis, career aur dhan sanket, prem aur vivah tendencies, swasthya, adhyatma, 4 Samudrika upay, shubh ratna suggestion, Trikaal ka personal sandesh, aur downloadable PDF report.',
+        text:    '8 dimension scores (career, wealth, health, relationships, vitality, leadership, creativity, spirituality), haath ka Samudrika parichay, 6 rekhaon ka vishleshan, vyaktitva analysis, career aur dhan sanket, prem aur vivah tendencies, swasthya, adhyatma, 4 Samudrika upay, shubh ratna suggestion, Jini ka personal sandesh, aur downloadable PDF report.',
       },
     },
     {
