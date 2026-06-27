@@ -48,7 +48,7 @@ const LOADING_MSGS = [
   'हस्त रेखाएं स्कैन हो रही हैं...',
   'MediaPipe से 21 बिंदु निकाले जा रहे हैं...',
   'समुद्रिक शास्त्र नियम लागू हो रहे हैं...',
-  'Jini आपकी रिपोर्ट तैयार कर रही है...',
+  'Trikaal आपकी रिपोर्ट तैयार कर रही है...',
 ];
 
 const UPLOAD_TIPS = [
@@ -228,7 +228,7 @@ export default function HastRekhaClient() {
           🖐️ AI Hast Rekha Calculator
         </h1>
         <p className="text-gray-300 max-w-2xl mx-auto text-base md:text-lg leading-relaxed">
-          Apni haath ki photo upload karein — Jini AI Samudrika Shastra se<br className="hidden md:block" />
+          Apni haath ki photo upload karein — Trikaal AI Samudrika Shastra se<br className="hidden md:block" />
           aapki hast rekhaon, parvaton aur unglion ka vishleshan karegi
         </p>
         <div className="flex flex-wrap gap-2 justify-center mt-5">
@@ -306,7 +306,7 @@ export default function HastRekhaClient() {
         </button>
 
         <p className="text-center text-gray-600 text-xs mt-3">
-          AI-powered by Jini · Samudrika Shastra · Data stored nahi hota
+          AI-powered by Trikaal · Samudrika Shastra · Data stored nahi hota
         </p>
       </section>
 
@@ -340,7 +340,7 @@ export default function HastRekhaClient() {
   if (step === 'loading') return (
     <main className="min-h-screen bg-[#0a0a0f] text-white flex flex-col items-center justify-center px-4 text-center">
       <div className="text-7xl mb-8 animate-pulse">🔮</div>
-      <h2 className="text-2xl font-bold mb-3">Jini Vishleshan Kar Rahi Hai...</h2>
+      <h2 className="text-2xl font-bold mb-3">Trikaal Vishleshan Kar Rahi Hai...</h2>
       <p className="text-amber-400 max-w-sm min-h-[2rem] transition-all">{LOADING_MSGS[loadingIdx]}</p>
       <div className="flex gap-2 mt-8">
         {LOADING_MSGS.map((_, i) => (
@@ -503,7 +503,7 @@ export default function HastRekhaClient() {
           <section className="bg-gradient-to-br from-amber-900/30 to-orange-900/20 border border-amber-700/30 rounded-xl p-6 text-center">
             <h3 className="font-bold text-lg mb-2">Gehri Kundali Reading Chahiye?</h3>
             <p className="text-gray-400 text-sm mb-5 max-w-sm mx-auto">
-              Janam Kundali se career, vivah timing, dhan yoga aur dasha vishleshan — Jini ke saath
+              Janam Kundali se career, vivah timing, dhan yoga aur dasha vishleshan — Trikaal ke saath
             </p>
             <a href="/kundali"
               className="inline-block px-8 py-3 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 rounded-lg font-semibold text-sm transition-all">
