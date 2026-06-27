@@ -3,71 +3,35 @@
  * 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER 🔱
  * ============================================================================
  * File:        app/sitemap.ts
- * Version:     v7.6
+ * Version:     v7.7
  * Owner:       Rohiit Gupta, Chief Vedic Architect
  *
+ * Changes v7.6 → v7.7 (2026-06-27):
+ *   VIVAH MUHURAT now PERMANENT-AUTO. readVivahYears() returns a ROLLING range
+ *   (2026 .. current year + 6) UNION any DISTINCT years still present in
+ *   muhurat_windows. The VM engine auto-computes forbidden windows for any
+ *   year, so future-year pages (2029, 2030, 2031 …) are emitted to the sitemap
+ *   WITHOUT needing a seeded DB row. Hand-validated years (2026/27/28) keep
+ *   their DB override on the page. Zero manual sitemap edits ever again.
+ *
  * Changes v7.5 → v7.6 (2026-06-25):
- *   VIVAH MUHURAT (year-dynamic) added. New helper readVivahYears() queries
- *   DISTINCT years from muhurat_windows; emits /vivah-muhurat (index) plus
- *   /vivah-muhurat/{year} for every seeded year. Zero hardcode — seed a new
- *   year in muhurat_windows + ONE Vercel redeploy (generateStaticParams) and
- *   the sitemap auto-includes it on next revalidation.
+ *   VIVAH MUHURAT (year-dynamic) added. readVivahYears() queried DISTINCT years
+ *   from muhurat_windows; emitted /vivah-muhurat + /vivah-muhurat/{year}.
  *
  * Changes v7.4 → v7.5 (2026-06-20):
  *   CONTENT CLUSTERS CONFIRMED — NO CODE CHANGE REQUIRED:
  *   All new /learn/[slug] pages are auto-picked up by readSeoLearnSlugs()
- *   which queries seo_pillar_pages WHERE published = true. Zero manual sitemap
- *   edits needed for new content — just INSERT with published=true.
- *
- *   Clusters now live in seo_pillar_pages (all published: true):
- *   ┌─────────────────────────────────────┬───────┬────────────────────────────┐
- *   │ Cluster                             │ Pages │ URL Pattern                │
- *   ├─────────────────────────────────────┼───────┼────────────────────────────┤
- *   │ Guru Singh Rashi Gochar 2026        │  14   │ /learn/jupiter-*           │
- *   │   — 1 pillar + 1 summary + 12 rashi │       │ /learn/guru-gochar-2026-*  │
- *   ├─────────────────────────────────────┼───────┼────────────────────────────┤
- *   │ Budh Vakri (Mercury Retrograde)     │  14   │ /learn/mercury-retrograde- │
- *   │   June 2026                         │       │ /learn/budh-vakri-2026-*   │
- *   │   — 1 pillar + 12 rashi + 1 upay   │       │                            │
- *   ├─────────────────────────────────────┼───────┼────────────────────────────┤
- *   │ Other transit pages (saturn, rahu-  │   5   │ /learn/saturn-transit-*    │
- *   │ ketu, older clusters)               │       │ /learn/rahu-ketu-*  etc.   │
- *   └─────────────────────────────────────┴───────┴────────────────────────────┘
- *   Total seo_pillar_pages published: 33 pages → all at /learn/[slug]
- *
- *   Blog posts (blog_posts table, is_published=true): auto-picked via
- *   getAllPosts() → /blog/[slug]. No redeployment needed for new blogs.
- *
- *   ⚠️  VERCEL REDEPLOYMENT NOTE:
- *   /learn/[slug] uses generateStaticParams → new slugs need ONE Vercel
- *   redeploy to generate static HTML. After redeployment, slugs are live
- *   and sitemap auto-includes them on next revalidation (3600s).
+ *   which queries seo_pillar_pages WHERE published = true.
  *
  * Changes v7.3 → v7.4 (2026-06-19):
- *   FESTIVAL 404 FIX: the festival loop now emits URLs ONLY for is_indexed=true
- *     festivals. Previously the all-India /events/{slug} URL was pushed for EVERY
- *     row — including is_indexed=false festivals (pongal, ugadi, navratri
- *     day-1..9, durga-puja) that have no content and return 404. Those ~12 dead
- *     URLs are no longer submitted to Google (saves crawl budget + quality
- *     signal). The city fan-out was already is_indexed-gated; the all-India URL
- *     is now gated too via a single `if (!f.is_indexed) continue;`.
+ *   FESTIVAL 404 FIX: festival loop emits URLs ONLY for is_indexed=true.
  *
  * Changes v7.2 → v7.3 (2026-06-16):
- *   GEMSTONE: Added the Gemstone Suitability ecosystem (10 new URLs) to the
- *             CALCULATORS array — 1 main suitability calculator + 9 stone-
- *             specific "should I wear X" pages (neelam, cats-eye, pukhraj,
- *             gomed, moonga, panna, moti, manik, heera). Calculator total 18 → 28.
- *   NOTE:     CALCULATORS is a manual list — every NEW calculator must be added
- *             here or it will be missing from the sitemap.
+ *   GEMSTONE: Added Gemstone Suitability ecosystem (10 URLs). Calc total 18→28.
  *
  * Changes v7.1 → v7.2 (2026-06-14):
- *   WIN 1: Compatibility Hindi — proper /hi/compatibility/[slug] URLs instead
- *          of ?lang=hi query params. Google indexes clean URLs reliably.
- *   WIN 3: Panchang — only future dates (today + 365 days). Past dates removed
- *          from sitemap to save crawl budget. DB still has 545 rows but we
- *          filter to future only via date >= today.
- *   ALSO:  festivals_master is_indexed now 35 (was 24) after DB update.
- *          City fan-out now 350 URLs (was 240).
+ *   WIN 1: Compatibility Hindi clean /hi/compatibility/[slug] URLs.
+ *   WIN 3: Panchang future dates only (today + 365 days).
  *
  * ── Earlier history (unchanged) ─────────────────────────────────────────────
  *   v7.1: festivals live from festivals_master + city fan-out.
@@ -91,6 +55,8 @@ import festivalsData from './data/festivals.json';
 const BASE = 'https://trikalvaani.com';
 
 export const revalidate = 3600;
+
+const VIVAH_START = 2026;
 
 const STATIC_ROUTES = [
   '',
@@ -204,9 +170,6 @@ function festivalInState(scope: string | null, homeStates: string[] | null, stat
   return true;
 }
 
-// WIN 1: Returns both EN and HI slug rows
-// EN → /compatibility/[slug]
-// HI → /hi/compatibility/[slug]  (clean URL, not ?lang=hi)
 async function readCompatibilitySlugs(): Promise<{ slug: string; lang: string }[]> {
   try {
     const supabase = anonClient();
@@ -237,8 +200,6 @@ async function readDomainSlugs(): Promise<string[]> {
   }
 }
 
-// WIN 3: Only future dates — today onwards, max 365 days
-// Saves crawl budget — past panchang pages have no search intent value
 async function readPanchangDates(): Promise<string[]> {
   try {
     const supabase = anonClient();
@@ -290,20 +251,6 @@ async function readReportSlugs(): Promise<{ slug: string; updatedAt: string | nu
 
 type SeoPageRow = { slug: string; category: string; priority: number };
 
-// ─────────────────────────────────────────────────────────────────────────────
-// AUTO-PICKUP: All rows in seo_pillar_pages WHERE published = true are served
-// at /learn/[slug] and included in the sitemap automatically.
-//
-// Current clusters (as of v7.5 — 2026-06-20):
-//   transit   → Jupiter Gochar 2026 (14 pages) + Budh Vakri June 2026 (14 pages)
-//               + Saturn Transit + Rahu-Ketu Transit (5 pages)
-//   knowledge → Vedic astrology reference pages
-//   trending  → Trending astrology topics
-//   festival  → Festival-specific SEO pages
-//
-// To add new /learn pages: INSERT into seo_pillar_pages with published=true.
-// Then trigger ONE Vercel redeploy for generateStaticParams to pick up new slugs.
-// ─────────────────────────────────────────────────────────────────────────────
 async function readSeoLearnSlugs(): Promise<SeoPageRow[]> {
   try {
     const supabase = anonClient();
@@ -322,24 +269,30 @@ async function readSeoLearnSlugs(): Promise<SeoPageRow[]> {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// VIVAH MUHURAT (v7.6) — year-dynamic. Returns the DISTINCT years present in
-// muhurat_windows. Each becomes /vivah-muhurat/{year}; plus the /vivah-muhurat
-// index (auto-redirects to the current year). Seed a new year + ONE Vercel
-// redeploy → auto-included on next revalidation. No hardcode.
+// VIVAH MUHURAT (v7.7) — PERMANENT AUTO. Rolling range 2026 .. (current+6),
+// UNION any years still seeded in muhurat_windows. VM auto-computes windows for
+// every year, so future-year pages are emitted without a DB row. Hand-validated
+// years (2026/27/28) keep their DB override on the page. No hardcode, no manual
+// sitemap edits.
 // ─────────────────────────────────────────────────────────────────────────────
 async function readVivahYears(): Promise<number[]> {
+  const set = new Set<number>();
+  const end = new Date().getFullYear() + 6;
+  for (let y = VIVAH_START; y <= end; y++) set.add(y);
   try {
     const supabase = anonClient();
     const { data, error } = await supabase
       .from('muhurat_windows')
       .select('year');
-    if (error || !data) return [];
-    return Array.from(
-      new Set((data as { year: number }[]).map((r) => r.year))
-    ).sort((a, b) => a - b);
+    if (!error && data) {
+      for (const r of data as { year: number }[]) {
+        if (typeof r.year === 'number' && r.year >= VIVAH_START && r.year <= 2100) set.add(r.year);
+      }
+    }
   } catch {
-    return [];
+    /* rolling range alone is fine */
   }
+  return Array.from(set).sort((a, b) => a - b);
 }
 
 function nextNDates(n: number): string[] {
@@ -393,8 +346,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     });
   }
 
-  // ── Vivah Muhurat (year-dynamic) — v7.6 ────────────────────────────
-  // /vivah-muhurat (index → current year) + /vivah-muhurat/{year} per seeded year.
+  // ── Vivah Muhurat (PERMANENT AUTO) — v7.7 ──────────────────────────
+  // /vivah-muhurat (index → current year) + /vivah-muhurat/{year} per rolling year.
   const vivahYears = await readVivahYears();
   if (vivahYears.length > 0) {
     entries.push({
@@ -425,9 +378,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }
 
   // ── WIN 1: Compatibility pages ─────────────────────────────────────
-  // EN: /compatibility/[slug]          — priority 0.8
-  // HI: /hi/compatibility/[slug]       — clean URL, priority 0.7
-  // NOTE: /hi/compatibility/[slug] route must exist in Next.js app dir
   const compatRows = await readCompatibilitySlugs();
   for (const row of compatRows) {
     if (row.lang === 'en') {
@@ -470,24 +420,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }
 
   // ── Festival/event pages ───────────────────────────────────────────
-  // v7.4 FIX: emit URLs ONLY for is_indexed=true festivals. is_indexed=false
-  // rows (pongal, ugadi, navratri day-1..9, durga-puja…) have no generated
-  // content and 404 — keeping them out of the sitemap stops Google crawling
-  // dead pages and wasting crawl budget. This now gates BOTH the all-India
-  // page and the city fan-out (single guard below).
   const dbFestivals = await readFestivalsFromDB();
   if (dbFestivals.length > 0) {
     for (const f of dbFestivals) {
       if (!f.is_indexed) continue; // skip no-content festivals entirely
 
-      // All-India single page
       entries.push({
         url: `${BASE}/events/${f.festival_slug}`,
         lastModified: now,
         changeFrequency: 'monthly',
         priority: 0.75,
       });
-      // City fan-out (scope-aware)
       for (const c of cities) {
         if (festivalInState(f.festival_scope, f.home_states, c.state)) {
           entries.push({
@@ -507,7 +450,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }
 
   // ── WIN 3: Panchang — future dates only (today + 365 days) ────────
-  // Past dates removed — zero search intent, wastes crawl budget
   const panchangDates = await readPanchangDates();
   for (const date of panchangDates) {
     entries.push({ url: `${BASE}/panchang/${date}`, lastModified: now, changeFrequency: 'daily', priority: 0.5 });
@@ -525,10 +467,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }
 
   // ── /learn hub + SEO knowledge pages ──────────────────────────────
-  // v7.5: 33 published pages auto-picked up from seo_pillar_pages.
-  // Clusters: Guru Singh Rashi 2026 (14) + Budh Vakri June 2026 (14)
-  //           + Saturn/Rahu-Ketu/other transit (5).
-  // New clusters: INSERT with published=true → auto-included next revalidation.
   entries.push({
     url: `${BASE}/learn`,
     lastModified: now,
