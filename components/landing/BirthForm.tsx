@@ -3,8 +3,18 @@
  * TRIKAAL VAANI — BirthForm Component
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: components/landing/BirthForm.tsx
- * VERSION: 10.0 — Free tier: mobile number OPTIONAL (funnel fix)
+ * VERSION: 10.1 — "Why we ask" trust box + per-field hints (conversion/UX)
  * SIGNED: ROHIIT GUPTA, CEO
+ *
+ * v10.1 CHANGES vs v10.0 (CEO-approved, conversion audit Fix #2):
+ *   ✅ ADDED a "Why we ask for these details" trust box at the TOP of the
+ *      form — reframes the detailed intake as PREMIUM personalization
+ *      (exact Lagna + planetary degrees + Dasha) instead of friction.
+ *   ✅ ADDED short "why this field matters" hints under: Profession, Time of
+ *      Birth, Place of Birth, Relationship Status; enriched the Current City
+ *      note (now explains current Gochar transits).
+ *   ✅ 100% presentational — ZERO change to fields, validation, Razorpay
+ *      flow, maps-proxy (LOCKED), OneSignal tagging, schema, or submit logic.
  *
  * v10.0 CHANGES vs v9.9 (CEO-approved, conversion audit Fix #1):
  *   ✅ MOBILE OPTIONAL FOR FREE TIER — requiring a phone number for
@@ -1220,6 +1230,27 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
           style={{ background: 'rgba(13,17,30,0.85)', border: '1px solid rgba(212,175,55,0.15)', backdropFilter: 'blur(12px)', maxWidth: '100%', overflow: 'hidden' }}>
           <form onSubmit={handleSubmit} noValidate className="grid gap-5">
 
+            {/* v10.1: "Why we ask" trust box — reframes the detailed form as
+                premium personalization, not friction. Pure presentational. */}
+            <div
+              style={{
+                background: GOLD_RGBA(0.05),
+                border: `1px solid ${GOLD_RGBA(0.18)}`,
+                borderRadius: '12px',
+                padding: '14px 16px',
+              }}
+            >
+              <p style={{ margin: '0 0 6px', color: GOLD, fontSize: '12px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                🔍 Why we ask for these details
+              </p>
+              <p style={{ margin: 0, color: '#94a3b8', fontSize: '11.5px', lineHeight: 1.6 }}>
+                Your exact birth time, place and life context let Trikaal fix your{' '}
+                <strong style={{ color: '#cbd5e1' }}>Lagna, planetary degrees and Dasha to the minute</strong>.
+                That is what makes this reading truly <em>yours</em> — a precise Vedic
+                analysis of your chart, not a generic rashifal shared by crores.
+              </p>
+            </div>
+
             <TierSelector selected={predictionTier} onChange={setPredictionTier} />
 
             {/* Razorpay inline trust strip — paid/voice only */}
@@ -1272,6 +1303,7 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
             {/* Job */}
             <div className="relative">
               <label htmlFor="tv-job" className="block text-sm font-medium text-slate-300 mb-1.5">Profession / Job Category</label>
+              <p className="text-slate-500 text-xs mb-1.5">Tunes your career &amp; money predictions to your real field</p>
               <div className="relative">
                 <select id="tv-job" value={fields.jobCategory} onChange={e => set('jobCategory', e.target.value)}
                   className="w-full px-4 py-2.5 rounded-lg text-sm outline-none appearance-none pr-8" style={SELECT_STYLE}>
@@ -1302,6 +1334,7 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
                   Unknown time
                 </label>
               </div>
+              <p className="text-slate-500 text-xs mb-1.5">Fixes your Lagna (Ascendant) — it shifts every ~2 hours, so this drives accuracy</p>
               <input id="tv-tob" type="time" value={fields.timeOfBirth}
                 onChange={e => set('timeOfBirth', e.target.value)}
                 disabled={fields.unknownTime}
@@ -1346,6 +1379,7 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
                   {locating ? '⟳ Locating...' : '📍 Use Current Location'}
                 </button>
               </div>
+              <p className="text-slate-500 text-xs mb-1.5">Sets your exact planetary degrees from your birth coordinates</p>
               <CityInput
                 id="tv-place"
                 label=""
@@ -1381,7 +1415,7 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
             {/* Current City — v9.4: Google Places autocomplete (same as Place of Birth) */}
             <div>
               <label className="block text-sm font-medium text-slate-300 mb-1.5">
-                Current City <span className="text-slate-500 text-xs ml-2">(where you live/work now)</span>
+                Current City <span className="text-slate-500 text-xs ml-2">(where you live now — used for current Gochar transits)</span>
               </label>
               <CityInput
                 id="tv-current-city"
@@ -1395,6 +1429,7 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
             {/* Relationship Status */}
             <div className="relative">
               <label htmlFor="tv-rel-status" className="block text-sm font-medium text-slate-300 mb-1.5">Relationship Status</label>
+              <p className="text-slate-500 text-xs mb-1.5">Helps focus marriage &amp; relationship timing for you</p>
               <div className="relative">
                 <select id="tv-rel-status" value={fields.relationshipStatus}
                   onChange={e => set('relationshipStatus', e.target.value)}
