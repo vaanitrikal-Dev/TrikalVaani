@@ -3,9 +3,14 @@
 // ============================================================
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
 // FILE: components/layout/SiteNav.tsx
-// VERSION: v2.6
-// DATE: 2026-06-25
+// VERSION: v2.7
+// DATE: 2026-06-27
 // CHANGES:
+//   v2.7: Removed "Life Pillars" nav link from shared NAV_LINKS (drops it
+//         from BOTH desktop + mobile nav). The Life Pillars SECTION still
+//         lives on the homepage (PillarsGrid, 15 domains) — only the top-nav
+//         shortcut is removed to de-clutter the bar and keep "Services" as
+//         the primary entry point. No other logic changed.
 //   v2.6: Added "Vivah Muhurat" nav link (→ /vivah-muhurat, year-dynamic
 //         index that redirects to the current year). Desktop + mobile both
 //         (shared NAV_LINKS). No other logic changed.
@@ -28,8 +33,8 @@ const GOLD = '#D4AF37';
 const GOLD_RGBA = (a: number) => `rgba(212,175,55,${a})`;
 
 // Single source of truth for nav links (desktop + mobile share this)
+// v2.7: "Life Pillars" removed — section still on homepage, just not in nav.
 const NAV_LINKS: { href: string; label: string; highlight?: boolean }[] = [
-  { href: '/#pillars',                 label: 'Life Pillars' },
   { href: '/services',                 label: 'Services', highlight: true },
   { href: '/kundali-milan',            label: 'Kundali Milan' },
   { href: '/vivah-muhurat',            label: 'Vivah Muhurat' },
