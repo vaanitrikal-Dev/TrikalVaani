@@ -112,7 +112,7 @@ const faqSchema = {
       name:             'Hast Rekha report mein kya milega?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text:    '8 dimension scores (career, wealth, health, relationships, vitality, leadership, creativity, spirituality), haath ka Samudrika parichay, 6 rekhaon ka vishleshan, vyaktitva analysis, career aur dhan sanket, prem aur vivah tendencies, swasthya, adhyatma, 4 Samudrika upay, shubh ratna suggestion, Jini ka personal sandesh, aur downloadable PDF report.',
+        text:    '8 dimension scores (career, wealth, health, relationships, vitality, leadership, creativity, spirituality), haath ka Samudrika parichay, 6 rekhaon ka vishleshan, vyaktitva analysis, career aur dhan sanket, prem aur vivah tendencies, swasthya, adhyatma, 4 Samudrika upay, shubh ratna suggestion, Trikaal ka personal sandesh, aur downloadable PDF report.',
       },
     },
     {
