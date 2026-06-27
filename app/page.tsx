@@ -1,37 +1,27 @@
-// 🔱 TRIKAL VAANI | app/page.tsx | v11.4
+// 🔱 TRIKAL VAANI | app/page.tsx | v11.5
 // Owner: Rohiit Gupta, Chief Vedic Architect
-// Date: 2026-06-14
+// Date: 2026-06-27
 // ============================================================================
+// v11.4 → v11.5 — "8 DEEP VEDIC READINGS" MOVED ABOVE PRICING (CEO-approved):
+//   ✅ ADD: <DeepReadingsGrid /> imported and rendered as a new TRUST +
+//      COMMERCIAL TIER slot, placed DIRECTLY ABOVE <PricingSection />.
+//      This is the "8 Deep Vedic Readings, Starting ₹51" question-menu that
+//      was previously buried inside HomepageGEO (slot #11), between the
+//      founder strip and the FAQ — so most visitors never reached it.
+//   ✅ Buying-psychology flow is now: free birth form → Kundali Milan → trust
+//      → SEE THE 8 READINGS (what you can ask) → THEN the price ladder.
+//   ✅ PAIRED CHANGE: HomepageGEO bumped to v2.4 — Element 3 (the same menu)
+//      removed there so there is NO duplicate. Content moved, not copied.
+//   IR-12 PRESERVED: new slot lives in the earning/commercial tier, above
+//      the mobile fold. No locked component (HomeClient) touched.
+//   PROTECTED (untouched): all metadata, blog ISR fetch, schemas, canonical,
+//      every other slot + component, HomeBlogCard, Voice teaser.
+// ----------------------------------------------------------------------------
 // v11.3 → v11.4 — VOICE ASTROLOGY TEASER (CEO-approved, promotion):
-//   ✅ ADD: New inline "Trikaal Voice" teaser section between slot #6
-//      (SocialProofTicker) and slot #7 (DailyPanchang). Gives the voice
-//      product a home-page entry point — kills the /voice-pricing
-//      orphan-page problem (internal link authority) AND makes visitors
-//      aware of voice instead of only the floating widget.
-//   ✅ Single CTA → /voice-pricing. Pure inline JSX — NO new imports,
-//      NO locked component touched, IR-12 tiered layout preserved.
-//   PROTECTED (untouched): all metadata, all 14 original slots, blog
-//      ISR fetch (v11.3), schemas, canonical, components, HomeBlogCard.
-// ----------------------------------------------------------------------------
-// v11.2 → v11.3 — DYNAMIC BLOG SECTION (Supabase, CEO-approved):
-//   ✅ FIX-1: "Latest from the Trikaal Blog" was rendering 3 HARDCODED
-//      posts from lib/blog-data.ts (Jan–Mar 2026, stale). Now fetches the
-//      3 most recent is_published=true rows from Supabase `blog_posts`
-//      (ordered by published_at DESC) server-side at build/revalidate.
-//   ✅ FIX-2: export const revalidate = 3600 — homepage blog refreshes
-//      every hour via ISR. New article published in Supabase → appears
-//      on homepage automatically within 1 hour. Zero manual work.
-//   ✅ FIX-3: Safe fallback — if the Supabase query fails or returns
-//      empty, a static 3-post fallback list renders (never a blank
-//      section, never a build crash).
-//   ✅ FIX-4: BlogCard + lib/blog-data imports removed from this page —
-//      blog cards are now rendered by a local HomeBlogCard (same visual
-//      design: category tag, title, excerpt, read time, date, Read →).
-//   PROTECTED (untouched): all metadata (v11.2), all 13 other slots,
-//      IR-12 tiered layout + locks, schemas, canonical, components.
-// ----------------------------------------------------------------------------
-// v11.1 → v11.2 — META DESCRIPTION REWRITE (SERP CTR, metadata only):
-//   ✅ description tightened to 136 chars. PROTECTED: title, OG, twitter.
+//   ✅ ADD: inline "Trikaal Voice" teaser between SocialProofTicker and
+//      DailyPanchang → kills the /voice-pricing orphan-page problem.
+// v11.2 → v11.3 — DYNAMIC BLOG SECTION (Supabase blog_posts, ISR 1h).
+// v11.1 → v11.2 — META DESCRIPTION REWRITE (metadata only).
 // v11.0 → v11.1 — BRAND FLIP + IR-0 CLEANUP (metadata only).
 // ============================================================================
 
@@ -45,6 +35,7 @@ import SiteNav from '@/components/layout/SiteNav';
 import SiteFooter from '@/components/layout/SiteFooter';
 import Hero from '@/components/landing/Hero';
 import PillarsGrid from '@/components/landing/PillarsGrid';
+import DeepReadingsGrid from '@/components/landing/DeepReadingsGrid';
 import SocialProofTicker from '@/components/landing/SocialProofTicker';
 import InnerCircleWaitlist from '@/components/landing/InnerCircleWaitlist';
 import AIManifesto from '@/components/landing/AIManifesto';
@@ -249,13 +240,9 @@ export default async function HomePage() {
               Order inside: DardEngine card grid → Mahakaal BirthForm. */}
           <HomeClient />
 
-          {/* ── 3. KUNDALI MILAN TEASER — NEW ──────────────────────────────
+          {/* ── 3. KUNDALI MILAN TEASER ────────────────────────────────────
               🔒 EARNING LOCKED (IR-12)
-              Day 1 ships "Launching Soon" placeholder with email capture
-              to Supabase milan_waitlist table. Pre-launch waitlist building
-              for Day 8 (Kundali Milan goes LIVE).
-              SEO/GEO indexing window opens immediately so Google starts
-              crawling Kundali Milan content before the product is live. */}
+              Pre-launch waitlist + SEO/GEO indexing window for Kundali Milan. */}
           <KundaliMilanTeaser />
 
           {/* ═══════════════════════════════════════════════════════════════
@@ -266,9 +253,17 @@ export default async function HomePage() {
           {/* ── 4. LIVE TRUST BAR ──────────────────────────────────────── */}
           <LiveTrustBar />
 
+          {/* ── 4.5 DEEP READINGS GRID — v11.5 — "8 Deep Vedic Readings" ────
+              Moved UP from inside HomepageGEO (was slot #11, buried below the
+              founder strip + FAQ). Now sits directly above the price ladder so
+              visitors see WHAT they can ask before they see the prices.
+              Content unchanged — HomepageGEO v2.4 had this block removed to
+              avoid any duplicate. Server component → all links crawlable. */}
+          <DeepReadingsGrid />
+
           {/* ── 5. PRICING SECTION ─────────────────────────────────────────
-              Moved up from slot #10. After someone sees Mahakaal form +
-              Kundali Milan teaser, they want to know the full price ladder. */}
+              After the 8-readings menu, the visitor is ready for the full
+              price ladder. */}
           <PricingSection />
 
           {/* ── 6. SOCIAL PROOF TICKER ─────────────────────────────────── */}
@@ -354,11 +349,10 @@ export default async function HomePage() {
               down has ZERO impact on search rankings or AI citations.
           ═══════════════════════════════════════════════════════════════ */}
 
-          {/* ── 11. HOMEPAGE GEO — moved from slot #2 ──────────────────────
-              56-word direct answer + Tier 1 FAQ + author E-E-A-T.
-              CEO DECISION (May 19 2026): "Human will not read HomepageGEO,
-              it's only for SEO/GEO/AEO/E-E-A-T — shift below earning sections."
-              Crawlers extract this content regardless of DOM position. */}
+          {/* ── 11. HOMEPAGE GEO — v2.4 (8-readings block extracted out) ────
+              Direct answer + author E-E-A-T + Tier 1 FAQ + global reach.
+              The "8 Deep Vedic Readings" hub that used to live inside this
+              component now renders above PricingSection (slot #4.5). */}
           <HomepageGEO />
 
           {/* ── 12. HOME FAQ v2.0 — TIER 2 DEEP TECHNICAL FAQ ──────────────
@@ -417,7 +411,7 @@ export default async function HomePage() {
 }
 
 // ============================================================================
-// END — app/page.tsx v11.4
+// END — app/page.tsx v11.5
 // 🔱 Trikaal Vaani | Rohiit Gupta, Chief Vedic Architect
 // CEO LOCKED: TIERED LAYOUT — earning sections above mobile fold
 // ============================================================================
