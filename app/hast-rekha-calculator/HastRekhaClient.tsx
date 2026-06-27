@@ -48,14 +48,14 @@ const SCORE_META: Record<string, { label: string; icon: string }> = {
 
 const ANALYZING_MSGS = [
   'हस्त रेखाएं स्कैन हो रही हैं...',
-  'MediaPipe से 21 बिंदु extract हो रहे हैं...',
-  'OpenCV से रेखाएं sharp की जा रही हैं...',
-  'Gemini Vision palm lines read कर रही है...',
-  'Samudrika Shastra नियम लागू हो रहे हैं...',
-  'Trikaal आपकी रिपोर्ट तैयार कर रही है...',
+  'हाथ के 21 बिंदु extract हो रहे हैं...',
+  'रेखाएं sharp की जा रही हैं...',
+  'मुख्य रेखाएं और पर्वत पढ़े जा रहे हैं...',
+  'समुद्रिक शास्त्र नियम लागू हो रहे हैं...',
+  'Trikaal AI आपकी रिपोर्ट तैयार कर रही है...',
 ];
 
-const GEO_ANSWER = `Samudrika Shastra mein haath ki 6 mukhya rekhaen — Jeevan, Mastishk, Hriday, Bhagya, Surya aur Budh — aur 8 parvat (Jupiter se Chandra tak) vyakti ke career, swasthya, prem aur adhyatma ka maarg dikhate hain. Trikaal Vaani ka AI engine MediaPipe + Gemini Vision se in sab ko scan karta hai.`;
+const GEO_ANSWER = `Samudrika Shastra mein haath ki 6 mukhya rekhaen — Jeevan, Mastishk, Hriday, Bhagya, Surya aur Budh — aur 8 parvat (Jupiter se Chandra tak) vyakti ke career, swasthya, prem aur adhyatma ka maarg dikhate hain. Trikaal Vaani ka AI engine advanced computer vision se in sab ko scan karta hai.`;
 
 // ─── Utilities ────────────────────────────────────────────────────────────────
 
@@ -285,7 +285,7 @@ export default function HastRekhaClient() {
       {/* Hero */}
       <section className="py-14 px-4 text-center bg-gradient-to-b from-amber-950/25 to-transparent">
         <p className="text-amber-400 text-xs font-semibold tracking-[0.25em] mb-3">
-          SAMUDRIKA SHASTRA × MEDIAPIPE × GEMINI VISION × CLAUDE AI
+          SAMUDRIKA SHASTRA × AI VISION × DEEP ANALYSIS
         </p>
         <h1 className="text-3xl md:text-5xl font-bold mb-4 leading-tight">
           🖐️ AI Hast Rekha Calculator
@@ -297,7 +297,7 @@ export default function HastRekhaClient() {
 
         {/* Trust badges */}
         <div className="flex flex-wrap gap-2 justify-center mt-5">
-          {['MediaPipe Analysis', 'OpenCV Enhancement', 'Gemini Vision', 'Samudrika Rules', 'PDF Report'].map(t => (
+          {['Hand Landmark Detection', 'Line Enhancement', 'AI Vision Scan', 'Samudrika Rules', 'PDF Report'].map(t => (
             <span key={t} className="px-3 py-1 bg-amber-900/30 border border-amber-700/30 rounded-full text-amber-300 text-xs">{t}</span>
           ))}
         </div>
@@ -380,7 +380,7 @@ export default function HastRekhaClient() {
               '8 Dimension Scores', 'Mukhya Rekhaen Analysis', 'Vyaktitva Vishleshan',
               'Vyavsay + Dhan Yoga', 'Prem + Vivah Sanket', 'Swasthya + Adhyatma',
               'Samudrika Upay (4)', 'Shubh Ratna Suggestion',
-              'Trikaal ka Vyaktigat Sandesh', 'PDF Download ✓'
+              'Trikaal AI ka Sandesh', 'PDF Download ✓'
             ].map((item, i) => (
               <div key={i} className="flex gap-2 text-xs text-gray-400">
                 <span className="text-amber-500">◈</span><span>{item}</span>
@@ -406,7 +406,7 @@ export default function HastRekhaClient() {
           },
           {
             q: 'AI palmistry kitni accurate hai?',
-            a: 'Achhi lighting aur clear palm photo ke saath MediaPipe 90%+ accuracy se 21 hand landmarks detect karta hai. Gemini Vision 6 mukhya rekhaon aur 8 parvaton ko scan karta hai. premium AI engine Samudrika niyamon se final report banata hai. Yeh ek AI-assisted reading hai — ek starting point, final nirnay hamesha aapka.'
+            a: 'Achhi lighting aur clear palm photo ke saath hamara AI engine 90%+ accuracy se haath ke 21 landmarks detect karta hai, 6 mukhya rekhaon aur 8 parvaton ko scan karta hai, aur Samudrika Shastra ke classical niyamon se final report banata hai. Yeh ek AI-assisted reading hai — ek starting point, final nirnay hamesha aapka.'
           },
           {
             q: 'Kaun sa haath upload karein — seedha ya ulta?',
@@ -414,7 +414,7 @@ export default function HastRekhaClient() {
           },
           {
             q: 'Hast Rekha Report mein kya milega?',
-            a: '8 dimension scores (career, wealth, health, relationships, vitality, leadership, creativity, spirituality), 7 detailed sections in Hindi/English/Hinglish, 4 Samudrika upay, shubh ratna suggestion, Trikaal ka personal sandesh, aur ek downloadable PDF report.'
+            a: '8 dimension scores (career, wealth, health, relationships, vitality, leadership, creativity, spirituality), 7 detailed sections in Hindi/English/Hinglish, 4 Samudrika upay, shubh ratna suggestion, Trikaal AI ka personal sandesh, aur ek downloadable PDF report.'
           },
           {
             q: 'Kya meri palm image save hoti hai?',
@@ -458,7 +458,7 @@ export default function HastRekhaClient() {
   if (step === 'analyzing') return (
     <main className="min-h-screen bg-[#0a0a0f] text-white flex flex-col items-center justify-center px-4 text-center">
       <div className="text-7xl mb-8 animate-pulse">🔮</div>
-      <h2 className="text-2xl font-bold mb-3">Trikaal Vishleshan Kar Rahi Hai...</h2>
+      <h2 className="text-2xl font-bold mb-3">Trikaal AI Vishleshan Kar Rahi Hai...</h2>
       <p className="text-amber-400 max-w-sm min-h-[2rem]">{ANALYZING_MSGS[msgIdx]}</p>
       <div className="flex gap-2 mt-8">
         {ANALYZING_MSGS.map((_, i) => (
@@ -477,7 +477,7 @@ export default function HastRekhaClient() {
 
         {/* Header */}
         <section className="py-12 px-4 text-center bg-gradient-to-b from-amber-950/25 to-transparent">
-          <p className="text-amber-400 text-xs font-semibold tracking-widest mb-3">JINI KA VISHLESHAN COMPLETE ✓</p>
+          <p className="text-amber-400 text-xs font-semibold tracking-widest mb-3">TRIKAAL AI VISHLESHAN COMPLETE ✓</p>
           <h1 className="text-3xl font-bold mb-3">Aapki Hast Rekha Report</h1>
           {mp_features?.hand_shape && (
             <div className="flex gap-2 justify-center flex-wrap">
@@ -604,10 +604,10 @@ export default function HastRekhaClient() {
             </section>
           )}
 
-          {/* Jini */}
+          {/* Trikaal AI Sandesh */}
           {report?.jini_sandesh && (
             <section className="bg-gradient-to-r from-amber-950/30 to-orange-950/30 border border-amber-700/40 rounded-xl p-6 text-center">
-              <p className="text-amber-400 text-xs font-semibold tracking-widest mb-3">✨ JINI KA SANDESH</p>
+              <p className="text-amber-400 text-xs font-semibold tracking-widest mb-3">✨ TRIKAAL AI KA SANDESH</p>
               <p className="text-gray-200 text-sm leading-relaxed italic">{report.jini_sandesh}</p>
             </section>
           )}
