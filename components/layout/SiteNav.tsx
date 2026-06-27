@@ -3,25 +3,33 @@
 // ============================================================
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
 // FILE: components/layout/SiteNav.tsx
-// VERSION: v2.7
+// VERSION: v2.8
 // DATE: 2026-06-27
 // CHANGES:
-//   v2.7: Removed "Life Pillars" nav link from shared NAV_LINKS (drops it
-//         from BOTH desktop + mobile nav). The Life Pillars SECTION still
-//         lives on the homepage (PillarsGrid, 15 domains) — only the top-nav
-//         shortcut is removed to de-clutter the bar and keep "Services" as
-//         the primary entry point. No other logic changed.
-//   v2.6: Added "Vivah Muhurat" nav link (→ /vivah-muhurat, year-dynamic
-//         index that redirects to the current year). Desktop + mobile both
-//         (shared NAV_LINKS). No other logic changed.
-//   v2.5: IR-0 cleanup — visible logo text "Trikaal Vaani".
+//   v2.8: NAV CONSISTENCY PASS (style + colour) —
+//     - Uniform link colour: every nav link is now the same slate tone and
+//       weight. Removed the lone gold "Services" highlight that made the bar
+//       look inconsistent. Gold now means ONE thing: hover + current page.
+//     - Active-page highlight: the link for the page you're on shows gold
+//       (via usePathname) - clear orientation, professional feel.
+//     - Removed the email address from the DESKTOP top bar (it cluttered the
+//       nav and is already in the footer + Contact). Email kept in the mobile
+//       menu where it does not crowd the bar.
+//     - Single gold accent on desktop = the "Free Analysis" CTA button.
+//     PROTECTED: logo, LangSwitcher, Sign In / My Vault, mobile hamburger,
+//       AuthModal, all routes. NAV_LINKS list unchanged except the now-unused
+//       `highlight` flag was dropped.
+//   v2.7: Removed "Life Pillars" nav link (section still on homepage).
+//   v2.6: Added "Vivah Muhurat" nav link.
+//   v2.5: IR-0 cleanup - visible logo text "Trikaal Vaani".
 //   v2.4: MOBILE HAMBURGER MENU.
 //   v2.3: Added "Kundali Milan" + "Karmic Reading" links.
-//   v2.2: Removed "Events"; added "Calculators" → /calculators.
+//   v2.2: Removed "Events"; added "Calculators".
 // ============================================================
 
 import Link from 'next/link';
 import Image from 'next/image';
+import { usePathname } from 'next/navigation';
 import { Mail, User, ChevronDown, Menu, X } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
@@ -33,9 +41,9 @@ const GOLD = '#D4AF37';
 const GOLD_RGBA = (a: number) => `rgba(212,175,55,${a})`;
 
 // Single source of truth for nav links (desktop + mobile share this)
-// v2.7: "Life Pillars" removed — section still on homepage, just not in nav.
-const NAV_LINKS: { href: string; label: string; highlight?: boolean }[] = [
-  { href: '/services',                 label: 'Services', highlight: true },
+// v2.8: uniform styling - no per-item highlight flag.
+const NAV_LINKS: { href: string; label: string }[] = [
+  { href: '/services',                 label: 'Services' },
   { href: '/kundali-milan',            label: 'Kundali Milan' },
   { href: '/vivah-muhurat',            label: 'Vivah Muhurat' },
   { href: '/karmic-background-reading', label: 'Karmic Reading' },
@@ -94,6 +102,11 @@ export default function SiteNav() {
   const [lang, setLang] = useState<Lang>('en');
   const [mobileOpen, setMobileOpen] = useState(false);
 
+  const pathname = usePathname();
+  // Active if exact match or a sub-page of the link (e.g. /services/ex-back-reading)
+  const isActive = (href: string) =>
+    pathname === href || pathname.startsWith(href + '/');
+
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
@@ -124,7 +137,7 @@ export default function SiteNav() {
       >
         <div className="max-w-6xl mx-auto h-16 flex items-center justify-between">
 
-          {/* ── LOGO ── */}
+          {/* -- LOGO -- */}
           <Link href="/" className="flex items-center gap-2.5 group" onClick={() => setMobileOpen(false)}>
             <div
               className="rounded-full flex items-center justify-center transition-all duration-300 group-hover:scale-105 overflow-hidden"
@@ -149,31 +162,23 @@ export default function SiteNav() {
             </span>
           </Link>
 
-          {/* ── DESKTOP NAV (unchanged) ── */}
+          {/* -- DESKTOP NAV - v2.8: uniform colour + active-page gold -- */}
           <nav className="hidden sm:flex items-center gap-4">
 
             {NAV_LINKS.map((l) => (
               <Link
                 key={l.href}
                 href={l.href}
-                className="text-sm transition-colors duration-200"
-                style={
-                  l.highlight
-                    ? { color: GOLD_RGBA(0.85), fontWeight: 600 }
-                    : { color: '#94a3b8' }
-                }
+                aria-current={isActive(l.href) ? 'page' : undefined}
+                className={`text-sm font-medium transition-colors duration-200 ${
+                  isActive(l.href)
+                    ? 'text-[#D4AF37]'
+                    : 'text-slate-300 hover:text-[#D4AF37]'
+                }`}
               >
                 {l.label}
               </Link>
             ))}
-
-            <a
-              href="mailto:rohiit@trikalvaani.com"
-              className="hidden lg:flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-300 transition-colors duration-200"
-            >
-              <Mail className="w-3.5 h-3.5" style={{ color: GOLD_RGBA(0.5) }} />
-              <span>rohiit@trikalvaani.com</span>
-            </a>
 
             <LangSwitcher lang={lang} setLang={setLang} />
 
@@ -216,7 +221,7 @@ export default function SiteNav() {
             </Link>
           </nav>
 
-          {/* ── MOBILE: Start button + hamburger ── */}
+          {/* -- MOBILE: Start button + hamburger -- */}
           <div className="sm:hidden flex items-center gap-2">
             <Link
               href="/#birth-form"
@@ -248,7 +253,7 @@ export default function SiteNav() {
         </div>
       </header>
 
-      {/* ── MOBILE DROPDOWN MENU ── */}
+      {/* -- MOBILE DROPDOWN MENU -- */}
       {mobileOpen && (
         <>
           {/* backdrop */}
@@ -276,12 +281,11 @@ export default function SiteNav() {
                   key={l.href}
                   href={l.href}
                   onClick={() => setMobileOpen(false)}
-                  className="py-3.5 text-base transition-colors"
-                  style={{
-                    color: l.highlight ? GOLD : '#cbd5e1',
-                    fontWeight: l.highlight ? 600 : 400,
-                    borderBottom: `1px solid ${GOLD_RGBA(0.08)}`,
-                  }}
+                  aria-current={isActive(l.href) ? 'page' : undefined}
+                  className={`py-3.5 text-base transition-colors ${
+                    isActive(l.href) ? 'text-[#D4AF37] font-semibold' : 'text-slate-300'
+                  }`}
+                  style={{ borderBottom: `1px solid ${GOLD_RGBA(0.08)}` }}
                 >
                   {l.label}
                 </Link>
@@ -300,14 +304,14 @@ export default function SiteNav() {
               ) : (
                 <button
                   onClick={() => { setMobileOpen(false); setShowAuth(true); }}
-                  className="py-3.5 text-base text-left"
-                  style={{ color: '#cbd5e1', borderBottom: `1px solid ${GOLD_RGBA(0.08)}` }}
+                  className="py-3.5 text-base text-left text-slate-300"
+                  style={{ borderBottom: `1px solid ${GOLD_RGBA(0.08)}` }}
                 >
                   Sign In
                 </button>
               )}
 
-              {/* Language + email */}
+              {/* Language + email (email kept here - does not crowd the bar) */}
               <div className="flex items-center justify-between pt-4">
                 <LangSwitcher lang={lang} setLang={setLang} />
                 <a
