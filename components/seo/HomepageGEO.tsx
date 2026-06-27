@@ -3,22 +3,29 @@
  * TRIKAL VAANI — trikalvaani.com
  * Chief Vedic Architect: Rohiit Gupta
  * FILE: components/seo/HomepageGEO.tsx
- * Version: 2.3 — Speakable classes + author photo (Claude audit June 2026)
- * Date: 2026-06-10
+ * Version: 2.4 — GEO Element 3 extracted to DeepReadingsGrid (June 2026)
+ * Date: 2026-06-27
  * 🔱 JAI MAA SHAKTI
  *
- * CHANGES vs v2.2 (CEO-approved):
- *   ✅ FIX-1: className="geo-direct-answer" added to direct answer section.
- *      layout.tsx speakable selector targets '.geo-direct-answer' — without
- *      this class, Google SGE / voice search cannot extract the direct answer.
- *   ✅ FIX-2: className="faq-speakable" added to FAQ section.
- *      layout.tsx speakable selector targets '.faq-speakable' — without this,
- *      Google SGE cannot extract FAQ answers for voice / AI overviews.
- *   ✅ FIX-3: Author strip 'RG' text placeholder replaced with actual
- *      Rohiit Gupta photo (Next/Image, same src as SiteFooter).
- *      Real author photo = stronger E-E-A-T signal for Google.
- *   PROTECTED (untouched): all content, FAQ Q&A, internal links, global
- *      reach block, all IDs, routes, CTAs, brand spelling, gold palette.
+ * CHANGES vs v2.3 (CEO-approved):
+ *   ✅ MOVED-OUT: "GEO Element 3 — Internal Link Hub" (the "8 Deep Vedic
+ *      Readings, Starting ₹51" question-menu + "Explore by Life Domain"
+ *      15-link block) has been EXTRACTED into its own component
+ *      components/landing/DeepReadingsGrid.tsx and is now rendered HIGH on
+ *      the homepage — directly above the Services & Pricing section in
+ *      page.tsx (v11.5). It used to sit here, buried between the author
+ *      strip and the FAQ, so most visitors never scrolled to it.
+ *      Content is byte-for-byte unchanged — only its LOCATION moved.
+ *   PROTECTED (untouched): Element 1 direct-answer (.geo-direct-answer +
+ *      id #what-is-trikaal-vaani), Element 2 E-E-A-T author strip (real
+ *      Rohiit Gupta photo), Element 4 FAQ (.faq-speakable + id #faq),
+ *      Element 5 global-reach block. All speakable classes, IDs, routes,
+ *      CTAs, brand spelling, gold palette intact.
+ *
+ * --- inherited from v2.3 ---
+ *   ✅ FIX-1: className="geo-direct-answer" on direct answer section.
+ *   ✅ FIX-2: className="faq-speakable" on FAQ section.
+ *   ✅ FIX-3: Author strip uses real Rohiit Gupta photo (Next/Image).
  * =============================================================
  */
 
@@ -158,103 +165,13 @@ export default function HomepageGEO() {
       </section>
 
       {/* ═══════════════════════════════════════════════════════════
-          GEO ELEMENT 3: INTERNAL LINK HUB
+          GEO ELEMENT 3: INTERNAL LINK HUB — MOVED (v2.4)
+          The "8 Deep Vedic Readings" menu + "Explore by Life Domain" block
+          that used to live here has been extracted to
+          components/landing/DeepReadingsGrid.tsx and is now rendered above
+          the Services & Pricing section in page.tsx (v11.5). Content moved
+          unchanged — only its position on the page changed.
           ═══════════════════════════════════════════════════════════ */}
-      <section
-        aria-labelledby="services-hub-heading"
-        className="px-4 py-16 bg-[#0D1020]"
-      >
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-12">
-            <p className="text-[#D4AF37] uppercase tracking-widest text-xs font-medium mb-3">
-              Pick Your Question
-            </p>
-            <h2
-              id="services-hub-heading"
-              className="font-serif text-3xl md:text-4xl font-bold text-white mb-4"
-            >
-              8 Deep Vedic Readings,{' '}
-              <span className="text-[#D4AF37]">Starting ₹51</span>
-            </h2>
-            <p className="text-gray-400 max-w-2xl mx-auto">
-              Each reading is built on a specific house, planet, and Dasha
-              combination from your kundli. Pick the question that matters
-              most.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
-            {[
-              { title: 'Ex-Back Reading', slug: 'ex-back-reading', emoji: '♀', hook: 'Will my ex come back?' },
-              { title: 'Toxic Boss Radar', slug: 'toxic-boss-radar', emoji: '♄', hook: 'Is my boss karmically toxic?' },
-              { title: 'Career Pivot', slug: 'career-pivot', emoji: '♃', hook: 'Wrong career?' },
-              { title: 'Property Yog', slug: 'property-yog', emoji: '🏠', hook: 'Right time to buy?' },
-              { title: 'Compatibility', slug: 'compatibility', emoji: '⚖️', hook: 'Truly compatible?' },
-              { title: 'Child Destiny', slug: 'child-destiny', emoji: '👶', hook: "Child's calling?" },
-              { title: 'Wealth Reading', slug: 'wealth-reading', emoji: '💰', hook: 'When wealth peaks?' },
-              { title: 'Spiritual Purpose', slug: 'spiritual-purpose', emoji: '🕉', hook: "Soul's purpose?" },
-            ].map((s) => (
-              <Link
-                key={s.slug}
-                href={`/services/${s.slug}`}
-                className="group border border-white/10 rounded-xl p-5 bg-white/[0.02] hover:border-[#D4AF37]/40 hover:bg-[#D4AF37]/5 transition-all duration-200"
-              >
-                <div className="text-2xl mb-2 group-hover:scale-110 transition-transform">
-                  {s.emoji}
-                </div>
-                <h3 className="font-serif text-base font-bold text-white mb-1 group-hover:text-[#D4AF37] transition-colors">
-                  {s.title}
-                </h3>
-                <p className="text-xs text-gray-500 italic">{s.hook}</p>
-                <p className="text-[#D4AF37] text-sm font-bold mt-2">₹51</p>
-              </Link>
-            ))}
-          </div>
-
-          <div className="text-center">
-            <Link
-              href="/services"
-              className="inline-block bg-[#D4AF37] text-[#080B12] font-bold px-8 py-3 rounded-lg hover:bg-[#e8c84a] transition-all duration-200"
-            >
-              View All 8 Readings →
-            </Link>
-          </div>
-
-          <div className="mt-16 pt-12 border-t border-white/5">
-            <h3 className="font-serif text-xl md:text-2xl font-bold text-white text-center mb-8">
-              Or Explore by{' '}
-              <span className="text-[#D4AF37]">Life Domain</span>
-            </h3>
-            <div className="flex flex-wrap justify-center gap-3">
-              {[
-                { name: 'Career', slug: 'career' },
-                { name: 'Wealth', slug: 'wealth' },
-                { name: 'Health', slug: 'health' },
-                { name: 'Relationships', slug: 'relationships' },
-                { name: 'Family', slug: 'family' },
-                { name: 'Education', slug: 'education' },
-                { name: 'Home & Property', slug: 'home' },
-                { name: 'Legal', slug: 'legal' },
-                { name: 'Travel', slug: 'travel' },
-                { name: 'Spirituality', slug: 'spirituality' },
-                { name: 'Wellbeing', slug: 'wellbeing' },
-                { name: 'Marriage', slug: 'marriage' },
-                { name: 'Business', slug: 'business' },
-                { name: 'Foreign Settlement', slug: 'foreign-settlement' },
-                { name: 'Digital Career', slug: 'digital-career' },
-              ].map((d) => (
-                <Link
-                  key={d.slug}
-                  href={`/${d.slug}`}
-                  className="text-sm border border-[#D4AF37]/30 text-[#D4AF37] px-4 py-2 rounded-full hover:bg-[#D4AF37]/10 transition-all duration-200"
-                >
-                  {d.name}
-                </Link>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* ═══════════════════════════════════════════════════════════
           GEO ELEMENT 4: VISIBLE FAQ
@@ -391,6 +308,6 @@ export default function HomepageGEO() {
 }
 
 // =============================================================
-// END — components/seo/HomepageGEO.tsx v2.3
+// END — components/seo/HomepageGEO.tsx v2.4
 // 🔱 Trikaal Vaani | Rohiit Gupta, Chief Vedic Architect
 // =============================================================
