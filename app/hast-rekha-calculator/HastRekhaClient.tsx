@@ -2,7 +2,7 @@
 
 // ============================================================
 // File: app/hast-rekha-calculator/HastRekhaClient.tsx
-// Version: v1.0 — Trikaal Vaani design system + paid ₹51 + PDF
+// Version: v2.0 — design system + paid ₹51 + PDF + mobile capture + PDF storage
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
 // ============================================================
 
@@ -22,7 +22,7 @@ const GOLD_RGBA = (a: number) => `rgba(212,175,55,${a})`;
 type Step = 'upload' | 'paying' | 'analyzing' | 'result' | 'review';
 
 interface FAQ { q: string; a: string; }
-interface FormState { userName: string; gender: 'M' | 'F'; language: 'hi' | 'en' | 'hinglish'; dob: string; }
+interface FormState { userName: string; mobile: string; gender: 'M' | 'F'; language: 'hi' | 'en' | 'hinglish'; dob: string; }
 interface PalmImage { preview: string; b64: string; }
 interface PalmResult {
   success: boolean;
@@ -194,7 +194,7 @@ export default function HastRekhaClient({ faqs }: { faqs: FAQ[] }) {
   const [step,      setStep]      = useState<Step>('upload');
   const [rightPalm, setRightPalm] = useState<PalmImage | null>(null);
   const [leftPalm,  setLeftPalm]  = useState<PalmImage | null>(null);
-  const [form,      setForm]      = useState<FormState>({ userName: '', gender: 'M', language: 'hi', dob: '' });
+  const [form,      setForm]      = useState<FormState>({ userName: '', mobile: '', gender: 'M', language: 'hi', dob: '' });
   const [msgIdx,    setMsgIdx]    = useState(0);
   const [result,    setResult]    = useState<PalmResult | null>(null);
   const [error,     setError]     = useState('');
@@ -240,7 +240,7 @@ export default function HastRekhaClient({ faqs }: { faqs: FAQ[] }) {
           name:        'Trikaal Vaani',
           description: 'AI Hast Rekha Report — Samudrika Shastra',
           image:       '/Trikal_Logo.png',
-          prefill:     { name: form.userName },
+          prefill:     { name: form.userName, contact: form.mobile },
           theme:       { color: GOLD },
           handler: async (response: any) => {
             try {
@@ -256,7 +256,7 @@ export default function HastRekhaClient({ faqs }: { faqs: FAQ[] }) {
                   razorpay_signature:  response.razorpay_signature,
                   right_palm_b64:      rightPalm!.b64,
                   left_palm_b64:       leftPalm?.b64 ?? null,
-                  user_name: form.userName, gender: form.gender, language: form.language, dob: form.dob,
+                  user_name: form.userName, user_mobile: form.mobile, gender: form.gender, language: form.language, dob: form.dob,
                 }),
               });
               clearInterval(timer);
@@ -358,7 +358,15 @@ export default function HastRekhaClient({ faqs }: { faqs: FAQ[] }) {
                 className="w-full rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none"
                 style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }} />
             </div>
-            <div>
+            <div className="col-span-2">
+              <label className="block text-xs text-slate-500 mb-1.5">WhatsApp Number</label>
+              <input type="tel" inputMode="numeric" maxLength={10} placeholder="Report link ke liye (10 digit)"
+                value={form.mobile}
+                onChange={e => setForm(p => ({ ...p, mobile: e.target.value.replace(/[^0-9]/g, '').slice(0, 10) }))}
+                className="w-full rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none"
+                style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }} />
+            </div>
+            <div className="col-span-2">
               <label className="block text-xs text-slate-500 mb-1.5">Gender</label>
               <select value={form.gender} onChange={e => setForm(p => ({ ...p, gender: e.target.value as any }))}
                 className="w-full rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none"
@@ -367,7 +375,7 @@ export default function HastRekhaClient({ faqs }: { faqs: FAQ[] }) {
                 <option value="F">Stri</option>
               </select>
             </div>
-            <div>
+            <div className="col-span-2">
               <label className="block text-xs text-slate-500 mb-1.5">Language</label>
               <select value={form.language} onChange={e => setForm(p => ({ ...p, language: e.target.value as any }))}
                 className="w-full rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none"
