@@ -51,9 +51,13 @@ const ANALYZING_MSGS = [
   'हस्त रेखाएं स्कैन हो रही हैं...',
   'हाथ के 21 बिंदु extract हो रहे हैं...',
   'रेखाएं sharp की जा रही हैं...',
-  'मुख्य रेखाएं और पर्वत पढ़े जा रहे हैं...',
-  'समुद्रिक शास्त्र नियम लागू हो रहे हैं...',
-  'Trikaal AI आपकी रिपोर्ट तैयार कर रही है...',
+  'जीवन रेखा और मस्तिष्क रेखा पढ़ी जा रही हैं...',
+  'हृदय रेखा और भाग्य रेखा का विश्लेषण...',
+  'आठ पर्वतों का अध्ययन हो रहा है...',
+  'समुद्रिक शास्त्र के 40+ नियम लागू हो रहे हैं...',
+  'आपके 8 जीवन आयाम गिने जा रहे हैं...',
+  'Trikaal AI आपकी विस्तृत रिपोर्ट लिख रही है...',
+  'अंतिम स्पर्श दिया जा रहा है...',
 ];
 
 // ─── Utilities ────────────────────────────────────────────────────────────────
@@ -242,7 +246,7 @@ export default function HastRekhaClient({ faqs }: { faqs: FAQ[] }) {
             try {
               setStep('analyzing');
               let idx = 0;
-              const timer = setInterval(() => { idx = (idx + 1) % ANALYZING_MSGS.length; setMsgIdx(idx); }, 3000);
+              const timer = setInterval(() => { idx = (idx + 1) % ANALYZING_MSGS.length; setMsgIdx(idx); }, 8000);
 
               const res = await fetch('/api/palmistry/paid-analyze', {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -470,7 +474,7 @@ export default function HastRekhaClient({ faqs }: { faqs: FAQ[] }) {
               style={{ width: i === msgIdx ? '32px' : '8px', background: i === msgIdx ? GOLD : 'rgba(255,255,255,0.1)' }} />
           ))}
         </div>
-        <p className="text-slate-600 text-xs mt-8">20-45 seconds lag sakte hain — page band mat karein</p>
+        <p className="text-slate-600 text-xs mt-8">90 second tak lag sakte hain — kripya page band na karein</p>
       </main>
     </>
   );
