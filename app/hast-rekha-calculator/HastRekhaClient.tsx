@@ -19,7 +19,7 @@ const GOLD_RGBA = (a: number) => `rgba(212,175,55,${a})`;
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type Step = 'upload' | 'paying' | 'analyzing' | 'result';
+type Step = 'upload' | 'paying' | 'analyzing' | 'result' | 'review';
 
 interface FAQ { q: string; a: string; }
 interface FormState { userName: string; gender: 'M' | 'F'; language: 'hi' | 'en' | 'hinglish'; dob: string; }
@@ -194,6 +194,7 @@ export default function HastRekhaClient({ faqs }: { faqs: FAQ[] }) {
   const [msgIdx,    setMsgIdx]    = useState(0);
   const [result,    setResult]    = useState<PalmResult | null>(null);
   const [error,     setError]     = useState('');
+  const [waUrl,     setWaUrl]     = useState('');
 
   useEffect(() => {
     const s = document.createElement('script');
@@ -257,6 +258,12 @@ export default function HastRekhaClient({ faqs }: { faqs: FAQ[] }) {
               clearInterval(timer);
               const data = await res.json();
               if (!res.ok || !data.success) throw new Error(data.error || 'Analysis failed');
+              if (data.pending_review) {
+                setWaUrl(data.whatsappUrl || '');
+                setStep('review');
+                resolve();
+                return;
+              }
               setResult(data); setStep('result'); resolve();
             } catch (e: any) { reject(e); }
           },
@@ -464,6 +471,53 @@ export default function HastRekhaClient({ faqs }: { faqs: FAQ[] }) {
           ))}
         </div>
         <p className="text-slate-600 text-xs mt-8">20-45 seconds lag sakte hain — page band mat karein</p>
+      </main>
+    </>
+  );
+
+  // ═══ REVIEW (graceful personal-review handoff — NOT a failure) ═══
+  if (step === 'review') return (
+    <>
+      <SiteNav />
+      <main className="min-h-screen pt-20 pb-16 px-4 flex flex-col items-center justify-center"
+        style={{ background: '#080B12', color: '#E5E7EB' }}>
+        <div className="max-w-md mx-auto text-center">
+          <div className="text-6xl mb-6">🔱</div>
+          <h1 className="text-2xl md:text-3xl font-serif font-bold mb-4" style={{ color: GOLD }}>
+            Aapki Reading Personal Review Mein Hai
+          </h1>
+          <p className="text-slate-300 text-sm md:text-base leading-relaxed mb-6">
+            Aapki Hast Rekha itni vishesh hai ki ise hamare Vedic experts personally
+            review kar rahe hain. Aapki detailed report agle <strong style={{ color: GOLD }}>30 minute</strong> mein
+            WhatsApp par bheji jayegi.
+          </p>
+
+          <div className="rounded-xl p-5 mb-6" style={{ background: GOLD_RGBA(0.06), border: `1px solid ${GOLD_RGBA(0.2)}` }}>
+            <p className="text-sm text-slate-400 leading-relaxed">
+              ✓ Aapka payment safe hai<br />
+              ✓ Report personally review hokar aayegi<br />
+              ✓ Koi extra charge nahi
+            </p>
+          </div>
+
+          {waUrl && (
+            <a href={waUrl} target="_blank" rel="noopener noreferrer"
+              className="inline-flex items-center justify-center gap-2 w-full py-4 rounded-xl font-bold text-base transition-all hover:scale-[1.02] mb-3"
+              style={{ background: '#25D366', color: '#fff' }}>
+              <span>💬</span> WhatsApp Par Confirm Karein
+            </a>
+          )}
+
+          <Link href="/"
+            className="inline-block w-full py-3 rounded-xl text-slate-500 hover:text-slate-300 text-sm transition-all"
+            style={{ border: '1px solid rgba(255,255,255,0.08)' }}>
+            Home Par Wapas Jayein
+          </Link>
+
+          <p className="text-slate-600 text-xs mt-6">
+            Trikaal Vaani · Rohiit Gupta, Chief Vedic Architect
+          </p>
+        </div>
       </main>
     </>
   );
