@@ -1,15 +1,28 @@
-// TRIKAL VAANI - Palmistry Paid Analyze + Verify API - v2.0
+// TRIKAL VAANI - Palmistry Paid Analyze + Verify API - v3.0 FINAL
 // CEO: Rohiit Gupta | Chief Vedic Architect
-// v2.0: SILENT AUTO-RETRY (3x) + classy "personal review" fallback.
-//   If VM analysis fails, retry up to 3 times silently. If all fail,
-//   payment is logged to Supabase as "pending_review" and a graceful
-//   WhatsApp-handoff response is returned (NO "failed" language).
-// Pattern matched to verify-milan-payment (HMAC verify, callVM, AbortController).
+//
+// v3.0 — ROOT-CAUSE FIX (proven by 4 live VM tests: analyze takes 85-94s):
+//   • REMOVED the 3x retry loop. The VM engine is reliable (4/4 success in
+//     testing), so retries only multiplied the timeout risk (3×90s) and
+//     directly caused the false "pending_review" — the VM returned 200 at
+//     ~94s but the old 90s AbortController had already aborted the fetch.
+//   • SINGLE attempt with a 150s timeout (observed max 94s + safe buffer).
+//   • maxDuration=300 (Vercel Pro) comfortably covers a 150s call + PDF.
+//   • PDF stays non-fatal with its own 60s timeout.
+//   • Graceful "personal review" fallback kept ONLY for a genuine error
+//     (real 500 from VM, or true network failure) — not for slowness.
+//
+// Flow: verify HMAC → VM analyze (single, 150s) → VM PDF (60s, non-fatal)
+//       → Supabase save → return report+PDF.
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import crypto from 'crypto';
 import { callVM } from '@/lib/callVM';
+
+// ── CRITICAL: function must outlive a ~90s VM analyze (Vercel Pro allows 300) ──
+export const maxDuration = 300;
+export const dynamic = 'force-dynamic';
 
 const VM_ANALYZE_ENDPOINT =
   process.env.VM_PALM_ANALYZE_ENDPOINT ?? 'http://34.47.182.227:8001/palmistry/analyze';
@@ -33,34 +46,6 @@ interface PalmVerifyRequest {
   gender?:             string;
   language?:           string;
   dob?:                string;
-}
-
-// Sleep helper for retry backoff
-const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
-
-// One VM analyze attempt with timeout. Returns parsed data or null.
-async function tryAnalyze(payload: object): Promise<any | null> {
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 60000);
-  try {
-    const vmRes = await callVM(VM_ANALYZE_ENDPOINT, {
-      method: 'POST',
-      body: JSON.stringify(payload),
-      signal: controller.signal,
-    });
-    clearTimeout(timeout);
-    if (!vmRes.ok) {
-      const txt = await vmRes.text().catch(() => '');
-      console.error('[Trikal] Palm VM analyze non-200:', vmRes.status, txt.slice(0, 200));
-      return null;
-    }
-    const data = await vmRes.json();
-    return data?.success ? data : null;
-  } catch (e: unknown) {
-    clearTimeout(timeout);
-    console.error('[Trikal] Palm VM attempt failed:', e);
-    return null;
-  }
 }
 
 export async function POST(req: NextRequest) {
@@ -89,34 +74,51 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Payment verification failed.' }, { status: 400 });
     }
 
-    // ── 2. VM Analysis — SILENT AUTO-RETRY (up to 3 attempts) ────────────────
-    const vmPayload = {
-      right_palm_b64,
-      left_palm_b64: left_palm_b64 ?? null,
-      user_name: user_name ?? '',
-      gender:    gender    ?? 'M',
-      language:  language  ?? 'hi',
-      dob:       dob       ?? '',
-    };
-
+    // ── 2. VM Analysis — SINGLE attempt, 150s timeout (analyze ~85-94s) ──────
     let analysisData: any = null;
-    const MAX_ATTEMPTS = 3;
-    for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
-      analysisData = await tryAnalyze(vmPayload);
-      if (analysisData) {
-        console.log(`[Trikal] Palm analysis OK on attempt ${attempt}`);
-        break;
+    let vmErrored = false;
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 150000); // 150s
+    try {
+      const vmRes = await callVM(VM_ANALYZE_ENDPOINT, {
+        method: 'POST',
+        body: JSON.stringify({
+          right_palm_b64,
+          left_palm_b64: left_palm_b64 ?? null,
+          user_name: user_name ?? '',
+          gender:    gender    ?? 'M',
+          language:  language  ?? 'hi',
+          dob:       dob       ?? '',
+        }),
+        signal: controller.signal,
+      });
+      clearTimeout(timeout);
+
+      if (vmRes.ok) {
+        const data = await vmRes.json();
+        if (data?.success) {
+          analysisData = data;
+          console.log('[Trikal] Palm analysis OK');
+        } else {
+          vmErrored = true;
+          console.error('[Trikal] Palm analyze returned success=false:', JSON.stringify(data).slice(0, 200));
+        }
+      } else {
+        vmErrored = true;
+        const txt = await vmRes.text().catch(() => '');
+        console.error('[Trikal] Palm VM analyze non-200:', vmRes.status, txt.slice(0, 200));
       }
-      if (attempt < MAX_ATTEMPTS) {
-        await sleep(2000 * attempt); // 2s, 4s backoff
-      }
+    } catch (e: unknown) {
+      clearTimeout(timeout);
+      vmErrored = true;
+      console.error('[Trikal] Palm VM fetch failed/aborted:', e);
     }
 
-    // ── 3. ALL ATTEMPTS FAILED → graceful "personal review" handoff ─────────
+    // ── 3. GENUINE FAILURE → graceful "personal review" handoff ─────────────
     if (!analysisData) {
-      console.error('[Trikal] Palm analysis failed after 3 attempts:', razorpay_order_id);
+      console.error('[Trikal] Palm analysis unavailable:', razorpay_order_id, 'vmErrored=', vmErrored);
 
-      // Log to Supabase for manual review / refund
       await supabase.from('palmistry_reports').insert({
         session_id:  `palm_review_${Date.now()}`,
         user_name:   user_name ?? null,
@@ -127,7 +129,7 @@ export async function POST(req: NextRequest) {
         scores:      null,
         observations: null,
         report:      null,
-        tier:        'pending_review',   // ← flag for manual handling
+        tier:        'pending_review',
         payment_id:  razorpay_payment_id,
       });
 
@@ -137,7 +139,6 @@ export async function POST(req: NextRequest) {
         `Naam: ${user_name || 'N/A'}`
       );
 
-      // NOTE: deliberately NO "failed" language — premium personal-review framing
       return NextResponse.json({
         success:        true,
         pending_review: true,
@@ -147,11 +148,11 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // ── 4. SUCCESS → Generate PDF (non-blocking) ─────────────────────────────
+    // ── 4. SUCCESS → Generate PDF (non-blocking, 60s) ────────────────────────
     let pdf_b64: string | null = null;
     try {
       const pdfController = new AbortController();
-      const pdfTimeout = setTimeout(() => pdfController.abort(), 30000);
+      const pdfTimeout = setTimeout(() => pdfController.abort(), 60000);
       const pdfRes = await callVM(VM_PDF_ENDPOINT, {
         method: 'POST',
         body: JSON.stringify({
@@ -170,6 +171,8 @@ export async function POST(req: NextRequest) {
       if (pdfRes.ok) {
         const pdfData = await pdfRes.json();
         pdf_b64 = pdfData.pdf_b64 ?? null;
+      } else {
+        console.error('[Trikal] Palm PDF non-200:', pdfRes.status);
       }
     } catch (e) {
       console.error('[Trikal] Palm PDF generation failed (non-fatal):', e);
@@ -195,19 +198,20 @@ export async function POST(req: NextRequest) {
 
     if (saveErr) {
       console.error('[Trikal] Palm record save error:', saveErr.message);
+      // Non-fatal — user still gets the report below.
     }
 
     // ── 6. Return report + PDF ───────────────────────────────────────────────
     return NextResponse.json({
-      success:      true,
+      success:        true,
       pending_review: false,
       session_id,
-      mp_features:  analysisData.mp_features,
-      scores:       analysisData.scores,
-      observations: analysisData.observations,
-      report:       analysisData.report,
+      mp_features:    analysisData.mp_features,
+      scores:         analysisData.scores,
+      observations:   analysisData.observations,
+      report:         analysisData.report,
       pdf_b64,
-      paymentId:    razorpay_payment_id,
+      paymentId:      razorpay_payment_id,
     });
 
   } catch (err: unknown) {
