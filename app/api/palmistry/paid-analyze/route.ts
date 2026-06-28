@@ -1,7 +1,10 @@
-// TRIKAL VAANI - Palmistry Paid Analyze + Verify API - v1.0
+// TRIKAL VAANI - Palmistry Paid Analyze + Verify API - v2.0
 // CEO: Rohiit Gupta | Chief Vedic Architect
-// Pattern matched to verify-milan-payment route (HMAC verify, callVM, AbortController).
-// Flow: verify signature -> VM analyze -> VM PDF -> Supabase save -> return report+PDF
+// v2.0: SILENT AUTO-RETRY (3x) + classy "personal review" fallback.
+//   If VM analysis fails, retry up to 3 times silently. If all fail,
+//   payment is logged to Supabase as "pending_review" and a graceful
+//   WhatsApp-handoff response is returned (NO "failed" language).
+// Pattern matched to verify-milan-payment (HMAC verify, callVM, AbortController).
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
@@ -12,6 +15,8 @@ const VM_ANALYZE_ENDPOINT =
   process.env.VM_PALM_ANALYZE_ENDPOINT ?? 'http://34.47.182.227:8001/palmistry/analyze';
 const VM_PDF_ENDPOINT =
   process.env.VM_PALM_PDF_ENDPOINT ?? 'http://34.47.182.227:8001/palmistry/generate-pdf';
+
+const WHATSAPP_NUMBER = '919211804111';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -28,6 +33,34 @@ interface PalmVerifyRequest {
   gender?:             string;
   language?:           string;
   dob?:                string;
+}
+
+// Sleep helper for retry backoff
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+// One VM analyze attempt with timeout. Returns parsed data or null.
+async function tryAnalyze(payload: object): Promise<any | null> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 60000);
+  try {
+    const vmRes = await callVM(VM_ANALYZE_ENDPOINT, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+      signal: controller.signal,
+    });
+    clearTimeout(timeout);
+    if (!vmRes.ok) {
+      const txt = await vmRes.text().catch(() => '');
+      console.error('[Trikal] Palm VM analyze non-200:', vmRes.status, txt.slice(0, 200));
+      return null;
+    }
+    const data = await vmRes.json();
+    return data?.success ? data : null;
+  } catch (e: unknown) {
+    clearTimeout(timeout);
+    console.error('[Trikal] Palm VM attempt failed:', e);
+    return null;
+  }
 }
 
 export async function POST(req: NextRequest) {
@@ -56,57 +89,69 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Payment verification failed.' }, { status: 400 });
     }
 
-    // ── 2. VM: Full Palm Analysis (30s timeout) ──────────────────────────────
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 60000);
+    // ── 2. VM Analysis — SILENT AUTO-RETRY (up to 3 attempts) ────────────────
+    const vmPayload = {
+      right_palm_b64,
+      left_palm_b64: left_palm_b64 ?? null,
+      user_name: user_name ?? '',
+      gender:    gender    ?? 'M',
+      language:  language  ?? 'hi',
+      dob:       dob       ?? '',
+    };
 
     let analysisData: any = null;
-    try {
-      const vmRes = await callVM(VM_ANALYZE_ENDPOINT, {
-        method: 'POST',
-        body: JSON.stringify({
-          right_palm_b64,
-          left_palm_b64: left_palm_b64 ?? null,
-          user_name: user_name ?? '',
-          gender:    gender    ?? 'M',
-          language:  language  ?? 'hi',
-          dob:       dob       ?? '',
-        }),
-        signal: controller.signal,
-      });
-      clearTimeout(timeout);
-
-      if (!vmRes.ok) {
-        const txt = await vmRes.text().catch(() => '');
-        console.error('[Trikal] Palm VM analyze error:', vmRes.status, txt);
-        return NextResponse.json(
-          { error: 'Analysis failed. Aapka payment safe hai — humse contact karein.' },
-          { status: 502 }
-        );
+    const MAX_ATTEMPTS = 3;
+    for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+      analysisData = await tryAnalyze(vmPayload);
+      if (analysisData) {
+        console.log(`[Trikal] Palm analysis OK on attempt ${attempt}`);
+        break;
       }
-      analysisData = await vmRes.json();
-    } catch (e: unknown) {
-      clearTimeout(timeout);
-      console.error('[Trikal] Palm VM fetch failed:', e);
-      return NextResponse.json(
-        { error: 'Analysis timeout. Aapka payment safe hai — humse contact karein.' },
-        { status: 504 }
-      );
+      if (attempt < MAX_ATTEMPTS) {
+        await sleep(2000 * attempt); // 2s, 4s backoff
+      }
     }
 
-    if (!analysisData?.success) {
-      return NextResponse.json(
-        { error: 'Analysis incomplete. Payment safe — contact us.' },
-        { status: 502 }
+    // ── 3. ALL ATTEMPTS FAILED → graceful "personal review" handoff ─────────
+    if (!analysisData) {
+      console.error('[Trikal] Palm analysis failed after 3 attempts:', razorpay_order_id);
+
+      // Log to Supabase for manual review / refund
+      await supabase.from('palmistry_reports').insert({
+        session_id:  `palm_review_${Date.now()}`,
+        user_name:   user_name ?? null,
+        gender:      gender    ?? 'M',
+        language:    language  ?? 'hi',
+        mp_features: null,
+        gemini_data: null,
+        scores:      null,
+        observations: null,
+        report:      null,
+        tier:        'pending_review',   // ← flag for manual handling
+        payment_id:  razorpay_payment_id,
+      });
+
+      const waText = encodeURIComponent(
+        `Namaste! Meri Hast Rekha report personal review mein hai.\n` +
+        `Payment ID: ${razorpay_payment_id}\n` +
+        `Naam: ${user_name || 'N/A'}`
       );
+
+      // NOTE: deliberately NO "failed" language — premium personal-review framing
+      return NextResponse.json({
+        success:        true,
+        pending_review: true,
+        paymentId:      razorpay_payment_id,
+        whatsappUrl:    `https://wa.me/${WHATSAPP_NUMBER}?text=${waText}`,
+        message:        'Aapki detailed Hast Rekha reading personally review ki ja rahi hai.',
+      });
     }
 
-    // ── 3. VM: Generate PDF (non-blocking — report shows even if PDF fails) ──
+    // ── 4. SUCCESS → Generate PDF (non-blocking) ─────────────────────────────
     let pdf_b64: string | null = null;
     try {
       const pdfController = new AbortController();
       const pdfTimeout = setTimeout(() => pdfController.abort(), 30000);
-
       const pdfRes = await callVM(VM_PDF_ENDPOINT, {
         method: 'POST',
         body: JSON.stringify({
@@ -122,7 +167,6 @@ export async function POST(req: NextRequest) {
         signal: pdfController.signal,
       });
       clearTimeout(pdfTimeout);
-
       if (pdfRes.ok) {
         const pdfData = await pdfRes.json();
         pdf_b64 = pdfData.pdf_b64 ?? null;
@@ -131,7 +175,7 @@ export async function POST(req: NextRequest) {
       console.error('[Trikal] Palm PDF generation failed (non-fatal):', e);
     }
 
-    // ── 4. Save to Supabase ──────────────────────────────────────────────────
+    // ── 5. Save successful report to Supabase ────────────────────────────────
     const session_id = `palm_${Date.now()}`;
     const { error: saveErr } = await supabase
       .from('palmistry_reports')
@@ -151,12 +195,12 @@ export async function POST(req: NextRequest) {
 
     if (saveErr) {
       console.error('[Trikal] Palm record save error:', saveErr.message);
-      // Non-fatal — report still returned to user
     }
 
-    // ── 5. Return report + PDF ───────────────────────────────────────────────
+    // ── 6. Return report + PDF ───────────────────────────────────────────────
     return NextResponse.json({
       success:      true,
+      pending_review: false,
       session_id,
       mp_features:  analysisData.mp_features,
       scores:       analysisData.scores,
