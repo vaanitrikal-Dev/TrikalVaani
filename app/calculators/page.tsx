@@ -1,16 +1,17 @@
 // ============================================================
 // File: app/calculators/page.tsx
 // Purpose: Calculators Hub — SEO/GEO/AEO landing page
-// Version: v3.5 — Vivah Muhurat (year-dynamic) card added (total 29)
+// Version: v3.6 — AI Hast Rekha Calculator card added (total 30)
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
-// Date: 2026-06-25
+// Date: 2026-06-28
 // ============================================================
+// CHANGES vs v3.5:
+//   ✅ Added "AI Hast Rekha Calculator" card. Like Vivah, it links to
+//      /hast-rekha-calculator (paid ₹51 palm-reading tool), NOT /calculators/…
+//      via the optional `href` field. Count 29 → 30 (dynamic).
+//   ✅ ALL OTHER LOGIC: identical to v3.5.
 // CHANGES vs v3.4:
-//   ✅ Added "Free Vivah Muhurat" card. Unlike other calculators it links to
-//      /vivah-muhurat (year-dynamic index → current year), NOT /calculators/…
-//      Done via an optional `href` field on the entry (CalcEntry type) that
-//      the card <Link> and schema hasPart now respect. Count 28 → 29 (dynamic).
-//   ✅ ALL OTHER LOGIC: identical to v3.4.
+//   ✅ Added "Free Vivah Muhurat" card (href → /vivah-muhurat). Count 28 → 29.
 // ============================================================
 
 import type { Metadata } from 'next';
@@ -42,7 +43,7 @@ export const metadata: Metadata = {
     'pitra dosh calculator', 'gemstone calculator', 'gemstone suitability calculator',
     'should i wear neelam', 'should i wear pukhraj', 'numerology calculator',
     'baby name by nakshatra', 'kundali strength', 'graha bal calculator',
-    'jyotish calculator', 'birth chart calculator',
+    'jyotish calculator', 'birth chart calculator', 'hast rekha calculator',
   ],
   alternates: { canonical: 'https://trikalvaani.com/calculators' },
   openGraph: {
@@ -89,6 +90,15 @@ const CALCULATORS: CalcEntry[] = [
     emoji: '💍',
     name: 'Free Vivah Muhurat',
     desc: 'Strict-classical shubh marriage dates for the year — exact muhurat time, nakshatra, tithi & lagna. Excludes Kharmas, Adhik Maas & Chaturmas.',
+    badge: 'New',
+    live: true,
+  },
+  {
+    slug: 'hast-rekha-calculator',
+    href: '/hast-rekha-calculator',
+    emoji: '🖐️',
+    name: 'AI Hast Rekha Calculator',
+    desc: 'Upload your palm photo — get a complete Samudrika Shastra reading. 8 life scores, line & mount analysis, remedies & PDF report.',
     badge: 'New',
     live: true,
   },
@@ -319,7 +329,7 @@ const CALC_LIST_TEXT =
 const FAQS = [
   {
     q: 'Are these calculators really free?',
-    a: `Yes, 100% free. All ${CALC_COUNT} calculators give complete results without any payment, signup, or hidden charges.`,
+    a: `Yes, most are 100% free. ${CALC_COUNT} tools cover Kundli, Dasha, Nakshatra, Dosha, Gemstone and more without payment or signup. (AI Hast Rekha is a premium palm-reading report at ₹51.)`,
   },
   {
     q: 'How accurate are Trikaal Vaani calculators?',
@@ -348,7 +358,7 @@ export default function CalculatorsHubPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify({
           '@context': 'https://schema.org', '@type': 'CollectionPage',
           name: 'Free Vedic Astrology Calculators',
-          description: `${CALC_COUNT} free Vedic astrology calculators powered by Swiss Ephemeris`,
+          description: `${CALC_COUNT} Vedic astrology calculators powered by Swiss Ephemeris`,
           url: 'https://trikalvaani.com/calculators',
           publisher: {
             '@type': 'Organization', '@id': ORG_ID,
@@ -362,7 +372,7 @@ export default function CalculatorsHubPage() {
           hasPart: CALCULATORS.map((c) => ({
             '@type': 'SoftwareApplication', name: c.name, applicationCategory: 'LifestyleApplication',
             url: c.href ? `https://trikalvaani.com${c.href}` : `https://trikalvaani.com/calculators/${c.slug}`,
-            offers: { '@type': 'Offer', price: '0', priceCurrency: 'INR' },
+            offers: { '@type': 'Offer', price: c.slug === 'hast-rekha-calculator' ? '51' : '0', priceCurrency: 'INR' },
           })),
         }) }} />
 
@@ -395,12 +405,12 @@ export default function CalculatorsHubPage() {
           </h1>
 
           <p className="text-base md:text-lg text-slate-300 mb-6">
-            {CALC_COUNT} free calculators · Swiss Ephemeris accuracy · BPHS classical rules · 100% free, forever.
+            {CALC_COUNT} calculators · Swiss Ephemeris accuracy · BPHS classical rules · Free tools + premium reports.
           </p>
 
           <div className="rounded-xl p-5 mb-8" style={{ background: 'rgba(212,175,55,0.06)', border: `1px solid ${GOLD_RGBA(0.2)}` }}>
             <p className="text-base md:text-lg leading-relaxed">
-              <strong style={{ color: GOLD }}>Trikaal Vaani offers {CALC_COUNT} free Vedic astrology calculators</strong> — {CALC_LIST_TEXT}, plus dedicated "Should I Wear" suitability checks for all 9 gemstones. All powered by Swiss Ephemeris (NASA-grade accuracy), Lahiri Ayanamsha, and BPHS classical rules. No signup. No payment. Instant results.
+              <strong style={{ color: GOLD }}>Trikaal Vaani offers {CALC_COUNT} Vedic astrology calculators</strong> — {CALC_LIST_TEXT}, plus dedicated "Should I Wear" suitability checks for all 9 gemstones. All powered by Swiss Ephemeris (NASA-grade accuracy), Lahiri Ayanamsha, and BPHS classical rules. No signup. Instant results.
             </p>
           </div>
 
@@ -443,7 +453,7 @@ export default function CalculatorsHubPage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <Pillar emoji="🎯" title="NASA-Grade Accuracy" desc="Swiss Ephemeris engine — the same astronomical library used by professional astrology software worldwide." />
               <Pillar emoji="📚" title="BPHS Classical Rules" desc="Every calculation follows Brihat Parashara Hora Shastra — the foundation text of Vedic astrology by Maharishi Parashar." />
-              <Pillar emoji="🆓" title="100% Free Forever" desc="No signup. No payment. No hidden charges. Instant results." />
+              <Pillar emoji="🆓" title="Free + Premium" desc="Most calculators are 100% free. Premium reports like AI Hast Rekha start at just ₹51." />
             </div>
           </section>
 
