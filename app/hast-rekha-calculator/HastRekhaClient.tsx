@@ -106,7 +106,9 @@ function downloadPDF(b64: string, name: string) {
 function UploadZone({ image, onFile, label, required, emoji }: {
   image: PalmImage | null; onFile: (f: File) => void; label: string; required?: boolean; emoji: string;
 }) {
-  const ref = useRef<HTMLInputElement>(null);
+  const galleryRef = useRef<HTMLInputElement>(null);
+  const cameraRef  = useRef<HTMLInputElement>(null);
+
   return (
     <div>
       <label className="block text-sm font-medium mb-2 text-slate-300">
@@ -115,8 +117,7 @@ function UploadZone({ image, onFile, label, required, emoji }: {
         {!required && <span className="text-slate-500 ml-1 text-xs">(Optional — better results)</span>}
       </label>
       <div
-        onClick={() => ref.current?.click()}
-        className="rounded-2xl p-5 text-center cursor-pointer transition-all min-h-[190px] flex flex-col items-center justify-center"
+        className="rounded-2xl p-5 text-center transition-all min-h-[210px] flex flex-col items-center justify-center"
         style={{
           background: 'rgba(255,255,255,0.03)',
           border: image ? '2px dashed #22c55e' : `2px dashed ${required ? GOLD_RGBA(0.4) : 'rgba(255,255,255,0.12)'}`,
@@ -124,17 +125,40 @@ function UploadZone({ image, onFile, label, required, emoji }: {
       >
         {image ? (
           <>
-            <img src={image.preview} alt={`${label} — Hast Rekha palm photo`} className="max-h-40 rounded-lg object-cover" />
-            <p className="text-green-400 text-sm mt-2">✓ Upload successful</p>
+            <img src={image.preview} alt={`${label} — Hast Rekha palm photo`} className="max-h-36 rounded-lg object-cover" />
+            <p className="text-green-400 text-sm mt-2">✓ Photo added</p>
+            <button onClick={() => galleryRef.current?.click()}
+              className="text-xs text-slate-500 hover:text-slate-300 mt-1.5 underline">
+              Badlein
+            </button>
           </>
         ) : (
           <>
             <div className="text-5xl mb-3">{emoji}</div>
-            <p className="text-slate-400 text-sm">Click karein ya photo drag karein</p>
-            <p className="text-slate-600 text-xs mt-1">JPG, PNG, WebP · Max 10MB</p>
+            <p className="text-slate-400 text-sm mb-4">Apni haath ki photo add karein</p>
+            <div className="flex gap-2.5 w-full max-w-xs">
+              <button onClick={() => cameraRef.current?.click()}
+                className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-sm font-medium transition-all hover:scale-[1.02]"
+                style={{ background: `linear-gradient(135deg, ${GOLD} 0%, #A8820A 100%)`, color: '#080B12' }}>
+                📷 Camera
+              </button>
+              <button onClick={() => galleryRef.current?.click()}
+                className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-sm font-medium transition-all hover:scale-[1.02]"
+                style={{ background: 'rgba(255,255,255,0.06)', border: `1px solid ${GOLD_RGBA(0.25)}`, color: GOLD_RGBA(0.9) }}>
+                🖼️ Gallery
+              </button>
+            </div>
+            <p className="text-slate-600 text-xs mt-3">JPG, PNG, WebP · Max 10MB</p>
           </>
         )}
-        <input ref={ref} type="file" accept="image/jpeg,image/jpg,image/png,image/webp"
+
+        {/* Gallery picker — opens photo library */}
+        <input ref={galleryRef} type="file" accept="image/jpeg,image/jpg,image/png,image/webp"
+          className="hidden"
+          onChange={e => { if (e.target.files?.[0]) onFile(e.target.files[0]); }} />
+
+        {/* Camera capture — opens back camera on mobile */}
+        <input ref={cameraRef} type="file" accept="image/*" capture="environment"
           className="hidden"
           onChange={e => { if (e.target.files?.[0]) onFile(e.target.files[0]); }} />
       </div>
