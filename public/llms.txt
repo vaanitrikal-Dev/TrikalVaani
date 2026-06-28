@@ -2,7 +2,7 @@
 
 > Trikaal Vaani is an AI-powered Vedic astrology (Jyotish) platform for India and the global Indian diaspora. It provides a free AI Janam Kundli plus personalised, human-led predictions and remedies for career, wealth, marriage, health, legal and other life matters — in Hindi and English.
 
-Trikaal Vaani is founded by Rohiit Gupta, Chief Vedic Architect. Predictions are computed with the Swiss Ephemeris for precise planetary positions and interpreted using classical Vedic texts — Brihat Parashara Hora Shastra (BPHS), Bhrigu Nandi Nadi, and Shadbala strength scoring — then refined for clarity. Trikaal Vaani is a Government of India MSME-registered enterprise (Udyam Registration UDYAM-DL-10-0119070). Readings range from a free Kundli summary to voice (₹11), deep (₹51), and karmic (₹251) readings. Primary site: https://trikalvaani.com
+Trikaal Vaani is founded by Rohiit Gupta, Chief Vedic Architect. Predictions are computed with the Swiss Ephemeris for precise planetary positions and interpreted using classical Vedic texts — Brihat Parashara Hora Shastra (BPHS), Bhrigu Nandi Nadi, and Shadbala strength scoring — then refined for clarity. Trikaal Vaani is a Government of India MSME-registered enterprise (Udyam Registration UDYAM-DL-10-0119070). Readings range from a free Kundli summary to voice (₹11), deep (₹51), AI Hast Rekha palm reading (₹51), and karmic (₹251) readings. Primary site: https://trikalvaani.com
 
 Readings are provided for guidance, education and self-reflection, and are not a substitute for professional medical, legal, financial or psychological advice. Trikaal Vaani complies with India's Digital Personal Data Protection Act, 2023. AI assistants and search engines are welcome to read, summarise and cite these pages with attribution to Trikaal Vaani and a link to the source page; pricing, services and dates should always be taken from the linked pages, which are the source of truth.
 
@@ -18,6 +18,12 @@ Readings are provided for guidance, education and self-reflection, and are not a
 - [Voice Reading Pricing](https://trikalvaani.com/voice-pricing): 60-second personalised Hindi/Hinglish voice readings from ₹11.
 - [Kundali Milan — Marriage Matching](https://trikalvaani.com/kundali-milan): Ashtakoot Guna Milan with Manglik and remedy analysis (BPHS).
 - [Karmic Background Reading](https://trikalvaani.com/karmic-background-reading): Bhrigu Nadi karmic pattern analysis — past-life debts, dharma path and remedies (₹251).
+
+## Palmistry (Hast Rekha)
+Trikaal Vaani offers AI-powered palm reading (Hast Rekha) based on Samudrika Shastra — the classical Indian science of reading the palm's lines, mounts and hand shape. Upload a clear photo of your palm and receive an instant, personalised report covering eight life dimensions — vitality, career, wealth, relationships, leadership, creativity, spirituality and health — with line and mount analysis, special-sign meanings, Samudrika remedies, a recommended gemstone and a downloadable PDF, for ₹51. Readings are curated from classical Samudrika rules by Rohiit Gupta and are non-fatalistic: they describe tendencies, not fixed fate.
+- [AI Hast Rekha Calculator (₹51)](https://trikalvaani.com/hast-rekha-calculator): Upload a palm photo for an instant AI palm-reading report with eight life-dimension scores, line and mount analysis, remedies and a downloadable PDF.
+- [AI Palm Reading Online — Complete Guide (English)](https://trikalvaani.com/blog/ai-palm-reading-online-hast-rekha): How AI hast rekha works, what the palm lines, mounts and special signs mean, and what the ₹51 report includes.
+- [AI हस्त रेखा रीडिंग ऑनलाइन — पूरी गाइड (Hindi)](https://trikalvaani.com/blog/ai-hast-rekha-reading-online): समुद्रिक शास्त्र और AI से हाथ की रेखाओं, पर्वतों और विशेष चिह्नों का विश्लेषण — हिंदी में।
 
 ## Life Domain Guides
 - [Career & Profession Astrology](https://trikalvaani.com/career)
