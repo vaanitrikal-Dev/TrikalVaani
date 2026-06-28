@@ -3,8 +3,13 @@
  * 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER 🔱
  * ============================================================================
  * File:        app/sitemap.ts
- * Version:     v7.7
+ * Version:     v7.8
  * Owner:       Rohiit Gupta, Chief Vedic Architect
+ *
+ * Changes v7.7 → v7.8 (2026-06-28):
+ *   AI HAST REKHA CALCULATOR added to STATIC_ROUTES (/hast-rekha-calculator).
+ *   Paid ₹51 palm-reading tool — emitted at priority 0.85, weekly. No other
+ *   logic changed.
  *
  * Changes v7.6 → v7.7 (2026-06-27):
  *   VIVAH MUHURAT now PERMANENT-AUTO. readVivahYears() returns a ROLLING range
@@ -70,6 +75,7 @@ const STATIC_ROUTES = [
   '/blog',
   '/services',
   '/calculators',
+  '/hast-rekha-calculator',
   '/panchang',
   '/kundali-milan',
   '/karmic-background-reading',
@@ -327,6 +333,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     if (path === '') priority = 1.0;
     else if (path === '/voice-pricing') priority = 0.95;
     else if (path === '/calculators') priority = 0.9;
+    else if (path === '/hast-rekha-calculator') priority = 0.85;
 
     entries.push({
       url: `${BASE}${path}`,
