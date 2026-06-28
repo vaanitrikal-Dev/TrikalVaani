@@ -1,8 +1,15 @@
 // ============================================================
 // TRIKAL VAANI — DYNAMIC BLOG ARTICLE PAGE (SSR)
 // CEO: Rohiit Gupta | Chief Vedic Architect
-// Version: 2.2
-// Date: 2026-06-13
+// Version: 2.3
+// Date: 2026-06-29
+// CHANGE v2.3:
+//   • REMOVED the green WhatsApp consultation CTA button site-wide (service not offered).
+//   • FIXED doubled <title> ("| Trikaal Vaani | Trikaal Vaani") by using
+//     title:{ absolute: post.title } so the root layout's title template is
+//     NOT re-applied (post.title already carries the brand suffix). OG and
+//     Twitter titles were already correct and are left unchanged.
+//   • No other logic / layout / schema changed from v2.2.
 // CHANGE v2.2: Renders 5 new Playbook body columns —
 //   emotional, communication, strengths, challenges, remedies —
 //   as structured prose sections between directAnswer and sections[].
@@ -51,7 +58,9 @@ export async function generateMetadata(
   const canonicalUrl = `https://trikalvaani.com/blog/${post.slug}`;
 
   return {
-    title: post.title,
+    // absolute → bypasses the root layout title template so the brand suffix
+    // (already present in post.title) is not duplicated in the <title> tag.
+    title: { absolute: post.title },
     description: post.description,
     keywords: post.keywords.join(', '),
     authors: [{ name: 'Rohiit Gupta', url: 'https://trikalvaani.com/founder' }],
@@ -488,14 +497,6 @@ export default async function BlogArticlePage({
               >
                 {post.ctaService.label}
               </Link>
-              <a
-                href={`https://wa.me/919211804111?text=Pranam%20Rohiit%20ji,%20${encodeURIComponent(post.category)}%20analysis%20chahiye.`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="rounded-lg bg-green-700 px-6 py-3 font-semibold text-white hover:bg-green-600 transition"
-              >
-                WhatsApp ₹499
-              </a>
             </div>
           </section>
 
