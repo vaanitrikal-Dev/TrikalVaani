@@ -1,48 +1,25 @@
 // ============================================================
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
 // FILE: app/layout.tsx
-// VERSION: v3.6.2 — + verified Google Business Profile in Organization sameAs
-// CHANGES vs v3.6.1 (CEO-approved):
-//   ✅ ADD: Verified Google Business Profile link to Organization.sameAs —
-//      connects the verified GBP business entity into the schema graph. GBP
-//      is a business listing, so it belongs on Organization (not the Person).
-//   🧹 IR-safety: removed a stale fake-rating field name from the body
-//      comment near <SchemaScript /> — no such field is rendered anywhere;
-//      that word in a comment is a landmine the IR Guard scanner flags.
-// CHANGES vs v3.6 (CEO-approved):
-//   ✅ FIX: Header comment no longer contains the forbidden double-a domain
-//      string. v3.6's changelog had referenced the competitor's literal
-//      domain inside a code comment; IR Guard's source scanner flagged it
-//      (it does not distinguish comment from code). Comment-only edit —
-//      schema, domain, brand, founder name and rendered output are 100%
-//      unchanged from v3.6.
-// CHANGES vs v3.5 (CEO-approved):
-//   ✅ ADD: Organization #organization gains TWO fields to sharpen entity
-//      identity against the unrelated same-name astrologer in Jaipur
-//      (Pt Rudra Bhardwaj — a separate 21-year practice, Justdial-listed).
-//      Goal: AI/Google must never merge or confuse the two same-named
-//      entities.
-//        • disambiguatingDescription — schema.org property purpose-built
-//          for entity disambiguation. Pins the canonical identity
-//          (Rohiit Gupta + Udyam UDYAM-DL-10-0119070 + trikalvaani.com)
-//          and asserts independence from any similar-sounding name.
-//        • slogan — Trikaal Vaani's signature couplet. A unique brand
-//          fingerprint the competitor does NOT use (brand-distinctiveness
-//          signal — not a keyword play; keywords already live in
-//          description, founder.knowsAbout and the metadata keywords array).
-//   PROTECTED (untouched): ALL v3.5 content — name, alternateName,
-//      legalName, url, logo, Udyam identifier, founder, contactPoint,
-//      areaServed, sameAs, paymentAccepted, WebApplication schema,
-//      AstrologicalService schema, metadata, OG/twitter, keywords, icons,
-//      verification, canonical, Razorpay preload, performance hints,
-//      SchemaScript, TrikalVoice, OneSignalInit, StickyMobileCTA,
-//      ClarityAnalytics, Vercel Analytics, Inter font, body className.
+// VERSION: v3.7 — Meta Pixel 2111897212873248 added
+// CHANGES vs v3.6.2 (CEO-approved):
+//   ✅ ADD: MetaPixel component imported + rendered as FIRST element
+//      in <body>. Pixel ID: 2111897212873248 (Trikal Vaani Voice).
+//      Fires PageView on every page automatically.
+//      Custom events (Lead, Purchase, InitiateCheckout) fire from
+//      BirthForm.tsx v10.3 via inline trackFB() helper.
+//      Audience building starts immediately — no ad spend needed.
+//   ✅ PROTECTED: ALL v3.6.2 content untouched — schemas, metadata,
+//      Razorpay preload, Clarity, OneSignal, TrikalVoice, Analytics,
+//      StickyMobileCTA, font, body className.
 // ------------------------------------------------------------
-// Prior — v3.5: Microsoft Clarity analytics wired (project x5li8xd59b).
-// Prior — v3.4: StickyMobileCTA added (Phase 2).
-// Prior — v3.3: legalName fix + AstrologicalService schema + speakable.
-// Prior — v3.2 (2026-06-04): OneSignalInit wired in.
-// Prior — v3.1 (2026-06-01): Favicon fix + Org logo URL corrected.
+// Prior — v3.6.2: + verified Google Business Profile in sameAs.
+// Prior — v3.6.1: IR-safety comment cleanup.
+// Prior — v3.5: Microsoft Clarity wired (project x5li8xd59b).
+// Prior — v3.4: StickyMobileCTA added.
+// Prior — v3.3: legalName fix + AstrologicalService schema.
+// Prior — v3.2: OneSignalInit wired.
+// Prior — v3.1: Favicon fix + Org logo URL corrected.
 // ============================================================
 
 import type { Metadata } from "next";
@@ -54,6 +31,7 @@ import TrikalVoice from "@/components/Trikal/TrikalVoice";
 import OneSignalInit from "@/components/OneSignalInit";
 import StickyMobileCTA from "@/components/landing/StickyMobileCTA";
 import ClarityAnalytics from "@/components/analytics/ClarityAnalytics";
+import MetaPixel from "@/components/analytics/MetaPixel";
 import { Analytics } from "@vercel/analytics/next";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -160,12 +138,7 @@ export default function RootLayout({
     <html lang="en-IN" suppressHydrationWarning>
       <head>
 
-        {/* ── Organization Schema ──────────────────────────────────────────
-            v3.6: + disambiguatingDescription + slogan (entity disambiguation
-            vs same-name astrologer). v3.3 FIX: legalName corrected to
-            "Trikaal Vaani" — matches UDYAM-DL-10-0119070 exactly.
-            All other fields untouched.
-        ──────────────────────────────────────────────────────────────────── */}
+        {/* ── Organization Schema ────────────────────────────────────────── */}
         <Script
           id="org-schema"
           type="application/ld+json"
@@ -306,14 +279,7 @@ export default function RootLayout({
           }}
         />
 
-        {/* ── AstrologicalService Schema ────────────────────────────────────
-            v3.3 NEW: Replaces parked LocalBusiness (GBP not yet approved).
-            Safe to use without GBP — no address/geo required.
-            Covers service intent for "Vedic astrology online India",
-            "AI kundli prediction", "astrology reading Hindi" queries.
-            speakable: targets Google SGE direct-answer box + voice search.
-            @id linked to Organization and Person for full graph integrity.
-        ──────────────────────────────────────────────────────────────────── */}
+        {/* ── AstrologicalService Schema ────────────────────────────────── */}
         <Script
           id="astro-service-schema"
           type="application/ld+json"
@@ -422,18 +388,31 @@ export default function RootLayout({
         <link rel="preconnect" href="https://api.razorpay.com" />
         <link rel="preconnect" href="https://checkout.razorpay.com" />
         <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
+        {/* v3.7: Meta Pixel preconnect */}
+        <link rel="preconnect" href="https://connect.facebook.net" />
+        <link rel="dns-prefetch" href="https://www.facebook.com" />
       </head>
       <body className={`${inter.className} bg-[#080B12] text-white antialiased`}>
+
+        {/* ── v3.7: Meta Pixel — fires PageView on every page ──────────────
+            Pixel ID: 2111897212873248 (Trikal Vaani Voice)
+            Custom events (Lead, Purchase, InitiateCheckout) fire from
+            BirthForm.tsx v10.3 via inline trackFB() helper — no extra
+            imports needed on other pages.
+        ─────────────────────────────────────────────────────────────────── */}
+        <MetaPixel />
+
         {children}
-        {/* SchemaScript: WebSite + Person (canonical) + Service + Product schemas */}
+
+        {/* SchemaScript: WebSite + Person + Service + Product schemas */}
         <SchemaScript />
         {/* TrikalVoice: floating mic — appears on ALL pages globally */}
         <TrikalVoice />
         {/* OneSignalInit: loads OneSignal v16 Web Push SDK + init globally */}
         <OneSignalInit />
-        {/* v3.4: StickyMobileCTA — mobile-only bottom-left bar, hides when #birth-form visible */}
+        {/* v3.4: StickyMobileCTA — mobile-only bottom-left bar */}
         <StickyMobileCTA />
-        {/* v3.5: Microsoft Clarity — heatmaps + session recordings (production only) */}
+        {/* v3.5: Microsoft Clarity — heatmaps + session recordings */}
         <ClarityAnalytics />
         <Analytics />
       </body>
