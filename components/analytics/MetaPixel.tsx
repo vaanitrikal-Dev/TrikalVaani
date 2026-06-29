@@ -23,7 +23,7 @@
 import Script from 'next/script';
 
 // ── Replace with your actual Pixel ID ──────────────────────────────────────
-const PIXEL_ID = 'YOUR_META_PIXEL_ID';
+const PIXEL_ID = '2111897212873248';
 // ────────────────────────────────────────────────────────────────────────────
 
 // ── Standard event tracker ─────────────────────────────────────────────────
