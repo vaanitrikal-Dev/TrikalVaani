@@ -1,5 +1,21 @@
 'use client';
 
+// ============================================================
+// FILE: components/landing/DardEngineShowcase.tsx
+// VERSION: v2.0 — FULL SALES REWRITE
+// CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
+// DATE: 2026-06-29
+// CHANGES v1.0 → v2.0:
+//   ✅ Card descriptions: technical jargon → pain-point / emotional copy
+//   ✅ Header: social proof micro-signal added below main description
+//   ✅ Card CTA: "Analyze Karma" → "Yes, This Is My Issue →"
+//   ✅ Bottom helper text: weak → urgency + benefit driven
+//   ✅ Bottom CTA: rewritten + trust signals added below button
+//   ✅ Selected banner: "Scroll to Form ↓" → "Get My Reading ↓"
+//   ✅ ALL LOGIC PRESERVED: useState, handleSegmentClick, scroll, props
+//   ✅ ALL ICONS/IMPORTS: identical to v1.0
+// ============================================================
+
 import { useState } from 'react';
 import { HeartCrack, TriangleAlert as AlertTriangle, Sparkles, TrendingUp, Chrome as Home, Banknote, Baby, Users, Sunset, Crown, MoonStar, ChevronRight, Zap, CircleCheck as CheckCircle2 } from 'lucide-react';
 import type { SelectedCategory } from '@/app/page';
@@ -14,35 +30,115 @@ type Segment = {
   label: string;
   icon: React.ElementType;
   color: string;
-  description: string;
+  description: string;      // sales-first pain-point copy
+  subDesc: string;          // astrology credibility (smaller text)
   isDual?: boolean;
 };
 
 // ── ALL 11 DOMAIN IDs MATCH domain-config.ts EXACTLY ─────────────────────────
 const SEGMENTS: Record<Generation, Segment[]> = {
   genz: [
-    { id: 'genz_ex_back',       label: 'Ex-Back & Closure',   icon: HeartCrack,    color: '#F472B6', description: 'Venus & Moon karmic bond analysis',       isDual: true },
-    { id: 'genz_toxic_boss',    label: 'Toxic Boss Radar',     icon: AlertTriangle, color: '#FB923C', description: 'Saturn & Mars clash in your karma bhava', isDual: true },
-    { id: 'genz_manifestation', label: 'Manifestation & Luck', icon: Sparkles,      color: '#FACC15', description: 'Your current Sankalpa activation window' },
-    { id: 'genz_dream_career',  label: 'Dream Career Pivot',   icon: TrendingUp,    color: '#60A5FA', description: '10th house + Rahu ambition transit' },
+    {
+      id: 'genz_ex_back',
+      label: 'Ex-Back & Closure',
+      icon: HeartCrack,
+      color: '#F472B6',
+      description: 'Is this love worth fighting for — or a karmic trap to escape? Your chart knows the truth.',
+      subDesc: 'Venus & Moon karmic bond · Dual chart analysis',
+      isDual: true,
+    },
+    {
+      id: 'genz_toxic_boss',
+      label: 'Toxic Boss / Workplace',
+      icon: AlertTriangle,
+      color: '#FB923C',
+      description: 'Is your workplace draining you because of your karma — or theirs? Saturn shows the exit window.',
+      subDesc: 'Saturn & Mars clash · Karma bhava analysis',
+      isDual: true,
+    },
+    {
+      id: 'genz_manifestation',
+      label: 'Manifestation & Luck',
+      icon: Sparkles,
+      color: '#FACC15',
+      description: "You're working hard. But is the universe actually backing you right now? Find your luck window.",
+      subDesc: 'Sankalpa activation · Current transit window',
+    },
+    {
+      id: 'genz_dream_career',
+      label: 'Dream Career Pivot',
+      icon: TrendingUp,
+      color: '#60A5FA',
+      description: 'Is this career change written in your stars — or are you jumping too early? Rahu reveals it.',
+      subDesc: '10th house + Rahu ambition transit reading',
+    },
   ],
   millennial: [
-    { id: 'mill_property_yog',     label: 'Property & Home Yog',  icon: Home,    color: '#34D399', description: '4th house & Jupiter blessing analysis' },
-    { id: 'mill_karz_mukti',       label: 'Karz Mukti (Debt)',     icon: Banknote, color: '#FACC15', description: '6th house & Saturn Karma clearing' },
-    { id: 'mill_childs_destiny',   label: "Child's Destiny",       icon: Baby,    color: '#F472B6', description: '5th house Putra Bhava activation' },
-    { id: 'mill_parents_wellness', label: "Parents' Wellness",     icon: Users,   color: '#60A5FA', description: '4th & 9th house ancestral protection' },
+    {
+      id: 'mill_property_yog',
+      label: 'Property & Home Yog',
+      icon: Home,
+      color: '#34D399',
+      description: 'Is property yog active in your chart this year — or should you wait? The 4th house answers.',
+      subDesc: '4th house & Jupiter blessing · Timing analysis',
+    },
+    {
+      id: 'mill_karz_mukti',
+      label: 'Karz Mukti (Debt Relief)',
+      icon: Banknote,
+      color: '#FACC15',
+      description: 'Debt weighing you down? Saturn shows exactly when — and how — your financial karma clears.',
+      subDesc: '6th house & Saturn karma · Clearing window',
+    },
+    {
+      id: 'mill_childs_destiny',
+      label: "Child's Destiny",
+      icon: Baby,
+      color: '#F472B6',
+      description: "What gift did your child bring into this life? Their destiny is readable from your own chart.",
+      subDesc: "5th house Putra Bhava · Parent's chart reading",
+    },
+    {
+      id: 'mill_parents_wellness',
+      label: "Parents' Wellness",
+      icon: Users,
+      color: '#60A5FA',
+      description: "Worried about a parent's health or safety? The ancestral house shows risks and protections.",
+      subDesc: '4th & 9th house · Ancestral protection reading',
+    },
   ],
   genx: [
-    { id: 'genx_retirement_peace',   label: 'Retirement Peace',     icon: Sunset,   color: '#FB923C', description: '12th house & Jupiter final cycle' },
-    { id: 'genx_legacy_inheritance', label: 'Legacy & Inheritance',  icon: Crown,    color: '#FACC15', description: '8th & 2nd house Dhan-Karma' },
-    { id: 'genx_spiritual_innings',  label: 'Spiritual 2nd Innings', icon: MoonStar, color: GOLD,      description: 'Ketu & 12th house moksha activation' },
+    {
+      id: 'genx_retirement_peace',
+      label: 'Retirement Planning',
+      icon: Sunset,
+      color: '#FB923C',
+      description: "Have you built enough — or does karma still have a lesson? Jupiter's final cycle tells the truth.",
+      subDesc: '12th house & Jupiter final cycle · Peace timing',
+    },
+    {
+      id: 'genx_legacy_inheritance',
+      label: 'Legacy & Inheritance',
+      icon: Crown,
+      color: '#FACC15',
+      description: 'What wealth will you leave — and receive? The Dhan-Karma houses reveal the full picture.',
+      subDesc: '8th & 2nd house Dhan-Karma · Transfer timing',
+    },
+    {
+      id: 'genx_spiritual_innings',
+      label: 'Spiritual 2nd Innings',
+      icon: MoonStar,
+      color: GOLD,
+      description: 'Your most powerful chapter is still ahead. Ketu shows exactly what this innings is meant for.',
+      subDesc: 'Ketu & 12th house moksha · Purpose activation',
+    },
   ],
 };
 
 const GEN_OPTIONS: { key: Generation; label: string; sub: string }[] = [
   { key: 'genz',       label: 'Gen Z',      sub: 'Age 11–31' },
   { key: 'millennial', label: 'Millennial', sub: 'Age 32–46' },
-  { key: 'genx',       label: 'Gen X',      sub: 'Age 47–56' },
+  { key: 'genx',       label: 'Gen X+',     sub: 'Age 47+' },
 ];
 
 type Props = {
@@ -71,6 +167,8 @@ export default function DardEngineShowcase({ selectedCategory, onSelectCategory 
       />
 
       <div className="max-w-5xl mx-auto relative z-10">
+
+        {/* ── Header ── */}
         <div className="text-center mb-12">
           <div
             className="inline-flex items-center gap-2 mb-5 px-4 py-2 rounded-full"
@@ -91,13 +189,21 @@ export default function DardEngineShowcase({ selectedCategory, onSelectCategory 
             <span className="text-gradient-gold">rent-free</span>
             {' '}in your head?
           </h2>
-          <p className="text-slate-400 max-w-xl mx-auto text-base leading-relaxed">
-            Tap your life stage. Pick the question that&apos;s been gnawing at you.
-            Trikaal Guru reads your chart specifically for it — not a generic horoscope.
+
+          {/* v2.0: Sales sub-copy — benefit first, then method */}
+          <p className="text-slate-300 max-w-xl mx-auto text-base leading-relaxed mb-3">
+            Pick the one question that&apos;s been gnawing at you.
+            <span className="text-white font-semibold"> We read your chart specifically for that</span>{' '}
+            — not a generic sun-sign horoscope.
+          </p>
+
+          {/* v2.0: Social proof micro-signal */}
+          <p className="text-xs" style={{ color: GOLD_RGBA(0.55) }}>
+            ✦ Swiss Ephemeris accuracy · BPHS classical rules · Free to start
           </p>
         </div>
 
-        {/* Selected state banner */}
+        {/* ── Selected state banner ── */}
         {selectedCategory && (
           <div
             className="mb-6 rounded-2xl px-5 py-3 flex items-center gap-3 transition-all duration-300"
@@ -109,7 +215,7 @@ export default function DardEngineShowcase({ selectedCategory, onSelectCategory 
             <CheckCircle2 className="w-4 h-4 flex-shrink-0" style={{ color: selectedCategory.color }} />
             <div className="flex-1 min-w-0">
               <span className="text-xs font-bold tracking-widest uppercase" style={{ color: `${selectedCategory.color}99` }}>
-                Selected Topic
+                Your Topic Selected
               </span>
               <p className="text-sm font-semibold text-white leading-tight">{selectedCategory.label}</p>
             </div>
@@ -122,12 +228,12 @@ export default function DardEngineShowcase({ selectedCategory, onSelectCategory 
                 border: `1px solid ${selectedCategory.color}40`,
               }}
             >
-              Scroll to Form ↓
+              Get My Reading ↓
             </a>
           </div>
         )}
 
-        {/* Generation tabs */}
+        {/* ── Generation tabs ── */}
         <div className="flex items-center justify-center gap-2 sm:gap-3 mb-10 flex-wrap">
           {GEN_OPTIONS.map((gen) => (
             <button
@@ -155,7 +261,7 @@ export default function DardEngineShowcase({ selectedCategory, onSelectCategory 
           ))}
         </div>
 
-        {/* Segment cards grid */}
+        {/* ── Segment cards grid ── */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {segments.map((seg) => {
             const Icon = seg.icon;
@@ -197,9 +303,10 @@ export default function DardEngineShowcase({ selectedCategory, onSelectCategory 
                       style={{ color: seg.color }}
                     />
                   </div>
+
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1 flex-wrap">
-                      <p className="text-sm font-bold text-white leading-snug group-hover:text-white transition-colors">
+                      <p className="text-sm font-bold text-white leading-snug">
                         {seg.label}
                       </p>
                       {seg.isDual && (
@@ -211,8 +318,13 @@ export default function DardEngineShowcase({ selectedCategory, onSelectCategory 
                         </span>
                       )}
                     </div>
-                    <p className="text-xs leading-relaxed" style={{ color: 'rgba(100,116,139,0.85)' }}>
+                    {/* v2.0: Sales-first description */}
+                    <p className="text-sm leading-relaxed text-slate-300 mb-1">
                       {seg.description}
+                    </p>
+                    {/* v2.0: Jargon as credibility signal (smaller, muted) */}
+                    <p className="text-xs" style={{ color: `${seg.color}60` }}>
+                      {seg.subDesc}
                     </p>
                   </div>
                 </div>
@@ -221,8 +333,8 @@ export default function DardEngineShowcase({ selectedCategory, onSelectCategory 
                   className="mt-4 pt-3 flex items-center justify-between gap-3"
                   style={{ borderTop: `1px solid ${seg.color}12` }}
                 >
-                  <span className="text-xs" style={{ color: `${seg.color}55` }}>
-                    {isActive ? 'Selected — scroll to form below' : 'Personalized chart reading'}
+                  <span className="text-xs text-slate-600">
+                    {isActive ? '✓ Topic locked — enter birth details below' : 'Free chart reading for this topic'}
                   </span>
                   <div
                     className="flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full transition-all duration-300 flex-shrink-0"
@@ -236,11 +348,11 @@ export default function DardEngineShowcase({ selectedCategory, onSelectCategory 
                     {isActive ? (
                       <>
                         <CheckCircle2 className="w-3 h-3" />
-                        Selected
+                        Selected ✓
                       </>
                     ) : (
                       <>
-                        Analyze Karma
+                        Yes, This Is My Issue
                         <ChevronRight
                           className="w-3 h-3 transition-transform duration-300"
                           style={{ transform: isHovered ? 'translateX(2px)' : 'none' }}
@@ -254,13 +366,19 @@ export default function DardEngineShowcase({ selectedCategory, onSelectCategory 
           })}
         </div>
 
+        {/* ── v2.0: Bottom CTA — sales rewrite ── */}
         <div className="mt-10 text-center">
-          <p className="text-xs text-slate-600 mb-3">
-            Complete your free birth-data analysis below to unlock all Dard Engine readings
+          {/* Urgency + benefit hook */}
+          <p className="text-sm text-slate-400 mb-1">
+            60 seconds to fill. <span className="text-white font-semibold">Lifetime of clarity</span> to gain.
           </p>
+          <p className="text-xs text-slate-600 mb-6">
+            No signup required · No credit card · 100% free to start
+          </p>
+
           <a
             href="#birth-form"
-            className="inline-flex items-center gap-2 px-8 py-4 rounded-full text-sm font-bold transition-all duration-300"
+            className="inline-flex items-center gap-2 px-8 py-4 rounded-full text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-2xl"
             style={{
               background: `linear-gradient(135deg, ${GOLD} 0%, #A8862A 100%)`,
               color: '#020817',
@@ -268,9 +386,15 @@ export default function DardEngineShowcase({ selectedCategory, onSelectCategory 
             }}
           >
             <Sparkles className="w-4 h-4" />
-            Start Free — Get All Answers
+            Get My Free Kundali Reading →
           </a>
+
+          {/* Trust signals below button */}
+          <p className="text-xs mt-4" style={{ color: GOLD_RGBA(0.4) }}>
+            Swiss Ephemeris · BPHS Classical Rules · Lahiri Ayanamsha · By Rohiit Gupta, Chief Vedic Architect
+          </p>
         </div>
+
       </div>
     </section>
   );
