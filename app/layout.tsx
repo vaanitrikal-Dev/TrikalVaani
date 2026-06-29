@@ -1,8 +1,11 @@
 // ============================================================
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
 // FILE: app/layout.tsx
-// VERSION: v3.7 — Meta Pixel 2111897212873248 added
+// VERSION: v3.8 — Google Ads Tag AW-7916189860 added
 // CHANGES vs v3.6.2 (CEO-approved):
+//   ✅ ADD: GoogleAdsTag AW-7916189860 — builds Google Display +
+//      YouTube + Gmail remarketing audiences alongside Meta Pixel.
+// CHANGES vs v3.7 (CEO-approved):
 //   ✅ ADD: MetaPixel component imported + rendered as FIRST element
 //      in <body>. Pixel ID: 2111897212873248 (Trikal Vaani Voice).
 //      Fires PageView on every page automatically.
@@ -32,6 +35,7 @@ import OneSignalInit from "@/components/OneSignalInit";
 import StickyMobileCTA from "@/components/landing/StickyMobileCTA";
 import ClarityAnalytics from "@/components/analytics/ClarityAnalytics";
 import MetaPixel from "@/components/analytics/MetaPixel";
+import GoogleAdsTag from "@/components/analytics/GoogleAdsTag";
 import { Analytics } from "@vercel/analytics/next";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -395,12 +399,13 @@ export default function RootLayout({
       <body className={`${inter.className} bg-[#080B12] text-white antialiased`}>
 
         {/* ── v3.7: Meta Pixel — fires PageView on every page ──────────────
-            Pixel ID: 2111897212873248 (Trikaal Vaani Voice)
+            Pixel ID: 2111897212873248 (Trikal Vaani Voice)
             Custom events (Lead, Purchase, InitiateCheckout) fire from
             BirthForm.tsx v10.3 via inline trackFB() helper — no extra
             imports needed on other pages.
         ─────────────────────────────────────────────────────────────────── */}
         <MetaPixel />
+        <GoogleAdsTag />
 
         {children}
 
