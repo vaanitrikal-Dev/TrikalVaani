@@ -1,7 +1,17 @@
-// 🔱 TRIKAL VAANI | app/page.tsx | v11.5
+// 🔱 TRIKAL VAANI | app/page.tsx | v11.6
 // Owner: Rohiit Gupta, Chief Vedic Architect
-// Date: 2026-06-27
+// Date: 2026-06-29
 // ============================================================================
+// v11.5 → v11.6 — CALC STRIP added (slot #3.5):
+//   ✅ ADD: <CalcStrip /> imported from @/components/layout/CalcStrip
+//      Placed immediately after KundaliMilanTeaser and before LiveTrustBar.
+//      Shows 6 high-curiosity calculators (1 paid AI Hast Rekha ₹51 + 5 free)
+//      in a horizontal scroll strip. Gold pulse animation on paid card.
+//      Mobile: scroll with right-edge fade. Desktop: all 6 in one row.
+//      Placement logic: users who didn't convert on the birth form will hit
+//      the free calculators next — builds engagement + Pixel audience.
+//   ✅ ZERO other changes — all slots, schemas, ISR, metadata untouched.
+// ----------------------------------------------------------------------------
 // v11.4 → v11.5 — "8 DEEP VEDIC READINGS" MOVED ABOVE PRICING (CEO-approved):
 //   ✅ ADD: <DeepReadingsGrid /> imported and rendered as a new TRUST +
 //      COMMERCIAL TIER slot, placed DIRECTLY ABOVE <PricingSection />.
@@ -33,6 +43,7 @@ import SchemaScript from '../components/SchemaScript';
 import HomeFAQ from '../components/HomeFAQ';
 import SiteNav from '@/components/layout/SiteNav';
 import SiteFooter from '@/components/layout/SiteFooter';
+import CalcStrip from '@/components/layout/CalcStrip';
 import Hero from '@/components/landing/Hero';
 import PillarsGrid from '@/components/landing/PillarsGrid';
 import DeepReadingsGrid from '@/components/landing/DeepReadingsGrid';
@@ -245,6 +256,15 @@ export default async function HomePage() {
               Pre-launch waitlist + SEO/GEO indexing window for Kundali Milan. */}
           <KundaliMilanTeaser />
 
+          {/* ── 3.5 CALC STRIP — v11.6 ─────────────────────────────────────
+              Discovery strip: 6 high-curiosity calculators shown inline.
+              Users who didn't convert on birth form hit free tools next.
+              Builds engagement, increases pages/session, grows Pixel audience.
+              Components: AI Hast Rekha (₹51 paid, gold pulse) + 5 free tools.
+              Mobile: horizontal scroll + right-fade hint. Desktop: single row.
+              File: components/layout/CalcStrip.tsx */}
+          <CalcStrip />
+
           {/* ═══════════════════════════════════════════════════════════════
               TRUST + COMMERCIAL TIER — slots #4 to #6
               Reinforce trust signals immediately after earning surfaces.
@@ -411,7 +431,7 @@ export default async function HomePage() {
 }
 
 // ============================================================================
-// END — app/page.tsx v11.5
+// END — app/page.tsx v11.6
 // 🔱 Trikaal Vaani | Rohiit Gupta, Chief Vedic Architect
 // CEO LOCKED: TIERED LAYOUT — earning sections above mobile fold
 // ============================================================================
