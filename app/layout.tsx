@@ -395,7 +395,7 @@ export default function RootLayout({
       <body className={`${inter.className} bg-[#080B12] text-white antialiased`}>
 
         {/* ── v3.7: Meta Pixel — fires PageView on every page ──────────────
-            Pixel ID: 2111897212873248 (Trikal Vaani Voice)
+            Pixel ID: 2111897212873248 (Trikaal Vaani Voice)
             Custom events (Lead, Purchase, InitiateCheckout) fire from
             BirthForm.tsx v10.3 via inline trackFB() helper — no extra
             imports needed on other pages.
