@@ -3,8 +3,10 @@
  * TRIKAAL VAANI — BirthForm Component
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: components/landing/BirthForm.tsx
- * VERSION: 10.1 — "Why we ask" trust box + per-field hints (conversion/UX)
+ * VERSION: 10.2 — Sales rewrite: VOICE_TAGLINES fix (double comma bug), tier-neutral taglines,
+ *            category heading, TierSelector benefit-first, submit labels, below-submit copy
  * SIGNED: ROHIIT GUPTA, CEO
+ * DATE: 2026-06-29
  *
  * v10.1 CHANGES vs v10.0 (CEO-approved, conversion audit Fix #2):
  *   ✅ ADDED a "Why we ask for these details" trust box at the TOP of the
@@ -373,12 +375,12 @@ const SEO_TRUST_BADGES = [
 ]
 
 const VOICE_TAGLINES = [
-  { text: 'Kuch dil ki baatein type nahi ki jaati', icon: '🎙️' },
-  { text: 'Bol do Trikaal ko — woh sun raha hai',    icon: '🔮' },
-  { text: 'Dil ki baat — sirf ek minute mein',      icon: '✨' },
-  { text: 'Trikaal sun raha hai — bas shuru karo',   icon: '🎙️' },
-  { text: 'Jo dil mein hai — woh bol do',            icon: '💫' },
-  { text: 'Type mat karo — feel karo',               icon: '🎙️' },
+  { text: 'Aapka chart sirf aapka hai — generic horoscope nahi', icon: '🔱' },
+  { text: 'Jo sawaal dil mein hai — chart mein jawab bhi hai', icon: '✨' },
+  { text: '2 minute fill karo — zindagi bhar ki clarity pao', icon: '🔮' },
+  { text: 'Sahi birth details = sahi prediction', icon: '⚡' },
+  { text: 'Crores ka ek sun sign — sirf aapka chart alag hai', icon: '🪐' },
+  { text: 'Trikaal padh raha hai — sirf aapke liye', icon: '💫' },
 ]
 
 const LOADING_STEPS = [
@@ -483,9 +485,6 @@ const INITIAL: BirthFormFields = {
 }
 
 // ── v9.9: Scoped mobile-overflow fix CSS ─────────────────────────────────────
-// Native date/time inputs, selects, and grid children have an intrinsic
-// min-width on Android Chrome that blows the form out beyond 100vw.
-// This forces every control to shrink within its column. CSS-only.
 const MOBILE_OVERFLOW_FIX_CSS = `
   #birth-form, #birth-form * { box-sizing: border-box; }
   #birth-form { overflow-x: clip; }
@@ -586,7 +585,6 @@ const SERVICE_OFFER_SCHEMA = {
     ],
   },
   termsOfService: 'https://trikalvaani.com/terms',
-  // ── Razorpay payment processor declared (AI search picks this up) ──
   brand: {
     '@type': 'Brand',
     name: 'Trikaal Vaani',
@@ -673,7 +671,7 @@ function RotatingTagline() {
         {tagline.icon} "{tagline.text}"
       </p>
       <p style={{ color: '#475569', fontSize: '10px', margin: '4px 0 0' }}>
-        — Trikaal Voice Reading · ₹11 only · Razorpay Secured
+        — Trikaal Vaani · By Rohiit Gupta · Swiss Ephemeris powered
       </p>
     </div>
   )
@@ -738,9 +736,9 @@ function RazorpayInlineTrustStrip({ tier }: { tier: PredictionTier }) {
 
 function TierSelector({ selected, onChange }: { selected: PredictionTier; onChange: (t: PredictionTier) => void }) {
   const tiers = [
-    { id: 'free'  as PredictionTier, icon: '🔮', label: 'Free Preview', price: 'Free', desc: 'Trikaal Ka Sandesh',  color: '#94a3b8', features: ['150-200 word summary', 'Key message + action', 'Instant results'] },
-    { id: 'paid'  as PredictionTier, icon: '⚡', label: 'Deep Reading',  price: '₹51',  desc: 'Full Vedic Analysis', color: GOLD,      features: ['900 word full analysis', 'Personalized 5 upay', 'Action windows + dates'], highlight: true },
-    { id: 'voice' as PredictionTier, icon: '🎙️', label: 'Voice',        price: '₹11',  desc: 'Trikaal ki awaaz',    color: '#a78bfa', features: ['60-sec voice', 'Hindi / Hinglish', 'Trikaal AI'] },
+    { id: 'free'  as PredictionTier, icon: '🔮', label: 'Free Preview', price: 'Free', desc: 'Free · No card needed', color: '#94a3b8', features: ['Key planet insight for you', 'What to do this week', 'Instant — 60 seconds'] },
+    { id: 'paid'  as PredictionTier, icon: '⚡', label: 'Deep Reading',  price: '₹51',  desc: 'Full Vedic Analysis', color: GOLD,      features: ['Deep dive into your chart', '5 personalized upay', 'Worth ₹500+, yours at ₹51'], highlight: true },
+    { id: 'voice' as PredictionTier, icon: '🎙️', label: 'Voice',        price: '₹11',  desc: 'Hear it in 60 sec',   color: '#a78bfa', features: ['Speak your question', 'Answer in your language', 'Most personal format'] },
   ]
 
   return (
@@ -873,7 +871,7 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
   const [locating,       setLocating]       = useState(false)
 
   const loadingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
-  const startedTaggedRef   = useRef(false)   // v9.8: ensures kundali_status=started fires once
+  const startedTaggedRef   = useRef(false)
   const isDualDomain = DUAL_CHART_DOMAINS.includes(selectedCategory?.id ?? '')
 
   const set = useCallback(<K extends keyof BirthFormFields>(key: K, value: BirthFormFields[K]) => {
@@ -881,7 +879,6 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
     setErrors(prev => ({ ...prev, [key]: undefined }))
   }, [])
 
-  // ── v9.8: tag "started" once user shows intent (name + DOB filled) ──────────
   useEffect(() => {
     if (!startedTaggedRef.current && fields.name.trim() && fields.dateOfBirth) {
       startedTaggedRef.current = true
@@ -889,7 +886,6 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
     }
   }, [fields.name, fields.dateOfBirth])
 
-  // ── Pre-load Razorpay script when paid/voice selected ───────────────────────
   useEffect(() => {
     if (predictionTier === 'paid' || predictionTier === 'voice') {
       loadRazorpayScript()
@@ -945,7 +941,6 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
     if (!fields.dateOfBirth)    errs.dateOfBirth = 'Date of birth is required'
     if (!fields.unknownTime && !fields.timeOfBirth) errs.timeOfBirth = 'Time of birth is required'
     if (fields.latitude === '') errs.latitude    = 'Place of birth is required'
-    // v10.0: mobile OPTIONAL for free tier, REQUIRED for paid/voice
     const mobileDigits = fields.mobile.replace(/\D/g, '').length
     if (predictionTier === 'free') {
       if (fields.mobile && mobileDigits < fields.countryDigits) errs.mobile = `Valid ${fields.countryDigits}-digit mobile required — ya blank chhod do`
@@ -961,7 +956,6 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
     return Object.keys(errs).length === 0
   }
 
-  // ── Build prediction request body ────────────────────────────────────────────
   const buildPredictionBody = (paymentVerification: any = null) => {
     const sessionId      = generateSessionId()
     const age            = calculateAge(fields.dateOfBirth)
@@ -1015,7 +1009,6 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
     }
   }
 
-  // ── Call /api/predict and handle navigation ─────────────────────────────────
   const callPredictAPI = async (paymentVerification: any = null) => {
     try {
       const res = await fetch('/api/predict', {
@@ -1031,7 +1024,6 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
       }
       if (onSubmit) await onSubmit(fields)
 
-      // v9.8: prediction succeeded → mark completed so abandoned-reminder won't fire
       tagOneSignal({ kundali_status: 'completed' })
 
       const publicSlug   = data?._meta?.publicSlug   ?? null
@@ -1046,13 +1038,11 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
     }
   }
 
-  // ── RAZORPAY PAYMENT FLOW (NEW v9.2) ────────────────────────────────────────
   const handleRazorpayPayment = async (tier: 'paid' | 'voice') => {
     setApiError(null)
     setPaymentLoading(true)
 
     try {
-      // Step 1: Load Razorpay script
       const scriptLoaded = await loadRazorpayScript()
       if (!scriptLoaded) {
         setApiError('Razorpay payment SDK failed to load. Please check your internet connection.')
@@ -1060,7 +1050,6 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
         return
       }
 
-      // Step 2: Create Razorpay order on server
       const orderRes = await fetch('/api/create-order', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -1074,7 +1063,6 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
       }
       const { orderId, amount, currency, keyId } = await orderRes.json()
 
-      // Step 3: Open Razorpay checkout popup
       openRazorpayCheckout({
         keyId,
         orderId,
@@ -1086,7 +1074,6 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
         prefillContact: `${fields.countryCode}${fields.mobile}`.replace(/\s/g, ''),
         themeColor:     '#D4AF37',
         onSuccess: async (response) => {
-          // Step 4: Verify payment server-side
           const verifyRes = await fetch('/api/verify-payment', {
             method:  'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -1099,16 +1086,13 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
             return
           }
 
-          // Step 5: For voice tier, redirect to /voice with payment proof
           if (tier === 'voice') {
-            // v9.8: voice purchase done → mark completed
             tagOneSignal({ kundali_status: 'completed' })
             const voiceUrl = `/voice?name=${encodeURIComponent(fields.name)}&lang=${fields.language}&pid=${response.razorpay_payment_id}`
             router.push(voiceUrl)
             return
           }
 
-          // Step 6: For paid tier, call /api/predict with payment verification
           setIsSubmitting(true)
           startLoadingMessages(PAYMENT_LOADING_STEPS)
 
@@ -1132,18 +1116,15 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
     }
   }
 
-  // ── MAIN SUBMIT HANDLER ─────────────────────────────────────────────────────
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!validate()) return
 
-    // ── PAID or VOICE → trigger Razorpay flow ──
     if (predictionTier === 'paid' || predictionTier === 'voice') {
       await handleRazorpayPayment(predictionTier)
       return
     }
 
-    // ── FREE → direct prediction ──
     setIsSubmitting(true)
     setApiError(null)
     startLoadingMessages()
@@ -1157,9 +1138,9 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
     if (paymentLoading)             return '⟳ Razorpay popup khul raha hai...'
     if (isLoading)                  return LOADING_STEPS[loadingStep] || 'Processing...'
     if (submitLabel)                return submitLabel
-    if (predictionTier === 'free')  return '🔮 Get Free Prediction — Trikaal Ka Sandesh'
-    if (predictionTier === 'paid')  return '⚡ Pay ₹51 with Razorpay — Deep Reading'
-    if (predictionTier === 'voice') return '🎙️ Pay ₹11 with Razorpay — Voice Reading'
+    if (predictionTier === 'free')  return '🔮 Get My Free Reading — Trikaal Ka Sandesh'
+    if (predictionTier === 'paid')  return '⚡ Get My Deep Reading — Pay ₹51 via Razorpay'
+    if (predictionTier === 'voice') return '🎙️ Get My Voice Reading — Pay ₹11 via Razorpay'
     return '🔮 Get My Prediction'
   }
 
@@ -1174,16 +1155,13 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
     <section id="birth-form" className={`py-16 px-4 pb-28 sm:pb-16 ${className}`}
       aria-label="Vedic Astrology Birth Chart Form — Trikaal Vaani by Rohiit Gupta">
 
-      {/* v9.9: Scoped mobile-overflow fix — forces all controls to shrink within viewport */}
       <style dangerouslySetInnerHTML={{ __html: MOBILE_OVERFLOW_FIX_CSS }} />
 
-      {/* JSON-LD: Service + Offer + PaymentMethod for AI Search (GEO) */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(SERVICE_OFFER_SCHEMA) }}
       />
 
-      {/* Hidden SEO content (expanded v9.2, IR-0 cleaned v9.6) */}
       <div style={{ display: 'none' }} aria-hidden="false">
         <h2>Free AI Vedic Astrology Prediction — Swiss Ephemeris Powered by Rohiit Gupta</h2>
         <p>Get your personalized Vedic astrology reading at Trikaal Vaani. Powered by Swiss Ephemeris, BPHS, Bhrigu Nandi Nadi, Shadbala. By Rohiit Gupta, Chief Vedic Architect. Free Trikaal Ka Sandesh preview, ₹51 Deep Reading with 900-word analysis and 5 personalized upay, ₹11 Voice Reading. All paid plans secured by Razorpay. PCI-DSS compliant, 256-bit SSL encrypted. Accepts UPI, Cards, NetBanking, Wallets, RuPay. Customer support via WhatsApp at +91 92118 04111. Refund policy at trikalvaani.com/refund. Terms at trikalvaani.com/terms.</p>
@@ -1192,7 +1170,6 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
 
       <div className="max-w-2xl mx-auto w-full" style={{ maxWidth: 'min(42rem, 100%)' }}>
 
-        {/* Hero */}
         <div className="text-center mb-8">
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', marginBottom: '12px' }}>
             <div style={{ height: '1px', flex: 1, background: `linear-gradient(to right, transparent, ${GOLD_RGBA(0.3)})` }} />
@@ -1205,13 +1182,13 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
                 style={{ background: `${selectedCategory.color}20`, color: selectedCategory.color, border: `1px solid ${selectedCategory.color}40` }}>
                 {selectedCategory.label}
               </span>
-              <h2 className="text-white text-xl font-serif font-bold mb-2">Apni Kundali Ka Sach Janein</h2>
-              <p className="text-slate-400 text-sm">Swiss Ephemeris precision · BPHS Classical · Bhrigu Nandi patterns</p>
+              <h2 className="text-white text-xl font-serif font-bold mb-2">Ab Kundali Bolegi Sachchi Baat</h2>
+              <p className="text-slate-400 text-sm">Your chart will be read specifically for{''}{'  '}<strong style={{ color: selectedCategory.color }}>{selectedCategory.label}</strong>{''}{'  '}&mdash; not a generic rashifal.</p>
             </>
           ) : (
             <>
               <h2 className="text-white text-2xl font-serif font-bold mb-2">Trikaal Ka Sandesh — Sirf Aapke Liye</h2>
-              <p className="text-slate-400 text-sm max-w-lg mx-auto">AI Vedic astrology on Swiss Ephemeris precision — by Rohiit Gupta, Chief Vedic Architect.</p>
+              <p className="text-slate-400 text-sm max-w-lg mx-auto">Fill in your birth details below — get a reading made for YOUR exact chart, not a generic rashifal shared by crores. By Rohiit Gupta, Chief Vedic Architect.</p>
             </>
           )}
           <div className="flex flex-wrap justify-center gap-2 mt-4">
@@ -1225,13 +1202,10 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
 
         <RotatingTagline />
 
-        {/* Form */}
         <div className="rounded-2xl p-6 sm:p-8"
           style={{ background: 'rgba(13,17,30,0.85)', border: '1px solid rgba(212,175,55,0.15)', backdropFilter: 'blur(12px)', maxWidth: '100%', overflow: 'hidden' }}>
           <form onSubmit={handleSubmit} noValidate className="grid gap-5">
 
-            {/* v10.1: "Why we ask" trust box — reframes the detailed form as
-                premium personalization, not friction. Pure presentational. */}
             <div
               style={{
                 background: GOLD_RGBA(0.05),
@@ -1244,19 +1218,17 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
                 🔍 Why we ask for these details
               </p>
               <p style={{ margin: 0, color: '#94a3b8', fontSize: '11.5px', lineHeight: 1.6 }}>
-                Your exact birth time, place and life context let Trikaal fix your{' '}
-                <strong style={{ color: '#cbd5e1' }}>Lagna, planetary degrees and Dasha to the minute</strong>.
-                That is what makes this reading truly <em>yours</em> — a precise Vedic
-                analysis of your chart, not a generic rashifal shared by crores.
+                Your exact birth time, place and life context let us calculate your{' '}
+                <strong style={{ color: '#cbd5e1' }}>Lagna, planetary degrees and current Dasha to the minute</strong>.
+                Without this, every prediction is a guess. With it —{' '}
+                <em>this reading is built only for you.</em>
               </p>
             </div>
 
             <TierSelector selected={predictionTier} onChange={setPredictionTier} />
 
-            {/* Razorpay inline trust strip — paid/voice only */}
             <RazorpayInlineTrustStrip tier={predictionTier} />
 
-            {/* Language */}
             <div>
               <label className="block text-sm font-medium text-slate-300 mb-2">Prediction Language / भाषा चुनें</label>
               <div className="grid grid-cols-3 gap-2">
@@ -1272,7 +1244,6 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
               </div>
             </div>
 
-            {/* Name */}
             <div>
               <label htmlFor="tv-name" className="block text-sm font-medium text-slate-300 mb-1.5">Full Name <span className="text-yellow-400">*</span></label>
               <input id="tv-name" type="text" placeholder="Enter your full name"
@@ -1282,7 +1253,6 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
               {errors.name && <p className="text-red-400 text-xs mt-1">{errors.name}</p>}
             </div>
 
-            {/* Mobile */}
             <div>
               <label htmlFor="tv-mobile" className="block text-sm font-medium text-slate-300 mb-1.5">
                 WhatsApp Mobile {predictionTier !== 'free' && <span className="text-yellow-400">*</span>}
@@ -1300,7 +1270,6 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
               {errors.mobile && <p className="text-red-400 text-xs mt-1">{errors.mobile}</p>}
             </div>
 
-            {/* Job */}
             <div className="relative">
               <label htmlFor="tv-job" className="block text-sm font-medium text-slate-300 mb-1.5">Profession / Job Category</label>
               <p className="text-slate-500 text-xs mb-1.5">Tunes your career &amp; money predictions to your real field</p>
@@ -1313,7 +1282,6 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
               </div>
             </div>
 
-            {/* DOB */}
             <div>
               <label htmlFor="tv-dob" className="block text-sm font-medium text-slate-300 mb-1.5">Date of Birth <span className="text-yellow-400">*</span></label>
               <input id="tv-dob" type="date" value={fields.dateOfBirth}
@@ -1323,7 +1291,6 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
               {errors.dateOfBirth && <p className="text-red-400 text-xs mt-1">{errors.dateOfBirth}</p>}
             </div>
 
-            {/* TOB */}
             <div>
               <div className="flex items-center justify-between mb-1.5">
                 <label htmlFor="tv-tob" className="text-sm font-medium text-slate-300">
@@ -1343,7 +1310,6 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
               {fields.unknownTime && <p className="text-slate-500 text-xs mt-1">Solar chart will be used (12:00 noon)</p>}
             </div>
 
-            {/* Gender */}
             <div>
               <label className="block text-sm font-medium text-slate-300 mb-2">
                 Gender <span className="text-slate-500 text-xs ml-1">(for personalized remedies)</span>
@@ -1368,7 +1334,6 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
               )}
             </div>
 
-            {/* Place of Birth */}
             <div>
               <div className="flex items-center justify-between mb-1.5">
                 <label className="block text-sm font-medium text-slate-300">
@@ -1393,7 +1358,6 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
               />
             </div>
 
-            {/* Lat/Lng display */}
             {fields.latitude !== '' && (
               <div className="grid grid-cols-3 gap-2">
                 {[
@@ -1412,7 +1376,6 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
               </div>
             )}
 
-            {/* Current City — v9.4: Google Places autocomplete (same as Place of Birth) */}
             <div>
               <label className="block text-sm font-medium text-slate-300 mb-1.5">
                 Current City <span className="text-slate-500 text-xs ml-2">(where you live now — used for current Gochar transits)</span>
@@ -1426,7 +1389,6 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
               />
             </div>
 
-            {/* Relationship Status */}
             <div className="relative">
               <label htmlFor="tv-rel-status" className="block text-sm font-medium text-slate-300 mb-1.5">Relationship Status</label>
               <p className="text-slate-500 text-xs mb-1.5">Helps focus marriage &amp; relationship timing for you</p>
@@ -1440,7 +1402,6 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
               </div>
             </div>
 
-            {/* Situation Note */}
             <div>
               <label htmlFor="tv-situation" className="block text-sm font-medium text-slate-300 mb-1.5">Tell Trikaal what's on your mind</label>
               <div className="relative">
@@ -1457,7 +1418,6 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
               </div>
             </div>
 
-            {/* Person 2 Section */}
             {isDualDomain && (
               <div className="mt-2 pt-5 border-t border-amber-400/20">
                 <div className="flex items-center gap-2 mb-4">
@@ -1537,7 +1497,6 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
               </div>
             )}
 
-            {/* Loading */}
             {isLoading && (
               <div className="px-4 py-4 rounded-xl text-center" style={{ background: GOLD_RGBA(0.06), border: `1px solid ${GOLD_RGBA(0.2)}` }}>
                 <div className="flex items-center justify-center gap-2 mb-2">
@@ -1553,14 +1512,12 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
               </div>
             )}
 
-            {/* API Error */}
             {apiError && (
               <div className="px-4 py-3 rounded-lg text-sm text-red-300" style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)' }}>
                 {apiError}
               </div>
             )}
 
-            {/* Submit */}
             <button type="submit" disabled={isLoading}
               aria-label={predictionTier === 'paid' ? 'Pay 51 rupees with Razorpay for Deep Reading' : predictionTier === 'voice' ? 'Pay 11 rupees with Razorpay for Voice Reading' : 'Get free Vedic prediction'}
               className="w-full py-4 rounded-xl text-sm font-bold transition-all duration-300"
@@ -1576,9 +1533,9 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
 
             {!isLoading && (
               <div style={{ textAlign: 'center' }}>
-                {predictionTier === 'free'  && <p className="text-xs text-slate-600">🔒 Free forever · No card required · Instant results</p>}
-                {predictionTier === 'paid'  && <p className="text-xs text-slate-600">🔒 ₹51 one-time · Secured by <span style={{color: RAZORPAY_BLUE, fontWeight: 700}}>Razorpay</span> · UPI / Cards / Wallets · Instant access</p>}
-                {predictionTier === 'voice' && <p className="text-xs text-slate-600">🎙️ ₹11 one-time · Secured by <span style={{color: RAZORPAY_BLUE, fontWeight: 700}}>Razorpay</span> · 60-sec voice response</p>}
+                {predictionTier === 'free'  && <p className="text-xs text-slate-600">🔒 Free forever · No card needed · No signup · Instant results</p>}
+                {predictionTier === 'paid'  && <p className="text-xs text-slate-600">🔒 ₹51 one-time · Same depth as ₹500+ readings elsewhere · Secured by <span style={{color: RAZORPAY_BLUE, fontWeight: 700}}>Razorpay</span> · Instant access</p>}
+                {predictionTier === 'voice' && <p className="text-xs text-slate-600">🎙️ ₹11 one-time · Speak your question, hear the answer · Secured by <span style={{color: RAZORPAY_BLUE, fontWeight: 700}}>Razorpay</span></p>}
               </div>
             )}
 
@@ -1586,7 +1543,6 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
           </form>
         </div>
 
-        {/* Footer */}
         <div style={{ marginTop: '24px', textAlign: 'center' }}>
           <p style={{ color: '#334155', fontSize: '11px', lineHeight: 1.7, maxWidth: '480px', margin: '0 auto 12px' }}>
             Powered by <strong style={{ color: '#475569' }}>Swiss Ephemeris</strong> — the same engine used by professional astrologers worldwide.
