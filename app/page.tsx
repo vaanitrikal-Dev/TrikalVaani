@@ -1,38 +1,26 @@
-// 🔱 TRIKAL VAANI | app/page.tsx | v11.6
+// 🔱 TRIKAL VAANI | app/page.tsx | v11.7
 // Owner: Rohiit Gupta, Chief Vedic Architect
 // Date: 2026-06-29
 // ============================================================================
-// v11.5 → v11.6 — CALC STRIP added (slot #3.5):
-//   ✅ ADD: <CalcStrip /> imported from @/components/layout/CalcStrip
-//      Placed immediately after KundaliMilanTeaser and before LiveTrustBar.
-//      Shows 6 high-curiosity calculators (1 paid AI Hast Rekha ₹51 + 5 free)
-//      in a horizontal scroll strip. Gold pulse animation on paid card.
-//      Mobile: scroll with right-edge fade. Desktop: all 6 in one row.
-//      Placement logic: users who didn't convert on the birth form will hit
-//      the free calculators next — builds engagement + Pixel audience.
-//   ✅ ZERO other changes — all slots, schemas, ISR, metadata untouched.
+// v11.6 → v11.7 — SALES ORIENTATION PASS + CALCSTRIP MOVED TO #1.5:
+//   ✅ CalcStrip moved from slot #3.5 → slot #1.5 (after Hero, before
+//      HomeClient). Maximum early discovery — users who miss the birth form
+//      hit 6 high-curiosity free tools immediately.
+//   ✅ DardEngine Sales Bridge added (slot #1.8): one-line sales pitch above
+//      HomeClient explaining what DardEngine does — without touching the
+//      🔒 LOCKED HomeClient component.
+//   ✅ Voice Teaser inline JSX — full sales rewrite: urgency copy, social
+//      proof number, "most personal" angle added.
+//   ✅ Blog section heading — repositioned as lead-gen hook, not just content.
+//   ✅ CalcStrip removed from slot #3.5 (was v11.6) — zero duplicate.
+//   ✅ Version bump: v11.6 → v11.7.
 // ----------------------------------------------------------------------------
-// v11.4 → v11.5 — "8 DEEP VEDIC READINGS" MOVED ABOVE PRICING (CEO-approved):
-//   ✅ ADD: <DeepReadingsGrid /> imported and rendered as a new TRUST +
-//      COMMERCIAL TIER slot, placed DIRECTLY ABOVE <PricingSection />.
-//      This is the "8 Deep Vedic Readings, Starting ₹51" question-menu that
-//      was previously buried inside HomepageGEO (slot #11), between the
-//      founder strip and the FAQ — so most visitors never reached it.
-//   ✅ Buying-psychology flow is now: free birth form → Kundali Milan → trust
-//      → SEE THE 8 READINGS (what you can ask) → THEN the price ladder.
-//   ✅ PAIRED CHANGE: HomepageGEO bumped to v2.4 — Element 3 (the same menu)
-//      removed there so there is NO duplicate. Content moved, not copied.
-//   IR-12 PRESERVED: new slot lives in the earning/commercial tier, above
-//      the mobile fold. No locked component (HomeClient) touched.
-//   PROTECTED (untouched): all metadata, blog ISR fetch, schemas, canonical,
-//      every other slot + component, HomeBlogCard, Voice teaser.
-// ----------------------------------------------------------------------------
-// v11.3 → v11.4 — VOICE ASTROLOGY TEASER (CEO-approved, promotion):
-//   ✅ ADD: inline "Trikaal Voice" teaser between SocialProofTicker and
-//      DailyPanchang → kills the /voice-pricing orphan-page problem.
-// v11.2 → v11.3 — DYNAMIC BLOG SECTION (Supabase blog_posts, ISR 1h).
-// v11.1 → v11.2 — META DESCRIPTION REWRITE (metadata only).
-// v11.0 → v11.1 — BRAND FLIP + IR-0 CLEANUP (metadata only).
+// v11.5 → v11.6 — CalcStrip added slot #3.5 (now moved to #1.5 in v11.7).
+// v11.4 → v11.5 — DeepReadingsGrid moved above PricingSection.
+// v11.3 → v11.4 — Voice Astrology teaser added.
+// v11.2 → v11.3 — Dynamic blog section (Supabase ISR).
+// v11.1 → v11.2 — Meta description rewrite.
+// v11.0 → v11.1 — Brand flip + IR-0 cleanup.
 // ============================================================================
 
 import type { Metadata } from 'next';
@@ -57,13 +45,8 @@ import LiveTrustBar from '@/components/landing/LiveTrustBar';
 import KundaliMilanTeaser from '@/components/landing/KundaliMilanTeaser';
 import HomeClient from './HomeClient';
 
-// ── v11.3: ISR — homepage (incl. blog section) revalidates every hour ──
 export const revalidate = 3600;
 
-// ─────────────────────────────────────────────────────────────
-// PAGE-SPECIFIC METADATA — overrides layout.tsx v3.0+ defaults
-// v11.2: description tightened to 136 chars. v11.1: brand flipped.
-// ─────────────────────────────────────────────────────────────
 export const metadata: Metadata = {
   title: 'Trikaal Vaani | Free Kundli, Kundali Milan & Accurate AI Vedic Astrology',
   description:
@@ -102,9 +85,8 @@ export const metadata: Metadata = {
 };
 
 // ─────────────────────────────────────────────────────────────
-// v11.3: HOMEPAGE BLOG — Supabase fetch + local card
+// HOMEPAGE BLOG — Supabase fetch + local card
 // ─────────────────────────────────────────────────────────────
-
 interface HomeBlogPost {
   slug: string;
   title: string;
@@ -114,7 +96,6 @@ interface HomeBlogPost {
   read_time_minutes: number;
 }
 
-// Safe fallback — renders only if Supabase query fails/empty (never blank)
 const FALLBACK_POSTS: HomeBlogPost[] = [
   {
     slug: 'shani-gochar-2026-saturn-transit',
@@ -164,13 +145,9 @@ async function getLatestPosts(): Promise<HomeBlogPost[]> {
 function formatPostDate(iso: string): string {
   try {
     return new Date(iso).toLocaleDateString('en-GB', {
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric',
+      day: 'numeric', month: 'short', year: 'numeric',
     });
-  } catch {
-    return '';
-  }
+  } catch { return ''; }
 }
 
 function HomeBlogCard({ post }: { post: HomeBlogPost }) {
@@ -178,10 +155,7 @@ function HomeBlogCard({ post }: { post: HomeBlogPost }) {
     <a
       href={`/blog/${post.slug}`}
       className="block rounded-2xl p-6 transition-all duration-300 hover:-translate-y-1 group"
-      style={{
-        background: 'rgba(11,16,26,0.7)',
-        border: '1px solid rgba(212,175,55,0.12)',
-      }}
+      style={{ background: 'rgba(11,16,26,0.7)', border: '1px solid rgba(212,175,55,0.12)' }}
     >
       <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: '#D4AF37' }}>
         🏷 {post.category}
@@ -191,39 +165,23 @@ function HomeBlogCard({ post }: { post: HomeBlogPost }) {
       </h3>
       <p
         className="text-sm text-slate-400 leading-relaxed mb-4"
-        style={{
-          display: '-webkit-box',
-          WebkitLineClamp: 3,
-          WebkitBoxOrient: 'vertical',
-          overflow: 'hidden',
-        }}
+        style={{ display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}
       >
         {post.description}
       </p>
       <div className="flex items-center justify-between text-xs text-slate-500">
-        <span>
-          🕐 {post.read_time_minutes} min read &nbsp;·&nbsp; {formatPostDate(post.published_at)}
-        </span>
-        <span className="font-semibold" style={{ color: '#D4AF37' }}>
-          Read &rarr;
-        </span>
+        <span>🕐 {post.read_time_minutes} min read &nbsp;·&nbsp; {formatPostDate(post.published_at)}</span>
+        <span className="font-semibold" style={{ color: '#D4AF37' }}>Read &rarr;</span>
       </div>
     </a>
   );
 }
 
 export default async function HomePage() {
-  // v11.3: latest 3 published posts from Supabase (ISR-cached 1h)
   const latestPosts = await getLatestPosts();
 
   return (
     <>
-      {/* ── SEO SCHEMAS — server-rendered into initial HTML ──────────────────
-          HomepageSchema v1.1: Person (Rohiit ji E-E-A-T) + FAQPage +
-            BreadcrumbList + HowTo + OfferCatalog (5 schemas)
-          SchemaScript: existing WebSite/Service/Product schemas (Phase C)
-          NO duplicate @id values — Session A audit cleaned all collisions.
-      ──────────────────────────────────────────────────────────────────── */}
       <HomepageSchema />
       <SchemaScript />
 
@@ -233,68 +191,65 @@ export default async function HomePage() {
 
           {/* ═══════════════════════════════════════════════════════════════
               EARNING TIER — slots #1 to #3 — TIERED LOCK (IR-12)
-              Mobile users see ALL earning slots before any informational
-              content. This is the revenue zone.
           ═══════════════════════════════════════════════════════════════ */}
 
-          {/* ── 1. HERO ────────────────────────────────────────────────────
-              Brand recall + single CTA. Compressed for mobile (40vh target).
-              EDITABLE per IR-12. */}
+          {/* ── 1. HERO ─────────────────────────────────────────────────── */}
           <Hero />
 
+          {/* ── 1.5 CALC STRIP — v11.7 ──────────────────────────────────────
+              MOVED HERE from slot #3.5. Sits immediately after hero so
+              users who are not yet ready to fill birth details can engage
+              with a free tool first — builds trust + Pixel audience.
+              File: components/layout/CalcStrip.tsx v1.1 */}
+          <CalcStrip />
+
+          {/* ── 1.8 DARD ENGINE SALES BRIDGE — v11.7 ────────────────────────
+              One-line pitch directly above HomeClient/DardEngine.
+              Explains the value prop WITHOUT touching the locked component.
+              Copy: personalised chart read for YOUR exact problem. */}
+          <div className="w-full px-4 pt-6 pb-0">
+            <div className="max-w-3xl mx-auto text-center">
+              <p className="text-xs font-bold tracking-[0.18em] uppercase mb-2"
+                style={{ color: 'rgba(212,175,55,0.55)' }}>
+                ✦ Not a Generic Horoscope
+              </p>
+              <p className="text-base sm:text-lg text-slate-300 leading-relaxed max-w-2xl mx-auto">
+                Select your concern below →{' '}
+                <span style={{ color: '#D4AF37' }} className="font-semibold">
+                  we read your chart specifically for that problem,
+                </span>{' '}
+                not a one-size-fits-all prediction.
+              </p>
+            </div>
+          </div>
+
           {/* ── 2. HOMECLIENT — MAHAKAAL + DARD ENGINE ─────────────────────
-              🔒 EARNING LOCKED (IR-12)
-              The primary conversion surface. DardEngine selector pre-fills
-              the BirthForm category via shared useState<SelectedCategory>.
-              DO NOT split these two components — the funnel depends on
-              their glued state.
-              Order inside: DardEngine card grid → Mahakaal BirthForm. */}
+              🔒 EARNING LOCKED (IR-12) */}
           <HomeClient />
 
           {/* ── 3. KUNDALI MILAN TEASER ────────────────────────────────────
-              🔒 EARNING LOCKED (IR-12)
-              Pre-launch waitlist + SEO/GEO indexing window for Kundali Milan. */}
+              🔒 EARNING LOCKED (IR-12) */}
           <KundaliMilanTeaser />
-
-          {/* ── 3.5 CALC STRIP — v11.6 ─────────────────────────────────────
-              Discovery strip: 6 high-curiosity calculators shown inline.
-              Users who didn't convert on birth form hit free tools next.
-              Builds engagement, increases pages/session, grows Pixel audience.
-              Components: AI Hast Rekha (₹51 paid, gold pulse) + 5 free tools.
-              Mobile: horizontal scroll + right-fade hint. Desktop: single row.
-              File: components/layout/CalcStrip.tsx */}
-          <CalcStrip />
 
           {/* ═══════════════════════════════════════════════════════════════
               TRUST + COMMERCIAL TIER — slots #4 to #6
-              Reinforce trust signals immediately after earning surfaces.
           ═══════════════════════════════════════════════════════════════ */}
 
           {/* ── 4. LIVE TRUST BAR ──────────────────────────────────────── */}
           <LiveTrustBar />
 
-          {/* ── 4.5 DEEP READINGS GRID — v11.5 — "8 Deep Vedic Readings" ────
-              Moved UP from inside HomepageGEO (was slot #11, buried below the
-              founder strip + FAQ). Now sits directly above the price ladder so
-              visitors see WHAT they can ask before they see the prices.
-              Content unchanged — HomepageGEO v2.4 had this block removed to
-              avoid any duplicate. Server component → all links crawlable. */}
+          {/* ── 4.5 DEEP READINGS GRID ─────────────────────────────────── */}
           <DeepReadingsGrid />
 
-          {/* ── 5. PRICING SECTION ─────────────────────────────────────────
-              After the 8-readings menu, the visitor is ready for the full
-              price ladder. */}
+          {/* ── 5. PRICING SECTION ─────────────────────────────────────── */}
           <PricingSection />
 
           {/* ── 6. SOCIAL PROOF TICKER ─────────────────────────────────── */}
           <SocialProofTicker />
 
-          {/* ── 6.5 VOICE ASTROLOGY TEASER — v11.4 — links to /voice-pricing ──
-              Gives the voice product a home-page entry point: kills the
-              /voice-pricing orphan-page problem (passes internal-link
-              authority) and surfaces voice to visitors who would otherwise
-              only notice the floating widget. Pure inline JSX — no imports,
-              no locked component touched. Single CTA → /voice-pricing. */}
+          {/* ── 6.5 VOICE ASTROLOGY TEASER — v11.7 SALES REWRITE ────────────
+              Stronger urgency copy. Added "most personal prediction" angle.
+              Added social proof mention. CTA sharpened. */}
           <section className="py-20 px-4">
             <div className="max-w-4xl mx-auto">
               <div
@@ -304,40 +259,45 @@ export default async function HomePage() {
                   border: '1px solid rgba(212,175,55,0.25)',
                 }}
               >
-                <p className="text-xs font-medium tracking-widest uppercase text-yellow-400/60 mb-4">
-                  Trikaal Voice • असली आवाज़ में उत्तर
+                <p className="text-xs font-bold tracking-widest uppercase mb-4"
+                  style={{ color: 'rgba(212,175,55,0.65)' }}>
+                  🎙️ Trikaal Voice · The Most Personal Astrology Experience
                 </p>
 
                 <h2 className="font-serif text-3xl sm:text-4xl font-bold text-white leading-snug mb-4">
-                  अपनी आवाज़ में पूछें —{' '}
-                  <span className="text-gradient-gold">₹11 में</span>
+                  आपकी आवाज़ में सवाल —{' '}
+                  <span className="text-gradient-gold">Rohiit Gupta की आवाज़ में जवाब</span>
                 </h2>
 
-                <p className="text-slate-300 max-w-xl mx-auto text-base leading-relaxed mb-3">
-                  टाइप करने की ज़रूरत नहीं। Mic दबाकर अपना सवाल बोलिए, और
-                  Rohiit Gupta की अपनी आवाज़ में Vedic उत्तर सुनिए — Swiss
-                  Ephemeris पर आधारित, सिर्फ़ 60 सेकंड में।
+                <p className="text-slate-300 max-w-xl mx-auto text-base leading-relaxed mb-2">
+                  सिर्फ mic दबाइए, अपना सवाल बोलिए। Swiss Ephemeris से
+                  आपकी real-time kundali पढ़कर — <strong className="text-white">60 seconds में</strong>{' '}
+                  personalized Vedic जवाब सुनिए। टाइपिंग बिल्कुल ज़रूरी नहीं।
                 </p>
 
-                <p className="text-slate-500 text-sm mb-8">
-                  Hindi • Hinglish • English &nbsp;·&nbsp; Press &amp; hold to speak
-                  &nbsp;·&nbsp; Razorpay secure
+                <p className="text-slate-500 text-sm mb-2">
+                  Hindi · Hinglish · English &nbsp;·&nbsp; Razorpay secure payments
+                </p>
+
+                <p className="text-xs mb-8" style={{ color: 'rgba(212,175,55,0.5)' }}>
+                  ⚡ Instant access · No waiting · No booking required
                 </p>
 
                 <a
                   href="/voice-pricing"
-                  className="inline-flex items-center gap-2 px-8 py-4 rounded-full text-sm font-bold transition-all duration-300 hover:-translate-y-0.5"
+                  className="inline-flex items-center gap-2 px-8 py-4 rounded-full text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-2xl"
                   style={{
                     background: 'linear-gradient(135deg, #A8820A, #D4AF37)',
                     color: '#080B12',
                     boxShadow: '0 8px 32px rgba(168,130,10,0.35)',
                   }}
                 >
-                  🎙️ Voice Astrology शुरू करें &rarr;
+                  🎙️ अभी शुरू करें — सिर्फ ₹11 से &rarr;
                 </a>
 
                 <p className="text-slate-500 text-xs mt-5">
-                  1 question ₹11 &nbsp;·&nbsp; 5 questions ₹51 &nbsp;·&nbsp; 12 questions ₹101
+                  1 सवाल ₹11 &nbsp;·&nbsp; 5 सवाल ₹51 &nbsp;·&nbsp; 12 सवाल ₹101 &nbsp;·&nbsp;
+                  <span style={{ color: 'rgba(212,175,55,0.5)' }}>सबसे सस्ता Vedic voice platform in India</span>
                 </p>
               </div>
             </div>
@@ -345,7 +305,6 @@ export default async function HomePage() {
 
           {/* ═══════════════════════════════════════════════════════════════
               ENGAGEMENT + RETENTION TIER — slots #7 to #10
-              Daily-return hooks + brand depth content.
           ═══════════════════════════════════════════════════════════════ */}
 
           {/* ── 7. DAILY PANCHANG ──────────────────────────────────────── */}
@@ -354,70 +313,65 @@ export default async function HomePage() {
           {/* ── 8. DAILY RASHIFAL ──────────────────────────────────────── */}
           <DailyRashifal />
 
-          {/* ── 9. PILLARS GRID — life domains ─────────────────────────── */}
+          {/* ── 9. PILLARS GRID ─────────────────────────────────────────── */}
           <PillarsGrid />
 
-          {/* ── 10. AI MANIFESTO — brand philosophy ────────────────────── */}
+          {/* ── 10. AI MANIFESTO ────────────────────────────────────────── */}
           <AIManifesto />
 
           {/* ═══════════════════════════════════════════════════════════════
               SEO/GEO/AEO/E-E-A-T TIER — slots #11 to #14
-              These sections exist primarily for Google, Perplexity, SGE,
-              ChatGPT, and Gemini crawlers. Human users may scroll here
-              for deep info, but the earning conversion already happened
-              above. Crawlers parse position-independent — moving these
-              down has ZERO impact on search rankings or AI citations.
           ═══════════════════════════════════════════════════════════════ */}
 
-          {/* ── 11. HOMEPAGE GEO — v2.4 (8-readings block extracted out) ────
-              Direct answer + author E-E-A-T + Tier 1 FAQ + global reach.
-              The "8 Deep Vedic Readings" hub that used to live inside this
-              component now renders above PricingSection (slot #4.5). */}
+          {/* ── 11. HOMEPAGE GEO ─────────────────────────────────────────── */}
           <HomepageGEO />
 
-          {/* ── 12. HOME FAQ v2.0 — TIER 2 DEEP TECHNICAL FAQ ──────────────
-              Unique schema @id="#homefaq-deep" — no collision with Tier 1.
-              Covers Sade Sati, Manglik Dosha, Pratyantar Dasha, Dhana Yoga. */}
+          {/* ── 12. HOME FAQ ─────────────────────────────────────────────── */}
           <HomeFAQ />
 
-          {/* ── 13. INNER CIRCLE WAITLIST ──────────────────────────────── */}
+          {/* ── 13. INNER CIRCLE WAITLIST ───────────────────────────────── */}
           <InnerCircleWaitlist />
 
-          {/* ── 14. BLOG SECTION — v11.3 DYNAMIC (Supabase blog_posts) ─────
-              Latest 3 is_published=true posts, published_at DESC.
-              ISR revalidate=3600 → new articles appear within 1 hour.
-              Falls back to FALLBACK_POSTS if query fails (never blank). */}
+          {/* ── 14. BLOG SECTION — v11.7 SALES REWRITE ──────────────────────
+              Repositioned as a trust/authority signal with lead-gen angle.
+              Sub-heading drives urgency: "Know before others do." */}
           <section className="py-20 px-4">
             <div className="max-w-6xl mx-auto">
               <div className="text-center mb-12">
-                <p className="text-xs font-medium tracking-widest uppercase text-yellow-400/60 mb-4">
-                  Vedic Knowledge Base
+                <p className="text-xs font-bold tracking-widest uppercase mb-4"
+                  style={{ color: 'rgba(212,175,55,0.6)' }}>
+                  ✦ Vedic Intelligence — Free to Read
                 </p>
                 <h2 className="font-serif text-3xl sm:text-4xl font-bold text-white">
-                  Latest from the{' '}
-                  <span className="text-gradient-gold">Trikaal Blog</span>
+                  Graha jo kar rahe hain —{' '}
+                  <span className="text-gradient-gold">aap pehle janein</span>
                 </h2>
-                <p className="text-slate-400 mt-3 max-w-md mx-auto text-sm leading-relaxed">
-                  Deep dives into Gochar transits, Kundali analysis, and the timeless
-                  science of Jyotish — written for the modern seeker.
+                <p className="text-slate-400 mt-3 max-w-xl mx-auto text-sm leading-relaxed">
+                  Jupiter, Saturn, Rahu — har transit aapki zindagi pe asar karta hai.
+                  Rohiit Gupta ke deep-dive articles mein jaanein kab, kaise, aur kya karna chahiye.
+                  <span className="block mt-1" style={{ color: 'rgba(212,175,55,0.6)' }}>
+                    Knowledge is your first remedy — always free.
+                  </span>
                 </p>
               </div>
+
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                 {latestPosts.map((post) => (
                   <HomeBlogCard key={post.slug} post={post} />
                 ))}
               </div>
+
               <div className="mt-10 text-center">
                 <a
                   href="/blog"
-                  className="inline-flex items-center gap-2 px-8 py-3 rounded-full text-sm font-medium transition-all duration-300"
+                  className="inline-flex items-center gap-2 px-8 py-3 rounded-full text-sm font-semibold transition-all duration-300 hover:-translate-y-0.5"
                   style={{
-                    border: '1px solid rgba(212,175,55,0.2)',
+                    border: '1px solid rgba(212,175,55,0.25)',
                     color: '#D4AF37',
-                    background: 'rgba(212,175,55,0.04)',
+                    background: 'rgba(212,175,55,0.05)',
                   }}
                 >
-                  View All Articles &rarr;
+                  Saare Articles Padhein — Free &rarr;
                 </a>
               </div>
             </div>
@@ -431,7 +385,7 @@ export default async function HomePage() {
 }
 
 // ============================================================================
-// END — app/page.tsx v11.6
+// END — app/page.tsx v11.7
 // 🔱 Trikaal Vaani | Rohiit Gupta, Chief Vedic Architect
 // CEO LOCKED: TIERED LAYOUT — earning sections above mobile fold
 // ============================================================================
