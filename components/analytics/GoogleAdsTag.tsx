@@ -23,7 +23,7 @@
 import Script from 'next/script';
 
 // ── Replace with your actual Google Ads Conversion ID ──────────────────────
-const GOOGLE_ADS_ID = 'AW-YOUR_CONVERSION_ID';
+const GOOGLE_ADS_ID = 'AW-7916189860';
 // ────────────────────────────────────────────────────────────────────────────
 
 // ── Conversion event tracker ───────────────────────────────────────────────
