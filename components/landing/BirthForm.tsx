@@ -3,7 +3,7 @@
  * TRIKAAL VAANI — BirthForm Component
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: components/landing/BirthForm.tsx
- * VERSION: 10.2 — Sales rewrite: VOICE_TAGLINES fix (double comma bug), tier-neutral taglines,
+ * VERSION: 10.3 — Meta Pixel events (trackFB) + situation note label fix — Sales rewrite: VOICE_TAGLINES fix (double comma bug), tier-neutral taglines,
  *            category heading, TierSelector benefit-first, submit labels, below-submit copy
  * SIGNED: ROHIIT GUPTA, CEO
  * DATE: 2026-06-29
@@ -92,6 +92,17 @@ function tagOneSignal(tags: Record<string, string>) {
   w.OneSignalDeferred.push(async (OneSignal: any) => {
     try { await OneSignal.User.addTags(tags) } catch { /* no-op */ }
   })
+}
+
+// ── Meta Pixel event helper (v10.3) ──────────────────────────────────────────
+// Safe wrapper — no-op if pixel not yet loaded. No imports needed.
+// Events: 'Lead' (free submit), 'Purchase' (paid), 'InitiateCheckout' (tier select)
+function trackFB(event: string, params?: Record<string, string | number>) {
+  try {
+    if (typeof window !== 'undefined' && (window as any).fbq) {
+      ;(window as any).fbq('track', event, params)
+    }
+  } catch { /* no-op */ }
 }
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -1025,6 +1036,7 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
       if (onSubmit) await onSubmit(fields)
 
       tagOneSignal({ kundali_status: 'completed' })
+      trackFB('Lead', { content_name: 'Free Vedic Reading', currency: 'INR', value: 0 })
 
       const publicSlug   = data?._meta?.publicSlug   ?? null
       const predictionId = data?._meta?.predictionId ?? null
@@ -1087,6 +1099,7 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
           }
 
           if (tier === 'voice') {
+            trackFB('Purchase', { value: 11, currency: 'INR', content_name: 'Voice Reading' })
             tagOneSignal({ kundali_status: 'completed' })
             const voiceUrl = `/voice?name=${encodeURIComponent(fields.name)}&lang=${fields.language}&pid=${response.razorpay_payment_id}`
             router.push(voiceUrl)
@@ -1094,6 +1107,7 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
           }
 
           setIsSubmitting(true)
+          trackFB('Purchase', { value: 51, currency: 'INR', content_name: 'Deep Reading' })
           startLoadingMessages(PAYMENT_LOADING_STEPS)
 
           await callPredictAPI({
@@ -1225,7 +1239,11 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
               </p>
             </div>
 
-            <TierSelector selected={predictionTier} onChange={setPredictionTier} />
+            <TierSelector selected={predictionTier} onChange={(t) => {
+              setPredictionTier(t)
+              if (t === 'paid')  trackFB('InitiateCheckout', { value: 51, currency: 'INR', content_name: 'Deep Reading' })
+              if (t === 'voice') trackFB('InitiateCheckout', { value: 11, currency: 'INR', content_name: 'Voice Reading' })
+            }} />
 
             <RazorpayInlineTrustStrip tier={predictionTier} />
 
@@ -1403,7 +1421,7 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
             </div>
 
             <div>
-              <label htmlFor="tv-situation" className="block text-sm font-medium text-slate-300 mb-1.5">Tell Trikaal what's on your mind</label>
+              <label htmlFor="tv-situation" className="block text-sm font-medium text-slate-300 mb-1.5">Your biggest concern right now <span className="text-slate-500 text-xs ml-1">(optional — makes reading sharper)</span></label>
               <div className="relative">
                 <textarea id="tv-situation"
                   placeholder="e.g. Job switch kar raha hoon, property khareedna hai, relationship mein problem hai, karz se pareshan hoon..."
