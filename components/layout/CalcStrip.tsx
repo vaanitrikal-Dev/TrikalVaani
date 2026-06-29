@@ -54,7 +54,7 @@ const CALCS: CalcItem[] = [
   {
     emoji: '🐍',
     shortName: 'Kaal Sarp Dosh',
-    subText: 'Check if it's blocking you',
+    subText: "Check if it's blocking you",
     fullName: 'Free Kaal Sarp Dosh Calculator',
     badge: 'FREE',
     paid: false,
