@@ -18,6 +18,7 @@ import type { DreamRow } from './dream_engine_02_resolver';
 import type { ResolvedReading } from './dream_engine_03_modifiers';
 
 export type Tier = 'free' | 'paid';
+export type DreamLanguage = 'english' | 'hindi' | 'hinglish';
 export type GeminiComposeFn = (prompt: string) => Promise<string>; // returns raw JSON string
 
 export interface DreamReadingOutput {
@@ -120,10 +121,11 @@ export async function composeDreamReading(
   row: DreamRow,
   reading: ResolvedReading,
   tier: Tier,
+  language: DreamLanguage,
   geminiCompose: GeminiComposeFn,
   dashaOverlay?: string // paid tier only; injected by Component 6 (from the VM)
 ): Promise<DreamReadingOutput> {
-  const prompt = buildComposePrompt(row, reading, tier, dashaOverlay);
+  const prompt = buildComposePrompt(row, reading, tier, language, dashaOverlay);
 
   let g: any = null;
   try {
@@ -136,19 +138,20 @@ export async function composeDreamReading(
 
   const disc = assembleDisclaimers(reading.disclaimer_tags);
   const teaser = teaserFor(reading.paid_hook, tier);
+  const hi = language === 'hindi'; // single-language output: hindi fills *_hi, english/hinglish fill *_en
 
   return {
-    title_en: g?.title_en ?? row.symbol_en,
-    title_hi: g?.title_hi ?? row.symbol_hi,
-    reading_en: g?.reading_en ?? reading.meaning_en,
-    reading_hi: g?.reading_hi ?? reading.meaning_hi,
+    title_en: hi ? '' : (g?.title_en ?? row.symbol_en),
+    title_hi: hi ? (g?.title_hi ?? row.symbol_hi) : '',
+    reading_en: hi ? '' : (g?.reading_en ?? reading.meaning_en),
+    reading_hi: hi ? (g?.reading_hi ?? reading.meaning_hi) : '',
     tendency: reading.effective_tendency,
-    remedy_en: g?.remedy_en ?? row.remedy_free ?? '',
-    remedy_hi: g?.remedy_hi ?? '',
-    paid_teaser_en: teaser.en,
-    paid_teaser_hi: teaser.hi,
-    disclaimer_en: disc.en,
-    disclaimer_hi: disc.hi,
+    remedy_en: hi ? '' : (g?.remedy_en ?? row.remedy_free ?? ''),
+    remedy_hi: hi ? (g?.remedy_hi ?? row.remedy_free ?? '') : '',
+    paid_teaser_en: hi ? '' : teaser.en,
+    paid_teaser_hi: hi ? teaser.hi : '',
+    disclaimer_en: hi ? '' : disc.en,
+    disclaimer_hi: hi ? disc.hi : '',
     citation: reading.public_citation,
     signal_strength: reading.signal_strength,
     confidence_tier: reading.confidence_tier,
@@ -163,12 +166,23 @@ export function buildComposePrompt(
   row: DreamRow,
   reading: ResolvedReading,
   tier: Tier,
+  language: DreamLanguage,
   dashaOverlay?: string
 ): string {
+  const LANG_RULES: Record<DreamLanguage, string> = {
+    english:
+      'LANGUAGE: Pure English only — zero Hindi or Devanagari. Fill ONLY title_en, reading_en, remedy_en. Set title_hi, reading_hi, remedy_hi to "" (empty string).',
+    hindi:
+      'LANGUAGE: Pure Hindi (देवनागरी) only — zero English words. Warm senior-Jyotishi tone, "आप"-form, simple words. Fill ONLY title_hi, reading_hi, remedy_hi. Set title_en, reading_en, remedy_en to "" (empty string).',
+    hinglish:
+      'LANGUAGE: Natural Hinglish — Hindi + English mixed in Latin script, the way a trusted friend speaks ("Aap" form, warm, simple). Fill ONLY title_en, reading_en, remedy_en with the Hinglish text. Set title_hi, reading_hi, remedy_hi to "" (empty string).',
+  };
+
   const p: string[] = [];
   p.push(
-    'You are the writer for Trikaal Vaani, a Vedic dream-reading service. Write a warm, respectful reading in BOTH Hindi and English. Preserve the given meaning EXACTLY — do not add predictions, dates, numbers, or any new astrological claim, and do not change what the dream means. Only make it warm, clear and human.'
+    'You are the writer for Trikaal Vaani, a Vedic dream-reading service. Write a warm, respectful reading in ONE language only (specified below). Preserve the given meaning EXACTLY — do not add predictions, dates, numbers, or any new astrological claim, and do not change what the dream means. Only make it warm, clear and human.'
   );
+  p.push(LANG_RULES[language]);
   p.push(`Symbol: ${row.symbol_en} (${row.sub_type}).`);
   p.push(`Core meaning to preserve (English): ${reading.meaning_en}`);
   p.push(`Core meaning to preserve (Hindi): ${reading.meaning_hi}`);
@@ -195,7 +209,7 @@ export function buildComposePrompt(
 
   const remedy = row.remedy_free ?? '';
   if (remedy) {
-    p.push(`Offer this simple remedy, rendered naturally into BOTH languages: "${remedy}"`);
+    p.push(`Offer this simple remedy, rendered naturally into the chosen language: "${remedy}"`);
   } else {
     p.push('No specific remedy is needed; offer a gentle general suggestion (calm prayer or quiet reflection) or omit it.');
   }
@@ -208,11 +222,11 @@ export function buildComposePrompt(
 
   if (tier === 'paid') {
     p.push(
-      'LENGTH & DEPTH (paid deep reading): Write a detailed, personal reading of about 500 words in EACH language — warm, specific, and woven around the personalised chart layer above. Preserve the core meaning and add depth from the chart. Give full clarity and closure. Do NOT add any sales pitch; they have already paid.'
+      'LENGTH & DEPTH (paid deep reading): Write a detailed, personal reading of about 500 words in the chosen language — warm, specific, and woven around the personalised chart layer above. Preserve the core meaning and add depth from the chart. Give full clarity and closure. Do NOT add any sales pitch; they have already paid.'
     );
   } else {
     p.push(
-      "LENGTH & PITCH (free reading): For EACH language, first write about 75-100 words interpreting the meaning warmly and clearly. THEN, at the very end, add one short paragraph (2-3 lines) as a compelling, honest sales pitch — say this is the classical meaning that holds for everyone who dreams this, but what it means for THIS person's own life depends on their birth chart and the planetary period (dasha) they are walking right now, and warmly invite them to unlock their personal reading for just Rs 51. Make them curious and hopeful, never fearful or pushy. This pitch must appear at the END of both reading_en and reading_hi."
+      "LENGTH & PITCH (free reading): The reading must be 75-100 words — HARD CAP 100 words, count carefully, no filler. Interpret the meaning warmly and clearly. THEN add one final short line (about 20 words) as a compelling, honest invite: this is the classical meaning for everyone, but its exact message for THEIR life depends on their own birth chart and running planetary period (dasha) — invite them to unlock their personal reading for just Rs 51, available right below. Curious and hopeful, never fearful or pushy."
     );
   }
   p.push('Overall tone: warm, rooted, hopeful — never frightening or fear-based.');
