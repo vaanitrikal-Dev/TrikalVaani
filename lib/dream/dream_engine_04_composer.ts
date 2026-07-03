@@ -129,8 +129,9 @@ export async function composeDreamReading(
   try {
     const raw = await geminiCompose(prompt);
     g = JSON.parse(cleanJson(raw));
-  } catch {
-    g = null; // Gemini misbehaved → fall back to the table's exact text (never show nothing)
+  } catch (err) {
+    console.error('[dream:composer] Gemini output unusable, falling back to table text. tier=' + tier, err);
+    g = null; // fall back to the table's exact text (never show nothing)
   }
 
   const disc = assembleDisclaimers(reading.disclaimer_tags);
@@ -205,9 +206,16 @@ export function buildComposePrompt(
     );
   }
 
-  p.push(
-    'Tone: warm, rooted, hopeful — never frightening or fear-based. Keep each language to about 3–5 sentences, plus the remedy line.'
-  );
+  if (tier === 'paid') {
+    p.push(
+      'LENGTH & DEPTH (paid deep reading): Write a detailed, personal reading of about 500 words in EACH language — warm, specific, and woven around the personalised chart layer above. Preserve the core meaning and add depth from the chart. Give full clarity and closure. Do NOT add any sales pitch; they have already paid.'
+    );
+  } else {
+    p.push(
+      "LENGTH & PITCH (free reading): For EACH language, first write about 75-100 words interpreting the meaning warmly and clearly. THEN, at the very end, add one short paragraph (2-3 lines) as a compelling, honest sales pitch — say this is the classical meaning that holds for everyone who dreams this, but what it means for THIS person's own life depends on their birth chart and the planetary period (dasha) they are walking right now, and warmly invite them to unlock their personal reading for just Rs 51. Make them curious and hopeful, never fearful or pushy. This pitch must appear at the END of both reading_en and reading_hi."
+    );
+  }
+  p.push('Overall tone: warm, rooted, hopeful — never frightening or fear-based.');
   p.push(
     'Return ONLY this JSON object, no markdown, no commentary: {"title_en":"","title_hi":"","reading_en":"","reading_hi":"","remedy_en":"","remedy_hi":""}'
   );
