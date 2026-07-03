@@ -74,12 +74,14 @@ Return exactly:
 export async function runExtraction(dreamText: string): Promise<DreamExtraction> {
   const model = genAI.getGenerativeModel({
     model: FLASH,
-    generationConfig: { temperature: 0, responseMimeType: 'application/json', maxOutputTokens: 700 },
+    // 2000 = headroom for Gemini 2.5 internal thinking + the ~200-token JSON.
+    generationConfig: { temperature: 0, responseMimeType: 'application/json', maxOutputTokens: 2000 },
   });
   try {
     const res = await model.generateContent(`${EXTRACTION_PROMPT}\n\nDREAM:\n"${dreamText}"`);
     return JSON.parse(cleanJson(res.response.text())) as DreamExtraction;
-  } catch {
+  } catch (err) {
+    console.error('[dream:extraction] failed, using category fallback:', err);
     // Safe fallback — treat as unmatched, no safety flags triggered
     return {
       primary_symbol: null,
@@ -108,38 +110,45 @@ export function makeSubTypePicker(): SubTypePicker {
       `Candidates:\n${list}\n\nOutput only the id number.`;
     const model = genAI.getGenerativeModel({
       model: FLASH,
-      generationConfig: { temperature: 0, maxOutputTokens: 10 },
+      // NOTE: Gemini 2.5 spends internal "thinking" from this same budget.
+      // A tiny cap (was 10) returned EMPTY text → silent fallback to the first
+      // candidate row (wrong sub-types). 1024 gives thinking headroom; the
+      // visible output is still just one id number.
+      generationConfig: { temperature: 0, maxOutputTokens: 1024 },
     });
     try {
       const res = await model.generateContent(prompt);
       const m = res.response.text().match(/\d+/);
       const n = m ? parseInt(m[0], 10) : NaN;
-      return Number.isFinite(n) ? n : candidates[0].id;
-    } catch {
+      if (!Number.isFinite(n)) {
+        console.error('[dream:picker] no id in response, falling back to first candidate');
+        return candidates[0].id;
+      }
+      return n;
+    } catch (err) {
+      console.error('[dream:picker] error:', err);
       return candidates[0].id;
     }
   };
 }
 
-// ── 3) COMPOSER (Flash free / Pro paid; tier-aware length) ───────────────────
-// Returns the GeminiComposeFn that Component 4 calls. Free stays short and
-// focused; paid may run to ~500 words because it carries the chart layer.
+// ── 3) COMPOSER (Flash free / Pro paid) ──────────────────────────────────────
+// Returns the GeminiComposeFn that Component 4 calls. Length + the free sales
+// hook are owned by buildComposePrompt (Component 4). Token caps are generous
+// so Gemini 2.5's internal "thinking" never eats the visible JSON output — this
+// is what was silently forcing free readings to fall back to raw table text.
 export function makeComposer(tier: 'free' | 'paid') {
   const modelName = tier === 'paid' ? PRO : FLASH;
-  const lengthRule =
-    tier === 'paid'
-      ? '\n\nLENGTH (paid deep reading): ignore any earlier brevity note. Write a rich, focused reading up to about 500 words total, built around the personalised chart layer. No filler, no repetition.'
-      : '\n\nLENGTH (free reading): keep it short and focused — about 3–5 sentences per language, plus the remedy line. No filler.';
   return async (prompt: string): Promise<string> => {
     const model = genAI.getGenerativeModel({
       model: modelName,
       generationConfig: {
-        temperature: 0.35,
+        temperature: 0.4,
         responseMimeType: 'application/json',
-        maxOutputTokens: tier === 'paid' ? 2048 : 1024,
+        maxOutputTokens: tier === 'paid' ? 8192 : 3000,
       },
     });
-    const res = await model.generateContent(prompt + lengthRule);
+    const res = await model.generateContent(prompt);
     return res.response.text();
   };
 }
