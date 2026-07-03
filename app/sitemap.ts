@@ -3,8 +3,14 @@
  * 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER 🔱
  * ============================================================================
  * File:        app/sitemap.ts
- * Version:     v7.9
+ * Version:     v8.0
  * Owner:       Rohiit Gupta, Chief Vedic Architect
+ *
+ * Changes v7.9 → v8.0 (2026-07-03):
+ *   SWAPNA SPOKES — PERMANENT AUTO. readDreamSymbols() queries DISTINCT
+ *   symbol_key + category from dream_symbols; emits /swapna/{symbol} (0.8,
+ *   weekly) and /swapna/category/{category} (0.75, weekly). Any symbol ever
+ *   added to the table is auto-indexed — zero manual sitemap edits.
  *
  * Changes v7.8 → v7.9 (2026-07-03):
  *   SWAPNA SHASTRA added to STATIC_ROUTES (/swapna). Free Vedic dream-decoding
@@ -307,6 +313,30 @@ async function readVivahYears(): Promise<number[]> {
   return Array.from(set).sort((a, b) => a - b);
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// SWAPNA SPOKES (v8.0) — PERMANENT AUTO. Distinct symbol_key + category from
+// dream_symbols drive /swapna/{symbol} and /swapna/category/{category}. Any
+// symbol added to the table is auto-emitted. No manual sitemap edits.
+// ─────────────────────────────────────────────────────────────────────────────
+async function readDreamSymbols(): Promise<{ symbols: string[]; categories: string[] }> {
+  try {
+    const supabase = anonClient();
+    const { data, error } = await supabase
+      .from('dream_symbols')
+      .select('symbol_key, category');
+    if (error || !data) return { symbols: [], categories: [] };
+    const symbols = new Set<string>();
+    const categories = new Set<string>();
+    for (const r of data as { symbol_key: string; category: string }[]) {
+      if (typeof r.symbol_key === 'string' && r.symbol_key.length > 0) symbols.add(r.symbol_key);
+      if (typeof r.category === 'string' && r.category.length > 0) categories.add(r.category);
+    }
+    return { symbols: Array.from(symbols).sort(), categories: Array.from(categories).sort() };
+  } catch {
+    return { symbols: [], categories: [] };
+  }
+}
+
 function nextNDates(n: number): string[] {
   const dates: string[] = [];
   const today = new Date();
@@ -477,6 +507,26 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: r.updatedAt ? new Date(r.updatedAt) : now,
       changeFrequency: 'monthly',
       priority: 0.6,
+    });
+  }
+
+  // ── SWAPNA SPOKES (PERMANENT AUTO) — v8.0 ──────────────────────────
+  // /swapna/{symbol} + /swapna/category/{category}, live from dream_symbols.
+  const dreams = await readDreamSymbols();
+  for (const s of dreams.symbols) {
+    entries.push({
+      url: `${BASE}/swapna/${s}`,
+      lastModified: now,
+      changeFrequency: 'weekly',
+      priority: 0.8,
+    });
+  }
+  for (const c of dreams.categories) {
+    entries.push({
+      url: `${BASE}/swapna/category/${c}`,
+      lastModified: now,
+      changeFrequency: 'weekly',
+      priority: 0.75,
     });
   }
 
