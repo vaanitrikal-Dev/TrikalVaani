@@ -1,15 +1,26 @@
 'use client';
-// 🔱 TRIKAAL VAANI | app/swapna/SwapnaClient.tsx | v1.1
-// v1.1: DREAM SUMMARY BOX — the free reading is now a 75–100 word Gemini
-//   summary (+ closing invite), so the plain 1.4rem line became a proper
-//   gold-bordered summary card ("✦ Dream Summary · स्वप्न सार") with
-//   readable long-text typography. Nothing else touched — medallion,
-//   paywall, form, terminal states, ₹51 integration point all unchanged.
+// 🔱 TRIKAAL VAANI | app/swapna/SwapnaClient.tsx | v1.2
+// v1.2: LANGUAGE CHOICE + INLINE UNLOCK LINK —
+//   - Language pills (English / हिंदी / Hinglish) above the dream box; the
+//     chosen language is sent to /api/dream and the reading comes back in
+//     that ONE language (halves Gemini tokens vs bilingual).
+//   - Result rendering is now conditional: shows whichever language fields
+//     the engine filled (backward-compatible with bilingual responses).
+//   - Inline gold "Unlock for ₹51 →" link inside the Dream Summary box that
+//     smooth-scrolls to the paywall card (id="swapna-paywall").
+// v1.1: DREAM SUMMARY BOX — gold-bordered summary card for the 75–100 word reading.
 // v1.0: Interactive dream funnel: dream box → engine (/api/dream) → result → paywall.
 // Free flow is fully live. The ₹51 paid trigger is the marked integration point
 // (Razorpay + Component 6 dasha overlay) — wired in the next build step.
 
 import { useState } from 'react';
+
+type DreamLang = 'english' | 'hindi' | 'hinglish';
+const LANG_PILLS: { key: DreamLang; label: string }[] = [
+  { key: 'english', label: 'English' },
+  { key: 'hindi', label: 'हिंदी' },
+  { key: 'hinglish', label: 'Hinglish' },
+];
 
 const C = {
   night: '#080B12', panel: 'rgba(11,16,26,0.7)', panel2: '#0E141F', raised: '#121826',
@@ -65,6 +76,7 @@ interface DreamResult {
 
 export default function SwapnaClient() {
   const [dream, setDream] = useState('');
+  const [lang, setLang] = useState<DreamLang>('english');
   const [phase, setPhase] = useState<'idle' | 'loading' | 'done' | 'error'>('idle');
   const [data, setData] = useState<DreamResult | null>(null);
   const [showForm, setShowForm] = useState(false);
@@ -78,7 +90,7 @@ export default function SwapnaClient() {
       const res = await fetch('/api/dream', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ dream, tier: 'free' }),
+        body: JSON.stringify({ dream, tier: 'free', language: lang }),
       });
       const j: DreamResult = await res.json();
       if (!j.ok) { setPhase('error'); return; }
@@ -131,6 +143,19 @@ export default function SwapnaClient() {
       <div style={{ fontFamily: 'serif', fontSize: '1.5rem', color: '#fff', textAlign: 'center' }}>
         What did you see?
         <span className="block" style={{ fontSize: '1.12rem', color: C.s4, marginTop: 2 }} lang="hi">आपने स्वप्न में क्या देखा?</span>
+      </div>
+
+      {/* language pills (v1.2) — reading comes back in ONE chosen language */}
+      <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginTop: 14 }}>
+        {LANG_PILLS.map((p) => (
+          <button key={p.key} onClick={() => setLang(p.key)}
+            style={{ cursor: 'pointer', fontSize: 13, fontWeight: 600, padding: '7px 16px', borderRadius: 999,
+              border: `1px solid ${lang === p.key ? C.gold : C.line2}`,
+              background: lang === p.key ? 'rgba(212,175,55,0.14)' : 'transparent',
+              color: lang === p.key ? C.gold : C.s4, transition: 'all .15s ease' }}>
+            {p.label}
+          </button>
+        ))}
       </div>
 
       <div style={{ marginTop: 16, background: `linear-gradient(180deg, ${C.raised}, ${C.night})`,
@@ -225,8 +250,10 @@ export default function SwapnaClient() {
           </div>
 
           <div style={{ textAlign: 'center', fontFamily: 'serif', fontSize: '2.2rem', color: '#fff' }}>
-            {data.title_en}
-            <span className="block" style={{ fontSize: '1.25rem', color: C.s4 }} lang="hi">{data.title_hi}</span>
+            {data.title_en || data.title_hi}
+            {data.title_en && data.title_hi ? (
+              <span className="block" style={{ fontSize: '1.25rem', color: C.s4 }} lang="hi">{data.title_hi}</span>
+            ) : null}
           </div>
 
           {tend && (
@@ -237,7 +264,7 @@ export default function SwapnaClient() {
             </div>
           )}
 
-          {/* ── DREAM SUMMARY BOX (v1.1) — sized for the 75–100 word reading ── */}
+          {/* ── DREAM SUMMARY BOX (v1.1; v1.2 single-language + inline unlock link) ── */}
           <div style={{ maxWidth: 620, margin: '26px auto 0',
             background: `linear-gradient(180deg, ${C.panel2}, rgba(8,11,18,0.85))`,
             border: `1px solid ${C.line2}`, borderRadius: 18, padding: '26px 28px',
@@ -246,9 +273,23 @@ export default function SwapnaClient() {
               color: C.goldSoft, textAlign: 'center', marginBottom: 14 }}>
               ✦ Dream Summary · <span lang="hi">स्वप्न सार</span>
             </div>
-            <p style={{ fontFamily: 'serif', fontSize: '1.12rem', lineHeight: 1.7, color: '#fff' }}>{data.reading_en}</p>
-            <p style={{ fontSize: '1.02rem', color: C.s4, marginTop: 14, lineHeight: 1.8,
-              borderTop: `1px solid ${C.line}`, paddingTop: 14 }} lang="hi">{data.reading_hi}</p>
+            {data.reading_en ? (
+              <p style={{ fontFamily: 'serif', fontSize: '1.12rem', lineHeight: 1.7, color: '#fff' }}>{data.reading_en}</p>
+            ) : null}
+            {data.reading_hi ? (
+              <p style={{ fontSize: '1.02rem', color: data.reading_en ? C.s4 : '#fff', marginTop: data.reading_en ? 14 : 0, lineHeight: 1.8,
+                borderTop: data.reading_en ? `1px solid ${C.line}` : undefined, paddingTop: data.reading_en ? 14 : 0 }} lang="hi">{data.reading_hi}</p>
+            ) : null}
+            {data.paid && (
+              <div style={{ textAlign: 'center', marginTop: 18, paddingTop: 16, borderTop: `1px solid ${C.line}` }}>
+                <a href="#swapna-paywall"
+                  onClick={(e) => { e.preventDefault(); document.getElementById('swapna-paywall')?.scrollIntoView({ behavior: 'smooth', block: 'center' }); }}
+                  style={{ color: C.gold, fontWeight: 700, fontSize: '1rem', textDecoration: 'none',
+                    borderBottom: `1px solid ${C.goldSoft}`, paddingBottom: 2, cursor: 'pointer' }}>
+                  {lang === 'hindi' ? 'अपनी व्यक्तिगत व्याख्या ₹51 में अनलॉक करें →' : 'Unlock your personal reading — ₹51 →'}
+                </a>
+              </div>
+            )}
           </div>
 
           {(data.remedy_en || data.remedy_hi) && (
@@ -263,7 +304,7 @@ export default function SwapnaClient() {
 
           {/* ── PAYWALL ── */}
           {data.paid && (
-            <div style={{ maxWidth: 720, margin: '52px auto 0', position: 'relative',
+            <div id="swapna-paywall" style={{ maxWidth: 720, margin: '52px auto 0', position: 'relative',
               background: `linear-gradient(180deg, ${C.panel2}, rgba(8,11,18,0.9))`, border: `1px solid ${C.line2}`,
               borderRadius: 24, padding: '44px 36px', boxShadow: '0 30px 80px rgba(0,0,0,0.55)' }}>
               <div style={{ position: 'absolute', top: -15, left: '50%', transform: 'translateX(-50%)', color: C.gold, fontSize: 24, textShadow: '0 0 18px rgba(240,214,138,0.8)' }}>✦</div>
@@ -279,10 +320,10 @@ export default function SwapnaClient() {
               </p>
 
               <div style={{ maxWidth: 520, margin: '26px auto 0', display: 'grid', gap: 12 }}>
-                {data.paid.unlocks_en.map((u, i) => (
+                {(lang === 'hindi' ? data.paid.unlocks_hi : data.paid.unlocks_en).map((u, i) => (
                   <div key={i} style={{ display: 'flex', gap: 13, alignItems: 'flex-start', fontSize: '0.98rem', color: '#fff' }}>
                     <span style={{ color: C.gold, flexShrink: 0 }}>✧</span>
-                    <span>{u}{data.paid!.unlocks_hi[i] && <span style={{ color: C.s4 }} lang="hi"> · {data.paid!.unlocks_hi[i]}</span>}</span>
+                    <span lang={lang === 'hindi' ? 'hi' : undefined}>{u}</span>
                   </div>
                 ))}
               </div>
@@ -334,8 +375,9 @@ export default function SwapnaClient() {
 
           {/* disclaimer (Rule 0) */}
           {(data.disclaimer_en || data.disclaimer_hi) && (
-            <p style={{ maxWidth: 620, margin: '24px auto 0', textAlign: 'center', fontSize: 12, color: C.s5, lineHeight: 1.7 }}>
-              {data.disclaimer_en}
+            <p style={{ maxWidth: 620, margin: '24px auto 0', textAlign: 'center', fontSize: 12, color: C.s5, lineHeight: 1.7 }}
+              lang={data.disclaimer_en ? undefined : 'hi'}>
+              {data.disclaimer_en || data.disclaimer_hi}
             </p>
           )}
         </div>
