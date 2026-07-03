@@ -3,9 +3,15 @@
 // ============================================================
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
 // FILE: components/layout/SiteNav.tsx
-// VERSION: v2.8
-// DATE: 2026-06-27
+// VERSION: v2.9
+// DATE: 2026-07-02
 // CHANGES:
+//   v2.9: Added "Swapna Shastra" nav link (/swapna) — free Vedic dream
+//     interpretation product, grouped with the reading products (after
+//     Karmic Reading). NAV_LINKS is the single source of truth, so both the
+//     desktop bar and the mobile menu pick it up automatically. Nothing else
+//     changed. PROTECTED (unchanged): logo, LangSwitcher, Sign In / My Vault,
+//     mobile hamburger, AuthModal, all other routes + styling.
 //   v2.8: NAV CONSISTENCY PASS (style + colour) —
 //     - Uniform link colour: every nav link is now the same slate tone and
 //       weight. Removed the lone gold "Services" highlight that made the bar
@@ -42,15 +48,17 @@ const GOLD_RGBA = (a: number) => `rgba(212,175,55,${a})`;
 
 // Single source of truth for nav links (desktop + mobile share this)
 // v2.8: uniform styling - no per-item highlight flag.
+// v2.9: added Swapna Shastra (/swapna) with the reading products.
 const NAV_LINKS: { href: string; label: string }[] = [
-  { href: '/services',                 label: 'Services' },
-  { href: '/kundali-milan',            label: 'Kundali Milan' },
-  { href: '/vivah-muhurat',            label: 'Vivah Muhurat' },
+  { href: '/services',                  label: 'Services' },
+  { href: '/kundali-milan',             label: 'Kundali Milan' },
+  { href: '/vivah-muhurat',             label: 'Vivah Muhurat' },
   { href: '/karmic-background-reading', label: 'Karmic Reading' },
-  { href: '/panchang',                 label: 'Panchang' },
-  { href: '/calculators',              label: 'Calculators' },
-  { href: '/blog',                     label: 'Vedic Blog' },
-  { href: '/founder',                  label: 'Founder' },
+  { href: '/swapna',                    label: 'Swapna Shastra' },
+  { href: '/panchang',                  label: 'Panchang' },
+  { href: '/calculators',               label: 'Calculators' },
+  { href: '/blog',                      label: 'Vedic Blog' },
+  { href: '/founder',                   label: 'Founder' },
 ];
 
 function LangSwitcher({ lang, setLang }: { lang: Lang; setLang: (l: Lang) => void }) {
