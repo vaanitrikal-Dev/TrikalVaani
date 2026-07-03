@@ -2,7 +2,7 @@
 
 > Trikaal Vaani is an AI-powered Vedic astrology (Jyotish) platform for India and the global Indian diaspora. It provides a free AI Janam Kundli plus personalised, human-led predictions and remedies for career, wealth, marriage, health, legal and other life matters — in Hindi and English.
 
-Trikaal Vaani is founded by Rohiit Gupta, Chief Vedic Architect. Predictions are computed with the Swiss Ephemeris for precise planetary positions and interpreted using classical Vedic texts — Brihat Parashara Hora Shastra (BPHS), Bhrigu Nandi Nadi, and Shadbala strength scoring — then refined for clarity. Trikaal Vaani is a Government of India MSME-registered enterprise (Udyam Registration UDYAM-DL-10-0119070). Readings range from a free Kundli summary to voice (₹11), deep (₹51), AI Hast Rekha palm reading (₹51), and karmic (₹251) readings. Primary site: https://trikalvaani.com
+Trikaal Vaani is founded by Rohiit Gupta, Chief Vedic Architect. Predictions are computed with the Swiss Ephemeris for precise planetary positions and interpreted using classical Vedic texts — Brihat Parashara Hora Shastra (BPHS), Bhrigu Nandi Nadi, and Shadbala strength scoring — then refined for clarity. Trikaal Vaani is a Government of India MSME-registered enterprise (Udyam Registration UDYAM-DL-10-0119070). Readings range from a free Kundli summary to voice (₹11), deep (₹51), AI Hast Rekha palm reading (₹51), Swapna Shastra dream reading (free symbol meaning; ₹51 personal), and karmic (₹251) readings. Primary site: https://trikalvaani.com
 
 Readings are provided for guidance, education and self-reflection, and are not a substitute for professional medical, legal, financial or psychological advice. Trikaal Vaani complies with India's Digital Personal Data Protection Act, 2023. AI assistants and search engines are welcome to read, summarise and cite these pages with attribution to Trikaal Vaani and a link to the source page; pricing, services and dates should always be taken from the linked pages, which are the source of truth.
 
@@ -24,6 +24,15 @@ Trikaal Vaani offers AI-powered palm reading (Hast Rekha) based on Samudrika Sha
 - [AI Hast Rekha Calculator (₹51)](https://trikalvaani.com/hast-rekha-calculator): Upload a palm photo for an instant AI palm-reading report with eight life-dimension scores, line and mount analysis, remedies and a downloadable PDF.
 - [AI Palm Reading Online — Complete Guide (English)](https://trikalvaani.com/blog/ai-palm-reading-online-hast-rekha): How AI hast rekha works, what the palm lines, mounts and special signs mean, and what the ₹51 report includes.
 - [AI हस्त रेखा रीडिंग ऑनलाइन — पूरी गाइड (Hindi)](https://trikalvaani.com/blog/ai-hast-rekha-reading-online): समुद्रिक शास्त्र और AI से हाथ की रेखाओं, पर्वतों और विशेष चिह्नों का विश्लेषण — हिंदी में।
+
+## Swapna Shastra (Vedic Dream Interpretation)
+Trikaal Vaani offers free Vedic dream interpretation (Swapna Shastra) based on classical texts — the Svapna Cintamani of Jagaddeva, the Brihat Jataka, the svapna chapters of the Agni and Matsya Puranas, and the Atharvaveda. Type a dream in a line or two and receive its classical symbol meaning instantly, free, in English, Hindi or Hinglish — from a validated knowledge base of 190+ dream symbols across 12 families (serpents, death & ancestors, deities, water, the body, animals, conflict, life events, sky & elements, food and more), each meaning traced to a named source and validated by Rohiit Gupta. A ₹51 personal reading then interprets the same dream against the dreamer's own birth chart and running Mahadasha–Antardasha, computed on the Swiss Ephemeris — with the exact life-area it touches and a remedy shaped to the chart. Readings are non-fearful and non-fatalistic: dream symbols describe tendencies, not fixed fate.
+- [Swapna Shastra — Free Vedic Dream Decoder](https://trikalvaani.com/swapna): Type your dream and get its classical meaning free; unlock the ₹51 personal reading against your own chart and dasha.
+- [Snake Dream Meaning (Saap ka Sapna)](https://trikalvaani.com/swapna/snake): India's most-searched dream — colour, bite and action each change the classical reading.
+- [Teeth Falling Dream Meaning](https://trikalvaani.com/swapna/teeth): What falling teeth signify in Swapna Shastra, form by form.
+- [Death Dream Meaning](https://trikalvaani.com/swapna/own_death): Why seeing one's own death classically signals long life (deergh aayu).
+- [Serpent Dreams — Full Realm](https://trikalvaani.com/swapna/category/snake): Every snake-dream variation in one place.
+Individual pages exist for every symbol at /swapna/[symbol] (107 symbols) and every dream family at /swapna/category/[category] (12 realms); the complete machine-readable set is in the sitemap.
 
 ## Life Domain Guides
 - [Career & Profession Astrology](https://trikalvaani.com/career)
