@@ -1,154 +1,151 @@
 // =============================================================================
-// TRIKAAL VAANI · Dream Engine · Component 5a: THE GEMINI CALLER
+// TRIKAAL VAANI · Dream Engine · Component 5b: THE API ROUTE
+// File: app/api/dream/route.ts
 // -----------------------------------------------------------------------------
-// The dream engine's OWN Gemini caller — fully separate from the locked
-// gemini-prompt.ts. Nothing here touches your prediction path.
+// The live endpoint your /swapna page calls. It assembles all the pieces:
+//   dream in → extract (Flash) → resolve (table) → tune (Layer 3) →
+//   compose (Flash free / Pro paid) → reading out.
 //
-// Anti-hallucination design (as requested):
-//   • Extraction + sub-type pick run at temperature 0 (deterministic parsing).
-//   • JSON response mode forces clean, parseable output.
-//   • Gemini never decides meaning — it picks only from ACTUAL table rows, and
-//     the composer is locked to the table's exact meaning.
-//   • Free = Gemini 2.5 Flash (~2 paise/dream). Paid = Gemini 2.5 Pro.
-//
-// SDK NOTE: this file uses `@google/generative-ai`. Your project already has a
-// Gemini SDK installed; if it happens to be the newer `@google/genai`, only the
-// import + call lines in THIS one file change — tell me and I'll swap it.
-// KEY NOTE: set your Gemini key under one of the env names below (Vercel).
+// The FREE path is fully live here. The PAID chart overlay is a marked
+// Component 6 placeholder (wired next via lib/callVM.ts) so nothing blocks.
+// Uses your existing Supabase client (@/lib/supabase). Never touches your
+// prediction path.
 // =============================================================================
 
-import { GoogleGenerativeAI } from '@google/generative-ai';
-import type { DreamExtraction, SubTypePicker } from './dream_engine_02_resolver';
+import { NextResponse } from 'next/server';
+import { supabase } from '@/lib/supabase';
+import { resolveDream } from '@/lib/dream/dream_engine_02_resolver';
+import { applyModifiers } from '@/lib/dream/dream_engine_03_modifiers';
+import { composeDreamReading, SAFE_MESSAGES } from '@/lib/dream/dream_engine_04_composer';
+import { runExtraction, makeSubTypePicker, makeComposer } from '@/lib/dream/dream_engine_05a_gemini';
 
-const GEMINI_KEY =
-  process.env.GEMINI_API_KEY ||
-  process.env.GOOGLE_API_KEY ||
-  process.env.GOOGLE_GENERATIVE_AI_API_KEY ||
-  '';
+export const runtime = 'nodejs'; // the Gemini SDK needs the Node runtime
 
-const genAI = new GoogleGenerativeAI(GEMINI_KEY);
+const MAX_DREAM_CHARS = 280; // frontend limits to 250; small buffer here
 
-const FLASH = 'gemini-2.5-flash';
-const PRO = 'gemini-2.5-pro';
+// What the ₹51 unlock gives — shown on the free-tier upsell card
+const PAID_UNLOCKS_EN = [
+  'This dream read against your running planetary period (Mahadasha–Antardasha)',
+  'Whether it ties to a yoga or dosha in YOUR birth chart',
+  'The exact life-area it points to — career, wealth, marriage',
+  'A remedy personalised to your chart, not a generic one',
+  'A deeper, 500-word reading written for your situation',
+];
+const PAID_UNLOCKS_HI = [
+  'यह स्वप्न आपकी चल रही महादशा–अंतर्दशा के संदर्भ में',
+  'क्या यह आपकी कुंडली के किसी योग या दोष से जुड़ा है',
+  'यह किस जीवन-क्षेत्र की ओर संकेत करता है — करियर, धन, विवाह',
+  'आपकी कुंडली के अनुसार वैयक्तिक उपाय, सामान्य नहीं',
+  'आपकी स्थिति के लिए लिखी गई गहन 500-शब्द व्याख्या',
+];
 
-function cleanJson(s: string): string {
-  return s.replace(/```json/gi, '').replace(/```/g, '').trim();
-}
-
-// ── The extraction prompt (Component 1). Gemini extracts SIGNALS only. ────────
-const EXTRACTION_PROMPT = `You are the extraction unit of a Vedic Swapna Shastra (dream) engine.
-Convert the user's dream into structured JSON signals ONLY. You DO NOT interpret
-or give any meaning. Output ONLY the JSON object — no markdown, no commentary.
-
-Map the dream to the closest symbol_key from this fixed VOCABULARY. Pick the best
-primary_symbol; list any others as secondary_symbols. If nothing matches, set
-primary_symbol to null and set category_fallback to the closest category.
-
-VOCABULARY (symbol_key : category)
-snake : snake
-own_death, living_person_death, deceased_relative, funeral, corpse, cremation : death
-deity_general, prasad, deity_blessing, vishnu, shiva, lakshmi, durga, hanuman, ganesha, saraswati, surya, deity_angry, idol_broken, temple : deity
-water, drowning, river, flood, sea, rain, well, ganga : water
-teeth, hair, flying, falling, chased, naked, blood : body
-faeces, toilet, urine : bodily_function
-intimacy, nude_desire, romantic : sexual
-fight, attacked, wounded, weapon, war, argument, police : conflict
-cat, cow, crow, dog, elephant, fish, horse, insects, lion, monkey, owl, peacock, scorpion : animal
-birth_omen, dancing, eating, exam, exercise, foreign, gold, house, journey, loss, lost, makeup, marriage, money, monkey, pilgrimage, pregnancy, vehicle, wedding, worship_female_deity, worship_male_deity, cow : life_event
-alcohol, bitter_food, cooking, eating, feast, feeding, hunger, meat, milk, overeating, prasad, rotten_served, sweet_food, sweets : food
-earthquake, eclipse, fire, land, moon, mountain, rainbow, sky, star, stars, storm, sun, tree : celestial
-
-RULES
-- dreamer_context ∈ {general, unmarried, married, pregnant, student, non_student}. Non-general ONLY if clearly indicated.
-- setting_occasion ∈ {general, temple, street, terahvi, enemy_house, friend_house, home, celebration}. Non-general ONLY if clearly indicated.
-- emotional_tone ∈ {calm, fearful, joyful, neutral, distressed} — the feeling IN the dream.
-- prahar_hint ∈ {brahma_muhurta, early_night, unknown} — only if time stated.
-- recurrence = true only if the user signals the dream repeats.
-- safety.minor_sexual = true if a minor is involved in any sexual/intimate way.
-- safety.gender_identity_theme = true if the central theme is gender identity, transition, or same-gender intimacy.
-
-Return exactly:
-{"primary_symbol":null,"secondary_symbols":[],"category_fallback":"","descriptors":{"form":null,"action":null,"count":null},"dreamer_context":"general","setting_occasion":"general","emotional_tone":"neutral","prahar_hint":"unknown","recurrence":false,"safety":{"minor_sexual":false,"gender_identity_theme":false},"raw_dream_summary":""}`;
-
-// ── 1) EXTRACTION (Flash, deterministic) ─────────────────────────────────────
-export async function runExtraction(dreamText: string): Promise<DreamExtraction> {
-  const model = genAI.getGenerativeModel({
-    model: FLASH,
-    // 2000 = headroom for Gemini 2.5 internal thinking + the ~200-token JSON.
-    generationConfig: { temperature: 0, responseMimeType: 'application/json', maxOutputTokens: 2000 },
-  });
+export async function POST(req: Request) {
   try {
-    const res = await model.generateContent(`${EXTRACTION_PROMPT}\n\nDREAM:\n"${dreamText}"`);
-    return JSON.parse(cleanJson(res.response.text())) as DreamExtraction;
+    const body = await req.json().catch(() => ({}));
+    const dream: string = (body?.dream ?? '').toString().trim();
+    const tier: 'free' | 'paid' = body?.tier === 'paid' ? 'paid' : 'free';
+    const language: 'english' | 'hindi' | 'hinglish' =
+      body?.language === 'hindi' || body?.language === 'hinglish' ? body.language : 'english';
+    const birth = body?.birth ?? null; // used by the paid overlay (Component 6)
+
+    if (!dream) {
+      return NextResponse.json({ ok: false, error: 'Please describe your dream.' }, { status: 400 });
+    }
+    if (dream.length > MAX_DREAM_CHARS) {
+      return NextResponse.json({ ok: false, error: 'Please keep your dream under 250 characters.' }, { status: 400 });
+    }
+
+    // 1) Extract signals (Flash, deterministic)
+    const extraction = await runExtraction(dream);
+
+    // 2) Resolve to a real table row (Supabase)
+    const resolved = await resolveDream(extraction, supabase, makeSubTypePicker());
+
+    // --- Rule 0 terminal cases (never reach the composer) ---
+    if (resolved.status === 'refuse_minor') {
+      const m = SAFE_MESSAGES.refuse_minor;
+      return NextResponse.json({
+        ok: true, status: 'refused',
+        title_en: m.title_en, title_hi: m.title_hi,
+        reading_en: m.body_en, reading_hi: m.body_hi,
+      });
+    }
+    if (resolved.status === 'gender_silent') {
+      const m = SAFE_MESSAGES.gender_silent;
+      return NextResponse.json({
+        ok: true, status: 'silent',
+        title_en: m.title_en, title_hi: m.title_hi,
+        reading_en: m.body_en, reading_hi: m.body_hi,
+      });
+    }
+    if (resolved.status === 'no_match') {
+      return NextResponse.json({
+        ok: true, status: 'no_match',
+        title_en: 'Tell me a little more',
+        title_hi: 'थोड़ा और बताइए',
+        reading_en: 'We could not place this dream clearly. Try naming the main object or the main feeling in a few words.',
+        reading_hi: 'हम इस स्वप्न को स्पष्ट रूप से पहचान नहीं पाए। मुख्य वस्तु या मुख्य भाव को कुछ शब्दों में बताइए।',
+      });
+    }
+
+    const { row, matchLevel } = resolved;
+
+    // 3) Layer-3 modifiers (feeling-flip, timing, recurrence)
+    const reading = applyModifiers(row, extraction, matchLevel);
+
+    // 4) Paid chart overlay — Component 6 (via the VM). Free tier: undefined.
+    let dashaOverlay: string | undefined;
+    if (tier === 'paid') {
+      dashaOverlay = await computeDashaOverlay(birth);
+    }
+
+    // 5) Compose the reading (Flash free / Pro paid) — in the user's chosen language only
+    const out = await composeDreamReading(row, reading, tier, language, makeComposer(tier), dashaOverlay);
+
+    // 6) Response shaped for the sales frontend
+    return NextResponse.json({
+      ok: true,
+      status: 'reading',
+      symbol_key: row.symbol_key,     // → big symbol illustration
+      category: row.category,
+      title_en: out.title_en,
+      title_hi: out.title_hi,
+      reading_en: out.reading_en,
+      reading_hi: out.reading_hi,
+      tendency: out.tendency,         // → auspicious / inauspicious / balanced badge
+      signal_strength: out.signal_strength,
+      remedy_en: out.remedy_en,
+      remedy_hi: out.remedy_hi,
+      citation: out.citation,         // → trust / source line
+      disclaimer_en: out.disclaimer_en,
+      disclaimer_hi: out.disclaimer_hi,
+      // Upsell block — present on the free tier only
+      paid: tier === 'free'
+        ? {
+            price: 51,
+            teaser_en: out.paid_teaser_en,
+            teaser_hi: out.paid_teaser_hi,
+            unlocks_en: PAID_UNLOCKS_EN,
+            unlocks_hi: PAID_UNLOCKS_HI,
+          }
+        : null,
+    });
   } catch (err) {
-    console.error('[dream:extraction] failed, using category fallback:', err);
-    // Safe fallback — treat as unmatched, no safety flags triggered
-    return {
-      primary_symbol: null,
-      secondary_symbols: [],
-      category_fallback: 'life_event',
-      descriptors: { form: null, action: null, count: null },
-      dreamer_context: 'general',
-      setting_occasion: 'general',
-      emotional_tone: 'neutral',
-      prahar_hint: 'unknown',
-      recurrence: false,
-      safety: { minor_sexual: false, gender_identity_theme: false },
-      raw_dream_summary: dreamText.slice(0, 120),
-    };
+    console.error('[dream] route error:', err);
+    return NextResponse.json(
+      { ok: false, error: 'Something went wrong reading your dream. Please try again.' },
+      { status: 500 }
+    );
   }
 }
 
-// ── 2) SUB-TYPE PICKER (Flash, deterministic, chooses only from candidates) ───
-export function makeSubTypePicker(): SubTypePicker {
-  return async (dreamSummary, extraction, candidates) => {
-    const list = candidates.map((c) => `[id ${c.id}] "${c.sub_type}"`).join('\n');
-    const prompt =
-      'You are the sub-type selector for a Vedic dream engine. Choose the ONE candidate whose sub_type best matches the dream. You MUST choose from the list — never invent, never explain. Output ONLY the id number.\n\n' +
-      `Dream: "${dreamSummary}"\n` +
-      `Details: form=${extraction.descriptors.form}, action=${extraction.descriptors.action}, count=${extraction.descriptors.count}, tone=${extraction.emotional_tone}\n\n` +
-      `Candidates:\n${list}\n\nOutput only the id number.`;
-    const model = genAI.getGenerativeModel({
-      model: FLASH,
-      // NOTE: Gemini 2.5 spends internal "thinking" from this same budget.
-      // A tiny cap (was 10) returned EMPTY text → silent fallback to the first
-      // candidate row (wrong sub-types). 1024 gives thinking headroom; the
-      // visible output is still just one id number.
-      generationConfig: { temperature: 0, maxOutputTokens: 1024 },
-    });
-    try {
-      const res = await model.generateContent(prompt);
-      const m = res.response.text().match(/\d+/);
-      const n = m ? parseInt(m[0], 10) : NaN;
-      if (!Number.isFinite(n)) {
-        console.error('[dream:picker] no id in response, falling back to first candidate');
-        return candidates[0].id;
-      }
-      return n;
-    } catch (err) {
-      console.error('[dream:picker] error:', err);
-      return candidates[0].id;
-    }
-  };
-}
-
-// ── 3) COMPOSER (Flash free / Pro paid) ──────────────────────────────────────
-// Returns the GeminiComposeFn that Component 4 calls. Length + the free sales
-// hook are owned by buildComposePrompt (Component 4). Token caps are generous
-// so Gemini 2.5's internal "thinking" never eats the visible JSON output — this
-// is what was silently forcing free readings to fall back to raw table text.
-export function makeComposer(tier: 'free' | 'paid') {
-  const modelName = tier === 'paid' ? PRO : FLASH;
-  return async (prompt: string): Promise<string> => {
-    const model = genAI.getGenerativeModel({
-      model: modelName,
-      generationConfig: {
-        temperature: 0.4,
-        responseMimeType: 'application/json',
-        maxOutputTokens: tier === 'paid' ? 8192 : 3000,
-      },
-    });
-    const res = await model.generateContent(prompt);
-    return res.response.text();
-  };
+// =============================================================================
+// COMPONENT 6 PLACEHOLDER — paid dasha/gochar overlay via the VM chart engine.
+// Wired next using lib/callVM.ts (Swiss Ephemeris → running dasha + any yoga/
+// dosha tied to the symbol → a short factual paragraph the composer includes).
+// Returns undefined for now, so the paid path still returns a Pro-written
+// reading until the overlay is connected.
+// =============================================================================
+async function computeDashaOverlay(_birth: unknown): Promise<string | undefined> {
+  return undefined;
 }
