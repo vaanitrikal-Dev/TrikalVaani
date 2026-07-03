@@ -1,6 +1,11 @@
 'use client';
-// 🔱 TRIKAAL VAANI | app/swapna/SwapnaClient.tsx | v1.0
-// Interactive dream funnel: dream box → engine (/api/dream) → result → paywall.
+// 🔱 TRIKAAL VAANI | app/swapna/SwapnaClient.tsx | v1.1
+// v1.1: DREAM SUMMARY BOX — the free reading is now a 75–100 word Gemini
+//   summary (+ closing invite), so the plain 1.4rem line became a proper
+//   gold-bordered summary card ("✦ Dream Summary · स्वप्न सार") with
+//   readable long-text typography. Nothing else touched — medallion,
+//   paywall, form, terminal states, ₹51 integration point all unchanged.
+// v1.0: Interactive dream funnel: dream box → engine (/api/dream) → result → paywall.
 // Free flow is fully live. The ₹51 paid trigger is the marked integration point
 // (Razorpay + Component 6 dasha overlay) — wired in the next build step.
 
@@ -232,9 +237,18 @@ export default function SwapnaClient() {
             </div>
           )}
 
-          <div style={{ maxWidth: 620, margin: '24px auto 0', textAlign: 'center' }}>
-            <p style={{ fontFamily: 'serif', fontSize: '1.4rem', lineHeight: 1.5, color: '#fff' }}>{data.reading_en}</p>
-            <p style={{ fontSize: '1.1rem', color: C.s4, marginTop: 12, lineHeight: 1.7 }} lang="hi">{data.reading_hi}</p>
+          {/* ── DREAM SUMMARY BOX (v1.1) — sized for the 75–100 word reading ── */}
+          <div style={{ maxWidth: 620, margin: '26px auto 0',
+            background: `linear-gradient(180deg, ${C.panel2}, rgba(8,11,18,0.85))`,
+            border: `1px solid ${C.line2}`, borderRadius: 18, padding: '26px 28px',
+            boxShadow: '0 18px 50px rgba(0,0,0,0.45)' }}>
+            <div style={{ fontSize: 11, letterSpacing: '0.3em', textTransform: 'uppercase',
+              color: C.goldSoft, textAlign: 'center', marginBottom: 14 }}>
+              ✦ Dream Summary · <span lang="hi">स्वप्न सार</span>
+            </div>
+            <p style={{ fontFamily: 'serif', fontSize: '1.12rem', lineHeight: 1.7, color: '#fff' }}>{data.reading_en}</p>
+            <p style={{ fontSize: '1.02rem', color: C.s4, marginTop: 14, lineHeight: 1.8,
+              borderTop: `1px solid ${C.line}`, paddingTop: 14 }} lang="hi">{data.reading_hi}</p>
           </div>
 
           {(data.remedy_en || data.remedy_hi) && (
