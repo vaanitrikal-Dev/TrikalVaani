@@ -3,8 +3,13 @@
  * 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER 🔱
  * ============================================================================
  * File:        app/sitemap.ts
- * Version:     v7.8
+ * Version:     v7.9
  * Owner:       Rohiit Gupta, Chief Vedic Architect
+ *
+ * Changes v7.8 → v7.9 (2026-07-03):
+ *   SWAPNA SHASTRA added to STATIC_ROUTES (/swapna). Free Vedic dream-decoding
+ *   hub with ₹51 personal reading — emitted at priority 0.9, weekly. No other
+ *   logic changed.
  *
  * Changes v7.7 → v7.8 (2026-06-28):
  *   AI HAST REKHA CALCULATOR added to STATIC_ROUTES (/hast-rekha-calculator).
@@ -76,6 +81,7 @@ const STATIC_ROUTES = [
   '/services',
   '/calculators',
   '/hast-rekha-calculator',
+  '/swapna',
   '/panchang',
   '/kundali-milan',
   '/karmic-background-reading',
@@ -334,6 +340,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     else if (path === '/voice-pricing') priority = 0.95;
     else if (path === '/calculators') priority = 0.9;
     else if (path === '/hast-rekha-calculator') priority = 0.85;
+    else if (path === '/swapna') priority = 0.9;
 
     entries.push({
       url: `${BASE}${path}`,
