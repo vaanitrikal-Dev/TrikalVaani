@@ -16,6 +16,14 @@ import { loadRazorpayScript, openRazorpayCheckout } from '@/lib/razorpay-helper'
 type Lang = 'english' | 'hindi' | 'hinglish';
 interface DreamCtx { dream: string; meaning: string; symbol: string; language: Lang; }
 
+const ANALYZING_STEPS = [
+  'Casting your birth chart on Swiss Ephemeris…',
+  'Finding your Moon and its nakshatra…',
+  'Reading your running Mahadasha–Antardasha…',
+  'Weighing your dream against your chart…',
+  'Composing your personal reading…',
+];
+
 const C = {
   night: '#080B12', panel: '#0E141F', panel2: 'rgba(11,16,26,0.7)',
   gold: '#D4AF37', goldDeep: '#A8820A', goldSoft: 'rgba(212,175,55,0.55)',
@@ -52,6 +60,14 @@ export default function SwapnaReadingForm() {
   const [geo, setGeo] = useState<{ lat: number; lng: number; tz: number } | null>(null);
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState(false);
+  const [analyzing, setAnalyzing] = useState(false);
+  const [step, setStep] = useState(0);
+
+  useEffect(() => {
+    if (!analyzing) return;
+    const t = setInterval(() => setStep((s) => (s + 1) % ANALYZING_STEPS.length), 3500);
+    return () => clearInterval(t);
+  }, [analyzing]);
 
   useEffect(() => {
     try {
@@ -71,6 +87,38 @@ export default function SwapnaReadingForm() {
           background: `linear-gradient(135deg, ${C.gold}, ${C.goldDeep})`, color: '#100B02', fontWeight: 700, textDecoration: 'none' }}>
           Decode my dream →
         </a>
+      </div>
+    );
+  }
+
+  // Payment done → interactive ~60s analysis screen
+  if (analyzing) {
+    return (
+      <div style={{ maxWidth: 480, margin: '10px auto', textAlign: 'center', padding: '0 16px' }}>
+        <div className="sw-orb" style={{ width: 92, height: 92, margin: '0 auto', borderRadius: '50%',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 40,
+          background: 'radial-gradient(circle at 50% 35%, #1a2230, #0b101a)', border: `2px solid ${C.line2}`,
+          boxShadow: '0 0 40px rgba(212,175,55,0.35)' }}>🔱</div>
+        <h2 style={{ fontFamily: 'serif', fontSize: '1.5rem', color: '#fff', marginTop: 24 }}>
+          Reading your dream against your stars…
+        </h2>
+        <p style={{ color: C.gold, fontSize: '1.02rem', marginTop: 14, minHeight: 26, transition: 'opacity .3s' }}>
+          {ANALYZING_STEPS[step]}
+        </p>
+        <div style={{ height: 4, borderRadius: 999, overflow: 'hidden', background: 'rgba(212,175,55,0.12)', margin: '22px auto 0', maxWidth: 300 }}>
+          <div className="sw-bar" style={{ height: '100%', background: `linear-gradient(90deg, ${C.goldDeep}, ${C.gold})` }} />
+        </div>
+        <p style={{ color: C.s4, fontSize: 13.5, marginTop: 20, lineHeight: 1.6 }}>
+          This deep, chart-personalised reading takes about <b style={{ color: C.s3 }}>60 seconds</b>.<br />
+          Please keep this page open — your reading is being written just for you.
+        </p>
+        <style>{`
+          @keyframes sw-pulse { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.06);opacity:.85} }
+          @keyframes sw-slide { 0%{transform:translateX(-100%)} 100%{transform:translateX(400%)} }
+          .sw-orb { animation: sw-pulse 2.4s ease-in-out infinite; }
+          .sw-bar { width: 28%; animation: sw-slide 1.6s ease-in-out infinite; }
+          @media (prefers-reduced-motion: reduce){ .sw-orb,.sw-bar{animation:none} }
+        `}</style>
       </div>
     );
   }
@@ -120,6 +168,9 @@ export default function SwapnaReadingForm() {
             setErr(e.error || 'Payment verification failed. Please contact support.'); setBusy(false); return;
           }
 
+          // payment done → show the ~60s interactive analysis screen
+          setAnalyzing(true);
+
           // 2) build the dream situation + call the proven predict engine
           const situationNote = (
             `My dream: "${ctx!.dream}". ` +
@@ -162,6 +213,7 @@ export default function SwapnaReadingForm() {
           });
           const data = await predRes.json().catch(() => ({}));
           if (!predRes.ok) {
+            setAnalyzing(false);
             setErr((data && data.error) || 'Reading could not be generated. Your payment is safe — please contact support.');
             setBusy(false); return;
           }
@@ -169,7 +221,7 @@ export default function SwapnaReadingForm() {
           const slug = data?._meta?.publicSlug ?? data?.publicSlug ?? null;
           try { sessionStorage.removeItem('tv_swapna_dream'); } catch { /* ignore */ }
           if (slug) router.push(`/report/${slug}`);
-          else { setErr('Reading ready but not saved — please contact support with your payment id.'); setBusy(false); }
+          else { setAnalyzing(false); setErr('Reading ready but not saved — please contact support with your payment id.'); setBusy(false); }
         },
       });
     } catch (e: any) {
@@ -231,6 +283,10 @@ export default function SwapnaReadingForm() {
             {err}
           </div>
         )}
+
+        <p style={{ textAlign: 'center', fontSize: 12.5, color: C.goldSoft, marginTop: 4 }}>
+          ⏳ Your personal reading is written live against your chart — it takes about <b style={{ color: C.s3 }}>60 seconds</b> after payment.
+        </p>
 
         <button
           onClick={pay}
