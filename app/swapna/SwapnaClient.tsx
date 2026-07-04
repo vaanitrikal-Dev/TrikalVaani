@@ -1,6 +1,11 @@
 'use client';
-// 🔱 TRIKAAL VAANI | app/swapna/SwapnaClient.tsx | v1.2
-// v1.2: LANGUAGE CHOICE + INLINE UNLOCK LINK —
+// 🔱 TRIKAAL VAANI | app/swapna/SwapnaClient.tsx | v1.3
+// v1.3: PAID FLOW WIRED — the paywall's unlock button now saves the dream to
+//   sessionStorage and routes to /swapna/reading (the dedicated dream form),
+//   which runs the proven create-order → Razorpay → verify → predict chain on
+//   the swapna_dream domain. Removed the old placeholder form + stub. BirthForm
+//   is NOT touched.
+// v1.2: LANGUAGE CHOICE + INLINE UNLOCK LINK.
 //   - Language pills (English / हिंदी / Hinglish) above the dream box; the
 //     chosen language is sent to /api/dream and the reading comes back in
 //     that ONE language (halves Gemini tokens vs bilingual).
@@ -14,6 +19,7 @@
 // (Razorpay + Component 6 dasha overlay) — wired in the next build step.
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 type DreamLang = 'english' | 'hindi' | 'hinglish';
 const LANG_PILLS: { key: DreamLang; label: string }[] = [
@@ -79,13 +85,11 @@ export default function SwapnaClient() {
   const [lang, setLang] = useState<DreamLang>('english');
   const [phase, setPhase] = useState<'idle' | 'loading' | 'done' | 'error'>('idle');
   const [data, setData] = useState<DreamResult | null>(null);
-  const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState({ name: '', place: '', dob: '', tob: '' });
-  const [paidNote, setPaidNote] = useState('');
+  const router = useRouter();
 
   async function reveal() {
     if (!dream.trim()) return;
-    setPhase('loading'); setData(null); setShowForm(false); setPaidNote('');
+    setPhase('loading'); setData(null);
     try {
       const res = await fetch('/api/dream', {
         method: 'POST',
@@ -98,20 +102,19 @@ export default function SwapnaClient() {
     } catch { setPhase('error'); }
   }
 
-  function startPaidReading() {
-    if (!form.name || !form.dob || !form.tob || !form.place) {
-      setPaidNote('Please fill all four details to continue.');
-      return;
-    }
-    setPaidNote('');
-    // ════════════════════════════════════════════════════════════════════
-    // ₹51 MOAT INTEGRATION POINT (next build step):
-    //   1) open Razorpay checkout (use lib/razorpay-helper.ts)
-    //   2) on payment success → POST /api/dream { tier:'paid', dream, birth:form }
-    //   3) render the deep 500-word reading (dasha overlay from Component 6)
-    // Until then, this is a safe placeholder.
-    // ════════════════════════════════════════════════════════════════════
-    setPaidNote('Personal readings open at checkout — connecting your ₹51 reading shortly.');
+  // ₹51 paid flow → hand the dream to the dedicated reading form (/swapna/reading),
+  // which runs the proven create-order → Razorpay → verify → predict chain.
+  function goToPaidReading() {
+    if (!data) return;
+    try {
+      sessionStorage.setItem('tv_swapna_dream', JSON.stringify({
+        dream,
+        meaning: data.reading_en || data.reading_hi || '',
+        symbol: data.title_en || data.title_hi || 'this symbol',
+        language: lang,
+      }));
+    } catch { /* ignore */ }
+    router.push('/swapna/reading');
   }
 
   const emoji = emojiFor(data?.symbol_key, data?.category);
@@ -335,41 +338,14 @@ export default function SwapnaClient() {
                 <b style={{ color: C.gold, fontSize: 15 }}>₹{data.paid.price}</b> &nbsp;·&nbsp; instant &nbsp;·&nbsp; private &nbsp;·&nbsp; no sign-up
               </div>
 
-              {!showForm && (
-                <div style={{ textAlign: 'center' }}>
-                  <button onClick={() => setShowForm(true)} className="sw-btn"
-                    style={{ cursor: 'pointer', border: 0, fontWeight: 700, fontSize: '1rem', color: '#100B02',
-                      background: `linear-gradient(135deg, ${C.gold}, ${C.goldDeep})`, padding: '15px 30px', borderRadius: 999,
-                      boxShadow: '0 12px 32px rgba(168,130,10,0.35)' }}>
-                    Unlock my personal reading →
-                  </button>
-                </div>
-              )}
-
-              {showForm && (
-                <div className="sw-rise" style={{ maxWidth: 440, margin: '10px auto 0' }}>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
-                    <input className="sw-inp" placeholder="Your name" value={form.name}
-                      onChange={(e) => setForm({ ...form, name: e.target.value })} style={inpStyle} />
-                    <input className="sw-inp" placeholder="Place of birth" value={form.place}
-                      onChange={(e) => setForm({ ...form, place: e.target.value })} style={inpStyle} />
-                  </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                    <input type="date" placeholder="Date of birth" value={form.dob}
-                      onChange={(e) => setForm({ ...form, dob: e.target.value })} style={inpStyle} />
-                    <input type="time" placeholder="Time of birth" value={form.tob}
-                      onChange={(e) => setForm({ ...form, tob: e.target.value })} style={inpStyle} />
-                  </div>
-                  <div style={{ textAlign: 'center' }}>
-                    <button onClick={startPaidReading} className="sw-btn"
-                      style={{ marginTop: 16, cursor: 'pointer', border: 0, fontWeight: 700, fontSize: '1rem', color: '#100B02',
-                        background: `linear-gradient(135deg, ${C.gold}, ${C.goldDeep})`, padding: '14px 28px', borderRadius: 999 }}>
-                      Continue to ₹{data.paid.price} →
-                    </button>
-                  </div>
-                  {paidNote && <p style={{ textAlign: 'center', color: C.goldSoft, fontSize: 13, marginTop: 12 }}>{paidNote}</p>}
-                </div>
-              )}
+              <div style={{ textAlign: 'center' }}>
+                <button onClick={goToPaidReading} className="sw-btn"
+                  style={{ cursor: 'pointer', border: 0, fontWeight: 700, fontSize: '1rem', color: '#100B02',
+                    background: `linear-gradient(135deg, ${C.gold}, ${C.goldDeep})`, padding: '15px 34px', borderRadius: 999,
+                    boxShadow: '0 12px 32px rgba(168,130,10,0.35)' }}>
+                  Unlock my personal reading · ₹{data.paid.price} →
+                </button>
+              </div>
             </div>
           )}
 
@@ -385,8 +361,3 @@ export default function SwapnaClient() {
     </div>
   );
 }
-
-const inpStyle: React.CSSProperties = {
-  background: '#080B12', border: '1px solid rgba(212,175,55,0.26)', borderRadius: 12,
-  padding: '13px 15px', color: '#fff', fontFamily: 'inherit', fontSize: '0.95rem', width: '100%', outline: 'none',
-};
