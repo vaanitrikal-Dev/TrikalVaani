@@ -28,7 +28,8 @@ export type DomainId =
   | 'mill_parents_wellness'
   | 'genx_retirement_peace'
   | 'genx_legacy_inheritance'
-  | 'genx_spiritual_innings';
+  | 'genx_spiritual_innings'
+  | 'swapna_dream';
 
 export interface HouseConfig {
   number:       number;
@@ -578,6 +579,58 @@ const DOMAINS: Record<DomainId, DomainConfig> = {
       spiritualStrength:  'strength of spiritual indicators in chart 1-10',
       sadhanaWindow:      'most powerful Pratyantar for spiritual practice',
       karmicRelease:      'areas of karmic clearing indicated in current period',
+    },
+  },
+
+  // ── Swapna Shastra — Personal Dream Reading (₹51) ───────────────────────────
+  // The dream symbol + its classical meaning arrive via userContext.situationNote.
+  // This domain reads that dream against the Moon, its nakshatra, and the running
+  // dasha. The MEANING is authoritative (from the dream_symbols table) — the
+  // engine interprets it against the chart, it does NOT invent symbol meanings.
+  swapna_dream: {
+    id: 'swapna_dream',
+    displayName: 'Swapna Shastra — Personal Dream Reading',
+    label: 'Dream Reading',
+    segment: 'millennial',
+    analysisType: 'single',
+    timeWindow: 'the running dasha period (next 3-12 months)',
+    primaryHouses: [
+      { number: 12, significance: 'Dreams, subconscious, sleep, the unseen, moksha' },
+      { number: 4,  significance: "Mind, emotional core, inner peace — Chandra's domain" },
+    ],
+    secondaryHouses: [
+      { number: 9, significance: 'Fortune, dharma, divine grace, auspicious omens' },
+      { number: 5, significance: 'Poorva punya, intuition, mantra, inherited merit' },
+      { number: 8, significance: 'Hidden matters, transformation, occult, sudden turns' },
+      { number: 1, significance: 'Self, body, overall vitality and life-force' },
+    ],
+    keyPlanets: [
+      { planet: 'Moon',    role: 'The mind and the dreaming faculty — ruler of dreams',        checkFor: ['nakshatra', 'strength', 'dasha'] },
+      { planet: 'Rahu',    role: 'Fears, illusions, subconscious shadows, unusual dreams',      checkFor: ['house', 'dasha'] },
+      { planet: 'Ketu',    role: 'Spiritual and psychic dreams, past-life signals, detachment', checkFor: ['house', 'dasha'] },
+      { planet: 'Saturn',  role: 'Recurring and fear-based dreams, karmic weight',              checkFor: ['aspect on Moon', 'dasha'] },
+      { planet: 'Jupiter', role: 'Auspicious, divine, guiding dreams and grace',                checkFor: ['aspect on Moon', 'strength'] },
+    ],
+    dashaFocus: ['Moon', 'Rahu', 'Ketu', 'Saturn', 'Jupiter'],
+    yogasToCheck: ['Chandra strength or affliction', 'Moon-Rahu (anxiety, Grahan)', 'Moon-Saturn (heaviness, Vish)', 'Moon-Ketu (detachment)', 'Gajakesari (Moon-Jupiter)', 'Kemadruma (isolation of Moon)'],
+    classicalBasis: [
+      { text: 'Svapna Cintamani', rule: 'Classical dream-symbol meanings compiled by Jagaddeva' },
+      { text: 'Brihat Jataka', rule: "A dream's fruit is shaped by the dreamer's own chart and running dasha" },
+      { text: 'BPHS', rule: 'The Moon (Chandra) governs the mind, emotions, and the dreaming faculty' },
+    ],
+    analysisDepthNote: "The dream symbol and its classical meaning are provided in the situation note. Read that dream against the Moon's sign and nakshatra, the running Mahadasha-Antardasha, and any affliction to the Moon. Explain what the dream signals for the person now and the window ahead. Do NOT invent a new meaning for the symbol — interpret the given meaning against THIS chart.",
+    antiHallucinationRules: [
+      'The dream symbol meaning is provided in the situation note — never invent a different meaning',
+      'Never predict death, disease, or disaster; keep dream signals hopeful and non-fearful',
+      'Dream timing and fruit windows come only from dasha data, never fixed calendar dates',
+      'Never name specific people, companies, or guarantee exact outcomes',
+    ],
+    worldContext: 'none',
+    worldContextSearchTerms: [],
+    extraOutputFields: {
+      dreamSignal:     'what this dream is signalling for the person right now, in one line',
+      chartConnection: 'how the Moon, its nakshatra, and the running dasha tie to this dream',
+      dreamRemedy:     'a chart-shaped remedy for the theme of this dream',
     },
   },
 
