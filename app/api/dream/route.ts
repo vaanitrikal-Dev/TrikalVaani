@@ -44,6 +44,8 @@ export async function POST(req: Request) {
     const body = await req.json().catch(() => ({}));
     const dream: string = (body?.dream ?? '').toString().trim();
     const tier: 'free' | 'paid' = body?.tier === 'paid' ? 'paid' : 'free';
+    const language: 'english' | 'hindi' | 'hinglish' =
+      body?.language === 'hindi' || body?.language === 'hinglish' ? body.language : 'english';
     const birth = body?.birth ?? null; // used by the paid overlay (Component 6)
 
     if (!dream) {
@@ -97,8 +99,8 @@ export async function POST(req: Request) {
       dashaOverlay = await computeDashaOverlay(birth);
     }
 
-    // 5) Compose the reading (Flash free / Pro paid)
-    const out = await composeDreamReading(row, reading, tier, makeComposer(tier), dashaOverlay);
+    // 5) Compose the reading (Flash free / Pro paid) — in the user's chosen language only
+    const out = await composeDreamReading(row, reading, tier, language, makeComposer(tier), dashaOverlay);
 
     // 6) Response shaped for the sales frontend
     return NextResponse.json({
