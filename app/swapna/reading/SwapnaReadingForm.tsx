@@ -1,0 +1,254 @@
+'use client';
+
+// 🔱 TRIKAAL VAANI | app/swapna/reading/SwapnaReadingForm.tsx | v1.0
+// Owner: Rohiit Gupta, Chief Vedic Architect
+// DEDICATED paid dream-reading form — fully ISOLATED from BirthForm.tsx.
+// Reuses (no touch): swapna_dream domain, CityInput, razorpay-helper,
+// /api/create-order, /api/verify-payment, /api/predict, /report/[slug].
+// The dream + its free meaning arrive via sessionStorage (set by SwapnaClient).
+// ----------------------------------------------------------------------------
+
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import CityInput from '@/components/calculators/CityInput';
+import { loadRazorpayScript, openRazorpayCheckout } from '@/lib/razorpay-helper';
+
+type Lang = 'english' | 'hindi' | 'hinglish';
+interface DreamCtx { dream: string; meaning: string; symbol: string; language: Lang; }
+
+const C = {
+  night: '#080B12', panel: '#0E141F', panel2: 'rgba(11,16,26,0.7)',
+  gold: '#D4AF37', goldDeep: '#A8820A', goldSoft: 'rgba(212,175,55,0.55)',
+  line: 'rgba(212,175,55,0.16)', line2: 'rgba(212,175,55,0.3)',
+  s3: '#CBD5E1', s4: '#94A3B8', s5: '#64748B',
+};
+
+function segmentFromDob(dob: string): 'genz' | 'millennial' | 'genx' {
+  const age = new Date().getFullYear() - new Date(dob).getFullYear();
+  if (age <= 28) return 'genz';
+  if (age <= 44) return 'millennial';
+  return 'genx';
+}
+function ageFromDob(dob: string): number {
+  return Math.max(0, new Date().getFullYear() - new Date(dob).getFullYear());
+}
+
+const inputStyle: React.CSSProperties = {
+  width: '100%', padding: '10px 14px', borderRadius: 10, fontSize: 15,
+  background: '#0d1120', border: '1px solid rgba(255,255,255,0.1)', color: '#e2e8f0',
+  colorScheme: 'dark', outline: 'none',
+};
+const labelStyle: React.CSSProperties = { fontSize: 12, color: C.s4, marginBottom: 6, display: 'block', letterSpacing: '0.03em' };
+
+export default function SwapnaReadingForm() {
+  const router = useRouter();
+  const [ctx, setCtx] = useState<DreamCtx | null>(null);
+  const [name, setName] = useState('');
+  const [gender, setGender] = useState('');
+  const [dob, setDob] = useState('');
+  const [tob, setTob] = useState('12:00');
+  const [unknownTime, setUnknownTime] = useState(false);
+  const [city, setCity] = useState('');
+  const [geo, setGeo] = useState<{ lat: number; lng: number; tz: number } | null>(null);
+  const [err, setErr] = useState('');
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    try {
+      const raw = sessionStorage.getItem('tv_swapna_dream');
+      if (raw) setCtx(JSON.parse(raw));
+    } catch { /* ignore */ }
+  }, []);
+
+  // No dream in session → send them back to decode one first
+  if (!ctx) {
+    return (
+      <div style={{ maxWidth: 560, margin: '40px auto', textAlign: 'center', padding: '0 16px' }}>
+        <p style={{ color: C.s4, fontSize: '1.05rem' }}>
+          Start with your dream, then unlock its personal reading.
+        </p>
+        <a href="/swapna" style={{ display: 'inline-block', marginTop: 16, padding: '12px 26px', borderRadius: 999,
+          background: `linear-gradient(135deg, ${C.gold}, ${C.goldDeep})`, color: '#100B02', fontWeight: 700, textDecoration: 'none' }}>
+          Decode my dream →
+        </a>
+      </div>
+    );
+  }
+
+  function validate(): string | null {
+    if (!name.trim()) return 'Please enter your name.';
+    if (!gender) return 'Please select your gender.';
+    if (!dob) return 'Please enter your date of birth.';
+    if (!unknownTime && !tob) return "Please enter your time of birth, or tick “I don't know”.";
+    if (!city || !geo) return 'Please pick your place of birth from the suggestions.';
+    return null;
+  }
+
+  async function pay() {
+    const v = validate();
+    if (v) { setErr(v); return; }
+    setErr(''); setBusy(true);
+    try {
+      const ok = await loadRazorpayScript();
+      if (!ok) { setErr('Payment could not load. Please check your connection.'); setBusy(false); return; }
+
+      const orderRes = await fetch('/api/create-order', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tier: 'deep' }),
+      });
+      if (!orderRes.ok) {
+        const e = await orderRes.json().catch(() => ({}));
+        setErr(e.error || 'Could not start payment. Please try again.'); setBusy(false); return;
+      }
+      const { orderId, amount, currency, keyId } = await orderRes.json();
+
+      openRazorpayCheckout({
+        keyId, orderId, amount, currency,
+        name: 'Trikaal Vaani',
+        description: 'Swapna Shastra — Personal Dream Reading',
+        prefillName: name.trim(),
+        themeColor: '#D4AF37',
+        onDismiss: () => setBusy(false),
+        onSuccess: async (response) => {
+          // 1) verify signature server-side
+          const verifyRes = await fetch('/api/verify-payment', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(response),
+          });
+          if (!verifyRes.ok) {
+            const e = await verifyRes.json().catch(() => ({}));
+            setErr(e.error || 'Payment verification failed. Please contact support.'); setBusy(false); return;
+          }
+
+          // 2) build the dream situation + call the proven predict engine
+          const situationNote = (
+            `My dream: "${ctx!.dream}". ` +
+            `Classical Swapna Shastra meaning of ${ctx!.symbol || 'this symbol'}: ${ctx!.meaning || 'as recorded in the tradition'}. ` +
+            `Please tell me what this dream means for my own life, read against my chart and running dasha.`
+          ).slice(0, 500);
+
+          const seg = segmentFromDob(dob);
+          const body = {
+            sessionId: (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : `swapna_${Date.now()}`,
+            domainId: 'swapna_dream',
+            domainLabel: 'Dream Reading',
+            predictionTier: 'paid',
+            paymentVerification: {
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+              amount, // 5100 — predict re-checks this
+            },
+            birthData: {
+              name: name.trim(), dob,
+              tob: unknownTime ? '12:00' : tob,
+              lat: geo!.lat, lng: geo!.lng, cityName: city,
+              timezone: geo!.tz, ayanamsa: 'lahiri',
+            },
+            userContext: {
+              segment: seg, dynamicSegment: seg, gender,
+              age: ageFromDob(dob),
+              employment: 'other', sector: 'general',
+              language: ctx!.language || 'hinglish',
+              city, currentCity: city, relationshipStatus: '',
+              situationNote, mobile: '',
+            },
+            person2Data: null,
+          };
+
+          const predRes = await fetch('/api/predict', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body),
+          });
+          const data = await predRes.json().catch(() => ({}));
+          if (!predRes.ok) {
+            setErr((data && data.error) || 'Reading could not be generated. Your payment is safe — please contact support.');
+            setBusy(false); return;
+          }
+
+          const slug = data?._meta?.publicSlug ?? data?.publicSlug ?? null;
+          try { sessionStorage.removeItem('tv_swapna_dream'); } catch { /* ignore */ }
+          if (slug) router.push(`/report/${slug}`);
+          else { setErr('Reading ready but not saved — please contact support with your payment id.'); setBusy(false); }
+        },
+      });
+    } catch (e: any) {
+      setErr(e?.message || 'Something went wrong. Please try again.');
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div style={{ maxWidth: 560, margin: '0 auto', padding: '0 16px' }}>
+      {/* dream recap */}
+      <div style={{ background: C.panel, border: `1px solid ${C.line}`, borderRadius: 14, padding: '16px 18px', marginBottom: 22 }}>
+        <div style={{ fontSize: 11, letterSpacing: '0.25em', textTransform: 'uppercase', color: C.goldSoft, marginBottom: 6 }}>Your dream</div>
+        <p style={{ margin: 0, color: C.s3, fontSize: '0.98rem', fontStyle: 'italic' }}>&ldquo;{ctx.dream}&rdquo;</p>
+      </div>
+
+      <div style={{ display: 'grid', gap: 16 }}>
+        <div>
+          <label style={labelStyle} htmlFor="sw-name">Your name</label>
+          <input id="sw-name" style={inputStyle} value={name} onChange={(e) => setName(e.target.value)} placeholder="Name" />
+        </div>
+
+        <div>
+          <label style={labelStyle} htmlFor="sw-gender">Gender</label>
+          <select id="sw-gender" style={inputStyle} value={gender} onChange={(e) => setGender(e.target.value)}>
+            <option value="" style={{ background: '#0d1120' }}>Select</option>
+            <option value="male" style={{ background: '#0d1120' }}>Male</option>
+            <option value="female" style={{ background: '#0d1120' }}>Female</option>
+            <option value="other" style={{ background: '#0d1120' }}>Other</option>
+          </select>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+          <div>
+            <label style={labelStyle} htmlFor="sw-dob">Date of birth</label>
+            <input id="sw-dob" type="date" style={inputStyle} value={dob} onChange={(e) => setDob(e.target.value)} />
+          </div>
+          <div>
+            <label style={labelStyle} htmlFor="sw-tob">Time of birth</label>
+            <input id="sw-tob" type="time" style={{ ...inputStyle, opacity: unknownTime ? 0.5 : 1 }} value={tob} disabled={unknownTime} onChange={(e) => setTob(e.target.value)} />
+          </div>
+        </div>
+        <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12.5, color: C.s4, marginTop: -6, cursor: 'pointer' }}>
+          <input type="checkbox" checked={unknownTime} onChange={(e) => setUnknownTime(e.target.checked)} />
+          I don&apos;t know my exact birth time (we&apos;ll use noon)
+        </label>
+
+        <div>
+          <label style={labelStyle} htmlFor="sw-pob">Place of birth</label>
+          <CityInput
+            id="sw-pob"
+            value={city}
+            onSelect={(c, lat, lng, tz) => { setCity(c); setGeo({ lat, lng, tz }); }}
+          />
+        </div>
+
+        {err && (
+          <div style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 10, padding: '10px 14px', color: '#fca5a5', fontSize: 13.5 }}>
+            {err}
+          </div>
+        )}
+
+        <button
+          onClick={pay}
+          disabled={busy}
+          style={{
+            marginTop: 6, padding: '15px 20px', borderRadius: 999, border: 'none',
+            background: busy ? '#5b4a12' : `linear-gradient(135deg, ${C.gold}, ${C.goldDeep})`,
+            color: '#100B02', fontWeight: 800, fontSize: 15.5,
+            cursor: busy ? 'wait' : 'pointer',
+            boxShadow: '0 12px 30px rgba(168,130,10,0.35)',
+          }}>
+          {busy ? '⟳ Opening secure payment…' : 'Reveal my personal reading · Pay ₹51 →'}
+        </button>
+
+        <p style={{ textAlign: 'center', fontSize: 11.5, color: C.s5, marginTop: 2 }}>
+          🔒 One-time ₹51 · Secured by Razorpay · Read against your real Swiss Ephemeris chart
+        </p>
+      </div>
+    </div>
+  );
+}
