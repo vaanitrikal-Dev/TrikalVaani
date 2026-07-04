@@ -32,7 +32,12 @@ const FLASH = 'gemini-2.5-flash';
 const PRO = 'gemini-2.5-pro';
 
 function cleanJson(s: string): string {
-  return s.replace(/```json/gi, '').replace(/```/g, '').trim();
+  let t = s.replace(/```json/gi, '').replace(/```/g, '').trim();
+  // Slice to the outermost JSON object in case the model adds stray prose.
+  const a = t.indexOf('{');
+  const b = t.lastIndexOf('}');
+  if (a !== -1 && b !== -1 && b > a) t = t.slice(a, b + 1);
+  return t;
 }
 
 // ── The extraction prompt (Component 1). Gemini extracts SIGNALS only. ────────
@@ -144,11 +149,21 @@ export function makeComposer(tier: 'free' | 'paid') {
       model: modelName,
       generationConfig: {
         temperature: 0.4,
-        responseMimeType: 'application/json',
+        // Cap "thinking" so it can't consume the whole budget and starve the
+        // JSON (the silent-truncation bug). Positive, never 0 (iron rule).
+        // @ts-expect-error thinkingConfig is valid for 2.5 models in the SDK
+        thinkingConfig: { thinkingBudget: tier === 'paid' ? 2048 : 512 },
         maxOutputTokens: tier === 'paid' ? 8192 : 3000,
       },
     });
     const res = await model.generateContent(prompt);
-    return res.response.text();
+    const out = res.response.text();
+    // Visibility: if output is empty/blocked, log the real reason (finishReason)
+    // instead of silently falling back to table text.
+    if (!out || out.trim().length === 0) {
+      const fr = res.response.candidates?.[0]?.finishReason ?? 'UNKNOWN';
+      console.error(`[dream:composer] empty output. tier=${tier} finishReason=${fr}`);
+    }
+    return out;
   };
 }
