@@ -147,23 +147,17 @@ export function makeComposer(tier: 'free' | 'paid') {
   return async (prompt: string): Promise<string> => {
     const model = genAI.getGenerativeModel({
       model: modelName,
+      // Mirrors the proven runExtraction config EXACTLY — json-mode on, generous
+      // token budget so Gemini 2.5's internal thinking never starves the output.
+      // NO thinkingConfig: that field crashed the 0.24 SDK ("r is not a function")
+      // and forced every free reading back to the raw table line.
       generationConfig: {
         temperature: 0.4,
-        // Cap "thinking" so it can't consume the whole budget and starve the
-        // JSON (the silent-truncation bug). Positive, never 0 (iron rule).
-        // @ts-expect-error thinkingConfig is valid for 2.5 models in the SDK
-        thinkingConfig: { thinkingBudget: tier === 'paid' ? 2048 : 512 },
-        maxOutputTokens: tier === 'paid' ? 8192 : 3000,
+        responseMimeType: 'application/json',
+        maxOutputTokens: tier === 'paid' ? 8192 : 4000,
       },
     });
     const res = await model.generateContent(prompt);
-    const out = res.response.text();
-    // Visibility: if output is empty/blocked, log the real reason (finishReason)
-    // instead of silently falling back to table text.
-    if (!out || out.trim().length === 0) {
-      const fr = res.response.candidates?.[0]?.finishReason ?? 'UNKNOWN';
-      console.error(`[dream:composer] empty output. tier=${tier} finishReason=${fr}`);
-    }
-    return out;
+    return res.response.text();
   };
 }
