@@ -3,51 +3,46 @@
  * TRIKAAL VAANI — Unified Prediction Endpoint
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/api/predict/route.ts
- * VERSION: 14.12 — Named section headings in paid summary + Remedy/Blessing 50w each
+ * VERSION: 14.13 — VM-accurate chart in Pro prompt + anti-hallucination + health sensitivity + diagnostics
  * SIGNED: ROHIIT GUPTA, CEO
  *
+ * CHANGES v14.13 vs v14.12 (LIVE REPORT AUDIT FIXES):
+ *   ✅ FIX-1 (ACCURACY): buildProPrompt now receives chartExtract (VM Swiss
+ *      Ephemeris values) — Lagna/Nakshatra/Mahadasha/Antardasha in the prompt
+ *      are now VM-accurate, with local kundaliData as fallback. Handles both
+ *      string and object lagna shapes (was silently blank before).
+ *   ✅ FIX-2 (ANTI-HALLUCINATION): DATA INTEGRITY rule — if Lagna/Nakshatra is
+ *      not provided, Gemini must NEVER invent or state one. Live report showed
+ *      "Meen Lagna" while DB lagna was null — that must never happen again.
+ *   ✅ FIX-3 (HEALTH SENSITIVITY — dharma + legal): when situationNote involves
+ *      mental or physical health (OCD, anxiety, depression, illness):
+ *      - NEVER claim planets CAUSE the medical condition — only that this
+ *        period can intensify such tendencies
+ *      - MUST include one caring line advising a qualified doctor/counselor —
+ *        upay SUPPORT healing, they do not replace treatment
+ *      - If client appears to be a minor/student, encourage talking to parents
+ *      Matches site disclaimer: "Not a substitute for professional advice."
+ *   ✅ FIX-4 (DIAGNOSTICS): /template and /synthesize failures now logged WITH
+ *      reason (were silent — live paid report lost planet table/chart/upay/
+ *      panchang with no log trail). geoBullets count logged (live report
+ *      returned ~5 instead of 10 under grounding).
+ *   ✅ ALL v14.12 logic preserved 100%
+ *
  * CHANGES v14.12 vs v14.11:
- *   ✅ Paid simpleSummary.text now has 9 NAMED SECTIONS — each paragraph starts
- *      with a short emoji heading line (in the reading's language) so the client
- *      SEES the structure and feels the ₹51 depth (perceived-value upgrade)
- *      Sections: Aapki Baat → Zameeni Haqeeqat → Kyun Ho Raha Hai → Current Dasha
- *      → Aage Kya Hai → 3 Kaam → Kya Avoid Karo → Aapka Upay → Maa Ka Ashirwad
- *   ✅ Remedy para raised 35 → 50 words, Blessing para raised 25 → 50 words
- *   ✅ Word budget: 700-750 → 720-780 (target 755) to absorb the increase
- *   ✅ Headings are plain-text lines separated by \n\n — NO new JSON keys,
- *      NO markdown syntax (safe for current report renderer)
- *   ✅ ALL v14.11 logic preserved 100%
- *   ⚠️ DEPLOY NOTE: verify report page renders \n\n as paragraph breaks
- *      (white-space: pre-line or split-on-newline) — test one paid reading
+ *   ✅ 9 NAMED SECTIONS in paid summary (emoji headings, \n\n separated)
+ *   ✅ Remedy 50w + Blessing 50w — word budget 720-780 (target 755)
  *
  * CHANGES v14.11 vs v14.10 (CONSOLIDATED):
- *   ✅ JOB_LABELS map — Gemini receives human-readable profession
- *      ("Salaried IT / Tech professional") instead of raw code ("salaried_it")
- *   ✅ numerologyCompatibility (BirthForm dual-chart domains) read from body
- *      and passed into Pro prompt — woven into relationship analysis
- *   ✅ Real-world grounding remains PAID-ONLY (FREE Flash tier untouched)
+ *   ✅ JOB_LABELS map — human-readable profession in prompt + grounding
+ *   ✅ numerologyCompatibility read from body → Pro prompt (dual domains)
+ *   ✅ Real-world grounding remains PAID-ONLY (FREE Flash untouched)
  *
  * CHANGES v14.10 vs v14.9:
- *   ✅ CLIENT DETAILS includes Age, Gender, Life Stage, Relationship Status
- *   ✅ REAL-WORLD CONTEXT age-aware grounding
+ *   ✅ Age/Gender/Life Stage/Relationship in CLIENT DETAILS; age-aware grounding
  *   ✅ Anti-doom rule: preparation guidance, never deterministic doom
  *
- * CHANGES v14.9 vs v14.8:
- *   ✅ Real-world sector/city context as SECOND paragraph (Para 2)
- *
- * CHANGES v14.8 vs v14.7:
- *   ✅ PAID predictions use live Google Search grounding (sector + current-city trends)
- *   ✅ STRICT privacy: sector/city trends only — never identifies the individual
- *   ✅ Gemini 2.5 constraint handled: json-mime auto-dropped when grounding on
- *   ✅ Auto-fallback to no-search call if grounded JSON fails
- *   ✅ CEO kill-switch PRO_REALWORLD_SEARCH
- *
- * CHANGES v14.7 vs v14.6:
- *   ✅ Paid summary reduced 900 → 650 words (read-completion)
- *
- * CHANGES v14.6 vs v14.5:
- *   ✅ paymentVerification gate, HMAC-SHA256 server-side verify
- *   ✅ razorpay payment columns in Supabase, anti-fraud block
+ * CHANGES v14.9 → v14.6: see git history — grounding (Option C), kill-switch,
+ *   json-mime handling, fallback, payment gate, HMAC verify, all preserved.
  *
  * IRON RULES — NEVER VIOLATE:
  *   🔒 NEVER touch gemini-prompt.ts
@@ -144,6 +139,14 @@ interface NumerologyCompatibility {
   color?:      string
 }
 
+// ── v14.13: VM chart extract shape (passed into Pro prompt) ──────────────────
+interface ChartExtract {
+  lagna:      string | null
+  nakshatra:  string | null
+  mahadasha:  string | null
+  antardasha: string | null
+}
+
 interface PredictRequest {
   userId?:string; sessionId:string; domainId:DomainId; domainLabel?:string
   predictionTier?:PredictionTier
@@ -232,6 +235,7 @@ function buildProPrompt(
   userContext: UserContext,
   templateData?: any,
   numerology?: NumerologyCompatibility | null,
+  chartExtract?: ChartExtract | null,
 ): { systemPrompt: string; userMessage: string } {
 
   const lang = userContext.language
@@ -241,10 +245,20 @@ function buildProPrompt(
     ? 'LANGUAGE: Pure English. Warm Vedic astrologer tone.'
     : 'LANGUAGE: Natural Hinglish — Hindi + English mixed naturally. Jigri dost + wise Guru tone.'
 
-  const mahadasha = kundali.currentMahadasha?.lord ?? 'Rahu'
-  const antardasha = kundali.currentAntardasha?.lord ?? 'Jupiter'
-  const lagna = kundali.lagna ?? ''
-  const nakshatra = kundali.nakshatra ?? ''
+  // ── v14.13 FIX-1: VM-accurate chart values first, local kundaliData fallback.
+  // Handles both string and object lagna/nakshatra shapes (was silently blank).
+  const kAny = kundali as any
+  const localLagna =
+    typeof kAny.lagna === 'string' ? kAny.lagna
+    : (kAny.lagna?.rashi ?? kAny.lagna?.sign ?? '')
+  const localNakshatra =
+    typeof kAny.nakshatra === 'string' ? kAny.nakshatra
+    : (kAny.planets?.['Moon']?.nakshatra ?? '')
+
+  const lagna      = chartExtract?.lagna      || localLagna      || ''
+  const nakshatra  = chartExtract?.nakshatra  || localNakshatra  || ''
+  const mahadasha  = chartExtract?.mahadasha  || kundali.currentMahadasha?.lord  || 'Rahu'
+  const antardasha = chartExtract?.antardasha || kundali.currentAntardasha?.lord || 'Jupiter'
 
   // ── v14.10: Full human profile for Gemini (age-aware grounding + remedies) ──
   const clientAge    = (userContext as any).age ?? null
@@ -266,7 +280,7 @@ present it as a separate section, and do NOT add new JSON keys.` : ''
 
   const systemPrompt = `
 ════════════════════════════════════════════════════════
-TRIKAAL VAANI — PRO DEEP ANALYSIS ENGINE v14.12
+TRIKAAL VAANI — PRO DEEP ANALYSIS ENGINE v14.13
 JAI MAA SHAKTI 🔱
 ════════════════════════════════════════════════════════
 
@@ -293,7 +307,20 @@ ABSOLUTE RULES:
    language — then a newline, then the paragraph. Separate sections with a blank line
    (two newlines: \\n\\n). PLAIN TEXT ONLY — no markdown #, no **, no HTML tags.
    Escape newlines as \\n inside the JSON string.
-10. REAL-WORLD CONTEXT: Where current information about the client's profession/sector
+10. DATA INTEGRITY (v14.13 — CRITICAL): Use ONLY the chart facts given in CLIENT
+   DETAILS below. If Lagna, Nakshatra, or any chart value is marked NOT AVAILABLE,
+   you must NEVER invent, guess, or state one — analyze using only the values you
+   were given (e.g. Dasha + Nakshatra). Stating a wrong Lagna destroys trust forever.
+11. HEALTH SENSITIVITY (v14.13 — CRITICAL): If the situation note involves MENTAL
+   or PHYSICAL health (e.g. OCD, anxiety, depression, panic, illness, disease):
+   a) NEVER state that planets/dasha CAUSE the medical condition. Say instead that
+      this period can INTENSIFY such tendencies or make this phase feel heavier.
+   b) You MUST include one caring, natural line (in Section 6 actions or Section 8
+      remedy) advising them to also consult a qualified doctor/counselor — upay
+      SUPPORT the healing journey, they do not replace medical treatment.
+   c) If the client is a student/minor, also gently encourage sharing openly with
+      parents. Extra-gentle, hopeful tone throughout. Never frighten.
+12. REAL-WORLD CONTEXT: Where current information about the client's profession/sector
    and current city is available to you, write 1-2 concrete present-day facts
    (industry/job-market climate, hiring/demand trend, local economic factor) and connect
    them to the planetary timing. Keep it GENERAL and sector-level, but AGE-RELEVANT —
@@ -304,7 +331,7 @@ ABSOLUTE RULES:
    NEVER write "job jayegi" / "loss hoga" as certainty. Instead: "sector mein abhi X trend
    hai + aapki dasha Y kehti hai → ye 3 kaam abhi karo." Warn + prepare. Never frighten.
    This context is SECTION 2 of simpleSummary.text — DO NOT add new JSON keys.
-11. OUTPUT = RAW JSON ONLY. No markdown fences, no preamble, no text after the final }.
+13. OUTPUT = RAW JSON ONLY. No markdown fences, no preamble, no text after the final }.
     Escape every double-quote inside string values. First char { — last char }.
 ════════════════════════════════════════════════════════`.trim()
 
@@ -313,7 +340,7 @@ ABSOLUTE RULES:
 CLIENT DETAILS:
 - Name: ${birthData.name ?? 'Friend'}
 - Age: ${clientAge ?? 'unknown'} | Gender: ${clientGender} | Life Stage: ${clientStage} | Relationship: ${clientRel}
-- Lagna: ${lagna} | Nakshatra: ${nakshatra}
+- Lagna: ${lagna || 'NOT AVAILABLE — do NOT state or invent any Lagna'} | Nakshatra: ${nakshatra || 'NOT AVAILABLE — do NOT state or invent any Nakshatra'}
 - Mahadasha: ${mahadasha} MD + ${antardasha} AD
 - City: ${birthData.cityName ?? userContext.city} → Currently: ${userContext.currentCity ?? userContext.city}
 - Segment: ${userContext.segment} | Profession: ${clientJob} | Sector: ${userContext.sector}
@@ -325,6 +352,7 @@ CLIENT DETAILS:
 SITUATION NOTE (60% FOCUS — MANDATORY):
 "${userContext.situationNote ?? 'domain challenges and growth'}"
 First 3 sentences MUST directly address this pain. Make them feel deeply understood.
+If this note involves mental/physical health, follow ABSOLUTE RULE 11 strictly.
 ${numerologyBlock}
 
 REAL-WORLD CONTEXT (use current web knowledge — sector + city only):
@@ -359,7 +387,7 @@ OUTPUT JSON:
   ],
 
   "simpleSummary": {
-    "text": "WRITE 720-780 WORDS of body text (target 755) in ${lang.toUpperCase()}, organized as 9 NAMED SECTIONS. Each section = ONE short heading line (emoji + 2-5 words in ${lang.toUpperCase()}) + \\n + paragraph. Separate sections with \\n\\n. Headings do NOT count in word budget. Heading style examples for Hinglish (translate appropriately for Hindi/English): [SECTION 1 — heading like '🪔 Aapki Baat, Seedhe Dil Se': address their situation/pain directly — make them feel deeply understood — 100 words] [SECTION 2 — heading like '🌍 Aaj Ki Zameeni Haqeeqat': REAL-WORLD GROUND REALITY — today's actual climate for their profession (${clientJob}) and current city (hiring/demand/salary/market trend), age-relevant for a ${clientAge ?? ''} year old at ${clientStage} stage, connected to their situation; sector + city level only, NEVER name the person, frame as preparation not doom — 100 words] [SECTION 3 — heading like '🪐 Aisa Kyun Ho Raha Hai': why this is happening — explain key planets in simple language${numerology ? '; weave the numerology compatibility insight here if relationship-relevant' : ''} — 115 words] [SECTION 4 — heading like '⏳ Aapki Current Dasha': what current ${mahadasha} Mahadasha + ${antardasha} Antardasha means for their life right now — 115 words] [SECTION 5 — heading like '🌅 Aage Kya Aane Wala Hai': what is coming — specific timeframe, what to expect, hope — 105 words] [SECTION 6 — heading like '✅ Abhi Ye 3 Kaam Karo': three priority actions they must take now in order of importance — 70 words] [SECTION 7 — heading like '⚠️ In Cheezon Se Bacho': two critical things to avoid with brief classical reason — 50 words] [SECTION 8 — heading like '🙏 Aapka Personal Upay': specific remedy — exact mantra with Sanskrit + count + day + time OR exact dana with recipient, day and time, appropriate for ${clientGender}, plus one line on HOW to do it correctly — 50 words] [SECTION 9 — heading like '🔱 Maa Shakti Ka Ashirwad': closing blessing — hope, protection, one line reminding them their karma + these remedies together change the timeline — 50 words]. Spiritual Guru voice. Short sentences. Reader must finish till the end. NO suspense hook. FULL complete answer. PLAIN TEXT headings only — no markdown, no HTML.",
+    "text": "WRITE 720-780 WORDS of body text (target 755) in ${lang.toUpperCase()}, organized as 9 NAMED SECTIONS. Each section = ONE short heading line (emoji + 2-5 words in ${lang.toUpperCase()}) + \\n + paragraph. Separate sections with \\n\\n. Headings do NOT count in word budget. Heading style examples for Hinglish (translate appropriately for Hindi/English): [SECTION 1 — heading like '🪔 Aapki Baat, Seedhe Dil Se': address their situation/pain directly — make them feel deeply understood — 100 words] [SECTION 2 — heading like '🌍 Aaj Ki Zameeni Haqeeqat': REAL-WORLD GROUND REALITY — today's actual climate for their profession (${clientJob}) and current city (hiring/demand/salary/market trend), age-relevant for a ${clientAge ?? ''} year old at ${clientStage} stage, connected to their situation; sector + city level only, NEVER name the person, frame as preparation not doom — 100 words] [SECTION 3 — heading like '🪐 Aisa Kyun Ho Raha Hai': why this is happening — explain key planets in simple language using ONLY the chart facts provided${numerology ? '; weave the numerology compatibility insight here if relationship-relevant' : ''} — 115 words] [SECTION 4 — heading like '⏳ Aapki Current Dasha': what current ${mahadasha} Mahadasha + ${antardasha} Antardasha means for their life right now — 115 words] [SECTION 5 — heading like '🌅 Aage Kya Aane Wala Hai': what is coming — specific timeframe, what to expect, hope — 105 words] [SECTION 6 — heading like '✅ Abhi Ye 3 Kaam Karo': three priority actions they must take now in order of importance (include doctor/counselor advice here if health-related per RULE 11) — 70 words] [SECTION 7 — heading like '⚠️ In Cheezon Se Bacho': two critical things to avoid with brief classical reason — 50 words] [SECTION 8 — heading like '🙏 Aapka Personal Upay': specific remedy — exact mantra with Sanskrit + count + day + time OR exact dana with recipient, day and time, appropriate for ${clientGender}, plus one line on HOW to do it correctly — 50 words] [SECTION 9 — heading like '🔱 Maa Shakti Ka Ashirwad': closing blessing — hope, protection, one line reminding them their karma + these remedies together change the timeline — 50 words]. Spiritual Guru voice. Short sentences. Reader must finish till the end. NO suspense hook. FULL complete answer. PLAIN TEXT headings only — no markdown, no HTML.",
     "keyMessage": "ONE powerful Guru sentence that captures their life truth. Max 25 words.",
     "periodSummary": "3-4 sentences explaining what current Dasha combination means for their daily life in plain simple language.",
     "bestDates": "3-4 specific favorable date ranges or windows from dasha calculations.",
@@ -384,15 +412,17 @@ OUTPUT JSON:
     }
   },
 
-  "_promptVersion": "pro-v14.12",
+  "_promptVersion": "pro-v14.13",
   "_tier": "premium"
 }
 
 CRITICAL FINAL CHECKLIST:
 - simpleSummary.text MUST be 720-780 WORDS of body text — 9 sections, each with an emoji heading line
 - Sections separated by \\n\\n — headings in ${lang.toUpperCase()} — NO markdown/HTML
-- geoBullets MUST have exactly 10 items — 25-40 words each
+- geoBullets MUST have exactly 10 items — 25-40 words each — COUNT THEM: 10
 - NO URLs anywhere in geoBullets or geoDirectAnswer
+- NEVER state a Lagna/Nakshatra that was marked NOT AVAILABLE
+- Health-related situation → doctor/counselor line included (RULE 11)
 - Language = ${lang.toUpperCase()} every single word throughout
 - Return ONLY valid JSON — first char { last char }
 - JAI MAA SHAKTI 🔱`
@@ -443,7 +473,7 @@ function mergeTemplateWithGemini(
 }
 
 // ── extractFromRawChart ───────────────────────────────────────────────────────
-function extractFromRawChart(rawChart:any) {
+function extractFromRawChart(rawChart:any): ChartExtract {
   if(!rawChart) return {lagna:null,nakshatra:null,mahadasha:null,antardasha:null}
   const lagna = rawChart?.lagna?.sign ?? rawChart?.lagna?.rashi ?? null
   const moon  = rawChart?.grahas?.find?.((g:any)=>g.planet==='Moon'||g.name==='Moon')
@@ -486,7 +516,7 @@ async function saveToSupabase(p:{
   predictionJson:Record<string,any>; geminiModel:string; polished:boolean
   processingMs:number; publicSlug:string
   seoMeta:ReturnType<typeof buildSeoGeoMeta>
-  chartExtract:ReturnType<typeof extractFromRawChart>
+  chartExtract:ChartExtract
   paymentVerification?: PaymentVerification | null
 }): Promise<string> {
   const simpleSummaryText =
@@ -679,12 +709,24 @@ export async function POST(req: NextRequest) {
   if(synthesisResult.status==='fulfilled'){
     synthesisData=synthesisResult.value
     console.log(`[TV-v14.6] /synthesize OK | ms:${Date.now()-startMs}`)
+  } else {
+    // v14.13 FIX-4: failure was silent — now logged with reason
+    console.error(`[TV-v14.13] /synthesize FAILED: ${synthesisResult.reason?.message ?? synthesisResult.reason} | ms:${Date.now()-startMs}`)
   }
   if(templateResult.status==='fulfilled'){
     const tr=templateResult.value
     templateData=tr?.template??tr?.html??null
-    if(templateData&&typeof templateData!=='object') templateData=null
+    if(templateData&&typeof templateData!=='object') {
+      console.error(`[TV-v14.13] /template returned non-object (type:${typeof templateData}) — planet table/upay/panchang will be MISSING | ms:${Date.now()-startMs}`)
+      templateData=null
+    }
     else if(templateData) console.log(`[TV-v14.6] /template OK | ms:${Date.now()-startMs}`)
+    else console.error(`[TV-v14.13] /template returned empty — planet table/upay/panchang will be MISSING | ms:${Date.now()-startMs}`)
+  } else {
+    // v14.13 FIX-4: failure was silent — now logged with reason.
+    // When this fires on a PAID request, the customer loses planet table,
+    // kundali chart, 5 upay, action windows and panchang — investigate VM.
+    console.error(`[TV-v14.13] /template FAILED: ${templateResult.reason?.message ?? templateResult.reason} | paid:${isPaid} | ms:${Date.now()-startMs}`)
   }
 
   // ── STEP 4: Gemini Call ───────────────────────────────────────────────────
@@ -693,10 +735,11 @@ export async function POST(req: NextRequest) {
 
   if(isPaid) {
     // ── PAID: Gemini Pro — 720-780 words + real-world grounding (Option C) ───
-    console.log(`[TV-v14.12] PRO START | grounding:${PRO_REALWORLD_SEARCH} | numerology:${numerologyCompatibility?'yes':'no'} | ms:${Date.now()-startMs}`)
+    console.log(`[TV-v14.13] PRO START | grounding:${PRO_REALWORLD_SEARCH} | numerology:${numerologyCompatibility?'yes':'no'} | vm_lagna:${chartExtract.lagna??'null'} | ms:${Date.now()-startMs}`)
     const {systemPrompt:proSystem, userMessage:proUser} = buildProPrompt(
       kundaliData, localBirthData, domainConfig, promptUserContext, templateData,
-      numerologyCompatibility ?? null
+      numerologyCompatibility ?? null,
+      chartExtract
     )
     try {
       let proJson:any
@@ -705,22 +748,22 @@ export async function POST(req: NextRequest) {
           // Attempt 1: WITH Google Search grounding (sector + city real-world context)
           const rawPro = await callGemini(GEMINI_PRO, proSystem, proUser, true, true)
           proJson = parseGeminiJSON(rawPro)
-          console.log(`[TV-v14.12] PRO grounded OK | summary_len:${proJson.simpleSummary?.text?.length??0} | ms:${Date.now()-startMs}`)
+          console.log(`[TV-v14.13] PRO grounded OK | summary_len:${proJson.simpleSummary?.text?.length??0} | geoBullets:${proJson.geoBullets?.length??0} | ms:${Date.now()-startMs}`)
         } catch(searchErr:any) {
           // Fallback: WITHOUT grounding (reliable JSON mode) — customer always gets a prediction
-          console.error(`[TV-v14.12] PRO grounded attempt failed (${searchErr.message}) — falling back to no-search`)
+          console.error(`[TV-v14.13] PRO grounded attempt failed (${searchErr.message}) — falling back to no-search`)
           const rawPro2 = await callGemini(GEMINI_PRO, proSystem, proUser, true, false)
           proJson = parseGeminiJSON(rawPro2)
-          console.log(`[TV-v14.12] PRO fallback OK | summary_len:${proJson.simpleSummary?.text?.length??0} | ms:${Date.now()-startMs}`)
+          console.log(`[TV-v14.13] PRO fallback OK | summary_len:${proJson.simpleSummary?.text?.length??0} | geoBullets:${proJson.geoBullets?.length??0} | ms:${Date.now()-startMs}`)
         }
       } else {
         const rawPro = await callGemini(GEMINI_PRO, proSystem, proUser, true, false)
         proJson = parseGeminiJSON(rawPro)
-        console.log(`[TV-v14.12] PRO OK (search off) | summary_len:${proJson.simpleSummary?.text?.length??0} | ms:${Date.now()-startMs}`)
+        console.log(`[TV-v14.13] PRO OK (search off) | summary_len:${proJson.simpleSummary?.text?.length??0} | geoBullets:${proJson.geoBullets?.length??0} | ms:${Date.now()-startMs}`)
       }
-      predictionJson = mergeTemplateWithGemini(templateData, proJson, '14.12-pro')
+      predictionJson = mergeTemplateWithGemini(templateData, proJson, '14.13-pro')
     } catch(err:any) {
-      console.error(`[TV-v14.12] PRO failed: ${err.message}`)
+      console.error(`[TV-v14.13] PRO failed: ${err.message}`)
       return NextResponse.json({error:`Pro prediction failed: ${err.message}`},{status:500})
     }
   } else {
