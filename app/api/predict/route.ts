@@ -3,43 +3,51 @@
  * TRIKAAL VAANI — Unified Prediction Endpoint
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/api/predict/route.ts
- * VERSION: 14.9 — Real-world context moved to Para 2 of paid summary
+ * VERSION: 14.12 — Named section headings in paid summary + Remedy/Blessing 50w each
  * SIGNED: ROHIIT GUPTA, CEO
  *
+ * CHANGES v14.12 vs v14.11:
+ *   ✅ Paid simpleSummary.text now has 9 NAMED SECTIONS — each paragraph starts
+ *      with a short emoji heading line (in the reading's language) so the client
+ *      SEES the structure and feels the ₹51 depth (perceived-value upgrade)
+ *      Sections: Aapki Baat → Zameeni Haqeeqat → Kyun Ho Raha Hai → Current Dasha
+ *      → Aage Kya Hai → 3 Kaam → Kya Avoid Karo → Aapka Upay → Maa Ka Ashirwad
+ *   ✅ Remedy para raised 35 → 50 words, Blessing para raised 25 → 50 words
+ *   ✅ Word budget: 700-750 → 720-780 (target 755) to absorb the increase
+ *   ✅ Headings are plain-text lines separated by \n\n — NO new JSON keys,
+ *      NO markdown syntax (safe for current report renderer)
+ *   ✅ ALL v14.11 logic preserved 100%
+ *   ⚠️ DEPLOY NOTE: verify report page renders \n\n as paragraph breaks
+ *      (white-space: pre-line or split-on-newline) — test one paid reading
+ *
+ * CHANGES v14.11 vs v14.10 (CONSOLIDATED):
+ *   ✅ JOB_LABELS map — Gemini receives human-readable profession
+ *      ("Salaried IT / Tech professional") instead of raw code ("salaried_it")
+ *   ✅ numerologyCompatibility (BirthForm dual-chart domains) read from body
+ *      and passed into Pro prompt — woven into relationship analysis
+ *   ✅ Real-world grounding remains PAID-ONLY (FREE Flash tier untouched)
+ *
+ * CHANGES v14.10 vs v14.9:
+ *   ✅ CLIENT DETAILS includes Age, Gender, Life Stage, Relationship Status
+ *   ✅ REAL-WORLD CONTEXT age-aware grounding
+ *   ✅ Anti-doom rule: preparation guidance, never deterministic doom
+ *
  * CHANGES v14.9 vs v14.8:
- *   ✅ Real-world sector/city context now appears as the SECOND paragraph (Para 2)
- *   ✅ Para budget rebalanced (Para 1 pain → Para 2 real-world → planets/timing) — still ~650 words
- *   ✅ All v14.8 grounding/fallback/privacy/kill-switch logic preserved
+ *   ✅ Real-world sector/city context as SECOND paragraph (Para 2)
  *
  * CHANGES v14.8 vs v14.7:
  *   ✅ PAID predictions use live Google Search grounding (sector + current-city trends)
- *   ✅ Real-world climate woven into summary + geoBullets (NO new JSON keys, no frontend change)
- *   ✅ STRICT privacy: sector/city trends only — never identifies the individual person
+ *   ✅ STRICT privacy: sector/city trends only — never identifies the individual
  *   ✅ Gemini 2.5 constraint handled: json-mime auto-dropped when grounding on
- *   ✅ Auto-fallback to no-search call if grounded JSON fails (customer always gets prediction)
- *   ✅ CEO kill-switch PRO_REALWORLD_SEARCH (set false to disable grounding instantly)
- *   ✅ FREE Flash tier unchanged — zero grounding cost on free
+ *   ✅ Auto-fallback to no-search call if grounded JSON fails
+ *   ✅ CEO kill-switch PRO_REALWORLD_SEARCH
  *
  * CHANGES v14.7 vs v14.6:
- *   ✅ Paid simpleSummary.text reduced 900 → 650 words (users not finishing long reads)
- *   ✅ Per-paragraph word budget rebalanced to total ~650
- *   ✅ Tighter paragraphs for higher read-completion
- *   ✅ ALL v14.6 logic preserved 100% (payment gate, schema, routing, geoBullets untouched)
- *   ✅ FREE Flash tier unchanged (150-200w)
+ *   ✅ Paid summary reduced 900 → 650 words (read-completion)
  *
  * CHANGES v14.6 vs v14.5:
- *   ✅ paymentVerification gate for paid + voice tiers
- *   ✅ HMAC-SHA256 signature verified server-side BEFORE prediction
- *   ✅ razorpay_payment_id + razorpay_order_id saved to Supabase
- *   ✅ payment_amount + payment_verified columns added
- *   ✅ Anti-fraud: blocks unverified paid requests
- *   ✅ Dev fallback: if env keys missing, falls back to free safely
- *   ✅ ALL v14.5 logic preserved:
- *      - Iron rules (gemini-prompt.ts LOCKED, MAX_TOKENS=12000)
- *      - 10 geoBullets, geoDirectAnswer, E-E-A-T schema
- *      - Gender + age + dynamicSegment routing
- *      - Parallel /synthesize + /template calls
- *      - 900-word Pro / 150-word Flash split
+ *   ✅ paymentVerification gate, HMAC-SHA256 server-side verify
+ *   ✅ razorpay payment columns in Supabase, anti-fraud block
  *
  * IRON RULES — NEVER VIOLATE:
  *   🔒 NEVER touch gemini-prompt.ts
@@ -86,6 +94,33 @@ const ALLOWED_PAID_AMOUNTS: Record<string, number> = {
   voice: 1100,   // ₹11 Voice Reading
 }
 
+// ── v14.11: Human-readable job labels for Gemini prompt + grounding search ──
+// MUST stay in sync with JOB_CATEGORIES in components/landing/BirthForm.tsx
+const JOB_LABELS: Record<string, string> = {
+  student:             'Student',
+  fresher:             'Fresher / Job Seeker (entry-level)',
+  salaried_it:         'Salaried IT / Tech professional',
+  salaried_finance:    'Salaried Finance / Banking professional',
+  salaried_healthcare: 'Salaried Healthcare / Medical professional',
+  salaried_govt:       'Government / PSU employee',
+  salaried_education:  'Education / Teaching professional',
+  salaried_legal:      'Legal / Law professional',
+  salaried_media:      'Media / Creative professional',
+  salaried_other:      'Salaried professional',
+  self_employed:       'Self-Employed / Freelancer',
+  business_owner:      'Business Owner',
+  startup_founder:     'Startup Founder',
+  real_estate:         'Real Estate professional',
+  trader_investor:     'Trader / Investor',
+  homemaker:           'Homemaker',
+  retired:             'Retired',
+  nri:                 'NRI / Working Abroad',
+}
+
+function jobLabel(code: string): string {
+  return JOB_LABELS[code] ?? code ?? 'Working professional'
+}
+
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -101,6 +136,14 @@ interface PaymentVerification {
   amount:              number  // in paise
 }
 
+// ── v14.11: Numerology compatibility payload (sent by BirthForm dual domains) ─
+interface NumerologyCompatibility {
+  score:       number
+  label:       string
+  description: string
+  color?:      string
+}
+
 interface PredictRequest {
   userId?:string; sessionId:string; domainId:DomainId; domainLabel?:string
   predictionTier?:PredictionTier
@@ -108,6 +151,7 @@ interface PredictRequest {
   birthData:{name?:string;dob:string;tob:string;lat:number;lng:number;cityName?:string;timezone?:number;ayanamsa?:string}
   userContext:{segment:'genz'|'millennial'|'genx';dynamicSegment?:string;gender?:string;age?:number;employment:string;sector:string;language:'hindi'|'hinglish'|'english';city:string;currentCity?:string;relationshipStatus?:string;situationNote?:string;mobile?:string;person2Name?:string|null;person2City?:string|null;person2CurrentCity?:string|null}
   person2Data?:{name:string;dob:string;tob:string;lat:number;lng:number;cityName:string;currentCity:string;mobile?:string}|null
+  numerologyCompatibility?: NumerologyCompatibility | null
 }
 
 // ── Razorpay signature verification (HMAC-SHA256) ────────────────────────────
@@ -180,13 +224,14 @@ function parseGeminiJSON(raw:string): any {
 }
 
 // ── buildProPrompt ────────────────────────────────────────────────────────────
-// Paid tier — 650 words, deep analysis, full GEO signals
+// Paid tier — 720-780 words, 9 named sections, deep analysis, full GEO signals
 function buildProPrompt(
   kundali: KundaliData,
   birthData: BirthData,
   domain: DomainConfig,
   userContext: UserContext,
   templateData?: any,
+  numerology?: NumerologyCompatibility | null,
 ): { systemPrompt: string; userMessage: string } {
 
   const lang = userContext.language
@@ -201,9 +246,27 @@ function buildProPrompt(
   const lagna = kundali.lagna ?? ''
   const nakshatra = kundali.nakshatra ?? ''
 
+  // ── v14.10: Full human profile for Gemini (age-aware grounding + remedies) ──
+  const clientAge    = (userContext as any).age ?? null
+  const clientGender = (userContext as any).gender || 'not specified'
+  const clientStage  = userContext.dynamicSegment ?? 'mid_general'
+  const clientRel    = userContext.relationshipStatus || 'not specified'
+  // ── v14.11: Human-readable profession for prompt + grounding search ────────
+  const clientJob    = jobLabel(userContext.employment)
+
+  // ── v14.11: Optional numerology block (dual-chart domains only) ────────────
+  const numerologyBlock = numerology ? `
+
+MOBILE NUMEROLOGY COMPATIBILITY (dual-chart reading — the client saw this score on the form):
+- Score: ${numerology.score}% — ${numerology.label}
+- Insight: ${numerology.description}
+Weave this numerology insight naturally into the relationship/person-2 analysis paragraphs
+of simpleSummary.text (1-2 sentences). Connect it to the planetary compatibility — do NOT
+present it as a separate section, and do NOT add new JSON keys.` : ''
+
   const systemPrompt = `
 ════════════════════════════════════════════════════════
-TRIKAAL VAANI — PRO DEEP ANALYSIS ENGINE v14.9
+TRIKAAL VAANI — PRO DEEP ANALYSIS ENGINE v14.12
 JAI MAA SHAKTI 🔱
 ════════════════════════════════════════════════════════
 
@@ -220,18 +283,28 @@ ABSOLUTE RULES:
 2. situationNote = 60% weight — first 3 sentences address pain directly
 3. geoBullets = EXACTLY 10 items — 25-40 words each — NO URLs
 4. geoDirectAnswer = 4-5 sentences — NO URLs — NO "Visit trikalvaani"
-5. simpleSummary.text = EXACTLY 650 WORDS — count carefully
+5. simpleSummary.text = 720-780 WORDS body text (target 755) — count carefully.
+   Section HEADING lines do NOT count toward the word budget.
 6. NO suspense hook — paid user gets full truth immediately
-7. Language = ${lang.toUpperCase()} every single word
+7. Language = ${lang.toUpperCase()} every single word — headings too
 8. All seoSignals fields populated
-9. REAL-WORLD CONTEXT: Where current information about the client's profession/sector
+9. SECTION HEADINGS (v14.12): simpleSummary.text is organized into 9 NAMED SECTIONS.
+   Each section starts with ONE short heading line — emoji + 2-5 words in the reading's
+   language — then a newline, then the paragraph. Separate sections with a blank line
+   (two newlines: \\n\\n). PLAIN TEXT ONLY — no markdown #, no **, no HTML tags.
+   Escape newlines as \\n inside the JSON string.
+10. REAL-WORLD CONTEXT: Where current information about the client's profession/sector
    and current city is available to you, write 1-2 concrete present-day facts
    (industry/job-market climate, hiring/demand trend, local economic factor) and connect
-   them to the planetary timing. Keep it GENERAL and sector-level.
+   them to the planetary timing. Keep it GENERAL and sector-level, but AGE-RELEVANT —
+   what matters for the client's career stage (entry-level vs mid-career vs senior).
    STRICT PRIVACY: NEVER search for, name, or identify this individual person. NEVER use
    their name. Only general sector/city/market trends — no private-person lookup.
-   This context is the SECOND paragraph (Para 2) of simpleSummary.text — DO NOT add new JSON keys.
-10. OUTPUT = RAW JSON ONLY. No markdown fences, no preamble, no text after the final }.
+   TONE RULE: Real-world challenges are PREPARATION guidance, never deterministic doom.
+   NEVER write "job jayegi" / "loss hoga" as certainty. Instead: "sector mein abhi X trend
+   hai + aapki dasha Y kehti hai → ye 3 kaam abhi karo." Warn + prepare. Never frighten.
+   This context is SECTION 2 of simpleSummary.text — DO NOT add new JSON keys.
+11. OUTPUT = RAW JSON ONLY. No markdown fences, no preamble, no text after the final }.
     Escape every double-quote inside string values. First char { — last char }.
 ════════════════════════════════════════════════════════`.trim()
 
@@ -239,10 +312,11 @@ ABSOLUTE RULES:
 
 CLIENT DETAILS:
 - Name: ${birthData.name ?? 'Friend'}
+- Age: ${clientAge ?? 'unknown'} | Gender: ${clientGender} | Life Stage: ${clientStage} | Relationship: ${clientRel}
 - Lagna: ${lagna} | Nakshatra: ${nakshatra}
 - Mahadasha: ${mahadasha} MD + ${antardasha} AD
 - City: ${birthData.cityName ?? userContext.city} → Currently: ${userContext.currentCity ?? userContext.city}
-- Segment: ${userContext.segment} | Employment: ${userContext.employment} | Sector: ${userContext.sector}
+- Segment: ${userContext.segment} | Profession: ${clientJob} | Sector: ${userContext.sector}
 - Dasha: ${templateData?.dashaOneLiner ?? `${mahadasha} MD + ${antardasha} AD`}
 - Dasha Quality: ${templateData?.dashaQuality ?? 'Madhyam'}
 - Action Window: ${templateData?.actionWindowHint ?? 'from dasha calculations'}
@@ -251,15 +325,20 @@ CLIENT DETAILS:
 SITUATION NOTE (60% FOCUS — MANDATORY):
 "${userContext.situationNote ?? 'domain challenges and growth'}"
 First 3 sentences MUST directly address this pain. Make them feel deeply understood.
+${numerologyBlock}
 
 REAL-WORLD CONTEXT (use current web knowledge — sector + city only):
-- Profession/Sector: ${userContext.employment}${userContext.sector ? ` (${userContext.sector})` : ''}
+- Profile: ${clientAge ? `${clientAge} year old` : 'Adult'} ${clientGender !== 'not specified' ? clientGender : 'person'}, ${clientStage} life stage
+- Profession: ${clientJob}${userContext.sector ? ` (${userContext.sector} sector)` : ''}
 - Lives/works in: ${userContext.currentCity ?? userContext.city}
-- Gender (for remedy personalization only): ${(userContext as any).gender || 'not specified'}
+- Relationship status (for marriage/relationship domains): ${clientRel}
 Find the CURRENT (today's) real-world climate for this profession/sector and this city —
-e.g. hiring vs layoffs, demand, salary/growth trend, or local economic factor. Place 1-2
-concrete present-day facts as the SECOND paragraph (Para 2) of simpleSummary.text and connect them to the
+e.g. hiring vs layoffs, demand, salary/growth trend, or local economic factor — RELEVANT
+TO THIS AGE AND CAREER STAGE (e.g. entry-level IT hiring in Pune for a 27-year-old vs
+senior-management churn for a 47-year-old are DIFFERENT trends). Place 1-2 concrete
+present-day facts as SECTION 2 of simpleSummary.text and connect them to the
 ${mahadasha} Mahadasha period — so the guidance feels grounded in real life, not only planets.
+Frame every challenge as preparation + timing guidance, NEVER as certain doom.
 NEVER identify or name this person. Sector + city trends ONLY. No private-person search.
 
 OUTPUT JSON:
@@ -280,7 +359,7 @@ OUTPUT JSON:
   ],
 
   "simpleSummary": {
-    "text": "WRITE EXACTLY 650 WORDS in ${lang.toUpperCase()}. Structure: [Para 1: Address their situation/pain directly — make them feel deeply understood — 90 words] [Para 2: REAL-WORLD GROUND REALITY — today's actual climate for their profession/sector (${userContext.employment}) and current city (hiring/demand/salary/market trend), connected to their situation; sector + city level only, NEVER name the person — 90 words] [Para 3-4: Why this is happening — explain key planets in simple language — 105 words] [Para 5-6: What current ${mahadasha} Mahadasha + ${antardasha} Antardasha means for their life right now — 105 words] [Para 7-8: What is coming — specific timeframe, what to expect, hope — 95 words] [Para 9: Three priority actions they must take now in order of importance — 65 words] [Para 10: Two critical things to avoid with brief classical reason — 45 words] [Para 11: Specific remedy — exact mantra with count OR exact dana with day and time — 30 words] [Para 12: Maa Shakti blessing and hope — 25 words]. Spiritual Guru voice. Short sentences. Tighter paragraphs — the reader must finish till the end. NO suspense hook. FULL complete answer.",
+    "text": "WRITE 720-780 WORDS of body text (target 755) in ${lang.toUpperCase()}, organized as 9 NAMED SECTIONS. Each section = ONE short heading line (emoji + 2-5 words in ${lang.toUpperCase()}) + \\n + paragraph. Separate sections with \\n\\n. Headings do NOT count in word budget. Heading style examples for Hinglish (translate appropriately for Hindi/English): [SECTION 1 — heading like '🪔 Aapki Baat, Seedhe Dil Se': address their situation/pain directly — make them feel deeply understood — 100 words] [SECTION 2 — heading like '🌍 Aaj Ki Zameeni Haqeeqat': REAL-WORLD GROUND REALITY — today's actual climate for their profession (${clientJob}) and current city (hiring/demand/salary/market trend), age-relevant for a ${clientAge ?? ''} year old at ${clientStage} stage, connected to their situation; sector + city level only, NEVER name the person, frame as preparation not doom — 100 words] [SECTION 3 — heading like '🪐 Aisa Kyun Ho Raha Hai': why this is happening — explain key planets in simple language${numerology ? '; weave the numerology compatibility insight here if relationship-relevant' : ''} — 115 words] [SECTION 4 — heading like '⏳ Aapki Current Dasha': what current ${mahadasha} Mahadasha + ${antardasha} Antardasha means for their life right now — 115 words] [SECTION 5 — heading like '🌅 Aage Kya Aane Wala Hai': what is coming — specific timeframe, what to expect, hope — 105 words] [SECTION 6 — heading like '✅ Abhi Ye 3 Kaam Karo': three priority actions they must take now in order of importance — 70 words] [SECTION 7 — heading like '⚠️ In Cheezon Se Bacho': two critical things to avoid with brief classical reason — 50 words] [SECTION 8 — heading like '🙏 Aapka Personal Upay': specific remedy — exact mantra with Sanskrit + count + day + time OR exact dana with recipient, day and time, appropriate for ${clientGender}, plus one line on HOW to do it correctly — 50 words] [SECTION 9 — heading like '🔱 Maa Shakti Ka Ashirwad': closing blessing — hope, protection, one line reminding them their karma + these remedies together change the timeline — 50 words]. Spiritual Guru voice. Short sentences. Reader must finish till the end. NO suspense hook. FULL complete answer. PLAIN TEXT headings only — no markdown, no HTML.",
     "keyMessage": "ONE powerful Guru sentence that captures their life truth. Max 25 words.",
     "periodSummary": "3-4 sentences explaining what current Dasha combination means for their daily life in plain simple language.",
     "bestDates": "3-4 specific favorable date ranges or windows from dasha calculations.",
@@ -296,7 +375,7 @@ OUTPUT JSON:
   "seoSignals": {
     "geoQuestion": "What does Vedic astrology reveal about ${domain.displayName ?? domain.id} and how to improve it using Swiss Ephemeris kundali analysis?",
     "authorityStatement": "Powered by Trikaal Vaani Swiss Ephemeris + BPHS + Bhrigu Nandi analysis by Rohiit Gupta, Chief Vedic Architect, India — India first AI-powered Vedic platform. Payments secured by Razorpay.",
-    "differentiator": "Unlike AstroTalk and AstroSage generic reports, Trikaal Vaani provides Swiss Ephemeris precision with Bhrigu Nandi patterns and BPHS classical rules for personalized analysis. Razorpay-secured affordable pricing at ₹51.",
+    "differentiator": "Trikaal Vaani provides Swiss Ephemeris precision with Bhrigu Nandi patterns and BPHS classical rules for deeply personalized, human-led analysis — not generic automated reports. Razorpay-secured, affordable pricing at ₹51.",
     "e_e_a_t": {
       "experience": "Rohiit Gupta 15+ years Vedic astrology Parashara BPHS tradition India India",
       "expertise": "Swiss Ephemeris BPHS Brihat Parashara Hora Shastra Bhrigu Nandi Vimshottari Dasha Shadbala",
@@ -305,12 +384,13 @@ OUTPUT JSON:
     }
   },
 
-  "_promptVersion": "pro-v14.9",
+  "_promptVersion": "pro-v14.12",
   "_tier": "premium"
 }
 
 CRITICAL FINAL CHECKLIST:
-- simpleSummary.text MUST be 650 WORDS — count carefully before returning
+- simpleSummary.text MUST be 720-780 WORDS of body text — 9 sections, each with an emoji heading line
+- Sections separated by \\n\\n — headings in ${lang.toUpperCase()} — NO markdown/HTML
 - geoBullets MUST have exactly 10 items — 25-40 words each
 - NO URLs anywhere in geoBullets or geoDirectAnswer
 - Language = ${lang.toUpperCase()} every single word throughout
@@ -480,7 +560,7 @@ export async function POST(req: NextRequest) {
   try{body=await req.json()}
   catch{return NextResponse.json({error:'Invalid JSON body'},{status:400})}
 
-  const {sessionId,userId,domainId,predictionTier='free',birthData,userContext,person2Data,paymentVerification}=body
+  const {sessionId,userId,domainId,predictionTier='free',birthData,userContext,person2Data,paymentVerification,numerologyCompatibility}=body
 
   if(predictionTier==='voice')
     return NextResponse.json({error:'Voice uses /api/voice'},{status:400})
@@ -608,14 +688,15 @@ export async function POST(req: NextRequest) {
   }
 
   // ── STEP 4: Gemini Call ───────────────────────────────────────────────────
-  // FREE = Flash (150w, fast) | PAID = Pro (900w, deep)
+  // FREE = Flash (150w, fast) | PAID = Pro (720-780w, 9 named sections + grounding)
   let predictionJson: Record<string,any>
 
   if(isPaid) {
-    // ── PAID: Gemini Pro — 650 words + real-world grounding (Option C) ───────
-    console.log(`[TV-v14.8] PRO START | grounding:${PRO_REALWORLD_SEARCH} | ms:${Date.now()-startMs}`)
+    // ── PAID: Gemini Pro — 720-780 words + real-world grounding (Option C) ───
+    console.log(`[TV-v14.12] PRO START | grounding:${PRO_REALWORLD_SEARCH} | numerology:${numerologyCompatibility?'yes':'no'} | ms:${Date.now()-startMs}`)
     const {systemPrompt:proSystem, userMessage:proUser} = buildProPrompt(
-      kundaliData, localBirthData, domainConfig, promptUserContext, templateData
+      kundaliData, localBirthData, domainConfig, promptUserContext, templateData,
+      numerologyCompatibility ?? null
     )
     try {
       let proJson:any
@@ -624,22 +705,22 @@ export async function POST(req: NextRequest) {
           // Attempt 1: WITH Google Search grounding (sector + city real-world context)
           const rawPro = await callGemini(GEMINI_PRO, proSystem, proUser, true, true)
           proJson = parseGeminiJSON(rawPro)
-          console.log(`[TV-v14.8] PRO grounded OK | summary_len:${proJson.simpleSummary?.text?.length??0} | ms:${Date.now()-startMs}`)
+          console.log(`[TV-v14.12] PRO grounded OK | summary_len:${proJson.simpleSummary?.text?.length??0} | ms:${Date.now()-startMs}`)
         } catch(searchErr:any) {
           // Fallback: WITHOUT grounding (reliable JSON mode) — customer always gets a prediction
-          console.error(`[TV-v14.8] PRO grounded attempt failed (${searchErr.message}) — falling back to no-search`)
+          console.error(`[TV-v14.12] PRO grounded attempt failed (${searchErr.message}) — falling back to no-search`)
           const rawPro2 = await callGemini(GEMINI_PRO, proSystem, proUser, true, false)
           proJson = parseGeminiJSON(rawPro2)
-          console.log(`[TV-v14.8] PRO fallback OK | summary_len:${proJson.simpleSummary?.text?.length??0} | ms:${Date.now()-startMs}`)
+          console.log(`[TV-v14.12] PRO fallback OK | summary_len:${proJson.simpleSummary?.text?.length??0} | ms:${Date.now()-startMs}`)
         }
       } else {
         const rawPro = await callGemini(GEMINI_PRO, proSystem, proUser, true, false)
         proJson = parseGeminiJSON(rawPro)
-        console.log(`[TV-v14.8] PRO OK (search off) | summary_len:${proJson.simpleSummary?.text?.length??0} | ms:${Date.now()-startMs}`)
+        console.log(`[TV-v14.12] PRO OK (search off) | summary_len:${proJson.simpleSummary?.text?.length??0} | ms:${Date.now()-startMs}`)
       }
-      predictionJson = mergeTemplateWithGemini(templateData, proJson, '14.9-pro')
+      predictionJson = mergeTemplateWithGemini(templateData, proJson, '14.12-pro')
     } catch(err:any) {
-      console.error(`[TV-v14.8] PRO failed: ${err.message}`)
+      console.error(`[TV-v14.12] PRO failed: ${err.message}`)
       return NextResponse.json({error:`Pro prediction failed: ${err.message}`},{status:500})
     }
   } else {
