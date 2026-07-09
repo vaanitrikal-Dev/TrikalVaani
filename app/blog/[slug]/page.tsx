@@ -1,8 +1,14 @@
 // ============================================================
 // TRIKAL VAANI — DYNAMIC BLOG ARTICLE PAGE (SSR)
 // CEO: Rohiit Gupta | Chief Vedic Architect
-// Version: 2.3
-// Date: 2026-06-29
+// Version: 2.4
+// Date: 2026-07-09
+// CHANGE v2.4:
+//   • BILINGUAL EN/HI: hreflang alternates now built from post.lang +
+//     post.altLangSlug (both languages live under /blog/{slug}). Fixes the
+//     old hardcoded /hi/blog/{slug} alternate that pointed to a 404.
+//   • Added a visible "हिंदी में पढ़ें ↔ Read in English" cross-language link.
+//   • openGraph.locale and JSON-LD inLanguage are now language-aware.
 // CHANGE v2.3:
 //   • REMOVED the green WhatsApp consultation CTA button site-wide (service not offered).
 //   • FIXED doubled <title> ("| Trikaal Vaani | Trikaal Vaani") by using
@@ -57,6 +63,17 @@ export async function generateMetadata(
 
   const canonicalUrl = `https://trikalvaani.com/blog/${post.slug}`;
 
+  // ── v2.4: hreflang pairing via alt_lang_slug (both live under /blog/) ──
+  const selfUrl = canonicalUrl;
+  const altUrl  = post.altLangSlug
+    ? `https://trikalvaani.com/blog/${post.altLangSlug}`
+    : null;
+  const enUrl = post.lang === 'hi' ? altUrl : selfUrl;
+  const hiUrl = post.lang === 'hi' ? selfUrl : altUrl;
+  const languages: Record<string, string> = {};
+  if (enUrl) { languages['en-IN'] = enUrl; languages['x-default'] = enUrl; }
+  if (hiUrl) { languages['hi-IN'] = hiUrl; }
+
   return {
     // absolute → bypasses the root layout title template so the brand suffix
     // (already present in post.title) is not duplicated in the <title> tag.
@@ -68,18 +85,15 @@ export async function generateMetadata(
     publisher: 'Trikaal Vaani',
     category: post.category,
     alternates: {
-      canonical: canonicalUrl,
-      languages: {
-        'en-IN': canonicalUrl,
-        'hi-IN': `https://trikalvaani.com/hi/blog/${post.slug}`,
-      },
+      canonical: selfUrl,
+      languages,
     },
     openGraph: {
       title: post.title,
       description: post.description,
       url: canonicalUrl,
       siteName: 'Trikaal Vaani',
-      locale: 'en_IN',
+      locale: post.lang === 'hi' ? 'hi_IN' : 'en_IN',
       type: 'article',
       publishedTime: post.publishedAt,
       modifiedTime: post.updatedAt,
@@ -153,7 +167,7 @@ function generateJsonLd(post: BlogPost) {
       '@type': 'WebPage',
       '@id': canonicalUrl,
     },
-    inLanguage: 'en-IN',
+    inLanguage: post.lang === 'hi' ? 'hi-IN' : 'en-IN',
     articleSection: post.category,
     keywords: post.keywords.join(', '),
     citation: post.classicalSources,
@@ -411,6 +425,18 @@ export default async function BlogArticlePage({
               <li className="text-amber-300 truncate">{post.category}</li>
             </ol>
           </nav>
+
+          {/* ── v2.4: CROSS-LANGUAGE LINK (hreflang pair) ── */}
+          {post.altLangSlug && (
+            <div className="mb-6">
+              <Link
+                href={`/blog/${post.altLangSlug}`}
+                className="inline-flex items-center gap-2 rounded-full border border-amber-700/40 bg-amber-950/30 px-4 py-1.5 text-sm font-semibold text-amber-300 hover:bg-amber-900/30 transition"
+              >
+                {post.lang === 'hi' ? 'Read in English →' : 'हिंदी में पढ़ें →'}
+              </Link>
+            </div>
+          )}
 
           {/* CATEGORY BADGE */}
           <div className="mb-4">
