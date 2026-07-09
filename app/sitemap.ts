@@ -3,8 +3,15 @@
  * 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER 🔱
  * ============================================================================
  * File:        app/sitemap.ts
- * Version:     v8.0
+ * Version:     v8.1
  * Owner:       Rohiit Gupta, Chief Vedic Architect
+ *
+ * Changes v8.0 → v8.1 (2026-07-09):
+ *   BILINGUAL BLOG hreflang. Blog loop now emits per-post alternate
+ *   hreflang pairs from post.lang + post.altLangSlug, so Google treats the
+ *   EN and HI versions as language alternates of each other. Posts without a
+ *   translation (altLangSlug = null) emit exactly as before. Requires
+ *   lib/blog-posts.ts v3.3 (BlogPost.lang + BlogPost.altLangSlug).
  *
  * Changes v7.9 → v8.0 (2026-07-03):
  *   SWAPNA SPOKES — PERMANENT AUTO. readDreamSymbols() queries DISTINCT
@@ -441,16 +448,25 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }
   }
 
-  // ── Blog posts ─────────────────────────────────────────────────────
+  // ── Blog posts (v8.1: bilingual EN/HI hreflang alternates) ─────────
   try {
     const posts = await getAllPosts();
     for (const post of posts) {
-      entries.push({
+      const entry: MetadataRoute.Sitemap[0] = {
         url: `${BASE}/blog/${post.slug}`,
         lastModified: post.updatedAt ? new Date(post.updatedAt) : now,
         changeFrequency: 'weekly',
         priority: 0.7,
-      });
+      };
+      if (post.altLangSlug) {
+        entry.alternates = {
+          languages: {
+            'en-IN': post.lang === 'hi' ? `${BASE}/blog/${post.altLangSlug}` : `${BASE}/blog/${post.slug}`,
+            'hi-IN': post.lang === 'hi' ? `${BASE}/blog/${post.slug}` : `${BASE}/blog/${post.altLangSlug}`,
+          },
+        };
+      }
+      entries.push(entry);
     }
   } catch (err) {
     console.error('[sitemap] blog fetch failed:', err);
