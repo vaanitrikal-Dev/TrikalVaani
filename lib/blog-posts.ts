@@ -1,8 +1,8 @@
 // ============================================================
 // TRIKAL VAANI — BLOG POSTS — SUPABASE VERSION
 // CEO: Rohiit Gupta | Chief Vedic Architect
-// Version: 3.2 (sections[] transform fix — {title,body} → BlogSection[])
-// Date: 2026-06-14
+// Version: 3.3 (bilingual EN/HI — adds lang + altLangSlug for hreflang pairing)
+// Date: 2026-07-09
 // ============================================================
 // HOW TO ADD NEW ARTICLES:
 //   1. Go to Supabase dashboard → Table Editor → blog_posts
@@ -45,6 +45,9 @@ export interface BlogPost {
   faqs: { q: string; a: string }[];
   relatedSlugs: string[];
   classicalSources: string;
+  // ── v3.3: bilingual (EN/HI) support ──────────────────────
+  lang: string;               // 'en' | 'hi'
+  altLangSlug: string | null; // counterpart slug in the other language (hreflang pairing)
 }
 
 export type BlogSection =
@@ -121,6 +124,9 @@ function mapRow(row: Record<string, unknown>): BlogPost {
     faqs:             (row.faqs as { q: string; a: string }[]) ?? [],
     relatedSlugs:     (row.related_slugs as string[]) ?? [],
     classicalSources: row.classical_sources as string,
+    // ── v3.3: bilingual (EN/HI) support ──────────────────────
+    lang:             (row.lang as string) ?? 'en',
+    altLangSlug:      (row.alt_lang_slug as string) ?? null,
   };
 }
 
