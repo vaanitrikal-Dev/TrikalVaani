@@ -3,28 +3,28 @@
 // ============================================================
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
 // FILE: components/layout/SiteNav.tsx
-// VERSION: v2.9
-// DATE: 2026-07-02
+// VERSION: v3.0
+// DATE: 2026-07-12
 // CHANGES:
+//   v3.0: Added "Hast Rekha" nav link (/hast-rekha-calculator), placed
+//     immediately after Vivah Muhurat with the other reading products.
+//     Reason: AI Hast Rekha is a PAID ₹51 product, so it was removed from
+//     the free Calculators hub (calculators/page.tsx v3.7) and promoted to
+//     primary navigation as a sales entry point. NAV_LINKS is the single
+//     source of truth, so the desktop bar and mobile menu both pick it up.
+//     Desktop gap tightened 4 → 3.5 (gap-x-3.5) to absorb the extra link
+//     without wrapping. Nothing else changed. PROTECTED (unchanged): logo,
+//     LangSwitcher, Sign In / My Vault, mobile hamburger, AuthModal, all
+//     other routes + styling.
 //   v2.9: Added "Swapna Shastra" nav link (/swapna) — free Vedic dream
 //     interpretation product, grouped with the reading products (after
-//     Karmic Reading). NAV_LINKS is the single source of truth, so both the
-//     desktop bar and the mobile menu pick it up automatically. Nothing else
-//     changed. PROTECTED (unchanged): logo, LangSwitcher, Sign In / My Vault,
-//     mobile hamburger, AuthModal, all other routes + styling.
+//     Karmic Reading).
 //   v2.8: NAV CONSISTENCY PASS (style + colour) —
-//     - Uniform link colour: every nav link is now the same slate tone and
-//       weight. Removed the lone gold "Services" highlight that made the bar
-//       look inconsistent. Gold now means ONE thing: hover + current page.
-//     - Active-page highlight: the link for the page you're on shows gold
-//       (via usePathname) - clear orientation, professional feel.
-//     - Removed the email address from the DESKTOP top bar (it cluttered the
-//       nav and is already in the footer + Contact). Email kept in the mobile
-//       menu where it does not crowd the bar.
+//     - Uniform link colour: every nav link is the same slate tone and
+//       weight. Gold now means ONE thing: hover + current page.
+//     - Active-page highlight via usePathname.
+//     - Removed the email address from the DESKTOP top bar (kept in mobile).
 //     - Single gold accent on desktop = the "Free Analysis" CTA button.
-//     PROTECTED: logo, LangSwitcher, Sign In / My Vault, mobile hamburger,
-//       AuthModal, all routes. NAV_LINKS list unchanged except the now-unused
-//       `highlight` flag was dropped.
 //   v2.7: Removed "Life Pillars" nav link (section still on homepage).
 //   v2.6: Added "Vivah Muhurat" nav link.
 //   v2.5: IR-0 cleanup - visible logo text "Trikaal Vaani".
@@ -49,10 +49,12 @@ const GOLD_RGBA = (a: number) => `rgba(212,175,55,${a})`;
 // Single source of truth for nav links (desktop + mobile share this)
 // v2.8: uniform styling - no per-item highlight flag.
 // v2.9: added Swapna Shastra (/swapna) with the reading products.
+// v3.0: added Hast Rekha (/hast-rekha-calculator) — paid ₹51 palm reading.
 const NAV_LINKS: { href: string; label: string }[] = [
   { href: '/services',                  label: 'Services' },
   { href: '/kundali-milan',             label: 'Kundali Milan' },
   { href: '/vivah-muhurat',             label: 'Vivah Muhurat' },
+  { href: '/hast-rekha-calculator',     label: 'Hast Rekha' },
   { href: '/karmic-background-reading', label: 'Karmic Reading' },
   { href: '/swapna',                    label: 'Swapna Shastra' },
   { href: '/panchang',                  label: 'Panchang' },
@@ -171,14 +173,15 @@ export default function SiteNav() {
           </Link>
 
           {/* -- DESKTOP NAV - v2.8: uniform colour + active-page gold -- */}
-          <nav className="hidden sm:flex items-center gap-4">
+          {/* v3.0: gap 4 → 3.5 to fit the extra Hast Rekha link on one line. */}
+          <nav className="hidden sm:flex items-center gap-3.5">
 
             {NAV_LINKS.map((l) => (
               <Link
                 key={l.href}
                 href={l.href}
                 aria-current={isActive(l.href) ? 'page' : undefined}
-                className={`text-sm font-medium transition-colors duration-200 ${
+                className={`text-sm font-medium whitespace-nowrap transition-colors duration-200 ${
                   isActive(l.href)
                     ? 'text-[#D4AF37]'
                     : 'text-slate-300 hover:text-[#D4AF37]'
@@ -219,7 +222,7 @@ export default function SiteNav() {
 
             <Link
               href="/#birth-form"
-              className="text-sm font-medium px-4 py-2 rounded-full transition-all duration-300 hover:scale-105"
+              className="text-sm font-medium px-4 py-2 rounded-full whitespace-nowrap transition-all duration-300 hover:scale-105"
               style={{
                 background: `linear-gradient(135deg, ${GOLD} 0%, #A8820A 100%)`,
                 color: '#080B12',
