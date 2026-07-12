@@ -3,8 +3,20 @@
  * 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER 🔱
  * ============================================================================
  * File:        app/sitemap.ts
- * Version:     v8.1
+ * Version:     v8.2
  * Owner:       Rohiit Gupta, Chief Vedic Architect
+ *
+ * Changes v8.1 → v8.2 (2026-07-12):
+ *   LOCAL SEO RESTORED. /astrologer-{city} pages are RE-ADDED, reversing the
+ *   v5.6 removal made under IR-20. IR-20 ("global not local") was SUPERSEDED by
+ *   CEO order in July 2026 after the Google Business Profile was approved
+ *   (Trikaal Vaani — Astrologer in Delhi, Dwarka 110075).
+ *   New LOCAL_ROUTES array + its own emit loop. Delhi is the flagship (0.9);
+ *   Noida/Gurgaon/Ghaziabad are satellites (0.8). Weekly changeFrequency.
+ *   NOTE: static routes are NOT auto-discovered — only DB-driven routes (blog,
+ *   swapna, learn, compatibility) are. Any new static page MUST be listed here
+ *   or it will never appear in the sitemap, no matter how many times we deploy.
+ *   Requires: app/astrologer-{city}/page.tsx to exist for each listed slug.
  *
  * Changes v8.0 → v8.1 (2026-07-09):
  *   BILINGUAL BLOG hreflang. Blog loop now emits per-post alternate
@@ -98,6 +110,26 @@ const STATIC_ROUTES = [
   '/panchang',
   '/kundali-milan',
   '/karmic-background-reading',
+];
+
+// ─────────────────────────────────────────────────────────────────────────────
+// LOCAL SEO (v8.2) — /astrologer-{city} landing pages.
+// Reverses the v5.6 removal (IR-20). Local SEO is now permitted and encouraged
+// following Google Business Profile approval (July 2026).
+//
+// NAP for every one of these pages is the SAME single verified address —
+// 724, Pocket 3, Sector 19, Dwarka, New Delhi 110075 — with the other cities
+// covered via schema `areaServed`. We deliberately do NOT invent a local street
+// address per city: fabricated NAPs are the fastest way to lose local ranking.
+//
+// Adding a city here WITHOUT creating app/astrologer-{city}/page.tsx will emit
+// a 404 into the sitemap. Create the page first, then add the slug.
+// ─────────────────────────────────────────────────────────────────────────────
+const LOCAL_ROUTES = [
+  '/astrologer-delhi',
+  '/astrologer-noida',
+  '/astrologer-gurgaon',
+  '/astrologer-ghaziabad',
 ];
 
 const CALCULATORS = [
@@ -384,6 +416,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: now,
       changeFrequency: path === '' ? 'daily' : 'weekly',
       priority,
+    });
+  }
+
+  // ── LOCAL SEO: /astrologer-{city} (v8.2) ───────────────────────────
+  // Delhi = flagship (GBP city, real NAP). Others = NCR satellites.
+  for (const path of LOCAL_ROUTES) {
+    entries.push({
+      url: `${BASE}${path}`,
+      lastModified: now,
+      changeFrequency: 'weekly',
+      priority: path === '/astrologer-delhi' ? 0.9 : 0.8,
     });
   }
 
