@@ -83,7 +83,7 @@ const SERVICE_SCHEMA = {
   serviceType: 'Vedic Astrology Reading',
   url: 'https://trikalvaani.com/astrologer-ghaziabad',
   description:
-    'Online Vedic astrology readings for clients in Ghaziabad and Delhi NCR — kundli, Kundali Milan, Mangal Dosh and Sade Sati analysis — computed on a self-hosted Swiss Ephemeris engine using Brihat Parashara Hora Shastra classical rules, under Rohiit Gupta, Chief Vedic Architect.',
+    'Online Vedic astrology readings for clients in Ghaziabad and India — kundli, Kundali Milan, Mangal Dosh and Sade Sati analysis — computed on a self-hosted Swiss Ephemeris engine using Brihat Parashara Hora Shastra classical rules, under Rohiit Gupta, Chief Vedic Architect.',
   provider: {
     '@type': 'Organization',
     '@id': 'https://trikalvaani.com/#organization',
@@ -101,7 +101,7 @@ const SERVICE_SCHEMA = {
   },
   areaServed: [
     { '@type': 'City', name: 'Ghaziabad' },
-    { '@type': 'Place', name: 'Delhi NCR' },
+    { '@type': 'Place', name: 'India' },
     { '@type': 'Country', name: 'India' },
   ],
   availableChannel: {
