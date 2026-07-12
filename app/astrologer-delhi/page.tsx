@@ -84,7 +84,7 @@ const LOCAL_BUSINESS_SCHEMA = {
   legalName: 'Trikal Vaani',
   alternateName: ['Trikaal Vaani Astrologer Delhi', 'त्रिकाल वाणी'],
   description:
-    'Vedic astrology practice in Delhi led by Rohiit Gupta, Chief Vedic Architect, offering kundli readings, Kundali Milan, Mangal Dosh and Sade Sati analysis using Swiss Ephemeris computation and Brihat Parashara Hora Shastra classical rules. Serving Delhi NCR, all of India and clients worldwide.',
+    'Vedic astrology practice in Delhi led by Rohiit Gupta, Chief Vedic Architect, offering kundli readings, Kundali Milan, Mangal Dosh and Sade Sati analysis using Swiss Ephemeris computation and Brihat Parashara Hora Shastra classical rules. Serving India, all of India and clients worldwide.',
   url: 'https://trikalvaani.com/astrologer-delhi',
   telephone: '+91-9211804111',
   priceRange: 'Rs0-Rs251',
@@ -248,7 +248,7 @@ export default function AstrologerDelhiPage() {
                 <strong style={{ color: '#cbd5e1' }}>Dwarka, New Delhi</strong>, led by{' '}
                 <strong style={{ color: '#cbd5e1' }}>Rohiit Gupta, Chief Vedic Architect</strong>, with sixteen years in the
                 Parashara BPHS tradition. Kundli, Kundali Milan, Mangal Dosh and Sade Sati readings are computed on a
-                self-hosted Swiss Ephemeris engine and delivered online across Delhi NCR, India and worldwide.
+                self-hosted Swiss Ephemeris engine and delivered online across India, India and worldwide.
                 Free tools; readings from Rs11.
               </p>
             </div>
@@ -359,7 +359,7 @@ export default function AstrologerDelhiPage() {
                 Areas Served
               </p>
               <h2 className="text-white text-3xl font-serif font-bold mb-4">
-                Delhi NCR — and Anywhere Else
+                India — and Anywhere Else
               </h2>
               <p style={{ color: '#94a3b8', fontSize: '14px', lineHeight: 1.8, maxWidth: '680px', margin: '0 auto 24px' }}>
                 The practice is based in Dwarka, New Delhi, and clients come from across the capital region —{' '}
