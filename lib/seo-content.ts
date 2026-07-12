@@ -1,3 +1,27 @@
+// ============================================================
+// File: lib/seo-content.ts
+// Version: v2.0
+// CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
+// Date: 2026-07-12
+// ============================================================
+// CHANGES vs v1:
+//   ✅ NEW: getPillarContent(slug) — fetches a seo_pillar_pages row WITHOUT
+//      the `published = true` filter. Used by money pages that own their own
+//      route (e.g. /hast-rekha-calculator) and store their long-form SEO body
+//      in Supabase.
+//
+//      WHY published=false MATTERS: every other query below filters on
+//      published=true, and BOTH /learn/[slug] and app/sitemap.ts derive from
+//      those queries. So a row with published=false is invisible to /learn and
+//      to the sitemap — which is exactly what we want for a pillar whose real
+//      URL is /hast-rekha-calculator. If it were published=true it would ALSO
+//      render at /learn/hast-rekha-calculator and cannibalise the money page.
+//
+//      RULE: never set published=true on a row whose route is owned by a
+//      dedicated page. Use getPillarContent() for those.
+//   ✅ ALL EXISTING FUNCTIONS: unchanged.
+// ============================================================
+
 import { createClient } from '@supabase/supabase-js'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
@@ -42,6 +66,23 @@ export async function getSeoPageBySlug(slug: string): Promise<SeoPage | null> {
     .select('*')
     .eq('slug', slug)
     .eq('published', true)
+    .single()
+
+  if (error || !data) return null
+  return data as SeoPage
+}
+
+/**
+ * v2.0 — Fetch pillar content for a page that owns its own route.
+ * Deliberately does NOT filter on `published`, so the row can stay
+ * published=false and remain out of /learn + sitemap.
+ * Use ONLY from a dedicated route (e.g. app/hast-rekha-calculator/page.tsx).
+ */
+export async function getPillarContent(slug: string): Promise<SeoPage | null> {
+  const { data, error } = await supabase
+    .from('seo_pillar_pages')
+    .select('*')
+    .eq('slug', slug)
     .single()
 
   if (error || !data) return null
