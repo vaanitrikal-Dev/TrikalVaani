@@ -1,17 +1,24 @@
 // ============================================================
 // File: app/calculators/page.tsx
 // Purpose: Calculators Hub — SEO/GEO/AEO landing page
-// Version: v3.6 — AI Hast Rekha Calculator card added (total 30)
+// Version: v3.7 — AI Hast Rekha REMOVED from hub (paid ₹51 product)
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
-// Date: 2026-06-28
+// Date: 2026-07-12
 // ============================================================
+// CHANGES vs v3.6:
+//   ✅ REMOVED the "AI Hast Rekha Calculator" card. This hub is now a
+//      100% FREE-tools hub. Hast Rekha is a paid ₹51 product and now lives
+//      in SiteNav (v3.0) next to Vivah Muhurat, funnelling straight to
+//      /hast-rekha-calculator as a sales page. Count 30 → 29 (dynamic).
+//   ✅ Removed 'hast rekha calculator' from metadata keywords (it was
+//      cannibalising the pillar page /hast-rekha-calculator).
+//   ✅ FAQ #1, sub-heading, 3rd Pillar card and schema Offer restored to
+//      clean "100% free" messaging (no ₹51 mention on a free hub).
+//   ✅ ALL OTHER LOGIC: identical to v3.6.
 // CHANGES vs v3.5:
-//   ✅ Added "AI Hast Rekha Calculator" card. Like Vivah, it links to
-//      /hast-rekha-calculator (paid ₹51 palm-reading tool), NOT /calculators/…
-//      via the optional `href` field. Count 29 → 30 (dynamic).
-//   ✅ ALL OTHER LOGIC: identical to v3.5.
+//   ✅ Added AI Hast Rekha card (now reverted in v3.7).
 // CHANGES vs v3.4:
-//   ✅ Added "Free Vivah Muhurat" card (href → /vivah-muhurat). Count 28 → 29.
+//   ✅ Added "Free Vivah Muhurat" card (href → /vivah-muhurat).
 // ============================================================
 
 import type { Metadata } from 'next';
@@ -43,7 +50,7 @@ export const metadata: Metadata = {
     'pitra dosh calculator', 'gemstone calculator', 'gemstone suitability calculator',
     'should i wear neelam', 'should i wear pukhraj', 'numerology calculator',
     'baby name by nakshatra', 'kundali strength', 'graha bal calculator',
-    'jyotish calculator', 'birth chart calculator', 'hast rekha calculator',
+    'jyotish calculator', 'birth chart calculator',
   ],
   alternates: { canonical: 'https://trikalvaani.com/calculators' },
   openGraph: {
@@ -67,6 +74,8 @@ type CalcEntry = {
 };
 
 // ── Single source of truth. Add a calculator = add ONE entry here. ──
+// v3.7 RULE: only FREE tools belong here. Paid products (Hast Rekha ₹51,
+// Karmic ₹251, Kundali Milan) live in SiteNav / Services, never in this hub.
 const CALCULATORS: CalcEntry[] = [
   {
     slug: 'free-kundali-calculator',
@@ -90,15 +99,6 @@ const CALCULATORS: CalcEntry[] = [
     emoji: '💍',
     name: 'Free Vivah Muhurat',
     desc: 'Strict-classical shubh marriage dates for the year — exact muhurat time, nakshatra, tithi & lagna. Excludes Kharmas, Adhik Maas & Chaturmas.',
-    badge: 'New',
-    live: true,
-  },
-  {
-    slug: 'hast-rekha-calculator',
-    href: '/hast-rekha-calculator',
-    emoji: '🖐️',
-    name: 'AI Hast Rekha Calculator',
-    desc: 'Upload your palm photo — get a complete Samudrika Shastra reading. 8 life scores, line & mount analysis, remedies & PDF report.',
     badge: 'New',
     live: true,
   },
@@ -329,7 +329,7 @@ const CALC_LIST_TEXT =
 const FAQS = [
   {
     q: 'Are these calculators really free?',
-    a: `Yes, most are 100% free. ${CALC_COUNT} tools cover Kundli, Dasha, Nakshatra, Dosha, Gemstone and more without payment or signup. (AI Hast Rekha is a premium palm-reading report at ₹51.)`,
+    a: `Yes, 100% free. All ${CALC_COUNT} tools cover Kundli, Dasha, Nakshatra, Dosha, Gemstone, Numerology and more — no payment, no signup.`,
   },
   {
     q: 'How accurate are Trikaal Vaani calculators?',
@@ -342,6 +342,10 @@ const FAQS = [
   {
     q: 'Why is birth time so important?',
     a: 'Birth time determines your Lagna (Ascendant), which changes every 2 hours. Even a 15-minute difference can shift your Lagna and house positions.',
+  },
+  {
+    q: 'What if I do not know my birth time?',
+    a: 'You can still get an accurate reading. Trikaal Vaani\'s AI Hast Rekha palm reading needs only a photo of your palm — no birth time, no birth chart. It is a premium Samudrika Shastra report for ₹51.',
   },
   {
     q: 'Do these calculators work for non-Indian birth places?',
@@ -358,7 +362,7 @@ export default function CalculatorsHubPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify({
           '@context': 'https://schema.org', '@type': 'CollectionPage',
           name: 'Free Vedic Astrology Calculators',
-          description: `${CALC_COUNT} Vedic astrology calculators powered by Swiss Ephemeris`,
+          description: `${CALC_COUNT} free Vedic astrology calculators powered by Swiss Ephemeris`,
           url: 'https://trikalvaani.com/calculators',
           publisher: {
             '@type': 'Organization', '@id': ORG_ID,
@@ -372,7 +376,7 @@ export default function CalculatorsHubPage() {
           hasPart: CALCULATORS.map((c) => ({
             '@type': 'SoftwareApplication', name: c.name, applicationCategory: 'LifestyleApplication',
             url: c.href ? `https://trikalvaani.com${c.href}` : `https://trikalvaani.com/calculators/${c.slug}`,
-            offers: { '@type': 'Offer', price: c.slug === 'hast-rekha-calculator' ? '51' : '0', priceCurrency: 'INR' },
+            offers: { '@type': 'Offer', price: '0', priceCurrency: 'INR' },
           })),
         }) }} />
 
@@ -405,12 +409,12 @@ export default function CalculatorsHubPage() {
           </h1>
 
           <p className="text-base md:text-lg text-slate-300 mb-6">
-            {CALC_COUNT} calculators · Swiss Ephemeris accuracy · BPHS classical rules · Free tools + premium reports.
+            {CALC_COUNT} calculators · Swiss Ephemeris accuracy · BPHS classical rules · 100% free.
           </p>
 
           <div className="rounded-xl p-5 mb-8" style={{ background: 'rgba(212,175,55,0.06)', border: `1px solid ${GOLD_RGBA(0.2)}` }}>
             <p className="text-base md:text-lg leading-relaxed">
-              <strong style={{ color: GOLD }}>Trikaal Vaani offers {CALC_COUNT} Vedic astrology calculators</strong> — {CALC_LIST_TEXT}, plus dedicated "Should I Wear" suitability checks for all 9 gemstones. All powered by Swiss Ephemeris (NASA-grade accuracy), Lahiri Ayanamsha, and BPHS classical rules. No signup. Instant results.
+              <strong style={{ color: GOLD }}>Trikaal Vaani offers {CALC_COUNT} free Vedic astrology calculators</strong> — {CALC_LIST_TEXT}, plus dedicated "Should I Wear" suitability checks for all 9 gemstones. All powered by Swiss Ephemeris (NASA-grade accuracy), Lahiri Ayanamsha, and BPHS classical rules. No signup. No payment. Instant results.
             </p>
           </div>
 
@@ -448,12 +452,32 @@ export default function CalculatorsHubPage() {
             </div>
           </section>
 
+          {/* No birth time? → funnel to the paid AI Hast Rekha product (₹51). */}
+          <section className="mb-12 p-6 rounded-2xl" style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid ${GOLD_RGBA(0.25)}` }}>
+            <div className="flex items-start gap-4">
+              <div className="text-4xl">🖐️</div>
+              <div>
+                <h2 className="text-xl font-serif font-bold mb-2" style={{ color: GOLD }}>
+                  Don't know your birth time?
+                </h2>
+                <p className="text-sm text-slate-300 leading-relaxed mb-4">
+                  Every calculator above needs your date, time and place of birth. If your birth time is unknown, your palm still carries the record. Upload one photo and the <strong>AI Hast Rekha</strong> engine reads your lines and mounts by classical Samudrika Shastra — 8 life scores, line &amp; mount analysis, remedies and a full PDF report. Premium reading, <strong style={{ color: GOLD }}>₹51</strong>.
+                </p>
+                <Link href="/hast-rekha-calculator"
+                  className="inline-block px-6 py-3 rounded-full font-bold transition-all hover:scale-105"
+                  style={{ background: `linear-gradient(135deg, ${GOLD} 0%, #A8820A 100%)`, color: '#080B12' }}>
+                  🖐️ Read My Palm — ₹51 →
+                </Link>
+              </div>
+            </div>
+          </section>
+
           <section className="mb-12">
             <h2 className="text-2xl font-serif font-bold mb-6" style={{ color: GOLD }}>Why Trikaal Vaani Calculators?</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <Pillar emoji="🎯" title="NASA-Grade Accuracy" desc="Swiss Ephemeris engine — the same astronomical library used by professional astrology software worldwide." />
               <Pillar emoji="📚" title="BPHS Classical Rules" desc="Every calculation follows Brihat Parashara Hora Shastra — the foundation text of Vedic astrology by Maharishi Parashar." />
-              <Pillar emoji="🆓" title="Free + Premium" desc="Most calculators are 100% free. Premium reports like AI Hast Rekha start at just ₹51." />
+              <Pillar emoji="🆓" title="100% Free" desc="Every calculator on this page is free — no payment, no signup, no hidden gate. Instant results." />
             </div>
           </section>
 
