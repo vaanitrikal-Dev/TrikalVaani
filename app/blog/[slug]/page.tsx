@@ -1,8 +1,17 @@
 // ============================================================
 // TRIKAL VAANI — DYNAMIC BLOG ARTICLE PAGE (SSR)
 // CEO: Rohiit Gupta | Chief Vedic Architect
-// Version: 2.4
-// Date: 2026-07-09
+// Version: 2.5
+// Date: 2026-07-13
+// CHANGE v2.5:
+//   • SectionBlock now renders the new `img` BlogSection variant introduced
+//     in lib/blog-posts.ts v3.4 — inline diagrams inside article bodies.
+//     Authored in Supabase as:  ![alt text](/diagrams/x.svg "Optional caption")
+//     on its own line (blank line above and below).
+//   • Rendered as <figure><img …/><figcaption/></figure>, lazy-loaded,
+//     with explicit dimensions to avoid CLS. Plain <img> (not next/image)
+//     because these are local SVGs in /public — no next.config change needed.
+//   • Requires lib/blog-posts.ts v3.4+ (body parser). Nothing else changed.
 // CHANGE v2.4:
 //   • BILINGUAL EN/HI: hreflang alternates now built from post.lang +
 //     post.altLangSlug (both languages live under /blog/{slug}). Fixes the
@@ -341,6 +350,29 @@ function SectionBlock({ section, index }: { section: BlogSection; index: number 
         <blockquote className="my-6 border-l-4 border-amber-700 pl-4 italic text-amber-100">
           {renderText(section.text)}
         </blockquote>
+      );
+    // ── v2.5: inline diagram / illustration ──────────────────
+    case 'img':
+      return (
+        <figure className="my-8">
+          <div className="overflow-hidden rounded-xl border border-amber-900/40 bg-slate-950/60 p-3 md:p-4">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={section.src}
+              alt={section.alt}
+              width={800}
+              height={500}
+              loading="lazy"
+              decoding="async"
+              className="mx-auto h-auto w-full max-w-2xl"
+            />
+          </div>
+          {section.caption && (
+            <figcaption className="mt-3 text-center text-sm italic text-slate-400">
+              {section.caption}
+            </figcaption>
+          )}
+        </figure>
       );
   }
 }
