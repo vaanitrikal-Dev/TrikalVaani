@@ -1,8 +1,22 @@
 // ============================================================
 // TRIKAL VAANI — BLOG POSTS — SUPABASE VERSION
 // CEO: Rohiit Gupta | Chief Vedic Architect
-// Version: 3.3 (bilingual EN/HI — adds lang + altLangSlug for hreflang pairing)
-// Date: 2026-07-09
+// Version: 3.4 (BODY PARSER — real paragraphs, lists, headings, quotes, IMAGES)
+// Date: 2026-07-13
+// CHANGE v3.4:
+//   • transformSections() no longer dumps the whole DB `body` into ONE <p>.
+//     A 2,788-character single paragraph was being rendered per section.
+//   • body is now split on blank lines and each chunk is typed:
+//       "### Heading"        -> h3
+//       "> quoted text"      -> quote
+//       "- item" lines       -> ul
+//       "1. item" lines      -> ol
+//       "![alt](/img.svg)"   -> img   (optional "Caption" after the path)
+//       anything else        -> p
+//   • NEW BlogSection variant: { type:'img'; src; alt; caption? }
+//     Requires app/blog/[slug]/page.tsx v2.5+ (adds the `img` case).
+//   • Fully backward compatible: old rows with plain prose bodies still
+//     render exactly as before, just correctly paragraphed.
 // ============================================================
 // HOW TO ADD NEW ARTICLES:
 //   1. Go to Supabase dashboard → Table Editor → blog_posts
@@ -58,7 +72,9 @@ export type BlogSection =
   | { type: 'ol'; items: string[] }
   | { type: 'table'; headers: string[]; rows: string[][] }
   | { type: 'callout'; variant: 'tip' | 'warn' | 'verdict'; text: string }
-  | { type: 'quote'; text: string };
+  | { type: 'quote'; text: string }
+  // ── v3.4: inline diagram / illustration ──────────────────
+  | { type: 'img'; src: string; alt: string; caption?: string };
 
 // ============================================================
 // SUPABASE CLIENT — Server-side only (no client JS leak)
@@ -69,14 +85,83 @@ const supabase = createClient(
 );
 
 // ============================================================
-// SECTIONS TRANSFORM — v3.2
-// Supabase sections column format: [{ title: string, body: string }]
-// BlogSection format:              [{ type: 'h2'|'p', text: string }]
-// Each DB section → h2 heading + p paragraph block
+// SECTIONS TRANSFORM — v3.4
+// Supabase `sections` column: [{ title: string, body: string }]
+//
+// The body is Markdown-lite. It is split on blank lines and each
+// chunk becomes a typed BlogSection block:
+//
+//   ### Sub heading          -> h3
+//   > quoted line            -> quote
+//   - bullet                 -> ul   (consecutive "- " lines)
+//   1. step                  -> ol   (consecutive "1. " lines)
+//   ![alt](/x.svg "Caption") -> img
+//   plain prose              -> p
+//
+// Inline **bold**, *italic* and [label](/url) are handled downstream
+// by renderText() in app/blog/[slug]/page.tsx — unchanged.
 // ============================================================
-function transformSections(
-  raw: unknown
-): BlogSection[] {
+
+const IMG_RE = /^!\[([^\]]*)\]\(\s*([^)\s"]+)(?:\s+"([^"]*)")?\s*\)$/;
+
+function parseBody(body: string): BlogSection[] {
+  const blocks: BlogSection[] = [];
+
+  // Normalise newlines, then split on one-or-more blank lines.
+  const chunks = body
+    .replace(/\r\n/g, '\n')
+    .split(/\n\s*\n/)
+    .map((c) => c.trim())
+    .filter(Boolean);
+
+  for (const chunk of chunks) {
+    const lines = chunk.split('\n').map((l) => l.trim()).filter(Boolean);
+    if (!lines.length) continue;
+
+    // ── image (standalone line) ──
+    const img = lines[0].match(IMG_RE);
+    if (img && lines.length === 1) {
+      blocks.push({
+        type: 'img',
+        alt: (img[1] || '').trim(),
+        src: img[2].trim(),
+        ...(img[3] ? { caption: img[3].trim() } : {}),
+      });
+      continue;
+    }
+
+    // ── h3 ──
+    if (lines.length === 1 && lines[0].startsWith('### ')) {
+      blocks.push({ type: 'h3', text: lines[0].slice(4).trim() });
+      continue;
+    }
+
+    // ── quote ──
+    if (lines.every((l) => l.startsWith('> '))) {
+      blocks.push({ type: 'quote', text: lines.map((l) => l.slice(2).trim()).join(' ') });
+      continue;
+    }
+
+    // ── unordered list ──
+    if (lines.every((l) => /^[-*]\s+/.test(l))) {
+      blocks.push({ type: 'ul', items: lines.map((l) => l.replace(/^[-*]\s+/, '').trim()) });
+      continue;
+    }
+
+    // ── ordered list ──
+    if (lines.every((l) => /^\d+[.)]\s+/.test(l))) {
+      blocks.push({ type: 'ol', items: lines.map((l) => l.replace(/^\d+[.)]\s+/, '').trim()) });
+      continue;
+    }
+
+    // ── paragraph (soft-wrapped lines rejoined) ──
+    blocks.push({ type: 'p', text: lines.join(' ') });
+  }
+
+  return blocks;
+}
+
+function transformSections(raw: unknown): BlogSection[] {
   if (!Array.isArray(raw)) return [];
   return (raw as { title?: string; body?: string }[]).flatMap((s) => {
     const blocks: BlogSection[] = [];
@@ -84,14 +169,14 @@ function transformSections(
       blocks.push({ type: 'h2', text: s.title.trim() });
     }
     if (s.body?.trim()) {
-      blocks.push({ type: 'p', text: s.body.trim() });
+      blocks.push(...parseBody(s.body));
     }
     return blocks;
   });
 }
 
 // ============================================================
-// ROW → BlogPost mapper — v3.2: sections correctly transformed
+// ROW → BlogPost mapper — v3.4: sections parsed into typed blocks
 // ============================================================
 function mapRow(row: Record<string, unknown>): BlogPost {
   return {
@@ -118,7 +203,7 @@ function mapRow(row: Record<string, unknown>): BlogPost {
     challenges:       (row.challenges as string) ?? '',
     remedies:         (row.remedies as string) ?? '',
     // ─────────────────────────────────────────────────────────
-    // ── v3.2: Transform {title,body}[] → BlogSection[] ───────
+    // ── v3.4: Transform {title,body}[] → BlogSection[] ───────
     sections:         transformSections(row.sections),
     // ─────────────────────────────────────────────────────────
     faqs:             (row.faqs as { q: string; a: string }[]) ?? [],
