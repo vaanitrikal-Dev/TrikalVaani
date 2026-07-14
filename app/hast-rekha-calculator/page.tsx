@@ -1,8 +1,16 @@
 // ============================================================
 // File: app/hast-rekha-calculator/page.tsx
 // Purpose: AI Hast Rekha Calculator — SEO/GEO/AEO landing + paid ₹51
-// Version: v1.0
+// Version: v1.1
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
+// CHANGE v1.1 (2026-07-13):
+//   • Removed "Free" from the <title>. This is a ₹51 paid product. The word
+//     was setting a false expectation, pulling in freebie-intent traffic that
+//     bounces, and depressing the conversion rate of the traffic that stays.
+//   • Removed the 'free palm reading' keyword for the same reason — we do not
+//     want to rank for an intent we cannot serve.
+//   • Title now leads with the classical entity (Samudrika Shastra) and states
+//     the price honestly. Nothing else changed.
 // ============================================================
 
 import type { Metadata } from 'next';
@@ -18,13 +26,13 @@ const REAL_SAMEAS = [
 
 export const metadata: Metadata = {
   title: {
-    absolute: 'AI Hast Rekha Calculator — Free Palm Reading by Samudrika Shastra | Trikaal Vaani',
+    absolute: 'AI Hast Rekha Calculator — Palm Reading by Samudrika Shastra (₹51) | Trikaal Vaani',
   },
   description:
     'Upload your palm photo and get an AI-powered Samudrika Shastra reading. Analyse Jeevan Rekha, Mastishk Rekha, Hriday Rekha, Bhagya Rekha & all 8 mounts. 8 life scores, remedies & PDF report. By Rohiit Gupta, Chief Vedic Architect.',
   keywords: [
     'hast rekha calculator', 'AI palmistry India', 'palm reading by photo',
-    'samudrika shastra online', 'hast rekha gyan hindi', 'free palm reading',
+    'samudrika shastra online', 'hast rekha gyan hindi', 'palm reading online india',
     'AI hast rekha vishleshan', 'hastrekha online', 'jeevan rekha analysis',
     'palm line reading AI', 'indian palmistry online', 'hath ki rekha',
   ],
