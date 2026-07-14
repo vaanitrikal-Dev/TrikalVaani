@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 430 450" role="img"><style>
+  text { font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif; }
+  .draw { stroke-dasharray:1000; stroke-dashoffset:1000;
+           animation: dash 1.6s ease-out forwards; }
+  .d2 { animation-delay:.3s } .d3 { animation-delay:.6s }
+  .d4 { animation-delay:.9s } .d5 { animation-delay:1.2s }
+  .d6 { animation-delay:1.5s }
+  @keyframes dash { to { stroke-dashoffset:0 } }
+  .fade { opacity:0; animation: fade .8s ease-out 1.4s forwards }
+  @keyframes fade { to { opacity:1 } }
+  @media (prefers-reduced-motion: reduce) {
+    * { animation:none !important; }
+    .draw { stroke-dashoffset:0 !important; }
+    .fade { opacity:1 !important; }
+  }
+  
+</style><g transform="translate(0,0) scale(1.0)"
+     stroke="#94a3b8" stroke-width="1.5" fill="#0f172a" fill-opacity=".35"
+     stroke-linejoin="round">
+  <rect x="90" y="140" width="180" height="230" rx="38"/>
+  <rect x="100" y="55"  width="34" height="90"  rx="17"/>
+  <rect x="140" y="35"  width="34" height="112" rx="17"/>
+  <rect x="180" y="48"  width="34" height="99"  rx="17"/>
+  <rect x="220" y="80"  width="30" height="68"  rx="15"/>
+  <rect x="46"  y="200" width="32" height="104" rx="16" transform="rotate(-28 62 252)"/>
+</g><circle class="fade" cx="197" cy="178" r="22" fill="#34d399" fill-opacity=".12" stroke="#34d399" stroke-width="1.5"/><line class="fade" x1="184.0" y1="178.0" x2="210.0" y2="178.0" stroke="#34d399" stroke-width="2"/><line class="fade" x1="185.7" y1="171.5" x2="208.3" y2="184.5" stroke="#34d399" stroke-width="2"/><line class="fade" x1="190.5" y1="166.7" x2="203.5" y2="189.3" stroke="#34d399" stroke-width="2"/><line class="fade" x1="197.0" y1="165.0" x2="197.0" y2="191.0" stroke="#34d399" stroke-width="2"/><line class="fade" x1="203.5" y1="166.7" x2="190.5" y2="189.3" stroke="#34d399" stroke-width="2"/><line class="fade" x1="208.3" y1="171.5" x2="185.7" y2="184.5" stroke="#34d399" stroke-width="2"/><circle class="fade" cx="157" cy="172" r="22" fill="#fb7185" fill-opacity=".12" stroke="#fb7185" stroke-width="1.5"/><line class="fade" x1="144.0" y1="172.0" x2="170.0" y2="172.0" stroke="#fb7185" stroke-width="2"/><line class="fade" x1="145.7" y1="165.5" x2="168.3" y2="178.5" stroke="#fb7185" stroke-width="2"/><line class="fade" x1="150.5" y1="160.7" x2="163.5" y2="183.3" stroke="#fb7185" stroke-width="2"/><line class="fade" x1="157.0" y1="159.0" x2="157.0" y2="185.0" stroke="#fb7185" stroke-width="2"/><line class="fade" x1="163.5" y1="160.7" x2="150.5" y2="183.3" stroke="#fb7185" stroke-width="2"/><line class="fade" x1="168.3" y1="165.5" x2="145.7" y2="178.5" stroke="#fb7185" stroke-width="2"/><g class="fade"><text x="300" y="220" font-size="12" fill="#e2e8f0" text-anchor="start" font-weight="700">SAME STAR.</text><text x="300" y="236" font-size="12" fill="#e2e8f0" text-anchor="start" font-weight="700">OPPOSITE READING.</text><circle cx="306" cy="266" r="5" fill="#34d399"/><text x="318" y="270" font-size="10" fill="#94a3b8" text-anchor="start" font-weight="500">On SURYA — sudden</text><text x="318" y="282" font-size="10" fill="#94a3b8" text-anchor="start" font-weight="500">elevation. Favourable.</text><circle cx="306" cy="306" r="5" fill="#fb7185"/><text x="318" y="310" font-size="10" fill="#fb7185" text-anchor="start" font-weight="600">On SHANI — a SHOCK.</text><text x="318" y="322" font-size="10" fill="#94a3b8" text-anchor="start" font-weight="500">The texts say so.</text><text x="318" y="334" font-size="10" fill="#94a3b8" text-anchor="start" font-weight="500">The internet hides it.</text><text x="215" y="404" font-size="11.5" fill="#e2e8f0" text-anchor="middle" font-weight="600">A star is intensity, not luck.</text><text x="215" y="420" font-size="10.5" fill="#94a3b8" text-anchor="middle" font-weight="500">Placement decides everything.</text></g></svg>
