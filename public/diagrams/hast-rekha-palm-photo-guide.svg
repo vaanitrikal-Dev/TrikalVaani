@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 300" role="img"><style>
+  text { font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif; }
+  .draw { stroke-dasharray:1000; stroke-dashoffset:1000;
+           animation: dash 1.6s ease-out forwards; }
+  .d2 { animation-delay:.3s } .d3 { animation-delay:.6s }
+  .d4 { animation-delay:.9s } .d5 { animation-delay:1.2s }
+  .d6 { animation-delay:1.5s }
+  @keyframes dash { to { stroke-dashoffset:0 } }
+  .fade { opacity:0; animation: fade .8s ease-out 1.4s forwards }
+  @keyframes fade { to { opacity:1 } }
+  @media (prefers-reduced-motion: reduce) {
+    * { animation:none !important; }
+    .draw { stroke-dashoffset:0 !important; }
+    .fade { opacity:1 !important; }
+  }
+  
+</style><rect class="fade" x="40" y="40" width="200" height="180" rx="12" fill="#fb7185" fill-opacity=".07" stroke="#fb7185" stroke-width="1.6"/><g transform="translate(-10,15) scale(0.42)"
+     stroke="#94a3b8" stroke-width="1.5" fill="#0f172a" fill-opacity=".35"
+     stroke-linejoin="round">
+  <rect x="90" y="140" width="180" height="230" rx="38"/>
+  <rect x="100" y="55"  width="34" height="90"  rx="17"/>
+  <rect x="140" y="35"  width="34" height="112" rx="17"/>
+  <rect x="180" y="48"  width="34" height="99"  rx="17"/>
+  <rect x="220" y="80"  width="30" height="68"  rx="15"/>
+  <rect x="46"  y="200" width="32" height="104" rx="16" transform="rotate(-28 62 252)"/>
+</g><rect class="fade" x="60" y="60" width="160" height="140" fill="#fff" fill-opacity=".14"/><text x="140" y="60" font-size="11" fill="#fb7185" text-anchor="middle" font-weight="700">FLASH — floods the palm</text><text x="140" y="244" font-size="10" fill="#94a3b8" text-anchor="middle" font-weight="500">Fine lines ERASED. Marriage lines gone.</text><text x="140" y="262" font-size="10" fill="#94a3b8" text-anchor="middle" font-weight="500">Angled. Cupped. Frame half empty.</text><rect class="fade" x="320" y="40" width="200" height="180" rx="12" fill="#34d399" fill-opacity=".07" stroke="#34d399" stroke-width="1.6"/><g transform="translate(272,15) scale(0.42)"
+     stroke="#94a3b8" stroke-width="1.5" fill="#0f172a" fill-opacity=".35"
+     stroke-linejoin="round">
+  <rect x="90" y="140" width="180" height="230" rx="38"/>
+  <rect x="100" y="55"  width="34" height="90"  rx="17"/>
+  <rect x="140" y="35"  width="34" height="112" rx="17"/>
+  <rect x="180" y="48"  width="34" height="99"  rx="17"/>
+  <rect x="220" y="80"  width="30" height="68"  rx="15"/>
+  <rect x="46"  y="200" width="32" height="104" rx="16" transform="rotate(-28 62 252)"/>
+</g><text x="420" y="60" font-size="11" fill="#34d399" text-anchor="middle" font-weight="700">DAYLIGHT — no flash</text><text x="420" y="244" font-size="10" fill="#94a3b8" text-anchor="middle" font-weight="500">Palm flat. Camera straight above.</text><text x="420" y="262" font-size="10" fill="#94a3b8" text-anchor="middle" font-weight="500">Wrist to fingertips, filling the frame.</text><text x="280" y="290" font-size="11" fill="#e2e8f0" text-anchor="middle" font-weight="700">If YOU cannot see the fine lines when you zoom in, neither can the engine.</text></svg>

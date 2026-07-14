@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 430 450" role="img"><style>
+  text { font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif; }
+  .draw { stroke-dasharray:1000; stroke-dashoffset:1000;
+           animation: dash 1.6s ease-out forwards; }
+  .d2 { animation-delay:.3s } .d3 { animation-delay:.6s }
+  .d4 { animation-delay:.9s } .d5 { animation-delay:1.2s }
+  .d6 { animation-delay:1.5s }
+  @keyframes dash { to { stroke-dashoffset:0 } }
+  .fade { opacity:0; animation: fade .8s ease-out 1.4s forwards }
+  @keyframes fade { to { opacity:1 } }
+  @media (prefers-reduced-motion: reduce) {
+    * { animation:none !important; }
+    .draw { stroke-dashoffset:0 !important; }
+    .fade { opacity:1 !important; }
+  }
+  
+</style><g transform="translate(0,0) scale(1.0)"
+     stroke="#94a3b8" stroke-width="1.5" fill="#0f172a" fill-opacity=".35"
+     stroke-linejoin="round">
+  <rect x="90" y="140" width="180" height="230" rx="38"/>
+  <rect x="100" y="55"  width="34" height="90"  rx="17"/>
+  <rect x="140" y="35"  width="34" height="112" rx="17"/>
+  <rect x="180" y="48"  width="34" height="99"  rx="17"/>
+  <rect x="220" y="80"  width="30" height="68"  rx="15"/>
+  <rect x="46"  y="200" width="32" height="104" rx="16" transform="rotate(-28 62 252)"/>
+</g><path d="M250 192 C 214 168, 170 154, 118 160" fill="none" stroke="#475569" stroke-width="2" stroke-linecap="round" class="draw"/><path d="M100 206 C 142 216, 196 224, 242 240" fill="none" stroke="#475569" stroke-width="2" stroke-linecap="round" class="draw d2"/><path d="M178 366 C 174 300, 172 240, 170 198" fill="none" stroke="#475569" stroke-width="2" stroke-linecap="round" class="draw d3"/><g class="fade"><line x1="168" y1="188" x2="192" y2="212" stroke="#34d399" stroke-width="2.4"/><line x1="192" y1="188" x2="168" y2="212" stroke="#34d399" stroke-width="2.4"/></g><g class="fade"><line x1="107" y1="168" x2="127" y2="188" stroke="#34d399" stroke-width="2.4"/><line x1="127" y1="168" x2="107" y2="188" stroke="#34d399" stroke-width="2.4"/></g><line class="fade" x1="152" y1="286" x2="192" y2="278" stroke="#fb7185" stroke-width="2.6"/><g class="fade"><text x="300" y="180" font-size="12" fill="#e2e8f0" text-anchor="start" font-weight="700">NOT ALL CROSSES</text><text x="300" y="196" font-size="12" fill="#e2e8f0" text-anchor="start" font-weight="700">ARE BAD NEWS.</text><circle cx="306" cy="224" r="5" fill="#34d399"/><text x="318" y="228" font-size="10" fill="#34d399" text-anchor="start" font-weight="500">On GURU — a fortunate</text><text x="318" y="240" font-size="10" fill="#94a3b8" text-anchor="start" font-weight="500">union. A blessing.</text><circle cx="306" cy="266" r="5" fill="#34d399"/><text x="318" y="270" font-size="10" fill="#34d399" text-anchor="start" font-weight="500">MYSTIC CROSS — between</text><text x="318" y="282" font-size="10" fill="#94a3b8" text-anchor="start" font-weight="500">head + heart. Intuition.</text><circle cx="306" cy="308" r="5" fill="#fb7185"/><text x="318" y="312" font-size="10" fill="#fb7185" text-anchor="start" font-weight="500">BAR across a line —</text><text x="318" y="324" font-size="10" fill="#94a3b8" text-anchor="start" font-weight="500">an obstacle. Not a curse.</text><text x="215" y="404" font-size="11.5" fill="#e2e8f0" text-anchor="middle" font-weight="600">Two of these are among the best</text><text x="215" y="420" font-size="11.5" fill="#e2e8f0" text-anchor="middle" font-weight="600">marks in the whole shastra.</text></g></svg>
