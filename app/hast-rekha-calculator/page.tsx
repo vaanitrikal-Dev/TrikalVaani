@@ -578,7 +578,7 @@ export default function HastRekhaPage() {
             Trikaal Vaani. Sixteen years of personal practice in Vedic astrology in the{' '}
             <strong>Parashara tradition</strong> (Brihat Parashara Hora Shastra), and in Samudrika Shastra.
             Trikaal Vaani is a registered MSME (UDYAM-DL-10-0119070), based in Dwarka, New Delhi 110075, serving
-            clients across Delhi NCR — Delhi, Noida, Gurgaon and Ghaziabad — and worldwide.
+            clients across India — Delhi, Noida, Gurgaon and Ghaziabad — and worldwide.
           </p>
           <p className="mb-3 text-[15px] leading-relaxed">
             The rules this engine applies are not invented. They are drawn from the classical corpus:{' '}
@@ -669,7 +669,7 @@ export default function HastRekhaPage() {
 
         {/* ── LOCAL (IR-0b) ── */}
         <h2 className="mb-4 mt-12 font-serif text-2xl font-bold" style={{ color: GOLD }}>
-          Palm reading in Delhi NCR — and everywhere else
+          Palm reading in India — and everywhere else
         </h2>
         <p className="mb-4 leading-relaxed">
           Trikaal Vaani is based in <strong>Dwarka, New Delhi</strong>, and a large share of the people who use
