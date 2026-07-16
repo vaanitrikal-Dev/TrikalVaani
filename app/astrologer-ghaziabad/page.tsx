@@ -5,7 +5,7 @@
  * File:        app/astrologer-ghaziabad/page.tsx
  * Version:     v1.0
  * Owner:       Rohiit Gupta, Chief Vedic Architect
- * Created:     2026-07-12
+ * Created:     2026-07-17
  *
  * PURPOSE:
  *   Local SEO satellite page for Ghaziabad (Delhi NCR). Companion to the flagship
