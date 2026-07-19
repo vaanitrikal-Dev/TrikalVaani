@@ -2,8 +2,39 @@
 
 // ============================================================
 // File: app/hast-rekha-calculator/HastRekhaClient.tsx
-// Version: v2.0 — design system + paid ₹51 + PDF + mobile capture + PDF storage
+// Version: v2.1 — SHASTRA-CORRECT + HONEST-SALES REBUILD
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
+//
+// CHANGE v2.1 (2026-07-19)
+//   1. HANDEDNESS FIX (accuracy-critical): form now asks which hand
+//      the user writes with. The DOMINANT hand is required; the other
+//      is optional. Labels flip automatically. Previously we forced
+//      the RIGHT palm — a left-handed user (~10% of users) was read
+//      from the wrong hand, contradicting our own FAQ.
+//      Payload: dominant image is sent in `right_palm_b64` (primary
+//      slot, backward-compatible) + new `handedness` and
+//      `dominant_palm_b64` fields. BACKEND TODO: read `handedness`.
+//   2. "आठ पर्वतों" → "सात पर्वतों" (CEO decision v1.3: 7 parvat).
+//   3. RATNA: engine's `shubh_ratna` text is NO LONGER rendered.
+//      Replaced with an honest pointer card — "ratna Kundali se tay
+//      hota hai" → gemstone suitability calculator (cross-sell that
+//      keeps the anti-fear promise intact). BACKEND TODO: stop
+//      generating shubh_ratna. 'Shubh Ratna Suggestion' removed from
+//      the included list.
+//   4. REVIEW screen: fabricated flattery ("aapki rekha itni vishesh
+//      hai") replaced with the honest premium version — extra QC
+//      because we refuse to ship a wrong report. Zero refund risk.
+//   5. PRIVACY: honest line added under CTA (photo processed only,
+//      never saved to our database/storage — verified in Supabase:
+//      palmistry_reports has no image column; only PDFs stored).
+//      NOTE: page.tsx FAQ still claims "browser session" — fix in
+//      page.tsx v1.4 (next step).
+//   6. Dead `dob` field removed (was in payload, had no input).
+//   7. Compression 1200px → 1600px (fine lines: vivah rekha, small
+//      signs survive). Quality 0.88.
+//   8. Budh Rekha mention removed from SEO paragraph (official list
+//      is 6 lines; engine doesn't read Budh Rekha yet).
+//   9. Unused `observations` no longer destructured.
 // ============================================================
 
 import { useState, useRef, useCallback, useEffect } from 'react';
@@ -20,16 +51,22 @@ const GOLD_RGBA = (a: number) => `rgba(212,175,55,${a})`;
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 type Step = 'upload' | 'paying' | 'analyzing' | 'result' | 'review';
+type Handedness = 'right' | 'left';
 
 interface FAQ { q: string; a: string; }
-interface FormState { userName: string; mobile: string; gender: 'M' | 'F'; language: 'hi' | 'en' | 'hinglish'; dob: string; }
+interface FormState {
+  userName: string;
+  mobile: string;
+  gender: 'M' | 'F';
+  language: 'hi' | 'en' | 'hinglish';
+  handedness: Handedness;
+}
 interface PalmImage { preview: string; b64: string; }
 interface PalmResult {
   success: boolean;
   session_id: string;
   mp_features: Record<string, any>;
   scores: Record<string, number>;
-  observations: string[];
   report: Record<string, any>;
   pdf_b64: string | null;
 }
@@ -53,7 +90,7 @@ const ANALYZING_MSGS = [
   'रेखाएं sharp की जा रही हैं...',
   'जीवन रेखा और मस्तिष्क रेखा पढ़ी जा रही हैं...',
   'हृदय रेखा और भाग्य रेखा का विश्लेषण...',
-  'आठ पर्वतों का अध्ययन हो रहा है...',
+  'सात पर्वतों का अध्ययन हो रहा है...',
   'समुद्रिक शास्त्र के 40+ नियम लागू हो रहे हैं...',
   'आपके 8 जीवन आयाम गिने जा रहे हैं...',
   'Trikaal AI आपकी विस्तृत रिपोर्ट लिख रही है...',
@@ -62,7 +99,10 @@ const ANALYZING_MSGS = [
 
 // ─── Utilities ────────────────────────────────────────────────────────────────
 
-async function compressImage(file: File, maxPx = 1200): Promise<string> {
+// v2.1: 1600px — vivah rekha and small signs are the first casualties
+// of aggressive downscaling. Payload cost is acceptable; accuracy is not
+// negotiable on a paid product.
+async function compressImage(file: File, maxPx = 1600): Promise<string> {
   return new Promise((resolve, reject) => {
     const img = new window.Image();
     const url = URL.createObjectURL(file);
@@ -73,7 +113,7 @@ async function compressImage(file: File, maxPx = 1200): Promise<string> {
         canvas.width  = Math.round(img.width  * ratio);
         canvas.height = Math.round(img.height * ratio);
         canvas.getContext('2d')!.drawImage(img, 0, 0, canvas.width, canvas.height);
-        resolve(canvas.toDataURL('image/jpeg', 0.85).split(',')[1]);
+        resolve(canvas.toDataURL('image/jpeg', 0.88).split(',')[1]);
       } catch (e) { reject(e); }
       finally { URL.revokeObjectURL(url); }
     };
@@ -107,19 +147,20 @@ function downloadPDF(b64: string, name: string) {
 
 // ─── Upload Zone ─────────────────────────────────────────────────────────────
 
-function UploadZone({ image, onFile, label, required, emoji }: {
-  image: PalmImage | null; onFile: (f: File) => void; label: string; required?: boolean; emoji: string;
+function UploadZone({ image, onFile, label, sublabel, required, emoji }: {
+  image: PalmImage | null; onFile: (f: File) => void; label: string; sublabel?: string; required?: boolean; emoji: string;
 }) {
   const galleryRef = useRef<HTMLInputElement>(null);
   const cameraRef  = useRef<HTMLInputElement>(null);
 
   return (
     <div>
-      <label className="block text-sm font-medium mb-2 text-slate-300">
+      <label className="block text-sm font-medium mb-1 text-slate-300">
         {label}
         {required && <span className="text-red-400 ml-1">*</span>}
-        {!required && <span className="text-slate-500 ml-1 text-xs">(Optional — better results)</span>}
+        {!required && <span className="text-slate-500 ml-1 text-xs">(Optional — behtar reading)</span>}
       </label>
+      {sublabel && <p className="text-xs text-slate-500 mb-2">{sublabel}</p>}
       <div
         className="rounded-2xl p-5 text-center transition-all min-h-[210px] flex flex-col items-center justify-center"
         style={{
@@ -191,14 +232,14 @@ function HastRekhaFooter() {
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
 export default function HastRekhaClient({ faqs }: { faqs: FAQ[] }) {
-  const [step,      setStep]      = useState<Step>('upload');
-  const [rightPalm, setRightPalm] = useState<PalmImage | null>(null);
-  const [leftPalm,  setLeftPalm]  = useState<PalmImage | null>(null);
-  const [form,      setForm]      = useState<FormState>({ userName: '', mobile: '', gender: 'M', language: 'hi', dob: '' });
-  const [msgIdx,    setMsgIdx]    = useState(0);
-  const [result,    setResult]    = useState<PalmResult | null>(null);
-  const [error,     setError]     = useState('');
-  const [waUrl,     setWaUrl]     = useState('');
+  const [step,       setStep]       = useState<Step>('upload');
+  const [domPalm,    setDomPalm]    = useState<PalmImage | null>(null); // dominant hand (required)
+  const [otherPalm,  setOtherPalm]  = useState<PalmImage | null>(null); // non-dominant (optional)
+  const [form,       setForm]       = useState<FormState>({ userName: '', mobile: '', gender: 'M', language: 'hi', handedness: 'right' });
+  const [msgIdx,     setMsgIdx]     = useState(0);
+  const [result,     setResult]     = useState<PalmResult | null>(null);
+  const [error,      setError]      = useState('');
+  const [waUrl,      setWaUrl]      = useState('');
 
   useEffect(() => {
     const s = document.createElement('script');
@@ -207,20 +248,20 @@ export default function HastRekhaClient({ faqs }: { faqs: FAQ[] }) {
     document.body.appendChild(s);
   }, []);
 
-  const handleFile = useCallback(async (file: File, side: 'right' | 'left') => {
+  const handleFile = useCallback(async (file: File, slot: 'dom' | 'other') => {
     setError('');
     if (!file.type.match(/image\/(jpeg|jpg|png|webp)/)) { setError('JPG, PNG ya WebP chahiye'); return; }
     if (file.size > 10 * 1024 * 1024) { setError('10MB se chhoti photo upload karein'); return; }
     try {
       const preview = URL.createObjectURL(file);
       const b64     = await compressImage(file);
-      if (side === 'right') setRightPalm({ preview, b64 });
-      else                  setLeftPalm({ preview, b64 });
+      if (slot === 'dom') setDomPalm({ preview, b64 });
+      else                setOtherPalm({ preview, b64 });
     } catch { setError('Image process error — dobara try karein'); }
   }, []);
 
   const handlePay = async () => {
-    if (!rightPalm) { setError('Seedha haath (Right Palm) zaroor upload karein'); return; }
+    if (!domPalm) { setError('Pradhan haath (jis se aap likhte hain) ki photo zaroor upload karein'); return; }
     setStep('paying'); setError('');
 
     try {
@@ -254,9 +295,17 @@ export default function HastRekhaClient({ faqs }: { faqs: FAQ[] }) {
                   razorpay_order_id:   response.razorpay_order_id,
                   razorpay_payment_id: response.razorpay_payment_id,
                   razorpay_signature:  response.razorpay_signature,
-                  right_palm_b64:      rightPalm!.b64,
-                  left_palm_b64:       leftPalm?.b64 ?? null,
-                  user_name: form.userName, user_mobile: form.mobile, gender: form.gender, language: form.language, dob: form.dob,
+                  // v2.1 handedness contract:
+                  //   right_palm_b64 = PRIMARY slot = DOMINANT hand image
+                  //   left_palm_b64  = SECONDARY   = non-dominant image
+                  //   `handedness` + `dominant_palm_b64` are the new explicit
+                  //   fields — backend should prefer these when present.
+                  right_palm_b64:      domPalm!.b64,
+                  left_palm_b64:       otherPalm?.b64 ?? null,
+                  dominant_palm_b64:   domPalm!.b64,
+                  other_palm_b64:      otherPalm?.b64 ?? null,
+                  handedness:          form.handedness,
+                  user_name: form.userName, user_mobile: form.mobile, gender: form.gender, language: form.language,
                 }),
               });
               clearInterval(timer);
@@ -281,7 +330,10 @@ export default function HastRekhaClient({ faqs }: { faqs: FAQ[] }) {
     }
   };
 
-  const reset = () => { setStep('upload'); setResult(null); setRightPalm(null); setLeftPalm(null); setError(''); };
+  const reset = () => { setStep('upload'); setResult(null); setDomPalm(null); setOtherPalm(null); setError(''); };
+
+  const domLabel   = form.handedness === 'right' ? 'Daya Haath — Pradhan (Dominant)'  : 'Baaya Haath — Pradhan (Dominant)';
+  const otherLabel = form.handedness === 'right' ? 'Baaya Haath (Non-dominant)'        : 'Daya Haath (Non-dominant)';
 
   // ═══ UPLOAD ═══
   if (step === 'upload' || step === 'paying') return (
@@ -308,8 +360,8 @@ export default function HastRekhaClient({ faqs }: { faqs: FAQ[] }) {
               🖐️ AI Hast Rekha Calculator
             </h1>
             <p className="text-base md:text-lg text-slate-300 max-w-xl mx-auto leading-relaxed">
-              Apni haath ki photo upload karein — Trikaal AI aapki Hast Rekhaon ka complete
-              Samudrika Shastra vishleshan karti hai. PDF report milti hai.
+              Ek photo — aur Trikaal AI aapke haath ki 6 rekhaon aur 7 parvaton ka poora
+              Samudrika Shastra vishleshan karti hai. PDF report aapki, hamesha ke liye.
             </p>
             <div className="flex flex-wrap gap-2 justify-center mt-5">
               {['Hand Landmark Detection', 'Line Enhancement', 'AI Vision Scan', 'Samudrika Rules', 'PDF Report'].map(t => (
@@ -333,7 +385,7 @@ export default function HastRekhaClient({ faqs }: { faqs: FAQ[] }) {
 
           {/* Photo tips */}
           <div className="rounded-xl p-4 mb-6" style={{ background: GOLD_RGBA(0.06), border: `1px solid ${GOLD_RGBA(0.2)}` }}>
-            <p className="font-semibold text-sm mb-3" style={{ color: GOLD }}>📸 Achhi Photo Ke Liye</p>
+            <p className="font-semibold text-sm mb-3" style={{ color: GOLD }}>📸 Achhi Photo = Achhi Reading</p>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               {['Natural light mein lein', 'Poora haath frame mein', 'Ungliyan seedhi khuli', 'Rings/bangles utaar lein'].map((t, i) => (
                 <div key={i} className="flex gap-2 text-sm text-slate-300">
@@ -343,10 +395,31 @@ export default function HastRekhaClient({ faqs }: { faqs: FAQ[] }) {
             </div>
           </div>
 
-          {/* Upload zones */}
+          {/* v2.1 — Handedness selector (accuracy-critical) */}
+          <div className="rounded-xl p-4 mb-6" style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid ${GOLD_RGBA(0.2)}` }}>
+            <p className="font-semibold text-sm mb-1" style={{ color: GOLD }}>✍️ Aap likhne ke liye kaun sa haath use karte hain?</p>
+            <p className="text-xs text-slate-500 mb-3">
+              Samudrika Shastra mein pradhan (dominant) haath padha jaata hai — wahi dikhata hai jo aapne banaya.
+            </p>
+            <div className="grid grid-cols-2 gap-3 max-w-sm">
+              {([['right', '🖐️ Daya (Right)'], ['left', '🤚 Baaya (Left)']] as [Handedness, string][]).map(([val, lab]) => (
+                <button key={val} onClick={() => setForm(p => ({ ...p, handedness: val }))}
+                  className="py-2.5 rounded-lg text-sm font-medium transition-all"
+                  style={form.handedness === val
+                    ? { background: `linear-gradient(135deg, ${GOLD} 0%, #A8820A 100%)`, color: '#080B12' }
+                    : { background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#cbd5e1' }}>
+                  {lab}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Upload zones — dominant first, always */}
           <div className="grid md:grid-cols-2 gap-6 mb-7">
-            <UploadZone image={rightPalm} onFile={f => handleFile(f, 'right')} label="Seedha Haath (Right Palm)" required emoji="🖐️" />
-            <UploadZone image={leftPalm}  onFile={f => handleFile(f, 'left')}  label="Ulta Haath (Left Palm)"   emoji="🤚" />
+            <UploadZone image={domPalm} onFile={f => handleFile(f, 'dom')} label={domLabel}
+              sublabel="Jis haath se aap likhte hain — ye zaroori hai" required emoji="🖐️" />
+            <UploadZone image={otherPalm} onFile={f => handleFile(f, 'other')} label={otherLabel}
+              sublabel="Dono haathon ka farak hi asli reading hai" emoji="🤚" />
           </div>
 
           {/* Form */}
@@ -393,7 +466,7 @@ export default function HastRekhaClient({ faqs }: { faqs: FAQ[] }) {
           )}
 
           {/* CTA */}
-          <button onClick={handlePay} disabled={!rightPalm || step === 'paying'}
+          <button onClick={handlePay} disabled={!domPalm || step === 'paying'}
             className="w-full py-4 rounded-xl font-bold text-lg transition-all hover:scale-[1.01] disabled:opacity-30 disabled:cursor-not-allowed"
             style={{ background: `linear-gradient(135deg, ${GOLD} 0%, #A8820A 100%)`, color: '#080B12' }}>
             {step === 'paying' ? '⏳ Payment Processing...' : '🔮 Full Hast Rekha Report — ₹51'}
@@ -403,8 +476,8 @@ export default function HastRekhaClient({ faqs }: { faqs: FAQ[] }) {
           <div className="mt-4 rounded-xl p-4" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
             <p className="text-xs font-semibold mb-2 tracking-wide" style={{ color: GOLD_RGBA(0.85) }}>REPORT MEIN KYA HAI</p>
             <div className="grid grid-cols-2 gap-1.5">
-              {['8 Dimension Scores', 'Mukhya Rekhaen Analysis', 'Vyaktitva Vishleshan', 'Vyavsay + Dhan Yoga',
-                'Prem + Vivah Sanket', 'Swasthya + Adhyatma', 'Samudrika Upay (4)', 'Shubh Ratna Suggestion',
+              {['8 Dimension Scores', '6 Mukhya Rekhaen Analysis', '7 Parvat Vishleshan', 'Vyaktitva Vishleshan',
+                'Vyavsay + Dhan Yoga', 'Prem + Vivah Sanket', 'Swasthya + Adhyatma', 'Samudrika Upay',
                 'Trikaal AI ka Sandesh', 'PDF Download ✓'].map((item, i) => (
                 <div key={i} className="flex gap-2 text-xs text-slate-400">
                   <span style={{ color: GOLD }}>◈</span><span>{item}</span>
@@ -414,7 +487,7 @@ export default function HastRekhaClient({ faqs }: { faqs: FAQ[] }) {
           </div>
 
           <p className="text-center text-slate-600 text-xs mt-4">
-            Secure payment via Razorpay · SSL encrypted · One-time ₹51
+            Secure payment via Razorpay · Photo sirf analysis ke liye — hamare database mein save nahi hoti · One-time ₹51
           </p>
 
           {/* AEO FAQ */}
@@ -433,15 +506,15 @@ export default function HastRekhaClient({ faqs }: { faqs: FAQ[] }) {
             </div>
           </section>
 
-          {/* SEO content */}
+          {/* SEO content — Budh Rekha removed (official scope = 6 lines) */}
           <section className="mt-12">
             <h2 className="text-xl font-serif font-bold mb-4" style={{ color: GOLD }}>Haath Ki Rekhaen Kya Batati Hain?</h2>
             <p className="text-sm text-slate-400 leading-relaxed">
               Jeevan Rekha (Life Line) vitality aur swasthya batati hai. Mastishk Rekha (Head Line) career path aur
               soch ka tarika dikhati hai. Hriday Rekha (Heart Line) prem aur rishton ki gehrai batati hai.
-              Bhagya Rekha (Fate Line) career trajectory aur bhagya sanket deti hai. Surya Rekha yash aur samridhi,
-              Budh Rekha vyapar aur communication skills batati hai. Trikaal Vaani ka AI engine in sab ko ek saath
-              analyze karke aapko personalized Samudrika Shastra report deta hai.
+              Bhagya Rekha (Fate Line) career trajectory aur bhagya sanket deti hai. Surya Rekha yash aur samridhi
+              batati hai, aur Vivah Rekha rishton ke bandhan ka sanket. Trikaal Vaani ka AI engine in sab ko
+              7 parvaton ke sandarbh mein ek saath analyze karke aapko personalized Samudrika Shastra report deta hai.
             </p>
           </section>
 
@@ -487,7 +560,7 @@ export default function HastRekhaClient({ faqs }: { faqs: FAQ[] }) {
     </>
   );
 
-  // ═══ REVIEW (graceful personal-review handoff — NOT a failure) ═══
+  // ═══ REVIEW — honest premium QC handoff (no fabricated flattery) ═══
   if (step === 'review') return (
     <>
       <SiteNav />
@@ -496,18 +569,19 @@ export default function HastRekhaClient({ faqs }: { faqs: FAQ[] }) {
         <div className="max-w-md mx-auto text-center">
           <div className="text-6xl mb-6">🔱</div>
           <h1 className="text-2xl md:text-3xl font-serif font-bold mb-4" style={{ color: GOLD }}>
-            Aapki Reading Personal Review Mein Hai
+            Aapki Report Extra Jaanch Mein Hai
           </h1>
           <p className="text-slate-300 text-sm md:text-base leading-relaxed mb-6">
-            Aapki Hast Rekha itni vishesh hai ki ise hamare Vedic experts personally
-            review kar rahe hain. Aapki detailed report agle <strong style={{ color: GOLD }}>30 minute</strong> mein
-            WhatsApp par bheji jayegi.
+            Hamara usool seedha hai: <strong style={{ color: GOLD }}>galat ya adhoori report kabhi nahi bhejni.</strong>{' '}
+            Aapki photo ke analysis ko hum ek baar aur saavdhani se check kar rahe hain, taaki jo report
+            aap tak pahunche wo poori tarah sahi ho. Aapki detailed report agle{' '}
+            <strong style={{ color: GOLD }}>30 minute</strong> mein WhatsApp par bheji jayegi.
           </p>
 
           <div className="rounded-xl p-5 mb-6" style={{ background: GOLD_RGBA(0.06), border: `1px solid ${GOLD_RGBA(0.2)}` }}>
             <p className="text-sm text-slate-400 leading-relaxed">
               ✓ Aapka payment safe hai<br />
-              ✓ Report personally review hokar aayegi<br />
+              ✓ Report jaanch ke baad hi aayegi<br />
               ✓ Koi extra charge nahi
             </p>
           </div>
@@ -536,7 +610,7 @@ export default function HastRekhaClient({ faqs }: { faqs: FAQ[] }) {
 
   // ═══ RESULT ═══
   if (step === 'result' && result) {
-    const { scores, report, mp_features, observations, pdf_b64 } = result;
+    const { scores, report, mp_features, pdf_b64 } = result;
     return (
       <>
         <SiteNav />
@@ -666,13 +740,22 @@ export default function HastRekhaClient({ faqs }: { faqs: FAQ[] }) {
               </section>
             )}
 
-            {/* Ratna */}
-            {report?.shubh_ratna && (
-              <section className="rounded-xl p-5 mb-5" style={{ background: 'rgba(59,130,246,0.08)', border: '1px solid rgba(59,130,246,0.25)' }}>
-                <h2 className="font-semibold text-sm mb-2" style={{ color: '#93c5fd' }}>💎 Shubh Ratna</h2>
-                <p className="text-slate-300 text-sm">{report.shubh_ratna}</p>
-              </section>
-            )}
+            {/* v2.1 RATNA — honest pointer, engine's shubh_ratna intentionally NOT rendered.
+                Palm marks never decide a gemstone; the Kundali does. This card protects the
+                anti-fear promise AND cross-sells the gemstone calculator. */}
+            <section className="rounded-xl p-5 mb-5" style={{ background: 'rgba(59,130,246,0.08)', border: '1px solid rgba(59,130,246,0.25)' }}>
+              <h2 className="font-semibold text-sm mb-2" style={{ color: '#93c5fd' }}>💎 Ratna Ke Baare Mein Sach</h2>
+              <p className="text-slate-300 text-sm leading-relaxed mb-3">
+                Ratna kabhi hatheli ke nishan se tay nahi hota — wo aapki <strong>Kundali</strong> se hota hai.
+                Isliye hum is report mein koi ratna suggest nahi karte. Galat ratna nuksaan karta hai.
+                Apni Kundali ke hisaab se free mein check karein:
+              </p>
+              <Link href="/calculators/free-gemstone-suitability-calculator"
+                className="inline-block px-4 py-2 rounded-lg text-sm font-semibold transition-all hover:scale-[1.02]"
+                style={{ background: 'rgba(59,130,246,0.2)', border: '1px solid rgba(59,130,246,0.4)', color: '#93c5fd' }}>
+                💎 Free Gemstone Suitability Calculator →
+              </Link>
+            </section>
 
             {/* Trikaal AI Sandesh */}
             {report?.jini_sandesh && (
@@ -691,12 +774,13 @@ export default function HastRekhaClient({ faqs }: { faqs: FAQ[] }) {
               </button>
             )}
 
-            {/* Upsell */}
+            {/* Upsell — timing questions belong to the Kundali; honest bridge */}
             <section className="rounded-2xl p-6 text-center mb-5"
               style={{ background: `linear-gradient(135deg, ${GOLD_RGBA(0.12)}, rgba(2,8,23,0.6))`, border: `1px solid ${GOLD_RGBA(0.35)}` }}>
-              <h3 className="font-serif font-bold text-lg mb-2" style={{ color: GOLD }}>Gehri Kundali Reading Chahiye?</h3>
+              <h3 className="font-serif font-bold text-lg mb-2" style={{ color: GOLD }}>Ab Sawaal &ldquo;Kab&rdquo; Ka Hai?</h3>
               <p className="text-slate-400 text-sm mb-5 max-w-sm mx-auto">
-                Janam Kundali se career, vivah timing, dhan yoga aur dasha vishleshan
+                Hatheli batati hai <em>kya</em> — timing batati hai <strong>Kundali</strong>.
+                Vivah kab, career shift kab, dasha kya keh rahi hai — sab Janam Kundali se.
               </p>
               <Link href="/#birth-form"
                 className="inline-block px-8 py-3 rounded-full font-semibold text-sm transition-all hover:scale-105"
