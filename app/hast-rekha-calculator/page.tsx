@@ -1,54 +1,37 @@
 // ═══════════════════════════════════════════════════════════════
 // app/hast-rekha-calculator/page.tsx
 // AI HAST REKHA CALCULATOR — money page (server component)
-// Version: v1.3
+// Version: v1.4
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
 //
+// CHANGE v1.4 (2026-07-19) — PRIVACY TRUTH + HANDEDNESS SYNC
+//   The v1.3 privacy claim ("image stays in your browser session")
+//   was FALSE: the image is POSTed to our server and passed to the
+//   vision engine for analysis. Verified in Supabase before this fix:
+//   palmistry_reports has NO image column and storage holds only PDFs
+//   — so the image is NOT saved by us, but it does leave the browser.
+//   A privacy claim that our own architecture contradicts is a legal
+//   and trust liability on a paid page. Every instance corrected to
+//   the verified truth: "processed for analysis, never saved to our
+//   database or storage; only your report is saved."
+//   Locations fixed: FAQ answer, how-it-works step 3, JSON-LD
+//   featureList, Offer description, bottom CTA microcopy.
+//   Also: FAQ hand answer now mentions the new handedness selector
+//   shipped in HastRekhaClient v2.1 (dominant hand required; labels
+//   flip for left-handed users).
+//
 // CHANGE v1.3 (2026-07-14) — SEO / GEO / AEO / E-E-A-T REBUILD
-//
-//   WHAT v1.2 DID NOT SOLVE:
-//   v1.2 fixed the JSON-LD so crawlers could see it. But schema is a
-//   LABEL on content, not content. Measured on the live page:
-//     • 654 visible words
-//     • ZERO links to any of the 17 Hast Rekha hub pages
-//     • no 40–60 word direct answer (IR-0b requires one)
-//     • E-E-A-T existed only in markup, never on screen
-//     • the anti-fear promise — our single biggest differentiator —
-//       lived only on the blog, and NOT on the page where the money
-//       decision is actually made
-//   The hub sends ~170 internal links INTO this page. This page sent
-//   nothing back. It was an authority dead end, and to an AI crawler
-//   it was a form with no evidence that we know anything.
-//
-//   WHAT v1.3 DOES:
-//   1. Adds a 2,000+ word SSR content block below the tool, covering all
-//      27 keyword types + Local (Delhi NCR / Noida / Gurgaon / Ghaziabad).
-//   2. Opens that block with a 40–60 word direct answer for AEO/GEO.
-//   3. Links out to ALL 17 hub pages, grouped — this page becomes the
-//      HEART of the hub instead of its dead end.
-//   4. Visible E-E-A-T: Rohiit Gupta, 16 years, Parashara BPHS lineage,
-//      MSME reg, Dwarka address, classical sources named, /founder link.
-//      Google's quality raters read the page, not the JSON-LD.
-//   5. Puts the ANTI-FEAR promise where the wallet is. It is the whole
-//      reason someone picks us over a ₹2,000 palmist who sells a puja
-//      afterwards.
-//
-//   LIVE INCONSISTENCIES CORRECTED (all were shipping):
-//   • "8 mounts" → "7 mounts" everywhere. The 17-page hub and all 22
-//     diagrams say SEVEN (Mangal = one parvat with two zones). CEO
-//     decision: standardise on SEVEN. One site, one answer. A
-//     contradiction across our own domain damages the entity
-//     consistency the entire GEO plan depends on.
-//   • FAQ said "8 parvat" and then listed SEVEN names. Fixed.
-//   • FAQ told users to upload the RIGHT hand. The hub says the
-//     DOMINANT hand. A left-handed user following the old FAQ would
-//     have received a reading of the wrong hand. Fixed.
-//   • FAQ claimed "90%+ accuracy". Unverifiable, and IR forbids fake
-//     stats — our own accuracy page explicitly refuses that claim.
-//     Removed and replaced with the honest answer.
-//   • Added FAQs for the two questions that actually decide the sale:
-//     "can you tell me when I'll marry / how long I'll live" and
-//     "will you sell me a puja afterwards". Both answered: no.
+//   1. 2,000+ word SSR content block below the tool — 27 keyword
+//      types + Local (Delhi NCR / Noida / Gurgaon / Ghaziabad).
+//   2. 40–60 word direct answer for AEO/GEO at the top of the block.
+//   3. Links out to ALL 17 hub pages, grouped — this page is the
+//      HEART of the hub, not its dead end (~170 links come in).
+//   4. Visible E-E-A-T: Rohiit Gupta, 16 years, Parashara BPHS,
+//      MSME reg, Dwarka address, classical sources, /founder link.
+//   5. Anti-fear promise placed where the money decision is made.
+//   6. "8 mounts" → "7 mounts" everywhere (CEO decision; Mangal =
+//      one parvat with two zones). Dominant-hand FAQ fixed. Fake
+//      "90%+ accuracy" removed.
 //
 //   SCHEMA (retained from v1.2): plain <script type="application/ld+json">
 //   rendered from this SERVER component so it lands in the SSR HTML.
@@ -178,11 +161,11 @@ const FAQS = [
   },
   {
     q: 'Kaun sa haath upload karein — seedha ya ulta?',
-    a: 'Apna DOMINANT haath upload karein — yaani jis haath se aap likhte hain. Agar aap left-handed hain toh baaya haath, chahe purani "purush ka daya haath" wali reet kuch bhi kahe. Dominant haath dikhata hai jo aapne banaya; non-dominant dikhata hai jo aapko mila. Dono upload karein toh unke beech ka farak bhi padha jaata hai — aur asli reading wahi hai.',
+    a: 'Apna DOMINANT haath upload karein — yaani jis haath se aap likhte hain. Form mein aap select kar sakte hain ki aap right-handed hain ya left-handed, aur upload labels apne aap sahi ho jaate hain. Agar aap left-handed hain toh baaya haath hi pradhan hai, chahe purani "purush ka daya haath" wali reet kuch bhi kahe. Dominant haath dikhata hai jo aapne banaya; non-dominant dikhata hai jo aapko mila. Dono upload karein toh unke beech ka farak bhi padha jaata hai — aur asli reading wahi hai.',
   },
   {
     q: 'Kya meri palm image save hoti hai?',
-    a: 'Nahi. Palm images hamare server par store nahi hoti — woh aapke browser session mein rehti hain aur analysis ke baad hata di jaati hain. Sirf analysis ka result save hota hai, koi image nahi.',
+    a: 'Aapki photo sirf analysis ke liye process hoti hai. Analysis ke liye photo hamare secure server par jaati hai, lekin hum use apne database ya storage mein save nahi karte — humne apna system check karke ye confirm kiya hai. Sirf aapki report aur PDF save hoti hai, taaki aap use dobara paa sakein. Photo bechna, share karna ya training ke liye use karna — kuch nahi hota.',
   },
   {
     q: 'Kya aap bata sakte hain ki meri shaadi kab hogi, ya main kitne saal jiyunga?',
@@ -269,11 +252,12 @@ export default function HastRekhaPage() {
                   'Palm line extraction — 6 lines and 7 mounts',
                   'Samudrika Shastra rule engine (40+ niyam)',
                   'Every sign read against the mount that carries it',
+                  'Dominant-hand reading with left-handed support',
                   '8 life dimension scores',
                   'Personalised classical remedies',
                   'Downloadable PDF report',
                   'No birth time, birth date or birth place required',
-                  'Palm image never stored on our servers',
+                  'Palm photo processed for analysis only — never saved to our database or storage',
                   'Hindi, English and Hinglish support',
                 ],
                 author: { '@id': PERSON_ID },
@@ -308,7 +292,7 @@ export default function HastRekhaPage() {
                 priceValidUntil: '2027-03-31',
                 url: PAGE_URL,
                 description:
-                  'Full Samudrika Shastra Hast Rekha report with PDF — 8 life dimension scores, 6 line and 7 mount analysis, personalised remedies. One photo. No birth time. No puja, gemstone or follow-up sitting sold afterwards.',
+                  'Full Samudrika Shastra Hast Rekha report with PDF — 8 life dimension scores, 6 line and 7 mount analysis, personalised remedies. One photo. No birth time. Photo processed for analysis only, never saved. No puja, gemstone or follow-up sitting sold afterwards.',
                 eligibleRegion: { '@type': 'Place', name: 'Worldwide' },
                 seller: { '@id': ORG_ID },
               },
@@ -541,7 +525,8 @@ export default function HastRekhaPage() {
             <strong className="text-amber-300">1. Photograph your dominant hand.</strong> The hand you write
             with — if you are left-handed, that is your left hand, regardless of the old
             &ldquo;right-for-men&rdquo; convention, which is a reading-order tradition and not a difference in
-            meaning. The dominant hand shows what you built. The non-dominant shows what you were given. Upload
+            meaning. Tell the form which hand you write with and the upload labels adjust themselves. The
+            dominant hand shows what you built. The non-dominant shows what you were given. Upload
             both if you can: <strong>the difference between them is the reading</strong>, and almost nobody
             performs it.
           </li>
@@ -555,8 +540,9 @@ export default function HastRekhaPage() {
           <li>
             <strong className="text-amber-300">3. Upload and pay ₹51.</strong> The engine detects the lines,
             mounts and signs, applies the classical rules, and returns your report with a downloadable PDF.
-            Your palm image is never stored on our servers — it stays in your browser session and is removed
-            after the analysis.
+            Your photo is processed for the analysis only — we never save it to our database or storage, and
+            we have verified our own system to confirm this. Only your report and PDF are kept, so you can
+            retrieve them again.
           </li>
         </ol>
         <p className="mb-4 leading-relaxed">
@@ -697,7 +683,7 @@ export default function HastRekhaPage() {
             Read my palm — ₹51 →
           </Link>
           <p className="mt-2 text-xs text-slate-500">
-            One photo · No birth time · Palm image never stored · No puja, no gemstone, no second sitting
+            One photo · No birth time · Photo never saved to our database · No puja, no gemstone, no second sitting
           </p>
         </div>
       </section>
