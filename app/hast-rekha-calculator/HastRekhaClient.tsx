@@ -2,8 +2,17 @@
 
 // ============================================================
 // File: app/hast-rekha-calculator/HastRekhaClient.tsx
-// Version: v2.2 — PAYLOAD BUDGET FIX (413 hotfix)
+// Version: v2.3 — PAYLOAD DUPLICATION FIX (final 413 kill)
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
+//
+// CHANGE v2.3 (2026-07-20) — PAYLOAD DUPLICATION REMOVED
+//   v2.2's budget was correct per-image but the payload sent EVERY
+//   image TWICE (right_palm_b64 + dominant_palm_b64 held the same
+//   string; left + other likewise) -> worst case 2 x 3.4MB = 6.8MB,
+//   so 413 could still fire (it did, once, 04:26 UTC). Legacy fields
+//   are now DROPPED from the payload — route v4.1 (REQUIRED, already
+//   live) reconstructs them for the VM. True max is now ~3.4MB with
+//   real headroom under Vercel's 4.5MB limit.
 //
 // CHANGE v2.2 (2026-07-20) — CRITICAL 413 HOTFIX
 //   Live failure (Vercel logs 04:07 UTC): dual-palm upload at 1600px
@@ -326,13 +335,10 @@ export default function HastRekhaClient({ faqs }: { faqs: FAQ[] }) {
                   razorpay_order_id:   response.razorpay_order_id,
                   razorpay_payment_id: response.razorpay_payment_id,
                   razorpay_signature:  response.razorpay_signature,
-                  // v2.1 handedness contract:
-                  //   right_palm_b64 = PRIMARY slot = DOMINANT hand image
-                  //   left_palm_b64  = SECONDARY   = non-dominant image
-                  //   `handedness` + `dominant_palm_b64` are the new explicit
-                  //   fields — backend should prefer these when present.
-                  right_palm_b64:      domPalm!.b64,
-                  left_palm_b64:       otherPalm?.b64 ?? null,
+                  // v2.3: ONLY the new fields are sent. Route v4.1
+                  // reconstructs right/left_palm_b64 for the VM, so
+                  // sending both names here doubled the payload and
+                  // caused 413s. Never re-add the legacy fields.
                   dominant_palm_b64:   domPalm!.b64,
                   other_palm_b64:      otherPalm?.b64 ?? null,
                   handedness:          form.handedness,
