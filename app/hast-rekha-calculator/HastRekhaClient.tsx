@@ -2,8 +2,22 @@
 
 // ============================================================
 // File: app/hast-rekha-calculator/HastRekhaClient.tsx
-// Version: v2.1 — SHASTRA-CORRECT + HONEST-SALES REBUILD
+// Version: v2.2 — PAYLOAD BUDGET FIX (413 hotfix)
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
+//
+// CHANGE v2.2 (2026-07-20) — CRITICAL 413 HOTFIX
+//   Live failure (Vercel logs 04:07 UTC): dual-palm upload at 1600px
+//   exceeded Vercel's 4.5MB serverless body limit -> 413 BEFORE our
+//   route ran -> non-JSON response -> Safari's res.json() threw "The
+//   string did not match the expected pattern". User paid, no report.
+//   1. compressImage now BUDGETED: starts at 1600px/0.85 and steps
+//      down (1400/1200/1000/900) until b64 <= 1.7M chars per image.
+//      Two palms + JSON always fit under 4.5MB. Most photos still
+//      ship at 1600px — accuracy kept, limit respected.
+//   2. paid-analyze response handling hardened: explicit 413 message
+//      + safe JSON parse. Raw browser/DOM errors never reach the
+//      user again — every failure path speaks Hindi and confirms
+//      payment is safe.
 //
 // CHANGE v2.1 (2026-07-19)
 //   1. HANDEDNESS FIX (accuracy-critical): form now asks which hand
@@ -99,27 +113,44 @@ const ANALYZING_MSGS = [
 
 // ─── Utilities ────────────────────────────────────────────────────────────────
 
-// v2.1: 1600px — vivah rekha and small signs are the first casualties
-// of aggressive downscaling. Payload cost is acceptable; accuracy is not
-// negotiable on a paid product.
-async function compressImage(file: File, maxPx = 1600): Promise<string> {
+// v2.2: BUDGETED compression. Vercel's serverless body limit is 4.5MB
+// TOTAL — and we send TWO palms. Per-image budget: <= 1.7M b64 chars
+// (~1.7MB), so dual-palm + JSON always fits. We start sharp (1600px,
+// for vivah rekha and fine signs) and step down ONLY if this photo is
+// too heavy. Most photos ship at 1600px.
+const B64_BUDGET = 1_700_000;
+const COMPRESS_STEPS: Array<[number, number]> = [
+  [1600, 0.85], [1400, 0.80], [1200, 0.78], [1000, 0.72], [900, 0.70],
+];
+
+function loadImage(file: File): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
     const img = new window.Image();
     const url = URL.createObjectURL(file);
-    img.onload = () => {
-      try {
-        const ratio   = Math.min(1, maxPx / img.width, maxPx / img.height);
-        const canvas  = document.createElement('canvas');
-        canvas.width  = Math.round(img.width  * ratio);
-        canvas.height = Math.round(img.height * ratio);
-        canvas.getContext('2d')!.drawImage(img, 0, 0, canvas.width, canvas.height);
-        resolve(canvas.toDataURL('image/jpeg', 0.88).split(',')[1]);
-      } catch (e) { reject(e); }
-      finally { URL.revokeObjectURL(url); }
-    };
-    img.onerror = reject;
+    img.onload  = () => { URL.revokeObjectURL(url); resolve(img); };
+    img.onerror = (e) => { URL.revokeObjectURL(url); reject(e); };
     img.src = url;
   });
+}
+
+function drawToB64(img: HTMLImageElement, maxPx: number, quality: number): string {
+  const ratio   = Math.min(1, maxPx / img.width, maxPx / img.height);
+  const canvas  = document.createElement('canvas');
+  canvas.width  = Math.round(img.width  * ratio);
+  canvas.height = Math.round(img.height * ratio);
+  canvas.getContext('2d')!.drawImage(img, 0, 0, canvas.width, canvas.height);
+  return canvas.toDataURL('image/jpeg', quality).split(',')[1] ?? '';
+}
+
+async function compressImage(file: File): Promise<string> {
+  const img = await loadImage(file);
+  let b64 = '';
+  for (const [maxPx, q] of COMPRESS_STEPS) {
+    b64 = drawToB64(img, maxPx, q);
+    if (b64 && b64.length <= B64_BUDGET) return b64;
+  }
+  if (!b64) throw new Error('Image process nahi ho payi');
+  return b64; // smallest step — always well under budget in practice
 }
 
 function scoreColor(v: number) {
@@ -309,8 +340,15 @@ export default function HastRekhaClient({ faqs }: { faqs: FAQ[] }) {
                 }),
               });
               clearInterval(timer);
-              const data = await res.json();
-              if (!res.ok || !data.success) throw new Error(data.error || 'Analysis failed');
+              if (res.status === 413) {
+                throw new Error('Photos bahut badi thi — page refresh karke dobara try karein. Aapka payment safe hai.');
+              }
+              let data: any = null;
+              try { data = await res.json(); }
+              catch {
+                throw new Error('Server se jawab nahi mil paya — aapka payment safe hai, kripya WhatsApp par humse sampark karein.');
+              }
+              if (!res.ok || !data.success) throw new Error(data.error || 'Analysis failed — payment safe hai, WhatsApp par sampark karein');
               if (data.pending_review) {
                 setWaUrl(data.whatsappUrl || '');
                 setStep('review');
