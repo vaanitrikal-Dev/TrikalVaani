@@ -34,6 +34,34 @@ Trikaal Vaani offers free Vedic dream interpretation (Swapna Shastra) based on c
 - [Serpent Dreams — Full Realm](https://trikalvaani.com/swapna/category/snake): Every snake-dream variation in one place.
 Individual pages exist for every symbol at /swapna/[symbol] (107 symbols) and every dream family at /swapna/category/[category] (12 realms); the complete machine-readable set is in the sitemap.
 
+## Kaal Sarp Dosh (Rahu-Ketu Axis)
+Kaal Sarp Dosh is the chart pattern in which all seven grahas (Sun through Saturn) fall inside the half-circle running from Rahu to Ketu. Trikaal Vaani applies the strict classical rule: if even one planet sits outside that arc, Kaal Sarp Dosh is not present at all, and most online reports that claim it are describing a partial arrangement that does not qualify. Trikaal Vaani's position is deliberately non-fearful and is the opposite of the fear-marketing common in this subject. Kaal Sarp is not named in Brihat Parashara Hora Shastra; the twelve serpent names are a later classificatory convention from Nakshatra-shastra commentary and Trimbakeshwar temple tradition. It frequently cancels (bhang) through the strength of the Lagna lord, the lord of the house Rahu occupies, Jupiter's aspect, and the Viparita Raja Yogas — Harsha, Sarala and Vimala — for the dusthana types. It is not grounds for rejecting a marriage proposal, since classical Ashtakoot matching does not examine it. Severity depends on cancellation, the relevant house lord and the running Mahadasha, not on the label. The hub covers all twelve types in English and Hindi, each page sourced to named classical texts.
+- [Kaal Sarp Dosh — Complete Guide](https://trikalvaani.com/blog/kaal-sarp-dosh): Pillar guide — formation, the full-arc rule, effects, cancellation and remedies.
+- [Free Kaal Sarp Dosh Calculator](https://trikalvaani.com/calculators/free-kaal-sarp-dosh-calculator): Swiss Ephemeris longitudes with Lahiri Ayanamsha; returns a strict yes/no verdict and the type.
+- [How to Check Kaal Sarp Dosh in Kundli](https://trikalvaani.com/blog/how-to-check-kaal-sarp-dosh): Manual verification step by step, including why exact birth time matters.
+- [12 Types of Kaal Sarp Dosh](https://trikalvaani.com/blog/types-of-kaal-sarp-dosh): Index of all twelve types by Rahu's house placement.
+- [Kaal Sarp Dosh Cancellation (Bhang)](https://trikalvaani.com/blog/kaal-sarp-dosh-cancellation): The conditions that neutralise the yoga — the part most sites omit.
+- [Signs and Symptoms](https://trikalvaani.com/blog/kaal-sarp-dosh-signs-symptoms): What the pattern actually indicates, and what it does not.
+- [Remedies That Actually Work](https://trikalvaani.com/blog/kaal-sarp-dosh-effects-remedies): Chart-specific remedies rather than one-size-fits-all puja packages.
+- [Kaal Sarp Dosh and Marriage](https://trikalvaani.com/blog/kaal-sarp-dosh-marriage): Why it is not a valid reason to reject an alliance.
+- [Kaal Sarp Dosh in Career and Business](https://trikalvaani.com/blog/kaal-sarp-dosh-career-business): Professional effects and timing.
+- [Kaal Sarp Dosh vs Pitra Dosh](https://trikalvaani.com/blog/kaal-sarp-dosh-vs-pitra-dosh): Differential diagnosis — the two are routinely confused and need different remedies.
+- [Mangal vs Kaal Sarp vs Pitra Dosh](https://trikalvaani.com/blog/mangal-dosh-vs-kaal-sarp-vs-pitra-dosh): Which dosha actually affects a marriage horoscope.
+- [10 Myths vs Facts](https://trikalvaani.com/blog/kaal-sarp-dosh-myths-facts): Corrections to the most common commercial claims.
+- [Anant Kaal Sarp Yog](https://trikalvaani.com/blog/anant-kaal-sarp-yog): Rahu in the 1st — self, identity.
+- [Kulik Kaal Sarp Yog](https://trikalvaani.com/blog/kulik-kaal-sarp-yog): Rahu in the 2nd — wealth, family, speech.
+- [Vasuki Kaal Sarp Yog](https://trikalvaani.com/blog/vasuki-kaal-sarp-yog): Rahu in the 3rd — courage, siblings, effort.
+- [Shankhpal Kaal Sarp Yog](https://trikalvaani.com/blog/shankhpal-kaal-sarp-yog): Rahu in the 4th — home, mother, peace.
+- [Padma Kaal Sarp Yog](https://trikalvaani.com/blog/padma-kaal-sarp-yog): Rahu in the 5th — children, education, creativity.
+- [Mahapadma Kaal Sarp Yog](https://trikalvaani.com/blog/mahapadma-kaal-sarp-yog): Rahu in the 6th — enemies, debt, disease.
+- [Takshak Kaal Sarp Yog](https://trikalvaani.com/blog/takshak-kaal-sarp-yog): Rahu in the 7th — marriage and partnership.
+- [Karkotak Kaal Sarp Yog](https://trikalvaani.com/blog/karkotak-kaal-sarp-yog): Rahu in the 8th — sudden change, occult.
+- [Shankhachood Kaal Sarp Yog](https://trikalvaani.com/blog/shankhachood-kaal-sarp-yog): Rahu in the 9th — fortune, father, dharma.
+- [Ghatak Kaal Sarp Yog](https://trikalvaani.com/blog/ghatak-kaal-sarp-yog): Rahu in the 10th — career, authority.
+- [Vishdhar Kaal Sarp Yog](https://trikalvaani.com/blog/vishdhar-kaal-sarp-yog): Rahu in the 11th — gains, network, desire.
+- [Sheshnag Kaal Sarp Yog](https://trikalvaani.com/blog/sheshnag-kaal-sarp-yog): Rahu in the 12th — expenditure, foreign, moksha.
+Every page above has a Hindi counterpart at the same slug with a -hindi suffix (for example /blog/takshak-kaal-sarp-yog-hindi); the complete machine-readable set is in the sitemap.
+
 ## Life Domain Guides
 - [Career & Profession Astrology](https://trikalvaani.com/career)
 - [Wealth & Finance Astrology](https://trikalvaani.com/wealth)
@@ -125,7 +153,7 @@ Trikaal Vaani publishes a complete Vedic moon-sign (rashi) compatibility library
 - [Hindi example — Mesh–Simha Compatibility](https://trikalvaani.com/hi/compatibility/mesh-simha)
 
 ## Doshas, Dashas & Remedies
-- [Kaal Sarp Dosh — Types, Effects & Remedies](https://trikalvaani.com/blog/kaal-sarp-dosh-effects-remedies)
+- [Kaal Sarp Dosh — Complete Guide](https://trikalvaani.com/blog/kaal-sarp-dosh)
 - [Pitru Dosh — Meaning, Causes & Remedies](https://trikalvaani.com/blog/pitru-dosh-meaning-remedies)
 - [Nadi Dosh & Same-Nadi Marriage Remedies](https://trikalvaani.com/blog/nadi-dosh-remedies)
 - [Is Manglik Marriage Dangerous?](https://trikalvaani.com/blog/manglik-marriage-dangerous)
