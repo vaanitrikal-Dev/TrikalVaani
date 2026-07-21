@@ -1,8 +1,20 @@
 // ============================================================
 // TRIKAL VAANI — DYNAMIC BLOG ARTICLE PAGE (SSR)
 // CEO: Rohiit Gupta | Chief Vedic Architect
-// Version: 2.5
-// Date: 2026-07-13
+// Version: 2.6
+// Date: 2026-07-21
+// CHANGE v2.6:
+//   • SEO FIX: added displayTitle() which strips the trailing
+//     " | Trikaal Vaani" brand suffix. Applied to the <h1>, to the
+//     Related Reading card headings (internal-link anchor text) and to
+//     JSON-LD `headline`. The <title>, og:title and twitter:title keep
+//     the brand suffix on purpose — brand belongs in the SERP/preview
+//     title, not in the H1 or in internal anchor text.
+//   • SCHEMA FIX: wordCount previously counted only sections carrying
+//     `text`/`items` and ignored the `body` variant, under-reporting the
+//     article length (e.g. 1657 vs ~2100 actual). It now counts
+//     directAnswer + every section variant + all FAQ Q&A text.
+//   • No layout, styling or data-fetching changes.
 // CHANGE v2.5:
 //   • SectionBlock now renders the new `img` BlogSection variant introduced
 //     in lib/blog-posts.ts v3.4 — inline diagrams inside article bodies.
@@ -44,6 +56,15 @@ import {
   type BlogPost,
   type BlogSection,
 } from '@/lib/blog-posts';
+
+
+// ------------------------------------------------------------------
+// Brand suffix is stored inside post.title so that <title> and the OG /
+// Twitter preview titles carry the brand. It must NOT appear in the H1
+// or in internal-link anchor text, where it dilutes keyword relevance.
+// ------------------------------------------------------------------
+const BRAND_SUFFIX = /\s*\|\s*Trikaal?\s+Vaani\s*$/i;
+const displayTitle = (t: string): string => (t ? t.replace(BRAND_SUFFIX, '').trim() : t);
 
 // ============================================================
 // STATIC PARAMS
@@ -148,7 +169,7 @@ function generateJsonLd(post: BlogPost) {
     '@context': 'https://schema.org',
     '@type': 'Article',
     '@id': `${canonicalUrl}#article`,
-    headline: post.title,
+    headline: displayTitle(post.title),
     description: post.description,
     image: [`https://trikalvaani.com${post.ogImage}`],
     datePublished: post.publishedAt,
@@ -180,11 +201,18 @@ function generateJsonLd(post: BlogPost) {
     articleSection: post.category,
     keywords: post.keywords.join(', '),
     citation: post.classicalSources,
-    wordCount: post.sections.reduce((acc, s) => {
-      if ('text' in s) return acc + s.text.split(/\s+/).length;
-      if ('items' in s) return acc + s.items.join(' ').split(/\s+/).length;
-      return acc;
-    }, 0),
+    wordCount: (() => {
+      const count = (v?: string) => (v ? v.trim().split(/\s+/).filter(Boolean).length : 0);
+      let total = count(post.directAnswer);
+      for (const s of post.sections as Array<Record<string, unknown>>) {
+        total += count(s.title as string | undefined);
+        if (typeof s.text === 'string') total += count(s.text);
+        if (typeof s.body === 'string') total += count(s.body);
+        if (Array.isArray(s.items)) total += count((s.items as string[]).join(' '));
+      }
+      for (const f of post.faqs ?? []) total += count(f.q) + count(f.a);
+      return total;
+    })(),
   };
 
   const faqSchema = {
@@ -479,7 +507,7 @@ export default async function BlogArticlePage({
 
           {/* H1 */}
           <h1 className="mb-4 text-3xl md:text-4xl lg:text-5xl font-bold leading-tight">
-            {post.title}
+            {displayTitle(post.title)}
           </h1>
 
           {/* META */}
@@ -596,7 +624,7 @@ export default async function BlogArticlePage({
                       {related.category}
                     </span>
                     <h3 className="font-semibold text-amber-100 group-hover:text-amber-300 transition leading-snug">
-                      {related.title}
+                      {displayTitle(related.title)}
                     </h3>
                   </Link>
                 ))}
