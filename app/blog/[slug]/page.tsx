@@ -1,8 +1,15 @@
 // ============================================================
 // TRIKAL VAANI — DYNAMIC BLOG ARTICLE PAGE (SSR)
 // CEO: Rohiit Gupta | Chief Vedic Architect
-// Version: 2.6
-// Date: 2026-07-21
+// Version: 2.7
+// Date: 2026-07-22
+// CHANGE v2.7:
+//   • BUG FIX: the v2.6 BRAND_SUFFIX regex only matched the Latin
+//     "Trikaal Vaani", so the 61 Hindi posts whose titles end in
+//     "| त्रिकाल वाणी" kept the brand in their <h1> and in Related
+//     Reading anchor text. The pattern now also matches the Devanagari
+//     brand (and the fullwidth pipe ｜), so displayTitle() works for
+//     both languages. <title>/og:title/twitter:title still keep the brand.
 // CHANGE v2.6:
 //   • SEO FIX: added displayTitle() which strips the trailing
 //     " | Trikaal Vaani" brand suffix. Applied to the <h1>, to the
@@ -63,7 +70,7 @@ import {
 // Twitter preview titles carry the brand. It must NOT appear in the H1
 // or in internal-link anchor text, where it dilutes keyword relevance.
 // ------------------------------------------------------------------
-const BRAND_SUFFIX = /\s*\|\s*Trikaal?\s+Vaani\s*$/i;
+const BRAND_SUFFIX = /\s*[|｜]\s*(?:Trikaal?\s+Vaani|त्रिकाल\s*वाणी|त्रिकल\s*वाणी)\s*$/i;
 const displayTitle = (t: string): string => (t ? t.replace(BRAND_SUFFIX, '').trim() : t);
 
 // ============================================================
