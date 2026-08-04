@@ -5,6 +5,10 @@ const supabaseKey = process.env.SUPABASE_SERVICE_KEY || process.env.NEXT_PUBLIC_
 
 const supabase = createClient(supabaseUrl, supabaseKey)
 
+// FIX (this session): added `faq_block_hi` — a new nullable jsonb column added to
+// seo_pillar_pages this session (ALTER TABLE ... ADD COLUMN faq_block_hi jsonb).
+// Existing rows have it as null until backfilled; app/learn/[slug]/page.tsx (also
+// updated this session) falls back to the English faq_block when it's null.
 export type SeoPage = {
   id: number
   slug: string
@@ -21,6 +25,7 @@ export type SeoPage = {
   search_intent: string
   internal_links: string[]
   faq_block: { q: string; a: string }[]
+  faq_block_hi: { q: string; a: string }[] | null
   schema_type: string
   cta_text: string
   cta_href: string
