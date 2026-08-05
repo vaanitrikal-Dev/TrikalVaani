@@ -1,8 +1,20 @@
 // ============================================================
 // TRIKAL VAANI — DYNAMIC BLOG ARTICLE PAGE (SSR)
 // CEO: Rohiit Gupta | Chief Vedic Architect
-// Version: 2.7
-// Date: 2026-07-22
+// Version: 2.8
+// Date: 2026-08-05
+// CHANGE v2.8:
+//   • SectionBlock now renders the new `video` BlogSection variant
+//     (lib/blog-posts.ts v3.5+) — a responsive embedded YouTube iframe,
+//     autoplay+muted (browsers block unmuted autoplay; user can unmute
+//     via the player controls), portrait 9:16 box for Shorts, 16:9 for
+//     regular videos.
+//   • generateJsonLd now emits a VideoObject schema when a post contains
+//     a video section (name/description/thumbnailUrl/embedUrl/contentUrl
+//     populated automatically; uploadDate defaults to the post's own
+//     publishedAt as a proxy — replace with the video's true upload date
+//     if it differs, for full Video SEO accuracy).
+//   • No other logic/layout/schema changed from v2.7.
 // CHANGE v2.7:
 //   • BUG FIX: the v2.6 BRAND_SUFFIX regex only matched the Latin
 //     "Trikaal Vaani", so the 61 Hindi posts whose titles end in
@@ -247,7 +259,31 @@ function generateJsonLd(post: BlogPost) {
     ],
   };
 
-  return [articleSchema, faqSchema, breadcrumbSchema];
+  // ── v2.8: VideoObject — only emitted when the post has a video section ──
+  const videoSection = (post.sections as Array<Record<string, unknown>>).find(
+    (s) => s.type === 'video'
+  ) as { videoId: string; title?: string } | undefined;
+
+  const videoSchema = videoSection
+    ? {
+        '@context': 'https://schema.org',
+        '@type': 'VideoObject',
+        '@id': `${canonicalUrl}#video`,
+        name: videoSection.title || displayTitle(post.title),
+        description: post.description,
+        thumbnailUrl: [`https://i.ytimg.com/vi/${videoSection.videoId}/hqdefault.jpg`],
+        // Proxy: the post's own publish date, since the true video upload
+        // date isn't stored yet. Swap in the exact upload date if known.
+        uploadDate: post.publishedAt,
+        embedUrl: `https://www.youtube.com/embed/${videoSection.videoId}`,
+        contentUrl: `https://www.youtube.com/watch?v=${videoSection.videoId}`,
+        publisher: { '@id': 'https://trikalvaani.com/#organization' },
+      }
+    : null;
+
+  return videoSchema
+    ? [articleSchema, faqSchema, breadcrumbSchema, videoSchema]
+    : [articleSchema, faqSchema, breadcrumbSchema];
 }
 
 // ============================================================
@@ -405,6 +441,32 @@ function SectionBlock({ section, index }: { section: BlogSection; index: number 
           {section.caption && (
             <figcaption className="mt-3 text-center text-sm italic text-slate-400">
               {section.caption}
+            </figcaption>
+          )}
+        </figure>
+      );
+    // ── v2.8: embedded YouTube video (Shorts get a portrait box) ──
+    case 'video':
+      return (
+        <figure className="my-8 mx-auto">
+          <div
+            className={
+              'mx-auto overflow-hidden rounded-xl border border-amber-900/40 bg-slate-950/60 ' +
+              (section.isShort ? 'aspect-[9/16] max-w-xs md:max-w-sm' : 'aspect-video max-w-2xl')
+            }
+          >
+            <iframe
+              className="h-full w-full"
+              src={`https://www.youtube.com/embed/${section.videoId}?autoplay=1&mute=1&playsinline=1&rel=0`}
+              title={section.title || 'Trikaal Vaani video'}
+              loading="lazy"
+              allow="autoplay; encrypted-media; picture-in-picture; web-share"
+              allowFullScreen
+            />
+          </div>
+          {section.title && (
+            <figcaption className="mt-3 text-center text-sm italic text-slate-400">
+              {section.title}
             </figcaption>
           )}
         </figure>
