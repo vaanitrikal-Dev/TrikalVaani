@@ -1,8 +1,18 @@
 // ============================================================
 // TRIKAL VAANI — BLOG POSTS — SUPABASE VERSION
 // CEO: Rohiit Gupta | Chief Vedic Architect
-// Version: 3.4 (BODY PARSER — real paragraphs, lists, headings, quotes, IMAGES)
-// Date: 2026-07-13
+// Version: 3.5 (BODY PARSER — adds embedded YouTube video blocks)
+// Date: 2026-08-05
+// CHANGE v3.5:
+//   • NEW BlogSection variant: { type:'video'; videoId; title?; isShort? }
+//     Authored in Supabase as a standalone line:
+//       !youtube[Optional Caption](https://www.youtube.com/shorts/VIDEO_ID)
+//     Accepts youtube.com/shorts/, /watch?v=, youtu.be/, /embed/ URL forms.
+//     isShort is auto-detected from the URL (shorts/ path) so the player
+//     renders in portrait (9:16) instead of landscape (16:9).
+//   • Requires app/blog/[slug]/page.tsx v2.8+ (adds the `video` case +
+//     VideoObject JSON-LD). Fully backward compatible — old rows with
+//     plain [label](url) links keep rendering as before.
 // CHANGE v3.4:
 //   • transformSections() no longer dumps the whole DB `body` into ONE <p>.
 //     A 2,788-character single paragraph was being rendered per section.
@@ -74,7 +84,9 @@ export type BlogSection =
   | { type: 'callout'; variant: 'tip' | 'warn' | 'verdict'; text: string }
   | { type: 'quote'; text: string }
   // ── v3.4: inline diagram / illustration ──────────────────
-  | { type: 'img'; src: string; alt: string; caption?: string };
+  | { type: 'img'; src: string; alt: string; caption?: string }
+  // ── v3.5: embedded YouTube video ──────────────────────────
+  | { type: 'video'; videoId: string; title?: string; isShort?: boolean };
 
 // ============================================================
 // SUPABASE CLIENT — Server-side only (no client JS leak)
@@ -104,6 +116,23 @@ const supabase = createClient(
 
 const IMG_RE = /^!\[([^\]]*)\]\(\s*([^)\s"]+)(?:\s+"([^"]*)")?\s*\)$/;
 
+// ── v3.5: !youtube[Caption](youtube-url) — standalone line ──
+const YOUTUBE_RE = /^!youtube\[([^\]]*)\]\(\s*([^)\s]+)\s*\)$/;
+
+function extractYouTubeId(url: string): string | null {
+  const patterns = [
+    /youtube\.com\/shorts\/([\w-]{11})/,
+    /youtube\.com\/watch\?v=([\w-]{11})/,
+    /youtu\.be\/([\w-]{11})/,
+    /youtube\.com\/embed\/([\w-]{11})/,
+  ];
+  for (const re of patterns) {
+    const m = url.match(re);
+    if (m) return m[1];
+  }
+  return null;
+}
+
 function parseBody(body: string): BlogSection[] {
   const blocks: BlogSection[] = [];
 
@@ -128,6 +157,24 @@ function parseBody(body: string): BlogSection[] {
         ...(img[3] ? { caption: img[3].trim() } : {}),
       });
       continue;
+    }
+
+    // ── youtube video (standalone line) ──
+    const yt = lines[0].match(YOUTUBE_RE);
+    if (yt && lines.length === 1) {
+      const rawUrl = yt[2].trim();
+      const videoId = extractYouTubeId(rawUrl);
+      if (videoId) {
+        blocks.push({
+          type: 'video',
+          videoId,
+          ...(yt[1]?.trim() ? { title: yt[1].trim() } : {}),
+          isShort: /youtube\.com\/shorts\//.test(rawUrl),
+        });
+        continue;
+      }
+      // Unrecognised URL shape — fall through and render as plain paragraph
+      // rather than silently dropping the line.
     }
 
     // ── h3 ──
