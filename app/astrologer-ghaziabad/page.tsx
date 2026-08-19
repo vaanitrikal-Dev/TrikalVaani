@@ -249,7 +249,10 @@ export default function AstrologerGhaziabadPage() {
                   <strong style={{ color: '#cbd5e1' }}>724, Pocket 3, Sector 19, Dwarka, New Delhi 110075</strong>.
                   There is no Ghaziabad branch, and we are not going to pretend there is. Every reading is computed from your
                   birth details and delivered online, so a Ghaziabad client receives the identical result from the identical
-                  engine. Proximity is convenience — never accuracy.
+                  engine. Proximity is convenience — never accuracy. Read more on{' '}
+                  <Link href="/blog/astrologer-near-me-online-vedic-consultation" style={{ color: GOLD, textDecoration: 'underline' }}>
+                    why &ldquo;astrologer near me&rdquo; actually means online, not local
+                  </Link>.
                 </p>
                 <p style={{ margin: '14px 0 0', color: '#64748b', fontSize: '12px' }}>
                   <a href="tel:+919211804111" style={{ color: GOLD, textDecoration: 'none' }}>+91 92118 04111</a>
