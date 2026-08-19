@@ -367,7 +367,10 @@ export default function AstrologerDelhiPage() {
                 But it is worth being straightforward about something most local listings will not say: because every reading is
                 computed from your birth details and delivered online, your distance from Dwarka changes nothing at all about the
                 result. A client in Rohini, a client in Noida and a client in Toronto receive the same computation from the same
-                engine. Proximity is convenience, never accuracy.
+                engine. Proximity is convenience, never accuracy. Read more on{' '}
+                <Link href="/blog/astrologer-near-me-online-vedic-consultation" style={{ color: GOLD, textDecoration: 'underline' }}>
+                  why &ldquo;astrologer near me&rdquo; actually means online, not local
+                </Link>.
               </p>
               <div className="flex flex-wrap justify-center gap-2">
                 {['Dwarka', 'New Delhi', 'Rohini', 'Noida', 'Gurgaon', 'Ghaziabad', 'Faridabad', 'All India', 'Worldwide'].map((c) => (
