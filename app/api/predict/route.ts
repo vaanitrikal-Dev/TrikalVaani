@@ -3,8 +3,22 @@
  * TRIKAAL VAANI — Unified Prediction Endpoint
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/api/predict/route.ts
- * VERSION: 14.18 — Real Bhrigu shape + geoBullets object normalisation
+ * VERSION: 15.0 — Gochar + Navamsa reach the writer; language purity rule
  * SIGNED: ROHIIT GUPTA, CEO
+ *
+ * CHANGES v15.0 vs v14.18 (CONSOLIDATED — everything pending for this file):
+ *   - whitelist now carries gocharTimeline and navamsaChart (template_engine
+ *     v3.0 produces both; without this they would be dropped exactly as
+ *     chartEvidence was before v14.17)
+ *   - ENGINE EVIDENCE block now includes the 9-month gochar timeline and the D9
+ *     chart. Without them in context the writer would either stay silent or
+ *     compute its own transit positions, which RULE 14 forbids.
+ *   - RULE 17 language purity: a live Hindi report emitted Urdu characters
+ *     inside a Devanagari sentence.
+ *   - RULE 18 month-by-month timing: months, transits and dates may only come
+ *     from the supplied timeline; window tone is relative, never absolute.
+ *   - new output fields monthlyOutlook[] and navamsaNote
+ *   - MAX_TOKENS 16000 -> 20000 for the larger schema
  *
  * CHANGES v14.18 vs v14.17 (SHAPE FIXES FOUND IN THE FIRST PAID REPORT):
  *   1. geoBullets arrived as [{item:"..."}]; the report filters for strings, so
@@ -145,7 +159,7 @@
  * IRON RULES — NEVER VIOLATE:
  *   🔒 NEVER touch gemini-prompt.ts
  *   🔒 NEVER use thinkingBudget:0
- *   🔒 MAX_TOKENS = 16000 — CEO approved (raised from 12000 on 23 Aug 2026)
+ *   🔒 MAX_TOKENS = 20000 — CEO approved (12000 -> 16000 -> 20000 on 23 Aug 2026)
  *   🔒 verifiedTier — CEO approval required
  *   🔒 Complete files only
  * ============================================================
@@ -182,7 +196,7 @@ const RAZORPAY_SECRET = process.env.RAZORPAY_KEY_SECRET ?? ''
 // costs more tokens per word than English) could truncate mid-JSON, and a
 // truncated response fails parsing entirely — the client would get the fallback
 // instead of their reading. 16000 leaves headroom; Gemini 2.5 Pro allows far more.
-const MAX_TOKENS      = 16000  // CEO approved 23 Aug 2026
+const MAX_TOKENS      = 20000  // CEO approved 23 Aug 2026 (16000 -> 20000 in v15.0 for monthlyOutlook + navamsaNote)
 
 // ── Option C (v14.8): Real-world sector/city grounding for PAID only ─────────
 // true  = paid predictions use live Google Search grounding (sector + city trends)
@@ -446,6 +460,40 @@ present it as a separate section, and do NOT add new JSON keys.` : ''
     .map((x:any)=>`  • ${x.description}${x.timing?` [${x.timing}]`:''}${x.domain_relevant?' (domain-relevant)':''}`)
     .join('\n')
 
+  // v15.0: the writer now also receives the 9-month gochar timeline and the D9
+  // chart. Without these in context it would either stay silent about them or,
+  // worse, reason out its own transit positions — which RULE 14 forbids.
+  const goc = templateData?.gocharTimeline ?? null
+  const nav = templateData?.navamsaChart ?? null
+
+  const monthLine = (m:any) => {
+    const hits = Array.isArray(m?.domain_hits) && m.domain_hits.length
+      ? m.domain_hits.map((h:any)=>`${h.planet} in house ${h.house}`).join(', ')
+      : 'no transit to this domain\u2019s houses'
+    const dsh = [m?.antardasha, m?.pratyantar].filter(Boolean).join(' / ')
+    return `  • ${m?.label}: ${m?.tone}${dsh?` | dasha ${dsh}`:''} | ${hits}`
+  }
+  const gocharBlock = goc ? `
+GOCHAR TIMELINE (real sidereal transits mapped to natal houses):
+  Tone is RELATIVE to this 9-month window — never call a month "bad" in absolute terms.
+${(goc.background||[]).length ? `  Standing background all window: ${(goc.background||[]).map((b:any)=>`${b.planet} in house ${b.house}`).join(', ')}` : ''}
+  PAST 3 MONTHS (this is what likely brought them here):
+${(goc.past||[]).map(monthLine).join('\n') || '  (none)'}
+  CURRENT MONTH:
+${goc.current ? monthLine(goc.current) : '  (none)'}
+  NEXT 6 MONTHS:
+${(goc.future||[]).map(monthLine).join('\n') || '  (none)'}
+  Most supportive month ahead: ${goc.best_month ?? 'no clear standout'}
+  Most cautious month ahead: ${goc.caution_month ?? 'no clear standout'}
+` : '\nGOCHAR TIMELINE: not available — do not discuss month-by-month timing at all.\n'
+
+  const navBlock = nav ? `
+NAVAMSA D9 (inner strength of each graha):
+  D9 Lagna: ${nav.navamsa_lagna ?? '—'}
+${(nav.planets||[]).map((r:any)=>`  • ${r.planet}: D1 ${r.d1_rashi} -> D9 ${r.navamsa_rashi}${r.navamsa_house?` (D9 house ${r.navamsa_house})`:''}, ${r.dignity_d9}${r.vargottama?' — VARGOTTAMA':''}`).join('\n')}
+${(nav.vargottama_planets||[]).length ? `  Vargottama (same sign D1 and D9, classically strengthened): ${nav.vargottama_planets.join(', ')}` : '  No vargottama planets.'}
+` : '\nNAVAMSA D9: not available — make no D9 claim.\n'
+
   const evidenceBlock = `
 ════════════════════════════════════════════════════════
 ENGINE EVIDENCE — COMPUTED, VERIFIED, YOURS TO EXPLAIN
@@ -467,6 +515,7 @@ Weak planets: ${(pSum.weakPlanets ?? []).join(', ') || 'not reported'}
 Best houses: ${(pSum.bestHouses ?? []).join(', ') || 'not reported'}
 Challenged houses: ${(pSum.challengedHouses ?? []).join(', ') || 'not reported'}
 
+${gocharBlock}${navBlock}
 BHRIGU NANDI NADI (Bhrigu engine): ${bhriguSignals.length ? `${bhriguSignals.length} signals, ${bhriguPointsTotal} confidence points` : `points ${bhrigu.bhrigu_points ?? 0}`}${bhrigu.current_life_theme ? ` | life theme: ${bhrigu.current_life_theme}` : ''}
 ${bhriguLines || ''}
 ${bhriguSignals.length === 0 && !bhrigu.current_life_theme ? 'NO Bhrigu data for this chart — you MUST NOT write any Bhrigu Nandi claim. Write the Bhrigu bullet as general BPHS/Parashara insight instead.' : ''}
@@ -546,6 +595,21 @@ ABSOLUTE RULES:
     "aapke 6th house ka swami Surya 10th mein baitha hai" — not "6L in H10".
     If the activation block says the running dasha has NO link to this domain's
     houses, say that honestly and shift the explanation to what IS linked.
+17. LANGUAGE PURITY (v15.0): Write the ENTIRE response in ${lang.toUpperCase()} and in
+    that script only.
+    - hindi  -> Devanagari throughout. No Roman transliteration mid-sentence.
+    - hinglish -> Roman script Hindi-English mix, the way Delhi speaks. No Devanagari
+      paragraphs.
+    - english -> English throughout; Sanskrit terms may stay (Lagna, Dasha, Shadbala).
+    NEVER emit Arabic, Urdu, Bengali, Tamil or any other script. A live Hindi report
+    shipped the line "अकेलेपन को پر خود हावी न होने दें" — Urdu characters inside a
+    Devanagari sentence. Re-read every string before returning it.
+18. MONTH-BY-MONTH TIMING (v15.0): Use the GOCHAR TIMELINE for anything month-
+    specific. Never invent a month, a transit, or a date that is not listed there.
+    Tone in that block is RELATIVE to the 9-month window: "the most supportive of
+    the next six months" is accurate; "October is a bad month" is not. When you
+    describe the past three months, present them as pressures the chart shows —
+    possibilities the reader may recognise — never as events you assert happened.
 16. CONFIDENCE HONESTY (v14.17): Different horizons deserve different certainty.
     Recent past and the next 3 months rest on exact Vimshottari dates and are
     the most reliable. Months 4-6 are directional. Never present every statement
@@ -628,12 +692,18 @@ OUTPUT JSON:
     {"house": 6, "meaning": "ONE plain-language sentence on what THIS house's lord placement means for the client. Do NOT restate the numbers — the report already shows them. Write only the meaning. Produce one entry per house listed in ENGINE EVIDENCE, using that exact house number. If no houses were given, return []."}
   ],
 
+  "monthlyOutlook": [
+    {"month": "COPY the exact label from GOCHAR TIMELINE, e.g. 'September 2026'", "theme": "2-4 words", "money": "one short line", "action": "one short line — what to do", "avoid": "one short line — what to avoid"}
+  ],
+
   "readingConfidence": {
     "recentPast": "High | Moderate | Low",
     "next3Months": "High | Moderate | Low",
     "months4to6": "High | Moderate | Low",
     "basis": "ONE short sentence naming what the confidence rests on, e.g. 'Exact Vimshottari dates from Swiss Ephemeris plus verified house lords.'"
   },
+
+  "navamsaNote": "2-3 sentences in ${lang.toUpperCase()} on what the D9 chart adds — inner strength of the key planets for this domain, and any Vargottama placement. If NAVAMSA D9 says not available, return an empty string.",
 
   "karmicInsight": null,
 
@@ -729,6 +799,10 @@ function mergeTemplateWithGemini(
     // as the stale EPHE_API_URL and the unused synthesisData: the engine
     // computes, an intermediate layer quietly discards it.
     chartEvidence:    templateObj.chartEvidence      ?? null,
+    // v15.0: template_engine v3.0 additions. Same whitelist trap as chartEvidence
+    // in v14.17 — a key not listed here is silently dropped before the DB write.
+    gocharTimeline:   templateObj.gocharTimeline     ?? null,
+    navamsaChart:     templateObj.navamsaChart       ?? null,
     dataIntegrity:    templateObj.dataIntegrity      ?? null,
     templateVersion:  templateObj.meta?.version      ?? null,
     // Parashari yogas + Bhrigu theme — computed by VM /synthesize, previously
@@ -738,6 +812,8 @@ function mergeTemplateWithGemini(
     engineSignals:    geminiObj._engineSignals ?? synthesisForReport ?? null,
     // Gemini's INTERPRETATION of the engine evidence (it never restates facts).
     whyYouAreHere:    geminiObj.whyYouAreHere        ?? null,
+    monthlyOutlook:   Array.isArray(geminiObj.monthlyOutlook) ? geminiObj.monthlyOutlook : [],
+    navamsaNote:      geminiObj.navamsaNote           ?? null,
     evidenceMeanings: geminiObj.evidenceMeanings     ?? [],
     readingConfidence: geminiObj.readingConfidence   ?? null,
     _source: 'template+gemini',
