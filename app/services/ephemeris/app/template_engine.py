@@ -4,7 +4,7 @@ TRIKAL VAANI — TEMPLATE ENGINE v2.0
 Chief Vedic Architect: Rohiit Gupta | CEO, Trikal Vaani
 GCP VM Mumbai (asia-south1) | Port 8001 | FastAPI
 =============================================================================
-VERSION 2.1 — NO-FABRICATION RELEASE (23 Aug 2026)
+VERSION 2.1.1 — NO-FABRICATION + 90-DAY ACTION HORIZON (23 Aug 2026)
 
   WHY THIS EXISTS
   v2.0 filled every missing chart field with random.randint / random.uniform.
@@ -35,7 +35,7 @@ AstroSage + AstroTalk inspired layout styles
 
 # v2.1: `random` is deliberately NOT imported. Astrological values must never
 # be fabricated. If a value is unknown it must be reported as unknown.
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 from typing import Optional
 from pydantic import BaseModel
 
@@ -521,6 +521,7 @@ def _current_dasha(dasha_raw):
         "pratyantar": _lvl(pd),
         "sookshma":   None,          # not computed upstream — never faked
         "sequence":   maha_list,
+        "current_maha_node": md,     # v2.1.1: full subtree for 90-day scanning
     }
 
 
@@ -720,44 +721,90 @@ def _fmt_window(start_iso, end_iso):
     return f"{s.strftime('%d %b %Y')} – {e.strftime('%d %b %Y')}"
 
 
-def action_windows(nk, domain):
-    """Windows built from REAL Pratyantar/Antardasha dates.
+ACTION_HORIZON_DAYS = 90   # v2.1.1: 3-month planning horizon (was ~1 window)
 
-    v2.1: the old version did today.replace(day=min(day+7, 28)), which clamped
-    to the 28th and produced zero-length windows like "28 Aug – 28 Aug", never
-    crossed a month boundary, and cited a Sookshma dasha that is never computed.
+
+def _d(iso):
+    try:
+        return datetime.strptime(iso, "%Y-%m-%d").date()
+    except (TypeError, ValueError):
+        return None
+
+
+def action_windows(nk, domain, horizon_days=ACTION_HORIZON_DAYS):
+    """Every REAL Pratyantar period overlapping the next `horizon_days`.
+
+    v2.1   : killed today.replace(day=min(day+7, 28)) — it clamped to the 28th,
+             produced zero-length windows ("28 Aug – 28 Aug"), never crossed a
+             month boundary, and cited a Sookshma dasha that is never computed.
+    v2.1.1 : scans a 3-month horizon instead of emitting one window. It walks
+             the real Vimshottari subtree, so a client sees every favourable AND
+             cautionary stretch in the next 90 days with genuine dates.
+
+    A period already in progress is clipped to start today — a client cannot act
+    on a window that began last month.
     """
     dr = nk.get("dasha") or {}
-    pd = dr.get("pratyantar")
-    ad = dr.get("antardasha")
     meta = DOMAIN_META.get(domain, {})
     fav = meta.get("key_planets", ["Jupiter", "Venus"])
     label = meta.get("label", domain)
+    today = date.today()
+    horizon_end = today + timedelta(days=horizon_days)
+
+    md_node = dr.get("current_maha_node")
+    segments = []
+
+    if isinstance(md_node, dict):
+        for antar in (md_node.get("antar") or []):
+            if not isinstance(antar, dict):
+                continue
+            a_s, a_e = _d(antar.get("start")), _d(antar.get("end"))
+            if not a_s or not a_e or a_e < today or a_s > horizon_end:
+                continue
+            prats = antar.get("pratyantar") or []
+            if prats:
+                for pr in prats:
+                    if not isinstance(pr, dict):
+                        continue
+                    p_s, p_e = _d(pr.get("start")), _d(pr.get("end"))
+                    lord = pr.get("planet") or pr.get("lord")
+                    if not p_s or not p_e or not lord or p_e < today or p_s > horizon_end:
+                        continue
+                    segments.append({"lord": lord, "start": max(p_s, today),
+                                     "end": min(p_e, horizon_end), "level": "Pratyantar",
+                                     "antar_lord": antar.get("planet")})
+            else:
+                lord = antar.get("planet")
+                if lord:
+                    segments.append({"lord": lord, "start": max(a_s, today),
+                                     "end": min(a_e, horizon_end), "level": "Antardasha",
+                                     "antar_lord": lord})
+
+    segments.sort(key=lambda x: x["start"])
+
     wins, avoid = [], []
+    for seg in segments:
+        if seg["end"] <= seg["start"]:
+            continue
+        w = f"{seg['start'].strftime('%d %b %Y')} – {seg['end'].strftime('%d %b %Y')}"
+        days = (seg["end"] - seg["start"]).days
+        common = {"window": w, "days": days, "level": seg["level"],
+                  "lord": seg["lord"], "starts": seg["start"].isoformat(),
+                  "ends": seg["end"].isoformat(),
+                  "active_now": seg["start"] <= today <= seg["end"]}
+        if seg["lord"] in fav:
+            wins.append({**common, "strength": "High",
+                         "reason": f"{seg['lord']} {seg['level']} supports {label}. Favourable stretch for decisive action."})
+        else:
+            avoid.append({**common,
+                          "reason": f"{seg['lord']} {seg['level']} is not supportive for {label}. Consolidate, avoid new commitments."})
 
-    if isinstance(pd, dict) and pd.get("lord"):
-        w = _fmt_window(pd.get("start"), pd.get("end"))
-        if w:
-            if pd["lord"] in fav:
-                wins.append({"window": w, "strength": "High", "level": "Pratyantar",
-                             "reason": f"{pd['lord']} Pratyantar is active and favourable for {label}."})
-            else:
-                avoid.append({"window": w, "level": "Pratyantar",
-                              "reason": f"{pd['lord']} Pratyantar is not supportive. Plan quietly, avoid major moves."})
-
-    if isinstance(ad, dict) and ad.get("lord"):
-        w = _fmt_window(ad.get("start"), ad.get("end"))
-        if w:
-            if ad["lord"] in fav:
-                wins.append({"window": w, "strength": "Moderate", "level": "Antardasha",
-                             "reason": f"{ad['lord']} Antardasha supports steady progress in {label}."})
-            else:
-                avoid.append({"window": w, "level": "Antardasha",
-                              "reason": f"{ad['lord']} Antardasha asks for patience with {label}."})
-
+    pd = dr.get("pratyantar")
     return {
-        "action_windows": wins,
-        "avoid_windows": avoid,
+        "action_windows": wins[:6],
+        "avoid_windows": avoid[:6],
+        "horizon_days": horizon_days,
+        "horizon_end": horizon_end.isoformat(),
         "pratyantar_lord": pd.get("lord") if isinstance(pd, dict) else None,
         "sookshma_lord": None,            # L4 not computed — never invented
     }
@@ -881,7 +928,7 @@ def build_template(domain, kundali, session_id, lang="hi"):
 
     return {
         # ── META
-        "meta": {"domain": domain, "label": meta["label"], "label_hi": meta["label_hi"], "segment": meta["segment"], "generated_at": datetime.utcnow().isoformat() + "Z", "session_id": session_id, "lang": lang, "version": "2.1.0", "platform": "Trikal Vaani — AI Vedic Intelligence"},
+        "meta": {"domain": domain, "label": meta["label"], "label_hi": meta["label_hi"], "segment": meta["segment"], "generated_at": datetime.utcnow().isoformat() + "Z", "session_id": session_id, "lang": lang, "version": "2.1.1", "platform": "Trikal Vaani — AI Vedic Intelligence"},
         # ── v2.1 DATA INTEGRITY — lets the frontend and Gemini know exactly
         #    which sections are backed by a real chart. Nothing is fabricated.
         "dataIntegrity": {
@@ -909,7 +956,7 @@ def build_template(domain, kundali, session_id, lang="hi"):
         # ── WINDOWS
         "actionWindows": aw["action_windows"],
         "avoidWindows": aw["avoid_windows"],
-        "dashaWindowMeta": {"pratyantar_lord": aw["pratyantar_lord"], "sookshma_lord": aw["sookshma_lord"], "levels_available": 3, "note": "3-7 day Pratyantar precision (Level 3). Sookshma/Level 4 is not computed upstream and is reported as null rather than guessed."},
+        "dashaWindowMeta": {"pratyantar_lord": aw["pratyantar_lord"], "sookshma_lord": aw["sookshma_lord"], "levels_available": 3, "horizon_days": aw["horizon_days"], "horizon_end": aw["horizon_end"], "note": "3-7 day Pratyantar precision (Level 3) scanned across a 90-day horizon. Sookshma/Level 4 is not computed upstream and is reported as null rather than guessed."},
         # ── REMEDY
         "remedyPlan": remedy_plan(nk, domain),
         # ── PANCHANG
