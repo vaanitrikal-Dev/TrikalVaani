@@ -48,6 +48,15 @@
  *   as a React child" and every report page returned __next_error__. Both yoga
  *   sources now pass through yogaName(); present:false yogas are dropped.
  *
+ * v8.4.2 (23 Aug 2026) — FIRST PAID REPORT AUDIT
+ *   - geoBullets can arrive as [{item:"..."}]. The string-only filter dropped all
+ *     ten and the page rendered two generic fallback lines instead ("2 INSIGHTS"
+ *     on a paid report) while ten real Hindi bullets sat in the DB. bulletText()
+ *     now unwraps both shapes.
+ *   - Bhrigu: the live /synthesize returns enriched.bhrigu.signals[], not
+ *     bhrigu_points/current_life_theme. Signals are now unwrapped and rendered,
+ *     so the Bhrigu Nandi badge on page 1 is finally backed by visible output.
+ *
  * CHANGES v8.1 -> v8.2 (retained): brand flip Trikaal, Delhi NCR
  *   removed, persona names flipped. Domain/links/logic untouched.
  * ============================================================
@@ -150,6 +159,17 @@ function yogaName(y:unknown):string {
   return ''
 }
 
+// v8.4.2: a geo bullet may be "text" or {item|text|bullet|content|value:"text"}.
+function bulletText(b:unknown):string {
+  if (typeof b === 'string') return b.trim()
+  if (b && typeof b === 'object') {
+    const o = b as Record<string, unknown>
+    const t = o.item ?? o.text ?? o.bullet ?? o.content ?? o.value
+    return typeof t === 'string' ? t.trim() : ''
+  }
+  return ''
+}
+
 function ordinal(n:number):string {
   if(n===1) return '1st'; if(n===2) return '2nd'; if(n===3) return '3rd'
   return `${n}th`
@@ -159,10 +179,13 @@ function splitGeoToBullets(text:string, isPaid:boolean, pj?:Record<string,unknow
   const bullets: string[] = []
   const maxBullets = isPaid ? 10 : 5
   if (pj) {
-    const geoBullets = safeArr<string>(pj.geoBullets)
-    if (geoBullets.length > 0) {
-      geoBullets.filter(b=>typeof b==='string'&&b.length>15).slice(0,maxBullets).forEach(b=>bullets.push(b))
-    }
+    // v8.4.2: Gemini sometimes returns geoBullets as [{item:"..."}]. The old
+    // string-only filter dropped all ten and the page fell back to two generic
+    // marketing lines — a paid client saw "(2 INSIGHTS)" while ten real Hindi
+    // bullets sat unused in the DB. route v14.18 normalises new rows; this
+    // handles rows already saved with the object shape.
+    const geoBullets = safeArr<unknown>(pj.geoBullets).map(bulletText)
+    geoBullets.filter(b=>b.length>15).slice(0,maxBullets).forEach(b=>bullets.push(b))
   }
   if (bullets.length < maxBullets && text && text !== '—') {
     const cleaned = text.replace(/trikalvaani\.\s*\n?\s*com/gi,'trikalvaani.com').replace(/Visit\s+trikalvaani\.com[^.]*\./gi,'').trim()
@@ -293,9 +316,9 @@ function EvidenceTable({ ev, meanings }:{ ev:ChartEvidence; meanings:{house?:num
 // The badge on page 1 has always claimed Bhrigu Nandi; until now the report never
 // showed a single Bhrigu output. This renders it only when the engine actually
 // returned something — an empty claim is worse than no claim.
-function EngineSignals({ yogas, bhriguTheme, bhriguPoints }:{ yogas:string[]; bhriguTheme:string; bhriguPoints:number }) {
+function EngineSignals({ yogas, bhriguTheme, bhriguPoints, signals }:{ yogas:string[]; bhriguTheme:string; bhriguPoints:number; signals:{desc:string;timing:string;rel:boolean}[] }) {
   const hasY = yogas.length>0
-  const hasB = bhriguTheme!=='—' || bhriguPoints>0
+  const hasB = bhriguTheme!=='—' || bhriguPoints>0 || signals.length>0
   if (!hasY && !hasB) return null
   return (
     <div style={{background:BG_CARD,border:`1px solid ${G(0.12)}`,borderRadius:'16px',padding:'22px',marginBottom:'14px'}}>
@@ -308,7 +331,12 @@ function EngineSignals({ yogas, bhriguTheme, bhriguPoints }:{ yogas:string[]; bh
       {hasB && (
         <div style={{padding:'12px 14px',borderRadius:'10px',background:'rgba(255,255,255,0.03)',border:'1px solid rgba(255,255,255,0.06)'}}>
           <p style={{margin:'0 0 4px',color:G(0.6),fontSize:'11px',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.06em'}}>Bhrigu Nandi Nadi{bhriguPoints>0?` · ${bhriguPoints} points`:''}</p>
-          {bhriguTheme!=='—' && <p style={{margin:0,color:'#cbd5e1',fontSize:'13px',lineHeight:1.7}}>{bhriguTheme}</p>}
+          {bhriguTheme!=='—' && <p style={{margin:'0 0 8px',color:'#cbd5e1',fontSize:'13px',lineHeight:1.7}}>{bhriguTheme}</p>}
+          {signals.length>0 && (
+            <ul style={{margin:0,padding:'0 0 0 18px',color:'#cbd5e1',fontSize:'12.5px',lineHeight:1.8}}>
+              {signals.map((sg,i)=>(<li key={i}>{sg.desc}{sg.timing?<span style={{color:'#64748b'}}> · {sg.timing}</span>:null}</li>))}
+            </ul>
+          )}
         </div>
       )}
     </div>
@@ -1226,9 +1254,18 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
   const whyHere     = safeObj(pj.whyYouAreHere) as unknown as WhyHere
   const evMeanings  = safeArr<{house?:number;meaning?:string}>(pj.evidenceMeanings)
   const confidence  = safeObj(pj.readingConfidence) as unknown as ReadingConfidence
-  const engineSig   = safeObj(pj.engineSignals)
-  const synthPara   = safeObj(safeObj(engineSig.parashara).summary)
+  // v8.4.2: live /synthesize returns {status, enriched:{bhrigu:{signals:[...]}}}
+  // — unwrap "enriched" before reading, and read signals[] rather than the
+  // bhrigu_points/current_life_theme fields the repo copy suggested.
+  const engineRaw   = safeObj(pj.engineSignals)
+  const engineSig   = Object.keys(safeObj(engineRaw.enriched)).length
+                        ? {...safeObj(engineRaw.enriched), ...engineRaw}
+                        : engineRaw
   const bhriguObj   = safeObj(engineSig.bhrigu)
+  const bhriguSignals = safeArr<Record<string,unknown>>(bhriguObj.signals)
+    .filter(x=>typeof x?.description==='string')
+    .slice(0,5)
+    .map(x=>({desc:String(x.description), timing:s(x.timing as string,''), rel:x.domain_relevant===true}))
   // v8.4.1 FIX: astro.py returns yogas as OBJECTS {name, present, description},
   // not strings. v8.4 typed chartEvidence.yogas as string[] and rendered them
   // directly, which threw "Objects are not valid as a React child" and took the
@@ -1239,7 +1276,8 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
     ...safeArr<unknown>(safeObj(engineSig.parashara).yogas),
   ].map(yogaName).filter(y => y !== '')))
   const bhriguTheme = s(bhriguObj.current_life_theme as string)
-  const bhriguPts   = Number(bhriguObj.bhrigu_points ?? 0) || 0
+  const bhriguPts   = Number(bhriguObj.bhrigu_points ?? 0) ||
+    safeArr<Record<string,unknown>>(bhriguObj.signals).reduce((t,x)=>t+(Number(x?.confidence_points)||0),0)
   const hasEvidence = safeArr<EvidenceHouse>(chartEv?.houses).length > 0
   const hasSummaryText = summaryText!=='—'
   const hasCoreMessage = coreMessage!=='—'
@@ -1347,7 +1385,7 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
               table — the client reads the chart, then immediately reads why it
               matters for them, before the dasha timeline. */}
           {hasEvidence && <EvidenceTable ev={chartEv} meanings={evMeanings}/>}
-          <EngineSignals yogas={allYogas} bhriguTheme={bhriguTheme} bhriguPoints={bhriguPts}/>
+          <EngineSignals yogas={allYogas} bhriguTheme={bhriguTheme} bhriguPoints={bhriguPts} signals={bhriguSignals}/>
           <ConfidenceCard c={confidence}/>
 
           <div style={{background:BG_CARD,border:`1px solid ${G(0.12)}`,borderRadius:'16px',padding:'22px',marginBottom:'14px'}}>
