@@ -42,6 +42,12 @@
  *   PDF needs no separate work: PDFBtn() is window.print(), so the PDF is this
  *   same page. Site and PDF are one file.
  *
+ * v8.4.1 (23 Aug 2026) — HOTFIX
+ *   v8.4 shipped with yogas typed as string[]. astro.py actually returns
+ *   {name, present, description} objects, so React threw "Objects are not valid
+ *   as a React child" and every report page returned __next_error__. Both yoga
+ *   sources now pass through yogaName(); present:false yogas are dropped.
+ *
  * CHANGES v8.1 -> v8.2 (retained): brand flip Trikaal, Delhi NCR
  *   removed, persona names flipped. Domain/links/logic untouched.
  * ============================================================
@@ -102,7 +108,7 @@ interface ChartEvidence {
   houses?:EvidenceHouse[]
   key_planets?:{planet:string;rashi:string;house:number;nakshatra:string;dignity:string;shadbala:number|null;strength:string|null;retrograde:boolean}[]
   activation?:{ mahadasha?:{lord?:string;start?:string;end?:string}; antardasha?:{lord?:string;start?:string;end?:string}; pratyantar?:{lord?:string;start?:string;end?:string}; domain_links?:{planet:string;house:string}[]; linked?:boolean }|null
-  yogas?:string[]
+  yogas?:unknown[]     // string | {name, present, description} — see yogaName()
 }
 interface WhyHere { text?:string; possibleManifestations?:string[]; recognitionLine?:string }
 interface ReadingConfidence { recentPast?:string; next3Months?:string; months4to6?:string; basis?:string }
@@ -131,6 +137,19 @@ function safeArr<T>(v:unknown):T[] { return Array.isArray(v) ? v as T[] : [] }
 function safeObj(v:unknown):Record<string,unknown> {
   return v&&typeof v==='object'&&!Array.isArray(v) ? v as Record<string,unknown> : {}
 }
+// v8.4.1: a yoga may arrive as "Gajakesari Yoga" or as
+// {name, present, description}. Anything else is discarded rather than rendered.
+function yogaName(y:unknown):string {
+  if (typeof y === 'string') return y.trim()
+  if (y && typeof y === 'object') {
+    const o = y as Record<string, unknown>
+    if (o.present === false) return ''
+    const n = o.name ?? o.yoga ?? o.title
+    return typeof n === 'string' ? n.trim() : ''
+  }
+  return ''
+}
+
 function ordinal(n:number):string {
   if(n===1) return '1st'; if(n===2) return '2nd'; if(n===3) return '3rd'
   return `${n}th`
@@ -1210,10 +1229,15 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
   const engineSig   = safeObj(pj.engineSignals)
   const synthPara   = safeObj(safeObj(engineSig.parashara).summary)
   const bhriguObj   = safeObj(engineSig.bhrigu)
+  // v8.4.1 FIX: astro.py returns yogas as OBJECTS {name, present, description},
+  // not strings. v8.4 typed chartEvidence.yogas as string[] and rendered them
+  // directly, which threw "Objects are not valid as a React child" and took the
+  // whole report page down. Both sources are now funnelled through yogaName(),
+  // and yogas explicitly marked present:false are dropped.
   const allYogas    = Array.from(new Set([
-    ...safeArr<string>(chartEv?.yogas),
-    ...safeArr<any>(safeObj(engineSig.parashara).yogas).map(y=>typeof y==='string'?y:s(y?.name)),
-  ].filter(y=>y && y!=='—')))
+    ...safeArr<unknown>(chartEv?.yogas),
+    ...safeArr<unknown>(safeObj(engineSig.parashara).yogas),
+  ].map(yogaName).filter(y => y !== '')))
   const bhriguTheme = s(bhriguObj.current_life_theme as string)
   const bhriguPts   = Number(bhriguObj.bhrigu_points ?? 0) || 0
   const hasEvidence = safeArr<EvidenceHouse>(chartEv?.houses).length > 0
