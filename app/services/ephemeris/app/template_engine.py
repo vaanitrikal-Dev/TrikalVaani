@@ -4,6 +4,28 @@ TRIKAL VAANI — TEMPLATE ENGINE v2.0
 Chief Vedic Architect: Rohiit Gupta | CEO, Trikal Vaani
 GCP VM Mumbai (asia-south1) | Port 8001 | FastAPI
 =============================================================================
+VERSION 2.1 — NO-FABRICATION RELEASE (23 Aug 2026)
+
+  WHY THIS EXISTS
+  v2.0 filled every missing chart field with random.randint / random.uniform.
+  Because /api/predict sent the chart nested as {"chart": {...}} while this
+  engine reads kundali["planets"] / kundali["dasha"] at the TOP level, NO real
+  data ever arrived — so every planet position, house, Shadbala and
+  Ashtakavarga score served to paying clients was randomly generated.
+
+  Observed in production 23 Aug 2026:
+    - Sun reported "Debilitated" AND "Very Strong" simultaneously
+    - Rahu 12th and Ketu 12th (they are always 7 houses apart)
+    - Moon in a house impossible for the stated Lagna
+    - dashaTimeline byte-identical across two unrelated charts
+      (Saturn 2024-08-23 -> 2031-08-23; Saturn Mahadasha is 19y, not 7y)
+
+  v2.1 RULES
+    1. NEVER invent astrological data. No random.* anywhere in this file.
+    2. If real data is absent, return None / [] so the UI shows nothing
+       or "—". A blank is honest; a fabricated planet is not.
+    3. Accept the real Swiss Ephemeris /kundali payload shape.
+
 150 Templates: 15 Domains x 10 Visual Styles
 GEO: 40-60 word direct answer blocks (Google SGE / Perplexity / Gemini / ChatGPT)
 SEO: FAQPage + HowTo + Person schema per domain
@@ -11,7 +33,8 @@ AstroSage + AstroTalk inspired layout styles
 =============================================================================
 """
 
-import random
+# v2.1: `random` is deliberately NOT imported. Astrological values must never
+# be fabricated. If a value is unknown it must be reported as unknown.
 from datetime import datetime, date
 from typing import Optional
 from pydantic import BaseModel
@@ -430,6 +453,132 @@ def get_style(mahadasha_lord, session_id):
     seed = sum(ord(c) for c in session_id)
     return preferred[seed % len(preferred)]
 
+# ═════════════════════════════════════════════════════════════════════════════
+# v2.1 NORMALIZER — accepts the real Swiss Ephemeris /kundali payload
+# ═════════════════════════════════════════════════════════════════════════════
+# /api/predict posts kundaliData as {"chart": <raw /kundali>, "synthesis": ...}.
+# The raw /kundali response (astro.py compute_kundali) looks like:
+#   {"lagna": {"sign","sign_index"...}, "grahas": [ {...} ], "bhavas": [...],
+#    "dasha": {"maha_dasha": [ {planet,start,end,is_current,antar:[...]} ]},
+#    "shadbala": {"Sun": {"strengthRatio", "strengthPercent", ...}}}
+# This engine historically expected a flat {"planets": {...}, "houses": {...},
+# "dasha": {"mahadasha": {"lord"}}} shape. normalize_kundali() bridges both and
+# NEVER invents a value that is absent.
+
+def _unwrap(kundali):
+    """Peel the {"chart": ...} envelope that /api/predict wraps around the chart."""
+    if not isinstance(kundali, dict):
+        return {}
+    inner = kundali.get("chart")
+    if isinstance(inner, dict) and ("grahas" in inner or "planets" in inner or "lagna" in inner):
+        merged = dict(inner)
+        for k in ("birthData", "tier", "synthesis", "source", "birth_time_precision"):
+            if k in kundali and k not in merged:
+                merged[k] = kundali[k]
+        return merged
+    return kundali
+
+
+def _current_dasha(dasha_raw):
+    """Walk the real Vimshottari tree and return the ACTIVE maha/antar/pratyantar.
+
+    astro.py returns {"maha_dasha": [...]} with is_current flags at every level
+    and real ISO start/end dates. It computes THREE levels only — there is no
+    Sookshma (L4). We therefore return sookshma=None rather than inventing one.
+    """
+    empty = {"mahadasha": None, "antardasha": None, "pratyantar": None, "sookshma": None, "sequence": []}
+    if not isinstance(dasha_raw, dict):
+        return empty
+    maha_list = dasha_raw.get("maha_dasha") or dasha_raw.get("mahaDasha") or []
+    if not isinstance(maha_list, list) or not maha_list:
+        return empty
+
+    def _pick(items):
+        if not isinstance(items, list):
+            return None
+        for it in items:
+            if isinstance(it, dict) and it.get("is_current"):
+                return it
+        return None
+
+    md = _pick(maha_list)
+    if md is None:
+        return {**empty, "sequence": maha_list}
+    ad = _pick(md.get("antar"))
+    pd = _pick(ad.get("pratyantar")) if isinstance(ad, dict) else None
+
+    def _lvl(node):
+        if not isinstance(node, dict):
+            return None
+        lord = node.get("planet") or node.get("lord")
+        if not lord:
+            return None
+        return {"lord": lord, "start": node.get("start"), "end": node.get("end")}
+
+    return {
+        "mahadasha":  _lvl(md),
+        "antardasha": _lvl(ad),
+        "pratyantar": _lvl(pd),
+        "sookshma":   None,          # not computed upstream — never faked
+        "sequence":   maha_list,
+    }
+
+
+def normalize_kundali(kundali):
+    """Return a flat dict this engine can read. Missing values stay missing."""
+    k = _unwrap(kundali)
+    planets = {}
+
+    grahas = k.get("grahas")
+    shadbala = k.get("shadbala") if isinstance(k.get("shadbala"), dict) else {}
+    if isinstance(grahas, list) and grahas:
+        for g in grahas:
+            if not isinstance(g, dict):
+                continue
+            name = g.get("planet") or g.get("name")
+            if not name:
+                continue
+            sb_entry = shadbala.get(name) if isinstance(shadbala.get(name), dict) else {}
+            # strengthRatio (total/minimum) matches shadbala_label's 0.4-1.8
+            # thresholds. strengthPercent is 0-100 and would mark EVERY planet
+            # "Very Strong" — that exact mix-up produced the live
+            # "Debilitated + Very Strong" Sun. Rahu/Ketu have no Shadbala.
+            planets[name] = {
+                "rashi_index": g.get("sign_index"),
+                "degree":      g.get("degree_in_sign"),
+                "house":       g.get("house"),
+                "nakshatra":   g.get("nakshatra"),
+                "pada":        g.get("pada"),
+                "retrograde":  g.get("retrograde", False),
+                "shadbala":    sb_entry.get("strengthRatio"),
+            }
+    elif isinstance(k.get("planets"), dict):
+        planets = k["planets"]
+
+    houses = k.get("houses")
+    if not isinstance(houses, dict):
+        bhavas = k.get("bhavas")
+        houses = {}
+        if isinstance(bhavas, list):
+            for i, b in enumerate(bhavas, start=1):
+                if isinstance(b, dict):
+                    houses[str(b.get("house", i))] = b
+
+    lagna = k.get("lagna") if isinstance(k.get("lagna"), dict) else {}
+
+    return {
+        "planets":      planets,
+        "houses":       houses,
+        "dasha":        _current_dasha(k.get("dasha")),
+        "ashtakavarga": k.get("ashtakavarga") if isinstance(k.get("ashtakavarga"), dict) else {},
+        "lagna":        lagna,
+        "yogas":        k.get("yogas") or [],
+        "has_chart":    bool(planets),
+        "source":       k.get("source"),
+        "birth_time_precision": k.get("birth_time_precision"),
+    }
+
+
 def compute_dignity(planet, rashi_idx):
     OWN =   {"Sun": [4], "Moon": [3], "Mars": [0, 7], "Mercury": [2, 5], "Jupiter": [8, 11], "Venus": [1, 6], "Saturn": [9, 10]}
     EXALT = {"Sun": 0, "Moon": 1, "Mars": 9, "Mercury": 5, "Jupiter": 3, "Venus": 11, "Saturn": 6}
@@ -440,101 +589,195 @@ def compute_dignity(planet, rashi_idx):
     return "Neutral"
 
 def shadbala_label(v):
+    if v is None: return None          # v2.1: unknown stays unknown
     if v >= 1.5: return "Very Strong"
     if v >= 1.0: return "Strong"
     if v >= 0.7: return "Moderate"
     return "Weak"
 
-def planet_table(kundali):
-    pr = kundali.get("planets", {})
+def planet_table(nk):
+    """Real Swiss Ephemeris positions only.
+
+    v2.1: returns [] when no chart reached us, so the UI hides the section
+    instead of printing nine fabricated planets. A planet with no Shadbala
+    (Rahu/Ketu) reports strength None -> the UI shows "—".
+    """
+    pr = nk.get("planets", {})
+    if not pr:
+        return []
     table = []
     for p in PLANETS:
-        d = pr.get(p, {})
-        ri = d.get("rashi_index", random.randint(0, 11))
-        deg = d.get("degree", round(random.uniform(0, 30), 2))
-        nak = int((ri * 30 + deg) / (360 / 27)) % 27
-        sb = d.get("shadbala", round(random.uniform(0.4, 1.8), 2))
+        d = pr.get(p)
+        if not isinstance(d, dict):
+            continue
+        ri = d.get("rashi_index")
+        deg = d.get("degree")
+        if ri is None or deg is None:
+            continue                      # incomplete -> omit, never guess
+        ri = int(ri) % 12
+        sb = d.get("shadbala")
         dig = compute_dignity(p, ri)
+        nak = d.get("nakshatra")
+        if not nak:                       # derive only from REAL longitude
+            nak = NAKSHATRAS[int((ri * 30 + deg) / (360 / 27)) % 27]
         table.append({
             "planet": p, "planet_hi": PLANET_HI[p],
-            "rashi": RASHIS[ri], "house": d.get("house", random.randint(1, 12)),
-            "degree": deg, "nakshatra": NAKSHATRAS[nak],
-            "pada": (int(deg / 3.33) % 4) + 1,
+            "rashi": RASHIS[ri],
+            "house": d.get("house"),
+            "degree": round(float(deg), 2),
+            "nakshatra": nak,
+            "pada": d.get("pada"),
             "retrograde": d.get("retrograde", False),
-            "dignity": dig, "shadbala": sb, "strength": shadbala_label(sb),
+            "dignity": dig,
+            "shadbala": round(float(sb), 2) if sb is not None else None,
+            "strength": shadbala_label(sb) if sb is not None else None,
             "domain_note": f"{p} is {dig} — {'maximum positive results' if dig == 'Exalted' else 'stable results' if dig == 'Own Sign' else 'challenges possible — Neecha Bhanga can reverse' if dig == 'Debilitated' else 'results depend on aspects and Dasha'}"
         })
     return table
 
-def dasha_timeline(kundali):
-    dr = kundali.get("dasha", {})
-    today = date.today()
-    md = dr.get("mahadasha", {})
-    ad = dr.get("antardasha", {})
-    pd = dr.get("pratyantar", {})
-    sd = dr.get("sookshma", {})
-    lords = list(VIMSHOTTARI_YEARS.keys())
-    cur = md.get("lord", "Saturn")
-    idx = lords.index(cur) if cur in lords else 0
-    next3 = [{"lord": lords[(idx + i) % 9], "years": VIMSHOTTARI_YEARS[lords[(idx + i) % 9]]} for i in range(1, 4)]
+def dasha_timeline(nk):
+    """Real Vimshottari periods with real dates.
+
+    v2.1: the old version defaulted to Saturn/Mercury/Jupiter/Venus and
+    today-2y -> today+5y whenever data was missing. Because data was ALWAYS
+    missing, every client received that identical fake timeline (and a 7-year
+    Saturn Mahadasha, which is impossible — Saturn runs 19 years).
+
+    Sookshma (L4) is NOT computed by astro.py, so it is returned as None.
+    """
+    dr = nk.get("dasha") or {}
+    md, ad, pd = dr.get("mahadasha"), dr.get("antardasha"), dr.get("pratyantar")
+    if not md:
+        return None                      # no real dasha -> show nothing
+
+    next3 = []
+    seq = dr.get("sequence") or []
+    if isinstance(seq, list) and seq:
+        seen_current = False
+        for node in seq:
+            if not isinstance(node, dict):
+                continue
+            if seen_current and len(next3) < 3:
+                lord = node.get("planet") or node.get("lord")
+                if lord:
+                    next3.append({"lord": lord, "years": node.get("years", VIMSHOTTARI_YEARS.get(lord)),
+                                  "start": node.get("start"), "end": node.get("end")})
+            if node.get("is_current"):
+                seen_current = True
+
     return {
-        "mahadasha":  {"lord": md.get("lord", "Saturn"),  "start": md.get("start", str(today.replace(year=today.year - 2))), "end": md.get("end", str(today.replace(year=today.year + 5)))},
-        "antardasha": {"lord": ad.get("lord", "Mercury"), "start": ad.get("start", ""), "end": ad.get("end", "")},
-        "pratyantar": {"lord": pd.get("lord", "Jupiter")},
-        "sookshma":   {"lord": sd.get("lord", "Venus"), "active_days": sd.get("active_days", 7)},
+        "mahadasha":  md,
+        "antardasha": ad,
+        "pratyantar": pd,
+        "sookshma":   None,
         "next_3_mahadasha": next3,
-        "precision_system": "Trikal Vaani Pratyantar Dasha (Level 3) — 3 to 7 day precision windows"
+        "levels_available": 3,
+        "precision_system": "Trikal Vaani Pratyantar Dasha (Level 3) — real Vimshottari dates from Swiss Ephemeris"
     }
 
-def domain_analysis(kundali, domain):
+def domain_analysis(nk, domain):
+    """v2.1: Ashtakavarga is not computed upstream, so it is reported as None
+    instead of random.randint(18, 38). Planets with no real position are
+    omitted rather than assigned a random rashi."""
     meta = DOMAIN_META.get(domain, DOMAIN_META["career"])
-    hr = kundali.get("houses", {})
-    ar = kundali.get("ashtakavarga", {})
+    hr = nk.get("houses", {})
+    ar = nk.get("ashtakavarga", {})
     houses = {}
     for h in meta["primary_houses"]:
-        hd = hr.get(str(h), {})
-        sc = ar.get(str(h), random.randint(18, 38))
-        st = "Strong" if sc >= 28 else ("Moderate" if sc >= 22 else "Weak")
-        houses[h] = {"house": h, "lord": hd.get("lord", "—"), "occupants": hd.get("occupants", []), "ashtakavarga": sc, "strength": st}
-    pr = kundali.get("planets", {})
+        hd = hr.get(str(h), {}) if isinstance(hr, dict) else {}
+        sc = ar.get(str(h)) if isinstance(ar, dict) else None
+        st = None if sc is None else ("Strong" if sc >= 28 else ("Moderate" if sc >= 22 else "Weak"))
+        houses[h] = {"house": h, "lord": hd.get("lord"), "occupants": hd.get("occupants", []),
+                     "ashtakavarga": sc, "strength": st}
+    pr = nk.get("planets", {})
     planets_assess = []
     for p in meta["key_planets"]:
-        d = pr.get(p, {})
-        ri = d.get("rashi_index", random.randint(0, 11))
-        sb = d.get("shadbala", round(random.uniform(0.5, 1.6), 2))
+        d = pr.get(p)
+        if not isinstance(d, dict) or d.get("rashi_index") is None:
+            continue
+        ri = int(d["rashi_index"]) % 12
+        sb = d.get("shadbala")
         dig = compute_dignity(p, ri)
-        planets_assess.append({"planet": p, "planet_hi": PLANET_HI[p], "rashi": RASHIS[ri], "dignity": dig, "shadbala": sb, "strength": shadbala_label(sb)})
+        planets_assess.append({"planet": p, "planet_hi": PLANET_HI[p], "rashi": RASHIS[ri],
+                               "dignity": dig,
+                               "shadbala": round(float(sb), 2) if sb is not None else None,
+                               "strength": shadbala_label(sb)})
     return {
         "domain": domain, "label": meta["label"], "label_hi": meta["label_hi"],
         "primary_houses": houses, "key_planets": planets_assess,
         "yogas": [{"name": y, "check": "Verify with full chart analysis"} for y in meta["key_yogas"]]
     }
 
-def action_windows(kundali, domain):
-    dr = kundali.get("dasha", {})
-    pd_lord = dr.get("pratyantar", {}).get("lord", "Jupiter")
-    sd_lord = dr.get("sookshma", {}).get("lord", "Venus")
+def _fmt_window(start_iso, end_iso):
+    """Format a real ISO date pair for display. Returns None if either is bad."""
+    try:
+        s = datetime.strptime(start_iso, "%Y-%m-%d").date()
+        e = datetime.strptime(end_iso, "%Y-%m-%d").date()
+    except (TypeError, ValueError):
+        return None
+    if e <= s:
+        return None                       # kills the "28 Aug – 28 Aug" bug
+    return f"{s.strftime('%d %b %Y')} – {e.strftime('%d %b %Y')}"
+
+
+def action_windows(nk, domain):
+    """Windows built from REAL Pratyantar/Antardasha dates.
+
+    v2.1: the old version did today.replace(day=min(day+7, 28)), which clamped
+    to the 28th and produced zero-length windows like "28 Aug – 28 Aug", never
+    crossed a month boundary, and cited a Sookshma dasha that is never computed.
+    """
+    dr = nk.get("dasha") or {}
+    pd = dr.get("pratyantar")
+    ad = dr.get("antardasha")
     meta = DOMAIN_META.get(domain, {})
     fav = meta.get("key_planets", ["Jupiter", "Venus"])
-    today = date.today()
+    label = meta.get("label", domain)
     wins, avoid = [], []
-    if pd_lord in fav or sd_lord in fav:
-        wins.append({"window": f"{today.strftime('%d %b')} – {today.replace(day=min(today.day + 7, 28)).strftime('%d %b %Y')}", "strength": "High", "reason": f"{pd_lord} Pratyantar is active and favorable for {meta.get('label', domain)} actions now."})
-    else:
-        avoid.append({"window": f"{today.strftime('%d %b')} – {today.replace(day=min(today.day + 7, 28)).strftime('%d %b %Y')}", "reason": f"{pd_lord} Pratyantar is not favorable. Plan quietly and avoid major moves."})
-    future = today.replace(day=min(today.day + 14, 28))
-    wins.append({"window": f"{future.strftime('%d %b')} – {future.replace(day=min(future.day + 10, 28)).strftime('%d %b %Y')}", "strength": "Moderate", "reason": f"Upcoming {sd_lord} Sookshma Dasha aligns positively with your domain."})
-    return {"action_windows": wins, "avoid_windows": avoid, "pratyantar_lord": pd_lord, "sookshma_lord": sd_lord}
 
-def remedy_plan(kundali, domain):
+    if isinstance(pd, dict) and pd.get("lord"):
+        w = _fmt_window(pd.get("start"), pd.get("end"))
+        if w:
+            if pd["lord"] in fav:
+                wins.append({"window": w, "strength": "High", "level": "Pratyantar",
+                             "reason": f"{pd['lord']} Pratyantar is active and favourable for {label}."})
+            else:
+                avoid.append({"window": w, "level": "Pratyantar",
+                              "reason": f"{pd['lord']} Pratyantar is not supportive. Plan quietly, avoid major moves."})
+
+    if isinstance(ad, dict) and ad.get("lord"):
+        w = _fmt_window(ad.get("start"), ad.get("end"))
+        if w:
+            if ad["lord"] in fav:
+                wins.append({"window": w, "strength": "Moderate", "level": "Antardasha",
+                             "reason": f"{ad['lord']} Antardasha supports steady progress in {label}."})
+            else:
+                avoid.append({"window": w, "level": "Antardasha",
+                              "reason": f"{ad['lord']} Antardasha asks for patience with {label}."})
+
+    return {
+        "action_windows": wins,
+        "avoid_windows": avoid,
+        "pratyantar_lord": pd.get("lord") if isinstance(pd, dict) else None,
+        "sookshma_lord": None,            # L4 not computed — never invented
+    }
+
+def remedy_plan(nk, domain):
+    """v2.1: weakness is judged only from REAL dignity/Shadbala. The old version
+    rolled random values, so remedies were prescribed for planets whose
+    'weakness' was invented — which is why a Tula-Lagna client was told
+    'Meena Lagna — wear Pukhraj'."""
     meta = DOMAIN_META.get(domain, DOMAIN_META["career"])
-    pr = kundali.get("planets", {})
-    weak = []
+    pr = nk.get("planets", {})
+    weak, evidence_based = [], False
     for p in meta["key_planets"]:
-        d = pr.get(p, {})
-        ri = d.get("rashi_index", random.randint(0, 11))
-        sb = d.get("shadbala", random.uniform(0.4, 1.6))
-        if compute_dignity(p, ri) == "Debilitated" or sb < 0.7:
+        d = pr.get(p)
+        if not isinstance(d, dict) or d.get("rashi_index") is None:
+            continue
+        evidence_based = True
+        ri = int(d["rashi_index"]) % 12
+        sb = d.get("shadbala")
+        if compute_dignity(p, ri) == "Debilitated" or (sb is not None and sb < 0.7):
             weak.append(p)
     if not weak:
         weak = meta["key_planets"][:2]
@@ -542,7 +785,10 @@ def remedy_plan(kundali, domain):
     for p in weak[:3]:
         r = REMEDY_DB.get(p, {})
         remedies.append({"planet": p, "planet_hi": PLANET_HI.get(p, p), "reason": f"{p} needs strengthening for {meta['label']}", "mantra": r.get("mantra", ""), "count": r.get("count", "108x daily"), "dana": r.get("dana", ""), "vrat": r.get("vrat", ""), "gemstone": r.get("gemstone", "Consult gemologist"), "priority": "High" if p == weak[0] else "Medium"})
-    return {"remedies": remedies, "general": {"daily": "Light ghee diya at home temple at dawn", "weekly": "Hanuman Chalisa every Tuesday", "monthly": "Temple visit on first Sunday of month"}, "disclaimer": "Vedic classical remedies. Results vary per individual karma."}
+    return {"remedies": remedies,
+            "basis": "chart" if evidence_based else "domain-default",
+            "general": {"daily": "Light ghee diya at home temple at dawn", "weekly": "Hanuman Chalisa every Tuesday", "monthly": "Temple visit on first Sunday of month"},
+            "disclaimer": "Vedic classical remedies. Results vary per individual karma. Spiritual remedies complement — they do not replace — practical action."}
 
 def panchang_today():
     today = date.today()
@@ -558,15 +804,34 @@ def panchang_today():
         "muhurta_advice": "Auspicious for new beginnings" if yoga not in INAUSPICIOUS_YOGAS else "Avoid major decisions today"
     }
 
-def confidence_badge(kundali):
-    s = 60
-    if kundali.get("source") == "prokerala": s += 20
-    if kundali.get("birth_time_precision") == "exact": s += 10
-    if kundali.get("ashtakavarga"): s += 5
-    if any(kundali.get("planets", {}).get(p, {}).get("shadbala") for p in PLANETS): s += 5
+def confidence_badge(nk):
+    """v2.1: the old check was `source == "prokerala"` — a vendor no longer in
+    use — so the badge read "Meeus Formula" even while Swiss Ephemeris was
+    running. Confidence is now derived from what actually arrived."""
+    has_chart = bool(nk.get("planets"))
+    has_shadbala = any(
+        isinstance(nk.get("planets", {}).get(p), dict) and nk["planets"][p].get("shadbala") is not None
+        for p in PLANETS
+    )
+    has_dasha = bool((nk.get("dasha") or {}).get("mahadasha"))
+
+    s = 40
+    if has_chart:    s += 25
+    if has_dasha:    s += 15
+    if has_shadbala: s += 10
+    if nk.get("ashtakavarga"): s += 5
+    if nk.get("birth_time_precision") == "exact": s += 5
+
     label = "High Accuracy" if s >= 85 else ("Good Accuracy" if s >= 70 else "Standard Accuracy")
     color = "#22C55E" if s >= 85 else ("#F59E0B" if s >= 70 else "#6B7280")
-    return {"score": s, "label": label, "color": color, "powered_by": "Swiss Ephemeris" if kundali.get("source") == "prokerala" else "Meeus Formula (±2–3°)", "note": "Same engine used by professional astrologers worldwide."}
+    return {
+        "score": s, "label": label, "color": color,
+        "powered_by": "Swiss Ephemeris" if has_chart else "Chart unavailable",
+        "chart_received": has_chart,
+        "shadbala_computed": has_shadbala,
+        "note": "Same engine used by professional astrologers worldwide." if has_chart
+                else "Chart data did not reach the template engine for this reading.",
+    }
 
 def build_seo_schema(domain, meta):
     """Full SEO schema: HowTo + FAQPage + Person — for Google SGE and AI search extraction."""
@@ -600,15 +865,33 @@ def build_template(domain, kundali, session_id, lang="hi"):
     if domain not in DOMAINS:
         raise ValueError(f"Invalid domain: {domain}. Valid: {DOMAINS}")
     meta = DOMAIN_META[domain]
-    md_lord = kundali.get("dasha", {}).get("mahadasha", {}).get("lord", "Saturn")
-    style_idx = get_style(md_lord, session_id)
+
+    # v2.1: normalise ONCE. Every downstream function now reads real data or
+    # nothing at all — no function is allowed to invent a fallback value.
+    nk = normalize_kundali(kundali)
+
+    md = (nk.get("dasha") or {}).get("mahadasha") or {}
+    md_lord = md.get("lord")
+    # Visual style is cosmetic, not astrological — a neutral default is fine
+    # here (unlike planetary data, where defaults are forbidden).
+    style_idx = get_style(md_lord or "Saturn", session_id)
     style = TEMPLATE_STYLES[style_idx]
-    aw = action_windows(kundali, domain)
+    aw = action_windows(nk, domain)
     geo_words = len(meta["geo_answer"].split())
 
     return {
         # ── META
-        "meta": {"domain": domain, "label": meta["label"], "label_hi": meta["label_hi"], "segment": meta["segment"], "generated_at": datetime.utcnow().isoformat() + "Z", "session_id": session_id, "lang": lang, "version": "2.0.0", "platform": "Trikal Vaani — AI Vedic Intelligence"},
+        "meta": {"domain": domain, "label": meta["label"], "label_hi": meta["label_hi"], "segment": meta["segment"], "generated_at": datetime.utcnow().isoformat() + "Z", "session_id": session_id, "lang": lang, "version": "2.1.0", "platform": "Trikal Vaani — AI Vedic Intelligence"},
+        # ── v2.1 DATA INTEGRITY — lets the frontend and Gemini know exactly
+        #    which sections are backed by a real chart. Nothing is fabricated.
+        "dataIntegrity": {
+            "chart_received":     nk.get("has_chart", False),
+            "planets_count":      len(nk.get("planets", {})),
+            "dasha_received":     bool(md_lord),
+            "ashtakavarga":       bool(nk.get("ashtakavarga")),
+            "sookshma_available": False,
+            "fabrication":        "none — v2.1 returns null/empty for missing values",
+        },
         # ── GEMINI SLOT (always null — Gemini fills post-render)
         "geminiSummarySlot": None,
         # ── STYLE
@@ -618,21 +901,21 @@ def build_template(domain, kundali, session_id, lang="hi"):
         # ── SEARCH INTENT MAP
         "searchIntents": meta.get("search_intents", {}),
         # ── PLANET TABLE
-        "planetTable": planet_table(kundali),
+        "planetTable": planet_table(nk),
         # ── DASHA TIMELINE
-        "dashaTimeline": dasha_timeline(kundali),
+        "dashaTimeline": dasha_timeline(nk),
         # ── DOMAIN ANALYSIS
-        "domainAnalysis": domain_analysis(kundali, domain),
+        "domainAnalysis": domain_analysis(nk, domain),
         # ── WINDOWS
         "actionWindows": aw["action_windows"],
         "avoidWindows": aw["avoid_windows"],
-        "dashaWindowMeta": {"pratyantar_lord": aw["pratyantar_lord"], "sookshma_lord": aw["sookshma_lord"], "note": "3-7 day Pratyantar precision — Trikal Vaani differentiator"},
+        "dashaWindowMeta": {"pratyantar_lord": aw["pratyantar_lord"], "sookshma_lord": aw["sookshma_lord"], "levels_available": 3, "note": "3-7 day Pratyantar precision (Level 3). Sookshma/Level 4 is not computed upstream and is reported as null rather than guessed."},
         # ── REMEDY
-        "remedyPlan": remedy_plan(kundali, domain),
+        "remedyPlan": remedy_plan(nk, domain),
         # ── PANCHANG
         "panchang": panchang_today(),
         # ── CONFIDENCE
-        "confidenceBadge": confidence_badge(kundali),
+        "confidenceBadge": confidence_badge(nk),
         # ── CTA
         "cta": {"primary": meta["cta"], "whatsapp": "https://wa.me/919211804111", "url": f"https://trikalvaani.com/{domain}", "urgency": "Limited slots — Book at launch price ₹51"},
         # ── FULL SEO SCHEMA (FAQPage + HowTo + BreadcrumbList)
