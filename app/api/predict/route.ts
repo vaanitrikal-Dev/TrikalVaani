@@ -3,8 +3,23 @@
  * TRIKAAL VAANI — Unified Prediction Endpoint
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/api/predict/route.ts
- * VERSION: 14.15 — VM ayanamsa payload fix (422) + v14.14 VM/Lagna fixes
+ * VERSION: 14.16 — Vimshottari tree walk (Mahadasha/Antardasha mismatch fix)
  * SIGNED: ROHIIT GUPTA, CEO
+ *
+ * CHANGES v14.16 vs v14.15 (DASHA LORD MISMATCH):
+ *   Live report 23 Aug 2026 showed BOTH of these on one page:
+ *     header  -> "Saturn Mahadasha · Ketu Antardasha"   (real, via /template)
+ *     prose   -> "Mars MD + Ketu AD"                    (local Meeus fallback)
+ *     SEO     -> "Mars-Ketu Dasha"
+ *   Supabase confirmed: dashaTimeline.mahadasha = Saturn 2020-06-09 ->
+ *   2039-06-10 (19y, the correct Saturn span) while the mahadasha COLUMN said
+ *   Mars.
+ *   CAUSE: extractFromRawChart read r.dasha.mahadasha.lord, but the VM returns
+ *   r.dasha.maha_dasha — an ARRAY of nodes with is_current flags and nested
+ *   antar/pratyantar. v14.14 fixed the lagna and graha shapes but not this one.
+ *   FIX: walkDashaTree() resolves the active lord from the real tree, with a
+ *   date-range fallback if is_current is stale. Gemini and the DB columns now
+ *   agree with the header.
  *
  * CHANGES v14.15 vs v14.14 (FINAL VM HANDSHAKE FIX):
  *   After v14.14 fixed the URL + auth header, the VM answered 401 -> gone, but
@@ -552,12 +567,45 @@ function extractFromRawChart(rawChart:any): ChartExtract {
     r.planets?.find?.((g:any)=>g.planet==='Moon'||g.name==='Moon') ??
     r.planets?.Moon ?? r.grahas?.Moon ?? null
   const d = r.dasha ?? r.vimshottari ?? {}
+  // v14.16: the VM returns dasha as a TREE — {maha_dasha:[{planet,start,end,
+  // is_current, antar:[{planet,...,pratyantar:[...]}]}]} — not the flat
+  // {mahadasha:{lord}} shape this function used to read. v14.14 made lagna and
+  // grahas shape-agnostic but left dasha flat, so mahadasha/antardasha resolved
+  // to null and the DB fell back to the LOCAL Meeus values. Result: the page
+  // header showed the real Swiss Ephemeris lord (via the template) while the
+  // Gemini prose and SEO title showed the Meeus one — e.g. "Saturn Mahadasha"
+  // in the header and "Mars MD" in the text of the same report.
+  const walked = walkDashaTree(d)
   return {
     lagna,
     nakshatra:   pickStr(moon?.nakshatra) ?? pickStr(r.nakshatra) ?? pickStr(r.moon_nakshatra),
-    mahadasha:   pickStr(d.mahadasha?.lord  ?? d.mahadasha  ?? r.currentMahadasha?.lord),
-    antardasha:  pickStr(d.antardasha?.lord ?? d.antardasha ?? r.currentAntardasha?.lord),
+    mahadasha:   walked.mahadasha  ?? pickStr(d.mahadasha?.lord  ?? d.mahadasha  ?? r.currentMahadasha?.lord),
+    antardasha:  walked.antardasha ?? pickStr(d.antardasha?.lord ?? d.antardasha ?? r.currentAntardasha?.lord),
   }
+}
+
+// v14.16: find the ACTIVE maha/antar/pratyantar in the VM's Vimshottari tree.
+// Prefers the is_current flags the VM sets; falls back to a date comparison so
+// a stale flag can never silently hand us the wrong lord.
+function walkDashaTree(d:any): {mahadasha:string|null; antardasha:string|null; pratyantar:string|null} {
+  const none = {mahadasha:null, antardasha:null, pratyantar:null}
+  const list = d?.maha_dasha ?? d?.mahaDasha ?? d?.maha
+  if(!Array.isArray(list) || !list.length) return none
+
+  const today = new Date().toISOString().slice(0,10)
+  const pick = (arr:any):any => {
+    if(!Array.isArray(arr)) return null
+    return arr.find((n:any)=>n?.is_current)
+        ?? arr.find((n:any)=>typeof n?.start==='string' && typeof n?.end==='string' && n.start<=today && today<=n.end)
+        ?? null
+  }
+  const lordOf = (n:any) => pickStr(n?.planet ?? n?.lord)
+
+  const md = pick(list)
+  if(!md) return none
+  const ad = pick(md.antar ?? md.antardasha ?? md.antar_dasha)
+  const pd = ad ? pick(ad.pratyantar ?? ad.pratyantardasha) : null
+  return {mahadasha: lordOf(md), antardasha: lordOf(ad), pratyantar: lordOf(pd)}
 }
 
 // ── buildSeoGeoMeta ───────────────────────────────────────────────────────────
