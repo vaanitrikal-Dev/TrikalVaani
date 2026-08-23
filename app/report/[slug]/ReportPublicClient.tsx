@@ -5,8 +5,14 @@
  * TRIKAAL VAANI — Public SEO Report Client
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/report/[slug]/ReportPublicClient.tsx
- * VERSION: 9.1 — monthlyOutlook + navamsaNote rendered; language wiring finished
+ * VERSION: 9.2 — every remaining heading is language-aware
  * SIGNED: ROHIIT GUPTA, CEO
+ *
+ * v9.2 (23 Aug 2026) — the last of the hardcoded headings
+ *   v9.0 and v9.1 translated the NEW sections but left every pre-existing one in
+ *   Hinglish, so a Hindi report still mixed registers: Devanagari prose under
+ *   "KYA KAREIN", "Graha Vishleshan", "Dasha Ka Arth", "Action Windows". All of
+ *   them now follow the `language` column.
  *
  * v9.1 (23 Aug 2026) — the half I shipped out of order
  *   v9.0 of this file was written BEFORE route v15.0 existed, so the two fields
@@ -218,6 +224,26 @@ const L: Record<string, Record<Lang,string>> = {
   mAction:      {hinglish:'Karein', hindi:'करें',   english:'Do'},
   mAvoid:       {hinglish:'Bachein',hindi:'बचें',   english:'Avoid'},
   navNote:      {hinglish:'D9 Ka Matlab', hindi:'नवांश का अर्थ', english:'What D9 Adds'},
+  // v9.2: the remaining hardcoded headings. v9.0/9.1 translated the new sections
+  // but left every pre-existing one in Hinglish, so a Hindi report still carried
+  // "KYA KAREIN" and "Graha Vishleshan" over Devanagari content.
+  sandesh:      {hinglish:'✨ Trikaal Ka Sandesh',  hindi:'✨ त्रिकाल का संदेश',  english:'✨ Trikaal\'s Message'},
+  coreMsg:      {hinglish:'🔑 Core Message',        hindi:'🔑 मुख्य संदेश',      english:'🔑 Core Message'},
+  doNow:        {hinglish:'✓ ABHI KAREIN',          hindi:'✓ अभी करें',          english:'✓ DO NOW'},
+  avoidNow:     {hinglish:'✗ BACHEIN',              hindi:'✗ बचें',              english:'✗ AVOID'},
+  premium:      {hinglish:'Trikaal Ka Poora Sandesh — Premium Analysis', hindi:'त्रिकाल का पूरा संदेश — प्रीमियम विश्लेषण', english:'Trikaal\'s Full Message — Premium Analysis'},
+  dashaArth:    {hinglish:'⏰ Dasha Ka Arth',       hindi:'⏰ दशा का अर्थ',       english:'⏰ What This Dasha Means'},
+  shubhDates:   {hinglish:'🗓 Sabse Shubh Dates',   hindi:'🗓 सबसे शुभ तिथियाँ',  english:'🗓 Most Auspicious Dates'},
+  kyaKarein:    {hinglish:'✓ KYA KAREIN',           hindi:'✓ क्या करें',          english:'✓ WHAT TO DO'},
+  kyaNaKarein:  {hinglish:'✗ KYA NA KAREIN',        hindi:'✗ क्या न करें',        english:'✗ WHAT NOT TO DO'},
+  upayHint:     {hinglish:'🕉️ Upay Hint',           hindi:'🕉️ उपाय संकेत',        english:'🕉️ Remedy Hint'},
+  karmic:       {hinglish:'🔱 Karmic Insight — Bhrigu Pattern', hindi:'🔱 कार्मिक अंतर्दृष्टि — भृगु पैटर्न', english:'🔱 Karmic Insight — Bhrigu Pattern'},
+  janmaKundali: {hinglish:'🪐 Janma Kundali — North Indian Chart', hindi:'🪐 जन्म कुंडली — उत्तर भारतीय चक्र', english:'🪐 Birth Chart — North Indian Style'},
+  grahaVish:    {hinglish:'⚡ Graha Vishleshan — All 9 Planets', hindi:'⚡ ग्रह विश्लेषण — सभी ९ ग्रह', english:'⚡ Planetary Analysis — All 9 Grahas'},
+  dashaKaal:    {hinglish:'⏰ Dasha Kaal — Vimshottari System', hindi:'⏰ दशा काल — विंशोत्तरी पद्धति', english:'⏰ Dasha Periods — Vimshottari System'},
+  actionWin:    {hinglish:'🗓 Action Windows — Trikaal Precision', hindi:'🗓 कार्य अवधि — त्रिकाल परिशुद्धता', english:'🗓 Action Windows — Trikaal Precision'},
+  upayTitle:    {hinglish:'🙏 Upay — 5 Classical Remedies (BPHS)', hindi:'🙏 उपाय — ५ शास्त्रीय उपाय (बीपीएचएस)', english:'🙏 Remedies — 5 Classical Upay (BPHS)'},
+  vedicAnalysis:{hinglish:'🔮 Vedic Analysis — Trikaal Ka Sandesh', hindi:'🔮 वैदिक विश्लेषण — त्रिकाल का संदेश', english:'🔮 Vedic Analysis — Trikaal\'s Message'},
   lvlPractical:   {hinglish:'Vyavaharik',  hindi:'व्यावहारिक',  english:'Practical'},
   lvlBehavioural: {hinglish:'Anushasan',   hindi:'अनुशासन',     english:'Behavioural'},
   lvlSpiritual:   {hinglish:'Adhyatmik',   hindi:'आध्यात्मिक',  english:'Spiritual'},
@@ -1261,7 +1287,7 @@ function MaaShakti({slug}:{slug:string}) {
 
 // ─── 5 UPAY CARDS — v8.3 (slug prop added, upsell link fixed) ────────────────
 
-function UpayCards({ remedies, isPaid, slug }: { remedies: UpayItem[]; isPaid: boolean; slug: string }) {
+function UpayCards({ remedies, isPaid, slug, lang }: { remedies: UpayItem[]; isPaid: boolean; slug: string; lang: Lang }) {
   const visibleCount = isPaid ? 5 : 3
   const visible = remedies.slice(0, visibleCount)
 
@@ -1276,7 +1302,7 @@ function UpayCards({ remedies, isPaid, slug }: { remedies: UpayItem[]; isPaid: b
   return (
     <div style={{ background: BG_CARD, border: `1px solid ${G(0.12)}`, borderRadius: '16px', padding: '22px', marginBottom: '14px' }}>
       <p style={{ margin: '0 0 16px', color: GOLD, fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
-        🙏 Upay — 5 Classical Remedies (BPHS)
+        {lbl('upayTitle',lang)}
       </p>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
@@ -1421,15 +1447,15 @@ function LockedSection({slug, mahadasha, domainLabel}:{slug:string; mahadasha:st
   )
 }
 
-function PaidFullSummary({ summaryText, periodSummary, bestDates, dosList, dontsList, remedyHint, karmicInsight }: {
+function PaidFullSummary({ summaryText, periodSummary, bestDates, dosList, dontsList, remedyHint, karmicInsight, lang }: {
   summaryText:string; periodSummary:string; bestDates:string;
-  dosList:string[]; dontsList:string[]; remedyHint:string; karmicInsight:string;
+  dosList:string[]; dontsList:string[]; remedyHint:string; karmicInsight:string; lang:Lang;
 }) {
   return (
     <div style={{background:BG_CARD,border:`1px solid ${G(0.2)}`,borderRadius:'16px',padding:'24px',marginBottom:'14px'}}>
       <div style={{display:'flex',alignItems:'center',gap:'8px',marginBottom:'16px'}}>
         <Sparkles size={16} style={{color:GOLD}}/>
-        <p style={{margin:0,color:GOLD,fontSize:'11px',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.08em'}}>Trikaal Ka Poora Sandesh — Premium Analysis</p>
+        <p style={{margin:0,color:GOLD,fontSize:'11px',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.08em'}}>{lbl('premium',lang)}</p>
       </div>
       {summaryText && summaryText!=='—' && (
         <div style={{background:G(0.05),border:`1px solid ${G(0.15)}`,borderRadius:'12px',padding:'18px',marginBottom:'16px'}}>
@@ -1438,13 +1464,13 @@ function PaidFullSummary({ summaryText, periodSummary, bestDates, dosList, donts
       )}
       {periodSummary && periodSummary!=='—' && (
         <div style={{padding:'14px',background:'rgba(96,165,250,0.06)',border:'1px solid rgba(96,165,250,0.2)',borderRadius:'10px',marginBottom:'12px'}}>
-          <p style={{margin:'0 0 4px',color:'#60a5fa',fontSize:'10px',fontWeight:700,textTransform:'uppercase'}}>⏰ Dasha Ka Arth</p>
+          <p style={{margin:'0 0 4px',color:'#60a5fa',fontSize:'10px',fontWeight:700,textTransform:'uppercase'}}>{lbl('dashaArth',lang)}</p>
           <p style={{margin:0,color:'#bfdbfe',fontSize:'13px',lineHeight:1.6}}>{periodSummary}</p>
         </div>
       )}
       {bestDates && bestDates!=='—' && (
         <div style={{padding:'14px',background:'rgba(34,197,94,0.06)',border:'1px solid rgba(34,197,94,0.2)',borderRadius:'10px',marginBottom:'12px'}}>
-          <p style={{margin:'0 0 4px',color:'#22c55e',fontSize:'10px',fontWeight:700,textTransform:'uppercase'}}>🗓 Sabse Shubh Dates</p>
+          <p style={{margin:'0 0 4px',color:'#22c55e',fontSize:'10px',fontWeight:700,textTransform:'uppercase'}}>{lbl('shubhDates',lang)}</p>
           <p style={{margin:0,color:'#86efac',fontSize:'13px',lineHeight:1.6}}>{bestDates}</p>
         </div>
       )}
@@ -1452,13 +1478,13 @@ function PaidFullSummary({ summaryText, periodSummary, bestDates, dosList, donts
         <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'12px',marginBottom:'12px'}}>
           {dosList.length>0 && (
             <div>
-              <p style={{margin:'0 0 10px',color:'#22c55e',fontSize:'11px',fontWeight:700,textTransform:'uppercase'}}>✓ KYA KAREIN</p>
+              <p style={{margin:'0 0 10px',color:'#22c55e',fontSize:'11px',fontWeight:700,textTransform:'uppercase'}}>{lbl('kyaKarein',lang)}</p>
               {dosList.map((d,i)=>(<div key={i} style={{display:'flex',gap:'8px',marginBottom:'8px'}}><span style={{color:'#22c55e',fontSize:'12px',flexShrink:0}}>✓</span><p style={{margin:0,color:'#e2e8f0',fontSize:'13px',lineHeight:1.5}}>{d}</p></div>))}
             </div>
           )}
           {dontsList.length>0 && (
             <div>
-              <p style={{margin:'0 0 10px',color:'#ef4444',fontSize:'11px',fontWeight:700,textTransform:'uppercase'}}>✗ KYA NA KAREIN</p>
+              <p style={{margin:'0 0 10px',color:'#ef4444',fontSize:'11px',fontWeight:700,textTransform:'uppercase'}}>{lbl('kyaNaKarein',lang)}</p>
               {dontsList.map((d,i)=>(<div key={i} style={{display:'flex',gap:'8px',marginBottom:'8px'}}><span style={{color:'#ef4444',fontSize:'12px',flexShrink:0}}>✗</span><p style={{margin:0,color:'#e2e8f0',fontSize:'13px',lineHeight:1.5}}>{d}</p></div>))}
             </div>
           )}
@@ -1466,13 +1492,13 @@ function PaidFullSummary({ summaryText, periodSummary, bestDates, dosList, donts
       )}
       {remedyHint && remedyHint!=='—' && (
         <div style={{padding:'14px',background:G(0.06),border:`1px solid ${G(0.2)}`,borderRadius:'10px',marginBottom:'12px'}}>
-          <p style={{margin:'0 0 4px',color:GOLD,fontSize:'10px',fontWeight:700,textTransform:'uppercase'}}>🕉️ Upay Hint</p>
+          <p style={{margin:'0 0 4px',color:GOLD,fontSize:'10px',fontWeight:700,textTransform:'uppercase'}}>{lbl('upayHint',lang)}</p>
           <p style={{margin:0,color:'#fde68a',fontSize:'13px',lineHeight:1.6}}>{remedyHint}</p>
         </div>
       )}
       {karmicInsight && karmicInsight!=='—' && (
         <div style={{padding:'14px',background:'rgba(167,139,250,0.06)',border:'1px solid rgba(167,139,250,0.2)',borderRadius:'10px'}}>
-          <p style={{margin:'0 0 4px',color:'#a78bfa',fontSize:'10px',fontWeight:700,textTransform:'uppercase'}}>🔱 Karmic Insight — Bhrigu Pattern</p>
+          <p style={{margin:'0 0 4px',color:'#a78bfa',fontSize:'10px',fontWeight:700,textTransform:'uppercase'}}>{lbl('karmic',lang)}</p>
           <p style={{margin:0,color:'#c4b5fd',fontSize:'13px',lineHeight:1.6}}>{karmicInsight}</p>
         </div>
       )}
@@ -1600,7 +1626,7 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
             </div>
             {geoBullets.length>0 && (
               <div style={{background:G(0.06),border:`1px solid ${G(0.15)}`,borderRadius:'14px',padding:'16px',marginTop:'14px',textAlign:'left'}}>
-                <p style={{margin:'0 0 12px',color:G(0.65),fontSize:'11px',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.08em'}}>🔮 Vedic Analysis — Trikaal Ka Sandesh {isPaid && <span style={{color:G(0.4),marginLeft:'8px',fontSize:'10px'}}>({geoBullets.length} insights)</span>}</p>
+                <p style={{margin:'0 0 12px',color:G(0.65),fontSize:'11px',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.08em'}}>{lbl('vedicAnalysis',lang)} {isPaid && <span style={{color:G(0.4),marginLeft:'8px',fontSize:'10px'}}>({geoBullets.length} insights)</span>}</p>
                 <ul style={{margin:0,padding:0,listStyle:'none',display:'flex',flexDirection:'column',gap:'10px'}}>
                   {geoBullets.map((pt,i)=>(<li key={i} style={{display:'flex',gap:'10px',alignItems:'flex-start'}}><span style={{color:GOLD,fontSize:'14px',flexShrink:0,marginTop:'2px'}}>{['🔱','✦','◆','▸','🪐','✧','🔮','⚡','🌟','🕉️'][i%10]}</span><p style={{margin:0,color:'#e2e8f0',fontSize:'14px',lineHeight:1.8}}>{pt.replace(/^[.!?,;\s]+/,'').trim()}</p></li>))}
                 </ul>
@@ -1611,17 +1637,17 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
 
           {!isPaid && (hasCoreMessage||hasKeyMessage||hasDoAvoid) && (
             <div style={{background:BG_CARD,border:`1px solid ${G(0.12)}`,borderRadius:'16px',padding:'22px',marginBottom:'14px'}}>
-              <p style={{margin:'0 0 14px',color:GOLD,fontSize:'11px',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.08em'}}>✨ Trikaal Ka Sandesh</p>
+              <p style={{margin:'0 0 14px',color:GOLD,fontSize:'11px',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.08em'}}>{lbl('sandesh',lang)}</p>
               {(hasCoreMessage||hasKeyMessage) && (
                 <div style={{background:`linear-gradient(135deg,${G(0.12)},${G(0.04)})`,border:`1px solid ${G(0.3)}`,borderRadius:'10px',padding:'14px 16px',marginBottom:'12px'}}>
-                  <p style={{margin:'0 0 4px',color:GOLD,fontSize:'11px',fontWeight:700,textTransform:'uppercase'}}>🔑 Core Message</p>
+                  <p style={{margin:'0 0 4px',color:GOLD,fontSize:'11px',fontWeight:700,textTransform:'uppercase'}}>{lbl('coreMsg',lang)}</p>
                   <p style={{margin:0,color:'#fff',fontSize:'15px',fontWeight:600,fontFamily:'Georgia,serif',lineHeight:1.6}}>{hasCoreMessage?coreMessage:keyMessage}</p>
                 </div>
               )}
               {hasDoAvoid && (
                 <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'10px'}}>
-                  {(doAction!=='—'||mainAction!=='—') && (<div style={{background:'rgba(34,197,94,0.06)',border:'1px solid rgba(34,197,94,0.2)',borderRadius:'10px',padding:'13px'}}><p style={{margin:'0 0 5px',color:'#22c55e',fontSize:'10px',fontWeight:700}}>✓ ABHI KAREIN</p><p style={{margin:0,color:'#86efac',fontSize:'13px',lineHeight:1.5}}>{doAction!=='—'?doAction:mainAction}</p></div>)}
-                  {(avoidAction!=='—'||mainCaution!=='—') && (<div style={{background:'rgba(239,68,68,0.06)',border:'1px solid rgba(239,68,68,0.2)',borderRadius:'10px',padding:'13px'}}><p style={{margin:'0 0 5px',color:'#ef4444',fontSize:'10px',fontWeight:700}}>✗ BACHEIN</p><p style={{margin:0,color:'#fca5a5',fontSize:'13px',lineHeight:1.5}}>{avoidAction!=='—'?avoidAction:mainCaution}</p></div>)}
+                  {(doAction!=='—'||mainAction!=='—') && (<div style={{background:'rgba(34,197,94,0.06)',border:'1px solid rgba(34,197,94,0.2)',borderRadius:'10px',padding:'13px'}}><p style={{margin:'0 0 5px',color:'#22c55e',fontSize:'10px',fontWeight:700}}>{lbl('doNow',lang)}</p><p style={{margin:0,color:'#86efac',fontSize:'13px',lineHeight:1.5}}>{doAction!=='—'?doAction:mainAction}</p></div>)}
+                  {(avoidAction!=='—'||mainCaution!=='—') && (<div style={{background:'rgba(239,68,68,0.06)',border:'1px solid rgba(239,68,68,0.2)',borderRadius:'10px',padding:'13px'}}><p style={{margin:'0 0 5px',color:'#ef4444',fontSize:'10px',fontWeight:700}}>{lbl('avoidNow',lang)}</p><p style={{margin:0,color:'#fca5a5',fontSize:'13px',lineHeight:1.5}}>{avoidAction!=='—'?avoidAction:mainCaution}</p></div>)}
                 </div>
               )}
               {hasSummaryText && (<div style={{marginTop:'14px',paddingTop:'14px',borderTop:`1px solid rgba(255,255,255,0.06)`}}><p style={{margin:0,color:'#94a3b8',fontSize:'13px',lineHeight:1.8,whiteSpace:'pre-line'}}>{summaryText}</p></div>)}
@@ -1640,7 +1666,7 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
               the client is asked to absorb any planetary detail. */}
           <WhyYouAreHere why={whyHere} activation={chartEv?.activation} lang={lang}/>
 
-          {isPaid && <PaidFullSummary summaryText={summaryText} periodSummary={periodSummary} bestDates={bestDates} dosList={dosList} dontsList={dontsList} remedyHint={remedyHint} karmicInsight={karmicInsight}/>}
+          {isPaid && <PaidFullSummary summaryText={summaryText} periodSummary={periodSummary} bestDates={bestDates} dosList={dosList} dontsList={dontsList} remedyHint={remedyHint} karmicInsight={karmicInsight} lang={lang}/>}
 
           <div style={{display:'grid',gridTemplateColumns:'repeat(2,1fr)',gap:'10px',marginBottom:'14px'}}>
             {[{label:'Lagna',value:lagna},{label:'Nakshatra',value:nakshatra},{label:'Mahadasha',value:mahadasha},{label:'Antardasha',value:antardasha}].map(({label,value})=>(<div key={label} style={{padding:'11px 14px',borderRadius:'10px',background:G(0.08),border:`1px solid ${G(0.2)}`,textAlign:'center'}}><p style={{margin:'0 0 3px',color:G(0.6),fontSize:'10px',textTransform:'uppercase',letterSpacing:'0.08em',fontWeight:600}}>{label}</p><p style={{margin:0,color:'#fff',fontSize:'14px',fontWeight:700}}>{value}</p></div>))}
@@ -1648,7 +1674,7 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
 
           {planetTable.length>0&&lagna!=='—'&&(
             <div style={{background:BG_CARD,border:`1px solid ${G(0.15)}`,borderRadius:'16px',padding:'22px',marginBottom:'14px'}}>
-              <p style={{margin:'0 0 14px',color:GOLD,fontSize:'11px',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.08em'}}>🪐 Janma Kundali — North Indian Chart</p>
+              <p style={{margin:'0 0 14px',color:GOLD,fontSize:'11px',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.08em'}}>{lbl('janmaKundali',lang)}</p>
               <KundaliChart lagna={lagna} planets={planetTable}/>
               <p style={{textAlign:'center',color:'#64748b',fontSize:'11px',margin:'10px 0 0'}}>Lahiri Ayanamsha · Swiss Ephemeris · BPHS classical</p>
             </div>
@@ -1656,7 +1682,7 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
 
           {planetTable.length>0&&(
             <div style={{background:BG_CARD,border:`1px solid ${G(0.12)}`,borderRadius:'16px',padding:'22px',marginBottom:'14px'}}>
-              <p style={{margin:'0 0 14px',color:GOLD,fontSize:'11px',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.08em'}}>⚡ Graha Vishleshan — All 9 Planets</p>
+              <p style={{margin:'0 0 14px',color:GOLD,fontSize:'11px',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.08em'}}>{lbl('grahaVish',lang)}</p>
               <div style={{overflowX:'auto'}}>
                 <table style={{width:'100%',borderCollapse:'collapse',fontSize:'13px'}}>
                   <thead><tr style={{borderBottom:`1px solid ${G(0.15)}`}}>{['Graha','Rashi','House','Nakshatra','Dignity','Strength'].map(h=>(<th key={h} style={{padding:'9px 6px',color:GOLD,fontWeight:600,textAlign:'left',fontSize:'11px',letterSpacing:'0.06em',textTransform:'uppercase'}}>{h}</th>))}</tr></thead>
@@ -1688,7 +1714,7 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
           <ConfidenceCard c={confidence} lang={lang}/>
 
           <div style={{background:BG_CARD,border:`1px solid ${G(0.12)}`,borderRadius:'16px',padding:'22px',marginBottom:'14px'}}>
-            <p style={{margin:'0 0 14px',color:GOLD,fontSize:'11px',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.08em'}}>⏰ Dasha Kaal — Vimshottari System</p>
+            <p style={{margin:'0 0 14px',color:GOLD,fontSize:'11px',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.08em'}}>{lbl('dashaKaal',lang)}</p>
             <div style={{display:'flex',flexDirection:'column',gap:'10px'}}>
               {/* v8.4: Sookshma (L4) removed. astro.py's _vimshottari() nests only three
                   levels — maha, antar, pratyantar — so L4 was never computed. The old
@@ -1700,13 +1726,13 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
 
           {actionWindows.length>0&&(
             <div style={{background:BG_CARD,border:`1px solid ${G(0.12)}`,borderRadius:'16px',padding:'22px',marginBottom:'14px'}}>
-              <p style={{margin:'0 0 14px',color:GOLD,fontSize:'11px',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.08em'}}>🗓 Action Windows — Trikaal Precision</p>
+              <p style={{margin:'0 0 14px',color:GOLD,fontSize:'11px',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.08em'}}>{lbl('actionWin',lang)}</p>
               {actionWindows.map((w,i)=>{const hi=w.strength==='High';return(<div key={i} style={{padding:'13px',background:hi?'rgba(34,197,94,0.06)':G(0.04),border:`1px solid ${hi?'rgba(34,197,94,0.2)':G(0.15)}`,borderRadius:'10px',marginBottom:'8px'}}><div style={{display:'flex',alignItems:'center',gap:'8px',marginBottom:'5px'}}><span style={{color:hi?'#22c55e':GOLD,fontSize:'13px',fontWeight:700}}>{hi?'🟢':'🟡'} {w.window}</span><span style={{padding:'2px 8px',borderRadius:'10px',background:hi?'rgba(34,197,94,0.15)':G(0.1),color:hi?'#22c55e':GOLD,fontSize:'11px',fontWeight:600}}>{w.strength}</span></div><p style={{margin:0,color:'#e2e8f0',fontSize:'13px',lineHeight:1.5}}>{w.reason}</p></div>)})}
             </div>
           )}
 
           {hasNewUpay ? (
-            <UpayCards remedies={upayItems} isPaid={isPaid} slug={slug}/>
+            <UpayCards remedies={upayItems} isPaid={isPaid} slug={slug} lang={lang}/>
           ) : oldRemedies.length > 0 && (
             <div style={{background:BG_CARD,border:`1px solid ${G(0.12)}`,borderRadius:'16px',padding:'22px',marginBottom:'14px'}}>
               <p style={{margin:'0 0 14px',color:GOLD,fontSize:'11px',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.08em'}}>🙏 Upay — Remedy Plan (BPHS Classical)</p>
