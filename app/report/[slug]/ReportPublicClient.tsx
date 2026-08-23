@@ -5,8 +5,27 @@
  * TRIKAAL VAANI — Public SEO Report Client
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/report/[slug]/ReportPublicClient.tsx
- * VERSION: 8.3 — FREE→PAID CONVERSION FIXES (CEO audit June 2026)
+ * VERSION: 9.0 — VERDICT FIRST + GOCHAR + NAVAMSA + REMEDY LEVELS + PANCHANG
  * SIGNED: ROHIIT GUPTA, CEO
+ *
+ * v9.0 (23 Aug 2026) — CONSOLIDATED. Everything pending for this file, once:
+ *   #3 VerdictCard   : the answer FIRST. The page opened with engine badges and
+ *                      credentials while the client's real question was answered
+ *                      two screens down — machinery explained before value proven.
+ *   #1 GocharTimeline: 3 months back + 6 forward from real sidereal transits,
+ *                      with the running Vimshottari period per month, plus best
+ *                      and caution month. Slow nodes shown as background rather
+ *                      than marking all nine months identically.
+ *   #2 NavamsaCard   : D9 divisional chart with dignity and Vargottama marks.
+ *   #6 RemedyLevels  : four ordered levels — Practical, Behavioural, Spiritual,
+ *                      Seva. Five flat spiritual upay made "chant 108x" read as
+ *                      the answer to debt; classically remedies support effort.
+ *   #4 Panchang      : restored, now computed from today's real Sun/Moon
+ *                      longitudes. Gated on _source === 'swiss-ephemeris', so the
+ *                      old day-of-year fabrication can never render again.
+ *   #9 Language      : section headings follow the `language` column
+ *                      (hinglish / hindi / english). A Hindi reader was getting
+ *                      Devanagari prose under Hinglish headings.
  *
  * CHANGES v8.2 -> v8.3 (CEO approved):
  *   ✅ FIX-1 (BUG): UpayCards upsell "Get Full Reading — ₹51" linked
@@ -146,6 +165,47 @@ interface RemedyItem {
   dana:string; vrat:string; priority?:string
 }
 
+// ── v9.0 LANGUAGE-AWARE LABELS ───────────────────────────────────────────────
+// Every section heading was hardcoded Hinglish. A Hindi reader received pages of
+// Devanagari prose under headings like "AAP YAHAN KYUN HAIN", and an English
+// reader got Hinglish headings over English text. The `language` column already
+// records the choice (hinglish / hindi / english) — it was simply never used.
+type Lang = 'hinglish'|'hindi'|'english'
+const L: Record<string, Record<Lang,string>> = {
+  verdict:      {hinglish:'🎯 60 Second Mein Aapka Jawab', hindi:'🎯 ६० सेकंड में आपका उत्तर',        english:'🎯 Your Answer in 60 Seconds'},
+  whyHere:      {hinglish:'🔍 Aap Yahan Kyun Hain',        hindi:'🔍 आप यहाँ क्यों हैं',                english:'🔍 Why You Are Here'},
+  whyManif:     {hinglish:'Yeh phase in tareeko se dikh sakta tha', hindi:'यह चरण इन रूपों में दिख सकता था', english:'This phase could have shown up as'},
+  evidence:     {hinglish:'🔎 Yeh Prediction Kyun — Aapki Kundali Se', hindi:'🔎 यह भविष्यवाणी क्यों — आपकी कुंडली से', english:'🔎 Why This Prediction — From Your Chart'},
+  evidenceSub:  {hinglish:'har row aapke chart se nikli hai, koi general baat nahi', hindi:'हर पंक्ति आपकी कुंडली से निकली है, कोई सामान्य बात नहीं', english:'every row is derived from your own chart, nothing generic'},
+  lord:         {hinglish:'Swami',      hindi:'स्वामी',        english:'Lord'},
+  inHouse:      {hinglish:'bhav mein',  hindi:'भाव में',       english:'house'},
+  occupants:    {hinglish:'Is bhav mein', hindi:'इस भाव में',   english:'Occupied by'},
+  noOccupants:  {hinglish:'Is bhav mein koi graha nahi', hindi:'इस भाव में कोई ग्रह नहीं', english:'No planets in this house'},
+  activation:   {hinglish:'⏳ Dasha Activation', hindi:'⏳ दशा सक्रियता', english:'⏳ Dasha Activation'},
+  signals:      {hinglish:'🔯 Yogas aur Bhrigu Signals', hindi:'🔯 योग और भृगु संकेत', english:'🔯 Yogas and Bhrigu Signals'},
+  confidence:   {hinglish:'📊 Prediction Confidence', hindi:'📊 भविष्यवाणी की विश्वसनीयता', english:'📊 Prediction Confidence'},
+  confPast:     {hinglish:'Pichhle kuch mahine', hindi:'पिछले कुछ महीने', english:'Recent past'},
+  confNext3:    {hinglish:'Agle 3 mahine',       hindi:'अगले ३ महीने',    english:'Next 3 months'},
+  conf46:       {hinglish:'Mahina 4-6',          hindi:'महीना ४-६',       english:'Months 4-6'},
+  timeline:     {hinglish:'📆 9 Mahine Ki Timeline — Gochar', hindi:'📆 ९ महीने की समय-रेखा — गोचर', english:'📆 9-Month Timeline — Transits'},
+  tlPast:       {hinglish:'Pichhle 3 mahine',    hindi:'पिछले ३ महीने',   english:'Past 3 months'},
+  tlNow:        {hinglish:'Abhi',                hindi:'अभी',             english:'Now'},
+  tlNext:       {hinglish:'Agle 6 mahine',       hindi:'अगले ६ महीने',    english:'Next 6 months'},
+  bestMonth:    {hinglish:'Sabse sahaayak mahina', hindi:'सबसे सहायक महीना', english:'Most supportive month'},
+  cautionMonth: {hinglish:'Sabse savdhaani wala', hindi:'सबसे सावधानी वाला', english:'Most cautious month'},
+  background:   {hinglish:'Poore daur mein sthir', hindi:'पूरे दौर में स्थिर', english:'Constant through the window'},
+  navamsa:      {hinglish:'🕉️ Navamsa (D9) — Divisional Chart', hindi:'🕉️ नवांश (D9) — वर्ग कुंडली', english:'🕉️ Navamsa (D9) — Divisional Chart'},
+  navLagna:     {hinglish:'D9 Lagna',   hindi:'नवांश लग्न',    english:'D9 Lagna'},
+  vargottama:   {hinglish:'Vargottama (D1 aur D9 mein ek hi rashi — vishesh bal)', hindi:'वर्गोत्तम (D1 और D9 में एक ही राशि — विशेष बल)', english:'Vargottama (same sign in D1 and D9 — special strength)'},
+  remedyLevels: {hinglish:'🪜 Upay Ka Kram — Pehle Vyavaharik',  hindi:'🪜 उपाय का क्रम — पहले व्यावहारिक', english:'🪜 Remedy Order — Practical First'},
+  panchang:     {hinglish:'📅 Aaj Ka Panchang', hindi:'📅 आज का पंचांग',  english:'📅 Today\'s Panchang'},
+  tithi:        {hinglish:'Tithi', hindi:'तिथि', english:'Tithi'},
+  vara:         {hinglish:'Vara',  hindi:'वार',  english:'Weekday'},
+  nak:          {hinglish:'Nakshatra', hindi:'नक्षत्र', english:'Nakshatra'},
+  yoga:         {hinglish:'Yoga',  hindi:'योग',  english:'Yoga'},
+}
+function lbl(key:string, lang:Lang):string { return L[key]?.[lang] ?? L[key]?.hinglish ?? key }
+
 function s(v:unknown, fb='—'):string {
   return typeof v==='string' && v.trim() ? v.trim() : fb
 }
@@ -239,7 +299,7 @@ function KundaliChart({lagna,planets}:{lagna:string;planets:PlanetRow[]}) {
 // already happened. This card names the real dasha segment that began, then
 // offers possible manifestations the reader can recognise OR dismiss. It never
 // asserts an event occurred; Gemini is instructed to give possibilities only.
-function WhyYouAreHere({ why, activation }:{ why:WhyHere; activation?:ChartEvidence['activation'] }) {
+function WhyYouAreHere({ why, activation, lang }:{ why:WhyHere; activation?:ChartEvidence['activation']; lang:Lang }) {
   const text = s(why?.text as string)
   const mans = safeArr<string>(why?.possibleManifestations)
   const rec  = s(why?.recognitionLine as string)
@@ -248,7 +308,7 @@ function WhyYouAreHere({ why, activation }:{ why:WhyHere; activation?:ChartEvide
   const pd = activation?.pratyantar
   return (
     <div style={{background:BG_CARD,border:`1px solid ${G(0.22)}`,borderRadius:'16px',padding:'22px',marginBottom:'14px'}}>
-      <p style={{margin:'0 0 12px',color:GOLD,fontSize:'11px',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.08em'}}>🔍 Aap Yahan Kyun Hain</p>
+      <p style={{margin:'0 0 12px',color:GOLD,fontSize:'11px',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.08em'}}>{lbl('whyHere',lang)}</p>
       {text!=='—' && <p style={{margin:'0 0 14px',color:'#e2e8f0',fontSize:'14px',lineHeight:1.75}}>{text}</p>}
       {(ad?.lord || pd?.lord) && (
         <div style={{display:'flex',flexWrap:'wrap',gap:'8px',marginBottom:'14px'}}>
@@ -258,7 +318,7 @@ function WhyYouAreHere({ why, activation }:{ why:WhyHere; activation?:ChartEvide
       )}
       {mans.length>0 && (
         <>
-          <p style={{margin:'0 0 8px',color:G(0.6),fontSize:'11px',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.06em'}}>Yeh phase in tareeko se dikh sakta tha</p>
+          <p style={{margin:'0 0 8px',color:G(0.6),fontSize:'11px',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.06em'}}>{lbl('whyManif',lang)}</p>
           <ul style={{margin:'0 0 12px',padding:'0 0 0 18px',color:'#cbd5e1',fontSize:'13px',lineHeight:1.9}}>
             {mans.map((m,i)=>(<li key={i}>{m}</li>))}
           </ul>
@@ -273,7 +333,7 @@ function WhyYouAreHere({ why, activation }:{ why:WhyHere; activation?:ChartEvide
 // Every row is a lookup into Parashara + Shadbala engine output. The numbers come
 // from the engine; only the "matlab" line is written by the reading. This is what
 // turns an assertion into something the client can follow and check.
-function EvidenceTable({ ev, meanings }:{ ev:ChartEvidence; meanings:{house?:number;meaning?:string}[] }) {
+function EvidenceTable({ ev, meanings, lang }:{ ev:ChartEvidence; meanings:{house?:number;meaning?:string}[]; lang:Lang }) {
   const rows = safeArr<EvidenceHouse>(ev?.houses)
   if (rows.length===0) return null
   const meaningFor = (hn?:number) => {
@@ -284,7 +344,7 @@ function EvidenceTable({ ev, meanings }:{ ev:ChartEvidence; meanings:{house?:num
   const links = safeArr<{planet:string;house:string}>(ev?.activation?.domain_links)
   return (
     <div style={{background:BG_CARD,border:`1px solid ${G(0.15)}`,borderRadius:'16px',padding:'22px',marginBottom:'14px'}}>
-      <p style={{margin:'0 0 6px',color:GOLD,fontSize:'11px',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.08em'}}>🔎 Yeh Prediction Kyun — Aapki Kundali Se</p>
+      <p style={{margin:'0 0 6px',color:GOLD,fontSize:'11px',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.08em'}}>{lbl('evidence',lang)}</p>
       <p style={{margin:'0 0 16px',color:'#64748b',fontSize:'11px'}}>
         Lagna {s(ev?.lagna)} · Lagna swami {s(ev?.lagna_lord)} — har row aapke chart se nikli hai, koi general baat nahi.
       </p>
@@ -308,7 +368,7 @@ function EvidenceTable({ ev, meanings }:{ ev:ChartEvidence; meanings:{house?:num
       </div>
       {links.length>0 && (
         <div style={{marginTop:'14px',padding:'12px 14px',borderRadius:'10px',background:G(0.06),border:`1px solid ${G(0.18)}`}}>
-          <p style={{margin:'0 0 6px',color:GOLD,fontSize:'11px',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.06em'}}>⏳ Dasha Activation</p>
+          <p style={{margin:'0 0 6px',color:GOLD,fontSize:'11px',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.06em'}}>{lbl('activation',lang)}</p>
           <p style={{margin:0,color:'#cbd5e1',fontSize:'12.5px',lineHeight:1.8}}>
             {links.map((l,i)=>(<span key={i}>{l.planet} → {l.house}{i<links.length-1?' · ':''}</span>))}
           </p>
@@ -323,13 +383,13 @@ function EvidenceTable({ ev, meanings }:{ ev:ChartEvidence; meanings:{house?:num
 // The badge on page 1 has always claimed Bhrigu Nandi; until now the report never
 // showed a single Bhrigu output. This renders it only when the engine actually
 // returned something — an empty claim is worse than no claim.
-function EngineSignals({ yogas, bhriguTheme, bhriguPoints, signals }:{ yogas:string[]; bhriguTheme:string; bhriguPoints:number; signals:{desc:string;timing:string;rel:boolean}[] }) {
+function EngineSignals({ yogas, bhriguTheme, bhriguPoints, signals, lang }:{ yogas:string[]; bhriguTheme:string; bhriguPoints:number; signals:{desc:string;timing:string;rel:boolean}[]; lang:Lang }) {
   const hasY = yogas.length>0
   const hasB = bhriguTheme!=='—' || bhriguPoints>0 || signals.length>0
   if (!hasY && !hasB) return null
   return (
     <div style={{background:BG_CARD,border:`1px solid ${G(0.12)}`,borderRadius:'16px',padding:'22px',marginBottom:'14px'}}>
-      <p style={{margin:'0 0 14px',color:GOLD,fontSize:'11px',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.08em'}}>🔯 Yogas aur Bhrigu Signals</p>
+      <p style={{margin:'0 0 14px',color:GOLD,fontSize:'11px',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.08em'}}>{lbl('signals',lang)}</p>
       {hasY && (
         <div style={{display:'flex',flexWrap:'wrap',gap:'8px',marginBottom:hasB?'14px':0}}>
           {yogas.map((y,i)=>(<span key={i} style={{padding:'7px 12px',borderRadius:'8px',background:G(0.08),border:`1px solid ${G(0.22)}`,color:'#e2e8f0',fontSize:'12.5px',fontWeight:600}}>{y}</span>))}
@@ -354,18 +414,18 @@ function EngineSignals({ yogas, bhriguTheme, bhriguPoints, signals }:{ yogas:str
 // Astrology should not pretend every horizon carries equal certainty. Near-term
 // rests on exact Vimshottari dates; months 4-6 are directional. Saying so is a
 // credibility gain, not a weakness.
-function ConfidenceCard({ c }:{ c:ReadingConfidence }) {
+function ConfidenceCard({ c, lang }:{ c:ReadingConfidence; lang:Lang }) {
   const rows = [
-    {label:'Pichhle kuch mahine', v:s(c?.recentPast as string)},
-    {label:'Agle 3 mahine',       v:s(c?.next3Months as string)},
-    {label:'Mahina 4-6',          v:s(c?.months4to6 as string)},
+    {label:lbl('confPast',lang),  v:s(c?.recentPast as string)},
+    {label:lbl('confNext3',lang), v:s(c?.next3Months as string)},
+    {label:lbl('conf46',lang),    v:s(c?.months4to6 as string)},
   ].filter(r=>r.v!=='—')
   if (rows.length===0) return null
   const col = (v:string) => /high/i.test(v)?'#22c55e':/moder/i.test(v)?GOLD:'#94a3b8'
   const dot = (v:string) => /high/i.test(v)?'🟢':/moder/i.test(v)?'🟡':'⚪'
   return (
     <div style={{background:BG_CARD,border:`1px solid ${G(0.12)}`,borderRadius:'16px',padding:'22px',marginBottom:'14px'}}>
-      <p style={{margin:'0 0 14px',color:GOLD,fontSize:'11px',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.08em'}}>📊 Prediction Confidence</p>
+      <p style={{margin:'0 0 14px',color:GOLD,fontSize:'11px',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.08em'}}>{lbl('confidence',lang)}</p>
       <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(140px,1fr))',gap:'10px'}}>
         {rows.map(r=>(
           <div key={r.label} style={{padding:'12px',borderRadius:'10px',background:'rgba(255,255,255,0.03)',border:'1px solid rgba(255,255,255,0.06)'}}>
@@ -375,6 +435,152 @@ function ConfidenceCard({ c }:{ c:ReadingConfidence }) {
         ))}
       </div>
       {s(c?.basis as string)!=='—' && <p style={{margin:'12px 0 0',color:'#475569',fontSize:'11px',lineHeight:1.6}}>{s(c?.basis as string)}</p>}
+    </div>
+  )
+}
+
+// ── v9.0 VERDICT CARD — the answer, before anything else ─────────────────────
+// GPT's audit: page 1 opened with credentials and engine badges while the
+// client's actual question ("when does this end?") appeared on page 2-3. The
+// machinery was being explained before the value was proven. This card carries
+// no new data — it re-orders what the engines already produced so the answer
+// comes first and the reasoning follows.
+function VerdictCard({ lang, coreMsg, mahadasha, antardasha, pratyantar, best, caution, conf, doNow, avoidNow }:{
+  lang:Lang; coreMsg:string; mahadasha:string; antardasha:string; pratyantar:string
+  best:string|null; caution:string|null; conf:ReadingConfidence; doNow:string; avoidNow:string
+}) {
+  if (coreMsg==='—' && !best && !caution) return null
+  const chip = (label:string, value:string, tone:'g'|'r'|'n') => (
+    <div style={{padding:'11px 13px',borderRadius:'10px',
+      background: tone==='g'?'rgba(34,197,94,0.08)':tone==='r'?'rgba(239,68,68,0.07)':G(0.06),
+      border:`1px solid ${tone==='g'?'rgba(34,197,94,0.25)':tone==='r'?'rgba(239,68,68,0.22)':G(0.18)}`}}>
+      <p style={{margin:'0 0 3px',color:'#64748b',fontSize:'10px',textTransform:'uppercase',letterSpacing:'0.06em'}}>{label}</p>
+      <p style={{margin:0,color: tone==='g'?'#86efac':tone==='r'?'#fca5a5':'#fff',fontSize:'13.5px',fontWeight:700}}>{value}</p>
+    </div>
+  )
+  return (
+    <div style={{background:`linear-gradient(135deg,${G(0.14)},rgba(8,11,18,0.96))`,border:`1px solid ${G(0.32)}`,borderRadius:'18px',padding:'22px',marginBottom:'14px'}}>
+      <p style={{margin:'0 0 14px',color:GOLD,fontSize:'11px',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.08em'}}>{lbl('verdict',lang)}</p>
+      {coreMsg!=='—' && <p style={{margin:'0 0 16px',color:'#fff',fontSize:'16px',fontWeight:600,fontFamily:'Georgia,serif',lineHeight:1.65}}>{coreMsg}</p>}
+      <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(150px,1fr))',gap:'9px',marginBottom:'12px'}}>
+        {mahadasha!=='—' && chip('Dasha', `${mahadasha} / ${antardasha}${pratyantar!=='—'?` / ${pratyantar}`:''}`, 'n')}
+        {best    && chip(lbl('bestMonth',lang),    best,    'g')}
+        {caution && chip(lbl('cautionMonth',lang), caution, 'r')}
+        {s(conf?.next3Months as string)!=='—' && chip(lbl('confNext3',lang), String(conf.next3Months), 'n')}
+      </div>
+      {(doNow!=='—'||avoidNow!=='—') && (
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'9px'}}>
+          {doNow!=='—'   && <div style={{padding:'11px',borderRadius:'9px',background:'rgba(34,197,94,0.06)',border:'1px solid rgba(34,197,94,0.18)'}}><p style={{margin:'0 0 4px',color:'#22c55e',fontSize:'10px',fontWeight:700}}>✓</p><p style={{margin:0,color:'#86efac',fontSize:'12.5px',lineHeight:1.5}}>{doNow}</p></div>}
+          {avoidNow!=='—'&& <div style={{padding:'11px',borderRadius:'9px',background:'rgba(239,68,68,0.06)',border:'1px solid rgba(239,68,68,0.18)'}}><p style={{margin:'0 0 4px',color:'#ef4444',fontSize:'10px',fontWeight:700}}>✗</p><p style={{margin:0,color:'#fca5a5',fontSize:'12.5px',lineHeight:1.5}}>{avoidNow}</p></div>}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ── v9.0 GOCHAR TIMELINE ─────────────────────────────────────────────────────
+// Real sidereal transits per month, mapped onto natal houses, with the running
+// Vimshottari period for each month. Tone is RELATIVE to this window — the slow
+// nodes hold one house for 18 months and would otherwise mark all nine months
+// identically, so they are shown separately as background.
+interface GMonth { ym:string; label:string; is_past:boolean; is_current:boolean
+  antardasha:string|null; pratyantar:string|null; tone:string; marker:string
+  domain_hits:{planet:string;house:number;nature:string}[] }
+function GocharTimeline({ g, lang }:{ g:Record<string,unknown>; lang:Lang }) {
+  const past = safeArr<GMonth>(g.past), future = safeArr<GMonth>(g.future)
+  const cur  = safeObj(g.current) as unknown as GMonth
+  if (past.length===0 && future.length===0) return null
+  const bg = safeArr<{planet:string;house:number;nature:string}>(g.background)
+  const dot = (m:string) => m==='green'?'🟢':m==='red'?'🔴':'🟡'
+  const Row = ({m,highlight}:{m:GMonth;highlight?:boolean}) => (
+    <div style={{padding:'11px 13px',borderRadius:'10px',marginBottom:'7px',
+      background: highlight?G(0.1):'rgba(255,255,255,0.03)',
+      border:`1px solid ${highlight?G(0.3):'rgba(255,255,255,0.06)'}`}}>
+      <div style={{display:'flex',alignItems:'center',gap:'8px',flexWrap:'wrap',marginBottom:'4px'}}>
+        <span style={{fontSize:'13px',fontWeight:700,color:'#fff'}}>{dot(m.marker)} {m.label}</span>
+        {(m.antardasha||m.pratyantar) && <span style={{color:'#64748b',fontSize:'11px'}}>{m.antardasha ?? '—'}{m.pratyantar?` / ${m.pratyantar}`:''}</span>}
+      </div>
+      <p style={{margin:0,color:'#94a3b8',fontSize:'12px',lineHeight:1.6}}>
+        {safeArr<{planet:string;house:number;nature:string}>(m.domain_hits)
+          .filter(h=>!bg.some(b=>b.planet===h.planet))
+          .map(h=>`${h.planet} → ${ordinal(h.house)}`).join(' · ') || '—'}
+      </p>
+    </div>
+  )
+  const Head = ({t}:{t:string}) => (<p style={{margin:'14px 0 8px',color:G(0.6),fontSize:'10px',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.07em'}}>{t}</p>)
+  return (
+    <div style={{background:BG_CARD,border:`1px solid ${G(0.15)}`,borderRadius:'16px',padding:'22px',marginBottom:'14px'}}>
+      <p style={{margin:'0 0 4px',color:GOLD,fontSize:'11px',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.08em'}}>{lbl('timeline',lang)}</p>
+      <div style={{display:'flex',gap:'8px',flexWrap:'wrap',marginBottom:'6px'}}>
+        {s(g.best_month as string)!=='—'    && <span style={{padding:'5px 10px',borderRadius:'8px',background:'rgba(34,197,94,0.1)',border:'1px solid rgba(34,197,94,0.25)',color:'#86efac',fontSize:'11.5px',fontWeight:600}}>🟢 {lbl('bestMonth',lang)}: {String(g.best_month)}</span>}
+        {s(g.caution_month as string)!=='—' && <span style={{padding:'5px 10px',borderRadius:'8px',background:'rgba(239,68,68,0.08)',border:'1px solid rgba(239,68,68,0.22)',color:'#fca5a5',fontSize:'11.5px',fontWeight:600}}>🔴 {lbl('cautionMonth',lang)}: {String(g.caution_month)}</span>}
+      </div>
+      {bg.length>0 && <p style={{margin:'0 0 6px',color:'#64748b',fontSize:'11px'}}>{lbl('background',lang)}: {bg.map(b=>`${b.planet} → ${ordinal(b.house)}`).join(' · ')}</p>}
+      {past.length>0 && <><Head t={lbl('tlPast',lang)}/>{past.map(m=><Row key={m.ym} m={m}/>)}</>}
+      {cur?.label   && <><Head t={lbl('tlNow',lang)}/><Row m={cur} highlight/></>}
+      {future.length>0 && <><Head t={lbl('tlNext',lang)}/>{future.map(m=><Row key={m.ym} m={m}/>)}</>}
+      <p style={{margin:'10px 0 0',color:'#475569',fontSize:'11px',lineHeight:1.5}}>{s(g.disclaimer as string,'')}</p>
+    </div>
+  )
+}
+
+// ── v9.0 NAVAMSA (D9) ────────────────────────────────────────────────────────
+function NavamsaCard({ nv, lang }:{ nv:Record<string,unknown>; lang:Lang }) {
+  const rows = safeArr<Record<string,unknown>>(nv.planets)
+  if (rows.length===0) return null
+  const vg = safeArr<string>(nv.vargottama_planets)
+  return (
+    <div style={{background:BG_CARD,border:`1px solid ${G(0.12)}`,borderRadius:'16px',padding:'22px',marginBottom:'14px'}}>
+      <p style={{margin:'0 0 6px',color:GOLD,fontSize:'11px',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.08em'}}>{lbl('navamsa',lang)}</p>
+      {s(nv.navamsa_lagna as string)!=='—' && <p style={{margin:'0 0 12px',color:'#94a3b8',fontSize:'12px'}}>{lbl('navLagna',lang)}: <strong style={{color:'#fff'}}>{String(nv.navamsa_lagna)}</strong></p>}
+      <div style={{overflowX:'auto'}}>
+        <table style={{width:'100%',borderCollapse:'collapse',fontSize:'13px'}}>
+          <thead><tr style={{borderBottom:`1px solid ${G(0.15)}`}}>{['Graha','D1','D9','House','Dignity'].map(h=>(<th key={h} style={{padding:'8px 6px',color:GOLD,fontWeight:600,textAlign:'left',fontSize:'11px',textTransform:'uppercase',letterSpacing:'0.06em'}}>{h}</th>))}</tr></thead>
+          <tbody>
+            {rows.map((r,i)=>(
+              <tr key={i} style={{borderBottom:'1px solid rgba(255,255,255,0.04)',background:i%2===0?G(0.02):'transparent'}}>
+                <td style={{padding:'10px 6px',color:'#fff',fontWeight:600}}><span style={{color:GOLD,marginRight:'5px'}}>{PLANET_GLYPH[String(r.planet)]??'✦'}</span>{s(r.planet_hi as string, String(r.planet))}{r.vargottama?<span style={{color:'#22c55e',fontSize:'10px',marginLeft:'5px'}}>★</span>:null}</td>
+                <td style={{padding:'10px 6px',color:'#94a3b8',fontSize:'12px'}}>{s(r.d1_rashi as string)}</td>
+                <td style={{padding:'10px 6px',color:'#e2e8f0'}}>{s(r.navamsa_rashi as string)}</td>
+                <td style={{padding:'10px 6px',color:'#e2e8f0'}}>{r.navamsa_house?ordinal(Number(r.navamsa_house)):'—'}</td>
+                <td style={{padding:'10px 6px',color:'#94a3b8',fontSize:'12px'}}>{s(r.dignity_d9 as string)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      {vg.length>0 && <p style={{margin:'10px 0 0',color:'#22c55e',fontSize:'11.5px'}}>★ {lbl('vargottama',lang)}: {vg.join(', ')}</p>}
+      <p style={{margin:'8px 0 0',color:'#475569',fontSize:'11px'}}>{s(nv.note as string,'')}</p>
+    </div>
+  )
+}
+
+// ── v9.0 REMEDY HIERARCHY ────────────────────────────────────────────────────
+// All five upay were spiritual and presented flat, so "chant 108x" read as the
+// answer to debt. Classical position is the reverse: remedies support effort.
+function RemedyLevels({ h, lang }:{ h:Record<string,unknown>; lang:Lang }) {
+  const levels = safeArr<Record<string,unknown>>(h.levels)
+  if (levels.length===0) return null
+  const COL = ['#22c55e','#60a5fa',GOLD,'#a78bfa']
+  return (
+    <div style={{background:BG_CARD,border:`1px solid ${G(0.15)}`,borderRadius:'16px',padding:'22px',marginBottom:'14px'}}>
+      <p style={{margin:'0 0 14px',color:GOLD,fontSize:'11px',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.08em'}}>{lbl('remedyLevels',lang)}</p>
+      <div style={{display:'flex',flexDirection:'column',gap:'10px'}}>
+        {levels.map((lv,i)=>{
+          const c = COL[i%COL.length]!
+          return (
+            <div key={i} style={{padding:'13px 14px',borderRadius:'10px',background:`${c}08`,border:`1px solid ${c}25`}}>
+              <p style={{margin:'0 0 4px',color:c,fontSize:'10px',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.07em'}}>Level {String(lv.level)} — {s(lv.name as string)}</p>
+              <p style={{margin:'0 0 7px',color:'#64748b',fontSize:'11.5px',lineHeight:1.55}}>{s(lv.why as string,'')}</p>
+              <ul style={{margin:0,padding:'0 0 0 17px',color:'#e2e8f0',fontSize:'13px',lineHeight:1.75}}>
+                {safeArr<string>(lv.actions).map((a,j)=>(<li key={j}>{a}</li>))}
+              </ul>
+            </div>
+          )
+        })}
+      </div>
+      {s(h.order_note as string)!=='—' && <p style={{margin:'12px 0 0',color:'#94a3b8',fontSize:'11.5px',fontStyle:'italic',lineHeight:1.6}}>{String(h.order_note)}</p>}
+      {s(h.disclaimer as string)!=='—' && <p style={{margin:'6px 0 0',color:'#475569',fontSize:'11px',lineHeight:1.55}}>{String(h.disclaimer)}</p>}
     </div>
   )
 }
@@ -1286,6 +1492,16 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
   const bhriguPts   = Number(bhriguObj.bhrigu_points ?? 0) ||
     safeArr<Record<string,unknown>>(bhriguObj.signals).reduce((t,x)=>t+(Number(x?.confidence_points)||0),0)
   const hasEvidence = safeArr<EvidenceHouse>(chartEv?.houses).length > 0
+
+  // ── v9.0 ───────────────────────────────────────────────────────────────────
+  const rawLang     = s(report.language,'hinglish').toLowerCase()
+  const lang: Lang  = rawLang==='hindi' ? 'hindi' : rawLang==='english' ? 'english' : 'hinglish'
+  const gochar      = safeObj(pj.gocharTimeline)
+  const navamsa     = safeObj(pj.navamsaChart)
+  const remedyLvls  = safeObj(remedyPlan.hierarchy)
+  const panchang    = safeObj(pj.panchang)     // v3.0 engine — real, or {} when unavailable
+  const bestMonth   = s(gochar.best_month as string)!=='—' ? String(gochar.best_month) : null
+  const cautionMon  = s(gochar.caution_month as string)!=='—' ? String(gochar.caution_month) : null
   const hasSummaryText = summaryText!=='—'
   const hasCoreMessage = coreMessage!=='—'
   const hasDoAvoid     = doAction!=='—'||avoidAction!=='—'
@@ -1348,9 +1564,17 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
             </div>
           )}
 
+          {/* v9.0: the answer comes FIRST. Engine badges and credentials used to
+              occupy the top of the page while the client's actual question was
+              answered two screens down. */}
+          <VerdictCard lang={lang} coreMsg={hasCoreMessage?coreMessage:keyMessage}
+            mahadasha={mahadasha} antardasha={antardasha} pratyantar={pratyantar}
+            best={bestMonth} caution={cautionMon} conf={confidence}
+            doNow={doAction!=='—'?doAction:mainAction} avoidNow={avoidAction!=='—'?avoidAction:mainCaution}/>
+
           {/* v8.4: "why you are here" sits high — recognition builds trust before
               the client is asked to absorb any planetary detail. */}
-          <WhyYouAreHere why={whyHere} activation={chartEv?.activation}/>
+          <WhyYouAreHere why={whyHere} activation={chartEv?.activation} lang={lang}/>
 
           {isPaid && <PaidFullSummary summaryText={summaryText} periodSummary={periodSummary} bestDates={bestDates} dosList={dosList} dontsList={dontsList} remedyHint={remedyHint} karmicInsight={karmicInsight}/>}
 
@@ -1391,9 +1615,12 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
           {/* v8.4: evidence, yogas/Bhrigu and confidence sit right after the planet
               table — the client reads the chart, then immediately reads why it
               matters for them, before the dasha timeline. */}
-          {hasEvidence && <EvidenceTable ev={chartEv} meanings={evMeanings}/>}
-          <EngineSignals yogas={allYogas} bhriguTheme={bhriguTheme} bhriguPoints={bhriguPts} signals={bhriguSignals}/>
-          <ConfidenceCard c={confidence}/>
+          {Object.keys(navamsa).length>0 && <NavamsaCard nv={navamsa} lang={lang}/>}
+
+          {hasEvidence && <EvidenceTable ev={chartEv} meanings={evMeanings} lang={lang}/>}
+          <EngineSignals yogas={allYogas} bhriguTheme={bhriguTheme} bhriguPoints={bhriguPts} signals={bhriguSignals} lang={lang}/>
+          {Object.keys(gochar).length>0 && <GocharTimeline g={gochar} lang={lang}/>}
+          <ConfidenceCard c={confidence} lang={lang}/>
 
           <div style={{background:BG_CARD,border:`1px solid ${G(0.12)}`,borderRadius:'16px',padding:'22px',marginBottom:'14px'}}>
             <p style={{margin:'0 0 14px',color:GOLD,fontSize:'11px',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.08em'}}>⏰ Dasha Kaal — Vimshottari System</p>
@@ -1427,13 +1654,29 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
             </div>
           )}
 
-          {/* v8.5: "Aaj Ka Panchang" REMOVED. It was fed by
-              template_engine.panchang_today(), which derives tithi/nakshatra from
-              day-of-year arithmetic — TITHIS[(d*13)%15] — not from any ephemeris.
-              Every value shown there was fabricated. The real panchang engine on
-              the VM works, and a real panchang_daily table exists in Supabase, so
-              this section will return wired to a genuine source. Until then,
-              showing nothing is the only honest option. */}
+          {Object.keys(remedyLvls).length>0 && <RemedyLevels h={remedyLvls} lang={lang}/>}
+
+          {/* v9.0: Panchang RESTORED — template_engine v3.0 now computes it from
+              today's real Sun/Moon longitudes through the VM's panchang engine.
+              The `_source` guard means the fabricated day-of-year version can
+              never render again: no verified source, no section. */}
+          {panchang._source==='swiss-ephemeris' && s(panchang.tithi as string)!=='—' && (
+            <div style={{background:BG_CARD,border:`1px solid ${G(0.12)}`,borderRadius:'16px',padding:'22px',marginBottom:'14px'}}>
+              <p style={{margin:'0 0 14px',color:GOLD,fontSize:'11px',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.08em'}}>{lbl('panchang',lang)}</p>
+              <div style={{display:'grid',gridTemplateColumns:'repeat(2,1fr)',gap:'8px',marginBottom:'10px'}}>
+                {[{label:lbl('tithi',lang),value:`${s(panchang.tithi as string)}${s(panchang.tithiPaksha as string)!=='—'?` (${s(panchang.tithiPaksha as string)})`:''}`},
+                  {label:lbl('vara',lang), value:s(panchang.vara as string)!=='—'?s(panchang.vara as string):s(panchang.weekday as string)},
+                  {label:lbl('nak',lang),  value:s(panchang.nakshatra as string)},
+                  {label:lbl('yoga',lang), value:s(panchang.yoga as string)}].map(({label,value})=>(
+                  <div key={label} style={{padding:'10px',background:'rgba(255,255,255,0.03)',borderRadius:'8px',border:'1px solid rgba(255,255,255,0.06)'}}>
+                    <p style={{margin:'0 0 2px',color:'#64748b',fontSize:'11px',textTransform:'uppercase',letterSpacing:'0.06em'}}>{label}</p>
+                    <p style={{margin:0,color:'#e2e8f0',fontSize:'14px',fontWeight:600}}>{value}</p>
+                  </div>))}
+              </div>
+              {s(panchang.rahu_kaal as string)!=='—'&&(<div style={{padding:'10px 13px',background:'rgba(239,68,68,0.06)',border:'1px solid rgba(239,68,68,0.15)',borderRadius:'8px'}}><span style={{color:'#ef4444',fontSize:'13px',fontWeight:600}}>🕐 Rahu Kaal: </span><span style={{color:'#fca5a5',fontSize:'13px'}}>{s(panchang.rahu_kaal as string)}</span></div>)}
+              <p style={{margin:'8px 0 0',color:'#475569',fontSize:'11px'}}>Swiss Ephemeris · {s(panchang._computed_for as string,'')}</p>
+            </div>
+          )}
 
           {!isPaid&&<LockedSection slug={slug} mahadasha={mahadasha} domainLabel={domainLabel}/>}
 
