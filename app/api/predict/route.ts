@@ -3,8 +3,18 @@
  * TRIKAAL VAANI — Unified Prediction Endpoint
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/api/predict/route.ts
- * VERSION: 14.17 — Engine evidence reaches the writer (Parashari + Bhrigu + Shadbala)
+ * VERSION: 14.18 — Real Bhrigu shape + geoBullets object normalisation
  * SIGNED: ROHIIT GUPTA, CEO
+ *
+ * CHANGES v14.18 vs v14.17 (SHAPE FIXES FOUND IN THE FIRST PAID REPORT):
+ *   1. geoBullets arrived as [{item:"..."}]; the report filters for strings, so
+ *      all 10 real Hindi bullets were dropped and only two generic marketing
+ *      lines rendered. normaliseBullets() now unwraps them at the merge.
+ *   2. engineSignals read geminiObj._engineSignals — a key Gemini never emits —
+ *      so it was always null and the Bhrigu section never rendered.
+ *   3. The live /synthesize returns {enriched:{bhrigu:{signals:[...]}}}, not the
+ *      repo's {parashara:{summary},bhrigu:{bhrigu_points}}. The evidence block
+ *      now reads the real shape and passes actual Bhrigu signal descriptions.
  *
  * CHANGES v14.17 vs v14.16 (THE WRITER FINALLY SEES THE CHART):
  *   Three separate layers were each discarding engine output:
@@ -389,7 +399,18 @@ present it as a separate section, and do NOT add new JSON keys.` : ''
   // it — Parashari yogas, Bhrigu points/theme, Shadbala ratios, real house lords
   // — and none of it reached the prompt. This block closes that gap.
   const ev  = templateData?.chartEvidence ?? null
-  const syn = synthesisData ?? null
+  // v14.18: the LIVE /synthesize returns {status, enriched:{bhrigu:{signals:[...]}}}
+  // — not the {parashara:{summary}, bhrigu:{bhrigu_points, current_life_theme}}
+  // shape the repo's main.py suggests. v14.17 read the repo shape, found nothing,
+  // and correctly told Gemini "NO Bhrigu data" — the guard worked, but the real
+  // Bhrigu output was sitting one level deeper the whole time.
+  const synRaw = synthesisData ?? null
+  const syn = (synRaw && typeof synRaw === 'object')
+    ? ((synRaw as any).enriched && typeof (synRaw as any).enriched === 'object'
+        ? { ...(synRaw as any).enriched, ...(synRaw as any) }
+        : synRaw)
+    : null
+  const bhriguSignals: any[] = Array.isArray(syn?.bhrigu?.signals) ? syn.bhrigu.signals : []
   const fmtNum = (v:any) => (typeof v === 'number' ? v.toFixed(2) : '—')
 
   const houseLines = Array.isArray(ev?.houses) && ev.houses.length
@@ -418,6 +439,12 @@ present it as a separate section, and do NOT add new JSON keys.` : ''
 
   const pSum = syn?.parashara?.summary ?? {}
   const bhrigu = syn?.bhrigu ?? {}
+  const bhriguPointsTotal = bhriguSignals.reduce((t:number,x:any)=>t + (Number(x?.confidence_points)||0), 0)
+  const bhriguLines = bhriguSignals
+    .filter((x:any)=>x?.description)
+    .slice(0, 5)
+    .map((x:any)=>`  • ${x.description}${x.timing?` [${x.timing}]`:''}${x.domain_relevant?' (domain-relevant)':''}`)
+    .join('\n')
 
   const evidenceBlock = `
 ════════════════════════════════════════════════════════
@@ -440,8 +467,9 @@ Weak planets: ${(pSum.weakPlanets ?? []).join(', ') || 'not reported'}
 Best houses: ${(pSum.bestHouses ?? []).join(', ') || 'not reported'}
 Challenged houses: ${(pSum.challengedHouses ?? []).join(', ') || 'not reported'}
 
-BHRIGU NANDI NADI (Bhrigu engine): points ${bhrigu.bhrigu_points ?? 0}${bhrigu.current_life_theme ? ` | life theme: ${bhrigu.current_life_theme}` : ''}${Array.isArray(bhrigu.domain_signals) && bhrigu.domain_signals.length ? ` | signals: ${bhrigu.domain_signals.join('; ')}` : ''}
-${(bhrigu.bhrigu_points ?? 0) === 0 && !bhrigu.current_life_theme ? 'NO Bhrigu data for this chart — you MUST NOT write any Bhrigu Nandi claim. Write the Bhrigu bullet as general BPHS/Parashara insight instead.' : ''}
+BHRIGU NANDI NADI (Bhrigu engine): ${bhriguSignals.length ? `${bhriguSignals.length} signals, ${bhriguPointsTotal} confidence points` : `points ${bhrigu.bhrigu_points ?? 0}`}${bhrigu.current_life_theme ? ` | life theme: ${bhrigu.current_life_theme}` : ''}
+${bhriguLines || ''}
+${bhriguSignals.length === 0 && !bhrigu.current_life_theme ? 'NO Bhrigu data for this chart — you MUST NOT write any Bhrigu Nandi claim. Write the Bhrigu bullet as general BPHS/Parashara insight instead.' : ''}
 ════════════════════════════════════════════════════════`.trim()
 
   const systemPrompt = `
@@ -640,10 +668,28 @@ CRITICAL FINAL CHECKLIST:
 }
 
 // ── mergeTemplateWithGemini ───────────────────────────────────────────────────
+// v14.18: Gemini has started returning geoBullets as [{item:"..."}] instead of
+// ["..."]. The report filters for strings, so all 10 real bullets were dropped and
+// the page fell back to two generic marketing lines — a paid client saw
+// "(2 INSIGHTS)" while ten Hindi bullets citing real house lords sat unused in the
+// DB. Normalising here fixes every consumer at once.
+function normaliseBullets(v:any): string[] {
+  if(!Array.isArray(v)) return []
+  return v.map((b:any)=>{
+    if(typeof b === 'string') return b.trim()
+    if(b && typeof b === 'object') {
+      const t = b.item ?? b.text ?? b.bullet ?? b.content ?? b.value
+      return typeof t === 'string' ? t.trim() : ''
+    }
+    return ''
+  }).filter((x:string)=>x.length > 0)
+}
+
 function mergeTemplateWithGemini(
   templateObj: Record<string,any>|null,
   geminiObj: Record<string,any>,
   version = '14.6',
+  synthesisForReport: any = null,   // v14.18
 ): Record<string,any> {
   if(!templateObj) return {...geminiObj, _source:'gemini-only', _version:version}
   const ss = geminiObj.simpleSummary ?? {}
@@ -655,7 +701,7 @@ function mergeTemplateWithGemini(
     remedyPlan:       templateObj.remedyPlan        ?? {},
     panchang:         templateObj.panchang          ?? {},
     geoDirectAnswer:  geminiObj.geoDirectAnswer     ?? templateObj.geoDirectAnswer ?? {},
-    geoBullets:       geminiObj.geoBullets          ?? [],
+    geoBullets:       normaliseBullets(geminiObj.geoBullets),
     geoFaq:           templateObj.geoFaq            ?? [],
     confidenceBadge:  templateObj.confidenceBadge   ?? {},
     domainAnalysis:   templateObj.domainAnalysis    ?? {},
@@ -687,7 +733,9 @@ function mergeTemplateWithGemini(
     templateVersion:  templateObj.meta?.version      ?? null,
     // Parashari yogas + Bhrigu theme — computed by VM /synthesize, previously
     // saved only to the synthesis_data column and never surfaced in the report.
-    engineSignals:    geminiObj._engineSignals       ?? null,
+    // v14.18: was geminiObj._engineSignals — a key Gemini never returns, so this
+    // was always null. The Parashari/Bhrigu output lives in synthesisData.
+    engineSignals:    geminiObj._engineSignals ?? synthesisForReport ?? null,
     // Gemini's INTERPRETATION of the engine evidence (it never restates facts).
     whyYouAreHere:    geminiObj.whyYouAreHere        ?? null,
     evidenceMeanings: geminiObj.evidenceMeanings     ?? [],
@@ -1044,7 +1092,7 @@ export async function POST(req: NextRequest) {
         proJson = parseGeminiJSON(rawPro)
         console.log(`[TV-v14.13] PRO OK (search off) | summary_len:${proJson.simpleSummary?.text?.length??0} | geoBullets:${proJson.geoBullets?.length??0} | ms:${Date.now()-startMs}`)
       }
-      predictionJson = mergeTemplateWithGemini(templateData, proJson, '14.13-pro')
+      predictionJson = mergeTemplateWithGemini(templateData, proJson, '14.13-pro', synthesisData)
     } catch(err:any) {
       console.error(`[TV-v14.13] PRO failed: ${err.message}`)
       return NextResponse.json({error:`Pro prediction failed: ${err.message}`},{status:500})
@@ -1058,7 +1106,7 @@ export async function POST(req: NextRequest) {
     try {
       const rawFlash = await callGemini(GEMINI_FLASH, flashSystem, flashUser, true)
       const flashJson = parseGeminiJSON(rawFlash)
-      predictionJson = mergeTemplateWithGemini(templateData, flashJson, '14.6-flash')
+      predictionJson = mergeTemplateWithGemini(templateData, flashJson, '14.6-flash', synthesisData)
       console.log(`[TV-v14.6] FLASH OK | ms:${Date.now()-startMs}`)
     } catch(err:any) {
       console.error(`[TV-v14.6] FLASH failed: ${err.message}`)
