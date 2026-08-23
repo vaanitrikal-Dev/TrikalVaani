@@ -3,8 +3,30 @@
  * TRIKAAL VAANI — Unified Prediction Endpoint
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/api/predict/route.ts
- * VERSION: 14.16 — Vimshottari tree walk (Mahadasha/Antardasha mismatch fix)
+ * VERSION: 14.17 — Engine evidence reaches the writer (Parashari + Bhrigu + Shadbala)
  * SIGNED: ROHIIT GUPTA, CEO
+ *
+ * CHANGES v14.17 vs v14.16 (THE WRITER FINALLY SEES THE CHART):
+ *   Three separate layers were each discarding engine output:
+ *     1. mergeTemplateWithGemini() is a whitelist — template_engine v2.2's
+ *        chartEvidence and dataIntegrity were dropped before the Supabase write.
+ *     2. buildProPrompt() received only Lagna, Nakshatra and two dasha lords,
+ *        yet the schema demanded a "Bhrigu Pattern" bullet and a "current
+ *        strength in chart" bullet. With neither in context, Gemini had to
+ *        invent both — every single reading.
+ *     3. synthesisData (Parashari yogas, Bhrigu points/theme, strong/weak
+ *        planets) was computed by the VM, written to the synthesis_data column,
+ *        and passed to NO prompt at all.
+ *   FIXES:
+ *     - whitelist now carries chartEvidence, dataIntegrity, templateVersion,
+ *       whyYouAreHere, evidenceMeanings, readingConfidence
+ *     - ENGINE EVIDENCE block: real house lords + where each lord sits +
+ *       occupants + Shadbala ratios + yogas + Bhrigu + dasha activation links
+ *     - RULE 14 engine authority (never calculate), RULE 15 evidence citation,
+ *       RULE 16 confidence honesty
+ *     - the two invention-forcing geoBullets now degrade honestly when data
+ *       is absent
+ *     - MAX_TOKENS 12000 -> 16000 for the larger schema
  *
  * CHANGES v14.16 vs v14.15 (DASHA LORD MISMATCH):
  *   Live report 23 Aug 2026 showed BOTH of these on one page:
@@ -113,7 +135,7 @@
  * IRON RULES — NEVER VIOLATE:
  *   🔒 NEVER touch gemini-prompt.ts
  *   🔒 NEVER use thinkingBudget:0
- *   🔒 MAX_TOKENS = 12000 — CEO approved
+ *   🔒 MAX_TOKENS = 16000 — CEO approved (raised from 12000 on 23 Aug 2026)
  *   🔒 verifiedTier — CEO approval required
  *   🔒 Complete files only
  * ============================================================
@@ -144,7 +166,13 @@ const GEMINI_API_KEY  = process.env.GEMINI_API_KEY  ?? ''
 const EPHE_API_URL    = process.env.EPHE_API_URL    || process.env.VM_ENGINE_URL || 'http://34.47.182.227:8001'
 const EPHE_API_KEY    = process.env.TRIKAL_VM_KEY   || process.env.EPHE_API_KEY  || ''
 const RAZORPAY_SECRET = process.env.RAZORPAY_KEY_SECRET ?? ''
-const MAX_TOKENS      = 12000  // CEO LOCKED
+// v14.17: raised 12000 -> 16000 with CEO approval. The PAID schema now also
+// returns whyYouAreHere, evidenceMeanings and readingConfidence on top of the
+// 720-780 word summary and 10 geoBullets. At 12000 a long Hindi reading (which
+// costs more tokens per word than English) could truncate mid-JSON, and a
+// truncated response fails parsing entirely — the client would get the fallback
+// instead of their reading. 16000 leaves headroom; Gemini 2.5 Pro allows far more.
+const MAX_TOKENS      = 16000  // CEO approved 23 Aug 2026
 
 // ── Option C (v14.8): Real-world sector/city grounding for PAID only ─────────
 // true  = paid predictions use live Google Search grounding (sector + city trends)
@@ -310,6 +338,7 @@ function buildProPrompt(
   templateData?: any,
   numerology?: NumerologyCompatibility | null,
   chartExtract?: ChartExtract | null,
+  synthesisData?: any,           // v14.17: Parashari yogas + Bhrigu theme
 ): { systemPrompt: string; userMessage: string } {
 
   const lang = userContext.language
@@ -352,9 +381,72 @@ Weave this numerology insight naturally into the relationship/person-2 analysis 
 of simpleSummary.text (1-2 sentences). Connect it to the planetary compatibility — do NOT
 present it as a separate section, and do NOT add new JSON keys.` : ''
 
+  // ── v14.17: ENGINE EVIDENCE BLOCK ──────────────────────────────────────────
+  // Until now the writer received only Lagna, Nakshatra and two dasha lords, yet
+  // the prompt still demanded a "Bhrigu Pattern" bullet and a "current strength
+  // in chart" bullet. With no Bhrigu data and no Shadbala in context, Gemini had
+  // no option but to invent both. Meanwhile the VM was already computing all of
+  // it — Parashari yogas, Bhrigu points/theme, Shadbala ratios, real house lords
+  // — and none of it reached the prompt. This block closes that gap.
+  const ev  = templateData?.chartEvidence ?? null
+  const syn = synthesisData ?? null
+  const fmtNum = (v:any) => (typeof v === 'number' ? v.toFixed(2) : '—')
+
+  const houseLines = Array.isArray(ev?.houses) && ev.houses.length
+    ? ev.houses.map((h:any) =>
+        `  • ${h.factor} (${h.sign ?? '—'}) — lord ${h.lord ?? '—'}` +
+        (h.lord_house ? ` sits in house ${h.lord_house} (${h.lord_rashi ?? '—'}, ${h.lord_dignity ?? '—'}, Shadbala ${fmtNum(h.lord_shadbala)})` : '') +
+        (h.occupants?.length ? ` | occupied by: ${h.occupants.join(', ')}` : ' | no occupants')
+      ).join('\n')
+    : '  (house data not available — do not discuss houses)'
+
+  const planetLines = Array.isArray(ev?.key_planets) && ev.key_planets.length
+    ? ev.key_planets.map((p:any) =>
+        `  • ${p.planet}: ${p.rashi ?? '—'}, house ${p.house ?? '—'}, ${p.nakshatra ?? '—'}, ${p.dignity ?? '—'}, Shadbala ${fmtNum(p.shadbala)} (${p.strength ?? 'unknown'})${p.retrograde ? ', retrograde' : ''}`
+      ).join('\n')
+    : '  (planet strength not available — do not claim any planet is strong or weak)'
+
+  const actLinks = ev?.activation?.domain_links
+  const activationLine = Array.isArray(actLinks) && actLinks.length
+    ? actLinks.map((l:any)=>`  • ${l.planet} rules/occupies ${l.house}`).join('\n')
+    : '  (running dasha lords have no direct link to this domain\u2019s houses — say so honestly rather than forcing a connection)'
+
+  const yogaList = [
+    ...(Array.isArray(ev?.yogas) ? ev.yogas : []),
+    ...(Array.isArray(syn?.parashara?.yogas) ? syn.parashara.yogas.map((y:any)=>y?.name ?? y) : []),
+  ].filter(Boolean).slice(0, 8)
+
+  const pSum = syn?.parashara?.summary ?? {}
+  const bhrigu = syn?.bhrigu ?? {}
+
+  const evidenceBlock = `
+════════════════════════════════════════════════════════
+ENGINE EVIDENCE — COMPUTED, VERIFIED, YOURS TO EXPLAIN
+════════════════════════════════════════════════════════
+Lagna: ${(ev?.lagna ?? lagna) || 'NOT AVAILABLE'} | Lagna lord: ${ev?.lagna_lord ?? 'NOT AVAILABLE'}
+
+DOMAIN HOUSES (Parashara — house lord and where that lord actually sits):
+${houseLines}
+
+KEY PLANETS (Shadbala — ratio above 1.00 = above minimum required strength):
+${planetLines}
+
+DASHA ACTIVATION (is the running period actually connected to these houses?):
+${activationLine}
+
+YOGAS DETECTED (Parashari engine): ${yogaList.length ? yogaList.join(', ') : 'none reported'}
+Strong planets: ${(pSum.strongPlanets ?? []).join(', ') || 'not reported'}
+Weak planets: ${(pSum.weakPlanets ?? []).join(', ') || 'not reported'}
+Best houses: ${(pSum.bestHouses ?? []).join(', ') || 'not reported'}
+Challenged houses: ${(pSum.challengedHouses ?? []).join(', ') || 'not reported'}
+
+BHRIGU NANDI NADI (Bhrigu engine): points ${bhrigu.bhrigu_points ?? 0}${bhrigu.current_life_theme ? ` | life theme: ${bhrigu.current_life_theme}` : ''}${Array.isArray(bhrigu.domain_signals) && bhrigu.domain_signals.length ? ` | signals: ${bhrigu.domain_signals.join('; ')}` : ''}
+${(bhrigu.bhrigu_points ?? 0) === 0 && !bhrigu.current_life_theme ? 'NO Bhrigu data for this chart — you MUST NOT write any Bhrigu Nandi claim. Write the Bhrigu bullet as general BPHS/Parashara insight instead.' : ''}
+════════════════════════════════════════════════════════`.trim()
+
   const systemPrompt = `
 ════════════════════════════════════════════════════════
-TRIKAAL VAANI — PRO DEEP ANALYSIS ENGINE v14.13
+TRIKAAL VAANI — PRO DEEP ANALYSIS ENGINE v14.17
 JAI MAA SHAKTI 🔱
 ════════════════════════════════════════════════════════
 
@@ -407,6 +499,30 @@ ABSOLUTE RULES:
    This context is SECTION 2 of simpleSummary.text — DO NOT add new JSON keys.
 13. OUTPUT = RAW JSON ONLY. No markdown fences, no preamble, no text after the final }.
     Escape every double-quote inside string values. First char { — last char }.
+14. ENGINE AUTHORITY (v14.17 — CRITICAL): The Parashara, Bhrigu, Shadbala and
+    Vimshottari engines have ALREADY done every calculation. You are the
+    interpreter, never the calculator.
+    a) NEVER derive a house, house lord, aspect, dignity, yoga, nakshatra or date
+       yourself. Do NOT reason "Meena Lagna means 6th house is Simha, so its lord
+       is Sun" — that chain is already computed and given to you below.
+    b) Use ONLY the values in ENGINE EVIDENCE and CLIENT DETAILS.
+    c) If a fact is absent or marked NOT AVAILABLE, stay silent about it. Never
+       fill a gap with a plausible-sounding guess. Silence is correct; invention
+       destroys trust permanently.
+    d) This applies with full force to Bhrigu Nandi and to any claim about a
+       planet being strong or weak — say it ONLY if the numbers are given.
+15. EVIDENCE CITATION (v14.17): Every major claim in Section 3 (why this is
+    happening) must rest on a specific fact from ENGINE EVIDENCE — a named house
+    lord and its placement, a Shadbala figure, a detected yoga, or the dasha
+    activation link. Write it in plain human language, never as a data dump:
+    "aapke 6th house ka swami Surya 10th mein baitha hai" — not "6L in H10".
+    If the activation block says the running dasha has NO link to this domain's
+    houses, say that honestly and shift the explanation to what IS linked.
+16. CONFIDENCE HONESTY (v14.17): Different horizons deserve different certainty.
+    Recent past and the next 3 months rest on exact Vimshottari dates and are
+    the most reliable. Months 4-6 are directional. Never present every statement
+    at the same confidence. Fill readingConfidence truthfully — if the chart did
+    not reach you, mark it Low and say the reading is dasha-based only.
 ════════════════════════════════════════════════════════`.trim()
 
   const userMessage = `Generate PAID PREMIUM FULL ANALYSIS for: ${domain.displayName ?? domain.id}
@@ -422,6 +538,8 @@ CLIENT DETAILS:
 - Dasha Quality: ${templateData?.dashaQuality ?? 'Madhyam'}
 - Action Window: ${templateData?.actionWindowHint ?? 'from dasha calculations'}
 - Avoid Window: ${templateData?.avoidWindowHint ?? 'from dasha calculations'}
+
+${evidenceBlock}
 
 SITUATION NOTE (60% FOCUS — MANDATORY):
 "${userContext.situationNote ?? 'domain challenges and growth'}"
@@ -450,13 +568,13 @@ OUTPUT JSON:
   "geoBullets": [
     "Vedic Foundation: Classical BPHS principle for ${domain.displayName ?? domain.id} — 25-40 words",
     "Dasha Impact: How ${mahadasha} MD + ${antardasha} AD specifically affects ${domain.displayName ?? domain.id} now — 25-40 words",
-    "Key Planet: Primary planet controlling ${domain.displayName ?? domain.id} and current strength in chart — 25-40 words",
+    "Key Planet: Primary planet for ${domain.displayName ?? domain.id} — quote its actual Shadbala strength from ENGINE EVIDENCE. If no Shadbala was given, describe the planet's classical role only and make no strength claim — 25-40 words",
     "Best Timing: Most favorable period from dasha calculations with approximate dates — 25-40 words",
     "Caution Period: Time requiring extra care with classical Vedic reason — 25-40 words",
     "Classical Remedy: Specific BPHS mantra or dana with exact day and time — 25-40 words",
     "FAQ Answer 1: Most searched question about ${domain.displayName ?? domain.id} astrology answered — 25-40 words",
     "FAQ Answer 2: Second most important insight about this domain — 25-40 words",
-    "Bhrigu Pattern: What Bhrigu Nandi Nadi reveals about this persons ${domain.displayName ?? domain.id} karma — 25-40 words",
+    "Bhrigu Pattern: ONLY if Bhrigu points/theme are present in ENGINE EVIDENCE, explain what that pattern means for ${domain.displayName ?? domain.id}. If Bhrigu data is absent, write a general BPHS/Parashara karmic insight instead and do NOT mention Bhrigu Nandi at all — 25-40 words",
     "Expert Insight: Rohiit Gupta Chief Vedic Architect key 15-year observation about ${domain.displayName ?? domain.id} — 25-40 words"
   ],
 
@@ -470,6 +588,23 @@ OUTPUT JSON:
     "dos": ["specific do 1 with brief reason", "specific do 2", "specific do 3 spiritual", "specific do 4 practical", "specific do 5 timing-based"],
     "donts": ["specific dont 1 with classical reason", "specific dont 2", "specific dont 3", "specific dont 4", "specific dont 5"],
     "remedyHint": "Specific mantra with Sanskrit + transliteration + count + day + time. OR specific dana item with recipient and day."
+  },
+
+  "whyYouAreHere": {
+    "text": "70-100 words in ${lang.toUpperCase()}. Why this person is searching RIGHT NOW. Anchor it to the REAL dasha segment dates in ENGINE EVIDENCE and to their situationNote. Say what phase began and when, and what kind of pressure that phase brings. NEVER claim a specific event happened. NEVER invent a date.",
+    "possibleManifestations": ["3 short lines — different ways this phase COULD have shown up in their life. Offer them as possibilities the reader can recognise or dismiss, never as certainties."],
+    "recognitionLine": "ONE sentence inviting them to check it against their own experience, e.g. 'Agar yeh aapko apni pichhli kuch mahino jaisa lagta hai, toh aage ki timeline aapke liye aur zyada relevant hai.'"
+  },
+
+  "evidenceMeanings": [
+    {"house": 6, "meaning": "ONE plain-language sentence on what THIS house's lord placement means for the client. Do NOT restate the numbers — the report already shows them. Write only the meaning. Produce one entry per house listed in ENGINE EVIDENCE, using that exact house number. If no houses were given, return []."}
+  ],
+
+  "readingConfidence": {
+    "recentPast": "High | Moderate | Low",
+    "next3Months": "High | Moderate | Low",
+    "months4to6": "High | Moderate | Low",
+    "basis": "ONE short sentence naming what the confidence rests on, e.g. 'Exact Vimshottari dates from Swiss Ephemeris plus verified house lords.'"
   },
 
   "karmicInsight": null,
@@ -541,6 +676,22 @@ function mergeTemplateWithGemini(
     seoSignals:       geminiObj.seoSignals           ?? {},
     actionWindowText: geminiObj.actionWindow         ?? null,
     avoidWindowText:  geminiObj.avoidWindow          ?? null,
+    // ── v14.17: this function is a WHITELIST — any key not listed here is
+    // silently dropped before the row is written to Supabase. That is why
+    // template_engine v2.2's chartEvidence and dataIntegrity never appeared in
+    // the DB even though the VM was producing them correctly. Same class of bug
+    // as the stale EPHE_API_URL and the unused synthesisData: the engine
+    // computes, an intermediate layer quietly discards it.
+    chartEvidence:    templateObj.chartEvidence      ?? null,
+    dataIntegrity:    templateObj.dataIntegrity      ?? null,
+    templateVersion:  templateObj.meta?.version      ?? null,
+    // Parashari yogas + Bhrigu theme — computed by VM /synthesize, previously
+    // saved only to the synthesis_data column and never surfaced in the report.
+    engineSignals:    geminiObj._engineSignals       ?? null,
+    // Gemini's INTERPRETATION of the engine evidence (it never restates facts).
+    whyYouAreHere:    geminiObj.whyYouAreHere        ?? null,
+    evidenceMeanings: geminiObj.evidenceMeanings     ?? [],
+    readingConfidence: geminiObj.readingConfidence   ?? null,
     _source: 'template+gemini',
     _version: version,
   }
@@ -870,7 +1021,8 @@ export async function POST(req: NextRequest) {
     const {systemPrompt:proSystem, userMessage:proUser} = buildProPrompt(
       kundaliData, localBirthData, domainConfig, promptUserContext, templateData,
       numerologyCompatibility ?? null,
-      chartExtract
+      chartExtract,
+      synthesisData            // v14.17: Parashari yogas + Bhrigu theme finally reach the writer
     )
     try {
       let proJson:any
