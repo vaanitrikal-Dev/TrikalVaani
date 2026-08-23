@@ -27,6 +27,21 @@
  *      5 upay, kundali chart, planet table, dasha, action windows,
  *      panchang, PDF, share, schemas untouched server-side).
  *
+ * v8.4 (23 Aug 2026) — THE REPORT FINALLY SHOWS ITS EVIDENCE
+ *   The engines were computing house lords, Shadbala ratios, Parashari yogas,
+ *   Bhrigu themes and dasha activation links; the report displayed none of it,
+ *   so a paying client saw conclusions with no visible chart reasoning. Adds:
+ *     - WhyYouAreHere  : recognition hook built on REAL Antardasha/Pratyantar dates
+ *     - EvidenceTable  : "why this prediction" — house, sign, lord, where the lord
+ *                        sits, occupants, Shadbala, plus the reading's meaning line
+ *     - EngineSignals  : Parashari yogas + Bhrigu Nandi (the page-1 badge has
+ *                        claimed Bhrigu since launch while showing none of it)
+ *     - ConfidenceCard : separate confidence per horizon, honestly
+ *     - Shadbala numbers in the planet table; Rahu/Ketu show "—", not a fake dot
+ *     - Sookshma (L4) row REMOVED — never computed, was hardcoded "Venus"
+ *   PDF needs no separate work: PDFBtn() is window.print(), so the PDF is this
+ *   same page. Site and PDF are one file.
+ *
  * CHANGES v8.1 -> v8.2 (retained): brand flip Trikaal, Delhi NCR
  *   removed, persona names flipped. Domain/links/logic untouched.
  * ============================================================
@@ -72,7 +87,25 @@ interface PlanetRow {
   degree:number; nakshatra:string; retrograde:boolean
   dignity:string; shadbala:number; strength:string; domain_note:string
 }
-interface ActionWindow { window:string; strength:string; reason:string }
+interface ActionWindow { window:string; strength:string; reason:string; days?:number; level?:string; lord?:string; active_now?:boolean }
+
+// v8.4: engine-computed evidence. template_engine v2.2 produces all of this and
+// predict route v14.17 finally forwards it; until now the report displayed none
+// of it, so a paying client saw conclusions with no visible chart reasoning.
+interface EvidenceHouse {
+  factor:string; house_number?:number; sign?:string; lord?:string
+  lord_house?:number; lord_rashi?:string; lord_dignity?:string
+  lord_shadbala?:number|null; occupants?:string[]
+}
+interface ChartEvidence {
+  lagna?:string; lagna_lord?:string
+  houses?:EvidenceHouse[]
+  key_planets?:{planet:string;rashi:string;house:number;nakshatra:string;dignity:string;shadbala:number|null;strength:string|null;retrograde:boolean}[]
+  activation?:{ mahadasha?:{lord?:string;start?:string;end?:string}; antardasha?:{lord?:string;start?:string;end?:string}; pratyantar?:{lord?:string;start?:string;end?:string}; domain_links?:{planet:string;house:string}[]; linked?:boolean }|null
+  yogas?:string[]
+}
+interface WhyHere { text?:string; possibleManifestations?:string[]; recognitionLine?:string }
+interface ReadingConfidence { recentPast?:string; next3Months?:string; months4to6?:string; basis?:string }
 
 interface UpayItem {
   upay_number: number
@@ -148,6 +181,146 @@ function KundaliChart({lagna,planets}:{lagna:string;planets:PlanetRow[]}) {
         })}
         <text x="200" y="396" fill={G(0.4)} fontSize="10" textAnchor="middle" fontFamily="Georgia,serif">{lagna} Lagna</text>
       </svg>
+    </div>
+  )
+}
+
+// ── v8.4 WHY YOU ARE HERE ─────────────────────────────────────────────────────
+// The trust hook. A client does not arrive curious about the future — something
+// already happened. This card names the real dasha segment that began, then
+// offers possible manifestations the reader can recognise OR dismiss. It never
+// asserts an event occurred; Gemini is instructed to give possibilities only.
+function WhyYouAreHere({ why, activation }:{ why:WhyHere; activation?:ChartEvidence['activation'] }) {
+  const text = s(why?.text as string)
+  const mans = safeArr<string>(why?.possibleManifestations)
+  const rec  = s(why?.recognitionLine as string)
+  if (text==='—' && mans.length===0) return null
+  const ad = activation?.antardasha
+  const pd = activation?.pratyantar
+  return (
+    <div style={{background:BG_CARD,border:`1px solid ${G(0.22)}`,borderRadius:'16px',padding:'22px',marginBottom:'14px'}}>
+      <p style={{margin:'0 0 12px',color:GOLD,fontSize:'11px',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.08em'}}>🔍 Aap Yahan Kyun Hain</p>
+      {text!=='—' && <p style={{margin:'0 0 14px',color:'#e2e8f0',fontSize:'14px',lineHeight:1.75}}>{text}</p>}
+      {(ad?.lord || pd?.lord) && (
+        <div style={{display:'flex',flexWrap:'wrap',gap:'8px',marginBottom:'14px'}}>
+          {ad?.lord && ad?.start && <span style={{padding:'6px 11px',borderRadius:'8px',background:G(0.08),border:`1px solid ${G(0.2)}`,color:'#cbd5e1',fontSize:'12px'}}>{ad.lord} Antardasha · {ad.start} → {ad.end}</span>}
+          {pd?.lord && pd?.start && <span style={{padding:'6px 11px',borderRadius:'8px',background:G(0.08),border:`1px solid ${G(0.2)}`,color:'#cbd5e1',fontSize:'12px'}}>{pd.lord} Pratyantar · {pd.start} → {pd.end}</span>}
+        </div>
+      )}
+      {mans.length>0 && (
+        <>
+          <p style={{margin:'0 0 8px',color:G(0.6),fontSize:'11px',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.06em'}}>Yeh phase in tareeko se dikh sakta tha</p>
+          <ul style={{margin:'0 0 12px',padding:'0 0 0 18px',color:'#cbd5e1',fontSize:'13px',lineHeight:1.9}}>
+            {mans.map((m,i)=>(<li key={i}>{m}</li>))}
+          </ul>
+        </>
+      )}
+      {rec!=='—' && <p style={{margin:0,color:'#94a3b8',fontSize:'12px',fontStyle:'italic',lineHeight:1.7}}>{rec}</p>}
+    </div>
+  )
+}
+
+// ── v8.4 EVIDENCE TABLE ───────────────────────────────────────────────────────
+// Every row is a lookup into Parashara + Shadbala engine output. The numbers come
+// from the engine; only the "matlab" line is written by the reading. This is what
+// turns an assertion into something the client can follow and check.
+function EvidenceTable({ ev, meanings }:{ ev:ChartEvidence; meanings:{house?:number;meaning?:string}[] }) {
+  const rows = safeArr<EvidenceHouse>(ev?.houses)
+  if (rows.length===0) return null
+  const meaningFor = (hn?:number) => {
+    if (hn===undefined) return ''
+    const m = meanings.find(x => Number(x?.house)===Number(hn))
+    return s(m?.meaning as string)!=='—' ? String(m?.meaning) : ''
+  }
+  const links = safeArr<{planet:string;house:string}>(ev?.activation?.domain_links)
+  return (
+    <div style={{background:BG_CARD,border:`1px solid ${G(0.15)}`,borderRadius:'16px',padding:'22px',marginBottom:'14px'}}>
+      <p style={{margin:'0 0 6px',color:GOLD,fontSize:'11px',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.08em'}}>🔎 Yeh Prediction Kyun — Aapki Kundali Se</p>
+      <p style={{margin:'0 0 16px',color:'#64748b',fontSize:'11px'}}>
+        Lagna {s(ev?.lagna)} · Lagna swami {s(ev?.lagna_lord)} — har row aapke chart se nikli hai, koi general baat nahi.
+      </p>
+      <div style={{display:'flex',flexDirection:'column',gap:'10px'}}>
+        {rows.map((r,i)=>{
+          const mean = meaningFor(r.house_number)
+          return (
+            <div key={i} style={{padding:'13px 14px',borderRadius:'10px',background:'rgba(255,255,255,0.03)',border:'1px solid rgba(255,255,255,0.06)'}}>
+              <p style={{margin:'0 0 5px',color:'#fff',fontSize:'13px',fontWeight:700}}>
+                {r.factor}{r.sign?` · ${r.sign}`:''}
+              </p>
+              <p style={{margin:'0 0 5px',color:'#cbd5e1',fontSize:'12.5px',lineHeight:1.7}}>
+                Swami <strong style={{color:GOLD}}>{s(r.lord)}</strong>
+                {r.lord_house?<> — {ordinal(r.lord_house)} bhav mein{r.lord_rashi?` (${r.lord_rashi})`:''}{r.lord_dignity?`, ${r.lord_dignity}`:''}{typeof r.lord_shadbala==='number'?`, Shadbala ${r.lord_shadbala.toFixed(2)}`:''}</>:null}
+                {safeArr<string>(r.occupants).length>0 ? <> · Is bhav mein: {safeArr<string>(r.occupants).join(', ')}</> : <> · Is bhav mein koi graha nahi</>}
+              </p>
+              {mean && <p style={{margin:0,color:'#94a3b8',fontSize:'12.5px',lineHeight:1.7}}>→ {mean}</p>}
+            </div>
+          )
+        })}
+      </div>
+      {links.length>0 && (
+        <div style={{marginTop:'14px',padding:'12px 14px',borderRadius:'10px',background:G(0.06),border:`1px solid ${G(0.18)}`}}>
+          <p style={{margin:'0 0 6px',color:GOLD,fontSize:'11px',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.06em'}}>⏳ Dasha Activation</p>
+          <p style={{margin:0,color:'#cbd5e1',fontSize:'12.5px',lineHeight:1.8}}>
+            {links.map((l,i)=>(<span key={i}>{l.planet} → {l.house}{i<links.length-1?' · ':''}</span>))}
+          </p>
+        </div>
+      )}
+      <p style={{margin:'12px 0 0',color:'#475569',fontSize:'11px'}}>Parashara BPHS house lords + Shadbala · Swiss Ephemeris</p>
+    </div>
+  )
+}
+
+// ── v8.4 ENGINE SIGNALS (yogas + Bhrigu) ──────────────────────────────────────
+// The badge on page 1 has always claimed Bhrigu Nandi; until now the report never
+// showed a single Bhrigu output. This renders it only when the engine actually
+// returned something — an empty claim is worse than no claim.
+function EngineSignals({ yogas, bhriguTheme, bhriguPoints }:{ yogas:string[]; bhriguTheme:string; bhriguPoints:number }) {
+  const hasY = yogas.length>0
+  const hasB = bhriguTheme!=='—' || bhriguPoints>0
+  if (!hasY && !hasB) return null
+  return (
+    <div style={{background:BG_CARD,border:`1px solid ${G(0.12)}`,borderRadius:'16px',padding:'22px',marginBottom:'14px'}}>
+      <p style={{margin:'0 0 14px',color:GOLD,fontSize:'11px',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.08em'}}>🔯 Yogas aur Bhrigu Signals</p>
+      {hasY && (
+        <div style={{display:'flex',flexWrap:'wrap',gap:'8px',marginBottom:hasB?'14px':0}}>
+          {yogas.map((y,i)=>(<span key={i} style={{padding:'7px 12px',borderRadius:'8px',background:G(0.08),border:`1px solid ${G(0.22)}`,color:'#e2e8f0',fontSize:'12.5px',fontWeight:600}}>{y}</span>))}
+        </div>
+      )}
+      {hasB && (
+        <div style={{padding:'12px 14px',borderRadius:'10px',background:'rgba(255,255,255,0.03)',border:'1px solid rgba(255,255,255,0.06)'}}>
+          <p style={{margin:'0 0 4px',color:G(0.6),fontSize:'11px',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.06em'}}>Bhrigu Nandi Nadi{bhriguPoints>0?` · ${bhriguPoints} points`:''}</p>
+          {bhriguTheme!=='—' && <p style={{margin:0,color:'#cbd5e1',fontSize:'13px',lineHeight:1.7}}>{bhriguTheme}</p>}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ── v8.4 CONFIDENCE ───────────────────────────────────────────────────────────
+// Astrology should not pretend every horizon carries equal certainty. Near-term
+// rests on exact Vimshottari dates; months 4-6 are directional. Saying so is a
+// credibility gain, not a weakness.
+function ConfidenceCard({ c }:{ c:ReadingConfidence }) {
+  const rows = [
+    {label:'Pichhle kuch mahine', v:s(c?.recentPast as string)},
+    {label:'Agle 3 mahine',       v:s(c?.next3Months as string)},
+    {label:'Mahina 4-6',          v:s(c?.months4to6 as string)},
+  ].filter(r=>r.v!=='—')
+  if (rows.length===0) return null
+  const col = (v:string) => /high/i.test(v)?'#22c55e':/moder/i.test(v)?GOLD:'#94a3b8'
+  const dot = (v:string) => /high/i.test(v)?'🟢':/moder/i.test(v)?'🟡':'⚪'
+  return (
+    <div style={{background:BG_CARD,border:`1px solid ${G(0.12)}`,borderRadius:'16px',padding:'22px',marginBottom:'14px'}}>
+      <p style={{margin:'0 0 14px',color:GOLD,fontSize:'11px',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.08em'}}>📊 Prediction Confidence</p>
+      <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(140px,1fr))',gap:'10px'}}>
+        {rows.map(r=>(
+          <div key={r.label} style={{padding:'12px',borderRadius:'10px',background:'rgba(255,255,255,0.03)',border:'1px solid rgba(255,255,255,0.06)'}}>
+            <p style={{margin:'0 0 4px',color:'#64748b',fontSize:'11px'}}>{r.label}</p>
+            <p style={{margin:0,color:col(r.v),fontSize:'13.5px',fontWeight:700}}>{dot(r.v)} {r.v}</p>
+          </div>
+        ))}
+      </div>
+      {s(c?.basis as string)!=='—' && <p style={{margin:'12px 0 0',color:'#475569',fontSize:'11px',lineHeight:1.6}}>{s(c?.basis as string)}</p>}
     </div>
   )
 }
@@ -997,11 +1170,10 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
   const mdObj       = safeObj(dashaTL.mahadasha)
   const adObj       = safeObj(dashaTL.antardasha)
   const ptObj       = safeObj(dashaTL.pratyantar)
-  const skObj       = safeObj(dashaTL.sookshma)
+  // v8.4: Sookshma (L4) is not computed upstream — see the Dasha Kaal block below.
   const mahadasha   = s(mdObj.lord)!=='—'?s(mdObj.lord):s(report.mahadasha)
   const antardasha  = s(adObj.lord)!=='—'?s(adObj.lord):s(report.antardasha)
   const pratyantar  = s(ptObj.lord)
-  const sookshma    = s(skObj.lord)
   const geoObj      = safeObj(pj.geoDirectAnswer)
   const geoText     = s(geoObj.text as string)!=='—' ? s(geoObj.text as string) : typeof pj.geoDirectAnswer==='string' ? s(pj.geoDirectAnswer as string) : s(report.geo_answer as string)
   const geoBullets  = splitGeoToBullets(geoText, isPaid, pj)
@@ -1029,6 +1201,22 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
   const hasNewUpay  = upayItems.length > 0 && upayItems[0]?.upay_number !== undefined
 
   const panchang    = safeObj(pj.panchang)
+
+  // ── v8.4: engine evidence now forwarded by predict route v14.17 ────────────
+  const chartEv     = safeObj(pj.chartEvidence) as unknown as ChartEvidence
+  const whyHere     = safeObj(pj.whyYouAreHere) as unknown as WhyHere
+  const evMeanings  = safeArr<{house?:number;meaning?:string}>(pj.evidenceMeanings)
+  const confidence  = safeObj(pj.readingConfidence) as unknown as ReadingConfidence
+  const engineSig   = safeObj(pj.engineSignals)
+  const synthPara   = safeObj(safeObj(engineSig.parashara).summary)
+  const bhriguObj   = safeObj(engineSig.bhrigu)
+  const allYogas    = Array.from(new Set([
+    ...safeArr<string>(chartEv?.yogas),
+    ...safeArr<any>(safeObj(engineSig.parashara).yogas).map(y=>typeof y==='string'?y:s(y?.name)),
+  ].filter(y=>y && y!=='—')))
+  const bhriguTheme = s(bhriguObj.current_life_theme as string)
+  const bhriguPts   = Number(bhriguObj.bhrigu_points ?? 0) || 0
+  const hasEvidence = safeArr<EvidenceHouse>(chartEv?.houses).length > 0
   const hasSummaryText = summaryText!=='—'
   const hasCoreMessage = coreMessage!=='—'
   const hasDoAvoid     = doAction!=='—'||avoidAction!=='—'
@@ -1091,6 +1279,10 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
             </div>
           )}
 
+          {/* v8.4: "why you are here" sits high — recognition builds trust before
+              the client is asked to absorb any planetary detail. */}
+          <WhyYouAreHere why={whyHere} activation={chartEv?.activation}/>
+
           {isPaid && <PaidFullSummary summaryText={summaryText} periodSummary={periodSummary} bestDates={bestDates} dosList={dosList} dontsList={dontsList} remedyHint={remedyHint} karmicInsight={karmicInsight}/>}
 
           <div style={{display:'grid',gridTemplateColumns:'repeat(2,1fr)',gap:'10px',marginBottom:'14px'}}>
@@ -1113,9 +1305,12 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
                   <thead><tr style={{borderBottom:`1px solid ${G(0.15)}`}}>{['Graha','Rashi','House','Nakshatra','Dignity','Strength'].map(h=>(<th key={h} style={{padding:'9px 6px',color:GOLD,fontWeight:600,textAlign:'left',fontSize:'11px',letterSpacing:'0.06em',textTransform:'uppercase'}}>{h}</th>))}</tr></thead>
                   <tbody>
                     {planetTable.map((p,i)=>{
-                      const sc=p.strength==='Very Strong'?'#22c55e':p.strength==='Strong'?'#86efac':p.strength==='Moderate'?GOLD:'#ef4444'
-                      const sd=p.strength==='Very Strong'?'●●':p.strength==='Strong'?'●':p.strength==='Moderate'?'◐':'○'
-                      return (<tr key={p.planet} style={{borderBottom:'1px solid rgba(255,255,255,0.04)',background:i%2===0?G(0.02):'transparent'}}><td style={{padding:'11px 6px',color:'#fff',fontWeight:600}}><span style={{color:GOLD,marginRight:'5px'}}>{PLANET_GLYPH[p.planet]??'✦'}</span>{p.planet_hi||PLANET_HI[p.planet]||p.planet}{p.retrograde&&<span style={{color:'#f59e0b',fontSize:'10px',marginLeft:'4px'}}>® Vakri</span>}</td><td style={{padding:'11px 6px',color:'#e2e8f0'}}>{p.rashi}</td><td style={{padding:'11px 6px',color:'#e2e8f0'}}>{ordinal(p.house)}</td><td style={{padding:'11px 6px',color:'#94a3b8',fontSize:'12px'}}>{p.nakshatra}</td><td style={{padding:'11px 6px',color:'#94a3b8',fontSize:'12px'}}>{p.dignity}</td><td style={{padding:'11px 6px'}}><span style={{color:sc,fontSize:'12px',fontWeight:700}}>{sd} {p.strength}</span></td></tr>)
+                      // v8.4: Rahu/Ketu carry no Shadbala — show "—", never a dot
+                      // implying a measured strength that was never computed.
+                      const hasSb = typeof p.shadbala==='number' && p.strength
+                      const sc=!hasSb?'#64748b':p.strength==='Very Strong'?'#22c55e':p.strength==='Strong'?'#86efac':p.strength==='Moderate'?GOLD:'#ef4444'
+                      const sd=!hasSb?'':p.strength==='Very Strong'?'●●':p.strength==='Strong'?'●':p.strength==='Moderate'?'◐':'○'
+                      return (<tr key={p.planet} style={{borderBottom:'1px solid rgba(255,255,255,0.04)',background:i%2===0?G(0.02):'transparent'}}><td style={{padding:'11px 6px',color:'#fff',fontWeight:600}}><span style={{color:GOLD,marginRight:'5px'}}>{PLANET_GLYPH[p.planet]??'✦'}</span>{p.planet_hi||PLANET_HI[p.planet]||p.planet}{p.retrograde&&<span style={{color:'#f59e0b',fontSize:'10px',marginLeft:'4px'}}>® Vakri</span>}</td><td style={{padding:'11px 6px',color:'#e2e8f0'}}>{p.rashi}</td><td style={{padding:'11px 6px',color:'#e2e8f0'}}>{ordinal(p.house)}</td><td style={{padding:'11px 6px',color:'#94a3b8',fontSize:'12px'}}>{p.nakshatra}</td><td style={{padding:'11px 6px',color:'#94a3b8',fontSize:'12px'}}>{p.dignity}</td><td style={{padding:'11px 6px'}}><span style={{color:sc,fontSize:'12px',fontWeight:700}}>{hasSb?<>{sd} {p.strength} <span style={{color:'#64748b',fontWeight:500}}>({p.shadbala.toFixed(2)})</span></>:'—'}</span></td></tr>)
                     })}
                   </tbody>
                 </table>
@@ -1124,10 +1319,21 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
             </div>
           )}
 
+          {/* v8.4: evidence, yogas/Bhrigu and confidence sit right after the planet
+              table — the client reads the chart, then immediately reads why it
+              matters for them, before the dasha timeline. */}
+          {hasEvidence && <EvidenceTable ev={chartEv} meanings={evMeanings}/>}
+          <EngineSignals yogas={allYogas} bhriguTheme={bhriguTheme} bhriguPoints={bhriguPts}/>
+          <ConfidenceCard c={confidence}/>
+
           <div style={{background:BG_CARD,border:`1px solid ${G(0.12)}`,borderRadius:'16px',padding:'22px',marginBottom:'14px'}}>
             <p style={{margin:'0 0 14px',color:GOLD,fontSize:'11px',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.08em'}}>⏰ Dasha Kaal — Vimshottari System</p>
             <div style={{display:'flex',flexDirection:'column',gap:'10px'}}>
-              {[{label:'Mahadasha',lord:mahadasha,color:'#60a5fa',lv:'L1'},{label:'Antardasha',lord:antardasha,color:'#a78bfa',lv:'L2'},{label:'Pratyantar',lord:pratyantar,color:GOLD,lv:'L3'},{label:'Sookshma',lord:sookshma,color:'#34d399',lv:'L4'}].map(({label,lord,color,lv})=>(<div key={label} style={{display:'flex',alignItems:'center',gap:'12px',padding:'12px',background:'rgba(255,255,255,0.03)',borderRadius:'10px',border:'1px solid rgba(255,255,255,0.06)'}}><div style={{width:'30px',height:'30px',borderRadius:'50%',background:`${color}20`,border:`1px solid ${color}40`,display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0,color,fontSize:'11px',fontWeight:700}}>{lv}</div><div style={{flex:1}}><p style={{margin:0,color:'#64748b',fontSize:'11px',textTransform:'uppercase',letterSpacing:'0.06em'}}>{label}</p><p style={{margin:'2px 0 0',color:'#fff',fontSize:'15px',fontWeight:700}}>{lord}</p></div></div>))}
+              {/* v8.4: Sookshma (L4) removed. astro.py's _vimshottari() nests only three
+                  levels — maha, antar, pratyantar — so L4 was never computed. The old
+                  template engine hardcoded "Venus" for it, meaning every client saw the
+                  same fake Sookshma lord. An absent level is better than an invented one. */}
+              {[{label:'Mahadasha',lord:mahadasha,color:'#60a5fa',lv:'L1'},{label:'Antardasha',lord:antardasha,color:'#a78bfa',lv:'L2'},{label:'Pratyantar',lord:pratyantar,color:GOLD,lv:'L3'}].map(({label,lord,color,lv})=>(<div key={label} style={{display:'flex',alignItems:'center',gap:'12px',padding:'12px',background:'rgba(255,255,255,0.03)',borderRadius:'10px',border:'1px solid rgba(255,255,255,0.06)'}}><div style={{width:'30px',height:'30px',borderRadius:'50%',background:`${color}20`,border:`1px solid ${color}40`,display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0,color,fontSize:'11px',fontWeight:700}}>{lv}</div><div style={{flex:1}}><p style={{margin:0,color:'#64748b',fontSize:'11px',textTransform:'uppercase',letterSpacing:'0.06em'}}>{label}</p><p style={{margin:'2px 0 0',color:'#fff',fontSize:'15px',fontWeight:700}}>{lord}</p></div></div>))}
             </div>
           </div>
 
