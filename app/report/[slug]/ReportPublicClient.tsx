@@ -57,6 +57,13 @@
  *     bhrigu_points/current_life_theme. Signals are now unwrapped and rendered,
  *     so the Bhrigu Nandi badge on page 1 is finally backed by visible output.
  *
+ * v8.5 (23 Aug 2026) — PANCHANG REMOVED
+ *   The "Aaj Ka Panchang" card was populated by panchang_today(), which computes
+ *   tithi and nakshatra as TITHIS[(d*13)%15] from the day of the year — pure
+ *   arithmetic, no ephemeris. Every reading showed invented panchang values. The
+ *   card and the paid feature-list promise are both removed until the section is
+ *   wired to the real panchang engine or the Supabase panchang_daily table.
+ *
  * CHANGES v8.1 -> v8.2 (retained): brand flip Trikaal, Delhi NCR
  *   removed, persona names flipped. Domain/links/logic untouched.
  * ============================================================
@@ -1113,7 +1120,7 @@ function UpayCards({ remedies, isPaid, slug }: { remedies: UpayItem[]; isPaid: b
 // ─── LOCKED SECTION — v8.3 PERSONALIZED ──────────────────────────────────────
 
 function LockedSection({slug, mahadasha, domainLabel}:{slug:string; mahadasha:string; domainLabel:string}) {
-  const features = ['✓ Complete planetary analysis (all 9 grahas)','✓ Bhrigu Nandi pattern insights','✓ 4 action windows with exact dates','✓ Full 5 upay plan (mantra+gemstone+vrat+dana+special)','✓ 900 word deep analysis','✓ Panchang muhurta guidance','✓ Lagna + Dasha gemstone recommendation','✓ Karmic insight (Bhrigu)']
+  const features = ['✓ Complete planetary analysis (all 9 grahas)','✓ Bhrigu Nandi pattern insights','✓ 4 action windows with exact dates','✓ Full 5 upay plan (mantra+gemstone+vrat+dana+special)','✓ 900 word deep analysis','✓ Chart evidence — house lords + Shadbala','✓ Lagna + Dasha gemstone recommendation','✓ Karmic insight (Bhrigu)']
   // v8.3 FIX-3: teaser personalized with the user's own dasha + domain
   const hasMd = mahadasha && mahadasha !== '—'
   const teaserLine = hasMd
@@ -1247,7 +1254,7 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
   const oldRemedies = safeArr<RemedyItem>(remedyPlan.remedies as any)
   const hasNewUpay  = upayItems.length > 0 && upayItems[0]?.upay_number !== undefined
 
-  const panchang    = safeObj(pj.panchang)
+  // v8.5: panchang intentionally not read — the upstream value is fabricated.
 
   // ── v8.4: engine evidence now forwarded by predict route v14.17 ────────────
   const chartEv     = safeObj(pj.chartEvidence) as unknown as ChartEvidence
@@ -1420,15 +1427,13 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
             </div>
           )}
 
-          {panchang.tithi&&(
-            <div style={{background:BG_CARD,border:`1px solid ${G(0.12)}`,borderRadius:'16px',padding:'22px',marginBottom:'14px'}}>
-              <p style={{margin:'0 0 14px',color:GOLD,fontSize:'11px',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.08em'}}>📅 Aaj Ka Panchang</p>
-              <div style={{display:'grid',gridTemplateColumns:'repeat(2,1fr)',gap:'8px',marginBottom:'10px'}}>
-                {[{label:'Tithi',value:s(panchang.tithi as string)},{label:'Vara',value:s(panchang.weekday as string)},{label:'Nakshatra',value:s(panchang.nakshatra as string)},{label:'Yoga',value:s(panchang.yoga as string)}].map(({label,value})=>(<div key={label} style={{padding:'10px',background:'rgba(255,255,255,0.03)',borderRadius:'8px',border:'1px solid rgba(255,255,255,0.06)'}}><p style={{margin:'0 0 2px',color:'#64748b',fontSize:'11px',textTransform:'uppercase',letterSpacing:'0.06em'}}>{label}</p><p style={{margin:0,color:'#e2e8f0',fontSize:'14px',fontWeight:600}}>{value}</p></div>))}
-              </div>
-              {s(panchang.rahu_kaal as string)!=='—'&&(<div style={{padding:'10px 13px',background:'rgba(239,68,68,0.06)',border:'1px solid rgba(239,68,68,0.15)',borderRadius:'8px'}}><span style={{color:'#ef4444',fontSize:'13px',fontWeight:600}}>🕐 Rahu Kaal: </span><span style={{color:'#fca5a5',fontSize:'13px'}}>{s(panchang.rahu_kaal as string)}</span></div>)}
-            </div>
-          )}
+          {/* v8.5: "Aaj Ka Panchang" REMOVED. It was fed by
+              template_engine.panchang_today(), which derives tithi/nakshatra from
+              day-of-year arithmetic — TITHIS[(d*13)%15] — not from any ephemeris.
+              Every value shown there was fabricated. The real panchang engine on
+              the VM works, and a real panchang_daily table exists in Supabase, so
+              this section will return wired to a genuine source. Until then,
+              showing nothing is the only honest option. */}
 
           {!isPaid&&<LockedSection slug={slug} mahadasha={mahadasha} domainLabel={domainLabel}/>}
 
