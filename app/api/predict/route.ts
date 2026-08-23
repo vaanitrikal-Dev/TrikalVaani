@@ -3,8 +3,17 @@
  * TRIKAAL VAANI — Unified Prediction Endpoint
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/api/predict/route.ts
- * VERSION: 15.0 — Gochar + Navamsa reach the writer; language purity rule
+ * VERSION: 15.1 — Script sanitizer (RULE 17 enforced mechanically)
  * SIGNED: ROHIIT GUPTA, CEO
+ *
+ * CHANGES v15.1 vs v15.0:
+ *   RULE 17 asks the model to stay in one script and it mostly complies, but two
+ *   consecutive live Hindi reports still leaked one foreign word each — Urdu
+ *   ("پر خود") and then French ("intérieure"). Instructions do not reliably stop
+ *   single-token drift, so sanitizeForLang() now strips them after generation.
+ *   Word-level and conservative: only tokens carrying impossible characters are
+ *   removed, so "Trikaal Vaani", "D9", "BPHS" and "Shadbala 0.30" survive intact.
+ *   Every strip is logged, so recurring leaks stay visible instead of silent.
  *
  * CHANGES v15.0 vs v14.18 (CONSOLIDATED — everything pending for this file):
  *   - whitelist now carries gocharTimeline and navamsaChart (template_engine
@@ -755,6 +764,51 @@ function normaliseBullets(v:any): string[] {
   }).filter((x:string)=>x.length > 0)
 }
 
+// ── v15.1 SCRIPT SANITIZER ───────────────────────────────────────────────────
+// RULE 17 tells the model to stay in one script, and it mostly obeys — but a
+// live Hindi report shipped "अकेलेपन को پر خود हावी न होने दें" (Urdu inside
+// Devanagari) and the next one shipped "हमें intérieure सच्चाई का सामना" (French).
+// A single stray word survives every instruction, so this strips them
+// mechanically after generation rather than asking more politely.
+//
+// Deliberately conservative — it removes WORDS containing characters that cannot
+// belong, never whole sentences:
+//   - any language: Arabic, Hebrew, CJK, Thai, and non-Devanagari Indic blocks
+//   - hindi output additionally: Latin words carrying diacritics (intérieure,
+//     naïve). Plain ASCII Latin survives so "Trikaal Vaani", "D9", "BPHS",
+//     "Shadbala 0.30" and dates are untouched.
+const FOREIGN_SCRIPT = /[\u0600-\u06FF\u0750-\u077F\u0590-\u05FF\u4E00-\u9FFF\u3040-\u30FF\uAC00-\uD7AF\u0E00-\u0E7F\u0980-\u09FF\u0A00-\u0A7F\u0A80-\u0AFF\u0B00-\u0B7F\u0B80-\u0BFF\u0C00-\u0C7F\u0C80-\u0CFF\u0D00-\u0D7F]/
+const ACCENTED_LATIN = /[\u00C0-\u024F]/
+
+function sanitizeForLang(obj:any, lang:string): any {
+  const hits: string[] = []
+  const out = sanitizeScript(obj, lang, hits)
+  if (hits.length) console.warn(`[TV-v15.1] script leak stripped (${lang}): ${hits.slice(0,8).join(' | ')}`)
+  return out
+}
+
+function sanitizeScript(value:any, lang:string, hits:string[]): any {
+  if (typeof value === 'string') {
+    if (!value) return value
+    const strictHindi = String(lang).toLowerCase().startsWith('hi') && !String(lang).toLowerCase().includes('hing')
+    const cleaned = value.split(/(\s+)/).filter(tok => {
+      if (/^\s*$/.test(tok)) return true
+      if (FOREIGN_SCRIPT.test(tok)) { hits.push(tok); return false }
+      if (strictHindi && ACCENTED_LATIN.test(tok)) { hits.push(tok); return false }
+      return true
+    }).join('')
+    // collapse the double spaces a removal leaves behind
+    return cleaned.replace(/[ \t]{2,}/g, ' ').replace(/\s+([।,.!?])/g, '$1').trim() || value
+  }
+  if (Array.isArray(value)) return value.map(v => sanitizeScript(v, lang, hits))
+  if (value && typeof value === 'object') {
+    const out: Record<string,any> = {}
+    for (const [k, v] of Object.entries(value)) out[k] = sanitizeScript(v, lang, hits)
+    return out
+  }
+  return value
+}
+
 function mergeTemplateWithGemini(
   templateObj: Record<string,any>|null,
   geminiObj: Record<string,any>,
@@ -1168,7 +1222,7 @@ export async function POST(req: NextRequest) {
         proJson = parseGeminiJSON(rawPro)
         console.log(`[TV-v14.13] PRO OK (search off) | summary_len:${proJson.simpleSummary?.text?.length??0} | geoBullets:${proJson.geoBullets?.length??0} | ms:${Date.now()-startMs}`)
       }
-      predictionJson = mergeTemplateWithGemini(templateData, proJson, '14.13-pro', synthesisData)
+      predictionJson = mergeTemplateWithGemini(templateData, sanitizeForLang(proJson, userContext?.language ?? 'hinglish'), '14.13-pro', synthesisData)
     } catch(err:any) {
       console.error(`[TV-v14.13] PRO failed: ${err.message}`)
       return NextResponse.json({error:`Pro prediction failed: ${err.message}`},{status:500})
@@ -1182,7 +1236,7 @@ export async function POST(req: NextRequest) {
     try {
       const rawFlash = await callGemini(GEMINI_FLASH, flashSystem, flashUser, true)
       const flashJson = parseGeminiJSON(rawFlash)
-      predictionJson = mergeTemplateWithGemini(templateData, flashJson, '14.6-flash', synthesisData)
+      predictionJson = mergeTemplateWithGemini(templateData, sanitizeForLang(flashJson, userContext?.language ?? 'hinglish'), '14.6-flash', synthesisData)
       console.log(`[TV-v14.6] FLASH OK | ms:${Date.now()-startMs}`)
     } catch(err:any) {
       console.error(`[TV-v14.6] FLASH failed: ${err.message}`)
