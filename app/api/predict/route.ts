@@ -3,8 +3,45 @@
  * TRIKAAL VAANI — Unified Prediction Endpoint
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/api/predict/route.ts
- * VERSION: 14.13 — VM-accurate chart in Pro prompt + anti-hallucination + health sensitivity + diagnostics
+ * VERSION: 14.14 — VM CONNECTION RESTORED + Lagna null fix
  * SIGNED: ROHIIT GUPTA, CEO
+ *
+ * CHANGES v14.14 vs v14.13 (VM OUTAGE + LAGNA "—" ROOT CAUSE):
+ *   ROOT CAUSE FOUND: this file never migrated to lib/callVM.ts. It used its
+ *   own env vars (EPHE_API_URL / EPHE_API_KEY) and its own auth header
+ *   (X-API-Key) while the rest of the app uses VM_ENGINE_URL + X-Trikal-Key
+ *   with a HARDCODED URL fallback. When the VM moved to its static IP on
+ *   11 May 2026, EPHE_API_URL went stale -> every VM call threw "fetch failed"
+ *   -> chart_source silently fell back to "swiss-ephemeris-meeus" on 270
+ *   consecutive reports, while the report header still advertised Swiss
+ *   Ephemeris / Shadbala / Bhrigu Nandi.
+ *
+ *   VERIFIED IN PROD BEFORE FIX:
+ *     Vercel 23-Aug 04:43 -> [TV-v14.6] /kundali failed: fetch failed
+ *     Vercel 23-Aug 08:20 -> VM /kundali -> 401: {"error":"Unauthorized"}
+ *     Supabase            -> 255/255 rows lagna = NULL, kundali_data->lagna
+ *                            present as a STRING on all 255
+ *
+ *   FIX-1 (AUTH, line ~187): callVM now sends X-Trikal-Key, the header the VM
+ *      guard actually reads (same as lib/callVM.ts). X-API-Key is still sent
+ *      alongside for backward compat with any older VM build. Fixes the 401.
+ *   FIX-2 (KEY SOURCE, line ~79): reads TRIKAL_VM_KEY first (the key the rest
+ *      of the app already uses), EPHE_API_KEY as fallback. No new env var.
+ *   FIX-3 (URL RESILIENCE, line ~78): EPHE_API_URL || VM_ENGINE_URL ||
+ *      hardcoded http://34.47.182.227:8001 — mirrors lib/callVM.ts so a stale
+ *      or missing env var can never silently disable the VM again.
+ *   FIX-4 (LAGNA NULL, line ~496 + ~566): extractFromRawChart is now
+ *      shape-agnostic via pickStr() — the VM has returned lagna as BOTH a
+ *      plain string ("Simha") and an object ({sign}/{rashi}). The old code
+ *      only read the object shape. Separately, the DB-write fallback did
+ *      `kundaliData?.lagna?.rashi` on a value that is a STRING, which is
+ *      always undefined — that is why the `lagna` column saved NULL on every
+ *      row and the UI/PDF showed "Lagna —" while the Gemini prose correctly
+ *      said "Simha Lagna hai".
+ *
+ *   VERIFY AFTER DEPLOY (one test reading, then):
+ *     Vercel log  -> [TV-v14.6] /kundali | lagna:Simha | ms:<2000
+ *     Supabase    -> chart_source = 'swiss-ephemeris-vm' AND lagna IS NOT NULL
  *
  * CHANGES v14.13 vs v14.12 (LIVE REPORT AUDIT FIXES):
  *   ✅ FIX-1 (ACCURACY): buildProPrompt now receives chartExtract (VM Swiss
@@ -73,8 +110,10 @@ const GEMINI_FLASH    = 'gemini-2.5-flash'
 const GEMINI_PRO      = 'gemini-2.5-pro'
 const GEMINI_BASE_URL = 'https://generativelanguage.googleapis.com/v1beta/models'
 const GEMINI_API_KEY  = process.env.GEMINI_API_KEY  ?? ''
-const EPHE_API_URL    = process.env.EPHE_API_URL    ?? ''
-const EPHE_API_KEY    = process.env.EPHE_API_KEY    ?? ''
+// v14.14: VM URL/key now mirror lib/callVM.ts. Hardcoded fallback so a missing
+// or stale env var can never silently drop us to the Meeus fallback again.
+const EPHE_API_URL    = process.env.EPHE_API_URL    || process.env.VM_ENGINE_URL || 'http://34.47.182.227:8001'
+const EPHE_API_KEY    = process.env.TRIKAL_VM_KEY   || process.env.EPHE_API_KEY  || ''
 const RAZORPAY_SECRET = process.env.RAZORPAY_KEY_SECRET ?? ''
 const MAX_TOKENS      = 12000  // CEO LOCKED
 
@@ -182,7 +221,13 @@ async function callVM(endpoint:string, body:object, timeoutMs=25000): Promise<an
   try {
     const res = await fetch(`${EPHE_API_URL}${endpoint}`,{
       method:'POST',
-      headers:{'Content-Type':'application/json','X-API-Key':EPHE_API_KEY},
+      // v14.14: VM guard reads X-Trikal-Key (same as lib/callVM.ts).
+      // X-API-Key kept for backward compat with any older VM build.
+      headers:{
+        'Content-Type':'application/json',
+        'X-Trikal-Key':EPHE_API_KEY,
+        'X-API-Key':EPHE_API_KEY,
+      },
       body:JSON.stringify(body),
       signal:controller.signal,
     })
@@ -473,15 +518,31 @@ function mergeTemplateWithGemini(
 }
 
 // ── extractFromRawChart ───────────────────────────────────────────────────────
+// v14.14: shape-agnostic. VM has returned lagna as BOTH a plain string
+// ("Simha") and an object ({sign}/{rashi}) across builds. The old version only
+// handled the object shape, so DB lagna silently saved as null -> UI showed "—".
+function pickStr(v:any): string|null {
+  if(v==null) return null
+  if(typeof v==='string') return v.trim()||null
+  if(typeof v==='object') return pickStr(v.sign ?? v.rashi ?? v.rashi_en ?? v.name ?? v.lord ?? null)
+  return null
+}
+
 function extractFromRawChart(rawChart:any): ChartExtract {
   if(!rawChart) return {lagna:null,nakshatra:null,mahadasha:null,antardasha:null}
-  const lagna = rawChart?.lagna?.sign ?? rawChart?.lagna?.rashi ?? null
-  const moon  = rawChart?.grahas?.find?.((g:any)=>g.planet==='Moon'||g.name==='Moon')
+  const r = rawChart as any
+  const lagna =
+    pickStr(r.lagna) ?? pickStr(r.ascendant) ?? pickStr(r.lagna_sign) ?? pickStr(r.chart?.lagna) ?? null
+  const moon =
+    r.grahas?.find?.((g:any)=>g.planet==='Moon'||g.name==='Moon') ??
+    r.planets?.find?.((g:any)=>g.planet==='Moon'||g.name==='Moon') ??
+    r.planets?.Moon ?? r.grahas?.Moon ?? null
+  const d = r.dasha ?? r.vimshottari ?? {}
   return {
     lagna,
-    nakshatra:   moon?.nakshatra ?? null,
-    mahadasha:   rawChart?.dasha?.mahadasha?.lord  ?? null,
-    antardasha:  rawChart?.dasha?.antardasha?.lord ?? null,
+    nakshatra:   pickStr(moon?.nakshatra) ?? pickStr(r.nakshatra) ?? pickStr(r.moon_nakshatra),
+    mahadasha:   pickStr(d.mahadasha?.lord  ?? d.mahadasha  ?? r.currentMahadasha?.lord),
+    antardasha:  pickStr(d.antardasha?.lord ?? d.antardasha ?? r.currentAntardasha?.lord),
   }
 }
 
@@ -539,7 +600,9 @@ async function saveToSupabase(p:{
     birth_lat:       p.birthData.lat??null,
     birth_lng:       p.birthData.lng??null,
     birth_timezone:  p.birthData.timezone??null,
-    lagna:           p.chartExtract.lagna??p.kundaliData?.lagna?.rashi??null,
+    // v14.14: local kundaliData.lagna is a STRING; the old `?.rashi` on a string
+    // returned undefined, so this column saved null on every single row.
+    lagna:           p.chartExtract.lagna??pickStr((p.kundaliData as any)?.lagna)??null,
     nakshatra:       p.chartExtract.nakshatra??p.kundaliData?.planets?.['Moon']?.nakshatra??null,
     mahadasha:       p.chartExtract.mahadasha??p.kundaliData?.currentMahadasha?.lord??null,
     antardasha:      p.chartExtract.antardasha??p.kundaliData?.currentAntardasha?.lord??null,
@@ -688,8 +751,11 @@ export async function POST(req: NextRequest) {
   }
 
   rawChart = await kundaliPromise
-  console.log(`[TV-v14.6] /kundali | lagna:${rawChart?.lagna?.sign} | ms:${Date.now()-startMs}`)
   const chartExtract = extractFromRawChart(rawChart)
+  // v14.14: log the RESOLVED lagna, not rawChart.lagna.sign. When the VM returns
+  // lagna as a plain string this old log printed "undefined" even on a healthy
+  // VM response, which made the outage look like a different bug than it was.
+  console.log(`[TV-v14.14] /kundali | vm:${rawChart?'HIT':'MISS'} | lagna:${chartExtract.lagna??'null'} | ms:${Date.now()-startMs}`)
 
   // ── STEP 2+3 PARALLEL: /synthesize + /template ────────────────────────────
   const [synthesisResult,templateResult] = await Promise.allSettled([
