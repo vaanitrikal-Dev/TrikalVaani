@@ -3,8 +3,22 @@
  * TRIKAAL VAANI — Unified Prediction Endpoint
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/api/predict/route.ts
- * VERSION: 14.14 — VM CONNECTION RESTORED + Lagna null fix
+ * VERSION: 14.15 — VM ayanamsa payload fix (422) + v14.14 VM/Lagna fixes
  * SIGNED: ROHIIT GUPTA, CEO
+ *
+ * CHANGES v14.15 vs v14.14 (FINAL VM HANDSHAKE FIX):
+ *   After v14.14 fixed the URL + auth header, the VM answered 401 -> gone, but
+ *   /kundali then returned:
+ *     422 {"loc":["body","ayanamsa"],"msg":"Input should be a valid string",
+ *          "input":1}
+ *   This route sent `ayanamsa: 1` (integer). The VM Pydantic model declares
+ *   `ayanamsa: str = Field(default="lahiri")` (main.py L126 and L161).
+ *   FIX: send 'lahiri'. /synthesize was only failing as a cascade of this
+ *   (it received kundaliData:null because rawChart was null).
+ *
+ *   VERIFY AFTER DEPLOY:
+ *     [TV-v14.14] /kundali | vm:HIT | lagna:Tula | ms:<1500
+ *     Supabase   -> chart_source = 'swiss-ephemeris-vm'
  *
  * CHANGES v14.14 vs v14.13 (VM OUTAGE + LAGNA "—" ROOT CAUSE):
  *   ROOT CAUSE FOUND: this file never migrated to lib/callVM.ts. It used its
@@ -725,7 +739,10 @@ export async function POST(req: NextRequest) {
   const kundaliPromise = callVM('/kundali',{
     dob:localBirthData.dob, tob:localBirthData.tob,
     lat:localBirthData.lat, lng:localBirthData.lng,
-    timezone:birthData.timezone??5.5, ayanamsa:1,
+    // v14.15: VM Pydantic model declares ayanamsa as a STRING with default
+    // "lahiri" (main.py L126/L161). Sending the integer 1 returned
+    // 422 string_type on every /kundali call -> rawChart null -> Meeus fallback.
+    timezone:birthData.timezone??5.5, ayanamsa:'lahiri',
   },25000).catch((err:any)=>{
     console.error(`[TV-v14.6] /kundali failed: ${err.message}`)
     return null
