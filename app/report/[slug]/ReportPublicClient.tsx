@@ -5,8 +5,17 @@
  * TRIKAAL VAANI — Public SEO Report Client
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/report/[slug]/ReportPublicClient.tsx
- * VERSION: 9.0 — VERDICT FIRST + GOCHAR + NAVAMSA + REMEDY LEVELS + PANCHANG
+ * VERSION: 9.1 — monthlyOutlook + navamsaNote rendered; language wiring finished
  * SIGNED: ROHIIT GUPTA, CEO
+ *
+ * v9.1 (23 Aug 2026) — the half I shipped out of order
+ *   v9.0 of this file was written BEFORE route v15.0 existed, so the two fields
+ *   that version generates had nowhere to render: seven months of real Hindi
+ *   monthlyOutlook and a Hindi navamsaNote sat unused in the DB. Both now render.
+ *   Language wiring is also finished — v9.0 translated the section headings but
+ *   left the evidence-table internals ("Swami X — 10th bhav mein", "Is bhav mein
+ *   koi graha nahi") and the remedy level names in Hinglish/English, so a Hindi
+ *   report still mixed three registers on one page.
  *
  * v9.0 (23 Aug 2026) — CONSOLIDATED. Everything pending for this file, once:
  *   #3 VerdictCard   : the answer FIRST. The page opened with engine badges and
@@ -203,6 +212,21 @@ const L: Record<string, Record<Lang,string>> = {
   vara:         {hinglish:'Vara',  hindi:'वार',  english:'Weekday'},
   nak:          {hinglish:'Nakshatra', hindi:'नक्षत्र', english:'Nakshatra'},
   yoga:         {hinglish:'Yoga',  hindi:'योग',  english:'Yoga'},
+  monthly:      {hinglish:'🗓 Mahine-Dar-Mahine Outlook', hindi:'🗓 महीने-दर-महीने आउटलुक', english:'🗓 Month-by-Month Outlook'},
+  mTheme:       {hinglish:'Theme',  hindi:'भाव',    english:'Theme'},
+  mMoney:       {hinglish:'Paisa',  hindi:'धन',     english:'Money'},
+  mAction:      {hinglish:'Karein', hindi:'करें',   english:'Do'},
+  mAvoid:       {hinglish:'Bachein',hindi:'बचें',   english:'Avoid'},
+  navNote:      {hinglish:'D9 Ka Matlab', hindi:'नवांश का अर्थ', english:'What D9 Adds'},
+  lvlPractical:   {hinglish:'Vyavaharik',  hindi:'व्यावहारिक',  english:'Practical'},
+  lvlBehavioural: {hinglish:'Anushasan',   hindi:'अनुशासन',     english:'Behavioural'},
+  lvlSpiritual:   {hinglish:'Adhyatmik',   hindi:'आध्यात्मिक',  english:'Spiritual'},
+  lvlSeva:        {hinglish:'Seva',        hindi:'सेवा',        english:'Seva'},
+}
+// v9.1: template_engine emits level names in English only. Translating the four
+// known names here keeps the engine language-neutral and the report consistent.
+const LEVEL_KEY: Record<string,string> = {
+  Practical:'lvlPractical', Behavioural:'lvlBehavioural', Spiritual:'lvlSpiritual', Seva:'lvlSeva',
 }
 function lbl(key:string, lang:Lang):string { return L[key]?.[lang] ?? L[key]?.hinglish ?? key }
 
@@ -346,7 +370,7 @@ function EvidenceTable({ ev, meanings, lang }:{ ev:ChartEvidence; meanings:{hous
     <div style={{background:BG_CARD,border:`1px solid ${G(0.15)}`,borderRadius:'16px',padding:'22px',marginBottom:'14px'}}>
       <p style={{margin:'0 0 6px',color:GOLD,fontSize:'11px',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.08em'}}>{lbl('evidence',lang)}</p>
       <p style={{margin:'0 0 16px',color:'#64748b',fontSize:'11px'}}>
-        Lagna {s(ev?.lagna)} · Lagna swami {s(ev?.lagna_lord)} — har row aapke chart se nikli hai, koi general baat nahi.
+        Lagna {s(ev?.lagna)} · {lbl('lord',lang)} {s(ev?.lagna_lord)} — {lbl('evidenceSub',lang)}
       </p>
       <div style={{display:'flex',flexDirection:'column',gap:'10px'}}>
         {rows.map((r,i)=>{
@@ -357,9 +381,9 @@ function EvidenceTable({ ev, meanings, lang }:{ ev:ChartEvidence; meanings:{hous
                 {r.factor}{r.sign?` · ${r.sign}`:''}
               </p>
               <p style={{margin:'0 0 5px',color:'#cbd5e1',fontSize:'12.5px',lineHeight:1.7}}>
-                Swami <strong style={{color:GOLD}}>{s(r.lord)}</strong>
-                {r.lord_house?<> — {ordinal(r.lord_house)} bhav mein{r.lord_rashi?` (${r.lord_rashi})`:''}{r.lord_dignity?`, ${r.lord_dignity}`:''}{typeof r.lord_shadbala==='number'?`, Shadbala ${r.lord_shadbala.toFixed(2)}`:''}</>:null}
-                {safeArr<string>(r.occupants).length>0 ? <> · Is bhav mein: {safeArr<string>(r.occupants).join(', ')}</> : <> · Is bhav mein koi graha nahi</>}
+                {lbl('lord',lang)} <strong style={{color:GOLD}}>{s(r.lord)}</strong>
+                {r.lord_house?<> — {ordinal(r.lord_house)} {lbl('inHouse',lang)}{r.lord_rashi?` (${r.lord_rashi})`:''}{r.lord_dignity?`, ${r.lord_dignity}`:''}{typeof r.lord_shadbala==='number'?`, Shadbala ${r.lord_shadbala.toFixed(2)}`:''}</>:null}
+                {safeArr<string>(r.occupants).length>0 ? <> · {lbl('occupants',lang)}: {safeArr<string>(r.occupants).join(', ')}</> : <> · {lbl('noOccupants',lang)}</>}
               </p>
               {mean && <p style={{margin:0,color:'#94a3b8',fontSize:'12.5px',lineHeight:1.7}}>→ {mean}</p>}
             </div>
@@ -525,7 +549,7 @@ function GocharTimeline({ g, lang }:{ g:Record<string,unknown>; lang:Lang }) {
 }
 
 // ── v9.0 NAVAMSA (D9) ────────────────────────────────────────────────────────
-function NavamsaCard({ nv, lang }:{ nv:Record<string,unknown>; lang:Lang }) {
+function NavamsaCard({ nv, lang, note }:{ nv:Record<string,unknown>; lang:Lang; note:string }) {
   const rows = safeArr<Record<string,unknown>>(nv.planets)
   if (rows.length===0) return null
   const vg = safeArr<string>(nv.vargottama_planets)
@@ -550,6 +574,12 @@ function NavamsaCard({ nv, lang }:{ nv:Record<string,unknown>; lang:Lang }) {
         </table>
       </div>
       {vg.length>0 && <p style={{margin:'10px 0 0',color:'#22c55e',fontSize:'11.5px'}}>★ {lbl('vargottama',lang)}: {vg.join(', ')}</p>}
+      {note!=='—' && (
+        <div style={{marginTop:'12px',padding:'12px 14px',borderRadius:'10px',background:G(0.06),border:`1px solid ${G(0.18)}`}}>
+          <p style={{margin:'0 0 5px',color:G(0.65),fontSize:'10px',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.06em'}}>{lbl('navNote',lang)}</p>
+          <p style={{margin:0,color:'#cbd5e1',fontSize:'13px',lineHeight:1.7}}>{note}</p>
+        </div>
+      )}
       <p style={{margin:'8px 0 0',color:'#475569',fontSize:'11px'}}>{s(nv.note as string,'')}</p>
     </div>
   )
@@ -570,7 +600,7 @@ function RemedyLevels({ h, lang }:{ h:Record<string,unknown>; lang:Lang }) {
           const c = COL[i%COL.length]!
           return (
             <div key={i} style={{padding:'13px 14px',borderRadius:'10px',background:`${c}08`,border:`1px solid ${c}25`}}>
-              <p style={{margin:'0 0 4px',color:c,fontSize:'10px',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.07em'}}>Level {String(lv.level)} — {s(lv.name as string)}</p>
+              <p style={{margin:'0 0 4px',color:c,fontSize:'10px',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.07em'}}>Level {String(lv.level)} — {LEVEL_KEY[String(lv.name)] ? lbl(LEVEL_KEY[String(lv.name)]!, lang) : s(lv.name as string)}</p>
               <p style={{margin:'0 0 7px',color:'#64748b',fontSize:'11.5px',lineHeight:1.55}}>{s(lv.why as string,'')}</p>
               <ul style={{margin:0,padding:'0 0 0 17px',color:'#e2e8f0',fontSize:'13px',lineHeight:1.75}}>
                 {safeArr<string>(lv.actions).map((a,j)=>(<li key={j}>{a}</li>))}
@@ -581,6 +611,38 @@ function RemedyLevels({ h, lang }:{ h:Record<string,unknown>; lang:Lang }) {
       </div>
       {s(h.order_note as string)!=='—' && <p style={{margin:'12px 0 0',color:'#94a3b8',fontSize:'11.5px',fontStyle:'italic',lineHeight:1.6}}>{String(h.order_note)}</p>}
       {s(h.disclaimer as string)!=='—' && <p style={{margin:'6px 0 0',color:'#475569',fontSize:'11px',lineHeight:1.55}}>{String(h.disclaimer)}</p>}
+    </div>
+  )
+}
+
+// ── v9.1 MONTH-BY-MONTH OUTLOOK ──────────────────────────────────────────────
+// route v15.0 generates monthlyOutlook[] from the gochar timeline — theme, money,
+// action and avoid per month, in the client's language. v9.0 of this file was
+// written BEFORE that route version existed, so seven months of real Hindi
+// content sat in the DB unrendered. This is the reader-facing half of GPT's
+// "next 6 months, month-wise" request; GocharTimeline above is the evidence half.
+interface MOut { month?:string; theme?:string; money?:string; action?:string; avoid?:string }
+function MonthlyOutlook({ rows, lang }:{ rows:MOut[]; lang:Lang }) {
+  const list = rows.filter(r => s(r?.month as string)!=='—')
+  if (list.length===0) return null
+  return (
+    <div style={{background:BG_CARD,border:`1px solid ${G(0.15)}`,borderRadius:'16px',padding:'22px',marginBottom:'14px'}}>
+      <p style={{margin:'0 0 14px',color:GOLD,fontSize:'11px',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.08em'}}>{lbl('monthly',lang)}</p>
+      <div style={{display:'flex',flexDirection:'column',gap:'10px'}}>
+        {list.map((r,i)=>(
+          <div key={i} style={{padding:'13px 14px',borderRadius:'10px',background:'rgba(255,255,255,0.03)',border:'1px solid rgba(255,255,255,0.06)'}}>
+            <div style={{display:'flex',alignItems:'center',gap:'9px',flexWrap:'wrap',marginBottom:'7px'}}>
+              <span style={{color:'#fff',fontSize:'13.5px',fontWeight:700}}>{s(r.month as string)}</span>
+              {s(r.theme as string)!=='—' && <span style={{padding:'3px 9px',borderRadius:'7px',background:G(0.1),border:`1px solid ${G(0.22)}`,color:GOLD,fontSize:'11.5px',fontWeight:600}}>{s(r.theme as string)}</span>}
+            </div>
+            <div style={{display:'flex',flexDirection:'column',gap:'4px'}}>
+              {s(r.money as string)!=='—'  && <p style={{margin:0,color:'#cbd5e1',fontSize:'12.5px',lineHeight:1.6}}>💰 <span style={{color:'#64748b'}}>{lbl('mMoney',lang)}:</span> {s(r.money as string)}</p>}
+              {s(r.action as string)!=='—' && <p style={{margin:0,color:'#86efac',fontSize:'12.5px',lineHeight:1.6}}>✓ <span style={{color:'#64748b'}}>{lbl('mAction',lang)}:</span> {s(r.action as string)}</p>}
+              {s(r.avoid as string)!=='—'  && <p style={{margin:0,color:'#fca5a5',fontSize:'12.5px',lineHeight:1.6}}>✗ <span style={{color:'#64748b'}}>{lbl('mAvoid',lang)}:</span> {s(r.avoid as string)}</p>}
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   )
 }
@@ -1500,6 +1562,8 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
   const navamsa     = safeObj(pj.navamsaChart)
   const remedyLvls  = safeObj(remedyPlan.hierarchy)
   const panchang    = safeObj(pj.panchang)     // v3.0 engine — real, or {} when unavailable
+  const monthlyOut  = safeArr<MOut>(pj.monthlyOutlook)
+  const navNote     = s(pj.navamsaNote as string)
   const bestMonth   = s(gochar.best_month as string)!=='—' ? String(gochar.best_month) : null
   const cautionMon  = s(gochar.caution_month as string)!=='—' ? String(gochar.caution_month) : null
   const hasSummaryText = summaryText!=='—'
@@ -1615,11 +1679,12 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
           {/* v8.4: evidence, yogas/Bhrigu and confidence sit right after the planet
               table — the client reads the chart, then immediately reads why it
               matters for them, before the dasha timeline. */}
-          {Object.keys(navamsa).length>0 && <NavamsaCard nv={navamsa} lang={lang}/>}
+          {Object.keys(navamsa).length>0 && <NavamsaCard nv={navamsa} lang={lang} note={navNote}/>}
 
           {hasEvidence && <EvidenceTable ev={chartEv} meanings={evMeanings} lang={lang}/>}
           <EngineSignals yogas={allYogas} bhriguTheme={bhriguTheme} bhriguPoints={bhriguPts} signals={bhriguSignals} lang={lang}/>
           {Object.keys(gochar).length>0 && <GocharTimeline g={gochar} lang={lang}/>}
+          <MonthlyOutlook rows={monthlyOut} lang={lang}/>
           <ConfidenceCard c={confidence} lang={lang}/>
 
           <div style={{background:BG_CARD,border:`1px solid ${G(0.12)}`,borderRadius:'16px',padding:'22px',marginBottom:'14px'}}>
