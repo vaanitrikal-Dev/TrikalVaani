@@ -3,8 +3,16 @@
  * TRIKAAL VAANI — Unified Prediction Endpoint
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/api/predict/route.ts
- * VERSION: 15.1 — Script sanitizer (RULE 17 enforced mechanically)
+ * VERSION: 15.2 — Free tier finally receives chart evidence
  * SIGNED: ROHIIT GUPTA, CEO
+ *
+ * CHANGES v15.2 vs v15.1:
+ *   buildFlashPrompt(kundali, birth, domain, userContext, templateData?) — the
+ *   fifth parameter existed from the start and was never supplied. Every free
+ *   reading was therefore generated with zero chart data: no house lords, no
+ *   dasha dates, nothing. That is precisely the "could have been written for
+ *   anybody" impression that stops a free reader paying ₹51. Now passed, with a
+ *   deliberately limited subset so the paid report keeps its depth.
  *
  * CHANGES v15.1 vs v15.0:
  *   RULE 17 asks the model to stay in one script and it mostly complies, but two
@@ -1230,8 +1238,13 @@ export async function POST(req: NextRequest) {
   } else {
     // ── FREE: Gemini Flash — 150 words ──────────────────────────────────────
     console.log(`[TV-v14.6] FLASH START | ms:${Date.now()-startMs}`)
+    // v15.2: buildFlashPrompt has always ACCEPTED a 5th templateData argument —
+    // it was simply never passed, so the free reading ran with no chart data at
+    // all and could only assert. Free tier now receives a deliberate subset
+    // (Lagna lord, two domain house lords, real dasha dates); Shadbala numbers,
+    // the nine-planet table, the gochar timeline and D9 remain paid-only.
     const {systemPrompt:flashSystem, userMessage:flashUser} = buildFlashPrompt(
-      kundaliData, localBirthData, domainConfig, promptUserContext
+      kundaliData, localBirthData, domainConfig, promptUserContext, templateData
     )
     try {
       const rawFlash = await callGemini(GEMINI_FLASH, flashSystem, flashUser, true)
