@@ -5,8 +5,20 @@
  * TRIKAAL VAANI — Public SEO Report Client
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/report/[slug]/ReportPublicClient.tsx
- * VERSION: 9.2 — every remaining heading is language-aware
+ * VERSION: 9.3 — paywall restored: free proves the chart, paid keeps the depth
  * SIGNED: ROHIIT GUPTA, CEO
+ *
+ * v9.3 (24 Aug 2026) — PAYWALL, which v9.0-9.2 quietly removed
+ *   Those versions added the evidence table, D9, gochar timeline, Bhrigu signals,
+ *   monthly outlook and remedy levels — and gated NONE of them. A free reader was
+ *   getting all nine Shadbala scores, the full D9 chart, six months of forecast
+ *   and every remedy level, while the ₹51 box on the same page promised exactly
+ *   those items. There was no reason left to pay.
+ *   Free now keeps what proves the chart is genuinely theirs: the D1 chart, the
+ *   planet table (no Shadbala figures), two evidence rows, the past three months,
+ *   the verdict card, confidence, and remedy levels 1-2 — the two that cost
+ *   nothing to act on. Everything below stays paid, and LockedTeaser names it
+ *   honestly instead of promising what the reader has already seen.
  *
  * v9.2 (23 Aug 2026) — the last of the hardcoded headings
  *   v9.0 and v9.1 translated the NEW sections but left every pre-existing one in
@@ -243,6 +255,12 @@ const L: Record<string, Record<Lang,string>> = {
   dashaKaal:    {hinglish:'⏰ Dasha Kaal — Vimshottari System', hindi:'⏰ दशा काल — विंशोत्तरी पद्धति', english:'⏰ Dasha Periods — Vimshottari System'},
   actionWin:    {hinglish:'🗓 Action Windows — Trikaal Precision', hindi:'🗓 कार्य अवधि — त्रिकाल परिशुद्धता', english:'🗓 Action Windows — Trikaal Precision'},
   upayTitle:    {hinglish:'🙏 Upay — 5 Classical Remedies (BPHS)', hindi:'🙏 उपाय — ५ शास्त्रीय उपाय (बीपीएचएस)', english:'🙏 Remedies — 5 Classical Upay (BPHS)'},
+  lockedMore:   {hinglish:'🔒 ₹51 mein aur bhi khulta hai', hindi:'🔒 ₹५१ में और भी खुलता है', english:'🔒 More unlocks for ₹51'},
+  lockedD9:     {hinglish:'Navamsa (D9) — har graha ka andaruni bal', hindi:'नवांश (D9) — हर ग्रह का आंतरिक बल', english:'Navamsa (D9) — the inner strength of each graha'},
+  lockedFuture: {hinglish:'Agle 6 mahine ka gochar + mahine-dar-mahine plan', hindi:'अगले ६ महीने का गोचर + महीने-दर-महीने योजना', english:'Next 6 months of transits + month-by-month plan'},
+  lockedBhrigu: {hinglish:'Bhrigu Nandi signals aur yogas', hindi:'भृगु नंदी संकेत और योग', english:'Bhrigu Nandi signals and yogas'},
+  lockedShad:   {hinglish:'Har graha ka Shadbala score', hindi:'हर ग्रह का षड्बल स्कोर', english:'Shadbala score for every graha'},
+  lockedRows:   {hinglish:'Baaki bhav, dasha activation aur poore upay', hindi:'शेष भाव, दशा सक्रियता और पूरे उपाय', english:'Remaining houses, dasha activation and the full remedies'},
   vedicAnalysis:{hinglish:'🔮 Vedic Analysis — Trikaal Ka Sandesh', hindi:'🔮 वैदिक विश्लेषण — त्रिकाल का संदेश', english:'🔮 Vedic Analysis — Trikaal\'s Message'},
   lvlPractical:   {hinglish:'Vyavaharik',  hindi:'व्यावहारिक',  english:'Practical'},
   lvlBehavioural: {hinglish:'Anushasan',   hindi:'अनुशासन',     english:'Behavioural'},
@@ -383,15 +401,18 @@ function WhyYouAreHere({ why, activation, lang }:{ why:WhyHere; activation?:Char
 // Every row is a lookup into Parashara + Shadbala engine output. The numbers come
 // from the engine; only the "matlab" line is written by the reading. This is what
 // turns an assertion into something the client can follow and check.
-function EvidenceTable({ ev, meanings, lang }:{ ev:ChartEvidence; meanings:{house?:number;meaning?:string}[]; lang:Lang }) {
-  const rows = safeArr<EvidenceHouse>(ev?.houses)
+function EvidenceTable({ ev, meanings, lang, isPaid }:{ ev:ChartEvidence; meanings:{house?:number;meaning?:string}[]; lang:Lang; isPaid:boolean }) {
+  // v9.3: free gets the same two rows the free prompt was given — enough to prove
+  // the reading is from THIS chart, not the whole evidence layer.
+  const allRows = safeArr<EvidenceHouse>(ev?.houses)
+  const rows = isPaid ? allRows : allRows.slice(0, 2)
   if (rows.length===0) return null
   const meaningFor = (hn?:number) => {
     if (hn===undefined) return ''
     const m = meanings.find(x => Number(x?.house)===Number(hn))
     return s(m?.meaning as string)!=='—' ? String(m?.meaning) : ''
   }
-  const links = safeArr<{planet:string;house:string}>(ev?.activation?.domain_links)
+  const links = isPaid ? safeArr<{planet:string;house:string}>(ev?.activation?.domain_links) : []
   return (
     <div style={{background:BG_CARD,border:`1px solid ${G(0.15)}`,borderRadius:'16px',padding:'22px',marginBottom:'14px'}}>
       <p style={{margin:'0 0 6px',color:GOLD,fontSize:'11px',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.08em'}}>{lbl('evidence',lang)}</p>
@@ -536,8 +557,10 @@ function VerdictCard({ lang, coreMsg, mahadasha, antardasha, pratyantar, best, c
 interface GMonth { ym:string; label:string; is_past:boolean; is_current:boolean
   antardasha:string|null; pratyantar:string|null; tone:string; marker:string
   domain_hits:{planet:string;house:number;nature:string}[] }
-function GocharTimeline({ g, lang }:{ g:Record<string,unknown>; lang:Lang }) {
-  const past = safeArr<GMonth>(g.past), future = safeArr<GMonth>(g.future)
+function GocharTimeline({ g, lang, isPaid }:{ g:Record<string,unknown>; lang:Lang; isPaid:boolean }) {
+  // v9.3: the past three months are the recognition hook and stay free; the six
+  // months AHEAD are the thing worth paying for.
+  const past = safeArr<GMonth>(g.past), future = isPaid ? safeArr<GMonth>(g.future) : []
   const cur  = safeObj(g.current) as unknown as GMonth
   if (past.length===0 && future.length===0) return null
   const bg = safeArr<{planet:string;house:number;nature:string}>(g.background)
@@ -614,8 +637,10 @@ function NavamsaCard({ nv, lang, note }:{ nv:Record<string,unknown>; lang:Lang; 
 // ── v9.0 REMEDY HIERARCHY ────────────────────────────────────────────────────
 // All five upay were spiritual and presented flat, so "chant 108x" read as the
 // answer to debt. Classical position is the reverse: remedies support effort.
-function RemedyLevels({ h, lang }:{ h:Record<string,unknown>; lang:Lang }) {
-  const levels = safeArr<Record<string,unknown>>(h.levels)
+function RemedyLevels({ h, lang, isPaid }:{ h:Record<string,unknown>; lang:Lang; isPaid:boolean }) {
+  // v9.3: free gets the practical and behavioural levels — the two that cost
+  // nothing to act on. The spiritual and seva levels are part of the paid upay.
+  const levels = isPaid ? safeArr<Record<string,unknown>>(h.levels) : safeArr<Record<string,unknown>>(h.levels).slice(0, 2)
   if (levels.length===0) return null
   const COL = ['#22c55e','#60a5fa',GOLD,'#a78bfa']
   return (
@@ -669,6 +694,27 @@ function MonthlyOutlook({ rows, lang }:{ rows:MOut[]; lang:Lang }) {
           </div>
         ))}
       </div>
+    </div>
+  )
+}
+
+// ── v9.3 PAYWALL TEASER ──────────────────────────────────────────────────────
+// v9.0-9.2 added evidence, D9, gochar, Bhrigu and remedy levels but gated NONE of
+// them, while the ₹51 lock box went on promising "Complete planetary analysis",
+// "Bhrigu Nandi pattern insights" and "Chart evidence — house lords + Shadbala"
+// — all of which the free reader could already read on the same page. Free tier
+// now sees enough to know the chart was genuinely read; the depth stays paid.
+function LockedTeaser({ lines, slug, lang }:{ lines:string[]; slug:string; lang:Lang }) {
+  if (lines.length===0) return null
+  return (
+    <div style={{background:G(0.05),border:`1px dashed ${G(0.3)}`,borderRadius:'14px',padding:'16px 18px',marginBottom:'14px'}}>
+      <p style={{margin:'0 0 8px',color:GOLD,fontSize:'11px',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.07em'}}>{lbl('lockedMore',lang)}</p>
+      <ul style={{margin:'0 0 12px',padding:'0 0 0 18px',color:'#94a3b8',fontSize:'12.5px',lineHeight:1.85}}>
+        {lines.map((l,i)=>(<li key={i}>{l}</li>))}
+      </ul>
+      <Link href={`/upgrade?slug=${slug}&tier=basic`} style={{display:'inline-block',padding:'10px 20px',borderRadius:'10px',background:`linear-gradient(135deg,${GOLD},#F5D76E)`,color:'#080B12',fontSize:'13px',fontWeight:700,textDecoration:'none'}}>
+        🔓 ₹51
+      </Link>
     </div>
   )
 }
@@ -1414,7 +1460,20 @@ function UpayCards({ remedies, isPaid, slug, lang }: { remedies: UpayItem[]; isP
 // ─── LOCKED SECTION — v8.3 PERSONALIZED ──────────────────────────────────────
 
 function LockedSection({slug, mahadasha, domainLabel}:{slug:string; mahadasha:string; domainLabel:string}) {
-  const features = ['✓ Complete planetary analysis (all 9 grahas)','✓ Bhrigu Nandi pattern insights','✓ 4 action windows with exact dates','✓ Full 5 upay plan (mantra+gemstone+vrat+dana+special)','✓ 900 word deep analysis','✓ Chart evidence — house lords + Shadbala','✓ Lagna + Dasha gemstone recommendation','✓ Karmic insight (Bhrigu)']
+  // v9.3: this list used to promise things the free page already showed —
+  // "Complete planetary analysis", "Bhrigu Nandi pattern insights", "Chart
+  // evidence — house lords + Shadbala". A reader who had just read all three had
+  // no reason to pay. Every line below is now something genuinely withheld.
+  const features = [
+    '✓ Navamsa (D9) — har graha ka andaruni bal',
+    '✓ Agle 6 mahine ka gochar, mahine-dar-mahine',
+    '✓ Har graha ka Shadbala score',
+    '✓ Saare bhav + dasha activation chain',
+    '✓ Bhrigu Nandi signals aur yogas',
+    '✓ Poora 5-upay plan (mantra+ratna+vrat+dana+vishesh)',
+    '✓ 900-word deep analysis',
+    '✓ Chaaron upay levels — vyavaharik se seva tak',
+  ]
   // v8.3 FIX-3: teaser personalized with the user's own dasha + domain
   const hasMd = mahadasha && mahadasha !== '—'
   const teaserLine = hasMd
@@ -1693,7 +1752,7 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
                       const hasSb = typeof p.shadbala==='number' && p.strength
                       const sc=!hasSb?'#64748b':p.strength==='Very Strong'?'#22c55e':p.strength==='Strong'?'#86efac':p.strength==='Moderate'?GOLD:'#ef4444'
                       const sd=!hasSb?'':p.strength==='Very Strong'?'●●':p.strength==='Strong'?'●':p.strength==='Moderate'?'◐':'○'
-                      return (<tr key={p.planet} style={{borderBottom:'1px solid rgba(255,255,255,0.04)',background:i%2===0?G(0.02):'transparent'}}><td style={{padding:'11px 6px',color:'#fff',fontWeight:600}}><span style={{color:GOLD,marginRight:'5px'}}>{PLANET_GLYPH[p.planet]??'✦'}</span>{p.planet_hi||PLANET_HI[p.planet]||p.planet}{p.retrograde&&<span style={{color:'#f59e0b',fontSize:'10px',marginLeft:'4px'}}>® Vakri</span>}</td><td style={{padding:'11px 6px',color:'#e2e8f0'}}>{p.rashi}</td><td style={{padding:'11px 6px',color:'#e2e8f0'}}>{ordinal(p.house)}</td><td style={{padding:'11px 6px',color:'#94a3b8',fontSize:'12px'}}>{p.nakshatra}</td><td style={{padding:'11px 6px',color:'#94a3b8',fontSize:'12px'}}>{p.dignity}</td><td style={{padding:'11px 6px'}}><span style={{color:sc,fontSize:'12px',fontWeight:700}}>{hasSb?<>{sd} {p.strength} <span style={{color:'#64748b',fontWeight:500}}>({p.shadbala.toFixed(2)})</span></>:'—'}</span></td></tr>)
+                      return (<tr key={p.planet} style={{borderBottom:'1px solid rgba(255,255,255,0.04)',background:i%2===0?G(0.02):'transparent'}}><td style={{padding:'11px 6px',color:'#fff',fontWeight:600}}><span style={{color:GOLD,marginRight:'5px'}}>{PLANET_GLYPH[p.planet]??'✦'}</span>{p.planet_hi||PLANET_HI[p.planet]||p.planet}{p.retrograde&&<span style={{color:'#f59e0b',fontSize:'10px',marginLeft:'4px'}}>® Vakri</span>}</td><td style={{padding:'11px 6px',color:'#e2e8f0'}}>{p.rashi}</td><td style={{padding:'11px 6px',color:'#e2e8f0'}}>{ordinal(p.house)}</td><td style={{padding:'11px 6px',color:'#94a3b8',fontSize:'12px'}}>{p.nakshatra}</td><td style={{padding:'11px 6px',color:'#94a3b8',fontSize:'12px'}}>{p.dignity}</td><td style={{padding:'11px 6px'}}><span style={{color:sc,fontSize:'12px',fontWeight:700}}>{hasSb?<>{sd} {p.strength}{isPaid && <span style={{color:'#64748b',fontWeight:500}}> ({p.shadbala.toFixed(2)})</span>}</>:'—'}</span></td></tr>)
                     })}
                   </tbody>
                 </table>
@@ -1705,12 +1764,23 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
           {/* v8.4: evidence, yogas/Bhrigu and confidence sit right after the planet
               table — the client reads the chart, then immediately reads why it
               matters for them, before the dasha timeline. */}
-          {Object.keys(navamsa).length>0 && <NavamsaCard nv={navamsa} lang={lang} note={navNote}/>}
+          {isPaid && Object.keys(navamsa).length>0 && <NavamsaCard nv={navamsa} lang={lang} note={navNote}/>}
 
-          {hasEvidence && <EvidenceTable ev={chartEv} meanings={evMeanings} lang={lang}/>}
-          <EngineSignals yogas={allYogas} bhriguTheme={bhriguTheme} bhriguPoints={bhriguPts} signals={bhriguSignals} lang={lang}/>
-          {Object.keys(gochar).length>0 && <GocharTimeline g={gochar} lang={lang}/>}
-          <MonthlyOutlook rows={monthlyOut} lang={lang}/>
+          {hasEvidence && <EvidenceTable ev={chartEv} meanings={evMeanings} lang={lang} isPaid={isPaid}/>}
+          {isPaid && <EngineSignals yogas={allYogas} bhriguTheme={bhriguTheme} bhriguPoints={bhriguPts} signals={bhriguSignals} lang={lang}/>}
+          {Object.keys(gochar).length>0 && <GocharTimeline g={gochar} lang={lang} isPaid={isPaid}/>}
+          {isPaid && <MonthlyOutlook rows={monthlyOut} lang={lang}/>}
+
+          {/* v9.3: one honest teaser naming exactly what is being held back. */}
+          {!isPaid && (
+            <LockedTeaser slug={slug} lang={lang} lines={[
+              ...(Object.keys(navamsa).length>0 ? [lbl('lockedD9',lang)] : []),
+              ...(safeArr<GMonth>(gochar.future).length>0 ? [lbl('lockedFuture',lang)] : []),
+              ...((allYogas.length>0 || bhriguSignals.length>0) ? [lbl('lockedBhrigu',lang)] : []),
+              ...(planetTable.length>0 ? [lbl('lockedShad',lang)] : []),
+              lbl('lockedRows',lang),
+            ]}/>
+          )}
           <ConfidenceCard c={confidence} lang={lang}/>
 
           <div style={{background:BG_CARD,border:`1px solid ${G(0.12)}`,borderRadius:'16px',padding:'22px',marginBottom:'14px'}}>
@@ -1745,7 +1815,7 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
             </div>
           )}
 
-          {Object.keys(remedyLvls).length>0 && <RemedyLevels h={remedyLvls} lang={lang}/>}
+          {Object.keys(remedyLvls).length>0 && <RemedyLevels h={remedyLvls} lang={lang} isPaid={isPaid}/>}
 
           {/* v9.0: Panchang RESTORED — template_engine v3.0 now computes it from
               today's real Sun/Moon longitudes through the VM's panchang engine.
