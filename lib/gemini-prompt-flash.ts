@@ -67,6 +67,31 @@ const SEGMENT_FOCUS: Record<string, string> = {
 
 // ─── MAIN EXPORT ──────────────────────────────────────────────────────────────
 
+// v2.0: compact evidence for the free tier — enough to prove the reading is
+// genuinely from THIS chart, not enough to replace the paid report.
+function freeEvidence(templateData?: any) {
+  const ev = (templateData as any)?.chartEvidence
+  if (!ev || !Array.isArray(ev.houses) || ev.houses.length === 0) return null
+  const houses = ev.houses.slice(0, 2).map((h: any) => ({
+    house:     h.factor,
+    sign:      h.sign ?? null,
+    lord:      h.lord ?? null,
+    lordSits:  h.lord_house ? `house ${h.lord_house}${h.lord_rashi ? ` (${h.lord_rashi})` : ''}` : null,
+    dignity:   h.lord_dignity ?? null,
+    occupants: Array.isArray(h.occupants) && h.occupants.length ? h.occupants : null,
+  }))
+  const act = ev.activation ?? {}
+  return {
+    lagna:      ev.lagna ?? null,
+    lagnaLord:  ev.lagna_lord ?? null,
+    houses,
+    mahadasha:  act.mahadasha ?? null,
+    antardasha: act.antardasha ?? null,
+    pratyantar: act.pratyantar ?? null,
+    note: 'These are computed values. Cite them; never derive new ones.',
+  }
+}
+
 export function buildFlashPrompt(
   kundali:      KundaliData,
   birthData:    BirthData,
@@ -137,6 +162,18 @@ RULE 7 — geoDirectAnswer = 2-3 sentences max. NO URL inside it.
          Must be indexable by Google SGE + Perplexity + SearchGPT.
 RULE 8 — Output COMPLETE JSON always.
 RULE 9 — seoSignals MUST include trending 2026 keywords for this domain.
+RULE 10 — ENGINE AUTHORITY: the Parashara, Shadbala and Vimshottari engines have
+         already done every calculation. You are the interpreter, never the
+         calculator. NEVER work out a house, house lord, aspect, dignity or date
+         yourself — do not reason "Meena Lagna means the 6th is Simha, so its lord
+         is Sun". Use ONLY what chartEvidence gives you. If a value is absent, stay
+         silent about it; a plausible guess destroys trust permanently.
+RULE 11 — CITE THE CHART: when chartEvidence is present, at least TWO bullets must
+         rest on a named house lord and where it actually sits — in plain language
+         ("aapke 6th house ka swami Surya 10th mein hai"), never as a data dump.
+         This is what shows the reader the analysis is genuinely theirs. If
+         chartEvidence is null, write general BPHS principles and make no
+         chart-specific claim at all.
 ════════════════════════════════════════════════════════
 `.trim()
 
@@ -162,6 +199,18 @@ RULE 9 — seoSignals MUST include trending 2026 keywords for this domain.
     nakshatra:          kundali.nakshatra,
     actionWindowHint:   templateData?.actionWindowHint || null,
     avoidWindowHint:    templateData?.avoidWindowHint || null,
+    // ── v2.0 FREE-TIER CHART EVIDENCE ────────────────────────────────────────
+    // The free reading previously carried NO chart data at all — the parameter
+    // existed but route.ts never passed it, so this prompt only ever saw a Lagna
+    // name and a one-line dasha string. A free reader therefore got assertions
+    // with nothing behind them, which is exactly the "could be written for
+    // anybody" impression that kills the ₹51 conversion.
+    //
+    // Free tier deliberately gets a SUBSET: the Lagna lord, the two most
+    // relevant house lords with where they sit, and the real dasha dates. It
+    // does NOT get Shadbala numbers, the full nine-planet table, the 9-month
+    // gochar timeline or the D9 chart — those stay the paid difference.
+    chartEvidence:      freeEvidence(templateData),
     person2Name:        userContext.person2Name || null,
     currentPeriod:      period.monthYear,
   }
@@ -172,6 +221,7 @@ RULE 9 — seoSignals MUST include trending 2026 keywords for this domain.
 
   "geoBullets": [
     "Bullet 1 (Vedic Foundation): Classical BPHS principle about ${domain.displayName} — entity-rich, cite planet or house — 15-25 words",
+    "Bullet 1b (Your Chart): If chartEvidence exists, name ONE house lord from it and where it sits, and what that means for ${domain.displayName}. If chartEvidence is null, omit this and give another general principle — 15-25 words",
     "Bullet 2 (Dasha Intelligence): How ${templateData?.dashaOneLiner || 'current planetary period'} specifically affects ${domain.displayName} — 15-25 words",
     "Bullet 3 (Segment-Specific): Insight tailored for ${dynSeg} — their primary concern in ${domain.displayName} — 15-25 words",
     "Bullet 4 (Timing Precision): Favorable period from dasha analysis — specific window — 15-25 words",
