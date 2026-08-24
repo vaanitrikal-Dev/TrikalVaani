@@ -5,8 +5,28 @@
  * TRIKAAL VAANI — Public SEO Report Client
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/report/[slug]/ReportPublicClient.tsx
- * VERSION: 9.3 — paywall restored: free proves the chart, paid keeps the depth
+ * VERSION: 10.0 — free tier builds suspense; dakshina ladder removed
  * SIGNED: ROHIIT GUPTA, CEO
+ *
+ * v10.0 (24 Aug 2026) — SUSPENSE, not a shorter report
+ *   v9.3 gated the right sections but every remaining one was still COMPLETE and
+ *   CLOSED — a full mantra, both gemstone prescriptions, two dated windows. A
+ *   reader with all that has what they came for. And the locked teaser was a
+ *   feature list ("Navamsa (D9)", "Shadbala score") — a spec sheet creates no
+ *   pull, because a stranger cannot want what they cannot picture.
+ *   v10.0 instead states something TRUE and SPECIFIC about this person's own
+ *   chart and stops halfway: "Jupiter is Vargottama in your D9", "your 11th and
+ *   12th share the SAME lord, and it is debilitated", "Bhrigu found 2 signals,
+ *   1 active now". Every fact comes from the engine — nothing is invented, only
+ *   the consequence is withheld. Free sections now END on an open question
+ *   (Cliff) rather than a full stop: one action window instead of two, the
+ *   mantra alone instead of three complete upay.
+ *
+ *   DAKSHINA LADDER REMOVED ENTIRELY. The dakshina table held two rows since
+ *   launch, both from July — it earned effectively nothing while ₹101 →
+ *   ₹1,08,000 sat under the ₹51 CTA competing with it, and on a free page asked
+ *   for money before the reader had reason to trust anything. Deleted rather
+ *   than hidden. Razorpay still powers the ₹51 unlock.
  *
  * v9.3 (24 Aug 2026) — PAYWALL, which v9.0-9.2 quietly removed
  *   Those versions added the evidence table, D9, gochar timeline, Bhrigu signals,
@@ -115,21 +135,16 @@
  * ============================================================
  */
 
-import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import SiteNav    from '@/components/layout/SiteNav'
 import SiteFooter from '@/components/layout/SiteFooter'
-import { ArrowLeft, Lock, Download, Sparkles, X, Check } from 'lucide-react'
-import { loadRazorpayScript, openRazorpayCheckout } from '@/lib/razorpay-helper'
+import { ArrowLeft, Lock, Download, Sparkles } from 'lucide-react'
 
 const GOLD    = '#D4AF37'
 const RAZORPAY_BLUE = '#3395FF'
 const G       = (a: number) => `rgba(212,175,55,${a})`
 const BG_DARK = '#080B12'
 const BG_CARD = 'rgba(6,10,22,0.95)'
-
-const ARZI_AMT      = [101,201,501,1001,2101,5001,11000,21000,51000,108000]
-const DHANYAWAD_AMT = [101,251,501,1008,2501,5001,10001,21000,51000,108000]
 
 const PLANET_GLYPH: Record<string,string> = {
   Sun:'☉', Moon:'☽', Mars:'♂', Mercury:'☿',
@@ -255,7 +270,12 @@ const L: Record<string, Record<Lang,string>> = {
   dashaKaal:    {hinglish:'⏰ Dasha Kaal — Vimshottari System', hindi:'⏰ दशा काल — विंशोत्तरी पद्धति', english:'⏰ Dasha Periods — Vimshottari System'},
   actionWin:    {hinglish:'🗓 Action Windows — Trikaal Precision', hindi:'🗓 कार्य अवधि — त्रिकाल परिशुद्धता', english:'🗓 Action Windows — Trikaal Precision'},
   upayTitle:    {hinglish:'🙏 Upay — 5 Classical Remedies (BPHS)', hindi:'🙏 उपाय — ५ शास्त्रीय उपाय (बीपीएचएस)', english:'🙏 Remedies — 5 Classical Upay (BPHS)'},
-  lockedMore:   {hinglish:'🔒 ₹51 mein aur bhi khulta hai', hindi:'🔒 ₹५१ में और भी खुलता है', english:'🔒 More unlocks for ₹51'},
+  lockedMore:   {hinglish:'🔒 Trikaal ne aur bhi dekha hai', hindi:'🔒 त्रिकाल ने और भी देखा है', english:'🔒 Trikaal has seen more'},
+  unlock51:     {hinglish:'🔓 Poora sach — ₹51',  hindi:'🔓 पूरा सच — ₹५१',  english:'🔓 The full answer — ₹51'},
+  tzMonths:     {hinglish:'…aur aage ke 6 mahine?', hindi:'…और आगे के ६ महीने?', english:'…and the next 6 months?'},
+  tzWindow:     {hinglish:'…doosri window kab khulti hai?', hindi:'…दूसरी अवधि कब खुलती है?', english:'…when does the next window open?'},
+  tzUpay:       {hinglish:'…aapke Lagna ka ratna kaun sa hai?', hindi:'…आपके लग्न का रत्न कौन सा है?', english:'…which gemstone is for your Lagna?'},
+  moreHouses:   {hinglish:'aur bhav', hindi:'और भाव', english:'more houses'},
   lockedD9:     {hinglish:'Navamsa (D9) — har graha ka andaruni bal', hindi:'नवांश (D9) — हर ग्रह का आंतरिक बल', english:'Navamsa (D9) — the inner strength of each graha'},
   lockedFuture: {hinglish:'Agle 6 mahine ka gochar + mahine-dar-mahine plan', hindi:'अगले ६ महीने का गोचर + महीने-दर-महीने योजना', english:'Next 6 months of transits + month-by-month plan'},
   lockedBhrigu: {hinglish:'Bhrigu Nandi signals aur yogas', hindi:'भृगु नंदी संकेत और योग', english:'Bhrigu Nandi signals and yogas'},
@@ -401,7 +421,7 @@ function WhyYouAreHere({ why, activation, lang }:{ why:WhyHere; activation?:Char
 // Every row is a lookup into Parashara + Shadbala engine output. The numbers come
 // from the engine; only the "matlab" line is written by the reading. This is what
 // turns an assertion into something the client can follow and check.
-function EvidenceTable({ ev, meanings, lang, isPaid }:{ ev:ChartEvidence; meanings:{house?:number;meaning?:string}[]; lang:Lang; isPaid:boolean }) {
+function EvidenceTable({ ev, meanings, lang, isPaid, slug }:{ ev:ChartEvidence; meanings:{house?:number;meaning?:string}[]; lang:Lang; isPaid:boolean; slug:string }) {
   // v9.3: free gets the same two rows the free prompt was given — enough to prove
   // the reading is from THIS chart, not the whole evidence layer.
   const allRows = safeArr<EvidenceHouse>(ev?.houses)
@@ -444,6 +464,9 @@ function EvidenceTable({ ev, meanings, lang, isPaid }:{ ev:ChartEvidence; meanin
             {links.map((l,i)=>(<span key={i}>{l.planet} → {l.house}{i<links.length-1?' · ':''}</span>))}
           </p>
         </div>
+      )}
+      {!isPaid && allRows.length > rows.length && (
+        <Cliff slug={slug} text={`…${allRows.length - rows.length} ${lbl('moreHouses',lang)} — ${allRows.slice(rows.length).map(r=>r.factor).join(', ')}`}/>
       )}
       <p style={{margin:'12px 0 0',color:'#475569',fontSize:'11px'}}>Parashara BPHS house lords + Shadbala · Swiss Ephemeris</p>
     </div>
@@ -557,7 +580,7 @@ function VerdictCard({ lang, coreMsg, mahadasha, antardasha, pratyantar, best, c
 interface GMonth { ym:string; label:string; is_past:boolean; is_current:boolean
   antardasha:string|null; pratyantar:string|null; tone:string; marker:string
   domain_hits:{planet:string;house:number;nature:string}[] }
-function GocharTimeline({ g, lang, isPaid }:{ g:Record<string,unknown>; lang:Lang; isPaid:boolean }) {
+function GocharTimeline({ g, lang, isPaid, slug }:{ g:Record<string,unknown>; lang:Lang; isPaid:boolean; slug:string }) {
   // v9.3: the past three months are the recognition hook and stay free; the six
   // months AHEAD are the thing worth paying for.
   const past = safeArr<GMonth>(g.past), future = isPaid ? safeArr<GMonth>(g.future) : []
@@ -592,6 +615,7 @@ function GocharTimeline({ g, lang, isPaid }:{ g:Record<string,unknown>; lang:Lan
       {past.length>0 && <><Head t={lbl('tlPast',lang)}/>{past.map(m=><Row key={m.ym} m={m}/>)}</>}
       {cur?.label   && <><Head t={lbl('tlNow',lang)}/><Row m={cur} highlight/></>}
       {future.length>0 && <><Head t={lbl('tlNext',lang)}/>{future.map(m=><Row key={m.ym} m={m}/>)}</>}
+      {!isPaid && <Cliff slug={slug} text={lbl('tzMonths',lang)}/>}
       <p style={{margin:'10px 0 0',color:'#475569',fontSize:'11px',lineHeight:1.5}}>{s(g.disclaimer as string,'')}</p>
     </div>
   )
@@ -707,15 +731,29 @@ function MonthlyOutlook({ rows, lang }:{ rows:MOut[]; lang:Lang }) {
 function LockedTeaser({ lines, slug, lang }:{ lines:string[]; slug:string; lang:Lang }) {
   if (lines.length===0) return null
   return (
-    <div style={{background:G(0.05),border:`1px dashed ${G(0.3)}`,borderRadius:'14px',padding:'16px 18px',marginBottom:'14px'}}>
-      <p style={{margin:'0 0 8px',color:GOLD,fontSize:'11px',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.07em'}}>{lbl('lockedMore',lang)}</p>
-      <ul style={{margin:'0 0 12px',padding:'0 0 0 18px',color:'#94a3b8',fontSize:'12.5px',lineHeight:1.85}}>
-        {lines.map((l,i)=>(<li key={i}>{l}</li>))}
-      </ul>
-      <Link href={`/upgrade?slug=${slug}&tier=basic`} style={{display:'inline-block',padding:'10px 20px',borderRadius:'10px',background:`linear-gradient(135deg,${GOLD},#F5D76E)`,color:'#080B12',fontSize:'13px',fontWeight:700,textDecoration:'none'}}>
-        🔓 ₹51
+    <div style={{background:`linear-gradient(135deg,${G(0.1)},rgba(8,11,18,0.9))`,border:`1px solid ${G(0.35)}`,borderRadius:'14px',padding:'18px',marginBottom:'14px'}}>
+      <p style={{margin:'0 0 10px',color:GOLD,fontSize:'11px',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.07em'}}>{lbl('lockedMore',lang)}</p>
+      <div style={{display:'flex',flexDirection:'column',gap:'9px',marginBottom:'14px'}}>
+        {lines.map((l,i)=>(
+          <p key={i} style={{margin:0,color:'#e2e8f0',fontSize:'13px',lineHeight:1.7}}>{l}</p>
+        ))}
+      </div>
+      <Link href={`/upgrade?slug=${slug}&tier=basic`} style={{display:'inline-block',padding:'12px 24px',borderRadius:'10px',background:`linear-gradient(135deg,${GOLD},#F5D76E,${GOLD})`,color:'#080B12',fontSize:'14px',fontWeight:700,textDecoration:'none',boxShadow:`0 0 24px ${G(0.35)}`}}>
+        {lbl('unlock51',lang)}
       </Link>
     </div>
+  )
+}
+
+// ── v10.0 INLINE CLIFFHANGER ─────────────────────────────────────────────────
+// A section that simply STOPS reads as "the free version is complete". A section
+// that stops mid-sentence reads as "there is more, and it is about me". This
+// short line closes each free section on an open question rather than a full stop.
+function Cliff({ text, slug }:{ text:string; slug:string }) {
+  return (
+    <Link href={`/upgrade?slug=${slug}&tier=basic`} style={{display:'block',marginTop:'10px',padding:'10px 13px',borderRadius:'9px',background:G(0.07),border:`1px dashed ${G(0.3)}`,color:GOLD,fontSize:'12.5px',fontWeight:600,textDecoration:'none',lineHeight:1.6}}>
+      {text} <span style={{opacity:0.85}}>→ ₹51</span>
+    </Link>
   )
 }
 
@@ -771,570 +809,13 @@ function StickyUpgradeBar({slug}:{slug:string}) {
 
 // ─── MAA SHAKTI DAKSHINA — v8.1 RAZORPAY ─────────────────────────────────────
 
-interface DakshinaSuccess {
-  type: 'arzi' | 'dhanyawad'
-  amount: number
-  paymentId: string
-  whatsappUrl: string
-  blessing: string
-}
-
-function MaaShakti({slug}:{slug:string}) {
-  const [tab, setTab] = useState<'arzi'|'dhanyawad'>('arzi')
-  const [customAmount, setCustomAmount] = useState<string>('')
-  const [showCustom, setShowCustom] = useState(false)
-  const [devoteeName, setDevoteeName] = useState('')
-  const [devoteeMobile, setDevoteeMobile] = useState('')
-  const [message, setMessage] = useState('')
-  const [paying, setPaying] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [success, setSuccess] = useState<DakshinaSuccess | null>(null)
-
-  const amts = tab === 'arzi' ? ARZI_AMT : DHANYAWAD_AMT
-
-  // Pre-load Razorpay script when component mounts
-  useEffect(() => {
-    loadRazorpayScript()
-  }, [])
-
-  const handleDakshinaClick = async (amount: number, isCustom = false) => {
-    setError(null)
-    setPaying(true)
-
-    try {
-      // Step 1: Ensure script loaded
-      const ok = await loadRazorpayScript()
-      if (!ok) {
-        setError('Razorpay SDK load nahi ho saka. Internet check karein.')
-        setPaying(false)
-        return
-      }
-
-      // Step 2: Create order on server
-      const orderRes = await fetch('/api/create-dakshina-order', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          type: tab,
-          amount,
-          reportSlug: slug,
-          isCustom,
-        }),
-      })
-
-      if (!orderRes.ok) {
-        const err = await orderRes.json().catch(() => ({}))
-        setError(err.error || 'Order create nahi ho saka.')
-        setPaying(false)
-        return
-      }
-
-      const { orderId, amount: amountPaise, currency, keyId } = await orderRes.json()
-
-      // Step 3: Open Razorpay popup
-      openRazorpayCheckout({
-        keyId,
-        orderId,
-        amount: amountPaise,
-        currency,
-        name: 'Trikaal Vaani',
-        description: tab === 'arzi'
-          ? `Maa Ko Arzi — ₹${amount.toLocaleString('en-IN')}`
-          : `Maa Ka Dhanyawad — ₹${amount.toLocaleString('en-IN')}`,
-        prefillName: devoteeName,
-        prefillContact: devoteeMobile,
-        themeColor: '#D4AF37',
-        onSuccess: async (response) => {
-          // Step 4: Verify and save
-          const verifyRes = await fetch('/api/verify-dakshina', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              ...response,
-              type: tab,
-              amount,
-              reportSlug: slug,
-              devoteeName: devoteeName || undefined,
-              devoteeMobile: devoteeMobile || undefined,
-              message: message || undefined,
-            }),
-          })
-
-          if (!verifyRes.ok) {
-            const err = await verifyRes.json().catch(() => ({}))
-            setError(err.error || 'Payment verification fail. Support se contact karein.')
-            setPaying(false)
-            return
-          }
-
-          const data = await verifyRes.json()
-          setSuccess({
-            type: tab,
-            amount,
-            paymentId: data.paymentId,
-            whatsappUrl: data.whatsappUrl,
-            blessing: data.blessing,
-          })
-          setPaying(false)
-        },
-        onDismiss: () => {
-          setPaying(false)
-        },
-      })
-    } catch (err: any) {
-      setError(err.message || 'Kuch problem hui. Phir try karein.')
-      setPaying(false)
-    }
-  }
-
-  const handleCustomSubmit = () => {
-    const amt = parseInt(customAmount.replace(/[^\d]/g, ''), 10)
-    if (!amt || amt < 51) {
-      setError('Minimum dakshina ₹51 hai.')
-      return
-    }
-    if (amt > 500000) {
-      setError('Maximum dakshina ₹5,00,000 hai.')
-      return
-    }
-    handleDakshinaClick(amt, true)
-  }
-
-  const waBase = tab === 'arzi'
-    ? `Pranam%20Rohiit%20ji%2C%20Maa%20ko%20Arzi%20karna%20chahta%20hoon.%20Report:%20${slug}.%20Jai%20Maa%20Shakti!`
-    : `Jai%20Maa%20Shakti!%20Maa%20ne%20meri%20sun%20li.%20Report:%20${slug}.`
-
-  // ── Success Modal ────────────────────────────────────────
-  if (success) {
-    return (
-      <div style={{
-        background: `linear-gradient(135deg,${G(0.12)},rgba(34,197,94,0.08))`,
-        border: `1px solid ${G(0.4)}`,
-        borderRadius: '20px',
-        padding: '32px 24px',
-        marginBottom: '16px',
-        textAlign: 'center',
-      }}>
-        <div style={{
-          width: '72px',
-          height: '72px',
-          margin: '0 auto 18px',
-          borderRadius: '50%',
-          background: `linear-gradient(135deg,${GOLD},#F5D76E)`,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          boxShadow: `0 0 40px ${G(0.5)}`,
-        }}>
-          <Check size={36} color="#080B12" strokeWidth={3}/>
-        </div>
-
-        <h2 style={{
-          margin: '0 0 8px',
-          color: GOLD,
-          fontSize: '22px',
-          fontFamily: 'Georgia,serif',
-          fontWeight: 700,
-        }}>
-          🔱 Jai Maa Shakti
-        </h2>
-
-        <p style={{
-          margin: '0 0 12px',
-          color: '#fff',
-          fontSize: '15px',
-          fontWeight: 600,
-          lineHeight: 1.6,
-        }}>
-          {success.type === 'arzi'
-            ? `Aapki Arzi Maa ke charnon mein pahunch gayi`
-            : `Aapka Dhanyawad Maa ne sweekar kar liya`}
-        </p>
-
-        <p style={{
-          margin: '0 0 18px',
-          color: '#94a3b8',
-          fontSize: '13px',
-          lineHeight: 1.6,
-        }}>
-          Dakshina: <strong style={{color: GOLD}}>₹{success.amount.toLocaleString('en-IN')}</strong>
-          <br/>
-          Payment ID: <code style={{color: '#64748b', fontSize: '11px'}}>{success.paymentId}</code>
-        </p>
-
-        <p style={{
-          margin: '0 0 20px',
-          color: '#cbd5e1',
-          fontSize: '13px',
-          fontStyle: 'italic',
-          lineHeight: 1.7,
-          maxWidth: '340px',
-          marginLeft: 'auto',
-          marginRight: 'auto',
-        }}>
-          {success.blessing}
-        </p>
-
-        <a
-          href={success.whatsappUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '8px',
-            padding: '13px 26px',
-            borderRadius: '12px',
-            background: 'linear-gradient(135deg,#25D366,#1da851)',
-            color: '#fff',
-            fontSize: '14px',
-            fontWeight: 700,
-            textDecoration: 'none',
-            boxShadow: '0 0 25px rgba(37,211,102,0.3)',
-          }}
-        >
-          📱 Rohiit ji ko inform karein
-        </a>
-
-        <p style={{
-          margin: '14px 0 0',
-          color: '#475569',
-          fontSize: '11px',
-        }}>
-          🔒 Secured by <span style={{color: RAZORPAY_BLUE, fontWeight: 600}}>Razorpay</span>
-        </p>
-      </div>
-    )
-  }
-
-  // ── Main Dakshina UI ─────────────────────────────────────
-  return (
-    <div style={{
-      background: `linear-gradient(135deg,${G(0.07)},rgba(124,58,237,0.07))`,
-      border: `1px solid ${G(0.25)}`,
-      borderRadius: '20px',
-      padding: '28px 20px',
-      marginBottom: '16px',
-    }}>
-      <div style={{textAlign: 'center', marginBottom: '20px'}}>
-        <div style={{fontSize: '38px', marginBottom: '8px'}}>🙏</div>
-        <h2 style={{
-          margin: '0 0 6px',
-          color: GOLD,
-          fontSize: '20px',
-          fontFamily: 'Georgia,serif',
-          fontWeight: 700,
-        }}>
-          Maa Shakti Ki Divya Seva
-        </h2>
-        <p style={{
-          margin: '0 auto',
-          color: G(0.65),
-          fontSize: '13px',
-          lineHeight: 1.6,
-          maxWidth: '320px',
-        }}>
-          Yeh fees nahi — yeh dil ki dakshina hai. Koi seema nahi devotion ki.
-        </p>
-      </div>
-
-      {/* Tab switcher */}
-      <div style={{
-        display: 'flex',
-        gap: '8px',
-        marginBottom: '16px',
-        background: 'rgba(0,0,0,0.3)',
-        padding: '4px',
-        borderRadius: '12px',
-      }}>
-        {(['arzi','dhanyawad'] as const).map(t => (
-          <button
-            key={t}
-            onClick={() => { setTab(t); setShowCustom(false); setError(null) }}
-            disabled={paying}
-            style={{
-              flex: 1,
-              padding: '10px',
-              borderRadius: '10px',
-              border: 'none',
-              cursor: paying ? 'not-allowed' : 'pointer',
-              fontWeight: 700,
-              fontSize: '13px',
-              transition: 'all 0.3s',
-              background: tab === t
-                ? `linear-gradient(135deg,${GOLD},#A8820A)`
-                : 'transparent',
-              color: tab === t ? '#080B12' : G(0.55),
-              opacity: paying ? 0.6 : 1,
-            }}
-          >
-            {t === 'arzi' ? '🪔 Arzi to Maa' : '🌺 Dhanyawad to Maa'}
-          </button>
-        ))}
-      </div>
-
-      <p style={{
-        color: '#94a3b8',
-        fontSize: '13px',
-        margin: '0 0 14px',
-        lineHeight: 1.6,
-        textAlign: 'center',
-      }}>
-        {tab === 'arzi'
-          ? 'Apni deepest prayer Maa ke charnon mein rakhein. Razorpay ke through secure dakshina.'
-          : 'Maa ka Dhanyawad karein — gratitude hi sabse badi puja hai.'}
-      </p>
-
-      {/* Razorpay trust strip */}
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: '8px',
-        padding: '6px 12px',
-        background: 'rgba(51,149,255,0.06)',
-        border: '1px solid rgba(51,149,255,0.18)',
-        borderRadius: '8px',
-        marginBottom: '16px',
-        flexWrap: 'wrap',
-      }}>
-        <span style={{fontSize: '10px', color: '#94a3b8', fontWeight: 600}}>🔒 Secured by</span>
-        <span style={{color: RAZORPAY_BLUE, fontWeight: 700, fontSize: '11px', fontFamily: 'Georgia,serif'}}>Razorpay</span>
-        <span style={{color: '#475569', fontSize: '10px'}}>·</span>
-        <span style={{fontSize: '9px', color: '#64748b'}}>UPI · Cards · Wallets</span>
-      </div>
-
-      {/* Optional devotee details */}
-      <div style={{
-        background: 'rgba(0,0,0,0.2)',
-        border: '1px solid rgba(255,255,255,0.06)',
-        borderRadius: '10px',
-        padding: '12px',
-        marginBottom: '14px',
-      }}>
-        <p style={{margin: '0 0 8px', color: '#94a3b8', fontSize: '11px', fontWeight: 600}}>
-          Optional — Maa tak aapka naam pahunche
-        </p>
-        <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '8px'}}>
-          <input
-            type="text"
-            placeholder="Aapka naam"
-            value={devoteeName}
-            onChange={e => setDevoteeName(e.target.value)}
-            disabled={paying}
-            style={{
-              padding: '8px 10px',
-              borderRadius: '6px',
-              background: '#0d1120',
-              border: '1px solid rgba(255,255,255,0.1)',
-              color: '#e2e8f0',
-              fontSize: '12px',
-              outline: 'none',
-            }}
-          />
-          <input
-            type="tel"
-            placeholder="WhatsApp number"
-            value={devoteeMobile}
-            onChange={e => setDevoteeMobile(e.target.value)}
-            disabled={paying}
-            style={{
-              padding: '8px 10px',
-              borderRadius: '6px',
-              background: '#0d1120',
-              border: '1px solid rgba(255,255,255,0.1)',
-              color: '#e2e8f0',
-              fontSize: '12px',
-              outline: 'none',
-            }}
-          />
-        </div>
-        <textarea
-          placeholder="Dil ki baat (optional, max 500 chars)"
-          value={message}
-          onChange={e => setMessage(e.target.value.slice(0, 500))}
-          disabled={paying}
-          rows={2}
-          style={{
-            width: '100%',
-            padding: '8px 10px',
-            borderRadius: '6px',
-            background: '#0d1120',
-            border: '1px solid rgba(255,255,255,0.1)',
-            color: '#e2e8f0',
-            fontSize: '12px',
-            outline: 'none',
-            resize: 'none',
-            fontFamily: 'inherit',
-          }}
-        />
-        {message && (
-          <p style={{margin: '4px 0 0', color: '#475569', fontSize: '10px', textAlign: 'right'}}>
-            {message.length}/500
-          </p>
-        )}
-      </div>
-
-      {/* Preset amount buttons */}
-      <div style={{
-        display: 'flex',
-        flexWrap: 'wrap',
-        gap: '8px',
-        justifyContent: 'center',
-        marginBottom: '14px',
-      }}>
-        {amts.map(a => (
-          <button
-            key={a}
-            onClick={() => handleDakshinaClick(a)}
-            disabled={paying}
-            style={{
-              padding: '8px 14px',
-              borderRadius: '20px',
-              border: `1px solid ${G(0.3)}`,
-              color: GOLD,
-              fontSize: '13px',
-              fontWeight: 600,
-              background: G(0.08),
-              cursor: paying ? 'not-allowed' : 'pointer',
-              opacity: paying ? 0.5 : 1,
-              transition: 'all 0.2s',
-            }}
-          >
-            ₹{a.toLocaleString('en-IN')}
-          </button>
-        ))}
-        <button
-          onClick={() => { setShowCustom(!showCustom); setError(null) }}
-          disabled={paying}
-          style={{
-            padding: '8px 14px',
-            borderRadius: '20px',
-            border: `1px dashed ${G(0.3)}`,
-            color: GOLD,
-            fontSize: '13px',
-            fontWeight: 600,
-            background: showCustom ? G(0.1) : 'transparent',
-            cursor: paying ? 'not-allowed' : 'pointer',
-            opacity: paying ? 0.5 : 1,
-          }}
-        >
-          ✦ Apni dakshina
-        </button>
-      </div>
-
-      {/* Custom amount input */}
-      {showCustom && (
-        <div style={{
-          display: 'flex',
-          gap: '8px',
-          marginBottom: '14px',
-          padding: '12px',
-          background: G(0.04),
-          border: `1px solid ${G(0.2)}`,
-          borderRadius: '10px',
-        }}>
-          <input
-            type="number"
-            placeholder="Apni dakshina (₹51 to ₹5,00,000)"
-            value={customAmount}
-            onChange={e => setCustomAmount(e.target.value)}
-            disabled={paying}
-            min={51}
-            max={500000}
-            style={{
-              flex: 1,
-              padding: '10px 12px',
-              borderRadius: '8px',
-              background: '#0d1120',
-              border: '1px solid rgba(255,255,255,0.1)',
-              color: '#e2e8f0',
-              fontSize: '14px',
-              fontWeight: 600,
-              outline: 'none',
-            }}
-          />
-          <button
-            onClick={handleCustomSubmit}
-            disabled={paying || !customAmount}
-            style={{
-              padding: '10px 18px',
-              borderRadius: '8px',
-              background: paying || !customAmount
-                ? G(0.15)
-                : `linear-gradient(135deg,${GOLD},#F5D76E)`,
-              color: paying || !customAmount ? G(0.5) : '#080B12',
-              fontSize: '13px',
-              fontWeight: 700,
-              border: 'none',
-              cursor: paying || !customAmount ? 'not-allowed' : 'pointer',
-              whiteSpace: 'nowrap',
-            }}
-          >
-            {paying ? '⟳' : 'Submit'}
-          </button>
-        </div>
-      )}
-
-      {/* Error */}
-      {error && (
-        <div style={{
-          padding: '10px 14px',
-          background: 'rgba(239,68,68,0.1)',
-          border: '1px solid rgba(239,68,68,0.25)',
-          borderRadius: '8px',
-          marginBottom: '14px',
-          textAlign: 'center',
-        }}>
-          <p style={{margin: 0, color: '#fca5a5', fontSize: '12px'}}>{error}</p>
-        </div>
-      )}
-
-      {/* Loading */}
-      {paying && (
-        <div style={{
-          padding: '12px',
-          background: G(0.08),
-          border: `1px solid ${G(0.25)}`,
-          borderRadius: '10px',
-          marginBottom: '14px',
-          textAlign: 'center',
-        }}>
-          <p style={{margin: 0, color: GOLD, fontSize: '12px', fontWeight: 600}}>
-            ⟳ Razorpay popup open ho raha hai... Maa ki kripa aapke saath hai.
-          </p>
-        </div>
-      )}
-
-      {/* Fallback WhatsApp link (if Razorpay fails) */}
-      <div style={{
-        marginTop: '8px',
-        paddingTop: '12px',
-        borderTop: `1px solid ${G(0.1)}`,
-        textAlign: 'center',
-      }}>
-        <a
-          href={`https://wa.me/919211804111?text=${waBase}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{
-            color: '#64748b',
-            fontSize: '11px',
-            textDecoration: 'none',
-            fontWeight: 500,
-          }}
-        >
-          Razorpay use nahi karna? → WhatsApp pe Rohiit ji se baat karein
-        </a>
-      </div>
-    </div>
-  )
-}
-
 // ─── 5 UPAY CARDS — v8.3 (slug prop added, upsell link fixed) ────────────────
 
 function UpayCards({ remedies, isPaid, slug, lang }: { remedies: UpayItem[]; isPaid: boolean; slug: string; lang: Lang }) {
-  const visibleCount = isPaid ? 5 : 3
+  // v10.0: free showed three complete upay — mantra, both gemstones, vrat, yantra
+  // and prasad. A reader with a full mantra AND two gemstone prescriptions has
+  // what they came for. Free now sees the mantra only.
+  const visibleCount = isPaid ? 5 : 1
   const visible = remedies.slice(0, visibleCount)
 
   const UPAY_CONFIG = [
@@ -1442,9 +923,9 @@ function UpayCards({ remedies, isPaid, slug, lang }: { remedies: UpayItem[]; isP
         })}
       </div>
 
-      {!isPaid && remedies.length > 3 && (
+      {!isPaid && remedies.length > visibleCount && (
         <div style={{ marginTop: '12px', padding: '12px', background: G(0.06), border: `1px solid ${G(0.2)}`, borderRadius: '10px', textAlign: 'center' }}>
-          <p style={{ margin: '0 0 8px', color: GOLD, fontSize: '12px', fontWeight: 600 }}>🔒 2 more upay (Gemstone + Special) unlocked in Deep Reading</p>
+          <p style={{ margin: '0 0 8px', color: GOLD, fontSize: '12px', fontWeight: 600 }}>{lbl('tzUpay',lang)}</p>
           {/* v8.3 FIX-1: was href="/" (homepage — user had to refill the form). Now goes straight to upgrade. */}
           <Link href={`/upgrade?slug=${slug}&tier=basic`} style={{ color: GOLD, fontSize: '12px', fontWeight: 700, textDecoration: 'none' }}>⚡ Get Full Reading — ₹51</Link>
         </div>
@@ -1650,6 +1131,51 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
   const monthlyOut  = safeArr<MOut>(pj.monthlyOutlook)
   const navNote     = s(pj.navamsaNote as string)
   const bestMonth   = s(gochar.best_month as string)!=='—' ? String(gochar.best_month) : null
+
+  // ── v10.0 SUSPENSE LINES ───────────────────────────────────────────────────
+  // Each line names a real finding from THIS chart and withholds what it means.
+  // A free reader cannot look any of this up; it is only in their own kundali.
+  const suspenseLines: string[] = (() => {
+    if (isPaid) return []
+    const out: string[] = []
+    const vg = safeArr<string>(navamsa.vargottama_planets)
+    if (vg.length > 0) {
+      out.push(lang==='hindi'
+        ? `आपके नवांश में ${vg.join(', ')} वर्गोत्तम है — जन्म कुंडली और D9 दोनों में एक ही राशि। यह विशेष बल आपके लिए कब और कैसे काम करता है, वह पूरी रीडिंग में है।`
+        : lang==='english'
+        ? `In your D9, ${vg.join(', ')} is Vargottama — the same sign in both charts. What that rare strength does for you, and when it activates, is inside.`
+        : `Aapke Navamsa mein ${vg.join(', ')} vargottama hai — janm kundali aur D9 dono mein ek hi rashi. Yeh vishesh bal aapke liye kab aur kaise kaam karta hai, woh poori reading mein hai.`)
+    }
+    // the repeated-lord finding is genuinely striking when it occurs
+    const lords = safeArr<EvidenceHouse>(chartEv?.houses).map(h=>h.lord).filter(Boolean) as string[]
+    const dup = lords.find((l,i)=>lords.indexOf(l)!==i)
+    if (dup) {
+      const rows = safeArr<EvidenceHouse>(chartEv?.houses).filter(h=>h.lord===dup)
+      const hs = rows.map(h=>h.factor).join(' aur ')
+      const dig = rows[0]?.lord_dignity
+      out.push(lang==='hindi'
+        ? `आपके ${hs} — दोनों का स्वामी एक ही ग्रह है: ${dup}${dig==='Debilitated'?', और वह नीच का है':''}। यही आपकी स्थिति की सबसे बड़ी जड़ है, और इसका पूरा विश्लेषण अंदर है।`
+        : lang==='english'
+        ? `Your ${hs} share the SAME lord: ${dup}${dig==='Debilitated'?', and it is debilitated':''}. That single placement is the root of your situation — the full reading explains it.`
+        : `Aapke ${hs} — dono ka swami ek hi grah hai: ${dup}${dig==='Debilitated'?', aur woh neech ka hai':''}. Yahi aapki sthiti ki sabse badi jad hai, aur iska poora vishleshan andar hai.`)
+    }
+    if (bestMonth) {
+      out.push(lang==='hindi'
+        ? `${bestMonth} आपका सबसे सहायक महीना है — लेकिन उससे पहले के महीनों में क्या सँभालना है, और उस महीने में ठीक क्या करना है, वह अंदर है।`
+        : lang==='english'
+        ? `${bestMonth} is your most supportive month — but what to protect before it, and exactly what to do during it, is inside.`
+        : `${bestMonth} aapka sabse sahaayak mahina hai — lekin usse pehle ke mahino mein kya sambhalna hai, aur us mahine mein theek kya karna hai, woh andar hai.`)
+    }
+    if (bhriguSignals.length > 0) {
+      const activeN = bhriguSignals.filter(x=>/active/i.test(x.timing)).length
+      out.push(lang==='hindi'
+        ? `भृगु नंदी नाड़ी ने आपकी कुंडली में ${bhriguSignals.length} संकेत पकड़े${activeN?`, जिनमें ${activeN} अभी सक्रिय है`:''} — वे क्या कह रहे हैं, वह पूरी रीडिंग में खुलता है।`
+        : lang==='english'
+        ? `Bhrigu Nandi Nadi found ${bhriguSignals.length} signals in your chart${activeN?`, ${activeN} of them active right now`:''} — what they say opens in the full reading.`
+        : `Bhrigu Nandi Nadi ne aapke chart mein ${bhriguSignals.length} signal pakde${activeN?`, jinme se ${activeN} abhi active hai`:''} — woh kya keh rahe hain, woh poori reading mein khulta hai.`)
+    }
+    return out.slice(0, 4)
+  })()
   const cautionMon  = s(gochar.caution_month as string)!=='—' ? String(gochar.caution_month) : null
   const hasSummaryText = summaryText!=='—'
   const hasCoreMessage = coreMessage!=='—'
@@ -1766,20 +1292,18 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
               matters for them, before the dasha timeline. */}
           {isPaid && Object.keys(navamsa).length>0 && <NavamsaCard nv={navamsa} lang={lang} note={navNote}/>}
 
-          {hasEvidence && <EvidenceTable ev={chartEv} meanings={evMeanings} lang={lang} isPaid={isPaid}/>}
+          {hasEvidence && <EvidenceTable ev={chartEv} meanings={evMeanings} lang={lang} isPaid={isPaid} slug={slug}/>}
           {isPaid && <EngineSignals yogas={allYogas} bhriguTheme={bhriguTheme} bhriguPoints={bhriguPts} signals={bhriguSignals} lang={lang}/>}
-          {Object.keys(gochar).length>0 && <GocharTimeline g={gochar} lang={lang} isPaid={isPaid}/>}
+          {Object.keys(gochar).length>0 && <GocharTimeline g={gochar} lang={lang} isPaid={isPaid} slug={slug}/>}
           {isPaid && <MonthlyOutlook rows={monthlyOut} lang={lang}/>}
 
-          {/* v9.3: one honest teaser naming exactly what is being held back. */}
+          {/* v10.0: the v9.3 teaser was a FEATURE LIST — "Navamsa (D9)", "Shadbala
+              score" — which reads like a spec sheet and creates no pull. These
+              lines instead state something TRUE and SPECIFIC about this person's
+              own chart and stop halfway. The facts come straight from the engine,
+              so nothing is invented; only the consequence is withheld. */}
           {!isPaid && (
-            <LockedTeaser slug={slug} lang={lang} lines={[
-              ...(Object.keys(navamsa).length>0 ? [lbl('lockedD9',lang)] : []),
-              ...(safeArr<GMonth>(gochar.future).length>0 ? [lbl('lockedFuture',lang)] : []),
-              ...((allYogas.length>0 || bhriguSignals.length>0) ? [lbl('lockedBhrigu',lang)] : []),
-              ...(planetTable.length>0 ? [lbl('lockedShad',lang)] : []),
-              lbl('lockedRows',lang),
-            ]}/>
+            <LockedTeaser slug={slug} lang={lang} lines={suspenseLines}/>
           )}
           <ConfidenceCard c={confidence} lang={lang}/>
 
@@ -1797,7 +1321,10 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
           {actionWindows.length>0&&(
             <div style={{background:BG_CARD,border:`1px solid ${G(0.12)}`,borderRadius:'16px',padding:'22px',marginBottom:'14px'}}>
               <p style={{margin:'0 0 14px',color:GOLD,fontSize:'11px',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.08em'}}>{lbl('actionWin',lang)}</p>
-              {actionWindows.map((w,i)=>{const hi=w.strength==='High';return(<div key={i} style={{padding:'13px',background:hi?'rgba(34,197,94,0.06)':G(0.04),border:`1px solid ${hi?'rgba(34,197,94,0.2)':G(0.15)}`,borderRadius:'10px',marginBottom:'8px'}}><div style={{display:'flex',alignItems:'center',gap:'8px',marginBottom:'5px'}}><span style={{color:hi?'#22c55e':GOLD,fontSize:'13px',fontWeight:700}}>{hi?'🟢':'🟡'} {w.window}</span><span style={{padding:'2px 8px',borderRadius:'10px',background:hi?'rgba(34,197,94,0.15)':G(0.1),color:hi?'#22c55e':GOLD,fontSize:'11px',fontWeight:600}}>{w.strength}</span></div><p style={{margin:0,color:'#e2e8f0',fontSize:'13px',lineHeight:1.5}}>{w.reason}</p></div>)})}
+              {/* v10.0: free sees ONE window. Two dated windows read as a finished
+                  answer; one window plus "when does the next open?" does not. */}
+              {(isPaid?actionWindows:actionWindows.slice(0,1)).map((w,i)=>{const hi=w.strength==='High';return(<div key={i} style={{padding:'13px',background:hi?'rgba(34,197,94,0.06)':G(0.04),border:`1px solid ${hi?'rgba(34,197,94,0.2)':G(0.15)}`,borderRadius:'10px',marginBottom:'8px'}}><div style={{display:'flex',alignItems:'center',gap:'8px',marginBottom:'5px'}}><span style={{color:hi?'#22c55e':GOLD,fontSize:'13px',fontWeight:700}}>{hi?'🟢':'🟡'} {w.window}</span><span style={{padding:'2px 8px',borderRadius:'10px',background:hi?'rgba(34,197,94,0.15)':G(0.1),color:hi?'#22c55e':GOLD,fontSize:'11px',fontWeight:600}}>{w.strength}</span></div><p style={{margin:0,color:'#e2e8f0',fontSize:'13px',lineHeight:1.5}}>{w.reason}</p></div>)})}
+              {!isPaid && actionWindows.length>1 && <Cliff slug={slug} text={lbl('tzWindow',lang)}/>}
             </div>
           )}
 
@@ -1841,7 +1368,13 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
 
           {!isPaid&&<LockedSection slug={slug} mahadasha={mahadasha} domainLabel={domainLabel}/>}
 
-          <MaaShakti slug={slug}/>
+          {/* v10.0: MaaShakti dakshina ladder REMOVED. Two rows in the dakshina
+              table since launch, both in July — it earned effectively nothing,
+              while ₹101 → ₹1,08,000 sat directly under the ₹51 call to action and
+              competed with it. On a free page it also asked for money before the
+              reader had any reason to trust the product. The component and the
+              amount arrays are deleted rather than hidden, so they cannot drift
+              back in. Razorpay is untouched — it still powers the ₹51 unlock. */}
 
           <div style={{background:'rgba(8,14,28,0.95)',border:'1px solid rgba(255,255,255,0.06)',borderRadius:'14px',padding:'18px',marginBottom:'14px'}}>
             <div style={{display:'flex',alignItems:'center',gap:'12px',marginBottom:'12px'}}>
