@@ -5,8 +5,17 @@
  * TRIKAAL VAANI — Public SEO Report Client
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/report/[slug]/ReportPublicClient.tsx
- * VERSION: 10.0 — free tier builds suspense; dakshina ladder removed
+ * VERSION: 10.1 — language leaks fixed in the suspense line and LockedSection
  * SIGNED: ROHIIT GUPTA, CEO
+ *
+ * v10.1 (24 Aug 2026) — two language leaks
+ *   1. The shared-lord suspense line joined house names with a hardcoded ' aur ',
+ *      so the English reading said "Your 12th house aur 11th house share the
+ *      SAME lord". The joiner now follows the chosen language.
+ *   2. LockedSection was the last hardcoded-Hinglish block. An English reader's
+ *      final pitch — the one asking for ₹51 — was written in a language they had
+ *      not chosen. Title, teaser, all eight feature lines and the CTA now follow
+ *      the `language` column.
  *
  * v10.0 (24 Aug 2026) — SUSPENSE, not a shorter report
  *   v9.3 gated the right sections but every remaining one was still COMPLETE and
@@ -281,6 +290,21 @@ const L: Record<string, Record<Lang,string>> = {
   lockedBhrigu: {hinglish:'Bhrigu Nandi signals aur yogas', hindi:'भृगु नंदी संकेत और योग', english:'Bhrigu Nandi signals and yogas'},
   lockedShad:   {hinglish:'Har graha ka Shadbala score', hindi:'हर ग्रह का षड्बल स्कोर', english:'Shadbala score for every graha'},
   lockedRows:   {hinglish:'Baaki bhav, dasha activation aur poore upay', hindi:'शेष भाव, दशा सक्रियता और पूरे उपाय', english:'Remaining houses, dasha activation and the full remedies'},
+  // v10.1: LockedSection was the last hardcoded-Hinglish block — an English
+  // reader saw "Aapki Saturn Mahadasha mein... har graha ka andaruni bal" as the
+  // final pitch, in a language they had not chosen.
+  lockTitle:    {hinglish:'Trikaal Ne Aur Bhi Dekha Hai', hindi:'त्रिकाल ने और भी देखा है', english:'Trikaal Has Seen More'},
+  lockTease:    {hinglish:'Complete analysis, yogas, 5 upay aur 900-word deep reading taiyaar hai.', hindi:'पूरा विश्लेषण, योग, ५ उपाय और ९०० शब्दों की गहन रीडिंग तैयार है।', english:'The complete analysis, yogas, 5 upay and a 900-word deep reading are ready.'},
+  lockCta:      {hinglish:'🔓 Unlock Full Report — ₹51 Only', hindi:'🔓 पूरी रिपोर्ट खोलें — केवल ₹५१', english:'🔓 Unlock Full Report — ₹51 Only'},
+  lockSub:      {hinglish:'One-time · Instant access · Razorpay secure', hindi:'एक बार · तुरंत उपलब्ध · Razorpay सुरक्षित', english:'One-time · Instant access · Razorpay secure'},
+  f1:{hinglish:'✓ Navamsa (D9) — har graha ka andaruni bal', hindi:'✓ नवांश (D9) — हर ग्रह का आंतरिक बल', english:'✓ Navamsa (D9) — the inner strength of each graha'},
+  f2:{hinglish:'✓ Agle 6 mahine ka gochar, mahine-dar-mahine', hindi:'✓ अगले ६ महीने का गोचर, महीने-दर-महीने', english:'✓ Next 6 months of transits, month by month'},
+  f3:{hinglish:'✓ Har graha ka Shadbala score', hindi:'✓ हर ग्रह का षड्बल स्कोर', english:'✓ Shadbala score for every graha'},
+  f4:{hinglish:'✓ Saare bhav + dasha activation chain', hindi:'✓ सभी भाव + दशा सक्रियता श्रृंखला', english:'✓ All houses + the dasha activation chain'},
+  f5:{hinglish:'✓ Bhrigu Nandi signals aur yogas', hindi:'✓ भृगु नंदी संकेत और योग', english:'✓ Bhrigu Nandi signals and yogas'},
+  f6:{hinglish:'✓ Poora 5-upay plan (mantra+ratna+vrat+dana+vishesh)', hindi:'✓ पूरा ५-उपाय प्लान (मंत्र+रत्न+व्रत+दान+विशेष)', english:'✓ The full 5-upay plan (mantra+gemstone+vrat+dana+special)'},
+  f7:{hinglish:'✓ 900-word deep analysis', hindi:'✓ ९०० शब्दों का गहन विश्लेषण', english:'✓ 900-word deep analysis'},
+  f8:{hinglish:'✓ Chaaron upay levels — vyavaharik se seva tak', hindi:'✓ चारों उपाय स्तर — व्यावहारिक से सेवा तक', english:'✓ All four remedy levels — practical through seva'},
   vedicAnalysis:{hinglish:'🔮 Vedic Analysis — Trikaal Ka Sandesh', hindi:'🔮 वैदिक विश्लेषण — त्रिकाल का संदेश', english:'🔮 Vedic Analysis — Trikaal\'s Message'},
   lvlPractical:   {hinglish:'Vyavaharik',  hindi:'व्यावहारिक',  english:'Practical'},
   lvlBehavioural: {hinglish:'Anushasan',   hindi:'अनुशासन',     english:'Behavioural'},
@@ -940,31 +964,27 @@ function UpayCards({ remedies, isPaid, slug, lang }: { remedies: UpayItem[]; isP
 
 // ─── LOCKED SECTION — v8.3 PERSONALIZED ──────────────────────────────────────
 
-function LockedSection({slug, mahadasha, domainLabel}:{slug:string; mahadasha:string; domainLabel:string}) {
+function LockedSection({slug, mahadasha, domainLabel, lang}:{slug:string; mahadasha:string; domainLabel:string; lang:Lang}) {
   // v9.3: this list used to promise things the free page already showed —
   // "Complete planetary analysis", "Bhrigu Nandi pattern insights", "Chart
   // evidence — house lords + Shadbala". A reader who had just read all three had
   // no reason to pay. Every line below is now something genuinely withheld.
-  const features = [
-    '✓ Navamsa (D9) — har graha ka andaruni bal',
-    '✓ Agle 6 mahine ka gochar, mahine-dar-mahine',
-    '✓ Har graha ka Shadbala score',
-    '✓ Saare bhav + dasha activation chain',
-    '✓ Bhrigu Nandi signals aur yogas',
-    '✓ Poora 5-upay plan (mantra+ratna+vrat+dana+vishesh)',
-    '✓ 900-word deep analysis',
-    '✓ Chaaron upay levels — vyavaharik se seva tak',
-  ]
+  const features = ['f1','f2','f3','f4','f5','f6','f7','f8'].map(k=>lbl(k,lang))
   // v8.3 FIX-3: teaser personalized with the user's own dasha + domain
   const hasMd = mahadasha && mahadasha !== '—'
-  const teaserLine = hasMd
-    ? `Aapki ${mahadasha} Mahadasha mein ${domainLabel} ko lekar Trikaal ne kuch aur bhi dekha hai...`
-    : `${domainLabel} ko lekar Trikaal ne kuch aur bhi dekha hai...`
+  const teaserLine = lang==='english'
+    ? (hasMd ? `In your ${mahadasha} Mahadasha, Trikaal has seen more about ${domainLabel}...`
+             : `Trikaal has seen more about ${domainLabel}...`)
+    : lang==='hindi'
+    ? (hasMd ? `आपकी ${mahadasha} महादशा में ${domainLabel} को लेकर त्रिकाल ने और भी देखा है...`
+             : `${domainLabel} को लेकर त्रिकाल ने और भी देखा है...`)
+    : (hasMd ? `Aapki ${mahadasha} Mahadasha mein ${domainLabel} ko lekar Trikaal ne kuch aur bhi dekha hai...`
+             : `${domainLabel} ko lekar Trikaal ne kuch aur bhi dekha hai...`)
   return (
     <div style={{position:'relative',borderRadius:'16px',overflow:'hidden',marginBottom:'16px',border:`1px solid ${G(0.15)}`}}>
       <div style={{padding:'20px',filter:'blur(5px)',pointerEvents:'none',userSelect:'none',background:BG_CARD}}>
         <p style={{color:GOLD,fontSize:'12px',fontWeight:700,marginBottom:'8px',textTransform:'uppercase'}}>📊 Complete Analysis</p>
-        <p style={{color:'#e2e8f0',fontSize:'14px',margin:'0 0 8px'}}>{hasMd ? `${mahadasha} Mahadasha ke graha yogas aur dasha periods ka poora vishleshan...` : 'Graha yogas aur dasha periods ka poora vishleshan...'}</p>
+        <p style={{color:'#e2e8f0',fontSize:'14px',margin:'0 0 8px'}}>{lbl('lockTease',lang)}</p>
         <p style={{color:'#22c55e',fontSize:'12px',fontWeight:600}}>💎 Gemstone + 4 Action Windows...</p>
       </div>
       <div style={{position:'absolute',inset:0,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',padding:'24px',background:'linear-gradient(to bottom,rgba(8,11,18,0.1) 0%,rgba(8,11,18,0.98) 28%)'}}>
@@ -972,15 +992,15 @@ function LockedSection({slug, mahadasha, domainLabel}:{slug:string; mahadasha:st
           <div style={{width:'52px',height:'52px',borderRadius:'50%',background:G(0.1),border:`1px solid ${G(0.35)}`,display:'flex',alignItems:'center',justifyContent:'center',margin:'0 auto 14px'}}>
             <Lock size={22} style={{color:GOLD}}/>
           </div>
-          <p style={{margin:'0 0 4px',color:'#fff',fontSize:'18px',fontWeight:700,fontFamily:'Georgia,serif'}}>Trikaal Ne Aur Bhi Dekha Hai</p>
-          <p style={{margin:'0 0 14px',color:'#94a3b8',fontSize:'13px',lineHeight:1.6,maxWidth:'300px'}}>{teaserLine} Complete analysis, yogas, 5 upay aur 900-word deep reading taiyaar hai.</p>
+          <p style={{margin:'0 0 4px',color:'#fff',fontSize:'18px',fontWeight:700,fontFamily:'Georgia,serif'}}>{lbl('lockTitle',lang)}</p>
+          <p style={{margin:'0 0 14px',color:'#94a3b8',fontSize:'13px',lineHeight:1.6,maxWidth:'300px'}}>{teaserLine} {lbl('lockTease',lang)}</p>
           <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'6px',marginBottom:'18px',maxWidth:'340px',margin:'0 auto 18px',textAlign:'left'}}>
             {features.map((f,i)=>(<p key={i} style={{margin:0,color:'#94a3b8',fontSize:'12px',lineHeight:1.5}}>{f}</p>))}
           </div>
           <Link href={`/upgrade?slug=${slug}&tier=basic`} style={{display:'block',padding:'15px 36px',borderRadius:'12px',background:`linear-gradient(135deg,${GOLD},#F5D76E,${GOLD})`,color:'#080B12',fontSize:'15px',fontWeight:700,textDecoration:'none',boxShadow:`0 0 30px ${G(0.4)}`,marginBottom:'10px'}}>
-            🔓 Unlock Full Report — ₹51 Only
+            {lbl('lockCta',lang)}
           </Link>
-          <p style={{margin:'6px 0 0',color:'#475569',fontSize:'11px'}}>One-time · Instant access · <span style={{color: RAZORPAY_BLUE, fontWeight: 600}}>Razorpay</span> secure</p>
+          <p style={{margin:'6px 0 0',color:'#475569',fontSize:'11px'}}>{lbl('lockSub',lang)}</p>
         </div>
       </div>
     </div>
@@ -1151,7 +1171,10 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
     const dup = lords.find((l,i)=>lords.indexOf(l)!==i)
     if (dup) {
       const rows = safeArr<EvidenceHouse>(chartEv?.houses).filter(h=>h.lord===dup)
-      const hs = rows.map(h=>h.factor).join(' aur ')
+      // v10.1: was hardcoded ' aur ', which leaked Hinglish into the English
+      // reading — "Your 12th house aur 11th house share the SAME lord".
+      const joiner = lang==='english' ? ' and ' : lang==='hindi' ? ' और ' : ' aur '
+      const hs = rows.map(h=>h.factor).join(joiner)
       const dig = rows[0]?.lord_dignity
       out.push(lang==='hindi'
         ? `आपके ${hs} — दोनों का स्वामी एक ही ग्रह है: ${dup}${dig==='Debilitated'?', और वह नीच का है':''}। यही आपकी स्थिति की सबसे बड़ी जड़ है, और इसका पूरा विश्लेषण अंदर है।`
@@ -1366,7 +1389,7 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
             </div>
           )}
 
-          {!isPaid&&<LockedSection slug={slug} mahadasha={mahadasha} domainLabel={domainLabel}/>}
+          {!isPaid&&<LockedSection slug={slug} mahadasha={mahadasha} domainLabel={domainLabel} lang={lang}/>}
 
           {/* v10.0: MaaShakti dakshina ladder REMOVED. Two rows in the dakshina
               table since launch, both in July — it earned effectively nothing,
