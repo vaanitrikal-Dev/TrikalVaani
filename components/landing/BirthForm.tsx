@@ -1,81 +1,23 @@
 /**
  * ============================================================
- * TRIKAAL VAANI — BirthForm Component
- * CEO & Chief Vedic Architect: Rohiit Gupta
- * File: components/landing/BirthForm.tsx
- * VERSION: 10.3 — Meta Pixel events (trackFB) + situation note label fix — Sales rewrite: VOICE_TAGLINES fix (double comma bug), tier-neutral taglines,
- *            category heading, TierSelector benefit-first, submit labels, below-submit copy
- * SIGNED: ROHIIT GUPTA, CEO
- * DATE: 2026-06-29
- *
- * v10.1 CHANGES vs v10.0 (CEO-approved, conversion audit Fix #2):
- *   ✅ ADDED a "Why we ask for these details" trust box at the TOP of the
- *      form — reframes the detailed intake as PREMIUM personalization
- *      (exact Lagna + planetary degrees + Dasha) instead of friction.
- *   ✅ ADDED short "why this field matters" hints under: Profession, Time of
- *      Birth, Place of Birth, Relationship Status; enriched the Current City
- *      note (now explains current Gochar transits).
- *   ✅ 100% presentational — ZERO change to fields, validation, Razorpay
- *      flow, maps-proxy (LOCKED), OneSignal tagging, schema, or submit logic.
- *
- * v10.0 CHANGES vs v9.9 (CEO-approved, conversion audit Fix #1):
- *   ✅ MOBILE OPTIONAL FOR FREE TIER — requiring a phone number for
- *      a free reading was the #1 funnel drop-off. Now:
- *      - FREE tier: mobile is optional. If left blank → no error.
- *        If user types something, format is still validated.
- *      - PAID / VOICE tiers: mobile remains REQUIRED (Razorpay
- *        receipt + WhatsApp delivery need it).
- *      - Label adapts per tier: "(optional — WhatsApp par report
- *        ke liye)" on free, required * on paid/voice.
- *   ✅ Gender, Profession, Current City, Relationship Status all
- *      KEPT — required for Gemini prediction-context quality
- *      (e.g. "Male, IT sector, living in Pune, born in Bihar").
- *   ✅ ALL v9.9 logic preserved 100%.
- *
- * v9.9 CHANGES vs v9.8 (CEO-approved):
- *   ✅ MOBILE OVERFLOW FIX — form, pricing cards, and field boxes
- *      were bleeding outside the mobile viewport. Root cause:
- *      native <input type="date">, <select>, and 3-column grid
- *      children carry an intrinsic min-width (min-width:auto on
- *      grid/flex items) that blows out the container on narrow
- *      Android screens, pushing the whole form wider than 100vw.
- *      Fixes (CSS-only, zero logic change):
- *      - Scoped <style> inside #birth-form forcing
- *        min-width:0 / max-width:100% on all inputs, selects,
- *        textareas, buttons and direct grid children
- *      - overflow-x: clip on the #birth-form section
- *      - minWidth: 0 + width: 100% added inline to TierSelector
- *        cards (the 3-col pricing grid)
- *      - box-sizing: border-box enforced inside the form
- *   ✅ ALL v9.8 logic preserved 100%: OneSignal tagging, Razorpay
- *      flow, maps-proxy (LOCKED, untouched), autocomplete,
- *      numerology, Person 2, validations, segment routing,
- *      schema, hidden SEO, hero/footer copy — nothing else changed.
- *
- * v9.8 CHANGES vs v9.7 (CEO-approved):
- *   ✅ OneSignal web-push tagging added for "abandoned kundali"
- *      re-engagement automation:
- *      - tagOneSignal() helper (deferred, safe, no-op on server)
- *      - When user enters NAME + DOB → tag kundali_status=started
- *        (fires once via startedTaggedRef)
- *      - When prediction succeeds (free + paid + voice) →
- *        tag kundali_status=completed
- *      OneSignal Journey then sends a 1-hour reminder ONLY to
- *      users still tagged "started" (i.e. did not complete).
- *
- * v9.7 CHANGES vs v9.6 (CEO-approved):
- *   ✅ "Delhi NCR" REMOVED from all 3 visible/SEO spots per CEO
- *      Decision #6 (global positioning).
- *
- * v9.6 CHANGES vs v9.5 (CEO-approved, IR-0 + brand compliant):
- *   ✅ MODEL NAMES REMOVED (tech-stack leak)
- *   ✅ COMPETITOR NAMES REMOVED
- *   ✅ FAKE SUPERLATIVES REMOVED (IR-0)
- *   ✅ ALL v9.5 logic preserved 100%
- *
- * v9.5 / v9.4 / v9.2 / v9.1: see git history — all logic preserved.
+ * TRIKAAL VAANI — BirthForm
+ * v9.0 (23 Aug 2026)
+ *   1. DOMAIN MISMATCH HINT — the domain tile is picked on the previous screen
+ *      and situationNote is typed here; the two were never compared. A client
+ *      chose "Karz Mukti (Debt)", wrote "MD seat 2029", and received a
+ *      debt-titled report full of debt houses about her medical entrance. The
+ *      hint is a suggestion with a link, never a block — their choice still wins,
+ *      and it stays silent when the note matches the chosen domain, when both
+ *      topics appear, or when the note is short or vague.
+ *   2. WAITING UX — the paid flow displayed "Razorpay popup khul raha hai..."
+ *      for the entire 40-second generation because paymentLoading stays true
+ *      long after the popup closes; clients messaged asking if it had hung. The
+ *      paid flow now walks its own step list like the free flow, steps advance
+ *      every 6s instead of 18s, and an elapsed clock plus "bas 2 minute" sets
+ *      the expectation. Also tells them not to close the page.
  * ============================================================
  */
+
 
 "use client"
 
@@ -394,17 +336,66 @@ const VOICE_TAGLINES = [
   { text: 'Trikaal padh raha hai — sirf aapke liye', icon: '💫' },
 ]
 
+// v9.0: the old set was 3 messages on an 18s interval, so after ~54s the text
+// froze on the last line while generation was still running. Worse, the paid
+// flow showed "Razorpay popup khul raha hai..." for the ENTIRE wait — long after
+// the popup had closed — so clients messaged asking whether it was stuck. More
+// steps, a shorter interval, and a live elapsed counter make the wait legible.
 const LOADING_STEPS = [
-  'Mahakaal se connection ho raha hai...',
-  'Kundali calculate ho rahi hai — Swiss Ephemeris...',
-  'Trikaal aapka sandesh taiyaar kar raha hai...',
+  '🔱 Mahakaal se connection ho raha hai...',
+  '🪐 Aapke janm ke grahon ki sthiti nikaali ja rahi hai — Swiss Ephemeris...',
+  '📐 Lagna, bhav aur unke swami calculate ho rahe hain...',
+  '⚖️ Shadbala — har grah ka bal aanka ja raha hai...',
+  '⏳ Vimshottari dasha ki exact tareekhein nikaali ja rahi hain...',
+  '📆 Agle 9 mahine ka gochar scan ho raha hai...',
+  '🕉️ Navamsa (D9) banaya ja raha hai...',
+  '✍️ Trikaal aapka sandesh likh rahe hain — bas thoda aur...',
 ]
 
 const PAYMENT_LOADING_STEPS = [
-  'Razorpay payment verify ho raha hai...',
-  'Mahakaal se connection ho raha hai...',
-  'Trikaal aapka deep reading taiyaar kar raha hai...',
+  '💳 Payment verify ho gaya — dhanyawad!',
+  '🔱 Mahakaal se connection ho raha hai...',
+  '🪐 Aapki poori kundali calculate ho rahi hai...',
+  '⚖️ Shadbala aur bhav-swami nikale ja rahe hain...',
+  '⏳ Dasha ki exact tareekhein aur 9 mahine ka gochar...',
+  '🕉️ Navamsa (D9) aur upay taiyaar ho rahe hain...',
+  '✍️ Trikaal aapka deep reading likh rahe hain — bas thoda aur...',
 ]
+
+// ── v9.0 DOMAIN MISMATCH GUARD ───────────────────────────────────────────────
+// The domain tile is chosen on the previous screen; situationNote is typed here.
+// Nothing ever compared them, so a client could pick "Karz Mukti (Debt)" and then
+// write "MD seat 2029" — and receive a debt report, titled Debt, with debt houses,
+// about their exams. This only SUGGESTS a switch; the client's choice always wins.
+const DOMAIN_HINTS: {id:string; label:string; kw:RegExp}[] = [
+  { id:'genz_dream_career',       label:'Dream Career',        kw:/\b(job|naukri|career|interview|promotion|exam|neet|upsc|jee|gate|cat\b|entrance|admission|padhai|study|studies|md seat|pg seat|result|competition|salary|appraisal|resign|switch)\b/i },
+  { id:'mill_karz_mukti',         label:'Karz Mukti (Debt)',   kw:/\b(karz|karza|debt|loan|emi|udhaar|udhar|credit card|repay|kist|byaaj|interest|default|recovery)\b/i },
+  { id:'mill_property_yog',       label:'Property Yog',        kw:/\b(property|ghar|makaan|makan|flat|plot|zameen|jameen|land|house buy|home loan|registry|builder)\b/i },
+  { id:'genz_ex_back',            label:'Ex Back',             kw:/\b(ex|breakup|break up|patch up|wapas|girlfriend|boyfriend|gf|bf)\b/i },
+  { id:'genz_toxic_boss',         label:'Toxic Boss',          kw:/\b(boss|manager|office politics|toxic|harass|senior|team lead|hr\b)\b/i },
+  { id:'mill_childs_destiny',     label:"Child's Destiny",     kw:/\b(bachcha|bachche|bachchon|bachchi|beta|bete|beti|betiyan|betiyon|child|children|kids|santan|santaan|son|daughter)\b/i },
+  { id:'mill_parents_wellness',   label:'Parents Wellness',    kw:/\b(maa|maata|mata|papa|pappa|mummy|pita|pitaji|parents|mother|father|buzurg|elderly|budhape)\b/i },
+  { id:'genx_retirement_peace',   label:'Retirement Peace',    kw:/\b(retire|retirement|pension|vrp|superannuation)\b/i },
+  { id:'genx_legacy_inheritance', label:'Legacy & Inheritance',kw:/\b(will\b|vasiyat|inheritance|virasat|bataware|partition|ancestral)\b/i },
+  { id:'genx_spiritual_innings',  label:'Spiritual Innings',   kw:/\b(moksha|sadhana|spiritual|bhakti|tirth|guru\b|dhyan|meditation)\b/i },
+  { id:'genz_manifestation',      label:'Manifestation',       kw:/\b(manifest|law of attraction|visualisation|visualization|affirmation)\b/i },
+]
+
+function suggestDomain(note: string, currentId: string) {
+  const text = (note || '').trim()
+  if (text.length < 12) return null                 // too short to judge
+  const scored = DOMAIN_HINTS
+    .map(d => ({ ...d, hits: (text.match(new RegExp(d.kw.source, 'gi')) || []).length }))
+    .filter(d => d.hits > 0)
+    .sort((a, b) => b.hits - a.hits)
+  if (scored.length === 0) return null
+  const top = scored[0]!
+  if (top.id === currentId) return null              // already the right one
+  // only suggest when the current domain is not mentioned at all
+  const current = DOMAIN_HINTS.find(d => d.id === currentId)
+  if (current && new RegExp(current.kw.source, 'i').test(text)) return null
+  return top
+}
 
 const DUAL_CHART_DOMAINS = ['genz_ex_back', 'genz_toxic_boss']
 
@@ -878,12 +869,18 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
   const [apiError,       setApiError]       = useState<string | null>(null)
   const [loadingStep,    setLoadingStep]    = useState(0)
   const [paymentLoading, setPaymentLoading] = useState(false)
+  const [elapsed,        setElapsed]        = useState(0)
+  const [activeSteps,    setActiveSteps]    = useState<string[]>(LOADING_STEPS)
   const [numerology,     setNumerology]     = useState<ReturnType<typeof getNumerologyCompatibility> | null>(null)
   const [locating,       setLocating]       = useState(false)
 
   const loadingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const elapsedIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const startedTaggedRef   = useRef(false)
   const isDualDomain = DUAL_CHART_DOMAINS.includes(selectedCategory?.id ?? '')
+  // v9.0: recomputed as they type — the note is capped at 200 chars so this is
+  // a trivial amount of work, no debounce needed.
+  const domainSuggestion = suggestDomain(fields.situationNote, selectedCategory?.id ?? '')
 
   const set = useCallback(<K extends keyof BirthFormFields>(key: K, value: BirthFormFields[K]) => {
     setFields(prev => ({ ...prev, [key]: value }))
@@ -903,16 +900,24 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
     }
   }, [predictionTier])
 
+  // v9.0: 6s per step across 7-8 steps (~45s of movement) instead of 18s across 3,
+  // and an elapsed counter so the client can see time actually passing. A frozen
+  // message reads as a hung page; a moving one reads as work being done.
   const startLoadingMessages = (steps: string[] = LOADING_STEPS) => {
     setLoadingStep(0)
+    setActiveSteps(steps)
+    setElapsed(0)
     if (loadingIntervalRef.current) clearInterval(loadingIntervalRef.current)
+    if (elapsedIntervalRef.current) clearInterval(elapsedIntervalRef.current)
     loadingIntervalRef.current = setInterval(() => {
       setLoadingStep(prev => prev < steps.length - 1 ? prev + 1 : prev)
-    }, 18000)
+    }, 6000)
+    elapsedIntervalRef.current = setInterval(() => setElapsed(p => p + 1), 1000)
   }
 
   const stopLoadingMessages = () => {
     if (loadingIntervalRef.current) clearInterval(loadingIntervalRef.current)
+    if (elapsedIntervalRef.current) clearInterval(elapsedIntervalRef.current)
   }
 
   const handleMobileChange = (val: string, isP2 = false) => {
@@ -1149,8 +1154,11 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
   const isLoading = loading || isSubmitting || paymentLoading
 
   const getSubmitLabel = () => {
-    if (paymentLoading)             return '⟳ Razorpay popup khul raha hai...'
-    if (isLoading)                  return LOADING_STEPS[loadingStep] || 'Processing...'
+    // v9.0: this used to return "Razorpay popup khul raha hai..." for the WHOLE
+    // paid wait, because paymentLoading stays true through generation. Clients
+    // messaged asking if it was stuck — the popup had closed 40 seconds earlier.
+    // Now the paid flow walks PAYMENT_LOADING_STEPS like the free flow does.
+    if (isLoading)                  return activeSteps[loadingStep] || activeSteps[activeSteps.length-1] || 'Processing...'
     if (submitLabel)                return submitLabel
     if (predictionTier === 'free')  return '🔮 Get My Free Reading — Trikaal Ka Sandesh'
     if (predictionTier === 'paid')  return '⚡ Get My Deep Reading — Pay ₹51 via Razorpay'
@@ -1434,6 +1442,27 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
                   {fields.situationNote.length}/200
                 </span>
               </div>
+
+              {/* v9.0 DOMAIN MISMATCH HINT — suggestion only, never a block.
+                  A client picked "Karz Mukti (Debt)" and wrote "MD seat 2029",
+                  and got a debt-titled report about their exams. The two inputs
+                  had never been compared. The client's choice still wins; this
+                  just makes the mismatch visible before they pay. */}
+              {domainSuggestion && (
+                <div className="mt-2 px-3 py-2.5 rounded-lg text-xs"
+                  style={{ background: GOLD_RGBA(0.07), border: `1px solid ${GOLD_RGBA(0.25)}` }}>
+                  <p className="mb-1.5" style={{ color: GOLD }}>
+                    💡 Aapki baat <strong>{domainSuggestion.label}</strong> ki lagti hai, par aapne{' '}
+                    <strong>{selectedCategory?.label ?? 'yeh reading'}</strong> chuni hai.
+                  </p>
+                  <p style={{ color: '#94a3b8' }}>
+                    Aap jo chunenge wahi reading banegi.{' '}
+                    <a href={`/${domainSuggestion.id}`} style={{ color: GOLD, textDecoration: 'underline', fontWeight: 600 }}>
+                      {domainSuggestion.label} par jaayein →
+                    </a>
+                  </p>
+                </div>
+              )}
             </div>
 
             {isDualDomain && (
@@ -1521,12 +1550,20 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
                   <span className="animate-spin text-base">🔱</span>
                   <span className="text-sm font-medium" style={{ color: GOLD }}>{getSubmitLabel()}</span>
                 </div>
-                <div className="flex justify-center gap-1.5">
-                  {LOADING_STEPS.map((_, i) => (
+                <div className="flex justify-center gap-1.5 mb-2">
+                  {activeSteps.map((_, i) => (
                     <div key={i} className="rounded-full transition-all duration-500"
                       style={{ width: i === loadingStep ? '20px' : '6px', height: '6px', background: i <= loadingStep ? GOLD : GOLD_RGBA(0.2) }} />
                   ))}
                 </div>
+                {/* v9.0: a visible clock plus an explicit expectation. Silence for
+                    40 seconds feels broken; "0:23 · ~2 min" feels like progress. */}
+                <p className="text-xs" style={{ color: GOLD_RGBA(0.75) }}>
+                  {`${Math.floor(elapsed / 60)}:${String(elapsed % 60).padStart(2, '0')}`} · bas 2 minute — Trikaal jaldbaazi nahi karte 🙂
+                </p>
+                <p className="text-xs mt-1" style={{ color: '#64748b' }}>
+                  Page band mat kijiye. Aapki reading isi screen par khulegi.
+                </p>
               </div>
             )}
 
