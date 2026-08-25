@@ -1,105 +1,160 @@
 'use client';
 
+/**
+ * ============================================================
+ * TRIKAAL VAANI — DailyPanchang (homepage)
+ * v2.0 (25 Aug 2026)
+ *
+ * WHAT WAS WRONG
+ * The previous version invented every value it displayed:
+ *
+ *     const lunarDay     = (dayOfYear * 12) % 30;   // tithi
+ *     const nakshatraIdx = (dayOfYear * 13) % 27;   // nakshatra
+ *     const yogaIdx      = (dayOfYear * 7)  % 27;   // yoga
+ *     const sunriseM     = 15 + (dayOfYear % 20);   // sunrise minutes
+ *     const sunsetM      = 30 + (dayOfYear % 30);   // sunset minutes
+ *
+ * Arithmetic on the day number — no ephemeris, no astronomy, not even a
+ * lunar month. On 25 Aug 2026 it showed "Krishna Paksha Dashami, Rohini,
+ * sunrise 6:32" when the sky held Shukla Trayodashi, Uttara Ashadha,
+ * sunrise 05:59. Roughly half a lunar month and seventeen nakshatras out.
+ *
+ * The footer signed that output with "Verified by Rohiit Gupta", which made
+ * a fabricated panchang carry the Chief Vedic Architect's name on the most
+ * visited page of the site.
+ *
+ * WHAT IT DOES NOW
+ * Reads /api/panchang/today, which is backed by Swiss Ephemeris with Lahiri
+ * ayanamsha and has been returning correct values all along — the homepage
+ * simply never called it. Nothing is computed in the browser.
+ *
+ * If the API is unreachable the section renders NOTHING rather than falling
+ * back to an approximation. A missing panchang is a visible gap; a plausible
+ * wrong one is a claim, and this page carries a signature.
+ * ============================================================
+ */
+
 import { useEffect, useState } from 'react';
 import { Sun, Moon, Star, Clock } from 'lucide-react';
 
 const GOLD = '#D4AF37';
 const GOLD_RGBA = (a: number) => `rgba(212,175,55,${a})`;
 
-const TITHIS = [
-  { en: 'Pratipada', hi: 'प्रतिपदा' },
-  { en: 'Dwitiya', hi: 'द्वितीया' },
-  { en: 'Tritiya', hi: 'तृतीया' },
-  { en: 'Chaturthi', hi: 'चतुर्थी' },
-  { en: 'Panchami', hi: 'पंचमी' },
-  { en: 'Shashthi', hi: 'षष्ठी' },
-  { en: 'Saptami', hi: 'सप्तमी' },
-  { en: 'Ashtami', hi: 'अष्टमी' },
-  { en: 'Navami', hi: 'नवमी' },
-  { en: 'Dashami', hi: 'दशमी' },
-  { en: 'Ekadashi', hi: 'एकादशी' },
-  { en: 'Dwadashi', hi: 'द्वादशी' },
-  { en: 'Trayodashi', hi: 'त्रयोदशी' },
-  { en: 'Chaturdashi', hi: 'चतुर्दशी' },
-  { en: 'Purnima / Amavasya', hi: 'पूर्णिमा / अमावस्या' },
-];
+const TITHI_HI: Record<string, string> = {
+  Pratipada: 'प्रतिपदा', Dwitiya: 'द्वितीया', Tritiya: 'तृतीया', Chaturthi: 'चतुर्थी',
+  Panchami: 'पंचमी', Shashthi: 'षष्ठी', Saptami: 'सप्तमी', Ashtami: 'अष्टमी',
+  Navami: 'नवमी', Dashami: 'दशमी', Ekadashi: 'एकादशी', Dwadashi: 'द्वादशी',
+  Trayodashi: 'त्रयोदशी', Chaturdashi: 'चतुर्दशी', Purnima: 'पूर्णिमा', Amavasya: 'अमावस्या',
+};
 
-const VAARAS = ['Ravivar', 'Somvar', 'Mangalvar', 'Budhvar', 'Brihaspativar', 'Shukravar', 'Shanivar'];
-const VAARA_HI = ['रविवार', 'सोमवार', 'मंगलवार', 'बुधवार', 'बृहस्पतिवार', 'शुक्रवार', 'शनिवार'];
+const VAARA_HI: Record<string, string> = {
+  Ravivar: 'रविवार', Somvar: 'सोमवार', Mangalvar: 'मंगलवार', Budhvar: 'बुधवार',
+  Guruvar: 'गुरुवार', Shukravar: 'शुक्रवार', Shanivar: 'शनिवार',
+};
 
-const NAKSHATRAS = [
-  'Ashwini', 'Bharani', 'Krittika', 'Rohini', 'Mrigashira', 'Ardra', 'Punarvasu',
-  'Pushya', 'Ashlesha', 'Magha', 'Purva Phalguni', 'Uttara Phalguni', 'Hasta',
-  'Chitra', 'Swati', 'Vishakha', 'Anuradha', 'Jyeshtha', 'Moola', 'Purva Ashadha',
-  'Uttara Ashadha', 'Shravana', 'Dhanishtha', 'Shatabhisha', 'Purva Bhadrapada',
-  'Uttara Bhadrapada', 'Revati',
-];
+interface PanchangApi {
+  date?: string;
+  weekday?: string;
+  tithi?: { name?: string; paksha?: string };
+  nakshatra?: { name?: string; pada?: number };
+  yoga?: { name?: string };
+  karana?: { name?: string };
+  sunrise?: string;
+  sunset?: string;
+  rahu_kaal?: string;
+  location?: { city?: string };
+  ayanamsha?: string;
+  engine?: string;
+}
 
-const YOGAS = [
-  'Vishkambha', 'Priti', 'Ayushman', 'Saubhagya', 'Shobhana', 'Atiganda',
-  'Sukarma', 'Dhriti', 'Shula', 'Ganda', 'Vriddhi', 'Dhruva', 'Vyaghata',
-  'Harshana', 'Vajra', 'Siddhi', 'Vyatipata', 'Variyana', 'Parigha', 'Shiva',
-  'Siddha', 'Sadhya', 'Shubha', 'Shukla', 'Brahma', 'Indra', 'Vaidhriti',
-];
+/** "05:59" -> "5:59 AM". Returns null for anything unparseable rather than guessing. */
+function to12h(hhmm?: string): string | null {
+  if (!hhmm) return null;
+  const m = /^(\d{1,2}):(\d{2})$/.exec(hhmm.trim());
+  if (!m) return null;
+  const h = Number(m[1]);
+  const suffix = h >= 12 ? 'PM' : 'AM';
+  const h12 = h % 12 === 0 ? 12 : h % 12;
+  return `${h12}:${m[2]} ${suffix}`;
+}
 
-function computePanchang(date: Date) {
-  const dayOfYear = Math.floor((date.getTime() - new Date(date.getFullYear(), 0, 0).getTime()) / 86400000);
-  const lunarDay = ((dayOfYear * 12) % 30 + 30) % 30;
-  const paksha = lunarDay < 15 ? 'Shukla Paksha' : 'Krishna Paksha';
-  const paksha_hi = lunarDay < 15 ? 'शुक्ल पक्ष' : 'कृष्ण पक्ष';
-  const tithiIdx = lunarDay % 15;
-  const tithi = TITHIS[tithiIdx] ?? TITHIS[0];
-  const vaara = VAARAS[date.getDay()];
-  const vaara_hi = VAARA_HI[date.getDay()];
-  const nakshatraIdx = (dayOfYear * 13) % 27;
-  const nakshatra = NAKSHATRAS[Math.floor(nakshatraIdx)];
-  const yogaIdx = (dayOfYear * 7) % 27;
-  const yoga = YOGAS[Math.floor(yogaIdx)];
-
-  const sunriseH = 6 + (date.getMonth() > 5 ? 0 : 1);
-  const sunriseM = 15 + (dayOfYear % 20);
-  const sunsetH = 18 + (date.getMonth() > 5 ? 0 : -1);
-  const sunsetM = 30 + (dayOfYear % 30);
-
-  const pad = (n: number) => String(n).padStart(2, '0');
-  const sunrise = `${sunriseH}:${pad(sunriseM)} AM`;
-  const sunset = `${sunsetH}:${pad(sunsetM)} PM`;
-
-  const midH = Math.floor((sunriseH + 12 + sunsetH) / 2);
-  const midM = pad(Math.floor(((sunriseM + sunsetM) / 2) % 60));
-  const abhijitStart = `${midH - 1}:${midM}`;
-  const abhijitEnd = `${midH}:${midM}`;
-
-  return {
-    paksha, paksha_hi,
-    tithi: tithi.en, tithi_hi: tithi.hi,
-    vaara, vaara_hi,
-    nakshatra, yoga,
-    sunrise, sunset,
-    abhijit: `${abhijitStart} – ${abhijitEnd}`,
+/**
+ * Abhijit is the eighth of fifteen equal parts of the day — a real division
+ * of sunrise-to-sunset, not the midpoint fudge the old version used.
+ */
+function abhijit(sunriseStr?: string, sunsetStr?: string): string | null {
+  const parse = (s?: string) => {
+    if (!s) return null;
+    const m = /^(\d{1,2}):(\d{2})$/.exec(s.trim());
+    return m ? Number(m[1]) * 60 + Number(m[2]) : null;
   };
+  const sr = parse(sunriseStr);
+  const ss = parse(sunsetStr);
+  if (sr === null || ss === null || ss <= sr) return null;
+  const part = (ss - sr) / 15;
+  const start = sr + part * 7;
+  const fmt = (mins: number) => {
+    const h = Math.floor(mins / 60) % 24;
+    const mm = String(Math.round(mins % 60)).padStart(2, '0');
+    const suffix = h >= 12 ? 'PM' : 'AM';
+    return `${h % 12 === 0 ? 12 : h % 12}:${mm} ${suffix}`;
+  };
+  return `${fmt(start)} – ${fmt(start + part)}`;
 }
 
 export default function DailyPanchang() {
-  const [panchang, setPanchang] = useState<ReturnType<typeof computePanchang> | null>(null);
+  const [p, setP] = useState<PanchangApi | null>(null);
+  const [failed, setFailed] = useState(false);
   const [dateStr, setDateStr] = useState('');
 
   useEffect(() => {
-    const now = new Date();
-    setPanchang(computePanchang(now));
-    setDateStr(now.toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }));
+    setDateStr(
+      new Date().toLocaleDateString('en-IN', {
+        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+      }),
+    );
+    let alive = true;
+    fetch('/api/panchang/today')
+      .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
+      .then((d: PanchangApi) => { if (alive) setP(d); })
+      .catch(() => { if (alive) setFailed(true); });
+    return () => { alive = false; };
   }, []);
 
-  if (!panchang) return null;
+  // No data, no section. Never an approximation — see the header note.
+  if (failed || !p || !p.tithi?.name) return null;
 
+  const tithiEn = `${p.tithi.paksha ?? ''} ${p.tithi.name}`.trim();
+  const pakshaHi = /krishna/i.test(p.tithi.paksha ?? '') ? 'कृष्ण पक्ष' : 'शुक्ल पक्ष';
+  const tithiHi = `${pakshaHi} ${TITHI_HI[p.tithi.name] ?? ''}`.trim();
+  const sunrise = to12h(p.sunrise);
+  const sunset = to12h(p.sunset);
+  const abhi = abhijit(p.sunrise, p.sunset);
+
+  // Every row is dropped when its value is missing, so a gap in the API can
+  // never surface as a blank or a placeholder.
   const rows = [
-    { icon: Moon, label: 'Tithi', value: `${panchang.paksha} ${panchang.tithi}`, hi: `${panchang.paksha_hi} ${panchang.tithi_hi}` },
-    { icon: Star, label: 'Nakshatra', value: panchang.nakshatra, hi: '' },
-    { icon: Sun, label: 'Yoga', value: panchang.yoga, hi: '' },
-    { icon: Clock, label: 'Abhijit Muhurat (अभिजीत मुहूर्त)', value: panchang.abhijit, hi: 'शुभ समय' },
-    { icon: Sun, label: 'Sunrise / Sunset', value: `${panchang.sunrise} / ${panchang.sunset}`, hi: '' },
-    { icon: Star, label: 'Vaara', value: `${panchang.vaara} (${panchang.vaara_hi})`, hi: '' },
-  ];
+    { icon: Moon,  label: 'Tithi', value: tithiEn, hi: tithiHi },
+    p.nakshatra?.name && {
+      icon: Star, label: 'Nakshatra',
+      value: p.nakshatra.pada ? `${p.nakshatra.name} Pada ${p.nakshatra.pada}` : p.nakshatra.name,
+      hi: '',
+    },
+    p.yoga?.name && { icon: Sun, label: 'Yoga', value: p.yoga.name, hi: '' },
+    p.karana?.name && { icon: Star, label: 'Karana', value: p.karana.name, hi: '' },
+    abhi && { icon: Clock, label: 'Abhijit Muhurat (अभिजीत मुहूर्त)', value: abhi, hi: 'शुभ समय' },
+    sunrise && sunset && { icon: Sun, label: 'Sunrise / Sunset', value: `${sunrise} / ${sunset}`, hi: '' },
+    p.rahu_kaal && { icon: Clock, label: 'Rahu Kaal (राहु काल)', value: p.rahu_kaal, hi: 'त्याज्य समय' },
+    p.weekday && {
+      icon: Star, label: 'Vaara',
+      value: `${p.weekday}${VAARA_HI[p.weekday] ? ` (${VAARA_HI[p.weekday]})` : ''}`,
+      hi: '',
+    },
+  ].filter(Boolean) as { icon: typeof Sun; label: string; value: string; hi: string }[];
+
+  const city = p.location?.city ?? 'Delhi NCR';
+  const engine = p.engine ?? 'Swiss Ephemeris';
+  const ayanamsha = p.ayanamsha ?? 'Lahiri';
 
   return (
     <section className="py-14 px-4">
@@ -131,13 +186,10 @@ export default function DailyPanchang() {
               Panchangam — Five Vedic Time Elements
             </p>
           </div>
+
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-px" style={{ background: GOLD_RGBA(0.06) }}>
             {rows.map(({ icon: Icon, label, value, hi }, i) => (
-              <div
-                key={i}
-                className="px-5 py-4"
-                style={{ background: 'rgba(8,11,18,0.9)' }}
-              >
+              <div key={i} className="px-5 py-4" style={{ background: 'rgba(8,11,18,0.9)' }}>
                 <div className="flex items-center gap-2 mb-1">
                   <Icon className="w-3.5 h-3.5 flex-shrink-0" style={{ color: GOLD_RGBA(0.55) }} />
                   <p className="text-xs text-slate-500">{label}</p>
@@ -147,9 +199,13 @@ export default function DailyPanchang() {
               </div>
             ))}
           </div>
+
+          {/* v2.0: the claim now names what actually produced the numbers. The old
+              footer read "Verified by Rohiit Gupta" over values invented from the
+              day of the year — a signature on something never computed. */}
           <div className="px-5 py-3" style={{ background: GOLD_RGBA(0.03), borderTop: `1px solid ${GOLD_RGBA(0.1)}` }}>
             <p className="text-xs text-slate-600 text-center">
-              Panchang computed using Parashara Vedic methodology for India (IST). Verified by Rohiit Gupta.
+              {engine} · {ayanamsha} Ayanamsha · {city} (IST) · Rohiit Gupta, Chief Vedic Architect
             </p>
           </div>
         </div>
