@@ -152,7 +152,7 @@ export default function DailyPanchang() {
     },
   ].filter(Boolean) as { icon: typeof Sun; label: string; value: string; hi: string }[];
 
-  const city = p.location?.city ?? 'Delhi NCR';
+  const city = p.location?.city ?? 'India';
   const engine = p.engine ?? 'Swiss Ephemeris';
   const ayanamsha = p.ayanamsha ?? 'Lahiri';
 
