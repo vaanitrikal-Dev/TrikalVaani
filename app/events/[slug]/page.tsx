@@ -1,7 +1,7 @@
 // ════════════════════════════════════════════════════════════════════════════
 // 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER
 // File:    app/events/[slug]/page.tsx
-// Version: v4.0 (28 Aug 2026) — thin route over components/festival/FestivalPillar
+// Version: v4.1 (28 Aug 2026) — thin route over components/festival/FestivalPillar
 // Owner:   Rohiit Gupta, Chief Vedic Architect
 //
 // English, national. Same body as the city route; timings fall back to New
@@ -13,7 +13,7 @@ import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import FestivalPillar, {
   SITE_URL, OG_IMAGE, AUTHOR_NAME, AUTHOR_TITLE,
-  resolveFestival, getContent, baseSlug,
+  resolveFestival, getContent, baseSlug, buildMeta,
 } from "@/components/festival/FestivalPillar";
 
 export const revalidate = 86400;
@@ -25,11 +25,10 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const f = await resolveFestival(params.slug, "en");
   if (!f) return {};
   const content = await getContent(baseSlug(f.festival_slug), "en");
+  const { title, description, keywords } =
+    buildMeta({ lang: "en", festival: f, city: null, content, local: null });
 
   const url = `${SITE_URL}/events/${f.festival_slug}`;
-  const title = content?.seo_title ?? `${f.festival_name}: Date, Muhurat & Puja Vidhi`;
-  const description = content?.seo_description
-    ?? `${f.festival_name} falls on ${f.date}. Tithi, puja muhurat, city-wise timings and the classical rule behind the date.`;
 
   const languages: Record<string, string> = { "en-IN": url };
   if (content?.alt_lang_slug) {
@@ -37,7 +36,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   }
 
   return {
-    title, description,
+    title, description, keywords,
     alternates: { canonical: url, languages },
     authors: [{ name: `${AUTHOR_NAME}, ${AUTHOR_TITLE}` }],
     openGraph: { title, description, url, images: [OG_IMAGE], type: "article" },
