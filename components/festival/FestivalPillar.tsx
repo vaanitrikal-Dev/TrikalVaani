@@ -2,7 +2,7 @@
 // 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER
 // ════════════════════════════════════════════════════════════════════════════
 // File:     components/festival/FestivalPillar.tsx
-// Version:  v1.0 (28 Aug 2026)
+// Version:  v1.1 (28 Aug 2026) — festival puja muhurat added
 // Owner:    Rohiit Gupta, Chief Vedic Architect
 //
 // ── WHAT THIS IS ───────────────────────────────────────────────────────────
@@ -70,6 +70,7 @@ export type DbFestival = {
   deity: string | null; mantra: string | null; color: string | null;
   dosha_relief: string | null; festival_scope: string | null;
   home_states: string[] | null;
+  puja_kaal: string | null;
 };
 
 export type Content = {
@@ -105,6 +106,11 @@ export type Panchang = {
   sunrise: string; sunset: string;
   rahu_kaal: string; yamaganda: string; gulika_kaal: string;
   abhijit_muhurat: string;
+  /** All seven windows, returned by /panchang v2.1. Which one this festival
+   *  uses is named by festivals_catalog.puja_kaal — the same mapping the
+   *  engine uses to DECIDE the date, so the muhurat shown can never disagree
+   *  with the reasoning printed further down the page. */
+  kaal?: Record<string, string>;
 };
 
 export const SITE_URL = "https://trikalvaani.com";
@@ -127,6 +133,12 @@ const L = {
     in: (f: string, c: string) => `${f} in ${c}`,
     readOther: "हिंदी में पढ़ें →",
     timings: (f: string, c: string) => `${f} Timings for ${c}`,
+    pujaMuhurat: "Puja Muhurat",
+    kaalName: {
+      pratah: "Pratah", sangava: "Sangava", madhyahna: "Madhyahna",
+      aparahna: "Aparahna", sayahna: "Sayahna", pradosh: "Pradosh",
+      nishita: "Nishita",
+    } as Record<string, string>,
     tithi: "Tithi", nakshatra: "Nakshatra", yogaKarana: "Yoga · Karana",
     abhijit: "Abhijit Muhurat", rahu: "Rahu Kaal",
     yamGulika: "Yamaganda · Gulika", sunriseSunset: "Sunrise · Sunset",
@@ -171,6 +183,12 @@ const L = {
     in: (f: string, c: string) => `${c} में ${f}`,
     readOther: "Read in English →",
     timings: (f: string, c: string) => `${c} के लिए ${f} का समय`,
+    pujaMuhurat: "पूजा मुहूर्त",
+    kaalName: {
+      pratah: "प्रातः", sangava: "संगव", madhyahna: "मध्याह्न",
+      aparahna: "अपराह्न", sayahna: "सायाह्न", pradosh: "प्रदोष",
+      nishita: "निशीथ",
+    } as Record<string, string>,
     tithi: "तिथि", nakshatra: "नक्षत्र", yogaKarana: "योग · करण",
     abhijit: "अभिजित मुहूर्त", rahu: "राहुकाल",
     yamGulika: "यमगंड · गुलिक", sunriseSunset: "सूर्योदय · सूर्यास्त",
@@ -229,6 +247,16 @@ const FESTIVAL_COLUMNS =
   "festival_slug,festival_name,festival_type,planet_ruler,date,year,geo_answer," +
   "dos,donts,name_hindi,muhurat,regional_note,deity,mantra,color,dosha_relief," +
   "festival_scope,home_states";
+
+/** festivals_master has no puja_kaal — it lives on the catalog, once, because
+ *  it does not change between years. Fetched alongside. */
+async function getPujaKaal(base: string): Promise<string | null> {
+  try {
+    const { data } = await supa().from("festivals_catalog")
+      .select("puja_kaal").eq("base_slug", base).single();
+    return (data?.puja_kaal as string) ?? null;
+  } catch { return null; }
+}
 
 export const baseSlug = (s: string) => s.replace(/-20\d\d$/, "");
 
@@ -337,12 +365,13 @@ export default async function FestivalPillar(
   const f = festival;
   const base = baseSlug(f.festival_slug);
 
-  const [content, local, panchang, upcoming] = await Promise.all([
+  const [content, local, panchang, upcoming, pujaKaal] = await Promise.all([
     getContent(base, lang),
     city ? getLocalTerm(base, city.state) : Promise.resolve(null),
     city ? getPanchang(f.date, city.latitude, city.longitude, city.name)
          : getPanchang(f.date, 28.6139, 77.209, "New Delhi"),
     getUpcoming(f.festival_slug),
+    getPujaKaal(base),
   ]);
 
   // Other cities where this festival is in scope, each with its own timings.
@@ -420,6 +449,20 @@ export default async function FestivalPillar(
                   </td></tr>
               <tr><td className="py-2 text-gray-600">{t.yogaKarana}</td>
                   <td className="py-2 text-right font-medium">{panchang.yoga.name} · {panchang.karana.name}</td></tr>
+              {/* The window the rite is actually performed in. This is the
+                  number people search for; before v3.1 the page showed Rahu
+                  Kaal and a generic Abhijit and never named it. */}
+              {pujaKaal && panchang.kaal?.[pujaKaal] && (
+                <tr className="bg-amber-50">
+                  <td className="py-2 font-semibold text-gray-800">{t.pujaMuhurat}</td>
+                  <td className="py-2 text-right font-bold text-amber-900">
+                    {panchang.kaal[pujaKaal]}
+                    <span className="ml-1 font-normal text-xs text-gray-600">
+                      ({t.kaalName[pujaKaal] ?? pujaKaal})
+                    </span>
+                  </td>
+                </tr>
+              )}
               <tr><td className="py-2 text-gray-600">{t.abhijit}</td>
                   <td className="py-2 text-right font-medium text-green-800">{panchang.abhijit_muhurat}</td></tr>
               <tr><td className="py-2 text-gray-600">{t.rahu}</td>
