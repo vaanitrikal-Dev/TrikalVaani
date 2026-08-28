@@ -1,7 +1,7 @@
 // ════════════════════════════════════════════════════════════════════════════
 // 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER
 // File:    app/[domain]/events/[slug]/page.tsx
-// Version: v4.0 (28 Aug 2026) — thin route over components/festival/FestivalPillar
+// Version: v4.1 (28 Aug 2026) — thin route over components/festival/FestivalPillar
 // Owner:   Rohiit Gupta, Chief Vedic Architect
 //
 // English, city. The whole page body lives in FestivalPillar, shared with the
@@ -16,7 +16,7 @@ import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import FestivalPillar, {
   ALL_CITIES, CITY_SLUGS, SITE_URL, OG_IMAGE, AUTHOR_NAME, AUTHOR_TITLE,
-  resolveFestival, getContent, baseSlug,
+  resolveFestival, getContent, getLocalTerm, getVisarjan, baseSlug, buildMeta,
 } from "@/components/festival/FestivalPillar";
 
 export const revalidate = 86400;
@@ -28,14 +28,18 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const city = ALL_CITIES.find(c => c.slug === params.domain);
   const f = city ? await resolveFestival(params.slug, "en") : null;
   if (!city || !f) return {};
-  const content = await getContent(baseSlug(f.festival_slug), "en");
+  const [content, local, visarjan] = await Promise.all([
+    getContent(baseSlug(f.festival_slug), "en"),
+    getLocalTerm(baseSlug(f.festival_slug), city.state),
+    getVisarjan(baseSlug(f.festival_slug), city.latitude, city.longitude, city.name),
+  ]);
+
+  // Composed here rather than taken from the content row, which is written
+  // once per festival and knows nothing about this city. See buildMeta.
+  const { title, description, keywords } =
+    buildMeta({ lang: "en", festival: f, city, content, local, visarjan });
 
   const url = `${SITE_URL}/${city.slug}/events/${f.festival_slug}`;
-  const title = content?.seo_title
-    ? `${content.seo_title} — ${city.name}`
-    : `${f.festival_name} in ${city.name}: Date, Muhurat & Puja Vidhi`;
-  const description = content?.seo_description
-    ?? `${f.festival_name} ${f.date} in ${city.name}. Tithi, puja muhurat, Rahu Kaal and sunrise computed for ${city.name}.`;
 
   // hreflang from alt_lang_slug. The site had none anywhere before v4.0, which
   // left the Hindi and English pages competing instead of covering two searches.
@@ -45,7 +49,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   }
 
   return {
-    title, description,
+    title, description, keywords,
     alternates: { canonical: url, languages },
     authors: [{ name: `${AUTHOR_NAME}, ${AUTHOR_TITLE}` }],
     openGraph: { title, description, url, images: [OG_IMAGE], type: "article" },
