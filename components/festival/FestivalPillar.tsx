@@ -2,7 +2,7 @@
 // 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER
 // ════════════════════════════════════════════════════════════════════════════
 // File:     components/festival/FestivalPillar.tsx
-// Version:  v1.1 (28 Aug 2026) — festival puja muhurat added
+// Version:  v1.3 (28 Aug 2026) — puja muhurat, per-city meta, immersion section
 // Owner:    Rohiit Gupta, Chief Vedic Architect
 //
 // ── WHAT THIS IS ───────────────────────────────────────────────────────────
@@ -95,7 +95,16 @@ export type Content = {
   keywords: string[] | null;
 };
 
-export type LocalTerm = { local_name: string; script_name: string | null; note: string | null };
+export type LocalTerm = {
+  local_name: string; script_name: string | null; note: string | null;
+  visarjan_name: string | null;
+};
+
+/** The immersion, when it falls on a day of its own. */
+export type Visarjan = {
+  label: string; note: string | null; kaal: string | null;
+  date: string; slug: string; muhurat: string | null;
+};
 
 export type Panchang = {
   weekday: string;
@@ -134,6 +143,10 @@ const L = {
     readOther: "हिंदी में पढ़ें →",
     timings: (f: string, c: string) => `${f} Timings for ${c}`,
     pujaMuhurat: "Puja Muhurat",
+    visarjanHead: (l: string) => l,
+    visarjanOn: "Immersion day",
+    visarjanMuhurat: "Immersion muhurat",
+    calledHere: (st: string) => `In ${st} this is called`,
     kaalName: {
       pratah: "Pratah", sangava: "Sangava", madhyahna: "Madhyahna",
       aparahna: "Aparahna", sayahna: "Sayahna", pradosh: "Pradosh",
@@ -184,6 +197,10 @@ const L = {
     readOther: "Read in English →",
     timings: (f: string, c: string) => `${c} के लिए ${f} का समय`,
     pujaMuhurat: "पूजा मुहूर्त",
+    visarjanHead: (l: string) => l,
+    visarjanOn: "विसर्जन का दिन",
+    visarjanMuhurat: "विसर्जन मुहूर्त",
+    calledHere: (st: string) => `${st} में इसे कहते हैं`,
     kaalName: {
       pratah: "प्रातः", sangava: "संगव", madhyahna: "मध्याह्न",
       aparahna: "अपराह्न", sayahna: "सायाह्न", pradosh: "प्रदोष",
@@ -250,6 +267,49 @@ const FESTIVAL_COLUMNS =
 
 /** festivals_master has no puja_kaal — it lives on the catalog, once, because
  *  it does not change between years. Fetched alongside. */
+/**
+ * The immersion day, its date and its muhurat.
+ *
+ * Ganesh Chaturthi is installed on one day and immersed ten days later on
+ * Anant Chaturdashi; Durga Puja is immersed on Vijayadashami. Both dates come
+ * from festivals_master, so the immersion is computed by the same engine as
+ * the festival and cannot drift from it.
+ *
+ * The concept was absent from the schema, the prompt and the page until
+ * 28 Aug 2026, while Search Console showed 810 impressions and zero clicks on
+ * nimajjanam and visarjan queries for Ganesh Chaturthi alone. The page ranked
+ * for every one of them without containing the word.
+ */
+export async function getVisarjan(
+  base: string, lat: number, lon: number, cityName: string
+): Promise<Visarjan | null> {
+  try {
+    const { data: cat } = await supa().from("festivals_catalog")
+      .select("visarjan_slug,visarjan_kaal,visarjan_note,visarjan_label")
+      .eq("base_slug", base).single();
+    if (!cat?.visarjan_slug) return null;
+
+    const today = new Date().toISOString().slice(0, 10);
+    const { data: rows } = await supa().from("festivals_master")
+      .select("festival_slug,date")
+      .like("festival_slug", `${cat.visarjan_slug}-%`)
+      .gte("date", today).order("date").limit(1);
+    const row = rows?.[0];
+    if (!row) return null;
+
+    // Its muhurat, in the city being viewed — not the festival's own.
+    const p = await getPanchang(row.date, lat, lon, cityName);
+    const muhurat = (cat.visarjan_kaal && p?.kaal?.[cat.visarjan_kaal]) || null;
+
+    return {
+      label: cat.visarjan_label || "Visarjan",
+      note: cat.visarjan_note ?? null,
+      kaal: cat.visarjan_kaal ?? null,
+      date: row.date, slug: row.festival_slug, muhurat,
+    };
+  } catch { return null; }
+}
+
 async function getPujaKaal(base: string): Promise<string | null> {
   try {
     const { data } = await supa().from("festivals_catalog")
@@ -304,7 +364,7 @@ export async function getContent(base: string, lang: Lang): Promise<Content | nu
 export async function getLocalTerm(base: string, state: string): Promise<LocalTerm | null> {
   try {
     const { data } = await supa().from("festival_local_terms")
-      .select("local_name,script_name,note")
+      .select("local_name,script_name,note,visarjan_name")
       .eq("base_slug", base).eq("state", state).eq("verified", true).limit(1);
     return (data && (data[0] as LocalTerm)) || null;
   } catch { return null; }
@@ -344,6 +404,97 @@ export async function getUpcoming(exclude: string, limit = 8) {
   } catch { return []; }
 }
 
+/**
+ * Title, description and keyword set for one city page.
+ *
+ * ── WHY THIS IS COMPOSED HERE AND NOT GENERATED ────────────────────────────
+ *
+ * Gemini writes ONE prose row per festival per language, which is correct — the
+ * puja vidhi does not differ between Mumbai and Hyderabad, and generating it
+ * eleven times would cost eleven times as much to produce eleven near-identical
+ * pages.
+ *
+ * But I treated the SEO title and description as prose and let them come from
+ * that same city-agnostic row. They are not prose. Measured on the live
+ * Hyderabad page, 28 Aug 2026:
+ *
+ *     title        "...Ganesh Chaturthi 2026 ... — Hyderabad"   city, no state
+ *     description  "Find the exact date and computed local
+ *                   muhurat for Ganesh Chaturthi 2026..."       neither
+ *
+ * Against Search Console for that one festival:
+ *
+ *     ganesh chaturthi 2026 in telangana          112 impressions, 0 clicks
+ *     vinayaka chavithi 2026 in telangana         106
+ *     vinayaka chavithi 2026 hyderabad             82
+ *     when is ganesh chaturthi in 2026 in telangana 78
+ *
+ * The page ranks for those and the description it shows them contains neither
+ * the state nor the name they used. Composing costs nothing, cannot drift from
+ * the truth, and needs no model call — the city, the state and the verified
+ * local term are all already in hand at render time.
+ */
+export function buildMeta(opts: {
+  lang: Lang; festival: DbFestival; city: City | null;
+  content: Content | null; local: LocalTerm | null; visarjan?: Visarjan | null;
+}) {
+  const { lang, festival: f, city, content, local, visarjan } = opts;
+  const name = lang === "hi" && f.name_hindi ? f.name_hindi : f.festival_name;
+  const place = city ? (lang === "hi" ? city.name_hindi : city.name) : null;
+  const alsoCalled = local?.local_name ?? null;
+
+  // TITLE — festival, local name where one is verified, then the city.
+  const titleCore = content?.seo_title ?? (lang === "hi"
+    ? `${name} कब है — तारीख, मुहूर्त और पूजा विधि`
+    : `${name}: Date, Puja Muhurat & Vidhi`);
+  const title = place
+    ? (alsoCalled && !titleCore.includes(alsoCalled)
+        ? `${titleCore} — ${alsoCalled}, ${place}`
+        : `${titleCore} — ${place}`)
+    : titleCore;
+
+  // DESCRIPTION — always names the city AND the state, because "in telangana"
+  // is how the query is typed, and the local name when there is a verified one.
+  let description: string;
+  if (place && city) {
+    const also = alsoCalled ? (lang === "hi" ? `${city.state} में ${alsoCalled}। ` : `Known in ${city.state} as ${alsoCalled}. `) : "";
+    const imm = local?.visarjan_name
+      ? (lang === "hi" ? `${local.visarjan_name} का समय भी। ` : `${local.visarjan_name} timing too. `)
+      : "";
+    description = lang === "hi"
+      ? `${place} (${city.state}) में ${name} — तिथि, पूजा मुहूर्त, राहुकाल और सूर्योदय, ${place} के लिए गणना। ${also}${imm}पूजा विधि और व्रत नियम।`
+      : `${name} in ${place}, ${city.state} — tithi, puja muhurat, Rahu Kaal and sunrise computed for ${place}. ${also}${imm}Puja vidhi and vrat rules.`;
+  } else {
+    description = content?.seo_description ?? (lang === "hi"
+      ? `${name} की सही तारीख, पूजा मुहूर्त, व्रत विधि और शहरवार समय।`
+      : `${name}: exact date, puja muhurat, vidhi and city-wise timings.`);
+  }
+  if (description.length > 158) description = description.slice(0, 155).trimEnd() + "…";
+
+  // KEYWORDS — the base set from the content row, crossed with this city and
+  // state, plus the local name. Mechanical, so it cannot be wrong.
+  const base = content?.keywords ?? [];
+  const keywords = new Set(base);
+  if (city) {
+    const cityForms = [city.name, city.slug, city.state];
+    for (const k of base.slice(0, 12)) {
+      for (const cf of cityForms) keywords.add(`${k} ${cf}`);
+    }
+    for (const cf of cityForms) {
+      keywords.add(`${f.festival_name} ${cf}`);
+      keywords.add(`${f.festival_name} ${f.year ?? ""} ${cf}`.replace(/\s+/g, " ").trim());
+      if (alsoCalled) {
+        keywords.add(`${alsoCalled} ${cf}`);
+        keywords.add(`${alsoCalled} ${f.year ?? ""} ${cf}`.replace(/\s+/g, " ").trim());
+      }
+    }
+  }
+  if (alsoCalled) keywords.add(alsoCalled);
+
+  return { title, description, keywords: Array.from(keywords).slice(0, 60) };
+}
+
+
 /** Where a festival lives, in either language. One place, so the four routes
  *  and the hreflang tags can never disagree about it. */
 export function festivalHref(
@@ -365,13 +516,15 @@ export default async function FestivalPillar(
   const f = festival;
   const base = baseSlug(f.festival_slug);
 
-  const [content, local, panchang, upcoming, pujaKaal] = await Promise.all([
+  const [content, local, panchang, upcoming, pujaKaal, visarjan] = await Promise.all([
     getContent(base, lang),
     city ? getLocalTerm(base, city.state) : Promise.resolve(null),
     city ? getPanchang(f.date, city.latitude, city.longitude, city.name)
          : getPanchang(f.date, 28.6139, 77.209, "New Delhi"),
     getUpcoming(f.festival_slug),
     getPujaKaal(base),
+    getVisarjan(base, city?.latitude ?? 28.6139, city?.longitude ?? 77.209,
+                city?.name ?? "New Delhi"),
   ]);
 
   // Other cities where this festival is in scope, each with its own timings.
@@ -476,6 +629,51 @@ export default async function FestivalPillar(
           <p className="mt-3 text-xs text-gray-500">
             {t.computedFor(placeName, city?.latitude ?? 28.6139, city?.longitude ?? 77.209)}
           </p>
+        </section>
+      )}
+
+      {/* IMMERSION — its own day, its own muhurat, and the local word for it.
+          810 impressions a quarter arrived on nimajjanam and visarjan queries
+          before this section existed, every one of them at zero clicks. */}
+      {visarjan && (
+        <section className="mb-8 rounded-xl border border-blue-200 bg-blue-50 p-5">
+          <h2 className={H2}>
+            🌊 {t.visarjanHead(local?.visarjan_name || visarjan.label)}
+          </h2>
+          {local?.visarjan_name && city && (
+            <p className="mb-2 text-sm text-gray-700">
+              {t.calledHere(city.state)} <strong>{local.visarjan_name}</strong>.
+            </p>
+          )}
+          <table className="w-full text-sm">
+            <tbody className="divide-y divide-blue-100">
+              <tr>
+                <td className="py-2 text-gray-600">{t.visarjanOn}</td>
+                <td className="py-2 text-right font-medium">
+                  <Link href={festivalHref(lang, city?.slug ?? null, visarjan.slug, null)}
+                        className="text-blue-800 hover:underline">
+                    {new Date(visarjan.date + "T00:00:00").toLocaleDateString(
+                      lang === "hi" ? "hi-IN" : "en-IN",
+                      { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
+                  </Link>
+                </td>
+              </tr>
+              {visarjan.muhurat && (
+                <tr>
+                  <td className="py-2 text-gray-600">{t.visarjanMuhurat}</td>
+                  <td className="py-2 text-right font-bold text-blue-900">
+                    {visarjan.muhurat}
+                    {visarjan.kaal && (
+                      <span className="ml-1 font-normal text-xs text-gray-600">
+                        ({t.kaalName[visarjan.kaal] ?? visarjan.kaal})
+                      </span>
+                    )}
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+          {visarjan.note && <p className="mt-3 text-sm text-gray-700">{visarjan.note}</p>}
         </section>
       )}
 
