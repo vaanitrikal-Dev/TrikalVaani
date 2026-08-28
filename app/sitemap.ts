@@ -69,6 +69,9 @@
  *   WIN 3: Panchang future dates only (today + 365 days).
  *
  * ── Earlier history (unchanged) ─────────────────────────────────────────────
+ *   v7.2: Hindi festival URLs (/hi/[slug], /hi/[city]/[slug]) with
+ *         hreflang, read from festival_content. They had been live and
+ *         unlisted; the sitemap knew only about /hi/compatibility/.
  *   v7.1: festivals live from festivals_master + city fan-out.
  *   v7.0: /learn hub + 90 /learn/[slug] SEO pages from seo_pillar_pages.
  *   v6.0: 10 new free calculators added (18 total).
@@ -219,6 +222,41 @@ async function readFestivalsFromDB(): Promise<DbFestivalRow[]> {
     return [];
   }
 }
+
+/**
+ * The Hindi slug for each festival, from festival_content.
+ *
+ * Added 28 Aug 2026. The Hindi festival routes went live that day and the
+ * sitemap did not know they existed — it handled /hi/compatibility/ and
+ * nothing else, so every Hindi festival page was invisible to Google from the
+ * moment it was published.
+ *
+ * English slugs carry the year (ganesh-chaturthi-2026); Hindi slugs are
+ * authority slugs with no year (ganesh-chaturthi-kab-hai), so the two cannot
+ * be derived from each other and the pairing is read from the table.
+ */
+type HiSlugRow = { base_slug: string; page_slug: string };
+
+async function readHindiFestivalSlugs(): Promise<Map<string, string>> {
+  const out = new Map<string, string>();
+  try {
+    const supabase = anonClient();
+    const { data, error } = await supabase
+      .from('festival_content')
+      .select('base_slug, page_slug')
+      .eq('lang', 'hi')
+      .eq('is_published', true);
+    if (error || !data) return out;
+    for (const r of data as HiSlugRow[]) {
+      if (r.base_slug && r.page_slug) out.set(r.base_slug, r.page_slug);
+    }
+  } catch {
+    /* sitemap must still build */
+  }
+  return out;
+}
+
+const baseSlugOf = (s: string) => s.replace(/-20\d\d$/, '');
 
 function festivalInState(scope: string | null, homeStates: string[] | null, state: string): boolean {
   if (scope === 'regional' && Array.isArray(homeStates) && homeStates.length > 0) {
@@ -524,23 +562,48 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   // ── Festival/event pages ───────────────────────────────────────────
   const dbFestivals = await readFestivalsFromDB();
+  const hiSlugs = await readHindiFestivalSlugs();
   if (dbFestivals.length > 0) {
     for (const f of dbFestivals) {
       if (!f.is_indexed) continue; // skip no-content festivals entirely
 
+      const hi = hiSlugs.get(baseSlugOf(f.festival_slug)) || null;
+
+      // national — English, and Hindi where a published Hindi page exists
+      const enUrl = `${BASE}/events/${f.festival_slug}`;
+      const hiUrl = hi ? `${BASE}/hi/${hi}` : null;
+      const natLangs = hi
+        ? { languages: { 'en-IN': enUrl, 'hi-IN': hiUrl! } }
+        : undefined;
+
       entries.push({
-        url: `${BASE}/events/${f.festival_slug}`,
-        lastModified: now,
-        changeFrequency: 'monthly',
-        priority: 0.75,
+        url: enUrl, lastModified: now, changeFrequency: 'monthly',
+        priority: 0.75, ...(natLangs ? { alternates: natLangs } : {}),
       });
+      if (hiUrl) {
+        entries.push({
+          url: hiUrl, lastModified: now, changeFrequency: 'monthly',
+          priority: 0.75, alternates: natLangs,
+        });
+      }
+
       for (const c of cities) {
-        if (festivalInState(f.festival_scope, f.home_states, c.state)) {
+        if (!festivalInState(f.festival_scope, f.home_states, c.state)) continue;
+
+        const enCity = `${BASE}/${c.slug}/events/${f.festival_slug}`;
+        const hiCity = hi ? `${BASE}/hi/${c.slug}/${hi}` : null;
+        const cityLangs = hi
+          ? { languages: { 'en-IN': enCity, 'hi-IN': hiCity! } }
+          : undefined;
+
+        entries.push({
+          url: enCity, lastModified: now, changeFrequency: 'monthly',
+          priority: 0.8, ...(cityLangs ? { alternates: cityLangs } : {}),
+        });
+        if (hiCity) {
           entries.push({
-            url: `${BASE}/${c.slug}/events/${f.festival_slug}`,
-            lastModified: now,
-            changeFrequency: 'monthly',
-            priority: 0.8,
+            url: hiCity, lastModified: now, changeFrequency: 'monthly',
+            priority: 0.8, alternates: cityLangs,
           });
         }
       }
