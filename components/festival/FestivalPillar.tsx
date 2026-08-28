@@ -2,7 +2,7 @@
 // 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER
 // ════════════════════════════════════════════════════════════════════════════
 // File:     components/festival/FestivalPillar.tsx
-// Version:  v2.0 (28 Aug 2026) — rebuilt on the site's own design language
+// Version:  v2.1 (28 Aug 2026) — dark design, plus the researched city block
 //
 // ── WHY v2.0 ───────────────────────────────────────────────────────────────
 //
@@ -121,6 +121,14 @@ export type LocalTerm = {
   visarjan_name: string | null;
 };
 
+/** What the festival actually looks like in one city — the researched block. */
+export type CityNote = {
+  heading: string | null;
+  body: string;
+  highlights: string[] | null;
+  sources: { uri?: string; title?: string; query?: string }[] | null;
+};
+
 /** The immersion, when it falls on a day of its own. */
 export type Visarjan = {
   label: string; note: string | null; kaal: string | null;
@@ -168,6 +176,8 @@ const L = {
     visarjanOn: "Immersion day",
     visarjanMuhurat: "Immersion muhurat",
     calledHere: (st: string) => `In ${st} this is called`,
+    inThisCity: (f: string, c: string) => `${f} in ${c}`,
+    localSources: "Researched from published sources",
     kaalName: {
       pratah: "Pratah", sangava: "Sangava", madhyahna: "Madhyahna",
       aparahna: "Aparahna", sayahna: "Sayahna", pradosh: "Pradosh",
@@ -222,6 +232,8 @@ const L = {
     visarjanOn: "विसर्जन का दिन",
     visarjanMuhurat: "विसर्जन मुहूर्त",
     calledHere: (st: string) => `${st} में इसे कहते हैं`,
+    inThisCity: (f: string, c: string) => `${c} में ${f}`,
+    localSources: "प्रकाशित स्रोतों से",
     kaalName: {
       pratah: "प्रातः", sangava: "संगव", madhyahna: "मध्याह्न",
       aparahna: "अपराह्न", sayahna: "सायाह्न", pradosh: "प्रदोष",
@@ -328,6 +340,32 @@ export async function getVisarjan(
       kaal: cat.visarjan_kaal ?? null,
       date: row.date, slug: row.festival_slug, muhurat,
     };
+  } catch { return null; }
+}
+
+/**
+ * The city block: Khairatabad and Tank Bund for Hyderabad, Lalbaugcha Raja for
+ * Mumbai, Golu for Chennai.
+ *
+ * Written with Google Search grounding — the one place in this codebase that
+ * uses it. Every other generated field comes from the engine, which is more
+ * reliable than the festival web. This is the opposite case: "what happens in
+ * Hyderabad on Ganesh Chaturthi" is not in any ephemeris, and a model asked to
+ * recall it unaided will put a real temple in the wrong city.
+ *
+ * is_published gates rendering and defaults false. A grounded claim is better
+ * sourced than a recalled one, but the web is wrong too, and this is the
+ * section whose entire value is being right about a place.
+ */
+export async function getCityNote(
+  base: string, citySlug: string, lang: Lang
+): Promise<CityNote | null> {
+  try {
+    const { data } = await supa().from("festival_city_notes")
+      .select("heading,body,highlights,sources")
+      .eq("base_slug", base).eq("city_slug", citySlug).eq("lang", lang)
+      .eq("is_published", true).limit(1);
+    return (data && (data[0] as CityNote)) || null;
   } catch { return null; }
 }
 
@@ -537,7 +575,7 @@ export default async function FestivalPillar(
   const f = festival;
   const base = baseSlug(f.festival_slug);
 
-  const [content, local, panchang, upcoming, pujaKaal, visarjan] = await Promise.all([
+  const [content, local, panchang, upcoming, pujaKaal, visarjan, cityNote] = await Promise.all([
     getContent(base, lang),
     city ? getLocalTerm(base, city.state) : Promise.resolve(null),
     city ? getPanchang(f.date, city.latitude, city.longitude, city.name)
@@ -546,6 +584,7 @@ export default async function FestivalPillar(
     getPujaKaal(base),
     getVisarjan(base, city?.latitude ?? 28.6139, city?.longitude ?? 77.209,
                 city?.name ?? "New Delhi"),
+    city ? getCityNote(base, city.slug, lang) : Promise.resolve(null),
   ]);
 
   // Other cities where this festival is in scope, each with its own timings.
@@ -720,6 +759,40 @@ export default async function FestivalPillar(
           {visarjan.note && <p className="mt-4 text-sm text-slate-300">{visarjan.note}</p>}
         </section>
       )}
+
+        {/* WHAT THIS FESTIVAL LOOKS LIKE HERE.
+            Placed high, because it is the only thing on this page that the
+            national page cannot also say — and the reason a reader in
+            Hyderabad should be on the Hyderabad URL. */}
+        {cityNote && city && (
+          <section className="my-10 rounded-xl border border-amber-800/50 bg-amber-950/25 p-6 md:p-8">
+            <h2 className="mb-4 text-2xl md:text-3xl font-bold text-amber-300">
+              {cityNote.heading || t.inThisCity(name, placeName)}
+            </h2>
+            <div className="space-y-4">
+              {cityNote.body.split(/\n\s*\n/).map((para, i) => (
+                <p key={i} className="text-slate-200 leading-relaxed">{para}</p>
+              ))}
+            </div>
+            {cityNote.highlights?.length ? (
+              <ul className="mt-6 space-y-2">
+                {cityNote.highlights.map((h, i) => (
+                  <li key={i} className="flex gap-3 text-slate-200 leading-relaxed">
+                    <span className="text-amber-400" aria-hidden>◆</span>
+                    <span>{h}</span>
+                  </li>
+                ))}
+              </ul>
+            ) : null}
+            {cityNote.sources?.some(x => x.uri) && (
+              <p className="mt-5 text-xs text-slate-500">
+                {t.localSources}
+                {" · "}
+                {cityNote.sources.filter(x => x.uri).length}
+              </p>
+            )}
+          </section>
+        )}
 
         <Link href="/#birth-form"
               className="my-8 block rounded-lg border border-amber-700/50 bg-amber-950/30 p-4 text-center text-sm font-semibold text-amber-300 hover:bg-amber-900/30 transition">
