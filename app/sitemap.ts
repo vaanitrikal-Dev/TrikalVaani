@@ -69,9 +69,13 @@
  *   WIN 3: Panchang future dates only (today + 365 days).
  *
  * ── Earlier history (unchanged) ─────────────────────────────────────────────
- *   v7.2: Hindi festival URLs (/hi/[slug], /hi/[city]/[slug]) with
- *         hreflang, read from festival_content. They had been live and
- *         unlisted; the sitemap knew only about /hi/compatibility/.
+ *   v8.2 (2026-08-28):
+ *     - Hindi festival URLs (/hi/[slug], /hi/[city]/[slug]) with hreflang,
+ *       read from festival_content. They went live that morning and the
+ *       sitemap did not know they existed.
+ *     - Compatibility now emits hreflang pairs, which it never had. The
+ *       /hi/compatibility/[pair] route it has advertised since June was built
+ *       the same day; until then all 144 of those URLs returned 404.
  *   v7.1: festivals live from festivals_master + city fan-out.
  *   v7.0: /learn hub + 90 /learn/[slug] SEO pages from seo_pillar_pages.
  *   v6.0: 10 new free calculators added (18 total).
@@ -510,21 +514,39 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }
 
   // ── WIN 1: Compatibility pages ─────────────────────────────────────
+  //
+  // Both languages, each pointing at the other through hreflang — which the
+  // blog has had since v8.1 and this block never did, so Google was left to
+  // treat the two as competing duplicates rather than one page in two
+  // languages.
+  //
+  // The /hi/compatibility/[pair] route these URLs need was listed here from
+  // June 2026 and only built on 28 Aug 2026. Every Hindi compatibility URL in
+  // this sitemap returned 404 in between.
   const compatRows = await readCompatibilitySlugs();
+  const compatSlugs = new Set<string>();
+  for (const row of compatRows) compatSlugs.add(row.slug);
+
   for (const row of compatRows) {
+    const enUrl = `${BASE}/compatibility/${row.slug}`;
+    const hiUrl = `${BASE}/hi/compatibility/${row.slug}`;
+    const languages = { 'en-IN': enUrl, 'hi-IN': hiUrl };
+
     if (row.lang === 'en') {
       entries.push({
-        url: `${BASE}/compatibility/${row.slug}`,
+        url: enUrl,
         lastModified: now,
         changeFrequency: 'monthly',
         priority: 0.8,
+        alternates: { languages },
       });
     } else if (row.lang === 'hi') {
       entries.push({
-        url: `${BASE}/hi/compatibility/${row.slug}`,
+        url: hiUrl,
         lastModified: now,
         changeFrequency: 'monthly',
         priority: 0.7,
+        alternates: { languages },
       });
     }
   }
