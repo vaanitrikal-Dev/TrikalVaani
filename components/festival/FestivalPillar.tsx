@@ -2,7 +2,28 @@
 // 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER
 // ════════════════════════════════════════════════════════════════════════════
 // File:     components/festival/FestivalPillar.tsx
-// Version:  v1.3 (28 Aug 2026) — puja muhurat, per-city meta, immersion section
+// Version:  v2.0 (28 Aug 2026) — rebuilt on the site's own design language
+//
+// ── WHY v2.0 ───────────────────────────────────────────────────────────────
+//
+// v1.x was built as a white page with grey text. The rest of trikalvaani.com
+// is dark — bg-[#080B12], white body text, amber-300 headings, slate-900/40
+// cards — and has been since the blog was built. A festival page dropped into
+// that site read as though it came from somewhere else, and at 4,000 words of
+// unbroken light-grey prose it was hard to read on its own terms too.
+//
+// Nothing about the data changed here. Every class in this file now comes from
+// app/blog/[slug]/page.tsx, so the two are the same product:
+//
+//     shell      min-h-screen bg-[#080B12] text-white
+//     column     mx-auto max-w-4xl px-4 py-12 md:py-16
+//     h1         text-3xl md:text-4xl lg:text-5xl font-bold leading-tight
+//     h2         mt-12 mb-4 text-2xl md:text-3xl font-bold text-amber-300
+//     card       rounded-xl border border-amber-900/40 bg-slate-900/40 p-5
+//     answer     border-amber-700/40 bg-gradient-to-br from-amber-950/50
+//     cta        border-amber-700/50 bg-gradient-to-r from-amber-900/30
+//     faq        collapsible rows with the + that rotates on open
+//     body       text-slate-200 leading-relaxed
 // Owner:    Rohiit Gupta, Chief Vedic Architect
 //
 // ── WHAT THIS IS ───────────────────────────────────────────────────────────
@@ -549,84 +570,107 @@ export default async function FestivalPillar(
     : null;
 
   const faqs = content?.faqs ?? [];
-  const H2 = "mb-3 text-xl font-bold text-gray-900";
-  const CARD = "mb-8 rounded-xl border border-amber-200 bg-white p-5";
+  // Design tokens lifted verbatim from app/blog/[slug]/page.tsx so a festival
+  // page and a blog post are visibly the same site.
+  const H2   = "mt-12 mb-4 text-2xl md:text-3xl font-bold text-amber-300";
+  const CARD = "my-8 rounded-xl border border-amber-900/40 bg-slate-900/40 p-5 md:p-6";
+  const BODY = "text-slate-200 leading-relaxed";
+  const LABEL = "text-slate-400";
+  const VALUE = "font-semibold text-amber-100";
 
   return (
-    <main className="mx-auto max-w-3xl px-4 py-8">
-      {city && <p className="text-sm text-amber-700">{placeName} · {city.state}</p>}
-      <h1 className="mt-1 text-3xl md:text-4xl font-bold text-gray-900">
-        {city ? t.in(name, placeName) : name}
-      </h1>
-      <p className="mt-2 text-lg text-gray-700">{pretty}</p>
+    <article className="min-h-screen bg-[#080B12] text-white">
+      <div className="mx-auto max-w-4xl px-4 py-12 md:py-16">
 
-      {altHref && (
-        <p className="mt-2 text-sm">
-          <Link href={altHref} className="text-amber-700 underline">{t.readOther}</Link>
-        </p>
-      )}
+        <nav aria-label="Breadcrumb" className="mb-8 text-sm text-slate-400">
+          <Link href="/" className="hover:text-amber-300 transition">Home</Link>
+          {city && <> · <Link href={`/${city.slug}/panchang`} className="hover:text-amber-300 transition">{placeName}</Link></>}
+          <> · <span className="text-slate-300">{name}</span></>
+        </nav>
+
+        {city && (
+          <span className="inline-block rounded-full bg-amber-900/40 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-amber-300">
+            {placeName} · {city.state}
+          </span>
+        )}
+        <h1 className="mb-4 mt-4 text-3xl md:text-4xl lg:text-5xl font-bold leading-tight">
+          {city ? t.in(name, placeName) : name}
+        </h1>
+        <div className="mb-8 flex flex-wrap items-center gap-3 text-sm text-slate-400">
+          <span className="text-amber-200">{pretty}</span>
+          {altHref && (
+            <>· <Link href={altHref} className="hover:text-amber-300 transition">{t.readOther}</Link></>
+          )}
+        </div>
 
       {/* DIRECT ANSWER — what AI search and the answer box lift */}
-      {(content?.direct_answer || f.geo_answer) && (
-        <section className="mt-6 mb-8 rounded-xl border border-amber-200 bg-amber-50 p-5">
-          <p className="text-gray-900">{content?.direct_answer ?? f.geo_answer}</p>
-        </section>
-      )}
+        {(content?.direct_answer || f.geo_answer) && (
+          <section className="mb-12 rounded-xl border border-amber-700/40 bg-gradient-to-br from-amber-950/50 to-slate-900/50 p-6 md:p-8">
+            <div className="mb-3 flex items-center gap-2">
+              <h2 className="text-lg font-bold text-amber-300">
+                {lang === "hi" ? "त्रिकाल संदेश — सीधा उत्तर" : "Trikaal Sandesh — Direct Answer"}
+              </h2>
+            </div>
+            <p className="text-base md:text-lg leading-relaxed text-amber-50">
+              {content?.direct_answer ?? f.geo_answer}
+            </p>
+          </section>
+        )}
 
       {/* LOCAL NAME — verified rows only, silent otherwise */}
-      {local && city && (
-        <section className="mb-8 rounded-xl border border-amber-300 bg-amber-50/60 p-4">
-          <p className="text-gray-900">
-            {t.knownAs(city.state, name)} <strong>{local.local_name}</strong>
+        {local && city && (
+          <aside className="my-6 rounded-lg border-l-4 border-amber-500 bg-amber-950/30 px-5 py-4">
+            <p className={BODY}>
+              {t.knownAs(city.state, name)} <strong className="text-amber-200">{local.local_name}</strong>
             {local.script_name ? <> ({local.script_name})</> : null}.
-            {local.note ? <> {local.note}</> : null}
-          </p>
-        </section>
-      )}
+              {local.note ? <> {local.note}</> : null}
+            </p>
+          </aside>
+        )}
 
       {/* TIMINGS — computed for this city. Absent, never approximated. */}
       {panchang && (
         <section className={CARD}>
           <h2 className={H2}>🕐 {t.timings(name, placeName)}</h2>
           <table className="w-full text-sm">
-            <tbody className="divide-y divide-amber-100">
-              <tr><td className="py-2 text-gray-600">{t.tithi}</td>
-                  <td className="py-2 text-right font-medium">
+            <tbody className="divide-y divide-amber-900/30">
+              <tr><td className="py-2 text-slate-400">{t.tithi}</td>
+                  <td className="py-2 text-right font-semibold text-amber-100">
                     {panchang.tithi.name} ({panchang.tithi.paksha})
                     {panchang.tithi.ends && <> — {panchang.tithi.ends} {t.upto}</>}
                   </td></tr>
-              <tr><td className="py-2 text-gray-600">{t.nakshatra}</td>
-                  <td className="py-2 text-right font-medium">
+              <tr><td className="py-2 text-slate-400">{t.nakshatra}</td>
+                  <td className="py-2 text-right font-semibold text-amber-100">
                     {panchang.nakshatra.name}, {t.pada} {panchang.nakshatra.pada}
                     {panchang.nakshatra.ends && <> — {panchang.nakshatra.ends} {t.upto}</>}
                   </td></tr>
-              <tr><td className="py-2 text-gray-600">{t.yogaKarana}</td>
-                  <td className="py-2 text-right font-medium">{panchang.yoga.name} · {panchang.karana.name}</td></tr>
+              <tr><td className="py-2 text-slate-400">{t.yogaKarana}</td>
+                  <td className="py-2 text-right font-semibold text-amber-100">{panchang.yoga.name} · {panchang.karana.name}</td></tr>
               {/* The window the rite is actually performed in. This is the
                   number people search for; before v3.1 the page showed Rahu
                   Kaal and a generic Abhijit and never named it. */}
               {pujaKaal && panchang.kaal?.[pujaKaal] && (
                 <tr className="bg-amber-50">
-                  <td className="py-2 font-semibold text-gray-800">{t.pujaMuhurat}</td>
-                  <td className="py-2 text-right font-bold text-amber-900">
+                  <td className="py-2 font-semibold text-amber-200">{t.pujaMuhurat}</td>
+                  <td className="py-2 text-right font-bold text-amber-300">
                     {panchang.kaal[pujaKaal]}
-                    <span className="ml-1 font-normal text-xs text-gray-600">
+                    <span className="ml-1 font-normal text-xs text-slate-400">
                       ({t.kaalName[pujaKaal] ?? pujaKaal})
                     </span>
                   </td>
                 </tr>
               )}
-              <tr><td className="py-2 text-gray-600">{t.abhijit}</td>
-                  <td className="py-2 text-right font-medium text-green-800">{panchang.abhijit_muhurat}</td></tr>
-              <tr><td className="py-2 text-gray-600">{t.rahu}</td>
-                  <td className="py-2 text-right font-medium text-red-700">{panchang.rahu_kaal}</td></tr>
-              <tr><td className="py-2 text-gray-600">{t.yamGulika}</td>
-                  <td className="py-2 text-right font-medium text-red-700">{panchang.yamaganda} · {panchang.gulika_kaal}</td></tr>
-              <tr><td className="py-2 text-gray-600">{t.sunriseSunset}</td>
-                  <td className="py-2 text-right font-medium">{panchang.sunrise} · {panchang.sunset}</td></tr>
+              <tr><td className="py-2 text-slate-400">{t.abhijit}</td>
+                  <td className="py-2 text-right font-semibold text-emerald-300">{panchang.abhijit_muhurat}</td></tr>
+              <tr><td className="py-2 text-slate-400">{t.rahu}</td>
+                  <td className="py-2 text-right font-semibold text-rose-300">{panchang.rahu_kaal}</td></tr>
+              <tr><td className="py-2 text-slate-400">{t.yamGulika}</td>
+                  <td className="py-2 text-right font-semibold text-rose-300">{panchang.yamaganda} · {panchang.gulika_kaal}</td></tr>
+              <tr><td className="py-2 text-slate-400">{t.sunriseSunset}</td>
+                  <td className="py-2 text-right font-semibold text-amber-100">{panchang.sunrise} · {panchang.sunset}</td></tr>
             </tbody>
           </table>
-          <p className="mt-3 text-xs text-gray-500">
+          <p className="mt-4 text-xs text-slate-500">
             {t.computedFor(placeName, city?.latitude ?? 28.6139, city?.longitude ?? 77.209)}
           </p>
         </section>
@@ -636,22 +680,22 @@ export default async function FestivalPillar(
           810 impressions a quarter arrived on nimajjanam and visarjan queries
           before this section existed, every one of them at zero clicks. */}
       {visarjan && (
-        <section className="mb-8 rounded-xl border border-blue-200 bg-blue-50 p-5">
+        <section className="my-10 rounded-xl border border-sky-800/50 bg-sky-950/30 p-6">
           <h2 className={H2}>
             🌊 {t.visarjanHead(local?.visarjan_name || visarjan.label)}
           </h2>
           {local?.visarjan_name && city && (
-            <p className="mb-2 text-sm text-gray-700">
+            <p className="mb-2 text-sm text-slate-300">
               {t.calledHere(city.state)} <strong>{local.visarjan_name}</strong>.
             </p>
           )}
           <table className="w-full text-sm">
-            <tbody className="divide-y divide-blue-100">
+            <tbody className="divide-y divide-sky-900/40">
               <tr>
-                <td className="py-2 text-gray-600">{t.visarjanOn}</td>
-                <td className="py-2 text-right font-medium">
+                <td className="py-2 text-slate-400">{t.visarjanOn}</td>
+                <td className="py-2 text-right font-semibold text-amber-100">
                   <Link href={festivalHref(lang, city?.slug ?? null, visarjan.slug, null)}
-                        className="text-blue-800 hover:underline">
+                        className="text-amber-300 hover:text-amber-200 transition">
                     {new Date(visarjan.date + "T00:00:00").toLocaleDateString(
                       lang === "hi" ? "hi-IN" : "en-IN",
                       { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
@@ -660,11 +704,11 @@ export default async function FestivalPillar(
               </tr>
               {visarjan.muhurat && (
                 <tr>
-                  <td className="py-2 text-gray-600">{t.visarjanMuhurat}</td>
+                  <td className="py-2 text-slate-400">{t.visarjanMuhurat}</td>
                   <td className="py-2 text-right font-bold text-blue-900">
                     {visarjan.muhurat}
                     {visarjan.kaal && (
-                      <span className="ml-1 font-normal text-xs text-gray-600">
+                      <span className="ml-1 font-normal text-xs text-slate-400">
                         ({t.kaalName[visarjan.kaal] ?? visarjan.kaal})
                       </span>
                     )}
@@ -673,19 +717,19 @@ export default async function FestivalPillar(
               )}
             </tbody>
           </table>
-          {visarjan.note && <p className="mt-3 text-sm text-gray-700">{visarjan.note}</p>}
+          {visarjan.note && <p className="mt-4 text-sm text-slate-300">{visarjan.note}</p>}
         </section>
       )}
 
-      <Link href="/#birth-form"
-            className="mb-8 block rounded-lg border border-amber-300 bg-white p-3 text-center text-sm text-amber-800 hover:bg-amber-50">
-        {t.freeCta}
-      </Link>
+        <Link href="/#birth-form"
+              className="my-8 block rounded-lg border border-amber-700/50 bg-amber-950/30 p-4 text-center text-sm font-semibold text-amber-300 hover:bg-amber-900/30 transition">
+          {t.freeCta}
+        </Link>
 
       {content?.quick_actions?.length ? (
         <section className={CARD}>
           <h2 className={H2}>✅ {t.whatToDo(name)}</h2>
-          <ol className="list-decimal space-y-2 pl-5 text-gray-800">
+          <ol className="list-decimal space-y-2 pl-5 text-slate-200 leading-relaxed marker:text-amber-400">
             {content.quick_actions.map((a, i) => <li key={i}>{a}</li>)}
           </ol>
           {content.puja_vidhi_short?.length ? (
@@ -698,10 +742,10 @@ export default async function FestivalPillar(
 
       {/* HOW THIS DATE WAS DETERMINED — the section nobody else has */}
       {f.regional_note && (
-        <section className="mb-8 rounded-xl border-2 border-amber-400 bg-amber-50 p-5">
+        <section className="my-10 rounded-xl border border-amber-700/50 bg-gradient-to-br from-amber-950/50 to-slate-900/50 p-6 md:p-8">
           <h2 className={H2}>📜 {t.howDate}</h2>
-          <p className="whitespace-pre-line text-gray-800">{f.regional_note}</p>
-          <p className="mt-3 text-xs text-gray-600">{t.howDateFoot}</p>
+          <p className="whitespace-pre-line text-slate-200 leading-relaxed">{f.regional_note}</p>
+          <p className="mt-4 text-xs text-slate-500">{t.howDateFoot}</p>
         </section>
       )}
 
@@ -710,13 +754,13 @@ export default async function FestivalPillar(
           <h2 className={H2}>🕐 {t.acrossIndia(name)}</h2>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="text-left text-gray-500">
+              <thead className="text-left text-slate-400">
                 <tr><th className="py-1">{t.city}</th><th>{t.sunrise}</th><th>{t.abhijit}</th><th>{t.rahu}</th></tr>
               </thead>
-              <tbody className="divide-y divide-amber-100">
+              <tbody className="divide-y divide-amber-900/30">
                 {city && panchang && (
                   <tr className="bg-amber-50">
-                    <td className="py-2 font-semibold">{placeName}</td>
+                    <td className="py-2 font-semibold text-amber-200">{placeName}</td>
                     <td>{panchang.sunrise}</td><td>{panchang.abhijit_muhurat}</td><td>{panchang.rahu_kaal}</td>
                   </tr>
                 )}
@@ -724,7 +768,7 @@ export default async function FestivalPillar(
                   <tr key={x.slug}>
                     <td className="py-2">
                       <Link href={festivalHref(lang, x.slug, f.festival_slug, content?.page_slug ?? null)}
-                            className="text-amber-700 hover:underline">
+                            className="text-amber-300 hover:text-amber-200 transition">
                         {lang === "hi" ? x.name_hindi : x.name}
                       </Link>
                     </td>
@@ -738,25 +782,25 @@ export default async function FestivalPillar(
       )}
 
       {content?.significance && (
-        <section className="mb-8 prose prose-amber max-w-none">
-          <h2 className="text-2xl font-semibold">{t.whyObserved(name)}</h2>
-          <div className="whitespace-pre-line text-gray-800">{content.significance}</div>
+        <section className="my-10">
+          <h2 className="mt-12 mb-4 text-2xl md:text-3xl font-bold text-amber-300">{t.whyObserved(name)}</h2>
+          <div className="whitespace-pre-line text-slate-200 leading-relaxed">{content.significance}</div>
         </section>
       )}
 
       {content?.puja_vidhi?.length ? (
         <section className={CARD}>
           <h2 className={H2}>🪔 {t.pujaVidhi(name)}</h2>
-          <ol className="list-decimal space-y-3 pl-5 text-gray-800">
-            {content.puja_vidhi.map((s, i) => <li key={i}><strong>{s.step}</strong> — {s.detail}</li>)}
+          <ol className="list-decimal space-y-3 pl-5 text-slate-200 leading-relaxed marker:text-amber-400">
+            {content.puja_vidhi.map((s, i) => <li key={i}><strong className="text-amber-200">{s.step}</strong> — {s.detail}</li>)}
           </ol>
         </section>
       ) : null}
 
       {content?.puja_vidhi_short?.length ? (
-        <section id="short-vidhi" className="mb-8 rounded-xl border border-green-300 bg-green-50 p-5">
+        <section id="short-vidhi" className="my-10 rounded-xl border border-emerald-800/50 bg-emerald-950/25 p-6">
           <h2 className={H2}>⚡ {t.fiveMin}</h2>
-          <ol className="list-decimal space-y-2 pl-5 text-gray-800">
+          <ol className="list-decimal space-y-2 pl-5 text-slate-200 leading-relaxed marker:text-amber-400">
             {content.puja_vidhi_short.map((s, i) => <li key={i}>{s}</li>)}
           </ol>
         </section>
@@ -766,18 +810,18 @@ export default async function FestivalPillar(
         <section className={CARD}>
           <h2 className={H2}>🛒 {t.samagri(name)}</h2>
           {content.samagri.essential?.length ? (
-            <><h3 className="mt-2 font-semibold text-gray-800">{t.essential}</h3>
-              <ul className="list-disc pl-5 text-gray-700">
+            <><h3 className="mt-4 mb-1 font-semibold text-amber-200">{t.essential}</h3>
+              <ul className="list-disc pl-5 text-slate-200 leading-relaxed marker:text-amber-400">
                 {content.samagri.essential.map((s, i) => <li key={i}>{s}</li>)}</ul></>
           ) : null}
           {content.samagri.optional?.length ? (
-            <><h3 className="mt-3 font-semibold text-gray-800">{t.optional}</h3>
-              <ul className="list-disc pl-5 text-gray-700">
+            <><h3 className="mt-4 mb-1 font-semibold text-amber-200">{t.optional}</h3>
+              <ul className="list-disc pl-5 text-slate-200 leading-relaxed marker:text-amber-400">
                 {content.samagri.optional.map((s, i) => <li key={i}>{s}</li>)}</ul></>
           ) : null}
           {content.samagri.substitutes?.length ? (
-            <><h3 className="mt-3 font-semibold text-gray-800">{t.substitutes}</h3>
-              <ul className="list-disc pl-5 text-gray-700">
+            <><h3 className="mt-4 mb-1 font-semibold text-amber-200">{t.substitutes}</h3>
+              <ul className="list-disc pl-5 text-slate-200 leading-relaxed marker:text-amber-400">
                 {content.samagri.substitutes.map((s, i) => <li key={i}>{s}</li>)}</ul></>
           ) : null}
         </section>
@@ -786,19 +830,19 @@ export default async function FestivalPillar(
       {content?.vrat_vidhi && (
         <section className={CARD}>
           <h2 className={H2}>🌙 {t.vrat(name)}</h2>
-          {content.vrat_vidhi.start && <p className="text-gray-800"><strong>{t.beginsAt}:</strong> {content.vrat_vidhi.start}</p>}
+          {content.vrat_vidhi.start && <p className="text-slate-200 leading-relaxed"><strong className="text-amber-200">{t.beginsAt}:</strong> {content.vrat_vidhi.start}</p>}
           {content.vrat_vidhi.may_eat?.length ? (
-            <><p className="mt-3 font-semibold text-green-800">{t.mayEat}</p>
-              <ul className="list-disc pl-5 text-gray-700">{content.vrat_vidhi.may_eat.map((s, i) => <li key={i}>{s}</li>)}</ul></>
+            <><p className="mt-4 mb-1 font-semibold text-emerald-300">{t.mayEat}</p>
+              <ul className="list-disc pl-5 text-slate-200 leading-relaxed marker:text-amber-400">{content.vrat_vidhi.may_eat.map((s, i) => <li key={i}>{s}</li>)}</ul></>
           ) : null}
           {content.vrat_vidhi.avoid?.length ? (
-            <><p className="mt-3 font-semibold text-red-800">{t.avoid}</p>
-              <ul className="list-disc pl-5 text-gray-700">{content.vrat_vidhi.avoid.map((s, i) => <li key={i}>{s}</li>)}</ul></>
+            <><p className="mt-4 mb-1 font-semibold text-rose-300">{t.avoid}</p>
+              <ul className="list-disc pl-5 text-slate-200 leading-relaxed marker:text-amber-400">{content.vrat_vidhi.avoid.map((s, i) => <li key={i}>{s}</li>)}</ul></>
           ) : null}
-          {content.vrat_vidhi.paran && <p className="mt-3 text-gray-800"><strong>{t.paran}:</strong> {content.vrat_vidhi.paran}</p>}
-          {content.vrat_vidhi.who_should_not && <p className="mt-2 text-gray-800"><strong>{t.whoNot}:</strong> {content.vrat_vidhi.who_should_not}</p>}
+          {content.vrat_vidhi.paran && <p className="mt-4 text-slate-200 leading-relaxed"><strong className="text-amber-200">{t.paran}:</strong> {content.vrat_vidhi.paran}</p>}
+          {content.vrat_vidhi.who_should_not && <p className="mt-3 text-slate-200 leading-relaxed"><strong className="text-amber-200">{t.whoNot}:</strong> {content.vrat_vidhi.who_should_not}</p>}
           {content.vrat_vidhi.health_note && (
-            <p className="mt-3 rounded-lg bg-blue-50 p-3 text-sm text-blue-900">{content.vrat_vidhi.health_note}</p>
+            <p className="mt-5 rounded-lg border border-sky-800/50 bg-sky-950/40 p-4 text-sm text-sky-200">{content.vrat_vidhi.health_note}</p>
           )}
         </section>
       )}
@@ -809,8 +853,8 @@ export default async function FestivalPillar(
           <div className="space-y-3">
             {content.dos_donts.map((d, i) => (
               <div key={i}>
-                <p className="font-medium text-gray-900">{d.q}</p>
-                <p className="text-gray-700">{d.a}</p>
+                <p className="font-semibold text-amber-200">{d.q}</p>
+                <p className="text-slate-200 leading-relaxed">{d.a}</p>
               </div>
             ))}
           </div>
@@ -818,17 +862,17 @@ export default async function FestivalPillar(
       ) : null}
 
       {(f.dos?.length || f.donts?.length) && (
-        <section className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2">
+        <section className="my-10 grid gap-4 md:grid-cols-2">
           {f.dos?.length ? (
-            <div className="rounded-xl border border-green-200 bg-green-50 p-5">
-              <h2 className="mb-3 text-xl font-bold text-green-800">✓ {t.dos}</h2>
-              <ul className="list-disc space-y-1 pl-5 text-gray-800">{f.dos.map((d, i) => <li key={i}>{d}</li>)}</ul>
+            <div className="rounded-xl border border-emerald-800/50 bg-emerald-950/25 p-5">
+              <h2 className="mb-3 text-xl font-bold text-emerald-300">✓ {t.dos}</h2>
+              <ul className="list-disc space-y-1 pl-5 text-slate-200 leading-relaxed marker:text-amber-400">{f.dos.map((d, i) => <li key={i}>{d}</li>)}</ul>
             </div>
           ) : null}
           {f.donts?.length ? (
-            <div className="rounded-xl border border-red-200 bg-red-50 p-5">
-              <h2 className="mb-3 text-xl font-bold text-red-800">✗ {t.donts}</h2>
-              <ul className="list-disc space-y-1 pl-5 text-gray-800">{f.donts.map((d, i) => <li key={i}>{d}</li>)}</ul>
+            <div className="rounded-xl border border-rose-900/50 bg-rose-950/25 p-5">
+              <h2 className="mb-3 text-xl font-bold text-rose-300">✗ {t.donts}</h2>
+              <ul className="list-disc space-y-1 pl-5 text-slate-200 leading-relaxed marker:text-amber-400">{f.donts.map((d, i) => <li key={i}>{d}</li>)}</ul>
             </div>
           ) : null}
         </section>
@@ -837,7 +881,7 @@ export default async function FestivalPillar(
       {content?.common_mistakes?.length ? (
         <section className={CARD}>
           <h2 className={H2}>⚠️ {t.mistakes}</h2>
-          <ul className="list-disc space-y-2 pl-5 text-gray-800">
+          <ul className="list-disc space-y-2 pl-5 text-slate-200 leading-relaxed marker:text-amber-400">
             {content.common_mistakes.map((m, i) => <li key={i}>{m}</li>)}
           </ul>
         </section>
@@ -846,34 +890,34 @@ export default async function FestivalPillar(
       {content?.mantra_block?.mantra && (
         <section className={CARD}>
           <h2 className={H2}>📿 {t.mantra}</h2>
-          <p className="text-xl text-amber-900">{content.mantra_block.mantra}</p>
-          {content.mantra_block.meaning && <p className="mt-2 text-gray-700">{content.mantra_block.meaning}</p>}
-          <p className="mt-2 text-sm text-gray-600">{content.mantra_block.count} {content.mantra_block.when}</p>
+          <p className="text-2xl text-amber-200">{content.mantra_block.mantra}</p>
+          {content.mantra_block.meaning && <p className="mt-2 text-slate-200 leading-relaxed">{content.mantra_block.meaning}</p>}
+          <p className="mt-3 text-sm text-slate-400">{content.mantra_block.count} {content.mantra_block.when}</p>
         </section>
       )}
 
       {content?.katha && (
         <section className={CARD}>
           <h2 className={H2}>📖 {t.katha(name)}</h2>
-          <div className="whitespace-pre-line text-gray-800">{content.katha}</div>
+          <div className="whitespace-pre-line text-slate-200 leading-relaxed">{content.katha}</div>
         </section>
       )}
 
       {content?.aarti && (
         <section className={CARD}>
           <h2 className={H2}>🪔 {t.aarti}</h2>
-          <p className="text-gray-800">{content.aarti}</p>
+          <p className="text-slate-200 leading-relaxed">{content.aarti}</p>
         </section>
       )}
 
       {content?.upay_by_problem?.length ? (
-        <section className="mb-8 rounded-xl border border-amber-300 bg-amber-50/60 p-5">
+        <section className="my-10 rounded-xl border border-amber-800/50 bg-amber-950/25 p-6">
           <h2 className={H2}>🔮 {t.upay(name)}</h2>
           <div className="space-y-3">
             {content.upay_by_problem.map((u, i) => (
               <div key={i}>
-                <p className="font-medium text-gray-900">{u.problem}</p>
-                <p className="text-gray-700">{u.upay}</p>
+                <p className="font-semibold text-amber-200">{u.problem}</p>
+                <p className="text-slate-200 leading-relaxed">{u.upay}</p>
               </div>
             ))}
           </div>
@@ -881,26 +925,44 @@ export default async function FestivalPillar(
       ) : null}
 
       {content?.solution_bridge && (
-        <section className="mb-8 rounded-xl bg-gradient-to-r from-amber-600 to-orange-600 p-6 text-white">
-          <h2 className="text-xl font-bold">{t.personal(name)}</h2>
-          <div className="mt-2 whitespace-pre-line text-amber-50">{content.solution_bridge}</div>
-          <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
-            <Link href="/#birth-form" className="rounded-lg bg-white px-4 py-2 text-center font-semibold text-amber-800">{t.kundli}</Link>
-            <Link href="/kundali-milan" className="rounded-lg border border-white px-4 py-2 text-center font-semibold text-white">{t.milan}</Link>
-            <Link href="/calculators" className="rounded-lg border border-white px-4 py-2 text-center font-semibold text-white">{t.hastrekha}</Link>
-            <Link href="/swapna" className="rounded-lg border border-white px-4 py-2 text-center font-semibold text-white">{t.swapna}</Link>
+        <section className="my-12 rounded-xl border border-amber-700/50 bg-gradient-to-r from-amber-900/30 to-amber-950/30 p-6 md:p-8">
+          <h3 className="mb-3 text-xl md:text-2xl font-bold text-amber-300">{t.personal(name)}</h3>
+          <div className="mb-6 whitespace-pre-line text-slate-200 leading-relaxed">
+            {content.solution_bridge}
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <Link href="/#birth-form"
+                  className="rounded-lg bg-amber-600 px-6 py-3 text-center font-semibold text-slate-900 hover:bg-amber-500 transition">
+              {t.kundli}
+            </Link>
+            <Link href="/kundali-milan"
+                  className="rounded-lg border-2 border-amber-500 px-6 py-3 text-center font-semibold text-amber-300 hover:bg-amber-500/10 transition">
+              {t.milan}
+            </Link>
+            <Link href="/calculators"
+                  className="rounded-lg border-2 border-amber-500 px-6 py-3 text-center font-semibold text-amber-300 hover:bg-amber-500/10 transition">
+              {t.hastrekha}
+            </Link>
+            <Link href="/swapna"
+                  className="rounded-lg border-2 border-amber-500 px-6 py-3 text-center font-semibold text-amber-300 hover:bg-amber-500/10 transition">
+              {t.swapna}
+            </Link>
           </div>
         </section>
       )}
 
       {faqs.length > 0 && (
         <section className="mb-8">
-          <h2 className="mb-4 text-2xl font-semibold text-gray-900">{t.faqHead(name, placeName)}</h2>
+          <h2 className="mb-6 text-2xl md:text-3xl font-bold text-amber-300">{t.faqHead(name, placeName)}</h2>
           <div className="space-y-4">
             {faqs.map((q, i) => (
-              <details key={i} className="rounded-lg border border-gray-200 p-4">
-                <summary className="cursor-pointer font-medium text-gray-900">{q.q}</summary>
-                <p className="mt-2 text-gray-700">{q.a}</p>
+              <details key={i}
+                className="group rounded-lg border border-amber-900/40 bg-slate-900/40 p-5 [&_summary::-webkit-details-marker]:hidden">
+                <summary className="flex cursor-pointer items-start justify-between gap-4 font-semibold text-amber-200">
+                  <span>{q.q}</span>
+                  <span className="text-amber-400 transition group-open:rotate-45" aria-hidden>+</span>
+                </summary>
+                <p className="mt-3 text-slate-200 leading-relaxed">{q.a}</p>
               </details>
             ))}
           </div>
@@ -908,37 +970,40 @@ export default async function FestivalPillar(
       )}
 
       {upcoming.length > 0 && (
-        <section className="mt-6 border-t border-gray-200 pt-6">
-          <h2 className="mb-3 text-lg font-semibold text-gray-900">{t.comingUp(placeName)}</h2>
-          <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+        <section className="my-12 border-t border-amber-900/40 pt-8">
+          <h2 className="mb-6 text-2xl md:text-3xl font-bold text-amber-300">{t.comingUp(placeName)}</h2>
+          <ul className="grid gap-4 sm:grid-cols-2">
             {upcoming
               .filter(o => !(o.festival_scope === "regional" && o.home_states?.length &&
                              city && !o.home_states.includes(city.state)))
               .map(o => (
                 <li key={o.festival_slug}>
                   <Link href={festivalHref("en", city?.slug ?? null, o.festival_slug, null)}
-                        className="text-amber-700 hover:underline">{o.festival_name}</Link>
-                  <span className="ml-2 text-sm text-gray-500">{o.date}</span>
+                        className="text-amber-300 hover:text-amber-200 transition">{o.festival_name}</Link>
+                  <span className="ml-2 text-sm text-slate-500">{o.date}</span>
                 </li>
               ))}
           </ul>
         </section>
       )}
 
-      <section className="mt-6 border-t border-gray-200 pt-6">
-        <h2 className="mb-3 text-lg font-semibold text-gray-900">{t.explore}</h2>
-        <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2 text-amber-700">
-          {city && <li><Link href={`/${city.slug}/panchang`} className="hover:underline">{t.panchangFor(placeName)}</Link></li>}
-          {city && <li><Link href={festivalHref(lang, null, f.festival_slug, content?.page_slug ?? null)} className="hover:underline">{t.allIndia(name)}</Link></li>}
-          <li><Link href={`/panchang/${f.date}`} className="hover:underline">{t.panchangDay}</Link></li>
-          <li><Link href="/upcoming-events" className="hover:underline">{t.allFestivals}</Link></li>
+      <section className="my-12 border-t border-amber-900/40 pt-8">
+        <h2 className="mb-6 text-2xl md:text-3xl font-bold text-amber-300">{t.explore}</h2>
+        <ul className="grid gap-3 sm:grid-cols-2 text-amber-300">
+          {city && <li><Link href={`/${city.slug}/panchang`} className="hover:text-amber-300 transition">{t.panchangFor(placeName)}</Link></li>}
+          {city && <li><Link href={festivalHref(lang, null, f.festival_slug, content?.page_slug ?? null)} className="hover:text-amber-300 transition">{t.allIndia(name)}</Link></li>}
+          <li><Link href={`/panchang/${f.date}`} className="hover:text-amber-300 transition">{t.panchangDay}</Link></li>
+          <li><Link href="/upcoming-events" className="hover:text-amber-300 transition">{t.allFestivals}</Link></li>
         </ul>
       </section>
 
-      <CalculatorLinks />
+        <CalculatorLinks />
 
-      <p className="mt-8 border-t border-gray-200 pt-4 text-xs text-gray-500">{t.footer}</p>
-    </main>
+        <footer className="mt-16 border-t border-amber-900/40 pt-8 text-sm text-slate-400">
+          {t.footer}
+        </footer>
+      </div>
+    </article>
   );
 }
 
