@@ -2,7 +2,7 @@
 // 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER
 // ════════════════════════════════════════════════════════════════════════════
 // File:    app/hi/[...path]/page.tsx
-// Version: v1.1 (28 Aug 2026)
+// Version: v1.2 (28 Aug 2026)
 // Owner:   Rohiit Gupta, Chief Vedic Architect
 //
 // Hindi festival pages, national and city, from one file.
@@ -49,7 +49,7 @@ import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import FestivalPillar, {
   ALL_CITIES, CITY_SLUGS, SITE_URL, OG_IMAGE, AUTHOR_NAME, AUTHOR_TITLE,
-  resolveFestival, getContent, baseSlug,
+  resolveFestival, getContent, getLocalTerm, getVisarjan, baseSlug, buildMeta,
 } from "@/components/festival/FestivalPillar";
 
 export const revalidate = 86400;
@@ -80,24 +80,22 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
 
   const f = await resolveFestival(p.slug, "hi");
   if (!f) return {};
-  const content = await getContent(baseSlug(f.festival_slug), "hi");
-  const name = f.name_hindi || f.festival_name;
-  const place = city ? city.name_hindi : null;
+  const [content, local, visarjan] = await Promise.all([
+    getContent(baseSlug(f.festival_slug), "hi"),
+    city ? getLocalTerm(baseSlug(f.festival_slug), city.state) : Promise.resolve(null),
+    getVisarjan(baseSlug(f.festival_slug),
+                city?.latitude ?? 28.6139, city?.longitude ?? 77.209,
+                city?.name ?? "New Delhi"),
+  ]);
+
+  // Composed per city — the content row is written once per festival and
+  // carries no city or state. See buildMeta in FestivalPillar.
+  const { title, description, keywords } =
+    buildMeta({ lang: "hi", festival: f, city, content, local, visarjan });
 
   const url = city
     ? `${SITE_URL}/hi/${city.slug}/${p.slug}`
     : `${SITE_URL}/hi/${p.slug}`;
-
-  const title = content?.seo_title
-    ? (place ? `${content.seo_title} — ${place}` : content.seo_title)
-    : (place
-        ? `${place} में ${name} कब है — तारीख, मुहूर्त और पूजा विधि`
-        : `${name} कब है — तारीख, शुभ मुहूर्त और पूजा विधि`);
-
-  const description = content?.seo_description
-    ?? (place
-        ? `${place} के लिए ${name} की तिथि, पूजा मुहूर्त, राहुकाल और सूर्योदय — स्विस एफ़ेमेरिस से गणना।`
-        : `${name} की सही तारीख, पूजा मुहूर्त, व्रत विधि और शहरवार समय — त्रिकाल वाणी के अपने इंजन से गणना।`);
 
   // hreflang from alt_lang_slug. The English side keeps the year in its slug,
   // so it is stored per row rather than derived.
@@ -109,7 +107,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   }
 
   return {
-    title, description,
+    title, description, keywords,
     alternates: { canonical: url, languages },
     authors: [{ name: `${AUTHOR_NAME}, ${AUTHOR_TITLE}` }],
     openGraph: { title, description, url, images: [OG_IMAGE], type: "article", locale: "hi_IN" },
