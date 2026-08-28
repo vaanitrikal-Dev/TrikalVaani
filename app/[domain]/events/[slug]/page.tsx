@@ -1,64 +1,62 @@
-// ════════════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════════════════════
 // 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER
-// ════════════════════════════════════════════════════════════════════
-// File:        app/[domain]/events/[slug]/page.tsx
-// Version:     v2.6 — Calculator internal links (Claude, June 2026)
-// Owner:       Rohiit Gupta, Chief Vedic Architect
-// Domain:      trikalvaani.com
+// ════════════════════════════════════════════════════════════════════════════
+// File:     app/[domain]/events/[slug]/page.tsx
+// Version:  v3.0 (28 Aug 2026) — pillar rebuild
+// Owner:    Rohiit Gupta, Chief Vedic Architect
 //
-// ── Changes vs v2.5 ────────────────────────────────────────────────
-//   1. INTERNAL LINKING — added <CalculatorLinks /> (components/seo/
-//      CalculatorLinks.tsx) just before the footer. Flows authority from
-//      high-traffic festival pages → priority calculators (Kundli, Manglik,
-//      Dasha, Sade Sati, Gemstone…). These calculators were near-orphaned;
-//      this is the biggest internal-authority injection available.
-//      Calculator list is managed in ONE place (the component) — no
-//      scattered hardcoded link lists.
-//   PROTECTED (untouched): all data fetching, scope logic, puja vidhi,
-//      remedies, regional customs, FAQ, schema, CTAs, footer.
+// ── WHY v3.0 ───────────────────────────────────────────────────────────────
 //
-// ── Changes vs v2.4 ────────────────────────────────────────────────
-//   1. SOFT CTA — slim value-first free-kundali bar under the quick-answer
-//      block → /#birth-form (FREE, no payment/signup). The ₹51 HARD CTA
-//      stays lower down. Free nudge early, paid ask late (honey-trap).
-//   2. CLEANUP — the 2 remaining /predict links (remedies funnel + bottom
-//      CTA) now point directly to /#birth-form (no redirect hop).
-//   PROTECTED (untouched): all data fetching, scope logic, puja vidhi,
-//      remedies content, regional customs, FAQ, schema, footer.
+// v2.6 was a national template with the city name substituted into it twice.
+// Measured against Search Console for the quarter to 28 Aug 2026:
 //
-// ── Changes vs v2.3 (Discover optimization — Claude, June 2026) ────
-//   1. OG image added (og-default.jpg 1200×630) to openGraph + twitter.
-//   2. robots expanded with googleBot max-image-preview:large + max-snippet
-//      (required for Google Discover large-image cards).
-//   3. Event schema now carries image:[OG_IMAGE] for Rich Results.
-//   PROTECTED (untouched): all data fetching, scope logic, puja vidhi,
-//      remedies, regional customs, FAQ build, JSX, footer.
+//     regional queries      118 queries   5,512 impressions   0.3% CTR
+//     hindi / devanagari    141 queries   7,638 impressions   0.5% CTR
+//     visarjan/nimajjanam     8 queries     881 impressions   0.0% CTR
+//     rahu kaal               3 queries     229 impressions   0.0% CTR
 //
-// ── Changes vs v2.2 ────────────────────────────────────────────────
-//   1. REMOVED the "Where to celebrate {festival} in {city}" temples box
-//      (CEO request — was rendering empty bullets for cities with no temple
-//      data).
-//   2. Temple data now filtered to non-empty strings (defensive), so the
-//      geo line / temple FAQ never render broken empty entries.
+// The Hyderabad page said "Hyderabad" twice, contained the word "Rahu" zero
+// times, "nimajjanam" zero times, and computed nothing for the city at all.
+// Those impressions were not lost to competition; they were lost to a page
+// that did not answer the question it ranked for.
 //
-// ── Changes vs v2.1 ────────────────────────────────────────────────
-//   1. PUJA VIDHI box (Layer 1) — renders festivals_master.puja_vidhi.
-//   2. REMEDIES box (Layer 2) — ruling-planet generic remedies from the
-//      planet_remedies table + funnel CTA to the personalised (paid) reading.
-//      Chart-specific Parashar/Bhrigu/Shadbala stays in the paid product.
-//   3. REGIONAL CUSTOMS box (Layer 3) — renders regional_customs[state]
-//      if present (graceful; empty until generated + verified).
-//   4. SCOPE LOGIC — regional festivals (festival_scope='regional') only
-//      render on their home_states cities; elsewhere → notFound(). The
-//      "in Other Cities" links are filtered to home_states too (no 404 links).
-//   5. GEO answer now uses the clean generated geo_answer; REMOVED the false
-//      "city-specific timings" claim (we don't show timings).
-//   6. FAQ = generated festival FAQs (gemini_content.faq) + city FAQs.
-//   7. Dropped intro_paragraph dependency. Double-a brand throughout.
+// ── WHAT IS ACTUALLY DIFFERENT PER CITY NOW ────────────────────────────────
 //
-// SEO: Event + FAQPage + BreadcrumbList schema, GEO answer block.
-// Lock: gemini-prompt.ts PERMANENTLY LOCKED (untouched).
-// ════════════════════════════════════════════════════════════════════
+// Everything in the timing panel, computed live from the city's own
+// coordinates through the VM engine: tithi with its end time, nakshatra, yoga,
+// karana, sunrise, sunset, Rahu Kaal, Yamaganda, Gulika, Abhijit. Kolkata
+// rises at 05:21 where Mumbai rises at 06:26, and the page now says so.
+//
+// If the engine is unreachable the timing panel does not render. It never
+// approximates, and it never repeats another city's numbers — which is what
+// the /mumbai/panchang page was silently doing with Delhi's data for three
+// months before 28 Aug 2026.
+//
+// ── THE SECTION NO COMPETITOR HAS ──────────────────────────────────────────
+//
+// "How this date was determined" renders festivals_master.regional_note: the
+// tithi span to the minute, the kaal that decides this festival, the tie-break
+// when two days qualify, and the Sanskrit line it rests on. Trikaal Vaani
+// computes its dates; the rest of the category copies them. On the years when
+// a festival date is disputed — and one is every year — this is the page that
+// settles it.
+//
+// ── DATA SOURCES, AND WHICH IS WHICH ───────────────────────────────────────
+//
+//   festivals_master        date, regional_note, dos, donts, muhurat        DB
+//   festivals_catalog       deity, mantra, offerings, planet, colour        DB
+//   festival_content        all prose, per language                     Gemini
+//   festival_local_terms    nimajjanam, dasara — verified rows only     manual
+//   VM /panchang            every clock time on the page                engine
+//
+// Gemini writes prose ONCE per festival per language, never per city. City
+// difference comes from the engine, free. Per-city generation would be 726
+// calls instead of 66 and would publish eleven near-identical pages.
+//
+// ── PRESERVED FROM v2.6 ────────────────────────────────────────────────────
+// Scope logic (regional festivals only render on home_states cities),
+// CalculatorLinks, Event/FAQPage/BreadcrumbList schema, the ₹51 funnel.
+// ════════════════════════════════════════════════════════════════════════════
 
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
@@ -66,55 +64,62 @@ import Link from "next/link";
 import { createClient } from "@supabase/supabase-js";
 import citiesData from "../../../data/cities.json";
 import CalculatorLinks from "@/components/seo/CalculatorLinks";
+import { callVM } from "@/lib/callVM";
 
 export const revalidate = 86400;
 export const dynamicParams = true;
 
-// ── Types ─────────────────────────────────────────────────────────────
+// ── Types ───────────────────────────────────────────────────────────────────
 type City = {
-  slug: string;
-  name: string;
-  name_hindi: string;
-  state: string;
-  latitude: number;
-  longitude: number;
-  description: string;
-  famous_temples: string[];
-  language: string;
-};
-
-type RegionalBlock = {
-  regional_intro?: string;
-  local_customs?: string[];
-  local_special?: string;
+  slug: string; name: string; name_hindi: string; state: string;
+  latitude: number; longitude: number; description: string;
+  famous_temples: string[]; language: string;
 };
 
 type DbFestival = {
-  festival_slug: string;
-  festival_name: string;
-  festival_type: string | null;
-  planet_ruler: string | null;
-  date: string;
-  year: number | null;
-  geo_answer: string | null;
-  dos: string[] | null;
-  donts: string[] | null;
-  puja_vidhi: string[] | null;
-  gemini_content: Record<string, unknown> | null;
-  name_hindi: string | null;
-  muhurat: string | null;
-  regional_customs: Record<string, RegionalBlock> | null;
-  festival_scope: string | null;
-  home_states: string[] | null;
+  festival_slug: string; festival_name: string; festival_type: string | null;
+  planet_ruler: string | null; date: string; year: number | null;
+  geo_answer: string | null; dos: string[] | null; donts: string[] | null;
+  puja_vidhi: string[] | null; name_hindi: string | null; muhurat: string | null;
+  regional_note: string | null; deity: string | null; mantra: string | null;
+  offerings: string[] | null; color: string | null; dosha_relief: string | null;
+  festival_scope: string | null; home_states: string[] | null;
 };
 
-type PlanetRemedy = {
-  planet: string;
-  day: string | null;
-  mantra: string | null;
-  daan: string | null;
-  remedies: string[] | null;
-  color: string | null;
+type Content = {
+  page_slug: string; alt_lang_slug: string | null;
+  seo_title: string | null; seo_description: string | null;
+  direct_answer: string | null; quick_actions: string[] | null;
+  significance: string | null;
+  puja_vidhi: { step: string; detail: string }[] | null;
+  puja_vidhi_short: string[] | null;
+  samagri: { essential?: string[]; optional?: string[]; substitutes?: string[] } | null;
+  vrat_vidhi: {
+    start?: string; may_eat?: string[]; avoid?: string[]; paran?: string;
+    who_should_not?: string; health_note?: string;
+  } | null;
+  dos_donts: { q: string; a: string }[] | null;
+  common_mistakes: string[] | null;
+  mantra_block: { mantra?: string; meaning?: string; count?: string; when?: string } | null;
+  katha: string | null; aarti: string | null;
+  upay_by_problem: { problem: string; upay: string }[] | null;
+  solution_bridge: string | null;
+  faqs: { q: string; a: string }[] | null;
+  keywords: string[] | null;
+};
+
+type LocalTerm = { local_name: string; script_name: string | null; note: string | null };
+
+/** What the VM returns from /panchang. Every clock time on the page. */
+type Panchang = {
+  weekday: string;
+  tithi: { name: string; paksha: string; ends: string | null };
+  nakshatra: { name: string; pada: number; ends: string | null };
+  yoga: { name: string; ends: string | null };
+  karana: { name: string; ends: string | null };
+  sunrise: string; sunset: string;
+  rahu_kaal: string; yamaganda: string; gulika_kaal: string;
+  abhijit_muhurat: string;
 };
 
 const SITE_URL = "https://trikalvaani.com";
@@ -127,7 +132,6 @@ const CITY_SLUGS = new Set([
   "hyderabad", "pune", "kolkata", "chennai", "ahmedabad",
 ]);
 
-// ── Supabase ──────────────────────────────────────────────────────────
 function getSupabase() {
   return createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -136,511 +140,581 @@ function getSupabase() {
 }
 
 const FESTIVAL_COLUMNS =
-  "festival_slug,festival_name,festival_type,planet_ruler,date,year,geo_answer,dos,donts,puja_vidhi,gemini_content,name_hindi,muhurat,regional_customs,festival_scope,home_states";
+  "festival_slug,festival_name,festival_type,planet_ruler,date,year,geo_answer," +
+  "dos,donts,puja_vidhi,name_hindi,muhurat,regional_note,deity,mantra,offerings," +
+  "color,dosha_relief,festival_scope,home_states";
+
+const baseSlug = (s: string) => s.replace(/-20\d\d$/, "");
+
+// ── Data ────────────────────────────────────────────────────────────────────
 
 async function getFestival(slug: string): Promise<DbFestival | null> {
   try {
-    const supabase = getSupabase();
-    const { data } = await supabase
-      .from("festivals_master")
-      .select(FESTIVAL_COLUMNS)
-      .eq("festival_slug", slug)
-      .single();
+    const { data } = await getSupabase()
+      .from("festivals_master").select(FESTIVAL_COLUMNS)
+      .eq("festival_slug", slug).single();
     return (data as DbFestival) || null;
-  } catch {
-    return null;
-  }
+  } catch { return null; }
 }
 
-async function getOtherFestivals(currentSlug: string): Promise<DbFestival[]> {
+async function getContent(base: string, lang: "en" | "hi"): Promise<Content | null> {
   try {
-    const supabase = getSupabase();
-    const today = new Date().toISOString().split("T")[0];
-    const { data } = await supabase
+    const { data } = await getSupabase()
+      .from("festival_content").select("*")
+      .eq("base_slug", base).eq("lang", lang)
+      .eq("is_published", true).single();
+    return (data as Content) || null;
+  } catch { return null; }
+}
+
+/**
+ * The local name for this festival in this state — nimajjanam, dasara.
+ *
+ * verified = true is required, and that filter is the point. A wrong religious
+ * term costs more authority than a missing one wins traffic, so unverified
+ * rows sit in the table and do not reach the page. An empty section is honest.
+ */
+async function getLocalTerm(base: string, state: string): Promise<LocalTerm | null> {
+  try {
+    const { data } = await getSupabase()
+      .from("festival_local_terms").select("local_name,script_name,note")
+      .eq("base_slug", base).eq("state", state).eq("verified", true).limit(1);
+    return (data && data[0] as LocalTerm) || null;
+  } catch { return null; }
+}
+
+/**
+ * Every clock time on this page, computed for THIS city's coordinates.
+ *
+ * Returns null on any failure, and the caller renders nothing rather than
+ * something. Between 4 June and 28 Aug 2026 ten city panchang pages served
+ * Delhi's numbers under their own name because a fallback looked better than
+ * a gap. It is not better. A missing table is a gap; a wrong muhurat is a
+ * person doing their puja at the wrong hour.
+ */
+async function getPanchang(date: string, lat: number, lon: number, city: string): Promise<Panchang | null> {
+  try {
+    const q = new URLSearchParams({ date, lat: String(lat), lon: String(lon), city });
+    const res = await callVM(`/panchang?${q.toString()}`, {
+      next: { revalidate: 86400 },
+      signal: AbortSignal.timeout(12000),
+    });
+    if (!res.ok) return null;
+    return (await res.json()) as Panchang;
+  } catch { return null; }
+}
+
+async function getOtherCityTimings(f: DbFestival, cities: City[]) {
+  const out = await Promise.all(
+    cities.map(async c => ({ city: c, p: await getPanchang(f.date, c.latitude, c.longitude, c.name) }))
+  );
+  return out.filter(r => r.p) as { city: City; p: Panchang }[];
+}
+
+async function getOtherFestivals(citySlug: string, exclude: string) {
+  try {
+    const today = new Date().toISOString().slice(0, 10);
+    const { data } = await getSupabase()
       .from("festivals_master")
-      .select(FESTIVAL_COLUMNS)
-      .neq("festival_slug", currentSlug)
-      .gte("date", today)
-      .order("date", { ascending: true })
-      .limit(6);
-    return (data as DbFestival[]) ?? [];
-  } catch {
-    return [];
-  }
+      .select("festival_slug,festival_name,date,festival_scope,home_states")
+      .gte("date", today).neq("festival_slug", exclude)
+      .order("date").limit(8);
+    return (data ?? []) as Pick<DbFestival,
+      "festival_slug" | "festival_name" | "date" | "festival_scope" | "home_states">[];
+  } catch { return []; }
 }
 
-async function getPlanetRemedies(planet: string | null): Promise<PlanetRemedy | null> {
-  if (!planet) return null;
-  try {
-    const supabase = getSupabase();
-    const { data } = await supabase
-      .from("planet_remedies")
-      .select("planet,day,mantra,daan,remedies,color")
-      .eq("planet", planet)
-      .single();
-    return (data as PlanetRemedy) || null;
-  } catch {
-    return null;
-  }
-}
+// ── Metadata ────────────────────────────────────────────────────────────────
 
-// ── Helpers ───────────────────────────────────────────────────────────
-function findCity(slug: string): City | null {
-  if (!CITY_SLUGS.has(slug)) return null;
-  return (citiesData.cities as City[]).find((c) => c.slug === slug) || null;
-}
-
-function cleanName(name: string): string {
-  return name.replace(/\s*(?:19|20)\d{2}\s*$/, "").trim();
-}
-
-function festYear(f: DbFestival): number {
-  return f.year ?? Number(f.date.slice(0, 4));
-}
-
-function formatDate(yyyymmdd: string): string {
-  const [y, m, d] = yyyymmdd.split("-").map(Number);
-  return new Date(Date.UTC(y, m - 1, d)).toLocaleDateString("en-IN", {
-    weekday: "long", year: "numeric", month: "long", day: "numeric", timeZone: "UTC",
-  });
-}
-
-function gc(f: DbFestival, key: string): string | null {
-  const v = f.gemini_content?.[key];
-  return typeof v === "string" && v.trim() ? v : null;
-}
-
-// regional festival is only valid in its home_states; pan_india valid everywhere
-function stateInScope(f: DbFestival, state: string): boolean {
-  if (f.festival_scope === "regional" && Array.isArray(f.home_states) && f.home_states.length > 0) {
-    return f.home_states.includes(state);
-  }
-  return true;
-}
-
-// ── Static params: upcoming festivals × cities, respecting scope ──────
-export async function generateStaticParams() {
-  const params: { domain: string; slug: string }[] = [];
-  try {
-    const supabase = getSupabase();
-    const today = new Date().toISOString().split("T")[0];
-    const { data } = await supabase
-      .from("festivals_master")
-      .select("festival_slug,festival_scope,home_states")
-      .gte("date", today)
-      .order("date", { ascending: true })
-      .limit(15);
-    const festivals = (data as Pick<DbFestival, "festival_slug" | "festival_scope" | "home_states">[]) ?? [];
-    const cities = (citiesData.cities as City[]).slice(0, 4);
-    for (const c of cities) {
-      for (const f of festivals) {
-        if (stateInScope(f as DbFestival, c.state)) {
-          params.push({ domain: c.slug, slug: f.festival_slug });
-        }
-      }
-    }
-  } catch {
-    // DB unreachable at build → everything renders on-demand via ISR
-  }
-  return params;
-}
-
-// ── Metadata ──────────────────────────────────────────────────────────
 export async function generateMetadata(
   { params }: { params: { domain: string; slug: string } }
 ): Promise<Metadata> {
-  const c = findCity(params.domain);
+  const cities = (citiesData as { cities: City[] }).cities;
+  const c = cities.find(x => x.slug === params.domain);
+  if (!c) return {};
   const f = await getFestival(params.slug);
-  if (!c || !f || !stateInScope(f, c.state)) return { title: "Not Found | Trikaal Vaani" };
+  if (!f) return {};
+  const content = await getContent(baseSlug(params.slug), "en");
 
-  const name = cleanName(f.festival_name);
-  const yr = festYear(f);
-  const human = formatDate(f.date);
-  const temples = (c.famous_temples ?? []).slice(0, 2);
-
-  const title = `${name} ${yr} in ${c.name} | ${human} | Puja Vidhi & Significance | Trikaal Vaani`;
-  const description =
-    `${name} ${yr} in ${c.name}, ${c.state} — ${human}. ` +
-    `${temples.length ? `Temples: ${temples.join(", ")}. ` : ""}` +
-    `Puja vidhi, do's & don'ts and remedies by Rohiit Gupta, Chief Vedic Architect.`;
+  const name = f.festival_name;
   const url = `${SITE_URL}/${c.slug}/events/${f.festival_slug}`;
+  const title = content?.seo_title
+    ? `${content.seo_title} — ${c.name}`
+    : `${name} in ${c.name}: Date, Muhurat & Puja Vidhi`;
+  const description = content?.seo_description
+    ?? `${name} ${f.date} in ${c.name}. Tithi, puja muhurat, Rahu Kaal and sunrise computed for ${c.name}, with the classical rule behind the date.`;
+
+  // hreflang, built from alt_lang_slug — the convention blog_posts already
+  // uses. The site had no hreflang anywhere before v3.0, which left the Hindi
+  // and English pages competing with each other instead of covering two
+  // different searches.
+  const languages: Record<string, string> = { "en-IN": url };
+  if (content?.alt_lang_slug) {
+    languages["hi-IN"] = `${SITE_URL}/hi/${c.slug}/events/${content.alt_lang_slug}`;
+  }
 
   return {
     title, description,
-    alternates: { canonical: url },
-    openGraph: { title, description, url, siteName: "Trikaal Vaani", type: "article", locale: "en_IN", images: [{ url: OG_IMAGE, width: 1200, height: 630, alt: title }] },
+    alternates: { canonical: url, languages },
+    openGraph: { title, description, url, images: [OG_IMAGE], type: "article" },
     twitter: { card: "summary_large_image", title, description, images: [OG_IMAGE] },
-    robots: { index: true, follow: true, googleBot: { index: true, follow: true, "max-video-preview": -1, "max-image-preview": "large", "max-snippet": -1 } },
+    robots: {
+      index: true, follow: true,
+      googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1 },
+    },
   };
 }
 
-// ── Page ──────────────────────────────────────────────────────────────
+// ── Page ────────────────────────────────────────────────────────────────────
+
 export default async function CityFestivalPage(
   { params }: { params: { domain: string; slug: string } }
 ) {
-  const c = findCity(params.domain);
+  if (!CITY_SLUGS.has(params.domain)) notFound();
+  const cities = (citiesData as { cities: City[] }).cities;
+  const c = cities.find(x => x.slug === params.domain);
+  if (!c) notFound();
+
   const f = await getFestival(params.slug);
-  if (!c || !f || !stateInScope(f, c.state)) notFound();
+  if (!f) notFound();
 
+  // Regional festivals render only where they are observed — kept from v2.6.
+  if (f.festival_scope === "regional" && f.home_states?.length &&
+      !f.home_states.includes(c.state)) notFound();
+
+  const base = baseSlug(params.slug);
+  const [content, local, panchang, otherFestivals] = await Promise.all([
+    getContent(base, "en"),
+    getLocalTerm(base, c.state),
+    getPanchang(f.date, c.latitude, c.longitude, c.name),
+    getOtherFestivals(c.slug, f.festival_slug),
+  ]);
+
+  const inScope = cities.filter(x =>
+    x.slug !== c.slug &&
+    !(f.festival_scope === "regional" && f.home_states?.length &&
+      !f.home_states.includes(x.state)));
+  const cityTimings = await getOtherCityTimings(f, inScope);
+
+  const name = f.festival_name;
+  const pretty = new Date(f.date + "T00:00:00").toLocaleDateString("en-IN", {
+    weekday: "long", day: "numeric", month: "long", year: "numeric",
+  });
   const url = `${SITE_URL}/${c.slug}/events/${f.festival_slug}`;
-  const human = formatDate(f.date);
-  const name = cleanName(f.festival_name);
-  const yr = festYear(f);
-  const ruler = f.planet_ruler || "";
-  const category = f.festival_type || "festival";
 
-  const temples = (c.famous_temples ?? []).filter((t) => typeof t === "string" && t.trim().length > 0);
-  const dos = f.dos ?? [];
-  const donts = f.donts ?? [];
-  const pujaVidhi = f.puja_vidhi ?? [];
-  const significance = gc(f, "spiritual_significance") || "";
-  const muhurat = f.muhurat;
-  const festivalHindi = f.name_hindi;
-  const subtitle = [festivalHindi, c.name_hindi].filter(Boolean).join(" · ");
-
-  // Layer 2 — ruling-planet generic remedies
-  const remedy = await getPlanetRemedies(f.planet_ruler);
-
-  // Layer 3 — regional customs for this city's state (graceful)
-  const regional: RegionalBlock | null =
-    (f.regional_customs && c.state && f.regional_customs[c.state]) || null;
-
-  // GEO answer — clean generated geo_answer + a local temple line (NO false timings)
-  const geoAnswer = f.geo_answer
-    ? `${f.geo_answer}${temples.length ? ` In ${c.name}, devotees visit temples like ${temples.slice(0, 2).join(" and ")}.` : ""}`
-    : `${name} ${yr} in ${c.name} (${c.name_hindi}) falls on ${human}.${ruler ? ` Ruling planet: ${ruler}.` : ""}${temples.length ? ` Visit ${c.name} temples like ${temples.slice(0, 2).join(" and ")} for darshan.` : ""}`;
-
-  // FAQ — generated festival FAQs + city FAQs
-  const genFaq = Array.isArray(f.gemini_content?.faq)
-    ? (f.gemini_content!.faq as Array<{ question?: string; answer?: string }>)
-        .filter((x) => x?.question && x?.answer)
-        .map((x) => ({ q: x.question as string, a: x.answer as string }))
-    : [];
-  const faqItems: { q: string; a: string }[] = [
-    { q: `When is ${name} ${yr} in ${c.name}?`, a: `${name} ${yr} is observed in ${c.name} on ${human}.` },
-    ...(temples.length ? [{ q: `Which temples to visit on ${name} in ${c.name}?`, a: `Famous temples in ${c.name}: ${temples.join(", ")}.` }] : []),
-    ...genFaq,
-  ];
-
-  // ── Schema ──
+  const faqs = content?.faqs ?? [];
   const eventSchema = {
-    "@context": "https://schema.org",
-    "@type": "Event",
-    name: `${name} ${yr} in ${c.name}`,
-    ...(festivalHindi ? { alternateName: festivalHindi } : {}),
+    "@context": "https://schema.org", "@type": "Event",
+    name: `${name} in ${c.name}`,
     startDate: f.date,
-    endDate: f.date,
+    eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
     eventStatus: "https://schema.org/EventScheduled",
-    eventAttendanceMode: "https://schema.org/MixedEventAttendanceMode",
-    description: significance || f.geo_answer || `${name} ${yr} in ${c.name}.`,
-    image: [OG_IMAGE],
+    image: [OG_IMAGE], url,
+    description: content?.direct_answer ?? f.geo_answer ?? undefined,
     location: {
-      "@type": "Place",
-      name: c.name,
+      "@type": "Place", name: c.name,
       address: { "@type": "PostalAddress", addressLocality: c.name, addressRegion: c.state, addressCountry: "IN" },
       geo: { "@type": "GeoCoordinates", latitude: c.latitude, longitude: c.longitude },
     },
+    author: { "@type": "Person", name: AUTHOR_NAME, jobTitle: AUTHOR_TITLE },
     organizer: { "@type": "Organization", name: "Trikaal Vaani", url: SITE_URL },
-    url,
   };
-
-  const breadcrumb = {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
+  const faqSchema = faqs.length ? {
+    "@context": "https://schema.org", "@type": "FAQPage",
+    mainEntity: faqs.map(q => ({
+      "@type": "Question", name: q.q,
+      acceptedAnswer: { "@type": "Answer", text: q.a },
+    })),
+  } : null;
+  const crumbs = {
+    "@context": "https://schema.org", "@type": "BreadcrumbList",
     itemListElement: [
       { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
       { "@type": "ListItem", position: 2, name: c.name, item: `${SITE_URL}/${c.slug}/panchang` },
-      { "@type": "ListItem", position: 3, name: "Festivals", item: `${SITE_URL}/upcoming-events` },
-      { "@type": "ListItem", position: 4, name: name, item: url },
+      { "@type": "ListItem", position: 3, name: name, item: url },
     ],
   };
 
-  const faqSchema = {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    mainEntity: faqItems.map((item) => ({
-      "@type": "Question",
-      name: item.q,
-      acceptedAnswer: { "@type": "Answer", text: item.a },
-    })),
-  };
-
-  const otherFestivals = await getOtherFestivals(f.festival_slug);
-  const otherCities = (citiesData.cities as City[])
-    .filter((o) => o.slug !== c.slug)
-    .filter((o) => stateInScope(f, o.state)) // regional → only home-state cities (no 404 links)
-    .slice(0, 6);
+  const H2 = "mb-3 text-xl font-bold text-gray-900";
+  const CARD = "mb-8 rounded-xl border border-amber-200 bg-white p-5";
 
   return (
-    <>
+    <main className="mx-auto max-w-3xl px-4 py-8">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(eventSchema) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumb) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
+      {faqSchema && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(crumbs) }} />
 
-      <main className="min-h-screen bg-gradient-to-b from-amber-50 to-white">
-        <div className="mx-auto max-w-4xl px-4 py-8 md:py-12">
+      <p className="text-sm text-amber-700">{c.name} · {c.state}</p>
+      <h1 className="mt-1 text-3xl md:text-4xl font-bold text-gray-900">
+        {name} in {c.name}
+      </h1>
+      <p className="mt-2 text-lg text-gray-700">{pretty}</p>
 
-          <nav className="mb-4 text-sm text-gray-600" aria-label="Breadcrumb">
-            <Link href="/" className="hover:text-amber-700">Home</Link>
-            <span className="mx-2">›</span>
-            <Link href={`/${c.slug}/panchang`} className="hover:text-amber-700">{c.name}</Link>
-            <span className="mx-2">›</span>
-            <Link href="/upcoming-events" className="hover:text-amber-700">Festivals</Link>
-            <span className="mx-2">›</span>
-            <span className="text-gray-900">{name}</span>
-          </nav>
+      {content?.alt_lang_slug && (
+        <p className="mt-2 text-sm">
+          <Link href={`/hi/${c.slug}/events/${content.alt_lang_slug}`} className="text-amber-700 underline">
+            हिंदी में पढ़ें →
+          </Link>
+        </p>
+      )}
 
-          <header className="mb-6">
-            <div className="text-sm font-semibold uppercase tracking-wide text-amber-700 capitalize">
-              {category} · {c.state}
+      {/* 1 · DIRECT ANSWER — what AI search and the answer box will lift */}
+      {(content?.direct_answer || f.geo_answer) && (
+        <section className="mt-6 mb-8 rounded-xl border border-amber-200 bg-amber-50 p-5" aria-label="Quick answer">
+          <p className="text-gray-900">{content?.direct_answer ?? f.geo_answer}</p>
+        </section>
+      )}
+
+      {/* 2 · LOCAL NAME — renders only when a verified term exists for this state */}
+      {local && (
+        <section className="mb-8 rounded-xl border border-amber-300 bg-amber-50/60 p-4">
+          <p className="text-gray-900">
+            In {c.state}, {name} is known as <strong>{local.local_name}</strong>
+            {local.script_name ? <> ({local.script_name})</> : null}.
+            {local.note ? <> {local.note}</> : null}
+          </p>
+        </section>
+      )}
+
+      {/* 3 · TIMING PANEL — every value computed for THIS city.
+          Absent, never approximated, if the engine is unreachable. */}
+      {panchang ? (
+        <section className={CARD} aria-label={`${name} timings for ${c.name}`}>
+          <h2 className={H2}>🕐 {name} Timings for {c.name}</h2>
+          <table className="w-full text-sm">
+            <tbody className="divide-y divide-amber-100">
+              <tr><td className="py-2 text-gray-600">Tithi</td>
+                  <td className="py-2 text-right font-medium">
+                    {panchang.tithi.name} ({panchang.tithi.paksha})
+                    {panchang.tithi.ends && <> — upto {panchang.tithi.ends}</>}
+                  </td></tr>
+              <tr><td className="py-2 text-gray-600">Nakshatra</td>
+                  <td className="py-2 text-right font-medium">
+                    {panchang.nakshatra.name}, Pada {panchang.nakshatra.pada}
+                    {panchang.nakshatra.ends && <> — upto {panchang.nakshatra.ends}</>}
+                  </td></tr>
+              <tr><td className="py-2 text-gray-600">Yoga · Karana</td>
+                  <td className="py-2 text-right font-medium">{panchang.yoga.name} · {panchang.karana.name}</td></tr>
+              <tr><td className="py-2 text-gray-600">Abhijit Muhurat</td>
+                  <td className="py-2 text-right font-medium text-green-800">{panchang.abhijit_muhurat}</td></tr>
+              <tr><td className="py-2 text-gray-600">Rahu Kaal</td>
+                  <td className="py-2 text-right font-medium text-red-700">{panchang.rahu_kaal}</td></tr>
+              <tr><td className="py-2 text-gray-600">Yamaganda · Gulika</td>
+                  <td className="py-2 text-right font-medium text-red-700">{panchang.yamaganda} · {panchang.gulika_kaal}</td></tr>
+              <tr><td className="py-2 text-gray-600">Sunrise · Sunset</td>
+                  <td className="py-2 text-right font-medium">{panchang.sunrise} · {panchang.sunset}</td></tr>
+            </tbody>
+          </table>
+          <p className="mt-3 text-xs text-gray-500">
+            Computed for {c.name} ({c.latitude}, {c.longitude}) with Swiss Ephemeris,
+            Lahiri ayanamsha. All five angas read at local sunrise.
+          </p>
+        </section>
+      ) : null}
+
+      {/* Soft CTA — free, early, no friction. Kept from v2.5. */}
+      <Link href="/#birth-form"
+            className="mb-8 block rounded-lg border border-amber-300 bg-white p-3 text-center text-sm text-amber-800 hover:bg-amber-50">
+        Free Kundli — no payment, no signup →
+      </Link>
+
+      {/* 4 · QUICK ACTIONS — for the reader standing at the thali */}
+      {content?.quick_actions?.length ? (
+        <section className={CARD}>
+          <h2 className={H2}>✅ What to do on {name}</h2>
+          <ol className="list-decimal space-y-2 pl-5 text-gray-800">
+            {content.quick_actions.map((a, i) => <li key={i}>{a}</li>)}
+          </ol>
+          {content.puja_vidhi_short?.length ? (
+            <p className="mt-3 text-sm">
+              <a href="#short-vidhi" className="text-amber-700 underline">
+                Short of time? → 5-minute puja vidhi
+              </a>
+            </p>
+          ) : null}
+        </section>
+      ) : null}
+
+      {/* 5 · HOW THIS DATE WAS DETERMINED — the section nobody else has */}
+      {f.regional_note && (
+        <section className="mb-8 rounded-xl border-2 border-amber-400 bg-amber-50 p-5">
+          <h2 className={H2}>📜 How this date was determined</h2>
+          <p className="whitespace-pre-line text-gray-800">{f.regional_note}</p>
+          <p className="mt-3 text-xs text-gray-600">
+            Computed by Trikaal Vaani from Swiss Ephemeris and the classical nirnaya
+            rules — Nirnaya Sindhu, Dharma Sindhu, and the Report of the Calendar
+            Reform Committee. Not copied from another calendar.
+          </p>
+        </section>
+      )}
+
+      {/* 6 · CITY-WISE TIMINGS — genuinely different per row */}
+      {cityTimings.length > 0 && (
+        <section className={CARD}>
+          <h2 className={H2}>🕐 {name} timings across India</h2>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="text-left text-gray-500">
+                <tr><th className="py-1">City</th><th>Sunrise</th><th>Abhijit</th><th>Rahu Kaal</th></tr>
+              </thead>
+              <tbody className="divide-y divide-amber-100">
+                <tr className="bg-amber-50">
+                  <td className="py-2 font-semibold">{c.name}</td>
+                  <td>{panchang?.sunrise ?? "—"}</td>
+                  <td>{panchang?.abhijit_muhurat ?? "—"}</td>
+                  <td>{panchang?.rahu_kaal ?? "—"}</td>
+                </tr>
+                {cityTimings.map(({ city, p }) => (
+                  <tr key={city.slug}>
+                    <td className="py-2">
+                      <Link href={`/${city.slug}/events/${f.festival_slug}`} className="text-amber-700 hover:underline">
+                        {city.name}
+                      </Link>
+                    </td>
+                    <td>{p.sunrise}</td><td>{p.abhijit_muhurat}</td><td>{p.rahu_kaal}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      )}
+
+      {/* 7 · SIGNIFICANCE */}
+      {content?.significance && (
+        <section className="mb-8 prose prose-amber max-w-none">
+          <h2 className="text-2xl font-semibold">Why {name} is observed</h2>
+          <div className="whitespace-pre-line text-gray-800">{content.significance}</div>
+        </section>
+      )}
+
+      {/* 8 · PUJA VIDHI */}
+      {content?.puja_vidhi?.length ? (
+        <section className={CARD}>
+          <h2 className={H2}>🪔 {name} Puja Vidhi</h2>
+          <ol className="list-decimal space-y-3 pl-5 text-gray-800">
+            {content.puja_vidhi.map((s, i) => (
+              <li key={i}><strong>{s.step}</strong> — {s.detail}</li>
+            ))}
+          </ol>
+        </section>
+      ) : null}
+
+      {content?.puja_vidhi_short?.length ? (
+        <section id="short-vidhi" className="mb-8 rounded-xl border border-green-300 bg-green-50 p-5">
+          <h2 className={H2}>⚡ 5-minute version</h2>
+          <ol className="list-decimal space-y-2 pl-5 text-gray-800">
+            {content.puja_vidhi_short.map((s, i) => <li key={i}>{s}</li>)}
+          </ol>
+        </section>
+      ) : null}
+
+      {/* 9 · SAMAGRI — with the substitutes column nobody writes */}
+      {content?.samagri && (
+        <section className={CARD}>
+          <h2 className={H2}>🛒 {name} Puja Samagri</h2>
+          {content.samagri.essential?.length ? (
+            <><h3 className="mt-2 font-semibold text-gray-800">Essential</h3>
+              <ul className="list-disc pl-5 text-gray-700">
+                {content.samagri.essential.map((s, i) => <li key={i}>{s}</li>)}
+              </ul></>
+          ) : null}
+          {content.samagri.optional?.length ? (
+            <><h3 className="mt-3 font-semibold text-gray-800">Optional</h3>
+              <ul className="list-disc pl-5 text-gray-700">
+                {content.samagri.optional.map((s, i) => <li key={i}>{s}</li>)}
+              </ul></>
+          ) : null}
+          {content.samagri.substitutes?.length ? (
+            <><h3 className="mt-3 font-semibold text-gray-800">If something is unavailable</h3>
+              <ul className="list-disc pl-5 text-gray-700">
+                {content.samagri.substitutes.map((s, i) => <li key={i}>{s}</li>)}
+              </ul></>
+          ) : null}
+        </section>
+      )}
+
+      {/* 10 · VRAT — the health line is required, not decorative */}
+      {content?.vrat_vidhi && (
+        <section className={CARD}>
+          <h2 className={H2}>🌙 {name} Vrat Vidhi</h2>
+          {content.vrat_vidhi.start && <p className="text-gray-800"><strong>When it begins:</strong> {content.vrat_vidhi.start}</p>}
+          {content.vrat_vidhi.may_eat?.length ? (
+            <><p className="mt-3 font-semibold text-green-800">May be eaten</p>
+              <ul className="list-disc pl-5 text-gray-700">{content.vrat_vidhi.may_eat.map((s, i) => <li key={i}>{s}</li>)}</ul></>
+          ) : null}
+          {content.vrat_vidhi.avoid?.length ? (
+            <><p className="mt-3 font-semibold text-red-800">To be avoided</p>
+              <ul className="list-disc pl-5 text-gray-700">{content.vrat_vidhi.avoid.map((s, i) => <li key={i}>{s}</li>)}</ul></>
+          ) : null}
+          {content.vrat_vidhi.paran && <p className="mt-3 text-gray-800"><strong>Paran:</strong> {content.vrat_vidhi.paran}</p>}
+          {content.vrat_vidhi.who_should_not && <p className="mt-2 text-gray-800"><strong>Who traditionally does not fast:</strong> {content.vrat_vidhi.who_should_not}</p>}
+          {content.vrat_vidhi.health_note && (
+            <p className="mt-3 rounded-lg bg-blue-50 p-3 text-sm text-blue-900">
+              {content.vrat_vidhi.health_note}
+            </p>
+          )}
+        </section>
+      )}
+
+      {/* 11 · THE ACTUAL QUESTIONS PEOPLE ASK */}
+      {content?.dos_donts?.length ? (
+        <section className={CARD}>
+          <h2 className={H2}>❓ {name}: what is allowed and what is not</h2>
+          <div className="space-y-3">
+            {content.dos_donts.map((d, i) => (
+              <div key={i}>
+                <p className="font-medium text-gray-900">{d.q}</p>
+                <p className="text-gray-700">{d.a}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
+      {/* Do's / Don'ts from the catalog — Rohiit's own, kept from v2.6 */}
+      {(f.dos?.length || f.donts?.length) && (
+        <section className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2">
+          {f.dos?.length ? (
+            <div className="rounded-xl border border-green-200 bg-green-50 p-5">
+              <h2 className="mb-3 text-xl font-bold text-green-800">✓ Do&apos;s</h2>
+              <ul className="list-disc space-y-1 pl-5 text-gray-800">{f.dos.map((d, i) => <li key={i}>{d}</li>)}</ul>
             </div>
-            <h1 className="mt-1 text-3xl md:text-4xl font-bold text-gray-900">
-              {name} {yr} in {c.name}
-            </h1>
-            {subtitle && (
-              <p className="mt-1 text-2xl text-gray-700">{subtitle}</p>
-            )}
-            <p className="mt-3 text-sm text-gray-600">
-              By <strong>{AUTHOR_NAME}</strong>, {AUTHOR_TITLE}
-            </p>
-          </header>
+          ) : null}
+          {f.donts?.length ? (
+            <div className="rounded-xl border border-red-200 bg-red-50 p-5">
+              <h2 className="mb-3 text-xl font-bold text-red-800">✗ Don&apos;ts</h2>
+              <ul className="list-disc space-y-1 pl-5 text-gray-800">{f.donts.map((d, i) => <li key={i}>{d}</li>)}</ul>
+            </div>
+          ) : null}
+        </section>
+      )}
 
-          <section className="mb-8 rounded-xl border border-amber-200 bg-amber-50 p-5" aria-label="Quick answer">
-            <p className="text-base leading-relaxed text-gray-800">{geoAnswer}</p>
-          </section>
+      {/* 12 · COMMON MISTAKES */}
+      {content?.common_mistakes?.length ? (
+        <section className={CARD}>
+          <h2 className={H2}>⚠️ Common mistakes</h2>
+          <ul className="list-disc space-y-2 pl-5 text-gray-800">
+            {content.common_mistakes.map((m, i) => <li key={i}>{m}</li>)}
+          </ul>
+        </section>
+      ) : null}
 
-          {/* SOFT CTA (v2.5) — value-first free-kundali nudge, early in the page.
-              The ₹51 HARD CTA stays lower down. Free now, paid later. */}
-          <div className="mb-8 flex flex-col gap-2 rounded-xl border border-amber-300 bg-amber-100/60 p-4 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-sm font-medium text-amber-900">
-              ✨ Curious what {name} means for YOUR chart?{" "}
-              <span className="text-amber-700">Start free — no payment, no signup.</span>
-            </p>
-            <Link href="/#birth-form" className="inline-block shrink-0 rounded-lg bg-amber-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-amber-700">
-              See my free kundali →
+      {/* 13 · MANTRA · KATHA · AARTI */}
+      {content?.mantra_block?.mantra && (
+        <section className={CARD}>
+          <h2 className={H2}>📿 Mantra</h2>
+          <p className="text-xl text-amber-900">{content.mantra_block.mantra}</p>
+          {content.mantra_block.meaning && <p className="mt-2 text-gray-700">{content.mantra_block.meaning}</p>}
+          <p className="mt-2 text-sm text-gray-600">
+            {content.mantra_block.count} {content.mantra_block.when}
+          </p>
+        </section>
+      )}
+      {content?.katha && (
+        <section className={CARD}>
+          <h2 className={H2}>📖 {name} Katha</h2>
+          <div className="whitespace-pre-line text-gray-800">{content.katha}</div>
+        </section>
+      )}
+      {content?.aarti && (
+        <section className={CARD}>
+          <h2 className={H2}>🪔 Aarti</h2>
+          <p className="text-gray-800">{content.aarti}</p>
+        </section>
+      )}
+
+      {/* 14 · UPAY BY PROBLEM — not by rashi, by decision */}
+      {content?.upay_by_problem?.length ? (
+        <section className="mb-8 rounded-xl border border-amber-300 bg-amber-50/60 p-5">
+          <h2 className={H2}>🔮 {name} upay, by what you are facing</h2>
+          <div className="space-y-3">
+            {content.upay_by_problem.map((u, i) => (
+              <div key={i}>
+                <p className="font-medium text-gray-900">{u.problem}</p>
+                <p className="text-gray-700">{u.upay}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
+      {/* 15 · SOLUTION BRIDGE — the honest limit, then the services */}
+      {content?.solution_bridge && (
+        <section className="mb-8 rounded-xl bg-gradient-to-r from-amber-600 to-orange-600 p-6 text-white">
+          <h2 className="text-xl font-bold">Is {name} significant for you personally?</h2>
+          <div className="mt-2 whitespace-pre-line text-amber-50">{content.solution_bridge}</div>
+          <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
+            <Link href="/#birth-form" className="rounded-lg bg-white px-4 py-2 text-center font-semibold text-amber-800">
+              Personal Kundli — ₹51
+            </Link>
+            <Link href="/kundali-milan" className="rounded-lg border border-white px-4 py-2 text-center font-semibold text-white">
+              Kundali Milan
+            </Link>
+            <Link href="/calculators" className="rounded-lg border border-white px-4 py-2 text-center font-semibold text-white">
+              Hastrekha
+            </Link>
+            <Link href="/swapna" className="rounded-lg border border-white px-4 py-2 text-center font-semibold text-white">
+              Swapna Shastra
             </Link>
           </div>
+        </section>
+      )}
 
-          <section className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2">
-            <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
-              <div className="text-xs uppercase tracking-wide text-gray-500">Date</div>
-              <div className="mt-1 text-lg font-semibold text-gray-900">{human}</div>
-            </div>
-            <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
-              <div className="text-xs uppercase tracking-wide text-gray-500">City</div>
-              <div className="mt-1 text-lg font-semibold text-gray-900">{c.name}, {c.state}</div>
-            </div>
-            {ruler && (
-              <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
-                <div className="text-xs uppercase tracking-wide text-gray-500">Planetary Ruler</div>
-                <div className="mt-1 text-lg font-semibold text-gray-900">{ruler}</div>
-              </div>
-            )}
-            <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
-              <div className="text-xs uppercase tracking-wide text-gray-500">Category</div>
-              <div className="mt-1 text-lg font-semibold text-gray-900 capitalize">{category}</div>
-            </div>
-            <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm md:col-span-2">
-              <div className="text-xs uppercase tracking-wide text-gray-500">Muhurat in {c.name}</div>
-              {muhurat ? (
-                <>
-                  <div className="mt-1 text-lg font-semibold text-gray-900">{muhurat}</div>
-                  <div className="mt-1 text-xs text-gray-600">All times in IST · {c.name}</div>
-                </>
-              ) : (
-                <Link href={`/panchang/${f.date}`} className="mt-1 inline-block text-lg font-semibold text-amber-700 hover:underline">
-                  View full Panchang &amp; muhurat for {human} →
-                </Link>
-              )}
-            </div>
-          </section>
+      {/* 16 · FAQ */}
+      {faqs.length > 0 && (
+        <section className="mb-8">
+          <h2 className="mb-4 text-2xl font-semibold text-gray-900">
+            {name} in {c.name} — frequently asked
+          </h2>
+          <div className="space-y-4">
+            {faqs.map((q, i) => (
+              <details key={i} className="rounded-lg border border-gray-200 p-4">
+                <summary className="cursor-pointer font-medium text-gray-900">{q.q}</summary>
+                <p className="mt-2 text-gray-700">{q.a}</p>
+              </details>
+            ))}
+          </div>
+        </section>
+      )}
 
-          {significance && (
-            <section className="mb-8 prose prose-amber max-w-none">
-              <h2 className="text-2xl font-semibold">Significance of {name}</h2>
-              <p>{significance}</p>
-            </section>
-          )}
-
-          {/* Puja Vidhi (Layer 1) */}
-          {pujaVidhi.length > 0 && (
-            <section className="mb-8 rounded-xl border border-amber-200 bg-white p-5">
-              <h2 className="mb-3 text-xl font-bold text-gray-900">🪔 {name} Puja Vidhi</h2>
-              <ol className="ml-5 list-decimal space-y-2 text-sm text-gray-800">
-                {pujaVidhi.map((step, i) => (
-                  <li key={i}>{step}</li>
-                ))}
-              </ol>
-            </section>
-          )}
-
-          {/* Do's & Don'ts */}
-          {(dos.length > 0 || donts.length > 0) && (
-            <section className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2">
-              {dos.length > 0 && (
-                <div className="rounded-xl border border-green-200 bg-green-50 p-5">
-                  <h2 className="mb-3 text-xl font-bold text-green-800">✓ Do&apos;s</h2>
-                  <ul className="space-y-2">
-                    {dos.map((item, i) => (
-                      <li key={i} className="flex items-start text-sm text-gray-800">
-                        <span className="mr-2 text-green-600">●</span><span>{item}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-              {donts.length > 0 && (
-                <div className="rounded-xl border border-red-200 bg-red-50 p-5">
-                  <h2 className="mb-3 text-xl font-bold text-red-800">✗ Don&apos;ts</h2>
-                  <ul className="space-y-2">
-                    {donts.map((item, i) => (
-                      <li key={i} className="flex items-start text-sm text-gray-800">
-                        <span className="mr-2 text-red-600">●</span><span>{item}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </section>
-          )}
-
-          {/* Remedies (Layer 2) — ruling-planet generic + funnel to paid personalised */}
-          {remedy && Array.isArray(remedy.remedies) && remedy.remedies.length > 0 && (
-            <section className="mb-8 rounded-xl border border-amber-300 bg-amber-50/60 p-5">
-              <h2 className="mb-2 text-xl font-bold text-gray-900">
-                ✨ Remedies for {name}{ruler ? ` (ruled by ${ruler})` : ""}
-              </h2>
-              <ul className="space-y-2">
-                {remedy.remedies.map((r, i) => (
-                  <li key={i} className="flex items-start text-sm text-gray-800">
-                    <span className="mr-2 text-amber-600">●</span><span>{r}</span>
-                  </li>
-                ))}
-              </ul>
-              <div className="mt-3 text-xs text-gray-600">
-                {remedy.mantra && <span>Mantra: <em>{remedy.mantra}</em>. </span>}
-                {remedy.daan && <span>Daan: {remedy.daan}{remedy.day ? ` (on ${remedy.day})` : ""}.</span>}
-              </div>
-              <p className="mt-3 text-sm text-gray-700">
-                These are general {ruler || "planetary"} remedies. For remedies based on YOUR birth chart —{" "}
-                <Link href="/#birth-form" className="font-semibold text-amber-700 hover:underline">
-                  get your personalised reading →
-                </Link>
-              </p>
-            </section>
-          )}
-
-          {/* Regional customs (Layer 3) — only if present + verified */}
-          {regional && regional.regional_intro && (
-            <section className="mb-8 rounded-xl border border-amber-200 bg-white p-5">
-              <h2 className="mb-3 text-xl font-bold text-gray-900">
-                How {c.name} celebrates {name}
-              </h2>
-              <p className="text-sm leading-relaxed text-gray-800">{regional.regional_intro}</p>
-              {Array.isArray(regional.local_customs) && regional.local_customs.length > 0 && (
-                <ul className="mt-3 space-y-2">
-                  {regional.local_customs.map((cm, i) => (
-                    <li key={i} className="flex items-start text-sm text-gray-800">
-                      <span className="mr-2 text-amber-600">●</span><span>{cm}</span>
-                    </li>
-                  ))}
-                </ul>
-              )}
-              {regional.local_special && (
-                <p className="mt-3 text-sm text-gray-700">Local special: {regional.local_special}</p>
-              )}
-            </section>
-          )}
-
-          <section className="mb-8 rounded-xl bg-gradient-to-r from-amber-600 to-orange-600 p-6 text-white">
-            <h2 className="text-xl font-bold">Personal {name} reading for {c.name}</h2>
-            <p className="mt-2 text-sm opacity-95">
-              How will {name} affect YOUR birth chart? Get a personalised reading with
-              remedies tailored to your kundali. Free Tithi insight, ₹51 for full prediction.
-            </p>
-            <Link href="/#birth-form" className="mt-4 inline-block rounded-lg bg-white px-6 py-3 font-semibold text-amber-700 hover:bg-amber-50">
-              Get My {name} Prediction →
-            </Link>
-          </section>
-
-          {faqItems.length > 0 && (
-            <section className="mb-8">
-              <h2 className="mb-4 text-2xl font-semibold text-gray-900">
-                Frequently Asked Questions
-              </h2>
-              {faqItems.map((item, i) => (
-                <details key={i} className="mb-2 rounded-lg border border-gray-200 bg-white p-4">
-                  <summary className="cursor-pointer font-medium text-gray-900">{item.q}</summary>
-                  <p className="mt-2 text-sm text-gray-700">{item.a}</p>
-                </details>
+      {/* 17 · RELATED */}
+      {otherFestivals.length > 0 && (
+        <section className="mt-6 border-t border-gray-200 pt-6">
+          <h2 className="mb-3 text-lg font-semibold text-gray-900">Coming up in {c.name}</h2>
+          <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+            {otherFestivals
+              .filter(o => !(o.festival_scope === "regional" && o.home_states?.length && !o.home_states.includes(c.state)))
+              .map(o => (
+                <li key={o.festival_slug}>
+                  <Link href={`/${c.slug}/events/${o.festival_slug}`} className="text-amber-700 hover:underline">
+                    {o.festival_name}
+                  </Link>
+                  <span className="ml-2 text-sm text-gray-500">{o.date}</span>
+                </li>
               ))}
-            </section>
-          )}
+          </ul>
+        </section>
+      )}
 
-          {/* Same festival in other (in-scope) cities */}
-          {otherCities.length > 0 && (
-            <section className="border-t border-gray-200 pt-6">
-              <h2 className="mb-3 text-lg font-semibold text-gray-900">
-                {name} in Other Cities
-              </h2>
-              <ul className="grid grid-cols-2 gap-2 text-sm md:grid-cols-3">
-                {otherCities.map((other) => (
-                  <li key={other.slug}>
-                    <Link href={`/${other.slug}/events/${f.festival_slug}`} className="text-amber-700 hover:underline">
-                      {name} in {other.name}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          )}
+      <section className="mt-6 border-t border-gray-200 pt-6">
+        <h2 className="mb-3 text-lg font-semibold text-gray-900">Explore More</h2>
+        <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2 text-amber-700">
+          <li><Link href={`/${c.slug}/panchang`} className="hover:underline">Panchang for {c.name}</Link></li>
+          <li><Link href={`/events/${f.festival_slug}`} className="hover:underline">{name} (All-India)</Link></li>
+          <li><Link href={`/panchang/${f.date}`} className="hover:underline">Panchang for this day</Link></li>
+          <li><Link href="/upcoming-events" className="hover:underline">All festivals</Link></li>
+        </ul>
+      </section>
 
-          {/* Other festivals in this city */}
-          {otherFestivals.length > 0 && (
-            <section className="mt-6 border-t border-gray-200 pt-6">
-              <h2 className="mb-3 text-lg font-semibold text-gray-900">
-                Other Festivals in {c.name}
-              </h2>
-              <ul className="grid grid-cols-2 gap-2 text-sm md:grid-cols-3">
-                {otherFestivals
-                  .filter((o) => stateInScope(o, c.state))
-                  .map((other) => (
-                    <li key={other.festival_slug}>
-                      <Link href={`/${c.slug}/events/${other.festival_slug}`} className="text-amber-700 hover:underline">
-                        {cleanName(other.festival_name)} in {c.name}
-                      </Link>
-                    </li>
-                  ))}
-              </ul>
-            </section>
-          )}
+      <CalculatorLinks />
 
-          <section className="mt-6 border-t border-gray-200 pt-6">
-            <h2 className="mb-3 text-lg font-semibold text-gray-900">Explore More</h2>
-            <ul className="grid grid-cols-2 gap-2 text-sm md:grid-cols-3">
-              <li><Link href={`/${c.slug}/panchang`} className="text-amber-700 hover:underline">Panchang {c.name}</Link></li>
-              <li><Link href={`/events/${f.festival_slug}`} className="text-amber-700 hover:underline">{name} (All-India)</Link></li>
-              <li><Link href={`/panchang/${f.date}`} className="text-amber-700 hover:underline">Panchang for this Day</Link></li>
-              <li><Link href="/upcoming-events" className="text-amber-700 hover:underline">All Festivals</Link></li>
-              <li><Link href="/spirituality" className="text-amber-700 hover:underline">Spirituality</Link></li>
-              <li><Link href="/marriage" className="text-amber-700 hover:underline">Marriage</Link></li>
-            </ul>
-          </section>
-
-          <CalculatorLinks />
-
-          <footer className="mt-8 border-t border-gray-200 pt-4 text-xs text-gray-500">
-            <p>
-              🔱 Curated by <strong>{AUTHOR_NAME}</strong>, {AUTHOR_TITLE} for {c.name} ({c.latitude}°N, {c.longitude}°E).
-              Source: Vedic shastras (BPHS, Surya Siddhanta) · Swiss Ephemeris.
-            </p>
-            <p className="mt-1 italic">
-              &quot;Kaal bada balwan hai, sabko nach nachaye; raja ka beta bhi bhiksha mangne jaye.&quot;
-            </p>
-          </footer>
-
-        </div>
-      </main>
-    </>
+      <p className="mt-8 border-t border-gray-200 pt-4 text-xs text-gray-500">
+        Dates and timings computed by Trikaal Vaani&apos;s own engine. Reviewed by{" "}
+        {AUTHOR_NAME}, {AUTHOR_TITLE}.
+      </p>
+    </main>
   );
 }
+
+// END — app/[domain]/events/[slug]/page.tsx v3.0 | Trikaal Vaani | Rohiit Gupta
