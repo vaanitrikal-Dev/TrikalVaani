@@ -3,7 +3,8 @@
  * TRIKAL VAANI — International Pricing (Option A)
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: lib/pricing-intl.ts
- * VERSION: 1.3 (29 Aug 2026)
+ * VERSION: 1.4 (30 Aug 2026)
+ *   v1.4 — Voice packs repriced $1 / $5 / $12 -> $1 / $4 / $7.
  *   v1.3 — Kundali Milan parent + both tiers ($12 / $15).
  *   v1.2 — Trikaal Voice packs priced at a flat $1 per question ($1 / $5 / $12).
  *   v1.1 — `yog` product added for the three yog calculators (Rs 51 / $7).
@@ -38,12 +39,19 @@ export interface ProductPrice {
 
 export const PRODUCTS: Record<string, ProductPrice> = {
   // ── Trikaal Voice packs ──────────────────────────────────────────────────
-  // Priced at a flat $1 per question on Rohiit's instruction, 29 Aug 2026.
+  // $1 / $4 / $7 — Rohiit's revision on 30 Aug 2026. The 29 Aug pricing was a
+  // flat $1 per question ($1 / $5 / $12); these tiers now carry a volume
+  // discount, down to about $0.58 per question on the largest pack.
+  //
   // The percentage lost to PayPal's fixed $0.30 fee looks bad on the $1 pack
-  // (~44%), but the unit economics are not percentage-driven: the delivery
-  // cost is about Rs 4, so even the $1 pack nets roughly twelve times cost.
+  // (~44%), but the unit economics are not percentage-driven: delivery costs
+  // about Rs 4 per question, so every tier still nets many times its cost.
   // Keeping a $1 entry point matters more — a foreign buyer who has never
   // heard of the brand will risk a dollar to find out.
+  //
+  // NOTE: the 12-question pack is now the same $7 as the Deep Reading. If that
+  // starts pulling buyers away from the written report, this is the line to
+  // revisit.
   voice: {
     key: 'voice',
     label: 'Trikaal Voice — 1 question',
@@ -54,13 +62,13 @@ export const PRODUCTS: Record<string, ProductPrice> = {
     key: 'voice_5q',
     label: 'Trikaal Voice — Sapt Darshan, 5 questions',
     inrPaise: 5100,  // Rs 51
-    usdCents: 500,   // $5
+    usdCents: 400,   // $4
   },
   voice_12q: {
     key: 'voice_12q',
     label: 'Trikaal Voice — Trikaal Bhakt, 12 questions',
     inrPaise: 10100, // Rs 101
-    usdCents: 1200,  // $12
+    usdCents: 700,   // $7
   },
   deep: {
     key: 'deep',
