@@ -102,10 +102,10 @@ export default function FreeForeignSettlementCalculatorPage() {
             scoreLabel: "Videsh Yog Score",
             breakdownHeading: "Har point ki wajah",
             secondaryHeading: "Kaunsa raasta khula hai",
-            ctaHref: '/kundali-milan',
+            ctaHref: '/#birth-form',
             ctaLabel: "Mera Videsh Yog dekho",
             ctaPrice: '₹51',
-            ctaBlurb: "Poori Kundali padhwayein",
+            ctaBlurb: "Poori kundali padhwayein — videsh ka samay aur upay",
           }} />
 
           <section className="rounded-2xl p-5 md:p-6 mb-6" style={{ background: '#0B0F1A', border: '1px solid rgba(255,255,255,0.07)' }}>
