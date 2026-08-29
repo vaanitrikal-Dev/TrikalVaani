@@ -33,11 +33,30 @@ export interface ProductPrice {
 }
 
 export const PRODUCTS: Record<string, ProductPrice> = {
+  // ── Trikaal Voice packs ──────────────────────────────────────────────────
+  // Priced at a flat $1 per question on Rohiit's instruction, 29 Aug 2026.
+  // The percentage lost to PayPal's fixed $0.30 fee looks bad on the $1 pack
+  // (~44%), but the unit economics are not percentage-driven: the delivery
+  // cost is about Rs 4, so even the $1 pack nets roughly twelve times cost.
+  // Keeping a $1 entry point matters more — a foreign buyer who has never
+  // heard of the brand will risk a dollar to find out.
   voice: {
     key: 'voice',
-    label: 'Voice Reading — Trikaal Voice',
+    label: 'Trikaal Voice — 1 question',
     inrPaise: 1100, // Rs 11
-    usdCents: 300, // $3
+    usdCents: 100,  // $1
+  },
+  voice_5q: {
+    key: 'voice_5q',
+    label: 'Trikaal Voice — Sapt Darshan, 5 questions',
+    inrPaise: 5100,  // Rs 51
+    usdCents: 500,   // $5
+  },
+  voice_12q: {
+    key: 'voice_12q',
+    label: 'Trikaal Voice — Trikaal Bhakt, 12 questions',
+    inrPaise: 10100, // Rs 101
+    usdCents: 1200,  // $12
   },
   deep: {
     key: 'deep',
