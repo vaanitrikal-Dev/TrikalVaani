@@ -3,7 +3,10 @@
  * TRIKAL VAANI — International Pricing (Option A)
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: lib/pricing-intl.ts
- * VERSION: 1.0
+ * VERSION: 1.2 (29 Aug 2026)
+ *   v1.2 — Trikaal Voice packs priced at a flat $1 per question ($1 / $5 / $12).
+ *   v1.1 — `yog` product added for the three yog calculators (Rs 51 / $7).
+ *   v1.0 — initial ladder.
  * SIGNED: ROHIIT GUPTA, CEO
  * ============================================================
  * OPTION A (decided 29 Aug 2026):
