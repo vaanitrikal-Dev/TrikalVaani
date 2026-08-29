@@ -2,7 +2,7 @@
 
 // ============================================================
 // File: components/calculators/YogCalculator.tsx
-// Version: v1.1
+// Version: v2.0 — paid gate (Razorpay Rs 51 / PayPal $7)
 // Purpose: One form + one result renderer, shared by all three yog
 //          calculators (IAS/UPSC, Videsh Settlement, Foreign Spouse).
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
@@ -25,6 +25,8 @@
 
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
+import { loadRazorpayScript, openRazorpayCheckout } from '@/lib/razorpay-helper';
+import PayPalCheckout, { type PayPalProof } from '@/components/payment/PayPalCheckout';
 
 const GOLD = '#D4AF37';
 const GOLD_RGBA = (a: number) => `rgba(212,175,55,${a})`;
@@ -55,9 +57,27 @@ interface YogPayload {
   nextStep?: { title: string; body: string; href: string; price: string };
 }
 
+/** Free tier: marks visible, reasoning withheld. See app/api/calc/yog/route.ts. */
+interface LockedRule {
+  block: string; label: string; points: number; max: number; absent: boolean;
+}
+
+interface FreePayload {
+  score: number; band: string; bandHi: string; disclaimer: string;
+  highlights: ScoredRule[];
+  rules: LockedRule[];
+  lockedCount: number;
+  blockers: { label: string; teaser: string }[];
+  directionNames: string[];
+  directionHintCount: number;
+  timingCount: number;
+  nextStep?: YogPayload['nextStep'];
+}
+
 interface ApiResponse {
   success: boolean;
   type: string;
+  paid: boolean;
   chart: {
     lagna: string | null;
     lagna_en: string | null;
@@ -67,7 +87,7 @@ interface ApiResponse {
     dasamsaLagna: string | null;
     navamsaLagna: string | null;
   };
-  result: YogPayload;
+  result: YogPayload | FreePayload;
 }
 
 export interface YogCalculatorConfig {
@@ -264,6 +284,27 @@ function RuleRow({ r }: { r: ScoredRule }) {
   );
 }
 
+/** A rule the free tier can see the marks for but not the reasoning. */
+function LockedRow({ r }: { r: LockedRule }) {
+  const pct = r.max ? Math.round((r.points / r.max) * 100) : 0;
+  return (
+    <div className="py-3" style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+      <div className="flex items-baseline justify-between gap-3 mb-1.5">
+        <p className="text-sm font-semibold m-0" style={{ color: '#94a3b8' }}>{r.label}</p>
+        <span className="text-xs font-mono shrink-0" style={{ color: '#64748b' }}>
+          {r.points.toFixed(1)} / {r.max}
+        </span>
+      </div>
+      <div className="h-1 rounded-full mb-2" style={{ background: 'rgba(255,255,255,0.06)' }}>
+        <div className="h-1 rounded-full" style={{ width: `${pct}%`, background: '#475569' }} />
+      </div>
+      <p className="text-xs m-0" style={{ color: '#64748b' }}>
+        &#128274; Wajah report mein
+      </p>
+    </div>
+  );
+}
+
 // ── Main component ───────────────────────────────────────────────────────────
 
 export default function YogCalculator({ config }: { config: YogCalculatorConfig }) {
@@ -275,7 +316,98 @@ export default function YogCalculator({ config }: { config: YogCalculatorConfig 
   const [loading, setLoading] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
   const [data, setData] = useState<ApiResponse | null>(null);
+  const [paying, setPaying] = useState(false);
+  const [isIndia, setIsIndia] = useState<boolean | null>(null);
   const resultRef = useRef<HTMLDivElement | null>(null);
+
+  // Which checkout to offer. India pays Rs 51 by Razorpay; everyone else pays
+  // $7 by PayPal, because Razorpay does not carry international cards on this
+  // account. The header falls back to India, which is today's behaviour.
+  useEffect(() => {
+    let cancelled = false;
+    fetch('/api/geo')
+      .then((r) => r.json())
+      .then((g) => { if (!cancelled) setIsIndia(g?.isIndia !== false); })
+      .catch(() => { if (!cancelled) setIsIndia(true); });
+    return () => { cancelled = true; };
+  }, []);
+
+  /** Birth details in the shape the API wants. Reused for the paid re-request. */
+  const birthPayload = () => {
+    const [year, month, day] = form.date.split('-').map(Number);
+    const [hour, minute] = (form.unknownTime ? '12:00' : form.time).split(':').map(Number);
+    return {
+      type: config.type,
+      year, month, day, hour, minute,
+      latitude: form.latitude, longitude: form.longitude, timezone: form.timezone,
+      name: form.name || null, gender: form.gender || null,
+    };
+  };
+
+  /** Re-request the same reading WITH proof of payment. The server re-verifies. */
+  const fetchPaid = async (proof: Record<string, string>) => {
+    const res = await fetch('/api/calc/yog', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ...birthPayload(), ...proof }),
+    });
+    const json = await res.json();
+    if (!res.ok || !json.success) {
+      setApiError(json.error || 'Payment ho gaya par report khul nahi payi. Support se baat karein — dobara payment na karein.');
+      return;
+    }
+    setData(json);
+    setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 80);
+  };
+
+  const payWithRazorpay = async () => {
+    setApiError(null);
+    setPaying(true);
+    try {
+      const ok = await loadRazorpayScript();
+      if (!ok) { setApiError('Payment window load nahi hui. Refresh karke dobara try karein.'); setPaying(false); return; }
+
+      const oRes = await fetch('/api/calc/yog/order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: config.type }),
+      });
+      const order = await oRes.json();
+      if (!oRes.ok || !order.orderId) {
+        setApiError(order.error || 'Order nahi ban paya. Dobara try karein.');
+        setPaying(false);
+        return;
+      }
+
+      openRazorpayCheckout({
+        keyId: order.keyId,
+        orderId: order.orderId,
+        amount: order.amount,
+        currency: order.currency,
+        name: 'Trikaal Vaani',
+        description: order.description,
+        prefillName: form.name || undefined,
+        onSuccess: async (r) => {
+          await fetchPaid({
+            razorpay_order_id: r.razorpay_order_id,
+            razorpay_payment_id: r.razorpay_payment_id,
+            razorpay_signature: r.razorpay_signature,
+          });
+          setPaying(false);
+        },
+        onDismiss: () => setPaying(false),
+      });
+    } catch {
+      setApiError('Payment flow mein dikkat aayi. Dobara try karein.');
+      setPaying(false);
+    }
+  };
+
+  const onPayPalPaid = async (proof: PayPalProof) => {
+    setPaying(true);
+    await fetchPaid({ paypal_order_id: proof.paypal_order_id });
+    setPaying(false);
+  };
 
   const validate = () => {
     const e: Record<string, string> = {};
@@ -292,17 +424,10 @@ export default function YogCalculator({ config }: { config: YogCalculatorConfig 
     setLoading(true);
     setData(null);
     try {
-      const [year, month, day] = form.date.split('-').map(Number);
-      const [hour, minute] = (form.unknownTime ? '12:00' : form.time).split(':').map(Number);
       const res = await fetch('/api/calc/yog', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          type: config.type,
-          year, month, day, hour, minute,
-          latitude: form.latitude, longitude: form.longitude, timezone: form.timezone,
-          name: form.name || null, gender: form.gender || null,
-        }),
+        body: JSON.stringify(birthPayload()),
       });
       const json = await res.json();
       if (!res.ok || !json.success) {
@@ -318,8 +443,9 @@ export default function YogCalculator({ config }: { config: YogCalculatorConfig 
     }
   };
 
-  const r = data?.result;
-  const secondary = r?.direction ?? r?.routes ?? null;
+  const paid = data?.paid === true;
+  const r: any = data?.result;
+  const secondary = paid ? (r?.direction ?? r?.routes ?? null) : null;
 
   return (
     <>
@@ -420,18 +546,28 @@ export default function YogCalculator({ config }: { config: YogCalculatorConfig 
             <p className="text-xs m-0 mb-3" style={{ color: '#64748b' }}>
               Har point ke saath wajah aur asli number diya gaya hai — sirf score nahi.
             </p>
-            {r.rules.map((rule, i) => <RuleRow key={i} r={rule} />)}
+            {paid
+              ? r.rules.map((rule: ScoredRule, i: number) => <RuleRow key={i} r={rule} />)
+              : (
+                <>
+                  {r.highlights.map((rule: ScoredRule, i: number) => <RuleRow key={i} r={rule} />)}
+                  {r.rules.map((rule: LockedRule, i: number) => <LockedRow key={i} r={rule} />)}
+                </>
+              )}
           </section>
 
-          {/* Blockers */}
-          {r.blockers.length > 0 && (
+          {/* Blockers — the reason people pay, so the free view names them and stops. */}
+          {r.blockers?.length > 0 && (
             <section className="rounded-2xl p-5 mb-6"
               style={{ background: 'rgba(239,68,68,0.05)', border: '1px solid rgba(239,68,68,0.2)' }}>
               <h2 className="text-base font-bold m-0 mb-3" style={{ color: '#FCA5A5' }}>Kya rok raha hai</h2>
-              {r.blockers.map((b, i) => (
+              {r.blockers.map((b: any, i: number) => (
                 <div key={i} className="mb-3 last:mb-0">
                   <p className="text-sm font-semibold m-0 mb-1" style={{ color: '#e2e8f0' }}>{b.label}</p>
-                  <p className="text-xs leading-relaxed m-0" style={{ color: '#94a3b8' }}><Rich text={b.reason} /></p>
+                  <p className="text-xs leading-relaxed m-0" style={{ color: '#94a3b8' }}>
+                    <Rich text={paid ? b.reason : b.teaser} />
+                    {!paid && <span style={{ color: GOLD }}> \u2014 iska aapke liye kya matlab hai, wo report mein.</span>}
+                  </p>
                 </div>
               ))}
             </section>
@@ -468,7 +604,7 @@ export default function YogCalculator({ config }: { config: YogCalculatorConfig 
             <section className="rounded-2xl p-5 mb-6"
               style={{ background: '#0B0F1A', border: '1px solid rgba(255,255,255,0.07)' }}>
               <h2 className="text-base font-bold m-0 mb-3" style={{ color: GOLD }}>Jeevansaathi kahan se</h2>
-              {r.directionHints.map((h, i) => (
+              {r.directionHints.map((h: any, i: number) => (
                 <div key={i} className="mb-3 last:mb-0">
                   <p className="text-sm font-semibold m-0 mb-1" style={{ color: '#e2e8f0' }}>{h.hint}</p>
                   <p className="text-xs m-0" style={{ color: '#94a3b8' }}><Rich text={h.reason} /></p>
@@ -482,7 +618,7 @@ export default function YogCalculator({ config }: { config: YogCalculatorConfig 
             <section className="rounded-2xl p-5 mb-6"
               style={{ background: '#0B0F1A', border: '1px solid rgba(255,255,255,0.07)' }}>
               <h2 className="text-base font-bold m-0 mb-3" style={{ color: GOLD }}>Samay</h2>
-              {r.timing.map((t, i) => (
+              {r.timing.map((t: any, i: number) => (
                 <div key={i} className="mb-3 last:mb-0">
                   <p className="text-sm font-semibold m-0 mb-1" style={{ color: '#e2e8f0' }}>{t.period}</p>
                   <p className="text-xs m-0" style={{ color: '#94a3b8' }}><Rich text={t.why} /></p>
@@ -491,7 +627,50 @@ export default function YogCalculator({ config }: { config: YogCalculatorConfig 
             </section>
           )}
 
+          {/* Locked preview + checkout */}
+          {!paid && (
+            <section className="rounded-2xl p-5 md:p-6 mb-6"
+              style={{ background: GOLD_RGBA(0.07), border: `1px solid ${GOLD_RGBA(0.35)}` }}>
+              <h2 className="text-base font-bold m-0 mb-1 text-center" style={{ color: GOLD }}>
+                Poori report mein kya milega
+              </h2>
+              <p className="text-xs text-center m-0 mb-4" style={{ color: '#94a3b8' }}>
+                Aapka chart padha ja chuka hai. Upar jo teen findings dikhe, wo isi reading se hain.
+              </p>
+
+              <ul className="text-sm space-y-2 mb-5 max-w-md mx-auto m-0 p-0" style={{ listStyle: 'none', color: '#cbd5e1' }}>
+                <li>\u2713 Baaki <b style={{ color: GOLD }}>{r.lockedCount}</b> rules ki poori wajah, har ek ka asli number ke saath</li>
+                <li>\u2713 <b style={{ color: GOLD }}>{r.blockers?.length ?? 0}</b> blockers ka poora vishleshan — kya rok raha hai aur kyun</li>
+                {r.directionNames?.length > 0 && (
+                  <li>\u2713 {r.directionNames.length} rasto ki ranking wajah ke saath \u2014 {r.directionNames.slice(0, 3).join(', ')}\u2026</li>
+                )}
+                {r.timingCount > 0 && <li>\u2713 Dasha timing \u2014 abhi kaunsi window chal rahi hai</li>}
+                {r.directionHintCount > 0 && <li>\u2713 Disha aur sanskriti ke sanket</li>}
+              </ul>
+
+              {isIndia === false ? (
+                <PayPalCheckout
+                  productKey="yog"
+                  onPaid={onPayPalPaid}
+                  onError={(m) => setApiError(m)}
+                />
+              ) : (
+                <div className="text-center">
+                  <button onClick={payWithRazorpay} disabled={paying}
+                    className="inline-block px-7 py-3 rounded-lg font-semibold text-sm disabled:opacity-50"
+                    style={{ background: GOLD, color: '#0B0F1A' }}>
+                    {paying ? 'Ruko\u2026' : 'Poori report kholein \u2014 \u20B951'}
+                  </button>
+                  <p className="text-xs mt-2 m-0" style={{ color: '#64748b' }}>
+                    One-time \u00b7 Instant \u00b7 Razorpay secure
+                  </p>
+                </div>
+              )}
+            </section>
+          )}
+
           {/* Next step */}
+          {paid && (
           <section className="rounded-2xl p-5 md:p-6 mb-6 text-center"
             style={{ background: GOLD_RGBA(0.07), border: `1px solid ${GOLD_RGBA(0.3)}` }}>
             <h2 className="text-base font-bold m-0 mb-2" style={{ color: GOLD }}>
@@ -508,6 +687,7 @@ export default function YogCalculator({ config }: { config: YogCalculatorConfig 
               {r.nextStep ? `Kundali Milan — ${r.nextStep.price}` : `${config.ctaBlurb} — ${config.ctaPrice}`}
             </Link>
           </section>
+          )}
 
           {/* Always rendered. The engine returns it on every call. */}
           <p className="text-xs text-center leading-relaxed mb-4" style={{ color: '#475569' }}>
