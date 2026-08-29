@@ -3,7 +3,11 @@
  * TRIKAL VAANI — Verify Voice Pack Payment API
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/api/verify-voice-pack/route.ts
- * VERSION: 1.0 — Razorpay signature verification + activate pack
+ * VERSION: 1.1 (30 Aug 2026) — PayPal accepted alongside Razorpay
+ *   The expected amount comes from the PACK ON THE PENDING ROW, never from the
+ *   request, so the browser cannot name its own price. The Razorpay block is
+ *   unchanged but guarded — a PayPal request carries no signature and would
+ *   otherwise be rejected by the HMAC check.
  * SIGNED: ROHIIT GUPTA, CEO
  *
  * ⚠️ STRICT CEO ORDER: DO NOT EDIT WITHOUT CEO APPROVAL
@@ -36,11 +40,14 @@ export async function POST(req: NextRequest) {
       razorpay_order_id,
       razorpay_payment_id,
       razorpay_signature,
+      paypal_order_id,
       sessionId,
     } = body;
 
+    const isPaypal = Boolean(paypal_order_id);
+
     // ── Validate inputs ─────────────────────────────────────
-    if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
+    if (!isPaypal && (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature)) {
       return NextResponse.json(
         { error: 'Missing payment fields' },
         { status: 400 }
@@ -51,25 +58,71 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Session required' }, { status: 401 });
     }
 
-    // ── Verify HMAC signature ───────────────────────────────
-    const payload = `${razorpay_order_id}|${razorpay_payment_id}`;
-    const expected = crypto
-      .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET!)
-      .update(payload)
-      .digest('hex');
+    const sb = supabaseAdmin();
 
-    if (expected !== razorpay_signature) {
-      console.warn('[VoicePack Verify] Invalid signature for order:', razorpay_order_id);
-      return NextResponse.json({ error: 'Invalid signature' }, { status: 400 });
+    // ── Verify payment (v1.1) ───────────────────────────────
+    // Two independent branches. A PayPal request never touches the Razorpay
+    // code, and a Razorpay request runs the identical block it always ran.
+    let paypalCaptureId: string | null = null;
+
+    if (isPaypal) {
+      const PAYPAL_KEY_FOR_PACK: Record<string, string> = {
+        p11: 'voice', p51: 'voice_5q', p101: 'voice_12q',
+      };
+      // Read the pack off the pending row BEFORE deciding the correct amount —
+      // the browser must not get to name the price.
+      const { data: pending } = await sb
+        .from('voice_packs')
+        .select('pack_id')
+        .eq('paypal_order_id', String(paypal_order_id))
+        .eq('session_id', sessionId)
+        .single();
+
+      const productKey = PAYPAL_KEY_FOR_PACK[pending?.pack_id ?? ''];
+      if (!productKey) {
+        return NextResponse.json({ error: 'Order not found' }, { status: 404 });
+      }
+
+      const { getProduct }                     = await import('@/lib/pricing-intl');
+      const { getPayPalOrder, isCaptureValid } = await import('@/lib/paypal-server');
+      const product = getProduct(productKey);
+      if (!product) {
+        return NextResponse.json({ error: 'Pricing not configured.' }, { status: 500 });
+      }
+      try {
+        const ppOrder = await getPayPalOrder(String(paypal_order_id));
+        if (!isCaptureValid(ppOrder, product.usdCents)) {
+          console.error(
+            `[VoicePack Verify] PayPal invalid — ${ppOrder.status} ${ppOrder.amountValue} ${ppOrder.currency}, ` +
+            `expected ${(product.usdCents / 100).toFixed(2)} USD`
+          );
+          return NextResponse.json({ error: 'Payment verification failed' }, { status: 400 });
+        }
+        paypalCaptureId = ppOrder.id;
+      } catch (e) {
+        console.error('[VoicePack Verify] PayPal verification threw:', e);
+        return NextResponse.json({ error: 'Payment could not be verified' }, { status: 400 });
+      }
+    } else {
+      // ── Verify HMAC signature ───────────────────────────────
+      const payload = `${razorpay_order_id}|${razorpay_payment_id}`;
+      const expected = crypto
+        .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET!)
+        .update(payload)
+        .digest('hex');
+
+      if (expected !== razorpay_signature) {
+        console.warn('[VoicePack Verify] Invalid signature for order:', razorpay_order_id);
+        return NextResponse.json({ error: 'Invalid signature' }, { status: 400 });
+      }
     }
 
     // ── Activate pack in Supabase ───────────────────────────
-    const sb = supabaseAdmin();
-
     const { data: existingPack, error: fetchError } = await sb
       .from('voice_packs')
       .select('*')
-      .eq('razorpay_order_id', razorpay_order_id)
+      .eq(isPaypal ? 'paypal_order_id' : 'razorpay_order_id',
+          isPaypal ? String(paypal_order_id) : razorpay_order_id)
       .eq('session_id', sessionId)
       .single();
 
@@ -83,7 +136,9 @@ export async function POST(req: NextRequest) {
     const { error: updateError } = await sb
       .from('voice_packs')
       .update({
-        razorpay_payment_id,
+        ...(isPaypal
+          ? { paypal_capture_id: paypalCaptureId }
+          : { razorpay_payment_id }),
         status: 'active',
         valid_until: validUntil.toISOString(),
         updated_at: new Date().toISOString(),
