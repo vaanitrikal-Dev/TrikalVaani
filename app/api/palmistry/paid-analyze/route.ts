@@ -1,5 +1,14 @@
-// TRIKAL VAANI - Palmistry Paid Analyze + Verify API - v4.1
+// TRIKAL VAANI - Palmistry Paid Analyze + Verify API - v4.2
 // CEO: Rohiit Gupta | Chief Vedic Architect
+//
+// v4.2 — PAYPAL FOR INTERNATIONAL BUYERS (2026-08-29):
+//   • Accepts a paypal_order_id ($7) as an alternative to the Razorpay trio
+//     (₹51). Two independent branches: a PayPal request never reaches the
+//     Razorpay code, and a Razorpay request runs the identical block it has
+//     always run. Nothing in the rupee path was edited.
+//   • PayPal is verified by fetching the order FROM PayPal and requiring
+//     COMPLETED, USD, and the exact catalogue amount. A browser-supplied id
+//     proves nothing by itself.
 //
 // v4.1 — ENGINE v1.1.0 COMPATIBILITY (2026-07-19):
 //   • CRITICAL FIX: engine v1.1.0's confidence gate returns
@@ -72,9 +81,12 @@ function makeSlug(name?: string): string {
 }
 
 interface PalmVerifyRequest {
+  // v4.2 — either a Razorpay trio OR a PayPal order id. The Razorpay fields
+  // stay required-shaped for every existing caller; nothing about them moved.
   razorpay_order_id:   string;
   razorpay_payment_id: string;
   razorpay_signature:  string;
+  paypal_order_id?:    string | null;   // international, $7
   // Legacy fields (still sent by frontend for backward compat):
   right_palm_b64:      string;
   left_palm_b64?:      string | null;
@@ -94,26 +106,54 @@ export async function POST(req: NextRequest) {
     const body: PalmVerifyRequest = await req.json();
     const {
       razorpay_order_id, razorpay_payment_id, razorpay_signature,
+      paypal_order_id,
       right_palm_b64, left_palm_b64,
       dominant_palm_b64, other_palm_b64, handedness,
       user_name, user_mobile, gender, language, dob,
     } = body;
 
-    if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
+    if (!paypal_order_id && (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature)) {
       return NextResponse.json({ error: 'Missing payment fields.' }, { status: 400 });
     }
     if (!right_palm_b64 && !dominant_palm_b64) {
       return NextResponse.json({ error: 'Palm image missing.' }, { status: 400 });
     }
 
-    // ── 1. Verify Razorpay Signature (HMAC) ──────────────────────────────────
-    const secret   = process.env.RAZORPAY_KEY_SECRET!;
-    const payload  = `${razorpay_order_id}|${razorpay_payment_id}`;
-    const expected = crypto.createHmac('sha256', secret).update(payload).digest('hex');
+    // ── 1. Verify payment ────────────────────────────────────────────────────
+    // v4.2: two independent branches. A PayPal request never reaches the
+    // Razorpay code, and a Razorpay request runs exactly the block it always
+    // has. PayPal is confirmed by asking PayPal — an order id from the browser
+    // proves nothing on its own.
+    if (paypal_order_id) {
+      const { getProduct }                   = await import('@/lib/pricing-intl');
+      const { getPayPalOrder, isCaptureValid } = await import('@/lib/paypal-server');
+      const product = getProduct('hast_rekha');
+      if (!product) {
+        return NextResponse.json({ error: 'Pricing not configured.' }, { status: 500 });
+      }
+      try {
+        const order = await getPayPalOrder(String(paypal_order_id));
+        if (!isCaptureValid(order, product.usdCents)) {
+          console.error(
+            `[Trikal] Palm PayPal invalid — ${order.status} ${order.amountValue} ${order.currency}, ` +
+            `expected ${(product.usdCents / 100).toFixed(2)} USD`
+          );
+          return NextResponse.json({ error: 'Payment verification failed.' }, { status: 400 });
+        }
+        console.log(`[Trikal] Palm PayPal verified | capture:${order.id}`);
+      } catch (e) {
+        console.error('[Trikal] Palm PayPal verification threw:', e);
+        return NextResponse.json({ error: 'Payment could not be verified.' }, { status: 400 });
+      }
+    } else {
+      const secret   = process.env.RAZORPAY_KEY_SECRET!;
+      const payload  = `${razorpay_order_id}|${razorpay_payment_id}`;
+      const expected = crypto.createHmac('sha256', secret).update(payload).digest('hex');
 
-    if (expected !== razorpay_signature) {
-      console.error('[Trikal] Palm signature mismatch:', razorpay_order_id);
-      return NextResponse.json({ error: 'Payment verification failed.' }, { status: 400 });
+      if (expected !== razorpay_signature) {
+        console.error('[Trikal] Palm signature mismatch:', razorpay_order_id);
+        return NextResponse.json({ error: 'Payment verification failed.' }, { status: 400 });
+      }
     }
 
     // Permanent slug for this report (used for PDF filename + report link).
