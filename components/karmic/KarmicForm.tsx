@@ -1,7 +1,15 @@
 // TRIKAL VAANI - KarmicForm Component
 // CEO & Chief Vedic Architect: Rohiit Gupta
 // File: components/karmic/KarmicForm.tsx
-// VERSION: 1.0
+// VERSION: 1.1 (29 Aug 2026)
+// v1.1 — INTERNATIONAL. Visitors outside India see PayPal at $19 instead of
+//   the ₹251 Razorpay button; Razorpay on this account rejects foreign cards,
+//   so they could not buy at all. PayPal's order is created by
+//   /api/create-karmic-order rather than the generic endpoint, because that
+//   route writes person_data into karmic_orders and the verify step reads it
+//   back — without the row a paying customer would receive nothing.
+//   Everything after payment now lives in finishAfterPayment(), shared by both
+//   paths. handlePayment() and its Razorpay call are otherwise unchanged.
 // Single-person form for Karmic Background Reading (Rs251).
 // Flow: birth details -> FREE teaser (Lagna/Moon + hook) -> Rs251 Razorpay -> /karmic/[slug]
 // Reuses BirthForm/KundaliMilanForm patterns: CountrySelector, CityInput (maps-proxy), Razorpay.
@@ -11,6 +19,7 @@
 import { useState, useCallback, useRef, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { loadRazorpayScript, openRazorpayCheckout } from "@/lib/razorpay-helper"
+import PayPalCheckout from "@/components/payment/PayPalCheckout"
 
 // -- Types -------------------------------------------------------------------
 
@@ -337,6 +346,50 @@ export default function KarmicForm() {
     setPreviewLoading(false)
   }
 
+  // v1.1 — international. Razorpay on this account rejects foreign cards, so a
+  // visitor outside India is shown PayPal ($19) instead of the ₹251 button.
+  // `?intl=1` forces the PayPal view for testing from India; one-way only.
+  const [isIndia, setIsIndia] = useState<boolean | null>(null)
+  useEffect(() => {
+    let cancelled = false
+    const forced = typeof window !== 'undefined' &&
+      new URLSearchParams(window.location.search).get('intl') === '1'
+    if (forced) { setIsIndia(false); return }
+    fetch('/api/geo').then(r => r.json())
+      .then(g => { if (!cancelled) setIsIndia(g?.isIndia !== false) })
+      .catch(() => { if (!cancelled) setIsIndia(true) })
+    return () => { cancelled = true }
+  }, [])
+
+  /**
+   * Everything after the money is taken. Shared by both payment paths so the
+   * verify call, the slug handling and the failure copy cannot drift apart.
+   */
+  const finishAfterPayment = async (proof: Record<string, string>) => {
+    const verifyRes = await fetch('/api/verify-karmic-payment', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(proof),
+    })
+    const verifyData = await verifyRes.json().catch(() => ({}))
+    if (!verifyRes.ok) {
+      setApiError(verifyData.error || 'Payment verification failed. Contact support.'); setPhase("preview"); return
+    }
+    const slug = verifyData.slug
+    if (slug) { router.push(`/karmic/${slug}`) }
+    else { setApiError('Payment done but link missing. WhatsApp +919211804111 with your payment ID.'); setPhase("preview") }
+  }
+
+  /** PayPal has taken $19. The verify route re-confirms with PayPal. */
+  const handlePayPalPaid = async (proof: { paypal_order_id: string }) => {
+    setApiError(null)
+    setPhase("paying")
+    try {
+      await finishAfterPayment({ paypal_order_id: proof.paypal_order_id })
+    } catch (err: any) {
+      setApiError(err.message || 'Payment flow error.'); setPhase("preview")
+    }
+  }
+
   // STEP 2: Rs251 payment
   const handlePayment = async () => {
     setApiError(null)
@@ -374,17 +427,7 @@ export default function KarmicForm() {
         prefillContact: `${fields.contactCountryCode}${fields.contactMobile}`.replace(/\s/g, ''),
         themeColor: '#D4AF37',
         onSuccess: async (response) => {
-          const verifyRes = await fetch('/api/verify-karmic-payment', {
-            method: 'POST', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(response),
-          })
-          const verifyData = await verifyRes.json().catch(() => ({}))
-          if (!verifyRes.ok) {
-            setApiError(verifyData.error || 'Payment verification failed. Contact support.'); setPhase("preview"); return
-          }
-          const slug = verifyData.slug
-          if (slug) { router.push(`/karmic/${slug}`) }
-          else { setApiError('Payment done but link missing. WhatsApp +919211804111 with your payment ID.'); setPhase("preview") }
+          await finishAfterPayment(response as unknown as Record<string, string>)
         },
         onDismiss: () => { setPhase("preview"); setApiError(null) },
       })
@@ -406,7 +449,7 @@ export default function KarmicForm() {
             <div className="grid gap-4">
               <div className="text-center mb-2">
                 <h3 className="text-white text-xl font-serif font-bold">Karmic Background Reading</h3>
-                <p className="text-slate-400 text-sm mt-1">Bhrigu Nandi Nadi · 6 Karmic Dimensions · ₹251</p>
+                <p className="text-slate-400 text-sm mt-1">Bhrigu Nandi Nadi · 6 Karmic Dimensions · {isIndia === false ? '$19' : '₹251'}</p>
               </div>
 
               <div>
@@ -540,11 +583,34 @@ export default function KarmicForm() {
 
               {apiError && <div className="px-4 py-3 rounded-lg text-sm text-red-300" style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)' }}>{apiError}</div>}
 
-              <button type="button" onClick={handlePayment} disabled={phase === "paying"}
-                className="w-full py-4 rounded-xl text-sm font-bold transition-all"
-                style={{ background: phase === "paying" ? GOLD_RGBA(0.3) : `linear-gradient(135deg, ${GOLD} 0%, #F5D76E 50%, ${GOLD} 100%)`, color: '#080B12', fontSize: '15px', boxShadow: phase === "paying" ? 'none' : '0 0 30px rgba(212,175,55,0.4)' }}>
-                {phase === "paying" ? 'Razorpay khul raha hai...' : 'Poori Reading Kholiye — ₹251 →'}
-              </button>
+              {isIndia === false ? (
+                // The order route stores person_data, so PayPal's order must be
+                // created THERE rather than by the generic endpoint — otherwise
+                // the row would not exist when the money arrived.
+                <PayPalCheckout
+                  productKey="karmic"
+                  createOrderUrl="/api/create-karmic-order"
+                  createOrderBody={{
+                    person:   buildPersonBody(),
+                    language: fields.language,
+                    contact:  {
+                      name:   fields.contactName,
+                      mobile: `${fields.contactCountryCode}${fields.contactMobile}`,
+                      email:  fields.contactEmail || null,
+                    },
+                  }}
+                  onPaid={(proof) => handlePayPalPaid({ paypal_order_id: proof.paypal_order_id })}
+                  onError={(m) => setApiError(m)}
+                  disabled={phase === "paying"}
+                  onBeforeCreate={() => validateContact()}
+                />
+              ) : (
+                <button type="button" onClick={handlePayment} disabled={phase === "paying"}
+                  className="w-full py-4 rounded-xl text-sm font-bold transition-all"
+                  style={{ background: phase === "paying" ? GOLD_RGBA(0.3) : `linear-gradient(135deg, ${GOLD} 0%, #F5D76E 50%, ${GOLD} 100%)`, color: '#080B12', fontSize: '15px', boxShadow: phase === "paying" ? 'none' : '0 0 30px rgba(212,175,55,0.4)' }}>
+                  {phase === "paying" ? 'Razorpay khul raha hai...' : 'Poori Reading Kholiye — ₹251 →'}
+                </button>
+              )}
 
               <div style={{ padding: '10px 14px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '8px', textAlign: 'center' }}>
                 <p style={{ color: '#64748b', fontSize: '10px', margin: 0, lineHeight: 1.5 }}>
