@@ -201,21 +201,34 @@ export function scoreUpsc(data: CalcData): UpscResult {
         'Shani ya Guru ki aapke 10th house par koi asardar drishti nahi hai.');
     }
 
-    const net = netDrishtiOnHouse(data, 10);
-    const penalty = net < 0 ? Math.max(-4, net / 30) : 0;
-    s.add('Drishti', '10th house par kul dabaav', penalty + 4, 4,
-      net >= 0
+    // The planet credited by the rule above is excluded here. Saturn or
+    // Jupiter aspecting the 10th is SUPPORT for a government career, so
+    // counting it again as malefic pressure both double-counted it and
+    // contradicted the line printed immediately above.
+    const credited = good?.from;
+    const net = netDrishtiOnHouse(data, 10, [credited]);
+    const pressure = allDrishtiOnHouse(data, 10)
+      .filter(r => !r.is_node && r.from !== credited && ['Sun', 'Mars', 'Saturn'].includes(r.from))
+      .slice(0, 2);
+
+    // A near-zero net is BALANCED, not adverse. The old wording warned of
+    // "rukavat, der ya baar-baar prayaas" on a net of -0.4 virupas while
+    // still awarding full marks — the score and the sentence disagreed.
+    const BALANCED = 15;
+    const pts = net >= BALANCED ? 4 : net <= -BALANCED ? Math.max(0, 4 + net / 20) : 3;
+
+    s.add('Drishti', '10th house par kul dabaav', pts, 4,
+      net >= BALANCED
         ? `Aapke 10th house par shubh grahon ki drishti bhari hai — net +${net} virupas. Karma sthan ko sahara mil raha hai.`
-        : `Aapke 10th house par paap grahon ki drishti zyada hai — net ${net} virupas. ` +
-          // Only the MALEFIC contributors belong in this sentence. Listing the
-          // strongest aspects regardless of nature put Jupiter in the evidence
-          // for a malefic verdict, which read as a contradiction.
-          `Dabaav ${allDrishtiOnHouse(data, 10)
-              .filter(r => !r.is_node && ['Sun', 'Mars', 'Saturn'].includes(r.from))
-              .slice(0, 2)
-              .map(r => `${PLANET_HI[r.from]} ${r.virupas}v`)
-              .join(', ') || 'paap grahon'} se aa raha hai. ` +
-          `Iska matlab rukavat, der ya baar-baar prayaas.`);
+        : net <= -BALANCED
+          ? `Aapke 10th house par paap grahon ki drishti zyada hai — net ${net} virupas` +
+            (pressure.length
+              ? `, mukhya dabaav ${pressure.map(r => `${PLANET_HI[r.from]} ${r.virupas}v`).join(' aur ')} se`
+              : '') +
+            `. Iska matlab rukavat, der ya baar-baar prayaas.`
+          : `Aapke 10th house par shubh aur paap drishti lagbhag barabar hain — net ${net} virupas. ` +
+            `Na khaas sahara, na khaas rukavat` +
+            (credited ? `. ${PLANET_HI[credited]} ki drishti upar alag se gini ja chuki hai` : '') + `.`);
   } else {
     s.add('Drishti', 'Drishti vishleshan', 0, 9, 'Drishti data is samay available nahi hai.');
   }
