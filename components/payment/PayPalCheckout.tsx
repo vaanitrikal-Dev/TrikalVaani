@@ -3,7 +3,11 @@
  * TRIKAL VAANI — PayPal Checkout Button
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: components/payment/PayPalCheckout.tsx
- * VERSION: 1.0
+ * VERSION: 1.1 (29 Aug 2026)
+ *   v1.1 — optional createOrderUrl / createOrderBody, for products that must
+ *   persist something at order time (Karmic stores the person's birth data in
+ *   karmic_orders, which the verify step reads back). Defaults are unchanged,
+ *   so Deep Reading, Hast Rekha, Swapna and the yog calculators are unaffected.
  * SIGNED: ROHIIT GUPTA, CEO
  * ============================================================
  * Drop-in replacement for the Razorpay button when the visitor is
@@ -57,6 +61,18 @@ interface Props {
   disabled?: boolean;
   /** Called just before the PayPal window opens — validate your form here. */
   onBeforeCreate?: () => boolean | Promise<boolean>;
+  /**
+   * Where to create the PayPal order. Defaults to the generic route, which is
+   * right whenever the price is the only thing the server needs to know.
+   *
+   * Products that must persist something AT ORDER TIME — Karmic writes the
+   * person's birth data into karmic_orders, and the verify step reads it back
+   * — pass their own route here instead. Without that the row would not exist
+   * when the money arrived and a paying customer would receive nothing.
+   */
+  createOrderUrl?: string;
+  /** Extra fields to send to createOrderUrl alongside productKey. */
+  createOrderBody?: Record<string, unknown>;
 }
 
 let sdkPromise: Promise<boolean> | null = null;
@@ -98,6 +114,8 @@ export default function PayPalCheckout({
   onError,
   disabled = false,
   onBeforeCreate,
+  createOrderUrl = '/api/paypal/create-order',
+  createOrderBody,
 }: Props) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const renderedRef = useRef(false);
@@ -106,8 +124,8 @@ export default function PayPalCheckout({
 
   // Keep the latest props reachable from inside PayPal's callbacks,
   // which are registered once and would otherwise capture stale values.
-  const liveProps = useRef({ disabled, onBeforeCreate, onPaid, onError, productKey });
-  liveProps.current = { disabled, onBeforeCreate, onPaid, onError, productKey };
+  const liveProps = useRef({ disabled, onBeforeCreate, onPaid, onError, productKey, createOrderUrl, createOrderBody });
+  liveProps.current = { disabled, onBeforeCreate, onPaid, onError, productKey, createOrderUrl, createOrderBody };
 
   const product = PRODUCTS[productKey];
   const clientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID;
@@ -145,10 +163,15 @@ export default function PayPalCheckout({
           },
 
           createOrder: async () => {
-            const res = await fetch('/api/paypal/create-order', {
+            const p = liveProps.current;
+            const res = await fetch(p.createOrderUrl, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ productKey: liveProps.current.productKey }),
+              body: JSON.stringify({
+                productKey: p.productKey,
+                provider: 'paypal',
+                ...(p.createOrderBody ?? {}),
+              }),
             });
             const data = await res.json().catch(() => ({}));
             if (!res.ok || !data.orderId) {
