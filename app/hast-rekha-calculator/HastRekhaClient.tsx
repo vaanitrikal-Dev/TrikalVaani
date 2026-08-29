@@ -2,8 +2,17 @@
 
 // ============================================================
 // File: app/hast-rekha-calculator/HastRekhaClient.tsx
-// Version: v2.3 — PAYLOAD DUPLICATION FIX (final 413 kill)
+// Version: v2.4 (29 Aug 2026) — INTERNATIONAL PAYMENT
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
+//
+// CHANGE v2.4 (2026-08-29) — PAYPAL FOR VISITORS OUTSIDE INDIA
+//   Razorpay on this account rejects international cards, so foreign
+//   visitors could not buy this report at all. They now see PayPal at $7
+//   in place of the ₹51 button, with the trust line following suit.
+//   Everything after the money is taken was extracted into runAnalysis()
+//   and is shared by both payment paths — the 413 handling, the
+//   pending_review handoff and the error copy must never drift apart.
+//   handlePay() and the Razorpay handler are otherwise unchanged.
 //
 // CHANGE v2.3 (2026-07-20) — PAYLOAD DUPLICATION REMOVED
 //   v2.2's budget was correct per-image but the payload sent EVERY
@@ -61,6 +70,7 @@
 // ============================================================
 
 import { useState, useRef, useCallback, useEffect } from 'react';
+import PayPalCheckout from '@/components/payment/PayPalCheckout';
 import Link from 'next/link';
 import SiteNav from '@/components/layout/SiteNav';
 
@@ -281,6 +291,21 @@ export default function HastRekhaClient({ faqs }: { faqs: FAQ[] }) {
   const [error,      setError]      = useState('');
   const [waUrl,      setWaUrl]      = useState('');
 
+  // v2.4 — international. Razorpay on this account rejects foreign cards, so
+  // a visitor outside India is shown PayPal ($7) instead of the ₹51 button.
+  // `?intl=1` forces the PayPal view for testing from India; one-way only.
+  const [isIndia,    setIsIndia]    = useState<boolean | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    const forced = typeof window !== 'undefined' &&
+      new URLSearchParams(window.location.search).get('intl') === '1';
+    if (forced) { setIsIndia(false); return; }
+    fetch('/api/geo').then(r => r.json())
+      .then(g => { if (!cancelled) setIsIndia(g?.isIndia !== false); })
+      .catch(() => { if (!cancelled) setIsIndia(true); });
+    return () => { cancelled = true; };
+  }, []);
+
   useEffect(() => {
     const s = document.createElement('script');
     s.src = 'https://checkout.razorpay.com/v1/checkout.js';
@@ -299,6 +324,54 @@ export default function HastRekhaClient({ faqs }: { faqs: FAQ[] }) {
       else                setOtherPalm({ preview, b64 });
     } catch { setError('Image process error — dobara try karein'); }
   }, []);
+
+  /**
+   * Everything after the money is taken. Extracted so PayPal and Razorpay run
+   * one identical code path — the analysis, the 413 handling, the
+   * pending_review handoff and the error copy must not drift between them.
+   */
+  const runAnalysis = async (proof: Record<string, string>) => {
+    setStep('analyzing');
+    let idx = 0;
+    const timer = setInterval(() => { idx = (idx + 1) % ANALYZING_MSGS.length; setMsgIdx(idx); }, 8000);
+    try {
+      const res = await fetch('/api/palmistry/paid-analyze', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...proof,
+          dominant_palm_b64: domPalm!.b64,
+          other_palm_b64:    otherPalm?.b64 ?? null,
+          handedness:        form.handedness,
+          user_name: form.userName, user_mobile: form.mobile,
+          gender: form.gender, language: form.language,
+        }),
+      });
+      if (res.status === 413) {
+        throw new Error('Photos bahut badi thi — page refresh karke dobara try karein. Aapka payment safe hai.');
+      }
+      let data: any = null;
+      try { data = await res.json(); }
+      catch {
+        throw new Error('Server se jawab nahi mil paya — aapka payment safe hai, kripya WhatsApp par humse sampark karein.');
+      }
+      if (!res.ok || !data.success) throw new Error(data.error || 'Analysis failed — payment safe hai, WhatsApp par sampark karein');
+      if (data.pending_review) { setWaUrl(data.whatsappUrl || ''); setStep('review'); return; }
+      setResult(data); setStep('result');
+    } finally {
+      clearInterval(timer);
+    }
+  };
+
+  /** PayPal has taken $7. The server re-verifies with PayPal before analysing. */
+  const handlePayPalPaid = async (proof: { paypal_order_id: string }) => {
+    setError('');
+    try {
+      await runAnalysis({ paypal_order_id: proof.paypal_order_id });
+    } catch (e: any) {
+      setError(e.message || 'Analysis error');
+      setStep('upload');
+    }
+  };
 
   const handlePay = async () => {
     if (!domPalm) { setError('Pradhan haath (jis se aap likhte hain) ki photo zaroor upload karein'); return; }
@@ -509,12 +582,30 @@ export default function HastRekhaClient({ faqs }: { faqs: FAQ[] }) {
               style={{ background: 'rgba(220,38,38,0.15)', border: '1px solid rgba(220,38,38,0.3)' }}>⚠️ {error}</div>
           )}
 
-          {/* CTA */}
-          <button onClick={handlePay} disabled={!domPalm || step === 'paying'}
-            className="w-full py-4 rounded-xl font-bold text-lg transition-all hover:scale-[1.01] disabled:opacity-30 disabled:cursor-not-allowed"
-            style={{ background: `linear-gradient(135deg, ${GOLD} 0%, #A8820A 100%)`, color: '#080B12' }}>
-            {step === 'paying' ? '⏳ Payment Processing...' : '🔮 Full Hast Rekha Report — ₹51'}
-          </button>
+          {/* CTA — v2.4: currency follows the visitor, not the other way round */}
+          {isIndia === false ? (
+            <div>
+              {!domPalm && (
+                <p className="text-center text-xs mb-2" style={{ color: '#94a3b8' }}>
+                  Upload your dominant palm photo first.
+                </p>
+              )}
+              <div style={{ opacity: domPalm ? 1 : 0.4, pointerEvents: domPalm ? 'auto' : 'none' }}>
+                <PayPalCheckout
+                  productKey="hast_rekha"
+                  onPaid={(proof) => handlePayPalPaid({ paypal_order_id: proof.paypal_order_id })}
+                  onError={(m) => setError(m)}
+                  disabled={!domPalm || step === 'paying'}
+                />
+              </div>
+            </div>
+          ) : (
+            <button onClick={handlePay} disabled={!domPalm || step === 'paying'}
+              className="w-full py-4 rounded-xl font-bold text-lg transition-all hover:scale-[1.01] disabled:opacity-30 disabled:cursor-not-allowed"
+              style={{ background: `linear-gradient(135deg, ${GOLD} 0%, #A8820A 100%)`, color: '#080B12' }}>
+              {step === 'paying' ? '⏳ Payment Processing...' : '🔮 Full Hast Rekha Report — ₹51'}
+            </button>
+          )}
 
           {/* What's included */}
           <div className="mt-4 rounded-xl p-4" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
@@ -531,7 +622,9 @@ export default function HastRekhaClient({ faqs }: { faqs: FAQ[] }) {
           </div>
 
           <p className="text-center text-slate-600 text-xs mt-4">
-            Secure payment via Razorpay · Photo sirf analysis ke liye — hamare database mein save nahi hoti · One-time ₹51
+            {isIndia === false
+              ? 'Secure payment via PayPal — or pay by card without a PayPal account · Photo is used only for the analysis and is never stored · One-time $7'
+              : 'Secure payment via Razorpay · Photo sirf analysis ke liye — hamare database mein save nahi hoti · One-time ₹51'}
           </p>
 
           {/* AEO FAQ */}
