@@ -3,8 +3,20 @@
  * 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER 🔱
  * ============================================================================
  * File:        app/sitemap.ts
- * Version:     v8.2
+ * Version:     v8.3
  * Owner:       Rohiit Gupta, Chief Vedic Architect
+ *
+ * Changes v8.2 -> v8.3 (2026-08-29):
+ *   THREE YOG CALCULATORS added to CALCULATORS: IAS astrology, foreign
+ *   settlement and foreign spouse. Count 28 -> 31.
+ *   Added by hand because, as the v8.2 note warns, static routes are NOT
+ *   auto-discovered here — only the DB-driven ones are. Without this edit the
+ *   three pages would never have entered the sitemap no matter how often the
+ *   site was deployed.
+ *   Search Console already shows demand landing on /learn/ pages for these
+ *   exact queries ("ias astrology calculator", "foreign settlement
+ *   astrology", "foreign spouse calculator") with no tool behind them until
+ *   now, so getting them indexed is the point of the whole build.
  *
  * Changes v8.1 → v8.2 (2026-07-12):
  *   LOCAL SEO RESTORED. /astrologer-{city} pages are RE-ADDED, reversing the
@@ -170,6 +182,13 @@ const CALCULATORS = [
   'free-graha-bal-calculator',
   'free-kundali-strength-calculator',
   'free-lagna-bal-calculator',
+  // ── Yog calculators (v8.3) ──
+  // Free score with reasoning; the full report is paid (Rs 51 / $7). The page
+  // itself is fully crawlable — the paywall sits on the API response, not on
+  // the page — so these belong in the sitemap exactly like the others.
+  'free-ias-astrology-calculator',
+  'free-foreign-settlement-calculator',
+  'free-foreign-spouse-calculator',
 ];
 
 const DOMAINS_FALLBACK = [
