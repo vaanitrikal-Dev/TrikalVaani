@@ -325,6 +325,18 @@ export default function YogCalculator({ config }: { config: YogCalculatorConfig 
   // account. The header falls back to India, which is today's behaviour.
   useEffect(() => {
     let cancelled = false;
+
+    // `?intl=1` forces the PayPal view. Needed because the team sits in Delhi
+    // and would otherwise never see the international checkout at all.
+    // Deliberately ONE-WAY: it can only switch a rupee payer TO dollars, never
+    // the reverse. The worst a stranger can do with it is pay more, and the
+    // server still prices and verifies everything itself, so this cannot be
+    // used to pay less or to unlock anything without a real payment.
+    const forced =
+      typeof window !== 'undefined' &&
+      new URLSearchParams(window.location.search).get('intl') === '1';
+    if (forced) { setIsIndia(false); return; }
+
     fetch('/api/geo')
       .then((r) => r.json())
       .then((g) => { if (!cancelled) setIsIndia(g?.isIndia !== false); })
@@ -566,7 +578,7 @@ export default function YogCalculator({ config }: { config: YogCalculatorConfig 
                   <p className="text-sm font-semibold m-0 mb-1" style={{ color: '#e2e8f0' }}>{b.label}</p>
                   <p className="text-xs leading-relaxed m-0" style={{ color: '#94a3b8' }}>
                     <Rich text={paid ? b.reason : b.teaser} />
-                    {!paid && <span style={{ color: GOLD }}> \u2014 iska aapke liye kya matlab hai, wo report mein.</span>}
+                    {!paid && <span style={{ color: GOLD }}> — iska aapke liye kya matlab hai, wo report mein.</span>}
                   </p>
                 </div>
               ))}
@@ -639,13 +651,13 @@ export default function YogCalculator({ config }: { config: YogCalculatorConfig 
               </p>
 
               <ul className="text-sm space-y-2 mb-5 max-w-md mx-auto m-0 p-0" style={{ listStyle: 'none', color: '#cbd5e1' }}>
-                <li>\u2713 Baaki <b style={{ color: GOLD }}>{r.lockedCount}</b> rules ki poori wajah, har ek ka asli number ke saath</li>
-                <li>\u2713 <b style={{ color: GOLD }}>{r.blockers?.length ?? 0}</b> blockers ka poora vishleshan — kya rok raha hai aur kyun</li>
+                <li>✓ Baaki <b style={{ color: GOLD }}>{r.lockedCount}</b> rules ki poori wajah, har ek ka asli number ke saath</li>
+                <li>✓ <b style={{ color: GOLD }}>{r.blockers?.length ?? 0}</b> blockers ka poora vishleshan — kya rok raha hai aur kyun</li>
                 {r.directionNames?.length > 0 && (
-                  <li>\u2713 {r.directionNames.length} rasto ki ranking wajah ke saath \u2014 {r.directionNames.slice(0, 3).join(', ')}\u2026</li>
+                  <li>✓ {r.directionNames.length} rasto ki ranking wajah ke saath — {r.directionNames.slice(0, 3).join(', ')}…</li>
                 )}
-                {r.timingCount > 0 && <li>\u2713 Dasha timing \u2014 abhi kaunsi window chal rahi hai</li>}
-                {r.directionHintCount > 0 && <li>\u2713 Disha aur sanskriti ke sanket</li>}
+                {r.timingCount > 0 && <li>✓ Dasha timing — abhi kaunsi window chal rahi hai</li>}
+                {r.directionHintCount > 0 && <li>✓ Disha aur sanskriti ke sanket</li>}
               </ul>
 
               {isIndia === false ? (
@@ -659,10 +671,10 @@ export default function YogCalculator({ config }: { config: YogCalculatorConfig 
                   <button onClick={payWithRazorpay} disabled={paying}
                     className="inline-block px-7 py-3 rounded-lg font-semibold text-sm disabled:opacity-50"
                     style={{ background: GOLD, color: '#0B0F1A' }}>
-                    {paying ? 'Ruko\u2026' : 'Poori report kholein \u2014 \u20B951'}
+                    {paying ? 'Ruko…' : 'Poori report kholein — ₹51'}
                   </button>
                   <p className="text-xs mt-2 m-0" style={{ color: '#64748b' }}>
-                    One-time \u00b7 Instant \u00b7 Razorpay secure
+                    One-time · Instant · Razorpay secure
                   </p>
                 </div>
               )}
