@@ -3,7 +3,7 @@
  * TRIKAL VAANI — Yog Scoring Foundation
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: lib/yog-engine.ts
- * VERSION: 1.1
+ * VERSION: 1.2
  * SIGNED: ROHIIT GUPTA, CEO
  * ============================================================
  * Shared by all three yog calculators:
@@ -296,12 +296,24 @@ export function drishtiOnPlanet(
 }
 
 /** Net benefic-minus-malefic pressure on a house, in virupas. */
-export function netDrishtiOnHouse(data: CalcData, house: number): number {
+export function netDrishtiOnHouse(
+  data: CalcData,
+  house: number,
+  /**
+   * Planets to leave out. Needed because a planet can be classically GOOD for
+   * one house in one context and still be a natural malefic — Saturn aspecting
+   * the 10th supports a government career, so crediting it in one rule and
+   * then counting it as pressure in the next both double-counts it and
+   * contradicts the first rule.
+   */
+  exclude: (string | null | undefined)[] = [],
+): number {
   const BEN = ['Jupiter', 'Venus', 'Mercury', 'Moon'];
   const MAL = ['Sun', 'Mars', 'Saturn'];
+  const skip = new Set(exclude.filter(Boolean) as string[]);
   let net = 0;
   for (const r of data.drishti?.on_houses ?? []) {
-    if (r.house !== house || r.is_node) continue;
+    if (r.house !== house || r.is_node || skip.has(r.from)) continue;
     if (BEN.includes(r.from)) net += r.virupas;
     else if (MAL.includes(r.from)) net -= r.virupas;
   }
@@ -310,10 +322,13 @@ export function netDrishtiOnHouse(data: CalcData, house: number): number {
 
 /** Human phrasing for an aspect's strength — the differentiator in one line. */
 export function drishtiWord(virupas: number): string {
-  if (virupas >= 59) return 'poori drishti';
-  if (virupas >= 45) return 'teen-chauthai drishti';
-  if (virupas >= 30) return 'aadhi drishti';
-  if (virupas >= 15) return 'chauthai drishti';
+  // Bands sit at the MIDPOINT between the classical quarters, so the word
+  // always agrees with the percentage shown beside it. The old thresholds
+  // called 57.64 virupas "teen-chauthai" while printing "96% taakat".
+  if (virupas >= 52.5) return 'poori drishti';       // ~88%+
+  if (virupas >= 37.5) return 'teen-chauthai drishti';
+  if (virupas >= 22.5) return 'aadhi drishti';
+  if (virupas >= 8) return 'chauthai drishti';
   return 'halki drishti';
 }
 
@@ -408,14 +423,14 @@ export function mahapurusha(
       present: true,
       name: meta.name,
       nameHi: meta.nameHi,
-      detail: `${PLANET_HI[planetName]} ${p.sign} mein (${dignityWord(p)}) aur ${p.house}th house yaani kendra mein`,
+      detail: `${PLANET_HI[planetName]} ${p.sign} mein (${dignityWord(p)}) aur ${ord(p.house)} house yaani kendra mein`,
     };
   }
   return {
     ...fallback,
     detail: !dignified
       ? `${PLANET_HI[planetName]} ${dignityWord(p)} hai — Mahapurusha yog ke liye own ya exalted chahiye`
-      : `${PLANET_HI[planetName]} ${p.house}th house mein hai — kendra (1/4/7/10) chahiye`,
+      : `${PLANET_HI[planetName]} ${ord(p.house)} house mein hai — kendra (1/4/7/10) chahiye`,
   };
 }
 
