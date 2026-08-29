@@ -2,7 +2,7 @@
 
 // ============================================================
 // File: components/calculators/YogCalculator.tsx
-// Version: v1.0
+// Version: v1.1
 // Purpose: One form + one result renderer, shared by all three yog
 //          calculators (IAS/UPSC, Videsh Settlement, Foreign Spouse).
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
@@ -441,9 +441,16 @@ export default function YogCalculator({ config }: { config: YogCalculatorConfig 
           {secondary && secondary.length > 0 && (
             <section className="rounded-2xl p-5 mb-6"
               style={{ background: '#0B0F1A', border: '1px solid rgba(255,255,255,0.07)' }}>
-              <h2 className="text-base font-bold m-0 mb-3" style={{ color: GOLD }}>
+              <h2 className="text-base font-bold m-0 mb-1" style={{ color: GOLD }}>
                 {config.secondaryHeading ?? 'Kaunsa raasta khula hai'}
               </h2>
+              {/* Without this line the numbers below read as if they were the
+                  main score. They are not — they rank the options against each
+                  other, so a 64 here next to an overall 34 is not a
+                  contradiction. */}
+              <p className="text-xs m-0 mb-3" style={{ color: '#64748b' }}>
+                Ye alag paimana hai. Ye rasto ko aapas mein tolta hai — upar wale score se iski tulna na karein.
+              </p>
               {secondary.map((d: any, i: number) => (
                 <div key={i} className="mb-3 last:mb-0">
                   <div className="flex items-baseline justify-between gap-3">
