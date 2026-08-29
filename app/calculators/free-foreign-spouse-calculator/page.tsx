@@ -122,7 +122,7 @@ export default function FreeForeignSpouseCalculatorPage() {
             <h2 className="text-base font-bold m-0 mb-3" style={{ color: GOLD }}>Aur padhein</h2>
             <ul className="text-sm space-y-2 m-0 p-0" style={{ listStyle: 'none' }}>
               <li><Link href="/kundali-milan" style={{ color: '#94a3b8' }} className="hover:text-slate-200">Kundali Milan — 36 gun aur Manglik dosh</Link></li>
-              <li><Link href="/learn/foreign-settlement-astrology" style={{ color: '#94a3b8' }} className="hover:text-slate-200">Foreign Settlement Astrology</Link></li>
+              <li><Link href="/foreign-settlement" style={{ color: '#94a3b8' }} className="hover:text-slate-200">Foreign Settlement Astrology</Link></li>
               <li><Link href="/calculators/free-foreign-settlement-calculator" style={{ color: '#94a3b8' }} className="hover:text-slate-200">Videsh Settlement Calculator</Link></li>
               <li><Link href="/calculators/free-manglik-dosh-calculator" style={{ color: '#94a3b8' }} className="hover:text-slate-200">Manglik Dosh Calculator</Link></li>
             </ul>
