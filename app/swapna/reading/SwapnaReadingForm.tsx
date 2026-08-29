@@ -1,7 +1,15 @@
 'use client';
 
-// 🔱 TRIKAAL VAANI | app/swapna/reading/SwapnaReadingForm.tsx | v1.0
+// 🔱 TRIKAAL VAANI | app/swapna/reading/SwapnaReadingForm.tsx | v1.1 (29 Aug 2026)
 // Owner: Rohiit Gupta, Chief Vedic Architect
+//
+// v1.1 — INTERNATIONAL PAYMENT. Visitors outside India see PayPal at $7
+// instead of the ₹51 Razorpay button; Razorpay on this account rejects
+// foreign cards, so they previously could not buy at all. Everything after
+// the money is taken now lives in generateReading() and is shared by both
+// paths — the situationNote, the predict payload and the error copy must be
+// identical for a rupee buyer and a dollar buyer. /api/predict already
+// accepts paypalVerification (route v15.3), so no backend change was needed.
 // DEDICATED paid dream-reading form — fully ISOLATED from BirthForm.tsx.
 // Reuses (no touch): swapna_dream domain, CityInput, razorpay-helper,
 // /api/create-order, /api/verify-payment, /api/predict, /report/[slug].
@@ -12,6 +20,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import CityInput from '@/components/calculators/CityInput';
 import { loadRazorpayScript, openRazorpayCheckout } from '@/lib/razorpay-helper';
+import PayPalCheckout from '@/components/payment/PayPalCheckout';
 
 type Lang = 'english' | 'hindi' | 'hinglish';
 interface DreamCtx { dream: string; meaning: string; symbol: string; language: Lang; }
@@ -132,6 +141,96 @@ export default function SwapnaReadingForm() {
     return null;
   }
 
+  // v1.1 — international. Razorpay on this account rejects foreign cards, so a
+  // visitor outside India is shown PayPal ($7) instead. `?intl=1` forces the
+  // PayPal view for testing from India; one-way, rupees to dollars only.
+  const [isIndia, setIsIndia] = useState<boolean | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    const forced = typeof window !== 'undefined' &&
+      new URLSearchParams(window.location.search).get('intl') === '1';
+    if (forced) { setIsIndia(false); return; }
+    fetch('/api/geo').then(r => r.json())
+      .then(g => { if (!cancelled) setIsIndia(g?.isIndia !== false); })
+      .catch(() => { if (!cancelled) setIsIndia(true); });
+    return () => { cancelled = true; };
+  }, []);
+
+  /**
+   * Everything after the money is taken. Shared by both payment paths so the
+   * prompt, the situationNote and the error copy cannot drift between them —
+   * a rupee buyer and a dollar buyer must receive the identical reading.
+   */
+  async function generateReading(payment: {
+    paymentVerification?: any;
+    paypalVerification?: any;
+  }) {
+    setAnalyzing(true);
+
+    const situationNote = (
+      `My dream: "${ctx!.dream}". ` +
+      `Classical Swapna Shastra meaning of ${ctx!.symbol || 'this symbol'}: ${ctx!.meaning || 'as recorded in the tradition'}. ` +
+      `Please tell me what this dream means for my own life, read against my chart and running dasha.`
+    ).slice(0, 500);
+
+    const seg = segmentFromDob(dob);
+    const body = {
+      sessionId: (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : `swapna_${Date.now()}`,
+      domainId: 'swapna_dream',
+      domainLabel: 'Dream Reading',
+      predictionTier: 'paid',
+      paymentVerification: payment.paymentVerification ?? null,
+      paypalVerification:  payment.paypalVerification ?? null,
+      birthData: {
+        name: name.trim(), dob,
+        tob: unknownTime ? '12:00' : tob,
+        lat: geo!.lat, lng: geo!.lng, cityName: city,
+        timezone: geo!.tz, ayanamsa: 'lahiri',
+      },
+      userContext: {
+        segment: seg, dynamicSegment: seg, gender,
+        age: ageFromDob(dob),
+        employment: 'other', sector: 'general',
+        language: ctx!.language || 'hinglish',
+        city, currentCity: city, relationshipStatus: '',
+        situationNote, mobile: '',
+      },
+      person2Data: null,
+    };
+
+    const predRes = await fetch('/api/predict', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    const data = await predRes.json().catch(() => ({}));
+    if (!predRes.ok) {
+      setAnalyzing(false);
+      setErr((data && data.error) || 'Reading could not be generated. Your payment is safe — please contact support.');
+      setBusy(false); return;
+    }
+
+    const slug = data?._meta?.publicSlug ?? data?.publicSlug ?? null;
+    try { sessionStorage.removeItem('tv_swapna_dream'); } catch { /* ignore */ }
+    if (slug) router.push(`/report/${slug}`);
+    else { setAnalyzing(false); setErr('Reading ready but not saved — please contact support with your payment id.'); setBusy(false); }
+  }
+
+  /** PayPal has taken $7. predict re-verifies with PayPal before generating. */
+  async function onPayPalPaid(proof: { paypal_order_id: string; usdCents: number }) {
+    const v = validate();
+    if (v) { setErr(v); return; }
+    setErr(''); setBusy(true);
+    try {
+      await generateReading({
+        paypalVerification: { paypal_order_id: proof.paypal_order_id, amount: proof.usdCents },
+      });
+    } catch (e: any) {
+      setAnalyzing(false);
+      setErr(e?.message || 'Something went wrong. Your payment is safe — please contact support.');
+      setBusy(false);
+    }
+  }
+
   async function pay() {
     const v = validate();
     if (v) { setErr(v); return; }
@@ -168,60 +267,16 @@ export default function SwapnaReadingForm() {
             setErr(e.error || 'Payment verification failed. Please contact support.'); setBusy(false); return;
           }
 
-          // payment done → show the ~60s interactive analysis screen
-          setAnalyzing(true);
-
-          // 2) build the dream situation + call the proven predict engine
-          const situationNote = (
-            `My dream: "${ctx!.dream}". ` +
-            `Classical Swapna Shastra meaning of ${ctx!.symbol || 'this symbol'}: ${ctx!.meaning || 'as recorded in the tradition'}. ` +
-            `Please tell me what this dream means for my own life, read against my chart and running dasha.`
-          ).slice(0, 500);
-
-          const seg = segmentFromDob(dob);
-          const body = {
-            sessionId: (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : `swapna_${Date.now()}`,
-            domainId: 'swapna_dream',
-            domainLabel: 'Dream Reading',
-            predictionTier: 'paid',
+          // payment done → the shared generator takes it from here, so the
+          // rupee and dollar buyers receive byte-identical readings.
+          await generateReading({
             paymentVerification: {
               razorpay_order_id: response.razorpay_order_id,
               razorpay_payment_id: response.razorpay_payment_id,
               razorpay_signature: response.razorpay_signature,
               amount, // 5100 — predict re-checks this
             },
-            birthData: {
-              name: name.trim(), dob,
-              tob: unknownTime ? '12:00' : tob,
-              lat: geo!.lat, lng: geo!.lng, cityName: city,
-              timezone: geo!.tz, ayanamsa: 'lahiri',
-            },
-            userContext: {
-              segment: seg, dynamicSegment: seg, gender,
-              age: ageFromDob(dob),
-              employment: 'other', sector: 'general',
-              language: ctx!.language || 'hinglish',
-              city, currentCity: city, relationshipStatus: '',
-              situationNote, mobile: '',
-            },
-            person2Data: null,
-          };
-
-          const predRes = await fetch('/api/predict', {
-            method: 'POST', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(body),
           });
-          const data = await predRes.json().catch(() => ({}));
-          if (!predRes.ok) {
-            setAnalyzing(false);
-            setErr((data && data.error) || 'Reading could not be generated. Your payment is safe — please contact support.');
-            setBusy(false); return;
-          }
-
-          const slug = data?._meta?.publicSlug ?? data?.publicSlug ?? null;
-          try { sessionStorage.removeItem('tv_swapna_dream'); } catch { /* ignore */ }
-          if (slug) router.push(`/report/${slug}`);
-          else { setAnalyzing(false); setErr('Reading ready but not saved — please contact support with your payment id.'); setBusy(false); }
         },
       });
     } catch (e: any) {
@@ -288,21 +343,36 @@ export default function SwapnaReadingForm() {
           ⏳ Your personal reading is written live against your chart — it takes about <b style={{ color: C.s3 }}>60 seconds</b> after payment.
         </p>
 
-        <button
-          onClick={pay}
-          disabled={busy}
-          style={{
-            marginTop: 6, padding: '15px 20px', borderRadius: 999, border: 'none',
-            background: busy ? '#5b4a12' : `linear-gradient(135deg, ${C.gold}, ${C.goldDeep})`,
-            color: '#100B02', fontWeight: 800, fontSize: 15.5,
-            cursor: busy ? 'wait' : 'pointer',
-            boxShadow: '0 12px 30px rgba(168,130,10,0.35)',
-          }}>
-          {busy ? '⟳ Opening secure payment…' : 'Reveal my personal reading · Pay ₹51 →'}
-        </button>
+        {/* v1.1 — currency follows the visitor. */}
+        {isIndia === false ? (
+          <div style={{ marginTop: 6 }}>
+            <PayPalCheckout
+              productKey="swapna"
+              onPaid={onPayPalPaid}
+              onError={(m) => setErr(m)}
+              disabled={busy}
+              onBeforeCreate={() => { const v = validate(); if (v) { setErr(v); return false; } return true; }}
+            />
+          </div>
+        ) : (
+          <button
+            onClick={pay}
+            disabled={busy}
+            style={{
+              marginTop: 6, padding: '15px 20px', borderRadius: 999, border: 'none',
+              background: busy ? '#5b4a12' : `linear-gradient(135deg, ${C.gold}, ${C.goldDeep})`,
+              color: '#100B02', fontWeight: 800, fontSize: 15.5,
+              cursor: busy ? 'wait' : 'pointer',
+              boxShadow: '0 12px 30px rgba(168,130,10,0.35)',
+            }}>
+            {busy ? '⟳ Opening secure payment…' : 'Reveal my personal reading · Pay ₹51 →'}
+          </button>
+        )}
 
         <p style={{ textAlign: 'center', fontSize: 11.5, color: C.s5, marginTop: 2 }}>
-          🔒 One-time ₹51 · Secured by Razorpay · Read against your real Swiss Ephemeris chart
+          {isIndia === false
+            ? '🔒 One-time $7 · Secured by PayPal, or pay by card without a PayPal account · Read against your real Swiss Ephemeris chart'
+            : '🔒 One-time ₹51 · Secured by Razorpay · Read against your real Swiss Ephemeris chart'}
         </p>
       </div>
     </div>
