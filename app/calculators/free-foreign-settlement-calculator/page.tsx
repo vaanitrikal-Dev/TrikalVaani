@@ -121,7 +121,7 @@ export default function FreeForeignSettlementCalculatorPage() {
           <section className="rounded-2xl p-5" style={{ background: '#0B0F1A', border: '1px solid rgba(255,255,255,0.07)' }}>
             <h2 className="text-base font-bold m-0 mb-3" style={{ color: GOLD }}>Aur padhein</h2>
             <ul className="text-sm space-y-2 m-0 p-0" style={{ listStyle: 'none' }}>
-              <li><Link href="/learn/foreign-settlement-astrology" style={{ color: '#94a3b8' }} className="hover:text-slate-200">Foreign Settlement Astrology — poora guide</Link></li>
+              <li><Link href="/foreign-settlement" style={{ color: '#94a3b8' }} className="hover:text-slate-200">Foreign Settlement Astrology — poora guide</Link></li>
               <li><Link href="/calculators/free-foreign-spouse-calculator" style={{ color: '#94a3b8' }} className="hover:text-slate-200">Foreign Spouse Yog Calculator</Link></li>
               <li><Link href="/calculators/free-ias-astrology-calculator" style={{ color: '#94a3b8' }} className="hover:text-slate-200">IAS Astrology Calculator</Link></li>
               <li><Link href="/calculators/free-kundali-calculator" style={{ color: '#94a3b8' }} className="hover:text-slate-200">Free Kundali Calculator</Link></li>
