@@ -1,6 +1,15 @@
 // TRIKAL VAANI - Kundali Milan Payment Verification API
 // CEO: Rohiit Gupta
 // File: app/api/verify-milan-payment/route.ts
+// VERSION: 1.6 (29 Aug 2026) - PayPal accepted alongside Razorpay
+//
+// CHANGE v1.6: accepts paypal_order_id for international buyers. The expected
+//   amount is read from the TIER ON THE PENDING ROW, never from the request,
+//   so the browser cannot name its own price. The Razorpay block is unchanged
+//   but now guarded by `if (!isPaypal)` — without that guard the HMAC check
+//   would run on a request that carries no signature and reject a genuine
+//   PayPal payment. Receipts and the WhatsApp text follow the provider.
+//
 // VERSION: 1.5 - VM call routed through lib/callVM.ts (X-Trikal-Key auto)
 //
 // CHANGE LOG (v1.4 → v1.5):
@@ -33,6 +42,7 @@ const supabase = createClient(
 interface MilanVerifyRequest {
   razorpay_order_id:   string;
   razorpay_payment_id: string;
+  paypal_order_id?:    string | null;   // v1.6 — international
   razorpay_signature:  string;
 }
 
@@ -78,25 +88,83 @@ function buildManglikData(vmData: any): object | null {
 export async function POST(req: NextRequest) {
   try {
     const body: MilanVerifyRequest = await req.json();
-    const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = body;
+    const { razorpay_order_id, razorpay_payment_id, razorpay_signature, paypal_order_id } = body;
 
-    if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
+    const isPaypal = Boolean(paypal_order_id);
+    // The reference the customer sees. A PayPal buyer must never read
+    // "Payment ID: undefined" on their receipt or WhatsApp message.
+    let paypalCaptureId: string | null = null;
+    let displayPaymentId: string = razorpay_payment_id;
+
+    if (!isPaypal && (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature)) {
       return NextResponse.json({ error: 'Missing payment fields.' }, { status: 400 });
     }
 
-    const secret   = process.env.RAZORPAY_KEY_SECRET!;
-    const payload  = `${razorpay_order_id}|${razorpay_payment_id}`;
-    const expected = crypto.createHmac('sha256', secret).update(payload).digest('hex');
+    // ── Verify payment (v1.6) ────────────────────────────────────────────────
+    // Two independent branches. A PayPal request never touches the Razorpay
+    // code, and a Razorpay request runs the identical block it always ran.
+    if (isPaypal) {
+      const PAYPAL_KEY_FOR_TIER: Record<string, string> = {
+        basic_51:        'milan_basic',
+        deep_101_couple: 'milan_deep',
+        deep_101_parent: 'milan_deep_parent',
+        both_151:        'milan_both',
+      };
+      // The tier lives on the pending row, so read that BEFORE deciding what
+      // the correct amount is — the browser must not get to name the price.
+      const { data: pending } = await supabase
+        .from('kundali_milan_orders')
+        .select('tier')
+        .eq('paypal_order_id', String(paypal_order_id))
+        .single();
 
-    if (expected !== razorpay_signature) {
-      console.error('[Trikal] Milan signature mismatch:', razorpay_order_id);
-      return NextResponse.json({ error: 'Payment verification failed.' }, { status: 400 });
+      const productKey = PAYPAL_KEY_FOR_TIER[pending?.tier ?? ''];
+      if (!productKey) {
+        return NextResponse.json({ error: 'Order not found.' }, { status: 404 });
+      }
+
+      const { getProduct }                     = await import('@/lib/pricing-intl');
+      const { getPayPalOrder, isCaptureValid } = await import('@/lib/paypal-server');
+      const product = getProduct(productKey);
+      if (!product) {
+        return NextResponse.json({ error: 'Pricing not configured.' }, { status: 500 });
+      }
+      try {
+        const ppOrder = await getPayPalOrder(String(paypal_order_id));
+        if (!isCaptureValid(ppOrder, product.usdCents)) {
+          console.error(
+            `[Trikal] Milan PayPal invalid — ${ppOrder.status} ${ppOrder.amountValue} ${ppOrder.currency}, ` +
+            `expected ${(product.usdCents / 100).toFixed(2)} USD`
+          );
+          return NextResponse.json({ error: 'Payment verification failed.' }, { status: 400 });
+        }
+        paypalCaptureId  = ppOrder.id;
+        displayPaymentId = ppOrder.id;
+      } catch (e) {
+        console.error('[Trikal] Milan PayPal verification threw:', e);
+        return NextResponse.json({ error: 'Payment could not be verified.' }, { status: 400 });
+      }
+    }
+
+    // Razorpay branch — unchanged, and now guarded so a PayPal request does not
+    // fall into it. Without the guard the HMAC check would run on a request
+    // that has no signature at all and reject a genuine PayPal payment.
+    if (!isPaypal) {
+      const secret   = process.env.RAZORPAY_KEY_SECRET!;
+      const payload  = `${razorpay_order_id}|${razorpay_payment_id}`;
+      const expected = crypto.createHmac('sha256', secret).update(payload).digest('hex');
+
+      if (expected !== razorpay_signature) {
+        console.error('[Trikal] Milan signature mismatch:', razorpay_order_id);
+        return NextResponse.json({ error: 'Payment verification failed.' }, { status: 400 });
+      }
     }
 
     const { data: order, error: orderErr } = await supabase
       .from('kundali_milan_orders')
       .select('*')
-      .eq('razorpay_order_id', razorpay_order_id)
+      .eq(isPaypal ? 'paypal_order_id' : 'razorpay_order_id',
+          isPaypal ? String(paypal_order_id) : razorpay_order_id)
       .single();
 
     if (orderErr || !order) {
@@ -113,7 +181,7 @@ export async function POST(req: NextRequest) {
       if (existing?.slug) {
         return NextResponse.json({
           success: true, slug: existing.slug, tier: order.tier,
-          audience: order.audience, paymentId: razorpay_payment_id,
+          audience: order.audience, paymentId: displayPaymentId,
           resultUrl: `https://trikalvaani.com/milan/${existing.slug}`, replay: true,
         });
       }
@@ -121,10 +189,15 @@ export async function POST(req: NextRequest) {
 
     await supabase
       .from('kundali_milan_orders')
-      .update({
-        razorpay_payment_id, razorpay_signature,
-        status: 'paid', payment_verified: true, paid_at: new Date().toISOString(),
-      })
+      .update(
+        isPaypal
+          ? { paypal_capture_id: paypalCaptureId,
+              status: 'paid', payment_verified: true, paid_at: new Date().toISOString(),
+                  }
+          : { razorpay_payment_id, razorpay_signature,
+              status: 'paid', payment_verified: true, paid_at: new Date().toISOString(),
+                  }
+      )
       .eq('id', order.id);
 
     const bride = order.bride_data;
@@ -193,7 +266,7 @@ export async function POST(req: NextRequest) {
     if (saveErr) {
       console.error('[Trikal] Milan record save error:', saveErr.message);
       return NextResponse.json({
-        success: true, paymentId: razorpay_payment_id,
+        success: true, paymentId: displayPaymentId,
         warning: 'Payment received. Reading is being prepared — please contact us if result page does not load.',
       }, { status: 200 });
     }
@@ -207,13 +280,13 @@ export async function POST(req: NextRequest) {
     const waText = encodeURIComponent(
       `Jai Mahakaal! Trikaal Vaani Kundali Milan confirm ho gaya.\n\n` +
       `Tier: ${tierLabel}\nBride: ${bride.name}\nGroom: ${groom.name}\n` +
-      `Payment ID: ${razorpay_payment_id}\n` +
+      `Payment ID: ${displayPaymentId}\n` +
       `Result: trikalvaani.com/milan/${slug}\n\nJai Maa Shakti!`
     );
 
     return NextResponse.json({
       success: true, slug, tier: order.tier, audience: order.audience,
-      language: order.language, paymentId: razorpay_payment_id,
+      language: order.language, paymentId: displayPaymentId,
       amount: order.amount_rupees,
       resultUrl:   `https://trikalvaani.com/milan/${slug}`,
       whatsappUrl: `https://wa.me/919211804111?text=${waText}`,
