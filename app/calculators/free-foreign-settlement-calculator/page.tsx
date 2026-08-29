@@ -105,7 +105,7 @@ export default function FreeForeignSettlementCalculatorPage() {
             ctaHref: '/#birth-form',
             ctaLabel: "Mera Videsh Yog dekho",
             ctaPrice: '₹51',
-            ctaBlurb: "Poori kundali padhwayein — videsh ka samay aur upay",
+            ctaBlurb: "Ye report sirf videsh ka yog dekhti hai. Trikaal Ka Sandesh aapki poori kundali padhta hai — career, paisa, shaadi, sehat — sabka samay aur upay ek saath.",
           }} />
 
           <section className="rounded-2xl p-5 md:p-6 mb-6" style={{ background: '#0B0F1A', border: '1px solid rgba(255,255,255,0.07)' }}>
