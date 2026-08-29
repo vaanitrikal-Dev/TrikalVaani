@@ -2,6 +2,14 @@
 
 // ============================================================
 // File: app/calculators/free-child-birth-muhurat-calculator/page.tsx
+// Version: v1.6 (29 Aug 2026) — INTERNATIONAL PAYMENT
+//   Visitors outside India pay through PayPal ($12 report / $15 with remedies)
+//   because Razorpay on this account rejects foreign cards. PayPal's order is
+//   created by /api/create-muhurat-order rather than the generic endpoint,
+//   since that route stores the chosen muhurat slot which verify reads back.
+//   Everything after payment now lives in finishAfterPayment(), shared by both
+//   paths, so a dollar buyer's report is computed from the same slot as a
+//   rupee buyer's. handleBuyReport and its Razorpay call are unchanged.
 // Version: v1.5 — full_day OFF on main scan (timeout fix) + v1.4 time-parse fix
 // VM endpoint: /muhurat-finder (free) | paid via /api/create-muhurat-order
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
@@ -37,6 +45,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import SiteNav from '@/components/layout/SiteNav';
 import { loadRazorpayScript, openRazorpayCheckout } from '@/lib/razorpay-helper';
+import PayPalCheckout from '@/components/payment/PayPalCheckout';
 import { buildCalcJsonLd } from '@/lib/seo/calcJsonLd';
 
 const GOLD = '#D4AF37';
@@ -305,6 +314,75 @@ export default function FreeChildBirthMuhuratPage() {
     }
   };
 
+  // v1.6 — international. Razorpay on this account rejects foreign cards, so a
+  // visitor outside India pays through PayPal. `?intl=1` forces the PayPal view
+  // for testing from India; one-way, rupees to dollars only.
+  const [isIndia, setIsIndia] = useState<boolean | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    const forced = typeof window !== 'undefined' &&
+      new URLSearchParams(window.location.search).get('intl') === '1';
+    if (forced) { setIsIndia(false); return; }
+    fetch('/api/geo').then(r => r.json())
+      .then(g => { if (!cancelled) setIsIndia(g?.isIndia !== false); })
+      .catch(() => { if (!cancelled) setIsIndia(true); });
+    return () => { cancelled = true; };
+  }, []);
+
+  /**
+   * The muhurat payload the order route stores. Shared by both payment paths
+   * so a dollar buyer's report is computed from exactly the same slot as a
+   * rupee buyer's. Returns null when the slot or location is not ready.
+   */
+  const buildMuhuratOrderBody = () => {
+    if (!result || !best) return null;
+    const [year, month, day] = date.split('-').map(Number);
+    const { hour: bh, minute: bm } = parseTimeTo24h(best.time);
+    const useLat = hospLat ?? lat;
+    const useLng = hospLng ?? lng;
+    const useTz  = hospTz ?? timezone;
+    if (useLat === null || useLng === null) return null;
+    return {
+      tier: payTier,
+      language: payLang,
+      muhurat: {
+        year, month, day,
+        hour: bh, minute: bm,
+        latitude: useLat, longitude: useLng, timezone: useTz,
+        city, hospital,
+      },
+    };
+  };
+
+  /** Everything after the money is taken — shared by both payment paths. */
+  const finishAfterPayment = async (proof: Record<string, string>) => {
+    setPayLoading(false);
+    setGenerating(true);
+    try {
+      const verifyRes = await fetch('/api/verify-muhurat-payment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(proof),
+      });
+      const vd = await verifyRes.json();
+      if (vd.success && vd.slug) {
+        window.location.href = `/muhurat/${vd.slug}`;
+      } else {
+        setGenerating(false);
+        setPayError(vd.error || 'Payment verified but report could not be created. Please contact us on WhatsApp.');
+      }
+    } catch {
+      setGenerating(false);
+      setPayError('Payment done, but verification failed. Please contact us on WhatsApp — your payment is safe.');
+    }
+  };
+
+  /** PayPal has taken the money. The verify route re-confirms with PayPal. */
+  const handlePayPalPaid = async (proof: { paypal_order_id: string }) => {
+    setPayError(null);
+    await finishAfterPayment({ paypal_order_id: proof.paypal_order_id });
+  };
+
   // ── Paid report: create order → Razorpay → verify → redirect ──
   const handleBuyReport = async () => {
     setPayError(null);
@@ -360,30 +438,12 @@ export default function FreeChildBirthMuhuratPage() {
         description: order.label,
         themeColor:  GOLD,
         onSuccess: async (resp) => {
-          // Payment captured — immediately show the calming progress overlay
-          setPayLoading(false);
-          setGenerating(true);
-          try {
-            const verifyRes = await fetch('/api/verify-muhurat-payment', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                razorpay_order_id:   resp.razorpay_order_id,
-                razorpay_payment_id: resp.razorpay_payment_id,
-                razorpay_signature:  resp.razorpay_signature,
-              }),
-            });
-            const vd = await verifyRes.json();
-            if (vd.success && vd.slug) {
-              window.location.href = `/muhurat/${vd.slug}`;
-            } else {
-              setGenerating(false);
-              setPayError(vd.error || 'Payment verified but report could not be created. Please contact us on WhatsApp.');
-            }
-          } catch {
-            setGenerating(false);
-            setPayError('Payment done, but verification failed. Please contact us on WhatsApp — your payment is safe.');
-          }
+          // Shared with the PayPal path — see finishAfterPayment.
+          await finishAfterPayment({
+            razorpay_order_id:   resp.razorpay_order_id,
+            razorpay_payment_id: resp.razorpay_payment_id,
+            razorpay_signature:  resp.razorpay_signature,
+          });
         },
         onDismiss: () => setPayLoading(false),
       });
@@ -666,7 +726,7 @@ export default function FreeChildBirthMuhuratPage() {
                       background: payTier === 'report_101' ? GOLD_RGBA(0.15) : 'rgba(2,8,23,0.4)',
                       border: `1px solid ${payTier === 'report_101' ? GOLD : GOLD_RGBA(0.2)}`,
                     }}>
-                    <div className="font-bold text-lg" style={{ color: GOLD }}>₹101</div>
+                    <div className="font-bold text-lg" style={{ color: GOLD }}>{isIndia === false ? '$12' : '₹101'}</div>
                     <div className="text-xs text-slate-400 mt-1">Full report + prediction + boy/girl names</div>
                   </button>
                   <button onClick={() => setPayTier('remedies_151')}
@@ -675,7 +735,7 @@ export default function FreeChildBirthMuhuratPage() {
                       background: payTier === 'remedies_151' ? GOLD_RGBA(0.15) : 'rgba(2,8,23,0.4)',
                       border: `1px solid ${payTier === 'remedies_151' ? GOLD : GOLD_RGBA(0.2)}`,
                     }}>
-                    <div className="font-bold text-lg" style={{ color: GOLD }}>₹151</div>
+                    <div className="font-bold text-lg" style={{ color: GOLD }}>{isIndia === false ? '$15' : '₹151'}</div>
                     <div className="text-xs text-slate-400 mt-1">Everything + all 10 personalised remedies</div>
                   </button>
                 </div>
@@ -700,12 +760,39 @@ export default function FreeChildBirthMuhuratPage() {
                 )}
 
                 <div className="text-center">
-                  <button onClick={handleBuyReport} disabled={payLoading || generating}
-                    className="px-8 py-3 rounded-xl font-bold transition disabled:opacity-50 disabled:cursor-not-allowed"
-                    style={{ background: GOLD, color: '#080B12' }}>
-                    {payLoading ? '⟳ Opening payment...' : `Get Full Report · ${payTier === 'remedies_151' ? '₹151' : '₹101'}`}
-                  </button>
-                  <p className="text-center text-xs text-slate-600 mt-3">🔒 Secure payment via Razorpay · No refund policy</p>
+                  {isIndia === false ? (
+                    // The order route stores the chosen muhurat slot, so
+                    // PayPal's order must be created THERE — otherwise the row
+                    // would not exist when the money arrived and the buyer
+                    // would receive nothing.
+                    <div className="max-w-md mx-auto">
+                      <PayPalCheckout
+                        productKey={payTier === 'remedies_151' ? 'muhurat_remedies' : 'muhurat_report'}
+                        createOrderUrl="/api/create-muhurat-order"
+                        createOrderBody={buildMuhuratOrderBody() ?? {}}
+                        onPaid={(proof) => handlePayPalPaid({ paypal_order_id: proof.paypal_order_id })}
+                        onError={(m) => setPayError(m)}
+                        disabled={payLoading || generating}
+                        onBeforeCreate={() => {
+                          if (!buildMuhuratOrderBody()) {
+                            setPayError('Location missing. Please re-run the calculator.');
+                            return false;
+                          }
+                          return true;
+                        }}
+                      />
+                      <p className="text-center text-xs text-slate-600 mt-3">🔒 Secure payment via PayPal — or pay by card without a PayPal account · No refund policy</p>
+                    </div>
+                  ) : (
+                    <>
+                      <button onClick={handleBuyReport} disabled={payLoading || generating}
+                        className="px-8 py-3 rounded-xl font-bold transition disabled:opacity-50 disabled:cursor-not-allowed"
+                        style={{ background: GOLD, color: '#080B12' }}>
+                        {payLoading ? '⟳ Opening payment...' : `Get Full Report · ${payTier === 'remedies_151' ? '₹151' : '₹101'}`}
+                      </button>
+                      <p className="text-center text-xs text-slate-600 mt-3">🔒 Secure payment via Razorpay · No refund policy</p>
+                    </>
+                  )}
                 </div>
               </div>
 
