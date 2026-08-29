@@ -1,8 +1,22 @@
 // ============================================================
 // File: app/api/calc/yog/route.ts
-// Version: v1.0
+// Version: v2.0 — paid gate (Razorpay Rs 51 / PayPal $7)
 // Purpose: Server-side scoring for the three yog calculators —
 //          IAS/UPSC, Videsh Settlement, and Foreign Spouse.
+//
+// CHANGELOG v2.0 (2026-08-29):
+//   - Free / paid split. The FREE response no longer CONTAINS the paid
+//     content. That is the whole point: hiding paid text behind CSS while
+//     still shipping it in the JSON is not a paywall, it is a suggestion.
+//   - Two payment paths, and BOTH re-verified here rather than trusted from
+//     the browser:
+//       Razorpay : HMAC-SHA256 over `order_id|payment_id`, the same check
+//                  app/api/verify-payment/route.ts already performs.
+//       PayPal   : the order is fetched back FROM PayPal and must return
+//                  COMPLETED, in USD, for exactly the catalogue amount.
+//     A forged id fails both.
+//   - A proof that was SENT but did not verify returns 402, never a silent
+//     downgrade — a real payer must never quietly get the free view.
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
 // ------------------------------------------------------------
 // WHY ONE ROUTE AND NOT THREE
@@ -25,11 +39,14 @@
 // ============================================================
 
 import { NextRequest, NextResponse } from 'next/server';
+import crypto from 'crypto';
 import { callVM } from '@/lib/callVM';
-import type { CalcData } from '@/lib/yog-engine';
+import type { CalcData, ScoredRule } from '@/lib/yog-engine';
 import { scoreUpsc } from '@/lib/upsc-engine';
 import { scoreForeignSettlement } from '@/lib/foreign-settlement-engine';
 import { scoreForeignSpouse } from '@/lib/foreign-spouse-engine';
+import { getProduct } from '@/lib/pricing-intl';
+import { getPayPalOrder, isCaptureValid } from '@/lib/paypal-server';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -50,11 +67,97 @@ interface Body {
   timezone?: number;
   name?: string | null;
   gender?: 'male' | 'female' | 'other' | null;
+  // Payment proof. Either set, or neither for the free tier.
+  razorpay_order_id?: string;
+  razorpay_payment_id?: string;
+  razorpay_signature?: string;
+  paypal_order_id?: string;
 }
 
 function bad(msg: string, status = 400) {
   return NextResponse.json({ error: msg }, { status });
 }
+
+// ── Payment verification ─────────────────────────────────────────────────────
+
+function razorpayValid(b: Body): boolean {
+  const { razorpay_order_id: o, razorpay_payment_id: p, razorpay_signature: sig } = b;
+  if (!o || !p || !sig) return false;
+  const secret = process.env.RAZORPAY_KEY_SECRET;
+  if (!secret) {
+    console.error('[yog] RAZORPAY_KEY_SECRET missing — refusing to unlock.');
+    return false;
+  }
+  const expected = crypto.createHmac('sha256', secret).update(`${o}|${p}`).digest('hex');
+  const a = Buffer.from(expected);
+  const c = Buffer.from(sig);
+  // Lengths must match before timingSafeEqual, which throws otherwise.
+  return a.length === c.length && crypto.timingSafeEqual(a, c);
+}
+
+async function paypalValid(b: Body): Promise<boolean> {
+  if (!b.paypal_order_id) return false;
+  const product = getProduct('yog');
+  if (!product) return false;
+  try {
+    const order = await getPayPalOrder(b.paypal_order_id);
+    return isCaptureValid(order, product.usdCents);
+  } catch (e) {
+    console.error('[yog] PayPal re-verification failed:', e);
+    return false;
+  }
+}
+
+async function isPaid(b: Body): Promise<boolean> {
+  if (b.razorpay_signature) return razorpayValid(b);
+  if (b.paypal_order_id) return await paypalValid(b);
+  return false;
+}
+
+// ── Free-tier shaping ────────────────────────────────────────────────────────
+
+/** Strip a rule to its label and marks. The reasoning IS the product. */
+function lockRule(r: ScoredRule) {
+  return { block: r.block, label: r.label, points: r.points, max: r.max, absent: r.absent };
+}
+
+/**
+ * A teaser states something TRUE and specific about this chart and stops
+ * before the consequence. "Aapka Amatyakaraka Guru hai" is a real finding;
+ * what its placement means for an exam route is the paid half.
+ */
+function teaser(r: ScoredRule): string {
+  const first = r.reason.split('. ')[0] ?? '';
+  return first.length > 130 ? first.slice(0, 127).trimEnd() + '\u2026' : first + '.';
+}
+
+function freeShape(full: any) {
+  const rules: ScoredRule[] = full.rules ?? [];
+  const shown: ScoredRule[] = full.highlights ?? [];
+  const shownLabels = new Set(shown.map((r) => r.label));
+  const rest = rules.filter((r) => !shownLabels.has(r.label));
+
+  return {
+    score: full.score,
+    band: full.band,
+    bandHi: full.bandHi,
+    disclaimer: full.disclaimer,
+    // Full reasoning for the three strongest findings — the proof of work.
+    highlights: shown,
+    // Everything else: marks visible, reasoning withheld.
+    rules: rest.map(lockRule),
+    lockedCount: rest.length,
+    // Blockers are why people pay. Name them, tease them, stop.
+    blockers: (full.blockers ?? []).map((b: ScoredRule) => ({ label: b.label, teaser: teaser(b) })),
+    // Names only. The ranking and the reasoning are paid.
+    directionNames: (full.direction ?? full.routes ?? []).map((d: any) => d.track ?? d.route),
+    directionHintCount: (full.directionHints ?? []).length,
+    timingCount: (full.timing ?? []).length,
+    nextStep: full.nextStep ?? null,
+  };
+}
+
+// ── Route ────────────────────────────────────────────────────────────────────
 
 export async function POST(req: NextRequest) {
   try {
@@ -70,6 +173,14 @@ export async function POST(req: NextRequest) {
       if (typeof b[k] !== 'number' || Number.isNaN(b[k] as number)) {
         return bad(`Missing or invalid birth detail: ${k}.`);
       }
+    }
+
+    const paid = await isPaid(b);
+
+    // A proof that was sent but did not verify is an ERROR, not a silent
+    // downgrade — a real payer must never quietly receive the free view.
+    if (!paid && (b.razorpay_signature || b.paypal_order_id)) {
+      return bad('Payment could not be verified. Please contact support before paying again.', 402);
     }
 
     // ── 1) Chart from the VM ─────────────────────────────────────────────────
@@ -128,14 +239,19 @@ export async function POST(req: NextRequest) {
     }
 
     // ── 3) Score ─────────────────────────────────────────────────────────────
-    const result =
+    const full =
       type === 'upsc' ? scoreUpsc(data)
       : type === 'foreign-settlement' ? scoreForeignSettlement(data)
       : scoreForeignSpouse(data);
 
+    if (paid) {
+      console.log(`[yog] PAID unlock | type:${type} | via:${b.razorpay_signature ? 'razorpay' : 'paypal'}`);
+    }
+
     return NextResponse.json({
       success: true,
       type,
+      paid,
       sessionId: `yog_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
       input: { name: b.name || null, gender: b.gender || null },
       chart: {
@@ -147,7 +263,7 @@ export async function POST(req: NextRequest) {
         dasamsaLagna: data.dasamsa?.lagna?.sign ?? null,
         navamsaLagna: data.navamsa?.lagna?.sign ?? null,
       },
-      result,
+      result: paid ? full : freeShape(full),
     });
   } catch (err: any) {
     console.error('[yog] Fatal:', err);
