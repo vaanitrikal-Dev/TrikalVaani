@@ -1,6 +1,13 @@
 // TRIKAL VAANI - KundaliMilanForm Component
 // CEO & Chief Vedic Architect: Rohiit Gupta
 // File: components/landing/KundaliMilanForm.tsx
+// VERSION: 1.3 (29 Aug 2026) - INTERNATIONAL PAYMENT
+// v1.3: visitors outside India pay through PayPal — Basic $7, Couple $12,
+//   Parent $12, Both $15 — because Razorpay on this account rejects foreign
+//   cards. The tier cards, the submit label and the checkout all follow the
+//   same geo check, so no one is quoted rupees on one line and dollars on the
+//   next. Everything after payment now lives in finishAfterPayment(), shared
+//   by both paths. handlePaymentSubmit and its Razorpay call are unchanged.
 // VERSION: 1.2 - Brand flip + Delhi NCR removed + 10 remedies + global areaServed
 // SIGNED: ROHIIT GUPTA, CEO
 //
@@ -31,6 +38,7 @@
 import { useState, useCallback, useRef, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { loadRazorpayScript, openRazorpayCheckout } from "@/lib/razorpay-helper"
+import PayPalCheckout from "@/components/payment/PayPalCheckout"
 
 // -- Types -------------------------------------------------------------------
 
@@ -708,15 +716,18 @@ function PersonForm({
 // ---------------------------------------------------------------------------
 
 function AudienceSelector({
-  selected, onChange,
-}: { selected: AudienceVersion | ''; onChange: (a: AudienceVersion) => void }) {
+  selected, onChange, intl = false,
+}: { selected: AudienceVersion | ''; onChange: (a: AudienceVersion) => void; intl?: boolean }) {
+  // v2.1: a foreign visitor was shown ₹101 on the card and then $12 at
+  // checkout. One product, two prices, one screen.
+  const P = (inr: string, usd: string) => (intl ? usd : inr);
   const options: { value: AudienceVersion; icon: string; titleHindi: string; titleEnglish: string; price: string; desc: string; tone: string; color: string; highlight?: boolean }[] = [
     {
       value: 'couple',
       icon: '💕',
       titleHindi: 'Hum Dono Ke Liye',
       titleEnglish: 'For Us (Couple)',
-      price: '₹101',
+      price: P('₹101', '$12'),
       desc: 'Hopeful . Romantic . Anti-fear',
       tone: 'Hinglish . Modern . For lovers',
       color: ROSE,
@@ -726,7 +737,7 @@ function AudienceSelector({
       icon: '🙏',
       titleHindi: 'Pariwar Ke Liye',
       titleEnglish: 'For Family / Parents',
-      price: '₹101',
+      price: P('₹101', '$12'),
       desc: 'Respectful . Traditional . Protective',
       tone: 'Shudh Hindi . Ritual-coded',
       color: BLUE,
@@ -736,7 +747,7 @@ function AudienceSelector({
       icon: '✨',
       titleHindi: 'Dono Ke Liye',
       titleEnglish: 'Both Versions',
-      price: '₹151',
+      price: P('₹151', '$15'),
       desc: 'Maximum coverage . One PDF . Two narratives',
       tone: 'Couple section + Parent section',
       color: GOLD,
@@ -1039,6 +1050,74 @@ export default function KundaliMilanForm() {
   }
 
   // Razorpay Payment Flow
+  // v2.1 — international. Razorpay on this account rejects foreign cards, so a
+  // visitor outside India pays through PayPal. `?intl=1` forces the PayPal view
+  // for testing from India; one-way, rupees to dollars only.
+  const [isIndia, setIsIndia] = useState<boolean | null>(null)
+  const paypalRef = useRef<HTMLDivElement | null>(null)
+  useEffect(() => {
+    let cancelled = false
+    const forced = typeof window !== 'undefined' &&
+      new URLSearchParams(window.location.search).get('intl') === '1'
+    if (forced) { setIsIndia(false); return }
+    fetch('/api/geo').then(r => r.json())
+      .then(g => { if (!cancelled) setIsIndia(g?.isIndia !== false) })
+      .catch(() => { if (!cancelled) setIsIndia(true) })
+    return () => { cancelled = true }
+  }, [])
+
+  /** Price-table key for the tier the visitor has chosen. */
+  const paypalProductKey = () => {
+    if (priceTier === 'basic_51') return 'milan_basic'
+    if (priceTier === 'both_151') return 'milan_both'
+    return fields.audience === 'parent' ? 'milan_deep_parent' : 'milan_deep'
+  }
+
+  /**
+   * Everything after the money is taken. Shared by both payment paths so the
+   * verify call, the slug handling and the failure copy cannot drift apart.
+   */
+  const finishAfterPayment = async (proof: Record<string, string>) => {
+    setIsSubmitting(true)
+    startLoadingMessages(LOADING_STEPS_PAYMENT)
+
+    const verifyRes = await fetch('/api/verify-milan-payment', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify(proof),
+    })
+    const verifyData = await verifyRes.json().catch(() => ({}))
+
+    if (!verifyRes.ok) {
+      setApiError(verifyData.error || 'Payment verification failed. Please contact support.')
+      setIsSubmitting(false)
+      setPaymentLoading(false)
+      return
+    }
+
+    const paidSlug = verifyData.slug ?? verifyData.milanId
+    if (paidSlug) {
+      router.push(`/milan/${paidSlug}`)
+    } else {
+      setApiError('Payment done but report link missing. WhatsApp +919211804111 with your payment ID.')
+      setIsSubmitting(false)
+      setPaymentLoading(false)
+    }
+  }
+
+  /** PayPal has taken the money. The verify route re-confirms with PayPal. */
+  const handlePayPalPaid = async (proof: { paypal_order_id: string }) => {
+    setApiError(null)
+    setPaymentLoading(true)
+    try {
+      await finishAfterPayment({ paypal_order_id: proof.paypal_order_id })
+    } catch (err: any) {
+      setApiError(err?.message || 'Payment flow error.')
+      setIsSubmitting(false)
+      setPaymentLoading(false)
+    }
+  }
+
   const handlePaymentSubmit = async () => {
     if (!validateStep3()) return
     setApiError(null)
@@ -1087,32 +1166,8 @@ export default function KundaliMilanForm() {
         prefillContact: `${fields.contactCountryCode}${fields.contactMobile}`.replace(/\s/g, ''),
         themeColor: '#D4AF37',
         onSuccess: async (response) => {
-          setIsSubmitting(true)
-          startLoadingMessages(LOADING_STEPS_PAYMENT)
-
-          const verifyRes = await fetch('/api/verify-milan-payment', {
-            method:  'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body:    JSON.stringify(response),
-          })
-          const verifyData = await verifyRes.json().catch(() => ({}))
-
-          if (!verifyRes.ok) {
-            setApiError(verifyData.error || 'Payment verification failed. Please contact support.')
-            setIsSubmitting(false)
-            setPaymentLoading(false)
-            return
-          }
-
-          // Use the PAID slug from verify-payment - do NOT call the free route
-          const paidSlug = verifyData.slug ?? verifyData.milanId
-          if (paidSlug) {
-            router.push(`/milan/${paidSlug}`)
-          } else {
-            setApiError('Payment done but report link missing. WhatsApp +919211804111 with your payment ID.')
-            setIsSubmitting(false)
-            setPaymentLoading(false)
-          }
+          // Shared with the PayPal path — see finishAfterPayment.
+          await finishAfterPayment(response as unknown as Record<string, string>)
         },
         onDismiss: () => {
           setPaymentLoading(false)
@@ -1131,6 +1186,15 @@ export default function KundaliMilanForm() {
     if (paymentLoading) return 'Razorpay popup khul raha hai...'
     if (isLoading) return LOADING_STEPS_PAYMENT[loadingStep] || 'Processing...'
     if (priceTier === 'free')     return 'Get Free Preview'
+    if (isIndia === false) {
+      // The button is not the payment control for these visitors — the PayPal
+      // buttons below it are — so it must not promise a Razorpay checkout.
+      if (priceTier === 'basic_51') return 'Basic Milan - $7 via PayPal below'
+      if (priceTier === 'both_151') return 'Both Versions - $15 via PayPal below'
+      if (fields.audience === 'couple') return 'Couple Version - $12 via PayPal below'
+      if (fields.audience === 'parent') return 'Parent Version - $12 via PayPal below'
+      return 'Select Couple or Parent above'
+    }
     if (priceTier === 'basic_51') return 'Pay Rs51 with Razorpay - Basic Milan'
     if (priceTier === 'both_151') return 'Pay Rs151 with Razorpay - Both Versions'
     // deep_101
@@ -1300,6 +1364,7 @@ export default function KundaliMilanForm() {
                   <AudienceSelector
                     selected={fields.audience}
                     onChange={(a) => setField('audience', a)}
+                    intl={isIndia === false}
                   />
                   {errors.audience && (
                     <p style={{ color: '#ef4444', fontSize: '12px', textAlign: 'center', margin: 0 }}>
@@ -1477,7 +1542,15 @@ export default function KundaliMilanForm() {
               <button
                 type="button"
                 disabled={isLoading || (needsAudience && !fields.audience)}
-                onClick={priceTier === 'free' ? handleFreePreview : handlePaymentSubmit}
+                onClick={
+                  priceTier === 'free'
+                    ? handleFreePreview
+                    : isIndia === false
+                      // Razorpay would only reject their card. Send them to the
+                      // PayPal buttons instead of opening a checkout that fails.
+                      ? () => paypalRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+                      : handlePaymentSubmit
+                }
                 aria-label={getSubmitLabel()}
                 className="w-full py-4 rounded-xl text-sm font-bold transition-all duration-300"
                 style={{
@@ -1492,6 +1565,27 @@ export default function KundaliMilanForm() {
               >
                 {getSubmitLabel()}
               </button>
+
+              {/* v2.1 — international checkout. The button above is disabled as
+                  a payment control for these visitors; these buttons are it. */}
+              {isIndia === false && priceTier !== 'free' && (
+                <div ref={paypalRef} style={{ marginTop: 12 }}>
+                  <PayPalCheckout
+                    productKey={paypalProductKey()}
+                    createOrderUrl="/api/create-milan-order"
+                    createOrderBody={{
+                      ...buildMilanBody(null, false),
+                      tier: resolveTier(fields.audience as AudienceVersion, false),
+                      audience: fields.audience,
+                    }}
+                    onPaid={(proof) => handlePayPalPaid({ paypal_order_id: proof.paypal_order_id })}
+                    onError={(m) => setApiError(m)}
+                    disabled={isLoading || (needsAudience && !fields.audience)}
+                    // validateStep3 is what handlePaymentSubmit uses; the PayPal path must gate on the same check.
+                    onBeforeCreate={() => validateStep3()}
+                  />
+                </div>
+              )}
 
               {/* Contextual note under button */}
               <div style={{ textAlign: 'center' }}>
