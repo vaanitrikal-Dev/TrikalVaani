@@ -1,7 +1,12 @@
 // TRIKAL VAANI - Karmic Background Reading - Order Creation API
 // CEO: Rohiit Gupta
 // File: app/api/create-karmic-order/route.ts
-// VERSION: 1.0
+// VERSION: 1.1 (29 Aug 2026)
+// v1.1 — PAYPAL FOR INTERNATIONAL BUYERS. `provider: 'paypal'` creates the
+//   order with PayPal ($19) instead of Razorpay (Rs 251) and stores it in
+//   karmic_orders under paypal_order_id. The Razorpay branch below is
+//   untouched, and a request that does not ask for PayPal never enters the
+//   new code.
 // Per Strategic Plan v2.0 §4 — Initiative C. Flat Rs251, single person.
 // Mirrors create-milan-order pattern (Razorpay + Supabase pending order).
 
@@ -75,6 +80,65 @@ export async function POST(req: NextRequest) {
     const userName   = contact.name   ?? body.userName   ?? null;
     const userMobile = contact.mobile ?? body.userMobile ?? null;
     const userEmail  = contact.email  ?? body.userEmail  ?? null;
+
+    // ── PayPal branch (v1.1) — international, $19 ────────────────────────────
+    // Returns before the Razorpay code below, which is therefore unreachable
+    // for these requests and stays exactly as it was.
+    if (body.provider === 'paypal') {
+      const { getProduct }        = await import('@/lib/pricing-intl');
+      const { createPayPalOrder } = await import('@/lib/paypal-server');
+      const product = getProduct('karmic');
+      if (!product) {
+        return NextResponse.json({ error: 'Pricing not configured.' }, { status: 500 });
+      }
+
+      const referenceId = `tv_karmic_${Date.now()}`;
+      const ppOrder = await createPayPalOrder({
+        usdCents:    product.usdCents,
+        description: 'Karmic Background Reading — Trikaal Vaani',
+        referenceId,
+      });
+
+      const { error: ppDbErr } = await supabase
+        .from('karmic_orders')
+        .insert({
+          paypal_order_id:   ppOrder.id,
+          amount_cents:      product.usdCents,
+          // amount_rupees / amount_paise are NOT NULL on this table, so the
+          // rupee equivalent is recorded rather than left blank. currency
+          // says which of the two the customer actually paid.
+          amount_rupees:     KARMIC_RUPEES,
+          amount_paise:      KARMIC_PAISE,
+          currency:          'USD',
+          language,
+          person_data:       person,
+          source_milan_slug: sourceMilanSlug,
+          user_name:         userName,
+          user_mobile:       userMobile,
+          user_email:        userEmail,
+          status:            'created',
+          payment_verified:  false,
+        });
+
+      if (ppDbErr) {
+        // Without this row the verify step has no person_data to read, so a
+        // paid customer would get nothing. Fail before taking the money.
+        console.error('[Trikal] Karmic PayPal order save error:', ppDbErr.message);
+        return NextResponse.json(
+          { error: 'Could not start the payment. Please try again.' },
+          { status: 500 }
+        );
+      }
+
+      return NextResponse.json({
+        provider:   'paypal',
+        orderId:    ppOrder.id,
+        usdCents:   product.usdCents,
+        currency:   'USD',
+        language,
+        label:      'Karmic Background Reading',
+      });
+    }
 
     // Create Razorpay order — flat Rs251
     const order = await razorpay.orders.create({
