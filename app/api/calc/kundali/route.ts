@@ -2,7 +2,12 @@
 // File: app/api/calc/kundali/route.ts
 // Purpose: VM bridge for Kundali / Nakshatra / Rashi / Lagna /
 //          Dasha + Shadbala-based Calculators
-// Version: v1.8
+// Version: v1.9
+// Changelog v1.9 (2026-08-29):
+//   - Passthrough drishti + dasamsa from the VM (astro.py patcher #2).
+//     Needed by the IAS / Foreign Settlement / Foreign Spouse calculators.
+//   - ADDITIVE ONLY. No existing field renamed, reshaped or removed, so
+//     every current calculator keeps the exact response it has today.
 // Changelog v1.8 (2026-06-17):
 //   - Pass through planetary DEGREES for the Gemstone Engine v2.1
 //     (combustion / astangata): planets[].longitude + degree_in_sign.
@@ -308,6 +313,15 @@ export async function POST(req: NextRequest) {
         antardasha: currentAntardasha,
       },
       shadbala: kundaliData?.shadbala ?? {},
+      // v1.9: passthrough of the two fields added to the VM engine on
+      // 29 Aug 2026. Both are plain passthrough — nothing is reshaped here.
+      //   drishti : BPHS Ch.26 sputa drishti, planet->planet and planet->house,
+      //             each row carrying virupas (60 = full aspect) and is_node.
+      //   dasamsa : the D-10 chart. BPHS Ch.6 names Dasamsa as the varga to
+      //             read for career, which is what the IAS calculator needs.
+      // Null when the VM has not been patched yet, so callers must guard.
+      drishti: kundaliData?.drishti ?? null,
+      dasamsa: kundaliData?.dasamsa ?? null,
       strongestPlanet,
       weakestPlanet,
       strengthAvailable,
