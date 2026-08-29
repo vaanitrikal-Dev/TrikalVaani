@@ -1,6 +1,15 @@
 // ============================================================
 // File: app/calculators/page.tsx
 // Purpose: Calculators Hub — SEO/GEO/AEO landing page
+// Version: v3.8 — three yog calculators added (IAS, Videsh, Foreign Spouse)
+// CHANGES vs v3.7:
+//   ✅ Added 3 FREE cards: IAS Astrology, Foreign Settlement, Foreign Spouse.
+//      All three are free, so the "100% free hub" rule of v3.7 still holds.
+//      Placed directly after the Kundli card because Search Console shows
+//      real demand already landing on /learn/ pages with no tool behind it.
+//   ✅ Added their queries to metadata keywords.
+//   ✅ CALC_COUNT, prose list, schema hasPart and FAQ counts all derive from
+//      the CALCULATORS array, so 29 → 32 updates itself. Nothing else touched.
 // Version: v3.7 — AI Hast Rekha REMOVED from hub (paid ₹51 product)
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
 // Date: 2026-07-12
@@ -51,6 +60,10 @@ export const metadata: Metadata = {
     'should i wear neelam', 'should i wear pukhraj', 'numerology calculator',
     'baby name by nakshatra', 'kundali strength', 'graha bal calculator',
     'jyotish calculator', 'birth chart calculator',
+    'ias astrology calculator', 'government job calculator',
+    'sarkari naukri yog', 'upsc astrology',
+    'foreign settlement astrology', 'foreign spouse calculator',
+    'videsh yog calculator', 'nri marriage astrology',
   ],
   alternates: { canonical: 'https://trikalvaani.com/calculators' },
   openGraph: {
@@ -83,6 +96,33 @@ const CALCULATORS: CalcEntry[] = [
     name: 'Free Kundli Calculator',
     desc: 'Get your complete Janm Kundali — Lagna, Nakshatra, all 9 planets, Dasha, and Parashar remedies.',
     badge: 'Most Popular',
+    live: true,
+  },
+  // ── Yog calculators (v3.8). Placed high on purpose: Search Console shows
+  // "ias astrology calculator" and "foreign settlement astrology" already
+  // earning clicks on /learn/ pages, with no tool behind them until now.
+  {
+    slug: 'free-ias-astrology-calculator',
+    emoji: '\u{1F3DB}\u{FE0F}',
+    name: 'Free IAS Astrology Calculator',
+    desc: 'Sarkari Naukri Yog score for UPSC, SSC, Banking, Railway & Police \u2014 with the reason behind every point, not just a number.',
+    badge: 'New',
+    live: true,
+  },
+  {
+    slug: 'free-foreign-settlement-calculator',
+    emoji: '\u2708\u{FE0F}',
+    name: 'Free Foreign Settlement Calculator',
+    desc: 'Videsh Yog score from your 12th house, Rahu, 9th house and Dasha \u2014 every point explained with its actual Shadbala figure.',
+    badge: 'New',
+    live: true,
+  },
+  {
+    slug: 'free-foreign-spouse-calculator',
+    emoji: '\u{1F491}',
+    name: 'Free Foreign Spouse Calculator',
+    desc: 'NRI / foreign spouse yog from your 7th house, Navamsa D-9, Rahu and Darakaraka \u2014 judged where marriage is actually judged.',
+    badge: 'New',
     live: true,
   },
   {
