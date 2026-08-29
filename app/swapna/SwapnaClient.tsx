@@ -1,5 +1,11 @@
 'use client';
-// 🔱 TRIKAAL VAANI | app/swapna/SwapnaClient.tsx | v1.3
+// 🔱 TRIKAAL VAANI | app/swapna/SwapnaClient.tsx | v1.4 (29 Aug 2026)
+// v1.4: INTERNATIONAL PRICING. The paid form charges $7 through PayPal for
+//   visitors outside India, so all three price labels on this page follow the
+//   same geo check — a visitor who reads ₹51 here and meets $7 on the next
+//   screen has been quoted two prices for one product. goToPaidReading also
+//   forwards ?intl=1, because router.push drops the query string and the
+//   override would otherwise die at the page boundary.
 // v1.3: PAID FLOW WIRED — the paywall's unlock button now saves the dream to
 //   sessionStorage and routes to /swapna/reading (the dedicated dream form),
 //   which runs the proven create-order → Razorpay → verify → predict chain on
@@ -18,7 +24,7 @@
 // Free flow is fully live. The ₹51 paid trigger is the marked integration point
 // (Razorpay + Component 6 dasha overlay) — wired in the next build step.
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
 type DreamLang = 'english' | 'hindi' | 'hinglish';
@@ -102,8 +108,28 @@ export default function SwapnaClient() {
     } catch { setPhase('error'); }
   }
 
-  // ₹51 paid flow → hand the dream to the dedicated reading form (/swapna/reading),
-  // which runs the proven create-order → Razorpay → verify → predict chain.
+  // v1.1 — international. The paid form charges $7 through PayPal for visitors
+  // outside India, so every price shown HERE has to agree with it. A visitor
+  // who reads ₹51 on this page and then meets $7 on the next one has been told
+  // two different prices for one product.
+  const [isIndia, setIsIndia] = useState<boolean | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    const forced = typeof window !== 'undefined' &&
+      new URLSearchParams(window.location.search).get('intl') === '1';
+    if (forced) { setIsIndia(false); return; }
+    fetch('/api/geo').then(r => r.json())
+      .then(g => { if (!cancelled) setIsIndia(g?.isIndia !== false); })
+      .catch(() => { if (!cancelled) setIsIndia(true); });
+    return () => { cancelled = true; };
+  }, []);
+
+  /** What this reading costs THIS visitor, as a display string. */
+  const priceLabel = (inr: string | number) => (isIndia === false ? '$7' : `₹${inr}`);
+
+  // paid flow → hand the dream to the dedicated reading form (/swapna/reading),
+  // which runs the proven create-order → Razorpay → verify → predict chain,
+  // or the PayPal chain for international visitors.
   function goToPaidReading() {
     if (!data) return;
     try {
@@ -114,7 +140,12 @@ export default function SwapnaClient() {
         language: lang,
       }));
     } catch { /* ignore */ }
-    router.push('/swapna/reading');
+    // Carry ?intl=1 across. router.push drops the query string, so without
+    // this the override dies at the page boundary and the paid form silently
+    // falls back to geo — which makes the flow untestable from India.
+    const intl = typeof window !== 'undefined' &&
+      new URLSearchParams(window.location.search).get('intl') === '1';
+    router.push(intl ? '/swapna/reading?intl=1' : '/swapna/reading');
   }
 
   const emoji = emojiFor(data?.symbol_key, data?.category);
@@ -289,7 +320,7 @@ export default function SwapnaClient() {
                   onClick={(e) => { e.preventDefault(); document.getElementById('swapna-paywall')?.scrollIntoView({ behavior: 'smooth', block: 'center' }); }}
                   style={{ color: C.gold, fontWeight: 700, fontSize: '1rem', textDecoration: 'none',
                     borderBottom: `1px solid ${C.goldSoft}`, paddingBottom: 2, cursor: 'pointer' }}>
-                  {lang === 'hindi' ? 'अपनी व्यक्तिगत व्याख्या ₹51 में अनलॉक करें →' : 'Unlock your personal reading — ₹51 →'}
+                  {lang === 'hindi' ? `अपनी व्यक्तिगत व्याख्या ${priceLabel(51)} में अनलॉक करें →` : `Unlock your personal reading — ${priceLabel(51)} →`}
                 </a>
               </div>
             )}
@@ -335,7 +366,7 @@ export default function SwapnaClient() {
                 Dreams fade by morning. Read yours while it still speaks.
               </div>
               <div style={{ textAlign: 'center', fontSize: 12.5, letterSpacing: '0.14em', color: C.s4, textTransform: 'uppercase', marginBottom: 20 }}>
-                <b style={{ color: C.gold, fontSize: 15 }}>₹{data.paid.price}</b> &nbsp;·&nbsp; instant &nbsp;·&nbsp; private &nbsp;·&nbsp; no sign-up
+                <b style={{ color: C.gold, fontSize: 15 }}>{priceLabel(data.paid.price)}</b> &nbsp;·&nbsp; instant &nbsp;·&nbsp; private &nbsp;·&nbsp; no sign-up
               </div>
 
               <div style={{ textAlign: 'center' }}>
@@ -343,7 +374,7 @@ export default function SwapnaClient() {
                   style={{ cursor: 'pointer', border: 0, fontWeight: 700, fontSize: '1rem', color: '#100B02',
                     background: `linear-gradient(135deg, ${C.gold}, ${C.goldDeep})`, padding: '15px 34px', borderRadius: 999,
                     boxShadow: '0 12px 32px rgba(168,130,10,0.35)' }}>
-                  Unlock my personal reading · ₹{data.paid.price} →
+                  Unlock my personal reading · {priceLabel(data.paid.price)} →
                 </button>
               </div>
             </div>
