@@ -1,5 +1,10 @@
-// TRIKAL VAANI - Kundali Milan Order Creation API - v1.1
+// TRIKAL VAANI - Kundali Milan Order Creation API - v1.2 (29 Aug 2026)
 // CEO: Rohiit Gupta
+// v1.2: PAYPAL for international buyers. `provider: 'paypal'` creates the order
+//       with PayPal instead of Razorpay and stores it under paypal_order_id.
+//       All four tiers are priced in USD: basic $7, deep couple/parent $12,
+//       both $15. The Razorpay branch below is untouched and a request that
+//       does not ask for PayPal never enters the new code.
 // v1.1: accepts form contract (tier deep_couple/parent/both, lat/lng/cityName,
 //       full buildMilanBody structure). Maps form tiers -> internal pricing tiers.
 //       Reads bride/groom from form body. Backward compatible with old names.
@@ -113,6 +118,81 @@ export async function POST(req: NextRequest) {
     const userName   = contact.name   ?? body.userName   ?? null;
     const userMobile = contact.mobile ?? body.userMobile ?? null;
     const userEmail  = contact.email  ?? body.userEmail  ?? null;
+
+    // ── PayPal branch (v1.2) — international ─────────────────────────────────
+    // Returns before the Razorpay code, which is therefore unreachable here.
+    if (body.provider === 'paypal') {
+      // Internal tier key -> price-table key. Kept as an explicit map rather
+      // than string-munging, so an unknown tier fails loudly instead of
+      // silently charging the wrong amount.
+      const PAYPAL_KEY_FOR_TIER: Record<string, string> = {
+        basic_51:        'milan_basic',
+        deep_101_couple: 'milan_deep',
+        deep_101_parent: 'milan_deep_parent',
+        both_151:        'milan_both',
+      };
+      const productKey = PAYPAL_KEY_FOR_TIER[tier];
+      if (!productKey) {
+        return NextResponse.json({ error: 'Unknown tier.' }, { status: 400 });
+      }
+
+      const { getProduct }        = await import('@/lib/pricing-intl');
+      const { createPayPalOrder } = await import('@/lib/paypal-server');
+      const product = getProduct(productKey);
+      if (!product) {
+        return NextResponse.json({ error: 'Pricing not configured.' }, { status: 500 });
+      }
+
+      const ppOrder = await createPayPalOrder({
+        usdCents:    product.usdCents,
+        description: `Kundali Milan — ${label}`,
+        referenceId: `tv_milan_${tier}_${Date.now()}`,
+      });
+
+      const { error: ppDbErr } = await supabase
+        .from('kundali_milan_orders')
+        .insert({
+          paypal_order_id:  ppOrder.id,
+          amount_cents:     product.usdCents,
+          // amount_rupees / amount_paise are NOT NULL, so the rupee equivalent
+          // is recorded. currency says which one was actually charged.
+          amount_rupees:    rupees,
+          amount_paise:     amountPaise,
+          currency:         'USD',
+          tier,
+          audience:         tierAudience,
+          language:         lang,
+          bride_data:       bride,
+          groom_data:       groom,
+          user_name:        userName,
+          user_mobile:      userMobile,
+          user_email:       userEmail,
+          status:           'created',
+          payment_verified: false,
+        });
+
+      if (ppDbErr) {
+        // The verify step reads bride_data/groom_data back out of this row.
+        // Without it a paying customer would receive nothing, so fail BEFORE
+        // the money is taken rather than after.
+        console.error('[Trikal] Milan PayPal order save error:', ppDbErr.message);
+        return NextResponse.json(
+          { error: 'Could not start the payment. Please try again.' },
+          { status: 500 }
+        );
+      }
+
+      return NextResponse.json({
+        provider: 'paypal',
+        orderId:  ppOrder.id,
+        usdCents: product.usdCents,
+        currency: 'USD',
+        tier,
+        audience: tierAudience,
+        label,
+        language: lang,
+      });
+    }
 
     // Create Razorpay Order
     const order = await razorpay.orders.create({
