@@ -3,9 +3,10 @@
  * TRIKAL VAANI — Voice Pack Order API
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/api/voice-pack-order/route.ts
- * VERSION: 1.2 (30 Aug 2026) — PayPal for international buyers
- *   `provider: 'paypal'` creates the order with PayPal at $1 per question
- *   ($1 / $5 / $12) instead of Razorpay, and stores it under paypal_order_id.
+ * VERSION: 1.3 (30 Aug 2026) — PayPal for international buyers ($1 / $4 / $7)
+ *   `provider: 'paypal'` creates the order with PayPal ($1 / $4 / $7) instead
+ *   of Razorpay, and stores it under paypal_order_id. The dollar figures live
+ *   in lib/pricing-intl.ts and are read from there — never hardcoded here.
  *   The Razorpay branch is untouched. Testing on 30 Aug found the voice modal
  *   showing "$1" and then opening a rupee Razorpay sheet — the price and the
  *   checkout disagreed because only the BirthForm voice tier had been moved.
@@ -89,9 +90,12 @@ export async function POST(req: NextRequest) {
     // Returns before the Razorpay code below, which stays exactly as it was.
     if (body.provider === 'paypal') {
       const PAYPAL_KEY_FOR_PACK: Record<string, string> = {
-        p11:  'voice',      // 1 question  — $1
-        p51:  'voice_5q',   // 5 questions — $5
-        p101: 'voice_12q',  // 12 questions — $12
+        // Only the MAPPING lives here. The amounts come from pricing-intl, so
+        // a reprice touches one file — repeating the figures in a comment is
+        // how they end up stale and contradicting the live price.
+        p11:  'voice',      // 1 question
+        p51:  'voice_5q',   // 5 questions
+        p101: 'voice_12q',  // 12 questions
       };
       const productKey = PAYPAL_KEY_FOR_PACK[packId];
       if (!productKey) {
