@@ -3,7 +3,12 @@
  * TRIKAL VAANI — Voice Pack Order API
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/api/voice-pack-order/route.ts
- * VERSION: 1.1 — Fixed TypeScript Record syntax
+ * VERSION: 1.2 (30 Aug 2026) — PayPal for international buyers
+ *   `provider: 'paypal'` creates the order with PayPal at $1 per question
+ *   ($1 / $5 / $12) instead of Razorpay, and stores it under paypal_order_id.
+ *   The Razorpay branch is untouched. Testing on 30 Aug found the voice modal
+ *   showing "$1" and then opening a rupee Razorpay sheet — the price and the
+ *   checkout disagreed because only the BirthForm voice tier had been moved.
  * SIGNED: ROHIIT GUPTA, CEO
  *
  * v1.1 CHANGES (May 10, 2026):
@@ -68,7 +73,8 @@ function razorpayClient() {
 // ── POST — Create order ───────────────────────────────────────
 export async function POST(req: NextRequest) {
   try {
-    const { packId, sessionId } = await req.json();
+    const body = await req.json();
+    const { packId, sessionId } = body;
 
     if (!packId || !PACKS[packId]) {
       return NextResponse.json({ error: 'Invalid pack' }, { status: 400 });
@@ -78,6 +84,67 @@ export async function POST(req: NextRequest) {
     }
 
     const pack = PACKS[packId];
+
+    // ── PayPal branch (v1.2) — international ─────────────────────────────────
+    // Returns before the Razorpay code below, which stays exactly as it was.
+    if (body.provider === 'paypal') {
+      const PAYPAL_KEY_FOR_PACK: Record<string, string> = {
+        p11:  'voice',      // 1 question  — $1
+        p51:  'voice_5q',   // 5 questions — $5
+        p101: 'voice_12q',  // 12 questions — $12
+      };
+      const productKey = PAYPAL_KEY_FOR_PACK[packId];
+      if (!productKey) {
+        return NextResponse.json({ error: 'Invalid pack' }, { status: 400 });
+      }
+
+      const { getProduct }        = await import('@/lib/pricing-intl');
+      const { createPayPalOrder } = await import('@/lib/paypal-server');
+      const product = getProduct(productKey);
+      if (!product) {
+        return NextResponse.json({ error: 'Pricing not configured.' }, { status: 500 });
+      }
+
+      const ppOrder = await createPayPalOrder({
+        usdCents:    product.usdCents,
+        description: `Trikaal Voice — ${pack.questions} question${pack.questions > 1 ? 's' : ''}`,
+        referenceId: `tv_${packId}_${Date.now()}`,
+      });
+
+      const ppValidUntil = new Date();
+      ppValidUntil.setDate(ppValidUntil.getDate() + pack.validityDays);
+
+      const sbPp = supabaseAdmin();
+      const { error: ppErr } = await sbPp.from('voice_packs').insert({
+        session_id:      sessionId,
+        pack_id:         packId,
+        // amount_paid is NOT NULL and is the rupee column; the dollar figure
+        // lives in amount_cents and currency says which one was charged.
+        amount_paid:     pack.price,
+        amount_cents:    product.usdCents,
+        currency:        'USD',
+        questions_total: pack.questions,
+        questions_used:  0,
+        validity_days:   pack.validityDays,
+        valid_until:     ppValidUntil.toISOString(),
+        paypal_order_id: ppOrder.id,
+        status:          'pending',
+      });
+
+      if (ppErr) {
+        console.error('[VoicePack] PayPal insert error:', ppErr);
+        return NextResponse.json({ error: 'Database error' }, { status: 500 });
+      }
+
+      return NextResponse.json({
+        provider: 'paypal',
+        orderId:  ppOrder.id,
+        usdCents: product.usdCents,
+        currency: 'USD',
+        packId,
+        questions: pack.questions,
+      });
+    }
 
     const rzp = razorpayClient();
     const order = await rzp.orders.create({
