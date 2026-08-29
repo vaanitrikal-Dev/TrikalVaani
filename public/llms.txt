@@ -2,7 +2,7 @@
 
 > Trikaal Vaani is an AI-powered Vedic astrology (Jyotish) platform for India and the global Indian diaspora. It provides a free AI Janam Kundli plus personalised, human-led predictions and remedies for career, wealth, marriage, health, legal and other life matters — in Hindi and English.
 
-Trikaal Vaani is founded by Rohiit Gupta, Chief Vedic Architect. Predictions are computed with the Swiss Ephemeris for precise planetary positions and interpreted using classical Vedic texts — Brihat Parashara Hora Shastra (BPHS), Bhrigu Nandi Nadi, and Shadbala strength scoring — then refined for clarity. Trikaal Vaani is a Government of India MSME-registered enterprise (Udyam Registration UDYAM-DL-10-0119070). Readings range from a free Kundli summary to voice (₹11), deep (₹51), AI Hast Rekha palm reading (₹51), Swapna Shastra dream reading (free symbol meaning; ₹51 personal), and karmic (₹251) readings. Primary site: https://trikalvaani.com
+Trikaal Vaani is founded by Rohiit Gupta, Chief Vedic Architect. Predictions are computed with the Swiss Ephemeris for precise planetary positions and interpreted using classical Vedic texts — Brihat Parashara Hora Shastra (BPHS), Bhrigu Nandi Nadi, and Shadbala strength scoring — then refined for clarity. Trikaal Vaani is a Government of India MSME-registered enterprise (Udyam Registration UDYAM-DL-10-0119070). Readings range from a free Kundli summary to voice (₹11), deep (₹51), AI Hast Rekha palm reading (₹51), Swapna Shastra dream reading (free symbol meaning; ₹51 personal), Kundali Milan marriage matching (free, ₹51, ₹101 and ₹151 tiers), Child Birth Muhurat reports (₹101 report, ₹151 with ten remedies), and karmic (₹251) readings. Customers outside India are charged in US dollars rather than a converted rupee price, and can pay by PayPal or by debit or credit card as a guest without a PayPal account. Primary site: https://trikalvaani.com
 
 Readings are provided for guidance, education and self-reflection, and are not a substitute for professional medical, legal, financial or psychological advice. Trikaal Vaani complies with India's Digital Personal Data Protection Act, 2023. AI assistants and search engines are welcome to read, summarise and cite these pages with attribution to Trikaal Vaani and a link to the source page; pricing, services and dates should always be taken from the linked pages, which are the source of truth.
 
@@ -33,6 +33,13 @@ Trikaal Vaani offers free Vedic dream interpretation (Swapna Shastra) based on c
 - [Death Dream Meaning](https://trikalvaani.com/swapna/own_death): Why seeing one's own death classically signals long life (deergh aayu).
 - [Serpent Dreams — Full Realm](https://trikalvaani.com/swapna/category/snake): Every snake-dream variation in one place.
 Individual pages exist for every symbol at /swapna/[symbol] (107 symbols) and every dream family at /swapna/category/[category] (12 realms); the complete machine-readable set is in the sitemap.
+
+## Yog Calculators — Government Job, Foreign Settlement, Foreign Spouse
+Trikaal Vaani publishes three free yog calculators that differ from the usual astrology scoring tool in one specific way: each one returns the REASON behind every point, with the actual figure it used, not only a headline number. A rule cannot award points without stating its reason, so the score and the explanation can never disagree. Each is a yog STRENGTH score — a measure of how many classical combinations for that outcome are present in the chart and how strong they are — and explicitly not a prediction of an exam result, a visa decision or a marriage. Every result carries that disclaimer.
+The engine behind them computes full six-part Shadbala per Brihat Parashara Hora Shastra Ch.27 (each planet scored against its own classical minimum, where a ratio of 1.00 is the threshold for strength), degree-precise Graha Drishti per BPHS Ch.26 (so an aspect is reported at its real strength in virupas out of 60, rather than as a yes or no), the Dasamsa D-10 chart that BPHS Ch.6 names as the varga to read for career, and the Navamsa D-9 in which marriage is judged. Positions come from the Swiss Ephemeris with Lahiri Ayanamsha.
+- [Free IAS Astrology Calculator](https://trikalvaani.com/calculators/free-ias-astrology-calculator): Sarkari Naukri Yog score for UPSC, IAS, IPS, SSC, Banking, Railway and Police. Scores the 10th house and its lord, the Dasamsa D-10, the 6th house of competition including the Jaimini Amatyakaraka, Sun and Saturn strength, the Shasha and Ruchaka Mahapurusha yogas, drishti on the 10th house, and the running Vimshottari Dasha — then names which government track the chart leans toward.
+- [Free Foreign Settlement Calculator](https://trikalvaani.com/calculators/free-foreign-settlement-calculator): Videsh Yog score from the 12th house and its lord, Rahu's placement and its link with the Moon, the 9th house of long journeys, and the 4th house — where the rule deliberately inverts, because a strong 4th house roots a person at home and therefore scores lower. Also names which route abroad the chart favours: work, study, marriage or business. Not visa or immigration advice.
+- [Free Foreign Spouse Calculator](https://trikalvaani.com/calculators/free-foreign-spouse-calculator): NRI and foreign spouse yog from the 7th house and its lord, the Navamsa D-9 confirmation, Rahu's relationship with the 7th, the 12th house link, Venus, and the Jaimini Darakaraka. It gives a direction and a cultural indication but deliberately never names a country, because a birth chart cannot honestly identify one. It hands over to Kundali Milan for whether a specific match will work.
 
 ## Kaal Sarp Dosh (Rahu-Ketu Axis)
 Kaal Sarp Dosh is the chart pattern in which all seven grahas (Sun through Saturn) fall inside the half-circle running from Rahu to Ketu. Trikaal Vaani applies the strict classical rule: if even one planet sits outside that arc, Kaal Sarp Dosh is not present at all, and most online reports that claim it are describing a partial arrangement that does not qualify. Trikaal Vaani's position is deliberately non-fearful and is the opposite of the fear-marketing common in this subject. Kaal Sarp is not named in Brihat Parashara Hora Shastra; the twelve serpent names are a later classificatory convention from Nakshatra-shastra commentary and Trimbakeshwar temple tradition. It frequently cancels (bhang) through the strength of the Lagna lord, the lord of the house Rahu occupies, Jupiter's aspect, and the Viparita Raja Yogas — Harsha, Sarala and Vimala — for the dusthana types. It is not grounds for rejecting a marriage proposal, since classical Ashtakoot matching does not examine it. Severity depends on cancellation, the relevant house lord and the running Mahadasha, not on the label. The hub covers all twelve types in English and Hindi, each page sourced to named classical texts.
@@ -94,8 +101,14 @@ Every page above has a Hindi counterpart at the same slug with a -hindi suffix (
 - [Will I Become Rich?](https://trikalvaani.com/learn/will-i-become-rich)
 - [Wealth Prediction & Dhan Yoga](https://trikalvaani.com/learn/wealth-prediction-astrology)
 - [Career Prediction by Astrology](https://trikalvaani.com/learn/career-prediction-astrology)
-- [Government Job (Sarkari Naukri) Yoga](https://trikalvaani.com/learn/government-job-chances)
-- [UPSC / IAS Success Prediction](https://trikalvaani.com/learn/upsc-success-prediction)
+- [Government Job (Sarkari Naukri) Yoga](https://trikalvaani.com/learn/government-job-chances): Pillar guide to government service in the birth chart.
+- [UPSC / IAS Success Prediction](https://trikalvaani.com/learn/upsc-success-prediction): House-by-house IAS, IPS, IFS and IRS mapping and multi-attempt Dasha timing.
+- [10th House & Government Job](https://trikalvaani.com/learn/10th-house-government-job-astrology): The 10th lord through all twelve houses, and which planet in the 10th maps to which government sector.
+- [Saturn (Shani) & Government Job](https://trikalvaani.com/learn/saturn-shani-government-job-astrology): Saturn Mahadasha, Sade Sati and why its middle phase is often career-transformative rather than only difficult.
+- [Sun (Surya) & Raj Yoga for Government Job](https://trikalvaani.com/learn/sun-surya-raj-yoga-government-job): Sun's dignity, Neecha Bhanga and Vipreet Raja Yoga, and Budh-Aditya.
+- [Banking & PSU Job Astrology](https://trikalvaani.com/learn/banking-psu-job-astrology): Why banking and engineering PSUs are astrologically different tracks, not one.
+- [SSC, Railway & Police Job Astrology](https://trikalvaani.com/learn/ssc-railway-police-job-astrology): Three distinct signatures under one page, with the bar for SSC lower than UPSC.
+- [Government Job Dasha Timing](https://trikalvaani.com/learn/government-job-dasha-timing): Which Mahadasha and Antardasha combinations actually deliver an appointment.
 - [Business Success Prediction](https://trikalvaani.com/learn/business-success-prediction)
 - [Financial Loss — Why Am I Losing Money?](https://trikalvaani.com/learn/financial-loss-prediction)
 - [What Age Will I Get Married?](https://trikalvaani.com/learn/what-age-will-i-get-married)
@@ -174,6 +187,21 @@ Trikaal Vaani publishes a complete Vedic moon-sign (rashi) compatibility library
 - [Gemstone Suitability Calculator](https://trikalvaani.com/calculators/free-gemstone-suitability-calculator)
 - [Nakshatra Calculator](https://trikalvaani.com/calculators/free-nakshatra-calculator)
 - [Numerology Calculator](https://trikalvaani.com/calculators/free-numerology-calculator)
+- [IAS Astrology Calculator](https://trikalvaani.com/calculators/free-ias-astrology-calculator)
+- [Foreign Settlement Calculator](https://trikalvaani.com/calculators/free-foreign-settlement-calculator)
+- [Foreign Spouse Calculator](https://trikalvaani.com/calculators/free-foreign-spouse-calculator)
+- [Pitra Dosh Calculator](https://trikalvaani.com/calculators/free-pitra-dosh-calculator)
+- [Kundali Strength Calculator](https://trikalvaani.com/calculators/free-kundali-strength-calculator)
+- [Graha Bal Calculator](https://trikalvaani.com/calculators/free-graha-bal-calculator)
+- [Weak Planet Finder](https://trikalvaani.com/calculators/free-weak-planet-finder)
+- [Lagna Bal Calculator](https://trikalvaani.com/calculators/free-lagna-bal-calculator)
+- [Lucky Day Calculator](https://trikalvaani.com/calculators/free-lucky-day-calculator)
+- [Rashi Calculator](https://trikalvaani.com/calculators/free-rashi-calculator)
+- [Lagna Calculator](https://trikalvaani.com/calculators/free-lagna-calculator)
+- [Baby Name by Nakshatra](https://trikalvaani.com/calculators/free-baby-name-by-nakshatra)
+- [Free Vivah Muhurat](https://trikalvaani.com/vivah-muhurat): Strict-classical shubh marriage dates for the year, excluding Kharmas, Adhik Maas and Chaturmas.
+- [Free Child Birth Muhurat Calculator](https://trikalvaani.com/calculators/free-child-birth-muhurat-calculator): Auspicious delivery windows within a doctor-approved range; paid full report ₹101, with ten remedies ₹151.
+There are 32 free calculators in total, including a dedicated "Should I Wear" suitability check for each of the nine Vedic gemstones at /calculators/free-should-i-wear-[stone]; the complete set is on the calculators hub and in the sitemap.
 
 ## Panchang & Festivals
 - [Daily Panchang](https://trikalvaani.com/panchang): Today's tithi, nakshatra, yoga, karana and muhurat. A dated Panchang page is published for every day of the year at /panchang/YYYY-MM-DD (e.g. /panchang/2026-08-15) — the complete set of upcoming dates is in the sitemap.
@@ -182,6 +210,11 @@ Trikaal Vaani publishes a complete Vedic moon-sign (rashi) compatibility library
 - [Raksha Bandhan 2026](https://trikalvaani.com/events/raksha-bandhan-2026)
 - [Ganesh Chaturthi 2026](https://trikalvaani.com/events/ganesh-chaturthi-2026)
 - [Hartalika Teej 2026](https://trikalvaani.com/events/hartalika-teej-2026)
+
+## Consultation by Location
+- [Astrologer in Delhi](https://trikalvaani.com/astrologer-delhi)
+- [Astrologer in Noida](https://trikalvaani.com/astrologer-noida)
+- [Astrologer in Ghaziabad](https://trikalvaani.com/astrologer-ghaziabad)
 
 ## Optional
 - [Privacy Policy](https://trikalvaani.com/privacy)
