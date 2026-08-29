@@ -24,6 +24,7 @@
  */
 
 import {
+  ord,
   CalcData, ScoreSheet, YogResult,
   planet, houseLord, houseOf, ratio, ratioScore, ratioWord,
   dignityScore, dignityWord, karakas, mahapurusha, conjunct, exchange,
@@ -62,7 +63,7 @@ export function scoreUpsc(data: CalcData): UpscResult {
     const pts = 10 * (dg * 0.5 + ratioScore(r) * 0.5);
     s.add('10th House', '10th lord ki taakat', pts, 10,
       `Aapka 10th house ${data.houses.find(h => h.house === 10)?.sign} ka hai, toh iska swami ${PLANET_HI[l10]} hua. ` +
-      `Wo ${p10.house}th house mein baitha hai, ${dignityWord(p10)}, aur uski Shadbala ${r !== null ? r.toFixed(2) : 'available nahi'}` +
+      `Wo ${ord(p10.house)} house mein baitha hai, ${dignityWord(p10)}, aur uski Shadbala ${r !== null ? r.toFixed(2) : 'available nahi'}` +
       `${r !== null ? ` (1.00 se upar mazboot mana jata hai) — yaani ${ratioWord(r)}` : ''}.`);
   } else {
     s.add('10th House', '10th lord ki taakat', 0, 10, '10th house ka swami chart se nahi mila.');
@@ -104,11 +105,11 @@ export function scoreUpsc(data: CalcData): UpscResult {
     const g = d10(data, l10);
     if (g && (KENDRA.includes(g.house) || TRIKONA.includes(g.house))) {
       s.add('Dasamsa D-10', 'Rasi 10th lord D-10 mein mazboot', 5, 5,
-        `Aapka rasi 10th lord ${PLANET_HI[l10!]} Dasamsa mein ${g.sign} (${g.house}th house) mein hai — ` +
+        `Aapka rasi 10th lord ${PLANET_HI[l10!]} Dasamsa mein ${g.sign} (${ord(g.house)} house) mein hai — ` +
         `kendra/trikona. Rasi ka vaada D-10 mein confirm ho raha hai.`);
     } else {
       s.add('Dasamsa D-10', 'Rasi 10th lord D-10 mein mazboot', 0, 5,
-        g ? `Rasi 10th lord ${PLANET_HI[l10!]} Dasamsa mein ${g.house}th house mein hai — kendra ya trikona nahi. ` +
+        g ? `Rasi 10th lord ${PLANET_HI[l10!]} Dasamsa mein ${ord(g.house)} house mein hai — kendra ya trikona nahi. ` +
             `Career mein mehnat zyada lagegi.`
           : 'Rasi 10th lord Dasamsa mein locate nahi hua.');
     }
@@ -127,7 +128,7 @@ export function scoreUpsc(data: CalcData): UpscResult {
         `Ye competitive exam ka sabse khaas classical signal hai — UPSC jaisi pratiyogita ke liye.`);
     } else {
       s.add('6th House', 'Amatyakaraka 6th house mein', 0, 8,
-        `Aapka Amatyakaraka ${PLANET_HI[AmK.planet]} hai par wo ${AmK.house}th house mein hai, 6th mein nahi. ` +
+        `Aapka Amatyakaraka ${PLANET_HI[AmK.planet]} hai par wo ${ord(AmK.house)} house mein hai, 6th mein nahi. ` +
         `6th house pratiyogita ka ghar hai — ye yog na hone se exam route thoda kam natural hota hai.`);
     }
   } else {
@@ -139,7 +140,7 @@ export function scoreUpsc(data: CalcData): UpscResult {
     const linked = [6, 10, 11].includes(houseOf(data, l6) ?? -1);
     const pts = 7 * (dignityScore(p6) * 0.5 + (linked ? 0.5 : 0));
     s.add('6th House', '6th lord ka sambandh', pts, 7,
-      `6th house ka swami ${PLANET_HI[l6]} hai, ${p6?.house}th house mein, ${dignityWord(p6)}. ` +
+      `6th house ka swami ${PLANET_HI[l6]} hai, ${ord(p6?.house)} house mein, ${dignityWord(p6)}. ` +
       (linked
         ? `Wo 6/10/11 se juda hai — pratiyogita, karma aur labh ka seedha sambandh.`
         : `Wo 6/10/11 se nahi juda — pratiyogita ka phal karma tak pahunchne mein der lagti hai.`));
@@ -151,12 +152,12 @@ export function scoreUpsc(data: CalcData): UpscResult {
 
   const rSun = ratio(sun);
   s.add('Sun + Saturn', 'Surya ki taakat', 8 * ratioScore(rSun), 8,
-    `Surya ${sun?.sign} mein ${sun?.house}th house mein hai, ${dignityWord(sun)}, Shadbala ${rSun !== null ? rSun.toFixed(2) : 'n/a'} (${ratioWord(rSun)}). ` +
+    `Surya ${sun?.sign} mein ${ord(sun?.house)} house mein hai, ${dignityWord(sun)}, Shadbala ${rSun !== null ? rSun.toFixed(2) : 'n/a'} (${ratioWord(rSun)}). ` +
     `Surya hi sarkar, adhikar aur rajya ka karak hai — sarkari naukri mein iski taakat sabse zyada mayne rakhti hai.`);
 
   const rSat = ratio(sat);
   s.add('Sun + Saturn', 'Shani ki taakat', 7 * ratioScore(rSat), 7,
-    `Shani ${sat?.sign} mein ${sat?.house}th house mein hai, ${dignityWord(sat)}, Shadbala ${rSat !== null ? rSat.toFixed(2) : 'n/a'} (${ratioWord(rSat)}). ` +
+    `Shani ${sat?.sign} mein ${ord(sat?.house)} house mein hai, ${dignityWord(sat)}, Shadbala ${rSat !== null ? rSat.toFixed(2) : 'n/a'} (${ratioWord(rSat)}). ` +
     `Shani anushasan, lambi taiyari aur sarkari tantra ka karak hai — UPSC jaisi lambi ladai iske bina mushkil hai.`);
 
   // ── BLOCK E — Yogas (16) ───────────────────────────────────────────────────
@@ -179,7 +180,7 @@ export function scoreUpsc(data: CalcData): UpscResult {
   s.add('Yogas', 'Budh-Aditya / Dharma-Karmadhipati', extra, 4,
     [
       budhAditya
-        ? `Budh-Aditya Yoga hai — Surya aur Budh dono ${houseOf(data, 'Sun')}th house mein. Buddhi ke saath adhikar.`
+        ? `Budh-Aditya Yoga hai — Surya aur Budh dono ${ord(houseOf(data, 'Sun'))} house mein. Buddhi ke saath adhikar.`
         : 'Budh-Aditya Yoga nahi hai (Surya aur Budh alag houses mein).',
       dka
         ? `Dharma-Karmadhipati Yoga hai — 9th aur 10th ke swami jude hue hain. Bhagya aur karma ek saath.`
