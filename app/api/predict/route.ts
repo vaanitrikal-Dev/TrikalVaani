@@ -3,6 +3,16 @@
  * TRIKAAL VAANI — Unified Prediction Endpoint
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/api/predict/route.ts
+ * VERSION: 15.3 — PayPal accepted alongside Razorpay (international)
+ *
+ * v15.3 (2026-08-29): international payment. A SEPARATE `paypalVerification`
+ * field and a SEPARATE gate branch were added rather than widening the
+ * existing ones, so not one line of the Razorpay path changed. That path has
+ * taken every payment this platform has ever received and the safest change
+ * to it was none at all. PayPal is verified by asking PayPal — a capture id
+ * from the browser proves nothing. USD amounts are checked in cents against
+ * ALLOWED_PAID_USD_CENTS, mirroring the paise table.
+ *
  * VERSION: 15.2 — Free tier finally receives chart evidence
  * SIGNED: ROHIIT GUPTA, CEO
  *
@@ -220,6 +230,16 @@ const MAX_TOKENS      = 20000  // CEO approved 23 Aug 2026 (16000 -> 20000 in v1
 // false = disable instantly (no grounding cost) — CEO kill-switch
 const PRO_REALWORLD_SEARCH = true
 
+// ── PayPal (international) — v15.3 ───────────────────────────────────────────
+// Imported lazily inside the gate so an env/config problem on the PayPal side
+// can never affect a rupee payment or a free reading.
+
+// ── Allowed paid USD amounts (cents) — anti-tamper, mirrors the paise table ──
+const ALLOWED_PAID_USD_CENTS: Record<string, number> = {
+  paid:  700,   // $7 Deep Reading
+  voice: 100,   // $1 Trikaal Voice, one question
+}
+
 // ── Allowed paid amounts (paise) — anti-tamper ───────────────────────────────
 const ALLOWED_PAID_AMOUNTS: Record<string, number> = {
   paid:  5100,   // ₹51 Deep Reading
@@ -268,6 +288,14 @@ interface PaymentVerification {
   amount:              number  // in paise
 }
 
+// v15.3 — international. A SEPARATE field rather than widening the one above,
+// so the rupee path that has taken every payment to date is not modified at
+// all. `amount` here is in CENTS, never paise; payment_currency records which.
+interface PaypalVerification {
+  paypal_order_id: string
+  amount:          number  // in cents
+}
+
 // ── v14.11: Numerology compatibility payload (sent by BirthForm dual domains) ─
 interface NumerologyCompatibility {
   score:       number
@@ -288,6 +316,7 @@ interface PredictRequest {
   userId?:string; sessionId:string; domainId:DomainId; domainLabel?:string
   predictionTier?:PredictionTier
   paymentVerification?: PaymentVerification
+  paypalVerification?: PaypalVerification | null
   birthData:{name?:string;dob:string;tob:string;lat:number;lng:number;cityName?:string;timezone?:number;ayanamsa?:string}
   userContext:{segment:'genz'|'millennial'|'genx';dynamicSegment?:string;gender?:string;age?:number;employment:string;sector:string;language:'hindi'|'hinglish'|'english';city:string;currentCity?:string;relationshipStatus?:string;situationNote?:string;mobile?:string;person2Name?:string|null;person2City?:string|null;person2CurrentCity?:string|null}
   person2Data?:{name:string;dob:string;tob:string;lat:number;lng:number;cityName:string;currentCity:string;mobile?:string}|null
@@ -978,6 +1007,8 @@ async function saveToSupabase(p:{
   seoMeta:ReturnType<typeof buildSeoGeoMeta>
   chartExtract:ChartExtract
   paymentVerification?: PaymentVerification | null
+  paypalVerification?: PaypalVerification | null
+  paypalCaptureId?: string | null
 }): Promise<string> {
   const simpleSummaryText =
     p.predictionJson.summaryText ??
@@ -1032,8 +1063,14 @@ async function saveToSupabase(p:{
     // ── Razorpay payment columns (v14.6) ─────────────────────────
     razorpay_order_id:   p.paymentVerification?.razorpay_order_id   ?? null,
     razorpay_payment_id: p.paymentVerification?.razorpay_payment_id ?? null,
-    payment_amount:      p.paymentVerification?.amount              ?? null,
-    payment_verified:    p.paymentVerification ? true : false,
+    // v15.3 — payment_amount is the smallest unit of whichever currency was
+    // charged: paise for INR, cents for USD. payment_currency is what makes
+    // 5100 and 700 tellable apart.
+    payment_amount:      p.paymentVerification?.amount ?? p.paypalVerification?.amount ?? null,
+    payment_currency:    p.paypalVerification ? 'USD' : 'INR',
+    paypal_order_id:     p.paypalVerification?.paypal_order_id ?? null,
+    paypal_capture_id:   p.paypalCaptureId ?? null,
+    payment_verified:    (p.paymentVerification || p.paypalVerification) ? true : false,
     created_at:          new Date().toISOString(),
   }).select('id').single()
 
@@ -1052,7 +1089,7 @@ export async function POST(req: NextRequest) {
   try{body=await req.json()}
   catch{return NextResponse.json({error:'Invalid JSON body'},{status:400})}
 
-  const {sessionId,userId,domainId,predictionTier='free',birthData,userContext,person2Data,paymentVerification,numerologyCompatibility}=body
+  const {sessionId,userId,domainId,predictionTier='free',birthData,userContext,person2Data,paymentVerification,paypalVerification,numerologyCompatibility}=body
 
   if(predictionTier==='voice')
     return NextResponse.json({error:'Voice uses /api/voice'},{status:400})
@@ -1062,9 +1099,44 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({error:'Ephemeris URL not configured'},{status:500})
 
   const isPaid = predictionTier==='paid'
+  let paypalCaptureId: string | null = null
 
-  // ── PAYMENT GATE — v14.6 NEW ───────────────────────────────────────────────
-  if(isPaid){
+  // ── PAYMENT GATE — v14.6, extended v15.3 ───────────────────────────────────
+  //
+  // v15.3 adds a SECOND, parallel branch for PayPal. The rupee branch below is
+  // byte-for-byte what it has always been; nothing in it was edited. A request
+  // either carries paypalVerification and takes the new branch, or it does not
+  // and takes the original one. There is no shared code between them, so the
+  // path that has processed every payment to date cannot regress.
+  if(isPaid && paypalVerification){
+    const {paypal_order_id, amount} = paypalVerification
+
+    const expectedCents = ALLOWED_PAID_USD_CENTS['paid']
+    if(amount !== expectedCents){
+      console.error(`[TV-v15.3] USD amount mismatch: got ${amount}, expected ${expectedCents}`)
+      return NextResponse.json({error:'Payment amount mismatch.'},{status:400})
+    }
+
+    // Ask PayPal directly. A capture id from the browser proves nothing; only
+    // PayPal's own answer does.
+    let capture: { id: string; status: string; amountValue: string; currency: string } | null = null
+    try {
+      const { getPayPalOrder, isCaptureValid } = await import('@/lib/paypal-server')
+      const order = await getPayPalOrder(paypal_order_id)
+      if(!isCaptureValid(order, expectedCents)){
+        console.error(`[TV-v15.3] PayPal order not valid | ${order.status} | ${order.amountValue} ${order.currency}`)
+        return NextResponse.json({error:'Payment could not be verified.'},{status:400})
+      }
+      capture = order
+    } catch (e) {
+      console.error('[TV-v15.3] PayPal verification threw:', e)
+      return NextResponse.json({error:'Payment could not be verified. Please contact support.'},{status:400})
+    }
+
+    paypalCaptureId = capture?.id ?? null
+    console.log(`[TV-v15.3] ✅ PayPal verified | capture:${paypalCaptureId} | $${(amount/100).toFixed(2)}`)
+
+  } else if(isPaid){
     if(!paymentVerification){
       console.error('[TV-v14.6] Paid request without payment verification')
       return NextResponse.json(
