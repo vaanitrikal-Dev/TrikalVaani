@@ -1,6 +1,17 @@
 /**
  * ============================================================
  * TRIKAAL VAANI — BirthForm
+ * v9.1 (29 Aug 2026)
+ *   0. INTERNATIONAL PAYMENT — every price on this form is now currency-aware.
+ *      Foreign visitors were being shown PayPal's $7 button directly beneath a
+ *      tier card that still read ₹51, with "Razorpay-secured" underneath it:
+ *      one product, two prices, one screen. The geo check drives the tier
+ *      cards, the trust copy, the submit label and the footer lines together,
+ *      and PayPal's buttons replace the Razorpay strip. The rupee path —
+ *      handleRazorpayPayment and everything it calls — is byte-for-byte v9.0.
+ *      A build marker is rendered above the tier cards so it is never again a
+ *      guess whether this file is the one deployed.
+ *
  * v9.0 (23 Aug 2026)
  *   1. DOMAIN MISMATCH HINT — the domain tile is picked on the previous screen
  *      and situationNote is typed here; the two were never compared. A client
@@ -737,11 +748,14 @@ function RazorpayInlineTrustStrip({ tier }: { tier: PredictionTier }) {
 
 // ── Tier Selector (v9.9: minWidth:0 + width:100% on cards — overflow fix) ────
 
-function TierSelector({ selected, onChange }: { selected: PredictionTier; onChange: (t: PredictionTier) => void }) {
+function TierSelector({ selected, onChange, intl = false }: { selected: PredictionTier; onChange: (t: PredictionTier) => void; intl?: boolean }) {
   const tiers = [
     { id: 'free'  as PredictionTier, icon: '🔮', label: 'Free Preview', price: 'Free', desc: 'Free · No card needed', color: '#94a3b8', features: ['Key planet insight for you', 'What to do this week', 'Instant — 60 seconds'] },
-    { id: 'paid'  as PredictionTier, icon: '⚡', label: 'Deep Reading',  price: '₹51',  desc: 'Full Vedic Analysis', color: GOLD,      features: ['Deep dive into your chart', '5 personalized upay', 'Worth ₹500+, yours at ₹51'], highlight: true },
-    { id: 'voice' as PredictionTier, icon: '🎙️', label: 'Voice',        price: '₹11',  desc: 'Hear it in 60 sec',   color: '#a78bfa', features: ['Speak your question', 'Answer in your language', 'Most personal format'] },
+    // v9.1: an international visitor was being shown ₹51 on the card and $7 on
+    // the button. Same product, two prices, on one screen — the fastest way to
+    // lose a sale. `intl` is passed down from the form's geo check.
+    { id: 'paid'  as PredictionTier, icon: '⚡', label: 'Deep Reading',  price: intl ? '$7' : '₹51',  desc: 'Full Vedic Analysis', color: GOLD,      features: ['Deep dive into your chart', '5 personalized upay', intl ? 'Worth $60+, yours at $7' : 'Worth ₹500+, yours at ₹51'], highlight: true },
+    { id: 'voice' as PredictionTier, icon: '🎙️', label: 'Voice',        price: intl ? '$1' : '₹11',  desc: 'Hear it in 60 sec',   color: '#a78bfa', features: ['Speak your question', 'Answer in your language', 'Most personal format'] },
   ]
 
   return (
@@ -770,7 +784,7 @@ function TierSelector({ selected, onChange }: { selected: PredictionTier; onChan
       {selected === 'paid' && (
         <div style={{ marginTop: '12px', padding: '12px', background: GOLD_RGBA(0.06), border: `1px solid ${GOLD_RGBA(0.2)}`, borderRadius: '10px' }}>
           <p style={{ margin: '0 0 4px', color: GOLD, fontSize: '11px', fontWeight: 700 }}>⚡ 900-Word Deep Vedic Analysis</p>
-          <p style={{ margin: 0, color: '#64748b', fontSize: '10px', lineHeight: 1.5 }}>Premium-grade reading that elsewhere costs ₹500+ — Trikaal Vaani delivers it for ₹51. Swiss Ephemeris + BPHS + personalized 5 upay by segment. Razorpay-secured one-time payment.</p>
+          <p style={{ margin: 0, color: '#64748b', fontSize: '10px', lineHeight: 1.5 }}>{intl ? 'Premium-grade reading that elsewhere costs $60+ — Trikaal Vaani delivers it for $7. Swiss Ephemeris + BPHS + personalized 5 upay by segment. PayPal-secured one-time payment; pay by card without a PayPal account.' : 'Premium-grade reading that elsewhere costs ₹500+ — Trikaal Vaani delivers it for ₹51. Swiss Ephemeris + BPHS + personalized 5 upay by segment. Razorpay-secured one-time payment.'}</p>
         </div>
       )}
     </div>
@@ -1325,7 +1339,14 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
               </p>
             </div>
 
-            <TierSelector selected={predictionTier} onChange={(t) => {
+            {/* BUILD MARKER — BirthForm v9.1 · 2026-08-29. If you cannot see
+                this line on screen, the file you are looking at is NOT the file
+                that is deployed, and the problem is the deployment, not the code. */}
+            <p style={{ margin: '0 0 6px', fontSize: '10px', color: '#334155', textAlign: 'right' }}>
+              BF v9.1 · 29-Aug-2026 · {isIndia === false ? 'INTL/USD' : 'IN/INR'}
+            </p>
+
+            <TierSelector selected={predictionTier} intl={isIndia === false} onChange={(t) => {
               setPredictionTier(t)
               if (t === 'paid')  trackFB('InitiateCheckout', { value: 51, currency: 'INR', content_name: 'Deep Reading' })
               if (t === 'voice') trackFB('InitiateCheckout', { value: 11, currency: 'INR', content_name: 'Voice Reading' })
@@ -1683,8 +1704,12 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
             {!isLoading && (
               <div style={{ textAlign: 'center' }}>
                 {predictionTier === 'free'  && <p className="text-xs text-slate-600">🔒 Free forever · No card needed · No signup · Instant results</p>}
-                {predictionTier === 'paid'  && <p className="text-xs text-slate-600">🔒 ₹51 one-time · Same depth as ₹500+ readings elsewhere · Secured by <span style={{color: RAZORPAY_BLUE, fontWeight: 700}}>Razorpay</span> · Instant access</p>}
-                {predictionTier === 'voice' && <p className="text-xs text-slate-600">🎙️ ₹11 one-time · Speak your question, hear the answer · Secured by <span style={{color: RAZORPAY_BLUE, fontWeight: 700}}>Razorpay</span></p>}
+                {predictionTier === 'paid'  && (isIndia === false
+                  ? <p className="text-xs text-slate-600">🔒 $7 one-time · Same depth as $60+ readings elsewhere · Secured by <span style={{color: '#0070BA', fontWeight: 700}}>PayPal</span> · Instant access</p>
+                  : <p className="text-xs text-slate-600">🔒 ₹51 one-time · Same depth as ₹500+ readings elsewhere · Secured by <span style={{color: RAZORPAY_BLUE, fontWeight: 700}}>Razorpay</span> · Instant access</p>)}
+                {predictionTier === 'voice' && (isIndia === false
+                  ? <p className="text-xs text-slate-600">🎙️ $1 one-time · Speak your question, hear the answer · Secured by <span style={{color: '#0070BA', fontWeight: 700}}>PayPal</span></p>
+                  : <p className="text-xs text-slate-600">🎙️ ₹11 one-time · Speak your question, hear the answer · Secured by <span style={{color: RAZORPAY_BLUE, fontWeight: 700}}>Razorpay</span></p>)}
               </div>
             )}
 
