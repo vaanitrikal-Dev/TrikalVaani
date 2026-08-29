@@ -681,23 +681,32 @@ export default function YogCalculator({ config }: { config: YogCalculatorConfig 
             </section>
           )}
 
-          {/* Next step */}
+          {/* Next step — shown only AFTER unlocking, and only for a DIFFERENT
+              product. Getting this wrong is expensive: the first version
+              repeated the same sentence as both heading and button at the same
+              ₹51, so someone who had just paid read it as "pay again" and
+              assumed their payment had failed. It now confirms the purchase
+              first, then names the other product explicitly. */}
           {paid && (
           <section className="rounded-2xl p-5 md:p-6 mb-6 text-center"
             style={{ background: GOLD_RGBA(0.07), border: `1px solid ${GOLD_RGBA(0.3)}` }}>
+            <p className="text-xs m-0 mb-3" style={{ color: '#86EFAC' }}>
+              ✓ Payment ho gaya. Poori report upar khul chuki hai.
+            </p>
             <h2 className="text-base font-bold m-0 mb-2" style={{ color: GOLD }}>
-              {r.nextStep?.title ?? config.ctaBlurb}
+              {r.nextStep?.title ?? 'Aage kya?'}
             </h2>
-            {r.nextStep && (
-              <p className="text-xs leading-relaxed m-0 mb-4 max-w-xl mx-auto" style={{ color: '#94a3b8' }}>
-                {r.nextStep.body}
-              </p>
-            )}
+            <p className="text-xs leading-relaxed m-0 mb-4 max-w-xl mx-auto" style={{ color: '#94a3b8' }}>
+              {r.nextStep?.body ?? config.ctaBlurb}
+            </p>
             <Link href={r.nextStep?.href ?? config.ctaHref}
               className="inline-block px-6 py-3 rounded-lg font-semibold text-sm"
               style={{ background: GOLD, color: '#0B0F1A' }}>
-              {r.nextStep ? `Kundali Milan — ${r.nextStep.price}` : `${config.ctaBlurb} — ${config.ctaPrice}`}
+              {r.nextStep ? `Kundali Milan — ${r.nextStep.price}` : `Trikaal Ka Sandesh — ${config.ctaPrice}`}
             </Link>
+            <p className="text-xs m-0 mt-2" style={{ color: '#64748b' }}>
+              Ye alag reading hai — poori kundali, saare jeevan-kshetra.
+            </p>
           </section>
           )}
 
