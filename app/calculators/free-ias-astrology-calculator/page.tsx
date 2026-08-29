@@ -102,10 +102,10 @@ export default function FreeIasAstrologyCalculatorPage() {
             scoreLabel: "Sarkari Naukri Yog Score",
             breakdownHeading: "Har point ki wajah",
             secondaryHeading: "Kaunsi sarkari line khuli hai",
-            ctaHref: '/kundali-milan',
+            ctaHref: '/#birth-form',
             ctaLabel: "Mera Sarkari Naukri Yog dekho",
             ctaPrice: '₹51',
-            ctaBlurb: "Poori Kundali padhwayein",
+            ctaBlurb: "Ye report sirf sarkari naukri ka yog dekhti hai. Trikaal Ka Sandesh aapki poori kundali padhta hai — career, paisa, shaadi, sehat — sabka samay aur upay ek saath.",
           }} />
 
           <section className="rounded-2xl p-5 md:p-6 mb-6" style={{ background: '#0B0F1A', border: '1px solid rgba(255,255,255,0.07)' }}>
