@@ -3,7 +3,8 @@
  * TRIKAL VAANI — International Pricing (Option A)
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: lib/pricing-intl.ts
- * VERSION: 1.2 (29 Aug 2026)
+ * VERSION: 1.3 (29 Aug 2026)
+ *   v1.3 — Kundali Milan parent + both tiers ($12 / $15).
  *   v1.2 — Trikaal Voice packs priced at a flat $1 per question ($1 / $5 / $12).
  *   v1.1 — `yog` product added for the three yog calculators (Rs 51 / $7).
  *   v1.0 — initial ladder.
@@ -87,9 +88,23 @@ export const PRODUCTS: Record<string, ProductPrice> = {
   },
   milan_deep: {
     key: 'milan_deep',
-    label: 'Kundali Milan — Deep',
+    label: 'Kundali Milan — Deep (Couple)',
     inrPaise: 10100, // Rs 101
     usdCents: 1200, // $12
+  },
+  // The parent version is the same depth at the same rupee price, written for
+  // the family rather than the couple. Same dollar price for the same reason.
+  milan_deep_parent: {
+    key: 'milan_deep_parent',
+    label: 'Kundali Milan — Deep (Parent)',
+    inrPaise: 10100, // Rs 101
+    usdCents: 1200,  // $12
+  },
+  milan_both: {
+    key: 'milan_both',
+    label: 'Kundali Milan — Both Versions (Couple + Parent)',
+    inrPaise: 15100, // Rs 151
+    usdCents: 1500,  // $15
   },
   muhurat_report: {
     key: 'muhurat_report',
