@@ -105,7 +105,7 @@ export default function FreeForeignSpouseCalculatorPage() {
             ctaHref: '/kundali-milan',
             ctaLabel: "Mera Foreign Spouse Yog dekho",
             ctaPrice: '₹51',
-            ctaBlurb: "Kundali Milan karwayein",
+            ctaBlurb: "Ye report sirf videshi jeevansaathi ka yog dekhti hai. Kundali Milan dono kundaliyan milakar batata hai ki rishta nibhega ya nahi.",
           }} />
 
           <section className="rounded-2xl p-5 md:p-6 mb-6" style={{ background: '#0B0F1A', border: '1px solid rgba(255,255,255,0.07)' }}>
