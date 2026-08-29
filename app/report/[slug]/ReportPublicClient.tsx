@@ -5,8 +5,18 @@
  * TRIKAAL VAANI — Public SEO Report Client
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/report/[slug]/ReportPublicClient.tsx
- * VERSION: 10.1 — language leaks fixed in the suspense line and LockedSection
+ * VERSION: 10.2 (29 Aug 2026) — Dasamsa (D10) card
  * SIGNED: ROHIIT GUPTA, CEO
+ *
+ * v10.2 (29 Aug 2026) — DASAMSA D10
+ *   The report has shown the Navamsa for a while, but BPHS Ch.6 reads
+ *   PROFESSION in the Dasamsa, not in the rasi chart — so every career
+ *   paragraph rested on a chart that was never meant to answer that question.
+ *   DasamsaCard deliberately mirrors NavamsaCard down to the star marker and
+ *   the note box, so the two read as one pair rather than two designers' work.
+ *   The star means vargottama in D9 and same-sign-as-D1 in D10; both say the
+ *   same thing in their own varga, which is why the same mark is used.
+ *   Paid tier only, like the D9 card.
  *
  * v10.1 (24 Aug 2026) — two language leaks
  *   1. The shared-lord suspense line joined house names with a hardcoded ' aur ',
@@ -260,6 +270,11 @@ const L: Record<string, Record<Lang,string>> = {
   mAction:      {hinglish:'Karein', hindi:'करें',   english:'Do'},
   mAvoid:       {hinglish:'Bachein',hindi:'बचें',   english:'Avoid'},
   navNote:      {hinglish:'D9 Ka Matlab', hindi:'नवांश का अर्थ', english:'What D9 Adds'},
+  dasamsa:      {hinglish:'💼 Dasamsa (D10) — Karma Kundali', hindi:'💼 दशांश (D10) — कर्म कुंडली', english:'💼 Dasamsa (D10) — Career Chart'},
+  dasLagna:     {hinglish:'D10 Lagna', hindi:'दशांश लग्न', english:'D10 Lagna'},
+  dasTenth:     {hinglish:'D10 Ka 10th Bhav', hindi:'दशांश का दशम भाव', english:'D10 10th House'},
+  dasConfirmed: {hinglish:'D1 aur D10 dono mein same rashi — karma mein pushti', hindi:'D1 और D10 दोनों में एक ही राशि — कर्म में पुष्टि', english:'Same sign in D1 and D10 — confirmed in career'},
+  dasNote:      {hinglish:'D10 Ka Matlab', hindi:'दशांश का अर्थ', english:'What D10 Adds'},
   // v9.2: the remaining hardcoded headings. v9.0/9.1 translated the new sections
   // but left every pre-existing one in Hinglish, so a Hindi report still carried
   // "KYA KAREIN" and "Graha Vishleshan" over Devanagari content.
@@ -678,6 +693,50 @@ function NavamsaCard({ nv, lang, note }:{ nv:Record<string,unknown>; lang:Lang; 
         </div>
       )}
       <p style={{margin:'8px 0 0',color:'#475569',fontSize:'11px'}}>{s(nv.note as string,'')}</p>
+    </div>
+  )
+}
+
+// ── v9.4 DASAMSA (D10) ───────────────────────────────────────────────────────
+// BPHS Ch.6 reads PROFESSION in the Dasamsa, not in the rasi chart. The report
+// has shown D9 for a while; without D10 every career paragraph rested on the
+// rasi chart alone. Deliberately mirrors NavamsaCard so the two read as a pair
+// rather than as two different designers' work.
+function DasamsaCard({ ds, lang, note }:{ ds:Record<string,unknown>; lang:Lang; note:string }) {
+  const rows = safeArr<Record<string,unknown>>(ds.planets)
+  if (rows.length===0) return null
+  const conf = safeArr<string>(ds.confirmed_planets)
+  return (
+    <div style={{background:BG_CARD,border:`1px solid ${G(0.12)}`,borderRadius:'16px',padding:'22px',marginBottom:'14px'}}>
+      <p style={{margin:'0 0 6px',color:GOLD,fontSize:'11px',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.08em'}}>{lbl('dasamsa',lang)}</p>
+      <div style={{margin:'0 0 12px',display:'flex',flexWrap:'wrap',gap:'14px'}}>
+        {s(ds.dasamsa_lagna as string)!=='—' && <p style={{margin:0,color:'#94a3b8',fontSize:'12px'}}>{lbl('dasLagna',lang)}: <strong style={{color:'#fff'}}>{String(ds.dasamsa_lagna)}</strong></p>}
+        {s(ds.dasamsa_10th_sign as string)!=='—' && <p style={{margin:0,color:'#94a3b8',fontSize:'12px'}}>{lbl('dasTenth',lang)}: <strong style={{color:'#fff'}}>{String(ds.dasamsa_10th_sign)}</strong></p>}
+      </div>
+      <div style={{overflowX:'auto'}}>
+        <table style={{width:'100%',borderCollapse:'collapse',fontSize:'13px'}}>
+          <thead><tr style={{borderBottom:`1px solid ${G(0.15)}`}}>{['Graha','D1','D10','House','Dignity'].map(h=>(<th key={h} style={{padding:'8px 6px',color:GOLD,fontWeight:600,textAlign:'left',fontSize:'11px',textTransform:'uppercase',letterSpacing:'0.06em'}}>{h}</th>))}</tr></thead>
+          <tbody>
+            {rows.map((r,i)=>(
+              <tr key={i} style={{borderBottom:'1px solid rgba(255,255,255,0.04)',background:i%2===0?G(0.02):'transparent'}}>
+                <td style={{padding:'10px 6px',color:'#fff',fontWeight:600}}><span style={{color:GOLD,marginRight:'5px'}}>{PLANET_GLYPH[String(r.planet)]??'✦'}</span>{s(r.planet_hi as string, String(r.planet))}{r.same_as_d1?<span style={{color:'#22c55e',fontSize:'10px',marginLeft:'5px'}}>★</span>:null}</td>
+                <td style={{padding:'10px 6px',color:'#94a3b8',fontSize:'12px'}}>{s(r.d1_rashi as string)}</td>
+                <td style={{padding:'10px 6px',color:'#e2e8f0'}}>{s(r.dasamsa_rashi as string)}</td>
+                <td style={{padding:'10px 6px',color:'#e2e8f0'}}>{r.dasamsa_house?ordinal(Number(r.dasamsa_house)):'—'}</td>
+                <td style={{padding:'10px 6px',color:'#94a3b8',fontSize:'12px'}}>{s(r.dignity_d10 as string)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      {conf.length>0 && <p style={{margin:'10px 0 0',color:'#22c55e',fontSize:'11.5px'}}>★ {lbl('dasConfirmed',lang)}: {conf.join(', ')}</p>}
+      {note!=='—' && (
+        <div style={{marginTop:'12px',padding:'12px 14px',borderRadius:'10px',background:G(0.06),border:`1px solid ${G(0.18)}`}}>
+          <p style={{margin:'0 0 5px',color:G(0.65),fontSize:'10px',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.06em'}}>{lbl('dasNote',lang)}</p>
+          <p style={{margin:0,color:'#cbd5e1',fontSize:'13px',lineHeight:1.7}}>{note}</p>
+        </div>
+      )}
+      <p style={{margin:'8px 0 0',color:'#475569',fontSize:'11px'}}>{s(ds.note as string,'')}</p>
     </div>
   )
 }
@@ -1150,6 +1209,8 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
   const panchang    = safeObj(pj.panchang)     // v3.0 engine — real, or {} when unavailable
   const monthlyOut  = safeArr<MOut>(pj.monthlyOutlook)
   const navNote     = s(pj.navamsaNote as string)
+  const dasamsa     = safeObj(pj.dasamsaChart)
+  const dasNote     = s(pj.dasamsaNote as string)
   const bestMonth   = s(gochar.best_month as string)!=='—' ? String(gochar.best_month) : null
 
   // ── v10.0 SUSPENSE LINES ───────────────────────────────────────────────────
@@ -1314,6 +1375,7 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
               table — the client reads the chart, then immediately reads why it
               matters for them, before the dasha timeline. */}
           {isPaid && Object.keys(navamsa).length>0 && <NavamsaCard nv={navamsa} lang={lang} note={navNote}/>}
+          {isPaid && Object.keys(dasamsa).length>0 && <DasamsaCard ds={dasamsa} lang={lang} note={dasNote}/>}
 
           {hasEvidence && <EvidenceTable ev={chartEv} meanings={evMeanings} lang={lang} isPaid={isPaid} slug={slug}/>}
           {isPaid && <EngineSignals yogas={allYogas} bhriguTheme={bhriguTheme} bhriguPoints={bhriguPts} signals={bhriguSignals} lang={lang}/>}
