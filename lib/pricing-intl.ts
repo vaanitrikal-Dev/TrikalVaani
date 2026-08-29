@@ -81,6 +81,12 @@ export const PRODUCTS: Record<string, ProductPrice> = {
     inrPaise: 15100, // Rs 151
     usdCents: 1500, // $15
   },
+  yog: {
+    key: 'yog',
+    label: 'Yog Report — Trikaal Vaani',
+    inrPaise: 5100, // Rs 51
+    usdCents: 700,  // $7
+  },
   karmic: {
     key: 'karmic',
     label: 'Karmic Background Reading',
