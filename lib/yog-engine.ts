@@ -3,7 +3,7 @@
  * TRIKAL VAANI — Yog Scoring Foundation
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: lib/yog-engine.ts
- * VERSION: 1.0
+ * VERSION: 1.1
  * SIGNED: ROHIIT GUPTA, CEO
  * ============================================================
  * Shared by all three yog calculators:
@@ -78,6 +78,11 @@ export interface DasamsaGraha {
   house: number;
 }
 
+export interface NavamsaGraha extends DasamsaGraha {
+  /** Same sign in D-1 and D-9 — a classical mark of strength. */
+  vargottama: boolean;
+}
+
 export interface CalcData {
   instant: {
     lagna: string | null;
@@ -94,6 +99,10 @@ export interface CalcData {
   dasamsa: {
     lagna: { sign: string; sign_en: string; sign_lord: string };
     grahas: DasamsaGraha[];
+  } | null;
+  navamsa: {
+    lagna: { sign: string; sign_en: string; sign_lord: string };
+    grahas: NavamsaGraha[];
   } | null;
 }
 
@@ -179,6 +188,15 @@ export const PLANET_HI: Record<string, string> = {
   Sun: 'सूर्य', Moon: 'चंद्र', Mars: 'मंगल', Mercury: 'बुध',
   Jupiter: 'गुरु', Venus: 'शुक्र', Saturn: 'शनि', Rahu: 'राहु', Ketu: 'केतु',
 };
+
+/** 1st, 2nd, 3rd, 4th... A chart full of "3th house" reads as careless. */
+export function ord(n: number | null | undefined): string {
+  if (n === null || n === undefined || Number.isNaN(Number(n))) return '?';
+  const v = Number(n);
+  const s = ['th', 'st', 'nd', 'rd'];
+  const k = v % 100;
+  return `${v}${s[(k - 20) % 10] || s[k] || s[0]}`;
+}
 
 export const KENDRA = [1, 4, 7, 10];
 export const TRIKONA = [1, 5, 9];
@@ -315,6 +333,27 @@ export function d10HouseLord(data: CalcData, house: number): string | null {
   return SIGN_LORD[sign] ?? null;
 }
 
+// ── Navamsa (D-9) helpers ────────────────────────────────────────────────────
+// Marriage is judged in the Navamsa the way career is judged in the Dasamsa.
+
+export function d9(data: CalcData, name: string | null): NavamsaGraha | null {
+  if (!name || !data.navamsa) return null;
+  return data.navamsa.grahas.find((g) => g.planet === name) ?? null;
+}
+
+/** The lord of a house in the D-9 chart. */
+export function d9HouseLord(data: CalcData, house: number): string | null {
+  if (!data.navamsa) return null;
+  const lagnaIdx = SIGN_ORDER.indexOf(data.navamsa.lagna.sign);
+  if (lagnaIdx < 0) return null;
+  const sign = SIGN_ORDER[(lagnaIdx + house - 1) % 12];
+  return SIGN_LORD[sign] ?? null;
+}
+
+export function isVargottama(data: CalcData, name: string | null): boolean {
+  return d9(data, name)?.vargottama === true;
+}
+
 // ── Jaimini karakas ──────────────────────────────────────────────────────────
 
 const KARAKA_PLANETS = ['Sun', 'Moon', 'Mars', 'Mercury', 'Jupiter', 'Venus', 'Saturn'];
@@ -324,11 +363,20 @@ const KARAKA_PLANETS = ['Sun', 'Moon', 'Mars', 'Mercury', 'Jupiter', 'Venus', 'S
  * Amatyakaraka is the career significator, and its placement in the 6th is the
  * classical competitive-exam signal used by the IAS engine.
  */
-export function karakas(data: CalcData): { AK: CalcPlanet | null; AmK: CalcPlanet | null } {
+export function karakas(data: CalcData): {
+  AK: CalcPlanet | null;
+  AmK: CalcPlanet | null;
+  DK: CalcPlanet | null;
+} {
   const ranked = data.planets
     .filter((p) => KARAKA_PLANETS.includes(p.planet) && typeof p.degree_in_sign === 'number')
     .sort((a, b) => (b.degree_in_sign as number) - (a.degree_in_sign as number));
-  return { AK: ranked[0] ?? null, AmK: ranked[1] ?? null };
+  return {
+    AK: ranked[0] ?? null,
+    AmK: ranked[1] ?? null,
+    // Darakaraka: the LOWEST degree of the seven — the spouse significator.
+    DK: ranked.length ? ranked[ranked.length - 1] : null,
+  };
 }
 
 // ── Pancha Mahapurusha Yogas ─────────────────────────────────────────────────
@@ -408,6 +456,7 @@ export function capabilities(data: CalcData) {
   return {
     hasDrishti: Boolean(data.drishti?.on_houses?.length),
     hasDasamsa: Boolean(data.dasamsa?.grahas?.length),
+    hasNavamsa: Boolean(data.navamsa?.grahas?.length),
     hasShadbala: data.planets.some((p) => typeof p.shadbala?.ratio === 'number'),
   };
 }
