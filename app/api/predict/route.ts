@@ -3,6 +3,17 @@
  * TRIKAAL VAANI — Unified Prediction Endpoint
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/api/predict/route.ts
+ * VERSION: 15.4 — DASAMSA D10 in the paid report
+ *
+ * v15.4 (2026-08-29): the report has carried the Navamsa (D9) for a while but
+ * never the Dasamsa (D10), and BPHS Ch.6 names D10 as the varga read for
+ * PROFESSION — so every career paragraph was written from the rasi chart
+ * alone. template_engine v3.1 now returns dasamsaChart; this feeds it into the
+ * evidence block and asks Gemini for a dasamsaNote that is explicitly NOT a
+ * second navamsaNote (D9 = inner strength and marriage, D10 = work and
+ * status). Shown on EVERY report per Rohiit's call, not only career domains.
+ * MAX_TOKENS 20000 -> 24000 to pay for the extra block and note.
+ *
  * VERSION: 15.3 — PayPal accepted alongside Razorpay (international)
  *
  * v15.3 (2026-08-29): international payment. A SEPARATE `paypalVerification`
@@ -186,7 +197,7 @@
  * IRON RULES — NEVER VIOLATE:
  *   🔒 NEVER touch gemini-prompt.ts
  *   🔒 NEVER use thinkingBudget:0
- *   🔒 MAX_TOKENS = 20000 — CEO approved (12000 -> 16000 -> 20000 on 23 Aug 2026)
+ *   🔒 MAX_TOKENS = 24000 — CEO approved (12000 -> 16000 -> 20000 -> 24000 on 29 Aug 2026)
  *   🔒 verifiedTier — CEO approval required
  *   🔒 Complete files only
  * ============================================================
@@ -223,7 +234,7 @@ const RAZORPAY_SECRET = process.env.RAZORPAY_KEY_SECRET ?? ''
 // costs more tokens per word than English) could truncate mid-JSON, and a
 // truncated response fails parsing entirely — the client would get the fallback
 // instead of their reading. 16000 leaves headroom; Gemini 2.5 Pro allows far more.
-const MAX_TOKENS      = 20000  // CEO approved 23 Aug 2026 (16000 -> 20000 in v15.0 for monthlyOutlook + navamsaNote)
+const MAX_TOKENS      = 24000  // CEO approved 29 Aug 2026 (20000 -> 24000 in v15.4 for dasamsaNote + the D10 evidence block)
 
 // ── Option C (v14.8): Real-world sector/city grounding for PAID only ─────────
 // true  = paid predictions use live Google Search grounding (sector + city trends)
@@ -511,6 +522,7 @@ present it as a separate section, and do NOT add new JSON keys.` : ''
   // worse, reason out its own transit positions — which RULE 14 forbids.
   const goc = templateData?.gocharTimeline ?? null
   const nav = templateData?.navamsaChart ?? null
+  const das = templateData?.dasamsaChart ?? null
 
   const monthLine = (m:any) => {
     const hits = Array.isArray(m?.domain_hits) && m.domain_hits.length
@@ -540,6 +552,15 @@ ${(nav.planets||[]).map((r:any)=>`  • ${r.planet}: D1 ${r.d1_rashi} -> D9 ${r.
 ${(nav.vargottama_planets||[]).length ? `  Vargottama (same sign D1 and D9, classically strengthened): ${nav.vargottama_planets.join(', ')}` : '  No vargottama planets.'}
 ` : '\nNAVAMSA D9: not available — make no D9 claim.\n'
 
+  // v15.4 — D10. BPHS Ch.6 names Dasamsa as the varga read for profession, so
+  // a career paragraph built on the rasi chart alone was always half an answer.
+  const dasBlock = das ? `
+DASAMSA D10 (the career varga — BPHS Ch.6 reads profession here, not in the rasi chart):
+  D10 Lagna: ${das.dasamsa_lagna ?? '—'} | D10 10th house sign: ${das.dasamsa_10th_sign ?? '—'}
+${(das.planets||[]).map((r:any)=>`  • ${r.planet}: D1 ${r.d1_rashi} -> D10 ${r.dasamsa_rashi}${r.dasamsa_house?` (D10 house ${r.dasamsa_house})`:''}, ${r.dignity_d10}${r.same_as_d1?' — SAME SIGN AS D1':''}`).join('\n')}
+${(das.confirmed_planets||[]).length ? `  Confirmed in D10 (same sign in D1 and D10 — the rasi promise holds up in career): ${das.confirmed_planets.join(', ')}` : '  No planet holds the same sign in D1 and D10.'}
+` : '\nDASAMSA D10: not available — make no D10 claim.\n'
+
   const evidenceBlock = `
 ════════════════════════════════════════════════════════
 ENGINE EVIDENCE — COMPUTED, VERIFIED, YOURS TO EXPLAIN
@@ -561,7 +582,7 @@ Weak planets: ${(pSum.weakPlanets ?? []).join(', ') || 'not reported'}
 Best houses: ${(pSum.bestHouses ?? []).join(', ') || 'not reported'}
 Challenged houses: ${(pSum.challengedHouses ?? []).join(', ') || 'not reported'}
 
-${gocharBlock}${navBlock}
+${gocharBlock}${navBlock}${dasBlock}
 BHRIGU NANDI NADI (Bhrigu engine): ${bhriguSignals.length ? `${bhriguSignals.length} signals, ${bhriguPointsTotal} confidence points` : `points ${bhrigu.bhrigu_points ?? 0}`}${bhrigu.current_life_theme ? ` | life theme: ${bhrigu.current_life_theme}` : ''}
 ${bhriguLines || ''}
 ${bhriguSignals.length === 0 && !bhrigu.current_life_theme ? 'NO Bhrigu data for this chart — you MUST NOT write any Bhrigu Nandi claim. Write the Bhrigu bullet as general BPHS/Parashara insight instead.' : ''}
@@ -750,6 +771,7 @@ OUTPUT JSON:
   },
 
   "navamsaNote": "2-3 sentences in ${lang.toUpperCase()} on what the D9 chart adds — inner strength of the key planets for this domain, and any Vargottama placement. If NAVAMSA D9 says not available, return an empty string.",
+  "dasamsaNote": "2-3 sentences in ${lang.toUpperCase()} on what the D10 chart adds about WORK AND STATUS specifically — the D10 lagna and its 10th house, where the key planets land in the career chart, and whether any planet holds the same sign in D1 and D10 (the rasi promise confirmed in career). Do NOT repeat the navamsaNote: D9 is inner strength and marriage, D10 is profession. If this reading is not about career, still write it — every life has a working side — but keep it to what the D10 actually shows. If DASAMSA D10 says not available, return an empty string.",
 
   "karmicInsight": null,
 
@@ -894,6 +916,7 @@ function mergeTemplateWithGemini(
     // in v14.17 — a key not listed here is silently dropped before the DB write.
     gocharTimeline:   templateObj.gocharTimeline     ?? null,
     navamsaChart:     templateObj.navamsaChart       ?? null,
+    dasamsaChart:     templateObj.dasamsaChart       ?? null,
     dataIntegrity:    templateObj.dataIntegrity      ?? null,
     templateVersion:  templateObj.meta?.version      ?? null,
     // Parashari yogas + Bhrigu theme — computed by VM /synthesize, previously
@@ -905,6 +928,7 @@ function mergeTemplateWithGemini(
     whyYouAreHere:    geminiObj.whyYouAreHere        ?? null,
     monthlyOutlook:   Array.isArray(geminiObj.monthlyOutlook) ? geminiObj.monthlyOutlook : [],
     navamsaNote:      geminiObj.navamsaNote           ?? null,
+    dasamsaNote:      geminiObj.dasamsaNote           ?? null,
     evidenceMeanings: geminiObj.evidenceMeanings     ?? [],
     readingConfidence: geminiObj.readingConfidence   ?? null,
     _source: 'template+gemini',
