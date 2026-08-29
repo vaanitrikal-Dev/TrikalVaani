@@ -5,6 +5,17 @@
  * TRIKAL VAANI — Trikaal Voice Widget
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: components/Trikal/TrikalVoice.tsx
+ * VERSION: 3.1 (30 Aug 2026) — INTERNATIONAL PAYMENT
+ *   Testing on 30 Aug found the card outside this modal showing "$1" while the
+ *   modal itself opened a RUPEE Razorpay sheet at Rs 11. Only the BirthForm
+ *   voice tier had been moved to PayPal; this widget had not, so the price a
+ *   foreign visitor read and the price they were charged disagreed.
+ *   Visitors outside India now pick a pack and pay in dollars — $1 per
+ *   question across all three ($1 / $5 / $12). Everything after the money is
+ *   taken lives in activatePack(), shared by both paths, so a dollar buyer's
+ *   balance and validity are computed by the identical code as a rupee buyer's.
+ *   handleBuyPack and its Razorpay call are otherwise unchanged.
+ *
  * VERSION: 3.0 — Stale-closure fix: prediction now gets the birth details
  * DATE: 2026-06-14
  * CHANGES:
@@ -27,6 +38,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
+import PayPalCheckout from '@/components/payment/PayPalCheckout';
 
 const GOLD       = '#D4AF37';
 const GOLD_LIGHT = '#F5D76E';
@@ -34,12 +46,16 @@ const GOLD_DARK  = '#A8820A';
 const BG_DARK    = '#080B12';
 const BG_CARD    = 'rgba(8,11,18,0.97)';
 
-type Pack = { id: 'p11' | 'p51' | 'p101'; price: number; questions: number; validityDays: number; label: string; sub: string };
+// v1.1: usdLabel added. Testing on 30 Aug found this modal showing "$1" on the
+// card outside and then opening a RUPEE Razorpay sheet — only the BirthForm
+// voice tier had been moved to PayPal, this modal had not. Price and checkout
+// must never disagree.
+type Pack = { id: 'p11' | 'p51' | 'p101'; price: number; usdLabel: string; questions: number; validityDays: number; label: string; usdName: string; sub: string };
 
 const PACKS: Pack[] = [
-  { id: 'p11',  price: 11,  questions: 1,  validityDays: 1,  label: '₹11 — Try Trikaal',    sub: '1 voice question'      },
-  { id: 'p51',  price: 51,  questions: 5,  validityDays: 7,  label: '₹51 — Sapt Darshan',   sub: '5 questions • 7 days'  },
-  { id: 'p101', price: 101, questions: 12, validityDays: 30, label: '₹101 — Trikaal Bhakt', sub: '12 questions • 30 days' },
+  { id: 'p11',  price: 11,  usdLabel: '$1',  questions: 1,  validityDays: 1,  label: '₹11 — Try Trikaal',    usdName: '$1 — Try Trikaal',    sub: '1 voice question'      },
+  { id: 'p51',  price: 51,  usdLabel: '$5',  questions: 5,  validityDays: 7,  label: '₹51 — Sapt Darshan',   usdName: '$5 — Sapt Darshan',   sub: '5 questions • 7 days'  },
+  { id: 'p101', price: 101, usdLabel: '$12', questions: 12, validityDays: 30, label: '₹101 — Trikaal Bhakt', usdName: '$12 — Trikaal Bhakt', sub: '12 questions • 30 days' },
 ];
 
 declare global {
@@ -383,6 +399,44 @@ export default function TrikalVoice() {
   };
 
   // ── Payment ──────────────────────────────────────────────────
+  // v1.1 — international. Razorpay on this account rejects foreign cards.
+  // `?intl=1` forces the PayPal view for testing from India; one-way only.
+  const [isIndia, setIsIndia] = useState<boolean | null>(null);
+  const [selectedIntlPack, setSelectedIntlPack] = useState<Pack | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    const forced = typeof window !== 'undefined' &&
+      new URLSearchParams(window.location.search).get('intl') === '1';
+    if (forced) { setIsIndia(false); return; }
+    fetch('/api/geo').then(r => r.json())
+      .then(g => { if (!cancelled) setIsIndia(g?.isIndia !== false); })
+      .catch(() => { if (!cancelled) setIsIndia(true); });
+    return () => { cancelled = true; };
+  }, []);
+
+  /** Everything after the money is taken — shared by both payment paths. */
+  const activatePack = async (pack: Pack, proof: Record<string, string>) => {
+    const verifyRes = await fetch('/api/verify-voice-pack', {
+      method : 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body   : JSON.stringify({ ...proof, packId: pack.id, sessionId: sessionIdRef.current }),
+    });
+    if (!verifyRes.ok) { setError('Payment verification failed. Contact support.'); return; }
+    const verified = await verifyRes.json();
+    setBalance(verified.balance);
+    setValidUntil(verified.validUntil);
+    localStorage.setItem('trikal_voice_balance',     String(verified.balance));
+    localStorage.setItem('trikal_voice_valid_until', verified.validUntil);
+    setStage('form');
+  };
+
+  /** PayPal has taken the money. verify re-confirms with PayPal. */
+  const handlePayPalPaid = async (pack: Pack, proof: { paypal_order_id: string }) => {
+    setError('');
+    setActivePack(pack);
+    await activatePack(pack, { paypal_order_id: proof.paypal_order_id });
+  };
+
   const handleBuyPack = async (pack: Pack) => {
     setError('');
     setActivePack(pack);
@@ -404,18 +458,7 @@ export default function TrikalVoice() {
         order_id   : order.orderId,
         theme      : { color: GOLD },
         handler    : async (response: Record<string, string>) => {
-          const verifyRes = await fetch('/api/verify-voice-pack', {
-            method : 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body   : JSON.stringify({ ...response, packId: pack.id, sessionId: sessionIdRef.current }),
-          });
-          if (!verifyRes.ok) { setError('Payment verification failed. Contact support.'); return; }
-          const verified = await verifyRes.json();
-          setBalance(verified.balance);
-          setValidUntil(verified.validUntil);
-          localStorage.setItem('trikal_voice_balance',     String(verified.balance));
-          localStorage.setItem('trikal_voice_valid_until', verified.validUntil);
-          setStage('form');
+          await activatePack(pack, response);
         },
         modal  : { ondismiss: () => setError('Payment cancelled') },
         prefill: { name: form.name },
@@ -537,30 +580,72 @@ export default function TrikalVoice() {
           {stage === 'pricing' && (
             <>
               <p style={{ color: '#fff', fontSize: 14, lineHeight: 1.6, marginBottom: 14 }}>
-                ₹11 में अपनी आवाज़ से सवाल पूछें — Trikaal अपनी आवाज़ में जवाब देंगे।
+                {isIndia === false
+                  ? 'Ask Trikaal in your own voice from $1 — and hear the answer in Trikaal\u2019s voice.'
+                  : '\u20B911 में अपनी आवाज़ से सवाल पूछें — Trikaal अपनी आवाज़ में जवाब देंगे।'}
               </p>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                {PACKS.map(pack => (
-                  <button
-                    key={pack.id}
-                    onClick={() => handleBuyPack(pack)}
-                    style={{
-                      background  : `linear-gradient(135deg, ${GOLD_DARK}22, ${GOLD}11)`,
-                      border      : `1px solid ${GOLD}55`,
-                      borderRadius: 12,
-                      padding     : '14px 16px',
-                      textAlign   : 'left',
-                      cursor      : 'pointer',
-                      color       : '#fff',
-                    }}
-                  >
-                    <div style={{ color: GOLD, fontSize: 16, fontWeight: 700 }}>{pack.label}</div>
-                    <div style={{ color: '#bbb', fontSize: 12, marginTop: 2 }}>{pack.sub}</div>
-                  </button>
-                ))}
-              </div>
+              {isIndia === false ? (
+                // International: pick a pack, then pay in dollars. The pack has
+                // to be chosen BEFORE the buttons render, because the PayPal
+                // order is created for one specific pack.
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  {PACKS.map(pack => (
+                    <div key={pack.id}
+                      style={{
+                        background  : selectedIntlPack?.id === pack.id
+                          ? `linear-gradient(135deg, ${GOLD_DARK}44, ${GOLD}22)`
+                          : `linear-gradient(135deg, ${GOLD_DARK}22, ${GOLD}11)`,
+                        border      : `1px solid ${GOLD}${selectedIntlPack?.id === pack.id ? 'cc' : '55'}`,
+                        borderRadius: 12,
+                        padding     : '14px 16px',
+                        color       : '#fff',
+                      }}>
+                      <button
+                        onClick={() => setSelectedIntlPack(pack)}
+                        style={{ background: 'none', border: 0, padding: 0, textAlign: 'left', width: '100%', cursor: 'pointer', color: '#fff' }}>
+                        <div style={{ color: GOLD, fontSize: 16, fontWeight: 700 }}>{pack.usdName}</div>
+                        <div style={{ color: '#bbb', fontSize: 12, marginTop: 2 }}>{pack.sub}</div>
+                      </button>
+                      {selectedIntlPack?.id === pack.id && (
+                        <div style={{ marginTop: 12 }}>
+                          <PayPalCheckout
+                            productKey={pack.id === 'p11' ? 'voice' : pack.id === 'p51' ? 'voice_5q' : 'voice_12q'}
+                            createOrderUrl="/api/voice-pack-order"
+                            createOrderBody={{ packId: pack.id, sessionId: sessionIdRef.current }}
+                            onPaid={(proof) => handlePayPalPaid(pack, { paypal_order_id: proof.paypal_order_id })}
+                            onError={(m) => setError(m)}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  {PACKS.map(pack => (
+                    <button
+                      key={pack.id}
+                      onClick={() => handleBuyPack(pack)}
+                      style={{
+                        background  : `linear-gradient(135deg, ${GOLD_DARK}22, ${GOLD}11)`,
+                        border      : `1px solid ${GOLD}55`,
+                        borderRadius: 12,
+                        padding     : '14px 16px',
+                        textAlign   : 'left',
+                        cursor      : 'pointer',
+                        color       : '#fff',
+                      }}
+                    >
+                      <div style={{ color: GOLD, fontSize: 16, fontWeight: 700 }}>{pack.label}</div>
+                      <div style={{ color: '#bbb', fontSize: 12, marginTop: 2 }}>{pack.sub}</div>
+                    </button>
+                  ))}
+                </div>
+              )}
               <p style={{ color: '#777', fontSize: 11, textAlign: 'center', marginTop: 14 }}>
-                100% secure • Razorpay • By Rohiit Gupta, Chief Vedic Architect
+                {isIndia === false
+                  ? '100% secure • PayPal, or pay by card without a PayPal account • By Rohiit Gupta, Chief Vedic Architect'
+                  : '100% secure • Razorpay • By Rohiit Gupta, Chief Vedic Architect'}
               </p>
               {error && <p style={errorStyle}>{error}</p>}
             </>
