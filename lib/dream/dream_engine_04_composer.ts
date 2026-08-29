@@ -1,5 +1,9 @@
 // =============================================================================
 // TRIKAAL VAANI · Dream Engine · Component 4: THE COMPOSER
+// v1.1 (29 Aug 2026) — the closing invite no longer names a price. It used to
+// say "just Rs 51", which an international visitor read directly above a $7
+// button: two prices, one product, one screen. The price now lives in exactly
+// one place, the button, which follows the visitor's country.
 // -----------------------------------------------------------------------------
 // Turns the tuned reading (Component 3) into the warm bilingual text the user
 // sees. Two hard rules are enforced here:
@@ -226,7 +230,7 @@ export function buildComposePrompt(
     );
   } else {
     p.push(
-      "LENGTH & PITCH (free reading): The reading must be 75-100 words — HARD CAP 100 words, count carefully, no filler. Interpret the meaning warmly and clearly. THEN add one final short line (about 20 words) as a compelling, honest invite: this is the classical meaning for everyone, but its exact message for THEIR life depends on their own birth chart and running planetary period (dasha) — invite them to unlock their personal reading for just Rs 51, available right below. Curious and hopeful, never fearful or pushy."
+      "LENGTH & PITCH (free reading): The reading must be 75-100 words — HARD CAP 100 words, count carefully, no filler. Interpret the meaning warmly and clearly. THEN add one final short line (about 20 words) as a compelling, honest invite: this is the classical meaning for everyone, but its exact message for THEIR life depends on their own birth chart and running planetary period (dasha) — invite them to unlock their personal reading, available right below. NEVER state a price, an amount or a currency anywhere in the reading — the button below it shows the price, and that price differs by country. Any figure written here will contradict the button and quote the reader two different amounts for one product on a single screen. Curious and hopeful, never fearful or pushy."
     );
   }
   p.push('Overall tone: warm, rooted, hopeful — never frightening or fear-based.');
