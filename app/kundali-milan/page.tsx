@@ -1,4 +1,9 @@
-// TRIKAL VAANI | app/kundali-milan/page.tsx | v1.3
+// TRIKAL VAANI | app/kundali-milan/page.tsx | v1.4 (29 Aug 2026)
+// v1.4: the four visible prices on the tier cards now follow the visitor's
+//   country via <IntlPrice>. This page is a SERVER component, so it cannot run
+//   the geo check itself; a foreign reader was seeing Rs101 here and $12 at
+//   checkout. Metadata, JSON-LD and the FAQ text stay in rupees on purpose —
+//   those are indexed for the primary Indian market.
 // Owner: Rohiit Gupta, Chief Vedic Architect
 // Date: 2026-06-25
 // ============================================================================
@@ -22,6 +27,7 @@ import type { Metadata } from 'next'
 import KundaliMilanForm from '@/components/landing/KundaliMilanForm'
 import SiteNav from '@/components/layout/SiteNav'
 import SiteFooter from '@/components/layout/SiteFooter'
+import IntlPrice from '@/components/payment/IntlPrice'
 
 export const metadata: Metadata = {
   title: 'Kundali Milan - Free 36 Guna Matching & Vedic Compatibility | Trikaal Vaani',
@@ -314,7 +320,7 @@ export default function KundaliMilanPage() {
                     Basic Milan
                   </p>
                   <p style={{ color: GOLD, fontSize: '32px', fontWeight: 800, fontFamily: 'Georgia, serif', margin: '8px 0' }}>
-                    ₹51
+                    <IntlPrice inr="₹51" usd="$7" />
                   </p>
                   <ul style={{ margin: '16px 0 0', padding: 0, listStyle: 'none', flex: 1 }}>
                     {[
@@ -336,7 +342,7 @@ export default function KundaliMilanPage() {
                     background: GOLD_RGBA(0.12), border: `1px solid ${GOLD_RGBA(0.45)}`,
                     color: GOLD, fontSize: '13px', fontWeight: 700,
                   }}>
-                    Choose Basic — ₹51 ↑
+                    Choose Basic — <IntlPrice inr="₹51" usd="$7" /> ↑
                   </a>
                 </div>
 
@@ -360,7 +366,7 @@ export default function KundaliMilanPage() {
                     Deep Milan
                   </p>
                   <p style={{ color: '#fff', fontSize: '32px', fontWeight: 800, fontFamily: 'Georgia, serif', margin: '8px 0' }}>
-                    ₹101 <span style={{ color: '#94a3b8', fontSize: '14px' }}>/ ₹151 both</span>
+                    <IntlPrice inr="₹101" usd="$12" /> <span style={{ color: '#94a3b8', fontSize: '14px' }}>/ <IntlPrice inr="₹151" usd="$15" /> both</span>
                   </p>
                   <ul style={{ margin: '16px 0 0', padding: 0, listStyle: 'none', flex: 1 }}>
                     {[
@@ -384,7 +390,7 @@ export default function KundaliMilanPage() {
                     color: '#080B12', fontSize: '13px', fontWeight: 700,
                     boxShadow: `0 0 24px ${GOLD_RGBA(0.35)}`,
                   }}>
-                    Choose Deep — ₹101 ↑
+                    Choose Deep — <IntlPrice inr="₹101" usd="$12" /> ↑
                   </a>
                 </div>
 
