@@ -24,6 +24,7 @@
 import { useState, useCallback, useRef, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { loadRazorpayScript, openRazorpayCheckout } from "@/lib/razorpay-helper"
+import PayPalCheckout, { type PayPalProof } from "@/components/payment/PayPalCheckout"
 
 // ── OneSignal tagging helper (v9.8) ──────────────────────────────────────────
 // Safe, deferred. Does nothing on server. Used for abandoned-kundali Journey.
@@ -972,7 +973,7 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
     return Object.keys(errs).length === 0
   }
 
-  const buildPredictionBody = (paymentVerification: any = null) => {
+  const buildPredictionBody = (paymentVerification: any = null, paypalVerification: any = null) => {
     const sessionId      = generateSessionId()
     const age            = calculateAge(fields.dateOfBirth)
     const dynamicSegment = calculateDynamicSegment(fields.dateOfBirth, fields.gender)
@@ -984,6 +985,7 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
       domainLabel: selectedCategory?.label || 'General',
       predictionTier,
       paymentVerification,
+      paypalVerification,
       birthData: {
         name:     fields.name,
         dob:      fields.dateOfBirth,
@@ -1025,12 +1027,12 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
     }
   }
 
-  const callPredictAPI = async (paymentVerification: any = null) => {
+  const callPredictAPI = async (paymentVerification: any = null, paypalVerification: any = null) => {
     try {
       const res = await fetch('/api/predict', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify(buildPredictionBody(paymentVerification)),
+        body:    JSON.stringify(buildPredictionBody(paymentVerification, paypalVerification)),
       })
       const data = await res.json()
       if (!res.ok) {
@@ -1052,6 +1054,69 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
     } catch {
       setApiError('Network error. Please check your connection.')
       stopLoadingMessages()
+    }
+  }
+
+  // ── v9.1: international checkout ───────────────────────────────────────────
+  // Indian visitors keep the Razorpay flow below, unchanged. Everyone else is
+  // shown PayPal instead, because this Razorpay account cannot take
+  // international cards — three real customers were turned away before this
+  // existed. `?intl=1` forces the PayPal view for testing from India; it can
+  // only move a payer from rupees to dollars, never the other way.
+  const [isIndia, setIsIndia] = useState<boolean | null>(null)
+  const paypalRef = useRef<HTMLDivElement | null>(null)
+  useEffect(() => {
+    let cancelled = false
+    const forced = typeof window !== 'undefined' &&
+      new URLSearchParams(window.location.search).get('intl') === '1'
+    if (forced) { setIsIndia(false); return }
+    fetch('/api/geo')
+      .then(r => r.json())
+      .then(g => { if (!cancelled) setIsIndia(g?.isIndia !== false) })
+      .catch(() => { if (!cancelled) setIsIndia(true) })
+    return () => { cancelled = true }
+  }, [])
+
+  /** Runs after PayPal has taken the money. The server re-verifies with PayPal. */
+  const handlePayPalPaid = async (tier: 'paid' | 'voice', proof: PayPalProof) => {
+    setApiError(null)
+    setPaymentLoading(true)
+    try {
+      const verifyRes = await fetch('/api/verify-payment', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({
+          paypal_order_id: proof.paypal_order_id,
+          productKey:      tier === 'paid' ? 'deep' : 'voice',
+        }),
+      })
+      if (!verifyRes.ok) {
+        const err = await verifyRes.json().catch(() => ({}))
+        setApiError(err.error || 'Payment ho gaya par verify nahi hua. Support se baat karein — dobara payment na karein.')
+        setPaymentLoading(false)
+        return
+      }
+
+      if (tier === 'voice') {
+        trackFB('Purchase', { value: 1, currency: 'USD', content_name: 'Voice Reading' })
+        tagOneSignal({ kundali_status: 'completed' })
+        router.push(`/voice?name=${encodeURIComponent(fields.name)}&lang=${fields.language}&pid=${proof.paypal_order_id}`)
+        return
+      }
+
+      setIsSubmitting(true)
+      trackFB('Purchase', { value: 7, currency: 'USD', content_name: 'Deep Reading' })
+      startLoadingMessages(PAYMENT_LOADING_STEPS)
+
+      await callPredictAPI(null, {
+        paypal_order_id: proof.paypal_order_id,
+        amount:          proof.usdCents,
+      })
+      setIsSubmitting(false)
+      setPaymentLoading(false)
+    } catch (err: any) {
+      setApiError(err.message || 'Payment flow error.')
+      setPaymentLoading(false)
     }
   }
 
@@ -1140,6 +1205,13 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
     if (!validate()) return
 
     if (predictionTier === 'paid' || predictionTier === 'voice') {
+      // International visitors pay through the PayPal buttons rendered below
+      // the form, not through this button — Razorpay would only reject their
+      // card. Scroll them to it instead of opening a checkout that must fail.
+      if (isIndia === false) {
+        paypalRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        return
+      }
       await handleRazorpayPayment(predictionTier)
       return
     }
@@ -1161,8 +1233,14 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
     if (isLoading)                  return activeSteps[loadingStep] || activeSteps[activeSteps.length-1] || 'Processing...'
     if (submitLabel)                return submitLabel
     if (predictionTier === 'free')  return '🔮 Get My Free Reading — Trikaal Ka Sandesh'
-    if (predictionTier === 'paid')  return '⚡ Get My Deep Reading — Pay ₹51 via Razorpay'
-    if (predictionTier === 'voice') return '🎙️ Get My Voice Reading — Pay ₹11 via Razorpay'
+    if (predictionTier === 'paid')
+      return isIndia === false
+        ? '⚡ Get My Deep Reading — Pay $7 via PayPal'
+        : '⚡ Get My Deep Reading — Pay ₹51 via Razorpay'
+    if (predictionTier === 'voice')
+      return isIndia === false
+        ? '🎙️ Get My Voice Reading — Pay $1 via PayPal'
+        : '🎙️ Get My Voice Reading — Pay ₹11 via Razorpay'
     return '🔮 Get My Prediction'
   }
 
@@ -1253,7 +1331,23 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
               if (t === 'voice') trackFB('InitiateCheckout', { value: 11, currency: 'INR', content_name: 'Voice Reading' })
             }} />
 
-            <RazorpayInlineTrustStrip tier={predictionTier} />
+            {isIndia === false && (predictionTier === 'paid' || predictionTier === 'voice') ? (
+              // International visitors: PayPal instead of the Razorpay strip.
+              // Razorpay on this account rejects international cards outright,
+              // so showing its trust strip here would be a promise we cannot keep.
+              <div ref={paypalRef} style={{ marginTop: 12 }}>
+                <PayPalCheckout
+                  productKey={predictionTier === 'paid' ? 'deep' : 'voice'}
+                  onPaid={(proof) => handlePayPalPaid(predictionTier === 'paid' ? 'paid' : 'voice', proof)}
+                  onError={(m) => setApiError(m)}
+                  // validate() both checks the form and surfaces field errors,
+                  // so it is the right gate immediately before PayPal opens.
+                  onBeforeCreate={() => validate()}
+                />
+              </div>
+            ) : (
+              <RazorpayInlineTrustStrip tier={predictionTier} />
+            )}
 
             <div>
               <label className="block text-sm font-medium text-slate-300 mb-2">Prediction Language / भाषा चुनें</label>
