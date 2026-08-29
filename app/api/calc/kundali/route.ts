@@ -2,7 +2,9 @@
 // File: app/api/calc/kundali/route.ts
 // Purpose: VM bridge for Kundali / Nakshatra / Rashi / Lagna /
 //          Dasha + Shadbala-based Calculators
-// Version: v1.9
+// Version: v2.0
+// Changelog v2.0 (2026-08-29):
+//   - Passthrough navamsa (D-9) from the VM (astro.py patcher #3).
 // Changelog v1.9 (2026-08-29):
 //   - Passthrough drishti + dasamsa from the VM (astro.py patcher #2).
 //     Needed by the IAS / Foreign Settlement / Foreign Spouse calculators.
@@ -322,6 +324,10 @@ export async function POST(req: NextRequest) {
       // Null when the VM has not been patched yet, so callers must guard.
       drishti: kundaliData?.drishti ?? null,
       dasamsa: kundaliData?.dasamsa ?? null,
+      //   navamsa : the D-9 chart. Marriage is judged in the Navamsa the way
+      //             career is judged in the Dasamsa (BPHS Ch.6 s.12). Each
+      //             graha also carries `vargottama` (same sign in D-1 and D-9).
+      navamsa: kundaliData?.navamsa ?? null,
       strongestPlanet,
       weakestPlanet,
       strengthAvailable,
