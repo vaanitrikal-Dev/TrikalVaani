@@ -5,13 +5,14 @@
  * TRIKAL VAANI — Trikaal Voice Widget
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: components/Trikal/TrikalVoice.tsx
- * VERSION: 3.1 (30 Aug 2026) — INTERNATIONAL PAYMENT
+ * VERSION: 3.2 (30 Aug 2026) — INTERNATIONAL PAYMENT (packs $1 / $4 / $7)
  *   Testing on 30 Aug found the card outside this modal showing "$1" while the
  *   modal itself opened a RUPEE Razorpay sheet at Rs 11. Only the BirthForm
  *   voice tier had been moved to PayPal; this widget had not, so the price a
  *   foreign visitor read and the price they were charged disagreed.
- *   Visitors outside India now pick a pack and pay in dollars — $1 per
- *   question across all three ($1 / $5 / $12). Everything after the money is
+ *   Visitors outside India now pick a pack and pay in dollars — $1 / $4 / $7
+ *   (repriced from $1 / $5 / $12 on 30 Aug; the tiers now carry a volume
+ *   discount rather than a flat per-question rate). Everything after the money is
  *   taken lives in activatePack(), shared by both paths, so a dollar buyer's
  *   balance and validity are computed by the identical code as a rupee buyer's.
  *   handleBuyPack and its Razorpay call are otherwise unchanged.
@@ -53,9 +54,9 @@ const BG_CARD    = 'rgba(8,11,18,0.97)';
 type Pack = { id: 'p11' | 'p51' | 'p101'; price: number; usdLabel: string; questions: number; validityDays: number; label: string; usdName: string; sub: string };
 
 const PACKS: Pack[] = [
-  { id: 'p11',  price: 11,  usdLabel: '$1',  questions: 1,  validityDays: 1,  label: '₹11 — Try Trikaal',    usdName: '$1 — Try Trikaal',    sub: '1 voice question'      },
-  { id: 'p51',  price: 51,  usdLabel: '$5',  questions: 5,  validityDays: 7,  label: '₹51 — Sapt Darshan',   usdName: '$5 — Sapt Darshan',   sub: '5 questions • 7 days'  },
-  { id: 'p101', price: 101, usdLabel: '$12', questions: 12, validityDays: 30, label: '₹101 — Trikaal Bhakt', usdName: '$12 — Trikaal Bhakt', sub: '12 questions • 30 days' },
+  { id: 'p11',  price: 11,  usdLabel: '$1', questions: 1,  validityDays: 1,  label: '₹11 — Try Trikaal',    usdName: '$1 — Try Trikaal',   sub: '1 voice question'      },
+  { id: 'p51',  price: 51,  usdLabel: '$4', questions: 5,  validityDays: 7,  label: '₹51 — Sapt Darshan',   usdName: '$4 — Sapt Darshan',  sub: '5 questions • 7 days'  },
+  { id: 'p101', price: 101, usdLabel: '$7', questions: 12, validityDays: 30, label: '₹101 — Trikaal Bhakt', usdName: '$7 — Trikaal Bhakt', sub: '12 questions • 30 days' },
 ];
 
 declare global {
