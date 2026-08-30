@@ -3,8 +3,32 @@
  * 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER 🔱
  * ============================================================================
  * File:        app/sitemap.ts
- * Version:     v8.3
+ * Version:     v8.4
  * Owner:       Rohiit Gupta, Chief Vedic Architect
+ *
+ * Changes v8.3 -> v8.4 (2026-08-30):
+ *   1. BLOG URLS RESTORED (this is the big one).
+ *      The live sitemap carried 612 /blog/ URLs at 10:00 UTC and ZERO at
+ *      13:21 UTC on the same day, from the same code. Intermittent, not
+ *      constant — which rules out bad credentials and points at load.
+ *      getAllPosts() does select('*') on blog_posts: 546 rows, ~5.9 MB, the
+ *      `sections` JSONB alone being 3.4 MB, then regex-parses every row. That
+ *      runs inside this one function, which already fires ~10 other Supabase
+ *      queries. When it times out getAllPosts does NOT throw — it logs and
+ *      returns [] — so the catch below never fired and 546 URLs vanished in
+ *      complete silence for weeks.
+ *      Fix: call getPostsForSitemap() from lib/blog-posts.ts v3.6, which pulls
+ *      4 narrow columns (~50 KB, ~120x smaller), uses the ANON key like every
+ *      other loop in this file, paginates with .range(), and RETURNS ITS ERROR
+ *      so a failure can never be silent again. REQUIRES lib/blog-posts.ts
+ *      v3.6+ to be deployed — v8.3 of this file plus v3.5 of that one will not
+ *      build.
+ *   2. DUPLICATE URLS REMOVED.
+ *      The 30 Aug sitemap held 5,611 <loc> entries but only 4,987 unique ones
+ *      — 624 duplicates, e.g. /hi/delhi/navratri-day-4-kushmanda-kab-hai
+ *      emitted by both the Hindi loop and the city loop. Duplicate <loc>
+ *      entries waste crawl budget. A single de-dupe pass now runs before
+ *      return, keeping the FIRST occurrence of each URL.
  *
  * Changes v8.2 -> v8.3 (2026-08-29):
  *   THREE YOG CALCULATORS added to CALCULATORS: IAS astrology, foreign
@@ -101,7 +125,7 @@
  */
 
 import type { MetadataRoute } from 'next';
-import { getAllPosts } from '@/lib/blog-posts';
+import { getPostsForSitemap } from '@/lib/blog-posts';
 import { createClient } from '@supabase/supabase-js';
 import citiesData from './data/cities.json';
 import festivalsData from './data/festivals.json';
@@ -570,9 +594,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }
   }
 
-  // ── Blog posts (v8.1: bilingual EN/HI hreflang alternates) ─────────
+  // ── Blog posts (v8.4: lightweight anon reader; v8.1 hreflang unchanged) ──
   try {
-    const posts = await getAllPosts();
+    const { rows: posts, error: blogError } = await getPostsForSitemap();
+
+    if (blogError) {
+      console.error('[sitemap] BLOG QUERY FAILED —', blogError,
+        `| emitted ${posts.length} blog URLs (partial)`);
+    } else if (posts.length === 0) {
+      console.error('[sitemap] BLOG RETURNED ZERO ROWS — no query error. ' +
+        'Check is_published and the blog_posts RLS SELECT policy.');
+    } else {
+      console.log(`[sitemap] blog OK — ${posts.length} URLs`);
+    }
+
     for (const post of posts) {
       const entry: MetadataRoute.Sitemap[0] = {
         url: `${BASE}/blog/${post.slug}`,
@@ -591,7 +626,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       entries.push(entry);
     }
   } catch (err) {
-    console.error('[sitemap] blog fetch failed:', err);
+    // getPostsForSitemap does not throw, but a module-level client failure
+    // (a missing NEXT_PUBLIC_SUPABASE_ANON_KEY) would land here.
+    console.error('[sitemap] BLOG BLOCK THREW:', err);
   }
 
   // ── City pages ─────────────────────────────────────────────────────
@@ -711,5 +748,21 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     });
   }
 
-  return entries;
+  // ── v8.4: de-dupe. 624 URLs were emitted twice on 30 Aug because the
+  // Hindi loop and the city loop both produce /hi/<city>/<festival> paths.
+  // Keep the first occurrence, which carries the richer hreflang alternates.
+  const seen = new Set<string>();
+  const unique = entries.filter((e) => {
+    const url = String(e.url);
+    if (seen.has(url)) return false;
+    seen.add(url);
+    return true;
+  });
+
+  if (unique.length !== entries.length) {
+    console.log(`[sitemap] removed ${entries.length - unique.length} duplicate URLs`);
+  }
+  console.log(`[sitemap] emitting ${unique.length} URLs`);
+
+  return unique;
 }
