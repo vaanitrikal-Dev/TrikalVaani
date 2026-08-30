@@ -1,8 +1,39 @@
 // ============================================================
 // TRIKAL VAANI — BLOG POSTS — SUPABASE VERSION
 // CEO: Rohiit Gupta | Chief Vedic Architect
-// Version: 3.5 (BODY PARSER — adds embedded YouTube video blocks)
-// Date: 2026-08-05
+// Version: 3.6 (SITEMAP READER — fixes 546 missing blog URLs)
+// Date: 2026-08-28
+//
+// CHANGE v3.6 — WHY THIS EXISTS:
+//   app/sitemap.ts emitted 4,979 URLs and ZERO /blog/ URLs, even though
+//   /blog rendered 549 post links and 546 rows are is_published = true.
+//   getAllPosts() never throws — on error it logs and `return []`, so the
+//   sitemap's try/catch never fired and the failure was completely silent.
+//
+//   Two candidate causes were identified and NEITHER was provable remotely:
+//     (A) select('*') pulls ~5.9 MB (the `sections` JSONB alone is 3.4 MB)
+//         and is then regex-parsed for all 546 rows, inside the SAME
+//         serverless invocation that already runs ~10 other Supabase
+//         queries -> timeout.
+//     (B) this file's client uses SUPABASE_SERVICE_ROLE_KEY, while every
+//         loop in sitemap.ts that DOES work uses NEXT_PUBLIC_SUPABASE_ANON_KEY.
+//         If the service role key was rotated in Supabase and not updated
+//         in Vercel, every service-role query fails auth while every anon
+//         query succeeds — exactly the observed symptom.
+//
+//   getPostsForSitemap() therefore defeats BOTH causes at once:
+//     • narrow select (4 columns, ~50 KB instead of 5.9 MB — ~120x smaller)
+//     • ANON key, the same key the working loops already use
+//       (RLS policy "Public can read published posts" permits this)
+//     • .range() pagination so the Supabase 1000-row cap can never
+//       silently truncate the sitemap as the blog grows past 1,000 posts
+//     • returns { rows, error } so sitemap.ts can log loudly instead of
+//       failing silently ever again
+//
+//   getAllPosts() and every other export are UNCHANGED. /blog, /blog/[slug]
+//   and related-posts keep using the service-role client exactly as before,
+//   so this file is a safe drop-in.
+//
 // CHANGE v3.5:
 //   • NEW BlogSection variant: { type:'video'; videoId; title?; isShort? }
 //     Authored in Supabase as a standalone line:
@@ -88,12 +119,31 @@ export type BlogSection =
   // ── v3.5: embedded YouTube video ──────────────────────────
   | { type: 'video'; videoId: string; title?: string; isShort?: boolean };
 
+// ── v3.6: minimal shape the sitemap needs. Deliberately NOT BlogPost —
+//    pulling BlogPost for the sitemap is what cost 5.9 MB per build.
+export interface SitemapPost {
+  slug: string;
+  updatedAt: string | null;
+  lang: string;
+  altLangSlug: string | null;
+}
+
 // ============================================================
-// SUPABASE CLIENT — Server-side only (no client JS leak)
+// SUPABASE CLIENTS
 // ============================================================
+// Service-role client — used by every page-rendering export below.
+// UNCHANGED from v3.5.
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
+
+// ── v3.6: anon client, used ONLY by getPostsForSitemap().
+// Mirrors anonClient() in app/sitemap.ts, whose loops all succeed.
+// RLS policy on blog_posts: "Public can read published posts [SELECT/public]".
+const supabaseAnon = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
 
 // ============================================================
@@ -278,6 +328,63 @@ export async function getAllPosts(): Promise<BlogPost[]> {
     return [];
   }
   return (data ?? []).map(mapRow);
+}
+
+// ============================================================
+// v3.6 — SITEMAP READER
+// Narrow columns + anon key + explicit pagination + surfaced error.
+// Returns { rows, error } on purpose: the caller MUST be able to tell
+// "zero posts" apart from "the query failed", which is precisely the
+// distinction that hid 546 missing URLs.
+// ============================================================
+const SITEMAP_PAGE_SIZE = 1000;
+const SITEMAP_MAX_PAGES = 20; // hard stop: 20,000 posts. Guards against a runaway loop.
+
+export async function getPostsForSitemap(): Promise<{
+  rows: SitemapPost[];
+  error: string | null;
+}> {
+  const rows: SitemapPost[] = [];
+
+  for (let page = 0; page < SITEMAP_MAX_PAGES; page++) {
+    const from = page * SITEMAP_PAGE_SIZE;
+    const to = from + SITEMAP_PAGE_SIZE - 1;
+
+    const { data, error } = await supabaseAnon
+      .from('blog_posts')
+      .select('slug, updated_at, lang, alt_lang_slug')
+      .eq('is_published', true)
+      .order('slug', { ascending: true })
+      .range(from, to);
+
+    if (error) {
+      console.error(
+        `[TV-Blog] getPostsForSitemap FAILED on page ${page}:`,
+        error.message
+      );
+      // Return whatever was already fetched plus the error, so a partial
+      // sitemap is still better than an empty one — but the caller knows.
+      return { rows, error: error.message };
+    }
+
+    const batch = (data ?? []) as Record<string, unknown>[];
+
+    for (const r of batch) {
+      const slug = r.slug as string | null;
+      if (!slug) continue; // never emit /blog/null
+      rows.push({
+        slug,
+        updatedAt: (r.updated_at as string) ?? null,
+        lang: (r.lang as string) ?? 'en',
+        altLangSlug: (r.alt_lang_slug as string) ?? null,
+      });
+    }
+
+    // Short page means we've reached the end.
+    if (batch.length < SITEMAP_PAGE_SIZE) break;
+  }
+
+  return { rows, error: null };
 }
 
 export async function getPostBySlug(slug: string): Promise<BlogPost | undefined> {
