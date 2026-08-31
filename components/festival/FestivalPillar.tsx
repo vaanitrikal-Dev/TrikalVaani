@@ -2,7 +2,7 @@
 // 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER
 // ════════════════════════════════════════════════════════════════════════════
 // File:     components/festival/FestivalPillar.tsx
-// Version:  v2.1 (28 Aug 2026) — dark design, plus the researched city block
+// Version:  v2.2 (1 Sep 2026) — festival tithi named beside the sunrise tithi
 //
 // ── WHY v2.0 ───────────────────────────────────────────────────────────────
 //
@@ -184,6 +184,9 @@ const L = {
       nishita: "Nishita",
     } as Record<string, string>,
     tithi: "Tithi", nakshatra: "Nakshatra", yogaKarana: "Yoga · Karana",
+    tithiAtSunrise: "Tithi at sunrise",
+    festivalTithi: "Festival tithi",
+    beginsAtTime: (t: string) => `begins ${t}`,
     abhijit: "Abhijit Muhurat", rahu: "Rahu Kaal",
     yamGulika: "Yamaganda · Gulika", sunriseSunset: "Sunrise · Sunset",
     upto: "upto", pada: "Pada",
@@ -240,6 +243,9 @@ const L = {
       nishita: "निशीथ",
     } as Record<string, string>,
     tithi: "तिथि", nakshatra: "नक्षत्र", yogaKarana: "योग · करण",
+    tithiAtSunrise: "सूर्योदय की तिथि",
+    festivalTithi: "पर्व की तिथि",
+    beginsAtTime: (t: string) => `${t} से`,
     abhijit: "अभिजित मुहूर्त", rahu: "राहुकाल",
     yamGulika: "यमगंड · गुलिक", sunriseSunset: "सूर्योदय · सूर्यास्त",
     upto: "तक", pada: "पाद",
@@ -369,12 +375,32 @@ export async function getCityNote(
   } catch { return null; }
 }
 
-async function getPujaKaal(base: string): Promise<string | null> {
+/**
+ * The kaal this festival's rite falls in, and the tithi that defines it.
+ *
+ * Both live on festivals_catalog because neither changes between years, and
+ * both are fetched together because the timing table needs them together —
+ * see the "festival tithi" row below for why the second one matters.
+ */
+async function getCatalogTiming(base: string): Promise<{ kaal: string | null; tithi: string | null }> {
   try {
     const { data } = await supa().from("festivals_catalog")
-      .select("puja_kaal").eq("base_slug", base).single();
-    return (data?.puja_kaal as string) ?? null;
-  } catch { return null; }
+      .select("puja_kaal,defining_tithi").eq("base_slug", base).single();
+    return {
+      kaal: (data?.puja_kaal as string) ?? null,
+      tithi: (data?.defining_tithi as string) ?? null,
+    };
+  } catch { return { kaal: null, tithi: null }; }
+}
+
+/**
+ * The tithi a festival is named for, pulled out of its defining_tithi string.
+ * "Ashwin Shukla Dashami" -> "Dashami"; "Kartik Amavasya" -> "Amavasya".
+ */
+function festivalTithiName(defining: string | null): string | null {
+  if (!defining) return null;
+  const last = defining.trim().split(/\s+/).pop();
+  return last || null;
 }
 
 export const baseSlug = (s: string) => s.replace(/-20\d\d$/, "");
@@ -575,19 +601,44 @@ export default async function FestivalPillar(
   const f = festival;
   const base = baseSlug(f.festival_slug);
 
-  const [content, local, panchang, upcoming, pujaKaal, visarjan, cityNote] = await Promise.all([
+  const [content, local, panchang, upcoming, catTiming, visarjan, cityNote] = await Promise.all([
     getContent(base, lang),
     city ? getLocalTerm(base, city.state) : Promise.resolve(null),
     city ? getPanchang(f.date, city.latitude, city.longitude, city.name)
          : getPanchang(f.date, 28.6139, 77.209, "New Delhi"),
     getUpcoming(f.festival_slug),
-    getPujaKaal(base),
+    getCatalogTiming(base),
     getVisarjan(base, city?.latitude ?? 28.6139, city?.longitude ?? 77.209,
                 city?.name ?? "New Delhi"),
     city ? getCityNote(base, city.slug, lang) : Promise.resolve(null),
   ]);
 
   // Other cities where this festival is in scope, each with its own timings.
+  const pujaKaal = catTiming.kaal;
+
+  // ── THE TITHI ROW, AND WHY THERE ARE TWO OF THEM ──────────────────────────
+  //
+  // A panchang states the tithi at sunrise. That is correct and it is the
+  // convention every printed almanac follows. On a festival page it reads as
+  // an error:
+  //
+  //     Dussehra page          Tithi: Navami      (Dussehra is Dashami)
+  //     Ganesh Chaturthi page  Tithi: Tritiya     (it is Chaturthi)
+  //
+  // Both were right. On 20 Oct sunrise falls in Navami and Dashami begins at
+  // 12:50; the festival is fixed by Dashami pervading aparahna, not by the
+  // sunrise tithi. But a reader who came for Dussehra and is shown "Navami"
+  // concludes the site is broken, and they are not being unreasonable.
+  //
+  // So the row is labelled honestly and the festival's own tithi is named
+  // beside it. Where they differ, the sunrise tithi's end IS the festival
+  // tithi's beginning — a festival day is only chosen when its tithi pervades
+  // the required kaal, so that tithi cannot be more than one step away.
+  const festTithi = festivalTithiName(catTiming.tithi);
+  const sunriseTithi = panchang?.tithi.name ?? null;
+  const tithiDiffers = !!(festTithi && sunriseTithi &&
+    festTithi.toLowerCase() !== sunriseTithi.toLowerCase());
+
   const inScope = ALL_CITIES.filter(x =>
     x.slug !== city?.slug &&
     !(f.festival_scope === "regional" && f.home_states?.length &&
@@ -673,11 +724,26 @@ export default async function FestivalPillar(
           <h2 className={H2}>🕐 {t.timings(name, placeName)}</h2>
           <table className="w-full text-sm">
             <tbody className="divide-y divide-amber-900/30">
-              <tr><td className="py-2 text-slate-400">{t.tithi}</td>
+              <tr><td className="py-2 text-slate-400">
+                    {tithiDiffers ? t.tithiAtSunrise : t.tithi}
+                  </td>
                   <td className="py-2 text-right font-semibold text-amber-100">
                     {panchang.tithi.name} ({panchang.tithi.paksha})
                     {panchang.tithi.ends && <> — {panchang.tithi.ends} {t.upto}</>}
                   </td></tr>
+              {/* Named only when it is not the sunrise tithi, so the reader is
+                  never left thinking the page has the wrong festival. */}
+              {tithiDiffers && (
+                <tr><td className="py-2 text-slate-400">{t.festivalTithi}</td>
+                    <td className="py-2 text-right font-semibold text-amber-100">
+                      {festTithi}
+                      {panchang.tithi.ends && (
+                        <span className="ml-1 font-normal text-xs text-slate-400">
+                          {t.beginsAtTime(panchang.tithi.ends)}
+                        </span>
+                      )}
+                    </td></tr>
+              )}
               <tr><td className="py-2 text-slate-400">{t.nakshatra}</td>
                   <td className="py-2 text-right font-semibold text-amber-100">
                     {panchang.nakshatra.name}, {t.pada} {panchang.nakshatra.pada}
