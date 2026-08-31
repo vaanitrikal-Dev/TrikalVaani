@@ -3,14 +3,58 @@
  * 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER 🔱
  * ============================================================================
  * File:        app/astrologer-delhi/page.tsx
- * Version:     v1.0
+ * Version:     v1.1
  * Owner:       Rohiit Gupta, Chief Vedic Architect
  * Created:     2026-07-12
+ * Updated:     2026-08-31
  *
  * PURPOSE:
  *   Local SEO flagship page for Delhi. Re-introduces /astrologer-{city}
  *   after IR-20 (the old "global not local" ban) was SUPERSEDED by CEO order
  *   in July 2026 following Google Business Profile approval.
+ *
+ * ── CHANGES v1.0 -> v1.1 (2026-08-31) ──────────────────────────────────────
+ *   1. DELHI-NCR DAMAGE REPAIRED (three places).
+ *      brand-guard.yml v5 ran s/Delhi NCR/India/g on every push. It rewrote
+ *      this file's copy and left sentences that read wrong:
+ *        schema description : "Serving India, all of India and clients
+ *                              worldwide"      -> "Serving Delhi NCR, ..."
+ *        direct answer      : "across India, India and worldwide"
+ *                                               -> "across Delhi NCR, India ..."
+ *        section 5 heading  : "India — and Anywhere Else"
+ *                                               -> "Delhi NCR — and Anywhere Else"
+ *      REQUIRES brand-guard.yml v6 (rule retired) TO BE DEPLOYED FIRST, or the
+ *      bot will simply undo all three again within seconds of the push.
+ *   2. TITLE DUPLICATION FIXED.
+ *      Live <title> read "... | Trikaal Vaani | Trikaal Vaani" because
+ *      metadata.title already carries the brand AND the root layout re-applies
+ *      its title template. Now uses title: { absolute: ... }, the same fix
+ *      app/blog/[slug]/page.tsx took in its v2.3. This page was one of the 43
+ *      Radar flagged on 30 Aug.
+ *   3. FEE LADDER CORRECTED against the live /pricing page (verified
+ *      31 Aug 2026). v1.0's catalog was missing the Rs151 Kundali Milan tier,
+ *      the Rs101/Rs151 Birth Muhurat tiers and the Rs499 On-Call Consultation,
+ *      and priceRange said Rs0-Rs251 when the real ceiling is Rs499.
+ *      ⚠️ OPEN ITEM FOR CEO: the Rs499 On-Call Consultation does NOT appear
+ *      anywhere on /pricing. It is in this schema because you confirmed it is
+ *      a real product — but a visitor who reads the offer here and clicks
+ *      through will not find it. Either add it to /pricing or tell me to
+ *      remove it from schema. Schema that promises what the site cannot sell
+ *      is a structured-data mismatch.
+ *   4. hasMap ADDED — direct link to the verified GBP listing on Google Maps.
+ *      A LocalBusiness with no map reference is a weaker local entity.
+ *   5. WhatsApp SURFACED in the NAP block. GBP has WhatsApp set as the PRIMARY
+ *      chat channel, and Radar found "whatsapp par free jyotish paramarsh" and
+ *      "free jyotish number" recurring in Delhi PASF. tel: alone was leaving
+ *      that intent uncaught.
+ *   6. CANONICAL ROLE STATED, to stop this page and the new
+ *      /blog/astrologer-near-me-delhi competing for the same query.
+ *      THIS page is the primary local landing page — short URL, service page
+ *      not an article, GBP website target, sitemap LOCAL_ROUTES priority 0.9.
+ *      The blog page is SUPPORTING: "near me + fees + free chat" informational
+ *      intent. A link now runs from here to there, and the blog page will link
+ *      back. Neither is redirected or canonicalised away — they answer
+ *      different questions.
  *
  * NAP CONSISTENCY (CRITICAL — must match GBP exactly, never edit casually):
  *   Name:    Trikaal Vaani
@@ -22,6 +66,7 @@
  * DELIBERATE OMISSIONS (each one is a decision, not an oversight):
  *   ✗ aggregateRating — Google does not support self-serving review markup for
  *     LocalBusiness rich results. Including it risks a manual action for zero gain.
+ *     Add nothing here until real GBP reviews exist, and even then only via GBP.
  *   ✗ openingHoursSpecification — CEO to supply exact opening time; GBP currently
  *     shows only "Closes 8 pm". Inventing hours = NAP mismatch. ADD LATER.
  *   ✗ geo lat/long — omitted rather than approximated. GBP pin is authoritative.
@@ -31,8 +76,8 @@
  * PATTERN SOURCE: app/kundali-milan/page.tsx v1.3 (imports, GOLD tokens, schema
  *   injection style, SiteNav/SiteFooter shell, .geo-direct-answer speakable class).
  *
- * SITEMAP: /astrologer-delhi MUST be added to STATIC_ROUTES in app/sitemap.ts.
- *   Static routes are NOT auto-discovered — only DB-driven routes (blog) are.
+ * SITEMAP: /astrologer-delhi is emitted from LOCAL_ROUTES in app/sitemap.ts
+ *   (v8.2+, priority 0.9). Static routes are NOT auto-discovered.
  * ============================================================================
  */
 
@@ -42,11 +87,16 @@ import SiteNav from '@/components/layout/SiteNav'
 import SiteFooter from '@/components/layout/SiteFooter'
 
 export const metadata: Metadata = {
-  title: 'Astrologer in Delhi — Rohiit Gupta, Chief Vedic Architect | Trikaal Vaani',
+  // v1.1: `absolute` stops the root layout title template appending the brand a
+  // second time. The brand stays inside this string on purpose — it belongs in
+  // the SERP title, just once.
+  title: {
+    absolute: 'Astrologer in Delhi — Rohiit Gupta, Chief Vedic Architect | Trikaal Vaani',
+  },
   description:
     'Looking for an astrologer in Delhi? Rohiit Gupta, Chief Vedic Architect at Trikaal Vaani, offers Vedic astrology readings from Dwarka, New Delhi — kundli, Kundali Milan, Mangal Dosh, Sade Sati. Swiss Ephemeris + BPHS. Free tools, readings from Rs11.',
   keywords:
-    'astrologer in delhi, best astrologer in delhi, vedic astrologer delhi, astrologer near me, jyotish in delhi, kundli in delhi, astrologer dwarka, kundali milan delhi, mangal dosh astrologer delhi, delhi ncr astrologer',
+    'astrologer in delhi, best astrologer in delhi, vedic astrologer delhi, astrologer near me, jyotish in delhi, kundli in delhi, astrologer dwarka, kundali milan delhi, mangal dosh astrologer delhi, delhi ncr astrologer, astrologer in delhi with fees, top 10 astrologer in delhi',
   alternates: {
     canonical: 'https://trikalvaani.com/astrologer-delhi',
   },
@@ -84,10 +134,11 @@ const LOCAL_BUSINESS_SCHEMA = {
   legalName: 'Trikal Vaani',
   alternateName: ['Trikaal Vaani Astrologer Delhi', 'त्रिकाल वाणी'],
   description:
-    'Vedic astrology practice in Delhi led by Rohiit Gupta, Chief Vedic Architect, offering kundli readings, Kundali Milan, Mangal Dosh and Sade Sati analysis using Swiss Ephemeris computation and Brihat Parashara Hora Shastra classical rules. Serving India, all of India and clients worldwide.',
+    'Vedic astrology practice in Delhi led by Rohiit Gupta, Chief Vedic Architect, offering kundli readings, Kundali Milan, Mangal Dosh and Sade Sati analysis using Swiss Ephemeris computation and Brihat Parashara Hora Shastra classical rules. Serving Delhi NCR, all of India and clients worldwide.',
   url: 'https://trikalvaani.com/astrologer-delhi',
   telephone: '+91-9211804111',
-  priceRange: 'Rs0-Rs251',
+  // v1.1: real ceiling is the Rs499 On-Call Consultation, not Rs251.
+  priceRange: 'Rs0-Rs499',
   currenciesAccepted: 'INR',
   paymentAccepted: ['UPI', 'Credit Card', 'Debit Card', 'Net Banking', 'Wallet', 'RuPay'],
   address: {
@@ -98,18 +149,29 @@ const LOCAL_BUSINESS_SCHEMA = {
     postalCode: '110075',
     addressCountry: 'IN',
   },
+  // v1.1: direct pointer to the verified GBP listing on Google Maps.
+  hasMap: 'https://maps.app.goo.gl/GYbBXLHygYdGLdvW8',
   areaServed: [
     { '@type': 'City', name: 'Delhi' },
     { '@type': 'City', name: 'New Delhi' },
     { '@type': 'City', name: 'Noida' },
     { '@type': 'City', name: 'Gurgaon' },
     { '@type': 'City', name: 'Ghaziabad' },
+    { '@type': 'City', name: 'Faridabad' },
     { '@type': 'Country', name: 'India' },
     { '@type': 'Place', name: 'Worldwide' },
   ],
   knowsLanguage: ['Hindi', 'English'],
   founder: { '@id': 'https://trikalvaani.com/#rohiit-gupta' },
   parentOrganization: { '@id': 'https://trikalvaani.com/#organization' },
+  contactPoint: [{
+    '@type': 'ContactPoint',
+    contactType: 'customer service',
+    telephone: '+91-9211804111',
+    url: 'https://wa.me/919211804111',
+    availableLanguage: ['Hindi', 'English'],
+    areaServed: 'IN',
+  }],
   identifier: [{
     '@type': 'PropertyValue',
     propertyID: 'Udyam Registration Number',
@@ -122,18 +184,24 @@ const LOCAL_BUSINESS_SCHEMA = {
     'https://www.youtube.com/@TheTrikalVaani',
     'https://www.facebook.com/people/Trikal-Vaani-Voice',
     'https://share.google/y5RN5czzW2MOmrq3j',
+    'https://maps.app.goo.gl/GYbBXLHygYdGLdvW8',
     'https://udyamregistration.gov.in/Udyam_Verify.aspx',
   ],
+  // v1.1: catalog rebuilt against the live /pricing page, verified 31 Aug 2026.
   hasOfferCatalog: {
     '@type': 'OfferCatalog',
     name: 'Vedic Astrology Services — Delhi',
     itemListElement: [
-      { '@type': 'Offer', name: 'Free Kundli & Trikaal Ka Sandesh', price: '0', priceCurrency: 'INR', availability: 'https://schema.org/InStock' },
-      { '@type': 'Offer', name: 'Trikaal Ki Awaaz — Voice Reading', price: '11', priceCurrency: 'INR', availability: 'https://schema.org/InStock' },
-      { '@type': 'Offer', name: 'Deep Reading', price: '51', priceCurrency: 'INR', availability: 'https://schema.org/InStock' },
-      { '@type': 'Offer', name: 'Kundali Milan — Basic', price: '51', priceCurrency: 'INR', availability: 'https://schema.org/InStock' },
-      { '@type': 'Offer', name: 'Kundali Milan — Deep', price: '101', priceCurrency: 'INR', availability: 'https://schema.org/InStock' },
-      { '@type': 'Offer', name: 'Karmic Background Reading', price: '251', priceCurrency: 'INR', availability: 'https://schema.org/InStock' },
+      { '@type': 'Offer', name: 'Free Kundli, all calculators & Trikaal Ka Sandesh', price: '0', priceCurrency: 'INR', availability: 'https://schema.org/InStock' },
+      { '@type': 'Offer', name: 'Trikaal Ki Awaaz — Voice Reading (1 question)', price: '11', priceCurrency: 'INR', availability: 'https://schema.org/InStock' },
+      { '@type': 'Offer', name: 'Deep Reading — one life domain', price: '51', priceCurrency: 'INR', availability: 'https://schema.org/InStock' },
+      { '@type': 'Offer', name: 'Kundali Milan — Basic, full 36-Guna Ashtakoot', price: '51', priceCurrency: 'INR', availability: 'https://schema.org/InStock' },
+      { '@type': 'Offer', name: 'Kundali Milan — Deep, 1000-word with 10 remedies', price: '101', priceCurrency: 'INR', availability: 'https://schema.org/InStock' },
+      { '@type': 'Offer', name: 'Child Birth Muhurat — full report', price: '101', priceCurrency: 'INR', availability: 'https://schema.org/InStock' },
+      { '@type': 'Offer', name: 'Kundali Milan — Both, Couple + Parent narratives', price: '151', priceCurrency: 'INR', availability: 'https://schema.org/InStock' },
+      { '@type': 'Offer', name: 'Child Birth Muhurat — report with 10 remedies', price: '151', priceCurrency: 'INR', availability: 'https://schema.org/InStock' },
+      { '@type': 'Offer', name: 'Karmic Background Reading — career, wealth and relationships', price: '251', priceCurrency: 'INR', availability: 'https://schema.org/InStock' },
+      { '@type': 'Offer', name: 'On-Call Consultation with Rohiit Gupta', price: '499', priceCurrency: 'INR', availability: 'https://schema.org/InStock' },
     ],
   },
   speakable: {
@@ -168,7 +236,7 @@ const FAQ_SCHEMA = {
       name: 'Where is Trikaal Vaani located in Delhi?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'Trikaal Vaani is at 724, Pocket 3, Sector 19, Dwarka, New Delhi, Delhi 110075. Readings are delivered online, so you do not need to travel — clients across Delhi, Noida, Gurgaon, Ghaziabad, the rest of India and abroad are served the same way.',
+        text: 'Trikaal Vaani is at 724, Pocket 3, Sector 19, Dwarka, New Delhi, Delhi 110075, and the Google Business Profile is verified under the Astrologer category. Readings are delivered online, so you do not need to travel — clients across Delhi, Noida, Gurgaon, Ghaziabad, the rest of India and abroad are served the same way.',
       },
     },
     {
@@ -184,7 +252,23 @@ const FAQ_SCHEMA = {
       name: 'How much does an astrology consultation in Delhi cost?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'Free kundli and all calculators cost nothing. A voice reading is Rs11, a Deep Reading Rs51, Kundali Milan starts at Rs51, and a Karmic Background Reading is Rs251. Anything that is a computation — your kundli, your Mangal Dosh status, your Sade Sati phase — is free, permanently. You pay only for interpretation.',
+        text: 'Free kundli and all calculators cost nothing. A voice reading starts at Rs11, a Deep Reading is Rs51, Kundali Milan runs Rs51 Basic, Rs101 Deep or Rs151 for both narratives, a Child Birth Muhurat report is Rs101 or Rs151 with remedies, and a Karmic Background Reading is Rs251. Anything that is a computation — your kundli, your Mangal Dosh status, your Sade Sati phase — is free, permanently. You pay only for interpretation.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'Can I talk to an astrologer free before paying?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Yes. Message +91 92118 04111 on WhatsApp and ask your question at no cost before any payment is discussed. Every calculator on the site is separately free and returns a real computed result, not a teaser. What free does not cover is a full written personalised reading or a scheduled call, because those take real time.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'Who is the best astrologer in Delhi?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'No neutral authority ranks astrologers in Delhi, so every "top 10" list is either paid advertising or self-promotion, including any that features Trikaal Vaani. Judge instead on five things you can actually verify: a real named practitioner, a Google-verified address and phone, fees published before you call, a stated calculation method, and whether the astrologer will ever tell you astrology is not the right tool for your problem.',
       },
     },
     {
@@ -248,7 +332,7 @@ export default function AstrologerDelhiPage() {
                 <strong style={{ color: '#cbd5e1' }}>Dwarka, New Delhi</strong>, led by{' '}
                 <strong style={{ color: '#cbd5e1' }}>Rohiit Gupta, Chief Vedic Architect</strong>, with sixteen years in the
                 Parashara BPHS tradition. Kundli, Kundali Milan, Mangal Dosh and Sade Sati readings are computed on a
-                self-hosted Swiss Ephemeris engine and delivered online across India, India and worldwide.
+                self-hosted Swiss Ephemeris engine and delivered online across Delhi NCR, India and worldwide.
                 Free tools; readings from Rs11.
               </p>
             </div>
@@ -267,11 +351,30 @@ export default function AstrologerDelhiPage() {
                     <p style={{ color: '#cbd5e1', fontSize: '13px', lineHeight: 1.6, margin: 0 }}>
                       724, Pocket 3, Sector 19,<br />Dwarka, New Delhi 110075
                     </p>
+                    <a
+                      href="https://maps.app.goo.gl/GYbBXLHygYdGLdvW8"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ color: GOLD, fontSize: '12px', textDecoration: 'underline', display: 'inline-block', marginTop: '6px' }}
+                    >
+                      View on Google Maps →
+                    </a>
                   </div>
                   <div>
                     <p style={{ color: GOLD, fontSize: '10px', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '6px' }}>Call / WhatsApp</p>
-                    <a href="tel:+919211804111" style={{ color: '#cbd5e1', fontSize: '13px', textDecoration: 'none' }}>
+                    <a href="tel:+919211804111" style={{ color: '#cbd5e1', fontSize: '13px', textDecoration: 'none', display: 'block' }}>
                       +91 92118 04111
+                    </a>
+                    {/* v1.1: WhatsApp is the PRIMARY chat channel on the GBP, and
+                        Radar found strong "free jyotish on WhatsApp" intent in
+                        Delhi PASF. A tel: link alone was not catching it. */}
+                    <a
+                      href="https://wa.me/919211804111"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ color: GOLD, fontSize: '12px', textDecoration: 'underline', display: 'inline-block', marginTop: '6px' }}
+                    >
+                      Ask free on WhatsApp →
                     </a>
                   </div>
                   <div>
@@ -331,6 +434,10 @@ export default function AstrologerDelhiPage() {
                 <h2 className="text-white text-3xl font-serif font-bold mb-3">
                   What You Can Get, and What It Costs
                 </h2>
+                <p className="text-slate-400 text-sm max-w-2xl mx-auto">
+                  Every price is published here rather than quoted after you call, and it is the same price in
+                  Dwarka, Noida, Gurgaon or anywhere else in India. There is no location markup.
+                </p>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -349,6 +456,15 @@ export default function AstrologerDelhiPage() {
                   </Link>
                 ))}
               </div>
+
+              <p style={{ color: '#94a3b8', fontSize: '13px', lineHeight: 1.8, marginTop: '20px', textAlign: 'center' }}>
+                A full fee table, and an honest answer to what a Delhi astrologer normally charges, is on the{' '}
+                <Link href="/blog/astrologer-near-me-delhi" style={{ color: GOLD, textDecoration: 'underline' }}>
+                  astrologer near me in Delhi guide
+                </Link>
+                {' — '}or see every option on the{' '}
+                <Link href="/pricing" style={{ color: GOLD, textDecoration: 'underline' }}>pricing page</Link>.
+              </p>
             </div>
           </section>
 
@@ -359,7 +475,7 @@ export default function AstrologerDelhiPage() {
                 Areas Served
               </p>
               <h2 className="text-white text-3xl font-serif font-bold mb-4">
-                India — and Anywhere Else
+                Delhi NCR — and Anywhere Else
               </h2>
               <p style={{ color: '#94a3b8', fontSize: '14px', lineHeight: 1.8, maxWidth: '680px', margin: '0 auto 24px' }}>
                 The practice is based in Dwarka, New Delhi, and clients come from across the capital region —{' '}
@@ -372,7 +488,7 @@ export default function AstrologerDelhiPage() {
                   why &ldquo;astrologer near me&rdquo; actually means online, not local
                 </Link>.
               </p>
-              <div className="flex flex-wrap justify-center gap-2">
+              <div className="flex flex-wrap justify-center gap-2 mb-6">
                 {['Dwarka', 'New Delhi', 'Rohini', 'Noida', 'Gurgaon', 'Ghaziabad', 'Faridabad', 'All India', 'Worldwide'].map((c) => (
                   <span key={c} style={{
                     padding: '5px 12px', borderRadius: '20px', fontSize: '12px',
@@ -380,6 +496,12 @@ export default function AstrologerDelhiPage() {
                   }}>{c}</span>
                 ))}
               </div>
+              <p style={{ color: '#94a3b8', fontSize: '13px', lineHeight: 1.8, maxWidth: '680px', margin: '0 auto' }}>
+                Dedicated pages for the rest of the capital region:{' '}
+                <Link href="/astrologer-noida" style={{ color: GOLD, textDecoration: 'underline' }}>Noida</Link>{', '}
+                <Link href="/astrologer-gurgaon" style={{ color: GOLD, textDecoration: 'underline' }}>Gurgaon</Link>{' and '}
+                <Link href="/astrologer-ghaziabad" style={{ color: GOLD, textDecoration: 'underline' }}>Ghaziabad</Link>.
+              </p>
             </div>
           </section>
 
@@ -415,15 +537,29 @@ export default function AstrologerDelhiPage() {
               </h2>
               <p style={{ color: '#94a3b8', fontSize: '14px', lineHeight: 1.7, marginBottom: '24px' }}>
                 Build your kundli, check a dosha, see your dasha — no payment, no account, no consultation call.
-                Decide afterwards whether you want anything more.
+                Or just message on WhatsApp and ask. Decide afterwards whether you want anything more.
               </p>
-              <Link href="/" style={{
-                display: 'inline-block', padding: '14px 32px', borderRadius: '10px',
-                background: GOLD, color: '#080B12', fontSize: '15px', fontWeight: 700,
-                textDecoration: 'none', boxShadow: `0 0 30px ${GOLD_RGBA(0.4)}`,
-              }}>
-                🔱 Free Kundli Shuru Karein
-              </Link>
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+                <Link href="/" style={{
+                  display: 'inline-block', padding: '14px 32px', borderRadius: '10px',
+                  background: GOLD, color: '#080B12', fontSize: '15px', fontWeight: 700,
+                  textDecoration: 'none', boxShadow: `0 0 30px ${GOLD_RGBA(0.4)}`,
+                }}>
+                  🔱 Free Kundli Shuru Karein
+                </Link>
+                <a
+                  href="https://wa.me/919211804111"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    display: 'inline-block', padding: '14px 32px', borderRadius: '10px',
+                    background: 'transparent', color: GOLD, fontSize: '15px', fontWeight: 700,
+                    textDecoration: 'none', border: `1px solid ${GOLD_RGBA(0.5)}`,
+                  }}
+                >
+                  WhatsApp par Poochein
+                </a>
+              </div>
               <p style={{ margin: '12px 0 0', color: '#475569', fontSize: '11px' }}>
                 Free · No card required · Swiss Ephemeris + BPHS · Dwarka, New Delhi
               </p>
@@ -437,4 +573,4 @@ export default function AstrologerDelhiPage() {
   )
 }
 
-// END app/astrologer-delhi/page.tsx v1.0
+// END app/astrologer-delhi/page.tsx v1.1
