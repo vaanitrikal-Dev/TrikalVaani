@@ -1,12 +1,56 @@
 name: IR Guard — auto-fix IRs + alert on violations + SEO/GEO/AEO/EEAT gaps
 
-# 🔱 Trikaal Vaani — IR (Iron Rule) Guard  v5
+# 🔱 Trikaal Vaani — IR (Iron Rule) Guard  v6
 # Runs on every push to main (and can be run manually from the Actions tab).
+#
+# ═══════════════════════════════════════════════════════════════════════════
+#  v5 -> v6  (2026-08-31)  — FOUR RULES RETIRED. All four were correct when
+#  written and are wrong now, because the Google Business Profile was approved
+#  and the product line changed underneath them.
+#
+#  RETIRED 1 — AUTO-FIX  s/Delhi NCR/India/g
+#    Written while the GBP was still pending, under IR-20 ("global not local").
+#    IR-20 was superseded by CEO order in July 2026. The GBP is now verified
+#    (Trikaal Vaani, Astrologer, Dwarka 110075) and /astrologer-{city} pages
+#    are live and in the sitemap, so "Delhi NCR" is now the correct phrase and
+#    this rule was silently deleting the exact regional signal local SEO needs.
+#    Observed on 31 Aug 2026: a page.tsx deployed at 13:35 had its
+#    areaServed AdministrativeArea "Delhi NCR" rewritten to "India" by the bot
+#    12 seconds later, leaving the schema with "India" twice.
+#
+#    NO REVERSE RULE HAS BEEN ADDED, DELIBERATELY. s/India/Delhi NCR/g would
+#    corrupt the codebase, because the bot cannot tell which "India" used to be
+#    "Delhi NCR" and which was always "India". It would break, among others:
+#      { '@type': 'Country', name: 'India' }   -> invalid schema
+#      "Government of India MSME"              -> false Udyam claim
+#      "All India", "across India", "en_IN"    -> nonsense
+#    The residue this rule already left behind ("Serving India, all of India",
+#    "across India, India and worldwide", "India — and Anywhere Else") is being
+#    repaired BY HAND, file by file. A one-time human fix, not a standing regex.
+#    An advisory scan for that residue is added in PART 3 below.
+#
+#  RETIRED 2 — BLOCKING  'LocalBusiness'
+#    Banned under IR-20 for the same pre-GBP reason. LocalBusiness schema is now
+#    REQUIRED on /astrologer-{city} and on the near-me city blog pages — it is
+#    the single biggest local ranking factor available to us. Keeping this rule
+#    meant every push carrying correct local schema failed the run.
+#
+#  RETIRED 3 — BLOCKING  'astrologer-delhi'
+#    Same cause. The route is live, has been in app/sitemap.ts LOCAL_ROUTES
+#    since v8.2 at priority 0.9, and is the landing page the GBP points at.
+#
+#  RETIRED 4 — BLOCKING  literal 499
+#    Rs 499 was a phantom price when this was written. It is now a real,
+#    published product: the On-Call Consultation. The strike-through check
+#    ('line-through') is KEPT — a crossed-out price implying a fake discount is
+#    still banned. Only the bare 499 literal is retired.
+#
+#  Everything else in v5 is unchanged.
+# ═══════════════════════════════════════════════════════════════════════════
 #
 # ─────────────────────────────────────────────────────────────────────────
 #  PART 1 — AUTO-FIX  (bot corrects + commits automatically; build-safe)
 #     • Brand spelling : "Trikal"                         -> "Trikaal"
-#     • Location        : "Delhi NCR"                      -> "India"
 #     • AI vendor names : "Gemini 2.5 Pro / Claude Sonnet" -> "premium AI engine"
 #     •                   "Gemini AI"                      -> "premium AI"
 #     • Retired persona : "Jini"                           -> "Trikaal"
@@ -14,6 +58,7 @@ name: IR Guard — auto-fix IRs + alert on violations + SEO/GEO/AEO/EEAT gaps
 #     • Broken link     : href/url "/about"               -> "/founder"
 #     • Old VM IP       : "34.14.164.105"                  -> "34.47.182.227"   [v5: 2026-06-05]
 #     These are mechanical text swaps — they CANNOT break the build.
+#     (Location rule removed in v6 — see the retirement note above.)
 #
 #  PART 2 — VIOLATION ALERTS  (turns the run RED ❌; GitHub emails you on failure)
 #     The bot NEVER auto-deletes these — they are structural/contextual and a
@@ -21,12 +66,10 @@ name: IR Guard — auto-fix IRs + alert on violations + SEO/GEO/AEO/EEAT gaps
 #     can fix by hand. Covered:
 #       • Fake ratings / star reviews (aggregateRating, "4.9/5", "★★★★★", "Client Rating")
 #       • Fake testimonial label ("Verified Experiences")
-#       • Phantom price (literal 499, and any strike-through "line-through" price anchor)
+#       • Strike-through price anchor ("line-through")
 #       • Fake counters ("10,000+ seekers", "2,400+ predictions", etc.)
 #       • Real-estate credential ("real estate ... expertise / experience", "India Real Estate")
 #       • Recurring monthly pricing ("/month", "per month", "₹99", "monthly plan/subscription")
-#       • LocalBusiness schema (IR: none allowed)
-#       • "/astrologer-delhi" route (IR: dropped local positioning)
 #
 #  PART 3 — SEO / GEO / AEO / EEAT COMPLETENESS  (⚠️ advisory, NON-blocking)
 #     Scans every app/**/page.tsx and lists MISSING items per file so you can
@@ -35,6 +78,7 @@ name: IR Guard — auto-fix IRs + alert on violations + SEO/GEO/AEO/EEAT gaps
 #       • canonical, openGraph                       (technical SEO)
 #       • speakable                                  (GEO / voice answers)
 #       • sameAs, dateModified, /founder author link (EEAT authority + freshness)
+#     v6 adds: leftover damage from the retired Delhi-NCR rule.
 #
 #  ALWAYS PROTECTED (never touched): trikalvaani.com URLs, legalName,
 #  meta-keyword alt-spellings, code identifiers (X-Trikal-Key, trikal-engines,
@@ -57,11 +101,13 @@ jobs:
         uses: actions/checkout@v4
 
       # ══ PART 1: AUTO-FIX ══════════════════════════════════════════════
-      - name: Auto-fix IRs (brand, location, vendor, Jini, Prokerala, about, VM IP)
+      # v6: "Delhi NCR" dropped from both the file-discovery grep and the
+      # substitution list. Nothing else in this step changed.
+      - name: Auto-fix IRs (brand, vendor, Jini, Prokerala, about, VM IP)
         shell: bash
         run: |
-          echo "IR Guard v5 — scanning & auto-fixing content IRs..."
-          FILES=$(grep -rlE 'Trikal|Delhi NCR|Gemini|Claude Sonnet|Jini|Prokerala|/about"|34\.14\.164\.105' \
+          echo "IR Guard v6 — scanning & auto-fixing content IRs..."
+          FILES=$(grep -rlE 'Trikal|Gemini|Claude Sonnet|Jini|Prokerala|/about"|34\.14\.164\.105' \
             --include='*.ts' --include='*.tsx' --include='*.js' --include='*.jsx' --include='*.html' \
             --exclude-dir=node_modules --exclude-dir=.next --exclude-dir=.git . 2>/dev/null || true)
           for f in $FILES; do
@@ -81,7 +127,6 @@ jobs:
                 s/ · Prokerala API//g;
                 s/Prokerala API/self-hosted Swiss Ephemeris/g;
                 s/\bJini\b/Trikaal/g;
-                s/Delhi NCR/India/g;
                 s/\bTrikal\b/Trikaal/g;
               }
               # VM IP replacement (separate block — no skip on comments/strings;
@@ -101,7 +146,7 @@ jobs:
             git config user.name  "Trikaal IR Bot"
             git config user.email "ir-bot@users.noreply.github.com"
             git add -A
-            git commit -m "IR Guard: auto-fix brand/location/vendor/Jini/Prokerala/about/VM-IP [skip ci]"
+            git commit -m "IR Guard: auto-fix brand/vendor/Jini/Prokerala/about/VM-IP [skip ci]"
             git push
             echo "Auto-fixed IR violations and pushed the correction."
           else
@@ -147,8 +192,36 @@ jobs:
           fi
           echo "Advisory scan complete (non-blocking)."
 
+      # ══ PART 3b (v6): LEFTOVER DAMAGE FROM THE RETIRED DELHI-NCR RULE ══
+      # Advisory only, and deliberately so. These phrases are what the old
+      # s/Delhi NCR/India/g left behind. They are listed for a HUMAN to fix —
+      # the bot must never substitute here, because "India" is correct in most
+      # places on this site and wrong only in these specific mangled phrases.
+      # Delete this whole step once the repair pass is finished.
+      - name: Advisory — leftover damage from retired Delhi-NCR rule
+        shell: bash
+        run: |
+          echo "## 🩹 Delhi-NCR rule residue (advisory — fix by hand, never by regex)" >> "$GITHUB_STEP_SUMMARY"
+          HITS=$(grep -rnE 'India, (all of )?India|across India, India|Serving India, all of India|India — and Anywhere|India and worldwide, India' \
+            --include='*.ts' --include='*.tsx' --include='*.js' --include='*.jsx' --include='*.html' \
+            --exclude-dir=node_modules --exclude-dir=.next --exclude-dir=.git . 2>/dev/null || true)
+          if [ -n "$HITS" ]; then
+            echo "Phrases below read wrong because 'Delhi NCR' was auto-replaced with 'India':"
+            echo "$HITS"
+            {
+              echo '```'
+              echo "$HITS"
+              echo '```'
+              echo "Restore the intended wording by hand. Do NOT add a reverse regex."
+            } >> "$GITHUB_STEP_SUMMARY"
+            echo "::warning::Delhi-NCR rule residue found — fix by hand (non-blocking)."
+          else
+            echo "No residue found."
+            echo "None found." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
       # ══ PART 2: VIOLATION ALERTS (blocking ❌ — fix by hand) ═══════════
-      - name: Alert on IR violations (fake content / phantom price / banned schema)
+      - name: Alert on IR violations (fake content / strike price)
         shell: bash
         run: |
           EXCL='remov|delet|no fake|not added|intentional|❌|^\s*\*|^\s*//'
@@ -166,12 +239,13 @@ jobs:
 
           add "Fake ratings / star reviews"   'aggregateRating|AggregateRating|ratingValue|reviewCount|ratingCount|[0-9]\.[0-9]\s*/\s*5|★★★|average rating|Client Rating'
           add "Fake testimonial label"        'Verified Experiences'
-          add "Phantom price (499 / strike)"  '(₹|Rs\.?\s*)499|line-through'
+          add "Strike-through price anchor"   'line-through'
           add "Fake counters"                 '[0-9][0-9,]*\+?\s*(seekers|predictions|clients|consultations|readings)'
           add "Real-estate credential"        'real estate (and|background|experience|expertise)|(years|expertise|experience)[^.]{0,20}real estate|India Real Estate'
           add "Recurring monthly pricing"     '/month|per month|monthly (plan|subscription|fee|price)|₹\s*99\b'
-          add "LocalBusiness schema (banned)" 'LocalBusiness'
-          add "Banned local route"            'astrologer-delhi'
+          # v6: 'LocalBusiness', 'astrologer-delhi' and the bare 499 literal are
+          # retired here — all three are now correct, required content. See the
+          # retirement notes at the top of this file.
 
           if [ -s /tmp/ir_found.txt ]; then
             echo "❌ IR VIOLATION(S) FOUND — fix by hand (bot never auto-deletes these):"
