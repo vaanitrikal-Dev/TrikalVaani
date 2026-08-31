@@ -1,8 +1,32 @@
 // ============================================================
 // TRIKAL VAANI — DYNAMIC BLOG ARTICLE PAGE (SSR)
 // CEO: Rohiit Gupta | Chief Vedic Architect
-// Version: 2.8
-// Date: 2026-08-05
+// Version: 2.9
+// Date: 2026-08-31
+// CHANGE v2.9 — LOCAL SEO SCHEMA (NCR city landing pages):
+//   • Added NAP constant block (BUSINESS) holding the exact,
+//     Google-Business-Profile-verified name, address, phone, WhatsApp,
+//     website and map link. THIS IS THE SINGLE SOURCE OF TRUTH — if the
+//     GBP is ever edited, edit this block too. One character's difference
+//     between GBP, this schema and the visible page text breaks local SEO.
+//   • Added LOCAL_PAGES — the ONLY slugs that receive LocalBusiness
+//     schema. Emitting LocalBusiness on all ~550 blog posts would be
+//     schema spam; it belongs on genuine local landing pages only.
+//   • generateJsonLd now appends, for those slugs only:
+//       – LocalBusiness  (@id …/#localbusiness, with areaServed = the
+//         city that page targets; the ADDRESS always stays Dwarka,
+//         because that is the only real physical location. Claiming an
+//         address in Noida/Gurgaon/Ghaziabad would be listing fraud.)
+//       – Service + OfferCatalog carrying the published fee ladder
+//         (Free / ₹51 / ₹251 / ₹499). This is what makes the page
+//         eligible for "astrologer fees" answers in AI Overview / SGE.
+//   • DELIBERATELY OMITTED, and must stay omitted until real data exists:
+//       – aggregateRating / reviewCount → no verified reviews yet.
+//         Fabricated ratings trigger a Google manual action.
+//       – geo (lat/long) and openingHoursSpecification → not confirmed
+//         on the GBP yet. Wrong coordinates are worse than none.
+//     Add all three in a v3.0 once reviews and hours are live.
+//   • No layout, styling, data-fetching or existing-schema change.
 // CHANGE v2.8:
 //   • SectionBlock now renders the new `video` BlogSection variant
 //     (lib/blog-posts.ts v3.5+) — a responsive embedded YouTube iframe,
@@ -85,9 +109,87 @@ import {
 const BRAND_SUFFIX = /\s*[|｜]\s*(?:Trikaal?\s+Vaani|त्रिकाल\s*वाणी|त्रिकल\s*वाणी)\s*$/i;
 const displayTitle = (t: string): string => (t ? t.replace(BRAND_SUFFIX, '').trim() : t);
 
-// ============================================================
+// ==================================================================
+// v2.9 — CANONICAL NAP (Name, Address, Phone)
+// ------------------------------------------------------------------
+// Copied verbatim from the verified Google Business Profile on
+// 31 Aug 2026. Local ranking depends on this matching the GBP, the
+// visible page text and every directory listing EXACTLY — one extra
+// space, a "New Delhi" vs "Delhi", or 92118-04111 vs 9211804111
+// counts as a mismatch. If the GBP changes, change this first.
+// ==================================================================
+const BUSINESS = {
+  name: 'Trikaal Vaani',
+  legalName: 'Trikal Vaani',
+  streetAddress: '724, Pocket 3, Sector 19, Dwarka',
+  addressLocality: 'New Delhi',
+  addressRegion: 'Delhi',
+  postalCode: '110075',
+  addressCountry: 'IN',
+  telephone: '+91-92118-04111',
+  whatsapp: 'https://wa.me/919211804111',
+  url: 'https://trikalvaani.com/',
+  logo: 'https://trikalvaani.com/logo.png',
+  // Real short link to the verified GBP listing on Google Maps.
+  hasMap: 'https://maps.app.goo.gl/GYbBXLHygYdGLdvW8',
+  priceRange: '₹0–₹499',
+  founderId: 'https://trikalvaani.com/#rohiit-gupta',
+  orgId: 'https://trikalvaani.com/#organization',
+} as const;
+
+// ------------------------------------------------------------------
+// The ONLY slugs that get LocalBusiness schema. These are genuine local
+// landing pages. Do not add ordinary articles here — LocalBusiness on
+// every post is schema spam and dilutes the entity.
+// Value = the city this page targets (used as areaServed only; the
+// postal address always remains the real Dwarka one).
+// ------------------------------------------------------------------
+const LOCAL_PAGES: Record<string, string> = {
+  'astrologer-near-me-delhi': 'Delhi',
+  'astrologer-near-me-delhi-hindi': 'Delhi',
+  'astrologer-near-me-noida': 'Noida',
+  'astrologer-near-me-noida-hindi': 'Noida',
+  'astrologer-near-me-gurgaon': 'Gurugram',
+  'astrologer-near-me-gurgaon-hindi': 'Gurugram',
+  'astrologer-near-me-ghaziabad': 'Ghaziabad',
+  'astrologer-near-me-ghaziabad-hindi': 'Ghaziabad',
+};
+
+// ------------------------------------------------------------------
+// The published fee ladder. Kept here (not in Supabase) so that the
+// schema and the page text can never silently drift apart — if a price
+// changes, it changes in one place and in the blog copy together.
+// ------------------------------------------------------------------
+const FEE_LADDER: { name: string; price: string; description: string }[] = [
+  {
+    name: 'Free Vedic Calculators (Kundli, Dasha, Manglik, Kaal Sarp, Sade Sati, Gemstone)',
+    price: '0',
+    description:
+      'Complete birth chart, running Dasha, dosha severity with cancellation status and gemstone suitability. No signup, no card.',
+  },
+  {
+    name: 'Deep Vedic Reading (Kundali Milan, Career Pivot, Wealth, Property Yog, Swapna Shastra, Hast Rekha and others)',
+    price: '51',
+    description:
+      'Any single in-depth reading, computed on Swiss Ephemeris with classical BPHS rules and reviewed by Rohiit Gupta. Remedies included, not sold separately.',
+  },
+  {
+    name: 'Karmic Background Reading',
+    price: '251',
+    description:
+      'Career, wealth and relationships analysed together in one consolidated report.',
+  },
+  {
+    name: 'On-Call Consultation',
+    price: '499',
+    description:
+      'A spoken consultation with Rohiit Gupta instead of a written report, for live decisions with a deadline attached.',
+  },
+];
+
+// ==================================================================
 // STATIC PARAMS
-// ============================================================
+// ==================================================================
 export async function generateStaticParams() {
   const slugs = await getAllSlugs();
   return slugs.map((slug) => ({ slug }));
@@ -95,9 +197,9 @@ export async function generateStaticParams() {
 
 export const revalidate = 86400;
 
-// ============================================================
+// ==================================================================
 // METADATA
-// ============================================================
+// ==================================================================
 export async function generateMetadata(
   { params }: { params: { slug: string } }
 ): Promise<Metadata> {
@@ -178,9 +280,9 @@ export async function generateMetadata(
   };
 }
 
-// ============================================================
-// JSON-LD SCHEMA — Article + FAQ + BreadcrumbList
-// ============================================================
+// ==================================================================
+// JSON-LD SCHEMA — Article + FAQ + BreadcrumbList (+ Video, + Local)
+// ==================================================================
 function generateJsonLd(post: BlogPost) {
   const canonicalUrl = `https://trikalvaani.com/blog/${post.slug}`;
 
@@ -195,19 +297,19 @@ function generateJsonLd(post: BlogPost) {
     dateModified: post.updatedAt,
     author: {
       '@type': 'Person',
-      '@id': 'https://trikalvaani.com/#rohiit-gupta',
+      '@id': BUSINESS.founderId,
       name: 'Rohiit Gupta',
       url: 'https://trikalvaani.com/founder',
       jobTitle: 'Chief Vedic Architect',
-      worksFor: { '@id': 'https://trikalvaani.com/#organization' },
+      worksFor: { '@id': BUSINESS.orgId },
     },
     publisher: {
       '@type': 'Organization',
-      '@id': 'https://trikalvaani.com/#organization',
-      name: 'Trikaal Vaani',
+      '@id': BUSINESS.orgId,
+      name: BUSINESS.name,
       logo: {
         '@type': 'ImageObject',
-        url: 'https://trikalvaani.com/logo.png',
+        url: BUSINESS.logo,
         width: 512,
         height: 512,
       },
@@ -259,36 +361,132 @@ function generateJsonLd(post: BlogPost) {
     ],
   };
 
-  // ── v2.8: VideoObject — only emitted when the post has a video section ──
+  const schemas: Record<string, unknown>[] = [articleSchema, faqSchema, breadcrumbSchema];
+
+  // ── v2.8: VideoObject — only when the post has a video section ──
   const videoSection = (post.sections as Array<Record<string, unknown>>).find(
     (s) => s.type === 'video'
   ) as { videoId: string; title?: string } | undefined;
 
-  const videoSchema = videoSection
-    ? {
-        '@context': 'https://schema.org',
-        '@type': 'VideoObject',
-        '@id': `${canonicalUrl}#video`,
-        name: videoSection.title || displayTitle(post.title),
-        description: post.description,
-        thumbnailUrl: [`https://i.ytimg.com/vi/${videoSection.videoId}/hqdefault.jpg`],
-        // Proxy: the post's own publish date, since the true video upload
-        // date isn't stored yet. Swap in the exact upload date if known.
-        uploadDate: post.publishedAt,
-        embedUrl: `https://www.youtube.com/embed/${videoSection.videoId}`,
-        contentUrl: `https://www.youtube.com/watch?v=${videoSection.videoId}`,
-        publisher: { '@id': 'https://trikalvaani.com/#organization' },
-      }
-    : null;
+  if (videoSection) {
+    schemas.push({
+      '@context': 'https://schema.org',
+      '@type': 'VideoObject',
+      '@id': `${canonicalUrl}#video`,
+      name: videoSection.title || displayTitle(post.title),
+      description: post.description,
+      thumbnailUrl: [`https://i.ytimg.com/vi/${videoSection.videoId}/hqdefault.jpg`],
+      // Proxy: the post's own publish date, since the true video upload
+      // date isn't stored yet. Swap in the exact upload date if known.
+      uploadDate: post.publishedAt,
+      embedUrl: `https://www.youtube.com/embed/${videoSection.videoId}`,
+      contentUrl: `https://www.youtube.com/watch?v=${videoSection.videoId}`,
+      publisher: { '@id': BUSINESS.orgId },
+    });
+  }
 
-  return videoSchema
-    ? [articleSchema, faqSchema, breadcrumbSchema, videoSchema]
-    : [articleSchema, faqSchema, breadcrumbSchema];
+  // ── v2.9: LocalBusiness + fee OfferCatalog, city landing pages only ──
+  const targetCity = LOCAL_PAGES[post.slug];
+
+  if (targetCity) {
+    const isHindi = post.lang === 'hi';
+
+    schemas.push({
+      '@context': 'https://schema.org',
+      '@type': 'LocalBusiness',
+      '@id': 'https://trikalvaani.com/#localbusiness',
+      name: BUSINESS.name,
+      legalName: BUSINESS.legalName,
+      description: post.description,
+      url: BUSINESS.url,
+      mainEntityOfPage: { '@id': canonicalUrl },
+      image: [BUSINESS.logo],
+      logo: BUSINESS.logo,
+      telephone: BUSINESS.telephone,
+      priceRange: BUSINESS.priceRange,
+      currenciesAccepted: 'INR',
+      // The address is ALWAYS the single real Dwarka location, on every
+      // city page. areaServed carries the city; the address never lies.
+      address: {
+        '@type': 'PostalAddress',
+        streetAddress: BUSINESS.streetAddress,
+        addressLocality: BUSINESS.addressLocality,
+        addressRegion: BUSINESS.addressRegion,
+        postalCode: BUSINESS.postalCode,
+        addressCountry: BUSINESS.addressCountry,
+      },
+      hasMap: BUSINESS.hasMap,
+      areaServed: [
+        { '@type': 'City', name: targetCity },
+        { '@type': 'AdministrativeArea', name: 'Delhi NCR' },
+        { '@type': 'Country', name: 'India' },
+      ],
+      founder: { '@id': BUSINESS.founderId },
+      employee: { '@id': BUSINESS.founderId },
+      parentOrganization: { '@id': BUSINESS.orgId },
+      knowsLanguage: ['en-IN', 'hi-IN'],
+      sameAs: [BUSINESS.hasMap],
+      contactPoint: [
+        {
+          '@type': 'ContactPoint',
+          contactType: 'customer service',
+          telephone: BUSINESS.telephone,
+          url: BUSINESS.whatsapp,
+          availableLanguage: ['English', 'Hindi'],
+          areaServed: 'IN',
+        },
+      ],
+      hasOfferCatalog: {
+        '@type': 'OfferCatalog',
+        name: isHindi ? 'ज्योतिष परामर्श शुल्क' : 'Vedic Astrology Consultation Fees',
+        itemListElement: FEE_LADDER.map((f) => ({
+          '@type': 'Offer',
+          name: f.name,
+          description: f.description,
+          price: f.price,
+          priceCurrency: 'INR',
+          availability: 'https://schema.org/InStock',
+          url: canonicalUrl,
+          seller: { '@id': 'https://trikalvaani.com/#localbusiness' },
+        })),
+      },
+      // NOTE (v2.9): aggregateRating, geo and openingHoursSpecification are
+      // intentionally absent. Add them only when real reviews, confirmed
+      // coordinates and confirmed hours exist. Inventing any of the three
+      // is a Google manual-action risk, not an optimisation.
+    });
+
+    schemas.push({
+      '@context': 'https://schema.org',
+      '@type': 'Service',
+      '@id': `${canonicalUrl}#service`,
+      serviceType: isHindi ? 'वैदिक ज्योतिष परामर्श' : 'Vedic Astrology Consultation',
+      name: displayTitle(post.title),
+      description: post.directAnswer,
+      provider: { '@id': 'https://trikalvaani.com/#localbusiness' },
+      areaServed: { '@type': 'City', name: targetCity },
+      availableChannel: {
+        '@type': 'ServiceChannel',
+        serviceUrl: 'https://trikalvaani.com/#birth-form',
+        servicePhone: BUSINESS.telephone,
+        availableLanguage: ['English', 'Hindi'],
+      },
+      offers: FEE_LADDER.map((f) => ({
+        '@type': 'Offer',
+        name: f.name,
+        price: f.price,
+        priceCurrency: 'INR',
+        availability: 'https://schema.org/InStock',
+      })),
+    });
+  }
+
+  return schemas;
 }
 
-// ============================================================
+// ==================================================================
 // MARKDOWN-LITE PARSER — bold, italic, links (v2.1 unchanged)
-// ============================================================
+// ==================================================================
 function renderText(text: string): React.ReactNode {
   const linkRegex = /(\[[^\]]+\]\([^)]+\))/g;
   const linkParts = text.split(linkRegex);
@@ -328,9 +526,9 @@ function renderEmphasis(text: string, keyBase: number): React.ReactNode {
   });
 }
 
-// ============================================================
-// SECTION RENDERER (unchanged from v2.1)
-// ============================================================
+// ==================================================================
+// SECTION RENDERER (unchanged from v2.8)
+// ==================================================================
 function SectionBlock({ section, index }: { section: BlogSection; index: number }) {
   switch (section.type) {
     case 'h2':
@@ -474,11 +672,11 @@ function SectionBlock({ section, index }: { section: BlogSection; index: number 
   }
 }
 
-// ============================================================
+// ==================================================================
 // v2.2: PLAYBOOK BODY SECTION RENDERER
 // Renders emotional / communication / strengths / challenges / remedies
 // Only renders if the field is non-empty (safe for old rows).
-// ============================================================
+// ==================================================================
 const BODY_SECTIONS: {
   key: keyof Pick<BlogPost, 'emotional' | 'communication' | 'strengths' | 'challenges' | 'remedies'>;
   heading: string;
@@ -514,9 +712,112 @@ function PlaybookBodySection({
   );
 }
 
-// ============================================================
+// ==================================================================
+// v2.9: VISIBLE NAP BLOCK — city landing pages only
+// ------------------------------------------------------------------
+// Google cross-checks the schema against text a human can actually see.
+// A LocalBusiness schema whose address appears nowhere on the rendered
+// page is weak-to-ignored, so the same NAP is printed here.
+// ==================================================================
+function LocalNapBlock({ lang }: { lang: string }) {
+  const hi = lang === 'hi';
+  return (
+    <section
+      aria-label={hi ? 'संपर्क और पता' : 'Contact and address'}
+      className="my-12 rounded-xl border border-amber-700/40 bg-slate-900/50 p-6 md:p-8"
+    >
+      <h2 className="mb-4 text-xl md:text-2xl font-bold text-amber-300">
+        {hi ? 'त्रिकाल वाणी — संपर्क और पता' : 'Trikaal Vaani — Contact and Address'}
+      </h2>
+
+      <address className="not-italic space-y-2 text-slate-200 text-base leading-relaxed">
+        <div className="font-semibold text-amber-200">Trikaal Vaani</div>
+        <div>724, Pocket 3, Sector 19, Dwarka, New Delhi, Delhi 110075</div>
+        <div>
+          <span className="text-slate-400">{hi ? 'फोन: ' : 'Phone: '}</span>
+          <a href="tel:+919211804111" className="text-amber-300 font-semibold hover:underline">
+            +91 92118 04111
+          </a>
+        </div>
+        <div>
+          <span className="text-slate-400">WhatsApp: </span>
+          <a
+            href={BUSINESS.whatsapp}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-amber-300 font-semibold hover:underline"
+          >
+            +91 92118 04111
+          </a>
+        </div>
+        <div>
+          <a
+            href={BUSINESS.hasMap}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-amber-300 font-semibold hover:underline"
+          >
+            {hi ? 'गूगल मैप्स पर देखें →' : 'View on Google Maps →'}
+          </a>
+        </div>
+      </address>
+
+      <div className="mt-6 overflow-x-auto rounded-lg border border-amber-900/40">
+        <table className="w-full text-sm md:text-base">
+          <caption className="sr-only">
+            {hi ? 'त्रिकाल वाणी परामर्श शुल्क' : 'Trikaal Vaani consultation fees'}
+          </caption>
+          <thead className="bg-amber-950/40">
+            <tr>
+              <th scope="col" className="px-4 py-3 text-left font-semibold text-amber-300 border-b border-amber-900/40">
+                {hi ? 'सेवा' : 'Service'}
+              </th>
+              <th scope="col" className="px-4 py-3 text-left font-semibold text-amber-300 border-b border-amber-900/40">
+                {hi ? 'शुल्क' : 'Fee'}
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr className="border-b border-amber-900/20">
+              <td className="px-4 py-3 text-slate-200">
+                {hi ? 'सभी कैलकुलेटर (कुंडली, दशा, मांगलिक, कालसर्प, साढ़े साती, रत्न)' : 'All calculators (Kundli, Dasha, Manglik, Kaal Sarp, Sade Sati, Gemstone)'}
+              </td>
+              <td className="px-4 py-3 font-semibold text-amber-200">{hi ? 'मुफ्त' : 'Free'}</td>
+            </tr>
+            <tr className="border-b border-amber-900/20">
+              <td className="px-4 py-3 text-slate-200">
+                {hi ? 'कोई भी एक डीप रीडिंग (कुंडली मिलान, करियर, वेल्थ, प्रॉपर्टी, स्वप्न, हस्त रेखा)' : 'Any single deep reading (Kundali Milan, Career, Wealth, Property, Swapna, Hast Rekha)'}
+              </td>
+              <td className="px-4 py-3 font-semibold text-amber-200">₹51</td>
+            </tr>
+            <tr className="border-b border-amber-900/20">
+              <td className="px-4 py-3 text-slate-200">
+                {hi ? 'कार्मिक बैकग्राउंड रीडिंग (करियर + धन + रिश्ते)' : 'Karmic Background Reading (career + wealth + relationships)'}
+              </td>
+              <td className="px-4 py-3 font-semibold text-amber-200">₹251</td>
+            </tr>
+            <tr>
+              <td className="px-4 py-3 text-slate-200">
+                {hi ? 'ऑन-कॉल परामर्श' : 'On-Call Consultation'}
+              </td>
+              <td className="px-4 py-3 font-semibold text-amber-200">₹499</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p className="mt-4 text-sm text-slate-400">
+        {hi
+          ? 'कोई छिपा शुल्क नहीं, प्रति-मिनट बिलिंग नहीं, और उपाय रीडिंग में शामिल हैं। कीमत पूरे भारत में एक जैसी है।'
+          : 'No hidden charges, no per-minute billing, and remedies are included in the reading. Pricing is identical across India.'}
+      </p>
+    </section>
+  );
+}
+
+// ==================================================================
 // MAIN PAGE COMPONENT
-// ============================================================
+// ==================================================================
 export default async function BlogArticlePage({
   params,
 }: {
@@ -530,6 +831,7 @@ export default async function BlogArticlePage({
 
   const relatedPosts  = await getRelatedPosts(post.relatedSlugs);
   const jsonLdSchemas = generateJsonLd(post);
+  const isLocalPage   = Boolean(LOCAL_PAGES[post.slug]);
 
   return (
     <>
@@ -608,6 +910,9 @@ export default async function BlogArticlePage({
               {post.directAnswer}
             </p>
           </section>
+
+          {/* ── v2.9: VISIBLE NAP + FEE TABLE (city landing pages only) ── */}
+          {isLocalPage && <LocalNapBlock lang={post.lang} />}
 
           {/* ── v2.2: PLAYBOOK BODY SECTIONS ── */}
           {BODY_SECTIONS.map(({ key, heading, icon }) => (
