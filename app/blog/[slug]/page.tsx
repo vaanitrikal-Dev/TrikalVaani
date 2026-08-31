@@ -1,32 +1,50 @@
 // ============================================================
 // TRIKAL VAANI — DYNAMIC BLOG ARTICLE PAGE (SSR)
 // CEO: Rohiit Gupta | Chief Vedic Architect
-// Version: 2.9
-// Date: 2026-08-31
+// Version: 3.0
+// CHANGE v3.0 — LOCALBUSINESS REMOVED FROM THESE PAGES (2026-08-31):
+//   • v2.9 emitted a full LocalBusiness block on all eight NCR city blog
+//     pages, same NAP, same @id. That was a mistake, and it broke a
+//     decision this codebase had already made and documented.
+//     app/astrologer-noida|gurgaon|ghaziabad/page.tsx each carry a header
+//     stating: ONE physical location, ONE Google Business Profile, therefore
+//     exactly ONE LocalBusiness entity, declared on /astrologer-delhi and
+//     referenced everywhere else — "Do not 'helpfully' add a LocalBusiness
+//     block here." v2.9 added one on eight more pages.
+//     v3.0 emits Service only, with provider/isRelatedTo pointing at
+//     https://trikalvaani.com/#localbusiness. A referenced entity carries the
+//     same weight as a repeated one; repetition is the part that reads as
+//     manipulation to Google.
+//   • areaServed reshaped to City / Delhi NCR / India, matching
+//     app/astrologer-{city}/page.tsx v1.1 exactly, so the four service pages
+//     and these eight describe the same geography in the same words.
+//     ("Delhi NCR" survives only because brand-guard.yml v6 retired the
+//     s/Delhi NCR/India/g auto-fix. On v5 the bot rewrote it in 12 seconds.)
+//   • FEE_LADDER and the visible fee table expanded 4 tiers -> 7, verified
+//     line by line against the live /pricing page on 31 Aug 2026. v2.9 was
+//     missing Rs11 voice, Rs101 Kundali Milan Deep and the Rs151 tier, which
+//     mattered because app/astrologer-{city}/page.tsx v1.1 sends readers here
+//     for "the full fee table".
+//     ⚠️ OPEN ITEM FOR CEO, unchanged from v2.9: Rs499 On-Call Consultation
+//     is NOT listed on /pricing. It is here because you confirmed it is real.
+//     Either add it to /pricing or say the word and it comes out.
+//   • Added PRIMARY_LOCAL_PAGE + a visible "official practice page" link, so
+//     each city blog page points at /astrologer-{city}. These pages are
+//     SUPPORTING content ("near me + fees + free chat"); the service page is
+//     primary. Neither is redirected or canonicalised away — they answer
+//     different questions and now say so.
+//   • The visible NAP block and fee table are UNCHANGED in principle and
+//     stay. They were never the problem; a human reads them and they are
+//     true. Only the schema was wrong.
+//   • No change to metadata, hreflang, Article/FAQ/Breadcrumb/Video schema,
+//     rendering, or any non-city page.
 // CHANGE v2.9 — LOCAL SEO SCHEMA (NCR city landing pages):
 //   • Added NAP constant block (BUSINESS) holding the exact,
 //     Google-Business-Profile-verified name, address, phone, WhatsApp,
-//     website and map link. THIS IS THE SINGLE SOURCE OF TRUTH — if the
-//     GBP is ever edited, edit this block too. One character's difference
-//     between GBP, this schema and the visible page text breaks local SEO.
-//   • Added LOCAL_PAGES — the ONLY slugs that receive LocalBusiness
-//     schema. Emitting LocalBusiness on all ~550 blog posts would be
-//     schema spam; it belongs on genuine local landing pages only.
-//   • generateJsonLd now appends, for those slugs only:
-//       – LocalBusiness  (@id …/#localbusiness, with areaServed = the
-//         city that page targets; the ADDRESS always stays Dwarka,
-//         because that is the only real physical location. Claiming an
-//         address in Noida/Gurgaon/Ghaziabad would be listing fraud.)
-//       – Service + OfferCatalog carrying the published fee ladder
-//         (Free / ₹51 / ₹251 / ₹499). This is what makes the page
-//         eligible for "astrologer fees" answers in AI Overview / SGE.
-//   • DELIBERATELY OMITTED, and must stay omitted until real data exists:
-//       – aggregateRating / reviewCount → no verified reviews yet.
-//         Fabricated ratings trigger a Google manual action.
-//       – geo (lat/long) and openingHoursSpecification → not confirmed
-//         on the GBP yet. Wrong coordinates are worse than none.
-//     Add all three in a v3.0 once reviews and hours are live.
-//   • No layout, styling, data-fetching or existing-schema change.
+//     website and map link. THIS IS THE SINGLE SOURCE OF TRUTH.
+//   • Added LOCAL_PAGES — the only slugs that receive local schema.
+//   • Added the visible NAP + fee block.
+//   • [superseded by v3.0] emitted LocalBusiness on those pages.
 // CHANGE v2.8:
 //   • SectionBlock now renders the new `video` BlogSection variant
 //     (lib/blog-posts.ts v3.5+) — a responsive embedded YouTube iframe,
@@ -156,6 +174,25 @@ const LOCAL_PAGES: Record<string, string> = {
 };
 
 // ------------------------------------------------------------------
+// v3.0 — the PRIMARY local landing page each of these blog pages
+// supports. /astrologer-{city} is the service page the verified GBP
+// points at and the one carrying the LocalBusiness entity; these blog
+// pages are the supporting "near me + fees + free chat" answer. Each
+// now links to its primary so the pair reads as a hierarchy rather
+// than as two pages fighting over one query.
+// ------------------------------------------------------------------
+const PRIMARY_LOCAL_PAGE: Record<string, string> = {
+  'astrologer-near-me-delhi': '/astrologer-delhi',
+  'astrologer-near-me-delhi-hindi': '/astrologer-delhi',
+  'astrologer-near-me-noida': '/astrologer-noida',
+  'astrologer-near-me-noida-hindi': '/astrologer-noida',
+  'astrologer-near-me-gurgaon': '/astrologer-gurgaon',
+  'astrologer-near-me-gurgaon-hindi': '/astrologer-gurgaon',
+  'astrologer-near-me-ghaziabad': '/astrologer-ghaziabad',
+  'astrologer-near-me-ghaziabad-hindi': '/astrologer-ghaziabad',
+};
+
+// ------------------------------------------------------------------
 // The published fee ladder. Kept here (not in Supabase) so that the
 // schema and the page text can never silently drift apart — if a price
 // changes, it changes in one place and in the blog copy together.
@@ -168,10 +205,28 @@ const FEE_LADDER: { name: string; price: string; description: string }[] = [
       'Complete birth chart, running Dasha, dosha severity with cancellation status and gemstone suitability. No signup, no card.',
   },
   {
-    name: 'Deep Vedic Reading (Kundali Milan, Career Pivot, Wealth, Property Yog, Swapna Shastra, Hast Rekha and others)',
+    name: 'Trikaal Ki Awaaz — spoken answer to one question',
+    price: '11',
+    description:
+      'A 60-second spoken reply in Hindi or Hinglish. Larger question packs are on the pricing page.',
+  },
+  {
+    name: 'Deep Reading — one life domain',
     price: '51',
     description:
-      'Any single in-depth reading, computed on Swiss Ephemeris with classical BPHS rules and reviewed by Rohiit Gupta. Remedies included, not sold separately.',
+      'In-depth reading of a single domain with five personalised remedies and action windows, reviewed by Rohiit Gupta.',
+  },
+  {
+    name: 'Kundali Milan — Basic, full 36-Guna Ashtakoot',
+    price: '51',
+    description:
+      'All eight Kootas scored, plus Nadi Dosha and Mangal Dosha with cancellation checked on both charts.',
+  },
+  {
+    name: 'Kundali Milan — Deep, 1000-word with 10 remedies',
+    price: '101',
+    description:
+      'The full Basic analysis expanded into a written narrative with ten remedies. Rs151 adds separate Couple and Parent narratives.',
   },
   {
     name: 'Karmic Background Reading',
@@ -385,7 +440,27 @@ function generateJsonLd(post: BlogPost) {
     });
   }
 
-  // ── v2.9: LocalBusiness + fee OfferCatalog, city landing pages only ──
+  // ── v3.0: Service ONLY. NO LocalBusiness. City landing pages only. ──
+  //
+  // v2.9 emitted a full LocalBusiness block here, on all eight city blog
+  // pages, with the same NAP and the same @id. That was wrong, and it was
+  // wrong against a decision this codebase had already made and written down.
+  // app/astrologer-noida|gurgaon|ghaziabad/page.tsx each carry a header that
+  // says, in as many words: ONE physical location, ONE Google Business
+  // Profile, therefore exactly ONE LocalBusiness entity, and it lives on
+  // /astrologer-delhi. "Do not 'helpfully' add a LocalBusiness block here."
+  // v2.9 did precisely that, eight times over.
+  //
+  // v3.0 removes it. These pages now declare a Service and POINT at the one
+  // LocalBusiness entity via provider @id. Google resolves the reference to
+  // the entity declared on /astrologer-delhi, which is the page the verified
+  // GBP actually points at. Nothing is lost: a referenced entity carries the
+  // same weight as a repeated one, and repetition is the part that reads as
+  // manipulation.
+  //
+  // The VISIBLE NAP block and fee table stay. Those are content a human
+  // reads, they are true, and they are what the "astrologer near me + fees"
+  // query is asking for. It was never the visible text that was the problem.
   const targetCity = LOCAL_PAGES[post.slug];
 
   if (targetCity) {
@@ -393,49 +468,31 @@ function generateJsonLd(post: BlogPost) {
 
     schemas.push({
       '@context': 'https://schema.org',
-      '@type': 'LocalBusiness',
-      '@id': 'https://trikalvaani.com/#localbusiness',
-      name: BUSINESS.name,
-      legalName: BUSINESS.legalName,
-      description: post.description,
-      url: BUSINESS.url,
-      mainEntityOfPage: { '@id': canonicalUrl },
-      image: [BUSINESS.logo],
-      logo: BUSINESS.logo,
-      telephone: BUSINESS.telephone,
-      priceRange: BUSINESS.priceRange,
-      currenciesAccepted: 'INR',
-      // The address is ALWAYS the single real Dwarka location, on every
-      // city page. areaServed carries the city; the address never lies.
-      address: {
-        '@type': 'PostalAddress',
-        streetAddress: BUSINESS.streetAddress,
-        addressLocality: BUSINESS.addressLocality,
-        addressRegion: BUSINESS.addressRegion,
-        postalCode: BUSINESS.postalCode,
-        addressCountry: BUSINESS.addressCountry,
-      },
-      hasMap: BUSINESS.hasMap,
+      '@type': 'Service',
+      '@id': `${canonicalUrl}#service`,
+      serviceType: isHindi ? 'वैदिक ज्योतिष परामर्श' : 'Vedic Astrology Consultation',
+      name: displayTitle(post.title),
+      description: post.directAnswer,
+      url: canonicalUrl,
+      // The single LocalBusiness entity, declared on /astrologer-delhi.
+      // Referenced here, never redeclared.
+      provider: { '@id': 'https://trikalvaani.com/#localbusiness' },
+      isRelatedTo: { '@id': 'https://trikalvaani.com/#localbusiness' },
+      brand: { '@id': BUSINESS.orgId },
+      // Matches the areaServed shape used by app/astrologer-{city}/page.tsx
+      // v1.1, so the four service pages and these eight describe the same
+      // geography the same way.
       areaServed: [
         { '@type': 'City', name: targetCity },
-        { '@type': 'AdministrativeArea', name: 'India' },
+        { '@type': 'Place', name: 'Delhi NCR' },
         { '@type': 'Country', name: 'India' },
       ],
-      founder: { '@id': BUSINESS.founderId },
-      employee: { '@id': BUSINESS.founderId },
-      parentOrganization: { '@id': BUSINESS.orgId },
-      knowsLanguage: ['en-IN', 'hi-IN'],
-      sameAs: [BUSINESS.hasMap],
-      contactPoint: [
-        {
-          '@type': 'ContactPoint',
-          contactType: 'customer service',
-          telephone: BUSINESS.telephone,
-          url: BUSINESS.whatsapp,
-          availableLanguage: ['English', 'Hindi'],
-          areaServed: 'IN',
-        },
-      ],
+      availableChannel: {
+        '@type': 'ServiceChannel',
+        serviceUrl: 'https://trikalvaani.com/#birth-form',
+        servicePhone: BUSINESS.telephone,
+        availableLanguage: ['English', 'Hindi'],
+      },
       hasOfferCatalog: {
         '@type': 'OfferCatalog',
         name: isHindi ? 'ज्योतिष परामर्श शुल्क' : 'Vedic Astrology Consultation Fees',
@@ -450,34 +507,10 @@ function generateJsonLd(post: BlogPost) {
           seller: { '@id': 'https://trikalvaani.com/#localbusiness' },
         })),
       },
-      // NOTE (v2.9): aggregateRating, geo and openingHoursSpecification are
-      // intentionally absent. Add them only when real reviews, confirmed
-      // coordinates and confirmed hours exist. Inventing any of the three
-      // is a Google manual-action risk, not an optimisation.
-    });
-
-    schemas.push({
-      '@context': 'https://schema.org',
-      '@type': 'Service',
-      '@id': `${canonicalUrl}#service`,
-      serviceType: isHindi ? 'वैदिक ज्योतिष परामर्श' : 'Vedic Astrology Consultation',
-      name: displayTitle(post.title),
-      description: post.directAnswer,
-      provider: { '@id': 'https://trikalvaani.com/#localbusiness' },
-      areaServed: { '@type': 'City', name: targetCity },
-      availableChannel: {
-        '@type': 'ServiceChannel',
-        serviceUrl: 'https://trikalvaani.com/#birth-form',
-        servicePhone: BUSINESS.telephone,
-        availableLanguage: ['English', 'Hindi'],
-      },
-      offers: FEE_LADDER.map((f) => ({
-        '@type': 'Offer',
-        name: f.name,
-        price: f.price,
-        priceCurrency: 'INR',
-        availability: 'https://schema.org/InStock',
-      })),
+      // NOTE (v3.0): aggregateRating stays absent, here and on the
+      // LocalBusiness entity itself, until real reviews exist. geo and
+      // openingHours belong on that entity, not on a Service, so they are
+      // not a gap here at all.
     });
   }
 
@@ -719,7 +752,7 @@ function PlaybookBodySection({
 // A LocalBusiness schema whose address appears nowhere on the rendered
 // page is weak-to-ignored, so the same NAP is printed here.
 // ==================================================================
-function LocalNapBlock({ lang }: { lang: string }) {
+function LocalNapBlock({ lang, primaryHref }: { lang: string; primaryHref?: string }) {
   const hi = lang === 'hi';
   return (
     <section
@@ -786,9 +819,27 @@ function LocalNapBlock({ lang }: { lang: string }) {
             </tr>
             <tr className="border-b border-amber-900/20">
               <td className="px-4 py-3 text-slate-200">
-                {hi ? 'कोई भी एक डीप रीडिंग (कुंडली मिलान, करियर, वेल्थ, प्रॉपर्टी, स्वप्न, हस्त रेखा)' : 'Any single deep reading (Kundali Milan, Career, Wealth, Property, Swapna, Hast Rekha)'}
+                {hi ? 'त्रिकाल की आवाज़ — एक सवाल का बोला हुआ जवाब' : 'Trikaal Ki Awaaz — spoken answer to one question'}
+              </td>
+              <td className="px-4 py-3 font-semibold text-amber-200">₹11</td>
+            </tr>
+            <tr className="border-b border-amber-900/20">
+              <td className="px-4 py-3 text-slate-200">
+                {hi ? 'डीप रीडिंग — एक जीवन-क्षेत्र (करियर, वेल्थ, प्रॉपर्टी, स्वप्न, हस्त रेखा)' : 'Deep Reading — one life domain (career, wealth, property, Swapna, Hast Rekha)'}
               </td>
               <td className="px-4 py-3 font-semibold text-amber-200">₹51</td>
+            </tr>
+            <tr className="border-b border-amber-900/20">
+              <td className="px-4 py-3 text-slate-200">
+                {hi ? 'कुंडली मिलान — बेसिक, पूरा 36-गुण अष्टकूट' : 'Kundali Milan — Basic, full 36-Guna Ashtakoot'}
+              </td>
+              <td className="px-4 py-3 font-semibold text-amber-200">₹51</td>
+            </tr>
+            <tr className="border-b border-amber-900/20">
+              <td className="px-4 py-3 text-slate-200">
+                {hi ? 'कुंडली मिलान — डीप (₹151 में कपल + पैरेंट दोनों नैरेटिव)' : 'Kundali Milan — Deep (₹151 for both Couple and Parent narratives)'}
+              </td>
+              <td className="px-4 py-3 font-semibold text-amber-200">₹101</td>
             </tr>
             <tr className="border-b border-amber-900/20">
               <td className="px-4 py-3 text-slate-200">
@@ -811,6 +862,18 @@ function LocalNapBlock({ lang }: { lang: string }) {
           ? 'कोई छिपा शुल्क नहीं, प्रति-मिनट बिलिंग नहीं, और उपाय रीडिंग में शामिल हैं। कीमत पूरे भारत में एक जैसी है।'
           : 'No hidden charges, no per-minute billing, and remedies are included in the reading. Pricing is identical across India.'}
       </p>
+
+      {/* v3.0: point at the primary local service page. This guide answers
+          "near me, what does it cost, can I talk free"; that page is the
+          practice's own local landing page. Saying so out loud keeps the two
+          from competing for the same query. */}
+      {primaryHref && (
+        <p className="mt-3 text-sm">
+          <Link href={primaryHref} className="font-semibold text-amber-300 underline underline-offset-2 hover:text-amber-200 transition">
+            {hi ? 'त्रिकाल वाणी का आधिकारिक पेज देखें →' : 'See the official practice page →'}
+          </Link>
+        </p>
+      )}
     </section>
   );
 }
@@ -912,7 +975,7 @@ export default async function BlogArticlePage({
           </section>
 
           {/* ── v2.9: VISIBLE NAP + FEE TABLE (city landing pages only) ── */}
-          {isLocalPage && <LocalNapBlock lang={post.lang} />}
+          {isLocalPage && <LocalNapBlock lang={post.lang} primaryHref={PRIMARY_LOCAL_PAGE[post.slug]} />}
 
           {/* ── v2.2: PLAYBOOK BODY SECTIONS ── */}
           {BODY_SECTIONS.map(({ key, heading, icon }) => (
