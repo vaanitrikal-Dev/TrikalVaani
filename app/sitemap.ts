@@ -3,8 +3,33 @@
  * 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER 🔱
  * ============================================================================
  * File:        app/sitemap.ts
- * Version:     v8.4
+ * Version:     v8.5
  * Owner:       Rohiit Gupta, Chief Vedic Architect
+ *
+ * Changes v8.4 -> v8.5 (2026-08-31):
+ *   1. PAID SERVICE PAGES ADDED — they were never in the sitemap at all.
+ *      Audit on 31 Aug 2026 of the live sitemap (5,074 <loc> entries) found
+ *      ZERO URLs under /services/. Meanwhile all eight service pages return
+ *      HTTP 200 and are linked from 99 published blog posts via cta_href:
+ *        ex-back-reading 23 · career-pivot 20 · wealth-reading 17
+ *        toxic-boss-radar 14 · child-destiny 11 · property-yog 8
+ *        compatibility 3 · spiritual-purpose 3
+ *      So these are the Rs 51 conversion pages — the only pages on the site
+ *      that take money — and Google has been finding them by crawling
+ *      internal links alone, never from the sitemap. Radar (30 Aug) shows
+ *      "property yog in kundli" stuck at rank 11; this is one plausible
+ *      contributor, though not proven to be the cause.
+ *      This is the exact failure mode the v8.2 note warned about: static
+ *      routes are NOT auto-discovered here. /services (the hub) sat in
+ *      STATIC_ROUTES since v5.x, but no loop ever emitted its children.
+ *      Fix: new SERVICE_ROUTES array + its own emit loop, mirroring
+ *      LOCAL_ROUTES exactly.
+ *      Honest scope note: being absent from a sitemap does not stop a page
+ *      being indexed when it is internally linked, and sitemap `priority` is
+ *      largely ignored by Google. So treat this as closing a real discovery
+ *      and crawl-scheduling gap, not as a guaranteed ranking fix.
+ *   2. No other logic, loop, query, priority or de-dupe behaviour changed.
+ *      Built directly on the deployed v8.4 source, not on any earlier draft.
  *
  * Changes v8.3 -> v8.4 (2026-08-30):
  *   1. BLOG URLS RESTORED (this is the big one).
@@ -173,6 +198,38 @@ const LOCAL_ROUTES = [
   '/astrologer-noida',
   '/astrologer-gurgaon',
   '/astrologer-ghaziabad',
+];
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PAID SERVICE PAGES (v8.5) — /services/{slug}.
+//
+// These are the Rs 51 conversion pages. Until 31 Aug 2026 not one of them was
+// in the sitemap: /services (the hub) has been in STATIC_ROUTES since v5.x,
+// but nothing ever emitted its children. All eight verified HTTP 200 on
+// 31 Aug 2026 and are the cta_href target of 99 published blog posts, so they
+// were being discovered by internal links alone.
+//
+// This list is HAND-MAINTAINED, exactly like LOCAL_ROUTES and CALCULATORS.
+// There is no `services` table in Supabase to read from (checked 31 Aug 2026),
+// so it cannot be made auto like blog / learn / swapna / compatibility are.
+//
+// RULE, same as LOCAL_ROUTES: create app/services/{slug}/page.tsx FIRST, then
+// add the slug here. Adding a slug with no page emits a 404 into the sitemap,
+// which is worse than the page being missing.
+//
+// Do NOT try to generate this list from blog_posts.cta_href — a typo in one
+// blog row would silently push a 404 into the sitemap, and CTA data is not a
+// route registry.
+// ─────────────────────────────────────────────────────────────────────────────
+const SERVICE_ROUTES = [
+  'career-pivot',
+  'child-destiny',
+  'compatibility',
+  'ex-back-reading',
+  'property-yog',
+  'spiritual-purpose',
+  'toxic-boss-radar',
+  'wealth-reading',
 ];
 
 const CALCULATORS = [
@@ -514,6 +571,22 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: path === '/astrologer-delhi' ? 0.9 : 0.8,
     });
   }
+
+  // ── PAID SERVICE PAGES (v8.5) ──────────────────────────────────────
+  // The Rs 51 conversion pages. Absent from every sitemap before v8.5.
+  // Priority 0.9 puts them level with the domain pillars and above blog
+  // posts (0.7), which reflects their commercial role — with the caveat
+  // noted in the header that Google largely ignores this field.
+  // changeFrequency is monthly: the copy is stable, only pricing moves.
+  for (const slug of SERVICE_ROUTES) {
+    entries.push({
+      url: `${BASE}/services/${slug}`,
+      lastModified: now,
+      changeFrequency: 'monthly',
+      priority: 0.9,
+    });
+  }
+  console.log(`[sitemap] services OK — ${SERVICE_ROUTES.length} URLs`);
 
   // ── Calculator detail pages ────────────────────────────────────────
   for (const calc of CALCULATORS) {
