@@ -2,7 +2,7 @@
 // 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER
 // ════════════════════════════════════════════════════════════════════════════
 // File:     components/festival/FestivalPillar.tsx
-// Version:  v2.2 (1 Sep 2026) — festival tithi named beside the sunrise tithi
+// Version:  v2.3 (1 Sep 2026) — Supabase reads expire; tithi name and spacing fixed
 //
 // ── WHY v2.0 ───────────────────────────────────────────────────────────────
 //
@@ -292,10 +292,42 @@ export const labels = (lang: Lang) => L[lang];
 
 // ── Data ────────────────────────────────────────────────────────────────────
 
+/**
+ * Supabase client whose reads expire.
+ *
+ * ── THE BUG THIS FIXES ─────────────────────────────────────────────────────
+ *
+ * Next.js 13's App Router caches every fetch() FOREVER by default, and
+ * supabase-js is built on fetch. So a query that returned nothing once
+ * returned nothing for good, no matter what changed in the database.
+ *
+ * Found on 1 Sep 2026. /hyderabad/events/ganesh-chaturthi-2026 refused to show
+ * its city note while /kolkata/events/durga-puja-2026 showed its own. Both
+ * rows were published and identical in shape. The difference was history: the
+ * Hyderabad page had been opened repeatedly BEFORE the notes were published,
+ * so its query cached an empty result, while the Kolkata page was first opened
+ * after. The page was fine; the cache was holding a snapshot of a moment when
+ * the data did not exist yet.
+ *
+ * This was never limited to city notes. Every read in this file — content,
+ * local terms, catalog timings, upcoming festivals — was frozen the first time
+ * it ran, which means a correction made in Supabase might never have reached
+ * the page at all.
+ *
+ * An hour is well inside the page's own 24-hour revalidate and short enough
+ * that a fix made in the database is visible the same morning.
+ */
 function supa() {
   return createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      auth: { persistSession: false },
+      global: {
+        fetch: (url: RequestInfo | URL, opts?: RequestInit) =>
+          fetch(url, { ...opts, next: { revalidate: 3600 } } as RequestInit),
+      },
+    }
   );
 }
 
@@ -395,11 +427,20 @@ async function getCatalogTiming(base: string): Promise<{ kaal: string | null; ti
 
 /**
  * The tithi a festival is named for, pulled out of its defining_tithi string.
- * "Ashwin Shukla Dashami" -> "Dashami"; "Kartik Amavasya" -> "Amavasya".
+ *
+ *   "Ashwin Shukla Dashami"                  -> "Dashami"
+ *   "Kartik Amavasya"                        -> "Amavasya"
+ *   "Ashwin Shukla Dashami (Vijayadashami)"  -> "Dashami"
+ *
+ * The parenthetical matters: several catalog rows carry the festival's popular
+ * name in brackets, and taking the last word verbatim printed
+ * "(Vijayadashami) begins 12:50" on the Dussehra page and "Shashthi)" on Durga
+ * Puja. Strip the bracket first, then take the last word.
  */
 function festivalTithiName(defining: string | null): string | null {
   if (!defining) return null;
-  const last = defining.trim().split(/\s+/).pop();
+  const cleaned = defining.replace(/\([^)]*\)/g, " ").trim();
+  const last = cleaned.split(/\s+/).filter(Boolean).pop();
   return last || null;
 }
 
@@ -738,9 +779,12 @@ export default async function FestivalPillar(
                     <td className="py-2 text-right font-semibold text-amber-100">
                       {festTithi}
                       {panchang.tithi.ends && (
-                        <span className="ml-1 font-normal text-xs text-slate-400">
-                          {t.beginsAtTime(panchang.tithi.ends)}
-                        </span>
+                        <>
+                          {" "}
+                          <span className="font-normal text-xs text-slate-400">
+                            {t.beginsAtTime(panchang.tithi.ends)}
+                          </span>
+                        </>
                       )}
                     </td></tr>
               )}
@@ -758,8 +802,8 @@ export default async function FestivalPillar(
                 <tr className="bg-amber-50">
                   <td className="py-2 font-semibold text-amber-200">{t.pujaMuhurat}</td>
                   <td className="py-2 text-right font-bold text-amber-300">
-                    {panchang.kaal[pujaKaal]}
-                    <span className="ml-1 font-normal text-xs text-slate-400">
+                    {panchang.kaal[pujaKaal]}{" "}
+                    <span className="font-normal text-xs text-slate-400">
                       ({t.kaalName[pujaKaal] ?? pujaKaal})
                     </span>
                   </td>
@@ -813,9 +857,12 @@ export default async function FestivalPillar(
                   <td className="py-2 text-right font-bold text-blue-900">
                     {visarjan.muhurat}
                     {visarjan.kaal && (
-                      <span className="ml-1 font-normal text-xs text-slate-400">
-                        ({t.kaalName[visarjan.kaal] ?? visarjan.kaal})
-                      </span>
+                      <>
+                        {" "}
+                        <span className="font-normal text-xs text-slate-400">
+                          ({t.kaalName[visarjan.kaal] ?? visarjan.kaal})
+                        </span>
+                      </>
                     )}
                   </td>
                 </tr>
