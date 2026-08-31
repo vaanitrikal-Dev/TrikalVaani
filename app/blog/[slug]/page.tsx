@@ -418,7 +418,7 @@ function generateJsonLd(post: BlogPost) {
       hasMap: BUSINESS.hasMap,
       areaServed: [
         { '@type': 'City', name: targetCity },
-        { '@type': 'AdministrativeArea', name: 'Delhi NCR' },
+        { '@type': 'AdministrativeArea', name: 'India' },
         { '@type': 'Country', name: 'India' },
       ],
       founder: { '@id': BUSINESS.founderId },
