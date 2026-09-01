@@ -1,6 +1,6 @@
 // ============================================================
 // File: app/api/calc/yog/route.ts
-// Version: v2.0 — paid gate (Razorpay Rs 51 / PayPal $7)
+// Version: v2.1 — paid gate + D-7 Saptamsa passthrough (1 Sep 2026)
 // Purpose: Server-side scoring for the three yog calculators —
 //          IAS/UPSC, Videsh Settlement, and Foreign Spouse.
 //
@@ -230,6 +230,10 @@ export async function POST(req: NextRequest) {
       drishti: k?.drishti && Object.keys(k.drishti).length ? k.drishti : null,
       dasamsa: k?.dasamsa && Object.keys(k.dasamsa).length ? k.dasamsa : null,
       navamsa: k?.navamsa && Object.keys(k.navamsa).length ? k.navamsa : null,
+      // D-7 Saptamsa — the progeny varga (BPHS Ch.6 s.11). Null until
+      // astro.py patcher #4 has run, so an engine must guard rather than
+      // assume it is there.
+      saptamsa: k?.saptamsa && Object.keys(k.saptamsa).length ? k.saptamsa : null,
     };
     data.instant.current_dasha = data.dasha.mahadasha;
     data.instant.current_antardasha = data.dasha.antardasha;
