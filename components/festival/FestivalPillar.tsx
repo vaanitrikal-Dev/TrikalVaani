@@ -2,7 +2,7 @@
 // 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER
 // ════════════════════════════════════════════════════════════════════════════
 // File:     components/festival/FestivalPillar.tsx
-// Version:  v2.3 (1 Sep 2026) — Supabase reads expire; tithi name and spacing fixed
+// Version:  v2.4 (1 Sep 2026) — engine reads expire hourly too
 //
 // ── WHY v2.0 ───────────────────────────────────────────────────────────────
 //
@@ -510,8 +510,19 @@ export async function getPanchang(
 ): Promise<Panchang | null> {
   try {
     const q = new URLSearchParams({ date, lat: String(lat), lon: String(lon), city });
+    // One hour, not one day.
+    //
+    // The page itself is ISR-cached for 24h, so a 24h fetch cache underneath it
+    // adds nothing and can outlive an engine change. On 1 Sep 2026 the Ganesh
+    // Chaturthi page showed no Puja Muhurat row: its /panchang call for 14 Sep
+    // had been cached before daily.py v2.1 started returning the kaal windows,
+    // and the stale response was then frozen into the page's own cache. The
+    // visarjan call for 25 Sep, made after v2.1, had the windows and rendered
+    // fine — the same page, two calls, two ages.
+    //
+    // An inner cache should never be older than the thing wrapping it.
     const res = await callVM(`/panchang?${q.toString()}`, {
-      next: { revalidate: 86400 },
+      next: { revalidate: 3600 },
       signal: AbortSignal.timeout(12000),
     });
     if (!res.ok) return null;
