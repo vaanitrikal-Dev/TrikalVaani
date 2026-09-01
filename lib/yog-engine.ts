@@ -3,7 +3,19 @@
  * TRIKAL VAANI — Yog Scoring Foundation
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: lib/yog-engine.ts
- * VERSION: 1.4 (1 Sep 2026)
+ * VERSION: 1.6 (2 Sep 2026)
+ *   v1.6 — karakas() now returns null for PK and DK when fewer than seven
+ *   karaka planets carry a degree. Without the guard, ranked[4] on a short
+ *   list can BE the last element, so PK and DK came back as the same graha
+ *   with no error at all — and a Santan rule would have scored the wrong
+ *   planet while looking perfectly healthy. A full chart always has seven;
+ *   null lets the caller say "not available" instead.
+ *   The SAPTA-scheme choice for PK (ranked[4]) was checked against both
+ *   Jaimini orderings and is correct as written — see the note in karakas().
+ *   v1.5 — Jaimini Putrakaraka (PK) added to karakas(). PK is the santan
+ *   significator and the Santan Yog engine scores it. Purely additive: the
+ *   returned object gains one key, so upsc-engine (AmK) and
+ *   foreign-spouse-engine (DK) are untouched.
  *   v1.4 — D-7 Saptamsa: types plus d7(), d7HouseLord() and isD7Vargottama(),
  *   for the Santan Yog calculator. BPHS Ch.6 s.11 judges CHILDREN in the
  *   Saptamsa; the D-9 already here is the marriage varga, so a progeny
@@ -463,6 +475,7 @@ const KARAKA_PLANETS = ['Sun', 'Moon', 'Mars', 'Mercury', 'Jupiter', 'Venus', 'S
 export function karakas(data: CalcData): {
   AK: CalcPlanet | null;
   AmK: CalcPlanet | null;
+  PK: CalcPlanet | null;
   DK: CalcPlanet | null;
 } {
   const ranked = data.planets
@@ -471,8 +484,29 @@ export function karakas(data: CalcData): {
   return {
     AK: ranked[0] ?? null,
     AmK: ranked[1] ?? null,
+    // Putrakaraka: the FIFTH highest degree — the children significator.
+    //
+    // WHICH SCHEME, AND WHY IT MATTERS. Jaimini is taught two ways. The
+    // SAPTA (seven) scheme ranks the seven grahas Sun..Saturn and the order
+    // is AK, AmK, BK, MK, PuK, GK, DK — so Putrakaraka is the 5th, i.e.
+    // ranked[4]. The ASHTA (eight) scheme adds Rahu and splits Pitri from
+    // Putra, which moves PK to the 6th. KARAKA_PLANETS above holds seven
+    // planets and DK is already read as the lowest of the seven, so this
+    // file is on the SAPTA scheme throughout and ranked[4] is the consistent
+    // answer. Moving to ashta is not a one-line change: Rahu joins the pool,
+    // its degree must be taken as 30 minus its degree in sign because it is
+    // always retrograde, PK becomes ranked[5], and WHICH graha ends up as DK
+    // can change even though the DK rule itself (lowest degree) does not.
+    //
+    // The length guard is not defensive noise. With fewer than seven ranked
+    // planets, ranked[4] can BE the last element — so PK and DK come back as
+    // the same graha, silently and with no error, and every rule built on
+    // Putrakaraka then scores the wrong planet. A full chart always has seven;
+    // returning null on a partial one lets the caller say "not available"
+    // instead of quietly producing a confident wrong answer.
+    PK: ranked.length >= 7 ? ranked[4] : null,
     // Darakaraka: the LOWEST degree of the seven — the spouse significator.
-    DK: ranked.length ? ranked[ranked.length - 1] : null,
+    DK: ranked.length >= 7 ? ranked[ranked.length - 1] : null,
   };
 }
 
