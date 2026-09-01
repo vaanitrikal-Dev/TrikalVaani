@@ -2,7 +2,14 @@
 // File: app/api/calc/kundali/route.ts
 // Purpose: VM bridge for Kundali / Nakshatra / Rashi / Lagna /
 //          Dasha + Shadbala-based Calculators
-// Version: v2.1
+// Version: v2.2
+// Changelog v2.2 (2026-09-01):
+//   SAPTAMSA (D-7) PASSTHROUGH added for the Santan Yog calculator. BPHS Ch.6
+//   s.11 judges children in the Saptamsa; the D-9 already exposed here is the
+//   marriage varga, so a progeny calculator built on it would be reading the
+//   wrong chart. Pure passthrough, null until astro.py patcher #4 has run —
+//   callers must guard, exactly as they do for drishti/dasamsa/navamsa.
+//
 // Changelog v2.1 (2026-09-01):
 //   THREE LIVE BUGS FIXED. All three were found by calling this endpoint
 //   directly on 1 Sep 2026 with two different births and reading the raw
@@ -402,6 +409,12 @@ export async function POST(req: NextRequest) {
       //             career is judged in the Dasamsa (BPHS Ch.6 s.12). Each
       //             graha also carries `vargottama` (same sign in D-1 and D-9).
       navamsa: kundaliData?.navamsa ?? null,
+      //   saptamsa: the D-7 chart. BPHS Ch.6 s.11 reads CHILDREN here — not in
+      //             the Navamsa, which is marriage. Each graha carries
+      //             `vargottama` (same sign in D-1 and D-7), and the chart
+      //             surfaces `fifth_sign`/`fifth_lord`: the 5th of the D-7 is
+      //             progeny within the progeny varga.
+      saptamsa: kundaliData?.saptamsa ?? null,
       strongestPlanet,
       weakestPlanet,
       strengthAvailable,
