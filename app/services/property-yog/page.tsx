@@ -2,7 +2,49 @@
  * TRIKAAL VAANI — trikalvaani.com
  * Chief Vedic Architect: Rohiit Gupta
  * FILE TO PASTE → app/services/property-yog/page.tsx
- * Version: 4.1 — IR-0 cleanup
+ * Version: 5.0 — schema render fix + Hindi layer + hub interlinking
+ *
+ * v5.0 CHANGES vs v4.1 (2026-08-31):
+ *   1. ❗ CRITICAL — SCHEMA WAS NEVER REACHING THE HTML.
+ *      v4.1 emitted the @graph through <Script> from next/script. Verified
+ *      on the live page 31 Aug 2026: this page served ZERO real
+ *      <script type="application/ld+json"> tags. The JSON existed only as
+ *      a deferred "$f" reference inside the React Flight payload.
+ *      Comparison on the same crawl: /hast-rekha-calculator 1 tag,
+ *      /astrologer-delhi 3 tags, /calculators/free-sade-sati-calculator
+ *      1 tag — all fine. Only this page was empty.
+ *      So the money page ranking 11 and 12 has been giving Google and the
+ *      AI crawlers no Service, no Offer, no price and no FAQPage at all.
+ *      FIX: plain <script type="application/ld+json"> rendered directly
+ *      from this server component, and the next/script import removed.
+ *      This is the exact failure app/hast-rekha-calculator/page.tsx v1.2
+ *      already documented — "DO NOT convert back to next/script … the
+ *      schema becomes JS-injected, and AI crawlers do not execute JS."
+ *      That lesson had never been applied here.
+ *      DO NOT reintroduce next/script on this page.
+ *   2. HINDI LAYER — page had 0 Devanagari characters. Radar (30 Aug) has
+ *      "property yog in kundli" at 11 and "संपत्ति योग ज्योतिष" at 12; the
+ *      second is a Hindi query and this page carried no Hindi at all.
+ *      Four new Devanagari H2 sections added (~2,600 Devanagari chars).
+ *   3. "Delhi NCR" RESTORED. v4.1 removed it under the old brand-guard
+ *      rule s/Delhi NCR/India/g. That rule was retired in brand-guard v6
+ *      (31 Aug) after the Google Business Profile was verified, so the
+ *      local wording is correct again and is now a dedicated section.
+ *   4. INTERNAL LINKS 2 -> 26. The property cluster already existed in
+ *      Supabase — the pillar, the yogas guide, Mars-as-Bhoomi-Karaka, the
+ *      Dasha buy-window, 4th-house Mangal and Pitra Dosh, plus two /learn
+ *      references — and NOT ONE was linked from this page. Same pattern as
+ *      the palmistry page: the cluster was fine, the money page was cut
+ *      off from it. Every href verified against the live sitemap.
+ *   5. ₹499 DELIBERATELY NOT ADDED. It is a real product now, but it is
+ *      still absent from /pricing, and v4.1 removed it from here as a
+ *      phantom price. Re-adding it before /pricing lists it would recreate
+ *      exactly the problem v4.1 fixed. This page sells the ₹51 reading.
+ *      Revisit only after /pricing carries the On-Call tier.
+ *   6. Nothing else touched: metadata, hero, AuthorStrip, DeliverableCard,
+ *      MaaDivineSeva, FaqSection, CtaSection and all v4.1 IR-0 cleanups
+ *      (no fake testimonials, no strike-through price, /founder links)
+ *      are unchanged.
  *
  * v4.1 CHANGES vs v4.0:
  *   ❌ REMOVED fake testimonials (fabricated reviews + ★★★★★ + "Verified Experiences")
@@ -15,7 +57,6 @@
  */
 import type { Metadata } from "next";
 import Link from "next/link";
-import Script from "next/script";
 import SiteNav from "@/components/layout/SiteNav";
 import SiteFooter from "@/components/layout/SiteFooter";
 
@@ -44,7 +85,10 @@ const schema = {
 export default function PropertyYogPage() {
   return (
     <>
-      <Script id="schema-property-yog" type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
+      {/* v5.0: plain <script>, rendered by this SERVER component so it lands
+          in the SSR HTML. next/script deferred it into the Flight payload and
+          the page shipped with zero structured data. Do not change this back. */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
       <main className="min-h-screen bg-[#080B12] text-white">
         <SiteNav />
         <section className="relative overflow-hidden pt-28 pb-20 px-4">
@@ -113,6 +157,7 @@ export default function PropertyYogPage() {
           { q: "What is Sade Sati and how does it affect property buying?", a: "Sade Sati is Saturn's 7.5-year transit over your Moon sign. Buying property during peak Sade Sati can invite delays, disputes, or depreciation. Rohiit Gupta checks your Sade Sati status before recommending any purchase timing." },
           { q: "Can astrology predict legal disputes in property purchase?", a: "Yes. The 12th house (losses), 6th house (disputes), and malefic planets in the 4th house can indicate legal complications. Rohiit Gupta reads these risk indicators as part of every property yog reading." },
         ]} />
+        <PropertyHindiBlock />
         <CtaSection headline="Before You Sign Anything —" highlight="Read Your Stars." body="A property is a multi-lakh decision. ₹51 to verify if the timing is right — or if your chart is warning you to wait." segment="property-yog" />
         <SiteFooter />
       </main>
@@ -120,6 +165,170 @@ export default function PropertyYogPage() {
   );
 }
 /* ─── SHARED COMPONENTS (inlined) ─────────────── */
+
+// ── v5.0: Hindi + hub content, rendered as plain server markup ──────
+// Every href below was verified against the live sitemap on 31 Aug 2026.
+type PyLink = { href: string; label: string; note: string };
+
+const PY_HUB_HI: PyLink[] = [
+  { href: '/blog/property-yog-real-estate-astrology-hindi', label: 'प्रॉपर्टी योग — पूरी गाइड', note: 'यहाँ से शुरू करें' },
+  { href: '/blog/property-yogas-raj-jupiter-mars-dhana-astrology-hindi', label: 'संपत्ति योग समझें', note: 'राज योग, बृहस्पति-मंगल, धन योग' },
+  { href: '/blog/mars-bhoomi-karaka-property-astrology-hindi', label: 'मंगल — भूमि कारक', note: 'ज़मीन का असली कारक ग्रह' },
+  { href: '/blog/dasha-timing-property-buy-window-astrology-hindi', label: 'दशा और खरीद-विंडो', note: 'कब खरीदें, कब रुकें' },
+  { href: '/blog/mangal-dosh-4th-house-effects-hindi', label: 'चौथे भाव में मंगल दोष', note: 'घर, माता और उपाय' },
+  { href: '/blog/pitra-dosh-in-4th-house-hindi', label: 'चतुर्थ भाव में पितृ दोष', note: 'पैतृक संपत्ति के विवाद' },
+];
+
+const PY_HUB_EN: PyLink[] = [
+  { href: '/blog/property-yog-real-estate-astrology', label: 'Property Yog — complete guide', note: 'The pillar' },
+  { href: '/blog/property-yogas-raj-jupiter-mars-dhana-astrology', label: 'Property Yogas explained', note: 'Raj, Jupiter-Mars, Dhana' },
+  { href: '/blog/mars-bhoomi-karaka-property-astrology', label: 'Mars as Bhoomi Karaka', note: 'The land significator' },
+  { href: '/blog/dasha-timing-property-buy-window-astrology', label: 'Dasha and your buy window', note: 'When to move, when to wait' },
+  { href: '/learn/property-prediction-astrology', label: 'Property prediction — reference', note: 'Houses, lords, yogas' },
+  { href: '/learn/vehicle-purchase-prediction', label: 'Vehicle purchase timing', note: '4th house, the other asset' },
+];
+
+const PY_SECTIONS: { id: string; h2: string; paras: string[] }[] = [
+  {
+    id: 'sampatti-yog-jyotish',
+    h2: 'संपत्ति योग ज्योतिष — कुंडली में प्रॉपर्टी योग क्या होता है',
+    paras: [
+      '**संपत्ति योग वह ग्रह-संयोजन है जो अचल संपत्ति के स्वामित्व का संकेत देता है।** यह किसी एक ग्रह से नहीं बनता — यह **चतुर्थ भाव**, उसके **स्वामी**, और **मंगल** के आपसी सम्बन्ध से बनता है। चतुर्थ भाव घर, भूमि, माता और सुख का भाव है; मंगल भूमि का कारक है; और शनि उस संपत्ति के दीर्घकालिक मूल्य को तय करते हैं।',
+      'शास्त्र में जो संयोजन सबसे प्रबल माने जाते हैं वे तीन हैं। **चतुर्थेश का एकादश भाव से सम्बन्ध** — यानी घर का भाव लाभ के भाव से जुड़ जाए; यही सबसे स्पष्ट संपत्ति योग है। **गुरु की चतुर्थ भाव पर दृष्टि** — विस्तार और शुभता। और **बलवान मंगल**, विशेषकर जब वे चतुर्थ या दशम से सम्बन्धित हों। इन तीनों का शास्त्रीय विवरण [संपत्ति योग समझें — राज योग, बृहस्पति-मंगल और धन योग](/blog/property-yogas-raj-jupiter-mars-dhana-astrology-hindi) में है।',
+      'पर योग का होना अकेला काफी नहीं है, और यही वह बात है जो सबसे कम बताई जाती है: **योग को सक्रिय करने के लिए सही दशा चाहिए।** जिस कुंडली में प्रबल संपत्ति योग है पर चतुर्थेश की दशा अभी दूर है, वहाँ खरीद टल सकती है या भारी पड़ सकती है। अपनी चल रही दशा [मुफ्त दशा कैलकुलेटर](/calculators/free-dasha-calculator) से देख लीजिए — यह बीस सेकंड का काम है और खरीद के फैसले पर सीधा असर डालता है।',
+    ],
+  },
+  {
+    id: 'ghar-kab-kharidein',
+    h2: 'घर खरीदने का शुभ समय — कुंडली से कैसे तय करें',
+    paras: [
+      'यह सवाल दो हिस्सों में बँटता है, और लोग अक्सर दूसरे हिस्से पर अटक जाते हैं। **पहला: क्या आपकी कुंडली में संपत्ति योग है?** दूसरा: **क्या अभी उसका समय है?** पहला जन्म कुंडली से तय होता है और जीवन भर एक ही रहता है; दूसरा दशा और गोचर से बदलता रहता है।',
+      'समय तय करने के लिए तीन चीजें एक साथ देखी जाती हैं। **चल रही महादशा और अंतर्दशा** — क्या चतुर्थेश, मंगल या गुरु की अवधि सक्रिय है; यह [दशा और खरीद-विंडो](/blog/dasha-timing-property-buy-window-astrology-hindi) में विस्तार से है। **शनि का गोचर** — [साढ़े साती](/calculators/free-sade-sati-calculator) के शिखर चरण में की गई बड़ी खरीद अक्सर विलंब, विवाद या मूल्य-ह्रास लाती है। और **चतुर्थ भाव की वर्तमान स्थिति** — कोई पाप ग्रह वहाँ बैठा या दृष्टि डाल रहा हो तो सावधानी।',
+      'रजिस्ट्री या गृह प्रवेश की तिथि के लिए **मुहूर्त** अलग विषय है और वह पंचांग से निकलता है, कुंडली से नहीं — शुभ तिथियाँ [पंचांग](/panchang) पर प्रतिदिन अपडेट होती हैं। पर एक बात साफ रखिए: **अच्छा मुहूर्त गलत दशा को ठीक नहीं करता।** पहले दशा देखिए, फिर मुहूर्त।',
+    ],
+  },
+  {
+    id: 'kaun-se-grah',
+    h2: 'संपत्ति के लिए कौन से ग्रह जिम्मेदार होते हैं',
+    paras: [
+      '**मंगल — भूमि कारक।** शास्त्र में भूमि का सीधा कारक मंगल हैं, और यही कारण है कि प्रॉपर्टी की हर गंभीर रीडिंग मंगल से शुरू होती है। बलवान मंगल संपत्ति देते हैं; पीड़ित मंगल संपत्ति में विवाद, सीमा-झगड़ा या जल्दबाजी का सौदा। पूरा विश्लेषण [मंगल — भूमि कारक](/blog/mars-bhoomi-karaka-property-astrology-hindi) में है।',
+      '**शनि — स्थायित्व और मूल्य।** शनि तय करते हैं कि संपत्ति टिकेगी और बढ़ेगी या बोझ बनेगी। **गुरु — विस्तार।** चतुर्थ भाव पर गुरु की दृष्टि बड़ा और शुभ घर देती है। **चंद्र — मानसिक सुख**, क्योंकि चतुर्थ भाव का कारक चंद्रमा भी है; इसीलिए कुछ लोगों को बड़ा घर मिलकर भी सुख नहीं मिलता।',
+      'और एक चेतावनी जो पैसे बचाती है: **पैतृक संपत्ति के विवाद अक्सर चतुर्थ भाव के पितृ दोष से जुड़े मिलते हैं** — यह [चतुर्थ भाव में पितृ दोष](/blog/pitra-dosh-in-4th-house-hindi) में खोला गया है, और उसे [मुफ्त पितृ दोष कैलकुलेटर](/calculators/free-pitra-dosh-calculator) से जाँचा जा सकता है। इसी तरह [चौथे भाव में मंगल दोष](/blog/mangal-dosh-4th-house-effects-hindi) घर की शांति पर असर डालता है — वह [मांगलिक कैलकुलेटर](/calculators/free-manglik-dosh-calculator) से मुफ्त जाँच लीजिए।',
+    ],
+  },
+  {
+    id: 'delhi-ncr-property',
+    h2: 'दिल्ली NCR में प्रॉपर्टी — और हर जगह',
+    paras: [
+      'त्रिकाल वाणी **द्वारका, नई दिल्ली** से चलता है, और स्वाभाविक रूप से सबसे ज्यादा प्रॉपर्टी सवाल **दिल्ली NCR** से ही आते हैं — नोएडा एक्सटेंशन और ग्रेटर नोएडा वेस्ट के फ्लैट, गुड़गांव के नए सेक्टर, गाजियाबाद में इंदिरापुरम और राज नगर एक्सटेंशन, और दिल्ली में पैतृक मकान का बँटवारा।',
+      'पर रीडिंग शहर से नहीं बदलती, और यह साफ कह देना ईमानदारी है: **कुंडली वही रहती है चाहे आप द्वारका में हों या दुबई में।** चतुर्थ भाव, मंगल और दशा — तीनों जन्म विवरण से निकलते हैं, संपत्ति के पते से नहीं। दिल्ली NCR के ग्राहक ज्यादा इसलिए हैं क्योंकि प्रैक्टिस यहीं है, इसलिए नहीं कि यहाँ की रीडिंग अलग होती है।',
+      'स्थानीय संदर्भ चाहिए तो [दिल्ली में ज्योतिषी](/astrologer-delhi) पेज पर पूरा पता, फोन और फीस है। और कीमत हर जगह एक जैसी है — **₹51**, चाहे संपत्ति दस लाख की हो या दस करोड़ की।',
+    ],
+  },
+];
+
+function PyHub({ items }: { items: PyLink[] }) {
+  return (
+    <ul className="space-y-2.5">
+      {items.map((i) => (
+        <li key={i.href}>
+          <Link href={i.href} className="group block rounded-lg px-3 py-2 transition hover:bg-white/5">
+            <span className="block text-sm font-semibold text-[#D4AF37] group-hover:brightness-125">{i.label}</span>
+            <span className="block text-xs text-gray-500">{i.note}</span>
+          </Link>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function PyRich({ text, k }: { text: string; k: string }) {
+  const parts = text.split(/(\[[^\]]+\]\([^)]+\)|\*\*[^*]+\*\*)/g);
+  return (
+    <>
+      {parts.map((part, i) => {
+        const link = part.match(/^\[([^\]]+)\]\(([^)]+)\)$/);
+        if (link) {
+          return (
+            <Link key={`${k}-l-${i}`} href={link[2]} className="text-[#D4AF37] font-semibold underline underline-offset-2 hover:brightness-125">
+              {link[1]}
+            </Link>
+          );
+        }
+        if (part.startsWith('**') && part.endsWith('**')) {
+          return <strong key={`${k}-b-${i}`} className="text-[#D4AF37]">{part.slice(2, -2)}</strong>;
+        }
+        return <span key={`${k}-s-${i}`}>{part}</span>;
+      })}
+    </>
+  );
+}
+
+function PropertyHindiBlock() {
+  return (
+    <section className="px-4 py-16">
+      <div className="max-w-4xl mx-auto">
+        {PY_SECTIONS.map((s) => (
+          <div key={s.id} id={s.id} className="scroll-mt-24 mb-10">
+            <h2 className="font-serif text-2xl md:text-3xl font-bold mb-4 text-[#D4AF37]">{s.h2}</h2>
+            {s.paras.map((p, i) => (
+              <p key={i} className="text-gray-300 leading-relaxed mb-4">
+                <PyRich text={p} k={`${s.id}-${i}`} />
+              </p>
+            ))}
+          </div>
+        ))}
+
+        <h2 className="font-serif text-2xl md:text-3xl font-bold mb-3 mt-14 text-[#D4AF37]">
+          प्रॉपर्टी ज्योतिष — पूरा गाइड पढ़ें
+        </h2>
+        <p className="text-gray-300 leading-relaxed mb-6">
+          नीचे हर विषय पर अलग विस्तृत लेख है — हिंदी और अंग्रेज़ी दोनों में। खरीदने से पहले कम से कम
+          दशा और चतुर्थ भाव वाले दो लेख जरूर पढ़िए।
+        </p>
+        <div className="grid gap-8 md:grid-cols-2">
+          <div>
+            <h3 className="mb-3 border-b border-[#D4AF37]/25 pb-2 font-serif text-base font-bold text-gray-200">हिंदी में</h3>
+            <PyHub items={PY_HUB_HI} />
+          </div>
+          <div>
+            <h3 className="mb-3 border-b border-[#D4AF37]/25 pb-2 font-serif text-base font-bold text-gray-200">In English</h3>
+            <PyHub items={PY_HUB_EN} />
+          </div>
+        </div>
+
+        <div className="mt-12 rounded-2xl border border-[#D4AF37]/30 bg-[#D4AF37]/5 p-6">
+          <h2 className="font-serif text-xl font-bold mb-3 text-[#D4AF37]">खरीदने से पहले ये तीन मुफ्त जाँच कर लीजिए</h2>
+          <p className="text-gray-300 leading-relaxed mb-4">
+            ₹51 खर्च करने से पहले भी — ये तीनों मुफ्त हैं और अक्सर आधा जवाब वहीं मिल जाता है।
+          </p>
+          <ul className="space-y-2 text-[15px] text-gray-300">
+            <li>
+              <Link href="/calculators/free-dasha-calculator" className="text-[#D4AF37] underline underline-offset-4">दशा कैलकुलेटर</Link>
+              {' '}— अभी कौन सी महादशा चल रही है, और अगली कब।
+            </li>
+            <li>
+              <Link href="/calculators/free-sade-sati-calculator" className="text-[#D4AF37] underline underline-offset-4">साढ़े साती कैलकुलेटर</Link>
+              {' '}— शनि का दबाव चल रहा है या नहीं, और किस चरण में।
+            </li>
+            <li>
+              <Link href="/calculators/free-kundali-calculator" className="text-[#D4AF37] underline underline-offset-4">मुफ्त कुंडली</Link>
+              {' '}— चतुर्थ भाव और मंगल की असली स्थिति, भाव सहित।
+            </li>
+          </ul>
+          <p className="text-gray-500 text-sm mt-4">
+            संपत्ति के साथ धन का पूरा चित्र चाहिए तो{' '}
+            <Link href="/services/wealth-reading" className="text-[#D4AF37] underline underline-offset-4">वेल्थ रीडिंग</Link>
+            {' '}और{' '}
+            <Link href="/karmic-background-reading" className="text-[#D4AF37] underline underline-offset-4">कार्मिक बैकग्राउंड रीडिंग</Link>
+            {' '}देखिए। सारे विकल्प{' '}
+            <Link href="/pricing" className="text-[#D4AF37] underline underline-offset-4">प्राइसिंग पेज</Link> पर हैं।
+          </p>
+        </div>
+      </div>
+    </section>
+  );
+}
 
 function AuthorStrip() {
   return (
