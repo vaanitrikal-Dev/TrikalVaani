@@ -3,8 +3,37 @@
  * 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER 🔱
  * ============================================================================
  * File:        app/sitemap.ts
- * Version:     v8.5
+ * Version:     v8.6
  * Owner:       Rohiit Gupta, Chief Vedic Architect
+ *
+ * Changes v8.5 -> v8.6 (2026-08-31):
+ *   1. DAILY RASHIFAL ADDED — it was absent from the sitemap entirely, the
+ *      same gap /services/ had. /rashifal is linked from 3 published blog
+ *      posts and /rashifal/<date> returns HTTP 200, so Google has been
+ *      finding it by internal link alone.
+ *      WHAT IS EMITTED, and the reasoning, because this one needed a
+ *      judgement call rather than a loop:
+ *        • ONLY TODAY'S DATED PAGE, /rashifal/<today>. That URL is the
+ *          canonical (verified: it self-canonicalises), it returns 200, and
+ *          because this file revalidates hourly the entry rolls forward on
+ *          its own. No cron, no seeding, no maintenance.
+ *        • NOT the bare /rashifal hub. It 307-redirects to today's dated
+ *          page, and a redirecting URL in a sitemap is reported in Search
+ *          Console as "Page with redirect" — a soft error that helps nobody.
+ *          Google still reaches the hub through the 3 internal links.
+ *        • NOT the 83 past dates sitting in daily_rashifal_cache. A daily
+ *          horoscope is stale the morning after; 83 near-identical thin
+ *          pages would spend crawl budget to rank for nothing. Radar's whole
+ *          finding was about crawl efficiency, and this would work against it.
+ *        • NOT future dates either. /rashifal/2026-09-15 does return 200, but
+ *          the content is generated on demand and does not meaningfully exist
+ *          yet, so submitting it would be submitting an empty page.
+ *      Deliberate contrast with the Panchang block below, which DOES emit
+ *      today + 365: panchang_daily is pre-seeded and future panchang is
+ *      genuinely useful for muhurat planning. Rashifal is the opposite —
+ *      only today has any value. Same site, opposite correct answer.
+ *   2. No other logic, loop, query, priority or de-dupe behaviour changed.
+ *      Built on the deployed v8.5 source.
  *
  * Changes v8.4 -> v8.5 (2026-08-31):
  *   1. PAID SERVICE PAGES ADDED — they were never in the sitemap at all.
@@ -518,6 +547,17 @@ async function readDreamSymbols(): Promise<{ symbols: string[]; categories: stri
   }
 }
 
+/**
+ * v8.6 — today's date as YYYY-MM-DD, used for the single Rashifal URL.
+ * Uses UTC like every other date helper in this file so the sitemap does not
+ * flip between two dates depending on which region the build runs in.
+ */
+function todayISO(): string {
+  const d = new Date();
+  d.setUTCHours(0, 0, 0, 0);
+  return d.toISOString().split('T')[0];
+}
+
 function nextNDates(n: number): string[] {
   const dates: string[] = [];
   const today = new Date();
@@ -771,6 +811,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   for (const date of panchangDates) {
     entries.push({ url: `${BASE}/panchang/${date}`, lastModified: now, changeFrequency: 'daily', priority: 0.5 });
   }
+
+  // ── DAILY RASHIFAL (v8.6) ──────────────────────────────────────────
+  // Exactly one URL: today's dated page. See the header note for why the
+  // bare /rashifal hub, the 83 cached past dates and the on-demand future
+  // dates are all deliberately excluded.
+  entries.push({
+    url: `${BASE}/rashifal/${todayISO()}`,
+    lastModified: now,
+    changeFrequency: 'daily',
+    priority: 0.7,
+  });
+  console.log('[sitemap] rashifal OK — 1 URL');
 
   // ── Public report pages ────────────────────────────────────────────
   const reports = await readReportSlugs();
