@@ -2,7 +2,18 @@
 // 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER
 // ════════════════════════════════════════════════════════════════════════════
 // File:     components/festival/FestivalPillar.tsx
-// Version:  v2.4 (1 Sep 2026) — engine reads expire hourly too
+// Version:  v2.5 (1 Sep 2026) — JSON-LD added (page had none at all)
+//
+// ── v2.5 ───────────────────────────────────────────────────────────────────
+// This component rendered ZERO structured data. Not deferred, not broken by
+// next/script — never written. Because four routes share this file, that was
+// 3,383 sitemap URLs (2,795 city-festival + 300 Hindi + 288 national) served
+// to Google and to AI crawlers with no schema whatsoever. Verified against the
+// live site on 31 Aug 2026 alongside /blog/pitra-dosh (3 tags) and
+// /astrologer-delhi (3 tags), which are fine.
+// See buildFestivalSchema() below for what is emitted and, just as important,
+// why Event is deliberately NOT emitted.
+// Nothing else in this file changed.
 //
 // ── WHY v2.0 ───────────────────────────────────────────────────────────────
 //
@@ -644,6 +655,139 @@ export function festivalHref(
   return citySlug ? `/hi/${citySlug}/${s}` : `/hi/${s}`;
 }
 
+// ── JSON-LD (v2.5) ──────────────────────────────────────────────────────────
+//
+// Until v2.5 this component emitted NO structured data at all. Not broken,
+// not deferred — simply never written. Verified on the live site 31 Aug 2026:
+// /events/janmashtami-2026, /delhi/events/janmashtami-2026 and
+// /hi/janmashtami-kab-hai each served ZERO <script type="application/ld+json">
+// tags, while /blog/pitra-dosh served 3 and /astrologer-delhi served 3.
+// Four routes feed this component, so that is 3,383 sitemap URLs — the single
+// largest structured-data gap on the site.
+//
+// WHAT IS EMITTED, and why each one:
+//   Article        — the page is a written guide; safe and always valid.
+//   BreadcrumbList — mirrors the visible breadcrumb already rendered below.
+//   FAQPage        — only when content.faqs exists. These pages rank for
+//                    "kab hai" queries and the FAQ is where that answer lives.
+//   HowTo          — only when content.puja_vidhi exists. A puja vidhi with
+//                    {step, detail} pairs is literally a HowTo; nothing is
+//                    invented, the steps are the ones already on the page.
+//
+// WHAT IS DELIBERATELY NOT EMITTED — Event.
+//   Event is the obvious candidate for a festival page and it is tempting.
+//   It is not emitted because Google's Event rich result expects a real
+//   occurrence with a location and, ideally, offers. A national festival
+//   observed at home has no venue, and a city page's "location" would be the
+//   whole city, which is not where the event happens either. Emitting Event
+//   without a defensible location earns Search Console warnings and no rich
+//   result, which is worse than emitting nothing.
+//   If the CEO wants Event, the honest version needs a real venue — e.g. a
+//   named temple from City.famous_temples with its address — and should be
+//   limited to city pages. That is a separate decision, not a default.
+//
+// Language is set from `lang`, so the Hindi pages declare hi-IN rather than
+// inheriting en-IN, and each page self-canonicalises to its own route.
+function buildFestivalSchema(opts: {
+  lang: Lang;
+  url: string;
+  name: string;
+  placeName: string;
+  festival: DbFestival;
+  content: Content | null;
+  city: City | null;
+  pretty: string;
+}) {
+  const { lang, url, name, placeName, festival, content, city, pretty } = opts;
+  const inLanguage = lang === "hi" ? "hi-IN" : "en-IN";
+  const headline = content?.seo_title || `${name} — ${placeName}`;
+  const description =
+    content?.seo_description || content?.direct_answer || festival.geo_answer || headline;
+
+  const graph: Record<string, unknown>[] = [
+    {
+      "@type": "Article",
+      "@id": `${url}#article`,
+      headline,
+      description,
+      inLanguage,
+      datePublished: festival.date,
+      dateModified: new Date().toISOString().split("T")[0],
+      mainEntityOfPage: { "@type": "WebPage", "@id": url },
+      author: {
+        "@type": "Person",
+        "@id": `${SITE_URL}/#rohiit-gupta`,
+        name: AUTHOR_NAME,
+        jobTitle: "Chief Vedic Architect",
+        url: `${SITE_URL}/founder`,
+      },
+      publisher: {
+        "@type": "Organization",
+        "@id": `${SITE_URL}/#organization`,
+        name: "Trikaal Vaani",
+        url: SITE_URL,
+        logo: { "@type": "ImageObject", url: `${SITE_URL}/logo.png` },
+      },
+      image: [OG_IMAGE],
+      about: [
+        { "@type": "Thing", name },
+        ...(festival.deity ? [{ "@type": "Thing", name: festival.deity }] : []),
+        ...(city ? [{ "@type": "City", name: city.name }] : []),
+      ],
+      ...(content?.keywords?.length ? { keywords: content.keywords.join(", ") } : {}),
+      speakable: {
+        "@type": "SpeakableSpecification",
+        cssSelector: ["h1", ".geo-direct-answer"],
+      },
+    },
+    {
+      "@type": "BreadcrumbList",
+      "@id": `${url}#breadcrumb`,
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
+        ...(city
+          ? [{ "@type": "ListItem", position: 2, name: city.name, item: `${SITE_URL}/${city.slug}/panchang` }]
+          : []),
+        { "@type": "ListItem", position: city ? 3 : 2, name, item: url },
+      ],
+    },
+  ];
+
+  if (content?.faqs?.length) {
+    graph.push({
+      "@type": "FAQPage",
+      "@id": `${url}#faq`,
+      inLanguage,
+      mainEntity: content.faqs.map((q) => ({
+        "@type": "Question",
+        name: q.q,
+        acceptedAnswer: { "@type": "Answer", text: q.a },
+      })),
+    });
+  }
+
+  if (content?.puja_vidhi?.length) {
+    graph.push({
+      "@type": "HowTo",
+      "@id": `${url}#howto`,
+      name: lang === "hi" ? `${name} पूजा विधि` : `${name} Puja Vidhi`,
+      description:
+        lang === "hi"
+          ? `${name} की पूजा कैसे करें — चरण दर चरण विधि।`
+          : `How to perform ${name} puja, step by step.`,
+      inLanguage,
+      step: content.puja_vidhi.map((s, i) => ({
+        "@type": "HowToStep",
+        position: i + 1,
+        name: s.step,
+        text: s.detail,
+      })),
+    });
+  }
+
+  return { "@context": "https://schema.org", "@graph": graph };
+}
+
 // ── The page ────────────────────────────────────────────────────────────────
 
 export default async function FestivalPillar(
@@ -712,6 +856,14 @@ export default async function FestivalPillar(
     : null;
 
   const faqs = content?.faqs ?? [];
+
+  // v2.5 — self-canonical URL for this exact route, and the graph built from it.
+  const canonicalUrl = `${SITE_URL}${festivalHref(
+    lang, city?.slug ?? null, f.festival_slug, content?.page_slug ?? null,
+  )}`;
+  const schema = buildFestivalSchema({
+    lang, url: canonicalUrl, name, placeName, festival: f, content, city, pretty,
+  });
   // Design tokens lifted verbatim from app/blog/[slug]/page.tsx so a festival
   // page and a blog post are visibly the same site.
   const H2   = "mt-12 mb-4 text-2xl md:text-3xl font-bold text-amber-300";
@@ -722,6 +874,15 @@ export default async function FestivalPillar(
 
   return (
     <article className="min-h-screen bg-[#080B12] text-white">
+      {/* v2.5: plain <script>, rendered by this SERVER component so it lands in
+          the SSR HTML. Do NOT move this to next/script — outside the root
+          layout that defers the JSON into the Flight payload and the tag never
+          reaches the HTML, which is exactly the failure found on
+          /services/property-yog on 31 Aug 2026. */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+      />
       <div className="mx-auto max-w-4xl px-4 py-12 md:py-16">
 
         <nav aria-label="Breadcrumb" className="mb-8 text-sm text-slate-400">
