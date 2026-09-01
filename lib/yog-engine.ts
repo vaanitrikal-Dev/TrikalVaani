@@ -3,7 +3,11 @@
  * TRIKAL VAANI — Yog Scoring Foundation
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: lib/yog-engine.ts
- * VERSION: 1.3
+ * VERSION: 1.4 (1 Sep 2026)
+ *   v1.4 — D-7 Saptamsa: types plus d7(), d7HouseLord() and isD7Vargottama(),
+ *   for the Santan Yog calculator. BPHS Ch.6 s.11 judges CHILDREN in the
+ *   Saptamsa; the D-9 already here is the marriage varga, so a progeny
+ *   calculator built on it would be reading the wrong chart.
  * SIGNED: ROHIIT GUPTA, CEO
  * ============================================================
  * Shared by all three yog calculators:
@@ -83,6 +87,16 @@ export interface NavamsaGraha extends DasamsaGraha {
   vargottama: boolean;
 }
 
+/**
+ * D-7 Saptamsa — the PROGENY varga. BPHS Ch.6 s.11 judges children here.
+ * Reading children in the D-9 instead would be reading the marriage chart.
+ */
+export interface SaptamsaGraha extends DasamsaGraha {
+  /** Same sign in D-1 and D-7 — the progeny promise confirmed in its own varga. */
+  vargottama: boolean;
+  d1_sign?: string | null;
+}
+
 export interface CalcData {
   instant: {
     lagna: string | null;
@@ -103,6 +117,15 @@ export interface CalcData {
   navamsa: {
     lagna: { sign: string; sign_en: string; sign_lord: string };
     grahas: NavamsaGraha[];
+  } | null;
+  /** D-7 Saptamsa — children. Null until astro.py patcher #4 has run. */
+  saptamsa: {
+    lagna?: { sign: string; sign_en: string; sign_lord: string };
+    /** The 5th of the D-7 — progeny within the progeny chart. */
+    fifth_sign?: string;
+    fifth_lord?: string;
+    grahas: SaptamsaGraha[];
+    vargottama_planets?: string[];
   } | null;
 }
 
@@ -398,6 +421,30 @@ export function d9HouseLord(data: CalcData, house: number): string | null {
   if (lagnaIdx < 0) return null;
   const sign = SIGN_ORDER[(lagnaIdx + house - 1) % 12];
   return SIGN_LORD[sign] ?? null;
+}
+
+/**
+ * A graha's D-7 position. The Saptamsa is the progeny varga — BPHS Ch.6 s.11.
+ * Returns null when the VM has not been patched, so a caller can say "not
+ * available" rather than quietly scoring a chart it never received.
+ */
+export function d7(data: CalcData, name: string | null): SaptamsaGraha | null {
+  if (!name || !data.saptamsa) return null;
+  return data.saptamsa.grahas.find((g) => g.planet === name) ?? null;
+}
+
+/** Lord of a house counted from the D-7 lagna. Null if the D-7 is absent. */
+export function d7HouseLord(data: CalcData, house: number): string | null {
+  if (!data.saptamsa?.lagna) return null;
+  const lagnaIdx = SIGN_ORDER.indexOf(data.saptamsa.lagna.sign);
+  if (lagnaIdx < 0) return null;
+  const sign = SIGN_ORDER[(lagnaIdx + house - 1) % 12];
+  return SIGN_LORD[sign] ?? null;
+}
+
+/** Same sign in D-1 and D-7 — the D-7 analogue of vargottama. */
+export function isD7Vargottama(data: CalcData, name: string | null): boolean {
+  return d7(data, name)?.vargottama === true;
 }
 
 export function isVargottama(data: CalcData, name: string | null): boolean {
