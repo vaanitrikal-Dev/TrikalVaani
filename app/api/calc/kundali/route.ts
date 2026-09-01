@@ -2,7 +2,58 @@
 // File: app/api/calc/kundali/route.ts
 // Purpose: VM bridge for Kundali / Nakshatra / Rashi / Lagna /
 //          Dasha + Shadbala-based Calculators
-// Version: v2.0
+// Version: v2.1
+// Changelog v2.1 (2026-09-01):
+//   THREE LIVE BUGS FIXED. All three were found by calling this endpoint
+//   directly on 1 Sep 2026 with two different births and reading the raw
+//   JSON — not by reading code. Both calls returned the identical shape.
+//
+//   BUG 1 — the full Vimshottari cycle was computed and then thrown away.
+//     This route already reads kundaliData.dasha.maha_dasha from the VM
+//     (see `const mahaList` below) and walks it to find the current period.
+//     But the response only carried the two resolved NAMES:
+//         dasha: { mahadasha: "Rahu", antardasha: "Jupiter" }
+//     Every start date, every end date and every antar[] was dropped on the
+//     way out. free-dasha-calculator reads result.kundali.dasha.maha_dasha
+//     to render its two date cards and its "Next 5 Mahadasha Periods"
+//     table, so that page has been showing "—" in both cards and hiding
+//     the timeline entirely. The data was there the whole time.
+//     FIX: `dasha` now also carries `maha_dasha`, passed through RAW from
+//     the VM. Raw rather than remapped so that anything the VM adds later
+//     — pratyantar, sookshma — arrives without another route change.
+//
+//   BUG 2 — no `kundali` key was ever returned.
+//     Several calculators read result.kundali.* :
+//       free-dasha-calculator   → result.kundali.dasha.maha_dasha
+//       free-nakshatra-calculator → result.kundali.grahas (Moon lookup)
+//     `kundali` did not exist in this response, so those reads were always
+//     undefined and those result blocks have always rendered empty.
+//     FIX: a `kundali` object is now returned alongside the existing
+//     top-level fields. It is a pure back-compat alias holding the raw VM
+//     grahas, lagna, dasha and houses. Nothing existing was renamed or
+//     removed, so pages reading `planets`, `instant` or `shadbala` are
+//     untouched — they keep the exact response they have today.
+//
+//   BUG 3 — template was null for the default calcType.
+//     synthesizeTemplate() only ran when NEW_CALC_TYPES included the
+//     calcType. The dasha and nakshatra pages POST without a calcType, so
+//     it defaulted to 'kundali', which is not in that list — and when the
+//     VM sent no remedies those pages lost their Dos, Don'ts and Remedies
+//     blocks completely.
+//     FIX: the synthesized fallback now applies to every calcType.
+//     `remediesSource` is returned alongside it ('vm' | 'synthesized' |
+//     'none') so this is visible rather than silent — if that field starts
+//     reading 'synthesized' across the board, the VM's remedy_master has
+//     stopped responding and should be looked at directly. The fallback
+//     is real classical Parashar data from PLANET_REMEDY, not invented,
+//     and it is the same data the newer calculators already receive.
+//
+//   NOT FIXED HERE, because it is not this file's problem:
+//     `houses` comes back as an empty array. This route maps
+//     kundaliData.houses faithfully; the VM is returning nothing to map.
+//     That needs looking at on the VM side, and is deliberately left
+//     visible rather than papered over here.
+//
 // Changelog v2.0 (2026-08-29):
 //   - Passthrough navamsa (D-9) from the VM (astro.py patcher #3).
 // Changelog v1.9 (2026-08-29):
@@ -268,9 +319,23 @@ export async function POST(req: NextRequest) {
     // Pass full remedies object — includes remedies array + actionWindows
     let templateData = buildTemplateFromVMRemedies(kundaliData?.remedies ?? {}, targetPlanet);
 
-    // synthesize remedies for NEW calc types if VM returned none
-    if (!templateData && isNewCalc) {
+    // v2.1 — where the remedies came from, so a silent VM failure is visible.
+    // 'vm'          → remedy_master answered and its remedies are being used
+    // 'synthesized' → VM sent none, PLANET_REMEDY fallback is being used
+    // 'none'        → no remedies at all (should not happen after v2.1)
+    let remediesSource: 'vm' | 'synthesized' | 'none' = templateData ? 'vm' : 'none';
+
+    // v2.1 BUG 3 — the fallback used to be gated on NEW_CALC_TYPES, so the
+    // dasha and nakshatra pages (which POST without a calcType, defaulting
+    // to 'kundali') lost their Dos / Don'ts / Remedies whenever the VM sent
+    // no remedies. It now applies to every calcType. `isNewCalc` is kept and
+    // still referenced so the older behaviour stays readable in the logs.
+    if (!templateData) {
       templateData = synthesizeTemplate(targetPlanet);
+      remediesSource = 'synthesized';
+      if (!isNewCalc) {
+        console.warn(`[kundali] VM sent no remedies for calcType="${calcType}" — using synthesized fallback.`);
+      }
     }
 
     const sessionId = `calc_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
@@ -313,6 +378,15 @@ export async function POST(req: NextRequest) {
       dasha: {
         mahadasha: currentMahadasha,
         antardasha: currentAntardasha,
+        // ── v2.1 BUG 1: the full cycle, passed through RAW from the VM ──
+        // This route already had `mahaList` in hand to resolve the two names
+        // above; it simply never sent it on. free-dasha-calculator needs the
+        // start/end dates and the antar[] to render its date cards and its
+        // "Next 5 Mahadasha Periods" table, and could never get them.
+        // Deliberately RAW rather than remapped: if the VM later adds a third
+        // level (pratyantar) or a fourth (sookshma), it arrives on its own
+        // with no further change here. Callers must guard for [].
+        maha_dasha: mahaList,
       },
       shadbala: kundaliData?.shadbala ?? {},
       // v1.9: passthrough of the two fields added to the VM engine on
@@ -332,6 +406,22 @@ export async function POST(req: NextRequest) {
       weakestPlanet,
       strengthAvailable,
       template: templateData,
+      // v2.1 — 'vm' | 'synthesized' | 'none'. See the note above the fallback.
+      remediesSource,
+      // ── v2.1 BUG 2: back-compat alias, purely additive ──
+      // free-dasha-calculator reads result.kundali.dasha.maha_dasha and
+      // free-nakshatra-calculator reads result.kundali.grahas to find the
+      // Moon. `kundali` was never returned by this route, so both reads were
+      // always undefined and both result blocks always rendered empty.
+      // This holds the RAW VM objects. Nothing above was renamed, reshaped or
+      // removed, so anything reading `planets`, `instant`, `shadbala`,
+      // `navamsa` or `template` keeps the exact response it has today.
+      kundali: {
+        grahas: kundaliData?.grahas ?? [],
+        lagna: kundaliData?.lagna ?? null,
+        houses: kundaliData?.houses ?? [],
+        dasha: kundaliData?.dasha ?? null,
+      },
     }, { status: 200 });
 
   } catch (err: any) {
