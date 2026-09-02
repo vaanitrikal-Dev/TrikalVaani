@@ -2,8 +2,45 @@
 // 🔱 TRIKAL VAANI — CEO PROTECTION HEADER
 // ════════════════════════════════════════════════════════════════════
 // File:    app/panchang/[date]/page.tsx
-// Version: v3.2
+// Version: v3.3
 // Owner:   Rohiit Gupta, Chief Vedic Architect
+// Changes vs v3.2 (date window — Claude, 2 Sep 2026):
+//   THE PROBLEM, measured rather than guessed. On 1-2 Sep 2026 the VM logs
+//   showed bursts of /panchang calls for date=2029-10-15 and date=2030-04-12,
+//   ten cities each, fired in parallel. During one such burst every live
+//   calculator on the site timed out for about two minutes and a real
+//   customer saw "Network error" on the Santan Yog page.
+//
+//   WHY IT HAPPENED. isValidDate() accepted any date from 2020 to 2100.
+//   That is roughly 29,000 crawlable URLs. dynamicParams is true, so a URL
+//   nobody has opened before is rendered ON DEMAND — and ISR cannot help a
+//   URL that is being seen for the first time. Every unseen date was one
+//   fresh VM call. A crawler walking dates forward generates them without
+//   limit, and FastAPI's 40-thread pool fills up; request 41 is a paying
+//   customer, waiting in a queue behind a robot asking about 2030.
+//
+//   THE FIX. The servable range is now COMPUTED AT REQUEST TIME, not
+//   hardcoded: today minus 365 days to today plus 365 days. Anything outside
+//   returns 404 BEFORE a single Supabase or VM call is made. 29,000 URLs
+//   become 731, and the window rolls forward on its own every day — no cron,
+//   no seeding, no yearly edit.
+//
+//   WHY 365 FORWARD. app/sitemap.ts emits exactly today + 365 days of
+//   panchang URLs, read from panchang_daily. Matching that number keeps the
+//   sitemap and the route in agreement: every URL we submit is servable, and
+//   nothing servable is missing from the sitemap. If the sitemap window ever
+//   changes, change FUTURE_WINDOW_DAYS here to match.
+//
+//   WHY 365 BACKWARD. Past dates are already in panchang_daily, so they cost
+//   a cheap Supabase read and never touch the VM. They are kept for archive
+//   value. They are NOT in the sitemap, by the same reasoning the v8.6
+//   sitemap note gives for past rashifal — worth serving if linked, not worth
+//   asking Google to crawl.
+//
+//   NOT A RANKING CHANGE. This removes URLs that were never legitimately
+//   requested by a human. Nothing that ranks today stops being served.
+//   PROTECTED (untouched): fetchFromVM/callVM, ISR, 10s timeout, redirect
+//      logic, Supabase festival lookup, all schemas, JSX, Card/FAQ.
 // Changes vs v3.1 (Discover optimization — Claude, June 2026):
 //   1. OG image added (og-default.jpg 1200×630) to openGraph + twitter.
 //   2. robots expanded with googleBot max-image-preview:large + max-snippet
@@ -80,11 +117,54 @@ function getSupabase() {
   );
 }
 
+// ── v3.3: the servable date window ────────────────────────────────────
+// Both numbers are days, both measured from today, both applied at request
+// time. FUTURE_WINDOW_DAYS must stay equal to the panchang window in
+// app/sitemap.ts (currently today + 365) or the sitemap will start
+// advertising URLs this route refuses to serve.
+const PAST_WINDOW_DAYS = 365;
+const FUTURE_WINDOW_DAYS = 365;
+
+/**
+ * Today in IST, as YYYY-MM-DD.
+ *
+ * IST rather than UTC on purpose. This is an Indian panchang: for five and a
+ * half hours every night, UTC is still on yesterday's date while the reader
+ * is on today's. Using UTC here would 404 the far edge of the window for
+ * exactly those hours.
+ */
+function todayIST(): Date {
+  const now = new Date();
+  const ist = new Date(now.getTime() + 5.5 * 60 * 60 * 1000);
+  return new Date(Date.UTC(ist.getUTCFullYear(), ist.getUTCMonth(), ist.getUTCDate()));
+}
+
+/** Format check only — is this string a real calendar date? */
 function isValidDate(s: string): boolean {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) return false;
   const d = new Date(s + "T00:00:00Z");
   if (isNaN(d.getTime())) return false;
-  return d.getUTCFullYear() >= 2020 && d.getUTCFullYear() <= 2100;
+  // Reject 2026-02-31 and friends: Date() rolls them over silently.
+  return d.toISOString().slice(0, 10) === s;
+}
+
+/**
+ * Is this date inside the rolling window we are willing to render?
+ *
+ * Everything outside it 404s before any Supabase or VM call. That ordering is
+ * the whole point of this function — a 404 must cost nothing.
+ */
+function isInWindow(s: string): boolean {
+  const d = new Date(s + "T00:00:00Z");
+  const today = todayIST();
+  const min = new Date(today); min.setUTCDate(today.getUTCDate() - PAST_WINDOW_DAYS);
+  const max = new Date(today); max.setUTCDate(today.getUTCDate() + FUTURE_WINDOW_DAYS);
+  return d >= min && d <= max;
+}
+
+/** Format is real AND the date is inside the rolling window. */
+function isServable(s: string): boolean {
+  return isValidDate(s) && isInWindow(s);
 }
 
 function formatHuman(yyyymmdd: string): string {
@@ -140,8 +220,32 @@ async function fetchFromVM(date: string): Promise<PanchangRow | null> {
   } catch { return null; }
 }
 
+/**
+ * v3.3: the VM is a fallback for the FUTURE only.
+ *
+ * Found while unit-testing the window: the crawl bursts in the VM log
+ * included 2026-05-16, a date only three months old. It is inside the past
+ * window and should be served — but it was reaching the VM, because a past
+ * date missing from panchang_daily fell straight through to a live
+ * ephemeris call.
+ *
+ * That is the wrong direction of travel. The cron writes panchang_daily
+ * forward every day, so a past date is either recorded or it is history we
+ * never recorded — and computing it live, on a crawler's request, buys
+ * nothing. A FUTURE date is different: the cron may genuinely not have
+ * reached it yet, so one VM call is justified, and ISR caches it for 24h.
+ *
+ * Net effect: the VM can now only be reached by future dates inside the
+ * +365 window. Everything else is a Supabase read or a 404.
+ */
 async function getPanchang(date: string): Promise<PanchangRow | null> {
-  return (await fetchFromSupabase(date)) ?? (await fetchFromVM(date));
+  const fromDb = await fetchFromSupabase(date);
+  if (fromDb) return fromDb;
+
+  const isPast = new Date(date + "T00:00:00Z") < todayIST();
+  if (isPast) return null;   // renders the "being computed" card, calls nothing
+
+  return await fetchFromVM(date);
 }
 
 // ── Metadata ──────────────────────────────────────────────────────────
@@ -149,7 +253,11 @@ export async function generateMetadata(
   { params }: { params: { date: string } }
 ): Promise<Metadata> {
   const { date } = params;
-  if (!isValidDate(date)) return { title: "Panchang Not Found" };
+  // v3.3: window check before any fetch. An out-of-range date must not cost
+  // a Supabase query here either — generateMetadata runs on the same request.
+  if (!isServable(date)) {
+    return { title: "Panchang Not Found", robots: { index: false, follow: false } };
+  }
 
   const p = await fetchFromSupabase(date);
   const human = formatHuman(date);
@@ -176,7 +284,9 @@ export default async function PanchangDatePage(
   { params }: { params: { date: string } }
 ) {
   const { date } = params;
-  if (!isValidDate(date)) notFound();
+  // v3.3: out-of-window dates 404 here, BEFORE getPanchang() runs. This is
+  // the line that stops a crawler walking to 2030 from reaching the VM.
+  if (!isServable(date)) notFound();
 
   const p = await getPanchang(date);
 
@@ -340,7 +450,7 @@ export default async function PanchangDatePage(
           </section>
 
           <footer className="mt-8 border-t border-gray-200 pt-4 text-xs text-gray-500">
-            <p>🔱 Calculated by <strong>{AUTHOR_NAME}</strong>, {AUTHOR_TITLE}. Engine: Swiss Ephemeris · Ayanamsha: Lahiri · Version: v3.2</p>
+            <p>🔱 Calculated by <strong>{AUTHOR_NAME}</strong>, {AUTHOR_TITLE}. Engine: Swiss Ephemeris · Ayanamsha: Lahiri · Version: v3.3</p>
             <p className="mt-1 italic">&quot;Kaal bada balwan hai, sabko nach nachaye; raja ka beta bhi bhiksha mangne jaye.&quot;</p>
           </footer>
 
