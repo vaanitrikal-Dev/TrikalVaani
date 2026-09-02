@@ -1,8 +1,23 @@
 // ============================================================
 // File: app/api/calc/yog/route.ts
-// Version: v2.1 — paid gate + D-7 Saptamsa passthrough (1 Sep 2026)
-// Purpose: Server-side scoring for the three yog calculators —
-//          IAS/UPSC, Videsh Settlement, and Foreign Spouse.
+// Version: v2.2 — Santan Yog added as the fourth type (2 Sep 2026)
+// Purpose: Server-side scoring for the four yog calculators —
+//          IAS/UPSC, Videsh Settlement, Foreign Spouse and Santan Yog.
+//
+// CHANGELOG v2.2 (2026-09-02):
+//   - `santan` added to YogType, VALID and the scoring dispatch, wired to
+//     lib/santan-engine.ts. Three lines of behaviour; everything else in this
+//     file is untouched, so the three live calculators keep the exact
+//     response they have today.
+//   - `saptamsaLagna` added to the `chart` summary, alongside the D-10 and
+//     D-9 lagnas that were already there. The Santan page shows it as proof
+//     the progeny varga was actually read.
+//   - NOTE ON THE PAID GATE: santan uses the SAME `yog` product key, so it is
+//     Rs 51 / $7 like the other three and lib/pricing-intl.ts needs no change.
+//   - NOTE ON THE MEDICAL LINE: the santan engine returns its own disclaimer
+//     (SANTAN_DISCLAIMER) which names a doctor. `freeShape` already passes
+//     `full.disclaimer` straight through, so the medical sentence reaches the
+//     FREE tier too. Do not "simplify" that to the shared DISCLAIMER.
 //
 // CHANGELOG v2.0 (2026-08-29):
 //   - Free / paid split. The FREE response no longer CONTAINS the paid
@@ -45,15 +60,16 @@ import type { CalcData, ScoredRule } from '@/lib/yog-engine';
 import { scoreUpsc } from '@/lib/upsc-engine';
 import { scoreForeignSettlement } from '@/lib/foreign-settlement-engine';
 import { scoreForeignSpouse } from '@/lib/foreign-spouse-engine';
+import { scoreSantan } from '@/lib/santan-engine';
 import { getProduct } from '@/lib/pricing-intl';
 import { getPayPalOrder, isCaptureValid } from '@/lib/paypal-server';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-type YogType = 'upsc' | 'foreign-settlement' | 'foreign-spouse';
+type YogType = 'upsc' | 'foreign-settlement' | 'foreign-spouse' | 'santan';
 
-const VALID: YogType[] = ['upsc', 'foreign-settlement', 'foreign-spouse'];
+const VALID: YogType[] = ['upsc', 'foreign-settlement', 'foreign-spouse', 'santan'];
 
 interface Body {
   type?: YogType;
@@ -246,6 +262,7 @@ export async function POST(req: NextRequest) {
     const full =
       type === 'upsc' ? scoreUpsc(data)
       : type === 'foreign-settlement' ? scoreForeignSettlement(data)
+      : type === 'santan' ? scoreSantan(data)
       : scoreForeignSpouse(data);
 
     if (paid) {
@@ -266,6 +283,9 @@ export async function POST(req: NextRequest) {
         antardasha: data.dasha.antardasha,
         dasamsaLagna: data.dasamsa?.lagna?.sign ?? null,
         navamsaLagna: data.navamsa?.lagna?.sign ?? null,
+        // D-7. Null when the VM has not been patched — the page must say
+        // "not available" rather than imply the progeny varga was read.
+        saptamsaLagna: data.saptamsa?.lagna?.sign ?? null,
       },
       result: paid ? full : freeShape(full),
     });
