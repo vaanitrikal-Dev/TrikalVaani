@@ -1,6 +1,19 @@
 // ============================================================
 // File: app/calculators/page.tsx
 // Purpose: Calculators Hub — SEO/GEO/AEO landing page
+// Version: v3.9 — Santan Yog calculator added (2 Sep 2026)
+// CHANGES vs v3.8:
+//   ✅ Added 1 FREE card: Santan Yog. Free basic result, so the "100% free
+//      hub" rule still holds — the Rs 51 unlock sits inside the tool, exactly
+//      like the other three yog calculators already listed here.
+//   ✅ Placed FIRST in the yog block, ahead of IAS. Reason, from data rather
+//      than taste: the Radar run of 30 Aug 2026 ranked Santan Yog the number
+//      one calculator to build (2 open tool SERPs), and the existing
+//      /learn/number-of-children-prediction page already earns 3,815
+//      impressions and 155 clicks at position 5.23 with no tool behind it.
+//   ✅ Added its queries to metadata keywords.
+//   ✅ CALC_COUNT, prose list, schema hasPart and FAQ counts all derive from
+//      the CALCULATORS array, so 32 → 33 updates itself. Nothing else touched.
 // Version: v3.8 — three yog calculators added (IAS, Videsh, Foreign Spouse)
 // CHANGES vs v3.7:
 //   ✅ Added 3 FREE cards: IAS Astrology, Foreign Settlement, Foreign Spouse.
@@ -64,6 +77,8 @@ export const metadata: Metadata = {
     'sarkari naukri yog', 'upsc astrology',
     'foreign settlement astrology', 'foreign spouse calculator',
     'videsh yog calculator', 'nri marriage astrology',
+    'santan yog calculator', 'santan yog kundali', 'putra yog calculator',
+    'child yog calculator', 'putrakaraka', 'saptamsa d7 calculator',
   ],
   alternates: { canonical: 'https://trikalvaani.com/calculators' },
   openGraph: {
@@ -98,9 +113,19 @@ const CALCULATORS: CalcEntry[] = [
     badge: 'Most Popular',
     live: true,
   },
-  // ── Yog calculators (v3.8). Placed high on purpose: Search Console shows
-  // "ias astrology calculator" and "foreign settlement astrology" already
-  // earning clicks on /learn/ pages, with no tool behind them until now.
+  // ── Yog calculators (v3.8, extended v3.9). Placed high on purpose:
+  // Search Console shows "ias astrology calculator" and "foreign settlement
+  // astrology" already earning clicks on /learn/ pages, with no tool behind
+  // them until now. Santan leads the block because Radar ranked it the
+  // strongest open opportunity of the four.
+  {
+    slug: 'free-santan-yog-calculator',
+    emoji: '\u{1F476}',
+    name: 'Free Santan Yog Calculator',
+    desc: 'Santan yog ka bal \u2014 panchma bhava, Saptamsa D-7, Guru aur Putrakaraka se. BPHS santan ka nirnay D-7 se karne ko kehta hai, aur wahi is score ke 24 ank uthata hai.',
+    badge: 'New',
+    live: true,
+  },
   {
     slug: 'free-ias-astrology-calculator',
     emoji: '\u{1F3DB}\u{FE0F}',
