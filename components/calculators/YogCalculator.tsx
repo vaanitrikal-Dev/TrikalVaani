@@ -2,9 +2,25 @@
 
 // ============================================================
 // File: components/calculators/YogCalculator.tsx
-// Version: v2.0 — paid gate (Razorpay Rs 51 / PayPal $7)
-// Purpose: One form + one result renderer, shared by all three yog
-//          calculators (IAS/UPSC, Videsh Settlement, Foreign Spouse).
+// Version: v2.1 — Santan Yog supported (2 Sep 2026)
+// Purpose: One form + one result renderer, shared by all four yog
+//          calculators (IAS/UPSC, Videsh Settlement, Foreign Spouse, Santan).
+//
+// CHANGELOG v2.1 (2026-09-02):
+//   Four additions, every one of them defaulted so the three live pages
+//   render byte-identically to v2.0.
+//   1. `type` accepts 'santan'.
+//   2. `hintsHeading` — the hints section had "Jeevansaathi kahan se" HARD
+//      CODED. That is foreign-spouse wording. Santan puts upay directions in
+//      the same slot, and a progeny result headed "Jeevansaathi kahan se"
+//      would read as a bug. Defaults to the old string.
+//   3. `hintsTeaser` — same problem in the locked list ("Disha aur sanskriti
+//      ke sanket"). Defaults to the old string.
+//   4. `showNextStep` — Santan is a NEW product with no other product to
+//      point at, so its paid view must not end in a CTA. Defaults true, so
+//      the other three keep theirs. The green "payment ho gaya" confirmation
+//      is deliberately kept even when the CTA is off: removing it is what
+//      caused the earlier "did my payment fail?" confusion.
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
 // ------------------------------------------------------------
 // WHY SHARED
@@ -92,12 +108,21 @@ interface ApiResponse {
 
 export interface YogCalculatorConfig {
   /** Matches the `type` the API expects. */
-  type: 'upsc' | 'foreign-settlement' | 'foreign-spouse';
+  type: 'upsc' | 'foreign-settlement' | 'foreign-spouse' | 'santan';
   scoreLabel: string;
   /** Heading above the per-rule breakdown. */
   breakdownHeading: string;
   /** Heading for the direction / routes list, when the engine returns one. */
   secondaryHeading?: string;
+  /** Heading above the engine's hints. Default is the foreign-spouse wording. */
+  hintsHeading?: string;
+  /** One-line teaser for the hints in the locked list. */
+  hintsTeaser?: string;
+  /**
+   * Show the post-payment CTA to another product. Set false for a product
+   * that has nothing to cross-sell — the paid view then ends on the report.
+   */
+  showNextStep?: boolean;
   ctaHref: string;
   ctaLabel: string;
   ctaPrice: string;
@@ -615,7 +640,9 @@ export default function YogCalculator({ config }: { config: YogCalculatorConfig 
           {r.directionHints && r.directionHints.length > 0 && (
             <section className="rounded-2xl p-5 mb-6"
               style={{ background: '#0B0F1A', border: '1px solid rgba(255,255,255,0.07)' }}>
-              <h2 className="text-base font-bold m-0 mb-3" style={{ color: GOLD }}>Jeevansaathi kahan se</h2>
+              <h2 className="text-base font-bold m-0 mb-3" style={{ color: GOLD }}>
+                {config.hintsHeading ?? 'Jeevansaathi kahan se'}
+              </h2>
               {r.directionHints.map((h: any, i: number) => (
                 <div key={i} className="mb-3 last:mb-0">
                   <p className="text-sm font-semibold m-0 mb-1" style={{ color: '#e2e8f0' }}>{h.hint}</p>
@@ -657,7 +684,9 @@ export default function YogCalculator({ config }: { config: YogCalculatorConfig 
                   <li>✓ {r.directionNames.length} rasto ki ranking wajah ke saath — {r.directionNames.slice(0, 3).join(', ')}…</li>
                 )}
                 {r.timingCount > 0 && <li>✓ Dasha timing — abhi kaunsi window chal rahi hai</li>}
-                {r.directionHintCount > 0 && <li>✓ Disha aur sanskriti ke sanket</li>}
+                {r.directionHintCount > 0 && (
+                  <li>✓ {config.hintsTeaser ?? 'Disha aur sanskriti ke sanket'}</li>
+                )}
               </ul>
 
               {isIndia === false ? (
@@ -693,20 +722,24 @@ export default function YogCalculator({ config }: { config: YogCalculatorConfig 
             <p className="text-xs m-0 mb-3" style={{ color: '#86EFAC' }}>
               ✓ Payment ho gaya. Poori report upar khul chuki hai.
             </p>
-            <h2 className="text-base font-bold m-0 mb-2" style={{ color: GOLD }}>
-              {r.nextStep?.title ?? 'Aage kya?'}
-            </h2>
-            <p className="text-xs leading-relaxed m-0 mb-4 max-w-xl mx-auto" style={{ color: '#94a3b8' }}>
-              {r.nextStep?.body ?? config.ctaBlurb}
-            </p>
-            <Link href={r.nextStep?.href ?? config.ctaHref}
-              className="inline-block px-6 py-3 rounded-lg font-semibold text-sm"
-              style={{ background: GOLD, color: '#0B0F1A' }}>
-              {r.nextStep ? `Kundali Milan — ${r.nextStep.price}` : `Trikaal Ka Sandesh — ${config.ctaPrice}`}
-            </Link>
-            <p className="text-xs m-0 mt-2" style={{ color: '#64748b' }}>
-              Ye alag reading hai — poori kundali, saare jeevan-kshetra.
-            </p>
+            {config.showNextStep === false ? null : (
+              <>
+                <h2 className="text-base font-bold m-0 mb-2" style={{ color: GOLD }}>
+                  {r.nextStep?.title ?? 'Aage kya?'}
+                </h2>
+                <p className="text-xs leading-relaxed m-0 mb-4 max-w-xl mx-auto" style={{ color: '#94a3b8' }}>
+                  {r.nextStep?.body ?? config.ctaBlurb}
+                </p>
+                <Link href={r.nextStep?.href ?? config.ctaHref}
+                  className="inline-block px-6 py-3 rounded-lg font-semibold text-sm"
+                  style={{ background: GOLD, color: '#0B0F1A' }}>
+                  {r.nextStep ? `Kundali Milan — ${r.nextStep.price}` : `Trikaal Ka Sandesh — ${config.ctaPrice}`}
+                </Link>
+                <p className="text-xs m-0 mt-2" style={{ color: '#64748b' }}>
+                  Ye alag reading hai — poori kundali, saare jeevan-kshetra.
+                </p>
+              </>
+            )}
           </section>
           )}
 
