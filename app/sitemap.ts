@@ -3,8 +3,29 @@
  * 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER 🔱
  * ============================================================================
  * File:        app/sitemap.ts
- * Version:     v8.6
+ * Version:     v8.7
  * Owner:       Rohiit Gupta, Chief Vedic Architect
+ *
+ * Changes v8.6 -> v8.7 (2026-09-02):
+ *   1. SANTAN YOG CALCULATOR added to CALCULATORS. Count 31 -> 32.
+ *      Added BY HAND for the reason the v8.2 note gives and the v8.3 note
+ *      repeats: static routes are NOT auto-discovered in this file. Without
+ *      this line the page would never enter the sitemap, however many times
+ *      the site is deployed. It is the fourth yog calculator and behaves
+ *      exactly like the other three — the page is fully crawlable, the
+ *      paywall sits on the API response, not on the page.
+ *      Verified before adding, not assumed: the page returns HTTP 200 and
+ *      renders (144 KB), and POST /api/calc/yog with type "santan" returns
+ *      200 with a real D-7 score.
+ *      WHY IT MATTERS HERE MORE THAN USUAL: Radar (30 Aug 2026) ranked Santan
+ *      Yog the number one calculator to build, and /learn/number-of-children-
+ *      prediction already earns 3,815 impressions and 155 clicks at position
+ *      5.23 with no tool behind it. The two pages target different intent —
+ *      that learn page owns the English "how many children" phrasing, the
+ *      calculator owns the tool phrasing — so they support each other rather
+ *      than compete.
+ *   2. No other logic, loop, query, priority or de-dupe behaviour changed.
+ *      Built on the deployed v8.6 source.
  *
  * Changes v8.5 -> v8.6 (2026-08-31):
  *   1. DAILY RASHIFAL ADDED — it was absent from the sitemap entirely, the
@@ -299,6 +320,8 @@ const CALCULATORS = [
   'free-ias-astrology-calculator',
   'free-foreign-settlement-calculator',
   'free-foreign-spouse-calculator',
+  // ── Santan Yog (v8.7) ──
+  'free-santan-yog-calculator',
 ];
 
 const DOMAINS_FALLBACK = [
