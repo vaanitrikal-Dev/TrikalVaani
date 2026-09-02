@@ -3,7 +3,11 @@
  * TRIKAL VAANI — Santan Yog Engine
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: lib/santan-engine.ts
- * VERSION: 1.0 (2 Sep 2026)
+ * VERSION: 1.1 (2 Sep 2026)
+ *   v1.1 — SANTAN-SPECIFIC BANDS. See BANDS below. The shared 60/48/36 in
+ *   yog-engine.ts were calibrated on the OTHER three engines and are wrong
+ *   for this one; measured, not felt. Nothing else changed — the 100-point
+ *   table Rohiit approved is untouched.
  * SIGNED: ROHIIT GUPTA, CEO
  * ============================================================
  * Scores 100 across seven blocks, per the table Rohiit approved on
@@ -67,6 +71,46 @@ export const SANTAN_DISCLAIMER =
   'upay par roshni daalta hai; santan se judi kisi bhi shaaririk chinta ke liye ' +
   'kripya qualified doctor se hi salah lein. Kam score ka matlab "santan nahi hogi" ' +
   'kabhi nahi hota — iska matlab hai ki yog ko samay aur upay ka sahara chahiye.';
+
+/**
+ * ── SANTAN BAND THRESHOLDS ──────────────────────────────────────────────────
+ *
+ * These OVERRIDE the shared VERY_STRONG / STRONG / MODERATE in yog-engine.ts.
+ * That is deliberate and it is measured, not a preference.
+ *
+ * The shared 60/48/36 were calibrated against 4,000 charts run through the
+ * UPSC, Videsh and Foreign-Spouse engines, whose median lands around 42-45.
+ * This engine scores higher for a structural reason: Block F awards its full
+ * 10 points whenever a chart is simply CLEAN of Putra Dosh, combustion and
+ * Pitra Dosh signals — and most charts are clean of all three at once. An
+ * empty 5th house also scores 4 of 6 rather than 0.
+ *
+ * Run on 4,000 simulated charts, 2 Sep 2026:
+ *   median 55  ·  p25 47  ·  p75 62  ·  p90 68  ·  p97 74
+ *   under 60/48/36 : Very Strong 34.1%  Strong 39.7%  Moderate 22.0%  Weak 4.1%
+ *   under 70/60/46 : Very Strong  7.4%  Strong 24.9%  Moderate 46.5%  Weak 21.1%
+ *
+ * The second row is what the shared bands were MEANT to produce — top few per
+ * cent, top quarter, a broad middle. One chart in three being told its progeny
+ * yog is "बहुत प्रबल" is not a calibration quirk on this subject; it is false
+ * reassurance about children, which is the one thing this engine must not do.
+ *
+ * HONEST LIMIT: those 4,000 charts are SIMULATED, not real births. They prove
+ * the SHIFT (median 42-45 -> 55 cannot be noise); they do not prove the exact
+ * cut points. Re-run against real charts once enough have passed through, and
+ * move these three numbers if the data says so. Do not move them by feel.
+ * ────────────────────────────────────────────────────────────────────────────
+ */
+const SANTAN_VERY_STRONG = 70;
+const SANTAN_STRONG = 60;
+const SANTAN_MODERATE = 46;
+
+function santanBand(score: number): { band: YogResult['band']; bandHi: string } {
+  if (score >= SANTAN_VERY_STRONG) return { band: 'Very Strong', bandHi: 'बहुत प्रबल' };
+  if (score >= SANTAN_STRONG) return { band: 'Strong', bandHi: 'प्रबल' };
+  if (score >= SANTAN_MODERATE) return { band: 'Moderate', bandHi: 'मध्यम' };
+  return { band: 'Weak', bandHi: 'कमज़ोर' };
+}
 
 /** Natural benefics and malefics, as used for the 5th house and its drishti. */
 const BENEFIC = ['Jupiter', 'Venus', 'Mercury', 'Moon'];
@@ -429,8 +473,13 @@ export function scoreSantan(data: CalcData): SantanResult {
   // ── Result ─────────────────────────────────────────────────────────────────
 
   const base = s.finish();
+  // finish() applies the SHARED bands. Re-band with the santan thresholds —
+  // the score itself is not touched, only the label it is given.
+  const { band, bandHi } = santanBand(base.score);
   return {
     ...base,
+    band,
+    bandHi,
     // The shared disclaimer has no medical sentence; santan must carry one.
     disclaimer: SANTAN_DISCLAIMER,
     timing: buildTiming(data, keyPlanets),
