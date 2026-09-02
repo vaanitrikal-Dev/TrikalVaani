@@ -2,8 +2,43 @@
 // 🔱 TRIKAL VAANI — CEO PROTECTION HEADER
 // ════════════════════════════════════════════════════════════════════
 // File:    app/panchang/[date]/[slug]/page.tsx
-// Version: v1.2
+// Version: v1.3
 // Owner:   Rohiit Gupta, Chief Vedic Architect
+// CHANGES v1.2 -> v1.3 (2026-09-02):
+//   1. THE VM HOLE. getFestival() and getPanchang() ran inside Promise.all,
+//      so the panchang fetch — and its VM fallback — fired even when the
+//      festival did not exist. A crawler could ask for
+//      /panchang/2029-10-15/anything-at-all and still cost one live Swiss
+//      Ephemeris call before the 404 came back. That is exactly the burst
+//      seen in the VM logs on 1-2 Sep 2026, and during one of them every
+//      live calculator on the site timed out for about two minutes.
+//      FIX: the festival row is fetched FIRST and 404s alone. Panchang is
+//      only read once a real festival is confirmed. This costs one extra
+//      round trip on pages that DO exist and saves the whole call on pages
+//      that do not — which is the right way round, because the ones that do
+//      not exist are the ones being enumerated.
+//   2. THE VM IS NOW FUTURE-ONLY, matching app/panchang/[date]/page.tsx
+//      v3.3. A past date is either recorded in panchang_daily or it is
+//      history we never recorded; computing it live on a crawler's request
+//      buys nothing. Future dates still get one VM call, ISR-cached 24h.
+//   3. TWO DEAD IMAGE URLS, both verified by request on 2 Sep 2026:
+//        /logo.png    -> 404   (Article publisher logo)
+//        /og-image.png -> 404  (openGraph images AND Article image)
+//      Both now point at files that actually return 200: /Trikal_Logo.png
+//      (1440x1440, the same one layout.tsx uses) and /og-default.jpg
+//      (1200x630, the same one the sibling panchang page uses).
+//      Worth naming plainly: the FIX 4 note below says og-image.png was
+//      "verified HTTP 200". It is not, today. So the Article rich-result
+//      fix it describes has not been working — Google was being handed a
+//      404 as the required image, and og:image was missing on every
+//      festival panchang page.
+//   4. isValidDate now rejects roll-over dates. new Date("2026-02-31")
+//      silently becomes 3 March, so that string used to pass as valid.
+//      NO DATE WINDOW HERE, deliberately — unlike the sibling page. This
+//      route cannot be enumerated once fix 1 is in: it requires a real
+//      (date, slug) pair in festivals_master, which is the whitelist.
+//      festivals_master is materialised through 2030, and a hard +365
+//      window would 404 legitimate 2029 and 2030 festival pages.
 // Purpose: Festival panchang page — /panchang/2026-05-16/shani-jayanti-2026
 //          100% dynamic. All content from Supabase + Gemini Flash.
 //          No hardcoded festival data.
@@ -103,8 +138,22 @@ function isValidDate(s: string): boolean {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) return false;
   const d = new Date(s + "T00:00:00Z");
   if (isNaN(d.getTime())) return false;
+  // v1.3: reject roll-over. new Date("2026-02-31") quietly becomes 3 March,
+  // so the old check passed impossible dates straight through to Supabase.
+  if (d.toISOString().slice(0, 10) !== s) return false;
   const y = d.getUTCFullYear();
   return y >= 2020 && y <= 2100;
+}
+
+/**
+ * v1.3: today in IST, midnight, used only to decide past vs future.
+ * IST rather than UTC because for five and a half hours every night UTC is
+ * still on yesterday, which would send today's page down the past branch.
+ */
+function todayIST(): Date {
+  const now = new Date();
+  const ist = new Date(now.getTime() + 5.5 * 60 * 60 * 1000);
+  return new Date(Date.UTC(ist.getUTCFullYear(), ist.getUTCMonth(), ist.getUTCDate()));
 }
 
 function formatHuman(yyyymmdd: string): string {
@@ -135,7 +184,14 @@ async function getPanchang(date: string): Promise<PanchangRow | null> {
       .eq("date", date).eq("city", "delhi").single();
     if (data) return data as PanchangRow;
   } catch {}
-  // Fallback to VM
+
+  // v1.3: the VM is a FUTURE-only fallback. A past date missing from
+  // panchang_daily is history we never recorded — recomputing it live for a
+  // crawler costs a Swiss Ephemeris call and gains nothing. The page simply
+  // renders without the panchang grid, which it already handles.
+  if (new Date(date + "T00:00:00Z") < todayIST()) return null;
+
+  // Fallback to VM (future dates only)
   try {
     const res = await callVM(`${VM_URL}/panchang?date=${date}`, {
       method: "GET",
@@ -200,7 +256,9 @@ export async function generateMetadata(
       locale: "en_IN",
       images: [
         {
-          url: `${SITE_URL}/og-image.png`,
+          // v1.3: /og-image.png returns 404. /og-default.jpg is the file that
+          // actually exists, and is what the sibling panchang page uses.
+          url: `${SITE_URL}/og-default.jpg`,
           width: 1200,
           height: 630,
           alt: festival.festival_name,
@@ -243,13 +301,15 @@ function buildSchemas(
       // FIX 4: Added required 'image' field — Google blocks Article rich results without it.
       // Confirmed missing via GSC "has issues" warning. og-image.png verified HTTP 200.
       image: {
+        // v1.3: was /og-image.png, which 404s — so the required Article image
+        // Google was given did not resolve, and FIX 4 below never took effect.
         "@type": "ImageObject",
-        url: `${SITE_URL}/og-image.png`,
+        url: `${SITE_URL}/og-default.jpg`,
         width: 1200,
         height: 630,
       },
       author: { "@type": "Person", name: AUTHOR_NAME, jobTitle: AUTHOR_TITLE, url: `${SITE_URL}/founder` },
-      publisher: { "@type": "Organization", name: "Trikaal Vaani", url: SITE_URL, logo: { "@type": "ImageObject", url: `${SITE_URL}/logo.png` } },
+      publisher: { "@type": "Organization", name: "Trikaal Vaani", url: SITE_URL, logo: { "@type": "ImageObject", url: `${SITE_URL}/Trikal_Logo.png`, width: 1440, height: 1440 } },
     },
     {
       "@context": "https://schema.org", "@type": "BreadcrumbList",
@@ -279,12 +339,14 @@ export default async function FestivalPage(
   const { date, slug } = params;
   if (!isValidDate(date)) notFound();
 
-  const [festival, panchang] = await Promise.all([
-    getFestival(date, slug),
-    getPanchang(date),
-  ]);
-
+  // v1.3: festival FIRST, and 404 on its own. Running these in Promise.all
+  // meant an unknown slug still paid for a panchang fetch — including the VM
+  // fallback — before the 404. The festival row is the whitelist for this
+  // whole route; nothing else should run until it is confirmed.
+  const festival = await getFestival(date, slug);
   if (!festival) notFound();
+
+  const panchang = await getPanchang(date);
 
   const url = `${SITE_URL}/panchang/${date}/${slug}`;
   const human = formatHuman(date);
@@ -456,7 +518,7 @@ export default async function FestivalPage(
           </section>
 
           <footer className="mt-8 border-t border-gray-200 pt-4 text-xs text-gray-500">
-            <p>🔱 By <strong>{AUTHOR_NAME}</strong>, {AUTHOR_TITLE}. Engine: Swiss Ephemeris · Ayanamsha: Lahiri · Version: v1.2</p>
+            <p>🔱 By <strong>{AUTHOR_NAME}</strong>, {AUTHOR_TITLE}. Engine: Swiss Ephemeris · Ayanamsha: Lahiri · Version: v1.3</p>
             <p className="mt-1 italic">&quot;Kaal bada balwan hai, sabko nach nachaye; raja ka beta bhi bhiksha mangne jaye.&quot;</p>
           </footer>
 
