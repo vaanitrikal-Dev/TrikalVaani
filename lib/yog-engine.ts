@@ -333,6 +333,53 @@ export function ratioScore(r: number | null): number {
  */
 const PRESENCE_MIN_RATIO = 0.6;
 
+/**
+ * Choose what to name as BLOCKING a chart.
+ *
+ * finish() filters blockers with `r.max >= 5`, which quietly excludes every
+ * dosha in the engine — they are small by design: Rahu-Ketu 4, Saturn 4,
+ * Mangal Dosh 3, combustion 3. A live paid Vivah report on 3 Sep 2026 scored
+ * "Rahu-Ketu saptam axis par" at 0 out of 4, the worst line on the page, and
+ * the "Kya rok raha hai" section did not mention it — so neither did the
+ * summary, because Gemini only ever sees what lands in blockedBy. The same
+ * gate had been hiding Pitra Dosh and combustion from Santan reports.
+ *
+ * Two changes from finish(): the floor drops to max >= 3, and a rule the
+ * product names as a DOSHA outranks an equally-scoring positional weakness.
+ * That ordering is a judgement and worth defending: a dosha is named, it is
+ * classical, and it has its own remedy — a reader can act on it. "The 7th lord
+ * is in a dusthana" is true but there is nothing to do about it directly.
+ *
+ * finish() is left alone, so the three older calculators are unaffected. The
+ * product engines override `blockers` with this.
+ */
+export function preferBlockers(
+  rules: ScoredRule[],
+  doshaLabels: string[],
+  n = 3,
+): ScoredRule[] {
+  const ratio = (r: ScoredRule) => r.points / r.max;
+  // NOTE: `absent` is set by ScoreSheet.add as `points <= 0` — it does NOT
+  // mean "the rule could not run", it means the rule scored nothing. Filtering
+  // on it here (as a first draft of this function did) removed every zero-
+  // scoring rule from the blocker list, which is precisely the set of rules
+  // that ARE the blockers. finish() does not filter on it either. Caught in
+  // testing on a chart with Ketu in the 7th: the 0/4 node rule vanished and
+  // only a 2.7/10 line survived.
+  return rules
+    .filter((r) => r.max >= 3 && ratio(r) < 0.35)
+    .sort((a, b) => {
+      const d = ratio(a) - ratio(b);
+      if (Math.abs(d) > 0.001) return d;
+      // Same score: a named dosha first, then the bigger block.
+      const ad = doshaLabels.includes(a.label) ? 0 : 1;
+      const bd = doshaLabels.includes(b.label) ? 0 : 1;
+      if (ad !== bd) return ad - bd;
+      return b.max - a.max;
+    })
+    .slice(0, n);
+}
+
 export function preferPresence(
   rules: ScoredRule[],
   absenceLabels: string[],
