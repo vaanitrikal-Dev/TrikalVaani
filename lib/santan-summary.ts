@@ -2,6 +2,18 @@
  * ============================================================================
  * TRIKAL VAANI — Santan Yog summary writer
  * File:    lib/santan-summary.ts
+ * VERSION: 1.4 (3 Sep 2026)
+ *   v1.4 — THE TIMEOUT WAS TOO TIGHT, and it was my own doing. v1.2 cut the
+ *   per-call timeout to 10s to make two attempts fit inside a 30s route
+ *   ceiling. Live Gemini calls measure 6-9s. That is no margin at all, and on
+ *   three consecutive live runs one fell back to the template — the reader got
+ *   the flat deterministic text while the other two got a proper personalised
+ *   summary. Fixing the nine-minute hang had quietly broken the writing.
+ *   Now: 20s per call, and the FREE tier takes ONE attempt rather than two.
+ *   Reasoning — free worst case is what a waiting stranger actually feels, and
+ *   the template is decent since v1.1, so one good try then fall back. PAID
+ *   keeps two attempts: they paid, and a longer wait is the lesser harm.
+ *   Worst case: free ~21s, paid ~42s. Route ceiling raised to 50s to match.
  * VERSION: 1.3 (3 Sep 2026)
  *   v1.3 — THE VERDICT WAS PRINTED THREE TIMES. The page shows it in
  *   Devanagari, then in Hinglish, and then the prompt asked Gemini to open by
@@ -99,9 +111,17 @@ const FREE_MIN = 45, FREE_MAX = 130;
 // the floor only has to be low enough that a safe, complete answer passes.
 const PAID_MIN = 200, PAID_MAX = 750;
 
-const TIMEOUT_MS = 10000;
-/** Total Gemini budget for one request. The route's ceiling is 30s. */
-const TOTAL_BUDGET_MS = 22000;
+/**
+ * Per-call ceiling. Measured on the live site: 6-9s for a fresh call. 20s is
+ * deliberately more than double that — a timeout here costs the reader the
+ * good summary, and the previous 10s was chosen from the mean with no margin.
+ */
+const TIMEOUT_MS = 20000;
+/** Total Gemini budget for one request. The route's ceiling is 50s. */
+const TOTAL_BUDGET_MS = 42000;
+/** Free gets one attempt; paid gets two. See the v1.4 note above. */
+const ATTEMPTS_FREE = 1;
+const ATTEMPTS_PAID = 2;
 
 /**
  * Output token budget. Far larger than the prose needs, and deliberately so:
@@ -343,10 +363,11 @@ export async function buildSantanSummary(f: SantanFacts, paid: boolean): Promise
   // to the fallback, and the fallback is noticeably flatter prose — worth one
   // more call before accepting that.
   const started = Date.now();
-  for (let attempt = 1; attempt <= 2; attempt++) {
+  const maxAttempts = paid ? ATTEMPTS_PAID : ATTEMPTS_FREE;
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     // Only retry if there is real time left. Better a good template now than a
     // second draft that arrives after the function has been killed.
-    if (attempt === 2 && Date.now() - started > TOTAL_BUDGET_MS - TIMEOUT_MS) {
+    if (attempt > 1 && Date.now() - started > TOTAL_BUDGET_MS - TIMEOUT_MS) {
       console.warn('[santan-summary] no time budget for a retry — using template.');
       break;
     }
