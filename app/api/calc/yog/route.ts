@@ -1,6 +1,30 @@
 // ============================================================
 // File: app/api/calc/yog/route.ts
-// Version: v2.2 — Santan Yog added as the fourth type (2 Sep 2026)
+// Version: v2.3 — Santan v2.0: dasha DATES + Gemini summary (2 Sep 2026)
+//
+// CHANGELOG v2.3 (2026-09-02):
+//   1. THE DATES WERE ALWAYS HERE AND WE THREW THEM AWAY. currentDasha() read
+//      maha.start and maha.end purely to decide which period is running now,
+//      then passed the planet NAMES on and dropped the dates. "Kab hogi" is
+//      the single most searched santan question — ~18 of the Radar keywords in
+//      that cluster — and the answer was sitting in the VM response the whole
+//      time. dashaTimeline() now hands the whole timeline to the santan engine
+//      as a second argument.
+//      WHY A SECOND ARGUMENT AND NOT A FIELD ON CalcData: CalcData lives in
+//      lib/yog-engine.ts, which the other three live calculators share. Adding
+//      to it would put them all in the blast radius of a santan-only change.
+//      scoreSantan(data, timeline) touches nothing they use.
+//   2. GEMINI WRITES THE SUMMARY — lib/santan-summary.ts. Free 75 words on
+//      gemini-3.7-flash, paid 500 on gemini-3.8-flash. Gemini receives ONLY
+//      the engine's `facts` object, never the chart, and its draft is validated
+//      before it is returned. Santan only; the other three types never call it.
+//   3. FREE SHAPE for santan is its own function. The generic freeShape() sells
+//      locked RULES, which is right for an exam calculator and wrong here — a
+//      person asking about children needs the answer first and the arithmetic
+//      never. Free now returns verdict + summary + three named locks (dates,
+//      count, upay) and no reasoning at all. The other three types keep
+//      freeShape() byte for byte.
+//   4. `directionHints` is gone from the santan path, replaced by `upay`.
 // Purpose: Server-side scoring for the four yog calculators —
 //          IAS/UPSC, Videsh Settlement, Foreign Spouse and Santan Yog.
 //
@@ -61,6 +85,8 @@ import { scoreUpsc } from '@/lib/upsc-engine';
 import { scoreForeignSettlement } from '@/lib/foreign-settlement-engine';
 import { scoreForeignSpouse } from '@/lib/foreign-spouse-engine';
 import { scoreSantan } from '@/lib/santan-engine';
+import type { DashaPeriod, SantanResult } from '@/lib/santan-engine';
+import { buildSantanSummary } from '@/lib/santan-summary';
 import { getProduct } from '@/lib/pricing-intl';
 import { getPayPalOrder, isCaptureValid } from '@/lib/paypal-server';
 
@@ -259,14 +285,27 @@ export async function POST(req: NextRequest) {
     }
 
     // ── 3) Score ─────────────────────────────────────────────────────────────
+    const timeline = dashaTimeline(k?.dasha?.maha_dasha ?? []);
+
     const full =
       type === 'upsc' ? scoreUpsc(data)
       : type === 'foreign-settlement' ? scoreForeignSettlement(data)
-      : type === 'santan' ? scoreSantan(data)
+      : type === 'santan' ? scoreSantan(data, timeline)
       : scoreForeignSpouse(data);
 
     if (paid) {
       console.log(`[yog] PAID unlock | type:${type} | via:${b.razorpay_signature ? 'razorpay' : 'paypal'}`);
+    }
+
+    // ── 4) Summary — santan only ─────────────────────────────────────────────
+    // Never fatal: buildSantanSummary falls back to a deterministic template on
+    // a missing key, a timeout, or a draft that fails validation. The
+    // calculator must always answer.
+    let santanSummary = '';
+    if (type === 'santan') {
+      const s = await buildSantanSummary((full as SantanResult).facts, paid);
+      santanSummary = s.text;
+      console.log(`[yog] santan summary | ${s.source} | ${s.words} words | paid:${paid}`);
     }
 
     return NextResponse.json({
@@ -287,12 +326,80 @@ export async function POST(req: NextRequest) {
         // "not available" rather than imply the progeny varga was read.
         saptamsaLagna: data.saptamsa?.lagna?.sign ?? null,
       },
-      result: paid ? full : freeShape(full),
+      result:
+        type === 'santan'
+          ? paid
+            ? { ...(full as SantanResult), summary: santanSummary }
+            : santanFreeShape(full as SantanResult, santanSummary)
+          : paid
+            ? full
+            : freeShape(full),
     });
   } catch (err: any) {
     console.error('[yog] Fatal:', err);
     return NextResponse.json({ error: 'Server error' }, { status: 500 });
   }
+}
+
+// ── v2.3: the whole timeline, dates intact ───────────────────────────────────
+//
+// currentDasha() below answers "which period is running". This answers "when",
+// which is a different question and the one santan customers actually ask.
+// Shape is passed through as the VM gives it; the engine does the filtering.
+function dashaTimeline(mahaList: any[]): DashaPeriod[] {
+  if (!Array.isArray(mahaList)) return [];
+  return mahaList
+    .filter((m) => m?.planet && m?.start && m?.end)
+    .map((m) => ({
+      planet: String(m.planet),
+      start: String(m.start),
+      end: String(m.end),
+      antar: (m.antar ?? [])
+        .filter((a: any) => a?.planet && a?.start && a?.end)
+        .map((a: any) => ({ planet: String(a.planet), start: String(a.start), end: String(a.end) })),
+    }));
+}
+
+// ── v2.3: santan's own free shape ────────────────────────────────────────────
+//
+// Deliberately NOT freeShape(). That one shows locked rule rows with their
+// marks, which suits a competitive-exam score. Here the marks mean nothing to
+// the reader and the answer means everything, so the free tier is: the verdict,
+// the 75-word summary, and three honest locks naming what is behind them.
+function santanFreeShape(full: SantanResult, summary: string) {
+  return {
+    verdict: full.verdict,
+    summary,
+    score: full.score,
+    band: full.band,
+    bandHi: full.bandHi,
+    disclaimer: full.disclaimer,
+    locks: [
+      {
+        key: 'kab',
+        title: 'Kab — anukool samay',
+        teaser: full.windows.length
+          ? 'Aapke chart mein anukool dasha ki khidkiyan mil gayi hain, tareekhon ke saath.'
+          : 'Aapki dasha ka poora hisaab taiyar hai.',
+        count: full.windows.length,
+      },
+      {
+        key: 'kitne',
+        title: 'Kitne — santan sankhya ka range',
+        teaser: full.sankhya
+          ? 'Aapke panchma bhava ki rashi aur uske swami ke bal se shastriya sanket nikal aaya hai.'
+          : 'Shastriya sanket taiyar hai.',
+        count: full.sankhya ? 1 : 0,
+      },
+      {
+        key: 'upay',
+        title: 'Trikaal Upay — 5 upay, aapke apne chart ke',
+        teaser: 'Do BPHS se, do Bhrigu paddhati se, aur ek aapke sabse kamzor santan graha ki ganit se.',
+        count: full.upay.length,
+      },
+    ],
+    // No rules, no reasoning, no dates, no upay text. Nothing to unhide.
+  };
 }
 
 // ── Current mahadasha / antardasha by date ───────────────────────────────────
