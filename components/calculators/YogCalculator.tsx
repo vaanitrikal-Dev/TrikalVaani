@@ -2,6 +2,12 @@
 
 // ============================================================
 // File: components/calculators/YogCalculator.tsx
+// Version: v2.5 — client timeout follows the route ceiling (3 Sep 2026)
+//
+// CHANGELOG v2.5 — the route ceiling moved 30s -> 50s (see its v2.6 note), so
+// 35s here would have aborted a request the server was still legitimately
+// working on. 55s stays just above the ceiling, which is the whole point of
+// this number: past it, the fault is the network, not the reading.
 // Version: v2.4 — browser fetch timeout (3 Sep 2026)
 //
 // CHANGELOG v2.4 — a customer sat on "Chart padha ja raha hai…" for FOUR
@@ -576,7 +582,7 @@ export default function YogCalculator({ config }: { config: YogCalculatorConfig 
    * v2.4: 35 seconds, then give up and say so. The route's own ceiling is 30s,
    * so anything past 35 is a network fault rather than a slow reading.
    */
-  const CLIENT_TIMEOUT_MS = 35000;
+  const CLIENT_TIMEOUT_MS = 55000;
 
   /** Re-request the same reading WITH proof of payment. The server re-verifies. */
   const fetchPaid = async (proof: Record<string, string>) => {
