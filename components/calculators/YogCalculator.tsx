@@ -2,6 +2,26 @@
 
 // ============================================================
 // File: components/calculators/YogCalculator.tsx
+// Version: v3.0 — the santan-only gates now cover every verdict type (3 Sep 2026)
+//
+// CHANGELOG v3.0 — LIVE CRASH. The Vivah page died with "Application error: a
+// client-side exception" the moment a free result came back. The API was fine
+// (200, verdict, three locks, a 72-word Gemini summary in the logs); the crash
+// was here, in the render.
+//
+// Cause: six gates in this file were written as `config.type === 'santan'`.
+// v2.9 generalised the VIEW and the route generalised the FREE SHAPE, but
+// these string comparisons were left hard-coded. So on a Vivah free result the
+// generic score card and the rule-by-rule breakdown still rendered — and the
+// breakdown calls r.rules.map(), while the verdict free shape deliberately
+// sends no `rules` at all. undefined.map() takes the whole page down.
+//
+// This is the SAME failure that has now happened four times in one day: a rule
+// changed in one of a pair and missed in the other (the order route's own type
+// whitelist, the lock teaser vs the Trikaal Upay heading, the window clamp in
+// santan vs vivah, and now this). So the fix is not six more string
+// comparisons — it is ONE predicate, isVerdictType(), used everywhere. A
+// seventh calculator of this kind changes one line, not six.
 // Version: v2.9 — Vivah Yog supported, gender can be required (3 Sep 2026)
 //
 // CHANGELOG v2.9 — three additions, all defaulted so the four live calculators
@@ -469,6 +489,17 @@ function shareTextFor(type: string, score: number, name: string | null): string 
   );
 }
 
+/**
+ * The calculators that lead with a verdict and a written summary, and whose
+ * FREE response therefore carries no `rules` and no `blockers` at all.
+ *
+ * Anything gated on "is this santan" was really asking this question. Keeping
+ * it as one function means a new verdict calculator cannot half-arrive.
+ */
+function isVerdictType(type: string): boolean {
+  return type === 'santan' || type === 'vivah';
+}
+
 function verdictColour(key: string): string {
   if (key === 'haan') return '#4ADE80';
   if (key === 'sambhavna') return GOLD;
@@ -893,12 +924,12 @@ export default function YogCalculator({ config }: { config: YogCalculatorConfig 
           {/* v2.2 — Santan leads with the answer, then the summary, then the
               locks (free) or the dates/count/upay (paid). The generic score +
               rule-row view follows for paid readers only. */}
-          {(config.type === 'santan' || config.type === 'vivah') && <VerdictView r={r} paid={paid} L={config.type === 'vivah' ? VIVAH_LABELS : SANTAN_LABELS} />}
+          {isVerdictType(config.type) && <VerdictView r={r} paid={paid} L={config.type === 'vivah' ? VIVAH_LABELS : SANTAN_LABELS} />}
 
           {/* Score. Hidden on santan FREE: a bare "51 / 100" on this subject
               reads as a verdict on the person, and the plain verdict above
               already carries the answer. Paid still sees it. */}
-          {!(config.type === 'santan' && !paid) && (
+          {!(isVerdictType(config.type) && !paid) && (
           <section className="rounded-2xl p-6 mb-6 text-center"
             style={{ background: '#0B0F1A', border: `1px solid ${GOLD_RGBA(0.25)}` }}>
             <p className="text-xs uppercase tracking-widest m-0" style={{ color: '#64748b' }}>{config.scoreLabel}</p>
@@ -922,7 +953,7 @@ export default function YogCalculator({ config }: { config: YogCalculatorConfig 
           {/* The differentiator. For santan this is the WORKING, not the
               product, so the free reader never sees it — santanFreeShape in
               the route does not even send the rows. */}
-          {!(config.type === 'santan' && !paid) && (
+          {!(isVerdictType(config.type) && !paid) && (
           <section className="rounded-2xl p-5 md:p-6 mb-6"
             style={{ background: '#0B0F1A', border: '1px solid rgba(255,255,255,0.07)' }}>
             <h2 className="text-base font-bold m-0 mb-1" style={{ color: GOLD }}>{config.breakdownHeading}</h2>
@@ -1021,14 +1052,14 @@ export default function YogCalculator({ config }: { config: YogCalculatorConfig 
                 Poori report mein kya milega
               </h2>
               <p className="text-xs text-center m-0 mb-4" style={{ color: '#94a3b8' }}>
-                {config.type === 'santan'
+                {isVerdictType(config.type)
                   ? 'Aapka chart padha ja chuka hai. Jawab upar hai — baaki teen cheezein report mein khulti hain.'
                   : 'Aapka chart padha ja chuka hai. Upar jo teen findings dikhe, wo isi reading se hain.'}
               </p>
 
               <ul className="text-sm space-y-2 mb-5 max-w-md mx-auto m-0 p-0" style={{ listStyle: 'none', color: '#cbd5e1' }}>
-                {config.type === 'santan' ? (
-                  /* v2.3: santan sends no rules and no blockers, so the generic
+                {isVerdictType(config.type) ? (
+                  /* v2.3: verdict types send no rules and no blockers, so the generic
                      counters below printed zeroes. These bullets name what the
                      three locks above actually contain. */
                   <>
@@ -1110,10 +1141,10 @@ export default function YogCalculator({ config }: { config: YogCalculatorConfig 
           <section className="rounded-2xl p-5 md:p-6 mb-6"
             style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
             <h2 className="text-base font-bold m-0 mb-1" style={{ color: GOLD }}>
-              {config.type === 'santan' ? 'Kisi ko bata dein' : 'Apna result share karein'}
+              {isVerdictType(config.type) ? 'Kisi ko bata dein' : 'Apna result share karein'}
             </h2>
             <p className="text-xs m-0 mb-4" style={{ color: '#64748b' }}>
-              {config.type === 'santan'
+              {isVerdictType(config.type)
                 ? 'Aapka result private hai — ye message sirf calculator ka link bhejta hai, aapka jawab nahi.'
                 : 'WhatsApp par bhejein, ya text copy karke kahin bhi paste karein.'}
             </p>
