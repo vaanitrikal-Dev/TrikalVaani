@@ -1,5 +1,11 @@
 // ============================================================
 // File: app/api/calc/yog/route.ts
+// Version: v2.5 — reader's name reaches the summary (3 Sep 2026)
+//
+// CHANGELOG v2.5 — `name` was already collected by the form and already echoed
+// back in `input`, but it never reached the engine, so a personal reading never
+// used it. scoreSantan now takes it as a third argument and puts the first name
+// into `facts`; lib/santan-summary.ts v1.3 lets Gemini use it once.
 // Version: v2.4 — maxDuration (3 Sep 2026)
 //
 // CHANGELOG v2.4 — a customer waited NINE MINUTES on the live santan page and
@@ -302,7 +308,7 @@ export async function POST(req: NextRequest) {
     const full =
       type === 'upsc' ? scoreUpsc(data)
       : type === 'foreign-settlement' ? scoreForeignSettlement(data)
-      : type === 'santan' ? scoreSantan(data, timeline)
+      : type === 'santan' ? scoreSantan(data, timeline, b.name ?? null)
       : scoreForeignSpouse(data);
 
     if (paid) {
