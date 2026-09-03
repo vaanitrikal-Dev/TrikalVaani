@@ -2,6 +2,25 @@
  * ============================================================================
  * TRIKAL VAANI — Santan Yog summary writer
  * File:    lib/santan-summary.ts
+ * VERSION: 1.7 (3 Sep 2026)
+ *   v1.7 — THE FREE SUMMARY WAS GIVING AWAY THE PAID READING.
+ *   Live free result, 3 Sep: "Guru achhe ghar mein baitha hai, Guru ki nazar
+ *   santan ke ghar par hai, aur Rahu-Ketu santan ke ghar se door hain. Lekin
+ *   santan ke ghar par kuch grahon ka bhaari dabaav hai, mukhya kundali ka
+ *   vaada doosri kundali confirm nahi kar rahi, aur abhi jo daur chal raha hai
+ *   wo santan grahon ka nahi hai."
+ *   That is all three supports and all three blockers — while the lock card
+ *   directly beneath it offered to sell "kaunsa graha sahara de raha hai aur
+ *   kaunsa rok raha hai". We were selling what we had just given away.
+ *
+ *   Cause: ONE facts object went to both tiers, and only the PROMPT asked for
+ *   restraint. A paywall enforced by a prompt is not a paywall — the same
+ *   mistake, in a new place, as shipping paid text and hiding it with CSS.
+ *
+ *   FIX: narrowFacts() below. The free tier is handed ONE support, ONE
+ *   blocker, and nothing else — no count, no window, no remedy names. Gemini
+ *   cannot reveal what it was never told. Rohiit's rule, 3 Sep 2026: "Free
+ *   should have less important details with NO remedies."
  * VERSION: 1.6 (3 Sep 2026)
  *   v1.6 — THE VALIDATOR WAS BANNING THE SENTENCE THE PROMPT DEMANDS.
  *   Vercel logs, 3 Sep, every santan call for hours:
@@ -218,7 +237,8 @@ const MEDICAL_PATTERNS: RegExp[] = [
  */
 function allowedNumbers(f: SantanFacts): Set<string> {
   const ok = new Set<string>();
-  ok.add(String(f.score));
+  // v2.4 of the engine removed score/band from the facts, so a model that
+  // writes the raw score is now caught here as an invented figure.
   if (f.sankhya) for (const n of f.sankhya.split('-')) ok.add(n.trim());
   if (f.firstWindow) for (const n of f.firstWindow.match(/\d+/g) ?? []) ok.add(n);
   // Small counting words a writer will legitimately reach for.
@@ -257,6 +277,31 @@ export function validateSummary(text: string, f: SantanFacts, paid: boolean): Va
   return { ok: true };
 }
 
+// ── Tier narrowing — THE PAYWALL ─────────────────────────────────────────────
+
+/**
+ * What each tier is allowed to KNOW, not merely what it is asked to say.
+ *
+ * The free reader gets the verdict, the single strongest thing carrying the
+ * chart, and the single biggest thing holding it back. Not the count, not the
+ * timing, not one remedy name. Those are the three locks on the page, and a
+ * lock whose contents have already been read aloud is decoration.
+ */
+function narrowFacts(f: SantanFacts, paid: boolean): SantanFacts {
+  if (paid) return f;
+  return {
+    name: f.name,
+    verdict: f.verdict,
+    verdictLine: f.verdictLine,
+    supportedBy: f.supportedBy.slice(0, 1),
+    blockedBy: f.blockedBy.slice(0, 1),
+    sankhya: null,
+    firstWindow: null,
+    upayTitles: [],
+    saptamsaRead: f.saptamsaRead,
+  };
+}
+
 // ── Prompts ──────────────────────────────────────────────────────────────────
 
 const SHARED_RULES = `
@@ -273,6 +318,10 @@ ABSOLUTE RULES — breaking any one makes the whole answer unusable:
 VOICE: simple spoken Hinglish, the way a kind older relative explains something at the kitchen table. Short sentences. No jargon — no "Shadbala", no "virupa", no "Saptamsa", no "D-7", no "Putrakaraka". The supportedBy and blockedBy lines are ALREADY in plain language: use them close to as they are written, do not translate them back into astrology terms.
 
 NAME: if "name" is present in the JSON, address the reader by it ONCE, naturally, near the start. If it is null, do not invent one and do not write a greeting.
+SCRIPT: write in Latin script throughout (Hinglish). Do not drop a Devanagari word into the middle of a Latin sentence — a live summary read "sahara dene wale paksh bhi मौजूद hain", which looks careless. Graha names that arrive in Devanagari inside the JSON stay as they are; everything you write yourself is Latin.
+
+NUMBERS: never write a score, a percentage or a band name. The page already shows those in their own place, and repeating a low number in a sentence about someone's children is unkind and unnecessary.
+
 Do not greet, do not sign off, do not use headings or bullet points unless asked. Return plain text only.
 `.trim();
 
@@ -283,9 +332,11 @@ TASK: write EXACTLY about ${FREE_TARGET} words, one single paragraph.
 
 IMPORTANT: the verdict is ALREADY printed on the page, directly above your text, in two languages. Do NOT open by restating it — that makes the reader see the same sentence three times. Assume they have just read it.
 
+You have been given exactly ONE helping point and ONE blocking point. That is deliberate. Write about those two and nothing else — do not invent a second one, and do not hint that more exist.
+
 Say, in this order:
-- start with what is HELPING this chart, in ordinary language
-- then what is holding it back, gently
+- start with the ONE thing HELPING this chart, in ordinary language
+- then the ONE thing holding it back, gently
 - one line on what that combination means for them in practice
 - close by saying this shows the strength of the yog, is not a guarantee, and is not medical advice
 
@@ -383,6 +434,11 @@ function cacheKey(f: SantanFacts, paid: boolean): string {
 // ── Entry point ──────────────────────────────────────────────────────────────
 
 export async function buildSantanSummary(f: SantanFacts, paid: boolean): Promise<SantanSummary> {
+  // v1.7: narrow FIRST. Everything downstream — prompt, cache key, validator,
+  // template — then works from the facts this tier is actually entitled to.
+  const full = f;
+  f = narrowFacts(full, paid);
+
   const key = cacheKey(f, paid);
   const hit = CACHE.get(key);
   if (hit) return hit;
