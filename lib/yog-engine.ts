@@ -307,6 +307,51 @@ export function ratioScore(r: number | null): number {
   return (r - 0.5) / 1.0;
 }
 
+/**
+ * Reorder a rule set so that PRESENCE beats ABSENCE when naming what is
+ * carrying a chart.
+ *
+ * Added 3 Sep 2026, after a live paid Vivah report whose three "supports" were
+ * all things that were merely NOT WRONG — Saturn not on the 7th, no Mangal
+ * Dosh, the 7th lord not combust — while two genuine strengths sat lower down:
+ * benefic aspect on the 7th at 5.6/6 and the marriage graha's dasha running at
+ * 6/6. The cause is arithmetic, not judgement: a rule that awards full marks
+ * for the absence of an affliction always scores a perfect 1.00 ratio, so it
+ * outranks a real strength at 0.93 every time.
+ *
+ * Measured across 800 simulated charts before changing anything: the free
+ * tier's single headline was an absence on 3.8% of Vivah charts and 2.8% of
+ * Santan charts. Small, but on those charts the one line a free reader sees is
+ * "nothing is wrong", which is the weakest possible thing to lead with.
+ *
+ * A presence rule is only promoted if it is genuinely doing well (MIN_RATIO).
+ * Leading with a mediocre positive would be worse than leading with a clean
+ * absence, so below that bar the original order stands.
+ *
+ * Existing callers are unaffected — this is a new export, and finish() is
+ * untouched. The three older calculators do not use it.
+ */
+const PRESENCE_MIN_RATIO = 0.6;
+
+export function preferPresence(
+  rules: ScoredRule[],
+  absenceLabels: string[],
+  n = 3,
+): ScoredRule[] {
+  const scored = rules.filter((r) => !r.absent && r.max > 0);
+  const ratio = (r: ScoredRule) => r.points / r.max;
+  const isAbsence = (r: ScoredRule) => absenceLabels.includes(r.label);
+
+  const presence = scored
+    .filter((r) => !isAbsence(r) && ratio(r) >= PRESENCE_MIN_RATIO)
+    .sort((a, b) => ratio(b) - ratio(a));
+  const rest = scored
+    .filter((r) => isAbsence(r) || ratio(r) < PRESENCE_MIN_RATIO)
+    .sort((a, b) => ratio(b) - ratio(a));
+
+  return [...presence, ...rest].slice(0, n);
+}
+
 export function ratioWord(r: number | null): string {
   if (r === null) return 'unknown';
   if (r >= 1.5) return 'bahut mazboot';
