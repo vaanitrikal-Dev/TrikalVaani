@@ -1,6 +1,24 @@
 // ============================================================
 // File: app/calculators/page.tsx
 // Purpose: Calculators Hub — SEO/GEO/AEO landing page
+// Version: v4.0 — Vivah Yog calculator added (3 Sep 2026)
+// CHANGES vs v3.9:
+//   ✅ Added 1 FREE card: Vivah Yog ("Shadi kab hogi"). Free verdict + summary,
+//      so the "100% free hub" rule still holds — the ₹51 unlock sits inside
+//      the tool, exactly like the other four yog calculators listed here.
+//   ✅ Placed FIRST in the yog block, ahead of Santan. Reason from data, not
+//      taste: GSC (3 Sep 2026) shows this site ALREADY ranking with no tool —
+//      marriage yoga in kundali 14 impressions at position 9.93, marriage yoga
+//      in astrology 12, marriage yog in astrology 11, vivah yog 6, vivaha yoga
+//      4. Of the five yog calculators this is the only one with an existing
+//      position to defend.
+//      NOTE the slug/name split, which is deliberate: the URL is
+//      free-shadi-kab-hogi-calculator (Radar's most frequent question in the
+//      whole marriage set) while the card name says Vivah Yog (the phrase
+//      already ranking). One page earns both.
+//   ✅ Added its queries to metadata keywords.
+//   ✅ CALC_COUNT, prose list, schema hasPart and FAQ counts all derive from
+//      the CALCULATORS array, so 33 → 34 updates itself. Nothing else touched.
 // Version: v3.9 — Santan Yog calculator added (2 Sep 2026)
 // CHANGES vs v3.8:
 //   ✅ Added 1 FREE card: Santan Yog. Free basic result, so the "100% free
@@ -79,6 +97,9 @@ export const metadata: Metadata = {
     'videsh yog calculator', 'nri marriage astrology',
     'santan yog calculator', 'santan yog kundali', 'putra yog calculator',
     'child yog calculator', 'putrakaraka', 'saptamsa d7 calculator',
+    'shadi kab hogi', 'shadi kab hogi calculator', 'vivah yog calculator',
+    'vivah yog by date of birth', 'marriage yog in kundali',
+    'marriage age prediction by date of birth', 'meri shadi kab hogi',
   ],
   alternates: { canonical: 'https://trikalvaani.com/calculators' },
   openGraph: {
@@ -118,6 +139,14 @@ const CALCULATORS: CalcEntry[] = [
   // astrology" already earning clicks on /learn/ pages, with no tool behind
   // them until now. Santan leads the block because Radar ranked it the
   // strongest open opportunity of the four.
+  {
+    slug: 'free-shadi-kab-hogi-calculator',
+    emoji: '\u{1F48D}',
+    name: 'Free Vivah Yog Calculator',
+    desc: 'Shadi kab hogi \u2014 saptam bhava, Navamsa D-9, kalatra karak aur Darakaraka se. Asli tareekhon ki dasha khidkiyan aur umar ka range, har ank ki wajah ke saath.',
+    badge: 'New',
+    live: true,
+  },
   {
     slug: 'free-santan-yog-calculator',
     emoji: '\u{1F476}',
