@@ -2,6 +2,16 @@
 
 // ============================================================
 // File: components/calculators/YogCalculator.tsx
+// Version: v3.2 — the share text fell through to the wrong product (3 Sep 2026)
+//
+// CHANGELOG v3.2 — a live PAID Vivah report offered to share "Nandini ne apna
+// Foreign Spouse Yog check kiya — score 50/100 … free-foreign-spouse-
+// calculator". Wrong product, wrong link, and her private score in a message
+// on a page that says three lines above it that the result is private.
+// shareTextFor() was an if-chain whose final `return` was foreign-spouse, so
+// `vivah` inherited it. It is a keyed map now, so an unlisted type gets a
+// neutral fallback rather than another product's words — and Vivah, like
+// Santan, shares the TOOL and never the reading.
 // Version: v3.1 — the age band rendered blank (3 Sep 2026)
 //
 // CHANGELOG v3.1 — a live PAID Vivah report printed "– saal ki umar ke beech"
@@ -470,35 +480,69 @@ function fmtDate(iso: string): string {
  * What each calculator invites the reader to send.
  * Santan is the exception on purpose — see the v2.6 note at the top.
  */
+/**
+ * What each calculator invites the reader to send.
+ *
+ * A LOOKUP, NOT AN IF-CHAIN — and that change is the whole point of v3.2.
+ * The chain ended in a bare `return` for foreign-spouse, so `vivah` fell
+ * straight through it. A live paid Vivah report offered to share:
+ *   "Nandini ne apna Foreign Spouse Yog check kiya — score 50/100 …
+ *    trikalvaani.com/calculators/free-foreign-spouse-calculator"
+ * Wrong product, wrong link, and her private score in the message — on a page
+ * whose own heading three lines above says "Aapka result private hai — ye
+ * message sirf calculator ka link bhejta hai, aapka jawab nahi."
+ *
+ * With a map, a type that is missing gets the neutral fallback below instead
+ * of silently inheriting another product's words.
+ *
+ * WHICH CALCULATORS SHARE A SCORE, AND WHY NOT THESE TWO.
+ * UPSC and the two foreign ones share the number: "mera Sarkari Naukri Yog
+ * 62/100 hai" is something people send to friends happily.
+ * SANTAN AND VIVAH SHARE THE TOOL, NEVER THE READING. Nobody forwards "my
+ * progeny yog is weak" or "my marriage yog is 50/100" to a family group — and
+ * a marriage-timing score is, if anything, the more exposed of the two,
+ * because for most readers the family is already asking the question. So both
+ * send a reason to try the calculator, and no score, no verdict, no name.
+ */
+const SHARE_TEXT: Record<string, (score: number, me: string) => string> = {
+  santan: () =>
+    'Santan Yog apni kundali se free check kar sakte hain — Trikaal Vaani Saptamsa (D-7) ' +
+    'padhta hai, jise shastra santan ke liye niyat karta hai. Zyadatar tools Navamsa se ' +
+    'padhte hain, jo asal mein vivah ka vibhag hai. ' +
+    'trikalvaani.com/calculators/free-santan-yog-calculator',
+
+  vivah: () =>
+    'Shadi kab hogi — apni kundali se free check kar sakte hain. Trikaal Vaani Navamsa (D-9) ' +
+    'padhta hai, jise shastra vivah ke liye niyat karta hai, aur asli dasha tareekhon ke saath ' +
+    'anukool umar ka range bhi deta hai. ' +
+    'trikalvaani.com/calculators/free-shadi-kab-hogi-calculator',
+
+  upsc: (score, me) =>
+    `${me} apna Sarkari Naukri Yog check kiya — score ${score}/100, aur har point ki wajah asli ` +
+    `Shadbala figure ke saath. Aap bhi free check karein: ` +
+    `trikalvaani.com/calculators/free-ias-astrology-calculator`,
+
+  'foreign-settlement': (score, me) =>
+    `${me} apna Videsh Yog check kiya — score ${score}/100, 12th house, Rahu aur Dasha ke hisaab se. ` +
+    `Free check: trikalvaani.com/calculators/free-foreign-settlement-calculator`,
+
+  'foreign-spouse': (score, me) =>
+    `${me} apna Foreign Spouse Yog check kiya — score ${score}/100, 7th house aur Navamsa D-9 se. ` +
+    `Free check: trikalvaani.com/calculators/free-foreign-spouse-calculator`,
+};
+
 function shareTextFor(type: string, score: number, name: string | null): string {
   const who = name && name.trim() ? name.trim().split(/\s+/)[0] : null;
   const me = who ? `${who} ne` : 'Maine';
-
-  if (type === 'santan') {
-    return (
-      'Santan Yog apni kundali se free check kar sakte hain — Trikaal Vaani Saptamsa (D-7) ' +
-      'padhta hai, jise shastra santan ke liye niyat karta hai. Zyadatar tools Navamsa se ' +
-      'padhte hain, jo asal mein vivah ka vibhag hai. ' +
-      'trikalvaani.com/calculators/free-santan-yog-calculator'
-    );
+  const fn = SHARE_TEXT[type];
+  // Neutral fallback. A new calculator with no entry sends people to the hub,
+  // which is harmless — rather than to whichever product happened to be last
+  // in an if-chain, which is not.
+  if (!fn) {
+    return 'Trikaal Vaani par free Vedic calculators hain — kundali, dasha, dosh aur yog, ' +
+      'har ank ki wajah asli aankde ke saath. trikalvaani.com/calculators';
   }
-  if (type === 'upsc') {
-    return (
-      `${me} apna Sarkari Naukri Yog check kiya — score ${score}/100, aur har point ki wajah asli ` +
-      `Shadbala figure ke saath. Aap bhi free check karein: ` +
-      `trikalvaani.com/calculators/free-ias-astrology-calculator`
-    );
-  }
-  if (type === 'foreign-settlement') {
-    return (
-      `${me} apna Videsh Yog check kiya — score ${score}/100, 12th house, Rahu aur Dasha ke hisaab se. ` +
-      `Free check: trikalvaani.com/calculators/free-foreign-settlement-calculator`
-    );
-  }
-  return (
-    `${me} apna Foreign Spouse Yog check kiya — score ${score}/100, 7th house aur Navamsa D-9 se. ` +
-    `Free check: trikalvaani.com/calculators/free-foreign-spouse-calculator`
-  );
+  return fn(score, me);
 }
 
 /**
