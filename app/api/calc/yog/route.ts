@@ -1,5 +1,11 @@
 // ============================================================
 // File: app/api/calc/yog/route.ts
+// Version: v2.7 — birth year reaches the santan engine (3 Sep 2026)
+//
+// CHANGELOG v2.7 — a paid report showed a reader born in 2004 dasha windows
+// starting in 2080 and 2094, ages 76 and 90. The engine had no upper bound
+// because it had no idea how old anyone was. b.year now goes through as a
+// fourth argument; lib/santan-engine.ts v2.2 caps windows at birth + 45 years.
 // Version: v2.6 — maxDuration 30 -> 50 (3 Sep 2026)
 //
 // CHANGELOG v2.6 — 30s was set to stop a nine-minute hang, and it did, but it
@@ -315,7 +321,7 @@ export async function POST(req: NextRequest) {
     const full =
       type === 'upsc' ? scoreUpsc(data)
       : type === 'foreign-settlement' ? scoreForeignSettlement(data)
-      : type === 'santan' ? scoreSantan(data, timeline, b.name ?? null)
+      : type === 'santan' ? scoreSantan(data, timeline, b.name ?? null, b.year)
       : scoreForeignSpouse(data);
 
     if (paid) {
