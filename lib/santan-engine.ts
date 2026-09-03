@@ -3,6 +3,13 @@
  * TRIKAL VAANI — Santan Yog Engine
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: lib/santan-engine.ts
+ * VERSION: 2.3 (3 Sep 2026)
+ *   v2.3 — TWO UPAY BOTH CLAIMED TO BE THE WEAKEST GRAHA. On a live paid
+ *   report, upay 3 said of Surya "ye aapke chart ka sabse kam bal wala graha
+ *   hai" and upay 5 said exactly the same of Chandra. Both cannot be true, and
+ *   a reader who notices stops trusting the rest. Cause: substitute() returns
+ *   a fixed basis string, and on the second call the graha it picks is the
+ *   next weakest, not the weakest. It now says which.
  * VERSION: 2.2 (3 Sep 2026)
  *   v2.2 — THREE DEFECTS FOUND IN A REAL PAID REPORT. All three were visible
  *   to a paying customer, and the first one short-changed her.
@@ -513,6 +520,10 @@ function buildUpay(
    * to the Saptamsa lagna lord; and only then to the weakest unused graha.
    * Returns the graha and a plain reason the reader can follow.
    */
+  // v2.3: how many substitutions have already been made, so the reason line
+  // can stay true on the second and third call.
+  let subCount = 0;
+
   function substitute(): { pl: string; basis: string } | null {
     // Rahu and Ketu are excluded EVERYWHERE here, not just in the last tier.
     // Caught in testing: on a chart with Ketu in the 5th, the substitute picked
@@ -525,6 +536,7 @@ function buildUpay(
       .map((x) => ({ pl: x.planet, r: ratio(x) ?? 1 }))
       .sort((a, b) => a.r - b.r);
     if (inFifth.length) {
+      subCount += 1;
       return {
         pl: inFifth[0].pl,
         basis: `wo aapke panchma bhava mein khud baitha hai`,
@@ -532,6 +544,7 @@ function buildUpay(
     }
     if (ctx.d7LagnaLord && PLANET_REMEDY[ctx.d7LagnaLord] && !used.has(ctx.d7LagnaLord)
         && !NODES.includes(ctx.d7LagnaLord)) {
+      subCount += 1;
       return {
         pl: ctx.d7LagnaLord,
         basis: `aapka panchma bhava khaali hai, isliye santan ki apni kundali ka lagnesh liya gaya hai`,
@@ -541,7 +554,14 @@ function buildUpay(
       .filter((pl) => !used.has(pl) && !NODES.includes(pl))
       .map((pl) => ({ pl, r: ratio(planet(data, pl)) ?? 1 }))
       .sort((a, b) => a.r - b.r);
-    return rest.length ? { pl: rest[0].pl, basis: 'ye aapke chart ka sabse kam bal wala graha hai' } : null;
+    if (!rest.length) return null;
+    subCount += 1;
+    return {
+      pl: rest[0].pl,
+      basis: subCount > 1
+        ? 'upar chune gaye grahon ke baad, aapke chart mein sabse kam bal isi ka hai'
+        : 'ye aapke chart ka sabse kam bal wala graha hai',
+    };
   }
 
   /** Standard graha remedy body, so every slot reads the same way. */
