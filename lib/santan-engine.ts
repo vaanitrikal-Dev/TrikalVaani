@@ -3,6 +3,15 @@
  * TRIKAL VAANI — Santan Yog Engine
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: lib/santan-engine.ts
+ * VERSION: 2.5 (3 Sep 2026)
+ *   v2.5 — RUNNING WINDOWS SHOWED A PAST START DATE. Found while testing the
+ *   Vivah engine, which shares this code shape: buildWindows only dropped
+ *   windows that had ENDED, so a favourable Mahadasha already under way was
+ *   printed with its original start — a nineteen-year period beginning in 2017
+ *   shown to someone in 2026 as if it were ahead of them. A window already
+ *   running is now clamped to today, because only the remaining part is
+ *   something the reader can act on. Fixed here at the same time rather than
+ *   left to diverge — the twin-file drift has cost three defects in one day.
  * VERSION: 2.4 (3 Sep 2026)
  *   v2.4 — THE RAW SCORE WAS REACHING THE PROSE. A live paid summary read
  *   "Score 38 aur band Weak hone ka matlab bas itna hai ki...". The whole
@@ -458,6 +467,10 @@ function buildWindows(
   // No birth year (older callers) falls back to a horizon from today, so the
   // bound can never silently vanish.
   const maxStartYear = (birthYear ?? today.getUTCFullYear()) + WINDOW_HORIZON_YEARS;
+  const todayISO = today.toISOString().slice(0, 10);
+  // v2.5: a window already under way is clamped to today. See the header note.
+  const clampStart = (iso: string) => (iso < todayISO ? todayISO : iso);
+  const running = (iso: string) => iso < todayISO;
   const out: SantanWindow[] = [];
 
   for (const maha of timeline) {
@@ -470,9 +483,10 @@ function buildWindows(
     if (keyPlanets.includes(maha.planet)) {
       out.push({
         label: `${PLANET_HI[maha.planet] ?? maha.planet} Mahadasha`,
-        from: String(maha.start).slice(0, 10),
+        from: clampStart(String(maha.start).slice(0, 10)),
         to: String(maha.end).slice(0, 10),
-        why: `${PLANET_HI[maha.planet] ?? maha.planet} aapke santan grahon mein hai, isliye ye poora daur anukool mana jata hai.`,
+        why: `${PLANET_HI[maha.planet] ?? maha.planet} aapke santan grahon mein hai, isliye ye poora daur anukool mana jata hai.` +
+          (running(String(maha.start).slice(0, 10)) ? ' Ye daur abhi chal raha hai — neeche di gayi tareekh aaj se aage ka bacha hua hissa hai.' : ''),
       });
     }
 
@@ -484,9 +498,10 @@ function buildWindows(
       if (keyPlanets.includes(maha.planet) && maha.planet === antar.planet) continue;
       out.push({
         label: `${PLANET_HI[maha.planet] ?? maha.planet} — ${PLANET_HI[antar.planet] ?? antar.planet}`,
-        from: String(antar.start).slice(0, 10),
+        from: clampStart(String(antar.start).slice(0, 10)),
         to: String(antar.end).slice(0, 10),
-        why: `${PLANET_HI[antar.planet] ?? antar.planet} ki antardasha — ye chhoti aur teekhi khidki hoti hai, isliye ispar nazar rakhiye.`,
+        why: `${PLANET_HI[antar.planet] ?? antar.planet} ki antardasha — ye chhoti aur teekhi khidki hoti hai, isliye ispar nazar rakhiye.` +
+          (running(String(antar.start).slice(0, 10)) ? ' Ye khidki abhi chal rahi hai.' : ''),
       });
     }
   }
