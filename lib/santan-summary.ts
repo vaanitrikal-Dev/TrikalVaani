@@ -2,6 +2,27 @@
  * ============================================================================
  * TRIKAL VAANI — Santan Yog summary writer
  * File:    lib/santan-summary.ts
+ * VERSION: 1.6 (3 Sep 2026)
+ *   v1.6 — THE VALIDATOR WAS BANNING THE SENTENCE THE PROMPT DEMANDS.
+ *   Vercel logs, 3 Sep, every santan call for hours:
+ *     REJECTED gemini-3.8-flash draft (medical: /guarantee.../)
+ *     REJECTED gemini-3.7-flash draft (medical: /guarantee.../)
+ *     both attempts unusable — using template.
+ *   The prompt instructs the model to close by saying the reading "is not a
+ *   guarantee". The validator then rejected it for containing the word. The
+ *   v1.1 lookahead only forgave "guarantee nahi" as ADJACENT words, and real
+ *   Hinglish puts the negation further along — "guarantee ke roop mein nahi",
+ *   "guarantee kabhi nahi di jaati". So the model obeyed, and was punished for
+ *   obeying, on every single call.
+ *   Same class of mistake as v2.1's jargon: I set two rules that contradict
+ *   each other and only one of them was visible in the output.
+ *   FIX: stop policing the WORD. Ban the affirmative PROMISE instead —
+ *   "guarantee dete hain", "pakka hoga", "100% ". A negated sentence about
+ *   guarantees is the safety line, not a claim, and must always pass.
+ *
+ *   Also raised the paid per-call timeout. The logs show attempt 1 on
+ *   gemini-3.8-flash hitting the 20s ceiling: 500 words plus reasoning needs
+ *   more room than 75 words does. Free stays at 20s, paid gets 32s.
  * VERSION: 1.5 (3 Sep 2026)
  *   v1.5 — THE TEMPLATE'S GRAMMAR BROKE, and I broke it. santan-engine v2.1
  *   turned supportedBy / blockedBy from short rule LABELS into full plain-
@@ -126,9 +147,11 @@ const PAID_MIN = 200, PAID_MAX = 750;
  * deliberately more than double that — a timeout here costs the reader the
  * good summary, and the previous 10s was chosen from the mean with no margin.
  */
+/** Free: 75 words. Paid: 500 words plus reasoning — the logs showed 20s cut it off. */
 const TIMEOUT_MS = 20000;
-/** Total Gemini budget for one request. The route's ceiling is 50s. */
-const TOTAL_BUDGET_MS = 42000;
+const TIMEOUT_MS_PAID = 32000;
+/** Total Gemini budget for one request. The route's ceiling is 60s. */
+const TOTAL_BUDGET_MS = 50000;
 /** Free gets one attempt; paid gets two. See the v1.4 note above. */
 const ATTEMPTS_FREE = 1;
 const ATTEMPTS_PAID = 2;
@@ -171,11 +194,20 @@ const MEDICAL_PATTERNS: RegExp[] = [
   /संतान\s+नहीं\s+हो/,
   /\b(banjh|baanjh|बांझ|बाँझ)\b/i,
   /\b(infertil|sterile|barren\s+woman)/i,
-  // BUG FOUND BY TEST, 2 Sep 2026: a bare /guarantee/ blocked our own safety
-  // sentence "kisi natije ki guarantee nahi" — the exact opposite of a claim.
-  // Only AFFIRMATIVE guarantees are banned; the negation is allowed through.
-  /\b(guarantee|guaranteed)\b(?!\s*(nahi|nhi|not|नहीं))/i,
-  /\b(pakka\s+hoga|zaroor\s+hoga|definitely\s+will)\b/i,
+  // v1.6: the word "guarantee" is NOT banned. The prompt requires the closing
+  // line "this is not a guarantee", and a lookahead cannot reliably tell a
+  // denial from a promise in Hinglish, where the negation often arrives several
+  // words later. What is banned is an affirmative promise, matched on its own
+  // wording rather than on one keyword.
+  /\b(guarantee|guaranteed)\s+(dete|deta|di ja sakti|hai ki|karte)\b/i,
+  // No \b before Devanagari: JavaScript word boundaries are ASCII-only, so
+  // \bहम never matches. Caught in testing — "हम गारंटी देते हैं" sailed through.
+  /(हम|मैं)\s*(गारंटी|guarantee)\s*(देते|देता|देंगे|दूंगा)/i,
+  /(पक्का|ज़रूर|जरूर)\s*(होगा|होगी|मिलेगा|मिलेगी)/,
+  /\b(pakka|pakkaa)\s+(hoga|hogi|milega|milegi)\b/i,
+  /\bzaroor\s+(hoga|hogi|milega|milegi)\b/i,
+  /\b(definitely|certainly|surely)\s+will\b/i,
+  /\b100\s*%\s*(sure|pakka|guarantee)/i,
   /(ilaaj|treatment|dawa)\s+(ki zarurat nahi|not needed|nahi chahiye)/i,
 ];
 
@@ -318,7 +350,7 @@ export function templateSummary(f: SantanFacts, paid: boolean): string {
 
 // ── Gemini call ──────────────────────────────────────────────────────────────
 
-async function callGemini(model: string, systemPrompt: string, userMessage: string, maxTokens: number): Promise<string> {
+async function callGemini(model: string, systemPrompt: string, userMessage: string, maxTokens: number, timeoutMs: number): Promise<string> {
   const url = `${GEMINI_BASE_URL}/${model}:generateContent?key=${GEMINI_API_KEY}`;
   const body = {
     system_instruction: { parts: [{ text: systemPrompt }] },
@@ -329,7 +361,7 @@ async function callGemini(model: string, systemPrompt: string, userMessage: stri
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
-    signal: AbortSignal.timeout(TIMEOUT_MS),
+    signal: AbortSignal.timeout(timeoutMs),
   });
   if (!res.ok) {
     const err = await res.text().catch(() => '');
@@ -370,6 +402,7 @@ export async function buildSantanSummary(f: SantanFacts, paid: boolean): Promise
   const user = `Here are the ONLY facts you may use:\n\n${JSON.stringify(f, null, 2)}`;
 
   const maxTokens = paid ? MAX_TOKENS_PAID : MAX_TOKENS_FREE;
+  const perCall = paid ? TIMEOUT_MS_PAID : TIMEOUT_MS;
 
   // Two attempts, then the template. One rejected draft used to drop straight
   // to the fallback, and the fallback is noticeably flatter prose — worth one
@@ -379,12 +412,12 @@ export async function buildSantanSummary(f: SantanFacts, paid: boolean): Promise
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     // Only retry if there is real time left. Better a good template now than a
     // second draft that arrives after the function has been killed.
-    if (attempt > 1 && Date.now() - started > TOTAL_BUDGET_MS - TIMEOUT_MS) {
+    if (attempt > 1 && Date.now() - started > TOTAL_BUDGET_MS - perCall) {
       console.warn('[santan-summary] no time budget for a retry — using template.');
       break;
     }
     try {
-      const raw = await callGemini(model, system, user, maxTokens);
+      const raw = await callGemini(model, system, user, maxTokens, perCall);
       const text = raw.replace(/^```[a-z]*\n?|```$/g, '').trim();
       const check = validateSummary(text, f, paid);
       if (!check.ok) {
