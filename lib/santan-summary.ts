@@ -2,6 +2,16 @@
  * ============================================================================
  * TRIKAL VAANI — Santan Yog summary writer
  * File:    lib/santan-summary.ts
+ * VERSION: 1.5 (3 Sep 2026)
+ *   v1.5 — THE TEMPLATE'S GRAMMAR BROKE, and I broke it. santan-engine v2.1
+ *   turned supportedBy / blockedBy from short rule LABELS into full plain-
+ *   language SENTENCES. This template was written in v1.0 around the labels
+ *   and wraps them as noun phrases, so a live paid report read:
+ *     "...wo santan ke ghar par kuch grahon ka bhaari dabaav hai hai"
+ *     "...sahara wahan se aa raha hai jise hum Guru achhe ghar mein baitha
+ *      hai kehte hain"
+ *   I changed the inputs and never re-read the consumer. The template now
+ *   treats them as the sentences they are.
  * VERSION: 1.4 (3 Sep 2026)
  *   v1.4 — THE TIMEOUT WAS TOO TIGHT, and it was my own doing. v1.2 cut the
  *   per-call timeout to 10s to make two attempts fit inside a 30s route
@@ -282,10 +292,12 @@ export function templateSummary(f: SantanFacts, paid: boolean): string {
   // v1.1: the page prints verdict.labelHi and verdict.label immediately above
   // this text. Opening with the label again made the reader see one sentence
   // three times over. Start at the LINE instead.
+  // v1.5: `help` and `block` are complete sentences now. Print them as
+  // sentences; do not wrap them in a phrase that adds another verb.
   const free =
     `${f.verdictLine} ` +
-    (help ? `Aapke chart mein sahara mil raha hai. ` : '') +
-    (block ? `Ek rukavat bhi hai, jispar dhyan dena hoga. ` : '') +
+    (help ? `Achhi baat ye hai ki ${help}. ` : '') +
+    (block ? `Rukavat ye hai ki ${block}. ` : '') +
     `Yaad rakhiye — ye yog ka bal batata hai, kisi natije ki guarantee nahi, aur ye medical raay bhi nahi hai. ` +
     `Santan se judi kisi bhi shaaririk chinta ke liye doctor se hi salah lein.`;
 
@@ -293,8 +305,8 @@ export function templateSummary(f: SantanFacts, paid: boolean): string {
 
   return (
     `${f.verdictLine}\n\n` +
-    (help ? `Aapke chart mein sabse mazboot sahara wahan se aa raha hai jise hum ${help} kehte hain. ` : '') +
-    (block ? `Aur jo cheez raah rok rahi hai, wo ${block} hai — ye rukavat hai, inkaar nahi.\n\n` : '\n\n') +
+    (help ? `Aapke chart mein sabse bada sahara ye hai ki ${help}. ` : '') +
+    (block ? `Aur raah jahan rukti hai wo ye hai ki ${block} — ye rukavat hai, inkaar nahi.\n\n` : '\n\n') +
     (f.sankhya ? `Shastra ke sanket aapke chart mein ${f.sankhya} santan ki taraf jaate hain. Ye ek anuman hai, ginti nahi — aur aaj ke samay mein sankhya sirf grahon par nirbhar nahi karti.\n\n` : '') +
     (f.firstWindow ? `Samay ki baat karein to sabse anukool khidki ${f.firstWindow} hai. Neeche di gayi table mein poori suchi hai.\n\n` : '') +
     (f.upayTitles.length ? `Upay aapke apne chart se chune gaye hain, kisi aam suchi se nahi: ${f.upayTitles.join('; ')}. Har ek ka poora vidhi, samay aur wajah neeche di gayi hai. Do upay Brihat Parashara Hora Shastra ke shastriya graha-upay hain, do karak-paddhati se aate hain, aur aakhri poori tarah aapke chart ki ganit se nikla hai — us graha ka jiska bal aapke teen santan grahon mein sabse kam nikla.\n\n` : '') +
