@@ -1,5 +1,12 @@
 // ============================================================
 // File: app/api/calc/yog/route.ts
+// Version: v2.6 — maxDuration 30 -> 50 (3 Sep 2026)
+//
+// CHANGELOG v2.6 — 30s was set to stop a nine-minute hang, and it did, but it
+// forced lib/santan-summary.ts to squeeze its per-call timeout down to 10s
+// against Gemini calls that measure 6-9s. One live run in three then fell back
+// to the flat template. 50s gives the writer real headroom while still being a
+// hard ceiling; typical santan responses measure 0.4s cached and 6-9s fresh.
 // Version: v2.5 — reader's name reaches the summary (3 Sep 2026)
 //
 // CHANGELOG v2.5 — `name` was already collected by the form and already echoed
@@ -109,7 +116,7 @@ import { getPayPalOrder, isCaptureValid } from '@/lib/paypal-server';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 /** Hard ceiling. See the v2.4 note above — without this it was Vercel's default. */
-export const maxDuration = 30;
+export const maxDuration = 50;
 
 type YogType = 'upsc' | 'foreign-settlement' | 'foreign-spouse' | 'santan';
 
