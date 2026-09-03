@@ -2,6 +2,7 @@
 
 // ============================================================
 // File: components/calculators/YogCalculator.tsx
+// Version: v2.8 — client timeout follows the 60s route ceiling (3 Sep 2026)
 // Version: v2.7 — Trikaal Upay heading made always-true (3 Sep 2026)
 // Version: v2.6 — WhatsApp share on all four yog calculators (3 Sep 2026)
 //
@@ -643,7 +644,7 @@ export default function YogCalculator({ config }: { config: YogCalculatorConfig 
    * v2.4: 35 seconds, then give up and say so. The route's own ceiling is 30s,
    * so anything past 35 is a network fault rather than a slow reading.
    */
-  const CLIENT_TIMEOUT_MS = 55000;
+  const CLIENT_TIMEOUT_MS = 65000;
 
   /** Re-request the same reading WITH proof of payment. The server re-verifies. */
   const fetchPaid = async (proof: Record<string, string>) => {
