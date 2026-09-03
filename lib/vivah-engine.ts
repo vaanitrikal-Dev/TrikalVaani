@@ -58,7 +58,7 @@ import {
   planet, houseLord, houseOf, ratio, ratioScore, ratioWord,
   dignityScore, dignityWord, karakas,
   dashaPair, drishtiOnHouse, netDrishtiOnHouse, drishtiWord, drishtiOnPlanet,
-  d9, d9HouseLord, isVargottama, capabilities,
+  d9, d9HouseLord, isVargottama, capabilities, preferPresence,
   PLANET_HI, KENDRA, TRIKONA, DUSTHANA,
 } from './yog-engine';
 
@@ -464,9 +464,13 @@ function umarRange(windows: VivahWindow[], birthYear?: number): VivahUmar | null
   return {
     from: lo,
     to: hi,
+    // This sentence is the ONLY place the point is made now. The UI used to
+    // print a second, near-identical footnote directly under it (YogCalculator
+    // v3.1 removed that), so the wording here has to stand alone.
     basis:
       `Ye aapki pehli anukool dasha khidki (${w.label}) ko aapki umar mein badal kar nikala gaya hai. ` +
-      `Ye ek window hai, koi tay tareekh nahi — aur agar us dauran prayas na ho, to yog agli khidki ka intezaar karta hai.`,
+      `Ye ek window hai, koi tay tareekh nahi — aur agar is dauran baat na bane to yog khatam nahi hota, ` +
+      `wo agli khidki ka intezaar karta hai.`,
   };
 }
 
@@ -675,13 +679,27 @@ function buildUpay(
         n: out.length + 1, source: 'Shadbala',
         title: `Bal badhane ke liye — ${PLANET_HI[sub.pl]}`,
         ...body(sub.pl),
-        why: `Aapke teenon vivah grahan — saptamesh, karak aur Darakaraka — ek hi graha par aa gaye hain, jiska upay upar diya ja chuka hai. Ye ek asli baat hai aapke chart ki, aur iska matlab hai ki poora bhaar ek graha par hai. Isliye paanchva upay ${PLANET_HI[sub.pl]} par rakha gaya hai: ${sub.basis}.`,
+        // v1.1: this used to say "teenon ... ek hi graha par aa gaye hain"
+        // unconditionally. On a live paid report the saptamesh and the
+        // Darakaraka were both Mangal while the karak was Guru — two, not
+        // three — and the sentence was simply untrue. It now counts.
+        why: `${new Set(trio).size === 1
+          ? `Aapke teenon vivah grahan — saptamesh, karak aur Darakaraka — ek hi graha par aa gaye hain`
+          : `Aapke vivah grahon mein se ek hi graha do bhoomikayein nibha raha hai`}, aur un sabka upay upar diya ja chuka hai. Ye ek asli baat hai aapke chart ki. Isliye paanchva upay ${PLANET_HI[sub.pl]} par rakha gaya hai: ${sub.basis}.`,
       });
     }
   }
 
   return out;
 }
+
+/**
+ * Rules that award full marks for the ABSENCE of an affliction. They score a
+ * perfect ratio on any clean chart, so without this list they crowd out the
+ * chart's real strengths in the 'what is carrying this' line. See
+ * preferPresence() in lib/yog-engine.ts for the measurement behind it.
+ */
+const ABSENCE_LABELS = ['Shani ka saptam par asar', 'Mangal Dosh', '7th lord asta ya vakri', 'Paap drishti ka dabaav'];
 
 function toFacts(
   base: YogResult,
@@ -696,7 +714,7 @@ function toFacts(
     name: name && name.trim() ? name.trim().split(/\s+/)[0] : null,
     verdict: verdict.label,
     verdictLine: verdict.line,
-    supportedBy: (base.highlights ?? []).map((h) => plain(h.label, 'up')),
+    supportedBy: preferPresence(base.rules ?? [], ABSENCE_LABELS).map((h) => plain(h.label, 'up')),
     blockedBy: (base.blockers ?? []).map((b) => plain(b.label, 'down')),
     umar: umar ? `${umar.from}-${umar.to}` : null,
     firstWindow: windows.length ? `${windows[0].label} (${windows[0].from} se ${windows[0].to})` : null,
