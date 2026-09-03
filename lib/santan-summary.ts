@@ -2,6 +2,13 @@
  * ============================================================================
  * TRIKAL VAANI — Santan Yog summary writer
  * File:    lib/santan-summary.ts
+ * VERSION: 1.3 (3 Sep 2026)
+ *   v1.3 — THE VERDICT WAS PRINTED THREE TIMES. The page shows it in
+ *   Devanagari, then in Hinglish, and then the prompt asked Gemini to open by
+ *   stating it again. The model was obeying. The instruction is now the
+ *   opposite: the verdict is already on screen, so start with what is CARRYING
+ *   the chart. Also: use the reader's first name once when it is given — a
+ *   73-word personal reading that never says the name reads like a form letter.
  * VERSION: 1.2 (3 Sep 2026)
  *   v1.2 — TIME BUDGET. v1.1 allowed two attempts at 15s each, so the worst
  *   case was 30s of Gemini inside a route that now has a 30s ceiling — the
@@ -201,7 +208,9 @@ ABSOLUTE RULES — breaking any one makes the whole answer unusable:
 5. Never promise or guarantee an outcome.
 6. Write no number that is not in the JSON.
 
-VOICE: simple spoken Hinglish, the way a kind older relative explains something at the kitchen table. Short sentences. No jargon — no "Shadbala", no "virupa", no "Saptamsa", no "D-7", no "Putrakaraka". If the JSON names a technical thing, say what it MEANS instead.
+VOICE: simple spoken Hinglish, the way a kind older relative explains something at the kitchen table. Short sentences. No jargon — no "Shadbala", no "virupa", no "Saptamsa", no "D-7", no "Putrakaraka". The supportedBy and blockedBy lines are ALREADY in plain language: use them close to as they are written, do not translate them back into astrology terms.
+
+NAME: if "name" is present in the JSON, address the reader by it ONCE, naturally, near the start. If it is null, do not invent one and do not write a greeting.
 Do not greet, do not sign off, do not use headings or bullet points unless asked. Return plain text only.
 `.trim();
 
@@ -210,10 +219,12 @@ function freePrompt(): string {
 
 TASK: write EXACTLY about ${FREE_TARGET} words, one single paragraph.
 
+IMPORTANT: the verdict is ALREADY printed on the page, directly above your text, in two languages. Do NOT open by restating it — that makes the reader see the same sentence three times. Assume they have just read it.
+
 Say, in this order:
-- the verdict, in plain words
-- one line on what is helping, in ordinary language
-- one line on what is holding it back, in ordinary language
+- start with what is HELPING this chart, in ordinary language
+- then what is holding it back, gently
+- one line on what that combination means for them in practice
 - close by saying this shows the strength of the yog, is not a guarantee, and is not medical advice
 
 DO NOT mention any date, any month, any year, any remedy, any mantra, and do not say how many children. Those are in the paid reading. Do not tease them either — simply leave them out.`;
@@ -224,8 +235,10 @@ function paidPrompt(): string {
 
 TASK: write about ${PAID_TARGET} words in flowing paragraphs, no headings.
 
+The verdict is already printed above your text. Do not restate it as your opening sentence — begin with what it MEANS for this person instead.
+
 Cover, in this order:
-- the verdict and what it means for this person, plainly
+- what the verdict means for this person, plainly
 - what in the chart is carrying it, said without jargon
 - what is holding it back, said gently and without alarm
 - the likely range for the number of children, always as a RANGE and always described as a classical indication rather than a count
