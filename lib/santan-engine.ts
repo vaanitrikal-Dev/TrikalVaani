@@ -3,6 +3,34 @@
  * TRIKAL VAANI — Santan Yog Engine
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: lib/santan-engine.ts
+ * VERSION: 2.0 (2 Sep 2026)
+ *   v2.0 — THE ANSWER, NOT THE ARITHMETIC. Rohiit judged v1.x too technical:
+ *   "normal person will not understand... they do not planet numbers, they
+ *   want direct answer." The keyword evidence agreed — of ~150 Radar keywords
+ *   in cluster svc-child-destiny, the largest bucket (~18) asks KAB, then
+ *   KITNE (~7), then UPAY (~6). Not one asks about Shadbala, virupas,
+ *   Saptamsa or Putrakaraka. The scoring below is unchanged and still correct;
+ *   what v2.0 adds is everything a person actually came for:
+ *     verdict   — a three-way plain answer (see VERDICT below)
+ *     sankhya   — a santan-count RANGE, never a number
+ *     windows   — real dasha dates, taken from the VM's own timeline
+ *     upay      — five chart-specific Trikaal Upay (2 BPHS, 2 Bhrigu, 1 Shadbala)
+ *   `directionHints` is REPLACED by `upay`. Nothing else was removed.
+ *
+ *   VERDICT — the one line I would not write. Rohiit asked for "yes, no or
+ *   chances". There is no "no". A calculator telling someone they will not
+ *   have children is not a claim Parashara makes, it is not medically true,
+ *   and the person reading it may stop seeing a doctor. The three-way answer
+ *   is haan / sambhavna / abhi kathin — just as decisive, and honest. He
+ *   accepted this.
+ *
+ *   HONEST LABELLING OF THE UPAY SOURCES. BPHS upay 1-2 are the classical
+ *   graha remedies (mantra, daan, vaar) applied to this chart's Panchamesh
+ *   and to Guru as Santan Karaka. The two marked Bhrigu are karaka-chain
+ *   remedies in the BHRIGU NANDI NADI STYLE, derived from this chart — they
+ *   are NOT verbatim quotations from a Bhrigu text held in hand, and must
+ *   never be advertised as such. The Shadbala one is pure computation: the
+ *   weakest of the three santan grahas by measured ratio.
  * VERSION: 1.1 (2 Sep 2026)
  *   v1.1 — SANTAN-SPECIFIC BANDS. See BANDS below. The shared 60/48/36 in
  *   yog-engine.ts were calibrated on the OTHER three engines and are wrong
@@ -54,11 +82,83 @@ import {
   PLANET_HI, KENDRA, TRIKONA, DUSTHANA,
 } from './yog-engine';
 
+/** One Vimshottari period as the VM returns it, dates included. */
+export interface DashaPeriod {
+  planet: string;
+  start: string;
+  end: string;
+  antar?: { planet: string; start: string; end: string }[];
+}
+
+export interface SantanVerdict {
+  key: 'haan' | 'sambhavna' | 'kathin';
+  /** Plain Hinglish, shown as the headline. */
+  label: string;
+  /** Devanagari, for the Hindi surface. */
+  labelHi: string;
+  /** One ordinary sentence. No graha, no number. */
+  line: string;
+}
+
+export interface SantanSankhya {
+  min: number;
+  max: number;
+  /** Which classical rule produced it, in plain words. */
+  basis: string;
+}
+
+export interface SantanWindow {
+  label: string;
+  /** ISO yyyy-mm-dd. The page formats them. */
+  from: string;
+  to: string;
+  why: string;
+}
+
+export interface TrikaalUpay {
+  n: number;
+  source: 'BPHS' | 'Bhrigu' | 'Shadbala';
+  title: string;
+  /** What to actually do. */
+  what: string;
+  /** When to do it. */
+  when: string;
+  /** Why THIS chart gets this one. */
+  why: string;
+}
+
 export interface SantanResult extends YogResult {
+  /** The direct answer. Free tier shows this. */
+  verdict: SantanVerdict;
   /** Dasha periods that support santan yog. Paid tier. */
   timing: { period: string; why: string }[];
-  /** Chart-specific upay directions. Paid tier. Never medical. */
-  directionHints: { hint: string; reason: string }[];
+  /** Real dated windows from the VM dasha timeline. Paid tier. */
+  windows: SantanWindow[];
+  /** Santan count RANGE per shastra. Paid tier. */
+  sankhya: SantanSankhya | null;
+  /** Five chart-specific Trikaal Upay. Paid tier. Never medical. */
+  upay: TrikaalUpay[];
+  /** Everything Gemini is allowed to see when writing the summary. */
+  facts: SantanFacts;
+}
+
+/**
+ * The ONLY thing handed to Gemini. Note what is absent: no birth details, no
+ * raw chart, no free text. Gemini is a writer here, not a calculator — every
+ * number and name it may use is in this object, and lib/santan-summary.ts
+ * rejects any output that introduces one that is not.
+ */
+export interface SantanFacts {
+  verdict: string;
+  verdictLine: string;
+  score: number;
+  band: string;
+  supportedBy: string[];
+  blockedBy: string[];
+  sankhya: string | null;
+  firstWindow: string | null;
+  upayTitles: string[];
+  saptamsaRead: boolean;
 }
 
 /**
@@ -158,9 +258,317 @@ function hasSaptamsa(data: CalcData): boolean {
   return Boolean(data.saptamsa?.grahas?.length);
 }
 
+
+// ── v2.0 — VERDICT, SANKHYA, WINDOWS, TRIKAAL UPAY ──────────────────────────
+
+/**
+ * Fruitful / barren / neutral signs for the 5th house.
+ *
+ * The classical division, and the basis Rohiit approved on 2 Sep 2026 for a
+ * santan COUNT RANGE. Bahu-santan are the watery signs; alpa-santan are the
+ * ones classical texts call barren. Everything else is sama. The range is then
+ * adjusted by the 5th lord's measured strength and by the D-7, exactly as he
+ * asked — sign alone is too blunt to act on.
+ */
+const BAHU_SANTAN = ['Karka', 'Vrishchika', 'Meena'];
+const ALPA_SANTAN = ['Mesha', 'Simha', 'Kanya'];
+
+/** Classical graha remedies. Mantra, daan, day. Used by the BPHS upay. */
+const PLANET_REMEDY: Record<string, { mantra: string; daan: string; vaar: string; rang: string }> = {
+  Sun:     { mantra: 'ॐ घृणिः सूर्याय नमः',      daan: 'gehu, gud, tamba',          vaar: 'Ravivar',   rang: 'laal' },
+  Moon:    { mantra: 'ॐ सों सोमाय नमः',          daan: 'chawal, doodh, chandi',     vaar: 'Somvar',    rang: 'safed' },
+  Mars:    { mantra: 'ॐ अं अंगारकाय नमः',        daan: 'masoor dal, gud, tamba',    vaar: 'Mangalvar', rang: 'laal' },
+  Mercury: { mantra: 'ॐ बुं बुधाय नमः',           daan: 'moong dal, hari sabzi',     vaar: 'Budhvar',   rang: 'hara' },
+  Jupiter: { mantra: 'ॐ बृं बृहस्पतये नमः',       daan: 'chana dal, haldi, kesar',   vaar: 'Guruvar',   rang: 'peela' },
+  Venus:   { mantra: 'ॐ शुं शुक्राय नमः',         daan: 'chawal, mishri, safed vastra', vaar: 'Shukravar', rang: 'safed' },
+  Saturn:  { mantra: 'ॐ शं शनैश्चराय नमः',       daan: 'kala til, sarson ka tel',   vaar: 'Shanivar',  rang: 'kaala' },
+  Rahu:    { mantra: 'ॐ रां राहवे नमः',           daan: 'kambal, kale til, nariyal', vaar: 'Shanivar',  rang: 'dhuandhla' },
+  Ketu:    { mantra: 'ॐ कें केतवे नमः',           daan: 'kambal, tirangi vastra',    vaar: 'Mangalvar', rang: 'chitkabra' },
+};
+
+/**
+ * The three-way answer.
+ *
+ * Cut points are the santan bands (70 / 46), so the verdict and the band can
+ * never disagree. The `line` is written for someone who has never heard the
+ * word Shadbala: no graha name, no number, no jargon.
+ */
+function verdictFor(score: number): SantanVerdict {
+  if (score >= SANTAN_VERY_STRONG) {
+    return {
+      key: 'haan',
+      label: 'Haan — yog prabal hai',
+      labelHi: 'हाँ — योग प्रबल है',
+      line: 'Aapki kundali santan ke maamle mein saath de rahi hai. Jo cheezein is baat ko sambhalti hain, wo aapke chart mein mazboot hain.',
+    };
+  }
+  if (score >= SANTAN_MODERATE) {
+    return {
+      key: 'sambhavna',
+      label: 'Sambhavna hai — samay aur upay chahiye',
+      labelHi: 'संभावना है — समय और उपाय चाहिए',
+      line: 'Yog aapki kundali mein maujood hai, par abhi uspar kuch dabaav bhi hai. Aise chart mein baat samay par bhi nirbhar karti hai, aur upay se rasta khulta hai.',
+    };
+  }
+  return {
+    key: 'kathin',
+    label: 'Abhi kathin hai — yog par bhaari rukavat hai',
+    labelHi: 'अभी कठिन है — योग पर भारी रुकावट है',
+    line: 'Is samay aapke chart par kaafi dabaav dikh raha hai. Iska matlab inkaar nahi hai — iska matlab hai ki raah lambi hai, aur usme samay, upay aur doctor ki salah teenon lagti hain.',
+  };
+}
+
+/**
+ * Santan count as a RANGE — never a number.
+ *
+ * Sign class sets the base; the 5th lord's Shadbala ratio and the D-7 then
+ * move it. A single figure would be a claim the shastra does not make and
+ * that modern life (medicine, money, choice) does not obey, so the range is
+ * deliberately the widest honest statement available.
+ */
+function sankhyaRange(
+  data: CalcData,
+  sign5: string | null,
+  l5: string | null,
+): SantanSankhya | null {
+  if (!sign5) return null;
+
+  let min = 2, max = 3, cls = 'sama';
+  if (BAHU_SANTAN.includes(sign5)) { min = 3; max = 4; cls = 'bahu-santan'; }
+  else if (ALPA_SANTAN.includes(sign5)) { min = 1; max = 2; cls = 'alpa-santan'; }
+
+  const notes: string[] = [`Aapka panchma bhava ${sign5} ka hai, jo shastra mein ${cls} rashi kehlati hai`];
+
+  const r = ratio(planet(data, l5));
+  if (r !== null && r >= 1.2) { max += 1; notes.push(`panchmesh ${PLANET_HI[l5 ?? '']} mazboot hai (Shadbala ${r.toFixed(2)})`); }
+  else if (r !== null && r < 0.8) { min = Math.max(1, min - 1); notes.push(`panchmesh ${PLANET_HI[l5 ?? '']} kamzor hai (Shadbala ${r.toFixed(2)})`); }
+
+  if (hasSaptamsa(data)) {
+    const g = d7(data, l5);
+    if (g && (KENDRA.includes(g.house) || TRIKONA.includes(g.house))) {
+      max += 1;
+      notes.push('aur Saptamsa D-7 ise sahara de rahi hai');
+    } else if (g) {
+      max = Math.max(min, max - 1);
+      notes.push('par Saptamsa D-7 utna sahara nahi de rahi');
+    }
+  }
+
+  // BUG FOUND BY TEST, 2 Sep 2026: on the reference chart the D-7 penalty
+  // pulled max down to equal min and the output read "2-2". A range whose two
+  // ends are the same is not a range, it is a number — which is precisely the
+  // claim this function exists to avoid making. The span is therefore always
+  // at least one, widened upward so the honest uncertainty stays visible.
+  min = Math.max(1, Math.min(min, 5));
+  max = Math.min(5, Math.max(max, min + 1));
+  if (max <= min) min = Math.max(1, max - 1);
+  return { min, max, basis: notes.join(', ') + '.' };
+}
+
+/**
+ * Dated windows, from the VM's own Vimshottari timeline.
+ *
+ * These dates were ALREADY being computed and thrown away: the route read
+ * maha.start and maha.end only to work out which period is running now, then
+ * passed the planet names on and dropped the dates. "Kab" is the single most
+ * searched santan question, and the answer was in the response all along.
+ *
+ * Only windows that have not finished are returned, newest last, capped at
+ * four so the paid table stays readable.
+ */
+function buildWindows(timeline: DashaPeriod[] | undefined, keyPlanets: string[]): SantanWindow[] {
+  if (!Array.isArray(timeline) || !timeline.length) return [];
+  const today = new Date();
+  const out: SantanWindow[] = [];
+
+  for (const maha of timeline) {
+    if (!maha?.start || !maha?.end) continue;
+    const mEnd = new Date(maha.end);
+    if (mEnd < today) continue;
+
+    if (keyPlanets.includes(maha.planet)) {
+      out.push({
+        label: `${PLANET_HI[maha.planet] ?? maha.planet} Mahadasha`,
+        from: String(maha.start).slice(0, 10),
+        to: String(maha.end).slice(0, 10),
+        why: `${PLANET_HI[maha.planet] ?? maha.planet} aapke santan grahon mein hai, isliye ye poora daur anukool mana jata hai.`,
+      });
+    }
+
+    for (const antar of maha.antar ?? []) {
+      if (!antar?.start || !antar?.end) continue;
+      if (new Date(antar.end) < today) continue;
+      if (!keyPlanets.includes(antar.planet)) continue;
+      if (keyPlanets.includes(maha.planet) && maha.planet === antar.planet) continue;
+      out.push({
+        label: `${PLANET_HI[maha.planet] ?? maha.planet} — ${PLANET_HI[antar.planet] ?? antar.planet}`,
+        from: String(antar.start).slice(0, 10),
+        to: String(antar.end).slice(0, 10),
+        why: `${PLANET_HI[antar.planet] ?? antar.planet} ki antardasha — ye chhoti aur teekhi khidki hoti hai, isliye ispar nazar rakhiye.`,
+      });
+    }
+  }
+
+  out.sort((a, b) => a.from.localeCompare(b.from));
+  return out.slice(0, 4);
+}
+
+/**
+ * The five Trikaal Upay: 2 BPHS, 2 Bhrigu, 1 Shadbala — the split Rohiit set.
+ *
+ * Every one is chosen BY THIS CHART. That is the whole point: an upay that is
+ * the same for everybody cannot be connected to anybody's grahas, which is
+ * exactly what the "kaunsa totka karein" searches keep landing on.
+ */
+function buildUpay(
+  data: CalcData,
+  ctx: {
+    l5: string | null;
+    PK: string | null;
+    nodeInFifth: boolean;
+    pitra: boolean;
+    saturnInFifth: boolean;
+    combustL5: boolean;
+  },
+): TrikaalUpay[] {
+  const out: TrikaalUpay[] = [];
+  const rem = (pl: string | null) => (pl ? PLANET_REMEDY[pl] : undefined);
+
+  // ── BPHS 1 — the Panchamesh, this chart's own santan lord ──
+  const r5 = rem(ctx.l5);
+  if (ctx.l5 && r5) {
+    out.push({
+      n: 1, source: 'BPHS',
+      title: `Panchamesh ${PLANET_HI[ctx.l5]} ka upay`,
+      what: `${r5.mantra} — 108 baar. Daan: ${r5.daan}. ${r5.rang} rang dharan karein.`,
+      when: `Har ${r5.vaar}, subah snan ke baad, ek hi samay par.`,
+      why: `Aapke chart mein santan ka swami ${PLANET_HI[ctx.l5]} hai. Isiliye aam "santan upay" aap par kaam nahi karega — upay usi graha ka hona chahiye jo aapki kundali mein ye bhava sambhalta hai.`,
+    });
+  }
+
+  // ── BPHS 2 — Guru, the Santan Karaka ──
+  const rj = rem('Jupiter')!;
+  out.push({
+    n: 2, source: 'BPHS',
+    title: 'Santan Karaka Guru ka upay',
+    what: `${rj.mantra} — 108 baar, aur Santan Gopal mantra ka niyam. Daan: ${rj.daan}.`,
+    when: 'Har Guruvar. Niyamitta sankhya se zyada mayne rakhti hai.',
+    why: 'Guru har kundali mein santan ka karak graha hai — panchma bhava chahe kitna bhi achha ho, kamzor Guru uska phal der se deta hai.',
+  });
+
+  // ── Bhrigu 1 — the chara karaka ──
+  const rpk = rem(ctx.PK);
+  if (ctx.PK && rpk) {
+    out.push({
+      n: 3, source: 'Bhrigu',
+      title: `Putrakaraka ${PLANET_HI[ctx.PK]} ki upasana`,
+      what: `${rpk.mantra} ka jaap, aur ${PLANET_HI[ctx.PK]} se judi vastu ka daan (${rpk.daan}).`,
+      when: `Har ${rpk.vaar}.`,
+      why: `Karak-paddhati mein aapka Putrakaraka ${PLANET_HI[ctx.PK]} hai — ye har kundali mein badalta hai, aur isi wajah se ye upay sirf aapke chart ka hai.`,
+    });
+  }
+
+  // ── Bhrigu 2 — the biggest actual blocker in THIS chart ──
+  if (ctx.nodeInFifth) {
+    out.push({
+      n: 4, source: 'Bhrigu',
+      title: 'Chhaya grahon ki shanti (Putra Dosh)',
+      what: 'Naag-Naagin ki shanti, Rahu-Ketu ka daan (kambal, kale til, nariyal), aur behte jal mein nariyal pravah.',
+      when: 'Shanivar ya Amavasya.',
+      why: 'Aapke panchma-ekadash axis par Rahu/Ketu baithe hain. Ye alag shreni ki baadha hai — iska upay chhaya grahon ka hota hai, panchmesh ka nahi, aur yahi antar zyadatar jagah chhoot jata hai.',
+    });
+  } else if (ctx.pitra) {
+    out.push({
+      n: 4, source: 'Bhrigu',
+      title: 'Pitra shanti',
+      what: 'Purvajon ke naam tarpan aur shraddh, Amavasya par anna-daan, aur peepal ko jal.',
+      when: 'Amavasya, aur Pitru Paksha ke dauran.',
+      why: 'Aapke chart mein Pitra Dosh ke sanket hain. Karak-paddhati santan baadha ko purvajon se seedha jodti hai, aur is sthiti mein ye upay panchmesh wale upay se pehle aata hai.',
+    });
+  } else if (ctx.saturnInFifth) {
+    out.push({
+      n: 4, source: 'Bhrigu',
+      title: 'Shani ko shant karna',
+      what: 'Kale til aur sarson ka tel daan, Hanuman Chalisa ka niyam, aur shramikon ki seva.',
+      when: 'Har Shanivar, suryast ke baad.',
+      why: 'Shani aapke panchma bhava par hai. Wo mana nahi karta — wo samay lamba karta hai; isliye upay ka maqsad rasta kholna nahi, intezaar ko chhota karna hai.',
+    });
+  } else if (ctx.combustL5) {
+    out.push({
+      n: 4, source: 'Bhrigu',
+      title: 'Asta panchmesh ko bal dena',
+      what: `Surya ko arghya, aur ${ctx.l5 ? PLANET_HI[ctx.l5] : 'panchmesh'} ka mantra jaap.`,
+      when: 'Suryoday ke samay, roz.',
+      why: 'Aapka panchmesh Surya ke bahut paas hai — yaani asta. Karak-paddhati kehti hai asta graha ka yog maujood rehta hai par dabaa hua, jab tak uski dasha na aaye.',
+    });
+  } else {
+    const jup = planet(data, 'Jupiter');
+    out.push({
+      n: 4, source: 'Bhrigu',
+      title: 'Guru ke swami ko bal dena',
+      what: 'Guru jis rashi mein hai, us rashi ke swami ka mantra aur uska daan.',
+      when: `Us graha ke vaar par.${jup ? ` Aapka Guru ${jup.sign} mein hai.` : ''}`,
+      why: 'Aapke chart par koi bhaari dosh nahi hai, isliye karak-paddhati agla kadam yahi bataati hai — karak ke aashray ko mazboot karna, taaki jo yog hai wo bina rukavat chale.',
+    });
+  }
+
+  // ── Shadbala — pure computation, no book ──
+  // BUG FOUND BY TEST, 2 Sep 2026: on the reference chart the Putrakaraka and
+  // the weakest graha were both the Moon, so upay 3 and upay 5 gave the same
+  // remedy twice and the customer paid for four, not five. The weakest graha
+  // ALREADY covered by upay 1 (Panchamesh) or upay 3 (Putrakaraka) is skipped,
+  // and the next weakest is taken instead. If all three are already covered,
+  // the weakest is used anyway — a repeat is better than a missing fifth upay,
+  // and the reason line still carries its own distinct number.
+  const trio = [ctx.l5, 'Jupiter', ctx.PK].filter(Boolean) as string[];
+  const alreadyCovered = new Set([ctx.l5, ctx.PK].filter(Boolean) as string[]);
+  const ranked = trio
+    .map((pl) => ({ pl, r: ratio(planet(data, pl)) }))
+    .filter((x): x is { pl: string; r: number } => x.r !== null)
+    .sort((a, b) => a.r - b.r);
+  const pick = ranked.find((x) => !alreadyCovered.has(x.pl)) ?? ranked[0];
+  const weakest: string | null = pick?.pl ?? null;
+  const weakestR: number = pick?.r ?? Infinity;
+  if (weakest) {
+    const rw = rem(weakest)!;
+    out.push({
+      n: 5, source: 'Shadbala',
+      title: `Sabse kamzor santan graha — ${PLANET_HI[weakest]}`,
+      what: `${rw.mantra}, ${rw.daan} ka daan, aur ${rw.rang} rang.`,
+      when: `Har ${rw.vaar}, kam se kam 40 din lagataar.`,
+      why: `Aapke teen santan grahon mein ${PLANET_HI[weakest]} ki Shadbala sabse kam hai — ${weakestR.toFixed(2)}, jahan 1.00 shastriya न्यूनतम hai. Ye upay kisi kitab se nahi, aapke apne chart ki ganit se nikla hai.`,
+    });
+  }
+
+  return out;
+}
+
+/** Everything Gemini may see. Nothing else reaches the prompt. */
+function toFacts(
+  base: YogResult,
+  verdict: SantanVerdict,
+  sankhya: SantanSankhya | null,
+  windows: SantanWindow[],
+  upay: TrikaalUpay[],
+  saptamsaRead: boolean,
+): SantanFacts {
+  return {
+    verdict: verdict.label,
+    verdictLine: verdict.line,
+    score: base.score,
+    band: base.band,
+    supportedBy: (base.highlights ?? []).map((h) => h.label),
+    blockedBy: (base.blockers ?? []).map((b) => b.label),
+    sankhya: sankhya ? `${sankhya.min}-${sankhya.max}` : null,
+    firstWindow: windows.length ? `${windows[0].label} (${windows[0].from} se ${windows[0].to})` : null,
+    upayTitles: upay.map((u) => u.title),
+    saptamsaRead,
+  };
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 
-export function scoreSantan(data: CalcData): SantanResult {
+export function scoreSantan(data: CalcData, timeline?: DashaPeriod[]): SantanResult {
   const s = new ScoreSheet();
   const cap = capabilities(data);
   const { PK } = karakas(data);
@@ -476,14 +884,30 @@ export function scoreSantan(data: CalcData): SantanResult {
   // finish() applies the SHARED bands. Re-band with the santan thresholds —
   // the score itself is not touched, only the label it is given.
   const { band, bandHi } = santanBand(base.score);
+  const rebanded = { ...base, band, bandHi };
+
+  const verdict = verdictFor(base.score);
+  const sankhya = sankhyaRange(data, sign5, l5);
+  const windows = buildWindows(timeline, keyPlanets);
+  const upay = buildUpay(data, {
+    l5,
+    PK: PK?.planet ?? null,
+    nodeInFifth: nodeInFifth.length > 0,
+    pitra: pitraSignals.length > 0,
+    saturnInFifth: inFifth.some((x) => x.planet === 'Saturn'),
+    combustL5: comb.yes,
+  });
+
   return {
-    ...base,
-    band,
-    bandHi,
+    ...rebanded,
     // The shared disclaimer has no medical sentence; santan must carry one.
     disclaimer: SANTAN_DISCLAIMER,
+    verdict,
     timing: buildTiming(data, keyPlanets),
-    directionHints: buildHints(data, { l5, PK: PK?.planet ?? null, nodeInFifth: nodeInFifth.length > 0, pitra: pitraSignals.length > 0 }),
+    windows,
+    sankhya,
+    upay,
+    facts: toFacts(rebanded, verdict, sankhya, windows, upay, hasSaptamsa(data)),
   };
 }
 
@@ -523,9 +947,12 @@ function buildTiming(data: CalcData, keyPlanets: string[]) {
   return out;
 }
 
-// ── Upay direction (never medical) ───────────────────────────────────────────
-
-function buildHints(
+// ── RETIRED in v2.0 ──────────────────────────────────────────────────────────
+// buildHints() produced the old one-line "direction" hints. buildUpay() above
+// replaces it with five sourced, chart-specific Trikaal Upay. Kept out rather
+// than left dead — nothing calls it.
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function _retiredBuildHints(
   data: CalcData,
   ctx: { l5: string | null; PK: string | null; nodeInFifth: boolean; pitra: boolean },
 ) {
