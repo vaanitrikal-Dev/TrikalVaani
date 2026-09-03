@@ -2,6 +2,21 @@
 
 // ============================================================
 // File: components/calculators/YogCalculator.tsx
+// Version: v2.9 — Vivah Yog supported, gender can be required (3 Sep 2026)
+//
+// CHANGELOG v2.9 — three additions, all defaulted so the four live calculators
+// render exactly as they do today.
+//   1. `type` accepts 'vivah'.
+//   2. `genderRequired` — Vivah alone needs it. The Kalatra Karaka is Venus
+//      for a man and Jupiter for a woman, so gender does not decorate the
+//      reading, it CHANGES it. Rohiit's instruction, 3 Sep 2026: "always ask
+//      for Gender for accurate results". The label and the validation both
+//      follow the flag; every other calculator keeps "(optional)".
+//   3. SantanView became VerdictView, shared by Santan and Vivah. The two had
+//      the same layout and different words. Keeping them apart is how the lock
+//      teaser and the Trikaal Upay heading came to say different things about
+//      the same fifth remedy earlier today, so the middle block's labels are
+//      now passed in rather than hard-coded twice.
 // Version: v2.8 — client timeout follows the 60s route ceiling (3 Sep 2026)
 // Version: v2.7 — Trikaal Upay heading made always-true (3 Sep 2026)
 // Version: v2.6 — WhatsApp share on all four yog calculators (3 Sep 2026)
@@ -176,7 +191,12 @@ interface ApiResponse {
 
 export interface YogCalculatorConfig {
   /** Matches the `type` the API expects. */
-  type: 'upsc' | 'foreign-settlement' | 'foreign-spouse' | 'santan';
+  type: 'upsc' | 'foreign-settlement' | 'foreign-spouse' | 'santan' | 'vivah';
+  /**
+   * Make the gender field mandatory. Only set this where the reading genuinely
+   * differs by gender — asking for it without using it is just friction.
+   */
+  genderRequired?: boolean;
   scoreLabel: string;
   /** Heading above the per-rule breakdown. */
   breakdownHeading: string;
@@ -455,8 +475,38 @@ function verdictColour(key: string): string {
   return '#FCA5A5';
 }
 
-function SantanView({ r, paid }: { r: any; paid: boolean }) {
+/**
+ * v2.9: shared by Santan and Vivah. `L` carries the only words that differ —
+ * the middle block is a child count for one and an age band for the other.
+ */
+interface VerdictLabels {
+  rangeHeading: string;
+  rangeUnit: string;
+  rangeFootnote: string;
+  windowsNote: string;
+}
+
+const SANTAN_LABELS: VerdictLabels = {
+  rangeHeading: 'Kitne — shastriya sanket',
+  rangeUnit: 'santan ka sanket',
+  rangeFootnote:
+    'Ye anuman hai, ginti nahi. Shastra range deta hai; aaj ke samay mein sankhya chikitsa, aarthik nirnay aur vyaktigat chunav par bhi nirbhar karti hai.',
+  windowsNote: 'Ye khidkiyan aapki apni Vimshottari dasha se nikli hain.',
+};
+
+const VIVAH_LABELS: VerdictLabels = {
+  rangeHeading: 'Kis umar mein — shastriya sanket',
+  rangeUnit: 'saal ki umar ke beech',
+  rangeFootnote:
+    'Ye ek window hai, koi tay tareekh nahi. Agar is dauran baat na bane to yog khatam nahi hota — wo agli khidki ka intezaar karta hai.',
+  windowsNote: 'Ye khidkiyan aapki apni Vimshottari dasha se nikli hain. Jo daur abhi chal raha hai, uski tareekh aaj se shuru dikhayi gayi hai.',
+};
+
+function VerdictView({ r, paid, L }: { r: any; paid: boolean; L: VerdictLabels }) {
   const v = r.verdict;
+  // Santan calls it `sankhya` (a child count), Vivah calls it `umar` (an age
+  // band). Same slot, same {min, max, basis} shape.
+  const range = r.sankhya ?? r.umar ?? null;
   return (
     <>
       {/* THE ANSWER */}
@@ -512,7 +562,7 @@ function SantanView({ r, paid }: { r: any; paid: boolean }) {
           style={{ background: '#0B0F1A', border: `1px solid ${GOLD_RGBA(0.22)}` }}>
           <h2 className="text-base font-bold m-0 mb-1" style={{ color: GOLD }}>Kab — anukool samay</h2>
           <p className="text-xs m-0 mb-4" style={{ color: '#64748b' }}>
-            Ye khidkiyan aapki apni Vimshottari dasha se nikli hain.
+            {L.windowsNote}
           </p>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -545,19 +595,16 @@ function SantanView({ r, paid }: { r: any; paid: boolean }) {
       )}
 
       {/* PAID — KITNE, always a range */}
-      {paid && r.sankhya && (
+      {paid && range && (
         <section className="rounded-2xl p-5 md:p-6 mb-5"
           style={{ background: '#0B0F1A', border: `1px solid ${GOLD_RGBA(0.22)}` }}>
-          <h2 className="text-base font-bold m-0 mb-3" style={{ color: GOLD }}>Kitne — shastriya sanket</h2>
+          <h2 className="text-base font-bold m-0 mb-3" style={{ color: GOLD }}>{L.rangeHeading}</h2>
           <p className="m-0 text-3xl font-bold" style={{ color: GOLD }}>
-            {r.sankhya.min}–{r.sankhya.max}
-            <span className="text-sm font-normal" style={{ color: '#64748b' }}> santan ka sanket</span>
+            {range.min}–{range.max}
+            <span className="text-sm font-normal" style={{ color: '#64748b' }}> {L.rangeUnit}</span>
           </p>
-          <p className="text-xs mt-3 mb-0 leading-relaxed" style={{ color: '#94a3b8' }}>{r.sankhya.basis}</p>
-          <p className="text-xs mt-2 mb-0 leading-relaxed" style={{ color: '#64748b' }}>
-            Ye anuman hai, ginti nahi. Shastra range deta hai; aaj ke samay mein sankhya chikitsa, aarthik
-            nirnay aur vyaktigat chunav par bhi nirbhar karti hai.
-          </p>
+          <p className="text-xs mt-3 mb-0 leading-relaxed" style={{ color: '#94a3b8' }}>{range.basis}</p>
+          <p className="text-xs mt-2 mb-0 leading-relaxed" style={{ color: '#64748b' }}>{L.rangeFootnote}</p>
         </section>
       )}
 
@@ -714,6 +761,9 @@ export default function YogCalculator({ config }: { config: YogCalculatorConfig 
 
   const validate = () => {
     const e: Record<string, string> = {};
+    if (config.genderRequired && !form.gender) {
+      e.gender = 'Gender chunein — iske bina reading sateek nahi hogi';
+    }
     if (!form.date) e.date = 'Date of birth zaroori hai';
     if (!form.unknownTime && !form.time) e.time = 'Time of birth zaroori hai (ya "pata nahi" chunein)';
     if (form.latitude === null || form.longitude === null) e.city = 'List mein se apna janm sthan chunein';
@@ -772,7 +822,9 @@ export default function YogCalculator({ config }: { config: YogCalculatorConfig 
               style={{ background: '#0d1120', border: '1px solid rgba(255,255,255,0.1)', color: '#e2e8f0' }} />
           </div>
           <div>
-            <label htmlFor="yog-gender" className="block text-xs mb-1.5" style={{ color: '#94a3b8' }}>Gender (optional)</label>
+            <label htmlFor="yog-gender" className="block text-xs mb-1.5" style={{ color: '#94a3b8' }}>
+              Gender {config.genderRequired ? <span style={{ color: '#FCA5A5' }}>*</span> : '(optional)'}
+            </label>
             <select id="yog-gender" value={form.gender}
               onChange={e => setForm(p => ({ ...p, gender: e.target.value as FormData['gender'] }))}
               className="w-full px-4 py-2.5 rounded-lg text-sm outline-none"
@@ -782,6 +834,12 @@ export default function YogCalculator({ config }: { config: YogCalculatorConfig 
               <option value="female">Female</option>
               <option value="other">Other</option>
             </select>
+            {errors.gender && <p className="text-xs mt-1 m-0" style={{ color: '#FCA5A5' }}>{errors.gender}</p>}
+            {config.genderRequired && !errors.gender && (
+              <p className="text-xs mt-1 m-0" style={{ color: '#64748b' }}>
+                Shastra mein vivah ka karak graha purush aur stri ke liye alag hai — isliye ye zaroori hai.
+              </p>
+            )}
           </div>
           <div>
             <label htmlFor="yog-date" className="block text-xs mb-1.5" style={{ color: '#94a3b8' }}>Date of Birth *</label>
@@ -835,7 +893,7 @@ export default function YogCalculator({ config }: { config: YogCalculatorConfig 
           {/* v2.2 — Santan leads with the answer, then the summary, then the
               locks (free) or the dates/count/upay (paid). The generic score +
               rule-row view follows for paid readers only. */}
-          {config.type === 'santan' && <SantanView r={r} paid={paid} />}
+          {(config.type === 'santan' || config.type === 'vivah') && <VerdictView r={r} paid={paid} L={config.type === 'vivah' ? VIVAH_LABELS : SANTAN_LABELS} />}
 
           {/* Score. Hidden on santan FREE: a bare "51 / 100" on this subject
               reads as a verdict on the person, and the plain verdict above
