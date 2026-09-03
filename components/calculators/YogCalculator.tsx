@@ -2,6 +2,27 @@
 
 // ============================================================
 // File: components/calculators/YogCalculator.tsx
+// Version: v2.6 — WhatsApp share on all four yog calculators (3 Sep 2026)
+//
+// CHANGELOG v2.6 — a share block after the result, free and paid alike. A free
+// result being passed around is the cheapest acquisition this site has.
+//
+// THE ONE JUDGEMENT CALL, AND IT IS DELIBERATE. The other three calculators
+// share the SCORE — "mera Sarkari Naukri Yog 62/100 hai" is something a person
+// is happy to send to friends. SANTAN DOES NOT SHARE THE RESULT AT ALL. Nobody
+// forwards "my progeny yog is weak" to a family group, and a site that invites
+// them to is being careless with a private subject. The santan share talks
+// about the TOOL instead — that it reads the Saptamsa D-7 — and carries no
+// score, no verdict and no name. It is better marketing too: the recipient is
+// handed a reason to try it, not someone else's private reading.
+//
+// Reuses components/result/ShareButtons.tsx rather than adding a second share
+// widget. Its text is overridden per calculator through segmentWhatsapp.
+//
+// PDF IS NOT HERE. Every PDF on this site is rendered on the VM (/karmic-pdf,
+// /milan-pdf, /muhurat-pdf) because the reports are Devanagari and the fonts
+// live there; package.json has no PDF library at all. A yog PDF therefore
+// needs a new VM endpoint and is a separate job, not a component change.
 // Version: v2.5 — client timeout follows the route ceiling (3 Sep 2026)
 //
 // CHANGELOG v2.5 — the route ceiling moved 30s -> 50s (see its v2.6 note), so
@@ -87,6 +108,7 @@ import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { loadRazorpayScript, openRazorpayCheckout } from '@/lib/razorpay-helper';
 import PayPalCheckout, { type PayPalProof } from '@/components/payment/PayPalCheckout';
+import ShareButtons from '@/components/result/ShareButtons';
 
 const GOLD = '#D4AF37';
 const GOLD_RGBA = (a: number) => `rgba(212,175,55,${a})`;
@@ -388,6 +410,41 @@ function fmtDate(iso: string): string {
   const MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   const mi = Number(m) - 1;
   return `${MON[mi] ?? m} ${y}`;
+}
+
+/**
+ * What each calculator invites the reader to send.
+ * Santan is the exception on purpose — see the v2.6 note at the top.
+ */
+function shareTextFor(type: string, score: number, name: string | null): string {
+  const who = name && name.trim() ? name.trim().split(/\s+/)[0] : null;
+  const me = who ? `${who} ne` : 'Maine';
+
+  if (type === 'santan') {
+    return (
+      'Santan Yog apni kundali se free check kar sakte hain — Trikaal Vaani Saptamsa (D-7) ' +
+      'padhta hai, jise shastra santan ke liye niyat karta hai. Zyadatar tools Navamsa se ' +
+      'padhte hain, jo asal mein vivah ka vibhag hai. ' +
+      'trikalvaani.com/calculators/free-santan-yog-calculator'
+    );
+  }
+  if (type === 'upsc') {
+    return (
+      `${me} apna Sarkari Naukri Yog check kiya — score ${score}/100, aur har point ki wajah asli ` +
+      `Shadbala figure ke saath. Aap bhi free check karein: ` +
+      `trikalvaani.com/calculators/free-ias-astrology-calculator`
+    );
+  }
+  if (type === 'foreign-settlement') {
+    return (
+      `${me} apna Videsh Yog check kiya — score ${score}/100, 12th house, Rahu aur Dasha ke hisaab se. ` +
+      `Free check: trikalvaani.com/calculators/free-foreign-settlement-calculator`
+    );
+  }
+  return (
+    `${me} apna Foreign Spouse Yog check kiya — score ${score}/100, 7th house aur Navamsa D-9 se. ` +
+    `Free check: trikalvaani.com/calculators/free-foreign-spouse-calculator`
+  );
 }
 
 function verdictColour(key: string): string {
@@ -985,6 +1042,24 @@ export default function YogCalculator({ config }: { config: YogCalculatorConfig 
             )}
           </section>
           )}
+
+          {/* ── Share (v2.6) ───────────────────────────────────────── */}
+          <section className="rounded-2xl p-5 md:p-6 mb-6"
+            style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
+            <h2 className="text-base font-bold m-0 mb-1" style={{ color: GOLD }}>
+              {config.type === 'santan' ? 'Kisi ko bata dein' : 'Apna result share karein'}
+            </h2>
+            <p className="text-xs m-0 mb-4" style={{ color: '#64748b' }}>
+              {config.type === 'santan'
+                ? 'Aapka result private hai — ye message sirf calculator ka link bhejta hai, aapka jawab nahi.'
+                : 'WhatsApp par bhejein, ya text copy karke kahin bhi paste karein.'}
+            </p>
+            <ShareButtons
+              score={r.score ?? 0}
+              name={data.input?.name || ''}
+              segmentWhatsapp={shareTextFor(config.type, r.score ?? 0, data.input?.name || null)}
+            />
+          </section>
 
           {/* Always rendered. The engine returns it on every call. */}
           <p className="text-xs text-center leading-relaxed mb-4" style={{ color: '#475569' }}>
