@@ -2,6 +2,24 @@
 
 // ============================================================
 // File: components/calculators/YogCalculator.tsx
+// Version: v2.2 — Santan Yog v2.0 result view (2 Sep 2026)
+//
+// CHANGELOG v2.2 (2026-09-02):
+//   Santan gets its OWN result view. Everything else is untouched — the three
+//   live calculators do not enter a single new branch, because the switch is
+//   one ternary at the top of the result block keyed on config.type.
+//
+//   WHY A SEPARATE VIEW RATHER THAN MORE CONFIG. The generic view sells locked
+//   RULE ROWS: marks visible, reasoning withheld. That is right for an exam
+//   score, where the rows are the product. It is wrong for a person asking
+//   whether they will have children — to them "5th lord ki taakat 7.4/12" is
+//   noise, and Radar agrees: of ~150 keywords in the santan cluster, not one
+//   mentions Shadbala, virupas, Saptamsa or Putrakaraka, while ~18 ask KAB,
+//   ~7 ask KITNE and ~6 ask UPAY. So santan leads with the verdict and a
+//   plain-language summary, and locks exactly those three things by name.
+//
+//   The technical breakdown is NOT thrown away — it still renders, below the
+//   summary, for the paid reader who wants to see the working.
 // Version: v2.1 — Santan Yog supported (2 Sep 2026)
 // Purpose: One form + one result renderer, shared by all four yog
 //          calculators (IAS/UPSC, Videsh Settlement, Foreign Spouse, Santan).
@@ -332,6 +350,159 @@ function LockedRow({ r }: { r: LockedRule }) {
 
 // ── Main component ───────────────────────────────────────────────────────────
 
+// ── v2.2 — SANTAN VIEW ───────────────────────────────────────────────────────
+//
+// Everything a person asking about children actually came for, in the order
+// they asked for it: the answer, then why, then when, then how many, then what
+// to do. No score, no ratios, no varga names on the free tier.
+
+function fmtDate(iso: string): string {
+  if (!iso || iso.length < 7) return iso;
+  const [y, m] = iso.split('-');
+  const MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const mi = Number(m) - 1;
+  return `${MON[mi] ?? m} ${y}`;
+}
+
+function verdictColour(key: string): string {
+  if (key === 'haan') return '#4ADE80';
+  if (key === 'sambhavna') return GOLD;
+  return '#FCA5A5';
+}
+
+function SantanView({ r, paid }: { r: any; paid: boolean }) {
+  const v = r.verdict;
+  return (
+    <>
+      {/* THE ANSWER */}
+      {v && (
+        <section className="rounded-2xl p-6 mb-5 text-center"
+          style={{ background: '#0B0F1A', border: `1px solid ${GOLD_RGBA(0.28)}` }}>
+          <p className="text-xs uppercase tracking-widest m-0 mb-2" style={{ color: '#64748b' }}>
+            Aapke chart ka jawab
+          </p>
+          <p className="m-0 text-2xl md:text-3xl font-bold leading-tight" style={{ color: verdictColour(v.key) }}>
+            {v.labelHi}
+          </p>
+          <p className="m-0 mt-1 text-sm" style={{ color: '#94a3b8' }}>{v.label}</p>
+        </section>
+      )}
+
+      {/* THE SUMMARY — 75 words free, 500 paid */}
+      {r.summary && (
+        <section className="rounded-2xl p-5 md:p-6 mb-5"
+          style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
+          {String(r.summary).split('\n').filter(Boolean).map((para: string, i: number) => (
+            <p key={i} className="text-sm md:text-base leading-relaxed m-0 mb-3 last:mb-0" style={{ color: '#cbd5e1' }}>
+              {para}
+            </p>
+          ))}
+        </section>
+      )}
+
+      {/* FREE — three locks, named honestly */}
+      {!paid && Array.isArray(r.locks) && (
+        <section className="rounded-2xl p-5 md:p-6 mb-5"
+          style={{ background: '#0B0F1A', border: `1px solid ${GOLD_RGBA(0.2)}` }}>
+          <h2 className="text-base font-bold m-0 mb-1" style={{ color: GOLD }}>Poori reading mein aur kya hai</h2>
+          <p className="text-xs m-0 mb-4" style={{ color: '#64748b' }}>
+            Ye teen cheezein aapke chart se nikal chuki hain — report mein khul jaati hain.
+          </p>
+          {r.locks.map((l: any) => (
+            <div key={l.key} className="flex items-start gap-3 py-3"
+              style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+              <span className="text-lg leading-none mt-0.5">🔒</span>
+              <div>
+                <p className="m-0 text-sm font-semibold" style={{ color: '#e2e8f0' }}>{l.title}</p>
+                <p className="m-0 text-xs mt-1 leading-relaxed" style={{ color: '#94a3b8' }}>{l.teaser}</p>
+              </div>
+            </div>
+          ))}
+        </section>
+      )}
+
+      {/* PAID — KAB, as a table of real dates */}
+      {paid && Array.isArray(r.windows) && r.windows.length > 0 && (
+        <section className="rounded-2xl p-5 md:p-6 mb-5"
+          style={{ background: '#0B0F1A', border: `1px solid ${GOLD_RGBA(0.22)}` }}>
+          <h2 className="text-base font-bold m-0 mb-1" style={{ color: GOLD }}>Kab — anukool samay</h2>
+          <p className="text-xs m-0 mb-4" style={{ color: '#64748b' }}>
+            Ye khidkiyan aapki apni Vimshottari dasha se nikli hain.
+          </p>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr style={{ background: GOLD_RGBA(0.08) }}>
+                  <th scope="col" className="p-2 text-left" style={{ color: GOLD }}>Daur</th>
+                  <th scope="col" className="p-2 text-left" style={{ color: GOLD }}>Se</th>
+                  <th scope="col" className="p-2 text-left" style={{ color: GOLD }}>Tak</th>
+                </tr>
+              </thead>
+              <tbody style={{ color: '#cbd5e1' }}>
+                {r.windows.map((w: any, i: number) => (
+                  <tr key={i} style={{ borderTop: '1px solid rgba(255,255,255,0.07)' }}>
+                    <td className="p-2 font-semibold">{w.label}</td>
+                    <td className="p-2 whitespace-nowrap">{fmtDate(w.from)}</td>
+                    <td className="p-2 whitespace-nowrap">{fmtDate(w.to)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <div className="mt-3">
+            {r.windows.map((w: any, i: number) => (
+              <p key={i} className="text-xs m-0 mb-2 leading-relaxed" style={{ color: '#94a3b8' }}>
+                <b style={{ color: '#cbd5e1' }}>{w.label}:</b> {w.why}
+              </p>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* PAID — KITNE, always a range */}
+      {paid && r.sankhya && (
+        <section className="rounded-2xl p-5 md:p-6 mb-5"
+          style={{ background: '#0B0F1A', border: `1px solid ${GOLD_RGBA(0.22)}` }}>
+          <h2 className="text-base font-bold m-0 mb-3" style={{ color: GOLD }}>Kitne — shastriya sanket</h2>
+          <p className="m-0 text-3xl font-bold" style={{ color: GOLD }}>
+            {r.sankhya.min}–{r.sankhya.max}
+            <span className="text-sm font-normal" style={{ color: '#64748b' }}> santan ka sanket</span>
+          </p>
+          <p className="text-xs mt-3 mb-0 leading-relaxed" style={{ color: '#94a3b8' }}>{r.sankhya.basis}</p>
+          <p className="text-xs mt-2 mb-0 leading-relaxed" style={{ color: '#64748b' }}>
+            Ye anuman hai, ginti nahi. Shastra range deta hai; aaj ke samay mein sankhya chikitsa, aarthik
+            nirnay aur vyaktigat chunav par bhi nirbhar karti hai.
+          </p>
+        </section>
+      )}
+
+      {/* PAID — TRIKAAL UPAY */}
+      {paid && Array.isArray(r.upay) && r.upay.length > 0 && (
+        <section className="rounded-2xl p-5 md:p-6 mb-5"
+          style={{ background: '#0B0F1A', border: `1px solid ${GOLD_RGBA(0.28)}` }}>
+          <h2 className="text-base font-bold m-0 mb-1" style={{ color: GOLD }}>Trikaal Upay</h2>
+          <p className="text-xs m-0 mb-4" style={{ color: '#64748b' }}>
+            Paanch upay, aapke apne chart se chune gaye — do BPHS se, do Bhrigu paddhati se, ek aapke sabse
+            kamzor santan graha ki ganit se.
+          </p>
+          {r.upay.map((u: any) => (
+            <div key={u.n} className="py-3" style={{ borderTop: '1px solid rgba(255,255,255,0.07)' }}>
+              <div className="flex items-baseline gap-2 flex-wrap">
+                <span className="text-xs font-bold px-2 py-0.5 rounded"
+                  style={{ background: GOLD_RGBA(0.15), color: GOLD }}>{u.source}</span>
+                <p className="m-0 text-sm font-semibold" style={{ color: '#e2e8f0' }}>{u.n}. {u.title}</p>
+              </div>
+              <p className="m-0 mt-2 text-sm leading-relaxed" style={{ color: '#cbd5e1' }}>{u.what}</p>
+              <p className="m-0 mt-1 text-xs" style={{ color: '#94a3b8' }}><b>Kab:</b> {u.when}</p>
+              <p className="m-0 mt-1 text-xs leading-relaxed" style={{ color: '#64748b' }}>{u.why}</p>
+            </div>
+          ))}
+        </section>
+      )}
+    </>
+  );
+}
+
 export default function YogCalculator({ config }: { config: YogCalculatorConfig }) {
   const [form, setForm] = useState<FormData>({
     name: '', gender: '', date: '', time: '', unknownTime: false,
@@ -557,7 +728,16 @@ export default function YogCalculator({ config }: { config: YogCalculatorConfig 
       {/* ── RESULT ─────────────────────────────────────────────── */}
       {r && data && (
         <div ref={resultRef}>
-          {/* Score */}
+
+          {/* v2.2 — Santan leads with the answer, then the summary, then the
+              locks (free) or the dates/count/upay (paid). The generic score +
+              rule-row view follows for paid readers only. */}
+          {config.type === 'santan' && <SantanView r={r} paid={paid} />}
+
+          {/* Score. Hidden on santan FREE: a bare "51 / 100" on this subject
+              reads as a verdict on the person, and the plain verdict above
+              already carries the answer. Paid still sees it. */}
+          {!(config.type === 'santan' && !paid) && (
           <section className="rounded-2xl p-6 mb-6 text-center"
             style={{ background: '#0B0F1A', border: `1px solid ${GOLD_RGBA(0.25)}` }}>
             <p className="text-xs uppercase tracking-widest m-0" style={{ color: '#64748b' }}>{config.scoreLabel}</p>
@@ -573,10 +753,15 @@ export default function YogCalculator({ config }: { config: YogCalculatorConfig 
               {data.chart.dasamsaLagna && <span>D-10 Lagna: <b style={{ color: '#94a3b8' }}>{data.chart.dasamsaLagna}</b></span>}
               {data.chart.navamsaLagna && <span>D-9 Lagna: <b style={{ color: '#94a3b8' }}>{data.chart.navamsaLagna}</b></span>}
               <span>Dasha: <b style={{ color: '#94a3b8' }}>{data.chart.mahadasha}–{data.chart.antardasha}</b></span>
+              {data.chart.saptamsaLagna && <span>D-7 Lagna: <b style={{ color: '#94a3b8' }}>{data.chart.saptamsaLagna}</b></span>}
             </div>
           </section>
+          )}
 
-          {/* The differentiator */}
+          {/* The differentiator. For santan this is the WORKING, not the
+              product, so the free reader never sees it — santanFreeShape in
+              the route does not even send the rows. */}
+          {!(config.type === 'santan' && !paid) && (
           <section className="rounded-2xl p-5 md:p-6 mb-6"
             style={{ background: '#0B0F1A', border: '1px solid rgba(255,255,255,0.07)' }}>
             <h2 className="text-base font-bold m-0 mb-1" style={{ color: GOLD }}>{config.breakdownHeading}</h2>
@@ -592,6 +777,7 @@ export default function YogCalculator({ config }: { config: YogCalculatorConfig 
                 </>
               )}
           </section>
+          )}
 
           {/* Blockers — the reason people pay, so the free view names them and stops. */}
           {r.blockers?.length > 0 && (
