@@ -2,6 +2,14 @@
 
 // ============================================================
 // File: components/calculators/YogCalculator.tsx
+// Version: v2.3 — santan pre-pay block fixed (2 Sep 2026)
+//
+// CHANGELOG v2.3 — caught on the live page, not in review. The pre-pay block
+// below is written around the generic shape: it counts locked RULES, counts
+// BLOCKERS, and lists directionNames. santanFreeShape sends none of those, so
+// on santan it rendered "Baaki 0 rules" and "0 blockers ka poora vishleshan" —
+// telling a paying visitor there is nothing behind the paywall. The bullet list
+// is now santan-aware; the payment buttons underneath are shared and untouched.
 // Version: v2.2 — Santan Yog v2.0 result view (2 Sep 2026)
 //
 // CHANGELOG v2.2 (2026-09-02):
@@ -860,18 +868,34 @@ export default function YogCalculator({ config }: { config: YogCalculatorConfig 
                 Poori report mein kya milega
               </h2>
               <p className="text-xs text-center m-0 mb-4" style={{ color: '#94a3b8' }}>
-                Aapka chart padha ja chuka hai. Upar jo teen findings dikhe, wo isi reading se hain.
+                {config.type === 'santan'
+                  ? 'Aapka chart padha ja chuka hai. Jawab upar hai — baaki teen cheezein report mein khulti hain.'
+                  : 'Aapka chart padha ja chuka hai. Upar jo teen findings dikhe, wo isi reading se hain.'}
               </p>
 
               <ul className="text-sm space-y-2 mb-5 max-w-md mx-auto m-0 p-0" style={{ listStyle: 'none', color: '#cbd5e1' }}>
-                <li>✓ Baaki <b style={{ color: GOLD }}>{r.lockedCount}</b> rules ki poori wajah, har ek ka asli number ke saath</li>
-                <li>✓ <b style={{ color: GOLD }}>{r.blockers?.length ?? 0}</b> blockers ka poora vishleshan — kya rok raha hai aur kyun</li>
-                {r.directionNames?.length > 0 && (
-                  <li>✓ {r.directionNames.length} rasto ki ranking wajah ke saath — {r.directionNames.slice(0, 3).join(', ')}…</li>
-                )}
-                {r.timingCount > 0 && <li>✓ Dasha timing — abhi kaunsi window chal rahi hai</li>}
-                {r.directionHintCount > 0 && (
-                  <li>✓ {config.hintsTeaser ?? 'Disha aur sanskriti ke sanket'}</li>
+                {config.type === 'santan' ? (
+                  /* v2.3: santan sends no rules and no blockers, so the generic
+                     counters below printed zeroes. These bullets name what the
+                     three locks above actually contain. */
+                  <>
+                    {Array.isArray(r.locks) && r.locks.map((l: any) => (
+                      <li key={l.key}>✓ {l.title}</li>
+                    ))}
+                    <li>✓ Poora vishleshan — kaunsa graha sahara de raha hai aur kaunsa rok raha hai, wajah ke saath</li>
+                  </>
+                ) : (
+                  <>
+                    <li>✓ Baaki <b style={{ color: GOLD }}>{r.lockedCount}</b> rules ki poori wajah, har ek ka asli number ke saath</li>
+                    <li>✓ <b style={{ color: GOLD }}>{r.blockers?.length ?? 0}</b> blockers ka poora vishleshan — kya rok raha hai aur kyun</li>
+                    {r.directionNames?.length > 0 && (
+                      <li>✓ {r.directionNames.length} rasto ki ranking wajah ke saath — {r.directionNames.slice(0, 3).join(', ')}…</li>
+                    )}
+                    {r.timingCount > 0 && <li>✓ Dasha timing — abhi kaunsi window chal rahi hai</li>}
+                    {r.directionHintCount > 0 && (
+                      <li>✓ {config.hintsTeaser ?? 'Disha aur sanskriti ke sanket'}</li>
+                    )}
+                  </>
                 )}
               </ul>
 
