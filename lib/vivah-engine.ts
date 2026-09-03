@@ -3,19 +3,61 @@
  * TRIKAL VAANI — Vivah Yog Engine ("Shadi kab hogi")
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: lib/vivah-engine.ts
+ * VERSION: 1.1 (3 Sep 2026)
+ *   v1.1 — THE NODES WERE MISSING. A live paid report for a chart with KETU
+ *   SITTING IN THE 7TH HOUSE never mentioned it. The Baadha block scored a
+ *   clean 10/10 and upay 4 told her "aapke chart par koi bhaari dosh nahi hai"
+ *   while a shadow graha sat on her marriage house.
+ *
+ *   Cause: this engine was built on the Santan engine's shape but its node
+ *   rule — "Putra Dosh (Rahu-Ketu axis)", worth 4 — was not carried across.
+ *   Rahu or Ketu on the lagna-saptam axis is one of the most cited classical
+ *   causes of vilamba, at least the equal of Saturn, and it was invisible.
+ *
+ *   REVISED TABLE, approved by Rohiit on 3 Sep 2026:
+ *     A Saptam bhava          20   (was 22 — A2 cut 6 -> 4)
+ *     B Navamsa D-9           24   (unchanged, still the paid hook)
+ *     C Kalatra Karaka        16   (was 18 — vargottama cut 4 -> 2)
+ *     D Darakaraka             8   (unchanged)
+ *     E Drishti               12   (unchanged)
+ *     F Baadhaayein           14   (was 10 — Rahu-Ketu axis adds 4)
+ *     G Dasha                  6   (unchanged)
+ *
+ *   WHERE THE FOUR POINTS CAME FROM, and why those two:
+ *     A2 "7th house mein graha" 6 -> 4. It already docks a chart for a malefic
+ *     in the 7th, which on a node chart is the SAME planet the new rule
+ *     scores. The overlap is real and partial, not total — "a malefic sits
+ *     here" and "the shadow axis falls here" are different classical
+ *     statements — but paying full price twice for one placement would be
+ *     wrong, so A2 gives up two points.
+ *     Vargottama 4 -> 2. It is a yes/no flag. Four points, four per cent of
+ *     the whole score, for a binary is generous when block B already carries
+ *     the Navamsa's real weight at 24.
+ *
+ *   TWO SIMPLIFICATIONS, STATED RATHER THAN HIDDEN:
+ *     1. No bhang (cancellation). Classically Jupiter's aspect on the 7th
+ *        softens a node there. That is not modelled; the Drishti block gives
+ *        Jupiter's aspect its own credit, which absorbs some of it, but this
+ *        is a simplification and not a complete reading.
+ *     2. Rahu and Ketu score the same. Tradition distinguishes them — Rahu in
+ *        the 7th toward obsession and the unconventional, Ketu toward
+ *        detachment — and the REASON TEXT says which. The POINTS do not
+ *        differ, because there is no sound basis for choosing a split, and
+ *        inventing one would be the very thing this engine exists to avoid.
  * VERSION: 1.0 (3 Sep 2026)
  * SIGNED: ROHIIT GUPTA, CEO
  * ============================================================
  * Scores 100 across seven blocks, per the table Rohiit approved on
  * 3 Sep 2026:
  *
- *   A  Saptam bhava (rasi)       22
+ *   A  Saptam bhava (rasi)       20
  *   B  Navamsa D-9               24   <- the paid hook
- *   C  Kalatra Karaka            18
+ *   C  Kalatra Karaka            16
  *   D  Darakaraka (Jaimini)       8
  *   E  Drishti on the 7th        12   (can go negative)
- *   F  Baadhaayein / doshas      10
+ *   F  Baadhaayein / doshas      14   (Shani 4, Mangal Dosh 3, asta 3, nodes 4)
  *   G  Dasha window               6
+ *   Revised in v1.1 — see the note above for what moved and why.
  *
  * Classical basis:
  *   7th house    — Kalatra Bhava; the spouse, its lord and its occupants
@@ -26,6 +68,7 @@
  *   Darakaraka   — Jaimini's chara karaka for the spouse (lowest degree of
  *                  the seven). Already computed by karakas() in yog-engine.
  *   Mangal Dosh  — Mars in 1/4/7/8/12 from the lagna
+ *   Rahu / Ketu  — the shadow grahas on the lagna-saptam (1-7) axis
  *
  * ------------------------------------------------------------
  * WHY THIS FILE MIRRORS lib/santan-engine.ts SO CLOSELY
@@ -152,9 +195,23 @@ export const VIVAH_DISCLAIMER =
 // award full marks for a chart that is merely CLEAN, which pushed its median
 // well above the older engines. Vivah is scored the same way, so the same
 // distribution check was run — see the note beside SIMULATED_DISTRIBUTION.
-const VIVAH_VERY_STRONG = 70;
-const VIVAH_STRONG = 60;
-const VIVAH_MODERATE = 46;
+// RE-MEASURED after v1.1 changed the table (4,000 simulated charts, 3 Sep 2026).
+//
+// Adding the Rahu-Ketu rule pushed scores UP, which is counter-intuitive for a
+// new PENALTY and worth stating plainly: the axis is afflicted on 15.6% of
+// charts, so the other 84.4% collect a clean 4 points they never had before.
+// Left at 70/60/46 the engine called 19.7% of everyone "bahut prabal" — one
+// reader in five — which on this subject is flattery, not a reading.
+//
+// 74/64/52 restores the shape the earlier table produced and Rohiit approved:
+//     70/60/46  ->  VS 19.7% · S 34.7% · M 37.8% · W  7.8%
+//     74/64/52  ->  VS 10.4% · S 28.4% · M 42.0% · W 19.3%   <- chosen
+//     75/65/52  ->  VS  8.7% · S 26.4% · M 45.6% · W 19.3%
+// The verdict cut points below follow these, so a verdict and a band can never
+// disagree.
+const VIVAH_VERY_STRONG = 74;
+const VIVAH_STRONG = 64;
+const VIVAH_MODERATE = 52;
 
 function vivahBand(score: number): { band: YogResult['band']; bandHi: string } {
   if (score >= VIVAH_VERY_STRONG) return { band: 'Very Strong', bandHi: 'बहुत प्रबल' };
@@ -311,6 +368,10 @@ const PLAIN: Record<string, { up: string; down: string }> = {
   'Shani ka saptam par asar': {
     up: 'Shani vivah ke ghar par dabaav nahi daal raha',
     down: 'Shani vivah ke ghar par hai, jo samay lamba karta hai',
+  },
+  'Rahu-Ketu saptam axis par': {
+    up: 'Rahu-Ketu vivah ke ghar se door hain',
+    down: 'Rahu ya Ketu vivah ke ghar par baithe hain',
   },
   'Mangal Dosh': {
     up: 'aapke chart mein Mangal Dosh nahi hai',
@@ -497,6 +558,7 @@ function buildUpay(
     karaka: string;
     DK: string | null;
     manglik: boolean;
+    nodeOnAxis: boolean;
     saturnOn7: boolean;
     combustL7: boolean;
     d9LagnaLord: string | null;
@@ -611,7 +673,15 @@ function buildUpay(
   }
 
   // ── Bhrigu 2 — the biggest actual blocker in THIS chart ──
-  if (ctx.manglik) {
+  if (ctx.nodeOnAxis) {
+    out.push({
+      n: out.length + 1, source: 'Bhrigu',
+      title: 'Chhaya grahon ki shanti',
+      what: 'Naag-Naagin ki shanti, Rahu-Ketu ka daan (kambal, kale til, nariyal), aur behte jal mein nariyal pravah.',
+      when: 'Shanivar ya Amavasya.',
+      why: 'Aapke lagna-saptam axis par Rahu/Ketu baithe hain. Ye alag shreni ki baadha hai — iska upay chhaya grahon ka hota hai, saptamesh ka nahi, aur yahi antar zyadatar jagah chhoot jata hai.',
+    });
+  } else if (ctx.manglik) {
     out.push({
       n: out.length + 1, source: 'Bhrigu',
       title: 'Mangal ki shanti',
@@ -699,7 +769,7 @@ function buildUpay(
  * chart's real strengths in the 'what is carrying this' line. See
  * preferPresence() in lib/yog-engine.ts for the measurement behind it.
  */
-const ABSENCE_LABELS = ['Shani ka saptam par asar', 'Mangal Dosh', '7th lord asta ya vakri', 'Paap drishti ka dabaav'];
+const ABSENCE_LABELS = ['Shani ka saptam par asar', 'Mangal Dosh', '7th lord asta ya vakri', 'Paap drishti ka dabaav', 'Rahu-Ketu saptam axis par'];
 
 function toFacts(
   base: YogResult,
@@ -766,20 +836,20 @@ export function scoreVivah(
   const malIn7 = inSeventh.filter((p) => MALEFIC_IN_HOUSE.includes(p.planet));
 
   if (benIn7.length && !malIn7.length) {
-    s.add('Saptam Bhava', '7th house mein graha', 6, 6,
+    s.add('Saptam Bhava', '7th house mein graha', 4, 4,
       `${benIn7.map((p) => PLANET_HI[p.planet]).join(' aur ')} aapke 7th house mein hai aur koi paap graha wahan nahi — ` +
       `vivah bhava saaf hai. ${benIn7.map((p) => `${PLANET_HI[p.planet]} ki Shadbala ${ratio(p)?.toFixed(2) ?? 'n/a'}`).join(', ')}.`);
   } else if (benIn7.length && malIn7.length) {
-    s.add('Saptam Bhava', '7th house mein graha', 3, 6,
+    s.add('Saptam Bhava', '7th house mein graha', 2, 4,
       `Aapke 7th house mein shubh aur paap dono hain — ${benIn7.map((p) => PLANET_HI[p.planet]).join(', ')} ` +
       `ke saath ${malIn7.map((p) => PLANET_HI[p.planet]).join(', ')}. Shastra ise mishrit phal kehta hai: yog banta hai, ` +
       `par saath mein deri ya kheenchtaan bhi aati hai.`);
   } else if (malIn7.length) {
-    s.add('Saptam Bhava', '7th house mein graha', 0, 6,
+    s.add('Saptam Bhava', '7th house mein graha', 0, 4,
       `Aapke 7th house mein ${malIn7.map((p) => PLANET_HI[p.planet]).join(' aur ')} baitha hai aur koi shubh graha wahan nahi. ` +
       `${malIn7.some((p) => p.planet === 'Saturn') ? 'Shani yahan mana nahi karta, samay lamba kar deta hai.' : 'Paap grahon ka yahan hona deri ka classical sanket hai.'}`);
   } else {
-    s.add('Saptam Bhava', '7th house mein graha', 4, 6,
+    s.add('Saptam Bhava', '7th house mein graha', 3, 4,
       `Aapka 7th house khaali hai — na koi shubh graha, na paap. Ye achha hai: ab poora phal saptamesh ` +
       `${PLANET_HI[l7 ?? '']} aur karak ${PLANET_HI[kar.planet]} par jata hai, jo neeche alag se gine gaye hain.`);
   }
@@ -872,7 +942,7 @@ export function scoreVivah(
   if (cap.hasNavamsa) {
     const vg = isVargottama(data, kar.planet);
     const gk = d9(data, kar.planet);
-    s.add('Kalatra Karaka', 'Karaka vargottama (D-1 ↔ D-9)', vg ? 4 : 0, 4,
+    s.add('Kalatra Karaka', 'Karaka vargottama (D-1 ↔ D-9)', vg ? 2 : 0, 2,
       vg
         ? `${PLANET_HI[kar.planet]} vargottama hai — rasi aur Navamsa dono mein ${karP?.sign}. ` +
           `Ek hi rashi do chart mein aana karak ki taakat ko dugna kar deta hai.`
@@ -881,7 +951,7 @@ export function scoreVivah(
             `Ye kami nahi hai, bas ek extra sahara nahi mila.`
           : 'Karak graha Navamsa mein locate nahi hua.');
   } else {
-    s.add('Kalatra Karaka', 'Karaka vargottama (D-1 ↔ D-9)', 0, 4,
+    s.add('Kalatra Karaka', 'Karaka vargottama (D-1 ↔ D-9)', 0, 2,
       'Navamsa available nahi, isliye vargottama check nahi ho paya.');
   }
 
@@ -947,6 +1017,34 @@ export function scoreVivah(
   }
 
   // ── BLOCK F — Baadhaayein (10) ─────────────────────────────────────────────
+
+  // v1.1 — Rahu/Ketu on the lagna-saptam axis. Santan reads the 5th-11th axis
+  // because that is where progeny lives; marriage is read on 1-7. A node in
+  // the 1st necessarily puts the other in the 7th, so checking both houses
+  // catches the axis either way round.
+  const nodesOnAxis = data.planets.filter(
+    (p) => (p.planet === 'Rahu' || p.planet === 'Ketu') && (p.house === 1 || p.house === 7),
+  );
+  if (!nodesOnAxis.length) {
+    s.add('Baadha', 'Rahu-Ketu saptam axis par', 4, 4,
+      'Rahu ya Ketu aapke lagna-saptam axis par nahi hain. Ye achhi khabar hai — chhaya grahon ka ' +
+      'vivah bhava par hona vilamba ka sabse aam classical kaaran hai, Shani ke barabar ya usse bhi bhaari.');
+  } else {
+    const inSeven = nodesOnAxis.filter((p) => p.house === 7).map((p) => p.planet);
+    const inOne = nodesOnAxis.filter((p) => p.house === 1).map((p) => p.planet);
+    const names = nodesOnAxis.map((p) => PLANET_HI[p.planet]).join(' aur ');
+    // Rahu and Ketu score the same; only the explanation differs. See the
+    // header note — there is no sound basis for a points split.
+    const flavour = inSeven.includes('Ketu')
+      ? 'Ketu ka saptam bhava par hona shastra mein vairagya se joda gaya hai — vivah ka virodh nahi, par uske prati udaseenta aur der.'
+      : inSeven.includes('Rahu')
+        ? 'Rahu ka saptam bhava par hona anokhe ya parampara se hat kar bane rishte se joda gaya hai, aur samay ko aage khiska deta hai.'
+        : 'Chhaya graha lagna par hai, yaani doosra saptam bhava par — axis vivah bhava ko chhoo raha hai.';
+    s.add('Baadha', 'Rahu-Ketu saptam axis par', 0, 4,
+      `${names} aapke ${nodesOnAxis.map((p) => ord(p.house)).join(' aur ')} house mein hai` +
+      `${inOne.length && !inSeven.length ? ', jiska matlab doosra chhaya graha saptam bhava par hai' : ''}. ` +
+      `${flavour} Ye rukavat hai, inkaar nahi — aur iska upay chhaya grahon ka hota hai, saptamesh ka nahi.`);
+  }
 
   const saturn = planet(data, 'Saturn');
   const saturnOn7 = Boolean(saturn && saturn.house === 7);
@@ -1016,6 +1114,7 @@ export function scoreVivah(
     karaka: kar.planet,
     DK: DK?.planet ?? null,
     manglik,
+    nodeOnAxis: nodesOnAxis.length > 0,
     saturnOn7,
     combustL7: comb.yes,
     d9LagnaLord: data.navamsa?.lagna?.sign_lord ?? null,
