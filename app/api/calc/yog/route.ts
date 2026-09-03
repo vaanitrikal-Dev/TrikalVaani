@@ -1,5 +1,15 @@
 // ============================================================
 // File: app/api/calc/yog/route.ts
+// Version: v2.4 — maxDuration (3 Sep 2026)
+//
+// CHANGELOG v2.4 — a customer waited NINE MINUTES on the live santan page and
+// then saw "Network error". This file had no maxDuration, so it inherited
+// Vercel's default, which on Pro can be 300 seconds. A slow Gemini call on a
+// cold function therefore had licence to hang for minutes instead of failing.
+// 30 seconds is a hard ceiling and is generous: warm, the whole santan path
+// measures 0.4s cached and 7-9s on a fresh Gemini call.
+// The browser side is fixed separately in YogCalculator v2.4 — an un-aborted
+// fetch is what turned a slow server into a nine-minute blank screen.
 // Version: v2.3 — Santan v2.0: dasha DATES + Gemini summary (2 Sep 2026)
 //
 // CHANGELOG v2.3 (2026-09-02):
@@ -92,6 +102,8 @@ import { getPayPalOrder, isCaptureValid } from '@/lib/paypal-server';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
+/** Hard ceiling. See the v2.4 note above — without this it was Vercel's default. */
+export const maxDuration = 30;
 
 type YogType = 'upsc' | 'foreign-settlement' | 'foreign-spouse' | 'santan';
 
