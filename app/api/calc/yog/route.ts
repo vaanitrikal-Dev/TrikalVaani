@@ -1,5 +1,12 @@
 // ============================================================
 // File: app/api/calc/yog/route.ts
+// Version: v2.8 — maxDuration 50 -> 60 (3 Sep 2026)
+//
+// CHANGELOG v2.8 — the paid summary runs on gemini-3.8-flash and writes 500
+// words with reasoning; the Vercel logs showed its first attempt timing out.
+// lib/santan-summary.ts v1.6 raises the paid per-call ceiling to 32s, so this
+// file has to leave room for it. Typical santan responses are 0.4s cached and
+// 6-9s fresh; 60s is the outer bound, not the expectation.
 // Version: v2.7 — birth year reaches the santan engine (3 Sep 2026)
 //
 // CHANGELOG v2.7 — a paid report showed a reader born in 2004 dasha windows
@@ -122,7 +129,7 @@ import { getPayPalOrder, isCaptureValid } from '@/lib/paypal-server';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 /** Hard ceiling. See the v2.4 note above — without this it was Vercel's default. */
-export const maxDuration = 50;
+export const maxDuration = 60;
 
 type YogType = 'upsc' | 'foreign-settlement' | 'foreign-spouse' | 'santan';
 
