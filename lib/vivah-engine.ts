@@ -101,7 +101,7 @@ import {
   planet, houseLord, houseOf, ratio, ratioScore, ratioWord,
   dignityScore, dignityWord, karakas,
   dashaPair, drishtiOnHouse, netDrishtiOnHouse, drishtiWord, drishtiOnPlanet,
-  d9, d9HouseLord, isVargottama, capabilities, preferPresence,
+  d9, d9HouseLord, isVargottama, capabilities, preferPresence, preferBlockers,
   PLANET_HI, KENDRA, TRIKONA, DUSTHANA,
 } from './yog-engine';
 
@@ -771,6 +771,13 @@ function buildUpay(
  */
 const ABSENCE_LABELS = ['Shani ka saptam par asar', 'Mangal Dosh', '7th lord asta ya vakri', 'Paap drishti ka dabaav', 'Rahu-Ketu saptam axis par'];
 
+/**
+ * Rules this product names as a DOSHA. They are small-max by design, so
+ * finish()'s `max >= 5` blocker gate excluded them entirely — see
+ * preferBlockers() in lib/yog-engine.ts.
+ */
+const DOSHA_LABELS = ['Rahu-Ketu saptam axis par', 'Mangal Dosh', 'Shani ka saptam par asar', '7th lord asta ya vakri'];
+
 function toFacts(
   base: YogResult,
   verdict: VivahVerdict,
@@ -1119,6 +1126,12 @@ export function scoreVivah(
     combustL7: comb.yes,
     d9LagnaLord: data.navamsa?.lagna?.sign_lord ?? null,
   });
+
+  // preferBlockers replaces finish()'s list BEFORE anything reads it, so the
+  // page section and facts.blockedBy — and therefore Gemini — all see the
+  // same three lines. Building it into `rebanded` is what guarantees that;
+  // overriding only the returned object left toFacts reading the old list.
+  rebanded.blockers = preferBlockers(base.rules, DOSHA_LABELS);
 
   return {
     ...rebanded,
