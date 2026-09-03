@@ -1,5 +1,13 @@
 // ============================================================
 // File: app/api/calc/yog/route.ts
+// Version: v2.9 — free lock teaser matched to the engine (3 Sep 2026)
+//
+// CHANGELOG v2.9 — the third lock still promised "ek aapke sabse kamzor santan
+// graha ki ganit se". Since engine v2.2 the fifth upay can be a SUBSTITUTE
+// when all three santan grahas turn out to be the same planet, so "sabse
+// kamzor" is not always true. The paid heading in YogCalculator v2.7 was
+// corrected and this twin was missed — the same one-of-a-pair miss that left
+// santan unable to take payment for a day.
 // Version: v2.8 — maxDuration 50 -> 60 (3 Sep 2026)
 //
 // CHANGELOG v2.8 — the paid summary runs on gemini-3.8-flash and writes 500
@@ -432,7 +440,7 @@ function santanFreeShape(full: SantanResult, summary: string) {
       {
         key: 'upay',
         title: 'Trikaal Upay — 5 upay, aapke apne chart ke',
-        teaser: 'Do BPHS se, do Bhrigu paddhati se, aur ek aapke sabse kamzor santan graha ki ganit se.',
+        teaser: 'Do BPHS se, do Bhrigu paddhati se, aur ek seedha aapke chart ki ganit se.',
         count: full.upay.length,
       },
     ],
