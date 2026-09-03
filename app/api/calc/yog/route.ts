@@ -1,5 +1,26 @@
 // ============================================================
 // File: app/api/calc/yog/route.ts
+// Version: v3.0 — Vivah Yog added as the fifth type (3 Sep 2026)
+//
+// CHANGELOG v3.0 — "Shadi kab hogi", slug free-shadi-kab-hogi-calculator,
+// type `vivah`. It follows Santan's rails exactly: the Vimshottari timeline
+// with dates, the birth year for the age band, the reader's name, and now the
+// GENDER, which this calculator alone requires — the Kalatra Karaka is Venus
+// for a man and Jupiter for a woman, so the reading is a different reading.
+//
+// THE FREE SHAPE IS NOW SHARED. santanFreeShape became verdictFreeShape: the
+// same three-lock structure with the lock titles supplied per product. Santan
+// and Vivah had identical shapes and different words, and on 3 Sep the lock
+// teaser in this file and the heading in YogCalculator drifted apart because
+// they were maintained separately. One function, one place to change.
+//
+// FIVE PLACES MUST LEARN A NEW TYPE. Only the first three fail loudly:
+//   1. this file — YogType, VALID, the score dispatch, the summary dispatch
+//   2. components/calculators/YogCalculator.tsx — the config type union
+//   3. app/sitemap.ts — the CALCULATORS array
+//   4. app/api/calc/yog/order/route.ts — the LABEL map (silent; Santan could
+//      not take payment for a day because this one was missed)
+//   5. public/llms.txt — discovery only, harmless if late
 // Version: v2.9 — free lock teaser matched to the engine (3 Sep 2026)
 //
 // CHANGELOG v2.9 — the third lock still promised "ek aapke sabse kamzor santan
@@ -131,6 +152,9 @@ import { scoreForeignSpouse } from '@/lib/foreign-spouse-engine';
 import { scoreSantan } from '@/lib/santan-engine';
 import type { DashaPeriod, SantanResult } from '@/lib/santan-engine';
 import { buildSantanSummary } from '@/lib/santan-summary';
+import { scoreVivah } from '@/lib/vivah-engine';
+import type { VivahResult } from '@/lib/vivah-engine';
+import { buildVivahSummary } from '@/lib/vivah-summary';
 import { getProduct } from '@/lib/pricing-intl';
 import { getPayPalOrder, isCaptureValid } from '@/lib/paypal-server';
 
@@ -139,9 +163,12 @@ export const dynamic = 'force-dynamic';
 /** Hard ceiling. See the v2.4 note above — without this it was Vercel's default. */
 export const maxDuration = 60;
 
-type YogType = 'upsc' | 'foreign-settlement' | 'foreign-spouse' | 'santan';
+type YogType = 'upsc' | 'foreign-settlement' | 'foreign-spouse' | 'santan' | 'vivah';
 
-const VALID: YogType[] = ['upsc', 'foreign-settlement', 'foreign-spouse', 'santan'];
+const VALID: YogType[] = ['upsc', 'foreign-settlement', 'foreign-spouse', 'santan', 'vivah'];
+
+/** The two types that lead with a verdict and a written summary. */
+const VERDICT_TYPES: YogType[] = ['santan', 'vivah'];
 
 interface Body {
   type?: YogType;
@@ -337,6 +364,7 @@ export async function POST(req: NextRequest) {
       type === 'upsc' ? scoreUpsc(data)
       : type === 'foreign-settlement' ? scoreForeignSettlement(data)
       : type === 'santan' ? scoreSantan(data, timeline, b.name ?? null, b.year)
+      : type === 'vivah' ? scoreVivah(data, timeline, b.name ?? null, b.year, b.gender ?? null)
       : scoreForeignSpouse(data);
 
     if (paid) {
@@ -347,11 +375,13 @@ export async function POST(req: NextRequest) {
     // Never fatal: buildSantanSummary falls back to a deterministic template on
     // a missing key, a timeout, or a draft that fails validation. The
     // calculator must always answer.
-    let santanSummary = '';
-    if (type === 'santan') {
-      const s = await buildSantanSummary((full as SantanResult).facts, paid);
-      santanSummary = s.text;
-      console.log(`[yog] santan summary | ${s.source} | ${s.words} words | paid:${paid}`);
+    let verdictSummary = '';
+    if (VERDICT_TYPES.includes(type)) {
+      const s = type === 'santan'
+        ? await buildSantanSummary((full as SantanResult).facts, paid)
+        : await buildVivahSummary((full as VivahResult).facts, paid);
+      verdictSummary = s.text;
+      console.log(`[yog] ${type} summary | ${s.source} | ${s.words} words | paid:${paid}`);
     }
 
     return NextResponse.json({
@@ -375,11 +405,15 @@ export async function POST(req: NextRequest) {
       result:
         type === 'santan'
           ? paid
-            ? { ...(full as SantanResult), summary: santanSummary }
-            : santanFreeShape(full as SantanResult, santanSummary)
-          : paid
-            ? full
-            : freeShape(full),
+            ? { ...(full as SantanResult), summary: verdictSummary }
+            : santanFreeShape(full as SantanResult, verdictSummary)
+        : type === 'vivah'
+          ? paid
+            ? { ...(full as VivahResult), summary: verdictSummary }
+            : vivahFreeShape(full as VivahResult, verdictSummary)
+        : paid
+          ? full
+          : freeShape(full),
     });
   } catch (err: any) {
     console.error('[yog] Fatal:', err);
@@ -412,7 +446,21 @@ function dashaTimeline(mahaList: any[]): DashaPeriod[] {
 // marks, which suits a competitive-exam score. Here the marks mean nothing to
 // the reader and the answer means everything, so the free tier is: the verdict,
 // the 75-word summary, and three honest locks naming what is behind them.
-function santanFreeShape(full: SantanResult, summary: string) {
+/**
+ * v3.0: one free shape for both verdict calculators.
+ *
+ * Santan and Vivah had the same structure and different words, kept in two
+ * places. On 3 Sep the second lock's wording in this file and the matching
+ * heading in YogCalculator drifted apart for exactly that reason. The shape
+ * lives here once; the middle lock's title and teaser come from the product,
+ * because a child count and an age band are the only thing that differs.
+ */
+function verdictFreeShape(
+  full: { verdict: unknown; score: number; band: string; bandHi: string; disclaimer: string;
+          windows: unknown[]; upay: unknown[] },
+  summary: string,
+  middle: { key: string; title: string; teaser: string; count: number },
+) {
   return {
     verdict: full.verdict,
     summary,
@@ -429,14 +477,7 @@ function santanFreeShape(full: SantanResult, summary: string) {
           : 'Aapki dasha ka poora hisaab taiyar hai.',
         count: full.windows.length,
       },
-      {
-        key: 'kitne',
-        title: 'Kitne — santan sankhya ka range',
-        teaser: full.sankhya
-          ? 'Aapke panchma bhava ki rashi aur uske swami ke bal se shastriya sanket nikal aaya hai.'
-          : 'Shastriya sanket taiyar hai.',
-        count: full.sankhya ? 1 : 0,
-      },
+      middle,
       {
         key: 'upay',
         title: 'Trikaal Upay — 5 upay, aapke apne chart ke',
@@ -446,6 +487,28 @@ function santanFreeShape(full: SantanResult, summary: string) {
     ],
     // No rules, no reasoning, no dates, no upay text. Nothing to unhide.
   };
+}
+
+function santanFreeShape(full: SantanResult, summary: string) {
+  return verdictFreeShape(full, summary, {
+    key: 'kitne',
+    title: 'Kitne — santan sankhya ka range',
+    teaser: full.sankhya
+      ? 'Aapke panchma bhava ki rashi aur uske swami ke bal se shastriya sanket nikal aaya hai.'
+      : 'Shastriya sanket taiyar hai.',
+    count: full.sankhya ? 1 : 0,
+  });
+}
+
+function vivahFreeShape(full: VivahResult, summary: string) {
+  return verdictFreeShape(full, summary, {
+    key: 'umar',
+    title: 'Kis umar mein — anukool umar ka range',
+    teaser: full.umar
+      ? 'Aapki pehli anukool dasha khidki ko aapki umar mein badal kar range nikal aayi hai.'
+      : 'Umar ka hisaab taiyar hai.',
+    count: full.umar ? 1 : 0,
+  });
 }
 
 // ── Current mahadasha / antardasha by date ───────────────────────────────────
