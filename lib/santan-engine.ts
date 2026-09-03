@@ -3,6 +3,17 @@
  * TRIKAL VAANI — Santan Yog Engine
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: lib/santan-engine.ts
+ * VERSION: 2.4 (3 Sep 2026)
+ *   v2.4 — THE RAW SCORE WAS REACHING THE PROSE. A live paid summary read
+ *   "Score 38 aur band Weak hone ka matlab bas itna hai ki...". The whole
+ *   point of v2.0 was that a bare number is the wrong thing to put in front of
+ *   someone asking about children — the page shows the score in its own card
+ *   already, and repeating it in a sentence, in English, is the harshest
+ *   possible framing of a private subject. `score` and `band` are removed from
+ *   SantanFacts entirely: the verdict already carries what they mean, and
+ *   Gemini never needed them. A useful side effect — with the score gone from
+ *   the allowed-number set, a model that writes "38" is now caught as an
+ *   invented figure rather than quietly permitted.
  * VERSION: 2.3 (3 Sep 2026)
  *   v2.3 — TWO UPAY BOTH CLAIMED TO BE THE WEAKEST GRAHA. On a live paid
  *   report, upay 3 said of Surya "ye aapke chart ka sabse kam bal wala graha
@@ -204,8 +215,6 @@ export interface SantanFacts {
   name: string | null;
   verdict: string;
   verdictLine: string;
-  score: number;
-  band: string;
   supportedBy: string[];
   blockedBy: string[];
   sankhya: string | null;
@@ -824,8 +833,6 @@ function toFacts(
     name: name && name.trim() ? name.trim().split(/\s+/)[0] : null,
     verdict: verdict.label,
     verdictLine: verdict.line,
-    score: base.score,
-    band: base.band,
     // v2.1: translated, not raw. These are the sentences Gemini writes from.
     supportedBy: (base.highlights ?? []).map((h) => plain(h.label, 'up')),
     blockedBy: (base.blockers ?? []).map((b) => plain(b.label, 'down')),
