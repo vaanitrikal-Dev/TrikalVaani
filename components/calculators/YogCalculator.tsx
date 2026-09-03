@@ -2,6 +2,7 @@
 
 // ============================================================
 // File: components/calculators/YogCalculator.tsx
+// Version: v2.7 — Trikaal Upay heading made always-true (3 Sep 2026)
 // Version: v2.6 — WhatsApp share on all four yog calculators (3 Sep 2026)
 //
 // CHANGELOG v2.6 — a share block after the result, free and paid alike. A free
@@ -565,8 +566,11 @@ function SantanView({ r, paid }: { r: any; paid: boolean }) {
           style={{ background: '#0B0F1A', border: `1px solid ${GOLD_RGBA(0.28)}` }}>
           <h2 className="text-base font-bold m-0 mb-1" style={{ color: GOLD }}>Trikaal Upay</h2>
           <p className="text-xs m-0 mb-4" style={{ color: '#64748b' }}>
-            Paanch upay, aapke apne chart se chune gaye — do BPHS se, do Bhrigu paddhati se, ek aapke sabse
-            kamzor santan graha ki ganit se.
+            {/* v2.7: slot 5 is not always "the weakest" — when all three santan
+                grahas turn out to be the same planet it becomes a substitute.
+                State what is always true rather than what is usually true. */}
+            Paanch upay, aapke apne chart se chune gaye — do BPHS se, do Bhrigu paddhati se,
+            aur ek seedha aapke chart ki ganit se.
           </p>
           {r.upay.map((u: any) => (
             <div key={u.n} className="py-3" style={{ borderTop: '1px solid rgba(255,255,255,0.07)' }}>
