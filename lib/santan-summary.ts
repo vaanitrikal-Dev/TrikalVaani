@@ -2,6 +2,23 @@
  * ============================================================================
  * TRIKAL VAANI — Santan Yog summary writer
  * File:    lib/santan-summary.ts
+ * VERSION: 1.1 (2 Sep 2026)
+ *   v1.1 — FOUND ON THE LIVE SITE WITHIN MINUTES OF DEPLOY, not in testing.
+ *   The free summary came back as "...Yeh aak" — cut off mid-word. Cause:
+ *   maxOutputTokens was 2048, and Gemini 3.x models spend output tokens on
+ *   reasoning before they write. 75 words needs almost nothing; the REASONING
+ *   needs room, and without it the visible text is what gets truncated.
+ *   Four changes, all of them things testing should have caught:
+ *     1. Token budget raised well above what the prose needs.
+ *     2. The validator now REJECTS text that does not end in terminal
+ *        punctuation. A half-sentence passed the word count and reached a real
+ *        customer, which is the worst kind of pass.
+ *     3. ONE RETRY before the fallback. A single rejected draft was dropping
+ *        straight to the template, and the template repeated the verdict the
+ *        page had already printed twice — so the reader saw the same sentence
+ *        three times. Retrying first makes that rare.
+ *     4. The template no longer opens with the verdict label, because the page
+ *        prints it directly above.
  * VERSION: 1.0 (2 Sep 2026)
  * Owner:   Rohiit Gupta, Chief Vedic Architect
  * ============================================================================
@@ -69,7 +86,16 @@ const FREE_MIN = 45, FREE_MAX = 130;
 // the floor only has to be low enough that a safe, complete answer passes.
 const PAID_MIN = 200, PAID_MAX = 750;
 
-const TIMEOUT_MS = 12000;
+const TIMEOUT_MS = 15000;
+
+/**
+ * Output token budget. Far larger than the prose needs, and deliberately so:
+ * Gemini 3.x reasons before it writes and that reasoning is charged to the
+ * SAME budget, so a tight cap truncates the visible answer rather than the
+ * thinking. 75 words is roughly 120 tokens; the rest is headroom.
+ */
+const MAX_TOKENS_FREE = 4096;
+const MAX_TOKENS_PAID = 12288;
 
 export interface SantanSummary {
   text: string;
@@ -132,6 +158,11 @@ export function validateSummary(text: string, f: SantanFacts, paid: boolean): Va
   const words = t.split(/\s+/).length;
   const [min, max] = paid ? [PAID_MIN, PAID_MAX] : [FREE_MIN, FREE_MAX];
   if (words < min || words > max) return { ok: false, reason: `length ${words} outside ${min}-${max}` };
+
+  // TRUNCATION. A cut-off draft can still pass the word count — the live free
+  // summary that shipped on 2 Sep ended "...Yeh aak" at 51 words and was let
+  // through. Anything that does not finish a sentence is not an answer.
+  if (!/[.!?।]["')\]]?$/.test(t)) return { ok: false, reason: 'truncated — no terminal punctuation' };
 
   for (const re of GENDER_PATTERNS) if (re.test(t)) return { ok: false, reason: `gender: ${re}` };
   for (const re of MEDICAL_PATTERNS) if (re.test(t)) return { ok: false, reason: `medical: ${re}` };
@@ -207,8 +238,11 @@ export function templateSummary(f: SantanFacts, paid: boolean): string {
   const help = f.supportedBy.length ? f.supportedBy[0] : null;
   const block = f.blockedBy.length ? f.blockedBy[0] : null;
 
+  // v1.1: the page prints verdict.labelHi and verdict.label immediately above
+  // this text. Opening with the label again made the reader see one sentence
+  // three times over. Start at the LINE instead.
   const free =
-    `${f.verdict}. ${f.verdictLine} ` +
+    `${f.verdictLine} ` +
     (help ? `Aapke chart mein sahara mil raha hai. ` : '') +
     (block ? `Ek rukavat bhi hai, jispar dhyan dena hoga. ` : '') +
     `Yaad rakhiye — ye yog ka bal batata hai, kisi natije ki guarantee nahi, aur ye medical raay bhi nahi hai. ` +
@@ -217,7 +251,7 @@ export function templateSummary(f: SantanFacts, paid: boolean): string {
   if (!paid) return free;
 
   return (
-    `${f.verdict}. ${f.verdictLine}\n\n` +
+    `${f.verdictLine}\n\n` +
     (help ? `Aapke chart mein sabse mazboot sahara wahan se aa raha hai jise hum ${help} kehte hain. ` : '') +
     (block ? `Aur jo cheez raah rok rahi hai, wo ${block} hai — ye rukavat hai, inkaar nahi.\n\n` : '\n\n') +
     (f.sankhya ? `Shastra ke sanket aapke chart mein ${f.sankhya} santan ki taraf jaate hain. Ye ek anuman hai, ginti nahi — aur aaj ke samay mein sankhya sirf grahon par nirbhar nahi karti.\n\n` : '') +
@@ -231,12 +265,12 @@ export function templateSummary(f: SantanFacts, paid: boolean): string {
 
 // ── Gemini call ──────────────────────────────────────────────────────────────
 
-async function callGemini(model: string, systemPrompt: string, userMessage: string): Promise<string> {
+async function callGemini(model: string, systemPrompt: string, userMessage: string, maxTokens: number): Promise<string> {
   const url = `${GEMINI_BASE_URL}/${model}:generateContent?key=${GEMINI_API_KEY}`;
   const body = {
     system_instruction: { parts: [{ text: systemPrompt }] },
     contents: [{ role: 'user', parts: [{ text: userMessage }] }],
-    generationConfig: { maxOutputTokens: 2048, temperature: 0.6, topK: 40, topP: 0.95 },
+    generationConfig: { maxOutputTokens: maxTokens, temperature: 0.6, topK: 40, topP: 0.95 },
   };
   const res = await fetch(url, {
     method: 'POST',
@@ -282,20 +316,28 @@ export async function buildSantanSummary(f: SantanFacts, paid: boolean): Promise
   const system = paid ? paidPrompt() : freePrompt();
   const user = `Here are the ONLY facts you may use:\n\n${JSON.stringify(f, null, 2)}`;
 
-  try {
-    const raw = await callGemini(model, system, user);
-    const text = raw.replace(/^```[a-z]*\n?|```$/g, '').trim();
-    const check = validateSummary(text, f, paid);
-    if (!check.ok) {
-      console.warn(`[santan-summary] REJECTED ${model} draft (${check.reason}) — using template.`);
-      return fallback();
+  const maxTokens = paid ? MAX_TOKENS_PAID : MAX_TOKENS_FREE;
+
+  // Two attempts, then the template. One rejected draft used to drop straight
+  // to the fallback, and the fallback is noticeably flatter prose — worth one
+  // more call before accepting that.
+  for (let attempt = 1; attempt <= 2; attempt++) {
+    try {
+      const raw = await callGemini(model, system, user, maxTokens);
+      const text = raw.replace(/^```[a-z]*\n?|```$/g, '').trim();
+      const check = validateSummary(text, f, paid);
+      if (!check.ok) {
+        console.warn(`[santan-summary] REJECTED ${model} draft, attempt ${attempt} (${check.reason})`);
+        continue;
+      }
+      const out: SantanSummary = { text, source: model, words: text.split(/\s+/).length };
+      if (CACHE.size >= CACHE_MAX) CACHE.clear();
+      CACHE.set(key, out);
+      return out;
+    } catch (e) {
+      console.error(`[santan-summary] Gemini failed, attempt ${attempt}:`, e);
     }
-    const out: SantanSummary = { text, source: model, words: text.split(/\s+/).length };
-    if (CACHE.size >= CACHE_MAX) CACHE.clear();
-    CACHE.set(key, out);
-    return out;
-  } catch (e) {
-    console.error('[santan-summary] Gemini failed — using template:', e);
-    return fallback();
   }
+  console.warn('[santan-summary] both attempts unusable — using template.');
+  return fallback();
 }
