@@ -2,6 +2,12 @@
  * ============================================================================
  * TRIKAL VAANI — Santan Yog summary writer
  * File:    lib/santan-summary.ts
+ * VERSION: 1.2 (3 Sep 2026)
+ *   v1.2 — TIME BUDGET. v1.1 allowed two attempts at 15s each, so the worst
+ *   case was 30s of Gemini inside a route that now has a 30s ceiling — the
+ *   retry could eat the entire function and leave nothing for a response.
+ *   Per-call timeout is 10s and the retry only happens if the budget still
+ *   allows it. Warm measurements on the live site: 0.4s cached, 7-9s fresh.
  * VERSION: 1.1 (2 Sep 2026)
  *   v1.1 — FOUND ON THE LIVE SITE WITHIN MINUTES OF DEPLOY, not in testing.
  *   The free summary came back as "...Yeh aak" — cut off mid-word. Cause:
@@ -86,7 +92,9 @@ const FREE_MIN = 45, FREE_MAX = 130;
 // the floor only has to be low enough that a safe, complete answer passes.
 const PAID_MIN = 200, PAID_MAX = 750;
 
-const TIMEOUT_MS = 15000;
+const TIMEOUT_MS = 10000;
+/** Total Gemini budget for one request. The route's ceiling is 30s. */
+const TOTAL_BUDGET_MS = 22000;
 
 /**
  * Output token budget. Far larger than the prose needs, and deliberately so:
@@ -321,7 +329,14 @@ export async function buildSantanSummary(f: SantanFacts, paid: boolean): Promise
   // Two attempts, then the template. One rejected draft used to drop straight
   // to the fallback, and the fallback is noticeably flatter prose — worth one
   // more call before accepting that.
+  const started = Date.now();
   for (let attempt = 1; attempt <= 2; attempt++) {
+    // Only retry if there is real time left. Better a good template now than a
+    // second draft that arrives after the function has been killed.
+    if (attempt === 2 && Date.now() - started > TOTAL_BUDGET_MS - TIMEOUT_MS) {
+      console.warn('[santan-summary] no time budget for a retry — using template.');
+      break;
+    }
     try {
       const raw = await callGemini(model, system, user, maxTokens);
       const text = raw.replace(/^```[a-z]*\n?|```$/g, '').trim();
