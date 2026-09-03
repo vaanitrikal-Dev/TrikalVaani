@@ -3,7 +3,30 @@
  * 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER 🔱
  * ============================================================================
  * File:        app/sitemap.ts
- * Version:     v8.7
+ * Version:     v8.8
+ *
+ * Changes v8.7 -> v8.8 (2026-09-03):
+ *   1. VIVAH YOG CALCULATOR added to CALCULATORS. Count 32 -> 33.
+ *      Added BY HAND, for the reason the v8.2 note gives and every note since
+ *      repeats: static routes are NOT auto-discovered in this file. Without
+ *      this line the page would never enter the sitemap, however many times
+ *      the site is deployed. Fifth yog calculator, same shape as the other
+ *      four — the page is fully crawlable, the paywall sits on the API
+ *      response and not on the page.
+ *      The slug is free-shadi-kab-hogi-calculator, which does NOT match the
+ *      page's own title ("Vivah Yog Calculator"). That is deliberate and is
+ *      explained in the page header: the slug carries the most-asked question
+ *      in Radar's marriage set, the title keeps the phrase this site already
+ *      ranks for in GSC (marriage yoga in kundali, position 9.93, with no
+ *      tool behind it). Do not "fix" the mismatch.
+ *      CANNIBALISATION NOTE: /learn/why-is-my-marriage-delayed earns 173
+ *      impressions at position 6.75. The calculator deliberately does not
+ *      chase that phrase in its title or metadata — the two target different
+ *      intent and support each other.
+ *   2. No other logic, loop, query, priority or de-dupe behaviour changed.
+ *      Built on the deployed v8.7 source.
+ *
+ * Version (previous): v8.7
  * Owner:       Rohiit Gupta, Chief Vedic Architect
  *
  * Changes v8.6 -> v8.7 (2026-09-02):
@@ -322,6 +345,8 @@ const CALCULATORS = [
   'free-foreign-spouse-calculator',
   // ── Santan Yog (v8.7) ──
   'free-santan-yog-calculator',
+  // ── Vivah Yog / "Shadi kab hogi" (v8.8) ──
+  'free-shadi-kab-hogi-calculator',
 ];
 
 const DOMAINS_FALLBACK = [
