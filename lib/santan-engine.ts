@@ -3,6 +3,20 @@
  * TRIKAL VAANI — Santan Yog Engine
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: lib/santan-engine.ts
+ * VERSION: 2.1 (3 Sep 2026)
+ *   v2.1 — PLAIN LANGUAGE, and the reader's name. Found on the live free
+ *   report: the summary read "paap drishti ka dabaav aur santan graha ki dasha
+ *   raah mein rukavat paida kar rahi hai". Those two phrases are the ENGINE'S
+ *   OWN RULE LABELS, handed to Gemini in `facts` — while the same prompt told
+ *   it to avoid jargon. I gave it jargon and asked it not to use jargon.
+ *   Worse, one of them was misleading: "santan graha ki dasha" scoring zero
+ *   means the CURRENT period does not belong to the santan planets, not that a
+ *   dasha is blocking anything, and the summary said the latter.
+ *   Fixed by translating every label through PLAIN below before it leaves the
+ *   engine. The same label has two forms — a rule can appear as support or as
+ *   a blocker, and "Guru ki taakat" means opposite things in each — so both
+ *   are written out rather than negated at runtime.
+ *   Also: `facts.name` so a 73-word personal reading can use the person's name.
  * VERSION: 2.0 (2 Sep 2026)
  *   v2.0 — THE ANSWER, NOT THE ARITHMETIC. Rohiit judged v1.x too technical:
  *   "normal person will not understand... they do not planet numbers, they
@@ -149,6 +163,8 @@ export interface SantanResult extends YogResult {
  * rejects any output that introduces one that is not.
  */
 export interface SantanFacts {
+  /** First name, when given. Gemini may use it once. */
+  name: string | null;
   verdict: string;
   verdictLine: string;
   score: number;
@@ -543,6 +559,96 @@ function buildUpay(
   return out;
 }
 
+/**
+ * Rule label -> ordinary Hinglish, in both directions.
+ *
+ * `up` is how the rule reads when it is CARRYING the chart; `down` is how it
+ * reads when it is holding it back. Written out rather than derived, because
+ * the negation of a classical statement is rarely its opposite in plain speech.
+ *
+ * A label with no entry falls through to itself. That is deliberate: a missing
+ * translation should read slightly technical, never crash and never vanish.
+ */
+const PLAIN: Record<string, { up: string; down: string }> = {
+  '5th lord ki taakat': {
+    up: 'santan bhava ka swami mazboot hai',
+    down: 'santan bhava ka swami abhi kamzor hai',
+  },
+  '5th house mein graha': {
+    up: 'santan ke ghar mein shubh graha baithe hain',
+    down: 'santan ke ghar par paap grahon ka dabaav hai',
+  },
+  '5th lord ki sthiti': {
+    up: 'santan ka swami achhe sthaan par hai',
+    down: 'santan ka swami kamzor sthaan par chala gaya hai',
+  },
+  'D-7 lagna lord': {
+    up: 'santan ki apni kundali ka aadhaar mazboot hai',
+    down: 'santan ki apni kundali ka aadhaar kamzor hai',
+  },
+  'D-7 ka panchma bhava': {
+    up: 'santan ki apni kundali saath de rahi hai',
+    down: 'santan ki apni kundali utna saath nahi de rahi',
+  },
+  'Rasi 5th lord D-7 mein mazboot': {
+    up: 'dono kundaliyan ek hi baat keh rahi hain',
+    down: 'mukhya kundali ka vaada doosri kundali confirm nahi kar rahi',
+  },
+  'D-7 vishleshan': {
+    up: 'santan ki apni kundali padhi ja chuki hai',
+    down: 'santan ki apni kundali is samay padhi nahi ja saki',
+  },
+  'Guru ki taakat': { up: 'Guru mazboot hai', down: 'Guru abhi kamzor hai' },
+  'Guru ki sthiti': {
+    up: 'Guru achhe ghar mein baitha hai',
+    down: 'Guru aise ghar mein hai jahan wo apna phal der se deta hai',
+  },
+  'Guru vargottama (D-1 ↔ D-7)': {
+    up: 'Guru ko dohri taakat mili hai',
+    down: 'Guru ko wo extra sahara nahi mila',
+  },
+  'Guru ki drishti panchma par': {
+    up: 'Guru ki nazar santan ke ghar par hai',
+    down: 'Guru ki nazar santan ke ghar par nahi padti',
+  },
+  'Paap drishti ka dabaav': {
+    up: 'santan ke ghar par koi bhaari dabaav nahi hai',
+    down: 'santan ke ghar par kuch grahon ka bhaari dabaav hai',
+  },
+  'Drishti vishleshan': {
+    up: 'grahon ki nazar ka hisaab ho chuka hai',
+    down: 'grahon ki nazar ka hisaab is samay nahi mil paya',
+  },
+  'PK ki taakat aur sthiti': {
+    up: 'santan ka doosra karak graha mazboot hai',
+    down: 'santan ka doosra karak graha kamzor hai',
+  },
+  'PK se panchma': {
+    up: 'us karak se bhi santan ka ghar saath de raha hai',
+    down: 'us karak se santan ka ghar kamzor hai',
+  },
+  'Putra Dosh (Rahu-Ketu axis)': {
+    up: 'Rahu-Ketu santan ke ghar se door hain',
+    down: 'Rahu-Ketu santan ke ghar par baithe hain',
+  },
+  '5th lord asta ya vakri': {
+    up: 'santan ka swami apna phal dene ki halat mein hai',
+    down: 'santan ka swami Surya ke taap mein dabaa hua hai',
+  },
+  'Pitra Dosh ka sanket': {
+    up: 'purvajon se judi koi baadha nahi dikh rahi',
+    down: 'purvajon se judi baadha ke sanket hain',
+  },
+  'Santan graha ki dasha': {
+    up: 'abhi jo daur chal raha hai wo santan grahon ka hai',
+    down: 'abhi jo daur chal raha hai wo santan grahon ka nahi hai',
+  },
+};
+
+function plain(label: string, dir: 'up' | 'down'): string {
+  return PLAIN[label]?.[dir] ?? label;
+}
+
 /** Everything Gemini may see. Nothing else reaches the prompt. */
 function toFacts(
   base: YogResult,
@@ -551,14 +657,17 @@ function toFacts(
   windows: SantanWindow[],
   upay: TrikaalUpay[],
   saptamsaRead: boolean,
+  name: string | null,
 ): SantanFacts {
   return {
+    name: name && name.trim() ? name.trim().split(/\s+/)[0] : null,
     verdict: verdict.label,
     verdictLine: verdict.line,
     score: base.score,
     band: base.band,
-    supportedBy: (base.highlights ?? []).map((h) => h.label),
-    blockedBy: (base.blockers ?? []).map((b) => b.label),
+    // v2.1: translated, not raw. These are the sentences Gemini writes from.
+    supportedBy: (base.highlights ?? []).map((h) => plain(h.label, 'up')),
+    blockedBy: (base.blockers ?? []).map((b) => plain(b.label, 'down')),
     sankhya: sankhya ? `${sankhya.min}-${sankhya.max}` : null,
     firstWindow: windows.length ? `${windows[0].label} (${windows[0].from} se ${windows[0].to})` : null,
     upayTitles: upay.map((u) => u.title),
@@ -568,7 +677,7 @@ function toFacts(
 
 // ─────────────────────────────────────────────────────────────────────────────
 
-export function scoreSantan(data: CalcData, timeline?: DashaPeriod[]): SantanResult {
+export function scoreSantan(data: CalcData, timeline?: DashaPeriod[], name?: string | null): SantanResult {
   const s = new ScoreSheet();
   const cap = capabilities(data);
   const { PK } = karakas(data);
@@ -907,7 +1016,7 @@ export function scoreSantan(data: CalcData, timeline?: DashaPeriod[]): SantanRes
     windows,
     sankhya,
     upay,
-    facts: toFacts(rebanded, verdict, sankhya, windows, upay, hasSaptamsa(data)),
+    facts: toFacts(rebanded, verdict, sankhya, windows, upay, hasSaptamsa(data), name ?? null),
   };
 }
 
