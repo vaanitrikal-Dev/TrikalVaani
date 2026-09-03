@@ -2,6 +2,18 @@
 
 // ============================================================
 // File: components/calculators/YogCalculator.tsx
+// Version: v2.4 — browser fetch timeout (3 Sep 2026)
+//
+// CHANGELOG v2.4 — a customer sat on "Chart padha ja raha hai…" for FOUR
+// minutes, then saw "Network error" after nine. Neither fetch below had a
+// timeout, so the browser waited exactly as long as the server did, and the
+// server had no ceiling either (fixed in the route, v2.4). An un-aborted fetch
+// turns any slow response into a blank screen with no way out.
+//
+// Both calls now abort at 35s — comfortably above the route's own 30s ceiling,
+// so a real server error still reaches the user as a real message. And the
+// message says what to do instead of just naming the fault: "Network error.
+// Dobara koshish karein." told a person nothing about whether to wait or retry.
 // Version: v2.3 — santan pre-pay block fixed (2 Sep 2026)
 //
 // CHANGELOG v2.3 — caught on the live page, not in review. The pre-pay block
@@ -560,12 +572,19 @@ export default function YogCalculator({ config }: { config: YogCalculatorConfig 
     };
   };
 
+  /**
+   * v2.4: 35 seconds, then give up and say so. The route's own ceiling is 30s,
+   * so anything past 35 is a network fault rather than a slow reading.
+   */
+  const CLIENT_TIMEOUT_MS = 35000;
+
   /** Re-request the same reading WITH proof of payment. The server re-verifies. */
   const fetchPaid = async (proof: Record<string, string>) => {
     const res = await fetch('/api/calc/yog', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ ...birthPayload(), ...proof }),
+      signal: AbortSignal.timeout(CLIENT_TIMEOUT_MS),
     });
     const json = await res.json();
     if (!res.ok || !json.success) {
@@ -644,6 +663,7 @@ export default function YogCalculator({ config }: { config: YogCalculatorConfig 
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(birthPayload()),
+        signal: AbortSignal.timeout(CLIENT_TIMEOUT_MS),
       });
       const json = await res.json();
       if (!res.ok || !json.success) {
@@ -652,8 +672,15 @@ export default function YogCalculator({ config }: { config: YogCalculatorConfig 
         setData(json);
         setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 80);
       }
-    } catch {
-      setApiError('Network error. Dobara koshish karein.');
+    } catch (e: any) {
+      // v2.4: name the two cases apart. A timeout is not a network failure, and
+      // telling someone to "try again" when the engine is busy just wastes
+      // another 35 seconds of their evening.
+      setApiError(
+        e?.name === 'TimeoutError' || e?.name === 'AbortError'
+          ? 'Engine abhi jawab nahi de paya. Aapka chart safe hai — 1 minute baad "Mera Santan Yog dekho" dobara dabayein.'
+          : 'Connection toot gaya. Internet check karke dobara koshish karein.',
+      );
     } finally {
       setLoading(false);
     }
