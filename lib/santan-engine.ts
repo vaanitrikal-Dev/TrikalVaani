@@ -149,7 +149,7 @@ import {
   planet, houseLord, houseOf, ratio, ratioScore, ratioWord,
   dignityScore, dignityWord, karakas, conjunct,
   dashaPair, drishtiOnHouse, netDrishtiOnHouse, drishtiWord, drishtiOnPlanet,
-  d7, d7HouseLord, isD7Vargottama, capabilities,
+  d7, d7HouseLord, isD7Vargottama, capabilities, preferPresence,
   PLANET_HI, KENDRA, TRIKONA, DUSTHANA,
 } from './yog-engine';
 
@@ -736,7 +736,13 @@ function buildUpay(
         n: out.length + 1, source: 'Shadbala',
         title: `Bal badhane ke liye — ${PLANET_HI[sub.pl]}`,
         ...body(sub.pl),
-        why: `Aapke teenon santan grahan — panchmesh, karak aur Putrakaraka — ek hi graha par aa gaye hain, jiska upay upar diya ja chuka hai. Ye ek asli baat hai aapke chart ki, aur iska matlab hai ki poora bhaar ek graha par hai. Isliye paanchva upay ${PLANET_HI[sub.pl]} par rakha gaya hai: ${sub.basis}.`,
+        // v2.6: was unconditional "teenon ... ek hi graha par". Fixed in the
+        // Vivah engine first, after a live paid report where only TWO of the
+        // three coincided. Same wording bug, same fix, applied here at the
+        // same time so the pair cannot drift again.
+        why: `${new Set(trio).size === 1
+          ? `Aapke teenon santan grahan — panchmesh, karak aur Putrakaraka — ek hi graha par aa gaye hain`
+          : `Aapke santan grahon mein se ek hi graha do bhoomikayein nibha raha hai`}, aur un sabka upay upar diya ja chuka hai. Ye ek asli baat hai aapke chart ki. Isliye paanchva upay ${PLANET_HI[sub.pl]} par rakha gaya hai: ${sub.basis}.`,
       });
     }
   }
@@ -835,6 +841,14 @@ function plain(label: string, dir: 'up' | 'down'): string {
 }
 
 /** Everything Gemini may see. Nothing else reaches the prompt. */
+/**
+ * Rules that award full marks for the ABSENCE of an affliction. They score a
+ * perfect ratio on any clean chart, so without this list they crowd out the
+ * chart's real strengths in the 'what is carrying this' line. See
+ * preferPresence() in lib/yog-engine.ts for the measurement behind it.
+ */
+const ABSENCE_LABELS = ['Putra Dosh (Rahu-Ketu axis)', '5th lord asta ya vakri', 'Pitra Dosh ka sanket', 'Paap drishti ka dabaav'];
+
 function toFacts(
   base: YogResult,
   verdict: SantanVerdict,
@@ -849,7 +863,7 @@ function toFacts(
     verdict: verdict.label,
     verdictLine: verdict.line,
     // v2.1: translated, not raw. These are the sentences Gemini writes from.
-    supportedBy: (base.highlights ?? []).map((h) => plain(h.label, 'up')),
+    supportedBy: preferPresence(base.rules ?? [], ABSENCE_LABELS).map((h) => plain(h.label, 'up')),
     blockedBy: (base.blockers ?? []).map((b) => plain(b.label, 'down')),
     sankhya: sankhya ? `${sankhya.min}-${sankhya.max}` : null,
     firstWindow: windows.length ? `${windows[0].label} (${windows[0].from} se ${windows[0].to})` : null,
