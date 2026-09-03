@@ -2,6 +2,18 @@
 
 // ============================================================
 // File: components/calculators/YogCalculator.tsx
+// Version: v3.1 — the age band rendered blank (3 Sep 2026)
+//
+// CHANGELOG v3.1 — a live PAID Vivah report printed "– saal ki umar ke beech"
+// with no numbers, while Gemini's own paragraph on the same page correctly
+// said "24-25". So the engine was right and this file was wrong.
+//
+// Cause: v2.9 generalised the view on the assumption that Santan and Vivah put
+// the same shape in the middle slot. They do not — Santan's `sankhya` is
+// { min, max, basis } and Vivah's `umar` is { from, to, basis }. Reading
+// range.min on a Vivah result gives undefined, and undefined renders as
+// nothing, so the sentence lost its numbers silently. Nothing threw.
+// The shapes are now normalised through one helper instead of being assumed.
 // Version: v3.0 — the santan-only gates now cover every verdict type (3 Sep 2026)
 //
 // CHANGELOG v3.0 — LIVE CRASH. The Vivah page died with "Application error: a
@@ -528,16 +540,26 @@ const SANTAN_LABELS: VerdictLabels = {
 const VIVAH_LABELS: VerdictLabels = {
   rangeHeading: 'Kis umar mein — shastriya sanket',
   rangeUnit: 'saal ki umar ke beech',
-  rangeFootnote:
-    'Ye ek window hai, koi tay tareekh nahi. Agar is dauran baat na bane to yog khatam nahi hota — wo agli khidki ka intezaar karta hai.',
+  // v3.1: the engine's `basis` already carries this point in full, and the two
+  // sentences ran back to back on the live page saying almost the same thing.
+  // The footnote is no longer rendered; the field is kept so the type is
+  // stable and a future product can use it.
+  rangeFootnote: '',
   windowsNote: 'Ye khidkiyan aapki apni Vimshottari dasha se nikli hain. Jo daur abhi chal raha hai, uski tareekh aaj se shuru dikhayi gayi hai.',
 };
 
 function VerdictView({ r, paid, L }: { r: any; paid: boolean; L: VerdictLabels }) {
   const v = r.verdict;
-  // Santan calls it `sankhya` (a child count), Vivah calls it `umar` (an age
-  // band). Same slot, same {min, max, basis} shape.
-  const range = r.sankhya ?? r.umar ?? null;
+  // Santan calls it `sankhya` (a child count) and uses { min, max }; Vivah
+  // calls it `umar` (an age band) and uses { from, to }. NOT the same shape —
+  // assuming they were is what printed an empty range on a paid report. Both
+  // are normalised to { lo, hi, basis } here, and a missing bound is caught
+  // rather than rendered as an empty string.
+  const raw = r.sankhya ?? r.umar ?? null;
+  const range =
+    raw && Number.isFinite(raw.min ?? raw.from) && Number.isFinite(raw.max ?? raw.to)
+      ? { lo: raw.min ?? raw.from, hi: raw.max ?? raw.to, basis: raw.basis }
+      : null;
   return (
     <>
       {/* THE ANSWER */}
@@ -631,11 +653,10 @@ function VerdictView({ r, paid, L }: { r: any; paid: boolean; L: VerdictLabels }
           style={{ background: '#0B0F1A', border: `1px solid ${GOLD_RGBA(0.22)}` }}>
           <h2 className="text-base font-bold m-0 mb-3" style={{ color: GOLD }}>{L.rangeHeading}</h2>
           <p className="m-0 text-3xl font-bold" style={{ color: GOLD }}>
-            {range.min}–{range.max}
+            {range.lo}–{range.hi}
             <span className="text-sm font-normal" style={{ color: '#64748b' }}> {L.rangeUnit}</span>
           </p>
           <p className="text-xs mt-3 mb-0 leading-relaxed" style={{ color: '#94a3b8' }}>{range.basis}</p>
-          <p className="text-xs mt-2 mb-0 leading-relaxed" style={{ color: '#64748b' }}>{L.rangeFootnote}</p>
         </section>
       )}
 
