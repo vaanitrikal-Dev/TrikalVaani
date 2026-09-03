@@ -3,6 +3,36 @@
  * TRIKAL VAANI — Santan Yog Engine
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: lib/santan-engine.ts
+ * VERSION: 2.2 (3 Sep 2026)
+ *   v2.2 — THREE DEFECTS FOUND IN A REAL PAID REPORT. All three were visible
+ *   to a paying customer, and the first one short-changed her.
+ *
+ *   A. FIVE UPAY, TWO OF THEM REAL. On a Simha lagna the 5th is Dhanu, so the
+ *   Panchamesh is Guru; Guru is also the natural Santan Karaka; and on that
+ *   chart Guru was the Jaimini Putrakaraka too. Three of the five slots
+ *   therefore printed the same graha and the SAME MANTRA, and the Shadbala
+ *   slot made it four. The v2.0 guard only skipped an already-used graha in
+ *   slot 5, which does nothing when every candidate is the same planet.
+ *   Not rare either — roughly one chart in thirty.
+ *   FIX: one `used` set across all five slots, and a substitute chosen the way
+ *   Rohiit directed on 3 Sep 2026 (Option 1): a graha sitting in the 5th
+ *   house, and if the 5th is empty, the Saptamsa lagna lord. The substituted
+ *   upay says openly WHY it was substituted — that two roles landed on one
+ *   graha is a real finding about the chart, not something to paper over.
+ *
+ *   B. WINDOWS RUNNING TO 2094. The reader was born in 2004 and was shown
+ *   dasha windows in 2080 and 2094 — ages 76 and 90. buildWindows only
+ *   dropped windows that had already ENDED; it had no upper bound at all.
+ *   FIX: windows must START within roughly 45 years of birth. This is a
+ *   readability bound, not a medical claim — a window nobody can act on is
+ *   noise, and printing it costs trust.
+ *
+ *   C. THE REPORT CONTRADICTED ITSELF. It called Guru "sabse kamzor" at
+ *   Shadbala 1.18 while three other lines on the same page called 1.18
+ *   "mazboot"; and "5th lord ki taakat" said "mazboot" while awarding 5.3/12,
+ *   with no hint that the Enemy Sign was the reason.
+ *   FIX: "sabse kam bal of the three" when the ratio is still above 1.00, and
+ *   the 5th-lord line now names the split when dignity and Shadbala disagree.
  * VERSION: 2.1 (3 Sep 2026)
  *   v2.1 — PLAIN LANGUAGE, and the reader's name. Found on the live free
  *   report: the summary read "paap drishti ka dabaav aur santan graha ki dasha
@@ -392,15 +422,34 @@ function sankhyaRange(
  * Only windows that have not finished are returned, newest last, capped at
  * four so the paid table stays readable.
  */
-function buildWindows(timeline: DashaPeriod[] | undefined, keyPlanets: string[]): SantanWindow[] {
+/**
+ * How far ahead a window is still worth printing, in years from birth.
+ *
+ * v2.2. A real report showed a reader born in 2004 windows starting in 2080
+ * and 2094. Those are arithmetically correct and completely useless. This is a
+ * READABILITY bound, not a statement about anyone's body — the engine simply
+ * stops listing periods the reader cannot plan around.
+ */
+const WINDOW_HORIZON_YEARS = 45;
+
+function buildWindows(
+  timeline: DashaPeriod[] | undefined,
+  keyPlanets: string[],
+  birthYear?: number,
+): SantanWindow[] {
   if (!Array.isArray(timeline) || !timeline.length) return [];
   const today = new Date();
+  // No birth year (older callers) falls back to a horizon from today, so the
+  // bound can never silently vanish.
+  const maxStartYear = (birthYear ?? today.getUTCFullYear()) + WINDOW_HORIZON_YEARS;
   const out: SantanWindow[] = [];
 
   for (const maha of timeline) {
     if (!maha?.start || !maha?.end) continue;
     const mEnd = new Date(maha.end);
     if (mEnd < today) continue;
+
+    if (Number(String(maha.start).slice(0, 4)) > maxStartYear) continue;
 
     if (keyPlanets.includes(maha.planet)) {
       out.push({
@@ -414,6 +463,7 @@ function buildWindows(timeline: DashaPeriod[] | undefined, keyPlanets: string[])
     for (const antar of maha.antar ?? []) {
       if (!antar?.start || !antar?.end) continue;
       if (new Date(antar.end) < today) continue;
+      if (Number(String(antar.start).slice(0, 4)) > maxStartYear) continue;
       if (!keyPlanets.includes(antar.planet)) continue;
       if (keyPlanets.includes(maha.planet) && maha.planet === antar.planet) continue;
       out.push({
@@ -445,49 +495,128 @@ function buildUpay(
     pitra: boolean;
     saturnInFifth: boolean;
     combustL5: boolean;
+    d7LagnaLord: string | null;
   },
 ): TrikaalUpay[] {
   const out: TrikaalUpay[] = [];
   const rem = (pl: string | null) => (pl ? PLANET_REMEDY[pl] : undefined);
 
-  // ── BPHS 1 — the Panchamesh, this chart's own santan lord ──
-  const r5 = rem(ctx.l5);
-  if (ctx.l5 && r5) {
+  // v2.2: ONE used-set across all five slots. The v2.0 version only checked
+  // slot 5, which is useless on a chart where the Panchamesh, the Santan
+  // Karaka and the Putrakaraka are all the same graha — a real paid report
+  // printed the same mantra four times out of five.
+  const used = new Set<string>();
+
+  /**
+   * Rohiit's Option 1, 3 Sep 2026: when a slot's natural graha is already
+   * spoken for, fall to a graha SITTING IN THE 5TH HOUSE; if the 5th is empty,
+   * to the Saptamsa lagna lord; and only then to the weakest unused graha.
+   * Returns the graha and a plain reason the reader can follow.
+   */
+  function substitute(): { pl: string; basis: string } | null {
+    // Rahu and Ketu are excluded EVERYWHERE here, not just in the last tier.
+    // Caught in testing: on a chart with Ketu in the 5th, the substitute picked
+    // "Ketu ka upay" to strengthen — while slot 4 was simultaneously prescribing
+    // Putra Dosh shanti for that very placement. A node on the 5th is an
+    // affliction to pacify, never a graha to feed.
+    const NODES = ['Rahu', 'Ketu'];
+    const inFifth = data.planets
+      .filter((x) => x.house === 5 && PLANET_REMEDY[x.planet] && !used.has(x.planet) && !NODES.includes(x.planet))
+      .map((x) => ({ pl: x.planet, r: ratio(x) ?? 1 }))
+      .sort((a, b) => a.r - b.r);
+    if (inFifth.length) {
+      return {
+        pl: inFifth[0].pl,
+        basis: `wo aapke panchma bhava mein khud baitha hai`,
+      };
+    }
+    if (ctx.d7LagnaLord && PLANET_REMEDY[ctx.d7LagnaLord] && !used.has(ctx.d7LagnaLord)
+        && !NODES.includes(ctx.d7LagnaLord)) {
+      return {
+        pl: ctx.d7LagnaLord,
+        basis: `aapka panchma bhava khaali hai, isliye santan ki apni kundali ka lagnesh liya gaya hai`,
+      };
+    }
+    const rest = Object.keys(PLANET_REMEDY)
+      .filter((pl) => !used.has(pl) && !NODES.includes(pl))
+      .map((pl) => ({ pl, r: ratio(planet(data, pl)) ?? 1 }))
+      .sort((a, b) => a.r - b.r);
+    return rest.length ? { pl: rest[0].pl, basis: 'ye aapke chart ka sabse kam bal wala graha hai' } : null;
+  }
+
+  /** Standard graha remedy body, so every slot reads the same way. */
+  function body(pl: string) {
+    const r = PLANET_REMEDY[pl];
+    return {
+      what: `${r.mantra} — 108 baar. Daan: ${r.daan}. ${r.rang} rang dharan karein.`,
+      when: `Har ${r.vaar}, subah snan ke baad, ek hi samay par.`,
+    };
+  }
+
+  // ── BPHS 1 — the Panchamesh ──
+  if (ctx.l5 && PLANET_REMEDY[ctx.l5]) {
+    used.add(ctx.l5);
     out.push({
       n: 1, source: 'BPHS',
       title: `Panchamesh ${PLANET_HI[ctx.l5]} ka upay`,
-      what: `${r5.mantra} — 108 baar. Daan: ${r5.daan}. ${r5.rang} rang dharan karein.`,
-      when: `Har ${r5.vaar}, subah snan ke baad, ek hi samay par.`,
+      ...body(ctx.l5),
       why: `Aapke chart mein santan ka swami ${PLANET_HI[ctx.l5]} hai. Isiliye aam "santan upay" aap par kaam nahi karega — upay usi graha ka hona chahiye jo aapki kundali mein ye bhava sambhalta hai.`,
     });
   }
 
-  // ── BPHS 2 — Guru, the Santan Karaka ──
-  const rj = rem('Jupiter')!;
-  out.push({
-    n: 2, source: 'BPHS',
-    title: 'Santan Karaka Guru ka upay',
-    what: `${rj.mantra} — 108 baar, aur Santan Gopal mantra ka niyam. Daan: ${rj.daan}.`,
-    when: 'Har Guruvar. Niyamitta sankhya se zyada mayne rakhti hai.',
-    why: 'Guru har kundali mein santan ka karak graha hai — panchma bhava chahe kitna bhi achha ho, kamzor Guru uska phal der se deta hai.',
-  });
-
-  // ── Bhrigu 1 — the chara karaka ──
-  const rpk = rem(ctx.PK);
-  if (ctx.PK && rpk) {
+  // ── BPHS 2 — the Santan Karaka, or a substitute when Guru is already used ──
+  if (!used.has('Jupiter')) {
+    used.add('Jupiter');
+    const rj = PLANET_REMEDY.Jupiter;
     out.push({
-      n: 3, source: 'Bhrigu',
+      n: out.length + 1, source: 'BPHS',
+      title: 'Santan Karaka Guru ka upay',
+      what: `${rj.mantra} — 108 baar, aur Santan Gopal mantra ka niyam. Daan: ${rj.daan}.`,
+      when: 'Har Guruvar. Niyamitta sankhya se zyada mayne rakhti hai.',
+      why: 'Guru har kundali mein santan ka karak graha hai — panchma bhava chahe kitna bhi achha ho, kamzor Guru uska phal der se deta hai.',
+    });
+  } else {
+    const sub = substitute();
+    if (sub) {
+      used.add(sub.pl);
+      out.push({
+        n: out.length + 1, source: 'BPHS',
+        title: `${PLANET_HI[sub.pl]} ka upay`,
+        ...body(sub.pl),
+        why: `Aapke chart mein Guru khud hi panchma bhava ka swami hai — yaani karak aur swami, dono bhoomikayein ek hi graha par. Uska upay upar aa chuka hai, isliye doosra upay ${PLANET_HI[sub.pl]} par rakha gaya hai: ${sub.basis}. Ek hi mantra do baar likh dena aapko paanch ki jagah chaar upay dena hota.`,
+      });
+    }
+  }
+
+  // ── Bhrigu 1 — the chara karaka, or a substitute ──
+  if (ctx.PK && PLANET_REMEDY[ctx.PK] && !used.has(ctx.PK)) {
+    used.add(ctx.PK);
+    const rpk = PLANET_REMEDY[ctx.PK];
+    out.push({
+      n: out.length + 1, source: 'Bhrigu',
       title: `Putrakaraka ${PLANET_HI[ctx.PK]} ki upasana`,
       what: `${rpk.mantra} ka jaap, aur ${PLANET_HI[ctx.PK]} se judi vastu ka daan (${rpk.daan}).`,
       when: `Har ${rpk.vaar}.`,
       why: `Karak-paddhati mein aapka Putrakaraka ${PLANET_HI[ctx.PK]} hai — ye har kundali mein badalta hai, aur isi wajah se ye upay sirf aapke chart ka hai.`,
     });
+  } else {
+    const sub = substitute();
+    if (sub) {
+      used.add(sub.pl);
+      out.push({
+        n: out.length + 1, source: 'Bhrigu',
+        title: `${PLANET_HI[sub.pl]} ki upasana`,
+        ...body(sub.pl),
+        why: `Aapka Putrakaraka ${ctx.PK ? PLANET_HI[ctx.PK] : 'wahi graha'} hai, jiska upay upar aa chuka hai — aapke chart mein do bhoomikayein ek hi graha par aa gayi hain. Isliye ye upay ${PLANET_HI[sub.pl]} par hai: ${sub.basis}.`,
+      });
+    }
   }
 
-  // ── Bhrigu 2 — the biggest actual blocker in THIS chart ──
+  // ── Bhrigu 2 — the biggest actual blocker. Rarely a graha mantra, so it
+  //    almost never collides with the slots above. ──
   if (ctx.nodeInFifth) {
     out.push({
-      n: 4, source: 'Bhrigu',
+      n: out.length + 1, source: 'Bhrigu',
       title: 'Chhaya grahon ki shanti (Putra Dosh)',
       what: 'Naag-Naagin ki shanti, Rahu-Ketu ka daan (kambal, kale til, nariyal), aur behte jal mein nariyal pravah.',
       when: 'Shanivar ya Amavasya.',
@@ -495,7 +624,7 @@ function buildUpay(
     });
   } else if (ctx.pitra) {
     out.push({
-      n: 4, source: 'Bhrigu',
+      n: out.length + 1, source: 'Bhrigu',
       title: 'Pitra shanti',
       what: 'Purvajon ke naam tarpan aur shraddh, Amavasya par anna-daan, aur peepal ko jal.',
       when: 'Amavasya, aur Pitru Paksha ke dauran.',
@@ -503,7 +632,7 @@ function buildUpay(
     });
   } else if (ctx.saturnInFifth) {
     out.push({
-      n: 4, source: 'Bhrigu',
+      n: out.length + 1, source: 'Bhrigu',
       title: 'Shani ko shant karna',
       what: 'Kale til aur sarson ka tel daan, Hanuman Chalisa ka niyam, aur shramikon ki seva.',
       when: 'Har Shanivar, suryast ke baad.',
@@ -511,7 +640,7 @@ function buildUpay(
     });
   } else if (ctx.combustL5) {
     out.push({
-      n: 4, source: 'Bhrigu',
+      n: out.length + 1, source: 'Bhrigu',
       title: 'Asta panchmesh ko bal dena',
       what: `Surya ko arghya, aur ${ctx.l5 ? PLANET_HI[ctx.l5] : 'panchmesh'} ka mantra jaap.`,
       when: 'Suryoday ke samay, roz.',
@@ -520,7 +649,7 @@ function buildUpay(
   } else {
     const jup = planet(data, 'Jupiter');
     out.push({
-      n: 4, source: 'Bhrigu',
+      n: out.length + 1, source: 'Bhrigu',
       title: 'Guru ke swami ko bal dena',
       what: 'Guru jis rashi mein hai, us rashi ke swami ka mantra aur uska daan.',
       when: `Us graha ke vaar par.${jup ? ` Aapka Guru ${jup.sign} mein hai.` : ''}`,
@@ -528,32 +657,44 @@ function buildUpay(
     });
   }
 
-  // ── Shadbala — pure computation, no book ──
-  // BUG FOUND BY TEST, 2 Sep 2026: on the reference chart the Putrakaraka and
-  // the weakest graha were both the Moon, so upay 3 and upay 5 gave the same
-  // remedy twice and the customer paid for four, not five. The weakest graha
-  // ALREADY covered by upay 1 (Panchamesh) or upay 3 (Putrakaraka) is skipped,
-  // and the next weakest is taken instead. If all three are already covered,
-  // the weakest is used anyway — a repeat is better than a missing fifth upay,
-  // and the reason line still carries its own distinct number.
+  // ── Shadbala — pure computation, and never a repeat ──
   const trio = [ctx.l5, 'Jupiter', ctx.PK].filter(Boolean) as string[];
-  const alreadyCovered = new Set([ctx.l5, ctx.PK].filter(Boolean) as string[]);
   const ranked = trio
     .map((pl) => ({ pl, r: ratio(planet(data, pl)) }))
     .filter((x): x is { pl: string; r: number } => x.r !== null)
     .sort((a, b) => a.r - b.r);
-  const pick = ranked.find((x) => !alreadyCovered.has(x.pl)) ?? ranked[0];
-  const weakest: string | null = pick?.pl ?? null;
-  const weakestR: number = pick?.r ?? Infinity;
-  if (weakest) {
-    const rw = rem(weakest)!;
+
+  const fresh = ranked.find((x) => !used.has(x.pl));
+  const chosen = fresh ?? null;
+
+  if (chosen) {
+    used.add(chosen.pl);
+    const rw = PLANET_REMEDY[chosen.pl];
+    // v2.2 wording: 1.18 is not "kamzor". A live report said "sabse kamzor —
+    // 1.18" on a page that called 1.18 "mazboot" three times over.
+    const weakAbs = chosen.r < 1;
     out.push({
-      n: 5, source: 'Shadbala',
-      title: `Sabse kamzor santan graha — ${PLANET_HI[weakest]}`,
+      n: out.length + 1, source: 'Shadbala',
+      title: weakAbs
+        ? `Sabse kamzor santan graha — ${PLANET_HI[chosen.pl]}`
+        : `Teen mein sabse kam bal — ${PLANET_HI[chosen.pl]}`,
       what: `${rw.mantra}, ${rw.daan} ka daan, aur ${rw.rang} rang.`,
       when: `Har ${rw.vaar}, kam se kam 40 din lagataar.`,
-      why: `Aapke teen santan grahon mein ${PLANET_HI[weakest]} ki Shadbala sabse kam hai — ${weakestR.toFixed(2)}, jahan 1.00 shastriya न्यूनतम hai. Ye upay kisi kitab se nahi, aapke apne chart ki ganit se nikla hai.`,
+      why: weakAbs
+        ? `Aapke teen santan grahon mein ${PLANET_HI[chosen.pl]} ki Shadbala sabse kam hai — ${chosen.r.toFixed(2)}, jo 1.00 ke shastriya न्यूनतम se neeche hai. Ye upay kisi kitab se nahi, aapke apne chart ki ganit se nikla hai.`
+        : `Aapke teen santan grahon mein ${PLANET_HI[chosen.pl]} ka bal sabse kam hai — Shadbala ${chosen.r.toFixed(2)}. Ye 1.00 ke shastriya न्यूनतम se upar hai, yaani kamzor nahi; bas teenon mein sabse peeche. Ye upay kisi kitab se nahi, aapke apne chart ki ganit se nikla hai.`,
     });
+  } else {
+    const sub = substitute();
+    if (sub) {
+      used.add(sub.pl);
+      out.push({
+        n: out.length + 1, source: 'Shadbala',
+        title: `Bal badhane ke liye — ${PLANET_HI[sub.pl]}`,
+        ...body(sub.pl),
+        why: `Aapke teenon santan grahan — panchmesh, karak aur Putrakaraka — ek hi graha par aa gaye hain, jiska upay upar diya ja chuka hai. Ye ek asli baat hai aapke chart ki, aur iska matlab hai ki poora bhaar ek graha par hai. Isliye paanchva upay ${PLANET_HI[sub.pl]} par rakha gaya hai: ${sub.basis}.`,
+      });
+    }
   }
 
   return out;
@@ -677,7 +818,12 @@ function toFacts(
 
 // ─────────────────────────────────────────────────────────────────────────────
 
-export function scoreSantan(data: CalcData, timeline?: DashaPeriod[], name?: string | null): SantanResult {
+export function scoreSantan(
+  data: CalcData,
+  timeline?: DashaPeriod[],
+  name?: string | null,
+  birthYear?: number,
+): SantanResult {
   const s = new ScoreSheet();
   const cap = capabilities(data);
   const { PK } = karakas(data);
@@ -699,6 +845,12 @@ export function scoreSantan(data: CalcData, timeline?: DashaPeriod[], name?: str
       `Wo ${ord(p5.house)} house mein baitha hai, ${dignityWord(p5)}, aur uski Shadbala ` +
       `${r !== null ? r.toFixed(2) : 'available nahi'}` +
       `${r !== null ? ` (1.00 se upar mazboot mana jata hai) — yaani ${ratioWord(r)}` : ''}. ` +
+      // v2.2: when Shadbala and dignity disagree, SAY SO. The live report read
+      // "Shadbala 1.18 — yaani mazboot" and then awarded 5.3 of 12, which looks
+      // like a contradiction until you know the sign is the reason.
+      `${r !== null && r >= 1.0 && dg <= 0.4
+        ? `Dhyan dijiye — bal to mazboot hai, par rashi ke hisaab se wo ${dignityWord(p5)} mein hai, aur isi wajah se poore ank nahi mile. `
+        : ''}` +
       `Panchma bhava ko shastra mein Putra Bhava kaha gaya hai, aur uske swami ki halat ` +
       `santan yog ka pehla paimana hai.`);
   } else {
@@ -997,7 +1149,7 @@ export function scoreSantan(data: CalcData, timeline?: DashaPeriod[], name?: str
 
   const verdict = verdictFor(base.score);
   const sankhya = sankhyaRange(data, sign5, l5);
-  const windows = buildWindows(timeline, keyPlanets);
+  const windows = buildWindows(timeline, keyPlanets, birthYear);
   const upay = buildUpay(data, {
     l5,
     PK: PK?.planet ?? null,
@@ -1005,6 +1157,9 @@ export function scoreSantan(data: CalcData, timeline?: DashaPeriod[], name?: str
     pitra: pitraSignals.length > 0,
     saturnInFifth: inFifth.some((x) => x.planet === 'Saturn'),
     combustL5: comb.yes,
+    // v2.2 Option 1: the substitute falls to the Saptamsa lagna lord when the
+    // 5th house is empty, so buildUpay needs to know it.
+    d7LagnaLord: data.saptamsa?.lagna?.sign_lord ?? null,
   });
 
   return {
