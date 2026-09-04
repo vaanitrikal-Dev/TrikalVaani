@@ -22,6 +22,11 @@ type IndexPage = {
   category: string
   page_type: string
   priority: number
+  /* Path A bilingual pairing (added 4 Sep 2026). Slug of this page's Hindi twin,
+     which is a separate lang='hi' row in blog_posts rendering at
+     /blog/<hindi_slug>. NULL for the ~75 /learn pages that have no Hindi
+     version yet — those cards simply render without the Hindi link. */
+  hindi_slug: string | null
 }
 
 const CATEGORY_CONFIG = {
@@ -59,7 +64,7 @@ async function fetchIndexPages(): Promise<IndexPage[]> {
   )
   const { data } = await supabase
     .from('seo_pillar_pages')
-    .select('slug, title_en, meta_description, cluster, category, page_type, priority')
+    .select('slug, title_en, meta_description, cluster, category, page_type, priority, hindi_slug')
     .eq('published', true)
     .order('priority', { ascending: false })
     .order('title_en')
@@ -169,6 +174,19 @@ export default async function LearnIndexPage() {
           font-weight: 700; color: #C9B48A;
         }
         .learn-cluster-links a.is-pillar:hover { color: #C8902D; }
+        /* Hindi twin link (Path A pairing, added 4 Sep 2026). Sits under the
+           English title, deliberately smaller and dimmer so it reads as a
+           secondary option rather than competing with the main link. */
+        .learn-cluster-links a.hi-link {
+          display: inline-block;
+          font-size: 0.74rem;
+          color: #8A6A2F;
+          padding: 0 0 0.2rem;
+          font-family: 'Noto Sans Devanagari', 'Nirmala UI', system-ui, sans-serif;
+        }
+        .learn-cluster-links a.hi-link:hover {
+          color: #C8902D; text-decoration: underline;
+        }
         .learn-view-all {
           display: inline-block; margin-top: 0.6rem;
           font-size: 0.76rem; color: #C8902D; text-decoration: none;
@@ -263,6 +281,11 @@ export default async function LearnIndexPage() {
                               <Link href={`/learn/${pillar.slug}`} className="is-pillar">
                                 ★ {pillar.title_en.split(' — ')[0]}
                               </Link>
+                              {pillar.hindi_slug && (
+                                <Link href={`/blog/${pillar.hindi_slug}`} className="hi-link" hrefLang="hi">
+                                  हिंदी में पढ़ें →
+                                </Link>
+                              )}
                             </li>
                           )}
                           {others.map(p => (
@@ -270,6 +293,11 @@ export default async function LearnIndexPage() {
                               <Link href={`/learn/${p.slug}`}>
                                 {p.title_en.split(' — ')[0]}
                               </Link>
+                              {p.hindi_slug && (
+                                <Link href={`/blog/${p.hindi_slug}`} className="hi-link" hrefLang="hi">
+                                  हिंदी में पढ़ें →
+                                </Link>
+                              )}
                             </li>
                           ))}
                         </ul>
