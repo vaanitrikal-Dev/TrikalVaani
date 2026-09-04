@@ -9,6 +9,10 @@
  * ⚠️ STRICT CEO ORDER: DO NOT EDIT WITHOUT CEO APPROVAL
  *
  * v1.2 CHANGES (May 10, 2026):
+ *   - MIGRATED 3 Sep 2026: gemini-2.5-flash -> gemini-3.7-flash.
+ *     2.5-flash and 2.5-pro SHUT DOWN ON 16 OCTOBER 2026.
+ *     maxOutputTokens stays 6000: already generous, and 3.x needs the room
+ *     because its reasoning is charged to the same budget as the text.
  *   - FIXED: maxOutputTokens 250 → 800
  *   - REASON: Hindi script = 2-4 tokens/word, 250 only gave 40-60 words
  *   - RESULT: Full 90-120 word Hinglish prediction = ~45-60 sec audio
@@ -23,7 +27,7 @@ export const maxDuration = 30;
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const GEMINI_URL =
-  'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
+  'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.7-flash:generateContent';
 
 type FlexibleBody = {
   transcription?: string;
