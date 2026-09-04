@@ -44,7 +44,12 @@ const VM_MUHURAT_PDF_ENDPOINT =
   process.env.VM_MUHURAT_PDF_ENDPOINT ?? 'http://34.47.182.227:8001/muhurat-pdf';
 
 // Generation config (CEO LOCKED)
-const GEMINI_MODEL   = 'gemini-2.5-pro';
+// MIGRATED 3 Sep 2026 — gemini-2.5-flash and gemini-2.5-pro SHUT DOWN ON
+// 16 OCTOBER 2026. Mapping approved by Rohiit: 2.5-flash -> 3.7-flash,
+// 2.5-pro -> 3.8-flash. On the independent Artificial Analysis index
+// 3.8 Flash scores 59 and 3.7 Flash 56, against Gemini 3.1 Pro's
+// upper-40s — an upgrade in capability, and cheaper than 2.5-pro was.
+const GEMINI_MODEL   = 'gemini-3.8-flash';
 const GEMINI_MAX_TOK = 12000;            // MAX_TOKENS CEO locked
 const WORD_TARGET    = 600;              // child-life prediction
 
