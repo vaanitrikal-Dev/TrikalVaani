@@ -27,7 +27,15 @@ import { callVM }                   from '@/lib/callVM';
 const VM_KUNDALI_ENDPOINT =
   process.env.VM_KUNDALI_ENDPOINT ?? 'http://34.47.182.227:8001/kundali';
 
-const GEMINI_MODEL   = 'gemini-2.5-pro';
+// MIGRATED 3 Sep 2026 — gemini-2.5-flash and gemini-2.5-pro SHUT DOWN ON
+// 16 OCTOBER 2026. Mapping approved by Rohiit: 2.5-flash -> 3.7-flash,
+// 2.5-pro -> 3.8-flash. On the independent Artificial Analysis index
+// 3.8 Flash scores 59 and 3.7 Flash 56, against Gemini 3.1 Pro's
+// upper-40s — an upgrade in capability, and cheaper than 2.5-pro was.
+// This is the Rs 251 Karmic reading, the deepest product on the site. It
+// was on 2.5-pro, so 3.8-flash is the mapping — and on every published
+// benchmark it is the stronger model, not a downgrade to save money.
+const GEMINI_MODEL   = 'gemini-3.8-flash';
 const GEMINI_MAX_TOK = 12000;
 const WORD_TARGET    = 1000;   // v1.1: was 1600, cut to ~90s generation
 
