@@ -288,19 +288,27 @@ ${OUTPUT_CONTRACT}
 // ============================================================================
 
 export const GEMINI_CONFIG = {
+  // MIGRATED 3 Sep 2026 — gemini-2.5-pro and gemini-2.5-flash SHUT DOWN ON
+  // 16 OCTOBER 2026. Mapping approved by Rohiit: 2.5-pro -> 3.8-flash,
+  // 2.5-flash -> 3.7-flash. On the independent Artificial Analysis index
+  // 3.8 Flash scores 59 and 3.7 Flash 56, against Gemini 3.1 Pro's upper-40s
+  // — so this is an upgrade in capability as well as a forced move, and it
+  // costs less than 2.5-pro did.
+  // maxOutputTokens stays 12000 everywhere: 3.x charges its reasoning to the
+  // same budget, so the headroom matters more now, not less.
   hub: {
-    model: "gemini-2.5-pro",
+    model: "gemini-3.8-flash",
     maxOutputTokens: 12000, // CEO-locked. NEVER reduce.
     temperature: 0.7,
-    // thinkingBudget OMITTED — Pro uses default reasoning. NEVER set to 0.
+    // thinkingBudget OMITTED — 3.x uses default reasoning. NEVER set to 0.
   },
   city: {
-    model: "gemini-2.5-flash",
+    model: "gemini-3.7-flash",
     maxOutputTokens: 12000,
     temperature: 0.65,
   },
   festival: {
-    model: "gemini-2.5-flash",
+    model: "gemini-3.7-flash",
     maxOutputTokens: 12000,
     temperature: 0.7,
   },
