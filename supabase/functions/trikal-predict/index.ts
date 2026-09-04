@@ -1,3 +1,35 @@
+/**
+ * ============================================================================
+ * ⚰️  DEAD CODE — NOT IN USE. DO NOT MIGRATE, DO NOT "FIX".
+ * ============================================================================
+ * Marked dead on 3 September 2026 by Rohiit Gupta's decision.
+ *
+ * WHAT THIS IS
+ *   A Supabase Edge Function carrying the Jini prediction prompts
+ *   (JINI_IDENTITY is defined below). Jini was retired.
+ *
+ * WHY IT IS DEAD
+ *  *   - IT IS NOT DEPLOYED. Checked against the live Supabase project
+ *     zrseiwomfbtrbnwftkne on 3 Sep 2026: the only ACTIVE edge functions are
+ *     pro-polish, pro-polish-v2 and indexnow-ping. This one is not among them.
+ *   - Nothing in the repo invokes it — there is no supabase.functions.invoke
+ *     call and no /functions/v1/ fetch anywhere.
+ *   - It calls gemini-1.5-pro, which Google shut down long ago. Even if it
+ *     were deployed and were being called, it would fail.
+ *   Three independent reasons it cannot run. It is not a migration gap.
+ *
+ * KEPT ON PURPOSE, NOT DELETED. Rohiit chose to keep the file rather than
+ * remove it. Deleting it gains nothing and risks breaking something nobody
+ * remembers, so it stays — labelled, so that the next person (or the next AI)
+ * does not spend an afternoon migrating code that never runs.
+ *
+ * ⚠️  IF YOU ARE SCANNING FOR OLD GEMINI MODELS: this file contains one, and
+ *     that is FINE. It is not called. Skip it. The live app was fully migrated
+ *     to Gemini 3.7 / 3.8 Flash on 3 September 2026.
+ *
+ * ============================================================================
+ */
+
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 
 const corsHeaders = {
