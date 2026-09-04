@@ -25,7 +25,7 @@ export const maxDuration = 20;
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const GEMINI_URL =
-  'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
+  'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.7-flash:generateContent';
 
 type ParseBody = {
   transcript?: string;
@@ -87,7 +87,11 @@ Return ONLY the JSON object: {"name": "", "dob": "", "tob": "", "pob": ""}`;
         contents: [{ role: 'user', parts: [{ text: userMessage }] }],
         generationConfig: {
           temperature    : 0.1,          // low — deterministic extraction
-          maxOutputTokens: 2000,
+          // 2000 -> 4096 on the 3.x migration (3 Sep 2026). This call returns
+          // a tiny JSON object, so the text needs almost nothing — but 3.x
+          // spends output budget on reasoning first, and a truncated JSON
+          // fails to parse and silently loses the user's birth details.
+          maxOutputTokens: 4096,
           topP           : 0.8,
           responseMimeType: 'application/json',
         },
