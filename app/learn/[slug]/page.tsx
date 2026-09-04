@@ -62,7 +62,16 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
   const canonical = `https://trikalvaani.com/learn/${page.slug}${isHindiView ? '?lang=hi' : ''}`
 
   return {
-    title: `${displayTitle} | Trikaal Vaani`,
+    // FIX (Sep 2026): was `title: \`${displayTitle} | Trikaal Vaani\``, a plain
+    // string. A plain string is passed through the ROOT layout's title template
+    // (app/layout.tsx -> title.template = "%s | Trikaal Vaani"), so every single
+    // /learn/ page was shipping a DOUBLE brand suffix in <title>, e.g.
+    //   "Inheritance Wealth Prediction ... | Trikaal Vaani | Trikaal Vaani"
+    // That is 32 wasted characters on every page and pushed real titles past
+    // Google's ~60-char display limit — a direct cause of high-impression /
+    // zero-click behaviour on /learn/ pages. `{ absolute: ... }` bypasses the
+    // template, which is the same pattern app/blog/[slug]/page.tsx already uses.
+    title: { absolute: `${displayTitle} | Trikaal Vaani` },
     description: page.meta_description,
     keywords: [page.primary_keyword, ...page.secondary_keywords, ...page.lsi_keywords].join(', '),
     authors: [{ name: page.eeat_author, url: 'https://trikalvaani.com/about' }],
