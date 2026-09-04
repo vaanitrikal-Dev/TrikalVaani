@@ -132,8 +132,38 @@ async function callGemini(apiKey: string, model: string, prompt: string, maxToke
   return { text: r.response.text(), tokensIn: r.response.usageMetadata?.promptTokenCount, tokensOut: r.response.usageMetadata?.candidatesTokenCount };
 }
 
-function costPaise(model: string, i = 0, o = 0): number {
-  return model === "gemini-2.5-pro" ? Math.ceil(i * 0.105 + o * 0.42) : Math.ceil(i * 0.025 + o * 0.1);
+/**
+ * Cost of one generation, in paise.
+ *
+ * REWRITTEN 3 Sep 2026 during the Gemini 3.x migration, for two reasons.
+ *
+ * 1. IT WOULD HAVE BROKEN SILENTLY. The old version branched on
+ *    `model === "gemini-2.5-pro"`. After the migration that string never
+ *    matches, so every run — including the Pro-tier hub page — would have
+ *    fallen through to the cheap branch and logged a wrong number into
+ *    panchang_daily.cost_inr_paise. No error, just quietly false accounting.
+ *    There is no branch now: 3.7 Flash and 3.8 Flash are priced identically
+ *    by Google, so there is nothing to branch on.
+ *
+ * 2. THE OLD RATES WERE ROUGHLY 10x TOO HIGH. 0.025 paise per input token is
+ *    Rs 250 per million; gemini-2.5-flash actually cost about USD 0.30 per
+ *    million, near Rs 25. So every cost figure this cron has ever written to
+ *    the database has overstated spend by about an order of magnitude.
+ *
+ * Current rates (Google introductory pricing, both 3.7 and 3.8 Flash):
+ *   input  USD 0.75 per 1M tokens  -> Rs 75/M   -> 0.0075 paise per token
+ *   output USD 3.75 per 1M tokens  -> Rs 375/M  -> 0.0375 paise per token
+ * at Rs 100 = USD 1.
+ *
+ * NOTE FOR 1 JANUARY 2027: the introductory pricing ends and Google's
+ * standard rate of USD 1.50 / USD 7.50 applies — exactly double. Multiply
+ * both constants by two on that date, or this function starts understating.
+ */
+const PAISE_PER_INPUT_TOKEN = 0.0075;
+const PAISE_PER_OUTPUT_TOKEN = 0.0375;
+
+function costPaise(_model: string, i = 0, o = 0): number {
+  return Math.ceil(i * PAISE_PER_INPUT_TOKEN + o * PAISE_PER_OUTPUT_TOKEN);
 }
 
 function adminSupa() {
