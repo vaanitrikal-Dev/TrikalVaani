@@ -82,7 +82,7 @@ export interface PromptOutput {
   systemPrompt: string;
   userMessage:  string;
   useSearch:    boolean;
-  model:        string;   // 'gemini-2.5-flash' | 'gemini-2.5-pro'
+  model:        string;   // 'gemini-3.7-flash' (free) | 'gemini-3.8-flash' (paid)
 }
 
 // ─── SEO/GEO DOMAIN KEYWORDS — PRO SEO ARCHITECT ─────────────────────────────
@@ -249,7 +249,12 @@ export function buildPredictionPrompt(
   const period  = getCurrentPeriod();
   const seo     = getSEO(domain.id);
   const isPaid  = ['basic', 'pro', 'premium'].includes(userContext.tier);
-  const model   = isPaid ? 'gemini-2.5-pro' : 'gemini-2.5-flash';
+  // MIGRATED 3 Sep 2026 — gemini-2.5-flash and gemini-2.5-pro SHUT DOWN ON
+  // 16 OCTOBER 2026. Mapping approved by Rohiit: 2.5-flash -> 3.7-flash,
+  // 2.5-pro -> 3.8-flash. On the independent Artificial Analysis index
+  // 3.8 Flash scores 59 and 3.7 Flash 56, against Gemini 3.1 Pro's
+  // upper-40s — an upgrade in capability, and cheaper than 2.5-pro was.
+  const model   = isPaid ? 'gemini-3.8-flash' : 'gemini-3.7-flash';
 
   // Build the lean input context — only what Gemini needs
   const clientContext = buildClientContext(
