@@ -198,13 +198,20 @@ Return ONLY this JSON (no fences, no preamble):
 export const FESTIVAL_GEMINI_CONFIG = {
   // Festival content: Flash is enough; LOW temperature for factual consistency
   content: {
-    model: "gemini-2.5-flash",
+    // MIGRATED 3 Sep 2026 — 2.5-flash SHUTS DOWN 16 OCTOBER 2026.
+    // Put on 3.8-flash rather than 3.7, unlike the rest of the migration, and
+    // deliberately: these festival pages are a CONTENT product, not a helper
+    // call, and Rohiit has been writing them by hand on Gemini 3.1 Pro because
+    // the automated ones were not good enough. 3.8 Flash scores 59 on the
+    // Artificial Analysis index against 3.1 Pro's upper-40s, at a third of the
+    // price. Worth comparing the two on one real festival before trusting it.
+    model: "gemini-3.8-flash",
     maxOutputTokens: 12000, // CEO-locked. NEVER reduce.
     temperature: 0.45, // low → factual, less fluff. (Old festival prompt used 0.7.)
   },
   // Regional customs: Flash + google_search grounding (route adds the tool)
   regional: {
-    model: "gemini-2.5-flash",
+    model: "gemini-3.8-flash",
     maxOutputTokens: 12000,
     temperature: 0.5,
   },
