@@ -28,8 +28,12 @@ const GEMINI_KEY =
 
 const genAI = new GoogleGenerativeAI(GEMINI_KEY);
 
-const FLASH = 'gemini-2.5-flash';
-const PRO = 'gemini-2.5-pro';
+// MIGRATED 3 Sep 2026 — gemini-2.5-flash and gemini-2.5-pro SHUT DOWN ON
+// 16 OCTOBER 2026. Mapping approved by Rohiit: flash -> 3.7, pro -> 3.8.
+// The constant names are kept so nothing downstream has to change; only the
+// model strings moved.
+const FLASH = 'gemini-3.7-flash';
+const PRO = 'gemini-3.8-flash';
 
 function cleanJson(s: string): string {
   let t = s.replace(/```json/gi, '').replace(/```/g, '').trim();
@@ -79,8 +83,12 @@ Return exactly:
 export async function runExtraction(dreamText: string): Promise<DreamExtraction> {
   const model = genAI.getGenerativeModel({
     model: FLASH,
-    // 2000 = headroom for Gemini 2.5 internal thinking + the ~200-token JSON.
-    generationConfig: { temperature: 0, responseMimeType: 'application/json', maxOutputTokens: 2000 },
+    // 2000 -> 4096 on the 3.x migration. The visible JSON is still ~200
+    // tokens; 3.x simply reasons more before writing it, and that reasoning
+    // is charged to this same budget. A starved budget returns EMPTY text,
+    // not an error — see the note on the sub-type call below, which has
+    // already been bitten by exactly this once.
+    generationConfig: { temperature: 0, responseMimeType: 'application/json', maxOutputTokens: 4096 },
   });
   try {
     const res = await model.generateContent(`${EXTRACTION_PROMPT}\n\nDREAM:\n"${dreamText}"`);
@@ -115,11 +123,13 @@ export function makeSubTypePicker(): SubTypePicker {
       `Candidates:\n${list}\n\nOutput only the id number.`;
     const model = genAI.getGenerativeModel({
       model: FLASH,
-      // NOTE: Gemini 2.5 spends internal "thinking" from this same budget.
+      // NOTE: Gemini spends internal "thinking" from this same budget.
       // A tiny cap (was 10) returned EMPTY text → silent fallback to the first
-      // candidate row (wrong sub-types). 1024 gives thinking headroom; the
-      // visible output is still just one id number.
-      generationConfig: { temperature: 0, maxOutputTokens: 1024 },
+      // candidate row (wrong sub-types). The visible output is still just one
+      // id number, but 3.x reasons more than 2.5 did, so 1024 -> 4096 on the
+      // migration. This is the one call in this file that has ALREADY failed
+      // this way; do not tighten it again.
+      generationConfig: { temperature: 0, maxOutputTokens: 4096 },
     });
     try {
       const res = await model.generateContent(prompt);
@@ -148,13 +158,16 @@ export function makeComposer(tier: 'free' | 'paid') {
     const model = genAI.getGenerativeModel({
       model: modelName,
       // Mirrors the proven runExtraction config EXACTLY — json-mode on, generous
-      // token budget so Gemini 2.5's internal thinking never starves the output.
+      // token budget so the model's internal thinking never starves the output.
       // NO thinkingConfig: that field crashed the 0.24 SDK ("r is not a function")
-      // and forced every free reading back to the raw table line.
+      // and forced every free reading back to the raw table line. Still true on
+      // 3.x — do not add thinkingLevel here without testing the SDK version.
       generationConfig: {
         temperature: 0.4,
         responseMimeType: 'application/json',
-        maxOutputTokens: tier === 'paid' ? 8192 : 4000,
+        // Free was 4000, just under the 4096 floor the rest of this migration
+        // uses. Raised so the free tier cannot be the one that truncates.
+        maxOutputTokens: tier === 'paid' ? 8192 : 4096,
       },
     });
     const res = await model.generateContent(prompt);
