@@ -1,4 +1,36 @@
 /**
+ * ============================================================================
+ * ⚰️  DEAD CODE — NOT IN USE. DO NOT MIGRATE, DO NOT "FIX".
+ * ============================================================================
+ * Marked dead on 3 September 2026 by Rohiit Gupta's decision.
+ *
+ * WHAT THIS IS
+ *   The Jini chat API. Jini was retired as a product.
+ *
+ * WHY IT IS DEAD
+ *  *   - Its only caller is components/Trikal/TrikalChat.tsx, which is dead and
+ *     is not imported anywhere.
+ *   - Still on gemini-2.5-flash. Two of its calls budget 280 and 300 output
+ *     tokens; on Gemini 3.x, reasoning is charged to that same budget, so
+ *     those calls would return empty or truncated text. That alone is why it
+ *     was left out of the migration: fixing it properly would mean re-tuning
+ *     a product that no longer exists.
+ *   - app/api/chat/route.ts re-exports POST from here, so the two live or die
+ *     together.
+ *
+ * KEPT ON PURPOSE, NOT DELETED. Rohiit chose to keep the file rather than
+ * remove it. Deleting it gains nothing and risks breaking something nobody
+ * remembers, so it stays — labelled, so that the next person (or the next AI)
+ * does not spend an afternoon migrating code that never runs.
+ *
+ * ⚠️  IF YOU ARE SCANNING FOR OLD GEMINI MODELS: this file contains one, and
+ *     that is FINE. It is not called. Skip it. The live app was fully migrated
+ *     to Gemini 3.7 / 3.8 Flash on 3 September 2026.
+ *
+ * ============================================================================
+ */
+
+/**
  * ============================================================
  * TRIKAL VAANI — TRIKAL CHAT API
  * CEO & Chief Vedic Architect: Rohiit Gupta
