@@ -3,7 +3,46 @@ import { createClient } from '@supabase/supabase-js'
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseKey = process.env.SUPABASE_SERVICE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
-const supabase = createClient(supabaseUrl, supabaseKey)
+/* ────────────────────────────────────────────────────────────────────────────
+   FIX (4 Sep 2026) — "I edited Supabase but the /learn page still shows the
+   old text."
+
+   THE BUG
+   supabase-js issues its PostgREST queries with the global `fetch`. Inside the
+   Next.js App Router that `fetch` is patched, and an un-annotated GET is stored
+   in the Next.js / Vercel **Data Cache**. Two things then bite:
+
+     1. The cached entry inherits the route's `export const revalidate`, which on
+        app/learn/[slug]/page.tsx is 86400 — so a Supabase content edit could
+        stay invisible for a full 24 hours.
+     2. The Vercel Data Cache SURVIVES A NEW DEPLOYMENT. Pushing a commit does
+        NOT clear it, so "just redeploy" did not fix it either. Confirmed live
+        on 4 Sep 2026: /learn (index) showed the new title while
+        /learn/inheritance-wealth-prediction still served the old title AND the
+        old body, from the same database row.
+
+   THE FIX
+   Give the Supabase client its own fetch that tags every query with
+   `next: { revalidate: 300 }`. Content edits now go live within ~5 minutes with
+   no deploy and no cache purge. 300s matches app/blog/page.tsx, which already
+   uses `export const revalidate = 300`.
+
+   WHY NOT `cache: 'no-store'`
+   That would hit Supabase on every single request for all 90+ /learn/ pages.
+   A 5-minute window costs at most one query per 5 minutes per distinct query
+   and keeps the route cacheable.
+
+   NOTE: this only covers seo_pillar_pages (/learn/). The blog_posts data layer
+   used by /blog/[slug] has the same pattern and the same 86400 route
+   revalidate, so it will need the same treatment — NOT changed here, to keep
+   this commit to one file.
+   ──────────────────────────────────────────────────────────────────────────── */
+const supabase = createClient(supabaseUrl, supabaseKey, {
+  global: {
+    fetch: (input: any, init?: any) =>
+      fetch(input, { ...(init || {}), next: { revalidate: 300 } } as any),
+  },
+})
 
 // FIX (this session): added `faq_block_hi` — a new nullable jsonb column added to
 // seo_pillar_pages this session (ALTER TABLE ... ADD COLUMN faq_block_hi jsonb).
