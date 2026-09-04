@@ -75,7 +75,7 @@ export interface VoiceContext {
 export interface VoicePromptOutput {
   systemPrompt: string;
   userMessage:  string;
-  model:        string;   // Always 'gemini-2.5-flash' for voice
+  model:        string;   // Always 'gemini-3.7-flash' for voice
   maxTokens:    number;   // Small — voice script only
 }
 
@@ -229,8 +229,19 @@ export function buildVoicePrompt(ctx: VoiceContext): VoicePromptOutput {
   return {
     systemPrompt,
     userMessage,
-    model:     'gemini-2.5-flash',   // Fast + lean for voice
-    maxTokens: 400,                  // 90-120 words = ~150-200 tokens + buffer
+    // MIGRATED 3 Sep 2026: gemini-2.5-flash SHUTS DOWN 16 Oct 2026.
+    model:     'gemini-3.7-flash',
+    // 400 -> 4096. NOT a quality change — a truncation fix.
+    //
+    // Gemini 3.x REASONS BEFORE IT WRITES, and that reasoning is charged to
+    // the SAME output budget. The spoken text still needs only ~200 tokens;
+    // the thinking needs room beside it. At 400 the reasoning would consume
+    // the entire budget and the voice reading would come back EMPTY or cut
+    // off mid-word — with no error, because the API returns 200 either way.
+    //
+    // This exact failure shipped once already: the Santan summary went live
+    // ending "...Yeh aak" because its budget was 2048. Do not lower this.
+    maxTokens: 4096,
   };
 }
 
