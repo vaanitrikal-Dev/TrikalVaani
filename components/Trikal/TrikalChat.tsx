@@ -1,3 +1,35 @@
+/**
+ * ============================================================================
+ * ⚰️  DEAD CODE — NOT IN USE. DO NOT MIGRATE, DO NOT "FIX".
+ * ============================================================================
+ * Marked dead on 3 September 2026 by Rohiit Gupta's decision.
+ *
+ * WHAT THIS IS
+ *   The Jini chat UI. Jini was retired as a product; Rohiit confirmed on
+ *   3 Sep 2026: "don't work on Jini, its my dead product".
+ *
+ * WHY IT IS DEAD
+ *  *   - Nothing imports this component. Verified by scanning app/, components/
+ *     and lib/ across the whole repo on 3 Sep 2026: zero references.
+ *   - It is the only caller of /api/Trikal-chat, which is itself dead.
+ *
+ * KEPT ON PURPOSE, NOT DELETED. Rohiit chose to keep the file rather than
+ * remove it. Deleting it gains nothing and risks breaking something nobody
+ * remembers, so it stays — labelled, so that the next person (or the next AI)
+ * does not spend an afternoon migrating code that never runs.
+ *
+ * ⚠️  IF YOU ARE SCANNING FOR OLD GEMINI MODELS: this file contains one, and
+ *     that is FINE. It is not called. Skip it. The live app was fully migrated
+ *     to Gemini 3.7 / 3.8 Flash on 3 September 2026.
+ *
+ * ⚠️  DO NOT DELETE THE FOLDER components/Trikal/ — it also contains
+ *     TrikalVoice.tsx, which IS LIVE. It is mounted in app/layout.tsx on every
+ *     page as the floating mic, and it drives the ₹11 voice product through
+ *     /api/voice-predict, /api/voice-tts and /api/voice-parse-details.
+ *     Deleting that folder would take down the whole site.
+ * ============================================================================
+ */
+
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
