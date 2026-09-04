@@ -86,6 +86,13 @@ export type SeoPage = {
   published: boolean
   priority: number
   created_at: string
+  /* Path A bilingual pairing (column added 4 Sep 2026). Slug of this English
+     page's Hindi twin, which is a separate lang='hi' row in blog_posts and
+     renders at /blog/<hindi_slug>. NULL when no Hindi version exists yet.
+     This is what drives the "हिंदी में पढ़ें" link on /learn and /learn/[slug];
+     the older title_hi / body_content_hi + ?lang=hi mechanism is legacy and is
+     left NULL under Path A. */
+  hindi_slug: string | null
 }
 
 /** Fetch a single published page by slug */
