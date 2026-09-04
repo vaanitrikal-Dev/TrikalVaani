@@ -191,8 +191,29 @@ export default async function SeoLearnPage({ params, searchParams }: Props) {
         />
       ))}
 
-      {/* Lang toggle — only rendered when the row actually has a Hindi version */}
-      {hasHindiVersion && (
+      {/* ── Hindi link ──────────────────────────────────────────────────────
+          FIX (4 Sep 2026): this block used to be driven by
+          `hasHindiVersion = !!title_hi && !!body_content_hi`, i.e. the legacy
+          `?lang=hi` query-param mechanism. Under the Path A bilingual pattern
+          this site actually uses, Hindi lives as a fully separate lang='hi'
+          row in blog_posts with its own indexable /blog/<slug> URL, and
+          body_content_hi is left NULL — so this toggle was dead on every Path A
+          page and readers had no way in from /learn.
+
+          It now prefers the real Hindi URL via the new `hindi_slug` column, and
+          only falls back to the legacy ?lang=hi toggle on older rows that
+          genuinely have body_content_hi filled in. */}
+      {page.hindi_slug ? (
+        <div style={{ maxWidth: '900px', margin: '12px auto 0', padding: '0 16px', textAlign: 'right' }}>
+          <Link
+            href={`/blog/${page.hindi_slug}`}
+            hrefLang="hi"
+            style={{ fontSize: '14px', color: '#A08050', textDecoration: 'underline' }}
+          >
+            हिंदी में पढ़ें →
+          </Link>
+        </div>
+      ) : hasHindiVersion ? (
         <div style={{ maxWidth: '900px', margin: '12px auto 0', padding: '0 16px', textAlign: 'right' }}>
           <Link
             href={isHindiView ? `/learn/${page.slug}` : `/learn/${page.slug}?lang=hi`}
@@ -201,7 +222,7 @@ export default async function SeoLearnPage({ params, searchParams }: Props) {
             {isHindiView ? 'Read in English →' : 'हिंदी में पढ़ें →'}
           </Link>
         </div>
-      )}
+      ) : null}
 
       <SeoPageLayout
         page={displayPage}
