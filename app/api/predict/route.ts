@@ -219,8 +219,16 @@ import type { UserTier, UserContext }   from '@/lib/gemini-prompt'
 export const maxDuration = 300
 
 // ── Config ────────────────────────────────────────────────────────────────────
-const GEMINI_FLASH    = 'gemini-2.5-flash'
-const GEMINI_PRO      = 'gemini-2.5-pro'
+// MIGRATED 3 Sep 2026 — gemini-2.5-flash and gemini-2.5-pro SHUT DOWN ON
+// 16 OCTOBER 2026. Mapping approved by Rohiit: 2.5-flash -> 3.7-flash,
+// 2.5-pro -> 3.8-flash. On the independent Artificial Analysis index
+// 3.8 Flash scores 59 and 3.7 Flash 56, against Gemini 3.1 Pro's
+// upper-40s — an upgrade in capability, and cheaper than 2.5-pro was.
+// MAX_TOKENS stays 24000 — already the most generous budget in the repo,
+// and 3.x needs it more than 2.5 did because its reasoning is charged to
+// the same budget as the visible JSON.
+const GEMINI_FLASH    = 'gemini-3.7-flash'
+const GEMINI_PRO      = 'gemini-3.8-flash'
 const GEMINI_BASE_URL = 'https://generativelanguage.googleapis.com/v1beta/models'
 const GEMINI_API_KEY  = process.env.GEMINI_API_KEY  ?? ''
 // v14.14: VM URL/key now mirror lib/callVM.ts. Hardcoded fallback so a missing
