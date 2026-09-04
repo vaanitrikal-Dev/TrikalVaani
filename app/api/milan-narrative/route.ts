@@ -43,10 +43,19 @@ interface TierConfig {
 }
 
 const TIER_CONFIG: Record<Tier, TierConfig> = {
-  basic_51:        { model: 'gemini-2.5-flash', maxTokens: 4000,  wordTarget: 400,  usePolish: true },
-  deep_101_couple: { model: 'gemini-2.5-pro',   maxTokens: 8000,  wordTarget: 1000, usePolish: true },
-  deep_101_parent: { model: 'gemini-2.5-pro',   maxTokens: 8000,  wordTarget: 1000, usePolish: true },
-  both_151:        { model: 'gemini-2.5-pro',   maxTokens: 12000, wordTarget: 1500, usePolish: true },
+  // MIGRATED 3 Sep 2026 — gemini-2.5-flash and gemini-2.5-pro SHUT DOWN ON
+  // 16 OCTOBER 2026. Mapping approved by Rohiit: 2.5-flash -> 3.7-flash,
+  // 2.5-pro -> 3.8-flash. On the independent Artificial Analysis index
+  // 3.8 Flash scores 59 and 3.7 Flash 56, against Gemini 3.1 Pro's
+  // upper-40s — an upgrade in capability, and cheaper than 2.5-pro was.
+  // basic_51 also goes 4000 -> 6000 tokens. It targets 400 words, roughly
+  // 700 tokens of visible text, and the rest was headroom for 2.5's thinking.
+  // 3.x reasons more and is measurably more verbose, so the old headroom is
+  // no longer headroom. Every other tier here was already well clear.
+  basic_51:        { model: 'gemini-3.7-flash', maxTokens: 6000,  wordTarget: 400,  usePolish: true },
+  deep_101_couple: { model: 'gemini-3.8-flash', maxTokens: 8000,  wordTarget: 1000, usePolish: true },
+  deep_101_parent: { model: 'gemini-3.8-flash', maxTokens: 8000,  wordTarget: 1000, usePolish: true },
+  both_151:        { model: 'gemini-3.8-flash', maxTokens: 12000, wordTarget: 1500, usePolish: true },
 };
 
 // ── Valid language whitelist (defensive) ─────────────────────
