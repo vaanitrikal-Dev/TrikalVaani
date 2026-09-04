@@ -4,50 +4,59 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseKey = process.env.SUPABASE_SERVICE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
 /* ────────────────────────────────────────────────────────────────────────────
-   FIX (4 Sep 2026) — "I edited Supabase but the /learn page still shows the
+   FIX v2 (4 Sep 2026) — "I edited Supabase but /learn/<slug> still shows the
    old text."
 
    THE BUG
-   supabase-js issues its PostgREST queries with the global `fetch`. Inside the
-   Next.js App Router that `fetch` is patched, and an un-annotated GET is stored
-   in the Next.js / Vercel **Data Cache**. Two things then bite:
+   supabase-js issues PostgREST queries through the global `fetch`. Inside the
+   Next.js App Router that fetch is patched, and an un-annotated GET is stored
+   in the Next.js / Vercel Data Cache. The stored entry inherits the route's
+   `export const revalidate` — 86400 on app/learn/[slug]/page.tsx — and the
+   Vercel Data Cache SURVIVES A NEW DEPLOYMENT. So a Supabase content edit
+   could stay invisible for 24 hours and redeploying did not clear it.
 
-     1. The cached entry inherits the route's `export const revalidate`, which on
-        app/learn/[slug]/page.tsx is 86400 — so a Supabase content edit could
-        stay invisible for a full 24 hours.
-     2. The Vercel Data Cache SURVIVES A NEW DEPLOYMENT. Pushing a commit does
-        NOT clear it, so "just redeploy" did not fix it either. Confirmed live
-        on 4 Sep 2026: /learn (index) showed the new title while
-        /learn/inheritance-wealth-prediction still served the old title AND the
-        old body, from the same database row.
+   WHY v1 OF THIS FIX DID NOT WORK
+   v1 passed `next: { revalidate: 300 }`. That only sets the TTL on entries
+   written AFTER the change. It does not evict the entry already sitting there
+   with an 86400 TTL, and it does not alter the cache key, so the stale entry
+   kept winning. Confirmed live: /learn/inheritance-wealth-prediction still
+   served the old 1,157-word body and "7 min read" after that deploy went READY.
 
-   THE FIX
-   Give the Supabase client its own fetch that tags every query with
-   `next: { revalidate: 300 }`. Content edits now go live within ~5 minutes with
-   no deploy and no cache purge. 300s matches app/blog/page.tsx, which already
-   uses `export const revalidate = 300`.
+   THE ACTUAL FIX
+   `cache: 'no-store'` on the Supabase client's fetch. The Data Cache is
+   bypassed outright, so there is no stale entry to evict and no TTL to wait
+   out. Supabase content edits are live on the next request.
 
-   WHY NOT `cache: 'no-store'`
-   That would hit Supabase on every single request for all 90+ /learn/ pages.
-   A 5-minute window costs at most one query per 5 minutes per distinct query
-   and keeps the route cacheable.
+   WHY THIS IS AFFORDABLE HERE
+   app/learn/[slug]/page.tsx already reads `searchParams`, so that route is
+   rendered per request regardless — this changes where the data comes from,
+   not how often the page renders. These are small indexed single-row lookups.
+   React's `cache()` would de-duplicate the repeated getSeoPageBySlug calls
+   (it is called three times per render: once in generateMetadata and twice in
+   the page's Promise.all), but this repo pins react 18.2.0 and `cache` is not
+   available there — adding it would crash the route at runtime. Leave the
+   functions plain. If query volume ever matters, first de-duplicate the two
+   getSeoPageBySlug calls inside app/learn/[slug]/page.tsx's Promise.all.
 
-   NOTE: this only covers seo_pillar_pages (/learn/). The blog_posts data layer
-   used by /blog/[slug] has the same pattern and the same 86400 route
-   revalidate, so it will need the same treatment — NOT changed here, to keep
-   this commit to one file.
+   IF DATABASE LOAD EVER BECOMES A CONCERN
+   Do not go back to a bare revalidate. Use `next: { tags: ['seo-pages'] }`
+   here plus a revalidateTag() route hit after each Supabase write — that keeps
+   caching AND stays correct.
+
+   NOTE: /blog/[slug] reads blog_posts through its own data layer with the same
+   un-annotated pattern and the same 86400 route revalidate. It has the same
+   bug. NOT touched here, to keep this commit to one file.
    ──────────────────────────────────────────────────────────────────────────── */
 const supabase = createClient(supabaseUrl, supabaseKey, {
   global: {
     fetch: (input: any, init?: any) =>
-      fetch(input, { ...(init || {}), next: { revalidate: 300 } } as any),
+      fetch(input, { ...(init || {}), cache: 'no-store' } as any),
   },
 })
 
-// FIX (this session): added `faq_block_hi` — a new nullable jsonb column added to
-// seo_pillar_pages this session (ALTER TABLE ... ADD COLUMN faq_block_hi jsonb).
-// Existing rows have it as null until backfilled; app/learn/[slug]/page.tsx (also
-// updated this session) falls back to the English faq_block when it's null.
+// FIX (earlier session): added `faq_block_hi` — a nullable jsonb column on
+// seo_pillar_pages. Existing rows have it as null until backfilled;
+// app/learn/[slug]/page.tsx falls back to the English faq_block when it's null.
 export type SeoPage = {
   id: number
   slug: string
