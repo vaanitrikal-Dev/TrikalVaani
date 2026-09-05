@@ -107,7 +107,10 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   }
 
   return {
-    title, description, keywords,
+    // absolute — app/layout.tsx sets template "%s | Trikaal Vaani".
+    // buildMeta already spends the full 58-char budget, so letting the
+    // template append would push the city past Google's cut-off.
+    title: { absolute: title }, description, keywords,
     alternates: { canonical: url, languages },
     authors: [{ name: `${AUTHOR_NAME}, ${AUTHOR_TITLE}` }],
     openGraph: { title, description, url, images: [OG_IMAGE], type: "article", locale: "hi_IN" },
