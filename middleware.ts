@@ -3,7 +3,7 @@
  * 🔱 TRIKAL VAANI — CEO PROTECTION HEADER 🔱
  * ============================================================================
  * File:        middleware.ts
- * Version:     v1.1 — adds ?lang=hi → /hi/compatibility/ redirect (144 pairs)
+ * Version:     v1.2 — matcher fix: ':pair' never matched on Next 13.5.1
  * Date:        2026-09-05
  * Owner:       Rohiit Gupta, Chief Vedic Architect
  *
@@ -82,8 +82,18 @@ export function middleware(request: NextRequest) {
 // request on the site bypasses this file entirely, so there is no measurable
 // performance cost site-wide.
 //
-// '/compatibility/:pair' matches exactly one segment after /compatibility/,
-// which is every pair page and nothing deeper.
+// v1.2 (5 Sep 2026) — MATCHER FIX. v1.1 shipped '/compatibility/:pair' and the
+// redirect silently never fired: verified live after deploy, /compatibility/
+// {pair}?lang=hi still returned 200, and a deliberately non-existent pair
+// returned the page's own 404 rather than a 308 — proving middleware was not
+// being invoked on that path at all. The bare named parameter ':pair' is not
+// matched by Next 13.5.1's matcher compilation. ':path*' is the form used in
+// Next's own documentation and is what works here.
+//
+// ':path*' is broader — it also matches /compatibility/ and deeper paths like
+// /compatibility/a/b. That is deliberately harmless: the handler above rejects
+// anything containing a '/' and anything empty, so only real single-segment
+// pair pages are ever redirected.
 export const config = {
-  matcher: ['/learn/sibling-prediction-astrology', '/compatibility/:pair'],
+  matcher: ['/learn/sibling-prediction-astrology', '/compatibility/:path*'],
 };
