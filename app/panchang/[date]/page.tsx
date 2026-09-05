@@ -263,14 +263,37 @@ export async function generateMetadata(
   const human = formatHuman(date);
   const url = `${SITE_URL}/panchang/${date}`;
 
-  const title = p?.seo_title?.replace(/\s*\|\s*Trikaal Vaani\s*$/i, "")
-    ?? `Aaj Ka Panchang ${human} | Tithi, Nakshatra, Rahu Kaal`;
+  // FIX (5 Sep 2026): the Gemini-written seo_title/seo_description stored in
+  // panchang_daily carry no length enforcement anywhere upstream (see the
+  // cron job in app/api/cron/panchang-generate/route.ts) and were running
+  // 39-88 chars / 148-250 chars respectively across all 545 rows — nowhere
+  // near Google's ~58/155 cutoffs. The one-time bulk cleanup for existing
+  // rows is a separate SQL pass; THIS fallback and the two clamps below are
+  // what stop every future date from reintroducing the same bug even if the
+  // model ignores the prompt's length instruction again.
+  //
+  // `title` was also a plain string here, so — same bug as the city panchang
+  // page — the root layout's "%s | Trikaal Vaani" template was appended on
+  // top of it. `{ absolute }` bypasses that. Brand is dropped rather than
+  // kept once: "Panchang Wednesday, 25 November 2026 — Tithi, Rahu Kaal" is
+  // already 55 chars before a suffix even starts, so a full weekday date +
+  // brand cannot both fit under 60 — the date is what the searcher is
+  // actually here for.
+  const shortDate = new Date(date + "T00:00:00Z").toLocaleDateString("en-IN", {
+    day: "numeric", month: "short", year: "numeric", timeZone: "UTC",
+  });
+  const rawTitle = p?.seo_title?.replace(/\s*\|\s*Trikaal Vaani\s*$/i, "").trim();
+  const title = rawTitle && rawTitle.length <= 58
+    ? rawTitle
+    : `Panchang ${shortDate} — Tithi, Rahu Kaal`;
 
-  const description = p?.seo_description
-    ?? `Vedic Panchang for ${human}: Tithi ${p?.tithi ?? ""}, Nakshatra ${p?.nakshatra ?? ""}, Rahu Kaal ${p?.rahu_kaal ?? ""}. Swiss Ephemeris, Lahiri Ayanamsha. By Rohiit Gupta, Chief Vedic Architect.`;
+  const rawDesc = p?.seo_description?.trim();
+  const description = rawDesc && rawDesc.length >= 100 && rawDesc.length <= 155
+    ? rawDesc
+    : `Vedic Panchang for ${human}: Tithi ${p?.tithi ?? ""}, Nakshatra ${p?.nakshatra ?? ""}, Rahu Kaal ${p?.rahu_kaal ?? ""}. Swiss Ephemeris, Lahiri Ayanamsha.`;
 
   return {
-    title, description,
+    title: { absolute: title }, description,
     authors: [{ name: AUTHOR_NAME, url: `${SITE_URL}/founder` }],
     alternates: { canonical: url },
     openGraph: { title: `${title} | Trikaal Vaani`, description, url, siteName: "Trikaal Vaani", type: "article", locale: "en_IN", images: [{ url: OG_IMAGE, width: 1200, height: 630, alt: title }] },
