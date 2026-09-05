@@ -167,8 +167,15 @@ ADDITIONAL HUB-SPECIFIC RULES:
 - dos_and_donts: 4 dos, 4 donts. Tied to the specific Tithi + Nakshatra of the day.
 - remedies: 3-5 remedies SPECIFIC to today's planetary lords.
   Format: "Action — Why (planetary reason)". Example: "Light til oil diya facing south — Shani is the karaka of ${panchang.vara}".
-- meta_title: Format "Aaj Ka Panchang ${panchang.date} — [unique hook] | Trikaal Vaani"
-- meta_description: Include Tithi + Nakshatra + a benefit promise. 150-160 chars.
+- meta_title: "Panchang [short date] — [unique hook]". EXACTLY 30-40 characters
+  total, hard ceiling 40. Do NOT include "Trikaal Vaani" or any brand name —
+  the page adds none, and a 30-40 char budget has no room for one anyway.
+  Use a short date form like "5 Sep" or "5 Sep 2026", never the full weekday
+  ("Saturday, September 5, 2026") — that alone is 28+ characters before the
+  hook even starts.
+- meta_description: Include Tithi + Nakshatra + a benefit promise. EXACTLY
+  140-155 characters total, hard ceiling 155. Count characters before
+  answering — 160 has repeatedly rendered truncated in the SERP.
 - faq questions MUST include: shubh muhurat today, what to avoid today, best time for puja today, Rahu Kaal meaning today, remedies for today.
 
 ${OUTPUT_CONTRACT}
@@ -221,8 +228,13 @@ CITY-SPECIFIC RULES:
   (Delhi → Chhatarpur, Mumbai → Siddhivinayak, Hyderabad → Birla Mandir, etc. Only if genuinely relevant.)
 - dos_and_donts: 3 dos, 3 donts. Practical, actionable.
 - remedies: 3 remedies. Mention nearest sacred direction or local-context practice.
-- meta_title: "Aaj Ka Panchang ${city.name} ${panchang.date} | Trikaal Vaani"
-- meta_description: Local sunrise + tithi + benefit. 150-160 chars. Include "${city.name}".
+- meta_title: "${city.name} Panchang [short date] — [hook]". EXACTLY 30-40
+  characters total, hard ceiling 40. Do NOT include "Trikaal Vaani" or any
+  brand name. Use a short date form ("5 Sep"), never the full weekday date —
+  "${city.name}" alone can already be long, so the date and hook must stay short.
+- meta_description: Local sunrise + tithi + benefit, must include "${city.name}".
+  EXACTLY 140-155 characters total, hard ceiling 155. Count characters before
+  answering — 160 has repeatedly rendered truncated in the SERP.
 - faq MUST include 1 question about local sunrise/sunset difference.
 - KEEP TOTAL LENGTH MODERATE — Flash model, ~600-800 words total content.
 
