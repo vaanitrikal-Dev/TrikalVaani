@@ -3,20 +3,21 @@
  * 🔱 TRIKAL VAANI — CEO PROTECTION HEADER 🔱
  * ============================================================================
  * File:        next.config.js
- * Version:     v1.5 — + 1 redirect for sibling-prediction Hindi page (Sep 2026)
+ * Version:     v1.6 — reverted the v1.5 redirect, moved to middleware.ts (Sep 2026)
  * Date:        2026-09-05
  * Owner:       Rohiit Gupta, Chief Vedic Architect
  *
- * CHANGES vs v1.4:
- *   ✅ ADDED 1 new 301 redirect: /learn/sibling-prediction-astrology?lang=hi
- *      (the legacy Hindi toggle, 214 GSC impressions/90d) now permanently
- *      redirects to the new hindi_slug page at
- *      /blog/kitne-bhai-bahan-honge-kundali-se. This preserves the existing
- *      indexed URL's SEO equity while moving to the new hindi_slug pattern
- *      (seo_pillar_pages.hindi_slug -> a real blog_posts row) instead of the
- *      legacy body_content_hi / ?lang=hi mechanism. Uses Next.js `has` query
- *      matching so only the ?lang=hi variant of this one page redirects —
- *      the plain English URL is untouched.
+ * CHANGES vs v1.5:
+ *   ✅ REMOVED the /learn/sibling-prediction-astrology?lang=hi redirect
+ *      added in v1.5. next.config.js redirects() ALWAYS forward the
+ *      incoming query string to the destination (documented Next.js
+ *      behaviour, no config option to stop it) — so that redirect landed
+ *      on /blog/kitne-bhai-bahan-honge-kundali-se?lang=hi instead of the
+ *      clean URL. The page rendered fine either way (this was cosmetic
+ *      only), but the clean-URL version of this redirect now lives in a
+ *      NEW file, middleware.ts (repo root), which can build the
+ *      destination URL without carrying over ?lang=hi. Deploy middleware.ts
+ *      ALONGSIDE this file — the redirect only works with both in place.
  *   ✅ KEPT (v1.4): all 20 Hindi-slug-rename redirects (Kundali/Property/
  *      Wealth hubs), unchanged.
  *   ✅ KEPT (v1.3): the /diagrams/ 1-year immutable Cache-Control headers.
@@ -96,18 +97,9 @@ const nextConfig = {
       // Wealth Learn Hub (1 so far — more will be added as the hub is built)
       { source: '/blog/wealth-prediction-astrology-hindi', destination: '/blog/dhan-bhavishyavani-jyotish', permanent: true },
 
-      // ──────────────────────────────────────────────────────────────
-      // FAMILY HUB — hindi_slug MIGRATION (5 Sep 2026) — legacy ?lang=hi
-      // toggle -> new hindi_slug page (separate blog_posts row). Only
-      // the ?lang=hi query variant redirects; the plain /learn/ English
-      // URL is untouched.
-      // ──────────────────────────────────────────────────────────────
-      {
-        source: '/learn/sibling-prediction-astrology',
-        has: [{ type: 'query', key: 'lang', value: 'hi' }],
-        destination: '/blog/kitne-bhai-bahan-honge-kundali-se',
-        permanent: true, // 301 — old ?lang=hi (214 GSC impressions) -> new hindi_slug page
-      },
+      // NOTE (5 Sep 2026): the /learn/sibling-prediction-astrology?lang=hi ->
+      // /blog/kitne-bhai-bahan-honge-kundali-se redirect lives in middleware.ts
+      // now, NOT here — see that file's header comment for why.
     ];
   },
   // ──────────────────────────────────────────────────────────────────
