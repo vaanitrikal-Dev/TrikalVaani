@@ -102,11 +102,21 @@ export async function generateMetadata(
 ): Promise<Metadata> {
   const c = findCity(params.domain);
   if (!c) return { title: "Not Found" };
-  const title = `Aaj Ka Panchang ${c.name} | Tithi, Nakshatra, Rahu Kaal Today | Trikaal Vaani`;
-  const description = `Today's Vedic Panchang for ${c.name} (${c.name_hindi}), ${c.state}. Accurate Tithi, Nakshatra, Yoga, Karana, Sunrise, Sunset & Rahu Kaal. Swiss Ephemeris · Lahiri Ayanamsha. By Rohiit Gupta.`;
+  // FIX (5 Sep 2026): the old title was a plain string ending "| Trikaal
+  // Vaani" — that passes through the root layout's title template
+  // ("%s | Trikaal Vaani"), so Google was actually shown the brand TWICE:
+  //   "...Rahu Kaal Today | Trikaal Vaani | Trikaal Vaani"        (86 chars)
+  // `{ absolute: ... }` bypasses the template. Brand is dropped here rather
+  // than kept once — at the longest city name (Delhi NCR / Bangalore /
+  // Hyderabad / Ahmedabad, 44 raw chars) even a single "| Trikaal Vaani"
+  // (18 chars) would push the total to 62, back over Google's ~60-char
+  // cutoff and burying the city name that is this page's whole purpose.
+  const titleText = `${c.name} Panchang Today — Tithi, Rahu Kaal`;
+  const description = `Today's Vedic Panchang for ${c.name}, ${c.state}: Tithi, Nakshatra, Yoga, Rahu Kaal — Swiss Ephemeris calculation. See today's shubh muhurat now.`;
   const url = `${SITE_URL}/${c.slug}/panchang`;
+  const title = titleText;
   return {
-    title, description,
+    title: { absolute: titleText }, description,
     alternates: { canonical: url },
     openGraph: { title, description, url, siteName: "Trikaal Vaani", type: "article", locale: "en_IN", images: [{ url: OG_IMAGE, width: 1200, height: 630, alt: title }] },
     twitter: { card: "summary_large_image", title, description, images: [OG_IMAGE] },
