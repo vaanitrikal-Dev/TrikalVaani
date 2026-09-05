@@ -105,6 +105,8 @@ export type DbFestival = {
   puja_kaal: string | null;
 };
 
+// Version: v1.1 (05 Sep 2026) — asList()/asObjList() guards on every list
+// field. See the note above the helpers for the live crash this fixes.
 export type Content = {
   base_slug: string; page_slug: string; alt_lang_slug: string | null;
   seo_title: string | null; seo_description: string | null;
@@ -126,6 +128,39 @@ export type Content = {
   faqs: { q: string; a: string }[] | null;
   keywords: string[] | null;
 };
+
+// ── v1.1 SAFETY HELPERS (05 Sep 2026) ────────────────────────────────────────
+// LIVE BUG this fixes: "TypeError: n.vrat_vidhi.may_eat.map is not a function"
+// on /hi/[...path] — 175 crashes, 116 users, starting 28 Aug 2026. The row
+// held vrat_vidhi.may_eat as a STRING instead of an array. The old guard was
+//   asList(content.vrat_vidhi.may_eat).length ? ... .map(...)
+// and a string HAS .length, so the guard passed and .map() threw. A throw in a
+// Server Component takes the whole page down, so the reader saw an error page.
+//
+// Every list field on this page comes from Gemini-generated JSON, so any of
+// them can arrive as a string on any future row. These helpers normalise at
+// the point of use instead of trusting the type annotation:
+//   asList()    - string lists. A plain string becomes a one-item list, and a
+//                 string holding newlines or bullets is split into items.
+//   asObjList() - object lists ({step,detail}, {q,a}, {problem,upay}). A
+//                 non-array is dropped rather than guessed at, because there
+//                 is no honest way to turn a bare string into {q, a}.
+// Neither throws. Worst case a section renders empty, which is survivable;
+// a crashed page is not.
+function asList(v: unknown): string[] {
+  if (Array.isArray(v)) return v.filter(x => typeof x === 'string' && x.trim()).map(x => (x as string).trim());
+  if (typeof v === 'string') {
+    const t = v.trim();
+    if (!t) return [];
+    const parts = t.split(/\r?\n+|\s*[•·]\s*/).map(x => x.replace(/^[-*\d.)\s]+/, '').trim()).filter(Boolean);
+    return parts.length > 1 ? parts : [t];
+  }
+  return [];
+}
+
+function asObjList<T>(v: unknown): T[] {
+  return Array.isArray(v) ? (v.filter(x => x && typeof x === 'object') as T[]) : [];
+}
 
 export type LocalTerm = {
   local_name: string; script_name: string | null; note: string | null;
@@ -734,7 +769,7 @@ function buildFestivalSchema(opts: {
         ...(festival.deity ? [{ "@type": "Thing", name: festival.deity }] : []),
         ...(city ? [{ "@type": "City", name: city.name }] : []),
       ],
-      ...(content?.keywords?.length ? { keywords: content.keywords.join(", ") } : {}),
+      ...(asList(content?.keywords).length ? { keywords: asList(content?.keywords).join(", ") } : {}),
       speakable: {
         "@type": "SpeakableSpecification",
         cssSelector: ["h1", ".geo-direct-answer"],
@@ -753,12 +788,12 @@ function buildFestivalSchema(opts: {
     },
   ];
 
-  if (content?.faqs?.length) {
+  if (asObjList<{ q: string; a: string }>(content?.faqs).length) {
     graph.push({
       "@type": "FAQPage",
       "@id": `${url}#faq`,
       inLanguage,
-      mainEntity: content.faqs.map((q) => ({
+      mainEntity: asObjList<{ q: string; a: string }>(content.faqs).map((q) => ({
         "@type": "Question",
         name: q.q,
         acceptedAnswer: { "@type": "Answer", text: q.a },
@@ -766,7 +801,7 @@ function buildFestivalSchema(opts: {
     });
   }
 
-  if (content?.puja_vidhi?.length) {
+  if (asObjList<{ step: string; detail: string }>(content?.puja_vidhi).length) {
     graph.push({
       "@type": "HowTo",
       "@id": `${url}#howto`,
@@ -776,7 +811,7 @@ function buildFestivalSchema(opts: {
           ? `${name} की पूजा कैसे करें — चरण दर चरण विधि।`
           : `How to perform ${name} puja, step by step.`,
       inLanguage,
-      step: content.puja_vidhi.map((s, i) => ({
+      step: asObjList<{ step: string; detail: string }>(content.puja_vidhi).map((s, i) => ({
         "@type": "HowToStep",
         position: i + 1,
         name: s.step,
@@ -855,7 +890,7 @@ export default async function FestivalPillar(
         lang === "en" ? content.alt_lang_slug : null)
     : null;
 
-  const faqs = content?.faqs ?? [];
+  const faqs = asObjList<{ q: string; a: string }>(content?.faqs);
 
   // v2.5 — self-canonical URL for this exact route, and the graph built from it.
   const canonicalUrl = `${SITE_URL}${festivalHref(
@@ -1055,13 +1090,13 @@ export default async function FestivalPillar(
               {cityNote.heading || t.inThisCity(name, placeName)}
             </h2>
             <div className="space-y-4">
-              {cityNote.body.split(/\n\s*\n/).map((para, i) => (
+              {String(cityNote.body ?? '').split(/\n\s*\n/).map((para, i) => (
                 <p key={i} className="text-slate-200 leading-relaxed">{para}</p>
               ))}
             </div>
-            {cityNote.highlights?.length ? (
+            {asList(cityNote.highlights).length ? (
               <ul className="mt-6 space-y-2">
-                {cityNote.highlights.map((h, i) => (
+                {asList(cityNote.highlights).map((h, i) => (
                   <li key={i} className="flex gap-3 text-slate-200 leading-relaxed">
                     <span className="text-amber-400" aria-hidden>◆</span>
                     <span>{h}</span>
@@ -1084,13 +1119,13 @@ export default async function FestivalPillar(
           {t.freeCta}
         </Link>
 
-      {content?.quick_actions?.length ? (
+      {asList(content?.quick_actions).length ? (
         <section className={CARD}>
           <h2 className={H2}>✅ {t.whatToDo(name)}</h2>
           <ol className="list-decimal space-y-2 pl-5 text-slate-200 leading-relaxed marker:text-amber-400">
-            {content.quick_actions.map((a, i) => <li key={i}>{a}</li>)}
+            {asList(content.quick_actions).map((a, i) => <li key={i}>{a}</li>)}
           </ol>
-          {content.puja_vidhi_short?.length ? (
+          {asList(content.puja_vidhi_short).length ? (
             <p className="mt-3 text-sm">
               <a href="#short-vidhi" className="text-amber-700 underline">{t.shortLink}</a>
             </p>
@@ -1146,20 +1181,20 @@ export default async function FestivalPillar(
         </section>
       )}
 
-      {content?.puja_vidhi?.length ? (
+      {asObjList<{ step: string; detail: string }>(content?.puja_vidhi).length ? (
         <section className={CARD}>
           <h2 className={H2}>🪔 {t.pujaVidhi(name)}</h2>
           <ol className="list-decimal space-y-3 pl-5 text-slate-200 leading-relaxed marker:text-amber-400">
-            {content.puja_vidhi.map((s, i) => <li key={i}><strong className="text-amber-200">{s.step}</strong> — {s.detail}</li>)}
+            {asObjList<{ step: string; detail: string }>(content.puja_vidhi).map((s, i) => <li key={i}><strong className="text-amber-200">{s.step}</strong> — {s.detail}</li>)}
           </ol>
         </section>
       ) : null}
 
-      {content?.puja_vidhi_short?.length ? (
+      {asList(content?.puja_vidhi_short).length ? (
         <section id="short-vidhi" className="my-10 rounded-xl border border-emerald-800/50 bg-emerald-950/25 p-6">
           <h2 className={H2}>⚡ {t.fiveMin}</h2>
           <ol className="list-decimal space-y-2 pl-5 text-slate-200 leading-relaxed marker:text-amber-400">
-            {content.puja_vidhi_short.map((s, i) => <li key={i}>{s}</li>)}
+            {asList(content.puja_vidhi_short).map((s, i) => <li key={i}>{s}</li>)}
           </ol>
         </section>
       ) : null}
@@ -1167,20 +1202,20 @@ export default async function FestivalPillar(
       {content?.samagri && (
         <section className={CARD}>
           <h2 className={H2}>🛒 {t.samagri(name)}</h2>
-          {content.samagri.essential?.length ? (
+          {asList(content.samagri.essential).length ? (
             <><h3 className="mt-4 mb-1 font-semibold text-amber-200">{t.essential}</h3>
               <ul className="list-disc pl-5 text-slate-200 leading-relaxed marker:text-amber-400">
-                {content.samagri.essential.map((s, i) => <li key={i}>{s}</li>)}</ul></>
+                {asList(content.samagri.essential).map((s, i) => <li key={i}>{s}</li>)}</ul></>
           ) : null}
-          {content.samagri.optional?.length ? (
+          {asList(content.samagri.optional).length ? (
             <><h3 className="mt-4 mb-1 font-semibold text-amber-200">{t.optional}</h3>
               <ul className="list-disc pl-5 text-slate-200 leading-relaxed marker:text-amber-400">
-                {content.samagri.optional.map((s, i) => <li key={i}>{s}</li>)}</ul></>
+                {asList(content.samagri.optional).map((s, i) => <li key={i}>{s}</li>)}</ul></>
           ) : null}
-          {content.samagri.substitutes?.length ? (
+          {asList(content.samagri.substitutes).length ? (
             <><h3 className="mt-4 mb-1 font-semibold text-amber-200">{t.substitutes}</h3>
               <ul className="list-disc pl-5 text-slate-200 leading-relaxed marker:text-amber-400">
-                {content.samagri.substitutes.map((s, i) => <li key={i}>{s}</li>)}</ul></>
+                {asList(content.samagri.substitutes).map((s, i) => <li key={i}>{s}</li>)}</ul></>
           ) : null}
         </section>
       )}
@@ -1189,13 +1224,13 @@ export default async function FestivalPillar(
         <section className={CARD}>
           <h2 className={H2}>🌙 {t.vrat(name)}</h2>
           {content.vrat_vidhi.start && <p className="text-slate-200 leading-relaxed"><strong className="text-amber-200">{t.beginsAt}:</strong> {content.vrat_vidhi.start}</p>}
-          {content.vrat_vidhi.may_eat?.length ? (
+          {asList(content.vrat_vidhi.may_eat).length ? (
             <><p className="mt-4 mb-1 font-semibold text-emerald-300">{t.mayEat}</p>
-              <ul className="list-disc pl-5 text-slate-200 leading-relaxed marker:text-amber-400">{content.vrat_vidhi.may_eat.map((s, i) => <li key={i}>{s}</li>)}</ul></>
+              <ul className="list-disc pl-5 text-slate-200 leading-relaxed marker:text-amber-400">{asList(content.vrat_vidhi.may_eat).map((s, i) => <li key={i}>{s}</li>)}</ul></>
           ) : null}
-          {content.vrat_vidhi.avoid?.length ? (
+          {asList(content.vrat_vidhi.avoid).length ? (
             <><p className="mt-4 mb-1 font-semibold text-rose-300">{t.avoid}</p>
-              <ul className="list-disc pl-5 text-slate-200 leading-relaxed marker:text-amber-400">{content.vrat_vidhi.avoid.map((s, i) => <li key={i}>{s}</li>)}</ul></>
+              <ul className="list-disc pl-5 text-slate-200 leading-relaxed marker:text-amber-400">{asList(content.vrat_vidhi.avoid).map((s, i) => <li key={i}>{s}</li>)}</ul></>
           ) : null}
           {content.vrat_vidhi.paran && <p className="mt-4 text-slate-200 leading-relaxed"><strong className="text-amber-200">{t.paran}:</strong> {content.vrat_vidhi.paran}</p>}
           {content.vrat_vidhi.who_should_not && <p className="mt-3 text-slate-200 leading-relaxed"><strong className="text-amber-200">{t.whoNot}:</strong> {content.vrat_vidhi.who_should_not}</p>}
@@ -1205,11 +1240,11 @@ export default async function FestivalPillar(
         </section>
       )}
 
-      {content?.dos_donts?.length ? (
+      {asObjList<{ q: string; a: string }>(content?.dos_donts).length ? (
         <section className={CARD}>
           <h2 className={H2}>❓ {t.allowed(name)}</h2>
           <div className="space-y-3">
-            {content.dos_donts.map((d, i) => (
+            {asObjList<{ q: string; a: string }>(content.dos_donts).map((d, i) => (
               <div key={i}>
                 <p className="font-semibold text-amber-200">{d.q}</p>
                 <p className="text-slate-200 leading-relaxed">{d.a}</p>
@@ -1219,28 +1254,28 @@ export default async function FestivalPillar(
         </section>
       ) : null}
 
-      {(f.dos?.length || f.donts?.length) && (
+      {(asList(f.dos).length || asList(f.donts).length) && (
         <section className="my-10 grid gap-4 md:grid-cols-2">
-          {f.dos?.length ? (
+          {asList(f.dos).length ? (
             <div className="rounded-xl border border-emerald-800/50 bg-emerald-950/25 p-5">
               <h2 className="mb-3 text-xl font-bold text-emerald-300">✓ {t.dos}</h2>
-              <ul className="list-disc space-y-1 pl-5 text-slate-200 leading-relaxed marker:text-amber-400">{f.dos.map((d, i) => <li key={i}>{d}</li>)}</ul>
+              <ul className="list-disc space-y-1 pl-5 text-slate-200 leading-relaxed marker:text-amber-400">{asList(f.dos).map((d, i) => <li key={i}>{d}</li>)}</ul>
             </div>
           ) : null}
-          {f.donts?.length ? (
+          {asList(f.donts).length ? (
             <div className="rounded-xl border border-rose-900/50 bg-rose-950/25 p-5">
               <h2 className="mb-3 text-xl font-bold text-rose-300">✗ {t.donts}</h2>
-              <ul className="list-disc space-y-1 pl-5 text-slate-200 leading-relaxed marker:text-amber-400">{f.donts.map((d, i) => <li key={i}>{d}</li>)}</ul>
+              <ul className="list-disc space-y-1 pl-5 text-slate-200 leading-relaxed marker:text-amber-400">{asList(f.donts).map((d, i) => <li key={i}>{d}</li>)}</ul>
             </div>
           ) : null}
         </section>
       )}
 
-      {content?.common_mistakes?.length ? (
+      {asList(content?.common_mistakes).length ? (
         <section className={CARD}>
           <h2 className={H2}>⚠️ {t.mistakes}</h2>
           <ul className="list-disc space-y-2 pl-5 text-slate-200 leading-relaxed marker:text-amber-400">
-            {content.common_mistakes.map((m, i) => <li key={i}>{m}</li>)}
+            {asList(content.common_mistakes).map((m, i) => <li key={i}>{m}</li>)}
           </ul>
         </section>
       ) : null}
@@ -1268,11 +1303,11 @@ export default async function FestivalPillar(
         </section>
       )}
 
-      {content?.upay_by_problem?.length ? (
+      {asObjList<{ problem: string; upay: string }>(content?.upay_by_problem).length ? (
         <section className="my-10 rounded-xl border border-amber-800/50 bg-amber-950/25 p-6">
           <h2 className={H2}>🔮 {t.upay(name)}</h2>
           <div className="space-y-3">
-            {content.upay_by_problem.map((u, i) => (
+            {asObjList<{ problem: string; upay: string }>(content.upay_by_problem).map((u, i) => (
               <div key={i}>
                 <p className="font-semibold text-amber-200">{u.problem}</p>
                 <p className="text-slate-200 leading-relaxed">{u.upay}</p>
