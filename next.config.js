@@ -3,10 +3,25 @@
  * 🔱 TRIKAL VAANI — CEO PROTECTION HEADER 🔱
  * ============================================================================
  * File:        next.config.js
- * Version:     v1.6 — reverted the v1.5 redirect, moved to middleware.ts (Sep 2026)
+ * Version:     v1.7 — 2 indexed /learn/ 404s redirected to their /blog/ twins
  * Date:        2026-09-05
  * Owner:       Rohiit Gupta, Chief Vedic Architect
  *
+ * CHANGES vs v1.6 — 5 Sep 2026:
+ *   ✅ ADDED 2 redirects for /learn/ URLs that Google has indexed but that
+ *      have NEVER existed in seo_pillar_pages — both return 404 today:
+ *        /learn/saturn-transit-2026                 1,911 impr, 19 clicks
+ *        /learn/raksha-bandhan-shubh-muhurat-2026     873 impr,  3 clicks
+ *      (GSC, 3 months to 2 Sep 2026.) Both have a real, live twin under
+ *      /blog/ with the identical slug, so the content the searcher wanted
+ *      exists — only the path was wrong. A 404 that keeps earning
+ *      impressions is the worst case available: crawl budget spent, click
+ *      thrown away, and the clicks it does get land on an error page.
+ *      Verified before writing: /learn/saturn-transit-2026 → 404,
+ *      /blog/saturn-transit-2026 → 200.
+ *      Query-string carry-over (the v1.6 problem) does not apply here —
+ *      these URLs are hit without a query string.
+ * ============================================================================
  * CHANGES vs v1.5:
  *   ✅ REMOVED the /learn/sibling-prediction-astrology?lang=hi redirect
  *      added in v1.5. next.config.js redirects() ALWAYS forward the
@@ -42,6 +57,17 @@ const nextConfig = {
   // ──────────────────────────────────────────────────────────────────
   async redirects() {
     return [
+      // ── v1.7: indexed /learn/ 404s → their existing /blog/ twins ──
+      {
+        source: '/learn/saturn-transit-2026',
+        destination: '/blog/saturn-transit-2026',
+        permanent: true, // 301 — page never existed at /learn/, content lives at /blog/
+      },
+      {
+        source: '/learn/raksha-bandhan-shubh-muhurat-2026',
+        destination: '/blog/raksha-bandhan-shubh-muhurat-2026',
+        permanent: true, // 301 — same case as above
+      },
       {
         source: '/upcoming-events',
         destination: '/panchang',
