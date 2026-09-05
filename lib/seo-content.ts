@@ -4,53 +4,51 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseKey = process.env.SUPABASE_SERVICE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
 /* ────────────────────────────────────────────────────────────────────────────
-   FIX v2 (4 Sep 2026) — "I edited Supabase but /learn/<slug> still shows the
-   old text."
+   FIX v3 (5 Sep 2026) — `cache: 'no-store'` was crashing /learn/[slug] with a
+   500 AND sending every single request straight to Postgres.
 
-   THE BUG
-   supabase-js issues PostgREST queries through the global `fetch`. Inside the
-   Next.js App Router that fetch is patched, and an un-annotated GET is stored
-   in the Next.js / Vercel Data Cache. The stored entry inherits the route's
-   `export const revalidate` — 86400 on app/learn/[slug]/page.tsx — and the
-   Vercel Data Cache SURVIVES A NEW DEPLOYMENT. So a Supabase content edit
-   could stay invisible for 24 hours and redeploying did not clear it.
+   WHAT THE LOGS SHOWED (Vercel, 5 Sep 2026):
+     GET /learn/jupiter-leo-2026-12-rashis  500  [error/serverless]
+       Page changed from static to dynamic at runtime, reason: no-store fetch
+       https://<ref>.supabase.co/rest/v1/seo_pillar_pages?select=*&slug=eq....
+     (same 500 on /learn/education-prediction-astrology,
+      /learn/rahu-ketu-transit-2026, /learn/how-to-wear-gemstone-vedic, ...)
 
-   WHY v1 OF THIS FIX DID NOT WORK
-   v1 passed `next: { revalidate: 300 }`. That only sets the TTL on entries
-   written AFTER the change. It does not evict the entry already sitting there
-   with an 86400 TTL, and it does not alter the cache key, so the stale entry
-   kept winning. Confirmed live: /learn/inheritance-wealth-prediction still
-   served the old 1,157-word body and "7 min read" after that deploy went READY.
+   WHY v2 BROKE IT:
+     app/learn/[slug]/page.tsx has generateStaticParams() + revalidate 86400,
+     so Next.js prerenders it. A `no-store` fetch inside a prerendered route is
+     a hard contradiction — Next bails out at runtime with exactly that error.
+     v2's own note said no-store was "affordable here" because the route was
+     already per-request thanks to searchParams. That premise is gone: page.tsx
+     v2.0 removes searchParams (Path A bilingual), so the route is static again
+     and no-store is now actively fatal.
 
-   THE ACTUAL FIX
-   `cache: 'no-store'` on the Supabase client's fetch. The Data Cache is
-   bypassed outright, so there is no stale entry to evict and no TTL to wait
-   out. Supabase content edits are live on the next request.
+     Second cost: no-store means ZERO caching. getSeoPageBySlug alone was firing
+     up to 3x per render, uncached, against a nano Postgres that fell over on
+     5 Sep. This is the same class of mistake as blog_posts' select('*').
 
-   WHY THIS IS AFFORDABLE HERE
-   app/learn/[slug]/page.tsx already reads `searchParams`, so that route is
-   rendered per request regardless — this changes where the data comes from,
-   not how often the page renders. These are small indexed single-row lookups.
-   React's `cache()` would de-duplicate the repeated getSeoPageBySlug calls
-   (it is called three times per render: once in generateMetadata and twice in
-   the page's Promise.all), but this repo pins react 18.2.0 and `cache` is not
-   available there — adding it would crash the route at runtime. Leave the
-   functions plain. If query volume ever matters, first de-duplicate the two
-   getSeoPageBySlug calls inside app/learn/[slug]/page.tsx's Promise.all.
+   THE FIX:
+     `next: { revalidate: 300, tags: ['seo-pages'] }`
+       • revalidate 300 — Supabase content edits go live within 5 minutes.
+         v2 was right that a bare 86400 was too slow; 300s is not.
+       • The 86400 Data Cache entries v2 could not evict expired long ago,
+         so the stale-entry problem v2 was fighting no longer exists.
+       • tags: ['seo-pages'] — when you want an edit live INSTANTLY instead of
+         within 5 minutes, hit a route that calls revalidateTag('seo-pages').
+         That is the approach v2's own closing note recommended.
 
-   IF DATABASE LOAD EVER BECOMES A CONCERN
-   Do not go back to a bare revalidate. Use `next: { tags: ['seo-pages'] }`
-   here plus a revalidateTag() route hit after each Supabase write — that keeps
-   caching AND stays correct.
-
-   NOTE: /blog/[slug] reads blog_posts through its own data layer with the same
-   un-annotated pattern and the same 86400 route revalidate. It has the same
-   bug. NOT touched here, to keep this commit to one file.
+   NOT CHANGED: getSeoPageBySlug still does select('*'). It is a single row
+   looked up on an indexed unique slug — unlike blog_posts' getAllPosts, which
+   pulled 737 rows. One row here is cheap and the page genuinely renders most
+   of its columns.
    ──────────────────────────────────────────────────────────────────────────── */
 const supabase = createClient(supabaseUrl, supabaseKey, {
   global: {
     fetch: (input: any, init?: any) =>
-      fetch(input, { ...(init || {}), cache: 'no-store' } as any),
+      fetch(input, {
+        ...(init || {}),
+        next: { revalidate: 300, tags: ['seo-pages'] },
+      } as any),
   },
 })
 
