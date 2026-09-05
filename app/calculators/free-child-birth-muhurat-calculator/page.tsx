@@ -49,6 +49,7 @@ import PayPalCheckout from '@/components/payment/PayPalCheckout';
 import { buildCalcJsonLd } from '@/lib/seo/calcJsonLd';
 
 const GOLD = '#D4AF37';
+// ── v2.0 (05 Sep 2026) — see the SECTIONS block below for where every H2 came from.
 const GOLD_RGBA = (a: number) => `rgba(212,175,55,${a})`;
 
 interface PlaceSuggestion {
@@ -195,6 +196,14 @@ const FAQS = [
   { q: 'Naamakshar (lucky name letter) kya hota hai?', a: 'Jis nakshatra aur pada mein bachcha paida hota hai, uske according ek shubh starting syllable (Naamakshar) milta hai — jaise "Cho", "La", "Mi". Iss syllable se shuru hone wala naam bachche ke liye auspicious mana jaata hai. Paid report mein hum boy + girl naam suggestions bhi dete hain.' },
   { q: 'Kya yeh IVF delivery ke liye bhi kaam karta hai?', a: 'Haan. Chahe C-section ho ya IVF embryo transfer/planned delivery — jab bhi date aur time pehle se decide ho sakti ho, yeh tool us window mein sabse shubh moment batata hai.' },
   { q: 'Result kitne accurate hain?', a: 'Trikaal Vaani Swiss Ephemeris (NASA-grade) + Lahiri Ayanamsha use karta hai, aur master-grade Muhurta logic se 9 factors check karta hai: Lagna nakshatra, Lagna lord ka house + dignity, 8th house affliction, kendra/trikona benefics, Moon strength, Yoga, Tithi, Karana, aur Rahu Kaal. Yeh wahi method hai jo experienced astrologers use karte hain.' },
+  { q: 'Is Rohini nakshatra good for birth?', a: 'Haan, Rohini ko shreshth nakshatron mein gina jaata hai. Uska swami Chandra hai aur devta Brahma, aur classical granthon mein ise saundarya, samriddhi aur sthirta se joda gaya hai. Ye Gandmool nakshatra nahi hai, isliye koi shanti-vidhi ki avashyakta nahi hoti. Par yaad rahe — akela nakshatra achha hona kaafi nahi. Us samay ka Lagna, Lagna swami ki sthiti aur aathva bhaav bhi dekhe jaate hain.' },
+  { q: 'Is Anuradha nakshatra good for child birth?', a: 'Haan. Anuradha ka swami Shani hai aur devta Mitra — mitrata, nishtha aur sangathan-kshamata ka nakshatra. Sadhana aur dheeraj ke liye ise bahut shubh maana gaya hai, aur ye Gandmool bhi nahi hai. Anuradha mein janme bachche ke liye naamakshar Na, Ni, Nu, Ne mein se aata hai, pada ke anusaar.' },
+  { q: 'Best tithi for child birth kaunsi hai?', a: 'Shubh maani jaane wali tithiyan hain Dwitiya, Tritiya, Panchami, Saptami, Dashami, Ekadashi, Trayodashi aur Purnima. Bachni chahiye — Chaturthi, Navami aur Chaturdashi, jinhe Rikta tithi kehte hain, aur Amavasya. Par tithi nau kaarkon mein se sirf ek hai; akeli tithi par faisla nahi hota.' },
+  { q: 'Abhijit muhurat kya hai aur kya delivery ke liye theek hai?', a: 'Abhijit sthaniya dopahar ke aas-paas ka lagbhag 48-minute ka samay hai — din ka aathvaan muhurat. Ise lagbhag har shubh kaary ke liye anukool maana jaata hai. Par Budhwar ko Abhijit ko chhod dene ka niyam hai. Agar aapki doctor-window mein Abhijit aata hai to calculator use uchit sthaan par gin leta hai.' },
+  { q: 'Gandmool nakshatra kya hota hai?', a: 'Chhe nakshatra Gandmool kehlate hain — Ashwini, Ashlesha, Magha, Jyeshtha, Mula aur Revati. Inme janm hone par 27 din baad Mool Shanti vidhi ki paramapara hai. Ye ashubh janm nahi hai — bahut se safal log Gandmool mein paida hue hain. Ye sirf ek vidhi ka sanket hai, koi shrap nahi. Calculator inhe alag se flag karta hai taaki aap jaan sakein.' },
+  { q: 'Muhurat mil gaya par doctor ne date badal di — ab kya?', a: 'Doctor ki baat hi antim hai. Nayi date daal kar calculator dobara chala lijiye — wo us nayi window ke andar ka sabse achha samay nikaal dega. Muhurat ke liye medical salah ke khilaf jaana Jyotish mein bhi galat maana gaya hai, kyunki maa aur bachche ki suraksha se bada koi yog nahi hota.' },
+  { q: 'Kitne bacche honge — ye calculator wo bata sakta hai?', a: 'Nahi, ye alag prashn hai aur alag chart maangta hai. Ye calculator ek nishchit window mein sabse shubh samay dhoondhta hai. Santan-sankhya ke liye panchma bhaav, Saptamsa D-7 aur Guru dekhe jaate hain — uske liye alag page hai.' },
+  { q: 'Kya ye tool sirf C-section ke liye hai?', a: 'Nahi. Ye kisi bhi planned delivery ke liye kaam karta hai — C-section, induction, ya IVF ke baad ki scheduled delivery. Shart ek hi hai: aapke paas doctor ki di hui ek samay-window honi chahiye, jiske andar chunav sambhav ho. Natural labour mein samay aapke haath mein nahi hota, isliye wahan ye lagu nahi.' },
 ];
 
 interface SlotData {
@@ -213,6 +222,446 @@ interface SlotData {
   eighth_house_malefics: string[];
   reasons: string[];
   cautions: string[];
+}
+
+
+// ════════════════════════════════════════════════════════════════════════════
+// v2.0 CONTENT (05 Sep 2026)
+//
+// BASELINE BEFORE THIS BUILD (Radar E2 + GSC, both 05 Sep 2026)
+//   888 words · 4 H2 · 21 internal links.
+//   GSC 3 months to 4 Sep 2026: 632 impressions, 52 clicks, CTR 8.23%,
+//   average position 6.76 — the strongest of the thirteen thin calculators.
+//   Position was never the problem here; there was simply almost no page.
+//
+// WHERE THE H2s COME FROM — Google Search Console, same window
+//   is rohini nakshatra good for birth ......... 107 impressions, pos 4.2, 0 clicks
+//   is anuradha nakshatra good for child birth .. 82, pos 2.7
+//   rohini nakshatra for baby birth ............. 30, pos 2.3
+//   is anuradha nakshatra good for birth ........ 30, pos 3.1
+//   best tithi for child birth .................. 17, pos 4.6
+//   child birth prediction calculator astrology . 14, pos 9.2
+//   best date for baby birth .................... 13, pos 8.1
+//   rohini nakshatra for child birth ............ 12, pos 2.4
+//   anuradha nakshatra is good for baby birth ... 12, pos 3.4
+//   c section delivery shubh muhurat ............. 8, pos 7.0
+//   shubh nakshatra for baby birth ............... 8, pos 7.9
+//   most auspicious time today for baby birth .... 7, pos 5.4
+//   shubh muhurat for child birth tomorrow ....... 6, pos 1.0
+//   good time for baby delivery tomorrow ......... 5, pos 4.4
+//   abhijit muhurat .............................. 5, pos 1.6
+//
+//   The nakshatra-quality questions are the loudest signal on the page and the
+//   worst served: "is rohini nakshatra good for birth" sat at position 4.2 for
+//   107 impressions and earned ZERO clicks, because nothing on this page
+//   answered it. Sections 12-17 answer each one directly, in its own H2.
+//
+// SAFETY POSITION — non-negotiable, and it runs through the whole page
+//   This is a medical subject. Every section that touches scheduling repeats
+//   the same line: the doctor's window comes first, the muhurat is chosen only
+//   INSIDE it, and no chart is a reason to argue with medical advice. A page
+//   that nudged a family to move a delivery for astrological reasons would be
+//   dangerous, whatever it did for the ranking.
+//
+// UNCHANGED — do not "tidy" these
+//   The form, /api/calc/muhurat, /api/create-muhurat-order,
+//   /api/verify-muhurat-payment, the paid flow, REPORT_STEPS, buildCalcJsonLd
+//   and the comparison table. Only words, links and FAQs changed.
+//
+// EVERY INTERNAL LINK WAS CHECKED against radar.pages (tier=self) on
+// 05 Sep 2026. No href here is guessed.
+// ════════════════════════════════════════════════════════════════════════════
+
+type MuhuratSection = { id: string; h2: string; paras: string[] };
+
+const SECTIONS: MuhuratSection[] = [
+  {
+    id: 'kaise-kaam-karta-hai',
+    h2: 'Child Birth Muhurat Calculator — kaam kaise karta hai',
+    paras: [
+      'Aap teen cheezein dete hain — **delivery ki date, doctor ki di hui samay-window, aur shahar**. Calculator us window ke andar har sambhav samay ka poora chart banata hai aur unhe score deta hai. Aapko sabse achha slot milta hai, uske saath ye bhi ki wo kyun achha hai.',
+      'Har slot par nau cheezein naapi jaati hain: **Lagna aur uska swami**, **Lagna Nakshatra**, **Chandra Nakshatra**, **Tithi**, **Vaar**, **Yoga**, **Karana**, **aathve bhaav ki sthiti**, aur **Gandmool** ka flag. Iske saath us slot ka **naamakshar** bhi nikal aata hai — bachche ke naam ka shubh pehla akshar.',
+      'Ganana **Swiss Ephemeris** aur **Lahiri Ayanamsha** par hoti hai — wahi library jo peshevar software use karte hain. Shahar isliye zaroori hai kyunki Lagna sthaan ke saath badalta hai: Delhi aur Chennai mein ek hi samay par Lagna alag ho sakta hai.',
+    ],
+  },
+  {
+    id: 'doctor-pehle',
+    h2: 'Sabse pehle — doctor ki window, phir muhurat',
+    paras: [
+      'Ye baat is poore page par sabse zaroori hai, isliye shuru mein hi likhi hai. **Delivery ki date aur surakshit samay sirf aapke doctor tay karte hain.** Ye calculator us faisle mein koi bhoomika nahi rakhta.',
+      'Iska kaam sirf itna hai: **jo window doctor pehle hi de chuke hain, uske andar** sabse anukool samay dhoondhna. Agar doctor kehte hain subah 9 se dopahar 1 ke beech, to calculator un char ghanton ke andar hi dekhta hai — ek minute bahar nahi.',
+      'Aur ek baat saaf: **muhurat ke liye medical salah ke khilaf jaana Jyotish mein bhi galat maana gaya hai.** Shastra ka apna niyam hai ki jeevan-raksha sabse upar hai. Agar koi jyotishi kahe ki delivery aage-peeche karwa lijiye kisi yog ke liye, to wo salah shastra-sammat nahi hai. Ye antar [Doctor ki safe window vs Muhurat](/blog/doctor-safe-window-vs-child-birth-muhurat) mein vistaar se rakha gaya hai.',
+    ],
+  },
+  {
+    id: 'muhurat-tomorrow',
+    h2: 'Shubh Muhurat for Child Birth Tomorrow — kal ki delivery ke liye',
+    paras: [
+      'Bahut se log ye page delivery se ek din pehle khol rahe hote hain, aur unke paas padhne ka waqt nahi hota. Unke liye seedha tarika: **kal ki date daalein, doctor ki batayi window daalein, shahar daalein, chala dein.** Result kuch hi second mein aa jaata hai.',
+      'Result mein sabse upar sabse achha slot hota hai, uske neeche **kyun** — kaunsa Lagna, uska swami kis bhaav mein, nakshatra kaunsa, aathva bhaav saaf hai ya nahi. Neeche do-teen aur slot bhi milte hain, taaki agar pehla slot doctor ke liye vyavharik na ho to doosra vikalp saamne ho.',
+      'Ek chhoti par kaam ki baat: **result print ya screenshot kar ke rakh lein.** Hospital mein network aksar kamzor hota hai, aur us waqt page dobara khulne ka intezaar karna theek nahi. Jaldi mein padhne ke liye [Last-minute quick check](/blog/child-birth-muhurat-last-minute-quick-check) chhota page hai.',
+    ],
+  },
+  {
+    id: 'auspicious-today',
+    h2: 'Most Auspicious Time Today for Baby Birth — aaj ke liye',
+    paras: [
+      'Aaj hi ki delivery ke liye tarika wahi hai — aaj ki date aur doctor ki window. Par ek baat samajh lena zaroori hai: **"aaj ka sabse shubh samay" har shahar aur har din alag hota hai.** Koi ek fixed samay nahi hota jo sabke liye achha ho.',
+      'Iski wajah Lagna hai. Lagna lagbhag har do ghante mein badalta hai, aur uske saath saare bhaav ghoom jaate hain. Isliye jo samay ek din shubh tha wo agle din usi shahar mein saamanya ho sakta hai — kyunki us din tithi, nakshatra aur vaar sab badal chuke hote hain.',
+      'Isi wajah se ye page koi "aaj ka shubh samay" ki tayyar list nahi dikhata. Aisi list jo har kisi ke liye ek hi ho, wo aapke doctor ki window se koi lena-dena nahi rakhti — aur wahi to asli seema hai.',
+    ],
+  },
+  {
+    id: 'c-section-muhurat',
+    h2: 'C-Section Delivery Shubh Muhurat',
+    paras: [
+      'Planned C-section wo sthiti hai jahan muhurat ka sabse zyada arth banta hai, kyunki yahan samay sach mein chuna ja sakta hai — doctor ki di hui seema ke andar.',
+      'Yahan do cheezein sabse bhaari padti hain. **Lagna aur uska swami** — Lagna bachche ka shareer, swabhav aur jeevan-disha darshata hai, aur uska swami kendra ya trikona mein ho to bal milta hai. **Aathva bhaav** — us samay aathve bhaav mein koi kroor graha na ho, ye classical dhyan ki baat hai. Calculator dono ko alag-alag ginta hai aur reason mein likhta hai.',
+      'Aur ek vyavharik baat: **operation ka nishchit samay minute-bhar sateek nahi hota.** Doctor ka scheduled samay aage-peeche hota hai. Isliye calculator ek band (band-width) deta hai, ek minute nahi — taaki thodi der-sawer se poora chunav bekaar na ho jaaye. Vistaar se [Best muhurat for C-section](/blog/best-muhurat-for-c-section) aur Hindi mein [सी-सेक्शन का शुभ मुहूर्त](/blog/best-muhurat-for-c-section-hindi) mein.',
+    ],
+  },
+  {
+    id: 'normal-vs-csection',
+    h2: 'Normal Delivery aur C-Section — muhurat mein kya farak hai',
+    paras: [
+      'Farak seedha hai: **normal delivery mein samay aapke haath mein nahi hota.** Labour apne samay par shuru hoti hai, isliye wahan muhurat chunne ka prashn hi nahi uthta.',
+      'Aise mein ye page kis kaam ka hai? Do tarah se. Ek, agar doctor ne **induction** ki salah di hai to samay ek hadd tak chuna ja sakta hai. Do, janm ho jaane ke **baad** aap sateek samay daal kar dekh sakte hain ki bachche ka Lagna, nakshatra aur naamakshar kya bana — jo naamkaran ke liye seedha kaam aata hai.',
+      'Aur wo baat jo shastra mein bhi hai aur jise log bhool jaate hain: **jo samay prakriti ne chuna, wo bhi ek muhurat hi hai.** Natural delivery ke samay ko kamtar maanna kahin nahi likha. Dono ka antar [Normal delivery vs C-section muhurat](/blog/normal-delivery-vs-c-section-muhurat) mein rakha gaya hai.',
+    ],
+  },
+  {
+    id: 'ivf-muhurat',
+    h2: 'IVF Delivery Muhurat — aur embryo transfer ka samay',
+    paras: [
+      'IVF ke baad ki planned delivery ke liye tarika bilkul wahi hai jo C-section ka hai — doctor ki window, uske andar sabse achha slot. Koi alag niyam nahi.',
+      'Par IVF ke saath ek doosra prashn bhi aata hai: **embryo transfer ka samay.** Ye alag cheez hai aur alag tarah se dekhi jaati hai — wahan panchma bhaav, Guru ki sthiti aur maa ke chart ki chal rahi dasha zyada mayne rakhti hai, kyunki prashn "janm kab" nahi balki "sthapana kab" hai.',
+      'Imandari se ek seema bhi bata deni chahiye: **IVF ki safalta chikitsiya kaarnon par nirbhar hai** — embryo ki gunvatta, hormonal sthiti, chikitsak ka anubhav. Muhurat inme se kisi ko nahi badalta. Jo dava aur samay dono ka wada kare, wo dar bech raha hai. Poora vishleshan [IVF delivery muhurat guide](/blog/ivf-delivery-muhurat-guide) mein.',
+    ],
+  },
+  {
+    id: 'nau-kaarak',
+    h2: 'Nau kaarak — muhurat kis-kis cheez par tikta hai',
+    paras: [
+      'Ek muhurat ek cheez se nahi banta. Nau alag kaarak dekhe jaate hain, aur inme aapas mein tolmol hota hai — koi slot nakshatra mein shreshth ho sakta hai par Lagna mein kamzor.',
+      '**(1) Lagna** — bachche ka shareer aur jeevan-disha. **(2) Lagna ka swami** — uska bhaav aur dignity. **(3) Lagna Nakshatra**. **(4) Chandra Nakshatra** — jisse naamakshar bhi nikalta hai. **(5) Tithi**. **(6) Vaar**. **(7) Yoga**. **(8) Karana**. **(9) Aathva bhaav** — usme koi kroor graha to nahi.',
+      'Inke alawa **Rahu Kaal, Yamaganda, Gulika aur Bhadra** ko alag se dekha jaata hai — ye "achha kitna hai" nahi balki "bachna chahiye ya nahi" waale khaane mein aate hain. Har kaarak alag se [9 factors explained](/blog/child-birth-muhurat-9-factors-explained) mein khola gaya hai, Hindi mein [9 कारक](/blog/child-birth-muhurat-9-factors-explained-hindi).',
+    ],
+  },
+  {
+    id: 'lagna-aur-swami',
+    h2: 'Lagna aur Lagna ka swami — sabse bhaari kaarak',
+    paras: [
+      'Nau kaarkon mein sabse zyada vazan Lagna par hai, aur iski wajah saaf hai: **Lagna bachche ki janm-kundali ka aadhaar ban jaata hai.** Nakshatra aur tithi din bhar mein ek-do baar badalte hain; Lagna har do ghante mein badalta hai, aur uske saath poora chart ghoom jaata hai.',
+      'Do baatein dekhi jaati hain. **Lagna swayam** — sthir rashi (Vrishabh, Simha, Vrishchik, Kumbh) sthirta ke liye anukool maani jaati hain, aur ye chunav bachche ke swabhav se juda hai. **Lagna ka swami** — wo kis bhaav mein hai aur kis dignity mein. Kendra (1, 4, 7, 10) ya trikona (1, 5, 9) mein ho to bal, aur uchch ya swarashi ho to aur bhi.',
+      'Jo bachna chahiye: **Lagna swami ka aathve ya barahve bhaav mein hona**, ya uska nichch hona. Calculator har slot ke liye ye sthiti alag se likhta hai — sirf "achha/bura" nahi, balki kaunsa graha kahan hai.',
+    ],
+  },
+  {
+    id: 'shubh-nakshatra',
+    h2: 'Shubh Nakshatra for Baby Birth — poori soochi',
+    paras: [
+      'Classical granthon mein janm ke liye anukool maane gaye nakshatra ye hain: **Rohini, Mrigashira, Pushya, Punarvasu, Uttara Phalguni, Hasta, Chitra, Swati, Anuradha, Uttara Ashadha, Shravana, Dhanishtha, Uttara Bhadrapada aur Revati.**',
+      'Inme se **Pushya** ko prayah sarvashreshth kaha jaata hai, aur **Rohini, Hasta aur Anuradha** uske turant baad aate hain. Har nakshatra ka apna swami graha aur devta hota hai, aur wahi uske gun tay karta hai — Pushya ka swami Shani aur devta Brihaspati, Rohini ka swami Chandra aur devta Brahma.',
+      'Ek zaroori chetavni jo aksar nahi di jaati: **akela shubh nakshatra kaafi nahi hai.** Shubh nakshatra mein bhi agar Lagna ka swami nichch ho aur aathve bhaav mein Mangal baitha ho, to slot achha nahi rehta. Isi liye calculator nau kaarak ginta hai, ek nahi.',
+    ],
+  },
+  {
+    id: 'rohini-nakshatra',
+    h2: 'Is Rohini Nakshatra Good for Birth?',
+    paras: [
+      'Haan — **Rohini ko janm ke liye shreshth nakshatron mein gina jaata hai**, aur ye is prashn ka seedha uttar hai.',
+      'Uska swami **Chandra** hai aur devta **Brahma**. Classical granth ise saundarya, samriddhi, srijan aur sthirta se jodte hain. Ye **Gandmool nahi** hai, isliye Mool Shanti jaisi koi vidhi is nakshatra ke liye nahi kehni padti. Vrishabh rashi mein padne ke kaaran Chandra yahan uchch ke aas-paas hota hai, jo ise aur bal deta hai — aur yahi wajah hai ki Krishna janm ka nakshatra Rohini hai.',
+      'Par wahi seema yahan bhi lagu hai: **Rohini hone se slot apne aap achha nahi ho jaata.** Us samay ka Lagna, uske swami ki sthiti aur aathva bhaav bhi dekhne padte hain. Calculator ye teeno alag se ginta hai. Nakshatra-wise vistaar [Rohini nakshatra baby birth](/blog/rohini-nakshatra-baby-birth) aur Hindi mein [रोहिणी नक्षत्र](/blog/rohini-nakshatra-baby-birth-hindi) mein.',
+    ],
+  },
+  {
+    id: 'anuradha-nakshatra',
+    h2: 'Is Anuradha Nakshatra Good for Child Birth?',
+    paras: [
+      'Haan, **Anuradha bhi anukool nakshatron mein aata hai** — aur ye Rohini se thoda alag prakriti ka hai.',
+      'Uska swami **Shani** hai aur devta **Mitra**. Isliye ise mitrata, nishtha, sangathan-kshamata aur lambe samay tak tik kar kaam karne se joda jaata hai. Shani ke prabhav ke kaaran yahan phal thoda der se aata hai par sthir rehta hai — jo bachche ke swabhav mein dheeraj ke roop mein dekha jaata hai. Ye bhi **Gandmool nahi** hai.',
+      'Anuradha mein janme bachche ka **naamakshar Na, Ni, Nu, Ne** mein se ek hota hai, pada ke anusaar. Calculator batata hai ki kaunsa pada chal raha hai aur usse kaunsa akshar banta hai. Vistaar se [Anuradha nakshatra baby birth](/blog/anuradha-nakshatra-baby-birth), Hindi mein [अनुराधा नक्षत्र](/blog/anuradha-nakshatra-baby-birth-hindi).',
+    ],
+  },
+  {
+    id: 'pushya-nakshatra',
+    h2: 'Pushya Nakshatra — sabse shubh maana jaane wala',
+    paras: [
+      'Pushya ko granthon mein **nakshatron ka raja** kaha gaya hai, aur bachche ke janm ke liye ise prayah sabse upar rakha jaata hai.',
+      'Swami **Shani**, devta **Brihaspati** — Shani ka anushasan aur Guru ka gyaan, dono ek saath. Karka rashi mein padne ke kaaran isme paalan-poshan ka bhaav bhi jud jaata hai. Yahi karan hai ki Pushya ko poshan, vidya aur samriddhi se joda jaata hai, aur isi liye kharidari se lekar naye kaam tak har cheez ke liye ise chuna jaata hai.',
+      'Ek vyavharik baat: **Pushya har 27 din mein ek baar hi aata hai** aur lagbhag ek din chalta hai. Aapki doctor-window mein wo aa hi jaaye, aisa zaroori nahi — aur na aana koi kami nahi hai. Uplabdh window mein jo sabse achha hai wahi sahi chunav hai. Aur padhein [Pushya nakshatra baby birth](/blog/pushya-nakshatra-baby-birth).',
+    ],
+  },
+  {
+    id: 'hasta-revati',
+    h2: 'Hasta aur Revati Nakshatra — dono anukool, par Revati mein ek shart',
+    paras: [
+      '**Hasta** ka swami Chandra hai aur devta Savitar (Surya ka ek roop). Ise kaushal, hasth-kaushal aur kaary-kushalta se joda jaata hai — haath se kiye jaane wale nipun kaam iska kshetra hai. Ye Gandmool nahi hai aur janm ke liye poori tarah anukool maana gaya hai. Vistaar [Hasta nakshatra baby birth](/blog/hasta-nakshatra-baby-birth) mein.',
+      '**Revati** apne gun mein bahut shubh hai — swami Budh, devta Pushan, aur ise poornata, daya aur suraksha se joda jaata hai. Ye 27 nakshatron mein antim hai, isliye ise ek chakra ke poora hone ka sanket bhi maana jaata hai.',
+      'Par Revati ke saath ek shart hai: **ye Gandmool nakshatra hai.** Iska matlab ashubh nahi — iska matlab itna hai ki paramapara ke anusaar 27 din baad Mool Shanti vidhi ki jaati hai. Calculator ise flag kar deta hai taaki aap pehle se jaan lein aur baad mein koi aapko chaunka na sake. Aur padhein [Revati nakshatra baby birth](/blog/revati-nakshatra-baby-birth).',
+    ],
+  },
+  {
+    id: 'gandmool',
+    h2: 'Gandmool Nakshatra — ye shrap nahi, ek vidhi ka sanket hai',
+    paras: [
+      'Chhe nakshatra Gandmool kehlate hain: **Ashwini, Ashlesha, Magha, Jyeshtha, Mula aur Revati.** Ye wo nakshatra hain jo rashi ki sandhi par padte hain — jahan ek rashi khatm hoti hai aur doosri shuru hoti hai.',
+      'Paramapara ke anusaar Gandmool mein janm hone par **27 din baad Mool Shanti** ki vidhi ki jaati hai. Bas itni si baat hai. Par is baat ko is tarah bech diya jaata hai jaise koi aapda aa gayi ho — aur bahut se parivaar isi dar mein mehnge upay kharid lete hain.',
+      'Saaf baat: **Gandmool ashubh janm nahi hai.** Bahut se safal aur sukhi log in nakshatron mein paida hue hain, aur Revati to swayam shubh nakshatron ki soochi mein bhi hai. Calculator ise isliye flag karta hai taaki aap **jaan** sakein aur chaho to vidhi kara lein — na ki isliye ki aap ghabra jaayein. Hamare paas is baat par koi paid upay nahi becha jaata.',
+    ],
+  },
+  {
+    id: 'best-tithi',
+    h2: 'Best Tithi for Child Birth',
+    paras: [
+      'Tithi chandra-din hai — Surya aur Chandra ke beech ke kon se banti hai, aur ek chandra maas mein 30 tithiyan hoti hain.',
+      'Janm ke liye **anukool tithiyan**: Dwitiya, Tritiya, Panchami, Saptami, Dashami, Ekadashi, Trayodashi aur Purnima. **Bachne yogya**: Chaturthi, Navami aur Chaturdashi — inhe **Rikta tithi** kehte hain aur naye kaam ke liye ye tali jaati hain. Amavasya ko bhi prayah chhod diya jaata hai.',
+      'Par yahan bhi wahi tolmol hai. Tithi nau kaarkon mein se **ek** hai. Rikta tithi par bhi agar Lagna mazboot ho, Lagna swami kendra mein ho aur nakshatra shubh ho, to slot kul milakar achha ho sakta hai. Calculator har kaarak alag dikhata hai — isiliye ki aap ye tolmol khud dekh sakein, sirf ek "haan/na" na milе.',
+    ],
+  },
+  {
+    id: 'vaar-yoga-karana',
+    h2: 'Vaar, Yoga aur Karana — teen kam charchit kaarak',
+    paras: [
+      '**Vaar** yaani saptah ka din. Somwar, Budhwar, Guruwar aur Shukrawar ko saumya (kalyankari) maana jaata hai; Mangalwar aur Shanivar ko kroor. Ravivar beech mein aata hai — kuch kaamon ke liye theek, kuch ke liye nahi. Ye vibhajan grahon ke swabhav se aata hai, kisi anddhvishwas se nahi.',
+      '**Yoga** — Surya aur Chandra ke sanyukt bhog se bante 27 yog. Inme se **Vyatipata, Vaidhriti, Parigha, Vyaghata, Vajra, Shoola, Ganda aur Atiganda** ko ashubh maana gaya hai. Baaki anukool ya tatasth hain.',
+      '**Karana** — aadhi tithi. Gyarah karana hote hain, jinme char sthir hain: Shakuni, Chatushpada, Naga aur Kimstughna. Inme se pehle teen ko shubh kaamon ke liye tala jaata hai. Ye teeno kaarak apne aap mein nirnayak nahi hain, par jab do-teen slot barabar lag rahe hon to yahi antar tay karte hain.',
+    ],
+  },
+  {
+    id: 'abhijit',
+    h2: 'Abhijit Muhurat — din ka sabse anukool samay',
+    paras: [
+      'Din ko pandrah barabar bhaagon mein baanta jaata hai; unme se **aathvaan bhaag Abhijit** kehlata hai. Ye sthaniya madhyanh (local noon) ke aas-paas aata hai aur lagbhag **48 minute** ka hota hai.',
+      'Abhijit ki khaas baat ye hai ki ise **lagbhag har shubh kaary ke liye anukool** maana jaata hai — yahan tak ki jab baaki kaarak kamzor hon tab bhi. Isliye jab aapki doctor-window mein Abhijit aa raha ho, to wo slot swabhavik roop se upar aa jaata hai.',
+      'Do baatein dhyan mein: **Budhwar ko Abhijit ko chhod dene ka niyam** hai, aur Abhijit ka samay **har shahar aur har din alag** hota hai kyunki wo sthaniya sooryodaya-sooryast par tikta hai — isiliye calculator shahar maangta hai. Koi ek fixed "12 baje ka Abhijit" nahi hota.',
+    ],
+  },
+  {
+    id: 'rahu-kaal-bhadra',
+    h2: 'Rahu Kaal, Yamaganda, Gulika aur Bhadra — kya sach mein bachna chahiye',
+    paras: [
+      'Ye char alag khaane mein aate hain — inhe "kitna achha" nahi balki "talna chahiye ya nahi" ke roop mein dekha jaata hai.',
+      '**Rahu Kaal** har din ka lagbhag 90-minute ka ek hissa hai jo din ke anusaar badalta hai. **Yamaganda** aur **Gulika** isi tarah ke aur khand hain. **Bhadra (Vishti Karana)** ek karana hai jise shubh kaamon ke liye tala jaata hai — aur uska niyam thoda sookshm hai, kyunki Bhadra ka nivas swarg, patal ya prithvi mein hone se uska prabhav badal jaata hai.',
+      'Imandari se ek baat: **in par vidwanon mein matbhed hai.** Kuch paramparaein Rahu Kaal ko bahut vazan deti hain, kuch ise sthaniya reeti maanti hain aur classical muhurat granthon mein iski jagah simit maanti hain. Calculator inhe **chetavni** ke roop mein dikhata hai, slot ko kaat nahi deta — kyunki chikitsiya window mein pehle hi kam vikalp bache hote hain, aur ek matbhed wale niyam par poora chunav girana theek nahi.',
+    ],
+  },
+  {
+    id: 'aathva-bhaav',
+    h2: 'Aathva bhaav — jise zyadatar muft tool dekhte hi nahi',
+    paras: [
+      'Aathva bhaav aayu, sankat aur achanak ghatnaon ka bhaav hai. Janm-muhurat ke sandarbh mein iski jaanch classical hai — **us samay aathve bhaav mein koi kroor graha na ho.**',
+      'Kroor grah kaun: **Mangal, Shani, Rahu, Ketu**, aur peedit Surya. Inme se koi aathve bhaav mein ho to us slot ko utar diya jaata hai, chahe nakshatra aur tithi dono shreshth hon. Yahi wo jaanch hai jo aksar chhoot jaati hai, kyunki iske liye poora chart banana padta hai — sirf panchang dekhne se ye nahi milti.',
+      'Yahi is calculator aur ek saadharan panchang lookup ke beech ka asli antar hai. Panchang aapko tithi, nakshatra aur Rahu Kaal de dega. Aathve bhaav ki sthiti ke liye us **kshan ka chart** chahiye — aur wahi yahan har slot ke liye banta hai.',
+    ],
+  },
+  {
+    id: 'chandra-guru',
+    h2: 'Chandra aur Guru — mann aur santan ke kaarak',
+    paras: [
+      '**Chandra** mann aur poshan ka kaarak hai, aur muhurat mein uska sthaan do wajah se mayne rakhta hai. Ek, Chandra ka nakshatra hi **naamakshar** tay karta hai. Do, Chandra ki rashi bachche ki **Chandra Rashi** ban jaati hai, jo aage chal kar dasha aur gochar dono mein kaam aati hai.',
+      '**Guru (Brihaspati)** ko **Putrakaraka** kaha gaya hai — santan ka kaarak. Muhurat mein Guru ki drishti Lagna par ya panchma bhaav par ho to use bahut anukool maana jaata hai, kyunki Guru ki drishti shastra mein sabse kalyankari maani gayi hai.',
+      'Ek vyavharik seema: **Guru ek rashi mein lagbhag ek saal rehta hai.** Iska matlab uski sthiti aapke chunav se nahi badlegi — wo us saal jaisi hai waisi hi rahegi. Isliye Guru is calculator mein ek sthir paristhiti hai, chunav ka aadhaar nahi. Guru aur santan ka poora sambandh [Jupiter, Putrakaraka aur santan](/blog/jupiter-putrakaraka-child-destiny-astrology) mein.',
+    ],
+  },
+  {
+    id: 'naamakshar',
+    h2: 'Naamakshar — bachche ke naam ka shubh pehla akshar',
+    paras: [
+      'Ye us cheez ka naam hai jo bahut se parivaar dhoondhte hain par jiska naam nahi jaante. **Har nakshatra ke char pada hote hain, aur har pada ka ek nirdharit shubh syllable hota hai.** Jis pada mein bachcha paida hota hai, uska akshar bachche ke naam ka pehla akshar maana jaata hai.',
+      'Udaharan: **Pushya** ke char pada se **Hu, He, Ho, Da** aate hain. **Anuradha** se **Na, Ni, Nu, Ne**. **Rohini** se **O, Va, Vi, Vu**. Calculator har slot ke saath uska naamakshar dikha deta hai — matlab aap muhurat chunne ke saath hi naam ka akshar bhi jaan jaate hain.',
+      'Ek chhota par kaam ka nuqta: **nakshatra ka pada Chandra ki gati se badalta hai**, aur ek pada lagbhag ek ghanta chalta hai. Isliye ek hi nakshatra ke andar do slot alag naamakshar de sakte hain. Agar aapko koi vishesh akshar chahiye, to us hisaab se slot chuna ja sakta hai — bina baaki kaarkon se samjhaute ke. Poori soochi [Lucky baby name letter by nakshatra](/blog/lucky-baby-name-letter-by-nakshatra), Hindi mein [नक्षत्र से नामाक्षर](/blog/lucky-baby-name-letter-by-nakshatra-hindi).',
+    ],
+  },
+  {
+    id: 'best-date',
+    h2: 'Best Date for Baby Birth — date chunne ka sahi kram',
+    paras: [
+      'Bahut se log ulta kram chalte hain — pehle "shubh date" dhoondhte hain, phir doctor se kehte hain ki isi din kar dijiye. **Ye kram galat hai aur khatarnak bhi.**',
+      'Sahi kram ye hai. **Pehle doctor se poochhiye** ki chikitsiya roop se kaunsi dates surakshit hain — prayah ek-do din ki chhoot hoti hai, kabhi zyada. **Phir un dates ko yahan chalayiye** aur dekhiye kis din ki window mein sabse achha slot ban raha hai. **Phir doctor ko wahi din aur samay batayiye**, aur unka faisla maaniye.',
+      'Is kram mein muhurat apni sahi jagah par rehta hai — chikitsiya seema ke **andar** ek behtar chunav, uske **upar** koi maang nahi. Jab bhi ye kram ulta hota hai, jokhim badhta hai aur shastra ka apna niyam bhi tootta hai.',
+    ],
+  },
+  {
+    id: 'prediction-calculator-limits',
+    h2: 'Child Birth Prediction Calculator — ye kya nahi bata sakta',
+    paras: [
+      'Ye seema saaf likhna zaroori hai, kyunki ye page vyapaar ke liye nahi likha ja raha.',
+      'Ye calculator **nahi** bata sakta: bachche ka ling — aur koi jyotishiya tool nahi bata sakta, aur Bharat mein ling-jaanch **kanooni roop se varjit** hai; delivery mein koi jatilta hogi ya nahi; bachcha swasth hoga ya nahi; ya delivery natural hogi ya operation se. Ye sab chikitsiya prashn hain aur inka uttar sirf aapke doctor ke paas hai.',
+      'Jo ye bata sakta hai: **di gayi window ke andar kaunsa samay classical niyamon ke hisaab se sabse anukool hai**, uske peeche kya wajah hai, aur us samay ka naamakshar kya banta hai. Bas. Jo site isse zyada ka wada kare, wo aapki chinta bech rahi hai.',
+    ],
+  },
+  {
+    id: 'kitne-bacche',
+    h2: 'Kitne bacche honge — ye alag prashn hai',
+    paras: [
+      'Ye prashn is page par bahut aata hai, par iska is calculator se koi sambandh nahi — aur do alag cheezon ko mila dena hi galtiyon ki jad hai.',
+      '**Muhurat calculator** ek nishchit window mein sabse achha samay dhoondhta hai. **Santan-sankhya** maa ya pita ke apne chart se padhi jaati hai: **panchma bhaav aur uska swami, Saptamsa (D-7) — santan ka varga chart, aur Guru ki sthiti.** Ye teeno cheezein us kshan se nahi, janm-kundali se aati hain.',
+      'Agar aapka prashn wahi hai, to [Number of Children Prediction](/learn/number-of-children-prediction) aur [Child Birth Prediction](/learn/child-birth-prediction) uske liye bane hain, aur [Santan Yog Calculator](/calculators/free-santan-yog-calculator) muft hai. Santan mein der ke prashn par [संतान प्राप्ति में देरी](/blog/santan-prapti-mein-deri-astrology-upay) alag se likha gaya hai.',
+    ],
+  },
+  {
+    id: 'maa-ka-chart',
+    h2: 'Maa ke chart mein Sade Sati ya Mangal dosh — kya ye muhurat ko badalta hai',
+    paras: [
+      'Chhota aur imandar uttar: **nahi, muhurat ke chunav ko nahi badalta.**',
+      'Muhurat us kshan ka chart dekhta hai jis kshan bachcha janm lega. Maa ke apne chart ki chal rahi dasha ya gochar us kshan ke Lagna, nakshatra ya aathve bhaav ko nahi badalte. Ye do alag chart hain aur do alag prashn.',
+      'Haan, ek anya sandarbh mein maa ka chart mayne rakhta hai — samay ke chunav mein nahi, balki us dauran ki paristhiti samajhne mein. Par yahan bhi wahi baat: **Sade Sati ya Mangal dosh delivery ko "ashubh" nahi banate**, aur is naam par dar bechne wale bahut hain. Apni sthiti dekhni ho to [Sade Sati Calculator](/calculators/free-sade-sati-calculator) aur [Manglik Dosh Calculator](/calculators/free-manglik-dosh-calculator) dono muft hain.',
+    ],
+  },
+  {
+    id: 'pitra-dosh-santan',
+    h2: 'Pitra Dosh aur santan — kya sambandh batayajata hai',
+    paras: [
+      'Ye prashn bhi is page par pahunchta hai, prayah tab jab kisi ne ye keh diya ho ki "aapki kundali mein pitra dosh hai, isliye santan mein badha hai".',
+      'Shastriya sthiti itni hai: **Pitra Dosh purvajon se jude rin ka sanket maana jaata hai**, aur Surya se uska sambandh hone ke kaaran ise pita-paksh aur vansh se joda jaata hai. Isi kaaran santan ke prashn mein iski charcha hoti hai.',
+      'Santulit baat: **ye sanket badha ki maatra badha sakta hai, par akela kisi ki santan nahi rokta**, aur na hi ye janm-muhurat ke chunav mein koi bhoomika rakhta hai. Jo vyakti dosh ke naam par hazaron ki pooja maange, wo dar bech raha hai. Apni sthiti khud dekhni ho to [Pitra Dosh Calculator](/calculators/free-pitra-dosh-calculator) muft hai, aur santan se uska sambandh [Pitra dosh aur santan](/blog/pitra-dosh-childbirth) mein khola gaya hai.',
+    ],
+  },
+  {
+    id: 'date-badal-gayi',
+    h2: 'Doctor ne date badal di — ab kya karein',
+    paras: [
+      'Ye hota hai, aur aksar hota hai. Ma ki sthiti badal jaati hai, hospital ka schedule badal jaata hai, ya doctor pehle bulaa lete hain.',
+      'Karna sirf itna hai: **nayi date aur nayi window daal kar calculator dobara chala lijiye.** Poora vishleshan naye sire se ban jaayega — naye slot, naye reason, naya naamakshar. Isme koi kami nahi hai; muhurat ek nishchit samay ka gun hai, koi aisa aashirwad nahi jo "kho" jaaye.',
+      'Aur wo baat jo shayad sabse zaroori hai: **agar nayi window mein koi bhi slot bahut achha na aaye, to bhi chinta ki baat nahi.** Har din har kshan koi na koi janm hota hai, aur unme se adhikansh saadharan muhurat mein hote hain. Muhurat ek anukoolta hai, koi shart nahi — aur kisi bhi haal mein ye maa aur bachche ki suraksha se upar nahi.',
+    ],
+  },
+  {
+    id: 'free-vs-paid',
+    h2: 'Free mein kya milta hai, aur paid report mein kya',
+    paras: [
+      '**Free mein** — aapki window ke andar sabse achha slot, uske saath doosre-teesre vikalp, har slot ke liye Lagna, Lagna swami aur uski dignity, Lagna nakshatra, Chandra nakshatra, tithi, yoga, karana, aathve bhaav ki sthiti, Gandmool ka flag aur naamakshar. Har point ke saath uski wajah. Koi signup nahi, koi card nahi, koi hissa chhupa kar nahi rakha jaata.',
+      '**Paid report mein** — us chune hue kshan ki poori janm-kundali: saare bhaav, Shadbala, Vimshottari dasha ka poora kram, aur bachche ke liye aage ka vishleshan. Yaani free version **samay chunne** ke liye hai, paid version us samay ko **samajhne** ke liye.',
+      'Jo yahan jaanbujh kar nahi hai: koi countdown, koi "aapki kundali mein bhaari dosh hai" wali chetavni, koi jaldi machane wala tareeka. Agar slot saadharan hai to result saadharan hi likhega. Antar vistaar se [Free vs paid report](/blog/child-birth-muhurat-free-vs-paid-report) mein.',
+    ],
+  },
+  {
+    id: 'janm-samay-note',
+    h2: 'Janm ke baad — sateek samay note karna sabse zaroori kaam hai',
+    paras: [
+      'Ye salah is page par sabse kam glamorous hai aur shayad sabse zyada kaam ki. **Janm ke turant baad ghadi dekhkar sateek samay likh lijiye — ghanta aur minute dono.**',
+      'Wajah wahi hai jo poore page par hai: **Lagna har do ghante mein badalta hai.** Pandrah minute ki galti Lagna badal sakti hai, aur uske saath poora chart. Ghar mein yaad rakha gaya samay prayah aadhe ghante par gol kar diya jaata hai — "subah lagbhag saat baje" — aur yahi aage chal kar har vishleshan ko kamzor kar deta hai.',
+      'Sabse vishwasneeya srot **janm pramanpatra ya hospital ka record** hai. Ho sake to nurse se poochh kar likh lijiye aur phone mein bhi save kar lijiye. Ye ek minute ka kaam hai jo agle chalis saal tak har kundali padhne ko sateek banata hai.',
+    ],
+  },
+  {
+    id: 'panchang-se-antar',
+    h2: 'Panchang dekh lein ya calculator — antar kya hai',
+    paras: [
+      'Vajib prashn hai, aur uska uttar iss page ke apne haq mein nahi jaata. **Bahut se kaamon ke liye saadharan panchang kaafi hai** — vrat ki tithi, tyohar ka din, ya Rahu Kaal jaanna ho to panchang se kaam chal jaata hai aur wo muft milta hai.',
+      'Antar tab shuru hota hai jab prashn **ek kshan** ka ho. Panchang aapko batata hai ki us din ki tithi kya hai, nakshatra kya hai, Rahu Kaal kab hai — ye poore din ke aankde hain. Wo ye nahi bata sakta ki subah 10:14 par **Lagna** kaunsa hoga, uska swami kis bhaav mein hoga, ya us kshan **aathve bhaav** mein koi kroor graha to nahi.',
+      'Aur delivery-window prayah **do-teen ghante** ki hoti hai, jiske andar Lagna badal bhi sakta hai. Isi liye yahan har slot ka poora chart banta hai. Agar aapka prashn sirf "aaj kaunsi tithi hai" hai, to [Panchang](/panchang) dekh lijiye — wo bhi muft hai.',
+    ],
+  },
+  {
+    id: 'twins-multiple',
+    h2: 'Twins ya multiple birth — muhurat kaise dekha jaata hai',
+    paras: [
+      'Tarika wahi rehta hai — doctor ki window, uske andar sabse achha slot — par ek vyavharik baat samajh leni chahiye.',
+      'Twins mein dono bachche prayah **kuch minute ke antar** se paida hote hain. Adhikansh sthitiyon mein utne se **Lagna nahi badalta**, isliye dono ka Lagna aur nakshatra ek hi hota hai. Par agar antar Lagna-sandhi par pad jaaye — yaani jab Lagna badalne wala ho — to do bhai-behnon ka poora chart alag ban jaata hai.',
+      'Isi wajah se twins mein **dono ka sateek samay alag-alag note karna** aur bhi zaroori ho jaata hai. Aur naamakshar bhi alag ho sakta hai, kyunki Chandra ka pada beech mein badal sakta hai. Calculator slot chunte waqt aisi sandhi se door wala samay upar rakhta hai, taaki chunav sthir rahe.',
+    ],
+  },
+  {
+    id: 'videsh-delivery',
+    h2: 'Videsh mein delivery — shahar aur timezone',
+    paras: [
+      'Calculator kisi bhi shahar ke liye kaam karta hai, sirf Bharat ke liye nahi. Shahar chunte hi uska **akshansh, deshantar aur timezone** apne aap lag jaate hain, aur ganana wahin ke sthaniya samay par hoti hai.',
+      'Ye zaroori isliye hai ki **Lagna sthaan ke saath badalta hai.** Ek hi kshan par Dubai, London aur Toronto mein Lagna alag hoga. Isliye agar delivery videsh mein hai to wahi shahar daaliye jahan hospital hai — apna Bharat ka shahar nahi, chahe parivaar wahan ho.',
+      'Ek aur baat: **samay hamesha sthaniya samay mein daalein** — yaani jo ghadi us hospital mein lagi hai. IST mein badal kar daalne ki koshish mat kijiye; calculator ye khud sambhal leta hai, aur haath se badalne par galti hone ka khatra hai.',
+    ],
+  },
+  {
+    id: 'samay-aur-bhagya',
+    h2: 'Kya janm ka samay bachche ka bhagya tay karta hai',
+    paras: [
+      'Ye prashn dabi zubaan mein poochha jaata hai, aur iska imandar uttar dena zaroori hai — kyunki isi dar par bahut kuch becha jaata hai.',
+      'Shastriya sthiti: kundali **pravritti** dikhati hai, **niyati** nahi. Janm ka kshan chart ka aarambh-bindu tay karta hai — Lagna, bhaav, dasha ka kram. Par usme jo likha hai wo sambhavnaon ka naksha hai, koi bandh-patra nahi. Karm, parivar, shiksha aur paristhiti — sab utne hi asar daalte hain.',
+      'Isliye ye baat saaf rakhni chahiye: **shubh muhurat ek anukoolta hai, koi guarantee nahi**, aur saadharan muhurat mein janm koi kami nahi hai. Duniya ke adhikansh log bina kisi muhurat ke paida hue hain aur achha jeevan jee rahe hain. Jo koi kahe ki galat samay par janm se bachche ka bhavishya bigad jaayega, wo shastra nahi, dar bech raha hai.',
+    ],
+  },
+  {
+    id: 'verify-result',
+    h2: 'Result ko khud jaanchne ka tarika',
+    paras: [
+      'Aap kisi bhi tool par bharosa karne se pehle use parakh sakte hain, aur karna bhi chahiye. Yahan ka har point **jaanche jaane layak** banaya gaya hai.',
+      'Result mein har slot ke saath likha hota hai: **kaunsa Lagna**, **Lagna ka swami kis bhaav mein aur kis dignity mein**, **kaunsa nakshatra aur pada**, **tithi, yoga, karana**, aur **aathve bhaav mein kya hai**. Ye sab objective aankde hain. Kisi bhi doosre bharose-mand jyotish software mein wahi date, time, shahar daaliye — Lagna aur nakshatra bilkul milne chahiye.',
+      'Agar kahin nakshatra ya rashi alag aa rahi ho, to prayah wo **ayanamsha ka antar** hota hai — hum Lahiri use karte hain, jo Bharat sarkar ka maanak hai; kuch videshi software Krishnamurti ya Raman use karte hain. Ye kisi ki galti nahi, sirf alag maanak hai. Par agar **Lagna** hi alag aaye to shahar ya samay mein kahin galti hui hai — dobara jaanch lijiye.',
+    ],
+  },
+  {
+    id: 'aage-kya-padhein',
+    h2: 'Aage kya padhein',
+    paras: [
+      'Agar delivery **kal ya aaj** hai — [Last-minute quick check](/blog/child-birth-muhurat-last-minute-quick-check) sabse chhota aur seedha page hai, aur Hindi mein [तुरंत जांच](/blog/child-birth-muhurat-last-minute-quick-check-hindi).',
+      'Agar aap **method samajhna** chahte hain — [9 factors explained](/blog/child-birth-muhurat-9-factors-explained), [Doctor safe window vs muhurat](/blog/doctor-safe-window-vs-child-birth-muhurat) aur [Child birth muhurat FAQ](/blog/child-birth-muhurat-faq).',
+      'Agar prashn **bachche ke bhavishya** ka hai, muhurat ka nahi — [Child ki destiny aur bhavishya](/blog/childs-destiny-future-astrology), [Panchmesh aur bachche ki pratibha](/blog/fifth-lord-child-aptitude-astrology), [Saraswati yog aur shiksha](/blog/saraswati-yoga-child-education-astrology) aur [Dasha timing aur bachche ka vikas](/blog/dasha-timing-child-development-astrology). Nakshatra ka poora parichay [Nakshatra Guide](/learn/nakshatra-guide) mein hai.',
+    ],
+  },
+];
+
+type MuhuratLink = { href: string; label: string; note: string };
+
+const HUB_HI: MuhuratLink[] = [
+  { href: '/blog/child-birth-muhurat-hindi', label: 'चाइल्ड बर्थ मुहूर्त — पूरी गाइड', note: 'शुरुआत यहाँ से' },
+  { href: '/blog/best-muhurat-for-c-section-hindi', label: 'सी-सेक्शन का शुभ मुहूर्त', note: 'नियोजित ऑपरेशन के लिए' },
+  { href: '/blog/child-birth-muhurat-9-factors-explained-hindi', label: '9 कारक — विस्तार से', note: 'तरीका समझने के लिए' },
+  { href: '/blog/doctor-safe-window-vs-child-birth-muhurat-hindi', label: 'डॉक्टर की विंडो vs मुहूर्त', note: 'क्रम क्या होना चाहिए' },
+  { href: '/blog/lucky-baby-name-letter-by-nakshatra-hindi', label: 'नक्षत्र से नामाक्षर', note: 'नाम का पहला अक्षर' },
+  { href: '/blog/rohini-nakshatra-baby-birth-hindi', label: 'रोहिणी नक्षत्र में जन्म', note: 'चंद्र का नक्षत्र' },
+  { href: '/blog/anuradha-nakshatra-baby-birth-hindi', label: 'अनुराधा नक्षत्र में जन्म', note: 'शनि का नक्षत्र' },
+  { href: '/blog/ivf-delivery-muhurat-guide-hindi', label: 'IVF डिलीवरी मुहूर्त', note: 'IVF के बाद की डिलीवरी' },
+  { href: '/blog/santan-prapti-mein-deri-astrology-upay', label: 'संतान प्राप्ति में देरी', note: 'अलग प्रश्न, अलग चार्ट' },
+];
+
+const HUB_EN: MuhuratLink[] = [
+  { href: '/blog/child-birth-muhurat', label: 'Child Birth Muhurat — full guide', note: 'Start here' },
+  { href: '/blog/best-muhurat-for-c-section', label: 'Best muhurat for C-section', note: 'Planned operation' },
+  { href: '/blog/normal-delivery-vs-c-section-muhurat', label: 'Normal delivery vs C-section', note: 'When choice exists' },
+  { href: '/blog/child-birth-muhurat-last-minute-quick-check', label: 'Last-minute quick check', note: 'Delivery is today' },
+  { href: '/blog/pushya-nakshatra-baby-birth', label: 'Pushya nakshatra', note: 'The most auspicious' },
+  { href: '/blog/hasta-nakshatra-baby-birth', label: 'Hasta nakshatra', note: 'Skill and dexterity' },
+  { href: '/blog/revati-nakshatra-baby-birth', label: 'Revati nakshatra', note: 'Auspicious, but Gandmool' },
+  { href: '/learn/number-of-children-prediction', label: 'Number of Children Prediction', note: 'A different question' },
+  { href: '/learn/nakshatra-guide', label: 'Nakshatra Guide', note: 'All 27, explained' },
+];
+
+function MuhuratRich({ text, k }: { text: string; k: string }) {
+  const parts = text.split(/(\[[^\]]+\]\([^)]+\)|\*\*[^*]+\*\*)/g);
+  return (
+    <>
+      {parts.map((part, i) => {
+        const link = part.match(/^\[([^\]]+)\]\(([^)]+)\)$/);
+        if (link) {
+          return (
+            <Link key={`${k}-l-${i}`} href={link[2]} className="font-semibold underline underline-offset-2 hover:opacity-80" style={{ color: GOLD }}>
+              {link[1]}
+            </Link>
+          );
+        }
+        if (part.startsWith('**') && part.endsWith('**')) {
+          return <strong key={`${k}-b-${i}`} style={{ color: GOLD }}>{part.slice(2, -2)}</strong>;
+        }
+        return <span key={`${k}-s-${i}`}>{part}</span>;
+      })}
+    </>
+  );
+}
+
+function MuhuratHub({ items }: { items: MuhuratLink[] }) {
+  return (
+    <ul className="space-y-2 m-0 p-0" style={{ listStyle: 'none' }}>
+      {items.map((i) => (
+        <li key={i.href}>
+          <Link href={i.href} className="group block rounded-lg px-3 py-2 transition hover:bg-white/5">
+            <span className="block text-sm font-semibold" style={{ color: GOLD }}>{i.label}</span>
+            <span className="block text-xs text-slate-500">{i.note}</span>
+          </Link>
+        </li>
+      ))}
+    </ul>
+  );
 }
 
 // ─── Post-payment progress steps (anti-anxiety wait-screen) ───
@@ -827,23 +1276,35 @@ export default function FreeChildBirthMuhuratPage() {
             </div>
           )}
 
-          {/* PILLAR CONTENT */}
-          <section className="mt-16 prose prose-invert max-w-none">
-            <h2 className="text-2xl font-serif font-bold mb-4" style={{ color: GOLD }}>Child Birth Muhurat Kya Hota Hai?</h2>
-            <p className="text-slate-300 leading-relaxed mb-4">
-              <strong style={{ color: GOLD }}>Child birth muhurat</strong> woh shubh samay hai jab bachche ka janam sabse favourable planetary alignment mein ho. Vedic Jyotish mein maana jaata hai ki janam ke samay ka Lagna, Nakshatra, aur grah sthiti bachche ke swabhav, health, aur bhavishya ko shape karte hain. C-section ya IVF mein, jab time pehle se choose kiya ja sakta hai, parents us shubh moment ko select kar sakte hain — lekin <strong>hamesha doctor ki approved safe window ke andar</strong>.
-            </p>
+          {/* ── v2.0: TABLE OF CONTENTS ─────────────────────────── */}
+          <nav aria-label="Is page par kya hai" className="mt-16 rounded-2xl p-5 md:p-6"
+            style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid ${GOLD_RGBA(0.2)}` }}>
+            <h2 className="text-lg font-serif font-bold mb-3" style={{ color: GOLD }}>Is Page Par Kya Hai</h2>
+            <ol className="grid sm:grid-cols-2 gap-x-6 gap-y-1.5 text-sm list-decimal pl-5 text-slate-300">
+              {SECTIONS.map((sec) => (
+                <li key={sec.id}>
+                  <a href={`#${sec.id}`} className="hover:underline underline-offset-2" style={{ color: '#cbd5e1' }}>{sec.h2}</a>
+                </li>
+              ))}
+            </ol>
+          </nav>
 
-            <h2 className="text-2xl font-serif font-bold mb-4 mt-8" style={{ color: GOLD }}>Muhurat Kis Cheez Par Depend Karta Hai? (9 Factors)</h2>
-            <p className="text-slate-300 leading-relaxed mb-4">
-              Trikaal Vaani master-grade analysis karta hai: (1) Lagna Nakshatra ki quality — Pushya, Rohini, Hasta jaise auspicious nakshatra. (2) Lagna lord ka house — kendra/trikona mein strong. (3) Lagna lord ki dignity — exalted ya own sign. (4) 8th house affliction — malefic 8th house mein ho toh avoid. (5) Kendra/trikona mein benefics. (6) Moon ki strength. (7) Shubh Yoga. (8) Purna Tithi. (9) Rahu Kaal avoidance. Yeh sab milkar 0-100 ka muhurat score banate hain.
-            </p>
+          {/* ── v2.0: PILLAR CONTENT — keyword-driven H2 sections ── */}
+          <section className="mt-12">
+            {SECTIONS.map((sec, si) => (
+              <div key={sec.id} id={sec.id} className="scroll-mt-24 mb-10">
+                <h2 className="text-2xl font-serif font-bold mb-4" style={{ color: GOLD }}>{sec.h2}</h2>
+                {sec.paras.map((p, pi) => (
+                  <p key={pi} className="text-slate-300 leading-relaxed mb-4">
+                    <MuhuratRich text={p} k={`s${si}-p${pi}`} />
+                  </p>
+                ))}
+              </div>
+            ))}
+          </section>
 
-            <h2 className="text-2xl font-serif font-bold mb-4 mt-8" style={{ color: GOLD }}>Naamakshar — Bachche Ka Lucky Naam Letter</h2>
-            <p className="text-slate-300 leading-relaxed mb-4">
-              Har nakshatra ke 4 pada hote hain, aur har pada ka ek shubh starting syllable hota hai. Jaise Pushya nakshatra ke padas se "Hu", "He", "Ho", "Da" aate hain. Jis muhurat mein bachcha paida hota hai, uska Lagna nakshatra-pada bachche ke naam ka lucky letter decide karta hai. Trikaal Vaani ki paid report mein hum is letter se shuru hone wale auspicious boy aur girl names suggest karte hain.
-            </p>
-
+          {/* comparison table — kept from v1.x, unchanged */}
+          <section className="mt-4 prose prose-invert max-w-none">
             <h2 className="text-2xl font-serif font-bold mb-4 mt-8" style={{ color: GOLD }}>Trikaal Vaani vs Other Muhurat Sites</h2>
             <div className="not-prose overflow-x-auto mb-6">
               <table className="w-full text-sm" style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid ${GOLD}33`, borderRadius: '12px' }}>
@@ -862,6 +1323,24 @@ export default function FreeChildBirthMuhuratPage() {
                   <tr style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }}><td className="p-3">Lucky name letter</td><td className="p-3" style={{ color: GOLD }}>✓ Naamakshar</td><td className="p-3 text-slate-500">✗ Missing</td></tr>
                 </tbody>
               </table>
+            </div>
+          </section>
+
+          {/* ── v2.0: the muhurat cluster this page was barely linked to ── */}
+          <section className="mt-12 rounded-2xl p-5 md:p-6" style={{ background: '#0B0F1A', border: '1px solid rgba(255,255,255,0.07)' }}>
+            <h2 className="text-base font-bold m-0 mb-2" style={{ color: GOLD }}>Child birth muhurat — poora guide</h2>
+            <p className="text-xs leading-relaxed mb-4" style={{ color: '#94a3b8' }}>
+              Har vishay par alag vistrit lekh — hindi aur angrezi dono mein. Delivery kal hai to sabse pehle &ldquo;Last-minute quick check&rdquo; padhiye.
+            </p>
+            <div className="grid gap-6 md:grid-cols-2">
+              <div>
+                <h3 className="mb-2 pb-1.5 text-sm font-bold border-b" style={{ color: '#e2e8f0', borderColor: 'rgba(212,175,55,0.25)' }}>हिंदी में</h3>
+                <MuhuratHub items={HUB_HI} />
+              </div>
+              <div>
+                <h3 className="mb-2 pb-1.5 text-sm font-bold border-b" style={{ color: '#e2e8f0', borderColor: 'rgba(212,175,55,0.25)' }}>In English</h3>
+                <MuhuratHub items={HUB_EN} />
+              </div>
             </div>
           </section>
 
