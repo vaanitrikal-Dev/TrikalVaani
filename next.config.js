@@ -3,23 +3,22 @@
  * 🔱 TRIKAL VAANI — CEO PROTECTION HEADER 🔱
  * ============================================================================
  * File:        next.config.js
- * Version:     v1.4 — 20 permanent redirects for the Hindi slug rename (Sep 2026)
- * Date:        2026-09-03
+ * Version:     v1.5 — + 1 redirect for sibling-prediction Hindi page (Sep 2026)
+ * Date:        2026-09-05
  * Owner:       Rohiit Gupta, Chief Vedic Architect
  *
- * CHANGES vs v1.3:
- *   ✅ ADDED 20 new 301 redirects. Every Hindi blog_posts slug that used to
- *      end in the wrong "-hindi" suffix (e.g. kundali-mein-dhan-yog-hindi)
- *      was renamed in Supabase to a pure transliterated-Hindi slug with no
- *      suffix (e.g. kundali-mein-dhan-yog). The DB rename alone does not
- *      fix already-cached pages: Next.js ISR keeps serving the old URL from
- *      cache (self-referencing canonical, HTTP 200) for up to 24h after a
- *      rename, which is a duplicate-content risk if Google crawls the old
- *      URL in that window. These redirects fix it immediately on deploy —
- *      redirects() runs at the edge before any cache lookup — and also
- *      permanently preserve any existing backlinks or Google index entries
- *      pointing at the old URLs, exactly like the /karmic-reading redirect
- *      below already does for a retired slug.
+ * CHANGES vs v1.4:
+ *   ✅ ADDED 1 new 301 redirect: /learn/sibling-prediction-astrology?lang=hi
+ *      (the legacy Hindi toggle, 214 GSC impressions/90d) now permanently
+ *      redirects to the new hindi_slug page at
+ *      /blog/kitne-bhai-bahan-honge-kundali-se. This preserves the existing
+ *      indexed URL's SEO equity while moving to the new hindi_slug pattern
+ *      (seo_pillar_pages.hindi_slug -> a real blog_posts row) instead of the
+ *      legacy body_content_hi / ?lang=hi mechanism. Uses Next.js `has` query
+ *      matching so only the ?lang=hi variant of this one page redirects —
+ *      the plain English URL is untouched.
+ *   ✅ KEPT (v1.4): all 20 Hindi-slug-rename redirects (Kundali/Property/
+ *      Wealth hubs), unchanged.
  *   ✅ KEPT (v1.3): the /diagrams/ 1-year immutable Cache-Control headers.
  *   ✅ KEPT (v1.2): all 4 original redirects — /upcoming-events, /predict,
  *      /birth-form, /karmic-reading — unchanged.
@@ -96,6 +95,19 @@ const nextConfig = {
 
       // Wealth Learn Hub (1 so far — more will be added as the hub is built)
       { source: '/blog/wealth-prediction-astrology-hindi', destination: '/blog/dhan-bhavishyavani-jyotish', permanent: true },
+
+      // ──────────────────────────────────────────────────────────────
+      // FAMILY HUB — hindi_slug MIGRATION (5 Sep 2026) — legacy ?lang=hi
+      // toggle -> new hindi_slug page (separate blog_posts row). Only
+      // the ?lang=hi query variant redirects; the plain /learn/ English
+      // URL is untouched.
+      // ──────────────────────────────────────────────────────────────
+      {
+        source: '/learn/sibling-prediction-astrology',
+        has: [{ type: 'query', key: 'lang', value: 'hi' }],
+        destination: '/blog/kitne-bhai-bahan-honge-kundali-se',
+        permanent: true, // 301 — old ?lang=hi (214 GSC impressions) -> new hindi_slug page
+      },
     ];
   },
   // ──────────────────────────────────────────────────────────────────
