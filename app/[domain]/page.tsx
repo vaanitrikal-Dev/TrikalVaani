@@ -2,9 +2,34 @@
  * ============================================================
  * TRIKAAL VAANI — SEO Domain Pages Generator
  * CEO & Chief Vedic Architect: Rohiit Gupta
- * File: app/[domain]/page.tsx (dynamic engine for all 15 domains)
- * VERSION: 2.7 — SUPABASE MIGRATION (data moved to domain_pages table)
+ * File: app/[domain]/page.tsx (dynamic engine for 15 life domains + 10 city hubs)
+ * VERSION: 2.9 — CITY HUB DELEGATION (05 Sep 2026)
  * SIGNED: ROHIIT GUPTA, CEO
+ *
+ * WHERE THIS FILE GOES: GitHub path -> app/[domain]/page.tsx (replace)
+ * SHIP TOGETHER WITH: components/city/CityHub.tsx (NEW FILE) — neither
+ * works without the other.
+ *
+ * v2.8 -> v2.9 CHANGES — exactly three insertion points, nothing else moved:
+ *   - generateMetadata(): if the slug is one of the 10 city slugs, return
+ *     buildCityMetadata(slug) and stop. Domain metadata path untouched.
+ *   - generateStaticParams(): the 10 city slugs are appended to the
+ *     domain_pages slugs, so all 10 hubs are pre-rendered at build.
+ *   - DomainPage(): if the slug is a city slug, render <CityHub /> and
+ *     return. The RESERVED_SLUGS guard runs FIRST and is unchanged, so a
+ *     reserved slug still 404s exactly as before.
+ *
+ *   WHY THIS ROUTE AND NOT A NEW ONE: Next.js allows only one dynamic
+ *   segment at a given path level. /delhi and /career are both root-level,
+ *   so [domain] already owns /delhi — it was simply calling notFound() on
+ *   it because no domain_pages row exists with slug 'delhi'. Adding city
+ *   rows to domain_pages was rejected: that table's shape is planet /
+ *   house / bphs_ref, which is a life-domain shape, not a city shape.
+ *   Delegation keeps both page types honest.
+ *
+ *   BLAST RADIUS: the 15 existing domain pages take a single extra
+ *   Set.has() call and are otherwise byte-identical to v2.8. No Supabase
+ *   query, no JSX, no schema block was changed.
  *
  * v2.6 -> v2.7 CHANGES:
  *   - Removed hardcoded DOMAIN_PAGES object (~15 domains) — now fetched from
@@ -29,6 +54,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { supabase } from '../../lib/supabase';
+import CityHub, { CITY_SLUGS, buildCityMetadata } from '../../components/city/CityHub';
 
 export const revalidate = 86400;
 
@@ -167,6 +193,11 @@ interface Props {
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  // v2.9 — city hubs own their own metadata. Must come before the
+  // domain_pages lookup, which would return null for a city and fall
+  // through to the bare 'Trikaal Vaani' title.
+  if (CITY_SLUGS.has(params.domain)) return buildCityMetadata(params.domain);
+
   const config = await getDomainPage(params.domain);
   if (!config) return { title: 'Trikaal Vaani' };
 
@@ -217,11 +248,22 @@ export async function generateStaticParams() {
     if (error) console.error('[TV-Supabase] generateStaticParams error:', error.message);
     return [];
   }
-  return (data as { slug: string }[]).map(row => ({ domain: row.slug }));
+  // v2.9 — the 10 city hubs are pre-rendered alongside the domain pages.
+  const domainParams = (data as { slug: string }[]).map(row => ({ domain: row.slug }));
+  const cityParams   = Array.from(CITY_SLUGS).map(slug => ({ domain: slug }));
+  return [...domainParams, ...cityParams];
 }
 
 export default async function DomainPage({ params }: Props) {
   if (RESERVED_SLUGS.includes(params.domain)) notFound();
+
+  // v2.9 — /delhi, /mumbai, /pune, /noida, /chennai, /kolkata, /bangalore,
+  // /hyderabad, /gurgaon, /ahmedabad. These 10 URLs have been in sitemap.xml
+  // and returning 404 the whole time; each one is the missing parent of ~278
+  // live /{city}/events/* pages.
+  if (CITY_SLUGS.has(params.domain)) {
+    return <CityHub citySlug={params.domain} />;
+  }
 
   const config = await getDomainPage(params.domain);
   if (!config) notFound();
