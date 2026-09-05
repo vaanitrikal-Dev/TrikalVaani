@@ -617,45 +617,202 @@ export async function getUpcoming(exclude: string, limit = 8) {
  * the truth, and needs no model call — the city, the state and the verified
  * local term are all already in hand at render time.
  */
+// ════════════════════════════════════════════════════════════════════════════
+// TITLE + META CONFIG — v5.0 (5 Sep 2026)
+//
+// Why this block exists. Measured on the live Hyderabad page, 5 Sep 2026, the
+// rendered title was:
+//
+//   "Ganesh Chaturthi 2026: Date, Puja Vidhi & Muhurat — Vinayaka Chavithi,
+//    Hyderabad | Trikaal Vaani"                                    96 chars
+//
+// Google cuts at roughly 60. The city — the only reason 3,083 of these pages
+// exist — never reached the SERP, and the promise on offer was the date, which
+// the AI Overview has already answered above the result. GSC: 0.25% CTR.
+//
+// So the title is now composed to a hard ceiling with the city held early and
+// the promise moved onto what a snippet cannot answer: muhurat, vidhi, samagri.
+// ════════════════════════════════════════════════════════════════════════════
+
+/** Hard ceilings. Google truncates on pixel width, ~580px. Devanagari runs
+ *  wider per character than Latin, so Hindi gets the lower number. */
+const TITLE_MAX_EN = 58;
+const TITLE_MAX_HI = 48;
+
+/** The brand is NOT appended on event pages. "| Trikaal Vaani" costs 16 of the
+ *  58 characters available and would push the city back out of the visible
+ *  title, which is the exact fault being fixed here. Flip to true to restore
+ *  it site-wide on events; nothing else needs changing. */
+const TITLE_BRAND = false;
+const BRAND = " | Trikaal Vaani";
+
+/** The five angles. Change ANGLE on the next line and every event page on the
+ *  site moves together. Longest wording first in each array — the builder
+ *  steps down the list until one fits the ceiling. */
+type Angle = "speed" | "authority" | "myth" | "benefit" | "hinglish";
+const ANGLE: Angle = "benefit";
+
+const ANGLE_TEXT: Record<Angle, { en: string[]; hi: string[] }> = {
+  speed: {
+    en: ["Live Muhurat & Puja Vidhi", "Live Muhurat & Vidhi", "Live Muhurat"],
+    hi: ["लाइव मुहूर्त और पूजा विधि", "लाइव मुहूर्त और विधि", "लाइव मुहूर्त"],
+  },
+  authority: {
+    en: ["Shubh Muhurat & Puja Vidhi", "Shubh Muhurat & Vidhi", "Shubh Muhurat"],
+    hi: ["शुभ मुहूर्त और पूजा विधि", "शुभ मुहूर्त और विधि", "शुभ मुहूर्त"],
+  },
+  myth: {
+    en: ["Puja Vidhi & Common Mistakes", "Vidhi & Common Mistakes", "Puja Vidhi"],
+    hi: ["पूजा विधि और आम गलतियाँ", "विधि और आम गलतियाँ", "पूजा विधि"],
+  },
+  benefit: {
+    en: ["Muhurat, Vidhi & Samagri", "Muhurat & Puja Vidhi", "Muhurat & Vidhi"],
+    hi: ["मुहूर्त, विधि और सामग्री", "मुहूर्त और पूजा विधि", "मुहूर्त और विधि"],
+  },
+  hinglish: {
+    en: ["Muhurat, Vidhi & Upay", "Muhurat & Upay", "Muhurat"],
+    hi: ["मुहूर्त, पूजा विधि और उपाय", "मुहूर्त और उपाय", "मुहूर्त"],
+  },
+};
+
+/** Google truncates descriptions on pixel width, not character count.
+ *  Devanagari runs wider per character, so Hindi is held to a lower ceiling —
+ *  padding a Hindi description out to 155 would get it cut mid-sentence. */
+const DESC_MAX_EN = 155;
+const DESC_MAX_HI = 145;
+
+/** First candidate that fits. Last one is trimmed rather than dropped, so this
+ *  always returns something — a festival with an unusually long name still
+ *  gets a title, just a shorter one. */
+function fitTitle(candidates: string[], max: number): string {
+  for (const c of candidates) if (c.length <= max) return c;
+  return candidates[candidates.length - 1].slice(0, max).trimEnd();
+}
+
+/** Base sentence, then any optional clauses that fit, then ONE filler chosen
+ *  from alternatives longest-first, then the CTA.
+ *
+ *  The filler is alternatives rather than more additive clauses because two
+ *  clauses both offering the samagri list read like padding. The CTA is never
+ *  dropped — a description without one is what this standard exists to stop —
+ *  so a clause gives way for it instead.
+ *
+ *  Order matters: the verified local name goes in `extras`, ahead of the
+ *  filler, because "vinayaka chavithi hyderabad" is a query the page already
+ *  ranks for and a generic samagri line is not. */
+function assembleDesc(base: string, extras: string[], fillers: string[], cta: string, max: number): string {
+  let out = base;
+  for (const e of extras) {
+    if (e && (out + e + cta).length <= max) out += e;
+  }
+  for (const fl of fillers) {
+    if ((out + fl + cta).length <= max) { out += fl; break; }
+  }
+  out += cta;
+  return out.length > max ? out.slice(0, max - 1).trimEnd() + "…" : out;
+}
+
 export function buildMeta(opts: {
   lang: Lang; festival: DbFestival; city: City | null;
   content: Content | null; local: LocalTerm | null; visarjan?: Visarjan | null;
 }) {
   const { lang, festival: f, city, content, local, visarjan } = opts;
-  const name = lang === "hi" && f.name_hindi ? f.name_hindi : f.festival_name;
-  const place = city ? (lang === "hi" ? city.name_hindi : city.name) : null;
+  const hi = lang === "hi";
+  // festival_name already carries the year ("Ganesh Chaturthi 2026"), so it is
+  // stripped here and re-added once by the ladder below. Without this the
+  // title reads "Ganesh Chaturthi 2026 Hyderabad 2026".
+  const name = (hi && f.name_hindi ? f.name_hindi : f.festival_name)
+    .replace(/\s*(19|20)\d{2}\s*$/, "").trim();
+  const place = city ? (hi ? city.name_hindi : city.name) : null;
   const alsoCalled = local?.local_name ?? null;
+  const year = f.year ? String(f.year) : "";
 
-  // TITLE — festival, local name where one is verified, then the city.
-  const titleCore = content?.seo_title ?? (lang === "hi"
-    ? `${name} कब है — तारीख, मुहूर्त और पूजा विधि`
-    : `${name}: Date, Puja Muhurat & Vidhi`);
-  const title = place
-    ? (alsoCalled && !titleCore.includes(alsoCalled)
-        ? `${titleCore} — ${alsoCalled}, ${place}`
-        : `${titleCore} — ${place}`)
-    : titleCore;
+  // ── TITLE ────────────────────────────────────────────────────────────────
+  // The festival name leads, not the verified local name. "Vinayaka Chavithi
+  // Hyderabad" would win Telangana and lose every searcher who typed the
+  // national name, and there is no per-city query data to justify that trade.
+  // The local name stays in the description, where there is room for both.
+  const max = (hi ? TITLE_MAX_HI : TITLE_MAX_EN) - (TITLE_BRAND ? BRAND.length : 0);
+  const angles = ANGLE_TEXT[ANGLE][hi ? "hi" : "en"];
 
-  // DESCRIPTION — always names the city AND the state, because "in telangana"
-  // is how the query is typed, and the local name when there is a verified one.
+  let title: string;
+  if (place) {
+    const head = `${name} ${place}`;
+    const candidates: string[] = [];
+    // Year kept as long as possible — "ganesh chaturthi 2026 hyderabad" is how
+    // the query is actually typed. Angle wording is what gives way first.
+    if (year) for (const a of angles) candidates.push(`${head} ${year} — ${a}`);
+    for (const a of angles) candidates.push(`${head} — ${a}`);
+    if (year) candidates.push(`${head} ${year}`);
+    candidates.push(head);
+    title = fitTitle(candidates, max);
+  } else {
+    // National page. The hand-written row title wins when it fits, because a
+    // human wrote it for that festival; the ladder is only a fallback.
+    const authored = content?.seo_title ?? null;
+    if (authored && authored.length <= max) {
+      title = authored;
+    } else {
+      const stem = year ? `${name} ${year}` : name;
+      title = fitTitle([...angles.map(a => `${stem} — ${a}`), stem, name], max);
+    }
+  }
+  if (TITLE_BRAND) title += BRAND;
+
+  // ── DESCRIPTION ──────────────────────────────────────────────────────────
+  // Intent confirmed in the first sentence, the verified local name kept
+  // ahead of any generic clause, exactly one CTA at the end.
+  const dmax = hi ? DESC_MAX_HI : DESC_MAX_EN;
   let description: string;
   if (place && city) {
-    const also = alsoCalled ? (lang === "hi" ? `${city.state} में ${alsoCalled}। ` : `Known in ${city.state} as ${alsoCalled}. `) : "";
-    const imm = local?.visarjan_name
-      ? (lang === "hi" ? `${local.visarjan_name} का समय भी। ` : `${local.visarjan_name} timing too. `)
-      : "";
-    description = lang === "hi"
-      ? `${place} (${city.state}) में ${name} — तिथि, पूजा मुहूर्त, राहुकाल और सूर्योदय, ${place} के लिए गणना। ${also}${imm}पूजा विधि और व्रत नियम।`
-      : `${name} in ${place}, ${city.state} — tithi, puja muhurat, Rahu Kaal and sunrise computed for ${place}. ${also}${imm}Puja vidhi and vrat rules.`;
+    if (hi) {
+      description = assembleDesc(
+        `${place} में ${name} ${year} — सटीक मुहूर्त, पूजा विधि और व्रत नियम।`,
+        [
+          alsoCalled ? ` ${city.state} में इसे ${alsoCalled} कहते हैं।` : "",
+          local?.visarjan_name ? ` ${local.visarjan_name} का समय भी।` : "",
+        ],
+        [" सामग्री सूची, उपाय और शहरवार समय भी।", " सामग्री सूची और उपाय भी।", " सामग्री सूची भी।"],
+        ` ${place} का समय अभी देखें।`,
+        dmax,
+      );
+    } else {
+      description = assembleDesc(
+        `${name} ${year} in ${place}, ${city.state}: exact muhurat, full puja vidhi and vrat rules.`,
+        [
+          alsoCalled ? ` Known as ${alsoCalled} here.` : "",
+          local?.visarjan_name ? ` ${local.visarjan_name} timing too.` : "",
+        ],
+        [" Samagri list, upay and city-wise timings.", " Samagri list and upay included.", " Samagri list too."],
+        ` Open ${place} timings.`,
+        dmax,
+      );
+    }
   } else {
-    description = content?.seo_description ?? (lang === "hi"
-      ? `${name} की सही तारीख, पूजा मुहूर्त, व्रत विधि और शहरवार समय।`
-      : `${name}: exact date, puja muhurat, vidhi and city-wise timings.`);
+    const authored = content?.seo_description ?? null;
+    if (authored && authored.length <= dmax) {
+      description = authored;
+    } else if (hi) {
+      description = assembleDesc(
+        `${name} ${year} की सटीक तिथि, शुभ मुहूर्त, पूजा विधि और व्रत नियम।`,
+        [],
+        [" सामग्री सूची, उपाय और शहरवार समय भी।", " सामग्री सूची और उपाय भी।"],
+        ` अपने शहर का मुहूर्त देखें।`,
+        dmax,
+      );
+    } else {
+      description = assembleDesc(
+        `${name} ${year}: exact tithi, shubh muhurat, full puja vidhi and vrat rules.`,
+        [],
+        [" Samagri list, upay and city-wise timings.", " Samagri list and upay included."],
+        ` Check your city's muhurat now.`,
+        dmax,
+      );
+    }
   }
-  if (description.length > 158) description = description.slice(0, 155).trimEnd() + "…";
 
-  // KEYWORDS — the base set from the content row, crossed with this city and
-  // state, plus the local name. Mechanical, so it cannot be wrong.
+  // ── KEYWORDS ─────────────────────────────────────────────────────────────
+  // Unchanged from v4.1. Mechanical, so it cannot be wrong.
   const base = content?.keywords ?? [];
   const keywords = new Set(base);
   if (city) {
