@@ -1,8 +1,50 @@
 // ============================================================
 // TRIKAL VAANI — BLOG POSTS — SUPABASE VERSION
 // CEO: Rohiit Gupta | Chief Vedic Architect
-// Version: 3.6 (SITEMAP READER — fixes 546 missing blog URLs)
-// Date: 2026-08-28
+// Version: 3.7 (LIST-QUERY FIX — stops the nano DB outage)
+// Date: 2026-09-05
+//
+// CHANGE v3.7 — WHY THIS EXISTS (DB OUTAGE ROOT CAUSE):
+//   Postgres went Unhealthy on 2026-09-05. Logs showed, on repeat:
+//     GET /blog_posts?select=*&is_published=eq.true&order=published_at.desc
+//       -> 500  {"code":"57014","message":"canceling statement due to
+//                statement timeout"}
+//       -> "Warp server error: Thread killed by timeout manager" (x dozens)
+//
+//   That is getAllPosts() below. It did select('*') across 546 published
+//   rows = ~5.9 MB, of which the `sections` JSONB alone is ~3.4 MB — and
+//   /blog has `revalidate = 300`, so this fired every 5 minutes forever on
+//   a 0.5 GB nano instance. Each run also regex-parsed all 546 bodies via
+//   transformSections(). CPU 82%, Memory 82%, Disk IO 75%.
+//
+//   The punchline: /blog renders BlogCards. A BlogCard uses exactly six
+//   fields. It never touched sections, faqs, remedies or classical_sources.
+//   We were paying 5.9 MB to render ~60 KB of text.
+//
+//   FIX (this version):
+//     • NEW const LIST_COLUMNS — the narrow column set the list views
+//       actually read. No JSONB body columns.
+//     • getAllPosts()     : select('*') -> LIST_COLUMNS, + .range()
+//                           pagination so it can never silently truncate
+//                           at Supabase's 1000-row cap as the blog grows.
+//     • getRelatedPosts() : select('*') -> LIST_COLUMNS. The related-posts
+//                           grid in app/blog/[slug]/page.tsx renders only
+//                           slug, category and title.
+//     • Both now use the anon client, same as getPostsForSitemap() — RLS
+//       policy "Public can read published posts" already permits it, and
+//       it removes the service-role-key-rotation failure mode described
+//       in v3.6 below.
+//
+//   NOT CHANGED — deliberately:
+//     • getPostBySlug() keeps select('*'). It fetches ONE row and the
+//       article page genuinely needs sections/faqs/remedies. One row is
+//       ~11 KB, not a problem.
+//     • mapRow() is untouched and is null-safe for the columns the narrow
+//       select omits: transformSections(undefined) -> [], and every other
+//       optional field already has an `?? ''` / `?? []` / `?? null` guard.
+//       So a narrow row maps to a BlogPost with empty body fields, which
+//       is exactly what the list views want.
+//     • Every export keeps its existing signature. Drop-in replacement.
 //
 // CHANGE v3.6 — WHY THIS EXISTS:
 //   app/sitemap.ts emitted 4,979 URLs and ZERO /blog/ URLs, even though
@@ -145,6 +187,23 @@ const supabaseAnon = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
+
+// ============================================================
+// v3.7 — NARROW COLUMN SET FOR LIST VIEWS
+// ============================================================
+// The only columns /blog cards and the related-posts grid read.
+// Excludes the heavy body columns: sections (3.4 MB across the table),
+// faqs, direct_answer, emotional, communication, strengths, challenges,
+// remedies, classical_sources, related_slugs, keywords.
+// Adding a column here is cheap. Adding `sections` here is what caused
+// the 2026-09-05 outage — do not.
+const LIST_COLUMNS =
+  'slug, title, description, category, domain, published_at, updated_at, ' +
+  'read_time_minutes, og_image, cta_label, cta_href, cta_price, ' +
+  'lang, alt_lang_slug';
+
+const LIST_PAGE_SIZE = 1000;
+const LIST_MAX_PAGES = 20; // hard stop: 20,000 posts. Guards a runaway loop.
 
 // ============================================================
 // SECTIONS TRANSFORM — v3.4
@@ -316,18 +375,42 @@ function mapRow(row: Record<string, unknown>): BlogPost {
 // PUBLIC API — Same function signatures, zero breaking changes
 // ============================================================
 
+// v3.7 — narrow select + pagination + anon client.
+// Before: select('*') = 546 rows / ~5.9 MB / statement timeout on nano.
+// After:  ~14 columns  = 546 rows / ~60 KB.
+// Returned BlogPost objects have empty sections/faqs/remedies by design —
+// the list views never read them. Use getPostBySlug() for a full article.
 export async function getAllPosts(): Promise<BlogPost[]> {
-  const { data, error } = await supabase
-    .from('blog_posts')
-    .select('*')
-    .eq('is_published', true)
-    .order('published_at', { ascending: false });
+  const rows: Record<string, unknown>[] = [];
 
-  if (error) {
-    console.error('[TV-Blog] getAllPosts error:', error.message);
-    return [];
+  for (let page = 0; page < LIST_MAX_PAGES; page++) {
+    const from = page * LIST_PAGE_SIZE;
+    const to = from + LIST_PAGE_SIZE - 1;
+
+    const { data, error } = await supabaseAnon
+      .from('blog_posts')
+      .select(LIST_COLUMNS)
+      .eq('is_published', true)
+      .order('published_at', { ascending: false })
+      .range(from, to);
+
+    if (error) {
+      console.error(
+        `[TV-Blog] getAllPosts FAILED on page ${page}:`,
+        error.message
+      );
+      // Return the partial set rather than nothing — a half-full /blog
+      // beats an empty one, and the error is now loud in the logs.
+      break;
+    }
+
+    const batch = (data ?? []) as unknown as Record<string, unknown>[];
+    rows.push(...batch);
+
+    if (batch.length < LIST_PAGE_SIZE) break;
   }
-  return (data ?? []).map(mapRow);
+
+  return rows.map(mapRow);
 }
 
 // ============================================================
@@ -409,14 +492,21 @@ export async function getAllSlugs(): Promise<string[]> {
   return (data ?? []).map((r) => r.slug as string);
 }
 
+// v3.7 — narrow select + anon client.
+// The related-posts grid in app/blog/[slug]/page.tsx renders only
+// slug, category and title. It was pulling full article bodies for
+// every related post on EVERY article page render.
 export async function getRelatedPosts(slugs: string[]): Promise<BlogPost[]> {
   if (!slugs.length) return [];
-  const { data, error } = await supabase
+  const { data, error } = await supabaseAnon
     .from('blog_posts')
-    .select('*')
+    .select(LIST_COLUMNS)
     .in('slug', slugs)
     .eq('is_published', true);
 
-  if (error) return [];
-  return (data ?? []).map(mapRow);
+  if (error) {
+    console.error('[TV-Blog] getRelatedPosts error:', error.message);
+    return [];
+  }
+  return ((data ?? []) as unknown as Record<string, unknown>[]).map(mapRow);
 }
