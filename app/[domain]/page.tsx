@@ -113,16 +113,33 @@ function mapRowToConfig(row: DomainPageRow): DomainPageConfig {
 // ─── Data fetchers ──────────────────────────────────────────────────────────────
 
 async function getDomainPage(slug: string): Promise<DomainPageConfig | null> {
+  // v2.8 (05 Sep 2026) — .single() -> .maybeSingle().
+  //
+  // WHY: this is a catch-all route, so EVERY non-existent top-level URL lands
+  // here — old links, typos, bot scans. .single() treats "zero rows" as a
+  // failure and returns PostgREST error PGRST116, so each of those logged
+  // "[TV-Supabase] getDomainPage error: Cannot coerce the result to a single
+  // JSON object". Vercel counted 1,976 of them across 7 days to 05 Sep 2026,
+  // the single loudest error on the project — and every one was a URL that was
+  // always meant to 404. The behaviour was already correct (null -> notFound(),
+  // the visitor got a proper 404 page); only the logging was wrong, and the
+  // noise buried real errors like the FestivalPillar may_eat crash.
+  //
+  // .maybeSingle() returns data: null with NO error for zero rows, so a missing
+  // page is silent and a genuine fault (network, RLS, bad column) still logs.
+  // Verified 05 Sep 2026: domain_pages holds 15 rows and 15 distinct slugs, so
+  // the multiple-rows case this guard also covers cannot currently fire.
   const { data, error } = await supabase
     .from('domain_pages')
     .select('*')
     .eq('slug', slug)
-    .single();
+    .maybeSingle();
 
-  if (error || !data) {
-    if (error) console.error('[TV-Supabase] getDomainPage error:', error.message);
+  if (error) {
+    console.error('[TV-Supabase] getDomainPage error:', error.message);
     return null;
   }
+  if (!data) return null;   // no such domain page — notFound() handles it
   return mapRowToConfig(data as DomainPageRow);
 }
 
