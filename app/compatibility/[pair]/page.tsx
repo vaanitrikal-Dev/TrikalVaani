@@ -3,9 +3,39 @@
  * TRIKAL VAANI — Compatibility Page (Programmatic SEO/GEO)
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/compatibility/[pair]/page.tsx
- * VERSION: 1.4 — Deep-dive aspect sections (love, married life,
- *                intimacy, trust, finance, family, graha maitri)
+ * VERSION: 1.5 — Hindi URL consolidation (canonical / hreflang /
+ *                toggle / related links all point at /hi/compatibility/)
+ * DATE:    2026-09-05
  * SIGNED: ROHIIT GUPTA, CEO
+ * ============================================================
+ * CHANGE LOG (v1.4 → v1.5) — 5 Sep 2026:
+ *   THE BUG: the clean Hindi route app/hi/compatibility/[pair] was built
+ *   on 28 Aug 2026 and the sitemap has published those 144 URLs since
+ *   June. But THIS file still treated `?lang=hi` as the real Hindi URL:
+ *   it self-canonicalised to it, advertised it in hreflang, sent the
+ *   "हिन्दी" toggle to it, and every related-pair link on a Hindi page
+ *   pointed at it too.
+ *
+ *   Net effect measured in GSC (3 months to 2 Sep 2026): both URLs return
+ *   200, both declare themselves canonical, the sitemap names one and the
+ *   whole page body names the other. Google was told two contradictory
+ *   things and consolidated neither — the ?lang=hi variants sat on
+ *   thousands of impressions at 0.30-0.70% CTR.
+ *
+ *   THE FIX (5 changes, no content touched):
+ *     1) canonical (generateMetadata) → /hi/compatibility/{slug} for hi
+ *     2) hreflang 'hi'                → /hi/compatibility/{slug}
+ *     3) canonical const in the page body (JSON-LD) → same
+ *     4) "हिन्दी" toggle link          → /hi/compatibility/{slug}
+ *     5) related-pair links on Hindi   → /hi/compatibility/{slug}
+ *   A matching middleware.ts v1.1 308-redirects the old ?lang=hi URL to
+ *   the clean path, so the duplicate stops existing rather than merely
+ *   being deprecated. Both files must ship together.
+ *
+ *   NOT CHANGED: English URLs, all page content, scores, schemas, CTAs.
+ *   The /hi/compatibility wrapper keeps working — it calls this component
+ *   directly with searchParams {lang:'hi'}, which is server-side and
+ *   never passes through middleware.
  * ============================================================
  * CHANGE LOG (v1.3 → v1.4):
  *   DEEP-DIVE SECTIONS: A new OPTIONAL jsonb column `sections`
@@ -50,6 +80,23 @@ const supabase = createClient(
 );
 
 const SITE = 'https://trikalvaani.com';
+
+/**
+ * The one place that decides what a compatibility URL looks like.
+ *
+ * Hindi lives at a real path, not a query parameter. `?lang=hi` still
+ * RENDERS (middleware redirects it, and the /hi wrapper calls this
+ * component directly), but nothing in this file may advertise it again —
+ * that is what split the ranking signal in the first place.
+ */
+function pairUrl(slug: string, hi: boolean): string {
+  return hi ? `${SITE}/hi/compatibility/${slug}` : `${SITE}/compatibility/${slug}`;
+}
+
+/** Same rule, as a relative href for <Link>. */
+function pairHref(slug: string, hi: boolean): string {
+  return hi ? `/hi/compatibility/${slug}` : `/compatibility/${slug}`;
+}
 
 interface CompatRow {
   slug:          string;
@@ -134,7 +181,7 @@ export async function generateMetadata(
     return { title: 'Compatibility — Trikaal Vaani', robots: { index: false } };
   }
 
-  const canonical = `${SITE}/compatibility/${page.slug}${lang === 'hi' ? '?lang=hi' : ''}`;
+  const canonical = pairUrl(page.slug, lang === 'hi');
 
   return {
     title:       page.meta_title,
@@ -142,8 +189,8 @@ export async function generateMetadata(
     alternates: {
       canonical,
       languages: {
-        'en': `${SITE}/compatibility/${page.slug}`,
-        'hi': `${SITE}/compatibility/${page.slug}?lang=hi`,
+        'en': pairUrl(page.slug, false),
+        'hi': pairUrl(page.slug, true),
       },
     },
     openGraph: {
@@ -178,7 +225,7 @@ export default async function CompatibilityPage(
   const isHi = lang === 'hi';
   const r1 = isHi ? page.rashi1_hi : page.rashi1_en;
   const r2 = isHi ? page.rashi2_hi : page.rashi2_en;
-  const canonical = `${SITE}/compatibility/${page.slug}${isHi ? '?lang=hi' : ''}`;
+  const canonical = pairUrl(page.slug, isHi);
 
   // v1.1: fetch related pairs for the interlinking mesh
   const relatedPairs = await getRelatedPairs(page.rashi1_en, lang, page.slug);
@@ -331,11 +378,11 @@ export default async function CompatibilityPage(
       {/* Language toggle */}
       <div className="max-w-3xl mx-auto px-5 pt-5 flex justify-end gap-2 text-xs">
         <Link
-          href={`/compatibility/${page.slug}`}
+          href={pairHref(page.slug, false)}
           className={`px-3 py-1 rounded-full border ${!isHi ? 'bg-[#D4AF37] text-[#080B12] border-[#D4AF37]' : 'border-[#D4AF37]/30 text-gray-400'}`}
         >English</Link>
         <Link
-          href={`/compatibility/${page.slug}?lang=hi`}
+          href={pairHref(page.slug, true)}
           className={`px-3 py-1 rounded-full border ${isHi ? 'bg-[#D4AF37] text-[#080B12] border-[#D4AF37]' : 'border-[#D4AF37]/30 text-gray-400'}`}
         >हिन्दी</Link>
       </div>
@@ -456,7 +503,7 @@ export default async function CompatibilityPage(
               return (
                 <Link
                   key={rp.slug}
-                  href={`/compatibility/${rp.slug}${isHi ? '?lang=hi' : ''}`}
+                  href={pairHref(rp.slug, isHi)}
                   className="flex items-center justify-between bg-[#0d1120]/60 border border-[#D4AF37]/15 rounded-xl px-4 py-3 hover:border-[#D4AF37]/40 transition"
                 >
                   <span className="text-gray-100 text-sm font-medium">
