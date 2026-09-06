@@ -3,8 +3,14 @@
 // Purpose: Free AI Kundli Calculator — SEO/GEO/AEO/E-E-A-T page
 // Version: v2.0 (05 Sep 2026) — calculator + full keyword-driven content
 // Changelog v2.0 (2026-09-05): content build from Radar E3 PASF —
+//   METADATA MOVED OUT of this file into ./layout.tsx. It used to live here
+//   because this is a server component and could export it. Keeping it in two
+//   places would have meant two sources of truth — the next person to edit the
+//   title would change one and leave the other stale. Every other calculator
+//   route now carries its metadata in layout.tsx, so this one matches.
+//   Do NOT re-add `export const metadata` here.
 //   ~900 -> ~5,100 words, 3 H2 -> 36, TOC added, FAQs expanded, and the
-//   metadata fixed (see the note above `metadata` below). The form,
+//   metadata moved to layout.tsx and fixed there. The form,
 //   FreeKundaliCalculator, KundaliCalculatorClient, HOWTO_STEPS and the
 //   JSON-LD are untouched.
 // Changelog v1.3 (2026-09-05): mounted FreeKundaliCalculator above the
@@ -31,7 +37,6 @@
 //   v1.1 — restored.
 // ============================================================
 
-import type { Metadata } from 'next';
 import Link from 'next/link';
 import SiteNav from '@/components/layout/SiteNav';
 import FreeKundaliCalculator from '@/components/calculators/FreeKundaliCalculator';
@@ -40,37 +45,6 @@ import { buildCalcJsonLd } from '@/lib/seo/calcJsonLd';
 
 const GOLD = '#D4AF37';
 
-// ── v2.0 METADATA FIX (05 Sep 2026) ──────────────────────────────────────
-// The v1.x title was 63 characters AND carried "| Trikaal Vaani" manually,
-// while app/layout.tsx sets title.template = "%s | Trikaal Vaani" — so the
-// rendered title was 79 characters ending in the brand twice, and Google cut
-// it at roughly 58. `absolute` bypasses the parent template so the string
-// below is exactly what renders. The description was 209 characters against a
-// 140-155 standard and was rewritten.
-//
-// TITLE IN USE — Option 5, Bilingual/Hinglish
-//   "Janm Kundali Online — Free Kundli Banaye | Trikaal Vaani"  (56 chars)
-//   Radar E3 (05 Sep 2026) tracks "janam kundali banaye free" and
-//   "कुंडली कैसे बनाएं ऑनलाइन" in cluster calc-kundali, both with an AI
-//   Overview that recommends a tool and neither ranking for us. The searcher
-//   types "banaye", not "calculator", so the title leads with that.
-export const metadata: Metadata = {
-  title: { absolute: 'Janm Kundali Online — Free Kundli Banaye | Trikaal Vaani' },
-  description:
-    'Janm tithi, samay aur sthan se poori kundali — lagna, nau graha degree ke saath, baarah bhaav, nakshatra aur chal rahi dasha. Free, bina signup.',
-  keywords: [
-    'free kundli calculator', 'janm kundali online', 'birth chart calculator',
-    'free kundali', 'kundli analysis', 'vedic birth chart', 'lagna calculator',
-    'nakshatra calculator', 'AI kundli', 'kundli by date of birth',
-  ],
-  alternates: { canonical: 'https://trikalvaani.com/calculators/free-kundali-calculator' },
-  openGraph: {
-    title: 'Free AI Kundli Calculator — Janm Kundali Online',
-    description: 'Free, accurate Janm Kundali with Lagna, Nakshatra, Dasha, and Parashar remedies. Powered by Swiss Ephemeris.',
-    url: 'https://trikalvaani.com/calculators/free-kundali-calculator',
-    type: 'website',
-  },
-};
 
 const FAQS = [
   { q: 'Kundli kya hoti hai?', a: 'Kundli (Janm Kundali) ek Vedic birth chart hai jo aapke janm samay grahon aur nakshatron ki position dikhata hai. Iska use Vedic astrology mein future predictions, character analysis, aur remedies ke liye hota hai.' },
