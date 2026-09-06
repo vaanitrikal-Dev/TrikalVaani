@@ -505,7 +505,7 @@ function EvidenceTable({ ev, meanings, lang, isPaid, slug }:{ ev:ChartEvidence; 
         </div>
       )}
       {!isPaid && allRows.length > rows.length && (
-        <Cliff slug={slug} text={`…${allRows.length - rows.length} ${lbl('moreHouses',lang)} — ${allRows.slice(rows.length).map(r=>r.factor).join(', ')}`}/>
+        <Cliff slug={slug} text={`…${allRows.length - rows.length} ${lbl('moreHouses',lang)}`}/>
       )}
       <p style={{margin:'12px 0 0',color:'#475569',fontSize:'11px'}}>Parashara BPHS house lords + Shadbala · Swiss Ephemeris</p>
     </div>
@@ -805,6 +805,24 @@ function MonthlyOutlook({ rows, lang }:{ rows:MOut[]; lang:Lang }) {
   )
 }
 
+// ── v10.2 PAYWALL LEAK FIX (06 Sep 2026) ────────────────────────────────────
+// Two places in the FREE report were handing over the paid finding.
+//
+//   1. EvidenceTable's cut-off printed the names of the withheld houses:
+//      "…2 aur bhav — 11th house, 12th house → ₹51". With the planet table
+//      sitting directly above it, naming the houses lets the reader work out
+//      the lords themselves. Now only the count is shown.
+//
+//   2. LockedTeaser's repeated-lord line printed the planet, its dignity, and
+//      declared it the root cause: "…dono ka swami ek hi grah hai: Saturn, aur
+//      woh neech ka hai. Yahi aapki sthiti ki sabse badi jad hai." That IS the
+//      answer the ₹51 reading is sold on. It now states the SHAPE of the
+//      finding — two houses, one lord, and that lord's condition is the root —
+//      without naming which houses or which planet.
+//
+// Nothing else changed: the vargottama, best-month and Bhrigu teasers already
+// withheld their consequence and were left as they were.
+//
 // ── v9.3 PAYWALL TEASER ──────────────────────────────────────────────────────
 // v9.0-9.2 added evidence, D9, gochar, Bhrigu and remedy levels but gated NONE of
 // them, while the ₹51 lock box went on promising "Complete planetary analysis",
@@ -1238,10 +1256,10 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
       const hs = rows.map(h=>h.factor).join(joiner)
       const dig = rows[0]?.lord_dignity
       out.push(lang==='hindi'
-        ? `आपके ${hs} — दोनों का स्वामी एक ही ग्रह है: ${dup}${dig==='Debilitated'?', और वह नीच का है':''}। यही आपकी स्थिति की सबसे बड़ी जड़ है, और इसका पूरा विश्लेषण अंदर है।`
+        ? `आपकी कुंडली में दो भाव ऐसे हैं जिनका स्वामी एक ही ग्रह है — और उस एक ग्रह की स्थिति ही आपकी पूरी स्थिति की जड़ है। कौन से भाव, कौन सा ग्रह, और उसका क्या असर है — वह पूरी रीडिंग में है।`
         : lang==='english'
-        ? `Your ${hs} share the SAME lord: ${dup}${dig==='Debilitated'?', and it is debilitated':''}. That single placement is the root of your situation — the full reading explains it.`
-        : `Aapke ${hs} — dono ka swami ek hi grah hai: ${dup}${dig==='Debilitated'?', aur woh neech ka hai':''}. Yahi aapki sthiti ki sabse badi jad hai, aur iska poora vishleshan andar hai.`)
+        ? `Two houses in your chart share the SAME lord — and the condition of that one planet is the root of your situation. Which houses, which planet, and what it means, is inside.`
+        : `Aapki kundali mein do bhaav aise hain jinka swami ek hi grah hai — aur us ek grah ki sthiti hi aapki poori sthiti ki jad hai. Kaunse bhaav, kaunsa grah, aur uska kya asar hai — woh poori reading mein hai.`)
     }
     if (bestMonth) {
       out.push(lang==='hindi'
