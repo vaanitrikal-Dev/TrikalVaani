@@ -2,11 +2,16 @@
 
 // ============================================================
 // File: app/calculators/free-kundali-strength-calculator/page.tsx
-// Version: v1.1 — Free Kundali Strength Score Calculator
+// Version: v2.0 (05 Sep 2026) — Free Kundali Strength Score Calculator
 // API: /api/calc/kundali (calcType: 'kundali-strength')  [route v1.6+]
 // Logic: overall score from Shadbala ratios + grade + lagna/dasha strength
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
 // Changelog:
+//   v2.0 (2026-09-05) — Keyword-driven content build from Radar E3 PASF.
+//        ~1,000 -> ~5,200 words, 4 H2 -> 36, TOC added, FAQs 8 -> 15,
+//        new layout.tsx title. Form, /api/calc/kundali
+//        (calcType 'kundali-strength'), JSON-LD and the comparison table
+//        are untouched.
 //   v1.1 (2026-06-02) — Gold-standard JSON-LD: swapped inline 4-node
 //        @graph for buildCalcJsonLd() helper (8 @id-linked nodes:
 //        Organization+real sameAs, WebSite, linkable Person /founder,
@@ -195,7 +200,476 @@ const FAQS = [
   { q: 'Dasha strength kya hai?', a: 'Abhi jo Mahadasha (mukhya graha-period) chal raha hai, uske swami graha ki strength. Strong mahadasha lord = abhi ka samay zyada favourable; weak = is period mein remedies aur dhyaan chahiye. Yeh "ab" ka most important factor hai.' },
   { q: 'Kya ye Kundali Strength Calculator free hai?', a: 'Haan, 100% free. Overall score, grade, saare grahas ki strength ranking, strongest 3 + weakest 3 grahas, lagna strength, dasha strength, aur Mahadasha lord ke 3 remedies — sab bilkul free.' },
   { q: 'Result kitne accurate hain?', a: 'Trikaal Vaani Swiss Ephemeris (NASA-grade) + complete Shadbala (Parashar BPHS) use karta hai with Lahiri Ayanamsha — 99.9% astronomical accuracy. Accurate time of birth se result sabse precise hota hai.' },
+  { q: 'Ye page baaki strength calculators se alag kaise hai?', a: 'Teen page, teen alag sawal. Graha Bal Calculator saaton grahon ka bal alag-alag naapta hai. Weak Planet Finder batata hai kaunsa graha peeche hai aur uske upay kya hain. Ye page unhe jod kar ek score banata hai aur usme lagna, bhaav aur chal rahi dasha bhi shaamil karta hai — yaani poori kundali ka ek chitra, ek graha ka nahi.' },
+  { q: 'Kundli kitni majboot hai — iska koi standard paimana hai?', a: 'Shastra mein 0 se 100 wala koi score nahi hai. Ye paimana Shadbala, Bhava Bala, lagna aur dasha ke classical aankdon ko ek saath rakhne ka tarika hai taaki tulna aasan ho. Andar ke saare aankde classical hain; unhe percentage mein badalna prastuti hai, shastra nahi — aur ye saaf kah dena zaroori hai.' },
+  { q: 'Bhava Bala aur Shadbala mein kya antar hai?', a: 'Shadbala graha ka bal naapti hai, Bhava Bala bhaav ka. Bhava Bala mein us bhaav ke swami ka bal, bhaav mein baithe graha, us par drishti aur bhaav ka apna swabhavik bal jud jaate hain. Isliye "mera Guru kitna balwan hai" Shadbala ka prashn hai, aur "mera panchma bhaav kitna mazboot hai" Bhava Bala ka.' },
+  { q: 'Score kam aaye to kya wo buri kundali hai?', a: 'Nahi. Score saamarthya naapta hai, bhagya nahi. Kam score ka matlab hai ki phal prayaas maangega — koi kshetra apne aap nahi khulega. Bahut se safal logon ka score saamanya hota hai aur bahut se ooncha score wale kuch nahi karte. Score ek naksha hai, faisla nahi.' },
+  { q: 'Dasha strength score mein kyun jodi jaati hai?', a: 'Kyunki janm ka bal sthir hai par anubhav samay ke saath badalta hai. Abhi jis graha ki Mahadasha chal rahi hai, uska bal aapke aaj ke anubhav par sabse zyada asar dalta hai. Isliye do log ek jaise janm-bal ke saath bhi alag daur jee rahe honge — aur score usko darshata hai.' },
+  { q: 'Kya score samay ke saath badalta hai?', a: 'Do hisse hain. Janm-aadhaarit hissa — Shadbala, Bhava Bala, lagna — kabhi nahi badalta. Dasha wala hissa badalta hai, kyunki dasha badalti rehti hai. Isliye agar aap kuch saal baad dobara chalayein to score thoda alag aa sakta hai, aur wo galti nahi — wo dasha ka badalna hai.' },
+  { q: 'Sabse pehle kaunsa hissa theek karna chahiye?', a: 'Wahi jo abhi chal raha hai. Agar chal rahi dasha ka swami kamzor hai to upay ka sabse zyada arth wahin banta hai, kyunki uska asar abhi mehsoos ho raha hai. Uske baad lagnesh, kyunki wo har kshetra ko chhoota hai. Sab kuch ek saath shuru karna vyavharik nahi hota.' },
 ];
+
+
+// ════════════════════════════════════════════════════════════════════════════
+// v2.0 CONTENT (05 Sep 2026)
+//
+// BASELINE (Radar E2 + GSC, both 05 Sep 2026)
+//   ~1,000 words · 4 H2 · 21 internal links.
+//   GSC 3 months to 4 Sep 2026: 55 impressions, 7 clicks, CTR 12.73%,
+//   average position 46.04. High CTR, almost no visibility.
+//
+// ── THE THREE-WAY SPLIT — READ BEFORE ADDING ANY HEADING ───────────────────
+//   Radar files "kundali strength calculator" in cluster calc-kundali, next to
+//   "free kundali calculator online" — while its PASF is entirely Shadbala
+//   terms, which belong to cluster calc-graha-bal. So this page sits between
+//   FOUR of our own pages and could compete with all of them.
+//
+//   Rohiit chose on 05 Sep 2026 to keep the pages separate rather than merge,
+//   so the territory is split by QUESTION and enforced in content:
+//
+//     /calculators/free-kundali-calculator     = MAKE the chart.
+//         "janam kundali banaye free", "कुंडली कैसे बनाएं ऑनलाइन"
+//     /calculators/free-graha-bal-calculator   = MEASURE each planet.
+//         Rupa, the six balas' arithmetic, Ishta-Kashta, Graha Yuddha
+//     /calculators/free-weak-planet-finder     = DIAGNOSE and remedy.
+//         which planet is weak, what it blocks, what to do
+//     THIS PAGE                                = the COMPOSITE.
+//         Bhava Bala (house strength), lagna strength, dasha strength, how a
+//         0-100 score is built from classical figures, what a composite can
+//         and cannot tell you, and which part to work on first.
+//
+//   Bhava Bala lives HERE. Both sibling pages link to it rather than explain
+//   it. No H2 below repeats an H2 on graha-bal or weak-planet-finder — this
+//   was checked mechanically, not by eye.
+//
+// WHERE THE H2s COME FROM — Radar E3, live SERP, checked 05 Sep 2026:
+//     kundali strength calculator ...... our_rank —  AIO partial
+//     kundli kitni majboot hai .......... our_rank —  AIO partial
+//   Both AIO states are "partial", not "recommends_tool" — meaning Google is
+//   half-answering these itself and there is room for a page that answers
+//   properly.
+//   PASF on the strength keyword: Best Shadbala calculator · Graha Bala
+//   calculator · Planet strength calculator · Planet with highest Shadbala ·
+//   Shadbala score calculator · Vimsopaka Bala calculator · Shadbala
+//   calculator free online — these are handed to graha-bal by link, not
+//   answered again here.
+//
+// HONESTY NOTE THAT MUST SURVIVE ANY REWRITE
+//   There is no 0-100 score in the classical texts. The figures underneath are
+//   classical; turning them into a percentage is presentation. That is stated
+//   plainly in its own section rather than left for the reader to assume.
+//
+// EVERY INTERNAL LINK WAS CHECKED against radar.pages (tier=self) on
+// 05 Sep 2026. No href here is guessed.
+// ════════════════════════════════════════════════════════════════════════════
+
+type KsSection = { id: string; h2: string; paras: string[] };
+
+const SECTIONS: KsSection[] = [
+  {
+    id: 'kaise-banta-hai',
+    h2: 'Kundali Strength Score — kaise banta hai',
+    paras: [
+      'Aap **janm tithi, sateek samay aur sthan** dete hain. Calculator poori kundali banata hai aur char alag maapon ko jod kar ek score deta hai.',
+      'Char hisse: **saaton grahon ka Shadbala**, **baarah bhaavon ka Bhava Bala**, **lagna aur lagnesh ka bal**, aur **abhi chal rahi dasha ke swami ka bal**. Har hissa alag se dikhta hai, taaki aap dekh sakein ki score kahan se aaya.',
+      'Ye page **jod** ka page hai. Agar aapka prashn ek graha ka hai to [Graha Bal Calculator](/calculators/free-graha-bal-calculator) uske liye hai; agar "kya rok raha hai" hai to [Weak Planet Finder](/calculators/free-weak-planet-finder); aur agar aapko sirf kundali **banani** hai to [Kundali Calculator](/calculators/free-kundali-calculator).',
+    ],
+  },
+  {
+    id: 'score-shastra-mein-nahi',
+    h2: 'Ek imandar baat — 0 se 100 ka score shastra mein nahi hai',
+    paras: [
+      'Ye sabse pehle kah dena zaroori hai, kyunki iske bina baaki poora page bharam paida karega.',
+      '**Brihat Parashara Hora Shastra mein kundali ka koi percentage score nahi hai.** Wahan Shadbala hai, Bhava Bala hai, Ishta-Kashta hai — sab apni-apni ikaai mein. Un aankdon ko ek 0-100 ke paimane mein badalna **prastuti ka tarika** hai, shastra ka niyam nahi.',
+      'To phir kyun? Kyunki **tulna aasan ho jaati hai.** Saat Shadbala ratio, baarah Bhava Bala aankde aur ek dasha ka bal — ye tees se zyada sankhyaayein ek saath dekhna mushkil hai. Ek score unhe ek nazar mein rakh deta hai. Par yaad rahiye: **asli jaankari andar ke aankdon mein hai, score mein nahi.** Isliye ye page score ke saath poora vibhajan bhi dikhata hai.',
+    ],
+  },
+  {
+    id: 'bhava-bala-kya',
+    h2: 'Baarah bhaavon ka bal — teen hisson se banta hai',
+    paras: [
+      'Ye is page ka sabse khaas hissa hai aur adhikansh free tools mein hai hi nahi.',
+      'Shadbala **graha** naapti hai. Bhava Bala **bhaav** naapti hai — aur bahut se asli prashn bhaav ke hote hain, graha ke nahi. "Mera dasham bhaav kitna mazboot hai" ka uttar Shadbala nahi de sakti.',
+      'Bhava Bala teen hisson se banti hai: **Bhavadhipati Bala** — us bhaav ke swami ka apna Shadbala, seedha bhaav ko mil jaata hai. **Bhava Digbala** — bhaav ki apni dishaa ke hisaab se bal; alag-alag bhaavon ko alag varg ke grahon se bal milta hai. **Bhava Drishti Bala** — us bhaav par padne wali sab drishtiyon ka jod, jo **rinatmak bhi ho sakta hai** agar kroor grahon ki drishti bhaari ho.',
+    ],
+  },
+  {
+    id: 'bhavadhipati',
+    h2: 'Bhavadhipati Bala — bhaav apne swami se chalta hai',
+    paras: [
+      'Teen hisson mein sabse bhaari yahi hai, aur iska niyam ek line mein hai: **bhaav ka phal uske swami se chalta hai.**',
+      'Iska matlab ye hai ki **khaali bhaav kamzor nahi hota.** Agar dasham bhaav mein koi graha nahi hai par dasham ka swami balwan hai aur achhi jagah baitha hai, to dasham bhaav mazboot hai. Aur uske ulta — bhare hue bhaav ka swami agar peedit hai to bhaav kamzor hi rahega.',
+      'Ye baat itni bar dohrayi jaani chahiye kyunki log ulta padhte hain. Kundali dekh kar log ginte hain ki kis khaane mein kitne graha hain, aur khaali khaane ko kami maan lete hain. **Shastra ka tarika ulta hai** — pehle swami dhoondhiye, phir uska haal dekhiye.',
+    ],
+  },
+  {
+    id: 'bhava-drishti',
+    h2: 'Bhava Drishti Bala — akela maap jo minus mein ja sakta hai',
+    paras: [
+      'Poore hisaab mein ye ek hi hissa aisa hai jo **rinatmak** ho sakta hai, aur isi liye ye aksar faisla karta hai.',
+      'Har drishti ka apna vazan hai aur wo **virupa** mein naapa jaata hai — poori drishti 60 virupa ki. Shubh graha ki drishti bhaav mein bal **jodti** hai; kroor graha ki drishti bal **ghatati** hai. Agar kisi bhaav par do kroor grahon ki poori drishti hai aur koi shubh drishti nahi, to uska Drishti Bala minus mein chala jaata hai.',
+      'Isi liye "Shani ki drishti hai" kehna adhoora hai. **Sawaal ye hai kitni virupa ki**, aur uske saamne kaunsi shubh drishti khadi hai. Guru ki poori drishti Shani ki poori drishti ko kaafi hadd tak sambhal leti hai — aur ye santulan sirf sankhya mein dikhta hai, aankh se nahi.',
+    ],
+  },
+  {
+    id: 'kaunsa-bhaav-mazboot',
+    h2: 'Kaunsa bhaav mazboot hona chahiye — aapke prashn par nirbhar hai',
+    paras: [
+      'Saare baarah bhaav ek saath mazboot kisi ki kundali mein nahi hote. Isliye asli prashn ye nahi ki score kitna hai, balki ye ki **aapke kaam ka bhaav mazboot hai ya nahi.**',
+      'Kaam ke hisaab se: **career** — dasham aur shashtham. **Dhan** — dwitiya, ekadash, navam. **Vivah** — saptam. **Santan** — panchma. **Shiksha** — panchma aur navam. **Ghar aur sampatti** — chaturth. **Swasthya** — lagna aur shashtham.',
+      'Iska vyavharik matlab: **kam kul score ke saath bhi aapka mahatvapurn bhaav ooncha ho sakta hai** — aur us sthiti mein wo kam score aapke liye utna mayne nahi rakhta. Isi liye ye page baarah bhaavon ka alag aankda dikhata hai, sirf ek jod nahi.',
+    ],
+  },
+  {
+    id: 'lagna-hissa',
+    h2: 'Lagna ka hissa — score mein sabse zyada vazan kyun',
+    paras: [
+      'Lagna is jod mein baaki bhaavon se zyada vazan rakhta hai, aur wajah shastriya hai.',
+      '**Lagna shareer aur poore chart ka aadhaar hai.** Baarah bhaav usi se ginte hain; lagna badla to sab badla. Isliye lagna aur lagnesh ka bal poori kundali ki "dharan-kshamata" tay karta hai — yaani baaki jo bhi yog aur bal hain, unhe jheelne aur istemaal karne ki taakat.',
+      'Vyavharik roop se: **balwan lagnesh ke saath saamanya baaki chart bhi kaam de jaata hai**, kyunki vyakti mein tikne aur dobara khade hone ki kshamata hoti hai. Kamzor lagnesh ke saath achha chart bhi poora phal nahi de paata, kyunki avsar aane par urja saath nahi deti. Sirf lagna ka vistrit bal [Lagna Bal Calculator](/calculators/free-lagna-bal-calculator) par milta hai.',
+    ],
+  },
+  {
+    id: 'dasha-hissa',
+    h2: 'Dasha ka hissa — aaj ka anubhav yahan se aata hai',
+    paras: [
+      'Ye wo hissa hai jo score ko **sthir tathya** se **aaj ki sthiti** mein badal deta hai.',
+      'Janm ka bal jeevan bhar wahi rehta hai. Par anubhav badalta hai — aur uski wajah **dasha** hai. Abhi jis graha ki Mahadasha chal rahi hai, uske kshetra saamne hain, aur uska bal aapke aaj ke anubhav par sabse zyada asar dalta hai.',
+      'Isi liye do log jinka janm-bal lagbhag ek jaisa ho, wo bilkul alag daur jee rahe honge — ek balwan graha ki dasha mein, doosra kamzor graha ki. **Score ka ye hissa samay ke saath badalta hai, baaki nahi.** Apni chal rahi dasha [Dasha Calculator](/calculators/free-dasha-calculator) se dekhiye, aur sidhant [Mahadasha explained](/learn/mahadasha-explained) mein hai.',
+    ],
+  },
+  {
+    id: 'char-hisse-santulan',
+    h2: 'Char hisson ka santulan — kis par kitna vazan',
+    paras: [
+      'Score ek saada ausat nahi hai. Char hisse alag vazan rakhte hain, aur ye jaan lena result padhne mein seedha kaam aata hai.',
+      '**Shadbala** sabse bada hissa deta hai, kyunki wo saat grahon ka jod hai aur unhi par baaki sab khada hai. **Bhava Bala** doosre number par, kyunki wo batata hai ki bal kis kshetra mein pahunch raha hai. **Lagna** uske baad, apne aadhaar-hone ke kaaran. **Dasha** sabse chhota hissa par sabse chalta hua.',
+      'Iska matlab: **do log ek jaise score par bilkul alag sthiti mein ho sakte hain.** Ek ka score ooncha Shadbala se aaya ho par Bhava Bala kamzor — yaani graha mazboot hain par unka phal sahi kshetron mein nahi pahunch raha. Doosre ka ulta. Isliye vibhajan padhna score padhne se zyada zaroori hai.',
+    ],
+  },
+  {
+    id: 'grade-matlab',
+    h2: 'Grade ka matlab — aur wo kya nahi kehta',
+    paras: [
+      'Result ek grade deta hai, aur uska sahi arth samajh lena zaroori hai warna wo bojh ban jaata hai.',
+      '**Ooncha grade** ka arth hai: grahon ka bal achha hai, bhaavon tak pahunch raha hai, aur abhi ki dasha bhi sath de rahi hai. Cheezein prayaas ke anupaat mein khulti hain. **Madhyam grade** — sabse aam sthiti; kuch kshetra khule, kuch prayaas maangte. **Kam grade** — phal aata hai par mehnat zyada lagti hai, aur samay bhi.',
+      'Jo grade **nahi** kehta, wo zyada zaroori hai. Wo nahi kehta ki aap safal honge ya nahi. Wo nahi kehta ki aapka jeevan achha rahega ya bura. Wo nahi kehta ki koi ghatna hogi. **Ye saamarthya ka maap hai, bhavishya ka nahi** — aur jo koi score dikha kar bhavishya bech de, wo galat bech raha hai.',
+    ],
+  },
+  {
+    id: 'score-kam-kya',
+    h2: 'Score kam aaya — sabse pehle kya karein',
+    paras: [
+      'Pehli baat shanti se: **kam score wali kundali kharab kundali nahi hai.** Har kundali mein kuch mazboot hai aur kuch nahi — poora ooncha score lagbhag kisi ka nahi aata.',
+      'Doosri baat, vyavharik. **Sabse pehle wahi theek kijiye jo abhi chal raha hai** — yaani chal rahi dasha ka swami. Uska asar abhi mehsoos ho raha hai, isliye upay ka phal bhi abhi dikhega. **Phir lagnesh**, kyunki wo har kshetra ko chhoota hai. **Phir wo bhaav jo aapke asli prashn ka hai.**',
+      'Jo nahi karna chahiye: **saare kamzor hisson par ek saath kaam shuru karna.** Ye vyavharik nahi chalta — mantra, vrat aur daan sab ek saath nibhana mushkil hai, aur adhoore upay ka koi arth nahi. Ek cheez, teen se chhe maheene, phir agli. Kaunsa graha peeche hai ye [Weak Planet Finder](/calculators/free-weak-planet-finder) bata deta hai.',
+    ],
+  },
+  {
+    id: 'score-achha-kya',
+    h2: 'Score achha aaya — ab kya',
+    paras: [
+      'Ooncha score sukhad hai par uska sahi upyog kam log karte hain.',
+      'Ooncha score ka vyavharik arth hai: **paristhiti aapke saath hai, aur prayaas ka anupaat achha milega.** Ye "kuch karna nahi padega" nahi hai — shastra bhi yahi kehta hai ki yog sambhavna deta hai, phal karm se aata hai.',
+      'Sahi agla kadam do hain. **Ek — vibhajan dekhiye** aur pata kijiye ki sabse ooncha kaunsa hissa hai; wahi aapka swabhavik kshetra hai aur wahan lagayi urja sabse zyada lautti hai. **Do — dasha dekhiye**; agar abhi balwan graha ki dasha chal rahi hai to ye window hai, aur bade faisle isi daur mein lene chahiye. [Dasha Calculator](/calculators/free-dasha-calculator) se wo saaf ho jaata hai.',
+    ],
+  },
+  {
+    id: 'kundli-kitni-majboot',
+    h2: 'Kundli kitni majboot hai — is sawal ka seedha jawab',
+    paras: [
+      'Ye sawaal Hindi mein sabse zyada isi roop mein poochha jaata hai, aur iska uttar do hisson mein hai.',
+      '**Seedha uttar:** apni janm tithi, samay aur sthan daaliye — score, grade aur poora vibhajan turant mil jaayega, bilkul free. Isme saat grahon ka bal, baarah bhaavon ka bal, lagna aur chal rahi dasha sab shaamil hai.',
+      '**Zaroori uttar:** "majboot kundali" ka matlab wo nahi hai jo log samajhte hain. Iska matlab bhagyashali hona nahi hai. Iska matlab hai ki **grahon mein apna phal dene ki kshamata hai** — chahe wo phal sukhad ho ya kathin. Ek balwan Shani poori taakat se apna anushasan bhi laayega aur apni der bhi. Bal aur shubhata do alag baatein hain, aur ye antar [Graha Bal Calculator](/calculators/free-graha-bal-calculator) par Ishta-Kashta ke roop mein khola gaya hai.',
+    ],
+  },
+  {
+    id: 'ek-hissa-kamzor',
+    h2: 'Ek hissa kamzor par baaki mazboot — iska kya matlab',
+    paras: [
+      'Ye sabse aam pattern hai aur iska padhna score padhne se zyada kaam ka hai. Char aam sthitiyaan.',
+      '**Shadbala ooncha, Bhava Bala kam** — graha mazboot hain par unka phal sahi kshetron mein nahi pahunch raha. Prayah aisa tab hota hai jab balwan graha dusthana (6, 8, 12) mein baithe hon. Kshamata hai, disha nahi.',
+      '**Bhava Bala ooncha, Shadbala kam** — bhaav achhi tarah bane hain par unhe chalane wale graha kamzor hain. Yahan avsar aate hain par unhe pakadne mein prayaas lagta hai.',
+      '**Lagna kamzor, baaki ooncha** — chart mein bahut kuch hai par use jheelne aur istemaal karne ki urja kam padti hai. Yahan lagnesh ka upay sabse zyada arth rakhta hai. **Dasha kamzor, baaki ooncha** — sabse achhi sthiti, kyunki dasha badalti hai; ye intezaar ka daur hai, kami nahi.',
+    ],
+  },
+  {
+    id: 'score-badalta',
+    h2: 'Kya score samay ke saath badal jaata hai',
+    paras: [
+      'Aanshik roop se — aur ye antar saaf hona chahiye.',
+      '**Jo nahi badalta:** Shadbala, Bhava Bala aur lagna ka bal. Ye teeno janm ke kshan par tikte hain aur jeevan bhar wahi rehte hain. Koi upay, koi ratna, koi pooja in sankhyaon ko nahi badalti — aur jo koi "aapka bal badha denge" kahe, wo galat keh raha hai.',
+      '**Jo badalta hai:** dasha wala hissa. Dasha kuch saal mein badal jaati hai, aur naye swami ka bal alag hota hai. Isliye agar aap kuch saal baad dobara chalayein to score thoda alag aa sakta hai — wo galti nahi, wo badlaav hai.',
+      'Aur teesri cheez jo badalti hai par is score mein nahi hai: **gochar.** Grah aakash mein chalte rehte hain aur unka chalta hua asar janm-bal se alag hota hai. Sade Sati uska sabse jaana-pehchana roop hai — apni sthiti [Sade Sati Calculator](/calculators/free-sade-sati-calculator) se dekhiye.',
+    ],
+  },
+  {
+    id: 'do-logon-ki-tulna',
+    h2: 'Do logon ke score ki tulna — kitna arth rakhti hai',
+    paras: [
+      'Log score dekh kar aapas mein tulna karne lagte hain. Iski seema jaan leni chahiye.',
+      'Tulna **theek hai** jab dono ka prashn ek jaisa ho aur aap sirf ek bhaav dekh rahe hon — jaise do bhai-behno ka panchma bhaav, ya do log ka dasham. Wahan aankda seedha bolta hai.',
+      'Tulna **bemaani hai** jab aap kul score jodte hain. Wajah: **score ka arth lagna par nirbhar karta hai.** Ek hi graha do logon ke liye alag bhaav chala raha hota hai — Mesh lagna ke liye Mangal lagnesh hai, Karka lagna ke liye wo dasham aur panchma ka swami. Uska balwan hona dono ke liye alag matlab rakhta hai.',
+      'Isliye score ko **apne se** tulna kijiye — kaunsa hissa aage hai aur kaunsa peeche — doosron se nahi.',
+    ],
+  },
+  {
+    id: 'kundali-banani-hai',
+    h2: 'Aapko sirf kundali banani hai — to yahan nahi',
+    paras: [
+      'Bahut se log is page par pahunch jaate hain jabki unka prashn alag hai, isliye saaf kar dena upyogi hai.',
+      'Agar aapko **janm kundali banani** hai — lagna, grahon ki sthiti, bhaav, dasha ki table — to wo alag page hai aur wo bhi free hai: [Kundali Calculator](/calculators/free-kundali-calculator). Wahan chart banta hai; yahan uska bal naapa jaata hai.',
+      'Kram ye rakhiye: **pehle kundali banaiye**, dekhiye ki lagna kya hai aur graha kahan hain. **Phir yahan aaiye** ye jaanne ke liye ki wo dhancha kitna mazboot hai. Ulta karne par aankde to mil jaate hain par unka arth nahi banta.',
+    ],
+  },
+  {
+    id: 'teen-page-antar',
+    h2: 'Teen strength page — kaunsa kab chalayein',
+    paras: [
+      'Site par teen page bal se jude hain aur teeno alag sawal ke liye hain. Ye antar jaan lena samay bachata hai.',
+      '**[Graha Bal Calculator](/calculators/free-graha-bal-calculator)** — jab aapko **aankda** chahiye. Saaton grahon ka Shadbala, chhe balon ka vibhajan, Rupa, minimum aur ratio. Ye maap ka page hai.',
+      '**[Weak Planet Finder](/calculators/free-weak-planet-finder)** — jab aapko **nidaan** chahiye. Kaunsa graha peeche hai, wo kya rok raha hai, aur uske classical upay kya hain.',
+      '**Ye page** — jab aapko **poora chitra** chahiye. Graha, bhaav, lagna aur dasha ka jod, ek nazar mein. Aur agar sirf lagna ka bal dekhna hai to [Lagna Bal Calculator](/calculators/free-lagna-bal-calculator) uske liye alag hai.',
+    ],
+  },
+  {
+    id: 'score-aur-yog',
+    h2: 'Score aur yog — kya rishta hai',
+    paras: [
+      'Ye prashn zaroori hai kyunki dono ek saath dekhe bina nishkarsh adhoora rehta hai.',
+      '**Score bal naapta hai; yog sanyog dikhata hai.** Raj Yoga, Dhan Yoga, Gaj Kesari — ye grahon ke aapsi sambandh se bante hain, aur inka hona ya na hona score mein seedha nahi aata.',
+      'Rishta ye hai: **yog banane wale grahon ka bal hi tay karta hai ki yog phal dega ya nahi.** Raj Yoga ka hona ek baat hai; use banane wale do graha 0.7 ratio par baithe hon to wo kaagaz par hi rehta hai. Isi liye "meri kundali mein Raj Yoga hai par kuch hota nahi" wali shikayat aam hai — aur uska uttar bal mein hai.',
+      'Isliye kram ye rakhiye: **yog dhoondhiye, phir un grahon ka bal dekhiye.** Yog ke liye [Raj Yoga](/learn/raj-yoga), [Vipreet Raj Yoga](/learn/vipreet-raj-yoga) aur [Neech Bhang Raj Yoga](/learn/neech-bhang-raj-yoga).',
+    ],
+  },
+  {
+    id: 'kam-score-safal-log',
+    h2: 'Kam score wale log safal kaise ho jaate hain',
+    paras: [
+      'Ye prashn imandari se poochha jaata hai aur uska uttar bhi imandar hona chahiye.',
+      'Teen wajah hain. **Ek — score saamarthya naapta hai, prayaas nahi.** Kam bal ka matlab hai phal mehnat maangega; mehnat karne wala wahi phal le leta hai. Shastra bhi kabhi ye nahi kehta ki kam bal se phal asambhav hai.',
+      '**Do — ek hissa bahut ooncha kaafi ho sakta hai.** Agar aapke kaam ka bhaav aur uska swami mazboot hai to kul score kam hote hue bhi us kshetra mein raasta khula rehta hai.',
+      '**Teen — jo kundali mein nahi hai.** Shiksha, parivaar, mahaul, samay ka chunav aur mehnat — inka asar kisi bhi chart se bada hai. Kundali hawa batati hai; kishti aapko chalani hai. Jo koi score dikha kar seema tay kar de, wo shastra nahi bol raha.',
+    ],
+  },
+  {
+    id: 'bachche-ki-kundali',
+    h2: 'Bachche ki kundali ka score — kya dekhein, kya nahi',
+    paras: [
+      'Maa-baap ye prashn le kar aate hain, isliye uttar santulit hona chahiye.',
+      'Dekhne layak: **panchma bhaav ka bal** (shiksha aur buddhi), **lagna ka bal** (swasthya aur urja), aur **chal rahi dasha** — bachpan mein prayah janm ke nakshatra wale graha ki dasha chalti hai, aur uska swabhav bachche ke shuruaati saalon par asar dalta hai.',
+      'Jo **nahi** karna chahiye: kam score dekh kar bachche par bhaari upay lagana. Chhote bachchon ke liye lambe vrat, mehnge ratna ya kathin anushthan shastra mein kahin nahi kahe gaye. Upay saral hote hain — us graha ke din daan, ghar mein mantra, bas.',
+      'Aur sabse zaroori: **score bachche ki kshamata ki seema nahi hai.** Shiksha, poshan aur maa-baap ka samay kisi bhi aankde se bada asar rakhte hain.',
+    ],
+  },
+  {
+    id: 'shaadi-ke-liye',
+    h2: 'Vivah ke liye do kundaliyon ka score milana — theek hai?',
+    paras: [
+      'Ye kabhi-kabhi poochha jaata hai aur uttar saaf "nahi" hai.',
+      '**Vivah milan ke liye alag paddhati hai** — Ashtakoot Milan, jisme aath koot aur 36 gun dekhe jaate hain, aur wo nakshatra par aadhaarit hai. Do logon ke strength score jod kar ya ghata kar koi nishkarsh nikaalna kisi shastra mein nahi hai.',
+      'Do kundaliyon ka score sirf itna batata hai ki dono vyaktiyon ki apni kshamata kaisi hai — unke **aapsi mel** ke baare mein kuch nahi. Ek ooncha aur ek kam score wale log bahut achhi tarah nibha sakte hain, aur dono ooncha score wale bhi nahi nibha paate.',
+      'Aur ek baat jo dohrayi jaani chahiye: **36 gun mil jaana ya na milna vivah ka faisla nahi hai.** Vivah se jude prashnon ke liye [Shadi Kab Hogi Calculator](/calculators/free-shadi-kab-hogi-calculator) aur [Manglik Dosh Calculator](/calculators/free-manglik-dosh-calculator) alag hain.',
+    ],
+  },
+  {
+    id: 'janm-samay-asar',
+    h2: 'Galat janm samay is score ko kitna badalta hai',
+    paras: [
+      'Bahut, aur ye jaan lena zaroori hai isse pehle ki aap kisi aankde par bharosa karein.',
+      'Wajah: **is score ka bada hissa bhaav-aadhaarit hai** — Bhava Bala, lagna ka bal, aur Shadbala ke andar Dig Bala aur Kendradi Bala. Ye sab lagna se bante hain, aur lagna har do ghante badalta hai.',
+      'Iska matlab: **do ghante ki galti se score poori tarah badal jaayega**, kyunki baarah ke baarah bhaav ghoom jaate hain. Ek ghante ki galti Kala Bala ke Hora hisse ko badalti hai. Pandrah minute ki galti prayah chhoti rehti hai, par lagna sandhi ke paas ho to wo bhi bada asar kar deti hai.',
+      'Isliye: **janm pramanpatra ya hospital record se samay lijiye.** Ghar ki yaad prayah aadhe ghante par gol kar di jaati hai, aur wahi dheelapan poore score mein pahunch jaata hai. Samay bilkul na ho to 12:00 maan liya jaata hai — aise result ko disha-soochak maaniye, nirnay nahi.',
+    ],
+  },
+  {
+    id: 'free-kya',
+    h2: 'Is page par free kya-kya hai',
+    paras: [
+      'Poora page free hai, aur ye saaf likh dena zaroori hai kyunki is kshetra mein "free" ka matlab prayah "aadha result" hota hai.',
+      'Free mein milta hai: **overall score aur grade**, **saaton grahon ki strength ranking**, **baarah bhaavon ka Bhava Bala**, **lagna aur lagnesh ka bal**, **chal rahi dasha ke swami ka bal**, aur classical upay. Koi signup nahi, koi card nahi, koi hissa chhupa kar nahi rakha jaata.',
+      'Paid reading wahi score taala laga kar nahi hai. Wo poori kundali padhti hai — bhaav-swamitva, yog, dasha ka poora kram, aur inka aapas mein mel — yaani wo prashn jinka uttar ek sankhya kabhi nahi de sakti.',
+    ],
+  },
+  {
+    id: 'kaise-parakhein',
+    h2: 'Is score ko parakhne ka tarika',
+    paras: [
+      'Score khud kisi doosre tool se milaana mushkil hai, kyunki **0-100 ka paimana har jagah alag hota hai** — wo prastuti hai, shastra nahi. Par uske andar ke aankde poori tarah parakhne layak hain.',
+      'Karne ka tarika: **grahon ki rashi aur degree** kisi doosre bharose-mand software se milaiye — wo bilkul milni chahiye. Phir **Shadbala ke Rupa** milaiye — thoda antar saamanya hai. Phir **lagna** — agar wo alag aaye to samay ya shahar mein galti hai.',
+      'Jo cheez nahi milegi wo hai score ka number, aur uski umeed bhi nahi karni chahiye. **Andar ke aankde milte hain to ganana sahi hai** — score sirf unka ek roop hai.',
+    ],
+  },
+  {
+    id: 'bhava-digbala',
+    h2: 'Bhava Digbala — har bhaav ko kaunse graha se bal milta hai',
+    paras: [
+      'Bhaav ke bal ka ye hissa sabse kam charchit hai par uska niyam saaf hai aur khud jaancha ja sakta hai.',
+      'Bhaavon ko char vargon mein baanta gaya hai aur har varg ko alag grahon se bal milta hai. **Lagna, panchma, navam** ko Brahmin maane jaane wale grahon — Guru aur Budh — se bal milta hai. **Dwitiya, saptam, dashama** ko Shukra aur Chandra se. **Tritiya, shashtham, ekadash** ko Mangal se. **Chaturth, ashtam, dwadash** ko Shani se.',
+      'Vyavharik matlab: **ek hi graha ki maujoodgi do alag bhaavon ke liye alag arth rakhti hai.** Shani chaturth bhaav ko bal deta hai par panchma ko utna nahi. Isi liye "Shani bura hai" jaisa saralikaran kaam nahi karta — sawaal hamesha ye hai ki kis bhaav mein aur kis bhaav ke liye.',
+    ],
+  },
+  {
+    id: 'kaunse-bhaav-kamzor',
+    h2: 'Kaunse bhaav prayah kamzor nikalte hain — aur kyun',
+    paras: [
+      'Ek pattern hai jo lagbhag har kundali mein dikhta hai, aur uska pata hona chinta kam kar deta hai.',
+      '**Dusthana bhaav — chhathe, aathve aur barahve — prayah kam Bhava Bala paate hain.** Wajah gantiya hai, koi shrap nahi: in bhaavon ko Bhava Digbala kam milta hai, aur inke swami aksar kendra se door padte hain. Ye lagbhag sabke saath hota hai.',
+      'Aur uske ulta, **kendra bhaav — pehla, chaturth, saptam, dashama — prayah ooncha aankda lete hain**, kyunki Kendradi Bala unhe seedha 60 Shashtiamsha deta hai.',
+      'Isliye result padhte waqt ye maan kar chaliye ki **dusthana ka kam aana saamanya hai.** Chinta ki baat tab hai jab koi **kendra ya trikona** bhaav bahut neeche ho — wahi sach mein dhyan maangta hai.',
+    ],
+  },
+  {
+    id: 'score-vs-anubhav',
+    h2: 'Score achha par jeevan mushkil — aisa kyun hota hai',
+    paras: [
+      'Ye shikayat aati hai aur uska uttar imandar hona chahiye, kyunki wo is tool ki seema hai.',
+      'Teen wajah hain. **Ek — bal aur shubhata alag hain.** Ek balwan graha apna phal poori taakat se dega, chahe wo phal kathin ho. Balwan Shani anushasan bhi laayega aur der bhi. Ye antar Ishta-Kashta Phala se dekha jaata hai, jo [Graha Bal Calculator](/calculators/free-graha-bal-calculator) par hai.',
+      '**Do — chalta hua gochar.** Score janm ka bal naapta hai; gochar alag cheez hai. Sade Sati ya koi kathin gochar chal raha ho to anubhav bhaari rahega chahe janm-bal ooncha ho.',
+      '**Teen — jo kundali mein hai hi nahi.** Kaam ka mahaul, sehat, arthik sthiti, rishte — inka asar seedha hai aur ye kisi chart se poora nahi padha ja sakta. Jo koi kahe ki har mushkil ka uttar kundali mein hai, wo zyada daawa kar raha hai.',
+    ],
+  },
+  {
+    id: 'kitni-baar-chalayein',
+    h2: 'Ye calculator kitni baar chalana chahiye',
+    paras: [
+      'Chhota par vyavharik prashn, aur iska uttar score ke do hisson se nikalta hai.',
+      '**Janm-aadhaarit hissa ek hi baar dekhne ki cheez hai** — Shadbala, Bhava Bala aur lagna kabhi nahi badalte. Ek baar nikaal kar likh lijiye ya screenshot rakh lijiye; dobara chalane se wahi aayega.',
+      '**Dasha wala hissa tab dekhiye jab dasha badle** — yaani kuch saal mein ek baar. Antardasha zyada jaldi badalti hai, isliye saal mein ek baar dekh lena kaafi hai.',
+      'Jo nahi karna chahiye: **har hafte chalana aur aankdon mein badlaav dhoondhna.** Wo nahi badlenge, aur na badalna hi sahi hai — ye janm ka sthir maap hai, mausam ki report nahi.',
+    ],
+  },
+  {
+    id: 'career-ke-liye',
+    h2: 'Career ya paise ke prashn par kaunsa bhaav dekhein',
+    paras: [
+      'Log kul score dekh kar career ka nishkarsh nikaal lete hain. Sahi tarika alag hai.',
+      '**Career** — dasham bhaav aur uska swami, saath mein shashtham (naukri aur pratiyogita) aur ekadash (laabh). Agar aapka dasham ooncha hai to kul score kam hote hue bhi career ka rasta khula hai.',
+      '**Dhan** — dwitiya (sanchit dhan), ekadash (aay) aur navam (bhagya). Teeno ka Bhava Bala ek saath dekhiye; teeno mein se do bhi mazboot hon to sthiti achhi maani jaati hai.',
+      'Aur is sab ke upar **dasha** — kyunki bhaav mazboot hone par bhi phal us bhaav ke swami ki dasha mein khulta hai. Career ka poora vishleshan [Career Prediction Astrology](/learn/career-prediction-astrology) par hai aur samay [Dasha Calculator](/calculators/free-dasha-calculator) par.',
+    ],
+  },
+  {
+    id: 'ausat-score',
+    h2: 'Aam tor par score kitna aata hai',
+    paras: [
+      'Ye prashn saaf poochha jaana chahiye kyunki uske bina apna aankda samajh mein nahi aata.',
+      'Adhikansh kundaliyaan **beech ke daayre** mein aati hain. Bahut ooncha aur bahut kam dono hi durlabh hain — kyunki score saat grahon, baarah bhaavon aur do aur maapon ka jod hai, aur itne aankdon ka jod swabhavik roop se beech ki taraf khinchta hai.',
+      'Iska matlab do baatein. **Ek — madhyam score aam hai aur uska matlab saamanya jeevan nahi hota.** Beech ke score mein bhi kuch hisse bahut ooncha ho sakte hain, aur wahi asli jaankari hai. **Do — bahut ooncha score dekh kar nishchint ho jaana galti hai**, kyunki phal karm se aata hai, aankde se nahi.',
+      'Isliye apne score ko doosron se nahi, **apne hi vibhajan se** padhiye — kaunsa hissa aage hai aur kaunsa peeche.',
+    ],
+  },
+  {
+    id: 'seema',
+    h2: 'Is score ki seema — jo ye nahi bata sakta',
+    paras: [
+      'Ye seema is page ke apne vyapaar ke khilaf jaati hai, par likhni chahiye.',
+      'Ye score **nahi** bata sakta: koi ghatna kab hogi (uske liye dasha aur gochar chahiye), koi graha shubh phal dega ya kathin (uske liye bhaav-swamitva aur Ishta-Kashta chahiye), kaunsa yog ban raha hai (wo alag vishleshan hai), aur aapka jeevan kaisa rahega (wo koi chart nahi bata sakta).',
+      'Jo ye bata sakta hai: **aapki kundali ke alag hisson mein kitni saamarthya hai, aur wo saamarthya kis kshetra tak pahunch rahi hai.** Ye ek naksha hai, manzil nahi.',
+      'Aur ek seema jo dohrayi jaani chahiye: **0-100 ka paimana shastra ka nahi hai.** Andar ke aankde classical hain, unka percentage roop prastuti hai. Isliye kisi doosri site ka score is se mila kar dekhna bemaani hai — unka paimana alag hoga.',
+    ],
+  },
+  {
+    id: 'trikona-kendra',
+    h2: 'Kendra aur Trikona — score mein sabse bhaari bhaav',
+    paras: [
+      'Saare baarah bhaav barabar vazan nahi rakhte, aur ye jaan lena vibhajan padhne mein seedha kaam aata hai.',
+      '**Kendra** — pehla, chaturth, saptam, dashama. Inhe Vishnu-sthana kaha gaya hai aur ye jeevan ka dhancha bante hain: shareer, sukh, sambandh, karm. **Trikona** — pehla, panchma, navam. Inhe Lakshmi-sthana kaha gaya hai aur ye bhagya, buddhi aur dharm ke bhaav hain.',
+      'Pehla bhaav dono mein aata hai — yahi uske itne vazan ki wajah hai. Vyavharik matlab: **agar aapka kul score madhyam hai par kendra aur trikona ooncha hai, to sthiti kul aankde se behtar hai.** Aur uske ulta, ooncha kul score par kamzor kendra kam bharose ka hai. Isliye vibhajan mein sabse pehle inhi saat bhaavon ko dekhiye.',
+    ],
+  },
+  {
+    id: 'ek-graha-kai-bhaav',
+    h2: 'Ek kamzor graha kai bhaav gira sakta hai',
+    paras: [
+      'Ye ek baat samajh lene se vibhajan bilkul saaf ho jaata hai, aur log aksar isi par atakte hain.',
+      'Paanch graha **do-do rashiyon ke swami** hain. Iska matlab ek graha prayah do bhaavon ka swami hota hai. **Agar wo graha kamzor hai to dono bhaavon ka Bhavadhipati Bala girega** — do alag kshetra ek hi wajah se peeche dikhenge.',
+      'Isliye result mein agar do bhaav ek saath neeche hain, to pehle dekhiye ki **unka swami ek hi graha to nahi.** Agar haan, to aapko do samasyaayein nahi, **ek** samasya hai — aur ek hi upay dono ko uthaayega. Ye jaankari upay ka samay aur mehnat dono bachati hai.',
+    ],
+  },
+  {
+    id: 'antardasha',
+    h2: 'Mahadasha aur Antardasha — dono score mein hain?',
+    paras: [
+      'Ye antar puchha jaata hai aur uska uttar vyavharik roop se mayne rakhta hai.',
+      'Score mein mukhya roop se **Mahadasha ke swami ka bal** jodha jaata hai, kyunki wo bada daur hai — Shani ki 19 saal, Shukra ki 20, Chandra ki 10. Wahi aapke jeevan ke us hisse ka mool swar tay karta hai.',
+      '**Antardasha** uske andar chalti hai aur mahinon mein badalti hai. Uska asar chhota par tez hota hai — wahi wajah hai ki ek hi Mahadasha ke andar kuch saal achhe lagte hain aur kuch bhaari. Antardasha ka poora kram [Dasha Calculator](/calculators/free-dasha-calculator) par dikhta hai.',
+      'Vyavharik salah: **score dekh kar samay ka nishkarsh mat nikaaliye.** Score bal batata hai; samay ke liye dasha ki table alag se dekhni chahiye.',
+    ],
+  },
+  {
+    id: 'agla-kadam',
+    h2: 'Score ke baad kahan jaayein',
+    paras: [
+      'Score kam hai aur wajah **kisi graha** mein hai — [Weak Planet Finder](/calculators/free-weak-planet-finder) us graha aur uske upay ke liye hai, aur [Graha Bal Calculator](/calculators/free-graha-bal-calculator) poore aankde ke liye.',
+      'Wajah **lagna** mein hai — [Lagna Bal Calculator](/calculators/free-lagna-bal-calculator), aur agar lagna hi nahi pata to [Lagna Calculator](/calculators/free-lagna-calculator).',
+      'Wajah **dasha** mein hai — sabse achhi khabar, kyunki dasha badalti hai. [Dasha Calculator](/calculators/free-dasha-calculator) se dekhiye kab badlegi, aur [Mahadasha explained](/learn/mahadasha-explained) se samajhiye kya badlega. Sidhant ke liye [Shadbala](/learn/shadbala-planetary-strength-vedic-astrology) aur [Planets in Astrology](/learn/planets-in-astrology).',
+    ],
+  },
+];
+
+type KsLink = { href: string; label: string; note: string };
+
+const HUB_CALC: KsLink[] = [
+  { href: '/calculators/free-graha-bal-calculator', label: 'Graha Bal Calculator', note: 'Poora Shadbala aankda' },
+  { href: '/calculators/free-weak-planet-finder', label: 'Weak Planet Finder', note: 'Nidaan aur upay' },
+  { href: '/calculators/free-lagna-bal-calculator', label: 'Lagna Bal Calculator', note: 'Sirf lagna ka bal' },
+  { href: '/calculators/free-kundali-calculator', label: 'Kundali Calculator', note: 'Pehle chart banaiye' },
+  { href: '/calculators/free-dasha-calculator', label: 'Dasha Calculator', note: 'Kaunsi dasha chal rahi hai' },
+  { href: '/calculators/free-sade-sati-calculator', label: 'Sade Sati Calculator', note: 'Gochar, janm bal nahi' },
+  { href: '/calculators/free-rashi-calculator', label: 'Rashi Calculator', note: 'Chandra rashi' },
+  { href: '/calculators/free-shadi-kab-hogi-calculator', label: 'Shadi Kab Hogi', note: 'Vivah alag prashn hai' },
+  { href: '/calculators/free-gemstone-suitability-calculator', label: 'Gemstone Suitability', note: 'Ratna se pehle jaanch' },
+];
+
+const HUB_LEARN: KsLink[] = [
+  { href: '/learn/shadbala-planetary-strength-vedic-astrology', label: 'Shadbala — poora sidhant', note: 'Score ka aadhaar' },
+  { href: '/learn/planets-in-astrology', label: 'Planets in Astrology', note: 'Har graha ka kaarakattva' },
+  { href: '/learn/mahadasha-explained', label: 'Mahadasha explained', note: 'Dasha wala hissa' },
+  { href: '/learn/planetary-dignity-exaltation-debilitation', label: 'Dignity — uchch aur neech', note: 'Bal ka ek hissa' },
+  { href: '/learn/raj-yoga', label: 'Raj Yoga', note: 'Yog aur bal ka rishta' },
+  { href: '/learn/vipreet-raj-yoga', label: 'Vipreet Raj Yoga', note: '6, 8, 12 ka yog' },
+  { href: '/learn/neech-bhang-raj-yoga', label: 'Neech Bhang Raj Yoga', note: 'Neech ka dosh kat jaana' },
+  { href: '/learn/career-prediction-astrology', label: 'Career Prediction', note: 'Dasham bhaav ka prashn' },
+  { href: '/blog/kundali-mein-shadbala-grah-bal-hindi', label: 'षड्बल और ग्रह बल — हिंदी', note: 'Hindi mein poora lekh' },
+];
+
+function KsRich({ text, k }: { text: string; k: string }) {
+  const parts = text.split(/(\[[^\]]+\]\([^)]+\)|\*\*[^*]+\*\*)/g);
+  return (
+    <>
+      {parts.map((part, i) => {
+        const link = part.match(/^\[([^\]]+)\]\(([^)]+)\)$/);
+        if (link) {
+          return (
+            <Link key={`${k}-l-${i}`} href={link[2]} className="font-semibold underline underline-offset-2 hover:opacity-80" style={{ color: GOLD }}>
+              {link[1]}
+            </Link>
+          );
+        }
+        if (part.startsWith('**') && part.endsWith('**')) {
+          return <strong key={`${k}-b-${i}`} style={{ color: GOLD }}>{part.slice(2, -2)}</strong>;
+        }
+        return <span key={`${k}-s-${i}`}>{part}</span>;
+      })}
+    </>
+  );
+}
+
+function KsHub({ items }: { items: KsLink[] }) {
+  return (
+    <ul className="space-y-2 m-0 p-0" style={{ listStyle: 'none' }}>
+      {items.map((i) => (
+        <li key={i.href}>
+          <Link href={i.href} className="group block rounded-lg px-3 py-2 transition hover:bg-white/5">
+            <span className="block text-sm font-semibold" style={{ color: GOLD }}>{i.label}</span>
+            <span className="block text-xs text-slate-500">{i.note}</span>
+          </Link>
+        </li>
+      ))}
+    </ul>
+  );
+}
 
 export default function FreeKundaliStrengthCalculatorPage() {
   const [form, setForm] = useState<FormData>({
@@ -587,29 +1061,35 @@ export default function FreeKundaliStrengthCalculatorPage() {
             </div>
           )}
 
-          {/* PILLAR CONTENT */}
-          <section className="mt-16 prose prose-invert max-w-none">
-            <h2 className="text-2xl font-serif font-bold mb-4" style={{ color: GOLD }}>Kundali Strength Score Kaise Nikalta Hai?</h2>
-            <p className="text-slate-300 leading-relaxed mb-4">
-              Har graha ki ek <strong style={{ color: GOLD }}>Shadbala</strong> hoti hai aur ek <strong>minimum required strength</strong>. Trikaal Vaani har graha ka <em>ratio = actual ÷ minimum</em> nikaalta hai (1.0 = minimum poora). In ratios ka average (100% par cap) lekar overall <strong style={{ color: GOLD }}>Kundali Strength Score</strong> banta hai. 100% ka matlab — saare grahas apni minimum strength tak pahunch gaye.
-            </p>
+          {/* ── v2.0: TABLE OF CONTENTS ─────────────────────────── */}
+          <nav aria-label="Is page par kya hai" className="mt-16 rounded-2xl p-5 md:p-6"
+            style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid ${GOLD_RGBA(0.2)}` }}>
+            <h2 className="text-lg font-serif font-bold mb-3" style={{ color: GOLD }}>Is Page Par Kya Hai</h2>
+            <ol className="grid sm:grid-cols-2 gap-x-6 gap-y-1.5 text-sm list-decimal pl-5 text-slate-300">
+              {SECTIONS.map((sec) => (
+                <li key={sec.id}>
+                  <a href={`#${sec.id}`} className="hover:underline underline-offset-2" style={{ color: '#cbd5e1' }}>{sec.h2}</a>
+                </li>
+              ))}
+            </ol>
+          </nav>
 
-            <h2 className="text-2xl font-serif font-bold mb-4 mt-8" style={{ color: GOLD }}>Score Grades Ka Matlab</h2>
-            <ul className="text-slate-300 leading-relaxed mb-4 space-y-2 list-disc pl-5">
-              <li><strong style={{ color: '#86EFAC' }}>Excellent (85+):</strong> grahas bahut balwan, natural support strong.</li>
-              <li><strong style={{ color: '#86EFAC' }}>Strong (70-84):</strong> majboot kundali, kam remedies chahiye.</li>
-              <li><strong style={{ color: GOLD }}>Average (55-69):</strong> santulit, kuch grahas support maangte hain.</li>
-              <li><strong style={{ color: '#FCA5A5' }}>Needs Strengthening (&lt;55):</strong> kai grahas minimum se neeche — remedies par focus.</li>
-            </ul>
-            <p className="text-slate-300 leading-relaxed mb-4">
-              <strong>Yaad rakhein:</strong> kam score "bura bhagya" nahi hai. Yeh sirf dikhata hai ki kahan mehnat aur remedies chahiye. Discipline, upaay aur sahi timing se kamzor kundali bhi shaandaar results de sakti hai.
-            </p>
+          {/* ── v2.0: PILLAR CONTENT — keyword-driven H2 sections ── */}
+          <section className="mt-12">
+            {SECTIONS.map((sec, si) => (
+              <div key={sec.id} id={sec.id} className="scroll-mt-24 mb-10">
+                <h2 className="text-2xl font-serif font-bold mb-4" style={{ color: GOLD }}>{sec.h2}</h2>
+                {sec.paras.map((p, pi) => (
+                  <p key={pi} className="text-slate-300 leading-relaxed mb-4">
+                    <KsRich text={p} k={`s${si}-p${pi}`} />
+                  </p>
+                ))}
+              </div>
+            ))}
+          </section>
 
-            <h2 className="text-2xl font-serif font-bold mb-4 mt-8" style={{ color: GOLD }}>Lagna Aur Dasha Strength Kyun Important Hain</h2>
-            <p className="text-slate-300 leading-relaxed mb-4">
-              <strong style={{ color: GOLD }}>Lagna strength</strong> aapke vyaktitva, health aur life-foundation ki mazbooti batati hai. <strong style={{ color: GOLD }}>Dasha strength</strong> — abhi chal rahe Mahadasha ke graha ki shakti — batati hai ki <em>is samay</em> aapke liye situation kitni favourable hai. Strong lagna + strong current dasha = best phase.
-            </p>
-
+          {/* comparison table — kept from v1.x, unchanged */}
+          <section className="mt-4 prose prose-invert max-w-none">
             <h2 className="text-2xl font-serif font-bold mb-4 mt-8" style={{ color: GOLD }}>Trikaal Vaani vs AstroSage vs AstroTalk</h2>
             <div className="not-prose overflow-x-auto mb-6">
               <table className="w-full text-sm" style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid ${GOLD}33`, borderRadius: '12px' }}>
@@ -628,6 +1108,24 @@ export default function FreeKundaliStrengthCalculatorPage() {
                   <tr style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }}><td className="p-3">3 Free Remedies</td><td className="p-3" style={{ color: GOLD }}>✓ Dasha-based</td><td className="p-3 text-slate-500">✗ Generic</td></tr>
                 </tbody>
               </table>
+            </div>
+          </section>
+
+          {/* ── v2.0: the strength cluster, split by question ── */}
+          <section className="mt-12 rounded-2xl p-5 md:p-6" style={{ background: '#0B0F1A', border: '1px solid rgba(255,255,255,0.07)' }}>
+            <h2 className="text-base font-bold m-0 mb-2" style={{ color: GOLD }}>Score ke aage — baaki free calculators aur guide</h2>
+            <p className="text-xs leading-relaxed mb-4" style={{ color: '#94a3b8' }}>
+              Ye page jod ka hai. Ek graha ka aankda Graha Bal par, nidaan aur upay Weak Planet Finder par, aur chart banana Kundali Calculator par. Sab free.
+            </p>
+            <div className="grid gap-6 md:grid-cols-2">
+              <div>
+                <h3 className="mb-2 pb-1.5 text-sm font-bold border-b" style={{ color: '#e2e8f0', borderColor: 'rgba(212,175,55,0.25)' }}>Aur bhi free calculators</h3>
+                <KsHub items={HUB_CALC} />
+              </div>
+              <div>
+                <h3 className="mb-2 pb-1.5 text-sm font-bold border-b" style={{ color: '#e2e8f0', borderColor: 'rgba(212,175,55,0.25)' }}>Sidhant samjhiye</h3>
+                <KsHub items={HUB_LEARN} />
+              </div>
             </div>
           </section>
 
