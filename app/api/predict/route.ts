@@ -320,7 +320,7 @@ import type { KundaliData, BirthData } from '@/lib/swiss-ephemeris'
 import type { DomainConfig, DomainId } from '@/lib/domain-config'
 import type { UserTier, UserContext }   from '@/lib/gemini-prompt'
 
-export const maxDuration = 210
+export const maxDuration = 240
 
 // ── Config ────────────────────────────────────────────────────────────────────
 // MIGRATED 3 Sep 2026 — gemini-2.5-flash and gemini-2.5-pro SHUT DOWN ON
