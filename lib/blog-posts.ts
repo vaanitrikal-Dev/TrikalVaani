@@ -1,6 +1,30 @@
 // ============================================================
 // TRIKAL VAANI — BLOG POSTS — SUPABASE VERSION
 // CEO: Rohiit Gupta | Chief Vedic Architect
+// Version: 3.8 (BUILD-COST FIX — getAllSlugs is now ordered + limitable)
+// Date: 2026-09-06
+//
+// CHANGE v3.8 — WHY:
+//   Vercel bill, cycle 26 Aug - 26 Sep: Build CPU = $40.80 of a $45.70 total.
+//   Build log showed 2m59s of a 3m20s build spent here:
+//     Generating static pages (0/1029) ... (1029/1029)
+//   741 of those 1029 pages are /blog/[slug], pre-rendered on EVERY push —
+//   353 pushes this cycle. A one-character code edit rebuilt all 741 posts.
+//
+//   getAllSlugs() returned every published slug with NO ordering, so it could
+//   not be safely limited — slicing an unordered set gives arbitrary posts.
+//   v3.8 adds `.order('published_at', desc)` and an optional `limit`, so
+//   app/blog/[slug]/page.tsx can pre-render the newest N and let the rest
+//   render on first request and then sit in the ISR cache.
+//
+//   NOTHING IS REMOVED FROM THE SITE. All 741 posts keep their URLs, their
+//   full HTML, and their sitemap entries. The only change is WHEN the HTML is
+//   produced — at build, or at first hit. Google receives identical markup.
+//
+//   Called with no argument, getAllSlugs() behaves exactly as in v3.7 (all
+//   slugs, now ordered). Only the ordering is new for existing callers, and
+//   blog page.tsx is the sole caller — verified with a repo-wide grep.
+//
 // Version: 3.7 (LIST-QUERY FIX — stops the nano DB outage)
 // Date: 2026-09-05
 //
@@ -482,13 +506,27 @@ export async function getPostBySlug(slug: string): Promise<BlogPost | undefined>
   return mapRow(data);
 }
 
-export async function getAllSlugs(): Promise<string[]> {
-  const { data, error } = await supabase
+// v3.8 — ordered, and limitable.
+//   getAllSlugs()    -> every published slug, newest first (old behaviour + order)
+//   getAllSlugs(60)  -> the 60 newest published slugs, for generateStaticParams
+// Uses the anon client and a single-column select, same as the rest of v3.7.
+export async function getAllSlugs(limit?: number): Promise<string[]> {
+  let query = supabaseAnon
     .from('blog_posts')
     .select('slug')
-    .eq('is_published', true);
+    .eq('is_published', true)
+    .order('published_at', { ascending: false });
 
-  if (error) return [];
+  if (typeof limit === 'number' && limit > 0) {
+    query = query.limit(limit);
+  }
+
+  const { data, error } = await query;
+
+  if (error) {
+    console.error('[TV-Blog] getAllSlugs error:', error.message);
+    return [];
+  }
   return (data ?? []).map((r) => r.slug as string);
 }
 
