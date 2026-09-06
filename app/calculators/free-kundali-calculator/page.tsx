@@ -44,6 +44,12 @@ import KundaliCalculatorClient from '@/components/calculators/KundaliCalculatorC
 import { buildCalcJsonLd } from '@/lib/seo/calcJsonLd';
 
 const GOLD = '#D4AF37';
+// v2.0 FIX (05 Sep 2026): this constant was MISSING and the v2.0 build used it
+// in the table-of-contents border, which killed the Vercel build with
+// "ReferenceError: GOLD_RGBA is not defined" while prerendering this route.
+// Every other calculator page already declares it next to GOLD; this one did
+// not, because it never had a TOC before.
+const GOLD_RGBA = (a: number) => `rgba(212,175,55,${a})`;
 
 
 const FAQS = [
