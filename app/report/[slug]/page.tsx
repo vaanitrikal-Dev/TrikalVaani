@@ -90,11 +90,11 @@ export async function generateMetadata(
   { params }: { params: { slug: string } }
 ): Promise<Metadata> {
   if (!isValidSlug(params.slug)) {
-    return { title: 'Report Not Found | Trikaal Vaani' }
+    return { title: { absolute: 'Report Not Found | Trikaal Vaani' } }
   }
 
   const report = await getReport(params.slug)
-  if (!report) return { title: 'Report Not Found | Trikaal Vaani' }
+  if (!report) return { title: { absolute: 'Report Not Found | Trikaal Vaani' } }
 
   const geoAnswer = report.geo_answer ?? `Vedic astrology ${report.domain_label} analysis for ${report.birth_city}. Powered by Swiss Ephemeris.`
 
@@ -108,7 +108,13 @@ export async function generateMetadata(
   )
 
   return {
-    title:       meta.title,
+    // v6.1 (06 Sep 2026): `absolute` bypasses app/layout.tsx's
+    // title.template = "%s | Trikaal Vaani". A plain string here got the brand
+    // appended on top of the brand generateSeoMeta already carried, rendering
+    // "... | Trikaal Vaani | Trikaal Vaani" at 102 chars. lib/slug.ts v1.2 now
+    // owns the whole title, brand included, and keeps it inside 58 chars —
+    // so nothing further may be appended to it.
+    title:       { absolute: meta.title },
     description: meta.description,
     alternates:  { canonical: meta.canonical },
     openGraph: {
