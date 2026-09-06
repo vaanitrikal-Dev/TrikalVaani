@@ -213,7 +213,34 @@ RULE 11 — CITE THE CHART: when chartEvidence is present, at least TWO bullets 
     chartEvidence:      freeEvidence(templateData),
     person2Name:        userContext.person2Name || null,
     currentPeriod:      period.monthYear,
+    // ── v-fix 06 Sep 2026: THE ENGINE'S REMEDY, SO GEMINI STOPS INVENTING ONE
+    // The Upay cards further down the report come from templateData.remedyPlan
+    // (computed by template_engine.py). Gemini never saw them, so Bullet 5 and
+    // the summary produced a DIFFERENT remedy for the same planet. Live example,
+    // 06 Sep 2026: summary said "Om Namah Shivaya + black sesame on Saturday",
+    // the card said "Om Shanaye Namah 108x + mustard oil diya on Saturday".
+    // Both classical, both for Saturn, and the reader has no way to know which
+    // to follow. Passing the engine's first remedy in lets the narrative point
+    // AT it instead of competing with it.
+    engineRemedy:       (() => {
+      const r = (templateData?.remedyPlan?.remedies ?? [])[0]
+      if (!r) return null
+      return {
+        planet:  r.planet  ?? null,
+        mantra:  r.mantra  ?? null,
+        count:   r.count   ?? null,
+        day:     r.day     ?? null,
+        special: r.special ?? null,
+      }
+    })(),
   }
+
+  // ── v-fix 06 Sep 2026: REMEDY OWNERSHIP ────────────────────────────────────
+  // One report, one instruction. The engine owns WHAT to do; Gemini owns WHY
+  // it matters. Without this the two disagreed in the same scroll.
+  const REMEDY_RULE = ctx.engineRemedy
+    ? `\n\nABSOLUTE REMEDY RULE — the Upay section of this report already prescribes: ${ctx.engineRemedy.mantra ?? 'a mantra'}${ctx.engineRemedy.count ? ` (${ctx.engineRemedy.count})` : ''} for ${ctx.engineRemedy.planet ?? 'the afflicted planet'}${ctx.engineRemedy.day ? ` on ${ctx.engineRemedy.day}` : ''}${ctx.engineRemedy.special ? `, plus: ${ctx.engineRemedy.special}` : ''}. You may REFER to it and explain why that planet needs support. You may NOT prescribe any other mantra, deity, dana, fast or gemstone anywhere in your output — not in geoBullets, not in simpleSummary, not in remedyHint. A second instruction makes the reader ask which one is real, and that costs more than the sentence is worth.`
+    : `\n\nABSOLUTE REMEDY RULE — no engine remedy was supplied for this chart. Do NOT invent a specific mantra, dana or gemstone. Speak about remedy in principle only.`
 
   // ── Output Schema ──────────────────────────────────────────────────────────
   const schema = `{
@@ -225,7 +252,7 @@ RULE 11 — CITE THE CHART: when chartEvidence is present, at least TWO bullets 
     "Bullet 2 (Dasha Intelligence): How ${templateData?.dashaOneLiner || 'current planetary period'} specifically affects ${domain.displayName} — 15-25 words",
     "Bullet 3 (Segment-Specific): Insight tailored for ${dynSeg} — their primary concern in ${domain.displayName} — 15-25 words",
     "Bullet 4 (Timing Precision): Favorable period from dasha analysis — specific window — 15-25 words",
-    "Bullet 5 (Classical Remedy): BPHS-based remedy principle — mantra or dana — 15-25 words"
+    "Bullet 5 (Classical Remedy): If engineRemedy is present, state the PRINCIPLE behind THAT remedy — name its planet and why that planet needs support. Do NOT name a different mantra, deity or dana; the exact instruction is printed in the Upay cards below and must not be contradicted here. If engineRemedy is null, give a general BPHS principle with no specific mantra — 15-25 words"
   ],
 
   "simpleSummary": {
@@ -280,7 +307,7 @@ CRITICAL REMINDERS:
 • summaryText = ${wordCount} words. First 2 sentences = ${dynSeg} pain.
 • Language = ${lang.toUpperCase()} — every word
 • JSON only — { to }
-• JAI MAA SHAKTI 🔱`
+• JAI MAA SHAKTI 🔱${REMEDY_RULE}`
 
   return { systemPrompt, userMessage }
 }
