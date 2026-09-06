@@ -11,6 +11,24 @@ import SeoPageLayout from '@/components/seo/SeoPageLayout'
 
 /* ============================================================
    TRIKAL VAANI — /learn/[slug]
+   VERSION: 2.1 — BUILD COST (6 Sep 2026)
+   ============================================================
+   CHANGE v2.1 — the ONLY change from v2.0 is generateStaticParams below.
+     Vercel build log: 2m59s of a 3m20s build is "Generating static pages
+     (1029)". 133 of those are /learn/[slug], rebuilt on every one of 353
+     deployments this cycle. Build CPU = $40.80 of a $45.70 bill.
+
+     v2.1 pre-renders the top 20 by `priority` (getAllPublishedSlugs already
+     returns them ordered by priority DESC — confirmed in lib/seo-content.ts).
+     The other 113 are NOT removed: dynamicParams defaults to true, so they
+     render on first request and then serve from the ISR cache
+     (revalidate = 86400, unchanged). All 133 stay in the sitemap —
+     app/sitemap-seo.ts calls getAllPublishedSlugs() separately and is
+     deliberately NOT touched, so it still emits every URL.
+
+     Rollback: delete `.slice(0, PRERENDER_COUNT)` on the line below.
+
+   ============================================================
    VERSION: 2.0 — PATH A BILINGUAL (5 Sep 2026)
    SIGNED: ROHIIT GUPTA, CEO
    ============================================================
@@ -69,9 +87,13 @@ interface Props {
 }
 
 /* ── generateStaticParams ── */
+// v2.1 — pre-render the 20 highest-priority pages only.
+// getAllPublishedSlugs() is already ordered by priority DESC.
+const PRERENDER_COUNT = 20
+
 export async function generateStaticParams() {
   const slugs = await getAllPublishedSlugs()
-  return slugs.map(({ slug }) => ({ slug }))
+  return slugs.slice(0, PRERENDER_COUNT).map(({ slug }) => ({ slug }))
 }
 
 /* ── generateMetadata ── */
