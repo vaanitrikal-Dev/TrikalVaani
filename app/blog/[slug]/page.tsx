@@ -1,7 +1,33 @@
 // ============================================================
 // TRIKAL VAANI — DYNAMIC BLOG ARTICLE PAGE (SSR)
 // CEO: Rohiit Gupta | Chief Vedic Architect
-// Version: 3.0
+// Version: 3.1
+// Date: 2026-09-06
+// CHANGE v3.1 — BUILD COST (the only change in this file):
+//   generateStaticParams() pre-rendered all 741 published posts on EVERY
+//   deployment. Vercel build log:
+//     Generating static pages (0/1029) -> (1029/1029)   = 2m59s of a 3m20s build
+//   353 deployments this billing cycle => Build CPU $40.80 of a $45.70 bill.
+//
+//   v3.1 pre-renders the 60 NEWEST posts. The other ~680 are NOT deleted and
+//   NOT hidden: Next.js App Router has dynamicParams = true by default, so any
+//   slug not in this list is rendered on its first request and then served
+//   from the ISR cache (revalidate = 86400, unchanged below). Google gets
+//   byte-identical HTML either way; all 741 URLs stay in the sitemap.
+//
+//   Why the 60 newest: fresh posts are the ones Google has not crawled yet and
+//   the ones with no cache entry anywhere. Older posts are steady-traffic and
+//   warm quickly after a deploy.
+//
+//   TRADE-OFF, stated honestly: after each deployment the ISR cache starts
+//   empty, so the FIRST visitor to an older post pays one server render
+//   (~300-500ms with the v3.7 narrow query) instead of getting a pre-built
+//   file. Every visitor after that is served from cache. Nothing 404s, nothing
+//   drops out of the index.
+//
+//   To go back to pre-rendering everything: change getAllSlugs(60) to
+//   getAllSlugs() on the line marked below. That is the entire rollback.
+//
 // CHANGE v3.0 — LOCALBUSINESS REMOVED FROM THESE PAGES (2026-08-31):
 //   • v2.9 emitted a full LocalBusiness block on all eight NCR city blog
 //     pages, same NAP, same @id. That was a mistake, and it broke a
@@ -245,8 +271,11 @@ const FEE_LADDER: { name: string; price: string; description: string }[] = [
 // ==================================================================
 // STATIC PARAMS
 // ==================================================================
+// v3.1 — pre-render the newest 60 only. Rollback = remove the number.
+const PRERENDER_COUNT = 60;
+
 export async function generateStaticParams() {
-  const slugs = await getAllSlugs();
+  const slugs = await getAllSlugs(PRERENDER_COUNT); // <-- getAllSlugs() = all 741
   return slugs.map((slug) => ({ slug }));
 }
 
