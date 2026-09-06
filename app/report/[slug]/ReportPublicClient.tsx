@@ -252,8 +252,13 @@ const L: Record<string, Record<Lang,string>> = {
   tlPast:       {hinglish:'Pichhle 3 mahine',    hindi:'पिछले ३ महीने',   english:'Past 3 months'},
   tlNow:        {hinglish:'Abhi',                hindi:'अभी',             english:'Now'},
   tlNext:       {hinglish:'Agle 6 mahine',       hindi:'अगले ६ महीने',    english:'Next 6 months'},
-  bestMonth:    {hinglish:'Sabse sahaayak mahina', hindi:'सबसे सहायक महीना', english:'Most supportive month'},
-  cautionMonth: {hinglish:'Sabse savdhaani wala', hindi:'सबसे सावधानी वाला', english:'Most cautious month'},
+  // v-fix 06 Sep 2026: these two chips read off gocharTimeline (TRANSITS).
+  // The Action Windows card lower down reads off actionWindows (PRATYANTAR
+  // DASHA). They are different measurements and will often name different
+  // months — which looked like the report contradicting itself. Saying which
+  // system each one comes from costs two words and removes the confusion.
+  bestMonth:    {hinglish:'Sabse sahaayak mahina (gochar)', hindi:'सबसे सहायक महीना (गोचर)', english:'Most supportive month (transit)'},
+  cautionMonth: {hinglish:'Sabse savdhaani wala (gochar)', hindi:'सबसे सावधानी वाला (गोचर)', english:'Most cautious month (transit)'},
   background:   {hinglish:'Poore daur mein sthir', hindi:'पूरे दौर में स्थिर', english:'Constant through the window'},
   navamsa:      {hinglish:'🕉️ Navamsa (D9) — Divisional Chart', hindi:'🕉️ नवांश (D9) — वर्ग कुंडली', english:'🕉️ Navamsa (D9) — Divisional Chart'},
   navLagna:     {hinglish:'D9 Lagna',   hindi:'नवांश लग्न',    english:'D9 Lagna'},
