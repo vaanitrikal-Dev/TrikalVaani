@@ -7,7 +7,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
 export const runtime = 'nodejs';
-export const maxDuration = 300; // 5 min (Vercel Pro allows up to 300s)
+export const maxDuration = 240; // 5 min (Vercel Pro allows up to 300s)
 export const dynamic = 'force-dynamic';
 
 // ============================================
