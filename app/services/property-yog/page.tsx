@@ -158,9 +158,9 @@ const schema = {
 // header before adding anything here.
 // ════════════════════════════════════════════════════════════════════════════
 
-type PySection = { id: string; h2: string; paras: string[] };
+type V6Section = { id: string; h2: string; paras: string[] };
 
-const V6_SECTIONS: PySection[] = [
+const V6_SECTIONS: V6Section[] = [
   {
     id: 'kaise-kaam',
     h2: 'Property Yog Calculator — kaam kaise karta hai',
@@ -476,9 +476,9 @@ const V6_SECTIONS: PySection[] = [
   },
 ];
 
-type PyLink = { href: string; label: string; note: string };
+type V6Link = { href: string; label: string; note: string };
 
-const V6_HUB_LEARN: PyLink[] = [
+const V6_HUB_LEARN: V6Link[] = [
   { href: '/learn/property-prediction-astrology', label: 'Property Prediction Astrology', note: 'Poora sidhant' },
   { href: '/learn/best-time-to-buy-property', label: 'Best time to buy property', note: 'Samay ka vishleshan' },
   { href: '/learn/property-investment-prediction', label: 'Property Investment Prediction', note: 'Nivesh ka prashn' },
@@ -490,7 +490,7 @@ const V6_HUB_LEARN: PyLink[] = [
   { href: '/blog/paitrik-sampatti-yog-jyotish', label: 'पैतृक संपत्ति योग', note: 'विरासत का योग' },
 ];
 
-const V6_HUB_CALC: PyLink[] = [
+const V6_HUB_CALC: V6Link[] = [
   { href: '/calculators/free-sade-sati-calculator', label: 'Sade Sati Calculator', note: 'Shani ka gochar' },
   { href: '/calculators/free-dasha-calculator', label: 'Dasha Calculator', note: 'Buying window ka aadhaar' },
   { href: '/calculators/free-graha-bal-calculator', label: 'Graha Bal Calculator', note: 'Mangal ka asli bal' },
@@ -502,7 +502,7 @@ const V6_HUB_CALC: PyLink[] = [
   { href: '/panchang', label: 'Panchang', note: 'Registry ka muhurat' },
 ];
 
-function PyRich({ text, k }: { text: string; k: string }) {
+function V6Rich({ text, k }: { text: string; k: string }) {
   const parts = text.split(/(\[[^\]]+\]\([^)]+\)|\*\*[^*]+\*\*)/g);
   return (
     <>
@@ -524,7 +524,7 @@ function PyRich({ text, k }: { text: string; k: string }) {
   );
 }
 
-function PyHub({ items }: { items: PyLink[] }) {
+function V6Hub({ items }: { items: V6Link[] }) {
   return (
     <ul className="space-y-2 m-0 p-0 list-none">
       {items.map((i) => (
@@ -559,7 +559,7 @@ function V6Content() {
             <h2 className="text-2xl font-serif font-bold mb-4 text-[#D4AF37]">{sec.h2}</h2>
             {sec.paras.map((p, pi) => (
               <p key={pi} className="text-slate-300 leading-relaxed mb-4">
-                <PyRich text={p} k={`v6-${si}-${pi}`} />
+                <V6Rich text={p} k={`v6-${si}-${pi}`} />
               </p>
             ))}
           </div>
@@ -574,11 +574,11 @@ function V6Content() {
         <div className="grid gap-6 md:grid-cols-2">
           <div>
             <h3 className="mb-2 pb-1.5 text-sm font-bold border-b border-[#D4AF37]/25 text-slate-200">Padhne ke liye</h3>
-            <PyHub items={V6_HUB_LEARN} />
+            <V6Hub items={V6_HUB_LEARN} />
           </div>
           <div>
             <h3 className="mb-2 pb-1.5 text-sm font-bold border-b border-[#D4AF37]/25 text-slate-200">Muft calculators</h3>
-            <PyHub items={V6_HUB_CALC} />
+            <V6Hub items={V6_HUB_CALC} />
           </div>
         </div>
       </section>
