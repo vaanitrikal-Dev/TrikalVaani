@@ -135,12 +135,55 @@ export function generateSeoMeta(
   const domainSlug    = DOMAIN_SLUG_MAP[domainId] ?? 'astrology'
   const domainDisplay = DOMAIN_DISPLAY[domainSlug] ?? 'Vedic Astrology'
 
-  // v1.1: no city in visible title — national + global scope, double-a brand.
-  const title = `${domainDisplay} Prediction — ${mahadasha}-${antardasha} Dasha | India & Global | Trikaal Vaani`
+  // ── v1.2 (06 Sep 2026) TITLE LENGTH + DOUBLE-BRAND FIX ──────────────────
+  //
+  // WHAT WAS WRONG
+  //   v1.1 built: "<Domain> Prediction — <Maha>-<Antar> Dasha | India & Global
+  //   | Trikaal Vaani" — 84 chars at its longest. app/layout.tsx line 47 sets
+  //   title.template = "%s | Trikaal Vaani", so Next.js appended the brand a
+  //   SECOND time and the rendered title reached 102 characters ending in
+  //   "| Trikaal Vaani | Trikaal Vaani". Confirmed live on
+  //   /report/property-saturn-ketu-new-2026-7x3v6, 06 Sep 2026.
+  //   Google shows roughly 58, so a searcher saw only
+  //   "Property & Real Estate Prediction — Saturn-Ketu D…" — no brand, no
+  //   scope, and the duplicate never visible but still diluting the tag.
+  //
+  // WHAT CHANGED
+  //   Dropped the two filler segments — the word "Prediction" (the page IS a
+  //   prediction; saying so buys nothing) and "| India & Global" (a scope
+  //   claim no one searches for). What remains is the domain and the dasha
+  //   pair, which is what makes each report page distinct from the others.
+  //
+  //   The brand is then added ONLY IF IT FITS inside 58 characters. Per the
+  //   site standard: keyword + differentiator win the 58 chars over
+  //   "| Trikaal Vaani" (16 chars) when both cannot fit. The worst case
+  //   ("Property & Real Estate" + a 13-char dasha pair) is 60 with the brand,
+  //   so on those few the brand is dropped rather than the dasha.
+  //
+  //   The consumer (app/report/[slug]/page.tsx) now passes this through
+  //   `title: { absolute: ... }`, which bypasses the root template so the
+  //   string below is exactly what renders. Both halves of the fix are
+  //   required — either one alone leaves the tag wrong.
+  const TITLE_MAX = 58
+  const BRAND     = ' | Trikaal Vaani'
+  const titleCore = `${domainDisplay} — ${mahadasha}-${antardasha} Dasha`
+  const title     = (titleCore.length + BRAND.length) <= TITLE_MAX
+    ? titleCore + BRAND
+    : titleCore
 
-  const description = geoAnswer
-    ? geoAnswer.slice(0, 155)
-    : `Vedic astrology ${domainDisplay.toLowerCase()} prediction. ${mahadasha} Mahadasha, ${antardasha} Antardasha analysis by Rohiit Gupta, Chief Vedic Architect. Powered by Swiss Ephemeris.`
+  // Meta: the standard is 140-155 chars with a clear CTA. v1.1 did a raw
+  // slice(0,155) on the GEO answer, which cut mid-word and carried no CTA.
+  // Now the cut lands on a word boundary and a short CTA is appended when
+  // there is room for it.
+  const CTA = ' Poori reading — ₹51.'
+  const rawDesc = geoAnswer
+    ? geoAnswer.trim()
+    : `Vedic ${domainDisplay.toLowerCase()} prediction from your own chart — ${mahadasha} Mahadasha, ${antardasha} Antardasha, by Rohiit Gupta.`
+  const budget  = 155 - CTA.length
+  const clipped = rawDesc.length <= budget
+    ? rawDesc
+    : rawDesc.slice(0, budget).replace(/\s+\S*$/, '') + '…'
+  const description = (clipped + CTA).slice(0, 155)
 
   const canonical = `https://trikalvaani.com/report/${slug}`
 
