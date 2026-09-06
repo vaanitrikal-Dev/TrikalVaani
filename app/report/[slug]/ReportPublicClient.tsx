@@ -1151,6 +1151,30 @@ function PaidFullSummary({ summaryText, periodSummary, bestDates, dosList, donts
 export default function ReportPublicClient({report,slug,meta}:ReportPublicClientProps) {
   const domainLabel = s(report.domain_label,'Vedic Reading')
   const birthCity   = s(report.birth_city,'India')
+
+  // ── v-fix 06 Sep 2026: SHOW THE BIRTH DATA THE CHART WAS BUILT FROM ────────
+  // On 06 Sep 2026 a report was analysed in detail — chart maths verified row
+  // by row, all twelve checks passing — before anyone noticed it had been
+  // computed from the WRONG birth date. The header showed only
+  // "New Delhi · Meena Lagna · Swati Nakshatra", so there was nothing on the
+  // page to compare against. The reader could not see it and neither could we.
+  //
+  // The row already carries `dob`; it was simply never rendered. Showing it
+  // makes a wrong entry visible in one second instead of six conversations.
+  // `birth_time` exists in the `predictions` table but is NOT exposed by
+  // public_report_view, so it cannot be shown until that view is altered —
+  // see the SQL in the handover note. Time matters most here, because lagna
+  // and nakshatra both hinge on it.
+  const birthDob = (() => {
+    const raw = s(report.dob, '')
+    if (!raw || raw === '—') return null
+    const d = new Date(raw)
+    if (isNaN(d.getTime())) return raw            // show whatever is stored
+    return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
+  })()
+  const birthTime = s((report as Record<string, unknown>).birth_time as string, '')
+  const birthLine = [birthDob, (birthTime && birthTime !== '—') ? birthTime : null, birthCity]
+    .filter(Boolean).join(' · ')
   const nakshatra   = s(report.nakshatra)
   const tier        = s(report.tier,'free')
   const isPaid      = tier==='premium'||tier==='paid'||tier==='basic'||tier==='standard'
@@ -1312,7 +1336,8 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
             </div>
             <p style={{margin:'0 0 6px',color:G(0.6),fontSize:'12px',fontWeight:600,letterSpacing:'0.08em',textTransform:'uppercase'}}>Vedic Astrology Analysis · {domainLabel}</p>
             <h1 style={{margin:'0 0 6px',color:'#fff',fontSize:'22px',fontFamily:'Georgia,serif',fontWeight:700}}>{mahadasha} Mahadasha · {antardasha} Antardasha</h1>
-            <p style={{margin:'0 0 16px',color:'#94a3b8',fontSize:'14px'}}>{birthCity} · {lagna} Lagna · {nakshatra} Nakshatra</p>
+            <p style={{margin:'0 0 4px',color:'#94a3b8',fontSize:'14px'}}>{birthLine}</p>
+            <p style={{margin:'0 0 16px',color:'#64748b',fontSize:'12.5px'}}>{lagna} Lagna · {nakshatra} Nakshatra · <span style={{color:'#475569'}}>ye vivaran galat ho to reading dobara banayein</span></p>
             <div style={{display:'flex',flexWrap:'wrap',gap:'6px',justifyContent:'center',marginBottom:'12px'}}>
               {[{icon:'⚡',label:'Swiss Ephemeris',color:'#60a5fa'},{icon:'📖',label:'BPHS Classical',color:'#a78bfa'},{icon:'🔮',label:'Bhrigu Nandi',color:'#f472b6'},{icon:'⚖️',label:'Shadbala',color:'#34d399'}].map(b=>(<span key={b.label} style={{display:'inline-flex',alignItems:'center',gap:'4px',padding:'5px 11px',borderRadius:'20px',fontSize:'11px',fontWeight:600,background:`${b.color}15`,border:`1px solid ${b.color}30`,color:b.color}}>{b.icon} {b.label}</span>))}
             </div>
