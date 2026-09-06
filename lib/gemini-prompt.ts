@@ -426,6 +426,22 @@ function buildClientContext(
     // Period
     currentPeriod:      period.monthYear,
     currentDate:        period.isoDate,
+
+    // ── v-fix 06 Sep 2026: the remedy the ENGINE already chose ──────────────
+    // Without this the model wrote its own mantra in remedyHint while the Upay
+    // cards printed a different one for the same planet. Passing it in lets
+    // the narrative point at the card instead of competing with it.
+    engineRemedy:       (() => {
+      const r = (templateData?.remedyPlan?.remedies ?? [])[0]
+      if (!r) return null
+      return {
+        planet:  r.planet  ?? null,
+        mantra:  r.mantra  ?? null,
+        count:   r.count   ?? null,
+        day:     r.day     ?? null,
+        special: r.special ?? null,
+      }
+    })(),
   };
 }
 
@@ -491,7 +507,7 @@ function buildUserMessage(
     "mainCaution":    "Most critical thing to avoid — specific, with brief reason",
     "dos":   ["5 specific actionable dos — mix of practical + spiritual + timing"],
     "donts": ["5 specific donts — with brief reasoning, not generic"],
-    "remedyHint":     "1-2 sentences hinting at remedy — mantra or dana — specific day/time"
+    "remedyHint":     "1-2 sentences pointing at the remedy in context.engineRemedy — name its planet and why it needs support. Do NOT name a different mantra, deity or dana; the exact instruction is printed in the Upay cards. If engineRemedy is null, speak of remedy in principle with no specific mantra."
   },
 
   "karmicInsight": ${templateData?.karmicMarker ? `"${templateData.karmicText || 'Ek karmic pattern active hai — 🔱 Bhrigu ne confirm kiya hai'}"` : 'null'},
@@ -546,5 +562,6 @@ FINAL REMINDERS:
 • actionWindow/avoidWindow = from templateData ONLY — never invent
 • Language = ${lang.toUpperCase()} — every word, zero exceptions
 • Output ONLY valid JSON — { to }
+• ABSOLUTE REMEDY RULE: the Upay section of this report prescribes the remedy in context.engineRemedy. Refer to it and explain WHY that planet needs support. Never introduce a different mantra, deity, dana, vrat or gemstone anywhere in your output — one report, one instruction.
 • JAI MAA SHAKTI 🔱 — TRIKAAL VAANI v5.0`;
 }
