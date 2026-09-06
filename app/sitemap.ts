@@ -1,3 +1,48 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   LASTMOD FIX — 06 September 2026
+
+   WHAT WAS WRONG
+     Every URL in this sitemap carried `lastModified: now` — the moment the
+     sitemap was generated. Live output, 06 Sep 2026:
+
+       <loc>https://trikalvaani.com</loc>
+       <lastmod>2026-09-06T12:59:23.126Z</lastmod>
+       <loc>https://trikalvaani.com/pricing</loc>
+       <lastmod>2026-09-06T12:59:23.126Z</lastmod>   <-- the same second
+
+     22 of the 24 lastModified lines in this file used `now`; only the report
+     loop used a real timestamp. So on every fetch, all ~5,300 URLs claimed to
+     have changed simultaneously.
+
+   WHY THAT IS WORSE THAN NO LASTMOD AT ALL
+     Google only uses lastmod when it is consistently accurate. A sitemap that
+     says everything changed just now, every time, teaches the crawler to
+     ignore the field completely — which means the handful of pages that DID
+     genuinely change get no signal at all. They are buried under thousands of
+     false ones. This is a large part of why so much of the site is crawled
+     rarely.
+
+   WHAT THIS CHANGES
+     The two biggest DB-driven groups now emit their real `updated_at`:
+       /learn/<slug>          133 rows, seo_pillar_pages
+       /compatibility/<slug>  288 rows, compatibility_pages
+     Both tables already have an updated_at column — it simply was never
+     selected. The pattern copies the report loop, which was already correct:
+       lastModified: row.updatedAt ? new Date(row.updatedAt) : now
+
+     /blog/<slug> was ALREADY correct (post.updatedAt) and is untouched.
+
+   WHAT STILL USES `now`, AND WHY THAT IS FINE
+     Genuinely dated or daily pages — /panchang/<date>, /rashifal/<today>,
+     vivah-muhurat years, city pages — plus the static routes. Those are
+     either regenerated daily or change rarely enough that `now` does no harm
+     once the bulk of the sitemap is honest.
+
+   NEXT STEP AFTER DEPLOY
+     Search Console -> Sitemaps -> remove sitemap.xml, then add it again.
+     That forces a full re-read rather than an incremental one.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
 /**
  * ============================================================================
  * 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER 🔱
@@ -446,14 +491,16 @@ function festivalInState(scope: string | null, homeStates: string[] | null, stat
   return true;
 }
 
-async function readCompatibilitySlugs(): Promise<{ slug: string; lang: string }[]> {
+async function readCompatibilitySlugs(): Promise<{ slug: string; lang: string; updated_at?: string | null }[]> {
   try {
     const supabase = anonClient();
     const { data, error } = await supabase
       .from('compatibility_pages')
-      .select('slug, lang');
+      // v-fix 06 Sep 2026: updated_at added so the 288 compatibility URLs can
+      // carry a real lastmod instead of `now`. The column already existed.
+      .select('slug, lang, updated_at');
     if (error || !data) return [];
-    return data as { slug: string; lang: string }[];
+    return data as { slug: string; lang: string; updated_at?: string | null }[];
   } catch {
     return [];
   }
@@ -525,14 +572,16 @@ async function readReportSlugs(): Promise<{ slug: string; updatedAt: string | nu
   }
 }
 
-type SeoPageRow = { slug: string; category: string; priority: number };
+type SeoPageRow = { slug: string; category: string; priority: number; updated_at?: string | null };
 
 async function readSeoLearnSlugs(): Promise<SeoPageRow[]> {
   try {
     const supabase = anonClient();
     const { data, error } = await supabase
       .from('seo_pillar_pages')
-      .select('slug, category, priority')
+      // v-fix 06 Sep 2026: updated_at added so /learn/ URLs can carry a real
+      // lastmod instead of `now`. The column already existed.
+      .select('slug, category, priority, updated_at')
       .eq('published', true)
       .order('priority', { ascending: false });
     if (error || !data) return [];
@@ -736,10 +785,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const hiUrl = `${BASE}/hi/compatibility/${row.slug}`;
     const languages = { 'en-IN': enUrl, 'hi-IN': hiUrl };
 
+    // v-fix 06 Sep 2026: real updated_at instead of `now`. See the header note.
+    const compatMod = row.updated_at ? new Date(row.updated_at) : now;
     if (row.lang === 'en') {
       entries.push({
         url: enUrl,
-        lastModified: now,
+        lastModified: compatMod,
         changeFrequency: 'monthly',
         priority: 0.8,
         alternates: { languages },
@@ -747,7 +798,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     } else if (row.lang === 'hi') {
       entries.push({
         url: hiUrl,
-        lastModified: now,
+        lastModified: compatMod,
         changeFrequency: 'monthly',
         priority: 0.7,
         alternates: { languages },
@@ -915,7 +966,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   for (const page of seoPages) {
     entries.push({
       url: `${BASE}/learn/${page.slug}`,
-      lastModified: now,
+      lastModified: page.updated_at ? new Date(page.updated_at) : now,
       changeFrequency: learnChangeFreq(page.category),
       priority: page.priority ?? 0.8,
     });
