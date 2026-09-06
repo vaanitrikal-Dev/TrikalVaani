@@ -248,7 +248,10 @@ const L: Record<string, Record<Lang,string>> = {
   confPast:     {hinglish:'Pichhle kuch mahine', hindi:'पिछले कुछ महीने', english:'Recent past'},
   confNext3:    {hinglish:'Agle 3 mahine',       hindi:'अगले ३ महीने',    english:'Next 3 months'},
   conf46:       {hinglish:'Mahina 4-6',          hindi:'महीना ४-६',       english:'Months 4-6'},
-  timeline:     {hinglish:'📆 9 Mahine Ki Timeline — Gochar', hindi:'📆 ९ महीने की समय-रेखा — गोचर', english:'📆 9-Month Timeline — Transits'},
+  timeline:     {hinglish:'📆 10 Mahine Ki Timeline — Gochar', hindi:'📆 १० महीने की समय-रेखा — गोचर', english:'📆 10-Month Timeline — Transits'},
+  // v-fix 06 Sep 2026: names the dasha LEVEL shown on each month row, so it
+  // no longer looks like it disagrees with the Mahadasha in the header.
+  adPd:         {hinglish:'antar / pratyantar', hindi:'अंतर / प्रत्यंतर', english:'antar / pratyantar'},
   tlPast:       {hinglish:'Pichhle 3 mahine',    hindi:'पिछले ३ महीने',   english:'Past 3 months'},
   tlNow:        {hinglish:'Abhi',                hindi:'अभी',             english:'Now'},
   tlNext:       {hinglish:'Agle 6 mahine',       hindi:'अगले ६ महीने',    english:'Next 6 months'},
@@ -406,6 +409,17 @@ function KundaliChart({lagna,planets}:{lagna:string;planets:PlanetRow[]}) {
   const lagnaIdx = RASHI_LIST.findIndex(r=>r.toLowerCase()===lagna.toLowerCase()||lagna.toLowerCase().startsWith(r.toLowerCase().slice(0,4)))
   if(lagnaIdx<0) return null
   const houseMap:Record<number,string[]> = {}
+  // v-fix 06 Sep 2026: slice(0,3) collapsed Vrishabha and Vrishchika to the
+  // same "Vri", and both can sit in one chart. Explicit, unambiguous shorts.
+  const RASHI_SHORT: Record<string,string> = {
+    'Mesha':'Mesh',   'Vrishabha':'Vrsh',  'Mithuna':'Mith',  'Karka':'Kark',
+    'Simha':'Simh',   'Kanya':'Kany',      'Tula':'Tula',     'Vrishchika':'Vrsc',
+    'Dhanu':'Dhan',   'Makara':'Makr',     'Kumbha':'Kumb',   'Meena':'Meen',
+    // the engine has also emitted these unsuffixed spellings — see the
+    // predictions table, where both 'Mesh' and 'Mesha' appear.
+    'Mesh':'Mesh',    'Vrishabh':'Vrsh',   'Mithun':'Mith',   'Makar':'Makr',
+    'Kumbh':'Kumb',   'Vrischika':'Vrsc',  'Vrishchik':'Vrsc',
+  }
   planets.forEach(p=>{if(!houseMap[p.house])houseMap[p.house]=[];houseMap[p.house].push(PLANET_HI[p.planet]?.slice(0,3)||p.planet.slice(0,3))})
   const cells:[number,number,number,number,number][] = [[12,0,0,100,100],[1,100,0,200,100],[2,300,0,100,100],[11,0,100,100,200],[3,300,100,100,200],[10,0,300,100,100],[9,100,300,200,100],[8,300,300,100,100],[4,100,100,100,100],[5,200,100,100,100],[6,100,200,100,100],[7,200,200,100,100]]
   const houseToRashi = (h:number) => RASHI_LIST[(lagnaIdx+h-1)%12]
@@ -418,7 +432,7 @@ function KundaliChart({lagna,planets}:{lagna:string;planets:PlanetRow[]}) {
         <line x1="300" y1="300" x2="200" y2="200" stroke={G(0.3)} strokeWidth="1.5"/>
         {cells.map(([h,x,y,w,ht])=>{
           const isLagna=h===1; const planetsHere=houseMap[h]??[]; const rashi=houseToRashi(h)
-          return (<g key={h}><rect x={x} y={y} width={w} height={ht} fill={isLagna?G(0.15):'rgba(10,15,30,0.6)'} stroke={G(isLagna?0.6:0.25)} strokeWidth={isLagna?2:1}/><text x={x+7} y={y+15} fill={G(0.55)} fontSize="11" fontFamily="Georgia,serif" fontWeight={isLagna?'700':'400'}>{h}</text><text x={x+w-6} y={y+15} fill={G(0.35)} fontSize="9" textAnchor="end" fontFamily="Georgia,serif">{rashi.slice(0,3)}</text>{isLagna&&<text x={x+w/2} y={y+ht-10} fill={GOLD} fontSize="12" textAnchor="middle" fontWeight="700" fontFamily="Georgia,serif">L</text>}{planetsHere.map((pl,i)=>(<text key={`${h}-${pl}-${i}`} x={x+w/2} y={y+ht/2+(i-(planetsHere.length-1)/2)*15} fill={isLagna?GOLD:'#e2e8f0'} fontSize="11" textAnchor="middle" fontWeight={isLagna?'700':'500'} fontFamily="Georgia,serif">{pl}</text>))}</g>)
+          return (<g key={h}><rect x={x} y={y} width={w} height={ht} fill={isLagna?G(0.15):'rgba(10,15,30,0.6)'} stroke={G(isLagna?0.6:0.25)} strokeWidth={isLagna?2:1}/><text x={x+7} y={y+15} fill={G(0.55)} fontSize="11" fontFamily="Georgia,serif" fontWeight={isLagna?'700':'400'}>{h}</text><text x={x+w-6} y={y+15} fill={G(0.35)} fontSize="9" textAnchor="end" fontFamily="Georgia,serif">{RASHI_SHORT[rashi] ?? rashi.slice(0,3)}</text>{isLagna&&<text x={x+w/2} y={y+ht-10} fill={GOLD} fontSize="12" textAnchor="middle" fontWeight="700" fontFamily="Georgia,serif">L</text>}{planetsHere.map((pl,i)=>(<text key={`${h}-${pl}-${i}`} x={x+w/2} y={y+ht/2+(i-(planetsHere.length-1)/2)*15} fill={isLagna?GOLD:'#e2e8f0'} fontSize="11" textAnchor="middle" fontWeight={isLagna?'700':'500'} fontFamily="Georgia,serif">{pl}</text>))}</g>)
         })}
         <text x="200" y="396" fill={G(0.4)} fontSize="10" textAnchor="middle" fontFamily="Georgia,serif">{lagna} Lagna</text>
       </svg>
@@ -638,7 +652,7 @@ function GocharTimeline({ g, lang, isPaid, slug }:{ g:Record<string,unknown>; la
       border:`1px solid ${highlight?G(0.3):'rgba(255,255,255,0.06)'}`}}>
       <div style={{display:'flex',alignItems:'center',gap:'8px',flexWrap:'wrap',marginBottom:'4px'}}>
         <span style={{fontSize:'13px',fontWeight:700,color:'#fff'}}>{dot(m.marker)} {m.label}</span>
-        {(m.antardasha||m.pratyantar) && <span style={{color:'#64748b',fontSize:'11px'}}>{m.antardasha ?? '—'}{m.pratyantar?` / ${m.pratyantar}`:''}</span>}
+        {(m.antardasha||m.pratyantar) && <span style={{color:'#64748b',fontSize:'11px'}}>{m.antardasha ?? '—'}{m.pratyantar?` / ${m.pratyantar}`:''} <span style={{color:'#475569'}}>({lbl('adPd',lang)})</span></span>}
       </div>
       <p style={{margin:0,color:'#94a3b8',fontSize:'12px',lineHeight:1.6}}>
         {safeArr<{planet:string;house:number;nature:string}>(m.domain_hits)
