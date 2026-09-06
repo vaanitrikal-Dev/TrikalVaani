@@ -1235,17 +1235,68 @@ export async function POST(req: NextRequest) {
   let rawChart:any=null, synthesisData:any=null, templateData:any=null
 
   // ── STEP 1: /kundali ─────────────────────────────────────────────────────
+  //
+  // ╔══════════════════════════════════════════════════════════════════════╗
+  // ║ v15.4 CRITICAL FIX (06 Sep 2026) — EVERY CHART WAS THE SAME CHART    ║
+  // ╚══════════════════════════════════════════════════════════════════════╝
+  //
+  // WHAT WAS HAPPENING
+  //   This call sent { dob, tob, lat, lng }. The VM's /kundali Pydantic model
+  //   does not have those fields — it reads
+  //   { year, month, day, hour, minute, second, latitude, longitude }.
+  //   Every one of those has a DEFAULT, so FastAPI did not reject the payload
+  //   with a 422. It silently built a chart from the defaults instead.
+  //
+  //   Proved on the VM, 06 Sep 2026, same birth details both ways:
+  //     year/month/day style -> birth_jd 2442678.97, Kumbha lagna, Sun Kanya
+  //     dob/tob style        -> birth_jd 2451544.77, Meena  lagna, Sun Dhanu
+  //   JD 2451544.77 is 1 January 2000, 12:00. That is the default, not a chart.
+  //
+  // THE DAMAGE
+  //   Supabase, 14 days to 06 Sep 2026: 153 predictions, of which 145 carry
+  //   the identical Meena / Swati / Saturn / Ketu chart across 99 DIFFERENT
+  //   dates of birth — including one born 2012 whose Sun still came out in
+  //   Dhanu. chart_source read 'swiss-ephemeris-vm' and dataIntegrity read
+  //   chart_received:true, because the call did succeed. It just answered a
+  //   question nobody asked.
+  //
+  //   /api/calc/kundali (all the free calculators) was never affected — it has
+  //   always sent the correct field names. That is why the calculators gave
+  //   right answers while the paid reports did not, and why this hid so long.
+  //
+  // WHY THE OLD COMMENT DID NOT CATCH IT
+  //   v14.15 fixed `ayanamsa` from integer to string and the 422s stopped, so
+  //   the call started returning 200. The 422 had been the only thing making
+  //   the wrong field names visible. Fixing the symptom hid the disease.
+  //
+  // THE RULE THIS LEAVES BEHIND
+  //   Send exactly what /api/calc/kundali sends. That route is the reference
+  //   implementation for this endpoint — it is proven in production by every
+  //   calculator on the site. If the VM contract ever changes, change both.
+  const [_kY, _kM, _kD] = String(localBirthData.dob ?? '').split('-').map(Number)
+  const [_kH, _kMin]    = String(localBirthData.tob ?? '12:00').split(':').map(Number)
   const kundaliPromise = callVM('/kundali',{
-    dob:localBirthData.dob, tob:localBirthData.tob,
-    lat:localBirthData.lat, lng:localBirthData.lng,
-    // v14.15: VM Pydantic model declares ayanamsa as a STRING with default
-    // "lahiri" (main.py L126/L161). Sending the integer 1 returned
-    // 422 string_type on every /kundali call -> rawChart null -> Meeus fallback.
-    timezone:birthData.timezone??5.5, ayanamsa:'lahiri',
+    year:   _kY,
+    month:  _kM,
+    day:    _kD,
+    hour:   Number.isFinite(_kH)   ? _kH   : 12,
+    minute: Number.isFinite(_kMin) ? _kMin : 0,
+    second: 0,
+    latitude:  localBirthData.lat,
+    longitude: localBirthData.lng,
+    timezone:  birthData.timezone ?? 5.5,
+    ayanamsa:  'lahiri',
+    house_system: 'P',
   },25000).catch((err:any)=>{
-    console.error(`[TV-v14.6] /kundali failed: ${err.message}`)
+    console.error(`[TV-v15.4] /kundali failed: ${err.message}`)
     return null
   })
+
+  // Loud guard: if the date did not parse we would silently send undefined and
+  // land back on the VM defaults — the exact failure this fix exists for.
+  if (![_kY,_kM,_kD].every(Number.isFinite)) {
+    console.error(`[TV-v15.4] UNPARSEABLE dob "${localBirthData.dob}" — chart would fall back to VM defaults`)
+  }
 
   const promptUserContext:UserContext = {
     tier:               verifiedTier,
