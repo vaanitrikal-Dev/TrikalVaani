@@ -2,7 +2,7 @@
 
 // ============================================================
 // File: components/calculators/FreeKundaliCalculator.tsx
-// Version: v1.0 (05 Sep 2026)
+// Version: v1.1 (06 Sep 2026) — dignity column read the wrong field
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
 //
 // WHY THIS FILE EXISTS
@@ -47,7 +47,15 @@ type Planet = {
   house: number | null;
   nakshatra: string | null;
   is_retrograde: boolean;
+  // v1.1 FIX (06 Sep 2026): `dignity` on the API response is ALWAYS null —
+  // verified against a live /api/calc/kundali call, all nine planets, including
+  // a Mars exalted in Makara. The real value lives in
+  // `shadbala.classification` ("Exalted", "Debilitated", "Friendly Sign",
+  // "Neutral Sign"). v1.0 read `dignity` and so printed "—" for every planet.
+  // lib/yog-engine.ts dignityWord() already does this correctly; this now
+  // matches it.
   dignity: string | null;
+  shadbala?: { classification?: string | null } | null;
 };
 
 type Instant = {
@@ -318,7 +326,7 @@ export default function FreeKundaliCalculator() {
                         <td className="py-2 px-2" style={{ color: '#cbd5e1' }}>{p.sign || '—'}</td>
                         <td className="py-2 px-2" style={{ color: '#cbd5e1' }}>{p.house ?? '—'}</td>
                         <td className="py-2 px-2" style={{ color: '#cbd5e1' }}>{p.nakshatra || '—'}</td>
-                        <td className="py-2 px-2" style={{ color: '#94a3b8' }}>{p.dignity || '—'}</td>
+                        <td className="py-2 px-2" style={{ color: '#94a3b8' }}>{p.shadbala?.classification || p.dignity || '—'}</td>
                       </tr>
                     ))}
                   </tbody>
