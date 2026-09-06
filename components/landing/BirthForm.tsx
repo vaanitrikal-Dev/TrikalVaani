@@ -984,6 +984,17 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
       if (fields.person2Lat === '')   errs.person2Lat  = 'Person 2 place required'
     }
     setErrors(errs)
+
+    // ── DOMAIN GUARD — v-fix 06 Sep 2026 ──────────────────────────────────
+    // With no domain chosen, buildPredictionBody falls back to Karz Mukti and
+    // the reader receives a debt reading they never asked for. Refuse the
+    // submit instead. Uses apiError because `errors` is keyed to form fields
+    // and the domain is chosen outside this form.
+    if (!selectedCategory?.id) {
+      setApiError('Pehle apna vishay chuniye — kis baare mein reading chahiye. Bina chune reading galat vishay par ban jaati hai.')
+      return false
+    }
+
     return Object.keys(errs).length === 0
   }
 
@@ -995,6 +1006,13 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
 
     return {
       sessionId,
+      // v-fix 06 Sep 2026: this fallback is now UNREACHABLE — validate() below
+      // refuses to submit without a chosen domain. It is left in place only as
+      // a type-safety default. Do NOT rely on it: until today it silently gave
+      // a DEBT-RELIEF reading to anyone who filled this form without clicking a
+      // domain card first, which is why all 31 paid rows in Supabase carry
+      // domain_label "Karz Mukti (Debt)". Same shape as the /kundali payload
+      // bug fixed the same day — a silent default standing in for real input.
       domainId:    selectedCategory?.id    || 'mill_karz_mukti',
       domainLabel: selectedCategory?.label || 'General',
       predictionTier,
