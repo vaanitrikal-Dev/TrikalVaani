@@ -460,11 +460,11 @@ const V6_HUB_CALC: V6Link[] = [
 ];
 
 function V6Rich({ text, k }: { text: string; k: string }) {
-  const parts = text.split(/(\\[[^\\]]+\\]\\([^)]+\\)|\\*\\*[^*]+\\*\\*)/g);
+  const parts = text.split(/(\[[^\]]+\]\([^)]+\)|\*\*[^*]+\*\*)/g);
   return (
     <>
       {parts.map((part, i) => {
-        const link = part.match(/^\\[([^\\]]+)\\]\\(([^)]+)\\)$/);
+        const link = part.match(/^\[([^\]]+)\]\(([^)]+)\)$/);
         if (link) {
           return (
             <Link key={`${k}-l-${i}`} href={link[2]} className="font-semibold underline underline-offset-2 hover:opacity-80 text-[#D4AF37]">
