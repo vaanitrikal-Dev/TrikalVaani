@@ -1,3 +1,38 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   app/services/page.tsx — the /services index
+   Version: 2.0 (06 Sep 2026)
+
+   WHAT WAS WRONG, AND IT WAS BACKWARDS
+     The big gold PRIMARY button on every card pointed at /?segment=${slug}.
+     Nothing in this repo reads the `segment` query parameter — category
+     selection is React state set by CLICKING a homepage card. So the main
+     call to action on the whole services page went nowhere: the visitor
+     landed at the top of the homepage with nothing selected.
+     Meanwhile the small grey "Learn More →" link pointed at
+     /services/${slug} — the page that actually works.
+     The working link was the weak one and the dead link was the loud one.
+
+     Since 06 Sep 2026 every /services/<slug> page carries the real BirthForm,
+     preselected to its own domain. So the primary button now goes there, and
+     the duplicate secondary link is gone — two buttons to one destination is
+     just a choice the reader does not need to make.
+
+   THE PRICE CAME OFF THE BUTTON, ON PURPOSE
+     "Get Reading — ₹51" asked for money before giving anything, while the
+     reading itself opens with a FREE tier ("Trikaal Ka Sandesh", 150-200
+     words) and the homepage cards already say "Free chart reading for this
+     topic". The page was quoting a price the product does not charge up
+     front. The ₹51 is still shown on the card, as information — it just is
+     not the thing the button asks for.
+
+   CONTENT ADDED IN v2.0
+     15 H2 sections, ~2,000 words, under the cards. This page had 4 H2 and
+     almost no body text, which is why it reads as a menu rather than an
+     answer. The sections cover what a reader decides HERE — which reading
+     fits my question, what free actually includes, what these readings
+     cannot do — and hand every theory branch off by link.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
 /**
  * ============================================================================
  * 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER 🔱
@@ -43,7 +78,10 @@ import Script from "next/script";
 // ============================================================================
 
 export const metadata: Metadata = {
-  title: "Vedic Astrology Services Online — Live Reading at ₹51",
+  // v2.0: was 53 chars and the root layout appended " | Trikaal Vaani" on
+  // top, rendering 69 and losing the brand to truncation. `absolute` makes
+  // the string below exactly what Google shows. 57 chars.
+  title: { absolute: "Vedic Astrology Reading — Free Jaanch | Trikaal Vaani" },
   description:
     "8 deep AI-powered Vedic astrology readings by Rohiit Gupta — Chief Vedic Architect. Swiss Ephemeris precision, BPHS classical rules, instant delivery. From ₹51.",
   alternates: {
@@ -336,6 +374,301 @@ const breadcrumbSchema = {
 // PAGE COMPONENT
 // ============================================================================
 
+
+// ════════════════════════════════════════════════════════════════════════════
+// v2.0 CONTENT — 15 sections. This page had 4 H2 and almost no body text, so it
+// read as a menu. These sections answer the ONE decision made here: which of
+// the eight fits my question, and what do I actually get. Every theory branch
+// is handed off by link to the /learn/ and /blog/ pages that own it.
+// ════════════════════════════════════════════════════════════════════════════
+
+type SvcSection = { id: string; h2: string; paras: string[] };
+type SvcLink    = { href: string; label: string; note: string };
+
+const V6_SECTIONS: SvcSection[] = [
+  {
+    id: 'kaise-kaam',
+    h2: 'Ye kaise kaam karta hai — teen kadam',
+    paras: [
+      '**Ek — apna sawaal chuniye.** Upar aath jaanch hain. Har ek ek hi sawaal ka jawab deti hai, isliye wahi chuniye jo abhi sabse zyada mann mein hai.',
+      '**Do — janm vivaran daaliye.** Tareekh, sateek samay aur sthan. Us page par form pehle se khula milega — kahin aur jaana nahi padta.',
+      '**Teen — apna vishleshan turant paiye.** Chart Swiss Ephemeris se banta hai aur report kuch second mein saamne aa jaati hai. **Pehla vishleshan bilkul free hai** — bina signup, bina card.',
+    ],
+  },
+  {
+    id: 'reading-nahi-jaanch',
+    h2: 'Ye "reading" nahi hai — ye jaanch hai',
+    paras: [
+      'Antar chhota lagta hai par bada hai, isliye saaf kar dena chahiye.',
+      '**Reading** wo hoti hai jo koi aur aapke liye karta hai — aap vivaran bhejte hain, intezaar karte hain, aur jawab aata hai. Usme aap dekh nahi sakte ki wo kis aadhaar par bana.',
+      '**Jaanch** wo hai jo aap khud chalate hain. Aapka chart aapke saamne banta hai — lagna, nau graha degree ke saath, bhaav, dasha — aur uske upar vishleshan. **Har point ke saath uski wajah likhi hoti hai:** kaunsa graha, kaunsa bhaav, kaunsi dasha.',
+      'Isi wajah se aap use **parakh sakte hain.** Wahi janm vivaran kisi doosre software mein daal kar aankde mila lijiye. Jo cheez jaanchi ja sakti hai, uspar bharosa alag hota hai.',
+    ],
+  },
+  {
+    id: 'kaunsi-chuniye',
+    h2: 'Kaunsi jaanch aapke liye hai',
+    paras: [
+      'Aath mein se chunna mushkil lagta hai. Sawaal ke hisaab se seedha kram ye hai.',
+      '**"Wo wapas aayenge ya nahi"** → [Ex-Back](/services/ex-back-reading). **"Mera boss ya office mahaul"** → [Toxic Boss](/services/toxic-boss-radar). **"Career badlun ya rukun"** → [Career Pivot](/services/career-pivot). **"Ghar ya zameen ka sahi samay"** → [Property Yog](/services/property-yog).',
+      '**"Mere bachche ka jhukav"** → [Child Destiny](/services/child-destiny). **"Ab kya — jeevan ka uddeshya"** → [Spiritual Purpose](/services/spiritual-purpose). **"Dhan aur karz"** → [Wealth Reading](/services/wealth-reading). **"Hum dono ka mel"** → [Compatibility](/services/compatibility).',
+      'Aur agar sawaal in aath mein nahi hai — **poori kundali** se shuru kijiye, wo bhi free: [Kundali Calculator](/calculators/free-kundali-calculator).',
+    ],
+  },
+  {
+    id: 'free-mein-kya',
+    h2: 'Free mein sach mein kya milta hai',
+    paras: [
+      'Ye saaf likhna zaroori hai, kyunki "free" shabd bahut jagah aadha sach hota hai.',
+      '**Free mein milta hai:** aapka poora chart — lagna, nau grahon ki sthiti **degree ke saath**, nakshatra, baarah bhaav, aur chal rahi Mahadasha tatha Antardasha. Iske saath **Trikaal Ka Sandesh** — 150 se 200 shabd ka vishleshan jo seedha aapke sawaal par hai.',
+      'Aur uske saath: gochar timeline, evidence table jisme har nishkarsh ke peeche ka bhaav aur Shadbala dikhta hai, aur paanch classical upay ka pehla.',
+      '**Koi signup nahi, koi card nahi, koi email nahi maanga jaata.** Aur free wala hissa ek adhoora tukda nahi hai — wo apne aap mein ek uttar hai. Agar usse aapka kaam ban jaaye to aage kuch dene ki zaroorat nahi.',
+    ],
+  },
+  {
+    id: 'paid-mein-kya',
+    h2: '₹51 mein kya aur milta hai',
+    paras: [
+      'Poori reading mein wo hissa aata hai jo free mein nahi ho sakta, aur uska aakar bata dena chahiye.',
+      '**900 shabd ka gehra vishleshan**, **Navamsa (D-9)** — jo rishton aur bhagya ka asli chart hai, **Dasamsa (D-10)** career ke prashn mein, har graha ka **Shadbala score**, saare bhaav aur unki dasha-activation chain, **Bhrigu Nandi Nadi** ke signals aur yog.',
+      'Iske saath **agle chhe mahine ka gochar mahine-dar-mahine**, sahi tareekhon ki window, aur **paanch upay ka poora plan** — mantra, ratna, vrat, daan aur vishesh.',
+      '**Ek baar ka payment, turant access, Razorpay se surakshit.** Koi subscription nahi, koi renewal nahi.',
+    ],
+  },
+  {
+    id: 'kyun-51',
+    h2: 'Sirf ₹51 kyun — kahin kuch chhupa to nahi',
+    paras: [
+      'Ye sawaal jaayaz hai kyunki is bazaar mein ek reading ke hazaron liye jaate hain.',
+      'Wajah seedhi hai: **ganana aur vishleshan dono automated hain.** Chart Swiss Ephemeris se banta hai, niyam BPHS se aate hain, aur vishleshan usi dhaanche par banta hai. Yahan koi ghanta bhar baith kar aapki kundali nahi dekhta — aur isi liye keemat itni rakhi ja sakti hai.',
+      'Jo isme **nahi** hai: ek jyotishi ke saath baith kar baat, aapke apne sawaalon ke uttar, aur wo cheez jo sirf anubhav se aati hai. **Wo alag sewa hai aur uski keemat alag hoti hai.**',
+      'Aur jo chhupa hua **nahi** hai: koi subscription, koi baad mein aane wala kharch, aur koi "aapki kundali mein bhaari dosh hai, nivaran ke liye itne hazaar" wali baat. Wo is site par kahin nahi hai — jaanbujh kar.',
+    ],
+  },
+  {
+    id: 'kitni-sateek',
+    h2: 'Kitna sateek hai — imandar jawab',
+    paras: [
+      'Is sawaal ka uttar do hisson mein hai aur dono kehna zaroori hai.',
+      '**Ganana par poora bharosa kijiye.** Grahon ki sthiti Swiss Ephemeris se aati hai — wahi library jo duniya ka har gambhir jyotish software use karta hai — aur **Lahiri ayanamsha** lagta hai, jo Bharat sarkar ka maanak hai aur Rashtriya Panchang usi par bana hai. Ye aankde kisi bhi doosre software se milne chahiye.',
+      '**Vyakhya par utna hi bharosa kijiye jitna kisi bhi jyotishiya vyakhya par.** Wo classical niyamon par bani hai — BPHS ke bhaav aur kaarak, Vimshottari dasha, Shadbala — par wo vyakhya hi rehti hai, tathya nahi.',
+      'Isi liye har point ke saath **uski wajah** likhi jaati hai. Aap use apni kundali se mila sakte hain, aur asahmat bhi ho sakte hain. **Jo koi "100% accurate" kahe, wo bharosa bech raha hai** — koi jyotishiya padhai sau pratishat sateek nahi hoti.',
+    ],
+  },
+  {
+    id: 'janm-samay',
+    h2: 'Sateek janm samay kyun itna zaroori hai',
+    paras: [
+      'Ye ek cheez poore vishleshan ki buniyad hai, aur sabse zyada yahi galat jaati hai.',
+      '**Lagna har lagbhag do ghante mein badal jaata hai** — aur lagna se hi baarah bhaav bante hain. Yaani samay galat hua to chautha bhaav, saptam, dasham — sab khisak jaate hain, aur unke saath poora vishleshan.',
+      'Aadhe ghante ki galti prayah lagna nahi badalti par uski **degree** badal deti hai — aur usse **Navamsa aur Dasamsa** badal jaate hain, jo poori reading ke sabse gehre hisse hain.',
+      '**Kahan se lein:** janm pramanpatra, hospital ka discharge card, ya nagar nigam ka record. Ghar ki yaad prayah aadhe ghante par gol kar di jaati hai. Aur agar samay bilkul na ho — 12:00 dopahar maan liya jaata hai, aur us reading ko **disha-soochak** maaniye, nirnay nahi.',
+    ],
+  },
+  {
+    id: 'kya-nahi-batate',
+    h2: 'Ye jaanch kya nahi bata sakti',
+    paras: [
+      'Ye seema hamare apne vyapaar ke khilaf jaati hai, par har page par likhi hai aur yahan bhi honi chahiye.',
+      'Koi bhi jaanch **nahi** bata sakti: kisi ki mrityu ka samay, koi ghatna kis tareekh ko hogi, kisi pariksha ka result, ya koi aisa uttar jise badla na ja sake. **Jo koi in mein se kuch bhi daawa kare — khaas kar mrityu — wo galat bhi hai aur nuksandeh bhi.**',
+      'Aur ye **nahi hain**: chikitsiya salah ka vikalp, kanooni salah ka vikalp, arthik salah ka vikalp, ya manochikitsa ka vikalp. Sehat, kanoon aur paise ke faisle peshevar jaanch maangte hain.',
+      'Jo ye dete hain: **pravritti ka naksha aur samay ka kram** — kaunse kshetra sahaj khulenge, kahan prayaas zyada lagega, aur kaunsa daur kis cheez ka hai. Isi roop mein inhe lijiye.',
+    ],
+  },
+  {
+    id: 'dar-nahi-bechte',
+    h2: 'Hum dar nahi bechte — aur ye jaanch layak daawa hai',
+    paras: [
+      'Is bazaar mein sabse zyada paisa dar se banta hai: "aapki kundali mein Kaal Sarp dosh hai", "Mangal dosh se shaadi nahi hogi", "poorvajon ka shraap hai".',
+      '**Ye site wo nahi karti.** Har dosh page par likha hai ki wo sthiti **kitni aam hai** aur shastra mein uske **bhang (radd hone) ke niyam** bhi diye gaye hain. Mangal dosh lagbhag har chauthe-paanchve chart mein milta hai. Kaal Sarp dikhne mein bhaari lagta hai par asaamanya nahi.',
+      'Aur ye daawa aap **khud jaanch sakte hain** — teeno dosh calculator free hain, koi email nahi maangte, aur agar aapki sthiti saadharan hai to wahi likhte hain: [Manglik Dosh](/calculators/free-manglik-dosh-calculator), [Kaal Sarp Dosh](/calculators/free-kaal-sarp-dosh-calculator), [Pitra Dosh](/calculators/free-pitra-dosh-calculator).',
+      'Isi tarah ratna par bhi — **hum ratna bechte nahi**, isliye "aapko ye ratna chahiye" kehne ka koi kaaran hi nahi hai. Jaanch [yahan](/calculators/free-gemstone-suitability-calculator) free hai.',
+    ],
+  },
+  {
+    id: 'privacy',
+    h2: 'Aapka janm vivaran kahan jaata hai',
+    paras: [
+      'Ye sawaal kam poochha jaata hai aur poochha jaana chahiye.',
+      'Janm vivaran chart banane ke liye chahiye — uske bina lagna aur bhaav bante hi nahi. Wo aapki report se juda rehta hai taaki aap use dobara khol sakein.',
+      '**Kisi bhi jaanch ke liye signup zaroori nahi hai.** Free vishleshan ke liye na email maanga jaata hai, na phone. Payment Razorpay se hota hai aur card ki jaankari kabhi hamare paas nahi aati — wo seedha unke paas jaati hai.',
+      'Poora vivaran [Privacy Policy](/privacy) par hai. Aur ek vyavharik salah: **apni report ka PDF ya screenshot save kar lijiye** — janm kundali kabhi badalti nahi, isliye ek baar save karna kaafi hai.',
+    ],
+  },
+  {
+    id: 'hindi-english',
+    h2: 'Hindi mein bhi milta hai',
+    paras: [
+      'Bhasha se ganana nahi badalti — grahon ki sthiti khagolik tathya hai. Jo badalta hai wo prastuti hai.',
+      'Har jaanch **teen roop** mein mil sakti hai: shudh Hindi (देवनागरी), **Hinglish** (jo adhikansh log rozmarra mein bolte hain), aur English.',
+      'Aur grahon ke naam bhartiya roop mein hi aate hain — Guru, Shukra, Shani — English mein bhi. Kyunki wahi asli naam hain.',
+      'Agar koi site "Hindi kundali" ko alag cheez ki tarah beche, to wo sirf bhasha bech rahi hai. **Ganana wahi hai.**',
+    ],
+  },
+  {
+    id: 'calculators-bhi',
+    h2: 'Sirf ek hissa dekhna hai to calculators free hain',
+    paras: [
+      'Har baar poori jaanch ki zaroorat nahi hoti. Agar sawaal chhota hai to seedha uska tool lijiye.',
+      '**Buniyad** — [Kundali Calculator](/calculators/free-kundali-calculator) poori kundali, [Lagna Calculator](/calculators/free-lagna-calculator), [Rashi Calculator](/calculators/free-rashi-calculator), [Nakshatra Calculator](/calculators/free-nakshatra-calculator), [Dasha Calculator](/calculators/free-dasha-calculator).',
+      '**Bal aur jaanch** — [Kundali Strength](/calculators/free-kundali-strength-calculator), [Graha Bal](/calculators/free-graha-bal-calculator), [Weak Planet Finder](/calculators/free-weak-planet-finder), [Gemstone Suitability](/calculators/free-gemstone-suitability-calculator).',
+      '**Khaas sawaal** — [Shadi Kab Hogi](/calculators/free-shadi-kab-hogi-calculator), [Santan Yog](/calculators/free-santan-yog-calculator), [Sade Sati](/calculators/free-sade-sati-calculator), [IAS Astrology](/calculators/free-ias-astrology-calculator). **Sab free, sab bina signup.**',
+    ],
+  },
+  {
+    id: 'kis-ke-liye-nahi',
+    h2: 'Ye jaanch kin logon ke liye nahi hai',
+    paras: [
+      'Ye likhna bikri ke khilaf jaata hai par bharosa isi se banta hai.',
+      '**Jinke paas sateek janm samay nahi hai** — unhe pehle wo dhoondhna chahiye. Bina samay ke lagna nahi banta, aur uske bina aadha vishleshan andaaza reh jaata hai.',
+      '**Jo koi nishchit bhavishyavani chahte hain** — "kis tareekh ko hoga" ka uttar yahan nahi milega, aur milna bhi nahi chahiye.',
+      '**Aur jo kisi gambhir sthiti mein hain** — sehat ka mamla, kanooni maamla, utpeedan, ya lagatar bhaari mann. Wahan pehla kadam koi jaanch nahi hai. Kisi apne se, kisi doctor se, ya kisi peshevar se baat kijiye. Jyotish uske saath chal sakta hai, uski jagah nahi.',
+    ],
+  },
+  {
+    id: 'kitni-jaldi',
+    h2: 'Report kitni jaldi milti hai',
+    paras: [
+      '**Free vishleshan turant** — form bharne ke kuch second baad. Koi queue nahi, koi "24 ghante mein bhejenge" nahi.',
+      '**₹51 waali poori reading bhi turant** — payment ke baad seedha khul jaati hai. Razorpay se surakshit, ek baar ka payment.',
+      'Wajah wahi hai jo keemat ki hai: **ganana automated hai.** Swiss Ephemeris chart banata hai, BPHS ke niyam vishleshan chalate hain. Yahan koi aapki baari ka intezaar nahi karwaata.',
+      'Aur report **rehti hai** — uska apna link banta hai jise aap kabhi bhi khol sakte hain, ya PDF bana kar rakh sakte hain. Janm kundali badalti nahi, isliye ek baar save karna kaafi hai.',
+    ],
+  },
+  {
+    id: 'kis-aadhaar-par',
+    h2: 'Ye vishleshan kis aadhaar par banta hai',
+    paras: [
+      'Ye batana zaroori hai kyunki isse aap parakh sakte hain ki kya asli hai aur kya sirf shabd.',
+      '**Ganana** — Swiss Ephemeris, jo NASA ke JPL data par aadhaarit khagolik library hai. Duniya ke adhikansh peshevar jyotish software yahi use karte hain. Ayanamsha **Lahiri**, jo Bharat sarkar ka maanak hai.',
+      '**Niyam** — Brihat Parashara Hora Shastra. Bhaav aur kaarak, Vimshottari dasha, Shadbala ke chhe ang (BPHS adhyay 27), aur varga chart — Navamsa, Dasamsa. Iske saath **Bhrigu Nandi Nadi** ke pattern.',
+      '**Framework** — Rohiit Gupta, Chief Vedic Architect, 15+ saal ki Parashara BPHS parampara. Wo dhancha jispar har vishleshan chalta hai. [Unke baare mein yahan](/founder).',
+    ],
+  },
+  {
+    id: 'astrotalk-astrosage',
+    h2: 'AstroTalk aur AstroSage se farak',
+    paras: [
+      'Seedha uttar, usme wo bhi jo hamare paksh mein nahi jaata.',
+      '**Grahon ki sthiti mein antar nahi milega.** Adhikansh gambhir tool wahi Swiss Ephemeris aur wahi Lahiri Ayanamsha use karte hain. Un platforms ke paas **zyada tool, zyada bhashaayein, mobile app, live jyotishi aur bahut purana domain authority** hai — ye maan lena chahiye.',
+      'Antar teen jagah hai. **Ek — yahan har aankde ke saath uska aadhaar likha hai**, isliye aap use parakh sakte hain. **Do — yahan kuch becha nahi jaata** — na ratna, na dosh nivaran, na koi chetavni jo dar par bike. **Teen — pehla vishleshan sach mein free hai**, bina signup aur bina email.',
+      'Aur jo unke paas hai aur yahan nahi: **kisi jyotishi se seedhi baat.** Wo alag sewa hai. Agar aapko wo chahiye to ye page uska vikalp nahi hai.',
+    ],
+  },
+  {
+    id: 'shuru-kaise',
+    h2: 'Shuru kaise karein — do minute',
+    paras: [
+      'Upar aath jaanch hain. Jo sawaal abhi sabse zyada mann mein hai, uspar click kijiye.',
+      'Us page par **form pehle se khula milega** — janm tithi, samay aur sthan. Do minute lagenge, aur aapka chart tatha vishleshan turant saamne aa jaayega.',
+      '**Pehla vishleshan free hai.** Bina signup, bina card, bina email. Poori reading chahiye to uske baad ₹51 ka vikalp hai — aur wo bhi ek baar ka.',
+      'Aur agar ye tay nahi kar paa rahe ki kaunsi jaanch chuniye, to **[poori kundali](/calculators/free-kundali-calculator) se shuru kijiye.** Wo bhi free hai, aur usse aapko apne chart ka poora naksha mil jaayega.',
+    ],
+  },
+];
+
+const V6_HUB_CALC: SvcLink[] = [
+  { href: '/calculators/free-kundali-calculator', label: 'Kundali Calculator', note: 'Poori kundali, free' },
+  { href: '/calculators/free-lagna-calculator', label: 'Lagna Calculator', note: 'Sab isi par khada hai' },
+  { href: '/calculators/free-dasha-calculator', label: 'Dasha Calculator', note: 'Abhi kaunsa daur' },
+  { href: '/calculators/free-kundali-strength-calculator', label: 'Kundali Strength', note: 'Poora chitra ek score mein' },
+  { href: '/calculators/free-shadi-kab-hogi-calculator', label: 'Shadi Kab Hogi', note: 'Vivah ka samay' },
+  { href: '/calculators/free-santan-yog-calculator', label: 'Santan Yog Calculator', note: 'Santan ka yog' },
+  { href: '/calculators/free-gemstone-suitability-calculator', label: 'Gemstone Suitability', note: 'Hum ratna bechte nahi' },
+  { href: '/calculators/free-sade-sati-calculator', label: 'Sade Sati Calculator', note: 'Shani ka gochar' },
+  { href: '/calculators/free-manglik-dosh-calculator', label: 'Manglik Dosh Calculator', note: 'Dosh khud jaanchiye' },
+];
+
+const V6_HUB_LEARN: SvcLink[] = [
+  { href: '/learn/planets-in-astrology', label: 'Planets in Astrology', note: 'Nau graha ka parichay' },
+  { href: '/learn/nakshatra-guide', label: 'Nakshatra Guide', note: 'Sattais nakshatra' },
+  { href: '/learn/mahadasha-explained', label: 'Mahadasha explained', note: 'Samay ka sidhant' },
+  { href: '/learn/shadbala-planetary-strength-vedic-astrology', label: 'Shadbala', note: 'Bal kaise naapa jaata hai' },
+  { href: '/learn/planetary-dignity-exaltation-debilitation', label: 'Uchch aur neech', note: 'Graha ki sthiti' },
+  { href: '/learn/raj-yoga', label: 'Raj Yoga', note: 'Yog ka sidhant' },
+  { href: '/learn/career-prediction-astrology', label: 'Career Prediction', note: 'Dasham bhaav' },
+  { href: '/blog/ex-back-reunion-astrology', label: 'Ex back reunion astrology', note: 'Poora vishay' },
+  { href: '/founder', label: 'Rohiit Gupta ke baare mein', note: 'Framework kisne banaya' },
+];
+
+function V6Rich({ text, k }: { text: string; k: string }) {
+  const parts = text.split(/(\[[^\]]+\]\([^)]+\)|\*\*[^*]+\*\*)/g);
+  return (
+    <>
+      {parts.map((part, i) => {
+        const link = part.match(/^\[([^\]]+)\]\(([^)]+)\)$/);
+        if (link) {
+          return (
+            <Link key={`${k}-l-${i}`} href={link[2]} className="font-semibold underline underline-offset-2 hover:opacity-80 text-[#D4AF37]">
+              {link[1]}
+            </Link>
+          );
+        }
+        if (part.startsWith('**') && part.endsWith('**')) {
+          return <strong key={`${k}-b-${i}`} className="text-[#D4AF37]">{part.slice(2, -2)}</strong>;
+        }
+        return <span key={`${k}-s-${i}`}>{part}</span>;
+      })}
+    </>
+  );
+}
+
+function V6Hub({ items }: { items: SvcLink[] }) {
+  return (
+    <ul className="space-y-2 m-0 p-0 list-none">
+      {items.map((i) => (
+        <li key={i.href}>
+          <Link href={i.href} className="group block rounded-lg px-3 py-2 transition hover:bg-white/5">
+            <span className="block text-sm font-semibold text-[#D4AF37]">{i.label}</span>
+            <span className="block text-xs text-slate-500">{i.note}</span>
+          </Link>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function V6Content() {
+  return (
+    <section className="py-16 px-4">
+      <nav aria-label="Is page par kya hai" className="mb-12 max-w-4xl mx-auto rounded-2xl p-5 md:p-6 bg-white/[0.03] border border-[#D4AF37]/20">
+        <h2 className="text-lg font-serif font-bold mb-3 text-[#D4AF37]">Is Page Par Kya Hai</h2>
+        <ol className="grid sm:grid-cols-2 gap-x-6 gap-y-1.5 text-sm list-decimal pl-5 text-slate-300">
+          {V6_SECTIONS.map((sec) => (
+            <li key={sec.id}><a href={`#${sec.id}`} className="hover:underline underline-offset-2 text-slate-300">{sec.h2}</a></li>
+          ))}
+        </ol>
+      </nav>
+      <div className="max-w-4xl mx-auto">
+        {V6_SECTIONS.map((sec, si) => (
+          <div key={sec.id} id={sec.id} className="scroll-mt-24 mb-10">
+            <h2 className="text-2xl font-serif font-bold mb-4 text-[#D4AF37]">{sec.h2}</h2>
+            {sec.paras.map((p, pi) => (
+              <p key={pi} className="text-slate-300 leading-relaxed mb-4"><V6Rich text={p} k={`v6-${si}-${pi}`} /></p>
+            ))}
+          </div>
+        ))}
+      </div>
+      <div className="max-w-4xl mx-auto mt-12 rounded-2xl p-5 md:p-6 bg-[#0B0F1A] border border-white/[0.07]">
+        <h2 className="text-base font-bold m-0 mb-2 text-[#D4AF37]">Aur bhi — sab free</h2>
+        <p className="text-xs leading-relaxed mb-4 text-slate-400">
+          Chhota sawaal ho to poori jaanch ki zaroorat nahi. Seedha uska calculator lijiye — sab bina signup.
+        </p>
+        <div className="grid gap-6 md:grid-cols-2">
+          <div>
+            <h3 className="mb-2 pb-1.5 text-sm font-bold border-b border-[#D4AF37]/25 text-slate-200">Muft calculators</h3>
+            <V6Hub items={V6_HUB_CALC} />
+          </div>
+          <div>
+            <h3 className="mb-2 pb-1.5 text-sm font-bold border-b border-[#D4AF37]/25 text-slate-200">Sidhant samjhiye</h3>
+            <V6Hub items={V6_HUB_LEARN} />
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export default function ServicesPage() {
   return (
     <>
@@ -375,19 +708,19 @@ export default function ServicesPage() {
             <div className="inline-flex items-center gap-2 border border-[#D4AF37]/40 rounded-full px-4 py-1.5 mb-8 bg-[#D4AF37]/5">
               <span className="w-2 h-2 rounded-full bg-[#D4AF37] animate-pulse" />
               <span className="text-[#D4AF37] text-sm font-medium tracking-widest uppercase">
-                8 Deep Readings · by Rohiit Gupta
+                8 Free Jaanch · Framework by Rohiit Gupta
               </span>
             </div>
 
             {/* H1 — single, primary keyword "Vedic Astrology Services" */}
             <h1 className="font-serif text-4xl md:text-6xl font-bold leading-tight mb-6">
-              Vedic Astrology Services
+              Apni Kundali Se Jawab
               <br />
-              <span className="text-[#D4AF37]">Answered by Your Stars.</span>
+              <span className="text-[#D4AF37]">Turant. Free.</span>
             </h1>
 
             <p className="text-lg md:text-xl text-gray-300 max-w-2xl mx-auto mb-4 leading-relaxed">
-              8 AI-powered Vedic readings designed by{" "}
+              8 free jaanch — janm vivaran daaliye aur apna vishleshan turant paiye. Framework by{" "}
               <Link
                 href="/founder"
                 className="text-[#D4AF37] hover:underline font-semibold"
@@ -510,7 +843,7 @@ export default function ServicesPage() {
                         <span className="text-3xl">{s.glyph}</span>
                         <div>
                           <p className="text-[#D4AF37] text-xs uppercase tracking-widest font-medium">
-                            Reading {s.no}
+                            Jaanch {s.no}
                           </p>
                           <h2 className="font-serif text-xl font-bold text-white">
                             {s.title}
@@ -537,20 +870,20 @@ export default function ServicesPage() {
                         </span>
                       ))}
                     </div>
-                    <div className="flex gap-3">
-                      <Link
-                        href={`/?segment=${s.slug}`}
-                        className="flex-1 text-center bg-[#D4AF37] text-[#080B12] font-bold py-3 rounded-lg text-sm hover:bg-[#e8c84a] transition-all duration-200 group-hover:shadow-[0_0_20px_rgba(212,175,55,0.3)]"
-                      >
-                        Get Reading — ₹{s.price}
-                      </Link>
-                      <Link
-                        href={`/services/${s.slug}`}
-                        className="px-4 border border-white/20 text-gray-400 font-medium py-3 rounded-lg text-sm hover:border-[#D4AF37]/40 hover:text-[#D4AF37] transition-all duration-200"
-                      >
-                        Learn More →
-                      </Link>
-                    </div>
+                    {/* v2.0: the primary button used to go to /?segment=,
+                        which nothing reads. It now goes to the reading page
+                        itself, which carries the real form. The duplicate
+                        "Learn More" link pointed at the same place and has
+                        been removed — one destination, one button. */}
+                    <Link
+                      href={`/services/${s.slug}`}
+                      className="block w-full text-center bg-[#D4AF37] text-[#080B12] font-bold py-3.5 rounded-lg text-sm hover:bg-[#e8c84a] transition-all duration-200"
+                    >
+                      Free Mein Dekhiye → {s.title}
+                    </Link>
+                    <p className="text-center text-[11px] text-gray-500 mt-2">
+                      Pehla reading free · poori reading ₹{s.price} · bina signup
+                    </p>
                   </div>
                 </article>
               ))}
@@ -642,7 +975,9 @@ export default function ServicesPage() {
         </section>
 
         {/* ================================================================ */}
-        {/* FAQ SECTION — 7 questions, all matching schema 1:1                */}
+        <V6Content />
+
+      {/* FAQ SECTION — 7 questions, all matching schema 1:1                */}
         {/* ================================================================ */}
         <section className="py-20 px-4">
           <div className="max-w-3xl mx-auto">
