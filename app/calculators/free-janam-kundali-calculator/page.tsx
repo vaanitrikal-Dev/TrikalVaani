@@ -79,7 +79,7 @@ const GOLD_RGBA = (a: number) => `rgba(212,175,55,${a})`;
 
 const FAQS = [
   { q: 'Kundli kya hoti hai?', a: 'Kundli (Janm Kundali) ek Vedic birth chart hai jo aapke janm samay grahon aur nakshatron ki position dikhata hai. Iska use Vedic astrology mein future predictions, character analysis, aur remedies ke liye hota hai.' },
-  { q: 'Free Kundli Calculator kaise kaam karta hai?', a: 'Aap apni date of birth, time of birth, aur birth place enter karte ho. Trikaal Vaani ka Swiss Ephemeris engine sab grahon ki exact position calculate karta hai aur aapko Lagna, Nakshatra, Chandra Rashi, Mahadasha, aur Parashar-based remedies turant dikhata hai.' },
+  { q: 'Free Janam Kundali Calculator kaise kaam karta hai?', a: 'Aap apni date of birth, time of birth, aur birth place enter karte ho. Trikaal Vaani ka Swiss Ephemeris engine sab grahon ki exact position calculate karta hai aur aapko Lagna, Nakshatra, Chandra Rashi, Mahadasha, aur Parashar-based remedies turant dikhata hai.' },
   { q: 'Kya yeh kundli accurate hai?', a: 'Haan. Trikaal Vaani Swiss Ephemeris use karta hai — wahi astronomical library jo NASA aur world-class astrology software use karte hain. Calculations Lahiri Ayanamsha pe based hain, BPHS ke classical rules ke according.' },
   { q: 'Mujhe apna exact birth time nahi pata, kya phir bhi kundli ban sakti hai?', a: 'Approximate time se bhi kundli ban sakti hai, lekin Lagna aur Bhava positions ke liye exact time important hai. Best — birth certificate ya parents se confirm karein.' },
   { q: 'Kundli ke baad kya milta hai?', a: 'Free mein aapko milta hai: (1) Lagna aur uska swami, (2) Chandra Rashi aur Surya Rashi, (3) Nakshatra aur pada, (4) Chal rahi Mahadasha aur Antardasha, (5) Sab 9 grahon ki rashi, bhaav, nakshatra aur vakri sthiti. Detailed prediction — Dasha timing, bhaav-wise yog aur personalized remedies (Mantra, Ratna, Daan) — ₹51 wale paid reading mein aate hain.' },
@@ -110,7 +110,8 @@ const jsonLd = buildCalcJsonLd({
   name: 'Free AI Kundli Calculator — Janm Kundali Online',
   description:
     'Free AI Kundli calculator powered by Swiss Ephemeris — accurate Janm Kundali with Lagna, Nakshatra, Chandra Rashi, Mahadasha and 3 free Parashar remedies. Free Vedic calculator by Trikaal Vaani.',
-  breadcrumbName: 'Free Kundli Calculator',
+  // v3.1 (08 Sep 2026): matches the renamed slug and the hub card.
+  breadcrumbName: 'Free Janam Kundali Calculator',
   aboutEntities: ['Janm Kundali', 'Lagna', 'Nakshatra', 'Mahadasha'],
   knowsAbout: ['Vedic Astrology', 'Jyotish Shastra', 'Janm Kundali', 'Birth Chart'],
   howToName: 'Free AI Kundli Kaise Banayein',
@@ -610,7 +611,7 @@ export default function KundaliCalculatorPage() {
             <span className="mx-2">›</span>
             <Link href="/calculators" className="hover:text-slate-300">Calculators</Link>
             <span className="mx-2">›</span>
-            <span style={{ color: GOLD }}>Free Kundli Calculator</span>
+            <span style={{ color: GOLD }}>Free Janam Kundali Calculator</span>
           </nav>
 
           <h1 className="text-3xl md:text-5xl font-serif font-bold mb-4" style={{ color: GOLD }}>
