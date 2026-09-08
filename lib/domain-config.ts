@@ -536,6 +536,80 @@ const DOMAINS: Record<DomainId, DomainConfig> = {
     },
   },
 
+  // ═══════════════════════════════════════════════════════════════════════
+  // general_kundali — added 08 Sep 2026
+  //
+  // WHY IT EXISTS
+  //   /calculators/free-janam-kundali-calculator needs the real BirthForm,
+  //   but BirthForm refuses to submit without a chosen domain (DOMAIN GUARD,
+  //   BirthForm L988, added 06 Sep 2026 after 432 of ~495 readings silently
+  //   fell through to the 'mill_karz_mukti' default). Every other domain here
+  //   is topic-specific — career, property, ex-back. None of them means
+  //   "read my whole chart", which is exactly what a kundali calculator
+  //   promises. So the page gets its own domain rather than a mislabelled one.
+  //
+  // THE VM SIDE IS ALREADY DONE — 08 Sep 2026
+  //   template_engine.py now carries 'general_kundali' in BOTH the DOMAINS
+  //   list and DOMAIN_META. Both were required: line ~1765 does
+  //   DOMAIN_META[domain] with no fallback, so the id in DOMAINS alone would
+  //   raise KeyError and break every reading for this domain.
+  //   Verified live after pm2 restart: DOMAINS 16, DOMAIN_META 16,
+  //   general_kundali present in both, 'career' unaffected.
+  //   If this id is ever renamed here, it MUST be renamed on the VM too.
+  //
+  // SEGMENT IS 'all' ON PURPOSE
+  //   This is not a Gen Z / Millennial / Gen X question. Anyone asking for
+  //   their kundali gets the same reading, so no age tab applies.
+  // ═══════════════════════════════════════════════════════════════════════
+  general_kundali: {
+    id: 'general_kundali',
+    displayName: 'Complete Birth Chart Reading',
+    label: 'Poori Kundali',
+    segment: 'all',
+    analysisType: 'single',
+    timeWindow: '6-12 months',
+    primaryHouses: [
+      { number: 1,  significance: 'Lagna — self, body, vitality; every other house is counted from here' },
+      { number: 10, significance: 'Karma — work, position, standing in the world' },
+    ],
+    secondaryHouses: [
+      { number: 2,  significance: 'Dhana — savings, family, speech' },
+      { number: 4,  significance: 'Sukha — home, mother, inner peace' },
+      { number: 7,  significance: 'Kalatra — partnership, marriage, the other person' },
+    ],
+    keyPlanets: [
+      { planet: 'Sun',     role: 'Atma — sense of self, authority, vitality',        checkFor: ['strength', 'house', 'dignity'] },
+      { planet: 'Moon',    role: 'Manas — mind, emotional nature, daily temperament', checkFor: ['strength', 'house', 'nakshatra'] },
+      { planet: 'Jupiter', role: 'Dharma — wisdom, growth, protection by aspect',     checkFor: ['strength', 'house', 'aspect'] },
+      { planet: 'Saturn',  role: 'Karma — discipline, delay, what must be earned',    checkFor: ['strength', 'house', 'dasha'] },
+      { planet: 'Mercury', role: 'Buddhi — intellect, speech, how the person learns', checkFor: ['strength', 'house'] },
+    ],
+    dashaFocus: ['Sun', 'Moon', 'Jupiter', 'Saturn', 'Mercury'],
+    yogasToCheck: ['Raja Yoga', 'Dhana Yoga', 'Gaja Kesari Yoga', 'Budha-Aditya Yoga', 'Pancha Mahapurusha Yoga', 'Vipreet Raj Yoga'],
+    classicalBasis: [
+      { text: 'BPHS', chapter: 'Ch.7',  rule: 'Lagna and its lord set the frame — all twelve houses are counted from the lagna' },
+      { text: 'BPHS', chapter: 'Ch.11', rule: 'House significations — each bhava read through its lord, occupants and aspects' },
+      { text: 'BPHS', chapter: 'Ch.27', rule: 'Shadbala — the six-fold strength that decides whether a placement delivers' },
+      { text: 'BPHS', chapter: 'Ch.46', rule: 'Vimshottari dasha decides which part of the chart is active now' },
+    ],
+    analysisDepthNote: 'Whole-chart reading, so breadth first and depth second. Start from the lagna and its lord, then the Moon for temperament, then the running Mahadasha — because the dasha decides which part of the chart is ACTIVE rather than merely present. Name the two or three strongest placements and the one or two that need support. Do not attempt every house; a scattered reading is worse than a focused one.',
+    antiHallucinationRules: [
+      'Never give dates for specific events — the chart shows tendency and period, not calendar entries',
+      'Never state or imply a lifespan, and never read the life line or any placement as an age',
+      'Never name an illness or suggest a diagnosis — that is a doctor\'s subject, not a chart\'s',
+      'Never call the chart good or bad overall — report strengths and areas needing effort',
+      'If the birth time is missing or noon was assumed, say the house-based findings are directional',
+    ],
+    worldContext: 'none',
+    worldContextSearchTerms: [],
+    extraOutputFields: {
+      lagnaStrength:    'strength of the lagna lord 1-10, with its house placement',
+      strongestHouses:  'the two or three houses best supported in this chart',
+      supportNeeded:    'the one or two areas where effort will be higher',
+      activeNow:        'which part of the chart the running dasha is activating',
+    },
+  },
+
   genx_spiritual_innings: {
     id: 'genx_spiritual_innings',
     displayName: 'Spiritual Path & Inner Journey',
