@@ -136,13 +136,70 @@ function tendencySummary(rows: Row[]): string {
 // ── metadata ────────────────────────────────────────────────────────────────
 export async function generateMetadata({ params }: { params: { symbol: string } }): Promise<Metadata> {
   const rows = await getSymbolRows(params.symbol);
-  if (rows.length === 0) return { title: 'Dream Meaning | Swapna Shastra — Trikaal Vaani' };
+  if (rows.length === 0) return { title: { absolute: 'Swapna Shastra — Sapno Ka Matlab | Trikaal Vaani' } };
   const r = rows[0];
-  const title = `${r.symbol_en} Dream Meaning (${r.symbol_hi}) | Vedic Swapna Shastra — Trikaal Vaani`;
-  const description = `${r.symbol_en} dream in Vedic Swapna Shastra: ${r.meaning_en.slice(0, 120)}… Classical meaning, remedy & what it means for YOUR chart. Free decode by Trikaal Vaani.`;
+  // ══════════════════════════════════════════════════════════════════════
+  // TITLE + META FIX — v2.0 (08 Sep 2026)
+  //
+  // WHAT WAS WRONG
+  //   The old title was built as a PLAIN STRING and already ended in
+  //   "— Trikaal Vaani", while app/layout.tsx sets
+  //   title.template = "%s | Trikaal Vaani". Next.js therefore appended the
+  //   brand a SECOND time. Verified live on five pages, 08 Sep 2026:
+  //     /swapna/prasad ... 100 chars, ends "— Trikaal Vaani | Trikaal Vaani"
+  //     /swapna/milk ..... 102 chars
+  //     /swapna/sweets ... 102 chars
+  //   Google shows about 58, so every one of these was cut mid-phrase, the
+  //   brand never rendered at all, and the first ~30 characters were English
+  //   ("Receiving prasad Dream Meaning") — which is not what anyone is
+  //   scanning for on these queries.
+  //
+  // THE DAMAGE
+  //   GSC, 3 months to 4 Sep 2026, across 71 symbol pages that appear in the
+  //   export: 13,683 impressions, 309 clicks, CTR 2.26%, most of them ranking
+  //   at position 3-6. /swapna/sweets sits at position 4.9 with 0.29% CTR;
+  //   /swapna/scorpion at 6.0 with 0%.
+  //
+  // WHY THE HINDI TERM COMES FIRST
+  //   The queries are dream-meaning questions, and the searcher scans for the
+  //   SYMBOL, not for the words "Dream Meaning". 102 dream queries in GSC:
+  //   77 are typed in Latin ("sapne me ladai dekhna", 4,035 impressions) and
+  //   25 in Devanagari (1,264). A Devanagari title still serves both, because
+  //   a Hindi speaker who types in Latin reads Devanagari without effort and
+  //   Google matches across scripts. What does NOT serve either is an English
+  //   phrase occupying the first 30 characters.
+  //
+  // HONEST LIMIT — Radar E3, 05 Sep 2026
+  //   All 14 tracked dream keywords show an AI Overview that ANSWERS the
+  //   question directly. When Google answers on the page, no title recovers
+  //   that click. This fix removes a real defect; it cannot beat an AIO.
+  //
+  // `absolute` is required — it bypasses the parent template, so the string
+  // below is exactly what renders. Do not switch it back to a plain string.
+  const brand = ' | Trikaal Vaani';
+  const longTitle = `सपने में ${r.symbol_hi} — मतलब व उपाय${brand}`;
+  const title = longTitle.length <= 58
+    ? longTitle
+    : `सपने में ${r.symbol_hi} — मतलब${brand}`;
+  // Checked against all 107 symbol_hi values in dream_symbols on 08 Sep 2026:
+  // the long form fits 58 chars for 106 of them; the one exception
+  // ("अंतिम संस्कार में जाना", 61) falls back to the short form at 54.
+  // Longest short form across the whole table is 54, so neither branch can
+  // exceed the window.
+
+  // Meaning first, CTA second. The old description opened with the English
+  // symbol name and used a raw slice(0,120) that cut mid-word.
+  const rawMeaning = (r.meaning_hi || r.meaning_en || '').replace(/\s+/g, ' ').trim();
+  const cta = ' Poora vishleshan free.';
+  const budget = 155 - cta.length;
+  const clipped = rawMeaning.length <= budget
+    ? rawMeaning
+    : rawMeaning.slice(0, budget).replace(/\s+\S*$/, '') + '…';
+  const description = (clipped + cta).slice(0, 155);
   const url = `${BASE}/swapna/${r.symbol_key}`;
   return {
-    title, description,
+    title: { absolute: title },
+    description,
     alternates: { canonical: url },
     openGraph: { title, description, url, type: 'article', locale: 'en_IN', siteName: 'Trikaal Vaani' },
     twitter: { card: 'summary', title, description },
