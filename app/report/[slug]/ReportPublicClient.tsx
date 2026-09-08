@@ -5,8 +5,47 @@
  * TRIKAAL VAANI — Public SEO Report Client
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/report/[slug]/ReportPublicClient.tsx
- * VERSION: 10.2 (29 Aug 2026) — Dasamsa (D10) card
+ * VERSION: 10.3 (08 Sep 2026) — five new cards + useState hotfix
  * SIGNED: ROHIIT GUPTA, CEO
+ *
+ * v10.3 (08 Sep 2026) — FIVE NEW CARDS, AND ONE HOTFIX
+ *   HOTFIX FIRST, because it took the page down. PastDashaTimeline uses
+ *   useState and this file had NO React import — every other component here is
+ *   stateless, so none had ever needed one. Production threw
+ *   "ReferenceError: useState is not defined" on /report/[slug]; 5 occurrences
+ *   across 4 users, 08 Sep 14:59-15:00 UTC. The build did not catch it because
+ *   next.config.js sets typescript.ignoreBuildErrors AND
+ *   eslint.ignoreDuringBuilds, so an undefined identifier ships silently.
+ *   There is no type-safety net on this repo — assume none and check by hand.
+ *
+ *   THE FIVE CARDS, in the order they appear:
+ *     BhriguChapter     — "the chapter your life is in", from Jupiter's house.
+ *                         FREE, deliberately: recognition is what earns the
+ *                         Rs 51, not withholding. The engine's English
+ *                         sentences ("Jupiter in 2th house activates...") are
+ *                         PARSED and rebuilt in plain language, which also
+ *                         disposes of the engine's "2th"/"3th" ordinal bug.
+ *     DrishtiCard       — support vs pressure rather than a raw aspect list.
+ *                         Moon aspects are SKIPPED: benefic only when waxing,
+ *                         and the engine does not report birth paksha.
+ *     ArgalaCard        — needed parashara.py argala v2.0 first. Before that,
+ *                         'positive' appeared in 8 rows out of 1,740 across 158
+ *                         reports; rendering it would have told every reader
+ *                         their whole chart was against them.
+ *     AshtakavargaCard  — needed parashara.py ashtakavarga v2.0 first, which
+ *                         corrected the tables from 396 points to the classical
+ *                         337 and added both Shodhana stages. The card refuses
+ *                         to render if the total is not 337.
+ *     PastDashaTimeline — every mahadasha back to birth, derived by walking the
+ *                         fixed Vimshottari cycle backwards from the current
+ *                         one. No engine change needed. Dates verified against
+ *                         AstroSage's output for the same chart, to the day.
+ *
+ *   HOUSES NOW SAY WHAT THEY MEAN. HOUSE_MEANING and HOUSE_SHORT replace bare
+ *   numbers throughout, including the evidence table — whose meaning line had
+ *   never rendered at all, because the engine's evidenceMeanings array has
+ *   been empty in every row checked. Rohiit, 08 Sep 2026: "everywhere people
+ *   don't understand grah, bhaav and other astrological technical words."
  *
  * v10.2 (29 Aug 2026) — DASAMSA D10
  *   The report has shown the Navamsa for a while, but BPHS Ch.6 reads
@@ -157,6 +196,15 @@
 import Link from 'next/link'
 import SiteNav    from '@/components/layout/SiteNav'
 import SiteFooter from '@/components/layout/SiteFooter'
+// v10.3 (08 Sep 2026) — HOTFIX. PastDashaTimeline (v9.5) uses useState, and
+// this file had no React import at all: every other component here is pure and
+// stateless, so nothing had ever needed one. Production threw
+// "ReferenceError: useState is not defined" on /report/[slug] and the page
+// would not render. Build did not catch it — next.config.js sets
+// typescript.ignoreBuildErrors and eslint.ignoreDuringBuilds, so an undefined
+// identifier ships silently. Verified against Vercel runtime errors,
+// 08 Sep 2026 14:59-15:00 UTC, 5 occurrences across 4 users.
+import { useState } from 'react'
 import { ArrowLeft, Lock, Download, Sparkles } from 'lucide-react'
 
 const GOLD    = '#D4AF37'
