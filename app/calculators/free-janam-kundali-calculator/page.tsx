@@ -2,6 +2,32 @@
 // File: app/calculators/free-janam-kundali-calculator/page.tsx
 // Purpose: Free AI Kundli Calculator — SEO/GEO/AEO/E-E-A-T page
 // Version: v2.0 (05 Sep 2026) — calculator + full keyword-driven content
+// Changelog v3.0 (2026-09-08): the real reading form now lives on this page.
+//   KundaliCalculatorClient — which only rendered a "Trikaal Ka Sandesh — 51"
+//   banner linking away to the homepage — is REMOVED. In its place sits
+//   ServiceReadingForm with domain="janam-kundali", which mounts the real
+//   BirthForm already set to the new general_kundali domain.
+//
+//   NO PICKER, AND THAT IS THE WHOLE POINT
+//     An earlier attempt mounted the homepage's age-tab picker here so that
+//     BirthForm's DOMAIN GUARD (BirthForm L988) would be satisfied. Rohiit
+//     rejected it on 08 Sep 2026: a visitor who searched "free kundali" should
+//     not first be asked whether their problem is an ex or a boss. So a real
+//     domain was created instead — general_kundali — on BOTH sides:
+//       lib/domain-config.ts        (Next.js)
+//       template_engine.py          (VM: DOMAINS + DOMAIN_META, 08 Sep 2026)
+//     Both were required. template_engine.py line ~1765 does
+//     DOMAIN_META[domain] with no fallback, so the id in DOMAINS alone would
+//     raise KeyError. Verified live after pm2 restart: DOMAINS 16,
+//     DOMAIN_META 16, both carrying general_kundali, 'career' unaffected.
+//
+//   FreeKundaliCalculator is REMOVED TOO — Rohiit, 08 Sep 2026: "keep only one
+//   master form ... client will never fill 2 forms anywhere". The free tier of
+//   BirthForm already returns the full chart (North Indian chart, all nine
+//   planets with rashi/house/nakshatra/dignity/Shadbala, and the running
+//   dasha), which is MORE than the old tool returned. So the page's
+//   "Free Kundli Banaye" promise is kept and extended, not broken.
+//
 // Changelog v2.0 (2026-09-05): content build from Radar E3 PASF —
 //   METADATA MOVED OUT of this file into ./layout.tsx. It used to live here
 //   because this is a server component and could export it. Keeping it in two
@@ -39,8 +65,7 @@
 
 import Link from 'next/link';
 import SiteNav from '@/components/layout/SiteNav';
-import FreeKundaliCalculator from '@/components/calculators/FreeKundaliCalculator';
-import KundaliCalculatorClient from '@/components/calculators/KundaliCalculatorClient';
+import ServiceReadingForm from '@/components/services/ServiceReadingForm';
 import { buildCalcJsonLd } from '@/lib/seo/calcJsonLd';
 
 const GOLD = '#D4AF37';
@@ -607,10 +632,15 @@ export default function KundaliCalculatorPage() {
             </div>
           </div>
 
-          <FreeKundaliCalculator />
-
+          {/* v3.0: one form only. ServiceReadingForm mounts the real
+              BirthForm preset to general_kundali, so no picker appears and
+              nobody is sent to the homepage to start over. */}
           <div className="mt-10">
-            <KundaliCalculatorClient />
+            <ServiceReadingForm
+              domain="janam-kundali"
+              heading="Apni poori janam kundali banaiye"
+              subheading="Janm tithi, sateek samay aur sthan daaliye — lagna, nau graha degree ke saath, baarah bhaav aur chal rahi dasha turant milegi. Pehla vishleshan free."
+            />
           </div>
 
           {/* ── v2.0: TABLE OF CONTENTS ─────────────────────────── */}
