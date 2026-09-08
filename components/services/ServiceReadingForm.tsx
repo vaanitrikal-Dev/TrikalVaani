@@ -63,7 +63,8 @@ export type ServiceDomainKey =
   | 'career-pivot'
   | 'property-yog'
   | 'child-destiny'
-  | 'spiritual-purpose';
+  | 'spiritual-purpose'
+  | 'janam-kundali';
 
 const DOMAIN_MAP: Record<ServiceDomainKey, { id: string; label: string; color: string }> = {
   'ex-back-reading':   { id: 'genz_ex_back',           label: 'Ex-Back & Closure',      color: '#F472B6' },
@@ -72,6 +73,10 @@ const DOMAIN_MAP: Record<ServiceDomainKey, { id: string; label: string; color: s
   'property-yog':      { id: 'mill_property_yog',      label: 'Property & Home Yog',    color: '#34D399' },
   'child-destiny':     { id: 'mill_childs_destiny',    label: "Child's Destiny",        color: '#F472B6' },
   'spiritual-purpose': { id: 'genx_spiritual_innings', label: 'Spiritual 2nd Innings',  color: '#D4AF37' },
+  // v1.1 (08 Sep 2026): the kundali calculator. Not a /services/ page, but it
+  // needs the same thing — the real BirthForm with a domain already chosen, so
+  // BirthForm's DOMAIN GUARD is satisfied without showing the age-tab picker.
+  'janam-kundali':     { id: 'general_kundali',          label: 'Poori Kundali',          color: '#D4AF37' },
 };
 
 const GOLD = '#D4AF37';
