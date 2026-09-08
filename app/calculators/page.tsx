@@ -129,7 +129,13 @@ const CALCULATORS: CalcEntry[] = [
   {
     slug: 'free-janam-kundali-calculator',
     emoji: '🔮',
-    name: 'Free Kundli Calculator',
+    // v4.1 (08 Sep 2026): was 'Free Kundli Calculator'. Renamed to match the
+    // slug after the 08 Sep rename to free-janam-kundali-calculator, and
+    // because "janam kundali" is the phrase Radar tracks in cluster
+    // calc-kundali ("janam kundali banaye free", "जन्म कुंडली कैलकुलेटर").
+    // NOTE: CALC_SHORT_NAMES strips "Free " and " Calculator", so the GEO
+    // prose list below now reads "Janam Kundali" — which is the intent.
+    name: 'Free Janam Kundali Calculator',
     desc: 'Get your complete Janm Kundali — Lagna, Nakshatra, all 9 planets, Dasha, and Parashar remedies.',
     badge: 'Most Popular',
     live: true,
@@ -596,10 +602,25 @@ export default function CalculatorsHubPage() {
               <li>✓ 50+ personalized remedies</li>
               <li>✓ Voice prediction in Hinglish</li>
             </ul>
-            <Link href="/#birth-form" className="inline-block mt-2 px-6 py-3 rounded-full font-bold transition-all hover:scale-105"
+            {/* v4.1 (08 Sep 2026): was href="/#birth-form" with a ₹51 label.
+                Two problems, both fixed here.
+                1. It sent people to the HOMEPAGE, where the form needs a
+                   domain card to be clicked before it will submit
+                   (BirthForm DOMAIN GUARD, L988). Since 08 Sep the kundali
+                   calculator carries the same form with general_kundali
+                   already selected, so it is one click instead of three.
+                2. It asked for ₹51 before giving anything, while the form's
+                   free tier returns the full chart — North Indian chart, all
+                   nine planets with dignity and Shadbala, and the running
+                   dasha. The price is still shown, as information, under the
+                   button rather than on it. */}
+            <Link href="/calculators/free-janam-kundali-calculator#birth-form" className="inline-block mt-2 px-6 py-3 rounded-full font-bold transition-all hover:scale-105"
               style={{ background: `linear-gradient(135deg, ${GOLD} 0%, #A8820A 100%)`, color: '#080B12' }}>
-              🔮 Trikaal Ka Sandesh — Sirf Aapke Liye — ₹51 →
+              🔮 Free Mein Apni Poori Kundali Dekhiye →
             </Link>
+            <p className="text-xs text-slate-500 mt-3">
+              Pehla vishleshan free · poori reading ₹51 · bina signup
+            </p>
           </section>
 
         </div>
