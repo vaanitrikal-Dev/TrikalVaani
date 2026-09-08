@@ -1360,7 +1360,7 @@ export default function FreeChildBirthMuhuratPage() {
             <h2 className="text-2xl font-serif font-bold mb-6" style={{ color: GOLD }}>Aur Bhi Free Calculators</h2>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
               {[
-                { slug: 'free-kundali-calculator', name: 'Kundli Calculator' },
+                { slug: 'free-janam-kundali-calculator', name: 'Kundli Calculator' },
                 { slug: 'free-dasha-calculator', name: 'Dasha Calculator' },
                 { slug: 'free-nakshatra-calculator', name: 'Nakshatra Finder' },
                 { slug: 'free-sade-sati-calculator', name: 'Sade Sati' },

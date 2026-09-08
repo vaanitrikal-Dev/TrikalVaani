@@ -350,7 +350,7 @@ const V6_SECTIONS: V6Section[] = [
       'Kisi bhi reading par bharosa karne se pehle uski ganana parakhni chahiye.',
       'Bachche ka wahi janm vivaran kisi doosre bharose-mand software mein daaliye. **Lagna, Chandra rashi, nakshatra aur panchma bhaav ki rashi** bilkul milni chahiye — dono taraf Lahiri ayanamsha ho to antar nahi aayega.',
       'Aur **dasha** milaiye — kaunsi Mahadasha chal rahi hai. Wo bilkul milni chahiye, kyunki wo janm nakshatra se nikalti hai aur usme koi vyakhya nahi hai.',
-      'Agar **lagna hi alag** aaye to samay ya shahar mein galti hai — wahi pehle jaanchiye. Poori kundali [Kundali Calculator](/calculators/free-kundali-calculator) par free ban jaati hai.',
+      'Agar **lagna hi alag** aaye to samay ya shahar mein galti hai — wahi pehle jaanchiye. Poori kundali [Kundali Calculator](/calculators/free-janam-kundali-calculator) par free ban jaati hai.',
     ],
   },
   {
@@ -398,7 +398,7 @@ const V6_SECTIONS: V6Section[] = [
     paras: [
       '**Poora vishay** — [Child destiny aur future astrology](/blog/childs-destiny-future-astrology), Hindi mein [बच्चे का भविष्य](/blog/childs-destiny-future-astrology-hindi), aur [Fifth lord aur aptitude](/blog/fifth-lord-child-aptitude-astrology).',
       '**Gehri baatein** — [Jupiter Putrakaraka](/blog/jupiter-putrakaraka-child-destiny-astrology), [Saraswati Yoga](/blog/saraswati-yoga-child-education-astrology), [Dasha timing aur child development](/blog/dasha-timing-child-development-astrology), aur [Education Prediction](/learn/education-prediction-astrology).',
-      '**Muft jaanch** — [Kundali Calculator](/calculators/free-kundali-calculator), [Nakshatra Calculator](/calculators/free-nakshatra-calculator), [Dasha Calculator](/calculators/free-dasha-calculator), [Baby Name by Nakshatra](/calculators/free-baby-name-by-nakshatra), aur [Santan Yog Calculator](/calculators/free-santan-yog-calculator).',
+      '**Muft jaanch** — [Kundali Calculator](/calculators/free-janam-kundali-calculator), [Nakshatra Calculator](/calculators/free-nakshatra-calculator), [Dasha Calculator](/calculators/free-dasha-calculator), [Baby Name by Nakshatra](/calculators/free-baby-name-by-nakshatra), aur [Santan Yog Calculator](/calculators/free-santan-yog-calculator).',
     ],
   },
   {
@@ -466,7 +466,7 @@ const V6_HUB_READ: V6Link[] = [
 ];
 
 const V6_HUB_CALC: V6Link[] = [
-  { href: '/calculators/free-kundali-calculator', label: 'Kundali Calculator', note: 'Poori kundali free' },
+  { href: '/calculators/free-janam-kundali-calculator', label: 'Kundali Calculator', note: 'Poori kundali free' },
   { href: '/calculators/free-nakshatra-calculator', label: 'Nakshatra Calculator', note: 'Nakshatra aur pada' },
   { href: '/calculators/free-dasha-calculator', label: 'Dasha Calculator', note: 'Abhi kaunsa daur' },
   { href: '/calculators/free-lagna-calculator', label: 'Lagna Calculator', note: 'Sab isi par khada hai' },

@@ -623,7 +623,7 @@ const HUB_CALC: LdLink[] = [
   { href: '/calculators/free-rashi-calculator', label: 'Rashi Calculator', note: 'Rashi wala tarika' },
   { href: '/calculators/free-numerology-calculator', label: 'Numerology Calculator', note: 'Ank wali paddhati' },
   { href: '/calculators/free-child-birth-muhurat-calculator', label: 'Child Birth Muhurat', note: 'Muhurat alag prashn hai' },
-  { href: '/calculators/free-kundali-calculator', label: 'Kundali Calculator', note: 'Poori kundali free' },
+  { href: '/calculators/free-janam-kundali-calculator', label: 'Kundali Calculator', note: 'Poori kundali free' },
   { href: '/calculators/free-lagna-calculator', label: 'Lagna Calculator', note: 'Aapka lagna' },
 ];
 
@@ -1010,7 +1010,7 @@ export default function FreeLuckyDayCalculatorPage() {
               {/* CTA */}
               <div className="rounded-2xl p-5 md:p-6 text-center" style={{ background: 'rgba(212,175,55,0.08)', border: `1px solid ${GOLD_RGBA(0.3)}` }}>
                 <p className="text-base text-slate-200 mb-3">Apni poori kundali ka deep analysis aur personalized remedies chahiye?</p>
-                <Link href="/calculators/free-kundali-calculator"
+                <Link href="/calculators/free-janam-kundali-calculator"
                   className="inline-block px-6 py-3 rounded-xl font-bold text-sm"
                   style={{ background: `linear-gradient(135deg,rgba(212,175,55,0.85) 0%,${GOLD} 100%)`, color: '#080B12' }}>
                   Free Kundali Banayein →
@@ -1135,7 +1135,7 @@ export default function FreeLuckyDayCalculatorPage() {
             <h2 className="text-2xl font-serif font-bold mb-6" style={{ color: GOLD }}>Aur Bhi Free Calculators</h2>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
               {[
-                { slug: 'free-kundali-calculator', name: 'Kundli Calculator' },
+                { slug: 'free-janam-kundali-calculator', name: 'Kundli Calculator' },
                 { slug: 'free-graha-bal-calculator', name: 'Graha Bal Calculator' },
                 { slug: 'free-weak-planet-finder', name: 'Weak Planet Finder' },
                 { slug: 'free-nakshatra-calculator', name: 'Nakshatra Finder' },

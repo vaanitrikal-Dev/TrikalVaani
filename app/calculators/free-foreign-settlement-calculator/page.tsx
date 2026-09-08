@@ -404,7 +404,7 @@ export default function FreeForeignSettlementCalculatorPage() {
               <li><Link href="/foreign-settlement" style={{ color: '#94a3b8' }} className="hover:text-slate-200">Foreign Settlement Astrology — poora guide</Link></li>
               <li><Link href="/calculators/free-foreign-spouse-calculator" style={{ color: '#94a3b8' }} className="hover:text-slate-200">Foreign Spouse Yog Calculator</Link></li>
               <li><Link href="/calculators/free-ias-astrology-calculator" style={{ color: '#94a3b8' }} className="hover:text-slate-200">IAS Astrology Calculator</Link></li>
-              <li><Link href="/calculators/free-kundali-calculator" style={{ color: '#94a3b8' }} className="hover:text-slate-200">Free Kundali Calculator</Link></li>
+              <li><Link href="/calculators/free-janam-kundali-calculator" style={{ color: '#94a3b8' }} className="hover:text-slate-200">Free Kundali Calculator</Link></li>
             </ul>
           </section>
 

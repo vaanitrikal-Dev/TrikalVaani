@@ -363,7 +363,7 @@ const PILLAR: PillarSection[] = [
     paras: [
       'तीन अलग-अलग तरीके प्रचलित हैं, और उनकी सटीकता एक जैसी बिल्कुल नहीं है। इन्हें अलग-अलग समझ लेना जरूरी है, क्योंकि तीनों को एक ही नाम से बेचा जाता है।',
       '**सबसे सटीक — जन्म तिथि + सटीक समय + स्थान:** इससे लग्न बनता है, और लग्न स्वामी का रत्न ही शास्त्रीय जीवन रत्न है। यही ऊपर वाला कैलकुलेटर करता है। **मध्यम — केवल जन्म तिथि (बिना समय):** लग्न नहीं बन सकता, इसलिए चंद्र राशि से काम चलाया जाता है — नीचे की राशि-रत्न तालिका इसी के लिए है। यह अनुमान है, गणना नहीं, पर बेकार नहीं। **सबसे कमजोर — नाम के अक्षर से:** यह अंक ज्योतिष या नाम-राशि से निकलता है, वैदिक कुंडली से नहीं। परंपरा में इसकी जगह है, पर इसे जन्म-कुंडली आधारित रत्न के बराबर मत मानिए।',
-      'साफ सलाह: **अगर आपका जन्म समय उपलब्ध है तो नाम या केवल तारीख वाले तरीके इस्तेमाल करने की कोई वजह नहीं है।** जन्म समय अस्पताल के रिकॉर्ड या जन्म प्रमाणपत्र से लीजिए, और [मुफ्त कुंडली कैलकुलेटर](/calculators/free-kundali-calculator) से पूरी कुंडली बना लीजिए। समय सचमुच न हो तभी राशि वाला रास्ता लीजिए — और तब भी कोई महँगा रत्न खरीदने से पहले किसी जानकार से पुष्टि करा लीजिए।',
+      'साफ सलाह: **अगर आपका जन्म समय उपलब्ध है तो नाम या केवल तारीख वाले तरीके इस्तेमाल करने की कोई वजह नहीं है।** जन्म समय अस्पताल के रिकॉर्ड या जन्म प्रमाणपत्र से लीजिए, और [मुफ्त कुंडली कैलकुलेटर](/calculators/free-janam-kundali-calculator) से पूरी कुंडली बना लीजिए। समय सचमुच न हो तभी राशि वाला रास्ता लीजिए — और तब भी कोई महँगा रत्न खरीदने से पहले किसी जानकार से पुष्टि करा लीजिए।',
     ],
   },
   {
@@ -782,7 +782,7 @@ export default function FreeGemstoneCalculatorPage() {
               {/* CTA */}
               <div className="rounded-2xl p-5 md:p-6 text-center" style={{ background: 'rgba(212,175,55,0.08)', border: `1px solid ${GOLD_RGBA(0.3)}` }}>
                 <p className="text-base text-slate-200 mb-3">Poori kundali ke aadhar par personalized ratna-paramarsh chahiye?</p>
-                <Link href="/calculators/free-kundali-calculator"
+                <Link href="/calculators/free-janam-kundali-calculator"
                   className="inline-block px-6 py-3 rounded-xl font-bold text-sm"
                   style={{ background: `linear-gradient(135deg,rgba(212,175,55,0.85) 0%,${GOLD} 100%)`, color: '#080B12' }}>
                   Free Kundali Banayein →
@@ -1010,7 +1010,7 @@ export default function FreeGemstoneCalculatorPage() {
                 { slug: 'free-lagna-calculator', name: 'Lagna Calculator' },
                 { slug: 'free-rashi-calculator', name: 'Rashi Calculator' },
                 { slug: 'free-dasha-calculator', name: 'Dasha Calculator' },
-                { slug: 'free-kundali-calculator', name: 'Kundli Calculator' },
+                { slug: 'free-janam-kundali-calculator', name: 'Kundli Calculator' },
               ].map((c) => (
                 <Link key={c.slug} href={`/calculators/${c.slug}`}
                   className="p-3 rounded-xl text-center text-sm transition-all hover:scale-105"

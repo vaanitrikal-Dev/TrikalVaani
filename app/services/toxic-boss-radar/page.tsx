@@ -465,7 +465,7 @@ const V6_SECTIONS: TbSection[] = [
     paras: [
       '**Career ka poora sidhant** — [Career Prediction Astrology](/learn/career-prediction-astrology), [Best career from your birth chart](/learn/best-career-birth-chart), aur Hindi mein [करियर भविष्यवाणी — पूरी गाइड](/blog/career-prediction-kundli-complete-guide-hindi).',
       '**Samay aur badlaav** — [Dasha timing: transfer aur conflict](/blog/dasha-timing-transfer-conflict-peak-astrology), Hindi mein [दशा और तबादला](/blog/dasha-timing-transfer-conflict-peak-astrology-hindi), aur [Dasha Calculator](/calculators/free-dasha-calculator).',
-      '**Muft jaanch** — [Sade Sati Calculator](/calculators/free-sade-sati-calculator), [Graha Bal Calculator](/calculators/free-graha-bal-calculator), [Kundali Strength Calculator](/calculators/free-kundali-strength-calculator), [Kundali Calculator](/calculators/free-kundali-calculator). Sarkari naukri ka alag prashn ho to [Government Job & UPSC](/learn/government-job-chances).',
+      '**Muft jaanch** — [Sade Sati Calculator](/calculators/free-sade-sati-calculator), [Graha Bal Calculator](/calculators/free-graha-bal-calculator), [Kundali Strength Calculator](/calculators/free-kundali-strength-calculator), [Kundali Calculator](/calculators/free-janam-kundali-calculator). Sarkari naukri ka alag prashn ho to [Government Job & UPSC](/learn/government-job-chances).',
     ],
   },
 ];
@@ -489,7 +489,7 @@ const V6_HUB_CALC: TbLink[] = [
   { href: '/calculators/free-sade-sati-calculator', label: 'Sade Sati Calculator', note: 'Shani ka gochar' },
   { href: '/calculators/free-graha-bal-calculator', label: 'Graha Bal Calculator', note: 'Shani aur Mangal ka bal' },
   { href: '/calculators/free-kundali-strength-calculator', label: 'Kundali Strength Calculator', note: 'Dasham bhaav ka bal' },
-  { href: '/calculators/free-kundali-calculator', label: 'Kundali Calculator', note: 'Poori kundali free' },
+  { href: '/calculators/free-janam-kundali-calculator', label: 'Kundali Calculator', note: 'Poori kundali free' },
   { href: '/calculators/free-lagna-calculator', label: 'Lagna Calculator', note: 'Dasham lagna se banta hai' },
   { href: '/calculators/free-weak-planet-finder', label: 'Weak Planet Finder', note: 'Kaunsa graha peeche' },
   { href: '/learn/government-job-chances', label: 'Government Job & UPSC', note: 'Sarkari naukri ka prashn' },

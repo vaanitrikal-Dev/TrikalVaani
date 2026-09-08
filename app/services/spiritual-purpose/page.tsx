@@ -332,7 +332,7 @@ const V6_SECTIONS: V6Section[] = [
       'Kisi bhi reading par bharosa karne se pehle uski ganana parakhni chahiye.',
       'Wahi janm vivaran kisi doosre bharose-mand software mein daaliye. **Lagna, Ketu ki rashi aur bhaav, aur barahve bhaav ki rashi** bilkul milni chahiye — dono taraf Lahiri ayanamsha ho to antar nahi aayega.',
       '**Atmakaraka bhi khud gin sakte hain** — jis graha ki degree (rashi ke andar) sabse zyada ho, wahi hai. Rahu ko kuch paramparaein ulta ginti hain, isliye wahan thoda antar aa sakta hai.',
-      'Aur **dasha** milaiye — wo janm nakshatra se nikalti hai aur usme koi vyakhya nahi hai, isliye bilkul milni chahiye. Poori kundali [Kundali Calculator](/calculators/free-kundali-calculator) par free hai.',
+      'Aur **dasha** milaiye — wo janm nakshatra se nikalti hai aur usme koi vyakhya nahi hai, isliye bilkul milni chahiye. Poori kundali [Kundali Calculator](/calculators/free-janam-kundali-calculator) par free hai.',
     ],
   },
   {
@@ -361,7 +361,7 @@ const V6_SECTIONS: V6Section[] = [
     paras: [
       '**Poora vishay** — [Spiritual purpose astrology](/blog/spiritual-purpose-astrology-kundli-reading) (3,788 shabd), [What is Ketu](/blog/what-is-ketu), aur [Ketu Mahadasha aur vairagya](/blog/ketu-mahadasha-vairagya-symptoms).',
       '**Gehri baatein** — [Past life aur karmic bond](/blog/past-life-karmic-bond-8th-12th-house-astrology), Hindi mein [पूर्व जन्म का कर्म बंधन](/blog/past-life-karmic-bond-8th-12th-house-astrology-hindi), [Guru Mahadasha](/blog/guru-mahadasha-wisdom-growth), aur [Vipreet Raj Yoga](/learn/vipreet-raj-yoga).',
-      '**Muft jaanch** — [Kundali Calculator](/calculators/free-kundali-calculator), [Dasha Calculator](/calculators/free-dasha-calculator), [Nakshatra Calculator](/calculators/free-nakshatra-calculator), [Gemstone Suitability](/calculators/free-gemstone-suitability-calculator), aur roz ka [Panchang](/panchang).',
+      '**Muft jaanch** — [Kundali Calculator](/calculators/free-janam-kundali-calculator), [Dasha Calculator](/calculators/free-dasha-calculator), [Nakshatra Calculator](/calculators/free-nakshatra-calculator), [Gemstone Suitability](/calculators/free-gemstone-suitability-calculator), aur roz ka [Panchang](/panchang).',
     ],
   },
   {
@@ -469,7 +469,7 @@ const V6_HUB_READ: V6Link[] = [
 ];
 
 const V6_HUB_CALC: V6Link[] = [
-  { href: '/calculators/free-kundali-calculator', label: 'Kundali Calculator', note: 'Poori kundali free' },
+  { href: '/calculators/free-janam-kundali-calculator', label: 'Kundali Calculator', note: 'Poori kundali free' },
   { href: '/calculators/free-dasha-calculator', label: 'Dasha Calculator', note: 'Abhi kaunsa daur' },
   { href: '/calculators/free-nakshatra-calculator', label: 'Nakshatra Calculator', note: 'Dasha ka aadhaar' },
   { href: '/calculators/free-lagna-calculator', label: 'Lagna Calculator', note: 'Bhaav isi se bante hain' },

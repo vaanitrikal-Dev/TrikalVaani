@@ -376,7 +376,7 @@ const PILLAR: PillarSection[] = [
     paras: [
       'बनने की शर्त एक ही है और वह गणितीय है: **सूर्य, चंद्र, मंगल, बुध, गुरु, शुक्र और शनि — सातों ग्रह राहु और केतु के बीच बने अक्ष के एक ही अर्ध-भाग में हों।** राहु और केतु हमेशा एक-दूसरे से ठीक 180° पर रहते हैं, इसलिए वे आकाश को दो हिस्सों में बाँट देते हैं। सारे ग्रह एक ही हिस्से में आ जाएँ तो कालसर्प।',
       'यहीं पर ज्यादातर मुफ्त कैलकुलेटर गलती करते हैं। वे सिर्फ **राशि या भाव** देखकर तय कर लेते हैं कि ग्रह किस तरफ है। पर अगर कोई ग्रह राहु या केतु की उसी राशि में है, तो राशि से यह पता ही नहीं चलता कि वह अक्ष के पहले है या बाद में — इसके लिए **सटीक देशांतर (longitude) की डिग्री** चाहिए। ऊपर वाला कैलकुलेटर Swiss Ephemeris से हर ग्रह की exact डिग्री लेकर लाहिड़ी अयनांश के साथ तुलना करता है, इसीलिए इसका उत्तर सीमावर्ती मामलों में भी बदलता नहीं।',
-      'खुद कदम-दर-कदम जाँचने की विधि [कुंडली में काल सर्प दोष कैसे चेक करें](/blog/how-to-check-kaal-sarp-dosh-hindi) में दी गई है, और पूरी कुंडली भाव सहित देखनी हो तो [मुफ्त कुंडली कैलकुलेटर](/calculators/free-kundali-calculator) से बना लीजिए।',
+      'खुद कदम-दर-कदम जाँचने की विधि [कुंडली में काल सर्प दोष कैसे चेक करें](/blog/how-to-check-kaal-sarp-dosh-hindi) में दी गई है, और पूरी कुंडली भाव सहित देखनी हो तो [मुफ्त कुंडली कैलकुलेटर](/calculators/free-janam-kundali-calculator) से बना लीजिए।',
     ],
   },
   {
@@ -403,7 +403,7 @@ const PILLAR: PillarSection[] = [
     paras: [
       'मान लीजिए एक कुंडली में **राहु मिथुन राशि में 12° पर, तृतीय भाव में** है। तब केतु स्वतः धनु राशि में 12° पर, नवम भाव में होगा। अब अक्ष बन गया — मिथुन 12° से धनु 12° तक की एक रेखा जो कुंडली को दो हिस्सों में काटती है।',
       'अब सातों ग्रह देखिए। मान लीजिए सूर्य, बुध और शुक्र वृषभ में हैं; चंद्र और मंगल मेष में; गुरु मीन में; शनि कुंभ में। ये सातों राहु से केतु की ओर **घड़ी की उल्टी दिशा** में एक ही अर्ध-भाग में पड़ रहे हैं — इसलिए कालसर्प **बनता है**, और राहु तृतीय भाव में होने से यह **वासुकि प्रकार** हुआ, जिसका पूरा विवरण [वासुकी काल सर्प योग](/blog/vasuki-kaal-sarp-yog-hindi) में है।',
-      'अब एक छोटा सा बदलाव: यदि शनि कुंभ के बजाय **तुला राशि में** होता, तो वह अक्ष के दूसरी तरफ चला जाता और **कालसर्प टूट जाता** — एक ग्रह की स्थिति से पूरा उत्तर पलट जाता है। यही कारण है कि डिग्री-स्तर की गणना जरूरी है और अंदाजा खतरनाक है। अपनी असली कुंडली इसी तरह भाव और डिग्री सहित देखने के लिए [कुंडली कैलकुलेटर](/calculators/free-kundali-calculator) और [लग्न कैलकुलेटर](/calculators/free-lagna-calculator) चलाइए।',
+      'अब एक छोटा सा बदलाव: यदि शनि कुंभ के बजाय **तुला राशि में** होता, तो वह अक्ष के दूसरी तरफ चला जाता और **कालसर्प टूट जाता** — एक ग्रह की स्थिति से पूरा उत्तर पलट जाता है। यही कारण है कि डिग्री-स्तर की गणना जरूरी है और अंदाजा खतरनाक है। अपनी असली कुंडली इसी तरह भाव और डिग्री सहित देखने के लिए [कुंडली कैलकुलेटर](/calculators/free-janam-kundali-calculator) और [लग्न कैलकुलेटर](/calculators/free-lagna-calculator) चलाइए।',
     ],
   },
   {
@@ -787,7 +787,7 @@ export default function FreeKaalSarpDoshCalculatorPage() {
               {/* CTA */}
               <div className="rounded-2xl p-5 md:p-6 text-center" style={{ background: 'rgba(212,175,55,0.08)', border: `1px solid ${GOLD_RGBA(0.3)}` }}>
                 <p className="text-base text-slate-200 mb-3">Poori kundali ka deep analysis aur personalized remedies chahiye?</p>
-                <Link href="/calculators/free-kundali-calculator"
+                <Link href="/calculators/free-janam-kundali-calculator"
                   className="inline-block px-6 py-3 rounded-xl font-bold text-sm"
                   style={{ background: `linear-gradient(135deg,rgba(212,175,55,0.85) 0%,${GOLD} 100%)`, color: '#080B12' }}>
                   Free Kundali Banayein →
@@ -947,7 +947,7 @@ export default function FreeKaalSarpDoshCalculatorPage() {
                 { slug: 'free-graha-bal-calculator', name: 'Graha Bal Calculator' },
                 { slug: 'free-kundali-strength-calculator', name: 'Kundali Strength' },
                 { slug: 'free-lagna-calculator', name: 'Lagna Calculator' },
-                { slug: 'free-kundali-calculator', name: 'Kundli Calculator' },
+                { slug: 'free-janam-kundali-calculator', name: 'Kundli Calculator' },
               ].map((c) => (
                 <Link key={c.slug} href={`/calculators/${c.slug}`}
                   className="p-3 rounded-xl text-center text-sm transition-all hover:scale-105"

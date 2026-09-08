@@ -658,7 +658,7 @@ export default function HastRekhaClient({ faqs }: { faqs: FAQ[] }) {
           {/* Internal links */}
           <section className="mt-10 grid sm:grid-cols-3 gap-3">
             {[
-              { href: '/calculators/free-kundali-calculator', label: 'Free Kundli Calculator', emoji: '🔮' },
+              { href: '/calculators/free-janam-kundali-calculator', label: 'Free Kundli Calculator', emoji: '🔮' },
               { href: '/kundali-milan', label: 'Kundali Milan', emoji: '💑' },
               { href: '/calculators', label: 'All Calculators', emoji: '🧮' },
             ].map((l) => (

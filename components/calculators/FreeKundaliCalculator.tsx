@@ -6,7 +6,7 @@
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
 //
 // WHY THIS FILE EXISTS
-//   /calculators/free-kundali-calculator carried NO calculator. The page and
+//   /calculators/free-janam-kundali-calculator carried NO calculator. The page and
 //   KundaliCalculatorClient.tsx together held 382 lines and not one <input>:
 //   the only action was a link to the homepage #birth-form. Radar E2 read the
 //   page on 05 Sep 2026 and classified it page_format = "article", which was

@@ -349,7 +349,7 @@ const PILLAR: PillarSection[] = [
     paras: [
       'The rule itself is short: **Manglik Dosh exists when Mars occupies the 1st, 2nd, 4th, 7th, 8th or 12th house of the birth chart.** Six houses, nothing else. If Mars sits in any of the other six, there is no Manglik Dosh, regardless of what a sign-based tool tells you.',
       'The part that separates an accurate calculation from a guess is **which reference point the houses are counted from**. Classically, Mars is checked from the **Lagna (ascendant)**, and many traditions also check it from the **Moon** and from **Venus**, with Lagna carrying the most weight. This page computes from the Lagna, which is why an exact birth time is non-negotiable — the Lagna changes roughly every two hours, and with it every house boundary in the chart.',
-      'The mechanics here: Swiss Ephemeris gives the exact sidereal longitude of Mars with Lahiri Ayanamsha, the house cusps are computed from your birth time and coordinates, Mars is placed in its house, that house is checked against the six, and then the classical cancellation conditions are tested. That last step is what most free tools skip. If you want to see the chart itself, house by house, build it free with the [Kundli Calculator](/calculators/free-kundali-calculator) or check your ascendant with the [Lagna Calculator](/calculators/free-lagna-calculator).',
+      'The mechanics here: Swiss Ephemeris gives the exact sidereal longitude of Mars with Lahiri Ayanamsha, the house cusps are computed from your birth time and coordinates, Mars is placed in its house, that house is checked against the six, and then the classical cancellation conditions are tested. That last step is what most free tools skip. If you want to see the chart itself, house by house, build it free with the [Kundli Calculator](/calculators/free-janam-kundali-calculator) or check your ascendant with the [Lagna Calculator](/calculators/free-lagna-calculator).',
       'One thing worth knowing before you compare tools: **different websites will give you different Manglik answers for the same birth details, and it is usually not a bug.** Three things vary between implementations — whether houses are counted from the Lagna, the Moon or Venus; whether the ayanamsha is Lahiri or something else; and whether cancellations are tested at all. A tool that checks only the Lagna and skips bhanga will report far more people as Manglik than a tool that does the full classical procedure. Neither is lying; one is simply incomplete.',
       'That is also why the birth time you supply matters more than the tool you choose. A chart built on a remembered time is a guess dressed up as a calculation, however good the engine behind it. Get the time from a hospital record or birth certificate if you possibly can, and if it is genuinely unknown, treat any Manglik verdict — including this one — as provisional rather than final.',
     ],
@@ -359,7 +359,7 @@ const PILLAR: PillarSection[] = [
     h2: 'कैसे पता करें कि मंगल दोष है?',
     paras: [
       'सबसे तेज तरीका ऊपर वाला कैलकुलेटर है — बीस सेकंड, मुफ्त, और भंग सहित। पर अगर आप **खुद जाँचना** चाहते हैं तो विधि यह है, और यह सीखने लायक है।',
-      '**पहला कदम:** अपनी कुंडली बनाइए — [मुफ्त कुंडली कैलकुलेटर](/calculators/free-kundali-calculator) से, भाव सहित। **दूसरा कदम:** देखिए मंगल किस **भाव** में हैं, राशि में नहीं। भाव की गिनती लग्न से शुरू होती है — लग्न पहला भाव, उससे अगला दूसरा, और इसी तरह। **तीसरा कदम:** अगर वह भाव 1, 2, 4, 7, 8 या 12 में से है, तो मांगलिक दोष है। **चौथा कदम, और यही सबसे जरूरी है:** भंग जाँचिए — क्या मंगल मेष, वृश्चिक या मकर में हैं, क्या गुरु या चंद्र की दृष्टि उन पर है।',
+      '**पहला कदम:** अपनी कुंडली बनाइए — [मुफ्त कुंडली कैलकुलेटर](/calculators/free-janam-kundali-calculator) से, भाव सहित। **दूसरा कदम:** देखिए मंगल किस **भाव** में हैं, राशि में नहीं। भाव की गिनती लग्न से शुरू होती है — लग्न पहला भाव, उससे अगला दूसरा, और इसी तरह। **तीसरा कदम:** अगर वह भाव 1, 2, 4, 7, 8 या 12 में से है, तो मांगलिक दोष है। **चौथा कदम, और यही सबसे जरूरी है:** भंग जाँचिए — क्या मंगल मेष, वृश्चिक या मकर में हैं, क्या गुरु या चंद्र की दृष्टि उन पर है।',
       'सबसे आम गलती जो लोग करते हैं: **राशि और भाव को एक मान लेना।** "मेरा मंगल तुला में है" यह भाव नहीं बताता — तुला राशि किसी के लिए सातवाँ भाव हो सकती है और किसी के लिए तीसरा, यह लग्न पर निर्भर है। इसीलिए बिना सटीक जन्म समय के कोई भी मांगलिक जाँच अनुमान से ज्यादा नहीं है।',
     ],
   },
@@ -978,7 +978,7 @@ export default function FreeManglikDoshCalculatorPage() {
                 { slug: 'free-weak-planet-finder', name: 'Weak Planet Finder' },
                 { slug: 'free-lagna-calculator', name: 'Lagna Calculator' },
                 { slug: 'free-rashi-calculator', name: 'Rashi Calculator' },
-                { slug: 'free-kundali-calculator', name: 'Kundli Calculator' },
+                { slug: 'free-janam-kundali-calculator', name: 'Kundli Calculator' },
               ].map((c) => (
                 <Link key={c.slug} href={`/calculators/${c.slug}`}
                   className="p-3 rounded-xl text-center text-sm transition-all hover:scale-105"

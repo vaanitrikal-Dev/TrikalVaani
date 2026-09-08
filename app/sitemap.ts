@@ -351,7 +351,7 @@ const SERVICE_ROUTES = [
 ];
 
 const CALCULATORS = [
-  'free-kundali-calculator',
+  'free-janam-kundali-calculator',
   'free-child-birth-muhurat-calculator',
   'free-dasha-calculator',
   'free-nakshatra-calculator',

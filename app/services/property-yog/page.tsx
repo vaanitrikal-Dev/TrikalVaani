@@ -471,7 +471,7 @@ const V6_SECTIONS: V6Section[] = [
     paras: [
       '**Sidhant samajhna ho** — [Property Prediction Astrology](/learn/property-prediction-astrology), [Best time to buy property](/learn/best-time-to-buy-property), aur Hindi mein [संपत्ति भविष्यवाणी](/blog/property-prediction-astrology-hindi) tatha [क्या मेरा घर होगा](/blog/kya-mera-ghar-hoga).',
       '**Koi khaas prashn ho** — nivesh ke liye [Property Investment Prediction](/learn/property-investment-prediction), vivad ke liye [Property Dispute Prediction](/learn/property-dispute-prediction), viraasat ke liye [Inheritance Wealth Prediction](/learn/inheritance-wealth-prediction), gaadi ke liye [Vehicle Purchase Prediction](/learn/vehicle-purchase-prediction), aur videsh ke liye [Foreign Property Prediction](/learn/foreign-property-prediction).',
-      '**Muft jaanch** — [Sade Sati Calculator](/calculators/free-sade-sati-calculator), [Dasha Calculator](/calculators/free-dasha-calculator), [Graha Bal Calculator](/calculators/free-graha-bal-calculator), [Kundali Calculator](/calculators/free-kundali-calculator) aur registry ke muhurat ke liye [Panchang](/panchang).',
+      '**Muft jaanch** — [Sade Sati Calculator](/calculators/free-sade-sati-calculator), [Dasha Calculator](/calculators/free-dasha-calculator), [Graha Bal Calculator](/calculators/free-graha-bal-calculator), [Kundali Calculator](/calculators/free-janam-kundali-calculator) aur registry ke muhurat ke liye [Panchang](/panchang).',
     ],
   },
 ];
@@ -494,7 +494,7 @@ const V6_HUB_CALC: V6Link[] = [
   { href: '/calculators/free-sade-sati-calculator', label: 'Sade Sati Calculator', note: 'Shani ka gochar' },
   { href: '/calculators/free-dasha-calculator', label: 'Dasha Calculator', note: 'Buying window ka aadhaar' },
   { href: '/calculators/free-graha-bal-calculator', label: 'Graha Bal Calculator', note: 'Mangal ka asli bal' },
-  { href: '/calculators/free-kundali-calculator', label: 'Kundali Calculator', note: 'Poori kundali free' },
+  { href: '/calculators/free-janam-kundali-calculator', label: 'Kundali Calculator', note: 'Poori kundali free' },
   { href: '/calculators/free-kundali-strength-calculator', label: 'Kundali Strength Calculator', note: 'Bhaav ka bal' },
   { href: '/calculators/free-gemstone-suitability-calculator', label: 'Gemstone Suitability', note: 'Ratna se pehle jaanch' },
   { href: '/calculators/free-foreign-settlement-calculator', label: 'Foreign Settlement Calculator', note: 'Videsh ka prashn' },
@@ -830,7 +830,7 @@ function PropertyHindiBlock() {
               {' '}— शनि का दबाव चल रहा है या नहीं, और किस चरण में।
             </li>
             <li>
-              <Link href="/calculators/free-kundali-calculator" className="text-[#D4AF37] underline underline-offset-4">मुफ्त कुंडली</Link>
+              <Link href="/calculators/free-janam-kundali-calculator" className="text-[#D4AF37] underline underline-offset-4">मुफ्त कुंडली</Link>
               {' '}— चतुर्थ भाव और मंगल की असली स्थिति, भाव सहित।
             </li>
           </ul>

@@ -16,7 +16,7 @@
 import Link from "next/link";
 
 const CALCULATORS: { slug: string; label: string }[] = [
-  { slug: "free-kundali-calculator",               label: "Free Kundli Calculator" },
+  { slug: "free-janam-kundali-calculator",               label: "Free Kundli Calculator" },
   { slug: "free-manglik-dosh-calculator",          label: "Free Manglik Dosh Calculator" },
   { slug: "free-dasha-calculator",                 label: "Free Dasha Calculator" },
   { slug: "free-sade-sati-calculator",             label: "Free Sade Sati Calculator" },

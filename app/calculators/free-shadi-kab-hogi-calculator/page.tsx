@@ -503,7 +503,7 @@ const MORE_CALC = [
   { href: '/calculators/free-santan-yog-calculator', t: 'Santan Yog Calculator' },
   { href: '/calculators/free-dasha-calculator', t: 'Free Dasha Calculator' },
   { href: '/calculators/free-graha-bal-calculator', t: 'Graha Bal (Shadbala) Calculator' },
-  { href: '/calculators/free-kundali-calculator', t: 'Free Kundali Calculator' },
+  { href: '/calculators/free-janam-kundali-calculator', t: 'Free Kundali Calculator' },
   { href: '/hast-rekha-calculator', t: 'हस्तरेखा कैलकुलेटर' },
 ];
 

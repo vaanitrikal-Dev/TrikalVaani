@@ -413,7 +413,7 @@ const PILLAR: DzSection[] = [
     h2: 'दशा मिल गई — अब आगे क्या',
     paras: [
       '**पहले तीनों स्तर नोट कर लीजिए** — महादशा, अंतर्दशा और प्रत्यंतर, तिथि सहित। अगली संधि कब है, वह भी ऊपर की टाइमलाइन से देख लीजिए। यह जानकारी अगले कई साल काम आएगी।',
-      '**फिर बाकी मुफ्त जाँचें कर लीजिए**, क्योंकि दशा अकेली पूरी तस्वीर नहीं देती: [मुफ्त कुंडली](/calculators/free-kundali-calculator) से लग्न और भाव, [नक्षत्र](/calculators/free-nakshatra-calculator) से दशा का आधार, और [साढ़े साती](/calculators/free-sade-sati-calculator) से गोचर का दबाव — तीनों अलग-अलग चीजें बताते हैं।',
+      '**फिर बाकी मुफ्त जाँचें कर लीजिए**, क्योंकि दशा अकेली पूरी तस्वीर नहीं देती: [मुफ्त कुंडली](/calculators/free-janam-kundali-calculator) से लग्न और भाव, [नक्षत्र](/calculators/free-nakshatra-calculator) से दशा का आधार, और [साढ़े साती](/calculators/free-sade-sati-calculator) से गोचर का दबाव — तीनों अलग-अलग चीजें बताते हैं।',
       'और अगर सामने कोई ठोस फैसला है — नौकरी छोड़नी है, घर खरीदना है, या शादी का समय तय करना है — तो सामान्य लेख उसे तय नहीं कर सकता। विवाह के लिए [कुंडली मिलान](/kundali-milan) है, और पूरे जीवन-पथ के लिए [कार्मिक बैकग्राउंड रीडिंग](/karmic-background-reading)। सारे विकल्प [प्राइसिंग पेज](/pricing) पर हैं।',
     ],
   },
@@ -968,7 +968,7 @@ export default function FreeDashaCalculatorPage() {
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
               {[
                 { slug: 'free-nakshatra-calculator', name: 'Nakshatra (दशा का आधार)' },
-                { slug: 'free-kundali-calculator', name: 'Kundli Calculator' },
+                { slug: 'free-janam-kundali-calculator', name: 'Kundli Calculator' },
                 { slug: 'free-sade-sati-calculator', name: 'Sade Sati (गोचर)' },
                 { slug: 'free-rashi-calculator', name: 'Rashi Calculator' },
                 { slug: 'free-lagna-calculator', name: 'Lagna Calculator' },

@@ -185,6 +185,19 @@ const nextConfig = {
   async redirects() {
     return [
       // ══════════════════════════════════════════════════════════════
+      // SLUG RENAME — 08 Sep 2026
+      //   The calculator moved to /calculators/free-janam-kundali-calculator
+      //   so the URL carries "janam", which appears in the Radar keyword
+      //   "janam kundali banaye free". Every internal link in the repo was
+      //   rewritten in the same commit, so this 301 exists only for external
+      //   links and for Google's existing index. Do not remove it.
+      // ══════════════════════════════════════════════════════════════
+      {
+        source: '/calculators/free-kundali-calculator',
+        destination: '/calculators/free-janam-kundali-calculator',
+        permanent: true, // 301
+      },
+      // ══════════════════════════════════════════════════════════════
       // EXISTING REDIRECTS (v1.2 - v1.7) — UNCHANGED
       // ══════════════════════════════════════════════════════════════
       {

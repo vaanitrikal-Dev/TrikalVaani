@@ -1,5 +1,5 @@
 // ============================================================
-// File: app/calculators/free-kundali-calculator/layout.tsx
+// File: app/calculators/free-janam-kundali-calculator/layout.tsx
 // Version: v2.0 (05 Sep 2026) — metadata only
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
 //
@@ -80,12 +80,12 @@ export const metadata: Metadata = {
     'सही जन्म कुंडली',
     'free kundali for new born baby',
   ],
-  alternates: { canonical: 'https://trikalvaani.com/calculators/free-kundali-calculator' },
+  alternates: { canonical: 'https://trikalvaani.com/calculators/free-janam-kundali-calculator' },
   openGraph: {
     title: 'Janm Kundali Online — Free Kundli Banaye | Trikaal Vaani',
     description:
       'Poori janm kundali free — lagna, Chandra aur Surya rashi, nakshatra aur pada, nau graha degree ke saath, aur chal rahi dasha. Bina signup.',
-    url: 'https://trikalvaani.com/calculators/free-kundali-calculator',
+    url: 'https://trikalvaani.com/calculators/free-janam-kundali-calculator',
     type: 'website',
     siteName: 'Trikaal Vaani',
   },

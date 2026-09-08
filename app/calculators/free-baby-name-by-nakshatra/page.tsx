@@ -501,7 +501,7 @@ const SECTIONS: BnSection[] = [
       'Ye do cheezein ek saath dhoondhi jaati hain aur ek hi ganana se aa jaati hain.',
       'Ek hi kshan ki Chandra sthiti se teeno nikal aate hain: **rashi** (Chandra kis rashi mein), **nakshatra** (kis nakshatra mein), aur **pada** (us nakshatra ke kis chauthai hisse mein). Naamakshar pada se aata hai; rashi apne aap mel kha jaati hai.',
       'Kram ye rakhiye: **sateek samay se nakshatra aur pada nikaaliye, akshar lijiye, phir naam chuniye.** Rashi ki alag se zaroorat naamkaran mein nahi padti — wo aage kaam aati hai, jaise gochar aur Sade Sati mein.',
-      'Bachche ki rashi alag se dekhni ho to [Rashi Calculator](/calculators/free-rashi-calculator) free hai. Poori kundali ke liye [Kundali Calculator](/calculators/free-kundali-calculator).',
+      'Bachche ki rashi alag se dekhni ho to [Rashi Calculator](/calculators/free-rashi-calculator) free hai. Poori kundali ke liye [Kundali Calculator](/calculators/free-janam-kundali-calculator).',
     ],
   },
   {
@@ -727,7 +727,7 @@ const SECTIONS: BnSection[] = [
     id: 'aage-kya',
     h2: 'Naam ke baad — aage kya dekhein',
     paras: [
-      'Bachche ka poora chart banana ho to [Kundali Calculator](/calculators/free-kundali-calculator) free hai, aur uska nakshatra vistaar se [Nakshatra Calculator](/calculators/free-nakshatra-calculator) par.',
+      'Bachche ka poora chart banana ho to [Kundali Calculator](/calculators/free-janam-kundali-calculator) free hai, aur uska nakshatra vistaar se [Nakshatra Calculator](/calculators/free-nakshatra-calculator) par.',
       'Bachche se jude asli prashn — [Child Birth Prediction](/learn/child-birth-prediction), aur agla bachcha kab ya kitne, uske liye [Number of Children Prediction](/learn/number-of-children-prediction) tatha [Santan Yog Calculator](/calculators/free-santan-yog-calculator).',
       'Sidhant samajhna ho — [Nakshatra Guide](/learn/nakshatra-guide) mein sattais nakshatra khole gaye hain aur [Planets in Astrology](/learn/planets-in-astrology) mein har graha ka swabhav. Bachche ki rashi ke liye [Rashi Calculator](/calculators/free-rashi-calculator).',
     ],
@@ -739,7 +739,7 @@ type BnLink = { href: string; label: string; note: string };
 const HUB_CALC: BnLink[] = [
   { href: '/calculators/free-nakshatra-calculator', label: 'Nakshatra Calculator', note: 'Nakshatra aur pada' },
   { href: '/calculators/free-rashi-calculator', label: 'Rashi Calculator', note: 'Bachche ki Chandra rashi' },
-  { href: '/calculators/free-kundali-calculator', label: 'Kundali Calculator', note: 'Poori kundali free' },
+  { href: '/calculators/free-janam-kundali-calculator', label: 'Kundali Calculator', note: 'Poori kundali free' },
   { href: '/calculators/free-child-birth-muhurat-calculator', label: 'Child Birth Muhurat', note: 'Planned delivery ka samay' },
   { href: '/calculators/free-santan-yog-calculator', label: 'Santan Yog Calculator', note: 'Santan ka yog' },
   { href: '/calculators/free-lagna-calculator', label: 'Lagna Calculator', note: 'Bachche ka lagna' },
@@ -1165,7 +1165,7 @@ export default function FreeBabyNameByNakshatraPage() {
                 { slug: 'free-numerology-calculator', name: 'Numerology' },
                 { slug: 'free-lucky-day-calculator', name: 'Lucky Day Calculator' },
                 { slug: 'free-rashi-calculator', name: 'Rashi Calculator' },
-                { slug: 'free-kundali-calculator', name: 'Kundli Calculator' },
+                { slug: 'free-janam-kundali-calculator', name: 'Kundli Calculator' },
                 { slug: 'free-kundali-strength-calculator', name: 'Kundali Strength' },
               ].map((c) => (
                 <Link key={c.slug} href={`/calculators/${c.slug}`}

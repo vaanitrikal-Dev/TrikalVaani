@@ -127,7 +127,7 @@ type CalcEntry = {
 // Karmic ₹251, Kundali Milan) live in SiteNav / Services, never in this hub.
 const CALCULATORS: CalcEntry[] = [
   {
-    slug: 'free-kundali-calculator',
+    slug: 'free-janam-kundali-calculator',
     emoji: '🔮',
     name: 'Free Kundli Calculator',
     desc: 'Get your complete Janm Kundali — Lagna, Nakshatra, all 9 planets, Dasha, and Parashar remedies.',

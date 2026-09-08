@@ -367,7 +367,7 @@ const SECTIONS: RcSection[] = [
       'Ye jawab is page ke apne traffic ke khilaf jaata hai, par saaf hona chahiye.',
       'Saamanya rashifal — akhbaar ka, app ka, ya website ka — **sirf aapki Chandra rashi par bana hota hai.** Iska matlab hai ki ek hi rashi ke karodon logon ko ek hi baat batayi ja rahi hai. Wo baat dilchasp ho sakti hai, kabhi mel bhi kha sakti hai, par wo **vyaktigat nahi** hai.',
       'Jo cheez vyaktigat banati hai wo hai **lagna, bhaavon ki sthiti aur chal rahi dasha** — aur ye teeno har vyakti ke alag hain. Do log ek hi rashi ke, ek hi din paida hue, par alag samay par — unki dasha aur bhaav alag honge, aur unka anubhav bhi.',
-      'Isliye rashifal ko mausam ki bhavishyavani ki tarah lijiye: mota rujhan, vyaktigat nirnay nahi. Poori kundali dekhni ho to [Kundali Calculator](/calculators/free-kundali-calculator) free hai.',
+      'Isliye rashifal ko mausam ki bhavishyavani ki tarah lijiye: mota rujhan, vyaktigat nirnay nahi. Poori kundali dekhni ho to [Kundali Calculator](/calculators/free-janam-kundali-calculator) free hai.',
     ],
   },
   {
@@ -530,7 +530,7 @@ const SECTIONS: RcSection[] = [
     paras: [
       'Aakhri baat, aur wo bhi utni hi seedhi honi chahiye jitni baaki page hai.',
       'Rashi barah mein se ek hai. Iska matlab hai ki **duniya ke har barahve vyakti ki rashi aapki hi hai** — aur unka jeevan aapke jaisa nahi hai. Isliye rashi se vyaktigat bhavishyavani nahi ban sakti, chahe wo kitni bhi vistrit likhi jaaye.',
-      'Vyaktigat cheez teen se banti hai: **lagna** (jo har do ghante badalta hai), **bhaavon ki sthiti**, aur **dasha ka kram** (jo janm nakshatra se shuru hoti hai). Teeno milne ki sambhavna do ajnabiyon mein lagbhag na ke barabar hai — aur wahi aapka apna chart hai. Poori kundali free banane ke liye [Kundali Calculator](/calculators/free-kundali-calculator).',
+      'Vyaktigat cheez teen se banti hai: **lagna** (jo har do ghante badalta hai), **bhaavon ki sthiti**, aur **dasha ka kram** (jo janm nakshatra se shuru hoti hai). Teeno milne ki sambhavna do ajnabiyon mein lagbhag na ke barabar hai — aur wahi aapka apna chart hai. Poori kundali free banane ke liye [Kundali Calculator](/calculators/free-janam-kundali-calculator).',
     ],
   },
   {
@@ -582,7 +582,7 @@ const SECTIONS: RcSection[] = [
     id: 'aage-kya',
     h2: 'Aage kya padhein',
     paras: [
-      'Rashi ke baad agla swabhavik kadam — nakshatra aur pada ke liye [Nakshatra Calculator](/calculators/free-nakshatra-calculator), poori kundali ke liye [Kundali Calculator](/calculators/free-kundali-calculator), aur lagna ke liye [Lagna Calculator](/calculators/free-lagna-calculator).',
+      'Rashi ke baad agla swabhavik kadam — nakshatra aur pada ke liye [Nakshatra Calculator](/calculators/free-nakshatra-calculator), poori kundali ke liye [Kundali Calculator](/calculators/free-janam-kundali-calculator), aur lagna ke liye [Lagna Calculator](/calculators/free-lagna-calculator).',
       'Rashi se jude sawal — Sade Sati ke liye [Sade Sati Calculator](/calculators/free-sade-sati-calculator), bachche ke naam ke liye [Baby Name by Nakshatra](/calculators/free-baby-name-by-nakshatra), aur ratna ke liye [Gemstone Suitability Calculator](/calculators/free-gemstone-suitability-calculator).',
       'Ank-shastra alag vishay hai — [Numerology Calculator](/calculators/free-numerology-calculator) aur [Lucky Day Calculator](/calculators/free-lucky-day-calculator). Sidhant samajhna ho to [Planets in Astrology](/learn/planets-in-astrology) aur [Nakshatra Guide](/learn/nakshatra-guide).',
     ],
@@ -595,7 +595,7 @@ const HUB_CALC: RcLink[] = [
   { href: '/calculators/free-nakshatra-calculator', label: 'Nakshatra Calculator', note: 'Rashi se sookshm' },
   { href: '/calculators/free-lagna-calculator', label: 'Lagna Calculator', note: 'Doosri "rashi"' },
   { href: '/calculators/free-lagna-bal-calculator', label: 'Lagna Bal Calculator', note: 'Lagna kitna mazboot' },
-  { href: '/calculators/free-kundali-calculator', label: 'Kundali Calculator', note: 'Poori kundali free' },
+  { href: '/calculators/free-janam-kundali-calculator', label: 'Kundali Calculator', note: 'Poori kundali free' },
   { href: '/calculators/free-sade-sati-calculator', label: 'Sade Sati Calculator', note: 'Chandra rashi se chalti hai' },
   { href: '/calculators/free-baby-name-by-nakshatra', label: 'Baby Name by Nakshatra', note: 'Naam ka shubh akshar' },
   { href: '/calculators/free-numerology-calculator', label: 'Numerology Calculator', note: 'Mulank aur bhagyank' },
@@ -1055,7 +1055,7 @@ export default function FreeRashiCalculatorPage() {
             <h2 className="text-2xl font-serif font-bold mb-6" style={{ color: GOLD }}>Aur Bhi Free Calculators</h2>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
               {[
-                { slug: 'free-kundali-calculator', name: 'Kundli Calculator' },
+                { slug: 'free-janam-kundali-calculator', name: 'Kundli Calculator' },
                 { slug: 'free-dasha-calculator', name: 'Dasha Calculator' },
                 { slug: 'free-nakshatra-calculator', name: 'Nakshatra Finder' },
                 { slug: 'free-lagna-calculator', name: 'Lagna Calculator' },

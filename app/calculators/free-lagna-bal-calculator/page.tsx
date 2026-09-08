@@ -340,7 +340,7 @@ const SECTIONS: LbSection[] = [
     paras: [
       'लग्न कुंडली वह चार्ट है जिसमें **पहला खाना आपका लग्न होता है** और वहीं से बारह भाव गिने जाते हैं। यही मूल चार्ट है — बाकी सब इसी पर टिका है।',
       'उत्तर भारतीय शैली में खाने स्थिर होते हैं और राशियाँ बदलती हैं; दक्षिण भारतीय शैली में राशियाँ स्थिर होती हैं और लग्न पर निशान लगता है। **दोनों एक ही जानकारी दिखाते हैं**, केवल प्रस्तुति अलग है — इसलिए दो चार्ट अलग दिखने पर घबराने की ज़रूरत नहीं।',
-      'पढ़ने का क्रम यह रखिए: **पहले लग्न, फिर लग्नेश कहाँ है, फिर पहले भाव में कौन है, फिर लग्नेश का बल।** यही क्रम यह पेज अनुसरण करता है। पूरी कुंडली मुफ्त देखनी हो तो [Kundali Calculator](/calculators/free-kundali-calculator) पर बन जाती है।',
+      'पढ़ने का क्रम यह रखिए: **पहले लग्न, फिर लग्नेश कहाँ है, फिर पहले भाव में कौन है, फिर लग्नेश का बल।** यही क्रम यह पेज अनुसरण करता है। पूरी कुंडली मुफ्त देखनी हो तो [Kundali Calculator](/calculators/free-janam-kundali-calculator) पर बन जाती है।',
     ],
   },
   {
@@ -475,7 +475,7 @@ const SECTIONS: LbSection[] = [
     paras: [
       'Janm lagna ek hi nahi hai. **Har varga chart ka apna lagna hota hai**, aur wo alag rashi ho sakti hai.',
       '**Navamsa (D-9)** vivah aur bhagya ka chart hai; uska lagna alag se dekha jaata hai. **Dasamsa (D-10)** career ka chart hai. Ek graha jo janm chart mein achhi sthiti mein ho par Navamsa mein kamzor pade, uska phal vaade se kam nikalta hai — aur yahi antar jaanchne ke liye varga chart bane hain.',
-      '**Vargottama** us sthiti ko kehte hain jab koi graha ya lagna janm chart aur Navamsa dono mein ek hi rashi mein pade. Ise bahut anukool maana jaata hai, kyunki wahan vaada aur pushti dono ek disha mein hote hain. Poore varga charton ke liye [Kundali Calculator](/calculators/free-kundali-calculator) free hai.',
+      '**Vargottama** us sthiti ko kehte hain jab koi graha ya lagna janm chart aur Navamsa dono mein ek hi rashi mein pade. Ise bahut anukool maana jaata hai, kyunki wahan vaada aur pushti dono ek disha mein hote hain. Poore varga charton ke liye [Kundali Calculator](/calculators/free-janam-kundali-calculator) free hai.',
     ],
   },
   {
@@ -572,7 +572,7 @@ const SECTIONS: LbSection[] = [
     id: 'aage-kya',
     h2: 'Aage kya padhein',
     paras: [
-      'Apna lagna hi nahi pata — [Lagna Calculator](/calculators/free-lagna-calculator) se shuru kijiye, phir yahan wapas aaiye. Poori kundali free banani ho to [Kundali Calculator](/calculators/free-kundali-calculator).',
+      'Apna lagna hi nahi pata — [Lagna Calculator](/calculators/free-lagna-calculator) se shuru kijiye, phir yahan wapas aaiye. Poori kundali free banani ho to [Kundali Calculator](/calculators/free-janam-kundali-calculator).',
       'Bal ka vishay aage badhana ho — saaton grahon ka bal [Weak Planet Finder](/calculators/free-weak-planet-finder), graha-wise vibhajan [Graha Bal Calculator](/calculators/free-graha-bal-calculator), bhaav ka bal [Kundali Strength Calculator](/calculators/free-kundali-strength-calculator), aur sidhant [Shadbala](/learn/shadbala-planetary-strength-vedic-astrology).',
       'Kisi khaas kshetra ka prashn ho — vivah ke liye [Shadi Kab Hogi](/calculators/free-shadi-kab-hogi-calculator), career ke liye [Career Prediction](/learn/career-prediction-astrology), aur chal rahi dasha ke liye [Dasha Calculator](/calculators/free-dasha-calculator).',
     ],
@@ -595,7 +595,7 @@ const HUB_LEARN: LbLink[] = [
 
 const HUB_CALC: LbLink[] = [
   { href: '/calculators/free-lagna-calculator', label: 'Lagna Calculator', note: 'Pehle lagna pata kijiye' },
-  { href: '/calculators/free-kundali-calculator', label: 'Kundali Calculator', note: 'Poori kundali free' },
+  { href: '/calculators/free-janam-kundali-calculator', label: 'Kundali Calculator', note: 'Poori kundali free' },
   { href: '/calculators/free-weak-planet-finder', label: 'Weak Planet Finder', note: 'Saaton grahon ka bal' },
   { href: '/calculators/free-graha-bal-calculator', label: 'Graha Bal Calculator', note: 'Graha-wise vibhajan' },
   { href: '/calculators/free-kundali-strength-calculator', label: 'Kundali Strength Calculator', note: 'Bhaav ka bal' },
@@ -1006,7 +1006,7 @@ export default function FreeLagnaBalCalculatorPage() {
               {/* CTA */}
               <div className="rounded-2xl p-5 md:p-6 text-center" style={{ background: 'rgba(212,175,55,0.08)', border: `1px solid ${GOLD_RGBA(0.3)}` }}>
                 <p className="text-base text-slate-200 mb-3">Poori kundali ka deep analysis aur personalized remedies chahiye?</p>
-                <Link href="/calculators/free-kundali-calculator"
+                <Link href="/calculators/free-janam-kundali-calculator"
                   className="inline-block px-6 py-3 rounded-xl font-bold text-sm"
                   style={{ background: `linear-gradient(135deg,rgba(212,175,55,0.85) 0%,${GOLD} 100%)`, color: '#080B12' }}>
                   Free Kundali Banayein →
@@ -1105,7 +1105,7 @@ export default function FreeLagnaBalCalculatorPage() {
                 { slug: 'free-weak-planet-finder', name: 'Weak Planet Finder' },
                 { slug: 'free-lucky-day-calculator', name: 'Lucky Day Calculator' },
                 { slug: 'free-lagna-calculator', name: 'Lagna Calculator' },
-                { slug: 'free-kundali-calculator', name: 'Kundli Calculator' },
+                { slug: 'free-janam-kundali-calculator', name: 'Kundli Calculator' },
               ].map((c) => (
                 <Link key={c.slug} href={`/calculators/${c.slug}`}
                   className="p-3 rounded-xl text-center text-sm transition-all hover:scale-105"

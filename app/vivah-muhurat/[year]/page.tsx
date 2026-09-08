@@ -447,7 +447,7 @@ export default async function VivahMuhuratYearPage(
               { href: '/kundali-milan', t: 'Kundali Milan', d: 'Guna Milan + Manglik + Dosha' },
               { href: '/calculators/free-child-birth-muhurat-calculator', t: 'Child Birth Muhurat', d: 'Auspicious delivery time' },
               { href: '/calculators/free-manglik-dosh-calculator', t: 'Manglik Dosh Check', d: 'Mangal dosha analysis' },
-              { href: '/calculators/free-kundali-calculator', t: 'Free Kundli', d: 'Full birth chart + dasha' },
+              { href: '/calculators/free-janam-kundali-calculator', t: 'Free Kundli', d: 'Full birth chart + dasha' },
             ].map((l, i) => (
               <Link key={i} href={l.href} style={{ background: GOLD_RGBA(0.04), border: `1px solid ${GOLD_RGBA(0.14)}`, borderRadius: 12, padding: '14px 16px', textDecoration: 'none', display: 'block' }}>
                 <div style={{ fontSize: 14.5, color: GOLD, fontWeight: 600 }}>{l.t} →</div>

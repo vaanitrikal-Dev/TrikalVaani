@@ -256,7 +256,7 @@ export default async function CompatibilityPage(
     exploreLinks: [
       { href: '/kundali-milan',                              label: 'पूर्ण कुंडली मिलान (₹51)' },
       { href: '/calculators/free-rashi-calculator',          label: 'मुफ़्त राशि कैलकुलेटर' },
-      { href: '/calculators/free-kundali-calculator',        label: 'मुफ़्त कुंडली कैलकुलेटर' },
+      { href: '/calculators/free-janam-kundali-calculator',        label: 'मुफ़्त कुंडली कैलकुलेटर' },
       { href: '/calculators/free-nakshatra-calculator',      label: 'नक्षत्र कैलकुलेटर' },
       { href: '/calculators/free-manglik-dosh-calculator',   label: 'मांगलिक दोष कैलकुलेटर' },
       { href: '/blog/36-guna-milan-explained',               label: '36 गुण मिलान क्या है?' },
@@ -295,7 +295,7 @@ export default async function CompatibilityPage(
     exploreLinks: [
       { href: '/kundali-milan',                              label: 'Full Kundali Milan (₹51)' },
       { href: '/calculators/free-rashi-calculator',          label: 'Free Rashi Calculator' },
-      { href: '/calculators/free-kundali-calculator',        label: 'Free Kundali Calculator' },
+      { href: '/calculators/free-janam-kundali-calculator',        label: 'Free Kundali Calculator' },
       { href: '/calculators/free-nakshatra-calculator',      label: 'Nakshatra Calculator' },
       { href: '/calculators/free-manglik-dosh-calculator',   label: 'Manglik Dosh Calculator' },
       { href: '/blog/36-guna-milan-explained',               label: 'What is 36 Guna Milan?' },

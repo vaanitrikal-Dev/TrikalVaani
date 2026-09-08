@@ -1,5 +1,5 @@
 // ============================================================
-// File: app/calculators/free-kundali-calculator/page.tsx
+// File: app/calculators/free-janam-kundali-calculator/page.tsx
 // Purpose: Free AI Kundli Calculator — SEO/GEO/AEO/E-E-A-T page
 // Version: v2.0 (05 Sep 2026) — calculator + full keyword-driven content
 // Changelog v2.0 (2026-09-05): content build from Radar E3 PASF —
@@ -79,7 +79,7 @@ const HOWTO_STEPS = [
 ];
 
 // ─── JSON-LD (gold-standard 8-node @graph via shared helper) ─
-const PAGE_URL = 'https://trikalvaani.com/calculators/free-kundali-calculator';
+const PAGE_URL = 'https://trikalvaani.com/calculators/free-janam-kundali-calculator';
 const jsonLd = buildCalcJsonLd({
   pageUrl: PAGE_URL,
   name: 'Free AI Kundli Calculator — Janm Kundali Online',

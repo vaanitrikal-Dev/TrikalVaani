@@ -439,7 +439,7 @@ const SECTIONS: LcSection[] = [
       'Ye prashn jaayaz hai aur uska uttar is page ki sabse zaroori seema hai.',
       '**Lagna sirf shuruat hai.** Wo batata hai ki bhaav kahan se ginne hain — bas. Uske baad aata hai: **nau grahon ki sthiti** (har vyakti ki alag), **unka bal** (Shadbala se), aur **chal rahi dasha** (janm nakshatra se, isliye har vyakti ki alag).',
       'Ganit dekhiye: duniya ke lagbhag har **barahve** vyakti ka lagna aapka hi hai. Agar lagna se sab tay hota to sab ek jaise hote.',
-      'Isliye lagna ko **naksha** maaniye, tasveer nahi. Poori tasveer ke liye [Kundali Calculator](/calculators/free-kundali-calculator) free hai, aur lagna kitna mazboot hai wo [Lagna Bal Calculator](/calculators/free-lagna-bal-calculator) par.',
+      'Isliye lagna ko **naksha** maaniye, tasveer nahi. Poori tasveer ke liye [Kundali Calculator](/calculators/free-janam-kundali-calculator) free hai, aur lagna kitna mazboot hai wo [Lagna Bal Calculator](/calculators/free-lagna-bal-calculator) par.',
     ],
   },
   {
@@ -528,7 +528,7 @@ const SECTIONS: LcSection[] = [
     paras: [
       'Poora page free hai. Milta hai: **lagna**, uska **swami graha**, **tatva** aur **prakriti**, **shareerik prakriti** ke sanket, **swabhav** ke sanket, aur us lagna ke liye **anukool tatha savdhaani wale graha.**',
       'Koi signup nahi, koi card nahi, koi email nahi maanga jaata.',
-      'Lagna **kitna mazboot** hai — wo alag prashn hai aur uske liye [Lagna Bal Calculator](/calculators/free-lagna-bal-calculator) alag bana hai, wo bhi free. Poori kundali [Kundali Calculator](/calculators/free-kundali-calculator) par.',
+      'Lagna **kitna mazboot** hai — wo alag prashn hai aur uske liye [Lagna Bal Calculator](/calculators/free-lagna-bal-calculator) alag bana hai, wo bhi free. Poori kundali [Kundali Calculator](/calculators/free-janam-kundali-calculator) par.',
     ],
   },
   {
@@ -588,7 +588,7 @@ const SECTIONS: LcSection[] = [
       'Ye seema is page ke apne traffic ke khilaf jaati hai, par likhni chahiye.',
       'Lagna **nahi** bata sakta: koi ghatna kab hogi, aapka bhavishya kya hai, aap safal honge ya nahi, ya kisi prashn ka nishchit uttar. Lagna sirf **aadhaar-bindu** hai — wo batata hai ki bhaav kahan se ginne hain.',
       'Poori tasveer teen aur cheezon se banti hai: **grahon ki sthiti**, **unka bal**, aur **chal rahi dasha.** Teeno lagna ke baad aate hain aur teeno har vyakti ke alag hote hain.',
-      'Isliye lagna jaan lena **shuruat** hai, uttar nahi. Aur jo koi sirf lagna dekh kar bhavishya bata de, wo saralikaran bech raha hai. Agla kadam [Kundali Calculator](/calculators/free-kundali-calculator) hai, jo poora chart banata hai — free.',
+      'Isliye lagna jaan lena **shuruat** hai, uttar nahi. Aur jo koi sirf lagna dekh kar bhavishya bata de, wo saralikaran bech raha hai. Agla kadam [Kundali Calculator](/calculators/free-janam-kundali-calculator) hai, jo poora chart banata hai — free.',
     ],
   },
   {
@@ -596,7 +596,7 @@ const SECTIONS: LcSection[] = [
     h2: 'Lagna jaan liya — ab kya',
     paras: [
       '**Lagna kitna mazboot hai** — [Lagna Bal Calculator](/calculators/free-lagna-bal-calculator) par lagnesh ka bhaav, uski Shadbala aur pehle bhaav ke graha milte hain.',
-      '**Poori kundali** — [Kundali Calculator](/calculators/free-kundali-calculator) par lagna ke saath nau graha degree ke saath, bhaav, nakshatra aur dasha. Chandra rashi [Rashi Calculator](/calculators/free-rashi-calculator) par aur nakshatra [Nakshatra Calculator](/calculators/free-nakshatra-calculator) par.',
+      '**Poori kundali** — [Kundali Calculator](/calculators/free-janam-kundali-calculator) par lagna ke saath nau graha degree ke saath, bhaav, nakshatra aur dasha. Chandra rashi [Rashi Calculator](/calculators/free-rashi-calculator) par aur nakshatra [Nakshatra Calculator](/calculators/free-nakshatra-calculator) par.',
       '**Sidhant** — [Planets in Astrology](/learn/planets-in-astrology) mein har graha, [Planetary dignity](/learn/planetary-dignity-exaltation-debilitation) mein uchch-neech, [Raj Yoga](/learn/raj-yoga) mein yog, aur [Mahadasha explained](/learn/mahadasha-explained) mein samay ka kram.',
     ],
   },
@@ -606,7 +606,7 @@ type LcLink = { href: string; label: string; note: string };
 
 const HUB_CALC: LcLink[] = [
   { href: '/calculators/free-lagna-bal-calculator', label: 'Lagna Bal Calculator', note: 'Lagna kitna mazboot hai' },
-  { href: '/calculators/free-kundali-calculator', label: 'Kundali Calculator', note: 'Poori kundali free' },
+  { href: '/calculators/free-janam-kundali-calculator', label: 'Kundali Calculator', note: 'Poori kundali free' },
   { href: '/calculators/free-rashi-calculator', label: 'Rashi Calculator', note: 'Chandra rashi alag hai' },
   { href: '/calculators/free-nakshatra-calculator', label: 'Nakshatra Calculator', note: 'Nakshatra aur pada' },
   { href: '/calculators/free-dasha-calculator', label: 'Dasha Calculator', note: 'Vyaktigat samay' },
@@ -1080,7 +1080,7 @@ export default function FreeLagnaCalculatorPage() {
             <h2 className="text-2xl font-serif font-bold mb-6" style={{ color: GOLD }}>Aur Bhi Free Calculators</h2>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
               {[
-                { slug: 'free-kundali-calculator', name: 'Kundli Calculator' },
+                { slug: 'free-janam-kundali-calculator', name: 'Kundli Calculator' },
                 { slug: 'free-dasha-calculator', name: 'Dasha Calculator' },
                 { slug: 'free-nakshatra-calculator', name: 'Nakshatra Finder' },
                 { slug: 'free-rashi-calculator', name: 'Rashi Calculator' },

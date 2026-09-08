@@ -390,7 +390,7 @@ const V6_SECTIONS: EbSection[] = [
       'Kisi bhi reading par bharosa karne se pehle uski ganana parakhni chahiye — aur yahan sab kuch parakhne layak hai.',
       'Wahi janm vivaran kisi doosre bharose-mand software mein daaliye. **Lagna, saptam bhaav ki rashi, aur Shukra tatha Guru ki sthiti** bilkul milni chahiye — dono taraf Lahiri ayanamsha ho to antar nahi aayega.',
       'Aur **dasha** milaiye — kaunsi Mahadasha aur Antardasha chal rahi hai. Wo bhi bilkul milni chahiye, kyunki wo janm nakshatra se nikalti hai aur usme koi vyakhya nahi hai.',
-      'Agar **lagna hi alag** aaye to samay ya shahar mein galti hai — wahi pehle jaanchiye. Apna lagna [Lagna Calculator](/calculators/free-lagna-calculator) se dekh sakte hain, aur poori kundali [Kundali Calculator](/calculators/free-kundali-calculator) se.',
+      'Agar **lagna hi alag** aaye to samay ya shahar mein galti hai — wahi pehle jaanchiye. Apna lagna [Lagna Calculator](/calculators/free-lagna-calculator) se dekh sakte hain, aur poori kundali [Kundali Calculator](/calculators/free-janam-kundali-calculator) se.',
     ],
   },
   {
@@ -459,7 +459,7 @@ const V6_SECTIONS: EbSection[] = [
     paras: [
       '**Poora vishay** — [Ex back reunion astrology](/blog/ex-back-reunion-astrology) (3,650 shabd), Hindi mein [एक्स वापस आएगा या नहीं](/blog/ex-wapas-aayega-ya-nahi-astrology), aur [Ex back remedies — reunion ya healing](/blog/ex-back-remedies-reunion-or-healing-astrology).',
       '**Gehri baatein** — [Dual chart synastry](/blog/dual-chart-synastry-ex-back-astrology), [Darakaraka aur reunion](/blog/darakaraka-planets-reunion-astrology), [Seventh lord aur Venus](/blog/seventh-lord-venus-reunion-astrology), [Rahu-Jupiter — obsession ya prem](/blog/rahu-jupiter-obsession-or-real-love-astrology), aur [Gender differences in reunion](/blog/gender-differences-reunion-astrology-venus-jupiter).',
-      '**Muft jaanch** — [Shadi Kab Hogi](/calculators/free-shadi-kab-hogi-calculator), [Manglik Dosh Calculator](/calculators/free-manglik-dosh-calculator), [Dasha Calculator](/calculators/free-dasha-calculator), [Kundali Calculator](/calculators/free-kundali-calculator), aur [Gemstone Suitability](/calculators/free-gemstone-suitability-calculator).',
+      '**Muft jaanch** — [Shadi Kab Hogi](/calculators/free-shadi-kab-hogi-calculator), [Manglik Dosh Calculator](/calculators/free-manglik-dosh-calculator), [Dasha Calculator](/calculators/free-dasha-calculator), [Kundali Calculator](/calculators/free-janam-kundali-calculator), aur [Gemstone Suitability](/calculators/free-gemstone-suitability-calculator).',
     ],
   },
 ];
@@ -482,7 +482,7 @@ const V6_HUB_CALC: EbLink[] = [
   { href: '/calculators/free-dasha-calculator', label: 'Dasha Calculator', note: 'Samay ka aadhaar' },
   { href: '/calculators/free-shadi-kab-hogi-calculator', label: 'Shadi Kab Hogi', note: 'Vivah ka alag prashn' },
   { href: '/calculators/free-manglik-dosh-calculator', label: 'Manglik Dosh Calculator', note: 'Dosh khud jaanchiye' },
-  { href: '/calculators/free-kundali-calculator', label: 'Kundali Calculator', note: 'Poori kundali free' },
+  { href: '/calculators/free-janam-kundali-calculator', label: 'Kundali Calculator', note: 'Poori kundali free' },
   { href: '/calculators/free-lagna-calculator', label: 'Lagna Calculator', note: 'Saptam lagna se banta hai' },
   { href: '/calculators/free-graha-bal-calculator', label: 'Graha Bal Calculator', note: 'Shukra aur Guru ka bal' },
   { href: '/calculators/free-gemstone-suitability-calculator', label: 'Gemstone Suitability', note: 'Ratna se pehle jaanch' },

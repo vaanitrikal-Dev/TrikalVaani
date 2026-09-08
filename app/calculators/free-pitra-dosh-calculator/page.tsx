@@ -374,7 +374,7 @@ const PILLAR: PillarSection[] = [
     paras: [
       'बनने की शर्तें चार हैं, और चारों गणितीय हैं। पहली: **सूर्य के साथ राहु या केतु की युति** — इसे ग्रहण-सम योग कहते हैं, क्योंकि छाया ग्रह सूर्य के प्रकाश को ढक देता है। दूसरी: **सूर्य के साथ शनि की युति या दृष्टि** — शनि कर्म-ऋण का कारक है, इसलिए यह योग अधूरे हिसाब का संकेत देता है।',
       'तीसरी: **नवम भाव में राहु, केतु या शनि की उपस्थिति** — नवम भाव स्वयं पितृ स्थान है, इसलिए यहाँ बैठा पाप ग्रह सीधा प्रभाव डालता है। चौथी: **नवम भाव पर इन ग्रहों की दृष्टि**, भले वे वहाँ बैठे न हों। इनमें से कोई एक भी पूरी हो तो कैलकुलेटर "हाँ" कहेगा, और साथ में severity भी बताएगा।',
-      'यहीं एक जरूरी तकनीकी बात: **नवम भाव जन्म समय से बनता है।** पंद्रह मिनट की गलती लग्न बदल सकती है, और उसके साथ पूरा भाव-चक्र घूम जाता है — यानी दोष है या नहीं, यह उत्तर ही पलट सकता है। इसलिए जन्म समय अस्पताल के रिकॉर्ड या जन्म प्रमाणपत्र से लीजिए। पूरी भाव-सहित कुंडली [मुफ्त कुंडली कैलकुलेटर](/calculators/free-kundali-calculator) से बनाइए, और कारणों का शास्त्रीय विस्तार [पितृ दोष क्यों होता है](/blog/what-causes-pitra-dosh-hindi) में है।',
+      'यहीं एक जरूरी तकनीकी बात: **नवम भाव जन्म समय से बनता है।** पंद्रह मिनट की गलती लग्न बदल सकती है, और उसके साथ पूरा भाव-चक्र घूम जाता है — यानी दोष है या नहीं, यह उत्तर ही पलट सकता है। इसलिए जन्म समय अस्पताल के रिकॉर्ड या जन्म प्रमाणपत्र से लीजिए। पूरी भाव-सहित कुंडली [मुफ्त कुंडली कैलकुलेटर](/calculators/free-janam-kundali-calculator) से बनाइए, और कारणों का शास्त्रीय विस्तार [पितृ दोष क्यों होता है](/blog/what-causes-pitra-dosh-hindi) में है।',
     ],
   },
   {
@@ -792,7 +792,7 @@ export default function FreePitraDoshCalculatorPage() {
               {/* CTA */}
               <div className="rounded-2xl p-5 md:p-6 text-center" style={{ background: 'rgba(212,175,55,0.08)', border: `1px solid ${GOLD_RGBA(0.3)}` }}>
                 <p className="text-base text-slate-200 mb-3">Poori kundali ka deep analysis aur personalized remedies chahiye?</p>
-                <Link href="/calculators/free-kundali-calculator"
+                <Link href="/calculators/free-janam-kundali-calculator"
                   className="inline-block px-6 py-3 rounded-xl font-bold text-sm"
                   style={{ background: `linear-gradient(135deg,rgba(212,175,55,0.85) 0%,${GOLD} 100%)`, color: '#080B12' }}>
                   Free Kundali Banayein →
@@ -983,7 +983,7 @@ export default function FreePitraDoshCalculatorPage() {
                 { slug: 'free-graha-bal-calculator', name: 'Graha Bal Calculator' },
                 { slug: 'free-kundali-strength-calculator', name: 'Kundali Strength' },
                 { slug: 'free-lagna-calculator', name: 'Lagna Calculator' },
-                { slug: 'free-kundali-calculator', name: 'Kundli Calculator' },
+                { slug: 'free-janam-kundali-calculator', name: 'Kundli Calculator' },
               ].map((c) => (
                 <Link key={c.slug} href={`/calculators/${c.slug}`}
                   className="p-3 rounded-xl text-center text-sm transition-all hover:scale-105"

@@ -338,7 +338,7 @@ const SECTIONS: NmSection[] = [
       'Dono is site par hain, isliye antar saaf kar dena upyogi hai — aur ye antar aapka samay bachata hai.',
       '**Numerology dekhiye** jab prashn saral aur symbolic ho: mera ank kya hai, kaunsa rang anukool maana jaata hai, naam ka ank kya banta hai. Ye halki, dilchasp aur turant milne wali jaankari hai.',
       '**Jyotish dekhiye** jab prashn sach mein mayne rakhta ho: shaadi kab hogi, career kis taraf jaana chahiye, ye daur bhaari kyun lag raha hai, kaunsa graha kamzor hai. In prashnon ka uttar khagolik ganana se aata hai — janm tithi ke ank jodne se nahi.',
-      'Shuruat ke liye [Kundali Calculator](/calculators/free-kundali-calculator) free hai, aur apni Chandra rashi ke liye [Rashi Calculator](/calculators/free-rashi-calculator). Dono is page se zyada gehra uttar dete hain.',
+      'Shuruat ke liye [Kundali Calculator](/calculators/free-janam-kundali-calculator) free hai, aur apni Chandra rashi ke liye [Rashi Calculator](/calculators/free-rashi-calculator). Dono is page se zyada gehra uttar dete hain.',
     ],
   },
   {
@@ -502,7 +502,7 @@ const SECTIONS: NmSection[] = [
     h2: 'Ankon ke baad — kahan jaayein',
     paras: [
       'Agar aapko **shubh din** ke prashn mein ruchi hai to [Lucky Day Calculator](/calculators/free-lucky-day-calculator) uske liye alag bana hai aur free hai.',
-      'Agar aap **jyotish** ki taraf jaana chahte hain — jo isse gehra uttar deta hai — to [Kundali Calculator](/calculators/free-kundali-calculator) se shuru kijiye, apni Chandra rashi [Rashi Calculator](/calculators/free-rashi-calculator) se dekhiye, aur nakshatra [Nakshatra Calculator](/calculators/free-nakshatra-calculator) se.',
+      'Agar aap **jyotish** ki taraf jaana chahte hain — jo isse gehra uttar deta hai — to [Kundali Calculator](/calculators/free-janam-kundali-calculator) se shuru kijiye, apni Chandra rashi [Rashi Calculator](/calculators/free-rashi-calculator) se dekhiye, aur nakshatra [Nakshatra Calculator](/calculators/free-nakshatra-calculator) se.',
       'Aur agar prashn kisi khaas kshetra ka hai — kaunsa graha kamzor hai [Weak Planet Finder](/calculators/free-weak-planet-finder), kundali kitni mazboot hai [Kundali Strength Calculator](/calculators/free-kundali-strength-calculator), ya kaunsi dasha chal rahi hai [Dasha Calculator](/calculators/free-dasha-calculator) — sab free hain. Sidhant ke liye [Planets in Astrology](/learn/planets-in-astrology).',
     ],
   },
@@ -515,7 +515,7 @@ const HUB_CALC: NmLink[] = [
   { href: '/calculators/free-rashi-calculator', label: 'Rashi Calculator', note: 'Jyotish waali rashi' },
   { href: '/calculators/free-nakshatra-calculator', label: 'Nakshatra Calculator', note: 'Nakshatra aur pada' },
   { href: '/calculators/free-baby-name-by-nakshatra', label: 'Baby Name by Nakshatra', note: 'Naam ka shubh akshar' },
-  { href: '/calculators/free-kundali-calculator', label: 'Kundali Calculator', note: 'Poori kundali free' },
+  { href: '/calculators/free-janam-kundali-calculator', label: 'Kundali Calculator', note: 'Poori kundali free' },
   { href: '/calculators/free-lagna-calculator', label: 'Lagna Calculator', note: 'Aapka lagna' },
   { href: '/calculators/free-dasha-calculator', label: 'Dasha Calculator', note: 'Samay ka prashn' },
   { href: '/calculators/free-weak-planet-finder', label: 'Weak Planet Finder', note: 'Kaunsa graha kamzor' },
@@ -877,7 +877,7 @@ export default function FreeNumerologyCalculatorPage() {
                 { slug: 'free-graha-bal-calculator', name: 'Graha Bal Calculator' },
                 { slug: 'free-kaal-sarp-dosh-calculator', name: 'Kaal Sarp Dosh' },
                 { slug: 'free-sade-sati-calculator', name: 'Sade Sati Calculator' },
-                { slug: 'free-kundali-calculator', name: 'Kundli Calculator' },
+                { slug: 'free-janam-kundali-calculator', name: 'Kundli Calculator' },
               ].map((c) => (
                 <Link key={c.slug} href={`/calculators/${c.slug}`}
                   className="p-3 rounded-xl text-center text-sm transition-all hover:scale-105"

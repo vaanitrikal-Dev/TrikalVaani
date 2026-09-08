@@ -1000,7 +1000,7 @@ export default function FreeNakshatraCalculatorPage() {
                 { slug: 'free-rashi-calculator', name: 'Rashi Calculator' },
                 { slug: 'free-lagna-calculator', name: 'Lagna Calculator' },
                 { slug: 'free-dasha-calculator', name: 'Dasha Calculator' },
-                { slug: 'free-kundali-calculator', name: 'Kundli Calculator' },
+                { slug: 'free-janam-kundali-calculator', name: 'Kundli Calculator' },
                 { slug: 'free-sade-sati-calculator', name: 'Sade Sati Check' },
                 { slug: 'free-manglik-dosh-calculator', name: 'Manglik Dosh' },
                 { slug: 'free-lucky-day-calculator', name: 'Lucky Day Calculator' },

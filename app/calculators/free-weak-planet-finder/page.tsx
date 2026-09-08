@@ -606,7 +606,7 @@ const HUB_CALC: WpLink[] = [
   { href: '/calculators/free-sade-sati-calculator', label: 'Sade Sati Calculator', note: 'Shani ka gochar' },
   { href: '/calculators/free-manglik-dosh-calculator', label: 'Manglik Dosh Calculator', note: 'Dosh, bal nahi' },
   { href: '/calculators/free-pitra-dosh-calculator', label: 'Pitra Dosh Calculator', note: 'Surya se juda' },
-  { href: '/calculators/free-kundali-calculator', label: 'Kundali Calculator', note: 'Poori kundali free' },
+  { href: '/calculators/free-janam-kundali-calculator', label: 'Kundali Calculator', note: 'Poori kundali free' },
 ];
 
 function WpRich({ text, k }: { text: string; k: string }) {
@@ -1007,7 +1007,7 @@ export default function FreeWeakPlanetFinderPage() {
               {/* CTA */}
               <div className="rounded-2xl p-5 md:p-6 text-center" style={{ background: 'rgba(212,175,55,0.08)', border: `1px solid ${GOLD_RGBA(0.3)}` }}>
                 <p className="text-base text-slate-200 mb-3">Poori kundali ka deep analysis aur har graha ke liye personalized remedies chahiye?</p>
-                <Link href="/calculators/free-kundali-calculator"
+                <Link href="/calculators/free-janam-kundali-calculator"
                   className="inline-block px-6 py-3 rounded-xl font-bold text-sm"
                   style={{ background: `linear-gradient(135deg,rgba(212,175,55,0.85) 0%,${GOLD} 100%)`, color: '#080B12' }}>
                   Free Kundali Banayein →
@@ -1102,7 +1102,7 @@ export default function FreeWeakPlanetFinderPage() {
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
               {[
                 { slug: 'free-lucky-day-calculator', name: 'Lucky Day Calculator' },
-                { slug: 'free-kundali-calculator', name: 'Kundli Calculator' },
+                { slug: 'free-janam-kundali-calculator', name: 'Kundli Calculator' },
                 { slug: 'free-graha-bal-calculator', name: 'Graha Bal Calculator' },
                 { slug: 'free-nakshatra-calculator', name: 'Nakshatra Finder' },
                 { slug: 'free-sade-sati-calculator', name: 'Sade Sati Calculator' },

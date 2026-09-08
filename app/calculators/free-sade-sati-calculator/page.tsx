@@ -978,7 +978,7 @@ export default function FreeSadeSatiCalculatorPage() {
                 { slug: 'free-kaal-sarp-dosh-calculator', name: 'Kaal Sarp Dosh' },
                 { slug: 'free-manglik-dosh-calculator', name: 'Manglik Dosh' },
                 { slug: 'free-nakshatra-calculator', name: 'Nakshatra Finder' },
-                { slug: 'free-kundali-calculator', name: 'Kundli Calculator' },
+                { slug: 'free-janam-kundali-calculator', name: 'Kundli Calculator' },
               ].map((c) => (
                 <Link key={c.slug} href={`/calculators/${c.slug}`}
                   className="p-3 rounded-xl text-center text-sm transition-all hover:scale-105"

@@ -626,7 +626,7 @@ const SECTIONS: GbSection[] = [
     h2: 'Is aankde ke baad agla kadam',
     paras: [
       'Prashn "kya rok raha hai aur kya karun" ho — [Weak Planet Finder](/calculators/free-weak-planet-finder) uske liye bana hai: kamzor graha, uske kshetra aur classical upay.',
-      'Doosre maap dekhne hon — bhaav ka bal [Kundali Strength Calculator](/calculators/free-kundali-strength-calculator), lagna ka bal [Lagna Bal Calculator](/calculators/free-lagna-bal-calculator), poori kundali [Kundali Calculator](/calculators/free-kundali-calculator), aur samay [Dasha Calculator](/calculators/free-dasha-calculator).',
+      'Doosre maap dekhne hon — bhaav ka bal [Kundali Strength Calculator](/calculators/free-kundali-strength-calculator), lagna ka bal [Lagna Bal Calculator](/calculators/free-lagna-bal-calculator), poori kundali [Kundali Calculator](/calculators/free-janam-kundali-calculator), aur samay [Dasha Calculator](/calculators/free-dasha-calculator).',
       'Sidhant samajhna ho — [Shadbala](/learn/shadbala-planetary-strength-vedic-astrology), [Planets in Astrology](/learn/planets-in-astrology), [Planetary dignity](/learn/planetary-dignity-exaltation-debilitation), aur Hindi mein [कुंडली में षड्बल और ग्रह बल](/blog/kundali-mein-shadbala-grah-bal-hindi). Yog ke liye [Raj Yoga](/learn/raj-yoga) aur [Vipreet Raj Yoga](/learn/vipreet-raj-yoga).',
     ],
   },
@@ -638,7 +638,7 @@ const HUB_CALC: GbLink[] = [
   { href: '/calculators/free-weak-planet-finder', label: 'Weak Planet Finder', note: 'Nidaan aur upay' },
   { href: '/calculators/free-kundali-strength-calculator', label: 'Kundali Strength Calculator', note: 'Bhava Bala' },
   { href: '/calculators/free-lagna-bal-calculator', label: 'Lagna Bal Calculator', note: 'Lagnesh ka bal' },
-  { href: '/calculators/free-kundali-calculator', label: 'Kundali Calculator', note: 'Poori kundali free' },
+  { href: '/calculators/free-janam-kundali-calculator', label: 'Kundali Calculator', note: 'Poori kundali free' },
   { href: '/calculators/free-dasha-calculator', label: 'Dasha Calculator', note: 'Bal kab khulega' },
   { href: '/calculators/free-rashi-calculator', label: 'Rashi Calculator', note: 'Chandra rashi' },
   { href: '/calculators/free-sade-sati-calculator', label: 'Sade Sati Calculator', note: 'Gochar, janm bal nahi' },
@@ -1082,7 +1082,7 @@ export default function FreeGrahaBalCalculatorPage() {
               {/* CTA */}
               <div className="rounded-2xl p-5 md:p-6 text-center" style={{ background: 'rgba(212,175,55,0.08)', border: `1px solid ${GOLD_RGBA(0.3)}` }}>
                 <p className="text-base text-slate-200 mb-3">Poori kundali ka deep analysis aur har graha ke liye personalized remedies chahiye?</p>
-                <Link href="/calculators/free-kundali-calculator"
+                <Link href="/calculators/free-janam-kundali-calculator"
                   className="inline-block px-6 py-3 rounded-xl font-bold text-sm"
                   style={{ background: `linear-gradient(135deg,rgba(212,175,55,0.85) 0%,${GOLD} 100%)`, color: '#080B12' }}>
                   Free Kundali Banayein →
@@ -1178,7 +1178,7 @@ export default function FreeGrahaBalCalculatorPage() {
               {[
                 { slug: 'free-weak-planet-finder', name: 'Weak Planet Finder' },
                 { slug: 'free-lucky-day-calculator', name: 'Lucky Day Calculator' },
-                { slug: 'free-kundali-calculator', name: 'Kundli Calculator' },
+                { slug: 'free-janam-kundali-calculator', name: 'Kundli Calculator' },
                 { slug: 'free-nakshatra-calculator', name: 'Nakshatra Finder' },
                 { slug: 'free-sade-sati-calculator', name: 'Sade Sati Calculator' },
                 { slug: 'free-dasha-calculator', name: 'Dasha Calculator' },

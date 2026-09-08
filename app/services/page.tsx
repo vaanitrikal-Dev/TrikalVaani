@@ -412,7 +412,7 @@ const V6_SECTIONS: SvcSection[] = [
       'Aath mein se chunna mushkil lagta hai. Sawaal ke hisaab se seedha kram ye hai.',
       '**"Wo wapas aayenge ya nahi"** → [Ex-Back](/services/ex-back-reading). **"Mera boss ya office mahaul"** → [Toxic Boss](/services/toxic-boss-radar). **"Career badlun ya rukun"** → [Career Pivot](/services/career-pivot). **"Ghar ya zameen ka sahi samay"** → [Property Yog](/services/property-yog).',
       '**"Mere bachche ka jhukav"** → [Child Destiny](/services/child-destiny). **"Ab kya — jeevan ka uddeshya"** → [Spiritual Purpose](/services/spiritual-purpose). **"Dhan aur karz"** → [Wealth Reading](/services/wealth-reading). **"Hum dono ka mel"** → [Compatibility](/services/compatibility).',
-      'Aur agar sawaal in aath mein nahi hai — **poori kundali** se shuru kijiye, wo bhi free: [Kundali Calculator](/calculators/free-kundali-calculator).',
+      'Aur agar sawaal in aath mein nahi hai — **poori kundali** se shuru kijiye, wo bhi free: [Kundali Calculator](/calculators/free-janam-kundali-calculator).',
     ],
   },
   {
@@ -510,7 +510,7 @@ const V6_SECTIONS: SvcSection[] = [
     h2: 'Sirf ek hissa dekhna hai to calculators free hain',
     paras: [
       'Har baar poori jaanch ki zaroorat nahi hoti. Agar sawaal chhota hai to seedha uska tool lijiye.',
-      '**Buniyad** — [Kundali Calculator](/calculators/free-kundali-calculator) poori kundali, [Lagna Calculator](/calculators/free-lagna-calculator), [Rashi Calculator](/calculators/free-rashi-calculator), [Nakshatra Calculator](/calculators/free-nakshatra-calculator), [Dasha Calculator](/calculators/free-dasha-calculator).',
+      '**Buniyad** — [Kundali Calculator](/calculators/free-janam-kundali-calculator) poori kundali, [Lagna Calculator](/calculators/free-lagna-calculator), [Rashi Calculator](/calculators/free-rashi-calculator), [Nakshatra Calculator](/calculators/free-nakshatra-calculator), [Dasha Calculator](/calculators/free-dasha-calculator).',
       '**Bal aur jaanch** — [Kundali Strength](/calculators/free-kundali-strength-calculator), [Graha Bal](/calculators/free-graha-bal-calculator), [Weak Planet Finder](/calculators/free-weak-planet-finder), [Gemstone Suitability](/calculators/free-gemstone-suitability-calculator).',
       '**Khaas sawaal** — [Shadi Kab Hogi](/calculators/free-shadi-kab-hogi-calculator), [Santan Yog](/calculators/free-santan-yog-calculator), [Sade Sati](/calculators/free-sade-sati-calculator), [IAS Astrology](/calculators/free-ias-astrology-calculator). **Sab free, sab bina signup.**',
     ],
@@ -562,13 +562,13 @@ const V6_SECTIONS: SvcSection[] = [
       'Upar aath jaanch hain. Jo sawaal abhi sabse zyada mann mein hai, uspar click kijiye.',
       'Us page par **form pehle se khula milega** — janm tithi, samay aur sthan. Do minute lagenge, aur aapka chart tatha vishleshan turant saamne aa jaayega.',
       '**Pehla vishleshan free hai.** Bina signup, bina card, bina email. Poori reading chahiye to uske baad ₹51 ka vikalp hai — aur wo bhi ek baar ka.',
-      'Aur agar ye tay nahi kar paa rahe ki kaunsi jaanch chuniye, to **[poori kundali](/calculators/free-kundali-calculator) se shuru kijiye.** Wo bhi free hai, aur usse aapko apne chart ka poora naksha mil jaayega.',
+      'Aur agar ye tay nahi kar paa rahe ki kaunsi jaanch chuniye, to **[poori kundali](/calculators/free-janam-kundali-calculator) se shuru kijiye.** Wo bhi free hai, aur usse aapko apne chart ka poora naksha mil jaayega.',
     ],
   },
 ];
 
 const V6_HUB_CALC: SvcLink[] = [
-  { href: '/calculators/free-kundali-calculator', label: 'Kundali Calculator', note: 'Poori kundali, free' },
+  { href: '/calculators/free-janam-kundali-calculator', label: 'Kundali Calculator', note: 'Poori kundali, free' },
   { href: '/calculators/free-lagna-calculator', label: 'Lagna Calculator', note: 'Sab isi par khada hai' },
   { href: '/calculators/free-dasha-calculator', label: 'Dasha Calculator', note: 'Abhi kaunsa daur' },
   { href: '/calculators/free-kundali-strength-calculator', label: 'Kundali Strength', note: 'Poora chitra ek score mein' },

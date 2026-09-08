@@ -227,7 +227,7 @@ const FAQS = [
 //   Rohiit chose on 05 Sep 2026 to keep the pages separate rather than merge,
 //   so the territory is split by QUESTION and enforced in content:
 //
-//     /calculators/free-kundali-calculator     = MAKE the chart.
+//     /calculators/free-janam-kundali-calculator     = MAKE the chart.
 //         "janam kundali banaye free", "कुंडली कैसे बनाएं ऑनलाइन"
 //     /calculators/free-graha-bal-calculator   = MEASURE each planet.
 //         Rupa, the six balas' arithmetic, Ishta-Kashta, Graha Yuddha
@@ -272,7 +272,7 @@ const SECTIONS: KsSection[] = [
     paras: [
       'Aap **janm tithi, sateek samay aur sthan** dete hain. Calculator poori kundali banata hai aur char alag maapon ko jod kar ek score deta hai.',
       'Char hisse: **saaton grahon ka Shadbala**, **baarah bhaavon ka Bhava Bala**, **lagna aur lagnesh ka bal**, aur **abhi chal rahi dasha ke swami ka bal**. Har hissa alag se dikhta hai, taaki aap dekh sakein ki score kahan se aaya.',
-      'Ye page **jod** ka page hai. Agar aapka prashn ek graha ka hai to [Graha Bal Calculator](/calculators/free-graha-bal-calculator) uske liye hai; agar "kya rok raha hai" hai to [Weak Planet Finder](/calculators/free-weak-planet-finder); aur agar aapko sirf kundali **banani** hai to [Kundali Calculator](/calculators/free-kundali-calculator).',
+      'Ye page **jod** ka page hai. Agar aapka prashn ek graha ka hai to [Graha Bal Calculator](/calculators/free-graha-bal-calculator) uske liye hai; agar "kya rok raha hai" hai to [Weak Planet Finder](/calculators/free-weak-planet-finder); aur agar aapko sirf kundali **banani** hai to [Kundali Calculator](/calculators/free-janam-kundali-calculator).',
     ],
   },
   {
@@ -418,7 +418,7 @@ const SECTIONS: KsSection[] = [
     h2: 'Aapko sirf kundali banani hai — to yahan nahi',
     paras: [
       'Bahut se log is page par pahunch jaate hain jabki unka prashn alag hai, isliye saaf kar dena upyogi hai.',
-      'Agar aapko **janm kundali banani** hai — lagna, grahon ki sthiti, bhaav, dasha ki table — to wo alag page hai aur wo bhi free hai: [Kundali Calculator](/calculators/free-kundali-calculator). Wahan chart banta hai; yahan uska bal naapa jaata hai.',
+      'Agar aapko **janm kundali banani** hai — lagna, grahon ki sthiti, bhaav, dasha ki table — to wo alag page hai aur wo bhi free hai: [Kundali Calculator](/calculators/free-janam-kundali-calculator). Wahan chart banta hai; yahan uska bal naapa jaata hai.',
       'Kram ye rakhiye: **pehle kundali banaiye**, dekhiye ki lagna kya hai aur graha kahan hain. **Phir yahan aaiye** ye jaanne ke liye ki wo dhancha kitna mazboot hai. Ulta karne par aankde to mil jaate hain par unka arth nahi banta.',
     ],
   },
@@ -614,7 +614,7 @@ const HUB_CALC: KsLink[] = [
   { href: '/calculators/free-graha-bal-calculator', label: 'Graha Bal Calculator', note: 'Poora Shadbala aankda' },
   { href: '/calculators/free-weak-planet-finder', label: 'Weak Planet Finder', note: 'Nidaan aur upay' },
   { href: '/calculators/free-lagna-bal-calculator', label: 'Lagna Bal Calculator', note: 'Sirf lagna ka bal' },
-  { href: '/calculators/free-kundali-calculator', label: 'Kundali Calculator', note: 'Pehle chart banaiye' },
+  { href: '/calculators/free-janam-kundali-calculator', label: 'Kundali Calculator', note: 'Pehle chart banaiye' },
   { href: '/calculators/free-dasha-calculator', label: 'Dasha Calculator', note: 'Kaunsi dasha chal rahi hai' },
   { href: '/calculators/free-sade-sati-calculator', label: 'Sade Sati Calculator', note: 'Gochar, janm bal nahi' },
   { href: '/calculators/free-rashi-calculator', label: 'Rashi Calculator', note: 'Chandra rashi' },
@@ -1051,7 +1051,7 @@ export default function FreeKundaliStrengthCalculatorPage() {
               {/* CTA */}
               <div className="rounded-2xl p-5 md:p-6 text-center" style={{ background: 'rgba(212,175,55,0.08)', border: `1px solid ${GOLD_RGBA(0.3)}` }}>
                 <p className="text-base text-slate-200 mb-3">Har graha ke liye detailed analysis aur personalized remedies chahiye?</p>
-                <Link href="/calculators/free-kundali-calculator"
+                <Link href="/calculators/free-janam-kundali-calculator"
                   className="inline-block px-6 py-3 rounded-xl font-bold text-sm"
                   style={{ background: `linear-gradient(135deg,rgba(212,175,55,0.85) 0%,${GOLD} 100%)`, color: '#080B12' }}>
                   Free Kundali Banayein →
@@ -1148,7 +1148,7 @@ export default function FreeKundaliStrengthCalculatorPage() {
                 { slug: 'free-graha-bal-calculator', name: 'Graha Bal Calculator' },
                 { slug: 'free-weak-planet-finder', name: 'Weak Planet Finder' },
                 { slug: 'free-lucky-day-calculator', name: 'Lucky Day Calculator' },
-                { slug: 'free-kundali-calculator', name: 'Kundli Calculator' },
+                { slug: 'free-janam-kundali-calculator', name: 'Kundli Calculator' },
                 { slug: 'free-sade-sati-calculator', name: 'Sade Sati Calculator' },
                 { slug: 'free-dasha-calculator', name: 'Dasha Calculator' },
               ].map((c) => (

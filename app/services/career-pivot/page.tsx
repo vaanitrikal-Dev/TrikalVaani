@@ -261,7 +261,7 @@ const V6_SECTIONS: V6Section[] = [
     paras: [
       '**Career ka poora sidhant** — [Career Prediction Astrology](/learn/career-prediction-astrology), [Best career from your birth chart](/learn/best-career-birth-chart), [Career growth prediction](/learn/career-growth-prediction), aur Hindi mein [करियर भविष्यवाणी — पूरी गाइड](/blog/career-prediction-kundli-complete-guide-hindi).',
       '**Khaas prashn** — sarkari naukri ke liye [Government Job & UPSC](/learn/government-job-chances), apna kaam shuru karne ke liye [Startup founders](/learn/career-astrology-for-startup-founders), aur [Dream career aur profession](/blog/dream-career-profession-astrology).',
-      '**Muft jaanch** — [Dasha Calculator](/calculators/free-dasha-calculator), [Sade Sati Calculator](/calculators/free-sade-sati-calculator), [Kundali Strength Calculator](/calculators/free-kundali-strength-calculator), [IAS Astrology Calculator](/calculators/free-ias-astrology-calculator), [Kundali Calculator](/calculators/free-kundali-calculator).',
+      '**Muft jaanch** — [Dasha Calculator](/calculators/free-dasha-calculator), [Sade Sati Calculator](/calculators/free-sade-sati-calculator), [Kundali Strength Calculator](/calculators/free-kundali-strength-calculator), [IAS Astrology Calculator](/calculators/free-ias-astrology-calculator), [Kundali Calculator](/calculators/free-janam-kundali-calculator).',
     ],
   },
   {
@@ -452,7 +452,7 @@ const V6_HUB_CALC: V6Link[] = [
   { href: '/calculators/free-sade-sati-calculator', label: 'Sade Sati Calculator', note: 'Shani ka gochar' },
   { href: '/calculators/free-kundali-strength-calculator', label: 'Kundali Strength Calculator', note: 'Dasham bhaav ka bal' },
   { href: '/calculators/free-ias-astrology-calculator', label: 'IAS Astrology Calculator', note: 'Sarkari sewa ka yog' },
-  { href: '/calculators/free-kundali-calculator', label: 'Kundali Calculator', note: 'Poori kundali free' },
+  { href: '/calculators/free-janam-kundali-calculator', label: 'Kundali Calculator', note: 'Poori kundali free' },
   { href: '/calculators/free-lagna-calculator', label: 'Lagna Calculator', note: 'Dasham lagna se banta hai' },
   { href: '/calculators/free-graha-bal-calculator', label: 'Graha Bal Calculator', note: 'Dashamesh ka bal' },
   { href: '/calculators/free-gemstone-suitability-calculator', label: 'Gemstone Suitability', note: 'Ratna se pehle jaanch' },

@@ -570,7 +570,7 @@ export default async function CityHub({ citySlug }: { citySlug: string }) {
             <h3 className="text-sm font-semibold text-slate-400 mb-3">Free Calculators</h3>
             <div className="flex flex-wrap gap-2">
               {[
-                { slug: 'free-kundali-calculator', name: 'Kundali', emoji: '📜' },
+                { slug: 'free-janam-kundali-calculator', name: 'Kundali', emoji: '📜' },
                 { slug: 'free-sade-sati-calculator', name: 'Sade Sati', emoji: '🪐' },
                 { slug: 'free-manglik-dosh-calculator', name: 'Manglik Dosh', emoji: '🔥' },
                 { slug: 'free-shadi-kab-hogi-calculator', name: 'Shadi Kab Hogi', emoji: '💍' },

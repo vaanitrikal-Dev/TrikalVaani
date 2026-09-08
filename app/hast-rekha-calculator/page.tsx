@@ -709,7 +709,7 @@ const HINDI_SECTIONS: HiSection[] = [
       'यह वह हिस्सा है जो लगभग कोई नहीं करता और जो सबसे उपयोगी है।',
       'हथेली के **सात पर्वत सीधे सात ग्रहों से जुड़े हैं** — गुरु, शनि, सूर्य, बुध, मंगल, शुक्र, चंद्र। यानी दोनों विधियाँ एक ही भाषा बोलती हैं।',
       'जब कुंडली में कोई ग्रह बलवान हो और हथेली में उसका पर्वत भी उभरा हो, तो वह संकेत **दोगुना मज़बूत** माना जाता है। और जब दोनों उल्टा कहें, तो वहीं असली प्रश्न होता है — प्रायः वह जन्म समय की ग़लती निकलता है।',
-      'व्यावहारिक तरीक़ा: **पहले हथेली** (जन्म समय की ज़रूरत नहीं, तुरंत मिल जाती है), फिर कुंडली यदि समय उपलब्ध हो। [Kundali Calculator](/calculators/free-kundali-calculator) मुफ़्त है।',
+      'व्यावहारिक तरीक़ा: **पहले हथेली** (जन्म समय की ज़रूरत नहीं, तुरंत मिल जाती है), फिर कुंडली यदि समय उपलब्ध हो। [Kundali Calculator](/calculators/free-janam-kundali-calculator) मुफ़्त है।',
     ],
   },
 
@@ -770,7 +770,7 @@ const HINDI_SECTIONS: HiSection[] = [
     paras: [
       '**अंग्रेज़ी में हर रेखा** — [Life line](/blog/life-line-jeevan-rekha-meaning), [Head line](/blog/head-line-mastishk-rekha-meaning), [Heart line](/blog/heart-line-hriday-rekha-meaning), [Fate line](/blog/fate-line-bhagya-rekha-meaning), [Sun line](/blog/sun-line-surya-rekha-meaning), [Marriage line](/blog/marriage-line-vivah-rekha-meaning)।',
       '**चिह्न और पर्वत** — [मछली का चिह्न](/blog/fish-sign-machli-on-palm-meaning), [M का निशान](/blog/m-sign-on-palm-meaning), [त्रिशूल](/blog/trishul-sign-on-palm-meaning), [तारा, त्रिभुज, चतुर्भुज](/blog/tara-tribhuj-chaturbhuj-palm-matlab), [द्वीप, क्रॉस, ग्रिल](/blog/dweep-cross-grille-palm-matlab), [हथेली के पर्वत](/blog/mounts-on-palm-parvat-meaning)।',
-      '**मुफ़्त जाँच** — [Kundali Calculator](/calculators/free-kundali-calculator), [Dasha Calculator](/calculators/free-dasha-calculator), [शादी कब होगी](/calculators/free-shadi-kab-hogi-calculator), [Santan Yog](/calculators/free-santan-yog-calculator), और [Swapna Shastra](/swapna) — सपनों का विश्लेषण।',
+      '**मुफ़्त जाँच** — [Kundali Calculator](/calculators/free-janam-kundali-calculator), [Dasha Calculator](/calculators/free-dasha-calculator), [शादी कब होगी](/calculators/free-shadi-kab-hogi-calculator), [Santan Yog](/calculators/free-santan-yog-calculator), और [Swapna Shastra](/swapna) — सपनों का विश्लेषण।',
     ],
   },
 ];
@@ -1286,7 +1286,7 @@ export default function HastRekhaPage() {
         </p>
         <ul className="mb-4 space-y-2 text-[15px]">
           <li>
-            <Link href="/calculators/free-kundali-calculator" className="text-amber-300 underline underline-offset-4">
+            <Link href="/calculators/free-janam-kundali-calculator" className="text-amber-300 underline underline-offset-4">
               Free Kundali Calculator
             </Link>{' '}
             — for timing, Dasha and the actual structure of your chart.

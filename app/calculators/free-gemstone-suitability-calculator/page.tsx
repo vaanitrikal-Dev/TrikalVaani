@@ -488,7 +488,7 @@ const HUB_MORE: GsLink[] = [
   { href: '/calculators/free-graha-bal-calculator', label: 'Graha Bal Calculator', note: 'Graha ka asli bal' },
   { href: '/calculators/free-weak-planet-finder', label: 'Weak Planet Finder', note: 'Muft upay bhi wahin' },
   { href: '/calculators/free-dasha-calculator', label: 'Dasha Calculator', note: 'Kaunsi dasha chal rahi hai' },
-  { href: '/calculators/free-kundali-calculator', label: 'Kundali Calculator', note: 'Poori kundali free' },
+  { href: '/calculators/free-janam-kundali-calculator', label: 'Kundali Calculator', note: 'Poori kundali free' },
   { href: '/learn/planetary-dignity-exaltation-debilitation', label: 'Dignity — uchch aur neech', note: 'Uchch matlab shubh nahi' },
   { href: '/panchang', label: 'Panchang', note: 'Dharan ka muhurat' },
 ];
@@ -659,7 +659,7 @@ export default function GemstoneSuitabilityPage() {
               <div className="rounded-2xl p-5 md:p-6 text-center" style={{ background: 'rgba(212,175,55,0.08)', border: `1px solid ${GOLD_RGBA(0.3)}` }}>
                 <p className="text-base text-slate-200 mb-1 font-semibold">Sahi ratna ka faisla poori kundali maangta hai.</p>
                 <p className="text-sm text-slate-400 mb-3">Combust, yoga aur poore bhaav-vishleshan ke saath apni complete kundali banayein — phir hi koi strong ratna dharan karein.</p>
-                <Link href="/calculators/free-kundali-calculator" className="inline-block px-6 py-3 rounded-xl font-bold text-sm" style={{ background: `linear-gradient(135deg,rgba(212,175,55,0.85) 0%,${GOLD} 100%)`, color: '#080B12' }}>
+                <Link href="/calculators/free-janam-kundali-calculator" className="inline-block px-6 py-3 rounded-xl font-bold text-sm" style={{ background: `linear-gradient(135deg,rgba(212,175,55,0.85) 0%,${GOLD} 100%)`, color: '#080B12' }}>
                   Free Poori Kundali Banayein →
                 </Link>
               </div>
@@ -732,7 +732,7 @@ export default function GemstoneSuitabilityPage() {
                 { slug: 'free-should-i-wear-cats-eye', name: "Should I Wear Cat's Eye?" },
                 { slug: 'free-weak-planet-finder', name: 'Weak Planet Finder' },
                 { slug: 'free-graha-bal-calculator', name: 'Graha Bal Calculator' },
-                { slug: 'free-kundali-calculator', name: 'Kundli Calculator' },
+                { slug: 'free-janam-kundali-calculator', name: 'Kundli Calculator' },
               ].map((c) => (
                 <Link key={c.slug} href={`/calculators/${c.slug}`} className="p-3 rounded-xl text-center text-sm transition-all hover:scale-105"
                   style={{ background: 'rgba(212,175,55,0.06)', border: '1px solid rgba(212,175,55,0.2)', color: GOLD }}>

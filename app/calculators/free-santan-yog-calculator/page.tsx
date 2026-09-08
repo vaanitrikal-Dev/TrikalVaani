@@ -493,7 +493,7 @@ const READ_MORE = [
 ];
 
 const MORE_CALC = [
-  { href: '/calculators/free-kundali-calculator', t: 'Free Kundali Calculator' },
+  { href: '/calculators/free-janam-kundali-calculator', t: 'Free Kundali Calculator' },
   { href: '/calculators/free-dasha-calculator', t: 'Free Dasha Calculator' },
   { href: '/calculators/free-graha-bal-calculator', t: 'Graha Bal (Shadbala) Calculator' },
   { href: '/calculators/free-pitra-dosh-calculator', t: 'Free Pitra Dosh Calculator' },
