@@ -304,6 +304,47 @@ const L: Record<string, Record<Lang,string>> = {
   janmaKundali: {hinglish:'🪐 Janma Kundali — North Indian Chart', hindi:'🪐 जन्म कुंडली — उत्तर भारतीय चक्र', english:'🪐 Birth Chart — North Indian Style'},
   grahaVish:    {hinglish:'⚡ Graha Vishleshan — All 9 Planets', hindi:'⚡ ग्रह विश्लेषण — सभी ९ ग्रह', english:'⚡ Planetary Analysis — All 9 Grahas'},
   dashaKaal:    {hinglish:'⏰ Dasha Kaal — Vimshottari System', hindi:'⏰ दशा काल — विंशोत्तरी पद्धति', english:'⏰ Dasha Periods — Vimshottari System'},
+
+  // v9.5 — past mahadasha timeline. Deliberately plain: no house numbers, no
+  // Sanskrit, no "karaka". The reader should not need a glossary.
+  // v9.6 — Ashtakavarga. Houses are named by MEANING, never by number alone.
+  // v9.7 — Bhrigu chapter. Plain language throughout; no house numbers.
+  // v9.8 — Drishti as support/pressure. No house numbers, no Sanskrit.
+  // v9.9 — Argala. "Blocked" means the help does not arrive, never that harm does.
+  agTitle:      {hinglish:'🔗 Kis Hisse Ko Sahara Mil Raha Hai', hindi:'🔗 किस हिस्से को सहारा मिल रहा है', english:'🔗 Which Parts of Life Are Getting Help'},
+  agIntro:      {hinglish:'Jyotish mein har hisse ko kuch grah peeche se sahara dete hain aur kuch use rok dete hain. Ise Argala kehte hain.', hindi:'ज्योतिष में हर हिस्से को कुछ ग्रह पीछे से सहारा देते हैं और कुछ उसे रोक देते हैं। इसे अर्गला कहते हैं।', english:'In Jyotish, some planets quietly back a part of your life and others hold it up. This is called Argala.'},
+  agHelp:       {hinglish:'{area} — yahan {who} ka sahara mil raha hai', hindi:'{area} — यहाँ {who} का सहारा मिल रहा है', english:'{area} — {who} is backing this'},
+  agBlock:      {hinglish:'{area} — yahan {who} ki wajah se raftaar dheemi rahegi', hindi:'{area} — यहाँ {who} की वजह से रफ़्तार धीमी रहेगी', english:'{area} — {who} slows this one down'},
+  agSomeone:    {hinglish:'kuch grahon', hindi:'कुछ ग्रहों', english:'some planets'},
+  agMore:       {hinglish:'{n} aur hisse — poora argala vishleshan', hindi:'{n} और हिस्से — पूरा अर्गला विश्लेषण', english:'{n} more areas — the full argala analysis'},
+  agFoot:       {hinglish:'Ruka hua matlab bura nahi — matlab madad apne aap nahi aayegi, maangni ya banani padegi. Shastra kehta hai ruka hua argala "raah bhatak jaata hai", nuksan nahi karta.', hindi:'रुका हुआ मतलब बुरा नहीं — मतलब मदद अपने आप नहीं आएगी, माँगनी या बनानी पड़ेगी। शास्त्र कहता है रुका हुआ अर्गला "राह भटक जाता है", नुक़सान नहीं करता।', english:'Blocked does not mean bad — it means the help will not arrive on its own. The shastra says an obstructed argala "goes astray"; it does not do harm.'},
+  drTitle:      {hinglish:'👁 Kaun Kis Par Nazar Rakhe Hai', hindi:'👁 कौन किस पर नज़र रखे है', english:'👁 Which Planets Support, Which Press'},
+  drIntro:      {hinglish:'Jyotish mein har grah kuch grahon par nazar daalta hai. Shubh grah ki nazar sahara deti hai, kroor grah ki nazar dabav.', hindi:'ज्योतिष में हर ग्रह कुछ ग्रहों पर नज़र डालता है। शुभ ग्रह की नज़र सहारा देती है, क्रूर ग्रह की नज़र दबाव।', english:'In Jyotish each planet casts its gaze on certain others. A benefic gaze supports; a malefic gaze presses.'},
+  drSupport:    {hinglish:'{from} ki nazar {to} par hai — ye sahara hai', hindi:'{from} की नज़र {to} पर है — यह सहारा है', english:'{from} looks upon {to} — this is support'},
+  drPressure:   {hinglish:'{from} ki nazar {to} par hai — yahan dabav banta hai', hindi:'{from} की नज़र {to} पर है — यहाँ दबाव बनता है', english:'{from} looks upon {to} — this creates pressure'},
+  drMore:       {hinglish:'{n} aur nazrein — poori drishti tabel', hindi:'{n} और नज़रें — पूरी दृष्टि तालिका', english:'{n} more aspects — the full drishti table'},
+  drFoot:       {hinglish:'Dabav ka matlab nuksan nahi hota — matlab wahan cheezein aasani se nahi, mehnat se banti hain. Aur sahara ka matlab bina prayaas ke fal, ye bhi nahi.', hindi:'दबाव का मतलब नुक़सान नहीं होता — मतलब वहाँ चीज़ें आसानी से नहीं, मेहनत से बनती हैं। और सहारे का मतलब बिना प्रयास के फल, यह भी नहीं।', english:'Pressure does not mean loss — it means things there are built by effort rather than ease. And support does not mean results without effort either.'},
+  bcTitle:      {hinglish:'🔱 Abhi Aapke Jeevan Ka Adhyay', hindi:'🔱 अभी आपके जीवन का अध्याय', english:'🔱 The Chapter Your Life Is In'},
+  bcWhy:        {hinglish:'Bhrigu Nandi Nadi ka niyam hai — kundali ka sabse shubh grah Guru jis hisse mein baithta hai, wahi us daur ka mukhya vishay hota hai.', hindi:'भृगु नंदी नाड़ी का नियम है — कुंडली का सबसे शुभ ग्रह गुरु जिस हिस्से में बैठता है, वही उस दौर का मुख्य विषय होता है।', english:'A Bhrigu Nandi Nadi rule — the part of life where Jupiter, the chart\'s most benefic planet, sits is the running theme of the period.'},
+  bcMore:       {hinglish:'{n} aur signal — Bhrigu Nandi Nadi ne aur kya pakda', hindi:'{n} और संकेत — भृगु नंदी नाड़ी ने और क्या पकड़ा', english:'{n} more signals — what else Bhrigu Nandi Nadi found'},
+  bcFoot:       {hinglish:'Adhyay vishay batata hai, ghatna nahi. Koi kundali ye nahi kah sakti ki kis din kya hoga — aur jo kahe, wo anumaan bech raha hai.', hindi:'अध्याय विषय बताता है, घटना नहीं। कोई कुंडली यह नहीं कह सकती कि किस दिन क्या होगा — और जो कहे, वह अनुमान बेच रहा है।', english:'A chapter names a subject, not an event. No chart can say what will happen on a given day — and anyone who claims to is selling guesswork.'},
+  avTitle:      {hinglish:'⚖️ Ashtakavarga — kaunsa hissa mazboot hai', hindi:'⚖️ अष्टकवर्ग — कौन सा हिस्सा मज़बूत है', english:'⚖️ Ashtakavarga — which part of life is best supported'},
+  avIntro:      {hinglish:'Ye BPHS ki wo paddhati hai jo aapke jeevan ke baarah hisson ko ank deti hai. Jitna zyada ank, utna sahaj wo kshetra.', hindi:'यह BPHS की वह पद्धति है जो आपके जीवन के बारह हिस्सों को अंक देती है। जितना ज़्यादा अंक, उतना सहज वह क्षेत्र।', english:'A BPHS method that scores the twelve areas of your life. The higher the number, the more naturally that area opens.'},
+  avStrong:     {hinglish:'Sabse zyada sahara jahan hai', hindi:'सबसे ज़्यादा सहारा जहाँ है', english:'Where you have the most support'},
+  avWeak:       {hinglish:'Jahan prayaas zyada lagega', hindi:'जहाँ प्रयास ज़्यादा लगेगा', english:'Where effort will be higher'},
+  avAvg:        {hinglish:'Kul ank hamesha 337 hote hain — har kundali mein, bina kisi apvaad ke. Isi liye aapke apne ank aapas mein tulna ke liye hain, kisi doosre ki kundali se nahi. Aapka aausat {avg} hai.', hindi:'कुल अंक हमेशा 337 होते हैं — हर कुंडली में, बिना किसी अपवाद के। इसीलिए आपके अपने अंक आपस में तुलना के लिए हैं, किसी दूसरे की कुंडली से नहीं। आपका औसत {avg} है।', english:'The grand total is always 337 — in every chart, without exception. So your numbers are for comparing against each other, never against someone else\'s chart. Your average is {avg}.'},
+  avReduced:    {hinglish:'Shodhan ke baad ye ank {n} rah jaate hain. Ye girawat nahi hai — BPHS (adhyay 67 aur 68) do charan mein dohraye hue bal ko hataata hai, taaki jo bacha rahe wahi asli bal ho.', hindi:'शोधन के बाद ये अंक {n} रह जाते हैं। यह गिरावट नहीं है — BPHS (अध्याय 67 और 68) दो चरणों में दोहराए हुए बल को हटाता है, ताकि जो बचा रहे वही असली बल हो।', english:'After Shodhana these come to {n}. That is not a fall — BPHS (Ch.67 and 68) strips out repeated strength in two stages, so what remains is the strength that actually counts.'},
+  avTease:      {hinglish:'Shodhan ke baad ke shuddh ank — BPHS adhyay 67 aur 68', hindi:'शोधन के बाद के शुद्ध अंक — BPHS अध्याय 67 और 68', english:'The reduced figures after Shodhana — BPHS Ch.67 and 68'},
+  avFoot:       {hinglish:'Kam ank ka matlab wo kshetra bandh nahi hai — matlab wahan prayaas zyada lagega. Aur zyada ank ka matlab kuch apne aap ho jaayega, ye bhi nahi.', hindi:'कम अंक का मतलब वह क्षेत्र बंद नहीं है — मतलब वहाँ प्रयास ज़्यादा लगेगा। और ज़्यादा अंक का मतलब कुछ अपने आप हो जाएगा, यह भी नहीं।', english:'A low number does not mean that area is closed — it means more effort is needed there. And a high number does not mean anything happens on its own.'},
+  pastTitle:    {hinglish:'🕰 Aapke Jeevan Ke Daur — kya ye mel khaate hain?', hindi:'🕰 आपके जीवन के दौर — क्या ये मेल खाते हैं?', english:'🕰 The Chapters of Your Life — do these match?'},
+  pastIntro:    {hinglish:'Ye tareekhein aapke janm nakshatra se nikli hain — inme koi anumaan nahi hai. Har daur ka apna vishay hota hai. Padhiye aur bataiye ki mel khaata hai ya nahi.', hindi:'ये तारीख़ें आपके जन्म नक्षत्र से निकली हैं — इनमें कोई अनुमान नहीं है। हर दौर का अपना विषय होता है। पढ़िए और बताइए कि मेल खाता है या नहीं।', english:'These dates come from your birth nakshatra — nothing here is guesswork. Each period carries its own theme. Read them and tell us whether they match.'},
+  pastPartial:  {hinglish:'janm se', hindi:'जन्म से', english:'from birth'},
+  pastYes:      {hinglish:'✓ Haan', hindi:'✓ हाँ', english:'✓ Yes'},
+  pastNo:       {hinglish:'✗ Nahi', hindi:'✗ नहीं', english:'✗ No'},
+  pastMatch:    {hinglish:'Jo daur aapne pehchane — wo isi chart se nikle hain. Yahi aadhaar hai jispar aage ki baat tiki hai.', hindi:'जो दौर आपने पहचाने — वे इसी चार्ट से निकले हैं। यही आधार है जिस पर आगे की बात टिकी है।', english:'The periods you recognised come from this same chart. That is the basis everything ahead rests on.'},
+  pastSome:     {hinglish:'Kuch daur mel khaate hain, kuch nahi — ye aam hai. Har daur har jeevan mein saaf nahi dikhta.', hindi:'कुछ दौर मेल खाते हैं, कुछ नहीं — यह आम है। हर दौर हर जीवन में साफ़ नहीं दिखता।', english:'Some periods match and some do not — that is normal. Not every period shows clearly in every life.'},
+  pastNoMatch:  {hinglish:'Mel nahi khaa raha? Teen wajah ho sakti hain — janm samay thoda alag ho, varnan bahut aam lage, ya purani baat theek se yaad na ho. Sabse pehle apna janm samay ek baar jaanch lijiye.', hindi:'मेल नहीं खा रहा? तीन वजह हो सकती हैं — जन्म समय थोड़ा अलग हो, वर्णन बहुत आम लगे, या पुरानी बात ठीक से याद न हो। सबसे पहले अपना जन्म समय एक बार जाँच लीजिए।', english:'Not matching? Three reasons are possible — the birth time may be slightly off, the description may read too generally, or the period may simply be too long ago to recall. Check your birth time first.'},
+  pastFoot:     {hinglish:'Ye daur vishay batate hain, ghatna nahi. Koi kundali ye nahi bata sakti ki kis din kya hua — aur jo batae, wo anumaan bech raha hai.', hindi:'ये दौर विषय बताते हैं, घटना नहीं। कोई कुंडली यह नहीं बता सकती कि किस दिन क्या हुआ — और जो बताए, वह अनुमान बेच रहा है।', english:'These periods describe themes, not events. No chart can say what happened on a given day — and anyone who claims to is selling guesswork.'},
   actionWin:    {hinglish:'🗓 Action Windows — Trikaal Precision', hindi:'🗓 कार्य अवधि — त्रिकाल परिशुद्धता', english:'🗓 Action Windows — Trikaal Precision'},
   upayTitle:    {hinglish:'🙏 Upay — 5 Classical Remedies (BPHS)', hindi:'🙏 उपाय — ५ शास्त्रीय उपाय (बीपीएचएस)', english:'🙏 Remedies — 5 Classical Upay (BPHS)'},
   lockedMore:   {hinglish:'🔒 Trikaal ne aur bhi dekha hai', hindi:'🔒 त्रिकाल ने और भी देखा है', english:'🔒 Trikaal has seen more'},
@@ -489,10 +530,24 @@ function EvidenceTable({ ev, meanings, lang, isPaid, slug }:{ ev:ChartEvidence; 
   const allRows = safeArr<EvidenceHouse>(ev?.houses)
   const rows = isPaid ? allRows : allRows.slice(0, 2)
   if (rows.length===0) return null
+  // v10.0 (08 Sep 2026) — the engine's `evidenceMeanings` array has been EMPTY
+  // in every prediction row checked, so this line never rendered and each row
+  // read as "1st house · Kumbha / Swami Saturn — 6th bhav mein" with no clue
+  // what the 1st house is ABOUT. The component was ready; the data never came.
+  //
+  // So HOUSE_MEANING is the fallback. If the engine ever starts sending real
+  // per-chart meanings they win, because a meaning computed from this chart
+  // beats a general one. Until then the reader at least learns what the house
+  // covers, which is Rohiit's standing instruction of 08 Sep 2026:
+  // "everywhere people don't understand grah, bhaav and other astrological
+  // technical words."
   const meaningFor = (hn?:number) => {
     if (hn===undefined) return ''
     const m = meanings.find(x => Number(x?.house)===Number(hn))
-    return s(m?.meaning as string)!=='—' ? String(m?.meaning) : ''
+    const fromEngine = s(m?.meaning as string)
+    if (fromEngine !== '—' && fromEngine.trim()) return String(m?.meaning)
+    const fallback = HOUSE_MEANING[Number(hn)]
+    return fallback ? fallback[lang] : ''
   }
   const links = isPaid ? safeArr<{planet:string;house:string}>(ev?.activation?.domain_links) : []
   return (
@@ -506,15 +561,25 @@ function EvidenceTable({ ev, meanings, lang, isPaid, slug }:{ ev:ChartEvidence; 
           const mean = meaningFor(r.house_number)
           return (
             <div key={i} style={{padding:'13px 14px',borderRadius:'10px',background:'rgba(255,255,255,0.03)',border:'1px solid rgba(255,255,255,0.06)'}}>
+              {/* v10.0: `factor` arrives from the engine as English — "1st
+                  house", "10th house". The number is kept, because a reader
+                  who wants to check it against any other software needs it,
+                  but the plain meaning now leads. */}
               <p style={{margin:'0 0 5px',color:'#fff',fontSize:'13px',fontWeight:700}}>
-                {r.factor}{r.sign?` · ${r.sign}`:''}
+                {mean || s(r.factor as string,'')}{r.sign?` · ${r.sign}`:''}
               </p>
+              {mean && (
+                <p style={{margin:'0 0 5px',color:'#64748b',fontSize:'11px'}}>
+                  {s(r.factor as string,'')}
+                </p>
+              )}
               <p style={{margin:'0 0 5px',color:'#cbd5e1',fontSize:'12.5px',lineHeight:1.7}}>
                 {lbl('lord',lang)} <strong style={{color:GOLD}}>{s(r.lord)}</strong>
-                {r.lord_house?<> — {ordinal(r.lord_house)} {lbl('inHouse',lang)}{r.lord_rashi?` (${r.lord_rashi})`:''}{r.lord_dignity?`, ${r.lord_dignity}`:''}{typeof r.lord_shadbala==='number'?`, Shadbala ${r.lord_shadbala.toFixed(2)}`:''}</>:null}
+                {r.lord_house?<> — {HOUSE_SHORT[Number(r.lord_house)]?`${HOUSE_SHORT[Number(r.lord_house)][lang]} `:''}{ordinal(r.lord_house)} {lbl('inHouse',lang)}{r.lord_rashi?` (${r.lord_rashi})`:''}{r.lord_dignity?`, ${r.lord_dignity}`:''}{typeof r.lord_shadbala==='number'?`, Shadbala ${r.lord_shadbala.toFixed(2)}`:''}</>:null}
                 {safeArr<string>(r.occupants).length>0 ? <> · {lbl('occupants',lang)}: {safeArr<string>(r.occupants).join(', ')}</> : <> · {lbl('noOccupants',lang)}</>}
               </p>
-              {mean && <p style={{margin:0,color:'#94a3b8',fontSize:'12.5px',lineHeight:1.7}}>→ {mean}</p>}
+              {/* v10.0: the meaning now leads the row, so the old trailing
+                  "→ meaning" line would simply repeat it. Removed. */}
             </div>
           )
         })}
@@ -642,6 +707,712 @@ function VerdictCard({ lang, coreMsg, mahadasha, antardasha, pratyantar, best, c
 interface GMonth { ym:string; label:string; is_past:boolean; is_current:boolean
   antardasha:string|null; pratyantar:string|null; tone:string; marker:string
   domain_hits:{planet:string;house:number;nature:string}[] }
+
+// ════════════════════════════════════════════════════════════════════════════
+// PAST MAHADASHA TIMELINE — v9.5 (08 Sep 2026)
+//
+// WHY IT EXISTS
+//   The engine returns the CURRENT mahadasha and the next three, and nothing
+//   before today. So the report could describe where the reader is going but
+//   never where they had been — which is the one thing that makes a reader
+//   believe the chart is theirs.
+//
+// WHY NO ENGINE CHANGE WAS NEEDED
+//   Vimshottari is a fixed 120-year cycle in a fixed order — Ketu 7, Venus 20,
+//   Sun 6, Moon 10, Mars 7, Rahu 18, Jupiter 16, Saturn 19, Mercury 17. Given
+//   the current mahadasha's lord and exact start date (both already in
+//   dashaTimeline, computed by Swiss Ephemeris from the birth nakshatra),
+//   every earlier period follows by subtraction. No astronomy, no VM call.
+//   Verified 08 Sep 2026 against AstroSage's own output for the same chart —
+//   Ketu(birth-Feb 1978), Venus(1978-98), Sun(98-04), Moon(04-14),
+//   Mars(14-21) — every boundary matched to the day.
+//
+// THE BIRTH PERIOD IS PARTIAL AND IS MARKED AS SUCH
+//   Nobody is born at the start of a mahadasha; the first one is a remainder.
+//   Walking backwards, the earliest period is clipped to the date of birth and
+//   labelled, rather than being drawn as if it were a full run.
+//
+// WHAT IT SAYS, AND WHAT IT REFUSES TO SAY
+//   It gives each period a THEME, never an event. "Mars — push, friction,
+//   property and energy" is classical (Mars is the karaka of those things).
+//   "You had an accident in 2016" is a guess dressed as a reading, and that is
+//   the line this page does not cross. Anyone can find some loss in a
+//   seven-year window; being told the THEME and recognising it yourself is
+//   both honest and more convincing.
+//
+// WHY IT ASKS INSTEAD OF TELLS
+//   The reader confirms the match rather than being told it happened. When it
+//   fits, they proved it to themselves. When it does not, that is information
+//   too — though NOT proof of a wrong birth time, which is only one of several
+//   reasons a period may not be recognised. The copy suggests checking the
+//   birth time; it does not diagnose it.
+//
+// NO STORAGE
+//   The answers stay in component state. Nothing is sent anywhere. If that
+//   ever changes it becomes personal data and needs its own decision.
+// ════════════════════════════════════════════════════════════════════════════
+
+const VIM_SEQ: [string, number][] = [
+  ['Ketu', 7], ['Venus', 20], ['Sun', 6], ['Moon', 10], ['Mars', 7],
+  ['Rahu', 18], ['Jupiter', 16], ['Saturn', 19], ['Mercury', 17],
+]
+
+// Plain-language theme per lord. Deliberately NOT astrological vocabulary —
+// no house numbers, no "karaka", no Sanskrit. What a period FEELS like.
+const DASHA_THEME: Record<string, { hinglish: string; hindi: string; english: string }> = {
+  Sun:     { hinglish: 'pehchan, pad aur pita — apni jagah banane ka daur',
+             hindi:    'पहचान, पद और पिता — अपनी जगह बनाने का दौर',
+             english:  'identity, position and father — making your own place' },
+  Moon:    { hinglish: 'mann, ghar aur maa — bhavnaon aur jud-jaane ka daur',
+             hindi:    'मन, घर और माँ — भावनाओं और जुड़ाव का दौर',
+             english:  'mind, home and mother — feeling and belonging' },
+  Mars:    { hinglish: 'urja, takrav aur zameen-ghar — dhakke aur himmat ka daur',
+             hindi:    'ऊर्जा, टकराव और ज़मीन-घर — धक्के और हिम्मत का दौर',
+             english:  'energy, conflict and property — push and courage' },
+  Mercury: { hinglish: 'padhai, baatcheet aur vyapaar — seekhne aur jodne ka daur',
+             hindi:    'पढ़ाई, बातचीत और व्यापार — सीखने और जोड़ने का दौर',
+             english:  'study, communication and trade — learning and connecting' },
+  Jupiter: { hinglish: 'gyaan, badhotri aur sahara — khulne aur badhne ka daur',
+             hindi:    'ज्ञान, बढ़ोतरी और सहारा — खुलने और बढ़ने का दौर',
+             english:  'knowledge, growth and support — opening and expanding' },
+  Venus:   { hinglish: 'prem, sukh aur sambandh — jodne aur sanwarne ka daur',
+             hindi:    'प्रेम, सुख और संबंध — जोड़ने और सँवरने का दौर',
+             english:  'love, comfort and relationships — joining and beautifying' },
+  Saturn:  { hinglish: 'mehnat, dheeraj aur zimmedari — dheere par pakka daur',
+             hindi:    'मेहनत, धैर्य और ज़िम्मेदारी — धीमा पर पक्का दौर',
+             english:  'work, patience and duty — slow but lasting' },
+  Rahu:    { hinglish: 'bada badlaav, nayi disha aur bechaini — hilne ka daur',
+             hindi:    'बड़ा बदलाव, नई दिशा और बेचैनी — हिलने का दौर',
+             english:  'big change, new direction and restlessness' },
+  Ketu:    { hinglish: 'chhodna, andar mudna aur khoj — halka hone ka daur',
+             hindi:    'छोड़ना, अंदर मुड़ना और खोज — हल्का होने का दौर',
+             english:  'letting go, turning inward and searching' },
+}
+
+type PastPeriod = { lord: string; start: Date; end: Date; partial: boolean }
+
+function buildPastDashas(lord: string, startISO: string, dobISO: string): PastPeriod[] {
+  const i = VIM_SEQ.findIndex(x => x[0] === lord)
+  if (i < 0 || !startISO || !dobISO) return []
+  const dob = new Date(dobISO)
+  let cur = new Date(startISO)
+  if (isNaN(dob.getTime()) || isNaN(cur.getTime()) || dob >= cur) return []
+  const out: PastPeriod[] = []
+  let k = i
+  for (let n = 0; n < 9; n++) {
+    k = (k - 1 + 9) % 9
+    const [p, yrs] = VIM_SEQ[k]
+    const end = new Date(cur)
+    const st = new Date(cur)
+    st.setFullYear(st.getFullYear() - yrs)
+    if (st <= dob) { out.unshift({ lord: p, start: dob, end, partial: true }); break }
+    out.unshift({ lord: p, start: st, end, partial: false })
+    cur = st
+  }
+  return out
+}
+
+
+// ════════════════════════════════════════════════════════════════════════════
+// ASHTAKAVARGA — v9.6 (08 Sep 2026)
+//
+// WHY IT APPEARS NOW AND NOT BEFORE
+//   The engine has computed Ashtakavarga all along, and it was never rendered.
+//   That was the right call while it was wrong: until 08 Sep 2026 the VM's
+//   tables totalled 396 instead of the fixed classical 337, every house came
+//   out inflated, and sarvashtakavarga reported eleven of twelve houses as
+//   "strong" — a field with no information in it. parashara.py v2.0 fixed the
+//   tables and added both Shodhana stages, and the live figures now read
+//   48/49/39/54/56/52/39 = 337 with five strong houses and six weak. Only then
+//   is there anything worth showing.
+//
+// WHY BOTH STAGES ARE SHOWN
+//   The raw total is ALWAYS 337, for every chart ever cast — which is exactly
+//   what makes it useful: your 36 and your 24 are comparable to each other,
+//   and to nobody else's chart. The reduced figure after Trikona and
+//   Ekadhipatya Shodhana is much smaller (91 on this chart) and would look
+//   like a collapse if shown alone, so it is labelled separately with a line
+//   saying why it is lower. Hiding the raw number would be worse: a reader who
+//   checks against any other software would find a mismatch and no
+//   explanation.
+//
+// LANGUAGE
+//   Rohiit, 08 Sep 2026: "everywhere people don't understand grah, bhaav and
+//   other astrological technical words." So every house is named by what it
+//   MEANS — "paisa aur parivar", not "2nd house". The number stays alongside
+//   for anyone who wants to check, but it never stands alone.
+// ════════════════════════════════════════════════════════════════════════════
+
+// What each house is ABOUT, in the words a reader would use. Not a glossary of
+// Sanskrit terms — the plain subject of the house.
+
+// v10.0 — a one-word tag per house, for places where the full HOUSE_MEANING
+// would not fit inline. The number is kept alongside so anyone checking
+// against other software still has it.
+const HOUSE_SHORT: Record<number, { hinglish: string; hindi: string; english: string }> = {
+  1:  { hinglish: 'khud ka',    hindi: 'स्वयं का',   english: 'self' },
+  2:  { hinglish: 'paise ka',   hindi: 'धन का',      english: 'wealth' },
+  3:  { hinglish: 'himmat ka',  hindi: 'साहस का',    english: 'courage' },
+  4:  { hinglish: 'ghar ka',    hindi: 'घर का',      english: 'home' },
+  5:  { hinglish: 'santan ka',  hindi: 'संतान का',   english: 'children' },
+  6:  { hinglish: 'naukri ka',  hindi: 'नौकरी का',   english: 'work' },
+  7:  { hinglish: 'shaadi ka',  hindi: 'विवाह का',   english: 'marriage' },
+  8:  { hinglish: 'badlaav ka', hindi: 'बदलाव का',   english: 'change' },
+  9:  { hinglish: 'bhagya ka',  hindi: 'भाग्य का',   english: 'fortune' },
+  10: { hinglish: 'kaam ka',    hindi: 'कर्म का',    english: 'work' },
+  11: { hinglish: 'aay ka',     hindi: 'आय का',      english: 'income' },
+  12: { hinglish: 'kharch ka',  hindi: 'व्यय का',    english: 'expense' },
+}
+
+const HOUSE_MEANING: Record<number, { hinglish: string; hindi: string; english: string }> = {
+  1:  { hinglish: 'aap khud — sehat aur swabhav',        hindi: 'आप स्वयं — सेहत और स्वभाव',        english: 'yourself — health and nature' },
+  2:  { hinglish: 'paisa, bachat aur parivar',           hindi: 'पैसा, बचत और परिवार',             english: 'money, savings and family' },
+  3:  { hinglish: 'himmat, bhai-behen aur mehnat',       hindi: 'हिम्मत, भाई-बहन और मेहनत',        english: 'courage, siblings and effort' },
+  4:  { hinglish: 'ghar, maa aur mann ki shanti',        hindi: 'घर, माँ और मन की शांति',          english: 'home, mother and peace of mind' },
+  5:  { hinglish: 'santan, padhai aur buddhi',           hindi: 'संतान, पढ़ाई और बुद्धि',           english: 'children, study and intellect' },
+  6:  { hinglish: 'naukri, muqable aur sehat ki chunauti', hindi: 'नौकरी, मुक़ाबले और सेहत की चुनौती', english: 'work, competition and health challenges' },
+  7:  { hinglish: 'shaadi, saathi aur saajhedaari',      hindi: 'शादी, साथी और साझेदारी',          english: 'marriage, partner and partnership' },
+  8:  { hinglish: 'achanak badlaav aur chhupi baatein',  hindi: 'अचानक बदलाव और छिपी बातें',       english: 'sudden change and hidden matters' },
+  9:  { hinglish: 'bhagya, guru aur lambi yatra',        hindi: 'भाग्य, गुरु और लंबी यात्रा',       english: 'fortune, guidance and long journeys' },
+  10: { hinglish: 'kaam, pad aur pehchan',               hindi: 'काम, पद और पहचान',                english: 'work, position and recognition' },
+  11: { hinglish: 'aay, laabh aur dost',                 hindi: 'आय, लाभ और दोस्त',                english: 'income, gains and friends' },
+  12: { hinglish: 'kharch, ekaant aur videsh',           hindi: 'ख़र्च, एकांत और विदेश',            english: 'expense, solitude and foreign lands' },
+}
+
+
+// ════════════════════════════════════════════════════════════════════════════
+// BHRIGU — "the chapter of your life" — v9.7 (08 Sep 2026)
+//
+// WHAT WAS ALREADY THERE, AND WHAT WAS NOT
+//   EngineSignals already rendered the yogas, the Bhrigu theme and the signal
+//   list — but only for PAID readers. A free reader saw one teaser line ("5
+//   signal pakde, 3 abhi active") and nothing else. The single most convincing
+//   thing the engine produces was therefore invisible to everyone who had not
+//   already paid.
+//
+// WHY THE ENGINE TEXT COULD NOT SIMPLY BE SHOWN
+//   The VM emits English sentences full of house numbers:
+//     "Jupiter in 2th house activates 'Wealth activation' — Family finances
+//      and speech. Timing: near-term."
+//   Three problems. It is English in a Hinglish report. It says "2th" — the
+//   ordinal is built as n + "th", so 1, 2 and 3 come out wrong while 11 and 12
+//   are fine. And it leans on house numbers, which Rohiit's instruction of
+//   08 Sep 2026 rules out: "everywhere people don't understand grah, bhaav and
+//   other astrological technical words."
+//
+//   So the descriptions are PARSED, not printed. Five templates cover
+//   everything the engine emits today; each is rebuilt in plain language using
+//   HOUSE_MEANING. Anything that matches none of them falls through to the raw
+//   English rather than being dropped — worse to lose a signal than to show it
+//   plainly.
+//
+// FREE SEES THE CHAPTER, PAID SEES THE SIGNALS
+//   The headline — which part of life is running now — is free. It is the
+//   thing that makes a reader recognise their own chart, and recognition is
+//   what earns the ₹51, not withholding. The individual signals stay paid.
+//
+// WHAT IT WILL NOT SAY
+//   A chapter is a SUBJECT, never an event. "Paisa aur parivar ka daur" is
+//   what the shastra supports; "you will receive money in March" is not, and
+//   no amount of confidence in the engine makes it so.
+// ════════════════════════════════════════════════════════════════════════════
+
+type PlainSignal = { text: string; timing: string; kind: 'theme' | 'driver' | 'next' | 'pressure' | 'other' }
+
+// Ordinal, done properly. The engine's own version emits "2th" and "3th".
+const ord = (n: number) => {
+  const t = n % 10, h = n % 100
+  if (t === 1 && h !== 11) return `${n}st`
+  if (t === 2 && h !== 12) return `${n}nd`
+  if (t === 3 && h !== 13) return `${n}rd`
+  return `${n}th`
+}
+
+/**
+ * Rebuild one engine sentence in plain language.
+ * Returns null only if the description is empty; unmatched patterns are passed
+ * through unchanged so nothing is silently lost.
+ */
+function plainSignal(raw: string, lang: Lang): PlainSignal | null {
+  const d = (raw || '').trim()
+  if (!d) return null
+  const mean = (h: number) => (HOUSE_MEANING[h] ? HOUSE_MEANING[h][lang] : `${ord(h)} bhaav`)
+  const P = (p: string) => PLANET_HI[p] ?? p
+  let m: RegExpMatchArray | null
+
+  // 1. "{Planet} in {N}th house activates '{Theme}' — {subtext}. Timing: {t}."
+  m = d.match(/^(\w+)\s+in\s+(\d{1,2})\w*\s+house\s+activates/i)
+  if (m) {
+    const h = Number(m[2])
+    return { kind: 'theme', timing: '', text:
+      lang === 'hindi'   ? `${P(m[1])} इस समय उस हिस्से में है जो ${mean(h)} का है — यही अभी का मुख्य विषय है।`
+    : lang === 'english' ? `${m[1]} is currently in the part of life that governs ${mean(h)} — that is the running theme.`
+    :                      `${P(m[1])} abhi us hisse mein hai jo ${mean(h)} ka hai — yahi abhi ka mukhya vishay hai.` }
+  }
+
+  // 2. "{Planet} (agent of ...) is {strongly|moderately|weakly} placed in house {N} — ..."
+  m = d.match(/^(\w+)\s*\(agent[^)]*\)\s*is\s+(\w+)\s+placed\s+in\s+house\s+(\d{1,2})/i)
+  if (m) {
+    const h = Number(m[3])
+    const strong = /strong/i.test(m[2]), weak = /weak/i.test(m[2])
+    const howHi = strong ? 'मज़बूती से' : weak ? 'कमज़ोर होकर' : 'ठीक-ठाक'
+    const howHn = strong ? 'mazbooti se' : weak ? 'kamzor hokar' : 'theek-thaak'
+    const howEn = strong ? 'strongly' : weak ? 'weakly' : 'moderately'
+    return { kind: 'driver', timing: '', text:
+      lang === 'hindi'   ? `इस दौर को चलाने वाला ग्रह ${P(m[1])} है, और वह ${mean(h)} वाले हिस्से में ${howHi} बैठा है।`
+    : lang === 'english' ? `The planet driving this period is ${m[1]}, placed ${howEn} in the part that governs ${mean(h)}.`
+    :                      `Is daur ko chalane wala grah ${P(m[1])} hai, aur wo ${mean(h)} wale hisse mein ${howHn} baitha hai.` }
+  }
+
+  // 3. "{Planet} in 2nd from Jupiter (house {N}) — {positive|challenging} future activation: ..."
+  m = d.match(/^(\w+)\s+in\s+2nd\s+from\s+Jupiter\s*\(house\s*(\d{1,2})\)\s*—\s*(\w+)/i)
+  if (m) {
+    const h = Number(m[2]), good = /positive/i.test(m[3])
+    return { kind: 'next', timing: '', text:
+      lang === 'hindi'   ? `आगे आने वाला दौर ${mean(h)} की ओर जाता दिखता है${good ? ' — और वह अनुकूल है।' : ', और वहाँ प्रयास ज़्यादा लगेगा।'}`
+    : lang === 'english' ? `What comes next leans toward ${mean(h)}${good ? ' — and it looks favourable.' : ', and it will ask for more effort.'}`
+    :                      `Aage aane wala daur ${mean(h)} ki taraf jaata dikhta hai${good ? ' — aur wo anukool hai.' : ', aur wahan prayaas zyada lagega.'}` }
+  }
+
+  // 4. "{Planet} aspects Jupiter from house {N} — creating challenge ..."
+  m = d.match(/^(\w+)\s+aspects\s+Jupiter\s+from\s+house\s*(\d{1,2})/i)
+  if (m) {
+    const h = Number(m[2])
+    return { kind: 'pressure', timing: '', text:
+      lang === 'hindi'   ? `${P(m[1])} ${mean(h)} वाले हिस्से से इस दौर पर दबाव डाल रहा है।`
+    : lang === 'english' ? `${m[1]} puts pressure on this period from the part that governs ${mean(h)}.`
+    :                      `${P(m[1])} ${mean(h)} wale hisse se is daur par dabav daal raha hai.` }
+  }
+
+  // 5. "Jupiter's Navamsa is in {Rashi} (lord: {Planet}) — ..."
+  m = d.match(/Navamsa\s+is\s+in\s+(\w+)\s*\(lord:\s*(\w+)\)/i)
+  if (m) {
+    return { kind: 'other', timing: '', text:
+      lang === 'hindi'   ? `इस दौर का छिपा हुआ फल ${P(m[2])} के स्वभाव से बनता है (नवांश ${m[1]} में)।`
+    : lang === 'english' ? `The hidden outcome of this period is shaped by ${m[2]} (Navamsa in ${m[1]}).`
+    :                      `Is daur ka chhupa hua phal ${P(m[2])} ke swabhav se banta hai (Navamsa ${m[1]} mein).` }
+  }
+
+  // unmatched — show it rather than lose it
+  return { kind: 'other', timing: '', text: d }
+}
+
+
+// ════════════════════════════════════════════════════════════════════════════
+// DRISHTI — who supports whom, who presses on whom — v9.8 (08 Sep 2026)
+//
+// THE DATA IS SOUND — checked, not assumed
+//   All ten aspects in the live 08 Sep report were verified by hand against
+//   the classical rules: every planet aspects the 7th from itself, Mars adds
+//   the 4th and 8th, Jupiter the 5th and 9th, Saturn the 3rd and 10th. Sun in
+//   8 → Jupiter in 2 (7th). Mars in 4 → Venus in 7 (4th). Jupiter in 2 →
+//   Saturn in 6 (5th). Saturn in 6 → Moon in 3 (10th). All ten correct.
+//
+// WHY THE RAW LIST IS NOT SHOWN
+//   "Sun aspects Jupiter" tells a reader nothing they can use, and `strength`
+//   is 100 on every single aspect in every chart, so it cannot rank them. What
+//   is worth saying is which planets are being SUPPORTED and which are under
+//   PRESSURE — and that follows from the classical benefic/malefic split,
+//   which is stable and needs no engine change.
+//
+//   Jupiter, Venus and Mercury are the natural benefics; Sun, Mars, Saturn,
+//   Rahu and Ketu the natural malefics. The Moon is conditional — waxing it is
+//   benefic, waning it is not — and since the engine does not report the
+//   paksha here, aspects FROM the Moon are left out rather than guessed at.
+//   Leaving a line out is better than asserting a strength the data cannot
+//   support.
+//
+// ARGALA IS DELIBERATELY NOT RENDERED — 08 Sep 2026
+//   Across 158 live reports the engine's argala netEffect came out "mixed"
+//   1,091 times, "negative" 641 times and "positive" 8 times — in 5 reports
+//   out of 158. A reader would see all twelve houses marked negative or mixed,
+//   which is both wrong and needlessly frightening. That is the same defect
+//   the Ashtakavarga tables had before v2.0 (eleven of twelve houses "strong"),
+//   pointing the other way. It belonged in the engine's classifier, not here.
+//   RESOLVED 08 Sep 2026 — parashara.py argala v2.0 rebuilt that classifier
+//   against BPHS Ch.31, and the live distribution is now negative 5,
+//   positive 4, mixed 1, none 2 on the same chart. ArgalaCard above renders
+//   it, and keeps a rail that hides the card if 'positive' ever vanishes
+//   again. This paragraph is kept as the record of why it was withheld.
+// ════════════════════════════════════════════════════════════════════════════
+
+const BENEFIC_GRAHA = new Set(['Jupiter', 'Venus', 'Mercury'])
+const MALEFIC_GRAHA = new Set(['Sun', 'Mars', 'Saturn', 'Rahu', 'Ketu'])
+
+
+// ════════════════════════════════════════════════════════════════════════════
+// ARGALA — what is helping a part of life, and what is blocking it — v9.9
+//
+// WHY THIS CARD DID NOT EXIST UNTIL NOW
+//   v9.8 deliberately refused to render argala, and left a note saying so. The
+//   engine's classifier was broken: across 158 live reports it returned
+//   "mixed" 1,091 times, "negative" 641 times and "positive" 8 times — in five
+//   reports out of a hundred and fifty-eight. A reader would have seen all
+//   twelve houses marked negative or mixed, which is both wrong and pointlessly
+//   frightening. Rendering that would have been worse than rendering nothing.
+//
+//   parashara.py argala v2.0 (08 Sep 2026) rebuilt it against BPHS Ch.31 —
+//   each argala resolved against ITS OWN obstructor rather than against the
+//   pooled total, obstruction applied to malefic and benefic alike, plus the
+//   5th-house argala and vipareeta argala which were missing entirely. The
+//   live figures are now negative 5, positive 4, mixed 1, none 2 on the same
+//   chart. Only now is there anything honest to show.
+//
+// THE SAFETY RAIL STAYS
+//   If argala ever returns without a single 'positive' across all twelve
+//   houses, this card hides itself rather than showing a chart where nothing
+//   is working. That is the exact symptom the old classifier had, and it
+//   should never reach a reader again.
+//
+// WHAT "BLOCKED" IS NOT
+//   BPHS: "The Argala unobstructed will be fruitful while the one duly
+//   obstructed will go astray." Obstructed means neutralised — the help simply
+//   does not arrive. It does not mean harm, and the copy does not let a reader
+//   read it as harm.
+// ════════════════════════════════════════════════════════════════════════════
+
+function ArgalaCard({ engineSig, lang, isPaid, slug }:{
+  engineSig: Record<string, unknown>; lang: Lang; isPaid: boolean; slug: string
+}) {
+  const par = safeObj(engineSig.parashara)
+  const rows = safeArr<Record<string, unknown>>(par.argala)
+    .filter(a => Number.isFinite(Number(a?.house)) && typeof a?.netEffect === 'string')
+
+  if (rows.length === 0) return null
+
+  const pos = rows.filter(a => a.netEffect === 'positive')
+  const neg = rows.filter(a => a.netEffect === 'negative')
+
+  // The old classifier could not produce 'positive'. If that ever returns,
+  // say nothing rather than tell someone their whole chart is against them.
+  if (pos.length === 0) return null
+
+  const P = (p: string) => PLANET_HI[p] ?? p
+  const meaning = (h: number) => (HOUSE_MEANING[h] ? HOUSE_MEANING[h][lang] : '')
+  const namesOf = (a: Record<string, unknown>) =>
+    safeArr<string>(a.argalaPlanets).filter(x => typeof x === 'string').map(P).join(', ')
+
+  const shownPos = isPaid ? pos : pos.slice(0, 2)
+  const shownNeg = isPaid ? neg : neg.slice(0, 1)
+  const hidden = (pos.length - shownPos.length) + (neg.length - shownNeg.length)
+
+  const Row = ({ a, good }: { a: Record<string, unknown>; good: boolean }) => {
+    const h = Number(a.house)
+    const who = namesOf(a)
+    return (
+      <div style={{padding:'10px 12px',borderRadius:'9px',
+           background: good ? 'rgba(34,197,94,0.06)' : 'rgba(248,113,113,0.05)',
+           border:`1px solid ${good ? 'rgba(34,197,94,0.18)' : 'rgba(248,113,113,0.16)'}`}}>
+        <p style={{margin:0,color:'#cbd5e1',fontSize:'12.5px',lineHeight:1.6}}>
+          <span style={{marginRight:'6px'}}>{good ? '🟢' : '🔴'}</span>
+          {lbl(good ? 'agHelp' : 'agBlock', lang)
+            .replace('{area}', meaning(h))
+            .replace('{who}', who || lbl('agSomeone', lang))}
+        </p>
+      </div>
+    )
+  }
+
+  return (
+    <div style={{background:BG_CARD,border:`1px solid ${G(0.12)}`,borderRadius:'16px',padding:'22px',marginBottom:'18px'}}>
+      <p style={{margin:'0 0 6px',color:GOLD,fontSize:'11px',fontWeight:700,textTransform:'uppercase',letterSpacing:'.08em'}}>
+        {lbl('agTitle', lang)}
+      </p>
+      <p style={{margin:'0 0 14px',color:'#94a3b8',fontSize:'12px',lineHeight:1.6}}>
+        {lbl('agIntro', lang)}
+      </p>
+
+      <div style={{display:'flex',flexDirection:'column',gap:'7px'}}>
+        {shownPos.map((a, i) => <Row key={`p${i}`} a={a} good/>)}
+        {shownNeg.map((a, i) => <Row key={`n${i}`} a={a} good={false}/>)}
+      </div>
+
+      {!isPaid && hidden > 0 && (
+        <Cliff slug={slug} text={lbl('agMore', lang).replace('{n}', String(hidden))}/>
+      )}
+
+      <p style={{margin:'12px 0 0',color:'#64748b',fontSize:'11px',lineHeight:1.55}}>
+        {lbl('agFoot', lang)}
+      </p>
+    </div>
+  )
+}
+
+function DrishtiCard({ engineSig, lang, isPaid, slug }:{
+  engineSig: Record<string, unknown>; lang: Lang; isPaid: boolean; slug: string
+}) {
+  const par = safeObj(engineSig.parashara)
+  const raw = safeArr<Record<string, unknown>>(par.drishti)
+    .filter(d => typeof d?.from === 'string' && typeof d?.to === 'string')
+
+  const support: { from: string; to: string }[] = []
+  const pressure: { from: string; to: string }[] = []
+  for (const d of raw) {
+    const from = String(d.from), to = String(d.to)
+    // Moon is skipped on purpose — benefic only when waxing, and paksha is not
+    // reported here. See the note above.
+    if (BENEFIC_GRAHA.has(from)) support.push({ from, to })
+    else if (MALEFIC_GRAHA.has(from)) pressure.push({ from, to })
+  }
+  if (support.length === 0 && pressure.length === 0) return null
+
+  const P = (p: string) => PLANET_HI[p] ?? p
+  const shownS = isPaid ? support  : support.slice(0, 2)
+  const shownP = isPaid ? pressure : pressure.slice(0, 1)
+  const hidden = (support.length - shownS.length) + (pressure.length - shownP.length)
+
+  const Row = ({ from, to, good }: { from: string; to: string; good: boolean }) => (
+    <div style={{display:'flex',alignItems:'center',gap:'8px',padding:'8px 11px',borderRadius:'9px',
+         background: good ? 'rgba(34,197,94,0.06)' : 'rgba(248,113,113,0.05)',
+         border:`1px solid ${good ? 'rgba(34,197,94,0.18)' : 'rgba(248,113,113,0.16)'}`}}>
+      <span style={{fontSize:'13px'}}>{good ? '🟢' : '🔴'}</span>
+      <span style={{color:'#cbd5e1',fontSize:'12.5px',lineHeight:1.55}}>
+        {lbl(good ? 'drSupport' : 'drPressure', lang)
+          .replace('{from}', P(from))
+          .replace('{to}', P(to))}
+      </span>
+    </div>
+  )
+
+  return (
+    <div style={{background:BG_CARD,border:`1px solid ${G(0.12)}`,borderRadius:'16px',padding:'22px',marginBottom:'18px'}}>
+      <p style={{margin:'0 0 6px',color:GOLD,fontSize:'11px',fontWeight:700,textTransform:'uppercase',letterSpacing:'.08em'}}>
+        {lbl('drTitle', lang)}
+      </p>
+      <p style={{margin:'0 0 14px',color:'#94a3b8',fontSize:'12px',lineHeight:1.6}}>
+        {lbl('drIntro', lang)}
+      </p>
+
+      <div style={{display:'flex',flexDirection:'column',gap:'7px'}}>
+        {shownS.map((d, i) => <Row key={`s${i}`} from={d.from} to={d.to} good/>)}
+        {shownP.map((d, i) => <Row key={`p${i}`} from={d.from} to={d.to} good={false}/>)}
+      </div>
+
+      {!isPaid && hidden > 0 && (
+        <Cliff slug={slug} text={lbl('drMore', lang).replace('{n}', String(hidden))}/>
+      )}
+
+      <p style={{margin:'12px 0 0',color:'#64748b',fontSize:'11px',lineHeight:1.55}}>
+        {lbl('drFoot', lang)}
+      </p>
+    </div>
+  )
+}
+
+function BhriguChapter({ bhriguObj, lang, isPaid, slug }:{
+  bhriguObj: Record<string, unknown>; lang: Lang; isPaid: boolean; slug: string
+}) {
+  const jupHouse = Number(bhriguObj.jupiter_house)
+  const rawSignals = safeArr<Record<string, unknown>>(bhriguObj.signals)
+    .map(x => plainSignal(String(x?.description ?? ''), lang))
+    .filter((x): x is PlainSignal => x !== null)
+
+  const hasHouse = Number.isFinite(jupHouse) && jupHouse >= 1 && jupHouse <= 12
+  if (!hasHouse && rawSignals.length === 0) return null
+
+  const headline = hasHouse && HOUSE_MEANING[jupHouse] ? HOUSE_MEANING[jupHouse][lang] : ''
+  // free sees the chapter and one signal; the rest is the paid reading
+  const shown = isPaid ? rawSignals : rawSignals.slice(0, 1)
+  const hidden = rawSignals.length - shown.length
+
+  return (
+    <div style={{background:BG_CARD,border:`1px solid ${G(0.12)}`,borderRadius:'16px',padding:'22px',marginBottom:'18px'}}>
+      <p style={{margin:'0 0 6px',color:GOLD,fontSize:'11px',fontWeight:700,textTransform:'uppercase',letterSpacing:'.08em'}}>
+        {lbl('bcTitle', lang)}
+      </p>
+
+      {headline && (
+        <>
+          <p style={{margin:'0 0 6px',color:'#f1f5f9',fontSize:'17px',fontWeight:700,lineHeight:1.45}}>
+            {headline}
+          </p>
+          <p style={{margin:'0 0 14px',color:'#94a3b8',fontSize:'12px',lineHeight:1.65}}>
+            {lbl('bcWhy', lang)}
+          </p>
+        </>
+      )}
+
+      {shown.length > 0 && (
+        <div style={{display:'flex',flexDirection:'column',gap:'9px'}}>
+          {shown.map((sg, i) => (
+            <div key={i} style={{padding:'10px 12px',borderRadius:'9px',
+                 background:'rgba(255,255,255,0.03)',border:'1px solid rgba(255,255,255,0.06)'}}>
+              <p style={{margin:0,color:'#cbd5e1',fontSize:'12.5px',lineHeight:1.65}}>{sg.text}</p>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {!isPaid && hidden > 0 && (
+        <Cliff slug={slug} text={lbl('bcMore', lang).replace('{n}', String(hidden))}/>
+      )}
+
+      <p style={{margin:'12px 0 0',color:'#64748b',fontSize:'11px',lineHeight:1.55}}>
+        {lbl('bcFoot', lang)}
+      </p>
+    </div>
+  )
+}
+
+function AshtakavargaCard({ engineSig, lang, isPaid, slug }:{
+  engineSig: Record<string, unknown>; lang: Lang; isPaid: boolean; slug: string
+}) {
+  const par   = safeObj(engineSig.parashara)
+  const sarva = safeObj(par.sarvashtakavarga)
+  const scores = safeArr<number>(sarva.houseScores).map(Number).filter(Number.isFinite)
+  if (scores.length !== 12) return null
+
+  const total = scores.reduce((a, b) => a + b, 0)
+  // The classical grand total is fixed at 337. If it is not, the engine tables
+  // are wrong again and the card refuses rather than showing bad numbers.
+  if (total !== 337) return null
+
+  const avg = total / 12
+  const ranked = scores.map((v, i) => ({ house: i + 1, v })).sort((a, b) => b.v - a.v)
+  const top    = ranked.slice(0, 3)
+  const bottom = ranked.slice(-2).reverse()
+
+  const av = safeArr<Record<string, unknown>>(par.ashtakavarga)
+  const reducedTotal = av.reduce((a, r) => a + (Number(r?.reducedPoints) || 0), 0)
+  const hasReduced   = av.length > 0 && av.every(r => Array.isArray(r?.afterEkadhipatya))
+
+  const meaning = (h: number) => (HOUSE_MEANING[h] ? HOUSE_MEANING[h][lang] : '')
+  const Bar = ({ v }: { v: number }) => (
+    <span style={{display:'inline-block',height:'6px',borderRadius:'3px',verticalAlign:'middle',
+      width: `${Math.max(6, Math.round((v / 40) * 100))}px`,
+      background: v >= 30 ? 'rgba(34,197,94,0.55)' : v <= 25 ? 'rgba(248,113,113,0.5)' : 'rgba(212,175,55,0.45)'}}/>
+  )
+
+  return (
+    <div style={{background:BG_CARD,border:`1px solid ${G(0.12)}`,borderRadius:'16px',padding:'22px',marginBottom:'18px'}}>
+      <p style={{margin:'0 0 6px',color:GOLD,fontSize:'11px',fontWeight:700,textTransform:'uppercase',letterSpacing:'.08em'}}>
+        {lbl('avTitle', lang)}
+      </p>
+      <p style={{margin:'0 0 16px',color:'#94a3b8',fontSize:'12px',lineHeight:1.6}}>
+        {lbl('avIntro', lang)}
+      </p>
+
+      <p style={{margin:'0 0 8px',color:'#e2e8f0',fontSize:'12px',fontWeight:600}}>{lbl('avStrong', lang)}</p>
+      <div style={{display:'flex',flexDirection:'column',gap:'7px',marginBottom:'14px'}}>
+        {top.map(r => (
+          <div key={r.house} style={{display:'flex',alignItems:'center',gap:'10px',flexWrap:'wrap'}}>
+            <span style={{minWidth:'34px',color:GOLD,fontSize:'13px',fontWeight:700}}>{r.v}</span>
+            <Bar v={r.v}/>
+            <span style={{color:'#cbd5e1',fontSize:'12px'}}>{meaning(r.house)}</span>
+          </div>
+        ))}
+      </div>
+
+      <p style={{margin:'0 0 8px',color:'#e2e8f0',fontSize:'12px',fontWeight:600}}>{lbl('avWeak', lang)}</p>
+      <div style={{display:'flex',flexDirection:'column',gap:'7px'}}>
+        {bottom.map(r => (
+          <div key={r.house} style={{display:'flex',alignItems:'center',gap:'10px',flexWrap:'wrap'}}>
+            <span style={{minWidth:'34px',color:'#f87171',fontSize:'13px',fontWeight:700}}>{r.v}</span>
+            <Bar v={r.v}/>
+            <span style={{color:'#cbd5e1',fontSize:'12px'}}>{meaning(r.house)}</span>
+          </div>
+        ))}
+      </div>
+
+      <p style={{margin:'14px 0 0',padding:'10px 12px',borderRadius:'8px',fontSize:'11px',lineHeight:1.6,
+           background:'rgba(212,175,55,0.06)',color:'#cbd5e1'}}>
+        {lbl('avAvg', lang).replace('{avg}', avg.toFixed(0))}
+      </p>
+
+      {isPaid && hasReduced && (
+        <p style={{margin:'10px 0 0',color:'#64748b',fontSize:'11px',lineHeight:1.6}}>
+          {lbl('avReduced', lang).replace('{n}', String(reducedTotal))}
+        </p>
+      )}
+      {!isPaid && hasReduced && <Cliff slug={slug} text={lbl('avTease', lang)}/>}
+
+      <p style={{margin:'10px 0 0',color:'#64748b',fontSize:'11px',lineHeight:1.55}}>
+        {lbl('avFoot', lang)}
+      </p>
+    </div>
+  )
+}
+
+function PastDashaTimeline({ pj, dob, lang }: { pj: Record<string, unknown>; dob: string; lang: Lang }) {
+  const [marks, setMarks] = useState<Record<number, 'yes' | 'no'>>({})
+  const tl  = safeObj(pj.dashaTimeline)
+  const md  = safeObj(tl.mahadasha)
+  // s() falls back to '—', which is truthy and would slip past the guard
+  // below. Pass '' so a missing value is genuinely empty. Checked 08 Sep 2026:
+  // dob lives on the `report` row (see birthLine, ~L1241), NOT in
+  // prediction_json — reading it from pj would silently render nothing.
+  const lord  = s(md.lord, '')
+  const start = s(md.start, '')
+  const periods = (lord && start && dob) ? buildPastDashas(lord, start, dob) : []
+  if (periods.length === 0) return null
+
+  const fmt = (d: Date) => d.toLocaleDateString(lang === 'hindi' ? 'hi-IN' : 'en-GB',
+    { month: 'short', year: 'numeric' })
+  const answered = Object.keys(marks).length
+  const agreed   = Object.values(marks).filter(v => v === 'yes').length
+
+  return (
+    <div style={{background:BG_CARD,border:`1px solid ${G(0.12)}`,borderRadius:'16px',padding:'22px',marginBottom:'18px'}}>
+      <p style={{margin:'0 0 6px',color:GOLD,fontSize:'11px',fontWeight:700,textTransform:'uppercase',letterSpacing:'.08em'}}>
+        {lbl('pastTitle', lang)}
+      </p>
+      <p style={{margin:'0 0 16px',color:'#94a3b8',fontSize:'12px',lineHeight:1.6}}>
+        {lbl('pastIntro', lang)}
+      </p>
+
+      <div style={{display:'flex',flexDirection:'column',gap:'10px'}}>
+        {periods.map((p, i) => {
+          const th = DASHA_THEME[p.lord]
+          const mark = marks[i]
+          return (
+            <div key={i} style={{padding:'12px 14px',borderRadius:'10px',
+                 background: mark === 'yes' ? 'rgba(34,197,94,0.07)' : 'rgba(255,255,255,0.03)',
+                 border:`1px solid ${mark === 'yes' ? 'rgba(34,197,94,0.3)' : 'rgba(255,255,255,0.07)'}`}}>
+              <div style={{display:'flex',justifyContent:'space-between',alignItems:'baseline',gap:'10px',flexWrap:'wrap'}}>
+                <span style={{color:'#e2e8f0',fontSize:'13px',fontWeight:600}}>
+                  {fmt(p.start)} – {fmt(p.end)}
+                </span>
+                <span style={{color:GOLD,fontSize:'12px',fontWeight:600}}>
+                  {PLANET_HI[p.lord] ?? p.lord}
+                  {p.partial && <span style={{color:'#64748b',fontWeight:400}}> · {lbl('pastPartial', lang)}</span>}
+                </span>
+              </div>
+              <p style={{margin:'6px 0 0',color:'#cbd5e1',fontSize:'12px',lineHeight:1.55}}>
+                {th ? th[lang] : ''}
+              </p>
+              <div style={{display:'flex',gap:'8px',marginTop:'9px'}}>
+                {(['yes','no'] as const).map(v => (
+                  <button key={v} type="button"
+                    onClick={() => setMarks(m => ({ ...m, [i]: m[i] === v ? undefined as unknown as 'yes' : v }))}
+                    style={{padding:'4px 12px',borderRadius:'999px',fontSize:'11px',cursor:'pointer',
+                      background: mark === v ? (v === 'yes' ? 'rgba(34,197,94,0.18)' : 'rgba(148,163,184,0.14)') : 'transparent',
+                      border:`1px solid ${mark === v ? (v === 'yes' ? 'rgba(34,197,94,0.5)' : 'rgba(148,163,184,0.4)') : 'rgba(255,255,255,0.14)'}`,
+                      color: mark === v ? '#e2e8f0' : '#94a3b8'}}>
+                    {lbl(v === 'yes' ? 'pastYes' : 'pastNo', lang)}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )
+        })}
+      </div>
+
+      {answered > 0 && (
+        <p style={{margin:'14px 0 0',padding:'10px 12px',borderRadius:'8px',fontSize:'12px',lineHeight:1.6,
+             background:'rgba(212,175,55,0.06)',color:'#cbd5e1'}}>
+          {agreed >= 2 ? lbl('pastMatch', lang)
+            : agreed === 0 && answered >= 2 ? lbl('pastNoMatch', lang)
+            : lbl('pastSome', lang)}
+        </p>
+      )}
+
+      <p style={{margin:'12px 0 0',color:'#64748b',fontSize:'11px',lineHeight:1.55}}>
+        {lbl('pastFoot', lang)}
+      </p>
+    </div>
+  )
+}
+
 function GocharTimeline({ g, lang, isPaid, slug }:{ g:Record<string,unknown>; lang:Lang; isPaid:boolean; slug:string }) {
   // v9.3: the past three months are the recognition hook and stay free; the six
   // months AHEAD are the thing worth paying for.
@@ -1511,6 +2282,25 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
             <LockedTeaser slug={slug} lang={lang} lines={suspenseLines}/>
           )}
           <ConfidenceCard c={confidence} lang={lang}/>
+
+          {/* v9.5: past periods sit directly above the current-dasha card, so
+              the reader moves from what they can verify to what they cannot. */}
+          {/* v9.6: Ashtakavarga sits above the past periods — the reader
+              moves from where their chart is strong, to when it was active. */}
+          {/* v9.7: the chapter first — it is what makes a reader recognise
+              their own chart — then where the chart is strong, then when. */}
+          <BhriguChapter bhriguObj={bhriguObj as Record<string, unknown>} lang={lang} isPaid={isPaid} slug={slug}/>
+
+          {/* v9.8: after the chapter, who is helping and who is pressing. */}
+          <DrishtiCard engineSig={engineSig as Record<string, unknown>} lang={lang} isPaid={isPaid} slug={slug}/>
+
+          {/* v9.9: argala reads as help vs hold-up. Rendering this needed
+              parashara.py argala v2.0 first — see the note on the card. */}
+          <ArgalaCard engineSig={engineSig as Record<string, unknown>} lang={lang} isPaid={isPaid} slug={slug}/>
+
+          <AshtakavargaCard engineSig={engineSig as Record<string, unknown>} lang={lang} isPaid={isPaid} slug={slug}/>
+
+          <PastDashaTimeline pj={pj as Record<string, unknown>} dob={s(report.dob, '')} lang={lang}/>
 
           <div style={{background:BG_CARD,border:`1px solid ${G(0.12)}`,borderRadius:'16px',padding:'22px',marginBottom:'14px'}}>
             <p style={{margin:'0 0 14px',color:GOLD,fontSize:'11px',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.08em'}}>{lbl('dashaKaal',lang)}</p>
