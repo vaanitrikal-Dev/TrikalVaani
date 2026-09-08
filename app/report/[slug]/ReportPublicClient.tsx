@@ -263,6 +263,10 @@ const L: Record<string, Record<Lang,string>> = {
   bestMonth:    {hinglish:'Sabse sahaayak mahina (gochar)', hindi:'सबसे सहायक महीना (गोचर)', english:'Most supportive month (transit)'},
   cautionMonth: {hinglish:'Sabse savdhaani wala (gochar)', hindi:'सबसे सावधानी वाला (गोचर)', english:'Most cautious month (transit)'},
   background:   {hinglish:'Poore daur mein sthir', hindi:'पूरे दौर में स्थिर', english:'Constant through the window'},
+  // v9.4: explains WHY the early months rank lower — a planet sitting in a
+  // focus house now that moves out later. Both placeholders are filled from
+  // the chart's own gochar data; nothing here is fixed.
+  shiftNote:    {hinglish:'{planets} abhi aapke focus bhaav mein hain — {month} se ye sthiti badal jaati hai, isi liye us se pehle ke mahine tulna mein bhaari dikhte hain.', hindi:'{planets} अभी आपके मुख्य भावों में हैं — {month} से यह स्थिति बदल जाती है, इसीलिए उससे पहले के महीने तुलना में भारी दिखते हैं।', english:'{planets} currently sits in your focus houses — this changes from {month}, which is why the earlier months rank heavier by comparison.'},
   navamsa:      {hinglish:'🕉️ Navamsa (D9) — Divisional Chart', hindi:'🕉️ नवांश (D9) — वर्ग कुंडली', english:'🕉️ Navamsa (D9) — Divisional Chart'},
   navLagna:     {hinglish:'D9 Lagna',   hindi:'नवांश लग्न',    english:'D9 Lagna'},
   vargottama:   {hinglish:'Vargottama (D1 aur D9 mein ek hi rashi — vishesh bal)', hindi:'वर्गोत्तम (D1 और D9 में एक ही राशि — विशेष बल)', english:'Vargottama (same sign in D1 and D9 — special strength)'},
@@ -645,6 +649,55 @@ function GocharTimeline({ g, lang, isPaid, slug }:{ g:Record<string,unknown>; la
   const cur  = safeObj(g.current) as unknown as GMonth
   if (past.length===0 && future.length===0) return null
   const bg = safeArr<{planet:string;house:number;nature:string}>(g.background)
+
+  // ── v9.4 (08 Sep 2026) — FOCUS SHIFT NOTE ────────────────────────────────
+  // WHY THIS EXISTS
+  //   gochar_timeline scores each month by which planets sit in the domain's
+  //   focus houses, then ranks tone RELATIVELY across the ten-month window
+  //   (template_engine.py ~L1420). A slow planet that occupies a focus house
+  //   for the FIRST half of the window and leaves in the second half drags
+  //   every early month down — correctly, because those months really are the
+  //   weaker ones. But the free tier shows only the first four months, so the
+  //   reader sees four reds with no way to know that the pattern breaks later.
+  //   The engine's own `background` list cannot carry this: it only holds
+  //   planets that never change house across the WHOLE window, so a planet
+  //   that shifts mid-window is silently excluded.
+  //
+  // FULLY DERIVED — nothing here is hardcoded
+  //   No planet name, no month, no house number is written into this code. It
+  //   reads g.future (present in the JSON for every tier), compares each
+  //   planet's house in the first future month against the last, and reports
+  //   only what it finds. If g.future is missing, if no planet changes, or if
+  //   the change does not involve a focus house, it renders NOTHING.
+  const focusHouses = new Set(
+    safeArr<number>(g.focus_houses).map(Number).filter(n => Number.isFinite(n))
+  )
+  const allFuture = safeArr<GMonth>(g.future)
+  const houseOf = (m: GMonth, planet: string): number | null => {
+    const t = safeArr<{planet:string;house:number}>((m as unknown as Record<string,unknown>).transits)
+      .find(x => x?.planet === planet)
+    return t && Number.isFinite(Number(t.house)) ? Number(t.house) : null
+  }
+  const focusShift = (() => {
+    if (allFuture.length < 2 || focusHouses.size === 0) return null
+    const first = allFuture[0], last = allFuture[allFuture.length - 1]
+    const names = Array.from(new Set(
+      safeArr<{planet:string}>((first as unknown as Record<string,unknown>).transits)
+        .map(t => t?.planet).filter(Boolean) as string[]
+    ))
+    // planets that START inside a focus house and END outside it
+    const leaving = names.filter(p => {
+      const a = houseOf(first, p), b = houseOf(last, p)
+      return a !== null && b !== null && a !== b && focusHouses.has(a) && !focusHouses.has(b)
+    })
+    if (leaving.length === 0) return null
+    // the first month in which ALL of them have left — that is when it changes
+    const turn = allFuture.find(m =>
+      leaving.every(p => { const h = houseOf(m, p); return h !== null && !focusHouses.has(h) })
+    )
+    if (!turn?.label) return null
+    return { planets: leaving, from: leaving.map(p => houseOf(first, p) as number), month: String(turn.label) }
+  })()
   const dot = (m:string) => m==='green'?'🟢':m==='red'?'🔴':'🟡'
   const Row = ({m,highlight}:{m:GMonth;highlight?:boolean}) => (
     <div style={{padding:'11px 13px',borderRadius:'10px',marginBottom:'7px',
@@ -670,6 +723,11 @@ function GocharTimeline({ g, lang, isPaid, slug }:{ g:Record<string,unknown>; la
         {s(g.caution_month as string)!=='—' && <span style={{padding:'5px 10px',borderRadius:'8px',background:'rgba(239,68,68,0.08)',border:'1px solid rgba(239,68,68,0.22)',color:'#fca5a5',fontSize:'11.5px',fontWeight:600}}>🔴 {lbl('cautionMonth',lang)}: {String(g.caution_month)}</span>}
       </div>
       {bg.length>0 && <p style={{margin:'0 0 6px',color:'#64748b',fontSize:'11px'}}>{lbl('background',lang)}: {bg.map(b=>`${b.planet} → ${ordinal(b.house)}`).join(' · ')}</p>}
+      {focusShift && <p style={{margin:'0 0 6px',color:'#94a3b8',fontSize:'11px',lineHeight:1.55}}>
+        {lbl('shiftNote',lang)
+          .replace('{planets}', focusShift.planets.map((p,i)=>`${p} (${ordinal(focusShift.from[i])})`).join(', '))
+          .replace('{month}', focusShift.month)}
+      </p>}
       {past.length>0 && <><Head t={lbl('tlPast',lang)}/>{past.map(m=><Row key={m.ym} m={m}/>)}</>}
       {cur?.label   && <><Head t={lbl('tlNow',lang)}/><Row m={cur} highlight/></>}
       {future.length>0 && <><Head t={lbl('tlNext',lang)}/>{future.map(m=><Row key={m.ym} m={m}/>)}</>}
