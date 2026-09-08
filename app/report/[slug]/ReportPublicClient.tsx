@@ -5,8 +5,17 @@
  * TRIKAAL VAANI — Public SEO Report Client
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/report/[slug]/ReportPublicClient.tsx
- * VERSION: 10.3 (08 Sep 2026) — five new cards + useState hotfix
+ * VERSION: 10.4 (08 Sep 2026) — card order: recognition before the ask
  * SIGNED: ROHIIT GUPTA, CEO
+ *
+ * v10.4 (08 Sep 2026) — CARD ORDER
+ *   BhriguChapter and PastDashaTimeline moved ABOVE the LockedTeaser. They had
+ *   been rendering below it, so the two cards that make a reader recognise
+ *   their own chart sat underneath the "unlock" pitch, where half of readers
+ *   never reach. Recognition earns the Rs 51; it cannot do that from below the
+ *   ask. The depth cards (drishti, argala, ashtakavarga) stay after the chart
+ *   and evidence, where "how strong is this chart" is the natural question.
+ *   No component changed — only where three lines sit.
  *
  * v10.3 (08 Sep 2026) — FIVE NEW CARDS, AND ONE HOTFIX
  *   HOTFIX FIRST, because it took the page down. PastDashaTimeline uses
@@ -2326,29 +2335,38 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
               lines instead state something TRUE and SPECIFIC about this person's
               own chart and stop halfway. The facts come straight from the engine,
               so nothing is invented; only the consequence is withheld. */}
+          {/* ═══ v10.4 (08 Sep 2026) — ORDER CHANGED, on Rohiit's reading of
+              the live report. These two cards were rendering BELOW the paywall
+              teaser, which is the worst possible place for them: they are the
+              two things that make a reader recognise their own chart, and half
+              the readers never scroll past the "unlock" pitch to reach them.
+              Recognition is what earns the Rs 51 — so it has to come before
+              the ask, not after it.
+
+              The chapter says WHAT part of life is running now; the past
+              periods let the reader confirm it against their own history. Both
+              are free on purpose. The three depth cards — drishti, argala,
+              ashtakavarga — stay below, after the chart and evidence, where
+              "how strong is this chart" is the natural next question. ═══ */}
+          <BhriguChapter bhriguObj={bhriguObj as Record<string, unknown>} lang={lang} isPaid={isPaid} slug={slug}/>
+
+          <PastDashaTimeline pj={pj as Record<string, unknown>} dob={s(report.dob, '')} lang={lang}/>
+
           {!isPaid && (
             <LockedTeaser slug={slug} lang={lang} lines={suspenseLines}/>
           )}
           <ConfidenceCard c={confidence} lang={lang}/>
 
-          {/* v9.5: past periods sit directly above the current-dasha card, so
-              the reader moves from what they can verify to what they cannot. */}
-          {/* v9.6: Ashtakavarga sits above the past periods — the reader
-              moves from where their chart is strong, to when it was active. */}
-          {/* v9.7: the chapter first — it is what makes a reader recognise
-              their own chart — then where the chart is strong, then when. */}
-          <BhriguChapter bhriguObj={bhriguObj as Record<string, unknown>} lang={lang} isPaid={isPaid} slug={slug}/>
-
-          {/* v9.8: after the chapter, who is helping and who is pressing. */}
+          {/* v10.4 (08 Sep 2026): the three DEPTH cards stay here, after the
+              chart and the evidence, because they answer "how strong is this
+              chart" — a question the reader only has once they have seen it.
+              The two RECOGNITION cards (chapter, past periods) were moved ABOVE
+              the paywall teaser; see the note there. */}
           <DrishtiCard engineSig={engineSig as Record<string, unknown>} lang={lang} isPaid={isPaid} slug={slug}/>
 
-          {/* v9.9: argala reads as help vs hold-up. Rendering this needed
-              parashara.py argala v2.0 first — see the note on the card. */}
           <ArgalaCard engineSig={engineSig as Record<string, unknown>} lang={lang} isPaid={isPaid} slug={slug}/>
 
           <AshtakavargaCard engineSig={engineSig as Record<string, unknown>} lang={lang} isPaid={isPaid} slug={slug}/>
-
-          <PastDashaTimeline pj={pj as Record<string, unknown>} dob={s(report.dob, '')} lang={lang}/>
 
           <div style={{background:BG_CARD,border:`1px solid ${G(0.12)}`,borderRadius:'16px',padding:'22px',marginBottom:'14px'}}>
             <p style={{margin:'0 0 14px',color:GOLD,fontSize:'11px',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.08em'}}>{lbl('dashaKaal',lang)}</p>
