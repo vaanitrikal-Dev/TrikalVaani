@@ -107,6 +107,16 @@
  * TRIKAAL VAANI — Unified Prediction Endpoint
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/api/predict/route.ts
+ * VERSION: 15.8 — shodashvarga whitelisted
+ *
+ * v15.8 (2026-09-09): ONE line. shodashvarga added to the whitelist so
+ *   template_engine v3.5's sixteen divisional charts reach the DB. Not fed to
+ *   the Gemini prompt: the evidence block already carries D9 and D10, which
+ *   are the two vargas the narrative actually reads, and sixteen more charts
+ *   would cost tokens the writer has no rule for using. When a D-chart card
+ *   exists in the report and there is something for the narrative to say about
+ *   it, that is the moment to revisit — not before.
+ *
  * VERSION: 15.7 — varshphal whitelisted; Saturn + annual chart reach the writer
  *
  * v15.7 (2026-09-09): TWO changes, both about the same gap.
@@ -1159,6 +1169,15 @@ function mergeTemplateWithGemini(
     // again. If you add a key to template_engine, add it here in the same
     // breath. Approved by Rohiit, 09 Sep 2026.
     varshphal:        templateObj.varshphal          ?? null,
+    // v15.8 (09 Sep 2026) — template_engine v3.5 returns shodashvarga: all
+    // sixteen divisional charts of BPHS Ch.6 for every graha, plus the count
+    // of how many of them each graha holds its rasi sign in. Added as one
+    // complete set on Rohiit's instruction, after D9, D10 and D7 had each been
+    // a separate build. Whitelisted in the same breath as the engine change —
+    // which is the rule this list keeps teaching: chartEvidence was lost until
+    // v14.17, sadeSati and varshphal were both caught only after they had
+    // already shipped as null.
+    shodashvarga:     templateObj.shodashvarga       ?? null,
     dataIntegrity:    templateObj.dataIntegrity      ?? null,
     templateVersion:  templateObj.meta?.version      ?? null,
     // Parashari yogas + Bhrigu theme — computed by VM /synthesize, previously
