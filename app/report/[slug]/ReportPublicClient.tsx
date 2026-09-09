@@ -5,9 +5,26 @@
  * TRIKAAL VAANI — Public SEO Report Client
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/report/[slug]/ReportPublicClient.tsx
- * VERSION: 10.9 (09 Sep 2026) — layout by importance; free tier is engine-only
+ * VERSION: 11.0 (09 Sep 2026) — the method comes off the page
  * SIGNED: ROHIIT GUPTA, CEO
 
+ *
+ * v11.0 (09 Sep 2026) — THE METHOD COMES OFF THE PAGE
+ *   Rohiit: "remove Chaalak, Conductor aur Sawari — it's our personal
+ *   technique and we should not disclose it... just share the result in
+ *   simple words." He is right twice over. A technique he worked out is not
+ *   something to publish for competitors to copy, and a reader does not need
+ *   to see the machinery to be shown what it produced.
+ *   BusCard is now SamayCard. The driver/conductor/passenger image is gone,
+ *   and so is the Sanskrit that went with it — no mitra, shatru, sam, maraka
+ *   or yogakaraka anywhere on the page. Every one of those still decides what
+ *   the card says; none of them is named. Rahu and Ketu still resolve through
+ *   another graha, silently.
+ *   It also finally carries the VERDICT LINE that v10.5 through v10.9 all
+ *   missed: three separate statements were never the model. The long period
+ *   sets the ceiling and the running stretch moves inside it, and the card now
+ *   says which of the four that makes before showing a single date.
+ *   And the list starts from the stretch running NOW rather than a past one.
  *
  * v10.9 (09 Sep 2026) — THE PAGE, REORDERED BY WHAT IS WORTH MOST
  *   Rohiit, reading the live report: the Bus prediction belongs at the top,
@@ -458,16 +475,6 @@ const L: Record<string, Record<Lang,string>> = {
   avReduced:    {hinglish:'Shodhan ke baad ye ank {n} rah jaate hain. Ye girawat nahi hai — BPHS (adhyay 67 aur 68) do charan mein dohraye hue bal ko hataata hai, taaki jo bacha rahe wahi asli bal ho.', hindi:'शोधन के बाद ये अंक {n} रह जाते हैं। यह गिरावट नहीं है — BPHS (अध्याय 67 और 68) दो चरणों में दोहराए हुए बल को हटाता है, ताकि जो बचा रहे वही असली बल हो।', english:'After Shodhana these come to {n}. That is not a fall — BPHS (Ch.67 and 68) strips out repeated strength in two stages, so what remains is the strength that actually counts.'},
   avTease:      {hinglish:'Shodhan ke baad ke shuddh ank — BPHS adhyay 67 aur 68', hindi:'शोधन के बाद के शुद्ध अंक — BPHS अध्याय 67 और 68', english:'The reduced figures after Shodhana — BPHS Ch.67 and 68'},
   avFoot:       {hinglish:'Kam ank ka matlab wo kshetra bandh nahi hai — matlab wahan prayaas zyada lagega. Aur zyada ank ka matlab kuch apne aap ho jaayega, ye bhi nahi.', hindi:'कम अंक का मतलब वह क्षेत्र बंद नहीं है — मतलब वहाँ प्रयास ज़्यादा लगेगा। और ज़्यादा अंक का मतलब कुछ अपने आप हो जाएगा, यह भी नहीं।', english:'A low number does not mean that area is closed — it means more effort is needed there. And a high number does not mean anything happens on its own.'},
-  // v10.5 — the bus card. Statements only, never a score. See the long note
-  // above BusCard for the three scored models that failed before this one.
-  // v10.6 — the passenger level of the bus, which v10.5 left out.
-  busPass:      {hinglish:'Abhi ki sawari — {pd}', hindi:'अभी की सवारी — {pd}', english:'Riding right now — {pd}'},
-  busPass_yogakaraka: {hinglish:'{pd} aapke lagna ka yogakaraka hai. Ye chhota hissa saath deta hai, chahe bada daur kaisa bhi ho.', hindi:'{pd} आपके लग्न का योगकारक है। यह छोटा हिस्सा साथ देता है, चाहे बड़ा दौर कैसा भी हो।', english:'{pd} is your ascendant\'s yogakaraka. This short stretch helps, whatever the larger period is doing.'},
-  busPass_dost: {hinglish:'{pd} aapke lagna ka mitra hai — agle kuch mahine tulna mein sahaj rehte hain.', hindi:'{pd} आपके लग्न का मित्र है — अगले कुछ महीने तुलना में सहज रहते हैं।', english:'{pd} is friendly to your ascendant — the next few months run comparatively easy.'},
-  busPass_sam:  {hinglish:'{pd} na mitra hai na shatru — ye chhota hissa apne aap mein tatasth hai.', hindi:'{pd} न मित्र है न शत्रु — यह छोटा हिस्सा अपने आप में तटस्थ है।', english:'{pd} is neither friend nor enemy — this short stretch is neutral in itself.'},
-  busPass_maraka: {hinglish:'{pd} maraka sthaan ka swami hai — in mahinon mein savdhaani thodi zyada.', hindi:'{pd} मारक स्थान का स्वामी है — इन महीनों में सावधानी थोड़ी ज़्यादा।', english:'{pd} rules a maraka house — a little extra care through these months.'},
-  busPass_dushman: {hinglish:'{pd} aapke lagna ka shatru hai — agle kuch mahine thode ubad-khabad rehte hain. Ye sabse chhota star hai, isliye asar bhi sabse halka.', hindi:'{pd} आपके लग्न का शत्रु है — अगले कुछ महीने थोड़े ऊबड़-खाबड़ रहते हैं। यह सबसे छोटा स्तर है, इसलिए असर भी सबसे हल्का।', english:'{pd} is unfriendly to your ascendant — the next few months run bumpy. This is the shortest level, so its effect is the mildest.'},
-  busPass_chhaya: {hinglish:'{pd} chhaya grah hai — uska phal bhaav swamitva se nahi padha jaata.', hindi:'{pd} छाया ग्रह है — उसका फल भाव स्वामित्व से नहीं पढ़ा जाता।', english:'{pd} is a shadow graha — its results are not read from house lordship.'},
 
   // v10.6 — Sade Sati. Dates only for the past; no verdict, ever.
   // v10.8 — Varshphal. The card names its own stage; the year lord is not computed.
@@ -505,6 +512,22 @@ const L: Record<string, Record<Lang,string>> = {
   ssMore:       {hinglish:'{n} aur beete daur — poori Shani timeline', hindi:'{n} और बीते दौर — पूरी शनि टाइमलाइन', english:'{n} more past windows — the full Saturn timeline'},
   ssNotPunishment: {hinglish:'Sade Sati dand nahi hai. Shastra Shani ko apne hi karm ka nyaayadhish kehta hai — jo neev in saalon mein padti hai, wahi sabse zyada tikti hai. Bahut log apna sabse mazboot kaam isi daur mein shuru karte hain.', hindi:'साढ़े साती दंड नहीं है। शास्त्र शनि को अपने ही कर्म का न्यायाधीश कहता है — जो नींव इन सालों में पड़ती है, वही सबसे ज़्यादा टिकती है। बहुत लोग अपना सबसे मज़बूत काम इसी दौर में शुरू करते हैं।', english:'Sade Sati is not a punishment. The shastra reads Saturn as the judge of your own work — and what is founded in these years tends to be what lasts. A great many people begin their strongest work inside exactly this period.'},
   ssFoot:       {hinglish:'Ye tareekhein khagolik hain — Shani kis rashi mein kab tha, bas itna. Beete daur padhiye aur khud dekhiye ki mel khaate hain ya nahi; koi kundali ye nahi bata sakti ki us daur mein kya hua tha.', hindi:'ये तारीख़ें खगोलीय हैं — शनि किस राशि में कब था, बस इतना। बीते दौर पढ़िए और खुद देखिए कि मेल खाते हैं या नहीं; कोई कुंडली यह नहीं बता सकती कि उस दौर में क्या हुआ था।', english:'These dates are astronomical — which sign Saturn occupied, and when. Read the past windows and judge the fit yourself; no chart can say what actually happened in them.'},
+  // v11.0 — the period card. Plain words only: no chaalak/conductor/sawari,
+  // and no mitra/shatru/yogakaraka either. The classification still decides
+  // every line below; it is simply never named to the reader.
+  syTitle:      {hinglish:'🔱 Abhi Aapka Samay Kaisa Hai', hindi:'🔱 अभी आपका समय कैसा है', english:'🔱 What Your Time Is Like Right Now'},
+  syBoth:       {hinglish:'Ye lamba daur aasan nahi hai, aur jo hissa abhi chal raha hai wo bhi nahi. Is samay har kaam mein mehnat zyada lagegi — par ye guzar jaata hai, aur jo aap ab khade karte hain wo tikta hai.', hindi:'यह लंबा दौर आसान नहीं है, और जो हिस्सा अभी चल रहा है वह भी नहीं। इस समय हर काम में मेहनत ज़्यादा लगेगी — पर यह गुज़र जाता है, और जो आप अब खड़ा करते हैं वह टिकता है।', english:'This long stretch is not an easy one, and neither is the part of it running now. Everything will take more effort than it should — but it passes, and what you build in it tends to hold.'},
+  syLongHard:   {hinglish:'Ye lamba daur aasan nahi hai — par jo hissa abhi chal raha hai wo poore daur mein tulna mein behtar hai. Ye samay kaam nikalne ka hai, chahe raasta halka na lage.', hindi:'यह लंबा दौर आसान नहीं है — पर जो हिस्सा अभी चल रहा है वह पूरे दौर में तुलना में बेहतर है। यह समय काम निकालने का है, चाहे रास्ता हल्का न लगे।', english:'This long stretch is not an easy one — but the part running now is among its better ones. This is a window to get things done, even if the road does not feel light.'},
+  syNowHard:    {hinglish:'Jo hissa abhi chal raha hai wo bhaari hai — par ye lamba daur aapke saath hai, isliye ye hissa sambhal jaayega. Iske aage raasta khulta hai.', hindi:'जो हिस्सा अभी चल रहा है वह भारी है — पर यह लंबा दौर आपके साथ है, इसलिए यह हिस्सा सँभल जाएगा। इसके आगे रास्ता खुलता है।', english:'The part running now is heavy — but the longer stretch is on your side, so this passes without lasting damage. The road opens after it.'},
+  syBothGood:   {hinglish:'Ye lamba daur aur abhi ka hissa, dono aapke saath hain. Jo shuru karna hai, karne ka samay yahi hai.', hindi:'यह लंबा दौर और अभी का हिस्सा, दोनों आपके साथ हैं। जो शुरू करना है, करने का समय यही है।', english:'The long stretch and the part running now are both with you. Whatever you mean to begin, this is the time.'},
+  syNow:        {hinglish:'abhi', hindi:'अभी', english:'now'},
+  syBest:       {hinglish:'Poore daur ka sabse achha hissa. Jo bada kaam rukka hua hai, wo yahan chalta hai.', hindi:'पूरे दौर का सबसे अच्छा हिस्सा। जो बड़ा काम रुका हुआ है, वह यहाँ चलता है।', english:'The best stretch of the whole period. Whatever big thing has been waiting moves here.'},
+  syGood:       {hinglish:'Ye hissa saath deta hai — cheezein tulna mein aasani se banti hain.', hindi:'यह हिस्सा साथ देता है — चीज़ें तुलना में आसानी से बनती हैं।', english:'This stretch supports you — things come together more easily than usual.'},
+  syFlat:       {hinglish:'Ye hissa na khaas achha hai na bura — jo aap laga kar chalenge, wahi milega.', hindi:'यह हिस्सा न ख़ास अच्छा है न बुरा — जो आप लगाकर चलेंगे, वही मिलेगा।', english:'This stretch is neither for you nor against — you get out of it what you put in.'},
+  syCare:       {hinglish:'Is hisse mein sambhal kar chalna hai — jaldbaazi mein liya faisla mehnga padta hai.', hindi:'इस हिस्से में सँभल कर चलना है — जल्दबाज़ी में लिया फ़ैसला महँगा पड़ता है।', english:'This stretch asks for care — a decision taken in a hurry costs more here than elsewhere.'},
+  syHard:       {hinglish:'Ye hissa mehnat maangta hai — kaam hote hain, par dhakke ke saath.', hindi:'यह हिस्सा मेहनत माँगता है — काम होते हैं, पर धक्के के साथ।', english:'This stretch asks for work — things do happen, but against friction.'},
+  syMore:       {hinglish:'{n} aur hisse — poora samay-kram', hindi:'{n} और हिस्से — पूरा समय-क्रम', english:'{n} more stretches — the full sequence'},
+  syFoot:       {hinglish:'Ye hisse vishay batate hain, ghatna nahi. Koi kundali ye nahi kah sakti ki kis din kya hoga — aur jo kahe, wo anumaan bech raha hai.', hindi:'ये हिस्से विषय बताते हैं, घटना नहीं। कोई कुंडली यह नहीं कह सकती कि किस दिन क्या होगा — और जो कहे, वह अनुमान बेच रहा है।', english:'These stretches name a subject, not an event. No chart can say what will happen on a given day — and anyone who claims to is selling guesswork.'},
   // v10.9 — the three dasha systems together. The comparison IS the reading.
   tcTitle:      {hinglish:'⏳ Teen Ghadiyaan — Teen Paddhati, Ek Hi Samay', hindi:'⏳ तीन घड़ियाँ — तीन पद्धति, एक ही समय', english:'⏳ Three Clocks — Three Systems, One Moment'},
   tcIntro:      {hinglish:'Jyotish mein samay naapne ke kai tarike hain, aur teeno alag ganit se chalte hain. Jahan teeno ek hi baat kahein, wo sanket zyada mazboot hota hai.', hindi:'ज्योतिष में समय नापने के कई तरीके हैं, और तीनों अलग गणित से चलते हैं। जहाँ तीनों एक ही बात कहें, वह संकेत ज़्यादा मज़बूत होता है।', english:'Jyotish measures time in more than one way, and these three run on different arithmetic. Where all three agree, the signal is worth more.'},
@@ -516,35 +539,6 @@ const L: Record<string, Record<Lang,string>> = {
   tcChaSrc:     {hinglish:'rashi par chalti hai, grah par nahi — Jaimini', hindi:'राशि पर चलती है, ग्रह पर नहीं — जैमिनि', english:'runs on the signs, not the planets — Jaimini'},
   tcTease:      {hinglish:'Har paddhati kab tak chalti hai — teeno ki tareekhein', hindi:'हर पद्धति कब तक चलती है — तीनों की तारीख़ें', english:'How long each one runs — the dates for all three'},
   tcFoot:       {hinglish:'Ye teeno alag granthon se aati hain aur alag ganit se chalti hain — isi liye alag jawab dena inka dosh nahi, inka swabhav hai. Koi ek paddhati akeli sach nahi hoti.', hindi:'ये तीनों अलग ग्रंथों से आती हैं और अलग गणित से चलती हैं — इसीलिए अलग जवाब देना इनका दोष नहीं, इनका स्वभाव है। कोई एक पद्धति अकेली सच नहीं होती।', english:'These come from different classics and run on different arithmetic — so disagreeing is their nature, not a fault. No single system is the truth on its own.'},
-  busTitle:     {hinglish:'🚌 Is Daur Ka Chaalak Aur Sahyaatri', hindi:'🚌 इस दौर का चालक और सहयात्री', english:'🚌 Who Is Driving This Period, and Who Rides Along'},
-  busIntro:     {hinglish:'Bada daur ek chaalak ki tarah hai aur uske andar ke chhote daur sahyaatri ki tarah. Shastra dekhta hai ki inme se kaun aapke lagna ka mitra hai — aur chaalak ka rishta sabse bhaari padta hai.', hindi:'बड़ा दौर एक चालक की तरह है और उसके अंदर के छोटे दौर सहयात्री की तरह। शास्त्र देखता है कि इनमें से कौन आपके लग्न का मित्र है — और चालक का रिश्ता सबसे भारी पड़ता है।', english:'The larger period is like a driver, and the shorter ones inside it ride along. The shastra asks which of them is friendly to your ascendant — and the driver\'s relationship weighs heaviest.'},
-  busDriver:    {hinglish:'Chaalak — {md}', hindi:'चालक — {md}', english:'The driver — {md}'},
-  busDriver_yogakaraka: {hinglish:'{md} aapke lagna ka yogakaraka hai — kendra aur trikon dono ka swami. Poore daur ka aadhaar mazboot hai.', hindi:'{md} आपके लग्न का योगकारक है — केंद्र और त्रिकोण दोनों का स्वामी। पूरे दौर का आधार मज़बूत है।', english:'{md} is the yogakaraka for your ascendant — lord of both a kendra and a trikona. The whole period rests on a strong footing.'},
-  busDriver_dost: {hinglish:'{md} aapke lagna ka mitra hai. Poora daur tulna mein sahaj rehta hai.', hindi:'{md} आपके लग्न का मित्र है। पूरा दौर तुलना में सहज रहता है।', english:'{md} is friendly to your ascendant. The period runs comparatively easy throughout.'},
-  busDriver_sam: {hinglish:'{md} aapke lagna ke liye na mitra hai na shatru. Daur ka rang uske andar ke chhote daur tay karenge.', hindi:'{md} आपके लग्न के लिए न मित्र है न शत्रु। दौर का रंग उसके अंदर के छोटे दौर तय करेंगे।', english:'{md} is neither friend nor enemy to your ascendant. The shorter periods inside will set the tone.'},
-  busDriver_maraka: {hinglish:'{md} aapke lagna ke liye maraka sthaan ka swami hai. Is daur mein dhairya aur savdhaani zyada maangi jaati hai.', hindi:'{md} आपके लग्न के लिए मारक स्थान का स्वामी है। इस दौर में धैर्य और सावधानी ज़्यादा माँगी जाती है।', english:'{md} rules a maraka house for your ascendant. This period asks for more patience and more care.'},
-  busDriver_dushman: {hinglish:'{md} aapke lagna ka shatru hai. Shastra kehta hai aise daur mein achhe chhote daur bhi poori raahat nahi de paate — prayaas har jagah zyada lagta hai.', hindi:'{md} आपके लग्न का शत्रु है। शास्त्र कहता है ऐसे दौर में अच्छे छोटे दौर भी पूरी राहत नहीं दे पाते — प्रयास हर जगह ज़्यादा लगता है।', english:'{md} is unfriendly to your ascendant. The shastra says that in such a period even the good stretches cannot bring full relief — effort runs higher throughout.'},
-  busDriver_chhaya: {hinglish:'{md} chhaya grah hai — uska koi rashi swamitva nahi hota, isliye lagna se uska rishta bhaav swamitva se nahi padha jaata.', hindi:'{md} छाया ग्रह है — उसका कोई राशि स्वामित्व नहीं होता, इसलिए लग्न से उसका रिश्ता भाव स्वामित्व से नहीं पढ़ा जाता।', english:'{md} is a shadow graha — it owns no sign, so its relationship to the ascendant is not read from house lordship.'},
-  // v10.9 — Rahu/Ketu read through another graha. BPHS Vol 1 sloka 10:
-  // "they act according to their position, association and dispositors."
-  busShadow_sang:  {hinglish:'{md} ka apna rashi swamitva nahi hota — shastra kehta hai wo jis grah ke saath baitha ho, uska phal deta hai. Aapke chart mein wo {via} ke saath hai.', hindi:'{md} का अपना राशि स्वामित्व नहीं होता — शास्त्र कहता है वह जिस ग्रह के साथ बैठा हो, उसका फल देता है। आपके चार्ट में वह {via} के साथ है।', english:'{md} owns no sign of its own — the shastra reads it through the graha it sits with. In your chart that is {via}.'},
-  busShadow_swami: {hinglish:'{md} ka apna rashi swamitva nahi hota — shastra kehta hai wo jis rashi mein baitha ho, uske swami ka phal deta hai. Aapke chart mein wo swami {via} hai.', hindi:'{md} का अपना राशि स्वामित्व नहीं होता — शास्त्र कहता है वह जिस राशि में बैठा हो, उसके स्वामी का फल देता है। आपके चार्ट में वह स्वामी {via} है।', english:'{md} owns no sign of its own — the shastra reads it through the lord of the sign it occupies. In your chart that lord is {via}.'},
-  busShadowBond_yogakaraka: {hinglish:'Aur {via} aapke lagna ka yogakaraka hai — is daur ka aadhaar mazboot hai.', hindi:'और {via} आपके लग्न का योगकारक है — इस दौर का आधार मज़बूत है।', english:'And {via} is your ascendant\'s yogakaraka — the period rests on a strong footing.'},
-  busShadowBond_dost: {hinglish:'Aur {via} aapke lagna ka mitra hai — is daur ka rukh anukool hai.', hindi:'और {via} आपके लग्न का मित्र है — इस दौर का रुख़ अनुकूल है।', english:'And {via} is friendly to your ascendant — the period leans your way.'},
-  busShadowBond_sam: {hinglish:'Aur {via} na mitra hai na shatru — daur ka rang uske andar ke chhote daur tay karenge.', hindi:'और {via} न मित्र है न शत्रु — दौर का रंग उसके अंदर के छोटे दौर तय करेंगे।', english:'And {via} is neither friend nor enemy — the shorter periods inside will set the tone.'},
-  busShadowBond_maraka: {hinglish:'Aur {via} maraka sthaan ka swami hai — is daur mein dhairya zyada maanga jaata hai.', hindi:'और {via} मारक स्थान का स्वामी है — इस दौर में धैर्य ज़्यादा माँगा जाता है।', english:'And {via} rules a maraka house — the period asks for more patience.'},
-  busShadowBond_dushman: {hinglish:'Aur {via} aapke lagna ka shatru hai — isi liye is daur mein prayaas har jagah zyada lagta hai.', hindi:'और {via} आपके लग्न का शत्रु है — इसीलिए इस दौर में प्रयास हर जगह ज़्यादा लगता है।', english:'And {via} is unfriendly to your ascendant — which is why effort runs higher throughout this period.'},
-  busShadowBond_chhaya: {hinglish:'Aur {via} bhi chhaya grah hai — yahan koi saaf kathan nahi banta.', hindi:'और {via} भी छाया ग्रह है — यहाँ कोई साफ़ कथन नहीं बनता।', english:'And {via} is also a shadow graha — no clear statement can be made here.'},
-  busNow:       {hinglish:'abhi', hindi:'अभी', english:'now'},
-  busCond_yogakaraka: {hinglish:'{ad} aapke lagna ka yogakaraka hai — poore daur ka sabse sahaayak hissa.', hindi:'{ad} आपके लग्न का योगकारक है — पूरे दौर का सबसे सहायक हिस्सा।', english:'{ad} is your ascendant\'s yogakaraka — the most supportive stretch of the period.'},
-  busCond_dost: {hinglish:'{ad} aapke lagna ka mitra hai — ye hissa saath deta hai.', hindi:'{ad} आपके लग्न का मित्र है — यह हिस्सा साथ देता है।', english:'{ad} is friendly to your ascendant — this stretch supports you.'},
-  busCond_sam:  {hinglish:'{ad} na mitra hai na shatru — ye hissa apne aap mein tatasth hai.', hindi:'{ad} न मित्र है न शत्रु — यह हिस्सा अपने आप में तटस्थ है।', english:'{ad} is neither friend nor enemy — this stretch is neutral in itself.'},
-  busCond_maraka: {hinglish:'{ad} maraka sthaan ka swami hai — is hisse mein savdhaani zyada.', hindi:'{ad} मारक स्थान का स्वामी है — इस हिस्से में सावधानी ज़्यादा।', english:'{ad} rules a maraka house — this stretch asks for extra care.'},
-  busCond_dushman: {hinglish:'{ad} aapke lagna ka shatru hai — ye hissa is daur ka sabse kathin hai.', hindi:'{ad} आपके लग्न का शत्रु है — यह हिस्सा इस दौर का सबसे कठिन है।', english:'{ad} is unfriendly to your ascendant — the hardest stretch of this period.'},
-  busCond_chhaya: {hinglish:'{ad} chhaya grah hai — uska phal jis grah ke saath baitha ho usse aur uski rashi se padha jaata hai, bhaav swamitva se nahi.', hindi:'{ad} छाया ग्रह है — उसका फल जिस ग्रह के साथ बैठा हो उससे और उसकी राशि से पढ़ा जाता है, भाव स्वामित्व से नहीं।', english:'{ad} is a shadow graha — its results are read from the graha it sits with and the sign it occupies, not from house lordship.'},
-  busMore:      {hinglish:'{n} aur hisse — poora kram', hindi:'{n} और हिस्से — पूरा क्रम', english:'{n} more stretches — the full sequence'},
-  busShadowFoot: {hinglish:'Rahu-Ketu ke liye shastra teen cheezein dekhta hai — sthiti, sang aur rashi ka swami (BPHS khand 1, shlok 10). Yahan un teen mein se do use hui hain.', hindi:'राहु-केतु के लिए शास्त्र तीन चीज़ें देखता है — स्थिति, संग और राशि का स्वामी (BPHS खंड १, श्लोक १०)। यहाँ उन तीन में से दो उपयोग हुई हैं।', english:'For Rahu and Ketu the shastra weighs three things — position, association and the lord of the occupied sign (BPHS Vol 1, sloka 10). Two of those three are used here.'},
-  busFoot:      {hinglish:'Yahan koi ank nahi hai, jaanbujh kar. Mitra ya shatru hona shastra ka seedha kathan hai; usse number banana anumaan hota. Aur ye hisse vishay batate hain, ghatna nahi — koi kundali ye nahi kah sakti ki kis din kya hoga.', hindi:'यहाँ कोई अंक नहीं है, जानबूझकर। मित्र या शत्रु होना शास्त्र का सीधा कथन है; उससे संख्या बनाना अनुमान होता। और ये हिस्से विषय बताते हैं, घटना नहीं — कोई कुंडली यह नहीं कह सकती कि किस दिन क्या होगा।', english:'There is no number here, deliberately. Friend or enemy is a plain classical statement; turning it into a score would be guesswork. And these stretches name a subject, not an event.'},
   pastTitle:    {hinglish:'🕰 Aapke Jeevan Ke Daur — kya ye mel khaate hain?', hindi:'🕰 आपके जीवन के दौर — क्या ये मेल खाते हैं?', english:'🕰 The Chapters of Your Life — do these match?'},
   pastIntro:    {hinglish:'Ye tareekhein aapke janm nakshatra se nikli hain — inme koi anumaan nahi hai. Har daur ka apna vishay hota hai. Padhiye aur bataiye ki mel khaata hai ya nahi.', hindi:'ये तारीख़ें आपके जन्म नक्षत्र से निकली हैं — इनमें कोई अनुमान नहीं है। हर दौर का अपना विषय होता है। पढ़िए और बताइए कि मेल खाता है या नहीं।', english:'These dates come from your birth nakshatra — nothing here is guesswork. Each period carries its own theme. Read them and tell us whether they match.'},
   pastPartial:  {hinglish:'janm se', hindi:'जन्म से', english:'from birth'},
@@ -1573,57 +1567,40 @@ function AshtakavargaCard({ engineSig, lang, isPaid, slug }:{
 // ════════════════════════════════════════════════════════════════════════════
 
 // ════════════════════════════════════════════════════════════════════════════
-// THE BUS — driver, conductor, passenger — v10.5 (09 Sep 2026)
+// THE PERIOD CARD — v11.0 (09 Sep 2026)
 //
-// ROHIIT'S MODEL, IN HIS OWN WORDS, 09 Sep 2026:
-//   "Rohit is the bus. Mahadasha is the driver, Antardasha is the conductor,
-//    Sookshma dasha are the passengers. All relations matter — between Rohit,
-//    driver, conductor and passengers. If the driver is Rohit's friend he will
-//    save the accident even if the conductor is Rohit's enemy. If the driver
-//    is an enemy he will crash even if the conductor is a friend."
+// WHAT CHANGED AND WHY, because the reason matters more than the code
+//   Until v10.9 this card was built around Rohiit's own driver / conductor /
+//   passenger image — the mahadasha drives, the antardasha collects fares, the
+//   sub-period rides along. It is a genuinely good way to think and it is HIS.
+//   He asked for it off the page: a technique you invented is not something to
+//   hand to competitors, and a reader does not need the machinery to be shown
+//   the machine. "Just share the result in simple words."
 //
-//   The correction that made this work: every level is judged against ROHIT —
-//   the LAGNA — not against each other. An earlier build compared mahadasha
-//   lord to antardasha lord and failed on his own life. "Friend of the native"
-//   is the classical functional benefic/malefic for that ascendant, read from
-//   house lordship, and that is what this card uses.
+//   So the metaphor is gone, and with it the Sanskrit. No chaalak, no
+//   conductor, no sawari; and no mitra, shatru, sam, maraka or yogakaraka
+//   either. The classification still drives every line — it simply is not
+//   named. A reader is told their period is demanding; they are not told it is
+//   demanding BECAUSE its lord rules the 3rd and 10th from the ascendant.
 //
-// TESTED AGAINST A REAL LIFE, NOT TUNED TO IT
-//   Rohiit's chart, Kumbha lagna, Mars mahadasha Feb 2014 – Feb 2021. Mars owns
-//   the 3rd and 10th from Kumbha, so Mars is a functional malefic — an enemy
-//   driver for the whole seven years, which is the period he describes as the
-//   worst of his life. Within it:
-//     Mar 2014  collapse begins   driver enemy + conductor enemy (Mars/Mars)
-//     Jun 2016  income stops      conductor Jupiter — which owns the 2nd
-//                                 (wealth) and 11th (income) from Kumbha and
-//                                 is a functional malefic there
-//     Jan 2018  bedridden         conductor Mercury, a friend — and it still
-//                                 went badly, which is exactly his rule about
-//                                 an enemy driver
-//     Jun 2019  surgery succeeds  conductor Venus, the yogakaraka for Kumbha
-//   Four moments, four fits, and the Jupiter one lands on the exact two houses
-//   that govern money.
+// THE VERDICT LINE — the thing v10.5 through v10.9 all missed
+//   Those versions printed three separate statements and left the reader to
+//   join them. Rohiit's rule was never three statements; it was a HIERARCHY:
+//   "if the driver is an enemy he will crash even if the conductor is a
+//   friend." So the long period sets the ceiling and the short one moves
+//   inside it, and the card now says so in one sentence before anything else.
+//   Four combinations, four verdicts, and they come straight from how he
+//   described it.
 //
-// WHY THERE IS NO SCORE ANYWHERE ON THIS CARD
-//   Three scored models were built first and all three failed against the same
-//   life: Ashtakavarga sampled year by year called 2016 his best year; Saturn
-//   from the natal Moon marked 2017-2019 unremarkable, the years he was
-//   bedridden; and a seven-term weighted sum rated two windows inside that
-//   bedridden stretch among his best. Continuing to tune a formula until it
-//   fits one life is curve fitting — the Barnum effect in mathematics. What
-//   survived was the plain classical statement, so only that ships.
+// SHADOW GRAHAS STILL RESOLVE, they just do not announce it
+//   Rahu and Ketu own no sign, so they are read through the graha they sit
+//   with or the lord of their sign (BPHS Vol 1, sloka 10). v10.9 explained
+//   that to the reader in two sentences. Now it is used silently — the verdict
+//   is the same, the lecture is gone.
 //
-// YOGAKARAKA IS COMPUTED, NOT LISTED
-//   A yogakaraka owns both a kendra and a trikona. House 1 counts as both, so
-//   naively testing it makes every ascendant lord a yogakaraka — an early
-//   version did exactly that and reported Saturn as Kumbha's yogakaraka. The
-//   test below uses 4/7/10 against 5/9 and excludes the 1st. Verified against
-//   the classical list for all twelve ascendants: Vrishabha and Tula give
-//   Saturn, Karka and Simha give Mars, Makara and Kumbha give Venus, and the
-//   other six correctly give none rather than inventing one.
-//
-// DERIVED, NOT FETCHED — the engine sends only the CURRENT antardasha. The
-// nine inside a mahadasha follow from fixed Vimshottari proportions.
+// WHAT IS STILL REFUSED: any number. No score, no percentage, no rating. Three
+// scored models were built and tested against Rohiit's own 2014-2021 and all
+// three failed; the record of what each got wrong is in git history at v10.5.
 // ════════════════════════════════════════════════════════════════════════════
 
 const SIGN_LORD = ['Mars','Venus','Mercury','Moon','Sun','Mercury',
@@ -1633,7 +1610,8 @@ const RASHI_ORDER = ['Mesha','Vrishabha','Mithuna','Karka','Simha','Kanya',
 
 type Bond = 'yogakaraka' | 'dost' | 'sam' | 'maraka' | 'dushman' | 'chhaya'
 
-/** Which grahas are friendly to THIS ascendant, from house lordship. */
+/** Which grahas support THIS ascendant, from house lordship. Internal only —
+ *  none of these names reaches the page. */
 function bondsForLagna(lagna: string): Record<string, Bond> {
   const li = RASHI_ORDER.indexOf(lagna)
   if (li < 0) return {}
@@ -1644,7 +1622,9 @@ function bondsForLagna(lagna: string): Record<string, Bond> {
   }
   const out: Record<string, Bond> = {}
   for (const [p, hs] of Object.entries(owns)) {
-    const kendra  = hs.some(h => h === 4 || h === 7 || h === 10)   // 1 excluded, see note
+    // house 1 is both a kendra and a trikona, so testing it makes every
+    // ascendant lord a yogakaraka. 4/7/10 against 5/9, with the 1st excluded.
+    const kendra  = hs.some(h => h === 4 || h === 7 || h === 10)
     const trikona = hs.some(h => h === 5 || h === 9)
     if (kendra && trikona)                       out[p] = 'yogakaraka'
     else if (hs.includes(1))                     out[p] = 'dost'
@@ -1654,15 +1634,27 @@ function bondsForLagna(lagna: string): Record<string, Bond> {
     else if (hs.some(h => h === 2 || h === 7))   out[p] = 'maraka'
     else                                         out[p] = 'sam'
   }
-  // Rahu and Ketu own no sign, so functional lordship says nothing about them.
-  // Reporting them as shadow rather than guessing is the honest option.
   out.Rahu = 'chhaya'; out.Ketu = 'chhaya'
   return out
 }
 
+/** Rahu and Ketu own no sign. BPHS Vol 1 sloka 10 reads them through their
+ *  position, association and dispositor; this uses the graha they sit with,
+ *  else the lord of their sign. The reader is not told any of this. */
+function resolveShadow(planet: string, rows: PlanetRow[]): string | null {
+  const me = rows.find(r => r.planet === planet)
+  if (!me?.rashi) return null
+  const withMe = rows.find(r => r.rashi === me.rashi && r.planet !== planet
+                                && r.planet !== 'Rahu' && r.planet !== 'Ketu')
+  if (withMe) return withMe.planet
+  const li = RASHI_ORDER.indexOf(me.rashi)
+  return li < 0 ? null : SIGN_LORD[li]
+}
+
 type Leg = { start: Date; end: Date; lord: string; bond: Bond; now: boolean }
 
-function buildLegs(mdLord: string, startISO: string, endISO: string, bonds: Record<string, Bond>): Leg[] {
+function buildLegs(mdLord: string, startISO: string, endISO: string,
+                   bonds: Record<string, Bond>, rows: PlanetRow[]): Leg[] {
   const i = VIM_SEQ.findIndex(x => x[0] === mdLord)
   if (i < 0 || !startISO || !endISO) return []
   const st = new Date(startISO), en = new Date(endISO)
@@ -1675,12 +1667,16 @@ function buildLegs(mdLord: string, startISO: string, endISO: string, bonds: Reco
     const [lord, yrs] = VIM_SEQ[(i + k) % 9]
     const span = total * (yrs / 120)
     const a = new Date(cur), b = new Date(cur + span)
-    out.push({ start: a, end: b, lord, bond: bonds[lord] ?? 'sam', now: today >= a && today < b })
+    let bond = bonds[lord] ?? 'sam'
+    if (bond === 'chhaya') {
+      const via = resolveShadow(lord, rows)
+      if (via) bond = bonds[via] ?? 'sam'
+    }
+    out.push({ start: a, end: b, lord, bond, now: today >= a && today < b })
     cur += span
   }
   return out
 }
-
 
 // ════════════════════════════════════════════════════════════════════════════
 // SADE SATI — Saturn measured from the natal Moon — v10.6 (09 Sep 2026)
@@ -2184,36 +2180,12 @@ function ThreeClocks({ pj, lang, isPaid, slug }:{
   )
 }
 
-// v10.9 — RAHU AND KETU NOW GIVE AN ANSWER.
-//
-// They own no sign, so functional lordship says nothing about them directly,
-// and v10.5-10.8 reported exactly that: "chhaya grah hai — lagna se uska
-// rishta bhaav swamitva se nahi padha jaata." Technically right, and the worst
-// possible thing to put in the FIRST line of the page — which is where it
-// landed for the roughly one reader in five whose mahadasha is Rahu (18 years)
-// or Ketu (7 of the 120).
-//
-// BPHS Vol 1, sloka 10, R. Santhanam: "As far as Rahu and Ketu are concerned,
-// they act according to their POSITION, ASSOCIATION and DISPOSITORS."
-//
-// So they can be read — through another graha. This uses two of those three:
-// the graha they sit WITH if there is one, otherwise the lord of the sign they
-// occupy. Position is not attempted. The card says which of the two it used,
-// so the reader can see the reasoning rather than take a verdict on trust.
-function resolveShadow(planet: string, rows: PlanetRow[]):
-    { via: string; how: 'sang' | 'swami' } | null {
-  const me = rows.find(r => r.planet === planet)
-  if (!me?.rashi) return null
-  // association first — a graha sharing the sign speaks louder than the lord
-  const withMe = rows.find(r => r.rashi === me.rashi && r.planet !== planet
-                                && r.planet !== 'Rahu' && r.planet !== 'Ketu')
-  if (withMe) return { via: withMe.planet, how: 'sang' }
-  const li = RASHI_ORDER.indexOf(me.rashi)
-  if (li < 0) return null
-  return { via: SIGN_LORD[li], how: 'swami' }
-}
+// good / hard / flat — the only three shapes the page ever shows
+const toneOf = (b: Bond) =>
+  b === 'yogakaraka' || b === 'dost' ? 'good'
+  : b === 'dushman' || b === 'maraka' ? 'hard' : 'flat'
 
-function BusCard({ pj, lagna, lang, isPaid, slug, planetRows }:{
+function SamayCard({ pj, lagna, lang, isPaid, slug, planetRows }:{
   pj: Record<string, unknown>; lagna: string; lang: Lang; isPaid: boolean
   slug: string; planetRows: PlanetRow[]
 }) {
@@ -2224,123 +2196,87 @@ function BusCard({ pj, lagna, lang, isPaid, slug, planetRows }:{
   const md = safeObj(tl.mahadasha)
   const mdLord = s(md.lord, '')
   if (!mdLord) return null
-  const legs = buildLegs(mdLord, s(md.start, ''), s(md.end, ''), bonds)
+  const legs = buildLegs(mdLord, s(md.start, ''), s(md.end, ''), bonds, planetRows)
   if (legs.length === 0) return null
 
-  const driverBond = bonds[mdLord] ?? 'sam'
-  // a shadow graha borrows its verdict — see resolveShadow and the note above
-  const driverShadow = driverBond === 'chhaya' ? resolveShadow(mdLord, planetRows) : null
-  const driverVia: Bond | null = driverShadow ? (bonds[driverShadow.via] ?? 'sam') : null
+  // the long period, resolved through another graha if it is Rahu or Ketu
+  let longBond = bonds[mdLord] ?? 'sam'
+  if (longBond === 'chhaya') {
+    const via = resolveShadow(mdLord, planetRows)
+    if (via) longBond = bonds[via] ?? 'sam'
+  }
+  const running = legs.find(l => l.now) ?? null
 
-  // v10.6 (09 Sep 2026) — THE PASSENGER, which v10.5 dropped.
-  // Rohiit's model has three levels, not two: "Mahadasha is the driver,
-  // Antardasha is the conductor, Sookshma dasha are the passengers ... all
-  // relations matter." He also gave the horizon: pratyantar carries 3-6
-  // months, sookshma 10-30 days, and it is the pratyantar that shapes a
-  // stretch a reader can actually feel.
-  // v10.5 built the driver and the conductor and stopped. That was not a
-  // design decision — an earlier attempt had folded pratyantar into a SCORE,
-  // the score performed badly against his own 2014-2021, and the level went
-  // out with the scoring. The scoring was wrong; the level was not.
-  // The engine already sends the running pratyantar, so this needs no new
-  // data — only the same lagna-relationship read as the other two levels.
-  const pd = safeObj(tl.pratyantar)
-  const pdLord = s(pd.lord, '')
-  const pdBond: Bond | null = pdLord ? (bonds[pdLord] ?? 'sam') : null
-
-  const P = (p: string) => PLANET_HI[p] ?? p
   const fmt = (d: Date) => d.toLocaleDateString(lang === 'hindi' ? 'hi-IN' : 'en-GB',
     { month: 'short', year: 'numeric' })
 
-  // free sees the running stretch and anything genuinely notable
-  const notable = legs.filter(l => l.now || l.bond === 'yogakaraka' || l.bond === 'dushman')
+  // THE VERDICT — the long period sets the ceiling, the running stretch moves
+  // inside it. Four combinations; see the note above for where they come from.
+  const longHard = toneOf(longBond) === 'hard'
+  const nowHard  = running ? toneOf(running.bond) === 'hard' : longHard
+  const verdictKey =
+    longHard && nowHard   ? 'syBoth'
+    : longHard            ? 'syLongHard'
+    : nowHard             ? 'syNowHard'
+    :                       'syBothGood'
+
+  // running stretch first, then what is still ahead — a past stretch is not
+  // what a reader opening the page wants at the top of the list
+  const ahead = legs.filter(l => !l.now && l.end >= new Date())
+  const notable = [
+    ...(running ? [running] : []),
+    ...ahead.filter(l => l.bond === 'yogakaraka' || toneOf(l.bond) === 'hard'),
+  ]
   const shown = isPaid ? legs : notable.slice(0, 3)
   const hidden = legs.length - shown.length
 
-  const toneOf = (b: Bond) =>
-    b === 'yogakaraka' || b === 'dost' ? 'good' : b === 'dushman' || b === 'maraka' ? 'hard' : 'flat'
+  const line = (b: Bond) =>
+    b === 'yogakaraka' ? lbl('syBest', lang)
+    : b === 'dost'     ? lbl('syGood', lang)
+    : b === 'dushman'  ? lbl('syHard', lang)
+    : b === 'maraka'   ? lbl('syCare', lang)
+    :                    lbl('syFlat', lang)
 
   return (
     <div style={{background:BG_CARD,border:`1px solid ${G(0.12)}`,borderRadius:'16px',padding:'22px',marginBottom:'18px'}}>
-      <p style={{margin:'0 0 6px',color:GOLD,fontSize:'11px',fontWeight:700,textTransform:'uppercase',letterSpacing:'.08em'}}>
-        {lbl('busTitle', lang)}
-      </p>
-      <p style={{margin:'0 0 12px',color:'#94a3b8',fontSize:'12px',lineHeight:1.65}}>
-        {lbl('busIntro', lang)}
+      <p style={{margin:'0 0 10px',color:GOLD,fontSize:'11px',fontWeight:700,textTransform:'uppercase',letterSpacing:'.08em'}}>
+        {lbl('syTitle', lang)}
       </p>
 
-      {/* the driver sets the tone for the whole period — say it first */}
-      {/* the box colour follows the BORROWED bond for a shadow graha — a Rahu
-          reading through an unfriendly dispositor should not look neutral */}
-      <div style={{padding:'12px 14px',borderRadius:'10px',marginBottom:'12px',
-           background: toneOf(driverVia ?? driverBond)==='good' ? 'rgba(34,197,94,0.07)'
-             : toneOf(driverVia ?? driverBond)==='hard' ? 'rgba(248,113,113,0.06)' : 'rgba(255,255,255,0.03)',
-           border:`1px solid ${toneOf(driverVia ?? driverBond)==='good' ? 'rgba(34,197,94,0.22)'
-             : toneOf(driverVia ?? driverBond)==='hard' ? 'rgba(248,113,113,0.2)' : 'rgba(255,255,255,0.08)'}`}}>
-        <p style={{margin:0,color:'#e2e8f0',fontSize:'13px',fontWeight:600}}>
-          {lbl('busDriver', lang).replace('{md}', P(mdLord))}
-        </p>
-        <p style={{margin:'6px 0 0',color:'#cbd5e1',fontSize:'12px',lineHeight:1.6}}>
-          {driverShadow && driverVia
-            ? lbl('busShadow_' + driverShadow.how, lang)
-                .replace('{md}', P(mdLord))
-                .replace('{via}', P(driverShadow.via)) + ' ' +
-              lbl('busShadowBond_' + driverVia, lang).replace('{via}', P(driverShadow.via))
-            : lbl('busDriver_' + driverBond, lang).replace('{md}', P(mdLord))}
-        </p>
-      </div>
+      {/* the answer, before any dates */}
+      <p style={{margin:'0 0 16px',color:'#f1f5f9',fontSize:'15px',fontWeight:600,lineHeight:1.6}}>
+        {lbl(verdictKey, lang)}
+      </p>
 
       <div style={{display:'flex',flexDirection:'column',gap:'8px'}}>
-        {shown.map((l, i) => (
-          <div key={i} style={{padding:'11px 13px',borderRadius:'10px',
-               background: l.now ? 'rgba(212,175,55,0.08)'
-                 : toneOf(l.bond)==='good' ? 'rgba(34,197,94,0.05)'
-                 : toneOf(l.bond)==='hard' ? 'rgba(248,113,113,0.05)' : 'rgba(255,255,255,0.03)',
-               border:`1px solid ${l.now ? G(0.4)
-                 : toneOf(l.bond)==='good' ? 'rgba(34,197,94,0.18)'
-                 : toneOf(l.bond)==='hard' ? 'rgba(248,113,113,0.18)' : 'rgba(255,255,255,0.07)'}`}}>
-            <div style={{display:'flex',justifyContent:'space-between',gap:'10px',flexWrap:'wrap'}}>
-              <span style={{color:'#e2e8f0',fontSize:'12.5px',fontWeight:600}}>
+        {shown.map((l, i) => {
+          const tone = toneOf(l.bond)
+          return (
+            <div key={i} style={{padding:'11px 13px',borderRadius:'10px',
+                 background: l.now ? 'rgba(212,175,55,0.08)'
+                   : tone==='good' ? 'rgba(34,197,94,0.05)'
+                   : tone==='hard' ? 'rgba(248,113,113,0.05)' : 'rgba(255,255,255,0.03)',
+                 border:`1px solid ${l.now ? G(0.4)
+                   : tone==='good' ? 'rgba(34,197,94,0.18)'
+                   : tone==='hard' ? 'rgba(248,113,113,0.18)' : 'rgba(255,255,255,0.07)'}`}}>
+              <p style={{margin:0,color:'#e2e8f0',fontSize:'12.5px',fontWeight:600}}>
                 {fmt(l.start)} – {fmt(l.end)}
-              </span>
-              <span style={{color:GOLD,fontSize:'12px',fontWeight:600}}>
-                {P(l.lord)}{l.now ? ` · ${lbl('busNow', lang)}` : ''}
-              </span>
+                {l.now ? <span style={{color:GOLD}}> · {lbl('syNow', lang)}</span> : null}
+              </p>
+              <p style={{margin:'5px 0 0',color:'#cbd5e1',fontSize:'12px',lineHeight:1.6}}>
+                {line(l.bond)}
+              </p>
             </div>
-            <p style={{margin:'6px 0 0',color:'#cbd5e1',fontSize:'12px',lineHeight:1.6}}>
-              {lbl('busCond_' + l.bond, lang).replace('{ad}', P(l.lord))}
-            </p>
-          </div>
-        ))}
+          )
+        })}
       </div>
 
-      {/* the passenger — the shortest of the three, and the one a reader
-          notices week to week. Shown last because it is also the weakest:
-          "bad passengers, hiccups" against "bad driver, life is worst". */}
-      {pdBond && (
-        <div style={{marginTop:'10px',padding:'11px 13px',borderRadius:'10px',
-             background:'rgba(255,255,255,0.03)',border:'1px solid rgba(255,255,255,0.07)'}}>
-          <p style={{margin:0,color:'#e2e8f0',fontSize:'12.5px',fontWeight:600}}>
-            {lbl('busPass', lang).replace('{pd}', P(pdLord))}
-          </p>
-          <p style={{margin:'6px 0 0',color:'#cbd5e1',fontSize:'12px',lineHeight:1.6}}>
-            {lbl('busPass_' + pdBond, lang).replace('{pd}', P(pdLord))}
-          </p>
-        </div>
-      )}
-
       {!isPaid && hidden > 0 && (
-        <Cliff slug={slug} text={lbl('busMore', lang).replace('{n}', String(hidden))}/>
-      )}
-
-      {driverShadow && (
-        <p style={{margin:'12px 0 0',color:'#64748b',fontSize:'11px',lineHeight:1.55}}>
-          {lbl('busShadowFoot', lang)}
-        </p>
+        <Cliff slug={slug} text={lbl('syMore', lang).replace('{n}', String(hidden))}/>
       )}
 
       <p style={{margin:'12px 0 0',color:'#64748b',fontSize:'11px',lineHeight:1.6}}>
-        {lbl('busFoot', lang)}
+        {lbl('syFoot', lang)}
       </p>
     </div>
   )
@@ -3286,8 +3222,8 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
                 read the file.)
               ═══════════════════════════════════════════════════════════════ */}
 
-          {/* ── 1 · THE ANSWER ─────────────────────────────────────────── */}
-          <BusCard pj={pj as Record<string, unknown>} lagna={s(chartEv?.lagna as string, '')} lang={lang} isPaid={isPaid} slug={slug} planetRows={planetTable}/>
+          {/* ── 1 · THE ANSWER — the period, in plain words ────────────── */}
+          <SamayCard pj={pj as Record<string, unknown>} lagna={s(chartEv?.lagna as string, '')} lang={lang} isPaid={isPaid} slug={slug} planetRows={planetTable}/>
 
           {/* ── 2 · RECOGNITION — the reader proves the chart is theirs ── */}
           <PastDashaTimeline pj={pj as Record<string, unknown>} dob={s(report.dob, '')} lang={lang}/>
