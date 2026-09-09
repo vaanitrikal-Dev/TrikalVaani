@@ -5,9 +5,30 @@
  * TRIKAAL VAANI — Public SEO Report Client
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/report/[slug]/ReportPublicClient.tsx
- * VERSION: 10.8 (09 Sep 2026) — Varshphal and Shodashvarga cards
+ * VERSION: 10.9 (09 Sep 2026) — layout by importance; free tier is engine-only
  * SIGNED: ROHIIT GUPTA, CEO
 
+ *
+ * v10.9 (09 Sep 2026) — THE PAGE, REORDERED BY WHAT IS WORTH MOST
+ *   Rohiit, reading the live report: the Bus prediction belongs at the top,
+ *   then the Haan/Nahi recognition question, then the real findings; generic
+ *   content moves down and the weakest goes last. Nothing deleted — moved.
+ *   The old first screen carried a Gemini line that could have been written
+ *   for anybody ("BPHS establishes that Lagna lord placement governs
+ *   vitality") while the cards built from this person's own chart sat five
+ *   screens below it. The five bands and the reasoning are documented at the
+ *   render block itself, including which cards now repeat each other.
+ *
+ *   ThreeClocks — Vimshottari, Yogini and Chara side by side. Three separate
+ *   cards would have put three different answers on one page with nothing
+ *   explaining why they differ. The comparison IS the reading: agreement
+ *   strengthens a signal, divergence means no one system is the truth.
+ *
+ *   FREE IS NOW ENGINE-ONLY. The geoBullets and the free summary block are
+ *   both Gemini prose, and both are gated to paid. A free reader now sees
+ *   nothing that was written rather than computed — which makes the free
+ *   report more trustworthy, not less, and stops paying Flash for prose on
+ *   ~191 free readings a month.
  *
  * v10.8 (09 Sep 2026) — THE TWO ENGINE BLOCKS THAT HAD NO CARD
  *   template_engine v3.4 and v3.5 have been computing the annual chart and all
@@ -379,7 +400,6 @@ const L: Record<string, Record<Lang,string>> = {
   nak:          {hinglish:'Nakshatra', hindi:'नक्षत्र', english:'Nakshatra'},
   yoga:         {hinglish:'Yoga',  hindi:'योग',  english:'Yoga'},
   monthly:      {hinglish:'🗓 Mahine-Dar-Mahine Outlook', hindi:'🗓 महीने-दर-महीने आउटलुक', english:'🗓 Month-by-Month Outlook'},
-  mTheme:       {hinglish:'Theme',  hindi:'भाव',    english:'Theme'},
   mMoney:       {hinglish:'Paisa',  hindi:'धन',     english:'Money'},
   mAction:      {hinglish:'Karein', hindi:'करें',   english:'Do'},
   mAvoid:       {hinglish:'Bachein',hindi:'बचें',   english:'Avoid'},
@@ -485,6 +505,17 @@ const L: Record<string, Record<Lang,string>> = {
   ssMore:       {hinglish:'{n} aur beete daur — poori Shani timeline', hindi:'{n} और बीते दौर — पूरी शनि टाइमलाइन', english:'{n} more past windows — the full Saturn timeline'},
   ssNotPunishment: {hinglish:'Sade Sati dand nahi hai. Shastra Shani ko apne hi karm ka nyaayadhish kehta hai — jo neev in saalon mein padti hai, wahi sabse zyada tikti hai. Bahut log apna sabse mazboot kaam isi daur mein shuru karte hain.', hindi:'साढ़े साती दंड नहीं है। शास्त्र शनि को अपने ही कर्म का न्यायाधीश कहता है — जो नींव इन सालों में पड़ती है, वही सबसे ज़्यादा टिकती है। बहुत लोग अपना सबसे मज़बूत काम इसी दौर में शुरू करते हैं।', english:'Sade Sati is not a punishment. The shastra reads Saturn as the judge of your own work — and what is founded in these years tends to be what lasts. A great many people begin their strongest work inside exactly this period.'},
   ssFoot:       {hinglish:'Ye tareekhein khagolik hain — Shani kis rashi mein kab tha, bas itna. Beete daur padhiye aur khud dekhiye ki mel khaate hain ya nahi; koi kundali ye nahi bata sakti ki us daur mein kya hua tha.', hindi:'ये तारीख़ें खगोलीय हैं — शनि किस राशि में कब था, बस इतना। बीते दौर पढ़िए और खुद देखिए कि मेल खाते हैं या नहीं; कोई कुंडली यह नहीं बता सकती कि उस दौर में क्या हुआ था।', english:'These dates are astronomical — which sign Saturn occupied, and when. Read the past windows and judge the fit yourself; no chart can say what actually happened in them.'},
+  // v10.9 — the three dasha systems together. The comparison IS the reading.
+  tcTitle:      {hinglish:'⏳ Teen Ghadiyaan — Teen Paddhati, Ek Hi Samay', hindi:'⏳ तीन घड़ियाँ — तीन पद्धति, एक ही समय', english:'⏳ Three Clocks — Three Systems, One Moment'},
+  tcIntro:      {hinglish:'Jyotish mein samay naapne ke kai tarike hain, aur teeno alag ganit se chalte hain. Jahan teeno ek hi baat kahein, wo sanket zyada mazboot hota hai.', hindi:'ज्योतिष में समय नापने के कई तरीके हैं, और तीनों अलग गणित से चलते हैं। जहाँ तीनों एक ही बात कहें, वह संकेत ज़्यादा मज़बूत होता है।', english:'Jyotish measures time in more than one way, and these three run on different arithmetic. Where all three agree, the signal is worth more.'},
+  tcVim:        {hinglish:'Vimshottari', hindi:'विंशोत्तरी', english:'Vimshottari'},
+  tcVimSrc:     {hinglish:'120 saal ka chakra, janm nakshatra se', hindi:'१२० साल का चक्र, जन्म नक्षत्र से', english:'a 120-year cycle, from the birth nakshatra'},
+  tcYog:        {hinglish:'Yogini', hindi:'योगिनी', english:'Yogini'},
+  tcYogSrc:     {hinglish:'36 saal ka chakra — BPHS adhyay 195-199', hindi:'३६ साल का चक्र — BPHS अध्याय १९५-१९९', english:'a 36-year cycle — BPHS slokas 195-199'},
+  tcCha:        {hinglish:'Chara', hindi:'चर', english:'Chara'},
+  tcChaSrc:     {hinglish:'rashi par chalti hai, grah par nahi — Jaimini', hindi:'राशि पर चलती है, ग्रह पर नहीं — जैमिनि', english:'runs on the signs, not the planets — Jaimini'},
+  tcTease:      {hinglish:'Har paddhati kab tak chalti hai — teeno ki tareekhein', hindi:'हर पद्धति कब तक चलती है — तीनों की तारीख़ें', english:'How long each one runs — the dates for all three'},
+  tcFoot:       {hinglish:'Ye teeno alag granthon se aati hain aur alag ganit se chalti hain — isi liye alag jawab dena inka dosh nahi, inka swabhav hai. Koi ek paddhati akeli sach nahi hoti.', hindi:'ये तीनों अलग ग्रंथों से आती हैं और अलग गणित से चलती हैं — इसीलिए अलग जवाब देना इनका दोष नहीं, इनका स्वभाव है। कोई एक पद्धति अकेली सच नहीं होती।', english:'These come from different classics and run on different arithmetic — so disagreeing is their nature, not a fault. No single system is the truth on its own.'},
   busTitle:     {hinglish:'🚌 Is Daur Ka Chaalak Aur Sahyaatri', hindi:'🚌 इस दौर का चालक और सहयात्री', english:'🚌 Who Is Driving This Period, and Who Rides Along'},
   busIntro:     {hinglish:'Bada daur ek chaalak ki tarah hai aur uske andar ke chhote daur sahyaatri ki tarah. Shastra dekhta hai ki inme se kaun aapke lagna ka mitra hai — aur chaalak ka rishta sabse bhaari padta hai.', hindi:'बड़ा दौर एक चालक की तरह है और उसके अंदर के छोटे दौर सहयात्री की तरह। शास्त्र देखता है कि इनमें से कौन आपके लग्न का मित्र है — और चालक का रिश्ता सबसे भारी पड़ता है।', english:'The larger period is like a driver, and the shorter ones inside it ride along. The shastra asks which of them is friendly to your ascendant — and the driver\'s relationship weighs heaviest.'},
   busDriver:    {hinglish:'Chaalak — {md}', hindi:'चालक — {md}', english:'The driver — {md}'},
@@ -520,14 +551,18 @@ const L: Record<string, Record<Lang,string>> = {
   tzWindow:     {hinglish:'…doosri window kab khulti hai?', hindi:'…दूसरी अवधि कब खुलती है?', english:'…when does the next window open?'},
   tzUpay:       {hinglish:'…aapke Lagna ka ratna kaun sa hai?', hindi:'…आपके लग्न का रत्न कौन सा है?', english:'…which gemstone is for your Lagna?'},
   moreHouses:   {hinglish:'aur bhav', hindi:'और भाव', english:'more houses'},
-  lockedD9:     {hinglish:'Navamsa (D9) — har graha ka andaruni bal', hindi:'नवांश (D9) — हर ग्रह का आंतरिक बल', english:'Navamsa (D9) — the inner strength of each graha'},
-  lockedFuture: {hinglish:'Agle 6 mahine ka gochar + mahine-dar-mahine plan', hindi:'अगले ६ महीने का गोचर + महीने-दर-महीने योजना', english:'Next 6 months of transits + month-by-month plan'},
-  lockedBhrigu: {hinglish:'Bhrigu Nandi signals aur yogas', hindi:'भृगु नंदी संकेत और योग', english:'Bhrigu Nandi signals and yogas'},
-  lockedShad:   {hinglish:'Har graha ka Shadbala score', hindi:'हर ग्रह का षड्बल स्कोर', english:'Shadbala score for every graha'},
-  lockedRows:   {hinglish:'Baaki bhav, dasha activation aur poore upay', hindi:'शेष भाव, दशा सक्रियता और पूरे उपाय', english:'Remaining houses, dasha activation and the full remedies'},
   // v10.1: LockedSection was the last hardcoded-Hinglish block — an English
   // reader saw "Aapki Saturn Mahadasha mein... har graha ka andaruni bal" as the
   // final pitch, in a language they had not chosen.
+  // v10.9: six labels removed here — lockedD9/Future/Bhrigu/Shad/Rows were the
+  // v9.3 LockedTeaser feature list, replaced in v10.0 by suspenseLines (which
+  // names findings from THIS chart rather than listing features), and mTheme
+  // was defined but never wired. All six were unreachable.
+  // NOTE ON THE COUNT: an earlier pass reported 25 orphans. That was wrong —
+  // the regex could not see labels built by concatenation ('busDriver_' + bond,
+  // 'ssNow_' + charan, 'ssType_' + type), which are 24 live keys. Checking
+  // whether a name appears ANYWHERE in the file, rather than only inside
+  // lbl('...'), is what separates the two.
   lockTitle:    {hinglish:'Trikaal Ne Aur Bhi Dekha Hai', hindi:'त्रिकाल ने और भी देखा है', english:'Trikaal Has Seen More'},
   lockTease:    {hinglish:'Complete analysis, yogas, 5 upay aur 900-word deep reading taiyaar hai.', hindi:'पूरा विश्लेषण, योग, ५ उपाय और ९०० शब्दों की गहन रीडिंग तैयार है।', english:'The complete analysis, yogas, 5 upay and a 900-word deep reading are ready.'},
   lockCta:      {hinglish:'🔓 Unlock Full Report — ₹51 Only', hindi:'🔓 पूरी रिपोर्ट खोलें — केवल ₹५१', english:'🔓 Unlock Full Report — ₹51 Only'},
@@ -837,7 +872,12 @@ function VerdictCard({ lang, coreMsg, mahadasha, antardasha, pratyantar, best, c
   lang:Lang; coreMsg:string; mahadasha:string; antardasha:string; pratyantar:string
   best:string|null; caution:string|null; conf:ReadingConfidence; doNow:string; avoidNow:string
 }) {
-  if (coreMsg==='—' && !best && !caution) return null
+  // v10.9: both checks below tested only for '—'. Free now passes '' — see the
+  // render site — which is neither '—' nor content, so the guard never fired
+  // and the heading paragraph rendered EMPTY with its 16px margin intact.
+  // hasMsg treats both as absent, which is what they both mean.
+  const hasMsg = !!coreMsg && coreMsg !== '—'
+  if (!hasMsg && !best && !caution) return null
   const chip = (label:string, value:string, tone:'g'|'r'|'n') => (
     <div style={{padding:'11px 13px',borderRadius:'10px',
       background: tone==='g'?'rgba(34,197,94,0.08)':tone==='r'?'rgba(239,68,68,0.07)':G(0.06),
@@ -849,7 +889,7 @@ function VerdictCard({ lang, coreMsg, mahadasha, antardasha, pratyantar, best, c
   return (
     <div style={{background:`linear-gradient(135deg,${G(0.14)},rgba(8,11,18,0.96))`,border:`1px solid ${G(0.32)}`,borderRadius:'18px',padding:'22px',marginBottom:'14px'}}>
       <p style={{margin:'0 0 14px',color:GOLD,fontSize:'11px',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.08em'}}>{lbl('verdict',lang)}</p>
-      {coreMsg!=='—' && <p style={{margin:'0 0 16px',color:'#fff',fontSize:'16px',fontWeight:600,fontFamily:'Georgia,serif',lineHeight:1.65}}>{coreMsg}</p>}
+      {hasMsg && <p style={{margin:'0 0 16px',color:'#fff',fontSize:'16px',fontWeight:600,fontFamily:'Georgia,serif',lineHeight:1.65}}>{coreMsg}</p>}
       <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(150px,1fr))',gap:'9px',marginBottom:'12px'}}>
         {mahadasha!=='—' && chip('Dasha', `${mahadasha} / ${antardasha}${pratyantar!=='—'?` / ${pratyantar}`:''}`, 'n')}
         {best    && chip(lbl('bestMonth',lang),    best,    'g')}
@@ -2024,6 +2064,115 @@ function ShodashvargaCard({ pj, lang, isPaid, slug }:{
   )
 }
 
+
+// ════════════════════════════════════════════════════════════════════════════
+// THREE CLOCKS — Vimshottari, Yogini and Chara together — v10.9 (09 Sep 2026)
+//
+// The engine now runs three independent dasha systems. Giving each its own
+// card would put three different answers on one page with nothing to say why
+// they differ — which reads as the report contradicting itself.
+//
+//   Vimshottari  120-year cycle, from the birth nakshatra
+//   Yogini        36-year cycle, also from the birth nakshatra (BPHS 195-199)
+//   Chara         sign-based, each rasi held for the distance to its own lord
+//                 (Jaimini, adhyaya 3 pada 1)
+//
+// THE COMPARISON IS THE READING. Where all three point the same way the signal
+// is worth more; where they diverge, no single one of them is the truth. That
+// is a real classical position, not a way of dodging the disagreement — and it
+// is the one thing a card can say that three separate cards cannot.
+//
+// EACH GATES ON ITS OWN self_check, so a system whose engine failed
+// verification simply does not appear rather than showing a wrong lord.
+// ════════════════════════════════════════════════════════════════════════════
+
+function ThreeClocks({ pj, lang, isPaid, slug }:{
+  pj: Record<string, unknown>; lang: Lang; isPaid: boolean; slug: string
+}) {
+  const P = (p: string) => PLANET_HI[p] ?? p
+  const okOf = (b: Record<string, unknown>) => {
+    const c = safeObj(b.self_check)
+    return Object.keys(b).length > 0 && c.ok !== false
+  }
+  const fmt = (iso: string) => {
+    const d = new Date(iso)
+    return isNaN(d.getTime()) ? '' : d.toLocaleDateString(
+      lang === 'hindi' ? 'hi-IN' : 'en-GB', { month: 'short', year: 'numeric' })
+  }
+
+  const rows: { system: string; running: string; span: string; source: string }[] = []
+
+  const tl = safeObj(pj.dashaTimeline)
+  const md = safeObj(tl.mahadasha), ad = safeObj(tl.antardasha)
+  if (s(md.lord, '')) {
+    rows.push({
+      system: lbl('tcVim', lang),
+      running: P(s(md.lord, '')) + (s(ad.lord, '') ? ` / ${P(s(ad.lord, ''))}` : ''),
+      span: (md.start && md.end) ? `${fmt(String(md.start))} – ${fmt(String(md.end))}` : '',
+      source: lbl('tcVimSrc', lang),
+    })
+  }
+
+  const yg = safeObj(pj.yoginiDasha)
+  if (okOf(yg)) {
+    const cur = safeObj(yg.current)
+    if (cur.yogini) rows.push({
+      system: lbl('tcYog', lang),
+      running: `${cur.yogini}${cur.lord ? ` (${P(String(cur.lord))})` : ''}`,
+      span: (cur.start && cur.end) ? `${fmt(String(cur.start))} – ${fmt(String(cur.end))}` : '',
+      source: lbl('tcYogSrc', lang),
+    })
+  }
+
+  const ch = safeObj(pj.charaDasha)
+  if (okOf(ch)) {
+    const cur = safeObj(ch.current)
+    if (cur.rashi) rows.push({
+      system: lbl('tcCha', lang),
+      running: `${cur.rashi}${cur.lord ? ` (${P(String(cur.lord))})` : ''}`,
+      span: (cur.start && cur.end) ? `${fmt(String(cur.start))} – ${fmt(String(cur.end))}` : '',
+      source: lbl('tcChaSrc', lang),
+    })
+  }
+
+  if (rows.length < 2) return null      // a comparison needs at least two
+
+  return (
+    <div style={{background:BG_CARD,border:`1px solid ${G(0.12)}`,borderRadius:'16px',padding:'22px',marginBottom:'18px'}}>
+      <p style={{margin:'0 0 6px',color:GOLD,fontSize:'11px',fontWeight:700,textTransform:'uppercase',letterSpacing:'.08em'}}>
+        {lbl('tcTitle', lang)}
+      </p>
+      <p style={{margin:'0 0 14px',color:'#94a3b8',fontSize:'12px',lineHeight:1.65}}>
+        {lbl('tcIntro', lang)}
+      </p>
+
+      <div style={{display:'flex',flexDirection:'column',gap:'8px'}}>
+        {rows.map((r, i) => (
+          <div key={i} style={{padding:'11px 13px',borderRadius:'10px',
+               background:'rgba(255,255,255,0.03)',border:'1px solid rgba(255,255,255,0.07)'}}>
+            <div style={{display:'flex',justifyContent:'space-between',gap:'10px',flexWrap:'wrap'}}>
+              <span style={{color:'#e2e8f0',fontSize:'12.5px',fontWeight:600}}>{r.system}</span>
+              <span style={{color:GOLD,fontSize:'13px',fontWeight:700}}>{r.running}</span>
+            </div>
+            {/* v10.9: free sees WHICH period is running, paid sees WHEN it ends.
+                Naming the system costs nothing; the dates are the paid part. */}
+            {isPaid && r.span && (
+              <p style={{margin:'5px 0 0',color:'#94a3b8',fontSize:'11.5px'}}>{r.span}</p>
+            )}
+            <p style={{margin:'4px 0 0',color:'#64748b',fontSize:'11px',lineHeight:1.5}}>{r.source}</p>
+          </div>
+        ))}
+      </div>
+
+      {!isPaid && <Cliff slug={slug} text={lbl('tcTease', lang)}/>}
+
+      <p style={{margin:'12px 0 0',color:'#64748b',fontSize:'11px',lineHeight:1.6}}>
+        {lbl('tcFoot', lang)}
+      </p>
+    </div>
+  )
+}
+
 function BusCard({ pj, lagna, lang, isPaid, slug }:{
   pj: Record<string, unknown>; lagna: string; lang: Lang; isPaid: boolean; slug: string
 }) {
@@ -2991,7 +3140,17 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
             <div style={{display:'flex',flexWrap:'wrap',gap:'6px',justifyContent:'center',marginBottom:'12px'}}>
               {[{icon:'⚡',label:'Swiss Ephemeris',color:'#60a5fa'},{icon:'📖',label:'BPHS Classical',color:'#a78bfa'},{icon:'🔮',label:'Bhrigu Nandi',color:'#f472b6'},{icon:'⚖️',label:'Shadbala',color:'#34d399'}].map(b=>(<span key={b.label} style={{display:'inline-flex',alignItems:'center',gap:'4px',padding:'5px 11px',borderRadius:'20px',fontSize:'11px',fontWeight:600,background:`${b.color}15`,border:`1px solid ${b.color}30`,color:b.color}}>{b.icon} {b.label}</span>))}
             </div>
-            {geoBullets.length>0 && (
+            {/* v10.9 (09 Sep 2026) — GEMINI PROSE IS NOW PAID-ONLY.
+                Rohiit's call, and the reasoning is stronger than the saving:
+                free readers were getting the one part of this page that is
+                WRITTEN rather than COMPUTED — the same thing every AI
+                astrology site produces. Free now shows nothing but engine
+                output, which makes it more trustworthy, not less: every line
+                a free reader sees can be traced to a calculation.
+                It also stops paying Flash for prose on ~191 free readings a
+                month. The bullets still generate and still save to the DB, so
+                nothing downstream changes and paid is untouched. */}
+            {isPaid && geoBullets.length>0 && (
               <div style={{background:G(0.06),border:`1px solid ${G(0.15)}`,borderRadius:'14px',padding:'16px',marginTop:'14px',textAlign:'left'}}>
                 <p style={{margin:'0 0 12px',color:G(0.65),fontSize:'11px',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.08em'}}>{lbl('vedicAnalysis',lang)} {isPaid && <span style={{color:G(0.4),marginLeft:'8px',fontSize:'10px'}}>({geoBullets.length} insights)</span>}</p>
                 <ul style={{margin:0,padding:0,listStyle:'none',display:'flex',flexDirection:'column',gap:'10px'}}>
@@ -3002,7 +3161,14 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
             )}
           </div>
 
-          {!isPaid && (hasCoreMessage||hasKeyMessage||hasDoAvoid) && (
+          {/* v10.9: this block was the FREE reader's Gemini summary — core
+              message, do/avoid and the summary text. All of it is Gemini's
+              prose. Free is engine-only now, so the whole block is gated off.
+              Kept rather than deleted: paid does not use it (PaidFullSummary
+              covers that tier), so it renders for nobody today, but deleting
+              a working block to express a tier decision is how a component
+              gets rebuilt from scratch in three months. */}
+          {false && !isPaid && (hasCoreMessage||hasKeyMessage||hasDoAvoid) && (
             <div style={{background:BG_CARD,border:`1px solid ${G(0.12)}`,borderRadius:'16px',padding:'22px',marginBottom:'14px'}}>
               <p style={{margin:'0 0 14px',color:GOLD,fontSize:'11px',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.08em'}}>{lbl('sandesh',lang)}</p>
               {(hasCoreMessage||hasKeyMessage) && (
@@ -3021,23 +3187,64 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
             </div>
           )}
 
-          {/* v9.0: the answer comes FIRST. Engine badges and credentials used to
-              occupy the top of the page while the client's actual question was
-              answered two screens down. */}
-          <VerdictCard lang={lang} coreMsg={hasCoreMessage?coreMessage:keyMessage}
-            mahadasha={mahadasha} antardasha={antardasha} pratyantar={pratyantar}
-            best={bestMonth} caution={cautionMon} conf={confidence}
-            doNow={doAction!=='—'?doAction:mainAction} avoidNow={avoidAction!=='—'?avoidAction:mainCaution}/>
+          {/* ═══════════════════════════════════════════════════════════════
+              v10.9 LAYOUT (09 Sep 2026) — ORDERED BY WHAT IS WORTH MOST
 
-          {/* v8.4: "why you are here" sits high — recognition builds trust before
-              the client is asked to absorb any planetary detail. */}
+              Rohiit's instruction: the Bus prediction first, then the
+              recognition question, then the real findings; generic content
+              goes down and the weakest goes last. Nothing was deleted — every
+              card that was here is still here, only moved.
+
+              WHY THE OLD ORDER WAS WRONG
+                The page opened with VerdictCard and a block of Gemini bullets
+                — the single most valuable screen carried a sentence that could
+                have been written for anybody ("BPHS establishes that Lagna
+                lord placement governs vitality"). Meanwhile the cards built
+                from this person's own chart sat five screens down.
+
+              THE ORDER, AND THE REASON FOR EACH BAND
+                1 ANSWER      what is running now and whether it is with or
+                              against this person. That is the question.
+                2 RECOGNITION the past periods, with Haan/Nahi. The reader
+                              proves the chart is theirs before being asked
+                              for anything.
+                3 FINDINGS    everything computed from this chart, strongest
+                              signal first.
+                4 GENERIC     Gemini's prose, confidence. True, but not
+                              specific to this chart in the way band 3 is.
+                5 WEAKEST     Panchang. It is IDENTICAL for every reader on a
+                              given day and has no connection to the chart at
+                              all, so it goes last.
+
+              WHAT NOW SAYS THE SAME THING TWICE — recorded, not hidden
+                VerdictCard's dasha chip, the "Dasha Kaal" L1/L2/L3 box, and
+                BusCard all state the running mahadasha/antardasha. BusCard
+                says the most (it also gives the relationship to the lagna) so
+                it leads; the other two are kept on Rohiit's instruction not to
+                delete anything, and moved to band 4. If they ever look
+                redundant on the live page, those are the two to cut — this
+                note exists so that decision does not need rediscovering.
+                (The last time a superseded card was left in place —
+                ConductorCard under BusCard — it went unnoticed until Rohiit
+                read the file.)
+              ═══════════════════════════════════════════════════════════════ */}
+
+          {/* ── 1 · THE ANSWER ─────────────────────────────────────────── */}
+          <BusCard pj={pj as Record<string, unknown>} lagna={s(chartEv?.lagna as string, '')} lang={lang} isPaid={isPaid} slug={slug}/>
+
+          {/* ── 2 · RECOGNITION — the reader proves the chart is theirs ── */}
+          <PastDashaTimeline pj={pj as Record<string, unknown>} dob={s(report.dob, '')} lang={lang}/>
+
+          {/* ── 3 · FINDINGS, strongest signal first ───────────────────── */}
+          <SadeSatiCard pj={pj as Record<string, unknown>} lang={lang} isPaid={isPaid} slug={slug}/>
+
+          <BhriguChapter bhriguObj={bhriguObj as Record<string, unknown>} lang={lang} isPaid={isPaid} slug={slug}/>
+
+          <ThreeClocks pj={pj as Record<string, unknown>} lang={lang} isPaid={isPaid} slug={slug}/>
+
+          <VarshphalCard pj={pj as Record<string, unknown>} lang={lang} isPaid={isPaid} slug={slug}/>
+
           <WhyYouAreHere why={whyHere} activation={chartEv?.activation} lang={lang}/>
-
-          {isPaid && <PaidFullSummary summaryText={summaryText} periodSummary={periodSummary} bestDates={bestDates} dosList={dosList} dontsList={dontsList} remedyHint={remedyHint} karmicInsight={karmicInsight} lang={lang}/>}
-
-          <div style={{display:'grid',gridTemplateColumns:'repeat(2,1fr)',gap:'10px',marginBottom:'14px'}}>
-            {[{label:'Lagna',value:lagna},{label:'Nakshatra',value:nakshatra},{label:'Mahadasha',value:mahadasha},{label:'Antardasha',value:antardasha}].map(({label,value})=>(<div key={label} style={{padding:'11px 14px',borderRadius:'10px',background:G(0.08),border:`1px solid ${G(0.2)}`,textAlign:'center'}}><p style={{margin:'0 0 3px',color:G(0.6),fontSize:'10px',textTransform:'uppercase',letterSpacing:'0.08em',fontWeight:600}}>{label}</p><p style={{margin:0,color:'#fff',fontSize:'14px',fontWeight:700}}>{value}</p></div>))}
-          </div>
 
           {planetTable.length>0&&lagna!=='—'&&(
             <div style={{background:BG_CARD,border:`1px solid ${G(0.15)}`,borderRadius:'16px',padding:'22px',marginBottom:'14px'}}>
@@ -3047,6 +3254,19 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
             </div>
           )}
 
+          {hasEvidence && <EvidenceTable ev={chartEv} meanings={evMeanings} lang={lang} isPaid={isPaid} slug={slug}/>}
+
+          <ShodashvargaCard pj={pj as Record<string, unknown>} lang={lang} isPaid={isPaid} slug={slug}/>
+
+          <AshtakavargaCard engineSig={engineSig as Record<string, unknown>} lang={lang} isPaid={isPaid} slug={slug}/>
+
+          <DrishtiCard engineSig={engineSig as Record<string, unknown>} lang={lang} isPaid={isPaid} slug={slug}/>
+
+          <ArgalaCard engineSig={engineSig as Record<string, unknown>} lang={lang} isPaid={isPaid} slug={slug}/>
+
+          {isPaid && Object.keys(navamsa).length>0 && <NavamsaCard nv={navamsa} lang={lang} note={navNote}/>}
+          {isPaid && Object.keys(dasamsa).length>0 && <DasamsaCard ds={dasamsa} lang={lang} note={dasNote}/>}
+
           {planetTable.length>0&&(
             <div style={{background:BG_CARD,border:`1px solid ${G(0.12)}`,borderRadius:'16px',padding:'22px',marginBottom:'14px'}}>
               <p style={{margin:'0 0 14px',color:GOLD,fontSize:'11px',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.08em'}}>{lbl('grahaVish',lang)}</p>
@@ -3055,8 +3275,6 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
                   <thead><tr style={{borderBottom:`1px solid ${G(0.15)}`}}>{['Graha','Rashi','House','Nakshatra','Dignity','Strength'].map(h=>(<th key={h} style={{padding:'9px 6px',color:GOLD,fontWeight:600,textAlign:'left',fontSize:'11px',letterSpacing:'0.06em',textTransform:'uppercase'}}>{h}</th>))}</tr></thead>
                   <tbody>
                     {planetTable.map((p,i)=>{
-                      // v8.4: Rahu/Ketu carry no Shadbala — show "—", never a dot
-                      // implying a measured strength that was never computed.
                       const hasSb = typeof p.shadbala==='number' && p.strength
                       const sc=!hasSb?'#64748b':p.strength==='Very Strong'?'#22c55e':p.strength==='Strong'?'#86efac':p.strength==='Moderate'?GOLD:'#ef4444'
                       const sd=!hasSb?'':p.strength==='Very Strong'?'●●':p.strength==='Strong'?'●':p.strength==='Moderate'?'◐':'○'
@@ -3069,85 +3287,12 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
             </div>
           )}
 
-          {/* v8.4: evidence, yogas/Bhrigu and confidence sit right after the planet
-              table — the client reads the chart, then immediately reads why it
-              matters for them, before the dasha timeline. */}
-          {isPaid && Object.keys(navamsa).length>0 && <NavamsaCard nv={navamsa} lang={lang} note={navNote}/>}
-          {isPaid && Object.keys(dasamsa).length>0 && <DasamsaCard ds={dasamsa} lang={lang} note={dasNote}/>}
-
-          {hasEvidence && <EvidenceTable ev={chartEv} meanings={evMeanings} lang={lang} isPaid={isPaid} slug={slug}/>}
-          {isPaid && <EngineSignals yogas={allYogas} bhriguTheme={bhriguTheme} bhriguPoints={bhriguPts} signals={bhriguSignals} lang={lang}/>}
           {Object.keys(gochar).length>0 && <GocharTimeline g={gochar} lang={lang} isPaid={isPaid} slug={slug}/>}
           {isPaid && <MonthlyOutlook rows={monthlyOut} lang={lang}/>}
-
-          {/* v10.0: the v9.3 teaser was a FEATURE LIST — "Navamsa (D9)", "Shadbala
-              score" — which reads like a spec sheet and creates no pull. These
-              lines instead state something TRUE and SPECIFIC about this person's
-              own chart and stop halfway. The facts come straight from the engine,
-              so nothing is invented; only the consequence is withheld. */}
-          {/* ═══ v10.4 (08 Sep 2026) — ORDER CHANGED, on Rohiit's reading of
-              the live report. These two cards were rendering BELOW the paywall
-              teaser, which is the worst possible place for them: they are the
-              two things that make a reader recognise their own chart, and half
-              the readers never scroll past the "unlock" pitch to reach them.
-              Recognition is what earns the Rs 51 — so it has to come before
-              the ask, not after it.
-
-              The chapter says WHAT part of life is running now; the past
-              periods let the reader confirm it against their own history. Both
-              are free on purpose. The three depth cards — drishti, argala,
-              ashtakavarga — stay below, after the chart and evidence, where
-              "how strong is this chart" is the natural next question. ═══ */}
-          <BhriguChapter bhriguObj={bhriguObj as Record<string, unknown>} lang={lang} isPaid={isPaid} slug={slug}/>
-
-          <PastDashaTimeline pj={pj as Record<string, unknown>} dob={s(report.dob, '')} lang={lang}/>
-
-          {/* v10.5: past periods, then who is driving the CURRENT one. */}
-          <BusCard pj={pj as Record<string, unknown>} lagna={s(chartEv?.lagna as string, '')} lang={lang} isPaid={isPaid} slug={slug}/>
-
-          {/* v10.6: after who is driving, the slower Saturn cycle underneath. */}
-          <SadeSatiCard pj={pj as Record<string, unknown>} lang={lang} isPaid={isPaid} slug={slug}/>
-
-          {/* v10.8: the annual chart sits with the other time cards — dasha,
-              Saturn cycle, then the year the reader is actually inside. */}
-          <VarshphalCard pj={pj as Record<string, unknown>} lang={lang} isPaid={isPaid} slug={slug}/>
-
-          {!isPaid && (
-            <LockedTeaser slug={slug} lang={lang} lines={suspenseLines}/>
-          )}
-          <ConfidenceCard c={confidence} lang={lang}/>
-
-          {/* v10.4 (08 Sep 2026): the three DEPTH cards stay here, after the
-              chart and the evidence, because they answer "how strong is this
-              chart" — a question the reader only has once they have seen it.
-              The two RECOGNITION cards (chapter, past periods) were moved ABOVE
-              the paywall teaser; see the note there. */}
-          <DrishtiCard engineSig={engineSig as Record<string, unknown>} lang={lang} isPaid={isPaid} slug={slug}/>
-
-          <ArgalaCard engineSig={engineSig as Record<string, unknown>} lang={lang} isPaid={isPaid} slug={slug}/>
-
-          <AshtakavargaCard engineSig={engineSig as Record<string, unknown>} lang={lang} isPaid={isPaid} slug={slug}/>
-
-          {/* v10.8: the sixteen vargas belong with the other strength cards —
-              this is "how strong is this chart", not "when does it happen". */}
-          <ShodashvargaCard pj={pj as Record<string, unknown>} lang={lang} isPaid={isPaid} slug={slug}/>
-
-          <div style={{background:BG_CARD,border:`1px solid ${G(0.12)}`,borderRadius:'16px',padding:'22px',marginBottom:'14px'}}>
-            <p style={{margin:'0 0 14px',color:GOLD,fontSize:'11px',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.08em'}}>{lbl('dashaKaal',lang)}</p>
-            <div style={{display:'flex',flexDirection:'column',gap:'10px'}}>
-              {/* v8.4: Sookshma (L4) removed. astro.py's _vimshottari() nests only three
-                  levels — maha, antar, pratyantar — so L4 was never computed. The old
-                  template engine hardcoded "Venus" for it, meaning every client saw the
-                  same fake Sookshma lord. An absent level is better than an invented one. */}
-              {[{label:'Mahadasha',lord:mahadasha,color:'#60a5fa',lv:'L1'},{label:'Antardasha',lord:antardasha,color:'#a78bfa',lv:'L2'},{label:'Pratyantar',lord:pratyantar,color:GOLD,lv:'L3'}].map(({label,lord,color,lv})=>(<div key={label} style={{display:'flex',alignItems:'center',gap:'12px',padding:'12px',background:'rgba(255,255,255,0.03)',borderRadius:'10px',border:'1px solid rgba(255,255,255,0.06)'}}><div style={{width:'30px',height:'30px',borderRadius:'50%',background:`${color}20`,border:`1px solid ${color}40`,display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0,color,fontSize:'11px',fontWeight:700}}>{lv}</div><div style={{flex:1}}><p style={{margin:0,color:'#64748b',fontSize:'11px',textTransform:'uppercase',letterSpacing:'0.06em'}}>{label}</p><p style={{margin:'2px 0 0',color:'#fff',fontSize:'15px',fontWeight:700}}>{lord}</p></div></div>))}
-            </div>
-          </div>
 
           {actionWindows.length>0&&(
             <div style={{background:BG_CARD,border:`1px solid ${G(0.12)}`,borderRadius:'16px',padding:'22px',marginBottom:'14px'}}>
               <p style={{margin:'0 0 14px',color:GOLD,fontSize:'11px',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.08em'}}>{lbl('actionWin',lang)}</p>
-              {/* v10.0: free sees ONE window. Two dated windows read as a finished
-                  answer; one window plus "when does the next open?" does not. */}
               {(isPaid?actionWindows:actionWindows.slice(0,1)).map((w,i)=>{const hi=w.strength==='High';return(<div key={i} style={{padding:'13px',background:hi?'rgba(34,197,94,0.06)':G(0.04),border:`1px solid ${hi?'rgba(34,197,94,0.2)':G(0.15)}`,borderRadius:'10px',marginBottom:'8px'}}><div style={{display:'flex',alignItems:'center',gap:'8px',marginBottom:'5px'}}><span style={{color:hi?'#22c55e':GOLD,fontSize:'13px',fontWeight:700}}>{hi?'🟢':'🟡'} {w.window}</span><span style={{padding:'2px 8px',borderRadius:'10px',background:hi?'rgba(34,197,94,0.15)':G(0.1),color:hi?'#22c55e':GOLD,fontSize:'11px',fontWeight:600}}>{w.strength}</span></div><p style={{margin:0,color:'#e2e8f0',fontSize:'13px',lineHeight:1.5}}>{w.reason}</p></div>)})}
               {!isPaid && actionWindows.length>1 && <Cliff slug={slug} text={lbl('tzWindow',lang)}/>}
             </div>
@@ -3169,10 +3314,42 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
 
           {Object.keys(remedyLvls).length>0 && <RemedyLevels h={remedyLvls} lang={lang} isPaid={isPaid}/>}
 
-          {/* v9.0: Panchang RESTORED — template_engine v3.0 now computes it from
-              today's real Sun/Moon longitudes through the VM's panchang engine.
-              The `_source` guard means the fabricated day-of-year version can
-              never render again: no verified source, no section. */}
+          {!isPaid && <LockedTeaser slug={slug} lang={lang} lines={suspenseLines}/>}
+
+          {isPaid && <PaidFullSummary summaryText={summaryText} periodSummary={periodSummary} bestDates={bestDates} dosList={dosList} dontsList={dontsList} remedyHint={remedyHint} karmicInsight={karmicInsight} lang={lang}/>}
+
+          {/* ── 4 · GENERIC — true, but not specific to this chart ─────────
+              VerdictCard and the Dasha Kaal box below both restate the running
+              dasha that BusCard opened with. Kept on Rohiit's instruction that
+              nothing be deleted; moved here because they say less than the
+              card that already said it. See the layout note above. */}
+          {/* v10.9 fix: coreMsg was `hasCoreMessage?coreMessage:keyMessage`, and
+              MEASURED on 09 Sep 2026 the engine's coreMessage is null on ALL
+              118 rows of the last ten days — so the fallback always won and
+              this card always printed Gemini's keyMessage. That made "free is
+              engine-only" untrue for 107 free readers who saw it here.
+              Free now gets '' and the card still renders its chips — best
+              month, caution month, confidence — every one of which is engine
+              output. Only the written sentence is withheld. */}
+          <VerdictCard lang={lang} coreMsg={isPaid ? (hasCoreMessage?coreMessage:keyMessage) : ''}
+            mahadasha={mahadasha} antardasha={antardasha} pratyantar={pratyantar}
+            best={bestMonth} caution={cautionMon} conf={confidence}
+            doNow={doAction!=='—'?doAction:mainAction} avoidNow={avoidAction!=='—'?avoidAction:mainCaution}/>
+
+          <div style={{background:BG_CARD,border:`1px solid ${G(0.12)}`,borderRadius:'16px',padding:'22px',marginBottom:'14px'}}>
+            <p style={{margin:'0 0 14px',color:GOLD,fontSize:'11px',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.08em'}}>{lbl('dashaKaal',lang)}</p>
+            <div style={{display:'flex',flexDirection:'column',gap:'10px'}}>
+              {[{label:'Mahadasha',lord:mahadasha,color:'#60a5fa',lv:'L1'},{label:'Antardasha',lord:antardasha,color:'#a78bfa',lv:'L2'},{label:'Pratyantar',lord:pratyantar,color:GOLD,lv:'L3'}].map(({label,lord,color,lv})=>(<div key={label} style={{display:'flex',alignItems:'center',gap:'12px',padding:'12px',background:'rgba(255,255,255,0.03)',borderRadius:'10px',border:'1px solid rgba(255,255,255,0.06)'}}><div style={{width:'30px',height:'30px',borderRadius:'50%',background:`${color}20`,border:`1px solid ${color}40`,display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0,color,fontSize:'11px',fontWeight:700}}>{lv}</div><div style={{flex:1}}><p style={{margin:0,color:'#64748b',fontSize:'11px',textTransform:'uppercase',letterSpacing:'0.06em'}}>{label}</p><p style={{margin:'2px 0 0',color:'#fff',fontSize:'15px',fontWeight:700}}>{lord}</p></div></div>))}
+            </div>
+          </div>
+
+          {isPaid && <EngineSignals yogas={allYogas} bhriguTheme={bhriguTheme} bhriguPoints={bhriguPts} signals={bhriguSignals} lang={lang}/>}
+
+          <ConfidenceCard c={confidence} lang={lang}/>
+
+          {/* ── 5 · WEAKEST — identical for every reader on a given day ────
+              Panchang is today's tithi and nakshatra. It is the same for
+              everyone and has no connection to this chart, so it sits last. */}
           {panchang._source==='swiss-ephemeris' && s(panchang.tithi as string)!=='—' && (
             <div style={{background:BG_CARD,border:`1px solid ${G(0.12)}`,borderRadius:'16px',padding:'22px',marginBottom:'14px'}}>
               <p style={{margin:'0 0 14px',color:GOLD,fontSize:'11px',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.08em'}}>{lbl('panchang',lang)}</p>
