@@ -107,6 +107,40 @@
  * TRIKAAL VAANI — Unified Prediction Endpoint
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/api/predict/route.ts
+ * VERSION: 15.12 — a minor's reading is delivered but never published
+ *
+ * v15.12 (09 Sep 2026): every reading was written is_public=true, which is what
+ *   app/sitemap.ts selects on and what the report page's robots meta now reads.
+ *   Publishing readings is deliberate and is part of the growth plan — but it
+ *   had no exception, and a child's reading carries a name, a date of birth and
+ *   a city, and was submitted to Google, Bing and every AI crawler like any
+ *   other page.
+ *   A minor's reading is now UNLISTED: is_public=false, is_indexed=false, and
+ *   the Google indexing ping is skipped. It is still delivered in full — the
+ *   companion change in app/report/[slug]/page.tsx v3.2 stopped is_public from
+ *   gating access, so the customer opens their report exactly as before. That
+ *   file must be deployed FIRST; deploying this one alone would hide a minor's
+ *   report from the parent who paid for it.
+ *   Age is computed from the DATE OF BIRTH, not from userContext.age — the
+ *   prompt path defaults a blank age to 30, so a form-field check would have
+ *   missed exactly the case this guards.
+ *   Nothing else changed. No payment path, no VM payload, no whitelist key.
+ *
+ * VERSION: 15.11 — DATA INTEGRITY guard extended to the dasha
+ *
+ * v15.11 (09 Sep 2026): the dasha was the one chart fact with NO guard. Lagna
+ *   and Nakshatra have said "NOT AVAILABLE — do not invent" since v14.13; the
+ *   dasha fell through to the literal strings 'Rahu' and 'Jupiter' in the
+ *   prompt, and 'rahu'/'saturn' in the slug, the SEO title and the DB columns.
+ *   A reading could therefore assert a Mahadasha nobody had computed, and the
+ *   row would look identical to a healthy one.
+ *   The invented defaults are gone. The LOCAL Meeus fallback is kept — a paid
+ *   customer has already been charged — but it is now labelled in the prompt
+ *   with a [source: ...] tag, and new RULE 10b tells the writer what each
+ *   source permits: exact dates only from the VM, no dates from the local
+ *   fallback, and no lord named at all when neither is available.
+ *   Nothing else changed. No payment path, no VM payload, no whitelist key.
+ *
  * VERSION: 15.10 — paid summary 750 -> 900 words, and told not to repeat the cards
  *
  * v15.10 (2026-09-09): TWO changes to buildProPrompt, both approved by Rohiit.
@@ -643,8 +677,32 @@ function buildProPrompt(
 
   const lagna      = chartExtract?.lagna      || localLagna      || ''
   const nakshatra  = chartExtract?.nakshatra  || localNakshatra  || ''
-  const mahadasha  = chartExtract?.mahadasha  || kundali.currentMahadasha?.lord  || 'Rahu'
-  const antardasha = chartExtract?.antardasha || kundali.currentAntardasha?.lord || 'Jupiter'
+  // ── v15.11 (09 Sep 2026): THE DASHA HAD NO DATA-INTEGRITY GUARD ──────────
+  // Lagna and Nakshatra are guarded — if absent the prompt says NOT AVAILABLE
+  // and RULE 10 forbids inventing one. The dasha had no such guard: it fell
+  // through to the literal strings 'Rahu' and 'Jupiter'. If both the VM and the
+  // local chart failed, the prompt asserted "Rahu MD + Jupiter AD" as fact, and
+  // that lie then flowed into the slug, the SEO title and the DB columns.
+  //
+  // The hardcoded pair is the smaller half of the problem. The bigger half is
+  // the middle term: kundali.currentMahadasha comes from buildKundali (the local
+  // Meeus calculator), which on the reference chart produced a Vimshottari start
+  // FIFTEEN MONTHS out. That is not a visible failure — it is a plausible wrong
+  // answer, the same shape as the 06 Sep incident. So the fallback is kept (a
+  // paid customer has already been charged and something is better than nothing)
+  // but it is now LABELLED, so the writer knows which it received and RULE 16
+  // can mark the confidence down honestly.
+  const dashaFromVM  = !!(chartExtract?.mahadasha)
+  const mahadasha    = chartExtract?.mahadasha  || kundali.currentMahadasha?.lord  || ''
+  const antardasha   = chartExtract?.antardasha || kundali.currentAntardasha?.lord || ''
+  const dashaKnown   = !!(mahadasha && antardasha)
+  const dashaSource  = dashaFromVM
+    ? 'Swiss Ephemeris (VM) — exact'
+    : (dashaKnown ? 'LOCAL FALLBACK — approximate, treat as lower confidence' : 'NOT AVAILABLE')
+  // Display tokens: the lord is interpolated into six sentences below. When it
+  // is unknown these keep the sentence grammatical without naming a planet.
+  const mdShow = mahadasha  || 'the running Mahadasha'
+  const adShow = antardasha || 'the running Antardasha'
 
   // ── v14.10: Full human profile for Gemini (age-aware grounding + remedies) ──
   const clientAge    = (userContext as any).age ?? null
@@ -881,6 +939,16 @@ ABSOLUTE RULES:
    DETAILS below. If Lagna, Nakshatra, or any chart value is marked NOT AVAILABLE,
    you must NEVER invent, guess, or state one — analyze using only the values you
    were given (e.g. Dasha + Nakshatra). Stating a wrong Lagna destroys trust forever.
+   10b. THE DASHA IS COVERED BY THIS RULE TOO (v15.11). The Mahadasha line in
+   CLIENT DETAILS carries a [source: ...] tag. Read it before you write.
+     - "Swiss Ephemeris (VM) — exact": name the lords and their dates freely.
+     - "LOCAL FALLBACK — approximate": you may name the lords, but you must NOT
+       give exact dasha start or end DATES, and readingConfidence must not be
+       High for anything that rests on dasha timing.
+     - "NOT AVAILABLE": do NOT name any Mahadasha or Antardasha lord anywhere in
+       your output, including geoBullets and the section headings. Write the
+       reading from the other chart facts you were given and say plainly that
+       the period could not be computed.
 11. HEALTH SENSITIVITY (v14.13 — CRITICAL): If the situation note involves MENTAL
    or PHYSICAL health (e.g. OCD, anxiety, depression, panic, illness, disease):
    a) NEVER state that planets/dasha CAUSE the medical condition. Say instead that
@@ -974,10 +1042,10 @@ CLIENT DETAILS:
 - Name: ${birthData.name ?? 'Friend'}
 - Age: ${clientAge ?? 'unknown'} | Gender: ${clientGender} | Life Stage: ${clientStage} | Relationship: ${clientRel}
 - Lagna: ${lagna || 'NOT AVAILABLE — do NOT state or invent any Lagna'} | Nakshatra: ${nakshatra || 'NOT AVAILABLE — do NOT state or invent any Nakshatra'}
-- Mahadasha: ${mahadasha} MD + ${antardasha} AD
+- Mahadasha: ${dashaKnown ? `${mahadasha} MD + ${antardasha} AD` : 'NOT AVAILABLE — do NOT state or invent any dasha lord'} [source: ${dashaSource}]
 - City: ${birthData.cityName ?? userContext.city} → Currently: ${userContext.currentCity ?? userContext.city}
 - Segment: ${userContext.segment} | Profession: ${clientJob} | Sector: ${userContext.sector}
-- Dasha: ${templateData?.dashaOneLiner ?? `${mahadasha} MD + ${antardasha} AD`}
+- Dasha: ${templateData?.dashaOneLiner ?? (dashaKnown ? `${mahadasha} MD + ${antardasha} AD` : 'not available')}
 - Dasha Quality: ${templateData?.dashaQuality ?? 'Madhyam'}
 - Action Window: ${templateData?.actionWindowHint ?? 'from dasha calculations'}
 - Avoid Window: ${templateData?.avoidWindowHint ?? 'from dasha calculations'}
@@ -1000,7 +1068,7 @@ e.g. hiring vs layoffs, demand, salary/growth trend, or local economic factor �
 TO THIS AGE AND CAREER STAGE (e.g. entry-level IT hiring in Pune for a 27-year-old vs
 senior-management churn for a 47-year-old are DIFFERENT trends). Place 1-2 concrete
 present-day facts as SECTION 2 of simpleSummary.text and connect them to the
-${mahadasha} Mahadasha period — so the guidance feels grounded in real life, not only planets.
+${mdShow} period — so the guidance feels grounded in real life, not only planets.
 Frame every challenge as preparation + timing guidance, NEVER as certain doom.
 NEVER identify or name this person. Sector + city trends ONLY. No private-person search.
 
@@ -1010,7 +1078,7 @@ OUTPUT JSON:
 
   "geoBullets": [
     "Vedic Foundation: Classical BPHS principle for ${domain.displayName ?? domain.id} — 25-40 words",
-    "Dasha Impact: How ${mahadasha} MD + ${antardasha} AD specifically affects ${domain.displayName ?? domain.id} now — 25-40 words",
+    "Dasha Impact: How ${mdShow} + ${adShow} specifically affects ${domain.displayName ?? domain.id} now — 25-40 words",
     "Key Planet: Primary planet for ${domain.displayName ?? domain.id} — quote its actual Shadbala strength from ENGINE EVIDENCE. If no Shadbala was given, describe the planet's classical role only and make no strength claim — 25-40 words",
     "Best Timing: Most favorable period from dasha calculations with approximate dates — 25-40 words",
     "Caution Period: Time requiring extra care with classical Vedic reason — 25-40 words",
@@ -1022,7 +1090,7 @@ OUTPUT JSON:
   ],
 
   "simpleSummary": {
-    "text": "WRITE 860-940 WORDS of body text (target 900) in ${lang.toUpperCase()}, organized as 9 NAMED SECTIONS. Each section = ONE short heading line (emoji + 2-5 words in ${lang.toUpperCase()}) + \\n + paragraph. Separate sections with \\n\\n. Headings do NOT count in word budget. Heading style examples for Hinglish (translate appropriately for Hindi/English): [SECTION 1 — heading like '🪔 Aapki Baat, Seedhe Dil Se': address their situation/pain directly — make them feel deeply understood — 120 words] [SECTION 2 — heading like '🌍 Aaj Ki Zameeni Haqeeqat': REAL-WORLD GROUND REALITY — today's actual climate for their profession (${clientJob}) and current city (hiring/demand/salary/market trend), age-relevant for a ${clientAge ?? ''} year old at ${clientStage} stage, connected to their situation; sector + city level only, NEVER name the person, frame as preparation not doom — 120 words] [SECTION 3 — heading like '🪐 Aisa Kyun Ho Raha Hai': why this is happening — explain key planets in simple language using ONLY the chart facts provided${numerology ? '; weave the numerology compatibility insight here if relationship-relevant' : ''} — 140 words] [SECTION 4 — heading like '⏳ Aapki Current Dasha': what current ${mahadasha} Mahadasha + ${antardasha} Antardasha means for their life right now — 140 words] [SECTION 5 — heading like '🌅 Aage Kya Aane Wala Hai': what is coming — specific timeframe, what to expect, hope — 125 words] [SECTION 6 — heading like '✅ Abhi Ye 3 Kaam Karo': three priority actions they must take now in order of importance (include doctor/counselor advice here if health-related per RULE 11) — 85 words] [SECTION 7 — heading like '⚠️ In Cheezon Se Bacho': two critical things to avoid with brief classical reason — 60 words] [SECTION 8 — heading like '🙏 Aapka Personal Upay': explain the remedy named in the ABSOLUTE REMEDY RULE below — which planet it supports, why that planet needs it in this chart, and one line on HOW to do it correctly for ${clientGender}. Do NOT name any other mantra, deity, dana, vrat or gemstone — the exact instruction is printed in the Upay cards and must match — 60 words] [SECTION 9 — heading like '🔱 Maa Shakti Ka Ashirwad': closing blessing — hope, protection, one line reminding them their karma + these remedies together change the timeline — 60 words]. Spiritual Guru voice. Short sentences. Reader must finish till the end. NO suspense hook. FULL complete answer. PLAIN TEXT headings only — no markdown, no HTML.",
+    "text": "WRITE 860-940 WORDS of body text (target 900) in ${lang.toUpperCase()}, organized as 9 NAMED SECTIONS. Each section = ONE short heading line (emoji + 2-5 words in ${lang.toUpperCase()}) + \\n + paragraph. Separate sections with \\n\\n. Headings do NOT count in word budget. Heading style examples for Hinglish (translate appropriately for Hindi/English): [SECTION 1 — heading like '🪔 Aapki Baat, Seedhe Dil Se': address their situation/pain directly — make them feel deeply understood — 120 words] [SECTION 2 — heading like '🌍 Aaj Ki Zameeni Haqeeqat': REAL-WORLD GROUND REALITY — today's actual climate for their profession (${clientJob}) and current city (hiring/demand/salary/market trend), age-relevant for a ${clientAge ?? ''} year old at ${clientStage} stage, connected to their situation; sector + city level only, NEVER name the person, frame as preparation not doom — 120 words] [SECTION 3 — heading like '🪐 Aisa Kyun Ho Raha Hai': why this is happening — explain key planets in simple language using ONLY the chart facts provided${numerology ? '; weave the numerology compatibility insight here if relationship-relevant' : ''} — 140 words] [SECTION 4 — heading like '⏳ Aapki Current Dasha': what ${mdShow} + ${adShow} means for their life right now — 140 words] [SECTION 5 — heading like '🌅 Aage Kya Aane Wala Hai': what is coming — specific timeframe, what to expect, hope — 125 words] [SECTION 6 — heading like '✅ Abhi Ye 3 Kaam Karo': three priority actions they must take now in order of importance (include doctor/counselor advice here if health-related per RULE 11) — 85 words] [SECTION 7 — heading like '⚠️ In Cheezon Se Bacho': two critical things to avoid with brief classical reason — 60 words] [SECTION 8 — heading like '🙏 Aapka Personal Upay': explain the remedy named in the ABSOLUTE REMEDY RULE below — which planet it supports, why that planet needs it in this chart, and one line on HOW to do it correctly for ${clientGender}. Do NOT name any other mantra, deity, dana, vrat or gemstone — the exact instruction is printed in the Upay cards and must match — 60 words] [SECTION 9 — heading like '🔱 Maa Shakti Ka Ashirwad': closing blessing — hope, protection, one line reminding them their karma + these remedies together change the timeline — 60 words]. Spiritual Guru voice. Short sentences. Reader must finish till the end. NO suspense hook. FULL complete answer. PLAIN TEXT headings only — no markdown, no HTML.",
     "keyMessage": "ONE powerful Guru sentence that captures their life truth. Max 25 words.",
     "periodSummary": "3-4 sentences explaining what current Dasha combination means for their daily life in plain simple language.",
     "bestDates": "3-4 specific favorable date ranges or windows from dasha calculations.",
@@ -1335,10 +1403,13 @@ function buildSeoGeoMeta(
   const geoClean = String(geoText)
     .replace(/Visit\s+trikalvaani\.com[^.]*\./gi,'')
     .trim()
-  const title = `${domainLabel} Prediction — ${mahadasha}-${antardasha} Dasha | ${cityName} | Trikaal Vaani`
+  // v15.11: drop the dasha clause entirely rather than print "unknown-unknown".
+  const dashaClause = (mahadasha && mahadasha !== 'unknown' && antardasha && antardasha !== 'unknown')
+    ? ` — ${mahadasha}-${antardasha} Dasha` : ''
+  const title = `${domainLabel} Prediction${dashaClause} | ${cityName} | Trikaal Vaani`
   const description = geoClean
     ? `${geoClean.slice(0,140)}... Rohiit Gupta, Chief Vedic Architect.`
-    : `Vedic ${domainLabel} for ${cityName}. ${mahadasha} Mahadasha. Swiss Ephemeris + BPHS. Rohiit Gupta.`
+    : `Vedic ${domainLabel} for ${cityName}.${mahadasha && mahadasha !== 'unknown' ? ` ${mahadasha} Mahadasha.` : ''} Swiss Ephemeris + BPHS. Rohiit Gupta.`
   return {
     title:       title.slice(0,70),
     description: description.slice(0,165),
@@ -1359,6 +1430,8 @@ async function saveToSupabase(p:{
   paymentVerification?: PaymentVerification | null
   paypalVerification?: PaypalVerification | null
   paypalCaptureId?: string | null
+  // v15.12 — drives is_public. See the MINOR CHECK block in the handler.
+  isMinor?: boolean
 }): Promise<string> {
   const simpleSummaryText =
     p.predictionJson.summaryText ??
@@ -1408,7 +1481,12 @@ async function saveToSupabase(p:{
     public_slug:     p.publicSlug,
     seo_title:       p.seoMeta.title??null,
     seo_description: p.seoMeta.description??null,
-    is_public:       true,
+    // v15.12 — was hardcoded true. is_public no longer controls whether the
+    // customer can open their report (app/report/[slug] v3.2 dropped that
+    // filter); it now controls DISCOVERABILITY only — app/sitemap.ts selects on
+    // it, and the report page's robots meta reads it. A minor's reading is
+    // therefore delivered normally and kept out of the sitemap and the index.
+    is_public:       !p.isMinor,
     is_indexed:      false,
     // ── Razorpay payment columns (v14.6) ─────────────────────────
     razorpay_order_id:   p.paymentVerification?.razorpay_order_id   ?? null,
@@ -1512,6 +1590,49 @@ export async function POST(req: NextRequest) {
       errorEn: 'Birth details are incomplete or invalid. Please re-enter date, time and place of birth.',
       code: 'INVALID_BIRTH_DATA',
     }, { status: 400 })
+  }
+
+  // ══════════════════════════════════════════════════════════════════════
+  // MINOR CHECK — v15.12 (09 Sep 2026)
+  //
+  // WHY IT EXISTS
+  //   Every reading is written with is_public=true, app/sitemap.ts selects
+  //   exactly those rows, and the report page asks Google to index them. That
+  //   is deliberate — published readings are part of the growth plan. But it
+  //   was applied to EVERY reading without exception, and a child's reading
+  //   carries a name, a date of birth and a city.
+  //
+  // WHY THE AGE IS COMPUTED FROM DOB AND NOT TAKEN FROM THE FORM
+  //   promptUserContext does `age: userContext.age ?? 30`. A blank age field
+  //   therefore becomes 30, and a minor would never be detected. The date of
+  //   birth is mandatory and was validated by the guard above, so it is the
+  //   only trustworthy source. The stated age is still consulted — whichever
+  //   of the two says minor, wins.
+  //
+  // WHAT IT DOES AND DOES NOT DO
+  //   It sets is_public=false and skips the Google indexing ping. It does NOT
+  //   hide the reading from the person who requested it: app/report/[slug]
+  //   v3.2 no longer gates delivery on is_public, and the slug's random uid is
+  //   the access token. Unlisted, not withheld — they paid for it.
+  const _ageFromDob = (() => {
+    try {
+      const now = new Date()
+      let a = now.getUTCFullYear() - _dobParts[0]
+      const m = (now.getUTCMonth() + 1) - _dobParts[1]
+      if (m < 0 || (m === 0 && now.getUTCDate() < _dobParts[2])) a--
+      return Number.isFinite(a) ? a : null
+    } catch { return null }
+  })()
+  const _statedAge = Number((userContext as any)?.age)
+  const isMinor =
+    (_ageFromDob !== null && _ageFromDob >= 0 && _ageFromDob < 18) ||
+    (Number.isFinite(_statedAge) && _statedAge > 0 && _statedAge < 18)
+  if (isMinor) {
+    console.log(
+      `[TV-v15.12] MINOR — reading will be UNLISTED (is_public=false, no ` +
+      `indexing ping). dob=${_gDob} age_from_dob=${_ageFromDob} ` +
+      `stated=${Number.isFinite(_statedAge) ? _statedAge : 'none'} session=${sessionId}`
+    )
   }
 
   const isPaid = predictionTier==='paid'
@@ -1864,8 +1985,13 @@ export async function POST(req: NextRequest) {
 
   // ── STEP 5: Slug + SEO ───────────────────────────────────────────────────
   const processingMs     = Date.now()-startMs
-  const mahadashaPlanet  = chartExtract.mahadasha??kundaliData?.currentMahadasha?.lord??'rahu'
-  const antardashaPlanet = chartExtract.antardasha??kundaliData?.currentAntardasha?.lord??'saturn'
+  // v15.11: was ??'rahu' / ??'saturn'. When neither the VM nor the local chart
+  // knew the dasha, the slug, the SEO title and the mahadasha/antardasha COLUMNS
+  // all recorded two planets that had never been computed — and the row looked
+  // exactly like a healthy one. 'unknown' is ugly in a URL; a wrong planet in
+  // the database is worse, because nothing downstream can tell it was a guess.
+  const mahadashaPlanet  = chartExtract.mahadasha??kundaliData?.currentMahadasha?.lord??'unknown'
+  const antardashaPlanet = chartExtract.antardasha??kundaliData?.currentAntardasha?.lord??'unknown'
 
   const publicSlug = generatePredictionSlug({
     domainId,
@@ -1918,6 +2044,7 @@ export async function POST(req: NextRequest) {
       // correctly at the gate and nothing carried them to the write.
       paypalVerification: paypalVerification ?? null,
       paypalCaptureId:    paypalCaptureId,
+      isMinor,                                    // v15.12
     })
     console.log(`[TV-v14.6] Saved | slug:${publicSlug} | polished:${isPaid} | ms:${Date.now()-startMs}`)
   } catch(err:any) {
@@ -1925,7 +2052,11 @@ export async function POST(req: NextRequest) {
   }
 
   // ── STEP 7: Google Indexing ───────────────────────────────────────────────
-  try{notifyGoogleIndexing(`https://trikalvaani.com/report/${publicSlug}`)}catch{}
+  // v15.12 — asking Google to index a page that is deliberately unlisted would
+  // undo the whole point of the flag above.
+  if (!isMinor) {
+    try{notifyGoogleIndexing(`https://trikalvaani.com/report/${publicSlug}`)}catch{}
+  }
 
   // ── STEP 8: Return ───────────────────────────────────────────────────────
   const totalMs = Date.now()-startMs
