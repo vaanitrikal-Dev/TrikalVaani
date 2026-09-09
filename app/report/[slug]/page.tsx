@@ -3,8 +3,33 @@
  * TRIKAAL VAANI — Public SEO Result Page
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/report/[slug]/page.tsx
- * VERSION: 3.1 — IR-0 CLEANUP (local-business + branding)
+ * VERSION: 3.2 — is_public stops gating delivery; robots honours the flags
  * SIGNED: ROHIIT GUPTA, CEO
+ * ============================================================
+ * v3.1 -> v3.2 CHANGES (09 Sep 2026):
+ *   TWO changes, and together they turn two dead database columns into a
+ *   working publish switch.
+ *
+ *   1. getReport() no longer filters on is_public. It used to, and that made
+ *      the flag self-defeating: marking a report is_public=false to keep it out
+ *      of Google ALSO hid it from the customer who had paid for it. So every
+ *      report had to stay public, and selective publishing was impossible.
+ *      Access is now the slug itself, which carries a 5-character random uid
+ *      (lib/slug.ts) — the unlisted-link model.
+ *
+ *   2. The robots meta was hardcoded index:true. app/api/predict/route.ts has
+ *      been writing is_indexed:false on every row since it was built, and
+ *      NOTHING read it — the page told Google to index regardless. Now a report
+ *      is indexable only when is_public and is_indexed both allow it.
+ *
+ *   BEHAVIOUR FOR EXISTING ROWS IS UNCHANGED. Both checks use `!== false`, so
+ *   a null or true keeps today's behaviour exactly. Only a row explicitly
+ *   flagged false behaves differently — and no such row exists yet.
+ *
+ *   WHY IT WAS NEEDED: a minor's reading, carrying a name, birth date and city,
+ *   is currently submitted to Google, Bing and every AI crawler like any other
+ *   page. There was no mechanism to exclude one. Now there is; the route change
+ *   that uses it is separate and comes next.
  * ============================================================
  * v3.0 -> v3.1 CHANGES (CEO approved):
  *   - REMOVED `other: { geo.region: 'IN-DL', geo.placename: 'Delhi NCR' }`
@@ -52,6 +77,10 @@ type ReportRow = {
   kundali_meta:        unknown
   created_at:          string
   public_views:        number
+  // v3.2 — the two flags this page now actually honours. They were always in
+  // the row (the query is select('*')); they were simply never read.
+  is_public:           boolean | null
+  is_indexed:          boolean | null
 }
 
 // ── Supabase ──────────────────────────────────────────────────────────────────
@@ -69,7 +98,16 @@ async function getReport(slug: string): Promise<ReportRow | null> {
     .from('predictions')
     .select('*')
     .eq('public_slug', slug)
-    .eq('is_public', true)
+    // v3.2 — is_public NO LONGER GATES DELIVERY.
+    // It used to. That made the flag unusable: setting is_public=false to keep
+    // a report out of Google also hid it from the person who had PAID for it,
+    // so in practice every report had to stay is_public=true and there was no
+    // way to publish selectively at all.
+    // The slug is the access control. lib/slug.ts builds it as
+    // [domain]-[mahadasha]-[antardasha]-[city]-[year]-[5char-uid]; the uid makes
+    // it unguessable, which is the same "unlisted link" model used for a private
+    // video. is_public and is_indexed now decide DISCOVERABILITY only —
+    // the sitemap and the robots meta below — never access.
     .single()
 
   if (error || !data) return null
@@ -95,6 +133,11 @@ export async function generateMetadata(
 
   const report = await getReport(params.slug)
   if (!report) return { title: { absolute: 'Report Not Found | Trikaal Vaani' } }
+
+  // v3.2 — a report is discoverable only if it was published AND marked
+  // indexable. Nulls are treated as "yes" so every existing row behaves exactly
+  // as it does today; only rows explicitly flagged false change.
+  const indexable = (report.is_public !== false) && (report.is_indexed !== false)
 
   const geoAnswer = report.geo_answer ?? `Vedic astrology ${report.domain_label} analysis for ${report.birth_city}. Powered by Swiss Ephemeris.`
 
@@ -136,16 +179,28 @@ export async function generateMetadata(
       title:       meta.title,
       description: meta.description,
     },
-    robots: {
-      index:  true,
-      follow: true,
-      googleBot: {
-        index:               true,
-        follow:              true,
-        'max-snippet':       -1,
-        'max-image-preview': 'large',
-      },
-    },
+    // v3.2 — was hardcoded index:true, which meant the is_indexed column was
+    // written on every row and read by nothing. A report could be marked
+    // not-indexed in the database and still tell Google to index it.
+    // Now: a report is indexable only when BOTH flags allow it. Anything else
+    // is served normally to whoever holds the link and told not to be indexed.
+    robots: indexable
+      ? {
+          index:  true,
+          follow: true,
+          googleBot: {
+            index:               true,
+            follow:              true,
+            'max-snippet':       -1,
+            'max-image-preview': 'large',
+          },
+        }
+      : {
+          index:  false,
+          follow: false,
+          nocache: true,
+          googleBot: { index: false, follow: false },
+        },
   }
 }
 
