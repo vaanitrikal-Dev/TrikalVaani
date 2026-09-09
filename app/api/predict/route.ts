@@ -107,6 +107,22 @@
  * TRIKAAL VAANI — Unified Prediction Endpoint
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/api/predict/route.ts
+ * VERSION: 15.6 — sadeSati whitelisted; PayPal reaches the DB row
+ *
+ * v15.6 (2026-09-09): TWO changes, both small, one of them a payment bug.
+ *   1. sadeSati added to the mergeTemplateWithGemini whitelist. template_engine
+ *      v3.3 returns Saturn's windows from the natal Moon with real dates; an
+ *      unlisted key is dropped before the DB write, exactly as chartEvidence
+ *      was before v14.17. Approved by Rohiit, 09 Sep 2026.
+ *   2. paypalVerification and paypalCaptureId are now passed to
+ *      saveToSupabase, and _meta.paymentVerified accounts for PayPal. The gate
+ *      verified the capture with PayPal and then nothing carried the result to
+ *      the write, so a paying international customer would have been recorded
+ *      with payment_verified=false, currency 'INR', and no capture id to
+ *      reconcile against. No damage done — Supabase shows zero USD rows in the
+ *      last 30 days, so PayPal has taken no payment yet.
+ *   Nothing else in this file changed. The Razorpay path is untouched.
+ *
  * VERSION: 15.4 — DASAMSA D10 in the paid report
  *
  * v15.4 (2026-08-29): the report has carried the Navamsa (D9) for a while but
@@ -1039,6 +1055,16 @@ function mergeTemplateWithGemini(
     gocharTimeline:   templateObj.gocharTimeline     ?? null,
     navamsaChart:     templateObj.navamsaChart       ?? null,
     dasamsaChart:     templateObj.dasamsaChart       ?? null,
+    // v15.6 (09 Sep 2026) — template_engine v3.3 returns sadeSati: Saturn's
+    // windows measured from the natal Moon (Sade Sati, Ashtama, Kantaka) with
+    // real dates. Listed here for the reason the two comments above give: this
+    // function is a whitelist, and a key not named is dropped silently before
+    // the Supabase write. chartEvidence went missing that way in v14.17 and
+    // gocharTimeline would have in v15.0.
+    // Approved by Rohiit, 09 Sep 2026. One new key, `?? null` like every line
+    // around it — nothing existing is touched, and if the VM omits it the
+    // report simply hides that section.
+    sadeSati:         templateObj.sadeSati           ?? null,
     dataIntegrity:    templateObj.dataIntegrity      ?? null,
     templateVersion:  templateObj.meta?.version      ?? null,
     // Parashari yogas + Bhrigu theme — computed by VM /synthesize, previously
@@ -1689,6 +1715,31 @@ export async function POST(req: NextRequest) {
       processingMs,
       publicSlug, seoMeta, chartExtract,
       paymentVerification: paymentVerification ?? null,
+      // ── v15.6 (09 Sep 2026) — PAYPAL WAS NEVER REACHING THE ROW ──────────
+      // saveToSupabase accepts paypalVerification and paypalCaptureId and uses
+      // both — payment_amount, payment_currency, paypal_order_id,
+      // paypal_capture_id and payment_verified are all derived from them. This
+      // call site passed neither. Every PayPal reading would therefore have
+      // been written as:
+      //     payment_verified = false    (the customer HAS paid)
+      //     payment_currency = 'INR'    (they paid USD)
+      //     payment_amount   = null
+      //     paypal_order_id  = null
+      //     paypal_capture_id = null
+      // A paying international customer recorded as unpaid, with no capture id
+      // to reconcile or refund against.
+      //
+      // Found 09 Sep 2026 while adding the sadeSati line above. NOT yet
+      // damaging: Supabase shows 0 rows with payment_currency 'USD' in the last
+      // 30 days, so PayPal has taken no payment yet. It would have broken on
+      // the first one.
+      //
+      // v15.3 deliberately kept the PayPal branch separate from the rupee
+      // branch so the rupee path could not regress. That was right — and it is
+      // also why this gap was easy to miss: the new branch set the variables
+      // correctly at the gate and nothing carried them to the write.
+      paypalVerification: paypalVerification ?? null,
+      paypalCaptureId:    paypalCaptureId,
     })
     console.log(`[TV-v14.6] Saved | slug:${publicSlug} | polished:${isPaid} | ms:${Date.now()-startMs}`)
   } catch(err:any) {
@@ -1722,7 +1773,10 @@ export async function POST(req: NextRequest) {
       seoTitle:       seoMeta.title,
       seoDescription: seoMeta.description,
       geoAnswer:      seoMeta.geoAnswer,
-      paymentVerified: paymentVerification ? true : false,
+      // v15.6: was `paymentVerification ? true : false`, so a PayPal customer
+      // got paymentVerified:false in the API response even though the gate
+      // above had already confirmed the capture with PayPal directly.
+      paymentVerified: (paymentVerification || paypalVerification) ? true : false,
     },
   })
 }
