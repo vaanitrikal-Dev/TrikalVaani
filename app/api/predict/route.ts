@@ -107,6 +107,46 @@
  * TRIKAAL VAANI — Unified Prediction Endpoint
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/api/predict/route.ts
+ * VERSION: 15.13 — BPHS classical layer to the writer; person 2 minor check
+ *
+ * v15.13a additions, folded into the same version so this file is deployed ONCE:
+ *   - PERSON 2 IS NOW CHECKED for minority as well. The gate added moments
+ *     earlier looked only at person 1, so a parent asking about a child — a
+ *     large share of what this platform is asked — would still have had that
+ *     child's name, date of birth and city published to Google. Both dates of
+ *     birth are now tested through one shared helper.
+ *   - The prompt banner said "v14.17" and the output carried
+ *     _promptVersion "pro-v14.13". Both are stale by four versions and
+ *     _promptVersion is STORED IN EVERY ROW, so the database has been recording
+ *     the wrong prompt version for every reading since v14.13. Corrected.
+ *   - /template's synthesis:null is documented in place as deliberate, with
+ *     the proof: template_engine.py lists "synthesis" among the keys it SKIPS
+ *     (line 513) and reads it nowhere, so passing it would change no card —
+ *     while serialising the two VM calls to make it possible would add up to
+ *     15s to every paid reading.
+ *
+ *
+ * v15.13 (09 Sep 2026): /synthesize has been returning enriched.bphs since the
+ *   VM gained its Engine 5 today — dignity and the SHUBHA RATIO (Ch.3
+ *   sl.59-60), the Baladi and Jagradadi avasthas (Ch.45), Vimshopaka bala with
+ *   Parashara's own bands (Ch.7 sl.17-27), functional nature by lordship
+ *   (Ch.34), the chara karakas and the ATMAKARAKA GATE (Ch.32 sl.9-12), and the
+ *   Ch.47 dasha dignity gate with drekkana timing. It was written to
+ *   synthesis_data and read by NOBODY — the same shape that hid chartEvidence
+ *   until v14.17 and the real Bhrigu output until v14.18.
+ *   The block now reaches buildProPrompt, governed by new RULE 21.
+ *
+ *   THE ONE THAT MATTERS: Shadbala says how much FORCE a planet has. Nothing in
+ *   this engine has ever said how much of that force is GOOD. That is why a
+ *   planet in an enemy sign in the 12th, with Shadbala above 1.0, has been
+ *   reaching the writer labelled "Strong" — a word that inverts its meaning.
+ *   Both numbers are now given and RULE 21 forbids collapsing them into one.
+ *
+ *   No whitelist change was needed: engineSignals already carries the whole
+ *   /synthesize response, so enriched.bphs was reaching the DB already.
+ *   Paid tier only. buildFlashPrompt (free) is untouched.
+ *   No payment path, no VM payload, no guard, no schema key changed.
+ *
  * VERSION: 15.12 — a minor's reading is delivered but never published
  *
  * v15.12 (09 Sep 2026): every reading was written is_public=true, which is what
@@ -875,6 +915,63 @@ VARSHPHAL — THE ANNUAL CHART (Tajika). ${vpal.stage ?? ''}
   Varshesh (year lord) is NOT computed — do not name one, do not infer one.
 ` : ''
 
+  // ── v15.13: THE BPHS BLOCK — /synthesize enriched.bphs ────────────────────
+  // The VM now computes, per chart: dignity and the SHUBHA RATIO (Ch.3
+  // sl.59-60), the Baladi and Jagradadi avasthas (Ch.45), Vimshopaka bala with
+  // Parashara's own band (Ch.7 sl.17-27), functional nature by lordship
+  // (Ch.34), the chara karakas and the ATMAKARAKA GATE (Ch.32 sl.9-12), and the
+  // Ch.47 dasha dignity gate plus drekkana timing. Until this version all of it
+  // was produced, written to synthesis_data, and read by nobody — the same
+  // failure that hid chartEvidence until v14.17 and Bhrigu until v14.18.
+  //
+  // WHY THE SHUBHA RATIO MATTERS MORE THAN THE REST
+  //   Shadbala answers HOW MUCH FORCE a planet has. Nothing in this engine has
+  //   ever answered HOW MUCH OF THAT FORCE IS GOOD. That is why a planet in an
+  //   enemy sign in the 12th house, with a Shadbala above 1.0, has been reaching
+  //   the writer labelled "Strong" — a word that inverts its meaning. The two
+  //   numbers are different axes and both are now given.
+  const bp = (syn as any)?.bphs ?? null
+  const bpOk = !!(bp && bp.available)
+  const _bpPlanetLine = (p: string, v: any) =>
+    `  • ${p}: ${v.sign} h${v.house}, ${v.dignity}, shubha ratio ${Number(v.shubha_ratio).toFixed(3)}` +
+    ` | Vimshopaka ${Number(v.vimshopaka).toFixed(2)}/20 (${v.vimshopaka_band})` +
+    ` | avastha ${v.baladi} / ${v.jagradadi}`
+  const _bpDashaLine = (k: string, v: any) => {
+    const w = v?.effect_window
+    return `  • ${k}: ${v?.lord ?? '—'} — gate ${v?.gate ?? '—'}` +
+      (v?.gate_because?.length ? ` (${v.gate_because.join(', ')})` : '') +
+      (v?.effects_land_in ? ` | drekkana ${v.drekkana}, so its effects land at the ${v.effects_land_in} of the period` : '') +
+      (w?.from ? ` — that window is ${w.from} to ${w.to}` : '')
+  }
+  const bphsBlock = bpOk ? `
+BPHS CLASSICAL LAYER (computed on the VM from the Sanskrit rules — never recompute any of it):
+
+  SHUBHA RATIO — Ch.3 sl.59-60. How much of a planet's output is AUSPICIOUS,
+  0 to 1: exaltation 1, moolatrikona 3/4, own sign 1/2, friend 1/4, neutral 1/8,
+  enemy or debilitated 0. THIS IS NOT STRENGTH. Read it TOGETHER with Shadbala:
+  a planet can be strong and still deliver nothing good, and a strong planet
+  with a ratio of 0 delivers its INAUSPICIOUS result with full force.
+${Object.entries(bp.planets ?? {}).map(([p, v]: any) => _bpPlanetLine(p, v)).join('\n')}
+
+  ATMAKARAKA GATE — Ch.32 sl.9-12. "Just as the minister cannot go against the
+  king, the other karakas cannot predominate over the Atmakaraka."
+  Atmakaraka: ${bp.atmakaraka_gate?.atmakaraka ?? '—'} (${bp.atmakaraka_gate?.sign ?? '—'}, house ${bp.atmakaraka_gate?.house ?? '—'}) — gate ${bp.atmakaraka_gate?.gate ?? '—'}
+  ${(bp.atmakaraka_gate?.adverse_because?.length ? 'adverse because: ' + bp.atmakaraka_gate.adverse_because.join(', ') : (bp.atmakaraka_gate?.favourable_because?.length ? 'favourable because: ' + bp.atmakaraka_gate.favourable_because.join(', ') : ''))}
+  ${bp.atmakaraka_gate?.consequence ?? ''}
+  Chara karakas: ${Object.entries(bp.chara_karakas?.seven ?? {}).map(([k, v]: any) => `${k} ${v}`).join(', ') || '—'}
+
+  DASHA — Ch.47 sl.5-6 dignity gate, sl.3-4 drekkana timing:
+${Object.entries(bp.dasha?.levels ?? {}).map(([k, v]: any) => _bpDashaLine(k, v)).join('\n') || '  (no running dasha resolved)'}
+
+  FUNCTIONAL NATURE BY LORDSHIP — Ch.34 sl.2-7. This is a DIFFERENT AXIS from
+  natural benefic/malefic, and the two can disagree about the same graha:
+${Object.entries(bp.functional_nature?.by_lordship ?? {}).map(([p, v]: any) => `  • ${p}: ${(Array.isArray(v) ? v : [v]).join(' | ')}`).join('\n')}
+` : `
+BPHS CLASSICAL LAYER: not available${bp?.error ? ` (${bp.error})` : ''} — make no claim about
+shubha ratio, avasthas, Vimshopaka, chara karakas, the Atmakaraka or the Ch.47
+dasha gate. Say nothing about them rather than reasoning any of them out.
+`
+
   const evidenceBlock = `
 ════════════════════════════════════════════════════════
 ENGINE EVIDENCE — COMPUTED, VERIFIED, YOURS TO EXPLAIN
@@ -886,6 +983,7 @@ ${houseLines}
 
 KEY PLANETS (Shadbala — ratio above 1.00 = above minimum required strength):
 ${planetLines}
+${bphsBlock}
 
 DASHA ACTIVATION (is the running period actually connected to these houses?):
 ${activationLine}
@@ -904,7 +1002,7 @@ ${bhriguSignals.length === 0 && !bhrigu.current_life_theme ? 'NO Bhrigu data for
 
   const systemPrompt = `
 ════════════════════════════════════════════════════════
-TRIKAAL VAANI — PRO DEEP ANALYSIS ENGINE v14.17
+TRIKAAL VAANI — PRO DEEP ANALYSIS ENGINE v15.13
 JAI MAA SHAKTI 🔱
 ════════════════════════════════════════════════════════
 
@@ -1029,6 +1127,30 @@ ABSOLUTE RULES:
     the next six months" is accurate; "October is a bad month" is not. When you
     describe the past three months, present them as pressures the chart shows —
     possibilities the reader may recognise — never as events you assert happened.
+21. THE TWO AXES (v15.13 — read this before you call any planet strong or weak).
+    The BPHS CLASSICAL LAYER gives a SHUBHA RATIO alongside Shadbala. They
+    measure different things and you must not collapse them into one word.
+    a) Shadbala = how much force. Shubha ratio = how much of that force is
+       auspicious. A planet with Shadbala 1.23 and a shubha ratio of 0.000 is
+       NOT "strong" in any sense the reader would understand — it is forceful
+       and unhelpful, and saying "strong" about it misleads them.
+    b) When you describe a planet, let the ratio decide whether the effect is
+       good and let Shadbala decide how MUCH of it there is.
+    c) The ATMAKARAKA GATE sits above every individual planet. If it reads
+       ADVERSE, temper every benefic claim in the reading — the grantha says no
+       other karaka can give its full benefic effect while the AK is afflicted.
+       If it reads FAVOURABLE, temper the malefic claims the same way. If MIXED,
+       apply neither direction.
+    d) The Ch.47 DASHA GATE tells you whether the RUNNING period is favourable,
+       and the drekkana tells you WHICH THIRD of that period its effects land
+       in. Where an explicit window with dates is given, you may state it. Where
+       it is not, do not invent one.
+    e) FUNCTIONAL NATURE BY LORDSHIP is a separate axis from natural
+       benefic/malefic and the two may disagree for the same graha. When they
+       do, say what each shows rather than picking one and hiding the other.
+    f) RULE 14 still governs all of it: none of these numbers may be
+       recalculated, adjusted or extended by you. If the block says not
+       available, stay silent on it.
 16. CONFIDENCE HONESTY (v14.17): Different horizons deserve different certainty.
     Recent past and the next 3 months rest on exact Vimshottari dates and are
     the most reliable. Months 4-6 are directional. Never present every statement
@@ -1139,7 +1261,7 @@ OUTPUT JSON:
     }
   },
 
-  "_promptVersion": "pro-v14.13",
+  "_promptVersion": "pro-v15.13",
   "_tier": "premium"
 }
 
@@ -1614,24 +1736,37 @@ export async function POST(req: NextRequest) {
   //   hide the reading from the person who requested it: app/report/[slug]
   //   v3.2 no longer gates delivery on is_public, and the slug's random uid is
   //   the access token. Unlisted, not withheld — they paid for it.
-  const _ageFromDob = (() => {
+  const _ageFromDobString = (dob: unknown): number | null => {
     try {
+      const p = String(dob ?? '').trim().split('-').map(Number)
+      if (p.length !== 3 || !p.every(Number.isFinite)) return null
       const now = new Date()
-      let a = now.getUTCFullYear() - _dobParts[0]
-      const m = (now.getUTCMonth() + 1) - _dobParts[1]
-      if (m < 0 || (m === 0 && now.getUTCDate() < _dobParts[2])) a--
+      let a = now.getUTCFullYear() - p[0]
+      const m = (now.getUTCMonth() + 1) - p[1]
+      if (m < 0 || (m === 0 && now.getUTCDate() < p[2])) a--
       return Number.isFinite(a) ? a : null
     } catch { return null }
-  })()
-  const _statedAge = Number((userContext as any)?.age)
+  }
+  const _isMinorAge = (a: number | null) => a !== null && a >= 0 && a < 18
+
+  const _ageFromDob = _ageFromDobString(_gDob)
+  const _statedAge  = Number((userContext as any)?.age)
+  // v15.13a — PERSON 2 IS CHECKED TOO. Dual-chart domains send person2Data, and
+  // it carries a name, a date of birth and a city exactly as person 1 does. The
+  // first version of this gate looked only at person 1, so a reading for an
+  // adult about a minor — a parent asking about a child, which is a large part
+  // of what this platform is asked — would still have been published.
+  const _age2 = person2Data ? _ageFromDobString((person2Data as any)?.dob) : null
   const isMinor =
-    (_ageFromDob !== null && _ageFromDob >= 0 && _ageFromDob < 18) ||
-    (Number.isFinite(_statedAge) && _statedAge > 0 && _statedAge < 18)
+    _isMinorAge(_ageFromDob) ||
+    (Number.isFinite(_statedAge) && _statedAge > 0 && _statedAge < 18) ||
+    _isMinorAge(_age2)
   if (isMinor) {
     console.log(
-      `[TV-v15.12] MINOR — reading will be UNLISTED (is_public=false, no ` +
+      `[TV-v15.13] MINOR — reading will be UNLISTED (is_public=false, no ` +
       `indexing ping). dob=${_gDob} age_from_dob=${_ageFromDob} ` +
-      `stated=${Number.isFinite(_statedAge) ? _statedAge : 'none'} session=${sessionId}`
+      `stated=${Number.isFinite(_statedAge) ? _statedAge : 'none'} ` +
+      `person2_age=${_age2 ?? 'n/a'} session=${sessionId}`
     )
   }
 
@@ -1894,6 +2029,19 @@ export async function POST(req: NextRequest) {
     },20000),
     callVM('/template',{
       domain:domainId,
+      // synthesis is null ON PURPOSE — do not "fix" it. VERIFIED 09 Sep 2026 on
+      // the live VM, not assumed:
+      //   grep -n "synthesis" template_engine.py
+      // returns exactly two lines, and neither one reads the value. One is a
+      // comment describing this payload; the other is line 513,
+      //   for k in ("birthData", "tier", "synthesis", "source", ...)
+      // which is the list of keys the engine SKIPS. Passing the real synthesis
+      // would therefore change not one card on the report.
+      // It would also cost time: this call shares a Promise.allSettled with
+      // /synthesize, so sending the data would mean running them in series and
+      // the bound goes from max(20s,15s) to 20s+15s — up to 15 seconds added to
+      // every paid reading, for nothing. If template_engine is ever changed to
+      // USE synthesis, that is the moment to revisit this, and not before.
       kundaliData:{chart:rawChart,synthesis:null,birthData:localBirthData,tier:predictionTier},
       sessionId,
       lang:userContext.language==='english'?'en':'hi',
