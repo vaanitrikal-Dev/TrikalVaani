@@ -3,7 +3,7 @@
  * TRIKAAL VAANI — Public SEO Result Page
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/report/[slug]/page.tsx
- * VERSION: 3.2 — is_public stops gating delivery; robots honours the flags
+ * VERSION: 3.3 — indexability follows is_public ONLY (v3.2 read a dead column)
  * SIGNED: ROHIIT GUPTA, CEO
  * ============================================================
  * v3.1 -> v3.2 CHANGES (09 Sep 2026):
@@ -17,10 +17,18 @@
  *      Access is now the slug itself, which carries a 5-character random uid
  *      (lib/slug.ts) — the unlisted-link model.
  *
- *   2. The robots meta was hardcoded index:true. app/api/predict/route.ts has
- *      been writing is_indexed:false on every row since it was built, and
- *      NOTHING read it — the page told Google to index regardless. Now a report
- *      is indexable only when is_public and is_indexed both allow it.
+ *   2. The robots meta was hardcoded index:true, so a report could never be
+ *      excluded from the index at all. It now follows is_public.
+ *
+ *   v3.2 -> v3.3 CORRECTION (same day): v3.2 required is_indexed !== false as
+ *   well. That was a mistake made without checking the data. route.ts has
+ *   written is_indexed:false on every row since it was built and nothing read
+ *   it, so the value means "never set", not "do not index" — 456 of 526 rows
+ *   carry it. v3.2 would therefore have put a noindex on 87% of the published
+ *   reports while app/sitemap.ts kept submitting them, which is the site
+ *   telling Google two opposite things about one page. v3.3 reads is_public
+ *   only, which is the same column the sitemap selects on, so the two can
+ *   never disagree.
  *
  *   BEHAVIOUR FOR EXISTING ROWS IS UNCHANGED. Both checks use `!== false`, so
  *   a null or true keeps today's behaviour exactly. Only a row explicitly
@@ -134,10 +142,23 @@ export async function generateMetadata(
   const report = await getReport(params.slug)
   if (!report) return { title: { absolute: 'Report Not Found | Trikaal Vaani' } }
 
-  // v3.2 — a report is discoverable only if it was published AND marked
-  // indexable. Nulls are treated as "yes" so every existing row behaves exactly
-  // as it does today; only rows explicitly flagged false change.
-  const indexable = (report.is_public !== false) && (report.is_indexed !== false)
+  // v3.3 — ONE FLAG, ONE MEANING. This reads is_public ONLY.
+  //
+  // v3.2 also required is_indexed !== false, which was wrong and would have
+  // been damaging. app/api/predict/route.ts has written is_indexed:false on
+  // every row since it was built and nothing ever read it, so `false` there
+  // does not mean "do not index" — it means "nobody ever set this". At the
+  // time of writing 456 of 526 rows carry that value. Honouring it would have
+  // put a noindex on 87% of the published reports, and app/sitemap.ts would
+  // have gone on submitting the same URLs — the site telling Google two
+  // opposite things about the same page.
+  //
+  // is_public is now the single switch, and it is the SAME column sitemap.ts
+  // already selects on, so the sitemap and the robots meta can never disagree.
+  // is_indexed is left in the type and untouched; if it is ever populated
+  // deliberately it can be added back here, but not before the data means
+  // something.
+  const indexable = (report.is_public !== false)
 
   const geoAnswer = report.geo_answer ?? `Vedic astrology ${report.domain_label} analysis for ${report.birth_city}. Powered by Swiss Ephemeris.`
 
