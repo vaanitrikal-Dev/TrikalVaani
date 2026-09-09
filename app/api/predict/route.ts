@@ -107,6 +107,18 @@
  * TRIKAAL VAANI — Unified Prediction Endpoint
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/api/predict/route.ts
+ * VERSION: 15.9 — yoginiDasha and charaDasha whitelisted
+ *
+ * v15.9 (2026-09-09): TWO lines, added together on purpose. template_engine
+ *   v3.6 and v3.7 add Yogini Dasha (BPHS) and Chara Dasha (Jaimini); both are
+ *   whitelisted in a single edit because this list has now dropped four
+ *   separate engine blocks on four separate occasions, each costing an edit to
+ *   a file that is locked precisely to discourage edits.
+ *   Neither is fed to the Gemini prompt. The evidence block already carries
+ *   Vimshottari, and three dasha systems in one narrative would invite the
+ *   writer to reconcile them — which is a judgement no rule here authorises.
+ *   The cards show each system in its own right and let the reader compare.
+ *
  * VERSION: 15.8 — shodashvarga whitelisted
  *
  * v15.8 (2026-09-09): ONE line. shodashvarga added to the whitelist so
@@ -1178,6 +1190,20 @@ function mergeTemplateWithGemini(
     // v14.17, sadeSati and varshphal were both caught only after they had
     // already shipped as null.
     shodashvarga:     templateObj.shodashvarga       ?? null,
+    // v15.9 (09 Sep 2026) — two more timing systems from template_engine v3.7.
+    // yoginiDasha: BPHS Vol 2 slokas 195-199. A 36-year cycle of eight
+    //   Yoginis keyed to the birth nakshatra. The engine reproduces the book's
+    //   own Mrigasira worked example before it will run.
+    // charaDasha : Jaimini Upadesa Sutras, adhyaya 3 pada 1. Sign-based rather
+    //   than nakshatra-based, so a genuinely third reading beside Vimshottari
+    //   and Yogini. Verified against the book's complete twelve-sign table
+    //   (Chart 49/50, General Franco) — all twelve figures and the 89-year
+    //   total reproduce, and the patch refuses to install if they ever stop.
+    // Both added in ONE edit rather than two: this whitelist has already
+    // swallowed chartEvidence, sadeSati, varshphal and shodashvarga on
+    // separate occasions, and each one cost a trip into a locked file.
+    yoginiDasha:      templateObj.yoginiDasha        ?? null,
+    charaDasha:       templateObj.charaDasha         ?? null,
     dataIntegrity:    templateObj.dataIntegrity      ?? null,
     templateVersion:  templateObj.meta?.version      ?? null,
     // Parashari yogas + Bhrigu theme — computed by VM /synthesize, previously
