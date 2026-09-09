@@ -107,6 +107,29 @@
  * TRIKAAL VAANI — Unified Prediction Endpoint
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/api/predict/route.ts
+ * VERSION: 15.10 — paid summary 750 -> 900 words, and told not to repeat the cards
+ *
+ * v15.10 (2026-09-09): TWO changes to buildProPrompt, both approved by Rohiit.
+ *   1. The paid word budget goes 720-780 (target 755) to 860-940 (target 900),
+ *      with every per-section budget scaled to match. THE REASON IS MEASURED,
+ *      not preference: across 37 live paid readings the 720-780 instruction
+ *      produced an average of 553 words, a range of 123 to 1037, and NOT ONE
+ *      reading inside the stated range. The model undershoots by roughly a
+ *      quarter, so asking for 900 should land near the 750 that was wanted all
+ *      along. This is working with a measured bias, not hoping harder.
+ *      Honest limit: it will not make the model obedient. The spread will stay
+ *      wide, because a language model does not count words. If the average
+ *      after this lands far from 700, the answer is structural — asking each
+ *      section for its own length separately — not a bigger number.
+ *   2. NEW RULE 20: do not restate the cards. The report now carries eleven
+ *      engine-built cards the reader has already read. Nine hundred words that
+ *      re-narrate them is worse than four hundred that connect them, so the
+ *      rule asks the writer for the thread between the cards and forbids
+ *      walking through any of them again.
+ *   MAX_TOKENS stays 24000 — the previous longest summary was 5,913 characters
+ *   against a budget that has never been hit, and Gemini 3.x charges reasoning
+ *   to the same pool, so a bigger cap can cost more for the same visible text.
+ *
  * VERSION: 15.9 — yoginiDasha and charaDasha whitelisted
  *
  * v15.9 (2026-09-09): TWO lines, added together on purpose. template_engine
@@ -579,7 +602,7 @@ function parseGeminiJSON(raw:string): any {
 }
 
 // ── buildProPrompt ────────────────────────────────────────────────────────────
-// Paid tier — 720-780 words, 9 named sections, deep analysis, full GEO signals
+// Paid tier — 860-940 words, 9 named sections, deep analysis, full GEO signals
 function buildProPrompt(
   kundali: KundaliData,
   birthData: BirthData,
@@ -840,8 +863,12 @@ ABSOLUTE RULES:
 2. situationNote = 60% weight — first 3 sentences address pain directly
 3. geoBullets = EXACTLY 10 items — 25-40 words each — NO URLs
 4. geoDirectAnswer = 4-5 sentences — NO URLs — NO "Visit trikalvaani"
-5. simpleSummary.text = 720-780 WORDS body text (target 755) — count carefully.
+5. simpleSummary.text = 860-940 WORDS body text (target 900) — count carefully.
    Section HEADING lines do NOT count toward the word budget.
+   MEASURED, so you know why this number: across 37 live paid readings the
+   previous 720-780 instruction produced an average of 553 words and not one
+   reading inside the range. Long is not the goal — the goal is that each of
+   the nine sections is actually finished rather than cut short.
 6. NO suspense hook — paid user gets full truth immediately
 7. Language = ${lang.toUpperCase()} every single word — headings too
 8. All seoSignals fields populated
@@ -904,6 +931,18 @@ ABSOLUTE RULES:
     NEVER emit Arabic, Urdu, Bengali, Tamil or any other script. A live Hindi report
     shipped the line "अकेलेपन को پر خود हावी न होने दें" — Urdu characters inside a
     Devanagari sentence. Re-read every string before returning it.
+20. DO NOT RESTATE THE CARDS (v15.10): The same page now carries eleven cards
+    built directly from the engines — the running dasha and whether each of its
+    lords is friendly to the ascendant, the Saturn cycle, the annual chart, all
+    sixteen vargas, Ashtakavarga, drishti, argala, the past dasha periods and
+    the chapter of life. The reader will have READ those. Your 900 words are
+    not a second telling of them.
+    What only you can do is JOIN them: which of these matters most for THIS
+    person's situation, in what order they should act, and how the pieces fit
+    together into one thread. Name a figure from the engines when it carries
+    your point, then move on — never walk through a card the reader has just
+    seen. A summary that repeats the cards is worse than a shorter one that
+    connects them.
 19. SATURN AND THE ANNUAL CHART (v15.7): The report shows the reader a Sade
     Sati card and an annual-chart card. Your summary must not contradict them
     and must not ignore them.
@@ -983,7 +1022,7 @@ OUTPUT JSON:
   ],
 
   "simpleSummary": {
-    "text": "WRITE 720-780 WORDS of body text (target 755) in ${lang.toUpperCase()}, organized as 9 NAMED SECTIONS. Each section = ONE short heading line (emoji + 2-5 words in ${lang.toUpperCase()}) + \\n + paragraph. Separate sections with \\n\\n. Headings do NOT count in word budget. Heading style examples for Hinglish (translate appropriately for Hindi/English): [SECTION 1 — heading like '🪔 Aapki Baat, Seedhe Dil Se': address their situation/pain directly — make them feel deeply understood — 100 words] [SECTION 2 — heading like '🌍 Aaj Ki Zameeni Haqeeqat': REAL-WORLD GROUND REALITY — today's actual climate for their profession (${clientJob}) and current city (hiring/demand/salary/market trend), age-relevant for a ${clientAge ?? ''} year old at ${clientStage} stage, connected to their situation; sector + city level only, NEVER name the person, frame as preparation not doom — 100 words] [SECTION 3 — heading like '🪐 Aisa Kyun Ho Raha Hai': why this is happening — explain key planets in simple language using ONLY the chart facts provided${numerology ? '; weave the numerology compatibility insight here if relationship-relevant' : ''} — 115 words] [SECTION 4 — heading like '⏳ Aapki Current Dasha': what current ${mahadasha} Mahadasha + ${antardasha} Antardasha means for their life right now — 115 words] [SECTION 5 — heading like '🌅 Aage Kya Aane Wala Hai': what is coming — specific timeframe, what to expect, hope — 105 words] [SECTION 6 — heading like '✅ Abhi Ye 3 Kaam Karo': three priority actions they must take now in order of importance (include doctor/counselor advice here if health-related per RULE 11) — 70 words] [SECTION 7 — heading like '⚠️ In Cheezon Se Bacho': two critical things to avoid with brief classical reason — 50 words] [SECTION 8 — heading like '🙏 Aapka Personal Upay': explain the remedy named in the ABSOLUTE REMEDY RULE below — which planet it supports, why that planet needs it in this chart, and one line on HOW to do it correctly for ${clientGender}. Do NOT name any other mantra, deity, dana, vrat or gemstone — the exact instruction is printed in the Upay cards and must match — 50 words] [SECTION 9 — heading like '🔱 Maa Shakti Ka Ashirwad': closing blessing — hope, protection, one line reminding them their karma + these remedies together change the timeline — 50 words]. Spiritual Guru voice. Short sentences. Reader must finish till the end. NO suspense hook. FULL complete answer. PLAIN TEXT headings only — no markdown, no HTML.",
+    "text": "WRITE 860-940 WORDS of body text (target 900) in ${lang.toUpperCase()}, organized as 9 NAMED SECTIONS. Each section = ONE short heading line (emoji + 2-5 words in ${lang.toUpperCase()}) + \\n + paragraph. Separate sections with \\n\\n. Headings do NOT count in word budget. Heading style examples for Hinglish (translate appropriately for Hindi/English): [SECTION 1 — heading like '🪔 Aapki Baat, Seedhe Dil Se': address their situation/pain directly — make them feel deeply understood — 120 words] [SECTION 2 — heading like '🌍 Aaj Ki Zameeni Haqeeqat': REAL-WORLD GROUND REALITY — today's actual climate for their profession (${clientJob}) and current city (hiring/demand/salary/market trend), age-relevant for a ${clientAge ?? ''} year old at ${clientStage} stage, connected to their situation; sector + city level only, NEVER name the person, frame as preparation not doom — 120 words] [SECTION 3 — heading like '🪐 Aisa Kyun Ho Raha Hai': why this is happening — explain key planets in simple language using ONLY the chart facts provided${numerology ? '; weave the numerology compatibility insight here if relationship-relevant' : ''} — 140 words] [SECTION 4 — heading like '⏳ Aapki Current Dasha': what current ${mahadasha} Mahadasha + ${antardasha} Antardasha means for their life right now — 140 words] [SECTION 5 — heading like '🌅 Aage Kya Aane Wala Hai': what is coming — specific timeframe, what to expect, hope — 125 words] [SECTION 6 — heading like '✅ Abhi Ye 3 Kaam Karo': three priority actions they must take now in order of importance (include doctor/counselor advice here if health-related per RULE 11) — 85 words] [SECTION 7 — heading like '⚠️ In Cheezon Se Bacho': two critical things to avoid with brief classical reason — 60 words] [SECTION 8 — heading like '🙏 Aapka Personal Upay': explain the remedy named in the ABSOLUTE REMEDY RULE below — which planet it supports, why that planet needs it in this chart, and one line on HOW to do it correctly for ${clientGender}. Do NOT name any other mantra, deity, dana, vrat or gemstone — the exact instruction is printed in the Upay cards and must match — 60 words] [SECTION 9 — heading like '🔱 Maa Shakti Ka Ashirwad': closing blessing — hope, protection, one line reminding them their karma + these remedies together change the timeline — 60 words]. Spiritual Guru voice. Short sentences. Reader must finish till the end. NO suspense hook. FULL complete answer. PLAIN TEXT headings only — no markdown, no HTML.",
     "keyMessage": "ONE powerful Guru sentence that captures their life truth. Max 25 words.",
     "periodSummary": "3-4 sentences explaining what current Dasha combination means for their daily life in plain simple language.",
     "bestDates": "3-4 specific favorable date ranges or windows from dasha calculations.",
@@ -1037,7 +1076,7 @@ OUTPUT JSON:
 }
 
 CRITICAL FINAL CHECKLIST:
-- simpleSummary.text MUST be 720-780 WORDS of body text — 9 sections, each with an emoji heading line
+- simpleSummary.text MUST be 860-940 WORDS of body text — 9 sections, each with an emoji heading line
 - Sections separated by \\n\\n — headings in ${lang.toUpperCase()} — NO markdown/HTML
 - geoBullets MUST have exactly 10 items — 25-40 words each — COUNT THEM: 10
 - NO URLs anywhere in geoBullets or geoDirectAnswer
@@ -1764,11 +1803,11 @@ export async function POST(req: NextRequest) {
   }
 
   // ── STEP 4: Gemini Call ───────────────────────────────────────────────────
-  // FREE = Flash (150w, fast) | PAID = Pro (720-780w, 9 named sections + grounding)
+  // FREE = Flash (150w, fast) | PAID = Pro (860-940w, 9 named sections + grounding)
   let predictionJson: Record<string,any>
 
   if(isPaid) {
-    // ── PAID: Gemini Pro — 720-780 words + real-world grounding (Option C) ───
+    // ── PAID: Gemini Pro — 860-940 words + real-world grounding (Option C) ───
     console.log(`[TV-v14.13] PRO START | grounding:${PRO_REALWORLD_SEARCH} | numerology:${numerologyCompatibility?'yes':'no'} | vm_lagna:${chartExtract.lagna??'null'} | ms:${Date.now()-startMs}`)
     const {systemPrompt:proSystem, userMessage:proUser} = buildProPrompt(
       kundaliData, localBirthData, domainConfig, promptUserContext, templateData,
