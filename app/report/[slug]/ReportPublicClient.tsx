@@ -525,6 +525,16 @@ const L: Record<string, Record<Lang,string>> = {
   busDriver_maraka: {hinglish:'{md} aapke lagna ke liye maraka sthaan ka swami hai. Is daur mein dhairya aur savdhaani zyada maangi jaati hai.', hindi:'{md} आपके लग्न के लिए मारक स्थान का स्वामी है। इस दौर में धैर्य और सावधानी ज़्यादा माँगी जाती है।', english:'{md} rules a maraka house for your ascendant. This period asks for more patience and more care.'},
   busDriver_dushman: {hinglish:'{md} aapke lagna ka shatru hai. Shastra kehta hai aise daur mein achhe chhote daur bhi poori raahat nahi de paate — prayaas har jagah zyada lagta hai.', hindi:'{md} आपके लग्न का शत्रु है। शास्त्र कहता है ऐसे दौर में अच्छे छोटे दौर भी पूरी राहत नहीं दे पाते — प्रयास हर जगह ज़्यादा लगता है।', english:'{md} is unfriendly to your ascendant. The shastra says that in such a period even the good stretches cannot bring full relief — effort runs higher throughout.'},
   busDriver_chhaya: {hinglish:'{md} chhaya grah hai — uska koi rashi swamitva nahi hota, isliye lagna se uska rishta bhaav swamitva se nahi padha jaata.', hindi:'{md} छाया ग्रह है — उसका कोई राशि स्वामित्व नहीं होता, इसलिए लग्न से उसका रिश्ता भाव स्वामित्व से नहीं पढ़ा जाता।', english:'{md} is a shadow graha — it owns no sign, so its relationship to the ascendant is not read from house lordship.'},
+  // v10.9 — Rahu/Ketu read through another graha. BPHS Vol 1 sloka 10:
+  // "they act according to their position, association and dispositors."
+  busShadow_sang:  {hinglish:'{md} ka apna rashi swamitva nahi hota — shastra kehta hai wo jis grah ke saath baitha ho, uska phal deta hai. Aapke chart mein wo {via} ke saath hai.', hindi:'{md} का अपना राशि स्वामित्व नहीं होता — शास्त्र कहता है वह जिस ग्रह के साथ बैठा हो, उसका फल देता है। आपके चार्ट में वह {via} के साथ है।', english:'{md} owns no sign of its own — the shastra reads it through the graha it sits with. In your chart that is {via}.'},
+  busShadow_swami: {hinglish:'{md} ka apna rashi swamitva nahi hota — shastra kehta hai wo jis rashi mein baitha ho, uske swami ka phal deta hai. Aapke chart mein wo swami {via} hai.', hindi:'{md} का अपना राशि स्वामित्व नहीं होता — शास्त्र कहता है वह जिस राशि में बैठा हो, उसके स्वामी का फल देता है। आपके चार्ट में वह स्वामी {via} है।', english:'{md} owns no sign of its own — the shastra reads it through the lord of the sign it occupies. In your chart that lord is {via}.'},
+  busShadowBond_yogakaraka: {hinglish:'Aur {via} aapke lagna ka yogakaraka hai — is daur ka aadhaar mazboot hai.', hindi:'और {via} आपके लग्न का योगकारक है — इस दौर का आधार मज़बूत है।', english:'And {via} is your ascendant\'s yogakaraka — the period rests on a strong footing.'},
+  busShadowBond_dost: {hinglish:'Aur {via} aapke lagna ka mitra hai — is daur ka rukh anukool hai.', hindi:'और {via} आपके लग्न का मित्र है — इस दौर का रुख़ अनुकूल है।', english:'And {via} is friendly to your ascendant — the period leans your way.'},
+  busShadowBond_sam: {hinglish:'Aur {via} na mitra hai na shatru — daur ka rang uske andar ke chhote daur tay karenge.', hindi:'और {via} न मित्र है न शत्रु — दौर का रंग उसके अंदर के छोटे दौर तय करेंगे।', english:'And {via} is neither friend nor enemy — the shorter periods inside will set the tone.'},
+  busShadowBond_maraka: {hinglish:'Aur {via} maraka sthaan ka swami hai — is daur mein dhairya zyada maanga jaata hai.', hindi:'और {via} मारक स्थान का स्वामी है — इस दौर में धैर्य ज़्यादा माँगा जाता है।', english:'And {via} rules a maraka house — the period asks for more patience.'},
+  busShadowBond_dushman: {hinglish:'Aur {via} aapke lagna ka shatru hai — isi liye is daur mein prayaas har jagah zyada lagta hai.', hindi:'और {via} आपके लग्न का शत्रु है — इसीलिए इस दौर में प्रयास हर जगह ज़्यादा लगता है।', english:'And {via} is unfriendly to your ascendant — which is why effort runs higher throughout this period.'},
+  busShadowBond_chhaya: {hinglish:'Aur {via} bhi chhaya grah hai — yahan koi saaf kathan nahi banta.', hindi:'और {via} भी छाया ग्रह है — यहाँ कोई साफ़ कथन नहीं बनता।', english:'And {via} is also a shadow graha — no clear statement can be made here.'},
   busNow:       {hinglish:'abhi', hindi:'अभी', english:'now'},
   busCond_yogakaraka: {hinglish:'{ad} aapke lagna ka yogakaraka hai — poore daur ka sabse sahaayak hissa.', hindi:'{ad} आपके लग्न का योगकारक है — पूरे दौर का सबसे सहायक हिस्सा।', english:'{ad} is your ascendant\'s yogakaraka — the most supportive stretch of the period.'},
   busCond_dost: {hinglish:'{ad} aapke lagna ka mitra hai — ye hissa saath deta hai.', hindi:'{ad} आपके लग्न का मित्र है — यह हिस्सा साथ देता है।', english:'{ad} is friendly to your ascendant — this stretch supports you.'},
@@ -533,6 +543,7 @@ const L: Record<string, Record<Lang,string>> = {
   busCond_dushman: {hinglish:'{ad} aapke lagna ka shatru hai — ye hissa is daur ka sabse kathin hai.', hindi:'{ad} आपके लग्न का शत्रु है — यह हिस्सा इस दौर का सबसे कठिन है।', english:'{ad} is unfriendly to your ascendant — the hardest stretch of this period.'},
   busCond_chhaya: {hinglish:'{ad} chhaya grah hai — uska phal jis grah ke saath baitha ho usse aur uski rashi se padha jaata hai, bhaav swamitva se nahi.', hindi:'{ad} छाया ग्रह है — उसका फल जिस ग्रह के साथ बैठा हो उससे और उसकी राशि से पढ़ा जाता है, भाव स्वामित्व से नहीं।', english:'{ad} is a shadow graha — its results are read from the graha it sits with and the sign it occupies, not from house lordship.'},
   busMore:      {hinglish:'{n} aur hisse — poora kram', hindi:'{n} और हिस्से — पूरा क्रम', english:'{n} more stretches — the full sequence'},
+  busShadowFoot: {hinglish:'Rahu-Ketu ke liye shastra teen cheezein dekhta hai — sthiti, sang aur rashi ka swami (BPHS khand 1, shlok 10). Yahan un teen mein se do use hui hain.', hindi:'राहु-केतु के लिए शास्त्र तीन चीज़ें देखता है — स्थिति, संग और राशि का स्वामी (BPHS खंड १, श्लोक १०)। यहाँ उन तीन में से दो उपयोग हुई हैं।', english:'For Rahu and Ketu the shastra weighs three things — position, association and the lord of the occupied sign (BPHS Vol 1, sloka 10). Two of those three are used here.'},
   busFoot:      {hinglish:'Yahan koi ank nahi hai, jaanbujh kar. Mitra ya shatru hona shastra ka seedha kathan hai; usse number banana anumaan hota. Aur ye hisse vishay batate hain, ghatna nahi — koi kundali ye nahi kah sakti ki kis din kya hoga.', hindi:'यहाँ कोई अंक नहीं है, जानबूझकर। मित्र या शत्रु होना शास्त्र का सीधा कथन है; उससे संख्या बनाना अनुमान होता। और ये हिस्से विषय बताते हैं, घटना नहीं — कोई कुंडली यह नहीं कह सकती कि किस दिन क्या होगा।', english:'There is no number here, deliberately. Friend or enemy is a plain classical statement; turning it into a score would be guesswork. And these stretches name a subject, not an event.'},
   pastTitle:    {hinglish:'🕰 Aapke Jeevan Ke Daur — kya ye mel khaate hain?', hindi:'🕰 आपके जीवन के दौर — क्या ये मेल खाते हैं?', english:'🕰 The Chapters of Your Life — do these match?'},
   pastIntro:    {hinglish:'Ye tareekhein aapke janm nakshatra se nikli hain — inme koi anumaan nahi hai. Har daur ka apna vishay hota hai. Padhiye aur bataiye ki mel khaata hai ya nahi.', hindi:'ये तारीख़ें आपके जन्म नक्षत्र से निकली हैं — इनमें कोई अनुमान नहीं है। हर दौर का अपना विषय होता है। पढ़िए और बताइए कि मेल खाता है या नहीं।', english:'These dates come from your birth nakshatra — nothing here is guesswork. Each period carries its own theme. Read them and tell us whether they match.'},
@@ -2173,8 +2184,38 @@ function ThreeClocks({ pj, lang, isPaid, slug }:{
   )
 }
 
-function BusCard({ pj, lagna, lang, isPaid, slug }:{
-  pj: Record<string, unknown>; lagna: string; lang: Lang; isPaid: boolean; slug: string
+// v10.9 — RAHU AND KETU NOW GIVE AN ANSWER.
+//
+// They own no sign, so functional lordship says nothing about them directly,
+// and v10.5-10.8 reported exactly that: "chhaya grah hai — lagna se uska
+// rishta bhaav swamitva se nahi padha jaata." Technically right, and the worst
+// possible thing to put in the FIRST line of the page — which is where it
+// landed for the roughly one reader in five whose mahadasha is Rahu (18 years)
+// or Ketu (7 of the 120).
+//
+// BPHS Vol 1, sloka 10, R. Santhanam: "As far as Rahu and Ketu are concerned,
+// they act according to their POSITION, ASSOCIATION and DISPOSITORS."
+//
+// So they can be read — through another graha. This uses two of those three:
+// the graha they sit WITH if there is one, otherwise the lord of the sign they
+// occupy. Position is not attempted. The card says which of the two it used,
+// so the reader can see the reasoning rather than take a verdict on trust.
+function resolveShadow(planet: string, rows: PlanetRow[]):
+    { via: string; how: 'sang' | 'swami' } | null {
+  const me = rows.find(r => r.planet === planet)
+  if (!me?.rashi) return null
+  // association first — a graha sharing the sign speaks louder than the lord
+  const withMe = rows.find(r => r.rashi === me.rashi && r.planet !== planet
+                                && r.planet !== 'Rahu' && r.planet !== 'Ketu')
+  if (withMe) return { via: withMe.planet, how: 'sang' }
+  const li = RASHI_ORDER.indexOf(me.rashi)
+  if (li < 0) return null
+  return { via: SIGN_LORD[li], how: 'swami' }
+}
+
+function BusCard({ pj, lagna, lang, isPaid, slug, planetRows }:{
+  pj: Record<string, unknown>; lagna: string; lang: Lang; isPaid: boolean
+  slug: string; planetRows: PlanetRow[]
 }) {
   const bonds = bondsForLagna(lagna)
   if (Object.keys(bonds).length === 0) return null
@@ -2187,6 +2228,9 @@ function BusCard({ pj, lagna, lang, isPaid, slug }:{
   if (legs.length === 0) return null
 
   const driverBond = bonds[mdLord] ?? 'sam'
+  // a shadow graha borrows its verdict — see resolveShadow and the note above
+  const driverShadow = driverBond === 'chhaya' ? resolveShadow(mdLord, planetRows) : null
+  const driverVia: Bond | null = driverShadow ? (bonds[driverShadow.via] ?? 'sam') : null
 
   // v10.6 (09 Sep 2026) — THE PASSENGER, which v10.5 dropped.
   // Rohiit's model has three levels, not two: "Mahadasha is the driver,
@@ -2226,16 +2270,23 @@ function BusCard({ pj, lagna, lang, isPaid, slug }:{
       </p>
 
       {/* the driver sets the tone for the whole period — say it first */}
+      {/* the box colour follows the BORROWED bond for a shadow graha — a Rahu
+          reading through an unfriendly dispositor should not look neutral */}
       <div style={{padding:'12px 14px',borderRadius:'10px',marginBottom:'12px',
-           background: toneOf(driverBond)==='good' ? 'rgba(34,197,94,0.07)'
-             : toneOf(driverBond)==='hard' ? 'rgba(248,113,113,0.06)' : 'rgba(255,255,255,0.03)',
-           border:`1px solid ${toneOf(driverBond)==='good' ? 'rgba(34,197,94,0.22)'
-             : toneOf(driverBond)==='hard' ? 'rgba(248,113,113,0.2)' : 'rgba(255,255,255,0.08)'}`}}>
+           background: toneOf(driverVia ?? driverBond)==='good' ? 'rgba(34,197,94,0.07)'
+             : toneOf(driverVia ?? driverBond)==='hard' ? 'rgba(248,113,113,0.06)' : 'rgba(255,255,255,0.03)',
+           border:`1px solid ${toneOf(driverVia ?? driverBond)==='good' ? 'rgba(34,197,94,0.22)'
+             : toneOf(driverVia ?? driverBond)==='hard' ? 'rgba(248,113,113,0.2)' : 'rgba(255,255,255,0.08)'}`}}>
         <p style={{margin:0,color:'#e2e8f0',fontSize:'13px',fontWeight:600}}>
           {lbl('busDriver', lang).replace('{md}', P(mdLord))}
         </p>
         <p style={{margin:'6px 0 0',color:'#cbd5e1',fontSize:'12px',lineHeight:1.6}}>
-          {lbl('busDriver_' + driverBond, lang).replace('{md}', P(mdLord))}
+          {driverShadow && driverVia
+            ? lbl('busShadow_' + driverShadow.how, lang)
+                .replace('{md}', P(mdLord))
+                .replace('{via}', P(driverShadow.via)) + ' ' +
+              lbl('busShadowBond_' + driverVia, lang).replace('{via}', P(driverShadow.via))
+            : lbl('busDriver_' + driverBond, lang).replace('{md}', P(mdLord))}
         </p>
       </div>
 
@@ -2280,6 +2331,12 @@ function BusCard({ pj, lagna, lang, isPaid, slug }:{
 
       {!isPaid && hidden > 0 && (
         <Cliff slug={slug} text={lbl('busMore', lang).replace('{n}', String(hidden))}/>
+      )}
+
+      {driverShadow && (
+        <p style={{margin:'12px 0 0',color:'#64748b',fontSize:'11px',lineHeight:1.55}}>
+          {lbl('busShadowFoot', lang)}
+        </p>
       )}
 
       <p style={{margin:'12px 0 0',color:'#64748b',fontSize:'11px',lineHeight:1.6}}>
@@ -3230,7 +3287,7 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
               ═══════════════════════════════════════════════════════════════ */}
 
           {/* ── 1 · THE ANSWER ─────────────────────────────────────────── */}
-          <BusCard pj={pj as Record<string, unknown>} lagna={s(chartEv?.lagna as string, '')} lang={lang} isPaid={isPaid} slug={slug}/>
+          <BusCard pj={pj as Record<string, unknown>} lagna={s(chartEv?.lagna as string, '')} lang={lang} isPaid={isPaid} slug={slug} planetRows={planetTable}/>
 
           {/* ── 2 · RECOGNITION — the reader proves the chart is theirs ── */}
           <PastDashaTimeline pj={pj as Record<string, unknown>} dob={s(report.dob, '')} lang={lang}/>
@@ -3318,6 +3375,25 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
 
           {isPaid && <PaidFullSummary summaryText={summaryText} periodSummary={periodSummary} bestDates={bestDates} dosList={dosList} dontsList={dontsList} remedyHint={remedyHint} karmicInsight={karmicInsight} lang={lang}/>}
 
+          {/* v10.9 fix 2 — THE SAME LEAK AS coreMsg, IN TWO MORE PROPS.
+              doAction/avoidAction come from the engine, mainAction/mainCaution
+              from Gemini. MEASURED 09 Sep 2026: the engine sends doAction on
+              0 of 118 rows, so the fallback always won and free readers got
+              Gemini's sentence here too. coreMsg was fixed and these were not,
+              which is the same mistake made four times today — repairing one
+              instance of a pattern and leaving its twins.
+              CONSEQUENCE, so it can be reversed knowingly: free now gets no
+              do/avoid line, because the engine has none to give. The card
+              still shows dasha, best month, caution month and confidence —
+              all engine output. If losing that action line costs more than the
+              Gemini prose is worth, this is the line to change.
+              A first attempt put this comment BETWEEN the JSX attributes,
+              which is a syntax error: a braced comment is only valid where a
+              CHILD would go, never in an attribute list. The correction then
+              quoted the brace characters inside this very comment, which broke
+              the parser a second time. Both were caught by the parser, neither
+              by reading — which is the argument for running it every time. */}
+
           {/* ── 4 · GENERIC — true, but not specific to this chart ─────────
               VerdictCard and the Dasha Kaal box below both restate the running
               dasha that BusCard opened with. Kept on Rohiit's instruction that
@@ -3334,7 +3410,8 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
           <VerdictCard lang={lang} coreMsg={isPaid ? (hasCoreMessage?coreMessage:keyMessage) : ''}
             mahadasha={mahadasha} antardasha={antardasha} pratyantar={pratyantar}
             best={bestMonth} caution={cautionMon} conf={confidence}
-            doNow={doAction!=='—'?doAction:mainAction} avoidNow={avoidAction!=='—'?avoidAction:mainCaution}/>
+            doNow={isPaid ? (doAction!=='—'?doAction:mainAction) : doAction}
+            avoidNow={isPaid ? (avoidAction!=='—'?avoidAction:mainCaution) : avoidAction}/>
 
           <div style={{background:BG_CARD,border:`1px solid ${G(0.12)}`,borderRadius:'16px',padding:'22px',marginBottom:'14px'}}>
             <p style={{margin:'0 0 14px',color:GOLD,fontSize:'11px',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.08em'}}>{lbl('dashaKaal',lang)}</p>
