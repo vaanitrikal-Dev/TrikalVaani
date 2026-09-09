@@ -107,6 +107,25 @@
  * TRIKAAL VAANI — Unified Prediction Endpoint
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/api/predict/route.ts
+ * VERSION: 15.7 — varshphal whitelisted; Saturn + annual chart reach the writer
+ *
+ * v15.7 (2026-09-09): TWO changes, both about the same gap.
+ *   1. varshphal added to the mergeTemplateWithGemini whitelist. Approved by
+ *      Rohiit. Without it template_engine v3.4 computes the annual chart and
+ *      the DB never sees it — the third time this list has swallowed a key.
+ *   2. sadeSati and varshphal now reach buildProPrompt's ENGINE EVIDENCE
+ *      block, with RULE 19 governing how they may be used. The report began
+ *      showing both as cards today while the 720-word narrative on the same
+ *      page knew about neither. Nothing was wrong — RULE 14 kept the writer
+ *      from inventing — but a paid reader would have met a Sade Sati card
+ *      beside a summary that never mentions Saturn.
+ *      Both blocks are gated on the engine's own self_check: template_engine
+ *      attaches a verdict after testing each window against its physically
+ *      possible length, and a block that failed it is withheld from the writer
+ *      entirely rather than risking a wrong date in the prose.
+ *   The Razorpay path, the payment gate, the birth-data guard and the
+ *   birth_jd sanity check are untouched.
+ *
  * VERSION: 15.6 — sadeSati whitelisted; PayPal reaches the DB row
  *
  * v15.6 (2026-09-09): TWO changes, both small, one of them a payment bug.
@@ -661,6 +680,14 @@ present it as a separate section, and do NOT add new JSON keys.` : ''
   const goc = templateData?.gocharTimeline ?? null
   const nav = templateData?.navamsaChart ?? null
   const das = templateData?.dasamsaChart ?? null
+  // v15.7: the report started showing a Sade Sati card and an annual-chart
+  // card on 09 Sep 2026, and the 720-word narrative on the same page knew
+  // about neither — so a paid reader could read "your Sade Sati runs to 2032"
+  // beside a summary that never mentions Saturn's cycle. RULE 14 stopped the
+  // writer inventing it, which is why nothing was WRONG; it was simply silent
+  // about the two most striking blocks on the page.
+  const sade = templateData?.sadeSati ?? null
+  const vpal = templateData?.varshphal ?? null
 
   const monthLine = (m:any) => {
     const hits = Array.isArray(m?.domain_hits) && m.domain_hits.length
@@ -699,6 +726,52 @@ ${(das.planets||[]).map((r:any)=>`  • ${r.planet}: D1 ${r.d1_rashi} -> D10 ${r
 ${(das.confirmed_planets||[]).length ? `  Confirmed in D10 (same sign in D1 and D10 — the rasi promise holds up in career): ${das.confirmed_planets.join(', ')}` : '  No planet holds the same sign in D1 and D10.'}
 ` : '\nDASAMSA D10: not available — make no D10 claim.\n'
 
+  // v15.7 — SADE SATI. Only rendered when the engine's own self_check passed;
+  // template_engine v3.3.2 attaches that verdict after testing every window
+  // against its physically possible length. Two separate bugs on 09 Sep 2026
+  // produced impossible windows (a 1.7-year Kantaka, and a Sade Sati dated
+  // before the person was born), so a block that failed its check must never
+  // reach the writer — a wrong date in the narrative is far worse than a
+  // missing paragraph.
+  const sadeOk = sade && (sade.self_check?.ok !== false)
+  const _charanWord = (c:any) =>
+    c === 'charan_1' ? 'first charan (Saturn in the 12th from the Moon)'
+    : c === 'charan_2' ? 'second charan (Saturn over the Moon itself — the peak)'
+    : c === 'charan_3' ? 'third charan (Saturn in the 2nd from the Moon — the release)'
+    : 'charan not resolved'
+  const _sadeType = (t:any) =>
+    t === 'sade_sati' ? 'Sade Sati' : t === 'ashtama' ? 'Ashtama Shani'
+    : t === 'kantaka' ? 'Kantaka Shani' : String(t ?? '—')
+  const sadeBlock = sadeOk ? `
+SATURN FROM THE NATAL MOON (Moon in ${sade.moon_rashi ?? '—'}):
+${sade.current
+  ? `  RUNNING NOW: ${_sadeType(sade.current.type)}, ${sade.current.start} to ${sade.current.end}` +
+    (sade.current.type === 'sade_sati' ? `\n  Phase: ${_charanWord(sade.current_charan)}` : '')
+  : `  No Sade Sati, Ashtama or Kantaka is running.` +
+    (sade.next_sade_sati ? ` Next Sade Sati: ${sade.next_sade_sati.start} to ${sade.next_sade_sati.end}.` : '')}
+${(sade.windows||[]).filter((w:any)=>w?.is_past).slice(-3).map((w:any)=>`  Past: ${_sadeType(w.type)} ${w.start} to ${w.end}`).join('\n')}
+  HOW TO USE THIS: state the window and the phase, never a verdict. Saturn is
+  the judge of one's own work in the shastra, not a punishment, and long-lasting
+  foundations are classically laid in exactly these years. Do NOT tell the
+  reader a past window explains an event — the dates are astronomical, what
+  happened in them is not something any chart knows.
+` : '\nSATURN FROM THE MOON: not available — make no Sade Sati claim.\n'
+
+  // v15.7 — VARSHPHAL. Stage 1 only: the annual chart's start, its ascendant
+  // and the Muntha. The year lord (Varshesh) needs Panchavargeeya Bala and is
+  // NOT computed, so the writer is told that outright rather than left to
+  // assume a complete annual chart and reason about a lord it never received.
+  const vpalOk = vpal && (vpal.self_check?.ok !== false)
+  const varshBlock = vpalOk ? `
+VARSHPHAL — THE ANNUAL CHART (Tajika). ${vpal.stage ?? ''}
+  This year began at Varsha Pravesh: ${vpal.pravesh ?? '—'}${vpal.next_pravesh ? ` and runs to ${vpal.next_pravesh}` : ''}
+  Age completed at that moment: ${vpal.age_completed ?? '—'}
+  Varsha Lagna: ${vpal.varsha_lagna?.sign ?? '—'} ${vpal.varsha_lagna?.degree ?? ''} (${vpal.varsha_lagna?.nakshatra ?? '—'}, lord ${vpal.varsha_lagna?.lord ?? '—'})${vpal.varsha_lagna?.near_cusp ? ' — SITS ON A SIGN CUSP, treat the sign as provisional' : ''}
+  Muntha: ${vpal.muntha?.sign ?? '—'}, in house ${vpal.muntha?.house ?? '—'} of the annual chart
+  HOW TO USE THIS: the Muntha's house is the subject the year turns on. The
+  Varshesh (year lord) is NOT computed — do not name one, do not infer one.
+` : ''
+
   const evidenceBlock = `
 ════════════════════════════════════════════════════════
 ENGINE EVIDENCE — COMPUTED, VERIFIED, YOURS TO EXPLAIN
@@ -720,7 +793,7 @@ Weak planets: ${(pSum.weakPlanets ?? []).join(', ') || 'not reported'}
 Best houses: ${(pSum.bestHouses ?? []).join(', ') || 'not reported'}
 Challenged houses: ${(pSum.challengedHouses ?? []).join(', ') || 'not reported'}
 
-${gocharBlock}${navBlock}${dasBlock}
+${gocharBlock}${navBlock}${dasBlock}${sadeBlock}${varshBlock}
 BHRIGU NANDI NADI (Bhrigu engine): ${bhriguSignals.length ? `${bhriguSignals.length} signals, ${bhriguPointsTotal} confidence points` : `points ${bhrigu.bhrigu_points ?? 0}`}${bhrigu.current_life_theme ? ` | life theme: ${bhrigu.current_life_theme}` : ''}
 ${bhriguLines || ''}
 ${bhriguSignals.length === 0 && !bhrigu.current_life_theme ? 'NO Bhrigu data for this chart — you MUST NOT write any Bhrigu Nandi claim. Write the Bhrigu bullet as general BPHS/Parashara insight instead.' : ''}
@@ -809,6 +882,18 @@ ABSOLUTE RULES:
     NEVER emit Arabic, Urdu, Bengali, Tamil or any other script. A live Hindi report
     shipped the line "अकेलेपन को پر خود हावी न होने दें" — Urdu characters inside a
     Devanagari sentence. Re-read every string before returning it.
+19. SATURN AND THE ANNUAL CHART (v15.7): The report shows the reader a Sade
+    Sati card and an annual-chart card. Your summary must not contradict them
+    and must not ignore them.
+    a) If a Sade Sati, Ashtama or Kantaka window is running, say so once, with
+       its dates, and say what the shastra actually holds: Saturn asks for
+       work and patience, and what is founded in these years is what tends to
+       last. NEVER frame it as a sentence to be served.
+    b) NEVER claim a past Saturn window caused anything. The dates are
+       astronomical; what happened inside them is not in the chart.
+    c) The Varshesh is NOT computed. Do not name a year lord, and do not
+       reason one out from the Varsha Lagna — that is RULE 14 territory.
+    d) If either block says "not available", stay silent on it entirely.
 18. MONTH-BY-MONTH TIMING (v15.0): Use the GOCHAR TIMELINE for anything month-
     specific. Never invent a month, a transit, or a date that is not listed there.
     Tone in that block is RELATIVE to the 9-month window: "the most supportive of
@@ -1065,6 +1150,15 @@ function mergeTemplateWithGemini(
     // around it — nothing existing is touched, and if the VM omits it the
     // report simply hides that section.
     sadeSati:         templateObj.sadeSati           ?? null,
+    // v15.7 (09 Sep 2026) — template_engine v3.4 returns varshphal: the annual
+    // chart's Varsha Pravesh, Varsha Lagna and Muntha, from the solar return.
+    // Whitelisted for the reason the line above it exists, which is by now the
+    // most repeated mistake on this platform: chartEvidence was missing until
+    // v14.17, sadeSati was caught this morning, and varshphal was missed ONE
+    // HOUR later — engine shipped, report showed null, cause was this list
+    // again. If you add a key to template_engine, add it here in the same
+    // breath. Approved by Rohiit, 09 Sep 2026.
+    varshphal:        templateObj.varshphal          ?? null,
     dataIntegrity:    templateObj.dataIntegrity      ?? null,
     templateVersion:  templateObj.meta?.version      ?? null,
     // Parashari yogas + Bhrigu theme — computed by VM /synthesize, previously
