@@ -184,7 +184,7 @@ export async function generateMetadata(
   const canonical = pairUrl(page.slug, lang === 'hi');
 
   return {
-    title:       page.meta_title,
+    title:       { absolute: page.meta_title },
     description: page.meta_desc,
     alternates: {
       canonical,

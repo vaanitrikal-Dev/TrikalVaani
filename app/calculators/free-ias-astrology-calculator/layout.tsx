@@ -36,7 +36,7 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'IAS Astrology Calculator — Free & Instant',
+  title: { absolute: 'IAS Astrology Calculator — Free & Instant' },
   description:
     'Sarkari naukri aur UPSC ka yog apni kundali se — 10th house, Dasamsa D-10, Shani aur Surya ki Shadbala, har point ki wajah ke saath. Free check karein.',
   keywords: [

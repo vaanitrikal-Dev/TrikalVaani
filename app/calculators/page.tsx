@@ -79,7 +79,7 @@ const REAL_SAMEAS = [
 
 export const metadata: Metadata = {
   title: {
-    absolute: 'Free Vedic Astrology Calculators — Kundli, Dasha, Nakshatra, Dosha, Gemstone & More | Trikaal Vaani',
+    absolute: 'Free Vedic Astrology Calculators — 33 Free Tools',
   },
   description:
     'Free Vedic astrology calculators powered by Swiss Ephemeris. Get accurate Kundli, Dasha, Nakshatra, Rashi, Lagna, Sade Sati, Manglik & Kaal Sarp Dosh, Gemstone Suitability, Numerology and Baby Name results instantly. By Rohiit Gupta, Chief Vedic Architect.',

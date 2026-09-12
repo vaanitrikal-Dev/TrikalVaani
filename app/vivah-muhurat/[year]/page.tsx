@@ -64,7 +64,7 @@ export async function generateMetadata(
 ): Promise<Metadata> {
   const year = params.year;
   return {
-    title: `Vivah Muhurat ${year} — Shubh Marriage Dates with Time, Nakshatra & Lagna | Trikaal Vaani`,
+    title: { absolute: `Vivah Muhurat ${year} — Shubh Dates, Time & Lagna` },
     description:
       `Authentic strict-classical Vivah Muhurat ${year} — exact shubh marriage dates with muhurat time, nakshatra, tithi and lagna. Computed by Parashara BPHS rules, excluding Kharmas, Adhik Maas, Shukra Ast and Chaturmas. By Rohiit Gupta, Chief Vedic Architect.`,
     alternates: { canonical: `${SITE}/vivah-muhurat/${year}` },

@@ -11,7 +11,7 @@ import SiteNav from "@/components/layout/SiteNav";
 import SiteFooter from "@/components/layout/SiteFooter";
 
 export const metadata: Metadata = {
-  title: "Refund & Cancellation Policy | Trikaal Vaani",
+  title: { absolute: "Refund & Cancellation Policy | Trikaal Vaani" },
   description: "Refund and Cancellation Policy for Trikaal Vaani. Understand when refunds apply for astrology readings and personal consultations.",
   authors: [{ name: "Rohiit Gupta", url: "https://trikalvaani.com/founder" }],
   alternates: { canonical: "https://trikalvaani.com/refund" },

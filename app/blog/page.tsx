@@ -22,7 +22,7 @@ import { getAllPosts } from '@/lib/blog-posts';
 export const revalidate = 300;
 
 export const metadata: Metadata = {
-  title: 'Vedic Astrology Blog — Gochar, Kundali & Jyotish | Trikaal Vaani',
+  title: { absolute: 'Vedic Astrology Blog — Gochar, Kundali & Jyotish' },
   description:
     'Expert articles on Vedic astrology — planetary transits (Gochar), Kundali analysis, Dashas, and the science of Jyotish explained for the modern seeker.',
   keywords: [

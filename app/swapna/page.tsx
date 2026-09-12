@@ -39,7 +39,7 @@ import SwapnaClient from './SwapnaClient';
 export const revalidate = 3600;
 
 export const metadata: Metadata = {
-  title: 'Swapna Shastra | Free Vedic Dream Meaning & Interpretation — Trikaal Vaani',
+  title: { absolute: 'Swapna Shastra — Free Vedic Dream Meanings' },
   description:
     "Free Vedic dream interpretation (Swapna Shastra). Decode your dream's symbol instantly, then unlock a personal reading against your birth chart & dasha. By Rohiit Gupta, Chief Vedic Architect.",
   keywords: [

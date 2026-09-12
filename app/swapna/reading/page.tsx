@@ -8,7 +8,7 @@ import SiteFooter from '@/components/layout/SiteFooter';
 import SwapnaReadingForm from './SwapnaReadingForm';
 
 export const metadata: Metadata = {
-  title: 'Your Personal Dream Reading — Trikaal Vaani',
+  title: { absolute: 'Your Personal Dream Reading | Trikaal Vaani' },
   description: 'Unlock your ₹51 personal Vedic dream reading, read against your own birth chart and running dasha.',
   robots: { index: false, follow: false },
 };

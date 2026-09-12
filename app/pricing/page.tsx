@@ -32,7 +32,7 @@ import Link from 'next/link';
 import { Check, Sparkles, Zap, Mic, Heart, Baby, Star } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'Pricing — Trikaal Vaani Vedic AI Astrology',
+  title: { absolute: 'Pricing — Trikaal Vaani Vedic AI Astrology' },
   description:
     'Choose your Trikaal Vaani reading. Free Vedic AI analysis, deep readings from ₹51, voice from ₹11, Kundali Milan ₹51–₹151, Karmic Reading ₹251. One-time pricing, no subscriptions. Swiss Ephemeris powered, Parashara classical system. Payments secured by Razorpay.',
   alternates: { canonical: 'https://trikalvaani.com/pricing' },

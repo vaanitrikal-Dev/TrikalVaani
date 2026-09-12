@@ -91,7 +91,7 @@ export const metadata: Metadata = {
   // second time. The brand stays inside this string on purpose — it belongs in
   // the SERP title, just once.
   title: {
-    absolute: 'Astrologer in Delhi — Rohiit Gupta, Chief Vedic Architect | Trikaal Vaani',
+    absolute: 'Astrologer in Delhi — Rohiit Gupta | Trikaal Vaani',
   },
   description:
     'Looking for an astrologer in Delhi? Rohiit Gupta, Chief Vedic Architect at Trikaal Vaani, offers Vedic astrology readings from Dwarka, New Delhi — kundli, Kundali Milan, Mangal Dosh, Sade Sati. Swiss Ephemeris + BPHS. Free tools, readings from Rs11.',

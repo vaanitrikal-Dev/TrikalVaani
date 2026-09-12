@@ -20,7 +20,7 @@ const SITE = 'https://trikalvaani.com';
 const URL  = `${SITE}/karmic-background-reading`;
 
 export const metadata: Metadata = {
-  title: 'Karmic Background Reading — Vedic Personality, Fidelity & Character Patterns | Trikaal Vaani',
+  title: { absolute: 'Karmic Background Reading — Personality Patterns' },
   description:
     'Reveal a person\'s karmic patterns — personality, fidelity tendencies, financial behaviour, family conduct, hidden tendencies and marriage outlook — from their birth chart alone. Bhrigu Nandi Nadi analysis by Rohiit Gupta. No personal data, purely Vedic.',
   alternates: { canonical: URL },

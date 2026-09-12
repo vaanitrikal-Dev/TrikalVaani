@@ -6,7 +6,7 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Free Gemstone Calculator — Your Lucky Ratna by Date of Birth | Trikaal Vaani',
+  title: { absolute: 'Free Gemstone Calculator — Lucky Ratna by DOB' },
   description:
     'Free Gemstone (Ratna) Calculator powered by Swiss Ephemeris. Find your lucky life gemstone from your ascendant lord, plus the mahadasha stone — with metal, finger, day, mantra and safety caution. By Rohiit Gupta.',
   keywords: [

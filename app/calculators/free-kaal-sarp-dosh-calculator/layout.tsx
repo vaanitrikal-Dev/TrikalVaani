@@ -6,7 +6,7 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Free Kaal Sarp Dosh Calculator — Check, Type & Remedies | Trikaal Vaani',
+  title: { absolute: 'Free Kaal Sarp Dosh Calculator — Type & Upay' },
   description:
     'Free Kaal Sarp Dosh Calculator powered by Swiss Ephemeris. Check if you have Kaal Sarp Dosh using exact planetary longitudes, find its type (Anant to Sheshnag) by Rahu house, and get free Naag-puja remedies. By Rohiit Gupta.',
   keywords: [

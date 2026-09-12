@@ -35,7 +35,7 @@ const GOLD = '#D4AF37'
 const GOLD_RGBA = (a: number) => `rgba(212,175,55,${a})`
 
 export const metadata: Metadata = {
-  title: 'Start Here — Trikaal Vaani | Free Kundali, Shaadi Milan & Life Answers',
+  title: { absolute: 'Start Here — Free Kundali, Milan & Life Answers' },
   description:
     'Aap sahi jagah aaye hain. Free Kundali aur 8 calculators, Shaadi ka 36 Guna Milan, aur aapke jeevan ke sawaalon ke jawaab — sab kuch ek jagah. By Rohiit Gupta, Chief Vedic Architect.',
   alternates: { canonical: 'https://trikalvaani.com/astro' },

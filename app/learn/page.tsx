@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { createClient } from '@supabase/supabase-js'
 
 export const metadata: Metadata = {
-  title: 'Vedic Astrology Knowledge Hub | Trikaal Vaani',
+  title: { absolute: 'Vedic Astrology Knowledge Hub | Trikaal Vaani' },
   description: 'India\'s most comprehensive Vedic astrology guide — 90+ expert articles on predictions, yogas, doshas, transits, and festivals. Written by Rohiit Gupta, Chief Vedic Architect.',
   alternates: { canonical: 'https://trikalvaani.com/learn' },
   openGraph: {

@@ -20,7 +20,7 @@ import SiteNav from "@/components/layout/SiteNav";
 import SiteFooter from "@/components/layout/SiteFooter";
 
 export const metadata: Metadata = {
-  title: "Dhana Yoga in Kundali — When Will I Get Rich? | Trikaal Vaani",
+  title: { absolute: "Dhana Yoga in Kundali — When Will I Get Rich?" },
   description: "Chief Vedic Architect Rohiit Gupta reads your 2nd House, Jupiter and Dhana Yoga to reveal your wealth timeline, peak earning years, and investment sectors your chart favors. ₹51 deep reading.",
   keywords: ["dhana yoga kundali astrology", "when will I get rich astrology", "wealth astrology vedic India", "2nd house money astrology", "Lakshmi yoga astrology"],
   authors: [{ name: "Rohiit Gupta", url: "https://trikalvaani.com/founder" }],

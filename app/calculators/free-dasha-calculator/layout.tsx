@@ -11,7 +11,7 @@
 import type { Metadata } from 'next';
 export const metadata: Metadata = {
   title: {
-  absolute: 'Free Dasha Calculator — Vimshottari Mahadasha & Antardasha Online | Trikaal Vaani',
+  absolute: 'Free Dasha Calculator — Vimshottari Mahadasha',
 },
   description:
     'Free Dasha Calculator powered by Swiss Ephemeris. Get accurate Vimshottari Mahadasha, Antardasha, next 5 dasha periods, Parashar Dos/Donts & 3 remedies instantly. By Rohiit Gupta, Chief Vedic Architect.',

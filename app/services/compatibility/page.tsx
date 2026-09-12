@@ -19,7 +19,7 @@ import SiteNav from "@/components/layout/SiteNav";
 import SiteFooter from "@/components/layout/SiteFooter";
 
 export const metadata: Metadata = {
-  title: "Kundali Matching Beyond Guna Milan — Deep Compatibility Reading | Trikaal Vaani",
+  title: { absolute: "Kundali Matching Beyond Guna Milan — Deep Read" },
   description: "Chief Vedic Architect Rohiit Gupta reads both charts — Navamsa, Mangal Dosha, Nadi Dosha, Dasha sync — to reveal the soul-level truth of your compatibility. Not just a number. ₹51 reading.",
   keywords: ["kundali matching astrology", "compatibility vedic astrology", "mangal dosha compatibility", "navamsa compatibility reading", "Rohiit Gupta vedic astrologer"],
   authors: [{ name: "Rohiit Gupta", url: "https://trikalvaani.com/founder" }],

@@ -42,7 +42,7 @@ const UDYAM_VERIFY_URL = "https://udyamregistration.gov.in/Udyam_Verify.aspx";
 const INSTAGRAM_URL = "https://instagram.com/thetrikalvaani";
 
 export const metadata: Metadata = {
-  title: "Rohiit Gupta — Chief Vedic Architect | Trikaal Vaani (Trikaal Vaani)",
+  title: { absolute: "Rohiit Gupta — Chief Vedic Architect, Trikaal Vaani" },
   description:
     "Rohiit Gupta — Founder of Trikal Vaani (also known as Trikaal Vaani). 15+ years Vedic astrology under Parashara BPHS tradition. Government of India MSME registered (UDYAM-DL-10-0119070). Chief Vedic Architect behind Jini AI — India's first AI-powered Vedic astrology platform, Delhi NCR.",
   keywords: [

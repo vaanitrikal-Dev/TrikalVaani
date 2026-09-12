@@ -11,7 +11,7 @@ import SiteNav from "@/components/layout/SiteNav";
 import SiteFooter from "@/components/layout/SiteFooter";
 
 export const metadata: Metadata = {
-  title: "Terms of Service | Trikaal Vaani",
+  title: { absolute: "Terms of Service | Trikaal Vaani" },
   description: "Terms of Service for Trikaal Vaani — AI-powered Vedic Astrology platform by Rohiit Gupta. Read before using our services.",
   authors: [{ name: "Rohiit Gupta", url: "https://trikalvaani.com/founder" }],
   alternates: { canonical: "https://trikalvaani.com/terms" },

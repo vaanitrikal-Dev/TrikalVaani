@@ -11,7 +11,7 @@ import SiteNav from "@/components/layout/SiteNav";
 import SiteFooter from "@/components/layout/SiteFooter";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy | Trikaal Vaani",
+  title: { absolute: "Privacy Policy | Trikaal Vaani" },
   description: "Privacy Policy for Trikaal Vaani — AI-powered Vedic Astrology platform by Rohiit Gupta. How we collect, use, and protect your personal data.",
   authors: [{ name: "Rohiit Gupta", url: "https://trikalvaani.com/founder" }],
   alternates: { canonical: "https://trikalvaani.com/privacy" },

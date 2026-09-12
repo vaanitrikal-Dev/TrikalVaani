@@ -10,7 +10,7 @@
 // ============================================================
 import type { Metadata } from 'next';
 export const metadata: Metadata = {
-  title: 'Free Sade Sati Calculator — Check Your Saturn 7.5 Year Period Online | Trikaal Vaani',
+  title: { absolute: 'Free Sade Sati Calculator — Saturn 7.5 Year Check' },
   description:
     'Free Sade Sati Calculator powered by Swiss Ephemeris. Find out if you are in Sade Sati, current phase (Rising/Peak/Setting), exact start-end dates, all life cycles & 3 Parashar remedies. By Rohiit Gupta.',
   keywords: [

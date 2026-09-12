@@ -54,7 +54,7 @@ import SiteFooter from '@/components/layout/SiteFooter'
 import IntlPrice from '@/components/payment/IntlPrice'
 
 export const metadata: Metadata = {
-  title: 'Kundali Milan - Free 36 Guna Matching & Vedic Compatibility | Trikaal Vaani',
+  title: { absolute: 'Kundali Milan — Free 36 Guna Matching Online' },
   description:
     'Free Kundali Milan with 36 Guna Ashtakoot, Mangal Dosh, Nadi Dosh check. Rs51 Basic Milan, Rs101 Deep Milan with Dos, Donts & 6 personalized remedies. By Rohiit Gupta, Chief Vedic Architect, India. Swiss Ephemeris + BPHS classical rules.',
   keywords: 'kundali matching, kundli milan, 36 guna milan, free kundali matching, ashtakoot, mangal dosh, nadi dosh, vedic compatibility, marriage matching, jyotish milan',

@@ -11,7 +11,7 @@ import SiteNav from "@/components/layout/SiteNav";
 import SiteFooter from "@/components/layout/SiteFooter";
 
 export const metadata: Metadata = {
-  title: "Contact Us | Trikaal Vaani",
+  title: { absolute: "Contact Trikaal Vaani — Astrology Support" },
   description: "Contact Rohiit Gupta and the Trikaal Vaani team. WhatsApp, email, and booking details for Vedic astrology consultations. India, India.",
   authors: [{ name: "Rohiit Gupta", url: "https://trikalvaani.com/founder" }],
   alternates: { canonical: "https://trikalvaani.com/contact" },

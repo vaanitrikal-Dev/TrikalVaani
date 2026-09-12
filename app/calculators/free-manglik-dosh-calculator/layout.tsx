@@ -10,7 +10,7 @@
 // ============================================================
 import type { Metadata } from 'next';
 export const metadata: Metadata = {
-  title: 'Free Manglik Dosh Calculator — Check Mangal Dosha Online | Trikaal Vaani',
+  title: { absolute: 'Free Manglik Dosh Calculator — Check Online' },
   description:
     'Free Manglik Dosh Calculator powered by Swiss Ephemeris. Find out if you are Manglik, severity (High/Medium/Low), Mars house position, cancellation rules & 3 Parashar remedies. By Rohiit Gupta, Chief Vedic Architect.',
   keywords: [

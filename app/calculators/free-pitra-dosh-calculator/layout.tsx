@@ -6,7 +6,7 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Free Pitra Dosh Calculator — Check, Causes & Remedies | Trikaal Vaani',
+  title: { absolute: 'Free Pitra Dosh Calculator — Causes & Upay' },
   description:
     'Free Pitra Dosh Calculator powered by Swiss Ephemeris. Check if you have Pitra Dosh (Sun / 9th house affliction by Rahu, Ketu or Saturn), its causes & signs, and free Pitru-Tarpan remedies. By Rohiit Gupta.',
   keywords: [

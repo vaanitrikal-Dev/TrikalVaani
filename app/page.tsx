@@ -48,7 +48,7 @@ import HomeClient from './HomeClient';
 export const revalidate = 3600;
 
 export const metadata: Metadata = {
-  title: 'Trikaal Vaani | Free Kundli, Kundali Milan & Accurate AI Vedic Astrology',
+  title: { absolute: 'Trikaal Vaani — Free Kundli & AI Vedic Astrology' },
   description:
     "Free AI kundli, Kundali Milan & accurate Vedic predictions for career, marriage, wealth & health by Rohiit Gupta, Chief Vedic Architect.",
   alternates: {

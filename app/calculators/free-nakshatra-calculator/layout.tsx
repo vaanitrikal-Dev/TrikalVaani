@@ -10,7 +10,7 @@
 // ============================================================
 import type { Metadata } from 'next';
 export const metadata: Metadata = {
-  title: 'Free Nakshatra Calculator — Find Your Janma Nakshatra Online | Trikaal Vaani',
+  title: { absolute: 'Free Nakshatra Calculator — Janma Nakshatra' },
   description:
     'Free Nakshatra Calculator powered by Swiss Ephemeris. Discover your Janma Nakshatra, Pada, ruling planet, deity, gana, yoni, nadi & 3 Parashar remedies instantly. By Rohiit Gupta, Chief Vedic Architect.',
   keywords: [

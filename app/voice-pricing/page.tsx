@@ -21,7 +21,7 @@ import type { Metadata } from 'next';
 import Script from 'next/script';
 
 export const metadata: Metadata = {
-  title: 'Voice Astrology by Trikaal — ₹11 Voice Predictions in Hindi | Trikaal Vaani',
+  title: { absolute: 'Voice Astrology — ₹11 Hindi Voice Predictions' },
   description:
     'Ask Vedic astrology questions by voice in Hindi or Hinglish — no typing needed. Get AI predictions in Rohiit Gupta\'s own voice, starting ₹11. Press, speak, and listen. Backed by Swiss Ephemeris.',
   keywords: [

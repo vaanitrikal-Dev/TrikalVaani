@@ -117,14 +117,14 @@ export async function generateMetadata(
 
   const human = formatHuman(date);
   const url = `${SITE_URL}/rashifal/${date}`;
-  const title = `Aaj Ka Rashifal ${human} | Daily Horoscope All 12 Signs`;
+  const title = `Aaj Ka Rashifal ${human} — 12 Rashi`;
   const description =
     `Aaj ka rashifal for ${human} — daily Vedic horoscope predictions for all 12 zodiac signs ` +
     `(Mesh to Meen). Career, wealth, love & health guidance by Rohiit Gupta, Chief Vedic Architect. ` +
     `Swiss Ephemeris, Lahiri Ayanamsha.`;
 
   return {
-    title,
+    title: { absolute: title },
     description,
     authors: [{ name: AUTHOR_NAME, url: `${SITE_URL}/founder` }],
     creator: AUTHOR_NAME,

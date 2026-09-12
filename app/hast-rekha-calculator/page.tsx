@@ -140,7 +140,7 @@ const REAL_SAMEAS = [
 
 export const metadata: Metadata = {
   title: {
-    absolute: 'AI Hast Rekha Calculator — Palm Reading by Samudrika Shastra (₹51) | Trikaal Vaani',
+    absolute: 'AI Hast Rekha Calculator — Palm Reading ₹51',
   },
   description:
     'Upload one palm photo and get a classical Samudrika Shastra reading — all 6 lines and all 7 mounts, 8 life scores, personalised remedies and a PDF report. ₹51. No birth time needed. We will not tell you when you will die, and there is no puja to buy afterwards.',
