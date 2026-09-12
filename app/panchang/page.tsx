@@ -2,8 +2,31 @@
 // 🔱 TRIKAL VAANI — CEO PROTECTION HEADER
 // ════════════════════════════════════════════════════════════════════
 // File:    app/panchang/page.tsx
-// Version: v2.2
+// Version: v2.3 (12 Sep 2026)
 // Owner:   Rohiit Gupta, Chief Vedic Architect
+// Changes vs v2.2:
+//   1. TITLE BUG FIXED. The title was a plain string ending "| Trikaal
+//      Vaani", so app/layout.tsx's title template appended the brand a
+//      SECOND time. Live on 12 Sep 2026 Google was being served:
+//        "आज का पंचांग 2026 | आज की तिथि, नक्षत्र, राहु काल और शुभ मुहूर्त | Trikaal Vaani | Trikaal Vaani"
+//      That is 96 characters against Google's ~58-character display window,
+//      so most of it — including the second brand — was cut off. The same
+//      fault was fixed on app/panchang/[date]/page.tsx and on the city
+//      panchang route on 5 Sep 2026; this route was missed in that pass.
+//      Fix: `title: { absolute: ... }` bypasses the parent template, and the
+//      hardcoded brand is removed rather than kept, because the keyword and
+//      the differentiator are worth more than 16 characters of brand.
+//   2. NEW TITLE, 45 chars: "आज का पंचांग — तिथि, वार, नक्षत्र और राहु काल".
+//      Not invented — Radar's harvested keywords show Google itself
+//      suggesting "आज का पंचांग तिथि, वार, नक्षत्र" 5 times in this cluster,
+//      the most of any panchang suggestion. Same words, same order.
+//      "2026" was dropped on purpose: "आज का" already carries the date, and
+//      a hardcoded year makes the title read stale every January.
+//   3. DESCRIPTION 191 -> 120 chars. The old one ran well past the ~155
+//      Google renders and was being truncated mid-sentence. Devanagari also
+//      renders wider per character than Latin, so it is held shorter still.
+//   4. ZERO logic change. Supabase queries, callVM fallback, ISR
+//      (revalidate 3600), timeout, types and all JSX are untouched.
 // Changes vs v2.1:
 //   1. UI text + metadata converted to DEVANAGARI (Hindi) — Hindi-first test.
 //   2. og:locale en_IN → hi_IN. Date formatters en-IN → hi-IN so weekday/
@@ -37,9 +60,12 @@ const SITE_URL = "https://trikalvaani.com";
 const VM_URL = "http://34.47.182.227:8001";
 
 export const metadata: Metadata = {
-  title: "आज का पंचांग 2026 | आज की तिथि, नक्षत्र, राहु काल और शुभ मुहूर्त | Trikaal Vaani",
+  // { absolute } — app/layout.tsx sets title.template "%s | Trikaal Vaani".
+  // A plain string here gets the brand appended, and this string used to end
+  // with the brand already, so Google saw it twice. See the header.
+  title: { absolute: "आज का पंचांग — तिथि, वार, नक्षत्र और राहु काल" },
   description:
-    "रोज़ का वैदिक पंचांग। आज की तिथि, नक्षत्र, योग, करण, राहु काल, सूर्योदय और दिवाली, नवरात्रि, जन्माष्टमी जैसे आने वाले त्योहार। Swiss Ephemeris और लाहिरी अयनांश पर आधारित। Rohiit Gupta द्वारा।",
+    "आज की तिथि, नक्षत्र, योग, करण, राहु काल और सूर्योदय — Swiss Ephemeris से गणना। आने वाले त्योहार और शुभ मुहूर्त भी देखें।",
   alternates: { canonical: `${SITE_URL}/panchang` },
   openGraph: {
     title: "आज का पंचांग | Trikaal Vaani",
