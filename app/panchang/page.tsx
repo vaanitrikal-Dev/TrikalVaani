@@ -2,8 +2,19 @@
 // 🔱 TRIKAL VAANI — CEO PROTECTION HEADER
 // ════════════════════════════════════════════════════════════════════
 // File:    app/panchang/page.tsx
-// Version: v2.3 (12 Sep 2026)
+// Version: v2.4 (12 Sep 2026)
 // Owner:   Rohiit Gupta, Chief Vedic Architect
+// Changes vs v2.3:
+//   1. H1 widened to match the title. It read "आज का पंचांग" — three words —
+//      while the <title> fixed in v2.3 carries "तिथि, वार, नक्षत्र और राहु
+//      काल". Google reads both, and the H1 was the weaker of the two.
+//      Not a guess: Radar's harvested PASF data shows Google itself
+//      suggesting "आज का पंचांग तिथि, वार, नक्षत्र" more often than any
+//      other phrase in this cluster — same words, same order.
+//      This is also the only part of v2.3/v2.4 that is VISIBLE on the page;
+//      the title change lives in the <head> and shows only in search results
+//      and the browser tab.
+//   2. Nothing else touched.
 // Changes vs v2.2:
 //   1. TITLE BUG FIXED. The title was a plain string ending "| Trikaal
 //      Vaani", so app/layout.tsx's title template appended the brand a
@@ -239,7 +250,7 @@ export default async function PanchangHubPage() {
               Swiss Ephemeris · लाहिरी अयनांश
             </p>
             <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
-              आज का पंचांग
+              आज का पंचांग — तिथि, वार, नक्षत्र और राहु काल
             </h1>
             <p className="text-gray-500 text-sm">
               {formatFull(today)} · लेखक —{" "}
