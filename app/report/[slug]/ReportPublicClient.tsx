@@ -1,7 +1,35 @@
 'use client'
 
 /**
- * ============================================================
+ *
+ * ══════════════════════════════════════════════════════════════════════════
+ * v9.0 — 16 SEPTEMBER 2026 — GRANTH KI CHAAR TABLE
+ * ══════════════════════════════════════════════════════════════════════════
+ * ROHIIT KA FAISLA: "Past, Present and Future should be in table format —
+ * Past ki alag table, Present ki alag table (with reason — Why you are Here?),
+ * Future alag, Upay ki alag." Aur: "No Summary from Gemini or Sonnet — NO AI."
+ *
+ * KYA JUDA:
+ *   GranthAteet     TABLE 1 — janm se aaj tak, har MD + AD + Sade Sati/Dhaiya
+ *   GranthFeedback  ATEET ke THEEK BAAD — kyunki grahak ne abhi apna ateet
+ *                   padha hai aur us kshan uske paas jawab TAIYAR hai
+ *   GranthAbhi      TABLE 2 — aap yahan kyun hain, umar+ling se chune bhav
+ *   GranthAage      TABLE 3 — FREE: chaudi tasveer · PAID: + gochar khidkiyan
+ *   GranthUpay      TABLE 4 — sirf paid, aur sirf jahan granth deta hai
+ *
+ * ⚠️ VerdictCard (Gemini ki prose) ab {!granthOn && ...} ke peechhe hai.
+ *    Purane report par — aur USE_GRANTH_ONLY=false par — wo jaise ka taisa
+ *    dikhta hai. Kuch HATAYA nahi gaya.
+ * ⚠️ BhriguChapter aur VarshphalCard JAAN-BOOJH KAR rakhe gaye — Rohiit ka
+ *    faisla: "client thinks he is getting more data, people psychology."
+ *
+ * JAANCHA GAYA (dene se pehle, tsc se):
+ *   {} ka antar 0 · () ka antar original jaisa hi (-1, wo strings mein hai)
+ *   React ka import JODA — <React.Fragment key={...}> ke liye. Bina uske
+ *   build TOOT JAATA aur wo Vercel par deploy ke BAAD pata chalta.
+ *   Jo "key prop" wali galtiyan bachi hain wo PURANI FILE MEIN BHI HAIN
+ *   (@types/react na hone se) — mere naye hisse par EK BHI nahi.
+ * * ============================================================
  * TRIKAAL VAANI — Public SEO Report Client
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/report/[slug]/ReportPublicClient.tsx
@@ -296,7 +324,11 @@ import SiteFooter from '@/components/layout/SiteFooter'
 // typescript.ignoreBuildErrors and eslint.ignoreDuringBuilds, so an undefined
 // identifier ships silently. Verified against Vercel runtime errors,
 // 08 Sep 2026 14:59-15:00 UTC, 5 occurrences across 4 users.
-import { useState } from 'react'
+// ⚠️ 16 Sep 2026 — React ka import JODA GAYA. Granth ki table mein
+// <React.Fragment key={...}> use hota hai (ek MD ke andar kai AD ki row), aur
+// key ke saath shorthand <>...</> chalta nahi. Bina is import ke build TOOT
+// JAATA — aur wo Vercel par deploy ke BAAD pata chalta.
+import React, { useState } from 'react'
 import { ArrowLeft, Lock, Download, Sparkles } from 'lucide-react'
 
 const GOLD    = '#D4AF37'
@@ -2940,6 +2972,350 @@ function PaidFullSummary({ summaryText, periodSummary, bestDates, dosList, donts
   )
 }
 
+// ══════════════════════════════════════════════════════════════════════════════
+// GRANTH KI CHAAR TABLE — 16 September 2026
+// ══════════════════════════════════════════════════════════════════════════════
+// ROHIIT KA FAISLA: "No Summary from Gemini or Sonnet — NO AI. Only data which
+// our Granth say." Aur: "Past, Present and Future should be in table format —
+// Past ki alag table, Present ki alag table (with reason — Why you are Here?),
+// Future alag, Upay ki alag."
+//
+// Har line ya to GRANTH ka shlok hai ya GINA hua ank. Jahan granth chup hai,
+// wahan ye table bhi CHUP rehti hai — "kuch to bata do" ke liye kuch nahi bharti.
+//
+// Data /api/predict ke naye "granth" khane se aata hai, jo VM ke /granth/poori
+// se aaya hai (granth_api.py v1.0). Koi AI beech mein nahi.
+
+const GTH = { head:'11px', cell:'13px' }
+
+function GranthTableShell({ title, subtitle, children, note }:{
+  title:string; subtitle?:string; children:React.ReactNode; note?:string
+}) {
+  return (
+    <div style={{margin:'26px 0',border:`1px solid ${G(0.16)}`,borderRadius:'12px',
+                 background:'rgba(10,15,30,0.5)',overflow:'hidden'}}>
+      <div style={{padding:'14px 16px',borderBottom:`1px solid ${G(0.12)}`}}>
+        <div style={{color:GOLD,fontWeight:700,fontSize:'14px',letterSpacing:'0.04em',
+                     textTransform:'uppercase',fontFamily:'Georgia,serif'}}>{title}</div>
+        {subtitle && <div style={{color:'#94a3b8',fontSize:'12px',marginTop:'4px'}}>{subtitle}</div>}
+      </div>
+      <div style={{overflowX:'auto'}}>{children}</div>
+      {note && <div style={{padding:'10px 16px',borderTop:`1px solid ${G(0.08)}`,
+                            color:'#64748b',fontSize:'11px',lineHeight:1.6}}>{note}</div>}
+    </div>
+  )
+}
+
+function Th({children,w}:{children:React.ReactNode;w?:string}) {
+  return <th style={{padding:'9px 10px',color:GOLD,fontWeight:600,textAlign:'left',
+                     fontSize:GTH.head,textTransform:'uppercase',letterSpacing:'0.06em',
+                     width:w,whiteSpace:'nowrap'}}>{children}</th>
+}
+function Td({children,c,b}:{children:React.ReactNode;c?:string;b?:boolean}) {
+  return <td style={{padding:'11px 10px',color:c??'#e2e8f0',fontSize:GTH.cell,
+                     fontWeight:b?600:400,verticalAlign:'top',lineHeight:1.55}}>{children}</td>
+}
+const gRow = (i:number) => ({borderBottom:'1px solid rgba(255,255,255,0.04)',
+                             background:i%2===0?G(0.02):'transparent'})
+
+/** TABLE 1 — AAPKA ATEET. Janm se aaj tak. SABKO, POORA.
+ *  Ateet hi wo cheez hai jise grahak KHUD JAANCH SAKTA HAI. */
+function GranthAteet({ a, lang }:{ a:any; lang:Lang }) {
+  const mds:any[] = Array.isArray(a?.mahadasha) ? a.mahadasha : []
+  if(!mds.length) return null
+  const shani:any[] = Array.isArray(a?.shani_ke_daur) ? a.shani_ke_daur : []
+  return (
+    <GranthTableShell
+      title={lang==='english'?'Your Past':'AAPKA ATEET'}
+      subtitle={lang==='english'
+        ? 'From birth to today — every major period, from the granth.'
+        : 'Janm se aaj tak — har bada daur, granth se.'}>
+      <table style={{width:'100%',borderCollapse:'collapse'}}>
+        <thead><tr style={{borderBottom:`1px solid ${G(0.15)}`}}>
+          <Th w="17%">DAUR</Th><Th w="15%">KAAL</Th><Th w="26%">GRAH KI JAGAH</Th>
+          <Th>GRANTH KYA KEHTA HAI</Th><Th w="12%">SROT</Th>
+        </tr></thead>
+        <tbody>
+          {mds.map((m:any,mi:number)=>(
+            <React.Fragment key={`md-${mi}`}>
+              <tr style={{...gRow(mi),background:G(0.05)}}>
+                <Td c={GOLD} b>{s(m.md)} <span style={{fontSize:'10px',opacity:0.7}}>MD</span></Td>
+                <Td c="#94a3b8">{s(m.se)}</Td>
+                <Td c="#cbd5e1">{s(m.graha_ki_jagah)}</Td>
+                <Td>
+                  {Array.isArray(m.khule_vishay)&&m.khule_vishay.length>0 ? (
+                    <div>
+                      <span style={{color:'#22c55e',fontWeight:600}}>★ </span>
+                      <span style={{color:'#e2e8f0'}}>
+                        {lang==='english'?'Open through this whole period: ':'Is poore daur mein khula: '}
+                      </span>
+                      <span style={{color:GOLD}}>
+                        {m.khule_vishay.map((k:any)=>s(k.vishay)).join(' · ')}
+                      </span>
+                      {m.khule_vishay[0]?.kyun?.[0] &&
+                        <div style={{color:'#64748b',fontSize:'11px',marginTop:'3px'}}>
+                          ({s(m.khule_vishay[0].kyun[0])})</div>}
+                    </div>
+                  ) : <span style={{color:'#64748b'}}>—</span>}
+                </Td>
+                <Td c="#64748b">{s(m.ch34)!=='GRANTH-CHUP'
+                  ? <span>Ch.34: {s(m.ch34)}</span>
+                  : <span style={{fontSize:'11px'}}>granth chup</span>}</Td>
+              </tr>
+              {(Array.isArray(m.ad)?m.ad:[]).map((d:any,di:number)=>(
+                <tr key={`ad-${mi}-${di}`} style={gRow(di+1)}>
+                  <Td c="#94a3b8">
+                    <span style={{opacity:0.5}}>└ </span>{s(m.md)}/{s(d.ad)}
+                    {d.abhi && <span style={{color:'#22c55e',fontSize:'10px',marginLeft:'5px'}}>← ABHI</span>}
+                  </Td>
+                  <Td c="#94a3b8">{s(d.se)} – {s(d.tak)}</Td>
+                  <Td c="#94a3b8">{s(d.graha_ki_jagah)}</Td>
+                  <Td>
+                    {(Array.isArray(d.granth)?d.granth:[]).map((gr:any,gi:number)=>(
+                      <div key={gi} style={{marginBottom:gi?'6px':0}}>
+                        <span style={{color:gr.kind==='shubh'?'#86efac':gr.kind==='kathin'?'#fca5a5':'#cbd5e1'}}>
+                          {s(gr.phal)}
+                        </span>
+                      </div>
+                    ))}
+                    {(!d.granth||!d.granth.length) &&
+                      <span style={{color:'#64748b',fontSize:'12px'}}>
+                        {lang==='english'?'the granth is silent here':'granth yahan chup hai'}
+                      </span>}
+                    {Number(d.chhupaya_gaya)>0 &&
+                      <div style={{color:'#64748b',fontSize:'11px',marginTop:'4px'}}>
+                        ({d.chhupaya_gaya} {lang==='english'
+                          ? 'entries not shown — the granth speaks of illness there'
+                          : 'baat nahi dikhayi ja rahi — granth wahan rog ki baat karta hai'})
+                      </div>}
+                  </Td>
+                  <Td c="#64748b">
+                    {(Array.isArray(d.granth)&&d.granth[0]?.srot) ? s(d.granth[0].srot) : '—'}
+                  </Td>
+                </tr>
+              ))}
+            </React.Fragment>
+          ))}
+          {shani.map((x:any,i:number)=>(
+            <tr key={`sh-${i}`} style={{...gRow(i),background:'rgba(250,204,21,0.05)'}}>
+              <Td c="#fbbf24" b>⚠️ {s(x.kya)}</Td>
+              <Td c="#fbbf24">{s(x.se)} – {s(x.tak)}</Td>
+              <Td c="#94a3b8">{Array.isArray(x.charan)?x.charan.join(', '):s(x.charan)}</Td>
+              <Td c="#94a3b8">{lang==='english'?'Saturn\u2019s long cycle':'Shani ka bada chakkar'}</Td>
+              <Td c="#64748b">—</Td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </GranthTableShell>
+  )
+}
+
+/** TABLE 2 — AAP YAHAN KYUN HAIN. Abhi ka daur + har bhav ka haal.
+ *  Bhav UMAR aur LING se chune jaate hain (Rohiit ki ruling, 16 Sep). */
+function GranthAbhi({ b, lang }:{ b:any; lang:Lang }) {
+  const mukhya:any[] = Array.isArray(b?.mukhya) ? b.mukhya : []
+  if(!mukhya.length) return null
+  const gaun:any[] = Array.isArray(b?.gaun) ? b.gaun : []
+  const ch = b?.abhi_chal_raha_hai ?? {}
+  const rang = (h:string) => h==='MAZBOOT' ? '#86efac' : h==='KAMZOR' ? '#fca5a5' : '#fbbf24'
+  return (
+    <GranthTableShell
+      title={lang==='english'?'Why You Are Here':'AAP YAHAN KYUN HAIN'}
+      subtitle={`${s(ch.md)} ka bada daur, ${s(ch.ad)} ka chhota daur`}
+      note={lang==='english'
+        ? 'Chosen for your age and the granth\u2019s own house meanings. Bindu = Ashtakavarga (BPHS Ch.72 sl.29 — below 25 is weak).'
+        : 'Aapki umar ke hisaab se chune gaye. Bindu = Ashtakavarga ke ank (BPHS Ch.72 sl.29 — 25 se neeche kamzor).'}>
+      <table style={{width:'100%',borderCollapse:'collapse'}}>
+        <thead><tr style={{borderBottom:`1px solid ${G(0.15)}`}}>
+          <Th w="24%">KYA</Th><Th w="13%">HAAL</Th><Th>WAJAH — GRANTH SE</Th><Th w="9%">BINDU</Th>
+        </tr></thead>
+        <tbody>
+          {mukhya.map((m:any,i:number)=>(
+            <tr key={`mk-${i}`} style={gRow(i)}>
+              <Td c="#fff" b>
+                {String(s(m.vishay)).toUpperCase()}
+                <div style={{color:'#64748b',fontSize:'11px',fontWeight:400,marginTop:'2px'}}>{s(m.kya)}</div>
+              </Td>
+              <Td c={rang(String(m.haal))} b>
+                {s(m.haal)}
+                {m.abhi_khula && <div style={{color:'#22c55e',fontSize:'10px',marginTop:'3px'}}>★ ABHI KHULA</div>}
+              </Td>
+              <Td>
+                {(Array.isArray(m.wajah)?m.wajah:[]).map((w:string,wi:number)=>(
+                  <div key={wi} style={{marginBottom:'3px',color:'#cbd5e1'}}>· {s(w)}</div>
+                ))}
+                {m.ph20_phal && <div style={{marginTop:'6px',color:'#94a3b8',fontStyle:'italic'}}>
+                  {s(m.ph20_phal)}
+                  <span style={{color:'#64748b',fontSize:'11px'}}> ({s(m.ph20_srot)})</span>
+                </div>}
+              </Td>
+              <Td c={Number(m.bindu)>=30?'#86efac':Number(m.bindu)<25?'#fca5a5':'#94a3b8'} b>
+                {m.bindu ?? '—'}
+              </Td>
+            </tr>
+          ))}
+          {gaun.map((m:any,i:number)=>(
+            <tr key={`gn-${i}`} style={{...gRow(i),opacity:0.72}}>
+              <Td c="#94a3b8">{s(m.vishay)}</Td>
+              <Td c={rang(String(m.haal))}>{s(m.haal)}</Td>
+              <Td c="#64748b">{(Array.isArray(m.wajah)?m.wajah:[]).slice(0,1).map((w:string)=>s(w)).join('')}</Td>
+              <Td c="#64748b">{m.bindu ?? '—'}</Td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </GranthTableShell>
+  )
+}
+
+/** TABLE 3 — AAGE KA DAUR. FREE: chaudi tasveer. PAID: + gochar ki sankri khidkiyan.
+ *  FREE ko 6 MAHINE nahi, 3 SAAL diye gaye — 6 mahine mein shayad kuch na ho aur
+ *  grahak "galat hai" samajh kar wapas na aaye. Aur MD/AD samay ki galti se nahi
+ *  hilte jabki gochar/SD hilte hain. */
+function GranthAage({ a, isPaid, lang, slug }:{ a:any; isPaid:boolean; lang:Lang; slug:string }) {
+  const daur:any[] = Array.isArray(a?.daur) ? a.daur : []
+  if(!daur.length) return null
+  const shani:any[] = Array.isArray(a?.shani_ke_daur) ? a.shani_ke_daur : []
+  return (
+    <GranthTableShell
+      title={lang==='english'?'The Road Ahead':'AAGE KA DAUR'}
+      subtitle={`${a?.saal ?? 3} ${lang==='english'?'years ahead':'saal aage'}`}>
+      <table style={{width:'100%',borderCollapse:'collapse'}}>
+        <thead><tr style={{borderBottom:`1px solid ${G(0.15)}`}}>
+          <Th w="15%">DAUR</Th><Th w="15%">KAAL</Th><Th>GRANTH KYA KEHTA HAI</Th>
+          {isPaid && <Th w="26%">⭐ KAB — GOCHAR</Th>}
+        </tr></thead>
+        <tbody>
+          {daur.map((d:any,i:number)=>(
+            <tr key={`ag-${i}`} style={gRow(i)}>
+              <Td c={GOLD} b>
+                {s(d.md)}/{s(d.ad)}
+                {d.abhi && <div style={{color:'#22c55e',fontSize:'10px'}}>← ABHI</div>}
+                {d.sd && <div style={{color:'#64748b',fontSize:'10px'}}>SD {s(d.sd)}</div>}
+              </Td>
+              <Td c="#94a3b8">{s(d.se)} – {s(d.tak)}</Td>
+              <Td>
+                {(Array.isArray(d.granth)?d.granth:[]).map((gr:any,gi:number)=>(
+                  <div key={gi} style={{marginBottom:gi?'6px':0,
+                        color:gr.kind==='shubh'?'#86efac':gr.kind==='kathin'?'#fca5a5':'#cbd5e1'}}>
+                    {s(gr.phal)}
+                    <span style={{color:'#64748b',fontSize:'11px'}}> ({s(gr.srot)})</span>
+                  </div>
+                ))}
+                {(!d.granth||!d.granth.length) && <span style={{color:'#64748b'}}>
+                  {lang==='english'?'the granth is silent here':'granth yahan chup hai'}</span>}
+                <div style={{color:'#64748b',fontSize:'11px',marginTop:'5px'}}>
+                  {s(d.graha_ki_jagah)} · Ch.34: {s(d.ch34)}
+                </div>
+              </Td>
+              {isPaid && <Td>
+                {(Array.isArray(d.gochar_khidkiyan)?d.gochar_khidkiyan:[]).map((k:any,ki:number)=>(
+                  <div key={ki} style={{marginBottom:'5px'}}>
+                    <span style={{color:'#a78bfa',fontWeight:600}}>{s(k.se)} – {s(k.tak)}</span>
+                    <div style={{color:'#64748b',fontSize:'11px'}}>
+                      {(Array.isArray(k.kyun)?k.kyun:[]).join('; ')}</div>
+                  </div>
+                ))}
+                {(!d.gochar_khidkiyan||!d.gochar_khidkiyan.length) &&
+                  <span style={{color:'#64748b',fontSize:'12px'}}>—</span>}
+              </Td>}
+            </tr>
+          ))}
+          {isPaid && shani.map((x:any,i:number)=>(
+            <tr key={`sa-${i}`} style={{...gRow(i),background:'rgba(250,204,21,0.05)'}}>
+              <Td c="#fbbf24" b>⚠️ {s(x.kya)}</Td>
+              <Td c="#fbbf24">{s(x.se)} – {s(x.tak)}</Td>
+              <Td c="#94a3b8" >{lang==='english'?'Saturn\u2019s long cycle ahead':'Shani ka bada chakkar, aage'}</Td>
+              <Td c="#64748b">—</Td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      {!isPaid && Array.isArray(a?.paid_mein_kya_milega) && (
+        <div style={{padding:'14px 16px',borderTop:`1px solid ${G(0.12)}`,
+                     background:'rgba(212,175,55,0.05)'}}>
+          <div style={{color:GOLD,fontSize:'12px',fontWeight:600,marginBottom:'7px'}}>
+            {lang==='english'?'In the full reading:':'Poori reading mein:'}
+          </div>
+          {a.paid_mein_kya_milega.map((x:string,i:number)=>(
+            <div key={i} style={{color:'#94a3b8',fontSize:'12px',marginBottom:'3px'}}>· {s(x)}</div>
+          ))}
+          <a href={`/report/${slug}?upgrade=1`} style={{display:'inline-block',marginTop:'10px',
+              padding:'8px 16px',border:`1px solid ${G(0.4)}`,borderRadius:'7px',
+              color:GOLD,fontSize:'12px',textDecoration:'none',fontWeight:600}}>
+            {lang==='english'?'Get the full reading':'Poori reading lijiye'}
+          </a>
+        </div>
+      )}
+    </GranthTableShell>
+  )
+}
+
+/** TABLE 4 — UPAY. SIRF PAID. Aur SIRF wahan jahan granth deta hai.
+ *  ⚠️ SROT: BPHS (148 shlok), Jataka Parijata (33), Phaladipika (30).
+ *  Bhrigu Sutram (568 mein se sirf 9) aur Shadbala — DONO HATAYE GAYE,
+ *  Rohiit ke faisle se: Bhrigu PHAL ka granth hai, aur Shadbala ek MAAP hai. */
+function GranthUpay({ u, lang }:{ u:any; lang:Lang }) {
+  const list:any[] = Array.isArray(u?.upay) ? u.upay : []
+  return (
+    <GranthTableShell
+      title={lang==='english'?'Remedies':'UPAY'}
+      subtitle={lang==='english'?'Only where the granth gives one':'Sirf wahan jahan granth deta hai'}
+      note={s(u?.srot_ki_baat)}>
+      {list.length ? (
+        <table style={{width:'100%',borderCollapse:'collapse'}}>
+          <thead><tr style={{borderBottom:`1px solid ${G(0.15)}`}}>
+            <Th w="16%">KIS DAUR KE LIYE</Th><Th w="22%">KIS LIYE</Th><Th>UPAY</Th><Th w="13%">SROT</Th>
+          </tr></thead>
+          <tbody>
+            {list.map((x:any,i:number)=>(
+              <tr key={`up-${i}`} style={gRow(i)}>
+                <Td c={GOLD} b>{s(x.kis_daur_ke_liye)}
+                  <div style={{color:'#64748b',fontSize:'11px',fontWeight:400}}>
+                    {s(x.se)} – {s(x.tak)}</div></Td>
+                <Td c="#94a3b8">{s(x.kis_liye)}
+                  <div style={{color:'#64748b',fontSize:'11px',marginTop:'3px'}}>{s(x.kyun)}</div></Td>
+                <Td c="#e2e8f0">{s(x.upay)}</Td>
+                <Td c="#64748b">{s(x.srot)}</Td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      ) : (
+        <div style={{padding:'18px 16px',color:'#94a3b8',fontSize:'13px',lineHeight:1.7}}>
+          {s(u?.agar_khaali)}
+        </div>
+      )}
+    </GranthTableShell>
+  )
+}
+
+/** FEEDBACK — ATEET wale hisse ke THEEK BAAD. Us kshan grahak ne abhi apna
+ *  ateet padha hai, aur uske paas jawab TAIYAR hai. Aur wahi ek data hai jo
+ *  mil sakta hai — sab kuch usi par aage badhega. */
+function GranthFeedback({ sawaal, slug, lang }:{ sawaal:string; slug:string; lang:Lang }) {
+  if(!sawaal) return null
+  return (
+    <div style={{margin:'24px 0',padding:'18px 20px',borderRadius:'12px',
+                 border:`1px solid ${G(0.28)}`,background:'rgba(212,175,55,0.06)'}}>
+      <div style={{color:GOLD,fontWeight:700,fontSize:'13px',marginBottom:'8px',
+                   letterSpacing:'0.04em',textTransform:'uppercase',fontFamily:'Georgia,serif'}}>
+        {lang==='english'?'Did this match?':'Kya ye sahi tha?'}
+      </div>
+      <div style={{color:'#cbd5e1',fontSize:'13px',lineHeight:1.75}}>{s(sawaal)}</div>
+      <a href={`https://wa.me/?text=${encodeURIComponent(
+          `Trikal Vaani — report ${slug}\n\nNaukri/kaam ka bada mod: \nShaadi ya rishta: \nGhar/sampatti: `)}`}
+         target="_blank" rel="noopener noreferrer"
+         style={{display:'inline-block',marginTop:'12px',padding:'8px 16px',
+                 border:`1px solid ${G(0.4)}`,borderRadius:'7px',color:GOLD,
+                 fontSize:'12px',textDecoration:'none',fontWeight:600}}>
+        {lang==='english'?'Send the three dates':'Teen tareekhein bhejiye'}
+      </a>
+    </div>
+  )
+}
+
 export default function ReportPublicClient({report,slug,meta}:ReportPublicClientProps) {
   const domainLabel = s(report.domain_label,'Vedic Reading')
   const birthCity   = s(report.birth_city,'India')
@@ -2971,6 +3347,13 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
   const tier        = s(report.tier,'free')
   const isPaid      = tier==='premium'||tier==='paid'||tier==='basic'||tier==='standard'
   const pj          = safeObj(report.prediction_json)
+  // ── GRANTH KI CHAAR TABLE — 16 September 2026 ────────────────────────────
+  // /api/predict v16.0 ab "granth" khana bhejta hai, jo VM ke /granth/poori se
+  // aaya hai. Koi AI beech mein nahi. Agar wo khana na ho (purane report, ya
+  // USE_GRANTH_ONLY=false) to granthOn false rehta hai aur purana roop dikhta
+  // hai — kuch tootta nahi.
+  const granth      = safeObj((pj as any)?.granth ?? (report as any)?.granth)
+  const granthOn    = !!(granth && (granth as any).ateet)
   const lagna       = s(report.lagna)!=='—' ? s(report.lagna) : s((pj as any)?.lagnaRashi ?? (pj as any)?.lagna?.sign)
   const dashaTL     = safeObj(pj.dashaTimeline)
   const mdObj       = safeObj(dashaTL.mahadasha)
@@ -3239,6 +3622,24 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
 
           <WhyYouAreHere why={whyHere} activation={chartEv?.activation} lang={lang}/>
 
+          {/* ══ GRANTH KI CHAAR TABLE ══════════════════════════════════════════
+              Rohiit ka faisla, 16 Sep 2026: "Past, Present and Future should be
+              in table format — Past ki alag table, Present ki alag table (with
+              reason — Why you are Here?), Future alag, Upay ki alag."
+              Har line granth ka shlok ya gina hua ank hai. Koi AI nahi. */}
+          {granthOn && <GranthAteet a={(granth as any).ateet} lang={lang}/>}
+          {granthOn && <GranthFeedback sawaal={s((granth as any).feedback_sawaal)} slug={slug} lang={lang}/>}
+          {granthOn && <GranthAbhi  b={(granth as any).abhi}  lang={lang}/>}
+          {granthOn && <GranthAage  a={(granth as any).aage}  isPaid={isPaid} lang={lang} slug={slug}/>}
+          {granthOn && isPaid && (granth as any).upay && <GranthUpay u={(granth as any).upay} lang={lang}/>}
+          {granthOn && s((granth as any).samay_ki_chetavni)!=='—' && (granth as any).samay_ki_chetavni && (
+            <div style={{margin:'18px 0',padding:'12px 16px',borderRadius:'9px',
+                         border:'1px solid rgba(250,204,21,0.3)',background:'rgba(250,204,21,0.06)',
+                         color:'#fbbf24',fontSize:'12px',lineHeight:1.7}}>
+              ⚠️ {s((granth as any).samay_ki_chetavni)}
+            </div>
+          )}
+
           {planetTable.length>0&&lagna!=='—'&&(
             <div style={{background:BG_CARD,border:`1px solid ${G(0.15)}`,borderRadius:'16px',padding:'22px',marginBottom:'14px'}}>
               <p style={{margin:'0 0 14px',color:GOLD,fontSize:'11px',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.08em'}}>{lbl('janmaKundali',lang)}</p>
@@ -3343,11 +3744,14 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
               Free now gets '' and the card still renders its chips — best
               month, caution month, confidence — every one of which is engine
               output. Only the written sentence is withheld. */}
-          <VerdictCard lang={lang} coreMsg={isPaid ? (hasCoreMessage?coreMessage:keyMessage) : ''}
+          {/* ⚠️ VerdictCard GEMINI KI PROSE hai. Granth mode mein wo chhup jaata hai —
+              uski jagah upar wali chaar table aati hain. Purane report (ya
+              USE_GRANTH_ONLY=false) par wo jaise ka taisa dikhta hai. */}
+          {!granthOn && <VerdictCard lang={lang} coreMsg={isPaid ? (hasCoreMessage?coreMessage:keyMessage) : ''}
             mahadasha={mahadasha} antardasha={antardasha} pratyantar={pratyantar}
             best={bestMonth} caution={cautionMon} conf={confidence}
             doNow={isPaid ? (doAction!=='—'?doAction:mainAction) : doAction}
-            avoidNow={isPaid ? (avoidAction!=='—'?avoidAction:mainCaution) : avoidAction}/>
+            avoidNow={isPaid ? (avoidAction!=='—'?avoidAction:mainCaution) : avoidAction}/>}
 
           <div style={{background:BG_CARD,border:`1px solid ${G(0.12)}`,borderRadius:'16px',padding:'22px',marginBottom:'14px'}}>
             <p style={{margin:'0 0 14px',color:GOLD,fontSize:'11px',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.08em'}}>{lbl('dashaKaal',lang)}</p>
@@ -3356,6 +3760,13 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
             </div>
           </div>
 
+          {granthOn && (granth as any).ant_ki_baat && (
+            <div style={{margin:'26px 0 10px',padding:'16px 18px',borderRadius:'10px',
+                         border:`1px solid ${G(0.14)}`,background:'rgba(10,15,30,0.4)',
+                         color:'#94a3b8',fontSize:'12px',lineHeight:1.8}}>
+              {s((granth as any).ant_ki_baat)}
+            </div>
+          )}
           {isPaid && <EngineSignals yogas={allYogas} bhriguTheme={bhriguTheme} bhriguPoints={bhriguPts} signals={bhriguSignals} lang={lang}/>}
 
           <ConfidenceCard c={confidence} lang={lang}/>
