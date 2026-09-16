@@ -3305,7 +3305,7 @@ function GranthFeedback({ sawaal, slug, lang }:{ sawaal:string; slug:string; lan
       </div>
       <div style={{color:'#cbd5e1',fontSize:'13px',lineHeight:1.75}}>{s(sawaal)}</div>
       <a href={`https://wa.me/?text=${encodeURIComponent(
-          `Trikaal Vaani — report ${slug}\n\nNaukri/kaam ka bada mod: \nShaadi ya rishta: \nGhar/sampatti: `)}`}
+          `Trikal Vaani — report ${slug}\n\nNaukri/kaam ka bada mod: \nShaadi ya rishta: \nGhar/sampatti: `)}`}
          target="_blank" rel="noopener noreferrer"
          style={{display:'inline-block',marginTop:'12px',padding:'8px 16px',
                  border:`1px solid ${G(0.4)}`,borderRadius:'7px',color:GOLD,
@@ -3622,6 +3622,21 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
 
           <WhyYouAreHere why={whyHere} activation={chartEv?.activation} lang={lang}/>
 
+          {/* ⭐ 16 Sep 2026 — ROHIIT KA NIRDESH: chart aur "Yeh Prediction Kyun"
+              ko UPAR laaya gaya, granth ki table se PEHLE. Wajah saaf hai —
+              grahak pehle apni KUNDALI dekhta hai, phir padhta hai ki reading
+              us kundali se KAISE nikli, aur TAB reading padhta hai.
+              Pehle ye dono granth ki chaar table ke NEECHE the. */}
+          {planetTable.length>0&&lagna!=='—'&&(
+            <div style={{background:BG_CARD,border:`1px solid ${G(0.15)}`,borderRadius:'16px',padding:'22px',marginBottom:'14px'}}>
+              <p style={{margin:'0 0 14px',color:GOLD,fontSize:'11px',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.08em'}}>{lbl('janmaKundali',lang)}</p>
+              <KundaliChart lagna={lagna} planets={planetTable}/>
+              <p style={{textAlign:'center',color:'#64748b',fontSize:'11px',margin:'10px 0 0'}}>Lahiri Ayanamsha · Swiss Ephemeris · BPHS classical</p>
+            </div>
+          )}
+
+          {hasEvidence && <EvidenceTable ev={chartEv} meanings={evMeanings} lang={lang} isPaid={isPaid} slug={slug}/>}
+
           {/* ══ GRANTH KI CHAAR TABLE ══════════════════════════════════════════
               Rohiit ka faisla, 16 Sep 2026: "Past, Present and Future should be
               in table format — Past ki alag table, Present ki alag table (with
@@ -3639,16 +3654,6 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
               ⚠️ {s((granth as any).samay_ki_chetavni)}
             </div>
           )}
-
-          {planetTable.length>0&&lagna!=='—'&&(
-            <div style={{background:BG_CARD,border:`1px solid ${G(0.15)}`,borderRadius:'16px',padding:'22px',marginBottom:'14px'}}>
-              <p style={{margin:'0 0 14px',color:GOLD,fontSize:'11px',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.08em'}}>{lbl('janmaKundali',lang)}</p>
-              <KundaliChart lagna={lagna} planets={planetTable}/>
-              <p style={{textAlign:'center',color:'#64748b',fontSize:'11px',margin:'10px 0 0'}}>Lahiri Ayanamsha · Swiss Ephemeris · BPHS classical</p>
-            </div>
-          )}
-
-          {hasEvidence && <EvidenceTable ev={chartEv} meanings={evMeanings} lang={lang} isPaid={isPaid} slug={slug}/>}
 
           <ShodashvargaCard pj={pj as Record<string, unknown>} lang={lang} isPaid={isPaid} slug={slug}/>
 
