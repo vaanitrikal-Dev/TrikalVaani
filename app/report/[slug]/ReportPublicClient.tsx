@@ -3,7 +3,7 @@
 /**
  *
  * ══════════════════════════════════════════════════════════════════════════
- * v9.0 — 16 SEPTEMBER 2026 — GRANTH KI CHAAR TABLE
+ * v9.2 — 16 SEPTEMBER 2026 — GRANTH KI CHAAR TABLE
  * ══════════════════════════════════════════════════════════════════════════
  * ROHIIT KA FAISLA: "Past, Present and Future should be in table format —
  * Past ki alag table, Present ki alag table (with reason — Why you are Here?),
@@ -22,6 +22,34 @@
  *    dikhta hai. Kuch HATAYA nahi gaya.
  * ⚠️ BhriguChapter aur VarshphalCard JAAN-BOOJH KAR rakhe gaye — Rohiit ka
  *    faisla: "client thinks he is getting more data, people psychology."
+ *
+ * ⭐ v9.1 — 16 Sep (audit ke baad): TEEN CHOOK THEEK KI GAYIN.
+ *   1. RAJAYOGA gina jaata tha par DIKHTA HI NAHI THA — rajayoga.py banaya,
+ *      granth_api ke aage() se juda, jawab bhi aa raha tha, par report use
+ *      padhti hi nahi thi. PAID grahak ka paisa lag raha tha aur cheez dikh
+ *      nahi rahi thi. Ab dikhta hai, sl.5 ke POORA/AADHA/CHAUTHAI darje ke saath.
+ *   2. chal_raha ka flag granth_api v1.1 mein joda gaya tha (Sade Sati wala bug
+ *      theek karte waqt) par ISTEMAL NAHI HO RAHA THA — grahak ko chhah
+ *      Sade Sati/Dhaiya dikhti thin aur pata hi nahi chalta tha ki kaunsi ABHI
+ *      chal rahi hai. Ab "← ABHI CHAL RAHI HAI" dikhta hai.
+ *   3. ph20_wajah aur ch34_md/ch34_ad ab dikhte hain.
+ *
+ * ⭐ v9.2 — ROHIIT KE DO NIRDESH (16 Sep, report dekhne ke baad):
+ *   1. Sade Sati DO jagah gini ja rahi thi aur tareekh EK MAHINE ALAG thi
+ *      (purana SadeSatiCard "May 2032", GranthAteet "Jun 2032") — ek hi page
+ *      par do ulte jawab. Faisla: GRANTH WALA RAKHO. SadeSatiCard ab
+ *      {!granthOn} ke peechhe hai.
+ *   2. Haan/Nahi ke button purane PastDashaTimeline se GranthAteet mein laaye
+ *      gaye. Dono har mahadasha ginaate the, par granth ka PHAL sirf
+ *      GranthAteet mein tha aur button sirf PastDashaTimeline mein. Ab ek hi
+ *      jagah: granth kya kehta hai, AUR grahak ka jawab.
+ *   ⚠️ DONO PURANE SECTION HATAYE NAHI GAYE — sirf {!granthOn} ke peechhe.
+ *      USE_GRANTH_ONLY=false par wo wapas aa jaate hain.
+ *
+ * ⚠️ AUDIT MEIN TEEN KHANE ABHI BHI "bheje jaate hain par dikhte nahi" —
+ *    bhav, granth_ne_kya_kaha, poore_daur_mein_khula. Wo CHOOK NAHI hain:
+ *    teenon wahi baat hain jo kahin aur PEHLE SE dikh rahi hai, aur dobara
+ *    dikhana grahak ko dohra lagta.
  *
  * JAANCHA GAYA (dene se pehle, tsc se):
  *   {} ka antar 0 · () ka antar original jaisa hi (-1, wo strings mein hai)
@@ -3021,6 +3049,14 @@ const gRow = (i:number) => ({borderBottom:'1px solid rgba(255,255,255,0.04)',
 /** TABLE 1 — AAPKA ATEET. Janm se aaj tak. SABKO, POORA.
  *  Ateet hi wo cheez hai jise grahak KHUD JAANCH SAKTA HAI. */
 function GranthAteet({ a, lang }:{ a:any; lang:Lang }) {
+  // ⭐ 16 Sep 2026 — ROHIIT KA NIRDESH: Haan/Nahi ke button purane
+  // "Aapke Jeevan Ke Daur" section se YAHAN laaye gaye, aur wo purana section
+  // hata diya gaya. Wajah: dono EK HI cheez ginaate the (har mahadasha), par
+  // granth ka phal SIRF yahan tha aur button SIRF wahan the.
+  // Ab ek hi jagah par: granth kya kehta hai, AUR grahak ka jawab.
+  const [marks, setMarks] = useState<Record<number,'yes'|'no'|undefined>>({})
+  const answered = Object.values(marks).filter(Boolean).length
+  const agreed   = Object.values(marks).filter(v=>v==='yes').length
   const mds:any[] = Array.isArray(a?.mahadasha) ? a.mahadasha : []
   if(!mds.length) return null
   const shani:any[] = Array.isArray(a?.shani_ke_daur) ? a.shani_ke_daur : []
@@ -3038,7 +3074,8 @@ function GranthAteet({ a, lang }:{ a:any; lang:Lang }) {
         <tbody>
           {mds.map((m:any,mi:number)=>(
             <React.Fragment key={`md-${mi}`}>
-              <tr style={{...gRow(mi),background:G(0.05)}}>
+              <tr style={{...gRow(mi),
+                   background: marks[mi]==='yes' ? 'rgba(34,197,94,0.08)' : G(0.05)}}>
                 <Td c={GOLD} b>{s(m.md)} <span style={{fontSize:'10px',opacity:0.7}}>MD</span></Td>
                 <Td c="#94a3b8">{s(m.se)}</Td>
                 <Td c="#cbd5e1">{s(m.graha_ki_jagah)}</Td>
@@ -3058,9 +3095,29 @@ function GranthAteet({ a, lang }:{ a:any; lang:Lang }) {
                     </div>
                   ) : <span style={{color:'#64748b'}}>—</span>}
                 </Td>
-                <Td c="#64748b">{s(m.ch34)!=='GRANTH-CHUP'
-                  ? <span>Ch.34: {s(m.ch34)}</span>
-                  : <span style={{fontSize:'11px'}}>granth chup</span>}</Td>
+                <Td c="#64748b">
+                  {s(m.ch34)!=='GRANTH-CHUP'
+                    ? <span>Ch.34: {s(m.ch34)}</span>
+                    : <span style={{fontSize:'11px'}}>granth chup</span>}
+                  <div style={{display:'flex',gap:'6px',marginTop:'8px'}}>
+                    {(['yes','no'] as const).map(v=>(
+                      <button key={v} type="button"
+                        onClick={()=>setMarks(x=>({...x,[mi]: x[mi]===v ? undefined : v}))}
+                        style={{padding:'3px 10px',borderRadius:'999px',fontSize:'10px',
+                          cursor:'pointer',whiteSpace:'nowrap',
+                          background: marks[mi]===v
+                            ? (v==='yes'?'rgba(34,197,94,0.18)':'rgba(148,163,184,0.14)')
+                            : 'transparent',
+                          border:`1px solid ${marks[mi]===v
+                            ? (v==='yes'?'rgba(34,197,94,0.5)':'rgba(148,163,184,0.4)')
+                            : 'rgba(255,255,255,0.14)'}`,
+                          color: marks[mi]===v ? '#e2e8f0' : '#94a3b8'}}>
+                        {v==='yes' ? (lang==='english'?'✓ Yes':'✓ Haan')
+                                   : (lang==='english'?'✗ No':'✗ Nahi')}
+                      </button>
+                    ))}
+                  </div>
+                </Td>
               </tr>
               {(Array.isArray(m.ad)?m.ad:[]).map((d:any,di:number)=>(
                 <tr key={`ad-${mi}-${di}`} style={gRow(di+1)}>
@@ -3096,9 +3153,18 @@ function GranthAteet({ a, lang }:{ a:any; lang:Lang }) {
               ))}
             </React.Fragment>
           ))}
+          {/* 🔴 16 Sep — chal_raha ka flag granth_api v1.1 mein JODA GAYA tha
+              (Sade Sati ko aaj par kaat dene wala bug theek karte waqt), par
+              yahan ISTEMAL NAHI HO RAHA THA. Grahak ko chhah Sade Sati/Dhaiya
+              ki soochi dikhti thi aur pata hi nahi chalta tha ki kaunsi ABHI
+              CHAL RAHI HAI. */}
           {shani.map((x:any,i:number)=>(
-            <tr key={`sh-${i}`} style={{...gRow(i),background:'rgba(250,204,21,0.05)'}}>
-              <Td c="#fbbf24" b>⚠️ {s(x.kya)}</Td>
+            <tr key={`sh-${i}`} style={{...gRow(i),
+                 background:x.chal_raha?'rgba(250,204,21,0.12)':'rgba(250,204,21,0.05)'}}>
+              <Td c="#fbbf24" b>⚠️ {s(x.kya)}
+                {x.chal_raha && <span style={{color:'#22c55e',fontSize:'10px',
+                     marginLeft:'6px',fontWeight:700}}>← ABHI CHAL RAHI HAI</span>}
+              </Td>
               <Td c="#fbbf24">{s(x.se)} – {s(x.tak)}</Td>
               <Td c="#94a3b8">{Array.isArray(x.charan)?x.charan.join(', '):s(x.charan)}</Td>
               <Td c="#94a3b8">{lang==='english'?'Saturn\u2019s long cycle':'Shani ka bada chakkar'}</Td>
@@ -3107,6 +3173,19 @@ function GranthAteet({ a, lang }:{ a:any; lang:Lang }) {
           ))}
         </tbody>
       </table>
+      {answered>0 && (
+        <div style={{margin:'0',padding:'13px 16px',borderTop:`1px solid ${G(0.12)}`,
+                     background:'rgba(212,175,55,0.06)',color:'#cbd5e1',
+                     fontSize:'12px',lineHeight:1.65}}>
+          {agreed>=2
+            ? (lang==='english'
+               ? `${agreed} of ${answered} match. These dates come from your birth nakshatra — there is no guess in them.`
+               : `${answered} mein se ${agreed} mel khaate hain. Ye tareekhein aapke janm nakshatra se nikli hain — inme koi anumaan nahi hai.`)
+            : (lang==='english'
+               ? 'Thank you — that tells us where to look. These periods name the SUBJECT, not the event.'
+               : 'Shukriya — isse pata chalta hai kahan dekhna hai. Ye daur VISHAY batate hain, ghatna nahi.')}
+        </div>
+      )}
     </GranthTableShell>
   )
 }
@@ -3122,7 +3201,8 @@ function GranthAbhi({ b, lang }:{ b:any; lang:Lang }) {
   return (
     <GranthTableShell
       title={lang==='english'?'Why You Are Here':'AAP YAHAN KYUN HAIN'}
-      subtitle={`${s(ch.md)} ka bada daur, ${s(ch.ad)} ka chhota daur`}
+      subtitle={`${s(ch.md)} ka bada daur (Ch.34: ${s(ch.ch34_md)}), `
+                 + `${s(ch.ad)} ka chhota daur (Ch.34: ${s(ch.ch34_ad)})`}
       note={lang==='english'
         ? 'Chosen for your age and the granth\u2019s own house meanings. Bindu = Ashtakavarga (BPHS Ch.72 sl.29 — below 25 is weak).'
         : 'Aapki umar ke hisaab se chune gaye. Bindu = Ashtakavarga ke ank (BPHS Ch.72 sl.29 — 25 se neeche kamzor).'}>
@@ -3145,10 +3225,42 @@ function GranthAbhi({ b, lang }:{ b:any; lang:Lang }) {
                 {(Array.isArray(m.wajah)?m.wajah:[]).map((w:string,wi:number)=>(
                   <div key={wi} style={{marginBottom:'3px',color:'#cbd5e1'}}>· {s(w)}</div>
                 ))}
-                {m.ph20_phal && <div style={{marginTop:'6px',color:'#94a3b8',fontStyle:'italic'}}>
-                  {s(m.ph20_phal)}
-                  <span style={{color:'#64748b',fontSize:'11px'}}> ({s(m.ph20_srot)})</span>
-                </div>}
+                {/* 🔴 16 Sep — PEHLI KOSHISH MEIN YE DO CHEEZEIN ADHOORI RAH GAYIN.
+                    granth_api.py mein khinchav aur ph20_swami_alag ka khana JODA
+                    gaya tha, par yahan RENDER NAHI HOTA THA — aur us wajah se ek
+                    ASLI REPORT par "KAAM AUR PEHCHAAN — KAMZOR" ke neeche
+                    Phaladipika ka MAZBOOT wala phal bina kisi labhel ke chhapa,
+                    aur "aap khud — KAMZOR" ke neeche ekmaatra wajah ACHHI thi.
+                    Backend theek tha, frontend adhoora. */}
+                {m.khinchav && (
+                  <div style={{marginTop:'6px',color:'#fbbf24',fontSize:'12px'}}>
+                    ⚠️ {s(m.khinchav)}
+                  </div>
+                )}
+                {m.ph20_phal && (
+                  <div style={{marginTop:'8px',paddingTop:'8px',
+                               borderTop:'1px solid rgba(255,255,255,0.06)'}}>
+                    <div style={{color:'#64748b',fontSize:'11px',marginBottom:'3px'}}>
+                      {lang==='english'
+                        ? `On the LORD of this house (${s(m.ph20_swami)}) — ${s(m.ph20_haalat)}:`
+                        : `Is ghar ke MALIK (${s(m.ph20_swami)}) par — ${s(m.ph20_haalat)}:`}
+                      {Array.isArray(m.ph20_wajah) && m.ph20_wajah.length>0 && (
+                        <span style={{color:'#64748b'}}> — {m.ph20_wajah.join('; ')}</span>
+                      )}
+                      {m.ph20_swami_alag && (
+                        <span style={{color:'#fbbf24'}}>
+                          {lang==='english'
+                            ? ' (different from the house itself)'
+                            : ' (ghar se ULTA — aur granth ke hisaab se ye galat nahi hai)'}
+                        </span>
+                      )}
+                    </div>
+                    <div style={{color:'#94a3b8',fontStyle:'italic'}}>
+                      {s(m.ph20_phal)}
+                      <span style={{color:'#64748b',fontSize:'11px'}}> ({s(m.ph20_srot)})</span>
+                    </div>
+                  </div>
+                )}
               </Td>
               <Td c={Number(m.bindu)>=30?'#86efac':Number(m.bindu)<25?'#fca5a5':'#94a3b8'} b>
                 {m.bindu ?? '—'}
@@ -3159,7 +3271,11 @@ function GranthAbhi({ b, lang }:{ b:any; lang:Lang }) {
             <tr key={`gn-${i}`} style={{...gRow(i),opacity:0.72}}>
               <Td c="#94a3b8">{s(m.vishay)}</Td>
               <Td c={rang(String(m.haal))}>{s(m.haal)}</Td>
-              <Td c="#64748b">{(Array.isArray(m.wajah)?m.wajah:[]).slice(0,1).map((w:string)=>s(w)).join('')}</Td>
+              <Td c="#64748b">
+                {(Array.isArray(m.wajah)?m.wajah:[]).slice(0,1).map((w:string)=>s(w)).join('')}
+                {m.khinchav && <div style={{color:'#fbbf24',fontSize:'11px',marginTop:'3px'}}>
+                  ⚠️ {s(m.khinchav)}</div>}
+              </Td>
               <Td c="#64748b">{m.bindu ?? '—'}</Td>
             </tr>
           ))}
@@ -3232,6 +3348,39 @@ function GranthAage({ a, isPaid, lang, slug }:{ a:any; isPaid:boolean; lang:Lang
           ))}
         </tbody>
       </table>
+      {/* 🔴 16 Sep — RAJAYOGA GINA JAATA THA PAR DIKHTA HI NAHI THA.
+          rajayoga.py (BPHS Ch.39 sl.3-8) banaya gaya, granth_api ke aage()
+          mein joda gaya, aur wo jawab bhi bhejta tha — par report use padhti
+          hi nahi thi. PAID grahak ka paisa lag raha tha aur cheez dikh nahi
+          rahi thi. ⭐ sl.5 kehta hai yoga POORA/AADHA/CHAUTHAI hota hai,
+          HAAN/NAA nahi — aur wo darja bhi dikhaya jaata hai. */}
+      {isPaid && Array.isArray(a?.rajayoga) && a.rajayoga.length>0 && (
+        <div style={{padding:'14px 16px',borderTop:`1px solid ${G(0.12)}`,
+                     background:'rgba(134,239,172,0.04)'}}>
+          <div style={{color:GOLD,fontSize:'12px',fontWeight:700,marginBottom:'9px',
+                       letterSpacing:'0.04em',textTransform:'uppercase'}}>
+            {lang==='english'?'Rajayoga — BPHS Ch.39':'RAJAYOGA — BPHS Ch.39'}
+          </div>
+          {a.rajayoga.map((y:any,i:number)=>(
+            <div key={i} style={{marginBottom:'9px'}}>
+              <span style={{color:y.darja==='poora'?'#86efac':y.darja==='aadha'?'#fbbf24':'#94a3b8',
+                            fontWeight:700,fontSize:'11px',textTransform:'uppercase'}}>
+                [{s(y.darja)}]
+              </span>
+              <span style={{color:'#e2e8f0',fontSize:'12px',marginLeft:'7px'}}>{s(y.kaunsa)}</span>
+              <div style={{color:'#94a3b8',fontSize:'12px',marginTop:'2px'}}>
+                {s(y.baat)}
+                <span style={{color:'#64748b',fontSize:'11px'}}> ({s(y.srot)})</span>
+              </div>
+            </div>
+          ))}
+          <div style={{color:'#64748b',fontSize:'11px',marginTop:'8px',lineHeight:1.6}}>
+            {lang==='english'
+              ? 'BPHS 39.5 says a rajayoga is FULL, HALF or a QUARTER by the strength of the two planets — not simply present or absent.'
+              : 'BPHS 39.5 kehta hai rajayoga POORA, AADHA ya CHAUTHAI hota hai — dono grahon ke BAL se. Wo "hai ya nahi" wali baat nahi hai.'}
+          </div>
+        </div>
+      )}
       {!isPaid && Array.isArray(a?.paid_mein_kya_milega) && (
         <div style={{padding:'14px 16px',borderTop:`1px solid ${G(0.12)}`,
                      background:'rgba(212,175,55,0.05)'}}>
@@ -3305,7 +3454,7 @@ function GranthFeedback({ sawaal, slug, lang }:{ sawaal:string; slug:string; lan
       </div>
       <div style={{color:'#cbd5e1',fontSize:'13px',lineHeight:1.75}}>{s(sawaal)}</div>
       <a href={`https://wa.me/?text=${encodeURIComponent(
-          `Trikaal Vaani — report ${slug}\n\nNaukri/kaam ka bada mod: \nShaadi ya rishta: \nGhar/sampatti: `)}`}
+          `Trikal Vaani — report ${slug}\n\nNaukri/kaam ka bada mod: \nShaadi ya rishta: \nGhar/sampatti: `)}`}
          target="_blank" rel="noopener noreferrer"
          style={{display:'inline-block',marginTop:'12px',padding:'8px 16px',
                  border:`1px solid ${G(0.4)}`,borderRadius:'7px',color:GOLD,
@@ -3609,10 +3758,21 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
           <SamayCard pj={pj as Record<string, unknown>} lagna={s(chartEv?.lagna as string, '')} lang={lang} isPaid={isPaid} slug={slug} planetRows={planetTable}/>
 
           {/* ── 2 · RECOGNITION — the reader proves the chart is theirs ── */}
-          <PastDashaTimeline pj={pj as Record<string, unknown>} dob={s(report.dob, '')} lang={lang}/>
+          {/* ⭐ 16 Sep 2026 — PastDashaTimeline ab {!granthOn} ke peechhe hai.
+              Wo aur GranthAteet DONO har mahadasha ginaate the — par granth ka
+              PHAL sirf GranthAteet mein tha, aur Haan/Nahi ke button sirf yahan.
+              Ab dono ek jagah: button GranthAteet mein aa gaye (Rohiit ka
+              nirdesh, 16 Sep) aur ye section granth mode mein chhup jaata hai.
+              HATAYA NAHI — USE_GRANTH_ONLY=false par wo wapas aa jaata hai. */}
+          {!granthOn && <PastDashaTimeline pj={pj as Record<string, unknown>} dob={s(report.dob, '')} lang={lang}/>}
 
           {/* ── 3 · FINDINGS, strongest signal first ───────────────────── */}
-          <SadeSatiCard pj={pj as Record<string, unknown>} lang={lang} isPaid={isPaid} slug={slug}/>
+          {/* ⭐ 16 Sep 2026 — SadeSatiCard ab {!granthOn} ke peechhe hai.
+              Wajah: wo aur GranthAteet DONO Sade Sati ginaate the aur unki
+              tareekh EK MAHINE ALAG aati thi (purana "May 2032", granth ka
+              "Jun 2032") — ek hi page par do ulte jawab. Rohiit ka faisla,
+              16 Sep: granth wala rakho. HATAYA NAHI, sirf band. */}
+          {!granthOn && <SadeSatiCard pj={pj as Record<string, unknown>} lang={lang} isPaid={isPaid} slug={slug}/>}
 
           <BhriguChapter bhriguObj={bhriguObj as Record<string, unknown>} lang={lang} isPaid={isPaid} slug={slug}/>
 
