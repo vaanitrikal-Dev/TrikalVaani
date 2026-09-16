@@ -103,7 +103,38 @@
    ═══════════════════════════════════════════════════════════════════════════ */
 
 /**
- * ============================================================
+ *
+ * ══════════════════════════════════════════════════════════════════════════
+ * v16.0 — 16 SEPTEMBER 2026 — GRANTH MODE
+ * ══════════════════════════════════════════════════════════════════════════
+ * ROHIIT KA FAISLA: "No Summary from Gemini or Sonnet — NO AI. Only data which
+ * our Granth say." Aur: "without Gemini/Sonnet/AI my Cost is Zero, with More
+ * accuracy."
+ *
+ * KYA BADLA — CHAAR JAGAH, AUR KUCH HATAYA NAHI GAYA:
+ *   1. USE_GRANTH_ONLY flag (default TRUE)
+ *   2. fetchGranth() — VM ke /granth/poori se chaar table
+ *   3. POST mein: flag on ho to predictionJson GRANTH se banta hai aur poora
+ *      Gemini block SKIP ho jaata hai (if/else)
+ *   4. Gemini key wali shart ab flag ke peechhe — pehle key hatate hi site
+ *      500 deti thi
+ *   + jawab mein naya khana "granth", aur _meta mein granthMode/aiUsed
+ *
+ * ⚠️ GEMINI KA CODE HATAYA NAHI GAYA — BAND KIYA GAYA HAI. Rollback ek FLAG
+ *    badalna hai (USE_GRANTH_ONLY=false), poori file badalna nahi. Jab teen-
+ *    chaar hafte mein pakka ho jaaye ki granth har chart par jawab de raha hai,
+ *    TAB wo code hataya jaayega — pehle nahi.
+ *
+ * ⚠️ templateData WAISE HI RAHTA HAI. Usme chart, shadbala, gochar aur upay ke
+ *    GINE HUE ANK hain (koi AI nahi) aur report unhi par tiki hai. Sirf GEMINI
+ *    KI PROSE hati hai.
+ *
+ * JAANCHA GAYA (banane se pehle):
+ *   POST ke andar bracket ka antar 0 — if/else theek band hua
+ *   _kY/_kM/_kD/_kH/_kMin (line 1951-52) · localBirthData (1892) · isPaid (1818)
+ *   templateData (1910) · userContext + birthData (1684) · startMs (1678)
+ *   — SAB indent 2 par, yani POST ke scope mein, aur SAB mere block se PEHLE.
+ * * ============================================================
  * TRIKAAL VAANI — Unified Prediction Endpoint
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/api/predict/route.ts
@@ -492,6 +523,48 @@ const GEMINI_API_KEY  = process.env.GEMINI_API_KEY  ?? ''
 // v14.14: VM URL/key now mirror lib/callVM.ts. Hardcoded fallback so a missing
 // or stale env var can never silently drop us to the Meeus fallback again.
 const EPHE_API_URL    = process.env.EPHE_API_URL    || process.env.VM_ENGINE_URL || 'http://34.47.182.227:8001'
+
+// ══════════════════════════════════════════════════════════════════════════════
+// GRANTH MODE — 16 September 2026
+// ══════════════════════════════════════════════════════════════════════════════
+// ROHIIT KA FAISLA: "No Summary from Gemini or Sonnet — NO AI. Only data which
+// our Granth say." Aur: "without Gemini/Sonnet/AI my Cost is Zero, with More
+// accuracy."
+//
+// ⚠️ GEMINI KA CODE HATAYA NAHI GAYA — BAND KIYA GAYA HAI. Teen wajah:
+//   1. Is file mein Gemini gehra juda hai (2,239 line). Hatane mein kuch aur
+//      toot sakta tha, aur ye file LIVE hai.
+//   2. Rollback ek FLAG badalna hai, poori file badalna nahi.
+//   3. Aur agar granth-wala jawab kisi chart par khaali aa jaaye, to purana
+//      raasta abhi bhi maujood hai.
+// Jab teen-chaar hafte mein pakka ho jaaye ki granth har chart par jawab de
+// raha hai, TAB Gemini ka code hataya jaayega — pehle nahi.
+const USE_GRANTH_ONLY = (process.env.USE_GRANTH_ONLY ?? 'true') !== 'false'
+
+/** VM ke /granth/poori se chaar table — GRANTH SE, bina kisi AI ke. */
+async function fetchGranth(
+  y:number, mo:number, d:number, h:number, mi:number,
+  lat:number, lng:number, tz:number,
+  umar:number, ling:string|null, tier:string, timeAssumed:boolean
+): Promise<Record<string,any>|null> {
+  try{
+    const r = await fetch(`${EPHE_API_URL}/granth/poori`, {
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        ...(process.env.TRIKAL_VM_KEY ? {'X-Trikal-Key':process.env.TRIKAL_VM_KEY} : {}),
+      },
+      body: JSON.stringify({
+        year:y, month:mo, day:d, hour:h, minute:mi,
+        latitude:lat, longitude:lng, timezone:tz,
+        umar, ling, tier, time_assumed:timeAssumed,
+      }),
+      cache:'no-store',
+    })
+    if(!r.ok){ console.error(`[Granth] ${r.status} ${await r.text().catch(()=>'')}`); return null }
+    return await r.json()
+  }catch(e:any){ console.error(`[Granth] fetch failed: ${e?.message}`); return null }
+}
 const EPHE_API_KEY    = process.env.TRIKAL_VM_KEY   || process.env.EPHE_API_KEY  || ''
 const RAZORPAY_SECRET = process.env.RAZORPAY_KEY_SECRET ?? ''
 // v14.17: raised 12000 -> 16000 with CEO approval. The PAID schema now also
@@ -1643,7 +1716,10 @@ export async function POST(req: NextRequest) {
 
   if(predictionTier==='voice')
     return NextResponse.json({error:'Voice uses /api/voice'},{status:400})
-  if(!GEMINI_API_KEY)
+  // ⚠️ 16 Sep 2026 — ye shart ab FLAG ke peechhe hai. Pehle bina Gemini key ke
+  // route 500 deta tha, yani key hatate hi SITE TOOT JAATI. Granth mode mein
+  // Gemini bulaya hi nahi jaata, isliye key ki zaroorat bhi nahi.
+  if(!USE_GRANTH_ONLY && !GEMINI_API_KEY)
     return NextResponse.json({error:'Gemini API key missing'},{status:500})
   if(!EPHE_API_URL)
     return NextResponse.json({error:'Ephemeris URL not configured'},{status:500})
@@ -2074,6 +2150,43 @@ export async function POST(req: NextRequest) {
   // ── STEP 4: Gemini Call ───────────────────────────────────────────────────
   // FREE = Flash (150w, fast) | PAID = Pro (860-940w, 9 named sections + grounding)
   let predictionJson: Record<string,any>
+  let granthData: Record<string,any>|null = null
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // GRANTH MODE — yahan se jawab GRANTH se aata hai, Gemini se nahi.
+  // Neeche ka poora Gemini block SKIP ho jaata hai (if/else se).
+  // ══════════════════════════════════════════════════════════════════════════
+  if(USE_GRANTH_ONLY){
+    // _kY/_kM/_kD/_kH/_kMin upar line ~1906 par pehle se nikale ja chuke hain.
+    const umar = Number.isFinite(_kY)
+      ? Math.max(0, new Date().getFullYear() - _kY)
+      : ((userContext as any)?.age ?? 30)
+    const g = String((userContext as any)?.gender ?? '').toLowerCase()
+    const ling = g.startsWith('f') || g.startsWith('w') || g.includes('mahila') ? 'F'
+               : g.startsWith('m') || g.includes('purush') ? 'M' : null
+    granthData = await fetchGranth(
+      _kY, _kM, _kD, _kH ?? 12, _kMin ?? 0,
+      Number(localBirthData.lat), Number(localBirthData.lng),
+      Number(localBirthData.timezone ?? 5.5),
+      umar, ling, isPaid ? 'paid' : 'free',
+      !birthData.tob,
+    )
+  }
+
+  if(USE_GRANTH_ONLY && granthData){
+    // ⭐ predictionJson ab GRANTH se banta hai. templateData wahi rahta hai —
+    // usme chart, shadbala aur gochar ke GINE HUE ANK hain (koi AI nahi), aur
+    // report unhi par tiki hai. Sirf Gemini ki PROSE hati hai.
+    predictionJson = {
+      ...templateData,
+      _source:  'granth-only',
+      _version: 'granth-1.0',
+      granth:   granthData,
+    }
+    console.log(`[TV-GRANTH] OK | tier:${isPaid?'paid':'free'} | ms:${Date.now()-startMs}`)
+  } else {
+  // ── PURANA RAASTA (Gemini) — sirf tab jab USE_GRANTH_ONLY=false ho, ya
+  //    granth call fail ho jaaye. Code jaan-boojh kar bacha kar rakha gaya hai.
 
   if(isPaid) {
     // ── PAID: Gemini Pro — 860-940 words + real-world grounding (Option C) ───
@@ -2130,6 +2243,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({error:`Prediction failed: ${err.message}`},{status:500})
     }
   }
+  } // ══ GRANTH MODE ka else YAHAN khatam ══════════════════════════════════
+    // ⚠️ 16 Sep — PEHLI KOSHISH MEIN YE BAND 170 LINE AAGE THA, aur us wajah se
+    // publicSlug, totalMs, mahadashaPlanet aur antardashaPlanet SAB is else ke
+    // ANDAR aa gaye the — jabki neeche ka return unhe use karta hai.
+    // TypeScript ne pakda: "No value exists in scope for 'publicSlug'".
+    // Ye bug Vercel par deploy ke BAAD hi dikhta.
 
   // ── STEP 5: Slug + SEO ───────────────────────────────────────────────────
   const processingMs     = Date.now()-startMs
@@ -2213,6 +2332,7 @@ export async function POST(req: NextRequest) {
   return NextResponse.json({
     success:      true,
     prediction:   predictionJson,
+    granth:       granthData,
     templateHtml: null,
     _meta: {
       publicSlug,
@@ -2220,6 +2340,8 @@ export async function POST(req: NextRequest) {
       predictionTier,
       geminiModel,
       polished:       isPaid,
+      granthMode:     USE_GRANTH_ONLY && !!granthData,
+      aiUsed:         !(USE_GRANTH_ONLY && !!granthData),
       processingMs:   totalMs,
       domainId,
       domainLabel:    domainConfig.label??domainId,
