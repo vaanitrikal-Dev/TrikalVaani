@@ -3,7 +3,7 @@
 /**
  *
  * ══════════════════════════════════════════════════════════════════════════
- * v9.5 — 16 SEPTEMBER 2026 — GRANTH KI CHAAR TABLE
+ * v9.7 — 17 SEPTEMBER 2026 — GRANTH KI CHAAR TABLE
  * ══════════════════════════════════════════════════════════════════════════
  * ROHIIT KA FAISLA: "Past, Present and Future should be in table format —
  * Past ki alag table, Present ki alag table (with reason — Why you are Here?),
@@ -102,6 +102,32 @@
  *      jo sach mein milta hai.
  *   4. UPAY KA KRAM (chaar level) {!granthOn} ke peechhe — achhi salaah hai
  *      par GRANTH KI NAHI hai.
+ *
+ * ⭐ v9.6 — 17 Sep, ROHIIT NE ASLI FREE READING PAR DO GALTIYAN PAKDIN:
+ *   1. Heading "2 saal aage" likhti thi par sirf EK MAHINA dikh raha tha
+ *      (Guru/Budh Sep-Oct 2026) — us grahak ka chalta hua AD khatam hone wala
+ *      tha aur granth_api v1.3 seedha break kar deta tha. granth_api v1.4 mein
+ *      naya niyam: EK AD, PAR KAM SE KAM CHHAH MAHINE ka bhavishya. Aur yahan
+ *      heading ab dikh_raha_saal se banti hai, yani wahi kehti hai jo SACH
+ *      MEIN dikh raha hai.
+ *   2. "Ch.34: GRANTH-CHUP" AAGE table mein DIKH RAHA THA. 16 Sep ko maine
+ *      ATEET table aur ABHI ke subtitle mein iska dhyaan rakha tha par YE
+ *      TEESRI JAGAH CHHOOT GAYI.
+ *
+ * ⭐ v9.7 — 17 Sep, ROHIIT NE ASLI PAID REPORT PAR TEEN CHEEZEIN PAKDIN:
+ *   1. "Abhi Aapka Samay Kaisa Hai" aur GranthAage DONO wahi antardasha
+ *      ginaate the. Wo 18 saal tak, par BINA GRANTH ke; mera 3 saal par kata
+ *      hua, shlok ke saath. Tareekh bhi ulti dikhti thi ("Sep 2029" vs
+ *      "Sept 2030"). Ab GranthAage POORE MD tak jaata hai (granth_api v1.5)
+ *      aur SamayCard {!granthOn} ke peechhe hai.
+ *   2. UPAY ka box KHAALI tha. Jaanch par pata chala: BPHS upay SIRF 'maraka'
+ *      wali shart par deta hai (daur ka swami 2re/7ve ka malik ho) — us chart
+ *      par wo shart lagti hi nahi thi. Engine SAHI tha, par mera VAAKYA galat:
+ *      "upay ka na hona apne aap mein achhi khabar hai" — wo framing hi galat
+ *      thi. Ab sahi wajah likhi jaati hai. AUR paid mein PARAMPARIK UPAY bhi
+ *      jud gaye — saaf label ke saath ki wo granth ka shlok NAHI hain.
+ *   3. "Ch.34: GRANTH-CHUP" AAGE table mein dikh raha tha — teesri jagah, jo
+ *      16 Sep ke fix mein chhoot gayi thi.
  *
  * ⚠️ AUDIT MEIN TEEN KHANE ABHI BHI "bheje jaate hain par dikhte nahi" —
  *    bhav, granth_ne_kya_kaha, poore_daur_mein_khula. Wo CHOOK NAHI hain:
@@ -689,7 +715,7 @@ const L: Record<string, Record<Lang,string>> = {
   lockTease:    {hinglish:'Aapne EK daur padha. Granth mein aage ke saare daur, unke mahine, aur jahan granth upay deta hai — sab taiyaar hai.', hindi:'आपने एक दौर पढ़ा। ग्रंथ में आगे के सारे दौर, उनके महीने, और जहाँ ग्रंथ उपाय देता है — सब तैयार है।', english:'You have read ONE period. The rest of the periods, their months, and the remedies the granth actually gives are ready.'},
   lockCta:      {hinglish:'🔓 Unlock Full Report — ₹51 Only', hindi:'🔓 पूरी रिपोर्ट खोलें — केवल ₹५१', english:'🔓 Unlock Full Report — ₹51 Only'},
   lockSub:      {hinglish:'One-time · Instant access · Razorpay secure', hindi:'एक बार · तुरंत उपलब्ध · Razorpay सुरक्षित', english:'One-time · Instant access · Razorpay secure'},
-  f1:{hinglish:'✓ Aage ke SAARE daur — ek nahi, teen saal tak', hindi:'✓ नवांश (D9) — हर ग्रह का आंतरिक बल', english:'✓ Navamsa (D9) — the inner strength of each graha'},
+  f1:{hinglish:'✓ Aage ke SAARE daur — poore chalte hue daur tak', hindi:'✓ नवांश (D9) — हर ग्रह का आंतरिक बल', english:'✓ Navamsa (D9) — the inner strength of each graha'},
   f2:{hinglish:'✓ KAB — gochar ki sankri khidkiyan, mahine ke naam se', hindi:'✓ अगले ६ महीने का गोचर, महीने-दर-महीने', english:'✓ Next 6 months of transits, month by month'},
   f3:{hinglish:'✓ SD ka star — jo saal ko mahinon mein todta hai', hindi:'✓ हर ग्रह का षड्बल स्कोर', english:'✓ Shadbala score for every graha'},
   f4:{hinglish:'✓ Sade Sati aur Dhaiya ke AAGE ke daur', hindi:'✓ सभी भाव + दशा सक्रियता श्रृंखला', english:'✓ All houses + the dasha activation chain'},
@@ -3386,7 +3412,19 @@ function GranthAage({ a, isPaid, lang, slug }:{ a:any; isPaid:boolean; lang:Lang
   return (
     <GranthTableShell
       title={lang==='english'?'The Road Ahead':'AAGE KA DAUR'}
-      subtitle={`${a?.saal ?? 3} ${lang==='english'?'years ahead':'saal aage'}`}>
+      subtitle={(() => {
+        // 🔴 17 Sep — heading "2 saal aage" likhti thi jabki ek asli report par
+        // sirf EK MAHINA dikh raha tha (Guru/Budh Sep–Oct 2026), kyunki us
+        // grahak ka chalta hua AD khatam hone wala tha. Ab heading wahi kehti
+        // hai jo SACH MEIN dikh raha hai (granth_api v1.4 ka dikh_raha_saal).
+        const d = Number(a?.dikh_raha_saal ?? a?.saal ?? 0)
+        if (!d) return ''
+        const mah = Math.round(d * 12)
+        if (mah < 18) return lang==='english'
+          ? `${mah} months ahead` : `${mah} mahine aage`
+        return lang==='english'
+          ? `${d} years ahead` : `${d} saal aage`
+      })()}>
       <table style={{width:'100%',borderCollapse:'collapse'}}>
         <thead><tr style={{borderBottom:`1px solid ${G(0.15)}`}}>
           <Th w="15%">DAUR</Th><Th w="15%">KAAL</Th><Th>GRANTH KYA KEHTA HAI</Th>
@@ -3413,8 +3451,15 @@ function GranthAage({ a, isPaid, lang, slug }:{ a:any; isPaid:boolean; lang:Lang
                 ))}
                 {(!d.granth||!d.granth.length) && <span style={{color:'#64748b'}}>
                   {lang==='english'?'the granth is silent here':'granth yahan chup hai'}</span>}
+                {/* 🔴 17 Sep — "Ch.34: GRANTH-CHUP" YAHAN BHI dikh raha tha.
+                    16 Sep ko maine ATEET table aur ABHI ke subtitle mein iska
+                    dhyaan rakha tha par YE TEESRI JAGAH CHHOOT GAYI — Rohiit ne
+                    asli report par pakda. */}
                 <div style={{color:'#64748b',fontSize:'11px',marginTop:'5px'}}>
-                  {s(d.graha_ki_jagah)} · Ch.34: {s(d.ch34)}
+                  {s(d.graha_ki_jagah)} · {s(d.ch34)==='GRANTH-CHUP'
+                    ? (lang==='english' ? 'the granth is silent on this planet'
+                                        : 'is grah par granth chup hai')
+                    : `Ch.34: ${s(d.ch34)}`}
                 </div>
               </Td>
               {isPaid && <Td>
@@ -3546,7 +3591,7 @@ function GranthFeedback({ sawaal, slug, lang }:{ sawaal:string; slug:string; lan
       </div>
       <div style={{color:'#cbd5e1',fontSize:'13px',lineHeight:1.75}}>{s(sawaal)}</div>
       <a href={`https://wa.me/?text=${encodeURIComponent(
-          `Trikaal Vaani — report ${slug}\n\nNaukri/kaam ka bada mod: \nShaadi ya rishta: \nGhar/sampatti: `)}`}
+          `Trikal Vaani — report ${slug}\n\nNaukri/kaam ka bada mod: \nShaadi ya rishta: \nGhar/sampatti: `)}`}
          target="_blank" rel="noopener noreferrer"
          style={{display:'inline-block',marginTop:'12px',padding:'8px 16px',
                  border:`1px solid ${G(0.4)}`,borderRadius:'7px',color:GOLD,
@@ -3896,6 +3941,47 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
           {granthOn && <GranthAbhi  b={(granth as any).abhi}  lang={lang}/>}
           {granthOn && <GranthAage  a={(granth as any).aage}  isPaid={isPaid} lang={lang} slug={slug}/>}
           {granthOn && isPaid && (granth as any).upay && <GranthUpay u={(granth as any).upay} lang={lang}/>}
+          {/* ⭐ 17 Sep 2026 — PARAMPARIK UPAY, Rohiit ke faisle se.
+              Granth ka upay (GranthUpay, upar) sirf 'maraka' wali shart par
+              milta hai — yani jab daur ka swami 2re/7ve bhav ka malik ho. Bahut
+              charton par wo shart lagti hi nahi aur paid grahak ka box KHAALI
+              rah jaata hai. Faisla: purana remedy_master WAPAS, PAR
+              (a) sirf PAID mein, aur (b) SAAF LIKH KAR ki wo PARAMPARIK hai,
+              granth ka shlok nahi. Granth wala upar rahega, ye uske neeche
+              jodta hai — dono ek saath, har ek apne naam ke saath. */}
+          {granthOn && isPaid && (hasNewUpay || oldRemedies.length > 0) && (
+            <div style={{margin:'22px 0',border:`1px solid ${G(0.12)}`,borderRadius:'12px',
+                         background:'rgba(10,15,30,0.4)',overflow:'hidden'}}>
+              <div style={{padding:'13px 16px',borderBottom:`1px solid ${G(0.1)}`}}>
+                <div style={{color:GOLD,fontWeight:700,fontSize:'13px',letterSpacing:'0.04em',
+                             textTransform:'uppercase',fontFamily:'Georgia,serif'}}>
+                  {lang==='english'?'Traditional Remedies':'PARAMPARIK UPAY'}
+                </div>
+                <div style={{color:'#fbbf24',fontSize:'11px',marginTop:'5px',lineHeight:1.6}}>
+                  ⚠️ {lang==='english'
+                    ? 'These come from traditional practice, not from a verse of the granth. The granth-given remedies are above, each with its sloka number.'
+                    : 'Ye PARAMPARA se aate hain — granth ka shlok NAHI hain. Granth ke apne upay upar hain, har ek apne shlok-number ke saath.'}
+                </div>
+              </div>
+              <div style={{padding:'4px 0'}}>
+                {hasNewUpay
+                  ? <UpayCards remedies={upayItems} isPaid={isPaid} slug={slug} lang={lang}/>
+                  : oldRemedies.slice(0,5).map((r:any,i:number)=>(
+                      <div key={i} style={{padding:'11px 16px',
+                           borderTop:i?'1px solid rgba(255,255,255,0.05)':'none'}}>
+                        <div style={{color:'#e2e8f0',fontSize:'13px'}}>
+                          {s(r.remedy ?? r.upay ?? r.title ?? r.mantra)}
+                        </div>
+                        {(r.planet || r.count || r.day) && (
+                          <div style={{color:'#64748b',fontSize:'11px',marginTop:'3px'}}>
+                            {[s(r.planet),s(r.count),s(r.day)].filter(x=>x&&x!=='—').join(' · ')}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+              </div>
+            </div>
+          )}
           {granthOn && s((granth as any).samay_ki_chetavni)!=='—' && (granth as any).samay_ki_chetavni && (
             <div style={{margin:'18px 0',padding:'12px 16px',borderRadius:'9px',
                          border:'1px solid rgba(250,204,21,0.3)',background:'rgba(250,204,21,0.06)',
@@ -3917,7 +4003,15 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
               Wajah: grahak pehle apni KUNDALI dekhe, phir padhe ki reading us
               se KAISE nikli, aur TAB reading padhe. Pehle ye teen granth ki
               table se UPAR the aur unka kaam wahi tha jo table karti hain. */}
-          <SamayCard pj={pj as Record<string, unknown>} lagna={s(chartEv?.lagna as string, '')} lang={lang} isPaid={isPaid} slug={slug} planetRows={planetTable}/>
+          {/* ⭐ 17 Sep 2026 — SamayCard ab {!granthOn} ke peechhe.
+              Rohiit ne asli PAID report par pakda: ye section aur GranthAage
+              DONO wahi antardasha ginaate the. SamayCard 18 SAAL tak, par BINA
+              GRANTH ke ("Ye hissa mehnat maangta hai", bas). GranthAage wahi
+              cheez 3 saal par kaat raha tha, shlok ke number ke saath — aur
+              tareekh bhi ULTI dikhti thi (mera "Sep 2029" vs uska "Sept 2030").
+              Faisla: GranthAage ko POORE MD tak badhao (granth_api v1.5) aur
+              ye band karo. HATAYA NAHI — flag false par wapas. */}
+          {!granthOn && <SamayCard pj={pj as Record<string, unknown>} lagna={s(chartEv?.lagna as string, '')} lang={lang} isPaid={isPaid} slug={slug} planetRows={planetTable}/>}
 
           <ThreeClocks pj={pj as Record<string, unknown>} lang={lang} isPaid={isPaid} slug={slug}/>
 
