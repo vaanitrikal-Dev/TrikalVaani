@@ -5,6 +5,35 @@
  * TRIKAL VAANI — Trikaal Voice Widget
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: components/Trikal/TrikalVoice.tsx
+ * VERSION: 3.3 (18 Sep 2026) — CHECKOUT RELIABILITY
+ *   Razorpay data for 19 Aug–18 Sep 2026 showed 18 voice-pack checkout
+ *   attempts, 8 captured, 10 failed. Supabase `voice_packs` held 80 rows for
+ *   those 18 attempts — 8 of them duplicate orders created inside the same
+ *   second by one session (one session made 5 orders in 1.4s). Cause: the pack
+ *   button had no in-flight lock and gave no feedback while the order was being
+ *   created, so an impatient user tapped it again and again, each tap minting a
+ *   fresh Razorpay order and a fresh pending row.
+ *   v3.3 CHANGES:
+ *     - `buying` lock: the pack button is disabled and shows "Opening…" from
+ *       the moment it is tapped until the Razorpay sheet is open or the attempt
+ *       ends. One tap = one order. This is what stops the duplicate rows.
+ *     - `rzp.on('payment.failed')`: the real reason from the issuer is now
+ *       shown to the user with a retry line, instead of the blanket
+ *       "Payment cancelled" that ondismiss used to paint over everything.
+ *       Note: lib/razorpay-helper.ts has such a handler but only console.errors
+ *       it; this widget does not use that helper, and deliberately shows the
+ *       reason on screen.
+ *     - ondismiss no longer overwrites an already-set failure message.
+ *     - activatePack retries /api/verify-voice-pack twice on a network error.
+ *       Money is already taken at that point; a single failed fetch used to
+ *       leave the pack unactivated with no second chance. There is still no
+ *       Razorpay webhook — that safety net is a separate, pending job.
+ *     - the empty `catch {}` in handleBuyPack now logs, so failures are
+ *       visible in Vercel logs instead of vanishing.
+ *   NOT CHANGED: pricing, PayPal path, activatePack's contract, the server
+ *   routes, and `questions_left` (a GENERATED ALWAYS column in Postgres —
+ *   never write to it).
+ *
  * VERSION: 3.2 (30 Aug 2026) — INTERNATIONAL PAYMENT (packs $1 / $4 / $7)
  *   Testing on 30 Aug found the card outside this modal showing "$1" while the
  *   modal itself opened a RUPEE Razorpay sheet at Rs 11. Only the BirthForm
@@ -404,6 +433,12 @@ export default function TrikalVoice() {
   // `?intl=1` forces the PayPal view for testing from India; one-way only.
   const [isIndia, setIsIndia] = useState<boolean | null>(null);
   const [selectedIntlPack, setSelectedIntlPack] = useState<Pack | null>(null);
+  // v3.3 — in-flight lock. Holds the pack id being bought, or null.
+  // Without this, every extra tap minted another Razorpay order and another
+  // pending row in voice_packs. Ref as well as state: the state drives the
+  // disabled button, the ref closes the gap before React re-renders.
+  const [buying, setBuying] = useState<string | null>(null);
+  const buyingRef = useRef<string | null>(null);
   useEffect(() => {
     let cancelled = false;
     const forced = typeof window !== 'undefined' &&
@@ -417,12 +452,37 @@ export default function TrikalVoice() {
 
   /** Everything after the money is taken — shared by both payment paths. */
   const activatePack = async (pack: Pack, proof: Record<string, string>) => {
-    const verifyRes = await fetch('/api/verify-voice-pack', {
-      method : 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body   : JSON.stringify({ ...proof, packId: pack.id, sessionId: sessionIdRef.current }),
-    });
-    if (!verifyRes.ok) { setError('Payment verification failed. Contact support.'); return; }
+    // v3.3 — the money is ALREADY taken by the time we get here. A single
+    // dropped fetch used to end the story: pack never activated, user charged.
+    // Three attempts, backing off, before we give up and tell them to contact
+    // support. A server-side 4xx is a real rejection and is not retried.
+    let verifyRes: Response | null = null;
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      try {
+        verifyRes = await fetch('/api/verify-voice-pack', {
+          method : 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body   : JSON.stringify({ ...proof, packId: pack.id, sessionId: sessionIdRef.current }),
+        });
+        if (verifyRes.ok) break;
+        if (verifyRes.status < 500) break;   // genuine rejection — retrying won't help
+      } catch (e) {
+        console.error(`[TrikalVoice] verify attempt ${attempt} threw:`, e);
+        verifyRes = null;
+      }
+      if (attempt < 3) await new Promise(r => setTimeout(r, attempt * 1500));
+    }
+
+    if (!verifyRes || !verifyRes.ok) {
+      console.error('[TrikalVoice] verify failed after retries', {
+        sessionId: sessionIdRef.current, pack: pack.id, proof,
+      });
+      setError(
+        'Payment ho gaya but activation atak gaya. Paisa safe hai — ' +
+        'WhatsApp par payment ID bhejein, turant activate kar denge.'
+      );
+      return;
+    }
     const verified = await verifyRes.json();
     setBalance(verified.balance);
     setValidUntil(verified.validUntil);
@@ -439,6 +499,18 @@ export default function TrikalVoice() {
   };
 
   const handleBuyPack = async (pack: Pack) => {
+    // v3.3 — one tap, one order. The ref is checked (not the state) because a
+    // second tap can land before React has re-rendered the disabled button.
+    if (buyingRef.current) return;
+    buyingRef.current = pack.id;
+    setBuying(pack.id);
+
+    // Set by the payment.failed handler so ondismiss, which fires immediately
+    // afterwards, does not paint "Payment cancelled" over the real reason.
+    let failureShown = false;
+
+    const release = () => { buyingRef.current = null; setBuying(null); };
+
     setError('');
     setActivePack(pack);
     try {
@@ -447,7 +519,7 @@ export default function TrikalVoice() {
         headers: { 'Content-Type': 'application/json' },
         body   : JSON.stringify({ packId: pack.id, sessionId: sessionIdRef.current }),
       });
-      if (!orderRes.ok) throw new Error('Order creation failed');
+      if (!orderRes.ok) throw new Error(`Order creation failed (${orderRes.status})`);
       const order = await orderRes.json();
 
       const rzp = new window.Razorpay({
@@ -459,14 +531,39 @@ export default function TrikalVoice() {
         order_id   : order.orderId,
         theme      : { color: GOLD },
         handler    : async (response: Record<string, string>) => {
+          release();
           await activatePack(pack, response);
         },
-        modal  : { ondismiss: () => setError('Payment cancelled') },
+        modal  : {
+          ondismiss: () => {
+            release();
+            if (!failureShown) setError('Payment cancelled — dobara try karein.');
+          },
+        },
         prefill: { name: form.name },
       });
+
+      // v3.3 — the reason the issuer gives, shown on screen. Razorpay's own
+      // data for the last 30 days: 5 timeouts, 1 wrong MPIN, 1 insufficient
+      // balance, 1 bank cutoff. Every one of those is recoverable if the user
+      // is told what happened instead of a blank "cancelled".
+      rzp.on('payment.failed', (resp: { error?: { description?: string; reason?: string } }) => {
+        console.error('[TrikalVoice] Razorpay payment.failed:', resp?.error);
+        failureShown = true;
+        release();
+        const reason = resp?.error?.description?.trim();
+        setError(
+          (reason && reason.length > 0
+            ? reason
+            : 'Payment poora nahi hua.') + ' Paisa nahi kata — dobara try karein.'
+        );
+      });
+
       rzp.open();
-    } catch {
-      setError('Could not start payment. Please try again.');
+    } catch (e) {
+      console.error('[TrikalVoice] handleBuyPack failed:', e);
+      release();
+      setError('Payment start nahi ho paya. Dobara try karein.');
     }
   };
 
@@ -627,18 +724,28 @@ export default function TrikalVoice() {
                     <button
                       key={pack.id}
                       onClick={() => handleBuyPack(pack)}
+                      // v3.3 — while ANY pack is being bought every pack button
+                      // is dead. This, plus the "Opening…" label, is the fix for
+                      // the duplicate Razorpay orders.
+                      disabled={buying !== null}
                       style={{
                         background  : `linear-gradient(135deg, ${GOLD_DARK}22, ${GOLD}11)`,
                         border      : `1px solid ${GOLD}55`,
                         borderRadius: 12,
                         padding     : '14px 16px',
                         textAlign   : 'left',
-                        cursor      : 'pointer',
+                        cursor      : buying !== null ? 'not-allowed' : 'pointer',
                         color       : '#fff',
+                        opacity     : buying !== null && buying !== pack.id ? 0.45 : 1,
+                        transition  : 'opacity .15s ease',
                       }}
                     >
-                      <div style={{ color: GOLD, fontSize: 16, fontWeight: 700 }}>{pack.label}</div>
-                      <div style={{ color: '#bbb', fontSize: 12, marginTop: 2 }}>{pack.sub}</div>
+                      <div style={{ color: GOLD, fontSize: 16, fontWeight: 700 }}>
+                        {buying === pack.id ? 'Opening…' : pack.label}
+                      </div>
+                      <div style={{ color: '#bbb', fontSize: 12, marginTop: 2 }}>
+                        {buying === pack.id ? 'Payment window khul raha hai' : pack.sub}
+                      </div>
                     </button>
                   ))}
                 </div>
