@@ -5,6 +5,28 @@
  * TRIKAL VAANI — Trikaal Voice Widget
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: components/Trikal/TrikalVoice.tsx
+ * VERSION: 3.4 (18 Sep 2026) — GEO RACE + two defects from 3.3
+ *   /api/geo was checked live on 18 Sep and is healthy: it reads Vercel's
+ *   x-vercel-ip-country and returned {"country":"US","isIndia":false} from a
+ *   US egress. The two "International cards are not supported" failures in the
+ *   Razorpay log are dated 22 Aug 2026 — eight days BEFORE the PayPal path
+ *   reached this widget in v3.2 (30 Aug). They are already fixed.
+ *   v3.4 CHANGES:
+ *     - isIndia === null now renders a loader. Until 3.3 an unresolved geo
+ *       fell through to the RUPEE branch, because `null === false` is false.
+ *       The window is small — the widget is mounted in app/layout.tsx so the
+ *       geo fetch starts at page load — but on a slow connection a foreign
+ *       visitor could tap a rupee pack and be rejected by Razorpay.
+ *     - FIX to 3.3: the activation-failure message told the user to send a
+ *       payment ID that was never shown to them. The ID is now in the message.
+ *     - FIX to 3.3: that failure path console.logged the entire `proof`
+ *       object, putting razorpay_signature in the visitor's browser console.
+ *       Only the order and payment ids are logged now.
+ *   STILL OPEN, not in this file: there is no Razorpay webhook, so a payment
+ *   captured while the browser dies is never activated. The PayPal voice path
+ *   has zero production captures to date and is untested live (?intl=1 forces
+ *   the dollar view for testing).
+ *
  * VERSION: 3.3 (18 Sep 2026) — CHECKOUT RELIABILITY
  *   Razorpay data for 19 Aug–18 Sep 2026 showed 18 voice-pack checkout
  *   attempts, 8 captured, 10 failed. Supabase `voice_packs` held 80 rows for
@@ -474,12 +496,22 @@ export default function TrikalVoice() {
     }
 
     if (!verifyRes || !verifyRes.ok) {
+      // v3.4 — log the ids only. v3.3 logged the whole `proof` object, which
+      // puts razorpay_signature into the visitor's browser console for anyone
+      // looking. The ids are all that is needed to reconcile.
+      const payId = proof.razorpay_payment_id || proof.paypal_order_id || '';
       console.error('[TrikalVoice] verify failed after retries', {
-        sessionId: sessionIdRef.current, pack: pack.id, proof,
+        sessionId: sessionIdRef.current,
+        pack     : pack.id,
+        paymentId: payId,
+        orderId  : proof.razorpay_order_id || '',
       });
+      // v3.4 — the ID is now IN the message. v3.3 told the user to send a
+      // payment ID they had no way of seeing.
       setError(
-        'Payment ho gaya but activation atak gaya. Paisa safe hai — ' +
-        'WhatsApp par payment ID bhejein, turant activate kar denge.'
+        'Payment ho gaya but activation atak gaya. Paisa safe hai. ' +
+        (payId ? `Yeh ID WhatsApp par bhejein: ${payId}` : 'WhatsApp par message karein') +
+        ' — turant activate kar denge.'
       );
       return;
     }
@@ -682,7 +714,30 @@ export default function TrikalVoice() {
                   ? 'Ask Trikaal in your own voice from $1 — and hear the answer in Trikaal\u2019s voice.'
                   : '\u20B911 में अपनी आवाज़ से सवाल पूछें — Trikaal अपनी आवाज़ में जवाब देंगे।'}
               </p>
-              {isIndia === false ? (
+              {isIndia === null ? (
+                // v3.4 — geo not answered yet. Until 3.3 this fell through to
+                // the RUPEE branch, because `null === false` is false. On a
+                // slow connection a foreign visitor could tap a rupee pack and
+                // hit Razorpay's "International cards are not supported".
+                // /api/geo is fired when the widget mounts (it is in
+                // app/layout.tsx, so that is page load) and normally resolves
+                // long before anyone reaches this screen — this is insurance,
+                // not a hot path.
+                <div style={{
+                  display: 'flex', flexDirection: 'column', alignItems: 'center',
+                  gap: 10, padding: '28px 0',
+                }}>
+                  <div style={{
+                    width: 26, height: 26, borderRadius: '50%',
+                    border: `2px solid ${GOLD}33`, borderTopColor: GOLD,
+                    animation: 'trikalGeoSpin 0.8s linear infinite',
+                  }} />
+                  <div style={{ color: '#888', fontSize: 12 }}>Loading…</div>
+                  <style>{`
+                    @keyframes trikalGeoSpin { to { transform: rotate(360deg); } }
+                  `}</style>
+                </div>
+              ) : isIndia === false ? (
                 // International: pick a pack, then pay in dollars. The pack has
                 // to be chosen BEFORE the buttons render, because the PayPal
                 // order is created for one specific pack.
