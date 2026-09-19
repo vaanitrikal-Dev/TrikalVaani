@@ -1,6 +1,6 @@
 // ============================================================
 // File: app/api/calc/yog/route.ts
-// Version: v3.0 — Vivah Yog added as the fifth type (3 Sep 2026)
+// Version: v3.1 — usage logging added (18 Sep 2026); Vivah Yog is the fifth type
 //
 // CHANGELOG v3.0 — "Shadi kab hogi", slug free-shadi-kab-hogi-calculator,
 // type `vivah`. It follows Santan's rails exactly: the Vimshottari timeline
@@ -157,6 +157,7 @@ import type { VivahResult } from '@/lib/vivah-engine';
 import { buildVivahSummary } from '@/lib/vivah-summary';
 import { getProduct } from '@/lib/pricing-intl';
 import { getPayPalOrder, isCaptureValid } from '@/lib/paypal-server';
+import { logUsage, usageBirthFields, usageContextFromRequest } from '@/lib/usage-log';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -383,6 +384,20 @@ export async function POST(req: NextRequest) {
       verdictSummary = s.text;
       console.log(`[yog] ${type} summary | ${s.source} | ${s.words} words | paid:${paid}`);
     }
+
+    // ── usage log — fire-and-forget, own try/catch. This route serves five
+    //    different calculators, so the slug carries `type`, and it is the one
+    //    calculator route with a paid tier, so `paid` is recorded too.
+    try {
+      logUsage({
+        ...usageContextFromRequest(req),
+        ...usageBirthFields(b as any),
+        product_slug : `calc-yog-${type}`,
+        product_name : `Yog Calculator (${type})`,
+        product_type : 'calculator',
+        tier         : paid ? 'paid' : 'free',
+      });
+    } catch { /* logging must never break the calculator */ }
 
     return NextResponse.json({
       success: true,
