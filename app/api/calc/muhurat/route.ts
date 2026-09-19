@@ -1,6 +1,6 @@
 // ============================================================
 // File: app/api/calc/muhurat/route.ts
-// Version: v1.1 — VM call routed through lib/callVM.ts (X-Trikal-Key auto)
+// Version: v1.2 — usage logging added (18 Sep 2026); VM call via lib/callVM.ts
 // Proxies to VM /muhurat-finder endpoint
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
 // ============================================================
@@ -10,6 +10,7 @@
 // ============================================================
 import { NextRequest, NextResponse } from 'next/server';
 import { callVM } from '@/lib/callVM';
+import { logUsage, usageBirthFields, usageContextFromRequest } from '@/lib/usage-log';
 const VM_URL = process.env.VM_ENGINE_URL || 'http://34.47.182.227:8001';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -51,6 +52,19 @@ export async function POST(req: NextRequest) {
       );
     }
     const data = await res.json();
+
+    // ── usage log — fire-and-forget, own try/catch (see lib/usage-log.ts) ──
+    try {
+      logUsage({
+        ...usageContextFromRequest(req),
+        ...usageBirthFields(body as any),
+        product_slug : 'calc-muhurat',
+        product_name : 'Child Birth Muhurat Calculator',
+        product_type : 'calculator',
+        tier         : 'free',
+      });
+    } catch { /* logging must never break the calculator */ }
+
     return NextResponse.json(data, { status: 200 });
   } catch (e: any) {
     const msg = e?.name === 'TimeoutError'
