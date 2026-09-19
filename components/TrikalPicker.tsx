@@ -2,9 +2,28 @@
 /**
  * ============================================================================
  * FILE   : components/TrikalPicker.tsx
- * VERSION: v1.0
+ * VERSION: v1.2
  * DATE   : 18 September 2026
  * ============================================================================
+ *
+ * v1.2 — MAGNIFYING GLASS, AND ATTENTION AT TWO MOMENTS ONLY
+ *   v1.1 used a left chevron. A chevron is a web convention for "this panel
+ *   opens" — it tells a visitor nothing about what the thing DOES, and a large
+ *   part of this audience has never learned it. The mic on the gold voice pill
+ *   works because it says both "tap me" AND "this is voice".
+ *   So v1.2 uses the magnifying glass: after the mic it is the most universally
+ *   read icon there is (WhatsApp, YouTube, Google all use it), it needs no
+ *   language, and it is TRUE — a search box is the first thing in the drawer.
+ *
+ *   ATTENTION: no constant blinking. A permanently animating element gets
+ *   mentally filed as an advert and stops being seen within seconds, and fast
+ *   flashing breaks WCAG 2.3.1. Instead the tab pulses at the two moments that
+ *   actually matter:
+ *     1. 2s after load — late enough that the page has painted.
+ *     2. Once at 50% scroll, only if nothing has been clicked — the "I have
+ *        read this, now what?" moment, which is where visitors leave.
+ *   After that it stays still. Someone who ignored two pulses will ignore a
+ *   third; the third only irritates.
  *
  * WHAT IT IS
  *   A narrow fluorescent-orange tab stuck to the RIGHT EDGE, vertically
@@ -136,6 +155,35 @@ export default function TrikalPicker() {
   const [query, setQuery]       = useState('');
   const [openCat, setOpenCat]   = useState<ProductCategory | null>(null);
   const searchRef               = useRef<HTMLInputElement>(null);
+  const [pulse, setPulse]       = useState(false);   // attention animation on/off
+  const everOpened              = useRef(false);     // suppresses pulse #2 after any open
+
+  /* Attention pulse #1 — 2s after load, three times, then stop. */
+  useEffect(() => {
+    const start = setTimeout(() => setPulse(true), 2000);
+    const stop  = setTimeout(() => setPulse(false), 2000 + 3 * 1100 + 100);
+    return () => { clearTimeout(start); clearTimeout(stop); };
+  }, []);
+
+  /* Attention pulse #2 — once at 50% scroll, only if never opened.
+     This is the "I have read this, now what?" moment where visitors leave. */
+  useEffect(() => {
+    if (everOpened.current) return;
+    let fired = false;
+    const onScroll = () => {
+      if (fired || everOpened.current) return;
+      const doc = document.documentElement;
+      const max = doc.scrollHeight - window.innerHeight;
+      if (max > 0 && window.scrollY / max >= 0.5) {
+        fired = true;
+        setPulse(true);
+        setTimeout(() => setPulse(false), 3 * 1100 + 100);
+        window.removeEventListener('scroll', onScroll);
+      }
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
   /* Rotate the tab label. Pauses while the drawer is open. */
   useEffect(() => {
@@ -171,6 +219,8 @@ export default function TrikalPicker() {
   }, [open]);
 
   const handleOpen = () => {
+    everOpened.current = true;
+    setPulse(false);
     setOpen(true);
     track('PickerOpen', { path: typeof window !== 'undefined' ? window.location.pathname : '' });
     setTimeout(() => searchRef.current?.focus(), 350);
@@ -215,25 +265,36 @@ export default function TrikalPicker() {
           style={{
             position: 'fixed', right: 0, top: '50%', transform: 'translateY(-50%)',
             zIndex: 9990,
-            width: 34, height: 158,
+            width: 34, height: 172,
             background: `linear-gradient(180deg, ${ORANGE}, ${ORANGE_LIGHT})`,
             borderRadius: '10px 0 0 10px',
             border: 'none',
             boxShadow: `-3px 0 16px ${ORANGE}80`,
             cursor: 'pointer',
             display: 'flex', flexDirection: 'column',
-            alignItems: 'center', paddingTop: 10, gap: 7,
-            animation: 'tvPickerGlow 3s ease-in-out infinite',
+            alignItems: 'center', paddingTop: 8, gap: 8,
+            animation: pulse ? 'tvPickerPulse 1.1s ease-in-out 3' : 'none',
           }}
         >
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
-               stroke={ON_ORANGE} strokeWidth="2.6" strokeLinecap="round" aria-hidden="true">
-            <path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3" />
-            <line x1="12" y1="17" x2="12.01" y2="17" />
-          </svg>
+          {/* Dark circle + magnifying glass. Same visual language as the gold
+              voice pill's mic-in-a-circle, so it reads as a button — and the
+              glass says what it does without needing any language. */}
+          <span style={{
+            width: 24, height: 24, borderRadius: '50%',
+            background: PANEL_DEEP, flex: 'none',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                 stroke={ORANGE_LIGHT} strokeWidth="3"
+                 strokeLinecap="round" aria-hidden="true">
+              <circle cx="11" cy="11" r="7" />
+              <line x1="21" y1="21" x2="16.7" y2="16.7" />
+            </svg>
+          </span>
+
           <span style={{
             writingMode: 'vertical-rl', transform: 'rotate(180deg)',
-            fontSize: 11.5, fontWeight: 800, color: ON_ORANGE,
+            fontSize: 11, fontWeight: 800, color: ON_ORANGE,
             letterSpacing: '.3px', whiteSpace: 'nowrap',
           }}>
             {TAGLINES[tagIdx]}
@@ -421,9 +482,17 @@ export default function TrikalPicker() {
       )}
 
       <style>{`
-        @keyframes tvPickerGlow {
-          0%, 100% { box-shadow: -3px 0 16px ${ORANGE}80; }
-          50%      { box-shadow: -3px 0 26px ${ORANGE}cc; }
+        @keyframes tvPickerPulse {
+          0%, 100% { transform: translateY(-50%) translateX(0);
+                     box-shadow: -3px 0 16px ${ORANGE}80; }
+          50%      { transform: translateY(-50%) translateX(-6px);
+                     box-shadow: -8px 0 30px ${ORANGE}ff; }
+        }
+        /* Anyone who has asked their system not to animate gets a still tab. */
+        @media (prefers-reduced-motion: reduce) {
+          @keyframes tvPickerPulse {
+            0%, 100% { transform: translateY(-50%); }
+          }
         }
         @keyframes tvPickerIn {
           from { transform: translateX(100%); }
