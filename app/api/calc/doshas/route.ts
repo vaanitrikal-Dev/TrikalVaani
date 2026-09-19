@@ -1,7 +1,7 @@
 // ============================================================
 // File: app/api/calc/doshas/route.ts
 // Purpose: VM bridge for Dosha Calculators (Kaal Sarp, Pitra, etc.)
-// Version: v1.1
+// Version: v1.2 — usage logging added (18 Sep 2026)
 // Changelog v1.1: check_all_doshas returns a DICT
 //   { doshas:[...], present_count, summary, lang } — not a bare list.
 //   Unwrap the inner `doshas` array robustly (handles list OR dict)
@@ -12,6 +12,7 @@
 // ============================================================
 import { NextRequest, NextResponse } from 'next/server';
 import { callVM } from '@/lib/callVM';
+import { logUsage, usageBirthFields, usageContextFromRequest } from '@/lib/usage-log';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -76,6 +77,21 @@ export async function POST(req: NextRequest) {
 
     const sessionId = `calc_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
 
+
+    // ── usage log — fire-and-forget. Wrapped in its own try/catch because the
+    //    ARGUMENT is built outside logUsage's internal guard; a bad field here
+    //    would otherwise crash the route. Nothing in this block can ever stop
+    //    a calculator from answering the customer.
+    try {
+      logUsage({
+        ...usageContextFromRequest(req),
+        ...usageBirthFields(body as any),
+        product_slug : 'calc-doshas',
+        product_name : 'Dosha Calculator',
+        product_type : 'calculator',
+        tier         : 'free',
+      });
+    } catch { /* logging must never break the calculator */ }
     return NextResponse.json({
       success: true,
       sessionId,
