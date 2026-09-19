@@ -1,7 +1,7 @@
 // ============================================================
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
 // FILE: app/layout.tsx
-// VERSION: v3.8 — Google Ads Tag AW-7916189860 added
+// VERSION: v3.9  (18 Sep 2026 — TrikalPicker added) — Google Ads Tag AW-7916189860 added
 // CHANGES vs v3.6.2 (CEO-approved):
 //   ✅ ADD: GoogleAdsTag AW-7916189860 — builds Google Display +
 //      YouTube + Gmail remarketing audiences alongside Meta Pixel.
@@ -31,6 +31,7 @@ import Script from "next/script";
 import "./globals.css";
 import SchemaScript from "@/components/SchemaScript";
 import TrikalVoice from "@/components/Trikal/TrikalVoice";
+import TrikalPicker from "@/components/TrikalPicker";
 import OneSignalInit from "@/components/OneSignalInit";
 import StickyMobileCTA from "@/components/landing/StickyMobileCTA";
 import ClarityAnalytics from "@/components/analytics/ClarityAnalytics";
@@ -413,6 +414,12 @@ export default function RootLayout({
         <SchemaScript />
         {/* TrikalVoice: floating mic — appears on ALL pages globally */}
         <TrikalVoice />
+        {/* v3.9: TrikalPicker — orange vertical product-finder tab, right edge,
+            vertically centred. Deliberately NOT at the bottom of the screen:
+            a second fixed bottom element (StickyMobileCTA v1.0) once covered
+            the form submit button on mobile. Turn off with
+            NEXT_PUBLIC_DISABLE_PICKER=true. */}
+        <TrikalPicker />
         {/* OneSignalInit: loads OneSignal v16 Web Push SDK + init globally */}
         <OneSignalInit />
         {/* v3.4: StickyMobileCTA — mobile-only bottom-left bar */}
