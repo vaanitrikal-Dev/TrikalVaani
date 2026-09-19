@@ -1,13 +1,14 @@
 // ============================================================
 // File: app/api/calc/sade-sati/route.ts
 // Purpose: VM bridge for Sade Sati Calculator (FREE forever)
-// Version: v1.4
+// Version: v1.5 — usage logging added (18 Sep 2026)
 // Changelog v1.4: Pass full VM remedies object to buildTemplateFromVMRemedies
 //   so actionWindows (Dos) from remedy_master are included in response.
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
 // ============================================================
 import { NextRequest, NextResponse } from 'next/server';
 import { callVM } from '@/lib/callVM';
+import { logUsage, usageBirthFields, usageContextFromRequest } from '@/lib/usage-log';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -127,6 +128,21 @@ export async function POST(req: NextRequest) {
 
     const sessionId = `calc_ss_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
 
+
+    // ── usage log — fire-and-forget. Wrapped in its own try/catch because the
+    //    ARGUMENT is built outside logUsage's internal guard; a bad field here
+    //    would otherwise crash the route. Nothing in this block can ever stop
+    //    a calculator from answering the customer.
+    try {
+      logUsage({
+        ...usageContextFromRequest(req),
+        ...usageBirthFields(body as any),
+        product_slug : 'calc-sade-sati',
+        product_name : 'Sade Sati Calculator',
+        product_type : 'calculator',
+        tier         : 'free',
+      });
+    } catch { /* logging must never break the calculator */ }
     return NextResponse.json({
       success: true,
       sessionId,
