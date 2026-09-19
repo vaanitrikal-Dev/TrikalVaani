@@ -2,7 +2,7 @@
 // File: app/api/calc/kundali/route.ts
 // Purpose: VM bridge for Kundali / Nakshatra / Rashi / Lagna /
 //          Dasha + Shadbala-based Calculators
-// Version: v2.2
+// Version: v2.3 — usage logging added (18 Sep 2026)
 // Changelog v2.2 (2026-09-01):
 //   SAPTAMSA (D-7) PASSTHROUGH added for the Santan Yog calculator. BPHS Ch.6
 //   s.11 judges children in the Saptamsa; the D-9 already exposed here is the
@@ -91,6 +91,7 @@
 // ============================================================
 import { NextRequest, NextResponse } from 'next/server';
 import { callVM } from '@/lib/callVM';
+import { logUsage, usageBirthFields, usageContextFromRequest } from '@/lib/usage-log';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -347,6 +348,21 @@ export async function POST(req: NextRequest) {
 
     const sessionId = `calc_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
 
+
+    // ── usage log — fire-and-forget. Wrapped in its own try/catch because the
+    //    ARGUMENT is built outside logUsage's internal guard; a bad field here
+    //    would otherwise crash the route. Nothing in this block can ever stop
+    //    a calculator from answering the customer.
+    try {
+      logUsage({
+        ...usageContextFromRequest(req),
+        ...usageBirthFields(body as any),
+        product_slug : 'calc-kundali',
+        product_name : 'Kundali Calculator',
+        product_type : 'calculator',
+        tier         : 'free',
+      });
+    } catch { /* logging must never break the calculator */ }
     return NextResponse.json({
       success: true,
       sessionId,
