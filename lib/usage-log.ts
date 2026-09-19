@@ -1,8 +1,8 @@
 /**
  * ============================================================================
  * FILE   : lib/usage-log.ts
- * VERSION: v1.0
- * DATE   : 18 September 2026
+ * VERSION: v1.1
+ * DATE   : 18 September 2026  (v1.1 — usageBirthFields helper added)
  * ============================================================================
  *
  * WHAT THIS IS
@@ -153,6 +153,41 @@ export function logUsage(event: UsageEvent): void {
   } catch (err) {
     console.error('[usage-log] unexpected error (ignored):', err);
   }
+}
+
+/**
+ * Turn the birth fields every /api/calc/* route already receives into the
+ * columns product_usage stores. Kept here so each route stays a single block
+ * and every calculator records the visitor the same way.
+ *
+ * Every field is optional and anything missing simply stays null.
+ * NOTE: the calculators never receive a phone or email, so those two columns
+ * are always null for calculator rows — that is expected, not a bug.
+ */
+export function usageBirthFields(b: {
+  year?: number; month?: number; day?: number;
+  hour?: number; minute?: number;
+  name?: string | null;
+  gender?: string | null;
+}): Partial<UsageEvent> {
+  const pad = (n: number) => String(n).padStart(2, '0');
+
+  const dob =
+    typeof b?.year === 'number' && typeof b?.month === 'number' && typeof b?.day === 'number'
+      ? `${b.year}-${pad(b.month)}-${pad(b.day)}`
+      : undefined;
+
+  const birth_time =
+    typeof b?.hour === 'number' && typeof b?.minute === 'number'
+      ? `${pad(b.hour)}:${pad(b.minute)}`
+      : undefined;
+
+  return {
+    dob,
+    birth_time,
+    person_name: b?.name ?? undefined,
+    gender: b?.gender ?? undefined,
+  };
 }
 
 /**
