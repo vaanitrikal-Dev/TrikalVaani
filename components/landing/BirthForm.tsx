@@ -1,7 +1,55 @@
 /**
  * ============================================================
  * TRIKAAL VAANI — BirthForm
- * v10.0 (20 Sep 2026) — "Your biggest concern right now" wala khana POORA
+ * v10.3 (20 Sep 2026) — CHHAH BADLAAV, ek hi commit mein:
+ *
+ *   -1. "Bhrigu Nandi Nadi" ka naam CHAAR jagah se hataya — badge, SEO ka
+ *      chhupa text (do jagah), aur footer. Wo AUR "Bhrigu Sutram" DO ALAG
+ *      paddhatiyan hain. Engine mein Bhrigu SUTRAM hai — bhav_phala ki 571
+ *      rows usi se aati hain. Bhrigu Nandi Nadi KISI ENGINE MEIN NAHI hai;
+ *      wo sirf Gemini ke prompt mein likha tha, aur Gemini band hai. Ab
+ *      wahi naam likhe hain jo sach mein chalte hain.
+ *      ⚠️ Ye naam doosri file mein bhi ho sakta hai — ABHI SIRF YAHAN badla.
+ *
+ *   -2. FREE card ka "What to do this week" hataya. Granth ki reading dasha
+ *      ke daur aur gochar ki khidkiyan deti hai — "is hafte kya karein"
+ *      NAHI. Wo Gemini-yug ka waada tha. Ab wahi likha hai jo free mein
+ *      SACH MEIN milta hai: chalta hua daur, aur teen mukhya bhav shlok
+ *      ke saath.
+ *
+ * v10.2 (20 Sep 2026) — CHAAR BADLAAV:
+ *
+ *   0. PURANE WAADE HATAYE — "900-word analysis" aur "5 personalized upay"
+ *      CHAAR jagah likhe the: tier ka description (571), paid card ke
+ *      features (766), dono checkout ki copy (796), aur SEO ka chhupa
+ *      text (1319). Gemini band hone ke baad wo 900-word analysis BANTA HI
+ *      NAHI, aur 5-upay remedy_master se aata tha jo bhi band hai. Yani
+ *      grahak ₹51 de kar wo cheez maang sakta tha jo banti hi nahi.
+ *      Report ke ANDAR se ye 17 Sep ko hata diye gaye the, par YAHAN AUR
+ *      NAU AUR JAGAH reh gaye the. Ab BirthForm ke chaaron theek hain.
+ *      ⚠️ Baaki 9 jagah (doosri file) ABHI BAAKI hai.
+ *      Naya waada wahi hai jo SACH MEIN milta hai: "har line par granth ka
+ *      apna shlok — koi AI ka likha nibandh nahi."
+ *
+ * v10.1 (20 Sep 2026) — TEEN BADLAAV:
+ *
+ *   1. PAISE KE BAAD WALI GALTI PAR AB PAYMENT ID DIKHTA HAI.
+ *      Pehle agar payment SAFAL ho jaata aur uske BAAD /api/predict fail
+ *      hota, to grahak ko sirf "Network error. Please check your connection."
+ *      dikhta tha — aur bas. Uske paise ja chuke the, par screen par na
+ *      order-id, na "aapka paisa surakshit hai", na support ko bhejne layak
+ *      koi number. Ab payment ka id saaf dikhta hai, is baat ke saath ki
+ *      paisa MIL GAYA hai aur reading dobara banayi ja sakti hai.
+ *      (paidRef state · callPredictAPI mein set · apiError ke neeche)
+ *
+ *   2. toxic-boss se DOOSRI KUNDALI HATI. DUAL_CHART_DOMAINS ab sirf
+ *      ['genz_ex_back']. Session 12 ki khoj: "unka grah aapke bhav mein"
+ *      jaisa niyam CHHAH granthon mein hai hi nahi; do kundali ka ekmaatra
+ *      shastriya tareeka MELAPAKA (36 guna) hai, jo VIVAH ke liye hai. Boss
+ *      ke saath uska koi matlab nahi. DB mein bhi:
+ *      calc_varga_map.toxic-boss-radar.do_chart = false
+ *
+ *   3. "Your biggest concern right now" wala khana POORA
  *   HATAYA (Rohiit ka faisla). Wo GEMINI ke liye tha — uske prompt mein uska
  *   60% weight tha. Gemini ab band hai (USE_GRANTH_ONLY), yani wo khana ek
  *   JHOOTHA WAADA reh gaya tha: label kehta tha "makes reading sharper", par
@@ -345,7 +393,7 @@ function getNumerologyCompatibility(n1: number, n2: number) {
 const SEO_TRUST_BADGES = [
   { icon: '⚡', label: 'Swiss Ephemeris' },
   { icon: '📖', label: 'BPHS Classical'  },
-  { icon: '🔮', label: 'Bhrigu Nandi'   },
+  { icon: '🔮', label: 'Bhrigu Sutram'  },
   { icon: '⚖️', label: 'Shadbala'       },
 ]
 
@@ -387,7 +435,20 @@ const PAYMENT_LOADING_STEPS = [
 // ── v9.0 DOMAIN MISMATCH GUARD ───────────────────────────────────────────────
 
 
-const DUAL_CHART_DOMAINS = ['genz_ex_back', 'genz_toxic_boss']
+const DUAL_CHART_DOMAINS = ['genz_ex_back']
+// ⭐ 20 September 2026 — 'genz_toxic_boss' YAHAN SE HATAYA (Rohiit ka faisla).
+// Session 12 ki khoj ne saabit kiya ki "unka grah aapke bhav mein" jaisa koi
+// niyam CHHAH granthon (BPHS, Phaladipika, Brihat Jataka, Jataka Parijata,
+// Bhrigu Sutram, Chamatkara) mein HAI HI NAHI. Do kundali ka ekmaatra
+// shastriya tareeka MELAPAKA (36 guna) hai, aur wo Muhurta Chintamani se
+// aata hai — yani VIVAH ke liye. BOSS ke saath 36 guna ka koi matlab nahi
+// banta, to us page par doosri kundali maangna grahak se bekaar ka kaam
+// karwana tha. Ab toxic-boss EK KUNDALI par chalta hai: 6tha aur 10va bhav,
+// D-10, karak SURYA (adhikaar aur upar wale ka) aur MANGAL (6the ka).
+// ⚠️ ex-back par do chart RAHTA hai — wahan vishay 7va bhav aur Shukra hai,
+// yani melapaka wahan lag SAKTA hai. Par wo "MEL" batata hai, "wapas aayega
+// ya nahi" NAHI — aur wo baat page par saaf likhni hai.
+// DB mein bhi badla gaya: calc_varga_map.toxic-boss-radar.do_chart = false
 
 const RELATIONSHIP_STATUS_OPTIONS = [
   { value: '',               label: 'Select status (optional)' },
@@ -537,7 +598,7 @@ const SERVICE_OFFER_SCHEMA = {
       {
         '@type': 'Offer',
         name: 'Deep Reading',
-        description: '900-word Vedic analysis with 5 personalized upay, action and avoid windows. Swiss Ephemeris precision validated against BPHS classical method.',
+        description: 'Poore chalte hue daur ka granth-paath — har line apne shlok ke saath. Gochar ki sankri khidkiyan, Rajayoga (BPHS Ch.39), aur upay jahan granth deta hai. Swiss Ephemeris + BPHS classical.',
         price: '51',
         priceCurrency: 'INR',
         availability: 'https://schema.org/InStock',
@@ -728,11 +789,11 @@ function RazorpayInlineTrustStrip({ tier }: { tier: PredictionTier }) {
 
 function TierSelector({ selected, onChange, intl = false }: { selected: PredictionTier; onChange: (t: PredictionTier) => void; intl?: boolean }) {
   const tiers = [
-    { id: 'free'  as PredictionTier, icon: '🔮', label: 'Free Preview', price: 'Free', desc: 'Free · No card needed', color: '#94a3b8', features: ['Key planet insight for you', 'What to do this week', 'Instant — 60 seconds'] },
+    { id: 'free'  as PredictionTier, icon: '🔮', label: 'Free Preview', price: 'Free', desc: 'Free · No card needed', color: '#94a3b8', features: ['Aapka chalta hua daur — granth se', 'Teen mukhya bhav, shlok ke saath', 'Instant — 60 seconds'] },
     // v9.1: an international visitor was being shown ₹51 on the card and $7 on
     // the button. Same product, two prices, on one screen — the fastest way to
     // lose a sale. `intl` is passed down from the form's geo check.
-    { id: 'paid'  as PredictionTier, icon: '⚡', label: 'Deep Reading',  price: intl ? '$7' : '₹51',  desc: 'Full Vedic Analysis', color: GOLD,      features: ['Deep dive into your chart', '5 personalized upay', intl ? 'Worth $60+, yours at $7' : 'Worth ₹500+, yours at ₹51'], highlight: true },
+    { id: 'paid'  as PredictionTier, icon: '⚡', label: 'Deep Reading',  price: intl ? '$7' : '₹51',  desc: 'Full Vedic Analysis', color: GOLD,      features: ['Poore daur ka granth-paath', 'Upay — jahan granth deta hai', intl ? 'Worth $60+, yours at $7' : 'Worth ₹500+, yours at ₹51'], highlight: true },
     { id: 'voice' as PredictionTier, icon: '🎙️', label: 'Voice',        price: intl ? '$1' : '₹11',  desc: 'Hear it in 60 sec',   color: '#a78bfa', features: ['Speak your question', 'Answer in your language', 'Most personal format'] },
   ]
 
@@ -762,7 +823,7 @@ function TierSelector({ selected, onChange, intl = false }: { selected: Predicti
       {selected === 'paid' && (
         <div style={{ marginTop: '12px', padding: '12px', background: GOLD_RGBA(0.06), border: `1px solid ${GOLD_RGBA(0.2)}`, borderRadius: '10px' }}>
           <p style={{ margin: '0 0 4px', color: GOLD, fontSize: '11px', fontWeight: 700 }}>⚡ 900-Word Deep Vedic Analysis</p>
-          <p style={{ margin: 0, color: '#64748b', fontSize: '10px', lineHeight: 1.5 }}>{intl ? 'Premium-grade reading that elsewhere costs $60+ — Trikaal Vaani delivers it for $7. Swiss Ephemeris + BPHS + personalized 5 upay by segment. PayPal-secured one-time payment; pay by card without a PayPal account.' : 'Premium-grade reading that elsewhere costs ₹500+ — Trikaal Vaani delivers it for ₹51. Swiss Ephemeris + BPHS + personalized 5 upay by segment. Razorpay-secured one-time payment.'}</p>
+          <p style={{ margin: 0, color: '#64748b', fontSize: '10px', lineHeight: 1.5 }}>{intl ? 'Premium-grade reading that elsewhere costs $60+ — Trikaal Vaani delivers it for $7. Every line carries its own verse from the BPHS, Bhrigu Sutram, Jataka Parijata and Phaladipika — no AI-written essay. PayPal-secured one-time payment; pay by card without a PayPal account.' : 'Premium-grade reading that elsewhere costs ₹500+ — Trikaal Vaani delivers it for ₹51. Har line par granth ka apna shlok — BPHS, Bhrigu Sutram, Jataka Parijata, Phaladipika. Koi AI ka likha nibandh nahi. Razorpay-secured one-time payment.'}</p>
         </div>
       )}
     </div>
@@ -860,6 +921,14 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
   const [errors,         setErrors]         = useState<Partial<Record<keyof BirthFormFields, string>>>({})
   const [isSubmitting,   setIsSubmitting]   = useState(false)
   const [apiError,       setApiError]       = useState<string | null>(null)
+  // ⭐ 20 September 2026 — PAISE LENE KE BAAD WALI GALTI KA NISHAAN.
+  // Pehle agar payment SAFAL ho jaata aur uske baad /api/predict fail hota,
+  // to grahak ko sirf "Network error. Please check your connection." dikhta
+  // tha — aur bas. Uske ₹51 ja chuke the, par screen par na order-id, na
+  // "aapka paisa surakshit hai", na support ko bhejne layak koi number.
+  // Ab payment ka id yahan rakha jaata hai aur galti ke saath SAAF dikhaya
+  // jaata hai, taaki grahak use copy kar ke bhej sake.
+  const [paidRef,        setPaidRef]        = useState<string | null>(null)
   const [loadingStep,    setLoadingStep]    = useState(0)
   const [paymentLoading, setPaymentLoading] = useState(false)
   const [elapsed,        setElapsed]        = useState(0)
@@ -1036,6 +1105,11 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
   }
 
   const callPredictAPI = async (paymentVerification: any = null, paypalVerification: any = null) => {
+    // ⭐ 20 Sep — agar paisa ja chuka hai to uska id yaad rakho. Neeche har
+    // galti ke saath ye dikhega.
+    const ref = paymentVerification?.razorpay_payment_id
+             ?? paypalVerification?.paypal_order_id ?? null
+    if (ref) setPaidRef(ref)
     try {
       const res = await fetch('/api/predict', {
         method:  'POST',
@@ -1272,8 +1346,8 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
 
       <div style={{ display: 'none' }} aria-hidden="false">
         <h2>Free AI Vedic Astrology Prediction — Swiss Ephemeris Powered by Rohiit Gupta</h2>
-        <p>Get your personalized Vedic astrology reading at Trikaal Vaani. Powered by Swiss Ephemeris, BPHS, Bhrigu Nandi Nadi, Shadbala. By Rohiit Gupta, Chief Vedic Architect. Free Trikaal Ka Sandesh preview, ₹51 Deep Reading with 900-word analysis and 5 personalized upay, ₹11 Voice Reading. All paid plans secured by Razorpay. PCI-DSS compliant, 256-bit SSL encrypted. Accepts UPI, Cards, NetBanking, Wallets, RuPay. Customer support via WhatsApp at +91 92118 04111. Refund policy at trikalvaani.com/refund. Terms at trikalvaani.com/terms.</p>
-        <p>Trikaal Vaani is an AI Vedic astrology platform offering professional-grade readings at affordable mass-market pricing. Each prediction uses real Swiss Ephemeris planetary calculations validated against BPHS classical sutras, Bhrigu Nandi Nadi pattern matching, and Shadbala planetary strength scoring. Vimshottari Dasha primary, Pratyantar Dasha for 3-7 day precision, Sookshma Dasha hourly. Lahiri Ayanamsha sidereal system. 11 life domains: Career, Wealth, Health, Relationships, Family, Education, Home, Legal, Travel, Spirituality, Well-being.</p>
+        <p>Get your personalized Vedic astrology reading at Trikaal Vaani. Powered by Swiss Ephemeris, BPHS, Bhrigu Sutram, Jataka Parijata, Phaladipika and Shadbala. By Rohiit Gupta, Chief Vedic Architect. Free Trikaal Ka Sandesh preview, ₹51 Deep Reading where every line carries its own classical verse, ₹11 Voice Reading. All paid plans secured by Razorpay. PCI-DSS compliant, 256-bit SSL encrypted. Accepts UPI, Cards, NetBanking, Wallets, RuPay. Customer support via WhatsApp at +91 92118 04111. Refund policy at trikalvaani.com/refund. Terms at trikalvaani.com/terms.</p>
+        <p>Trikaal Vaani is an AI Vedic astrology platform offering professional-grade readings at affordable mass-market pricing. Each prediction uses real Swiss Ephemeris planetary calculations validated against BPHS classical sutras, Bhrigu Sutram, Jataka Parijata, Phaladipika, Brihat Jataka and Chamatkara Chintamani, with Shadbala planetary strength scoring. Vimshottari Dasha primary, Pratyantar Dasha for 3-7 day precision, Sookshma Dasha hourly. Lahiri Ayanamsha sidereal system. 11 life domains: Career, Wealth, Health, Relationships, Family, Education, Home, Legal, Travel, Spirituality, Well-being.</p>
       </div>
 
       <div className="max-w-2xl mx-auto w-full" style={{ maxWidth: 'min(42rem, 100%)' }}>
@@ -1654,6 +1728,24 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
             {apiError && (
               <div className="px-4 py-3 rounded-lg text-sm text-red-300" style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)' }}>
                 {apiError}
+                {/* ⭐ 20 September 2026 — PAISE KE BAAD WALI GALTI PAR PAYMENT ID.
+                    Pehle grahak ke ₹51 ja chuke hote the aur screen par sirf
+                    "Network error" likha hota tha — na koi number, na koi
+                    raasta. Ab payment ka id saaf dikhta hai, is baat ke saath
+                    ki paisa MIL GAYA hai aur reading dobara banegi. */}
+                {paidRef && (
+                  <div className="mt-3 pt-3" style={{ borderTop: '1px solid rgba(239,68,68,0.25)' }}>
+                    <p className="text-amber-200 text-xs leading-relaxed mb-2">
+                      Aapka payment HO CHUKA hai — paisa surakshit hai. Reading
+                      banane mein dikkat aayi. Ye number sambhal kar rakhiye —
+                      isse aapki reading dobara banayi ja sakti hai:
+                    </p>
+                    <p className="font-mono text-amber-300 text-sm break-all select-all"
+                       style={{ background: 'rgba(0,0,0,0.3)', padding: '7px 10px', borderRadius: '6px' }}>
+                      {paidRef}
+                    </p>
+                  </div>
+                )}
               </div>
             )}
 
@@ -1689,7 +1781,7 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
         <div style={{ marginTop: '24px', textAlign: 'center' }}>
           <p style={{ color: '#334155', fontSize: '11px', lineHeight: 1.7, maxWidth: '480px', margin: '0 auto 12px' }}>
             Powered by <strong style={{ color: '#475569' }}>Swiss Ephemeris</strong> — the same engine used by professional astrologers worldwide.
-            Validated against <strong style={{ color: '#475569' }}>BPHS</strong>, <strong style={{ color: '#475569' }}>Bhrigu Nandi Nadi</strong> and <strong style={{ color: '#475569' }}>Shadbala</strong>.
+            Validated against <strong style={{ color: '#475569' }}>BPHS</strong>, <strong style={{ color: '#475569' }}>Bhrigu Sutram</strong> and <strong style={{ color: '#475569' }}>Shadbala</strong>.
             Payments secured by <strong style={{ color: RAZORPAY_BLUE }}>Razorpay</strong>.
           </p>
           <div style={{ padding: '14px 20px', background: GOLD_RGBA(0.05), border: `1px solid ${GOLD_RGBA(0.15)}`, borderRadius: '12px', marginBottom: '12px' }}>
