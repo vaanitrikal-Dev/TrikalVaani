@@ -3,7 +3,7 @@
 /**
  *
  * ══════════════════════════════════════════════════════════════════════════
- * v10.1 — 20 SEPTEMBER 2026 — GRANTH KI CHAAR TABLE
+ * v10.2 — 20 SEPTEMBER 2026 — GRANTH KI CHAAR TABLE
  * ══════════════════════════════════════════════════════════════════════════
  * ROHIIT KA FAISLA: "Past, Present and Future should be in table format —
  * Past ki alag table, Present ki alag table (with reason — Why you are Here?),
@@ -3404,6 +3404,131 @@ function BhavParat({ p, lang }:{ p:any; lang:Lang }) {
 }
 
 
+/* ⭐ GRANTH — US SAWAAL KA (20 September 2026)
+ *
+ * Jab grahak "Ex Back" ya "Toxic Boss" ki reading maangta hai, to use UN
+ * bhavon ka granth chahiye jo US SAWAAL ke hain — umar ke chune hue nahi.
+ * /granth/product wahi deta hai: calc_varga_map se bhav, varga aur karak,
+ * phir har bhav ki TEEN PARAT, aur TIMING (dasha ke daur + gochar).
+ *
+ * ⚠️ DO CHART PAR (Session 12 ki khoj): "unka grah aapke bhav mein" jaisa
+ * niyam CHHAH granthon mein HAI HI NAHI. Do kundali ka ekmaatra shastriya
+ * tareeka MELAPAKA (36 guna) hai — Muhurta Chintamani se, yani VIVAH ke
+ * liye. Isliye jawab mein jo "do_chart_ki_baat" aati hai wo SAAF likhi
+ * jaati hai, chhupayi nahi.
+ */
+function GranthProduct({ p, lang }:{ p:any; lang:Lang }) {
+  if (!p || p.galti) return null
+  const bhav:any[] = Array.isArray(p.bhav) ? p.bhav : []
+  if (!bhav.length) return null
+  const daur:any[] = Array.isArray(p?.kab?.daur) ? p.kab.daur : []
+  const kh:any[]   = Array.isArray(p?.kab?.gochar_khidkiyan) ? p.kab.gochar_khidkiyan : []
+  const karak:any[]= Array.isArray(p.karak) ? p.karak : []
+  // GranthAbhi ka rang() uske apne andar hai — yahan apna chahiye
+  const rang = (h:string) => h==='MAZBOOT' ? '#86efac' : h==='KAMZOR' ? '#fca5a5' : '#fbbf24'
+
+  return (
+    <GranthTableShell
+      title={lang==='english'?'🎯 On Your Question':'🎯 AAPKE SAWAAL PAR'}
+      subtitle={`${s(p.varga)} · ${bhav.map(b=>`${b.bhav}va`).join(' + ')} ghar`}>
+
+      {bhav.map((b:any,i:number)=>(
+        <div key={i} style={{marginBottom:'16px',paddingBottom:'14px',
+             borderBottom: i<bhav.length-1 ? '1px solid rgba(255,255,255,0.06)':'none'}}>
+          <div style={{display:'flex',justifyContent:'space-between',
+                       alignItems:'baseline',marginBottom:'6px'}}>
+            <span style={{color:GOLD,fontWeight:700,fontSize:'13px',
+                          textTransform:'uppercase',letterSpacing:'0.04em'}}>
+              {s(b.vishay)}
+            </span>
+            <span style={{fontSize:'12px'}}>
+              <span style={{color:rang(String(b.haal)),fontWeight:700}}>{s(b.haal)}</span>
+              <span style={{color:'#64748b'}}> · bindu {b.bindu ?? '—'}</span>
+            </span>
+          </div>
+          {Array.isArray(b.wajah) && b.wajah.length>0 && (
+            <div style={{color:'#64748b',fontSize:'12px',marginBottom:'4px',lineHeight:1.65}}>
+              {b.wajah.slice(0,3).map((w:string,wi:number)=>(
+                <div key={wi}>· {s(w)}</div>
+              ))}
+            </div>
+          )}
+          <BhavParat p={b.parat} lang={lang}/>
+        </div>
+      ))}
+
+      {karak.length>0 && (
+        <div style={{margin:'12px 0',padding:'9px 12px',borderRadius:'8px',
+                     background:'rgba(255,255,255,0.03)'}}>
+          <div style={{color:GOLD,fontSize:'10px',fontWeight:700,
+                       textTransform:'uppercase',letterSpacing:'0.07em',marginBottom:'5px'}}>
+            {lang==='english'?'Significator':'IS VISHAY KA MUKHYA GRAH'}
+          </div>
+          {karak.map((kk:any,i:number)=>(
+            <div key={i} style={{color:'#cbd5e1',fontSize:'12px',lineHeight:1.7}}>
+              <strong style={{color:'#e2e8f0'}}>{s(kk.grah)}</strong>
+              {' — '}{s(kk.bhav)}ve ghar mein, {s(kk.rashi)}
+              {kk.vakri && <span style={{color:'#fbbf24'}}> · VAKRI</span>}
+              {kk.asta && <span style={{color:'#fca5a5'}}> · AST</span>}
+              <span style={{color:'#64748b'}}>
+                {' · '}{s(kk.ch34)==='GRANTH-CHUP'
+                  ? (lang==='english'?'the granth is silent':'granth chup hai')
+                  : `Ch.34: ${s(kk.ch34)}`}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {(daur.length>0 || kh.length>0) && (
+        <div style={{marginTop:'12px'}}>
+          <div style={{color:GOLD,fontSize:'10px',fontWeight:700,
+                       textTransform:'uppercase',letterSpacing:'0.07em',marginBottom:'7px'}}>
+            {lang==='english'?'⏱ When':'⏱ KAB'}
+          </div>
+          {daur.map((x:any,i:number)=>(
+            <div key={i} style={{color:'#cbd5e1',fontSize:'12px',marginBottom:'5px',lineHeight:1.7}}>
+              <strong style={{color:x.abhi?'#22c55e':'#e2e8f0'}}>
+                {s(x.md)}/{s(x.ad)}
+              </strong>
+              {x.abhi && <span style={{color:'#22c55e',fontSize:'10px'}}>{'\u00A0← ABHI'}</span>}
+              <span style={{color:'#94a3b8'}}> · {s(x.se)} – {s(x.tak)}</span>
+              <span style={{color:'#64748b'}}>
+                {' · '}{(x.khule_bhav||[]).map((h:number)=>`${h}va`).join(', ')} ghar khulta hai
+              </span>
+              {Array.isArray(x.granth) && x.granth.filter((g:any)=>g?.phal).map((g:any,gi:number)=>(
+                <div key={gi} style={{color:g.kind==='shubh'?'#86efac':g.kind==='kathin'?'#fca5a5':'#94a3b8',
+                     fontSize:'12px',marginLeft:'12px',marginTop:'2px',lineHeight:1.65}}>
+                  {s(g.phal)}
+                </div>
+              ))}
+            </div>
+          ))}
+          {kh.map((x:any,i:number)=>(
+            <div key={`k${i}`} style={{color:'#94a3b8',fontSize:'11px',marginTop:'3px'}}>
+              {s(x.se)} – {s(x.tak)} · {s(x.kyun)}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {p.do_chart_ki_baat && (
+        <div style={{marginTop:'13px',padding:'9px 12px',borderRadius:'7px',
+                     background:'rgba(251,191,36,0.06)',
+                     border:'1px solid rgba(251,191,36,0.16)',
+                     color:'#fbbf24',fontSize:'11px',lineHeight:1.65}}>
+          ⚠️ {s(p.do_chart_ki_baat)}
+        </div>
+      )}
+
+      <p style={{margin:'12px 0 0',color:'#475569',fontSize:'11px',lineHeight:1.6}}>
+        {s(p.varga_ki_baat)}
+      </p>
+    </GranthTableShell>
+  )
+}
+
+
 function GranthAbhi({ b, lang }:{ b:any; lang:Lang }) {
   const mukhya:any[] = Array.isArray(b?.mukhya) ? b.mukhya : []
   if(!mukhya.length) return null
@@ -3718,7 +3843,7 @@ function GranthFeedback({ sawaal, slug, lang }:{ sawaal:string; slug:string; lan
       </div>
       <div style={{color:'#cbd5e1',fontSize:'13px',lineHeight:1.75}}>{s(sawaal)}</div>
       <a href={`https://wa.me/?text=${encodeURIComponent(
-          `Trikaal Vaani — report ${slug}\n\nNaukri/kaam ka bada mod: \nShaadi ya rishta: \nGhar/sampatti: `)}`}
+          `Trikal Vaani — report ${slug}\n\nNaukri/kaam ka bada mod: \nShaadi ya rishta: \nGhar/sampatti: `)}`}
          target="_blank" rel="noopener noreferrer"
          style={{display:'inline-block',marginTop:'12px',padding:'8px 16px',
                  border:`1px solid ${G(0.4)}`,borderRadius:'7px',color:GOLD,
@@ -4062,6 +4187,12 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
               scroll karne padte the. Ab wo pehli cheez hai jo grahak padhta hai.
               ⚠️ Ye kram SAB JAGAH lagega — 34 calculator, 8 service, aur milan. */}
           {granthOn && <GranthAbhi  b={(granth as any).abhi}  lang={lang}/>}
+
+          {/* ⭐ 20 Sep — US SAWAAL KA GRANTH. Sirf un domain par aata hai
+              jinka product calc_varga_map mein hai (ex-back, toxic-boss,
+              career-pivot, property-yog, child-destiny, spiritual-purpose).
+              Baaki par undefined rahta hai aur ye kuch nahi dikhata. */}
+          {granthOn && <GranthProduct p={(granth as any).product} lang={lang}/>}
 
           <WhyYouAreHere why={whyHere} activation={chartEv?.activation} lang={lang}/>
 
