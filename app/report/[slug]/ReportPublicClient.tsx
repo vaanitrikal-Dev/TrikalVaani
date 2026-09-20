@@ -3,7 +3,7 @@
 /**
  *
  * ══════════════════════════════════════════════════════════════════════════
- * v9.7 — 17 SEPTEMBER 2026 — GRANTH KI CHAAR TABLE
+ * v9.9 — 20 SEPTEMBER 2026 — GRANTH KI CHAAR TABLE
  * ══════════════════════════════════════════════════════════════════════════
  * ROHIIT KA FAISLA: "Past, Present and Future should be in table format —
  * Past ki alag table, Present ki alag table (with reason — Why you are Here?),
@@ -128,6 +128,27 @@
  *      jud gaye — saaf label ke saath ki wo granth ka shlok NAHI hain.
  *   3. "Ch.34: GRANTH-CHUP" AAGE table mein dikh raha tha — teesri jagah, jo
  *      16 Sep ke fix mein chhoot gayi thi.
+ *
+ * ⭐ v9.9 — 20 Sep: KRAM BADLA (Rohiit ka nirdesh).
+ *   1. 🔱 AAPKI KUNDALI KYA KEHTI HAI  — granth ka nichod, 644 shabd
+ *   2. 🔎 Yeh Prediction Kyun
+ *   3. AAPKA ATEET (+ feedback)
+ *   4. AAGE KA DAUR + UPAY
+ *   5. 🪐 Janma Kundali (chart)
+ *   6. Abhi Aapka Samay · Teen Ghadiyaan · Varshphal · baaki
+ *   Pehle teen parat TEESRE section mein dabi thi aur grahak ko wahan tak
+ *   teen scroll karne padte the. Ab wo PEHLI cheez hai. Aur "AAP YAHAN KYUN
+ *   HAIN" ka naam badal kar "🔱 AAPKI KUNDALI KYA KEHTI HAI" ho gaya —
+ *   kyunki ab usme bindu, wajah, Ph.20 AUR teen parat, sab EK JAGAH hain.
+ *
+ * ⭐ v9.8 — 20 Sep: BHAV KI TEEN PARAT (<BhavParat/>). bhav_phala ki 2,555
+ *   rows, 6 granth se (BPHS, Bhrigu Sutram, Jataka Parijata, Phaladipika,
+ *   Brihat Jataka, Chamatkara Chintamani), har line apne shlok-number ke saath.
+ *   Pehle "AAP YAHAN KYUN HAIN" mein sirf MERE apne shabd the ("4ve ghar mein
+ *   Mangal baitha hai — dabaav banata hai") aur Ph.20 ki 20 rows. Ab granth
+ *   KHUD bolta hai. Rohiit ki asli kundali par 644 shabd bante hain.
+ *   ⚠️ Ye component SAB JAGAH lagega — Rohiit ka nirdesh: "we will use this
+ *   format across all service pages and calculators and Kundali milan".
  *
  * ⚠️ AUDIT MEIN TEEN KHANE ABHI BHI "bheje jaate hain par dikhte nahi" —
  *    bhav, granth_ne_kya_kaha, poore_daur_mein_khula. Wo CHOOK NAHI hain:
@@ -3287,6 +3308,102 @@ function GranthAteet({ a, lang }:{ a:any; lang:Lang }) {
 
 /** TABLE 2 — AAP YAHAN KYUN HAIN. Abhi ka daur + har bhav ka haal.
  *  Bhav UMAR aur LING se chune jaate hain (Rohiit ki ruling, 16 Sep). */
+/* ⭐ BHAV KI TEEN PARAT — 20 September 2026
+ *
+ * Rohiit ne ye roop 20 Sep ko tay kiya aur kaha: "we will use this format
+ * across all service pages and calculators and Kundali milan". Isliye ye
+ * EK hi component hai — Kundali report, 34 calculator, 8 service aur milan,
+ * sab isi se chalenge. Koi sudhaar yahan karne par SAB TAK pahunchega.
+ *
+ * TEEN PARAT:
+ *   ⭐ AAPKE CHART SE        — wo rows jinki SHART SACH MEIN LAGI
+ *   ⏳ JAB YE HISSA KHULEGA  — jinka phal us bhav ki DASHA mein aata hai
+ *                              (Phaladipika 25.25 "tad-dashAyAM phalaM vadet")
+ *   📖 IS GHAR KE BAARE MEIN — ALWAYS wali, chhote akshar mein
+ *
+ * GINTI KI HADD (Rohiit ka faisla):
+ *   shart-wali  PAID saari · FREE top 3
+ *   ALWAYS      PAID top 3 · FREE 0
+ *   bhav        PAID 8     · FREE 3 mukhya
+ *
+ * ⚠️ ALWAYS wali teen BHAV KE NATIJE SE MELTI hain — KAMZOR ghar par kathin,
+ * MAZBOOT par shubh. Wo chunav granth_api ki bhav_parat() karti hai. Isse har
+ * kundali par ALAG teen aati hain; warna har grahak ko WAHI teen line milti
+ * aur do reports mila kar dekhne par pakad mein aa jaata.
+ *
+ * ⚠️ TAKRAAV — 190 rows par granth aapas mein ALAG kehte hain. Rohiit ka
+ * faisla: DONO dikhao aur saaf likho. Ek chun kar doosri chhupana grahak se
+ * sach chhupana hota.
+ */
+function BhavParat({ p, lang }:{ p:any; lang:Lang }) {
+  if (!p) return null
+  const apna:any[]  = Array.isArray(p.apne_chart_se) ? p.apne_chart_se : []
+  const dasha:any[] = Array.isArray(p.dasha_mein_aayega) ? p.dasha_mein_aayega : []
+  const sabka:any[] = Array.isArray(p.is_ghar_ke_baare_mein) ? p.is_ghar_ke_baare_mein : []
+  if (!apna.length && !dasha.length && !sabka.length) return null
+
+  const Line = ({ x, dim }:{ x:any; dim?:boolean }) => (
+    <div style={{marginBottom:'7px',lineHeight:1.72,
+                 fontSize: dim ? '12px' : '13px',
+                 color: dim ? '#64748b'
+                      : x.kind === 'shubh'  ? '#86efac'
+                      : x.kind === 'kathin' || x.kind === 'maraka' ? '#fca5a5'
+                      : '#cbd5e1'}}>
+      {s(x.phal)}
+      <span style={{color:'#475569',fontSize:'10px',marginLeft:'6px',
+                    whiteSpace:'nowrap'}}>{s(x.srot)}</span>
+      {x.do_granth && (
+        <span title={lang==='english'?'two or more granths agree':'do ya zyada granth ek baat kehte hain'}
+              style={{color:'#fbbf24',fontSize:'10px',marginLeft:'4px'}}>◆</span>
+      )}
+    </div>
+  )
+  const Sar = ({ t, n }:{ t:string; n:number }) => (
+    <div style={{color:GOLD,fontSize:'10px',fontWeight:700,letterSpacing:'0.07em',
+                 textTransform:'uppercase',margin:'13px 0 7px',
+                 display:'flex',justifyContent:'space-between',alignItems:'baseline'}}>
+      <span>{t}</span><span style={{color:'#475569',fontWeight:400}}>{n}</span>
+    </div>
+  )
+
+  return (
+    <div style={{marginTop:'11px',paddingTop:'10px',
+                 borderTop:'1px solid rgba(255,255,255,0.06)'}}>
+      {apna.length > 0 && (<>
+        <Sar t={lang==='english'?'⭐ From your own chart':'⭐ AAPKE CHART SE'} n={apna.length}/>
+        {apna.map((x:any,i:number)=><Line key={i} x={x}/>)}
+      </>)}
+
+      {p.takraav_hai && (
+        <div style={{margin:'9px 0',padding:'8px 11px',borderRadius:'7px',
+                     background:'rgba(251,191,36,0.07)',
+                     border:'1px solid rgba(251,191,36,0.18)',
+                     color:'#fbbf24',fontSize:'11px',lineHeight:1.65}}>
+          ⚠️ {lang==='english'
+            ? 'The granths differ here. Both readings are shown above with their own verses — we do not pick one and hide the other.'
+            : s(p.takraav_ki_baat)}
+        </div>
+      )}
+
+      {dasha.length > 0 && (<>
+        <Sar t={lang==='english'?'⏳ When this part opens':'⏳ JAB YE HISSA KHULEGA'} n={dasha.length}/>
+        <div style={{color:'#64748b',fontSize:'11px',marginBottom:'7px',lineHeight:1.6}}>
+          {lang==='english'
+            ? 'These do not apply all the time — the granth says they come in this house\u2019s own period.'
+            : 'Ye hamesha nahi lagte — granth kehta hai inka phal IS GHAR KE DAUR mein aata hai. (Phaladipika 20.25)'}
+        </div>
+        {dasha.map((x:any,i:number)=><Line key={i} x={x}/>)}
+      </>)}
+
+      {sabka.length > 0 && (<>
+        <Sar t={lang==='english'?'📖 About this house':'📖 IS GHAR KE BAARE MEIN'} n={sabka.length}/>
+        {sabka.map((x:any,i:number)=><Line key={i} x={x} dim/>)}
+      </>)}
+    </div>
+  )
+}
+
+
 function GranthAbhi({ b, lang }:{ b:any; lang:Lang }) {
   const mukhya:any[] = Array.isArray(b?.mukhya) ? b.mukhya : []
   if(!mukhya.length) return null
@@ -3295,7 +3412,7 @@ function GranthAbhi({ b, lang }:{ b:any; lang:Lang }) {
   const rang = (h:string) => h==='MAZBOOT' ? '#86efac' : h==='KAMZOR' ? '#fca5a5' : '#fbbf24'
   return (
     <GranthTableShell
-      title={lang==='english'?'Why You Are Here':'AAP YAHAN KYUN HAIN'}
+      title={lang==='english'?'🔱 What Your Chart Says':'🔱 AAPKI KUNDALI KYA KEHTI HAI'}
       subtitle={(() => {
         // 🔴 16 Sep — "Ch.34: GRANTH-CHUP" grahak ko DIKH RAHA THA. Wo engine ka
         // andaruni shabd hai, grahak ki bhasha nahi. ATEET table mein iska
@@ -3364,6 +3481,10 @@ function GranthAbhi({ b, lang }:{ b:any; lang:Lang }) {
                     </div>
                   </div>
                 )}
+                {/* ⭐ 20 Sep — bhav_phala ki TEEN PARAT. 2,555 rows, 6 granth.
+                    Gemini hatane ke baad jo summary ki jagah khaali thi, wo
+                    yahi bharta hai — par har line granth ka shlok hai. */}
+                <BhavParat p={m.parat} lang={lang}/>
               </Td>
               <Td c={Number(m.bindu)>=30?'#86efac':Number(m.bindu)<25?'#fca5a5':'#94a3b8'} b>
                 {m.bindu ?? '—'}
@@ -3591,7 +3712,7 @@ function GranthFeedback({ sawaal, slug, lang }:{ sawaal:string; slug:string; lan
       </div>
       <div style={{color:'#cbd5e1',fontSize:'13px',lineHeight:1.75}}>{s(sawaal)}</div>
       <a href={`https://wa.me/?text=${encodeURIComponent(
-          `Trikaal Vaani — report ${slug}\n\nNaukri/kaam ka bada mod: \nShaadi ya rishta: \nGhar/sampatti: `)}`}
+          `Trikal Vaani — report ${slug}\n\nNaukri/kaam ka bada mod: \nShaadi ya rishta: \nGhar/sampatti: `)}`}
          target="_blank" rel="noopener noreferrer"
          style={{display:'inline-block',marginTop:'12px',padding:'8px 16px',
                  border:`1px solid ${G(0.4)}`,borderRadius:'7px',color:GOLD,
@@ -3914,13 +4035,37 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
 
 
 
+
+
+          {/* ══ GRANTH KI CHAAR TABLE ══════════════════════════════════════════
+              Rohiit ka faisla, 16 Sep 2026: "Past, Present and Future should be
+              in table format — Past ki alag table, Present ki alag table (with
+              reason — Why you are Here?), Future alag, Upay ki alag."
+              Har line granth ka shlok ya gina hua ank hai. Koi AI nahi. */}
+          {/* ⭐ 20 September 2026 — ROHIIT KA NAYA KRAM.
+              1. 🔱 AAPKI KUNDALI KYA KEHTI HAI  (granth ka nichod, 644 shabd)
+              2. 🔎 Yeh Prediction Kyun
+              3. AAPKA ATEET (+ feedback)
+              4. AAGE KA DAUR + UPAY
+              5. 🪐 Janma Kundali (chart)
+              6. Abhi Aapka Samay · Teen Ghadiyaan · Varshphal · baaki
+
+              WAJAH: bhav_phala ki teen parat (2,555 rows, 6 granth) ab sabse
+              KEEMTI cheez hai — 644 shabd, har line apne shlok ke saath. Pehle
+              wo TEESRE section mein dabi hui thi aur grahak ko wahan tak teen
+              scroll karne padte the. Ab wo pehli cheez hai jo grahak padhta hai.
+              ⚠️ Ye kram SAB JAGAH lagega — 34 calculator, 8 service, aur milan. */}
+          {granthOn && <GranthAbhi  b={(granth as any).abhi}  lang={lang}/>}
+
           <WhyYouAreHere why={whyHere} activation={chartEv?.activation} lang={lang}/>
 
-          {/* ⭐ 16 Sep 2026 — ROHIIT KA NIRDESH: chart aur "Yeh Prediction Kyun"
-              ko UPAR laaya gaya, granth ki table se PEHLE. Wajah saaf hai —
-              grahak pehle apni KUNDALI dekhta hai, phir padhta hai ki reading
-              us kundali se KAISE nikli, aur TAB reading padhta hai.
-              Pehle ye dono granth ki chaar table ke NEECHE the. */}
+          {hasEvidence && <EvidenceTable ev={chartEv} meanings={evMeanings} lang={lang} isPaid={isPaid} slug={slug}/>}
+
+          {granthOn && <GranthAteet a={(granth as any).ateet} lang={lang}/>}
+          {granthOn && <GranthFeedback sawaal={s((granth as any).feedback_sawaal)} slug={slug} lang={lang}/>}
+          {granthOn && <GranthAage  a={(granth as any).aage}  isPaid={isPaid} lang={lang} slug={slug}/>}
+          {granthOn && isPaid && (granth as any).upay && <GranthUpay u={(granth as any).upay} lang={lang}/>}
+
           {planetTable.length>0&&lagna!=='—'&&(
             <div style={{background:BG_CARD,border:`1px solid ${G(0.15)}`,borderRadius:'16px',padding:'22px',marginBottom:'14px'}}>
               <p style={{margin:'0 0 14px',color:GOLD,fontSize:'11px',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.08em'}}>{lbl('janmaKundali',lang)}</p>
@@ -3929,18 +4074,6 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
             </div>
           )}
 
-          {hasEvidence && <EvidenceTable ev={chartEv} meanings={evMeanings} lang={lang} isPaid={isPaid} slug={slug}/>}
-
-          {/* ══ GRANTH KI CHAAR TABLE ══════════════════════════════════════════
-              Rohiit ka faisla, 16 Sep 2026: "Past, Present and Future should be
-              in table format — Past ki alag table, Present ki alag table (with
-              reason — Why you are Here?), Future alag, Upay ki alag."
-              Har line granth ka shlok ya gina hua ank hai. Koi AI nahi. */}
-          {granthOn && <GranthAteet a={(granth as any).ateet} lang={lang}/>}
-          {granthOn && <GranthFeedback sawaal={s((granth as any).feedback_sawaal)} slug={slug} lang={lang}/>}
-          {granthOn && <GranthAbhi  b={(granth as any).abhi}  lang={lang}/>}
-          {granthOn && <GranthAage  a={(granth as any).aage}  isPaid={isPaid} lang={lang} slug={slug}/>}
-          {granthOn && isPaid && (granth as any).upay && <GranthUpay u={(granth as any).upay} lang={lang}/>}
           {/* ⭐ 17 Sep 2026 — PARAMPARIK UPAY, Rohiit ke faisle se.
               Granth ka upay (GranthUpay, upar) sirf 'maraka' wali shart par
               milta hai — yani jab daur ka swami 2re/7ve bhav ka malik ho. Bahut
