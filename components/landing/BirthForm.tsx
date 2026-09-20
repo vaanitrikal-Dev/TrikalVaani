@@ -1,6 +1,17 @@
 /**
  * ============================================================
  * TRIKAAL VAANI — BirthForm
+ * v10.0 (20 Sep 2026) — "Your biggest concern right now" wala khana POORA
+ *   HATAYA (Rohiit ka faisla). Wo GEMINI ke liye tha — uske prompt mein uska
+ *   60% weight tha. Gemini ab band hai (USE_GRANTH_ONLY), yani wo khana ek
+ *   JHOOTHA WAADA reh gaya tha: label kehta tha "makes reading sharper", par
+ *   reading ab granth ki shartein laga kar banti hai aur us likhe hue se
+ *   BILKUL nahi badalti.
+ *   Saath mein gaye: suggestDomain(), DOMAIN_HINTS, aur domainSuggestion wali
+ *   hint ("aapki baat SHAADI ki lagti hai par aapne KARIYAR chuna").
+ *   ⚠️ app/api/predict/route.ts NAHI badli — wahan situationNote OPTIONAL hai
+ *   aur ??'' ka fallback hai, to undefined aane par bhi sab chalta hai.
+ *
  * v9.1 (29 Aug 2026)
  *   0. INTERNATIONAL PAYMENT — every price on this form is now currency-aware.
  *      Foreign visitors were being shown PayPal's $7 button directly beneath a
@@ -14,7 +25,7 @@
  *
  * v9.0 (23 Aug 2026)
  *   1. DOMAIN MISMATCH HINT — the domain tile is picked on the previous screen
- *      and situationNote is typed here; the two were never compared. A client
+ *      and situationNote was typed here; the two were never compared. A client
  *      chose "Karz Mukti (Debt)", wrote "MD seat 2029", and received a
  *      debt-titled report full of debt houses about her medical entrance. The
  *      hint is a suggestion with a link, never a block — their choice still wins,
@@ -82,7 +93,6 @@ export interface BirthFormFields {
   countryDigits:       number
   currentCity:         string
   relationshipStatus:  string
-  situationNote:       string
   person2Name:         string
   person2Mobile:       string
   person2CountryCode:  string
@@ -375,39 +385,7 @@ const PAYMENT_LOADING_STEPS = [
 ]
 
 // ── v9.0 DOMAIN MISMATCH GUARD ───────────────────────────────────────────────
-// The domain tile is chosen on the previous screen; situationNote is typed here.
-// Nothing ever compared them, so a client could pick "Karz Mukti (Debt)" and then
-// write "MD seat 2029" — and receive a debt report, titled Debt, with debt houses,
-// about their exams. This only SUGGESTS a switch; the client's choice always wins.
-const DOMAIN_HINTS: {id:string; label:string; kw:RegExp}[] = [
-  { id:'genz_dream_career',       label:'Dream Career',        kw:/\b(job|naukri|career|interview|promotion|exam|neet|upsc|jee|gate|cat\b|entrance|admission|padhai|study|studies|md seat|pg seat|result|competition|salary|appraisal|resign|switch)\b/i },
-  { id:'mill_karz_mukti',         label:'Karz Mukti (Debt)',   kw:/\b(karz|karza|debt|loan|emi|udhaar|udhar|credit card|repay|kist|byaaj|interest|default|recovery)\b/i },
-  { id:'mill_property_yog',       label:'Property Yog',        kw:/\b(property|ghar|makaan|makan|flat|plot|zameen|jameen|land|house buy|home loan|registry|builder)\b/i },
-  { id:'genz_ex_back',            label:'Ex Back',             kw:/\b(ex|breakup|break up|patch up|wapas|girlfriend|boyfriend|gf|bf)\b/i },
-  { id:'genz_toxic_boss',         label:'Toxic Boss',          kw:/\b(boss|manager|office politics|toxic|harass|senior|team lead|hr\b)\b/i },
-  { id:'mill_childs_destiny',     label:"Child's Destiny",     kw:/\b(bachcha|bachche|bachchon|bachchi|beta|bete|beti|betiyan|betiyon|child|children|kids|santan|santaan|son|daughter)\b/i },
-  { id:'mill_parents_wellness',   label:'Parents Wellness',    kw:/\b(maa|maata|mata|papa|pappa|mummy|pita|pitaji|parents|mother|father|buzurg|elderly|budhape)\b/i },
-  { id:'genx_retirement_peace',   label:'Retirement Peace',    kw:/\b(retire|retirement|pension|vrp|superannuation)\b/i },
-  { id:'genx_legacy_inheritance', label:'Legacy & Inheritance',kw:/\b(will\b|vasiyat|inheritance|virasat|bataware|partition|ancestral)\b/i },
-  { id:'genx_spiritual_innings',  label:'Spiritual Innings',   kw:/\b(moksha|sadhana|spiritual|bhakti|tirth|guru\b|dhyan|meditation)\b/i },
-  { id:'genz_manifestation',      label:'Manifestation',       kw:/\b(manifest|law of attraction|visualisation|visualization|affirmation)\b/i },
-]
 
-function suggestDomain(note: string, currentId: string) {
-  const text = (note || '').trim()
-  if (text.length < 12) return null                 // too short to judge
-  const scored = DOMAIN_HINTS
-    .map(d => ({ ...d, hits: (text.match(new RegExp(d.kw.source, 'gi')) || []).length }))
-    .filter(d => d.hits > 0)
-    .sort((a, b) => b.hits - a.hits)
-  if (scored.length === 0) return null
-  const top = scored[0]!
-  if (top.id === currentId) return null              // already the right one
-  // only suggest when the current domain is not mentioned at all
-  const current = DOMAIN_HINTS.find(d => d.id === currentId)
-  if (current && new RegExp(current.kw.source, 'i').test(text)) return null
-  return top
-}
 
 const DUAL_CHART_DOMAINS = ['genz_ex_back', 'genz_toxic_boss']
 
@@ -491,7 +469,7 @@ const INITIAL: BirthFormFields = {
   timezoneOffset: 5.5, ayanamsa: 'lahiri',
   language: 'hinglish', jobCategory: '', mobile: '',
   countryCode: '+91', countryDigits: 10,
-  currentCity: '', relationshipStatus: '', situationNote: '',
+  currentCity: '', relationshipStatus: '',
   person2Name: '', person2Mobile: '', person2CountryCode: '+91',
   person2Dob: '', person2Tob: '12:00', person2Place: '',
   person2City: '', person2Lat: '', person2Lng: '',
@@ -895,7 +873,6 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
   const isDualDomain = DUAL_CHART_DOMAINS.includes(selectedCategory?.id ?? '')
   // v9.0: recomputed as they type — the note is capped at 200 chars so this is
   // a trivial amount of work, no debounce needed.
-  const domainSuggestion = suggestDomain(fields.situationNote, selectedCategory?.id ?? '')
 
   const set = useCallback(<K extends keyof BirthFormFields>(key: K, value: BirthFormFields[K]) => {
     setFields(prev => ({ ...prev, [key]: value }))
@@ -1039,7 +1016,6 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
         city:               fields.city,
         currentCity:        fields.currentCity || fields.city,
         relationshipStatus: fields.relationshipStatus,
-        situationNote:      fields.situationNote.slice(0, 200),
         mobile:             `${fields.countryCode}${fields.mobile}`,
         person2Name:        fields.person2Name        || null,
         person2City:        fields.person2City        || null,
@@ -1561,42 +1537,17 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
               </div>
             </div>
 
-            <div>
-              <label htmlFor="tv-situation" className="block text-sm font-medium text-slate-300 mb-1.5">Your biggest concern right now <span className="text-slate-500 text-xs ml-1">(optional — makes reading sharper)</span></label>
-              <div className="relative">
-                <textarea id="tv-situation"
-                  placeholder="e.g. Job switch kar raha hoon, property khareedna hai, relationship mein problem hai, karz se pareshan hoon..."
-                  value={fields.situationNote}
-                  onChange={e => set('situationNote', e.target.value.slice(0, 200))}
-                  maxLength={200} rows={2}
-                  className="w-full px-4 py-2.5 rounded-lg text-sm outline-none resize-none" style={inputStyle()} />
-                <span className="absolute bottom-2 right-3 text-xs"
-                  style={{ color: fields.situationNote.length >= 180 ? '#f59e0b' : '#475569' }}>
-                  {fields.situationNote.length}/200
-                </span>
-              </div>
-
-              {/* v9.0 DOMAIN MISMATCH HINT — suggestion only, never a block.
-                  A client picked "Karz Mukti (Debt)" and wrote "MD seat 2029",
-                  and got a debt-titled report about their exams. The two inputs
-                  had never been compared. The client's choice still wins; this
-                  just makes the mismatch visible before they pay. */}
-              {domainSuggestion && (
-                <div className="mt-2 px-3 py-2.5 rounded-lg text-xs"
-                  style={{ background: GOLD_RGBA(0.07), border: `1px solid ${GOLD_RGBA(0.25)}` }}>
-                  <p className="mb-1.5" style={{ color: GOLD }}>
-                    💡 Aapki baat <strong>{domainSuggestion.label}</strong> ki lagti hai, par aapne{' '}
-                    <strong>{selectedCategory?.label ?? 'yeh reading'}</strong> chuni hai.
-                  </p>
-                  <p style={{ color: '#94a3b8' }}>
-                    Aap jo chunenge wahi reading banegi.{' '}
-                    <a href={`/${domainSuggestion.id}`} style={{ color: GOLD, textDecoration: 'underline', fontWeight: 600 }}>
-                      {domainSuggestion.label} par jaayein →
-                    </a>
-                  </p>
-                </div>
-              )}
-            </div>
+            {/* ⭐ 20 September 2026 — "Your biggest concern right now" wala
+                khana POORA HATA DIYA GAYA (Rohiit ka faisla).
+                Wo GEMINI ke liye tha — uske prompt mein uska 60% weight tha
+                ("situationNote = 60% weight — first 3 sentences address pain
+                directly"). Gemini ab band hai (USE_GRANTH_ONLY), yani wo
+                khana ek JHOOTHA WAADA reh gaya tha: label kehta tha "makes
+                reading sharper", par reading ab granth ki shartein laga kar
+                banti hai aur us likhe hue se BILKUL nahi badalti.
+                ⚠️ Iske saath suggestDomain() wali madad bhi gayi — wo grahak
+                ko batata tha ki "aapki baat SHAADI ki lagti hai par aapne
+                KARIYAR chuna". Rohiit ne (अ) chuna: poora hatao. */}
 
             {isDualDomain && (
               <div className="mt-2 pt-5 border-t border-amber-400/20">
