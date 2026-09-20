@@ -1,9 +1,13 @@
 /**
+ * v1.4 (21 Sep 2026) — GRANTH KA FAISLA 36 guna ke dabbe mein, sabse upar.
+ *   HAAN / HO SAKTA HAI / NAHI — parihar ke BAAD (milan_engine v2.0).
+ *   scoreBand() ab tabhi dikhta hai jab faisla NA ho — warna ek hi dabbe
+ *   mein do ulte faisle dikhte (30/36 par 'Excellent' aur TEEVRA nadi par 'NAHI').
  * ============================================================
  * TRIKAL VAANI - Kundali Milan Result Page
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/milan/[slug]/page.tsx
- * VERSION: 1.3
+ * VERSION: 1.4
  * SIGNED: ROHIIT GUPTA, CEO
  * ============================================================
  * CHANGE LOG (v1.2 → v1.3):
@@ -188,6 +192,17 @@ export default async function MilanResultPage({ params }: { params: { slug: stri
   const bride     = m.bride_data;
   const groom     = m.groom_data;
   const score     = m.ashtakoot_score;
+  // ⭐ 21 Sep — milan_engine v2.0 ka faisla. Purani reading mein ye khane
+  // nahi hote, isliye sab optional — tab page purane jaisa dikhta hai.
+  const ak           = (m.ashtakoot_data ?? {}) as Record<string, any>;
+  const faisla       = typeof ak.faisla === 'string' ? ak.faisla : null;
+  const faislaWajah  = Array.isArray(ak.faisla_wajah) ? ak.faisla_wajah.map(String) : [];
+  const nadiTeevrata = ak.nadi_teevrata && typeof ak.nadi_teevrata === 'object' ? ak.nadi_teevrata : null;
+  const daan         = Array.isArray(ak.daan) ? ak.daan.map(String) : [];
+  const faislaColor  = faisla === 'HAAN' ? 'text-emerald-400'
+                     : faisla === 'NAHI' ? 'text-red-400' : 'text-amber-400';
+  const faislaBorder = faisla === 'HAAN' ? 'border-emerald-500/30'
+                     : faisla === 'NAHI' ? 'border-red-500/30' : 'border-amber-500/30';
   const resultUrl = `https://trikalvaani.com/milan/${m.slug}`;
 
   return (
@@ -225,10 +240,61 @@ export default async function MilanResultPage({ params }: { params: { slug: stri
               <div className="text-5xl sm:text-7xl font-bold text-white">
                 {score}<span className="text-[#D4AF37] text-3xl sm:text-4xl font-normal"> / 36</span>
               </div>
-              <div className="mt-3 text-sm sm:text-base text-gray-300">
-                {scoreBand(score)}
-              </div>
+              {/* ⭐ 21 Sep 2026 — scoreBand() SIRF ANK se faisla deta tha:
+                  30/36 par "Excellent" — chahe TEEVRA nadi-dosh ho. Aur ab
+                  neeche GRANTH ka FAISLA bhi hai. Dono ek saath hote to grahak
+                  ko ek hi dabbe mein DO ULTE faisle dikhte. Isliye jahan
+                  faisla hai wahan scoreBand NAHI dikhta. Purani reading (jinme
+                  faisla nahi) par scoreBand rehta hai. */}
+              {!faisla && (
+                <div className="mt-3 text-sm sm:text-base text-gray-300">
+                  {scoreBand(score)}
+                </div>
+              )}
             </div>
+
+            {/* ⭐⭐ GRANTH KA FAISLA — 21 September 2026
+                Rohiit ka nirdesh: "HAAN / HO SAKTA HAI / NAHI — parihar ke BAAD",
+                aur 36 guna ke ank ke SAATH, sabse upar.
+                milan_engine v2.0 ise Muhurta Chintamani Vivaha sl.21-37 se
+                nikalta hai. ⚠️ Faisla SIRF ank se nahi banta — granth NADI ko
+                "aathon koot mein sabse pradhan" (sl.34) aur SHADASHTAK ko
+                "mrityu" (sl.31) kehta hai; unke rehte ank kitna bhi ho, "HAAN"
+                kehna granth ke khilaaf hota. */}
+            {faisla && (
+              <div className={`mt-6 pt-6 border-t text-center ${faislaBorder}`}>
+                <div className="text-[10px] tracking-[0.35em] uppercase text-gray-500 mb-2">
+                  Hamara Faisla · Granth ke Anusaar
+                </div>
+                <div className={`text-3xl sm:text-4xl font-bold ${faislaColor}`}>
+                  {faisla}
+                </div>
+                {faislaWajah.length > 0 && (
+                  <ul className="mt-4 space-y-1.5 text-left max-w-xl mx-auto">
+                    {faislaWajah.map((w, i) => (
+                      <li key={i} className="text-sm text-gray-300 leading-relaxed">· {w}</li>
+                    ))}
+                  </ul>
+                )}
+                {nadiTeevrata && (
+                  <p className="mt-3 text-xs text-amber-300/90">
+                    Nadi-dosh ki teevrata: <strong>{nadiTeevrata.teevrata}</strong>
+                    {' '}— {nadiTeevrata.kispar} ({nadiTeevrata.sloka})
+                  </p>
+                )}
+                {daan.length > 0 && (
+                  <p className="mt-3 text-xs text-[#D4AF37]">
+                    🔱 Granth ka upay (Muhurta Chintamani 6.34): {daan.join(' · ')}
+                  </p>
+                )}
+                <p className="mt-4 text-[11px] text-gray-500 max-w-xl mx-auto leading-relaxed">
+                  Ye faisla Muhurta Chintamani (Vivaha-prakarana sl.21-37) ke aathon
+                  koot, unke parihar aur dosh dekh kar bana hai. Jahan granth chup
+                  hai wahan ank anumaan hai, aur wo saaf likha gaya hai. Hum koi
+                  guarantee nahi dete — hum wahi batate hain jo granth kehta hai.
+                </p>
+              </div>
+            )}
           </div>
         </section>
       )}
