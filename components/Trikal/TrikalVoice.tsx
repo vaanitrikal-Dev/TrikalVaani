@@ -5,6 +5,25 @@
  * TRIKAL VAANI — Trikaal Voice Widget
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: components/Trikal/TrikalVoice.tsx
+ * VERSION: 3.5 (19 Sep 2026) — CLOSED PILL RESTYLED VIOLET
+ *   WHY: the pill was gold on a gold site, so it read as decoration rather
+ *   than as a product. Violet is far from the site's gold AND from the
+ *   picker's orange, and violet is the established "voice" colour (Siri).
+ *   Cyan was considered and rejected — too close to the WhatsApp green that
+ *   already appears in the picker.
+ *   WHAT CHANGED — the closed pill ONLY:
+ *     • deep violet gradient + WHITE text (dark text on deep violet measures
+ *       3.4:1 and fails WCAG AA; white measures 5.7:1 and passes)
+ *     • height 64px -> 46px (circle 36->28, padding 14->9, text 14->13).
+ *       46px keeps it above the 44px minimum tap target.
+ *     • attention blink every 5s, SIX times, then permanently still (30s).
+ *       Soft glow + slight scale, never an opacity flash: flashing breaks
+ *       WCAG 2.3.1 and a permanently animating element stops being seen.
+ *     • the old constant `trikalPulse` ring on the icon is gone — the 30s
+ *       blink replaces it, so only one thing moves.
+ *   WHAT DID NOT CHANGE: the modal. It is still gold, still uses GOLD/
+ *   GOLD_DARK/GOLD_LIGHT, and not one line of its logic was touched. The
+ *   violet constants below are used by the closed pill and nothing else.
  * VERSION: 3.4 (18 Sep 2026) — GEO RACE + two defects from 3.3
  *   /api/geo was checked live on 18 Sep and is healthy: it reads Vercel's
  *   x-vercel-ip-country and returned {"country":"US","isIndia":false} from a
@@ -96,6 +115,13 @@ const GOLD       = '#D4AF37';
 const GOLD_LIGHT = '#F5D76E';
 const GOLD_DARK  = '#A8820A';
 const BG_DARK    = '#080B12';
+
+/* Closed-pill palette (v3.5). Used by the pill only — the modal stays gold. */
+const V_DARK     = '#5B21B6';   // gradient start
+const V_MID      = '#7C3AED';   // gradient middle
+const V_LIGHT    = '#9D5CFF';   // gradient end
+const V_ICON     = '#C89CFF';   // mic stroke inside the dark circle
+const ON_VIOLET  = '#FFFFFF';   // 5.7:1 on V_MID — dark text would be 3.4:1
 const BG_CARD    = 'rgba(8,11,18,0.97)';
 
 // v1.1: usdLabel added. Testing on 30 Aug found this modal showing "$1" on the
@@ -642,37 +668,47 @@ export default function TrikalVoice() {
         <button
           onClick={handleOpen}
           aria-label="Open Trikaal Voice — Ask Vedic astrology by voice"
-          className="fixed bottom-6 right-6 flex items-center gap-3"
+          className="fixed bottom-6 right-6 flex items-center"
           style={{
             zIndex      : 9998,
-            background  : `linear-gradient(135deg, ${GOLD_DARK}, ${GOLD}, ${GOLD_LIGHT})`,
+            gap         : 9,
+            background  : `linear-gradient(135deg, ${V_DARK}, ${V_MID}, ${V_LIGHT})`,
             borderRadius: '999px',
-            padding     : '14px 22px 14px 18px',
-            boxShadow   : `0 8px 32px ${GOLD_DARK}66, 0 0 0 2px ${GOLD}33`,
+            /* 28px circle + 9px top + 9px bottom = 46px tall */
+            padding     : '9px 18px 9px 9px',
             border      : 'none',
             cursor      : 'pointer',
+            /* six 5s cycles = 30s of attention, then permanently still */
+            animation   : 'trikalVoiceBlink 5s ease-in-out 6',
+            boxShadow   : `0 5px 20px ${V_MID}73`,
           }}
         >
           <span style={{
-            width: 36, height: 36, borderRadius: '50%',
+            width: 28, height: 28, borderRadius: '50%',
             background: BG_DARK, display: 'flex', alignItems: 'center', justifyContent: 'center',
-            animation: 'trikalPulse 2s ease-in-out infinite',
+            flex: 'none',
           }}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={GOLD} strokeWidth="2.2">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={V_ICON} strokeWidth="2.4">
               <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
               <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
               <line x1="12" y1="19" x2="12" y2="23"/>
               <line x1="8" y1="23" x2="16" y2="23"/>
             </svg>
           </span>
-          <span style={{ color: BG_DARK, fontWeight: 700, fontSize: 14 }}>
+          <span style={{ color: ON_VIOLET, fontWeight: 700, fontSize: 13 }}>
             {TAGLINES[taglineIdx]}
           </span>
         </button>
         <style>{`
-          @keyframes trikalPulse {
-            0%, 100% { box-shadow: 0 0 0 0 ${GOLD}aa; }
-            50%      { box-shadow: 0 0 0 12px ${GOLD}00; }
+          @keyframes trikalVoiceBlink {
+            0%, 86%, 100% { box-shadow: 0 5px 20px ${V_MID}73; transform: scale(1); }
+            93%           { box-shadow: 0 7px 36px ${V_LIGHT};  transform: scale(1.06); }
+          }
+          /* Anyone who asked their system not to animate gets a still pill. */
+          @media (prefers-reduced-motion: reduce) {
+            @keyframes trikalVoiceBlink {
+              0%, 100% { box-shadow: 0 5px 20px ${V_MID}73; transform: none; }
+            }
           }
         `}</style>
       </>
