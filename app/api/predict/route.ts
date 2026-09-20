@@ -541,6 +541,62 @@ const EPHE_API_URL    = process.env.EPHE_API_URL    || process.env.VM_ENGINE_URL
 // raha hai, TAB Gemini ka code hataya jaayega — pehle nahi.
 const USE_GRANTH_ONLY = (process.env.USE_GRANTH_ONLY ?? 'true') !== 'false'
 
+/** ⭐ 20 September 2026 — DOMAIN se PRODUCT ka naksha.
+ *
+ *  /granth/poori UMAR ke hisaab se bhav chunta hai — 51 saal ke aadmi ko
+ *  ghar, kaam, kamai. Wo POORI KUNDALI ke liye theek hai. Par jab koi
+ *  "Ex Back" ya "Toxic Boss" ki reading maangta hai, to use UN bhavon ka
+ *  granth chahiye jo US SAWAAL ke hain — umar ke nahi.
+ *
+ *  Isliye jin domain ka product calc_varga_map mein hai, unpar EK AUR call
+ *  jaati hai: /granth/product. VM khud us table se padh leta hai ki bhav
+ *  kaunsa, varga kaunsa, karak kaun. NAYA PRODUCT JODNA = EK DB ROW.
+ *
+ *  ⚠️ Jinka product nahi hai (karz, maa-baap, retirement, virasat,
+ *  manifestation, general_kundali, swapna) un par SIRF /granth/poori chalta
+ *  hai — jaisa abhi chal raha hai. Unke liye naye product jodne se Rohiit ne
+ *  20 Sep ko MANA kiya tha.
+ */
+const DOMAIN_TO_PRODUCT: Record<string,string> = {
+  genz_ex_back:           'ex-back-reading',
+  genz_toxic_boss:        'toxic-boss-radar',
+  genz_dream_career:      'career-pivot',
+  mill_property_yog:      'property-yog',
+  mill_childs_destiny:    'child-destiny',
+  genx_spiritual_innings: 'spiritual-purpose',
+}
+
+/** VM ke /granth/product se us SAWAAL ke bhav ka granth. */
+async function fetchGranthProduct(
+  product:string,
+  y:number, mo:number, d:number, h:number, mi:number,
+  lat:number, lng:number, tz:number, tier:string,
+  person2:Record<string,any>|null
+): Promise<Record<string,any>|null> {
+  try{
+    const r = await fetch(`${EPHE_API_URL}/granth/product`, {
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        ...(process.env.TRIKAL_VM_KEY ? {'X-Trikal-Key':process.env.TRIKAL_VM_KEY} : {}),
+      },
+      body: JSON.stringify({
+        product,
+        year:y, month:mo, day:d, hour:h, minute:mi,
+        latitude:lat, longitude:lng, timezone:tz, tier,
+        ...(person2 ? {person2} : {}),
+      }),
+      cache:'no-store',
+    })
+    if(!r.ok){ console.error(`[GranthProduct] ${r.status} ${await r.text().catch(()=>'')}`); return null }
+    const j = await r.json()
+    // ⚠️ VM 200 ke saath bhi "galti" laut sakta hai — misaal ke liye jab
+    // calc_varga_map Supabase se aayi hi na ho. Use CHUP-CHAAP mat nigalna.
+    if(j?.galti){ console.error(`[GranthProduct] ${product}: ${j.galti}`); return null }
+    return j
+  }catch(e:any){ console.error(`[GranthProduct] fetch failed: ${e?.message}`); return null }
+}
+
 /** VM ke /granth/poori se chaar table — GRANTH SE, bina kisi AI ke. */
 async function fetchGranth(
   y:number, mo:number, d:number, h:number, mi:number,
@@ -2171,6 +2227,28 @@ export async function POST(req: NextRequest) {
       umar, ling, isPaid ? 'paid' : 'free',
       !birthData.tob,
     )
+    // ⭐ 20 Sep — jin domain ka apna product hai, un par US SAWAAL ke bhav
+    // ka granth bhi aata hai. Ye /granth/poori ki JAGAH nahi, uske SAATH
+    // hai — poori kundali bhi dikhti hai aur us sawaal ka jawab bhi.
+    const _prod = DOMAIN_TO_PRODUCT[domainId]
+    if(_prod && granthData){
+      const pg = await fetchGranthProduct(
+        _prod, _kY, _kM, _kD, _kH ?? 12, _kMin ?? 0,
+        Number(localBirthData.lat), Number(localBirthData.lng),
+        Number(localBirthData.timezone ?? 5.5),
+        isPaid ? 'paid' : 'free',
+        person2Data ? {
+          year:   Number(String(person2Data.dob).slice(0,4)),
+          month:  Number(String(person2Data.dob).slice(5,7)),
+          day:    Number(String(person2Data.dob).slice(8,10)),
+          hour:   Number(String(person2Data.tob ?? '12:00').slice(0,2)),
+          minute: Number(String(person2Data.tob ?? '12:00').slice(3,5)),
+          latitude: Number(person2Data.lat), longitude: Number(person2Data.lng),
+          timezone: 5.5,
+        } : null,
+      )
+      if(pg) (granthData as any).product = pg
+    }
   }
 
   if(USE_GRANTH_ONLY && granthData){
