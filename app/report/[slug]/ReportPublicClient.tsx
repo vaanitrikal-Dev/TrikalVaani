@@ -3,7 +3,7 @@
 /**
  *
  * ══════════════════════════════════════════════════════════════════════════
- * v10.2 — 20 SEPTEMBER 2026 — GRANTH KI CHAAR TABLE
+ * v10.4 — 20 SEPTEMBER 2026 — GRANTH KI CHAAR TABLE
  * ══════════════════════════════════════════════════════════════════════════
  * ROHIIT KA FAISLA: "Past, Present and Future should be in table format —
  * Past ki alag table, Present ki alag table (with reason — Why you are Here?),
@@ -3417,6 +3417,39 @@ function BhavParat({ p, lang }:{ p:any; lang:Lang }) {
  * liye. Isliye jawab mein jo "do_chart_ki_baat" aati hai wo SAAF likhi
  * jaati hai, chhupayi nahi.
  */
+/* ⭐ FAISLA — ek panktiaan roop, Kundali ki table ki row ke liye.
+ * GranthProduct ka bada block service page par theek hai, par Kundali ki
+ * table mein har bhav ek ROW hai — wahan wo bada dabba nahi samata.
+ * ⚠️ Ye 20 Sep ko CHHOOT GAYA THA: faisla granth_api v2.5 ki abhi() mein
+ * BAN raha tha par report use RENDER nahi karti thi. Wahi galti aaj gaun
+ * rows par bhi hui thi — data banao aur dikhana bhool jao. */
+function FaislaPankti({ F, lang }:{ F:any; lang:Lang }) {
+  if (!F || !F.faisla) return null
+  const c = F.faisla==='HAAN' ? '#86efac' : F.faisla==='NAHI' ? '#fca5a5' : '#fbbf24'
+  const bg = F.faisla==='HAAN' ? 'rgba(34,197,94,0.07)'
+           : F.faisla==='NAHI' ? 'rgba(239,68,68,0.07)' : 'rgba(251,191,36,0.06)'
+  return (
+    <div style={{margin:'9px 0 0',padding:'8px 11px',borderRadius:'7px',
+                 background:bg, border:`1px solid ${c}30`}}>
+      <span style={{color:'#64748b',fontSize:'9.5px',fontWeight:700,
+                    textTransform:'uppercase',letterSpacing:'0.08em'}}>
+        {lang==='english'?'Our reading':'HAMARA FAISLA'}
+      </span>
+      <span style={{color:c,fontSize:'14px',fontWeight:800,marginLeft:'8px'}}>
+        {s(F.faisla)}
+      </span>
+      {F.upay_ki_baat && Array.isArray(F.kispar_upay) && F.kispar_upay.length>0 && (
+        <div style={{color:'#fbbf24',fontSize:'11px',marginTop:'4px',lineHeight:1.6}}>
+          🔱 {lang==='english'
+            ? `The granth prescribes shanti where a graha is afflicted — the work here is on ${F.kispar_upay.join(' and ')}.`
+            : `Granth kehta hai grah ki peeda par SHANTI ka vidhaan hai — kaam ${F.kispar_upay.join(' aur ')} par karna hai.`}
+        </div>
+      )}
+    </div>
+  )
+}
+
+
 function GranthProduct({ p, lang }:{ p:any; lang:Lang }) {
   if (!p || p.galti) return null
   const bhav:any[] = Array.isArray(p.bhav) ? p.bhav : []
@@ -3431,6 +3464,59 @@ function GranthProduct({ p, lang }:{ p:any; lang:Lang }) {
     <GranthTableShell
       title={lang==='english'?'🎯 On Your Question':'🎯 AAPKE SAWAAL PAR'}
       subtitle={`${s(p.varga)} · ${bhav.map(b=>`${b.bhav}va`).join(' + ')} ghar`}>
+
+      {/* ⭐⭐ FAISLA — 20 September 2026
+          Rohiit ki baat: "kuch toh humme bhi bolna hai. Sab granth bolenge
+          toh hum kisliye hain?" Usne asli grahak ka chart bheja — ladka
+          ladki ko chhod chuka hai — aur report mein 7ve ghar ka POORA haal
+          tha, par report ne wo baat BOLI nahi.
+          Ab bolti hai. ⚠️ ANK KABHI NAHI DIKHTA (Rohiit ka purana niyam:
+          "score grahak ko mat dikhao") — sirf faisla aur uski wajah. */}
+      {p.faisla && (() => {
+        const F = p.faisla
+        const rangF = F.faisla==='HAAN' ? '#86efac'
+                    : F.faisla==='NAHI' ? '#fca5a5' : '#fbbf24'
+        const bg    = F.faisla==='HAAN' ? 'rgba(34,197,94,0.07)'
+                    : F.faisla==='NAHI' ? 'rgba(239,68,68,0.07)'
+                    : 'rgba(251,191,36,0.06)'
+        return (
+          <div style={{margin:'0 0 16px',padding:'14px 16px',borderRadius:'10px',
+                       background:bg, border:`1px solid ${rangF}33`}}>
+            <div style={{color:'#64748b',fontSize:'10px',fontWeight:700,
+                         textTransform:'uppercase',letterSpacing:'0.08em',marginBottom:'6px'}}>
+              {lang==='english'?'Our reading of the chart':'HAMARA FAISLA'}
+            </div>
+            <div style={{color:rangF,fontSize:'20px',fontWeight:800,
+                         letterSpacing:'0.02em',marginBottom:'9px'}}>
+              {s(F.faisla)}
+            </div>
+            {Array.isArray(F.wajah) && F.wajah.map((w:string,wi:number)=>(
+              <div key={wi} style={{color:'#cbd5e1',fontSize:'12.5px',lineHeight:1.75}}>
+                · {s(w)}
+              </div>
+            ))}
+            {F.seedhi_baat && (
+              <p style={{margin:'10px 0 0',color:'#e2e8f0',fontSize:'12.5px',
+                         lineHeight:1.7,fontWeight:600}}>
+                {s(F.seedhi_baat)}
+              </p>
+            )}
+            {F.upay_ki_baat && (
+              <p style={{margin:'8px 0 0',color:'#fbbf24',fontSize:'11.5px',lineHeight:1.7}}>
+                🔱 {s(F.upay_ki_baat)}
+                {Array.isArray(F.kispar_upay) && F.kispar_upay.length>0 && (
+                  <span style={{color:'#94a3b8'}}>
+                    {' '}Kaam {F.kispar_upay.join(' aur ')} par karna hai.
+                  </span>
+                )}
+              </p>
+            )}
+            <p style={{margin:'9px 0 0',color:'#475569',fontSize:'10.5px',lineHeight:1.6}}>
+              {s(F.granth_chup_par)}
+            </p>
+          </div>
+        )
+      })()}
 
       {bhav.map((b:any,i:number)=>(
         <div key={i} style={{marginBottom:'16px',paddingBottom:'14px',
@@ -3467,7 +3553,11 @@ function GranthProduct({ p, lang }:{ p:any; lang:Lang }) {
           {karak.map((kk:any,i:number)=>(
             <div key={i} style={{color:'#cbd5e1',fontSize:'12px',lineHeight:1.7}}>
               <strong style={{color:'#e2e8f0'}}>{s(kk.grah)}</strong>
-              {' — '}{s(kk.bhav)}ve ghar mein, {s(kk.rashi)}
+              {/* 🔴 20 Sep — YAHAN s(kk.bhav) THA. s() sirf STRING leta hai
+                  (typeof v==='string'), aur bhav ek NUMBER hai — to har baar
+                  '—' chhapta tha: "Shukra — —ve ghar mein". Asli report par
+                  pakda gaya. Number ke liye seedha likhna hai. */}
+              {' — '}{kk.bhav ?? '—'}ve ghar mein, {s(kk.rashi)}
               {kk.vakri && <span style={{color:'#fbbf24'}}> · VAKRI</span>}
               {kk.asta && <span style={{color:'#fca5a5'}}> · AST</span>}
               <span style={{color:'#64748b'}}>
@@ -3504,7 +3594,10 @@ function GranthProduct({ p, lang }:{ p:any; lang:Lang }) {
               ))}
             </div>
           ))}
-          {kh.map((x:any,i:number)=>(
+          {/* 🔴 20 Sep — "Sep 2026 – Nov 2026 · —" chhap raha tha. Gochar ki
+              khidki par kabhi-kabhi 'kaun' khaali aata hai, aur bina wajah ke
+              tareekh grahak ke liye bekaar hai. Ab wo line chhapti hi nahi. */}
+          {kh.filter((x:any)=>s(x.kyun)!=='—').map((x:any,i:number)=>(
             <div key={`k${i}`} style={{color:'#94a3b8',fontSize:'11px',marginTop:'3px'}}>
               {s(x.se)} – {s(x.tak)} · {s(x.kyun)}
             </div>
@@ -3610,6 +3703,9 @@ function GranthAbhi({ b, lang }:{ b:any; lang:Lang }) {
                     Gemini hatane ke baad jo summary ki jagah khaali thi, wo
                     yahi bharta hai — par har line granth ka shlok hai. */}
                 <BhavParat p={m.parat} lang={lang}/>
+                {/* ⭐ 20 Sep — FAISLA Kundali report par bhi (Rohiit: "sab
+                    jagah implement kardo, Kundali par bhi"). */}
+                <FaislaPankti F={m.faisla} lang={lang}/>
               </Td>
               <Td c={Number(m.bindu)>=30?'#86efac':Number(m.bindu)<25?'#fca5a5':'#94a3b8'} b>
                 {m.bindu ?? '—'}
@@ -3843,7 +3939,7 @@ function GranthFeedback({ sawaal, slug, lang }:{ sawaal:string; slug:string; lan
       </div>
       <div style={{color:'#cbd5e1',fontSize:'13px',lineHeight:1.75}}>{s(sawaal)}</div>
       <a href={`https://wa.me/?text=${encodeURIComponent(
-          `Trikaal Vaani — report ${slug}\n\nNaukri/kaam ka bada mod: \nShaadi ya rishta: \nGhar/sampatti: `)}`}
+          `Trikal Vaani — report ${slug}\n\nNaukri/kaam ka bada mod: \nShaadi ya rishta: \nGhar/sampatti: `)}`}
          target="_blank" rel="noopener noreferrer"
          style={{display:'inline-block',marginTop:'12px',padding:'8px 16px',
                  border:`1px solid ${G(0.4)}`,borderRadius:'7px',color:GOLD,
