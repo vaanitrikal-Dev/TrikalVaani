@@ -3,7 +3,7 @@
 /**
  *
  * ══════════════════════════════════════════════════════════════════════════
- * v9.9 — 20 SEPTEMBER 2026 — GRANTH KI CHAAR TABLE
+ * v10.1 — 20 SEPTEMBER 2026 — GRANTH KI CHAAR TABLE
  * ══════════════════════════════════════════════════════════════════════════
  * ROHIIT KA FAISLA: "Past, Present and Future should be in table format —
  * Past ki alag table, Present ki alag table (with reason — Why you are Here?),
@@ -3369,21 +3369,21 @@ function BhavParat({ p, lang }:{ p:any; lang:Lang }) {
   return (
     <div style={{marginTop:'11px',paddingTop:'10px',
                  borderTop:'1px solid rgba(255,255,255,0.06)'}}>
+      {p.takraav_hai && (
+        <div style={{margin:'0 0 9px',padding:'7px 10px',borderRadius:'6px',
+                     background:'rgba(251,191,36,0.06)',
+                     border:'1px solid rgba(251,191,36,0.16)',
+                     color:'#fbbf24',fontSize:'10.5px',lineHeight:1.6}}>
+          ⚠️ {lang==='english'
+            ? 'The granths differ on this house. The line below is from the BPHS, which this reading stands on.'
+            : s(p.takraav_ki_baat)}
+        </div>
+      )}
+
       {apna.length > 0 && (<>
         <Sar t={lang==='english'?'⭐ From your own chart':'⭐ AAPKE CHART SE'} n={apna.length}/>
         {apna.map((x:any,i:number)=><Line key={i} x={x}/>)}
       </>)}
-
-      {p.takraav_hai && (
-        <div style={{margin:'9px 0',padding:'8px 11px',borderRadius:'7px',
-                     background:'rgba(251,191,36,0.07)',
-                     border:'1px solid rgba(251,191,36,0.18)',
-                     color:'#fbbf24',fontSize:'11px',lineHeight:1.65}}>
-          ⚠️ {lang==='english'
-            ? 'The granths differ here. Both readings are shown above with their own verses — we do not pick one and hide the other.'
-            : s(p.takraav_ki_baat)}
-        </div>
-      )}
 
       {dasha.length > 0 && (<>
         <Sar t={lang==='english'?'⏳ When this part opens':'⏳ JAB YE HISSA KHULEGA'} n={dasha.length}/>
@@ -3512,6 +3512,12 @@ function GranthAbhi({ b, lang }:{ b:any; lang:Lang }) {
                 })()}
                 {m.khinchav && <div style={{color:'#fbbf24',fontSize:'11px',marginTop:'3px'}}>
                   ⚠️ {s(m.khinchav)}</div>}
+                {/* 🔴 20 Sep — GAUN ROWS PAR <BhavParat/> LAGTA HI NAHI THA.
+                    granth_api v2.0 paid mein teenon gaun bhav ka bhi parat
+                    banata hai, par ye table use render nahi karti thi — yani
+                    paid grahak ne TEEN BHAV ka data khareeda aur wo dikhta hi
+                    nahi tha. Deploy se pehle pakda gaya. */}
+                <BhavParat p={m.parat} lang={lang}/>
               </Td>
               <Td c="#64748b">{m.bindu ?? '—'}</Td>
             </tr>
@@ -3712,7 +3718,7 @@ function GranthFeedback({ sawaal, slug, lang }:{ sawaal:string; slug:string; lan
       </div>
       <div style={{color:'#cbd5e1',fontSize:'13px',lineHeight:1.75}}>{s(sawaal)}</div>
       <a href={`https://wa.me/?text=${encodeURIComponent(
-          `Trikaal Vaani — report ${slug}\n\nNaukri/kaam ka bada mod: \nShaadi ya rishta: \nGhar/sampatti: `)}`}
+          `Trikal Vaani — report ${slug}\n\nNaukri/kaam ka bada mod: \nShaadi ya rishta: \nGhar/sampatti: `)}`}
          target="_blank" rel="noopener noreferrer"
          style={{display:'inline-block',marginTop:'12px',padding:'8px 16px',
                  border:`1px solid ${G(0.4)}`,borderRadius:'7px',color:GOLD,
