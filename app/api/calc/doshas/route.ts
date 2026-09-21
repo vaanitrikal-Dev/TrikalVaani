@@ -1,7 +1,8 @@
 // ============================================================
 // File: app/api/calc/doshas/route.ts
 // Purpose: VM bridge for Dosha Calculators (Kaal Sarp, Pitra, etc.)
-// Version: v1.2 — usage logging added (18 Sep 2026)
+// Version: v1.3 — storage AWAIT (21 Sep 2026)
+// PICHHLA: v1.2 — usage logging added (18 Sep 2026)
 // Changelog v1.1: check_all_doshas returns a DICT
 //   { doshas:[...], present_count, summary, lang } — not a bare list.
 //   Unwrap the inner `doshas` array robustly (handles list OR dict)
@@ -83,7 +84,12 @@ export async function POST(req: NextRequest) {
     //    would otherwise crash the route. Nothing in this block can ever stop
     //    a calculator from answering the customer.
     try {
-      logUsage({
+      // ⭐ 21 Sep 2026 — AB AWAIT HOTA HAI. Pehle fire-and-forget tha: Vercel
+      // jawab lautte hi function jam kar deta tha aur Supabase ka request
+      // beech mein marta tha — aadhe se zyada rows KHO jaati thin (Rohiit ki
+      // ginti galat aa rahi thi). usage-log v1.2 Promise lautata hai aur
+      // andar kabhi throw nahi karta, to calculator par koi khatra nahi.
+      await logUsage({
         ...usageContextFromRequest(req),
         ...usageBirthFields(body as any),
         product_slug : 'calc-doshas',
