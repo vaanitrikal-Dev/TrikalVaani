@@ -1,7 +1,8 @@
 /**
  * ============================================================================
  * FILE   : lib/usage-log.ts
- * VERSION: v1.1
+ * VERSION: v1.2 — logUsage() ab Promise lautata hai, taaki route AWAIT kar sake (21 Sep 2026)
+ * PICHHLA: v1.1
  * DATE   : 18 September 2026  (v1.1 — usageBirthFields helper added)
  * ============================================================================
  *
@@ -102,15 +103,15 @@ export interface UsageEvent {
  *
  * Never throws. Never blocks. Never returns an error to the caller.
  */
-export function logUsage(event: UsageEvent): void {
+export function logUsage(event: UsageEvent): Promise<void> {
   try {
     if (!usageClient) {
       console.warn('[usage-log] Supabase env missing — skipping');
-      return;
+      return Promise.resolve();
     }
     if (!event?.product_slug) {
       console.warn('[usage-log] product_slug missing — skipping');
-      return;
+      return Promise.resolve();
     }
 
     const row = {
@@ -144,14 +145,31 @@ export function logUsage(event: UsageEvent): void {
       error_message : event.error_message ?? null,
     };
 
-    void usageClient
+    // ⭐ 21 Sep 2026 — AB PROMISE LAUTTA HAI.
+    // 🔴 Pehle yahan "void usageClient.insert(...)" tha — fire-and-forget.
+    // Lambe chalne wale server par wo theek hai, par VERCEL SERVERLESS par
+    // galat: jawab lautte hi function JAM jaata hai aur beech ka Supabase
+    // request mar jaata hai. Natija — 16 calculator wale calc-kundali par
+    // 3 din mein sirf 13 rows, aur santan/vivah/doshas/manglik par 0.
+    // Saboot: kundali-milan/route.ts apna insert AWAIT karta hai aur
+    // hamesha chala hai.
+    // Ab jo route ise AWAIT karega uska likhna pakka hoga. Jo route bina
+    // await ke bulata hai (baaki 5 calc route), uske liye byavhaar WAISA HI
+    // hai jaisa pehle tha — kuch nahi tootta. Rohiit ka niyam (20 Sep):
+    // "jab us calculator ki file waise bhi badle, tabhi save jodna."
+    // Supabase ka .then() PromiseLike deta hai, asli Promise nahi —
+    // Promise.resolve() use asli Promise banata hai (tsc ne pakda, 21 Sep).
+    return Promise.resolve(usageClient
       .from('product_usage')
       .insert(row)
       .then(({ error }) => {
         if (error) console.error('[usage-log] insert failed:', error.message);
-      });
+      }, (e: unknown) => {
+        console.error('[usage-log] insert threw (ignored):', e);
+      }));
   } catch (err) {
     console.error('[usage-log] unexpected error (ignored):', err);
+    return Promise.resolve();
   }
 }
 
