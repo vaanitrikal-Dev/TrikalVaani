@@ -1,7 +1,8 @@
 // ============================================================
 // File: app/api/calc/sade-sati/route.ts
 // Purpose: VM bridge for Sade Sati Calculator (FREE forever)
-// Version: v1.5 — usage logging added (18 Sep 2026)
+// Version: v1.6 — storage AWAIT (21 Sep 2026)
+// PICHHLA: v1.5 — usage logging added (18 Sep 2026)
 // Changelog v1.4: Pass full VM remedies object to buildTemplateFromVMRemedies
 //   so actionWindows (Dos) from remedy_master are included in response.
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
@@ -134,7 +135,12 @@ export async function POST(req: NextRequest) {
     //    would otherwise crash the route. Nothing in this block can ever stop
     //    a calculator from answering the customer.
     try {
-      logUsage({
+      // ⭐ 21 Sep 2026 — AB AWAIT HOTA HAI. Pehle fire-and-forget tha: Vercel
+      // jawab lautte hi function jam kar deta tha aur Supabase ka request
+      // beech mein marta tha — aadhe se zyada rows KHO jaati thin (Rohiit ki
+      // ginti galat aa rahi thi). usage-log v1.2 Promise lautata hai aur
+      // andar kabhi throw nahi karta, to calculator par koi khatra nahi.
+      await logUsage({
         ...usageContextFromRequest(req),
         ...usageBirthFields(body as any),
         product_slug : 'calc-sade-sati',
