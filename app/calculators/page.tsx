@@ -1,7 +1,8 @@
 // ============================================================
 // File: app/calculators/page.tsx
 // Purpose: Calculators Hub — SEO/GEO/AEO landing page
-// Version: v4.0 — Vivah Yog calculator added (3 Sep 2026)
+// Version: v4.1 — second-marriage card (21 Sep 2026)
+// PICHHLA: 4.0 — Vivah Yog calculator added (3 Sep 2026)
 // CHANGES vs v3.9:
 //   ✅ Added 1 FREE card: Vivah Yog ("Shadi kab hogi"). Free verdict + summary,
 //      so the "100% free hub" rule still holds — the ₹51 unlock sits inside
@@ -150,6 +151,14 @@ const CALCULATORS: CalcEntry[] = [
     emoji: '\u{1F48D}',
     name: 'Free Vivah Yog Calculator',
     desc: 'Shadi kab hogi \u2014 saptam bhava, Navamsa D-9, kalatra karak aur Darakaraka se. Asli tareekhon ki dasha khidkiyan aur umar ka range, har ank ki wajah ke saath.',
+    badge: 'New',
+    live: true,
+  },
+  {
+    slug: 'free-second-marriage-calculator',
+    emoji: '\u{1F491}',
+    name: 'Free Second Marriage Calculator',
+    desc: 'Doosre vivah ka yog \u2014 BPHS 18.19, Bhrigu Sutram aur Navamsa D-9 se. Ling ke hisaab se karak (Shukra/Guru), har ank ke saath uska shlok.',
     badge: 'New',
     live: true,
   },

@@ -48,7 +48,7 @@
  * 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER 🔱
  * ============================================================================
  * File:        app/sitemap.ts
- * Version:     v8.8
+ * Version:     v8.9 — free-second-marriage-calculator juda (21 Sep 2026)
  *
  * Changes v8.7 -> v8.8 (2026-09-03):
  *   1. VIVAH YOG CALCULATOR added to CALCULATORS. Count 32 -> 33.
@@ -392,6 +392,8 @@ const CALCULATORS = [
   'free-santan-yog-calculator',
   // ── Vivah Yog / "Shadi kab hogi" (v8.8) ──
   'free-shadi-kab-hogi-calculator',
+  // ── Second Marriage / Doosra Vivah (v8.9 — 21 Sep 2026) ──
+  'free-second-marriage-calculator',
 ];
 
 const DOMAINS_FALLBACK = [
