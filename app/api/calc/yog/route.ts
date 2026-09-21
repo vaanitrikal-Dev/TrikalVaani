@@ -1,6 +1,7 @@
 // ============================================================
 // File: app/api/calc/yog/route.ts
-// Version: v4.0 — GRANTH PAR, GEMINI BAND, storage AWAIT (21 Sep 2026)
+// Version: v4.1 — CHHATHA TYPE: second-marriage (Doosra Vivah, BPHS 18.19-21) — 21 Sep 2026
+// PICHHLA: v4.0 — GRANTH PAR, GEMINI BAND, storage AWAIT (21 Sep 2026)
 //   * Paancho calculator /granth/product se — saar + faisla + teen parat
 //   * Gemini (santan-summary, vivah-summary) BILKUL BAND — Rohiit ka nirdesh
 //   * logUsage ab AWAIT — pehle fire-and-forget se aadhe request marte the
@@ -154,6 +155,8 @@ import type { CalcData, ScoredRule } from '@/lib/yog-engine';
 import { scoreUpsc } from '@/lib/upsc-engine';
 import { scoreForeignSettlement } from '@/lib/foreign-settlement-engine';
 import { scoreForeignSpouse } from '@/lib/foreign-spouse-engine';
+// ⭐ 21 Sep 2026 — Second Marriage (Doosra Vivah) Yog — BPHS 18.19-21
+import { scoreSecondMarriage } from '@/lib/second-marriage-engine';
 import { scoreSantan } from '@/lib/santan-engine';
 import type { DashaPeriod, SantanResult } from '@/lib/santan-engine';
 import { scoreVivah } from '@/lib/vivah-engine';
@@ -170,6 +173,7 @@ const YOG_TO_PRODUCT: Record<string, string> = {
   upsc:                 'ias-govt-job',
   'foreign-settlement': 'foreign-settlement',
   'foreign-spouse':     'foreign-spouse',
+  'second-marriage':    'second-marriage',
   santan:               'santan-yog',
   vivah:                'shadi-kab-hogi',
 };
@@ -213,9 +217,9 @@ export const dynamic = 'force-dynamic';
 /** Hard ceiling. See the v2.4 note above — without this it was Vercel's default. */
 export const maxDuration = 60;
 
-type YogType = 'upsc' | 'foreign-settlement' | 'foreign-spouse' | 'santan' | 'vivah';
+type YogType = 'upsc' | 'foreign-settlement' | 'foreign-spouse' | 'santan' | 'vivah' | 'second-marriage';
 
-const VALID: YogType[] = ['upsc', 'foreign-settlement', 'foreign-spouse', 'santan', 'vivah'];
+const VALID: YogType[] = ['upsc', 'foreign-settlement', 'foreign-spouse', 'santan', 'vivah', 'second-marriage'];
 
 /** The two types that lead with a verdict and a written summary. */
 const VERDICT_TYPES: YogType[] = ['santan', 'vivah'];
@@ -415,6 +419,7 @@ export async function POST(req: NextRequest) {
       : type === 'foreign-settlement' ? scoreForeignSettlement(data)
       : type === 'santan' ? scoreSantan(data, timeline, b.name ?? null, b.year)
       : type === 'vivah' ? scoreVivah(data, timeline, b.name ?? null, b.year, b.gender ?? null)
+      : type === 'second-marriage' ? scoreSecondMarriage(data)
       : scoreForeignSpouse(data);
 
     if (paid) {
