@@ -2,7 +2,9 @@
 
 // ============================================================
 // File: app/calculators/free-gemstone-calculator/page.tsx
-// Version: v2.0 — Free Gemstone (Ratna) Calculator (Radar E3 content build)
+// Version: v2.1 — 📖 GRANTH SE dabba + LAGNA-SWAMI KA SUJHAV PARASHAR SE (BPHS Ch.34) — 21 Sep 2026
+//   Pehle har lagna ko lagna-swami ka ratna 'sabse mukhya' bataya jaata tha — Vrishabh ko Heera (granth: PAAP).
+// PICHHLA: v2.0 — Free Gemstone (Ratna) Calculator (Radar E3 content build)
 // API: /api/calc/kundali (calcType: 'gemstone') — already live
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
 // Changelog:
@@ -66,6 +68,8 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import SiteNav from '@/components/layout/SiteNav';
+// ⭐ 21 Sep 2026 — granth ka ratna + upay (BPHS 84.17, JP 2.21)
+import { GranthRatnaBox } from '@/components/calculators/StoneScoreboard';
 
 const GOLD = '#D4AF37';
 const GOLD_RGBA = (a: number) => `rgba(212,175,55,${a})`;
@@ -127,6 +131,32 @@ const PLANET_ALIASES: Record<string, string> = {
   saturn: 'Saturn', shani: 'Saturn', shanaishchara: 'Saturn',
   rahu: 'Rahu',
   ketu: 'Ketu',
+};
+
+// ⭐⭐ 21 Sep 2026 — LAGNA-SWAMI KA DARJA, PARASHAR SE (BPHS Ch.34).
+// 🔴 PEHLE: ye page HAR lagna ko lagna-swami ka ratna "aam taur par sabse
+// mukhya sujhav" batata tha — engine (gemstone.ts) ka faisla use hi nahi
+// karta tha. Par Parashar kai lagna ke liye lagna-swami ko shubh NAHI
+// kehte: Vrishabh ke liye Shukra PAAP hai (34.23-24 — 6th ka mooltrikon),
+// aur Tula/Vrischik/Dhanu/Makar ke liye lagna-swami sirf SAMA hai. Yani
+// Vrishabh wale ko HEERA "sabse mukhya" bataya ja raha tha — ULTA.
+// ⚠️ Maine 21 Sep ko Rohiit ko galat bataya tha ki "engine ka sudhaar is
+// page par pehle se lag gaya" — critique mein pakda gaya.
+// Ye table ch34_lagna.py (VM) se SEEDHI nikaali gayi. gemstone.ts ko jaan-
+// boojh kar nahi chhua (Rohiit: "no rework") — isliye yahan chhoti copy.
+const LAGNA_SWAMI_DARJA: Record<string, [string, string]> = {
+  Mesha: ['shubh', 'BPHS 34.19-22'],
+  Vrishabha: ['paap', 'BPHS 34.23-24'],
+  Mithuna: ['chup', 'BPHS 34.25-26'],
+  Karka: ['shubh', 'BPHS 34.27-28'],
+  Simha: ['shubh', 'BPHS 34.29-30'],
+  Kanya: ['yogakaraka', 'BPHS 34.31-32'],
+  Tula: ['sama', 'BPHS 34.33-34'],
+  Vrishchika: ['sama', 'BPHS 34.35-36'],
+  Dhanu: ['sama', 'BPHS 34.37-38'],
+  Makara: ['sama', 'BPHS 34.39-40'],
+  Kumbha: ['shubh', 'BPHS 34.41-42'],
+  Meena: ['yogakaraka', 'BPHS 34.43-44'],
 };
 
 function resolvePlanet(name?: string | null): string | null {
@@ -709,7 +739,27 @@ export default function FreeGemstoneCalculatorPage() {
                   <div className="text-xs uppercase tracking-widest text-slate-400 mb-2">Your Life Stone (Lagna Ratna)</div>
                   <div className="text-5xl mb-2">💎</div>
                   <div className="text-3xl md:text-4xl font-serif font-bold mb-1" style={{ color: GOLD }}>{lifeGem.stone} <span className="text-2xl text-slate-300">({lifeGem.hi})</span></div>
-                  <div className="text-sm text-slate-300">Lagna swami <strong style={{ color: GOLD }}>{lagnaLordRaw} ({lifeGem.planet_hi})</strong> ka ratna — aam taur par sabse mukhya sujhav. <span style={{ color: '#fbbf24' }}>Pehnne se pehle suitability zaroor check karein.</span></div>
+                  {(() => {
+                    // ⭐ 21 Sep — sujhav ab Parashar ke darje se (upar LAGNA_SWAMI_DARJA)
+                    const [d, sl] = (lagna && LAGNA_SWAMI_DARJA[lagna]) || ['chup', ''];
+                    const who = <>Lagna swami <strong style={{ color: GOLD }}>{lagnaLordRaw} ({lifeGem.planet_hi})</strong> ka ratna</>;
+                    if (d === 'paap') return (
+                      <div className="text-sm" style={{ color: '#FCA5A5' }}>
+                        {who} — par <strong>Parashar ({sl}) aapke lagna ke liye {lifeGem.planet_hi} ko PAAP kehte hain.</strong> Ye ratna aapke liye nahi — sahi ratna ke liye suitability zaroor check karein.
+                      </div>);
+                    if (d === 'sama') return (
+                      <div className="text-sm text-slate-300">
+                        {who} — Parashar ({sl}) aapke lagna ke liye {lifeGem.planet_hi} ko <strong>sama</strong> (na shubh, na paap) kehte hain. <span style={{ color: '#fbbf24' }}>Pehnne se pehle suitability zaroor check karein.</span>
+                      </div>);
+                    if (d === 'shubh' || d === 'yogakaraka') return (
+                      <div className="text-sm text-slate-300">
+                        {who} — Parashar ({sl}) aapke lagna ke liye {lifeGem.planet_hi} ko <strong style={{ color: '#86EFAC' }}>{d}</strong> kehte hain, isliye ye mukhya sujhav hai. <span style={{ color: '#fbbf24' }}>Pehnne se pehle suitability zaroor check karein.</span>
+                      </div>);
+                    return (
+                      <div className="text-sm text-slate-300">
+                        {who}. Is lagna par granth {lifeGem.planet_hi} ke baare mein chup hai. <span style={{ color: '#fbbf24' }}>Pehnne se pehle suitability zaroor check karein.</span>
+                      </div>);
+                  })()}
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-5 text-left">
                     <DetailCell icon="🔗" label="Metal" value={lifeGem.metal} />
                     <DetailCell icon="✋" label="Finger" value={lifeGem.finger} />
@@ -724,6 +774,8 @@ export default function FreeGemstoneCalculatorPage() {
                       {lifeGem.hi} किसे पहनना चाहिए — पूरा लेख →
                     </Link>
                   )}
+                  {/* ⭐ 21 Sep — 📖 GRANTH SE: lagna-swami ka ratna aur granth ka upay */}
+                  <div className="text-left"><GranthRatnaBox graha={lagnaLord} /></div>
                 </div>
               ) : (
                 <div className="rounded-2xl p-6 text-center" style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid ${GOLD_RGBA(0.2)}` }}>
