@@ -1,9 +1,11 @@
 /**
+ * v1.6 (21 Sep 2026) — word count ghataya (Rohiit): basic 400->250,
+ *   couple/parent 1000->550, both 1500->1000. maxTokens nahi ghataya.
  * ============================================================
  * TRIKAL VAANI — Milan Narrative Generator API
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/api/milan-narrative/route.ts
- * VERSION: 1.5
+ * VERSION: 1.6
  * SIGNED: ROHIIT GUPTA, CEO
  * ============================================================
  * CHANGE LOG (v1.4 → v1.5):
@@ -52,10 +54,20 @@ const TIER_CONFIG: Record<Tier, TierConfig> = {
   // 700 tokens of visible text, and the rest was headroom for 2.5's thinking.
   // 3.x reasons more and is measurably more verbose, so the old headroom is
   // no longer headroom. Every other tier here was already well clear.
-  basic_51:        { model: 'gemini-3.7-flash', maxTokens: 6000,  wordTarget: 400,  usePolish: true },
-  deep_101_couple: { model: 'gemini-3.8-flash', maxTokens: 8000,  wordTarget: 1000, usePolish: true },
-  deep_101_parent: { model: 'gemini-3.8-flash', maxTokens: 8000,  wordTarget: 1000, usePolish: true },
-  both_151:        { model: 'gemini-3.8-flash', maxTokens: 12000, wordTarget: 1500, usePolish: true },
+  // ⭐ 21 Sep 2026 — WORD COUNT GHATAYA (Rohiit ka nirdesh):
+  //   basic_51 400 -> 250 · deep_101_couple 1000 -> 550 ·
+  //   deep_101_parent 1000 -> 550 · both_151 1500 -> 1000
+  // Wajah: milan ab GRANTH par hai (milan_engine v2.0 — Muhurta Chintamani
+  // sl.21-37), aur har koot ka shlok, parihar aur faisla engine KHUD deta
+  // hai. Gemini ka kaam ab un tathyon ko BHASHA dena hai, lamba nibandh
+  // likhna nahi. Aur "1000-word analysis" ka waada copy se hata diya gaya
+  // hai — "poora granth-paath" likha hai.
+  // ⚠️ maxTokens JAAN-BOOJH KAR NAHI GHATAYA. 3.x model soch mein token
+  // khaata hai (upar ka note); chhat ghatane se jawab beech mein kat sakta hai.
+  basic_51:        { model: 'gemini-3.7-flash', maxTokens: 6000,  wordTarget: 250,  usePolish: true },
+  deep_101_couple: { model: 'gemini-3.8-flash', maxTokens: 8000,  wordTarget: 550,  usePolish: true },
+  deep_101_parent: { model: 'gemini-3.8-flash', maxTokens: 8000,  wordTarget: 550,  usePolish: true },
+  both_151:        { model: 'gemini-3.8-flash', maxTokens: 12000, wordTarget: 1000, usePolish: true },
 };
 
 // ── Valid language whitelist (defensive) ─────────────────────
