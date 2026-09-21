@@ -1,6 +1,9 @@
 // ============================================================
 // File: lib/jyotish/gemstone.ts
-// Version: v2.1 — Gemologist Brain + Rule 8 Combustion (pure chart-based)
+// Version: v3.0 — NEENV PARASHAR SE (BPHS Ch.34 sl.19-44) — 21 Sep 2026
+//   computeFunctional() ab pehle Parashar ki lagna-dar-lagna soochi dekhta hai;
+//   saamanya lordship niyam sirf "granth chup" par. 7 ulte jawab theek.
+// PICHHLA: v2.1 — Gemologist Brain + Rule 8 Combustion (pure chart-based)
 // Single source of truth for all gemstone pages.
 //
 // LOGICAL BASE: strength (Shadbala ratio, inverted) + dignity + house + dasha.
@@ -79,8 +82,81 @@ function badhakaHouse(lagnaEn: string): number {
 type Cap = 'avoid' | 'caution' | 'trial';
 interface Functional { score: number; flags: string[]; caps: Cap[]; yk: boolean; }
 
+// ⭐⭐ 21 September 2026 — NEENV AB PARASHAR KI SOOCHI SE (BPHS Ch.34 sl.19-44).
+//
+// Rohiit: "agar neev galat hai toh usse theek kardo."
+//
+// 🔴 PEHLE: ye function SIRF saamanya lordship niyam se ginta tha ("kendra +
+// trikon = yogakaraka", "8th swami = −35"). Wahi niyam jo Santhanam ki TIKA
+// (p.342) mein hai. Par Parashar ki LAGNA-DAR-LAGNA soochi (34.19-44) kai
+// jagah us niyam ko PALAT deti hai. 84 grah-lagna jodiyon par chala kar
+// naapa gaya: 55 mel, 18 halka farq, aur 7 BILKUL ULTE —
+//     Shani-Mesh      engine SHUBH  → Neelam theek   · shlok PAAP
+//                     ⚠️ Neelam sabse khatarnak ratna hai
+//     Mangal-Mesh     engine PAAP   → apne LAGNA-SWAMI ka Moonga mat pehno
+//                     shlok 34.19: "randhreshatve api bhUputro ... shubha"
+//                     (8th ka swami hone par bhi Mangal SHUBH)
+//     Shukra-Vrishabh engine SHUBH  · shlok PAAP (6th ka mooltrikon)
+//     Budh-Dhanu      engine PAAP   · shlok YOGAKARAKA
+//     Guru-Simha      engine PAAP   · shlok SHUBH (5va 8ve par bhaari)
+//     Chandra-Tula    engine PAAP   · shlok 34.33 RAJAYOGA-KARAK
+//     Mangal-Makar    engine SHUBH  · shlok 34.39 PAAP
+//
+// ⭐ ROHIIT KA FAISLA (21 Sep): TULA-SHANI par SHLOK, TIKA nahi — "Shani
+// shubh; Chandra-Budh rajayoga-karak". Isliye yahan poori soochi SHLOK se hai.
+//
+// Ye table ch34_lagna.py (VM) se SEEDHA nikaali gayi — haath se nahi likhi.
+//   Y=yogakaraka  S=shubh  P=paap  M=maarak  N=sama  '-'=granth chup
+// ⚠️ Mithun-Shani ko ch34_lagna.py 'sama' kehta hai, par 34.25-26 ka shlok us
+// par CHUP hai ("no hint on Saturn's role"). VM par alag se theek karna baaki.
+//
+// ⭐ "GEMOLOGIST BRAIN" KE BAAKI 7 NIYAM WAISE HI HAIN — bal, dignity, bhav,
+// MKS, badhaka, papakartari, combustion, risk-cap. Sirf NEENV badli hai.
+const CH34: Record<string, Record<string, string>> = {
+  Aries:       { Sun: 'S', Moon: '-', Mars: 'S', Mercury: 'P', Jupiter: 'S', Venus: 'PM', Saturn: 'PM' },  // BPHS 34.19-22
+  Taurus:      { Sun: 'S', Moon: 'P', Mars: 'M', Mercury: 'N', Jupiter: 'PM', Venus: 'P', Saturn: 'YS' },  // BPHS 34.23-24
+  Gemini:      { Sun: 'P', Moon: 'M', Mars: 'P', Mercury: '-', Jupiter: 'P', Venus: 'S', Saturn: 'N' },  // BPHS 34.25-26
+  Cancer:      { Sun: 'N', Moon: 'S', Mars: 'YS', Mercury: 'P', Jupiter: 'S', Venus: 'P', Saturn: 'M' },  // BPHS 34.27-28
+  Leo:         { Sun: 'S', Moon: 'N', Mars: 'S', Mercury: 'P', Jupiter: 'S', Venus: 'P', Saturn: 'PM' },  // BPHS 34.29-30
+  Virgo:       { Sun: 'N', Moon: 'P', Mars: 'P', Mercury: 'YS', Jupiter: 'P', Venus: 'YSM', Saturn: '-' },  // BPHS 34.31-32
+  Libra:       { Sun: 'P', Moon: 'Y', Mars: 'PM', Mercury: 'YS', Jupiter: 'PM', Venus: 'N', Saturn: 'S' },  // BPHS 34.33-34
+  Scorpio:     { Sun: 'Y', Moon: 'YS', Mars: 'N', Mercury: 'P', Jupiter: 'S', Venus: 'PM', Saturn: 'P' },  // BPHS 34.35-36
+  Sagittarius: { Sun: 'YS', Moon: '-', Mars: 'S', Mercury: 'Y', Jupiter: 'N', Venus: 'PM', Saturn: 'M' },  // BPHS 34.37-38
+  Capricorn:   { Sun: 'N', Moon: 'P', Mars: 'PM', Mercury: 'S', Jupiter: 'P', Venus: 'YS', Saturn: 'N' },  // BPHS 34.39-40
+  Aquarius:    { Sun: 'M', Moon: 'P', Mars: 'PM', Mercury: 'N', Jupiter: 'P', Venus: 'YS', Saturn: 'S' },  // BPHS 34.41-42
+  Pisces:      { Sun: 'P', Moon: 'S', Mars: 'YS', Mercury: 'PM', Jupiter: 'Y', Venus: 'P', Saturn: 'PM' },  // BPHS 34.43-44
+};
+
+function fromCh34(graha: string, lagnaEn: string): Functional | null {
+  const f = CH34[lagnaEn]?.[graha];
+  if (!f || f === '-') return null;                          // granth chup
+  const sl = `BPHS 34`;
+  if (f.includes('Y')) {
+    const fl = [`yogakaraka (${sl})`];
+    if (f.includes('M')) fl.push(`maarak bhi (${sl})`);
+    return { score: 55, flags: fl, caps: [], yk: true };
+  }
+  if (f.includes('P')) {
+    // Parashar ne naam lekar PAAP kaha — iska ratna nahi pehnna
+    return { score: -22, flags: [`paap (${sl})${f.includes('M') ? ' · maarak' : ''}`],
+             caps: ['avoid'], yk: false };
+  }
+  if (f.includes('S')) {
+    const fl = [`shubh (${sl})`]; const cp: Cap[] = [];
+    if (f.includes('M')) { fl.push(`maarak bhi (${sl})`); cp.push('trial'); }
+    return { score: 22, flags: fl, caps: cp, yk: false };
+  }
+  if (f.includes('M')) return { score: -12, flags: [`maarak (${sl})`], caps: ['trial'], yk: false };
+  if (f.includes('N')) return { score: 0, flags: [`sama (${sl})`], caps: [], yk: false };
+  return null;
+}
+
 // Rules 1 + 2 + kendradhipati — functional nature computed from lordships
+// ⭐ 21 Sep — ab PEHLE Parashar ki soochi dekhi jaati hai. Ye saamanya niyam
+// SIRF tab chalta hai jab granth us grah par CHUP ho.
 function computeFunctional(graha: string, lagnaEn: string): Functional {
+  const shlok = fromCh34(graha, lagnaEn);
+  if (shlok) return shlok;
   const hs = ownedHouses(graha, lagnaEn);
   const flags: string[] = []; const caps: Cap[] = []; let score = 0; let yk = false;
   const has = (h: number) => hs.includes(h);
