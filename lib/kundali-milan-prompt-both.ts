@@ -1,9 +1,21 @@
 /**
+ * v1.2 (21 Sep 2026) — GRANTH PAR:
+ *   1. 🔴 GUARANTEE HATAYI — teeno bhasha mein Gemini ko likhna tha:
+ *      "Trikaal assures you that your married life will be successful. Every
+ *       dosha will be neutralised. This is the word of Vedic shastra." Wo
+ *      Rohiit ke 'no accuracy claims' niyam ke khilaaf tha. Ab MC 6.34 ka apna
+ *      shabd: "ye daan dosh door karne wale KAHE GAYE hain" — aur saaf ki hum
+ *      koi guarantee nahi dete.
+ *   2. "1000-word" -> "poora granth-paath" (word count 550 ho gaya).
+ *   3. "Bhrigu Nadi" -> "Bhrigu". "4 Maharishi Parashar ke upaay" ->
+ *      "4 paramparik upaay" — ye 10 upay BPHS ke shlok NAHI hain.
+ *   4. GRANTH KA FAISLA ka nirdesh — Gemini engine ka faisla, parihar aur
+ *      daan WAHI likhega, apna nahi banayega. Upay DO hisson mein.
  * ============================================================
  * TRIKAL VAANI — Kundali Milan Prompt: BOTH Versions
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: lib/kundali-milan-prompt-both.ts
- * VERSION: 1.1 — Language lock (hinglish | hindi | english) — Option A
+ * VERSION: 1.2 — Language lock (hinglish | hindi | english) — Option A
  *                + basic_51 tier gate added (safety/consistency)
  * SIGNED: ROHIIT GUPTA, CEO
  * ============================================================
@@ -102,11 +114,11 @@ export function buildMilanBothPrompt(input: MilanBothPromptInput): string {
       parentGreeting: 'Aadarniya maata-pita',
       parentArzi: 'Vivah se pehle yeh parivaar Maa Shakti ke charano mein ek Arzi arpit kare — aane waali bahu/nayi grihalakshmi ki raksha ke liye. Yeh aapki shraddha ka pratham sankalp hai.',
       parentDhanyawad: 'Jab vivah saanand sampann ho — tab lautkar aaiye. Trikaal Vaani aapka apna ghar hai. Maa ke charano mein Dhanyawad arpan karna na bhooliye. Yeh chakra poora hona zaroori hai.',
-      parentKarmic: 'Ek aur gambhir vishay — yeh dosh sirf is janam ke nahi hain. Poorva janam ka koi karmic karz bhi in dono ke beech juda ho sakta hai. Woh kahani Bhrigu Nadi ki gehri parton mein chhupi hai — woh Trikaal Vaani ki Karmic Background Reading mein khulegi.',
+      parentKarmic: 'Ek aur gambhir vishay — yeh dosh sirf is janam ke nahi hain. Poorva janam ka koi karmic karz bhi in dono ke beech juda ho sakta hai. Woh kahani Bhrigu ki gehri parton mein chhupi hai — woh Trikaal Vaani ki Karmic Background Reading mein khulegi.',
       parentClosing: 'Trikaal aapke parivaar ke saath hai. Maa ki kripa banee rahe. Shubhamastu.',
-      remediesIntro: 'Trikaal Vaani ne aap (dono / aapke parivaar) ke liye 10 vishesh remedies select kiye hain — 4 Maharishi Parashar se, 4 Bhrigu Nadi se, aur 2 Shadbala-based. Ye SIRF isi kundali-jodi ke liye chune gaye hain.',
-      remediesPromise: 'Agar yeh 10 remedies dil se follow kiye jaayein — pooja sahi din ko, mantra sahi sankhya mein, daan sahi vyakti ko — toh Trikaal vishwas dilata hai ki vivahit jeevan safal hoga. Yeh Vedic shastra ka vachan hai.',
-      teaseIntro: 'Trikaal Vaani ne 10 vishesh remedies identify ki hain — 4 Parashar, 4 Bhrigu Nadi, 2 Shadbala-based — sirf isi kundali-jodi ke liye.',
+      remediesIntro: 'Trikaal Vaani ne aap (dono / aapke parivaar) ke liye 10 vishesh remedies select kiye hain — 4 paramparik, 4 Bhrigu se, aur 2 Shadbala-based. Ye SIRF isi kundali-jodi ke liye chune gaye hain.',
+      remediesPromise: 'Granth kehta hai ki ye daan dosh door karne wale hain — Muhurta Chintamani 6.34: "swarn ka daan, gau ka daan aur ann ka daan — ye sab doshon ko door karne wale kahe gaye hain." Upay shraddha aur sahi vidhi se kiye jaate hain; unka phal aapke karm aur samay par bhi nirbhar karta hai. Hum koi guarantee nahi dete — hum wahi batate hain jo granth kehta hai.',
+      teaseIntro: 'Trikaal Vaani ne 10 vishesh remedies identify ki hain — 4 Parashar, 4 Bhrigu, 2 Shadbala-based — sirf isi kundali-jodi ke liye.',
       teaseClose: 'Lekin yeh remedies itni specific hain ki poora reveal sirf Deep/Full Reading mein hota hai. Diagnosis ho gayi — samadhan ke liye full reading kholiye.',
     },
 
@@ -126,7 +138,7 @@ export function buildMilanBothPrompt(input: MilanBothPromptInput): string {
       parentKarmic: 'एक और गम्भीर विषय — ये दोष केवल इस जन्म के नहीं हैं। पूर्व जन्म का कोई कार्मिक ऋण भी इन दोनों के बीच जुड़ा हो सकता है। वह कथा भृगु नाड़ी की गूढ़ परतों में छिपी है — वह त्रिकाल वाणी की Karmic Background Reading में खुलेगी।',
       parentClosing: 'त्रिकाल आपके परिवार के साथ है। माँ की कृपा बनी रहे। शुभमस्तु।',
       remediesIntro: 'त्रिकाल वाणी ने इसी कुंडली-जोड़ी के लिए 10 विशिष्ट उपाय चुने हैं — 4 महर्षि पाराशर से, 4 भृगु नाड़ी से, और 2 षड्बल-आधारित।',
-      remediesPromise: 'यदि इन 10 उपायों का पालन श्रद्धा से किया जाए — पूजा शास्त्रोक्त मुहूर्त में, मन्त्र निर्धारित संख्या में, दान योग्य पात्र को — तो त्रिकाल विश्वास दिलाता है कि वैवाहिक जीवन सफल होगा। यह वैदिक शास्त्र का वचन है।',
+      remediesPromise: 'ग्रन्थ कहता है कि ये दान दोष दूर करने वाले हैं — मुहूर्त चिन्तामणि 6.34: "स्वर्ण का दान, गौ का दान और अन्न का दान — ये सब दोषों को दूर करने वाले कहे गये हैं।" उपाय श्रद्धा और सही विधि से किये जाते हैं; उनका फल आपके कर्म और समय पर भी निर्भर करता है। हम कोई गारन्टी नहीं देते — हम वही बताते हैं जो ग्रन्थ कहता है।',
       teaseIntro: 'त्रिकाल वाणी ने 10 विशिष्ट उपाय चिह्नित किए हैं — 4 पाराशर, 4 भृगु नाड़ी, 2 षड्बल-आधारित — केवल इसी कुंडली-जोड़ी के लिए।',
       teaseClose: 'परन्तु ये उपाय इतने विशिष्ट हैं कि पूर्ण प्रकाशन केवल Deep/Full Reading में होता है। निदान हो गया — समाधान के लिए पूर्ण रीडिंग खोलिए।',
     },
@@ -144,11 +156,11 @@ export function buildMilanBothPrompt(input: MilanBothPromptInput): string {
       parentGreeting: 'Respected Parents',
       parentArzi: 'Before the marriage, let this family offer an Arzi at the feet of Maa Shakti — for the protection of the incoming bride / new Grihalakshmi. It is the first resolve of your devotion.',
       parentDhanyawad: 'When the marriage is joyfully complete — return again. Trikaal Vaani is your own home. Do not forget to offer Dhanyawad at Her feet. This cycle must be completed.',
-      parentKarmic: 'One more grave matter — these doshas are not of this birth alone. A karmic debt from a past life may bind these two. That story lies hidden in the deeper layers of Bhrigu Nadi — it will be revealed in Trikaal Vaani\u2019s Karmic Background Reading.',
+      parentKarmic: 'One more grave matter — these doshas are not of this birth alone. A karmic debt from a past life may bind these two. That story lies hidden in the deeper layers of Bhrigu — it will be revealed in Trikaal Vaani\u2019s Karmic Background Reading.',
       parentClosing: 'Trikaal is with your family. May the grace of Maa remain upon you. Shubhamastu.',
-      remediesIntro: 'Trikaal Vaani has selected 10 specific remedies for this Kundali pairing — 4 from Maharishi Parashar, 4 from Bhrigu Nadi, and 2 Shadbala-based.',
-      remediesPromise: 'If these 10 remedies are followed with sincerity — the pooja on the right day, the mantra in the prescribed count, the daan to the right recipient — then Trikaal assures that the married life will be successful. This is the word of Vedic shastra.',
-      teaseIntro: 'Trikaal Vaani has identified 10 specific remedies — 4 Parashar, 4 Bhrigu Nadi, 2 Shadbala-based — for this Kundali pairing alone.',
+      remediesIntro: 'Trikaal Vaani has selected 10 specific remedies for this Kundali pairing — 4 traditional, 4 from Bhrigu, and 2 Shadbala-based.',
+      remediesPromise: 'The granth says these offerings remove doshas — Muhurta Chintamani 6.34: "the gift of gold, the gift of a cow and the gift of grain — all of these are said to remove doshas." Remedies are done with faith and the right procedure; their result also depends on your own karma and timing. We give no guarantee — we tell you what the granth says.',
+      teaseIntro: 'Trikaal Vaani has identified 10 specific remedies — 4 Parashar, 4 Bhrigu, 2 Shadbala-based — for this Kundali pairing alone.',
       teaseClose: 'But these remedies are so specific that full revelation comes only in the Deep/Full Reading. The diagnosis is complete — for the solution, open the full reading.',
     },
   };
@@ -196,6 +208,39 @@ ASHTAKOOT SCORE: ${ashtakoot_score} / 36
 
 ASHTAKOOT BREAKDOWN (8 Kootas):
 ${ashtakootJSON}
+━━━ ⭐ GRANTH KA FAISLA — ISE BADALNA NAHI (21 Sep 2026) ━━━
+Upar ke ASHTAKOOT DATA mein engine ne Muhurta Chintamani (Vivaha sl.21-37) se
+har koot ka ank, PARIHAR aur FAISLA pehle hi nikaal diya hai. Tumhara kaam
+un tathyon ko BHASHA dena hai — naya faisla banana NAHI.
+
+1. FAISLA: "faisla" khane mein jo likha hai (HAAN / HO SAKTA HAI / NAHI) —
+   WAHI likho. Apna faisla mat banao, aur use naram ya kathor mat karo.
+   Uski wajah "faisla_wajah" mein hai — wahi batao.
+2. PARIHAR: sirf wahi parihar likho jo "parihar" soochi mein hain, apne
+   shlok ke saath. Koi aur parihar mat gadho. Agar soochi khaali hai to
+   saaf kaho ki is jodi par koi parihar nahi lagta.
+3. DOSH: "bache_dosh" mein jo hai wahi bache hue dosh hain. Jo parihar se
+   kat gaya, use dosh mat kaho.
+4. NADI TEEVRATA: agar "nadi_teevrata" diya hai to uski "teevrata" (TEEVRA/
+   HALKA) aur "kispar" (var par ya vadhu par) — dono batao. Granth kehta
+   hai paas ke nakshatra ho to dosh teevra, door ke ho to kam.
+5. UPAY — DO ALAG HISSE, aur dono ko unke naam se:
+   🔱 GRANTH KA UPAY — "daan" khane se (Muhurta Chintamani 6.34). Ye
+      granth ka apna shlok hai.
+   📿 PARAMPARIK UPAY — remedies ke 10 upay. In par SAAF likho ki ye
+      PARAMPARA se hain, granth ke shlok nahi. Unhe "Parashar" ya "BPHS"
+      ka mat kaho.
+6. ANUMAAN: "anumaan" soochi mein jo koot hain (Tara, Yoni, Vashya ke kuch
+   maamle), unke ank granth ne NAHI diye — wahan granth chup hai. Unhe
+   pakka ank bata kar mat likho.
+7. KABHI GUARANTEE MAT DO: "vivah safal hoga", "sab dosh khatm ho jaayenge",
+   "shastra ka vachan hai" — aisi koi baat NAHI. Granth jo kehta hai wahi
+   kaho, uske shlok ke saath.
+8. 36 guna ka ANK dikhao — wo parampara mein sab dekhte hain. Par faisla
+   sirf ank se NAHI banta — NADI aur SHADASHTAK (mrityu) jaise dosh ank se
+   bade hain, aur isliye faisla unhe dekh kar bana hai.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
 
 MANGLIK STATUS (BPHS Lagna + Moon basis):
 ${manglikJSON}
