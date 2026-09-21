@@ -1,6 +1,7 @@
 // ============================================================
 // File: app/api/calc/muhurat/route.ts
-// Version: v1.2 — usage logging added (18 Sep 2026); VM call via lib/callVM.ts
+// Version: v1.3 — storage AWAIT (21 Sep 2026)
+// PICHHLA: v1.2 — usage logging added (18 Sep 2026); VM call via lib/callVM.ts
 // Proxies to VM /muhurat-finder endpoint
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
 // ============================================================
@@ -55,7 +56,12 @@ export async function POST(req: NextRequest) {
 
     // ── usage log — fire-and-forget, own try/catch (see lib/usage-log.ts) ──
     try {
-      logUsage({
+      // ⭐ 21 Sep 2026 — AB AWAIT HOTA HAI. Pehle fire-and-forget tha: Vercel
+      // jawab lautte hi function jam kar deta tha aur Supabase ka request
+      // beech mein marta tha — aadhe se zyada rows KHO jaati thin (Rohiit ki
+      // ginti galat aa rahi thi). usage-log v1.2 Promise lautata hai aur
+      // andar kabhi throw nahi karta, to calculator par koi khatra nahi.
+      await logUsage({
         ...usageContextFromRequest(req),
         ...usageBirthFields(body as any),
         product_slug : 'calc-muhurat',
