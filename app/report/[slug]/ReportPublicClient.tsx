@@ -4004,7 +4004,7 @@ function GranthFeedback({ sawaal, slug, lang }:{ sawaal:string; slug:string; lan
       </div>
       <div style={{color:'#cbd5e1',fontSize:'13px',lineHeight:1.75}}>{s(sawaal)}</div>
       <a href={`https://wa.me/?text=${encodeURIComponent(
-          `Trikal Vaani — report ${slug}\n\nNaukri/kaam ka bada mod: \nShaadi ya rishta: \nGhar/sampatti: `)}`}
+          `Trikaal Vaani — report ${slug}\n\nNaukri/kaam ka bada mod: \nShaadi ya rishta: \nGhar/sampatti: `)}`}
          target="_blank" rel="noopener noreferrer"
          style={{display:'inline-block',marginTop:'12px',padding:'8px 16px',
                  border:`1px solid ${G(0.4)}`,borderRadius:'7px',color:GOLD,
