@@ -571,7 +571,8 @@ async function fetchGranthProduct(
   product:string,
   y:number, mo:number, d:number, h:number, mi:number,
   lat:number, lng:number, tz:number, tier:string,
-  person2:Record<string,any>|null
+  person2:Record<string,any>|null,
+  bhasha:string = 'hinglish'
 ): Promise<Record<string,any>|null> {
   try{
     const r = await fetch(`${EPHE_API_URL}/granth/product`, {
@@ -584,6 +585,7 @@ async function fetchGranthProduct(
         product,
         year:y, month:mo, day:d, hour:h, minute:mi,
         latitude:lat, longitude:lng, timezone:tz, tier,
+        bhasha,
         ...(person2 ? {person2} : {}),
       }),
       cache:'no-store',
@@ -601,7 +603,11 @@ async function fetchGranthProduct(
 async function fetchGranth(
   y:number, mo:number, d:number, h:number, mi:number,
   lat:number, lng:number, tz:number,
-  umar:number, ling:string|null, tier:string, timeAssumed:boolean
+  umar:number, ling:string|null, tier:string, timeAssumed:boolean,
+  // ⭐ 21 Sep 2026 — saar.py teen bhasha mein likhta hai (hinglish/hindi/
+  // english). Bina iske VM hamesha hinglish deta, aur Hindi ya angrezi
+  // grahak ko galat bhasha ka saar milta.
+  bhasha:string = 'hinglish'
 ): Promise<Record<string,any>|null> {
   try{
     const r = await fetch(`${EPHE_API_URL}/granth/poori`, {
@@ -614,7 +620,8 @@ async function fetchGranth(
         year:y, month:mo, day:d, hour:h, minute:mi,
         latitude:lat, longitude:lng, timezone:tz,
         umar, ling, tier, time_assumed:timeAssumed,
-      }),
+              bhasha,
+}),
       cache:'no-store',
     })
     if(!r.ok){ console.error(`[Granth] ${r.status} ${await r.text().catch(()=>'')}`); return null }
@@ -2226,6 +2233,9 @@ export async function POST(req: NextRequest) {
       Number(localBirthData.timezone ?? 5.5),
       umar, ling, isPaid ? 'paid' : 'free',
       !birthData.tob,
+      // VM ki bhasha wahi jo grahak ne chuni — saar.py isi se likhta hai.
+      userContext.language === 'hindi' ? 'hindi'
+        : userContext.language === 'english' ? 'english' : 'hinglish',
     )
     // ⭐ 20 Sep — jin domain ka apna product hai, un par US SAWAAL ke bhav
     // ka granth bhi aata hai. Ye /granth/poori ki JAGAH nahi, uske SAATH
@@ -2246,6 +2256,8 @@ export async function POST(req: NextRequest) {
           latitude: Number(person2Data.lat), longitude: Number(person2Data.lng),
           timezone: 5.5,
         } : null,
+        userContext.language === 'hindi' ? 'hindi'
+          : userContext.language === 'english' ? 'english' : 'hinglish',
       )
       if(pg) (granthData as any).product = pg
     }
