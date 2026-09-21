@@ -2,7 +2,8 @@
 
 // ============================================================
 // File: app/calculators/free-manglik-dosh-calculator/page.tsx
-// Version: v2.0 — Free Manglik Dosh Calculator (Radar E3 content build)
+// Version: v2.1 — 📖 GRANTH SE: BPHS 80.48-49 (21 Sep 2026)
+// PICHHLA: v2.0 — Free Manglik Dosh Calculator (Radar E3 content build)
 // VM endpoint: /manglik-dosh (dedicated, 100% accurate)
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
 // Changelog:
@@ -673,6 +674,26 @@ export default function FreeManglikDoshCalculatorPage() {
                   </>
                 )}
               </div>
+
+              {/* ⭐ 21 Sep 2026 — 📖 GRANTH SE (Rohiit ka faisla).
+                  sambandh_phala ki do DIKHNE-LAYAK rows — BPHS 80.48 aur 80.49.
+                  ⚠️ BPHS 80.47 aur JP 14.34 JAAN-BOOJH KAR nahi dikhaye —
+                  dono never_show hain (unka paath "daampatya par kathin baat",
+                  yani vaidhavya ki baat). Sirf manglik hone par dikhta hai,
+                  kyunki "dono manglik = bhang" tabhi kaam ki baat hai. */}
+              {isManglik && (
+                <div className="rounded-2xl p-5 md:p-6" style={{ background: 'rgba(212,175,55,0.05)', border: `1px solid ${GOLD_RGBA(0.22)}` }}>
+                  <p className="text-xs font-bold uppercase mb-3" style={{ color: GOLD, letterSpacing: '0.12em' }}>📖 Granth se</p>
+                  <p className="text-sm text-slate-300 mb-3 leading-relaxed">
+                    Ye dosh <strong style={{ color: '#fff' }}>dono par ek samaan</strong> lagta hai — jo kanya par, wahi purush par bhi.
+                    <span className="text-slate-500 text-xs"> (BPHS 80.48)</span>
+                  </p>
+                  <p className="text-sm text-slate-300 leading-relaxed">
+                    Aur agar <strong style={{ color: '#fff' }}>dono ke yahi dosh ho</strong>, to dosh ka <strong style={{ color: '#86EFAC' }}>bhang nishchit</strong> hai.
+                    <span className="text-slate-500 text-xs"> (BPHS 80.49)</span>
+                  </p>
+                </div>
+              )}
 
               {/* MARS POSITION */}
               {isManglik && (
