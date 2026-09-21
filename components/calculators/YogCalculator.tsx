@@ -2,7 +2,8 @@
 
 // ============================================================
 // File: components/calculators/YogCalculator.tsx
-// Version: v4.0 — GRANTH KA SAAR, GEMINI BAND (21 Sep 2026)
+// Version: v4.1 — type union mein second-marriage (21 Sep 2026)
+// PICHHLA: v4.0 — GRANTH KA SAAR, GEMINI BAND (21 Sep 2026)
 //   * KRAM: score upar → 🔱 granth se aapka saar → baaki
 //   * purana "Aapke chart ka jawab" granth faisla hone par chhupta hai
 //   * Gemini ka summary nahi aata (route v4.0 ne band kiya)
@@ -243,7 +244,7 @@ interface ApiResponse {
 
 export interface YogCalculatorConfig {
   /** Matches the `type` the API expects. */
-  type: 'upsc' | 'foreign-settlement' | 'foreign-spouse' | 'santan' | 'vivah';
+  type: 'upsc' | 'foreign-settlement' | 'foreign-spouse' | 'santan' | 'vivah' | 'second-marriage';
   /**
    * Make the gender field mandatory. Only set this where the reading genuinely
    * differs by gender — asking for it without using it is just friction.
