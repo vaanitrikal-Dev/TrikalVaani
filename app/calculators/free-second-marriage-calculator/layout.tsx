@@ -29,7 +29,7 @@
 
 import type { Metadata } from 'next';
 
-const TITLE = 'Second Marriage Calculator by Date of Birth | Trikal Vaani';
+const TITLE = 'Second Marriage Calculator by Date of Birth | Trikaal Vaani';
 const DESC =
   'Free Second Marriage Calculator by date of birth. Parashar ke BPHS 18.19 niyam se doosre vivah ka yog, samay aur classical upay — generic nahi, granth se.';
 const URL = 'https://trikalvaani.com/calculators/free-second-marriage-calculator';
