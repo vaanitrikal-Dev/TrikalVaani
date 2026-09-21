@@ -2,7 +2,11 @@
 
 // ============================================================
 // File: components/calculators/YogCalculator.tsx
-// Version: v3.2 — the share text fell through to the wrong product (3 Sep 2026)
+// Version: v4.0 — GRANTH KA SAAR, GEMINI BAND (21 Sep 2026)
+//   * KRAM: score upar → 🔱 granth se aapka saar → baaki
+//   * purana "Aapke chart ka jawab" granth faisla hone par chhupta hai
+//   * Gemini ka summary nahi aata (route v4.0 ne band kiya)
+// PICHHLA: v3.2 — the share text fell through to the wrong product (3 Sep 2026)
 //
 // CHANGELOG v3.2 — a live PAID Vivah report offered to share "Nandini ne apna
 // Foreign Spouse Yog check kiya — score 50/100 … free-foreign-spouse-
@@ -229,6 +233,12 @@ interface ApiResponse {
     navamsaLagna: string | null;
   };
   result: YogPayload | FreePayload;
+  // ⭐ 21 Sep 2026 — granth ka saar + faisla (VM /granth/product se).
+  // null tab jab VM na mile — calculator tab bhi score ke saath chalta hai.
+  granth?: {
+    saar?: { saar?: string; shabd?: number; bhasha?: string } | null;
+    faisla?: { faisla?: string } | null;
+  } | null;
 }
 
 export interface YogCalculatorConfig {
@@ -592,7 +602,52 @@ const VIVAH_LABELS: VerdictLabels = {
   windowsNote: 'Ye khidkiyan aapki apni Vimshottari dasha se nikli hain. Jo daur abhi chal raha hai, uski tareekh aaj se shuru dikhayi gayi hai.',
 };
 
-function VerdictView({ r, paid, L }: { r: any; paid: boolean; L: VerdictLabels }) {
+/* ⭐ 21 Sep 2026 — **bold** ko asli bold banao (saar mein faisla aur tareekh bold hoti hai) */
+function Bold({ t }: { t: string }) {
+  const parts = String(t ?? '').split(/(\*\*[^*]+\*\*)/g);
+  return (
+    <>
+      {parts.map((p, i) =>
+        p.startsWith('**') && p.endsWith('**') && p.length > 4
+          ? <strong key={i} style={{ color: '#fff', fontWeight: 700 }}>{p.slice(2, -2)}</strong>
+          : <span key={i}>{p}</span>)}
+    </>
+  );
+}
+
+/* ⭐ 21 Sep 2026 — GRANTH SE AAPKA SAAR.
+ * Rohiit: "Gemini bilkul STOP" — uski jagah saar.py (VM) ka paath: 250-500
+ * shabd, har vaakya granth se, koi AI nahi. Faisla pehla shabd hota hai.
+ * KRAM (Rohiit ka faisla): SCORE upar, phir ye saar.
+ * ⚠️ "manyata" wali line JAAN-BOOJH KAR nahi dikhti (Rohiit, 21 Sep). */
+function GranthSaar({ saar }: { saar?: { saar?: string } | null }) {
+  const txt = typeof saar?.saar === 'string' ? saar.saar.trim() : '';
+  if (!txt) return null;
+  return (
+    <section className="rounded-2xl p-5 md:p-6 mb-5"
+      style={{ background: 'linear-gradient(180deg,rgba(212,175,55,0.07),rgba(212,175,55,0.02))',
+               border: `1px solid ${GOLD_RGBA(0.22)}` }}>
+      <p className="text-xs font-extrabold uppercase m-0 mb-3"
+        style={{ color: GOLD, letterSpacing: '0.13em' }}>
+        🔱 Granth se aapka saar
+      </p>
+      {txt.split(/\n{2,}/).map((para, i) => (
+        <p key={i} className="text-sm md:text-base leading-relaxed m-0 mb-3 last:mb-0"
+          style={{ color: '#cbd5e1', whiteSpace: 'pre-line' }}>
+          <Bold t={para} />
+        </p>
+      ))}
+    </section>
+  );
+}
+
+function VerdictView({ r, paid, L, jawabChhupao = false }: {
+  r: any; paid: boolean; L: VerdictLabels;
+  // ⭐ 21 Sep — jab granth ka faisla ho, to purana "Aapke chart ka jawab"
+  // CHHUPTA hai. Warna ek page par do ulte jawab aa sakte the: 100-ank
+  // table se "HAAN" aur granth se "ABHI KATHIN" — dono alag tareeke se bante hain.
+  jawabChhupao?: boolean;
+}) {
   const v = r.verdict;
   // Santan calls it `sankhya` (a child count) and uses { min, max }; Vivah
   // calls it `umar` (an age band) and uses { from, to }. NOT the same shape —
@@ -606,8 +661,8 @@ function VerdictView({ r, paid, L }: { r: any; paid: boolean; L: VerdictLabels }
       : null;
   return (
     <>
-      {/* THE ANSWER */}
-      {v && (
+      {/* THE ANSWER — granth ka faisla ho to chhupta hai (21 Sep) */}
+      {v && !jawabChhupao && (
         <section className="rounded-2xl p-6 mb-5 text-center"
           style={{ background: '#0B0F1A', border: `1px solid ${GOLD_RGBA(0.28)}` }}>
           <p className="text-xs uppercase tracking-widest m-0 mb-2" style={{ color: '#64748b' }}>
@@ -989,7 +1044,6 @@ export default function YogCalculator({ config }: { config: YogCalculatorConfig 
           {/* v2.2 — Santan leads with the answer, then the summary, then the
               locks (free) or the dates/count/upay (paid). The generic score +
               rule-row view follows for paid readers only. */}
-          {isVerdictType(config.type) && <VerdictView r={r} paid={paid} L={config.type === 'vivah' ? VIVAH_LABELS : SANTAN_LABELS} />}
 
           {/* Score. Hidden on santan FREE: a bare "51 / 100" on this subject
               reads as a verdict on the person, and the plain verdict above
@@ -1013,6 +1067,18 @@ export default function YogCalculator({ config }: { config: YogCalculatorConfig 
               {data.chart.saptamsaLagna && <span>D-7 Lagna: <b style={{ color: '#94a3b8' }}>{data.chart.saptamsaLagna}</b></span>}
             </div>
           </section>
+          )}
+
+          {/* ⭐ 21 Sep — KRAM (Rohiit): SCORE upar (upar wala dabba), PHIR
+              granth ka saar, PHIR baaki. Gemini ka summary BAND — uski
+              jagah ye saar. Purana "Aapke chart ka jawab" granth ka faisla
+              hone par chhupta hai. */}
+          <GranthSaar saar={data.granth?.saar} />
+
+          {isVerdictType(config.type) && (
+            <VerdictView r={r} paid={paid}
+              L={config.type === 'vivah' ? VIVAH_LABELS : SANTAN_LABELS}
+              jawabChhupao={!!data.granth?.faisla?.faisla} />
           )}
 
           {/* The differentiator. For santan this is the WORKING, not the
