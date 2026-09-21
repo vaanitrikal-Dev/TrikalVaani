@@ -1,6 +1,11 @@
 // ============================================================
 // File: app/api/calc/yog/route.ts
-// Version: v3.1 — usage logging added (18 Sep 2026); Vivah Yog is the fifth type
+// Version: v4.0 — GRANTH PAR, GEMINI BAND, storage AWAIT (21 Sep 2026)
+//   * Paancho calculator /granth/product se — saar + faisla + teen parat
+//   * Gemini (santan-summary, vivah-summary) BILKUL BAND — Rohiit ka nirdesh
+//   * logUsage ab AWAIT — pehle fire-and-forget se aadhe request marte the
+//   * score/100 WAISA HI — Rohiit: "score RAKHO + faisla"
+// PICHHLA: v3.1 — usage logging added (18 Sep 2026); Vivah Yog is the fifth type
 //
 // CHANGELOG v3.0 — "Shadi kab hogi", slug free-shadi-kab-hogi-calculator,
 // type `vivah`. It follows Santan's rails exactly: the Vimshottari timeline
@@ -151,13 +156,57 @@ import { scoreForeignSettlement } from '@/lib/foreign-settlement-engine';
 import { scoreForeignSpouse } from '@/lib/foreign-spouse-engine';
 import { scoreSantan } from '@/lib/santan-engine';
 import type { DashaPeriod, SantanResult } from '@/lib/santan-engine';
-import { buildSantanSummary } from '@/lib/santan-summary';
 import { scoreVivah } from '@/lib/vivah-engine';
 import type { VivahResult } from '@/lib/vivah-engine';
-import { buildVivahSummary } from '@/lib/vivah-summary';
 import { getProduct } from '@/lib/pricing-intl';
 import { getPayPalOrder, isCaptureValid } from '@/lib/paypal-server';
 import { logUsage, usageBirthFields, usageContextFromRequest } from '@/lib/usage-log';
+
+// ⭐ 21 September 2026 — CALCULATOR GRANTH PAR.
+// Rohiit: "pehle hamara main kaam — saari prediction GRANTH se, saar ke
+// saath." Har calculator ka apna product calc_varga_map mein hai — VM wahi
+// padh kar bhav ki TEEN PARAT, karak, KAB, FAISLA aur SAAR deta hai.
+const YOG_TO_PRODUCT: Record<string, string> = {
+  upsc:                 'ias-govt-job',
+  'foreign-settlement': 'foreign-settlement',
+  'foreign-spouse':     'foreign-spouse',
+  santan:               'santan-yog',
+  vivah:                'shadi-kab-hogi',
+};
+
+async function fetchGranthYog(product: string, b: any, paid: boolean) {
+  try {
+    const r = await callVM('/granth/product', {
+      method: 'POST',
+      body: JSON.stringify({
+        product,
+        year: b.year, month: b.month, day: b.day,
+        hour: b.hour, minute: b.minute,
+        latitude: b.latitude, longitude: b.longitude,
+        timezone: b.timezone ?? 5.5,
+        tier: paid ? 'paid' : 'free',
+        // VIVAH/FOREIGN-SPOUSE: granth_api v2.8 ling dekh kar karak chunta
+        // hai — stree par GURU, purush par Shukra (Rohiit, 3 Sep).
+        ling: b.gender ?? null,
+        bhasha: 'hinglish',
+      }),
+    });
+    if (!r.ok) {
+      console.error(`[yog] granth ${product}: ${r.status}`);
+      return null;
+    }
+    const j = await r.json();
+    // ⚠️ VM 200 ke saath bhi "galti" laut sakta hai — chup-chaap mat nigalo
+    if (j?.galti) {
+      console.error(`[yog] granth ${product}: ${j.galti}`);
+      return null;
+    }
+    return j;
+  } catch (e: any) {
+    console.error(`[yog] granth fetch failed: ${e?.message}`);
+    return null;
+  }
+}
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -376,26 +425,39 @@ export async function POST(req: NextRequest) {
     // Never fatal: buildSantanSummary falls back to a deterministic template on
     // a missing key, a timeout, or a draft that fails validation. The
     // calculator must always answer.
-    let verdictSummary = '';
-    if (VERDICT_TYPES.includes(type)) {
-      const s = type === 'santan'
-        ? await buildSantanSummary((full as SantanResult).facts, paid)
-        : await buildVivahSummary((full as VivahResult).facts, paid);
-      verdictSummary = s.text;
-      console.log(`[yog] ${type} summary | ${s.source} | ${s.words} words | paid:${paid}`);
-    }
+    // 🔴 21 Sep — GEMINI BILKUL BAND (Rohiit: "Gemini bilkul STOP").
+    // Pehle santan aur vivah par buildSantanSummary / buildVivahSummary
+    // Gemini se 75/500 shabd likhwate the. Ab uski jagah GRANTH KA SAAR hai —
+    // saar.py (VM), 250-500 shabd, har vaakya granth se, koi AI nahi.
+    // verdictSummary khaali rehta hai, to purana summary-dabba apne aap
+    // nahi dikhta (YogCalculator mein {r.summary && ...} hai).
+    const verdictSummary = '';
+    const granth = await fetchGranthYog(YOG_TO_PRODUCT[type] ?? type, b, paid);
+    console.log(`[yog] granth ${type} | ${granth ? 'mila' : 'NAHI mila'} | saar ${granth?.saar?.shabd ?? 0} shabd | faisla ${granth?.faisla?.faisla ?? '—'}`);
 
     // ── usage log — fire-and-forget, own try/catch. This route serves five
     //    different calculators, so the slug carries `type`, and it is the one
     //    calculator route with a paid tier, so `paid` is recorded too.
+    // ⭐ 21 Sep — AB AWAIT HOTA HAI. Pehle fire-and-forget tha, aur Vercel
+    // jawab lautte hi function jam kar deta tha — aadhe se zyada request
+    // beech mein marte the (santan/vivah par 0 rows). usage-log v1.2 ab
+    // Promise lautata hai. logUsage apne andar kabhi throw nahi karta, to
+    // calculator par koi khatra nahi. Rohiit ka niyam: "jab calculator ki
+    // file waise bhi badle, tabhi save jodna" — ye file granth ke liye
+    // waise bhi badal rahi thi.
     try {
-      logUsage({
+      await logUsage({
         ...usageContextFromRequest(req),
         ...usageBirthFields(b as any),
         product_slug : `calc-yog-${type}`,
         product_name : `Yog Calculator (${type})`,
         product_type : 'calculator',
         tier         : paid ? 'paid' : 'free',
+        result_meta  : {
+          score  : (full as any)?.score ?? null,
+          band   : (full as any)?.band ?? null,
+          faisla : granth?.faisla?.faisla ?? null,
+        },
       });
     } catch { /* logging must never break the calculator */ }
 
@@ -405,6 +467,16 @@ export async function POST(req: NextRequest) {
       paid,
       sessionId: `yog_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
       input: { name: b.name || null, gender: b.gender || null },
+      // ⭐ 21 Sep — granth: saar (250-500 shabd) + faisla + bhav ki teen parat
+      // + karak + KAB. Na mile to null — calculator tab bhi score ke saath chalta hai.
+      granth: granth ? {
+        saar:   granth.saar ?? null,
+        faisla: granth.faisla ?? null,
+        bhav:   granth.bhav ?? [],
+        karak:  granth.karak ?? [],
+        kab:    granth.kab ?? null,
+        varga:  granth.varga ?? null,
+      } : null,
       chart: {
         lagna: data.instant.lagna,
         lagna_en: data.instant.lagna_en,
