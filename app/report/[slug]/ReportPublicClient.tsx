@@ -3,7 +3,7 @@
 /**
  *
  * ══════════════════════════════════════════════════════════════════════════
- * v10.4 — 20 SEPTEMBER 2026 — GRANTH KI CHAAR TABLE
+ * v11.0 — 21 SEPTEMBER 2026 — GRANTH KI CHAAR TABLE
  * ══════════════════════════════════════════════════════════════════════════
  * ROHIIT KA FAISLA: "Past, Present and Future should be in table format —
  * Past ki alag table, Present ki alag table (with reason — Why you are Here?),
@@ -3120,10 +3120,16 @@ function PaidFullSummary({ summaryText, periodSummary, bestDates, dosList, donts
 
 const GTH = { head:'11px', cell:'13px' }
 
-function GranthTableShell({ title, subtitle, children, note }:{
+function GranthTableShell({ title, subtitle, children, note, saarUpar }:{
   title:string; subtitle?:string; children:React.ReactNode; note?:string
+  // ⭐ 21 Sep — saar table ke BAHAR aur UPAR baithta hai (Rohiit ka faisla:
+  // "Always on Top"). Shell ke andar daalne se wo table ke header ke neeche
+  // chala jaata, jo ulta kram hota.
+  saarUpar?:React.ReactNode
 }) {
   return (
+    <>
+    {saarUpar}
     <div style={{margin:'26px 0',border:`1px solid ${G(0.16)}`,borderRadius:'12px',
                  background:'rgba(10,15,30,0.5)',overflow:'hidden'}}>
       <div style={{padding:'14px 16px',borderBottom:`1px solid ${G(0.12)}`}}>
@@ -3135,6 +3141,7 @@ function GranthTableShell({ title, subtitle, children, note }:{
       {note && <div style={{padding:'10px 16px',borderTop:`1px solid ${G(0.08)}`,
                             color:'#64748b',fontSize:'11px',lineHeight:1.6}}>{note}</div>}
     </div>
+    </>
   )
 }
 
@@ -3247,7 +3254,7 @@ function GranthAteet({ a, lang }:{ a:any; lang:Lang }) {
                       .map((gr:any,gi:number)=>(
                       <div key={gi} style={{marginBottom:gi?'6px':0}}>
                         <span style={{color:gr.kind==='shubh'?'#86efac':gr.kind==='kathin'?'#fca5a5':'#cbd5e1'}}>
-                          {s(gr.phal)}
+                          {<Bold t={s(gr.phal)}/>}
                         </span>
                       </div>
                     ))}
@@ -3349,7 +3356,7 @@ function BhavParat({ p, lang }:{ p:any; lang:Lang }) {
                       : x.kind === 'shubh'  ? '#86efac'
                       : x.kind === 'kathin' || x.kind === 'maraka' ? '#fca5a5'
                       : '#cbd5e1'}}>
-      {s(x.phal)}
+      {<Bold t={s(x.phal)}/>}
       <span style={{color:'#475569',fontSize:'10px',marginLeft:'6px',
                     whiteSpace:'nowrap'}}>{s(x.srot)}</span>
       {x.do_granth && (
@@ -3423,6 +3430,59 @@ function BhavParat({ p, lang }:{ p:any; lang:Lang }) {
  * ⚠️ Ye 20 Sep ko CHHOOT GAYA THA: faisla granth_api v2.5 ki abhi() mein
  * BAN raha tha par report use RENDER nahi karti thi. Wahi galti aaj gaun
  * rows par bhi hui thi — data banao aur dikhana bhool jao. */
+/* ⭐ 21 September 2026 — **bold** ko asli bold banao.
+ *
+ * 🔴 YE EK PURANA BUG BHI THEEK KARTA HAI: granth ki lines mein "**पद का लाभ
+ * और बड़ा सुख।**" jaisa text PEHLE SE aata hai (bhav_phala aur dasha_phala
+ * dono mein), par report use {<Bold t={s(x.phal)}/>} se seedha chhapti thi — yani grahak
+ * ko TAARE dikhte the, bold nahi. Paanch jagah. Ab ek hi helper dono ka hal
+ * karta hai: purani lines bhi, aur naya saar bhi.
+ */
+function Bold({ t }:{ t:string }) {
+  const parts = String(t ?? '').split(/(\*\*[^*]+\*\*)/g)
+  return (
+    <>
+      {parts.map((p, i) =>
+        p.startsWith('**') && p.endsWith('**') && p.length > 4
+          ? <strong key={i} style={{ color:'#fff', fontWeight:700 }}>{p.slice(2, -2)}</strong>
+          : <span key={i}>{p}</span>)}
+    </>
+  )
+}
+
+/* ⭐ 21 September 2026 — GRANTH SE AAPKA SAAR.
+ *
+ * Rohiit ki baat: "Main hamesha keh raha hoon Gemini summary ko replace karna
+ * hai apni summary se." Gemini hataya gaya tha par uski jagah SIRF TABLE di
+ * gayi thi — summary banayi hi nahi. saar.py (VM) ab wo jodaa hua paath deta
+ * hai: 250-500 shabd, teen bhasha, har vaakya granth se.
+ *
+ * KAHAN: TABLE SE UPAR — Rohiit ka faisla, "grahak pehle jawab padhe, phir
+ * saboot dekhe".
+ * ⚠️ manyata wali line JAAN-BOOJH KAR nahi dikhti (Rohiit, 21 Sep). Wo
+ * jawab mein aati hai aur andar darj rehti hai, par page par nahi.
+ */
+function GranthSaar({ s: sr, lang }:{ s:any; lang:Lang }) {
+  const txt = typeof sr?.saar === 'string' ? sr.saar.trim() : ''
+  if (!txt) return null
+  return (
+    <div style={{ margin:'0 0 18px', padding:'16px 18px', borderRadius:'12px',
+                  background:'linear-gradient(180deg,rgba(212,175,55,0.07),rgba(212,175,55,0.02))',
+                  border:'1px solid rgba(212,175,55,0.22)' }}>
+      <div style={{ color:GOLD, fontSize:'11px', fontWeight:800, marginBottom:'10px',
+                    textTransform:'uppercase', letterSpacing:'0.13em' }}>
+        {lang==='english' ? '🔱 YOUR READING FROM THE GRANTH' : '🔱 GRANTH SE AAPKA SAAR'}
+      </div>
+      {txt.split(/\n{2,}/).map((para, i) => (
+        <p key={i} style={{ margin: i ? '11px 0 0' : 0, color:'#cbd5e1',
+                            fontSize:'13.5px', lineHeight:1.85, whiteSpace:'pre-line' }}>
+          <Bold t={para}/>
+        </p>
+      ))}
+    </div>
+  )
+}
+
 function FaislaPankti({ F, lang }:{ F:any; lang:Lang }) {
   if (!F || !F.faisla) return null
   const c = F.faisla==='HAAN' ? '#86efac' : F.faisla==='NAHI' ? '#fca5a5' : '#fbbf24'
@@ -3464,6 +3524,10 @@ function GranthProduct({ p, lang }:{ p:any; lang:Lang }) {
     <GranthTableShell
       title={lang==='english'?'🎯 On Your Question':'🎯 AAPKE SAWAAL PAR'}
       subtitle={`${s(p.varga)} · ${bhav.map(b=>`${b.bhav}va`).join(' + ')} ghar`}>
+
+      {/* ⭐ 21 Sep — SAAR sabse upar (Rohiit: "Always on Top — saar UPAR,
+          table NEECHE; grahak pehle jawab padhe, phir saboot dekhe"). */}
+      <GranthSaar s={p.saar} lang={lang}/>
 
       {/* ⭐⭐ FAISLA — 20 September 2026
           Rohiit ki baat: "kuch toh humme bhi bolna hai. Sab granth bolenge
@@ -3589,7 +3653,7 @@ function GranthProduct({ p, lang }:{ p:any; lang:Lang }) {
               {Array.isArray(x.granth) && x.granth.filter((g:any)=>g?.phal).map((g:any,gi:number)=>(
                 <div key={gi} style={{color:g.kind==='shubh'?'#86efac':g.kind==='kathin'?'#fca5a5':'#94a3b8',
                      fontSize:'12px',marginLeft:'12px',marginTop:'2px',lineHeight:1.65}}>
-                  {s(g.phal)}
+                  {<Bold t={s(g.phal)}/>}
                 </div>
               ))}
             </div>
@@ -3630,6 +3694,7 @@ function GranthAbhi({ b, lang }:{ b:any; lang:Lang }) {
   const rang = (h:string) => h==='MAZBOOT' ? '#86efac' : h==='KAMZOR' ? '#fca5a5' : '#fbbf24'
   return (
     <GranthTableShell
+      saarUpar={<GranthSaar s={b?.saar} lang={lang}/>}
       title={lang==='english'?'🔱 What Your Chart Says':'🔱 AAPKI KUNDALI KYA KEHTI HAI'}
       subtitle={(() => {
         // 🔴 16 Sep — "Ch.34: GRANTH-CHUP" grahak ko DIKH RAHA THA. Wo engine ka
@@ -3694,7 +3759,7 @@ function GranthAbhi({ b, lang }:{ b:any; lang:Lang }) {
                       )}
                     </div>
                     <div style={{color:'#94a3b8',fontStyle:'italic'}}>
-                      {s(m.ph20_phal)}
+                      {<Bold t={s(m.ph20_phal)}/>}
                       <span style={{color:'#64748b',fontSize:'11px'}}> ({s(m.ph20_srot)})</span>
                     </div>
                   </div>
@@ -3793,7 +3858,7 @@ function GranthAage({ a, isPaid, lang, slug }:{ a:any; isPaid:boolean; lang:Lang
                   .map((gr:any,gi:number)=>(
                   <div key={gi} style={{marginBottom:gi?'6px':0,
                         color:gr.kind==='shubh'?'#86efac':gr.kind==='kathin'?'#fca5a5':'#cbd5e1'}}>
-                    {s(gr.phal)}
+                    {<Bold t={s(gr.phal)}/>}
                     <span style={{color:'#64748b',fontSize:'11px'}}> ({s(gr.srot)})</span>
                   </div>
                 ))}
@@ -3939,7 +4004,7 @@ function GranthFeedback({ sawaal, slug, lang }:{ sawaal:string; slug:string; lan
       </div>
       <div style={{color:'#cbd5e1',fontSize:'13px',lineHeight:1.75}}>{s(sawaal)}</div>
       <a href={`https://wa.me/?text=${encodeURIComponent(
-          `Trikaal Vaani — report ${slug}\n\nNaukri/kaam ka bada mod: \nShaadi ya rishta: \nGhar/sampatti: `)}`}
+          `Trikal Vaani — report ${slug}\n\nNaukri/kaam ka bada mod: \nShaadi ya rishta: \nGhar/sampatti: `)}`}
          target="_blank" rel="noopener noreferrer"
          style={{display:'inline-block',marginTop:'12px',padding:'8px 16px',
                  border:`1px solid ${G(0.4)}`,borderRadius:'7px',color:GOLD,
