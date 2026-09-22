@@ -1,5 +1,6 @@
 // ============================================================
 // File: app/api/calc/yog/route.ts
+// Version: v4.3 — teaser ka ".." double period theek (sab yog calculator) — 22 Sep 2026
 // Version: v4.2 — SATVA TYPE: health-insight (Jeevan-shakti, VM se) — 22 Sep 2026
 // Version: v4.1 — CHHATHA TYPE: second-marriage (Doosra Vivah, BPHS 18.19-21) — 21 Sep 2026
 // PICHHLA: v4.0 — GRANTH PAR, GEMINI BAND, storage AWAIT (21 Sep 2026)
@@ -300,7 +301,9 @@ function lockRule(r: ScoredRule) {
  */
 function teaser(r: ScoredRule): string {
   const first = r.reason.split('. ')[0] ?? '';
-  return first.length > 130 ? first.slice(0, 127).trimEnd() + '\u2026' : first + '.';
+  // ⭐ 22 Sep — vaakya pehle se '.' par khatam ho to dobara '.' nahi ("kamzor).." wali galti)
+  const saaf = first.replace(/[.\u0964]+$/, '');
+  return saaf.length > 130 ? saaf.slice(0, 127).trimEnd() + '\u2026' : saaf + '.';
 }
 
 function freeShape(full: any) {

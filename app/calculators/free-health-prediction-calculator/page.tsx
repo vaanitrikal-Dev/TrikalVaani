@@ -2,6 +2,7 @@
 
 // ============================================================
 // File: app/calculators/free-health-prediction-calculator/page.tsx
+// Version: v1.1 — 'Related reading' heading: vivah → swasthya (template ka bacha text) — 22 Sep 2026
 // Version: v1.0 — Health Prediction (Jeevan-shakti) Calculator — 22 Sep 2026
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
 // API: /api/calc/yog (type: 'health-insight') · Engine: lib/health-engine.ts
@@ -662,7 +663,7 @@ export default function FreeHealthPredictionCalculatorPage() {
           <section className="rounded-2xl p-5 mb-6"
             style={{ background: '#0B0F1A', border: '1px solid rgba(255,255,255,0.07)' }}>
             <h2 className="text-2xl font-serif font-bold mb-4" style={{ color: GOLD }}>
-              विवाह ज्योतिष पर पूरा गाइड पढ़ें
+              स्वास्थ्य ज्योतिष पर पूरा गाइड पढ़ें
             </h2>
             <ul className="text-sm space-y-2 m-0 p-0" style={{ listStyle: 'none' }}>
               {READ_MORE.map((l) => (
