@@ -2,6 +2,7 @@
 
 // ============================================================
 // File: components/calculators/YogCalculator.tsx
+// Version: v4.6 — 💍 jawab ab /api/calc/vivah-jawab par (ad-blocker "feedback" URL rokta tha — request server tak nahi pahunchti thi) (22 Sep 2026)
 // Version: v4.5 — 💍 feedback: save fail ho to "Dhanyavaad" NAHI, saaf sandesh + dobara button (pehle galti chupchaap nigal li jaati thi) (22 Sep 2026)
 // Version: v4.4 — love-arranged: Love:Arranged meter + 🎯 Hamara jawab; "Kya rok raha hai" aur "Payment ho gaya" chhupe (22 Sep 2026)
 // Version: v4.3 — love-arranged: POORA MUFT + 💍 "aapki shaadi kaisi thi?" feedback card (22 Sep 2026)
@@ -818,7 +819,7 @@ export default function YogCalculator({ config }: { config: YogCalculatorConfig 
     let saved = false;
     try {
       const res: any = (data as any)?.result ?? {};
-      const fr = await fetch('/api/calc/vivah-feedback', {
+      const fr = await fetch('/api/calc/vivah-jawab', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
