@@ -2,6 +2,7 @@
 
 // ============================================================
 // File: components/calculators/YogCalculator.tsx
+// Version: v4.5 — 💍 feedback: save fail ho to "Dhanyavaad" NAHI, saaf sandesh + dobara button (pehle galti chupchaap nigal li jaati thi) (22 Sep 2026)
 // Version: v4.4 — love-arranged: Love:Arranged meter + 🎯 Hamara jawab; "Kya rok raha hai" aur "Payment ho gaya" chhupe (22 Sep 2026)
 // Version: v4.3 — love-arranged: POORA MUFT + 💍 "aapki shaadi kaisi thi?" feedback card (22 Sep 2026)
 // Version: v4.2 — health-insight + bandLabel ("Dhyan Rakhein", "Weak" nahi) (22 Sep 2026)
@@ -807,12 +808,17 @@ export default function YogCalculator({ config }: { config: YogCalculatorConfig 
   // ⭐ 22 Sep — love-arranged: shaadi-shuda log ka asli jawab (vivah_feedback)
   const [fbJawab, setFbJawab] = useState<string | null>(null);
   const [fbBusy, setFbBusy] = useState(false);
+  const [fbErr, setFbErr] = useState(false);
   async function sendFeedback(jawab: string) {
     if (fbBusy || fbJawab) return;
     setFbBusy(true);
+    setFbErr(false);
+    // 🔴 v4.5 — pehle jawab na jaaye to bhi "Dhanyavaad" dikhta tha, isliye
+    // save tootne ka kabhi pata nahi chalta. Ab sirf ok:true par Dhanyavaad.
+    let saved = false;
     try {
       const res: any = (data as any)?.result ?? {};
-      await fetch('/api/calc/vivah-feedback', {
+      const fr = await fetch('/api/calc/vivah-feedback', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -823,8 +829,10 @@ export default function YogCalculator({ config }: { config: YogCalculatorConfig 
           sanket: (res.rules ?? []).filter((x: any) => x.points > 0).map((x: any) => x.label),
         }),
       });
-    } catch { /* jawab na jaaye to bhi grahak ko rukna nahi */ }
-    setFbJawab(jawab);
+      const fj: any = await fr.json().catch(() => null);
+      saved = fr.ok && fj?.ok === true;
+    } catch { saved = false; }
+    if (saved) setFbJawab(jawab); else setFbErr(true);
     setFbBusy(false);
   }
   const [isIndia, setIsIndia] = useState<boolean | null>(null);
@@ -1339,6 +1347,9 @@ export default function YogCalculator({ config }: { config: YogCalculatorConfig 
                     </button>
                   ))}
                 </div>
+                {fbErr && (
+                  <p className="text-xs m-0 mt-3" style={{ color: '#FCA5A5' }}>Jawab save nahi ho paya — kripya dobara dabaiye.</p>
+                )}
                 <p className="text-xs m-0 mt-3" style={{ color: '#64748b' }}>🔒 Sirf aapki kundali ke saath — naam kabhi nahi dikhta</p>
               </>
             )}
