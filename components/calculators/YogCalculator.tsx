@@ -2,6 +2,7 @@
 
 // ============================================================
 // File: components/calculators/YogCalculator.tsx
+// Version: v4.4 — love-arranged: Love:Arranged meter + 🎯 Hamara jawab; "Kya rok raha hai" aur "Payment ho gaya" chhupe (22 Sep 2026)
 // Version: v4.3 — love-arranged: POORA MUFT + 💍 "aapki shaadi kaisi thi?" feedback card (22 Sep 2026)
 // Version: v4.2 — health-insight + bandLabel ("Dhyan Rakhein", "Weak" nahi) (22 Sep 2026)
 // Version: v4.1 — type union mein second-marriage (21 Sep 2026)
@@ -1080,6 +1081,27 @@ export default function YogCalculator({ config }: { config: YogCalculatorConfig 
           <section className="rounded-2xl p-6 mb-6 text-center"
             style={{ background: '#0B0F1A', border: `1px solid ${GOLD_RGBA(0.25)}` }}>
             <p className="text-xs uppercase tracking-widest m-0" style={{ color: '#64748b' }}>{config.scoreLabel}</p>
+            {config.type === 'love-arranged' ? (() => {
+              // ⭐ 22 Sep — Rohiit: 0/100 adhoora lagta tha. Love:Arranged meter, 5-95
+              // ke beech (kabhi "100% pakka" nahi). Love 35%+ = LOVE (VM ki seema).
+              const lp = Math.max(5, Math.min(95, Math.round(r.score ?? 0)));
+              return (
+                <div className="mt-3 text-left">
+                  <div className="flex justify-between text-sm font-bold mb-2">
+                    <span style={{ color: '#F9A8D4' }}>💘 Love {lp}%</span>
+                    <span style={{ color: GOLD }}>Arranged {100 - lp}% 🤝</span>
+                  </div>
+                  <div className="w-full h-3 rounded-full overflow-hidden flex" style={{ background: 'rgba(255,255,255,0.08)' }}>
+                    <div style={{ width: `${lp}%`, background: '#F472B6' }} />
+                    <div style={{ width: `${100 - lp}%`, background: GOLD }} />
+                  </div>
+                  <p className="m-0 mt-3 text-lg font-semibold text-center" style={{ color: GOLD }}>
+                    🎯 Hamara jawab: {r.bandLabel ?? r.band} · {r.bandHi}
+                  </p>
+                </div>
+              );
+            })() : (
+            <>
             <p className="m-0 leading-none" style={{ fontSize: '58px', fontWeight: 800, color: bandColor(r.band) }}>
               {r.score}
               <span style={{ fontSize: '20px', color: '#475569' }}> / 100</span>
@@ -1087,6 +1109,8 @@ export default function YogCalculator({ config }: { config: YogCalculatorConfig 
             <p className="m-0 mt-1 text-lg font-semibold" style={{ color: bandColor(r.band) }}>
               {r.bandLabel ?? r.band} · {r.bandHi}
             </p>
+            </>
+            )}
             <div className="flex flex-wrap justify-center gap-x-5 gap-y-1 mt-4 text-xs" style={{ color: '#64748b' }}>
               <span>Lagna: <b style={{ color: '#94a3b8' }}>{data.chart.lagna}</b></span>
               {data.chart.dasamsaLagna && <span>D-10 Lagna: <b style={{ color: '#94a3b8' }}>{data.chart.dasamsaLagna}</b></span>}
@@ -1131,7 +1155,7 @@ export default function YogCalculator({ config }: { config: YogCalculatorConfig 
           )}
 
           {/* Blockers — the reason people pay, so the free view names them and stops. */}
-          {r.blockers?.length > 0 && (
+          {config.type !== 'love-arranged' && r.blockers?.length > 0 && (   /* ⭐ love-sanket na hona "rukavat" nahi */
             <section className="rounded-2xl p-5 mb-6"
               style={{ background: 'rgba(239,68,68,0.05)', border: '1px solid rgba(239,68,68,0.2)' }}>
               <h2 className="text-base font-bold m-0 mb-3" style={{ color: '#FCA5A5' }}>Kya rok raha hai</h2>
@@ -1269,7 +1293,7 @@ export default function YogCalculator({ config }: { config: YogCalculatorConfig 
               ₹51, so someone who had just paid read it as "pay again" and
               assumed their payment had failed. It now confirms the purchase
               first, then names the other product explicitly. */}
-          {paid && (
+          {paid && config.type !== 'love-arranged' && (   /* ⭐ muft par "Payment ho gaya" galat tha */
           <section className="rounded-2xl p-5 md:p-6 mb-6 text-center"
             style={{ background: GOLD_RGBA(0.07), border: `1px solid ${GOLD_RGBA(0.3)}` }}>
             <p className="text-xs m-0 mb-3" style={{ color: '#86EFAC' }}>

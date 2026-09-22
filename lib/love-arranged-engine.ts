@@ -1,6 +1,6 @@
 /**
  * File:    lib/love-arranged-engine.ts
- * Version: v1.0 — 22 Sep 2026 — Love or Arranged Marriage Prediction
+ * Version: v1.1 — 22 Sep 2026 — Love or Arranged Marriage Prediction
  *
  * ⭐ ADAPTER — APNI KOI GINTI NAHI. Score VM ke granth_api v3.8
  * love_jhukaav() se aata hai (EK jagah), taaki score-card aur saar kabhi
@@ -11,7 +11,8 @@
  * sanket sanyog jitne dikhaye, isliye nateeja "jhukaav" hai, daava nahi.
  * Shaadi-shuda log apna asli jawab dete hain (vivah_feedback) — ank asli data
  * se badlenge. POORA MUFT (Rohiit, 22 Sep 2026).
- * Seema: 0-20 ARRANGED KI OR JHUKAAV · 21-39 DONO KA MEL · 40+ LOVE KI OR JHUKAAV
+ * Seema (Rohiit, 22 Sep): <20 ARRANGED · 20-34 DONO KA MEL · 35+ LOVE (band VM se aata hai).
+ * v1.1 — seema badli; UI meter love% = score (5-95).
  */
 import { ScoreSheet, YogResult } from './yog-engine';
 

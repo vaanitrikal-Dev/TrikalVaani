@@ -2,6 +2,7 @@
 
 // ============================================================
 // File: app/calculators/free-love-or-arranged-marriage-calculator/page.tsx
+// Version: v1.1 — seema 20/35 (Rohiit), button "Love ya Arranged", meter — 22 Sep 2026
 // Version: v1.0 — Love or Arranged Marriage Prediction — 22 Sep 2026
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
 // API: /api/calc/yog (type: 'love-arranged') · Engine: lib/love-arranged-engine.ts
@@ -12,7 +13,8 @@
 //     har jagah label. Nateeja "jhukaav", daava nahi. Page par sach BINA KISI GINTI.
 //   * "Sach Seekhne Wala": shaadi-shuda log apna asli jawab dete hain (vivah_feedback),
 //     ank har mahine asli data se badlenge. POORA MUFT.
-//   * Seema: 0-20 ARRANGED KI OR JHUKAAV · 21-39 DONO KA MEL · 40+ LOVE KI OR JHUKAAV
+//   * Seema (Rohiit): <20 ARRANGED · 20-34 DONO KA MEL · 35+ LOVE — "love ki taraf 35% bhi ho to
+//     love marriage; aaj live-in, bhaag kar shaadi bahut aam"
 //   * Title Rohiit ka: Radar ka hubahu phrase "love or arranged marriage prediction by date of birth"
 //
 // CONTENT: 44 H2 · 46 inline link (sab ASLI — 26 /blog + 3 /learn DB mein jaanche,
@@ -94,7 +96,7 @@ const PILLAR: PillarSection[] = [
     paras: [
       "**Love ki or jhukaav** — aapki kundali mein apni pasand ke vivah ke kai parampara-sanket ek saath hain. **Dono ka mel** — kuch sanket hain; aksar pasand aapki hoti hai aur parivaar ki raazi-khushi bhi. **Arranged ki or jhukaav** — love ke sanket kam hain; parampara ise parivaar ki pasand ke vivah ki or maanti hai.",
       "Teeno mein se koi bhi 'achha' ya 'bura' nahi. Arranged vivah kamzor nahi, aur love vivah zyada safal nahi — ye sirf raasta batata hai, manzil nahi.",
-      "Score ki seema ek asli kundali se tay hui: jis vyakti ka vivah arranged tha, uska score seema ke andar arranged ki or aaya. Aam taur par lagbhag aadhe log arranged ki or, ek-tihaai 'dono ka mel' mein aur thode log love ki or aate hain — Bharat ki asliyat se mel khaata bantwara. Har nateeje ke saath sanket aur unki wajah likhi hoti hai.",
+      "Score ki seema ek asli kundali se tay hui: jis vyakti ka vivah arranged tha, uska score seema ke andar arranged ki or aaya. Aaj ke daur mein apni pasand ke vivah — live-in se lekar parivaar ki raay ke bina vivah tak — tezi se badh rahe hain, isliye love ka jhukaav 35% sanket par hi maana jaata hai. Aam taur par lagbhag aadhe log arranged ki or, ek-tihaai 'dono ka mel' mein aur har paanch mein ek love ki or aata hai. Har nateeje ke saath sanket aur unki wajah likhi hoti hai.",
     ],
   },
   {
@@ -579,7 +581,7 @@ export default function FreeLoveOrArrangedMarriageCalculatorPage() {
             hintsTeaser: 'Aapke 7ve swami aur Shukra/Guru par aadharit',
             showNextStep: false,
             ctaHref: '/calculators/free-shadi-kab-hogi-calculator',
-            ctaLabel: 'Shadi kab hogi — dekho',
+            ctaLabel: 'Love ya Arranged — dekho',
             ctaPrice: 'Muft',
             ctaBlurb: 'Poora nateeja upar khula hai — muft.',
           }} />
