@@ -1,6 +1,7 @@
 // ============================================================
 // File: app/calculators/page.tsx
 // Purpose: Calculators Hub — SEO/GEO/AEO landing page
+// Version: v4.3 — love-or-arranged card (22 Sep 2026)
 // Version: v4.2 — health-prediction card (22 Sep 2026)
 // Version: v4.1 — second-marriage card (21 Sep 2026)
 // PICHHLA: 4.0 — Vivah Yog calculator added (3 Sep 2026)
@@ -160,6 +161,14 @@ const CALCULATORS: CalcEntry[] = [
     emoji: '\u{1F491}',
     name: 'Free Second Marriage Calculator',
     desc: 'Doosre vivah ka yog \u2014 BPHS 18.19, Bhrigu Sutram aur Navamsa D-9 se. Ling ke hisaab se karak (Shukra/Guru), har ank ke saath uska shlok.',
+    badge: 'New',
+    live: true,
+  },
+  {
+    slug: 'free-love-or-arranged-marriage-calculator',
+    emoji: '\u{1F498}',
+    name: 'Free Love or Arranged Marriage Calculator',
+    desc: 'Love ki or jhukaav, dono ka mel ya arranged ki or \u2014 10 parampara-sanket (5-7 swami, Shukra, Rahu, Navamsa) saaf label ke saath, aur BPHS dasha se vivah ka samay. Poora muft.',
     badge: 'New',
     live: true,
   },

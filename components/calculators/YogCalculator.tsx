@@ -2,6 +2,7 @@
 
 // ============================================================
 // File: components/calculators/YogCalculator.tsx
+// Version: v4.3 — love-arranged: POORA MUFT + 💍 "aapki shaadi kaisi thi?" feedback card (22 Sep 2026)
 // Version: v4.2 — health-insight + bandLabel ("Dhyan Rakhein", "Weak" nahi) (22 Sep 2026)
 // Version: v4.1 — type union mein second-marriage (21 Sep 2026)
 // PICHHLA: v4.0 — GRANTH KA SAAR, GEMINI BAND (21 Sep 2026)
@@ -246,7 +247,7 @@ interface ApiResponse {
 
 export interface YogCalculatorConfig {
   /** Matches the `type` the API expects. */
-  type: 'upsc' | 'foreign-settlement' | 'foreign-spouse' | 'santan' | 'vivah' | 'second-marriage' | 'health-insight';
+  type: 'upsc' | 'foreign-settlement' | 'foreign-spouse' | 'santan' | 'vivah' | 'second-marriage' | 'health-insight' | 'love-arranged';
   /**
    * Make the gender field mandatory. Only set this where the reading genuinely
    * differs by gender — asking for it without using it is just friction.
@@ -802,6 +803,29 @@ export default function YogCalculator({ config }: { config: YogCalculatorConfig 
   const [apiError, setApiError] = useState<string | null>(null);
   const [data, setData] = useState<ApiResponse | null>(null);
   const [paying, setPaying] = useState(false);
+  // ⭐ 22 Sep — love-arranged: shaadi-shuda log ka asli jawab (vivah_feedback)
+  const [fbJawab, setFbJawab] = useState<string | null>(null);
+  const [fbBusy, setFbBusy] = useState(false);
+  async function sendFeedback(jawab: string) {
+    if (fbBusy || fbJawab) return;
+    setFbBusy(true);
+    try {
+      const res: any = (data as any)?.result ?? {};
+      await fetch('/api/calc/vivah-feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          jawab, date: form.date, time: form.unknownTime ? null : form.time,
+          lat: form.latitude, lon: form.longitude, tz: form.timezone, gender: form.gender || null,
+          score: typeof res.score === 'number' ? res.score : null,
+          band: typeof res.bandLabel === 'string' ? res.bandLabel : null,
+          sanket: (res.rules ?? []).filter((x: any) => x.points > 0).map((x: any) => x.label),
+        }),
+      });
+    } catch { /* jawab na jaaye to bhi grahak ko rukna nahi */ }
+    setFbJawab(jawab);
+    setFbBusy(false);
+  }
   const [isIndia, setIsIndia] = useState<boolean | null>(null);
   const resultRef = useRef<HTMLDivElement | null>(null);
 
@@ -958,7 +982,8 @@ export default function YogCalculator({ config }: { config: YogCalculatorConfig 
     }
   };
 
-  const paid = data?.paid === true;
+  // ⭐ 22 Sep — love-arranged poora muft: koi taala, koi ₹51 nahi
+  const paid = data?.paid === true || config.type === 'love-arranged';
   const r: any = data?.result;
   const secondary = paid ? (r?.direction ?? r?.routes ?? null) : null;
 
@@ -1266,6 +1291,31 @@ export default function YogCalculator({ config }: { config: YogCalculatorConfig 
                 <p className="text-xs m-0 mt-2" style={{ color: '#64748b' }}>
                   Ye alag reading hai — poori kundali, saare jeevan-kshetra.
                 </p>
+              </>
+            )}
+          </section>
+          )}
+
+          {/* ── 💍 Sach Seekhne Wala — love-arranged feedback (v4.3) ── */}
+          {config.type === 'love-arranged' && (
+          <section className="rounded-2xl p-5 md:p-6 mb-6"
+            style={{ background: '#0B0F1A', border: `1px solid ${GOLD_RGBA(0.35)}` }}>
+            <h2 className="text-base font-bold m-0 mb-1" style={{ color: GOLD }}>💍 Kya aapki shaadi ho chuki hai?</h2>
+            {fbJawab ? (
+              <p className="text-sm m-0" style={{ color: '#cbd5e1' }}>Dhanyavaad 🙏 — aapka jawab calculator ko aur sahi banayega.</p>
+            ) : (
+              <>
+                <p className="text-xs m-0 mb-4" style={{ color: '#94a3b8' }}>Ek click se hamein sach sikhaiye:</p>
+                <div className="flex flex-wrap gap-2">
+                  {[['love', 'Love'], ['arranged', 'Arranged'], ['love-cum-arranged', 'Love-cum-arranged'], ['abhi-nahi', 'Abhi shaadi nahi hui']].map(([k, t]) => (
+                    <button key={k} type="button" disabled={fbBusy} onClick={() => sendFeedback(k)}
+                      className="px-4 py-2 rounded-lg text-sm font-semibold"
+                      style={{ border: `1px solid ${GOLD}`, color: GOLD, background: 'transparent', opacity: fbBusy ? 0.5 : 1 }}>
+                      {t}
+                    </button>
+                  ))}
+                </div>
+                <p className="text-xs m-0 mt-3" style={{ color: '#64748b' }}>🔒 Sirf aapki kundali ke saath — naam kabhi nahi dikhta</p>
               </>
             )}
           </section>

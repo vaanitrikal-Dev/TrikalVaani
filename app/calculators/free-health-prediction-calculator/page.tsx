@@ -2,6 +2,7 @@
 
 // ============================================================
 // File: app/calculators/free-health-prediction-calculator/page.tsx
+// Version: v1.2 — "kin angon ka dhyan aur kab" (ang + samay, muft) ka zikr — 22 Sep 2026
 // Version: v1.1 — 'Related reading' heading: vivah → swasthya (template ka bacha text) — 22 Sep 2026
 // Version: v1.0 — Health Prediction (Jeevan-shakti) Calculator — 22 Sep 2026
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
@@ -94,7 +95,7 @@ const PILLAR: PillarSection[] = [
     id: "free-health-astrology-by-date-of-birth",
     h2: "Free health astrology by date of birth — kya milta hai",
     paras: [
-      "Muft mein aapko poora Jeevan-shakti score, band, teen sabse mazboot niyam unki wajah ke saath, areas to watch, prakriti aur granth ka saar milta hai. Baaki niyamon ke ank dikhte hain par unki wajah ₹51 ki poori reading mein khulti hai.",
+      "Muft mein aapko poora Jeevan-shakti score, band, teen sabse mazboot niyam unki wajah ke saath, **kin angon ka dhyan aur kab** (har ang ke liye beeta, abhi chal raha aur aane wala dasha-samay), prakriti aur granth ka saar milta hai. Baaki niyamon ke ank dikhte hain par unki wajah ₹51 ki poori reading mein khulti hai.",
       "Poori reading mein har niyam ki wajah, dasha ke hisaab se samay aur aapke grahon ke liye granth ke upay milte hain. Poori kundali ek saath dekhni ho to [Janam Kundali Calculator](/calculators/free-janam-kundali-calculator) bhi muft hai.",
     ],
   },
@@ -354,7 +355,7 @@ const PILLAR: PillarSection[] = [
     id: "free-aur-51-report",
     h2: "Free aur ₹51 report mein kya farak",
     paras: [
-      "Free mein score, band, teen mukhya niyam, areas to watch, prakriti aur saar. ₹51 mein saaton niyam ki poori wajah, dasha ka samay aur granth ke upay.",
+      "Free mein score, band, teen mukhya niyam, har ang ka dasha-samay (beeta, abhi, aage), prakriti aur saar. ₹51 mein saaton niyam ki poori wajah, dasha ka samay aur granth ke upay.",
       "Dono mein ek hi ganana hai — paid mein sirf zyada vistaar khulta hai.",
     ],
   },

@@ -1,5 +1,6 @@
 // ============================================================
 // File: app/api/calc/yog/route.ts
+// Version: v4.4 — ATHVA TYPE: love-arranged (parampara ke sanket, POORA MUFT) — 22 Sep 2026
 // Version: v4.3 — teaser ka ".." double period theek (sab yog calculator) — 22 Sep 2026
 // Version: v4.2 — SATVA TYPE: health-insight (Jeevan-shakti, VM se) — 22 Sep 2026
 // Version: v4.1 — CHHATHA TYPE: second-marriage (Doosra Vivah, BPHS 18.19-21) — 21 Sep 2026
@@ -160,6 +161,7 @@ import { scoreForeignSpouse } from '@/lib/foreign-spouse-engine';
 // ⭐ 21 Sep 2026 — Second Marriage (Doosra Vivah) Yog — BPHS 18.19-21
 import { scoreSecondMarriage } from '@/lib/second-marriage-engine';
 import { healthFromGranth } from '@/lib/health-engine';
+import { loveFromGranth } from '@/lib/love-arranged-engine';
 import { scoreSantan } from '@/lib/santan-engine';
 import type { DashaPeriod, SantanResult } from '@/lib/santan-engine';
 import { scoreVivah } from '@/lib/vivah-engine';
@@ -178,6 +180,7 @@ const YOG_TO_PRODUCT: Record<string, string> = {
   'foreign-spouse':     'foreign-spouse',
   'second-marriage':    'second-marriage',
   'health-insight':     'health-insight',
+  'love-arranged':      'love-arranged',
   santan:               'santan-yog',
   vivah:                'shadi-kab-hogi',
 };
@@ -221,9 +224,9 @@ export const dynamic = 'force-dynamic';
 /** Hard ceiling. See the v2.4 note above — without this it was Vercel's default. */
 export const maxDuration = 60;
 
-type YogType = 'upsc' | 'foreign-settlement' | 'foreign-spouse' | 'santan' | 'vivah' | 'second-marriage' | 'health-insight';
+type YogType = 'upsc' | 'foreign-settlement' | 'foreign-spouse' | 'santan' | 'vivah' | 'second-marriage' | 'health-insight' | 'love-arranged';
 
-const VALID: YogType[] = ['upsc', 'foreign-settlement', 'foreign-spouse', 'santan', 'vivah', 'second-marriage', 'health-insight'];
+const VALID: YogType[] = ['upsc', 'foreign-settlement', 'foreign-spouse', 'santan', 'vivah', 'second-marriage', 'health-insight', 'love-arranged'];
 
 /** The two types that lead with a verdict and a written summary. */
 const VERDICT_TYPES: YogType[] = ['santan', 'vivah'];
@@ -352,6 +355,9 @@ export async function POST(req: NextRequest) {
     }
 
     const paid = await isPaid(b);
+    // ⭐ 22 Sep — Love or Arranged POORA MUFT (Rohiit): poora nateeja aur poora
+    // saar khula. Supabase ka `tier` ASLI hi darj hota hai (paid nahi likhta).
+    const khula = paid || type === 'love-arranged';
 
     // A proof that was sent but did not verify is an ERROR, not a silent
     // downgrade — a real payer must never quietly receive the free view.
@@ -420,10 +426,13 @@ export async function POST(req: NextRequest) {
 
     // ── 3) Granth (VM) — ⭐ 22 Sep: score se PEHLE. Health ka score yahi se
     //    aata hai (VM par EK jagah ginti). Baaki type par koi asar nahi.
-    const granth = await fetchGranthYog(YOG_TO_PRODUCT[type] ?? type, b, paid);
+    const granth = await fetchGranthYog(YOG_TO_PRODUCT[type] ?? type, b, khula);
     console.log(`[yog] granth ${type} | ${granth ? 'mila' : 'NAHI mila'} | saar ${granth?.saar?.shabd ?? 0} shabd | faisla ${granth?.faisla?.faisla ?? '—'}`);
     // 🔴 SURAKSHA: health par VM na mile to KHAALI data se jhootha "Dhyan
     //    Rakhein" kabhi nahi — saaf bata do ki engine abhi uplabdh nahi.
+    if (type === 'love-arranged' && !granth?.love) {
+      return NextResponse.json({ error: 'Engine abhi uplabdh nahi — kripya thodi der mein dobara koshish karein.' }, { status: 503 });
+    }
     if (type === 'health-insight' && !granth?.jeevan) {
       return NextResponse.json({ error: 'Health engine abhi uplabdh nahi — kripya thodi der mein dobara koshish karein.' }, { status: 503 });
     }
@@ -438,6 +447,7 @@ export async function POST(req: NextRequest) {
       : type === 'vivah' ? scoreVivah(data, timeline, b.name ?? null, b.year, b.gender ?? null)
       : type === 'second-marriage' ? scoreSecondMarriage(data)
       : type === 'health-insight' ? healthFromGranth(granth.jeevan)
+      : type === 'love-arranged' ? loveFromGranth(granth.love)
       : scoreForeignSpouse(data);
 
     if (paid) {
@@ -485,7 +495,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       success: true,
       type,
-      paid,
+      paid: khula,
       sessionId: `yog_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
       input: { name: b.name || null, gender: b.gender || null },
       // ⭐ 21 Sep — granth: saar (250-500 shabd) + faisla + bhav ki teen parat
@@ -519,7 +529,7 @@ export async function POST(req: NextRequest) {
           ? paid
             ? { ...(full as VivahResult), summary: verdictSummary }
             : vivahFreeShape(full as VivahResult, verdictSummary)
-        : paid
+        : khula
           ? full
           : freeShape(full),
     });
