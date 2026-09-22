@@ -48,6 +48,7 @@
  * 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER 🔱
  * ============================================================================
  * File:        app/sitemap.ts
+ * Version:     v9.2 — free-life-span-calculator juda (22 Sep 2026)
  * Version:     v9.1 — free-love-or-arranged-marriage-calculator juda (22 Sep 2026)
  * Version:     v9.0 — free-health-prediction-calculator juda (22 Sep 2026)
  * Version:     v8.9 — free-second-marriage-calculator juda (21 Sep 2026)
@@ -398,6 +399,7 @@ const CALCULATORS = [
   'free-second-marriage-calculator',
   'free-health-prediction-calculator',
   'free-love-or-arranged-marriage-calculator',
+  'free-life-span-calculator',
 ];
 
 const DOMAINS_FALLBACK = [

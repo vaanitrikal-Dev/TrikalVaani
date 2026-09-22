@@ -1,6 +1,7 @@
 // ============================================================
 // File: app/calculators/page.tsx
 // Purpose: Calculators Hub — SEO/GEO/AEO landing page
+// Version: v4.4 — life-span (Ayushya) card (22 Sep 2026)
 // Version: v4.3 — love-or-arranged card (22 Sep 2026)
 // Version: v4.2 — health-prediction card (22 Sep 2026)
 // Version: v4.1 — second-marriage card (21 Sep 2026)
@@ -169,6 +170,14 @@ const CALCULATORS: CalcEntry[] = [
     emoji: '\u{1F498}',
     name: 'Free Love or Arranged Marriage Calculator',
     desc: 'Love ki or jhukaav, dono ka mel ya arranged ki or \u2014 10 parampara-sanket (5-7 swami, Shukra, Rahu, Navamsa) saaf label ke saath, aur BPHS dasha se vivah ka samay. Poora muft.',
+    badge: 'New',
+    live: true,
+  },
+  {
+    slug: 'free-life-span-calculator',
+    emoji: '\u{1F549}\uFE0F',
+    name: 'Free Life Span Calculator',
+    desc: 'Ayushya \u2014 BPHS 43 ke teen jode se Alpayu, Madhyayu ya Deerghayu, BPHS 44 se maraka ke saavdhaani daur aur graha-shanti upay. Koi saal ya death date nahi. Poora muft.',
     badge: 'New',
     live: true,
   },

@@ -2,6 +2,7 @@
 
 // ============================================================
 // File: components/calculators/YogCalculator.tsx
+// Version: v4.7 — life-span (Ayushya): band card BINA score, teen jode table, maraka chips, upay; POORA MUFT (22 Sep 2026)
 // Version: v4.6 — 💍 jawab ab /api/calc/vivah-jawab par (ad-blocker "feedback" URL rokta tha — request server tak nahi pahunchti thi) (22 Sep 2026)
 // Version: v4.5 — 💍 feedback: save fail ho to "Dhanyavaad" NAHI, saaf sandesh + dobara button (pehle galti chupchaap nigal li jaati thi) (22 Sep 2026)
 // Version: v4.4 — love-arranged: Love:Arranged meter + 🎯 Hamara jawab; "Kya rok raha hai" aur "Payment ho gaya" chhupe (22 Sep 2026)
@@ -250,7 +251,7 @@ interface ApiResponse {
 
 export interface YogCalculatorConfig {
   /** Matches the `type` the API expects. */
-  type: 'upsc' | 'foreign-settlement' | 'foreign-spouse' | 'santan' | 'vivah' | 'second-marriage' | 'health-insight' | 'love-arranged';
+  type: 'upsc' | 'foreign-settlement' | 'foreign-spouse' | 'santan' | 'vivah' | 'second-marriage' | 'health-insight' | 'love-arranged' | 'life-span';
   /**
    * Make the gender field mandatory. Only set this where the reading genuinely
    * differs by gender — asking for it without using it is just friction.
@@ -627,6 +628,149 @@ function Bold({ t }: { t: string }) {
  * shabd, har vaakya granth se, koi AI nahi. Faisla pehla shabd hota hai.
  * KRAM (Rohiit ka faisla): SCORE upar, phir ye saar.
  * ⚠️ "manyata" wali line JAAN-BOOJH KAR nahi dikhti (Rohiit, 21 Sep). */
+// ⭐ v4.7 (22 Sep 2026) — LIFE SPAN (Ayushya). Rohiit ke design faisle:
+//   * band ka naam bada + saral bracket (Madhyayu = ausat umar) — KOI SCORE /
+//     NUMBER / METER NAHI · teen jode ki table · maraka ke chips (beete feeke,
+//     abhi sona, aage saaf) · upay card · 20 se kam par sirf granth ka vachan
+const AAYU_RANG: Record<string, string> = {
+  DEERGHAYU: '#86EFAC', MADHYAYU: GOLD, ALPAYU: '#FDBA74', 'BAAL AVASTHA': '#94a3b8',
+};
+const AAYU_KISM: Record<string, string> = { C: 'char', S: 'sthir', D: 'dvisvabhav' };
+const AAYU_BAND_NAAM: Record<string, string> = {
+  DEERGHAYU: 'Deerghayu', MADHYAYU: 'Madhyayu', ALPAYU: 'Alpayu',
+};
+
+function AayuBand({ r, chart }: { r: any; chart: any }) {
+  const a = r?.aayu;
+  if (!a) return null;
+  const rang = AAYU_RANG[a.band] ?? GOLD;
+  return (
+    <section className="rounded-2xl p-6 mb-6 text-center"
+      style={{ background: '#0B0F1A', border: `1px solid ${GOLD_RGBA(0.25)}` }}>
+      <p className="text-xs uppercase tracking-widest m-0" style={{ color: '#64748b' }}>Ayushya — BPHS Ch.43</p>
+      {a.bal ? (
+        <p className="m-0 mt-3 text-base leading-relaxed" style={{ color: '#cbd5e1' }}>
+          Aapki umar abhi 20 saal se kam hai. <b style={{ color: GOLD }}>BPHS 44.12</b> kehta hai ki 20 varsh tak aayu jaani nahi ja sakti —
+          isliye hum koi shreni nahi batate.
+        </p>
+      ) : (
+        <>
+          <p className="m-0 mt-2 leading-none" style={{ fontSize: '46px', fontWeight: 800, color: rang }}>
+            {String(a.band)}
+          </p>
+          <p className="m-0 mt-2 text-lg font-semibold" style={{ color: rang }}>
+            ({r.bracket}) · {r.bandHi}
+          </p>
+        </>
+      )}
+      <div className="flex flex-wrap justify-center gap-x-5 gap-y-1 mt-4 text-xs" style={{ color: '#64748b' }}>
+        <span>Lagna: <b style={{ color: '#94a3b8' }}>{chart?.lagna}</b></span>
+        {a.hora_lagna && <span>Hora lagna: <b style={{ color: '#94a3b8' }}>{a.hora_lagna}</b></span>}
+        <span>Dasha: <b style={{ color: '#94a3b8' }}>{chart?.mahadasha}–{chart?.antardasha}</b></span>
+      </div>
+    </section>
+  );
+}
+
+function AayuJode({ a }: { a: any }) {
+  if (!a || a.bal || !(a.jode ?? []).length) return null;
+  const nir: number[] = a.nirnayak ?? [];
+  const ww: string[] = a.kakshya_wajah ?? [];
+  const KK: Record<string, string> = {
+    shani_hrasa: 'Faisla dene wale jode mein Shani hai aur wo apni ya uchcha raashi mein nahi — BPHS 43.47 se band ek shreni neeche.',
+    shani_swa: 'Faisla dene wale jode mein Shani apni/uchcha raashi mein hai — isliye band neeche nahi (43.47).',
+    shani_paap: 'Shani par sirf paap grahon ka sambandh — granth (43.47) tab band neeche nahi karta.',
+    guru_vriddhi: 'Guru ki sthiti se band ek shreni upar (BPHS 43.48-50).',
+  };
+  return (
+    <section className="rounded-2xl p-5 md:p-6 mb-6"
+      style={{ background: '#0B0F1A', border: '1px solid rgba(255,255,255,0.07)' }}>
+      <h2 className="text-base font-bold m-0 mb-1" style={{ color: GOLD }}>Granth ne ye kaise nikaala — teen jode (BPHS 43.33-40)</h2>
+      <p className="text-xs m-0 mb-3" style={{ color: '#64748b' }}>✓ = jo jode faisle mein gine gaye. Koi ank nahi — sirf granth ka niyam.</p>
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead>
+            <tr style={{ color: '#94a3b8' }}>
+              <th className="text-left p-2">Jodi</th><th className="text-left p-2">Raashi</th>
+              <th className="text-left p-2">Band</th><th className="p-2"></th>
+            </tr>
+          </thead>
+          <tbody style={{ color: '#cbd5e1' }}>
+            {(a.jode as any[]).map((j, i) => (
+              <tr key={i} style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+                <td className="p-2">{j.naam}{j.a !== 'Lagna' ? ` (${j.a}, ${j.b})` : ''}</td>
+                <td className="p-2">{j.band ? `${j.rashi_a} (${AAYU_KISM[j.kism?.[0]] ?? ''}) + ${j.rashi_b} (${AAYU_KISM[j.kism?.[1]] ?? ''})` : '—'}</td>
+                <td className="p-2 font-semibold" style={{ color: AAYU_RANG[j.band] ?? '#94a3b8' }}>{j.band ? AAYU_BAND_NAAM[j.band] : '—'}</td>
+                <td className="p-2 text-center" style={{ color: GOLD }}>{nir.includes(i) ? '✓' : ''}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      {ww.length > 0 && (
+        <p className="text-xs m-0 mt-3 leading-relaxed" style={{ color: '#94a3b8' }}>
+          {ww.map((w) => KK[w]).filter(Boolean).join(' ')}
+          {a.kakshya ? ` Isliye ${AAYU_BAND_NAAM[a.mool_band] ?? a.mool_band} → ${AAYU_BAND_NAAM[a.band] ?? a.band}.` : ''}
+        </p>
+      )}
+    </section>
+  );
+}
+
+function AayuMaraka({ a }: { a: any }) {
+  const m = a?.maraka;
+  if (!a || a.bal || !m) return null;
+  const chip = (d: any, kism: 'beeta' | 'abhi' | 'aage', i: number) => (
+    <span key={`${kism}-${i}`} className="inline-block text-xs px-3 py-1.5 rounded-full mr-2 mb-2"
+      style={kism === 'abhi'
+        ? { background: GOLD, color: '#0B0F1A', fontWeight: 700 }
+        : kism === 'beeta'
+          ? { background: 'rgba(255,255,255,0.04)', color: '#64748b', border: '1px solid rgba(255,255,255,0.08)' }
+          : { background: 'transparent', color: '#e2e8f0', border: `1px solid ${GOLD_RGBA(0.45)}` }}>
+      {d.md}/{d.ad} · {d.se} – {d.tak}
+    </span>
+  );
+  const koi = (m.beeta?.length ?? 0) + (m.abhi?.length ?? 0) + (m.aage?.length ?? 0);
+  const up = (a.upay ?? [])[0];
+  return (
+    <>
+      <section className="rounded-2xl p-5 md:p-6 mb-6"
+        style={{ background: '#0B0F1A', border: '1px solid rgba(255,255,255,0.07)' }}>
+        <h2 className="text-base font-bold m-0 mb-1" style={{ color: GOLD }}>Maraka — saavdhaani ke daur (BPHS Ch.44)</h2>
+        <p className="text-xs m-0 mb-3" style={{ color: '#64748b' }}>
+          Maraka grah: <b style={{ color: '#94a3b8' }}>{(m.grah ?? []).map((g: any) => g.grah).join(', ')}</b> · Mukhya:{' '}
+          <b style={{ color: GOLD }}>{m.mukhya}</b> ({m.mukhya_kyun === '44.9' ? 'BPHS 44.9 — maraka se juda Shani' : 'BPHS 44.3 — 2re ghar ka swami'}).
+          Granth (44.8): maraka shubh antardasha mein asar nahi karta — isliye sirf paap antardasha wale daur.
+        </p>
+        {koi === 0 ? (
+          <p className="text-sm m-0" style={{ color: '#94a3b8' }}>Paas ke samay mein aisa koi daur nahi.</p>
+        ) : (
+          <div>
+            {(m.beeta ?? []).map((d: any, i: number) => chip(d, 'beeta', i))}
+            {(m.abhi ?? []).map((d: any, i: number) => chip(d, 'abhi', i))}
+            {(m.aage ?? []).map((d: any, i: number) => chip(d, 'aage', i))}
+          </div>
+        )}
+        <p className="text-xs m-0 mt-2" style={{ color: '#64748b' }}>
+          Feeke = beete · sona = abhi · saaf = aage. Granth (44.20-21) in daur mein &ldquo;rog-kasht&rdquo; kehta hai — ye sehat par
+          dhyan aur jaanch ka samay hai, darne ka nahi.
+        </p>
+      </section>
+      {up && (
+        <section className="rounded-2xl p-5 md:p-6 mb-6"
+          style={{ background: GOLD_RGBA(0.05), border: `1px solid ${GOLD_RGBA(0.25)}` }}>
+          <h2 className="text-base font-bold m-0 mb-2" style={{ color: GOLD }}>Upay — BPHS graha-shanti ({up.grah})</h2>
+          <ul className="text-sm m-0 pl-5 leading-relaxed" style={{ color: '#cbd5e1' }}>
+            <li><b style={{ color: GOLD }}>{Number(up.jaap).toLocaleString('en-IN')}</b> jaap — vaidik ya pauranik mantra, maun rehkar</li>
+            <li><b style={{ color: GOLD }}>{up.samidha}</b> ki samidha se havan</li>
+            <li><b style={{ color: GOLD }}>{up.daan}</b> ka daan</li>
+          </ul>
+        </section>
+      )}
+    </>
+  );
+}
+
 function GranthSaar({ saar }: { saar?: { saar?: string } | null }) {
   const txt = typeof saar?.saar === 'string' ? saar.saar.trim() : '';
   if (!txt) return null;
@@ -993,7 +1137,8 @@ export default function YogCalculator({ config }: { config: YogCalculatorConfig 
   };
 
   // ⭐ 22 Sep — love-arranged poora muft: koi taala, koi ₹51 nahi
-  const paid = data?.paid === true || config.type === 'love-arranged';
+  // ⭐ 22 Sep — life-span (Ayushya) bhi poora muft
+  const paid = data?.paid === true || config.type === 'love-arranged' || config.type === 'life-span';
   const r: any = data?.result;
   const secondary = paid ? (r?.direction ?? r?.routes ?? null) : null;
 
@@ -1086,7 +1231,9 @@ export default function YogCalculator({ config }: { config: YogCalculatorConfig 
           {/* Score. Hidden on santan FREE: a bare "51 / 100" on this subject
               reads as a verdict on the person, and the plain verdict above
               already carries the answer. Paid still sees it. */}
-          {!(isVerdictType(config.type) && !paid) && (
+          {config.type === 'life-span' && <AayuBand r={r} chart={data.chart} />}
+          {config.type === 'life-span' && <AayuJode a={r.aayu} />}
+          {config.type !== 'life-span' && !(isVerdictType(config.type) && !paid) && (
           <section className="rounded-2xl p-6 mb-6 text-center"
             style={{ background: '#0B0F1A', border: `1px solid ${GOLD_RGBA(0.25)}` }}>
             <p className="text-xs uppercase tracking-widest m-0" style={{ color: '#64748b' }}>{config.scoreLabel}</p>
@@ -1135,6 +1282,7 @@ export default function YogCalculator({ config }: { config: YogCalculatorConfig 
               jagah ye saar. Purana "Aapke chart ka jawab" granth ka faisla
               hone par chhupta hai. */}
           <GranthSaar saar={data.granth?.saar} />
+          {config.type === 'life-span' && <AayuMaraka a={r.aayu} />}
 
           {isVerdictType(config.type) && (
             <VerdictView r={r} paid={paid}
@@ -1145,7 +1293,7 @@ export default function YogCalculator({ config }: { config: YogCalculatorConfig 
           {/* The differentiator. For santan this is the WORKING, not the
               product, so the free reader never sees it — santanFreeShape in
               the route does not even send the rows. */}
-          {!(isVerdictType(config.type) && !paid) && (
+          {config.type !== 'life-span' && !(isVerdictType(config.type) && !paid) && (
           <section className="rounded-2xl p-5 md:p-6 mb-6"
             style={{ background: '#0B0F1A', border: '1px solid rgba(255,255,255,0.07)' }}>
             <h2 className="text-base font-bold m-0 mb-1" style={{ color: GOLD }}>{config.breakdownHeading}</h2>
@@ -1164,7 +1312,7 @@ export default function YogCalculator({ config }: { config: YogCalculatorConfig 
           )}
 
           {/* Blockers — the reason people pay, so the free view names them and stops. */}
-          {config.type !== 'love-arranged' && r.blockers?.length > 0 && (   /* ⭐ love-sanket na hona "rukavat" nahi */
+          {config.type !== 'love-arranged' && config.type !== 'life-span' && r.blockers?.length > 0 && (   /* ⭐ love-sanket na hona "rukavat" nahi */
             <section className="rounded-2xl p-5 mb-6"
               style={{ background: 'rgba(239,68,68,0.05)', border: '1px solid rgba(239,68,68,0.2)' }}>
               <h2 className="text-base font-bold m-0 mb-3" style={{ color: '#FCA5A5' }}>Kya rok raha hai</h2>
@@ -1302,7 +1450,7 @@ export default function YogCalculator({ config }: { config: YogCalculatorConfig 
               ₹51, so someone who had just paid read it as "pay again" and
               assumed their payment had failed. It now confirms the purchase
               first, then names the other product explicitly. */}
-          {paid && config.type !== 'love-arranged' && (   /* ⭐ muft par "Payment ho gaya" galat tha */
+          {paid && config.type !== 'love-arranged' && config.type !== 'life-span' && (   /* ⭐ muft par "Payment ho gaya" galat tha */
           <section className="rounded-2xl p-5 md:p-6 mb-6 text-center"
             style={{ background: GOLD_RGBA(0.07), border: `1px solid ${GOLD_RGBA(0.3)}` }}>
             <p className="text-xs m-0 mb-3" style={{ color: '#86EFAC' }}>
