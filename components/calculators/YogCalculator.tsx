@@ -2,6 +2,7 @@
 
 // ============================================================
 // File: components/calculators/YogCalculator.tsx
+// Version: v4.2 — health-insight + bandLabel ("Dhyan Rakhein", "Weak" nahi) (22 Sep 2026)
 // Version: v4.1 — type union mein second-marriage (21 Sep 2026)
 // PICHHLA: v4.0 — GRANTH KA SAAR, GEMINI BAND (21 Sep 2026)
 //   * KRAM: score upar → 🔱 granth se aapka saar → baaki
@@ -192,6 +193,7 @@ interface YogPayload {
   score: number;
   band: string;
   bandHi: string;
+  bandLabel?: string;
   rules: ScoredRule[];
   highlights: ScoredRule[];
   blockers: ScoredRule[];
@@ -209,7 +211,7 @@ interface LockedRule {
 }
 
 interface FreePayload {
-  score: number; band: string; bandHi: string; disclaimer: string;
+  score: number; band: string; bandHi: string; bandLabel?: string; disclaimer: string;
   highlights: ScoredRule[];
   rules: LockedRule[];
   lockedCount: number;
@@ -244,7 +246,7 @@ interface ApiResponse {
 
 export interface YogCalculatorConfig {
   /** Matches the `type` the API expects. */
-  type: 'upsc' | 'foreign-settlement' | 'foreign-spouse' | 'santan' | 'vivah' | 'second-marriage';
+  type: 'upsc' | 'foreign-settlement' | 'foreign-spouse' | 'santan' | 'vivah' | 'second-marriage' | 'health-insight';
   /**
    * Make the gender field mandatory. Only set this where the reading genuinely
    * differs by gender — asking for it without using it is just friction.
@@ -1058,7 +1060,7 @@ export default function YogCalculator({ config }: { config: YogCalculatorConfig 
               <span style={{ fontSize: '20px', color: '#475569' }}> / 100</span>
             </p>
             <p className="m-0 mt-1 text-lg font-semibold" style={{ color: bandColor(r.band) }}>
-              {r.band} · {r.bandHi}
+              {r.bandLabel ?? r.band} · {r.bandHi}
             </p>
             <div className="flex flex-wrap justify-center gap-x-5 gap-y-1 mt-4 text-xs" style={{ color: '#64748b' }}>
               <span>Lagna: <b style={{ color: '#94a3b8' }}>{data.chart.lagna}</b></span>

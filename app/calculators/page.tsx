@@ -1,6 +1,7 @@
 // ============================================================
 // File: app/calculators/page.tsx
 // Purpose: Calculators Hub — SEO/GEO/AEO landing page
+// Version: v4.2 — health-prediction card (22 Sep 2026)
 // Version: v4.1 — second-marriage card (21 Sep 2026)
 // PICHHLA: 4.0 — Vivah Yog calculator added (3 Sep 2026)
 // CHANGES vs v3.9:
@@ -159,6 +160,14 @@ const CALCULATORS: CalcEntry[] = [
     emoji: '\u{1F491}',
     name: 'Free Second Marriage Calculator',
     desc: 'Doosre vivah ka yog \u2014 BPHS 18.19, Bhrigu Sutram aur Navamsa D-9 se. Ling ke hisaab se karak (Shukra/Guru), har ank ke saath uska shlok.',
+    badge: 'New',
+    live: true,
+  },
+  {
+    slug: 'free-health-prediction-calculator',
+    emoji: '\u{1FA7A}',
+    name: 'Free Health Prediction Calculator',
+    desc: 'Jeevan-shakti score \u2014 lagna, lagna-swami, Surya, Chandra aur 6/8 ke swami (Harsha/Sarala, Phaladipika 6) se. Areas to watch (BPHS 4.4) aur prakriti (BPHS 4.5). Pehle doctor ki jaanch.',
     badge: 'New',
     live: true,
   },

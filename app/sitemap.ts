@@ -48,6 +48,7 @@
  * 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER 🔱
  * ============================================================================
  * File:        app/sitemap.ts
+ * Version:     v9.0 — free-health-prediction-calculator juda (22 Sep 2026)
  * Version:     v8.9 — free-second-marriage-calculator juda (21 Sep 2026)
  *
  * Changes v8.7 -> v8.8 (2026-09-03):
@@ -394,6 +395,7 @@ const CALCULATORS = [
   'free-shadi-kab-hogi-calculator',
   // ── Second Marriage / Doosra Vivah (v8.9 — 21 Sep 2026) ──
   'free-second-marriage-calculator',
+  'free-health-prediction-calculator',
 ];
 
 const DOMAINS_FALLBACK = [

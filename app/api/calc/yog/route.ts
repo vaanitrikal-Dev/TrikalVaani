@@ -1,5 +1,6 @@
 // ============================================================
 // File: app/api/calc/yog/route.ts
+// Version: v4.2 — SATVA TYPE: health-insight (Jeevan-shakti, VM se) — 22 Sep 2026
 // Version: v4.1 — CHHATHA TYPE: second-marriage (Doosra Vivah, BPHS 18.19-21) — 21 Sep 2026
 // PICHHLA: v4.0 — GRANTH PAR, GEMINI BAND, storage AWAIT (21 Sep 2026)
 //   * Paancho calculator /granth/product se — saar + faisla + teen parat
@@ -157,6 +158,7 @@ import { scoreForeignSettlement } from '@/lib/foreign-settlement-engine';
 import { scoreForeignSpouse } from '@/lib/foreign-spouse-engine';
 // ⭐ 21 Sep 2026 — Second Marriage (Doosra Vivah) Yog — BPHS 18.19-21
 import { scoreSecondMarriage } from '@/lib/second-marriage-engine';
+import { healthFromGranth } from '@/lib/health-engine';
 import { scoreSantan } from '@/lib/santan-engine';
 import type { DashaPeriod, SantanResult } from '@/lib/santan-engine';
 import { scoreVivah } from '@/lib/vivah-engine';
@@ -174,6 +176,7 @@ const YOG_TO_PRODUCT: Record<string, string> = {
   'foreign-settlement': 'foreign-settlement',
   'foreign-spouse':     'foreign-spouse',
   'second-marriage':    'second-marriage',
+  'health-insight':     'health-insight',
   santan:               'santan-yog',
   vivah:                'shadi-kab-hogi',
 };
@@ -217,9 +220,9 @@ export const dynamic = 'force-dynamic';
 /** Hard ceiling. See the v2.4 note above — without this it was Vercel's default. */
 export const maxDuration = 60;
 
-type YogType = 'upsc' | 'foreign-settlement' | 'foreign-spouse' | 'santan' | 'vivah' | 'second-marriage';
+type YogType = 'upsc' | 'foreign-settlement' | 'foreign-spouse' | 'santan' | 'vivah' | 'second-marriage' | 'health-insight';
 
-const VALID: YogType[] = ['upsc', 'foreign-settlement', 'foreign-spouse', 'santan', 'vivah', 'second-marriage'];
+const VALID: YogType[] = ['upsc', 'foreign-settlement', 'foreign-spouse', 'santan', 'vivah', 'second-marriage', 'health-insight'];
 
 /** The two types that lead with a verdict and a written summary. */
 const VERDICT_TYPES: YogType[] = ['santan', 'vivah'];
@@ -310,6 +313,7 @@ function freeShape(full: any) {
     score: full.score,
     band: full.band,
     bandHi: full.bandHi,
+    bandLabel: full.bandLabel,      // ⭐ 22 Sep — health: "Dhyan Rakhein" ("Weak" nahi)
     disclaimer: full.disclaimer,
     // Full reasoning for the three strongest findings — the proof of work.
     highlights: shown,
@@ -411,7 +415,17 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Chart could not be built from the birth details.' }, { status: 502 });
     }
 
-    // ── 3) Score ─────────────────────────────────────────────────────────────
+    // ── 3) Granth (VM) — ⭐ 22 Sep: score se PEHLE. Health ka score yahi se
+    //    aata hai (VM par EK jagah ginti). Baaki type par koi asar nahi.
+    const granth = await fetchGranthYog(YOG_TO_PRODUCT[type] ?? type, b, paid);
+    console.log(`[yog] granth ${type} | ${granth ? 'mila' : 'NAHI mila'} | saar ${granth?.saar?.shabd ?? 0} shabd | faisla ${granth?.faisla?.faisla ?? '—'}`);
+    // 🔴 SURAKSHA: health par VM na mile to KHAALI data se jhootha "Dhyan
+    //    Rakhein" kabhi nahi — saaf bata do ki engine abhi uplabdh nahi.
+    if (type === 'health-insight' && !granth?.jeevan) {
+      return NextResponse.json({ error: 'Health engine abhi uplabdh nahi — kripya thodi der mein dobara koshish karein.' }, { status: 503 });
+    }
+
+    // ── 3b) Score ────────────────────────────────────────────────────────────
     const timeline = dashaTimeline(k?.dasha?.maha_dasha ?? []);
 
     const full =
@@ -420,6 +434,7 @@ export async function POST(req: NextRequest) {
       : type === 'santan' ? scoreSantan(data, timeline, b.name ?? null, b.year)
       : type === 'vivah' ? scoreVivah(data, timeline, b.name ?? null, b.year, b.gender ?? null)
       : type === 'second-marriage' ? scoreSecondMarriage(data)
+      : type === 'health-insight' ? healthFromGranth(granth.jeevan)
       : scoreForeignSpouse(data);
 
     if (paid) {
@@ -437,8 +452,6 @@ export async function POST(req: NextRequest) {
     // verdictSummary khaali rehta hai, to purana summary-dabba apne aap
     // nahi dikhta (YogCalculator mein {r.summary && ...} hai).
     const verdictSummary = '';
-    const granth = await fetchGranthYog(YOG_TO_PRODUCT[type] ?? type, b, paid);
-    console.log(`[yog] granth ${type} | ${granth ? 'mila' : 'NAHI mila'} | saar ${granth?.saar?.shabd ?? 0} shabd | faisla ${granth?.faisla?.faisla ?? '—'}`);
 
     // ── usage log — fire-and-forget, own try/catch. This route serves five
     //    different calculators, so the slug carries `type`, and it is the one

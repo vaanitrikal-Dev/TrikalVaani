@@ -3,6 +3,7 @@
  * TRIKAL VAANI — Yog Report Order (Razorpay, India)
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/api/calc/yog/order/route.ts
+ * Version: 22 Sep 2026 — 'health-insight' LABEL mein juda (satva calculator)
  * Version: 21 Sep 2026 — 'second-marriage' LABEL mein juda (chhatha calculator)
  * VERSION: 1.2 (3 Sep 2026)
  *   v1.2 — `vivah` added ("Shadi kab hogi"). This is the file the v1.1 note
@@ -62,6 +63,7 @@ const LABEL: Record<string, string> = {
   'vivah': 'Vivah Yog Report',
   // ⭐ 21 Sep 2026 — chhatha calculator
   'second-marriage': 'Second Marriage Yog Report',
+  'health-insight': 'Health Prediction (Jeevan-shakti) Report',
 };
 
 const VALID_TYPES = Object.keys(LABEL);
