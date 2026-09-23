@@ -2,7 +2,32 @@
 
 // ============================================================
 // File: components/calculators/MuhuratCalculator.tsx
-// Version: v1.7 — 23 September 2026 (CityInput bilkul nahi chhua)
+// Version: v2.0 — 23 September 2026 (seema 45 din / 6 mahine)
+// Rohiit: "bahut lambi list ho jayegi, abhi bhi bahut lambi hai." Ab muft
+// 45 din ki soochi aur paid 180 din (6 mahine) ki — paid mein lagbhag 30
+// tareekhein, pehle 63 tak chali jaati thi. Banner ab engine ka seema_din
+// padhta hai, apna andaza nahi lagata: pehle wo "agle 3 mahine" likh deta
+// tha jabki khidki 45 din ki hoti.
+//
+// v1.9 — UPAY ka block, Hinglish, sach ka label
+//
+// v1.9 — karak grah ka label sudhra. Card par likha tha "Karak grah BPHS ke
+//   karakatva se" — par library kholkar dekha: BPHS adhyay 32 CHARA karak
+//   ka hai (Atmakarak, Jaimini paddhati), aur naisargik karak ki saaf soochi
+//   (Shukra = kalatra, Mangal = bhoomi) BPHS e-text mein kahin nahi hai.
+//   Bina shlok ke granth ka dawa nahi karte, isliye ab saaf "parampara".
+//   Upay ka text bhi ab Hinglish mein aata hai (engine v1.9 + planet_remedies
+//   ke naye Hinglish khaane) — pehle beech mein angrezi aa jaati thi.
+//
+// v1.8 — UPAY ka block juda (sirf paid; engine muft jawab mein upay ki key
+//   bhejta hi nahi) aur "(agli subah)" ka bug theek: pehle wo sirf tab lagta
+//   tha jab khidki ka ant shuruaat se chhota ho, isliye 00:18-01:16 jaisi
+//   khidki chhut jaati thi. Ab engine har khidki par se_agli/tak_agli bhejta
+//   hai aur UI usi par chalta hai.
+//   (Ye header us waqt likha nahi ja saka — script beech mein ruk gayi thi,
+//    aur aakhri audit mein pakda gaya.)
+//
+// v1.7 — CityInput bilkul nahi chhua
 // Rohiit: "agar A doosre calculator ko affect kar sakta hai to B" — yani
 // sajha CityInput.tsx mein ek optional placeholder tak nahi jodna. Wo file
 // paanch chalte hue calculator (Gemstone, Kundali, Yog…) chala rahi hai, aur
@@ -136,6 +161,7 @@ interface Result {
   tareekhein: Tareekh[];
   darje: Record<string, number>;
   chhupi?: Record<string, number>; chhupi_kul?: number;
+  seema_din?: number;     // engine kitne din jaanche (45 muft / 180 paid)
   upay?: Upay[];          // sirf paid mein aata hai (engine v1.8)
   kul_shubh?: number; mahine?: number; paid?: boolean;
 }
@@ -297,7 +323,13 @@ export default function MuhuratCalculator() {
             {t.samay.khirkiyan.map((k, i) => {
               // Aadhi raat ke paar (22:26 – 02:17) — tareekh badal chuki hai.
               // Bina likhe grahak usi din dopahar/raat 2 baje samajh leta.
-              const paar = k.kab === 'raat' && k.tak < k.se;
+              // Engine hi batata hai ki khidki agle din mein girti hai.
+              // Pehle yahan samay ki string ki tulna thi (k.tak < k.se) — usse
+              // 00:18-01:16 jaisi khidki, jo POORI ki poori aadhi raat ke baad
+              // hai, chhut jaati thi aur grahak use usi din ki raat samajhta.
+              // (Ye sudhaar v1.8 mein likha gaya tha par script beech mein ruk
+              //  gayi thi; aakhri audit mein pakda gaya.)
+              const paar = k.tak_agli ?? (k.kab === 'raat' && k.tak < k.se);
               return (
                 <span key={i} style={{ fontSize: 20, fontWeight: 700, color: INK, letterSpacing: 0.3 }}>
                   {k.kab === 'raat' && <span style={{ fontSize: 14, marginRight: 4 }} title="raat ka samay">🌙</span>}
@@ -497,7 +529,11 @@ export default function MuhuratCalculator() {
           <div style={{ background: GOLD_RGBA(0.06), border: `1px solid ${GOLD_RGBA(0.25)}`, borderRadius: 16, padding: '18px 20px', marginBottom: 20 }}>
             <div style={{ fontSize: 15, color: INK, fontWeight: 700 }}>
               {form.name ? `${form.name} ji, ` : ''}{data.kaam.naam_hi} ke liye
-              agle {data.mahine ?? 3} mahine mein {data.tareekhein.length} shubh tareekhein
+              {(() => {
+                // Engine se seedha — 45 din, ya 180 ko "6 mahine" mein
+                const dn = data.seema_din ?? 45;
+                return dn >= 150 ? `agle ${Math.round(dn / 30)} mahine mein` : `agle ${dn} din mein`;
+              })()} {data.tareekhein.length} shubh tareekhein
             </div>
             <div style={{ fontSize: 13, color: MUTED, marginTop: 6 }}>
               {(['shreshth', 'achha', 'theek'] as const)
@@ -539,7 +575,7 @@ export default function MuhuratCalculator() {
                 }}>
                   <div style={{ fontSize: 26, marginBottom: 6 }}>🔒</div>
                   <div style={{ fontSize: 17, fontWeight: 700, color: INK, lineHeight: 1.4 }}>
-                    Aapki kundali mein agle 12 mahine ki aur tareekhein hain
+                    Aapki kundali mein agle 6 mahine ki aur tareekhein hain
                   </div>
                   <div style={{ fontSize: 14, color: '#cbd5e1', marginTop: 10, lineHeight: 1.7 }}>
                     Har tareekh par shubh samay, har niyam ke saath granth ka shlok,
@@ -563,21 +599,21 @@ export default function MuhuratCalculator() {
 
           {data.paid && (
             <div style={{ background: 'rgba(34,197,94,0.10)', border: '1px solid rgba(34,197,94,0.35)', borderRadius: 12, padding: '14px 16px', fontSize: 14, color: '#86efac', marginTop: 6 }}>
-              ✓ Poori soochi khul gayi — agle 12 mahine ki saari shubh tareekhein upar hain.
+              ✓ Poori soochi khul gayi — agle 6 mahine (180 din) ki saari shubh tareekhein upar hain.
             </div>
           )}
 
           {/* ⭐ v1.8 — UPAY. Sirf paid mein, kyunki engine muft jawab mein ye
-              key bhejta hi nahi. Karak grah BPHS ke karakatva se (granth),
-              mantra aur daan planet_remedies se (parampara) — dono par label. */}
+              key bhejta hi nahi. Karak grah, mantra aur daan — sab parampara
+              se; granth ka naam kisi par nahi. */}
           {data.paid && (data.upay?.length ?? 0) > 0 && (
             <div style={{ marginTop: 22 }}>
               <div style={{ fontSize: 18, fontWeight: 800, color: GOLD, marginBottom: 4 }}>
                 ग्रह-शान्ति के उपाय
               </div>
               <div style={{ fontSize: 13, color: MUTED, marginBottom: 14, lineHeight: 1.7 }}>
-                Ye upay is kaam ke <strong style={{ color: '#cbd5e1' }}>karak grah</strong> ke hain.
-                Upar chuni tareekh se pehle ya usi din kar lijiye — muhurat aur upay saath chalte hain.
+                Ye upay is kaam ke <strong style={{ color: '#cbd5e1' }}>karak grah</strong> ke hain —
+                jyotish parampara se, granth se nahi. Upar chuni tareekh se pehle ya usi din kar lijiye.
               </div>
 
               {data.upay!.map((u, i) => (
@@ -609,8 +645,8 @@ export default function MuhuratCalculator() {
                   )}
 
                   <div style={{ fontSize: 12, color: MUTED, marginTop: 10 }}>
-                    Karak grah {u.srot_kism === 'granth' ? 'BPHS ke karakatva se' : '(parampara)'} ·
-                    mantra aur daan (parampara)
+                    Karak grah, mantra aur daan — <strong style={{ color: '#94a3b8' }}>parampara</strong> se.
+                    Brihat Samhita in par kuch nahi kehti, isliye hum granth ka naam nahi lagate.
                   </div>
                 </div>
               ))}

@@ -2,6 +2,19 @@
 
 // ============================================================
 // File: app/calculators/free-shubh-muhurat-calculator/page.tsx
+// Version: v1.7 (23 Sep 2026) — "kitni tareekhein" ke aankde ASLI naap se
+//   (23 Sep 2026, Delhi kundali, engine v2.0 par chalakar). Pehle wahan
+//   purani ginti padi thi jo seema badalne se galat ho chuki thi — ek page
+//   jo apni sachchai bechta hai, uspar galat ginti sabse buri jagah hai.
+// Version: v1.6 (23 Sep 2026) — vivah wale hisse mein teeno page ka farak
+//   saaf (milan alag, saal alag, tareekh alag)
+// Version: v1.5 (23 Sep 2026) — seema 45 din (muft) aur 180 din / 6 mahine
+//   (paid). Rohiit: "bahut lambi list ho jayegi" — paid mein 60+ tareekhein
+//   aa rahi thi, jo padhi hi nahi jaati.
+// Version: v1.4 (23 Sep 2026) — vivah ke Mula/Magha ka hissa juda (engine
+//   v1.9 mein wo ab khulte hain), karak grah ka "BPHS karakatva" wala dawa
+//   hataya (shlok nahi mila — parampara hai), aur "kitni tareekhein" wale
+//   aankde asli naap se dobara likhe gaye
 // Version: v1.3 (23 Sep 2026) — page ka text asli niyam se milaya (database
 //   har kaam ko 2-3 nakshatra-varg deta hai, page ek-do hi batata tha), aur
 //   raat ab sirf un kaamon par jinke liye wo theek hai
@@ -67,7 +80,7 @@ const PILLAR: PillarSection[] = [
       "Ye calculator aapki **janm-tithi, samay aur sthan** se kundali banata hai aur **Brihat Samhita (Varahamihira) adhyay 97, 98 aur 99** ke niyam se aane wale mahinon ki har tareekh jaanchta hai. Jo tareekhein granth ke niyam par khari utarti hain, wahi aapko milti hain — **tareekh ke saath us din ka shubh samay bhi**.",
       "Baaki muhurat sites aapse tareekh maangti hain aur us din ka panchang de deti hain. **Panchang sabke liye ek hota hai.** Hum ulta chalte hain: aap kaam bataiye, hum aapki kundali se wo tareekhein chunte hain jo **aapke** janm-nakshatra aur raashi ke anukool hon. Isliye do logon ko ek hi mahine ki alag tareekhein milengi — aur yahi sahi hai.",
       "Chalana teen qadam ka hai: **kaam chuniye** (40 mein se — vivah, griha pravesh, vahan, exam form, business…), **janm vivaran bhariye**, aur **kaam ka shehar** bataiye. Nateeja turant — koi login nahi, koi intezaar nahi.",
-      "Muft mein agle **3 mahine** ki chuni hui tareekhein milti hain — 1 shreshth, 2 achhi aur 3 theek. Poore **12 mahine** ki soochi aur graha-shanti ke upay ₹51 mein. Panchang ki poori jaankari ke liye [Daily Panchang](/panchang) bhi muft hai.",
+      "Muft mein agle **45 din** ki chuni hui tareekhein milti hain — 1 shreshth, 2 achhi aur 3 theek. Poore **6 mahine (180 din)** ki soochi aur graha-shanti ke upay ₹51 mein. Panchang ki poori jaankari ke liye [Daily Panchang](/panchang) bhi muft hai.",
     ],
   },
   {
@@ -144,8 +157,11 @@ const PILLAR: PillarSection[] = [
     h2: "Vivah Muhurat — shaadi ki shubh tareekh aapki kundali se",
     paras: [
       "Vivah ke liye granth ke apne nakshatra hain — **Rohini, teeno Uttara, Revati, Mrigashira, Mula, Anuradha, Magha, Hasta aur Swati** (BS 99.7). Yahi gyarah is calculator mein lagte hain.",
+      "Inme **Mula aur Magha** bhi hain — aur yahi granth ki sabse dilchasp baat hai. Wahi do nakshatra BS 97.7-8 mein **tikshna aur ugra** kahe gaye hain, yani aam shubh kaamon se varjit. To vivah par chalenge ya nahi? Shastra ka apna niyam hai — **vishesh samanya se balwan**, khaas niyam aam niyam se upar. Vivah ke liye granth ne khud inhe kaha hai, isliye hamara engine vivah par inhe khulta rakhta hai aur report mein wajah bhi likh deta hai. Baaki har kaam par ye dono band hi rehte hain.",
       "Saath mein 99.8 ke varjit: **Vyatipata, Vaidhriti, Vishti aur Rikta tithi**, aur var-vadhu ki raashi ka aapas mein 2, 9 ya 8 na hona.",
-      "Vivah ki tareekh ke saath samay bhi milta hai, aur us samay mein se Rahu Kaal hata hua. Milan pehle karwana ho to [Kundali Milan](/kundali-milan) muft hai, aur shaadi kab hogi ye [Shadi Kab Hogi Calculator](/calculators/free-shadi-kab-hogi-calculator) batata hai.",
+      "Teen alag sawaal hain, aur log aksar inhe mila dete hain. **Jodi kaisi hai** — wo [Kundali Milan](/kundali-milan) batata hai (36 guna, Manglik, dosh). **Shaadi kis saal hogi** — wo [Shadi Kab Hogi Calculator](/calculators/free-shadi-kab-hogi-calculator) dasha se batata hai. Aur **kaunsi tareekh par** — wo yahan milta hai, aapke apne janm-nakshatra se, samay ke saath.",
+      "Ek soochi aur hai — [Vivah Muhurat 2026](/vivah-muhurat/2026) — par wo panchang ki **aam soochi** hai, sabke liye ek. Us page par khud likha hai ki wo kisi ki kundali se nahi bani. Yahan ki soochi sirf aapki hai: wahi tareekhein jo aapki Tara aur Chandra bala se bhi baith rahi hain.",
+      "Vivah ki tareekh ke saath samay bhi milta hai — din ka bhi aur **raat ka bhi**, kyunki lagn aksar raat ka hota hai — aur us samay mein se Rahu Kaal hata hua.",
       "⚠️ Chaturmas aur Kharmas (jab Surya Dhanu ya Meen mein ho) ki roak **parampara** ki hai, Brihat Samhita ki nahi — hum ise usi label ke saath dikhate hain.",
     ],
   },
@@ -239,9 +255,9 @@ const PILLAR: PillarSection[] = [
     id: "muft-mein-kya-milta-hai",
     h2: "Muft mein kya milta hai — aur ₹51 mein kya",
     paras: [
-      "**Muft:** agle 3 mahine se chuni hui **6 tareekhein** — 1 श्रेष्ठ, 2 अच्छी, 3 ठीक. Har tareekh par shubh samay, Abhijit, aur \"ye din kyun shubh hai\" ka poora hissa shlok ke saath. Koi login nahi.",
-      "**₹51 mein:** poore **12 mahine** ki saari shubh tareekhein — aam taur par **50 se 60** — aur soochi ke neeche **graha-shanti ke upay**. Upay is kaam ke **karak grah** ke hote hain: vivah, gaadi aur sona Shukra ka; ghar aur property Mangal ka; vyapar aur padhai Budh ka; naukri Surya-Shani ka; sanskar aur puja Guru ka; yatra Chandra ka. Har grah ke saath mantra, kis din karna hai, kya daan aur kaunsa rang. Karak grah BPHS ke karakatva se hai; mantra aur daan parampara ke. Ek baar ka bhugtaan, Razorpay se, turant khul jaata hai.",
-      "Ek baat saaf: agar aapki kundali par 3 mahine mein koi **श्रेष्ठ** tareekh hai hi nahi, to muft mein 6 ki jagah 5 dikhengi. Hum banawti \"BEST\" nahi bana sakte — jo granth kehta hai wahi dikhta hai.",
+      "**Muft:** agle **45 din** mein se chuni hui **6 tareekhein** — 1 श्रेष्ठ, 2 अच्छी, 3 ठीक. Har tareekh par shubh samay, Abhijit, aur \"ye din kyun shubh hai\" ka poora hissa shlok ke saath. Koi login nahi.",
+      "**₹51 mein:** poore **6 mahine (180 din)** ki saari shubh tareekhein — aam taur par **25 se 35** — aur soochi ke neeche **graha-shanti ke upay**. Upay is kaam ke **karak grah** ke hote hain: vivah, gaadi aur sona Shukra ka; ghar aur property Mangal ka; vyapar aur padhai Budh ka; naukri Surya-Shani ka; sanskar aur puja Guru ka; yatra Chandra ka. Har grah ke saath mantra, kis din karna hai, kya daan aur kaunsa rang. Ye poora hissa **parampara** ka hai — karak grah, mantra aur daan, teeno. Brihat Samhita in par kuch nahi kehti, aur BPHS mein bhi naisargik karak ki saaf soochi hamein nahi mili (uska adhyay 32 chara-karak ka hai), isliye hum inpar granth ka naam nahi lagate. Ek baar ka bhugtaan, Razorpay se, turant khul jaata hai.",
+      "Ek baat saaf: agar aapki kundali par in 45 dinon mein koi **श्रेष्ठ** tareekh hai hi nahi, to muft mein 6 ki jagah 5 ya 4 dikhengi. Hum banawti \"BEST\" nahi bana sakte — jo granth kehta hai wahi dikhta hai.",
       "Aur doosre calculator bhi poore muft hain — [Life Span](/calculators/free-life-span-calculator), [Health Prediction](/calculators/free-health-prediction-calculator), [Sade Sati](/calculators/free-sade-sati-calculator).",
     ],
   },
@@ -288,9 +304,10 @@ const PILLAR: PillarSection[] = [
     id: "kitni-tareekh-milengi",
     h2: "Kitni tareekhein milengi — asli aankde",
     paras: [
-      "Ek asli jaanch, 23 September 2026 se: ek Delhi ki kundali par **griha pravesh** ke liye 3 mahine mein 15 shubh tareekhein mili (3 shreshth, 7 achhi, 5 theek) aur 12 mahine mein 57.",
-      "**Vivah** par 17 aur 62, **vahan kharid** par 18 aur 63, **exam form** par 17 aur 62. Har tareekh par do-teen samay ki khidkiyan.",
-      "Ye ginti har kundali par alag hogi — kyunki Tara bala aur Chandra bala aapki apni hain. Par soochi khaali kabhi nahi milegi.",
+      "Ek asli jaanch — 23 September 2026, ek Delhi ki kundali, wahi engine jo upar chal raha hai. **Griha pravesh:** 45 din mein 7 shubh din nikle (1 shreshth, 3 achhe, 3 theek) aur 180 din mein 35 (3 shreshth, 14 achhe, 18 theek).",
+      "**Vivah:** 45 din mein 14 aur 180 din mein 70 — vivah par sabse zyada isliye ki granth iske liye gyarah nakshatra deta hai (BS 99.7). **Vahan kharid:** 11 aur 51. **Exam form:** 11 aur 48.",
+      "Ab ek baat jo aksar confuse karti hai: **jitne din milte hain, utne dikhaye nahi jaate.** Har mahine sirf sabse achhi 5 tareekhein dikhti hain, warna soochi itni lambi ho jaati hai ki koi padhta hi nahi. Isliye upar wali jaanch mein muft soochi 6 tareekhein deti hai aur paid soochi 30 se 33.",
+      "Ye ginti har kundali par alag hogi — kyunki Tara bala aur Chandra bala aapki apni hain. Usi jaanch mein vivah aur exam form par muft soochi 6 ki jagah **5** aayi, kyunki un 45 dinon mein us kundali par koi श्रेष्ठ din tha hi nahi. Hum ginti poori karne ke liye banawti BEST nahi banate.",
     ],
   },
   {
@@ -361,7 +378,7 @@ const PILLAR: PillarSection[] = [
     paras: [
       "**Ek:** upar dropdown se apna kaam chuniye. **Do:** janm-tithi, samay aur sthan bhariye — event ka shehar apne aap bhar jayega, alag ho to wahin badal dijiye. **Teen:** \"शुभ मुहूर्त देखें\" dabaiye.",
       "Nateeje mein har tareekh par **WhatsApp bhejein** ka button hai — ek dabane par poori tareekh aur samay ghar walon ko chala jayega. **Samay copy karein** se sirf tareekh aur samay copy ho jaata hai.",
-      "Soochi aaj se agle 3 mahine ki hoti hai — usme se granth ke hisaab se chuni hui 6 tareekhein. **Poore 12 mahine** ki saari tareekhein aur upay ₹51 wale vikalp mein, jo nateeje ke neeche milega.",
+      "Soochi aaj se agle **45 din** ki hoti hai — usme se granth ke hisaab se chuni hui 6 tareekhein. **Poore 6 mahine** ki saari tareekhein aur upay ₹51 wale vikalp mein, jo nateeje ke neeche milega.",
     ],
   },
   {
@@ -370,7 +387,7 @@ const PILLAR: PillarSection[] = [
     paras: [
       "Log aksar \"griha pravesh muhurat 2027\" dhoondhte hain aur ek chhapi hui soochi dekhte hain. Wo soochi **sabke liye ek** hoti hai — usme aapki raashi ka koi hissa nahi.",
       "Asli baat ye hai ki har mahine dhruva nakshatra (Rohini aur teeno Uttara) **do-teen baar** aate hain, aur unmein se wo din bachte hain jinpar Rikta tithi, Bhadra ya Amavasya na ho. Isliye kisi mahine 4 tareekhein milti hain aur kisi mahine 1.",
-      "Upar wale calculator mein saal 2027 ki tareekhein bhi aati hain — paid mein poore 12 mahine, aur wo aapki kundali se chuni hui hoti hain. Isliye aapki soochi kisi chhapi hui soochi se **alag** hogi, aur honi bhi chahiye.",
+      "Upar wale calculator mein 2027 ki tareekhein bhi aati hain — paid mein aaj se 6 mahine tak, aur wo aapki kundali se chuni hui hoti hain. Isliye aapki soochi kisi chhapi hui soochi se **alag** hogi, aur honi bhi chahiye.",
     ],
   },
   {
@@ -488,7 +505,7 @@ const PILLAR: PillarSection[] = [
     paras: [
       "यह कैलकुलेटर आपकी **जन्म-तिथि, समय और स्थान** से बृहत्संहिता (वराहमिहिर) के अध्याय 97, 98 और 99 के नियमों पर आने वाले महीनों की हर तिथि जाँचता है, और शुभ तिथियाँ **समय के साथ** देता है।",
       "तीन दर्जे मिलते हैं — **श्रेष्ठ** (नक्षत्र, तिथि और करण तीनों), **अच्छा** (नक्षत्र के साथ एक और), **ठीक** (नक्षत्र सही, कोई वर्जित नहीं)। रिक्ता तिथि, भद्रा, अमावस्या, व्यतिपात और वैधृति वाले दिन कभी नहीं दिखाए जाते।",
-      "जो नियम ग्रन्थ में नहीं है — राहु काल, तारा बल, चन्द्र बल, खरमास — उस पर साफ़ **\"परम्परा\"** लिखा जाता है। मुफ़्त में 3 महीने, पूरी सूची और उपाय ₹51 में।",
+      "जो नियम ग्रन्थ में नहीं है — राहु काल, तारा बल, चन्द्र बल, खरमास — उस पर साफ़ **\"परम्परा\"** लिखा जाता है। मुफ़्त में 45 दिन, पूरी सूची (6 महीने) और उपाय ₹51 में।",
     ],
   },
 ];
@@ -508,11 +525,11 @@ const FAQS = [
   },
   {
     q: "Muft mein kitni tareekhein milti hain?",
-    a: "Agle 3 mahine se chuni hui 6 tareekhein — 1 shreshth, 2 achhi aur 3 theek — har ek par shubh samay ke saath. Agar aapki kundali par 3 mahine mein koi shreshth din nahi hai to 5 dikhengi; hum banawti BEST nahi banate.",
+    a: "Agle 45 din mein se chuni hui 6 tareekhein — 1 shreshth, 2 achhi aur 3 theek — har ek par shubh samay ke saath. Agar aapki kundali par in 45 dinon mein koi shreshth din nahi hai to 5 ya 4 dikhengi; hum banawti BEST nahi banate.",
   },
   {
     q: "Rs 51 mein kya milta hai?",
-    a: "Poore 12 mahine ki saari shubh tareekhein — aam taur par 50 se 60 — har tareekh par samay, aur soochi ke neeche is kaam ke karak grah ke graha-shanti upay: mantra, kis din karna hai, kya daan aur kaunsa rang. Ek baar ka bhugtaan, Razorpay se, turant khul jaata hai.",
+    a: "Poore 6 mahine (180 din) ki saari shubh tareekhein — aam taur par 25 se 35 — har tareekh par samay, aur soochi ke neeche is kaam ke karak grah ke graha-shanti upay: mantra, kis din karna hai, kya daan aur kaunsa rang. Ek baar ka bhugtaan, Razorpay se, turant khul jaata hai.",
   },
   {
     q: "Kaam ka shehar kyun poochha jaata hai?",
@@ -556,7 +573,7 @@ const FAQS = [
   },
   {
     q: "Kisi khaas mahine ki tareekhein chahiye to?",
-    a: "Muft mein aaj se agle 3 mahine ki tareekhein aati hain. Aapka kaam usse aage ho — jaise agle saal May mein shaadi — to Rs 51 wala vikalp lijiye; usme poore 12 mahine ki tareekhein aati hain aur aap apna mahina unme se chun lete hain.",
+    a: "Muft mein aaj se agle 45 din ki tareekhein aati hain, aur Rs 51 wale vikalp mein aaj se 6 mahine ki. Iske aage ka kaam ho — jaise agle saal ki shaadi — to abhi soochi usme nahi aayegi; aise mein hamein likhiye, hum aapke mahine ke liye alag se dekh denge.",
   },
   {
     q: "Kya ye bhavishyavani hai?",
@@ -572,7 +589,7 @@ const COMPARE: { f: string; tv: string; as: string }[] = [
   { f: "Jo granth mein nahi", tv: "\"parampara\" likha aata hai", as: "sab ek jaisa dikhaya jaata hai" },
   { f: "Kaam", tv: "40 kaam, dropdown se", as: "aksar 5-8 kaam" },
   { f: "Kaam ka shehar", tv: "Alag shehar ka samay", as: "ek hi shehar ka" },
-  { f: "Keemat", tv: "3 mahine muft, 12 mahine Rs 51", as: "muft ya mehnga dono" },
+  { f: "Keemat", tv: "45 din muft, 6 mahine Rs 51", as: "muft ya mehnga dono" },
 ];
 
 export default function FreeShubhMuhuratCalculatorPage() {
@@ -632,12 +649,12 @@ export default function FreeShubhMuhuratCalculatorPage() {
               Shubh muhurat aapki janm-tithi se nikalta hai, kisi aam soochi se nahi. Ye calculator
               Brihat Samhita adhyay 97-99 ke niyam har aane wale din par lagata hai aur wo tareekhein
               deta hai jo aapke janm-nakshatra ke anukool hon — <strong style={{ color: GOLD }}>tareekh ke
-              saath us din ka shubh samay bhi</strong>. 40 kaam, 3 mahine muft.
+              saath us din ka shubh samay bhi</strong>. 40 kaam, 45 din muft.
             </p>
 
             <div className="flex flex-wrap gap-2 text-xs mb-4">
               {['40 kaam ka muhurat', 'Tareekh + samay dono', 'Har niyam par shlok',
-                'Aapki kundali se', '3 mahine muft'].map((t) => (
+                'Aapki kundali se', '45 din muft'].map((t) => (
                 <span key={t} className="px-3 py-1.5 rounded-full"
                   style={{ background: GOLD_RGBA(0.1), border: `1px solid ${GOLD_RGBA(0.3)}`, color: '#E9C862' }}>
                   {t}
@@ -742,7 +759,7 @@ export default function FreeShubhMuhuratCalculatorPage() {
             </h2>
             <p className="text-slate-300 leading-relaxed mb-4">
               40 kaam, aapki kundali se chuni hui tareekhein, har tareekh par shubh samay aur
-              har niyam ke saath uska shlok. Agle 3 mahine ki soochi muft — koi login nahi.
+              har niyam ke saath uska shlok. Agle 45 din ki soochi muft — koi login nahi.
             </p>
             <a href="#top" onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
               className="inline-block px-6 py-3 rounded-xl font-bold"

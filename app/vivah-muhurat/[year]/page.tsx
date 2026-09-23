@@ -3,6 +3,13 @@
 //  File: app/vivah-muhurat/[year]/page.tsx
 //  Author: Rohiit Gupta, Chief Vedic Architect
 //  Type:  Server Component (SSR + ISR) — SEO + GEO optimised
+//  Version: 3.1 — 23 September 2026
+//  v3.1 — CTA now points to the Shubh Muhurat calculator (23 Sep 2026).
+//         Until today this page said "for a personalised date, start with a
+//         free Kundali Milan" — but Kundali Milan gives a guna score, not a
+//         DATE. The visitor who came here for their own date left with
+//         nothing. /calculators/free-shubh-muhurat-calculator now answers
+//         exactly that question from the seeker's own chart, free.
 //  v3.0 — PERMANENT AUTO. DB-override for hand-validated years,
 //         VM auto-compute for all future years. Rolling params.
 //  Data:  Supabase muhurat_windows (override) + VM /vivah-muhurat
@@ -176,7 +183,7 @@ export default async function VivahMuhuratYearPage(
     },
     {
       q: 'Are these vivah muhurat dates personalised to my kundli?',
-      a: 'No — these are the general shuddha (clean) muhurats valid for everyone, based on panchang. For a personalised muhurat that also harmonises with both partners janma rashi, nakshatra and dosha, an individual consultation is recommended.',
+      a: 'No — these are the general shuddha (clean) muhurats valid for everyone, based on panchang. For dates chosen from your own birth chart, with Tara bala and Chandra bala applied and the auspicious time on each date, use the free Shubh Muhurat calculator at /calculators/free-shubh-muhurat-calculator. It applies Brihat Samhita chapters 97-99 and shows the verse behind every rule.',
     },
     {
       q: 'What makes a Vivah Muhurat auspicious in Vedic astrology?',
@@ -354,12 +361,18 @@ export default async function VivahMuhuratYearPage(
             Want the perfect date for <em>your</em> wedding?
           </h3>
           <p style={{ color: '#94A3B8', maxWidth: 560, margin: '0 auto 18px', fontSize: 15 }}>
-            These are the general shuddha muhurats. For a date that also harmonises with both partners janma rashi,
-            nakshatra and Manglik status, start with a free Kundali Milan.
+            These are the general shuddha muhurats — the same list for everyone. For the dates that also suit
+            <em> your own</em> janma nakshatra and rashi, with the auspicious time on each date, use the free
+            Shubh Muhurat calculator. Rules from Brihat Samhita ch. 97-99, with the verse behind every date.
           </p>
-          <Link href="/kundali-milan" style={{ display: 'inline-block', background: GOLD, color: '#1A1206', fontWeight: 700, fontSize: 15, padding: '12px 28px', borderRadius: 10, textDecoration: 'none' }}>
-            Check Kundali Milan →
+          <Link href="/calculators/free-shubh-muhurat-calculator" style={{ display: 'inline-block', background: GOLD, color: '#1A1206', fontWeight: 700, fontSize: 15, padding: '12px 28px', borderRadius: 10, textDecoration: 'none' }}>
+            Get my own muhurat dates →
           </Link>
+          <div style={{ marginTop: 12, fontSize: 13 }}>
+            <Link href="/kundali-milan" style={{ color: '#94A3B8', textDecoration: 'underline' }}>
+              Or check Kundali Milan first (36 guna, Manglik)
+            </Link>
+          </div>
         </section>
 
         {windows.length > 0 && (
