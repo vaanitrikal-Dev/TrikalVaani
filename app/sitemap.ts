@@ -48,6 +48,7 @@
  * 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER 🔱
  * ============================================================================
  * File:        app/sitemap.ts
+ * Version:     v9.3 — free-shubh-muhurat-calculator juda (23 Sep 2026)
  * Version:     v9.2 — free-life-span-calculator juda (22 Sep 2026)
  * Version:     v9.1 — free-love-or-arranged-marriage-calculator juda (22 Sep 2026)
  * Version:     v9.0 — free-health-prediction-calculator juda (22 Sep 2026)
@@ -400,6 +401,8 @@ const CALCULATORS = [
   'free-health-prediction-calculator',
   'free-love-or-arranged-marriage-calculator',
   'free-life-span-calculator',
+  // ── Shubh Muhurat (v9.3 — 23 Sep 2026) ──
+  'free-shubh-muhurat-calculator',
 ];
 
 const DOMAINS_FALLBACK = [

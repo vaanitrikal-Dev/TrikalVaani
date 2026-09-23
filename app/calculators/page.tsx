@@ -1,6 +1,7 @@
 // ============================================================
 // File: app/calculators/page.tsx
 // Purpose: Calculators Hub — SEO/GEO/AEO landing page
+// Version: v4.5 — Shubh Muhurat calculator ka card juda (23 Sep 2026)
 // Version: v4.4 — life-span (Ayushya) card (22 Sep 2026)
 // Version: v4.3 — love-or-arranged card (22 Sep 2026)
 // Version: v4.2 — health-prediction card (22 Sep 2026)
@@ -170,6 +171,14 @@ const CALCULATORS: CalcEntry[] = [
     emoji: '\u{1F498}',
     name: 'Free Love or Arranged Marriage Calculator',
     desc: 'Love ki or jhukaav, dono ka mel ya arranged ki or \u2014 10 parampara-sanket (5-7 swami, Shukra, Rahu, Navamsa) saaf label ke saath, aur BPHS dasha se vivah ka samay. Poora muft.',
+    badge: 'New',
+    live: true,
+  },
+  {
+    slug: 'free-shubh-muhurat-calculator',
+    emoji: '\u{1F5D3}\uFE0F',
+    name: 'Free Shubh Muhurat Calculator',
+    desc: 'Apni janm-tithi se shubh tareekh AUR samay \u2014 vivah, griha pravesh, vahan, business, exam form samet 40 kaam. Brihat Samhita 97-99 ke niyam, har wajah par shlok. 3 mahine muft.',
     badge: 'New',
     live: true,
   },

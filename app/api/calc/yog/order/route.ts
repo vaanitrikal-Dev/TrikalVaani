@@ -3,6 +3,7 @@
  * TRIKAL VAANI — Yog Report Order (Razorpay, India)
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/api/calc/yog/order/route.ts
+ * Version: 23 Sep 2026 — 'muhurat' LABEL mein juda (Shubh Muhurat calculator)
  * Version: 22 Sep 2026 — 'health-insight' LABEL mein juda (satva calculator)
  * Version: 21 Sep 2026 — 'second-marriage' LABEL mein juda (chhatha calculator)
  * VERSION: 1.2 (3 Sep 2026)
@@ -64,6 +65,10 @@ const LABEL: Record<string, string> = {
   // ⭐ 21 Sep 2026 — chhatha calculator
   'second-marriage': 'Second Marriage Yog Report',
   'health-insight': 'Health Prediction (Jeevan-shakti) Report',
+  // ⭐ 23 Sep 2026 — Shubh Muhurat calculator. Yahi ek jagah hai jise naya
+  // PRODUCT jodne par chhedna padta hai; naya KAAM (griha pravesh, vahan…)
+  // jodne par kuch nahi, wo Supabase muhurat_karma ki row se aata hai.
+  'muhurat': 'Shubh Muhurat — 12 mahine ki tareekhein aur upay',
 };
 
 const VALID_TYPES = Object.keys(LABEL);
