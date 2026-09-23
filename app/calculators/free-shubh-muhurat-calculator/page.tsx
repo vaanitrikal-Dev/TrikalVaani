@@ -2,6 +2,9 @@
 
 // ============================================================
 // File: app/calculators/free-shubh-muhurat-calculator/page.tsx
+// Version: v1.2 (23 Sep 2026) — date range ka zikr HATAYA (wo khaana hi hat
+//   gaya, kyunki usse muft ki deewar tootti thi), aur event-location wala
+//   hissa sudhra (checkbox ab hai hi nahi)
 // Version: v1.1 (23 Sep 2026) — raat ka samay aur "kab se kab tak" ka zikr
 //   (engine v1.6 ne dono jode; page ka text uske saath milana zaroori tha —
 //    warna page kehta \"suryoday se sooryast tak\" aur engine raat bhi deta)
@@ -226,7 +229,7 @@ const PILLAR: PillarSection[] = [
     paras: [
       "Aapka janm Delhi mein hua ho aur griha pravesh Pune mein ho — to samay **Pune ka** chahiye, Delhi ka nahi.",
       "Hamari jaanch mein ek hi tareekh par Delhi ka samay 06:13 se shuru hua aur Pune ka 06:25 se — baara minute ka farak, kyunki suryoday alag hai. Chhota lagta hai, par muhurat mein minute maayne rakhte hain.",
-      "Isliye form mein ek checkbox hai: kaam usi shehar mein hai ya kisi aur mein. Na bharein to janm-sthan hi maan liya jaata hai.",
+      "Isliye form mein **Event / Program / Exam Location** alag se poochha jaata hai. Janm-sthan chunte hi wo apne aap bhar jaata hai, aur kaam kisi doosre shehar mein ho to aap use wahin badal dete hain.",
     ],
   },
   {
@@ -353,9 +356,9 @@ const PILLAR: PillarSection[] = [
     id: "kaise-istemal-karein",
     h2: "Ise kaise istemal karein — teen qadam",
     paras: [
-      "**Ek:** upar dropdown se apna kaam chuniye. **Do:** janm-tithi, samay aur sthan bhariye, aur bataiye ki kaam kis shehar mein hoga. **Teen:** \"शुभ मुहूर्त देखें\" dabaiye.",
+      "**Ek:** upar dropdown se apna kaam chuniye. **Do:** janm-tithi, samay aur sthan bhariye — event ka shehar apne aap bhar jayega, alag ho to wahin badal dijiye. **Teen:** \"शुभ मुहूर्त देखें\" dabaiye.",
       "Nateeje mein har tareekh par **WhatsApp bhejein** ka button hai — ek dabane par poori tareekh aur samay ghar walon ko chala jayega. **Samay copy karein** se sirf tareekh aur samay copy ho jaata hai.",
-      "Soochi aaj se agle 3 mahine ki hoti hai. **Koi khaas mahina dekhna ho** — jaise \"meri shaadi May mein hai\" — to form mein date range daal dijiye, soochi usi seema ki aayegi. Poore saal ki chahiye to ₹51 wala vikalp neeche milega.",
+      "Soochi aaj se agle 3 mahine ki hoti hai — usme se granth ke hisaab se chuni hui 6 tareekhein. **Poore 12 mahine** ki saari tareekhein aur upay ₹51 wale vikalp mein, jo nateeje ke neeche milega.",
     ],
   },
   {
@@ -550,7 +553,7 @@ const FAQS = [
   },
   {
     q: "Kisi khaas mahine ki tareekhein chahiye to?",
-    a: "Form mein date range daal dijiye — soochi usi seema ki aayegi. Khaali chhodenge to aaj se agle 3 mahine (paid mein 12) ki tareekhein aayengi.",
+    a: "Muft mein aaj se agle 3 mahine ki tareekhein aati hain. Aapka kaam usse aage ho — jaise agle saal May mein shaadi — to Rs 51 wala vikalp lijiye; usme poore 12 mahine ki tareekhein aati hain aur aap apna mahina unme se chun lete hain.",
   },
   {
     q: "Kya ye bhavishyavani hai?",

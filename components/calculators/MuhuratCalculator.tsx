@@ -2,7 +2,31 @@
 
 // ============================================================
 // File: components/calculators/MuhuratCalculator.tsx
-// Version: v1.5 — 23 September 2026 (BEST sabse upar, thappa bada aur bharwa)
+// Version: v1.7 — 23 September 2026 (CityInput bilkul nahi chhua)
+// Rohiit: "agar A doosre calculator ko affect kar sakta hai to B" — yani
+// sajha CityInput.tsx mein ek optional placeholder tak nahi jodna. Wo file
+// paanch chalte hue calculator (Gemstone, Kundali, Yog…) chala rahi hai, aur
+// unka risk lene layak ye chhoti si baat nahi thi. Event wale box par
+// placeholder "Type city of birth…" hi rahega; uske neeche ki line saaf
+// batati hai ki box kis cheez ke liye hai.
+//
+// v1.6 — 23 September 2026 (event location khula, date range HATAYA)
+// Rohiit ne live dekh kar teen baatein pakdin, teeno sahi:
+//   1. "Work is in the same city as birth" wala checkbox tick tha, isliye
+//      event ka shehar CHHUPA rehta tha — grahak ko uncheck karna padta.
+//      Ab checkbox hai hi nahi: "Event / Program / Exam Location" HAMESHA
+//      dikhta hai aur janm-sthan chunte hi apne aap bhar jaata hai.
+//   2. DATE RANGE hataya. Rohiit: "iska koi usage nahi". Aur usse bhi badi
+//      baat — wo MUFT KI DEEWAR TOD DETA tha: grahak shuru=May 2027 dal kar
+//      muft mein teen mahine dekhta, phir Aug se teen, phir Nov se — yani
+//      poora saal muft. Engine mein seema ka sahara bana rahega (route bhi
+//      bhejta hai), par form se wo khaana hataya gaya.
+//   3. RAAT ka sach: raat ki khidki DIN ke panchang par nahi, raat ke apne
+//      panchang par milti hai — card ab ye saaf likhta hai. Aur jo khidki
+//      aadhi raat ke paar jaati hai (22:26-02:17) uspar "agli subah" likha
+//      aata hai, warna grahak usi din 2 baje samajh leta.
+//
+// v1.5 — 23 September 2026 (BEST sabse upar, thappa bada aur bharwa)
 // Rohiit, live dekhne ke baad: "Best date top par aaye, chahe tareekh koi
 // bhi ho" — grahak sabse prabal din pehle dekhe, kyunki wahi bechne wali
 // cheez hai. Aur thappa: bharwa rang, KAALA text, bada box aur bade akshar —
@@ -119,8 +143,6 @@ export default function MuhuratCalculator() {
     name: '', karma: '', dob: '', tob: '', timeUnknown: false,
     placeQuery: '', city: '', latitude: null as number | null, longitude: null as number | null, timezone: 5.5,
     kaamQuery: '', kaamCity: '', kaamLat: null as number | null, kaamLon: null as number | null, kaamTz: null as number | null,
-    kaamWahi: true,
-    se: '', tak: '',          // grahak ki apni seema (optional)
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
@@ -146,7 +168,7 @@ export default function MuhuratCalculator() {
     if (!form.dob) e.dob = 'Janm tithi zaroori hai';
     if (!form.timeUnknown && !form.tob) e.tob = 'Janm samay daaliye, ya "samay nahi pata" chuniye';
     if (!form.city || form.latitude === null) e.city = 'Janm sthan soochi mein se chuniye';
-    if (!form.kaamWahi && (form.kaamLat === null)) e.kaam = 'Kaam ka shehar soochi mein se chuniye';
+    if (form.kaamLat === null) e.kaam = 'Event ka shehar soochi mein se chuniye';
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -158,13 +180,11 @@ export default function MuhuratCalculator() {
       karma: form.karma,
       year: y, month: m, day: d, hour: hh, minute: mm,
       latitude: form.latitude, longitude: form.longitude, timezone: form.timezone,
-      kaam_lat: form.kaamWahi ? null : form.kaamLat,
-      kaam_lon: form.kaamWahi ? null : form.kaamLon,
-      kaam_tz: form.kaamWahi ? null : form.kaamTz,
-      kaam_sthan: form.kaamWahi ? form.city : form.kaamCity,
+      kaam_lat: form.kaamLat,
+      kaam_lon: form.kaamLon,
+      kaam_tz: form.kaamTz,
+      kaam_sthan: form.kaamCity || form.city,
       name: form.name || null,
-      shuru: form.se || null,
-      ant: form.tak || null,
       ...(proof ?? {}),
     };
   };
@@ -262,16 +282,34 @@ export default function MuhuratCalculator() {
         <div style={{ marginTop: 14, background: GOLD_RGBA(0.05), border: `1px solid ${GOLD_RGBA(0.18)}`, borderRadius: 12, padding: '12px 14px' }}>
           <div style={{ fontSize: 12, color: MUTED, marginBottom: 6 }}>⏰ Shubh samay</div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px 18px' }}>
-            {t.samay.khirkiyan.map((k, i) => (
-              <span key={i} style={{ fontSize: 20, fontWeight: 700, color: INK, letterSpacing: 0.3 }}>
-                {k.kab === 'raat' && <span style={{ fontSize: 14, marginRight: 4 }} title="raat ka samay">🌙</span>}
-                {k.se} – {k.tak}
-              </span>
-            ))}
+            {t.samay.khirkiyan.map((k, i) => {
+              // Aadhi raat ke paar (22:26 – 02:17) — tareekh badal chuki hai.
+              // Bina likhe grahak usi din dopahar/raat 2 baje samajh leta.
+              const paar = k.kab === 'raat' && k.tak < k.se;
+              return (
+                <span key={i} style={{ fontSize: 20, fontWeight: 700, color: INK, letterSpacing: 0.3 }}>
+                  {k.kab === 'raat' && <span style={{ fontSize: 14, marginRight: 4 }} title="raat ka samay">🌙</span>}
+                  {k.se} – {k.tak}
+                  {paar && <span style={{ fontSize: 12, color: MUTED, fontWeight: 600, marginLeft: 4 }}>
+                    (agli subah)
+                  </span>}
+                </span>
+              );
+            })}
           </div>
           {t.samay.abhijit.saaf && (
             <div style={{ fontSize: 13, color: '#E9C862', marginTop: 8 }}>
               ✨ Abhijit muhurat: {t.samay.abhijit.se} – {t.samay.abhijit.tak}
+            </div>
+          )}
+          {t.samay.khirkiyan.some(k => k.kab === 'raat') && (
+            // Imaandari: upar jo nakshatra/tithi/karan likhe hain wo DIN ke
+            // hain. Raat tak wo badal chuke hote hain, aur raat ki khidki
+            // raat ke APNE panchang par mili hai — engine ne use alag se
+            // jaancha hai. Bina likhe ye baat chhup jaati.
+            <div style={{ fontSize: 12, color: MUTED, marginTop: 8, lineHeight: 1.6 }}>
+              🌙 Raat ka nakshatra, tithi aur karan din se alag hote hain — raat ki khidki
+              unhi par alag se jaanchi gayi hai.
             </div>
           )}
         </div>
@@ -390,41 +428,33 @@ export default function MuhuratCalculator() {
           <label style={label} htmlFor="mu-city">Place of Birth *</label>
           <CityInput id="mu-city" value={form.placeQuery} error={errors.city}
             onSelect={(city, lat, lng, tz) =>
-              setForm(p => ({ ...p, placeQuery: city, city, latitude: lat, longitude: lng, timezone: tz }))} />
+              // Event ka shehar bhi yahin bhar jaata hai — zyadatar log usi
+              // shehar mein kaam karte hain, aur jise badalna ho wo neeche
+              // wale box mein badal deta hai. Pehle wo box CHECKBOX ke peeche
+              // chhupa tha, jo Rohiit ne live par pakda.
+              setForm(p => ({
+                ...p, placeQuery: city, city, latitude: lat, longitude: lng, timezone: tz,
+                ...(p.kaamLat === null
+                  ? { kaamQuery: city, kaamCity: city, kaamLat: lat, kaamLon: lng, kaamTz: tz }
+                  : {}),
+              }))} />
         </div>
 
-        {/* काम कहाँ होगा — शुभ समय शहर से बदलता है */}
+        {/* Event ki jagah — HAMESHA khula. Shubh samay suryoday se banta hai. */}
         <div style={{ marginBottom: 18 }}>
-          <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, color: '#E5E7EB', fontWeight: 600, minHeight: 44 }}>
-            <input type="checkbox" checked={form.kaamWahi}
-              onChange={e => setForm(p => ({ ...p, kaamWahi: e.target.checked }))} />
-            Work is in the same city as birth
-          </label>
-          {!form.kaamWahi && (
-            <div style={{ marginTop: 10 }}>
-              <label style={label} htmlFor="mu-kaam-city">Place of the Event *</label>
-              <CityInput id="mu-kaam-city" value={form.kaamQuery} error={errors.kaam}
-                onSelect={(city, lat, lng, tz) =>
-                  setForm(p => ({ ...p, kaamQuery: city, kaamCity: city, kaamLat: lat, kaamLon: lng, kaamTz: tz }))} />
-              <div style={{ fontSize: 12, color: '#64748b', marginTop: 6 }}>
-                Shubh samay suryoday se banta hai, aur suryoday har shehar mein alag hota hai.
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Kab se kab tak — optional. "Meri shaadi May mein hai" wala maamla. */}
-        <div style={{ marginBottom: 18 }}>
-          <label style={label}>Date range (optional)</label>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
-            <input type="date" style={input} value={form.se} aria-label="From date"
-              onChange={e => setForm(p => ({ ...p, se: e.target.value }))} />
-            <input type="date" style={input} value={form.tak} aria-label="To date"
-              onChange={e => setForm(p => ({ ...p, tak: e.target.value }))} />
-          </div>
-          <div style={{ fontSize: 12, color: '#64748b', marginTop: 5 }}>
-            Khaali chhod dein to aaj se agle {'{'}3{'}'} mahine. Kisi khaas mahine ki tareekhein
-            chahiye to yahan seema daal dijiye.
+          <label style={label} htmlFor="mu-kaam-city">Event / Program / Exam Location *</label>
+          {/* ⭐ Rohiit ka faisla (23 Sep): CityInput.tsx CHHUNA NAHI — wo sajha
+              file hai aur paanch chalte hue calculator uspar tike hain.
+              Isliye placeholder wahi purana ("Type city of birth…") rahega.
+              Uski bharpayi neeche ki line se: wahan saaf likha hai ki ye box
+              kis cheez ke liye hai. */}
+          <CityInput id="mu-kaam-city" value={form.kaamQuery} error={errors.kaam}
+            onSelect={(city, lat, lng, tz) =>
+              setForm(p => ({ ...p, kaamQuery: city, kaamCity: city, kaamLat: lat, kaamLon: lng, kaamTz: tz }))} />
+          <div style={{ fontSize: 12, color: '#64748b', marginTop: 6 }}>
+            <strong style={{ color: '#94a3b8' }}>Yahan wo shehar likhiye jahan ye kaam hoga.</strong>{' '}
+            Janm-sthan chunte hi ye apne aap bhar jaata hai; alag shehar ho to badal dijiye —
+            shubh samay suryoday se banta hai, aur suryoday har shehar mein alag hota hai.
           </div>
         </div>
 
