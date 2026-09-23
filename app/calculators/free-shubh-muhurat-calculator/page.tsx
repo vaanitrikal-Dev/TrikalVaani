@@ -2,6 +2,9 @@
 
 // ============================================================
 // File: app/calculators/free-shubh-muhurat-calculator/page.tsx
+// Version: v1.3 (23 Sep 2026) — page ka text asli niyam se milaya (database
+//   har kaam ko 2-3 nakshatra-varg deta hai, page ek-do hi batata tha), aur
+//   raat ab sirf un kaamon par jinke liye wo theek hai
 // Version: v1.2 (23 Sep 2026) — date range ka zikr HATAYA (wo khaana hi hat
 //   gaya, kyunki usse muft ki deewar tootti thi), aur event-location wala
 //   hissa sudhra (checkbox ab hai hi nahi)
@@ -150,7 +153,7 @@ const PILLAR: PillarSection[] = [
     id: "griha-pravesh-muhurat",
     h2: "Griha Pravesh Muhurat — naye ghar mein pehla kadam",
     paras: [
-      "Griha pravesh ke liye granth **dhruva nakshatra** kehta hai — Rohini aur teeno Uttara (97.6), kyunki ye wo kaam hai jo hamesha rehna hai.",
+      "Griha pravesh ke liye granth **dhruva nakshatra** kehta hai — Rohini aur teeno Uttara (97.6), kyunki ye wo kaam hai jo hamesha rehna hai. Saath mein **mridu varg** (Mrigashira, Chitra, Anuradha, Revati) bhi lagta hai — 97.10 ka mangal-karya wala varg.",
       "Karan mein **Taitila** (ashray) aur **Gara** (ghar) aate hain (99.3-4), aur tithi mein doosri (ghar ki neenv) aur dasvi-gyarahvi.",
       "Lagna par bhi granth ka niyam hai: **sthir raashi udit ho** aur wo lagna aapki janm-raashi se 8va ya 12va na ho (97.16). Ye jaanch engine agle version mein jodegi — abhi nakshatra, tithi, karan aur varjit par nateeja aata hai.",
       "Naya ghar khareedne ka yog kundali mein hai ya nahi, ye [Property Yog](/learn/property-yog-kundali) par padh sakte hain.",
@@ -160,7 +163,7 @@ const PILLAR: PillarSection[] = [
     id: "vahan-kharid-muhurat",
     h2: "Vahan Kharid Muhurat — gaadi ya bike kis din lein",
     paras: [
-      "Gaadi ke liye granth ka shabd hai **\"yaan\"** — aur wo **laghu varg** (Hasta, Ashwini, Pushya) mein aata hai (97.9). Saath mein **chara varg** (Swati, Punarvasu, Shravana, Dhanishtha, Shatabhisha) — chalne wale kaam (97.11).",
+      "Gaadi ke liye granth ka shabd hai **\"yaan\"** — aur wo **laghu varg** (Hasta, Ashwini, Pushya) mein aata hai (97.9). Saath mein **chara varg** (Swati, Punarvasu, Shravana, Dhanishtha, Shatabhisha) — chalne wale kaam (97.11) — aur **mridu varg** (Mrigashira, Chitra, Anuradha, Revati), jise granth 97.10 mein abhushan aur mangal-karya deta hai. Isliye soochi mein teeno varg ke nakshatra milenge.",
       "Tithi mein **saatvi** khaas hai — granth us par vahan banwane aur yatra ki baat karta hai. Karan mein **Vanija** (kharid-farokht) aur **Bava**.",
       "Delivery aur kharid alag-alag din ho to dono ke liye alag tareekh dekh lijiye — dropdown mein dono hain.",
     ],
@@ -169,7 +172,7 @@ const PILLAR: PillarSection[] = [
     id: "exam-form-upsc-ias-muhurat",
     h2: "Exam Form, UPSC aur IAS — padhai ke kaam ka muhurat",
     paras: [
-      "Form bharna, coaching shuru karna, admission — ye sab **gyan aur kala** ke kaam hain, aur granth inhe **laghu varg** deta hai: Hasta, Ashwini, Pushya (97.9).",
+      "Form bharna, coaching shuru karna, admission — ye sab **gyan aur kala** ke kaam hain, aur granth inhe **laghu varg** deta hai: Hasta, Ashwini, Pushya (97.9). Saath mein **mridu varg** (Mrigashira, Chitra, Anuradha, Revati) aur **dhruva varg** (Rohini, teeno Uttara) — kyunki padhai wo cheez hai jo tikni chahiye.",
       "UPSC, NEET, JEE, SSC, State PSC, CUET — dropdown mein **exam form bharna** ek hi option hai, kyunki granth ka niyam sab par ek hai. Karan mein **Bava** aur **Kimstughna** (naya shubh aarambh).",
       "Sarkari naukri ka yog aapki kundali mein hai ya nahi, ye alag sawaal hai — uske liye [Government Job Yog Calculator](/calculators/free-government-job-calculator) hai. Muhurat sirf shuruaat ka samay deta hai, nateeja nahi.",
       "Aur seedhi baat: **form shubh muhurat mein bharne se padhai nahi ho jaati.** Muhurat shuruaat ko sahara deta hai, mehnat ki jagah nahi leta.",
@@ -180,7 +183,7 @@ const PILLAR: PillarSection[] = [
     h2: "Naya business, dukaan aur startup — kis din shuru karein",
     paras: [
       "Vyapar granth ka apna vishay hai: **laghu varg** (paNya yani vyapar, 97.9) aur karan mein **Vanija** — *\"lambe chalne wale kaam, vyapar aur sajhedari\"* (99.4).",
-      "Saath mein **dhruva varg** bhi, kyunki dukaan ya company wo cheez hai jo tikni chahiye. Aur **Kimstughna** karan — mangal aarambh ke liye (99.5).",
+      "Saath mein **dhruva varg** (Rohini, teeno Uttara) aur **chara varg** (Swati, Punarvasu, Shravana, Dhanishtha, Shatabhisha) bhi — ek isliye ki dukaan tikni chahiye, doosra isliye ki vyapar chalta rehna chahiye. Aur **Kimstughna** karan — mangal aarambh ke liye (99.5).",
       "Dropdown mein alag-alag hain: naya business, dukaan/office kholna, startup registration, nivesh ya SIP shuru, aur sona kharid. Har ek ka apna niyam-jod hai, sab granth se.",
     ],
   },
@@ -218,7 +221,7 @@ const PILLAR: PillarSection[] = [
     paras: [
       "Sirf tareekh dena aadha kaam hai. Us din **kaunsa samay** — asli sawaal wahi hai, aur yahi log WhatsApp par aage bhejte hain.",
       "Hamara engine suryoday se shuru karta hai aur wahan tak jaata hai jab tak wahi nakshatra, tithi aur karan bane rehte hain. Us samay mein se **Rahu Kaal, Yamaganda aur Gulika** kaat diye jaate hain. Jo bachta hai, wahi khidkiyan aapko dikhti hain.",
-      "**Raat ka samay bhi milta hai** — 🌙 ke nishan ke saath. Vivah ka lagn aksar raat ka hota hai, isliye sooryast ke baad ka samay chhodna aadha kaam hota. Par raat tak tithi aur karan aksar badal chuke hote hain, to hum raat ka panchang alag se nikalte hain aur uspar bhi wahi granth ke niyam lagate hain — tabhi raat ki khidki milti hai. Raat ke apne Rahu Kaal, Yamaganda aur Gulika bhi kaat diye jaate hain.",
+      "**Raat ka samay bhi milta hai** — 🌙 ke nishan ke saath — par **sirf un kaamon par jinke liye raat theek hai**: vivah, sagai, godbharai, puja-havan, yatra, visa aur online ke kaam. Gaadi, registry, exam form, joining, dukaan — ye din ke kaam hain, inpar hum raat ki tareekh dete hi nahi, aur koi bhi khidki **raat 1 baje ke baad** nahi jaati. Raat tak tithi aur karan aksar badal chuke hote hain, isliye raat ka panchang **alag se** nikalta hai aur uspar bhi wahi granth ke niyam lagte hain. Raat ke apne Rahu Kaal, Yamaganda aur Gulika kaat diye jaate hain, aur jo khidki aadhi raat paar karti hai uspar **(agli subah)** likha aata hai.",
       "**Abhijit muhurat** — dopahar ke aas-paas ka lagbhag 48 minute — alag se dikhaya jaata hai, agar wo saaf ho. Parampara use lagbhag har kaam ke liye shubh maanti hai.",
       "Isliye **kaam ka shehar** poochha jaata hai: suryoday Delhi aur Pune mein alag hota hai, aur samay usi se banta hai. Aaj ka poora panchang [yahan](/panchang) muft hai.",
     ],
@@ -237,7 +240,7 @@ const PILLAR: PillarSection[] = [
     h2: "Muft mein kya milta hai — aur ₹51 mein kya",
     paras: [
       "**Muft:** agle 3 mahine se chuni hui **6 tareekhein** — 1 श्रेष्ठ, 2 अच्छी, 3 ठीक. Har tareekh par shubh samay, Abhijit, aur \"ye din kyun shubh hai\" ka poora hissa shlok ke saath. Koi login nahi.",
-      "**₹51 mein:** poore **12 mahine** ki saari shubh tareekhein — aam taur par **50 se 60** — aur aapke kaam ke hisaab se graha-shanti ke upay. Ek baar ka bhugtaan, Razorpay se, turant khul jaata hai.",
+      "**₹51 mein:** poore **12 mahine** ki saari shubh tareekhein — aam taur par **50 se 60** — aur soochi ke neeche **graha-shanti ke upay**. Upay is kaam ke **karak grah** ke hote hain: vivah, gaadi aur sona Shukra ka; ghar aur property Mangal ka; vyapar aur padhai Budh ka; naukri Surya-Shani ka; sanskar aur puja Guru ka; yatra Chandra ka. Har grah ke saath mantra, kis din karna hai, kya daan aur kaunsa rang. Karak grah BPHS ke karakatva se hai; mantra aur daan parampara ke. Ek baar ka bhugtaan, Razorpay se, turant khul jaata hai.",
       "Ek baat saaf: agar aapki kundali par 3 mahine mein koi **श्रेष्ठ** tareekh hai hi nahi, to muft mein 6 ki jagah 5 dikhengi. Hum banawti \"BEST\" nahi bana sakte — jo granth kehta hai wahi dikhta hai.",
       "Aur doosre calculator bhi poore muft hain — [Life Span](/calculators/free-life-span-calculator), [Health Prediction](/calculators/free-health-prediction-calculator), [Sade Sati](/calculators/free-sade-sati-calculator).",
     ],
@@ -509,7 +512,7 @@ const FAQS = [
   },
   {
     q: "Rs 51 mein kya milta hai?",
-    a: "Poore 12 mahine ki saari shubh tareekhein — aam taur par 50 se 60 — har tareekh par samay, aur aapke kaam ke hisaab se graha-shanti ke upay. Ek baar ka bhugtaan, Razorpay se, turant khul jaata hai.",
+    a: "Poore 12 mahine ki saari shubh tareekhein — aam taur par 50 se 60 — har tareekh par samay, aur soochi ke neeche is kaam ke karak grah ke graha-shanti upay: mantra, kis din karna hai, kya daan aur kaunsa rang. Ek baar ka bhugtaan, Razorpay se, turant khul jaata hai.",
   },
   {
     q: "Kaam ka shehar kyun poochha jaata hai?",

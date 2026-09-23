@@ -110,7 +110,18 @@ const VAAR_HI: Record<string, string> = {
 };
 
 interface Karma { slug: string; naam_hi: string; naam_en: string; samuh: string; srot_kism?: string; chetavni?: string | null; }
-interface Khidki { se: string; tak: string; minute: number; kab?: 'din' | 'raat'; }
+interface Khidki {
+  se: string; tak: string; minute: number;
+  kab?: 'din' | 'raat';
+  se_agli?: boolean;   // khidki aadhi raat ke BAAD shuru hoti hai
+  tak_agli?: boolean;  // khidki aadhi raat ke BAAD khatam hoti hai
+}
+
+interface Upay {
+  grah: string; grah_hi: string; kyun: string;
+  din: string; mantra: string; daan: string; rang: string;
+  upay: string[]; srot_kism: string; upay_srot_kism: string;
+}
 interface Wajah { kya: string; kyun?: string; granth?: string | null; srot: string; }
 interface Tareekh {
   tareekh: string; vaar: string; darja: 'shreshth' | 'achha' | 'theek';
@@ -125,6 +136,7 @@ interface Result {
   tareekhein: Tareekh[];
   darje: Record<string, number>;
   chhupi?: Record<string, number>; chhupi_kul?: number;
+  upay?: Upay[];          // sirf paid mein aata hai (engine v1.8)
   kul_shubh?: number; mahine?: number; paid?: boolean;
 }
 
@@ -552,6 +564,60 @@ export default function MuhuratCalculator() {
           {data.paid && (
             <div style={{ background: 'rgba(34,197,94,0.10)', border: '1px solid rgba(34,197,94,0.35)', borderRadius: 12, padding: '14px 16px', fontSize: 14, color: '#86efac', marginTop: 6 }}>
               ✓ Poori soochi khul gayi — agle 12 mahine ki saari shubh tareekhein upar hain.
+            </div>
+          )}
+
+          {/* ⭐ v1.8 — UPAY. Sirf paid mein, kyunki engine muft jawab mein ye
+              key bhejta hi nahi. Karak grah BPHS ke karakatva se (granth),
+              mantra aur daan planet_remedies se (parampara) — dono par label. */}
+          {data.paid && (data.upay?.length ?? 0) > 0 && (
+            <div style={{ marginTop: 22 }}>
+              <div style={{ fontSize: 18, fontWeight: 800, color: GOLD, marginBottom: 4 }}>
+                ग्रह-शान्ति के उपाय
+              </div>
+              <div style={{ fontSize: 13, color: MUTED, marginBottom: 14, lineHeight: 1.7 }}>
+                Ye upay is kaam ke <strong style={{ color: '#cbd5e1' }}>karak grah</strong> ke hain.
+                Upar chuni tareekh se pehle ya usi din kar lijiye — muhurat aur upay saath chalte hain.
+              </div>
+
+              {data.upay!.map((u, i) => (
+                <div key={i} style={{
+                  background: CARD, border: `1px solid ${GOLD_RGBA(0.22)}`, borderRadius: 16,
+                  padding: '16px 18px', marginBottom: 12,
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+                    <span style={{
+                      background: GOLD, color: '#101010', borderRadius: 12,
+                      padding: '7px 14px', fontSize: 16, fontWeight: 800,
+                    }}>{u.grah_hi}</span>
+                    <span style={{ fontSize: 13, color: MUTED }}>{u.kyun}</span>
+                  </div>
+
+                  <div style={{ display: 'grid', gap: 8, marginTop: 14, fontSize: 14, color: '#cbd5e1', lineHeight: 1.7 }}>
+                    <div>🕉️ <strong style={{ color: '#E9C862' }}>Mantra:</strong> {u.mantra}</div>
+                    <div>📅 <strong style={{ color: '#E9C862' }}>Din:</strong> {u.din}</div>
+                    <div>🎁 <strong style={{ color: '#E9C862' }}>Daan:</strong> {u.daan}</div>
+                    {u.rang && <div>🎨 <strong style={{ color: '#E9C862' }}>Rang:</strong> {u.rang}</div>}
+                  </div>
+
+                  {u.upay?.length > 0 && (
+                    <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+                      {u.upay.map((x: string, j: number) => (
+                        <div key={j} style={{ fontSize: 14, color: '#cbd5e1', lineHeight: 1.8 }}>• {x}</div>
+                      ))}
+                    </div>
+                  )}
+
+                  <div style={{ fontSize: 12, color: MUTED, marginTop: 10 }}>
+                    Karak grah {u.srot_kism === 'granth' ? 'BPHS ke karakatva se' : '(parampara)'} ·
+                    mantra aur daan (parampara)
+                  </div>
+                </div>
+              ))}
+
+              <div style={{ fontSize: 12, color: MUTED, lineHeight: 1.7 }}>
+                Upay shraddha ka vishay hai. Ye kisi ilaaj, vakeel ya peshewar salaah ki jagah nahi lete.
+              </div>
             </div>
           )}
 
