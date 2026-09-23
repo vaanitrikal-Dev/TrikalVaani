@@ -2,7 +2,32 @@
 
 // ============================================================
 // File: components/calculators/MuhuratCalculator.tsx
-// Version: v1.1 — 23 September 2026 (DARK theme — site ke baaki calculator jaisa)
+// Version: v1.5 — 23 September 2026 (BEST sabse upar, thappa bada aur bharwa)
+// Rohiit, live dekhne ke baad: "Best date top par aaye, chahe tareekh koi
+// bhi ho" — grahak sabse prabal din pehle dekhe, kyunki wahi bechne wali
+// cheez hai. Aur thappa: bharwa rang, KAALA text, bada box aur bade akshar —
+// pehle wo sunehri lakeer par halka sa dikhta tha aur nazar hi nahi aata tha.
+//
+// v1.4 — 23 September 2026 (raat ki khidki + "kab se kab tak")
+// v1.4 — teen cheezein: (1) raat wali khidki par 🌙 ka nishan, kyunki vivah
+// ka lagn aksar raat ka hota hai aur grahak ko farak dikhna chahiye;
+// (2) grahak apni seema de sakta hai — "meri shaadi May mein hai" wala
+// maamla; (3) samay ki khidkiyan ab teen se zyada bhi aa sakti hain.
+//
+// v1.3 — 23 September 2026 (form ke label SITE ke standard par)
+// Do baar galti ki: v1.1 ke label Devanagari the, v1.2 mein Hinglish kar
+// diye. Site ka asli standard YogCalculator.tsx mein hai aur wo teesra hai —
+// LABEL ANGREZI ("Date of Birth *", "Place of Birth *") aur madad ki line
+// HINGLISH ("Time pata nahi (12:00 PM maan lenge)"). Ab wahi laga hai,
+// shabd-dar-shabd. Nateeje ke card Hinglish hi rahenge — wo padhne ki cheez
+// hai, bharne ki nahi — aur darja ka thappa dono bhasha mein.
+//
+// GENDER JAAN-BOOJH KAR NAHI HAI (Rohiit ka faisla, 23 Sep): is engine mein
+// gender kahin use hi nahi hota — Tara bala, Chandra bala, tithi, nakshatra,
+// karan, koi bhi niyam gender nahi dekhta. Jo cheez use nahi karte, wo
+// grahak se poochhna uska samay lena hai.
+//
+// v1.1 — DARK theme — site ke baaki calculator jaisa
 // v1.0 safed/cream tha; site ka page #080B12 par hai aur YogCalculator ke card
 // #0B0F1A par — safed card wahan chipka hua dikhta. Rang badle, dhaancha wahi.
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
@@ -46,20 +71,22 @@ const FIELD = '#0d1120';          // input ka background
 const MUTED = '#94a3b8';          // halka text
 
 const DARJA: Record<string, { hi: string; en: string; bg: string; fg: string; br: string }> = {
-  shreshth: { hi: 'श्रेष्ठ', en: 'BEST', bg: 'rgba(212,175,55,0.16)', fg: '#E9C862', br: GOLD },
-  achha:    { hi: 'अच्छा',  en: 'GOOD', bg: 'rgba(34,197,94,0.12)',  fg: '#86efac', br: 'rgba(34,197,94,0.45)' },
-  theek:    { hi: 'ठीक',   en: 'OK',   bg: 'rgba(148,163,184,0.12)', fg: '#cbd5e1', br: 'rgba(148,163,184,0.35)' },
+  // Bharwa rang + KAALA text (Rohiit, 23 Sep). Teeno par text #101010 —
+  // teeno background itne halke hain ki kaala text 4.5:1 se upar rehta hai.
+  shreshth: { hi: 'श्रेष्ठ', en: 'BEST', bg: GOLD,      fg: '#101010', br: '#F0CB58' },
+  achha:    { hi: 'अच्छा',  en: 'GOOD', bg: '#6EE7A0',  fg: '#101010', br: '#8FF0BA' },
+  theek:    { hi: 'ठीक',   en: 'OK',   bg: '#CBD5E1',  fg: '#101010', br: '#E2E8F0' },
 };
 
-const MAHINA_HI = ['जनवरी', 'फ़रवरी', 'मार्च', 'अप्रैल', 'मई', 'जून', 'जुलाई',
-  'अगस्त', 'सितम्बर', 'अक्टूबर', 'नवम्बर', 'दिसम्बर'];
+const MAHINA_HI = ['Jan', 'Feb', 'March', 'April', 'May', 'June', 'July',
+  'Aug', 'Sept', 'Oct', 'Nov', 'Dec'];
 const VAAR_HI: Record<string, string> = {
-  Ravivar: 'रविवार', Somvar: 'सोमवार', Mangalvar: 'मंगलवार', Budhvar: 'बुधवार',
-  Guruvar: 'गुरुवार', Shukravar: 'शुक्रवार', Shanivar: 'शनिवार',
+  Ravivar: 'Ravivar', Somvar: 'Somvar', Mangalvar: 'Mangalvar', Budhvar: 'Budhvar',
+  Guruvar: 'Guruvar', Shukravar: 'Shukravar', Shanivar: 'Shanivar',
 };
 
 interface Karma { slug: string; naam_hi: string; naam_en: string; samuh: string; srot_kism?: string; chetavni?: string | null; }
-interface Khidki { se: string; tak: string; minute: number; }
+interface Khidki { se: string; tak: string; minute: number; kab?: 'din' | 'raat'; }
 interface Wajah { kya: string; kyun?: string; granth?: string | null; srot: string; }
 interface Tareekh {
   tareekh: string; vaar: string; darja: 'shreshth' | 'achha' | 'theek';
@@ -77,10 +104,13 @@ interface Result {
   kul_shubh?: number; mahine?: number; paid?: boolean;
 }
 
+// Dikhane ka kram — BEST sabse upar (Rohiit, 23 Sep)
+const KRAM_UI: Record<string, number> = { shreshth: 0, achha: 1, theek: 2 };
+
 const SAMUH_HI: Record<string, string> = {
-  vivah: 'विवाह और रिश्ते', ghar: 'घर और प्रॉपर्टी', paisa: 'पैसा और काम-धंधा',
-  vahan: 'वाहन', students: 'पढ़ाई और परीक्षा', naukri: 'नौकरी',
-  sanskar: 'बच्चों के संस्कार', yatra: 'यात्रा', aaj: 'आज के काम', anya: 'अन्य',
+  vivah: 'Vivah aur rishte', ghar: 'Ghar aur property', paisa: 'Paisa aur kaam-dhandha',
+  vahan: 'Vahan', students: 'Padhai aur pariksha', naukri: 'Naukri',
+  sanskar: 'Bachchon ke sanskar', yatra: 'Yatra', aaj: 'Aaj ke kaam', anya: 'Anya',
 };
 
 export default function MuhuratCalculator() {
@@ -90,6 +120,7 @@ export default function MuhuratCalculator() {
     placeQuery: '', city: '', latitude: null as number | null, longitude: null as number | null, timezone: 5.5,
     kaamQuery: '', kaamCity: '', kaamLat: null as number | null, kaamLon: null as number | null, kaamTz: null as number | null,
     kaamWahi: true,
+    se: '', tak: '',          // grahak ki apni seema (optional)
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
@@ -111,11 +142,11 @@ export default function MuhuratCalculator() {
 
   const jaancho = () => {
     const e: Record<string, string> = {};
-    if (!form.karma) e.karma = 'कौन सा काम है, यह चुनिए';
-    if (!form.dob) e.dob = 'जन्म तिथि ज़रूरी है';
-    if (!form.timeUnknown && !form.tob) e.tob = 'जन्म समय डालिए, या "समय नहीं पता" चुनिए';
-    if (!form.city || form.latitude === null) e.city = 'जन्म स्थान सूची में से चुनिए';
-    if (!form.kaamWahi && (form.kaamLat === null)) e.kaam = 'काम का शहर सूची में से चुनिए';
+    if (!form.karma) e.karma = 'Kaunsa kaam hai, ye chuniye';
+    if (!form.dob) e.dob = 'Janm tithi zaroori hai';
+    if (!form.timeUnknown && !form.tob) e.tob = 'Janm samay daaliye, ya "samay nahi pata" chuniye';
+    if (!form.city || form.latitude === null) e.city = 'Janm sthan soochi mein se chuniye';
+    if (!form.kaamWahi && (form.kaamLat === null)) e.kaam = 'Kaam ka shehar soochi mein se chuniye';
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -132,6 +163,8 @@ export default function MuhuratCalculator() {
       kaam_tz: form.kaamWahi ? null : form.kaamTz,
       kaam_sthan: form.kaamWahi ? form.city : form.kaamCity,
       name: form.name || null,
+      shuru: form.se || null,
+      ant: form.tak || null,
       ...(proof ?? {}),
     };
   };
@@ -145,11 +178,11 @@ export default function MuhuratCalculator() {
         body: JSON.stringify(payload(proof)),
       });
       const d = await res.json();
-      if (!res.ok) { setApiError(d?.error || 'कुछ गड़बड़ हुई। दोबारा कोशिश कीजिए।'); return; }
+      if (!res.ok) { setApiError(d?.error || 'Kuch gadbad hui. Dobara koshish kijiye.'); return; }
       setData(d);
       setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 120);
     } catch {
-      setApiError('जुड़ नहीं पाए। इंटरनेट देखिए और दोबारा कोशिश कीजिए।');
+      setApiError('Jud nahi paye. Internet dekhiye aur dobara koshish kijiye.');
     } finally { setLoading(false); }
   };
 
@@ -189,7 +222,7 @@ export default function MuhuratCalculator() {
   const whatsapp = (t: Tareekh) => {
     const k = data?.kaam.naam_hi ?? '';
     const w = t.samay.khirkiyan.map(x => `${x.se}–${x.tak}`).join(' , ');
-    const txt = `🔱 ${k} का शुभ मुहूर्त\n\n📅 ${tareekhHi(t.tareekh)} (${VAAR_HI[t.vaar] ?? t.vaar})\n⏰ शुभ समय: ${w}\n✨ अभिजित: ${t.samay.abhijit.se}–${t.samay.abhijit.tak}\n\n${t.nakshatra} · ${t.tithi} · ${t.karan} करण\nबृहत्संहिता के नियम से — trikalvaani.com/calculators/free-shubh-muhurat-calculator`;
+    const txt = `🔱 ${k} ka shubh muhurat\n\n📅 ${tareekhHi(t.tareekh)} (${VAAR_HI[t.vaar] ?? t.vaar})\n⏰ Shubh samay: ${w}\n✨ Abhijit: ${t.samay.abhijit.se}–${t.samay.abhijit.tak}\n\n${t.nakshatra} · ${t.tithi} · ${t.karan} karan\nBrihat Samhita ke niyam se — trikalvaani.com/calculators/free-shubh-muhurat-calculator`;
     window.open(`https://wa.me/?text=${encodeURIComponent(txt)}`, '_blank');
   };
 
@@ -216,27 +249,29 @@ export default function MuhuratCalculator() {
             <div style={{ fontSize: 24, fontWeight: 700, color: INK, lineHeight: 1.2 }}>{tareekhHi(t.tareekh)}</div>
           </div>
           <span style={{
-            background: D.bg, color: D.fg, border: `1px solid ${D.br}`, borderRadius: 999,
-            padding: '6px 12px', fontSize: 12, fontWeight: 700, whiteSpace: 'nowrap',
+            background: D.bg, color: D.fg, border: `1px solid ${D.br}`, borderRadius: 12,
+            padding: '10px 18px', fontSize: 17, fontWeight: 800, whiteSpace: 'nowrap',
+            letterSpacing: 0.3, boxShadow: '0 2px 10px rgba(0,0,0,0.35)',
           }}>{D.hi} · {D.en}</span>
         </div>
 
         <div style={{ fontSize: 13, color: MUTED, marginTop: 8 }}>
-          {t.nakshatra} · {t.tithi} · {t.karan} करण
+          {t.nakshatra} · {t.tithi} · {t.karan} karan
         </div>
 
         <div style={{ marginTop: 14, background: GOLD_RGBA(0.05), border: `1px solid ${GOLD_RGBA(0.18)}`, borderRadius: 12, padding: '12px 14px' }}>
-          <div style={{ fontSize: 12, color: MUTED, marginBottom: 6 }}>⏰ शुभ समय</div>
+          <div style={{ fontSize: 12, color: MUTED, marginBottom: 6 }}>⏰ Shubh samay</div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px 18px' }}>
             {t.samay.khirkiyan.map((k, i) => (
               <span key={i} style={{ fontSize: 20, fontWeight: 700, color: INK, letterSpacing: 0.3 }}>
+                {k.kab === 'raat' && <span style={{ fontSize: 14, marginRight: 4 }} title="raat ka samay">🌙</span>}
                 {k.se} – {k.tak}
               </span>
             ))}
           </div>
           {t.samay.abhijit.saaf && (
             <div style={{ fontSize: 13, color: '#E9C862', marginTop: 8 }}>
-              ✨ अभिजित मुहूर्त: {t.samay.abhijit.se} – {t.samay.abhijit.tak}
+              ✨ Abhijit muhurat: {t.samay.abhijit.se} – {t.samay.abhijit.tak}
             </div>
           )}
         </div>
@@ -246,7 +281,7 @@ export default function MuhuratCalculator() {
             marginTop: 12, background: 'none', border: 'none', padding: '8px 0', cursor: 'pointer',
             color: '#E9C862', fontSize: 14, fontWeight: 600, minHeight: 44,
           }} aria-expanded={open}>
-          {open ? '▾' : '▸'} यह दिन क्यों शुभ है
+          {open ? '▾' : '▸'} Ye din kyun shubh hai
         </button>
 
         {open && (
@@ -255,13 +290,13 @@ export default function MuhuratCalculator() {
               <div key={i} style={{ marginBottom: 6 }}>
                 • <strong>{w.kya}</strong>{w.kyun ? ` — ${w.kyun}` : ''}
                 {w.granth && <span style={{ color: '#E9C862' }}> · बृहत्संहिता {String(w.granth).replace('brihatsamhita ', '')}</span>}
-                {w.srot === 'parampara' && <span style={{ color: MUTED }}> · (परम्परा)</span>}
-                {w.srot === 'granth-tarjuma' && <span style={{ color: MUTED }}> · (अंग्रेज़ी अनुवाद से)</span>}
+                {w.srot === 'parampara' && <span style={{ color: MUTED }}> · (parampara)</span>}
+                {w.srot === 'granth-tarjuma' && <span style={{ color: MUTED }}> · (angrezi tarjume se)</span>}
               </div>
             ))}
             {t.dhyan.length > 0 && t.dhyan.map((w, i) => (
               <div key={`d${i}`} style={{ marginTop: 6, color: '#E9C862' }}>
-                ⚠ {w.kya} <span style={{ color: MUTED }}>(परम्परा — ग्रन्थ का नियम नहीं)</span>
+                ⚠ {w.kya} <span style={{ color: MUTED }}>(parampara — granth ka niyam nahi)</span>
               </div>
             ))}
           </div>
@@ -271,11 +306,11 @@ export default function MuhuratCalculator() {
           <button type="button" onClick={() => whatsapp(t)} style={{
             background: '#25D366', color: '#fff', border: 'none', borderRadius: 10,
             padding: '11px 16px', fontSize: 14, fontWeight: 600, cursor: 'pointer', minHeight: 44,
-          }}>WhatsApp पर भेजें</button>
+          }}>WhatsApp par bhejein</button>
           <button type="button" onClick={() => copy(t)} style={{
             background: 'rgba(255,255,255,0.04)', color: INK, border: '1px solid rgba(255,255,255,0.14)', borderRadius: 10,
             padding: '11px 16px', fontSize: 14, fontWeight: 600, cursor: 'pointer', minHeight: 44,
-          }}>समय कॉपी करें</button>
+          }}>Samay copy karein</button>
         </div>
       </div>
     );
@@ -299,16 +334,19 @@ export default function MuhuratCalculator() {
       {/* ── FORM ─────────────────────────────────────────────────────────── */}
       <div style={{ background: CARD, border: `1px solid ${GOLD_RGBA(0.25)}`, borderRadius: 18, padding: 22 }}>
         <div style={{ marginBottom: 16 }}>
-          <label style={label} htmlFor="mu-karma">आपको किस काम का मुहूर्त चाहिए? *</label>
+          <label style={label} htmlFor="mu-karma">Which work do you need a muhurat for? *</label>
           <select id="mu-karma" style={input} value={form.karma}
             onChange={e => setForm(p => ({ ...p, karma: e.target.value }))}>
-            <option value="">— काम चुनिए —</option>
+            <option value="">Select the work</option>
             {Object.keys(SAMUH_HI).filter(s => samuhWise[s]?.length).map(s => (
               <optgroup key={s} label={SAMUH_HI[s]}>
                 {samuhWise[s].map(k => <option key={k.slug} value={k.slug}>{k.naam_hi}</option>)}
               </optgroup>
             ))}
           </select>
+          <div style={{ fontSize: 12, color: '#64748b', marginTop: 5 }}>
+            Har kaam ka apna nakshatra, tithi aur karan hai — granth se.
+          </div>
           {errText(errors.karma)}
           {chuna?.chetavni && (
             <div style={{
@@ -319,34 +357,37 @@ export default function MuhuratCalculator() {
         </div>
 
         <div style={{ marginBottom: 16 }}>
-          <label style={label} htmlFor="mu-name">आपका नाम (वैकल्पिक)</label>
+          <label style={label} htmlFor="mu-name">Naam (optional)</label>
           <input id="mu-name" style={input} value={form.name} autoComplete="name"
             onChange={e => setForm(p => ({ ...p, name: e.target.value }))} />
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 16 }}>
           <div>
-            <label style={label} htmlFor="mu-dob">जन्म तिथि *</label>
+            <label style={label} htmlFor="mu-dob">Date of Birth *</label>
             <input id="mu-dob" type="date" style={input} value={form.dob}
               onChange={e => setForm(p => ({ ...p, dob: e.target.value }))} />
             {errText(errors.dob)}
           </div>
           <div>
-            <label style={label} htmlFor="mu-tob">जन्म समय *</label>
+            <label style={label} htmlFor="mu-tob">Time of Birth *</label>
             <input id="mu-tob" type="time" style={input} value={form.tob} disabled={form.timeUnknown}
               onChange={e => setForm(p => ({ ...p, tob: e.target.value }))} />
             {errText(errors.tob)}
+            <div style={{ fontSize: 12, color: '#64748b', marginTop: 5 }}>
+              Samay se Chandra ki sthiti pakki hoti hai — usi par Tara aur Chandra bala tikti hai.
+            </div>
           </div>
         </div>
 
         <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: '#cbd5e1', marginBottom: 16, minHeight: 44 }}>
           <input type="checkbox" checked={form.timeUnknown}
             onChange={e => setForm(p => ({ ...p, timeUnknown: e.target.checked }))} />
-          समय नहीं पता (दोपहर 12:00 मान लेंगे)
+          Time pata nahi (12:00 PM maan lenge)
         </label>
 
         <div style={{ marginBottom: 16 }}>
-          <label style={label} htmlFor="mu-city">जन्म स्थान *</label>
+          <label style={label} htmlFor="mu-city">Place of Birth *</label>
           <CityInput id="mu-city" value={form.placeQuery} error={errors.city}
             onSelect={(city, lat, lng, tz) =>
               setForm(p => ({ ...p, placeQuery: city, city, latitude: lat, longitude: lng, timezone: tz }))} />
@@ -357,19 +398,34 @@ export default function MuhuratCalculator() {
           <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, color: '#E5E7EB', fontWeight: 600, minHeight: 44 }}>
             <input type="checkbox" checked={form.kaamWahi}
               onChange={e => setForm(p => ({ ...p, kaamWahi: e.target.checked }))} />
-            यह काम / कार्यक्रम भी इसी शहर में होगा
+            Work is in the same city as birth
           </label>
           {!form.kaamWahi && (
             <div style={{ marginTop: 10 }}>
-              <label style={label} htmlFor="mu-kaam-city">यह काम / कार्यक्रम कहाँ होगा? *</label>
+              <label style={label} htmlFor="mu-kaam-city">Place of the Event *</label>
               <CityInput id="mu-kaam-city" value={form.kaamQuery} error={errors.kaam}
                 onSelect={(city, lat, lng, tz) =>
                   setForm(p => ({ ...p, kaamQuery: city, kaamCity: city, kaamLat: lat, kaamLon: lng, kaamTz: tz }))} />
-              <div style={{ fontSize: 12, color: MUTED, marginTop: 6 }}>
-                शुभ समय सूर्योदय से बनता है, और सूर्योदय शहर से बदलता है।
+              <div style={{ fontSize: 12, color: '#64748b', marginTop: 6 }}>
+                Shubh samay suryoday se banta hai, aur suryoday har shehar mein alag hota hai.
               </div>
             </div>
           )}
+        </div>
+
+        {/* Kab se kab tak — optional. "Meri shaadi May mein hai" wala maamla. */}
+        <div style={{ marginBottom: 18 }}>
+          <label style={label}>Date range (optional)</label>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+            <input type="date" style={input} value={form.se} aria-label="From date"
+              onChange={e => setForm(p => ({ ...p, se: e.target.value }))} />
+            <input type="date" style={input} value={form.tak} aria-label="To date"
+              onChange={e => setForm(p => ({ ...p, tak: e.target.value }))} />
+          </div>
+          <div style={{ fontSize: 12, color: '#64748b', marginTop: 5 }}>
+            Khaali chhod dein to aaj se agle {'{'}3{'}'} mahine. Kisi khaas mahine ki tareekhein
+            chahiye to yahan seema daal dijiye.
+          </div>
         </div>
 
         <button type="button" onClick={() => chalao()} disabled={loading}
@@ -378,11 +434,11 @@ export default function MuhuratCalculator() {
             borderRadius: 12, padding: '16px 20px', fontSize: 17, fontWeight: 700,
             cursor: loading ? 'wait' : 'pointer', minHeight: 52,
           }}>
-          {loading ? 'ग्रन्थ के नियम लगाए जा रहे हैं…' : 'शुभ मुहूर्त देखें'}
+          {loading ? 'Granth ke niyam lagaye ja rahe hain…' : 'Shubh Muhurat Dekhein'}
         </button>
 
         <div style={{ fontSize: 12, color: MUTED, textAlign: 'center', marginTop: 10 }}>
-          मुफ़्त · कोई लॉगिन नहीं · नियम बृहत्संहिता अध्याय 97–99 से
+          Muft · koi login nahi · niyam Brihat Samhita adhyay 97-99 se
         </div>
 
         {apiError && (
@@ -398,26 +454,35 @@ export default function MuhuratCalculator() {
 
           <div style={{ background: GOLD_RGBA(0.06), border: `1px solid ${GOLD_RGBA(0.25)}`, borderRadius: 16, padding: '18px 20px', marginBottom: 20 }}>
             <div style={{ fontSize: 15, color: INK, fontWeight: 700 }}>
-              {form.name ? `${form.name} जी, ` : ''}{data.kaam.naam_hi} के लिए
-              अगले {data.mahine ?? 3} महीने में {data.tareekhein.length} शुभ तिथियाँ
+              {form.name ? `${form.name} ji, ` : ''}{data.kaam.naam_hi} ke liye
+              agle {data.mahine ?? 3} mahine mein {data.tareekhein.length} shubh tareekhein
             </div>
             <div style={{ fontSize: 13, color: MUTED, marginTop: 6 }}>
               {(['shreshth', 'achha', 'theek'] as const)
-                .map(d => `${data.tareekhein.filter(t => t.darja === d).length} ${DARJA[d].hi}`)
-                .join(' · ')} — आपका जन्म नक्षत्र {data.janma.nakshatra}, राशि {data.janma.rashi}
+                .map(d => `${data.tareekhein.filter(t => t.darja === d).length} ${DARJA[d].en}`)
+                .join(' · ')} — aapka janm nakshatra {data.janma.nakshatra}, raashi {data.janma.rashi}
             </div>
             {data.kaam.chetavni && (
               <div style={{ fontSize: 13, color: '#E9C862', marginTop: 10, lineHeight: 1.6 }}>⚠ {data.kaam.chetavni}</div>
             )}
           </div>
 
-          {data.tareekhein.map(t => <Card key={t.tareekh} t={t} />)}
+          {/* ⭐ v1.5 — BEST pehle, phir GOOD, phir OK; har darje ke andar
+              tareekh ke kram se. Engine tareekh ke kram se bhejta hai;
+              badalna yahan hai, kyunki ye dikhane ki baat hai. */}
+          {[...data.tareekhein]
+            .sort((a, b) => (KRAM_UI[a.darja] - KRAM_UI[b.darja])
+                          || a.tareekh.localeCompare(b.tareekh))
+            .map(t => <Card key={t.tareekh} t={t} />)}
 
           {!data.paid && (data.chhupi_kul ?? 0) > 0 && (
             <div style={{ position: 'relative', marginTop: 4 }}>
               {/* dhundhle card — grahak ko dikhta hai ki sach mein aur tareekhein hain */}
               <div>
-                {data.tareekhein.slice(0, 3).map((t, i) => (
+                {[...data.tareekhein]
+                  .sort((a, b) => (KRAM_UI[a.darja] - KRAM_UI[b.darja])
+                                || a.tareekh.localeCompare(b.tareekh))
+                  .slice(0, 3).map((t, i) => (
                   <Card key={`blur${i}`} t={t} dhundhla />
                 ))}
               </div>
@@ -432,11 +497,11 @@ export default function MuhuratCalculator() {
                 }}>
                   <div style={{ fontSize: 26, marginBottom: 6 }}>🔒</div>
                   <div style={{ fontSize: 17, fontWeight: 700, color: INK, lineHeight: 1.4 }}>
-                    आपकी कुंडली में अगले 12 महीने की और तिथियाँ हैं
+                    Aapki kundali mein agle 12 mahine ki aur tareekhein hain
                   </div>
                   <div style={{ fontSize: 14, color: '#cbd5e1', marginTop: 10, lineHeight: 1.7 }}>
-                    हर तिथि पर शुभ समय, हर नियम के साथ ग्रन्थ का श्लोक,
-                    और आपके लिए ग्रह-शान्ति के उपाय।
+                    Har tareekh par shubh samay, har niyam ke saath granth ka shlok,
+                    aur aapke liye graha-shanti ke upay.
                   </div>
                   <button type="button" onClick={payKarein} disabled={paying}
                     style={{
@@ -444,10 +509,10 @@ export default function MuhuratCalculator() {
                       color: '#2a2118', border: 'none', borderRadius: 12, padding: '15px 18px',
                       fontSize: 17, fontWeight: 700, cursor: paying ? 'wait' : 'pointer', minHeight: 52,
                     }}>
-                    {paying ? 'Payment खुल रही है…' : 'पूरी सूची देखें — ₹51'}
+                    {paying ? 'Payment khul rahi hai…' : 'Poori soochi dekhein — ₹51'}
                   </button>
                   <div style={{ fontSize: 12, color: MUTED, marginTop: 10 }}>
-                    एक बार का भुगतान · Razorpay से सुरक्षित · तुरंत खुल जाएगा
+                    Ek baar ka bhugtaan · Razorpay se surakshit · turant khul jayega
                   </div>
                 </div>
               </div>
@@ -456,13 +521,14 @@ export default function MuhuratCalculator() {
 
           {data.paid && (
             <div style={{ background: 'rgba(34,197,94,0.10)', border: '1px solid rgba(34,197,94,0.35)', borderRadius: 12, padding: '14px 16px', fontSize: 14, color: '#86efac', marginTop: 6 }}>
-              ✓ पूरी सूची खुल गई — अगले 12 महीने की सभी शुभ तिथियाँ ऊपर हैं।
+              ✓ Poori soochi khul gayi — agle 12 mahine ki saari shubh tareekhein upar hain.
             </div>
           )}
 
           <div style={{ fontSize: 12, color: MUTED, lineHeight: 1.8, marginTop: 22, borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: 14 }}>
-            नियम बृहत्संहिता अध्याय 97 (नक्षत्र), 98 (तिथि) और 99 (करण) से; जो नियम ग्रन्थ में
-            नहीं है उस पर “परम्परा” लिखा जाता है। यह शुभ समय का चुनाव है, भविष्यवाणी नहीं।
+            Niyam Brihat Samhita adhyay 97 (nakshatra), 98 (tithi) aur 99 (karan) se; jo niyam
+            granth mein nahi hai uspar &ldquo;parampara&rdquo; likha jaata hai. Ye shubh samay ka
+            chunav hai, bhavishyavani nahi.
           </div>
         </div>
       )}

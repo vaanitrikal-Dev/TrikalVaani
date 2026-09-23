@@ -1,5 +1,6 @@
 // ============================================================
 // File: app/api/calc/muhurat-shubh/route.ts
+// Version: v1.1 — 23 September 2026 — "kab se kab tak" (ant) aage bheja
 // Version: v1.0 — 23 September 2026
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
 // ============================================================
@@ -50,6 +51,7 @@ interface Body {
   kaam_sthan?: string | null;
   name?: string | null;
   shuru?: string | null;
+  ant?: string | null;          // "kab tak" — grahak ki apni seema (v1.1)
   // Payment proof — dono mein se ek, ya koi nahi (muft).
   razorpay_order_id?: string;
   razorpay_payment_id?: string;
@@ -157,6 +159,7 @@ export async function POST(req: NextRequest) {
         tier: paid ? 'paid' : 'free',
         mahine: paid ? 12 : 3,
         shuru: b.shuru ?? null,
+        ant: b.ant ?? null,
         prati_mahina: 5,
       }),
       // 12 mahine = 365 din ka scan. VM par ~2 second lagta hai, par edge

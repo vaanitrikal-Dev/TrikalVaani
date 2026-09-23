@@ -2,6 +2,9 @@
 
 // ============================================================
 // File: app/calculators/free-shubh-muhurat-calculator/page.tsx
+// Version: v1.1 (23 Sep 2026) — raat ka samay aur "kab se kab tak" ka zikr
+//   (engine v1.6 ne dono jode; page ka text uske saath milana zaroori tha —
+//    warna page kehta \"suryoday se sooryast tak\" aur engine raat bhi deta)
 // Version: v1.0 (23 Sep 2026) — Shubh Muhurat Calculator
 // API: /api/calc/muhurat-shubh -> VM /muhurat/shubh (muhurat_api.py v1.4)
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
@@ -212,6 +215,7 @@ const PILLAR: PillarSection[] = [
     paras: [
       "Sirf tareekh dena aadha kaam hai. Us din **kaunsa samay** — asli sawaal wahi hai, aur yahi log WhatsApp par aage bhejte hain.",
       "Hamara engine suryoday se shuru karta hai aur wahan tak jaata hai jab tak wahi nakshatra, tithi aur karan bane rehte hain. Us samay mein se **Rahu Kaal, Yamaganda aur Gulika** kaat diye jaate hain. Jo bachta hai, wahi khidkiyan aapko dikhti hain.",
+      "**Raat ka samay bhi milta hai** — 🌙 ke nishan ke saath. Vivah ka lagn aksar raat ka hota hai, isliye sooryast ke baad ka samay chhodna aadha kaam hota. Par raat tak tithi aur karan aksar badal chuke hote hain, to hum raat ka panchang alag se nikalte hain aur uspar bhi wahi granth ke niyam lagate hain — tabhi raat ki khidki milti hai. Raat ke apne Rahu Kaal, Yamaganda aur Gulika bhi kaat diye jaate hain.",
       "**Abhijit muhurat** — dopahar ke aas-paas ka lagbhag 48 minute — alag se dikhaya jaata hai, agar wo saaf ho. Parampara use lagbhag har kaam ke liye shubh maanti hai.",
       "Isliye **kaam ka shehar** poochha jaata hai: suryoday Delhi aur Pune mein alag hota hai, aur samay usi se banta hai. Aaj ka poora panchang [yahan](/panchang) muft hai.",
     ],
@@ -351,7 +355,7 @@ const PILLAR: PillarSection[] = [
     paras: [
       "**Ek:** upar dropdown se apna kaam chuniye. **Do:** janm-tithi, samay aur sthan bhariye, aur bataiye ki kaam kis shehar mein hoga. **Teen:** \"शुभ मुहूर्त देखें\" dabaiye.",
       "Nateeje mein har tareekh par **WhatsApp bhejein** ka button hai — ek dabane par poori tareekh aur samay ghar walon ko chala jayega. **Samay copy karein** se sirf tareekh aur samay copy ho jaata hai.",
-      "Soochi aaj se agle 3 mahine ki hoti hai. Poore saal ki chahiye to ₹51 wala vikalp neeche milega.",
+      "Soochi aaj se agle 3 mahine ki hoti hai. **Koi khaas mahina dekhna ho** — jaise \"meri shaadi May mein hai\" — to form mein date range daal dijiye, soochi usi seema ki aayegi. Poore saal ki chahiye to ₹51 wala vikalp neeche milega.",
     ],
   },
   {
@@ -539,6 +543,14 @@ const FAQS = [
   {
     q: "Abhijit muhurat kya hai aur wo kyun dikhta hai?",
     a: "Abhijit dopahar ke aas-paas ka lagbhag 48 minute hai, jise parampara lagbhag har kaam ke liye shubh maanti hai. Hum use tabhi dikhate hain jab us samay Rahu Kaal ya Yamaganda na pade.",
+  },
+  {
+    q: "Raat ka muhurat bhi milta hai? Vivah to raat ko hota hai.",
+    a: "Haan. Raat ki khidkiyan 🌙 ke nishan ke saath aati hain. Raat tak tithi aur karan aksar badal jaate hain, isliye hum raat ka panchang alag se nikalte hain aur uspar bhi wahi granth ke niyam lagate hain — tabhi raat ka samay dikhta hai. Raat ke Rahu Kaal, Yamaganda aur Gulika bhi kaate jaate hain.",
+  },
+  {
+    q: "Kisi khaas mahine ki tareekhein chahiye to?",
+    a: "Form mein date range daal dijiye — soochi usi seema ki aayegi. Khaali chhodenge to aaj se agle 3 mahine (paid mein 12) ki tareekhein aayengi.",
   },
   {
     q: "Kya ye bhavishyavani hai?",
