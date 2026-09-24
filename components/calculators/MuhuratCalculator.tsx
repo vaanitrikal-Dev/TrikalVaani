@@ -2,7 +2,20 @@
 
 // ============================================================
 // File: components/calculators/MuhuratCalculator.tsx
-// Version: v2.1 — 23 September 2026 (POORI SOOCHI WhatsApp par + space fix)
+// Version: v2.2 — 23 September 2026 (har kaam ka apna nishan)
+// Rohiit: "wo astrologer sagai ke liye ring ka nishan lagata hai — kya hum
+// muhurat ke hisaab se emoji laga sakte hain?" Haan — aur isse sandesh
+// pehli nazar mein padha jaata hai: 💍 dikhte hi pata chal jaata hai ki
+// sagai ki baat ho rahi hai, 🏠 se griha pravesh ki.
+// Soochi CODE mein hai, database mein nahi — ye dikhawe ki cheez hai,
+// granth ka niyam nahi, aur iske liye VM chhoona nahi padta (Rohiit ne
+// window di thi, par zaroorat hi nahi thi). Naya kaam jude to yahan ek line.
+// Nishan jaan-boojh kar SAADHARAN chune hain — zyadatar ek hi code-point
+// wale, taaki purane Android par bhi bane. (Aakhri jaanch mein chaar nishan
+// aise mile jinme variation-selector tha — ✏️ ✂️ ✈️ ⚖️ — wo purane phone par
+// khaali dabba ban sakte the; unhe 📖 💇 🛫 🏛 se badla.)
+//
+// v2.1 — POORI SOOCHI WhatsApp par + space fix
 // Rohiit ne live dekh kar do baatein kahin:
 //   1. Banner mein shabd chipke the — "vivah ke liyeagle 45 din mein". JSX
 //      mein nayi line ke baad {IIFE} aaya to beech ka space gir gaya.
@@ -184,6 +197,30 @@ interface Result {
 // Dikhane ka kram — BEST sabse upar (Rohiit, 23 Sep)
 const KRAM_UI: Record<string, number> = { shreshth: 0, achha: 1, theek: 2 };
 
+// Har kaam ka apna nishan. Pehle slug se, na mile to samuh se — isliye
+// naya kaam jodne par bhi kuch na kuch sahi nishan aa hi jaata hai.
+const KAAM_EMOJI: Record<string, string> = {
+  vivah: '🎊', sagai: '💍', godbharai: '🍼', 'marriage-registration': '📝',
+  'griha-pravesh': '🏠', 'bhoomi-pujan': '🧱', 'property-kharid': '🏡',
+  'property-registry': '📜', 'kiraye-ka-ghar': '🔑',
+  'naya-business': '🏪', 'dukaan-office': '🏬', 'nivesh-sip': '📈',
+  'sona-kharid': '🪙', 'loan-lena': '🏦',
+  'vahan-kharid': '🚗', 'vahan-delivery': '🚘',
+  'exam-form': '📝', vidyarambh: '📖', admission: '🎓', 'result-ke-baad': '🎯',
+  'job-joining': '💼', interview: '🤝', 'application-bhejna': '📤', resignation: '🚪',
+  namkaran: '👶', annaprashan: '🍚', mundan: '💇', karnavedha: '👂', janeu: '🧵',
+  yatra: '🧳', 'visa-videsh': '🛫',
+  'phone-laptop': '💻', 'channel-launch': '🎬', 'startup-registration': '🚀',
+  'gym-diet': '🏃', 'aadat-chhodna': '🌱',
+  'puja-havan': '🪔', surgery: '🏥', 'court-case': '🏛', 'anya-shubh-kaam': '🔱',
+};
+const SAMUH_EMOJI: Record<string, string> = {
+  vivah: '🎊', ghar: '🏠', paisa: '💰', vahan: '🚗', students: '📚',
+  naukri: '💼', sanskar: '👶', yatra: '🧳', aaj: '✨', anya: '🔱',
+};
+const kaamEmoji = (slug?: string, samuh?: string) =>
+  (slug && KAAM_EMOJI[slug]) || (samuh && SAMUH_EMOJI[samuh]) || '🔱';
+
 const SAMUH_HI: Record<string, string> = {
   vivah: 'Vivah aur rishte', ghar: 'Ghar aur property', paisa: 'Paisa aur kaam-dhandha',
   vahan: 'Vahan', students: 'Padhai aur pariksha', naukri: 'Naukri',
@@ -295,7 +332,7 @@ export default function MuhuratCalculator() {
   const whatsapp = (t: Tareekh) => {
     const k = data?.kaam.naam_hi ?? '';
     const w = t.samay.khirkiyan.map(x => `${x.se}–${x.tak}`).join(' , ');
-    const txt = `🔱 ${k} ka shubh muhurat\n\n📅 ${tareekhHi(t.tareekh)} (${VAAR_HI[t.vaar] ?? t.vaar})\n⏰ Shubh samay: ${w}\n✨ Abhijit: ${t.samay.abhijit.se}–${t.samay.abhijit.tak}\n\n${t.nakshatra} · ${t.tithi} · ${t.karan} karan\nBrihat Samhita ke niyam se — trikalvaani.com/calculators/free-shubh-muhurat-calculator`;
+    const txt = `${kaamEmoji(data?.kaam.slug, chuna?.samuh)} ${k} ka shubh muhurat\n\n📅 ${tareekhHi(t.tareekh)} (${VAAR_HI[t.vaar] ?? t.vaar})\n⏰ Shubh samay: ${w}\n✨ Abhijit: ${t.samay.abhijit.se}–${t.samay.abhijit.tak}\n\n${t.nakshatra} · ${t.tithi} · ${t.karan} karan\nBrihat Samhita ke niyam se — trikalvaani.com/calculators/free-shubh-muhurat-calculator`;
     window.open(`https://wa.me/?text=${encodeURIComponent(txt)}`, '_blank');
   };
 
@@ -320,7 +357,7 @@ export default function MuhuratCalculator() {
       .join('\n\n');
     const bacha = data.tareekhein.length - SANDESH_HADD;
     const txt =
-      `🔱 *${data.kaam.naam_hi}* ke shubh muhurat — agle ${kitna}\n` +
+      `${kaamEmoji(data.kaam.slug, chuna?.samuh)} *${data.kaam.naam_hi}* ke shubh muhurat — agle ${kitna}\n` +
       `(janm nakshatra ${data.janma.nakshatra}, raashi ${data.janma.rashi})\n\n` +
       `${soochi}\n\n` +
       (bacha > 0 ? `…aur ${bacha} tareekhein — poori soochi neeche wale link par.\n\n` : '') +
@@ -574,6 +611,7 @@ export default function MuhuratCalculator() {
 
           <div style={{ background: GOLD_RGBA(0.06), border: `1px solid ${GOLD_RGBA(0.25)}`, borderRadius: 16, padding: '18px 20px', marginBottom: 20 }}>
             <div style={{ fontSize: 15, color: INK, fontWeight: 700 }}>
+              <span style={{ marginRight: 6 }}>{kaamEmoji(data.kaam.slug, chuna?.samuh)}</span>
               {form.name ? `${form.name} ji, ` : ''}{data.kaam.naam_hi} ke liye{' '}
               {(() => {
                 // Engine se seedha — 45 din, ya 180 ko "6 mahine" mein
