@@ -2,7 +2,22 @@
 
 // ============================================================
 // File: components/calculators/MuhuratCalculator.tsx
-// Version: v2.0 — 23 September 2026 (seema 45 din / 6 mahine)
+// Version: v2.1 — 23 September 2026 (POORI SOOCHI WhatsApp par + space fix)
+// Rohiit ne live dekh kar do baatein kahin:
+//   1. Banner mein shabd chipke the — "vivah ke liyeagle 45 din mein". JSX
+//      mein nayi line ke baad {IIFE} aaya to beech ka space gir gaya.
+//   2. "Hum ek-ek date WhatsApp karne ka option de rahe hain — POORI LIST
+//      bhejne ka option do, aur ise marketing feature ki tarah likho."
+//      Sahi baat: muhurat ki tareekh ghar mein sab milkar chunte hain, aur
+//      jo soochi pariwar ke group mein chali jaati hai wo hamara naam bhi
+//      saath le jaati hai. Ab nateeje ke sabse upar ek bada button hai jo
+//      saari tareekhein ek sandesh mein bhej deta hai, aur uske neeche ek
+//      line jo saaf kehti hai ki ye ghar walon ko bheja ja sakta hai.
+//      Sandesh ki hadd: 20 tareekh tak (WhatsApp ka URL bahut lamba ho to
+//      kuch phone use kaat dete hain) — usse zyada par "aur X tareekhein"
+//      likh kar link chala jaata hai.
+//
+// v2.0 — seema 45 din / 6 mahine
 // Rohiit: "bahut lambi list ho jayegi, abhi bhi bahut lambi hai." Ab muft
 // 45 din ki soochi aur paid 180 din (6 mahine) ki — paid mein lagbhag 30
 // tareekhein, pehle 63 tak chali jaati thi. Banner ab engine ka seema_din
@@ -284,6 +299,37 @@ export default function MuhuratCalculator() {
     window.open(`https://wa.me/?text=${encodeURIComponent(txt)}`, '_blank');
   };
 
+  // ⭐ v2.1 — POORI SOOCHI ek sandesh mein. Muhurat ka faisla ghar mein
+  // milkar hota hai, isliye soochi ka pariwar ke group tak pahunchna hi
+  // asli kaam hai — aur wahan hamara naam bhi saath jaata hai.
+  const SANDESH_HADD = 20;   // isse zyada par link; bahut lamba URL kuch phone kaat dete hain
+  const whatsappSab = () => {
+    if (!data) return;
+    const din = data.seema_din ?? 45;
+    const kitna = din >= 150 ? `${Math.round(din / 30)} mahine` : `${din} din`;
+    const soochi = [...data.tareekhein]
+      .sort((a, b) => a.tareekh.localeCompare(b.tareekh))
+      .slice(0, SANDESH_HADD)
+      .map(t => {
+        const D = DARJA[t.darja];
+        const w = t.samay.khirkiyan
+          .map(x => `${x.kab === 'raat' ? '🌙' : ''}${x.se}–${x.tak}`)
+          .join(', ');
+        return `📅 ${tareekhHi(t.tareekh)} (${VAAR_HI[t.vaar] ?? t.vaar}) — ${D.hi} · ${D.en}\n⏰ ${w}`;
+      })
+      .join('\n\n');
+    const bacha = data.tareekhein.length - SANDESH_HADD;
+    const txt =
+      `🔱 *${data.kaam.naam_hi}* ke shubh muhurat — agle ${kitna}\n` +
+      `(janm nakshatra ${data.janma.nakshatra}, raashi ${data.janma.rashi})\n\n` +
+      `${soochi}\n\n` +
+      (bacha > 0 ? `…aur ${bacha} tareekhein — poori soochi neeche wale link par.\n\n` : '') +
+      `Ye tareekhein kisi aam soochi se nahi — isi kundali se chuni gayi hain, ` +
+      `Brihat Samhita (adhyay 97-99) ke niyam se.\n` +
+      `Apni kundali se apni tareekhein: trikalvaani.com/calculators/free-shubh-muhurat-calculator`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(txt)}`, '_blank');
+  };
+
   const copy = (t: Tareekh) => {
     const w = t.samay.khirkiyan.map(x => `${x.se}–${x.tak}`).join(' , ');
     navigator.clipboard?.writeText(`${tareekhHi(t.tareekh)} — ${w}`);
@@ -528,7 +574,7 @@ export default function MuhuratCalculator() {
 
           <div style={{ background: GOLD_RGBA(0.06), border: `1px solid ${GOLD_RGBA(0.25)}`, borderRadius: 16, padding: '18px 20px', marginBottom: 20 }}>
             <div style={{ fontSize: 15, color: INK, fontWeight: 700 }}>
-              {form.name ? `${form.name} ji, ` : ''}{data.kaam.naam_hi} ke liye
+              {form.name ? `${form.name} ji, ` : ''}{data.kaam.naam_hi} ke liye{' '}
               {(() => {
                 // Engine se seedha — 45 din, ya 180 ko "6 mahine" mein
                 const dn = data.seema_din ?? 45;
@@ -543,6 +589,24 @@ export default function MuhuratCalculator() {
             {data.kaam.chetavni && (
               <div style={{ fontSize: 13, color: '#E9C862', marginTop: 10, lineHeight: 1.6 }}>⚠ {data.kaam.chetavni}</div>
             )}
+
+            {/* ⭐ v2.1 — POORI SOOCHI bhejein. Tareekh ghar mein milkar chuni
+                jaati hai, isliye sabse kaam ka button yahi hai — aur jo soochi
+                pariwar ke group mein jaati hai, wo hamein bhi saath le jaati hai. */}
+            <div style={{ marginTop: 16, paddingTop: 16, borderTop: `1px solid ${GOLD_RGBA(0.22)}` }}>
+              <button type="button" onClick={whatsappSab} style={{
+                width: '100%', background: '#25D366', color: '#fff', border: 'none',
+                borderRadius: 12, padding: '14px 18px', fontSize: 16, fontWeight: 800,
+                cursor: 'pointer', minHeight: 52,
+              }}>
+                📲 Poori soochi WhatsApp par bhejein
+              </button>
+              <div style={{ fontSize: 13, color: MUTED, marginTop: 8, lineHeight: 1.7 }}>
+                Ek dabane par saari tareekhein aur samay <strong style={{ color: '#cbd5e1' }}>ghar
+                walon, rishtedaron ya pandit ji</strong> ko seedha chali jayengi — muhurat akele
+                nahi, milkar chuna jaata hai. Koi app nahi, koi login nahi.
+              </div>
+            </div>
           </div>
 
           {/* ⭐ v1.5 — BEST pehle, phir GOOD, phir OK; har darje ke andar

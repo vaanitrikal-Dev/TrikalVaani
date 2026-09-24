@@ -2,6 +2,10 @@
 
 // ============================================================
 // File: app/calculators/free-shubh-muhurat-calculator/page.tsx
+// Version: v1.8 (23 Sep 2026) — poori soochi WhatsApp par bhejne wala hissa
+//   (Rohiit: "isko marketing feature ki tarah likho") — muhurat ghar mein
+//   milkar chuna jaata hai, isliye soochi ka pariwar tak jaana hi asli kaam
+//   hai, aur wahan hamara naam bhi saath jaata hai
 // Version: v1.7 (23 Sep 2026) — "kitni tareekhein" ke aankde ASLI naap se
 //   (23 Sep 2026, Delhi kundali, engine v2.0 par chalakar). Pehle wahan
 //   purani ginti padi thi jo seema badalne se galat ho chuki thi — ek page
@@ -377,8 +381,18 @@ const PILLAR: PillarSection[] = [
     h2: "Ise kaise istemal karein — teen qadam",
     paras: [
       "**Ek:** upar dropdown se apna kaam chuniye. **Do:** janm-tithi, samay aur sthan bhariye — event ka shehar apne aap bhar jayega, alag ho to wahin badal dijiye. **Teen:** \"शुभ मुहूर्त देखें\" dabaiye.",
-      "Nateeje mein har tareekh par **WhatsApp bhejein** ka button hai — ek dabane par poori tareekh aur samay ghar walon ko chala jayega. **Samay copy karein** se sirf tareekh aur samay copy ho jaata hai.",
+      "Nateeje ke sabse upar **Poori soochi WhatsApp par bhejein** ka button hai — ek dabane par saari tareekhein aur unke samay, ek hi sandesh mein, ghar walon ke group mein chale jaate hain. Har tareekh par apna alag WhatsApp button bhi hai, aur **Samay copy karein** se sirf us din ka samay copy ho jaata hai.",
       "Soochi aaj se agle **45 din** ki hoti hai — usme se granth ke hisaab se chuni hui 6 tareekhein. **Poore 6 mahine** ki saari tareekhein aur upay ₹51 wale vikalp mein, jo nateeje ke neeche milega.",
+    ],
+  },
+  {
+    id: "soochi-ghar-walon-ko-bhejein",
+    h2: "Poori soochi ek dabane mein ghar walon ko bhejiye",
+    paras: [
+      "Muhurat kabhi akele nahi chuna jaata. Maa-pita, sasural, pandit ji — tareekh sabki salaah se tay hoti hai, aur aksar WhatsApp ke ek group mein. Isliye hamara sabse kaam ka button wahi hai: **Poori soochi WhatsApp par bhejein**, jo nateeje ke sabse upar milta hai.",
+      "Us sandesh mein saari tareekhein hoti hain, har ek ka **darja** (श्रेष्ठ, अच्छा, ठीक), us din ka **shubh samay**, aur raat wale samay par 🌙 ka nishan. Saath mein ek line jo batati hai ki ye soochi kisi aam calendar se nahi, **isi kundali se** aur Brihat Samhita ke niyam se bani hai.",
+      "Koi app nahi, koi login nahi, koi PDF nahi — seedha WhatsApp. Aur agar koi aur bhi apni tareekhein dekhna chahe, sandesh ke neeche link maujood hai. Ghar mein baithe pandit ji ko bhej dijiye — wo dekh lenge ki har tareekh ke peeche shlok likha hua hai.",
+      "Har tareekh ka apna button bhi hai, agar sirf ek din bhejna ho — jaise sasural ko sirf wahi tareekh jispar sabki haan ban rahi hai.",
     ],
   },
   {
@@ -576,6 +590,10 @@ const FAQS = [
     a: "Muft mein aaj se agle 45 din ki tareekhein aati hain, aur Rs 51 wale vikalp mein aaj se 6 mahine ki. Iske aage ka kaam ho — jaise agle saal ki shaadi — to abhi soochi usme nahi aayegi; aise mein hamein likhiye, hum aapke mahine ke liye alag se dekh denge.",
   },
   {
+    q: "Kya poori soochi ek saath WhatsApp par bhej sakte hain?",
+    a: "Haan. Nateeje ke sabse upar Poori soochi WhatsApp par bhejein ka button hai — saari tareekhein, unka darja aur shubh samay ek hi sandesh mein chale jaate hain, ghar walon ke group mein ya pandit ji ko. Har tareekh ka apna alag button bhi hai agar sirf ek din bhejna ho. Koi app ya login nahi chahiye.",
+  },
+  {
     q: "Kya ye bhavishyavani hai?",
     a: "Nahi. Muhurat shuruaat ka samay chunne ki vidya hai, aage kya hoga ye batane ki nahi. Hum sirf itna kehte hain ki granth ke niyam se ye din aur ye samay shubh hai.",
   },
@@ -654,7 +672,7 @@ export default function FreeShubhMuhuratCalculatorPage() {
 
             <div className="flex flex-wrap gap-2 text-xs mb-4">
               {['40 kaam ka muhurat', 'Tareekh + samay dono', 'Har niyam par shlok',
-                'Aapki kundali se', '45 din muft'].map((t) => (
+                'Aapki kundali se', '45 din muft', 'WhatsApp par bhejein'].map((t) => (
                 <span key={t} className="px-3 py-1.5 rounded-full"
                   style={{ background: GOLD_RGBA(0.1), border: `1px solid ${GOLD_RGBA(0.3)}`, color: '#E9C862' }}>
                   {t}
