@@ -2,7 +2,39 @@
 
 // ============================================================
 // File: components/calculators/MuhuratCalculator.tsx
-// Version: v2.2 — 23 September 2026 (har kaam ka apna nishan)
+// Version: v2.4 — 24 September 2026 (phone ka apna share sheet + poori soochi)
+//
+// PEHLE EK GALTI MAAN LOON: v2.3 mein maine WhatsApp ke sandesh se saare
+// emoji hata diye the, ye maan kar ki wo grahak ke phone par toot rahe hain.
+// Rohiit ne phone se bhej kar dikhaya — emoji BILKUL THEEK aate hain; "?"
+// wale dabbe sirf laptop ke copy-paste mein ban rahe the. Emoji wapas.
+//
+// v2.4 ka asli badlaav: sandesh ab navigator.share() se jaata hai — phone
+// ka apna share sheet. Teen faayde: (1) text SEEDHA phone ko jaata hai,
+// kisi URL mein bandh kar nahi, isliye 20 tareekh ki hadd khatam aur POORI
+// soochi jaati hai; (2) grahak WhatsApp, Telegram ya email — kahin bhi bhej
+// sakta hai; (3) emoji encoding ke raaste se guzarte hi nahi. Jahan ye nahi
+// hai (zyadatar Windows desktop), wahan purana wa.me apne aap chal jaata
+// hai, isliye kisi grahak ka kuch nahi bigadta.
+//
+// 📅 hataya: wo har phone par "FEB 24" likha calendar dikhata hai, jo asli
+// tareekh ke bagal mein ajeeb lagta tha. Tareekh ab bold; ⏰ aur kaam ka
+// nishan (💍 🏠 🚗) wahi hain.
+//
+// v2.3 — sandesh saada kiya gaya tha (wapas le liya)
+// Rohiit ke sandesh mein emoji do baar "?" ke dabbe ban gaye — jabki file
+// ke bytes saaf hain (jaanche: UTF-8 valid, ek bhi toota akshar nahi) aur
+// Devanagari bach raha hai. Matlab gadbad raaste mein hai — unka WhatsApp
+// Desktop / clipboard / jis doc mein paste hua. Hum us raaste ko theek
+// nahi kar sakte, isliye us par nirbhar hi nahi rehte:
+//   * WEBPAGE par emoji rahenge (wahan sahi dikhte hain),
+//   * WHATSAPP ke sandesh mein ek bhi emoji nahi — sirf WhatsApp ka apna
+//     *bold*, aur shabd: "Din", "Samay", "(raat)", "(agli subah)".
+// Saada text har phone, har WhatsApp aur har copy-paste se bach kar nikal
+// jaata hai. Ye khoobsurti se zyada BHAROSE ka faisla hai: grahak ye soochi
+// apne ghar walon ko bhejta hai — wahan dabbe dikhna hamari galti lagti hai.
+//
+// v2.2 — har kaam ka apna nishan (webpage par)
 // Rohiit: "wo astrologer sagai ke liye ring ka nishan lagata hai — kya hum
 // muhurat ke hisaab se emoji laga sakte hain?" Haan — aur isse sandesh
 // pehli nazar mein padha jaata hai: 💍 dikhte hi pata chal jaata hai ki
@@ -331,40 +363,75 @@ export default function MuhuratCalculator() {
 
   const whatsapp = (t: Tareekh) => {
     const k = data?.kaam.naam_hi ?? '';
-    const w = t.samay.khirkiyan.map(x => `${x.se}–${x.tak}`).join(' , ');
-    const txt = `${kaamEmoji(data?.kaam.slug, chuna?.samuh)} ${k} ka shubh muhurat\n\n📅 ${tareekhHi(t.tareekh)} (${VAAR_HI[t.vaar] ?? t.vaar})\n⏰ Shubh samay: ${w}\n✨ Abhijit: ${t.samay.abhijit.se}–${t.samay.abhijit.tak}\n\n${t.nakshatra} · ${t.tithi} · ${t.karan} karan\nBrihat Samhita ke niyam se — trikalvaani.com/calculators/free-shubh-muhurat-calculator`;
-    window.open(`https://wa.me/?text=${encodeURIComponent(txt)}`, '_blank');
+    const D = DARJA[t.darja];
+    const w = t.samay.khirkiyan
+      .map(x => `${x.kab === 'raat' ? '\u{1F319}' : ''}${x.se}\u2013${x.tak}`
+        + (x.tak_agli ? ' (agli subah)' : ''))
+      .join(', ');
+    const ab = t.samay.abhijit.saaf
+      ? `\n\u2728 Abhijit muhurat: ${t.samay.abhijit.se}\u2013${t.samay.abhijit.tak}` : '';
+    const txt =
+      `${kaamEmoji(data?.kaam.slug, chuna?.samuh)} *${k}* ka shubh muhurat\n\n`
+      + `*${tareekhHi(t.tareekh)}* (${VAAR_HI[t.vaar] ?? t.vaar}) \u2014 ${D.hi} \u00b7 ${D.en}\n`
+      + `\u23F0 ${w}${ab}\n\n`
+      + `${t.nakshatra} \u00b7 ${t.tithi} \u00b7 ${t.karan} karan\n`
+      + `Brihat Samhita ke niyam se \u2014 trikalvaani.com/calculators/free-shubh-muhurat-calculator`;
+    bhejo(txt, txt);
   };
 
   // ⭐ v2.1 — POORI SOOCHI ek sandesh mein. Muhurat ka faisla ghar mein
   // milkar hota hai, isliye soochi ka pariwar ke group tak pahunchna hi
   // asli kaam hai — aur wahan hamara naam bhi saath jaata hai.
-  const SANDESH_HADD = 20;   // isse zyada par link; bahut lamba URL kuch phone kaat dete hain
+  // ⭐ v2.4 — hadd sirf purane raste par. navigator.share text seedha deta
+  // hai, URL banta hi nahi, isliye saari tareekhein ja sakti hain.
+  const WAME_HADD = 20;
+
+  /** Sandesh bhejo — pehle phone ka apna share sheet, na ho to WhatsApp. */
+  const bhejo = async (poora: string, chhota: string) => {
+    const nav = typeof navigator !== 'undefined' ? navigator : undefined;
+    if (nav && typeof nav.share === 'function') {
+      try {
+        await nav.share({ text: poora });
+        return;
+      } catch (e) {
+        // grahak ne share sheet band kar di — kuch mat karo
+        if ((e as Error)?.name === 'AbortError') return;
+        // koi aur gadbad — purane raaste par gir jao
+      }
+    }
+    window.open(`https://wa.me/?text=${encodeURIComponent(chhota)}`, '_blank');
+  };
   const whatsappSab = () => {
     if (!data) return;
     const din = data.seema_din ?? 45;
     const kitna = din >= 150 ? `${Math.round(din / 30)} mahine` : `${din} din`;
-    const soochi = [...data.tareekhein]
-      .sort((a, b) => a.tareekh.localeCompare(b.tareekh))
-      .slice(0, SANDESH_HADD)
-      .map(t => {
-        const D = DARJA[t.darja];
-        const w = t.samay.khirkiyan
-          .map(x => `${x.kab === 'raat' ? '🌙' : ''}${x.se}–${x.tak}`)
-          .join(', ');
-        return `📅 ${tareekhHi(t.tareekh)} (${VAAR_HI[t.vaar] ?? t.vaar}) — ${D.hi} · ${D.en}\n⏰ ${w}`;
-      })
-      .join('\n\n');
-    const bacha = data.tareekhein.length - SANDESH_HADD;
-    const txt =
-      `${kaamEmoji(data.kaam.slug, chuna?.samuh)} *${data.kaam.naam_hi}* ke shubh muhurat — agle ${kitna}\n` +
-      `(janm nakshatra ${data.janma.nakshatra}, raashi ${data.janma.rashi})\n\n` +
-      `${soochi}\n\n` +
-      (bacha > 0 ? `…aur ${bacha} tareekhein — poori soochi neeche wale link par.\n\n` : '') +
-      `Ye tareekhein kisi aam soochi se nahi — isi kundali se chuni gayi hain, ` +
-      `Brihat Samhita (adhyay 97-99) ke niyam se.\n` +
-      `Apni kundali se apni tareekhein: trikalvaani.com/calculators/free-shubh-muhurat-calculator`;
-    window.open(`https://wa.me/?text=${encodeURIComponent(txt)}`, '_blank');
+
+    const ek = (t: Tareekh) => {
+      const D = DARJA[t.darja];
+      const w = t.samay.khirkiyan
+        .map(x => `${x.kab === 'raat' ? '\u{1F319}' : ''}${x.se}\u2013${x.tak}`
+          + (x.tak_agli ? ' (agli subah)' : ''))
+        .join(', ');
+      return `*${tareekhHi(t.tareekh)}* (${VAAR_HI[t.vaar] ?? t.vaar}) \u2014 ${D.hi} \u00b7 ${D.en}\n\u23F0 ${w}`;
+    };
+    const kramSe = [...data.tareekhein].sort((a, b) => a.tareekh.localeCompare(b.tareekh));
+
+    const sir =
+      `${kaamEmoji(data.kaam.slug, chuna?.samuh)} *${data.kaam.naam_hi}* ke shubh muhurat \u2014 agle ${kitna}\n`
+      + `(janm nakshatra ${data.janma.nakshatra}, raashi ${data.janma.rashi})\n\n`;
+    const pair =
+      `\nYe tareekhein kisi aam soochi se nahi \u2014 isi kundali se chuni gayi hain, `
+      + `Brihat Samhita (adhyay 97-99) ke niyam se.\n`
+      + `Apni kundali se apni tareekhein: trikalvaani.com/calculators/free-shubh-muhurat-calculator`;
+
+    // share sheet ke liye POORA sandesh — koi hadd nahi
+    const poora = sir + kramSe.map(ek).join('\n\n') + '\n' + pair;
+    // chhota sirf tab jab purane wa.me par girna pade
+    const bacha = kramSe.length - WAME_HADD;
+    const chhota = sir + kramSe.slice(0, WAME_HADD).map(ek).join('\n\n') + '\n'
+      + (bacha > 0 ? `\n\u2026aur ${bacha} tareekhein \u2014 neeche wale link par.\n` : '') + pair;
+
+    bhejo(poora, chhota);
   };
 
   const copy = (t: Tareekh) => {
@@ -637,12 +704,13 @@ export default function MuhuratCalculator() {
                 borderRadius: 12, padding: '14px 18px', fontSize: 16, fontWeight: 800,
                 cursor: 'pointer', minHeight: 52,
               }}>
-                📲 Poori soochi WhatsApp par bhejein
+                📲 Poori soochi bhejein — WhatsApp, Telegram ya email par
               </button>
               <div style={{ fontSize: 13, color: MUTED, marginTop: 8, lineHeight: 1.7 }}>
-                Ek dabane par saari tareekhein aur samay <strong style={{ color: '#cbd5e1' }}>ghar
-                walon, rishtedaron ya pandit ji</strong> ko seedha chali jayengi — muhurat akele
-                nahi, milkar chuna jaata hai. Koi app nahi, koi login nahi.
+                Ek dabane par <strong style={{ color: '#cbd5e1' }}>saari tareekhein aur samay</strong> —
+                ghar walon ke group mein, rishtedaron ko, ya pandit ji ko. Phone apna share sheet
+                kholega; wahan se WhatsApp, Telegram ya email chun lijiye. Muhurat akele nahi,
+                milkar chuna jaata hai.
               </div>
             </div>
           </div>
