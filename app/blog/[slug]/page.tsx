@@ -1,7 +1,26 @@
 // ============================================================
 // TRIKAL VAANI — DYNAMIC BLOG ARTICLE PAGE (SSR)
 // CEO: Rohiit Gupta | Chief Vedic Architect
-// Version: 3.1
+// Version: 3.2
+// Date: 2026-09-25
+// CHANGE v3.2 — GRANTH SANDARBH (classical citations), approved by Rohiit 25 Sep 2026:
+//   • Visible "ग्रंथ सन्दर्भ · Classical Sources" box, placed just BEFORE the
+//     FAQ section (Option A of the approved mockup, site amber/dark palette).
+//     Renders ONLY when post.citations has rows. Pages without citations
+//     look exactly as before and keep the footer "Classical sources:" line.
+//   • JSON-LD Article.citation: when citations exist it is now an array of
+//     schema.org Chapter objects (isPartOf -> Book with Devanagari
+//     alternateName + author), so Google/AI read Granth + Adhyaya + Shlok as
+//     structured data. With no citations it falls back to the old
+//     classicalSources string — no page loses its citation.
+//   • Only the Granth NAME is shown in Devanagari. The Sanskrit mool paath is
+//     never rendered (licence rule, editorial_rulings 25 Sep 2026).
+//   • Authors come from GRANTH_META below; an unknown work gets no author
+//     rather than a guessed one.
+//   Requires lib/blog-posts.ts v3.9. No change to metadata, routing, ISR,
+//   generateStaticParams, other schemas or the CTA.
+// ------------------------------------------------------------
+// PREVIOUS: Version 3.1
 // Date: 2026-09-06
 // CHANGE v3.1 — BUILD COST (the only change in this file):
 //   generateStaticParams() pre-rendered all 741 published posts on EVERY
@@ -142,6 +161,7 @@ import {
   getRelatedPosts,
   type BlogPost,
   type BlogSection,
+  type BlogCitation,
 } from '@/lib/blog-posts';
 
 
@@ -152,6 +172,67 @@ import {
 // ------------------------------------------------------------------
 const BRAND_SUFFIX = /\s*[|｜]\s*(?:Trikaal?\s+Vaani|त्रिकाल\s*वाणी|त्रिकल\s*वाणी)\s*$/i;
 const displayTitle = (t: string): string => (t ? t.replace(BRAND_SUFFIX, '').trim() : t);
+
+// ==================================================================
+// v3.2 — GRANTH META (Devanagari title + author) for citations
+// ------------------------------------------------------------------
+// Keyed by public.bphs_slokas.work. Author left null where the
+// attribution is disputed — better no author than a wrong one.
+// ==================================================================
+const GRANTH_META: Record<string, { sa: string; author: string | null }> = {
+  bphs:                  { sa: 'बृहत्पाराशरहोराशास्त्रम्', author: 'Maharishi Parashara' },
+  phaladipika:           { sa: 'फलदीपिका', author: 'Mantreshwara' },
+  jatakaparijata:        { sa: 'जातकपारिजातः', author: 'Vaidyanatha Dikshita' },
+  brihajjataka:          { sa: 'बृहज्जातकम्', author: 'Varahamihira' },
+  laghujataka:           { sa: 'लघुजातकम्', author: 'Varahamihira' },
+  brihatsamhita:         { sa: 'बृहत्संहिता', author: 'Varahamihira' },
+  bhrigusutram:          { sa: 'भृगुसूत्रम्', author: 'Maharishi Bhrigu' },
+  chamatkarachintamani:  { sa: 'चमत्कारचिन्तामणि', author: 'Bhatta Narayana' },
+  saravali:              { sa: 'सारावली', author: 'Kalyanavarma' },
+  jaiminisutra:          { sa: 'जैमिनिसूत्रम्', author: 'Maharishi Jaimini' },
+  jaiminiyaupadesasutra: { sa: 'जैमिनीयोपदेशसूत्रम्', author: 'Maharishi Jaimini' },
+  uttarakalamrita:       { sa: 'उत्तरकालामृतम्', author: 'Kalidasa' },
+  sarvarthachintamani:   { sa: 'सर्वार्थचिन्तामणि', author: 'Venkatesha Daivajna' },
+  jatakatattva:          { sa: 'जातकतत्त्वम्', author: 'Mahadeva' },
+  muhurtachintamani:     { sa: 'मुहूर्तचिन्तामणि', author: 'Rama Daivajna' },
+  vriddhayavanajataka:   { sa: 'वृद्धयवनजातकम्', author: 'Minaraja' },
+  minarajayavanajataka:  { sa: 'वृद्धयवनजातकम्', author: 'Minaraja' },
+  gargahora:             { sa: 'गर्गहोरा', author: null },
+  daivajnavallabha:      { sa: 'दैवज्ञवल्लभा', author: null },
+  shatpanchashika:       { sa: 'षट्पञ्चाशिका', author: null },
+};
+
+function citationRef(c: BlogCitation, hi: boolean): string {
+  const parts: string[] = [];
+  if (c.adhyaya) parts.push(`${hi ? 'अध्याय' : 'Adhyaya'} ${c.adhyaya}`);
+  if (c.shlok) parts.push(`${hi ? 'श्लोक' : 'Shlok'} ${c.shlok}`);
+  if (c.edition) parts.push(c.edition);
+  return parts.join(' · ');
+}
+
+function citationSchema(c: BlogCitation, hi: boolean): Record<string, unknown> {
+  const meta = c.work ? GRANTH_META[c.work] : undefined;
+  const book: Record<string, unknown> = {
+    '@type': 'Book',
+    name: c.granth,
+    inLanguage: 'sa',
+  };
+  if (meta?.sa) book.alternateName = meta.sa;
+  if (meta?.author) book.author = { '@type': 'Person', name: meta.author };
+  if (c.edition) book.bookEdition = c.edition;
+  const rule = (hi ? c.rule_hi || c.rule_en : c.rule_en || c.rule_hi) ?? undefined;
+  if (!c.adhyaya) {
+    return rule ? { ...book, description: rule } : book;
+  }
+  const chapter: Record<string, unknown> = {
+    '@type': 'Chapter',
+    name: `${c.granth} — ${hi ? 'अध्याय' : 'Adhyaya'} ${c.adhyaya}`,
+    isPartOf: book,
+  };
+  if (c.shlok) chapter.pagination = `${hi ? 'श्लोक' : 'Shloka'} ${c.shlok}`;
+  if (rule) chapter.description = rule;
+  return chapter;
+}
 
 // ==================================================================
 // v2.9 — CANONICAL NAP (Name, Address, Phone)
@@ -405,7 +486,11 @@ function generateJsonLd(post: BlogPost) {
     inLanguage: post.lang === 'hi' ? 'hi-IN' : 'en-IN',
     articleSection: post.category,
     keywords: post.keywords.join(', '),
-    citation: post.classicalSources,
+    // v3.2: structured Chapter/Book list when verified citations exist,
+    // otherwise the legacy classicalSources string.
+    citation: post.citations.length > 0
+      ? post.citations.map((c) => citationSchema(c, post.lang === 'hi'))
+      : post.classicalSources,
     wordCount: (() => {
       const count = (v?: string) => (v ? v.trim().split(/\s+/).filter(Boolean).length : 0);
       let total = count(post.directAnswer);
@@ -1052,6 +1137,55 @@ export default async function BlogArticlePage({
             </div>
           </section>
 
+          {/* v3.2: GRANTH SANDARBH — only when verified citations exist */}
+          {post.citations.length > 0 && (
+            <section
+              id="granth-sandarbh"
+              aria-label="Granth Sandarbh — Classical Sources"
+              className="my-12 rounded-xl border border-amber-900/40 bg-slate-900/40 p-5 md:p-6"
+            >
+              <h2 className="mb-1 text-2xl md:text-3xl font-bold text-amber-300">
+                ग्रंथ सन्दर्भ · Classical Sources
+              </h2>
+              <p className="mb-5 text-sm text-slate-400">
+                {post.lang === 'hi'
+                  ? 'इस लेख के हर नियम का मूल स्रोत — ग्रंथ, अध्याय और श्लोक संख्या के साथ।'
+                  : 'The classical source behind every rule in this article — Granth, Adhyaya and Shlok number.'}
+              </p>
+              <ol className="divide-y divide-amber-900/30">
+                {post.citations.map((c, i) => {
+                  const hi = post.lang === 'hi';
+                  const meta = c.work ? GRANTH_META[c.work] : undefined;
+                  const main = hi ? c.rule_hi || c.rule_en : c.rule_en || c.rule_hi;
+                  const second = hi ? (c.rule_hi ? c.rule_en : null) : (c.rule_en ? c.rule_hi : null);
+                  const ref = citationRef(c, hi);
+                  return (
+                    <li key={i} className="py-4 first:pt-0 last:pb-0">
+                      <div className="font-semibold text-amber-200">
+                        {c.granth}
+                        {meta && (
+                          <span className="ml-2 text-sm font-normal text-slate-400">
+                            {meta.sa}{meta.author ? ` · ${meta.author}` : ''}
+                          </span>
+                        )}
+                      </div>
+                      {ref && <div className="mt-0.5 text-sm text-amber-400">{ref}</div>}
+                      {main && <p className="mt-2 text-slate-200 leading-relaxed">{main}</p>}
+                      {second && <p className="mt-1 text-sm text-slate-400 leading-relaxed">{second}</p>}
+                    </li>
+                  );
+                })}
+              </ol>
+              <p className="mt-5 border-t border-amber-900/30 pt-4 text-xs text-slate-400">
+                {post.lang === 'hi'
+                  ? 'हर सन्दर्भ त्रिकाल वाणी ग्रंथ-पुस्तकालय या प्रतिष्ठित मुक्त स्रोत से मिलाया गया · व्याख्या: '
+                  : 'Each reference checked against the Trikaal Vaani Granth library or a reputable open source · Interpretation: '}
+                <Link href="/founder" className="text-amber-300 hover:underline">Rohiit Gupta</Link>
+                , Chief Vedic Architect
+              </p>
+            </section>
+          )}
+
           {/* FAQ SECTION */}
           <section aria-label="Frequently Asked Questions" className="my-12">
             <h2 className="mb-6 text-2xl md:text-3xl font-bold text-amber-300">
@@ -1106,9 +1240,12 @@ export default async function BlogArticlePage({
                 Chief Vedic Architect, Trikaal Vaani · India · UDYAM-DL-10-0119070
               </em>
             </p>
-            <p>
-              <strong className="text-amber-200">Classical sources:</strong> {post.classicalSources}
-            </p>
+            {/* v3.2: legacy line only when the Granth Sandarbh box is absent */}
+            {post.citations.length === 0 && post.classicalSources && (
+              <p>
+                <strong className="text-amber-200">Classical sources:</strong> {post.classicalSources}
+              </p>
+            )}
           </footer>
 
         </div>

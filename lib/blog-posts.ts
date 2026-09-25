@@ -1,7 +1,22 @@
 // ============================================================
 // TRIKAL VAANI — BLOG POSTS — SUPABASE VERSION
 // CEO: Rohiit Gupta | Chief Vedic Architect
-// Version: 3.8 (BUILD-COST FIX — getAllSlugs is now ordered + limitable)
+// Version: 3.9 (CITATIONS — verified Granth references for page + JSON-LD)
+// Date: 2026-09-25
+//
+// CHANGE v3.9 — the only change in this file:
+//   • New column public.blog_posts.citations (jsonb, added 25 Sep 2026,
+//     approved by Rohiit). JSON array of
+//       {work, granth, adhyaya, shlok, edition, rule_en, rule_hi}
+//     written by the nightly content job from the verified Trikaal Library.
+//   • BlogPost gains `citations: BlogCitation[]`; mapRow() reads it through
+//     normalizeCitations(), which drops malformed rows instead of crashing
+//     the page. NULL / missing column / list queries => [] (LIST_COLUMNS is
+//     deliberately NOT changed — list pages never need citations).
+//   • Nothing else touched: queries, LIST_COLUMNS, getAllSlugs unchanged.
+//
+// ------------------------------------------------------------
+// PREVIOUS: Version 3.8 (BUILD-COST FIX — getAllSlugs is now ordered + limitable)
 // Date: 2026-09-06
 //
 // CHANGE v3.8 — WHY:
@@ -138,6 +153,41 @@ import { createClient } from '@supabase/supabase-js';
 // ============================================================
 // TYPES — v3.2: sections now correctly typed + transformed
 // ============================================================
+// v3.9 — one verified classical reference (see header).
+export interface BlogCitation {
+  work: string | null;        // public.bphs_slokas.work key, null = open-source Granth
+  granth: string;             // display name, e.g. "Brihat Parashara Hora Shastra"
+  adhyaya: number | null;
+  shlok: string | null;       // "8" or "19-44"; null when only the Granth is cited
+  edition: string | null;
+  rule_en: string | null;
+  rule_hi: string | null;
+}
+
+function normalizeCitations(raw: unknown): BlogCitation[] {
+  if (!Array.isArray(raw)) return [];
+  const out: BlogCitation[] = [];
+  for (const r of raw) {
+    if (!r || typeof r !== 'object') continue;
+    const o = r as Record<string, unknown>;
+    const granth = typeof o.granth === 'string' ? o.granth.trim() : '';
+    if (!granth) continue;
+    const adh = Number(o.adhyaya);
+    const shlok = o.shlok === null || o.shlok === undefined || o.shlok === '' ? null : String(o.shlok).trim();
+    const str = (v: unknown) => (typeof v === 'string' && v.trim() ? v.trim() : null);
+    out.push({
+      work: str(o.work),
+      granth,
+      adhyaya: Number.isFinite(adh) && adh > 0 ? adh : null,
+      shlok,
+      edition: str(o.edition),
+      rule_en: str(o.rule_en),
+      rule_hi: str(o.rule_hi),
+    });
+  }
+  return out;
+}
+
 export interface BlogPost {
   slug: string;
   title: string;
@@ -166,6 +216,8 @@ export interface BlogPost {
   faqs: { q: string; a: string }[];
   relatedSlugs: string[];
   classicalSources: string;
+  // ── v3.9: verified Granth references ([] when none) ──────
+  citations: BlogCitation[];
   // ── v3.3: bilingual (EN/HI) support ──────────────────────
   lang: string;               // 'en' | 'hi'
   altLangSlug: string | null; // counterpart slug in the other language (hreflang pairing)
@@ -389,6 +441,8 @@ function mapRow(row: Record<string, unknown>): BlogPost {
     faqs:             (row.faqs as { q: string; a: string }[]) ?? [],
     relatedSlugs:     (row.related_slugs as string[]) ?? [],
     classicalSources: row.classical_sources as string,
+    // ── v3.9: verified Granth references ─────────────────────
+    citations:        normalizeCitations(row.citations),
     // ── v3.3: bilingual (EN/HI) support ──────────────────────
     lang:             (row.lang as string) ?? 'en',
     altLangSlug:      (row.alt_lang_slug as string) ?? null,
