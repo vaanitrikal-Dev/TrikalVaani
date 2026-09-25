@@ -1,7 +1,17 @@
 // ============================================================
 // TRIKAL VAANI — BLOG POSTS — SUPABASE VERSION
 // CEO: Rohiit Gupta | Chief Vedic Architect
-// Version: 3.9 (CITATIONS — verified Granth references for page + JSON-LD)
+// Version: 3.10 (REVIEWED_AT — dated "Last reviewed by Rohiit Gupta")
+// Date: 2026-09-25
+//
+// CHANGE v3.10 — the only change in this file:
+//   • New column public.blog_posts.reviewed_at (timestamptz, added 25 Sep 2026,
+//     approved by Rohiit). Set ONLY when Rohiit reviews/corrects a page.
+//   • BlogPost gains `reviewedAt: string | null`; mapRow() passes it through.
+//     NULL / list queries => null. LIST_COLUMNS unchanged.
+//
+// ------------------------------------------------------------
+// PREVIOUS: Version 3.9 (CITATIONS — verified Granth references for page + JSON-LD)
 // Date: 2026-09-25
 //
 // CHANGE v3.9 — the only change in this file:
@@ -218,6 +228,8 @@ export interface BlogPost {
   classicalSources: string;
   // ── v3.9: verified Granth references ([] when none) ──────
   citations: BlogCitation[];
+  // ── v3.10: when Rohiit last reviewed this page (ISO timestamp) ──
+  reviewedAt: string | null;
   // ── v3.3: bilingual (EN/HI) support ──────────────────────
   lang: string;               // 'en' | 'hi'
   altLangSlug: string | null; // counterpart slug in the other language (hreflang pairing)
@@ -443,6 +455,8 @@ function mapRow(row: Record<string, unknown>): BlogPost {
     classicalSources: row.classical_sources as string,
     // ── v3.9: verified Granth references ─────────────────────
     citations:        normalizeCitations(row.citations),
+    // ── v3.10: human review timestamp ─────────────────────────
+    reviewedAt:       typeof row.reviewed_at === 'string' && row.reviewed_at ? row.reviewed_at : null,
     // ── v3.3: bilingual (EN/HI) support ──────────────────────
     lang:             (row.lang as string) ?? 'en',
     altLangSlug:      (row.alt_lang_slug as string) ?? null,

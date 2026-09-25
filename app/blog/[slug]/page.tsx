@@ -1,7 +1,18 @@
 // ============================================================
 // TRIKAL VAANI — DYNAMIC BLOG ARTICLE PAGE (SSR)
 // CEO: Rohiit Gupta | Chief Vedic Architect
-// Version: 3.2
+// Version: 3.3
+// Date: 2026-09-25
+// CHANGE v3.3 — DATED HUMAN REVIEW, approved by Rohiit 25 Sep 2026:
+//   • Footer now reads "Last reviewed by Rohiit Gupta · 25 Sep 2026, 2:30 PM IST"
+//     when public.blog_posts.reviewed_at is set (Rohiit's own review time).
+//     With reviewed_at NULL the footer is exactly as before (no date) — a
+//     time is never invented.
+//   • JSON-LD: Article.mainEntityOfPage (WebPage) gains lastReviewed +
+//     reviewedBy (the founder Person @id) only when reviewed_at is set.
+//   Requires lib/blog-posts.ts v3.10. Nothing else changed.
+// ------------------------------------------------------------
+// PREVIOUS: Version 3.2
 // Date: 2026-09-25
 // CHANGE v3.2 — GRANTH SANDARBH (classical citations), approved by Rohiit 25 Sep 2026:
 //   • Visible "ग्रंथ सन्दर्भ · Classical Sources" box, placed just BEFORE the
@@ -172,6 +183,28 @@ import {
 // ------------------------------------------------------------------
 const BRAND_SUFFIX = /\s*[|｜]\s*(?:Trikaal?\s+Vaani|त्रिकाल\s*वाणी|त्रिकल\s*वाणी)\s*$/i;
 const displayTitle = (t: string): string => (t ? t.replace(BRAND_SUFFIX, '').trim() : t);
+
+// ==================================================================
+// v3.3 — IST review timestamp, e.g. "25 Sep 2026, 2:30 PM IST"
+// ==================================================================
+function formatReviewedIST(iso: string | null): string | null {
+  if (!iso) return null;
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return null;
+  const parts = new Intl.DateTimeFormat('en-IN', {
+    timeZone: 'Asia/Kolkata',
+    day: 'numeric', month: 'short', year: 'numeric',
+    hour: 'numeric', minute: '2-digit', hour12: true,
+  }).formatToParts(d);
+  const get = (t: string) => parts.find((p) => p.type === t)?.value ?? '';
+  // en-IN prints "Sept"; use a fixed 3-letter month so it reads "25 Sep 2026".
+  const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const monthIdx = Number(
+    new Intl.DateTimeFormat('en-US', { timeZone: 'Asia/Kolkata', month: 'numeric' }).format(d)
+  ) - 1;
+  const ampm = get('dayPeriod').toUpperCase();
+  return `${get('day')} ${MONTHS[monthIdx]} ${get('year')}, ${get('hour')}:${get('minute')} ${ampm} IST`;
+}
 
 // ==================================================================
 // v3.2 — GRANTH META (Devanagari title + author) for citations
@@ -482,6 +515,10 @@ function generateJsonLd(post: BlogPost) {
     mainEntityOfPage: {
       '@type': 'WebPage',
       '@id': canonicalUrl,
+      // v3.3: only when Rohiit has actually reviewed the page
+      ...(post.reviewedAt
+        ? { lastReviewed: post.reviewedAt, reviewedBy: { '@id': BUSINESS.founderId } }
+        : {}),
     },
     inLanguage: post.lang === 'hi' ? 'hi-IN' : 'en-IN',
     articleSection: post.category,
@@ -1236,8 +1273,14 @@ export default async function BlogArticlePage({
           <footer className="mt-16 border-t border-amber-900/40 pt-8 text-sm text-slate-400">
             <p className="mb-2">
               <em>Last reviewed by{' '}
-                <Link href="/founder" className="text-amber-300 hover:underline">Rohiit Gupta</Link>,
-                Chief Vedic Architect, Trikaal Vaani · India · UDYAM-DL-10-0119070
+                <Link href="/founder" className="text-amber-300 hover:underline">Rohiit Gupta</Link>
+                {formatReviewedIST(post.reviewedAt) && (
+                  <>
+                    {' · '}
+                    <time dateTime={post.reviewedAt ?? undefined}>{formatReviewedIST(post.reviewedAt)}</time>
+                  </>
+                )}
+                , Chief Vedic Architect, Trikaal Vaani · India · UDYAM-DL-10-0119070
               </em>
             </p>
             {/* v3.2: legacy line only when the Granth Sandarbh box is absent */}
