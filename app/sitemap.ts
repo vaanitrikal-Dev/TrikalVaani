@@ -1,4 +1,49 @@
 /* ═══════════════════════════════════════════════════════════════════════════
+   LASTMOD FIX, PART 2 — 26 September 2026 (v9.4)
+
+   WHAT WAS STILL WRONG (live sitemap, 26 Sep 2026, 5,641 URLs)
+     Part 1 (06 Sep) fixed blog / learn / compatibility / report. The other
+     3,676 URLs — 65% of the file — still carried `lastModified: now`:
+       city event pages + city hubs   2,973
+       /events/ national              288
+       /hi/ festival pages            266
+       /panchang/<date>               98
+       calculators 39, services 9, static routes, local, vivah, swapna, domains
+     So on every fetch two out of three URLs still said "changed this second",
+     and Google keeps discounting the whole field — including the honest blog
+     dates the nightly content run depends on.
+
+   WHAT THIS CHANGES — every URL now gets a lastmod it can defend:
+     • DB-driven pages → the row's own updated_at:
+         festivals (national, Hindi, every city copy) = latest of
+           festivals_master.updated_at, festival_content.updated_at (en + hi)
+           and the festival template's last code change
+         domain pillars = domain_pages.updated_at
+         /panchang/<date> = panchang_daily.updated_at for that date
+         /swapna/<symbol>, /swapna/category/<c> = dream_symbols.updated_at
+         /vivah-muhurat/<year> = latest of muhurat_windows.created_at for that
+           year and the page's last code change
+         today's /rashifal = daily_rashifal_cache.generated_at for today
+     • Hub pages → the newest child: /blog, /learn, /swapna, /calculators,
+       /services.
+     • Code-only pages (calculators, services, static, /astrologer-*) → the
+       date of the page's last git commit, held in CODE_LASTMOD below.
+     • Pages whose content really changes every day (home, /panchang hub,
+       the 10 city hubs and /<city>/panchang) → 00:00 IST today. That date
+       is stable for the whole day, so repeated fetches no longer disagree.
+     • No row date available → the code date, never `now`.
+
+   MAINTENANCE RULE (one line, for whoever edits a code page next):
+     When you change app/calculators/<x>, app/services/<x>, a static page or
+     the festival template, set its date in CODE_LASTMOD to the commit date.
+     A path missing from the map falls back to CODE_LASTMOD_DEFAULT.
+     Adding a new calculator: add it to CALCULATORS AND to CODE_LASTMOD.
+
+   NEXT STEP AFTER DEPLOY
+     Search Console → Sitemaps → submit sitemap.xml again (no need to remove).
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════════════════════════
    LASTMOD FIX — 06 September 2026
 
    WHAT WAS WRONG
@@ -48,6 +93,7 @@
  * 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER 🔱
  * ============================================================================
  * File:        app/sitemap.ts
+ * Version:     v9.4 — honest lastmod for every URL, part 2 (26 Sep 2026)
  * Version:     v9.3 — free-shubh-muhurat-calculator juda (23 Sep 2026)
  * Version:     v9.2 — free-life-span-calculator juda (22 Sep 2026)
  * Version:     v9.1 — free-love-or-arranged-marriage-calculator juda (22 Sep 2026)
@@ -411,6 +457,119 @@ const DOMAINS_FALLBACK = [
   'wellbeing', 'marriage', 'business', 'foreign-settlement', 'digital-career',
 ];
 
+// ─────────────────────────────────────────────────────────────────────────────
+// v9.4 — CODE_LASTMOD: last git commit date (YYYY-MM-DD) of each page that is
+// built from code, not from a Supabase row. Read from `git log -1 --format=%cs`
+// on 26 Sep 2026. Update the date when you change that page (see header).
+// ─────────────────────────────────────────────────────────────────────────────
+const CODE_LASTMOD_DEFAULT = '2026-09-26';
+const CODE_LASTMOD: Record<string, string> = {
+  // static routes
+  '/voice-pricing': '2026-09-12',
+  '/pricing': '2026-09-12',
+  '/founder': '2026-09-12',
+  '/contact': '2026-09-12',
+  '/privacy': '2026-09-12',
+  '/terms': '2026-09-12',
+  '/refund': '2026-09-12',
+  '/services': '2026-09-08',
+  '/calculators': '2026-09-23',
+  '/hast-rekha-calculator': '2026-09-12',
+  '/kundali-milan': '2026-09-12',
+  '/karmic-background-reading': '2026-09-12',
+  '/blog': '2026-09-12',
+  '/learn': '2026-09-12',
+  '/swapna': '2026-09-12',
+  '/swapna/[symbol]': '2026-09-08',
+  '/swapna/category': '2026-07-04',
+  '/panchang/[date]': '2026-09-05',
+  '/rashifal': '2026-09-12',
+  '/vivah-muhurat': '2026-06-27',
+  '/vivah-muhurat/[year]': '2026-09-24',
+  '/[domain]': '2026-09-05',
+  // festival template (components/festival/FestivalPillar.tsx) — shared by
+  // /events/, /hi/ and every city copy, so a template change is a real change
+  'festival-template': '2026-09-26',
+  // local SEO
+  '/astrologer-delhi': '2026-09-12',
+  '/astrologer-noida': '2026-09-12',
+  '/astrologer-gurgaon': '2026-09-12',
+  '/astrologer-ghaziabad': '2026-09-12',
+  // services
+  '/services/career-pivot': '2026-09-08',
+  '/services/child-destiny': '2026-09-08',
+  '/services/compatibility': '2026-09-12',
+  '/services/ex-back-reading': '2026-09-08',
+  '/services/property-yog': '2026-09-08',
+  '/services/spiritual-purpose': '2026-09-08',
+  '/services/toxic-boss-radar': '2026-09-08',
+  '/services/wealth-reading': '2026-09-12',
+  // calculators
+  '/calculators/free-janam-kundali-calculator': '2026-09-08',
+  '/calculators/free-child-birth-muhurat-calculator': '2026-09-08',
+  '/calculators/free-dasha-calculator': '2026-09-12',
+  '/calculators/free-nakshatra-calculator': '2026-09-12',
+  '/calculators/free-rashi-calculator': '2026-09-08',
+  '/calculators/free-lagna-calculator': '2026-09-08',
+  '/calculators/free-sade-sati-calculator': '2026-09-12',
+  '/calculators/free-manglik-dosh-calculator': '2026-09-21',
+  '/calculators/free-kaal-sarp-dosh-calculator': '2026-09-12',
+  '/calculators/free-pitra-dosh-calculator': '2026-09-12',
+  '/calculators/free-gemstone-calculator': '2026-09-21',
+  '/calculators/free-gemstone-suitability-calculator': '2026-09-08',
+  '/calculators/free-should-i-wear-neelam': '2026-09-21',
+  '/calculators/free-should-i-wear-cats-eye': '2026-09-05',
+  '/calculators/free-should-i-wear-pukhraj': '2026-09-21',
+  '/calculators/free-should-i-wear-gomed': '2026-09-05',
+  '/calculators/free-should-i-wear-moonga': '2026-09-21',
+  '/calculators/free-should-i-wear-panna': '2026-09-21',
+  '/calculators/free-should-i-wear-moti': '2026-09-21',
+  '/calculators/free-should-i-wear-manik': '2026-09-21',
+  '/calculators/free-should-i-wear-heera': '2026-09-21',
+  '/calculators/free-numerology-calculator': '2026-09-08',
+  '/calculators/free-baby-name-by-nakshatra': '2026-09-08',
+  '/calculators/free-lucky-day-calculator': '2026-09-08',
+  '/calculators/free-weak-planet-finder': '2026-09-08',
+  '/calculators/free-graha-bal-calculator': '2026-09-08',
+  '/calculators/free-kundali-strength-calculator': '2026-09-08',
+  '/calculators/free-lagna-bal-calculator': '2026-09-08',
+  '/calculators/free-ias-astrology-calculator': '2026-09-12',
+  '/calculators/free-foreign-settlement-calculator': '2026-09-08',
+  '/calculators/free-foreign-spouse-calculator': '2026-09-05',
+  '/calculators/free-santan-yog-calculator': '2026-09-08',
+  '/calculators/free-shadi-kab-hogi-calculator': '2026-09-08',
+  '/calculators/free-second-marriage-calculator': '2026-09-21',
+  '/calculators/free-health-prediction-calculator': '2026-09-22',
+  '/calculators/free-love-or-arranged-marriage-calculator': '2026-09-22',
+  '/calculators/free-life-span-calculator': '2026-09-22',
+  '/calculators/free-shubh-muhurat-calculator': '2026-09-24',
+};
+
+function codeMod(key: string): Date {
+  return new Date(`${CODE_LASTMOD[key] ?? CODE_LASTMOD_DEFAULT}T00:00:00.000Z`);
+}
+
+/** Newest valid date among the arguments; null if none is valid. */
+function latest(...vals: (Date | string | null | undefined)[]): Date | null {
+  let best: Date | null = null;
+  for (const v of vals) {
+    if (!v) continue;
+    const d = v instanceof Date ? v : new Date(v);
+    if (isNaN(d.getTime())) continue;
+    if (!best || d > best) best = d;
+  }
+  return best;
+}
+
+/** 00:00 IST today, as a Date. Stable for the whole IST day — used only for
+ *  pages whose content genuinely changes every day. */
+function istDayStart(): Date {
+  const IST_MS = 330 * 60 * 1000;
+  const ist = new Date(Date.now() + IST_MS);
+  ist.setUTCHours(0, 0, 0, 0);
+  return new Date(ist.getTime() - IST_MS);
+}
+
 type CityRow = { slug: string; state: string };
 type FestivalRow = { slug: string; date?: string };
 
@@ -420,6 +579,7 @@ type DbFestivalRow = {
   festival_scope: string | null;
   home_states: string[] | null;
   is_indexed: boolean | null;
+  updated_at?: string | null;
 };
 
 function anonClient() {
@@ -452,7 +612,7 @@ async function readFestivalsFromDB(): Promise<DbFestivalRow[]> {
     const supabase = anonClient();
     const { data, error } = await supabase
       .from('festivals_master')
-      .select('festival_slug, date, festival_scope, home_states, is_indexed');
+      .select('festival_slug, date, festival_scope, home_states, is_indexed, updated_at');
     if (error || !data || data.length === 0) return [];
     return (data as DbFestivalRow[]).filter((r) => typeof r.festival_slug === 'string');
   } catch {
@@ -493,6 +653,27 @@ async function readHindiFestivalSlugs(): Promise<Map<string, string>> {
   return out;
 }
 
+/** v9.4 — newest festival_content.updated_at per base_slug (en + hi rows). */
+async function readFestivalContentDates(): Promise<Map<string, string>> {
+  const out = new Map<string, string>();
+  try {
+    const supabase = anonClient();
+    const { data, error } = await supabase
+      .from('festival_content')
+      .select('base_slug, updated_at')
+      .eq('is_published', true);
+    if (error || !data) return out;
+    for (const r of data as { base_slug: string; updated_at: string | null }[]) {
+      if (!r.base_slug || !r.updated_at) continue;
+      const prev = out.get(r.base_slug);
+      if (!prev || r.updated_at > prev) out.set(r.base_slug, r.updated_at);
+    }
+  } catch {
+    /* sitemap must still build */
+  }
+  return out;
+}
+
 const baseSlugOf = (s: string) => s.replace(/-20\d\d$/, '');
 
 function festivalInState(scope: string | null, homeStates: string[] | null, state: string): boolean {
@@ -517,24 +698,27 @@ async function readCompatibilitySlugs(): Promise<{ slug: string; lang: string; u
   }
 }
 
-async function readDomainSlugs(): Promise<string[]> {
+async function readDomainSlugs(): Promise<{ slug: string; updatedAt: string | null }[]> {
+  const fallback = DOMAINS_FALLBACK.map((slug) => ({ slug, updatedAt: null }));
   try {
     const supabase = anonClient();
     const { data, error } = await supabase
       .from('domain_pages')
-      .select('slug')
+      // v9.4: updated_at added for a real lastmod
+      .select('slug, updated_at')
       .order('sort_order', { ascending: true });
-    if (error || !data || data.length === 0) return DOMAINS_FALLBACK;
-    const slugs = (data as { slug: string }[])
-      .map((r) => r.slug)
-      .filter((s) => typeof s === 'string' && s.length > 0);
-    return slugs.length > 0 ? slugs : DOMAINS_FALLBACK;
+    if (error || !data || data.length === 0) return fallback;
+    const rows = (data as { slug: string; updated_at: string | null }[])
+      .filter((r) => typeof r.slug === 'string' && r.slug.length > 0)
+      .map((r) => ({ slug: r.slug, updatedAt: r.updated_at ?? null }));
+    return rows.length > 0 ? rows : fallback;
   } catch {
-    return DOMAINS_FALLBACK;
+    return fallback;
   }
 }
 
-async function readPanchangDates(): Promise<string[]> {
+async function readPanchangDates(): Promise<{ dates: string[]; mods: Map<string, string> }> {
+  const mods = new Map<string, string>();
   try {
     const supabase = anonClient();
     const today = new Date();
@@ -547,22 +731,28 @@ async function readPanchangDates(): Promise<string[]> {
 
     const { data, error } = await supabase
       .from('panchang_daily')
-      .select('date')
+      // v9.4: updated_at added for a real lastmod per date
+      .select('date, updated_at')
       .gte('date', todayStr)
       .lte('date', futureLimitStr)
       .order('date', { ascending: true });
 
-    if (error || !data || data.length === 0) return nextNDates(30);
+    if (error || !data || data.length === 0) return { dates: nextNDates(30), mods };
     const set = new Set<string>();
-    for (const row of data as { date: string }[]) {
+    for (const row of data as { date: string; updated_at: string | null }[]) {
       if (typeof row.date === 'string' && row.date.length >= 10) {
-        set.add(row.date.slice(0, 10));
+        const d = row.date.slice(0, 10);
+        set.add(d);
+        if (row.updated_at) {
+          const prev = mods.get(d);
+          if (!prev || row.updated_at > prev) mods.set(d, row.updated_at);
+        }
       }
     }
     const dates = Array.from(set).sort();
-    return dates.length > 0 ? dates : nextNDates(30);
+    return { dates: dates.length > 0 ? dates : nextNDates(30), mods };
   } catch {
-    return nextNDates(30);
+    return { dates: nextNDates(30), mods };
   }
 }
 
@@ -611,24 +801,32 @@ async function readSeoLearnSlugs(): Promise<SeoPageRow[]> {
 // years (2026/27/28) keep their DB override on the page. No hardcode, no manual
 // sitemap edits.
 // ─────────────────────────────────────────────────────────────────────────────
-async function readVivahYears(): Promise<number[]> {
+async function readVivahYears(): Promise<{ years: number[]; mods: Map<number, string> }> {
   const set = new Set<number>();
+  const mods = new Map<number, string>();
   const end = new Date().getFullYear() + 6;
   for (let y = VIVAH_START; y <= end; y++) set.add(y);
   try {
     const supabase = anonClient();
     const { data, error } = await supabase
       .from('muhurat_windows')
-      .select('year');
+      // v9.4: created_at added (the table has no updated_at) for a real lastmod
+      .select('year, created_at');
     if (!error && data) {
-      for (const r of data as { year: number }[]) {
-        if (typeof r.year === 'number' && r.year >= VIVAH_START && r.year <= 2100) set.add(r.year);
+      for (const r of data as { year: number; created_at: string | null }[]) {
+        if (typeof r.year === 'number' && r.year >= VIVAH_START && r.year <= 2100) {
+          set.add(r.year);
+          if (r.created_at) {
+            const prev = mods.get(r.year);
+            if (!prev || r.created_at > prev) mods.set(r.year, r.created_at);
+          }
+        }
       }
     }
   } catch {
     /* rolling range alone is fine */
   }
-  return Array.from(set).sort((a, b) => a - b);
+  return { years: Array.from(set).sort((a, b) => a - b), mods };
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -636,22 +834,65 @@ async function readVivahYears(): Promise<number[]> {
 // dream_symbols drive /swapna/{symbol} and /swapna/category/{category}. Any
 // symbol added to the table is auto-emitted. No manual sitemap edits.
 // ─────────────────────────────────────────────────────────────────────────────
-async function readDreamSymbols(): Promise<{ symbols: string[]; categories: string[] }> {
+type DreamRead = {
+  symbols: string[];
+  categories: string[];
+  symbolMods: Map<string, string>;
+  categoryMods: Map<string, string>;
+};
+
+async function readDreamSymbols(): Promise<DreamRead> {
+  const symbolMods = new Map<string, string>();
+  const categoryMods = new Map<string, string>();
+  const bump = (m: Map<string, string>, k: string, v: string | null) => {
+    if (!v) return;
+    const prev = m.get(k);
+    if (!prev || v > prev) m.set(k, v);
+  };
   try {
     const supabase = anonClient();
     const { data, error } = await supabase
       .from('dream_symbols')
-      .select('symbol_key, category');
-    if (error || !data) return { symbols: [], categories: [] };
+      // v9.4: updated_at added for a real lastmod per symbol and per category
+      .select('symbol_key, category, updated_at');
+    if (error || !data) return { symbols: [], categories: [], symbolMods, categoryMods };
     const symbols = new Set<string>();
     const categories = new Set<string>();
-    for (const r of data as { symbol_key: string; category: string }[]) {
-      if (typeof r.symbol_key === 'string' && r.symbol_key.length > 0) symbols.add(r.symbol_key);
-      if (typeof r.category === 'string' && r.category.length > 0) categories.add(r.category);
+    for (const r of data as { symbol_key: string; category: string; updated_at: string | null }[]) {
+      if (typeof r.symbol_key === 'string' && r.symbol_key.length > 0) {
+        symbols.add(r.symbol_key);
+        bump(symbolMods, r.symbol_key, r.updated_at);
+      }
+      if (typeof r.category === 'string' && r.category.length > 0) {
+        categories.add(r.category);
+        bump(categoryMods, r.category, r.updated_at);
+      }
     }
-    return { symbols: Array.from(symbols).sort(), categories: Array.from(categories).sort() };
+    return {
+      symbols: Array.from(symbols).sort(),
+      categories: Array.from(categories).sort(),
+      symbolMods,
+      categoryMods,
+    };
   } catch {
-    return { symbols: [], categories: [] };
+    return { symbols: [], categories: [], symbolMods, categoryMods };
+  }
+}
+
+/** v9.4 — when today's Rashifal was generated (newest row for today), or null. */
+async function readRashifalGeneratedAt(date: string): Promise<string | null> {
+  try {
+    const supabase = anonClient();
+    const { data, error } = await supabase
+      .from('daily_rashifal_cache')
+      .select('generated_at')
+      .eq('date', date)
+      .order('generated_at', { ascending: false })
+      .limit(1);
+    if (error || !data || data.length === 0) return null;
+    return (data[0] as { generated_at: string | null }).generated_at ?? null;
+  } catch {
+    return null;
   }
 }
 
@@ -689,8 +930,12 @@ function learnChangeFreq(category: string): MetadataRoute.Sitemap[0]['changeFreq
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const now = new Date();
+  // v9.4: `now` is gone. Daily pages use istDayStart(); everything else uses a
+  // real row date or its code date. Hub pages are patched at the end with the
+  // date of their newest child (see "HUB LASTMOD PATCH" below).
+  const today = istDayStart();
   const entries: MetadataRoute.Sitemap = [];
+  const hubMods: Record<string, Date | null> = {};
 
   // ── Static routes ──────────────────────────────────────────────────
   for (const path of STATIC_ROUTES) {
@@ -701,9 +946,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     else if (path === '/hast-rekha-calculator') priority = 0.85;
     else if (path === '/swapna') priority = 0.9;
 
+    // v9.4: home and the /panchang hub change daily; the rest are code pages.
+    const staticMod = path === '' || path === '/panchang' ? today : codeMod(path);
     entries.push({
       url: `${BASE}${path}`,
-      lastModified: now,
+      lastModified: staticMod,
       changeFrequency: path === '' ? 'daily' : 'weekly',
       priority,
     });
@@ -714,7 +961,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   for (const path of LOCAL_ROUTES) {
     entries.push({
       url: `${BASE}${path}`,
-      lastModified: now,
+      lastModified: codeMod(path),
       changeFrequency: 'weekly',
       priority: path === '/astrologer-delhi' ? 0.9 : 0.8,
     });
@@ -729,37 +976,40 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   for (const slug of SERVICE_ROUTES) {
     entries.push({
       url: `${BASE}/services/${slug}`,
-      lastModified: now,
+      lastModified: codeMod(`/services/${slug}`),
       changeFrequency: 'monthly',
       priority: 0.9,
     });
   }
   console.log(`[sitemap] services OK — ${SERVICE_ROUTES.length} URLs`);
+  hubMods['/services'] = latest(codeMod('/services'), ...SERVICE_ROUTES.map((s) => codeMod(`/services/${s}`)));
 
   // ── Calculator detail pages ────────────────────────────────────────
   for (const calc of CALCULATORS) {
     entries.push({
       url: `${BASE}/calculators/${calc}`,
-      lastModified: now,
+      lastModified: codeMod(`/calculators/${calc}`),
       changeFrequency: 'monthly',
       priority: 0.85,
     });
   }
 
+  hubMods['/calculators'] = latest(codeMod('/calculators'), ...CALCULATORS.map((c) => codeMod(`/calculators/${c}`)));
+
   // ── Vivah Muhurat (PERMANENT AUTO) — v7.7 ──────────────────────────
   // /vivah-muhurat (index → current year) + /vivah-muhurat/{year} per rolling year.
-  const vivahYears = await readVivahYears();
+  const { years: vivahYears, mods: vivahMods } = await readVivahYears();
   if (vivahYears.length > 0) {
     entries.push({
       url: `${BASE}/vivah-muhurat`,
-      lastModified: now,
+      lastModified: latest(codeMod('/vivah-muhurat'), codeMod('/vivah-muhurat/[year]'), ...Array.from(vivahMods.values())) ?? codeMod('/vivah-muhurat'),
       changeFrequency: 'monthly',
       priority: 0.85,
     });
     for (const y of vivahYears) {
       entries.push({
         url: `${BASE}/vivah-muhurat/${y}`,
-        lastModified: now,
+        lastModified: latest(codeMod('/vivah-muhurat/[year]'), vivahMods.get(y)) ?? codeMod('/vivah-muhurat/[year]'),
         changeFrequency: 'weekly',
         priority: 0.9,
       });
@@ -770,8 +1020,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const domainSlugs = await readDomainSlugs();
   for (const d of domainSlugs) {
     entries.push({
-      url: `${BASE}/${d}`,
-      lastModified: now,
+      url: `${BASE}/${d.slug}`,
+      lastModified: latest(d.updatedAt) ?? codeMod('/[domain]'),
       changeFrequency: 'monthly',
       priority: 0.9,
     });
@@ -797,7 +1047,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const languages = { 'en-IN': enUrl, 'hi-IN': hiUrl };
 
     // v-fix 06 Sep 2026: real updated_at instead of `now`. See the header note.
-    const compatMod = row.updated_at ? new Date(row.updated_at) : now;
+    const compatMod = latest(row.updated_at) ?? codeMod(CODE_LASTMOD_DEFAULT);
     if (row.lang === 'en') {
       entries.push({
         url: enUrl,
@@ -831,10 +1081,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       console.log(`[sitemap] blog OK — ${posts.length} URLs`);
     }
 
+    hubMods['/blog'] = latest(codeMod('/blog'), ...posts.map((x) => x.updatedAt));
     for (const post of posts) {
       const entry: MetadataRoute.Sitemap[0] = {
         url: `${BASE}/blog/${post.slug}`,
-        lastModified: post.updatedAt ? new Date(post.updatedAt) : now,
+        lastModified: latest(post.updatedAt) ?? codeMod('/blog'),
         changeFrequency: 'weekly',
         priority: 0.7,
       };
@@ -857,16 +1108,23 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // ── City pages ─────────────────────────────────────────────────────
   const cities = readCities();
   for (const c of cities) {
-    entries.push({ url: `${BASE}/${c.slug}`, lastModified: now, changeFrequency: 'weekly', priority: 0.85 });
-    entries.push({ url: `${BASE}/${c.slug}/panchang`, lastModified: now, changeFrequency: 'daily', priority: 0.8 });
+    // v9.4: both show today's panchang / upcoming events → 00:00 IST today.
+    entries.push({ url: `${BASE}/${c.slug}`, lastModified: today, changeFrequency: 'weekly', priority: 0.85 });
+    entries.push({ url: `${BASE}/${c.slug}/panchang`, lastModified: today, changeFrequency: 'daily', priority: 0.8 });
   }
 
   // ── Festival/event pages ───────────────────────────────────────────
   const dbFestivals = await readFestivalsFromDB();
   const hiSlugs = await readHindiFestivalSlugs();
+  const festContentMods = await readFestivalContentDates();
   if (dbFestivals.length > 0) {
     for (const f of dbFestivals) {
       if (!f.is_indexed) continue; // skip no-content festivals entirely
+
+      // v9.4: one honest date for the national EN/HI pages and every city copy
+      const festMod =
+        latest(f.updated_at, festContentMods.get(baseSlugOf(f.festival_slug)), codeMod('festival-template')) ??
+        codeMod('festival-template');
 
       const hi = hiSlugs.get(baseSlugOf(f.festival_slug)) || null;
 
@@ -878,12 +1136,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         : undefined;
 
       entries.push({
-        url: enUrl, lastModified: now, changeFrequency: 'monthly',
+        url: enUrl, lastModified: festMod, changeFrequency: 'monthly',
         priority: 0.75, ...(natLangs ? { alternates: natLangs } : {}),
       });
       if (hiUrl) {
         entries.push({
-          url: hiUrl, lastModified: now, changeFrequency: 'monthly',
+          url: hiUrl, lastModified: festMod, changeFrequency: 'monthly',
           priority: 0.75, alternates: natLangs,
         });
       }
@@ -898,12 +1156,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
           : undefined;
 
         entries.push({
-          url: enCity, lastModified: now, changeFrequency: 'monthly',
+          url: enCity, lastModified: festMod, changeFrequency: 'monthly',
           priority: 0.8, ...(cityLangs ? { alternates: cityLangs } : {}),
         });
         if (hiCity) {
           entries.push({
-            url: hiCity, lastModified: now, changeFrequency: 'monthly',
+            url: hiCity, lastModified: festMod, changeFrequency: 'monthly',
             priority: 0.8, alternates: cityLangs,
           });
         }
@@ -912,23 +1170,29 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   } else {
     const festivals = readFestivals();
     for (const f of festivals) {
-      entries.push({ url: `${BASE}/events/${f.slug}`, lastModified: now, changeFrequency: 'monthly', priority: 0.75 });
+      entries.push({ url: `${BASE}/events/${f.slug}`, lastModified: codeMod('festival-template'), changeFrequency: 'monthly', priority: 0.75 });
     }
   }
 
   // ── WIN 3: Panchang — future dates only (today + 365 days) ────────
-  const panchangDates = await readPanchangDates();
+  const { dates: panchangDates, mods: panchangMods } = await readPanchangDates();
   for (const date of panchangDates) {
-    entries.push({ url: `${BASE}/panchang/${date}`, lastModified: now, changeFrequency: 'daily', priority: 0.5 });
+    entries.push({
+      url: `${BASE}/panchang/${date}`,
+      lastModified: latest(panchangMods.get(date), codeMod('/panchang/[date]')) ?? codeMod('/panchang/[date]'),
+      changeFrequency: 'daily',
+      priority: 0.5,
+    });
   }
 
   // ── DAILY RASHIFAL (v8.6) ──────────────────────────────────────────
   // Exactly one URL: today's dated page. See the header note for why the
   // bare /rashifal hub, the 83 cached past dates and the on-demand future
   // dates are all deliberately excluded.
+  const rashifalGen = await readRashifalGeneratedAt(todayISO());
   entries.push({
     url: `${BASE}/rashifal/${todayISO()}`,
-    lastModified: now,
+    lastModified: latest(rashifalGen) ?? today,
     changeFrequency: 'daily',
     priority: 0.7,
   });
@@ -939,7 +1203,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   for (const r of reports) {
     entries.push({
       url: `${BASE}/report/${r.slug}`,
-      lastModified: r.updatedAt ? new Date(r.updatedAt) : now,
+      lastModified: latest(r.updatedAt) ?? codeMod(CODE_LASTMOD_DEFAULT),
       changeFrequency: 'monthly',
       priority: 0.6,
     });
@@ -948,10 +1212,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // ── SWAPNA SPOKES (PERMANENT AUTO) — v8.0 ──────────────────────────
   // /swapna/{symbol} + /swapna/category/{category}, live from dream_symbols.
   const dreams = await readDreamSymbols();
+  hubMods['/swapna'] = latest(codeMod('/swapna'), ...Array.from(dreams.symbolMods.values()));
   for (const s of dreams.symbols) {
     entries.push({
       url: `${BASE}/swapna/${s}`,
-      lastModified: now,
+      lastModified: latest(dreams.symbolMods.get(s), codeMod('/swapna/[symbol]')) ?? codeMod('/swapna/[symbol]'),
       changeFrequency: 'weekly',
       priority: 0.8,
     });
@@ -959,28 +1224,38 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   for (const c of dreams.categories) {
     entries.push({
       url: `${BASE}/swapna/category/${c}`,
-      lastModified: now,
+      lastModified: latest(dreams.categoryMods.get(c), codeMod('/swapna/category')) ?? codeMod('/swapna/category'),
       changeFrequency: 'weekly',
       priority: 0.75,
     });
   }
 
   // ── /learn hub + SEO knowledge pages ──────────────────────────────
+  const seoPages = await readSeoLearnSlugs();
   entries.push({
     url: `${BASE}/learn`,
-    lastModified: now,
+    // v9.4: the hub lists every /learn/ page → its newest page's date
+    lastModified: latest(codeMod('/learn'), ...seoPages.map((x) => x.updated_at)) ?? codeMod('/learn'),
     changeFrequency: 'weekly',
     priority: 0.9,
   });
 
-  const seoPages = await readSeoLearnSlugs();
   for (const page of seoPages) {
     entries.push({
       url: `${BASE}/learn/${page.slug}`,
-      lastModified: page.updated_at ? new Date(page.updated_at) : now,
+      lastModified: latest(page.updated_at) ?? codeMod('/learn'),
       changeFrequency: learnChangeFreq(page.category),
       priority: page.priority ?? 0.8,
     });
+  }
+
+  // ── v9.4: HUB LASTMOD PATCH — /blog, /calculators, /services, /swapna are
+  // emitted early (static routes) before their children are read; give each
+  // the date of its newest child now.
+  for (const e of entries) {
+    const path = String(e.url).replace(BASE, '');
+    const hub = hubMods[path];
+    if (hub) e.lastModified = hub;
   }
 
   // ── v8.4: de-dupe. 624 URLs were emitted twice on 30 Aug because the
