@@ -2,7 +2,14 @@
 // 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER
 // ════════════════════════════════════════════════════════════════════════════
 // File:     components/festival/FestivalPillar.tsx
-// Version:  v2.5 (1 Sep 2026) — JSON-LD added (page had none at all)
+// Version:  v2.6 (26 Sep 2026) — Pitra Dosh calculator CTA on Pitru Paksha + Amavasya pages
+//
+// ── v2.6 ───────────────────────────────────────────────────────────────────
+// On pitru-paksha and every *-amavasya festival (all years, all cities, EN+HI)
+// the two birth-form CTAs now point to /calculators/free-pitra-dosh-calculator:
+//   (a) the mid-page box (freeCta → pitraCta)
+//   (b) the first button of the solution_bridge grid (kundli → pitraBtn)
+// Every other festival page is unchanged. Rule lives in isPitraFestival().
 //
 // ── v2.5 ───────────────────────────────────────────────────────────────────
 // This component rendered ZERO structured data. Not deferred, not broken by
@@ -239,6 +246,8 @@ const L = {
     computedFor: (c: string, la: number, lo: number) =>
       `Computed for ${c} (${la}, ${lo}) with Swiss Ephemeris, Lahiri ayanamsha. All five angas read at local sunrise.`,
     freeCta: "Free Kundli — no payment, no signup →",
+    pitraCta: "Is Pitra Dosh in your Kundli? Check free — 60 sec →",
+    pitraBtn: "Pitra Dosh Check — Free",
     whatToDo: (f: string) => `What to do on ${f}`,
     shortLink: "Short of time? → 5-minute puja vidhi",
     howDate: "How this date was determined",
@@ -298,6 +307,8 @@ const L = {
     computedFor: (c: string, la: number, lo: number) =>
       `${c} (${la}, ${lo}) के लिए स्विस एफ़ेमेरिस और लाहिड़ी अयनांश से गणना। पाँचों अंग स्थानीय सूर्योदय पर।`,
     freeCta: "मुफ़्त कुंडली — कोई भुगतान नहीं, कोई साइनअप नहीं →",
+    pitraCta: "क्या आपकी कुंडली में पितृ दोष है? फ्री जाँचें — 60 सेकंड →",
+    pitraBtn: "पितृ दोष जाँच — फ्री",
     whatToDo: (f: string) => `${f} पर क्या करें`,
     shortLink: "समय कम है? → 5-मिनट पूजा विधि",
     howDate: "यह तारीख कैसे तय हुई",
@@ -491,6 +502,11 @@ function festivalTithiName(defining: string | null): string | null {
 }
 
 export const baseSlug = (s: string) => s.replace(/-20\d\d$/, "");
+
+// v2.6 — Pitru Paksha + Amavasya pages send the visitor to the Pitra Dosh calculator.
+export const PITRA_CALC_HREF = "/calculators/free-pitra-dosh-calculator";
+export const isPitraFestival = (base: string) =>
+  base === "pitru-paksha" || base.includes("amavasya");
 
 /** English routes carry the year; Hindi routes carry an authority slug. Both
  *  resolve through festival_content, which stores each side's page_slug. */
@@ -988,6 +1004,7 @@ export default async function FestivalPillar(
   const t = labels(lang);
   const f = festival;
   const base = baseSlug(f.festival_slug);
+  const pitra = isPitraFestival(base);
 
   const [content, local, panchang, upcoming, catTiming, visarjan, cityNote] = await Promise.all([
     getContent(base, lang),
@@ -1271,9 +1288,9 @@ export default async function FestivalPillar(
           </section>
         )}
 
-        <Link href="/#birth-form"
+        <Link href={pitra ? PITRA_CALC_HREF : "/#birth-form"}
               className="my-8 block rounded-lg border border-amber-700/50 bg-amber-950/30 p-4 text-center text-sm font-semibold text-amber-300 hover:bg-amber-900/30 transition">
-          {t.freeCta}
+          {pitra ? t.pitraCta : t.freeCta}
         </Link>
 
       {asList(content?.quick_actions).length ? (
@@ -1481,9 +1498,9 @@ export default async function FestivalPillar(
             {content.solution_bridge}
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
-            <Link href="/#birth-form"
+            <Link href={pitra ? PITRA_CALC_HREF : "/#birth-form"}
                   className="rounded-lg bg-amber-600 px-6 py-3 text-center font-semibold text-slate-900 hover:bg-amber-500 transition">
-              {t.kundli}
+              {pitra ? t.pitraBtn : t.kundli}
             </Link>
             <Link href="/kundali-milan"
                   className="rounded-lg border-2 border-amber-500 px-6 py-3 text-center font-semibold text-amber-300 hover:bg-amber-500/10 transition">
