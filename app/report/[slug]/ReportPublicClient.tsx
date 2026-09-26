@@ -3661,11 +3661,41 @@ function GranthProduct({ p, lang }:{ p:any; lang:Lang }) {
           {/* 🔴 20 Sep — "Sep 2026 – Nov 2026 · —" chhap raha tha. Gochar ki
               khidki par kabhi-kabhi 'kaun' khaali aata hai, aur bina wajah ke
               tareekh grahak ke liye bekaar hai. Ab wo line chhapti hi nahi. */}
-          {kh.filter((x:any)=>s(x.kyun)!=='—').map((x:any,i:number)=>(
-            <div key={`k${i}`} style={{color:'#94a3b8',fontSize:'11px',marginTop:'3px'}}>
-              {s(x.se)} – {s(x.tak)} · {s(x.kyun)}
+          {/* ⭐ 26 Sep 2026 — DARJA. Engine ab har khidki par 'hari' ya
+              'peeli' bhejta hai (gochar.py darje_wali): jis khidki par DO ya
+              zyada wajah hain — jaise Guru us ghar par AUR Shani use dekh
+              raha ho — wo hari.
+              ⚠️ Ye darja GRANTH KA NIYAM NAHI, hamari ghoshit manyata hai.
+              Isliye neeche "samay ka darja hai, ghatna ka waada nahi" likha
+              jaata hai, aur wo line kabhi hatani nahi hai. */}
+          {kh.filter((x:any)=>s(x.kyun)!=='—').map((x:any,i:number)=>{
+            const hari = x?.darja === 'hari'
+            return (
+              <div key={`k${i}`} style={{marginTop:'6px',paddingLeft:'9px',
+                   borderLeft:`2px solid ${hari?'#22c55e':'#fbbf24'}`}}>
+                <div style={{color:hari?'#86efac':'#fbbf24',fontSize:'12px',fontWeight:600}}>
+                  {hari?'\u25CF':'\u25CB'} {s(x.se)} – {s(x.tak)}
+                  {hari && <span style={{color:'#64748b',fontWeight:400,fontSize:'10px'}}>
+                    {lang==='english'?'\u00A0· strongest':'\u00A0· sabse mazboot'}</span>}
+                </div>
+                <div style={{color:'#94a3b8',fontSize:'11px',marginTop:'1px'}}>{s(x.kyun)}</div>
+              </div>
+            )
+          })}
+          {/* Daur halka ho to narmi se sach — Rohiit ka nirdesh 26 Sep:
+              "bol do thoda time zyada lagega." */}
+          {bhav.some((b:any)=>b?.samay_halka) && (
+            <div style={{marginTop:'9px',color:'#94a3b8',fontSize:'11px',lineHeight:1.65}}>
+              {lang==='english'
+                ? 'This area is in a lighter phase right now — it may take a little longer here.'
+                : 'Is vishay mein abhi halka daur chal raha hai \u2014 yahan thoda samay zyada lag sakta hai.'}
             </div>
-          ))}
+          )}
+          <div style={{marginTop:'8px',color:'#475569',fontSize:'10px',lineHeight:1.6}}>
+            {lang==='english'
+              ? 'These are the strength of a period, not a promise of an event.'
+              : 'Ye samay ka darja hai, ghatna ka waada nahi.'}
+          </div>
         </div>
       )}
 
@@ -3878,7 +3908,9 @@ function GranthAage({ a, isPaid, lang, slug }:{ a:any; isPaid:boolean; lang:Lang
               {isPaid && <Td>
                 {(Array.isArray(d.gochar_khidkiyan)?d.gochar_khidkiyan:[]).map((k:any,ki:number)=>(
                   <div key={ki} style={{marginBottom:'5px'}}>
-                    <span style={{color:'#a78bfa',fontWeight:600}}>{s(k.se)} – {s(k.tak)}</span>
+                    {/* 26 Sep — wahi darja jo upar KAB block mein hai */}
+                    <span style={{color:k?.darja==='hari'?'#86efac':'#a78bfa',fontWeight:600}}>
+                      {k?.darja==='hari'?'\u25CF ':''}{s(k.se)} – {s(k.tak)}</span>
                     <div style={{color:'#64748b',fontSize:'11px'}}>
                       {(Array.isArray(k.kyun)?k.kyun:[]).join('; ')}</div>
                   </div>
