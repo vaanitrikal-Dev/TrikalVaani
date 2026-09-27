@@ -3,7 +3,7 @@
  * TRIKAL VAANI — Milan PDF Proxy API
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/api/milan-pdf/route.ts
- * VERSION: 1.1
+ * VERSION: 1.2 (27 Sep 2026)
  * SIGNED: ROHIIT GUPTA, CEO
  * ============================================================
  * On-demand PDF generation for Kundali Milan readings.
@@ -25,8 +25,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { callVM } from '@/lib/callVM';
 
-const VM_MILAN_PDF_ENDPOINT =
-  process.env.VM_MILAN_PDF_ENDPOINT ?? 'http://34.47.182.227:8001/milan-pdf';
+// v1.2 (27 Sep 2026) — Vercel env var VM_MILAN_PDF_ENDPOINT ab IGNORE hota hai.
+// Karmic ka env var 28 Jun se purane VM IP (34.14.164.105) par tha → har PDF
+// fail. Edit karte waqt value sirf IP reh gayi → URL toot gaya. Ab yeh route
+// seedha callVM('/milan-pdf') use karta hai = wahi VM_ENGINE_URL jo kundali,
+// calculators aur Hast Rekha chalata hai (live proven). Ek hi jagah IP.
+const VM_MILAN_PDF_ENDPOINT = '/milan-pdf';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,

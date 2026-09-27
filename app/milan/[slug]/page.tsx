@@ -1,4 +1,12 @@
 /**
+ * v1.5 (27 Sep 2026) — NARRATIVE AB PAGE KE ANDAR NAHI BANTA.
+ *   Pehle page khud /api/milan-narrative ko await karta tha. Narrative ~34s
+ *   leta hai, page ki limit 30s (vercel.json) — page timeout, generation
+ *   beech mein kat jaati, aur 6 ke 6 paid Milan readings ka gemini_narrative
+ *   NULL raha (May se). Grahak ko error / "refresh karein" hi milta tha.
+ *   Ab: narrative DB mein hai to seedha dikhao; nahi hai to
+ *   <MilanNarrativeLoader> browser se route call karta hai (route ki apni
+ *   120s limit), bante hi page reload. Baaki layout/logic bilkul same.
  * v1.4 (21 Sep 2026) — GRANTH KA FAISLA 36 guna ke dabbe mein, sabse upar.
  *   HAAN / HO SAKTA HAI / NAHI — parihar ke BAAD (milan_engine v2.0).
  *   scoreBand() ab tabhi dikhta hai jab faisla NA ho — warna ek hi dabbe
@@ -7,7 +15,7 @@
  * TRIKAL VAANI - Kundali Milan Result Page
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/milan/[slug]/page.tsx
- * VERSION: 1.4
+ * VERSION: 1.5
  * SIGNED: ROHIIT GUPTA, CEO
  * ============================================================
  * CHANGE LOG (v1.2 → v1.3):
@@ -28,6 +36,7 @@ import { createClient } from '@supabase/supabase-js';
 import MilanShareButtons   from '@/components/milan/MilanShareButtons';
 import MilanManglikBadge   from '@/components/milan/MilanManglikBadge';
 import MilanRemediesCard   from '@/components/milan/MilanRemediesCard';
+import MilanNarrativeLoader from '@/components/milan/MilanNarrativeLoader';
 
 export const dynamic   = 'force-dynamic';
 export const revalidate = 0;
@@ -116,24 +125,7 @@ function scoreBand(score: number | null): string {
   return 'Serious Doshas · गंभीर';
 }
 
-// ── Trigger narrative generation if missing ───────────────────
-async function ensureNarrative(slug: string, currentNarrative: string | null): Promise<string | null> {
-  if (currentNarrative && currentNarrative.length > 200) return currentNarrative;
-  try {
-    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://trikalvaani.com';
-    const res = await fetch(`${baseUrl}/api/milan-narrative`, {
-      method:  'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify({ slug }),
-      cache:   'no-store',
-    });
-    if (!res.ok) return null;
-    const data = await res.json();
-    return data.narrative ?? null;
-  } catch {
-    return null;
-  }
-}
+// v1.5: ensureNarrative() hataya — narrative ab MilanNarrativeLoader (browser) banata hai.
 
 // ── Render narrative HTML ─────────────────────────────────────
 function renderNarrative(narrative: string, audience: string) {
@@ -187,7 +179,8 @@ export default async function MilanResultPage({ params }: { params: { slug: stri
   const m    = milan as MilanRow;
   const free = isFreeTier(m.tier);
 
-  const narrative = free ? null : await ensureNarrative(m.slug, m.gemini_narrative);
+  const narrative = free ? null
+    : (m.gemini_narrative && m.gemini_narrative.length > 200 ? m.gemini_narrative : null);
 
   const bride     = m.bride_data;
   const groom     = m.groom_data;
@@ -356,11 +349,7 @@ export default async function MilanResultPage({ params }: { params: { slug: stri
           </div>
           <article className="milan-narrative bg-[#0d1120]/60 border border-[#D4AF37]/15 rounded-2xl p-6 sm:p-10">
             {!narrative ? (
-              <div className="text-center py-12 text-gray-400">
-                <p className="text-lg mb-2">🔱</p>
-                <p>Aapki reading taiyaar ho rahi hai...</p>
-                <p className="text-sm mt-2 text-gray-500">Please refresh in 30 seconds.</p>
-              </div>
+              <MilanNarrativeLoader slug={m.slug} />
             ) : (
               renderNarrative(narrative, m.audience)
             )}

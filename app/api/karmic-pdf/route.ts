@@ -3,7 +3,7 @@
  * TRIKAL VAANI — Karmic PDF Proxy API
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/api/karmic-pdf/route.ts
- * VERSION: 1.1
+ * VERSION: 1.2 (27 Sep 2026)
  * ============================================================
  * On-demand PDF generation for paid Karmic Background Readings.
  * Mirrors app/api/muhurat-pdf/route.ts exactly.
@@ -25,8 +25,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { callVM } from '@/lib/callVM';
 
-const VM_KARMIC_PDF_ENDPOINT =
-  process.env.VM_KARMIC_PDF_ENDPOINT ?? 'http://34.47.182.227:8001/karmic-pdf';
+// v1.2 (27 Sep 2026) — Vercel env var VM_KARMIC_PDF_ENDPOINT ab IGNORE hota hai.
+// Karmic ka env var 28 Jun se purane VM IP (34.14.164.105) par tha → har PDF
+// fail. Edit karte waqt value sirf IP reh gayi → URL toot gaya. Ab yeh route
+// seedha callVM('/karmic-pdf') use karta hai = wahi VM_ENGINE_URL jo kundali,
+// calculators aur Hast Rekha chalata hai (live proven). Ek hi jagah IP.
+const VM_KARMIC_PDF_ENDPOINT = '/karmic-pdf';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,

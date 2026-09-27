@@ -1,11 +1,16 @@
 /**
+ * v1.7 (27 Sep 2026) — maxDuration = 120 (explicit). Narrative banne mein
+ *   ~34s lagte hain (27 Sep live test). Ab yeh route SIRF browser se call hota
+ *   hai (components/milan/MilanNarrativeLoader.tsx), page se nahi — page ki
+ *   30s limit (vercel.json) is route ko beech mein kaat deti thi, isliye
+ *   kisi bhi paid Milan ka narrative kabhi save nahi hua (6/6 NULL).
  * v1.6 (21 Sep 2026) — word count ghataya (Rohiit): basic 400->250,
  *   couple/parent 1000->550, both 1500->1000. maxTokens nahi ghataya.
  * ============================================================
  * TRIKAL VAANI — Milan Narrative Generator API
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/api/milan-narrative/route.ts
- * VERSION: 1.6
+ * VERSION: 1.7
  * SIGNED: ROHIIT GUPTA, CEO
  * ============================================================
  * CHANGE LOG (v1.4 → v1.5):
@@ -31,6 +36,10 @@ import { buildMilanCouplePrompt } from '@/lib/kundali-milan-prompt-couple';
 import { buildMilanParentPrompt } from '@/lib/kundali-milan-prompt-parent';
 import { buildMilanBothPrompt }   from '@/lib/kundali-milan-prompt-both';
 import { polishMilanNarrative }   from '@/lib/claude-polish';
+
+// v1.7 — Gemini 3.8 + polish ~35-60s; 120s ki gunjaaish
+export const maxDuration = 120;
+export const dynamic = 'force-dynamic';
 
 // ── Tier configuration (CEO LOCKED) ──────────────────────────
 type Tier      = 'basic_51' | 'deep_101_couple' | 'deep_101_parent' | 'both_151';
