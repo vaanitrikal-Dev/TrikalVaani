@@ -7,6 +7,8 @@
  *   hataya. Vishay khaali ho to ab general_kundali ("Poori Kundali") jaata
  *   hai (pehle galti se Karz Mukti). Service pages apna vishay khud bhejte
  *   hain — unpar koi asar nahi. Payment code bilkul same.
+ *   Screen par dikhne wala build marker "BF v9.1 · 29-Aug-2026" (stale) →
+ *   "BF v10.5 · 27-Sep-2026", taaki deploy hui file pehchani ja sake.
  *
  * v10.4 (27 Sep 2026) — EK BADLAAV (sirf handleRazorpayPayment, create-order call):
  *
@@ -1425,11 +1427,11 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
               </p>
             </div>
 
-            {/* BUILD MARKER — BirthForm v9.1 · 2026-08-29. If you cannot see
+            {/* BUILD MARKER — BirthForm v10.5 · 2026-09-27. If you cannot see
                 this line on screen, the file you are looking at is NOT the file
                 that is deployed, and the problem is the deployment, not the code. */}
             <p style={{ margin: '0 0 6px', fontSize: '10px', color: '#334155', textAlign: 'right' }}>
-              BF v9.1 · 29-Aug-2026 · {isIndia === false ? 'INTL/USD' : 'IN/INR'}
+              BF v10.5 · 27-Sep-2026 · {isIndia === false ? 'INTL/USD' : 'IN/INR'}
             </p>
 
             <TierSelector selected={predictionTier} intl={isIndia === false} onChange={(t) => {

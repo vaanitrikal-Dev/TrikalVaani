@@ -11,6 +11,7 @@
 //      Karz Mukti, Parents' Wellness, Retirement Planning, Legacy & Inheritance
 //   ✅ Bache 6: Ex-Back, Toxic Boss, Dream Career, Property Yog, Child's
 //      Destiny, Spiritual 2nd Innings — har ek ka service page maujood hai
+//   ✅ Neeche wala "Get My Free Kundali Reading" button + text hataya, gap kam
 //   ✅ Props (selectedCategory, onSelectCategory) same — HomeClient nahi badla
 //
 // DATE (v2.0): 2026-06-29
@@ -26,7 +27,7 @@
 // ============================================================
 
 import { useState } from 'react';
-import { HeartCrack, TriangleAlert as AlertTriangle, Sparkles, TrendingUp, Chrome as Home, Baby, MoonStar, ChevronRight, Zap, CircleCheck as CheckCircle2 } from 'lucide-react';
+import { HeartCrack, TriangleAlert as AlertTriangle, TrendingUp, Chrome as Home, Baby, MoonStar, ChevronRight, Zap, CircleCheck as CheckCircle2 } from 'lucide-react';
 import type { SelectedCategory } from '@/app/page';
 
 const GOLD = '#D4AF37';
@@ -133,7 +134,7 @@ export default function DardEngineShowcase({ selectedCategory, onSelectCategory 
   }
 
   return (
-    <section className="relative py-24 px-4 overflow-hidden">
+    <section className="relative pt-24 pb-8 px-4 overflow-hidden">{/* v2.1: neeche ka gap kam (pb-24 → pb-8) */}
       <div
         className="absolute inset-0 pointer-events-none"
         aria-hidden="true"
@@ -343,34 +344,7 @@ export default function DardEngineShowcase({ selectedCategory, onSelectCategory 
           })}
         </div>
 
-        {/* ── v2.0: Bottom CTA — sales rewrite ── */}
-        <div className="mt-10 text-center">
-          {/* Urgency + benefit hook */}
-          <p className="text-sm text-slate-400 mb-1">
-            60 seconds to fill. <span className="text-white font-semibold">Lifetime of clarity</span> to gain.
-          </p>
-          <p className="text-xs text-slate-600 mb-6">
-            No signup required · No credit card · 100% free to start
-          </p>
-
-          <a
-            href="#birth-form"
-            className="inline-flex items-center gap-2 px-8 py-4 rounded-full text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-2xl"
-            style={{
-              background: `linear-gradient(135deg, ${GOLD} 0%, #A8862A 100%)`,
-              color: '#020817',
-              boxShadow: `0 0 28px ${GOLD_RGBA(0.35)}`,
-            }}
-          >
-            <Sparkles className="w-4 h-4" />
-            Get My Free Kundali Reading →
-          </a>
-
-          {/* Trust signals below button */}
-          <p className="text-xs mt-4" style={{ color: GOLD_RGBA(0.4) }}>
-            Swiss Ephemeris · BPHS Classical Rules · Lahiri Ayanamsha · By Rohiit Gupta, Chief Vedic Architect
-          </p>
-        </div>
+        {/* v2.1: bottom CTA block ("Get My Free Kundali Reading") HATAYA — CEO, 27 Sep. Form seedha neeche hai. */}
 
       </div>
     </section>
