@@ -2,8 +2,15 @@
 // 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER
 // ════════════════════════════════════════════════════════════════════════════
 // File:     app/api/cron/paid-recovery/route.ts
-// Version:  v1.1 (27 Sep 2026)
+// Version:  v1.2 (27 Sep 2026)
 // Owner:    Rohiit Gupta, Chief Vedic Architect
+//
+// ── v1.2 (27 Sep 2026) — REPORT AB SERVER KE ANDAR HI BANTI HAI ───────
+//   Pehle chowkidar https://trikalvaani.com/api/predict ko internet se call
+//   karta tha. Vercel firewall datacenter IPs ko 403 de raha tha — chowkidar
+//   bhi block ho sakta tha. Ab predict route ka POST seedha import karke
+//   andar hi chalaya jaata hai: na network, na firewall. Signature check,
+//   amount check, Supabase save — sab predict route khud karta hai.
 //
 // ── v1.1 (27 Sep 2026, deploy se pehle ka self-critique) ─────────────────
 //   • WINDOW 26h → 7 din. 30 din ka backtest kiya: 26 real paid payments mein
@@ -53,6 +60,7 @@ import { createClient } from '@supabase/supabase-js';
 import Razorpay from 'razorpay';
 import crypto from 'crypto';
 import { raiseAlert, raiseAlertOnce } from '@/lib/alert';
+import { POST as predictPOST } from '@/app/api/predict/route'; // v1.2: in-process
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300;
@@ -171,12 +179,12 @@ async function recoverDeep(supa: any, p: any): Promise<string> {
 
   const attemptNo = intent.recovery_attempts + 1;
   try {
-    const res = await fetch(`${SITE}/api/predict`, {
+    // v1.2: no HTTP hop — call the predict handler directly (firewall-proof)
+    const res = await predictPOST(new NextRequest(`${SITE}/api/predict`, {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
       body:    JSON.stringify(body),
-      signal:  AbortSignal.timeout(250_000),
-    });
+    }));
     const data: any = await res.json().catch(() => ({}));
     const slug = data?._meta?.publicSlug ?? null;
     if (!res.ok || !slug) throw new Error(`predict HTTP ${res.status}: ${String(data?.error ?? 'no slug').slice(0, 200)}`);
@@ -315,4 +323,4 @@ export async function GET(req: NextRequest) {
   return NextResponse.json({ ok: true, window_hours: WINDOW_SEC / 3600, ...summary });
 }
 
-// END — app/api/cron/paid-recovery/route.ts v1.1 | Trikaal Vaani | Rohiit Gupta, Chief Vedic Architect
+// END — app/api/cron/paid-recovery/route.ts v1.2 | Trikaal Vaani | Rohiit Gupta, Chief Vedic Architect
