@@ -27,7 +27,7 @@ import { createClient } from '@supabase/supabase-js';
 import { callVM } from '@/lib/callVM';
 
 // v1.2 (27 Sep 2026) — Vercel env var VM_MUHURAT_PDF_ENDPOINT ab IGNORE hota hai.
-// Karmic ka env var 28 Jun se purane VM IP (34.14.164.105) par tha → har PDF
+// Karmic ka env var 28 Jun se purane VM IP (34.47.182.227) par tha → har PDF
 // fail. Edit karte waqt value sirf IP reh gayi → URL toot gaya. Ab yeh route
 // seedha callVM('/muhurat-pdf') use karta hai = wahi VM_ENGINE_URL jo kundali,
 // calculators aur Hast Rekha chalata hai (live proven). Ek hi jagah IP.
