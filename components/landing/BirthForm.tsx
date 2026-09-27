@@ -1,6 +1,19 @@
 /**
  * ============================================================
  * TRIKAAL VAANI — BirthForm
+ * v10.4 (27 Sep 2026) — EK BADLAAV (sirf handleRazorpayPayment, create-order call):
+ *
+ *   27 Sep 10:39am: 9250886991 ne ₹51 pay kiya, UPI app se wapas aate hi tab
+ *   reload hua, onSuccess chala hi nahi → /api/predict kabhi call nahi hua.
+ *   Paisa gaya, report zero, birth data kahin nahi.
+ *
+ *   Ab 'paid' tier par /api/create-order ko `predictBody:
+ *   buildPredictionBody(null, null)` bhi bheja jaata hai (wahi body jo
+ *   /api/predict ko jaati hai, bina payment proof ke). Server use
+ *   paid_order_intents mein rakhta hai; /api/cron/paid-recovery har 5 min
+ *   missing report khud banata hai. Voice (₹11) ka body bilkul pehle jaisa.
+ *   onSuccess, verify, callPredictAPI, PayPal path — kuch nahi badla.
+ *
  * v10.3 (20 Sep 2026) — CHHAH BADLAAV, ek hi commit mein:
  *
  *   -1. "Bhrigu Nandi Nadi" ka naam CHAAR jagah se hataya — badge, SEO ka
@@ -1217,7 +1230,11 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
       const orderRes = await fetch('/api/create-order', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ tier: tier === 'paid' ? 'deep' : 'voice' }),
+        // v10.4 — Deep Reading ka poora predict body order ke saath server par
+        // save hota hai, taaki tab band hone par bhi cron report bana sake.
+        body:    JSON.stringify(tier === 'paid'
+          ? { tier: 'deep', predictBody: buildPredictionBody(null, null) }
+          : { tier: 'voice' }),
       })
       if (!orderRes.ok) {
         const err = await orderRes.json().catch(() => ({}))
