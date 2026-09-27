@@ -1,4 +1,9 @@
 /**
+ * v1.8 (27 Sep 2026) — remedies_data ab OPTIONAL (manglik_data jaisa).
+ *   5 Jun 2026 ke paid Milan (8826256938, ₹51 basic) mein VM ne remedies
+ *   nahi lautaye the → route 500 deta tha ("core engine data missing") aur
+ *   grahak ko reading kabhi nahi mili. Sirf ashtakoot_data zaroori hai;
+ *   remedies na ho to prompt ko khaali {} jaata hai.
  * v1.7 (27 Sep 2026) — maxDuration = 120 (explicit). Narrative banne mein
  *   ~34s lagte hain (27 Sep live test). Ab yeh route SIRF browser se call hota
  *   hai (components/milan/MilanNarrativeLoader.tsx), page se nahi — page ki
@@ -10,7 +15,7 @@
  * TRIKAL VAANI — Milan Narrative Generator API
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/api/milan-narrative/route.ts
- * VERSION: 1.7
+ * VERSION: 1.8
  * SIGNED: ROHIIT GUPTA, CEO
  * ============================================================
  * CHANGE LOG (v1.4 → v1.5):
@@ -158,8 +163,8 @@ export async function POST(req: NextRequest) {
 
     const cfg = TIER_CONFIG[tier];
 
-    // ── Engine data sanity — manglik_data now OPTIONAL ─────
-    if (!milan.ashtakoot_data || !milan.remedies_data) {
+    // ── Engine data sanity — manglik_data + remedies_data OPTIONAL (v1.8) ─────
+    if (!milan.ashtakoot_data) {
       console.error('[Trikal] Milan core engine data missing for slug:', slug);
       return NextResponse.json(
         { error: 'Reading data incomplete. Please contact support.' },
@@ -186,7 +191,7 @@ export async function POST(req: NextRequest) {
         ashtakoot_score: milan.ashtakoot_score ?? 0,
         ashtakoot_data:  milan.ashtakoot_data,
         manglik_data:    manglikData,
-        remedies_data:   milan.remedies_data,
+        remedies_data:   milan.remedies_data ?? {},
         tier:            tier as 'basic_51' | 'deep_101_couple' | 'both_151',
         word_target:     cfg.wordTarget,
         language,
@@ -200,7 +205,7 @@ export async function POST(req: NextRequest) {
         ashtakoot_score: milan.ashtakoot_score ?? 0,
         ashtakoot_data:  milan.ashtakoot_data,
         manglik_data:    manglikData,
-        remedies_data:   milan.remedies_data,
+        remedies_data:   milan.remedies_data ?? {},
         tier:            tier as 'basic_51' | 'deep_101_parent' | 'both_151',
         word_target:     cfg.wordTarget,
         language,
@@ -214,7 +219,7 @@ export async function POST(req: NextRequest) {
         ashtakoot_score: milan.ashtakoot_score ?? 0,
         ashtakoot_data:  milan.ashtakoot_data,
         manglik_data:    manglikData,
-        remedies_data:   milan.remedies_data,
+        remedies_data:   milan.remedies_data ?? {},
         word_target:     cfg.wordTarget,
         tier:            tier as 'basic_51' | 'both_151',
         language,
