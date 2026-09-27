@@ -2,7 +2,24 @@
 // 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER
 // ════════════════════════════════════════════════════════════════════════════
 // File:     components/festival/FestivalPillar.tsx
-// Version:  v2.6 (26 Sep 2026) — Pitra Dosh calculator CTA on Pitru Paksha + Amavasya pages
+// Version:  v2.7 (27 Sep 2026) — Trikaal Vaani standard format (Wikipedia-style)
+//
+// ── v2.7 ───────────────────────────────────────────────────────────────────
+// editorial_rulings #8 section G — same format as /blog v3.6 and /learn:
+//   • Infobox (festival_content.infobox) under the direct answer
+//   • Contents: every rendered H2 gets a descriptive id (lib/wiki
+//     headingAnchor) and is listed in order. Ids are collected while the JSX
+//     tree is built; TableOfContents is a component, so it renders after the
+//     list is complete. Only sections that actually render are listed.
+//   • [^n] markers in infobox, significance and katha → superscript [n]
+//   • Glossary (festival_content.glossary) + numbered References with the mool
+//     Sanskrit shlok (festival_content.citations; the 6 restricted granth never
+//     show Sanskrit) — just before the FAQ
+//   • JSON-LD: Article gains citation (Chapter/Quotation) + verified-entity
+//     about/mentions; a DefinedTermSet node joins the graph.
+//   Columns added 27 Sep 2026. Pages without them look as before + Contents.
+//
+// ── v2.6 (26 Sep 2026) — Pitra Dosh calculator CTA on Pitru Paksha + Amavasya pages
 //
 // ── v2.6 ───────────────────────────────────────────────────────────────────
 // On pitru-paksha and every *-amavasya festival (all years, all cities, EN+HI)
@@ -92,6 +109,11 @@ import { createClient } from "@supabase/supabase-js";
 import { callVM } from "@/lib/callVM";
 import CalculatorLinks from "@/components/seo/CalculatorLinks";
 import citiesData from "@/app/data/cities.json";
+import { Infobox, TableOfContents, Glossary, References, CiteText } from "@/components/wiki/WikiBlocks";
+import {
+  headingAnchor, normalizeCitations, normalizeInfobox, normalizeGlossary,
+  firstCiteAnchors, citationSchema, entitySchema, glossarySchema, stripCites,
+} from "@/lib/wiki";
 
 export type Lang = "en" | "hi";
 
@@ -116,6 +138,8 @@ export type DbFestival = {
 // field. See the note above the helpers for the live crash this fixes.
 export type Content = {
   base_slug: string; page_slug: string; alt_lang_slug: string | null;
+  // v2.7 — raw jsonb, normalized through lib/wiki (null until backfilled)
+  citations?: unknown; infobox?: unknown; glossary?: unknown;
   seo_title: string | null; seo_description: string | null;
   direct_answer: string | null; quick_actions: string[] | null;
   significance: string | null;
@@ -1073,9 +1097,46 @@ export default async function FestivalPillar(
   const schema = buildFestivalSchema({
     lang, url: canonicalUrl, name, placeName, festival: f, content, city, pretty,
   });
+  // ── v2.7: standard-format data + JSON-LD additions ──
+  const hiLang = lang === "hi";
+  const wCitations = normalizeCitations(content?.citations);
+  const wInfobox = normalizeInfobox(content?.infobox);
+  const wGlossary = normalizeGlossary(content?.glossary);
+  const wBack = firstCiteAnchors([
+    ...wInfobox.map((r, i) => ({ text: r.value, loc: `ib${i}` })),
+    { text: content?.significance ?? "", loc: "sig" },
+    { text: content?.katha ?? "", loc: "katha" },
+  ], wCitations.length);
+  {
+    const graph = (schema as { "@graph": Record<string, unknown>[] })["@graph"];
+    const article = graph.find((n) => n["@type"] === "Article");
+    if (article) {
+      if (wCitations.length) article.citation = wCitations.map((c) => citationSchema(c, hiLang));
+      const ent = entitySchema(wGlossary, [
+        content?.direct_answer ?? "", stripCites(content?.significance ?? ""), ...wInfobox.map((r) => r.value),
+      ].join(" \n "));
+      // keep the festival's own about[] and add verified entities after it
+      if (Array.isArray(ent.about)) article.about = [...((article.about as unknown[]) ?? []), ...(ent.about as unknown[])];
+      if (ent.mentions) article.mentions = ent.mentions;
+    }
+    const gls = glossarySchema(canonicalUrl, hiLang, wGlossary);
+    if (gls) { const { ["@context"]: _c, ...node } = gls; void _c; graph.push(node); }
+  }
+  // Contents collector — filled in document order while the JSX below is built
+  const toc: { text: string; href: string }[] = [];
+  const tocUsed = new Set<string>();
+  const tid = (text: string): string => {
+    const base = headingAnchor(text.replace(/^[^\p{L}\p{N}]+/u, ""));
+    let a = base; let k = 2;
+    while (tocUsed.has(a)) a = `${base}-${k++}`;
+    tocUsed.add(a);
+    toc.push({ text: text.trim(), href: `#${a}` });
+    return a;
+  };
+
   // Design tokens lifted verbatim from app/blog/[slug]/page.tsx so a festival
   // page and a blog post are visibly the same site.
-  const H2   = "mt-12 mb-4 text-2xl md:text-3xl font-bold text-amber-300";
+  const H2   = "mt-12 mb-4 text-2xl md:text-3xl font-bold text-amber-300 scroll-mt-24";
   const CARD = "my-8 rounded-xl border border-amber-900/40 bg-slate-900/40 p-5 md:p-6";
   const BODY = "text-slate-200 leading-relaxed";
   const LABEL = "text-slate-400";
@@ -1129,6 +1190,10 @@ export default async function FestivalPillar(
           </section>
         )}
 
+      {/* v2.7: Infobox + Contents (standard format) */}
+        <Infobox rows={wInfobox} max={wCitations.length} />
+        <TableOfContents items={toc} />
+
       {/* LOCAL NAME — verified rows only, silent otherwise */}
         {local && city && (
           <aside className="my-6 rounded-lg border-l-4 border-amber-500 bg-amber-950/30 px-5 py-4">
@@ -1143,7 +1208,7 @@ export default async function FestivalPillar(
       {/* TIMINGS — computed for this city. Absent, never approximated. */}
       {panchang && (
         <section className={CARD}>
-          <h2 className={H2}>🕐 {t.timings(name, placeName)}</h2>
+          <h2 className={H2} id={tid(`🕐 ${t.timings(name, placeName)}`)}>🕐 {t.timings(name, placeName)}</h2>
           <table className="w-full text-sm">
             <tbody className="divide-y divide-amber-900/30">
               <tr><td className="py-2 text-slate-400">
@@ -1211,7 +1276,7 @@ export default async function FestivalPillar(
           before this section existed, every one of them at zero clicks. */}
       {visarjan && (
         <section className="my-10 rounded-xl border border-sky-800/50 bg-sky-950/30 p-6">
-          <h2 className={H2}>
+          <h2 className={H2} id={tid(`🌊 ${t.visarjanHead(local?.visarjan_name || visarjan.label)}`)}>
             🌊 {t.visarjanHead(local?.visarjan_name || visarjan.label)}
           </h2>
           {local?.visarjan_name && city && (
@@ -1260,7 +1325,7 @@ export default async function FestivalPillar(
             Hyderabad should be on the Hyderabad URL. */}
         {cityNote && city && (
           <section className="my-10 rounded-xl border border-amber-800/50 bg-amber-950/25 p-6 md:p-8">
-            <h2 className="mb-4 text-2xl md:text-3xl font-bold text-amber-300">
+            <h2 className="mb-4 text-2xl md:text-3xl font-bold text-amber-300" id={tid(`${cityNote.heading || t.inThisCity(name, placeName)}`)}>
               {cityNote.heading || t.inThisCity(name, placeName)}
             </h2>
             <div className="space-y-4">
@@ -1295,7 +1360,7 @@ export default async function FestivalPillar(
 
       {asList(content?.quick_actions).length ? (
         <section className={CARD}>
-          <h2 className={H2}>✅ {t.whatToDo(name)}</h2>
+          <h2 className={H2} id={tid(`✅ ${t.whatToDo(name)}`)}>✅ {t.whatToDo(name)}</h2>
           <ol className="list-decimal space-y-2 pl-5 text-slate-200 leading-relaxed marker:text-amber-400">
             {asList(content.quick_actions).map((a, i) => <li key={i}>{a}</li>)}
           </ol>
@@ -1310,7 +1375,7 @@ export default async function FestivalPillar(
       {/* HOW THIS DATE WAS DETERMINED — the section nobody else has */}
       {f.regional_note && (
         <section className="my-10 rounded-xl border border-amber-700/50 bg-gradient-to-br from-amber-950/50 to-slate-900/50 p-6 md:p-8">
-          <h2 className={H2}>📜 {t.howDate}</h2>
+          <h2 className={H2} id={tid(`📜 ${t.howDate}`)}>📜 {t.howDate}</h2>
           <p className="whitespace-pre-line text-slate-200 leading-relaxed">{f.regional_note}</p>
           <p className="mt-4 text-xs text-slate-500">{t.howDateFoot}</p>
         </section>
@@ -1318,7 +1383,7 @@ export default async function FestivalPillar(
 
       {others.length > 0 && (
         <section className={CARD}>
-          <h2 className={H2}>🕐 {t.acrossIndia(name)}</h2>
+          <h2 className={H2} id={tid(`🕐 ${t.acrossIndia(name)}`)}>🕐 {t.acrossIndia(name)}</h2>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead className="text-left text-slate-400">
@@ -1350,14 +1415,14 @@ export default async function FestivalPillar(
 
       {content?.significance && (
         <section className="my-10">
-          <h2 className="mt-12 mb-4 text-2xl md:text-3xl font-bold text-amber-300">{t.whyObserved(name)}</h2>
-          <div className="whitespace-pre-line text-slate-200 leading-relaxed">{content.significance}</div>
+          <h2 className="mt-12 mb-4 text-2xl md:text-3xl font-bold text-amber-300" id={tid(`${t.whyObserved(name)}`)}>{t.whyObserved(name)}</h2>
+          <div className="whitespace-pre-line text-slate-200 leading-relaxed"><CiteText text={content.significance} max={wCitations.length} loc="sig" /></div>
         </section>
       )}
 
       {asObjList<{ step: string; detail: string }>(content?.puja_vidhi).length ? (
         <section className={CARD}>
-          <h2 className={H2}>🪔 {t.pujaVidhi(name)}</h2>
+          <h2 className={H2} id={tid(`🪔 ${t.pujaVidhi(name)}`)}>🪔 {t.pujaVidhi(name)}</h2>
           <ol className="list-decimal space-y-3 pl-5 text-slate-200 leading-relaxed marker:text-amber-400">
             {asObjList<{ step: string; detail: string }>(content.puja_vidhi).map((s, i) => <li key={i}><strong className="text-amber-200">{s.step}</strong> — {s.detail}</li>)}
           </ol>
@@ -1366,7 +1431,7 @@ export default async function FestivalPillar(
 
       {asList(content?.puja_vidhi_short).length ? (
         <section id="short-vidhi" className="my-10 rounded-xl border border-emerald-800/50 bg-emerald-950/25 p-6">
-          <h2 className={H2}>⚡ {t.fiveMin}</h2>
+          <h2 className={H2} id={tid(`⚡ ${t.fiveMin}`)}>⚡ {t.fiveMin}</h2>
           <ol className="list-decimal space-y-2 pl-5 text-slate-200 leading-relaxed marker:text-amber-400">
             {asList(content.puja_vidhi_short).map((s, i) => <li key={i}>{s}</li>)}
           </ol>
@@ -1375,7 +1440,7 @@ export default async function FestivalPillar(
 
       {content?.samagri && (
         <section className={CARD}>
-          <h2 className={H2}>🛒 {t.samagri(name)}</h2>
+          <h2 className={H2} id={tid(`🛒 ${t.samagri(name)}`)}>🛒 {t.samagri(name)}</h2>
           {asList(content.samagri.essential).length ? (
             <><h3 className="mt-4 mb-1 font-semibold text-amber-200">{t.essential}</h3>
               <ul className="list-disc pl-5 text-slate-200 leading-relaxed marker:text-amber-400">
@@ -1396,7 +1461,7 @@ export default async function FestivalPillar(
 
       {content?.vrat_vidhi && (
         <section className={CARD}>
-          <h2 className={H2}>🌙 {t.vrat(name)}</h2>
+          <h2 className={H2} id={tid(`🌙 ${t.vrat(name)}`)}>🌙 {t.vrat(name)}</h2>
           {content.vrat_vidhi.start && <p className="text-slate-200 leading-relaxed"><strong className="text-amber-200">{t.beginsAt}:</strong> {content.vrat_vidhi.start}</p>}
           {asList(content.vrat_vidhi.may_eat).length ? (
             <><p className="mt-4 mb-1 font-semibold text-emerald-300">{t.mayEat}</p>
@@ -1416,7 +1481,7 @@ export default async function FestivalPillar(
 
       {asObjList<{ q: string; a: string }>(content?.dos_donts).length ? (
         <section className={CARD}>
-          <h2 className={H2}>❓ {t.allowed(name)}</h2>
+          <h2 className={H2} id={tid(`❓ ${t.allowed(name)}`)}>❓ {t.allowed(name)}</h2>
           <div className="space-y-3">
             {asObjList<{ q: string; a: string }>(content.dos_donts).map((d, i) => (
               <div key={i}>
@@ -1447,7 +1512,7 @@ export default async function FestivalPillar(
 
       {asList(content?.common_mistakes).length ? (
         <section className={CARD}>
-          <h2 className={H2}>⚠️ {t.mistakes}</h2>
+          <h2 className={H2} id={tid(`⚠️ ${t.mistakes}`)}>⚠️ {t.mistakes}</h2>
           <ul className="list-disc space-y-2 pl-5 text-slate-200 leading-relaxed marker:text-amber-400">
             {asList(content.common_mistakes).map((m, i) => <li key={i}>{m}</li>)}
           </ul>
@@ -1456,7 +1521,7 @@ export default async function FestivalPillar(
 
       {content?.mantra_block?.mantra && (
         <section className={CARD}>
-          <h2 className={H2}>📿 {t.mantra}</h2>
+          <h2 className={H2} id={tid(`📿 ${t.mantra}`)}>📿 {t.mantra}</h2>
           <p className="text-2xl text-amber-200">{content.mantra_block.mantra}</p>
           {content.mantra_block.meaning && <p className="mt-2 text-slate-200 leading-relaxed">{content.mantra_block.meaning}</p>}
           <p className="mt-3 text-sm text-slate-400">{content.mantra_block.count} {content.mantra_block.when}</p>
@@ -1465,21 +1530,21 @@ export default async function FestivalPillar(
 
       {content?.katha && (
         <section className={CARD}>
-          <h2 className={H2}>📖 {t.katha(name)}</h2>
-          <div className="whitespace-pre-line text-slate-200 leading-relaxed">{content.katha}</div>
+          <h2 className={H2} id={tid(`📖 ${t.katha(name)}`)}>📖 {t.katha(name)}</h2>
+          <div className="whitespace-pre-line text-slate-200 leading-relaxed"><CiteText text={content.katha} max={wCitations.length} loc="katha" /></div>
         </section>
       )}
 
       {content?.aarti && (
         <section className={CARD}>
-          <h2 className={H2}>🪔 {t.aarti}</h2>
+          <h2 className={H2} id={tid(`🪔 ${t.aarti}`)}>🪔 {t.aarti}</h2>
           <p className="text-slate-200 leading-relaxed">{content.aarti}</p>
         </section>
       )}
 
       {asObjList<{ problem: string; upay: string }>(content?.upay_by_problem).length ? (
         <section className="my-10 rounded-xl border border-amber-800/50 bg-amber-950/25 p-6">
-          <h2 className={H2}>🔮 {t.upay(name)}</h2>
+          <h2 className={H2} id={tid(`🔮 ${t.upay(name)}`)}>🔮 {t.upay(name)}</h2>
           <div className="space-y-3">
             {asObjList<{ problem: string; upay: string }>(content.upay_by_problem).map((u, i) => (
               <div key={i}>
@@ -1518,9 +1583,17 @@ export default async function FestivalPillar(
         </section>
       )}
 
+      {/* v2.7: Glossary + numbered References (standard format) */}
+      {wGlossary.length > 0 && toc.push({ text: hiLang ? "शब्दावली" : "Glossary", href: "#glossary" }) > 0 && (
+        <Glossary terms={wGlossary} />
+      )}
+      {wCitations.length > 0 && toc.push({ text: hiLang ? "ग्रंथ सन्दर्भ" : "Classical Sources", href: "#granth-sandarbh" }) > 0 && (
+        <References citations={wCitations} hi={hiLang} backRefs={wBack} />
+      )}
+
       {faqs.length > 0 && (
         <section className="mb-8">
-          <h2 className="mb-6 text-2xl md:text-3xl font-bold text-amber-300">{t.faqHead(name, placeName)}</h2>
+          <h2 className="mb-6 text-2xl md:text-3xl font-bold text-amber-300" id={tid(`${t.faqHead(name, placeName)}`)}>{t.faqHead(name, placeName)}</h2>
           <div className="space-y-4">
             {faqs.map((q, i) => (
               <details key={i}
@@ -1538,7 +1611,7 @@ export default async function FestivalPillar(
 
       {upcoming.length > 0 && (
         <section className="my-12 border-t border-amber-900/40 pt-8">
-          <h2 className="mb-6 text-2xl md:text-3xl font-bold text-amber-300">{t.comingUp(placeName)}</h2>
+          <h2 className="mb-6 text-2xl md:text-3xl font-bold text-amber-300" id={tid(`${t.comingUp(placeName)}`)}>{t.comingUp(placeName)}</h2>
           <ul className="grid gap-4 sm:grid-cols-2">
             {upcoming
               .filter(o => !(o.festival_scope === "regional" && o.home_states?.length &&
@@ -1555,7 +1628,7 @@ export default async function FestivalPillar(
       )}
 
       <section className="my-12 border-t border-amber-900/40 pt-8">
-        <h2 className="mb-6 text-2xl md:text-3xl font-bold text-amber-300">{t.explore}</h2>
+        <h2 className="mb-6 text-2xl md:text-3xl font-bold text-amber-300" id={tid(`${t.explore}`)}>{t.explore}</h2>
         <ul className="grid gap-3 sm:grid-cols-2 text-amber-300">
           {city && <li><Link href={`/${city.slug}/panchang`} className="hover:text-amber-300 transition">{t.panchangFor(placeName)}</Link></li>}
           {city && <li><Link href={festivalHref(lang, null, f.festival_slug, content?.page_slug ?? null)} className="hover:text-amber-300 transition">{t.allIndia(name)}</Link></li>}

@@ -8,10 +8,32 @@ import {
   getAllPublishedSlugs,
 } from '@/lib/seo-content'
 import SeoPageLayout from '@/components/seo/SeoPageLayout'
+import {
+  normalizeCitations,
+  normalizeGlossary,
+  normalizeInfobox,
+  citationSchema,
+  entitySchema,
+  glossarySchema,
+  stripCites,
+} from '@/lib/wiki'
 
 /* ============================================================
    TRIKAL VAANI — /learn/[slug]
-   VERSION: 2.1 — BUILD COST (6 Sep 2026)
+   VERSION: 2.2 — TRIKAAL VAANI STANDARD FORMAT (27 Sep 2026)
+   ============================================================
+   CHANGE v2.2 (editorial_rulings #8 G — same format as /blog v3.6):
+     • Article.citation = Chapter/Book (+ Quotation of the mool shlok where
+       allowed) from seo_pillar_pages.citations; legacy classical_ref string
+       when a page has none yet.
+     • Article.about / mentions — verified Wikipedia/Wikidata entities only.
+     • DefinedTermSet from seo_pillar_pages.glossary.
+     • BreadcrumbList: Home › Learn › <cluster pillar> › page when the cluster
+       has a pillar page (else the old cluster item, unchanged).
+     • Visible Infobox / Contents / Glossary / References: SeoPageLayout v2.0.
+     Requires lib/wiki.ts v1.0 and components/wiki/WikiBlocks.tsx v1.0.
+   ============================================================
+   PREVIOUS: VERSION 2.1 — BUILD COST (6 Sep 2026)
    ============================================================
    CHANGE v2.1 — the ONLY change from v2.0 is generateStaticParams below.
      Vercel build log: 2m59s of a 3m20s build is "Generating static pages
@@ -178,6 +200,13 @@ export default async function SeoLearnPage({ params }: Props) {
 
   /* ── JSON-LD Schemas ── */
   const schemas: object[] = []
+  // v2.2 — standard-format data
+  const canonicalUrl = `https://trikalvaani.com/learn/${page.slug}`
+  const citations = normalizeCitations(page.citations)
+  const glossary = normalizeGlossary(page.glossary)
+  const infobox = normalizeInfobox(page.infobox)
+  const pillar = clusterPages.find(p => p.page_type === 'pillar' && p.slug !== page.slug) ?? null
+  const entityText = [page.geo_answer ?? '', stripCites(page.body_content ?? ''), ...infobox.map(r => r.value)].join(' \n ')
 
   // Article schema
   schemas.push({
@@ -205,7 +234,18 @@ export default async function SeoLearnPage({ params }: Props) {
     mainEntityOfPage: `https://trikalvaani.com/learn/${page.slug}`,
     inLanguage: 'en-IN',
     keywords: page.primary_keyword,
+    // v2.2
+    ...(citations.length
+      ? { citation: citations.map(c => citationSchema(c, false)) }
+      : page.classical_ref
+        ? { citation: page.classical_ref }
+        : {}),
+    ...entitySchema(glossary, entityText),
   })
+
+  // v2.2 — DefinedTermSet
+  const gls = glossarySchema(canonicalUrl, false, glossary)
+  if (gls) schemas.push(gls)
 
   // FAQPage schema (English only for now — see KNOWN REMAINING GAP note above)
   if (page.faq_block?.length > 0) {
@@ -227,7 +267,10 @@ export default async function SeoLearnPage({ params }: Props) {
     itemListElement: [
       { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://trikalvaani.com' },
       { '@type': 'ListItem', position: 2, name: 'Learn', item: 'https://trikalvaani.com/learn' },
-      { '@type': 'ListItem', position: 3, name: page.cluster, item: `https://trikalvaani.com/learn?cluster=${page.cluster}` },
+      // v2.2: the cluster's pillar page when it exists (a real URL)
+      pillar
+        ? { '@type': 'ListItem', position: 3, name: pillar.title_en, item: `https://trikalvaani.com/learn/${pillar.slug}` }
+        : { '@type': 'ListItem', position: 3, name: page.cluster, item: `https://trikalvaani.com/learn?cluster=${page.cluster}` },
       { '@type': 'ListItem', position: 4, name: displayPage.title_en, item: `https://trikalvaani.com/learn/${page.slug}` },
     ],
   })

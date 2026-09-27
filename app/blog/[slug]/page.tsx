@@ -1,7 +1,67 @@
 // ============================================================
 // TRIKAL VAANI — DYNAMIC BLOG ARTICLE PAGE (SSR)
 // CEO: Rohiit Gupta | Chief Vedic Architect
-// Version: 3.3
+// Version: 3.6
+// Date: 2026-09-27
+// CHANGE v3.6 — no visible change. GRANTH_META, the 6 restricted granth,
+//   canShowSanskrit, citationRef/citationSchema, ENTITY_LINKS and the
+//   about/mentions + DefinedTermSet builders moved to lib/wiki.ts (v1.0), the
+//   one source now shared by /blog, /learn and /events. pageText() stays here
+//   (it knows the blog's section shape).
+// ------------------------------------------------------------
+// PREVIOUS: Version 3.5
+// Date: 2026-09-27
+// CHANGE v3.5 — completes the 6 Wikipedia-style items (Rohiit, 27 Sep 2026):
+//   • Descriptive H2 anchors: id = headingAnchor(heading), e.g.
+//     #aaj-samuh-modern-life-events (unique per page). The old
+//     #section-N anchor still works via an empty span, so no old link breaks.
+//     Contents box links to the new anchors.
+//   • Entity linking: ENTITY_LINKS holds ONLY verified Wikipedia/Wikidata URLs
+//     (Nakshatra = Wikidata Q1125935 + Wikipedia; Anuradha = Q2606414; 20
+//     nakshatra Wikipedia pages; Hindu astrology). Article.about gets matching
+//     glossary terms (full sameAs list); Article.mentions gets every listed
+//     entity found in the page text. Muhurta Chintamani has NO verified
+//     Wikipedia/Wikidata page (checked 27 Sep 2026) — deliberately absent.
+//   • Hub hierarchy Pillar → Samuh → Cluster (lib v3.12 hub_group):
+//     breadcrumb shows Home › Blog › Pillar › Samuh › …; "See also" links the
+//     Samuh section of the pillar; the PILLAR page lists every child page
+//     grouped by Samuh, in the pillar's own heading order, plus an ItemList
+//     JSON-LD. Samuh is NOT added to BreadcrumbList schema (its URL would be
+//     pillar#anchor — same page as the pillar item; Google ignores fragments).
+//   Requires lib/blog-posts.ts v3.12 and column hub_group (27 Sep 2026).
+// ------------------------------------------------------------
+// PREVIOUS: Version 3.4
+// Date: 2026-09-27
+// CHANGE v3.4 — WIKIPEDIA-STYLE PAGE, approved by Rohiit 27 Sep 2026
+//   (editorial_rulings #8 — B.2, B.8, B.9, G):
+//   • Inline citations: [^n] in section text / infobox renders as a
+//     superscript [n] linking to reference n; each reference has a ↑ link
+//     back to the first place it is cited. A marker whose n has no citation
+//     is dropped (never a dangling [n]). Anchor ids are computed from the
+//     text itself, so they never depend on render order.
+//   • Granth Sandarbh box is now a numbered reference list: mool Sanskrit
+//     shlok (lang="sa", Devanagari) then an italic Wikipedia-style reference
+//     line, then the meaning. Sanskrit is shown ONLY for works in the Trikaal
+//     Library that are NOT one of the 6 restricted granth (sanskritdocuments.org
+//     licence): bhrigusutram, bphs, brihajjataka, chamatkarachintamani,
+//     jatakaparijata, phaladipika. Enforced here even if the data has it.
+//   • Infobox ("मुख्य तथ्य · Key Facts") from blog_posts.infobox — right side
+//     on desktop, full width on mobile.
+//   • Contents (TOC) built from the page's own H2s (+ Glossary, References,
+//     FAQ). Shown when there are 3+ H2s. No data needed — every blog page.
+//   • Glossary ("शब्दावली · Glossary") from blog_posts.glossary, with a
+//     DefinedTermSet JSON-LD block; verified same_as URLs also go into
+//     Article.about.
+//   • Hub pillar (blog_posts.pillar_slug): breadcrumb (visible + schema)
+//     becomes Home › Blog › Pillar › …, and "See also" shows the pillar.
+//   • JSON-LD citation Chapter gains hasPart Quotation (inLanguage "sa")
+//     when the shlok may be shown; Book gains sameAs when GRANTH_META has a
+//     verified URL (none added yet — never guessed).
+//   Requires lib/blog-posts.ts v3.11 and columns infobox / glossary /
+//   pillar_slug (added 27 Sep 2026). Pages without these fields look as
+//   before plus the automatic Contents box.
+// ------------------------------------------------------------
+// PREVIOUS: Version 3.3
 // Date: 2026-09-25
 // CHANGE v3.3 — DATED HUMAN REVIEW, approved by Rohiit 25 Sep 2026:
 //   • Footer now reads "Last reviewed by Rohiit Gupta · 25 Sep 2026, 2:30 PM IST"
@@ -25,7 +85,7 @@
 //     structured data. With no citations it falls back to the old
 //     classicalSources string — no page loses its citation.
 //   • Only the Granth NAME is shown in Devanagari. The Sanskrit mool paath is
-//     never rendered (licence rule, editorial_rulings 25 Sep 2026).
+//     never rendered (licence rule, editorial_rulings 25 Sep 2026) — superseded by v3.4.
 //   • Authors come from GRANTH_META below; an unknown work gets no author
 //     rather than a guessed one.
 //   Requires lib/blog-posts.ts v3.9. No change to metadata, routing, ISR,
@@ -170,10 +230,25 @@ import {
   getPostBySlug,
   getAllSlugs,
   getRelatedPosts,
+  getHubChildren,
+  headingAnchor,
+  type HubChild,
   type BlogPost,
   type BlogSection,
   type BlogCitation,
+  type BlogInfoboxRow,
+  type BlogGlossaryTerm,
 } from '@/lib/blog-posts';
+// v3.6: citation / entity / glossary rules shared with /learn and /events
+import {
+  GRANTH_META,
+  canShowSanskrit,
+  citationRef,
+  citationSchema,
+  entitySchema,
+  glossarySchema,
+  matchEntities,
+} from '@/lib/wiki';
 
 
 // ------------------------------------------------------------------
@@ -212,60 +287,38 @@ function formatReviewedIST(iso: string | null): string | null {
 // Keyed by public.bphs_slokas.work. Author left null where the
 // attribution is disputed — better no author than a wrong one.
 // ==================================================================
-const GRANTH_META: Record<string, { sa: string; author: string | null }> = {
-  bphs:                  { sa: 'बृहत्पाराशरहोराशास्त्रम्', author: 'Maharishi Parashara' },
-  phaladipika:           { sa: 'फलदीपिका', author: 'Mantreshwara' },
-  jatakaparijata:        { sa: 'जातकपारिजातः', author: 'Vaidyanatha Dikshita' },
-  brihajjataka:          { sa: 'बृहज्जातकम्', author: 'Varahamihira' },
-  laghujataka:           { sa: 'लघुजातकम्', author: 'Varahamihira' },
-  brihatsamhita:         { sa: 'बृहत्संहिता', author: 'Varahamihira' },
-  bhrigusutram:          { sa: 'भृगुसूत्रम्', author: 'Maharishi Bhrigu' },
-  chamatkarachintamani:  { sa: 'चमत्कारचिन्तामणि', author: 'Bhatta Narayana' },
-  saravali:              { sa: 'सारावली', author: 'Kalyanavarma' },
-  jaiminisutra:          { sa: 'जैमिनिसूत्रम्', author: 'Maharishi Jaimini' },
-  jaiminiyaupadesasutra: { sa: 'जैमिनीयोपदेशसूत्रम्', author: 'Maharishi Jaimini' },
-  uttarakalamrita:       { sa: 'उत्तरकालामृतम्', author: 'Kalidasa' },
-  sarvarthachintamani:   { sa: 'सर्वार्थचिन्तामणि', author: 'Venkatesha Daivajna' },
-  jatakatattva:          { sa: 'जातकतत्त्वम्', author: 'Mahadeva' },
-  muhurtachintamani:     { sa: 'मुहूर्तचिन्तामणि', author: 'Rama Daivajna' },
-  vriddhayavanajataka:   { sa: 'वृद्धयवनजातकम्', author: 'Minaraja' },
-  minarajayavanajataka:  { sa: 'वृद्धयवनजातकम्', author: 'Minaraja' },
-  gargahora:             { sa: 'गर्गहोरा', author: null },
-  daivajnavallabha:      { sa: 'दैवज्ञवल्लभा', author: null },
-  shatpanchashika:       { sa: 'षट्पञ्चाशिका', author: null },
-};
 
-function citationRef(c: BlogCitation, hi: boolean): string {
-  const parts: string[] = [];
-  if (c.adhyaya) parts.push(`${hi ? 'अध्याय' : 'Adhyaya'} ${c.adhyaya}`);
-  if (c.shlok) parts.push(`${hi ? 'श्लोक' : 'Shlok'} ${c.shlok}`);
-  if (c.edition) parts.push(c.edition);
-  return parts.join(' · ');
+
+
+function pageText(post: BlogPost): string {
+  const parts: string[] = [post.directAnswer ?? ''];
+  post.infobox.forEach((r) => parts.push(r.value));
+  post.sections.forEach((sec) => {
+    if (sec.type === 'h2' || sec.type === 'h3' || sec.type === 'p' || sec.type === 'quote' || sec.type === 'callout') parts.push(sec.text);
+    else if (sec.type === 'ul' || sec.type === 'ol') parts.push(sec.items.join(' '));
+  });
+  return parts.join(' \n ');
 }
 
-function citationSchema(c: BlogCitation, hi: boolean): Record<string, unknown> {
-  const meta = c.work ? GRANTH_META[c.work] : undefined;
-  const book: Record<string, unknown> = {
-    '@type': 'Book',
-    name: c.granth,
-    inLanguage: 'sa',
-  };
-  if (meta?.sa) book.alternateName = meta.sa;
-  if (meta?.author) book.author = { '@type': 'Person', name: meta.author };
-  if (c.edition) book.bookEdition = c.edition;
-  const rule = (hi ? c.rule_hi || c.rule_en : c.rule_en || c.rule_hi) ?? undefined;
-  if (!c.adhyaya) {
-    return rule ? { ...book, description: rule } : book;
-  }
-  const chapter: Record<string, unknown> = {
-    '@type': 'Chapter',
-    name: `${c.granth} — ${hi ? 'अध्याय' : 'Adhyaya'} ${c.adhyaya}`,
-    isPartOf: book,
-  };
-  if (c.shlok) chapter.pagination = `${hi ? 'श्लोक' : 'Shloka'} ${c.shlok}`;
-  if (rule) chapter.description = rule;
-  return chapter;
+
+// v3.5 — descriptive, unique H2 anchors for the whole page
+function computeAnchors(sections: BlogSection[]): Map<number, string> {
+  const map = new Map<number, string>();
+  const used = new Set<string>();
+  sections.forEach((sec, i) => {
+    if (sec.type !== 'h2') return;
+    const base = headingAnchor(sec.text);
+    let a = base;
+    let k = 2;
+    while (used.has(a)) a = `${base}-${k++}`;
+    used.add(a);
+    map.set(i, a);
+  });
+  return map;
 }
+
+
+
 
 // ==================================================================
 // v2.9 — CANONICAL NAP (Name, Address, Phone)
@@ -481,7 +534,11 @@ export async function generateMetadata(
 // ==================================================================
 // JSON-LD SCHEMA — Article + FAQ + BreadcrumbList (+ Video, + Local)
 // ==================================================================
-function generateJsonLd(post: BlogPost) {
+function generateJsonLd(
+  post: BlogPost,
+  pillar: { slug: string; title: string } | null = null,
+  hubChildren: HubChild[] = [],
+) {
   const canonicalUrl = `https://trikalvaani.com/blog/${post.slug}`;
 
   const articleSchema = {
@@ -525,11 +582,14 @@ function generateJsonLd(post: BlogPost) {
     keywords: post.keywords.join(', '),
     // v3.2: structured Chapter/Book list when verified citations exist,
     // otherwise the legacy classicalSources string.
+    // v3.4: verified entities (glossary same_as) for knowledge-graph linking
+    // v3.5/v3.6: Article.about + Article.mentions (lib/wiki entitySchema)
+    ...entitySchema(post.glossary, pageText(post)),
     citation: post.citations.length > 0
       ? post.citations.map((c) => citationSchema(c, post.lang === 'hi'))
       : post.classicalSources,
     wordCount: (() => {
-      const count = (v?: string) => (v ? v.trim().split(/\s+/).filter(Boolean).length : 0);
+      const count = (v?: string) => (v ? v.replace(/\[\^\d+\]/g, '').trim().split(/\s+/).filter(Boolean).length : 0);
       let total = count(post.directAnswer);
       for (const s of post.sections as Array<Record<string, unknown>>) {
         total += count(s.title as string | undefined);
@@ -563,11 +623,36 @@ function generateJsonLd(post: BlogPost) {
     itemListElement: [
       { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://trikalvaani.com' },
       { '@type': 'ListItem', position: 2, name: 'Blog', item: 'https://trikalvaani.com/blog' },
-      { '@type': 'ListItem', position: 3, name: post.title, item: canonicalUrl },
+      // v3.4: hub pillar level when the post belongs to a hub
+      ...(pillar
+        ? [{ '@type': 'ListItem', position: 3, name: pillar.title, item: `https://trikalvaani.com/blog/${pillar.slug}` }]
+        : []),
+      { '@type': 'ListItem', position: pillar ? 4 : 3, name: displayTitle(post.title), item: canonicalUrl },
     ],
   };
 
   const schemas: Record<string, unknown>[] = [articleSchema, faqSchema, breadcrumbSchema];
+
+  // ── v3.5: ItemList of the hub's pages (pillar page only) ──
+  if (hubChildren.length > 0) {
+    schemas.push({
+      '@context': 'https://schema.org',
+      '@type': 'ItemList',
+      '@id': `${canonicalUrl}#hub`,
+      name: displayTitle(post.title),
+      numberOfItems: hubChildren.length,
+      itemListElement: hubChildren.map((c, i) => ({
+        '@type': 'ListItem',
+        position: i + 1,
+        url: `https://trikalvaani.com/blog/${c.slug}`,
+        name: displayTitle(c.title),
+      })),
+    });
+  }
+
+  // ── v3.4/v3.6: DefinedTermSet (lib/wiki glossarySchema) ──
+  const gls = glossarySchema(canonicalUrl, post.lang === 'hi', post.glossary);
+  if (gls) schemas.push(gls);
 
   // ── v2.8: VideoObject — only when the post has a video section ──
   const videoSection = (post.sections as Array<Record<string, unknown>>).find(
@@ -671,9 +756,76 @@ function generateJsonLd(post: BlogPost) {
 // ==================================================================
 // MARKDOWN-LITE PARSER — bold, italic, links (v2.1 unchanged)
 // ==================================================================
-function renderText(text: string): React.ReactNode {
+// ==================================================================
+// v3.4 — WIKIPEDIA-STYLE INLINE CITATIONS
+// ------------------------------------------------------------------
+// [^n] in text = "see reference n". Each marker gets a unique anchor id
+// built from WHERE it sits (loc) and its occurrence number inside that
+// text, so ids never depend on React render order. scanCitations() runs
+// once per request over the same texts, in the same way, to find the first
+// anchor of every n (used by the ↑ back-link in the reference list).
+// ==================================================================
+type CiteCtx = { max: number; firstRef: Map<number, string> };
+type CiteArg = { ctx: CiteCtx; loc: string };
+
+const LINK_STRIP_RE = /\[[^\]]+\]\([^)]+\)/g;
+const CITE_SPLIT_RE = /(\[\^\d+\])/g;
+
+function citeAnchor(n: number, loc: string, occ: number): string {
+  return `cite-ref-${n}-${loc}-${occ}`;
+}
+
+function scanText(text: string, loc: string, ctx: CiteCtx): void {
+  const re = /\[\^(\d+)\]/g;
+  const plain = text.replace(LINK_STRIP_RE, '');
+  let m: RegExpExecArray | null;
+  let occ = 0;
+  while ((m = re.exec(plain)) !== null) {
+    const n = Number(m[1]);
+    if (n >= 1 && n <= ctx.max && !ctx.firstRef.has(n)) ctx.firstRef.set(n, citeAnchor(n, loc, occ));
+    occ += 1;
+  }
+}
+
+function scanCitations(post: BlogPost): CiteCtx {
+  const ctx: CiteCtx = { max: post.citations.length, firstRef: new Map() };
+  if (!ctx.max) return ctx;
+  post.infobox.forEach((r, i) => scanText(r.value, `ib${i}`, ctx));
+  post.sections.forEach((sec, i) => {
+    if (sec.type === 'p' || sec.type === 'quote' || sec.type === 'callout') scanText(sec.text, `s${i}`, ctx);
+    else if (sec.type === 'ul' || sec.type === 'ol') sec.items.forEach((it, j) => scanText(it, `s${i}-${j}`, ctx));
+    else if (sec.type === 'table') sec.rows.forEach((row, ri) => row.forEach((cell, ci) => scanText(cell, `s${i}-${ri}-${ci}`, ctx)));
+  });
+  return ctx;
+}
+
+function renderText(text: string, cite?: CiteArg): React.ReactNode {
   const linkRegex = /(\[[^\]]+\]\([^)]+\))/g;
   const linkParts = text.split(linkRegex);
+  let occ = 0; // counts [^n] markers across the whole text, like scanText()
+
+  const renderPlain = (plain: string, i: number): React.ReactNode => {
+    const bits = plain.split(CITE_SPLIT_RE);
+    return bits.map((bit, j) => {
+      const cm = bit.match(/^\[\^(\d+)\]$/);
+      if (cm) {
+        const n = Number(cm[1]);
+        const thisOcc = occ;
+        occ += 1;
+        // No context, or no such reference: drop the marker (never dangling)
+        if (!cite || n < 1 || n > cite.ctx.max) return null;
+        return (
+          <sup key={`c-${i}-${j}`} id={citeAnchor(n, cite.loc, thisOcc)} className="ml-0.5 text-xs font-semibold leading-none">
+            <a href={`#cite-${n}`} aria-label={`Source ${n}`} className="text-amber-400 no-underline hover:text-amber-200">
+              [{n}]
+            </a>
+          </sup>
+        );
+      }
+      if (!bit) return null;
+      return <span key={`t-${i}-${j}`}>{renderEmphasis(bit, i * 100 + j)}</span>;
+    });
+  };
 
   return linkParts.map((part, i) => {
     const linkMatch = part.match(/^\[([^\]]+)\]\(([^)]+)\)$/);
@@ -693,7 +845,7 @@ function renderText(text: string): React.ReactNode {
         </a>
       );
     }
-    return renderEmphasis(part, i);
+    return <span key={`p-${i}`}>{renderPlain(part, i)}</span>;
   });
 }
 
@@ -713,11 +865,24 @@ function renderEmphasis(text: string, keyBase: number): React.ReactNode {
 // ==================================================================
 // SECTION RENDERER (unchanged from v2.8)
 // ==================================================================
-function SectionBlock({ section, index }: { section: BlogSection; index: number }) {
+function SectionBlock({
+  section,
+  index,
+  ctx,
+  anchor,
+}: {
+  section: BlogSection;
+  index: number;
+  ctx?: CiteCtx;
+  anchor?: string;
+}) {
+  const at = (loc: string): CiteArg | undefined => (ctx ? { ctx, loc } : undefined);
   switch (section.type) {
     case 'h2':
       return (
-        <h2 id={`section-${index}`} className="mt-12 mb-4 text-2xl md:text-3xl font-bold text-amber-300 scroll-mt-24">
+        <h2 id={anchor ?? `section-${index}`} className="mt-12 mb-4 text-2xl md:text-3xl font-bold text-amber-300 scroll-mt-24">
+          {/* v3.5: legacy #section-N anchor kept so old links still land here */}
+          {anchor && <span id={`section-${index}`} aria-hidden="true" className="block scroll-mt-24" />}
           {section.text}
         </h2>
       );
@@ -730,7 +895,7 @@ function SectionBlock({ section, index }: { section: BlogSection; index: number 
     case 'p':
       return (
         <p className="my-4 text-base md:text-lg leading-relaxed text-slate-200">
-          {renderText(section.text)}
+          {renderText(section.text, at(`s${index}`))}
         </p>
       );
     case 'ul':
@@ -738,7 +903,7 @@ function SectionBlock({ section, index }: { section: BlogSection; index: number 
         <ul className="my-4 ml-6 space-y-2 list-disc text-slate-200">
           {section.items.map((item, i) => (
             <li key={i} className="text-base md:text-lg leading-relaxed">
-              {renderText(item)}
+              {renderText(item, at(`s${index}-${i}`))}
             </li>
           ))}
         </ul>
@@ -748,7 +913,7 @@ function SectionBlock({ section, index }: { section: BlogSection; index: number 
         <ol className="my-4 ml-6 space-y-2 list-decimal text-slate-200">
           {section.items.map((item, i) => (
             <li key={i} className="text-base md:text-lg leading-relaxed pl-2">
-              {renderText(item)}
+              {renderText(item, at(`s${index}-${i}`))}
             </li>
           ))}
         </ol>
@@ -771,7 +936,7 @@ function SectionBlock({ section, index }: { section: BlogSection; index: number 
                 <tr key={ri} className="border-b border-amber-900/20 last:border-0">
                   {row.map((cell, ci) => (
                     <td key={ci} className="px-4 py-3 text-slate-200">
-                      {renderText(cell)}
+                      {renderText(cell, at(`s${index}-${ri}-${ci}`))}
                     </td>
                   ))}
                 </tr>
@@ -794,14 +959,14 @@ function SectionBlock({ section, index }: { section: BlogSection; index: number 
       return (
         <aside className={`my-6 rounded-lg border-l-4 px-5 py-4 ${variantStyles[section.variant]}`}>
           <div className="mb-2 font-semibold">{variantLabels[section.variant]}</div>
-          <p className="leading-relaxed">{renderText(section.text)}</p>
+          <p className="leading-relaxed">{renderText(section.text, at(`s${index}`))}</p>
         </aside>
       );
     }
     case 'quote':
       return (
         <blockquote className="my-6 border-l-4 border-amber-700 pl-4 italic text-amber-100">
-          {renderText(section.text)}
+          {renderText(section.text, at(`s${index}`))}
         </blockquote>
       );
     // ── v2.5: inline diagram / illustration ──────────────────
@@ -854,6 +1019,109 @@ function SectionBlock({ section, index }: { section: BlogSection; index: number 
         </figure>
       );
   }
+}
+
+// ==================================================================
+// v3.4 — WIKIPEDIA-STYLE COMPONENTS (Infobox · Contents · Glossary)
+// ==================================================================
+function Infobox({ rows, ctx }: { rows: BlogInfoboxRow[]; ctx: CiteCtx }) {
+  if (!rows.length) return null;
+  return (
+    <aside
+      aria-label="Key facts"
+      className="mb-8 overflow-hidden rounded-xl border border-amber-800/50 bg-slate-900/70 text-sm md:float-right md:mb-6 md:ml-8 md:w-80"
+    >
+      <div className="bg-amber-950/70 px-4 py-2 text-center font-bold text-amber-300">
+        मुख्य तथ्य · Key Facts
+      </div>
+      <table className="w-full">
+        <tbody>
+          {rows.map((r, i) => (
+            <tr key={i} className="border-t border-amber-900/30 align-top">
+              <th scope="row" className="w-2/5 px-3 py-2 text-left font-semibold text-amber-200">
+                {r.label}
+              </th>
+              <td className="px-3 py-2 leading-relaxed text-slate-200">
+                {renderText(r.value, { ctx, loc: `ib${i}` })}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </aside>
+  );
+}
+
+function TableOfContents({
+  sections,
+  anchors,
+  hasGlossary,
+  hasReferences,
+  hasFaq,
+  hi,
+}: {
+  sections: BlogSection[];
+  anchors: Map<number, string>;
+  hasGlossary: boolean;
+  hasReferences: boolean;
+  hasFaq: boolean;
+  hi: boolean;
+}) {
+  const heads: { text: string; href: string }[] = [];
+  sections.forEach((sec, i) => {
+    if (sec.type === 'h2') heads.push({ text: sec.text, href: `#${anchors.get(i) ?? `section-${i}`}` });
+  });
+  if (heads.length < 3) return null;
+  if (hasGlossary) heads.push({ text: hi ? 'शब्दावली' : 'Glossary', href: '#glossary' });
+  if (hasReferences) heads.push({ text: hi ? 'ग्रंथ सन्दर्भ' : 'Classical Sources', href: '#granth-sandarbh' });
+  if (hasFaq) heads.push({ text: hi ? 'अक्सर पूछे जाने वाले प्रश्न' : 'FAQ', href: '#faq' });
+  return (
+    <nav aria-label="Contents" className="mb-10 rounded-xl border border-amber-900/40 bg-slate-900/40 p-4 md:max-w-md">
+      <details open>
+        <summary className="cursor-pointer select-none font-bold text-amber-300">
+          विषय सूची · Contents <span className="text-xs font-normal text-slate-400">({heads.length})</span>
+        </summary>
+        <ol className="mt-3 ml-5 list-decimal space-y-1 text-sm text-slate-300">
+          {heads.map((h, k) => (
+            <li key={k}>
+              <a href={h.href} className="hover:text-amber-300 transition">
+                {h.text}
+              </a>
+            </li>
+          ))}
+        </ol>
+      </details>
+    </nav>
+  );
+}
+
+function Glossary({ terms }: { terms: BlogGlossaryTerm[] }) {
+  if (!terms.length) return null;
+  return (
+    <section
+      id="glossary"
+      aria-label="Glossary"
+      className="my-12 scroll-mt-24 rounded-xl border border-amber-900/40 bg-slate-900/40 p-5 md:p-6"
+    >
+      <h2 className="mb-4 text-2xl md:text-3xl font-bold text-amber-300">शब्दावली · Glossary</h2>
+      <dl className="space-y-4">
+        {terms.map((t, i) => (
+          <div key={i}>
+            <dt className="font-semibold text-amber-200">
+              {t.same_as ? (
+                <a href={t.same_as} target="_blank" rel="noopener noreferrer" className="hover:underline">
+                  {t.term}
+                </a>
+              ) : (
+                t.term
+              )}
+            </dt>
+            <dd className="mt-1 leading-relaxed text-slate-300">{t.definition}</dd>
+          </div>
+        ))}
+      </dl>
+    </section>
+  );
 }
 
 // ==================================================================
@@ -1043,8 +1311,35 @@ export default async function BlogArticlePage({
     notFound();
   }
 
-  const relatedPosts  = await getRelatedPosts(post.relatedSlugs);
-  const jsonLdSchemas = generateJsonLd(post);
+  // v3.4: fetch the hub pillar in the SAME query as related posts
+  const fetchSlugs    = post.pillarSlug && post.pillarSlug !== post.slug
+    ? Array.from(new Set([...post.relatedSlugs, post.pillarSlug]))
+    : post.relatedSlugs;
+  const fetched       = await getRelatedPosts(fetchSlugs);
+  const pillarPost    = post.pillarSlug ? fetched.find((p) => p.slug === post.pillarSlug) ?? null : null;
+  const relatedPosts  = fetched.filter((p) => p.slug !== post.pillarSlug);
+  const pillarRef     = pillarPost ? { slug: pillarPost.slug, title: displayTitle(pillarPost.title) } : null;
+  // v3.5: a page with no pillar of its own may BE a pillar — list its children
+  const hubChildren   = post.pillarSlug ? [] : await getHubChildren(post.slug);
+  const anchors       = computeAnchors(post.sections);
+  const jsonLdSchemas = generateJsonLd(post, pillarRef, hubChildren);
+  const hubGroupHref  = pillarRef && post.hubGroup ? `/blog/${pillarRef.slug}#${post.hubGroup.anchor}` : null;
+  // v3.5: hub children grouped by Samuh, in the pillar's own heading order
+  const anchorOrder   = new Map<string, number>();
+  anchors.forEach((a, i) => anchorOrder.set(a, i));
+  const hubGroups: { label: string; anchor: string | null; items: HubChild[] }[] = [];
+  hubChildren.forEach((c) => {
+    const key = c.hubGroup ? c.hubGroup.anchor : null;
+    let g = hubGroups.find((x) => x.anchor === key);
+    if (!g) {
+      g = { label: c.hubGroup ? c.hubGroup.label : (post.lang === 'hi' ? 'अन्य' : 'More'), anchor: key, items: [] };
+      hubGroups.push(g);
+    }
+    g.items.push(c);
+  });
+  hubGroups.sort((a, b) => (anchorOrder.get(a.anchor ?? '') ?? 1e9) - (anchorOrder.get(b.anchor ?? '') ?? 1e9));
+  const citeCtx       = scanCitations(post);
+  const isHi          = post.lang === 'hi';
   const isLocalPage   = Boolean(LOCAL_PAGES[post.slug]);
 
   return (
@@ -1067,6 +1362,18 @@ export default async function BlogArticlePage({
               <li aria-hidden>›</li>
               <li><Link href="/blog" className="hover:text-amber-300 transition">Blog</Link></li>
               <li aria-hidden>›</li>
+              {pillarRef && (
+                <>
+                  <li><Link href={`/blog/${pillarRef.slug}`} className="hover:text-amber-300 transition">{pillarRef.title}</Link></li>
+                  <li aria-hidden>›</li>
+                </>
+              )}
+              {hubGroupHref && post.hubGroup && (
+                <>
+                  <li><Link href={hubGroupHref} className="hover:text-amber-300 transition">{post.hubGroup.label}</Link></li>
+                  <li aria-hidden>›</li>
+                </>
+              )}
               <li className="text-amber-300 truncate">{post.category}</li>
             </ol>
           </nav>
@@ -1125,6 +1432,17 @@ export default async function BlogArticlePage({
             </p>
           </section>
 
+          {/* ── v3.4: INFOBOX + CONTENTS (Wikipedia-style) ── */}
+          <Infobox rows={post.infobox} ctx={citeCtx} />
+          <TableOfContents
+            sections={post.sections}
+            anchors={anchors}
+            hasGlossary={post.glossary.length > 0}
+            hasReferences={post.citations.length > 0}
+            hasFaq={post.faqs.length > 0}
+            hi={isHi}
+          />
+
           {/* ── v2.9: VISIBLE NAP + FEE TABLE (city landing pages only) ── */}
           {isLocalPage && <LocalNapBlock lang={post.lang} primaryHref={PRIMARY_LOCAL_PAGE[post.slug]} />}
 
@@ -1145,10 +1463,12 @@ export default async function BlogArticlePage({
                 Deep Dive Analysis
               </h2>
               {post.sections.map((section, i) => (
-                <SectionBlock key={i} section={section} index={i} />
+                <SectionBlock key={i} section={section} index={i} ctx={citeCtx} anchor={anchors.get(i)} />
               ))}
             </div>
           )}
+          {/* v3.4: end the infobox float before full-width blocks */}
+          <div className="clear-both" />
 
           {/* PRIMARY CTA */}
           <section className="my-12 rounded-xl border border-amber-700/50 bg-gradient-to-r from-amber-900/30 to-amber-950/30 p-6 md:p-8 text-center">
@@ -1174,12 +1494,15 @@ export default async function BlogArticlePage({
             </div>
           </section>
 
-          {/* v3.2: GRANTH SANDARBH — only when verified citations exist */}
+          {/* v3.4: GLOSSARY (before references, Wikipedia order) */}
+          <Glossary terms={post.glossary} />
+
+          {/* v3.2/v3.4: GRANTH SANDARBH — numbered reference list */}
           {post.citations.length > 0 && (
             <section
               id="granth-sandarbh"
               aria-label="Granth Sandarbh — Classical Sources"
-              className="my-12 rounded-xl border border-amber-900/40 bg-slate-900/40 p-5 md:p-6"
+              className="my-12 scroll-mt-24 rounded-xl border border-amber-900/40 bg-slate-900/40 p-5 md:p-6"
             >
               <h2 className="mb-1 text-2xl md:text-3xl font-bold text-amber-300">
                 ग्रंथ सन्दर्भ · Classical Sources
@@ -1192,21 +1515,44 @@ export default async function BlogArticlePage({
               <ol className="divide-y divide-amber-900/30">
                 {post.citations.map((c, i) => {
                   const hi = post.lang === 'hi';
+                  const n = i + 1;
                   const meta = c.work ? GRANTH_META[c.work] : undefined;
                   const main = hi ? c.rule_hi || c.rule_en : c.rule_en || c.rule_hi;
                   const second = hi ? (c.rule_hi ? c.rule_en : null) : (c.rule_en ? c.rule_hi : null);
                   const ref = citationRef(c, hi);
+                  const back = citeCtx.firstRef.get(n);
+                  const showSa = canShowSanskrit(c);
                   return (
-                    <li key={i} className="py-4 first:pt-0 last:pb-0">
-                      <div className="font-semibold text-amber-200">
-                        {c.granth}
-                        {meta && (
-                          <span className="ml-2 text-sm font-normal text-slate-400">
-                            {meta.sa}{meta.author ? ` · ${meta.author}` : ''}
-                          </span>
+                    <li key={i} id={`cite-${n}`} className="scroll-mt-24 py-4 first:pt-0 last:pb-0">
+                      <div className="flex items-baseline gap-2">
+                        <span className="font-bold text-amber-400">[{n}]</span>
+                        {back && (
+                          <a href={`#${back}`} aria-label={hi ? 'लेख में वापस' : 'Back to text'} className="text-amber-500 no-underline hover:text-amber-200">
+                            ↑
+                          </a>
                         )}
+                        <span className="font-semibold text-amber-200">
+                          {c.granth}
+                          {meta && (
+                            <span className="ml-2 text-sm font-normal text-slate-400">
+                              {meta.sa}{meta.author ? ` · ${meta.author}` : ''}
+                            </span>
+                          )}
+                        </span>
                       </div>
-                      {ref && <div className="mt-0.5 text-sm text-amber-400">{ref}</div>}
+                      {showSa && (
+                        <blockquote
+                          lang="sa"
+                          className="mt-3 whitespace-pre-line border-l-2 border-amber-600 pl-4 text-base italic leading-relaxed text-amber-100"
+                        >
+                          {c.sanskrit}
+                        </blockquote>
+                      )}
+                      {ref && (
+                        <div className="mt-1.5 text-sm italic text-amber-400">
+                          — {c.granth}, {ref}
+                        </div>
+                      )}
                       {main && <p className="mt-2 text-slate-200 leading-relaxed">{main}</p>}
                       {second && <p className="mt-1 text-sm text-slate-400 leading-relaxed">{second}</p>}
                     </li>
@@ -1224,7 +1570,7 @@ export default async function BlogArticlePage({
           )}
 
           {/* FAQ SECTION */}
-          <section aria-label="Frequently Asked Questions" className="my-12">
+          <section id="faq" aria-label="Frequently Asked Questions" className="my-12 scroll-mt-24">
             <h2 className="mb-6 text-2xl md:text-3xl font-bold text-amber-300">
               Frequently Asked Questions
             </h2>
@@ -1244,28 +1590,89 @@ export default async function BlogArticlePage({
             </div>
           </section>
 
-          {/* RELATED POSTS */}
-          {relatedPosts.length > 0 && (
-            <section aria-label="Related Reading" className="my-12">
+          {/* RELATED POSTS — v3.4: "See also" with hub pillar + categories */}
+          {/* v3.5: PILLAR → SAMUH → CLUSTER — every page of this hub */}
+          {hubGroups.length > 0 && (
+            <section id="hub-pages" aria-label="All pages in this hub" className="my-12 scroll-mt-24">
               <h2 className="mb-6 text-2xl md:text-3xl font-bold text-amber-300">
-                Related Reading
+                {isHi ? 'इस हब के सभी पेज' : 'All pages in this hub'}
               </h2>
-              <div className="grid gap-4 sm:grid-cols-2">
-                {relatedPosts.map((related) => (
-                  <Link
-                    key={related.slug}
-                    href={`/blog/${related.slug}`}
-                    className="group rounded-lg border border-amber-900/40 bg-slate-900/40 p-5 hover:border-amber-600/60 hover:bg-slate-900/60 transition"
-                  >
-                    <span className="mb-2 block text-xs font-semibold uppercase tracking-wider text-amber-400">
-                      {related.category}
-                    </span>
-                    <h3 className="font-semibold text-amber-100 group-hover:text-amber-300 transition leading-snug">
-                      {displayTitle(related.title)}
+              <div className="space-y-6">
+                {hubGroups.map((g, gi) => (
+                  <div key={gi}>
+                    <h3 className="mb-3 text-lg font-semibold text-amber-200">
+                      {g.anchor ? (
+                        <a href={`#${g.anchor}`} className="hover:text-amber-300 transition">{g.label}</a>
+                      ) : (
+                        g.label
+                      )}
                     </h3>
-                  </Link>
+                    <ul className="grid gap-2 sm:grid-cols-2">
+                      {g.items.map((c) => (
+                        <li key={c.slug}>
+                          <Link
+                            href={`/blog/${c.slug}`}
+                            className="block rounded-md border border-amber-900/40 bg-slate-900/40 px-4 py-2 text-sm text-amber-100 hover:border-amber-600/60 hover:text-amber-300 transition"
+                          >
+                            {displayTitle(c.title)}
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                 ))}
               </div>
+            </section>
+          )}
+
+          {(relatedPosts.length > 0 || pillarRef) && (
+            <section aria-label="See also" className="my-12">
+              <h2 className="mb-6 text-2xl md:text-3xl font-bold text-amber-300">
+                {isHi ? 'यह भी देखें · See also' : 'See also · यह भी देखें'}
+              </h2>
+              {pillarRef && (
+                <Link
+                  href={`/blog/${pillarRef.slug}`}
+                  className="mb-4 block rounded-lg border border-amber-600/60 bg-amber-950/30 p-5 hover:bg-amber-900/30 transition"
+                >
+                  <span className="mb-1 block text-xs font-semibold uppercase tracking-wider text-amber-400">
+                    {isHi ? 'इस हब का मुख्य पेज' : 'Part of the hub'}
+                  </span>
+                  <span className="font-semibold text-amber-100">{pillarRef.title}</span>
+                </Link>
+              )}
+              {hubGroupHref && post.hubGroup && (
+                <p className="mb-4 text-sm text-slate-300">
+                  {isHi ? 'समूह' : 'Group'}:{' '}
+                  <Link href={hubGroupHref} className="font-semibold text-amber-300 underline underline-offset-2 hover:text-amber-200">
+                    {post.hubGroup.label}
+                  </Link>
+                </p>
+              )}
+              {relatedPosts.length > 0 && (
+                <div className="grid gap-4 sm:grid-cols-2">
+                  {relatedPosts.map((related) => (
+                    <Link
+                      key={related.slug}
+                      href={`/blog/${related.slug}`}
+                      className="group rounded-lg border border-amber-900/40 bg-slate-900/40 p-5 hover:border-amber-600/60 hover:bg-slate-900/60 transition"
+                    >
+                      <span className="mb-2 block text-xs font-semibold uppercase tracking-wider text-amber-400">
+                        {related.category}
+                      </span>
+                      <h3 className="font-semibold text-amber-100 group-hover:text-amber-300 transition leading-snug">
+                        {displayTitle(related.title)}
+                      </h3>
+                    </Link>
+                  ))}
+                </div>
+              )}
+              <p className="mt-5 text-xs text-slate-400">
+                {isHi ? 'श्रेणी' : 'Categories'}: <span className="text-slate-300">{post.category}</span>
+                {post.domain && post.domain !== post.category && (
+                  <> · <span className="text-slate-300">{post.domain}</span></>
+                )}
+              </p>
             </section>
           )}
 

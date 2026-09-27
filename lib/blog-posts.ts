@@ -1,7 +1,47 @@
 // ============================================================
 // TRIKAL VAANI — BLOG POSTS — SUPABASE VERSION
 // CEO: Rohiit Gupta | Chief Vedic Architect
-// Version: 3.10 (REVIEWED_AT — dated "Last reviewed by Rohiit Gupta")
+// Version: 3.13 (SHARED lib/wiki.ts — one source for /blog, /learn, /events)
+// Date: 2026-09-27
+//
+// CHANGE v3.13 — no behaviour change. BlogCitation / BlogInfoboxRow /
+//   BlogGlossaryTerm / BlogHubGroup, their normalizers and headingAnchor()
+//   moved to lib/wiki.ts (v1.0) so /learn and /events use the exact same
+//   rules. This file imports them and re-exports the old names, so every
+//   existing import keeps working.
+//
+// ------------------------------------------------------------
+// PREVIOUS: Version 3.12 (HUB HIERARCHY — Pillar → Samuh → Cluster)
+// Date: 2026-09-27
+//
+// CHANGE v3.12 — approved by Rohiit 27 Sep 2026 (editorial_rulings #8 G.6):
+//   • New column public.blog_posts.hub_group jsonb {label, anchor} (added
+//     27 Sep 2026): the Samuh/group a cluster belongs to inside its pillar.
+//     `anchor` is headingAnchor() of that group's H2 on the pillar page.
+//     BlogPost gains `hubGroup`.
+//   • headingAnchor(text): ONE shared slug rule for H2 ids. The page uses it
+//     for descriptive anchors (#aaj-samuh-modern-life-events) and hub_group
+//     anchors are generated with the same rule — keep them identical.
+//   • getHubChildren(pillarSlug): every published page whose pillar_slug is
+//     this pillar (slug, title, category, lang, hub_group only — light).
+//
+// ------------------------------------------------------------
+// PREVIOUS: Version 3.11 (WIKIPEDIA-STYLE — sanskrit shlok, infobox, glossary, pillar)
+// Date: 2026-09-27
+//
+// CHANGE v3.11 — approved by Rohiit 27 Sep 2026 (editorial_rulings #8, B.8/B.9/G):
+//   • BlogCitation gains `adhyaya_name` and `sanskrit` (mool shlok, Devanagari,
+//     from bphs_slokas.text_deva). The page never shows sanskrit for the 6
+//     restricted granth (page.tsx enforces it too — defence in depth).
+//   • New columns (added 27 Sep 2026): infobox jsonb [{label,value}],
+//     glossary jsonb [{term,definition,same_as}], pillar_slug text.
+//     BlogPost gains `infobox`, `glossary`, `pillarSlug`; mapRow() reads them
+//     through normalizers that drop malformed rows instead of crashing.
+//   • getPostBySlug() already uses select('*') — no query change needed.
+//     LIST_COLUMNS unchanged (list pages never need these).
+//
+// ------------------------------------------------------------
+// PREVIOUS: Version 3.10 (REVIEWED_AT — dated "Last reviewed by Rohiit Gupta")
 // Date: 2026-09-25
 //
 // CHANGE v3.10 — the only change in this file:
@@ -159,44 +199,37 @@
 // ============================================================
 
 import { createClient } from '@supabase/supabase-js';
+import {
+  normalizeCitations,
+  normalizeInfobox,
+  normalizeGlossary,
+  normalizeHubGroup,
+  headingAnchor,
+  type WikiCitation,
+  type WikiInfoboxRow,
+  type WikiGlossaryTerm,
+  type WikiHubGroup,
+} from './wiki';
+
+// v3.13: old names kept so every existing import still compiles
+export type BlogCitation = WikiCitation;
+export type BlogInfoboxRow = WikiInfoboxRow;
+export type BlogGlossaryTerm = WikiGlossaryTerm;
+export type BlogHubGroup = WikiHubGroup;
+export { headingAnchor };
 
 // ============================================================
 // TYPES — v3.2: sections now correctly typed + transformed
 // ============================================================
 // v3.9 — one verified classical reference (see header).
-export interface BlogCitation {
-  work: string | null;        // public.bphs_slokas.work key, null = open-source Granth
-  granth: string;             // display name, e.g. "Brihat Parashara Hora Shastra"
-  adhyaya: number | null;
-  shlok: string | null;       // "8" or "19-44"; null when only the Granth is cited
-  edition: string | null;
-  rule_en: string | null;
-  rule_hi: string | null;
-}
 
-function normalizeCitations(raw: unknown): BlogCitation[] {
-  if (!Array.isArray(raw)) return [];
-  const out: BlogCitation[] = [];
-  for (const r of raw) {
-    if (!r || typeof r !== 'object') continue;
-    const o = r as Record<string, unknown>;
-    const granth = typeof o.granth === 'string' ? o.granth.trim() : '';
-    if (!granth) continue;
-    const adh = Number(o.adhyaya);
-    const shlok = o.shlok === null || o.shlok === undefined || o.shlok === '' ? null : String(o.shlok).trim();
-    const str = (v: unknown) => (typeof v === 'string' && v.trim() ? v.trim() : null);
-    out.push({
-      work: str(o.work),
-      granth,
-      adhyaya: Number.isFinite(adh) && adh > 0 ? adh : null,
-      shlok,
-      edition: str(o.edition),
-      rule_en: str(o.rule_en),
-      rule_hi: str(o.rule_hi),
-    });
-  }
-  return out;
-}
+
+
+
+
+
+
+
 
 export interface BlogPost {
   slug: string;
@@ -230,6 +263,11 @@ export interface BlogPost {
   citations: BlogCitation[];
   // ── v3.10: when Rohiit last reviewed this page (ISO timestamp) ──
   reviewedAt: string | null;
+  // ── v3.11: Wikipedia-style components ([] / null when absent) ──
+  infobox: BlogInfoboxRow[];
+  glossary: BlogGlossaryTerm[];
+  pillarSlug: string | null;
+  hubGroup: BlogHubGroup | null; // v3.12
   // ── v3.3: bilingual (EN/HI) support ──────────────────────
   lang: string;               // 'en' | 'hi'
   altLangSlug: string | null; // counterpart slug in the other language (hreflang pairing)
@@ -457,6 +495,11 @@ function mapRow(row: Record<string, unknown>): BlogPost {
     citations:        normalizeCitations(row.citations),
     // ── v3.10: human review timestamp ─────────────────────────
     reviewedAt:       typeof row.reviewed_at === 'string' && row.reviewed_at ? row.reviewed_at : null,
+    // ── v3.11: Wikipedia-style components ─────────────────────
+    infobox:          normalizeInfobox(row.infobox),
+    glossary:         normalizeGlossary(row.glossary),
+    pillarSlug:       typeof row.pillar_slug === 'string' && row.pillar_slug.trim() ? row.pillar_slug.trim() : null,
+    hubGroup:         normalizeHubGroup(row.hub_group),
     // ── v3.3: bilingual (EN/HI) support ──────────────────────
     lang:             (row.lang as string) ?? 'en',
     altLangSlug:      (row.alt_lang_slug as string) ?? null,
@@ -615,4 +658,36 @@ export async function getRelatedPosts(slugs: string[]): Promise<BlogPost[]> {
     return [];
   }
   return ((data ?? []) as unknown as Record<string, unknown>[]).map(mapRow);
+}
+
+// ============================================================
+// v3.12 — HUB CHILDREN (pillar page only)
+// Light select: never pulls sections/faqs.
+// ============================================================
+export interface HubChild {
+  slug: string;
+  title: string;
+  category: string;
+  hubGroup: BlogHubGroup | null;
+}
+
+export async function getHubChildren(pillarSlug: string): Promise<HubChild[]> {
+  const { data, error } = await supabaseAnon
+    .from('blog_posts')
+    .select('slug, title, category, hub_group')
+    .eq('pillar_slug', pillarSlug)
+    .eq('is_published', true)
+    .order('slug', { ascending: true })
+    .limit(500);
+
+  if (error) {
+    console.error('[TV-Blog] getHubChildren error:', error.message);
+    return [];
+  }
+  return ((data ?? []) as unknown as Record<string, unknown>[]).map((r) => ({
+    slug: r.slug as string,
+    title: (r.title as string) ?? '',
+    category: (r.category as string) ?? '',
+    hubGroup: normalizeHubGroup(r.hub_group),
+  }));
 }

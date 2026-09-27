@@ -1,9 +1,51 @@
 'use client'
+/* ============================================================
+   components/seo/SeoPageLayout.tsx — /learn/[slug] layout
+   VERSION: 2.0 (27 Sep 2026) — TRIKAAL VAANI STANDARD FORMAT
+   (editorial_rulings #8 section G — same as /blog v3.6 and /events)
+     • Infobox (seo_pillar_pages.infobox) + Contents (auto from ## headings)
+     • ## headings get descriptive ids (lib/wiki headingAnchor)
+     • [^n] in body_content → superscript [n] linked to the reference list
+     • Glossary (seo_pillar_pages.glossary) and numbered References with the
+       mool Sanskrit shlok (seo_pillar_pages.citations; the 6 restricted granth
+       never show Sanskrit — lib/wiki). Legacy classical_ref text still shows
+       when a page has no citations yet.
+     • Hub: the cluster's pillar page (page_type 'pillar') is linked in the
+       breadcrumb and "See also" — derived from data we already fetch.
+     • Order: body → CTA → Glossary → References → FAQ → See also.
+   ============================================================ */
 
 import React, { useState } from 'react'
 import Link from 'next/link'
 import type { SeoPage } from '@/lib/seo-content'
 import SeoSidebar from './SeoSidebar'
+import { Infobox, TableOfContents, Glossary, References } from '@/components/wiki/WikiBlocks'
+import {
+  headingAnchor,
+  normalizeCitations,
+  normalizeInfobox,
+  normalizeGlossary,
+  firstCiteAnchors,
+  citeAnchor,
+  stripCites,
+} from '@/lib/wiki'
+
+/* v2.0 — per-render state for the markdown pass: citation markers (anchor of
+   each first occurrence) and the H2 list for Contents. The pass runs in
+   document order, so anchors are deterministic. */
+type MdState = {
+  max: number
+  first: Map<number, string>
+  heads: { text: string; href: string }[]
+  used: Set<string>
+  occ: number
+}
+function plainHeading(md: string): string {
+  return stripCites(md)
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+    .replace(/\*\*|\*|`/g, '')
+    .trim()
+}
 
 interface Props {
   page: SeoPage
@@ -12,7 +54,7 @@ interface Props {
 }
 
 /* ── Markdown-to-JSX renderer (lightweight, no dependency) ── */
-function renderMarkdown(md: string): React.ReactNode[] {
+function renderMarkdown(md: string, st?: MdState): React.ReactNode[] {
   if (!md) return []
   const lines = md.split('\n')
   const nodes: React.ReactNode[] = []
@@ -60,6 +102,16 @@ function renderMarkdown(md: string): React.ReactNode[] {
       .replace(/\*(.+?)\*/g, '<em>$1</em>')
       .replace(/`(.+?)`/g, '<code>$1</code>')
       .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" class="seo-inline-link">$1</a>')
+      // v2.0: [^n] → superscript link; dropped when n has no reference
+      .replace(/\[\^(\d+)\]/g, (_m: string, d: string) => {
+        if (!st) return ''
+        const n = Number(d)
+        const occ = st.occ++
+        if (n < 1 || n > st.max) return ''
+        const id = citeAnchor(n, 'md', occ)
+        if (!st.first.has(n)) st.first.set(n, id)
+        return `<sup id="${id}" class="ml-0.5 text-xs font-semibold leading-none"><a href="#cite-${n}" aria-label="Source ${n}" class="text-amber-400 no-underline hover:text-amber-200">[${n}]</a></sup>`
+      })
   }
 
   while (i < lines.length) {
@@ -98,7 +150,19 @@ function renderMarkdown(md: string): React.ReactNode[] {
     }
     if (line.startsWith('## ')) {
       flushList()
-      nodes.push(<h2 key={`h2-${i}`} className="seo-h2" dangerouslySetInnerHTML={{ __html: inlineFormat(line.slice(3)) }} />)
+      // v2.0: descriptive, unique id + Contents entry
+      let h2id: string | undefined
+      if (st) {
+        const txt = plainHeading(line.slice(3))
+        const base = headingAnchor(txt)
+        let a = base
+        let k = 2
+        while (st.used.has(a)) a = `${base}-${k++}`
+        st.used.add(a)
+        st.heads.push({ text: txt, href: `#${a}` })
+        h2id = a
+      }
+      nodes.push(<h2 key={`h2-${i}`} id={h2id} className="seo-h2" style={{ scrollMarginTop: '6rem' }} dangerouslySetInnerHTML={{ __html: inlineFormat(line.slice(3)) }} />)
       i++; continue
     }
     if (line.startsWith('# ')) {
@@ -164,6 +228,29 @@ export default function SeoPageLayout({ page, clusterPages, relatedPages }: Prop
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const catColour = CATEGORY_COLOURS[page.category] || '#C8902D'
   const readTime = page.reading_time_min || Math.ceil((page.word_count || 1000) / 200)
+
+  // ── v2.0: standard-format data (lib/wiki) ──
+  const citations = normalizeCitations(page.citations)
+  const infobox = normalizeInfobox(page.infobox)
+  const glossary = normalizeGlossary(page.glossary)
+  const md: MdState = {
+    max: citations.length,
+    first: firstCiteAnchors(infobox.map((r, i) => ({ text: r.value, loc: `ib${i}` })), citations.length),
+    heads: [],
+    used: new Set(),
+    occ: 0,
+  }
+  const bodyNodes = page.body_content ? renderMarkdown(page.body_content, md) : null
+  const tocItems =
+    md.heads.length >= 3
+      ? [
+          ...md.heads,
+          ...(glossary.length ? [{ text: 'Glossary', href: '#glossary' }] : []),
+          ...(citations.length ? [{ text: 'Classical Sources', href: '#granth-sandarbh' }] : []),
+          ...(page.faq_block?.length ? [{ text: 'FAQ', href: '#faq' }] : []),
+        ]
+      : []
+  const pillar = clusterPages.find(p => p.page_type === 'pillar' && p.slug !== page.slug) ?? null
 
   return (
     <>
@@ -526,7 +613,11 @@ export default function SeoPageLayout({ page, clusterPages, relatedPages }: Prop
               <span>›</span>
               <Link href="/learn">Learn</Link>
               <span>›</span>
-              <Link href={`/learn?cluster=${page.cluster}`}>{page.cluster}</Link>
+              {pillar ? (
+                <Link href={`/learn/${pillar.slug}`}>{pillar.title_en}</Link>
+              ) : (
+                <Link href={`/learn?cluster=${page.cluster}`}>{page.cluster}</Link>
+              )}
               <span>›</span>
               <span style={{ color: '#A08050' }}>{page.title_en.slice(0, 48)}…</span>
             </nav>
@@ -607,22 +698,17 @@ export default function SeoPageLayout({ page, clusterPages, relatedPages }: Prop
 
           {/* Article */}
           <article className="seo-article">
+            {/* v2.0: Infobox + Contents (standard format) */}
+            <Infobox rows={infobox} max={citations.length} />
+            <TableOfContents items={tocItems} />
+
             {/* Body content */}
-            {page.body_content ? (
-              <div>{renderMarkdown(page.body_content)}</div>
+            {bodyNodes ? (
+              <div>{bodyNodes}</div>
             ) : (
               <p className="seo-p">{page.meta_description}</p>
             )}
-
-            {/* FAQ Section */}
-            {page.faq_block?.length > 0 && (
-              <div className="seo-faq">
-                <div className="seo-faq-title">Frequently Asked Questions</div>
-                {page.faq_block.map((faq, i) => (
-                  <FaqItem key={i} q={faq.q} a={faq.a} />
-                ))}
-              </div>
-            )}
+            <div className="clear-both" />
 
             {/* CTA Box */}
             <div className="seo-cta-box">
@@ -637,12 +723,38 @@ export default function SeoPageLayout({ page, clusterPages, relatedPages }: Prop
               </Link>
             </div>
 
-            {/* Classical reference */}
-            {page.classical_ref && (
-              <div className="seo-classical-ref">
-                <div className="seo-classical-ref-label">Classical Sources</div>
-                <p>{page.classical_ref}</p>
+            {/* v2.0: Glossary + numbered References (standard format) */}
+            <Glossary terms={glossary} />
+            {citations.length > 0 ? (
+              <References citations={citations} hi={false} backRefs={md.first} />
+            ) : (
+              page.classical_ref && (
+                <div className="seo-classical-ref">
+                  <div className="seo-classical-ref-label">Classical Sources</div>
+                  <p>{page.classical_ref}</p>
+                </div>
+              )
+            )}
+
+            {/* FAQ Section */}
+            {page.faq_block?.length > 0 && (
+              <div id="faq" className="seo-faq" style={{ scrollMarginTop: '6rem' }}>
+                <div className="seo-faq-title">Frequently Asked Questions</div>
+                {page.faq_block.map((faq, i) => (
+                  <FaqItem key={i} q={faq.q} a={faq.a} />
+                ))}
               </div>
+            )}
+
+            {/* v2.0: hub pillar (See also) */}
+            {pillar && (
+              <Link
+                href={`/learn/${pillar.slug}`}
+                className="my-8 block rounded-lg border border-amber-600/60 bg-amber-950/30 p-5 hover:bg-amber-900/30 transition"
+              >
+                <span className="mb-1 block text-xs font-semibold uppercase tracking-wider text-amber-400">Part of the hub</span>
+                <span className="font-semibold text-amber-100">{pillar.title_en}</span>
+              </Link>
             )}
 
             {/* Related pages */}

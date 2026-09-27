@@ -1,4 +1,9 @@
 import { createClient } from '@supabase/supabase-js'
+/* v4 (27 Sep 2026) — Wikipedia-style standard format (editorial_rulings #8 G):
+   SeoPage gains citations / infobox / glossary (jsonb columns added to
+   seo_pillar_pages on 27 Sep 2026, same shapes as blog_posts). They arrive raw;
+   components/seo/SeoPageLayout.tsx normalizes them through lib/wiki.ts.
+   No query changed — getSeoPageBySlug already selects '*'. */
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseKey = process.env.SUPABASE_SERVICE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -91,6 +96,10 @@ export type SeoPage = {
      the older title_hi / body_content_hi + ?lang=hi mechanism is legacy and is
      left NULL under Path A. */
   hindi_slug: string | null
+  /* v4 — raw jsonb, normalized by lib/wiki.ts (null until backfilled) */
+  citations?: unknown
+  infobox?: unknown
+  glossary?: unknown
 }
 
 /** Fetch a single published page by slug */
