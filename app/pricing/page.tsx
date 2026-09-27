@@ -3,7 +3,8 @@
  * TRIKAAL VAANI — Pricing Page
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/pricing/page.tsx
- * VERSION: 2.1
+ * VERSION: 2.2 (27 Sep 2026)
+ * v2.2 — 27 Sep 2026 — delivery text sach kiya (CEO Option A): WhatsApp/Email auto-delivery ka koi system nahi hai, isliye 'PDF on/via WhatsApp + Email' → 'PDF download + WhatsApp share'.
  * SIGNED: ROHIIT GUPTA, CEO
  *
  * ⚠️ STRICT CEO ORDER: DO NOT EDIT WITHOUT CEO APPROVAL
@@ -120,7 +121,7 @@ const PLANS = [
       '₹51 Basic — full Ashtakoot',
       '₹101 Deep — 1000-word + 10 remedies',
       '₹151 Both — Couple + Parent narratives',
-      'PDF on WhatsApp, Email & shareable link',
+      'PDF download, WhatsApp share & shareable link',
     ],
     locked: [],
     cta: 'Match Kundalis',
@@ -161,7 +162,7 @@ const PLANS = [
       'Personality, fidelity, finances & family',
       'Patterns, never verdicts',
       'Available in 3 languages',
-      'PDF on WhatsApp, Email & shareable link',
+      'PDF download, WhatsApp share & shareable link',
     ],
     locked: [],
     cta: 'Read the Karma — ₹251',

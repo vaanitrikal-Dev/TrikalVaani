@@ -3,7 +3,8 @@
  * TRIKAL VAANI — Karmic Background Reading — SEO Landing Pillar
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/karmic-background-reading/page.tsx
- * VERSION: 1.0
+ * VERSION: 1.1 (27 Sep 2026)
+ * v1.1 — 27 Sep 2026 — delivery text sach kiya (CEO Option A): WhatsApp/Email auto-delivery ka koi system nahi hai, isliye 'PDF on/via WhatsApp + Email' → 'PDF download + WhatsApp share'.
  * SIGNED: ROHIIT GUPTA, CEO
  * ============================================================
  * Server component (SEO). Renders <KarmicForm/> (client).
@@ -62,7 +63,7 @@ const FAQS = [
   { q: 'What are the 6 dimensions covered?',
     a: 'Core Personality, Fidelity & Relationship Conduct, Financial Behaviour, Family & Parental Respect, Hidden Tendencies & Karmic Baggage, and Marriage Outlook & Longevity.' },
   { q: 'How much does it cost and how is it delivered?',
-    a: 'A complete Karmic Background Reading is ₹251. It is delivered as an on-screen reading plus PDF via WhatsApp and email, usually within 60 seconds of payment.' },
+    a: 'A complete Karmic Background Reading is ₹251. It is delivered as an on-screen reading plus a downloadable PDF you can share on WhatsApp, usually within 60 seconds of payment.' },
 ];
 
 export default function KarmicLandingPage() {

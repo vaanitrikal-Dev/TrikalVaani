@@ -1,4 +1,5 @@
-// 🔱 TRIKAL VAANI | components/landing/PricingSection.tsx | v2.1
+// 🔱 TRIKAL VAANI | components/landing/PricingSection.tsx | v2.2 (27 Sep 2026)
+// v2.2 — 27 Sep 2026 — delivery text sach kiya (CEO Option A): WhatsApp/Email auto-delivery ka koi system nahi hai, isliye 'PDF on/via WhatsApp + Email' → 'PDF download + WhatsApp share'.
 // Owner: Rohiit Gupta, Chief Vedic Architect
 // Date: 2026-05-27
 // ============================================================================
@@ -82,7 +83,7 @@ const products = [
       'Full 8-koot Ashtakoot + Manglik Dosh check',
       'Deep ₹101 reading: 1000-word + 10 remedies',
       '₹151 Both: Couple + Parent narratives',
-      'PDF on WhatsApp, Email & shareable link',
+      'PDF download, WhatsApp share & shareable link',
     ],
   },
   {

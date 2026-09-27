@@ -3,6 +3,7 @@
  * TRIKAL VAANI — trikalvaani.com
  * Chief Vedic Architect: Rohiit Gupta
  * FILE: components/seo/HomepageGEO.tsx
+ * Version: 2.5 (27 Sep 2026) — 27 Sep 2026 — delivery text sach kiya (CEO Option A): WhatsApp/Email auto-delivery ka koi system nahi hai, isliye 'PDF on/via WhatsApp + Email' → 'PDF download + WhatsApp share'.
  * Version: 2.4 — GEO Element 3 extracted to DeepReadingsGrid (June 2026)
  * Date: 2026-06-27
  * 🔱 JAI MAA SHAKTI
@@ -284,7 +285,7 @@ export default function HomepageGEO() {
               'Auto time-zone resolution',
               'NRI &amp; global diaspora',
               'English · Hindi · Hinglish',
-              'PDF on WhatsApp &amp; Email',
+              'PDF download + WhatsApp share',
               '15 life domains',
             ].map((tag) => (
               <span

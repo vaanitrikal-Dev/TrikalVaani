@@ -1,7 +1,8 @@
 // TRIKAL VAANI - KarmicForm Component
 // CEO & Chief Vedic Architect: Rohiit Gupta
 // File: components/karmic/KarmicForm.tsx
-// VERSION: 1.1 (29 Aug 2026)
+// VERSION: 1.2 (27 Sep 2026)
+// v1.2 — 27 Sep 2026 — delivery text sach kiya (CEO Option A): WhatsApp/Email auto-delivery ka koi system nahi hai, isliye 'PDF on/via WhatsApp + Email' → 'PDF download + WhatsApp share'.
 // v1.1 — INTERNATIONAL. Visitors outside India see PayPal at $19 instead of
 //   the ₹251 Razorpay button; Razorpay on this account rejects foreign cards,
 //   so they could not buy at all. PayPal's order is created by
@@ -615,7 +616,7 @@ export default function KarmicForm() {
               <div style={{ padding: '10px 14px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '8px', textAlign: 'center' }}>
                 <p style={{ color: '#64748b', fontSize: '10px', margin: 0, lineHeight: 1.5 }}>
                   <strong style={{ color: '#94a3b8' }}>No Refund Policy</strong> — final-sale digital product.
-                  PDF delivered within 60 seconds via WhatsApp + Email.
+                  PDF download within 60 seconds + WhatsApp share.
                 </p>
               </div>
 

@@ -1,4 +1,5 @@
 /**
+ * v1.6 (27 Sep 2026) — 27 Sep 2026 — delivery text sach kiya (CEO Option A): WhatsApp/Email auto-delivery ka koi system nahi hai, isliye 'PDF on/via WhatsApp + Email' → 'PDF download + WhatsApp share'.
  * v1.5 (27 Sep 2026) — NARRATIVE AB PAGE KE ANDAR NAHI BANTA.
  *   Pehle page khud /api/milan-narrative ko await karta tha. Narrative ~34s
  *   leta hai, page ki limit 30s (vercel.json) — page timeout, generation
@@ -15,7 +16,7 @@
  * TRIKAL VAANI - Kundali Milan Result Page
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/milan/[slug]/page.tsx
- * VERSION: 1.5
+ * VERSION: 1.6
  * SIGNED: ROHIIT GUPTA, CEO
  * ============================================================
  * CHANGE LOG (v1.2 → v1.3):
@@ -336,7 +337,7 @@ export default async function MilanResultPage({ params }: { params: { slug: stri
               Poori Sachhai Dekhein — Deep Reading Kholiye →
             </a>
             <p className="mt-3 text-xs text-gray-500">
-              No refund · PDF delivered on WhatsApp + Email · 60 seconds
+              No refund · PDF download + WhatsApp share · 60 seconds
             </p>
           </div>
         </section>
@@ -415,7 +416,7 @@ export default async function MilanResultPage({ params }: { params: { slug: stri
                 Karmic Background Reading Kholiye — ₹251 →
               </a>
               <span className="text-xs text-gray-500">
-                Free Lagna &amp; Moon jhalak · PDF on WhatsApp
+                Free Lagna &amp; Moon jhalak · PDF download + WhatsApp share
               </span>
             </div>
           </div>

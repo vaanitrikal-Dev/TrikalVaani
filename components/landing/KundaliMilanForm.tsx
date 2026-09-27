@@ -1,6 +1,8 @@
 // TRIKAL VAANI - KundaliMilanForm Component
 // CEO & Chief Vedic Architect: Rohiit Gupta
 // File: components/landing/KundaliMilanForm.tsx
+// VERSION: 1.4 (27 Sep 2026)
+// v1.4 — 27 Sep 2026 — delivery text sach kiya (CEO Option A): WhatsApp/Email auto-delivery ka koi system nahi hai, isliye 'PDF on/via WhatsApp + Email' → 'PDF download + WhatsApp share'.
 // VERSION: 1.3 (29 Aug 2026) - INTERNATIONAL PAYMENT
 // v1.3: visitors outside India pay through PayPal — Basic $7, Couple $12,
 //   Parent $12, Both $15 — because Razorpay on this account rejects foreign
@@ -1611,7 +1613,7 @@ export default function KundaliMilanForm() {
                 <p style={{ color: '#64748b', fontSize: '10px', margin: 0, lineHeight: 1.5 }}>
                   <strong style={{ color: '#94a3b8' }}>No Refund Policy</strong> - This is a final-sale digital product.
                   Once payment is confirmed, the report cannot be refunded.
-                  PDF delivery within 60 seconds via WhatsApp + Email.
+                  PDF download within 60 seconds + WhatsApp share.
                 </p>
               </div>
 
