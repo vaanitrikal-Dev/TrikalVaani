@@ -2,9 +2,18 @@
 
 // ============================================================
 // FILE: components/landing/DardEngineShowcase.tsx
-// VERSION: v2.0 — FULL SALES REWRITE
+// VERSION: v2.1 — CARDS AB SERVICE PAGE PAR LE JAATE HAIN
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
-// DATE: 2026-06-29
+// DATE: 2026-09-27
+// CHANGES v2.0 → v2.1 (CEO faisla, 27 Sep 2026):
+//   ✅ Card click → apne /services/<page>#birth-form par (homepage form nahi)
+//   ✅ 5 cards HATAYE jinka service page nahi hai: Manifestation & Luck,
+//      Karz Mukti, Parents' Wellness, Retirement Planning, Legacy & Inheritance
+//   ✅ Bache 6: Ex-Back, Toxic Boss, Dream Career, Property Yog, Child's
+//      Destiny, Spiritual 2nd Innings — har ek ka service page maujood hai
+//   ✅ Props (selectedCategory, onSelectCategory) same — HomeClient nahi badla
+//
+// DATE (v2.0): 2026-06-29
 // CHANGES v1.0 → v2.0:
 //   ✅ Card descriptions: technical jargon → pain-point / emotional copy
 //   ✅ Header: social proof micro-signal added below main description
@@ -17,7 +26,7 @@
 // ============================================================
 
 import { useState } from 'react';
-import { HeartCrack, TriangleAlert as AlertTriangle, Sparkles, TrendingUp, Chrome as Home, Banknote, Baby, Users, Sunset, Crown, MoonStar, ChevronRight, Zap, CircleCheck as CheckCircle2 } from 'lucide-react';
+import { HeartCrack, TriangleAlert as AlertTriangle, Sparkles, TrendingUp, Chrome as Home, Baby, MoonStar, ChevronRight, Zap, CircleCheck as CheckCircle2 } from 'lucide-react';
 import type { SelectedCategory } from '@/app/page';
 
 const GOLD = '#D4AF37';
@@ -33,13 +42,15 @@ type Segment = {
   description: string;      // sales-first pain-point copy
   subDesc: string;          // astrology credibility (smaller text)
   isDual?: boolean;
+  href: string;             // v2.1: service page jahan card le jaata hai
 };
 
-// ── ALL 11 DOMAIN IDs MATCH domain-config.ts EXACTLY ─────────────────────────
+// ── v2.1: SIRF 6 CARDS — har ek ka /services/ page hai (CEO faisla 27 Sep) ──
 const SEGMENTS: Record<Generation, Segment[]> = {
   genz: [
     {
       id: 'genz_ex_back',
+      href: '/services/ex-back-reading#birth-form',
       label: 'Ex-Back & Closure',
       icon: HeartCrack,
       color: '#F472B6',
@@ -49,6 +60,7 @@ const SEGMENTS: Record<Generation, Segment[]> = {
     },
     {
       id: 'genz_toxic_boss',
+      href: '/services/toxic-boss-radar#birth-form',
       label: 'Toxic Boss / Workplace',
       icon: AlertTriangle,
       color: '#FB923C',
@@ -57,15 +69,8 @@ const SEGMENTS: Record<Generation, Segment[]> = {
       isDual: true,
     },
     {
-      id: 'genz_manifestation',
-      label: 'Manifestation & Luck',
-      icon: Sparkles,
-      color: '#FACC15',
-      description: "You're working hard. But is the universe actually backing you right now? Find your luck window.",
-      subDesc: 'Sankalpa activation · Current transit window',
-    },
-    {
       id: 'genz_dream_career',
+      href: '/services/career-pivot#birth-form',
       label: 'Dream Career Pivot',
       icon: TrendingUp,
       color: '#60A5FA',
@@ -76,6 +81,7 @@ const SEGMENTS: Record<Generation, Segment[]> = {
   millennial: [
     {
       id: 'mill_property_yog',
+      href: '/services/property-yog#birth-form',
       label: 'Property & Home Yog',
       icon: Home,
       color: '#34D399',
@@ -83,49 +89,19 @@ const SEGMENTS: Record<Generation, Segment[]> = {
       subDesc: '4th house & Jupiter blessing · Timing analysis',
     },
     {
-      id: 'mill_karz_mukti',
-      label: 'Karz Mukti (Debt Relief)',
-      icon: Banknote,
-      color: '#FACC15',
-      description: 'Debt weighing you down? Saturn shows exactly when — and how — your financial karma clears.',
-      subDesc: '6th house & Saturn karma · Clearing window',
-    },
-    {
       id: 'mill_childs_destiny',
+      href: '/services/child-destiny#birth-form',
       label: "Child's Destiny",
       icon: Baby,
       color: '#F472B6',
       description: "What gift did your child bring into this life? Their destiny is readable from your own chart.",
       subDesc: "5th house Putra Bhava · Parent's chart reading",
     },
-    {
-      id: 'mill_parents_wellness',
-      label: "Parents' Wellness",
-      icon: Users,
-      color: '#60A5FA',
-      description: "Worried about a parent's health or safety? The ancestral house shows risks and protections.",
-      subDesc: '4th & 9th house · Ancestral protection reading',
-    },
   ],
   genx: [
     {
-      id: 'genx_retirement_peace',
-      label: 'Retirement Planning',
-      icon: Sunset,
-      color: '#FB923C',
-      description: "Have you built enough — or does karma still have a lesson? Jupiter's final cycle tells the truth.",
-      subDesc: '12th house & Jupiter final cycle · Peace timing',
-    },
-    {
-      id: 'genx_legacy_inheritance',
-      label: 'Legacy & Inheritance',
-      icon: Crown,
-      color: '#FACC15',
-      description: 'What wealth will you leave — and receive? The Dhan-Karma houses reveal the full picture.',
-      subDesc: '8th & 2nd house Dhan-Karma · Transfer timing',
-    },
-    {
       id: 'genx_spiritual_innings',
+      href: '/services/spiritual-purpose#birth-form',
       label: 'Spiritual 2nd Innings',
       icon: MoonStar,
       color: GOLD,
@@ -151,8 +127,9 @@ export default function DardEngineShowcase({ selectedCategory, onSelectCategory 
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const segments = SEGMENTS[activeGen];
 
+  // v2.1: homepage form nahi — seedha us vishay ke service page ke form par
   function handleSegmentClick(seg: Segment) {
-    onSelectCategory({ id: seg.id, label: seg.label, color: seg.color });
+    window.location.assign(seg.href);
   }
 
   return (

@@ -1,6 +1,13 @@
 /**
  * ============================================================
  * TRIKAAL VAANI — BirthForm
+ * v10.5 (27 Sep 2026) — CEO FAISLA: VISHAY NA HO TO "POORI KUNDALI".
+ *   Homepage par form ke paas vishay chunne ka koi box nahi tha; 6 Sep ka
+ *   domain guard seedha form bharne wale har grahak ko rok deta tha. Guard
+ *   hataya. Vishay khaali ho to ab general_kundali ("Poori Kundali") jaata
+ *   hai (pehle galti se Karz Mukti). Service pages apna vishay khud bhejte
+ *   hain — unpar koi asar nahi. Payment code bilkul same.
+ *
  * v10.4 (27 Sep 2026) — EK BADLAAV (sirf handleRazorpayPayment, create-order call):
  *
  *   27 Sep 10:39am: 9250886991 ne ₹51 pay kiya, UPI app se wapas aate hi tab
@@ -1044,15 +1051,8 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
     }
     setErrors(errs)
 
-    // ── DOMAIN GUARD — v-fix 06 Sep 2026 ──────────────────────────────────
-    // With no domain chosen, buildPredictionBody falls back to Karz Mukti and
-    // the reader receives a debt reading they never asked for. Refuse the
-    // submit instead. Uses apiError because `errors` is keyed to form fields
-    // and the domain is chosen outside this form.
-    if (!selectedCategory?.id) {
-      setApiError('Pehle apna vishay chuniye — kis baare mein reading chahiye. Bina chune reading galat vishay par ban jaati hai.')
-      return false
-    }
+    // v10.5: 6 Sep ka DOMAIN GUARD hataya (CEO faisla, 27 Sep 2026) — vishay
+    // na ho to buildPredictionBody ab general_kundali (Poori Kundali) bhejta hai.
 
     return Object.keys(errs).length === 0
   }
@@ -1072,8 +1072,9 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
       // domain card first, which is why all 31 paid rows in Supabase carry
       // domain_label "Karz Mukti (Debt)". Same shape as the /kundali payload
       // bug fixed the same day — a silent default standing in for real input.
-      domainId:    selectedCategory?.id    || 'mill_karz_mukti',
-      domainLabel: selectedCategory?.label || 'General',
+      // v10.5: default = Poori Kundali (general_kundali), CEO faisla 27 Sep 2026
+      domainId:    selectedCategory?.id    || 'general_kundali',
+      domainLabel: selectedCategory?.label || 'Poori Kundali',
       predictionTier,
       paymentVerification,
       paypalVerification,
