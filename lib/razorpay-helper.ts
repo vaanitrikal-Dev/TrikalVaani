@@ -3,8 +3,20 @@
  * TRIKAL VAANI — Razorpay Helper
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: lib/razorpay-helper.ts
- * VERSION: 1.0
+ * VERSION: 1.1 (27 Sep 2026)
  * SIGNED: ROHIIT GUPTA, CEO
+ * ============================================================
+ * v1.1 (27 Sep 2026) — OPTIONAL callbackUrl (REDIRECT MODE)
+ *   Problem: mobile par UPI app khulte hi Chrome hamara tab maar/reload kar
+ *   deta hai → `handler` kabhi nahi chalta → /api/verify-payment aur
+ *   /api/predict kabhi call nahi hote. Proof: 26-27 Sep ko 2 din mein
+ *   verify-payment sirf 1 baar chala, jabki Deep ke 3 payment captured the.
+ *   Fix: callbackUrl diya jaaye to Razorpay `redirect: true` mode mein
+ *   chalta hai — payment ke baad Razorpay KHUD customer ko callbackUrl par
+ *   POST karta hai (payment_id, order_id, signature). Hamare tab ka zinda
+ *   rehna zaroori nahi.
+ *   callbackUrl NA diya jaaye to sab kuch v1.0 jaisa (Milan, Karmic, Swapna,
+ *   Muhurat, Yog, Upgrade — kisi par asar nahi).
  * ============================================================
  * Loads Razorpay checkout.js dynamically (only when user clicks pay)
  * and opens the Razorpay payment popup.
@@ -61,6 +73,8 @@ export interface RazorpayCheckoutOptions {
   prefillEmail?: string;
   prefillContact?: string;
   themeColor?: string;
+  // v1.1 — diya ho to redirect mode (handler nahi chalta, Razorpay POST karta hai)
+  callbackUrl?: string;
   onSuccess: (response: {
     razorpay_payment_id: string;
     razorpay_order_id: string;
@@ -96,6 +110,8 @@ export function openRazorpayCheckout(opts: RazorpayCheckoutOptions): void {
     theme: {
       color: opts.themeColor ?? '#D4AF37',
     },
+    // v1.1 — sirf tab jab caller callbackUrl de
+    ...(opts.callbackUrl ? { callback_url: opts.callbackUrl, redirect: true } : {}),
     modal: {
       ondismiss: () => {
         if (opts.onDismiss) opts.onDismiss();
@@ -116,3 +132,4 @@ export function openRazorpayCheckout(opts: RazorpayCheckoutOptions): void {
 
   rzp.open();
 }
+// END — lib/razorpay-helper.ts v1.1

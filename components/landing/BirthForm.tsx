@@ -1,6 +1,18 @@
 /**
  * ============================================================
  * TRIKAAL VAANI — BirthForm
+ * v10.6 (27 Sep 2026) — EK BADLAAV: Deep Reading (₹51) Razorpay REDIRECT MODE.
+ *   Mobile par UPI app se lautne par tab reload ho jaata tha → onSuccess kabhi
+ *   nahi chalta tha → report nahi banti thi (26-27 Sep: verify-payment 2 din
+ *   mein sirf 1 baar chala). Ab sirf 'paid' tier par openRazorpayCheckout ko
+ *   `callbackUrl` jaata hai → Razorpay khud customer ko
+ *   /api/razorpay-callback par bhejta hai, server report bana kar
+ *   /report/<slug> par redirect karta hai.
+ *   Voice (₹11), PayPal, free tier, validate, buildPredictionBody,
+ *   create-order body — kuch nahi badla. onSuccess code wahi hai (voice ke
+ *   liye chalta hai; paid par redirect mode mein Razorpay use call nahi karta).
+ *   Build marker → "BF v10.6 · 27-Sep-2026".
+ *
  * v10.5 (27 Sep 2026) — CEO FAISLA: VISHAY NA HO TO "POORI KUNDALI".
  *   Homepage par form ke paas vishay chunne ka koi box nahi tha; 6 Sep ka
  *   domain guard seedha form bharne wale har grahak ko rok deta tha. Guard
@@ -1257,6 +1269,8 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
         prefillName:    fields.name,
         prefillContact: `${fields.countryCode}${fields.mobile}`.replace(/\s/g, ''),
         themeColor:     '#D4AF37',
+        // v10.6 — sirf Deep Reading: redirect mode, report server par banegi
+        callbackUrl: tier === 'paid' ? `${window.location.origin}/api/razorpay-callback` : undefined,
         onSuccess: async (response) => {
           const verifyRes = await fetch('/api/verify-payment', {
             method:  'POST',
@@ -1427,11 +1441,11 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
               </p>
             </div>
 
-            {/* BUILD MARKER — BirthForm v10.5 · 2026-09-27. If you cannot see
+            {/* BUILD MARKER — BirthForm v10.6 · 2026-09-27. If you cannot see
                 this line on screen, the file you are looking at is NOT the file
                 that is deployed, and the problem is the deployment, not the code. */}
             <p style={{ margin: '0 0 6px', fontSize: '10px', color: '#334155', textAlign: 'right' }}>
-              BF v10.5 · 27-Sep-2026 · {isIndia === false ? 'INTL/USD' : 'IN/INR'}
+              BF v10.6 · 27-Sep-2026 · {isIndia === false ? 'INTL/USD' : 'IN/INR'}
             </p>
 
             <TierSelector selected={predictionTier} intl={isIndia === false} onChange={(t) => {
