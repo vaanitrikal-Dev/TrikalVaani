@@ -3,7 +3,11 @@
  * TRIKAL VAANI — Voice Prediction API
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/api/voice-predict/route.ts
- * VERSION: 1.4 — CEO order: 6000 tokens for richest predictions
+ * VERSION: 1.5 (29 Sep 2026) — AI fallback (CEO approved: "pehle sab pe laga do")
+ *   v1.5: Pehle EK Gemini call — 503 par "Prediction failed". Ab
+ *   lib/ai-fallback.ts: gemini-3.7-flash → gemini-3.8-flash (bheed par ek
+ *   retry) → Claude Sonnet 5, sab 30s limit ke andar. Prompt, 6000 tokens,
+ *   TTS cleanup — sab v1.4 jaisa.
  * SIGNED: ROHIIT GUPTA, CEO
  *
  * ⚠️ STRICT CEO ORDER: DO NOT EDIT WITHOUT CEO APPROVAL
@@ -21,6 +25,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { generateWithFallback } from '@/lib/ai-fallback';
 
 export const runtime = 'nodejs';
 export const maxDuration = 30;
@@ -111,28 +116,28 @@ Seeker's voice question:
 Write a warm, specific 100-120 word Hinglish voice prediction. Count your words — minimum 100.`;
 
     // ── Call Gemini 2.5 Flash ────────────────────────────────
-    const geminiRes = await fetch(`${GEMINI_URL}?key=${GEMINI_API_KEY}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        system_instruction: { parts: [{ text: systemPrompt }] },
-        contents: [{ role: 'user', parts: [{ text: userMessage }] }],
-        generationConfig: {
-          temperature    : 0.85,
-          maxOutputTokens: 6000,  // CEO ORDER: 6000 tokens for rich complete Devanagari predictions
-          topP           : 0.9,
-        },
-      }),
-    });
-
-    if (!geminiRes.ok) {
-      const errText = await geminiRes.text();
-      console.error('[VoicePredict v1.2] Gemini error:', geminiRes.status, errText.substring(0, 200));
+    // v1.5: 3.7 → 3.8 → Claude Sonnet 5, 30s maxDuration ke andar
+    let prediction = '';
+    try {
+      const ai = await generateWithFallback({
+        tag: 'voice-predict',
+        prompt: userMessage,
+        systemInstruction: systemPrompt,
+        models: ['gemini-3.7-flash', 'gemini-3.8-flash'],
+        maxOutputTokens: 6000,  // CEO ORDER: 6000 tokens for rich complete Devanagari predictions
+        temperature: 0.85,
+        topP: 0.9,
+        perCallTimeoutMs: 12_000,
+        deadlineMs: Date.now() + 27_000,
+        claudeMaxTokens: 1500,
+        claudeMinMs: 8_000,
+        minChars: 40,
+      });
+      prediction = ai.text;
+    } catch (e) {
+      console.error('[VoicePredict v1.5] All AI failed:', e instanceof Error ? e.message.slice(0, 300) : e);
       return NextResponse.json({ error: 'Prediction failed' }, { status: 500 });
     }
-
-    const geminiData = await geminiRes.json();
-    let prediction = geminiData.candidates?.[0]?.content?.parts?.[0]?.text || '';
 
     // ── Strip all markdown/links/emojis for clean TTS ────────
     prediction = prediction

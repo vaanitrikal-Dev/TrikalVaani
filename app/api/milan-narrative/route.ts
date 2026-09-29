@@ -1,4 +1,10 @@
 /**
+ * v1.9 (29 Sep 2026) — AI FALLBACK (CEO: "pehle sab pe laga do"):
+ *   Pehle EK Gemini call — Google 503 aate hi customer ko 502, reading
+ *   nahi. Ab lib/ai-fallback.ts: tier ka model (3.7/3.8) → doosra Gemini
+ *   (bheed par ek retry) → Claude Sonnet 5. Claude ne likha ho to polish
+ *   skip. maxDuration 120 → 300 (polish ki apni 120s limit + fallback
+ *   chain 120s ke andar nahi samaati thi). Prompt/tier/save — sab v1.8.
  * v1.8 (27 Sep 2026) — remedies_data ab OPTIONAL (manglik_data jaisa).
  *   5 Jun 2026 ke paid Milan (8826256938, ₹51 basic) mein VM ne remedies
  *   nahi lautaye the → route 500 deta tha ("core engine data missing") aur
@@ -36,14 +42,14 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { generateWithFallback } from '@/lib/ai-fallback';
 import { buildMilanCouplePrompt } from '@/lib/kundali-milan-prompt-couple';
 import { buildMilanParentPrompt } from '@/lib/kundali-milan-prompt-parent';
 import { buildMilanBothPrompt }   from '@/lib/kundali-milan-prompt-both';
 import { polishMilanNarrative }   from '@/lib/claude-polish';
 
 // v1.7 — Gemini 3.8 + polish ~35-60s; 120s ki gunjaaish
-export const maxDuration = 120;
+export const maxDuration = 300; // v1.9: AI chain ≤150s + polish ≤120s
 export const dynamic = 'force-dynamic';
 
 // ── Tier configuration (CEO LOCKED) ──────────────────────────
@@ -102,9 +108,6 @@ const supabase = createClient(
 );
 
 // FIX 1: GEMINI_API_KEY first — GOOGLE_API_KEY is Maps key, invalid for Gemini
-const genAI = new GoogleGenerativeAI(
-  process.env.GEMINI_API_KEY ?? process.env.GOOGLE_API_KEY ?? ''
-);
 
 interface NarrativeRequest {
   slug: string;
@@ -228,23 +231,24 @@ export async function POST(req: NextRequest) {
 
     // ── Call Gemini ────────────────────────────────────────
     let geminiText = '';
+    let writtenByClaude = false;
     try {
-      const model = genAI.getGenerativeModel({
-        model: cfg.model,
-        generationConfig: {
-          maxOutputTokens: cfg.maxTokens,
-          temperature:     0.85,
-          topP:            0.95,
-        },
-        // Iron Rule: never set thinkingBudget:0
+      // v1.9: tier ka model pehle, phir doosra Gemini, phir Claude Sonnet 5
+      const ai = await generateWithFallback({
+        tag: `milan-${tier}`,
+        prompt,
+        models: [cfg.model, cfg.model === 'gemini-3.8-flash' ? 'gemini-3.7-flash' : 'gemini-3.8-flash'],
+        maxOutputTokens: cfg.maxTokens,
+        temperature: 0.85,
+        topP: 0.95,
+        perCallTimeoutMs: 90_000,
+        deadlineMs: Date.now() + 150_000,
+        claudeMaxTokens: 8000,
+        claudeMinMs: 45_000,
+        minChars: 200,
       });
-
-      const result = await model.generateContent(prompt);
-      geminiText   = result.response.text();
-
-      if (!geminiText || geminiText.length < 200) {
-        throw new Error('Gemini returned empty or too-short response.');
-      }
+      geminiText = ai.text;
+      writtenByClaude = ai.fallback;
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : 'Unknown Gemini error';
       console.error('[Trikal] Gemini error:', msg);
@@ -259,7 +263,7 @@ export async function POST(req: NextRequest) {
     let polishMs  = 0;
     let didPolish = false;
 
-    if (cfg.usePolish) {
+    if (cfg.usePolish && !writtenByClaude) {  // v1.9: Claude ne likha to polish skip
       const polishResult = await polishMilanNarrative({
         rawNarrative: geminiText,
         audience,

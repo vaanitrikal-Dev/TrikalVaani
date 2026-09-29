@@ -3,8 +3,16 @@
  * TRIKAL VAANI — Karmic Background Reading — Generate API
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/api/karmic-reading/route.ts
- * VERSION: 1.2
+ * VERSION: 1.3 (29 Sep 2026)
  * SIGNED: ROHIIT GUPTA, CEO
+ * ============================================================
+ * CHANGE v1.3 (29 Sep 2026) — AI FALLBACK (CEO: "pehle sab pe laga do"):
+ *   Pehle sirf EK Gemini call thi — Google 503 ("high demand", 27-29 Sep
+ *   baar-baar) aate hi ₹251 customer ko "Reading engine failed". Ab
+ *   lib/ai-fallback.ts: gemini-3.8-flash → gemini-3.7-flash (bheed par
+ *   ek retry) → Claude Sonnet 5. Claude ne likha ho to alag Claude polish
+ *   skip (dobara Claude ka time/kharcha nahi). maxDuration 300 explicit.
+ *   Prompt, word target, save, GEO answer — sab v1.2 jaisa.
  * ============================================================
  * CHANGE v1.2:
  *   VM call now routes through lib/callVM.ts so the X-Trikal-Key
@@ -19,7 +27,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { generateWithFallback }     from '@/lib/ai-fallback';
 import { buildKarmicReadingPrompt } from '@/lib/karmic-reading-prompt';
 import { polishKarmicNarrative }    from '@/lib/claude-polish';
 import { callVM }                   from '@/lib/callVM';
@@ -47,9 +55,7 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-const genAI = new GoogleGenerativeAI(
-  process.env.GEMINI_API_KEY ?? process.env.GOOGLE_API_KEY ?? ''
-);
+export const maxDuration = 300; // v1.3: VM ~25s + AI chain ≤150s + polish ≤120s
 
 interface KarmicRequest { slug: string }
 
@@ -155,16 +161,25 @@ export async function POST(req: NextRequest) {
       language,
     });
 
-    // 3) Gemini 2.5 Pro
+    // 3) v1.3: Gemini 3.8 → 3.7 → Claude Sonnet 5 (lib/ai-fallback.ts)
     let geminiText = '';
+    let writtenByClaude = false;
     try {
-      const model = genAI.getGenerativeModel({
-        model: GEMINI_MODEL,
-        generationConfig: { maxOutputTokens: GEMINI_MAX_TOK, temperature: 0.85, topP: 0.95 },
+      const ai = await generateWithFallback({
+        tag: 'karmic',
+        prompt,
+        models: [GEMINI_MODEL, 'gemini-3.7-flash'],
+        maxOutputTokens: GEMINI_MAX_TOK,
+        temperature: 0.85,
+        topP: 0.95,
+        perCallTimeoutMs: 100_000,
+        deadlineMs: Date.now() + 150_000,
+        claudeMaxTokens: 8000,
+        claudeMinMs: 60_000,
+        minChars: 300,
       });
-      const result = await model.generateContent(prompt);
-      geminiText = result.response.text();
-      if (!geminiText || geminiText.length < 300) throw new Error('Empty Gemini response');
+      geminiText = ai.text;
+      writtenByClaude = ai.fallback;
     } catch (e) {
       const msg = e instanceof Error ? e.message : 'Unknown';
       console.error('[Trikal] Karmic Gemini error:', msg);
@@ -174,8 +189,10 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 4) Claude Sonnet 4.6 polish
-    const polishResult = await polishKarmicNarrative({ rawNarrative: geminiText, language });
+    // 4) Claude Sonnet 4.6 polish (v1.3: skip if Claude already wrote it)
+    const polishResult = writtenByClaude
+      ? { narrative: geminiText, polished: false, error: undefined as string | undefined }
+      : await polishKarmicNarrative({ rawNarrative: geminiText, language });
     const finalText = polishResult.narrative;
     if (!polishResult.polished && polishResult.error) {
       console.warn('[Trikal] Karmic polish skipped:', polishResult.error);

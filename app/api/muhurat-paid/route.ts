@@ -3,8 +3,14 @@
  * TRIKAL VAANI — Child Birth Muhurat Paid Report — Generate API
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/api/muhurat-paid/route.ts
- * VERSION: 1.2.2 — VM calls routed through lib/callVM.ts (X-Trikal-Key auto)
+ * VERSION: 1.3.0 (29 Sep 2026) — AI fallback
  * ============================================================
+ * CHANGE v1.3.0 (29 Sep 2026) — AI FALLBACK (CEO: "pehle sab pe laga do"):
+ *   Pehle EK Gemini call — Google 503 aate hi ₹151 customer ko 502. Ab
+ *   lib/ai-fallback.ts: gemini-3.8-flash → gemini-3.7-flash (bheed par ek
+ *   retry) → Claude Sonnet 5. Claude ne likha ho to polish skip.
+ *   maxDuration 300 explicit. VM, tiers, prompt, PDF — sab v1.2.2 jaisa.
+ *
  * CHANGE v1.2.2: Both VM calls (/muhurat-paid + fire-and-forget /muhurat-pdf)
  *   now go through lib/callVM.ts so the X-Trikal-Key auth header is injected
  *   automatically. Timeouts/abort, tiers, prompt, Gemini, polish, and the
@@ -31,7 +37,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { generateWithFallback } from '@/lib/ai-fallback';
 import { polishMuhuratNarrative, type MuhuratLanguage } from '@/lib/claude-polish';
 import { callVM } from '@/lib/callVM';
 
@@ -49,6 +55,7 @@ const VM_MUHURAT_PDF_ENDPOINT =
 // 2.5-pro -> 3.8-flash. On the independent Artificial Analysis index
 // 3.8 Flash scores 59 and 3.7 Flash 56, against Gemini 3.1 Pro's
 // upper-40s — an upgrade in capability, and cheaper than 2.5-pro was.
+export const maxDuration = 300; // v1.3.0: VM ≤30s + AI chain ≤140s + polish ≤120s
 const GEMINI_MODEL   = 'gemini-3.8-flash';
 const GEMINI_MAX_TOK = 12000;            // MAX_TOKENS CEO locked
 const WORD_TARGET    = 600;              // child-life prediction
@@ -59,9 +66,6 @@ const supabase = createClient(
 );
 
 // GEMINI_API_KEY first — GOOGLE_API_KEY is the Maps key (invalid for Gemini)
-const genAI = new GoogleGenerativeAI(
-  process.env.GEMINI_API_KEY ?? process.env.GOOGLE_API_KEY ?? ''
-);
 
 interface MuhuratPaidRequest {
   slug: string;
@@ -327,23 +331,24 @@ export async function POST(req: NextRequest) {
 
     // 3) Gemini 2.5 Pro
     let geminiText = '';
+    let writtenByClaude = false;
     try {
-      const model = genAI.getGenerativeModel({
-        model: GEMINI_MODEL,
-        generationConfig: {
-          maxOutputTokens: GEMINI_MAX_TOK,
-          temperature:     0.85,
-          topP:            0.95,
-        },
-        // Iron Rule: never set thinkingBudget:0
+      // v1.3.0: Gemini 3.8 → 3.7 → Claude Sonnet 5
+      const ai = await generateWithFallback({
+        tag: 'muhurat-paid',
+        prompt,
+        models: [GEMINI_MODEL, 'gemini-3.7-flash'],
+        maxOutputTokens: GEMINI_MAX_TOK,
+        temperature: 0.85,
+        topP: 0.95,
+        perCallTimeoutMs: 90_000,
+        deadlineMs: Date.now() + 140_000,
+        claudeMaxTokens: 8000,
+        claudeMinMs: 45_000,
+        minChars: 300,
       });
-
-      const result = await model.generateContent(prompt);
-      geminiText   = result.response.text();
-
-      if (!geminiText || geminiText.length < 300) {
-        throw new Error('Gemini returned empty or too-short response.');
-      }
+      geminiText = ai.text;
+      writtenByClaude = ai.fallback;
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : 'Unknown Gemini error';
       console.error('[Trikal] Muhurat Gemini error:', msg);
@@ -358,10 +363,13 @@ export async function POST(req: NextRequest) {
     let didPolish = false;
     let polishMs  = 0;
 
-    const polishResult = await polishMuhuratNarrative({
-      rawNarrative: geminiText,
-      language,
-    });
+    // v1.3.0: Claude ne pehle hi likha ho to polish skip
+    const polishResult = writtenByClaude
+      ? { narrative: geminiText, polished: false, polishMs: 0, error: undefined as string | undefined }
+      : await polishMuhuratNarrative({
+          rawNarrative: geminiText,
+          language,
+        });
 
     finalText = polishResult.narrative;
     didPolish = polishResult.polished;
