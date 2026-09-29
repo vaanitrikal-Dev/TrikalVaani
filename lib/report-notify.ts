@@ -2,7 +2,11 @@
 // 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER
 // ════════════════════════════════════════════════════════════════════════════
 // File:     lib/report-notify.ts   (NEW FILE)
-// Version:  v1.0 (29 Sep 2026)
+// Version:  v1.1 (29 Sep 2026)
+// v1.1: Apps Script galat key par bhi HTTP 200 deta hai (body mein ok:false).
+//   v1.0 sirf HTTP status dekhta tha → CEO ke pehle test mein log ne
+//   "EMAILED" likha par email aaya hi nahi. Ab JSON ka ok:true zaroori; warna
+//   asli error (jaise "bad key") log + emailed_at khaali (Phase 2 dobara bhejega).
 // Owner:    Rohiit Gupta, Chief Vedic Architect
 //
 // ── KYUN ───────────────────────────────────────────────────────────────────
@@ -161,8 +165,10 @@ export async function notifyReportReady(input: NotifyInput): Promise<void> {
       signal: AbortSignal.timeout(10_000),
       redirect: 'follow',
     });
-    if (!res.ok) {
-      console.error(`[notify] email webhook HTTP ${res.status}`, key);
+    // v1.1: Apps Script har haal mein 200 deta hai — asli jawab JSON ke andar
+    const reply: any = await res.json().catch(() => null);
+    if (!res.ok || !reply || reply.ok !== true) {
+      console.error(`[notify] email NOT sent | HTTP ${res.status} | ${JSON.stringify(reply).slice(0, 200)}`, key);
       await supa.from('report_notifications').update({ emailed_at: null }).eq('payment_id', key);
       return;
     }
@@ -171,4 +177,4 @@ export async function notifyReportReady(input: NotifyInput): Promise<void> {
     console.error('[notify] failed (report unaffected):', e instanceof Error ? e.message : e);
   }
 }
-// END — lib/report-notify.ts v1.0
+// END — lib/report-notify.ts v1.1
