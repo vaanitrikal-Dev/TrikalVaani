@@ -2,7 +2,10 @@
 // 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER
 // ════════════════════════════════════════════════════════════════════════════
 // File:     lib/report-notify.ts   (NEW FILE)
-// Version:  v1.1 (29 Sep 2026)
+// Version:  v1.2 (29 Sep 2026)
+// v1.2: email bhejna alag function (sendNotifyEmail) + retryPendingEmails() —
+//   paid-recovery cron har 5 min un rows ko dobara bhejta hai jinka email
+//   fail hua tha (emailed_at khaali). Customer message/format wahi.
 // v1.1: Apps Script galat key par bhi HTTP 200 deta hai (body mein ok:false).
 //   v1.0 sirf HTTP status dekhta tha → CEO ke pehle test mein log ne
 //   "EMAILED" likha par email aaya hi nahi. Ab JSON ka ok:true zaroori; warna
@@ -86,6 +89,84 @@ async function fromRazorpay(paymentId: string): Promise<{ phone?: string; amount
   }
 }
 
+interface EmailRow {
+  key: string; product: string; name: string; waNumber: string | null;
+  reportUrl: string; amountRupees?: number | null;
+}
+
+/** v1.2: ek 1-tap email bhejo. true = Apps Script ne ok:true kaha. Never throws. */
+async function sendNotifyEmail(r: EmailRow): Promise<boolean> {
+  try {
+    const url = process.env.ALERT_WEBHOOK_URL;
+    const secret = process.env.ALERT_WEBHOOK_KEY;
+    if (!url || !secret) { console.warn('[notify] ALERT_WEBHOOK_URL/KEY not set — email NOT sent', r.key); return false; }
+    const msg = customerMessage(r.name, r.product, r.reportUrl);
+    const waLink = r.waNumber ? `https://wa.me/${r.waNumber}?text=${encodeURIComponent(msg)}` : null;
+    const amt = r.amountRupees != null ? ` ₹${r.amountRupees}` : '';
+    const subject = `📿 Report bhejein — ${r.name || 'Customer'}, ${r.product}${amt}`;
+    const body =
+      `${r.product}${amt} — ${r.name || 'Customer'}\n` +
+      `Mobile: ${r.waNumber ? '+' + r.waNumber : 'NAHI MILA'}\n\n` +
+      (waLink ? `WhatsApp par bhejo (tap karein):\n${waLink}\n\n` : `Mobile nahi mila — report link khud bhejein.\n\n`) +
+      `Message:\n${msg}\n\nPayment: ${r.key}`;
+    const html =
+      `<div style="font-family:Arial,sans-serif;font-size:15px;line-height:1.5">` +
+      `<p><b>${esc(r.product)}${esc(amt)}</b> — ${esc(r.name || 'Customer')}<br>` +
+      `Mobile: ${r.waNumber ? '+' + esc(r.waNumber) : '<b style="color:#c00">NAHI MILA</b>'}</p>` +
+      (waLink
+        ? `<p><a href="${esc(waLink)}" style="display:inline-block;background:#25D366;color:#fff;` +
+          `padding:14px 22px;border-radius:10px;text-decoration:none;font-weight:bold;font-size:17px">` +
+          `WhatsApp par bhejo</a></p>`
+        : `<p style="color:#c00">Mobile nahi mila — report link khud bhejein.</p>`) +
+      `<p style="color:#555">Message:<br>${esc(msg)}</p>` +
+      `<p style="color:#999;font-size:12px">Payment: ${esc(r.key)}</p></div>`;
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ key: secret, subject, body, html }),
+      signal: AbortSignal.timeout(10_000),
+      redirect: 'follow',
+    });
+    // v1.1: Apps Script har haal mein 200 deta hai — asli jawab JSON ke andar
+    const reply: any = await res.json().catch(() => null);
+    if (!res.ok || !reply || reply.ok !== true) {
+      console.error(`[notify] email NOT sent | HTTP ${res.status} | ${JSON.stringify(reply).slice(0, 200)}`, r.key);
+      return false;
+    }
+    console.log(`[notify] EMAILED | ${r.product} | ${r.key} | ${r.waNumber ?? 'no-phone'}`);
+    return true;
+  } catch (e) {
+    console.error('[notify] send failed:', e instanceof Error ? e.message : e);
+    return false;
+  }
+}
+
+/** v1.2: cron ke liye — jin rows ka email fail hua (emailed_at khaali) unhe dobara bhejo. */
+export async function retryPendingEmails(limit = 5): Promise<{ tried: number; sent: number }> {
+  const out = { tried: 0, sent: 0 };
+  try {
+    const supa = admin();
+    const { data: rows } = await supa.from('report_notifications')
+      .select('payment_id, product, customer_name, phone, report_url')
+      .is('emailed_at', null).limit(limit);
+    for (const row of rows ?? []) {
+      out.tried++;
+      const ok = await sendNotifyEmail({
+        key: row.payment_id, product: row.product ?? 'Report', name: row.customer_name ?? '',
+        waNumber: row.phone ?? null, reportUrl: row.report_url ?? 'https://trikalvaani.com',
+      });
+      if (ok) {
+        out.sent++;
+        await supa.from('report_notifications').update({ emailed_at: new Date().toISOString() })
+          .eq('payment_id', row.payment_id);
+      }
+    }
+  } catch (e) {
+    console.error('[notify] retryPendingEmails failed:', e instanceof Error ? e.message : e);
+  }
+  return out;
+}
+
 /** Report ready → one 1-tap email to the CEO. Never throws. */
 export async function notifyReportReady(input: NotifyInput): Promise<void> {
   try {
@@ -130,51 +211,12 @@ export async function notifyReportReady(input: NotifyInput): Promise<void> {
     }
 
     // 3. Email (Apps Script webhook)
-    const url = process.env.ALERT_WEBHOOK_URL;
-    const secret = process.env.ALERT_WEBHOOK_KEY;
-    if (!url || !secret) {
-      console.warn('[notify] ALERT_WEBHOOK_URL/KEY not set — email NOT sent', key);
-      await supa.from('report_notifications').update({ emailed_at: null }).eq('payment_id', key);
-      return;
-    }
-    const msg = customerMessage(name, input.product, input.reportUrl);
-    const waLink = waNumber ? `https://wa.me/${waNumber}?text=${encodeURIComponent(msg)}` : null;
-    const amt = amountRupees != null ? ` ₹${amountRupees}` : '';
-    const subject = `📿 Report bhejein — ${name || 'Customer'}, ${input.product}${amt}`;
-    const body =
-      `${input.product}${amt} — ${name || 'Customer'}\n` +
-      `Mobile: ${waNumber ? '+' + waNumber : 'NAHI MILA'}\n\n` +
-      (waLink ? `WhatsApp par bhejo (tap karein):\n${waLink}\n\n` : `Mobile nahi mila — report link khud bhejein.\n\n`) +
-      `Message:\n${msg}\n\nPayment: ${key}`;
-    const html =
-      `<div style="font-family:Arial,sans-serif;font-size:15px;line-height:1.5">` +
-      `<p><b>${esc(input.product)}${esc(amt)}</b> — ${esc(name || 'Customer')}<br>` +
-      `Mobile: ${waNumber ? '+' + esc(waNumber) : '<b style="color:#c00">NAHI MILA</b>'}</p>` +
-      (waLink
-        ? `<p><a href="${esc(waLink)}" style="display:inline-block;background:#25D366;color:#fff;` +
-          `padding:14px 22px;border-radius:10px;text-decoration:none;font-weight:bold;font-size:17px">` +
-          `WhatsApp par bhejo</a></p>`
-        : `<p style="color:#c00">Mobile nahi mila — report link khud bhejein.</p>`) +
-      `<p style="color:#555">Message:<br>${esc(msg)}</p>` +
-      `<p style="color:#999;font-size:12px">Payment: ${esc(key)}</p></div>`;
-
-    const res = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ key: secret, subject, body, html }),
-      signal: AbortSignal.timeout(10_000),
-      redirect: 'follow',
+    const ok = await sendNotifyEmail({
+      key, product: input.product, name, waNumber, reportUrl: input.reportUrl, amountRupees,
     });
-    // v1.1: Apps Script har haal mein 200 deta hai — asli jawab JSON ke andar
-    const reply: any = await res.json().catch(() => null);
-    if (!res.ok || !reply || reply.ok !== true) {
-      console.error(`[notify] email NOT sent | HTTP ${res.status} | ${JSON.stringify(reply).slice(0, 200)}`, key);
-      await supa.from('report_notifications').update({ emailed_at: null }).eq('payment_id', key);
-      return;
-    }
-    console.log(`[notify] EMAILED | ${input.product} | ${key} | ${waNumber ?? 'no-phone'}`);
+    if (!ok) await supa.from('report_notifications').update({ emailed_at: null }).eq('payment_id', key);
   } catch (e) {
     console.error('[notify] failed (report unaffected):', e instanceof Error ? e.message : e);
   }
 }
-// END — lib/report-notify.ts v1.1
+// END — lib/report-notify.ts v1.2

@@ -2,8 +2,23 @@
 // 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER
 // ════════════════════════════════════════════════════════════════════════════
 // File:     app/api/cron/paid-recovery/route.ts
-// Version:  v1.2 (27 Sep 2026)
+// Version:  v1.3 (29 Sep 2026)
 // Owner:    Rohiit Gupta, Chief Vedic Architect
+//
+// ── v1.3 (29 Sep 2026) — SURAKSHIT 1-TAP PHASE 2 (CEO: "Yes bhai") ──────
+//   CEO ka niyam: har paid customer ko 10 min ke andar WhatsApp report.
+//   A. EMAIL RETRY: report_notifications ki jin rows ka email fail hua
+//      (emailed_at khaali) — har run mein 5 tak dobara (lib/report-notify
+//      retryPendingEmails).
+//   B. READING RECOVERY: Milan / Karmic / Child Birth Muhurat ki reading
+//      customer ke BROWSER se banti hai — page band = reading kabhi nahi.
+//      Ab: jis reading row ko bane 8-60 min ho gaye aur gemini_narrative
+//      khaali hai, cron us route ka POST andar hi chalata hai ({slug}) —
+//      wahi AI fallback + save + 1-tap email jo browser mein hota. Har run
+//      max 1, aur sirf tab jab is run mein Deep recovery na hui ho (300s
+//      budget). 60 min tak (≈10 koshish) na bane → CEO ko ek critical alert.
+//      Sirf PAID readings (order_id wali) — free Milan rows chhodi jaati hain.
+//      Koi Supabase schema change nahi.
 //
 // ── v1.2 (27 Sep 2026) — REPORT AB SERVER KE ANDAR HI BANTI HAI ───────
 //   Pehle chowkidar https://trikalvaani.com/api/predict ko internet se call
@@ -61,6 +76,10 @@ import Razorpay from 'razorpay';
 import crypto from 'crypto';
 import { raiseAlert, raiseAlertOnce } from '@/lib/alert';
 import { POST as predictPOST } from '@/app/api/predict/route'; // v1.2: in-process
+import { POST as karmicPOST }  from '@/app/api/karmic-reading/route';   // v1.3
+import { POST as milanPOST }   from '@/app/api/milan-narrative/route';  // v1.3
+import { POST as muhuratPOST } from '@/app/api/muhurat-paid/route';     // v1.3
+import { retryPendingEmails }  from '@/lib/report-notify';              // v1.3
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300;
@@ -74,6 +93,54 @@ const GRACE_SEC       = 10 * 60;     // itna naya payment abhi browser ke paas h
 const MAX_ATTEMPTS    = 2;
 const MAX_RECOVERIES_PER_RUN = 1;    // predict ~5-60s leta hai, 300s budget
 const ALERT_DEDUPE_HOURS = 30 * 24;  // v1.1: har payment ka alert sirf ek baar
+const NARR_GRACE_MIN  = 8;           // v1.3: itni der browser ko reading banane do
+const NARR_GIVEUP_MIN = 60;          // v1.3: isse purani ho to cron nahi, alert
+
+// v1.3: browser-generated readings (Milan / Karmic / Muhurat)
+const NARRATIVE_JOBS = [
+  { table: 'kundali_milan',    label: 'Kundali Milan',       page: 'milan',   run: milanPOST,   api: '/api/milan-narrative' },
+  { table: 'karmic_readings',  label: 'Karmic Reading',      page: 'karmic',  run: karmicPOST,  api: '/api/karmic-reading' },
+  { table: 'muhurat_readings', label: 'Child Birth Muhurat', page: 'muhurat', run: muhuratPOST, api: '/api/muhurat-paid' },
+] as const;
+
+/** v1.3: ek khaali reading dhoondh ke server par banao. Result text lautata hai. */
+async function recoverOneNarrative(supa: any): Promise<string | null> {
+  const now = Date.now();
+  const newest = new Date(now - NARR_GRACE_MIN * 60_000).toISOString();
+  const oldest = new Date(now - 24 * 3600_000).toISOString();
+  for (const job of NARRATIVE_JOBS) {
+    // Sirf PAID readings: order_id wali (free Milan rows ka order_id khaali hota hai —
+    // live DB check 29 Sep: 2 free Milan rows khaali mili, unpar AI/alert nahi chahiye)
+    const { data: rows, error } = await supa.from(job.table)
+      .select('slug, created_at, gemini_narrative, order_id')
+      .not('order_id', 'is', null)
+      .lte('created_at', newest).gte('created_at', oldest)
+      .order('created_at', { ascending: true }).limit(20);
+    if (error) throw new Error(`${job.table}: ${error.message}`);
+    const pending = (rows ?? []).filter((r: any) => !r.gemini_narrative || String(r.gemini_narrative).length < 200);
+    for (const r of pending) {
+      const ageMin = (now - new Date(r.created_at).getTime()) / 60_000;
+      if (ageMin > NARR_GIVEUP_MIN) {
+        await raiseAlertOnce({
+          severity: 'critical', source: 'paid-recovery',
+          subject: `Reading nahi bani (${Math.round(ageMin)} min) — ${job.label} ${r.slug}`,
+          body: `${job.label} ki paid reading ${Math.round(ageMin)} min se khaali hai; cron ki har koshish fail.\n` +
+                `Page: ${SITE}/${job.page}/${r.slug}\n` +
+                `ACTION: page khol ke "Dobara koshish karein" dabao; na bane to Vercel log mein "${job.api}" dekho ya refund karo.`,
+        }, ALERT_DEDUPE_HOURS);
+        continue;
+      }
+      const t0 = Date.now();
+      const res = await job.run(new NextRequest(`${SITE}${job.api}`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ slug: r.slug }),
+      }));
+      const secs = ((Date.now() - t0) / 1000).toFixed(0);
+      return `${job.label} ${r.slug}: ${res.ok ? 'RECOVERED' : 'FAILED HTTP ' + res.status} (${secs}s)`;
+    }
+  }
+  return null;
+}
 
 type Product =
   | 'deep' | 'hast_rekha' | 'karmic' | 'milan' | 'muhurat' | 'voice_pack'
@@ -264,6 +331,11 @@ export async function GET(req: NextRequest) {
   }
 
   let recoveriesThisRun = 0;
+  const runStart = Date.now();
+
+  // v1.3 A — fail hue 1-tap emails dobara
+  const emailRetry = await retryPendingEmails(5);
+  if (emailRetry.tried) summary.notes.push(`email retry: ${emailRetry.sent}/${emailRetry.tried} sent`);
 
   for (const p of items) {
     if (p.status !== 'captured' || (p.amount_refunded ?? 0) > 0) continue;
@@ -314,6 +386,16 @@ export async function GET(req: NextRequest) {
     }
   }
 
+  // v1.3 B — browser-generated readings (sirf tab jab Deep recovery na hui ho)
+  if (recoveriesThisRun === 0 && Date.now() - runStart < 60_000) {
+    try {
+      const r = await recoverOneNarrative(supa);
+      if (r) summary.notes.push(r);
+    } catch (e) {
+      summary.errors.push(`narrative: ${e instanceof Error ? e.message : String(e)}`);
+    }
+  }
+
   if (summary.errors.length) {
     await raiseAlertOnce({ severity: 'warning', source: 'paid-recovery',
       subject: 'paid-recovery: check errors', body: summary.errors.join('\n').slice(0, 1500) }, 6);
@@ -323,4 +405,4 @@ export async function GET(req: NextRequest) {
   return NextResponse.json({ ok: true, window_hours: WINDOW_SEC / 3600, ...summary });
 }
 
-// END — app/api/cron/paid-recovery/route.ts v1.2 | Trikaal Vaani | Rohiit Gupta, Chief Vedic Architect
+// END — app/api/cron/paid-recovery/route.ts v1.3 | Trikaal Vaani | Rohiit Gupta, Chief Vedic Architect
