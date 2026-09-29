@@ -1,4 +1,6 @@
 /**
+ * v1.9.1 (29 Sep 2026) — ai-fallback v1.1 ke saath: Gemini ek call 60s max,
+ *   Claude ke liye 60s hamesha reserve (CEO test mein Claude skip hua tha).
  * v1.9 (29 Sep 2026) — AI FALLBACK (CEO: "pehle sab pe laga do"):
  *   Pehle EK Gemini call — Google 503 aate hi customer ko 502, reading
  *   nahi. Ab lib/ai-fallback.ts: tier ka model (3.7/3.8) → doosra Gemini
@@ -241,10 +243,11 @@ export async function POST(req: NextRequest) {
         maxOutputTokens: cfg.maxTokens,
         temperature: 0.85,
         topP: 0.95,
-        perCallTimeoutMs: 90_000,
+        perCallTimeoutMs: 60_000,
         deadlineMs: Date.now() + 150_000,
         claudeMaxTokens: 8000,
         claudeMinMs: 45_000,
+        claudeReserveMs: 60_000,
         minChars: 200,
       });
       geminiText = ai.text;

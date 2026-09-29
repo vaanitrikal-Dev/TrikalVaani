@@ -3,7 +3,7 @@
  * TRIKAL VAANI — Child Birth Muhurat Paid Report — Generate API
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/api/muhurat-paid/route.ts
- * VERSION: 1.3.0 (29 Sep 2026) — AI fallback
+ * VERSION: 1.3.1 (29 Sep 2026) — AI fallback (ai-fallback v1.1: Claude 60s reserve)
  * ============================================================
  * CHANGE v1.3.0 (29 Sep 2026) — AI FALLBACK (CEO: "pehle sab pe laga do"):
  *   Pehle EK Gemini call — Google 503 aate hi ₹151 customer ko 502. Ab
@@ -341,10 +341,11 @@ export async function POST(req: NextRequest) {
         maxOutputTokens: GEMINI_MAX_TOK,
         temperature: 0.85,
         topP: 0.95,
-        perCallTimeoutMs: 90_000,
+        perCallTimeoutMs: 75_000,
         deadlineMs: Date.now() + 140_000,
         claudeMaxTokens: 8000,
         claudeMinMs: 45_000,
+        claudeReserveMs: 60_000,
         minChars: 300,
       });
       geminiText = ai.text;

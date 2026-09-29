@@ -3,7 +3,7 @@
  * TRIKAL VAANI — Karmic Background Reading — Generate API
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/api/karmic-reading/route.ts
- * VERSION: 1.3 (29 Sep 2026)
+ * VERSION: 1.3.1 (29 Sep 2026) — ai-fallback v1.1: Claude ke liye 70s reserve
  * SIGNED: ROHIIT GUPTA, CEO
  * ============================================================
  * CHANGE v1.3 (29 Sep 2026) — AI FALLBACK (CEO: "pehle sab pe laga do"):
@@ -55,7 +55,7 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-export const maxDuration = 300; // v1.3: VM ~25s + AI chain ≤150s + polish ≤120s
+export const maxDuration = 300; // v1.3.1: VM ~25s + AI chain ≤170s (Claude likhe to polish nahi) / Gemini ≤100s + polish ≤120s
 
 interface KarmicRequest { slug: string }
 
@@ -173,9 +173,10 @@ export async function POST(req: NextRequest) {
         temperature: 0.85,
         topP: 0.95,
         perCallTimeoutMs: 100_000,
-        deadlineMs: Date.now() + 150_000,
+        deadlineMs: Date.now() + 170_000,
         claudeMaxTokens: 8000,
         claudeMinMs: 60_000,
+        claudeReserveMs: 70_000,
         minChars: 300,
       });
       geminiText = ai.text;

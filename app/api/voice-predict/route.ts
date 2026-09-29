@@ -3,7 +3,7 @@
  * TRIKAL VAANI — Voice Prediction API
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/api/voice-predict/route.ts
- * VERSION: 1.5 (29 Sep 2026) — AI fallback (CEO approved: "pehle sab pe laga do")
+ * VERSION: 1.5.1 (29 Sep 2026) — AI fallback (ai-fallback v1.1: Claude 10s reserve) (CEO approved: "pehle sab pe laga do")
  *   v1.5: Pehle EK Gemini call — 503 par "Prediction failed". Ab
  *   lib/ai-fallback.ts: gemini-3.7-flash → gemini-3.8-flash (bheed par ek
  *   retry) → Claude Sonnet 5, sab 30s limit ke andar. Prompt, 6000 tokens,
@@ -127,10 +127,11 @@ Write a warm, specific 100-120 word Hinglish voice prediction. Count your words 
         maxOutputTokens: 6000,  // CEO ORDER: 6000 tokens for rich complete Devanagari predictions
         temperature: 0.85,
         topP: 0.9,
-        perCallTimeoutMs: 12_000,
+        perCallTimeoutMs: 10_000,
         deadlineMs: Date.now() + 27_000,
         claudeMaxTokens: 1500,
         claudeMinMs: 8_000,
+        claudeReserveMs: 10_000,
         minChars: 40,
       });
       prediction = ai.text;

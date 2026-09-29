@@ -2,8 +2,19 @@
  * ============================================================
  * TRIKAAL VAANI — AI Fallback Helper (paid products)
  * CEO & Chief Vedic Architect: Rohiit Gupta
- * File: lib/ai-fallback.ts   (NEW FILE)
- * VERSION: 1.0 (29 Sep 2026)
+ * File: lib/ai-fallback.ts
+ * VERSION: 1.1 (29 Sep 2026)
+ * ============================================================
+ * v1.1 (29 Sep 2026) — CLAUDE KA TIME PEHLE SE BACHA KE RAKHO
+ *   Proof (Vercel log, CEO ka Milan test 06:47 IST): gemini-3.7-flash ne
+ *   88.7s baad 503 diya ("slow 503"), v1.0 ne usi ko dobara try kiya (56s
+ *   timeout) → Claude ke liye 1s bacha → SKIP → customer ko error. Doosri
+ *   baar bhi Claude ko 40s mile (45s chahiye the).
+ *   F1. claudeReserveMs: Gemini kabhi bhi is aakhri hisse ko nahi chhoota —
+ *       Claude ka time hamesha bacha rehta hai.
+ *   F2. Retry sirf tab jab fail JALDI hua ho (<10s). Slow fail = agla model.
+ *   F3. Ek model ne slow-fail kiya to doosra Gemini bhi shayad bheed mein —
+ *       uske liye bhi wahi reserve rule; time na ho to seedha Claude.
  * ============================================================
  * KYUN: 27-29 Sep ko Google Gemini par baar-baar "HTTP 503 — high demand"
  * aaya. Karmic, Milan, Child Birth Muhurat aur Voice sirf EK Gemini call
@@ -31,6 +42,7 @@ const CLAUDE_URL = 'https://api.anthropic.com/v1/messages';
 
 export const FALLBACK_CLAUDE_MODEL = 'claude-sonnet-5'; // CEO rule: newest model
 const RETRY_WAIT_MS = 2000;
+const FAST_FAIL_MS = 10_000;      // v1.1: isse jaldi fail hua tabhi retry
 const TRANSIENT = [429, 500, 503];
 
 export interface FallbackOptions {
@@ -45,6 +57,7 @@ export interface FallbackOptions {
   deadlineMs: number;              // absolute Date.now() deadline for whole chain
   claudeMaxTokens: number;         // Claude fallback budget
   claudeMinMs: number;             // itna time bacha ho tabhi Claude
+  claudeReserveMs?: number;        // v1.1: Gemini is aakhri hisse ko nahi chhoota (default = claudeMinMs)
   minChars?: number;               // isse chhota jawab = fail
 }
 
@@ -133,11 +146,13 @@ export async function generateWithFallback(o: FallbackOptions): Promise<Fallback
   const models = o.models?.length ? o.models : ['gemini-3.8-flash', 'gemini-3.7-flash'];
   const errors: string[] = [];
   const left = () => o.deadlineMs - Date.now();
+  const reserve = o.claudeReserveMs ?? o.claudeMinMs;
+  const geminiLeft = () => left() - reserve;       // v1.1 F1
 
   for (const model of models) {
     for (let attempt = 1; attempt <= 2; attempt++) {
-      const timeout = Math.min(o.perCallTimeoutMs, left() - 3000);
-      if (timeout < 8000) { errors.push(`${model}: skipped (time)`); break; }
+      const timeout = Math.min(o.perCallTimeoutMs, geminiLeft());
+      if (timeout < 8000) { errors.push(`${model}: skipped (time reserved for Claude)`); break; }
       const t0 = Date.now();
       try {
         const text = await callGeminiOnce(model, o, timeout);
@@ -148,7 +163,8 @@ export async function generateWithFallback(o: FallbackOptions): Promise<Fallback
         console.warn(`[ai-fallback] ${o.tag} ${model} try${attempt} FAIL ${secs(t0)}s | ${msg.slice(0, 160)}`);
         errors.push(`${model}#${attempt}: ${msg.slice(0, 160)}`);
         const transient = e instanceof HttpError && TRANSIENT.includes(e.status);
-        if (!transient || attempt === 2 || left() - RETRY_WAIT_MS < 15000) break;
+        const fast = Date.now() - t0 < FAST_FAIL_MS;               // v1.1 F2
+        if (!transient || !fast || attempt === 2 || geminiLeft() - RETRY_WAIT_MS < 8000) break;
         await sleep(RETRY_WAIT_MS);
       }
     }
@@ -170,4 +186,4 @@ export async function generateWithFallback(o: FallbackOptions): Promise<Fallback
     throw new Error(`All AI failed: ${errors.join(' | ')} | claude: ${msg.slice(0, 160)}`);
   }
 }
-// END — lib/ai-fallback.ts v1.0
+// END — lib/ai-fallback.ts v1.1
