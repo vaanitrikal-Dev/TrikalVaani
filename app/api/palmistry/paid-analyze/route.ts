@@ -1,5 +1,9 @@
-// TRIKAL VAANI - Palmistry Paid Analyze + Verify API - v4.2
+// TRIKAL VAANI - Palmistry Paid Analyze + Verify API - v4.3
 // CEO: Rohiit Gupta | Chief Vedic Architect
+//
+// v4.3 — SURAKSHIT 1-TAP (2026-09-29, CEO approved): report + PDF save hote hi
+//   lib/report-notify.ts CEO ko WhatsApp-button email bhejta hai (PDF link).
+//   Ek payment = ek email. Report/PDF logic mein koi badlaav nahi.
 //
 // v4.2 — PAYPAL FOR INTERNATIONAL BUYERS (2026-08-29):
 //   • Accepts a paypal_order_id ($7) as an alternative to the Razorpay trio
@@ -46,6 +50,7 @@
 //       → VM PDF (60s) → upload PDF to Storage (non-fatal) → Supabase
 //       save → return report + PDF + url.
 
+import { notifyReportReady } from '@/lib/report-notify';
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import crypto from 'crypto';
@@ -336,6 +341,17 @@ export async function POST(req: NextRequest) {
     if (saveErr) {
       console.error('[Trikal] Palm record save error:', saveErr.message);
       // Non-fatal — user still gets the report below.
+    }
+
+    // v4.3 — Surakshit 1-tap email (never throws)
+    if (pdf_url) {
+      await notifyReportReady({
+        product:      'Hast Rekha',
+        reportUrl:    pdf_url,
+        paymentId:    razorpay_payment_id || paypal_order_id || null,
+        customerName: user_name ?? null,
+        phone:        user_mobile ?? null,
+      });
     }
 
     // ── 6. Return report + PDF ───────────────────────────────────────────────

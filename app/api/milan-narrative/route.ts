@@ -1,4 +1,6 @@
 /**
+ * v1.10 (29 Sep 2026) — Surakshit 1-tap: narrative save hote hi CEO ko WhatsApp-button
+ *   email (lib/report-notify.ts). Ek payment = ek email.
  * v1.9.1 (29 Sep 2026) — ai-fallback v1.1 ke saath: Gemini ek call 60s max,
  *   Claude ke liye 60s hamesha reserve (CEO test mein Claude skip hua tha).
  * v1.9 (29 Sep 2026) — AI FALLBACK (CEO: "pehle sab pe laga do"):
@@ -45,6 +47,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { generateWithFallback } from '@/lib/ai-fallback';
+import { notifyReportReady } from '@/lib/report-notify';
 import { buildMilanCouplePrompt } from '@/lib/kundali-milan-prompt-couple';
 import { buildMilanParentPrompt } from '@/lib/kundali-milan-prompt-parent';
 import { buildMilanBothPrompt }   from '@/lib/kundali-milan-prompt-both';
@@ -294,6 +297,14 @@ export async function POST(req: NextRequest) {
 
     if (saveErr) {
       console.error('[Trikal] Milan narrative save failed:', saveErr.message);
+    } else {
+      // v1.10 — Surakshit 1-tap email (never throws)
+      await notifyReportReady({
+        product:    'Kundali Milan',
+        reportUrl:  `https://trikalvaani.com/milan/${slug}`,
+        orderTable: 'kundali_milan_orders',
+        orderId:    milan.order_id ?? null,
+      });
     }
 
     return NextResponse.json({

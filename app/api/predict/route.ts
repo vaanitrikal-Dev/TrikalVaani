@@ -105,6 +105,11 @@
 /**
  *
  * ══════════════════════════════════════════════════════════════════════════
+ * v16.1 — 29 SEPTEMBER 2026 — SURAKSHIT 1-TAP (CEO approved): paid report save hote hi
+ *   lib/report-notify.ts CEO ko email bhejta hai (WhatsApp button). Ek payment = ek
+ *   email. Browser, /api/razorpay-callback aur paid-recovery cron — teeno isi POST
+ *   se guzarte hain, isliye teeno cover. Report logic mein koi badlaav nahi.
+ *
  * v16.0 — 16 SEPTEMBER 2026 — GRANTH MODE
  * ══════════════════════════════════════════════════════════════════════════
  * ROHIIT KA FAISLA: "No Summary from Gemini or Sonnet — NO AI. Only data which
@@ -492,6 +497,7 @@
  * ============================================================
  */
 
+import { notifyReportReady } from '@/lib/report-notify'
 import { NextRequest, NextResponse }   from 'next/server'
 import { createClient }                from '@supabase/supabase-js'
 import crypto                          from 'crypto'
@@ -2404,6 +2410,15 @@ export async function POST(req: NextRequest) {
       isMinor,                                    // v15.12
     })
     console.log(`[TV-v14.6] Saved | slug:${publicSlug} | polished:${isPaid} | ms:${Date.now()-startMs}`)
+    // v16.1 — Surakshit 1-tap: CEO ko WhatsApp-button email (never throws)
+    if (isPaid && (paymentVerification?.razorpay_payment_id || paypalCaptureId)) {
+      await notifyReportReady({
+        product:      'Deep Reading',
+        reportUrl:    `https://trikalvaani.com/report/${publicSlug}`,
+        paymentId:    paymentVerification?.razorpay_payment_id ?? paypalCaptureId ?? null,
+        customerName: localBirthData?.name ?? null,
+      })
+    }
   } catch(err:any) {
     console.error(`[TV-v14.6] Save failed: ${err.message}`)
   }

@@ -3,7 +3,7 @@
  * TRIKAL VAANI — Karmic Background Reading — Generate API
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/api/karmic-reading/route.ts
- * VERSION: 1.3.1 (29 Sep 2026) — ai-fallback v1.1: Claude ke liye 70s reserve
+ * VERSION: 1.4 (29 Sep 2026) — Surakshit 1-tap email + ai-fallback v1.1 (Claude 70s reserve)
  * SIGNED: ROHIIT GUPTA, CEO
  * ============================================================
  * CHANGE v1.3 (29 Sep 2026) — AI FALLBACK (CEO: "pehle sab pe laga do"):
@@ -28,6 +28,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { generateWithFallback }     from '@/lib/ai-fallback';
+import { notifyReportReady }        from '@/lib/report-notify';
 import { buildKarmicReadingPrompt } from '@/lib/karmic-reading-prompt';
 import { polishKarmicNarrative }    from '@/lib/claude-polish';
 import { callVM }                   from '@/lib/callVM';
@@ -211,6 +212,14 @@ export async function POST(req: NextRequest) {
         updated_at: new Date().toISOString(),
       })
       .eq('slug', slug);
+
+    // v1.4 — Surakshit 1-tap: CEO ko WhatsApp-button email (never throws)
+    await notifyReportReady({
+      product:    'Karmic Reading',
+      reportUrl:  `https://trikalvaani.com/karmic/${slug}`,
+      orderTable: 'karmic_orders',
+      orderId:    reading.order_id ?? null,
+    });
 
     return NextResponse.json({
       success: true, slug, language, narrative: finalText,

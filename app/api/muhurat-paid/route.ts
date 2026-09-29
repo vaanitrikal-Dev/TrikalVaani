@@ -3,7 +3,7 @@
  * TRIKAL VAANI — Child Birth Muhurat Paid Report — Generate API
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/api/muhurat-paid/route.ts
- * VERSION: 1.3.1 (29 Sep 2026) — AI fallback (ai-fallback v1.1: Claude 60s reserve)
+ * VERSION: 1.4 (29 Sep 2026) — Surakshit 1-tap email + AI fallback (ai-fallback v1.1)
  * ============================================================
  * CHANGE v1.3.0 (29 Sep 2026) — AI FALLBACK (CEO: "pehle sab pe laga do"):
  *   Pehle EK Gemini call — Google 503 aate hi ₹151 customer ko 502. Ab
@@ -38,6 +38,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { generateWithFallback } from '@/lib/ai-fallback';
+import { notifyReportReady } from '@/lib/report-notify';
 import { polishMuhuratNarrative, type MuhuratLanguage } from '@/lib/claude-polish';
 import { callVM } from '@/lib/callVM';
 
@@ -399,6 +400,14 @@ export async function POST(req: NextRequest) {
 
     if (saveErr) {
       console.error('[Trikal] Muhurat narrative save failed:', saveErr.message);
+    } else {
+      // v1.4 — Surakshit 1-tap email (never throws)
+      await notifyReportReady({
+        product:    'Child Birth Muhurat',
+        reportUrl:  `https://trikalvaani.com/muhurat/${slug}`,
+        orderTable: 'muhurat_orders',
+        orderId:    reading.order_id ?? null,
+      });
     }
 
     // 7) Fire-and-forget PDF generation (non-blocking).
