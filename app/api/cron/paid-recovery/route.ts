@@ -2,8 +2,21 @@
 // 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER
 // ════════════════════════════════════════════════════════════════════════════
 // File:     app/api/cron/paid-recovery/route.ts
-// Version:  v1.3 (29 Sep 2026)
+// Version:  v1.4 (29 Sep 2026)
 // Owner:    Rohiit Gupta, Chief Vedic Architect
+//
+// ── v1.4 (29 Sep 2026) — PHASE 3: HAST REKHA RETRY (CEO approved) ────────
+//   C. pending_review Hast Rekha (retry_input wali, 5-60 min purani, <6
+//      koshish) → private bucket se photo, paid-analyze POST andar hi RETRY
+//      mode mein → report + PDF + 1-tap email. Har run max 1, sirf tab jab
+//      is run mein koi aur recovery na hui ho (VM 180s + PDF 60s).
+//   D. 60 min tak na bani → CEO ko critical alert: "REFUND karein" (CEO
+//      faisla: 60 min mein na bane to refund).
+//   E. Photo cleanup: 7 din se purani palm-retry photos delete (CEO: storage
+//      full nahi karni). Success par route khud turant delete karta hai.
+//   Razorpay loop: jis Hast Rekha ka retry chal raha ho (60 min ke andar) us
+//   par generic "Paisa aaya, report nahi" alert nahi (pehle 10 min par hi
+//   aa jaata tha, retry se pehle).
 //
 // ── v1.3 (29 Sep 2026) — SURAKSHIT 1-TAP PHASE 2 (CEO: "Yes bhai") ──────
 //   CEO ka niyam: har paid customer ko 10 min ke andar WhatsApp report.
@@ -80,6 +93,7 @@ import { POST as karmicPOST }  from '@/app/api/karmic-reading/route';   // v1.3
 import { POST as milanPOST }   from '@/app/api/milan-narrative/route';  // v1.3
 import { POST as muhuratPOST } from '@/app/api/muhurat-paid/route';     // v1.3
 import { retryPendingEmails }  from '@/lib/report-notify';              // v1.3
+import { POST as palmPOST }    from '@/app/api/palmistry/paid-analyze/route'; // v1.4
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300;
@@ -102,6 +116,98 @@ const NARRATIVE_JOBS = [
   { table: 'karmic_readings',  label: 'Karmic Reading',      page: 'karmic',  run: karmicPOST,  api: '/api/karmic-reading' },
   { table: 'muhurat_readings', label: 'Child Birth Muhurat', page: 'muhurat', run: muhuratPOST, api: '/api/muhurat-paid' },
 ] as const;
+
+// ── v1.4 — HAST REKHA RETRY ────────────────────────────────────────────────
+const PALM_BUCKET      = 'palm-retry';
+const PALM_GRACE_MIN   = 5;
+const PALM_GIVEUP_MIN  = 60;
+const PALM_MAX_TRIES   = 6;
+const PALM_PHOTO_DAYS  = 7;
+
+/** Razorpay loop ke liye: is payment ka retry abhi chal raha hai? */
+async function palmRetryInProgress(supa: any, paymentId: string): Promise<boolean> {
+  const since = new Date(Date.now() - PALM_GIVEUP_MIN * 60_000).toISOString();
+  const { data } = await supa.from('palmistry_reports').select('slug')
+    .eq('payment_id', paymentId).eq('tier', 'pending_review')
+    .not('retry_input', 'is', null).gte('created_at', since).limit(1);
+  return (data ?? []).length > 0;
+}
+
+/** Ek pending Hast Rekha dobara banao (ya 60 min baad refund alert). */
+async function retryOnePalm(supa: any): Promise<string | null> {
+  const now = Date.now();
+  const { data: rows, error } = await supa.from('palmistry_reports')
+    .select('slug, created_at, user_name, user_mobile, gender, language, payment_id, razorpay_order_id, retry_input, retry_count')
+    .eq('tier', 'pending_review').not('retry_input', 'is', null)
+    .lte('created_at', new Date(now - PALM_GRACE_MIN * 60_000).toISOString())
+    .gte('created_at', new Date(now - 24 * 3600_000).toISOString())
+    .order('created_at', { ascending: true }).limit(10);
+  if (error) throw new Error(`palmistry_reports: ${error.message}`);
+
+  for (const r of rows ?? []) {
+    const ageMin = (now - new Date(r.created_at).getTime()) / 60_000;
+    const ri = r.retry_input ?? {};
+    if (ageMin > PALM_GIVEUP_MIN || (r.retry_count ?? 0) >= PALM_MAX_TRIES || !ri.dominant_path) {
+      await raiseAlertOnce({
+        severity: 'critical', source: 'paid-recovery',
+        subject: `Hast Rekha nahi bani — REFUND karein — ${r.payment_id}`,
+        body: `Hast Rekha ${Math.round(ageMin)} min se pending, ${r.retry_count ?? 0} baar dobara koshish fail.\n` +
+              `Customer: ${r.user_name ?? '-'} | ${r.user_mobile ?? '-'}\n` +
+              `Payment: ${r.payment_id} (order ${r.razorpay_order_id ?? '-'})\n` +
+              `ACTION: Razorpay dashboard se ${r.payment_id} REFUND karo (CEO niyam: 60 min mein na bane to refund).`,
+      }, ALERT_DEDUPE_HOURS);
+      continue;
+    }
+    const dl = async (path: string | null) => {
+      if (!path) return null;
+      const { data, error: e } = await supa.storage.from(PALM_BUCKET).download(path);
+      if (e || !data) throw new Error(`photo download ${path}: ${e?.message ?? 'empty'}`);
+      return await data.text();
+    };
+    const dominant = await dl(ri.dominant_path);
+    const other    = await dl(ri.other_path ?? null);
+    const t0 = Date.now();
+    const res = await palmPOST(new NextRequest(`${SITE}/api/palmistry/paid-analyze`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        razorpay_order_id:   r.razorpay_order_id ?? '',
+        razorpay_payment_id: r.payment_id ?? '',
+        razorpay_signature:  '',
+        paypal_order_id:     ri.paypal_order_id ?? null,
+        dominant_palm_b64:   dominant, right_palm_b64: dominant,
+        other_palm_b64:      other,    left_palm_b64:  other,
+        handedness:          ri.handedness ?? 'right',
+        user_name:           r.user_name ?? '', user_mobile: r.user_mobile ?? '',
+        gender:              r.gender ?? 'M',   language:    r.language ?? 'hi',
+        dob:                 ri.dob ?? '',
+        _retry_slug:         r.slug,
+        _retry_key:          process.env.SUPABASE_SERVICE_ROLE_KEY ?? '',
+      }),
+    }));
+    const secs = ((Date.now() - t0) / 1000).toFixed(0);
+    return `Hast Rekha ${r.slug}: ${res.ok ? 'RECOVERED' : 'retry failed HTTP ' + res.status} (${secs}s, try ${(r.retry_count ?? 0) + 1})`;
+  }
+  return null;
+}
+
+/** 7 din se purani palm-retry photos delete (CEO policy). */
+async function cleanupOldPalmPhotos(supa: any): Promise<number> {
+  const cutoff = new Date(Date.now() - PALM_PHOTO_DAYS * 24 * 3600_000).toISOString();
+  const { data: rows } = await supa.from('palmistry_reports')
+    .select('slug, retry_input').not('retry_input', 'is', null)
+    .lte('created_at', cutoff).limit(50);
+  let n = 0;
+  for (const r of rows ?? []) {
+    const ri = r.retry_input ?? {};
+    if (ri.photos_deleted) continue;
+    const paths = [ri.dominant_path, ri.other_path].filter(Boolean);
+    if (paths.length) await supa.storage.from(PALM_BUCKET).remove(paths);
+    await supa.from('palmistry_reports')
+      .update({ retry_input: { ...ri, photos_deleted: new Date().toISOString() } }).eq('slug', r.slug);
+    n++;
+  }
+  return n;
+}
 
 /** v1.3: ek khaali reading dhoondh ke server par banao. Result text lautata hai. */
 async function recoverOneNarrative(supa: any): Promise<string | null> {
@@ -366,6 +472,12 @@ export async function GET(req: NextRequest) {
         if (isTest) { summary.skipped.test = (summary.skipped.test ?? 0) + 1; continue; }
       }
 
+      // v1.4 — Hast Rekha ka retry chal raha hai to abhi alert nahi (60 min baad retryOnePalm khud bhejega)
+      if (product === 'hast_rekha' && await palmRetryInProgress(supa, p.id)) {
+        summary.notes.push(`${p.id}: hast rekha retry in progress`);
+        continue;
+      }
+
       const res = await raiseAlertOnce({
         severity: 'critical',
         source:   'paid-recovery',
@@ -387,13 +499,32 @@ export async function GET(req: NextRequest) {
   }
 
   // v1.3 B — browser-generated readings (sirf tab jab Deep recovery na hui ho)
-  if (recoveriesThisRun === 0 && Date.now() - runStart < 60_000) {
+  let heavyRan = recoveriesThisRun > 0;
+  if (!heavyRan && Date.now() - runStart < 60_000) {
     try {
       const r = await recoverOneNarrative(supa);
-      if (r) summary.notes.push(r);
+      if (r) { summary.notes.push(r); heavyRan = true; }
     } catch (e) {
       summary.errors.push(`narrative: ${e instanceof Error ? e.message : String(e)}`);
     }
+  }
+
+  // v1.4 C/D — Hast Rekha retry / 60-min refund alert (sirf tab jab kuch aur bhaari na chala ho)
+  if (!heavyRan && Date.now() - runStart < 45_000) {
+    try {
+      const r = await retryOnePalm(supa);
+      if (r) summary.notes.push(r);
+    } catch (e) {
+      summary.errors.push(`palm retry: ${e instanceof Error ? e.message : String(e)}`);
+    }
+  }
+
+  // v1.4 E — 7 din purani palm photos delete
+  try {
+    const n = await cleanupOldPalmPhotos(supa);
+    if (n) summary.notes.push(`palm photos deleted: ${n}`);
+  } catch (e) {
+    summary.errors.push(`palm cleanup: ${e instanceof Error ? e.message : String(e)}`);
   }
 
   if (summary.errors.length) {
@@ -405,4 +536,4 @@ export async function GET(req: NextRequest) {
   return NextResponse.json({ ok: true, window_hours: WINDOW_SEC / 3600, ...summary });
 }
 
-// END — app/api/cron/paid-recovery/route.ts v1.3 | Trikaal Vaani | Rohiit Gupta, Chief Vedic Architect
+// END — app/api/cron/paid-recovery/route.ts v1.4 | Trikaal Vaani | Rohiit Gupta, Chief Vedic Architect

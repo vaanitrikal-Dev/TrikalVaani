@@ -1,5 +1,16 @@
-// TRIKAL VAANI - Palmistry Paid Analyze + Verify API - v4.3
+// TRIKAL VAANI - Palmistry Paid Analyze + Verify API - v4.4
 // CEO: Rohiit Gupta | Chief Vedic Architect
+//
+// v4.4 — PHASE 3: FAIL HUI REPORT DOBARA (2026-09-29, CEO approved):
+//   • pending_review par customer ki photo(s) PRIVATE bucket 'palm-retry'
+//     mein ({slug}/dominant.txt, other.txt — base64 jaisi ki taisi) + baaki
+//     input palmistry_reports.retry_input mein.
+//   • RETRY MODE: paid-recovery cron isi POST ko andar se chalata hai
+//     (_retry_slug + _retry_key = SUPABASE_SERVICE_ROLE_KEY, jo sirf server
+//     ke paas hai). Retry mein payment dobara verify nahi hota (pehle ho
+//     chuka), nayi row nahi banti — wahi row update: success → tier 'paid',
+//     PDF, 1-tap email, photos turant delete; fail → retry_count +1.
+//   • Normal customer flow (payment verify, VM, PDF, response) — badla nahi.
 //
 // v4.3 — SURAKSHIT 1-TAP (2026-09-29, CEO approved): report + PDF save hote hi
 //   lib/report-notify.ts CEO ko WhatsApp-button email bhejta hai (PDF link).
@@ -104,7 +115,12 @@ interface PalmVerifyRequest {
   gender?:             string;
   language?:           string;
   dob?:                string;
+  // v4.4 — sirf paid-recovery cron (server) ke liye
+  _retry_slug?:        string;
+  _retry_key?:         string;
 }
+
+const RETRY_BUCKET = 'palm-retry';   // v4.4 private bucket
 
 export async function POST(req: NextRequest) {
   try {
@@ -115,7 +131,12 @@ export async function POST(req: NextRequest) {
       right_palm_b64, left_palm_b64,
       dominant_palm_b64, other_palm_b64, handedness,
       user_name, user_mobile, gender, language, dob,
+      _retry_slug, _retry_key,
     } = body;
+
+    // v4.4 — server-only retry mode (cron). Key = service role key (browser ke paas kabhi nahi).
+    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY ?? '';
+    const isRetry = !!_retry_slug && !!serviceKey && _retry_key === serviceKey;
 
     if (!paypal_order_id && (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature)) {
       return NextResponse.json({ error: 'Missing payment fields.' }, { status: 400 });
@@ -129,7 +150,9 @@ export async function POST(req: NextRequest) {
     // Razorpay code, and a Razorpay request runs exactly the block it always
     // has. PayPal is confirmed by asking PayPal — an order id from the browser
     // proves nothing on its own.
-    if (paypal_order_id) {
+    if (isRetry) {
+      console.log(`[Trikal] Palm RETRY mode | ${_retry_slug}`);   // v4.4: payment pehle hi verify ho chuka
+    } else if (paypal_order_id) {
       const { getProduct }                   = await import('@/lib/pricing-intl');
       const { getPayPalOrder, isCaptureValid } = await import('@/lib/paypal-server');
       const product = getProduct('hast_rekha');
@@ -162,7 +185,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Permanent slug for this report (used for PDF filename + report link).
-    const slug = makeSlug(user_name);
+    const slug = isRetry ? String(_retry_slug) : makeSlug(user_name);   // v4.4: retry = wahi slug
 
     // ── Shared: graceful "personal review" handoff (VM failure OR gate) ─────
     const pendingReviewResponse = async (
@@ -171,7 +194,42 @@ export async function POST(req: NextRequest) {
     ) => {
       console.error('[Trikal] Palm → pending_review:', reason, razorpay_order_id);
 
+      // v4.4 — retry mode: nayi row nahi, bas koshish ginti
+      if (isRetry) {
+        const { data: cur } = await supabase.from('palmistry_reports')
+          .select('retry_count').eq('slug', slug).maybeSingle();
+        await supabase.from('palmistry_reports')
+          .update({ retry_count: (cur?.retry_count ?? 0) + 1 }).eq('slug', slug);
+        return NextResponse.json({ success: false, retry_failed: true, reason }, { status: 502 });
+      }
+
+      // v4.4 — photo(s) private bucket mein, taaki cron dobara bana sake
+      let retry_input: any = null;
+      try {
+        const dom = dominant_palm_b64 ?? right_palm_b64 ?? null;
+        const oth = other_palm_b64 ?? left_palm_b64 ?? null;
+        const put = async (name: string, b64: string) => {
+          const { error } = await supabase.storage.from(RETRY_BUCKET)
+            .upload(`${slug}/${name}.txt`, Buffer.from(b64, 'utf8'),
+                    { contentType: 'text/plain', upsert: true });
+          if (error) throw new Error(error.message);
+          return `${slug}/${name}.txt`;
+        };
+        retry_input = {
+          dominant_path: dom ? await put('dominant', dom) : null,
+          other_path:    oth ? await put('other', oth) : null,
+          handedness:    handedness ?? 'right',
+          dob:           dob ?? '',
+          paypal_order_id: paypal_order_id ?? null,
+          saved_at:      new Date().toISOString(),
+        };
+      } catch (e) {
+        console.error('[Trikal] Palm retry photo save failed (review still recorded):', e);
+      }
+
       await supabase.from('palmistry_reports').insert({
+        retry_input,                                  // v4.4
+        retry_count:       0,                         // v4.4
         session_id:        `palm_review_${reason}_${Date.now()}`,
         slug,
         user_name:         user_name   ?? null,
@@ -318,9 +376,7 @@ export async function POST(req: NextRequest) {
 
     // ── 5. Save successful report to Supabase ────────────────────────────────
     const session_id = `palm_${Date.now()}`;
-    const { error: saveErr } = await supabase
-      .from('palmistry_reports')
-      .insert({
+    const successRow = {
         session_id,
         slug,
         user_name:         user_name   ?? null,
@@ -336,7 +392,25 @@ export async function POST(req: NextRequest) {
         tier:         'paid',
         payment_id:        razorpay_payment_id,
         razorpay_order_id: razorpay_order_id,
-      });
+      };
+    // v4.4 — retry: wahi pending row paid banti hai; normal: nayi row (pehle jaisa)
+    const { error: saveErr } = isRetry
+      ? await supabase.from('palmistry_reports').update(successRow).eq('slug', slug)
+      : await supabase.from('palmistry_reports').insert(successRow);
+
+    // v4.4 — report ban gayi → customer ki photos turant delete (CEO policy)
+    if (isRetry && !saveErr) {
+      const { data: row } = await supabase.from('palmistry_reports')
+        .select('retry_input').eq('slug', slug).maybeSingle();
+      const paths = [row?.retry_input?.dominant_path, row?.retry_input?.other_path].filter(Boolean);
+      if (paths.length) {
+        await supabase.storage.from(RETRY_BUCKET).remove(paths as string[]);
+        await supabase.from('palmistry_reports')
+          .update({ retry_input: { ...row!.retry_input, photos_deleted: new Date().toISOString() } })
+          .eq('slug', slug);
+      }
+      console.log(`[Trikal] Palm RETRY SUCCESS | ${slug} | photos deleted`);
+    }
 
     if (saveErr) {
       console.error('[Trikal] Palm record save error:', saveErr.message);
