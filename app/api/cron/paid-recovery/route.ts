@@ -2,7 +2,10 @@
 // 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER
 // ════════════════════════════════════════════════════════════════════════════
 // File:     app/api/cron/paid-recovery/route.ts
-// Version:  v1.5 (30 Sep 2026)
+// Version:  v1.6 (30 Sep 2026)
+// v1.6 (30 Sep 2026) — CEO: sirf is cron file mein, lib/alert.ts nahi chhuna. Do
+//   system alerts ('Razorpay list fail', 'check errors') 6 ghante wali window par
+//   the (din mein 4 baar tak) → ab baaki sab ki tarah 30 din mein EK baar.
 // v1.5 (30 Sep 2026) — CEO: "Alert sirf 2 baar". Reading-nahi-bani alert ke
 //   subject se MINUTE hataye (har 5 min naya subject → dedupe fail → har run
 //   email). Ab subject stable, aur lib/alert v1.1 har subject max 2 baar bhejta hai.
@@ -435,7 +438,7 @@ export async function GET(req: NextRequest) {
   } catch (e) {
     const msg = e instanceof Error ? e.message : JSON.stringify(e);
     await raiseAlertOnce({ severity: 'critical', source: 'paid-recovery',
-      subject: 'paid-recovery: Razorpay list fail', body: msg.slice(0, 800) }, 6);
+      subject: 'paid-recovery: Razorpay list fail', body: msg.slice(0, 800) }, ALERT_DEDUPE_HOURS); // v1.6
     return NextResponse.json({ ok: false, error: `razorpay list: ${msg}` }, { status: 500 });
   }
 
@@ -532,11 +535,11 @@ export async function GET(req: NextRequest) {
 
   if (summary.errors.length) {
     await raiseAlertOnce({ severity: 'warning', source: 'paid-recovery',
-      subject: 'paid-recovery: check errors', body: summary.errors.join('\n').slice(0, 1500) }, 6);
+      subject: 'paid-recovery: check errors', body: summary.errors.join('\n').slice(0, 1500) }, ALERT_DEDUPE_HOURS); // v1.6
   }
 
   console.log('[paid-recovery]', JSON.stringify(summary));
   return NextResponse.json({ ok: true, window_hours: WINDOW_SEC / 3600, ...summary });
 }
 
-// END — app/api/cron/paid-recovery/route.ts v1.5 | Trikaal Vaani | Rohiit Gupta, Chief Vedic Architect
+// END — app/api/cron/paid-recovery/route.ts v1.6 | Trikaal Vaani | Rohiit Gupta, Chief Vedic Architect
