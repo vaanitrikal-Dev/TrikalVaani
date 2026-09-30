@@ -1,6 +1,9 @@
 // TRIKAL VAANI - Child Birth Muhurat Paid Report - Payment Verification API
 // CEO: Rohiit Gupta
-// File: app/api/calc/verify-muhurat-payment/route.ts
+// File: app/api/verify-muhurat-payment/route.ts
+// VERSION: 1.2 (30 Sep 2026) — muhurat_51 tier (₹51 / $5) added to the PayPal
+//   price map and the WhatsApp tier label. Old tiers kept so older pending
+//   orders still verify. Header path corrected to the real file location.
 // VERSION: 1.1 (29 Aug 2026) — PayPal accepted alongside Razorpay.
 //   The expected amount comes from the TIER ON THE PENDING ROW, never from the
 //   request, so the browser cannot name its own price. The Razorpay block is
@@ -53,6 +56,7 @@ export async function POST(req: NextRequest) {
       const PAYPAL_KEY_FOR_TIER: Record<string, string> = {
         report_101:   'muhurat_report',
         remedies_151: 'muhurat_remedies',
+        muhurat_51:   'muhurat_51',
       };
       // Read the tier off the pending row BEFORE deciding the correct amount —
       // the browser must not get to name the price.
@@ -169,9 +173,11 @@ export async function POST(req: NextRequest) {
       }, { status: 200 });
     }
 
-    const tierLabel = order.tier === 'remedies_151'
-      ? 'Full Report + 10 Remedies'
-      : 'Full Muhurat Report';
+    const tierLabel = order.tier === 'muhurat_51'
+      ? 'Full Muhurat Report + 10 Remedies'
+      : order.tier === 'remedies_151'
+        ? 'Full Report + 10 Remedies'
+        : 'Full Muhurat Report';
 
     const waText = encodeURIComponent(
       `Jai Mahakaal! Trikaal Vaani Child Birth Muhurat Report confirm ho gaya.\n\n` +

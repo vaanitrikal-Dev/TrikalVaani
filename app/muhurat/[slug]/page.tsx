@@ -3,6 +3,15 @@
  * TRIKAL VAANI — Child Birth Muhurat — Paid Result Page
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/muhurat/[slug]/page.tsx
+ * VERSION: 1.4 (30 Sep 2026) — ₹51 single tier + honest weak-slot box
+ *   * SAFETY FIX: the old backup box scanned the WHOLE DAY (0:00–23:59), so it
+ *     could suggest a time OUTSIDE the doctor's window. Backups now come only
+ *     from muhurat_data.backup_slots — picked inside the doctor's window by
+ *     create-muhurat-order v1.3. Older orders simply show no backup box.
+ *   * No score number anywhere (Rohiit's ruling) — quality label instead.
+ *   * Saadharan (weak) slot -> "Is window mein koi atyant shubh samay nahi"
+ *     box asking parents to check another safe time/date with the doctor.
+ *   * muhurat_51 tier shows the 10-remedies card.
  * VERSION: 1.3 — Moved backup best-slot box to top (after medical safety, before report)
  * VERSION: 1.1 — Adds premium MuhuratRemediesCard (remedies_151 tier)
  *                and removes the in-narrative UPAY text block so the 10
@@ -35,7 +44,8 @@ interface MuhuratRow {
   slug:             string;
   tier:             string;
   language:         string;
-  muhurat_data:     { year?: number; month?: number; day?: number; hour?: number; minute?: number; city?: string; hospital?: string; latitude?: number; longitude?: number; timezone?: number };
+  muhurat_data:     { year?: number; month?: number; day?: number; hour?: number; minute?: number; city?: string; hospital?: string; latitude?: number; longitude?: number; timezone?: number;
+                      quality?: string; backup_slots?: BackupSlot[] };
   vm_data:          any;
   remedies_data:    any;
   gemini_narrative: string | null;
@@ -77,50 +87,15 @@ async function ensureReport(slug: string, current: string | null): Promise<strin
   }
 }
 
-// ── Backup best slot: scan the FULL day for the single best muhurat ──
-// If the chosen delivery window is missed (operation delayed), this gives
-// the parents the most auspicious alternative time across the whole day.
+// ── Backup slots (v1.4) — INSIDE the doctor's window only ──────
+// Picked server-side by create-muhurat-order v1.3 and stored on the row.
 interface BackupSlot {
-  time:           string;
-  score:          number;
-  band:           string;
-  lagna_sign?:    string;
+  time:             string;
+  lagna_sign?:      string;
   lagna_nakshatra?: string;
-}
-
-async function fetchBackupSlot(md: MuhuratRow['muhurat_data']): Promise<BackupSlot | null> {
-  const { year, month, day, latitude, longitude } = md;
-  if (!year || !month || !day || typeof latitude !== 'number' || typeof longitude !== 'number') {
-    return null;
-  }
-  try {
-    const vmUrl = process.env.MUHURAT_VM_URL ?? 'http://34.47.182.227:8001';
-    const res = await fetch(`${vmUrl}/muhurat-finder`, {
-      method:  'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        year, month, day,
-        window_start_hour: 0,  window_start_minute: 0,
-        window_end_hour: 23,   window_end_minute: 59,
-        latitude, longitude,
-        timezone: typeof md.timezone === 'number' ? md.timezone : 5.5,
-      }),
-      cache: 'no-store',
-    });
-    if (!res.ok) return null;
-    const data = await res.json();
-    const best = data.best_slot;
-    if (!best || typeof best.score !== 'number') return null;
-    return {
-      time:            best.time ?? '',
-      score:           best.score,
-      band:            data.best_band ?? '',
-      lagna_sign:      best.lagna_sign,
-      lagna_nakshatra: best.lagna_nakshatra,
-    };
-  } catch {
-    return null;
-  }
+  tithi?:           string;
+  naamakshar?:      string;
+  label?:           string;
 }
 
 // ── Split narrative into sections + opening + Maa Shakti ──
@@ -210,27 +185,29 @@ export default async function MuhuratResultPage({ params }: { params: { slug: st
   const place = md.hospital || md.city || '';
 
   const vm = r.vm_data ?? {};
-  const score       = vm.score ?? '';
   const band        = vm.band ?? '';
   const lagna       = vm.lagna_sign ?? '';
   const nakshatra   = vm.lagna_nakshatra ?? '';
   const naamakshar  = vm.naamakshar ?? '';
+  // v1.4 — label, never a number. Old rows (no quality) fall back to VM band.
+  const quality = md.quality
+    ?? (/less|avoid|poor|inauspicious|weak|bad/i.test(band) ? 'Saadharan'
+      : /moderate|average|mixed/i.test(band) ? 'Madhyam'
+      : band ? 'Anukool' : '');
+  const isWeak = quality === 'Saadharan';
 
-  const isRemediesTier = r.tier === 'remedies_151';
-  const tierLabel = isRemediesTier
-    ? 'Full Report + 10 Remedies · ₹151'
-    : 'Full Muhurat Report · ₹101';
+  const isRemediesTier = r.tier === 'remedies_151' || r.tier === 'muhurat_51';
+  const tierLabel = r.tier === 'muhurat_51'
+    ? 'Full Muhurat Report + 10 Remedies'
+    : r.tier === 'remedies_151'
+      ? 'Full Report + 10 Remedies · ₹151'
+      : 'Full Muhurat Report · ₹101';
 
   const narrative = await ensureReport(r.slug, r.gemini_narrative);
   const parsed = narrative ? parseReport(narrative) : null;
 
-  // Best alternative slot across the whole day (backup if window is missed)
-  const backupSlot = await fetchBackupSlot(md);
-  // Only worth showing if it actually beats / differs from the chosen slot
-  const chosenScore = typeof score === 'number' ? score : Number(score) || 0;
-  const showBackup = !!backupSlot
-    && backupSlot.time !== ''
-    && (backupSlot.time !== timeStr || backupSlot.score > chosenScore);
+  // Backups inside the doctor's window (v1.4). Never the whole day.
+  const backups: BackupSlot[] = Array.isArray(md.backup_slots) ? md.backup_slots.filter(b => b?.time) : [];
 
   const resultUrl = `https://trikalvaani.com/muhurat/${r.slug}`;
   const waText = encodeURIComponent(
@@ -259,7 +236,7 @@ export default async function MuhuratResultPage({ params }: { params: { slug: st
             <p className="mt-2 text-sm text-gray-400 tracking-wide">
               {lagna && <>Lagna: <span className="text-gray-200">{lagna}</span></>}
               {nakshatra && <> · Nakshatra: <span className="text-gray-200">{nakshatra}</span></>}
-              {score && <> · <span className="text-[#D4AF37]">{score}/100 {band}</span></>}
+              {quality && <> · <span className="text-[#D4AF37]">{quality}</span></>}
             </p>
           )}
           <p className="mt-3 text-xs text-gray-500 tracking-widest uppercase">
@@ -280,45 +257,54 @@ export default async function MuhuratResultPage({ params }: { params: { slug: st
         </div>
       </section>
 
-      {/* ─────────── BACKUP BEST SLOT (paid — both tiers) ─────────── */}
-      {narrative && showBackup && backupSlot && (
+      {/* ─────────── WEAK SLOT — honest note (v1.4, Rohiit's ruling) ─────────── */}
+      {isWeak && timeStr && (
+        <section className="max-w-3xl mx-auto px-5 pt-6">
+          <div className="rounded-2xl p-5 sm:p-6 bg-[#f59e0b]/8 border border-[#f59e0b]/40">
+            <h2 className="text-base sm:text-lg font-semibold text-[#fbbf24] mb-2">
+              Is window mein koi atyant shubh samay nahi ban raha
+            </h2>
+            <p className="text-sm text-gray-300 leading-relaxed">
+              Aapki doctor-window mein sabse behtar uplabdh samay <strong className="text-white">{timeStr}</strong> hai,
+              par ye saadharan muhurat hai.
+              {Array.isArray(vm?.chosen_slot?.cautions) && vm.chosen_slot.cautions.length > 0 && (
+                <> Kaaran: {vm.chosen_slot.cautions.join('; ')}.</>
+              )}
+            </p>
+            <p className="text-sm text-gray-300 leading-relaxed mt-2">
+              Agar sambhav ho to apne doctor se poochhein ki kya koi doosra surakshit samay ya date ho sakti hai.
+              Nayi window milne par calculator dobara chala lijiye.
+            </p>
+            <p className="text-sm text-[#93c5fd] leading-relaxed mt-2">
+              Aur yaad rakhein: maa aur bachche ki suraksha hamesha muhurat se upar hai.
+            </p>
+          </div>
+        </section>
+      )}
+
+      {/* ─────────── BACKUP SLOTS — inside the doctor's window only (v1.4) ─────────── */}
+      {narrative && backups.length > 0 && (
         <section className="max-w-3xl mx-auto px-5 pt-6">
           <div className="bg-gradient-to-br from-[#1a1530] to-[#0d1120] border border-[#D4AF37]/40 rounded-2xl p-6 sm:p-7 shadow-xl">
-            <div className="flex items-center gap-2 mb-3">
-              <span className="text-xl">⏳</span>
-              <h2 className="text-base sm:text-lg font-semibold text-[#D4AF37]">
-                Is pure din ka sabse uttam muhurat
-              </h2>
-            </div>
+            <h2 className="text-base sm:text-lg font-semibold text-[#D4AF37] mb-2">
+              Doctor ki window ke andar backup samay
+            </h2>
             <p className="text-sm text-gray-300 leading-relaxed mb-4">
-              Agar aapka chuna gaya samay kisi karan se miss ho jaye (operation mein deri, etc.),
-              toh ghabrayein nahi. Iss pure din mein sabse shubh vaikalpik samay yeh hai —
-              ise apne doctor se charcha karke backup ke roop mein rakh sakte hain.
+              Agar operation ka samay thoda aage-peeche ho jaaye, to ghabrayein nahi. Aapki doctor-window ke
+              andar ye alag Lagna/Nakshatra wale vikalp hain — inhe doctor se charcha karke backup ke roop mein rakh sakte hain.
             </p>
-            <div className="flex flex-wrap items-center gap-x-6 gap-y-2 rounded-xl bg-[#080B12]/60 border border-[#D4AF37]/20 px-5 py-4">
-              <div>
-                <div className="text-[10px] text-gray-500 uppercase tracking-widest">Best Time</div>
-                <div className="text-2xl font-semibold text-white">{backupSlot.time}</div>
-              </div>
-              <div className="h-8 w-px bg-[#D4AF37]/20" />
-              <div>
-                <div className="text-[10px] text-gray-500 uppercase tracking-widest">Score</div>
-                <div className="text-2xl font-semibold text-[#D4AF37]">
-                  {backupSlot.score}<span className="text-sm text-gray-500">/100</span>
-                </div>
-              </div>
-              {backupSlot.lagna_sign && (
-                <>
-                  <div className="h-8 w-px bg-[#D4AF37]/20" />
-                  <div>
-                    <div className="text-[10px] text-gray-500 uppercase tracking-widest">Lagna</div>
-                    <div className="text-base text-gray-200 mt-1">
-                      {backupSlot.lagna_sign}
-                      {backupSlot.lagna_nakshatra ? ` · ${backupSlot.lagna_nakshatra}` : ''}
-                    </div>
+            <div className="space-y-3">
+              {backups.map((b, i) => (
+                <div key={i} className="flex flex-wrap items-center gap-x-5 gap-y-1 rounded-xl bg-[#080B12]/60 border border-[#D4AF37]/20 px-4 py-3">
+                  <div className="text-xl font-semibold text-white">{b.time}</div>
+                  <div className="text-sm text-gray-300">
+                    {b.lagna_sign ? `${b.lagna_sign} Lagna` : ''}
+                    {b.lagna_nakshatra ? ` · ${b.lagna_nakshatra}` : ''}
+                    {b.naamakshar ? ` · Naamakshar ${b.naamakshar}` : ''}
                   </div>
-                </>
-              )}
+                  {b.label && <div className="text-xs text-[#D4AF37]">{b.label}</div>}
+                </div>
+              ))}
             </div>
             <p className="text-[11px] text-gray-500 mt-3 leading-relaxed">
               🩺 Yeh sirf jyotishiya margdarshan hai. Koi bhi samay apne doctor ki salah aur surakshit
@@ -360,7 +346,9 @@ export default async function MuhuratResultPage({ params }: { params: { slug: st
             >
               <div className="flex items-center gap-3 mb-4">
                 <span className="text-2xl">{sec.icon}</span>
-                <h2 className="text-lg sm:text-xl font-semibold text-[#D4AF37]">{sec.title}</h2>
+                <h2 className="text-lg sm:text-xl font-semibold text-[#D4AF37]">
+                  {isWeak && sec.title === 'Shubh Muhurat' ? 'Aapka Muhurat' : sec.title}
+                </h2>
               </div>
               {paras(sec.body).map((p, j) => (
                 <p key={j} className="muhurat-para">{p}</p>
@@ -370,7 +358,7 @@ export default async function MuhuratResultPage({ params }: { params: { slug: st
         </section>
       )}
 
-      {/* ─────────── REMEDIES CARD (remedies_151 tier only) ─────────── */}
+      {/* ─────────── REMEDIES CARD (muhurat_51 + old remedies_151) ─────────── */}
       {narrative && isRemediesTier && (
         <MuhuratRemediesCard remediesData={r.remedies_data} />
       )}

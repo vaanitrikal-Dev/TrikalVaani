@@ -1,66 +1,59 @@
 // ============================================================
 // File: app/api/calc/muhurat/route.ts
-// Version: v1.3 — storage AWAIT (21 Sep 2026)
-// PICHHLA: v1.2 — usage logging added (18 Sep 2026); VM call via lib/callVM.ts
-// Proxies to VM /muhurat-finder endpoint
+// Version: v1.4 — FREE/PAID SPLIT (30 Sep 2026)
+// PICHHLA: v1.3 — storage AWAIT (21 Sep 2026)
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
 // ============================================================
-// CHANGE v1.1: /muhurat-finder call now goes through lib/callVM.ts so the
-// X-Trikal-Key auth header is injected automatically. The 45s
-// AbortSignal.timeout, validation, and payload are byte-for-byte identical.
+// CHANGE v1.4 (Rohiit's ruling, 30 Sep 2026):
+//   The lock is enforced HERE, on the server — the browser never receives
+//   the paid data, so it cannot be read from DevTools.
+//   * Doctor's window capped at 4 hours.
+//   * Two VM scans in parallel: first 1 hour (free) and full window.
+//   * Response carries ONLY the free best slot (no score), a quality label,
+//     and a yes/no flag `better_in_window` for the "behtar slot mila" teaser.
+//     top_slots and the full-window best slot are NOT sent any more.
+//   Usage logging kept exactly as v1.3.
 // ============================================================
 import { NextRequest, NextResponse } from 'next/server';
-import { callVM } from '@/lib/callVM';
 import { logUsage, usageBirthFields, usageContextFromRequest } from '@/lib/usage-log';
-const VM_URL = process.env.VM_ENGINE_URL || 'http://34.47.182.227:8001';
+import {
+  FREE_WINDOW_MIN, normaliseWindow, scanWindow, publicSlot, qualityLabel,
+} from '@/lib/muhurat-tiering';
+
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    // Basic validation — all required for a meaningful muhurat
     const required = ['year', 'month', 'day', 'latitude', 'longitude'];
     for (const f of required) {
       if (body[f] === undefined || body[f] === null) {
         return NextResponse.json({ error: `Missing field: ${f}` }, { status: 400 });
       }
     }
-    const payload = {
-      year: Number(body.year),
-      month: Number(body.month),
-      day: Number(body.day),
-      window_start_hour: Number(body.window_start_hour ?? 9),
-      window_start_minute: Number(body.window_start_minute ?? 0),
-      window_end_hour: Number(body.window_end_hour ?? 13),
-      window_end_minute: Number(body.window_end_minute ?? 0),
-      latitude: Number(body.latitude),
-      longitude: Number(body.longitude),
-      timezone: Number(body.timezone ?? 5.5),
-      step_minutes: Number(body.step_minutes ?? 10),
-      full_day: body.full_day !== false, // default true
-    };
-    const res = await callVM(`${VM_URL}/muhurat-finder`, {
-      method: 'POST',
-      body: JSON.stringify(payload),
-      // muhurat scan can take a few seconds (many slots)
-      signal: AbortSignal.timeout(45000),
-    });
-    if (!res.ok) {
-      const errText = await res.text().catch(() => '');
-      return NextResponse.json(
-        { error: 'Muhurat engine error', detail: errText.slice(0, 300) },
-        { status: 502 }
-      );
+    const w = normaliseWindow(body);
+    if (!w) {
+      return NextResponse.json({ error: 'Invalid date, time window or location.' }, { status: 400 });
     }
-    const data = await res.json();
 
-    // ── usage log — fire-and-forget, own try/catch (see lib/usage-log.ts) ──
+    const freeEnd = Math.min(w.startMin + FREE_WINDOW_MIN, w.endMin);
+    const hasMore = w.endMin > freeEnd;
+
+    const [freeData, fullData] = await Promise.all([
+      scanWindow(w, w.startMin, freeEnd),
+      hasMore ? scanWindow(w, w.startMin, w.endMin) : Promise.resolve(null),
+    ]);
+
+    const freeBest = freeData?.best_slot ?? null;
+    const fullBest = fullData?.best_slot ?? null;
+    const betterInWindow = !!(
+      freeBest && fullBest &&
+      fullBest.time !== freeBest.time &&
+      Number(fullBest.score) > Number(freeBest.score)
+    );
+
     try {
-      // ⭐ 21 Sep 2026 — AB AWAIT HOTA HAI. Pehle fire-and-forget tha: Vercel
-      // jawab lautte hi function jam kar deta tha aur Supabase ka request
-      // beech mein marta tha — aadhe se zyada rows KHO jaati thin (Rohiit ki
-      // ginti galat aa rahi thi). usage-log v1.2 Promise lautata hai aur
-      // andar kabhi throw nahi karta, to calculator par koi khatra nahi.
       await logUsage({
         ...usageContextFromRequest(req),
         ...usageBirthFields(body as any),
@@ -71,11 +64,19 @@ export async function POST(req: NextRequest) {
       });
     } catch { /* logging must never break the calculator */ }
 
-    return NextResponse.json(data, { status: 200 });
+    return NextResponse.json({
+      best_slot:        publicSlot(freeBest),
+      quality:          freeBest ? qualityLabel(freeData?.best_band, freeBest.score) : null,
+      better_in_window: betterInWindow,
+      free_window:      { start_min: w.startMin, end_min: freeEnd },
+      full_window:      { start_min: w.startMin, end_min: w.endMin },
+      disclaimer:       freeData?.disclaimer ?? null,
+    }, { status: 200 });
   } catch (e: any) {
+    const isEngine = String(e?.message || '').startsWith('Muhurat engine error');
     const msg = e?.name === 'TimeoutError'
-      ? 'Calculation timed out. Please try a smaller time window.'
-      : (e?.message || 'Server error');
-    return NextResponse.json({ error: msg }, { status: 500 });
+      ? 'Calculation timed out. Please try again.'
+      : (isEngine ? 'Muhurat engine error' : (e?.message || 'Server error'));
+    return NextResponse.json({ error: msg }, { status: isEngine ? 502 : 500 });
   }
 }

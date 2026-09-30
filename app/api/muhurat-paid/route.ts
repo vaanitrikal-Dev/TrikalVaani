@@ -3,8 +3,19 @@
  * TRIKAL VAANI — Child Birth Muhurat Paid Report — Generate API
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/api/muhurat-paid/route.ts
+ * VERSION: 1.5 (30 Sep 2026) — ₹51 single tier (muhurat_51) + half-length report
  * VERSION: 1.4 (29 Sep 2026) — Surakshit 1-tap email + AI fallback (ai-fallback v1.1)
  * ============================================================
+ * CHANGE v1.5 (30 Sep 2026, Rohiit's ruling):
+ *   * muhurat_51 (₹51 / $5) gets report + ALL 10 remedies (like old remedies_151).
+ *   * WORD_TARGET 600 -> 300 (report length halved). GEMINI_MAX_TOK unchanged.
+ *   * No score number in the report — the prompt now gets a quality label
+ *     (Anukool / Madhyam / Saadharan) instead of "53/100".
+ *   * If the slot is Saadharan (weak), the first section says honestly that no
+ *     highly auspicious time exists in this window, gives this as the best
+ *     available ordinary time, and asks parents to check with the doctor for
+ *     another safe time/date. Label comes from muhurat_data.quality (set by
+ *     create-muhurat-order v1.3); older rows fall back to the VM band.
  * CHANGE v1.3.0 (29 Sep 2026) — AI FALLBACK (CEO: "pehle sab pe laga do"):
  *   Pehle EK Gemini call — Google 503 aate hi ₹151 customer ko 502. Ab
  *   lib/ai-fallback.ts: gemini-3.8-flash → gemini-3.7-flash (bheed par ek
@@ -18,7 +29,7 @@
  *
  * PIPELINE (parent's CHOSEN delivery time):
  *   VM /muhurat-paid (kundali + slot + doshas + 10 remedies)
- *     -> build 600-word child-life prediction prompt
+ *     -> build 300-word child-life prediction prompt (v1.5)
  *     -> Gemini 2.5 Pro
  *     -> polishMuhuratNarrative() [Claude Sonnet 4.6, language-locked]
  *     -> save to muhurat_readings
@@ -28,8 +39,9 @@
  * The reading row already holds muhurat_data + tier + language.
  *
  * Tiers:
- *   report_101   = report + 600w prediction + boy/girl names (NO remedy detail)
- *   remedies_151 = everything + all 10 remedies
+ *   muhurat_51   = report + 300w prediction + names + all 10 remedies (SOLD from 30 Sep 2026)
+ *   report_101   = old, no longer sold (no remedy detail)
+ *   remedies_151 = old, no longer sold (everything + all 10 remedies)
  *
  * Mirrors the proven Karmic route: idempotency cache, VM timeout, graceful errors.
  * ============================================================
@@ -41,6 +53,7 @@ import { generateWithFallback } from '@/lib/ai-fallback';
 import { notifyReportReady } from '@/lib/report-notify';
 import { polishMuhuratNarrative, type MuhuratLanguage } from '@/lib/claude-polish';
 import { callVM } from '@/lib/callVM';
+import { qualityLabel } from '@/lib/muhurat-tiering';
 
 // VM paid-muhurat endpoint (kundali + slot + doshas + 10 remedies)
 const VM_MUHURAT_PAID_ENDPOINT =
@@ -59,7 +72,7 @@ const VM_MUHURAT_PDF_ENDPOINT =
 export const maxDuration = 300; // v1.3.0: VM ≤30s + AI chain ≤140s + polish ≤120s
 const GEMINI_MODEL   = 'gemini-3.8-flash';
 const GEMINI_MAX_TOK = 12000;            // MAX_TOKENS CEO locked
-const WORD_TARGET    = 600;              // child-life prediction
+const WORD_TARGET    = 300;              // v1.5: halved (was 600) — Rohiit 30 Sep 2026
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -119,10 +132,12 @@ function buildMuhuratPrompt(params: {
   tier: string;
   language: MuhuratLanguage;
   wordTarget: number;
+  quality: string; // v1.5 — Anukool | Madhyam | Saadharan
 }): string {
-  const { vm, tier, language, wordTarget } = params;
+  const { vm, tier, language, wordTarget, quality } = params;
 
-  const includeRemedies = tier === 'remedies_151';
+  const includeRemedies = tier === 'remedies_151' || tier === 'muhurat_51';
+  const isWeak = quality === 'Saadharan';
 
   const slot = vm.chosen_slot ?? {};
   const remedies = Array.isArray(vm.remedies) ? vm.remedies : [];
@@ -152,7 +167,7 @@ ${langInstruction}
 THE CHOSEN MUHURAT (use these EXACT values — never change them)
 ═══════════════════════════════════════════════════════════════
 Chosen time: ${vm.chosen_time ?? ''}
-Muhurat score: ${vm.score ?? slot.score ?? ''}/100  (band: ${vm.band ?? ''})
+Muhurat quality: ${quality} (NEVER write any score or number out of 100 in the report)
 Lagna (ascendant): ${vm.lagna_sign ?? slot.lagna_sign ?? ''}
 Lagna Nakshatra: ${vm.lagna_nakshatra ?? slot.lagna_nakshatra ?? ''}
 Tithi: ${slot.tithi ?? ''}
@@ -167,7 +182,7 @@ DOSHAS TO BE AWARE OF (frame gently as "be aware + remedy", never fear)
 ${doshas.length ? JSON.stringify(doshas) : 'No major doshas detected at this muhurat.'}
 
 ${includeRemedies ? `═══════════════════════════════════════════════════════════════
-10 REMEDIES (include ALL of these in the remedies section — this is the Rs151 tier)
+10 REMEDIES (include ALL of these in the remedies section — this tier includes remedies)
 ═══════════════════════════════════════════════════════════════
 ${JSON.stringify(remedies)}
 ` : `(This is the Rs101 tier — do NOT list detailed remedies. You may mention that a full
@@ -177,8 +192,14 @@ ${JSON.stringify(remedies)}
 STRUCTURE — use these EXACT section markers (keep them verbatim)
 ═══════════════════════════════════════════════════════════════
 ═══ SHUBH MUHURAT ═══
-(Confirm the chosen time, score, Lagna, Nakshatra. Remind warmly that this is WITHIN the
-doctor-approved window — Trikaal honours medical safety first.)
+${isWeak
+  ? `(Say HONESTLY and gently, in the report language: in this doctor-approved window there is no
+highly auspicious (atyant shubh) time. This time is the best AVAILABLE one in the window, but it is an
+ordinary (saadharan) muhurat — name the weak factors from "Points of caution" above. Then advise: if
+possible, ask your doctor whether another safe time or date is possible, and re-run the calculator for
+that new window. End with: the safety of mother and baby always comes above any muhurat. Never frighten.)`
+  : `(Confirm the chosen time, Lagna, Nakshatra and the quality "${quality}". Remind warmly that this is
+WITHIN the doctor-approved window — Trikaal honours medical safety first.)`}
 
 ═══ BACHCHE KA SWABHAV (Child's Nature & Potential) ═══
 (Based on Lagna + Nakshatra, describe the child's likely temperament, strengths, gifts.
@@ -322,12 +343,13 @@ export async function POST(req: NextRequest) {
         .eq('slug', slug);
     }
 
-    // 2) Build the 600-word child-life prediction prompt
+    // 2) Build the child-life prediction prompt (v1.5: 300 words)
     const prompt = buildMuhuratPrompt({
       vm:         vmData,
       tier:       reading.tier,
       language,
       wordTarget: WORD_TARGET,
+      quality:    muhuratData.quality ?? qualityLabel(vmData?.band, vmData?.score),
     });
 
     // 3) Gemini 2.5 Pro

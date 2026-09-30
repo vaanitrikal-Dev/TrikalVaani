@@ -3,7 +3,8 @@
  * TRIKAAL VAANI — Pricing Page
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/pricing/page.tsx
- * VERSION: 2.2 (27 Sep 2026)
+ * VERSION: 2.3 (30 Sep 2026)
+ * v2.3 — 30 Sep 2026 — Birth Muhurat repriced (CEO approved in chat): single ₹51 report + 10 remedies, was ₹101/₹151. Only the Birth Muhurat card, its schema Offer and CTA link changed.
  * v2.2 — 27 Sep 2026 — delivery text sach kiya (CEO Option A): WhatsApp/Email auto-delivery ka koi system nahi hai, isliye 'PDF on/via WhatsApp + Email' → 'PDF download + WhatsApp share'.
  * SIGNED: ROHIIT GUPTA, CEO
  *
@@ -15,7 +16,7 @@
  *   ONE-TIME pricing — no monthly subscriptions.
  * - Replaced with the ACTUAL product lineup (verified against homepage):
  *   Free Preview · Deep Reading ₹51 · Voice (₹11/₹51/₹101) ·
- *   Kundali Milan (₹51/₹101/₹151) · Birth Muhurat (Free/₹101/₹151) ·
+ *   Kundali Milan (₹51/₹101/₹151) · Birth Muhurat (Free/₹51 since 30 Sep 2026) ·
  *   Karmic Reading ₹251.
  * - Removed "Jini AI" line (Jini permanently off roadmap → Trikaal AI).
  * - IR-0 fixes: visible brand "Trikaal Vaani" -> "Trikaal Vaani" (title,
@@ -131,7 +132,7 @@ const PLANS = [
   {
     name: 'Birth Muhurat',
     price: 'Free',
-    period: '₹101 report · ₹151 + remedies',
+    period: '₹51 full report + 10 remedies',
     tagline: 'Auspicious birth window for your child',
     icon: Baby,
     color: '#A78BFA',
@@ -139,14 +140,14 @@ const PLANS = [
     features: [
       'Best birth time in doctor-approved window',
       '9-factor BPHS muhurat scan',
-      '₹101 — full report',
-      '₹151 — report + 10 remedies',
+      '₹51 — full-window best time + backups',
+      '₹51 — report + 10 remedies included',
       'Medical safety always comes first',
       'Hindi / Hinglish / English',
     ],
     locked: [],
     cta: 'Find the Muhurat',
-    ctaHref: '/free-child-birth-muhurat-calculator',
+    ctaHref: '/calculators/free-child-birth-muhurat-calculator',
     highlight: false,
   },
   {
@@ -243,7 +244,7 @@ const pricingSchema = {
       {
         '@type': 'Offer',
         name: 'Child Birth Muhurat Report',
-        price: '101',
+        price: '51',
         priceCurrency: 'INR',
         availability: 'https://schema.org/InStock',
       },

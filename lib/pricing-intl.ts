@@ -3,7 +3,10 @@
  * TRIKAL VAANI — International Pricing (Option A)
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: lib/pricing-intl.ts
- * VERSION: 1.4 (30 Aug 2026)
+ * VERSION: 1.5 (30 Sep 2026)
+ *   v1.5 — Child Birth Muhurat single tier `muhurat_51` (Rs 51 / $5), report +
+ *          10 remedies. Old muhurat_report / muhurat_remedies kept only so
+ *          older pending PayPal orders still verify; no longer sold.
  *   v1.4 — Voice packs repriced $1 / $5 / $12 -> $1 / $4 / $7.
  *   v1.3 — Kundali Milan parent + both tiers ($12 / $15).
  *   v1.2 — Trikaal Voice packs priced at a flat $1 per question ($1 / $5 / $12).
@@ -125,6 +128,12 @@ export const PRODUCTS: Record<string, ProductPrice> = {
     label: 'Full Report + 10 Remedies',
     inrPaise: 15100, // Rs 151
     usdCents: 1500, // $15
+  },
+  muhurat_51: {
+    key: 'muhurat_51',
+    label: 'Full Muhurat Report + 10 Remedies',
+    inrPaise: 5100, // Rs 51
+    usdCents: 500,  // $5
   },
   yog: {
     key: 'yog',

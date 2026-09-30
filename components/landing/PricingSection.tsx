@@ -1,4 +1,5 @@
-// 🔱 TRIKAL VAANI | components/landing/PricingSection.tsx | v2.2 (27 Sep 2026)
+// 🔱 TRIKAL VAANI | components/landing/PricingSection.tsx | v2.3 (30 Sep 2026)
+// v2.3 — 30 Sep 2026 — Birth Muhurat repriced to a single ₹51 report (+10 remedies), was ₹101/₹151. Links point to the canonical /calculators/ URL (old path only redirected).
 // v2.2 — 27 Sep 2026 — delivery text sach kiya (CEO Option A): WhatsApp/Email auto-delivery ka koi system nahi hai, isliye 'PDF on/via WhatsApp + Email' → 'PDF download + WhatsApp share'.
 // Owner: Rohiit Gupta, Chief Vedic Architect
 // Date: 2026-05-27
@@ -22,7 +23,7 @@
 //   ✅ NEW v2.0: 5 real product cards, honest live INR pricing, NO fake MRP.
 //      1. Prediction (Free → ₹51/domain)   → /#birth-form
 //      2. Kundali Milan (₹51/101/151)        → /kundali-milan#kundali-milan-form
-//      3. Birth Muhurat (Free/₹101/₹151)     → /free-child-birth-muhurat-calculator
+//      3. Birth Muhurat (Free/₹51)     → /free-child-birth-muhurat-calculator
 //      4. Karmic Reading (₹251)              → /karmic-background-reading
 //      5. Voice Guidance (₹11/51/101)        → /#birth-form (floating mic)
 //
@@ -90,16 +91,16 @@ const products = [
     icon: Baby,
     name: 'Birth Muhurat',
     price: 'Free',
-    sub: '₹101 report · ₹151 + remedies',
+    sub: '₹51 full report + 10 remedies',
     badge: 'NEW',
     tagline: 'Auspicious birth window for your child',
     accent: '#10B981',
-    href: '/free-child-birth-muhurat-calculator',
+    href: '/calculators/free-child-birth-muhurat-calculator',
     cta: 'Find the Muhurat',
     features: [
       'Best birth time within doctor-approved window',
       '9-factor BPHS muhurat scan',
-      '₹101: full report · ₹151: + 10 remedies',
+      '₹51: full-window best time, backups + 10 remedies',
       'Medical safety always comes first',
     ],
   },
@@ -181,10 +182,10 @@ const offerSchema = {
       '@type': 'Offer',
       name: 'Child Birth Muhurat',
       description:
-        'Auspicious birth-window finder using a 9-factor BPHS scan within the doctor-approved delivery window. Free calculator; full report ₹101, with remedies ₹151.',
+        'Auspicious birth-window finder using a 9-factor BPHS scan within the doctor-approved delivery window. Free calculator; full report with 10 remedies ₹51.',
       price: '0',
       priceCurrency: 'INR',
-      url: 'https://trikalvaani.com/free-child-birth-muhurat-calculator',
+      url: 'https://trikalvaani.com/calculators/free-child-birth-muhurat-calculator',
     },
     {
       '@type': 'Offer',
@@ -237,7 +238,7 @@ export default function PricingSection() {
         <p className="text-center text-sm sm:text-base text-slate-300/80 max-w-3xl mx-auto leading-relaxed mb-12">
           Trikaal Vaani offers AI-powered Vedic astrology with honest, transparent pricing.
           Life predictions start free, with extra domains at ₹51. Kundali Milan ranges ₹51–₹151,
-          Child Birth Muhurat reports ₹101–₹151, a Karmic Background Reading is ₹251, and voice
+          a Child Birth Muhurat report is ₹51, a Karmic Background Reading is ₹251, and voice
           guidance starts at just ₹11 — all guided by Rohiit Gupta, Chief Vedic Architect.
         </p>
 

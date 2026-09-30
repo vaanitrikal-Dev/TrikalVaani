@@ -2,6 +2,18 @@
 
 // ============================================================
 // File: app/calculators/free-child-birth-muhurat-calculator/page.tsx
+// Version: v1.7 (30 Sep 2026) — FREE 1-HOUR / PAID ₹51 SPLIT (Rohiit's ruling)
+//   * Doctor's window max 4 hours. FREE = best slot in the FIRST 1 hour only.
+//     PAID ₹51 / $5 = best across the full window + up to 3 backups inside
+//     it + report (half length) + 10 remedies. ₹101/₹151 tiers removed.
+//   * "Other Good Times" list removed from free. No score number shown —
+//     quality label (Anukool / Madhyam / Saadharan) only.
+//   * Locked teaser: "Aapki poori window mein ek behtar samay mila hai 🔒"
+//     appears ONLY when the server found a better slot in the full window.
+//   * Order body now sends the doctor's window; the server picks the paid
+//     slot (create-muhurat-order v1.3). The lock lives on the server
+//     (/api/calc/muhurat v1.4), not in this page.
+//   * Page text updated: free-vs-paid section, HowTo schema.
 // Version: v1.6 (29 Aug 2026) — INTERNATIONAL PAYMENT
 //   Visitors outside India pay through PayPal ($12 report / $15 with remedies)
 //   because Razorpay on this account rejects foreign cards. PayPal's order is
@@ -207,7 +219,7 @@ const FAQS = [
 ];
 
 interface SlotData {
-  score: number;
+  score?: number; // v1.7: no longer sent to the browser
   time: string;
   lagna_sign: string;
   lagna_lord: string;
@@ -531,8 +543,8 @@ const SECTIONS: MuhuratSection[] = [
     id: 'free-vs-paid',
     h2: 'Free mein kya milta hai, aur paid report mein kya',
     paras: [
-      '**Free mein** — aapki window ke andar sabse achha slot, uske saath doosre-teesre vikalp, har slot ke liye Lagna, Lagna swami aur uski dignity, Lagna nakshatra, Chandra nakshatra, tithi, yoga, karana, aathve bhaav ki sthiti, Gandmool ka flag aur naamakshar. Har point ke saath uski wajah. Koi signup nahi, koi card nahi, koi hissa chhupa kar nahi rakha jaata.',
-      '**Paid report mein** — us chune hue kshan ki poori janm-kundali: saare bhaav, Shadbala, Vimshottari dasha ka poora kram, aur bachche ke liye aage ka vishleshan. Yaani free version **samay chunne** ke liye hai, paid version us samay ko **samajhne** ke liye.',
+      '**Free mein** — aapki doctor-window ke **pehle ek ghante** ka sabse achha samay, uske saath Lagna, nakshatra, tithi, naamakshar aur us samay ke anukool aur saavdhani wale kaarak — har point ke saath uski wajah. Koi signup nahi, koi card nahi.',
+      '**Paid report mein (₹51)** — aapki **poori doctor-window (4 ghante tak)** ka sabse achha samay, doctor ka samay aage-peeche ho jaaye to kaam aane wale **teen tak backup samay** (sab window ke andar), bachche ke liye sankshipt jeevan-vishleshan, naamakshar ke saath naam ke sujhaav, aur **10 vyaktigat upay**. Agar poori window mein bhi koi atyant shubh samay nahi banta, to report ye saaf-saaf likhti hai aur doctor se doosra surakshit samay poochhne ki salah deti hai.',
       'Jo yahan jaanbujh kar nahi hai: koi countdown, koi "aapki kundali mein bhaari dosh hai" wali chetavni, koi jaldi machane wala tareeka. Agar slot saadharan hai to result saadharan hi likhega. Antar vistaar se [Free vs paid report](/blog/child-birth-muhurat-free-vs-paid-report) mein.',
     ],
   },
@@ -691,12 +703,11 @@ export default function FreeChildBirthMuhuratPage() {
   const [result, setResult] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [showFullDay, setShowFullDay] = useState(false);
   const resultRef = useRef<HTMLDivElement>(null);
 
   // ── Paid flow state ──
   const [payLang, setPayLang] = useState<'hinglish' | 'hindi' | 'english'>('hinglish');
-  const [payTier, setPayTier] = useState<'report_101' | 'remedies_151'>('report_101');
+  const payTier = 'muhurat_51' as const; // v1.7 — single tier (₹51 / $5)
   const [payLoading, setPayLoading] = useState(false);
   const [payError, setPayError] = useState<string | null>(null);
   // ── Post-payment "generating report" overlay ──
@@ -719,6 +730,11 @@ export default function FreeChildBirthMuhuratPage() {
     if (!endTime) e.end = 'Window end time required';
     if (lat === null) e.place = 'Please select hospital/city from suggestions';
     if (startTime && endTime && endTime <= startTime) e.end = 'End time must be after start time';
+    if (startTime && endTime && endTime > startTime) {
+      const [a, b] = startTime.split(':').map(Number);
+      const [c, d] = endTime.split(':').map(Number);
+      if ((c * 60 + d) - (a * 60 + b) > 240) e.end = 'Window can be at most 4 hours';
+    }
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -784,9 +800,11 @@ export default function FreeChildBirthMuhuratPage() {
    * rupee buyer's. Returns null when the slot or location is not ready.
    */
   const buildMuhuratOrderBody = () => {
-    if (!result || !best) return null;
+    // v1.7 — send the doctor's WINDOW. The server picks the paid slot.
+    if (!result || !best || !date || !startTime || !endTime) return null;
     const [year, month, day] = date.split('-').map(Number);
-    const { hour: bh, minute: bm } = parseTimeTo24h(best.time);
+    const [sh, sm] = startTime.split(':').map(Number);
+    const [eh, em] = endTime.split(':').map(Number);
     const useLat = hospLat ?? lat;
     const useLng = hospLng ?? lng;
     const useTz  = hospTz ?? timezone;
@@ -796,7 +814,8 @@ export default function FreeChildBirthMuhuratPage() {
       language: payLang,
       muhurat: {
         year, month, day,
-        hour: bh, minute: bm,
+        window_start_hour: sh, window_start_minute: sm,
+        window_end_hour: eh, window_end_minute: em,
         latitude: useLat, longitude: useLng, timezone: useTz,
         city, hospital,
       },
@@ -837,15 +856,8 @@ export default function FreeChildBirthMuhuratPage() {
     setPayError(null);
     if (!result || !best) return;
 
-    const [year, month, day] = date.split('-').map(Number);
-    // Use the best slot's time as the parent's CHOSEN delivery moment
-    // (parseTimeTo24h handles the VM's 12-hour "h:mm AM/PM" format)
-    const { hour: bh, minute: bm } = parseTimeTo24h(best.time);
-    const useLat = hospLat ?? lat;
-    const useLng = hospLng ?? lng;
-    const useTz = hospTz ?? timezone;
-
-    if (useLat === null || useLng === null) {
+    const orderBody = buildMuhuratOrderBody();
+    if (!orderBody) {
       setPayError('Location missing. Please re-run the calculator.');
       return;
     }
@@ -856,20 +868,11 @@ export default function FreeChildBirthMuhuratPage() {
       const ok = await loadRazorpayScript();
       if (!ok) throw new Error('Could not load payment gateway. Please try again.');
 
-      // 2) Create order
+      // 2) Create order (v1.7: server scans the full window and picks the slot)
       const orderRes = await fetch('/api/create-muhurat-order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          tier: payTier,
-          language: payLang,
-          muhurat: {
-            year, month, day,
-            hour: bh, minute: bm,
-            latitude: useLat, longitude: useLng, timezone: useTz,
-            city, hospital,
-          },
-        }),
+        body: JSON.stringify(orderBody),
       });
       if (!orderRes.ok) {
         const err = await orderRes.json().catch(() => ({}));
@@ -909,8 +912,6 @@ export default function FreeChildBirthMuhuratPage() {
   });
 
   const best: SlotData | null = result?.best_slot || null;
-  const topSlots: SlotData[] = result?.top_slots || [];
-  const fullDay = result?.full_day || null;
 
   // ─── JSON-LD (gold-standard 8-node @graph via shared helper) ─
   const PAGE_URL = 'https://trikalvaani.com/calculators/free-child-birth-muhurat-calculator';
@@ -924,9 +925,9 @@ export default function FreeChildBirthMuhuratPage() {
     knowsAbout: ['Vedic Astrology', 'Jyotish Shastra', 'Muhurta', 'Electional Astrology'],
     howToName: 'How to find an auspicious child birth muhurat',
     howToSteps: [
-      { name: 'Enter the doctor-approved window', text: "Enter the planned delivery date and the safe time window your doctor has approved, plus the city or hospital location." },
+      { name: 'Enter the doctor-approved window', text: "Enter the planned delivery date and the safe time window your doctor has approved (up to 4 hours), plus the city or hospital location." },
       { name: 'Analyse each slot', text: 'The calculator scores every slot in the window on Lagna, Nakshatra, Tithi, Yoga and 8th house using Swiss Ephemeris with Lahiri Ayanamsha.' },
-      { name: 'Get your result', text: 'See the most auspicious moment inside the window, alternative good slots, the lucky name letter and favourable factors.' },
+      { name: 'Get your result', text: 'See the most auspicious moment in the first hour of your window free, with the lucky name letter and favourable factors. The full-window best time, backup slots and remedies are in the paid report.' },
     ],
     faqs: FAQS,
   });
@@ -1041,7 +1042,7 @@ export default function FreeChildBirthMuhuratPage() {
                   {errors.end && <p className="text-red-400 text-xs mt-1">{errors.end}</p>}
                 </div>
               </div>
-              <p className="text-xs text-slate-500 -mt-3">⏱️ Enter the time window your doctor has cleared as safe (e.g. 9:00 AM to 1:00 PM).</p>
+              <p className="text-xs text-slate-500 -mt-3">⏱️ Enter the time window your doctor has cleared as safe — up to 4 hours (e.g. 9:00 AM to 1:00 PM). Free result checks the first hour; the ₹51 report checks the full window.</p>
 
               {/* WHY WE ASK — trust + accuracy explainer */}
               <div className="rounded-lg p-3" style={{ background: 'rgba(212,175,55,0.05)', border: '1px solid rgba(212,175,55,0.15)' }}>
@@ -1109,11 +1110,11 @@ export default function FreeChildBirthMuhuratPage() {
                 background: `linear-gradient(135deg, rgba(212,175,55,0.14) 0%, rgba(2,8,23,0.6) 100%)`,
                 border: `1px solid ${GOLD_RGBA(0.4)}`
               }}>
-                <div className="text-xs uppercase tracking-widest text-slate-400 mb-2">Most Auspicious Time (within your window)</div>
+                <div className="text-xs uppercase tracking-widest text-slate-400 mb-2">Most Auspicious Time (first hour of your window)</div>
                 <div className="text-5xl font-serif font-bold mb-2" style={{ color: GOLD }}>{best.time}</div>
                 <div className="inline-block px-4 py-1 rounded-full text-sm font-semibold mb-4"
                   style={{ background: GOLD_RGBA(0.15), color: GOLD, border: `1px solid ${GOLD_RGBA(0.3)}` }}>
-                  {result.best_band} · {best.score}/100
+                  {result.quality === 'Anukool' ? 'Anukool muhurat' : result.quality === 'Madhyam' ? 'Madhyam muhurat' : 'Saadharan muhurat'}
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-4 text-left">
                   <Cell label="Lagna" value={best.lagna_sign} />
@@ -1141,53 +1142,24 @@ export default function FreeChildBirthMuhuratPage() {
                 )}
               </div>
 
-              {/* TOP ALTERNATIVE SLOTS */}
-              {topSlots.length > 1 && (
-                <div className="rounded-2xl p-5 md:p-7" style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid ${GOLD_RGBA(0.2)}` }}>
-                  <h3 className="text-xl font-serif font-bold mb-4" style={{ color: GOLD }}>🕐 Other Good Times in Your Window</h3>
-                  <div className="space-y-2">
-                    {topSlots.slice(1, 5).map((s, i) => (
-                      <div key={i} className="flex items-center justify-between p-3 rounded-lg"
-                        style={{ background: 'rgba(2,8,23,0.4)', border: `1px solid ${GOLD_RGBA(0.12)}` }}>
-                        <div>
-                          <span className="font-bold text-base" style={{ color: GOLD }}>{s.time}</span>
-                          <span className="text-xs text-slate-500 ml-3">{s.lagna_sign} Lagna · {s.lagna_nakshatra}</span>
-                        </div>
-                        <span className="text-sm font-mono" style={{ color: s.score >= 60 ? '#86EFAC' : s.score >= 45 ? GOLD : '#FCA5A5' }}>{s.score}/100</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* PAID CTA — ₹101 / ₹151 with Razorpay */}
+              {/* PAID CTA — ₹51 / $5 single tier (v1.7) */}
               <div className="rounded-2xl p-6" style={{ background: `linear-gradient(135deg, rgba(212,175,55,0.12), rgba(2,8,23,0.5))`, border: `1px solid ${GOLD_RGBA(0.3)}` }}>
-                <h3 className="text-xl font-serif font-bold mb-2 text-center" style={{ color: GOLD }}>🔮 Unlock the Full Muhurat Report</h3>
-                <p className="text-sm text-slate-300 mb-5 max-w-xl mx-auto text-center">
-                  A detailed life prediction for a child born at <strong style={{ color: GOLD }}>{best.time}</strong>, the lucky name letter with boy &amp; girl name suggestions, doshas to be aware of, and a downloadable report to share with your family.
+                {result.better_in_window && (
+                  <div className="rounded-xl p-4 mb-4 max-w-md mx-auto text-center" style={{ background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.35)' }}>
+                    <p className="text-sm font-semibold" style={{ color: '#86EFAC' }}>🔒 Aapki poori window mein ek behtar samay mila hai</p>
+                    <p className="text-xs text-slate-400 mt-1">Ye samay ₹51 report mein khulega.</p>
+                  </div>
+                )}
+                <h3 className="text-xl font-serif font-bold mb-2 text-center" style={{ color: GOLD }}>🔮 Poora muhurat kholein</h3>
+                <p className="text-sm text-slate-300 mb-4 max-w-xl mx-auto text-center">
+                  Doctor ka OT time aage-peeche hota rehta hai. Report mein milega:
                 </p>
-
-                {/* Tier selector */}
-                <div className="grid grid-cols-2 gap-3 mb-4 max-w-md mx-auto">
-                  <button onClick={() => setPayTier('report_101')}
-                    className="rounded-xl p-4 text-left transition"
-                    style={{
-                      background: payTier === 'report_101' ? GOLD_RGBA(0.15) : 'rgba(2,8,23,0.4)',
-                      border: `1px solid ${payTier === 'report_101' ? GOLD : GOLD_RGBA(0.2)}`,
-                    }}>
-                    <div className="font-bold text-lg" style={{ color: GOLD }}>{isIndia === false ? '$12' : '₹101'}</div>
-                    <div className="text-xs text-slate-400 mt-1">Full report + prediction + boy/girl names</div>
-                  </button>
-                  <button onClick={() => setPayTier('remedies_151')}
-                    className="rounded-xl p-4 text-left transition relative"
-                    style={{
-                      background: payTier === 'remedies_151' ? GOLD_RGBA(0.15) : 'rgba(2,8,23,0.4)',
-                      border: `1px solid ${payTier === 'remedies_151' ? GOLD : GOLD_RGBA(0.2)}`,
-                    }}>
-                    <div className="font-bold text-lg" style={{ color: GOLD }}>{isIndia === false ? '$15' : '₹151'}</div>
-                    <div className="text-xs text-slate-400 mt-1">Everything + all 10 personalised remedies</div>
-                  </button>
-                </div>
+                <ul className="text-sm text-slate-300 mb-5 max-w-md mx-auto space-y-1.5">
+                  <li className="flex gap-2"><span style={{ color: GOLD }}>🔒</span><span>Poori window (4 ghante tak) ka sabse achha samay</span></li>
+                  <li className="flex gap-2"><span style={{ color: GOLD }}>🔒</span><span>3 tak backup samay — sab doctor ki window ke andar</span></li>
+                  <li className="flex gap-2"><span style={{ color: GOLD }}>🔒</span><span>Bachche ka sankshipt jeevan-vishleshan aur naam ke sujhaav</span></li>
+                  <li className="flex gap-2"><span style={{ color: GOLD }}>🔒</span><span>10 vyaktigat upay</span></li>
+                </ul>
 
                 {/* Language selector */}
                 <div className="flex justify-center gap-2 mb-5">
@@ -1216,7 +1188,7 @@ export default function FreeChildBirthMuhuratPage() {
                     // would receive nothing.
                     <div className="max-w-md mx-auto">
                       <PayPalCheckout
-                        productKey={payTier === 'remedies_151' ? 'muhurat_remedies' : 'muhurat_report'}
+                        productKey="muhurat_51"
                         createOrderUrl="/api/create-muhurat-order"
                         createOrderBody={buildMuhuratOrderBody() ?? {}}
                         onPaid={(proof) => handlePayPalPaid({ paypal_order_id: proof.paypal_order_id })}
@@ -1237,35 +1209,13 @@ export default function FreeChildBirthMuhuratPage() {
                       <button onClick={handleBuyReport} disabled={payLoading || generating}
                         className="px-8 py-3 rounded-xl font-bold transition disabled:opacity-50 disabled:cursor-not-allowed"
                         style={{ background: GOLD, color: '#080B12' }}>
-                        {payLoading ? '⟳ Opening payment...' : `Get Full Report · ${payTier === 'remedies_151' ? '₹151' : '₹101'}`}
+                        {payLoading ? '⟳ Opening payment...' : 'Poora muhurat kholein · ₹51'}
                       </button>
                       <p className="text-center text-xs text-slate-600 mt-3">🔒 Secure payment via Razorpay · No refund policy</p>
                     </>
                   )}
                 </div>
               </div>
-
-              {/* FULL DAY — EDUCATIONAL, collapsed by default */}
-              {fullDay && fullDay.best_slot && (
-                <div className="rounded-2xl p-5" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.08)' }}>
-                  <button onClick={() => setShowFullDay(!showFullDay)} className="w-full flex items-center justify-between text-left">
-                    <span className="text-sm font-semibold text-slate-400">📚 Educational: most auspicious time across the whole day</span>
-                    <span style={{ color: GOLD }}>{showFullDay ? '−' : '+'}</span>
-                  </button>
-                  {showFullDay && (
-                    <div className="mt-4">
-                      <div className="rounded-lg p-4 mb-3" style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.25)' }}>
-                        <p className="text-xs text-red-200 leading-relaxed">{fullDay.note}</p>
-                      </div>
-                      <div className="flex items-center justify-between p-3 rounded-lg" style={{ background: 'rgba(2,8,23,0.4)' }}>
-                        <span className="font-bold" style={{ color: GOLD }}>{fullDay.best_slot.time}</span>
-                        <span className="text-xs text-slate-500">{fullDay.best_slot.lagna_sign} · {fullDay.best_slot.lagna_nakshatra}</span>
-                        <span className="text-sm font-mono text-slate-400">{fullDay.best_slot.score}/100</span>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
 
               {/* DISCLAIMER */}
               {result.disclaimer && (

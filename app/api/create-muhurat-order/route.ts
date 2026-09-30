@@ -1,24 +1,32 @@
 // TRIKAL VAANI - Child Birth Muhurat Paid Report - Order Creation API
 // CEO: Rohiit Gupta
-// File: app/api/calc/create-muhurat-order/route.ts
-// VERSION: 1.2 (29 Aug 2026) — PAYPAL for international buyers. `provider:
-//                 'paypal'` creates the order with PayPal ($12 report / $15
-//                 with remedies) instead of Razorpay and stores it under
-//                 paypal_order_id. The Razorpay branch is untouched.
+// File: app/api/create-muhurat-order/route.ts
+// VERSION: 1.3 (30 Sep 2026) — SINGLE ₹51 / $5 TIER + SERVER-PICKED SLOT
+//   * One tier only: muhurat_51 (₹51 India / $5 PayPal). report_101 and
+//     remedies_151 are no longer sold (old rows still readable elsewhere).
+//     Supabase muhurat_orders_tier_check was widened to allow muhurat_51
+//     on 30 Sep 2026 BEFORE this deploy.
+//   * The browser now sends the doctor's WINDOW, not a chosen time. This
+//     route scans the full window (max 4h) on the VM and picks the best slot
+//     + up to 3 backups itself, so the paid time can't be tampered with and
+//     never falls outside the doctor's window.
+//   * FIX: a failed Supabase save on the Razorpay path now stops BEFORE the
+//     customer pays (previously it was only logged, so a paying customer
+//     could get no report).
+// VERSION: 1.2 (29 Aug 2026) — PAYPAL for international buyers.
 // VERSION: 1.1 — FIX: preserve all 3 languages (hinglish/hindi/english).
-//                 Previously every language collapsed to "hi", which made the
-//                 report engine default everything to Hinglish.
-// Tiers: report_101 (Rs101) / remedies_151 (Rs151). Mirrors create-karmic-order.
-// Pay-first flow: creates Razorpay order + saves pending muhurat_orders row.
+// Pay-first flow: creates Razorpay/PayPal order + saves pending muhurat_orders row.
 
 import { NextRequest, NextResponse } from 'next/server';
 import Razorpay from 'razorpay';
 import { createClient } from '@supabase/supabase-js';
+import {
+  normaliseWindow, scanWindow, parseTimeTo24h, qualityLabel, pickBackups,
+} from '@/lib/muhurat-tiering';
 
-// CEO LOCKED pricing
+// CEO LOCKED pricing (30 Sep 2026): one tier, report + 10 remedies.
 const TIERS: Record<string, { rupees: number; paise: number; label: string }> = {
-  report_101:   { rupees: 101, paise: 10100, label: 'Full Muhurat Report' },
-  remedies_151: { rupees: 151, paise: 15100, label: 'Full Report + 10 Remedies' },
+  muhurat_51: { rupees: 51, paise: 5100, label: 'Full Muhurat Report + 10 Remedies' },
 };
 
 const razorpay = new Razorpay({
@@ -31,34 +39,27 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-// Validate the parent's CHOSEN delivery moment + location.
-// Form may send lat/lng or latitude/longitude. Returns null if invalid.
-function normaliseMuhurat(m: any) {
+// v1.3 — the server picks the paid slot from the doctor's window.
+// Returns the muhurat_data row payload, or null if the window is invalid.
+// Throws if the VM engine fails (caller stops before any payment).
+async function buildMuhuratData(m: any) {
   if (!m || typeof m !== 'object') return null;
-
-  const year   = Number(m.year);
-  const month  = Number(m.month);
-  const day    = Number(m.day);
-  const hour   = Number(m.hour);
-  const minute = Number(m.minute);
-
-  const latitude  = typeof m.latitude  === 'number' ? m.latitude  : (typeof m.lat === 'number' ? m.lat : null);
-  const longitude = typeof m.longitude === 'number' ? m.longitude : (typeof m.lng === 'number' ? m.lng : null);
-
-  if (!Number.isInteger(year) || year < 2024 || year > 2030) return null;
-  if (!Number.isInteger(month) || month < 1 || month > 12) return null;
-  if (!Number.isInteger(day) || day < 1 || day > 31) return null;
-  if (!Number.isInteger(hour) || hour < 0 || hour > 23) return null;
-  if (!Number.isInteger(minute) || minute < 0 || minute > 59) return null;
-  if (typeof latitude !== 'number' || Math.abs(latitude) > 90) return null;
-  if (typeof longitude !== 'number' || Math.abs(longitude) > 180) return null;
-
+  const w = normaliseWindow(m);
+  if (!w) return null;
+  const data = await scanWindow(w, w.startMin, w.endMin);
+  const best = data?.best_slot;
+  if (!best?.time) return null;
+  const { hour, minute } = parseTimeTo24h(best.time);
+  if (!Number.isInteger(hour) || !Number.isInteger(minute)) return null;
   return {
-    year, month, day, hour, minute,
-    latitude, longitude,
-    timezone: typeof m.timezone === 'number' ? m.timezone : 5.5,
+    year: w.year, month: w.month, day: w.day, hour, minute,
+    latitude: w.latitude, longitude: w.longitude, timezone: w.timezone,
     city:     m.city     ?? m.cityName ?? '',
     hospital: m.hospital ?? '',
+    // v1.3 fields — read by /api/muhurat-paid and /muhurat/[slug]
+    window:       { start_min: w.startMin, end_min: w.endMin },
+    quality:      qualityLabel(data?.best_band, best.score),
+    backup_slots: pickBackups(best, data?.top_slots ?? []),
   };
 }
 
@@ -78,15 +79,21 @@ export async function POST(req: NextRequest) {
   try {
     const body: any = await req.json();
 
-    // Tier
-    const tierKey = body.tier ?? 'report_101';
+    // Tier — only muhurat_51 is sold now
+    const tierKey = body.tier ?? 'muhurat_51';
     const tier = TIERS[tierKey];
     if (!tier) {
-      return NextResponse.json({ error: 'Invalid tier.' }, { status: 400 });
+      return NextResponse.json({ error: 'This offer has changed. Please refresh the page and try again.' }, { status: 400 });
     }
 
-    // The parent's chosen delivery moment (form may send body.muhurat OR top-level)
-    const muhurat = normaliseMuhurat(body.muhurat ?? body);
+    // The doctor's window (form sends body.muhurat). Server picks the slot.
+    let muhurat: Awaited<ReturnType<typeof buildMuhuratData>> = null;
+    try {
+      muhurat = await buildMuhuratData(body.muhurat ?? body);
+    } catch (e) {
+      console.error('[Trikal] Muhurat order VM scan failed:', e);
+      return NextResponse.json({ error: 'Could not calculate the muhurat right now. Please try again.' }, { status: 502 });
+    }
     if (!muhurat) {
       return NextResponse.json({ error: 'Invalid muhurat data.' }, { status: 400 });
     }
@@ -106,8 +113,7 @@ export async function POST(req: NextRequest) {
       // Explicit map so an unknown tier fails loudly rather than silently
       // charging the wrong amount.
       const PAYPAL_KEY_FOR_TIER: Record<string, string> = {
-        report_101:   'muhurat_report',
-        remedies_151: 'muhurat_remedies',
+        muhurat_51: 'muhurat_51',
       };
       const productKey = PAYPAL_KEY_FOR_TIER[tierKey];
       if (!productKey) {
@@ -201,8 +207,13 @@ export async function POST(req: NextRequest) {
       });
 
     if (dbErr) {
+      // v1.3 FIX — verify reads muhurat_data from this row. Without it a
+      // paying customer gets nothing, so stop BEFORE the checkout opens.
       console.error('[Trikal] Muhurat order save error:', dbErr.message);
-      // Order created on Razorpay; verify route can still proceed.
+      return NextResponse.json(
+        { error: 'Could not start the payment. Please try again.' },
+        { status: 500 }
+      );
     }
 
     return NextResponse.json({
