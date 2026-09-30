@@ -1,7 +1,19 @@
 // ============================================================
 // TRIKAL VAANI — DYNAMIC BLOG ARTICLE PAGE (SSR)
 // CEO: Rohiit Gupta | Chief Vedic Architect
-// Version: 3.6
+// Version: 3.7
+// Date: 2026-09-30
+// CHANGE v3.7 — no visible change. RECIPROCAL hreflang for Hindi posts that
+//   are the Hindi version of a /learn page (seo_pillar_pages.hindi_slug).
+//   /learn/<x> already said hi-IN = /blog/<hindi>, but the Hindi post never
+//   pointed back (its alt_lang_slug is NULL), and Google ignores one-way
+//   hreflang. Now, for a Hindi post with no alt_lang_slug, generateMetadata
+//   looks up the /learn page that names it and emits en-IN + x-default =
+//   /learn/<x>. 19 posts affected (30 Sep 2026). Lookup failure = old
+//   behaviour, never an error. Needs app/sitemap.ts v9.5 alongside (no hard
+//   dependency — either file works without the other).
+// ------------------------------------------------------------
+// PREVIOUS: Version 3.6
 // Date: 2026-09-27
 // CHANGE v3.6 — no visible change. GRANTH_META, the 6 restricted granth,
 //   canShowSanskrit, citationRef/citationSchema, ENTITY_LINKS and the
@@ -226,6 +238,7 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import type { Metadata } from 'next';
+import { createClient } from '@supabase/supabase-js'; // v3.7
 import {
   getPostBySlug,
   getAllSlugs,
@@ -448,6 +461,25 @@ export async function generateStaticParams() {
 
 export const revalidate = 86400;
 
+// v3.7 — the /learn page (if any) whose Hindi version is this post.
+async function learnSlugForHindiPost(hindiSlug: string): Promise<string | null> {
+  try {
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    if (!url || !key) return null;
+    const { data, error } = await createClient(url, key)
+      .from('seo_pillar_pages')
+      .select('slug')
+      .eq('hindi_slug', hindiSlug)
+      .eq('published', true)
+      .limit(1);
+    if (error || !data || data.length === 0) return null;
+    return (data[0] as { slug: string }).slug ?? null;
+  } catch {
+    return null;
+  }
+}
+
 // ==================================================================
 // METADATA
 // ==================================================================
@@ -467,9 +499,14 @@ export async function generateMetadata(
 
   // ── v2.4: hreflang pairing via alt_lang_slug (both live under /blog/) ──
   const selfUrl = canonicalUrl;
-  const altUrl  = post.altLangSlug
+  let altUrl: string | null = post.altLangSlug
     ? `https://trikalvaani.com/blog/${post.altLangSlug}`
     : null;
+  // v3.7 — Hindi post with no blog pair: is it the Hindi side of a /learn page?
+  if (!altUrl && post.lang === 'hi') {
+    const learnSlug = await learnSlugForHindiPost(post.slug);
+    if (learnSlug) altUrl = `https://trikalvaani.com/learn/${learnSlug}`;
+  }
   const enUrl = post.lang === 'hi' ? altUrl : selfUrl;
   const hiUrl = post.lang === 'hi' ? selfUrl : altUrl;
   const languages: Record<string, string> = {};

@@ -1,4 +1,31 @@
 /* ═══════════════════════════════════════════════════════════════════════════
+   v9.5 — 30 September 2026 — /learn HREFLANG + LOUD LEARN LOGGING
+
+   WHAT WAS CHECKED FIRST (live sitemap, 30 Sep 2026)
+     All 133 published /learn/ pages ARE in the sitemap (133 of 133). A report
+     that "no /learn URL exists" came from a fetch that truncated this ~1 MB
+     file — /learn entries sit in the last 3% of it. So nothing was missing.
+
+   WHAT THIS CHANGES
+     1. /learn EN <-> HI hreflang. 19 /learn pages have a Hindi version that
+        lives at /blog/<hindi_slug>. Both URLs were emitted, but never paired,
+        so Google could treat them as two competing pages. Now:
+          /learn/<slug>          alternates en-IN = itself, hi-IN = /blog/<hindi>
+          /blog/<hindi_slug>     alternates en-IN = /learn/<slug>, hi-IN = itself
+        A pair is emitted ONLY when the Hindi blog post is actually published
+        (present in this same sitemap run) — a dead hindi_slug can never push a
+        404 into hreflang. A Hindi blog post that already has its own blog
+        alt_lang_slug pair is left alone (none do today; logged if one ever does).
+     2. readSeoLearnSlugs() no longer fails SILENTLY. It used to return [] on
+        any error — the exact bug that made all /blog URLs vanish before v8.4.
+        Now it returns { rows, error }, logs loudly, and if the hindi_slug
+        column ever cannot be read it retries without it, so /learn URLs are
+        never lost because of the hreflang feature.
+     No other loop, priority, lastmod or de-dupe behaviour changed.
+     Built on the deployed v9.4 source.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════════════════════════
    LASTMOD FIX, PART 2 — 26 September 2026 (v9.4)
 
    WHAT WAS STILL WRONG (live sitemap, 26 Sep 2026, 5,641 URLs)
@@ -93,6 +120,7 @@
  * 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER 🔱
  * ============================================================================
  * File:        app/sitemap.ts
+ * Version:     v9.5 — /learn EN<->HI hreflang + loud learn logging (30 Sep 2026)
  * Version:     v9.4 — honest lastmod for every URL, part 2 (26 Sep 2026)
  * Version:     v9.3 — free-shubh-muhurat-calculator juda (23 Sep 2026)
  * Version:     v9.2 — free-life-span-calculator juda (22 Sep 2026)
@@ -773,24 +801,43 @@ async function readReportSlugs(): Promise<{ slug: string; updatedAt: string | nu
   }
 }
 
-type SeoPageRow = { slug: string; category: string; priority: number; updated_at?: string | null };
+type SeoPageRow = {
+  slug: string;
+  category: string;
+  priority: number;
+  updated_at?: string | null;
+  hindi_slug?: string | null; // v9.5
+};
 
-async function readSeoLearnSlugs(): Promise<SeoPageRow[]> {
+/**
+ * v9.5 — returns { rows, error } instead of silently returning [] on failure
+ * (the same silent-failure pattern that wiped /blog from the sitemap before
+ * v8.4). If hindi_slug cannot be read, retries without it so the /learn URLs
+ * themselves are never lost to the hreflang feature.
+ */
+async function readSeoLearnSlugs(): Promise<{ rows: SeoPageRow[]; error: string | null }> {
+  const clean = (data: unknown) =>
+    ((data ?? []) as SeoPageRow[]).filter((r) => typeof r.slug === 'string' && r.slug.length > 0);
   try {
     const supabase = anonClient();
-    const { data, error } = await supabase
+    const first = await supabase
       .from('seo_pillar_pages')
-      // v-fix 06 Sep 2026: updated_at added so /learn/ URLs can carry a real
-      // lastmod instead of `now`. The column already existed.
+      .select('slug, category, priority, updated_at, hindi_slug')
+      .eq('published', true)
+      .order('priority', { ascending: false });
+    if (!first.error) return { rows: clean(first.data), error: null };
+
+    console.error('[sitemap] LEARN QUERY (with hindi_slug) FAILED —', first.error.message,
+      '| retrying without hindi_slug');
+    const second = await supabase
+      .from('seo_pillar_pages')
       .select('slug, category, priority, updated_at')
       .eq('published', true)
       .order('priority', { ascending: false });
-    if (error || !data) return [];
-    return (data as SeoPageRow[]).filter(
-      (r) => typeof r.slug === 'string' && r.slug.length > 0
-    );
-  } catch {
-    return [];
+    if (second.error) return { rows: [], error: second.error.message };
+    return { rows: clean(second.data), error: `hindi_slug unreadable: ${first.error.message}` };
+  } catch (err) {
+    return { rows: [], error: err instanceof Error ? err.message : String(err) };
   }
 }
 
@@ -936,6 +983,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const today = istDayStart();
   const entries: MetadataRoute.Sitemap = [];
   const hubMods: Record<string, Date | null> = {};
+  // v9.5 — every published blog slug seen in this run (for /learn hreflang)
+  const publishedBlog = new Map<string, MetadataRoute.Sitemap[0]>();
 
   // ── Static routes ──────────────────────────────────────────────────
   for (const path of STATIC_ROUTES) {
@@ -1098,6 +1147,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         };
       }
       entries.push(entry);
+      publishedBlog.set(post.slug, entry);
     }
   } catch (err) {
     // getPostsForSitemap does not throw, but a module-level client failure
@@ -1231,7 +1281,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }
 
   // ── /learn hub + SEO knowledge pages ──────────────────────────────
-  const seoPages = await readSeoLearnSlugs();
+  const { rows: seoPages, error: learnError } = await readSeoLearnSlugs();
+  if (learnError && seoPages.length === 0) {
+    console.error('[sitemap] LEARN QUERY FAILED —', learnError, '| emitted 0 /learn URLs');
+  } else if (seoPages.length === 0) {
+    console.error('[sitemap] LEARN RETURNED ZERO ROWS — no query error. ' +
+      'Check published and the seo_pillar_pages RLS SELECT policy.');
+  } else {
+    console.log(`[sitemap] learn OK — ${seoPages.length} URLs` + (learnError ? ` (warning: ${learnError})` : ''));
+  }
+
   entries.push({
     url: `${BASE}/learn`,
     // v9.4: the hub lists every /learn/ page → its newest page's date
@@ -1240,14 +1299,32 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.9,
   });
 
+  let learnPairs = 0;
   for (const page of seoPages) {
-    entries.push({
-      url: `${BASE}/learn/${page.slug}`,
+    const enUrl = `${BASE}/learn/${page.slug}`;
+    const entry: MetadataRoute.Sitemap[0] = {
+      url: enUrl,
       lastModified: latest(page.updated_at) ?? codeMod('/learn'),
       changeFrequency: learnChangeFreq(page.category),
       priority: page.priority ?? 0.8,
-    });
+    };
+
+    // v9.5 — pair with the Hindi /blog version, only if that post is published
+    // in this run and is not already paired with another blog post.
+    const hiEntry = page.hindi_slug ? publishedBlog.get(page.hindi_slug) : undefined;
+    if (page.hindi_slug && !hiEntry) {
+      console.warn(`[sitemap] learn ${page.slug}: hindi_slug ${page.hindi_slug} not published — no hreflang`);
+    } else if (hiEntry && hiEntry.alternates) {
+      console.warn(`[sitemap] learn ${page.slug}: /blog/${page.hindi_slug} already has a blog pair — skipped`);
+    } else if (hiEntry) {
+      const languages = { 'en-IN': enUrl, 'hi-IN': `${BASE}/blog/${page.hindi_slug}` };
+      entry.alternates = { languages };
+      hiEntry.alternates = { languages };
+      learnPairs++;
+    }
+    entries.push(entry);
   }
+  console.log(`[sitemap] learn hreflang pairs — ${learnPairs}`);
 
   // ── v9.4: HUB LASTMOD PATCH — /blog, /calculators, /services, /swapna are
   // emitted early (static routes) before their children are read; give each
