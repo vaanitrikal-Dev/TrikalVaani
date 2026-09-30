@@ -2,7 +2,10 @@
 // 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER
 // ════════════════════════════════════════════════════════════════════════════
 // File:     app/api/cron/paid-recovery/route.ts
-// Version:  v1.4 (29 Sep 2026)
+// Version:  v1.5 (30 Sep 2026)
+// v1.5 (30 Sep 2026) — CEO: "Alert sirf 2 baar". Reading-nahi-bani alert ke
+//   subject se MINUTE hataye (har 5 min naya subject → dedupe fail → har run
+//   email). Ab subject stable, aur lib/alert v1.1 har subject max 2 baar bhejta hai.
 // Owner:    Rohiit Gupta, Chief Vedic Architect
 //
 // ── v1.4 (29 Sep 2026) — PHASE 3: HAST REKHA RETRY (CEO approved) ────────
@@ -229,7 +232,7 @@ async function recoverOneNarrative(supa: any): Promise<string | null> {
       if (ageMin > NARR_GIVEUP_MIN) {
         await raiseAlertOnce({
           severity: 'critical', source: 'paid-recovery',
-          subject: `Reading nahi bani (${Math.round(ageMin)} min) — ${job.label} ${r.slug}`,
+          subject: `Reading nahi bani — ${job.label} ${r.slug}`,   // v1.5: stable (minute body mein)
           body: `${job.label} ki paid reading ${Math.round(ageMin)} min se khaali hai; cron ki har koshish fail.\n` +
                 `Page: ${SITE}/${job.page}/${r.slug}\n` +
                 `ACTION: page khol ke "Dobara koshish karein" dabao; na bane to Vercel log mein "${job.api}" dekho ya refund karo.`,
@@ -536,4 +539,4 @@ export async function GET(req: NextRequest) {
   return NextResponse.json({ ok: true, window_hours: WINDOW_SEC / 3600, ...summary });
 }
 
-// END — app/api/cron/paid-recovery/route.ts v1.4 | Trikaal Vaani | Rohiit Gupta, Chief Vedic Architect
+// END — app/api/cron/paid-recovery/route.ts v1.5 | Trikaal Vaani | Rohiit Gupta, Chief Vedic Architect
