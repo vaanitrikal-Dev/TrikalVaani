@@ -3,7 +3,7 @@
  * TRIKAL VAANI — Milan Remedies Card Component
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: components/milan/MilanRemediesCard.tsx
- * VERSION: 1.0
+ * VERSION: 1.1 (1 Oct 2026) — milan_51 ka label "Poora Milan" (pehle "Both Versions" dikhta tha)
  * SIGNED: ROHIIT GUPTA, CEO
  * ============================================================
  * Renders 10 remedies from remedies_data in 3 clean sections:
@@ -11,7 +11,7 @@
  *   • Bhrigu Nandi Nadi (4 remedies)
  *   • Shadbala (2 remedies)
  *
- * Shown on PAID tiers only (basic_51, deep_101, both_151).
+ * Shown on PAID tiers only (milan_51; purane basic_51, deep_101, both_151).
  * Reads directly from engine data — no Gemini involved.
  * ============================================================
  */
@@ -313,7 +313,7 @@ export default function MilanRemediesCard({ remediesData, tier }: Props) {
         {/* Footer note */}
         <div className="mt-6 pt-5 border-t border-[#D4AF37]/10 text-center">
           <p className="text-xs text-gray-500 leading-relaxed">
-            Yeh remedies sirf <span className="text-white">{tier === 'basic_51' ? 'Basic Milan' : tier === 'deep_101_couple' ? 'Deep Reading' : 'Both Versions'}</span> ke liye hain.
+            Yeh remedies sirf <span className="text-white">{tier === 'milan_51' ? 'Poora Milan' : tier === 'basic_51' ? 'Basic Milan' : tier === 'deep_101_couple' ? 'Deep Reading' : 'Both Versions'}</span> ke liye hain.
             Aapki kundali ke hisaab se personally compute ki gayi hain — general advice nahi hai.
           </p>
           <p className="text-[10px] text-gray-600 mt-1">

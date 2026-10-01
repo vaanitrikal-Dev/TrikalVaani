@@ -1,4 +1,10 @@
 /**
+ * v1.8 (1 Oct 2026) — FREE PREVIEW ka upsell dabba ab bhi ₹51/₹101/₹151 aur
+ *   "Deep Reading Kholiye" dikha raha tha (Rohiit ne free test mein pakda).
+ *   v1.7 mein sirf upar ke helper badle the — ye dabba neeche alag likha tha
+ *   aur poori file nahi padhi gayi thi. Ab ek dabba: Poora Milan ₹51.
+ *   Karmic cross-sell ka ₹251 JAAN-BOOJH KAR nahi badla — Karmic ka daam
+ *   ₹101 uske apne deploy mein badlega; pehle badla to ₹101 dikhta aur ₹251 katta.
  * v1.7 (1 Oct 2026) — single tier milan_51 (₹51, couple + parent dono, granth
  *   saar + 10 upay). Label, daam aur upay-card milan_51 ke liye. Narrative ab
  *   granth se (api/milan-narrative v2.0) — wahi COUPLE/PARENT markers, isliye
@@ -321,26 +327,30 @@ export default async function MilanResultPage({ params }: { params: { slug: stri
               Aapne dekha {bride.name} aur {groom.name} ka Ashtakoot score
               {score !== null ? ` (${score}/36)` : ''} aur Mangal Dosh status.
               Lekin poori sachhai — har dosha ki gehrai, aur 10 vishesh
-              upaay jo aapki shaadi safal banayenge — woh Deep Reading mein khulti hai.
+              upaay — woh Poore Milan mein khulti hai: aathon koot ke granth-shlok,
+              couple aur parent dono ke liye.
             </p>
-            <div className="mt-7 grid sm:grid-cols-3 gap-3 text-left max-w-2xl mx-auto">
-              {[
-                { p: '₹51',  t: 'Basic Milan',  d: 'Full 8 koots + all doshas' },
-                { p: '₹101', t: 'Deep Reading',  d: '1000-word + 10 remedies' },
-                { p: '₹151', t: 'Both Versions', d: 'Couple + Parent narratives' },
-              ].map((tier, i) => (
-                <div key={i} className="bg-[#080B12]/60 border border-[#D4AF37]/20 rounded-xl p-4">
-                  <div className="text-[#D4AF37] font-bold text-xl">{tier.p}</div>
-                  <div className="text-white text-sm font-medium mt-1">{tier.t}</div>
-                  <div className="text-gray-400 text-xs mt-1">{tier.d}</div>
-                </div>
-              ))}
+            <div className="mt-7 text-left max-w-md mx-auto bg-[#080B12]/60 border border-[#D4AF37]/40 rounded-xl p-5">
+              <div className="flex items-baseline justify-between">
+                <div className="text-white text-base font-semibold">⭐ Poora Milan</div>
+                <div className="text-[#D4AF37] font-bold text-2xl">₹51</div>
+              </div>
+              <ul className="mt-3 space-y-1.5 text-gray-300 text-sm">
+                {[
+                  'Aathon koot — Sanskrit shlok + Hindi arth (Muhurta Chintamani)',
+                  'Nadi, Bhakoot, Gan dosh aur granth ka parihar',
+                  'Couple (Hinglish) + Parent (Hindi) — dono version',
+                  '10 upay · PDF download',
+                ].map((f) => (
+                  <li key={f} className="flex gap-2"><span className="text-[#D4AF37]">+</span><span>{f}</span></li>
+                ))}
+              </ul>
             </div>
             <a
               href="/kundali-milan#kundali-milan-form"
               className="inline-block mt-8 px-8 py-3.5 rounded-lg bg-[#D4AF37] hover:bg-[#b8962e] text-[#080B12] font-semibold tracking-wide transition shadow-lg"
             >
-              Poori Sachhai Dekhein — Deep Reading Kholiye →
+              Poora Milan Kholiye — ₹51 →
             </a>
             <p className="mt-3 text-xs text-gray-500">
               No refund · PDF download + WhatsApp share · 60 seconds
@@ -364,7 +374,7 @@ export default async function MilanResultPage({ params }: { params: { slug: stri
         </section>
       )}
 
-      {/* ─────────── REMEDIES CARDS (deep_101 + both_151 only) ─────────── */}
+      {/* ─────────── REMEDIES CARDS (milan_51 + purane deep/both tiers) ─────────── */}
       {!free && showRemedies(m.tier) && (
         <MilanRemediesCard
           remediesData={m.remedies_data as any}
