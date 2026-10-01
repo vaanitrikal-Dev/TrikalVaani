@@ -7,7 +7,7 @@
 //   tay karta hai. Free preview ka raasta waisa hi.
 // CEO & Chief Vedic Architect: Rohiit Gupta
 // File: components/landing/KundaliMilanForm.tsx
-// VERSION: 1.5 (1 Oct 2026)
+// VERSION: 1.6 (1 Oct 2026 — footer: Ashtakoot Muhurta Chintamani se, upay BPHS 84 se; Bhrigu Nandi ka daava hataya) (1 Oct 2026)
 // v1.4 — 27 Sep 2026 — delivery text sach kiya (CEO Option A): WhatsApp/Email auto-delivery ka koi system nahi hai, isliye 'PDF on/via WhatsApp + Email' → 'PDF download + WhatsApp share'.
 // VERSION: 1.3 (29 Aug 2026) - INTERNATIONAL PAYMENT
 // v1.3: visitors outside India pay through PayPal — Basic $7, Couple $12,
@@ -1592,8 +1592,8 @@ export default function KundaliMilanForm() {
           <div style={{ marginTop: '24px', textAlign: 'center' }}>
             <p style={{ color: '#334155', fontSize: '11px', lineHeight: 1.7, maxWidth: '480px', margin: '0 auto 12px' }}>
               Powered by <strong style={{ color: '#475569' }}>Swiss Ephemeris</strong>.
-              Computed against <strong style={{ color: '#475569' }}>BPHS</strong> classical Ashtakoot rules and{' '}
-              <strong style={{ color: '#475569' }}>Bhrigu Nandi Nadi</strong> patterns.
+              Ashtakoot from <strong style={{ color: '#475569' }}>Muhurta Chintamani</strong> (Vivah Prakaran), upay from{' '}
+              <strong style={{ color: '#475569' }}>BPHS 84</strong>.
               Payments secured by <strong style={{ color: RAZORPAY_BLUE }}>Razorpay</strong>.
             </p>
             <p style={{ color: '#1e293b', fontSize: '10px', margin: 0 }}>

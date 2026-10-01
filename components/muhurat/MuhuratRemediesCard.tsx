@@ -3,7 +3,9 @@
  * TRIKAL VAANI — Muhurat Remedies Card Component
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: components/muhurat/MuhuratRemediesCard.tsx
- * VERSION: 1.0
+ * VERSION: 1.1 (1 Oct 2026) — teesra khaana "Granth ke Upay — BPHS 84" (system "Granth", VM
+ *   remedy_master v2.0); Parashar ke 4 ab "Parampara ke Upay" (wo granth ke shlok se nahi);
+ *   chips aur srot-line upay se banti hai. Purani reports (system "Bhrigu") purani heading ke saath.
  * SIGNED: ROHIIT GUPTA, CEO
  * ============================================================
  * Renders the 10 personalised remedies from the muhurat reading's
@@ -51,6 +53,8 @@ interface Props {
 // ── Icon by remedy type ───────────────────────────────────────
 function typeIcon(type: string): string {
   const t = (type || '').toLowerCase();
+  if (t.includes('havan'))          return '🔥';
+  if (t.includes('dakshina'))       return '🙏';
   if (t.includes('mantra'))         return '🕉️';
   if (t.includes('daan'))           return '🌾';
   if (t.includes('vrat'))           return '🌙';
@@ -141,7 +145,8 @@ export default function MuhuratRemediesCard({ remediesData }: Props) {
 
   const all = remediesData.remedies;
   const parashar = all.filter((r) => (r.system || '').toLowerCase() === 'parashar');
-  const bhrigu   = all.filter((r) => (r.system || '').toLowerCase() === 'bhrigu');
+  const bhrigu   = all.filter((r) => (r.system || '').toLowerCase() === 'bhrigu');   // sirf purani reports
+  const granth   = all.filter((r) => (r.system || '').toLowerCase() === 'granth');   // v1.1 — BPHS 84
   const shadbala = all.filter((r) => (r.system || '').toLowerCase() === 'shadbala');
 
   return (
@@ -158,20 +163,20 @@ export default function MuhuratRemediesCard({ remediesData }: Props) {
             विशेष उपाय · Aapke bachche ke shubh bhavishya ke liye
           </div>
           <div className="mt-3 inline-flex items-center gap-4 text-[10px] text-gray-500">
-            <span>4 Parashar</span>
+            <span>{parashar.length} Parampara</span>
             <span className="text-[#D4AF37]/40">·</span>
-            <span>4 Bhrigu Nadi</span>
+            <span>{granth.length > 0 ? `${granth.length} Granth` : `${bhrigu.length} Bhrigu Nadi`}</span>
             <span className="text-[#D4AF37]/40">·</span>
-            <span>2 Shadbala</span>
+            <span>{shadbala.length} Shadbala</span>
           </div>
         </div>
 
         {/* ── Maharishi Parashar ── */}
         {parashar.length > 0 && (
           <RemedySection
-            title="Maharishi Parashar"
-            title_hi="महर्षि पाराशर · BPHS"
-            subtitle="Classical remedies from Brihat Parashara Hora Shastra"
+            title="Parampara ke Upay"
+            title_hi="परम्परा के उपाय"
+            subtitle="Lok-parampara se — granth ka shlok nahi"
             count={parashar.length}
             color="to-amber-500/40"
           >
@@ -179,7 +184,20 @@ export default function MuhuratRemediesCard({ remediesData }: Props) {
           </RemedySection>
         )}
 
-        {/* ── Bhrigu Nandi Nadi ── */}
+        {/* ── v1.1 — Granth ke Upay (BPHS 84) ── */}
+        {granth.length > 0 && (
+          <RemedySection
+            title="📜 Granth ke Upay"
+            title_hi="ग्रन्थ के उपाय · BPHS 84"
+            subtitle="Jo grah dukh-sthaan mein hai, usi ki shanti — BPHS 84.26"
+            count={granth.length}
+            color="to-[#D4AF37]/40"
+          >
+            {granth.map((r, i) => <RemedyCard key={`g-${i}`} r={r} />)}
+          </RemedySection>
+        )}
+
+        {/* ── Bhrigu Nandi Nadi (sirf purani reports) ── */}
         {bhrigu.length > 0 && (
           <RemedySection
             title="Bhrigu Nandi Nadi"
@@ -217,7 +235,9 @@ export default function MuhuratRemediesCard({ remediesData }: Props) {
             </p>
           )}
           <p className="text-[10px] text-gray-600 mt-1">
-            Source: Brihat Parashara Hora Shastra · Bhrigu Nandi Nadi · Shadbala (Parashari 6-fold)
+            {granth.length > 0
+              ? 'Srot: BPHS 84 (grah-shanti) · Phaladipika 2.28 · Parampara · Shadbala'
+              : 'Source: Brihat Parashara Hora Shastra · Bhrigu Nandi Nadi · Shadbala (Parashari 6-fold)'}
           </p>
         </div>
 

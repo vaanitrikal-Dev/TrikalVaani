@@ -1,3 +1,4 @@
+// (1 Oct 2026 — upay engine BPHS 84: Karmic card se "Bhrigu Nandi Nadi" ka daava hataya)
 // (1 Oct 2026 — daam sahi kiye: Kundali Milan ₹51 (couple + parent), Karmic ₹101 / $11, Child Birth ₹51; Bhrigu Nandi ke purane daave hataye)
 // 🔱 TRIKAL VAANI | components/landing/PricingSection.tsx | v2.3 (30 Sep 2026)
 // v2.3 — 30 Sep 2026 — Birth Muhurat repriced to a single ₹51 report (+10 remedies), was ₹101/₹151. Links point to the canonical /calculators/ URL (old path only redirected).
@@ -116,7 +117,7 @@ const products = [
     href: '/karmic-background-reading',
     cta: 'Read the Karma',
     features: [
-      '6 karmic dimensions via Bhrigu Nandi Nadi',
+      '6 karmic dimensions + prediction + granth upay',
       'Personality, fidelity, finances, family & more',
       'Available in 3 languages',
       'Patterns, never verdicts — understanding to prepare',

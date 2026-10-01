@@ -3,7 +3,10 @@
  * TRIKAL VAANI — Milan Remedies Card Component
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: components/milan/MilanRemediesCard.tsx
- * VERSION: 1.1 (1 Oct 2026) — milan_51 ka label "Poora Milan" (pehle "Both Versions" dikhta tha)
+ * VERSION: 1.2 (1 Oct 2026) — "bhrigu" khaane mein ab BPHS 84 ke granth-upay aate hain (VM milan_engine
+ *   v2.1): source "BPHS 84…" ho to heading "Granth ke Upay"; purani reports purani heading. Parashar ke
+ *   4 ab "Parampara ke Upay" (engine unhe source Parampara kehta hai).
+ * PICHHLA: 1.1 (1 Oct 2026) — milan_51 ka label "Poora Milan"
  * SIGNED: ROHIIT GUPTA, CEO
  * ============================================================
  * Renders 10 remedies from remedies_data in 3 clean sections:
@@ -85,6 +88,8 @@ interface Props {
 
 // ── Type icon by remedy type ──────────────────────────────────
 function typeIcon(type: string): string {
+  if (type.includes('granth_mantra')) return '🔥';
+  if (type.includes('granth_daan'))   return '🙏';
   if (type.includes('mantra'))   return '🕉️';
   if (type.includes('daan'))     return '🌾';
   if (type.includes('vrat'))     return '🌙';
@@ -186,6 +191,8 @@ export default function MilanRemediesCard({ remediesData, tier }: Props) {
   if (!remediesData) return null;
 
   const { parashar, bhrigu, shadbala } = remediesData;
+  // v1.2 — naye upay BPHS 84 se (VM milan_engine v2.1); purani reports mein sthir "Bhrigu" upay
+  const isGranth = (bhrigu ?? []).some((r) => (r.source || '').startsWith('BPHS 84'));
 
   // Build detail string for Parashar remedies
   function parasharDetail(r: ParasharRemedy): string {
@@ -232,20 +239,20 @@ export default function MilanRemediesCard({ remediesData, tier }: Props) {
             विशेष उपाय · Personalized for your charts only
           </div>
           <div className="mt-3 inline-flex items-center gap-4 text-[10px] text-gray-500">
-            <span>4 Parashar</span>
+            <span>{parashar?.length ?? 0} Parampara</span>
             <span className="text-[#D4AF37]/40">·</span>
-            <span>4 Bhrigu Nadi</span>
+            <span>{bhrigu?.length ?? 0} {isGranth ? 'Granth' : 'Bhrigu Nadi'}</span>
             <span className="text-[#D4AF37]/40">·</span>
-            <span>2 Shadbala</span>
+            <span>{shadbala?.length ?? 0} Shadbala</span>
           </div>
         </div>
 
         {/* ── Maharishi Parashar ── */}
         {parashar?.length > 0 && (
           <RemedySection
-            title="Maharishi Parashar"
-            title_hi="महर्षि पाराशर · BPHS"
-            subtitle="Classical remedies from Brihat Parashara Hora Shastra"
+            title="Parampara ke Upay"
+            title_hi="परम्परा के उपाय"
+            subtitle="Lok-parampara se — granth ka shlok nahi"
             count={parashar.length}
             color="to-amber-500/40"
           >
@@ -266,11 +273,11 @@ export default function MilanRemediesCard({ remediesData, tier }: Props) {
         {/* ── Bhrigu Nandi Nadi ── */}
         {bhrigu?.length > 0 && (
           <RemedySection
-            title="Bhrigu Nandi Nadi"
-            title_hi="भृगु नन्दी नाड़ी"
-            subtitle="Karmic corrections from the Bhrigu tradition"
+            title={isGranth ? '📜 Granth ke Upay' : 'Bhrigu Nandi Nadi'}
+            title_hi={isGranth ? 'ग्रन्थ के उपाय · BPHS 84' : 'भृगु नन्दी नाड़ी'}
+            subtitle={isGranth ? 'Vadhu aur var ke dukh-sthaan wale grah ki shanti — BPHS 84.26' : 'Karmic corrections from the Bhrigu tradition'}
             count={bhrigu.length}
-            color="to-purple-500/40"
+            color={isGranth ? 'to-[#D4AF37]/40' : 'to-purple-500/40'}
           >
             {bhrigu.map((r, i) => (
               <RemedyCard
@@ -317,7 +324,9 @@ export default function MilanRemediesCard({ remediesData, tier }: Props) {
             Aapki kundali ke hisaab se personally compute ki gayi hain — general advice nahi hai.
           </p>
           <p className="text-[10px] text-gray-600 mt-1">
-            Source: Brihat Parashara Hora Shastra · Bhrigu Nandi Nadi · Shadbala (Parashari 6-fold)
+            {isGranth
+              ? 'Srot: BPHS 84 (grah-shanti) · Phaladipika 2.28 · Parampara · Shadbala'
+              : 'Source: Brihat Parashara Hora Shastra · Bhrigu Nandi Nadi · Shadbala (Parashari 6-fold)'}
           </p>
         </div>
 
