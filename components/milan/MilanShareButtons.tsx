@@ -3,7 +3,7 @@
  * TRIKAL VAANI — Milan Share Buttons
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: components/milan/MilanShareButtons.tsx
- * VERSION: 1.1 — Brand flip (Trikaal Vaani in share text)
+ * VERSION: 1.2 (1 Oct 2026 — Trikaal Vaani ka core tagline (Rohiit ne chuna): "Granth ka Gyaan · Rohiit ki Parakh · AI ki Shakti" / "Rooted in Granth · Verified by Rohiit · Powered by AI") — Brand flip (Trikaal Vaani in share text)
  * SIGNED: ROHIIT GUPTA, CEO
  * ============================================================
  * v1.1: "Trikaal Vaani" -> "Trikaal Vaani" in WhatsApp + Email share
@@ -68,7 +68,7 @@ export default function MilanShareButtons({
     `Groom: ${groomName}\n` +
     (ashtakoot !== null ? `Ashtakoot Score: ${ashtakoot}/36\n` : '') +
     `\nPoori reading is link par:\n${resultUrl}\n\n` +
-    `Trikaal Vaani — AI-Powered Vedic Astrology\n` +
+    `Trikaal Vaani — Granth ka Gyaan · Rohiit ki Parakh · AI ki Shakti\n` +
     `Rohiit Gupta, Chief Vedic Architect\n` +
     `trikalvaani.com 🔱`
   );

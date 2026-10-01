@@ -8,7 +8,7 @@
  *   + purva janm (Phaladipika 14.24-25) + BPHS 83 (purva janm ke shaap).
  *   Copy mein wahi likha jo report sach mein deti hai — "Bhrigu Nandi Nadi",
  *   "Navamsa D9", "Rahu-Ketu axis" ke waade hataye (naya engine ye nahi padhta).
- * VERSION: 2.0 (1 Oct 2026) — ₹101/$11 + granth saar copy
+ * VERSION: 2.1 (1 Oct 2026 — Trikaal Vaani ka core tagline (Rohiit ne chuna): "Granth ka Gyaan · Rohiit ki Parakh · AI ki Shakti" / "Rooted in Granth · Verified by Rohiit · Powered by AI") (1 Oct 2026) — ₹101/$11 + granth saar copy
  * v1.1 — 27 Sep 2026 — delivery text sach kiya (CEO Option A): WhatsApp/Email auto-delivery ka koi system nahi hai, isliye 'PDF on/via WhatsApp + Email' → 'PDF download + WhatsApp share'.
  * SIGNED: ROHIIT GUPTA, CEO
  * ============================================================
@@ -198,7 +198,8 @@ export default function KarmicLandingPage() {
       <footer className="border-t border-[#D4AF37]/10">
         <div className="max-w-3xl mx-auto px-5 py-8 text-center text-xs text-gray-500">
           <p className="text-[#D4AF37] tracking-[0.3em] uppercase">Trikaal Vaani</p>
-          <p className="mt-2">AI-Powered Vedic Astrology · Rohiit Gupta, Chief Vedic Architect</p>
+          <p className="mt-2 text-[#D4AF37] font-semibold">Granth ka Gyaan · Rohiit ki Parakh · AI ki Shakti</p>
+          <p className="mt-1">Rooted in Granth · Verified by Rohiit · Powered by AI · Rohiit Gupta, Chief Vedic Architect</p>
           <p className="mt-1">MSME · UDYAM-DL-10-0119070 · trikalvaani.com</p>
         </div>
       </footer>

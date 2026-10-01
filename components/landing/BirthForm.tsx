@@ -1,3 +1,4 @@
+// (1 Oct 2026 — Trikaal Vaani ka core tagline (Rohiit ne chuna): "Granth ka Gyaan · Rohiit ki Parakh · AI ki Shakti" / "Rooted in Granth · Verified by Rohiit · Powered by AI")
 /**
  * ============================================================
  * TRIKAAL VAANI — BirthForm
@@ -675,7 +676,7 @@ const SERVICE_OFFER_SCHEMA = {
   brand: {
     '@type': 'Brand',
     name: 'Trikaal Vaani',
-    slogan: 'AI-Powered Vedic Astrology on Swiss Ephemeris — Razorpay-Secured Payments',
+    slogan: 'Rooted in Granth · Verified by Rohiit · Powered by AI',
   },
 }
 

@@ -3,7 +3,7 @@
  * TRIKAL VAANI — Compatibility Page (Programmatic SEO/GEO)
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/compatibility/[pair]/page.tsx
- * VERSION: 1.6 (1 Oct 2026 — daam sahi kiye: Kundali Milan ₹51 (couple + parent), Karmic ₹101 / $11, Child Birth ₹51; Bhrigu Nandi ke purane daave hataye) — Hindi URL consolidation (canonical / hreflang /
+ * VERSION: 1.7 (1 Oct 2026 — Trikaal Vaani ka core tagline (Rohiit ne chuna): "Granth ka Gyaan · Rohiit ki Parakh · AI ki Shakti" / "Rooted in Granth · Verified by Rohiit · Powered by AI") (1 Oct 2026 — daam sahi kiye: Kundali Milan ₹51 (couple + parent), Karmic ₹101 / $11, Child Birth ₹51; Bhrigu Nandi ke purane daave hataye) — Hindi URL consolidation (canonical / hreflang /
  *                toggle / related links all point at /hi/compatibility/)
  * DATE:    2026-09-05
  * SIGNED: ROHIIT GUPTA, CEO
@@ -560,7 +560,8 @@ export default async function CompatibilityPage(
       <footer className="border-t border-[#D4AF37]/10">
         <div className="max-w-3xl mx-auto px-5 py-8 text-center text-xs text-gray-500">
           <p className="text-[#D4AF37] tracking-[0.3em] uppercase">Trikaal Vaani</p>
-          <p className="mt-2">AI-Powered Vedic Astrology · Rohiit Gupta, {L.authorRole}</p>
+          <p className="mt-2 text-[#D4AF37] font-semibold">Granth ka Gyaan · Rohiit ki Parakh · AI ki Shakti</p>
+          <p className="mt-1">Rooted in Granth · Verified by Rohiit · Powered by AI · Rohiit Gupta, {L.authorRole}</p>
           <p className="mt-1">MSME · UDYAM-DL-10-0119070 · trikalvaani.com</p>
         </div>
       </footer>

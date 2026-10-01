@@ -2,7 +2,7 @@
  * TRIKAL VAANI — trikalvaani.com
  * Chief Vedic Architect: Rohiit Gupta
  * FILE TO PASTE → app/privacy/page.tsx (REPLACE EXISTING)
- * Version: 2.0 — Full SEO + EEAT + Razorpay compliant
+ * Version: 2.1 (1 Oct 2026 — Trikaal Vaani ka core tagline (Rohiit ne chuna): "Granth ka Gyaan · Rohiit ki Parakh · AI ki Shakti" / "Rooted in Granth · Verified by Rohiit · Powered by AI") — Full SEO + EEAT + Razorpay compliant
  */
 
 import type { Metadata } from "next";
@@ -12,7 +12,7 @@ import SiteFooter from "@/components/layout/SiteFooter";
 
 export const metadata: Metadata = {
   title: { absolute: "Privacy Policy | Trikaal Vaani" },
-  description: "Privacy Policy for Trikaal Vaani — AI-powered Vedic Astrology platform by Rohiit Gupta. How we collect, use, and protect your personal data.",
+  description: "Privacy Policy for Trikaal Vaani — granth-based, Rohiit-verified, AI-powered Vedic Astrology platform by Rohiit Gupta. How we collect, use, and protect your personal data.",
   authors: [{ name: "Rohiit Gupta", url: "https://trikalvaani.com/founder" }],
   alternates: { canonical: "https://trikalvaani.com/privacy" },
   openGraph: { title: "Privacy Policy | Trikaal Vaani", url: "https://trikalvaani.com/privacy", siteName: "Trikaal Vaani", locale: "en_IN", type: "website" },

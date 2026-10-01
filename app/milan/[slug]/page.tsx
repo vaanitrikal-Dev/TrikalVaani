@@ -1,4 +1,5 @@
 /**
+ * v1.10 (1 Oct 2026) — footer mein Trikaal Vaani ka core tagline: "Granth ka Gyaan · Rohiit ki Parakh · AI ki Shakti" / "Rooted in Granth · Verified by Rohiit · Powered by AI".
  * v1.9 (1 Oct 2026) — Karmic cross-sell ₹251 -> ₹101 (Karmic ka daam isi deploy mein ₹101).
  * v1.8 (1 Oct 2026) — FREE PREVIEW ka upsell dabba ab bhi ₹51/₹101/₹151 aur
  *   "Deep Reading Kholiye" dikha raha tha (Rohiit ne free test mein pakda).
@@ -490,7 +491,8 @@ export default async function MilanResultPage({ params }: { params: { slug: stri
       <footer className="border-t border-[#D4AF37]/10 mt-8">
         <div className="max-w-4xl mx-auto px-5 py-8 text-center text-xs text-gray-500">
           <p className="text-[#D4AF37] tracking-[0.3em] uppercase">Trikaal Vaani</p>
-          <p className="mt-2">AI-Powered Vedic Astrology · Rohiit Gupta, Chief Vedic Architect</p>
+          <p className="mt-2 text-[#D4AF37] font-semibold">Granth ka Gyaan · Rohiit ki Parakh · AI ki Shakti</p>
+          <p className="mt-1">Rooted in Granth · Verified by Rohiit · Powered by AI · Rohiit Gupta, Chief Vedic Architect</p>
           <p className="mt-1">MSME · UDYAM-DL-10-0119070 · trikalvaani.com</p>
         </div>
       </footer>

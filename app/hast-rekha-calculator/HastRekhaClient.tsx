@@ -2,7 +2,7 @@
 
 // ============================================================
 // File: app/hast-rekha-calculator/HastRekhaClient.tsx
-// Version: v2.4 (29 Aug 2026) — INTERNATIONAL PAYMENT
+// Version: 2.5 (1 Oct 2026 — Trikaal Vaani ka core tagline (Rohiit ne chuna): "Granth ka Gyaan · Rohiit ki Parakh · AI ki Shakti" / "Rooted in Granth · Verified by Rohiit · Powered by AI") (29 Aug 2026) — INTERNATIONAL PAYMENT
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
 //
 // CHANGE v2.4 (2026-08-29) — PAYPAL FOR VISITORS OUTSIDE INDIA
@@ -268,7 +268,8 @@ function HastRekhaFooter() {
     <footer className="border-t mt-8" style={{ borderColor: GOLD_RGBA(0.1) }}>
       <div className="max-w-4xl mx-auto px-5 py-8 text-center text-xs text-slate-500">
         <p style={{ color: GOLD, letterSpacing: '0.3em', textTransform: 'uppercase' }}>Trikaal Vaani</p>
-        <p className="mt-2">AI-Powered Vedic Astrology · Rohiit Gupta, Chief Vedic Architect</p>
+        <p className="mt-2 text-[#D4AF37] font-semibold">Granth ka Gyaan · Rohiit ki Parakh · AI ki Shakti</p>
+          <p className="mt-1">Rooted in Granth · Verified by Rohiit · Powered by AI · Rohiit Gupta, Chief Vedic Architect</p>
         <p className="mt-1">MSME · UDYAM-DL-10-0119070 · trikalvaani.com</p>
         <p className="mt-3 text-slate-600 italic max-w-lg mx-auto">
           Hast Rekha reading self-reflection ke liye hai. Samudrika Shastra ek praacheen vidya hai —

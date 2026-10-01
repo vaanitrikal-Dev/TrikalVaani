@@ -3,7 +3,7 @@
  * TRIKAL VAANI — Child Birth Muhurat — Paid Result Page
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/muhurat/[slug]/page.tsx
- * VERSION: 1.4 (30 Sep 2026) — ₹51 single tier + honest weak-slot box
+ * VERSION: 1.5 (1 Oct 2026 — Trikaal Vaani ka core tagline (Rohiit ne chuna): "Granth ka Gyaan · Rohiit ki Parakh · AI ki Shakti" / "Rooted in Granth · Verified by Rohiit · Powered by AI") (30 Sep 2026) — ₹51 single tier + honest weak-slot box
  *   * SAFETY FIX: the old backup box scanned the WHOLE DAY (0:00–23:59), so it
  *     could suggest a time OUTSIDE the doctor's window. Backups now come only
  *     from muhurat_data.backup_slots — picked inside the doctor's window by
@@ -430,7 +430,8 @@ export default async function MuhuratResultPage({ params }: { params: { slug: st
       <footer className="border-t border-[#D4AF37]/10 mt-8">
         <div className="max-w-4xl mx-auto px-5 py-8 text-center text-xs text-gray-500">
           <p className="text-[#D4AF37] tracking-[0.3em] uppercase">Trikaal Vaani</p>
-          <p className="mt-2">AI-Powered Vedic Astrology · Rohiit Gupta, Chief Vedic Architect</p>
+          <p className="mt-2 text-[#D4AF37] font-semibold">Granth ka Gyaan · Rohiit ki Parakh · AI ki Shakti</p>
+          <p className="mt-1">Rooted in Granth · Verified by Rohiit · Powered by AI · Rohiit Gupta, Chief Vedic Architect</p>
           <p className="mt-1">MSME · UDYAM-DL-10-0119070 · trikalvaani.com</p>
           <p className="mt-3 text-[10px] text-gray-600 max-w-lg mx-auto leading-relaxed">
             This report describes the life potential indicated by the birth chart of a child born at the chosen

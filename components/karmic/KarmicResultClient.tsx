@@ -1,7 +1,8 @@
 // TRIKAL VAANI — Karmic Result Client Component
 // CEO & Chief Vedic Architect: Rohiit Gupta
 // File: components/karmic/KarmicResultClient.tsx
-// VERSION: 1.1 (1 Oct 2026) — granth saar: do naye section (7. Prediction, 8. Upay),
+// VERSION: 1.2 (1 Oct 2026) — "📜 Granth kehta hai" sunehri dabbe mein (Rohiit), **bold** asli bold,
+//   footer mein core tagline. PICHHLA: 1.1 (1 Oct 2026) — granth saar: do naye section (7. Prediction, 8. Upay),
 //   daam ₹101, srot "BPHS · Phaladipika" (report ab AI nahi, granth se — api/karmic-reading v2.0)
 // Handles: animated waiting screen, auto-polling, 6-dim render, PDF, share.
 
@@ -75,6 +76,33 @@ function parseReading(narrative: string) {
   }
 
   return { opening, dimensions, maaShakti }
+}
+
+// v1.2 — "**KAMZOR**" jaisa likha bold asli bold banta hai (pehle sitaare dikhte the)
+function boldify(t: string, key: string): React.ReactNode[] {
+  return t.split(/\*\*(.+?)\*\*/g).map((x, i) =>
+    i % 2 ? <strong key={`${key}-b${i}`} className="text-white font-semibold">{x}</strong> : x)
+}
+
+// v1.2 — Rohiit (1 Oct): "Granth kehta hai — isko bold karo, alag rang se highlight karo,
+// taaki log ye line zaroor padhein". Uske baad ka granth-vachan sunehri patti wale dabbe mein.
+const GRANTH_RE = /Granth kehta hai —|par granth:/
+function rich(p: string, key: string): React.ReactNode {
+  const m = GRANTH_RE.exec(p)
+  if (!m) return boldify(p, key)
+  const isPar = m[0].startsWith('par')
+  const before = p.slice(0, m.index).trim()
+  const after = p.slice(m.index + m[0].length).trim()
+  const label = isPar ? `${before} par granth` : 'Granth kehta hai'
+  return (
+    <>
+      {!isPar && before && <span>{boldify(before, key)}</span>}
+      <span className="block mt-3 pl-4 pr-3 py-3 border-l-4 border-[#D4AF37] bg-[#D4AF37]/[0.08] rounded-r-lg">
+        <span className="block text-[#D4AF37] font-bold text-sm tracking-wide mb-1">📜 {label}</span>
+        <span className="block text-amber-100 leading-[1.9]">{boldify(after, key + 'a')}</span>
+      </span>
+    </>
+  )
 }
 
 function paras(text: string) {
@@ -295,7 +323,7 @@ export default function KarmicResultClient({ initialRow }: { initialRow: KarmicR
         <section className="max-w-3xl mx-auto px-5 pt-8">
           <div className="bg-[#0d1120]/60 border-l-4 border-[#D4AF37] rounded-r-xl p-5 sm:p-6">
             {paras(parsed.opening).map((p, i) => (
-              <p key={i} className="text-base sm:text-lg leading-relaxed text-gray-100 mb-3 last:mb-0">{p}</p>
+              <p key={i} className="text-base sm:text-lg leading-relaxed text-gray-100 mb-3 last:mb-0">{rich(p, `o${i}`)}</p>
             ))}
           </div>
         </section>
@@ -313,7 +341,7 @@ export default function KarmicResultClient({ initialRow }: { initialRow: KarmicR
                 </h2>
               </div>
               {paras(dim.body).map((p, j) => (
-                <p key={j} className="text-base leading-[1.9] text-[#e8e8e8] mb-4 last:mb-0">{p}</p>
+                <p key={j} className="text-base leading-[1.9] text-[#e8e8e8] mb-4 last:mb-0">{rich(p, `d${j}`)}</p>
               ))}
             </article>
           ))}
@@ -375,7 +403,8 @@ export default function KarmicResultClient({ initialRow }: { initialRow: KarmicR
       <footer className="border-t border-[#D4AF37]/10 mt-8">
         <div className="max-w-4xl mx-auto px-5 py-8 text-center text-xs text-gray-500">
           <p className="text-[#D4AF37] tracking-[0.3em] uppercase">Trikaal Vaani</p>
-          <p className="mt-2">AI-Powered Vedic Astrology · Rohiit Gupta, Chief Vedic Architect</p>
+          <p className="mt-2 text-[#D4AF37] font-semibold">Granth ka Gyaan · Rohiit ki Parakh · AI ki Shakti</p>
+          <p className="mt-1">Rooted in Granth · Verified by Rohiit · Powered by AI · Rohiit Gupta, Chief Vedic Architect</p>
           <p className="mt-1">MSME · UDYAM-DL-10-0119070 · trikalvaani.com</p>
           <p className="mt-3 text-[10px] text-gray-600 max-w-lg mx-auto leading-relaxed">
             This reading reveals karmic patterns from the birth chart for self-understanding.

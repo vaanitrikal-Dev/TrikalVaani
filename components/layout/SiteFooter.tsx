@@ -3,7 +3,7 @@
  * 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER 🔱
  * ============================================================================
  * File:        components/SiteFooter.tsx
- * Version:     v2.5 — "72+ seekers" counter removed (CEO conversion audit)
+ * Version: 2.6 (1 Oct 2026 — Trikaal Vaani ka core tagline (Rohiit ne chuna): "Granth ka Gyaan · Rohiit ki Parakh · AI ki Shakti" / "Rooted in Granth · Verified by Rohiit · Powered by AI") — "72+ seekers" counter removed (CEO conversion audit)
  * Owner:       Rohiit Gupta, Chief Vedic Architect
  *
  * CHANGES vs v2.4 (CEO-approved):
@@ -63,8 +63,10 @@ export default function SiteFooter() {
             {/* ── v2.4 FIX-2: "world's leading" removed — unverified superlative
                 Replaced with accurate, entity-rich, E-E-A-T compliant description ── */}
             <p className="text-xs text-slate-400 leading-relaxed max-w-xs mb-4">
-              AI-powered Vedic Astrology platform by Rohiit Gupta, India. Merging 5,000 years
-              of Parashara wisdom with Swiss Ephemeris precision to decode your cosmic blueprint.
+              <span className="block font-semibold mb-1" style={{ color: GOLD }}>Granth ka Gyaan · Rohiit ki Parakh · AI ki Shakti</span>
+              <span className="block mb-2">Rooted in Granth · Verified by Rohiit · Powered by AI</span>
+              Vedic Astrology platform by Rohiit Gupta, India — classical granth (BPHS, Phaladipika,
+              Muhurta Chintamani) with Swiss Ephemeris precision.
             </p>
 
             <div
@@ -257,7 +259,7 @@ export default function SiteFooter() {
             <strong style={{ color: GOLD }}>Trikal Vaani</strong> is also searched as{' '}
             <strong style={{ color: GOLD_RGBA(0.85) }}>Trikaal Vaani</strong>
             <span className="text-slate-500"> · </span>
-            India&apos;s AI-powered Vedic Astrology platform by Rohiit Gupta.
+            Granth ka Gyaan · Rohiit ki Parakh · AI ki Shakti — India&apos;s Vedic Astrology platform by Rohiit Gupta.
             <br />
             <span className="text-slate-600 text-[11px]">
               Official domain: trikalvaani.com · Also: trikaalvaani.in · trikalvaani.in · trikaalvaani.org

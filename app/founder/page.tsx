@@ -3,7 +3,7 @@
  * 🔱 TRIKAL VAANI — CEO PROTECTION HEADER 🔱
  * ============================================================================
  * File:        app/founder/page.tsx
- * Version:     v4.3 — Brand Spelling Consolidation (Trikaal = Trikaal)
+ * Version: 4.4 (1 Oct 2026 — Trikaal Vaani ka core tagline (Rohiit ne chuna): "Granth ka Gyaan · Rohiit ki Parakh · AI ki Shakti" / "Rooted in Granth · Verified by Rohiit · Powered by AI") — Brand Spelling Consolidation (Trikaal = Trikaal)
  * Owner:       Rohiit Gupta, Chief Vedic Architect
  * Domain:      trikalvaani.com
  * Updated:     May 10, 2026
@@ -195,7 +195,7 @@ const schema = {
         },
       },
       description:
-        "Trikal Vaani (also known as Trikaal Vaani) is India's first AI-powered Vedic Astrology platform combining Swiss Ephemeris precision with Gemini AI reasoning. Government of India MSME registered enterprise. Defensive domains trikaalvaani.in, trikalvaani.in, and trikaalvaani.org all redirect to the official trikalvaani.com.",
+        "Trikal Vaani (also known as Trikaal Vaani) is a Vedic Astrology platform — Rooted in Granth · Verified by Rohiit · Powered by AI: every reading built from classical granth (BPHS, Phaladipika, Muhurta Chintamani), on Swiss Ephemeris precision. Government of India MSME registered enterprise. Defensive domains trikaalvaani.in, trikalvaani.in, and trikaalvaani.org all redirect to the official trikalvaani.com.",
       areaServed: { "@type": "Country", name: "India" },
       identifier: {
         "@type": "PropertyValue",

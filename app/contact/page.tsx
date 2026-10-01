@@ -2,7 +2,7 @@
  * TRIKAL VAANI — trikalvaani.com
  * Chief Vedic Architect: Rohiit Gupta
  * FILE TO PASTE → app/contact/page.tsx (CREATE NEW)
- * Version: 1.0 — Full SEO + Razorpay compliant
+ * Version: 1.1 (1 Oct 2026 — Trikaal Vaani ka core tagline (Rohiit ne chuna): "Granth ka Gyaan · Rohiit ki Parakh · AI ki Shakti" / "Rooted in Granth · Verified by Rohiit · Powered by AI") — Full SEO + Razorpay compliant
  */
 
 import type { Metadata } from "next";
@@ -88,7 +88,8 @@ export default function ContactPage() {
                 </div>
                 <div>
                   <p className="text-gray-500 text-xs uppercase tracking-wider mb-1">Services</p>
-                  <p className="text-white">AI-powered Vedic Astrology Readings</p>
+                  <p className="text-white">Granth-based Vedic Astrology Readings</p>
+                  <p className="text-[#D4AF37] text-xs mt-1">Granth ka Gyaan · Rohiit ki Parakh · AI ki Shakti</p>
                 </div>
                 <div>
                   <p className="text-gray-500 text-xs uppercase tracking-wider mb-1">Payment</p>

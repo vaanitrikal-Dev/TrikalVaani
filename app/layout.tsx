@@ -1,7 +1,7 @@
 // ============================================================
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
 // FILE: app/layout.tsx
-// VERSION: 3.10 (1 Oct 2026 — daam sahi kiye: Kundali Milan ₹51 (couple + parent), Karmic ₹101 / $11, Child Birth ₹51; Bhrigu Nandi ke purane daave hataye)  (18 Sep 2026 — TrikalPicker added) — Google Ads Tag AW-7916189860 added
+// VERSION: 3.11 (1 Oct 2026 — Trikaal Vaani ka core tagline (Rohiit ne chuna): "Granth ka Gyaan · Rohiit ki Parakh · AI ki Shakti" / "Rooted in Granth · Verified by Rohiit · Powered by AI") (1 Oct 2026 — daam sahi kiye: Kundali Milan ₹51 (couple + parent), Karmic ₹101 / $11, Child Birth ₹51; Bhrigu Nandi ke purane daave hataye)  (18 Sep 2026 — TrikalPicker added) — Google Ads Tag AW-7916189860 added
 // CHANGES vs v3.6.2 (CEO-approved):
 //   ✅ ADD: GoogleAdsTag AW-7916189860 — builds Google Display +
 //      YouTube + Gmail remarketing audiences alongside Meta Pixel.
@@ -174,7 +174,7 @@ export default function RootLayout({
               description:
                 "AI-powered Vedic astrology platform offering free kundli and personalised predictions across India and worldwide. Powered by Swiss Ephemeris, BPHS Parashara classical rules, Bhrigu Nandi Nadi, and Shadbala. Government of India MSME registered enterprise (UDYAM-DL-10-0119070). Founded by Rohiit Gupta, Chief Vedic Architect.",
               disambiguatingDescription:
-                "AI-powered Vedic astrology platform founded by Rohiit Gupta, Chief Vedic Architect, operated solely at trikalvaani.com under Government of India MSME registration UDYAM-DL-10-0119070. An independent online astrology service, distinct from any other individual, pandit, or business with a similar-sounding name.",
+                "Vedic astrology platform — Rooted in Granth · Verified by Rohiit · Powered by AI — founded by Rohiit Gupta, Chief Vedic Architect, operated solely at trikalvaani.com under Government of India MSME registration UDYAM-DL-10-0119070. An independent online astrology service, distinct from any other individual, pandit, or business with a similar-sounding name.",
               slogan:
                 "Kaal bada balwan hai, sabko nach nachaye; raja ka beta bhi bhiksha mangne jaye.",
               foundingDate: "2026",
