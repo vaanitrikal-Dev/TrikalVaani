@@ -1,5 +1,11 @@
-// TRIKAL VAANI - Kundali Milan Order Creation API - v1.2 (29 Aug 2026)
+// TRIKAL VAANI - Kundali Milan Order Creation API - v1.3 (1 Oct 2026)
 // CEO: Rohiit Gupta
+// v1.3: EK HI TIER — milan_51 (₹51 / $5), couple + parent dono, granth saar +
+//       10 upay. Rohiit, 1 Oct 2026: "sirf one paid Tier ka banado 51 only ...
+//       101 and 151 hata do". Browser kuch bhi tier bheje (purana page cache
+//       mein ho to deep_couple/both bhi aa sakta hai) — sab milan_51 banta hai,
+//       ₹51. Daam sirf server tay karta hai. Purane chaar tier DB constraint
+//       mein purane orders ke liye bache hain, yahan se nahi bante.
 // v1.2: PAYPAL for international buyers. `provider: 'paypal'` creates the order
 //       with PayPal instead of Razorpay and stores it under paypal_order_id.
 //       All four tiers are priced in USD: basic $7, deep couple/parent $12,
@@ -15,36 +21,13 @@ import { createClient } from '@supabase/supabase-js';
 
 // CEO LOCKED Pricing (IR-19) - internal tier keys
 const TIER_PRICING: Record<string, { rupees: number; audience: 'couple' | 'parent' | 'both'; label: string }> = {
-  basic_51:        { rupees: 51,  audience: 'couple', label: 'Basic Milan'                       },
-  deep_101_couple: { rupees: 101, audience: 'couple', label: 'Deep Reading - Couple'             },
-  deep_101_parent: { rupees: 101, audience: 'parent', label: 'Deep Reading - Parent'             },
-  both_151:        { rupees: 151, audience: 'both',   label: 'Both Versions (Couple + Parent)'   },
+  milan_51: { rupees: 51, audience: 'both', label: 'Kundali Milan — Couple + Parent' },
 };
 
-// Map the FORM tier names -> internal tier keys
-// Form sends: deep_couple / deep_parent / deep_both (and possibly basic)
-function normaliseTier(raw: string | undefined, audience: string | undefined): string {
-  if (!raw) {
-    // derive from audience if tier missing
-    if (audience === 'parent') return 'deep_101_parent';
-    if (audience === 'both')   return 'both_151';
-    return 'deep_101_couple';
-  }
-  const map: Record<string, string> = {
-    // form names
-    deep_couple:     'deep_101_couple',
-    deep_parent:     'deep_101_parent',
-    deep_both:       'both_151',
-    basic:           'basic_51',
-    // already-internal names (passthrough)
-    basic_51:        'basic_51',
-    deep_101_couple: 'deep_101_couple',
-    deep_101_parent: 'deep_101_parent',
-    both_151:        'both_151',
-  };
-  return map[raw] ?? 'deep_101_couple';
+// v1.3 — har tier naam milan_51 banta hai (purane form/cache ke naam bhi).
+function normaliseTier(_raw: string | undefined, _audience: string | undefined): string {
+  return 'milan_51';
 }
-
 const razorpay = new Razorpay({
   key_id:     process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID!,
   key_secret: process.env.RAZORPAY_KEY_SECRET!,
@@ -126,10 +109,7 @@ export async function POST(req: NextRequest) {
       // than string-munging, so an unknown tier fails loudly instead of
       // silently charging the wrong amount.
       const PAYPAL_KEY_FOR_TIER: Record<string, string> = {
-        basic_51:        'milan_basic',
-        deep_101_couple: 'milan_deep',
-        deep_101_parent: 'milan_deep_parent',
-        both_151:        'milan_both',
+        milan_51: 'milan_51',   // v1.3 — $5
       };
       const productKey = PAYPAL_KEY_FOR_TIER[tier];
       if (!productKey) {

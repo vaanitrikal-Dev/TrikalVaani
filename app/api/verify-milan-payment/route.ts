@@ -1,6 +1,12 @@
 // TRIKAL VAANI - Kundali Milan Payment Verification API
 // CEO: Rohiit Gupta
 // File: app/api/verify-milan-payment/route.ts
+// VERSION: 1.7 (1 Oct 2026) - single tier milan_51
+//
+// CHANGE v1.7 (Rohiit, 1 Oct 2026): naya tier milan_51 (₹51 / $5, couple +
+//   parent). PayPal map aur WhatsApp label mein joda. Purane chaar tier ke
+//   naam bache hain taaki purane pending orders verify ho sakein.
+//
 // VERSION: 1.6 (29 Aug 2026) - PayPal accepted alongside Razorpay
 //
 // CHANGE v1.6: accepts paypal_order_id for international buyers. The expected
@@ -105,6 +111,7 @@ export async function POST(req: NextRequest) {
     // code, and a Razorpay request runs the identical block it always ran.
     if (isPaypal) {
       const PAYPAL_KEY_FOR_TIER: Record<string, string> = {
+        milan_51:        'milan_51',          // v1.7 — $5
         basic_51:        'milan_basic',
         deep_101_couple: 'milan_deep',
         deep_101_parent: 'milan_deep_parent',
@@ -272,6 +279,7 @@ export async function POST(req: NextRequest) {
     }
 
     const tierLabel =
+      order.tier === 'milan_51'        ? 'Kundali Milan - Couple + Parent (Rs51)' :
       order.tier === 'basic_51'        ? 'Basic Milan (Rs51)'            :
       order.tier === 'deep_101_couple' ? 'Deep Reading - Couple (Rs101)' :
       order.tier === 'deep_101_parent' ? 'Deep Reading - Parent (Rs101)' :

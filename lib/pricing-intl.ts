@@ -3,7 +3,10 @@
  * TRIKAL VAANI — International Pricing (Option A)
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: lib/pricing-intl.ts
- * VERSION: 1.5 (30 Sep 2026)
+ * VERSION: 1.6 (1 Oct 2026)
+ *   v1.6 — Kundali Milan single tier `milan_51` (Rs 51 / $5) — couple + parent
+ *          dono, granth saar + 10 upay. milan_basic/deep/deep_parent/both sirf
+ *          purane pending PayPal orders verify karne ke liye; ab nahi bikte.
  *   v1.5 — Child Birth Muhurat single tier `muhurat_51` (Rs 51 / $5), report +
  *          10 remedies. Old muhurat_report / muhurat_remedies kept only so
  *          older pending PayPal orders still verify; no longer sold.
@@ -91,6 +94,14 @@ export const PRODUCTS: Record<string, ProductPrice> = {
     inrPaise: 5100,
     usdCents: 700,
   },
+  // v1.6 — Rohiit, 1 Oct 2026: Kundali Milan ka EK hi tier.
+  milan_51: {
+    key: 'milan_51',
+    label: 'Kundali Milan — Couple + Parent',
+    inrPaise: 5100, // Rs 51
+    usdCents: 500,  // $5
+  },
+  // Neeche ke chaar ab nahi bikte — purane orders ke liye rakhe hain.
   milan_basic: {
     key: 'milan_basic',
     label: 'Kundali Milan — Basic',

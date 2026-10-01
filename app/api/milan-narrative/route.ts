@@ -1,330 +1,252 @@
 /**
- * v1.10 (29 Sep 2026) — Surakshit 1-tap: narrative save hote hi CEO ko WhatsApp-button
- *   email (lib/report-notify.ts). Ek payment = ek email.
- * v1.9.1 (29 Sep 2026) — ai-fallback v1.1 ke saath: Gemini ek call 60s max,
- *   Claude ke liye 60s hamesha reserve (CEO test mein Claude skip hua tha).
- * v1.9 (29 Sep 2026) — AI FALLBACK (CEO: "pehle sab pe laga do"):
- *   Pehle EK Gemini call — Google 503 aate hi customer ko 502, reading
- *   nahi. Ab lib/ai-fallback.ts: tier ka model (3.7/3.8) → doosra Gemini
- *   (bheed par ek retry) → Claude Sonnet 5. Claude ne likha ho to polish
- *   skip. maxDuration 120 → 300 (polish ki apni 120s limit + fallback
- *   chain 120s ke andar nahi samaati thi). Prompt/tier/save — sab v1.8.
- * v1.8 (27 Sep 2026) — remedies_data ab OPTIONAL (manglik_data jaisa).
- *   5 Jun 2026 ke paid Milan (8826256938, ₹51 basic) mein VM ne remedies
- *   nahi lautaye the → route 500 deta tha ("core engine data missing") aur
- *   grahak ko reading kabhi nahi mili. Sirf ashtakoot_data zaroori hai;
- *   remedies na ho to prompt ko khaali {} jaata hai.
- * v1.7 (27 Sep 2026) — maxDuration = 120 (explicit). Narrative banne mein
- *   ~34s lagte hain (27 Sep live test). Ab yeh route SIRF browser se call hota
- *   hai (components/milan/MilanNarrativeLoader.tsx), page se nahi — page ki
- *   30s limit (vercel.json) is route ko beech mein kaat deti thi, isliye
- *   kisi bhi paid Milan ka narrative kabhi save nahi hua (6/6 NULL).
- * v1.6 (21 Sep 2026) — word count ghataya (Rohiit): basic 400->250,
- *   couple/parent 1000->550, both 1500->1000. maxTokens nahi ghataya.
  * ============================================================
- * TRIKAL VAANI — Milan Narrative Generator API
+ * TRIKAL VAANI — Milan Narrative (Granth Saar) API
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/api/milan-narrative/route.ts
- * VERSION: 1.8
- * SIGNED: ROHIIT GUPTA, CEO
+ * VERSION: 2.0 (1 Oct 2026) — AI BAND. Report GRANTH se.
  * ============================================================
- * CHANGE LOG (v1.4 → v1.5):
- *   Pass `language` into polishMilanNarrative() so Claude Sonnet preserves
- *   the language and never translates/drifts. Closes the language chain
- *   end-to-end (builders → Gemini → Sonnet polish all language-locked).
- *
- * CHANGE LOG (v1.3 → v1.4):
- *   WIRE LANGUAGE: read milan.language ('hinglish' | 'hindi' | 'english'),
- *   default 'hinglish', pass into all 3 prompt builders. Pass `tier` into
- *   buildMilanBothPrompt.
- *
- * CHANGE LOG (v1.1 → v1.3):
- *   FIX 1: API key order corrected — GEMINI_API_KEY first, GOOGLE_API_KEY second.
- *   FIX 2: manglik_data removed from hard require gate (null → safe fallback).
+ * v2.0 (Rohiit, 1 Oct 2026): "Only Granth Saar - Only 500 words (couple +
+ *   parent ke saath)" aur "Saar do add Slokas as well in Sanskrit with Book
+ *   name".
+ *   * Gemini + Claude polish POORA hata. Report VM milan_engine v2.0 ke data
+ *     se banti hai (Muhurta Chintamani, Vivah Prakaran sl.21-37 — har koot
+ *     ka ank, shlok, faisla, parihar, Nadi ki teevrata, daan, anumaan).
+ *   * SANSKRIT SHLOK aur unka HINDI ARTH Supabase bphs_slokas se — sirf woh
+ *     rows jinka bharosa = 'aankh-se-padha' hai (Rohiit ki PDF ke panne
+ *     107-114 dekh kar padhe gaye, 1 Oct 2026). OCR wala Sanskrit kabhi nahi.
+ *     Shlok code mein nahi likhe — library sudhre to report apne aap sudhre.
+ *   * Do hisse, WAHI markers jo report page (app/milan/[slug]/page.tsx)
+ *     pehle se padhta hai: ═══ COUPLE VERSION ═══ (Hinglish) aur
+ *     ═══ PARENT VERSION ═══ (शुद्ध हिन्दी). Kul ~500 shabd + shlok.
+ *   * Single tier milan_51 (₹51/$5, couple + parent). Purani reports
+ *     (gemini_narrative pehle se) jaisi hain waisi — Rohiit: "do not touch
+ *     old reports".
+ *   * Granth ke kathor vachan (maran, santan-haani) JAISE HAIN WAISE —
+ *     Rohiit, 1 Oct: "Keep harsh line as it is.... prediction can be bitter".
+ *     Saath mein engine ka parihar aur teevrata bhi, taaki poori baat jaaye.
+ * PURANA (v1.10): Gemini 3.8/3.7 + Claude polish, 4 tier, 3 prompt files.
  * ============================================================
  */
-
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { generateWithFallback } from '@/lib/ai-fallback';
 import { notifyReportReady } from '@/lib/report-notify';
-import { buildMilanCouplePrompt } from '@/lib/kundali-milan-prompt-couple';
-import { buildMilanParentPrompt } from '@/lib/kundali-milan-prompt-parent';
-import { buildMilanBothPrompt }   from '@/lib/kundali-milan-prompt-both';
-import { polishMilanNarrative }   from '@/lib/claude-polish';
 
-// v1.7 — Gemini 3.8 + polish ~35-60s; 120s ki gunjaaish
-export const maxDuration = 300; // v1.9: AI chain ≤150s + polish ≤120s
+export const maxDuration = 60;
 export const dynamic = 'force-dynamic';
 
-// ── Tier configuration (CEO LOCKED) ──────────────────────────
-type Tier      = 'basic_51' | 'deep_101_couple' | 'deep_101_parent' | 'both_151';
-type Audience  = 'couple' | 'parent' | 'both';
-type Language  = 'hinglish' | 'hindi' | 'english';
-
-interface TierConfig {
-  model:       string;
-  maxTokens:   number;
-  wordTarget:  number;
-  usePolish:   boolean;
-}
-
-const TIER_CONFIG: Record<Tier, TierConfig> = {
-  // MIGRATED 3 Sep 2026 — gemini-2.5-flash and gemini-2.5-pro SHUT DOWN ON
-  // 16 OCTOBER 2026. Mapping approved by Rohiit: 2.5-flash -> 3.7-flash,
-  // 2.5-pro -> 3.8-flash. On the independent Artificial Analysis index
-  // 3.8 Flash scores 59 and 3.7 Flash 56, against Gemini 3.1 Pro's
-  // upper-40s — an upgrade in capability, and cheaper than 2.5-pro was.
-  // basic_51 also goes 4000 -> 6000 tokens. It targets 400 words, roughly
-  // 700 tokens of visible text, and the rest was headroom for 2.5's thinking.
-  // 3.x reasons more and is measurably more verbose, so the old headroom is
-  // no longer headroom. Every other tier here was already well clear.
-  // ⭐ 21 Sep 2026 — WORD COUNT GHATAYA (Rohiit ka nirdesh):
-  //   basic_51 400 -> 250 · deep_101_couple 1000 -> 550 ·
-  //   deep_101_parent 1000 -> 550 · both_151 1500 -> 1000
-  // Wajah: milan ab GRANTH par hai (milan_engine v2.0 — Muhurta Chintamani
-  // sl.21-37), aur har koot ka shlok, parihar aur faisla engine KHUD deta
-  // hai. Gemini ka kaam ab un tathyon ko BHASHA dena hai, lamba nibandh
-  // likhna nahi. Aur "1000-word analysis" ka waada copy se hata diya gaya
-  // hai — "poora granth-paath" likha hai.
-  // ⚠️ maxTokens JAAN-BOOJH KAR NAHI GHATAYA. 3.x model soch mein token
-  // khaata hai (upar ka note); chhat ghatane se jawab beech mein kat sakta hai.
-  basic_51:        { model: 'gemini-3.7-flash', maxTokens: 6000,  wordTarget: 250,  usePolish: true },
-  deep_101_couple: { model: 'gemini-3.8-flash', maxTokens: 8000,  wordTarget: 550,  usePolish: true },
-  deep_101_parent: { model: 'gemini-3.8-flash', maxTokens: 8000,  wordTarget: 550,  usePolish: true },
-  both_151:        { model: 'gemini-3.8-flash', maxTokens: 12000, wordTarget: 1000, usePolish: true },
-};
-
-// ── Valid language whitelist (defensive) ─────────────────────
-const VALID_LANGUAGES: Language[] = ['hinglish', 'hindi', 'english'];
-
-// ── Safe fallback for manglik_data when null/missing ─────────
-const MANGLIK_FALLBACK = {
-  evaluated:     false,
-  bride:         { is_manglik: null, strength: 'Not evaluated' },
-  groom:         { is_manglik: null, strength: 'Not evaluated' },
-  combined:      { status: 'NONE', verdict: 'Manglik evaluation not available.', verdict_hi: '', recommendation: '' },
-};
-
-// ── Clients ──────────────────────────────────────────────────
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-// FIX 1: GEMINI_API_KEY first — GOOGLE_API_KEY is Maps key, invalid for Gemini
+const GRANTH = 'Muhurta Chintamani, Vivah Prakaran';
+const GRANTH_HI = 'मुहूर्त चिन्तामणि, विवाह प्रकरण';
 
-interface NarrativeRequest {
-  slug: string;
+const KOOT_HI: Record<string, string> = {
+  Varna: 'वर्ण', Vashya: 'वश्य', Tara: 'तारा', Yoni: 'योनि',
+  'Graha Maitri': 'ग्रहमैत्री', Gana: 'गण', Bhakoot: 'भकूट', Nadi: 'नाड़ी',
+};
+const KOOT_ORDER = ['Varna', 'Vashya', 'Tara', 'Yoni', 'Graha Maitri', 'Gana', 'Bhakoot', 'Nadi'];
+
+type Shlok = { deva: string; hindi: string };
+
+/** "MC 6.25-26" -> [25, 26]; "MC 6.34 (Garga)" -> [34] */
+function shlokNums(ref: unknown): number[] {
+  const m = String(ref ?? '').match(/6\.(\d+)(?:-(\d+))?/);
+  if (!m) return [];
+  const a = Number(m[1]); const b = m[2] ? Number(m[2]) : a;
+  const out: number[] = [];
+  for (let i = a; i <= b && i - a < 4; i++) out.push(i);
+  return out;
 }
+
+/** Engine ek shlok batata hai, par niyam kabhi do mein hota hai: Graha Maitri
+ *  ki soochi 27 mein, phal 28 mein; Gan ki soochi 29 mein, phal 30 mein. */
+const PURA: Record<string, number[]> = { 'Graha Maitri': [27, 28], Gana: [29, 30] };
+const kootShlok = (k: string, ref: unknown) => PURA[k] ?? shlokNums(ref);
+
+async function loadShloks(): Promise<Record<number, Shlok>> {
+  const out: Record<number, Shlok> = {};
+  try {
+    const { data } = await supabase
+      .from('bphs_slokas')
+      .select('sloka,text_deva,hindi')
+      .eq('work', 'muhurtachintamani')
+      .eq('chapter', 6)
+      .eq('bharosa', 'aankh-se-padha');
+    for (const r of data ?? []) {
+      if (r.text_deva) out[r.sloka] = { deva: r.text_deva, hindi: r.hindi ?? '' };
+    }
+  } catch (e) {
+    console.error('[Trikal] shlok load failed (non-fatal):', e);
+  }
+  return out;
+}
+
+/** Koot ke saath vadhu-var ke gun — engine jo deta hai wahi */
+function gun(k: string, v: any): string {
+  if (!v) return '';
+  const p = (a: any, b: any) => (a || b) ? ` (vadhu ${a ?? '—'}, var ${b ?? '—'})` : '';
+  switch (k) {
+    case 'Varna':        return p(v.bride, v.groom);
+    case 'Vashya':       return p(v.bride_group, v.groom_group);
+    case 'Yoni':         return p(v.bride_yoni, v.groom_yoni);
+    case 'Gana':         return p(v.bride_gana, v.groom_gana);
+    case 'Nadi':         return p(v.bride_nadi, v.groom_nadi);
+    case 'Graha Maitri': return p(v.bride_lord, v.groom_lord);
+    case 'Bhakoot':      return Array.isArray(v.doori) ? ` (doori ${v.doori.join('/')})` : '';
+    default:             return '';
+  }
+}
+
+const DAAN_HI: Record<string, string> = {
+  swarn: 'स्वर्ण', gau: 'गौ', ann: 'अन्न', aur: 'और', ka: 'का', ki: 'की', daan: 'दान',
+  vastra: 'वस्त्र', til: 'तिल', ghee: 'घी', chandi: 'चाँदी', bhojan: 'भोजन',
+};
+const daanHi = (t: string) => t.split(/(\s+|,)/).map((w) => DAAN_HI[w.toLowerCase()] ?? w).join('');
+
+const n = (x: unknown) => {
+  const v = Number(x);
+  return Number.isFinite(v) ? (Number.isInteger(v) ? String(v) : v.toFixed(1)) : '—';
+};
+
+/** Kaunse koot report mein shlok ke saath khulenge — jahan dosh ya ank aadhe se kam. */
+function kamzorKoot(koots: Record<string, any>, bache: string[]): string[] {
+  const set = new Set<string>();
+  for (const b of bache) {
+    const k = KOOT_ORDER.find((x) => x.toUpperCase().replace(' ', '_') === b.toUpperCase()
+      || x.toUpperCase() === b.toUpperCase() || x.split(' ')[0].toUpperCase() === b.toUpperCase());
+    if (k) set.add(k);
+  }
+  // bache dosh pehle, phir jinka ank aadhe se kam — sabse badi kami pehle
+  const kami = KOOT_ORDER
+    .filter((k) => koots?.[k] && Number(koots[k].score) < Number(koots[k].max) / 2)
+    .sort((x, y) => (Number(koots[y].max) - Number(koots[y].score))
+                  - (Number(koots[x].max) - Number(koots[x].score)));
+  const out = [...KOOT_ORDER.filter((k) => set.has(k)), ...kami.filter((k) => !set.has(k))];
+  return out.slice(0, 2);   // ~500 shabd ki seema
+}
+
+function buildGranthMilan(m: any, sh: Record<number, Shlok>): string {
+  const a = m.ashtakoot_data ?? {};
+  const koots: Record<string, any> = a.koots ?? {};
+  const bride = m.bride_data?.name ?? 'Kanya';
+  const groom = m.groom_data?.name ?? 'Var';
+  const total = n(a.total_score ?? m.ashtakoot_score);
+  const bache: string[] = Array.isArray(a.bache_dosh) ? a.bache_dosh : [];
+  const wajah: string[] = Array.isArray(a.faisla_wajah) ? a.faisla_wajah : [];
+  const parihar: string[] = Array.isArray(a.parihar) ? a.parihar : [];
+  const anumaan: string[] = Array.isArray(a.anumaan) ? a.anumaan : [];
+  const daan: string[] = Array.isArray(a.daan) ? a.daan : [];
+  const nt = a.nadi_teevrata ?? null;
+  const mg = m.manglik_data?.combined ?? null;
+  const focus = kamzorKoot(koots, bache);
+  const out: string[] = [];
+
+  // ═══════════ COUPLE VERSION (Hinglish) ═══════════
+  out.push('═══ COUPLE VERSION ═══');
+  out.push(`${groom} aur ${bride} — Ashtakoot gun milan ${total}/36. Granth ke anusaar faisla: `
+    + `${a.faisla ?? '—'}.${wajah.length ? ' Wajah: ' + wajah.join('; ') + '.' : ''}`);
+  const bm = a.bride_moon ?? {}; const gm = a.groom_moon ?? {};
+  if (bm.rashi || gm.rashi) {
+    out.push(`Janm Chandra — ${bride}: ${bm.rashi ?? '—'} raashi, ${bm.nakshatra ?? '—'} nakshatra · `
+      + `${groom}: ${gm.rashi ?? '—'} raashi, ${gm.nakshatra ?? '—'} nakshatra. `
+      + 'Ashtakoot inhi do Chandra se milaya jaata hai.');
+  }
+  out.push('Aathon koot: ' + KOOT_ORDER.filter((k) => koots[k])
+    .map((k) => `${k} ${n(koots[k].score)}/${n(koots[k].max)}${gun(k, koots[k])}`).join(' · ') + '.');
+  for (const k of focus) {
+    const v = koots[k];
+    const nums = kootShlok(k, v?.sloka);
+    const deva = nums.map((x) => sh[x]?.deva).filter(Boolean).join(' ');
+    out.push(`${k} ${n(v?.score)}/${n(v?.max)}${gun(k, v)}${v?.wajah ? ' — ' + v.wajah : ''}. ${deva ? deva + ` — ${GRANTH}, shlok ${nums.join('-')}.` : `${GRANTH}, shlok ${nums.join('-') || '—'}.`}`);
+  }
+  if (nt?.teevrata) {
+    out.push(`Nadi dosh ki teevrata: ${nt.teevrata}${nt.kispar ? ` (${nt.kispar})` : ''}`
+      + `${nt.sloka ? ` — ${nt.sloka}` : ''}.`);
+  }
+  out.push(parihar.length
+    ? `Parihar: ${parihar.join('; ')}.`
+    : 'Is jodi par granth ka koi parihar laagu nahi hota.');
+  if (mg?.verdict) out.push(`Manglik: ${mg.verdict}.`);
+  if (daan.length) out.push(`Granth ka daan: ${daan.join(', ')}.`);
+  if (anumaan.length) out.push(`Jahan granth chup hai, wahan kya maana: ${anumaan.join('; ')}.`);
+  out.push('');
+
+  // ═══════════ PARENT VERSION (शुद्ध हिन्दी) ═══════════
+  out.push('═══ PARENT VERSION ═══');
+  out.push(`आदरणीय माता-पिता, ${groom} और ${bride} का अष्टकूट गुण मिलान ${total}/36 है। `
+    + `ग्रन्थ के अनुसार निर्णय: ${a.verdict_hi ?? a.faisla ?? '—'}।`);
+  out.push('आठों कूट: ' + KOOT_ORDER.filter((k) => koots[k])
+    .map((k) => `${KOOT_HI[k] ?? k} ${n(koots[k].score)}/${n(koots[k].max)}`).join(' · ') + '।');
+  for (const k of focus) {
+    const nums = kootShlok(k, koots[k]?.sloka);
+    const hi = nums.map((x) => sh[x]?.hindi).filter(Boolean).join(' ');
+    if (hi) out.push(`${KOOT_HI[k] ?? k} कूट पर ग्रन्थ कहता है — "${hi}" (${GRANTH_HI}, श्लोक ${nums.join('-')})`);
+  }
+  if (parihar.length && sh[32]?.hindi) {
+    out.push(`परिहार — ${sh[32].hindi} (${GRANTH_HI}, श्लोक ३२)`);
+  } else if (!parihar.length) {
+    out.push('इस जोड़ी पर ग्रन्थ का कोई परिहार लागू नहीं होता।');
+  }
+  if (mg?.verdict_hi) out.push(`मांगलिक: ${mg.verdict_hi}।`);
+  if (daan.length) out.push(`ग्रन्थ के अनुसार दान: ${daan.map(daanHi).join(', ')}।`);
+  out.push('यह ग्रन्थ का कथन है। अंतिम निर्णय में दोनों परिवारों की समझ, बच्चों की आपसी सहमति '
+    + 'और योग्य ज्योतिषी से व्यक्तिगत परामर्श भी उतना ही महत्त्वपूर्ण है।');
+  return out.join('\n\n');
+}
+
+interface NarrativeRequest { slug: string; }
 
 export async function POST(req: NextRequest) {
   try {
-    const body: NarrativeRequest = await req.json();
-    const { slug } = body;
-
+    const { slug }: NarrativeRequest = await req.json();
     if (!slug || typeof slug !== 'string') {
       return NextResponse.json({ error: 'Missing slug.' }, { status: 400 });
     }
-
-    // ── Load Milan record ──────────────────────────────────
     const { data: milan, error: loadErr } = await supabase
-      .from('kundali_milan')
-      .select('*')
-      .eq('slug', slug)
-      .single();
-
+      .from('kundali_milan').select('*').eq('slug', slug).single();
     if (loadErr || !milan) {
       console.error('[Trikal] Milan record not found:', slug, loadErr?.message);
       return NextResponse.json({ error: 'Reading not found.' }, { status: 404 });
     }
-
-    // ── Idempotency: return cached narrative if exists ─────
+    // Purani reports jaisi hain waisi (Rohiit, 1 Oct 2026)
     if (milan.gemini_narrative && milan.gemini_narrative.length > 200) {
       return NextResponse.json({
-        success:   true,
-        slug,
-        tier:      milan.tier,
-        audience:  milan.audience,
-        narrative: milan.gemini_narrative,
-        cached:    true,
+        success: true, slug, tier: milan.tier, audience: milan.audience,
+        narrative: milan.gemini_narrative, cached: true,
       });
     }
-
-    // ── Validate tier + audience ───────────────────────────
-    const tier     = milan.tier     as Tier;
-    const audience = milan.audience as Audience;
-
-    if (!TIER_CONFIG[tier]) {
-      return NextResponse.json({ error: 'Invalid tier on record.' }, { status: 500 });
-    }
-
-    if (!['couple', 'parent', 'both'].includes(audience)) {
-      return NextResponse.json({ error: 'Invalid audience on record.' }, { status: 500 });
-    }
-
-    // ── Resolve language (WIRE v1.4) ───────────────────────
-    // DB column has a CHECK constraint, but we defend here too.
-    const language: Language = VALID_LANGUAGES.includes(milan.language as Language)
-      ? (milan.language as Language)
-      : 'hinglish';
-
-    const cfg = TIER_CONFIG[tier];
-
-    // ── Engine data sanity — manglik_data + remedies_data OPTIONAL (v1.8) ─────
     if (!milan.ashtakoot_data) {
       console.error('[Trikal] Milan core engine data missing for slug:', slug);
       return NextResponse.json(
-        { error: 'Reading data incomplete. Please contact support.' },
-        { status: 500 }
-      );
+        { error: 'Reading data incomplete. Please contact support.' }, { status: 500 });
     }
 
-    const manglikData = milan.manglik_data ?? MANGLIK_FALLBACK;
-    if (!milan.manglik_data) {
-      console.warn('[Trikal] manglik_data null for slug — using fallback:', slug);
-    }
+    const shloks = await loadShloks();
+    const finalText = buildGranthMilan(milan, shloks);
 
-    // ── Build the prompt by audience ───────────────────────
-    const bride = milan.bride_data;
-    const groom = milan.groom_data;
-    let prompt: string;
-
-    if (audience === 'couple') {
-      prompt = buildMilanCouplePrompt({
-        bride_name:      bride.name,
-        groom_name:      groom.name,
-        bride_place:     bride.place,
-        groom_place:     groom.place,
-        ashtakoot_score: milan.ashtakoot_score ?? 0,
-        ashtakoot_data:  milan.ashtakoot_data,
-        manglik_data:    manglikData,
-        remedies_data:   milan.remedies_data ?? {},
-        tier:            tier as 'basic_51' | 'deep_101_couple' | 'both_151',
-        word_target:     cfg.wordTarget,
-        language,
-      });
-    } else if (audience === 'parent') {
-      prompt = buildMilanParentPrompt({
-        bride_name:      bride.name,
-        groom_name:      groom.name,
-        bride_place:     bride.place,
-        groom_place:     groom.place,
-        ashtakoot_score: milan.ashtakoot_score ?? 0,
-        ashtakoot_data:  milan.ashtakoot_data,
-        manglik_data:    manglikData,
-        remedies_data:   milan.remedies_data ?? {},
-        tier:            tier as 'basic_51' | 'deep_101_parent' | 'both_151',
-        word_target:     cfg.wordTarget,
-        language,
-      });
-    } else {
-      prompt = buildMilanBothPrompt({
-        bride_name:      bride.name,
-        groom_name:      groom.name,
-        bride_place:     bride.place,
-        groom_place:     groom.place,
-        ashtakoot_score: milan.ashtakoot_score ?? 0,
-        ashtakoot_data:  milan.ashtakoot_data,
-        manglik_data:    manglikData,
-        remedies_data:   milan.remedies_data ?? {},
-        word_target:     cfg.wordTarget,
-        tier:            tier as 'basic_51' | 'both_151',
-        language,
-      });
-    }
-
-    // ── Call Gemini ────────────────────────────────────────
-    let geminiText = '';
-    let writtenByClaude = false;
-    try {
-      // v1.9: tier ka model pehle, phir doosra Gemini, phir Claude Sonnet 5
-      const ai = await generateWithFallback({
-        tag: `milan-${tier}`,
-        prompt,
-        models: [cfg.model, cfg.model === 'gemini-3.8-flash' ? 'gemini-3.7-flash' : 'gemini-3.8-flash'],
-        maxOutputTokens: cfg.maxTokens,
-        temperature: 0.85,
-        topP: 0.95,
-        perCallTimeoutMs: 60_000,
-        deadlineMs: Date.now() + 150_000,
-        claudeMaxTokens: 8000,
-        claudeMinMs: 45_000,
-        claudeReserveMs: 60_000,
-        minChars: 200,
-      });
-      geminiText = ai.text;
-      writtenByClaude = ai.fallback;
-    } catch (e: unknown) {
-      const msg = e instanceof Error ? e.message : 'Unknown Gemini error';
-      console.error('[Trikal] Gemini error:', msg);
-      return NextResponse.json(
-        { error: 'Narrative engine failed. Please refresh — your payment is safe and we will retry.' },
-        { status: 502 }
-      );
-    }
-
-    // ── Claude Sonnet 4.6 polish via polishMilanNarrative ──
-    let finalText = geminiText;
-    let polishMs  = 0;
-    let didPolish = false;
-
-    if (cfg.usePolish && !writtenByClaude) {  // v1.9: Claude ne likha to polish skip
-      const polishResult = await polishMilanNarrative({
-        rawNarrative: geminiText,
-        audience,
-        tier,
-        language,           // v1.5 — preserve language, no drift in polish
-      });
-
-      finalText = polishResult.narrative;
-      polishMs  = polishResult.polishMs ?? 0;
-      didPolish = polishResult.polished;
-
-      if (!polishResult.polished && polishResult.error) {
-        console.warn('[Trikal] Milan polish skipped:', polishResult.error);
-      }
-    }
-
-    // ── Save to Supabase ───────────────────────────────────
     const { error: saveErr } = await supabase
       .from('kundali_milan')
-      .update({
-        gemini_narrative: finalText,
-        updated_at:       new Date().toISOString(),
-      })
+      .update({ gemini_narrative: finalText, updated_at: new Date().toISOString() })
       .eq('slug', slug);
-
     if (saveErr) {
       console.error('[Trikal] Milan narrative save failed:', saveErr.message);
     } else {
-      // v1.10 — Surakshit 1-tap email (never throws)
       await notifyReportReady({
-        product:    'Kundali Milan',
-        reportUrl:  `https://trikalvaani.com/milan/${slug}`,
+        product: 'Kundali Milan',
+        reportUrl: `https://trikalvaani.com/milan/${slug}`,
         orderTable: 'kundali_milan_orders',
-        orderId:    milan.order_id ?? null,
+        orderId: milan.order_id ?? null,
       });
     }
-
     return NextResponse.json({
-      success:   true,
-      slug,
-      tier,
-      audience,
-      language,
-      narrative: finalText,
-      cached:    false,
-      polished:  didPolish,
-      polishMs,
+      success: true, slug, tier: milan.tier, audience: milan.audience,
+      narrative: finalText, cached: false, granth: true,
     });
-
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : 'Unknown error';
     console.error('[Trikal] /api/milan-narrative error:', msg);
-    return NextResponse.json(
-      { error: 'Server error generating narrative.' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Server error generating narrative.' }, { status: 500 });
   }
 }

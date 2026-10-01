@@ -1,4 +1,11 @@
-// TRIKAL VAANI | app/kundali-milan/page.tsx | v2.0 (31 Aug 2026)
+// TRIKAL VAANI | app/kundali-milan/page.tsx | v2.1 (1 Oct 2026)
+// v2.1 (Rohiit, 1 Oct 2026): EK HI PAID TIER — ₹51 / $5, couple + parent dono.
+//   Free / ₹51 / ₹101 / ₹151 ki jagah Free + ₹51. Report ab GRANTH se (AI band):
+//   aathon koot ke Sanskrit shlok (Muhurta Chintamani, Vivah Prakaran) + Hindi
+//   arth, dosh + parihar, Manglik, 10 upay. Copy, FAQ, JSON-LD aur meta mein
+//   SIRF WOHI likha jo report sach mein deti hai — purane ₹101 copy ke D-9,
+//   saptam bhav, Dashakoot, muhurat windows ke waade hataye (granth report
+//   mein nahi hain).
 // v2.0: depth + Hindi + cluster interlinking on the money page.
 //   BASELINE measured live 31 Aug: 1,260 words, 5 H2, 26 links, and 27
 //   Devanagari characters on a page whose entire audience searches in Hindi.
@@ -56,7 +63,7 @@ import IntlPrice from '@/components/payment/IntlPrice'
 export const metadata: Metadata = {
   title: { absolute: 'Kundali Milan — Free 36 Guna Matching Online' },
   description:
-    'Free Kundali Milan with 36 Guna Ashtakoot, Mangal Dosh, Nadi Dosh check. Rs51 Basic Milan, Rs101 Deep Milan with Dos, Donts & 6 personalized remedies. By Rohiit Gupta, Chief Vedic Architect, India. Swiss Ephemeris + BPHS classical rules.',
+    'Free Kundali Milan: 36 Guna Ashtakoot with Muhurta Chintamani shlokas. ₹51 full report — couple + parent versions, dosh parihar, Manglik, 10 remedies.',
   keywords: 'kundali matching, kundli milan, 36 guna milan, free kundali matching, ashtakoot, mangal dosh, nadi dosh, vedic compatibility, marriage matching, jyotish milan',
   alternates: {
     canonical: 'https://trikalvaani.com/kundali-milan',
@@ -68,7 +75,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Kundali Milan - Free 36 Guna Matching & Vedic Compatibility | Trikaal Vaani',
     description:
-      'Free Kundali Milan with 36 Guna Ashtakoot, Mangal Dosh, Nadi Dosh check. Deep Rs101 readings with personalized remedies by Rohiit Gupta.',
+      'Free 36 Guna Kundali Milan. ₹51 full report with Sanskrit shlokas from Muhurta Chintamani — couple + parent versions and 10 remedies.',
     url: 'https://trikalvaani.com/kundali-milan',
     type: 'website',
     locale: 'en_IN',
@@ -82,7 +89,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Kundali Milan - Free 36 Guna Matching | Trikaal Vaani',
-    description: 'Free Kundali Milan with 36 Guna, Mangal Dosh, Nadi Dosh. Deep Rs101 readings with remedies.',
+    description: 'Free 36 Guna Kundali Milan. ₹51 full report — couple + parent, granth shlokas, 10 remedies.',
     images: ['https://trikalvaani.com/og-kundali-milan.jpg'],
   },
 }
@@ -124,7 +131,7 @@ const FAQ_SCHEMA = {
       name: 'What if Nadi Dosh is present?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'Nadi Dosh occurs when both partners share the same Nadi (Aadi, Madhya, or Antya). It traditionally indicates health and progeny concerns. However, multiple cancellation rules exist - same rashi but different nakshatra, same nakshatra but different padas. Personalized remedies are provided in the Rs101 Deep Milan tier.',
+        text: 'Nadi Dosh occurs when both partners share the same Nadi (Aadi, Madhya, or Antya). It traditionally indicates health and progeny concerns. However, multiple cancellation rules exist - same rashi but different nakshatra, same nakshatra but different padas. Remedies for the doshas actually found are part of the ₹51 report.',
       },
     },
     {
@@ -132,15 +139,15 @@ const FAQ_SCHEMA = {
       name: 'How does Trikaal Vaani Kundali Milan work?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'Enter both partners birth details (date, time, place). Trikaal computes both kundalis using Swiss Ephemeris precision, then matches all 8 Ashtakoot koots, checks Mangal, Nadi, and Bhakoot Dosh, and generates a personalized report. Choose Couple, Parent, or Both narrative styles for Rs101-151.',
+        text: 'Enter both partners birth details (date, time, place). Trikaal computes both kundalis using Swiss Ephemeris precision, then matches all 8 Ashtakoot koots, checks Mangal, Nadi, and Bhakoot Dosh, and generates a personalized report. The ₹51 report includes both a couple version and a parent version.',
       },
     },
     {
       '@type': 'Question',
-      name: 'What is the difference between Basic Rs51 and Deep Rs101 Milan?',
+      name: 'What do I get in the ₹51 Kundali Milan report?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'Basic Rs51 Milan includes full 36 Guna breakdown, all dosha analysis, and compatibility verdict. Deep Rs101 Milan adds personalized Dos and Donts, 6 ritual remedies (mantra, daan, vrat, ratna, pooja, muhurat), Dashakoot analysis, Navamsa D9 chart comparison, and audience-specific narrative (Couple or Parent version).',
+        text: 'The ₹51 report covers all 8 Ashtakoot koots with their classical shlokas from Muhurta Chintamani (Vivah Prakaran) in Sanskrit with Hindi meaning, Nadi, Bhakoot and Gana dosh with the parihar the granth gives, Manglik analysis for both partners, a Hinglish version for the couple and a Hindi version for the parents, 10 remedies, and a PDF.',
       },
     },
     {
@@ -164,7 +171,7 @@ const FAQ_SCHEMA = {
       name: 'What remedies are provided for low Guna score?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'The Rs101 Deep Milan tier provides 6 personalized remedies based on detected doshas - specific mantras with count and timing, daan items and recipients, fast days (vrat), gemstones with metal and finger guidance, pujas with location, and exact auspicious muhurat windows for marriage, engagement, and griha pravesh.',
+        text: 'The ₹51 report gives 10 remedies based on the doshas actually found in the two charts — mantra, daan, vrat and puja guidance — along with the daan that Muhurta Chintamani itself prescribes, and the parihar conditions under which a dosh is cancelled.',
       },
     },
     {
@@ -189,7 +196,7 @@ const BREADCRUMB_SCHEMA = {
 }
 
 // ── v1.2 FIX-4: Service + OfferCatalog schema — AI search extracts pricing
-//    (IR-19 prices exact: Free / ₹51 / ₹101 / ₹151) ──────────────────────────
+//    v2.1: Free / ₹51 only (Rohiit, 1 Oct 2026) ─────────────────────────────
 const MILAN_SERVICE_SCHEMA = {
   '@context': 'https://schema.org',
   '@type': 'Service',
@@ -217,23 +224,9 @@ const MILAN_SERVICE_SCHEMA = {
       },
       {
         '@type': 'Offer',
-        name: 'Basic Milan',
-        description: 'Full 36 Guna breakdown, Mangal + Nadi + Bhakoot analysis, compatibility verdict, PDF download, WhatsApp and Email share',
+        name: 'Poora Kundali Milan — Couple + Parent',
+        description: 'All 8 Ashtakoot koots with Sanskrit shlokas from Muhurta Chintamani (Vivah Prakaran) and Hindi meaning, dosh with parihar, Manglik analysis, couple and parent versions, 10 remedies, PDF',
         price: '51', priceCurrency: 'INR',
-        availability: 'https://schema.org/InStock',
-      },
-      {
-        '@type': 'Offer',
-        name: 'Deep Milan',
-        description: 'Everything in Basic plus Couple or Parent narrative, personalized Dos and Donts, 6 ritual remedies, Navamsa D9, Dashakoot, auspicious muhurat windows',
-        price: '101', priceCurrency: 'INR',
-        availability: 'https://schema.org/InStock',
-      },
-      {
-        '@type': 'Offer',
-        name: 'Deep Milan — Both Narratives',
-        description: 'Deep Milan with both Couple and Parent narrative versions',
-        price: '151', priceCurrency: 'INR',
         availability: 'https://schema.org/InStock',
       },
     ],
@@ -284,7 +277,7 @@ const KM_SECTIONS: KmSection[] = [
     paras: [
       '**पहला कदम — दोनों के जन्म विवरण जुटाइए।** दोनों की जन्म तिथि, **सटीक जन्म समय** और जन्म स्थान। समय पर इतना ज़ोर इसलिए है क्योंकि चंद्रमा एक नक्षत्र लगभग सवा दिन में और एक पाद लगभग छह घंटे में पार करता है — कुछ घंटों की गलती नक्षत्र बदल देती है, और नक्षत्र बदलते ही आठों कूट के अंक बदल जाते हैं। जन्म समय अस्पताल के रिकॉर्ड या जन्म प्रमाणपत्र से लीजिए।',
       '**दूसरा कदम — अष्टकूट।** आठ कूट, कुल 36 अंक: वर्ण (1), वश्य (2), तारा (3), योनि (4), ग्रह मैत्री (5), गण (6), भकूट (7), नाड़ी (8)। ऊपर वाला टूल ये आठों गिनता है और हर कूट का अंक अलग दिखाता है — केवल कुल नहीं, क्योंकि जैसा ऊपर कहा, कुल अकेला भ्रामक है।',
-      '**तीसरा कदम, और यही वह है जो अष्टकूट से बाहर है:** दोनों की कुंडलियों में **मांगलिक दोष**, **सप्तम भाव और उसका स्वामी**, और **नवमांश (D-9)** का आपसी मिलान। अष्टकूट केवल चंद्र नक्षत्र पर आधारित है — वह पूरी कुंडली नहीं देखता। इसीलिए 30 गुण वाली जोड़ी में भी एक तरफ प्रबल मांगलिक दोष हो सकता है, और अष्टकूट उसे पकड़ेगा ही नहीं। यही वजह है कि हमारी ₹101 और ₹151 वाली रीडिंग में ये तीनों अलग से देखे जाते हैं।',
+      '**तीसरा कदम, और यही वह है जो अष्टकूट से बाहर है:** दोनों की कुंडलियों में **मांगलिक दोष**, **सप्तम भाव और उसका स्वामी**, और **नवमांश (D-9)** का आपसी मिलान। अष्टकूट केवल चंद्र नक्षत्र पर आधारित है — वह पूरी कुंडली नहीं देखता। इसीलिए 30 गुण वाली जोड़ी में भी एक तरफ प्रबल मांगलिक दोष हो सकता है, और अष्टकूट उसे पकड़ेगा ही नहीं। इसीलिए हमारी ₹51 रिपोर्ट में दोनों का मांगलिक विश्लेषण अलग से दिया जाता है; सप्तम भाव और नवमांश के लिए व्यक्तिगत परामर्श सबसे सही है।',
     ],
   },
   {
@@ -310,7 +303,7 @@ const KM_SECTIONS: KmSection[] = [
     h2: 'कुंडली मिलान ऑनलाइन फ्री — और "फ्री" में क्या मिलता है',
     paras: [
       '**मुफ्त में क्या मिलता है:** आठों कूट के अलग-अलग अंक, कुल 36 में से स्कोर, नाड़ी और भकूट की स्थिति, और सीधा निष्कर्ष। इसके लिए न साइनअप चाहिए, न कार्ड। गणना **स्विस एफेमेरिस** और **लाहिड़ी अयनांश** से होती है — वही मानक जो पेशेवर सॉफ्टवेयर इस्तेमाल करते हैं।',
-      '**पैसे में क्या जुड़ता है, और क्यों:** ₹51 वाली बेसिक रीडिंग अंकों की व्याख्या देती है। ₹101 वाली डीप रीडिंग वह जोड़ती है जो अष्टकूट में है ही नहीं — **दोनों का मांगलिक विश्लेषण, सप्तम भाव और उसका स्वामी, और नवमांश (D-9) का आपसी मिलान।** यही असली अंतर है, और यही कारण है कि केवल गुण-अंक देखकर लिया गया फैसला अधूरा होता है।',
+      '**₹51 में क्या मिलता है:** आठों कूट के **मूल संस्कृत श्लोक** (मुहूर्त चिन्तामणि, विवाह प्रकरण) और उनका हिन्दी अर्थ, नाड़ी-भकूट-गण दोष और ग्रन्थ का परिहार, दोनों का **मांगलिक विश्लेषण**, युगल के लिए हिंग्लिश और माता-पिता के लिए शुद्ध हिन्दी संस्करण, और 10 उपाय। सप्तम भाव और नवमांश (D-9) का मिलान अष्टकूट से बाहर है — उसके लिए व्यक्तिगत परामर्श सबसे सही है।',
       'और एक बात जो हम **नहीं** करते: कोई घबराहट पैदा करने वाला संदेश, कोई "आपकी कुंडली में गंभीर दोष है" वाला डर, कोई उलटी गिनती। अगर मिलान कमजोर है तो परिणाम सीधा कहता है कि कमजोर है — और साथ में यह भी कि कौन सा कूट कमजोर है और कोई शास्त्रीय छूट लागू होती है या नहीं। पूरी कीमत सूची [प्राइसिंग पेज](/pricing) पर है।',
     ],
   },
@@ -443,7 +436,7 @@ export default function KundaliMilanPage() {
                 <strong style={{ color: '#cbd5e1' }}>36 Guna Ashtakoot system</strong>. Trikaal Vaani computes all 8 koots -
                 Varna, Vashya, Tara, Yoni, Graha Maitri, Gana, Bhakoot, Nadi - plus{' '}
                 <strong style={{ color: '#cbd5e1' }}>Mangal Dosh, Nadi Dosh, and Bhakoot Dosh</strong> using{' '}
-                Swiss Ephemeris precision and BPHS classical rules. Free preview, Rs51 deep analysis, Rs101 with personalized remedies.
+                Swiss Ephemeris precision and BPHS classical rules. Free preview, and a ₹51 full report — couple + parent versions with classical shlokas and 10 remedies.
               </p>
             </div>
           </section>
@@ -466,11 +459,11 @@ export default function KundaliMilanPage() {
                   What's Included
                 </h2>
                 <p className="text-slate-400 text-sm max-w-2xl mx-auto">
-                  Pick your tier inside the form above. Here's what each tier delivers.
+                  Free mein jhalak, ₹51 mein poora milan — couple aur parent dono ke liye.
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl mx-auto">
 
                 {/* Free Preview */}
                 <div style={{
@@ -503,44 +496,7 @@ export default function KundaliMilanPage() {
                   </a>
                 </div>
 
-                {/* Basic ₹51 */}
-                <div style={{
-                  padding: '24px', borderRadius: '16px',
-                  background: GOLD_RGBA(0.06),
-                  border: `1px solid ${GOLD_RGBA(0.3)}`,
-                  display: 'flex', flexDirection: 'column',
-                }}>
-                  <p style={{ color: GOLD, fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', margin: 0 }}>
-                    Basic Milan
-                  </p>
-                  <p style={{ color: GOLD, fontSize: '32px', fontWeight: 800, fontFamily: 'Georgia, serif', margin: '8px 0' }}>
-                    <IntlPrice inr="₹51" usd="$7" />
-                  </p>
-                  <ul style={{ margin: '16px 0 0', padding: 0, listStyle: 'none', flex: 1 }}>
-                    {[
-                      'Full 36 Guna breakdown',
-                      'Mangal + Nadi + Bhakoot analysis',
-                      'Compatibility verdict',
-                      'PDF download',
-                      'WhatsApp + Email share',
-                    ].map(f => (
-                      <li key={f} style={{ display: 'flex', gap: '8px', alignItems: 'flex-start', marginBottom: '8px', color: '#e2e8f0', fontSize: '13px' }}>
-                        <span style={{ color: GOLD, flexShrink: 0 }}>+</span>{f}
-                      </li>
-                    ))}
-                  </ul>
-                  {/* v1.2 FIX-1: card CTA → form */}
-                  <a href="#milan-form" style={{
-                    display: 'block', marginTop: '18px', padding: '11px 16px',
-                    borderRadius: '10px', textAlign: 'center', textDecoration: 'none',
-                    background: GOLD_RGBA(0.12), border: `1px solid ${GOLD_RGBA(0.45)}`,
-                    color: GOLD, fontSize: '13px', fontWeight: 700,
-                  }}>
-                    Choose Basic — <IntlPrice inr="₹51" usd="$7" /> ↑
-                  </a>
-                </div>
-
-                {/* Deep ₹101 */}
+                {/* v2.1 — Poora Milan ₹51 / $5 (ek hi paid tier) */}
                 <div style={{
                   padding: '24px', borderRadius: '16px',
                   background: `linear-gradient(135deg, ${GOLD_RGBA(0.12)}, ${GOLD_RGBA(0.04)})`,
@@ -554,29 +510,28 @@ export default function KundaliMilanPage() {
                     fontSize: '10px', fontWeight: 700,
                     padding: '3px 12px', borderRadius: '12px', whiteSpace: 'nowrap',
                   }}>
-                    MOST POPULAR
+                    COUPLE + PARENT
                   </div>
                   <p style={{ color: GOLD, fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', margin: 0 }}>
-                    Deep Milan
+                    Poora Milan
                   </p>
                   <p style={{ color: '#fff', fontSize: '32px', fontWeight: 800, fontFamily: 'Georgia, serif', margin: '8px 0' }}>
-                    <IntlPrice inr="₹101" usd="$12" /> <span style={{ color: '#94a3b8', fontSize: '14px' }}>/ <IntlPrice inr="₹151" usd="$15" /> both</span>
+                    <IntlPrice inr="₹51" usd="$5" />
                   </p>
                   <ul style={{ margin: '16px 0 0', padding: 0, listStyle: 'none', flex: 1 }}>
                     {[
-                      'Everything in Basic',
-                      'Couple OR Parent narrative',
-                      'Personalized Dos & Donts',
-                      '6 Ritual remedies',
-                      'Navamsa D9 + Dashakoot',
-                      'Auspicious muhurat windows',
+                      'Aathon koot — ank aur granth ka shlok',
+                      'Sanskrit shlok + Hindi arth (Muhurta Chintamani)',
+                      'Nadi, Bhakoot, Gan dosh aur parihar',
+                      'Dono ka Manglik vishleshan',
+                      'Couple (Hinglish) + Parent (Hindi) version',
+                      '10 upay · PDF download',
                     ].map(f => (
                       <li key={f} style={{ display: 'flex', gap: '8px', alignItems: 'flex-start', marginBottom: '8px', color: '#fff', fontSize: '13px' }}>
                         <span style={{ color: GOLD, flexShrink: 0 }}>+</span>{f}
                       </li>
                     ))}
                   </ul>
-                  {/* v1.2 FIX-1: card CTA → form */}
                   <a href="#milan-form" style={{
                     display: 'block', marginTop: '18px', padding: '12px 16px',
                     borderRadius: '10px', textAlign: 'center', textDecoration: 'none',
@@ -584,7 +539,7 @@ export default function KundaliMilanPage() {
                     color: '#080B12', fontSize: '13px', fontWeight: 700,
                     boxShadow: `0 0 24px ${GOLD_RGBA(0.35)}`,
                   }}>
-                    Choose Deep — <IntlPrice inr="₹101" usd="$12" /> ↑
+                    Poora Milan — <IntlPrice inr="₹51" usd="$5" /> ↑
                   </a>
                 </div>
 

@@ -1,7 +1,13 @@
 // TRIKAL VAANI - KundaliMilanForm Component
+// v1.5 (1 Oct 2026) — EK HI PAID TIER: ₹51 / $5, couple + parent dono, granth
+//   saar + 10 upay (Rohiit: "sirf one paid Tier ka banado 51 only ... 101 and
+//   151 hata do"). Step 3 mein ab do dabbe — Free Preview aur Poora Milan ₹51
+//   (pehle se chuna hua). "Couple ya Parent" ka sawaal hata — dono milte hain.
+//   Server (create-milan-order v1.3) har tier ko milan_51 banata hai; daam wahi
+//   tay karta hai. Free preview ka raasta waisa hi.
 // CEO & Chief Vedic Architect: Rohiit Gupta
 // File: components/landing/KundaliMilanForm.tsx
-// VERSION: 1.4 (27 Sep 2026)
+// VERSION: 1.5 (1 Oct 2026)
 // v1.4 — 27 Sep 2026 — delivery text sach kiya (CEO Option A): WhatsApp/Email auto-delivery ka koi system nahi hai, isliye 'PDF on/via WhatsApp + Email' → 'PDF download + WhatsApp share'.
 // VERSION: 1.3 (29 Aug 2026) - INTERNATIONAL PAYMENT
 // v1.3: visitors outside India pay through PayPal — Basic $7, Couple $12,
@@ -260,30 +266,9 @@ const MILAN_SERVICE_SCHEMA = {
       },
       {
         '@type': 'Offer',
-        name: 'Basic Milan',
-        description: 'Full 36 Guna Ashtakoot breakdown with all 8 koots, Mangal Dosh, Nadi Dosh, Bhakoot Dosh analysis. PDF + WhatsApp share.',
+        name: 'Poora Kundali Milan — Couple + Parent',
+        description: 'All 8 Ashtakoot koots with classical shlokas from Muhurta Chintamani (Vivah Prakaran), Nadi/Bhakoot/Gana dosh with parihar, Manglik analysis, couple (Hinglish) and parent (Hindi) versions, 10 remedies and PDF.',
         price: '51', priceCurrency: 'INR',
-        availability: 'https://schema.org/InStock',
-      },
-      {
-        '@type': 'Offer',
-        name: 'Deep Milan - Couple Version',
-        description: 'Deep compatibility analysis for couples with Dos, Donts, and 10 personalized remedies. Premium AI engine with expert polish.',
-        price: '101', priceCurrency: 'INR',
-        availability: 'https://schema.org/InStock',
-      },
-      {
-        '@type': 'Offer',
-        name: 'Deep Milan - Parent Version',
-        description: 'Deep compatibility analysis for parents with Dos, Donts, and 10 ritual remedies. Shudh Hindi authoritative tone.',
-        price: '101', priceCurrency: 'INR',
-        availability: 'https://schema.org/InStock',
-      },
-      {
-        '@type': 'Offer',
-        name: 'Deep Milan - Both Versions',
-        description: 'Both Couple and Parent narratives in one combined PDF. Maximum coverage.',
-        price: '151', priceCurrency: 'INR',
         availability: 'https://schema.org/InStock',
       },
     ],
@@ -845,10 +830,9 @@ export default function KundaliMilanForm() {
   const [loadingStep,    setLoadingStep]    = useState(0)
   const [paymentLoading, setPaymentLoading] = useState(false)
 
-  // v1.2: price tier picker. free / basic_51 / deep_101 / both_151
-  // deep_101 needs an audience (couple|parent). free/basic_51/both_151 do not.
-  type PriceTier = 'free' | 'basic_51' | 'deep_101' | 'both_151'
-  const [priceTier, setPriceTier] = useState<PriceTier>('deep_101')
+  // v1.4: sirf do — free aur milan_51 (₹51 / $5, couple + parent)
+  type PriceTier = 'free' | 'milan_51'
+  const [priceTier, setPriceTier] = useState<PriceTier>('milan_51')
 
   const loadingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const formTopRef = useRef<HTMLDivElement>(null)
@@ -957,29 +941,23 @@ export default function KundaliMilanForm() {
   // Tier resolution (priceTier + audience -> internal MilanTier)
   const resolveTier = (audience: AudienceVersion, isFreePreview: boolean): MilanTier => {
     if (isFreePreview || priceTier === 'free') return 'free'
-    if (priceTier === 'basic_51') return 'basic'
-    if (priceTier === 'both_151') return 'deep_both'
-    // deep_101 -> couple or parent based on audience
-    if (audience === 'parent') return 'deep_parent'
-    return 'deep_couple'
+    // v1.4 — paid hamesha couple + parent; server ise milan_51 banata hai
+    return 'deep_both'
   }
 
   const resolvePrice = (_audience: AudienceVersion | ''): number => {
-    if (priceTier === 'basic_51') return 51
-    if (priceTier === 'both_151') return 151
-    return 101
+    return 51   // v1.4 — ek hi daam (server bhi yahi tay karta hai)
   }
 
   // Does the chosen price tier need an audience (couple/parent) choice?
-  const needsAudience = priceTier === 'deep_101'
+  const needsAudience = false   // v1.4 — couple + parent dono milte hain
 
   // Build request body for API
   const buildMilanBody = (paymentVerification: any = null, isFree = false) => {
     // For basic_51/free: audience is cosmetic (couple default).
     // For both_151: force 'both'. For deep_101: use selected audience.
     const effectiveAudience: AudienceVersion =
-      priceTier === 'both_151' ? 'both' :
-      (fields.audience || 'couple') as AudienceVersion
+      priceTier === 'milan_51' ? 'both' : (fields.audience || 'couple') as AudienceVersion
     return {
       sessionId: `milan_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`,
       tier: resolveTier(effectiveAudience, isFree),
@@ -1070,9 +1048,7 @@ export default function KundaliMilanForm() {
 
   /** Price-table key for the tier the visitor has chosen. */
   const paypalProductKey = () => {
-    if (priceTier === 'basic_51') return 'milan_basic'
-    if (priceTier === 'both_151') return 'milan_both'
-    return fields.audience === 'parent' ? 'milan_deep_parent' : 'milan_deep'
+    return 'milan_51'   // v1.4 — $5
   }
 
   /**
@@ -1191,18 +1167,9 @@ export default function KundaliMilanForm() {
     if (isIndia === false) {
       // The button is not the payment control for these visitors — the PayPal
       // buttons below it are — so it must not promise a Razorpay checkout.
-      if (priceTier === 'basic_51') return 'Basic Milan - $7 via PayPal below'
-      if (priceTier === 'both_151') return 'Both Versions - $15 via PayPal below'
-      if (fields.audience === 'couple') return 'Couple Version - $12 via PayPal below'
-      if (fields.audience === 'parent') return 'Parent Version - $12 via PayPal below'
-      return 'Select Couple or Parent above'
+      return 'Poora Milan - $5 via PayPal below'
     }
-    if (priceTier === 'basic_51') return 'Pay Rs51 with Razorpay - Basic Milan'
-    if (priceTier === 'both_151') return 'Pay Rs151 with Razorpay - Both Versions'
-    // deep_101
-    if (fields.audience === 'couple') return 'Pay Rs101 with Razorpay - Couple Version'
-    if (fields.audience === 'parent') return 'Pay Rs101 with Razorpay - Parent Version'
-    return 'Select Couple or Parent above'
+    return 'Pay ₹51 — Poora Milan (Couple + Parent)'
   }
 
   // RENDER
@@ -1315,7 +1282,7 @@ export default function KundaliMilanForm() {
           {currentStep === 3 && (
             <div className="grid gap-5">
 
-              {/* v1.2: PRICE TIER PICKER (Free / Rs51 / Rs101 / Rs151) */}
+              {/* v1.5: DO DABBE — Free Preview aur Poora Milan ₹51 / $5 */}
               <div>
                 <div style={{ textAlign: 'center', marginBottom: '14px' }}>
                   <p style={{ color: GOLD, fontSize: '12px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', margin: '0 0 6px' }}>
@@ -1327,10 +1294,8 @@ export default function KundaliMilanForm() {
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                   {([
-                    { key: 'free',     label: 'Free Preview', price: 'Rs0',   desc: 'Score + dosha flags' },
-                    { key: 'basic_51', label: 'Basic Milan',  price: 'Rs51',  desc: 'Full 36 Guna + PDF' },
-                    { key: 'deep_101', label: 'Deep Milan',   price: 'Rs101', desc: 'Couple / Parent + remedies' },
-                    { key: 'both_151', label: 'Both Versions',price: 'Rs151', desc: 'Couple + Parent, one PDF' },
+                    { key: 'free',     label: 'Free Preview', price: isIndia === false ? '$0' : '₹0', desc: 'Gun + dosh ki jhalak' },
+                    { key: 'milan_51', label: '⭐ Poora Milan', price: isIndia === false ? '$5' : '₹51', desc: 'Couple + Parent dono · Granth saar · 10 upay · PDF' },
                   ] as { key: PriceTier; label: string; price: string; desc: string }[]).map(t => (
                     <button
                       key={t.key}

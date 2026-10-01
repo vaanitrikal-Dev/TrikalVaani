@@ -1,4 +1,8 @@
 /**
+ * v1.7 (1 Oct 2026) — single tier milan_51 (₹51, couple + parent dono, granth
+ *   saar + 10 upay). Label, daam aur upay-card milan_51 ke liye. Narrative ab
+ *   granth se (api/milan-narrative v2.0) — wahi COUPLE/PARENT markers, isliye
+ *   renderNarrative bina badle. Purane tier ki reports jaisi thi waisi.
  * v1.6 (27 Sep 2026) — 27 Sep 2026 — delivery text sach kiya (CEO Option A): WhatsApp/Email auto-delivery ka koi system nahi hai, isliye 'PDF on/via WhatsApp + Email' → 'PDF download + WhatsApp share'.
  * v1.5 (27 Sep 2026) — NARRATIVE AB PAGE KE ANDAR NAHI BANTA.
  *   Pehle page khud /api/milan-narrative ko await karta tha. Narrative ~34s
@@ -91,6 +95,7 @@ interface MilanRow {
 function tierLabel(tier: string): string {
   return {
     free:            'Free Preview',
+    milan_51:        'Kundali Milan — Couple + Parent',
     basic_51:        'Basic Milan',
     deep_101_couple: 'Deep Reading — Couple',
     deep_101_parent: 'Deep Reading — Parent',
@@ -101,6 +106,7 @@ function tierLabel(tier: string): string {
 function tierPrice(tier: string): string {
   return {
     free:            'Free',
+    milan_51:        '₹51',
     basic_51:        '₹51',
     deep_101_couple: '₹101',
     deep_101_parent: '₹101',
@@ -114,7 +120,7 @@ function isFreeTier(tier: string): boolean {
 
 // basic_51 shows score + narrative tease of remedies only — no remedy cards
 function showRemedies(tier: string): boolean {
-  return ['deep_101_couple', 'deep_101_parent', 'both_151'].includes(tier);
+  return ['milan_51', 'deep_101_couple', 'deep_101_parent', 'both_151'].includes(tier);
 }
 
 function scoreBand(score: number | null): string {
