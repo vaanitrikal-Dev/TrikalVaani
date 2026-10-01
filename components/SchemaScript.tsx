@@ -1,7 +1,7 @@
 // ============================================================
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
 // FILE: components/SchemaScript.tsx
-// VERSION: v3.3.1 — IR-Guard fix: landmine strings scrubbed from comments
+// VERSION: 3.4 (1 Oct 2026 — daam sahi kiye: Kundali Milan ₹51 (couple + parent), Karmic ₹101 / $11, Child Birth ₹51; Bhrigu Nandi ke purane daave hataye).1 — IR-Guard fix: landmine strings scrubbed from comments
 // CHANGES vs v3.3 (CEO-approved):
 //   🔧 FIX: The IR Guard source scanner flags certain landmine strings even
 //      inside COMMENTS. Removed them — the fake star/review schema field name
@@ -240,7 +240,7 @@ export default function SchemaScript() {
       offers: {
         "@type": "AggregateOffer",
         lowPrice: "0",
-        highPrice: "251",
+        highPrice: "101",
         priceCurrency: "INR",
         offerCount: "6",
         availability: "https://schema.org/InStock",

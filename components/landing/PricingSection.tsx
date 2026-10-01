@@ -1,3 +1,4 @@
+// (1 Oct 2026 — daam sahi kiye: Kundali Milan ₹51 (couple + parent), Karmic ₹101 / $11, Child Birth ₹51; Bhrigu Nandi ke purane daave hataye)
 // 🔱 TRIKAL VAANI | components/landing/PricingSection.tsx | v2.3 (30 Sep 2026)
 // v2.3 — 30 Sep 2026 — Birth Muhurat repriced to a single ₹51 report (+10 remedies), was ₹101/₹151. Links point to the canonical /calculators/ URL (old path only redirected).
 // v2.2 — 27 Sep 2026 — delivery text sach kiya (CEO Option A): WhatsApp/Email auto-delivery ka koi system nahi hai, isliye 'PDF on/via WhatsApp + Email' → 'PDF download + WhatsApp share'.
@@ -24,7 +25,7 @@
 //      1. Prediction (Free → ₹51/domain)   → /#birth-form
 //      2. Kundali Milan (₹51/101/151)        → /kundali-milan#kundali-milan-form
 //      3. Birth Muhurat (Free/₹51)     → /free-child-birth-muhurat-calculator
-//      4. Karmic Reading (₹251)              → /karmic-background-reading
+//      4. Karmic Reading (₹101)              → /karmic-background-reading
 //      5. Voice Guidance (₹11/51/101)        → /#birth-form (floating mic)
 //
 //   ✅ SEO/GEO/AEO/E-E-A-T baked in:
@@ -74,7 +75,7 @@ const products = [
     icon: HeartHandshake,
     name: 'Kundali Milan',
     price: '₹51',
-    sub: '₹51 · ₹101 · ₹151 tiers',
+    sub: 'couple + parent dono',
     badge: 'MOST POPULAR',
     tagline: 'Marriage compatibility, the classical way',
     accent: GOLD,
@@ -82,8 +83,8 @@ const products = [
     cta: 'Match Kundalis',
     features: [
       'Full 8-koot Ashtakoot + Manglik Dosh check',
-      'Deep ₹101 reading: 1000-word + 10 remedies',
-      '₹151 Both: Couple + Parent narratives',
+      'Sanskrit shlok + Hindi arth (Muhurta Chintamani)',
+      'Couple + Parent version · 10 upay',
       'PDF download, WhatsApp share & shareable link',
     ],
   },
@@ -107,7 +108,7 @@ const products = [
   {
     icon: InfinityIcon,
     name: 'Karmic Reading',
-    price: '₹251',
+    price: '₹101',
     sub: 'one deep reading',
     badge: null,
     tagline: 'Who they truly are, beneath the surface',
@@ -173,7 +174,7 @@ const offerSchema = {
       '@type': 'Offer',
       name: 'Kundali Milan',
       description:
-        'Vedic marriage compatibility with full 8-koot Ashtakoot, Manglik Dosh analysis and remedies. Tiers at ₹51, ₹101 and ₹151.',
+        'Vedic marriage compatibility with full 8-koot Ashtakoot, Manglik Dosh analysis and remedies — couple and parent versions with classical shlokas, ₹51.',
       price: '51',
       priceCurrency: 'INR',
       url: 'https://trikalvaani.com/kundali-milan',
@@ -191,8 +192,8 @@ const offerSchema = {
       '@type': 'Offer',
       name: 'Karmic Background Reading',
       description:
-        'A six-dimension karmic reading via Bhrigu Nandi Nadi covering personality, conduct, finances and life patterns. ₹251.',
-      price: '251',
+        'A six-dimension karmic reading from BPHS and Phaladipika covering personality, conduct, finances and life patterns, with prediction and classical remedies. ₹101.',
+      price: '101',
       priceCurrency: 'INR',
       url: 'https://trikalvaani.com/karmic-background-reading',
     },
@@ -237,8 +238,8 @@ export default function PricingSection() {
             accurate one-paragraph answer to "How much does Trikaal Vaani cost?" */}
         <p className="text-center text-sm sm:text-base text-slate-300/80 max-w-3xl mx-auto leading-relaxed mb-12">
           Trikaal Vaani offers AI-powered Vedic astrology with honest, transparent pricing.
-          Life predictions start free, with extra domains at ₹51. Kundali Milan ranges ₹51–₹151,
-          a Child Birth Muhurat report is ₹51, a Karmic Background Reading is ₹251, and voice
+          Life predictions start free, with extra domains at ₹51. Kundali Milan is ₹51,
+          a Child Birth Muhurat report is ₹51, a Karmic Background Reading is ₹101, and voice
           guidance starts at just ₹11 — all guided by Rohiit Gupta, Chief Vedic Architect.
         </p>
 

@@ -3,7 +3,8 @@
  * TRIKAL VAANI — International Pricing (Option A)
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: lib/pricing-intl.ts
- * VERSION: 1.6 (1 Oct 2026)
+ * VERSION: 1.7 (1 Oct 2026)
+ *   v1.7 — Karmic Background Reading Rs 251 / $19 -> Rs 101 / $11 (Rohiit).
  *   v1.6 — Kundali Milan single tier `milan_51` (Rs 51 / $5) — couple + parent
  *          dono, granth saar + 10 upay. milan_basic/deep/deep_parent/both sirf
  *          purane pending PayPal orders verify karne ke liye; ab nahi bikte.
@@ -155,8 +156,8 @@ export const PRODUCTS: Record<string, ProductPrice> = {
   karmic: {
     key: 'karmic',
     label: 'Karmic Background Reading',
-    inrPaise: 25100, // Rs 251
-    usdCents: 1900, // $19
+    inrPaise: 10100, // Rs 101 (v1.7 — pehle Rs 251)
+    usdCents: 1100, // $11  (v1.7 — pehle $19)
   },
   consultation: {
     key: 'consultation',

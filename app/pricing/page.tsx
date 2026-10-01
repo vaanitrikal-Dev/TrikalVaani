@@ -3,7 +3,7 @@
  * TRIKAAL VAANI — Pricing Page
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/pricing/page.tsx
- * VERSION: 2.3 (30 Sep 2026)
+ * VERSION: 2.4 (1 Oct 2026 — daam sahi kiye: Kundali Milan ₹51 (couple + parent), Karmic ₹101 / $11, Child Birth ₹51; Bhrigu Nandi ke purane daave hataye) (30 Sep 2026)
  * v2.3 — 30 Sep 2026 — Birth Muhurat repriced (CEO approved in chat): single ₹51 report + 10 remedies, was ₹101/₹151. Only the Birth Muhurat card, its schema Offer and CTA link changed.
  * v2.2 — 27 Sep 2026 — delivery text sach kiya (CEO Option A): WhatsApp/Email auto-delivery ka koi system nahi hai, isliye 'PDF on/via WhatsApp + Email' → 'PDF download + WhatsApp share'.
  * SIGNED: ROHIIT GUPTA, CEO
@@ -16,8 +16,8 @@
  *   ONE-TIME pricing — no monthly subscriptions.
  * - Replaced with the ACTUAL product lineup (verified against homepage):
  *   Free Preview · Deep Reading ₹51 · Voice (₹11/₹51/₹101) ·
- *   Kundali Milan (₹51/₹101/₹151) · Birth Muhurat (Free/₹51 since 30 Sep 2026) ·
- *   Karmic Reading ₹251.
+ *   Kundali Milan (₹51 couple + parent, 1 Oct 2026) · Birth Muhurat (Free/₹51 since 30 Sep 2026) ·
+ *   Karmic Reading ₹101 (1 Oct 2026).
  * - Removed "Jini AI" line (Jini permanently off roadmap → Trikaal AI).
  * - IR-0 fixes: visible brand "Trikaal Vaani" -> "Trikaal Vaani" (title,
  *   schema name, back link); domain/URL trikalvaani.com untouched.
@@ -36,7 +36,7 @@ import { Check, Sparkles, Zap, Mic, Heart, Baby, Star } from 'lucide-react';
 export const metadata: Metadata = {
   title: { absolute: 'Pricing — Trikaal Vaani Vedic AI Astrology' },
   description:
-    'Choose your Trikaal Vaani reading. Free Vedic AI analysis, deep readings from ₹51, voice from ₹11, Kundali Milan ₹51–₹151, Karmic Reading ₹251. One-time pricing, no subscriptions. Swiss Ephemeris powered, Parashara classical system. Payments secured by Razorpay.',
+    'Choose your Trikaal Vaani reading. Free Vedic AI analysis, deep readings from ₹51, voice from ₹11, Kundali Milan ₹51, Karmic Reading ₹101. One-time pricing, no subscriptions. Swiss Ephemeris powered, Parashara classical system. Payments secured by Razorpay.',
   alternates: { canonical: 'https://trikalvaani.com/pricing' },
 };
 
@@ -111,7 +111,7 @@ const PLANS = [
   {
     name: 'Kundali Milan',
     price: '₹51',
-    period: '₹51 · ₹101 · ₹151 tiers',
+    period: 'couple + parent dono',
     tagline: 'Marriage compatibility, the classical way',
     icon: Heart,
     color: '#F472B6',
@@ -119,9 +119,9 @@ const PLANS = [
     features: [
       'Full 8-koot Ashtakoot (36 Guna)',
       'Manglik Dosh + Nadi Dosh check',
-      '₹51 Basic — full Ashtakoot',
-      '₹101 Deep — 1000-word + 10 remedies',
-      '₹151 Both — Couple + Parent narratives',
+      'Sanskrit shlok + Hindi arth (Muhurta Chintamani)',
+      'Couple (Hinglish) + Parent (Hindi) version',
+      '10 upay',
       'PDF download, WhatsApp share & shareable link',
     ],
     locked: [],
@@ -147,26 +147,26 @@ const PLANS = [
     ],
     locked: [],
     cta: 'Find the Muhurat',
-    ctaHref: '/calculators/free-child-birth-muhurat-calculator',
+    ctaHref: '/kundali-milan',
     highlight: false,
   },
   {
     name: 'Karmic Reading',
-    price: '₹251',
+    price: '₹101',
     period: 'one deep reading',
     tagline: 'Who they truly are, beneath the surface',
     icon: Star,
     color: '#FBBF24',
     paid: true,
     features: [
-      '6 karmic dimensions via Bhrigu Nandi Nadi',
+      '6 karmic dimensions + prediction + granth upay',
       'Personality, fidelity, finances & family',
       'Patterns, never verdicts',
       'Available in 3 languages',
       'PDF download, WhatsApp share & shareable link',
     ],
     locked: [],
-    cta: 'Read the Karma — ₹251',
+    cta: 'Read the Karma — ₹101',
     ctaHref: '/karmic-background-reading',
     highlight: false,
   },
@@ -251,7 +251,7 @@ const pricingSchema = {
       {
         '@type': 'Offer',
         name: 'Karmic Background Reading',
-        price: '251',
+        price: '101',
         priceCurrency: 'INR',
         availability: 'https://schema.org/InStock',
       },

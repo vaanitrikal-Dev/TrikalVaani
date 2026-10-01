@@ -1,3 +1,4 @@
+// (1 Oct 2026 — daam sahi kiye: Kundali Milan ₹51 (couple + parent), Karmic ₹101 / $11, Child Birth ₹51; Bhrigu Nandi ke purane daave hataye)
 import { Metadata } from 'next'
 import Link from 'next/link'
 import { createClient } from '@supabase/supabase-js'
@@ -322,7 +323,7 @@ export default async function LearnIndexPage() {
               Get a personalised analysis from Rohiit Gupta, Chief Vedic Architect.
             </p>
             <Link href="/birth-form" className="cta-btn">
-              ✦ Get My Reading — ₹251
+              ✦ Get My Reading — ₹51
             </Link>
           </div>
         </div>

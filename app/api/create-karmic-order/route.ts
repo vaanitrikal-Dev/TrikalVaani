@@ -1,7 +1,7 @@
 // TRIKAL VAANI - Karmic Background Reading - Order Creation API
 // CEO: Rohiit Gupta
 // File: app/api/create-karmic-order/route.ts
-// VERSION: 1.1 (29 Aug 2026)
+// VERSION: 1.2 (1 Oct 2026) — Rs101 / $11 (Rohiit). Report ab granth se (api/karmic-reading v2.0).
 // v1.1 — PAYPAL FOR INTERNATIONAL BUYERS. `provider: 'paypal'` creates the
 //   order with PayPal ($19) instead of Razorpay (Rs 251) and stores it in
 //   karmic_orders under paypal_order_id. The Razorpay branch below is
@@ -14,9 +14,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import Razorpay from 'razorpay';
 import { createClient } from '@supabase/supabase-js';
 
-// CEO LOCKED price — flat Rs251, no tiers.
-const KARMIC_RUPEES = 251;
-const KARMIC_PAISE  = 25100;
+// CEO LOCKED price — v1.2 (Rohiit, 1 Oct 2026): flat Rs101 / $11 (pehle Rs251 / $19).
+const KARMIC_RUPEES = 101;
+const KARMIC_PAISE  = 10100;
 
 const razorpay = new Razorpay({
   key_id:     process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID!,
@@ -81,7 +81,7 @@ export async function POST(req: NextRequest) {
     const userMobile = contact.mobile ?? body.userMobile ?? null;
     const userEmail  = contact.email  ?? body.userEmail  ?? null;
 
-    // ── PayPal branch (v1.1) — international, $19 ────────────────────────────
+    // ── PayPal branch (v1.1) — international, $11 (v1.2) ────────────────────────────
     // Returns before the Razorpay code below, which is therefore unreachable
     // for these requests and stays exactly as it was.
     if (body.provider === 'paypal') {
@@ -140,7 +140,7 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // Create Razorpay order — flat Rs251
+    // Create Razorpay order — flat Rs101 (v1.2)
     const order = await razorpay.orders.create({
       amount:   KARMIC_PAISE,
       currency: 'INR',

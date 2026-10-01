@@ -1,7 +1,7 @@
 // ============================================================
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
 // FILE: app/layout.tsx
-// VERSION: v3.9  (18 Sep 2026 — TrikalPicker added) — Google Ads Tag AW-7916189860 added
+// VERSION: 3.10 (1 Oct 2026 — daam sahi kiye: Kundali Milan ₹51 (couple + parent), Karmic ₹101 / $11, Child Birth ₹51; Bhrigu Nandi ke purane daave hataye)  (18 Sep 2026 — TrikalPicker added) — Google Ads Tag AW-7916189860 added
 // CHANGES vs v3.6.2 (CEO-approved):
 //   ✅ ADD: GoogleAdsTag AW-7916189860 — builds Google Display +
 //      YouTube + Gmail remarketing audiences alongside Meta Pixel.
@@ -362,10 +362,10 @@ export default function RootLayout({
                     "@type": "Offer",
                     "@id": "https://trikalvaani.com/#offer-karmic",
                     name: "Karmic Background Reading",
-                    price: "251",
+                    price: "101",
                     priceCurrency: "INR",
                     description:
-                      "Deep Bhrigu Nadi karmic pattern analysis — past-life karmic debt, current-life dharma path, and Nadi-specific remedies.",
+                      "Granth-based karmic reading (BPHS, Phaladipika) — six karmic dimensions, past-life karma (Phaladipika 14.24, BPHS 83), prediction and classical remedies (BPHS 84).",
                     eligibleRegion: { "@type": "Place", name: "Worldwide" },
                   },
                 ],

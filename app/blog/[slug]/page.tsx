@@ -1,7 +1,7 @@
 // ============================================================
 // TRIKAL VAANI — DYNAMIC BLOG ARTICLE PAGE (SSR)
 // CEO: Rohiit Gupta | Chief Vedic Architect
-// Version: 3.7
+// Version: 3.8 (1 Oct 2026 — daam sahi kiye: Kundali Milan ₹51 (couple + parent), Karmic ₹101 / $11, Child Birth ₹51; Bhrigu Nandi ke purane daave hataye)
 // Date: 2026-09-30
 // CHANGE v3.7 — no visible change. RECIPROCAL hreflang for Hindi posts that
 //   are the Hindi version of a /learn page (seo_pillar_pages.hindi_slug).
@@ -423,22 +423,16 @@ const FEE_LADDER: { name: string; price: string; description: string }[] = [
       'In-depth reading of a single domain with five personalised remedies and action windows, reviewed by Rohiit Gupta.',
   },
   {
-    name: 'Kundali Milan — Basic, full 36-Guna Ashtakoot',
+    name: 'Kundali Milan — couple + parent, full 36-Guna Ashtakoot',
     price: '51',
     description:
       'All eight Kootas scored, plus Nadi Dosha and Mangal Dosha with cancellation checked on both charts.',
   },
   {
-    name: 'Kundali Milan — Deep, 1000-word with 10 remedies',
+    name: 'Karmic Background Reading',
     price: '101',
     description:
-      'The full Basic analysis expanded into a written narrative with ten remedies. Rs151 adds separate Couple and Parent narratives.',
-  },
-  {
-    name: 'Karmic Background Reading',
-    price: '251',
-    description:
-      'Career, wealth and relationships analysed together in one consolidated report.',
+      'Six karmic dimensions, past-life karma, prediction and classical remedies — from BPHS and Phaladipika.',
   },
   {
     name: 'On-Call Consultation',
@@ -1287,21 +1281,15 @@ function LocalNapBlock({ lang, primaryHref }: { lang: string; primaryHref?: stri
             </tr>
             <tr className="border-b border-amber-900/20">
               <td className="px-4 py-3 text-slate-200">
-                {hi ? 'कुंडली मिलान — बेसिक, पूरा 36-गुण अष्टकूट' : 'Kundali Milan — Basic, full 36-Guna Ashtakoot'}
+                {hi ? 'कुंडली मिलान — कपल + पैरेंट, पूरा 36-गुण अष्टकूट श्लोक सहित' : 'Kundali Milan — couple + parent, full 36-Guna Ashtakoot with shlokas'}
               </td>
               <td className="px-4 py-3 font-semibold text-amber-200">₹51</td>
             </tr>
             <tr className="border-b border-amber-900/20">
               <td className="px-4 py-3 text-slate-200">
-                {hi ? 'कुंडली मिलान — डीप (₹151 में कपल + पैरेंट दोनों नैरेटिव)' : 'Kundali Milan — Deep (₹151 for both Couple and Parent narratives)'}
+                {hi ? 'कार्मिक बैकग्राउंड रीडिंग (6 आयाम + भविष्यवाणी + ग्रन्थ के उपाय)' : 'Karmic Background Reading (6 dimensions + prediction + granth remedies)'}
               </td>
               <td className="px-4 py-3 font-semibold text-amber-200">₹101</td>
-            </tr>
-            <tr className="border-b border-amber-900/20">
-              <td className="px-4 py-3 text-slate-200">
-                {hi ? 'कार्मिक बैकग्राउंड रीडिंग (करियर + धन + रिश्ते)' : 'Karmic Background Reading (career + wealth + relationships)'}
-              </td>
-              <td className="px-4 py-3 font-semibold text-amber-200">₹251</td>
             </tr>
             <tr>
               <td className="px-4 py-3 text-slate-200">

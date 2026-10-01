@@ -3,7 +3,7 @@
  * TRIKAL VAANI — Compatibility Page (Programmatic SEO/GEO)
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/compatibility/[pair]/page.tsx
- * VERSION: 1.5 — Hindi URL consolidation (canonical / hreflang /
+ * VERSION: 1.6 (1 Oct 2026 — daam sahi kiye: Kundali Milan ₹51 (couple + parent), Karmic ₹101 / $11, Child Birth ₹51; Bhrigu Nandi ke purane daave hataye) — Hindi URL consolidation (canonical / hreflang /
  *                toggle / related links all point at /hi/compatibility/)
  * DATE:    2026-09-05
  * SIGNED: ROHIIT GUPTA, CEO
@@ -251,7 +251,7 @@ export default async function CompatibilityPage(
     homeCrumb:      'होम',
     karmicTitle:    'अनुकूलता से आगे — वह इंसान असल में कैसा है?',
     karmicText:     'राशि अनुकूलता दो राशियों का मेल दिखाती है। पर विवाह दो इंसानों का रिश्ता है। किसी की कुंडली से उनके 6 कार्मिक पैटर्न — स्वभाव, निष्ठा, धन, परिवार का सम्मान, छुपी प्रवृत्ति और विवाह का भविष्य — भृगु नाड़ी के आधार पर जानें। किसी पर निर्णय नहीं, केवल समझ।',
-    karmicButton:   'कार्मिक बैकग्राउंड रीडिंग ₹251 →',
+    karmicButton:   'कार्मिक बैकग्राउंड रीडिंग ₹101 →',
     exploreTitle:   'और जानें — मुफ़्त ज्योतिष टूल्स और सेवाएँ',
     exploreLinks: [
       { href: '/kundali-milan',                              label: 'पूर्ण कुंडली मिलान (₹51)' },
@@ -266,7 +266,7 @@ export default async function CompatibilityPage(
       { href: '/relationships',                              label: 'रिश्ते व प्रेम ज्योतिष' },
       { href: '/marriage',                                   label: 'विवाह ज्योतिष' },
       { href: '/family',                                     label: 'परिवार ज्योतिष' },
-      { href: '/karmic-background-reading',                  label: 'कार्मिक बैकग्राउंड रीडिंग (₹251)' },
+      { href: '/karmic-background-reading',                  label: 'कार्मिक बैकग्राउंड रीडिंग (₹101)' },
       { href: '/calculators',                                label: 'सभी मुफ़्त कैलकुलेटर' },
       { href: '/services',                                   label: 'सभी सेवाएँ' },
     ],
@@ -290,7 +290,7 @@ export default async function CompatibilityPage(
     homeCrumb:      'Home',
     karmicTitle:    'Beyond Compatibility — Who Is This Person Really?',
     karmicText:     'Rashi compatibility shows how two signs match. But marriage is a bond between two people. A Karmic Background Reading reveals a person\'s 6 karmic patterns — personality, fidelity, money, family respect, hidden tendencies, and marriage outlook — read from their birth chart via Bhrigu Nandi Nadi. Patterns, not verdicts.',
-    karmicButton:   'Karmic Background Reading ₹251 →',
+    karmicButton:   'Karmic Background Reading ₹101 →',
     exploreTitle:   'Explore More — Free Tools & Services',
     exploreLinks: [
       { href: '/kundali-milan',                              label: 'Full Kundali Milan (₹51)' },
@@ -305,7 +305,7 @@ export default async function CompatibilityPage(
       { href: '/relationships',                              label: 'Relationships & Love Astrology' },
       { href: '/marriage',                                   label: 'Marriage Astrology' },
       { href: '/family',                                     label: 'Family Astrology' },
-      { href: '/karmic-background-reading',                  label: 'Karmic Background Reading (₹251)' },
+      { href: '/karmic-background-reading',                  label: 'Karmic Background Reading (₹101)' },
       { href: '/calculators',                                label: 'All Free Calculators' },
       { href: '/services',                                   label: 'All Services' },
     ],

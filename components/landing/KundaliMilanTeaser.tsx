@@ -1,6 +1,9 @@
 'use client';
 
-// 🔱 TRIKAL VAANI | components/landing/KundaliMilanTeaser.tsx | v2.1
+// 🔱 TRIKAL VAANI | components/landing/KundaliMilanTeaser.tsx | v2.2 (1 Oct 2026)
+// v2.2: Kundali Milan ka EK paid tier — ₹51, couple + parent dono, granth saar.
+//   4 dabbe (₹0/₹51/₹101/₹151) -> 2 (Free + Poora Milan ₹51). "Dos & Don'ts"
+//   hataya — nayi granth report mein nahi; uski jagah "Sanskrit Shlok".
 // Owner: Rohiit Gupta, Chief Vedic Architect
 // ============================================================================
 // CHANGE LOG (v2.0 → v2.1):
@@ -63,7 +66,7 @@ export default function KundaliMilanTeaser() {
           }}
         >
           {/* Pricing Tiers Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+          <div className="grid grid-cols-2 gap-3 sm:gap-4 max-w-xl mx-auto">
 
             {/* Free Preview */}
             <div
@@ -80,22 +83,7 @@ export default function KundaliMilanTeaser() {
               <div className="text-xs text-slate-500 mt-1">36 Guna score</div>
             </div>
 
-            {/* Basic Milan */}
-            <div
-              className="rounded-xl p-4 text-center"
-              style={{
-                background: GOLD_RGBA(0.04),
-                border: `1px solid ${GOLD_RGBA(0.2)}`,
-              }}
-            >
-              <div className="text-xs uppercase tracking-wider mb-2" style={{ color: GOLD_RGBA(0.7) }}>
-                Basic Milan
-              </div>
-              <div className="text-2xl font-bold" style={{ color: GOLD }}>₹51</div>
-              <div className="text-xs text-slate-500 mt-1">Full Ashtakoot</div>
-            </div>
-
-            {/* Deep Milan — MOST POPULAR */}
+            {/* v2.2 — Poora Milan ₹51 (ek hi paid tier) */}
             <div
               className="rounded-xl p-4 text-center relative"
               style={{
@@ -104,31 +92,16 @@ export default function KundaliMilanTeaser() {
               }}
             >
               <span
-                className="absolute -top-2.5 left-1/2 -translate-x-1/2 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full"
+                className="absolute -top-2.5 left-1/2 -translate-x-1/2 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full whitespace-nowrap"
                 style={{ background: GOLD, color: '#080B12' }}
               >
-                Most Popular
+                Couple + Parent
               </span>
               <div className="text-xs uppercase tracking-wider mb-2" style={{ color: GOLD_RGBA(0.9) }}>
-                Deep Milan
+                Poora Milan
               </div>
-              <div className="text-2xl font-bold" style={{ color: GOLD }}>₹101</div>
-              <div className="text-xs text-slate-500 mt-1">10 Remedies</div>
-            </div>
-
-            {/* Both Versions */}
-            <div
-              className="rounded-xl p-4 text-center"
-              style={{
-                background: GOLD_RGBA(0.04),
-                border: `1px solid ${GOLD_RGBA(0.2)}`,
-              }}
-            >
-              <div className="text-xs uppercase tracking-wider mb-2" style={{ color: GOLD_RGBA(0.7) }}>
-                Both Versions
-              </div>
-              <div className="text-2xl font-bold" style={{ color: GOLD }}>₹151</div>
-              <div className="text-xs text-slate-500 mt-1">Couple + Parent</div>
+              <div className="text-2xl font-bold" style={{ color: GOLD }}>₹51</div>
+              <div className="text-xs text-slate-500 mt-1">Granth shlok · 10 upay</div>
             </div>
 
           </div>
@@ -150,7 +123,7 @@ export default function KundaliMilanTeaser() {
               </div>
               <div className="flex items-center gap-1.5">
                 <FileText className="w-3.5 h-3.5" style={{ color: GOLD_RGBA(0.6) }} />
-                Dos &amp; Don&apos;ts
+                Sanskrit Shlok
               </div>
               <div className="flex items-center gap-1.5">
                 <Sparkles className="w-3.5 h-3.5" style={{ color: GOLD_RGBA(0.6) }} />
@@ -207,7 +180,7 @@ export default function KundaliMilanTeaser() {
 }
 
 // ============================================================================
-// END — components/landing/KundaliMilanTeaser.tsx v2.1
+// END — components/landing/KundaliMilanTeaser.tsx v2.2
 // 🔱 Trikaal Vaani | Rohiit Gupta, Chief Vedic Architect
 // 🔒 EARNING LOCKED (IR-12)
 // ============================================================================

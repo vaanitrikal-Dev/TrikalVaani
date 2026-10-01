@@ -1,7 +1,7 @@
 // TRIKAL VAANI - KarmicForm Component
 // CEO & Chief Vedic Architect: Rohiit Gupta
 // File: components/karmic/KarmicForm.tsx
-// VERSION: 1.2 (27 Sep 2026)
+// VERSION: 1.3 (1 Oct 2026) — ₹101 / $11 (pehle ₹251 / $19); report ab granth se
 // v1.2 — 27 Sep 2026 — delivery text sach kiya (CEO Option A): WhatsApp/Email auto-delivery ka koi system nahi hai, isliye 'PDF on/via WhatsApp + Email' → 'PDF download + WhatsApp share'.
 // v1.1 — INTERNATIONAL. Visitors outside India see PayPal at $19 instead of
 //   the ₹251 Razorpay button; Razorpay on this account rejects foreign cards,
@@ -11,8 +11,8 @@
 //   back — without the row a paying customer would receive nothing.
 //   Everything after payment now lives in finishAfterPayment(), shared by both
 //   paths. handlePayment() and its Razorpay call are otherwise unchanged.
-// Single-person form for Karmic Background Reading (Rs251).
-// Flow: birth details -> FREE teaser (Lagna/Moon + hook) -> Rs251 Razorpay -> /karmic/[slug]
+// Single-person form for Karmic Background Reading (Rs101 — v1.3).
+// Flow: birth details -> FREE teaser (Lagna/Moon + hook) -> Rs101 Razorpay -> /karmic/[slug]
 // Reuses BirthForm/KundaliMilanForm patterns: CountrySelector, CityInput (maps-proxy), Razorpay.
 
 "use client"
@@ -420,7 +420,7 @@ export default function KarmicForm() {
 
       openRazorpayCheckout({
         keyId, orderId,
-        amount: (amount ?? 25100),
+        amount: (amount ?? 10100),   // v1.3 — fallback bhi ₹101; asli daam server deta hai
         currency: currency ?? 'INR',
         name: 'Trikaal Vaani',
         description: 'Karmic Background Reading',
@@ -450,7 +450,7 @@ export default function KarmicForm() {
             <div className="grid gap-4">
               <div className="text-center mb-2">
                 <h3 className="text-white text-xl font-serif font-bold">Karmic Background Reading</h3>
-                <p className="text-slate-400 text-sm mt-1">Bhrigu Nandi Nadi · 6 Karmic Dimensions · {isIndia === false ? '$19' : '₹251'}</p>
+                <p className="text-slate-400 text-sm mt-1">BPHS · Phaladipika · 6 Dimensions + Prediction + Upay · {isIndia === false ? '$11' : '₹101'}</p>
               </div>
 
               <div>
@@ -609,7 +609,7 @@ export default function KarmicForm() {
                 <button type="button" onClick={handlePayment} disabled={phase === "paying"}
                   className="w-full py-4 rounded-xl text-sm font-bold transition-all"
                   style={{ background: phase === "paying" ? GOLD_RGBA(0.3) : `linear-gradient(135deg, ${GOLD} 0%, #F5D76E 50%, ${GOLD} 100%)`, color: '#080B12', fontSize: '15px', boxShadow: phase === "paying" ? 'none' : '0 0 30px rgba(212,175,55,0.4)' }}>
-                  {phase === "paying" ? 'Razorpay khul raha hai...' : 'Poori Reading Kholiye — ₹251 →'}
+                  {phase === "paying" ? 'Razorpay khul raha hai...' : 'Poori Reading Kholiye — ₹101 →'}
                 </button>
               )}
 

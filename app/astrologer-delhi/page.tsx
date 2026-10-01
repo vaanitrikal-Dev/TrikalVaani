@@ -3,7 +3,7 @@
  * 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER 🔱
  * ============================================================================
  * File:        app/astrologer-delhi/page.tsx
- * Version:     v1.1
+ * Version: 1.2 (1 Oct 2026 — daam sahi kiye: Kundali Milan ₹51 (couple + parent), Karmic ₹101 / $11, Child Birth ₹51; Bhrigu Nandi ke purane daave hataye)
  * Owner:       Rohiit Gupta, Chief Vedic Architect
  * Created:     2026-07-12
  * Updated:     2026-08-31
@@ -195,12 +195,9 @@ const LOCAL_BUSINESS_SCHEMA = {
       { '@type': 'Offer', name: 'Free Kundli, all calculators & Trikaal Ka Sandesh', price: '0', priceCurrency: 'INR', availability: 'https://schema.org/InStock' },
       { '@type': 'Offer', name: 'Trikaal Ki Awaaz — Voice Reading (1 question)', price: '11', priceCurrency: 'INR', availability: 'https://schema.org/InStock' },
       { '@type': 'Offer', name: 'Deep Reading — one life domain', price: '51', priceCurrency: 'INR', availability: 'https://schema.org/InStock' },
-      { '@type': 'Offer', name: 'Kundali Milan — Basic, full 36-Guna Ashtakoot', price: '51', priceCurrency: 'INR', availability: 'https://schema.org/InStock' },
-      { '@type': 'Offer', name: 'Kundali Milan — Deep, 1000-word with 10 remedies', price: '101', priceCurrency: 'INR', availability: 'https://schema.org/InStock' },
-      { '@type': 'Offer', name: 'Child Birth Muhurat — full report', price: '101', priceCurrency: 'INR', availability: 'https://schema.org/InStock' },
-      { '@type': 'Offer', name: 'Kundali Milan — Both, Couple + Parent narratives', price: '151', priceCurrency: 'INR', availability: 'https://schema.org/InStock' },
-      { '@type': 'Offer', name: 'Child Birth Muhurat — report with 10 remedies', price: '151', priceCurrency: 'INR', availability: 'https://schema.org/InStock' },
-      { '@type': 'Offer', name: 'Karmic Background Reading — career, wealth and relationships', price: '251', priceCurrency: 'INR', availability: 'https://schema.org/InStock' },
+      { '@type': 'Offer', name: 'Kundali Milan — couple + parent, 36-Guna Ashtakoot with shlokas', price: '51', priceCurrency: 'INR', availability: 'https://schema.org/InStock' },
+      { '@type': 'Offer', name: 'Child Birth Muhurat — report with 10 remedies', price: '51', priceCurrency: 'INR', availability: 'https://schema.org/InStock' },
+      { '@type': 'Offer', name: 'Karmic Background Reading — six dimensions, prediction and remedies', price: '101', priceCurrency: 'INR', availability: 'https://schema.org/InStock' },
       { '@type': 'Offer', name: 'On-Call Consultation with Rohiit Gupta', price: '499', priceCurrency: 'INR', availability: 'https://schema.org/InStock' },
     ],
   },
@@ -252,7 +249,7 @@ const FAQ_SCHEMA = {
       name: 'How much does an astrology consultation in Delhi cost?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'Free kundli and all calculators cost nothing. A voice reading starts at Rs11, a Deep Reading is Rs51, Kundali Milan runs Rs51 Basic, Rs101 Deep or Rs151 for both narratives, a Child Birth Muhurat report is Rs101 or Rs151 with remedies, and a Karmic Background Reading is Rs251. Anything that is a computation — your kundli, your Mangal Dosh status, your Sade Sati phase — is free, permanently. You pay only for interpretation.',
+        text: 'Free kundli and all calculators cost nothing. A voice reading starts at Rs11, a Deep Reading is Rs51, Kundali Milan is Rs51 for both couple and parent versions, a Child Birth Muhurat report is Rs51 with remedies, and a Karmic Background Reading is Rs101. Anything that is a computation — your kundli, your Mangal Dosh status, your Sade Sati phase — is free, permanently. You pay only for interpretation.',
       },
     },
     {
@@ -296,7 +293,7 @@ const SERVICES = [
   { name: 'Mangal Dosh Check', desc: 'Is the dosh present, how strong, and is it already cancelled — graded honestly.', href: '/calculators/free-manglik-dosh-calculator', price: 'Free' },
   { name: 'Sade Sati Check', desc: 'Which phase of Shani Sade Sati you are in, and what it actually means.', href: '/calculators/free-sade-sati-calculator', price: 'Free' },
   { name: 'Deep Reading', desc: '900-word analysis with five personalised upay and action windows.', href: '/pricing', price: 'Rs51' },
-  { name: 'Karmic Background Reading', desc: 'Bhrigu Nadi karmic pattern analysis — past-life debt and current dharma path.', href: '/karmic-background-reading', price: 'Rs251' },
+  { name: 'Karmic Background Reading', desc: 'Granth-based karmic reading — six dimensions, past-life karma, prediction and remedies.', href: '/karmic-background-reading', price: 'Rs101' },
 ]
 
 export default function AstrologerDelhiPage() {

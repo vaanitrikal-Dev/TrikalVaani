@@ -1,9 +1,9 @@
 // TRIKAL VAANI - Karmic Background Reading - Free Preview API
 // CEO: Rohiit Gupta
 // File: app/api/karmic-preview/route.ts
-// VERSION: 1.1
+// VERSION: 1.2 (1 Oct 2026) — teaser ka daam ₹101
 // Light teaser ONLY: calls VM /kundali, returns Lagna sign + Moon sign.
-// NO Gemini, NO save, near-zero cost. Builds trust before the Rs251 unlock.
+// NO Gemini, NO save, near-zero cost. Builds trust before the Rs101 unlock (v1.2, 1 Oct 2026 — pehle Rs251).
 //
 // CHANGE v1.1: VM call routes through lib/callVM.ts so X-Trikal-Key is
 // injected automatically. 20s timeout/abort preserved. Logic unchanged.
@@ -130,7 +130,7 @@ export async function POST(req: NextRequest) {
       hook:
         'Trikaal ne aapki kundali mein 6 gehre karmic patterns dekhe hain — ' +
         'personality, nibhaane ki aadat, paisa, parivaar, chhupi pravritti, aur vivah ka bhavishya. ' +
-        'Poori sachhai ₹251 mein khulegi.',
+        'Poori sachhai ₹101 mein khulegi — granth ke shlok, prediction aur upay ke saath.',
     });
 
   } catch (err: unknown) {

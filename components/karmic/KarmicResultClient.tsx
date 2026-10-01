@@ -1,7 +1,8 @@
 // TRIKAL VAANI — Karmic Result Client Component
 // CEO & Chief Vedic Architect: Rohiit Gupta
 // File: components/karmic/KarmicResultClient.tsx
-// VERSION: 1.0
+// VERSION: 1.1 (1 Oct 2026) — granth saar: do naye section (7. Prediction, 8. Upay),
+//   daam ₹101, srot "BPHS · Phaladipika" (report ab AI nahi, granth se — api/karmic-reading v2.0)
 // Handles: animated waiting screen, auto-polling, 6-dim render, PDF, share.
 
 'use client'
@@ -26,6 +27,9 @@ const DIMENSION_MARKERS = [
   { marker: '═══ 4. FAMILY & PARENTAL RESPECT ═══',           title: 'Family & Parental Respect',       icon: '🏠' },
   { marker: '═══ 5. HIDDEN TENDENCIES & KARMIC BAGGAGE ═══',  title: 'Hidden Tendencies & Karmic Baggage', icon: '🌑' },
   { marker: '═══ 6. MARRIAGE OUTLOOK & LONGEVITY ═══',        title: 'Marriage Outlook & Longevity',    icon: '🔱' },
+  // v1.1 — granth saar ke do naye hisse (purani reports mein nahi hote, to khaali nahi dikhte)
+  { marker: '═══ 7. KAB KYA KHULEGA — PREDICTION ═══',        title: 'Kab Kya Khulega — Prediction',    icon: '⏳' },
+  { marker: '═══ 8. GRANTH KE UPAY ═══',                      title: 'Granth ke Upay',                  icon: '🕉️' },
 ]
 const MAA_SHAKTI_MARKER = '═══ MAA SHAKTI ═══'
 
@@ -229,7 +233,7 @@ export default function KarmicResultClient({ initialRow }: { initialRow: KarmicR
           </div>
 
           <p className="text-gray-600 text-[10px]">
-            Aapka ₹251 secure hai. Reading taiyaar hone par automatic dikhega.
+            Aapka ₹101 secure hai. Reading taiyaar hone par automatic dikhega.
           </p>
         </div>
 
@@ -281,7 +285,7 @@ export default function KarmicResultClient({ initialRow }: { initialRow: KarmicR
           <h1 className="text-3xl sm:text-5xl font-semibold">{personName}</h1>
           {personPlace && <p className="mt-4 text-sm text-gray-400">{personPlace}</p>}
           <p className="mt-2 text-xs text-gray-500 tracking-widest uppercase">
-            Bhrigu Nandi Nadi · 6 Karmic Dimensions · ₹251
+            BPHS · Phaladipika · 6 Karmic Dimensions + Prediction + Upay · ₹101
           </p>
         </div>
       </header>

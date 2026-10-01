@@ -1,10 +1,10 @@
 /**
+ * v1.9 (1 Oct 2026) — Karmic cross-sell ₹251 -> ₹101 (Karmic ka daam isi deploy mein ₹101).
  * v1.8 (1 Oct 2026) — FREE PREVIEW ka upsell dabba ab bhi ₹51/₹101/₹151 aur
  *   "Deep Reading Kholiye" dikha raha tha (Rohiit ne free test mein pakda).
  *   v1.7 mein sirf upar ke helper badle the — ye dabba neeche alag likha tha
  *   aur poori file nahi padhi gayi thi. Ab ek dabba: Poora Milan ₹51.
- *   Karmic cross-sell ka ₹251 JAAN-BOOJH KAR nahi badla — Karmic ka daam
- *   ₹101 uske apne deploy mein badlega; pehle badla to ₹101 dikhta aur ₹251 katta.
+ *   (Karmic cross-sell ka daam v1.9 mein badla.)
  * v1.7 (1 Oct 2026) — single tier milan_51 (₹51, couple + parent dono, granth
  *   saar + 10 upay). Label, daam aur upay-card milan_51 ke liye. Narrative ab
  *   granth se (api/milan-narrative v2.0) — wahi COUPLE/PARENT markers, isliye
@@ -429,7 +429,7 @@ export default async function MilanResultPage({ params }: { params: { slug: stri
                 href="/karmic-background-reading"
                 className="inline-block px-7 py-3.5 rounded-lg bg-[#D4AF37] hover:bg-[#b8962e] text-[#080B12] font-semibold tracking-wide transition shadow-lg w-full sm:w-auto text-center"
               >
-                Karmic Background Reading Kholiye — ₹251 →
+                Karmic Background Reading Kholiye — ₹101 →
               </a>
               <span className="text-xs text-gray-500">
                 Free Lagna &amp; Moon jhalak · PDF download + WhatsApp share
