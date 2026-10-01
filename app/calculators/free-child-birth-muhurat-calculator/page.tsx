@@ -2,6 +2,15 @@
 
 // ============================================================
 // File: app/calculators/free-child-birth-muhurat-calculator/page.tsx
+// Version: v1.8 (1 Oct 2026) — GRANTH SE SAAR (free result par)
+//   * Rohiit (1 Oct): "Add Granth and Summary (Saar) for same way like we did
+//     to another calculators". /api/calc/muhurat v1.5 ab free slot ka saar
+//     bhejta hai (VM muhurat_saar — Brihat Samhita / Muhurta Chintamani /
+//     BPHS, shlok ke saath). Best-samay card ke neeche "🔱 Granth se aapka
+//     saar" dabba — wahi roop jo Vivah aur baaki calculators mein hai.
+//   * "Points of Caution" se engine ki "Janm-dosh: <code> (...)" wali angrezi
+//     lines chhaant di — wahi baat saar mein narm bhasha mein jaati hai.
+//   * Baaki sab (form, paid flow, ₹51, PayPal) v1.7 jaisa.
 // Version: v1.7 (30 Sep 2026) — FREE 1-HOUR / PAID ₹51 SPLIT (Rohiit's ruling)
 //   * Doctor's window max 4 hours. FREE = best slot in the FIRST 1 hour only.
 //     PAID ₹51 / $5 = best across the full window + up to 3 backups inside
@@ -1124,6 +1133,34 @@ export default function FreeChildBirthMuhuratPage() {
                 </div>
               </div>
 
+              {/* v1.8 — GRANTH SE SAAR (free slot ka; VM muhurat_saar se) */}
+              {Array.isArray(result?.saar?.lines) && result.saar.lines.length > 0 && (
+                <div className="rounded-2xl p-5 md:p-6" style={{
+                  background: 'rgba(212,175,55,0.05)', border: `1px solid ${GOLD_RGBA(0.25)}`,
+                }}>
+                  <h4 className="text-lg font-serif font-bold mb-3" style={{ color: GOLD }}>
+                    🔱 Granth se aapka saar
+                  </h4>
+                  <ul className="space-y-2.5 text-sm text-slate-300 leading-relaxed">
+                    {result.saar.lines.map((l: any, i: number) => (
+                      <li key={i} className="flex gap-2">
+                        <span style={{ color: GOLD }}>•</span>
+                        <span>
+                          {String(l?.baat ?? '')}
+                          {l?.srot && (
+                            <span className="text-xs text-slate-500"> — {String(l.srot)}</span>
+                          )}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                  <p className="text-xs text-slate-500 mt-4">
+                    Jahan granth chup hai, wahan hum bhi chup hain. Ye samay ka darja hai —
+                    maa aur bachche ki suraksha doctor ki salah se hi tay hoti hai.
+                  </p>
+                </div>
+              )}
+
               {/* WHY THIS TIME */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="rounded-2xl p-5" style={{ background: 'rgba(34,197,94,0.06)', border: '1px solid rgba(34,197,94,0.25)' }}>
@@ -1132,11 +1169,11 @@ export default function FreeChildBirthMuhuratPage() {
                     {best.reasons.map((r, i) => <li key={i} className="flex gap-2"><span className="text-green-400">•</span><span>{r}</span></li>)}
                   </ul>
                 </div>
-                {best.cautions.length > 0 && (
+                {best.cautions.filter((c) => !String(c).startsWith('Janm-dosh:')).length > 0 && (
                   <div className="rounded-2xl p-5" style={{ background: 'rgba(239,68,68,0.06)', border: '1px solid rgba(239,68,68,0.25)' }}>
                     <h4 className="text-lg font-serif font-bold mb-3" style={{ color: '#FCA5A5' }}>⚠️ Points of Caution</h4>
                     <ul className="space-y-2 text-sm text-slate-300">
-                      {best.cautions.map((c, i) => <li key={i} className="flex gap-2"><span className="text-red-400">•</span><span>{c}</span></li>)}
+                      {best.cautions.filter((c) => !String(c).startsWith('Janm-dosh:')).map((c, i) => <li key={i} className="flex gap-2"><span className="text-red-400">•</span><span>{c}</span></li>)}
                     </ul>
                   </div>
                 )}

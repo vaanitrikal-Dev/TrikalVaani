@@ -1,9 +1,17 @@
 // ============================================================
 // File: app/api/calc/muhurat/route.ts
-// Version: v1.4 — FREE/PAID SPLIT (30 Sep 2026)
-// PICHHLA: v1.3 — storage AWAIT (21 Sep 2026)
+// Version: v1.5 — GRANTH SAAR (1 Oct 2026)
+// PICHHLA: v1.4 — FREE/PAID SPLIT (30 Sep 2026)
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
 // ============================================================
+// CHANGE v1.5 (Rohiit, 1 Oct 2026 — "Add Granth and Summary (Saar) for same
+//   way like we did to another calculators"):
+//   * VM /muhurat-finder ab har scan ke best slot ka GRANTH SAAR deta hai
+//     (Brihat Samhita / Muhurta Chintamani / BPHS, shlok ke saath). Yahan
+//     sirf FREE scan ka saar aage jaata hai — wahi slot jo grahak dekhta hai.
+//     Poore window wale scan ka saar kabhi nahi bheja jaata (leak nahi).
+//   * Free saar mein bachche ka bhavishya NAHI aur "poora window doshit"
+//     wali line NAHI — dono sirf paid mein (VM hi ye tay karta hai).
 // CHANGE v1.4 (Rohiit's ruling, 30 Sep 2026):
 //   The lock is enforced HERE, on the server — the browser never receives
 //   the paid data, so it cannot be read from DevTools.
@@ -68,6 +76,8 @@ export async function POST(req: NextRequest) {
       best_slot:        publicSlot(freeBest),
       quality:          freeBest ? qualityLabel(freeData?.best_band, freeBest.score) : null,
       better_in_window: betterInWindow,
+      // v1.5 — sirf FREE scan ka granth saar (poore window wala kabhi nahi)
+      saar:             freeData?.saar ?? null,
       free_window:      { start_min: w.startMin, end_min: freeEnd },
       full_window:      { start_min: w.startMin, end_min: w.endMin },
       disclaimer:       freeData?.disclaimer ?? null,
