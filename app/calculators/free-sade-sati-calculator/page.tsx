@@ -2,7 +2,7 @@
 
 // ============================================================
 // File: app/calculators/free-sade-sati-calculator/page.tsx
-// Version: v2.0 — Free Sade Sati Calculator (Radar E3 content build)
+// Version: 2.1 (1 Oct 2026 — "📜 Granth ke Upay — BPHS 84" dabba (components/calculators/GranthUpayBox); upay heading "(Parashar)" -> "(Parampara)") — Free Sade Sati Calculator (Radar E3 content build)
 // VM endpoint: /sade-sati (dedicated, 100% accurate)
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
 // Changelog:
@@ -56,6 +56,7 @@
 // ============================================================
 
 import { useState, useRef, useEffect, useCallback } from 'react';
+import GranthUpayBox from '@/components/calculators/GranthUpayBox';   // v-next 1 Oct 2026 — BPHS 84
 import Link from 'next/link';
 import SiteNav from '@/components/layout/SiteNav';
 import { buildCalcJsonLd } from '@/lib/seo/calcJsonLd';
@@ -812,12 +813,13 @@ export default function FreeSadeSatiCalculatorPage() {
               {/* REMEDIES */}
               {(mantra || ratna || daan) && (
                 <div className="rounded-2xl p-5 md:p-7" style={{ background: 'rgba(212,175,55,0.06)', border: `1px solid ${GOLD_RGBA(0.25)}` }}>
-                  <h3 className="text-xl font-serif font-bold mb-5" style={{ color: GOLD }}>🪔 Your 3 Free Remedies (Parashar)</h3>
+                  <h3 className="text-xl font-serif font-bold mb-5" style={{ color: GOLD }}>🪔 Your 3 Free Remedies (Parampara)</h3>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     {mantra && <Remedy icon="🔱" title="Mantra" content={mantra} />}
                     {ratna && <Remedy icon="💎" title="Ratna" content={ratna} />}
                     {daan && <Remedy icon="🙏" title="Daan" content={daan} />}
                   </div>
+                  <GranthUpayBox data={result?.granthUpay} />
                   <p className="text-xs text-slate-400 mt-4">
                     Poori upay soochi aur unka shastriya aadhaar:{' '}
                     <Link href="/blog/sade-sati-remedies-hindi" className="underline underline-offset-2" style={{ color: GOLD }}>शनि साढ़ेसाती के सच्चे उपाय</Link>

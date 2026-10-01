@@ -2,8 +2,8 @@
 // File: app/api/calc/kundali/route.ts
 // Purpose: VM bridge for Kundali / Nakshatra / Rashi / Lagna /
 //          Dasha + Shadbala-based Calculators
-// Version: v2.4 — storage AWAIT (21 Sep 2026)
-// PICHHLA: v2.3 — usage logging added (18 Sep 2026)
+// Version: v2.5 — granth-upay (BPHS 84) bina chhede aage; ratna upay ke grah (lagnesh) ka (1 Oct 2026)
+// PICHHLA: v2.4 — storage AWAIT (21 Sep 2026)
 // Changelog v2.2 (2026-09-01):
 //   SAPTAMSA (D-7) PASSTHROUGH added for the Santan Yog calculator. BPHS Ch.6
 //   s.11 judges children in the Saptamsa; the D-9 already exposed here is the
@@ -92,6 +92,7 @@
 // ============================================================
 import { NextRequest, NextResponse } from 'next/server';
 import { callVM } from '@/lib/callVM';
+import { buildGranthUpay } from '@/lib/bphs84-upay';   // v2.5 — BPHS 84 granth-upay (free calculator dabba)
 import { logUsage, usageBirthFields, usageContextFromRequest } from '@/lib/usage-log';
 
 export const runtime = 'nodejs';
@@ -209,6 +210,9 @@ function buildTemplateFromVMRemedies(vmRemediesObj: any, planet: string | null):
     remedyPlan: {
       remedies: vmRemedies.map((r: any) => {
         const base = { type: r.type, planet: r.planet ?? planet };
+        // v1.7 (1 Oct 2026) — BPHS 84 ke granth-upay (VM remedy_master v2.0, system "Granth"):
+        // koi pakka mantra/daan NAHI chipkaana — seedha granth ka text, hawale ke saath.
+        if (r.system === 'Granth') return { ...base, granth: true, srot: r.srot, text: r.detail };
         if (r.type === 'mantra') {
           return { ...base, mantra: pd.mantra_hi, count: '108', time: `${pd.day_hi} सुबह`, special: r.detail };
         }
@@ -219,7 +223,9 @@ function buildTemplateFromVMRemedies(vmRemediesObj: any, planet: string | null):
           return { ...base, name: pd.vrat, day: pd.day, deity: pd.deity, prasad: pd.daan_hi };
         }
         if (r.type === 'gemstone') {
-          return { ...base, lagna_stone: { stone: pd.stone, metal: pd.metal, finger: pd.finger, for: r.detail } };
+          // v2.5 — ratna upay ke apne grah (lagnesh) ka; pehle route ke grah ka aata tha
+          const gp = PLANET_REMEDY[r.planet ?? ''] ?? pd;
+          return { ...base, lagna_stone: { stone: gp.stone, metal: gp.metal, finger: gp.finger, for: r.detail } };
         }
         return { ...base, text: r.detail };
       }),
@@ -443,6 +449,8 @@ export async function POST(req: NextRequest) {
       template: templateData,
       // v2.1 — 'vm' | 'synthesized' | 'none'. See the note above the fallback.
       remediesSource,
+      // v2.5 — BPHS 84: kundali ke ghar se dukh-sthaan wala grah; na ho to calculator ka grah
+      granthUpay: buildGranthUpay(kundaliData?.grahas, targetPlanet),
       // ── v2.1 BUG 2: back-compat alias, purely additive ──
       // free-dasha-calculator reads result.kundali.dasha.maha_dasha and
       // free-nakshatra-calculator reads result.kundali.grahas to find the

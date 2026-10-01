@@ -2,7 +2,7 @@
 
 // ============================================================
 // File: app/calculators/free-graha-bal-calculator/page.tsx
-// Version: v2.0 (05 Sep 2026) — Free Graha Bal Calculator (Shadbala showcase)
+// Version: 2.1 (1 Oct 2026 — "📜 Granth ke Upay — BPHS 84" dabba (components/calculators/GranthUpayBox); upay heading "(Parashar)" -> "(Parampara)") (05 Sep 2026) — Free Graha Bal Calculator (Shadbala showcase)
 // API: /api/calc/kundali (calcType: 'graha-bal')  [route v1.7+]
 // Logic: strongest + weakest planet, full Shadbala 6-bala breakdown
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
@@ -21,6 +21,7 @@
 // ============================================================
 
 import { useState, useRef, useEffect, useCallback } from 'react';
+import GranthUpayBox from '@/components/calculators/GranthUpayBox';   // v-next 1 Oct 2026 — BPHS 84
 import Link from 'next/link';
 import SiteNav from '@/components/layout/SiteNav';
 import { buildCalcJsonLd } from '@/lib/seo/calcJsonLd';
@@ -1076,6 +1077,7 @@ export default function FreeGrahaBalCalculatorPage() {
                     {ratna && <Remedy icon="💎" title="Ratna" content={ratna} />}
                     {daan && <Remedy icon="🙏" title="Daan" content={daan} />}
                   </div>
+                  <GranthUpayBox data={result?.granthUpay} />
                 </div>
               )}
 

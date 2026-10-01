@@ -1,14 +1,15 @@
 // ============================================================
 // File: app/api/calc/manglik-dosh/route.ts
 // Purpose: VM bridge for Manglik Dosh Calculator (FREE forever)
-// Version: v1.6 — storage AWAIT (21 Sep 2026)
-// PICHHLA: v1.5 — usage logging added (18 Sep 2026)
+// Version: v1.7 — granth-upay (BPHS 84) bina chhede aage; ratna lagnesh ka (1 Oct 2026)
+// PICHHLA: v1.6 — storage AWAIT (21 Sep 2026)
 // Changelog v1.4: Pass full VM remedies object to buildTemplateFromVMRemedies
 //   so actionWindows (Dos) from remedy_master are included in response.
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
 // ============================================================
 import { NextRequest, NextResponse } from 'next/server';
 import { callVM } from '@/lib/callVM';
+import { buildGranthUpay } from '@/lib/bphs84-upay';   // v1.7 — BPHS 84 granth-upay (free calculator dabba)
 import { logUsage, usageBirthFields, usageContextFromRequest } from '@/lib/usage-log';
 
 export const runtime = 'nodejs';
@@ -47,6 +48,20 @@ function getSeverityColor(severity: string): string {
   return '#94a3b8';
 }
 
+// v1.7 — ratna LAGNESH ka (remedy_master r.planet). Pehle pakka likha tha, jabki
+// andar ka text kisi aur grah ka ratna batata tha (grahak ko galat ratna dikhta tha).
+const STONE: Record<string, { stone: string; metal: string; finger: string }> = {
+  Sun:     { stone: 'Ruby (Manik)',              metal: 'Gold',   finger: 'Ring finger' },
+  Moon:    { stone: 'Pearl (Moti)',              metal: 'Silver', finger: 'Little finger' },
+  Mars:    { stone: 'Red Coral (Moonga)',        metal: 'Gold',   finger: 'Ring finger' },
+  Mercury: { stone: 'Emerald (Panna)',           metal: 'Gold',   finger: 'Little finger' },
+  Jupiter: { stone: 'Yellow Sapphire (Pukhraj)', metal: 'Gold',   finger: 'Index finger' },
+  Venus:   { stone: 'Diamond (Heera)',           metal: 'Gold',   finger: 'Middle finger' },
+  Saturn:  { stone: 'Blue Sapphire (Neelam)',    metal: 'Silver', finger: 'Middle finger' },
+  Rahu:    { stone: 'Hessonite (Gomed)',         metal: 'Silver', finger: 'Middle finger' },
+  Ketu:    { stone: "Cat's Eye (Lehsunia)",      metal: 'Silver', finger: 'Little finger' },
+};
+
 // ─── Map VM remedy object to frontend template format ───────────────────────
 function buildTemplateFromVMRemedies(vmRemediesObj: any): any {
   const vmRemedies: any[] = vmRemediesObj?.remedies ?? [];
@@ -55,6 +70,9 @@ function buildTemplateFromVMRemedies(vmRemediesObj: any): any {
     remedyPlan: {
       remedies: vmRemedies.map((r: any) => {
         const base = { type: r.type, planet: r.planet ?? 'Mars' };
+        // v1.7 (1 Oct 2026) — BPHS 84 ke granth-upay (VM remedy_master v2.0, system "Granth"):
+        // koi pakka mantra/daan NAHI chipkaana — seedha granth ka text, hawale ke saath.
+        if (r.system === 'Granth') return { ...base, granth: true, srot: r.srot, text: r.detail };
         if (r.type === 'mantra') {
           return { ...base, mantra: 'ॐ अंगारकाय नमः', count: '108', time: 'मंगलवार सुबह', special: r.detail };
         }
@@ -65,7 +83,7 @@ function buildTemplateFromVMRemedies(vmRemediesObj: any): any {
           return { ...base, name: 'मंगलवार व्रत', day: 'Tuesday', deity: 'Hanuman ji', prasad: 'Red lentils, jaggery, red flowers' };
         }
         if (r.type === 'gemstone') {
-          return { ...base, lagna_stone: { stone: 'Red Coral (Moonga)', metal: 'Gold', finger: 'Ring finger', for: r.detail } };
+          return { ...base, lagna_stone: { ...(STONE[r.planet] ?? STONE.Mars), for: r.detail } };
         }
         return { ...base, text: r.detail };
       }),
@@ -157,6 +175,7 @@ export async function POST(req: NextRequest) {
         manglikHousesAffected: manglikData?.manglik_houses_affected || [1, 2, 4, 7, 8, 12],
       },
       template: templateData,
+      granthUpay: buildGranthUpay(null, 'Mars'),   // v1.7 — components/calculators/GranthUpayBox
     }, { status: 200 });
 
   } catch (err: any) {

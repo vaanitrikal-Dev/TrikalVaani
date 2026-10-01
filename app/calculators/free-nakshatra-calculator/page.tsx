@@ -2,7 +2,7 @@
 
 // ============================================================
 // File: app/calculators/free-nakshatra-calculator/page.tsx
-// Version: v4.0 — Free Nakshatra Calculator (Radar E3 content build)
+// Version: 4.1 (1 Oct 2026 — "📜 Granth ke Upay — BPHS 84" dabba (components/calculators/GranthUpayBox); upay heading "(Parashar)" -> "(Parampara)") — Free Nakshatra Calculator (Radar E3 content build)
 // VM structure: grahas[Moon].nakshatra, .pada, .nakshatra_lord
 // Janma Nakshatra = Moon's nakshatra per Parashar BPHS
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
@@ -59,6 +59,7 @@
 // ============================================================
 
 import { useState, useRef, useEffect, useCallback } from 'react';
+import GranthUpayBox from '@/components/calculators/GranthUpayBox';   // v-next 1 Oct 2026 — BPHS 84
 import Link from 'next/link';
 import SiteNav from '@/components/layout/SiteNav';
 import { buildCalcJsonLd } from '@/lib/seo/calcJsonLd';
@@ -798,12 +799,13 @@ export default function FreeNakshatraCalculatorPage() {
               {/* REMEDIES */}
               {(mantra || ratna || daan) && (
                 <div className="rounded-2xl p-5 md:p-7" style={{ background: 'rgba(212,175,55,0.06)', border: `1px solid ${GOLD_RGBA(0.25)}` }}>
-                  <h3 className="text-xl font-serif font-bold mb-5" style={{ color: GOLD }}>🪔 Your 3 Free Remedies (Parashar)</h3>
+                  <h3 className="text-xl font-serif font-bold mb-5" style={{ color: GOLD }}>🪔 Your 3 Free Remedies (Parampara)</h3>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     {mantra && <Remedy icon="🔱" title="Mantra" content={typeof mantra === 'string' ? mantra : JSON.stringify(mantra)} />}
                     {ratna && <Remedy icon="💎" title="Ratna" content={typeof ratna === 'string' ? ratna : JSON.stringify(ratna)} />}
                     {daan && <Remedy icon="🙏" title="Daan" content={typeof daan === 'string' ? daan : JSON.stringify(daan)} />}
                   </div>
+                  <GranthUpayBox data={result?.granthUpay} />
                 </div>
               )}
 

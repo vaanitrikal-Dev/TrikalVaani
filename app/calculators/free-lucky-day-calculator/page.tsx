@@ -2,7 +2,7 @@
 
 // ============================================================
 // File: app/calculators/free-lucky-day-calculator/page.tsx
-// Version: v2.0 (05 Sep 2026) — Free Lucky Day Calculator
+// Version: 2.1 (1 Oct 2026 — "📜 Granth ke Upay — BPHS 84" dabba (components/calculators/GranthUpayBox); upay heading "(Parashar)" -> "(Parampara)") (05 Sep 2026) — Free Lucky Day Calculator
 // API: /api/calc/kundali (calcType: 'lucky-day')
 // Logic: strongest planet (Shadbala) → lucky day/color/number/metal/direction
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
@@ -20,6 +20,7 @@
 // ============================================================
 
 import { useState, useRef, useEffect, useCallback } from 'react';
+import GranthUpayBox from '@/components/calculators/GranthUpayBox';   // v-next 1 Oct 2026 — BPHS 84
 import Link from 'next/link';
 import SiteNav from '@/components/layout/SiteNav';
 import { buildCalcJsonLd } from '@/lib/seo/calcJsonLd';
@@ -1004,6 +1005,7 @@ export default function FreeLuckyDayCalculatorPage() {
                     {ratna && <Remedy icon="💎" title="Ratna" content={ratna} />}
                     {daan && <Remedy icon="🙏" title="Daan" content={daan} />}
                   </div>
+                  <GranthUpayBox data={result?.granthUpay} />
                 </div>
               )}
 
