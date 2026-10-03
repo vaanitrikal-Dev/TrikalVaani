@@ -2,7 +2,11 @@
 
 // ============================================================
 // File: app/calculators/free-pitra-dosh-calculator/page.tsx
-// Version: v2.0 — Free Pitra Dosh Calculator (Radar E3 content build)
+// Version: v2.1 (03 Oct 2026) — previous header: v2.0 — Free Pitra Dosh Calculator (Radar E3 content build)
+//   v2.1 (2026-10-03) — +2 H2 from DataForSEO volumes (Trikaal Keywords sheet 2-3 Oct 2026):
+//   पितृ दोष कब खत्म होता है 1.3K, pitra dosh ke upay 3.6K (Hinglish). '14 types' skipped:
+//   already answered honestly in 'prakar'.
+//   Remedies in editorial ruling #4 format. Form/API/result rendering unchanged.
 // API: /api/calc/doshas (VM /doshas — birth-chart dosha engine)
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
 // Changelog:
@@ -429,6 +433,22 @@ const PILLAR: PillarSection[] = [
       '**सामग्री:** एक ताँबे या पीतल का पात्र, शुद्ध जल, काले तिल, कुश (यदि उपलब्ध हो), सफेद फूल, और एक दीपक। बस इतना। कोई महँगी सामग्री शास्त्र में अनिवार्य नहीं बताई गई।',
       '**विधि:** प्रातः स्नान के बाद, **दक्षिण दिशा** की ओर मुख करके बैठिए। जनेऊ हो तो उसे दाहिने कंधे पर करिए (अपसव्य)। पात्र में जल लेकर काले तिल मिलाइए। दोनों हाथों की **अनामिका और अंगूठे के बीच** से, हथेली के पितृ-तीर्थ भाग से जल गिराते हुए पितृ गायत्री का जप कीजिए और अपने ज्ञात पूर्वजों के नाम लेकर तर्पण अर्पित कीजिए। अंत में दीपक जलाकर पाँच मिनट मौन बैठिए।',
       '**कब:** हर अमावस्या को, और पितृ पक्ष के पंद्रह दिन प्रतिदिन। **कौन कर सकता है:** कोई भी — पुत्र, पुत्री, पत्नी या पौत्र; इस पर [स्त्री पितृ दोष](/blog/stri-pitra-dosh-hindi) में शास्त्रीय संदर्भ दिए हैं। पूरी विस्तृत विधि चित्रण सहित [अमावस्या तर्पण विधि](/blog/amavasya-tarpan-remedies-hindi) में है, और इस वर्ष की श्राद्ध तिथियाँ [पितृ पक्ष 2026](/blog/pitru-paksha-2026-hindi) में। अमावस्या की सही तारीख हर महीने [पंचांग](/panchang) पर अपडेट होती रहती है।',
+    ],
+  },
+  {
+    id: "kab-khatam",
+    h2: "पितृ दोष कब खत्म होता है?",
+    paras: [
+      "सीधा उत्तर दो हिस्सों में। **कुंडली का योग खत्म नहीं होता** — सूर्य, राहु या नवम भाव की स्थिति जन्म से तय है, और कोई पूजा उसे मिटा नहीं सकती। पर **उसका असर शांत होता है, और प्रायः होता है**: लगातार किए गए तर्पण और श्राद्ध से, और तब जब पीड़ा देने वाले ग्रह की दशा बीत जाती है।",
+      "इसलिए सही प्रश्न \"कब खत्म होगा\" से ज़्यादा \"असर कब हल्का होगा\" है — और उसका सबसे भरोसेमंद संकेत चल रही दशा है, जो [मुफ़्त दशा कैलकुलेटर](/calculators/free-dasha-calculator) बताता है। उपाय वहीं से शुरू होता है: **क्या:** अमावस्या को काले तिल मिले जल से तर्पण। **कब:** हर अमावस्या, सुबह। **कितने का:** ₹10–20। **कितने दिन:** 12 अमावस्या (एक वर्ष)। **आपके लिए क्यों:** पितृ दोष पूर्वजों से जुड़ा है और तर्पण उसका सीधा शास्त्रीय उपाय है।",
+    ],
+  },
+  {
+    id: "pitra-dosh-ke-upay",
+    h2: "Pitra Dosh Ke Upay — Saral, Muft Aur Ghar Par",
+    paras: [
+      "Do upay, paanch hisson mein. **Kya:** kauve aur kutte ko roti dena. **Kab:** roz ya kam se kam Shanivar aur Amavasya ko. **Kharch:** ₹10–20. **Kitne din:** 40 din lagatar. **Aapke liye kyun:** parampara mein kauva pitron ka doot maana gaya hai, aur yeh upay itna saral hai ki niyamit chal sakta hai.",
+      "**Kya:** Pitru Paksha mein ek din kisi bhookhe ko bhojan, apne pitron ke naam se. **Kab:** Pitru Paksha ki tithi par (pata na ho to Sarva Pitru Amavasya). **Kharch:** ₹100–200. **Kitne din:** har saal ek baar. **Aapke liye kyun:** shraddh ka mool bhaav annadaan hai, mehnga anushthan nahi. Poori soochi [सबसे अच्छे पितृ दोष उपाय](/blog/best-pitra-dosh-remedies-hindi) mein hai.",
     ],
   },
 ];

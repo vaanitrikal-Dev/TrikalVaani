@@ -2,10 +2,21 @@
 
 // ============================================================
 // File: app/calculators/free-numerology-calculator/page.tsx
-// Version: v2.0 (05 Sep 2026) — Free Numerology Calculator (Mulank / Bhagyank / Naamank)
+// Version: v2.1 (03 Oct 2026) — Free Numerology Calculator (Mulank / Bhagyank / Naamank)
 // NO VM, NO API — pure client-side date/name math (Cheiro / Vedic numerology)
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
 // Changelog:
+//   v2.1 (2026-10-03) — +5 H2 sections from DataForSEO volumes (weekly Trikaal
+//        Keywords sheet, 2-3 Oct 2026): "numerology calculator by name" 165K,
+//        "lucky name numerology calculator" 8.1K, "lucky number by date of
+//        birth" 5.4K (x5 variants) + "numerology birth date 1 to 9",
+//        "मूलांक कैसे निकाले" 1.3K + "मूलांक और भाग्यांक कैसे निकाले",
+//        "mulank 2 ki shadi kab hogi". Only 5, not 10: every other numerology
+//        term in the sheet is already an H2 here (chart, best calculator, free,
+//        by DOB, birth time) or a competitor brand. Worked examples verified
+//        against the page's own CHALDEAN table and reduceToSingle().
+//        Three same-page anchor links (#do-site-alag, #lucky-number,
+//        #naam-badalna). FORM, NUM_DATA, maths, JSON-LD unchanged.
 //   v2.0 (2026-09-05) — Keyword-driven content build from Radar E3 PASF.
 //        ~700 -> ~5,200 words, 3 H2 -> 36, TOC added, FAQs 8 -> 15,
 //        new layout.tsx title. The form, NUM_DATA, the number-to-planet
@@ -155,6 +166,23 @@ const FAQS = [
 type NmSection = { id: string; h2: string; paras: string[] };
 
 const SECTIONS: NmSection[] = [
+  {
+    id: "numerology-by-name",
+    h2: "Numerology Calculator by Name — How Your Name Number Is Worked Out",
+    paras: [
+      "Type your name in the box above and the calculator gives your **naamank (name number)** using the **Chaldean** system, the one most used in Indian numerology. Each letter carries a fixed value: **A, I, J, Q, Y = 1 · B, K, R = 2 · C, G, L, S = 3 · D, M, T = 4 · E, H, N, X = 5 · U, V, W = 6 · O, Z = 7 · F, P = 8**. There is no 9 — Chaldean treats it as sacred and leaves it out.",
+      "A worked example: **RAHUL** = 2 + 1 + 5 + 6 + 3 = 17, then 1 + 7 = **8**. **PRIYA SHARMA** = 13 + 16 = 29, then 2 + 9 = 11, then 1 + 1 = **2**. Two practical points: the calculator reads **English letters only**, so type a Hindi name in Roman script (प्रिया → Priya); and the name you use decides the result — the name people actually call you and your full name on paper will usually give different numbers. That is normal, not an error, as explained in [why sites show different naamank](#do-site-alag).",
+      "Add your date of birth and you get all three numbers together — mulank, bhagyank and naamank — which is what \"numerology calculator by name and date of birth\" searches are really asking for.",
+    ],
+  },
+  {
+    id: "lucky-number-by-dob",
+    h2: "Lucky Number by Date of Birth — Birth Dates 1 to 31 and Their Mulank",
+    paras: [
+      "In Indian numerology your **lucky numbers are the birth dates that reduce to your mulank**. So the table is short and fixed: **Mulank 1** — 1, 10, 19, 28. **Mulank 2** — 2, 11, 20, 29. **Mulank 3** — 3, 12, 21, 30. **Mulank 4** — 4, 13, 22, 31. **Mulank 5** — 5, 14, 23. **Mulank 6** — 6, 15, 24. **Mulank 7** — 7, 16, 25. **Mulank 8** — 8, 17, 26. **Mulank 9** — 9, 18, 27.",
+      "Read it either way: born on the 23rd, your mulank is 5 and your lucky numbers are 5, 14 and 23. The result card above also gives the lucky colours and days tied to that number's planet. How much weight to give them is covered honestly in [Lucky number — kitna maanein](#lucky-number): they are a small traditional aid, not a solution, and nothing needs to be bought on their basis.",
+    ],
+  },
   {
     id: 'kaise-kaam',
     h2: 'Numerology Calculator — kaam kaise karta hai',
@@ -504,6 +532,30 @@ const SECTIONS: NmSection[] = [
       'Agar aapko **shubh din** ke prashn mein ruchi hai to [Lucky Day Calculator](/calculators/free-lucky-day-calculator) uske liye alag bana hai aur free hai.',
       'Agar aap **jyotish** ki taraf jaana chahte hain — jo isse gehra uttar deta hai — to [Kundali Calculator](/calculators/free-janam-kundali-calculator) se shuru kijiye, apni Chandra rashi [Rashi Calculator](/calculators/free-rashi-calculator) se dekhiye, aur nakshatra [Nakshatra Calculator](/calculators/free-nakshatra-calculator) se.',
       'Aur agar prashn kisi khaas kshetra ka hai — kaunsa graha kamzor hai [Weak Planet Finder](/calculators/free-weak-planet-finder), kundali kitni mazboot hai [Kundali Strength Calculator](/calculators/free-kundali-strength-calculator), ya kaunsi dasha chal rahi hai [Dasha Calculator](/calculators/free-dasha-calculator) — sab free hain. Sidhant ke liye [Planets in Astrology](/learn/planets-in-astrology).',
+    ],
+  },
+  {
+    id: "lucky-name",
+    h2: "Lucky Name Numerology Calculator — What a \"Lucky Name\" Really Means",
+    paras: [
+      "A \"lucky name\" in numerology simply means a name whose naamank is **friendly to your mulank** — the same friendship the result card checks when it compares your numbers. The traditional friendly sets used here: **1 with 1, 2, 3, 9 · 2 with 1, 2, 4, 7 · 3 with 3, 6, 9 · 4 with 1, 5, 7, 8 · 5 with 1, 3, 5, 6, 9 · 6 with 3, 6, 9 · 7 with 1, 2, 4, 7 · 8 with 4, 5, 8 · 9 with 3, 6, 9**.",
+      "What a lucky name does not do: it does not change your mulank or bhagyank, because those come from your birth date. If you like the idea of a spelling that matches, that is your choice and costs nothing — type the variants into the box and compare. Paying for a \"lucky name\" service is not something this page recommends, for the reasons in [Naam badal kar bhagya badalna](#naam-badalna). For a newborn, the nakshatra-based first letter is the stronger tradition — [Baby Name by Nakshatra](/calculators/free-baby-name-by-nakshatra).",
+    ],
+  },
+  {
+    id: "hindi-tarika",
+    h2: "मूलांक और भाग्यांक कैसे निकालें — एक उदाहरण से",
+    paras: [
+      "**मूलांक** सिर्फ़ जन्म की तारीख़ से बनता है, महीना और साल नहीं जुड़ते। तारीख़ 1 से 9 के बीच है तो वही मूलांक है; 10 से 31 के बीच है तो अंक जोड़ते जाइए जब तक एक अंक न बचे। उदाहरण — **14 नवंबर 1992**: तारीख़ 14, यानी 1 + 4 = **5**। मूलांक 5।",
+      "**भाग्यांक** पूरी जन्मतिथि के सारे अंक जोड़कर बनता है। उसी उदाहरण में: 1 + 4 + 1 + 1 + 1 + 9 + 9 + 2 = 28, फिर 2 + 8 = 10, फिर 1 + 0 = **1**। भाग्यांक 1। मूलांक रोज़मर्रा का स्वभाव दिखाता है, भाग्यांक जीवन की बड़ी दिशा — दोनों अलग हों तो यह आम है, दोष नहीं। ऊपर वाला कैलकुलेटर दोनों अंक तुरंत देता है, और नाम डालें तो नामांक भी।",
+    ],
+  },
+  {
+    id: "mulank-shadi",
+    h2: "Mulank Se Shadi Kab Hogi — Kya Numerology Bata Sakti Hai?",
+    paras: [
+      "Seedha jawab: **nahi.** \"Mulank 2 ki shadi kab hogi\" jaise sawaal bahut khoje jaate hain, par numerology mein samay ki koi ganana hai hi nahi — sirf sthir ank hain. Ek hi tareekh ko paida hue sab logon ka mulank ek hota hai, aur unki shadi ek saath nahi hoti.",
+      "Shadi ke samay ka uttar jyotish deta hai — 7th bhaav, uska swami, Shukra aur chal rahi dasha se. Uske liye free [Shadi Kab Hogi Calculator](/calculators/free-shadi-kab-hogi-calculator) hai, aur rishta pakka karne se pehle milan ke liye [Kundali Milan](/kundali-milan).",
     ],
   },
 ];

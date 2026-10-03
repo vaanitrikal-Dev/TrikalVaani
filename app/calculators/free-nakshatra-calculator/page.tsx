@@ -2,7 +2,12 @@
 
 // ============================================================
 // File: app/calculators/free-nakshatra-calculator/page.tsx
-// Version: 4.1 (1 Oct 2026 — "📜 Granth ke Upay — BPHS 84" dabba (components/calculators/GranthUpayBox); upay heading "(Parashar)" -> "(Parampara)") — Free Nakshatra Calculator (Radar E3 content build)
+// Version: 4.2 (03 Oct 2026) — previous header: 4.1 (1 Oct 2026 — "📜 Granth ke Upay — BPHS 84" dabba (components/calculators/GranthUpayBox
+//   4.2 (2026-10-03) — +2 H2 from DataForSEO volumes (Trikaal Keywords sheet 2-3 Oct 2026):
+//   what is my nakshatra by date of birth 2.9K + rasi nakshatra calculator by DOB 2.9K,
+//   आज का पंचांग तिथि वार नक्षत्र 27.1K (disambiguation, links /panchang). Rohini (18.1K) and
+//   Uttara Bhadrapada (6.6K) linked to their own /blog pages, not given H2s here.
+//   Remedies in editorial ruling #4 format. Form/API/result rendering unchanged.
 // VM structure: grahas[Moon].nakshatra, .pada, .nakshatra_lord
 // Janma Nakshatra = Moon's nakshatra per Parashar BPHS
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
@@ -304,6 +309,14 @@ type PillarSection = { id: string; h2: string; paras: string[] };
 
 const PILLAR: PillarSection[] = [
   {
+    id: "my-nakshatra-dob",
+    h2: "What Is My Nakshatra by Date of Birth? — Rasi and Nakshatra Together",
+    paras: [
+      "Your nakshatra is the **one of 27 star segments the Moon occupied at the moment you were born**, and your rasi (Moon sign) is the sign that segment sits in. The calculator above finds both from your date, exact time and place of birth, along with the **pada** (quarter) and the naming syllable. Because the Moon moves through a nakshatra in roughly a day, the birth time matters — a few hours can change the answer.",
+      "Each nakshatra also has its own page on this site with its nature, career and marriage themes — for example [Rohini Nakshatra](/blog/rohini-nakshatra) and [Uttara Bhadrapada Nakshatra](/blog/uttara-bhadrapada-nakshatra). For the full list with Tamil and Malayalam names, see the [27-nakshatra table](#27-nakshatra-list) on this page.",
+    ],
+  },
+  {
     id: 'naam-aur-rashi',
     h2: 'जन्म तारीख से नाम और राशि — ऑनलाइन कैसे निकालें',
     paras: [
@@ -389,6 +402,14 @@ const PILLAR: PillarSection[] = [
       'The master table above lists all 27 nakshatras with their **Tamil and Malayalam names**, so this page works as a finder in either language. Find your nakshatra in whichever column you know it by, and read across for the rest — including the Namakaran syllables and the ruling planet.',
       'Two things are genuinely different in South Indian practice and worth stating rather than glossing over. First, the **naming convention**: in Tamil Nadu and Kerala the birth star is used far more actively in daily life than in the North — birthdays are often celebrated on the **nakshatra day** each month rather than the calendar date, and the star is quoted in matrimonial listings as a matter of course. Second, **the same nakshatra carries different regional spellings**, and sometimes noticeably different ones — Ashlesha is Ayilyam, Jyeshtha is Kettai in Tamil and Thrikketta in Malayalam.',
       'One point of caution, offered plainly: **transliteration varies by region, by almanac and by family tradition.** The spellings in the table are the most widely used forms, not the only correct ones. If your local panchangam spells it differently, that is a spelling difference and not a different nakshatra — the underlying calculation is identical everywhere, because the Moon does not care which script you write it in.',
+    ],
+  },
+  {
+    id: "aaj-ka-nakshatra",
+    h2: "आज का नक्षत्र कैसे जानें — पंचांग और जन्म नक्षत्र का फ़र्क",
+    paras: [
+      "\"आज का नक्षत्र\" और \"जन्म नक्षत्र\" दो अलग चीज़ें हैं। **आज का नक्षत्र** रोज़ बदलता है — चंद्रमा लगभग एक दिन में एक नक्षत्र पार करता है — और यह तिथि, वार, योग और करण के साथ **पंचांग** का हिस्सा है, जो मुहूर्त के लिए देखा जाता है। आज की तिथि, वार और नक्षत्र [आज का पंचांग](/panchang) पर मिलते हैं।",
+      "**जन्म नक्षत्र** जीवन भर एक रहता है — जन्म के क्षण में चंद्रमा जिस नक्षत्र में था। नामकरण, दशा और विवाह-मिलान इसी से होते हैं, और यही ऊपर वाला कैलकुलेटर निकालता है।",
     ],
   },
 ];

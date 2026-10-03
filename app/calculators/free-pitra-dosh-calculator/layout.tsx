@@ -1,14 +1,16 @@
 // ============================================================
 // File: app/calculators/free-pitra-dosh-calculator/layout.tsx
-// Version: v1.0 — metadata only
+// Version: v1.1 (03 Oct 2026) — metadata only. Previous: v1.0 — metadata only
+//   v1.1 (2026-10-03) — title + description rewritten for CTR (keyword first, 50-58 / 140-155).
+//        Old title: "Free Pitra Dosh Calculator — Causes & Upay".
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
 // ============================================================
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: { absolute: 'Free Pitra Dosh Calculator — Causes & Upay' },
+  title: { absolute: 'Pitra Dosh Calculator — Free Check, Lakshan & Upay' },
   description:
-    'Free Pitra Dosh Calculator powered by Swiss Ephemeris. Check if you have Pitra Dosh (Sun / 9th house affliction by Rahu, Ketu or Saturn), its causes & signs, and free Pitru-Tarpan remedies. By Rohiit Gupta.',
+    "Free Pitra Dosh calculator: checks Sun and 9th house affliction by Rahu, Ketu or Saturn, shows severity, and gives simple tarpan remedies. Check now.",
   keywords: [
     'pitra dosh calculator',
     'pitru dosh calculator',

@@ -2,7 +2,13 @@
 
 // ============================================================
 // File: app/calculators/free-gemstone-calculator/page.tsx
-// Version: v2.1 — 📖 GRANTH SE dabba + LAGNA-SWAMI KA SUJHAV PARASHAR SE (BPHS Ch.34) — 21 Sep 2026
+// Version: v2.2 (03 Oct 2026) — previous header: v2.1 — 📖 GRANTH SE dabba + LAGNA-SWAMI KA SUJHAV PARASHAR SE (BPHS Ch.34) — 21 Sep 2026
+//   v2.2 (2026-10-03) — +3 H2 from DataForSEO volumes (Trikaal Keywords sheet 2-3 Oct 2026):
+//   pukhraj/panna/gomed/neelam/moonga benefits 0.9-2.4K each (hub summary linking each
+//   should-i-wear page — no duplication), रत्न किस उंगली 0.9-1K, रत्न price 1K x3 (factors only,
+//   no price numbers). Finger table matches lib/jyotish/gemstone.ts; Lehsunia left out because
+//   that file says Ring finger while FocusedStonePage says मध्यमा.
+//   Remedies in editorial ruling #4 format. Form/API/result rendering unchanged.
 //   Pehle har lagna ko lagna-swami ka ratna 'sabse mukhya' bataya jaata tha — Vrishabh ko Heera (granth: PAAP).
 // PICHHLA: v2.0 — Free Gemstone (Ratna) Calculator (Radar E3 content build)
 // API: /api/calc/kundali (calcType: 'gemstone') — already live
@@ -457,6 +463,30 @@ const PILLAR: PillarSection[] = [
       'The honest answer is the one nobody selling stones will give you: **there is no universally lucky gemstone.** A stone is lucky for you only if the planet it strengthens is a benefic for your ascendant. The same stone that transforms one person\'s year can quietly work against the next person\'s, and both outcomes are consistent with the same classical rules.',
       'That said, two stones are **most often** recommended, and the reason is structural rather than mystical. **Pukhraj (Yellow Sapphire)** carries Jupiter, and Jupiter is the natural benefic of the chart — it also has the widest safety margin, which is why it is suggested more than any other stone. **Moti (Pearl)** carries the Moon, and the Moon rules the mind; a pearl is the gentlest of the nine and is very rarely harmful. If someone insists on a "generally safe" answer, those two are it — but generally safe is not the same as right for you.',
       'And the corollary, which matters more: **three stones are the least universally safe** — [Neelam](/blog/neelam-blue-sapphire-benefits-side-effects-hindi) (Saturn), [Gomed](/blog/gomed-hessonite-benefits-side-effects-hindi) (Rahu) and [Lehsunia](/blog/lehsunia-cats-eye-benefits-side-effects-hindi) (Ketu). Neelam in particular is famous for acting fast in both directions, which is exactly why classical practice demands a three-day trial before permanent wear. Never buy one on a shop\'s recommendation. Run the [suitability check](/calculators/free-gemstone-suitability-calculator) first, then trial it, then decide.',
+    ],
+  },
+  {
+    id: "ratna-fayde-nuksan",
+    h2: "रत्नों के फ़ायदे और नुकसान — पुखराज, पन्ना, गोमेद, नीलम, मूंगा",
+    paras: [
+      "हर रत्न अपने ग्रह को **बल देता है** — फ़ायदा भी इसी से है और नुकसान भी। **पुखराज** (गुरु) — ज्ञान, संतान और विवाह के कारक को बल। **पन्ना** (बुध) — बुद्धि, वाणी और व्यापार। **मूंगा** (मंगल) — साहस, ऊर्जा और भूमि। **मोती** (चंद्र) — मन की स्थिरता। **माणिक्य** (सूर्य) — आत्मविश्वास और पद। **नीलम** (शनि) और **गोमेद** (राहु) — सबसे तेज़ असर और सबसे ज़्यादा जोखिम वाले, इसलिए इन दोनों को बिना जाँच के कभी न पहनें।",
+      "नुकसान तब होता है जब ग्रह आपके लग्न के लिए अशुभ हो — तब रत्न उसकी अशुभता भी बढ़ा देता है। इसीलिए **रत्न पहला उपाय नहीं है**; पहले जाँच, फिर निर्णय। हर रत्न की अलग जाँच मुफ़्त है: [पुखराज](/calculators/free-should-i-wear-pukhraj), [पन्ना](/calculators/free-should-i-wear-panna), [गोमेद](/calculators/free-should-i-wear-gomed), [नीलम](/calculators/free-should-i-wear-neelam), [मूंगा](/calculators/free-should-i-wear-moonga), [मोती](/calculators/free-should-i-wear-moti), [माणिक्य](/calculators/free-should-i-wear-manik)।",
+    ],
+  },
+  {
+    id: "ratna-ungli",
+    h2: "रत्न किस उंगली में पहनें — पूरी तालिका",
+    paras: [
+      "प्रचलित परंपरा, जो इस साइट के कैलकुलेटर भी देते हैं: **पुखराज** — तर्जनी (पहली उंगली)। **माणिक्य** और **मूंगा** — अनामिका (तीसरी)। **पन्ना** और **मोती** — कनिष्ठा (छोटी उंगली)। **नीलम**, **गोमेद** और **हीरा** — मध्यमा (बीच की)। लहसुनिया के लिए परंपराएँ अलग-अलग उंगली बताती हैं, इसलिए उसे केवल जाँच के बाद ही चुनें।",
+      "उंगली के साथ धातु और दिन भी तय होते हैं — जैसे पुखराज सोने में गुरुवार सुबह, नीलम चाँदी या पंचधातु में शनिवार शाम। आपका रत्न जो भी निकले, ऊपर के परिणाम में उसकी उंगली, धातु, दिन और मंत्र साथ में दिखते हैं।",
+    ],
+  },
+  {
+    id: "ratna-keemat",
+    h2: "रत्न की क़ीमत कैसे तय होती है — पुखराज, गोमेद, मूंगा price",
+    paras: [
+      "रत्न की क़ीमत का कोई एक तय भाव नहीं होता, इसलिए यहाँ कोई संख्या नहीं दी जा रही — जो भी साइट एक भाव बताए, वह अंदाज़ा है। क़ीमत चार बातों से तय होती है: **वज़न** (कैरेट या रत्ती), **खदान/मूल स्थान**, **रंग और साफ़ी**, और **उपचार** (heated या treated रत्न बहुत सस्ते होते हैं)।",
+      "दो बातें जो सबसे ज़्यादा पैसा बचाती हैं: बिना **प्रमाणित लैब सर्टिफ़िकेट** के महँगा रत्न न ख़रीदें, और ख़रीदने से पहले यह पक्का करें कि रत्न आपके लिए उपयुक्त भी है — ग़लत रत्न पर पैसा भी जाता है और असर भी उल्टा पड़ सकता है। जाँच के लिए [रत्न उपयुक्तता कैलकुलेटर](/calculators/free-gemstone-suitability-calculator) मुफ़्त है।",
     ],
   },
 ];

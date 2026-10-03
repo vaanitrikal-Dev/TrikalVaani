@@ -1,7 +1,13 @@
 // ============================================================
 // File: app/calculators/free-janam-kundali-calculator/page.tsx
 // Purpose: Free AI Kundli Calculator — SEO/GEO/AEO/E-E-A-T page
-// Version: v2.0 (05 Sep 2026) — calculator + full keyword-driven content
+// Version: v3.1 (03 Oct 2026) — previous header: v2.0 (05 Sep 2026) — calculator + full keyword-driven content
+//   v3.1 (2026-10-03) — +3 H2 from DataForSEO volumes (Trikaal Keywords sheet 2-3 Oct 2026):
+//   on line kundali 49.5K, free online kundali / kundali maker 40.5K, मेरा जन्म कुंडली बताओ 14.8K,
+//   janam kundali by date of birth and time in hindi 9.9K. Feature claims limited to what the
+//   free BirthForm tier returns (header v3.0 note): North Indian chart, 9 planets with
+//   rashi/house/nakshatra/dignity/Shadbala, running dasha.
+//   Remedies in editorial ruling #4 format. Form/API/result rendering unchanged.
 // Changelog v3.0 (2026-09-08): the real reading form now lives on this page.
 //   KundaliCalculatorClient — which only rendered a "Trikaal Ka Sandesh — 51"
 //   banner linking away to the homepage — is REMOVED. In its place sits
@@ -176,6 +182,30 @@ const jsonLd = buildCalcJsonLd({
 type KcSection = { id: string; h2: string; paras: string[] };
 
 const SECTIONS: KcSection[] = [
+  {
+    id: "online-kundali-maker",
+    h2: "Online Kundali Maker — Free Kundli by Date, Time and Place",
+    paras: [
+      "This page is a free **online kundali maker**: enter your date of birth, exact time and place, and the free tier returns your birth chart — the **North Indian chart**, all nine planets with their **rashi, house, nakshatra, dignity and strength (Shadbala)**, and the **dasha running now**. No payment is needed for the chart itself.",
+      "The chart is calculated with Swiss Ephemeris and Lahiri ayanamsa, the standard used in Indian astrology, so the planetary positions match any serious software to the minute. What separates a good kundali maker from a weak one is not the drawing but the inputs: a birth time off by 15 minutes can change the Lagna, so take the time from a birth certificate or hospital record if you can. Once the chart is ready, [Kundli check online](#kundli-check-online) on this page explains the five things to look at first.",
+    ],
+  },
+  {
+    id: "mera-janam-kundali",
+    h2: "मेरा जन्म कुंडली बताओ — अपनी कुंडली कैसे देखें",
+    paras: [
+      "अपनी जन्म कुंडली देखने के लिए तीन चीज़ें चाहिए: **जन्म तिथि, सटीक जन्म समय और जन्म स्थान।** ऊपर वाले फ़ॉर्म में ये तीनों डालिए — मुफ़्त स्तर पर ही आपकी कुंडली मिल जाती है — उत्तर भारतीय चार्ट, नौ ग्रहों की राशि, भाव, नक्षत्र और बल, और अभी चल रही दशा।",
+      "कुंडली बन जाने के बाद पढ़ने का सही क्रम है: पहले **लग्न** (पहला भाव) और उसका स्वामी, फिर **चंद्र राशि** और नक्षत्र, फिर **चल रही महादशा**। इसी क्रम की पूरी विधि [कुंडली कैसे देखें](#kundali-kaise-dekhe) वाले हिस्से में है। और ध्यान रहे — नाम से कुंडली नहीं बनती; जन्म का समय ही असली आधार है।",
+    ],
+  },
+  {
+    id: "dob-time-hindi",
+    h2: "Janam Kundali by Date of Birth and Time in Hindi",
+    paras: [
+      "Janam kundali **date of birth aur time** se banti hai — dono zaroori hain. Tareekh se grah kis rashi mein the yeh pata chalta hai, aur samay se **lagna** aur 12 bhaav bante hain. Lagna lagbhag har do ghante mein badal jaata hai, isliye bina samay ke kundali adhoori rehti hai — usme grah to sahi honge, par bhaav nahi.",
+      "Is page par kundali **Hindi aur Hinglish** dono mein padhi ja sakti hai, aur grahon ke naam Bharatiya roop mein hi aate hain. Bhasha se ganana nahi badalti — wahi Swiss Ephemeris, wahi Lahiri ayanamsa. Samay bilkul nahi pata to [Janm samay nahi pata](#janm-samay-nahi) wala hissa padhiye; wahan bataya hai ki kya ban sakta hai aur kya nahi.",
+    ],
+  },
   {
     id: 'kundali-kaise-banaye',
     h2: 'Janam Kundali kaise banaye — teen cheezein chahiye',

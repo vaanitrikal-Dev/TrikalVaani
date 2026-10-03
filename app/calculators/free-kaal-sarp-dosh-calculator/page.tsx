@@ -2,7 +2,11 @@
 
 // ============================================================
 // File: app/calculators/free-kaal-sarp-dosh-calculator/page.tsx
-// Version: v2.0 — Free Kaal Sarp Dosh Calculator (Radar E3 content build)
+// Version: v2.1 (03 Oct 2026) — previous header: v2.0 — Free Kaal Sarp Dosh Calculator (Radar E3 content build)
+//   v2.1 (2026-10-03) — +2 H2 from DataForSEO volumes (Trikaal Keywords sheet 2-3 Oct 2026):
+//   kaal sarp dosh kya hota hai 5.4K (+ kyu hota hai 720), kaal sarp dosh remedies 720 +
+//   how to remove permanently 390. Puja-place keywords skipped: already answered in 'nivaran-kahan'.
+//   Remedies in editorial ruling #4 format. Form/API/result rendering unchanged.
 // API: /api/calc/doshas (VM /doshas — exact longitude arc logic)
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
 // Changelog:
@@ -263,6 +267,14 @@ type PillarSection = { id: string; h2: string; paras: string[] };
 
 const PILLAR: PillarSection[] = [
   {
+    id: "kya-hota-hai",
+    h2: "Kaal Sarp Dosh Kya Hota Hai — Aur Kyun Banta Hai",
+    paras: [
+      "**Kaal Sarp dosh tab banta hai jab saaton grah — Surya, Chandra, Mangal, Budh, Guru, Shukra aur Shani — Rahu aur Ketu ke beech bane aksh ke ek hi taraf hon.** Rahu aur Ketu hamesha ek doosre se 180° par rehte hain, isliye aasmaan ko do hisson mein baant dete hain. Saare grah ek hi hisse mein aa jaayein to yeh yog banta hai. Rahu jis bhaav mein ho, usse iska prakar tay hota hai — Anant se Sheshnag tak 12 prakar.",
+      "\"Kyun banta hai\" ka shastriya uttar karmic hai, par vyavhaarik baat yeh hai ki **bahut si kundaliyon mein yeh yog bhang ke saath hota hai**, yaani janm se hi nishkriya. Isliye dar se pehle jaanch: upar wala calculator saaton grahon ki sateek degree dekhta hai, sirf rashi nahi — wahi galti jo zyadatar muft tools karte hain. Poori vidhi [कुंडली में कालसर्प दोष कैसे बनता है](#kaise-banta-hai) mein hai.",
+    ],
+  },
+  {
     id: 'sabse-khatarnak',
     h2: 'सबसे खतरनाक कौन सा कालसर्प दोष होता है?',
     paras: [
@@ -431,6 +443,14 @@ const PILLAR: PillarSection[] = [
       '**मुख्य मंत्र (महामृत्युंजय):** "ॐ त्र्यम्बकं यजामहे सुगन्धिं पुष्टिवर्धनम्। उर्वारुकमिव बन्धनान् मृत्योर्मुक्षीय मामृतात्॥" — यह कालसर्प शांति का सबसे प्रामाणिक मंत्र है, क्योंकि यह शिव से जुड़ा है और काल पर शिव का ही अधिकार माना गया है।',
       '**राहु बीज मंत्र:** "ॐ भ्रां भ्रीं भ्रौं सः राहवे नमः" और **केतु बीज मंत्र:** "ॐ स्रां स्रीं स्रौं सः केतवे नमः" — दोनों 108 बार। **सरल विकल्प**, यदि उच्चारण कठिन लगे: "ॐ नमः शिवाय" — यह भी पूर्णतः मान्य है और गलत उच्चारण के जोखिम से बचाता है।',
       '**विधि:** सोमवार या शनिवार से आरंभ, प्रातः स्नान के बाद, पूर्व या उत्तर दिशा की ओर मुख, रुद्राक्ष माला से 108 बार, लगातार **चालीस दिन**। संख्या से ज्यादा निरंतरता मायने रखती है। किस उपाय की क्या शास्त्रीय पृष्ठभूमि है और कौन सा किस प्रकार के लिए विशेष है, यह [काल सर्प दोष के उपाय](/blog/kaal-sarp-dosh-remedies-hindi) में विस्तार से है। सही मुहूर्त के लिए [पंचांग](/panchang) देख लीजिए, जो प्रतिदिन अपडेट होता है।',
+    ],
+  },
+  {
+    id: "remedies-english",
+    h2: "Kaal Sarp Dosh Remedies — English Summary",
+    paras: [
+      "First check whether the dosha is **cancelled** — many charts carry a classical cancellation, and then nothing needs to be done. If it is active, these two remedies, in the five-part standard. **What:** chant the Maha Mrityunjaya mantra 108 times (about 15 minutes). **When:** Monday morning. **Cost:** free. **How long:** 21 Mondays. **Why for you:** tradition ties the Rahu–Ketu axis to Lord Shiva, and this is the remedy the classical texts reach for first.",
+      "**What:** offer milk and water on a Shivling. **When:** Monday, and on Nag Panchami. **Cost:** ₹20–30. **How long:** 11 Mondays. **Why for you:** it is the simplest home form of Kaal Sarp shanti. A pilgrimage puja (Trimbakeshwar, Ujjain) is a valid option but not compulsory, and no ritual deletes a placement from your chart — what remedies reduce is its effect. More in [Kaal Sarp Dosh Remedies](/blog/kaal-sarp-dosh-remedies-hindi).",
     ],
   },
 ];

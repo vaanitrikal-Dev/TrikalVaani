@@ -1,6 +1,8 @@
 // ============================================================
 // File: app/calculators/free-janam-kundali-calculator/layout.tsx
-// Version: v2.0 (05 Sep 2026) — metadata only
+// Version: v2.1 (03 Oct 2026) — metadata only. Previous: v2.0 (05 Sep 2026) — metadata only
+//   v2.1 (2026-10-03) — title + description rewritten for CTR (keyword first, 50-58 / 140-155).
+//        Old title: "Janm Kundali Online — Free Kundli Banaye | Trikaal Vaani".
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
 //
 // WHY THIS FILE EXISTS
@@ -61,9 +63,9 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: { absolute: 'Janm Kundali Online — Free Kundli Banaye | Trikaal Vaani' },
+  title: { absolute: 'Free Online Kundali — Janam Kundli by Date of Birth' },
   description:
-    'Janm tithi, samay aur sthan se poori kundali — lagna, nau graha degree ke saath, baarah bhaav, nakshatra aur chal rahi dasha. Free, bina signup.',
+    "Free online kundali by date of birth, time and place: North Indian chart, nine planets with house, nakshatra and strength, and your running dasha.",
   keywords: [
     'free kundali calculator online',
     'janam kundali banaye free',

@@ -1,6 +1,8 @@
 // ============================================================
 // File: app/calculators/free-nakshatra-calculator/layout.tsx
-// Version: v2.2 — metadata only, clean passthrough
+// Version: v2.3 (03 Oct 2026) — metadata only. Previous: v2.2 — metadata only, clean passthrough
+//   v2.3 (2026-10-03) — title + description rewritten for CTR (keyword first, 50-58 / 140-155).
+//        Old title: "Free Nakshatra Calculator — Janma Nakshatra".
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
 // Changelog:
 //   v2.2 (2026-06-02) — Brand fix: visible brand normalised to the
@@ -10,9 +12,9 @@
 // ============================================================
 import type { Metadata } from 'next';
 export const metadata: Metadata = {
-  title: { absolute: 'Free Nakshatra Calculator — Janma Nakshatra' },
+  title: { absolute: 'Nakshatra Calculator by Date of Birth — Rasi & Pada' },
   description:
-    'Free Nakshatra Calculator powered by Swiss Ephemeris. Discover your Janma Nakshatra, Pada, ruling planet, deity, gana, yoni, nadi & 3 Parashar remedies instantly. By Rohiit Gupta, Chief Vedic Architect.',
+    "Find your nakshatra by date of birth: rasi, pada, naming syllable, ruling planet, gana and nadi \u2014 free, with Tamil and Malayalam names. Check now.",
   keywords: [
     'nakshatra calculator', 'free nakshatra calculator', 'janma nakshatra calculator',
     'birth star calculator', 'nakshatra finder', 'nakshatra by date of birth',

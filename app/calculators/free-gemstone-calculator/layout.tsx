@@ -1,14 +1,16 @@
 // ============================================================
 // File: app/calculators/free-gemstone-calculator/layout.tsx
-// Version: v1.0 — metadata only
+// Version: v1.1 (03 Oct 2026) — metadata only. Previous: v1.0 — metadata only
+//   v1.1 (2026-10-03) — title + description rewritten for CTR (keyword first, 50-58 / 140-155).
+//        Old title: "Free Gemstone Calculator — Lucky Ratna by DOB".
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
 // ============================================================
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: { absolute: 'Free Gemstone Calculator — Lucky Ratna by DOB' },
+  title: { absolute: 'Gemstone Calculator by Date of Birth — Free Ratna Check' },
   description:
-    'Free Gemstone (Ratna) Calculator powered by Swiss Ephemeris. Find your lucky life gemstone from your ascendant lord, plus the mahadasha stone — with metal, finger, day, mantra and safety caution. By Rohiit Gupta.',
+    "Free gemstone calculator by date of birth: your life stone from the ascendant lord, with metal, finger, day, mantra and a safety check before buying.",
   keywords: [
     'gemstone calculator',
     'lucky gemstone by date of birth',

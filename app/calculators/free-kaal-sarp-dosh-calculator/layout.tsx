@@ -1,14 +1,16 @@
 // ============================================================
 // File: app/calculators/free-kaal-sarp-dosh-calculator/layout.tsx
-// Version: v1.0 — metadata only
+// Version: v1.1 (03 Oct 2026) — metadata only. Previous: v1.0 — metadata only
+//   v1.1 (2026-10-03) — title + description rewritten for CTR (keyword first, 50-58 / 140-155).
+//        Old title: "Free Kaal Sarp Dosh Calculator — Type & Upay".
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
 // ============================================================
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: { absolute: 'Free Kaal Sarp Dosh Calculator — Type & Upay' },
+  title: { absolute: 'Kaal Sarp Dosh Calculator — Free Check, Type & Upay' },
   description:
-    'Free Kaal Sarp Dosh Calculator powered by Swiss Ephemeris. Check if you have Kaal Sarp Dosh using exact planetary longitudes, find its type (Anant to Sheshnag) by Rahu house, and get free Naag-puja remedies. By Rohiit Gupta.',
+    "Free Kaal Sarp Dosh calculator: checks all seven planets by exact degree and finds the type (Anant to Sheshnag) by Rahu's house, with safe home remedies.",
   keywords: [
     'kaal sarp dosh calculator',
     'kaal sarp dosh',

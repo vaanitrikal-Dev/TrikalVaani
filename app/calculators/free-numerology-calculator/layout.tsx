@@ -1,9 +1,16 @@
 // ============================================================
 // File: app/calculators/free-numerology-calculator/layout.tsx
-// Version: v2.0 (05 Sep 2026) — metadata only
+// Version: v2.1 (03 Oct 2026) — metadata only
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
 //
 // Changelog:
+//   v2.1 (2026-10-03) — <title> and description changed for CTR. DataForSEO
+//        volume (Trikaal Keywords sheet, 2-3 Oct 2026) shows "numerology
+//        calculator by name" at 165,000/month against "मूलांक कैसे निकाले" at
+//        1,300, so the main keyword now leads. New title (52 chars):
+//        "Numerology Calculator by Name & Date of Birth — Free". The "A NOTE
+//        THAT MUST SURVIVE" rule below is kept: nothing implies prediction or
+//        a paid name change. openGraph/twitter titles left as they were.
 //   v2.0 (2026-09-05) — Title rewritten and switched to title.absolute.
 //        The v1.0 title was 93 characters AND carried "| Trikaal Vaani"
 //        manually, while app/layout.tsx already sets
@@ -46,10 +53,12 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: { absolute: 'Mulank Kaise Nikale — Free Calculator | Trikaal Vaani' },
+  title: { absolute: 'Numerology Calculator by Name & Date of Birth — Free' },
   description:
-    'Mulank, bhagyank aur naamank — teeno janm tithi aur naam se, tarike ke saath taaki aap khud jaanch sakein. Free, bina signup, kuch becha nahi jaata.',
+    'Free numerology calculator by name and date of birth: mulank, bhagyank and naamank, with the method shown so you can check it by hand. No signup.',
   keywords: [
+    'numerology calculator by name',
+    'lucky number by date of birth',
     'mulank kaise nikale',
     'mulank kaise nikale calculator',
     'mera mulank kya hai',
