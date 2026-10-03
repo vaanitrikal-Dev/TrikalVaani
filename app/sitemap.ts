@@ -1,4 +1,13 @@
 /* ═══════════════════════════════════════════════════════════════════════════
+   v9.6 — 03 October 2026 — CODE_LASTMOD bumped for 9 calculators
+   The 9 calculator pages changed in commits cb8592c and 9da4fad (3 Oct 2026:
+   new keyword H2 sections + new titles) still carried their September dates
+   in CODE_LASTMOD, so the sitemap told Google nothing had changed. Set to
+   2026-10-03: janam-kundali, dasha, nakshatra, sade-sati, manglik-dosh,
+   kaal-sarp-dosh, pitra-dosh, gemstone, numerology. Nothing else changed.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════════════════════════
    v9.5 — 30 September 2026 — /learn HREFLANG + LOUD LEARN LOGGING
 
    WHAT WAS CHECKED FIRST (live sitemap, 30 Sep 2026)
@@ -120,6 +129,7 @@
  * 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER 🔱
  * ============================================================================
  * File:        app/sitemap.ts
+ * Version:     v9.6 — CODE_LASTMOD 2026-10-03 for 9 calculators (03 Oct 2026)
  * Version:     v9.5 — /learn EN<->HI hreflang + loud learn logging (30 Sep 2026)
  * Version:     v9.4 — honest lastmod for every URL, part 2 (26 Sep 2026)
  * Version:     v9.3 — free-shubh-muhurat-calculator juda (23 Sep 2026)
@@ -533,17 +543,17 @@ const CODE_LASTMOD: Record<string, string> = {
   '/services/toxic-boss-radar': '2026-09-08',
   '/services/wealth-reading': '2026-09-12',
   // calculators
-  '/calculators/free-janam-kundali-calculator': '2026-09-08',
+  '/calculators/free-janam-kundali-calculator': '2026-10-03',
   '/calculators/free-child-birth-muhurat-calculator': '2026-09-08',
-  '/calculators/free-dasha-calculator': '2026-09-12',
-  '/calculators/free-nakshatra-calculator': '2026-09-12',
+  '/calculators/free-dasha-calculator': '2026-10-03',
+  '/calculators/free-nakshatra-calculator': '2026-10-03',
   '/calculators/free-rashi-calculator': '2026-09-08',
   '/calculators/free-lagna-calculator': '2026-09-08',
-  '/calculators/free-sade-sati-calculator': '2026-09-12',
-  '/calculators/free-manglik-dosh-calculator': '2026-09-21',
-  '/calculators/free-kaal-sarp-dosh-calculator': '2026-09-12',
-  '/calculators/free-pitra-dosh-calculator': '2026-09-12',
-  '/calculators/free-gemstone-calculator': '2026-09-21',
+  '/calculators/free-sade-sati-calculator': '2026-10-03',
+  '/calculators/free-manglik-dosh-calculator': '2026-10-03',
+  '/calculators/free-kaal-sarp-dosh-calculator': '2026-10-03',
+  '/calculators/free-pitra-dosh-calculator': '2026-10-03',
+  '/calculators/free-gemstone-calculator': '2026-10-03',
   '/calculators/free-gemstone-suitability-calculator': '2026-09-08',
   '/calculators/free-should-i-wear-neelam': '2026-09-21',
   '/calculators/free-should-i-wear-cats-eye': '2026-09-05',
@@ -554,7 +564,7 @@ const CODE_LASTMOD: Record<string, string> = {
   '/calculators/free-should-i-wear-moti': '2026-09-21',
   '/calculators/free-should-i-wear-manik': '2026-09-21',
   '/calculators/free-should-i-wear-heera': '2026-09-21',
-  '/calculators/free-numerology-calculator': '2026-09-08',
+  '/calculators/free-numerology-calculator': '2026-10-03',
   '/calculators/free-baby-name-by-nakshatra': '2026-09-08',
   '/calculators/free-lucky-day-calculator': '2026-09-08',
   '/calculators/free-weak-planet-finder': '2026-09-08',
