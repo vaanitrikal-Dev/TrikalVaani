@@ -1,6 +1,17 @@
 // ============================================================
 // TRIKAAL VAANI — lib/wiki.ts
-// Version: 1.0 (27 Sep 2026) — ONE source for the Wikipedia-style format
+// Version: 1.2 (03 Oct 2026) — NO granth is restricted any more (Rohiit's ruling, 3 Oct 2026)
+//   v1.2: RESTRICTED_WORKS is now EMPTY. Rohiit, 3 Oct 2026: "BPHS ke Sanskrit
+//         slokas dikhao ... changed the rule ... we also have our PDF in our
+//         library" and then "aur bhi koi restriction hai toh wo bhi hatado".
+//         So the Sanskrit mool shlok of every granth (bphs, phaladipika,
+//         brihajjataka, jatakaparijata, chamatkarachintamani, bhrigusutram
+//         included) is shown wherever the citation's sanskrit field is filled.
+//         The Set is kept (empty) so existing imports keep compiling.
+//         canShowSanskrit() still needs a non-empty sanskrit field, so old
+//         citations saved with sanskrit = null show no text until filled.
+//         (v1.1, never deployed, removed only 'bphs'; v1.2 replaces it.)
+//   v1.0 (27 Sep 2026) — ONE source for the Wikipedia-style format
 // Owner: Rohiit Gupta, Chief Vedic Architect
 //
 // editorial_rulings #8 section G: this format is the Trikaal Vaani standard for
@@ -8,7 +19,7 @@
 // behave identically on all three lives here, so it is fixed in one place:
 //   • data types + normalizers: citations, infobox, glossary, hub group
 //   • headingAnchor(): the one slug rule for H2 ids
-//   • GRANTH_META, the 6 RESTRICTED granth, canShowSanskrit()
+//   • GRANTH_META, RESTRICTED_WORKS (empty from v1.2), canShowSanskrit()
 //   • citationRef() / citationSchema() (Chapter + Quotation JSON-LD)
 //   • ENTITY_LINKS (verified Wikipedia/Wikidata URLs only) + entity matching
 //   • glossarySchema() (DefinedTermSet), citeSplit() for [^n] markers
@@ -27,7 +38,7 @@ export interface WikiCitation {
   rule_hi: string | null;
   // ── v3.11 ──
   adhyaya_name: string | null; // e.g. "Nakshatra Prakaranam" / "नक्षत्रप्रकरणम्"
-  sanskrit: string | null;     // mool shlok (Devanagari); null for restricted granth
+  sanskrit: string | null;     // mool shlok (Devanagari); shown for every granth from v1.2
 }
 
 export interface WikiInfoboxRow {
@@ -144,11 +155,11 @@ export const GRANTH_META: Record<string, { sa: string; author: string | null; sa
   shatpanchashika:       { sa: 'षट्पञ्चाशिका', author: null },
 };
 
-// The 6 granth whose Sanskrit text may NEVER be shown
-// (sanskritdocuments.org licence; editorial_rulings #8 B.2).
-export const RESTRICTED_WORKS = new Set([
-  'bhrigusutram', 'bphs', 'brihajjataka', 'chamatkarachintamani', 'jatakaparijata', 'phaladipika',
-]);
+// v1.2 (3 Oct 2026): NO restricted granth. Rohiit removed every restriction —
+// all 6 earlier names (bhrigusutram, bphs, brihajjataka, chamatkarachintamani,
+// jatakaparijata, phaladipika) are now allowed. Kept as an empty Set so any
+// future restriction is a one-line change here (editorial_rulings #8 B.2C).
+export const RESTRICTED_WORKS = new Set<string>([]);
 
 export function canShowSanskrit(c: WikiCitation): boolean {
   return Boolean(c.sanskrit && c.work && !RESTRICTED_WORKS.has(c.work));
