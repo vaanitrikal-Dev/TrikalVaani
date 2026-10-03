@@ -3,7 +3,8 @@
  * 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER 🔱
  * ============================================================================
  * File:        app/astrologer-delhi/page.tsx
- * Version: 1.2 (1 Oct 2026 — daam sahi kiye: Kundali Milan ₹51 (couple + parent), Karmic ₹101 / $11, Child Birth ₹51; Bhrigu Nandi ke purane daave hataye)
+ * Version: 1.3 (3 Oct 2026 — title/description for "astrologer in delhi ncr fees"; Services H2 renamed to carry the fees keyword; new section "Best Astrologer in Delhi — Five Checks Before You Pay" (DataForSEO 2,400/month). NAP, schema, prices UNCHANGED.)
+ * Previous:    1.2 (1 Oct 2026 — daam sahi kiye: Kundali Milan ₹51 (couple + parent), Karmic ₹101 / $11, Child Birth ₹51; Bhrigu Nandi ke purane daave hataye)
  * Owner:       Rohiit Gupta, Chief Vedic Architect
  * Created:     2026-07-12
  * Updated:     2026-08-31
@@ -91,10 +92,10 @@ export const metadata: Metadata = {
   // second time. The brand stays inside this string on purpose — it belongs in
   // the SERP title, just once.
   title: {
-    absolute: 'Astrologer in Delhi — Rohiit Gupta | Trikaal Vaani',
+    absolute: 'Astrologer in Delhi NCR — Fees from ₹11 | Trikaal Vaani',
   },
   description:
-    'Looking for an astrologer in Delhi? Rohiit Gupta, Chief Vedic Architect at Trikaal Vaani, offers Vedic astrology readings from Dwarka, New Delhi — kundli, Kundali Milan, Mangal Dosh, Sade Sati. Swiss Ephemeris + BPHS. Free tools, readings from Rs11.',
+    'Astrologer in Delhi NCR from Dwarka: Rohiit Gupta, 16 years in Parashara BPHS. Free kundli and dosha checks, readings from ₹11, fees published upfront.',
   keywords:
     'astrologer in delhi, best astrologer in delhi, vedic astrologer delhi, astrologer near me, jyotish in delhi, kundli in delhi, astrologer dwarka, kundali milan delhi, mangal dosh astrologer delhi, delhi ncr astrologer, astrologer in delhi with fees, top 10 astrologer in delhi',
   alternates: {
@@ -429,7 +430,7 @@ export default function AstrologerDelhiPage() {
                   Services
                 </p>
                 <h2 className="text-white text-3xl font-serif font-bold mb-3">
-                  What You Can Get, and What It Costs
+                  Astrologer Fees in Delhi NCR — What You Get, What It Costs
                 </h2>
                 <p className="text-slate-400 text-sm max-w-2xl mx-auto">
                   Every price is published here rather than quoted after you call, and it is the same price in
@@ -461,6 +462,31 @@ export default function AstrologerDelhiPage() {
                 </Link>
                 {' — '}or see every option on the{' '}
                 <Link href="/pricing" style={{ color: GOLD, textDecoration: 'underline' }}>pricing page</Link>.
+              </p>
+            </div>
+          </section>
+
+          {/* SECTION 4b — v1.3: "best astrologer in delhi" answered honestly */}
+          <section className="py-16 px-4" style={{ background: 'rgba(13,17,30,0.4)' }}>
+            <div className="max-w-3xl mx-auto">
+              <h2 className="text-white text-3xl font-serif font-bold mb-4 text-center">
+                Best Astrologer in Delhi — Five Checks Before You Pay
+              </h2>
+              <p style={{ color: '#94a3b8', fontSize: '14px', lineHeight: 1.8, marginBottom: '16px' }}>
+                No neutral body ranks astrologers, so any &ldquo;best astrologer in Delhi&rdquo; list is advertising — including one that names us. These five checks work on anyone, here or elsewhere, and take ten minutes.
+              </p>
+              <ol style={{ color: '#cbd5e1', fontSize: '14px', lineHeight: 1.8, paddingLeft: '20px', margin: 0 }}>
+                <li><strong style={{ color: GOLD }}>Fees written before you call.</strong> A practice that only quotes a price on the phone is pricing your worry, not the work.</li>
+                <li><strong style={{ color: GOLD }}>Doshas graded, not announced.</strong> A good reading tells you how strong a Mangal or Kaal Sarp dosh is and whether it is already cancelled — not just that it &ldquo;exists&rdquo;.</li>
+                <li><strong style={{ color: GOLD }}>Remedies before rituals.</strong> If the first advice is an expensive puja or gemstone, walk away. Classical remedies — mantra, daan, discipline — cost almost nothing.</li>
+                <li><strong style={{ color: GOLD }}>The method is stated.</strong> Which ephemeris, which ayanamsa, which classical text. If they cannot say, the chart may not be accurate.</li>
+                <li><strong style={{ color: GOLD }}>Verifiable identity.</strong> A real address, Google reviews you can read, and a registration you can check.</li>
+              </ol>
+              <p style={{ color: '#94a3b8', fontSize: '13px', lineHeight: 1.8, marginTop: '16px' }}>
+                If you are searching &ldquo;astrologer near me&rdquo;, the{' '}
+                <Link href="/blog/astrologer-near-me-delhi" style={{ color: GOLD, textDecoration: 'underline' }}>astrologer near me in Delhi guide</Link>{' '}
+                explains what online versus in-person really changes — and you can test us first with the free{' '}
+                <Link href="/calculators/free-janam-kundali-calculator" style={{ color: GOLD, textDecoration: 'underline' }}>kundli</Link>.
               </p>
             </div>
           </section>
@@ -570,4 +596,4 @@ export default function AstrologerDelhiPage() {
   )
 }
 
-// END app/astrologer-delhi/page.tsx v1.1
+// END app/astrologer-delhi/page.tsx v1.3

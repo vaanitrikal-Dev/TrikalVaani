@@ -2,7 +2,9 @@
 
 // ============================================================
 // File: app/calculators/free-kaal-sarp-dosh-calculator/page.tsx
-// Version: v2.1 (03 Oct 2026) — previous header: v2.0 — Free Kaal Sarp Dosh Calculator (Radar E3 content build)
+// Version: v2.2 (03 Oct 2026) — +2 H2 from the Radar weekly report 03 Oct 2026 — content-edit brief / PUSH list.
+//   effects on marriage, puja kitni baar. Form/API unchanged.
+// (previous) Version: v2.1 (03 Oct 2026) — previous header: v2.0 — Free Kaal Sarp Dosh Calculator (Radar E3 content build)
 //   v2.1 (2026-10-03) — +2 H2 from DataForSEO volumes (Trikaal Keywords sheet 2-3 Oct 2026):
 //   kaal sarp dosh kya hota hai 5.4K (+ kyu hota hai 720), kaal sarp dosh remedies 720 +
 //   how to remove permanently 390. Puja-place keywords skipped: already answered in 'nivaran-kahan'.
@@ -451,6 +453,22 @@ const PILLAR: PillarSection[] = [
     paras: [
       "First check whether the dosha is **cancelled** — many charts carry a classical cancellation, and then nothing needs to be done. If it is active, these two remedies, in the five-part standard. **What:** chant the Maha Mrityunjaya mantra 108 times (about 15 minutes). **When:** Monday morning. **Cost:** free. **How long:** 21 Mondays. **Why for you:** tradition ties the Rahu–Ketu axis to Lord Shiva, and this is the remedy the classical texts reach for first.",
       "**What:** offer milk and water on a Shivling. **When:** Monday, and on Nag Panchami. **Cost:** ₹20–30. **How long:** 11 Mondays. **Why for you:** it is the simplest home form of Kaal Sarp shanti. A pilgrimage puja (Trimbakeshwar, Ujjain) is a valid option but not compulsory, and no ritual deletes a placement from your chart — what remedies reduce is its effect. More in [Kaal Sarp Dosh Remedies](/blog/kaal-sarp-dosh-remedies-hindi).",
+    ],
+  },
+  {
+    id: "shadi-par-asar",
+    h2: "Kaal Sarp Dosh Effects on Marriage — Kitna Sach?",
+    paras: [
+      "Kaal Sarp dosh ko shaadi mein der ya tanaav se joda jaata hai, par shaadi ka asli faisla **saptam bhaav, uske swami, Shukra aur chal rahi dasha** se hota hai — Kaal Sarp akela vivah nahi rokta. Sabse zyada asar tab maana jaata hai jab Rahu ya Ketu khud 1st/7th aksh par ho (Anant ya Takshak prakar).",
+      "Isliye pehle do jaanch: yog bhang hai ya nahi, aur saptam bhaav kitna mazboot hai. Upay wahi saral rahte hain jo [remedies section](#remedies-english) mein hain. Poora vishleshan [Kaal Sarp Dosh aur Shaadi](/blog/kaal-sarp-dosh-marriage-hindi) mein hai.",
+    ],
+  },
+  {
+    id: "puja-kitni-baar",
+    h2: "Kaal Sarp Dosh Puja Kitni Baar Karni Chahiye?",
+    paras: [
+      "Parampara mein Kaal Sarp shanti puja **jeevan mein ek baar** karayi jaati hai — har saal dohrane ka koi shastriya niyam nahi hai. Jo baar-baar puja karwane ko kahe, wo shastra nahi, apni fees bata raha hai.",
+      "Jo niyamit hona chahiye wo puja nahi, **saral upay** hai: Somwar ko Mahamrityunjay jaap aur Nag Panchami ki pooja. Aur sabse pehle yeh dekhiye ki dosh bhang to nahi — tab puja ki zaroorat hi nahi. Jagah ka sawaal [निवारण कहां होता है](#nivaran-kahan) mein hai.",
     ],
   },
 ];

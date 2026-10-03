@@ -2,7 +2,10 @@
 
 // ============================================================
 // File: app/calculators/free-foreign-spouse-calculator/page.tsx
-// Version: v2.0 — content + cluster interlinking (Radar Part 5, rank 15)
+// Version: v2.1 (03 Oct 2026) — +4 H2 from the Radar weekly report 03 Oct 2026 — content-edit brief / PUSH list.
+//   Rahu in 7th, कौन सा ग्रह अचानक शादी करवाता है, where will I meet my spouse,
+//   can AI predict my future spouse. YogCalculator, FAQS, JSON-LD unchanged.
+// (previous) Version: v2.0 — content + cluster interlinking (Radar Part 5, rank 15)
 //
 // CHANGE v2.0 (2026-08-31):
 //   BASELINE 31 Aug 2026: 608 words, 2 H2, 0 Devanagari characters, and
@@ -191,6 +194,38 @@ const SECTIONS: FsSection[] = [
       '**Score achha aaya:** iska matlab sirf itna hai ki videshi jeevansaathi ke classical yog aapki kundali mein prabal hain. Ye **nahi** batata ki jis vyakti ki baat chal rahi hai, unke saath nibhegi ya nahi — uske liye **dono** kundaliyan milani padti hain. [Kundali Milan](/kundali-milan) mein Ashtakoot ke 36 gun, Manglik dosh aur dono ke 7th house va Navamsa ka aapsi milaan dekha jaata hai. Gun-ankon ka asli matlab [36 Guna Milan](/blog/36-guna-milan-explained) mein hai.',
       '**Score kam aaya:** iska matlab **bilkul nahi** hai ki shaadi nahi hogi. Shaadi ka yog alag cheez hai aur wo poori tarah maujood ho sakta hai — ye calculator sirf "videshi" wale pehlu ko naapta hai. Agar vivah mein vilamb ho raha hai to wajah kahin aur hai: [मांगलिक दोष](/calculators/free-manglik-dosh-calculator) ya chal rahi [दशा](/calculators/free-dasha-calculator), dono muft check kar lijiye. Saatve bhaav ka mangal alag se [सातवें भाव में मंगल दोष](/blog/mangal-dosh-7th-house-effects-hindi) mein hai.',
       'Aur agar aapka asli sawaal shaadi nahi, **videsh mein basna** hai, to wo alag yog hai aur alag tool: [विदेश बसना कैलकुलेटर](/calculators/free-foreign-settlement-calculator) aur poora [Foreign Settlement hub](/foreign-settlement). Dono aksar saath chalte hain par ek doosre par nirbhar nahi hain.',
+    ],
+  },
+  {
+    id: "rahu-7th",
+    h2: "Rahu in the 7th House — Does It Mean a Foreign Spouse?",
+    paras: [
+      "**Rahu in the 7th house is the most quoted foreign-spouse sign, and it is a real one** — Rahu is the karaka of the unfamiliar, and the 7th is the spouse. Classically it points to a partner from outside your community, language, religion or country. But \"outside\" is wider than \"foreign\": in most charts it shows up as an inter-caste or inter-state marriage, not a passport.",
+      "It becomes a stronger foreign indication only when the 7th lord also connects to the 12th or 9th, or when Navamsa (D-9) repeats the pattern. On its own it is one block of the score, not the verdict — which is why the calculator above shows it separately. The Hindi explanation with Darakaraka is in [राहु और दारकारक](#rahu-darakaraka).",
+    ],
+  },
+  {
+    id: "achanak-shadi",
+    h2: "कौन सा ग्रह अचानक शादी करवाता है?",
+    paras: [
+      "परंपरा में अचानक या जल्दी तय होने वाले विवाह का संबंध सबसे ज़्यादा **राहु** से जोड़ा जाता है — विशेषकर जब राहु सप्तम भाव में हो, या सप्तमेश के साथ हो, और उसकी दशा-अंतर्दशा चल रही हो। **मंगल** की सप्तम पर दृष्टि जल्दबाज़ी के निर्णय से, और **शुक्र** की दशा अचानक बने संबंध से जोड़ी जाती है।",
+      "पर \"अचानक\" ग्रह से कम और **दशा से ज़्यादा** तय होता है — योग जन्म से कुंडली में रहता है, और समय तब आता है जब सप्तम भाव से जुड़े ग्रह की दशा खुलती है। अपनी शादी का संभावित समय [शादी कब होगी कैलकुलेटर](/calculators/free-shadi-kab-hogi-calculator) मुफ़्त बताता है।",
+    ],
+  },
+  {
+    id: "where-meet",
+    h2: "Where Will I Meet My Spouse? — What the Chart Can and Cannot Say",
+    paras: [
+      "Classically the **sign and house of the 7th lord** describe the setting, not the address. A 7th lord in the 10th suggests meeting through work; in the 9th, through travel, study or a teacher; in the 11th, through friends or an elder sibling; in the 12th, far from home or abroad; in the 5th, through a love connection.",
+      "That is a direction, not a city or a date, and honest reading stops there. If the 7th lord sits in the 12th, the foreign-settlement side of the same question is in the [Foreign Settlement Calculator](/calculators/free-foreign-settlement-calculator), which reads the 12th house and Rahu in detail.",
+    ],
+  },
+  {
+    id: "ai-predict-spouse",
+    h2: "Can AI Predict My Future Spouse?",
+    paras: [
+      "No AI — and no astrologer — can name your future spouse or show their face. What software can do reliably is the **calculation**: placing your planets precisely and applying the classical rules for the 7th house, its lord, Venus, Rahu and Navamsa the same way every time. That is what this calculator does, with the reason for every point shown.",
+      "What it cannot do is replace the people involved — compatibility between two real charts is a separate check, done with both birth details in [Kundali Milan](/kundali-milan). Anyone claiming an AI can \"see\" your spouse is selling a story, not a reading.",
     ],
   },
 ];

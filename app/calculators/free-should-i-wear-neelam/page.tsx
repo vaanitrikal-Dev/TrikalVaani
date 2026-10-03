@@ -2,7 +2,10 @@
 
 // ============================================================
 // File: app/calculators/free-should-i-wear-neelam/page.tsx
-// Version: v2.0 — lagna ke daave PARASHAR se (BPHS Ch.34) — 21 Sep 2026
+// Version: v2.1 (03 Oct 2026) — +4 H2 inside `guidance` from the Radar weekly report 03 Oct 2026 — content-edit brief / PUSH list.
+//   asar kitne din mein, side effects / sleepy, kitne ratti + asli pehchaan, rules after wearing.
+//   Lagna table, FAQs and FocusedStonePage untouched.
+// (previous) Version: v2.0 — lagna ke daave PARASHAR se (BPHS Ch.34) — 21 Sep 2026
 //   Pehle ye text SAAMANYA lordship niyam se likha tha. Parashar ki
 //   lagna-dar-lagna soochi (34.19-44) se milane par farq nikle — kuch ULTE
 //   (Panna-Dhanu: page "malefic", shlok "YOGAKARAKA"; Heera-Vrishabh: page
@@ -43,6 +46,22 @@ const config: FocusedStoneConfig = {
       </p>
       <p className="text-slate-300 leading-relaxed mb-4">
         <strong style={{ color: GOLD }}>Iron rule:</strong> Neelam chahe kitna hi suitable lage, ise hamesha <strong>3 din ke trial</strong> ke saath, jaankaar astrologer ki salaah lekar hi dharan karein.
+      </p>
+      <h2 className="text-2xl font-serif font-bold mb-4 mt-10" style={{ color: GOLD }}>नीलम कितने दिन में असर दिखाता है?</h2>
+      <p className="text-slate-300 leading-relaxed mb-4">
+        परंपरा में नीलम को <strong style={{ color: GOLD }}>सबसे जल्दी असर दिखाने वाला रत्न</strong> माना गया है — अच्छा या बुरा, संकेत प्रायः 24 से 72 घंटे में दिखने लगते हैं। इसी कारण नियम है कि पहले <strong>3 दिन का trial</strong> हो: रत्न को कपड़े में बाँधकर या तकिये के नीचे रखें, और नींद, मन और घटनाओं पर ध्यान दें। स्थायी लाभ धीरे-धीरे, Shani की प्रकृति के अनुसार, हफ़्तों-महीनों में बनता है।
+      </p>
+      <h2 className="text-2xl font-serif font-bold mb-4 mt-10" style={{ color: GOLD }}>Neelam Side Effects — Feeling Sleepy, Restless or Bad Dreams?</h2>
+      <p className="text-slate-300 leading-relaxed mb-4">
+        Tradition names clear warning signs during or after the trial: <strong>disturbed sleep or heavy drowsiness, frightening dreams, small accidents or injuries, sudden losses, or a heavy, low mood</strong>. Any of these is read as Neelam not suiting you — take it off and do not continue. Persistent sleep or health problems should be seen by a doctor; a gemstone is never the explanation to rely on. More on this in <a href="/blog/blue-sapphire-neelam-side-effects" style={{ color: GOLD }} className="underline">Blue Sapphire side effects</a>.
+      </p>
+      <h2 className="text-2xl font-serif font-bold mb-4 mt-10" style={{ color: GOLD }}>नीलम कितने रत्ती का पहनें — और असली नीलम की पहचान</h2>
+      <p className="text-slate-300 leading-relaxed mb-4">
+        वज़न का कोई एक शास्त्रीय नियम नहीं है; प्रचलन में <strong>3 से 7 रत्ती</strong> के बीच पहना जाता है। उससे ज़्यादा ज़रूरी है कि रत्न असली और बिना दरार हो। घर पर पानी या दूध वाले &ldquo;टेस्ट&rdquo; भरोसेमंद नहीं होते — <strong style={{ color: GOLD }}>प्रमाणित लैब सर्टिफ़िकेट</strong> लीजिए, जो यह भी बताए कि रत्न heated है या unheated। कीमत वज़न, मूल स्थान, रंग और उपचार से तय होती है, इसलिए कोई एक भाव सही नहीं होता।
+      </p>
+      <h2 className="text-2xl font-serif font-bold mb-4 mt-10" style={{ color: GOLD }}>Rules After Wearing Blue Sapphire</h2>
+      <p className="text-slate-300 leading-relaxed mb-4">
+        Wear it on the middle finger in silver or panchdhatu, first put on on a Saturday evening with the Shani mantra (ॐ शं शनैश्चराय नमः). Keep wearing it rather than taking it on and off. Traditional practice avoids pairing Neelam with Manik (ruby), Moti (pearl) or Moonga (red coral), as their planets are treated as Shani&apos;s opposites. And keep watching for the warning signs above — if they appear even after weeks, remove it.
       </p>
     </>
   ),

@@ -2,7 +2,17 @@
 
 // ============================================================
 // File: app/calculators/free-foreign-settlement-calculator/page.tsx
-// Version: v2.0 — content + cluster interlinking
+// Version: v2.1 (03 Oct 2026) — +5 H2 from the Radar E3 brief (03 Oct report)
+//
+// CHANGE v2.1 (2026-10-03):
+//   Radar report of 3 Oct 2026 flagged this page PUSH: rank 2 on its core
+//   terms but absent from 30 SERPs. Five new H2 for the brief items not yet
+//   covered: foreign settlement meaning + success in foreign land, when will
+//   I go abroad (timing), permanent foreign settlement, how to calculate in
+//   kundali, विदेश जाने के लिए क्या करना चाहिए (210/month, DataForSEO). Remedy
+//   in editorial ruling #4 format. YogCalculator config, FAQS, JSON-LD unchanged.
+//
+// (previous header) Version: v2.0 — content + cluster interlinking
 //
 // CHANGE v2.0 (2026-09-01):
 //   BASELINE measured live 31 Aug 2026: 613 words, 2 H2, 27 Devanagari
@@ -236,6 +246,46 @@ const SECTIONS: FstSection[] = [
       'पहले वह बात जो सबसे ज़्यादा राहत देती है: **कम स्कोर का मतलब "आप विदेश नहीं जा सकते" नहीं है।** इसका मतलब इतना है कि शास्त्रीय विदेश-संयोजन आपके चार्ट में प्रमुख नहीं हैं। बहुत से लोग सामान्य योग के साथ वर्षों विदेश में काम करके लौट आते हैं — और वह भी एक पहचानी हुई स्थिति है।',
       'दूसरा — **ब्लॉक देखिए, कुल नहीं।** अगर बारहवां और राहु मजबूत हैं पर दशा अभी अनुकूल नहीं, तो योग है और समय नहीं आया; यह बिल्कुल अलग स्थिति है उससे जहाँ बारहवां ही कमज़ोर हो। परिणाम में यह अंतर साफ लिखा आता है।',
       'और तीसरा — **कोई उपाय आपका चार्ट नहीं बदलता।** जो कोई कहे "यह पूजा करवा लीजिए, विदेश का रास्ता खुल जाएगा" और सामने बड़ी राशि रख दे, वह आपकी उम्मीद बेच रहा है। जो सचमुच काम आता है वह है सही दरवाज़े का चुनाव और सही समय — और वह दोनों ऊपर के परिणाम में मुफ्त हैं। पूरी कुंडली का विश्लेषण चाहिए तो [कार्मिक बैकग्राउंड रीडिंग](/karmic-background-reading) देखिए, या सारे विकल्प [प्राइसिंग](/pricing) पर हैं।',
+    ],
+  },
+  {
+    id: "meaning-success",
+    h2: "Foreign Settlement Meaning in Astrology — and \"Success in a Foreign Land\"",
+    paras: [
+      "In astrology, **foreign settlement** means a chart pattern for **living** outside your birth land, not just visiting it. It is read mainly from the **12th house and its lord**, **Rahu**, the **9th house**, and a **loose 4th house** — while travel alone is a lighter yoga of the 3rd and 9th houses. That is why a person can fly abroad every year and never settle, as explained in [Foreign Travel Astrology by Date of Birth](#foreign-travel-dob).",
+      "\"Success in a foreign land\" is a second question on top of settling. Classically it needs the settlement houses to connect with the **10th house** (work) or the **11th** (gains), a strong lord of the Lagna, and the D-10 (Dasamsa) supporting it. A chart can show settlement without success, or success at home without settlement — the calculator scores them through separate blocks so you can see which one your chart carries.",
+    ],
+  },
+  {
+    id: "when-abroad",
+    h2: "When Will I Go Abroad? — Timing Through Dasha",
+    paras: [
+      "The yoga shows **whether** the pattern exists; the **dasha shows when** it opens. The window is typically a Mahadasha or Antardasha of the **12th lord, the 9th lord, or Rahu**, often helped by Saturn or Jupiter transiting the 12th or 9th from your Moon. The calculator's last block checks exactly this — whether one of those periods is running now.",
+      "If none is running, the yoga is still in your chart; the timing simply has not arrived, which is why many people with strong charts move only in their thirties. You can see your full dasha timeline free in the [Dasha Calculator](/calculators/free-dasha-calculator), and the Hindi explanation is in [योग है, पर समय कब आएगा](#dasha-samay).",
+    ],
+  },
+  {
+    id: "permanent-settlement",
+    h2: "Permanent Foreign Settlement in Vedic Astrology — What Makes It Permanent",
+    paras: [
+      "The difference between going abroad and **staying abroad for good** lies mostly in the **4th house** — home and roots. When the 4th house or its lord is weak, or its lord sits in the 12th, the pull back home is light, and settlement tends to become permanent. A strong 4th house usually brings a person back, however long they stay away.",
+      "Two further signs point to permanence: the **12th lord connected to the Lagna lord** (the self joins the foreign land), and **Rahu influencing the 4th** (detachment from birthplace). None of these is a guarantee — visas, family and choice matter — but together they describe the classical picture of a life built outside the birth country. Why a weak 4th house scores higher here is explained in [कमज़ोर चौथा भाव अच्छा क्यों माना जाता है](#kamzor-chautha-bhaav).",
+    ],
+  },
+  {
+    id: "calculate-in-kundali",
+    h2: "How to Calculate Foreign Settlement in Your Kundali — Step by Step",
+    paras: [
+      "You can check the main signs yourself in five steps. **One:** build your chart with an exact birth time ([free Kundali](/calculators/free-janam-kundali-calculator)). **Two:** find the 12th house and where its lord sits — a 12th lord in the 1st, 9th, 10th or 12th is a strong sign. **Three:** see where Rahu sits — the 1st, 3rd, 7th, 9th, 10th or 12th favour settlement abroad.",
+      "**Four:** look at the 4th house — weaker roots favour settling abroad. **Five:** check whether a dasha of the 12th lord, 9th lord or Rahu is running. The calculator above does all five plus the D-10 and strength (Shadbala) checks, and shows the reason behind every point — so you can match its result against your own chart instead of trusting a single score.",
+    ],
+  },
+  {
+    id: "videsh-kya-karein",
+    h2: "विदेश जाने के लिए क्या करना चाहिए — व्यावहारिक और ज्योतिषीय कदम",
+    paras: [
+      "पहला कदम ज्योतिष का नहीं, दिशा का है: ऊपर के परिणाम में **चार रास्तों** (नौकरी, पढ़ाई, शादी, व्यापार) में से जो सबसे मज़बूत हो, उसी पर पहले मेहनत लगाइए — गलत दरवाज़े पर वर्षों लगाना सबसे महँगी गलती है। दूसरा — चल रही दशा देखिए; अनुकूल दशा में आवेदन करना समझदारी है।",
+      "परंपरा का एक उपाय, पाँच हिस्सों में: **क्या:** \"ॐ रां राहवे नमः\" 108 बार (लगभग 10 मिनट)। **कब:** शनिवार शाम। **कितने का:** मुफ़्त। **कितने दिन:** 21 शनिवार। **आपके लिए क्यों:** राहु विदेश का मुख्य कारक है, और मंत्र उसे शांत करता है, बढ़ाता नहीं। कोई उपाय वीज़ा नहीं दिलाता — वह कागज़ात और नीति से मिलता है; और जो पूजा \"विदेश का रास्ता खोलने\" के नाम पर बड़ी राशि माँगे, उससे दूर रहिए।",
     ],
   },
 ];

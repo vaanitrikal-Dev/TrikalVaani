@@ -1,4 +1,11 @@
 /* ═══════════════════════════════════════════════════════════════════════════
+   v9.7 — 03 October 2026 — CODE_LASTMOD 2026-10-03 for the 7 pages changed in
+   the Radar-report bundle: /astrologer-delhi, free-foreign-settlement,
+   free-foreign-spouse, free-kaal-sarp-dosh, free-should-i-wear-neelam,
+   /services/wealth-reading, /hast-rekha-calculator. Nothing else changed.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════════════════════════
    v9.6 — 03 October 2026 — CODE_LASTMOD bumped for 9 calculators
    The 9 calculator pages changed in commits cb8592c and 9da4fad (3 Oct 2026:
    new keyword H2 sections + new titles) still carried their September dates
@@ -129,6 +136,7 @@
  * 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER 🔱
  * ============================================================================
  * File:        app/sitemap.ts
+ * Version:     v9.7 — CODE_LASTMOD for 7 Radar-bundle pages (03 Oct 2026)
  * Version:     v9.6 — CODE_LASTMOD 2026-10-03 for 9 calculators (03 Oct 2026)
  * Version:     v9.5 — /learn EN<->HI hreflang + loud learn logging (30 Sep 2026)
  * Version:     v9.4 — honest lastmod for every URL, part 2 (26 Sep 2026)
@@ -512,7 +520,7 @@ const CODE_LASTMOD: Record<string, string> = {
   '/refund': '2026-09-12',
   '/services': '2026-09-08',
   '/calculators': '2026-09-23',
-  '/hast-rekha-calculator': '2026-09-12',
+  '/hast-rekha-calculator': '2026-10-03',
   '/kundali-milan': '2026-09-12',
   '/karmic-background-reading': '2026-09-12',
   '/blog': '2026-09-12',
@@ -529,7 +537,7 @@ const CODE_LASTMOD: Record<string, string> = {
   // /events/, /hi/ and every city copy, so a template change is a real change
   'festival-template': '2026-09-26',
   // local SEO
-  '/astrologer-delhi': '2026-09-12',
+  '/astrologer-delhi': '2026-10-03',
   '/astrologer-noida': '2026-09-12',
   '/astrologer-gurgaon': '2026-09-12',
   '/astrologer-ghaziabad': '2026-09-12',
@@ -541,7 +549,7 @@ const CODE_LASTMOD: Record<string, string> = {
   '/services/property-yog': '2026-09-08',
   '/services/spiritual-purpose': '2026-09-08',
   '/services/toxic-boss-radar': '2026-09-08',
-  '/services/wealth-reading': '2026-09-12',
+  '/services/wealth-reading': '2026-10-03',
   // calculators
   '/calculators/free-janam-kundali-calculator': '2026-10-03',
   '/calculators/free-child-birth-muhurat-calculator': '2026-09-08',
@@ -555,7 +563,7 @@ const CODE_LASTMOD: Record<string, string> = {
   '/calculators/free-pitra-dosh-calculator': '2026-10-03',
   '/calculators/free-gemstone-calculator': '2026-10-03',
   '/calculators/free-gemstone-suitability-calculator': '2026-09-08',
-  '/calculators/free-should-i-wear-neelam': '2026-09-21',
+  '/calculators/free-should-i-wear-neelam': '2026-10-03',
   '/calculators/free-should-i-wear-cats-eye': '2026-09-05',
   '/calculators/free-should-i-wear-pukhraj': '2026-09-21',
   '/calculators/free-should-i-wear-gomed': '2026-09-05',
@@ -572,8 +580,8 @@ const CODE_LASTMOD: Record<string, string> = {
   '/calculators/free-kundali-strength-calculator': '2026-09-08',
   '/calculators/free-lagna-bal-calculator': '2026-09-08',
   '/calculators/free-ias-astrology-calculator': '2026-09-12',
-  '/calculators/free-foreign-settlement-calculator': '2026-09-08',
-  '/calculators/free-foreign-spouse-calculator': '2026-09-05',
+  '/calculators/free-foreign-settlement-calculator': '2026-10-03',
+  '/calculators/free-foreign-spouse-calculator': '2026-10-03',
   '/calculators/free-santan-yog-calculator': '2026-09-08',
   '/calculators/free-shadi-kab-hogi-calculator': '2026-09-08',
   '/calculators/free-second-marriage-calculator': '2026-09-21',

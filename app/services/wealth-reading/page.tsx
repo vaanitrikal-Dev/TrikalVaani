@@ -2,7 +2,11 @@
  * TRIKAAL VAANI — trikalvaani.com
  * Chief Vedic Architect: Rohiit Gupta
  * FILE TO PASTE → app/services/wealth-reading/page.tsx
- * Version: 4.1 — IR-0 cleanup
+ * Version: 4.2 (03 Oct 2026) — +5 H2 content sections from the Radar weekly report 03 Oct 2026 — content-edit brief / PUSH list.
+ *   which planet for money, paisa kyun nahi rukta, कर्ज़ में डूबा इंसान क्या करे, अचानक धन के संकेत,
+ *   wealth prediction by DOB + time. Rendered as a new WEALTH_SECTIONS block before Maa Divine Seva.
+ *   Prices, schema, FAQs and CTA links unchanged. Remedies in editorial ruling #4 format.
+ * (previous) Version: 4.1 — IR-0 cleanup
  *
  * v4.1 CHANGES vs v4.0:
  *   ❌ REMOVED fake testimonials (fabricated reviews + ★★★★★ + "Verified Experiences")
@@ -40,6 +44,66 @@ const schema = {
     { "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: "https://trikalvaani.com" }, { "@type": "ListItem", position: 2, name: "Services", item: "https://trikalvaani.com/services" }, { "@type": "ListItem", position: 3, name: "Wealth Reading", item: "https://trikalvaani.com/services/wealth-reading" }] },
   ],
 };
+
+
+type WlSection = { id: string; h2: string; paras: string[] };
+
+const WEALTH_SECTIONS: WlSection[] = [
+  {
+    id: "dhan-kis-grah",
+    h2: "Which Planet Is Responsible for Money in Astrology?",
+    paras: [
+      "**Jupiter (Guru)** is the main karaka of wealth, **Venus (Shukra)** of comfort and luxury, and **Mercury (Budh)** of trade and income from intelligence. But in your own chart the deciding factors are the **2nd house lord** (savings and family wealth), the **11th house lord** (income and gains), and whether a **Dhana Yoga** links them with the 1st, 5th or 9th lords.",
+      "A strong karaka in a weak house still struggles to hold money, and a modest karaka in a well-connected house can do very well — which is why wealth is read from combinations, not one planet. How to check your own chart step by step: [Dhan Yog Kaise Jaanchein](/blog/dhan-yog-kaise-jaanchein).",
+    ],
+  },
+  {
+    id: "paisa-nahi-rukta",
+    h2: "Paisa Kyun Nahi Rukta? — Kundali Ke Teen Sanket",
+    paras: [
+      "Kamaai hone ke baad bhi paisa na rukne ke teen classical sanket dekhe jaate hain: **dwitiya (2nd) bhaav ya uske swami par Rahu/Shani ka prabhav**, **12th bhaav (kharch) ka mazboot hona** jabki 11th kamzor ho, aur **chal rahi dasha** ka 12th ya 6th bhaav se juda hona.",
+      "Isme \"dosh\" se zyada samay ka hissa hota hai — kharch ka daur aksar ek dasha ke saath aata aur jaata hai. Upay: **Kya:** Guruvar ko peeli daal ya kele ka daan. **Kab:** har Guruvar subah. **Kharch:** ₹20–50. **Kitne din:** 16 Guruvar. **Aapke liye kyun:** Guru dhan ka kaarak hai, aur daan uska sabse saral shastriya upay hai.",
+    ],
+  },
+  {
+    id: "karz-kya-kare",
+    h2: "कर्ज़ में डूबा इंसान क्या करे — कुंडली और व्यवहार दोनों",
+    paras: [
+      "पहले व्यवहार: कर्ज़ों की पूरी सूची बनाइए, सबसे ऊँचे ब्याज वाला पहले चुकाइए, और नया कर्ज़ लेना बंद कीजिए — कोई उपाय इसकी जगह नहीं लेता। कुंडली में कर्ज़ **छठे भाव और उसके स्वामी** से देखा जाता है, और उससे मुक्ति का समय अक्सर उस दशा के बदलने से जुड़ा होता है।",
+      "परंपरा का उपाय, पाँच हिस्सों में: **क्या:** मंगलवार को हनुमान चालीसा और ऋणमोचक मंगल स्तोत्र का पाठ। **कब:** मंगलवार सुबह। **कितने का:** मुफ़्त। **कितने दिन:** 21 मंगलवार। **आपके लिए क्यों:** मंगल को ऋण-मोचन का कारक माना गया है। कर्ज़ मुक्ति का समय कब खुलता है, यह [Debt-Free Window](/blog/dasha-timing-debt-free-window-astrology-hindi) में है, और पूरे उपाय [कर्ज़ मुक्ति उपाय](/blog/karz-mukti-remedies-astrology-hindi) में।",
+    ],
+  },
+  {
+    id: "achanak-dhan",
+    h2: "अचानक धन प्राप्ति के संकेत — कुंडली में कहाँ दिखते हैं",
+    paras: [
+      "अचानक या अप्रत्याशित धन — विरासत, बीमा, लॉटरी, अचानक बड़ा सौदा — का संबंध **अष्टम भाव** और **राहु** से जोड़ा जाता है, क्योंकि अष्टम छिपे और अचानक आने वाले धन का भाव है। अष्टमेश का एकादश (लाभ) से संबंध, या एकादश में राहु, परंपरा में इसके संकेत माने गए हैं।",
+      "पर यही भाव अचानक नुकसान का भी है, इसलिए ऐसा योग जोखिम लेने की अनुमति नहीं देता — सट्टा या लॉटरी पर भरोसा करना इसका अर्थ नहीं। जो धन टिकता है वह द्वितीय और एकादश भाव से आता है। अपनी कुंडली के धन योग [कुंडली में धन योग](/blog/kundali-mein-dhan-yog) में देखिए।",
+    ],
+  },
+  {
+    id: "wealth-by-dob",
+    h2: "Wealth Prediction by Date of Birth and Time — What You Need",
+    paras: [
+      "Wealth prediction needs the **date, exact time and place** of birth. The date fixes the planets; the time fixes the **2nd and 11th house cusps**, which move every two hours or so — and those houses are the core of any money reading. Date alone gives a Moon-sign level overview, not a wealth timeline.",
+      "With full details, the reading identifies your Dhana Yogas, the strength of the 2nd and 11th lords, and the **dasha periods** most likely to bring gains — the \"peak earning years\" question. The wider classical combinations are explained in [Dhan Yog in Kundli](/blog/dhan-yog-in-kundli-wealth-combinations).",
+    ],
+  },
+];
+
+function WlRich({ text, k }: { text: string; k: string }) {
+  const parts = text.split(/(\[[^\]]+\]\([^)]+\)|\*\*[^*]+\*\*)/g);
+  return (
+    <>
+      {parts.map((part, i) => {
+        const link = part.match(/^\[([^\]]+)\]\(([^)]+)\)$/);
+        if (link) return <Link key={`${k}-l-${i}`} href={link[2]} className="text-[#D4AF37] underline underline-offset-2 hover:opacity-80">{link[1]}</Link>;
+        if (part.startsWith("**") && part.endsWith("**")) return <strong key={`${k}-b-${i}`} className="text-[#D4AF37]">{part.slice(2, -2)}</strong>;
+        return <span key={`${k}-s-${i}`}>{part}</span>;
+      })}
+    </>
+  );
+}
 
 export default function WealthReadingPage() {
   return (
@@ -104,6 +168,18 @@ export default function WealthReadingPage() {
               </div>
               <DeliverableCard segment="wealth" items={["Dhana Yoga identification and strength", "2nd and 11th house wealth analysis", "Peak earning years (Dasha-based)", "Investment sectors your chart favors", "Wealth blocks and remedies", "Lakshmi and Gaja Kesari Yoga check", "4-week financial energy forecast"]} />
             </div>
+          </div>
+        </section>
+        <section className="py-16 px-4">
+          <div className="max-w-3xl mx-auto">
+            {WEALTH_SECTIONS.map((sec) => (
+              <div key={sec.id} id={sec.id} className="scroll-mt-24 mb-10">
+                <h2 className="font-serif text-2xl md:text-3xl font-bold mb-4 text-[#D4AF37]">{sec.h2}</h2>
+                {sec.paras.map((p, i) => (
+                  <p key={i} className="text-gray-300 leading-relaxed mb-4"><WlRich text={p} k={`${sec.id}-${i}`} /></p>
+                ))}
+              </div>
+            ))}
           </div>
         </section>
         <MaaDivineSeva />

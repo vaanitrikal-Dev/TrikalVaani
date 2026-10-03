@@ -1,6 +1,7 @@
 // ============================================================
 // File: app/calculators/free-foreign-settlement-calculator/layout.tsx
-// Version: v1.0 (05 Sep 2026)
+// Version: v1.1 (03 Oct 2026) — title/description for CTR; old title "Foreign Settlement Calculator — Instant | Trikaal Vaani"
+// (previous) Version: v1.0 (05 Sep 2026)
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
 //
 // WHY THIS FILE EXISTS
@@ -38,9 +39,9 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: { absolute: 'Foreign Settlement Calculator — Instant | Trikaal Vaani' },
+  title: { absolute: 'Foreign Settlement Calculator by Date of Birth — Free' },
   description:
-    'Videsh basne ka yog aapki kundali se — 12vaan, navam aur chaturth bhaav, Rahu-Ketu aur Dasha timing, har point ki wajah ke saath. Free check karein.',
+    'Will you settle abroad? Free foreign settlement calculator by date of birth: 12th house, Rahu, 4th house and dasha timing, with the reason for every point.',
   keywords: [
     'foreign settlement calculator',
     'videsh settlement calculator',

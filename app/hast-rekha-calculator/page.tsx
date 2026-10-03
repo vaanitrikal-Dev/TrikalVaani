@@ -1,7 +1,10 @@
 // ═══════════════════════════════════════════════════════════════
 // app/hast-rekha-calculator/page.tsx
 // AI HAST REKHA CALCULATOR — money page (server component)
-// Version: v2.0
+// Version: v3.1 (03 Oct 2026) — +2 English H2 from the Radar weekly report 03 Oct 2026 — content-edit brief / PUSH list.
+//   "AI palm reading online / scanner free no sign up" and "palm reading for male / female".
+//   Price stated as on page (report ₹51). Form, upload flow, JSON-LD unchanged.
+// (previous header line) Version: v2.0
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
 //
 // CHANGE v2.0 (2026-08-31) — HINDI LAYER + PDF LEAD MAGNET
@@ -771,6 +774,22 @@ const HINDI_SECTIONS: HiSection[] = [
       '**अंग्रेज़ी में हर रेखा** — [Life line](/blog/life-line-jeevan-rekha-meaning), [Head line](/blog/head-line-mastishk-rekha-meaning), [Heart line](/blog/heart-line-hriday-rekha-meaning), [Fate line](/blog/fate-line-bhagya-rekha-meaning), [Sun line](/blog/sun-line-surya-rekha-meaning), [Marriage line](/blog/marriage-line-vivah-rekha-meaning)।',
       '**चिह्न और पर्वत** — [मछली का चिह्न](/blog/fish-sign-machli-on-palm-meaning), [M का निशान](/blog/m-sign-on-palm-meaning), [त्रिशूल](/blog/trishul-sign-on-palm-meaning), [तारा, त्रिभुज, चतुर्भुज](/blog/tara-tribhuj-chaturbhuj-palm-matlab), [द्वीप, क्रॉस, ग्रिल](/blog/dweep-cross-grille-palm-matlab), [हथेली के पर्वत](/blog/mounts-on-palm-parvat-meaning)।',
       '**मुफ़्त जाँच** — [Kundali Calculator](/calculators/free-janam-kundali-calculator), [Dasha Calculator](/calculators/free-dasha-calculator), [शादी कब होगी](/calculators/free-shadi-kab-hogi-calculator), [Santan Yog](/calculators/free-santan-yog-calculator), और [Swapna Shastra](/swapna) — सपनों का विश्लेषण।',
+    ],
+  },
+  {
+    id: "ai-palm-reading-online",
+    h2: "AI Palm Reading Online — Upload a Photo, No Sign-Up",
+    paras: [
+      "This page reads your palm from **one photo**: no app to download, no sign-up, and no birth time needed. The analysis covers the six main lines, the seven mounts and eight life scores, each with the classical Samudrik rule it comes from. The guidance and line-by-line articles on this page are free; the full personal report with five remedies and a PDF is **₹51**.",
+      "Use daylight, an open palm and the camera straight above — the photo guide above explains why most bad readings start with a bad photo. For how this differs from asking ChatGPT or a scanner app, see [ChatGPT से हस्तरेखा](#chatgpt-se-farak), and for an honest view on accuracy, [AI Palm Reading Online](/blog/ai-palm-reading-online-hast-rekha).",
+    ],
+  },
+  {
+    id: "male-female-hand",
+    h2: "Palm Reading for Male and Female — Which Hand to Show?",
+    paras: [
+      "Tradition reads the **right hand for men and the left for women** as the main hand. Many palmists today also give weight to the hand you write and work with, because it shows the present while the other shows what you were born with. If you can, upload both — the comparison is the most useful part.",
+      "The lines themselves are read the same way for both; what differs is which hand leads. The Hindi detail is in [महिलाओं की हस्तरेखा](#female-palm) and [पुरुषों की हस्तरेखा](#male-palm).",
     ],
   },
 ];
