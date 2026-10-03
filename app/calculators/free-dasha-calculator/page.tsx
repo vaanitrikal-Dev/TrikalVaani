@@ -2,8 +2,18 @@
 
 // ============================================================
 // File: app/calculators/free-dasha-calculator/page.tsx
-// Version: 4.1 (1 Oct 2026 — "📜 Granth ke Upay — BPHS 84" dabba (components/calculators/GranthUpayBox); upay heading "(Parashar)" -> "(Parampara)") — three-level dasha (Pratyantar) + content rebuild
+// Version: 4.2 (3 Oct 2026 — +6 keyword H2s from Trikaal Keywords 2-3 Oct 2026: Vimshottari calculator, Rahu/Ketu/Shani mahadasha remedies) — three-level dasha (Pratyantar) + content
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
+//
+// v4.2 (2026-10-03)
+//   +6 H2 sections from DataForSEO volumes in the weekly Trikaal Keywords
+//   sheet: "vimshottari dasha calculator" 18.1K, rahu mahadasha remedies
+//   1.6K + rahu dasha remedies 1.6K, राहु महादशा-अंतर्दशा उपाय (long tail),
+//   ketu mahadasha results/effects 1K+1K, ketu remedies 390+390, shani
+//   mahadasha ke upay. Only 6, not 10: the other dasha terms in the sheet are
+//   either already covered here (mahadasha chart, pratyantar) or a different
+//   intent (Dussehra / Dasha Mata festival queries).
+//   Remedies follow editorial ruling #4. FORM, API, RESULT RENDERING unchanged.
 //
 // v4.0 (2026-09-01)
 //   CONTEXT — this page was BROKEN, not merely thin. It reads
@@ -275,6 +285,14 @@ type DzSection = { id: string; h2: string; paras: string[] };
 
 const PILLAR: DzSection[] = [
   {
+    id: "vimshottari-calculator",
+    h2: "Vimshottari Dasha Calculator — How the 120-Year Cycle Works",
+    paras: [
+      "**Vimshottari (\"of 120\") is the dasha system Maharishi Parashara treats as primary.** Nine grahas rule in a fixed order with fixed lengths that add up to 120 years — Ketu 7, Venus 20, Sun 6, Moon 10, Mars 7, Rahu 18, Jupiter 16, Saturn 19, Mercury 17. The calculator above finds where your cycle started from the nakshatra the Moon occupied at birth, and how much of that first dasha was already used up before you were born.",
+      "What you get: the current **Mahadasha, Antardasha and Pratyantar** with dates, all nine Antardashas of the current Mahadasha, and the next five Mahadashas. Why the exact birth time matters: the Moon moves about half a degree an hour, so a one-hour error shifts every date by roughly **three to ten months**, depending on which dasha you were born in. The manual method is in [विंशोत्तरी दशा कैसे कैलकुलेट करें](/blog/vimshottari-dasha-kaise-calculate-karein).",
+    ],
+  },
+  {
     id: 'abhi-kaun-si-dasha',
     h2: 'अभी कौन सी दशा चल रही है — तीनों स्तर एक साथ',
     paras: [
@@ -416,6 +434,46 @@ const PILLAR: DzSection[] = [
       '**पहले तीनों स्तर नोट कर लीजिए** — महादशा, अंतर्दशा और प्रत्यंतर, तिथि सहित। अगली संधि कब है, वह भी ऊपर की टाइमलाइन से देख लीजिए। यह जानकारी अगले कई साल काम आएगी।',
       '**फिर बाकी मुफ्त जाँचें कर लीजिए**, क्योंकि दशा अकेली पूरी तस्वीर नहीं देती: [मुफ्त कुंडली](/calculators/free-janam-kundali-calculator) से लग्न और भाव, [नक्षत्र](/calculators/free-nakshatra-calculator) से दशा का आधार, और [साढ़े साती](/calculators/free-sade-sati-calculator) से गोचर का दबाव — तीनों अलग-अलग चीजें बताते हैं।',
       'और अगर सामने कोई ठोस फैसला है — नौकरी छोड़नी है, घर खरीदना है, या शादी का समय तय करना है — तो सामान्य लेख उसे तय नहीं कर सकता। विवाह के लिए [कुंडली मिलान](/kundali-milan) है, और पूरे जीवन-पथ के लिए [कार्मिक बैकग्राउंड रीडिंग](/karmic-background-reading)। सारे विकल्प [प्राइसिंग पेज](/pricing) पर हैं।',
+    ],
+  },
+  {
+    id: "rahu-remedies",
+    h2: "Rahu Mahadasha Remedies — What Genuinely Helps",
+    paras: [
+      "Use these only if the calculator shows a **Rahu Mahadasha or Antardasha** running. **What:** chant \"ॐ रां राहवे नमः\" 108 times (about 10 minutes). **When:** Saturday evening. **Cost:** free. **How long:** 21 Saturdays. **Why for you:** a mantra calms Rahu without amplifying it, so it is safe in any chart.",
+      "**What:** offer a coconut at a temple, or give a dark-coloured blanket to someone who needs one. **When:** Saturday. **Cost:** ₹30–300. **How long:** 11 Saturdays. **Why for you:** these are Rahu's traditional daan items. And one behavioural remedy that matters more than either: write every big decision down and wait seven days before acting — Rahu's signature is false urgency. Hessonite (Gomed) is not a first remedy; check [Gomed suitability](/calculators/free-should-i-wear-gomed) first. More in [Rahu Mahadasha](/blog/rahu-mahadasha-effects-guide).",
+    ],
+  },
+  {
+    id: "rahu-antardasha-upay",
+    h2: "राहु की महादशा में किस अंतर्दशा में क्या उपाय करें",
+    paras: [
+      "राहु की 18 साल की महादशा में नौ अंतर्दशाएँ आती हैं, और उपाय का ज़ोर **अभी चल रही अंतर्दशा के स्वामी** पर रखा जाता है — ऊपर का कैलकुलेटर यही दिखाता है। तरीका एक ही, पाँच हिस्सों में: **क्या:** अंतर्दशा-स्वामी की एक वस्तु का दान (सूची नीचे)। **कब:** उसी ग्रह के वार, सुबह। **कितने का:** ₹20–50। **कितने दिन:** 11 सप्ताह। **आपके लिए क्यों:** महादशा क्षेत्र तय करती है और अंतर्दशा घटना — इसलिए अंतर्दशा-स्वामी को संतुलित करना सबसे सीधा असर देता है।",
+      "वस्तु और वार: **राहु-गुरु** — चने की दाल, गुरुवार। **राहु-शनि** — काले तिल, शनिवार। **राहु-बुध** — हरी मूँग, बुधवार। **राहु-केतु** — कंबल, शनिवार। **राहु-शुक्र** — चावल या सफ़ेद मिठाई, शुक्रवार। **राहु-सूर्य** — गेहूँ या गुड़, रविवार। **राहु-चंद्र** — चावल या दूध, सोमवार। **राहु-मंगल** — मसूर दाल, मंगलवार। **राहु-राहु** — नारियल, शनिवार। राहु का स्वभाव और भ्रम के लक्षण [राहु अंतर्दशा](/blog/rahu-antardasha-confusion-symptoms) में हैं।",
+    ],
+  },
+  {
+    id: "ketu-results",
+    h2: "Ketu Mahadasha Results — Effects of the 7-Year Period",
+    paras: [
+      "Ketu's Mahadasha lasts **seven years**, and its common themes are detachment, sudden endings, a pull towards spirituality, research and intuition, and losing interest in things that used to matter. As with every dasha, the result depends on where Ketu sits and which sign it occupies — Ketu in the 12th, or with Jupiter, often gives deep spiritual results, while Ketu in the 7th more often shows up as distance in relationships.",
+      "If the period brings sudden separations or a feeling of emptiness, the remedies in the next section belong alongside that reading — and the longer view is that Ketu removes what was not essential, which is why many people describe this as the period that clarified their life. The full picture is in [Ketu Mahadasha](/blog/ketu-mahadasha-vairagya-symptoms).",
+    ],
+  },
+  {
+    id: "ketu-remedies",
+    h2: "Ketu Mahadasha Remedies",
+    paras: [
+      "**What:** offer durva grass to Lord Ganesha and chant \"ॐ गं गणपतये नमः\" 108 times. **When:** Wednesday morning. **Cost:** ₹10. **How long:** 21 Wednesdays. **Why for you:** tradition links Ketu with Ganesha, and this is the gentlest way to steady a Ketu period.",
+      "**What:** feed a stray dog. **When:** Saturday. **Cost:** ₹20. **How long:** 11 Saturdays. **Why for you:** the dog is Ketu's traditional animal. Cat's Eye (Lehsunia) is not a first remedy; check [Cat's Eye suitability](/calculators/free-should-i-wear-cats-eye) before considering it.",
+    ],
+  },
+  {
+    id: "shani-upay",
+    h2: "Shani Mahadasha Ke Upay — Jo Sach Mein Kaam Karte Hain",
+    paras: [
+      "Pehle yeh dekhiye ki Shani aapke lagna ke liye shubh hain ya nahi — **Makar, Kumbh, Tula aur Vrishabh lagna ke liye Shani shubh, kai mein yogkarak** maane jaate hain. Agar aisa hai, to upay ka matlab Shani se ladna nahi, unhe sahara dena hai.",
+      "**Kya:** kisi buzurg, mazdoor ya safai-karmi ki ek thos madad. **Kab:** Shanivar. **Kharch:** ₹50–200. **Kitne din:** 19 Shanivar. **Aapke liye kyun:** Shani seva-varg ke karak hain, aur shastra mein Shani ka sabse prabhavi upay seva aur anyaay sudharna hai. Neelam pehla upay nahi — pehle [Neelam suit karega ya nahi](/calculators/free-should-i-wear-neelam) dekhiye. Poori guide [Shani Mahadasha](/blog/shani-mahadasha-effects-guide) mein hai.",
     ],
   },
 ];
@@ -870,7 +928,7 @@ export default function FreeDashaCalculatorPage() {
             </ol>
           </nav>
 
-          {/* ── v4.0: PILLAR CONTENT — 16 keyword-driven H2 sections ── */}
+          {/* ── v4.0: PILLAR CONTENT — 22 keyword-driven H2 sections ── */}
           <section className="mt-12">
             {PILLAR.map((s) => (
               <div key={s.id} id={s.id} className="scroll-mt-24 mb-10">

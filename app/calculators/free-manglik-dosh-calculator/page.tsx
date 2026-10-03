@@ -2,11 +2,22 @@
 
 // ============================================================
 // File: app/calculators/free-manglik-dosh-calculator/page.tsx
-// Version: 2.2 (1 Oct 2026 — "📜 Granth ke Upay — BPHS 84" dabba (components/calculators/GranthUpayBox); upay heading "(Parashar)" -> "(Parampara)") — 📖 GRANTH SE: BPHS 80.48-49 (21 Sep 2026)
+// Version: 2.3 (3 Oct 2026 — +10 keyword H2s from Trikaal Keywords 2-3 Oct 2026: mangal dosha calculator, manglik kya hota hai, check by DOB, remedies) — 📖 GRANTH SE: BPHS 80.48-49 (21 Sep 2026)
 // PICHHLA: v2.0 — Free Manglik Dosh Calculator (Radar E3 content build)
 // VM endpoint: /manglik-dosh (dedicated, 100% accurate)
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
 // Changelog:
+//   v2.3 (2026-10-03) — +10 H2 sections (11 kept + 3 new at top, 7 at the end),
+//        chosen from DataForSEO volumes in the weekly Trikaal Keywords sheet:
+//        "mangal dosha calculator" 12.1K, "manglik kya hota hai" 8.1K,
+//        "manglik dosha check" 8.1K, mangal dosha remedies (6 variants x 1K),
+//        मंगल दोष के उपाय, manglik ladki se shadi ke nuksan 880, mangal ke upay
+//        720, आंशिक/चंद्र मांगलिक, remedies after marriage.
+//        • Remedies follow editorial ruling #4 (what / when / cost / how long / why);
+//          Moonga is never the first remedy; every heavy statement carries its
+//          bhang/remedy in the same paragraph (ruling #1).
+//        • One same-page anchor link (#dosh-ki-kaat).
+//        • FORM, API, RESULT RENDERING, HOUSE_ARTICLES: unchanged.
 //   v2.0 (2026-08-31) — CONTENT + INTERNAL LINKING REBUILD.
 //        Fourth page in this series, after kaal-sarp v2.0, pitra-dosh v2.0
 //        and sade-sati v2.0. Driven by the Radar E3 PAA/PASF keyword brief
@@ -269,6 +280,30 @@ type PillarSection = { id: string; h2: string; paras: string[] };
 
 const PILLAR: PillarSection[] = [
   {
+    id: "mangal-dosha-calculator",
+    h2: "Mangal Dosha Calculator — How This Free Check Works",
+    paras: [
+      "A Mangal Dosha calculator has to answer one question first — **which house Mars occupies in your birth chart** — and then a second, more important one: **is that dosha cancelled?** This calculator takes your date, exact time and place of birth, computes Mars with Swiss Ephemeris (Lahiri ayanamsa), builds the houses from your Lagna, checks Mars against the six Manglik houses (1, 2, 4, 7, 8, 12), assigns severity, and then tests the classical cancellation conditions.",
+      "What you get free: the verdict, severity, Mars's house, sign and degree, active cancellations and three remedies. What one chart cannot tell you: whether the marriage match is affected — Manglik is a matching question, and the most common cancellation is that both partners are Manglik. [Kundali Milan](/kundali-milan) checks both charts together. The Hindi walkthrough is in [मंगल दोष कैलकुलेटर गाइड](/blog/mangal-dosh-calculator-hindi).",
+    ],
+  },
+  {
+    id: "manglik-kya-hota-hai",
+    h2: "Manglik Kya Hota Hai? — Seedhe Shabdon Mein",
+    paras: [
+      "**Manglik woh vyakti hai jiski janm kundali mein Mangal 1st, 2nd, 4th, 7th, 8th ya 12th bhaav mein ho.** Bas itni si paribhasha — rang, roop, swabhav, janm ka din ya mahina is par koi asar nahi daalta. Ise Mangal dosh, Kuja dosh ya Bhauma dosh bhi kehte hain, aur yeh mukhya roop se vivah-milan ka vishay hai, vyaktigat bhagya ka nahi.",
+      "Paribhasha ke saath hi teen baatein jaan lijiye. Pehli — bahut se Manglik logon ki kundali mein **bhang pehle se hota hai** ([bhang ke niyam](#dosh-ki-kaat) isi page par hain). Doosri — **2nd aur 12th bhaav ka dosh kam gambhir** hai. Teesri — **dono paksh Manglik hon to dosh aapas mein kat jaata hai.** Is vishay ke aas-paas bane mithak [मांगलिक के 10 मिथक](/blog/manglik-myths-hindi) mein tode gaye hain.",
+    ],
+  },
+  {
+    id: "check-by-dob",
+    h2: "Manglik Dosha Check — Kya Sirf Date of Birth Se Ho Sakta Hai?",
+    paras: [
+      "Seedha jawab: **sirf janm tithi se Manglik check bharosemand nahi hota.** Manglik dosh bhaav se tay hota hai, aur bhaav lagna se bante hain — lagna lagbhag har do ghante mein badal jaata hai. Ek hi din janme do logon mein se ek Manglik ho sakta hai aur doosra nahi.",
+      "Agar janm samay bilkul nahi pata, to **Unknown time** chuniye — calculator dopahar 12 baje ka chart lega; is natije ko antim nahi, kaam-chalau maaniye. Kuch paramparayein Mangal ko Chandra se bhi dekhti hain, aur Chandra rashi par samay ka asar bahut kam hota hai — [Rashi Calculator](/calculators/free-rashi-calculator) se Chandra rashi nikaal kar dekh sakte hain ki Chandra se Mangal kahan hai. Samay dhoondhne ki jagah: janm praman-patra, hospital ki discharge summary, ya parivaar ki purani janampatri.",
+    ],
+  },
+  {
     id: 'dosh-ki-kaat',
     h2: 'मांगलिक दोष की काट — Cancellation कब लगती है?',
     paras: [
@@ -372,6 +407,65 @@ const PILLAR: PillarSection[] = [
       '**Hanuman ji** is the answer given in every classical remedial tradition, and the reasoning is direct rather than mystical: Hanuman is regarded as the deity who governs Mars, and Mars-related affliction is therefore addressed through his worship. In practice this means the **Hanuman Chalisa, read daily, and especially on Tuesdays** — the day Mars rules.',
       'Two others are named alongside. **Lord Kartikeya (Murugan)**, who in classical texts is himself associated with Mars — Mangal is called his graha in several traditions, and his worship is prescribed particularly in South India. And **Lord Shiva**, through the Mangalnath temple at Ujjain, which is traditionally held to be the birthplace of Mars and where the Bhaat Puja for Mangal Dosh is performed.',
       'One honest note before you travel anywhere. **No deity, temple or ritual deletes a planetary placement from a birth chart** — anyone promising permanent removal is selling something that does not exist. What remedies genuinely do is reduce the behavioural expression of Mars: the anger, the haste, the confrontation that actually damage a marriage. That is not a small thing, and it is achievable at home for nothing. The full remedy set, with what each is actually for, is in [Mangal Dosh Remedies](/blog/mangal-dosh-remedies) and, in Hindi, [मंगल दोष के उपाय](/blog/mangal-dosh-remedies-hindi).',
+    ],
+  },
+  {
+    id: "mangal-dosha-remedies",
+    h2: "Mangal Dosha Remedies — What Actually Works",
+    paras: [
+      "Before any remedy, check cancellation: **if the dosha is cancelled, no remedy is needed.** If it is not, these three work, each in the five-part standard.",
+      "**What:** read the Hanuman Chalisa once (about 8–10 minutes). **When:** every Tuesday morning. **Cost:** free. **How long:** 11 Tuesdays. **Why for you:** Mars is the planet the calculator found in a Manglik house, and Hanuman is the deity tradition assigns to Mars.",
+      "**What:** give red lentils (masoor dal) and a little jaggery to a temple or a needy family. **When:** Tuesday, before sunset. **Cost:** ₹30–60. **How long:** 11 Tuesdays. **Why for you:** these are Mars's own items, given on Mars's day.",
+      "**What:** one rule — wait a full day before any big decision or angry reply. **When:** daily. **Cost:** free. **How long:** 40 days, long enough to become habit. **Why for you:** the real damage Mars does in a marriage comes through haste and temper, and this targets exactly that. Red Coral (Moonga) is not a first remedy — only after a [Moonga suitability check](/calculators/free-should-i-wear-moonga). The full list is in [Mangal Dosh Remedies](/blog/mangal-dosh-remedies).",
+    ],
+  },
+  {
+    id: "ghar-par-upay",
+    h2: "मंगल दोष के उपाय — घर पर, बिना खर्च",
+    paras: [
+      "नियम वही: **भंग हो तो उपाय की ज़रूरत नहीं।** भंग न हो तो घर पर ये दो उपाय, हर एक पाँच हिस्सों में।",
+      "**क्या:** \"ॐ मंगलाय नमः\" मंत्र 108 बार (लगभग 10 मिनट)। **कब:** मंगलवार सुबह, स्नान के बाद। **कितने का:** मुफ़्त। **कितने दिन:** 21 मंगलवार। **आपके लिए क्यों:** मंत्र मंगल को शांत करता है, बढ़ाता नहीं — इसलिए हर कुंडली के लिए सुरक्षित है, रत्न जैसा जोखिम नहीं।",
+      "**क्या:** किसी छोटे भाई, बहन या उनके समान किसी व्यक्ति की एक ठोस मदद। **कब:** मंगलवार। **कितने का:** मुफ़्त या ₹50 तक। **कितने दिन:** 11 मंगलवार। **आपके लिए क्यों:** शास्त्र में मंगल भ्रातृ-कारक हैं — छोटे भाई-बहनों से संबंध सुधारना मंगल को सीधे संतुलित करता है। पूरी सूची [मंगल दोष के उपाय](/blog/mangal-dosh-remedies-hindi) और [मांगलिक दोष: शादी की समस्या और 11 उपाय](/blog/manglik-dosh-shaadi-mein-problem-upay-hindi) में है।",
+    ],
+  },
+  {
+    id: "manglik-ladki-nuksan",
+    h2: "Manglik Ladki Se Shadi Ke Nuksan — Sach Kya Hai?",
+    paras: [
+      "Seedhi baat: **shastra mein Manglik ladki ke liye alag se koi \"nuksan\" nahi likha** — niyam ladka aur ladki dono ke liye bilkul ek hai. Dar ka sabse bada hissa 8th bhaav ke \"jeevansathi ki aayu\" wale mithak se aata hai, jiska shastriya aadhar utna nahi jitna bataya jaata hai — [8th bhaav mein Mangal: deerghayu ka mithak](/blog/mangal-dosh-8th-house-effects-hindi).",
+      "Jo vyavhaarik jokhim sach hai, woh yeh hai ki Mangal-pradhan jodi mein krodh aur takrav jaldi badh sakta hai — aur uska upay usi waqt hai: dono kundaliyan milaiye, bhang dekhiye, aur yaad rakhiye ki dono Manglik hon to dosh waise hi kat jaata hai. [Kundali Milan](/kundali-milan) yeh teeno ek saath jaanchta hai, aur yeh dar pramaan sahit [kya Manglik vivah khatarnak hai](/blog/manglik-marriage-dangerous-hindi) mein toda gaya hai.",
+    ],
+  },
+  {
+    id: "mangal-ke-upay-mangalvar",
+    h2: "Mangal Ke Upay — Mangalvar Ko Kya Karein",
+    paras: [
+      "Mangalvar Mangal ka din hai, isliye Mangal ke paramparik upay isi din kiye jaate hain. **Kya:** Hanuman mandir mein ek laal phool aur gud-chana chadhana. **Kab:** Mangalvar shaam. **Kharch:** ₹20–40. **Kitne din:** 11 Mangalvar. **Aapke liye kyun:** Mangal ki ugrata Hanuman-upasana se shaant maani jaati hai — calculator mein Mangal kisi Manglik bhaav mein aaye to yahi sabse saral shuruaat hai.",
+      "Mangalvar ko karz-mukti ke upay bahut khoje jaate hain. Imaandari se: karz ka asli kaaran aur samay dasha se dikhta hai — [karz mukti ka dasha-samay](/blog/dasha-timing-debt-free-window-astrology-hindi). Parampara ka ek niyam vyavhaarik bhi hai: **Kya:** karz ki ek kisht, chahe chhoti ho, Mangalvar ko chukana. **Kab:** Mangalvar. **Kharch:** utni hi jitni kisht. **Kitne din:** agle 12 Mangalvar. **Aapke liye kyun:** parampara Mangalvar ko karz chukane ka din maanti hai, aur har hafte ka ek chhota kadam karz ka bojh sach mein ghatata hai.",
+    ],
+  },
+  {
+    id: "aanshik-manglik",
+    h2: "आंशिक (लो) मांगलिक दोष क्या है?",
+    paras: [
+      "\"आंशिक\" या \"लो मांगलिक\" शास्त्र का शब्द नहीं, व्यवहार का है — इसका अर्थ है ऐसा मंगल दोष जो मौजूद तो है पर कमज़ोर है। तीन स्थितियों में ऐसा कहा जाता है: **मंगल दूसरे या बारहवें भाव में हों** (कम गंभीरता), **दोष केवल लग्न से बन रहा हो पर चंद्र और शुक्र से नहीं**, या **कोई आंशिक भंग मौजूद हो।**",
+      "आंशिक दोष के लिए अलग उपाय नहीं हैं — ऊपर वाले उपाय ही काफ़ी हैं, और अक्सर कुछ करने की ज़रूरत भी नहीं होती। मिलान में आंशिक मांगलिक और ग़ैर-मांगलिक का विवाह आम तौर पर स्वीकार किया जाता है — विस्तार [मांगलिक और ग़ैर-मांगलिक का विवाह](/blog/manglik-non-manglik-marriage-hindi) में है।",
+    ],
+  },
+  {
+    id: "chandra-manglik",
+    h2: "चंद्र मांगलिक दोष क्या है?",
+    paras: [
+      "जब मंगल को लग्न की जगह **चंद्र राशि से** गिना जाए और वह चंद्र से 1, 2, 4, 7, 8 या 12वें स्थान में हो, तो इसे **चंद्र मांगलिक दोष** कहते हैं। कई परंपराएँ इसे देखती हैं, क्योंकि चंद्र मन का कारक है और विवाह में मन का मेल मायने रखता है।",
+      "वज़न का क्रम: **लग्न से बना दोष सबसे प्रबल**, चंद्र से बना उससे हल्का, और केवल चंद्र से बना दोष आमतौर पर \"आंशिक\" माना जाता है। ऊपर वाला कैलकुलेटर लग्न से गणना करता है — चंद्र से जाँचने के लिए [राशि कैलकुलेटर](/calculators/free-rashi-calculator) से चंद्र राशि और [कुंडली कैलकुलेटर](/calculators/free-janam-kundali-calculator) से मंगल की राशि देखकर गिनिए।",
+    ],
+  },
+  {
+    id: "after-marriage",
+    h2: "Manglik Dosha Remedies After Marriage",
+    paras: [
+      "If the marriage has already happened, the first thing to know is that **no remedy is \"too late\"**. Most cancellation conditions are in the chart from birth, and if your spouse's chart is also Manglik, the dosha is classically cancelled — many couples learn this only after years of worry. Check both charts first.",
+      "**What:** read the Hanuman Chalisa, together or individually (about 8–10 minutes). **When:** Tuesday evening. **Cost:** free. **How long:** 11 Tuesdays. **Why for you:** it addresses Mars directly, whereas pre-marriage rituals such as Kumbh Vivah apply only before the wedding. Add one household rule — no big argument is settled the same day. A step-by-step guide is in [I Am Manglik — What Should I Do?](/blog/i-am-manglik-what-to-do).",
     ],
   },
 ];
@@ -842,7 +936,7 @@ export default function FreeManglikDoshCalculatorPage() {
             </ol>
           </nav>
 
-          {/* ── v2.0: PILLAR CONTENT — 11 keyword-driven H2 sections ── */}
+          {/* ── v2.0: PILLAR CONTENT — 21 keyword-driven H2 sections ── */}
           <section className="mt-12">
             {PILLAR.map((s, si) => (
               <div key={s.id} id={s.id} className="scroll-mt-24 mb-10">

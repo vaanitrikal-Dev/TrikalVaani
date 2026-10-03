@@ -2,10 +2,26 @@
 
 // ============================================================
 // File: app/calculators/free-sade-sati-calculator/page.tsx
-// Version: 2.1 (1 Oct 2026 — "📜 Granth ke Upay — BPHS 84" dabba (components/calculators/GranthUpayBox); upay heading "(Parashar)" -> "(Parampara)") — Free Sade Sati Calculator (Radar E3 content build)
+// Version: 2.2 (3 Oct 2026 — +10 keyword H2s from Trikaal Keywords 2-3 Oct 2026, all-12-rashi start/end date table, Kumbh exact dates) — Free Sade Sati Calculator (Radar E3 content build)
 // VM endpoint: /sade-sati (dedicated, 100% accurate)
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
 // Changelog:
+//   v2.2 (2026-10-03) — +10 H2 sections (12 kept + 2 new at top, 1 after the
+//        rashi table, 7 at the end), chosen from DataForSEO volumes in the
+//        weekly Trikaal Keywords sheet: "sade sati calculator" 6.6K,
+//        "sade sati meaning" 5.4K, "meen/kumbh rashi sade sati start and end
+//        date" 4.4K/3.6K, "saturn retrograde" 1.9K, Mesh/Vrishabh/Mithun,
+//        Singh dhaiya, Shani dosh upay, English remedies.
+//        • REVERSES the v2.0 "no exact dates" decision. Dates are now printed,
+//          computed with Swiss Ephemeris + Lahiri, IST (same engine as the
+//          calculator) and cross-checked against /blog/saturn-transit-2027-date-timeline.
+//          Ingress dates are fixed astronomical facts and do not go stale; the
+//          same dates are live on all 24 /blog/*-rashi-sade-sati pages (3 Oct 2026).
+//        • New SADE_SATI_DATES table (12 rows) rendered inside 'start-end-tithi'.
+//        • 'kumbh-kab-hatega' paragraph 2 and its FAQ now give the exact dates
+//          instead of saying they are deliberately omitted.
+//        • Remedies follow editorial ruling #4 (what / when / cost / how long / why).
+//        • FORM, API, RESULT RENDERING, RASHI_STATUS: unchanged.
 //   v2.0 (2026-08-31) — CONTENT + INTERNAL LINKING REBUILD.
 //        Third page in this series, after free-kaal-sarp-dosh-calculator
 //        v2.0 and free-pitra-dosh-calculator v2.0. Driven by the Radar E3
@@ -273,6 +289,24 @@ const RASHI_STATUS: { rashi: string; en: string; status: string; tone: 'in' | 'd
   { rashi: 'वृश्चिक', en: 'Scorpio',     status: 'साढ़ेसाती नहीं चल रही',         tone: 'out',    slug: 'vrishchik-rashi-sade-sati-hindi' },
 ];
 
+// v2.2 — exact Sade Sati windows, Swiss Ephemeris + Lahiri, IST (computed 3 Oct 2026).
+// start = Saturn's first entry into the 12th sign from the Moon; end = final exit
+// from the 2nd sign. Fixed astronomical dates — they do not change over time.
+const SADE_SATI_DATES: { rashi: string; start: string; end: string; slug: string }[] = [
+  { rashi: "Mesh (Aries)", start: "29 Mar 2025", end: "31 May 2032", slug: "mesh-rashi-sade-sati" },
+  { rashi: "Vrishabh (Taurus)", start: "3 Jun 2027 (final 23 Feb 2028)", end: "13 Jul 2034", slug: "vrishabh-rashi-sade-sati" },
+  { rashi: "Mithun (Gemini)", start: "8 Aug 2029 (final 17 Apr 2030)", end: "27 Aug 2036", slug: "mithun-rashi-sade-sati" },
+  { rashi: "Kark (Cancer)", start: "31 May 2032", end: "13 Jul 2039 (first exit 22 Oct 2038)", slug: "kark-rashi-sade-sati" },
+  { rashi: "Simha (Leo)", start: "13 Jul 2034", end: "26 Sep 2041 (first exit 28 Jan 2041)", slug: "simha-rashi-sade-sati" },
+  { rashi: "Kanya (Virgo)", start: "27 Aug 2036", end: "30 Aug 2044 (first exit 11 Dec 2043)", slug: "kanya-rashi-sade-sati" },
+  { rashi: "Tula (Libra)", start: "22 Oct 2038 (final 13 Jul 2039)", end: "8 Dec 2046", slug: "tula-rashi-sade-sati" },
+  { rashi: "Vrishchik (Scorpio)", start: "28 Jan 2041 (final 26 Sep 2041)", end: "4 Dec 2049 (first exit 6 Mar 2049)", slug: "vrishchik-rashi-sade-sati" },
+  { rashi: "Dhanu (Sagittarius)", start: "11 Dec 2043 (final 30 Aug 2044)", end: "25 Feb 2052", slug: "dhanu-rashi-sade-sati" },
+  { rashi: "Makar (Capricorn)", start: "26 Jan 2017 (final 26 Oct 2017)", end: "29 Mar 2025 \u2014 completed; next from 8 Dec 2046", slug: "makar-rashi-sade-sati" },
+  { rashi: "Kumbh (Aquarius)", start: "24 Jan 2020", end: "23 Feb 2028 (first exit 3 Jun 2027)", slug: "kumbh-rashi-sade-sati" },
+  { rashi: "Meen (Pisces)", start: "29 Apr 2022 (final 17 Jan 2023)", end: "17 Apr 2030 (first exit 8 Aug 2029)", slug: "meen-rashi-sade-sati" },
+];
+
 // ============================================================
 // v2.0 — PILLAR CONTENT
 // Every h2 is a keyword Google itself surfaced in PAA/PASF for this
@@ -282,12 +316,36 @@ type PillarSection = { id: string; h2: string; paras: string[] };
 
 const PILLAR: PillarSection[] = [
   {
+    id: "calculator-by-dob",
+    h2: "Sade Sati Calculator by Date of Birth — How It Works",
+    paras: [
+      "The calculator above needs three things — **date, exact time and place of birth** — because Sade Sati is counted from your **Moon sign (Chandra Rashi)**, not your Sun sign. It takes the Moon's sidereal position from Swiss Ephemeris with Lahiri ayanamsa, compares it with Saturn's live transit, and returns a Yes/No verdict, the active phase, exact start and end dates, and the days remaining.",
+      "Why the time matters: the Moon changes sign roughly every two and a quarter days, so a birth close to a sign change can flip the whole result. If you genuinely do not know the time, tick **Unknown time** — a noon chart is used — and treat the answer as provisional. You can confirm your Moon sign separately with the [Rashi Calculator](/calculators/free-rashi-calculator), and the full method is in the [Sade Sati Calculator guide](/blog/shani-sade-sati-calculator).",
+    ],
+  },
+  {
+    id: "sade-sati-meaning",
+    h2: "Sade Sati Meaning — What Sade Sati Actually Is",
+    paras: [
+      "**Sade Sati literally means \"seven and a half\"** — the roughly 7.5-year period when Saturn transits the **12th, 1st and 2nd sign from your Moon sign**, about two and a half years in each. Because Saturn takes about 29.5 years to circle the zodiac, most people go through it **two or three times in a lifetime**.",
+      "What it is not: it is not a curse, not a punishment, and not the same for everyone. Classically Saturn is the graha of karma, discipline and delay — it slows results rather than denying them, and how heavy the period feels depends on Saturn's own strength in your chart and the dasha running at the same time. The longer explanation, with effects and remedies, is in [Sade Sati: Meaning, Effects and Remedies](/blog/sade-sati-meaning-effects-remedies).",
+    ],
+  },
+  {
     id: 'kis-rashi-par',
     h2: 'शनि की साढ़े साती किस राशि पर है?',
     paras: [
       'जब तक **शनि मीन राशि में** गोचर कर रहे हैं, तब तक साढ़ेसाती केवल **तीन राशियों** पर चलती है — और यह नियम से निकलता है, किसी सूची से नहीं। साढ़ेसाती का अर्थ है शनि का आपकी **चंद्र राशि से बारहवें, पहले और दूसरे** भाव में गोचर। शनि मीन में हैं, इसलिए: **कुंभ** (मीन उससे दूसरा — अंतिम चरण), **मीन** (शनि राशि पर ही — शिखर चरण), और **मेष** (मीन उससे बारहवाँ — प्रथम चरण)।',
       'बाकी नौ राशियों पर साढ़ेसाती नहीं है, पर दो पर **ढैया** चल रही है, जो अलग चीज़ है और अक्सर उसी नाम से डराई जाती है — **सिंह** (अष्टम शनि) और **धनु** (अर्ध अष्टम)। **मकर** की साढ़ेसाती अभी हाल में पूरी हुई है। नीचे की तालिका में बारहों राशियाँ हैं, और हर राशि अपने विस्तृत पेज से जुड़ी है। एक साथ पूरी सूची [साढ़ेसाती 2026 राशि अनुसार](/blog/sade-sati-2026-rashi-wise-hindi) में है।',
       'एक जरूरी बात, क्योंकि यहीं सबसे बड़ी गलती होती है: **यह चंद्र राशि से तय होता है, सूर्य राशि या नाम राशि से नहीं।** अखबार वाली राशि आमतौर पर सूर्य राशि होती है, और वह यहाँ बेकार है। आपकी असली चंद्र राशि ऊपर वाला कैलकुलेटर जन्म विवरण से निकाल देता है, या [राशि कैलकुलेटर](/calculators/free-rashi-calculator) से अलग से देख लीजिए। गलत राशि पर साढ़ेसाती ढूँढना सबसे आम कारण है जिससे लोग बेवजह डरते हैं।',
+    ],
+  },
+  {
+    id: "start-end-tithi",
+    h2: "Sade Sati Start and End Date — All 12 Rashis",
+    paras: [
+      "The table below gives the **start and end date of the current or next Sade Sati for every Moon sign**, computed with Swiss Ephemeris, Lahiri ayanamsa, IST — the same engine the calculator uses. Start means the day Saturn **first enters** the 12th sign from your Moon; end means the day it **finally leaves** the 2nd sign. Where Saturn's retrograde takes it back for a few months, both dates are shown — the first entry and the final exit.",
+      "Two signs need a note. **Meen**: Sade Sati began on 29 Apr 2022; Saturn briefly slipped back into Makar and entered Kumbh for good on 17 Jan 2023; it ends on **17 Apr 2030**. **Kumbh**: began on 24 Jan 2020; Saturn first leaves Meen on 3 Jun 2027, comes back on 20 Oct 2027, and leaves for good on **23 Feb 2028**. Your own phase changes and days remaining come from the calculator above, and each sign links to its full page.",
     ],
   },
   {
@@ -385,7 +443,7 @@ const PILLAR: PillarSection[] = [
     h2: 'कुंभ राशि से शनि का प्रकोप कब हटेगा?',
     paras: [
       'कुंभ राशि इस समय साढ़ेसाती के **अंतिम चरण (अवरोह)** में है — शनि कुंभ से दूसरे भाव, यानी मीन में। यह तीनों चरणों का आखिरी है, इसलिए सीधा जवाब यह है कि **कुंभ की साढ़ेसाती तब समाप्त होगी जब शनि मीन छोड़कर मेष में प्रवेश करेंगे।**',
-      'यहाँ कोई सटीक तारीख जानबूझकर नहीं लिखी जा रही, और वजह ईमानदार है: शनि की **वक्री चाल** के कारण राशि-परिवर्तन की तारीख कुछ महीने आगे-पीछे होती है, और गोचर की तारीखें हर पंचांग में थोड़ी अलग मिलती हैं। इस पेज पर एक स्थिर तारीख लिख देना कुछ ही महीनों में गलत हो जाएगा। **ऊपर वाला कैलकुलेटर आपकी अपनी सटीक अंत-तिथि और बचे हुए दिन गिनकर देता है** — Swiss Ephemeris से, लाइव।',
+      "**कुंभ की साढ़ेसाती 24 जनवरी 2020 को शुरू हुई थी और 23 फ़रवरी 2028 को पूरी तरह समाप्त होगी।** बीच में एक मोड़ है: शनि 3 जून 2027 को पहली बार मेष में जाएँगे, 20 अक्टूबर 2027 को वक्री होकर मीन में लौटेंगे, और 23 फ़रवरी 2028 को अंतिम रूप से मेष में प्रवेश करेंगे। ये तिथियाँ Swiss Ephemeris (लाहिड़ी अयनांश, IST) से हैं — उसी इंजन से जिससे **ऊपर वाला कैलकुलेटर आपकी अपनी चरण-तिथियाँ और बचे हुए दिन गिनकर देता है।**",
       'और एक बात कुंभ राशि वालों के लिए, क्योंकि यह अक्सर छूट जाती है: **अंतिम चरण में दबाव धीरे-धीरे घटता है, अंतिम दिन अचानक नहीं।** अधिकांश लोग बताते हैं कि राहत खत्म होने से कुछ महीने पहले ही महसूस होने लगी। इस चरण का पूरा विवरण, प्रभाव और उपाय [कुंभ राशि साढ़ेसाती](/blog/kumbh-rashi-sade-sati-hindi) में है।',
     ],
   },
@@ -407,6 +465,63 @@ const PILLAR: PillarSection[] = [
       '**सिंह और धनु**, जिन पर ढैया है, उनके लिए भी उपाय वही हैं पर अवधि छोटी है — इसलिए तीव्रता से करें, लंबी योजना की जरूरत नहीं। और **जिन सात राशियों पर कुछ नहीं चल रहा**, उन्हें कोई शनि-उपाय करने की आवश्यकता ही नहीं है; उनका दबाव किसी और कारण से है, जो [दशा कैलकुलेटर](/calculators/free-dasha-calculator) या [कमजोर ग्रह खोजें](/calculators/free-weak-planet-finder) से पता चलेगा। हर राशि का अलग विस्तृत पेज नीचे की तालिका में लिंक किया गया है।',
     ],
   },
+  {
+    id: "meen-kab-tak",
+    h2: "Meen Rashi Sade Sati Kab Tak Rahegi? — 2nd Phase End Date",
+    paras: [
+      "Meen rashi par Sade Sati **29 April 2022** se chal rahi hai aur **17 April 2030** ko poori hogi. Abhi doosra yaani **shikhar charan** chal raha hai — Shani seedhe Meen par. Yeh charan **3 June 2027** ko pehli baar badlega jab Shani Mesh mein jaayenge, 20 October 2027 ko vakri hokar Shani Meen mein laut aayenge, aur **23 February 2028** ko pakka teesra charan shuru hoga.",
+      "Teesre charan mein Shani Meen se doosre bhaav (Mesh) mein honge — yeh dhan, parivar aur vaani ka bhaav hai, isliye dabav mann se hatkar hisaab-kitaab par aata hai. Ek baat jo raahat deti hai: shikhar charan ka sabse bhaari hissa beech mein hota hai, ant mein nahi. Poora vivaran [Meen Rashi Sade Sati](/blog/meen-rashi-sade-sati-hindi) mein hai.",
+    ],
+  },
+  {
+    id: "mesh-good-bad",
+    h2: "Mesh Rashi Sade Sati — Good or Bad?",
+    paras: [
+      "Neither, by itself. Mesh (Aries Moon) Sade Sati began on **29 Mar 2025**, the peak phase starts on **3 Jun 2027** (final entry 23 Feb 2028), and the cycle ends on **31 May 2032**. One detail changes the reading for Aries: counted from the Aries Moon, **Saturn rules the 10th and 11th signs** — work and gains — so this Sade Sati usually restructures career and income rather than ruining them.",
+      "The demanding part is real: in the peak phase Saturn sits in Mesh, its **sign of debilitation (neecha)**, which tests patience and discipline more than usual — and the remedy belongs right here. **What:** feed one labourer or elderly person a meal. **When:** Saturday, before sunset. **Cost:** ₹50–100. **How long:** 11 Saturdays. **Why for you:** Saturn signifies the working class, and service is the classical way to steady a weak Saturn. More in [Mesh Rashi Sade Sati](/blog/mesh-rashi-sade-sati) and [मेष में शनि नीच 2027](/blog/mesh-mein-shani-neech-2027).",
+    ],
+  },
+  {
+    id: "saturn-retrograde",
+    h2: "Saturn Retrograde 2026 — Does Vakri Shani Change Sade Sati?",
+    paras: [
+      "Saturn turned retrograde on **27 Jul 2026** and turns direct on **11 Dec 2026** (Swiss Ephemeris, Lahiri, IST), and the whole retrograde stays inside Meen. So **no sign's Sade Sati starts or ends because of this retrograde** — the positions in the tables on this page hold through it.",
+      "Retrograde matters only when it crosses a sign boundary, and that happens next year: Saturn enters Mesh on 3 Jun 2027, stations retrograde on 10 Aug, slips back into Meen on 20 Oct, turns direct on 24 Dec, and re-enters Mesh on 23 Feb 2028. That is exactly why Kumbh's Sade Sati \"ends\" twice and Vrishabh's \"starts\" twice. Tradition reads a retrograde Saturn as revisiting unfinished work, not as added danger. Full dates are in [Saturn Transit 2027: Dates and Timeline](/blog/saturn-transit-2027-date-timeline).",
+    ],
+  },
+  {
+    id: "singh-dhaiya",
+    h2: "Singh Rashi Ki Dhaiya Kab Khatam Hogi? — Aur Dhaiya Ke Upay",
+    paras: [
+      "Singh (Simha) par abhi **Ashtam Shani ki dhaiya** hai — **29 March 2025** se. Shani 3 June 2027 ko Meen chhodenge to dhaiya halki padegi, par 20 October 2027 ko vakri hokar laut aayenge; **pakka ant 23 February 2028** ko hoga. Dhanu par chal rahi ardh-ashtam dhaiya bhi bilkul inhi tareekhon par khatam hogi.",
+      "Dhaiya ka upay, paanch hisson mein: **Kya:** kisi mazdoor ya buzurg ko bhojan ya ek joda chappal dena. **Kab:** har Shanivar, suryast se pehle. **Kharch:** ₹20–100. **Kitne din:** 11 Shanivar lagatar. **Aapke liye kyun:** dhaiya Shani ka gochar hai aur Shani seva-varg ke karak hain — yeh upay seedha unhi tak pahunchta hai. Poora vivaran [Simha Rashi Dhaiya](/blog/simha-rashi-sade-sati-hindi) aur farak [Sade Sati banaam Dhaiya](/blog/sade-sati-vs-dhaiyya-shani-hindi) mein.",
+    ],
+  },
+  {
+    id: "shani-dosh",
+    h2: "Shani Dosh Ke Upay — Aur Shani Dosh Sade Sati Se Alag Kaise Hai",
+    paras: [
+      "\"Shani dosh\" koi ek shastriya dosh ka naam nahi hai — bolchaal mein yeh teen alag cheezon ke liye use hota hai: **janm kundali mein kamzor ya peedit Shani**, **Shani ki mahadasha**, aur **Shani ka gochar** (Sade Sati ya Dhaiya). Teeno ka upay alag hai, isliye pehle pehchaniye ki aapka kaun sa hai — gochar ke liye upar wala calculator, dasha ke liye [Dasha Calculator](/calculators/free-dasha-calculator), aur janm Shani ka bal [Graha Bal Calculator](/calculators/free-graha-bal-calculator) se.",
+      "Teeno sthitiyon mein surakshit upay: **Kya:** \"ॐ शं शनैश्चराय नमः\" 108 baar (lagbhag 10 minute). **Kab:** Shanivar subah. **Kharch:** muft. **Kitne din:** 21 Shanivar. **Aapke liye kyun:** mantra Shani ko shaant karta hai, ratna ki tarah urja nahi badhata — isliye kisi bhi kundali mein jokhim nahi. Neelam pehla upay nahi hai; pehle [Neelam suit karega ya nahi](/calculators/free-should-i-wear-neelam) jaanch lijiye.",
+    ],
+  },
+  {
+    id: "vrishabh-mithun-agli",
+    h2: "Vrishabh aur Mithun Rashi — Agli Sade Sati Kab Shuru Hogi?",
+    paras: [
+      "**Vrishabh:** Sade Sati 3 June 2027 ko pehli baar shuru hogi (Shani Mesh mein), vakri hokar lautne ke baad **23 February 2028** se pakki, aur ant **13 July 2034** ko. **Mithun:** 8 August 2029 ko pehli baar (Shani Vrishabh mein), lautne ke baad **17 April 2030** se pakki, aur ant **27 August 2036** ko.",
+      "Vrishabh ke liye ek khaas baat: Vrishabh rashi se Shani **nauvein aur dasvein** bhaav ke swami hain — bhagya aur karm — isliye Vrishabh ki Sade Sati aksar mehnat se mili unnati ka daur banti hai. Dono rashiyon ke paas taiyari ka samay hai: chhe mahine ka kharch ka buffer aur ek pakki dincharya abhi se. Vistaar [Vrishabh Rashi Sade Sati](/blog/vrishabh-rashi-sade-sati) aur [Mithun Rashi Sade Sati](/blog/mithun-rashi-sade-sati) mein.",
+    ],
+  },
+  {
+    id: "remedies-english",
+    h2: "Remedies for Sade Sati — English Summary",
+    paras: [
+      "Three remedies, each in the five-part standard. **What:** read the Hanuman Chalisa once (about 8–10 minutes). **When:** Saturday and Tuesday mornings. **Cost:** free. **How long:** 11 weeks. **Why for you:** if the calculator shows Sade Sati or Dhaiya active, this is the remedy tradition ties most directly to Saturn.",
+      "**What:** give black sesame (til) and a little mustard oil to a temple or a needy person. **When:** Saturday, before sunset. **Cost:** ₹20–50. **How long:** 11 Saturdays. **Why for you:** these are Saturn's own items, given on Saturn's day. And the third, which costs nothing: **What:** settle one unfair debt, apology or promise you have been avoiding. **When:** this week. **Cost:** free. **How long:** once, then keep the habit. **Why for you:** Saturn is the graha of justice, and righting a wrong is the classical remedy it responds to.",
+      "Blue Sapphire is not a first remedy — wear it only after a suitability check — and no Sade Sati needs an expensive puja. The full list is in [Sade Sati Remedies](/blog/sade-sati-remedies).",
+    ],
+  },
 ];
 
 const FAQS = [
@@ -418,7 +533,7 @@ const FAQS = [
   { q: 'शनि की साढ़ेसाती उतरने के क्या लक्षण हैं?', a: 'Sabse pehla aur sabse bharosemand sanket: neend laut aati hai. Uske baad atke hue kaam apne aap khulne lagte hain, purane sampark aur avsar wapas aate hain, aur bhavishya ko lekar rehne wala dar shaant padne lagta hai. Par yeh sab ek din mein nahi hota — Shani dheere utarte hain aur badlav aakhri chhe maheene mein kramashah mehsoos hota hai.' },
   { q: 'क्या साढ़ेसाती हमेशा बुरी होती है?', a: 'Nahi. Shastra mein Shani dand dene wale nahi, nyay dene wale graha hain. Chaar thos laabh dikhte hain: anushasan jo jeevan bhar rehta hai, jhoothe rishton aur naukriyon ki safai, aatmanirbharta, aur aadhyatmik gehrai. Bahut se atyant safal logon ki sabse badi uplabdhi saadhesati ke dauran hi aayi hai, kyunki Shani mehnat ko der se par poora phal dete hain.' },
   { q: 'शनि ढैया और साढ़ेसाती में क्या फर्क है?', a: 'Saadhesati 7.5 saal ki hoti hai, Dhaiya 2.5 saal ki. Saadhesati mein Shani Chandra Rashi se 12th, 1st aur 2nd bhaav mein hote hain. Dhaiya (chhoti panauti) mein Shani 4th ya 8th bhaav mein — 4th wali "ardh ashtam", 8th wali "ashtam Shani". Ashtam Dhaiya aksar shikhar charan jitni hi teevra lagti hai par ek-tihai samay chalti hai, isliye yeh jaanna raahat deta hai.' },
-  { q: 'कुंभ राशि से शनि का प्रकोप कब हटेगा?', a: 'Kumbh abhi antim charan mein hai — Shani Kumbh se doosre bhaav (Meen) mein. Saadhesati tab samapt hogi jab Shani Meen chhod kar Mesh mein pravesh karenge. Exact tareekh yahan jaanbooj kar nahi likhi ja rahi, kyunki Shani ki vakri chaal se rashi-parivartan ki tareekh kuch maheene aage-peeche hoti hai. Upar wala calculator aapki apni exact ant-tithi aur bache hue din live gin kar deta hai.' },
+  { q: 'कुंभ राशि से शनि का प्रकोप कब हटेगा?', a: "Kumbh ki Sade Sati 24 January 2020 ko shuru hui thi aur 23 February 2028 ko poori tarah samapt hogi. Shani 3 June 2027 ko pehli baar Mesh mein jaayenge, 20 October 2027 ko vakri hokar Meen mein lautenge, aur 23 February 2028 ko antim roop se Mesh mein pravesh karenge. Tareekhein Swiss Ephemeris (Lahiri, IST) se hain; upar wala calculator aapki apni charan-tithiyan aur bache hue din deta hai." },
   { q: 'Apni Sade Sati kaise check karein?', a: 'Date of Birth, exact Time of Birth, aur Place of Birth chahiye. Calculator Swiss Ephemeris se Saturn ki current transit position calculate karta hai aur Chandra Rashi se compare karke status, phase aur exact dates deta hai — bilkul free. Newspaper wali rashi (jo aksar Surya Rashi hoti hai) se check mat kijiye, wahi sabse aam galti hai.' },
   { q: 'Sade Sati mein kya karna chahiye?', a: '(1) Daily Hanuman Chalisa path. (2) Shani mantra "Om Sham Shanaicharaya Namah" 108 times. (3) Shanivar ko kaale til, sarson tel, loha, kaala vastra daan. (4) Vriddhon aur mazdooron ki seva — Shani unhi ke karak hain. (5) Discipline aur imaandari; shortcuts se bachein. Sabse prabhavi upay: kisi ke saath kiya gaya anyaay sudhar dena.' },
   { q: 'शनि को तुरंत खुश करने के क्या उपाय हैं?', a: 'Sawal mein hi ek galatfehmi hai: Shani "turant" khush nahi hote, aur yahi unka swabhav hai. Ve dhairya aur samay ke graha hain. Jo sabse jaldi asar dikhate hain woh teen hain — Hanuman Chalisa, kisi bhookhe mazdoor ya vriddh ko bhojan, aur Shanivar ko kaale til-sarson tel-loha ka daan. Par sabse tez asar kisi ke saath kiye gaye anyaay ko sudharne ka hota hai.' },
@@ -845,7 +960,7 @@ export default function FreeSadeSatiCalculatorPage() {
             </ol>
           </nav>
 
-          {/* ── v2.0: PILLAR CONTENT — 14 keyword-driven H2 sections ── */}
+          {/* ── v2.0: PILLAR CONTENT — 24 keyword-driven H2 sections ── */}
           <section className="mt-12">
             {PILLAR.map((s, si) => (
               <div key={s.id} id={s.id} className="scroll-mt-24 mb-10">
@@ -856,6 +971,32 @@ export default function FreeSadeSatiCalculatorPage() {
                   </p>
                 ))}
 
+                {/* v2.2: all-12-rashi Sade Sati start/end table */}
+                {s.id === 'start-end-tithi' && (
+                  <div className="overflow-x-auto mb-4">
+                    <table className="w-full text-sm" style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid ${GOLD}33`, borderRadius: '12px' }}>
+                      <caption className="sr-only">Sade Sati start and end date for all 12 Moon signs (Swiss Ephemeris, Lahiri, IST)</caption>
+                      <thead>
+                        <tr style={{ background: 'rgba(212,175,55,0.1)' }}>
+                          <th scope="col" className="p-3 text-left" style={{ color: GOLD }}>Moon sign</th>
+                          <th scope="col" className="p-3 text-left" style={{ color: GOLD }}>Sade Sati starts</th>
+                          <th scope="col" className="p-3 text-left" style={{ color: GOLD }}>Sade Sati ends</th>
+                        </tr>
+                      </thead>
+                      <tbody className="text-slate-300">
+                        {SADE_SATI_DATES.map((r) => (
+                          <tr key={r.slug} style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+                            <td className="p-3 font-semibold">
+                              <Link href={`/blog/${r.slug}`} className="underline underline-offset-2" style={{ color: GOLD }}>{r.rashi}</Link>
+                            </td>
+                            <td className="p-3">{r.start}</td>
+                            <td className="p-3">{r.end}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
                 {/* the 12-rashi status table sits inside the first section */}
                 {s.id === 'kis-rashi-par' && (
                   <div className="overflow-x-auto mb-4">

@@ -1,8 +1,11 @@
 // ============================================================
 // File: app/calculators/free-sade-sati-calculator/layout.tsx
-// Version: v1.1 — metadata only
+// Version: v1.2 — metadata only (3 Oct 2026)
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
 // Changelog:
+//   v1.2 (2026-10-03) — title + meta description rewritten for CTR
+//        (Google title standard: keyword first, 50-58 chars; meta 140-155).
+//        Old title: "Free Sade Sati Calculator — Saturn 7.5 Year Check".
 //   v1.1 (2026-06-02) — Brand fix: visible brand normalised to the
 //        double-a spelling in page <title> and openGraph siteName.
 //        No other change.
@@ -10,9 +13,9 @@
 // ============================================================
 import type { Metadata } from 'next';
 export const metadata: Metadata = {
-  title: { absolute: 'Free Sade Sati Calculator — Saturn 7.5 Year Check' },
+  title: { absolute: 'Sade Sati Calculator by Date of Birth — Free & Instant' },
   description:
-    'Free Sade Sati Calculator powered by Swiss Ephemeris. Find out if you are in Sade Sati, current phase (Rising/Peak/Setting), exact start-end dates, all life cycles & 3 Parashar remedies. By Rohiit Gupta.',
+    "Sade Sati calculator by date of birth: Yes/No, current phase, exact start-end dates and days left \u2014 Swiss Ephemeris. Free, no signup. Check now.",
   keywords: [
     'sade sati calculator',
     'free sade sati calculator',

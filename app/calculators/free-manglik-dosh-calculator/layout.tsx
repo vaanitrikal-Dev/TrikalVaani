@@ -1,8 +1,11 @@
 // ============================================================
 // File: app/calculators/free-manglik-dosh-calculator/layout.tsx
-// Version: v1.1 — metadata only
+// Version: v1.2 — metadata only (3 Oct 2026)
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
 // Changelog:
+//   v1.2 (2026-10-03) — title + meta description rewritten for CTR
+//        (Google title standard: keyword first, 50-58 chars; meta 140-155).
+//        Old title: "Free Manglik Dosh Calculator — Check Online".
 //   v1.1 (2026-06-02) — Brand fix: visible brand normalised to the
 //        double-a spelling in page <title> and openGraph siteName.
 //        No other change.
@@ -10,9 +13,9 @@
 // ============================================================
 import type { Metadata } from 'next';
 export const metadata: Metadata = {
-  title: { absolute: 'Free Manglik Dosh Calculator — Check Online' },
+  title: { absolute: 'Mangal Dosha Calculator — Free Manglik Check Online' },
   description:
-    'Free Manglik Dosh Calculator powered by Swiss Ephemeris. Find out if you are Manglik, severity (High/Medium/Low), Mars house position, cancellation rules & 3 Parashar remedies. By Rohiit Gupta, Chief Vedic Architect.',
+    "Free Mangal Dosha calculator: Manglik yes/no, severity, Mars house and bhang (cancellation) check from your birth chart. No signup. Check now.",
   keywords: [
     'manglik dosh calculator',
     'free manglik dosh calculator',
