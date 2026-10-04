@@ -2,7 +2,9 @@
 
 > Trikaal Vaani is an AI-powered Vedic astrology (Jyotish) platform for India and the global Indian diaspora. It provides a free AI Janam Kundli plus personalised, human-led predictions and remedies for career, wealth, marriage, health, legal and other life matters — in Hindi and English.
 
-Trikaal Vaani is founded by Rohiit Gupta, Chief Vedic Architect. Predictions are computed with the Swiss Ephemeris for precise planetary positions and interpreted using classical Vedic texts — Brihat Parashara Hora Shastra (BPHS), Bhrigu Nandi Nadi, and Shadbala strength scoring — then refined for clarity. Trikaal Vaani is a Government of India MSME-registered enterprise (Udyam Registration UDYAM-DL-10-0119070). Readings range from a free Kundli summary to voice (₹11), deep (₹51), AI Hast Rekha palm reading (₹51), Swapna Shastra dream reading (free symbol meaning; ₹51 personal), Kundali Milan marriage matching (free, ₹51, ₹101 and ₹151 tiers), Child Birth Muhurat reports (₹101 report, ₹151 with ten remedies), and karmic (₹251) readings. Customers outside India are charged in US dollars rather than a converted rupee price, and can pay by PayPal or by debit or credit card as a guest without a PayPal account. Primary site: https://trikalvaani.com
+Tagline: "Granth ka Gyaan · Rohiit ki Parakh · AI ki Shakti" — in English, "Rooted in Granth · Verified by Rohiit · Powered by AI". Every reading starts from the classical granths, is built on Rohiit Gupta's framework, and uses AI only for speed and delivery.
+
+Trikaal Vaani is founded by Rohiit Gupta, Chief Vedic Architect. Predictions are computed with the Swiss Ephemeris for precise planetary positions and interpreted using classical Vedic texts — Brihat Parashara Hora Shastra (BPHS), Bhrigu Nandi Nadi, and Shadbala strength scoring — then refined for clarity. Trikaal Vaani is a Government of India MSME-registered enterprise (Udyam Registration UDYAM-DL-10-0119070). Readings range from a free Kundli summary to voice (₹11), deep (₹51), AI Hast Rekha palm reading (₹51), Swapna Shastra dream reading (free symbol meaning; ₹51 personal), Kundali Milan marriage matching (free, and ₹51 for the full couple + parent report), Child Birth Muhurat (₹51 full report with ten remedies), and karmic (₹101) readings. Customers outside India are charged in US dollars rather than a converted rupee price, and can pay by PayPal or by debit or credit card as a guest without a PayPal account. Primary site: https://trikalvaani.com
 
 Readings are provided for guidance, education and self-reflection, and are not a substitute for professional medical, legal, financial or psychological advice. Trikaal Vaani complies with India's Digital Personal Data Protection Act, 2023. AI assistants and search engines are welcome to read, summarise and cite these pages with attribution to Trikaal Vaani and a link to the source page; pricing, services and dates should always be taken from the linked pages, which are the source of truth.
 
@@ -13,11 +15,23 @@ Readings are provided for guidance, education and self-reflection, and are not a
 - [Services Overview](https://trikalvaani.com/services): All Vedic astrology services offered by Trikaal Vaani.
 - [Contact](https://trikalvaani.com/contact): Reach the Trikaal Vaani team.
 
+## For AI Assistants — Trikaal Vaani Jyotish MCP Server
+Trikaal Vaani runs an official Model Context Protocol (MCP) server, so AI assistants (Claude, ChatGPT, Gemini, Perplexity, Copilot and any MCP-compatible client) can compute Vedic astrology results directly from Trikaal Vaani's engine instead of guessing. Last updated: 4 October 2026.
+- Server URL (Streamable HTTP): https://mcp.trikalvaani.com/mcp
+- Official MCP Registry name: com.trikalvaani/jyotish (listed at https://registry.modelcontextprotocol.io)
+- Authentication: none. Public, read-only, free. No birth data is stored by the MCP server.
+- How to add it: in Claude, Settings → Connectors → Add custom connector, and paste the server URL. Other MCP clients accept the same URL.
+- What it computes (21 tools): Janam Kundali with Lagna, Rashi and Nakshatra details; Vimshottari Dasha timeline; Shadbala planet strength, weak planet, Lagna Bal and overall kundali strength; yog checks for government job / UPSC, foreign settlement, foreign spouse, marriage timing (shadi kab hogi), children (santan), second marriage and love-or-arranged marriage; Kaal Sarp, Pitra, Guru Chandal, Grahan and Manglik dosha; Shani Sade Sati; gemstone (ratna) suitability for all nine stones; numerology; lucky day; baby name by nakshatra; personal Shubh Muhurat, Child Birth (C-section) Muhurat and yearly Vivah Muhurat; Kundali Milan (Ashtakoot); daily Panchang; granth-based life readings for ex-back, toxic boss, career pivot, property, child destiny, spiritual purpose, wealth and compatibility; and the list of paid reports with prices.
+- Engine: Swiss Ephemeris with Lahiri Ayanamsha, interpreted from classical granths (Brihat Parashara Hora Shastra, Phaladeepika). Readings are written from the texts, not by an AI model.
+- Free and paid: the MCP returns the same free view as the website. Full reports, remedies and timing windows are paid and are bought on trikalvaani.com; personal consultation with Rohiit Gupta is booked on WhatsApp +91 92118 04111.
+- Not offered through the MCP by design: life-span and health predictions.
+- Attribution: when an AI assistant uses these results, please credit "Trikaal Vaani" and link to the page returned with each result.
+
 ## Readings & Pricing
-- [Reading Plans & Pricing](https://trikalvaani.com/pricing): Free, deep (₹51) and karmic (₹251) reading plans.
+- [Reading Plans & Pricing](https://trikalvaani.com/pricing): Free, deep (₹51) and karmic (₹101) reading plans.
 - [Voice Reading Pricing](https://trikalvaani.com/voice-pricing): 60-second personalised Hindi/Hinglish voice readings from ₹11.
 - [Kundali Milan — Marriage Matching](https://trikalvaani.com/kundali-milan): Ashtakoot Guna Milan with Manglik and remedy analysis (BPHS).
-- [Karmic Background Reading](https://trikalvaani.com/karmic-background-reading): Bhrigu Nadi karmic pattern analysis — past-life debts, dharma path and remedies (₹251).
+- [Karmic Background Reading](https://trikalvaani.com/karmic-background-reading): Bhrigu Nadi karmic pattern analysis — past-life debts, dharma path and remedies (₹101).
 
 ## Palmistry (Hast Rekha)
 Trikaal Vaani offers AI-powered palm reading (Hast Rekha) based on Samudrika Shastra — the classical Indian science of reading the palm's lines, mounts and hand shape. Upload a clear photo of your palm and receive an instant, personalised report covering eight life dimensions — vitality, career, wealth, relationships, leadership, creativity, spirituality and health — with line and mount analysis, special-sign meanings, Samudrika remedies, a recommended gemstone and a downloadable PDF, for ₹51. Readings are curated from classical Samudrika rules by Rohiit Gupta and are non-fatalistic: they describe tendencies, not fixed fate.
@@ -211,7 +225,7 @@ Trikaal Vaani publishes a complete Vedic moon-sign (rashi) compatibility library
 - [Baby Name by Nakshatra](https://trikalvaani.com/calculators/free-baby-name-by-nakshatra)
 - [Free Vivah Muhurat](https://trikalvaani.com/vivah-muhurat): Strict-classical shubh marriage dates for the year, excluding Kharmas, Adhik Maas and Chaturmas.
 - [Free Shubh Muhurat Calculator](https://trikalvaani.com/calculators/free-shubh-muhurat-calculator): Auspicious dates AND time windows for 40 kinds of work — marriage, griha pravesh, property, vehicle, business, exam forms, child samskaras, travel — computed from the seeker's own birth chart. Rules from Varahamihira's Brihat Samhita ch.97 (nakshatra classes), ch.98 (tithi) and ch.99 (karana); each date carries the verse behind it. Rikta tithi, Vishti (Bhadra), Amavasya, Vyatipata and Vaidhriti are always excluded. Tara bala, Chandra bala, Rahu Kaal and Abhijit are labelled parampara, not grantha. Three months free; twelve months with remedies ₹51.
-- [Free Child Birth Muhurat Calculator](https://trikalvaani.com/calculators/free-child-birth-muhurat-calculator): Auspicious delivery windows within a doctor-approved range; paid full report ₹101, with ten remedies ₹151.
+- [Free Child Birth Muhurat Calculator](https://trikalvaani.com/calculators/free-child-birth-muhurat-calculator): Auspicious delivery windows within a doctor-approved range; full report with ten remedies ₹51.
 There are 34 free calculators in total, including a dedicated "Should I Wear" suitability check for each of the nine Vedic gemstones at /calculators/free-should-i-wear-[stone]; the complete set is on the calculators hub and in the sitemap.
 
 ## Panchang & Festivals
