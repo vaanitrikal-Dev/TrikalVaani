@@ -1,6 +1,14 @@
 // ============================================================
 // File: app/calculators/page.tsx
 // Purpose: Calculators Hub — SEO/GEO/AEO landing page
+// Version: v4.6 — Vivah card ke naam mein "Shadi Kab Hogi" + title ka count apne aap (4 Oct 2026)
+//   * Card ka naam: 'Free Vivah Yog Calculator' → 'Free Vivah Yog — Shadi Kab Hogi Calculator'.
+//     Rohiit /calculators par "Shadi Kab Hogi" dhoondh rahe the aur heading mein
+//     nahi mila (sirf chhote desc mein tha). "Vivah Yog" pehle rakha kyunki v4.0
+//     ke GSC data mein wahi phrase rank kar raha tha — dono shabd ab heading mein.
+//     Prose list mein "Vivah Yog — Shadi Kab Hogi" padha jaata hai.
+//   * Title tag mein '33 Free Tools' haath se likha tha, jabki page 39 kehta tha.
+//     Ab generateMetadata() CALCULATORS.length se ginta hai — aage kabhi galat nahi.
 // Version: v4.5 — Shubh Muhurat calculator ka card juda (23 Sep 2026)
 // Version: v4.4 — life-span (Ayushya) card (22 Sep 2026)
 // Version: v4.3 — love-or-arranged card (22 Sep 2026)
@@ -82,9 +90,12 @@ const REAL_SAMEAS = [
   'https://www.facebook.com/people/Trikal-Vaani-Voice',
 ];
 
-export const metadata: Metadata = {
+// v4.6 — function, taaki title ka count CALCULATORS se aaye (yeh neeche
+// define hai; function Next.js module load hone ke BAAD bulata hai).
+export function generateMetadata(): Metadata {
+  return {
   title: {
-    absolute: 'Free Vedic Astrology Calculators — 33 Free Tools',
+    absolute: `Free Vedic Astrology Calculators — ${CALCULATORS.length} Free Tools`,
   },
   description:
     'Free Vedic astrology calculators powered by Swiss Ephemeris. Get accurate Kundli, Dasha, Nakshatra, Rashi, Lagna, Sade Sati, Manglik & Kaal Sarp Dosh, Gemstone Suitability, Numerology and Baby Name results instantly. By Rohiit Gupta, Chief Vedic Architect.',
@@ -113,7 +124,8 @@ export const metadata: Metadata = {
     url: 'https://trikalvaani.com/calculators',
     type: 'website',
   },
-};
+  };
+}
 
 // Calculator card shape. `href` (optional) overrides the default
 // /calculators/{slug} link — used by tools that live elsewhere (e.g. Vivah).
@@ -153,7 +165,7 @@ const CALCULATORS: CalcEntry[] = [
   {
     slug: 'free-shadi-kab-hogi-calculator',
     emoji: '\u{1F48D}',
-    name: 'Free Vivah Yog Calculator',
+    name: 'Free Vivah Yog \u2014 Shadi Kab Hogi Calculator',
     desc: 'Shadi kab hogi \u2014 saptam bhava, Navamsa D-9, kalatra karak aur Darakaraka se. Asli tareekhon ki dasha khidkiyan aur umar ka range, har ank ki wajah ke saath.',
     badge: 'New',
     live: true,
