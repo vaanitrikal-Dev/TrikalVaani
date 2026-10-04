@@ -1,5 +1,11 @@
 // ============================================================
 // File: app/api/calc/yog/route.ts
+// Version: v4.6 — DIMAAG lib/calc-core/yog.ts mein gaya (MCP programme B0) — 4 Oct 2026
+//   * VM kundali, granth, score aur free/paid aakaar ab runYog() mein —
+//     website aur VM ka MCP dono EK hi file chalate hain.
+//   * Is file mein sirf: payment ki jaanch, usage log, sessionId, jawab.
+//   * Output v4.5 se same — Rohiit ke chart (23-09-1975 16:55 Delhi) ke asli
+//     VM jawab par 9 type x free/paid = 18 case mila kar jaancha.
 // Version: v4.5 — NAUVA TYPE: life-span (Ayushya, BPHS 43-44, VM granth_api v4.1 aayushya(), POORA MUFT, koi score nahi) — 22 Sep 2026
 // Version: v4.4 — ATHVA TYPE: love-arranged (parampara ke sanket, POORA MUFT) — 22 Sep 2026
 // Version: v4.3 — teaser ka ".." double period theek (sab yog calculator) — 22 Sep 2026
@@ -155,84 +161,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
 import { callVM } from '@/lib/callVM';
-import type { CalcData, ScoredRule } from '@/lib/yog-engine';
-import { scoreUpsc } from '@/lib/upsc-engine';
-import { scoreForeignSettlement } from '@/lib/foreign-settlement-engine';
-import { scoreForeignSpouse } from '@/lib/foreign-spouse-engine';
-// ⭐ 21 Sep 2026 — Second Marriage (Doosra Vivah) Yog — BPHS 18.19-21
-import { scoreSecondMarriage } from '@/lib/second-marriage-engine';
-import { healthFromGranth } from '@/lib/health-engine';
-import { loveFromGranth } from '@/lib/love-arranged-engine';
-import { lifeSpanFromGranth } from '@/lib/life-span-engine';
-import { scoreSantan } from '@/lib/santan-engine';
-import type { DashaPeriod, SantanResult } from '@/lib/santan-engine';
-import { scoreVivah } from '@/lib/vivah-engine';
-import type { VivahResult } from '@/lib/vivah-engine';
+import { runYog, isYogType, yogBirthError, YOG_TYPES } from '@/lib/calc-core/yog';
+import type { YogType, YogBirth, VmCaller } from '@/lib/calc-core/yog';
 import { getProduct } from '@/lib/pricing-intl';
 import { getPayPalOrder, isCaptureValid } from '@/lib/paypal-server';
 import { logUsage, usageBirthFields, usageContextFromRequest } from '@/lib/usage-log';
-
-// ⭐ 21 September 2026 — CALCULATOR GRANTH PAR.
-// Rohiit: "pehle hamara main kaam — saari prediction GRANTH se, saar ke
-// saath." Har calculator ka apna product calc_varga_map mein hai — VM wahi
-// padh kar bhav ki TEEN PARAT, karak, KAB, FAISLA aur SAAR deta hai.
-const YOG_TO_PRODUCT: Record<string, string> = {
-  upsc:                 'ias-govt-job',
-  'foreign-settlement': 'foreign-settlement',
-  'foreign-spouse':     'foreign-spouse',
-  'second-marriage':    'second-marriage',
-  'health-insight':     'health-insight',
-  'love-arranged':      'love-arranged',
-  'life-span':          'ayushya',
-  santan:               'santan-yog',
-  vivah:                'shadi-kab-hogi',
-};
-
-async function fetchGranthYog(product: string, b: any, paid: boolean) {
-  try {
-    const r = await callVM('/granth/product', {
-      method: 'POST',
-      body: JSON.stringify({
-        product,
-        year: b.year, month: b.month, day: b.day,
-        hour: b.hour, minute: b.minute,
-        latitude: b.latitude, longitude: b.longitude,
-        timezone: b.timezone ?? 5.5,
-        tier: paid ? 'paid' : 'free',
-        // VIVAH/FOREIGN-SPOUSE: granth_api v2.8 ling dekh kar karak chunta
-        // hai — stree par GURU, purush par Shukra (Rohiit, 3 Sep).
-        ling: b.gender ?? null,
-        bhasha: 'hinglish',
-      }),
-    });
-    if (!r.ok) {
-      console.error(`[yog] granth ${product}: ${r.status}`);
-      return null;
-    }
-    const j = await r.json();
-    // ⚠️ VM 200 ke saath bhi "galti" laut sakta hai — chup-chaap mat nigalo
-    if (j?.galti) {
-      console.error(`[yog] granth ${product}: ${j.galti}`);
-      return null;
-    }
-    return j;
-  } catch (e: any) {
-    console.error(`[yog] granth fetch failed: ${e?.message}`);
-    return null;
-  }
-}
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 /** Hard ceiling. See the v2.4 note above — without this it was Vercel's default. */
 export const maxDuration = 60;
-
-type YogType = 'upsc' | 'foreign-settlement' | 'foreign-spouse' | 'santan' | 'vivah' | 'second-marriage' | 'health-insight' | 'love-arranged' | 'life-span';
-
-const VALID: YogType[] = ['upsc', 'foreign-settlement', 'foreign-spouse', 'santan', 'vivah', 'second-marriage', 'health-insight', 'love-arranged', 'life-span'];
-
-/** The two types that lead with a verdict and a written summary. */
-const VERDICT_TYPES: YogType[] = ['santan', 'vivah'];
 
 interface Body {
   type?: YogType;
@@ -256,6 +194,10 @@ interface Body {
 function bad(msg: string, status = 400) {
   return NextResponse.json({ error: msg }, { status });
 }
+
+/** Website ka VM raasta — callVM (key apne aap judti hai). */
+const vmViaCallVM: VmCaller = (path, body) =>
+  callVM(path, { method: 'POST', body: JSON.stringify(body) });
 
 // ── Payment verification ─────────────────────────────────────────────────────
 
@@ -293,52 +235,6 @@ async function isPaid(b: Body): Promise<boolean> {
   return false;
 }
 
-// ── Free-tier shaping ────────────────────────────────────────────────────────
-
-/** Strip a rule to its label and marks. The reasoning IS the product. */
-function lockRule(r: ScoredRule) {
-  return { block: r.block, label: r.label, points: r.points, max: r.max, absent: r.absent };
-}
-
-/**
- * A teaser states something TRUE and specific about this chart and stops
- * before the consequence. "Aapka Amatyakaraka Guru hai" is a real finding;
- * what its placement means for an exam route is the paid half.
- */
-function teaser(r: ScoredRule): string {
-  const first = r.reason.split('. ')[0] ?? '';
-  // ⭐ 22 Sep — vaakya pehle se '.' par khatam ho to dobara '.' nahi ("kamzor).." wali galti)
-  const saaf = first.replace(/[.\u0964]+$/, '');
-  return saaf.length > 130 ? saaf.slice(0, 127).trimEnd() + '\u2026' : saaf + '.';
-}
-
-function freeShape(full: any) {
-  const rules: ScoredRule[] = full.rules ?? [];
-  const shown: ScoredRule[] = full.highlights ?? [];
-  const shownLabels = new Set(shown.map((r) => r.label));
-  const rest = rules.filter((r) => !shownLabels.has(r.label));
-
-  return {
-    score: full.score,
-    band: full.band,
-    bandHi: full.bandHi,
-    bandLabel: full.bandLabel,      // ⭐ 22 Sep — health: "Dhyan Rakhein" ("Weak" nahi)
-    disclaimer: full.disclaimer,
-    // Full reasoning for the three strongest findings — the proof of work.
-    highlights: shown,
-    // Everything else: marks visible, reasoning withheld.
-    rules: rest.map(lockRule),
-    lockedCount: rest.length,
-    // Blockers are why people pay. Name them, tease them, stop.
-    blockers: (full.blockers ?? []).map((b: ScoredRule) => ({ label: b.label, teaser: teaser(b) })),
-    // Names only. The ranking and the reasoning are paid.
-    directionNames: (full.direction ?? full.routes ?? []).map((d: any) => d.track ?? d.route),
-    directionHintCount: (full.directionHints ?? []).length,
-    timingCount: (full.timing ?? []).length,
-    nextStep: full.nextStep ?? null,
-  };
-}
-
 // ── Route ────────────────────────────────────────────────────────────────────
 
 export async function POST(req: NextRequest) {
@@ -346,22 +242,14 @@ export async function POST(req: NextRequest) {
     const b = (await req.json().catch(() => ({}))) as Body;
 
     const type = b.type;
-    if (!type || !VALID.includes(type)) {
-      return bad(`Unknown calculator type. Expected one of: ${VALID.join(', ')}.`);
+    if (!isYogType(type)) {
+      return bad(`Unknown calculator type. Expected one of: ${YOG_TYPES.join(', ')}.`);
     }
 
-    const nums: (keyof Body)[] = ['year', 'month', 'day', 'hour', 'minute', 'latitude', 'longitude', 'timezone'];
-    for (const k of nums) {
-      if (typeof b[k] !== 'number' || Number.isNaN(b[k] as number)) {
-        return bad(`Missing or invalid birth detail: ${k}.`);
-      }
-    }
+    const birthErr = yogBirthError(b as Partial<YogBirth>);
+    if (birthErr) return bad(birthErr);
 
     const paid = await isPaid(b);
-    // ⭐ 22 Sep — Love or Arranged POORA MUFT (Rohiit): poora nateeja aur poora
-    // saar khula. Supabase ka `tier` ASLI hi darj hota hai (paid nahi likhta).
-    // ⭐ 22 Sep — Life Span (Ayushya) bhi POORA MUFT (Rohiit)
-    const khula = paid || type === 'love-arranged' || type === 'life-span';
 
     // A proof that was sent but did not verify is an ERROR, not a silent
     // downgrade — a real payer must never quietly receive the free view.
@@ -369,121 +257,18 @@ export async function POST(req: NextRequest) {
       return bad('Payment could not be verified. Please contact support before paying again.', 402);
     }
 
-    // ── 1) Chart from the VM ─────────────────────────────────────────────────
-    const vmRes = await callVM('/kundali', {
-      method: 'POST',
-      body: JSON.stringify({
-        year: b.year, month: b.month, day: b.day,
-        hour: b.hour, minute: b.minute, second: 0,
-        latitude: b.latitude, longitude: b.longitude,
-        timezone: b.timezone, ayanamsa: 'lahiri',
-      }),
-    });
-
-    if (!vmRes.ok) {
-      const detail = await vmRes.text().catch(() => '');
-      console.error('[yog] VM /kundali failed:', detail);
-      return NextResponse.json({ error: 'Kundali engine error' }, { status: 502 });
+    const out = await runYog({ type, birth: b as YogBirth, paid, vm: vmViaCallVM });
+    if (!out.ok) {
+      return NextResponse.json({ error: out.error }, { status: out.status });
     }
-
-    const k = await vmRes.json();
-
-    // ── 2) Reshape into what the engines expect ──────────────────────────────
-    const data: CalcData = {
-      instant: {
-        lagna: k?.lagna?.sign ?? null,
-        lagna_en: k?.lagna?.sign_en ?? null,
-        lagna_lord: k?.lagna?.sign_lord ?? null,
-        current_dasha: null,
-        current_antardasha: null,
-      },
-      planets: (k?.grahas ?? []).map((g: any) => ({
-        planet: g.planet,
-        sign: g.sign ?? null,
-        sign_en: g.sign_en ?? null,
-        house: g.house ?? 1,
-        nakshatra: g.nakshatra ?? null,
-        is_retrograde: g.retrograde ?? false,
-        dignity: g.shadbala?.classification ?? g.dignity ?? null,
-        strength: typeof g.strength === 'number' ? g.strength : null,
-        shadbala: g.shadbala ?? null,
-        longitude: typeof g.longitude === 'number' ? g.longitude : null,
-        degree_in_sign: typeof g.degree_in_sign === 'number' ? g.degree_in_sign : null,
-      })),
-      // The VM calls them bhavas; the engines read houses.
-      houses: (k?.bhavas ?? []).map((h: any) => ({ house: h.bhava, sign: h.sign ?? null })),
-      dasha: currentDasha(k?.dasha?.maha_dasha ?? []),
-      drishti: k?.drishti && Object.keys(k.drishti).length ? k.drishti : null,
-      dasamsa: k?.dasamsa && Object.keys(k.dasamsa).length ? k.dasamsa : null,
-      navamsa: k?.navamsa && Object.keys(k.navamsa).length ? k.navamsa : null,
-      // D-7 Saptamsa — the progeny varga (BPHS Ch.6 s.11). Null until
-      // astro.py patcher #4 has run, so an engine must guard rather than
-      // assume it is there.
-      saptamsa: k?.saptamsa && Object.keys(k.saptamsa).length ? k.saptamsa : null,
-    };
-    data.instant.current_dasha = data.dasha.mahadasha;
-    data.instant.current_antardasha = data.dasha.antardasha;
-
-    if (!data.planets.length || !data.houses.length) {
-      return NextResponse.json({ error: 'Chart could not be built from the birth details.' }, { status: 502 });
-    }
-
-    // ── 3) Granth (VM) — ⭐ 22 Sep: score se PEHLE. Health ka score yahi se
-    //    aata hai (VM par EK jagah ginti). Baaki type par koi asar nahi.
-    const granth = await fetchGranthYog(YOG_TO_PRODUCT[type] ?? type, b, khula);
-    console.log(`[yog] granth ${type} | ${granth ? 'mila' : 'NAHI mila'} | saar ${granth?.saar?.shabd ?? 0} shabd | faisla ${granth?.faisla?.faisla ?? '—'}`);
-    // 🔴 SURAKSHA: health par VM na mile to KHAALI data se jhootha "Dhyan
-    //    Rakhein" kabhi nahi — saaf bata do ki engine abhi uplabdh nahi.
-    if (type === 'love-arranged' && !granth?.love) {
-      return NextResponse.json({ error: 'Engine abhi uplabdh nahi — kripya thodi der mein dobara koshish karein.' }, { status: 503 });
-    }
-    if (type === 'life-span' && !granth?.faisla?.aayu) {
-      return NextResponse.json({ error: 'Ayushya engine abhi uplabdh nahi — kripya thodi der mein dobara koshish karein.' }, { status: 503 });
-    }
-    if (type === 'health-insight' && !granth?.jeevan) {
-      return NextResponse.json({ error: 'Health engine abhi uplabdh nahi — kripya thodi der mein dobara koshish karein.' }, { status: 503 });
-    }
-
-    // ── 3b) Score ────────────────────────────────────────────────────────────
-    const timeline = dashaTimeline(k?.dasha?.maha_dasha ?? []);
-
-    const full =
-      type === 'upsc' ? scoreUpsc(data)
-      : type === 'foreign-settlement' ? scoreForeignSettlement(data)
-      : type === 'santan' ? scoreSantan(data, timeline, b.name ?? null, b.year)
-      : type === 'vivah' ? scoreVivah(data, timeline, b.name ?? null, b.year, b.gender ?? null)
-      : type === 'second-marriage' ? scoreSecondMarriage(data)
-      : type === 'health-insight' ? healthFromGranth(granth.jeevan)
-      : type === 'love-arranged' ? loveFromGranth(granth.love)
-      : type === 'life-span' ? lifeSpanFromGranth(granth.faisla.aayu)
-      : scoreForeignSpouse(data);
 
     if (paid) {
       console.log(`[yog] PAID unlock | type:${type} | via:${b.razorpay_signature ? 'razorpay' : 'paypal'}`);
     }
 
-    // ── 4) Summary — santan only ─────────────────────────────────────────────
-    // Never fatal: buildSantanSummary falls back to a deterministic template on
-    // a missing key, a timeout, or a draft that fails validation. The
-    // calculator must always answer.
-    // 🔴 21 Sep — GEMINI BILKUL BAND (Rohiit: "Gemini bilkul STOP").
-    // Pehle santan aur vivah par buildSantanSummary / buildVivahSummary
-    // Gemini se 75/500 shabd likhwate the. Ab uski jagah GRANTH KA SAAR hai —
-    // saar.py (VM), 250-500 shabd, har vaakya granth se, koi AI nahi.
-    // verdictSummary khaali rehta hai, to purana summary-dabba apne aap
-    // nahi dikhta (YogCalculator mein {r.summary && ...} hai).
-    const verdictSummary = '';
-
-    // ── usage log — fire-and-forget, own try/catch. This route serves five
-    //    different calculators, so the slug carries `type`, and it is the one
-    //    calculator route with a paid tier, so `paid` is recorded too.
-    // ⭐ 21 Sep — AB AWAIT HOTA HAI. Pehle fire-and-forget tha, aur Vercel
-    // jawab lautte hi function jam kar deta tha — aadhe se zyada request
-    // beech mein marte the (santan/vivah par 0 rows). usage-log v1.2 ab
-    // Promise lautata hai. logUsage apne andar kabhi throw nahi karta, to
-    // calculator par koi khatra nahi. Rohiit ka niyam: "jab calculator ki
-    // file waise bhi badle, tabhi save jodna" — ye file granth ke liye
-    // waise bhi badal rahi thi.
+    // ── usage log — AWAIT (Vercel jawab ke baad function jam kar deta hai).
+    //    logUsage apne andar kabhi throw nahi karta.
+    const { full, granth } = out.meta;
     try {
       await logUsage({
         ...usageContextFromRequest(req),
@@ -500,155 +285,16 @@ export async function POST(req: NextRequest) {
       });
     } catch { /* logging must never break the calculator */ }
 
+    const { success, type: t, paid: p, ...rest } = out.body;
     return NextResponse.json({
-      success: true,
-      type,
-      paid: khula,
+      success,
+      type: t,
+      paid: p,
       sessionId: `yog_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
-      input: { name: b.name || null, gender: b.gender || null },
-      // ⭐ 21 Sep — granth: saar (250-500 shabd) + faisla + bhav ki teen parat
-      // + karak + KAB. Na mile to null — calculator tab bhi score ke saath chalta hai.
-      granth: granth ? {
-        saar:   granth.saar ?? null,
-        faisla: granth.faisla ?? null,
-        bhav:   granth.bhav ?? [],
-        karak:  granth.karak ?? [],
-        kab:    granth.kab ?? null,
-        varga:  granth.varga ?? null,
-      } : null,
-      chart: {
-        lagna: data.instant.lagna,
-        lagna_en: data.instant.lagna_en,
-        lagna_lord: data.instant.lagna_lord,
-        mahadasha: data.dasha.mahadasha,
-        antardasha: data.dasha.antardasha,
-        dasamsaLagna: data.dasamsa?.lagna?.sign ?? null,
-        navamsaLagna: data.navamsa?.lagna?.sign ?? null,
-        // D-7. Null when the VM has not been patched — the page must say
-        // "not available" rather than imply the progeny varga was read.
-        saptamsaLagna: data.saptamsa?.lagna?.sign ?? null,
-      },
-      result:
-        type === 'santan'
-          ? paid
-            ? { ...(full as SantanResult), summary: verdictSummary }
-            : santanFreeShape(full as SantanResult, verdictSummary)
-        : type === 'vivah'
-          ? paid
-            ? { ...(full as VivahResult), summary: verdictSummary }
-            : vivahFreeShape(full as VivahResult, verdictSummary)
-        : khula
-          ? full
-          : freeShape(full),
+      ...rest,
     });
   } catch (err: any) {
     console.error('[yog] Fatal:', err);
     return NextResponse.json({ error: 'Server error' }, { status: 500 });
   }
-}
-
-// ── v2.3: the whole timeline, dates intact ───────────────────────────────────
-//
-// currentDasha() below answers "which period is running". This answers "when",
-// which is a different question and the one santan customers actually ask.
-// Shape is passed through as the VM gives it; the engine does the filtering.
-function dashaTimeline(mahaList: any[]): DashaPeriod[] {
-  if (!Array.isArray(mahaList)) return [];
-  return mahaList
-    .filter((m) => m?.planet && m?.start && m?.end)
-    .map((m) => ({
-      planet: String(m.planet),
-      start: String(m.start),
-      end: String(m.end),
-      antar: (m.antar ?? [])
-        .filter((a: any) => a?.planet && a?.start && a?.end)
-        .map((a: any) => ({ planet: String(a.planet), start: String(a.start), end: String(a.end) })),
-    }));
-}
-
-// ── v2.3: santan's own free shape ────────────────────────────────────────────
-//
-// Deliberately NOT freeShape(). That one shows locked rule rows with their
-// marks, which suits a competitive-exam score. Here the marks mean nothing to
-// the reader and the answer means everything, so the free tier is: the verdict,
-// the 75-word summary, and three honest locks naming what is behind them.
-/**
- * v3.0: one free shape for both verdict calculators.
- *
- * Santan and Vivah had the same structure and different words, kept in two
- * places. On 3 Sep the second lock's wording in this file and the matching
- * heading in YogCalculator drifted apart for exactly that reason. The shape
- * lives here once; the middle lock's title and teaser come from the product,
- * because a child count and an age band are the only thing that differs.
- */
-function verdictFreeShape(
-  full: { verdict: unknown; score: number; band: string; bandHi: string; disclaimer: string;
-          windows: unknown[]; upay: unknown[] },
-  summary: string,
-  middle: { key: string; title: string; teaser: string; count: number },
-) {
-  return {
-    verdict: full.verdict,
-    summary,
-    score: full.score,
-    band: full.band,
-    bandHi: full.bandHi,
-    disclaimer: full.disclaimer,
-    locks: [
-      {
-        key: 'kab',
-        title: 'Kab — anukool samay',
-        teaser: full.windows.length
-          ? 'Aapke chart mein anukool dasha ki khidkiyan mil gayi hain, tareekhon ke saath.'
-          : 'Aapki dasha ka poora hisaab taiyar hai.',
-        count: full.windows.length,
-      },
-      middle,
-      {
-        key: 'upay',
-        title: 'Trikaal Upay — 5 upay, aapke apne chart ke',
-        teaser: 'Do BPHS se, do Bhrigu paddhati se, aur ek seedha aapke chart ki ganit se.',
-        count: full.upay.length,
-      },
-    ],
-    // No rules, no reasoning, no dates, no upay text. Nothing to unhide.
-  };
-}
-
-function santanFreeShape(full: SantanResult, summary: string) {
-  return verdictFreeShape(full, summary, {
-    key: 'kitne',
-    title: 'Kitne — santan sankhya ka range',
-    teaser: full.sankhya
-      ? 'Aapke panchma bhava ki rashi aur uske swami ke bal se shastriya sanket nikal aaya hai.'
-      : 'Shastriya sanket taiyar hai.',
-    count: full.sankhya ? 1 : 0,
-  });
-}
-
-function vivahFreeShape(full: VivahResult, summary: string) {
-  return verdictFreeShape(full, summary, {
-    key: 'umar',
-    title: 'Kis umar mein — anukool umar ka range',
-    teaser: full.umar
-      ? 'Aapki pehli anukool dasha khidki ko aapki umar mein badal kar range nikal aayi hai.'
-      : 'Umar ka hisaab taiyar hai.',
-    count: full.umar ? 1 : 0,
-  });
-}
-
-// ── Current mahadasha / antardasha by date ───────────────────────────────────
-
-function currentDasha(mahaList: any[]): { mahadasha: string | null; antardasha: string | null } {
-  if (!Array.isArray(mahaList) || !mahaList.length) return { mahadasha: null, antardasha: null };
-  const today = new Date();
-
-  let maha = mahaList.find((m) => new Date(m.start) <= today && today <= new Date(m.end));
-  if (!maha) maha = mahaList[mahaList.length - 1];
-
-  const antarList = maha?.antar ?? [];
-  let antar = antarList.find((a: any) => new Date(a.start) <= today && today <= new Date(a.end));
-  if (!antar && antarList.length) antar = antarList[0];
-
-  return { mahadasha: maha?.planet ?? null, antardasha: antar?.planet ?? null };
 }
