@@ -1,7 +1,9 @@
 // ============================================================
 // File: app/api/calc/manglik-dosh/route.ts
 // Purpose: VM bridge for Manglik Dosh Calculator (FREE forever)
-// Version: v1.7 — granth-upay (BPHS 84) bina chhede aage; ratna lagnesh ka (1 Oct 2026)
+// Version: v1.8 — DIMAAG lib/calc-core/manglik.ts mein gaya (MCP programme) — 4 Oct 2026
+//   * Is file mein sirf: field jaanch, usage log, sessionId, jawab. Output v1.7 se same.
+// PICHHLA: v1.7 — granth-upay (BPHS 84) bina chhede aage; ratna lagnesh ka (1 Oct 2026)
 // PICHHLA: v1.6 — storage AWAIT (21 Sep 2026)
 // Changelog v1.4: Pass full VM remedies object to buildTemplateFromVMRemedies
 //   so actionWindows (Dos) from remedy_master are included in response.
@@ -9,147 +11,34 @@
 // ============================================================
 import { NextRequest, NextResponse } from 'next/server';
 import { callVM } from '@/lib/callVM';
-import { buildGranthUpay } from '@/lib/bphs84-upay';   // v1.7 — BPHS 84 granth-upay (free calculator dabba)
+import { runManglik, manglikBirthError } from '@/lib/calc-core/manglik';
+import type { CalcInput, VmCaller } from '@/lib/calc-core/manglik';
 import { logUsage, usageBirthFields, usageContextFromRequest } from '@/lib/usage-log';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-interface CalcInput {
-  year: number;
-  month: number;
-  day: number;
-  hour: number;
-  minute: number;
-  latitude: number;
-  longitude: number;
-  timezone: number;
-  name?: string;
-  gender?: 'male' | 'female' | 'other';
-}
-
-// ─── House meaning per Parashar BPHS ────────────────────────────────────────
-function getHouseEffect(house: number): string {
-  const effects: Record<number, string> = {
-    1: 'Lagna (Self) — Personality, body, temperament. Mars here = aggressive, dominant nature.',
-    2: 'Dhana (Wealth) — Family wealth, speech. Mars here = harsh speech, family discord.',
-    4: 'Sukha (Home) — Domestic happiness, mother, property. Mars here = home tensions, peace disturbed.',
-    7: 'Kalatra (Spouse) — Marriage, partnership. Mars here = marital conflict, spouse health issues.',
-    8: 'Ayur (Longevity) — Spouse longevity, in-laws. Mars here = sudden challenges, accident risk to spouse.',
-    12: 'Vyaya (Loss) — Bed pleasures, expenses, foreign. Mars here = marital intimacy issues, loss of peace.',
-  };
-  return effects[house] || `House ${house} — affected by Mars placement.`;
-}
-
-function getSeverityColor(severity: string): string {
-  if (severity === 'High') return '#FCA5A5';
-  if (severity === 'Medium') return '#FBBF24';
-  if (severity === 'Low') return '#86EFAC';
-  return '#94a3b8';
-}
-
-// v1.7 — ratna LAGNESH ka (remedy_master r.planet). Pehle pakka likha tha, jabki
-// andar ka text kisi aur grah ka ratna batata tha (grahak ko galat ratna dikhta tha).
-const STONE: Record<string, { stone: string; metal: string; finger: string }> = {
-  Sun:     { stone: 'Ruby (Manik)',              metal: 'Gold',   finger: 'Ring finger' },
-  Moon:    { stone: 'Pearl (Moti)',              metal: 'Silver', finger: 'Little finger' },
-  Mars:    { stone: 'Red Coral (Moonga)',        metal: 'Gold',   finger: 'Ring finger' },
-  Mercury: { stone: 'Emerald (Panna)',           metal: 'Gold',   finger: 'Little finger' },
-  Jupiter: { stone: 'Yellow Sapphire (Pukhraj)', metal: 'Gold',   finger: 'Index finger' },
-  Venus:   { stone: 'Diamond (Heera)',           metal: 'Gold',   finger: 'Middle finger' },
-  Saturn:  { stone: 'Blue Sapphire (Neelam)',    metal: 'Silver', finger: 'Middle finger' },
-  Rahu:    { stone: 'Hessonite (Gomed)',         metal: 'Silver', finger: 'Middle finger' },
-  Ketu:    { stone: "Cat's Eye (Lehsunia)",      metal: 'Silver', finger: 'Little finger' },
-};
-
-// ─── Map VM remedy object to frontend template format ───────────────────────
-function buildTemplateFromVMRemedies(vmRemediesObj: any): any {
-  const vmRemedies: any[] = vmRemediesObj?.remedies ?? [];
-  if (!vmRemedies.length) return null;
-  return {
-    remedyPlan: {
-      remedies: vmRemedies.map((r: any) => {
-        const base = { type: r.type, planet: r.planet ?? 'Mars' };
-        // v1.7 (1 Oct 2026) — BPHS 84 ke granth-upay (VM remedy_master v2.0, system "Granth"):
-        // koi pakka mantra/daan NAHI chipkaana — seedha granth ka text, hawale ke saath.
-        if (r.system === 'Granth') return { ...base, granth: true, srot: r.srot, text: r.detail };
-        if (r.type === 'mantra') {
-          return { ...base, mantra: 'ॐ अंगारकाय नमः', count: '108', time: 'मंगलवार सुबह', special: r.detail };
-        }
-        if (r.type === 'daan') {
-          return { ...base, items: 'मसूर दाल, गुड़, तांबा, लाल वस्त्र', day: 'मंगलवार', recipient: 'गरीब या जरूरतमंद', note: r.detail };
-        }
-        if (r.type === 'vrat') {
-          return { ...base, name: 'मंगलवार व्रत', day: 'Tuesday', deity: 'Hanuman ji', prasad: 'Red lentils, jaggery, red flowers' };
-        }
-        if (r.type === 'gemstone') {
-          return { ...base, lagna_stone: { ...(STONE[r.planet] ?? STONE.Mars), for: r.detail } };
-        }
-        return { ...base, text: r.detail };
-      }),
-    },
-    actionWindows: vmRemediesObj?.actionWindows ?? [],
-    avoidWindows: vmRemediesObj?.avoidWindows ?? [],
-  };
-}
+/** Website ka VM raasta — callVM (key apne aap judti hai). */
+const vmViaCallVM: VmCaller = (path, body) =>
+  callVM(path, { method: 'POST', body: JSON.stringify(body) });
 
 export async function POST(req: NextRequest) {
   try {
     const body: CalcInput = await req.json();
 
-    // Validate
-    const required = ['year', 'month', 'day', 'hour', 'minute', 'latitude', 'longitude', 'timezone'];
-    for (const f of required) {
-      if (body[f as keyof CalcInput] === undefined || body[f as keyof CalcInput] === null) {
-        return NextResponse.json({ error: `Missing field: ${f}` }, { status: 400 });
-      }
+    const missing = manglikBirthError(body);
+    if (missing) {
+      return NextResponse.json({ error: missing }, { status: 400 });
     }
 
-    const vmPayload = {
-      year: body.year,
-      month: body.month,
-      day: body.day,
-      hour: body.hour,
-      minute: body.minute,
-      second: 0,
-      latitude: body.latitude,
-      longitude: body.longitude,
-      timezone: body.timezone,
-      ayanamsa: 'lahiri',
-    };
-
-    // 1) Call VM /manglik-dosh — Mars-specific remedies + actionWindows via remedy_master v1.1
-    const mdRes = await callVM('/manglik-dosh', {
-      method: 'POST',
-      body: JSON.stringify(vmPayload),
-    });
-    if (!mdRes.ok) {
-      const errText = await mdRes.text();
-      console.error('[manglik-dosh] VM /manglik-dosh failed:', errText);
-      return NextResponse.json({ error: 'Manglik engine error', detail: errText }, { status: 502 });
+    const out = await runManglik(body, vmViaCallVM);
+    if (!out.ok) {
+      return NextResponse.json({ error: out.error, detail: out.detail }, { status: out.status });
     }
-    const manglikData = await mdRes.json();
-
-    const houseEffect = manglikData?.is_manglik && manglikData?.mars_house
-      ? getHouseEffect(manglikData.mars_house)
-      : null;
-
-    // Pass full remedies object — includes remedies array + actionWindows
-    const templateData = buildTemplateFromVMRemedies(manglikData?.remedies ?? {});
 
     const sessionId = `calc_md_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
 
-
-    // ── usage log — fire-and-forget. Wrapped in its own try/catch because the
-    //    ARGUMENT is built outside logUsage's internal guard; a bad field here
-    //    would otherwise crash the route. Nothing in this block can ever stop
-    //    a calculator from answering the customer.
     try {
-      // ⭐ 21 Sep 2026 — AB AWAIT HOTA HAI. Pehle fire-and-forget tha: Vercel
-      // jawab lautte hi function jam kar deta tha aur Supabase ka request
-      // beech mein marta tha — aadhe se zyada rows KHO jaati thin (Rohiit ki
-      // ginti galat aa rahi thi). usage-log v1.2 Promise lautata hai aur
-      // andar kabhi throw nahi karta, to calculator par koi khatra nahi.
       await logUsage({
         ...usageContextFromRequest(req),
         ...usageBirthFields(body as any),
@@ -159,25 +48,9 @@ export async function POST(req: NextRequest) {
         tier         : 'free',
       });
     } catch { /* logging must never break the calculator */ }
-    return NextResponse.json({
-      success: true,
-      sessionId,
-      input: { name: body.name || null, gender: body.gender || null },
-      manglik: {
-        isManglik: manglikData?.is_manglik || false,
-        severity: manglikData?.severity || null,
-        severityColor: getSeverityColor(manglikData?.severity || ''),
-        marsHouse: manglikData?.mars_house || null,
-        marsSign: manglikData?.mars_sign || null,
-        marsLongitude: manglikData?.mars_longitude || null,
-        houseEffect,
-        cancellationConditions: manglikData?.cancellation_conditions || [],
-        manglikHousesAffected: manglikData?.manglik_houses_affected || [1, 2, 4, 7, 8, 12],
-      },
-      template: templateData,
-      granthUpay: buildGranthUpay(null, 'Mars'),   // v1.7 — components/calculators/GranthUpayBox
-    }, { status: 200 });
 
+    const { success, ...rest } = out.body;
+    return NextResponse.json({ success, sessionId, ...rest }, { status: 200 });
   } catch (err: any) {
     console.error('[manglik-dosh] Fatal:', err);
     return NextResponse.json({ error: 'Server error', detail: String(err?.message || err) }, { status: 500 });
