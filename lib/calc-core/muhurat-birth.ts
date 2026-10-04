@@ -1,46 +1,65 @@
 // ============================================================
-// File: lib/muhurat-tiering.ts
-// Version: v1.1 (4 Oct 2026) — pure niyam lib/calc-core/muhurat-rules.ts mein gaye (MCP programme);
-//   yahan `export *` se wapas milte hain — kisi caller ka import nahi badla.
-//   Sirf scanWindow (VM call) yahan bacha.
-// PICHHLA: v1.0 (30 Sep 2026) — NEW
-// CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
+// File: lib/calc-core/muhurat-birth.ts
+// Version: v1.0 — 4 Oct 2026 — MCP programme
+//
+// KYA HAI: /api/calc/muhurat (Child Birth Muhurat, FREE tier) ka dimaag —
+// window ki jaanch, pehla 1 ghanta free scan, poori window ka scan sirf
+// "aur behtar hai" batane ke liye, aur jawab ka aakaar. Route v1.5 se
+// akshar-se-akshar.
+//   * Scan (VM call) CALLER deta hai: website lib/muhurat-tiering ka
+//     scanWindow, MCP apna. Scan fail ho to woh THROW karta hai — route ka
+//     catch use waise hi sambhalta hai jaise v1.5 mein.
 // ============================================================
-// Child Birth Muhurat — free vs paid window rules (Rohiit's ruling, 30 Sep 2026):
-//   * Doctor's window is at most 4 hours (form + server both enforce).
-//   * FREE  = best slot inside the FIRST 1 hour of that window, one slot only.
-//   * PAID  = best slot across the full window (up to 4 hours) + up to 3
-//             backup slots, all INSIDE the doctor's window. Never outside it.
-//   * No score numbers shown to the customer — only a quality label.
-//   * If the paid best slot is weak, the report says so honestly and asks the
-//     parents to check with the doctor for another safe time/date.
-// Used by: app/api/calc/muhurat/route.ts, app/api/create-muhurat-order/route.ts
-// ============================================================
-import { callVM } from '@/lib/callVM';
-import type { WindowInput } from './calc-core/muhurat-rules';
 
-export * from './calc-core/muhurat-rules';
+import { FREE_WINDOW_MIN, normaliseWindow, publicSlot, qualityLabel } from './muhurat-rules';
+import type { WindowInput } from './muhurat-rules';
 
-const VM_URL = process.env.VM_ENGINE_URL || 'http://34.47.182.227:8001';
+export type MuhuratScan = (w: WindowInput, startMin: number, endMin: number) => Promise<any>;
 
-/** One VM /muhurat-finder scan of [startMin, endMin]. Throws on engine failure. */
-export async function scanWindow(w: WindowInput, startMin: number, endMin: number): Promise<any> {
-  const res = await callVM(`${VM_URL}/muhurat-finder`, {
-    method: 'POST',
-    body: JSON.stringify({
-      year: w.year, month: w.month, day: w.day,
-      window_start_hour: Math.floor(startMin / 60), window_start_minute: startMin % 60,
-      window_end_hour:   Math.floor(endMin / 60),   window_end_minute:   endMin % 60,
-      latitude: w.latitude, longitude: w.longitude, timezone: w.timezone,
-      step_minutes: 10,
-      full_day: false,
-    }),
-    signal: AbortSignal.timeout(45000),
-    cache: 'no-store',
-  });
-  if (!res.ok) {
-    const t = await res.text().catch(() => '');
-    throw new Error(`Muhurat engine error ${res.status}: ${t.slice(0, 200)}`);
+export type BirthMuhuratOutcome =
+  | { ok: false; status: number; error: string }
+  | { ok: true; body: Record<string, unknown> };
+
+/** Free tier. Scan ki galti (throw) caller tak jaati hai. */
+export async function runChildBirthMuhurat(body: any, scan: MuhuratScan): Promise<BirthMuhuratOutcome> {
+  const required = ['year', 'month', 'day', 'latitude', 'longitude'];
+  for (const f of required) {
+    if (body[f] === undefined || body[f] === null) {
+      return { ok: false, status: 400, error: `Missing field: ${f}` };
+    }
   }
-  return res.json();
+
+  const w = normaliseWindow(body);
+  if (!w) {
+    return { ok: false, status: 400, error: 'Invalid date, time window or location.' };
+  }
+
+  const freeEnd = Math.min(w.startMin + FREE_WINDOW_MIN, w.endMin);
+  const hasMore = w.endMin > freeEnd;
+
+  const [freeData, fullData] = await Promise.all([
+    scan(w, w.startMin, freeEnd),
+    hasMore ? scan(w, w.startMin, w.endMin) : Promise.resolve(null),
+  ]);
+
+  const freeBest = freeData?.best_slot ?? null;
+  const fullBest = fullData?.best_slot ?? null;
+  const betterInWindow = !!(
+    freeBest && fullBest &&
+    fullBest.time !== freeBest.time &&
+    Number(fullBest.score) > Number(freeBest.score)
+  );
+
+  return {
+    ok: true,
+    body: {
+      best_slot:        publicSlot(freeBest),
+      quality:          freeBest ? qualityLabel(freeData?.best_band, freeBest.score) : null,
+      better_in_window: betterInWindow,
+      saar:             freeData?.saar ?? null,
+      free_window:      { start_min: w.startMin, end_min: freeEnd },
+      full_window:      { start_min: w.startMin, end_min: w.endMin },
+      disclaimer:       freeData?.disclaimer ?? null,
+    },
+  };
 }
