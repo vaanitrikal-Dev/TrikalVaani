@@ -3,250 +3,151 @@
  * TRIKAL VAANI — Voice TTS API
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/api/voice-tts/route.ts
- * VERSION: 5.1 — Gemini TTS fallback moved to the 3.x Interactions API
+ * VERSION: 6.0 — ElevenLabs REMOVED. Gemini 3.8 Flash TTS is now primary.
+ * DATE: 5 Oct 2026   ·   Approved by CEO in chat (ElevenLabs subscription ending)
  *
- * v5.1 CHANGES (3 Sep 2026) — Gemini fallback only. ElevenLabs (primary) and
- * Neural2-D (fallback 2) are untouched.
+ * CHAIN (product never goes silent):
+ *   1) PRIMARY    gemini-3.8-flash-tts + Rohiit's REPLICATED voice
+ *                 (env GEMINI_TTS_VOICE_ID, default voice_gjiq25svsaeo — created 3 Oct 2026)
+ *   2) FALLBACK 1 gemini-3.8-flash-tts + prebuilt "Charon" (same API, no clone)
+ *   3) FALLBACK 2 Google Cloud TTS hi-IN-Neural2-D
  *
- *   THIS WAS NOT A MODEL-NAME SWAP. gemini-2.5-flash-preview-tts used
- *   /models/{model}:generateContent. Gemini 3.1 Flash TTS uses a DIFFERENT
- *   ENDPOINT with a different request and response shape:
- *     endpoint  /models/{m}:generateContent  ->  /v1beta/interactions
- *     auth      ?key=<KEY>                   ->  x-goog-api-key header
- *     body      contents + generationConfig  ->  input + response_format
- *     voice     speechConfig.voiceConfig.prebuiltVoiceConfig.voiceName
- *                                            ->  generation_config.speech_config[].voice
- *     audio     candidates[0]...inlineData.data -> output_audio.data
- *   Changing only the model string would have returned 404 on every call.
- *   Charon still exists in the 3.1 voice list, and output is still 24kHz PCM,
- *   so wrapPcmInWav() is unchanged.
+ * v6.0 CHANGES vs v5.1:
+ *   - ElevenLabs call deleted (subscription cancelled; a dead key would add ~1s latency to every reply).
+ *   - Model 3.1-flash-tts-preview -> 3.8-flash-tts (GA; 3.1 preview is being replaced).
+ *   - Style prompt moved OUT of the spoken text into an `annotations: speech_metadata.style`
+ *     block, exactly as the 3.8 docs show — the model can no longer read the director's notes aloud.
+ *   - Response parsed from `steps[].content[].data` (what 3.8 actually returns; verified on the VM
+ *     3 Oct 2026) with `output_audio.data` kept as a fallback for older shapes.
+ *   - Audio comes back as WAV; raw PCM is still wrapped if a RIFF header is missing.
+ *   - BUG FIX: v5.x called synthesizeNeural2() but the function was never defined (build hid it via
+ *     typescript.ignoreBuildErrors). Fallback 2 threw a ReferenceError -> 500. It now exists.
  *
- *   TWO FAILURE MODES GOOGLE DOCUMENTS FOR THIS MODEL, both handled below:
- *   1. "The model occasionally returns text tokens instead of audio tokens,
- *      causing the server to fail the request with a 500 error... implement
- *      automated retry logic." -> ONE retry on 5xx.
- *   2. "Vague prompts may... cause the model to read your style instructions
- *      and director's notes aloud." -> the guru style prompt is now wrapped in
- *      an explicit synthesis instruction with a labelled transcript boundary.
- *      Without that, a customer could hear the persona brief read out.
- *
- *   HONEST NOTE ON THE DEADLINE: gemini-2.5-flash and gemini-2.5-pro (text)
- *   shut down on 16 October 2026. gemini-2.5-flash-preview-tts is a SEPARATE
- *   preview model ID and Google has not published a shutdown date for it; the
- *   docs still list it as supported. It is being migrated anyway because
- *   preview models carry a short deprecation notice, not because a date is
- *   confirmed.
- *
- *   RISK IS CONTAINED: Gemini is FALLBACK 1. If this path fails the chain
- *   still drops to Neural2-D, so the product does not go silent either way.
- *
- * VERSION: 5.0 — ElevenLabs cloned voice (Rohiit) PRIMARY
- * SIGNED: ROHIIT GUPTA, CEO
- *
- * ⚠️ STRICT CEO ORDER: DO NOT EDIT WITHOUT CEO APPROVAL
- *
- * v5.0 CHANGES (Jun 14, 2026):
- *   - PRIMARY: ElevenLabs cloned voice (Rohiit's own voice)
- *     Model: eleven_multilingual_v2 (best for Hindi/Hinglish)
- *     Makes "असली आवाज़" tagline literally true.
- *   - FALLBACK 1: Gemini-TTS Charon (if 11Labs fails OR quota out)
- *   - FALLBACK 2: Neural2-D (if both above fail)
- *   - Product NEVER goes silent — triple safety chain.
- *   - Voice ID + API key read from Vercel env (already added Jun 7):
- *       ELEVENLABS_API_KEY, ELEVENLABS_VOICE_ID
- *
- * QUOTA NOTE (CEO aware):
- *   ElevenLabs Creator quota is SHARED with content engine.
- *   If monthly credits run out → auto-falls back to Gemini Charon.
- *   No outage, just a voice change until quota resets.
- *
- * VOICE PERSONALITY (unchanged for fallbacks):
- *   "Ancient wisdom + modern AI" — calm, slow, authoritative guru.
+ * ENV (Vercel): GEMINI_API_KEY (already set)
+ *               GEMINI_TTS_VOICE_ID = voice_gjiq25svsaeo   (optional; default below)
+ *               GOOGLE_TTS_API_KEY   (optional; Neural2 uses GEMINI_API_KEY if absent)
+ *   NOTE: a replicated voice belongs to the Google project that created it. The Vercel GEMINI_API_KEY
+ *   must be from the SAME project as the VM key, or step 1 returns 404 and the chain drops to Charon.
  * ============================================================
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 
 export const runtime = 'nodejs';
-export const maxDuration = 60; // CACHE-BUST-v5.0
+export const maxDuration = 60; // CACHE-BUST-v6.0
 
-// ── ElevenLabs (primary) ──────────────────────────────────────
-const ELEVEN_MODEL = 'eleven_multilingual_v2';
+const GEMINI_TTS_MODEL   = 'gemini-3.8-flash-tts';
+const GEMINI_TTS_URL     = 'https://generativelanguage.googleapis.com/v1beta/interactions';
+const ROHIIT_VOICE_ID    = process.env.GEMINI_TTS_VOICE_ID || 'voice_gjiq25svsaeo';
+const PREBUILT_VOICE     = 'Charon';
+const FALLBACK_VOICE     = 'hi-IN-Neural2-D';
 
-// ── Gemini-TTS (fallback 1) ───────────────────────────────────
-const GEMINI_TTS_MODEL = 'gemini-3.1-flash-tts-preview';
-const GEMINI_TTS_VOICE = 'Charon';   // still in the 3.1 voice list — "Informative"
-const GEMINI_TTS_URL   = 'https://generativelanguage.googleapis.com/v1beta/interactions';
+// Delivery notes travel in annotations (NOT inside the transcript) so they are never spoken.
+const GURU_STYLE =
+  'Calm, deeply wise Vedic astrologer in his late 50s; composed, unhurried, authoritative. ' +
+  'Not a support bot, not an energetic YouTube narrator. Slow deliberate pacing with natural pauses, ' +
+  'slightly lower pitch for gravitas. Pronounce Sanskrit and Hindi terms (शनि, राहु, केतु, महादशा, अंतर्दशा) ' +
+  'with respectful clarity. A reverent spiritual consultation.';
 
-// ── Neural2-D (fallback 2) ────────────────────────────────────
-const FALLBACK_VOICE   = 'hi-IN-Neural2-D';
-
-// ── Style prompt for Gemini guru persona (fallback only) ──────
-// v5.1: opens with an explicit synthesis instruction and closes with a labelled
-// TRANSCRIPT boundary. Google documents that without both, this model can read
-// the director's notes aloud instead of performing them, or reject the request
-// as PROHIBITED_CONTENT because the classifier never sees a clear speech task.
-const GURU_STYLE_PROMPT = `Synthesize speech for the transcript that appears after the TRANSCRIPT label below. Read ONLY that transcript aloud. Do not read these instructions.
-
-Speak as a calm, deeply wise Vedic astrologer in his late 50s — composed, unhurried, authoritative. 
-NOT a customer support bot. NOT a YouTube narrator. NOT energetic or upbeat.
-Use slow, deliberate pacing with natural pauses between insights.
-Slightly lower your pitch for gravitas and trust.
-Pronounce Sanskrit and Hindi words (Shani, Rahu, Ketu, Mahadasha, Antardasha, Pancham bhav) with respectful clarity.
-Sound like an ancient wisdom keeper who has spent decades studying the stars.
-This is a spiritual consultation — treat it with reverence.
-
-TRANSCRIPT:`;
+type Audio = { buffer: Buffer; mime: string };
 
 // ─────────────────────────────────────────────────────────────
-// ElevenLabs synthesis (PRIMARY — Rohiit's cloned voice)
+// Gemini 3.8 Flash TTS (primary = replicated voice, fallback 1 = prebuilt)
 // ─────────────────────────────────────────────────────────────
-async function synthesizeElevenLabs(text: string): Promise<{ buffer: Buffer; mime: string } | null> {
-  const apiKey  = process.env.ELEVENLABS_API_KEY;
-  const voiceId = process.env.ELEVENLABS_VOICE_ID;
-
-  if (!apiKey || !voiceId) {
-    console.error('[Trikal TTS v5.0] ElevenLabs key or voiceId missing — skipping to fallback');
-    return null;
-  }
-
-  try {
-    const res = await fetch(
-      `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`,
-      {
-        method : 'POST',
-        headers: {
-          'xi-api-key'  : apiKey,
-          'Content-Type': 'application/json',
-          'Accept'      : 'audio/mpeg',
-        },
-        body: JSON.stringify({
-          text,
-          model_id: ELEVEN_MODEL,
-          voice_settings: {
-            stability        : 0.45,   // a touch of natural variation, still composed
-            similarity_boost : 0.85,   // stay close to Rohiit's cloned timbre
-            style            : 0.30,   // mild expressiveness for guru gravitas
-            use_speaker_boost: true,
-          },
-        }),
-      }
-    );
-
-    if (!res.ok) {
-      const err = await res.text();
-      // 401 = bad key, 429 = quota exhausted — both fall back gracefully
-      console.error('[Trikal TTS v5.0] ElevenLabs error:', res.status, err.substring(0, 200));
-      return null;
-    }
-
-    const arrayBuf = await res.arrayBuffer();
-    const buffer   = Buffer.from(arrayBuf);
-
-    if (buffer.length === 0) {
-      console.error('[Trikal TTS v5.0] ElevenLabs returned empty audio');
-      return null;
-    }
-
-    console.log('[Trikal TTS v5.0] ElevenLabs success:', buffer.length, 'bytes');
-    return { buffer, mime: 'audio/mpeg' };
-
-  } catch (err) {
-    const message = err instanceof Error ? err.message : String(err);
-    console.error('[Trikal TTS v5.0] ElevenLabs exception:', message);
-    return null;
-  }
-}
-
-// ─────────────────────────────────────────────────────────────
-// Gemini-TTS synthesis (Fallback 1)
-// ─────────────────────────────────────────────────────────────
-async function synthesizeGeminiTTS(text: string): Promise<{ buffer: Buffer; mime: string } | null> {
+async function synthesizeGemini(text: string, voice: string, tag: string): Promise<Audio | null> {
   const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) {
-    console.error('[Trikal TTS v5.1] GEMINI_API_KEY missing');
-    return null;
-  }
+  if (!apiKey) { console.error(`[Trikal TTS v6.0] GEMINI_API_KEY missing (${tag})`); return null; }
 
-  const fullPrompt = `${GURU_STYLE_PROMPT}\n\n${text}`;
-
-  // Gemini 3.1 Flash TTS — Interactions API. See the v5.1 note in the header:
-  // this is a different endpoint and payload from the 2.5 TTS call, not a
-  // renamed model.
   const body = JSON.stringify({
     model: GEMINI_TTS_MODEL,
-    input: fullPrompt,
+    input: [{
+      type: 'user_input',
+      content: [{ type: 'text', text, annotations: [{ type: 'speech_metadata', style: GURU_STYLE }] }],
+    }],
     response_format: { type: 'audio' },
-    generation_config: {
-      speech_config: [{ voice: GEMINI_TTS_VOICE }],
-    },
+    generation_config: { speech_config: [{ voice }] },
   });
 
-  // Google documents that this model randomly returns text tokens instead of
-  // audio and fails the request with a 500, and explicitly tells callers to
-  // retry. Two attempts, then hand over to Neural2-D rather than stall the
-  // request — the caller already has a working fallback below us.
+  // Google documents occasional 500s where the model emits text instead of audio — one retry on 5xx.
   for (let attempt = 1; attempt <= 2; attempt++) {
     let res: Response;
     try {
       res = await fetch(GEMINI_TTS_URL, {
         method : 'POST',
-        headers: {
-          'Content-Type'  : 'application/json',
-          'x-goog-api-key': apiKey,
-        },
+        headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
         body,
-        signal: AbortSignal.timeout(30000),
+        signal : AbortSignal.timeout(30000),
       });
     } catch (e) {
-      console.error(`[Trikal TTS v5.1] Gemini-TTS network error, attempt ${attempt}:`, e);
+      console.error(`[Trikal TTS v6.0] ${tag} network error, attempt ${attempt}:`, e);
       continue;
     }
-
     if (!res.ok) {
       const err = await res.text().catch(() => '');
-      console.error(`[Trikal TTS v5.1] Gemini-TTS ${res.status}, attempt ${attempt}:`, err.substring(0, 200));
-      // 5xx is the documented random failure and is worth one retry.
-      // A 4xx is our own request being wrong and will fail identically again.
+      console.error(`[Trikal TTS v6.0] ${tag} HTTP ${res.status}, attempt ${attempt}:`, err.substring(0, 200));
       if (res.status >= 500 && attempt === 1) continue;
       return null;
     }
-
-    const data = await res.json();
-    const audioBase64 = data?.output_audio?.data;
-
-    if (!audioBase64) {
-      // This is the "returned text instead of audio" case. Log what came back
-      // so the cause is visible rather than guessed at.
-      const asText = data?.output_text ?? '';
-      console.error(
-        `[Trikal TTS v5.1] No audio in Gemini response, attempt ${attempt}.`,
-        asText ? `Model returned text instead: ${String(asText).substring(0, 120)}` : ''
-      );
+    const data: any = await res.json();
+    let b64 = '';
+    for (const step of data?.steps ?? []) {
+      for (const c of step?.content ?? []) {
+        if (c?.type === 'audio' && c?.data) b64 = c.data;
+      }
+    }
+    if (!b64 && data?.output_audio?.data) b64 = data.output_audio.data;
+    if (!b64) {
+      console.error(`[Trikal TTS v6.0] ${tag} returned no audio, attempt ${attempt}`);
       if (attempt === 1) continue;
       return null;
     }
-
-    const pcmBuffer = Buffer.from(audioBase64, 'base64');
-    const wavBuffer = wrapPcmInWav(pcmBuffer, 24000);
-
-    console.log('[Trikal TTS v5.1] Gemini-TTS fallback success:', wavBuffer.length, 'bytes');
-    return { buffer: wavBuffer, mime: 'audio/wav' };
+    let buf: Buffer = Buffer.from(b64, "base64");
+    if (buf.subarray(0, 4).toString('ascii') !== 'RIFF') buf = wrapPcmInWav(buf, 24000);
+    console.log(`[Trikal TTS v6.0] ${tag} success:`, buf.length, 'bytes');
+    return { buffer: buf, mime: 'audio/wav' };
   }
-
   return null;
 }
 
-function wrapPcmInWav(pcmData: Buffer, sampleRate: number): Buffer {
-  const numChannels   = 1;
-  const bitsPerSample = 16;
-  const byteRate      = sampleRate * numChannels * (bitsPerSample / 8);
-  const blockAlign    = numChannels * (bitsPerSample / 8);
-  const dataSize      = pcmData.length;
+// ─────────────────────────────────────────────────────────────
+// Google Cloud TTS Neural2-D (fallback 2) — was referenced in v5.x but never defined
+// ─────────────────────────────────────────────────────────────
+async function synthesizeNeural2(text: string): Promise<Audio | null> {
+  const key = process.env.GOOGLE_TTS_API_KEY || process.env.GEMINI_API_KEY;
+  if (!key) return null;
+  try {
+    const res = await fetch(`https://texttospeech.googleapis.com/v1/text:synthesize?key=${key}`, {
+      method : 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body   : JSON.stringify({
+        input      : { text },
+        voice      : { languageCode: 'hi-IN', name: FALLBACK_VOICE },
+        audioConfig: { audioEncoding: 'MP3', speakingRate: 0.92, pitch: -2.0 },
+      }),
+      signal : AbortSignal.timeout(20000),
+    });
+    if (!res.ok) {
+      console.error('[Trikal TTS v6.0] Neural2 HTTP', res.status, (await res.text().catch(() => '')).substring(0, 200));
+      return null;
+    }
+    const data: any = await res.json();
+    if (!data?.audioContent) return null;
+    const buf = Buffer.from(data.audioContent, 'base64');
+    console.log('[Trikal TTS v6.0] Neural2 success:', buf.length, 'bytes');
+    return { buffer: buf, mime: 'audio/mpeg' };
+  } catch (e) {
+    console.error('[Trikal TTS v6.0] Neural2 exception:', e);
+    return null;
+  }
+}
 
+function wrapPcmInWav(pcmData: Buffer, sampleRate: number): Buffer {
+  const numChannels = 1, bitsPerSample = 16;
+  const byteRate = sampleRate * numChannels * (bitsPerSample / 8);
+  const blockAlign = numChannels * (bitsPerSample / 8);
   const header = Buffer.alloc(44);
   header.write('RIFF', 0);
-  header.writeUInt32LE(36 + dataSize, 4);
+  header.writeUInt32LE(36 + pcmData.length, 4);
   header.write('WAVE', 8);
   header.write('fmt ', 12);
   header.writeUInt32LE(16, 16);
@@ -257,61 +158,43 @@ function wrapPcmInWav(pcmData: Buffer, sampleRate: number): Buffer {
   header.writeUInt16LE(blockAlign, 32);
   header.writeUInt16LE(bitsPerSample, 34);
   header.write('data', 36);
-  header.writeUInt32LE(dataSize, 40);
-
+  header.writeUInt32LE(pcmData.length, 40);
   return Buffer.concat([header, pcmData]);
 }
 
 // ─────────────────────────────────────────────────────────────
-// POST handler
+// POST handler (request/response contract unchanged — TrikalVoice.tsx needs no edit)
 // ─────────────────────────────────────────────────────────────
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
-    const { text, sessionId } = body;
+    const { text, sessionId } = await req.json();
+    if (!text || typeof text !== 'string') return NextResponse.json({ error: 'Text required' }, { status: 400 });
+    if (!sessionId) return NextResponse.json({ error: 'Session required' }, { status: 401 });
 
-    if (!text || typeof text !== 'string') {
-      return NextResponse.json({ error: 'Text required' }, { status: 400 });
-    }
-    if (!sessionId) {
-      return NextResponse.json({ error: 'Session required' }, { status: 401 });
-    }
-
-    // ── Clean text for TTS ───────────────────────────────────
     const words = text.trim().split(/\s+/);
-    const trimmedText = words
-      .slice(0, 200)
-      .join(' ')
+    const clean = words.slice(0, 200).join(' ')
       .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
       .replace(/\*+([^*]+)\*+/g, '$1')
       .replace(/[\u{1F300}-\u{1F9FF}]/gu, '')
       .trim();
+    console.log('[Trikal TTS v6.0] Synthesizing:', words.length, 'words for session:', sessionId);
 
-    console.log('[Trikal TTS v5.0] Synthesizing:', words.length, 'words for session:', sessionId);
-
-    // ── 1) PRIMARY: ElevenLabs (Rohiit's cloned voice) ──────
-    let result = await synthesizeElevenLabs(trimmedText);
-    let engine = '11labs-rohiit';
-
-    // ── 2) FALLBACK 1: Gemini-TTS Charon ────────────────────
+    let result = await synthesizeGemini(clean, ROHIIT_VOICE_ID, 'gemini-rohiit');
+    let engine = 'gemini-3.8-rohiit';
     if (!result) {
-      console.warn('[Trikal TTS v5.0] ElevenLabs unavailable → Gemini-TTS Charon');
-      result = await synthesizeGeminiTTS(trimmedText);
-      engine = `gemini-tts-${GEMINI_TTS_VOICE}`;
+      console.warn('[Trikal TTS v6.0] Rohiit voice unavailable -> Charon');
+      result = await synthesizeGemini(clean, PREBUILT_VOICE, 'gemini-charon');
+      engine = `gemini-3.8-${PREBUILT_VOICE}`;
     }
-
-    // ── 3) FALLBACK 2: Neural2-D ────────────────────────────
     if (!result) {
-      console.warn('[Trikal TTS v5.0] Gemini-TTS failed → Neural2-D');
-      result = await synthesizeNeural2(trimmedText);
+      console.warn('[Trikal TTS v6.0] Gemini failed -> Neural2-D');
+      result = await synthesizeNeural2(clean);
       engine = FALLBACK_VOICE;
     }
-
     if (!result || result.buffer.length === 0) {
       return NextResponse.json({ error: 'Voice synthesis failed' }, { status: 500 });
     }
-
-    return new NextResponse(result.buffer, {
+    return new NextResponse(new Uint8Array(result.buffer), {
       status : 200,
       headers: {
         'Content-Type'         : result.mime,
@@ -320,10 +203,9 @@ export async function POST(req: NextRequest) {
         'X-Trikal-Voice-Engine': engine,
       },
     });
-
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
-    console.error('[Trikal TTS v5.0] Fatal:', message);
+    console.error('[Trikal TTS v6.0] Fatal:', message);
     return NextResponse.json({ error: 'Voice synthesis failed', detail: message }, { status: 500 });
   }
 }
@@ -331,11 +213,9 @@ export async function POST(req: NextRequest) {
 export async function GET() {
   return NextResponse.json({
     status         : 'Trikaal Voice TTS API is live',
-    version        : '5.0',
-    voice_primary  : `ElevenLabs ${ELEVEN_MODEL} (Rohiit cloned voice)`,
-    voice_fallback1: `Gemini-TTS ${GEMINI_TTS_VOICE}`,
+    version        : '6.0',
+    voice_primary  : `${GEMINI_TTS_MODEL} replicated voice (${ROHIIT_VOICE_ID})`,
+    voice_fallback1: `${GEMINI_TTS_MODEL} ${PREBUILT_VOICE}`,
     voice_fallback2: FALLBACK_VOICE,
-    quality        : 'Real Rohiit voice — असली आवाज़, triple-safety fallback',
-    note           : 'Quota shared with content engine — auto-falls back if exhausted',
   });
 }
