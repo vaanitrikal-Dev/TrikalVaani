@@ -2,7 +2,11 @@
 // 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER
 // ════════════════════════════════════════════════════════════════════════════
 // File:     lib/report-notify.ts   (NEW FILE)
-// Version:  v1.2 (29 Sep 2026)
+// Version:  v1.3 (10 Oct 2026)
+// v1.3: NotifyInput mein optional 'note' (jaise Upay Report mein grahak ki apni
+//       baat) — CEO email mein dikhta hai. Customer message NAHI badla. Retry
+//       wale email mein note nahi jaata (table mein column nahi) — report link
+//       mein wo baat dikhti hai.
 // v1.2: email bhejna alag function (sendNotifyEmail) + retryPendingEmails() —
 //   paid-recovery cron har 5 min un rows ko dobara bhejta hai jinka email
 //   fail hua tha (emailed_at khaali). Customer message/format wahi.
@@ -45,6 +49,7 @@ export interface NotifyInput {
   amountRupees?: number | null;
   orderTable?: 'karmic_orders' | 'kundali_milan_orders' | 'muhurat_orders';
   orderId?: string | null;    // readings.order_id → orders.id
+  note?: string | null;       // v1.3: sirf CEO email ke liye (grahak ki baat)
 }
 
 function admin() {
@@ -92,6 +97,7 @@ async function fromRazorpay(paymentId: string): Promise<{ phone?: string; amount
 interface EmailRow {
   key: string; product: string; name: string; waNumber: string | null;
   reportUrl: string; amountRupees?: number | null;
+  note?: string | null;
 }
 
 /** v1.2: ek 1-tap email bhejo. true = Apps Script ne ok:true kaha. Never throws. */
@@ -108,6 +114,7 @@ async function sendNotifyEmail(r: EmailRow): Promise<boolean> {
       `${r.product}${amt} — ${r.name || 'Customer'}\n` +
       `Mobile: ${r.waNumber ? '+' + r.waNumber : 'NAHI MILA'}\n\n` +
       (waLink ? `WhatsApp par bhejo (tap karein):\n${waLink}\n\n` : `Mobile nahi mila — report link khud bhejein.\n\n`) +
+      (r.note ? `${r.note}\n\n` : '') +
       `Message:\n${msg}\n\nPayment: ${r.key}`;
     const html =
       `<div style="font-family:Arial,sans-serif;font-size:15px;line-height:1.5">` +
@@ -118,6 +125,7 @@ async function sendNotifyEmail(r: EmailRow): Promise<boolean> {
           `padding:14px 22px;border-radius:10px;text-decoration:none;font-weight:bold;font-size:17px">` +
           `WhatsApp par bhejo</a></p>`
         : `<p style="color:#c00">Mobile nahi mila — report link khud bhejein.</p>`) +
+      (r.note ? `<p style="background:#fff8e1;padding:10px;border-radius:8px">${esc(r.note)}</p>` : '') +
       `<p style="color:#555">Message:<br>${esc(msg)}</p>` +
       `<p style="color:#999;font-size:12px">Payment: ${esc(r.key)}</p></div>`;
     const res = await fetch(url, {
@@ -213,10 +221,11 @@ export async function notifyReportReady(input: NotifyInput): Promise<void> {
     // 3. Email (Apps Script webhook)
     const ok = await sendNotifyEmail({
       key, product: input.product, name, waNumber, reportUrl: input.reportUrl, amountRupees,
+      note: input.note ?? null,
     });
     if (!ok) await supa.from('report_notifications').update({ emailed_at: null }).eq('payment_id', key);
   } catch (e) {
     console.error('[notify] failed (report unaffected):', e instanceof Error ? e.message : e);
   }
 }
-// END — lib/report-notify.ts v1.2
+// END — lib/report-notify.ts v1.3

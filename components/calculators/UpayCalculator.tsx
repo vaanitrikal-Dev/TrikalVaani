@@ -1,8 +1,15 @@
 'use client';
 
 // ============================================================
-// File: components/calculators/UpayCalculator.tsx   (NEW FILE)
-// Version: v1.0 — 10 Oct 2026
+// File: components/calculators/UpayCalculator.tsx
+// Version: v1.1 — 10 Oct 2026
+//   v1.1 (Rohiit, 10 Oct): (a) form ke upar 9 grah chips — "Kis grah ke upay
+//        chahiye?" (optional); chuna to free result ke saath us grah ke 3 upay bhi.
+//        (b) ₹51 box mein samasya + DOSH (Kaal Sarp, Manglik, Sade Sati) + 9 GRAH —
+//        koi bhi 2. Grah slug 'grah-shani' (VM granth_api v4.3 samajhta hai).
+//        (c) "Apni baat likhein" box (300 akshar) → upay_reports.vishesh —
+//        report aur CEO email mein. Upay isse NAHI badalte (granth se hi).
+//   v1.0: pehla version.
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
 //
 // ROHIIT KA DESIGN (10 Oct 2026, AskUserQuestion se pakka):
@@ -30,7 +37,12 @@ const GRAH: { id: string; hi: string }[] = [
   { id: 'Shani', hi: 'शनि' }, { id: 'Rahu', hi: 'राहु' }, { id: 'Ketu', hi: 'केतु' },
 ];
 
-interface Samasya { slug: string; naam_hi?: string; naam_en?: string }
+interface Samasya { slug: string; naam_hi?: string; naam_en?: string; prakar?: string }
+
+// VM v4.3 'prakar' bhejta hai; purana VM na bheje to bhi ye teen dosh pehchane jaayein
+const DOSH_SLUGS = ['kaal-sarp', 'manglik', 'sade-sati'];
+const grahSlug = (id: string) => `grah-${id.toLowerCase()}`;
+const VISHESH_MAX = 300;
 
 const inputStyle: React.CSSProperties = {
   background: '#0d1120', border: '1px solid rgba(255,255,255,0.1)', color: '#e2e8f0', colorScheme: 'dark',
@@ -57,6 +69,8 @@ export default function UpayCalculator() {
   const [samasyaList, setSamasyaList] = useState<Samasya[]>([]);
   const [chuni, setChuni] = useState<string[]>([]);
   const [mobile, setMobile] = useState('');
+  const [vishesh, setVishesh] = useState('');
+  const [preGrah, setPreGrah] = useState<string | null>(null);
   const [payErr, setPayErr] = useState('');
   const [paying, setPaying] = useState(false);
 
@@ -87,14 +101,15 @@ export default function UpayCalculator() {
       const d = await r.json();
       if (!r.ok) throw new Error(d?.error || 'Upay nahi mil paaye.');
       setFree(d);
+      if (preGrah) grahDekho(preGrah, b);
       setTimeout(() => document.getElementById('upay-result')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
     } catch (e: any) {
       setErr(e?.message || 'Kuch galat hua — dobara try karein.');
     } finally { setLoading(false); }
   }
 
-  async function grahDekho(g: string) {
-    const b = birth();
+  async function grahDekho(g: string, bIn?: ReturnType<typeof birth>) {
+    const b = bIn ?? birth();
     if (!b) return;
     setGrah(g); setGrahRes(null); setGrahLoading(true);
     try {
@@ -109,18 +124,47 @@ export default function UpayCalculator() {
     setChuni((c) => (c.includes(slug) ? c.filter((x) => x !== slug) : c.length >= 2 ? [c[1], slug] : [...c, slug]));
   }
 
+  // form ke upar grah chuna → ₹51 box mein bhi pehle se chuna (jagah ho to)
+  function preGrahChuno(id: string) {
+    const next = preGrah === id ? null : id;
+    setPreGrah(next);
+    if (next) setChuni((c) => (c.includes(grahSlug(next)) || c.length >= 2 ? c : [...c, grahSlug(next)]));
+  }
+
+  const doshList = samasyaList.filter((s) => s.prakar === 'dosh' || DOSH_SLUGS.includes(s.slug));
+  const samList = samasyaList.filter((s) => !(s.prakar === 'dosh' || DOSH_SLUGS.includes(s.slug)));
+  function naamOf(slug: string) {
+    if (slug.startsWith('grah-')) {
+      const g = GRAH.find((x) => grahSlug(x.id) === slug);
+      return g ? `${g.hi} ${g.id} ke upay` : slug;
+    }
+    return samasyaList.find((s) => s.slug === slug)?.naam_hi || slug;
+  }
+  function Chip({ slug, label }: { slug: string; label: string }) {
+    const on = chuni.includes(slug);
+    return (
+      <button type="button" onClick={() => toggle(slug)}
+        className="px-3 py-1.5 rounded-full text-sm"
+        style={on
+          ? { background: GOLD, color: '#080B12', fontWeight: 700 }
+          : { background: 'transparent', color: '#e2e8f0', border: '1px solid rgba(255,255,255,0.15)' }}>
+        {on ? '✓ ' : ''}{label}
+      </button>
+    );
+  }
+
   async function pay() {
     setPayErr('');
     const b = birth();
     if (!b) { setPayErr('Pehle upar janm-vivran bharein.'); return; }
-    if (chuni.length === 0) { setPayErr('Kam se kam ek samasya chuniye.'); return; }
+    if (chuni.length === 0) { setPayErr('Kam se kam ek samasya, dosh ya grah chuniye.'); return; }
     const mob = mobile.replace(/\D/g, '');
     if (mob.length < 10) { setPayErr('WhatsApp number (10 ank) bharein — report wahi bheji jaayegi.'); return; }
     setPaying(true);
     try {
       const r = await fetch('/api/calc/upay/order', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ birth: b, samasya: chuni, mobile: mob, language: 'hinglish' }),
+        body: JSON.stringify({ birth: b, samasya: chuni, mobile: mob, language: 'hinglish', vishesh: vishesh.trim() || null }),
       });
       const o = await r.json();
       if (!r.ok) throw new Error(o?.error || 'Order nahi bana.');
@@ -175,6 +219,20 @@ export default function UpayCalculator() {
             </div>
           </div>
         </div>
+        <div className="mt-5">
+          <p className="text-sm text-slate-300 m-0 mb-2">Kis grah ke upay chahiye? <span className="text-xs text-slate-500">(optional — Surya se Ketu tak)</span></p>
+          <div className="flex flex-wrap gap-2">
+            {GRAH.map((g) => (
+              <button key={g.id} type="button" onClick={() => preGrahChuno(g.id)}
+                className="px-3 py-1.5 rounded-full text-sm font-semibold"
+                style={preGrah === g.id
+                  ? { background: GOLD, color: '#080B12' }
+                  : { background: 'transparent', color: '#e2e8f0', border: `1px solid ${GOLD_RGBA(0.35)}` }}>
+                {g.hi} {g.id}
+              </button>
+            ))}
+          </div>
+        </div>
         {err ? <p className="text-red-400 text-sm mt-3 mb-0">{err}</p> : null}
         <button type="submit" disabled={loading}
           className="mt-5 w-full sm:w-auto px-6 py-3 rounded-lg font-bold text-sm"
@@ -226,27 +284,40 @@ export default function UpayCalculator() {
 
       {/* ── KADAM 3: ₹51 ─────────────────────────────────────────── */}
       <section className="mt-8 rounded-2xl p-5 md:p-6" style={{ background: '#0B0F1A', border: `2px solid ${GOLD_RGBA(0.45)}` }}>
-        <h2 className="text-xl font-serif font-bold m-0 mb-1" style={{ color: GOLD }}>₹51 — Aapki 2 samasya ke 10 alag upay</h2>
+        <h2 className="text-xl font-serif font-bold m-0 mb-1" style={{ color: GOLD }}>₹51 — Aapki 2 samasya, dosh ya grah ke 10 upay</h2>
         <p className="text-sm m-0 mb-4" style={{ color: '#cbd5e1' }}>
           Har upay alag: mantra, daan, seva, snaan, raksha-dhaaga… — Atharvaveda (Kaushika Sutra), Rigveda (Rgvidhana),
           BPHS aur Phaladeepika se. Aasaan, ghar par, kam kharche mein. Website par report + PDF download + WhatsApp share.
         </p>
-        <p className="text-sm font-semibold m-0 mb-2 text-slate-200">Apni 2 samasya chuniye:</p>
+        <p className="text-sm font-semibold m-0 mb-1 text-slate-200">Koi 2 chuniye — samasya, dosh ya grah:</p>
+        <p className="text-xs m-0 mb-3" style={{ color: '#94a3b8' }}>
+          {chuni.length ? `Chuna: ${chuni.map(naamOf).join(' · ')}` : 'Abhi kuch nahi chuna'}
+        </p>
+        <p className="text-xs font-semibold m-0 mb-2" style={{ color: GOLD }}>Samasya</p>
         <div className="flex flex-wrap gap-2 mb-4">
           {samasyaList.length === 0 ? <span className="text-xs text-slate-500">Soochi aa rahi hai…</span> : null}
-          {samasyaList.map((s) => {
-            const on = chuni.includes(s.slug);
-            return (
-              <button key={s.slug} type="button" onClick={() => toggle(s.slug)}
-                className="px-3 py-1.5 rounded-full text-sm"
-                style={on
-                  ? { background: GOLD, color: '#080B12', fontWeight: 700 }
-                  : { background: 'transparent', color: '#e2e8f0', border: '1px solid rgba(255,255,255,0.15)' }}>
-                {on ? '✓ ' : ''}{s.naam_hi || s.slug}
-              </button>
-            );
-          })}
+          {samList.map((s) => <Chip key={s.slug} slug={s.slug} label={s.naam_hi || s.slug} />)}
         </div>
+        {doshList.length ? (
+          <>
+            <p className="text-xs font-semibold m-0 mb-2" style={{ color: GOLD }}>Dosh</p>
+            <div className="flex flex-wrap gap-2 mb-4">
+              {doshList.map((s) => <Chip key={s.slug} slug={s.slug} label={s.naam_hi || s.slug} />)}
+            </div>
+          </>
+        ) : null}
+        <p className="text-xs font-semibold m-0 mb-2" style={{ color: GOLD }}>Grah — sirf us grah ke granth upay</p>
+        <div className="flex flex-wrap gap-2 mb-4">
+          {GRAH.map((g) => <Chip key={g.id} slug={grahSlug(g.id)} label={`${g.hi} ${g.id}`} />)}
+        </div>
+        <label className="text-sm text-slate-300 block mb-3">Apni baat likhein (optional)
+          <textarea value={vishesh} onChange={(e) => setVishesh(e.target.value.slice(0, VISHESH_MAX))} rows={3}
+            className="w-full mt-1 px-4 py-2.5 rounded-lg text-sm outline-none block" style={inputStyle}
+            placeholder="Jaise: beti ki shaadi mein 3 saal se deri ho rahi hai / mujhe sirf daan wale upay chahiye" />
+          <span className="text-xs block mt-1" style={{ color: '#64748b' }}>
+            {vishesh.length}/{VISHESH_MAX} · Ye report mein aur Rohiit Gupta tak pahunchti hai. Upay granth se hi chune jaate hain.
+          </span>
+        </label>
         <label className="text-sm text-slate-300 block mb-3">WhatsApp number (report ka link isi par)
           <input value={mobile} onChange={(e) => setMobile(e.target.value)} inputMode="numeric" maxLength={14}
             className="w-full sm:w-72 mt-1 px-4 py-2.5 rounded-lg text-sm outline-none block" style={inputStyle} placeholder="98XXXXXXXX" />
@@ -264,4 +335,4 @@ export default function UpayCalculator() {
     </div>
   );
 }
-// END — components/calculators/UpayCalculator.tsx v1.0
+// END — components/calculators/UpayCalculator.tsx v1.1

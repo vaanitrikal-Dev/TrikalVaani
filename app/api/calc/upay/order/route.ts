@@ -2,8 +2,12 @@
  * ============================================================
  * TRIKAL VAANI — Upay Report Order (₹51, Razorpay)
  * CEO & Chief Vedic Architect: Rohiit Gupta
- * File: app/api/calc/upay/order/route.ts   (NEW FILE)
- * VERSION: 1.0 (10 Oct 2026)
+ * File: app/api/calc/upay/order/route.ts
+ * VERSION: 1.1 (10 Oct 2026)
+ *   v1.1: chunav mein 'grah-shani' jaise grah aur 'kaal-sarp' jaise dosh bhi
+ *         (SAMASYA_RE mein pehle se fit — VM granth_api v4.3 samajhta hai).
+ *         'vishesh' (grahak ki apni baat, max 300) → upay_reports.vishesh.
+ *   v1.0: pehla version.
  * ============================================================
  * 1. Janm-vivran + 1-2 samasya jaancho
  * 2. Razorpay order ₹51 (amount SERVER par tay — browser sirf product bolta hai)
@@ -37,6 +41,9 @@ export async function POST(req: NextRequest) {
     const mobileDigits = String(body?.mobile ?? '').replace(/\D/g, '');
     const mobile = mobileDigits.length >= 10 ? mobileDigits.slice(-10) : null;
     const language = ['hinglish', 'hindi', 'english'].includes(body?.language) ? body.language : 'hinglish';
+    // grahak ki apni baat — control characters hatao, 300 akshar tak
+    const visheshRaw = String(body?.vishesh ?? '').replace(/[\u0000-\u0008\u000B-\u001F\u007F]/g, '').trim();
+    const vishesh = visheshRaw ? Array.from(visheshRaw).slice(0, 300).join('') : null;
 
     const keyId = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
     const keySecret = process.env.RAZORPAY_KEY_SECRET;
@@ -66,6 +73,7 @@ export async function POST(req: NextRequest) {
       language,
       birth,
       samasya,
+      vishesh,
       status: 'created',
     });
     if (error) {
@@ -86,4 +94,4 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Payment shuru nahi ho paya — dobara try karein.' }, { status: 500 });
   }
 }
-// END — app/api/calc/upay/order/route.ts v1.0
+// END — app/api/calc/upay/order/route.ts v1.1

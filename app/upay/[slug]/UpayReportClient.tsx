@@ -1,8 +1,10 @@
 'use client';
 
 // ============================================================
-// File: app/upay/[slug]/UpayReportClient.tsx   (NEW FILE)
-// Version: v1.0 — 10 Oct 2026
+// File: app/upay/[slug]/UpayReportClient.tsx
+// Version: v1.1 — 10 Oct 2026
+//   v1.1: "Aapki baat" (upay_reports.vishesh) hero ke neeche; hero mein
+//         "Samasya" ki jagah "Aapne chuna" (ab grah/dosh bhi chune ja sakte hain).
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
 //
 // Upay Report (₹51) — Janam Kundali report (app/report/[slug]/ReportPublicClient)
@@ -94,7 +96,7 @@ export default function UpayReportClient({ report, slug }: { report: any; slug: 
             {birthLine ? <p style={{ margin: '0 0 8px', color: '#cbd5e1', fontSize: '13px' }}>{birthLine}</p> : null}
             {samasya.length ? (
               <p style={{ margin: '0 0 6px', color: '#e2e8f0', fontSize: '14px', fontWeight: 600 }}>
-                Samasya: {samasya.map((s) => s.naam_hi || s.slug).join(' · ')}
+                Aapne chuna: {samasya.map((s) => s.naam_hi || s.slug).join(' · ')}
               </p>
             ) : null}
             <p style={{ margin: 0, color: '#94a3b8', fontSize: '12px' }}>
@@ -102,6 +104,16 @@ export default function UpayReportClient({ report, slug }: { report: any; slug: 
               {res?.dasha?.md ? ` · Chalti dasha: ${res.dasha.md} – ${res.dasha.ad}` : ''}
             </p>
           </section>
+
+          {report.vishesh ? (
+            <section style={{ background: G(0.05), border: `1px solid ${G(0.2)}`, borderRadius: '12px', padding: '14px 16px', marginBottom: '18px' }}>
+              <p style={{ margin: '0 0 4px', color: GOLD, fontSize: '13px', fontWeight: 700 }}>Aapki baat</p>
+              <p style={{ margin: 0, color: '#e2e8f0', fontSize: '13px', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>{String(report.vishesh)}</p>
+              <p style={{ margin: '6px 0 0', color: '#94a3b8', fontSize: '11px' }}>
+                Upay aapki kundali aur chuni samasya ke hisaab se granth se chune gaye hain. Is baat par seedhi salaah ke liye neeche ₹499 consultation hai.
+              </p>
+            </section>
+          ) : null}
 
           {/* ── kaise karein ── */}
           <section style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '12px', padding: '14px 16px', marginBottom: '18px' }}>
@@ -199,4 +211,4 @@ export default function UpayReportClient({ report, slug }: { report: any; slug: 
     </>
   );
 }
-// END — app/upay/[slug]/UpayReportClient.tsx v1.0
+// END — app/upay/[slug]/UpayReportClient.tsx v1.1

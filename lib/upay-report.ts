@@ -1,8 +1,11 @@
 // ════════════════════════════════════════════════════════════════════════════
 // 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER
 // ════════════════════════════════════════════════════════════════════════════
-// File:     lib/upay-report.ts   (NEW FILE)
-// Version:  v1.0 (10 Oct 2026)
+// File:     lib/upay-report.ts
+// Version:  v1.1 (10 Oct 2026)
+//   v1.1: grahak ki apni baat (upay_reports.vishesh) CEO email mein (note).
+//         Chunav mein grah/dosh slug bhi — VM granth_api v4.3.
+//   v1.0: pehla version.
 // Owner:    Rohiit Gupta, Chief Vedic Architect
 //
 // ── KYA HAI ────────────────────────────────────────────────────────────────
@@ -148,6 +151,7 @@ export async function generateUpayReport(orderId: string, paymentId: string, via
       customerName: row.person_name ?? null,
       phone: row.mobile ?? null,
       amountRupees: (row.amount_paise ?? UPAY_AMOUNT_PAISE) / 100,
+      note: row.vishesh ? `Grahak ki baat: ${String(row.vishesh).slice(0, 300)}` : null,
     });
     console.log(`[upay] DELIVERED via ${via} | ${paymentId} | ${slug}`);
     return { ok: true, slug };
@@ -159,4 +163,4 @@ export async function generateUpayReport(orderId: string, paymentId: string, via
     return { ok: false, reason: 'failed', error: msg };
   }
 }
-// END — lib/upay-report.ts v1.0
+// END — lib/upay-report.ts v1.1

@@ -2,8 +2,9 @@
  * ============================================================
  * TRIKAL VAANI — Upay Report Page (₹51)
  * CEO & Chief Vedic Architect: Rohiit Gupta
- * File: app/upay/[slug]/page.tsx   (NEW FILE)
- * VERSION: 1.0 (10 Oct 2026)
+ * File: app/upay/[slug]/page.tsx
+ * VERSION: 1.1 (10 Oct 2026)
+ *   v1.1: 'vishesh' (grahak ki apni baat) bhi select — report mein dikhti hai.
  * ============================================================
  * Rohiit ka niyam: report Janam Kundali report jaisi — website par, PDF
  * download (browser print) aur WhatsApp share. Access = slug (unlisted link,
@@ -30,7 +31,7 @@ export default async function UpayReportPage({ params }: { params: { slug: strin
   if (!SLUG_RE.test(slug)) notFound();
   const supa = upayAdmin();
   const { data: r } = await supa.from('upay_reports')
-    .select('slug, person_name, birth, samasya, result, status, public_views, ready_at, language')
+    .select('slug, person_name, birth, samasya, result, status, public_views, ready_at, language, vishesh')
     .eq('slug', slug).maybeSingle();
   if (!r || r.status !== 'ready' || !r.result) notFound();
 
@@ -40,4 +41,4 @@ export default async function UpayReportPage({ params }: { params: { slug: strin
 
   return <UpayReportClient report={r} slug={slug} />;
 }
-// END — app/upay/[slug]/page.tsx v1.0
+// END — app/upay/[slug]/page.tsx v1.1
