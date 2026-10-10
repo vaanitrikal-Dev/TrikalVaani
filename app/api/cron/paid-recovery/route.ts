@@ -2,7 +2,11 @@
 // 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER
 // ════════════════════════════════════════════════════════════════════════════
 // File:     app/api/cron/paid-recovery/route.ts
-// Version:  v1.6 (30 Sep 2026)
+// Version:  v1.7 (10 Oct 2026)
+// v1.7 (10 Oct 2026) — UPAY REPORT (₹51) juda: notes.product 'upay' → upay_reports
+//   mein status 'ready' na ho to lib/upay-report generateUpayReport() se KHUD
+//   banata hai (wahi function jo callback chalata hai) — max 2 koshish, phir alert.
+// v1.6 (30 Sep 2026)
 // v1.6 (30 Sep 2026) — CEO: sirf is cron file mein, lib/alert.ts nahi chhuna. Do
 //   system alerts ('Razorpay list fail', 'check errors') 6 ghante wali window par
 //   the (din mein 4 baar tak) → ab baaki sab ki tarah 30 din mein EK baar.
@@ -100,6 +104,7 @@ import { POST as milanPOST }   from '@/app/api/milan-narrative/route';  // v1.3
 import { POST as muhuratPOST } from '@/app/api/muhurat-paid/route';     // v1.3
 import { retryPendingEmails }  from '@/lib/report-notify';              // v1.3
 import { POST as palmPOST }    from '@/app/api/palmistry/paid-analyze/route'; // v1.4
+import { generateUpayReport }  from '@/lib/upay-report';                    // v1.7
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300;
@@ -255,13 +260,13 @@ async function recoverOneNarrative(supa: any): Promise<string | null> {
 }
 
 type Product =
-  | 'deep' | 'hast_rekha' | 'karmic' | 'milan' | 'muhurat' | 'voice_pack'
+  | 'deep' | 'hast_rekha' | 'karmic' | 'milan' | 'muhurat' | 'voice_pack' | 'upay'
   | 'skip_yog' | 'skip_voice' | 'skip_dakshina' | 'skip_unknown';
 
 const LABEL: Record<string, string> = {
   deep: 'Deep Reading / Swapna (₹51)', hast_rekha: 'Hast Rekha',
   karmic: 'Karmic Background Reading', milan: 'Kundali Milan',
-  muhurat: 'Muhurat Report', voice_pack: 'Voice Pack',
+  muhurat: 'Muhurat Report', voice_pack: 'Voice Pack', upay: 'Upay Report (₹51)',
 };
 
 function admin() {
@@ -278,6 +283,7 @@ function classify(p: any): Product {
   if (n.product === 'hast_rekha')        return 'hast_rekha';
   if (n.product === 'trikal_voice_pack') return 'voice_pack';
   if (n.product === 'yog')               return 'skip_yog';
+  if (n.product === 'upay')              return 'upay';      // v1.7
   if (/karmic/i.test(purpose))           return 'karmic';
   if (/milan/i.test(purpose))            return 'milan';
   if (/muhurat/i.test(purpose))          return 'muhurat';
@@ -303,6 +309,7 @@ async function isDelivered(supa: any, product: Product, paymentId: string): Prom
     case 'milan':      return one('kundali_milan_orders', 'razorpay_payment_id');
     case 'muhurat':    return one('muhurat_orders', 'razorpay_payment_id');
     case 'voice_pack': return one('voice_packs', 'razorpay_payment_id');
+    case 'upay':       return one('upay_reports', 'razorpay_payment_id', q => q.eq('status', 'ready')); // v1.7
     default:           return true;
   }
 }
@@ -478,6 +485,22 @@ export async function GET(req: NextRequest) {
         if (isTest) { summary.skipped.test = (summary.skipped.test ?? 0) + 1; continue; }
       }
 
+      // v1.7 — Upay Report: server par khud banao (callback wala hi function)
+      if (product === 'upay') {
+        const { data: ur } = await supa.from('upay_reports').select('attempts')
+          .eq('razorpay_order_id', p.order_id).maybeSingle();
+        if (ur && (ur.attempts ?? 0) < MAX_ATTEMPTS) {
+          if (recoveriesThisRun >= MAX_RECOVERIES_PER_RUN) { summary.notes.push(`${p.id}: upay next run`); continue; }
+          recoveriesThisRun++;
+          const r = await generateUpayReport(p.order_id, p.id, 'cron');
+          summary.notes.push(`${p.id}: upay ${r.ok ? 'recovered:' + r.slug : r.reason + (r.error ? ' ' + r.error.slice(0, 80) : '')}`);
+          if (r.ok) { summary.recovered.push(p.id); continue; }
+          if (r.reason === 'claimed') continue;
+          if ((ur.attempts ?? 0) + 1 < MAX_ATTEMPTS) continue;   // agla run ek aur koshish
+        }
+        // row hi nahi, ya koshishein khatam → neeche generic critical alert (ek baar)
+      }
+
       // v1.4 — Hast Rekha ka retry chal raha hai to abhi alert nahi (60 min baad retryOnePalm khud bhejega)
       if (product === 'hast_rekha' && await palmRetryInProgress(supa, p.id)) {
         summary.notes.push(`${p.id}: hast rekha retry in progress`);
@@ -542,4 +565,4 @@ export async function GET(req: NextRequest) {
   return NextResponse.json({ ok: true, window_hours: WINDOW_SEC / 3600, ...summary });
 }
 
-// END — app/api/cron/paid-recovery/route.ts v1.6 | Trikaal Vaani | Rohiit Gupta, Chief Vedic Architect
+// END — app/api/cron/paid-recovery/route.ts v1.7 | Trikaal Vaani | Rohiit Gupta, Chief Vedic Architect

@@ -136,6 +136,7 @@
  * 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER 🔱
  * ============================================================================
  * File:        app/sitemap.ts
+ * Version:     v9.8 — free-upay-calculator juda (10 Oct 2026)
  * Version:     v9.7 — CODE_LASTMOD for 7 Radar-bundle pages (03 Oct 2026)
  * Version:     v9.6 — CODE_LASTMOD 2026-10-03 for 9 calculators (03 Oct 2026)
  * Version:     v9.5 — /learn EN<->HI hreflang + loud learn logging (30 Sep 2026)
@@ -495,6 +496,8 @@ const CALCULATORS = [
   'free-life-span-calculator',
   // ── Shubh Muhurat (v9.3 — 23 Sep 2026) ──
   'free-shubh-muhurat-calculator',
+  // ── Upay Calculator (v9.8 — 10 Oct 2026) ──
+  'free-upay-calculator',
 ];
 
 const DOMAINS_FALLBACK = [
@@ -589,6 +592,7 @@ const CODE_LASTMOD: Record<string, string> = {
   '/calculators/free-love-or-arranged-marriage-calculator': '2026-09-22',
   '/calculators/free-life-span-calculator': '2026-09-22',
   '/calculators/free-shubh-muhurat-calculator': '2026-09-24',
+  '/calculators/free-upay-calculator': '2026-10-10',
 };
 
 function codeMod(key: string): Date {

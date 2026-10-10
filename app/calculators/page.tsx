@@ -1,6 +1,7 @@
 // ============================================================
 // File: app/calculators/page.tsx
 // Purpose: Calculators Hub — SEO/GEO/AEO landing page
+// Version: v4.7 — Upay Calculator ka card juda (10 Oct 2026)
 // Version: v4.6 — Vivah card ke naam mein "Shadi Kab Hogi" + title ka count apne aap (4 Oct 2026)
 //   * Card ka naam: 'Free Vivah Yog Calculator' → 'Free Vivah Yog — Shadi Kab Hogi Calculator'.
 //     Rohiit /calculators par "Shadi Kab Hogi" dhoondh rahe the aur heading mein
@@ -191,6 +192,14 @@ const CALCULATORS: CalcEntry[] = [
     emoji: '\u{1F5D3}\uFE0F',
     name: 'Free Shubh Muhurat Calculator',
     desc: 'Apni janm-tithi se shubh tareekh AUR samay \u2014 vivah, griha pravesh, vahan, business, exam form samet 40 kaam. Brihat Samhita 97-99 ke niyam, har wajah par shlok. 3 mahine muft.',
+    badge: 'New',
+    live: true,
+  },
+  {
+    slug: 'free-upay-calculator',
+    emoji: '\u{1F531}',
+    name: 'Upay Calculator',
+    desc: 'Shadbala se kamzor grah aur BPHS ke 3 upay muft. \u20B951 mein 2 samasya ke 10 alag upay \u2014 Atharvaveda (Kaushika), Rigveda, BPHS se. Koi AI nahi.',
     badge: 'New',
     live: true,
   },
