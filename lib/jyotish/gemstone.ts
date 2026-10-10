@@ -1,6 +1,10 @@
 // ============================================================
 // File: lib/jyotish/gemstone.ts
-// Version: v3.0 — NEENV PARASHAR SE (BPHS Ch.34 sl.19-44) — 21 Sep 2026
+// Version: v3.1 — KAM SCORE PAR "NEUTRAL" NAHI — 10 Oct 2026
+//   Pehle score 0-34 sab "Neutral / Optional" dikhte the — 0/100 wala maarak
+//   Manik (Kumbh lagna) bhi. Ab 20 se kam = "Aapke Lagna ke liye nahi", aur
+//   pehnne ka tareeka chhupta hai. 'maarak' ab "Dhyaan" mein dikhta hai.
+// PICHHLA: v3.0 — NEENV PARASHAR SE (BPHS Ch.34 sl.19-44) — 21 Sep 2026
 //   computeFunctional() ab pehle Parashar ki lagna-dar-lagna soochi dekhta hai;
 //   saamanya lordship niyam sirf "granth chup" par. 7 ulte jawab theek.
 // PICHHLA: v2.1 — Gemologist Brain + Rule 8 Combustion (pure chart-based)
@@ -236,6 +240,15 @@ export const VERDICT_COLOR: Record<VerdictKey, { c: string; bg: string }> = {
   avoid:       { c: '#ef4444', bg: 'rgba(239,68,68,0.12)' },
   reject:      { c: '#ef4444', bg: 'rgba(239,68,68,0.10)' },
 };
+// 🔴 v3.1 (10 Oct 2026) — pehle yahan aakhri `return 2` tha, yani 0 se 34 tak
+// HAR score "Neutral / Optional" ban jaata tha. Rohiit ki apni kundali (Kumbh
+// lagna) par Manik 0/100 aaya — Surya maarak (BPHS 34.41-42), 8ve ghar mein —
+// aur label phir bhi "Optional" tha. Grahak use "pehen sakte hain" padhta.
+// Ab: 20 se kam score + grah SHUBH nahi (maarak / sama / chhaya / granth-chup
+// par bhi kamzor) = 'reject' ("Aapke Lagna ke liye nahi"), aur gate 'M' se
+// pehnne ka tareeka page par chhup jaata hai. SHUBH grah (jaise lagna-swami)
+// kam score par bhi "Neutral" hi rehta hai, aur PAAP grah pehle ki tarah
+// "Avoid" — un dono ka label nahi badla. (Neeche runEngine mein.)
 function scoreGood(score: number): number {
   if (score >= 65) return 5; if (score >= 50) return 4; if (score >= 35) return 3; return 2;
 }
@@ -310,12 +323,19 @@ export function runEngine(data: any): EngineResult | null {
     score = Math.max(0, Math.min(100, Math.round(score)));
     let g = scoreGood(score);
     for (const c of caps) g = Math.min(g, GOOD[c]);
+    // v3.1 — kam score + shubh nahi = "Aapke Lagna ke liye nahi" (pehle "Neutral / Optional")
+    if (g === 2 && score < 20 && !yk && (isNode || computeFunctional(graha, lagna).score <= 0)) g = 0;
     if (g === 1) score = Math.min(score, 18); // floor display for 'avoid'
     const verdictKey = KEY_BY_GOOD[g];
 
     // gate (compat with pages: 'M' hides wearing-details for avoid/reject)
     let gate = 'N'; let gateLabel = 'Neutral';
-    if (verdictKey === 'avoid' || verdictKey === 'reject') { gate = 'M'; gateLabel = 'Functional Malefic / Avoid'; }
+    if (verdictKey === 'avoid' || verdictKey === 'reject') {
+      gate = 'M';
+      // v3.1 — kam score se 'reject' hua grah zaroori nahi ki PAAP ho; use paap mat kaho
+      gateLabel = (verdictKey === 'avoid' || isNode || computeFunctional(graha, lagna).score < 0)
+        ? 'Functional Malefic / Avoid' : 'Is ratna se laabh nahi';
+    }
     else if (isNode) { gate = 'node'; gateLabel = 'Chhaya graha (node)'; }
     else if (yk) { gate = 'YK'; gateLabel = 'Yogakaraka'; }
     else { const fn = computeFunctional(graha, lagna).score; if (fn >= 15) { gate = 'B'; gateLabel = 'Functional Benefic'; } else if (fn > 0) { gate = 'b'; gateLabel = 'Mild Benefic'; } }
@@ -335,7 +355,7 @@ export function runEngine(data: any): EngineResult | null {
 export function reasonHi(s: StoneResult, lagna: string): string {
   const f = s.flags;
   if (f.includes('randhresh (8th) lord'))
-    return `${s.graha} aapke ${lagna} lagna mein 8ve ghar (randhra — aayu/achaanak sankat) ka swami hai. Ratna graha ke poore prabhav ko jagaता hai, isliye iska ratna (${s.stone_hi}) is sanvedansheel ghar ko sakriya kar sakta hai — score ${s.score}/100, verdict: Avoid.`;
+    return `${s.graha} aapke ${lagna} lagna mein 8ve ghar (randhra — aayu/achaanak sankat) ka swami hai. Ratna graha ke poore prabhav ko jagata hai, isliye iska ratna (${s.stone_hi}) is sanvedansheel ghar ko sakriya kar sakta hai — score ${s.score}/100, verdict: Avoid.`;
   if (f.includes('Marana Karaka Sthana'))
     return `${s.graha} apne Marana-Karaka-Sthana (mrityu-bhaav) mein baitha hai — yahan iska ratna kashta ko badha sakta hai. Verdict: Avoid. Score ${s.score}/100.`;
   if (f.includes('yogakaraka'))
@@ -347,7 +367,7 @@ export function reasonHi(s: StoneResult, lagna: string): string {
   const dl = f.find((x) => x.startsWith('dispositor'));
   if (dl) bits.push(dl);
   let txt = bits.join(', ') + '. ';
-  const aff = f.filter((x) => ['Rahu-conjunct', 'Ketu-conjunct', 'malefic aspects', 'maraka', 'badhakesh', 'papakartari', 'combust', '12th (vyaya) lord', '6th (ripu) lord'].some((k) => x.includes(k)));
+  const aff = f.filter((x) => ['Rahu-conjunct', 'Ketu-conjunct', 'malefic aspects', 'maraka', 'maarak', 'paap', 'badhakesh', 'papakartari', 'combust', '12th (vyaya) lord', '6th (ripu) lord'].some((k) => x.includes(k)));
   if (aff.length) txt += `Dhyaan: ${aff.join(', ')}. `;
   if (s.risk >= 15) txt += `Yeh strong ratna hai — verdict suraksha ke liye "Expert Review" tak seemit. `;
   txt += `Final: ${s.score}/100 — ${s.verdictLabel}.`;
