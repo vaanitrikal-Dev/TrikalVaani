@@ -3,7 +3,21 @@
  * 🔱 TRIKAL VAANI — CEO PROTECTION HEADER 🔱
  * ============================================================================
  * File:        app/founder/page.tsx
- * Version: 4.4 (1 Oct 2026 — Trikaal Vaani ka core tagline (Rohiit ne chuna): "Granth ka Gyaan · Rohiit ki Parakh · AI ki Shakti" / "Rooted in Granth · Verified by Rohiit · Powered by AI") — Brand Spelling Consolidation (Trikaal = Trikaal)
+ * Version: 4.6 (11 Oct 2026 — LOT 3C Play Billing: Rohiit ka faisla #1 — Play Store app ke andar
+ *   payment provider ka naam "Google Play" dikhega, "Razorpay" nahi (app mein Razorpay likhna
+ *   asatya hoga). Teen jagah naam <PayProviderName web="Razorpay" /> se: Vision para, ₹51 Deep
+ *   Reading card, "Government Registered. Razorpay Secured." heading. "Razorpay Secured" trust card
+ *   (Razorpay ka rang + "UPI · Cards · NetBanking · Wallets · RuPay" + "India's most trusted
+ *   payment gateway") poora Razorpay-specific hai — app mein asatya hota — isliye
+ *   <HideInPlayApp> mein lapeta. Website par sab pehle jaisa; JSON-LD/metadata bilkul same.
+ *   Gemini model ka naam is file mein nahi hai.)
+ * Previous: 4.5 (11 Oct 2026 — LOT 3 Play Billing: Rohiit ka faisla (11 Oct 2026) — Google Play app
+ *   ke andar ₹499 Personal Consultation ka WhatsApp booking offer NAHI dikhega (bahar payment
+ *   ki taraf bhejna Google mana karta hai). Hero ka "Book Personal Call — ₹499" button aur
+ *   "Personal Consultation — ₹499" card <HideInPlayApp> mein lapete. Website par sab
+ *   BYTE-FOR-BYTE pehle jaisa — JSON-LD schema bhi bilkul same. Is file mein Gemini model
+ *   ka koi naam nahi tha, isliye wahan kuch nahi badla.)
+ * Previous: 4.4 (1 Oct 2026 — Trikaal Vaani ka core tagline (Rohiit ne chuna): "Granth ka Gyaan · Rohiit ki Parakh · AI ki Shakti" / "Rooted in Granth · Verified by Rohiit · Powered by AI") — Brand Spelling Consolidation (Trikaal = Trikaal)
  * Owner:       Rohiit Gupta, Chief Vedic Architect
  * Domain:      trikalvaani.com
  * Updated:     May 10, 2026
@@ -36,6 +50,8 @@ import Link from "next/link";
 import Script from "next/script";
 import SiteNav from "@/components/layout/SiteNav";
 import SiteFooter from "@/components/layout/SiteFooter";
+import HideInPlayApp from "@/components/payment/HideInPlayApp"; // v4.5
+import PayProviderName from "@/components/payment/PayProviderName"; // v4.6
 
 const UDYAM_NUMBER = "UDYAM-DL-10-0119070";
 const UDYAM_VERIFY_URL = "https://udyamregistration.gov.in/Udyam_Verify.aspx";
@@ -411,6 +427,8 @@ export default function FounderPage() {
 
                 {/* Quick contact */}
                 <div className="flex gap-3 mt-6 justify-center md:justify-start flex-wrap">
+                  {/* v4.5: ₹499 WhatsApp booking — Play app mein chhupa (website par same) */}
+                  <HideInPlayApp>
                   <a
                     href="https://wa.me/919211804111?text=Hi%20Rohiit%20ji%2C%20I%20want%20to%20book%20a%20personal%20consultation"
                     target="_blank"
@@ -420,6 +438,7 @@ export default function FounderPage() {
                   >
                     <WAIcon /> Book Personal Call — ₹499
                   </a>
+                  </HideInPlayApp>
                   <a
                     href="mailto:rohiit@trikalvaani.com"
                     className="flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold border border-white/15 text-gray-300 hover:border-white/30 transition-all duration-200"
@@ -582,7 +601,7 @@ export default function FounderPage() {
                 >
                   {UDYAM_NUMBER}
                 </a>
-                . All payments are secured by Razorpay with PCI-DSS compliance
+                . All payments are secured by <PayProviderName web="Razorpay" /> with PCI-DSS compliance
                 and 256-bit SSL encryption. This isn&apos;t an offshore astrology
                 marketplace — it is a fully compliant Indian business built for
                 Indian seekers.
@@ -692,7 +711,7 @@ export default function FounderPage() {
                         birth chart by Trikaal AI. 4096-token personalised reading
                         covering your specific question — love, career, wealth,
                         property, compatibility, child destiny, or spiritual
-                        purpose. Razorpay secured payment.
+                        purpose. <PayProviderName web="Razorpay" /> secured payment.
                       </p>
                       <Link
                         href="/services"
@@ -705,6 +724,8 @@ export default function FounderPage() {
                   </div>
                 </div>
 
+                {/* v4.5: ₹499 Personal Consultation card — Play app mein chhupa (website par same) */}
+                <HideInPlayApp>
                 <div
                   className="border border-white/10 rounded-xl p-6"
                   style={{ background: "rgba(255,255,255,0.02)" }}
@@ -733,6 +754,7 @@ export default function FounderPage() {
                     </div>
                   </div>
                 </div>
+                </HideInPlayApp>
               </div>
             </div>
 
@@ -745,7 +767,7 @@ export default function FounderPage() {
                 Trust & Verification
               </p>
               <h2 className="font-serif text-2xl font-bold text-white mb-5">
-                Government Registered. Razorpay Secured.
+                Government Registered. <PayProviderName web="Razorpay" /> Secured.
               </h2>
               <div className="grid md:grid-cols-2 gap-4">
                 <a
@@ -780,6 +802,8 @@ export default function FounderPage() {
                   </p>
                 </a>
 
+                {/* v4.6: Razorpay trust card (UPI/NetBanking list, Razorpay rang) — Play app mein chhupa (website par same) */}
+                <HideInPlayApp>
                 <div
                   className="border rounded-xl p-5"
                   style={{
@@ -806,6 +830,7 @@ export default function FounderPage() {
                     India&apos;s most trusted payment gateway
                   </p>
                 </div>
+                </HideInPlayApp>
               </div>
             </div>
 
@@ -879,7 +904,7 @@ function WAIcon() {
 }
 
 // ============================================================================
-// END — app/founder/page.tsx v4.3
+// END — app/founder/page.tsx v4.6
 // 🔱 Trikaal Vaani | Rohiit Gupta, Chief Vedic Architect
 // MSME Registered: UDYAM-DL-10-0119070
 // Phase 4: Brand spelling consolidation (Trikaal = Trikaal)

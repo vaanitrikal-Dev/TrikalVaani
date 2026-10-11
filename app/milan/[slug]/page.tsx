@@ -1,4 +1,8 @@
 /**
+ * v1.12 (11 Oct 2026) — LOT 3, PLAY STORE APP: "Maa Shakti Ki Kripa" dabba ("Maa ko Arzi
+ *   karein →" /maa-shakti button ke saath) app mein <HideInPlayApp> se chhupa — Rohiit:
+ *   "Maa Shakti ko Arzi ... Dakshina hai". Website par sab pehle jaisa. Page server
+ *   component hi hai. Gemini: is file mein nahi.
  * v1.11 (1 Oct 2026) — Karmic cross-sell: "Bhrigu Nandi Nadi se padhe gaye" -> "BPHS aur Phaladipika se" (Karmic ab granth se).
  * v1.10 (1 Oct 2026) — footer mein Trikaal Vaani ka core tagline: "Granth ka Gyaan · Rohiit ki Parakh · AI ki Shakti" / "Rooted in Granth · Verified by Rohiit · Powered by AI".
  * v1.9 (1 Oct 2026) — Karmic cross-sell ₹251 -> ₹101 (Karmic ka daam isi deploy mein ₹101).
@@ -50,6 +54,7 @@ import MilanShareButtons   from '@/components/milan/MilanShareButtons';
 import MilanManglikBadge   from '@/components/milan/MilanManglikBadge';
 import MilanRemediesCard   from '@/components/milan/MilanRemediesCard';
 import MilanNarrativeLoader from '@/components/milan/MilanNarrativeLoader';
+import HideInPlayApp        from '@/components/payment/HideInPlayApp'; // v1.12
 
 export const dynamic   = 'force-dynamic';
 export const revalidate = 0;
@@ -442,6 +447,8 @@ export default async function MilanResultPage({ params }: { params: { slug: stri
       </section>
 
       {/* ─────────── MAA SHAKTI PERMANENT SECTION ─────────── */}
+      {/* v1.12 — Play Store app mein nahi (Arzi = dakshina, LOT 3) */}
+      <HideInPlayApp>
       <section className="max-w-3xl mx-auto px-5 py-8">
         <div className="bg-gradient-to-br from-[#1a1a2e] to-[#0d1120] border border-[#D4AF37]/30 rounded-2xl p-6 sm:p-10 text-center">
           <div className="text-3xl sm:text-4xl mb-3">🔱</div>
@@ -468,6 +475,7 @@ export default async function MilanResultPage({ params }: { params: { slug: stri
           </div>
         </div>
       </section>
+      </HideInPlayApp>
 
       {/* ─────────── SHARE + PDF (paid only) ─────────── */}
       {!free && (

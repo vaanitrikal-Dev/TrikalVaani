@@ -2,7 +2,11 @@
 
 // ============================================================
 // File: app/calculators/free-shadi-kab-hogi-calculator/page.tsx
-// Version: v1.0 — Vivah Yog Calculator (3 Sep 2026)
+// Version: v1.1 — 11 Oct 2026 — LOT 3, PLAY STORE APP: "Free mein kya milta hai" section ki
+//   line "₹51 (India) / $7 (international)" app mein sirf "₹51 (India)" dikhti hai
+//   (usePlayApp + render-time replace; PILLAR data aur website text BILKUL same).
+//   Gemini: is file mein nahi.
+// (previous) Version: v1.0 — Vivah Yog Calculator (3 Sep 2026)
 // API: /api/calc/yog  (type: 'vivah')  · Engine: lib/vivah-engine.ts
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
 // ------------------------------------------------------------
@@ -39,9 +43,15 @@ import Link from 'next/link';
 import SiteNav from '@/components/layout/SiteNav';
 import { buildCalcJsonLd } from '@/lib/seo/calcJsonLd';
 import YogCalculator from '@/components/calculators/YogCalculator';
+import { usePlayApp } from '@/components/payment/usePlayApp'; // v1.1
 
 const GOLD = '#D4AF37';
 const GOLD_RGBA = (a: number) => `rgba(212,175,55,${a})`;
+
+// v1.1 (LOT 3) — Play Store app mein "/ $7 (international)" nahi dikhta (Rohiit ka
+// 11 Oct faisla: app mein sirf ₹ daam, Google khud local daam dikhata hai). Data
+// waisa hi rehta hai; sirf render ke waqt, sirf app mein, ye tukda hataya jaata hai.
+const INTL_PRICE_TEXT = ' / $7 (international)';
 
 // ── Inline markdown: **bold** and [text](/href) ──────────────────────────────
 function renderRich(text: string, keyBase: string): React.ReactNode {
@@ -511,6 +521,7 @@ const ALL = [...PILLAR, ...PILLAR_2];
 
 export default function FreeShadiKabHogiCalculatorPage() {
   const PAGE_URL = 'https://trikalvaani.com/calculators/free-shadi-kab-hogi-calculator';
+  const inPlayApp = usePlayApp(); // v1.1 — website par hamesha false
 
   const jsonLd = buildCalcJsonLd({
     pageUrl: PAGE_URL,
@@ -634,7 +645,7 @@ export default function FreeShadiKabHogiCalculatorPage() {
                 <h2 className="text-2xl font-serif font-bold mb-4" style={{ color: GOLD }}>{s.h2}</h2>
                 {s.paras.map((p, pi) => (
                   <p key={pi} className="text-slate-300 leading-relaxed mb-4">
-                    {renderRich(p, `s${si}-p${pi}`)}
+                    {renderRich(inPlayApp ? p.replace(INTL_PRICE_TEXT, '') : p, `s${si}-p${pi}`)}
                   </p>
                 ))}
               </div>

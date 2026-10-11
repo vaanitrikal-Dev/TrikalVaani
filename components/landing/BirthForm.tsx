@@ -2,6 +2,15 @@
 /**
  * ============================================================
  * TRIKAAL VAANI — BirthForm
+ * v10.9 (11 Oct 2026) — LOT 3: "Maa Shakti ko Arzi" dabba PLAY STORE APP mein HIDE.
+ *   Rohiit ka faisla (11 Oct 2026, LOT 3): "Maa Shakti ko Arzi ... Dakshina hai" —
+ *   form ke neeche wala "🙏 Prediction ke baad — Maa Shakti ko Arzi karein" dabba
+ *   (WhatsApp link ke saath) app mein NAHI dikhega. Sirf us dabbe par
+ *   {!inPlayApp && …} lagaya (wahi inPlayApp jo v10.7 se hai). Website par
+ *   inPlayApp hamesha false → dabba BYTE-FOR-BYTE pehle jaisa. Payment code,
+ *   validate, Razorpay/PayPal/Play — EK LINE NAHI BADLI. Gemini: is file mein nahi.
+ *   Build marker → "BF v10.9 · 11-Oct-2026".
+ *
  * v10.8 (11 Oct 2026) — VOICE (₹11) AB PLAY STORE APP MEIN BHI (Google Play).
  *   Rohiit ne 11 Oct 2026 ko locked files edit karne ki permission di.
  *   v10.7 ka temporary message ("Voice Reading abhi app mein uplabdh nahi
@@ -1626,11 +1635,11 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
               </p>
             </div>
 
-            {/* BUILD MARKER — BirthForm v10.8 · 2026-10-11. If you cannot see
+            {/* BUILD MARKER — BirthForm v10.9 · 2026-10-11. If you cannot see
                 this line on screen, the file you are looking at is NOT the file
                 that is deployed, and the problem is the deployment, not the code. */}
             <p style={{ margin: '0 0 6px', fontSize: '10px', color: '#334155', textAlign: 'right' }}>
-              BF v10.8 · 11-Oct-2026 · {isIndia === false ? 'INTL/USD' : 'IN/INR'}{inPlayApp ? ' · PLAY' : ''}
+              BF v10.9 · 11-Oct-2026 · {isIndia === false ? 'INTL/USD' : 'IN/INR'}{inPlayApp ? ' · PLAY' : ''}
             </p>
 
             {/* v10.7 — in the Play app Google shows each buyer their own local
@@ -2014,6 +2023,8 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
               ? <strong style={{ color: '#34A853' }}>Google Play</strong>
               : <strong style={{ color: RAZORPAY_BLUE }}>Razorpay</strong>}.
           </p>
+          {/* v10.9 — Maa Shakti Arzi (WhatsApp) dabba: Play Store app mein nahi (LOT 3) */}
+          {!inPlayApp && (
           <div style={{ padding: '14px 20px', background: GOLD_RGBA(0.05), border: `1px solid ${GOLD_RGBA(0.15)}`, borderRadius: '12px', marginBottom: '12px' }}>
             <p style={{ margin: '0 0 8px', color: GOLD, fontSize: '13px', fontWeight: 600 }}>🙏 Prediction ke baad — Maa Shakti ko Arzi karein</p>
             <p style={{ margin: '0 0 8px', color: '#475569', fontSize: '11px', lineHeight: 1.5 }}>Prediction milne ke baad aap Maa ko apni dil ki baat rakh sakte hain. Rohiit ji personally transmit karenge.</p>
@@ -2022,10 +2033,11 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
               📱 WhatsApp karo Rohiit ji ko →
             </a>
           </div>
+          )}
           <p style={{ color: '#1e293b', fontSize: '10px', margin: 0 }}>By Rohiit Gupta, Chief Vedic Architect · trikalvaani.com · 🔱 Mahakaal Ka Ashirwad</p>
         </div>
       </div>
     </section>
   )
 }
-// END — components/landing/BirthForm.tsx v10.8
+// END — components/landing/BirthForm.tsx v10.9

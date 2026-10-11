@@ -2,7 +2,12 @@
 
 // ============================================================
 // File: app/upay/[slug]/UpayReportClient.tsx
-// Version: v2.1 — 11 Oct 2026
+// Version: v2.2 — 11 Oct 2026
+//   v2.2 (LOT 3, Rohiit ka 11 Oct faisla): PLAY STORE APP mein ₹499 consultation
+//         (WhatsApp button wala dabba) <HideInPlayApp> se chhupa, aur "Aapki baat" ke
+//         neeche wali line ka "neeche ₹499 consultation hai" wala vaakya app mein nahi
+//         (naya L.baatNoteApp — sirf pehla vaakya). Website par sab BYTE-FOR-BYTE same.
+//         Gemini: is file mein nahi.
 //   v2.1: ratna ki line ab bhasha mein — Hindi: "धातु: चाँदी · उँगली: मध्यमा…",
 //         Hinglish: Heera (Shukra) jaise desi naam (pehle English "Diamond (Venus)").
 //   v2.0 (Rohiit ka 11 Oct ka design — mockup "upay_report_v2" approve):
@@ -30,6 +35,8 @@ import SiteFooter from '@/components/layout/SiteFooter';
 import UpayCard, { type UpayItem, type UpayLang } from '@/components/calculators/UpayCard';
 import { isCrisisText, CRISIS_HELP } from '@/lib/upay-flags';
 import { runEngine, type EngineResult, type StoneResult } from '@/lib/jyotish/gemstone';
+import HideInPlayApp from '@/components/payment/HideInPlayApp'; // v2.2
+import { usePlayApp } from '@/components/payment/usePlayApp';   // v2.2
 
 const GOLD = '#D4AF37';
 const G = (a: number) => `rgba(212,175,55,${a})`;
@@ -49,6 +56,9 @@ const L = {
   baat: ['आपकी बात', 'Aapki baat'],
   baatNote: ['उपाय आपकी कुंडली और चुनी समस्या के हिसाब से ग्रंथ से चुने गए हैं। इस बात पर सीधी सलाह के लिए नीचे ₹499 consultation है।',
              'Upay aapki kundali aur chuni samasya ke hisaab se granth se chune gaye hain. Is baat par seedhi salaah ke liye neeche ₹499 consultation hai.'],
+  // v2.2 — sirf Play Store app: ₹499 wala vaakya nahi (bahar ka payment)
+  baatNoteApp: ['उपाय आपकी कुंडली और चुनी समस्या के हिसाब से ग्रंथ से चुने गए हैं।',
+                'Upay aapki kundali aur chuni samasya ke hisaab se granth se chune gaye hain.'],
   baatNoteCrisis: ['उपाय ग्रंथ से हैं और इलाज के साथ किए जा सकते हैं। ऊपर दी गई हेल्पलाइन पर आज ही बात करें।',
                    'Upay granth se hain aur ilaaj ke saath kiye ja sakte hain. Upar di gayi helpline par aaj hi baat karein.'],
   upayN: ['आपके {n} उपाय', 'Aapke {n} Upay'],
@@ -183,6 +193,7 @@ export default function UpayReportClient({ report, slug }: { report: any; slug: 
   const [lang, setLang] = useState<UpayLang>(report.language === 'hindi' || !report.language ? 'hi' : 'en');
   const hi = lang === 'hi';
   const l = (k: LKey) => L[k][hi ? 0 : 1];
+  const inPlayApp = usePlayApp(); // v2.2 — website par hamesha false
 
   const upay: UpayItem[] = Array.isArray(res.upay) ? res.upay : [];
   const shanti: any[] = Array.isArray(res.grah_shanti) ? res.grah_shanti.filter(Boolean) : [];
@@ -283,7 +294,7 @@ export default function UpayReportClient({ report, slug }: { report: any; slug: 
             <section style={{ background: G(0.05), border: `1px solid ${G(0.2)}`, borderRadius: '12px', padding: '14px 16px', marginBottom: '14px' }}>
               <p style={{ margin: '0 0 4px', color: GOLD, fontSize: '13px', fontWeight: 700 }}>{l('baat')}</p>
               <p style={{ margin: 0, color: '#e2e8f0', fontSize: '13px', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>{String(report.vishesh)}</p>
-              <p style={{ margin: '6px 0 0', color: '#94a3b8', fontSize: '11px' }}>{crisis ? l('baatNoteCrisis') : l('baatNote')}</p>
+              <p style={{ margin: '6px 0 0', color: '#94a3b8', fontSize: '11px' }}>{crisis ? l('baatNoteCrisis') : inPlayApp ? l('baatNoteApp') : l('baatNote')}</p>
             </section>
           ) : null}
 
@@ -361,7 +372,9 @@ export default function UpayReportClient({ report, slug }: { report: any; slug: 
           ) : null}
 
           {/* ── ₹499 — sankat wale grahak ko bechne ka message NAHI ── */}
+          {/* v2.2 — Play Store app mein ₹499 WhatsApp consultation nahi (LOT 3) */}
           {!crisis ? (
+            <HideInPlayApp>
             <section className="no-print" style={{ background: G(0.06), border: `1px solid ${G(0.25)}`, borderRadius: '12px', padding: '16px', marginBottom: '14px' }}>
               <p style={{ margin: '0 0 8px', color: '#e2e8f0', fontSize: '14px', fontWeight: 700 }}>{l('cta')}</p>
               <a href="https://wa.me/919211804111?text=Namaste%2C%20mujhe%20Upay%20Report%20par%20consultation%20chahiye" target="_blank" rel="noopener noreferrer"
@@ -369,6 +382,7 @@ export default function UpayReportClient({ report, slug }: { report: any; slug: 
                 ₹499 Consultation — WhatsApp
               </a>
             </section>
+            </HideInPlayApp>
           ) : null}
 
           {/* ── founder ── */}
@@ -415,4 +429,4 @@ export default function UpayReportClient({ report, slug }: { report: any; slug: 
     </>
   );
 }
-// END — app/upay/[slug]/UpayReportClient.tsx v2.1
+// END — app/upay/[slug]/UpayReportClient.tsx v2.2

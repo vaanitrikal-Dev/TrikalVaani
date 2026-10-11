@@ -3,6 +3,10 @@
  * TRIKAL VAANI — Child Birth Muhurat — Paid Result Page
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/muhurat/[slug]/page.tsx
+ * VERSION: 1.6 (11 Oct 2026) — LOT 3, PLAY STORE APP: "Maa Shakti Ki Kripa" dabba ("Maa ko
+ *   Arzi karein →" /maa-shakti button ke saath) app mein <HideInPlayApp> se chhupa —
+ *   Rohiit: "Maa Shakti ko Arzi ... Dakshina hai". Website par sab pehle jaisa. Page
+ *   server component hi hai. Gemini: is file mein nahi.
  * VERSION: 1.5 (1 Oct 2026 — Trikaal Vaani ka core tagline (Rohiit ne chuna): "Granth ka Gyaan · Rohiit ki Parakh · AI ki Shakti" / "Rooted in Granth · Verified by Rohiit · Powered by AI") (30 Sep 2026) — ₹51 single tier + honest weak-slot box
  *   * SAFETY FIX: the old backup box scanned the WHOLE DAY (0:00–23:59), so it
  *     could suggest a time OUTSIDE the doctor's window. Backups now come only
@@ -31,6 +35,7 @@ import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { createClient } from '@supabase/supabase-js';
 import MuhuratRemediesCard from '@/components/muhurat/MuhuratRemediesCard';
+import HideInPlayApp from '@/components/payment/HideInPlayApp'; // v1.6
 
 export const dynamic    = 'force-dynamic';
 export const revalidate = 0;
@@ -364,6 +369,8 @@ export default async function MuhuratResultPage({ params }: { params: { slug: st
       )}
 
       {/* ─────────── MAA SHAKTI ─────────── */}
+      {/* v1.6 — Play Store app mein nahi (Arzi = dakshina, LOT 3) */}
+      <HideInPlayApp>
       <section className="max-w-3xl mx-auto px-5 py-8">
         <div className="bg-gradient-to-br from-[#1a1a2e] to-[#0d1120] border border-[#D4AF37]/30 rounded-2xl p-6 sm:p-10 text-center">
           <div className="text-3xl sm:text-4xl mb-3">🔱</div>
@@ -393,6 +400,7 @@ export default async function MuhuratResultPage({ params }: { params: { slug: st
           </div>
         </div>
       </section>
+      </HideInPlayApp>
 
       {/* ─────────── SHARE + PDF ─────────── */}
       {narrative && (

@@ -38,11 +38,22 @@
  * 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER 🔱
  * ============================================================================
  * File:        app/services/page.tsx
- * Version:     v2.5 — IR-0 cleanup: fake rating + phantom ₹499 removed
+ * Version:     v2.6 (11 Oct 2026) — LOT 3C Play Billing
+ * Previous:    v2.5 — IR-0 cleanup: fake rating + phantom ₹499 removed
  * Phase:       Deliverable 3 of Master SEO Strategy
  * Owner:       Rohiit Gupta, Chief Vedic Architect
  * Domain:      trikalvaani.com/services
  * Updated:     June 03, 2026
+ *
+ * v2.6 CHANGES vs v2.5 (11 Oct 2026):
+ *   ✅ Rohiit ka faisla #1 — Play Store app ke andar payment provider ka naam
+ *      "Google Play" dikhega, "Razorpay" nahi (app mein Razorpay likhna asatya hoga).
+ *      Data strings (V6_SECTIONS, faqPageSchema) BILKUL same — sirf screen par
+ *      render karte waqt shabd "Razorpay" ko <PayProviderName web="Razorpay" /> se
+ *      dikhaya jaata hai (V6PayText helper): "Razorpay se surakshit" (2 jagah),
+ *      "Payment Razorpay se hota hai", aur FAQ ka "processed via Razorpay".
+ *   ✅ JSON-LD (FAQPage/ItemList/Person/Breadcrumb) + metadata byte-identical.
+ *   ✅ Website par screen ka text pehle jaisa. Gemini model ka naam is file mein nahi.
  *
  * v2.5 CHANGES vs v2.4:
  *   ❌ REMOVED fake AggregateRating (4.9 / 1250) from every Product schema — IR-0
@@ -72,6 +83,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Script from "next/script";
+import PayProviderName from "@/components/payment/PayProviderName"; // v2.6
 
 // ============================================================================
 // METADATA — SEO foundation
@@ -591,6 +603,21 @@ const V6_HUB_LEARN: SvcLink[] = [
   { href: '/founder', label: 'Rohiit Gupta ke baare mein', note: 'Framework kisne banaya' },
 ];
 
+// v2.6: screen par "Razorpay" shabd → <PayProviderName> (Play app mein "Google Play",
+// website par "Razorpay"). Data string khud nahi badalti — schema same rehta hai.
+function V6PayText({ text, k }: { text: string; k: string }) {
+  if (!text.includes('Razorpay')) return <>{text}</>;
+  return (
+    <>
+      {text.split(/(Razorpay)/g).map((t, i) =>
+        t === 'Razorpay'
+          ? <PayProviderName key={`${k}-p-${i}`} web="Razorpay" />
+          : <span key={`${k}-t-${i}`}>{t}</span>
+      )}
+    </>
+  );
+}
+
 function V6Rich({ text, k }: { text: string; k: string }) {
   const parts = text.split(/(\[[^\]]+\]\([^)]+\)|\*\*[^*]+\*\*)/g);
   return (
@@ -605,9 +632,9 @@ function V6Rich({ text, k }: { text: string; k: string }) {
           );
         }
         if (part.startsWith('**') && part.endsWith('**')) {
-          return <strong key={`${k}-b-${i}`} className="text-[#D4AF37]">{part.slice(2, -2)}</strong>;
+          return <strong key={`${k}-b-${i}`} className="text-[#D4AF37]"><V6PayText text={part.slice(2, -2)} k={`${k}-b-${i}`} /></strong>;
         }
-        return <span key={`${k}-s-${i}`}>{part}</span>;
+        return <span key={`${k}-s-${i}`}><V6PayText text={part} k={`${k}-s-${i}`} /></span>;
       })}
     </>
   );
@@ -1006,7 +1033,7 @@ export default function ServicesPage() {
                     </span>
                   </summary>
                   <p className="text-gray-400 text-sm leading-relaxed mt-4">
-                    {faq.acceptedAnswer.text}
+                    <V6PayText text={faq.acceptedAnswer.text} k={`faq-${i}`} />
                   </p>
                 </details>
               ))}
@@ -1049,6 +1076,6 @@ export default function ServicesPage() {
 }
 
 // ============================================================================
-// END — app/services/page.tsx v2.5
+// END — app/services/page.tsx v2.6
 // 🔱 Trikaal Vaani | Rohiit Gupta, Chief Vedic Architect
 // ============================================================================

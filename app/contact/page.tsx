@@ -2,13 +2,19 @@
  * TRIKAL VAANI — trikalvaani.com
  * Chief Vedic Architect: Rohiit Gupta
  * FILE TO PASTE → app/contact/page.tsx (CREATE NEW)
- * Version: 1.1 (1 Oct 2026 — Trikaal Vaani ka core tagline (Rohiit ne chuna): "Granth ka Gyaan · Rohiit ki Parakh · AI ki Shakti" / "Rooted in Granth · Verified by Rohiit · Powered by AI") — Full SEO + Razorpay compliant
+ * Version: 1.2 (11 Oct 2026) — LOT 3, PLAY STORE APP: "Book Personal Consultation" (₹499,
+ *   WhatsApp) aur "Maa Shakti Arzi / Dhanyewaad" wali do help-rows app mein <HideInPlayApp>
+ *   se chhupi (Rohiit ka 11 Oct faisla — bahar ka payment / dakshina). Baaki rows
+ *   (Reading Support, Payment Issue, Business) aur website par sab pehle jaisa.
+ *   Page server component hi hai ('use client' nahi laga). Gemini: is file mein nahi.
+ * (previous) Version: 1.1 (1 Oct 2026 — Trikaal Vaani ka core tagline (Rohiit ne chuna): "Granth ka Gyaan · Rohiit ki Parakh · AI ki Shakti" / "Rooted in Granth · Verified by Rohiit · Powered by AI") — Full SEO + Razorpay compliant
  */
 
 import type { Metadata } from "next";
 import Link from "next/link";
 import SiteNav from "@/components/layout/SiteNav";
 import SiteFooter from "@/components/layout/SiteFooter";
+import HideInPlayApp from "@/components/payment/HideInPlayApp"; // v1.2
 
 export const metadata: Metadata = {
   title: { absolute: "Contact Trikaal Vaani — Astrology Support" },
@@ -105,11 +111,13 @@ export default function ContactPage() {
             <div className="space-y-3">
               {[
                 { icon: "🔮", title: "Reading Support", desc: "Issues with accessing or understanding your Trikaal AI reading", wa: "I%20need%20help%20with%20my%20reading" },
-                { icon: "📞", title: "Book Personal Consultation", desc: "Schedule a ₹499 personal call with Rohiit Gupta", wa: "I%20want%20to%20book%20a%20personal%20consultation%20at%20Rs499" },
+                { icon: "📞", title: "Book Personal Consultation", desc: "Schedule a ₹499 personal call with Rohiit Gupta", wa: "I%20want%20to%20book%20a%20personal%20consultation%20at%20Rs499", hideInApp: true },
                 { icon: "💳", title: "Payment Issue", desc: "Payment failed, double charge, or refund request", wa: "I%20have%20a%20payment%20issue" },
-                { icon: "🙏", title: "Maa Shakti Arzi / Dhanyewaad", desc: "Submit your prayer or gratitude offering to Maa Shakti", wa: "I%20want%20to%20submit%20my%20Arzi%20to%20Maa%20Shakti" },
+                { icon: "🙏", title: "Maa Shakti Arzi / Dhanyewaad", desc: "Submit your prayer or gratitude offering to Maa Shakti", wa: "I%20want%20to%20submit%20my%20Arzi%20to%20Maa%20Shakti", hideInApp: true },
                 { icon: "🤝", title: "Business Enquiry", desc: "Partnerships, collaborations, or media enquiries", wa: "I%20have%20a%20business%20enquiry%20for%20Trikal%20Vaani" },
-              ].map((item, i) => (
+              ].map((item, i) => {
+                // v1.2 — ₹499 consultation + Arzi rows: Play Store app mein nahi
+                const row = (
                 <a key={i} href={`https://wa.me/919211804111?text=Hi%20Rohiit%20ji%2C%20${item.wa}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-4 border border-white/10 rounded-xl p-4 transition-all duration-200 group hover:bg-white/[0.03]">
                   <span className="text-2xl flex-shrink-0">{item.icon}</span>
                   <div className="flex-1">
@@ -118,7 +126,9 @@ export default function ContactPage() {
                   </div>
                   <span className="text-sm flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200" style={{ color: GOLD }}>→</span>
                 </a>
-              ))}
+                );
+                return item.hideInApp ? <HideInPlayApp key={i}>{row}</HideInPlayApp> : row;
+              })}
             </div>
           </div>
 

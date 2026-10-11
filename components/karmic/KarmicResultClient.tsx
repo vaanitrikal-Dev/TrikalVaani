@@ -1,7 +1,10 @@
 // TRIKAL VAANI — Karmic Result Client Component
 // CEO & Chief Vedic Architect: Rohiit Gupta
 // File: components/karmic/KarmicResultClient.tsx
-// VERSION: 1.2 (1 Oct 2026) — "📜 Granth kehta hai" sunehri dabbe mein (Rohiit), **bold** asli bold,
+// VERSION: 1.3 (11 Oct 2026) — LOT 3, PLAY STORE APP: "Maa Shakti Ki Kripa" dabba ("Maa ko Arzi
+//   karein →" /maa-shakti button) app mein <HideInPlayApp> se chhupa — Rohiit: "Maa Shakti ko
+//   Arzi ... Dakshina hai". Website par sab pehle jaisa. Gemini: is file mein nahi.
+// PICHHLA: 1.2 (1 Oct 2026) — "📜 Granth kehta hai" sunehri dabbe mein (Rohiit), **bold** asli bold,
 //   footer mein core tagline. PICHHLA: 1.1 (1 Oct 2026) — granth saar: do naye section (7. Prediction, 8. Upay),
 //   daam ₹101, srot "BPHS · Phaladipika" (report ab AI nahi, granth se — api/karmic-reading v2.0)
 // Handles: animated waiting screen, auto-polling, 6-dim render, PDF, share.
@@ -10,6 +13,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
+import HideInPlayApp from '@/components/payment/HideInPlayApp' // v1.3
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 interface KarmicRow {
@@ -348,7 +352,8 @@ export default function KarmicResultClient({ initialRow }: { initialRow: KarmicR
         </section>
       )}
 
-      {/* MAA SHAKTI */}
+      {/* MAA SHAKTI — v1.3: Play Store app mein nahi (Arzi = dakshina, LOT 3) */}
+      <HideInPlayApp>
       <section className="max-w-3xl mx-auto px-5 py-8">
         <div className="bg-gradient-to-br from-[#1a1a2e] to-[#0d1120] border border-[#D4AF37]/30 rounded-2xl p-6 sm:p-10 text-center">
           <div className="text-3xl sm:text-4xl mb-3">🔱</div>
@@ -372,6 +377,7 @@ export default function KarmicResultClient({ initialRow }: { initialRow: KarmicR
           </div>
         </div>
       </section>
+      </HideInPlayApp>
 
       {/* SHARE + PDF */}
       <section className="max-w-3xl mx-auto px-5 py-8">

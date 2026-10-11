@@ -1,7 +1,14 @@
 // ============================================================
 // TRIKAL VAANI — DYNAMIC BLOG ARTICLE PAGE (SSR)
 // CEO: Rohiit Gupta | Chief Vedic Architect
-// Version: 3.8 (1 Oct 2026 — daam sahi kiye: Kundali Milan ₹51 (couple + parent), Karmic ₹101 / $11, Child Birth ₹51; Bhrigu Nandi ke purane daave hataye)
+// Version: 3.9 (11 Oct 2026 — LOT 3 Play Billing: Rohiit ka faisla — Google Play app ke andar
+//   ₹499 On-Call Consultation ka offer NAHI dikhega (uska payment app ke bahar hota hai). Sirf
+//   8 NCR city pages ke visible fee table ki "On-Call Consultation ₹499" wali row <HideInPlayApp>
+//   mein lapeti. Website par sab BYTE-FOR-BYTE pehle jaisa; JSON-LD (FEE_LADDER / OfferCatalog)
+//   bilkul nahi chheda. Is file mein Gemini model ka naam nahi tha — kuch nahi badla.)
+// Date: 2026-10-11
+// ------------------------------------------------------------
+// PREVIOUS: Version 3.8 (1 Oct 2026 — daam sahi kiye: Kundali Milan ₹51 (couple + parent), Karmic ₹101 / $11, Child Birth ₹51; Bhrigu Nandi ke purane daave hataye)
 // Date: 2026-09-30
 // CHANGE v3.7 — no visible change. RECIPROCAL hreflang for Hindi posts that
 //   are the Hindi version of a /learn page (seo_pillar_pages.hindi_slug).
@@ -239,6 +246,7 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import { createClient } from '@supabase/supabase-js'; // v3.7
+import HideInPlayApp from '@/components/payment/HideInPlayApp'; // v3.9
 import {
   getPostBySlug,
   getAllSlugs,
@@ -1291,12 +1299,15 @@ function LocalNapBlock({ lang, primaryHref }: { lang: string; primaryHref?: stri
               </td>
               <td className="px-4 py-3 font-semibold text-amber-200">₹101</td>
             </tr>
+            {/* v3.9: ₹499 row — Play app mein chhupi (website par same) */}
+            <HideInPlayApp>
             <tr>
               <td className="px-4 py-3 text-slate-200">
                 {hi ? 'ऑन-कॉल परामर्श' : 'On-Call Consultation'}
               </td>
               <td className="px-4 py-3 font-semibold text-amber-200">₹499</td>
             </tr>
+            </HideInPlayApp>
           </tbody>
         </table>
       </div>

@@ -5,7 +5,13 @@
  * TRIKAL VAANI — Prediction Result Client
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: components/result/ResultClient.tsx
- * VERSION: 3.1 (11 Oct 2026) — PLAY STORE APP: Maa Shakti dakshina section app mein HIDE.
+ * VERSION: 3.2 (11 Oct 2026) — LOT 3: PLAY STORE APP mein ₹499 WhatsApp consultation link HIDE.
+ *   Rohiit ka naya faisla (11 Oct 2026, LOT 3): app ke andar "₹499 Rohiit ji se seedha baat"
+ *   wala WhatsApp link (bahar ka payment) NAHI dikhega — <HideInPlayApp> mein lapeta.
+ *   Free box ki line "Razorpay secure" app mein "Google Play secure" (faisla #1: sirf
+ *   provider ka naam badla). /upgrade link wahi rehta hai (app mein Upgrade Google Play
+ *   se pay hota hai). Website par sab BYTE-FOR-BYTE pehle jaisa. (Gemini: is file mein nahi.)
+ * (previous) VERSION: 3.1 (11 Oct 2026) — PLAY STORE APP: Maa Shakti dakshina section app mein HIDE.
  *   Rohiit ka faisla #4 (11 Oct 2026): Google Play app ke andar WhatsApp par dakshina
  *   (Arzi / Dhanyewaad amount chips + pay links) wala section NAHI dikhega — Google
  *   bahar ke payment ki taraf bhejna mana karta hai. Sirf us section ko
@@ -38,6 +44,7 @@ import Link from 'next/link';
 import SiteNav    from '@/components/layout/SiteNav';
 import SiteFooter from '@/components/layout/SiteFooter';
 import HideInPlayApp from '@/components/payment/HideInPlayApp';
+import { usePlayApp } from '@/components/payment/usePlayApp'; // v3.2
 
 // ─── CONSTANTS ────────────────────────────────────────────────────────────────
 
@@ -388,6 +395,7 @@ function MaaShaktiSection() {
 export default function ResultClient({ predictionId, predictionData, meta }: ResultClientProps) {
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
+  const inPlayApp = usePlayApp(); // v3.2 — website par hamesha false
 
   const isFree    = meta.tier === 'free';
   const isPaid    = !isFree;
@@ -919,8 +927,10 @@ const mainCaution    = simpleSummary?.mainCaution
                 🔓 Poora Jawab Unlock Karein — ₹51
               </Link>
               <p style={{ margin: 0, color: '#475569', fontSize: '11px' }}>
-                One-time · Instant access · Razorpay secure
+                One-time · Instant access · {inPlayApp ? 'Google Play secure' : 'Razorpay secure'}
               </p>
+              {/* v3.2 — ₹499 WhatsApp consultation: Play app mein nahi (LOT 3) */}
+              <HideInPlayApp>
               <a
                 href="https://wa.me/919211804111?text=Rohiit%20ji%2C%20personal%20consultation%20chahiye"
                 target="_blank"
@@ -934,6 +944,7 @@ const mainCaution    = simpleSummary?.mainCaution
               >
                 📞 Ya Rohiit ji se seedha baat karein — ₹499
               </a>
+              </HideInPlayApp>
             </div>
           </div>
         )}
