@@ -1,6 +1,9 @@
 // ============================================================
 // File: components/calculators/UpayCard.tsx
-// Version: v2.0 — 11 Oct 2026
+// Version: v2.1 — 11 Oct 2026
+//   v2.1: सस्ता विकल्प Hindi tab mein Hindi mein — VM v5.3 'sasta_vikalp_hi'
+//         (Supabase upay_phala.sasta_vikalp_hi). Purani report mein ye field
+//         nahi to pehle jaisa Hinglish.
 //   v2.0 (Rohiit ka 11 Oct ka design — mockup approve):
 //     * हिंदी / Hinglish — `lang` prop ('hi' | 'en'). Hindi mein upay_hindi,
 //       heading_hi, saral_vidhi.*_hi; Hinglish mein purana text.
@@ -43,6 +46,7 @@ export interface UpayItem {
   srot?: string; srot_hi?: string;
   kya_chahiye?: string | null;
   sasta_vikalp?: string | null;
+  sasta_vikalp_hi?: string | null;
   grah?: string | null;
   label?: 'granth' | 'paramparik';
   kyun?: string; kyun_hi?: string;
@@ -96,6 +100,7 @@ export default function UpayCard({ u, n, lang = 'hi' }: { u: UpayItem; n: number
   const matlab = sv ? (hi ? sv.matlab_hi : sv.matlab_en) : null;
   const kaise = sv ? ((hi ? sv.kaise_hi : sv.kaise_en) || []) : [];
   const chahiye = sv ? (hi ? sv.chahiye_hi : sv.chahiye_en) : null;
+  const sasta = hi ? (u.sasta_vikalp_hi || u.sasta_vikalp) : u.sasta_vikalp;
   const ds = u.daan_star || null;
   const dsMadhyam = ds ? (hi ? ds.madhyam_hi : ds.madhyam_en) : null;
 
@@ -155,8 +160,8 @@ export default function UpayCard({ u, n, lang = 'hi' }: { u: UpayItem; n: number
         ))
       )}
 
-      {u.sasta_vikalp ? (
-        <p className="text-xs m-0 mt-1 font-semibold" style={{ color: '#FCD34D' }}>🌾 {t('sasta', lang)}: {u.sasta_vikalp}</p>
+      {sasta ? (
+        <p className="text-xs m-0 mt-1 font-semibold" style={{ color: '#FCD34D' }}>🌾 {t('sasta', lang)}: {sasta}</p>
       ) : null}
 
       {(kyun || srot) ? (
@@ -178,4 +183,4 @@ export default function UpayCard({ u, n, lang = 'hi' }: { u: UpayItem; n: number
     </article>
   );
 }
-// END — components/calculators/UpayCard.tsx v2.0
+// END — components/calculators/UpayCard.tsx v2.1
