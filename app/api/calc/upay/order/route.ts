@@ -3,7 +3,9 @@
  * TRIKAL VAANI — Upay Report Order (₹51, Razorpay)
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/api/calc/upay/order/route.ts
- * VERSION: 1.1 (10 Oct 2026)
+ * VERSION: 1.2 (11 Oct 2026)
+ *   v1.2: UPAY_PAID_ON=false (lib/upay-flags) par order BANTA HI NAHI (503) —
+ *         Rohiit, 11 Oct: report theek hone tak ₹51 bikri band.
  *   v1.1: chunav mein 'grah-shani' jaise grah aur 'kaal-sarp' jaise dosh bhi
  *         (SAMASYA_RE mein pehle se fit — VM granth_api v4.3 samajhta hai).
  *         'vishesh' (grahak ki apni baat, max 300) → upay_reports.vishesh.
@@ -21,11 +23,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Razorpay from 'razorpay';
 import { cleanBirth, SAMASYA_RE, UPAY_AMOUNT_PAISE, upayAdmin } from '@/lib/upay-report';
+import { UPAY_PAID_ON } from '@/lib/upay-flags';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 export async function POST(req: NextRequest) {
+  if (!UPAY_PAID_ON) {
+    return NextResponse.json({ error: '₹51 Upay Report abhi naye roop mein ban rahi hai — jald wapas aayegi.' }, { status: 503 });
+  }
   try {
     const body = await req.json().catch(() => ({}));
     const birth = cleanBirth(body?.birth ?? {});
@@ -94,4 +100,4 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Payment shuru nahi ho paya — dobara try karein.' }, { status: 500 });
   }
 }
-// END — app/api/calc/upay/order/route.ts v1.1
+// END — app/api/calc/upay/order/route.ts v1.2

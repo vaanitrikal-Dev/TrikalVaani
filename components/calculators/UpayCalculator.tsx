@@ -2,7 +2,11 @@
 
 // ============================================================
 // File: components/calculators/UpayCalculator.tsx
-// Version: v1.1 — 10 Oct 2026
+// Version: v1.2 — 11 Oct 2026
+//   v1.2 (Rohiit, 11 Oct): ₹51 box UPAY_PAID_ON (lib/upay-flags) ke peeche —
+//        abhi BAND, uski jagah "jald aa rahi hai" ka chhota card. Free + grah
+//        upay chalte rahenge. "Apni baat" mein sankat likha ho to box ke neeche
+//        hi helpline (Tele-MANAS 14416, 112).
 //   v1.1 (Rohiit, 10 Oct): (a) form ke upar 9 grah chips — "Kis grah ke upay
 //        chahiye?" (optional); chuna to free result ke saath us grah ke 3 upay bhi.
 //        (b) ₹51 box mein samasya + DOSH (Kaal Sarp, Manglik, Sade Sati) + 9 GRAH —
@@ -27,6 +31,7 @@ import { useEffect, useState } from 'react';
 import CityInput from '@/components/calculators/CityInput';
 import UpayCard, { type UpayItem } from '@/components/calculators/UpayCard';
 import { loadRazorpayScript, openRazorpayCheckout } from '@/lib/razorpay-helper';
+import { UPAY_PAID_ON, isCrisisText, CRISIS_HELP } from '@/lib/upay-flags';
 
 const GOLD = '#D4AF37';
 const GOLD_RGBA = (a: number) => `rgba(212,175,55,${a})`;
@@ -283,7 +288,16 @@ export default function UpayCalculator() {
       ) : null}
 
       {/* ── KADAM 3: ₹51 ─────────────────────────────────────────── */}
-      <section className="mt-8 rounded-2xl p-5 md:p-6" style={{ background: '#0B0F1A', border: `2px solid ${GOLD_RGBA(0.45)}` }}>
+      {!UPAY_PAID_ON ? (
+        <section className="mt-8 rounded-2xl p-5" style={{ background: '#0B0F1A', border: `1px solid ${GOLD_RGBA(0.3)}` }}>
+          <h2 className="text-lg font-serif font-bold m-0 mb-1" style={{ color: GOLD }}>₹51 Upay Report — naye roop mein jald</h2>
+          <p className="text-sm m-0" style={{ color: '#cbd5e1' }}>
+            Hum report ko aur gehra bana rahe hain — mantra, ratna, vrat, daan aur seva, Hindi aur Hinglish dono mein.
+            Tab tak upar ke free upay aur kisi bhi grah ke upay dekhein.
+          </p>
+        </section>
+      ) : null}
+      {UPAY_PAID_ON ? <section className="mt-8 rounded-2xl p-5 md:p-6" style={{ background: '#0B0F1A', border: `2px solid ${GOLD_RGBA(0.45)}` }}>
         <h2 className="text-xl font-serif font-bold m-0 mb-1" style={{ color: GOLD }}>₹51 — Aapki 2 samasya, dosh ya grah ke 10 upay</h2>
         <p className="text-sm m-0 mb-4" style={{ color: '#cbd5e1' }}>
           Har upay alag: mantra, daan, seva, snaan, raksha-dhaaga… — Atharvaveda (Kaushika Sutra), Rigveda (Rgvidhana),
@@ -317,6 +331,11 @@ export default function UpayCalculator() {
           <span className="text-xs block mt-1" style={{ color: '#64748b' }}>
             {vishesh.length}/{VISHESH_MAX} · Ye report mein aur Rohiit Gupta tak pahunchti hai. Upay granth se hi chune jaate hain.
           </span>
+          {isCrisisText(vishesh) ? (
+            <span className="block mt-2 p-3 rounded-lg text-sm" style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.45)', color: '#fecaca' }}>
+              Aapne jo likha hai wo gambhir hai — pehle doctor ki madad lein. Tele-MANAS {CRISIS_HELP.teleManas} (24 ghante, muft) · Turant khatra: {CRISIS_HELP.emergency}
+            </span>
+          ) : null}
         </label>
         <label className="text-sm text-slate-300 block mb-3">WhatsApp number (report ka link isi par)
           <input value={mobile} onChange={(e) => setMobile(e.target.value)} inputMode="numeric" maxLength={14}
@@ -331,8 +350,8 @@ export default function UpayCalculator() {
         <p className="text-xs mt-2 mb-0" style={{ color: '#64748b' }}>
           🔒 Razorpay secured · UPI / Card / Netbanking · Upar janm-vivran zaroori hai
         </p>
-      </section>
+      </section> : null}
     </div>
   );
 }
-// END — components/calculators/UpayCalculator.tsx v1.1
+// END — components/calculators/UpayCalculator.tsx v1.2

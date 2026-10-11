@@ -2,7 +2,8 @@
 // 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER
 // ════════════════════════════════════════════════════════════════════════════
 // File:     lib/upay-report.ts
-// Version:  v1.1 (10 Oct 2026)
+// Version:  v1.2 (11 Oct 2026)
+//   v1.2: grahak ki baat mein aatmhatya / sankat ho to CEO email 🚨 URGENT.
 //   v1.1: grahak ki apni baat (upay_reports.vishesh) CEO email mein (note).
 //         Chunav mein grah/dosh slug bhi — VM granth_api v4.3.
 //   v1.0: pehla version.
@@ -27,6 +28,7 @@ import { createClient } from '@supabase/supabase-js';
 import { randomBytes } from 'crypto';
 import { callVM } from '@/lib/callVM';
 import { notifyReportReady } from '@/lib/report-notify';
+import { isCrisisText } from '@/lib/upay-flags';
 
 export const UPAY_AMOUNT_PAISE = 5100;
 export const UPAY_SITE = 'https://trikalvaani.com';
@@ -151,7 +153,10 @@ export async function generateUpayReport(orderId: string, paymentId: string, via
       customerName: row.person_name ?? null,
       phone: row.mobile ?? null,
       amountRupees: (row.amount_paise ?? UPAY_AMOUNT_PAISE) / 100,
-      note: row.vishesh ? `Grahak ki baat: ${String(row.vishesh).slice(0, 300)}` : null,
+      note: row.vishesh
+        ? `${isCrisisText(row.vishesh) ? '⚠️ GRAHAK NE AATMHATYA / MANSIK SANKAT LIKHA HAI — turant WhatsApp/call karein. ' : ''}Grahak ki baat: ${String(row.vishesh).slice(0, 300)}`
+        : null,
+      urgent: isCrisisText(row.vishesh),
     });
     console.log(`[upay] DELIVERED via ${via} | ${paymentId} | ${slug}`);
     return { ok: true, slug };
@@ -163,4 +168,4 @@ export async function generateUpayReport(orderId: string, paymentId: string, via
     return { ok: false, reason: 'failed', error: msg };
   }
 }
-// END — lib/upay-report.ts v1.1
+// END — lib/upay-report.ts v1.2

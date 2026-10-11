@@ -2,7 +2,11 @@
 
 // ============================================================
 // File: app/upay/[slug]/UpayReportClient.tsx
-// Version: v1.1 — 10 Oct 2026
+// Version: v1.2 — 11 Oct 2026
+//   v1.2 (Rohiit, 11 Oct): "Aapki baat" mein aatmhatya / mansik sankat likha ho
+//        (lib/upay-flags isCrisisText) to SABSE UPAR helpline card (Tele-MANAS
+//        14416, 112), aur ₹499 ka bechne wala message HATA. Pehle report ne
+//        aise grahak ko ₹499 dikhaya tha — wo galat tha.
 //   v1.1: "Aapki baat" (upay_reports.vishesh) hero ke neeche; hero mein
 //         "Samasya" ki jagah "Aapne chuna" (ab grah/dosh bhi chune ja sakte hain).
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
@@ -19,6 +23,7 @@ import Link from 'next/link';
 import SiteNav from '@/components/layout/SiteNav';
 import SiteFooter from '@/components/layout/SiteFooter';
 import UpayCard, { type UpayItem } from '@/components/calculators/UpayCard';
+import { isCrisisText, CRISIS_HELP } from '@/lib/upay-flags';
 
 const GOLD = '#D4AF37';
 const G = (a: number) => `rgba(212,175,55,${a})`;
@@ -60,6 +65,7 @@ export default function UpayReportClient({ report, slug }: { report: any; slug: 
   const samasya: { slug: string; naam_hi?: string }[] = Array.isArray(res.samasya) ? res.samasya : [];
   const kamzor: string[] = (res.kamzor_grah ?? []).filter((g: string) => g);
   const url = `${SITE}/upay/${slug}`;
+  const crisis = isCrisisText(report.vishesh);
   const waShare = `https://wa.me/?text=${encodeURIComponent(`Meri Trikaal Vaani Upay Report — granth ke 10 upay: ${url}`)}`;
 
   const [grah, setGrah] = useState<string | null>(null);
@@ -87,6 +93,23 @@ export default function UpayReportClient({ report, slug }: { report: any; slug: 
             <span style={{ color: '#94a3b8' }}>Aapki Report</span>
           </nav>
 
+          {crisis ? (
+            <section style={{ background: 'rgba(239,68,68,0.08)', border: '2px solid rgba(239,68,68,0.5)', borderRadius: '16px', padding: '18px 20px', marginBottom: '18px' }}>
+              <p style={{ margin: '0 0 8px', color: '#fca5a5', fontSize: '16px', fontWeight: 800 }}>सबसे पहले सुरक्षा · Pehle suraksha</p>
+              <p style={{ margin: '0 0 10px', color: '#f1f5f9', fontSize: '14px', lineHeight: 1.65 }}>
+                Aapne jo likha hai, wo gambhir hai. Is samay sabse zaroori hai doctor ya psychiatrist ki dekh-rekh, aur parivar ka saath.
+                Upay iske saath kiye ja sakte hain — iski jagah kabhi nahi.
+              </p>
+              <p style={{ margin: '0 0 4px', color: '#fff', fontSize: '15px', fontWeight: 700 }}>
+                📞 Tele-MANAS: <a href={`tel:${CRISIS_HELP.teleManas}`} style={{ color: '#fff' }}>{CRISIS_HELP.teleManas}</a>
+                {' '}<span style={{ fontWeight: 400, fontSize: '13px', color: '#cbd5e1' }}>(ya {CRISIS_HELP.teleManasAlt}) · 24 ghante · muft · Bharat sarkar</span>
+              </p>
+              <p style={{ margin: 0, color: '#fff', fontSize: '15px', fontWeight: 700 }}>
+                🚨 Turant khatra ho to: <a href={`tel:${CRISIS_HELP.emergency}`} style={{ color: '#fff' }}>{CRISIS_HELP.emergency}</a>
+              </p>
+            </section>
+          ) : null}
+
           {/* ── HERO ── */}
           <section style={{ background: 'linear-gradient(135deg, rgba(212,175,55,0.10), rgba(8,14,28,0.95))', border: `1px solid ${G(0.3)}`, borderRadius: '16px', padding: '22px', marginBottom: '18px', textAlign: 'center' }}>
             <p style={{ margin: '0 0 6px', color: GOLD, fontSize: '12px', letterSpacing: '2px' }}>🔱 MAHAKAAL KA ASHIRWAD 🔱</p>
@@ -110,7 +133,9 @@ export default function UpayReportClient({ report, slug }: { report: any; slug: 
               <p style={{ margin: '0 0 4px', color: GOLD, fontSize: '13px', fontWeight: 700 }}>Aapki baat</p>
               <p style={{ margin: 0, color: '#e2e8f0', fontSize: '13px', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>{String(report.vishesh)}</p>
               <p style={{ margin: '6px 0 0', color: '#94a3b8', fontSize: '11px' }}>
-                Upay aapki kundali aur chuni samasya ke hisaab se granth se chune gaye hain. Is baat par seedhi salaah ke liye neeche ₹499 consultation hai.
+                {crisis
+                  ? 'Upay granth se hain aur ilaaj ke saath kiye ja sakte hain. Upar di gayi helpline par aaj hi baat karein.'
+                  : 'Upay aapki kundali aur chuni samasya ke hisaab se granth se chune gaye hain. Is baat par seedhi salaah ke liye neeche ₹499 consultation hai.'}
               </p>
             </section>
           ) : null}
@@ -155,14 +180,14 @@ export default function UpayReportClient({ report, slug }: { report: any; slug: 
             <p style={{ fontSize: '12px', color: '#94a3b8', lineHeight: 1.6, margin: '0 0 18px' }}>📖 {res.srot_ki_baat}</p>
           ) : null}
 
-          {/* ── ₹499 ── */}
-          <section className="no-print" style={{ background: G(0.06), border: `1px solid ${G(0.25)}`, borderRadius: '12px', padding: '16px', marginBottom: '14px' }}>
+          {/* ── ₹499 — sankat wale grahak ko bechne ka message NAHI ── */}
+          {!crisis ? <section className="no-print" style={{ background: G(0.06), border: `1px solid ${G(0.25)}`, borderRadius: '12px', padding: '16px', marginBottom: '14px' }}>
             <p style={{ margin: '0 0 8px', color: '#e2e8f0', fontSize: '14px', fontWeight: 700 }}>Upay kaun sa pehle karein, kab tak karein — Rohiit Gupta se seedhi baat</p>
             <a href="https://wa.me/919211804111?text=Namaste%2C%20mujhe%20Upay%20Report%20par%20consultation%20chahiye" target="_blank" rel="noopener noreferrer"
               style={{ display: 'inline-block', padding: '10px 18px', borderRadius: '10px', background: GOLD, color: '#080B12', fontWeight: 700, fontSize: '13px', textDecoration: 'none' }}>
               ₹499 Consultation — WhatsApp
             </a>
-          </section>
+          </section> : null}
 
           {/* ── founder ── */}
           <div style={{ background: 'rgba(8,14,28,0.95)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '14px', padding: '18px', marginBottom: '14px' }}>
@@ -211,4 +236,4 @@ export default function UpayReportClient({ report, slug }: { report: any; slug: 
     </>
   );
 }
-// END — app/upay/[slug]/UpayReportClient.tsx v1.1
+// END — app/upay/[slug]/UpayReportClient.tsx v1.2

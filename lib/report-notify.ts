@@ -2,7 +2,9 @@
 // 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER
 // ════════════════════════════════════════════════════════════════════════════
 // File:     lib/report-notify.ts   (NEW FILE)
-// Version:  v1.3 (10 Oct 2026)
+// Version:  v1.4 (11 Oct 2026)
+// v1.4: optional 'urgent' — subject '🚨 URGENT' se shuru, note laal box mein.
+//       (Upay Report: grahak ne aatmhatya / mansik sankat likha ho.)
 // v1.3: NotifyInput mein optional 'note' (jaise Upay Report mein grahak ki apni
 //       baat) — CEO email mein dikhta hai. Customer message NAHI badla. Retry
 //       wale email mein note nahi jaata (table mein column nahi) — report link
@@ -50,6 +52,7 @@ export interface NotifyInput {
   orderTable?: 'karmic_orders' | 'kundali_milan_orders' | 'muhurat_orders';
   orderId?: string | null;    // readings.order_id → orders.id
   note?: string | null;       // v1.3: sirf CEO email ke liye (grahak ki baat)
+  urgent?: boolean;           // v1.4: subject mein 🚨 URGENT
 }
 
 function admin() {
@@ -98,6 +101,7 @@ interface EmailRow {
   key: string; product: string; name: string; waNumber: string | null;
   reportUrl: string; amountRupees?: number | null;
   note?: string | null;
+  urgent?: boolean;
 }
 
 /** v1.2: ek 1-tap email bhejo. true = Apps Script ne ok:true kaha. Never throws. */
@@ -109,7 +113,7 @@ async function sendNotifyEmail(r: EmailRow): Promise<boolean> {
     const msg = customerMessage(r.name, r.product, r.reportUrl);
     const waLink = r.waNumber ? `https://wa.me/${r.waNumber}?text=${encodeURIComponent(msg)}` : null;
     const amt = r.amountRupees != null ? ` ₹${r.amountRupees}` : '';
-    const subject = `📿 Report bhejein — ${r.name || 'Customer'}, ${r.product}${amt}`;
+    const subject = `${r.urgent ? '🚨 URGENT — ' : ''}📿 Report bhejein — ${r.name || 'Customer'}, ${r.product}${amt}`;
     const body =
       `${r.product}${amt} — ${r.name || 'Customer'}\n` +
       `Mobile: ${r.waNumber ? '+' + r.waNumber : 'NAHI MILA'}\n\n` +
@@ -125,7 +129,7 @@ async function sendNotifyEmail(r: EmailRow): Promise<boolean> {
           `padding:14px 22px;border-radius:10px;text-decoration:none;font-weight:bold;font-size:17px">` +
           `WhatsApp par bhejo</a></p>`
         : `<p style="color:#c00">Mobile nahi mila — report link khud bhejein.</p>`) +
-      (r.note ? `<p style="background:#fff8e1;padding:10px;border-radius:8px">${esc(r.note)}</p>` : '') +
+      (r.note ? `<p style="background:${r.urgent ? '#fee2e2' : '#fff8e1'};padding:10px;border-radius:8px${r.urgent ? ';border:2px solid #dc2626' : ''}">${esc(r.note)}</p>` : '') +
       `<p style="color:#555">Message:<br>${esc(msg)}</p>` +
       `<p style="color:#999;font-size:12px">Payment: ${esc(r.key)}</p></div>`;
     const res = await fetch(url, {
@@ -222,10 +226,11 @@ export async function notifyReportReady(input: NotifyInput): Promise<void> {
     const ok = await sendNotifyEmail({
       key, product: input.product, name, waNumber, reportUrl: input.reportUrl, amountRupees,
       note: input.note ?? null,
+      urgent: !!input.urgent,
     });
     if (!ok) await supa.from('report_notifications').update({ emailed_at: null }).eq('payment_id', key);
   } catch (e) {
     console.error('[notify] failed (report unaffected):', e instanceof Error ? e.message : e);
   }
 }
-// END — lib/report-notify.ts v1.3
+// END — lib/report-notify.ts v1.4
