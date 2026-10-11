@@ -105,6 +105,33 @@
 /**
  *
  * ══════════════════════════════════════════════════════════════════════════
+ * v16.2 — 11 OCTOBER 2026 — GOOGLE PLAY BILLING (Play Store app ke liye)
+ *   Rohiit ki explicit permission se ("haan, predict edit karo", 11 Oct 2026).
+ *   Play Store app (TWA) mein payment Google Play Billing se hota hai — app
+ *   ke andar Razorpay allowed nahi. v15.3 ke PayPal wale tareeke se hi:
+ *   ek ALAG field `playVerification` aur ek ALAG gate branch, jo PayPal
+ *   branch se PEHLE `if ... else` ke roop mein laga hai.
+ *     - Razorpay branch: EK BHI LINE NAHI BADLI.
+ *     - PayPal branch: EK BHI LINE NAHI BADLI (bas uske aage "else" juda).
+ *     - VM payload, granth, template, Gemini, slug, minor check: NAHI CHHUE.
+ *   Play branch kya karta hai:
+ *     1. PLAY_BILLING_ENABLED=true na ho to mana (kill-switch).
+ *     2. product_id ALLOWED_PLAY_PRODUCTS se milta hai ya nahi.
+ *     3. Google se seedha poochta hai: purchased + abhi tak consumed nahi.
+ *     4. Supabase mein us Play orderId ki report pehle se hai? Hai to nayi
+ *        report NAHI banti, purani ka link lautta hai (dobara free report
+ *        ka raasta band).
+ *     5. Report save hone ke BAAD token "consume" hota hai. Report bante
+ *        waqt koi galti aaye to token consume NAHI hota — customer usi
+ *        payment se dobara koshish kar sakta hai, aur 3 din mein consume
+ *        na hua to Google khud refund kar deta hai.
+ *   Row mein: play_order_id (naya column — sirf Play rows par likha jaata
+ *   hai, isliye migration se pehle deploy hone par bhi Razorpay/free rows
+ *   par asar nahi), payment_verified=true, India mein payment_amount 5100 +
+ *   'INR'; bahar ke desh mein amount null + currency 'PLAY' (asli local daam
+ *   Play Console report mein hota hai).
+ *   Naya helper: lib/play-billing-server.ts (lazy import, PayPal jaisa).
+ *
  * v16.1 — 29 SEPTEMBER 2026 — SURAKSHIT 1-TAP (CEO approved): paid report save hote hi
  *   lib/report-notify.ts CEO ko email bhejta hai (WhatsApp button). Ek payment = ek
  *   email. Browser, /api/razorpay-callback aur paid-recovery cron — teeno isi POST
@@ -510,6 +537,7 @@ import { buildKundali }                from '@/lib/swiss-ephemeris'
 import type { KundaliData, BirthData } from '@/lib/swiss-ephemeris'
 import type { DomainConfig, DomainId } from '@/lib/domain-config'
 import type { UserTier, UserContext }   from '@/lib/gemini-prompt'
+import type { PlayPurchase }            from '@/lib/play-billing-server'  // v16.2 — type only, erased at build
 
 export const maxDuration = 240
 
@@ -659,6 +687,13 @@ const ALLOWED_PAID_USD_CENTS: Record<string, number> = {
   voice: 100,   // $1 Trikaal Voice, one question
 }
 
+// ── v16.2: Allowed Google Play product IDs — anti-tamper, mirrors the tables
+// above. Play mein daam Play Console tay karta hai; yahan sirf product ID
+// milaya jaata hai. MUST match PLAY_PRODUCT_IDS.deep in lib/play-billing-server.ts
+const ALLOWED_PLAY_PRODUCTS: Record<string, string> = {
+  paid: 'deep_reading_51',   // ₹51 Deep Reading
+}
+
 // ── Allowed paid amounts (paise) — anti-tamper ───────────────────────────────
 const ALLOWED_PAID_AMOUNTS: Record<string, number> = {
   paid:  5100,   // ₹51 Deep Reading
@@ -715,6 +750,13 @@ interface PaypalVerification {
   amount:          number  // in cents
 }
 
+// v16.2 — Google Play (Play Store app). Again a SEPARATE field: the browser
+// sends only what Google gave it; amount is never trusted from the browser.
+interface PlayVerification {
+  product_id:     string
+  purchase_token: string
+}
+
 // ── v14.11: Numerology compatibility payload (sent by BirthForm dual domains) ─
 interface NumerologyCompatibility {
   score:       number
@@ -736,6 +778,7 @@ interface PredictRequest {
   predictionTier?:PredictionTier
   paymentVerification?: PaymentVerification
   paypalVerification?: PaypalVerification | null
+  playVerification?: PlayVerification | null   // v16.2
   birthData:{name?:string;dob:string;tob:string;lat:number;lng:number;cityName?:string;timezone?:number;ayanamsa?:string}
   userContext:{segment:'genz'|'millennial'|'genx';dynamicSegment?:string;gender?:string;age?:number;employment:string;sector:string;language:'hindi'|'hinglish'|'english';city:string;currentCity?:string;relationshipStatus?:string;situationNote?:string;mobile?:string;person2Name?:string|null;person2City?:string|null;person2CurrentCity?:string|null}
   person2Data?:{name:string;dob:string;tob:string;lat:number;lng:number;cityName:string;currentCity:string;mobile?:string}|null
@@ -1694,6 +1737,10 @@ async function saveToSupabase(p:{
   paymentVerification?: PaymentVerification | null
   paypalVerification?: PaypalVerification | null
   paypalCaptureId?: string | null
+  // v16.2 — Google Play. playOrderId set ONLY after the Play gate verified it.
+  playOrderId?: string | null
+  playAmount?: number | null      // 5100 for India, null elsewhere
+  playCurrency?: string | null    // 'INR' for India, 'PLAY' elsewhere
   // v15.12 — drives is_public. See the MINOR CHECK block in the handler.
   isMinor?: boolean
 }): Promise<string> {
@@ -1758,11 +1805,17 @@ async function saveToSupabase(p:{
     // v15.3 — payment_amount is the smallest unit of whichever currency was
     // charged: paise for INR, cents for USD. payment_currency is what makes
     // 5100 and 700 tellable apart.
-    payment_amount:      p.paymentVerification?.amount ?? p.paypalVerification?.amount ?? null,
-    payment_currency:    p.paypalVerification ? 'USD' : 'INR',
+    // v16.2 — Play added at the END of each chain, so a Razorpay or PayPal row
+    // resolves exactly as before (their values come first and win).
+    payment_amount:      p.paymentVerification?.amount ?? p.paypalVerification?.amount ?? (p.playOrderId ? (p.playAmount ?? null) : null),
+    payment_currency:    p.paypalVerification ? 'USD' : (p.playOrderId ? (p.playCurrency ?? 'PLAY') : 'INR'),
     paypal_order_id:     p.paypalVerification?.paypal_order_id ?? null,
     paypal_capture_id:   p.paypalCaptureId ?? null,
-    payment_verified:    (p.paymentVerification || p.paypalVerification) ? true : false,
+    payment_verified:    (p.paymentVerification || p.paypalVerification || p.playOrderId) ? true : false,
+    // v16.2 — the key is written ONLY on Play rows. Razorpay, PayPal and free
+    // rows send no play_order_id at all, so they keep working even if this
+    // file reaches production before the play_order_id column migration.
+    ...(p.playOrderId ? { play_order_id: p.playOrderId } : {}),
     created_at:          new Date().toISOString(),
   }).select('id').single()
 
@@ -1782,6 +1835,7 @@ export async function POST(req: NextRequest) {
   catch{return NextResponse.json({error:'Invalid JSON body'},{status:400})}
 
   const {sessionId,userId,domainId,predictionTier='free',birthData,userContext,person2Data,paymentVerification,paypalVerification,numerologyCompatibility}=body
+  const playVerification = body.playVerification ?? null   // v16.2
 
   if(predictionTier==='voice')
     return NextResponse.json({error:'Voice uses /api/voice'},{status:400})
@@ -1917,6 +1971,10 @@ export async function POST(req: NextRequest) {
 
   const isPaid = predictionTier==='paid'
   let paypalCaptureId: string | null = null
+  // v16.2 — set only by the Play gate branch below, after Google confirmed it.
+  let playOrderId: string | null = null
+  let playAmount: number | null = null
+  let playCurrency: string | null = null
 
   // ── PAYMENT GATE — v14.6, extended v15.3 ───────────────────────────────────
   //
@@ -1925,7 +1983,73 @@ export async function POST(req: NextRequest) {
   // either carries paypalVerification and takes the new branch, or it does not
   // and takes the original one. There is no shared code between them, so the
   // path that has processed every payment to date cannot regress.
-  if(isPaid && paypalVerification){
+  // ── v16.2 (11 Oct 2026): GOOGLE PLAY branch — Play Store app only ─────────
+  // Same discipline as v15.3: its own field, its own branch, no shared code.
+  // It is placed in FRONT of the PayPal branch as `if (...) {...} else`, so a
+  // request without playVerification falls through to the PayPal and Razorpay
+  // branches exactly as before.
+  if(isPaid && playVerification){
+    const productId     = String(playVerification.product_id ?? '')
+    const purchaseToken = String(playVerification.purchase_token ?? '')
+
+    const expectedProduct = ALLOWED_PLAY_PRODUCTS['paid']
+    if(productId !== expectedProduct){
+      console.error(`[TV-v16.2] Play product mismatch: got "${productId}", expected "${expectedProduct}"`)
+      return NextResponse.json({error:'Payment product mismatch.'},{status:400})
+    }
+    if(!purchaseToken || purchaseToken.length > 4096){
+      console.error('[TV-v16.2] Play purchase token missing or malformed')
+      return NextResponse.json({error:'Payment verification required for paid tier.'},{status:402})
+    }
+
+    // Ask Google directly. A token from the browser proves nothing on its own.
+    let purchase: PlayPurchase | null = null
+    try {
+      const { playBillingEnabled, getPlayPurchase, isPlayPurchaseUsable } = await import('@/lib/play-billing-server')
+      if(!playBillingEnabled()){
+        console.error('[TV-v16.2] Play payment received while PLAY_BILLING_ENABLED is off')
+        return NextResponse.json({error:'App payments are not active yet. Please try again later.'},{status:503})
+      }
+      purchase = await getPlayPurchase(productId, purchaseToken)
+      if(!isPlayPurchaseUsable(purchase)){
+        console.error(`[TV-v16.2] Play purchase not usable | state:${purchase.purchaseState} | consumed:${purchase.consumptionState} | order:${purchase.orderId}`)
+        return NextResponse.json({error:'Payment could not be verified.'},{status:400})
+      }
+    } catch (e) {
+      console.error('[TV-v16.2] Play verification threw:', e)
+      return NextResponse.json({error:'Payment could not be verified. Please contact support.'},{status:400})
+    }
+    if(!purchase || !purchase.orderId){
+      return NextResponse.json({error:'Payment could not be verified.'},{status:400})
+    }
+
+    // One Play order = one report. If a report already exists for this order
+    // (e.g. the consume step failed last time and the customer retried), hand
+    // back THAT report instead of generating a second one for free.
+    const {data:_playDup, error:_playDupErr} = await supabase
+      .from('predictions')
+      .select('public_slug')
+      .eq('play_order_id', purchase.orderId)
+      .limit(1)
+    if(_playDupErr){
+      console.error(`[TV-v16.2] Play duplicate check failed: ${_playDupErr.message} | order:${purchase.orderId}`)
+      return NextResponse.json({error:'Payment is verified but could not be recorded right now. Please retry in a minute — you will not be charged again.'},{status:503})
+    }
+    if(Array.isArray(_playDup) && _playDup.length){
+      console.error(`[TV-v16.2] Play order already used | order:${purchase.orderId} | slug:${_playDup[0]?.public_slug}`)
+      return NextResponse.json({
+        error:     'This payment has already been used for a report.',
+        code:      'PLAY_ALREADY_USED',
+        reportUrl: `https://trikalvaani.com/report/${_playDup[0]?.public_slug}`,
+      },{status:409})
+    }
+
+    playOrderId  = purchase.orderId
+    playAmount   = purchase.regionCode === 'IN' ? ALLOWED_PAID_AMOUNTS['paid'] : null
+    playCurrency = purchase.regionCode === 'IN' ? 'INR' : 'PLAY'
+    console.log(`[TV-v16.2] ✅ Play verified | order:${playOrderId} | region:${purchase.regionCode ?? 'unknown'}`)
+
+  } else if(isPaid && paypalVerification){
     const {paypal_order_id, amount} = paypalVerification
 
     const expectedCents = ALLOWED_PAID_USD_CENTS['paid']
@@ -2407,20 +2531,39 @@ export async function POST(req: NextRequest) {
       // correctly at the gate and nothing carried them to the write.
       paypalVerification: paypalVerification ?? null,
       paypalCaptureId:    paypalCaptureId,
+      playOrderId,                                // v16.2
+      playAmount,                                 // v16.2
+      playCurrency,                               // v16.2
       isMinor,                                    // v15.12
     })
     console.log(`[TV-v14.6] Saved | slug:${publicSlug} | polished:${isPaid} | ms:${Date.now()-startMs}`)
     // v16.1 — Surakshit 1-tap: CEO ko WhatsApp-button email (never throws)
-    if (isPaid && (paymentVerification?.razorpay_payment_id || paypalCaptureId)) {
+    // v16.2 — Play orders included (added at the END of both chains).
+    if (isPaid && (paymentVerification?.razorpay_payment_id || paypalCaptureId || playOrderId)) {
       await notifyReportReady({
         product:      'Deep Reading',
         reportUrl:    `https://trikalvaani.com/report/${publicSlug}`,
-        paymentId:    paymentVerification?.razorpay_payment_id ?? paypalCaptureId ?? null,
+        paymentId:    paymentVerification?.razorpay_payment_id ?? paypalCaptureId ?? playOrderId ?? null,
         customerName: localBirthData?.name ?? null,
       })
     }
   } catch(err:any) {
     console.error(`[TV-v14.6] Save failed: ${err.message}`)
+  }
+
+  // ── v16.2: CONSUME the Play purchase — only now, after the report exists.
+  // Every earlier failure returned before this line, leaving the token
+  // unconsumed so the customer can retry with the same payment (and Google
+  // refunds it automatically if it is never consumed). consumePlayPurchase
+  // never throws; a failure is logged, and the duplicate check at the gate
+  // still stops the same order from producing a second report.
+  if (isPaid && playOrderId && playVerification) {
+    const { consumePlayPurchase } = await import('@/lib/play-billing-server')
+    const consumed = await consumePlayPurchase(
+      String(playVerification.product_id),
+      String(playVerification.purchase_token),
+    )
+    console.log(`[TV-v16.2] Play consume ${consumed ? 'OK' : 'FAILED'} | order:${playOrderId} | slug:${publicSlug}`)
   }
 
   // ── STEP 7: Google Indexing ───────────────────────────────────────────────
@@ -2460,7 +2603,7 @@ export async function POST(req: NextRequest) {
       // v15.6: was `paymentVerification ? true : false`, so a PayPal customer
       // got paymentVerified:false in the API response even though the gate
       // above had already confirmed the capture with PayPal directly.
-      paymentVerified: (paymentVerification || paypalVerification) ? true : false,
+      paymentVerified: (paymentVerification || paypalVerification || playOrderId) ? true : false,
     },
   })
 }
