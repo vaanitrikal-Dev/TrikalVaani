@@ -2,7 +2,16 @@
 
 // ============================================================
 // File: app/calculators/free-upay-calculator/page.tsx
-// Version: v2.0 — Upay Calculator — 10 Oct 2026
+// Version: v2.1 — Upay Calculator — 11 Oct 2026
+//   v2.1 (11 Oct, UpayCalculator v1.3 + VM v5.1 ke saath):
+//         * Mangal jap 10,000 → 11,000 (Rohiit).
+//         * "10 upay" → "7-12 upay" har jagah (copy, FAQ, JSON-LD).
+//         * Page se saare ₹ daam hataye (₹11-21, ₹21-51…) — Rohiit: daam har
+//           rajya mein alag, grahak khud tay kare. Sirf ₹51/₹499 plan ke daam bache.
+//         * Library ginti 910 → 919, dhan-vyapar 165 → 133 (retag ke baad, DB se).
+//         * Do tarah ki report: samasya → kundali-aadharit + Rahu/Ketu/Shani
+//           shanti; sirf ek grah → us grah ke 7-12 upay (Vedic mantra, jap,
+//           havan, daan, vrat, dasha-shanti). Hindi + Hinglish, ratna bhi.
 //   v2.0 (10 Oct, UpayCalculator v1.1 ke saath): ₹51 mein samasya ke saath
 //         DOSH (Kaal Sarp, Manglik, Sade Sati) aur 9 GRAH bhi chune ja sakte
 //         hain + "apni baat" box — copy usi hisaab se.
@@ -14,8 +23,8 @@
 //         Table of contents + #upay-form CTA. FAQ 8 → 14.
 //   v1.0: pehla page (10 Oct 2026).
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
-// API: /api/calc/upay · Engine: VM granth_api v4.2 upay_calculator()
-// Data: Supabase upay_phala (910 granth upay)
+// API: /api/calc/upay · Engine: VM granth_api v5.1 upay_calculator()
+// Data: Supabase upay_phala (919 granth upay)
 //
 // ROHIIT KE NIYAM:
 //   * Atharva upay sirf Kaushika Sutra se; maans / sura / bali kabhi nahi
@@ -56,8 +65,8 @@ const SECTIONS: Section[] = [
     h2: 'Upay Calculator by Date of Birth — ye kaise kaam karta hai',
     paras: [
       'Aap **janm-tithi, samay aur sthan** dete hain. Swiss Ephemeris (Lahiri ayanamsha) par kundali banti hai aur **Shadbala (BPHS adhyay 27)** se dekha jaata hai ki kaunsa grah kamzor hai. Saath mein chalti **Vimshottari dasha** — mahadasha aur antardasha — bhi nikalti hai.',
-      'Phir upay chune jaate hain — apne mann se nahi, granth ki table se. Hamari library mein 910 upay hain: Atharvaveda (Kaushika Sutra), Rigveda (Rgvidhana aur Grihya Sutra), BPHS, Phaladeepika aur Jataka Parijata. Har upay ke saath uska shlok-hawala likha hai, taaki aap ya koi bhi pandit use granth mein khol kar dekh sake.',
-      'Free mein 3 BPHS upay milte hain. ₹51 mein aap apni 2 samasya chunte hain aur 10 upay milte hain — har ek alag kism ka. Apni kundali ka kamzor grah alag se dekhna ho to [Weak Planet Finder](/calculators/free-weak-planet-finder) bhi muft hai.',
+      'Phir upay chune jaate hain — apne mann se nahi, granth ki table se. Hamari library mein 919 upay hain: Atharvaveda (Kaushika Sutra), Rigveda (Rgvidhana aur Grihya Sutra), BPHS, Phaladeepika aur Jataka Parijata. Har upay ke saath uska shlok-hawala likha hai, taaki aap ya koi bhi pandit use granth mein khol kar dekh sake.',
+      'Free mein 3 BPHS upay milte hain. ₹51 mein aap 1 ya 2 samasya chunte hain — ya sirf ek grah — aur 7 se 12 upay milte hain, har ek alag kism ka, Hindi aur Hinglish dono mein. Apni kundali ka kamzor grah alag se dekhna ho to [Weak Planet Finder](/calculators/free-weak-planet-finder) bhi muft hai.',
     ],
   },
   {
@@ -82,8 +91,8 @@ const SECTIONS: Section[] = [
     id: 'navagraha-ke-upay',
     h2: 'Navagraha ke upay — 9 grah, har grah ka alag raasta',
     paras: [
-      'BPHS ka graha-shanti prasang (BPHS 85.18-27) har grah ke liye teen cheezein deta hai: **naam-mantra ka jap, havan ki samidha (lakdi) aur daan**. Jap ki kul ginti bhi granth ne di hai — Surya 7,000, Chandra 11,000, Mangal 10,000, Budh 9,000, Guru 19,000, Shukra 16,000, Shani 23,000, Rahu 18,000 aur Ketu 17,000.',
-      'Itna jap ek din mein nahi hota — roz 108 ya 11 baar se shuru karein aur ginti likhte jaayein. Neeche har grah ka alag hissa hai: mantra, samidha, din aur sasta daan. Calculator mein "Kisi grah ke upay dekhein" mein Surya se Ketu tak koi bhi grah chun kar uske upay seedhe dekh sakte hain.',
+      'BPHS ka graha-shanti prasang (BPHS 85.18-27) har grah ke liye teen cheezein deta hai: **naam-mantra ka jap, havan ki samidha (lakdi) aur daan**. Jap ki kul ginti bhi granth ne di hai — Surya 7,000, Chandra 11,000, Mangal 11,000, Budh 9,000, Guru 19,000, Shukra 16,000, Shani 23,000, Rahu 18,000 aur Ketu 17,000.',
+      'Itna jap ek din mein nahi hota — roz 108 ya 11 baar se shuru karein aur ginti likhte jaayein. Neeche har grah ka alag hissa hai: mantra, samidha, din aur daan. Calculator mein "Kisi grah ke upay dekhein" mein Surya se Ketu tak koi bhi grah chun kar uske upay seedhe dekh sakte hain.',
     ],
   },
   {
@@ -91,7 +100,7 @@ const SECTIONS: Section[] = [
     h2: 'सूर्य के उपाय — Surya kamzor ho to kya karein',
     paras: [
       'Surya aatma, pita, sarkar aur maan-samman ka karak hai. Kamzor Surya mein aatmavishwas ghatna, pita se doori ya sarkari kaam mein rukawat jaise anubhav log batate hain. BPHS ka mantra: **«ॐ सूर्याय नमः»**, Ravivaar ko, aak (arka) ki samidha se chhota havan ya ghee ka diya.',
-      'Sabse saral upay: roz subah ugte Surya ko ek lota jal aur 11 baar mantra. Daan: gud-gehun, ya gaushala mein ₹11-21. Phaladeepika (12.20) santan ke prasang mein Surya ke liye Shiv aaradhana aur pitron ka smaran bhi batata hai. Surya ka ratna Manik hai, par pehle [Manik pehnein ya nahi](/calculators/free-should-i-wear-manik) zaroor jaanchein.',
+      'Sabse saral upay: roz subah ugte Surya ko ek lota jal aur 11 baar mantra. Daan: gud-gehun, ya gaushala mein chaara. Phaladeepika (12.20) santan ke prasang mein Surya ke liye Shiv aaradhana aur pitron ka smaran bhi batata hai. Surya ka ratna Manik hai, par pehle [Manik pehnein ya nahi](/calculators/free-should-i-wear-manik) zaroor jaanchein.',
     ],
   },
   {
@@ -99,14 +108,14 @@ const SECTIONS: Section[] = [
     h2: 'चंद्र के उपाय — Chandra kamzor ho to mann aur maata',
     paras: [
       'Chandra mann, maata, neend aur bhavnaon ka karak hai. Kamzor Chandra mein bechaini, neend na aana ya jaldi ghabra jaana aam shikayat hai. BPHS ka mantra **«ॐ सोमाय नमः»** — Somvaar ko, palash ki samidha se havan ya diya.',
-      'Daan bahut sasta hai: chaawal, doodh ya safed vastra (₹11-21). Phaladeepika (12.20) Chandra ke liye Devi aaradhana batata hai. Ketu mahadasha mein Chandra antardasha ho to BPHS 59.35-36 alag Chandra-shanti kehta hai — calculator ye apne aap jodta hai. Chandra ka ratna Moti hai; [Moti pehnein ya nahi](/calculators/free-should-i-wear-moti) pehle dekhein.',
+      'Daan bahut sasta hai: chaawal, doodh ya safed vastra. Phaladeepika (12.20) Chandra ke liye Devi aaradhana batata hai. Ketu mahadasha mein Chandra antardasha ho to BPHS 59.35-36 alag Chandra-shanti kehta hai — calculator ye apne aap jodta hai. Chandra ka ratna Moti hai; [Moti pehnein ya nahi](/calculators/free-should-i-wear-moti) pehle dekhein.',
     ],
   },
   {
     id: 'mangal-ke-upay',
     h2: 'मंगल के उपाय — Mangal ke upay aur chaturth bhaav ka Mangal',
     paras: [
-      'Mangal saahas, bhai, zameen aur khoon ka karak hai. BPHS mantra **«ॐ भौमाय नमः»**, Mangalvaar ko, khair (khadira) ki samidha. Daan: laal masoor daal ya gud (₹11-21). Phaladeepika (12.20) Mangal ke liye gram-devta aur Kartikeya ki pooja batata hai.',
+      'Mangal saahas, bhai, zameen aur khoon ka karak hai. BPHS mantra **«ॐ भौमाय नमः»**, Mangalvaar ko, khair (khadira) ki samidha. Daan: laal masoor daal ya gud. Phaladeepika (12.20) Mangal ke liye gram-devta aur Kartikeya ki pooja batata hai.',
       'Bahut log poochte hain **"chaturth bhaav mein Mangal ke upay"** — chautha ghar sukh, maata aur ghar ka hai. Yahan bhi upay wahi BPHS wala hai; fark ye hai ki Mangal 6, 8 ya 12 ghar mein ho to BPHS ki shanti zyada zaroori maani jaati hai. Mangal ka ratna Moonga hai — [Moonga pehnein ya nahi](/calculators/free-should-i-wear-moonga) yahan jaanchein.',
     ],
   },
@@ -114,7 +123,7 @@ const SECTIONS: Section[] = [
     id: 'budh-ke-upay',
     h2: 'बुध के उपाय — Budh, buddhi aur vyapar',
     paras: [
-      'Budh buddhi, vaani, hisaab-kitaab aur vyapar ka karak hai. BPHS mantra **«ॐ बुधाय नमः»**, Budhvaar ko, apamarg (chirchita) ki samidha. Daan: hara moong ya hari sabzi (₹11-21) — sabse sasta upay.',
+      'Budh buddhi, vaani, hisaab-kitaab aur vyapar ka karak hai. BPHS mantra **«ॐ बुधाय नमः»**, Budhvaar ko, apamarg (chirchita) ki samidha. Daan: hara moong ya hari sabzi — sabse sasta upay.',
       'Phaladeepika (12.20) Budh ke liye Vishnu aaradhana kehta hai, aur BPHS bhi Rahu ya Shani mahadasha mein Budh antardasha ho to Vishnu mantra **«इदं विष्णुर् वि चक्रमे»** batata hai (BPHS 55.39, 57.15). Padhai ya exam ki chinta ho to neeche "padhai ke upay" bhi padhein. Budh ka ratna Panna hai — [Panna pehnein ya nahi](/calculators/free-should-i-wear-panna).',
     ],
   },
@@ -122,7 +131,7 @@ const SECTIONS: Section[] = [
     id: 'guru-brihaspati-ke-upay',
     h2: 'गुरु (बृहस्पति) के उपाय — Guru, gyaan aur santan',
     paras: [
-      'Guru gyaan, dharm, santan aur stree ki kundali mein pati ka karak hai. BPHS mantra **«ॐ बृहस्पतये नमः»**, Guruvaar ko, peepal ki samidha. Daan: peela vastra, chane ki daal ya haldi (₹11-21).',
+      'Guru gyaan, dharm, santan aur stree ki kundali mein pati ka karak hai. BPHS mantra **«ॐ बृहस्पतये नमः»**, Guruvaar ko, peepal ki samidha. Daan: peela vastra, chane ki daal ya haldi.',
       'Phaladeepika (12.21) Guru ke liye ped lagaana batata hai — ye sabse sundar upay hai: ek paudha lagaayein aur use paani dein. Jataka Parijata (13.2) Guru ke liye Shiv aaradhana kehta hai. Vivah mein deri ho aur Guru kamzor ho, to ye upay khaas taur par dekhe jaate hain. Guru ka ratna Pukhraj — [Pukhraj pehnein ya nahi](/calculators/free-should-i-wear-pukhraj).',
     ],
   },
@@ -130,7 +139,7 @@ const SECTIONS: Section[] = [
     id: 'shukra-ke-upay',
     h2: 'शुक्र के उपाय — Shukra, vivah aur sukh',
     paras: [
-      'Shukra vivah, prem, sukh-suvidha aur kala ka karak hai. BPHS mantra **«ॐ शुक्राय नमः»**, Shukravaar ko, gular (udumbara) ki samidha. Daan: safed mithai, chaawal ya safed vastra (₹11-21).',
+      'Shukra vivah, prem, sukh-suvidha aur kala ka karak hai. BPHS mantra **«ॐ शुक्राय नमः»**, Shukravaar ko, gular (udumbara) ki samidha. Daan: safed mithai, chaawal ya safed vastra.',
       'Phaladeepika (12.21) Shukra ke liye gau-seva aur phool ka paudha lagaana batata hai; Jataka Parijata (13.2) Gauri aaradhana. Rahu, Shani ya Ketu ki mahadasha mein Shukra antardasha ho to BPHS Durga mantra **«जातवेदसे सुनवाम सोमम्»** kehta hai (55.59, 57.35, 59.15). Shukra ka ratna Heera — [Heera pehnein ya nahi](/calculators/free-should-i-wear-heera).',
     ],
   },
@@ -139,14 +148,14 @@ const SECTIONS: Section[] = [
     h2: 'शनि के उपाय — Shani dev ko prasann karne ke upay',
     paras: [
       '"Shani dev ko khush karne ke upay" sabse zyada khoje jaate hain. BPHS ka mantra **«ॐ शनैश्चराय नमः»** hai — Shanivaar ko, shami ki samidha se havan ya sarson ke tel ka diya. Granth ne Shani ke liye sabse lambi ginti di hai: 23,000 jap.',
-      'Daan: kaale til, sarson ka tel ya kaala kambal (₹11-21). Phaladeepika (12.21) Shani ke liye **peepal ki seva** kehta hai — peepal ko jal dena. Ye sab sasta hai aur roz ho sakta hai. Shani ka ratna Neelam sabse tez maana jaata hai; bina jaanch pehnna theek nahi — [Neelam pehnein ya nahi](/calculators/free-should-i-wear-neelam) pehle dekhein.',
+      'Daan: kaale til, sarson ka tel ya kaala kambal. Phaladeepika (12.21) Shani ke liye **peepal ki seva** kehta hai — peepal ko jal dena. Ye sab sasta hai aur roz ho sakta hai. Shani ka ratna Neelam sabse tez maana jaata hai; bina jaanch pehnna theek nahi — [Neelam pehnein ya nahi](/calculators/free-should-i-wear-neelam) pehle dekhein.',
     ],
   },
   {
     id: 'rahu-ke-upay',
     h2: 'राहु के उपाय — Rahu ke granth upay',
     paras: [
-      'Rahu chaaya grah hai — bhram, achanak badlav, videsh aur nashe jaisi pravritti se joda jaata hai. BPHS mantra **«ॐ राहवे नमः»**, Shanivaar ko, doob (durva) ki samidha. Daan: loha (kil, chimta) ya kaale til (₹11-21).',
+      'Rahu chaaya grah hai — bhram, achanak badlav, videsh aur nashe jaisi pravritti se joda jaata hai. BPHS mantra **«ॐ राहवे नमः»**, Shanivaar ko, doob (durva) ki samidha. Daan: loha (kil, chimta) ya kaale til.',
       'Phaladeepika (12.22) santan ke prasang mein Rahu ke liye naag-devta ki pooja batata hai. Rahu ka Shadbala nahi hota, isliye calculator Rahu ke upay tab deta hai jab Rahu ki mahadasha/antardasha chal rahi ho, ya aap 9 grah mein se Rahu chunein. Rahu ka ratna Gomed — [Gomed pehnein ya nahi](/calculators/free-should-i-wear-gomed).',
     ],
   },
@@ -155,7 +164,7 @@ const SECTIONS: Section[] = [
     h2: 'केतु के उपाय — Ketu kya hai aur iske upay',
     paras: [
       '**Ketu kya hai?** Rahu ki tarah Ketu bhi chaaya grah hai — Chandra ke path ka dakshini sira (south node). Iska koi pind nahi, isliye ise moksha, vairagya aur achanak ghatnaon se joda jaata hai. BPHS mantra **«ॐ केतवे नमः»**, kusha ki samidha.',
-      'Daan: kambal ya til-gud (₹11-21). Granth Ketu ke kai prasang mein pashu-daan kehta hai; hum uski jagah pashu-seva ya gaushala mein chaara ka vikalp dete hain. Phaladeepika (12.22) Ketu ke liye vidwan ka samman aur daan batata hai. Ketu ka ratna Lehsuniya — [Cat\'s Eye pehnein ya nahi](/calculators/free-should-i-wear-cats-eye).',
+      'Daan: kambal ya til-gud. Granth Ketu ke kai prasang mein pashu-daan kehta hai; hum uski jagah pashu-seva ya gaushala mein chaara ka vikalp dete hain. Phaladeepika (12.22) Ketu ke liye vidwan ka samman aur daan batata hai. Ketu ka ratna Lehsuniya — [Cat\'s Eye pehnein ya nahi](/calculators/free-should-i-wear-cats-eye).',
     ],
   },
   {
@@ -163,7 +172,7 @@ const SECTIONS: Section[] = [
     h2: 'Kisi bhi ek grah ke upay kaise dekhein — Surya se Ketu tak',
     paras: [
       'Kai baar aapko pehle se pata hota hai ki pareshani kis grah se hai — jaise pandit ji ne kaha "Shani ka upay karo" ya "Rahu ki dasha chal rahi hai". Iske liye calculator mein **"Kisi grah ke upay dekhein"** hai: Surya, Chandra, Mangal, Budh, Guru, Shukra, Shani, Rahu aur Ketu — koi bhi chunein.',
-      'Form mein hi "Kis grah ke upay chahiye?" mein grah chun lein — free nateeje ke saath us grah ke 3 upay bhi aa jaate hain. ₹51 ki report mein grah ko samasya ki jagah bhi chun sakte hain; granth mein us grah ke jitne upay hain (daan, havan, aaradhana, seva) sab aate hain, baaki jagah aapki doosri samasya ke upay. [Upar form bharein](#upay-form).',
+      'Form mein hi "Kis grah ke upay chahiye?" mein grah chun lein — free nateeje ke saath us grah ke 3 upay bhi aa jaate hain. ₹51 ki report mein **sirf ek grah** chunein to report sirf usi grah ki banti hai — 7 se 12 tarah ke upay: Vedic mantra, naam-mantra ka jap (ginti ke saath), BPHS havan ki samidha, teen star ka daan, vrat, aur agar aage us grah ki dasha aa rahi ho to dasha-shanti. Koi doosra grah beech mein nahi aata. [Upar form bharein](#upay-form).',
     ],
   },
 
@@ -189,7 +198,7 @@ const SECTIONS: Section[] = [
     h2: 'राहु की महादशा में शनि की अंतर्दशा के उपाय',
     paras: [
       'Ye combination log sabse zyada poochte hain, kyunki dono grah dheeme aur bhaari maane jaate hain. BPHS (55.29) is antardasha ke liye **kaali gaay aur bhains ka daan** batata hai aur kehta hai isse aarogya milta hai. Saath mein Shanivaar ko diya jalaa kar **«ॐ शनैश्चराय नमः»** 11 baar.',
-      'Aaj har koi gaay daan nahi kar sakta — isliye report mein sasta vikalp hai: gaushala mein ₹21-51 ka chaara, ya kaale til/kambal ka daan. Granth ka arth seva aur tyaag hai, keemat nahi. Rahu mahadasha mein Budh antardasha ho to Vishnu mantra (55.39), aur Shukra antardasha ho to Durga mantra (55.59).',
+      'Aaj har koi gaay daan nahi kar sakta — isliye report mein sasta vikalp hai: gaushala mein chaara, ya kaale til/kambal ka daan. Granth ka arth seva aur tyaag hai, keemat nahi. Rahu mahadasha mein Budh antardasha ho to Vishnu mantra (55.39), aur Shukra antardasha ho to Durga mantra (55.59).',
     ],
   },
   {
@@ -299,7 +308,7 @@ const SECTIONS: Section[] = [
     h2: 'विवाह में विलंब के उपाय — rishte aane ke upay',
     paras: [
       'Vivah mein vilamb ke peeche aksar Guru, Shukra ya saatve ghar ke swami ki kamzori hoti hai. Isliye ₹51 report mein "vivah-deri" chunne par upay sirf vivah wale mantra nahi — kamzor grah ka daan ya seva bhi aata hai, taaki jad par kaam ho.',
-      '**Rishte aane ke upay** mein sabse aasaan Guruvaar ko peeli vastu (chane ki daal, haldi) ka daan aur Shukravaar ko safed mithai ka daan hai — dono ₹11-21 mein. Shubh tareekh chahiye to [Vivah Muhurat](/vivah-muhurat) dekhein.',
+      '**Rishte aane ke upay** mein sabse aasaan Guruvaar ko peeli vastu (chane ki daal, haldi) ka daan aur Shukravaar ko safed mithai ka daan hai — dono saral aur ghar ki cheezon se. Shubh tareekh chahiye to [Vivah Muhurat](/vivah-muhurat) dekhein.',
     ],
   },
   {
@@ -341,7 +350,7 @@ const SECTIONS: Section[] = [
     h2: 'Dhan aur vyapar badhane ke upay — Rigveda aur Atharvaveda',
     paras: [
       'Rgvidhana (1.13.66) kehta hai ki dhan ki ichchha se Rigveda ka pehla sukta **«अग्निम् ईळे पुरोहितं»** japa jaaye — roz subah 11 baar. Atharvaveda 1.4 **«अप्स्व् अन्तर् अमृतम्»** (Kaushika 9.1-9.7): kaanse ke katore mein jal abhimantrit karke thoda aachman, baaki ghar mein chhidkaav.',
-      'Dhan-vyapar hamari library ki sabse badi samasya hai — 165 upay, 10 alag kism ke. Isliye ₹51 report mein yahan sabse zyada vividhta aati hai: jap, jal-arpan, daan, seva, raksha-dhaaga.',
+      'Dhan-vyapar hamari library ki sabse badi samasya hai — 133 upay, 10 alag kism ke. Isliye ₹51 report mein yahan sabse zyada vividhta aati hai: jap, jal-arpan, daan, seva, raksha-dhaaga.',
     ],
   },
   {
@@ -372,7 +381,7 @@ const SECTIONS: Section[] = [
     id: 'court-case-ke-upay',
     h2: 'Court case aur vivaad mein jeet ke upay',
     paras: [
-      'Court-kacheri ke liye Kaushika (38.17, 76.8) Atharvaveda 1.34 **«मधुमन् मे निक्रमणं»** deta hai: roz subah 11 baar, aur sunvaai, interview ya vivaad mein jaate samay mulethi ka chhota tukda chabaayein. Kharcha ₹10 se kam.',
+      'Court-kacheri ke liye Kaushika (38.17, 76.8) Atharvaveda 1.34 **«मधुमन् मे निक्रमणं»** deta hai: roz subah 11 baar, aur sunvaai, interview ya vivaad mein jaate samay mulethi ka chhota tukda chabaayein.',
       'Jhoothe mukadme mein Rgvidhana wala Rigveda 7.104.1 ka upay bhi aata hai. **Zaroori baat: upay vakeel ki salaah ke saath karein, uski jagah nahi.** Hum kisi ka nuksaan karne wale (shatru-maran) upay nahi dete — sirf apni raksha aur saty ki jeet ke.',
     ],
   },
@@ -498,7 +507,7 @@ const SECTIONS: Section[] = [
     id: 'asli-daan-sasta-vikalp',
     h2: 'Asli daan aur sasta vikalp — har koi kar sake',
     paras: [
-      'Granth kai jagah bada daan kehta hai — gaay, bail, sona, bhains. Hum granth ko chhupaate nahi: report mein **asli daan** likha hota hai, aur neeche **sasta vikalp** — jaise gaushala mein ₹21-51 ka chaara, ya ₹11-21 ka anaaj.',
+      'Granth kai jagah bada daan kehta hai — gaay, bail, sona, bhains. Hum granth ko chhupaate nahi: report mein **asli daan** likha hota hai, aur neeche **sasta vikalp** — jaise gaushala mein chaara, ya mutthi bhar anaaj. Daan ke teen star hote hain — poorna (granth), madhyam aur saral — apni shakti se chunein.',
       'Rohiit Gupta ka niyam hai ki har report mein kam se kam 2-3 upay aise hon jo lagbhag muft hon — jal, diya, jap. Upay ki taakat shraddha aur niyam mein hai, keemat mein nahi.',
     ],
   },
@@ -549,7 +558,7 @@ const SECTIONS: Section[] = [
     id: 'free-51-499-mein-fark',
     h2: 'Free, ₹51 aur ₹499 — kis mein kya milta hai',
     paras: [
-      '**Free:** Shadbala se kamzor grah, chalti dasha, aur 3 BPHS upay. Kisi bhi grah ke 3 upay bhi muft. **₹51:** koi 2 chuniye — samasya, dosh (Kaal Sarp, Manglik, Sade Sati) ya grah — aur 10 upay paayein, alag-alag kism aur granth se. Website report, PDF download aur WhatsApp share. Form mein apni baat bhi likh sakte hain — wo report mein aur Rohiit Gupta tak pahunchti hai.',
+      '**Free:** Shadbala se kamzor grah, chalti dasha, aur 3 BPHS upay. Kisi bhi grah ke 3 upay bhi muft. **₹51:** koi 2 chuniye — samasya, dosh (Kaal Sarp, Manglik, Sade Sati) ya grah — aur 7 se 12 upay paayein, alag-alag kism aur granth se — kaise karna hai 1-2-3 mein, Hindi aur Hinglish dono mein, kundali ke hisaab se ratna aur Rahu-Ketu-Shani ki alag graha shanti bhi. Website report, PDF download aur WhatsApp share. Form mein apni baat bhi likh sakte hain — wo report mein aur Rohiit Gupta tak pahunchti hai.',
       '**₹499:** [Rohiit Gupta](/founder) ke saath seedhi baat — kaunsa upay pehle, kab tak, aur kundali ki poori padhaai. Saare plan [Pricing](/pricing) par.',
     ],
   },
@@ -558,7 +567,7 @@ const SECTIONS: Section[] = [
     h2: '27 samasya — naukri, karz, vivah, santan, court aur bahut kuch',
     paras: [
       'Naukri, office ka jhagda, dhan-vyapar, karz se mukti, vivah mein deri, rishta toota, santan, swasthya, lambi aayu, court-kacheri, ghar-zameen, yatra, padhai, bure sapne, nazar, pitra dosh, grah peeda, adhyatm, manokamna, prem, parivar klesh, talaq se bachav, tanav, pati/patni ka doosra sambandh, live-in, aatmavishwas aur prasiddhi.',
-      'Inke alawa teen dosh — **Kaal Sarp, Manglik aur Shani Sade Sati/Dhaiya** — aur 9 grah bhi chune ja sakte hain. Koi bhi 2 chun kar ₹51 report banaayein. [Upar form bharein](#upay-form).',
+      'Inke alawa teen dosh — **Kaal Sarp, Manglik aur Shani Sade Sati/Dhaiya** — aur 9 grah bhi chune ja sakte hain. 1 ya 2 chun kar ₹51 report banaayein. [Upar form bharein](#upay-form).',
     ],
   },
   {
@@ -572,11 +581,11 @@ const SECTIONS: Section[] = [
 ];
 
 const FAQS = [
-  { q: 'Upay calculator by date of birth kya hai?', a: 'Ye janm-tithi, samay aur sthan se kundali banakar Shadbala (BPHS 27) se kamzor grah nikalta hai aur granth se upay deta hai — free mein 3 BPHS upay, ₹51 mein 2 samasya ke 10 alag upay.' },
+  { q: 'Upay calculator by date of birth kya hai?', a: 'Ye janm-tithi, samay aur sthan se kundali banakar Shadbala (BPHS 27) se kamzor grah nikalta hai aur granth se upay deta hai — free mein 3 BPHS upay, ₹51 mein samasya ya ek grah ke 7 se 12 alag upay.' },
   { q: 'Kya ye upay AI likhta hai?', a: 'Nahi. Har upay Trikaal Vaani ki granth library se hai — Atharvaveda (Kaushika Sutra), Rigveda (Rgvidhana), BPHS, Phaladeepika aur Jataka Parijata — aur har upay ke saath uska shlok-hawala likha hai.' },
-  { q: 'Kya main sirf Shani, Rahu ya kisi ek grah ke upay dekh sakta hoon?', a: 'Haan. Nateeje ke neeche "Kisi grah ke upay dekhein" mein Surya, Chandra, Mangal, Budh, Guru, Shukra, Shani, Rahu aur Ketu — koi bhi chunein. Free mein 3 upay, ₹51 report mein saare.' },
-  { q: '₹51 mein kya milta hai?', a: 'Aapki chuni hui 2 samasya, dosh ya grah ke 10 upay — mantra, daan, seva, snaan, raksha-dhaaga jaise alag-alag kism ke. Report website par khulti hai, PDF download hoti hai aur WhatsApp par share ho sakti hai.' },
-  { q: 'Kya upay mehenge hain?', a: 'Zyadatar upay mein kharcha nahi ya sirf diya, jal, ghee lagta hai. Jahan granth bada daan kehta hai, wahan ₹11-51 ka sasta vikalp bhi diya hai.' },
+  { q: 'Kya main sirf Shani, Rahu ya kisi ek grah ke upay dekh sakta hoon?', a: 'Haan. Nateeje ke neeche "Kisi grah ke upay dekhein" mein Surya, Chandra, Mangal, Budh, Guru, Shukra, Shani, Rahu aur Ketu — koi bhi chunein. Free mein 3 upay; ₹51 report mein sirf wahi grah chunein to us grah ke 7 se 12 tarah ke upay.' },
+  { q: '₹51 mein kya milta hai?', a: 'Aapki chuni hui samasya, dosh ya grah ke 7 se 12 upay — mantra jap, havan, daan, vrat, seva, snaan, raksha-dhaaga jaise alag-alag kism ke, Hindi aur Hinglish mein, kaise karna hai ke saath. Kundali ke hisaab se ratna aur Rahu-Ketu-Shani shanti bhi. Report website par khulti hai, PDF download hoti hai aur WhatsApp par share ho sakti hai.' },
+  { q: 'Kya upay mehenge hain?', a: 'Har tarah ke upay hain — bina kharche ke jap, jal aur seva se lekar bade daan aur ratna tak. Jahan granth bada daan kehta hai, wahan saral vikalp bhi likha hai. Daam hum nahi likhte — wo har jagah alag hote hain, aap apni shakti se tay karein.' },
   { q: 'Rahu ki mahadasha ke upay kya hain?', a: 'BPHS adhyay 55 Rahu mahadasha ki har antardasha ka alag upay deta hai — Rahu antardasha mein «ॐ राहवे नमः» ka jap, Guru antardasha mein Rudra mantra, Shani antardasha mein Shani ka daan. Calculator aapki chalti antardasha dekh kar sahi upay deta hai.' },
   { q: 'Sade Sati ke upay kya hain?', a: 'Shani ke granth upay: «ॐ शनैश्चराय नमः» ka jap, Shanivaar ko shami ki samidha ya sarson ke tel ka diya, kaale til ka daan aur peepal ki seva (Phaladeepika 12.21). Calculator mein Shani chun kar dekhein.' },
   { q: 'Kya Kaal Sarp dosh granth mein hai?', a: 'BPHS, Phaladeepika aur Jataka Parijata mein "Kaal Sarp" naam se yog nahi milta. Granth Rahu-Ketu ki shanti deta hai, aur sarp-shaap ki baat santan ke prasang mein karta hai (BPHS 83, Phaladeepika 12.22).' },
@@ -606,7 +615,7 @@ export default function FreeUpayCalculatorPage() {
     pageUrl: PAGE_URL,
     name: 'Upay Calculator by Date of Birth — ग्रंथ के उपाय',
     description:
-      'Free upay calculator by date of birth: weak planet from Shadbala (BPHS Ch.27) and 3 BPHS graha-shanti remedies free; remedies for any of the 9 planets; Rahu, Shani and Ketu mahadasha remedies from BPHS; for Rs 51, 10 different remedies for 2 chosen problems from Atharvaveda (Kaushika Sutra), Rigveda (Rgvidhana), BPHS and Phaladeepika. No AI.',
+      'Free upay calculator by date of birth: weak planet from Shadbala (BPHS Ch.27) and 3 BPHS graha-shanti remedies free; remedies for any of the 9 planets; Rahu, Shani and Ketu mahadasha remedies from BPHS; for Rs 51, 7 to 12 different remedies (in Hindi and Hinglish) for chosen problems or for a single planet from Atharvaveda (Kaushika Sutra), Rigveda (Rgvidhana), BPHS and Phaladeepika. No AI.',
     breadcrumbName: 'Upay Calculator',
     aboutEntities: [
       'Shadbala', 'Navagraha', 'Atharvaveda', 'Kaushika Sutra', 'Rigveda', 'Rgvidhana', 'Brihat Parashara Hora Shastra',
@@ -618,7 +627,7 @@ export default function FreeUpayCalculatorPage() {
     howToSteps: [
       { name: 'Enter birth details', text: 'Date, time and place of birth; the chart is computed on Swiss Ephemeris with Lahiri ayanamsha.' },
       { name: 'See the weak planet and 3 free remedies', text: 'Shadbala (BPHS Ch.27) finds the weak planet; three BPHS graha-shanti remedies are shown with their verse reference. Remedies for any one of the 9 planets can also be opened.' },
-      { name: 'Choose 2 problems for 10 remedies', text: 'For Rs 51, choose two problems; ten remedies of different kinds come from Atharvaveda, Rigveda, BPHS and Phaladeepika, with PDF download and WhatsApp share.' },
+      { name: 'Choose a problem or one planet for 7-12 remedies', text: 'For Rs 51, choose one or two problems, or a single planet; 7 to 12 remedies of different kinds come from Atharvaveda, Rigveda, BPHS and Phaladeepika, with PDF download and WhatsApp share.' },
     ],
     faqs: FAQS,
     dateModified: '2026-10-10',
@@ -642,7 +651,7 @@ export default function FreeUpayCalculatorPage() {
               Upay Calculator by Date of Birth — ग्रंथ के उपाय
             </h1>
             <p className="text-sm m-0" style={{ color: '#94a3b8' }}>
-              Shadbala se kamzor grah · 9 grah mein se kisi ke bhi upay · BPHS ke 3 upay muft · ₹51 mein 2 samasya ke 10 alag upay — Atharvaveda, Rigveda, BPHS se। Koi AI nahi।
+              Shadbala se kamzor grah · 9 grah mein se kisi ke bhi upay · BPHS ke 3 upay muft · ₹51 mein samasya ya ek grah ke 7-12 alag upay — Atharvaveda, Rigveda, BPHS se। Koi AI nahi।
             </p>
           </header>
 
@@ -652,7 +661,7 @@ export default function FreeUpayCalculatorPage() {
               <strong style={{ color: GOLD }}>Upay by date of birth</strong> ke liye kundali se pehle{' '}
               <strong style={{ color: GOLD }}>kamzor grah (Shadbala, BPHS 27)</strong> aur chalti dasha nikalti hai, phir granth se upay.{' '}
               <strong style={{ color: GOLD }}>Trikaal Vaani ka Upay Calculator</strong> free mein BPHS ke 3 graha-shanti upay deta hai, aur ₹51 mein
-              aapki 2 samasya ke 10 alag upay — Atharvaveda (Kaushika Sutra), Rigveda (Rgvidhana) aur BPHS se, har ek shlok-hawale ke saath.
+              aapki samasya ya kisi ek grah ke 7 se 12 alag upay — Atharvaveda (Kaushika Sutra), Rigveda (Rgvidhana) aur BPHS se, har ek shlok-hawale ke saath.
             </p>
           </div>
 
@@ -666,7 +675,7 @@ export default function FreeUpayCalculatorPage() {
                 <Link href="/founder" className="hover:underline">Rohiit Gupta</Link>
               </div>
               <div className="text-slate-400">Chief Vedic Architect · Trikaal Vaani · India</div>
-              <div className="text-xs text-slate-500 mt-0.5">Engine: Swiss Ephemeris · Shadbala (BPHS 27) · Granth library — 910 upay</div>
+              <div className="text-xs text-slate-500 mt-0.5">Engine: Swiss Ephemeris · Shadbala (BPHS 27) · Granth library — 919 upay</div>
             </div>
           </div>
 
@@ -722,4 +731,4 @@ export default function FreeUpayCalculatorPage() {
     </>
   );
 }
-// END — app/calculators/free-upay-calculator/page.tsx v2.0
+// END — app/calculators/free-upay-calculator/page.tsx v2.1

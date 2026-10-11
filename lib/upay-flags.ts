@@ -1,6 +1,9 @@
 // ============================================================
 // File: lib/upay-flags.ts   (NEW FILE)
-// Version: v1.0 — 11 Oct 2026
+// Version: v1.1 — 11 Oct 2026
+//   v1.1: UPAY_PAID_ON = true — report v2 (Hindi + Hinglish, 7-12 upay, ratna,
+//         graha shanti, ek-grah report) taiyaar; ₹51 bikri wapas chalu.
+//   v1.0: pehla version (bikri band).
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
 //
 // Upay Calculator ke chhote, browser-safe niyam — client aur server dono
@@ -16,7 +19,7 @@
 //    chhoot jaana nahi.
 // ============================================================
 
-export const UPAY_PAID_ON = false;
+export const UPAY_PAID_ON = true;
 
 const CRISIS_RE = new RegExp(
   [
@@ -43,4 +46,4 @@ export const CRISIS_HELP = {
   teleManasAlt: '1-800-891-4416',
   emergency: '112',
 };
-// END — lib/upay-flags.ts v1.0
+// END — lib/upay-flags.ts v1.1

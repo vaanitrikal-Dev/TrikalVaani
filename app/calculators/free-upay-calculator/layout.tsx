@@ -1,21 +1,23 @@
 // ============================================================
 // File: app/calculators/free-upay-calculator/layout.tsx   (NEW FILE)
-// Version: v1.0 (10 Oct 2026)
+// Version: v1.1 (11 Oct 2026)
+//   v1.1: meta — '10 upay' → '7-12 upay', Hindi + ek-grah report ka zikr.
+//   v1.0: pehla version.
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
 //
 // page.tsx client component hai — metadata yahan.
 // TITLE 56 akshar (Google niyam 50-58): keyword aage, brand jagah ki kami se nahi.
-// META 153 akshar.
+// META 151 akshar.
 // TARGET KEYWORD  : upay calculator by date of birth / remedies by date of birth
 // AUDIENCE CONCERN: Meri samasya (naukri, karz, vivah…) ka granth wala upay kya hai?
-// PAGE OFFER      : free 3 BPHS upay + kamzor grah; ₹51 mein 2 samasya ke 10 alag upay
+// PAGE OFFER      : free 3 BPHS upay + kamzor grah; ₹51 mein samasya ya ek grah ke 7-12 upay
 // ============================================================
 
 import type { Metadata } from 'next';
 
 const TITLE = 'Upay Calculator by Date of Birth - Vedic Granth Remedies';
 const DESC =
-  'Free upay calculator by date of birth: Shadbala se kamzor grah aur BPHS ke 3 upay muft. Rs 51 mein 2 samasya ke 10 upay Atharvaveda, Rigveda aur BPHS se.';
+  'Free upay calculator by date of birth: Shadbala se kamzor grah aur BPHS ke 3 upay. Rs 51 mein samasya ya ek grah ke 7-12 upay, Hindi aur Hinglish mein.';
 const URL = 'https://trikalvaani.com/calculators/free-upay-calculator';
 
 export const metadata: Metadata = {

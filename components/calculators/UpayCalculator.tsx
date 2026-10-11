@@ -2,7 +2,14 @@
 
 // ============================================================
 // File: components/calculators/UpayCalculator.tsx
-// Version: v1.2 — 11 Oct 2026
+// Version: v1.3 — 11 Oct 2026
+//   v1.3 (Rohiit, 11 Oct — report v2 design approve):
+//        * Free result aur grah upay mein हिंदी / Hinglish button (UpayCard v2.0).
+//        * ₹51 box: "7-12 upay" (10 ki fixed ginti hatai). Do tarah ki report
+//          saaf likhi — (1) samasya/dosh → kundali se kamzor grah, dasha, bhaav +
+//          Rahu-Ketu-Shani shanti; (2) sirf EK grah → sirf us grah ke 7-12 upay.
+//        * Report ki bhasha chunne ka button (default हिंदी) → order 'hindi'/'hinglish'.
+//        * Copy se "kam kharche mein" hataya — ab sasta se bada har upay, ratna bhi.
 //   v1.2 (Rohiit, 11 Oct): ₹51 box UPAY_PAID_ON (lib/upay-flags) ke peeche —
 //        abhi BAND, uski jagah "jald aa rahi hai" ka chhota card. Free + grah
 //        upay chalte rahenge. "Apni baat" mein sankat likha ho to box ke neeche
@@ -20,8 +27,8 @@
 //   Ek page, 3 kadam:
 //     1. Janm-vivran → FREE: Shadbala ka kamzor grah + 3 BPHS upay
 //     2. "Kisi grah ke upay dekhein" — 9 grah chips, free mein us grah ke 3
-//     3. ₹51 box — 2 samasya chuno (27 mein se) → Razorpay → /upay/<slug>
-//        (10 alag upay, PDF download, WhatsApp share — Janam Kundali report jaisa)
+//     3. ₹51 box — 1-2 samasya/dosh/grah chuno → Razorpay → /upay/<slug>
+//        (7-12 alag upay, PDF download, WhatsApp share — Janam Kundali report jaisa)
 //   Upay card: heading GOLDEN BOLD, baaki BOLD safed (UpayCard.tsx).
 //   Grahak ko koi ANK nahi dikhta — sirf "kamzor" aur wajah.
 // API: /api/calc/upay (free/grah) · /api/calc/upay/order · callback (redirect mode)
@@ -29,7 +36,7 @@
 
 import { useEffect, useState } from 'react';
 import CityInput from '@/components/calculators/CityInput';
-import UpayCard, { type UpayItem } from '@/components/calculators/UpayCard';
+import UpayCard, { type UpayItem, type UpayLang } from '@/components/calculators/UpayCard';
 import { loadRazorpayScript, openRazorpayCheckout } from '@/lib/razorpay-helper';
 import { UPAY_PAID_ON, isCrisisText, CRISIS_HELP } from '@/lib/upay-flags';
 
@@ -69,6 +76,7 @@ export default function UpayCalculator() {
   const [grah, setGrah] = useState<string | null>(null);
   const [grahRes, setGrahRes] = useState<any>(null);
   const [grahLoading, setGrahLoading] = useState(false);
+  const [lang, setLang] = useState<UpayLang>('hi');
 
   // ── paid ──
   const [samasyaList, setSamasyaList] = useState<Samasya[]>([]);
@@ -76,6 +84,7 @@ export default function UpayCalculator() {
   const [mobile, setMobile] = useState('');
   const [vishesh, setVishesh] = useState('');
   const [preGrah, setPreGrah] = useState<string | null>(null);
+  const [reportLang, setReportLang] = useState<'hindi' | 'hinglish'>('hindi');
   const [payErr, setPayErr] = useState('');
   const [paying, setPaying] = useState(false);
 
@@ -169,7 +178,7 @@ export default function UpayCalculator() {
     try {
       const r = await fetch('/api/calc/upay/order', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ birth: b, samasya: chuni, mobile: mob, language: 'hinglish', vishesh: vishesh.trim() || null }),
+        body: JSON.stringify({ birth: b, samasya: chuni, mobile: mob, language: reportLang, vishesh: vishesh.trim() || null }),
       });
       const o = await r.json();
       if (!r.ok) throw new Error(o?.error || 'Order nahi bana.');
@@ -249,16 +258,28 @@ export default function UpayCalculator() {
       {/* ── KADAM 2: free result ────────────────────────────────── */}
       {free ? (
         <section id="upay-result" className="mt-8 scroll-mt-24">
+          <div className="flex justify-end gap-2 mb-3">
+            {(['hi', 'en'] as UpayLang[]).map((x) => (
+              <button key={x} type="button" onClick={() => setLang(x)}
+                className="px-3 py-1 rounded-full text-sm font-semibold"
+                style={lang === x
+                  ? { background: GOLD, color: '#080B12' }
+                  : { background: 'transparent', color: '#e2e8f0', border: `1px solid ${GOLD_RGBA(0.4)}` }}>
+                {x === 'hi' ? 'हिंदी' : 'Hinglish'}
+              </button>
+            ))}
+          </div>
           <div className="rounded-xl p-4 mb-5" style={{ background: GOLD_RGBA(0.06), border: `1px solid ${GOLD_RGBA(0.2)}` }}>
             <p className="m-0 text-base font-bold" style={{ color: GOLD }}>
-              Aapka kamzor grah: {(free.kamzor_grah ?? []).filter((g: string) => !['Rahu', 'Ketu'].includes(g)).join(', ') || '—'}
+              {lang === 'hi' ? 'आपका कमज़ोर ग्रह' : 'Aapka kamzor grah'}: {(free.kamzor_grah ?? []).filter((g: string) => !['Rahu', 'Ketu'].includes(g)).map((g: string) => (lang === 'hi' ? GRAH.find((x) => x.id === g)?.hi ?? g : g)).join(', ') || '—'}
             </p>
             <p className="m-0 mt-1 text-xs" style={{ color: '#94a3b8' }}>
-              Shadbala (BPHS adhyay 27) se. {free?.dasha?.md ? `Abhi ${free.dasha.md} mahadasha mein ${free.dasha.ad} antardasha chal rahi hai.` : ''}
-              {' '}Ye 3 upay Maharshi Parashar ke BPHS se hain.
+              {lang === 'hi'
+                ? <>षड्बल (BPHS अध्याय 27) से। {free?.dasha?.md ? `अभी ${GRAH.find((x) => x.id === free.dasha.md)?.hi ?? free.dasha.md} की महादशा में ${GRAH.find((x) => x.id === free.dasha.ad)?.hi ?? free.dasha.ad} की अंतर्दशा चल रही है।` : ''} ये 3 उपाय महर्षि पराशर के BPHS से हैं।</>
+                : <>Shadbala (BPHS adhyay 27) se. {free?.dasha?.md ? `Abhi ${free.dasha.md} mahadasha mein ${free.dasha.ad} antardasha chal rahi hai.` : ''} Ye 3 upay Maharshi Parashar ke BPHS se hain.</>}
             </p>
           </div>
-          {freeUpay.map((u, i) => <UpayCard key={u.id ?? i} u={u} n={i + 1} />)}
+          {freeUpay.map((u, i) => <UpayCard key={u.id ?? i} u={u} n={i + 1} lang={lang} />)}
 
           {/* grah chips */}
           <div className="rounded-xl p-4 mt-6" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
@@ -279,8 +300,12 @@ export default function UpayCalculator() {
               <div className="mt-4">
                 {grahUpay.length === 0
                   ? <p className="text-sm text-slate-400">Abhi upay nahi mil paaye — thodi der baad try karein.</p>
-                  : grahUpay.map((u, i) => <UpayCard key={u.id ?? i} u={u} n={i + 1} />)}
-                <p className="text-xs mt-1" style={{ color: '#94a3b8' }}>₹51 report mein is grah ke saare granth-upay khulte hain.</p>
+                  : grahUpay.map((u, i) => <UpayCard key={u.id ?? i} u={u} n={i + 1} lang={lang} />)}
+                <p className="text-xs mt-1" style={{ color: '#94a3b8' }}>
+                  {lang === 'hi'
+                    ? '₹51 रिपोर्ट में सिर्फ़ इसी ग्रह के 7-12 उपाय खुलते हैं — मंत्र, जप, हवन, दान, व्रत और दशा-शांति।'
+                    : '₹51 report mein sirf isi grah ke 7-12 upay khulte hain — mantra, jap, havan, daan, vrat aur dasha-shanti.'}
+                </p>
               </div>
             ) : null}
           </div>
@@ -298,12 +323,23 @@ export default function UpayCalculator() {
         </section>
       ) : null}
       {UPAY_PAID_ON ? <section className="mt-8 rounded-2xl p-5 md:p-6" style={{ background: '#0B0F1A', border: `2px solid ${GOLD_RGBA(0.45)}` }}>
-        <h2 className="text-xl font-serif font-bold m-0 mb-1" style={{ color: GOLD }}>₹51 — Aapki 2 samasya, dosh ya grah ke 10 upay</h2>
-        <p className="text-sm m-0 mb-4" style={{ color: '#cbd5e1' }}>
-          Har upay alag: mantra, daan, seva, snaan, raksha-dhaaga… — Atharvaveda (Kaushika Sutra), Rigveda (Rgvidhana),
-          BPHS aur Phaladeepika se. Aasaan, ghar par, kam kharche mein. Website par report + PDF download + WhatsApp share.
+        <h2 className="text-xl font-serif font-bold m-0 mb-1" style={{ color: GOLD }}>₹51 Upay Report — 7 se 12 upay, Hindi + Hinglish</h2>
+        <p className="text-sm m-0 mb-3" style={{ color: '#cbd5e1' }}>
+          Har upay alag tarah ka — mantra jap, havan, daan, vrat, seva, snaan, raksha-dhaaga, aur kundali ke hisaab se ratna.
+          Sasta se bada, har tarah ka upay; kaise karna hai 1-2-3 mein. Atharvaveda (Kaushika Sutra), Rigveda (Rgvidhana),
+          BPHS aur Phaladeepika se. Website par report + PDF download + WhatsApp share.
         </p>
-        <p className="text-sm font-semibold m-0 mb-1 text-slate-200">Koi 2 chuniye — samasya, dosh ya grah:</p>
+        <div className="grid sm:grid-cols-2 gap-3 mb-4">
+          <div className="rounded-lg p-3 text-xs" style={{ background: GOLD_RGBA(0.06), border: `1px solid ${GOLD_RGBA(0.2)}`, color: '#cbd5e1' }}>
+            <b style={{ color: GOLD }}>1. Samasya ya dosh chunein</b><br />
+            Aapki kundali se kamzor grah, chal rahi dasha aur bhaav dekh kar upay — saath mein Rahu, Ketu, Shani ki alag graha shanti.
+          </div>
+          <div className="rounded-lg p-3 text-xs" style={{ background: GOLD_RGBA(0.06), border: `1px solid ${GOLD_RGBA(0.2)}`, color: '#cbd5e1' }}>
+            <b style={{ color: GOLD }}>2. Sirf ek grah chunein</b><br />
+            Kisi pandit ji ne kaha &quot;Surya ka upay karo&quot;? Sirf us grah ke 7-12 tarah ke upay — Vedic mantra, jap, havan, daan, vrat.
+          </div>
+        </div>
+        <p className="text-sm font-semibold m-0 mb-1 text-slate-200">1 ya 2 chuniye — samasya, dosh ya grah:</p>
         <p className="text-xs m-0 mb-3" style={{ color: '#94a3b8' }}>
           {chuni.length ? `Chuna: ${chuni.map(naamOf).join(' · ')}` : 'Abhi kuch nahi chuna'}
         </p>
@@ -320,7 +356,7 @@ export default function UpayCalculator() {
             </div>
           </>
         ) : null}
-        <p className="text-xs font-semibold m-0 mb-2" style={{ color: GOLD }}>Grah — sirf us grah ke granth upay</p>
+        <p className="text-xs font-semibold m-0 mb-2" style={{ color: GOLD }}>Grah — akela chunein to sirf us grah ke 7-12 upay</p>
         <div className="flex flex-wrap gap-2 mb-4">
           {GRAH.map((g) => <Chip key={g.id} slug={grahSlug(g.id)} label={`${g.hi} ${g.id}`} />)}
         </div>
@@ -337,6 +373,19 @@ export default function UpayCalculator() {
             </span>
           ) : null}
         </label>
+        <div className="text-sm text-slate-300 mb-3">Report ki bhasha (report mein dono badal sakte hain)
+          <div className="flex gap-2 mt-1">
+            {(['hindi', 'hinglish'] as const).map((x) => (
+              <button key={x} type="button" onClick={() => setReportLang(x)}
+                className="px-3 py-1.5 rounded-full text-sm font-semibold"
+                style={reportLang === x
+                  ? { background: GOLD, color: '#080B12' }
+                  : { background: 'transparent', color: '#e2e8f0', border: `1px solid ${GOLD_RGBA(0.35)}` }}>
+                {x === 'hindi' ? 'हिंदी' : 'Hinglish'}
+              </button>
+            ))}
+          </div>
+        </div>
         <label className="text-sm text-slate-300 block mb-3">WhatsApp number (report ka link isi par)
           <input value={mobile} onChange={(e) => setMobile(e.target.value)} inputMode="numeric" maxLength={14}
             className="w-full sm:w-72 mt-1 px-4 py-2.5 rounded-lg text-sm outline-none block" style={inputStyle} placeholder="98XXXXXXXX" />
@@ -345,7 +394,7 @@ export default function UpayCalculator() {
         <button type="button" onClick={pay} disabled={paying}
           className="w-full sm:w-auto px-6 py-3 rounded-lg font-bold text-base"
           style={{ background: GOLD, color: '#080B12', opacity: paying ? 0.6 : 1 }}>
-          {paying ? 'Payment khul raha hai…' : '₹51 Pay karein — 10 Upay Paayein'}
+          {paying ? 'Payment khul raha hai…' : '₹51 Pay karein — 7-12 Upay Paayein'}
         </button>
         <p className="text-xs mt-2 mb-0" style={{ color: '#64748b' }}>
           🔒 Razorpay secured · UPI / Card / Netbanking · Upar janm-vivran zaroori hai
@@ -354,4 +403,4 @@ export default function UpayCalculator() {
     </div>
   );
 }
-// END — components/calculators/UpayCalculator.tsx v1.2
+// END — components/calculators/UpayCalculator.tsx v1.3

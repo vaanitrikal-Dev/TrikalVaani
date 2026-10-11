@@ -3,7 +3,8 @@
  * TRIKAL VAANI — Upay Report Order (₹51, Razorpay)
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/api/calc/upay/order/route.ts
- * VERSION: 1.2 (11 Oct 2026)
+ * VERSION: 1.3 (11 Oct 2026)
+ *   v1.3: description '7-12 granth upay' (10 ki fixed ginti hati — VM v5.1).
  *   v1.2: UPAY_PAID_ON=false (lib/upay-flags) par order BANTA HI NAHI (503) —
  *         Rohiit, 11 Oct: report theek hone tak ₹51 bikri band.
  *   v1.1: chunav mein 'grah-shani' jaise grah aur 'kaal-sarp' jaise dosh bhi
@@ -93,11 +94,11 @@ export async function POST(req: NextRequest) {
       amount: order.amount,
       currency: order.currency,
       keyId,
-      description: 'Upay Report — 10 granth upay',
+      description: 'Upay Report — 7-12 granth upay',
     });
   } catch (err) {
     console.error('[upay-order] error:', err);
     return NextResponse.json({ error: 'Payment shuru nahi ho paya — dobara try karein.' }, { status: 500 });
   }
 }
-// END — app/api/calc/upay/order/route.ts v1.2
+// END — app/api/calc/upay/order/route.ts v1.3
