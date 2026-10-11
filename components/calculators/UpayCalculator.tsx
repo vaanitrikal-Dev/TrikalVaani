@@ -2,7 +2,18 @@
 
 // ============================================================
 // File: components/calculators/UpayCalculator.tsx
-// Version: v1.3 — 11 Oct 2026
+// Version: v1.4 — 11 Oct 2026
+//   v1.4 (Rohiit, 11 Oct — Google Play Billing, SIRF Play Store app ke andar):
+//        * App mein ₹51 button wahi look + text; Google Play sheet (upay_51) →
+//          purchase token → /api/calc/upay/order (`play_purchase_token`) →
+//          server Google se verify karke report banata hai → /upay/<slug>.
+//        * Neeche ki line app mein "Secure payment via Google Play. Instant unlock."
+//          (Razorpay ka naam app mein nahi). Daam ₹51 same.
+//        * UPAY_PAID_ON=false ho to app mein bhi ₹51 box nahi dikhta (website
+//          jaisa hi "jald" card) — wahi ek switch dono jagah.
+//        * 409 PLAY_ALREADY_USED → purani report seedha khulti hai.
+//        * Website (inPlayApp false): pay(), Razorpay — EK LINE NAHI BADLI.
+//          Is component mein PayPal/dollar/Dakshina pehle se nahi hai. Gemini nahi.
 //   v1.3 (Rohiit, 11 Oct — report v2 design approve):
 //        * Free result aur grah upay mein हिंदी / Hinglish button (UpayCard v2.0).
 //        * ₹51 box: "7-12 upay" (10 ki fixed ginti hatai). Do tarah ki report
@@ -39,6 +50,8 @@ import CityInput from '@/components/calculators/CityInput';
 import UpayCard, { type UpayItem, type UpayLang } from '@/components/calculators/UpayCard';
 import { loadRazorpayScript, openRazorpayCheckout } from '@/lib/razorpay-helper';
 import { UPAY_PAID_ON, isCrisisText, CRISIS_HELP } from '@/lib/upay-flags';
+import { isPlayBillingAvailable, purchaseWithPlay, PLAY_PRODUCTS } from '@/lib/play-billing'; // v1.4
+import { usePlayApp } from '@/components/payment/usePlayApp';                             // v1.4
 
 const GOLD = '#D4AF37';
 const GOLD_RGBA = (a: number) => `rgba(212,175,55,${a})`;
@@ -87,6 +100,7 @@ export default function UpayCalculator() {
   const [reportLang, setReportLang] = useState<'hindi' | 'hinglish'>('hindi');
   const [payErr, setPayErr] = useState('');
   const [paying, setPaying] = useState(false);
+  const inPlayApp = usePlayApp(); // v1.4 — website par hamesha false
 
   useEffect(() => {
     fetch('/api/calc/upay').then((r) => r.json()).then((d) => {
@@ -165,6 +179,49 @@ export default function UpayCalculator() {
         {on ? '✓ ' : ''}{label}
       </button>
     );
+  }
+
+  // ── v1.4: Play Store app checkout — sirf onPayClick se, sirf app ke andar ──
+  async function payPlay() {
+    setPayErr('');
+    const b = birth();
+    if (!b) { setPayErr('Pehle upar janm-vivran bharein.'); return; }
+    if (chuni.length === 0) { setPayErr('Kam se kam ek samasya, dosh ya grah chuniye.'); return; }
+    const mob = mobile.replace(/\D/g, '');
+    if (mob.length < 10) { setPayErr('WhatsApp number (10 ank) bharein — report wahi bheji jaayegi.'); return; }
+    setPaying(true);
+    try {
+      const res = await purchaseWithPlay(PLAY_PRODUCTS.upay);
+      if (!res.ok) {
+        if (!res.cancelled) setPayErr(res.error);
+        setPaying(false);
+        return;
+      }
+      const r = await fetch('/api/calc/upay/order', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          birth: b, samasya: chuni, mobile: mob, language: reportLang, vishesh: vishesh.trim() || null,
+          play_purchase_token: res.purchaseToken,
+        }),
+      });
+      const o = await r.json().catch(() => ({}));
+      if (r.status === 409 && o?.code === 'PLAY_ALREADY_USED' && o?.existingRef) {
+        window.location.href = `/upay/${encodeURIComponent(o.existingRef)}`;
+        return;
+      }
+      if (!r.ok || !o?.slug) throw new Error(o?.error || 'Report abhi nahi ban payi — 1 minute baad dobara try karein.');
+      window.location.href = `/upay/${encodeURIComponent(o.slug)}`;
+    } catch (e: any) {
+      setPayErr(e?.message || 'Payment shuru nahi hua.');
+      setPaying(false);
+    }
+  }
+
+  // v1.4 — Play app pehle jaancho (detection abhi poori na hui ho to dobara
+  // poochte hain — app mein Razorpay kabhi nahi khulna chahiye), warna pay().
+  async function onPayClick() {
+    if (inPlayApp || await isPlayBillingAvailable()) { await payPlay(); return; }
+    await pay();
   }
 
   async function pay() {
@@ -391,16 +448,22 @@ export default function UpayCalculator() {
             className="w-full sm:w-72 mt-1 px-4 py-2.5 rounded-lg text-sm outline-none block" style={inputStyle} placeholder="98XXXXXXXX" />
         </label>
         {payErr ? <p className="text-red-400 text-sm mt-1 mb-2">{payErr}</p> : null}
-        <button type="button" onClick={pay} disabled={paying}
+        <button type="button" onClick={onPayClick} disabled={paying}
           className="w-full sm:w-auto px-6 py-3 rounded-lg font-bold text-base"
           style={{ background: GOLD, color: '#080B12', opacity: paying ? 0.6 : 1 }}>
           {paying ? 'Payment khul raha hai…' : '₹51 Pay karein — 7-12 Upay Paayein'}
         </button>
+        {inPlayApp ? (
+          <p className="text-xs mt-2 mb-0" style={{ color: '#64748b' }}>
+            🔒 Secure payment via Google Play. Instant unlock. · Upar janm-vivran zaroori hai
+          </p>
+        ) : (
         <p className="text-xs mt-2 mb-0" style={{ color: '#64748b' }}>
           🔒 Razorpay secured · UPI / Card / Netbanking · Upar janm-vivran zaroori hai
         </p>
+        )}
       </section> : null}
     </div>
   );
 }
-// END — components/calculators/UpayCalculator.tsx v1.3
+// END — components/calculators/UpayCalculator.tsx v1.4

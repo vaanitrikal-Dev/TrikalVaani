@@ -2,6 +2,15 @@
 
 // ============================================================
 // File: components/calculators/MuhuratCalculator.tsx
+// Version: v2.5 — 11 October 2026 — GOOGLE PLAY BILLING, SIRF PLAY STORE APP MEIN
+//   * Play product: yog_51 — website par bhi ye calculator 'yog' product (₹51)
+//     se bikta hai (/api/calc/yog/order type 'muhurat'), isliye wahi.
+//   * App mein: Google Play sheet → token → /api/calc/muhurat-shubh
+//     `play_purchase_token` (route v1.2 Google se khud jaanchta hai).
+//   * Button ka text same ("Poori soochi dekhein — ₹51"); neeche ki line app
+//     mein "Secure payment via Google Play. Instant unlock."
+//   * payKarein ke upar guard: app mein Razorpay KABHI nahi khulta.
+//   * Website par usePlayApp() hamesha false → Razorpay bilkul pehle jaisa.
 // Version: v2.4 — 24 September 2026 (phone ka apna share sheet + poori soochi)
 //
 // PEHLE EK GALTI MAAN LOON: v2.3 mein maine WhatsApp ke sandesh se saare
@@ -170,6 +179,8 @@
 import { useState, useEffect, useRef } from 'react';
 import CityInput from './CityInput';
 import { loadRazorpayScript, openRazorpayCheckout } from '@/lib/razorpay-helper';
+import { usePlayApp } from '@/components/payment/usePlayApp';                       // v2.5
+import { isPlayBillingAvailable, purchaseWithPlay, PLAY_PRODUCTS } from '@/lib/play-billing'; // v2.5
 
 // ── Rang ─────────────────────────────────────────────────────────────────────
 const GOLD = '#D4AF37';
@@ -328,7 +339,25 @@ export default function MuhuratCalculator() {
     } finally { setLoading(false); }
   };
 
+  // ── v2.5: Google Play (Play Store app only) ────────────────────────────────
+  const inPlayApp = usePlayApp();
+  const playSeKhareedo = async () => {
+    setApiError(null); setPaying(true);
+    try {
+      const result = await purchaseWithPlay(PLAY_PRODUCTS.yog);
+      if (!result.ok) {
+        if (!result.cancelled) setApiError(result.error);
+        setPaying(false);
+        return;
+      }
+      await chalao({ play_purchase_token: result.purchaseToken });
+    } catch { setApiError('Payment mein dikkat aayi. Dobara try karein.'); }
+    setPaying(false);
+  };
+
   const payKarein = async () => {
+    // v2.5 — Play Store app mein Razorpay kabhi nahi. Website par ye hamesha false.
+    if (inPlayApp || await isPlayBillingAvailable()) { await playSeKhareedo(); return; }
     setApiError(null); setPaying(true);
     try {
       const ok = await loadRazorpayScript();
@@ -759,9 +788,16 @@ export default function MuhuratCalculator() {
                     }}>
                     {paying ? 'Payment khul rahi hai…' : 'Poori soochi dekhein — ₹51'}
                   </button>
+                  {inPlayApp ? (
+                    /* v2.5 — Play Store app: provider ka sach naam */
+                    <div style={{ fontSize: 12, color: MUTED, marginTop: 10 }}>
+                      Secure payment via Google Play. Instant unlock.
+                    </div>
+                  ) : (
                   <div style={{ fontSize: 12, color: MUTED, marginTop: 10 }}>
                     Ek baar ka bhugtaan · Razorpay se surakshit · turant khul jayega
                   </div>
+                  )}
                 </div>
               </div>
             </div>

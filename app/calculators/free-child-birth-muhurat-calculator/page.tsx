@@ -2,6 +2,22 @@
 
 // ============================================================
 // File: app/calculators/free-child-birth-muhurat-calculator/page.tsx
+// Version: v1.9 (11 Oct 2026) — GOOGLE PLAY BILLING (sirf Play Store app mein)
+//   * Rohiit ke 11 Oct ke faisle: app ke andar ₹51 report Google Play se
+//     (product muhurat_51). Button ka look + text WAHI ("Poora muhurat
+//     kholein · ₹51"), sirf neeche ki line "Secure payment via Google Play.
+//     Instant unlock." App mein PayPal / dollar wala hissa nahi dikhta, aur
+//     Razorpay kabhi nahi khulta.
+//   * Flow: Google Play sheet → purchase token → /api/create-muhurat-order
+//     v1.4 (`play_purchase_token`) — server Google se jaanchta hai, order +
+//     reading row banata hai aur slug deta hai → /muhurat/<slug> (wahi
+//     report page jo Razorpay ke baad khulta hai).
+//   * Token server tak na pahunche / server fail ho to token yaad rakha jaata
+//     hai — dobara button dabane par NAYI payment nahi, wahi token dobara
+//     jaata hai. Same payment pehle use ho chuki ho (409) to purani report.
+//   * Website par usePlayApp() hamesha false → handleBuyReport, PayPal,
+//     finishAfterPayment, free calculator — EK LINE NAHI BADLI.
+//   * Gemini: is file mein koi Gemini model nahi (3.7 → 3.8 lagu nahi).
 // Version: v1.8 (1 Oct 2026) — GRANTH SE SAAR (free result par)
 //   * Rohiit (1 Oct): "Add Granth and Summary (Saar) for same way like we did
 //     to another calculators". /api/calc/muhurat v1.5 ab free slot ka saar
@@ -68,6 +84,8 @@ import SiteNav from '@/components/layout/SiteNav';
 import { loadRazorpayScript, openRazorpayCheckout } from '@/lib/razorpay-helper';
 import PayPalCheckout from '@/components/payment/PayPalCheckout';
 import { buildCalcJsonLd } from '@/lib/seo/calcJsonLd';
+import { usePlayApp } from '@/components/payment/usePlayApp';                       // v1.9
+import { isPlayBillingAvailable, purchaseWithPlay, PLAY_PRODUCTS } from '@/lib/play-billing'; // v1.9
 
 const GOLD = '#D4AF37';
 // ── v2.0 (05 Sep 2026) — see the SECTIONS block below for where every H2 came from.
@@ -860,8 +878,85 @@ export default function FreeChildBirthMuhuratPage() {
     await finishAfterPayment({ paypal_order_id: proof.paypal_order_id });
   };
 
+  // ── v1.9: Google Play (Play Store app only) ───────────────────────────────
+  // Website par inPlayApp hamesha false, isliye ye code wahan kabhi nahi chalta.
+  const inPlayApp = usePlayApp();
+  // Google ne paisa le liya par server tak report shuru nahi hui — wahi token
+  // dobara bhejna hai (naya purchase nahi: unconsumed item Google dobara
+  // bechne nahi deta). Page reload par bhi bacha rahe, isliye localStorage.
+  const PLAY_TOKEN_KEY = 'tv_muhurat_play_token';
+  const readPendingPlayToken = (): string | null => {
+    try { return window.localStorage.getItem(PLAY_TOKEN_KEY); } catch { return null; }
+  };
+  const savePendingPlayToken = (t: string | null) => {
+    try {
+      if (t) window.localStorage.setItem(PLAY_TOKEN_KEY, t);
+      else window.localStorage.removeItem(PLAY_TOKEN_KEY);
+    } catch { /* storage band — sirf is visit ke liye */ }
+  };
+
+  const handlePlayBuy = async () => {
+    setPayError(null);
+    if (!result || !best) return;
+    const orderBody = buildMuhuratOrderBody();
+    if (!orderBody) {
+      setPayError('Location missing. Please re-run the calculator.');
+      return;
+    }
+    setPayLoading(true);
+    try {
+      let token = readPendingPlayToken();
+      if (!token) {
+        const pr = await purchaseWithPlay(PLAY_PRODUCTS.muhurat);
+        if (!pr.ok) {
+          if (!pr.cancelled) setPayError(pr.error);
+          setPayLoading(false);
+          return;
+        }
+        token = pr.purchaseToken;
+        savePendingPlayToken(token);
+      }
+      setPayLoading(false);
+      setGenerating(true);
+      const res = await fetch('/api/create-muhurat-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...orderBody, play_purchase_token: token }),
+      });
+      const d = await res.json().catch(() => ({} as any));
+      if (res.ok && d?.success && d?.slug) {
+        savePendingPlayToken(null);
+        window.location.href = `/muhurat/${d.slug}`;
+        return;
+      }
+      // Is payment ki report pehle ban chuki hai — wahi kholo.
+      if (res.status === 409 && d?.code === 'PLAY_ALREADY_USED') {
+        savePendingPlayToken(null);
+        if (typeof d?.existingRef === 'string' && d.existingRef) {
+          window.location.href = `/muhurat/${d.existingRef}`;
+          return;
+        }
+      }
+      // Google ne token ko mana kiya — dobara bhejne ka fayda nahi.
+      if (d?.code === 'PLAY_NOT_VALID' || d?.code === 'PLAY_BAD_REQUEST') savePendingPlayToken(null);
+      setGenerating(false);
+      setPayError(d?.error || 'Payment received, but the report could not be started. Please tap the button again — you will not be charged again.');
+    } catch {
+      setGenerating(false);
+      setPayLoading(false);
+      setPayError('Network error. Please tap the button again — you will not be charged again.');
+    }
+  };
+
   // ── Paid report: create order → Razorpay → verify → redirect ──
   const handleBuyReport = async () => {
+    // v1.9 — Play Store app: Google Play only, checked FIRST and returned from.
+    // Re-asked here in case detection had not finished — Razorpay must never
+    // open inside the Play app. On the website this is always false.
+    if (inPlayApp || await isPlayBillingAvailable()) {
+      await handlePlayBuy();
+      return;
+    }
     setPayError(null);
     if (!result || !best) return;
 
@@ -1218,7 +1313,18 @@ export default function FreeChildBirthMuhuratPage() {
                 )}
 
                 <div className="text-center">
-                  {isIndia === false ? (
+                  {inPlayApp ? (
+                    // v1.9 — Play Store app: same button + text, provider is
+                    // Google Play. No PayPal / dollar UI, no Razorpay.
+                    <>
+                      <button onClick={handlePlayBuy} disabled={payLoading || generating}
+                        className="px-8 py-3 rounded-xl font-bold transition disabled:opacity-50 disabled:cursor-not-allowed"
+                        style={{ background: GOLD, color: '#080B12' }}>
+                        {payLoading ? '⟳ Opening payment...' : 'Poora muhurat kholein · ₹51'}
+                      </button>
+                      <p className="text-center text-xs text-slate-600 mt-3">🔒 Secure payment via Google Play. Instant unlock.</p>
+                    </>
+                  ) : isIndia === false ? (
                     // The order route stores the chosen muhurat slot, so
                     // PayPal's order must be created THERE — otherwise the row
                     // would not exist when the money arrived and the buyer
@@ -1377,3 +1483,4 @@ function Cell({ label, value, highlight }: { label: string; value: any; highligh
     </div>
   );
 }
+// END — app/calculators/free-child-birth-muhurat-calculator/page.tsx v1.9

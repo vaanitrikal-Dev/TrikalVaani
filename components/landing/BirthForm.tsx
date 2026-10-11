@@ -2,6 +2,26 @@
 /**
  * ============================================================
  * TRIKAAL VAANI — BirthForm
+ * v10.8 (11 Oct 2026) — VOICE (₹11) AB PLAY STORE APP MEIN BHI (Google Play).
+ *   Rohiit ne 11 Oct 2026 ko locked files edit karne ki permission di.
+ *   v10.7 ka temporary message ("Voice Reading abhi app mein uplabdh nahi
+ *   hai") HATAYA. Ab app mein ₹11 Voice:
+ *     Google Play sheet (voice_1q_11) → purchase token →
+ *     handOffPlayVoicePurchase() (TrikalVoice v3.6) → floating Trikaal Voice
+ *     widget khulta hai, /api/verify-voice-pack (v1.2) Google se verify
+ *     karke widget ke session par 1-sawaal ka ACTIVE voice_packs pack banata
+ *     hai — wahi pack jo mic se ₹11 khareedne par milta hai — aur janm
+ *     details pehle se bhar kar seedha "sawaal bolo" par le jaata hai.
+ *   Kyun widget: sawaal poochne ka asli raasta sirf wahi hai (voice_packs
+ *   balance → PATCH consume). Website ka ₹11 Razorpay path /voice?… par
+ *   bhejta hai jo page repo mein HAI HI NAHI (404) — use is file mein NAHI
+ *   chheda (orchestrator ko report kiya).
+ *   NEXT_PUBLIC_ENABLE_VOICE band ho to widget mount hi nahi hota — tab app
+ *   mein paisa lene SE PEHLE saaf message, Play sheet nahi khulti.
+ *   Website: handleRazorpayPayment, handlePayPalPaid, validate, Deep Reading
+ *   Play path — EK LINE NAHI BADLI. Gemini: is file mein koi model nahi.
+ *   Build marker → "BF v10.8 · 11-Oct-2026".
+ *
  * v10.7 (11 Oct 2026) — GOOGLE PLAY BILLING, SIRF PLAY STORE APP KE ANDAR.
  *   Rohiit ke 11 Oct ke faisle: (1) button ka look + text same, (2) neeche ki
  *   line "Secure payment via Google Play", (3) daam same ₹51, (4) Dakshina app
@@ -148,6 +168,8 @@ import { useRouter } from "next/navigation"
 import { loadRazorpayScript, openRazorpayCheckout } from "@/lib/razorpay-helper"
 import PayPalCheckout, { type PayPalProof } from "@/components/payment/PayPalCheckout"
 import { isPlayBillingAvailable, purchaseWithPlay, PLAY_PRODUCT_DEEP } from "@/lib/play-billing" // v10.7
+import { PLAY_PRODUCTS } from "@/lib/play-billing"                                  // v10.8
+import { handOffPlayVoicePurchase } from "@/components/Trikal/TrikalVoice"          // v10.8
 
 // ── OneSignal tagging helper (v9.8) ──────────────────────────────────────────
 // Safe, deferred. Does nothing on server. Used for abandoned-kundali Journey.
@@ -1397,10 +1419,10 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
   // Google before generating, and consumes it only after the report is saved.
   const handlePlayPayment = async (tier: 'paid' | 'voice') => {
     setApiError(null)
-    // Voice (₹11) ka Play product abhi nahi bana. App ke andar Razorpay khol
-    // nahi sakte (Google policy), isliye saaf message aur bas.
+    // v10.8 — Voice (₹11) via Google Play (voice_1q_11). Separate branch,
+    // returns; the Deep Reading code below is v10.7 unchanged.
     if (tier !== 'paid') {
-      setApiError('Voice Reading abhi app mein uplabdh nahi hai. Deep Reading ya Free Reading chuniye.')
+      await handlePlayVoicePayment()
       return
     }
     setPaymentLoading(true)
@@ -1419,6 +1441,43 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
         purchase_token: result.purchaseToken,
       })
       setIsSubmitting(false)
+      setPaymentLoading(false)
+    } catch (err: any) {
+      setApiError(err?.message || 'Payment flow error.')
+      setPaymentLoading(false)
+    }
+  }
+
+  // ── v10.8: ₹11 Voice inside the Play Store app ─────────────────────────────
+  // A voice question is delivered ONLY by the floating Trikaal Voice widget
+  // (components/Trikal/TrikalVoice.tsx): it holds the session, the paid
+  // voice_packs balance, and the record → answer flow. So Google Play takes
+  // the ₹11 here and the token is handed to the widget, which has the server
+  // verify it and create the same ACTIVE 1-question pack a ₹11 mic purchase
+  // creates, then opens on "ask your question" with these birth details.
+  const handlePlayVoicePayment = async () => {
+    // The widget is mounted only when this switch is on (app/layout.tsx). If
+    // it is off nobody could deliver the answer — so do not take the money.
+    if (process.env.NEXT_PUBLIC_ENABLE_VOICE !== 'true') {
+      setApiError('Voice Reading abhi uplabdh nahi hai. Deep Reading ya Free Reading chuniye.')
+      return
+    }
+    setPaymentLoading(true)
+    try {
+      const result = await purchaseWithPlay(PLAY_PRODUCTS.voice_1q)
+      if (!result.ok) {
+        if (!result.cancelled) setApiError(result.error)
+        setPaymentLoading(false)
+        return
+      }
+      trackFB('Purchase', { value: 11, currency: 'INR', content_name: 'Voice Reading' })
+      tagOneSignal({ kundali_status: 'completed' })
+      handOffPlayVoicePurchase(result.purchaseToken, {
+        name: fields.name,
+        dob:  fields.dateOfBirth,
+        tob:  fields.unknownTime ? '12:00' : fields.timeOfBirth,
+        pob:  fields.city || fields.placeQuery,
+      })
       setPaymentLoading(false)
     } catch (err: any) {
       setApiError(err?.message || 'Payment flow error.')
@@ -1474,7 +1533,7 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
     if (predictionTier === 'free')  return '🔮 Get My Free Reading — Trikaal Ka Sandesh'
     // v10.7 — Play Store app: same text, only the true payment provider named.
     if (inPlayApp && predictionTier === 'paid')  return '⚡ Get My Deep Reading — Pay ₹51 via Google Play'
-    if (inPlayApp && predictionTier === 'voice') return '🎙️ Get My Voice Reading — ₹11'
+    if (inPlayApp && predictionTier === 'voice') return '🎙️ Get My Voice Reading — Pay ₹11 via Google Play'
     if (predictionTier === 'paid')
       return isIndia === false
         ? '⚡ Get My Deep Reading — Pay $7 via PayPal'
@@ -1567,11 +1626,11 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
               </p>
             </div>
 
-            {/* BUILD MARKER — BirthForm v10.6 · 2026-09-27. If you cannot see
+            {/* BUILD MARKER — BirthForm v10.8 · 2026-10-11. If you cannot see
                 this line on screen, the file you are looking at is NOT the file
                 that is deployed, and the problem is the deployment, not the code. */}
             <p style={{ margin: '0 0 6px', fontSize: '10px', color: '#334155', textAlign: 'right' }}>
-              BF v10.7 · 11-Oct-2026 · {isIndia === false ? 'INTL/USD' : 'IN/INR'}{inPlayApp ? ' · PLAY' : ''}
+              BF v10.8 · 11-Oct-2026 · {isIndia === false ? 'INTL/USD' : 'IN/INR'}{inPlayApp ? ' · PLAY' : ''}
             </p>
 
             {/* v10.7 — in the Play app Google shows each buyer their own local
@@ -1915,7 +1974,7 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
             )}
 
             <button type="submit" disabled={isLoading}
-              aria-label={inPlayApp && predictionTier === 'paid' ? 'Pay 51 rupees with Google Play for Deep Reading' : inPlayApp && predictionTier === 'voice' ? 'Voice Reading' : predictionTier === 'paid' ? 'Pay 51 rupees with Razorpay for Deep Reading' : predictionTier === 'voice' ? 'Pay 11 rupees with Razorpay for Voice Reading' : 'Get free Vedic prediction'}
+              aria-label={inPlayApp && predictionTier === 'paid' ? 'Pay 51 rupees with Google Play for Deep Reading' : inPlayApp && predictionTier === 'voice' ? 'Pay 11 rupees with Google Play for Voice Reading' : predictionTier === 'paid' ? 'Pay 51 rupees with Razorpay for Deep Reading' : predictionTier === 'voice' ? 'Pay 11 rupees with Razorpay for Voice Reading' : 'Get free Vedic prediction'}
               className="w-full py-4 rounded-xl text-sm font-bold transition-all duration-300"
               style={{
                 background: isLoading ? GOLD_RGBA(0.3) : predictionTier === 'voice' ? 'linear-gradient(135deg,#7c3aed,#a78bfa)' : predictionTier === 'paid' ? `linear-gradient(135deg,${GOLD} 0%,#F5D76E 50%,${GOLD} 100%)` : `linear-gradient(135deg,rgba(212,175,55,0.8) 0%,${GOLD} 100%)`,
@@ -1933,7 +1992,7 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
                 {/* v10.7 — Play Store app lines. On the website inPlayApp is
                     false and the two original lines below render unchanged. */}
                 {inPlayApp && predictionTier === 'paid'  && <p className="text-xs text-slate-600">🔒 ₹51 one-time · Same depth as ₹500+ readings elsewhere · Secured by <span style={{color: '#34A853', fontWeight: 700}}>Google Play</span> · Instant access</p>}
-                {inPlayApp && predictionTier === 'voice' && <p className="text-xs text-slate-600">🎙️ ₹11 one-time · Speak your question, hear the answer</p>}
+                {inPlayApp && predictionTier === 'voice' && <p className="text-xs text-slate-600">🎙️ ₹11 one-time · Speak your question, hear the answer · Secured by <span style={{color: '#34A853', fontWeight: 700}}>Google Play</span></p>}
                 {!inPlayApp && predictionTier === 'paid'  && (isIndia === false
                   ? <p className="text-xs text-slate-600">🔒 $7 one-time · Same depth as $60+ readings elsewhere · Secured by <span style={{color: '#0070BA', fontWeight: 700}}>PayPal</span> · Instant access</p>
                   : <p className="text-xs text-slate-600">🔒 ₹51 one-time · Same depth as ₹500+ readings elsewhere · Secured by <span style={{color: RAZORPAY_BLUE, fontWeight: 700}}>Razorpay</span> · Instant access</p>)}
@@ -1969,3 +2028,4 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
     </section>
   )
 }
+// END — components/landing/BirthForm.tsx v10.8

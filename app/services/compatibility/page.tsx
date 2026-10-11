@@ -2,7 +2,13 @@
  * TRIKAAL VAANI — trikalvaani.com
  * Chief Vedic Architect: Rohiit Gupta
  * FILE TO PASTE → app/services/compatibility/page.tsx
- * Version: 4.1 — IR-0 cleanup
+ * Version: 4.2 (11 Oct 2026) — PLAY STORE APP: Maa Shakti dakshina section app mein HIDE.
+ *   Rohiit ka faisla #4 (11 Oct 2026): Google Play app ke andar WhatsApp par dakshina
+ *   (Arzi / Dhanyewaad amount chips + pay links) wala section NAHI dikhega — Google
+ *   bahar ke payment ki taraf bhejna mana karta hai. Sirf us section ko
+ *   <HideInPlayApp> mein lapeta. Website par sab BYTE-FOR-BYTE pehle jaisa —
+ *   koi text, styling ya doosra section nahi badla. (Is file mein gemini-3.7 nahi tha.)
+ * (previous) Version: 4.1 — IR-0 cleanup
  *
  * v4.1 CHANGES vs v4.0:
  *   ❌ REMOVED fake testimonials (fabricated reviews + ★★★★★ + "Verified Experiences")
@@ -17,6 +23,7 @@ import Link from "next/link";
 import Script from "next/script";
 import SiteNav from "@/components/layout/SiteNav";
 import SiteFooter from "@/components/layout/SiteFooter";
+import HideInPlayApp from '@/components/payment/HideInPlayApp';
 
 export const metadata: Metadata = {
   title: { absolute: "Kundali Matching Beyond Guna Milan — Deep Read" },
@@ -105,7 +112,7 @@ export default function CompatibilityPage() {
             </div>
           </div>
         </section>
-        <MaaDivineSeva />
+        <HideInPlayApp><MaaDivineSeva /></HideInPlayApp>
         <FaqSection items={[
           { q: "Is 36 out of 36 gunas enough for a good marriage?", a: "No. The 36-guna system is just one layer. Navamsa D9 soul compatibility, Mangal Dosha analysis, Nadi Dosha severity, and Dasha synchronicity are equally important. Many couples with high guna scores face serious problems because these deeper factors were ignored." },
           { q: "What is Mangal Dosha and how serious is it?", a: "Mangal Dosha occurs when Mars is placed in the 1st, 2nd, 4th, 7th, 8th, or 12th house. Its severity depends on sign, aspect, and conjunctions. Not all Mangal Dosha is equal — some are self-cancelling. Rohiit Gupta reads the exact strength and recommends remedies." },

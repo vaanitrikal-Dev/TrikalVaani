@@ -5,7 +5,13 @@
  * TRIKAL VAANI — Prediction Result Client
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: components/result/ResultClient.tsx
- * VERSION: 3.0 — Complete Prediction Layout
+ * VERSION: 3.1 (11 Oct 2026) — PLAY STORE APP: Maa Shakti dakshina section app mein HIDE.
+ *   Rohiit ka faisla #4 (11 Oct 2026): Google Play app ke andar WhatsApp par dakshina
+ *   (Arzi / Dhanyewaad amount chips + pay links) wala section NAHI dikhega — Google
+ *   bahar ke payment ki taraf bhejna mana karta hai. Sirf us section ko
+ *   <HideInPlayApp> mein lapeta. Website par sab BYTE-FOR-BYTE pehle jaisa —
+ *   koi text, styling ya doosra section nahi badla. (Is file mein gemini-3.7 nahi tha.)
+ * (previous) VERSION: 3.0 — Complete Prediction Layout
  * SIGNED: ROHIIT GUPTA, CEO
  *
  * LAYOUT (11 Sections):
@@ -31,6 +37,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import SiteNav    from '@/components/layout/SiteNav';
 import SiteFooter from '@/components/layout/SiteFooter';
+import HideInPlayApp from '@/components/payment/HideInPlayApp';
 
 // ─── CONSTANTS ────────────────────────────────────────────────────────────────
 
@@ -932,7 +939,7 @@ const mainCaution    = simpleSummary?.mainCaution
         )}
 
         {/* ── SECTION 10: MAA SHAKTI (BOTH TIERS — PERMANENT) ─────────────── */}
-        <MaaShaktiSection />
+        <HideInPlayApp><MaaShaktiSection /></HideInPlayApp>
 
         {/* ── SECTION 11: SHARE + RETURN ───────────────────────────────────── */}
         <SectionCard>

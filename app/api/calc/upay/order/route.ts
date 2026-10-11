@@ -3,7 +3,17 @@
  * TRIKAL VAANI — Upay Report Order (₹51, Razorpay)
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/api/calc/upay/order/route.ts
- * VERSION: 1.3 (11 Oct 2026)
+ * VERSION: 1.4 (11 Oct 2026)
+ *   v1.4: GOOGLE PLAY (sirf Play Store app) — body mein `play_purchase_token`
+ *         aaye to ALAG raasta: janm-vivran/samasya wahi jaanch → Google se
+ *         verify + claim (lib/play-billing-server verifyAndClaimPlay 'upay')
+ *         → upay_reports row (razorpay_order_id = Play order "GPA.…", kyunki
+ *         column NOT NULL + unique hai; play_order_id sirf Play rows par)
+ *         → wahi generateUpayReport() jo Razorpay callback/cron chalate hain
+ *         → safal: finishPlay (consume) + JSON { slug }; fail: releasePlay.
+ *         UPAY_PAID_ON=false ho to Play bhi 503 (sabse upar wahi check).
+ *         Razorpay raasta: EK LINE NAHI BADLI. maxDuration 120 joda (Play mein
+ *         report isi request mein banti hai — VM 90s tak). Gemini: is file mein nahi.
  *   v1.3: description '7-12 granth upay' (10 ki fixed ginti hati — VM v5.1).
  *   v1.2: UPAY_PAID_ON=false (lib/upay-flags) par order BANTA HI NAHI (503) —
  *         Rohiit, 11 Oct: report theek hone tak ₹51 bikri band.
@@ -25,9 +35,60 @@ import { NextRequest, NextResponse } from 'next/server';
 import Razorpay from 'razorpay';
 import { cleanBirth, SAMASYA_RE, UPAY_AMOUNT_PAISE, upayAdmin } from '@/lib/upay-report';
 import { UPAY_PAID_ON } from '@/lib/upay-flags';
+import { generateUpayReport, UPAY_SITE, type UpayBirth } from '@/lib/upay-report';       // v1.4
+import { verifyAndClaimPlay, finishPlay, releasePlay } from '@/lib/play-billing-server'; // v1.4
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
+export const maxDuration = 120; // v1.4 — Play raasta report isi request mein banata hai
+
+// ── v1.4: GOOGLE PLAY raasta (sirf jab body mein play_purchase_token ho) ────
+// Janm-vivran/samasya pehle hi jaanch chuke (POST mein), isliye galat data par
+// token kabhi claim nahi hota — customer usi payment se dobara bhej sakta hai.
+async function playOrder(
+  token: unknown,
+  d: { birth: UpayBirth; samasya: string[]; mobile: string | null; language: string; vishesh: string | null },
+) {
+  const gate = await verifyAndClaimPlay('upay', token, 'upay_reports');
+  if (!gate.ok) {
+    return NextResponse.json({ error: gate.error, code: gate.code, existingRef: gate.existingRef ?? null }, { status: gate.status });
+  }
+  try {
+    // Row: Razorpay jaisi hi, bas order id Play ka. Retry par row pehle se ho
+    // (23505) to wahi row chalegi — generateUpayReport usi ko padhta hai.
+    const { error: insErr } = await upayAdmin().from('upay_reports').insert({
+      razorpay_order_id: gate.orderId,
+      amount_paise: gate.amountPaise ?? UPAY_AMOUNT_PAISE,
+      person_name: d.birth.name ?? null,
+      mobile: d.mobile,
+      language: d.language,
+      birth: d.birth,
+      samasya: d.samasya,
+      vishesh: d.vishesh,
+      status: 'created',
+      ...(gate ? { play_order_id: gate.orderId } : {}),
+    });
+    if (insErr && (insErr as any).code !== '23505') {
+      console.error('[upay-order] PLAY insert failed:', gate.orderId, insErr.message);
+      await releasePlay(gate);
+      return NextResponse.json({ error: 'Payment mil gaya, par report abhi shuru nahi ho payi — 1 minute baad dobara try karein. Dobara paisa nahi katega.' }, { status: 503 });
+    }
+
+    const r = await generateUpayReport(gate.orderId, gate.orderId, 'play');
+    if (!r.ok) {
+      console.error('[upay-order] PLAY generate failed:', gate.orderId, r.reason, r.error ?? '');
+      await releasePlay(gate);
+      return NextResponse.json({ error: 'Payment mil gaya, par report abhi nahi ban payi — 1 minute baad dobara try karein. Dobara paisa nahi katega.' }, { status: 503 });
+    }
+
+    await finishPlay(gate, r.slug);
+    return NextResponse.json({ ok: true, slug: r.slug, reportUrl: `${UPAY_SITE}/upay/${r.slug}` });
+  } catch (e) {
+    console.error('[upay-order] PLAY error:', gate.orderId, e);
+    await releasePlay(gate);
+    return NextResponse.json({ error: 'Payment mil gaya, par report abhi nahi ban payi — 1 minute baad dobara try karein. Dobara paisa nahi katega.' }, { status: 503 });
+  }
+}
 
 export async function POST(req: NextRequest) {
   if (!UPAY_PAID_ON) {
@@ -51,6 +112,11 @@ export async function POST(req: NextRequest) {
     // grahak ki apni baat — control characters hatao, 300 akshar tak
     const visheshRaw = String(body?.vishesh ?? '').replace(/[\u0000-\u0008\u000B-\u001F\u007F]/g, '').trim();
     const vishesh = visheshRaw ? Array.from(visheshRaw).slice(0, 300).join('') : null;
+
+    // v1.4 — Play Store app: alag raasta, yahin se lautta hai. Razorpay neeche wahi.
+    if (body?.play_purchase_token) {
+      return await playOrder(body.play_purchase_token, { birth, samasya, mobile, language, vishesh });
+    }
 
     const keyId = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
     const keySecret = process.env.RAZORPAY_KEY_SECRET;
@@ -101,4 +167,4 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Payment shuru nahi ho paya — dobara try karein.' }, { status: 500 });
   }
 }
-// END — app/api/calc/upay/order/route.ts v1.3
+// END — app/api/calc/upay/order/route.ts v1.4

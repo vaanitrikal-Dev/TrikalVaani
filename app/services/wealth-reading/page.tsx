@@ -2,7 +2,13 @@
  * TRIKAAL VAANI — trikalvaani.com
  * Chief Vedic Architect: Rohiit Gupta
  * FILE TO PASTE → app/services/wealth-reading/page.tsx
- * Version: 4.2 (03 Oct 2026) — +5 H2 content sections from the Radar weekly report 03 Oct 2026 — content-edit brief / PUSH list.
+ * Version: 4.3 (11 Oct 2026) — PLAY STORE APP: Maa Shakti dakshina section app mein HIDE.
+ *   Rohiit ka faisla #4 (11 Oct 2026): Google Play app ke andar WhatsApp par dakshina
+ *   (Arzi / Dhanyewaad amount chips + pay links) wala section NAHI dikhega — Google
+ *   bahar ke payment ki taraf bhejna mana karta hai. Sirf us section ko
+ *   <HideInPlayApp> mein lapeta. Website par sab BYTE-FOR-BYTE pehle jaisa —
+ *   koi text, styling ya doosra section nahi badla. (Is file mein gemini-3.7 nahi tha.)
+ * (previous) Version: 4.2 (03 Oct 2026) — +5 H2 content sections from the Radar weekly report 03 Oct 2026 — content-edit brief / PUSH list.
  *   which planet for money, paisa kyun nahi rukta, कर्ज़ में डूबा इंसान क्या करे, अचानक धन के संकेत,
  *   wealth prediction by DOB + time. Rendered as a new WEALTH_SECTIONS block before Maa Divine Seva.
  *   Prices, schema, FAQs and CTA links unchanged. Remedies in editorial ruling #4 format.
@@ -22,6 +28,7 @@ import Link from "next/link";
 import Script from "next/script";
 import SiteNav from "@/components/layout/SiteNav";
 import SiteFooter from "@/components/layout/SiteFooter";
+import HideInPlayApp from '@/components/payment/HideInPlayApp';
 
 export const metadata: Metadata = {
   title: { absolute: "Dhana Yoga in Kundali — When Will I Get Rich?" },
@@ -182,7 +189,7 @@ export default function WealthReadingPage() {
             ))}
           </div>
         </section>
-        <MaaDivineSeva />
+        <HideInPlayApp><MaaDivineSeva /></HideInPlayApp>
         <FaqSection items={[
           { q: "What is Dhana Yoga in Vedic astrology?", a: "Dhana Yoga is a specific planetary combination indicating significant wealth accumulation. The most powerful include the 2nd and 11th lord exchanging signs, Jupiter aspecting the 2nd house, and the presence of Lakshmi Yoga or Gaja Kesari Yoga." },
           { q: "Which planets indicate wealth in Vedic astrology?", a: "Jupiter is the primary significator of wealth. The 2nd house lord governs earned wealth. The 11th lord governs gains. Venus rules luxury. When these align in a positive Dasha, significant wealth accumulation occurs." },

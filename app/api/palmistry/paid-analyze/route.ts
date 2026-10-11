@@ -1,5 +1,22 @@
-// TRIKAL VAANI - Palmistry Paid Analyze + Verify API - v4.4
+// TRIKAL VAANI - Palmistry Paid Analyze + Verify API - v4.5
 // CEO: Rohiit Gupta | Chief Vedic Architect
+//
+// v4.5 — 11 OCT 2026 — GOOGLE PLAY BILLING (Play Store app ke liye):
+//   • Naya ALAG field `play_purchase_token` (sirf Play Store app bhejta hai).
+//     Token ho (aur retry mode na ho) tabhi Play branch chalta hai —
+//     lib/play-billing-server verifyAndClaimPlay('hast_rekha', token,
+//     'palmistry_reports') Google se seedha verify + "ek order = ek report" claim.
+//   • Uske baad WAHI VM analyze → PDF → Supabase save → 1-tap email jo Razorpay
+//     mein hota hai. Report bani (ya pending_review row save hui, jise cron
+//     khud dobara banata hai) → finishPlay(slug) (token consume). Server galti
+//     / review row save na ho → releasePlay (customer usi payment se dobara).
+//   • Wahi Play order dobara aaye (PLAY_ALREADY_USED) → nayi report NAHI, purani
+//     row (slug) se wahi report lautti hai.
+//   • Play rows par play_order_id + payment_id = Play order "GPA.…" (sirf Play
+//     rows par spread — migration se pehle deploy safe).
+//   • Razorpay, PayPal aur cron RETRY mode — EK LINE NAHI BADLI (sirf 4 lines
+//     mein Play ka fallback/guard juda — report mein list).
+//   • Gemini: is file mein koi Gemini model naam nahi (3.7 → 3.8 lagu nahi).
 //
 // v4.4 — PHASE 3: FAIL HUI REPORT DOBARA (2026-09-29, CEO approved):
 //   • pending_review par customer ki photo(s) PRIVATE bucket 'palm-retry'
@@ -66,6 +83,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import crypto from 'crypto';
 import { callVM } from '@/lib/callVM';
+import { verifyAndClaimPlay, finishPlay, releasePlay } from '@/lib/play-billing-server';   // v4.5
+import type { PlayGateOk } from '@/lib/play-billing-server';                               // v4.5
 
 // ── CRITICAL: function must outlive a ~90-120s VM analyze (Vercel Pro allows 300) ──
 export const maxDuration = 300;
@@ -103,6 +122,7 @@ interface PalmVerifyRequest {
   razorpay_payment_id: string;
   razorpay_signature:  string;
   paypal_order_id?:    string | null;   // international, $7
+  play_purchase_token?: string | null;  // v4.5 — Google Play (Play Store app only)
   // Legacy fields (still sent by frontend for backward compat):
   right_palm_b64:      string;
   left_palm_b64?:      string | null;
@@ -123,11 +143,14 @@ interface PalmVerifyRequest {
 const RETRY_BUCKET = 'palm-retry';   // v4.4 private bucket
 
 export async function POST(req: NextRequest) {
+  // v4.5 — set ONLY after Google verified + claimed a Play purchase.
+  let playGate: PlayGateOk | null = null;
   try {
     const body: PalmVerifyRequest = await req.json();
     const {
       razorpay_order_id, razorpay_payment_id, razorpay_signature,
       paypal_order_id,
+      play_purchase_token,   // v4.5
       right_palm_b64, left_palm_b64,
       dominant_palm_b64, other_palm_b64, handedness,
       user_name, user_mobile, gender, language, dob,
@@ -137,12 +160,62 @@ export async function POST(req: NextRequest) {
     // v4.4 — server-only retry mode (cron). Key = service role key (browser ke paas kabhi nahi).
     const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY ?? '';
     const isRetry = !!_retry_slug && !!serviceKey && _retry_key === serviceKey;
+    // v4.5 — Play branch sirf tab jab request mein Play token ho (cron retry kabhi nahi bhejta).
+    const isPlay = !isRetry && typeof play_purchase_token === 'string' && play_purchase_token.length > 0;
 
-    if (!paypal_order_id && (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature)) {
+    if (!isPlay && !paypal_order_id && (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature)) {
       return NextResponse.json({ error: 'Missing payment fields.' }, { status: 400 });
     }
     if (!right_palm_b64 && !dominant_palm_b64) {
       return NextResponse.json({ error: 'Palm image missing.' }, { status: 400 });
+    }
+
+    // ── v4.5: GOOGLE PLAY gate — Play Store app only, checked FIRST ─────────
+    // Google se seedha verify + play_purchases mein claim. Bina token wali
+    // request yahan aati hi nahi — Razorpay / PayPal / retry bilkul pehle jaise.
+    if (isPlay) {
+      const gate = await verifyAndClaimPlay('hast_rekha', play_purchase_token, 'palmistry_reports');
+      if (!gate.ok) {
+        // Wahi Play order dobara: nayi report nahi — purani row (slug) wapas.
+        if (gate.code === 'PLAY_ALREADY_USED' && gate.existingRef) {
+          const { data: prev } = await supabase.from('palmistry_reports')
+            .select('session_id, slug, tier, mp_features, scores, observations, report, pdf_url, payment_id')
+            .eq('slug', gate.existingRef).maybeSingle();
+          if (prev?.tier === 'paid' && prev.report) {
+            return NextResponse.json({
+              success:        true,
+              pending_review: false,
+              already_used:   true,
+              session_id:     prev.session_id,
+              slug:           prev.slug,
+              mp_features:    prev.mp_features,
+              scores:         prev.scores,
+              observations:   prev.observations,
+              report:         prev.report,
+              pdf_b64:        null,
+              pdf_url:        prev.pdf_url ?? null,
+              paymentId:      prev.payment_id ?? null,
+            });
+          }
+          if (prev?.tier === 'pending_review') {
+            const waPrev = encodeURIComponent(
+              `Namaste! Meri Hast Rekha report personal review mein hai.\n` +
+              `Payment ID: ${prev.payment_id ?? 'N/A'}\n` +
+              `Naam: ${user_name || 'N/A'}`
+            );
+            return NextResponse.json({
+              success:        true,
+              pending_review: true,
+              already_used:   true,
+              paymentId:      prev.payment_id ?? null,
+              whatsappUrl:    `https://wa.me/${WHATSAPP_NUMBER}?text=${waPrev}`,
+              message:        'Aapki detailed Hast Rekha reading personally review ki ja rahi hai.',
+            });
+          }
+        }
+        return NextResponse.json({ error: gate.error, code: gate.code, existingRef: gate.existingRef ?? null }, { status: gate.status });
+      }
+      playGate = gate;
     }
 
     // ── 1. Verify payment ────────────────────────────────────────────────────
@@ -152,6 +225,8 @@ export async function POST(req: NextRequest) {
     // proves nothing on its own.
     if (isRetry) {
       console.log(`[Trikal] Palm RETRY mode | ${_retry_slug}`);   // v4.4: payment pehle hi verify ho chuka
+    } else if (playGate) {
+      console.log(`[Trikal] Palm Play verified | order:${playGate.orderId} | region:${playGate.regionCode}`);   // v4.5
     } else if (paypal_order_id) {
       const { getProduct }                   = await import('@/lib/pricing-intl');
       const { getPayPalOrder, isCaptureValid } = await import('@/lib/paypal-server');
@@ -227,7 +302,7 @@ export async function POST(req: NextRequest) {
         console.error('[Trikal] Palm retry photo save failed (review still recorded):', e);
       }
 
-      await supabase.from('palmistry_reports').insert({
+      const { error: reviewSaveErr } = await supabase.from('palmistry_reports').insert({
         retry_input,                                  // v4.4
         retry_count:       0,                         // v4.4
         session_id:        `palm_review_${reason}_${Date.now()}`,
@@ -246,11 +321,27 @@ export async function POST(req: NextRequest) {
         tier:         'pending_review',
         payment_id:        razorpay_payment_id,
         razorpay_order_id: razorpay_order_id,
+        // v4.5 — sirf Play rows par (Razorpay/PayPal rows mein ye keys jaati hi nahi)
+        ...(playGate ? { payment_id: playGate.orderId, play_order_id: playGate.orderId } : {}),
       });
+
+      // v4.5 — Play: review row save hui = cron khud report banayega → payment
+      // pakka (consume). Row save NAHI hui → claim chhodo, customer dobara kare.
+      if (playGate) {
+        if (reviewSaveErr) {
+          console.error('[Trikal] Palm Play review row save failed:', reviewSaveErr.message);
+          await releasePlay(playGate);
+          return NextResponse.json(
+            { error: 'Report abhi save nahi ho payi — aapka payment safe hai. Kripya 1 minute baad dobara try karein.' },
+            { status: 503 }
+          );
+        }
+        await finishPlay(playGate, slug);
+      }
 
       const waText = encodeURIComponent(
         `Namaste! Meri Hast Rekha report personal review mein hai.\n` +
-        `Payment ID: ${razorpay_payment_id}\n` +
+        `Payment ID: ${razorpay_payment_id ?? playGate?.orderId}\n` +
         `Naam: ${user_name || 'N/A'}`
       );
 
@@ -392,6 +483,8 @@ export async function POST(req: NextRequest) {
         tier:         'paid',
         payment_id:        razorpay_payment_id,
         razorpay_order_id: razorpay_order_id,
+        // v4.5 — sirf Play rows par (Razorpay/PayPal rows mein ye keys jaati hi nahi)
+        ...(playGate ? { payment_id: playGate.orderId, play_order_id: playGate.orderId } : {}),
       };
     // v4.4 — retry: wahi pending row paid banti hai; normal: nayi row (pehle jaisa)
     const { error: saveErr } = isRetry
@@ -417,12 +510,15 @@ export async function POST(req: NextRequest) {
       // Non-fatal — user still gets the report below.
     }
 
+    // v4.5 — Play: report customer ko ja rahi hai → order fulfilled + token consume.
+    if (playGate) await finishPlay(playGate, slug);
+
     // v4.3 — Surakshit 1-tap email (never throws)
     if (pdf_url) {
       await notifyReportReady({
         product:      'Hast Rekha',
         reportUrl:    pdf_url,
-        paymentId:    razorpay_payment_id || paypal_order_id || null,
+        paymentId:    razorpay_payment_id || paypal_order_id || playGate?.orderId || null,
         customerName: user_name ?? null,
         phone:        user_mobile ?? null,
       });
@@ -445,6 +541,8 @@ export async function POST(req: NextRequest) {
 
   } catch (err: unknown) {
     console.error('[Trikal] Palm verify+analyze error:', err);
+    // v4.5 — Play: report nahi bani → claim chhodo (customer wahi payment se dobara).
+    if (playGate) await releasePlay(playGate);
     return NextResponse.json(
       { error: 'Server error. Payment safe — contact us if report does not load.' },
       { status: 500 }

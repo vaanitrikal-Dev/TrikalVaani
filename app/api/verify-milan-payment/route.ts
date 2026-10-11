@@ -1,6 +1,23 @@
 // TRIKAL VAANI - Kundali Milan Payment Verification API
 // CEO: Rohiit Gupta
 // File: app/api/verify-milan-payment/route.ts
+// VERSION: 1.8 (11 Oct 2026) - GOOGLE PLAY BILLING (sirf Play Store app)
+//
+// CHANGE v1.8 (Rohiit, 11 Oct 2026): Play Store app (TWA) mein Kundali Milan
+//   ₹51 Google Play se (product milan_51). Request mein `play_purchase_token`
+//   ho tabhi naya ALAG branch chalta hai — POST ke shuru mein, aur wahin se
+//   return. Token na ho to Razorpay / PayPal ka raasta EK LINE NAHI BADLA.
+//   Play branch (handlePlayMilan):
+//     1. bride/groom data body se (wahi jaanch jo create-milan-order karta hai)
+//     2. verifyAndClaimPlay('milan') — Google se seedha verify + ek order =
+//        ek report. Pehle se bani report ho to 409 PLAY_ALREADY_USED + slug.
+//     3. kundali_milan_orders mein 'paid' row (daam server tay karta hai —
+//        ₹51 / 5100 paise; play_order_id sirf Play row par), phir WAHI VM
+//        /milan-compute + kundali_milan insert jo Razorpay ke baad hota hai.
+//     4. Safal → finishPlay(slug) (token consume). Fail → releasePlay +
+//        error, taaki customer usi payment se dobara koshish kar sake.
+//   Gemini: is file mein koi Gemini model nahi (3.7 → 3.8 kuch badalna nahi).
+//
 // VERSION: 1.7 (1 Oct 2026) - single tier milan_51
 //
 // CHANGE v1.7 (Rohiit, 1 Oct 2026): naya tier milan_51 (₹51 / $5, couple +
@@ -36,6 +53,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import crypto from 'crypto';
 import { callVM } from '@/lib/callVM';
+import { verifyAndClaimPlay, finishPlay, releasePlay } from '@/lib/play-billing-server'; // v1.8
 
 const VM_MILAN_ENDPOINT =
   process.env.VM_MILAN_ENDPOINT ?? 'http://34.47.182.227:8001/milan-compute';
@@ -91,9 +109,208 @@ function buildManglikData(vmData: any): object | null {
   };
 }
 
+// ══════════════════════════════════════════════════════════════════════════
+// v1.8 — GOOGLE PLAY (Play Store app) — Razorpay / PayPal is code ko kabhi
+// nahi chhoote. Sirf tab chalta hai jab body mein play_purchase_token ho.
+// ══════════════════════════════════════════════════════════════════════════
+
+// create-milan-order v1.3 ka normalisePartner — wahi jaanch, Play ke liye copy
+// (Razorpay ke liye birth data create-milan-order mein jaanchta hai; Play mein
+// alag order step nahi hai, isliye yahan).
+function playNormalisePartner(p: any, fallbackGender: 'male' | 'female') {
+  if (!p || typeof p !== 'object') return null;
+  const latitude  = typeof p.latitude  === 'number' ? p.latitude  : (typeof p.lat === 'number' ? p.lat : null);
+  const longitude = typeof p.longitude === 'number' ? p.longitude : (typeof p.lng === 'number' ? p.lng : null);
+  const place     = p.place ?? p.cityName ?? '';
+  const dob       = p.dob ?? '';
+  const tob       = p.tob ?? '12:00';
+  const name      = String(p.name ?? '').trim();
+
+  if (!name) return null;
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(dob)) return null;
+  if (!/^\d{2}:\d{2}$/.test(tob)) return null;
+  if (typeof latitude !== 'number' || Math.abs(latitude) > 90) return null;
+  if (typeof longitude !== 'number' || Math.abs(longitude) > 180) return null;
+  if (!place) return null;
+
+  return {
+    name,
+    gender:   p.gender ?? fallbackGender,
+    dob,
+    tob,
+    place,
+    latitude,
+    longitude,
+    timezone: typeof p.timezone === 'number' ? p.timezone : 5.5,
+  };
+}
+
+async function handlePlayMilan(body: any): Promise<NextResponse> {
+  // Birth data pehle jaancho — Google ka token claim karne se PEHLE, taaki
+  // galat form par payment "claimed" na atke.
+  const bride = playNormalisePartner(body.bride, 'female');
+  const groom = playNormalisePartner(body.groom, 'male');
+  if (!bride) return NextResponse.json({ error: 'Invalid bride birth data.' }, { status: 400 });
+  if (!groom) return NextResponse.json({ error: 'Invalid groom birth data.' }, { status: 400 });
+
+  // DB check: language sirf in teen mein se ho sakti hai.
+  const lang = ['hinglish', 'hindi', 'english'].includes(body.language) ? body.language : 'hinglish';
+  const contact    = body.contact ?? {};
+  const userName   = contact.name   ?? body.userName   ?? null;
+  const userMobile = contact.mobile ?? body.userMobile ?? null;
+  const userEmail  = contact.email  ?? body.userEmail  ?? null;
+
+  const gate = await verifyAndClaimPlay('milan', body.play_purchase_token, 'kundali_milan_orders');
+  if (!gate.ok) {
+    return NextResponse.json(
+      { error: gate.error, code: gate.code, existingRef: gate.existingRef ?? null },
+      { status: gate.status }
+    );
+  }
+
+  let orderRowId: string | null = null;
+  try {
+    // Daam browser se nahi — ek hi tier milan_51 (₹51). amount_rupees /
+    // amount_paise NOT NULL hain; bahar ke desh mein Google local daam leta
+    // hai, wahan bhi ₹ ka barabar likha jaata hai (PayPal row jaisa) aur
+    // currency 'PLAY' batata hai ki asli daam Play Console mein hai.
+    const { data: orderRow, error: insErr } = await supabase
+      .from('kundali_milan_orders')
+      .insert({
+        amount_rupees:    51,
+        amount_paise:     gate.amountPaise ?? 5100,
+        currency:         gate.currency,
+        tier:             'milan_51',
+        audience:         'both',
+        language:         lang,
+        bride_data:       bride,
+        groom_data:       groom,
+        user_name:        userName,
+        user_mobile:      userMobile,
+        user_email:       userEmail,
+        status:           'paid',
+        payment_verified: true,
+        paid_at:          new Date().toISOString(),
+        // Naya column — key SIRF Play row par (migration se pehle deploy ho
+        // to bhi Razorpay/PayPal rows par koi asar nahi).
+        ...(gate ? { play_order_id: gate.orderId } : {}),
+      })
+      .select('*')
+      .single();
+
+    if (insErr || !orderRow) {
+      console.error('[Trikal] Milan PLAY order save error:', gate.orderId, insErr?.message);
+      await releasePlay(gate);
+      return NextResponse.json(
+        { error: 'Payment received but the report could not be started. Please tap Pay again — you will not be charged twice.' },
+        { status: 500 }
+      );
+    }
+    orderRowId = orderRow.id;
+
+    // ── Wahi VM call jo Razorpay ke baad hota hai (POST neeche) ─────────────
+    const vmPayload = {
+      person1: {
+        name: bride.name, gender: bride.gender ?? 'female',
+        year:   Number(bride.dob.slice(0, 4)), month:  Number(bride.dob.slice(5, 7)),
+        day:    Number(bride.dob.slice(8, 10)), hour:   Number(bride.tob.slice(0, 2)),
+        minute: Number(bride.tob.slice(3, 5)),
+        latitude: bride.latitude, longitude: bride.longitude,
+        timezone: bride.timezone, place: bride.place,
+      },
+      person2: {
+        name: groom.name, gender: groom.gender ?? 'male',
+        year:   Number(groom.dob.slice(0, 4)), month:  Number(groom.dob.slice(5, 7)),
+        day:    Number(groom.dob.slice(8, 10)), hour:   Number(groom.tob.slice(0, 2)),
+        minute: Number(groom.tob.slice(3, 5)),
+        latitude: groom.latitude, longitude: groom.longitude,
+        timezone: groom.timezone, place: groom.place,
+      },
+    };
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 30000);
+
+    let vmData: any = null;
+    try {
+      const vmRes = await callVM(VM_MILAN_ENDPOINT, {
+        method: 'POST',
+        body: JSON.stringify(vmPayload), signal: controller.signal,
+      });
+      clearTimeout(timeout);
+      if (!vmRes.ok) {
+        const txt = await vmRes.text().catch(() => '');
+        console.error('[Trikal] VM error post-payment (PLAY):', vmRes.status, txt);
+      } else {
+        vmData = await vmRes.json();
+      }
+    } catch (e: unknown) {
+      clearTimeout(timeout);
+      console.error('[Trikal] VM fetch failed post-payment (PLAY):', e);
+    }
+
+    const slug = makeSlug();
+
+    const { error: saveErr } = await supabase
+      .from('kundali_milan')
+      .insert({
+        order_id:         orderRow.id,
+        slug,
+        tier:             orderRow.tier,
+        audience:         orderRow.audience,
+        language:         orderRow.language,
+        bride_data:       bride,
+        groom_data:       groom,
+        ashtakoot_score:  vmData?.ashtakoot?.total_score ?? null,
+        ashtakoot_data:   vmData?.ashtakoot              ?? null,
+        manglik_data:     buildManglikData(vmData),
+        remedies_data:    vmData?.remedies                ?? null,
+        gemini_narrative: null,
+        pdf_url:          null,
+      });
+
+    if (saveErr) {
+      console.error('[Trikal] Milan PLAY record save error:', gate.orderId, saveErr.message);
+      await supabase.from('kundali_milan_orders')
+        .update({ status: 'failed', payment_verified: false })
+        .eq('id', orderRow.id);
+      await releasePlay(gate);
+      return NextResponse.json(
+        { error: 'Payment received but the report could not be saved. Please tap Pay again — you will not be charged twice.' },
+        { status: 500 }
+      );
+    }
+
+    await finishPlay(gate, slug);
+
+    return NextResponse.json({
+      success: true, slug, tier: orderRow.tier, audience: orderRow.audience,
+      language: orderRow.language, paymentId: gate.orderId,
+      amount: orderRow.amount_rupees,
+      resultUrl: `https://trikalvaani.com/milan/${slug}`,
+    });
+  } catch (err: unknown) {
+    console.error('[Trikal] Milan PLAY flow error:', gate.orderId, err);
+    if (orderRowId) {
+      await supabase.from('kundali_milan_orders')
+        .update({ status: 'failed', payment_verified: false })
+        .eq('id', orderRowId);
+    }
+    await releasePlay(gate);
+    return NextResponse.json({ error: 'Server error during verification.' }, { status: 500 });
+  }
+}
+
 export async function POST(req: NextRequest) {
   try {
     const body: MilanVerifyRequest = await req.json();
+
+    // v1.8 — Google Play (Play Store app). Checked FIRST and returned from;
+    // a request without play_purchase_token never enters it.
+    if ((body as any)?.play_purchase_token) {
+      return await handlePlayMilan(body as any);
+    }
+
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature, paypal_order_id } = body;
 
     const isPaypal = Boolean(paypal_order_id);

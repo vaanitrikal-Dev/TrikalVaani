@@ -1,7 +1,19 @@
 // TRIKAL VAANI - Karmic Background Reading - Payment Verification API
 // CEO: Rohiit Gupta
 // File: app/api/verify-karmic-payment/route.ts
-// VERSION: 1.2 (29 Aug 2026)
+// VERSION: 1.3 (11 Oct 2026)
+// CHANGE v1.3 (11 Oct 2026): GOOGLE PLAY BILLING — sirf Play Store app ke liye.
+//   Body mein `play_purchase_token` ho tabhi naya Play branch chalta hai, wo
+//   SABSE PEHLE check hota hai aur wahin se return karta hai. Razorpay aur
+//   PayPal ka code EK LINE NAHI BADLA (sirf ek `if` upar joda).
+//   Play mein pehle se koi pending order nahi hota, isliye birth data +
+//   contact isi request mein aata hai: verifyAndClaimPlay('karmic') Google se
+//   token verify karta hai → karmic_orders mein PAID row (play_order_id ke
+//   saath) → karmic_readings row + wahi background generation jo Razorpay par
+//   chalti hai → finishPlay(gate, slug). Kahin bhi fail → releasePlay(gate),
+//   taaki customer wahi payment dobara chala sake. Daam browser se kabhi nahi
+//   liya jaata — product 'karmic' server par fixed hai.
+//   Gemini: is file mein koi Gemini model naam nahi (3.7 → 3.8 ki zaroorat nahi).
 // CHANGE v1.2: PAYPAL. Accepts paypal_order_id ($19) as an alternative to the
 //   Razorpay trio (Rs 251), verifies it by fetching the order FROM PayPal, and
 //   looks the pending row up by whichever id was used. The Razorpay branch is
@@ -18,6 +30,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import crypto from 'crypto';
+import { verifyAndClaimPlay, finishPlay, releasePlay } from '@/lib/play-billing-server'; // v1.3
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -52,9 +65,158 @@ function fireBackgroundGeneration(slug: string): void {
   });
 }
 
+// ── v1.3: GOOGLE PLAY (Play Store app only) ─────────────────────────────────
+// Same checks as create-karmic-order's normalisePerson (route files cannot
+// export helpers to each other in the App Router, so it is mirrored here).
+const PLAY_KARMIC_RUPEES = 101;
+const PLAY_KARMIC_PAISE  = 10100;
+
+function normalisePlayPerson(p: any) {
+  if (!p || typeof p !== 'object') return null;
+  const latitude  = typeof p.latitude  === 'number' ? p.latitude  : (typeof p.lat === 'number' ? p.lat : null);
+  const longitude = typeof p.longitude === 'number' ? p.longitude : (typeof p.lng === 'number' ? p.lng : null);
+  const place     = p.place ?? p.cityName ?? '';
+  const dob       = p.dob ?? '';
+  const tob       = p.tob ?? '12:00';
+  const name      = (p.name ?? '').trim();
+
+  if (!name) return null;
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(dob)) return null;
+  if (!/^\d{2}:\d{2}$/.test(tob)) return null;
+  if (typeof latitude !== 'number' || Math.abs(latitude) > 90) return null;
+  if (typeof longitude !== 'number' || Math.abs(longitude) > 180) return null;
+  if (!place) return null;
+
+  return {
+    name, dob, tob, place, cityName: place, latitude, longitude,
+    timezone: typeof p.timezone === 'number' ? p.timezone : 5.5,
+  };
+}
+
+/**
+ * Play Store app: Google has taken the money. Verify the token WITH GOOGLE,
+ * claim it once, then do exactly what the Razorpay path does after payment:
+ * a paid karmic_orders row, a karmic_readings row, background generation.
+ */
+async function handlePlayKarmic(body: any): Promise<NextResponse> {
+  // Validate BEFORE claiming, so bad input never locks the payment.
+  const person = normalisePlayPerson(body.person ?? body);
+  if (!person) {
+    return NextResponse.json({ error: 'Invalid birth data.' }, { status: 400 });
+  }
+  const lang = body.language ?? 'hinglish';
+  const language = ['hinglish', 'hindi', 'english'].includes(lang) ? lang : 'hinglish';
+  const sourceMilanSlug = body.source_milan_slug ?? body.sourceMilanSlug ?? null;
+  const contact    = body.contact ?? {};
+  const userName   = contact.name   ?? body.userName   ?? null;
+  const userMobile = contact.mobile ?? body.userMobile ?? null;
+  const userEmail  = contact.email  ?? body.userEmail  ?? null;
+
+  const gate = await verifyAndClaimPlay('karmic', body.play_purchase_token, 'karmic_orders');
+  if (!gate.ok) {
+    return NextResponse.json(
+      { error: gate.error, code: gate.code, existingRef: gate.existingRef ?? null },
+      { status: gate.status }
+    );
+  }
+
+  let orderRowId: string | null = null;
+  try {
+    // 1. Paid order row. razorpay_order_id stays NULL (column is nullable).
+    //    amount_rupees / amount_paise are NOT NULL: outside India Google
+    //    charges a local price we do not know, so the rupee equivalent is
+    //    recorded and `currency` says 'PLAY' (same idea as the PayPal rows).
+    const { data: orderRow, error: orderErr } = await supabase
+      .from('karmic_orders')
+      .insert({
+        amount_rupees:     PLAY_KARMIC_RUPEES,
+        amount_paise:      gate.amountPaise ?? PLAY_KARMIC_PAISE,
+        currency:          gate.currency,
+        language,
+        person_data:       person,
+        source_milan_slug: sourceMilanSlug,
+        user_name:         userName,
+        user_mobile:       userMobile,
+        user_email:        userEmail,
+        status:            'paid',
+        payment_verified:  true,
+        paid_at:           new Date().toISOString(),
+        ...(gate ? { play_order_id: gate.orderId } : {}),
+      })
+      .select('id')
+      .single();
+
+    if (orderErr || !orderRow) {
+      console.error(`[Trikal] Karmic PLAY order save error | ${gate.orderId}: ${orderErr?.message}`);
+      await releasePlay(gate);
+      return NextResponse.json(
+        { error: 'Payment is verified but your order could not be saved. Please tap the button again — you will not be charged again.' },
+        { status: 500 }
+      );
+    }
+    orderRowId = orderRow.id;
+
+    // 2. Reading row — identical to the Razorpay path.
+    const slug = makeSlug();
+    const { error: saveErr } = await supabase.from('karmic_readings').insert({
+      order_id:          orderRow.id,
+      slug,
+      language,
+      person_data:       person,
+      kundali_data:      null,
+      dimensions_data:   null,
+      gemini_narrative:  null,
+      geo_answer:        null,
+      source_milan_slug: sourceMilanSlug,
+      pdf_url:           null,
+      is_public:         false,
+    });
+
+    if (saveErr) {
+      console.error(`[Trikal] Karmic PLAY reading row save error | ${gate.orderId}: ${saveErr.message}`);
+      // Order row is orphaned — mark it failed so it is not counted as a sale twice on retry.
+      await supabase.from('karmic_orders').update({ status: 'failed' }).eq('id', orderRow.id);
+      await releasePlay(gate);
+      return NextResponse.json(
+        { error: 'Payment is verified but your reading could not be started. Please tap the button again — you will not be charged again.' },
+        { status: 500 }
+      );
+    }
+
+    // 3. Same background generation as Razorpay / PayPal.
+    fireBackgroundGeneration(slug);
+
+    // 4. Mark fulfilled + consume the Play token.
+    await finishPlay(gate, slug);
+    console.log(`[Trikal] Karmic PLAY ok | order:${gate.orderId} | region:${gate.regionCode ?? 'unknown'} | slug:${slug}`);
+
+    return NextResponse.json({
+      success: true, slug, language,
+      paymentId: gate.orderId,
+      amount:    gate.amountPaise != null ? gate.amountPaise / 100 : null,
+      currency:  gate.currency,
+      resultUrl: `${SITE}/karmic/${slug}`,
+    });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'Unknown';
+    console.error(`[Trikal] Karmic PLAY error | ${gate.orderId}: ${msg}`);
+    if (orderRowId) {
+      try { await supabase.from('karmic_orders').update({ status: 'failed' }).eq('id', orderRowId); } catch { /* best effort */ }
+    }
+    await releasePlay(gate);
+    return NextResponse.json({ error: 'Server error during verification. Please tap the button again.' }, { status: 500 });
+  }
+}
+
 export async function POST(req: NextRequest) {
   try {
     const body: KarmicVerifyRequest = await req.json();
+
+    // v1.3 — Google Play (Play Store app). Checked FIRST and returned from;
+    // a request without a Play token never enters it.
+    if ((body as any)?.play_purchase_token) {
+      return await handlePlayKarmic(body as any);
+    }
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature, paypal_order_id } = body;
 
     const isPaypal = Boolean(paypal_order_id);

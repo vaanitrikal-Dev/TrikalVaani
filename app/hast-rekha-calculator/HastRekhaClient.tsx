@@ -2,8 +2,21 @@
 
 // ============================================================
 // File: app/hast-rekha-calculator/HastRekhaClient.tsx
-// Version: 2.5 (1 Oct 2026 — Trikaal Vaani ka core tagline (Rohiit ne chuna): "Granth ka Gyaan · Rohiit ki Parakh · AI ki Shakti" / "Rooted in Granth · Verified by Rohiit · Powered by AI") (29 Aug 2026) — INTERNATIONAL PAYMENT
+// Version: 2.6 (11 Oct 2026 — GOOGLE PLAY BILLING, sirf Play Store app ke andar) | v2.5 (1 Oct 2026 — Trikaal Vaani ka core tagline (Rohiit ne chuna): "Granth ka Gyaan · Rohiit ki Parakh · AI ki Shakti" / "Rooted in Granth · Verified by Rohiit · Powered by AI") (29 Aug 2026) — INTERNATIONAL PAYMENT
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
+//
+// CHANGE v2.6 (11 Oct 2026) — GOOGLE PLAY BILLING (Play Store app ke liye)
+//   Rohiit ke 11 Oct ke faisle: (1) button ka look + text same ("Full Hast
+//   Rekha Report — ₹51"), (2) neeche ki line "Secure payment via Google Play.
+//   Instant unlock.", (3) daam same ₹51, (5) app mein PayPal / $7 nahi.
+//   Kab chalta hai: usePlayApp() true — yani NEXT_PUBLIC_PLAY_BILLING=true HO
+//   aur page Play Store app (TWA) ke andar HO. Website par HAMESHA false →
+//   Razorpay, PayPal, runAnalysis — EK LINE NAHI BADLI.
+//   App mein: handlePay() sabse PEHLE Play check karta hai → Google Play sheet
+//   (hast_rekha_51) → purchase token → runAnalysis({ play_purchase_token })
+//   → /api/palmistry/paid-analyze v4.5 Google se verify karke wahi report
+//   banata hai. Sheet band ki = koi galti nahi dikhti.
+//   Gemini: is file mein koi Gemini model naam nahi (3.7 → 3.8 lagu nahi).
 //
 // CHANGE v2.4 (2026-08-29) — PAYPAL FOR VISITORS OUTSIDE INDIA
 //   Razorpay on this account rejects international cards, so foreign
@@ -73,6 +86,8 @@ import { useState, useRef, useCallback, useEffect } from 'react';
 import PayPalCheckout from '@/components/payment/PayPalCheckout';
 import Link from 'next/link';
 import SiteNav from '@/components/layout/SiteNav';
+import { usePlayApp } from '@/components/payment/usePlayApp';                        // v2.6
+import { isPlayBillingAvailable, purchaseWithPlay, PLAY_PRODUCTS } from '@/lib/play-billing'; // v2.6
 
 declare global {
   interface Window { Razorpay: any; }
@@ -296,6 +311,8 @@ export default function HastRekhaClient({ faqs }: { faqs: FAQ[] }) {
   // a visitor outside India is shown PayPal ($7) instead of the ₹51 button.
   // `?intl=1` forces the PayPal view for testing from India; one-way only.
   const [isIndia,    setIsIndia]    = useState<boolean | null>(null);
+  // v2.6 — true ONLY inside the Play Store app; website par hamesha false.
+  const inPlayApp = usePlayApp();
   useEffect(() => {
     let cancelled = false;
     const forced = typeof window !== 'undefined' &&
@@ -374,9 +391,38 @@ export default function HastRekhaClient({ faqs }: { faqs: FAQ[] }) {
     }
   };
 
+  /**
+   * v2.6 — Play Store app checkout (Google Play Billing). Reached ONLY from
+   * handlePay() when the page is inside the Play app. Google Play takes the
+   * money; paid-analyze v4.5 re-verifies the token with Google before analysing
+   * and consumes it only after the report is produced.
+   */
+  const handlePlayPay = async () => {
+    try {
+      const purchase = await purchaseWithPlay(PLAY_PRODUCTS.hast_rekha);
+      if (!purchase.ok) {
+        if (!purchase.cancelled) setError(purchase.error);
+        setStep('upload');
+        return;
+      }
+      await runAnalysis({ play_purchase_token: purchase.purchaseToken });
+    } catch (e: any) {
+      setError(e.message || 'Analysis error');
+      setStep('upload');
+    }
+  };
+
   const handlePay = async () => {
     if (!domPalm) { setError('Pradhan haath (jis se aap likhte hain) ki photo zaroor upload karein'); return; }
     setStep('paying'); setError('');
+
+    // v2.6 — Play Store app: Google Play only. Checked FIRST and returned from,
+    // so the Razorpay code below is unchanged for the website. Re-asked here in
+    // case detection had not finished — Razorpay must never open in the app.
+    if (inPlayApp || await isPlayBillingAvailable()) {
+      await handlePlayPay();
+      return;
+    }
 
     try {
       const orderRes = await fetch('/api/palmistry/order', {
@@ -584,7 +630,7 @@ export default function HastRekhaClient({ faqs }: { faqs: FAQ[] }) {
           )}
 
           {/* CTA — v2.4: currency follows the visitor, not the other way round */}
-          {isIndia === false ? (
+          {isIndia === false && !inPlayApp ? (
             <div>
               {!domPalm && (
                 <p className="text-center text-xs mb-2" style={{ color: '#94a3b8' }}>
@@ -623,7 +669,9 @@ export default function HastRekhaClient({ faqs }: { faqs: FAQ[] }) {
           </div>
 
           <p className="text-center text-slate-600 text-xs mt-4">
-            {isIndia === false
+            {inPlayApp
+              ? 'Secure payment via Google Play. Instant unlock. · Photo sirf analysis ke liye — hamare database mein save nahi hoti · One-time ₹51'
+              : isIndia === false
               ? 'Secure payment via PayPal — or pay by card without a PayPal account · Photo is used only for the analysis and is never stored · One-time $7'
               : 'Secure payment via Razorpay · Photo sirf analysis ke liye — hamare database mein save nahi hoti · One-time ₹51'}
           </p>

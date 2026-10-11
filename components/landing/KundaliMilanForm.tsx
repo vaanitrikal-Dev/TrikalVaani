@@ -1,4 +1,19 @@
 // TRIKAL VAANI - KundaliMilanForm Component
+// v1.7 (11 Oct 2026) — GOOGLE PLAY BILLING, SIRF PLAY STORE APP KE ANDAR.
+//   IR-13 LOCK: Rohiit ne 11 Oct 2026 ko is file ko edit karne ki PERMISSION
+//   di (Play Billing ke liye). Lock iske baad phir se laagu.
+//   Rohiit ke 11 Oct ke faisle: (1) button ka look + text same, sirf provider
+//   ka naam "Google Play", (2) trust line "Secure payment via Google Play.
+//   Instant unlock.", (3) daam same ₹51, (5) app mein PayPal / $ nahi.
+//   Kab chalta hai: NEXT_PUBLIC_PLAY_BILLING=true HO aur page Play Store app
+//   (TWA) ke andar HO (usePlayApp / isPlayBillingAvailable). Website par
+//   inPlayApp HAMESHA false → Razorpay, PayPal, free — sab pehle jaisa.
+//   App mein: Pay dabao → Google Play sheet (milan_51) → purchase token →
+//   /api/verify-milan-payment v1.8 (play_purchase_token + bride/groom) →
+//   server Google se verify karke wahi report banata hai → /milan/<slug>.
+//   409 PLAY_ALREADY_USED aaye to seedha purani report khulti hai.
+//   handleRazorpay checkout, finishAfterPayment, handlePayPalPaid — EK LINE
+//   NAHI BADLI. Gemini: is file mein koi model nahi (3.7 → 3.8 kuch nahi).
 // v1.5 (1 Oct 2026) — EK HI PAID TIER: ₹51 / $5, couple + parent dono, granth
 //   saar + 10 upay (Rohiit: "sirf one paid Tier ka banado 51 only ... 101 and
 //   151 hata do"). Step 3 mein ab do dabbe — Free Preview aur Poora Milan ₹51
@@ -47,6 +62,8 @@ import { useState, useCallback, useRef, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { loadRazorpayScript, openRazorpayCheckout } from "@/lib/razorpay-helper"
 import PayPalCheckout from "@/components/payment/PayPalCheckout"
+import { isPlayBillingAvailable, purchaseWithPlay, PLAY_PRODUCTS } from "@/lib/play-billing" // v1.7
+import { usePlayApp } from "@/components/payment/usePlayApp"                                  // v1.7
 
 // -- Types -------------------------------------------------------------------
 
@@ -203,6 +220,15 @@ const TRUST_BADGES = [
 
 const LOADING_STEPS_PAYMENT = [
   'Razorpay payment verify ho raha hai...',
+  'Bride + Groom kundali compute ho rahi hai...',
+  '36 Guna Ashtakoot calculate ho raha hai...',
+  'Mangal, Nadi, Bhakoot Dosh check ho raha hai...',
+  'Trikaal aapka Milan report taiyaar kar raha hai...',
+]
+
+// v1.7 — Play Store app: wahi kadam, bas sahi provider ka naam.
+const LOADING_STEPS_PLAY = [
+  'Google Play payment verify ho raha hai...',
   'Bride + Groom kundali compute ho rahi hai...',
   '36 Guna Ashtakoot calculate ho raha hai...',
   'Mangal, Nadi, Bhakoot Dosh check ho raha hai...',
@@ -830,6 +856,9 @@ export default function KundaliMilanForm() {
   const [loadingStep,    setLoadingStep]    = useState(0)
   const [paymentLoading, setPaymentLoading] = useState(false)
 
+  // v1.7 — true SIRF Play Store app ke andar. Website par hamesha false.
+  const inPlayApp = usePlayApp()
+
   // v1.4: sirf do — free aur milan_51 (₹51 / $5, couple + parent)
   type PriceTier = 'free' | 'milan_51'
   const [priceTier, setPriceTier] = useState<PriceTier>('milan_51')
@@ -1096,7 +1125,73 @@ export default function KundaliMilanForm() {
     }
   }
 
+  // ── v1.7: Play Store app checkout (Google Play Billing) ───────────────────
+  // Google Play takes the money; /api/verify-milan-payment v1.8 re-verifies
+  // the token with Google, builds the SAME report as after Razorpay, and
+  // consumes the token only after the report is saved. Razorpay / PayPal are
+  // never opened from here.
+  const handlePlayPayment = async () => {
+    if (!validateStep3()) return
+    setApiError(null)
+    setPaymentLoading(true)
+    try {
+      const result = await purchaseWithPlay(PLAY_PRODUCTS.milan)
+      if (!result.ok) {
+        if (!result.cancelled) setApiError(result.error)
+        setPaymentLoading(false)
+        return
+      }
+      setIsSubmitting(true)
+      startLoadingMessages(LOADING_STEPS_PLAY)
+
+      const verifyRes = await fetch('/api/verify-milan-payment', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({
+          ...buildMilanBody(null, false),
+          play_purchase_token: result.purchaseToken,
+        }),
+      })
+      const verifyData = await verifyRes.json().catch(() => ({}))
+
+      // Is payment ki report pehle ban chuki hai — wahi kholo.
+      if (verifyRes.status === 409 && verifyData?.code === 'PLAY_ALREADY_USED' && verifyData?.existingRef) {
+        router.push(`/milan/${verifyData.existingRef}`)
+        return
+      }
+      if (!verifyRes.ok) {
+        setApiError(verifyData.error || 'Payment verification failed. Please try again.')
+        stopLoadingMessages()
+        setIsSubmitting(false)
+        setPaymentLoading(false)
+        return
+      }
+      const paidSlug = verifyData.slug ?? verifyData.milanId
+      if (paidSlug) {
+        router.push(`/milan/${paidSlug}`)
+      } else {
+        setApiError('Payment done but report link missing. Please contact support with your Google Play order ID.')
+        stopLoadingMessages()
+        setIsSubmitting(false)
+        setPaymentLoading(false)
+      }
+    } catch (err: any) {
+      setApiError(err?.message || 'Payment flow error.')
+      stopLoadingMessages()
+      setIsSubmitting(false)
+      setPaymentLoading(false)
+    }
+  }
+
   const handlePaymentSubmit = async () => {
+    // v1.7 — Play Store app: Google Play only. Checked FIRST and returned from.
+    // Re-asked here (not only from the hook) in case detection had not
+    // finished yet — Razorpay must never open inside the Play app.
+    if (inPlayApp || await isPlayBillingAvailable()) {
+      await handlePlayPayment()
+      return
+    }
+
     if (!validateStep3()) return
     setApiError(null)
     setPaymentLoading(true)
@@ -1161,6 +1256,13 @@ export default function KundaliMilanForm() {
   const isLoading = isSubmitting || paymentLoading
 
   const getSubmitLabel = () => {
+    // v1.7 — Play Store app: same text, only the true payment provider named.
+    if (inPlayApp) {
+      if (isSubmitting) return LOADING_STEPS_PLAY[loadingStep] || 'Processing...'
+      if (paymentLoading) return 'Google Play payment khul raha hai...'
+      if (priceTier === 'free') return 'Get Free Preview'
+      return 'Pay ₹51 — Poora Milan (Couple + Parent)'
+    }
     if (paymentLoading) return 'Razorpay popup khul raha hai...'
     if (isLoading) return LOADING_STEPS_PAYMENT[loadingStep] || 'Processing...'
     if (priceTier === 'free')     return 'Get Free Preview'
@@ -1294,8 +1396,8 @@ export default function KundaliMilanForm() {
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                   {([
-                    { key: 'free',     label: 'Free Preview', price: isIndia === false ? '$0' : '₹0', desc: 'Gun + dosh ki jhalak' },
-                    { key: 'milan_51', label: '⭐ Poora Milan', price: isIndia === false ? '$5' : '₹51', desc: 'Couple + Parent dono · Granth saar · 10 upay · PDF' },
+                    { key: 'free',     label: 'Free Preview', price: isIndia === false && !inPlayApp ? '$0' : '₹0', desc: 'Gun + dosh ki jhalak' },
+                    { key: 'milan_51', label: '⭐ Poora Milan', price: isIndia === false && !inPlayApp ? '$5' : '₹51', desc: 'Couple + Parent dono · Granth saar · 10 upay · PDF' },
                   ] as { key: PriceTier; label: string; price: string; desc: string }[]).map(t => (
                     <button
                       key={t.key}
@@ -1437,8 +1539,27 @@ export default function KundaliMilanForm() {
                 />
               </div>
 
+              {/* v1.7 — Play Store app: Google Play trust line (Rohiit, 11 Oct 2026) */}
+              {priceTier !== 'free' && inPlayApp && (
+                <div
+                  role="region"
+                  aria-label="Google Play payment security"
+                  style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    padding: '10px 12px',
+                    background: 'rgba(52,168,83,0.06)',
+                    border: '1px solid rgba(52,168,83,0.18)',
+                    borderRadius: '10px',
+                  }}
+                >
+                  <span style={{ fontSize: '11px', color: '#94A3B8', fontWeight: 600 }}>
+                    🔒 Secure payment via <span style={{ color: '#34A853', fontWeight: 700 }}>Google Play</span>. Instant unlock.
+                  </span>
+                </div>
+              )}
+
               {/* Razorpay Trust Strip - show for any PAID tier */}
-              {priceTier !== 'free' && (
+              {priceTier !== 'free' && !inPlayApp && (
                 <div
                   role="region"
                   aria-label="Razorpay payment security trust signals"
@@ -1512,6 +1633,7 @@ export default function KundaliMilanForm() {
                 onClick={
                   priceTier === 'free'
                     ? handleFreePreview
+                    : inPlayApp ? handlePlayPayment   // v1.7 — Play app: Google Play only
                     : isIndia === false
                       // Razorpay would only reject their card. Send them to the
                       // PayPal buttons instead of opening a checkout that fails.
@@ -1535,7 +1657,7 @@ export default function KundaliMilanForm() {
 
               {/* v2.1 — international checkout. The button above is disabled as
                   a payment control for these visitors; these buttons are it. */}
-              {isIndia === false && priceTier !== 'free' && (
+              {isIndia === false && priceTier !== 'free' && !inPlayApp && (
                 <div ref={paypalRef} style={{ marginTop: 12 }}>
                   <PayPalCheckout
                     productKey={paypalProductKey()}
@@ -1594,7 +1716,9 @@ export default function KundaliMilanForm() {
               Powered by <strong style={{ color: '#475569' }}>Swiss Ephemeris</strong>.
               Ashtakoot from <strong style={{ color: '#475569' }}>Muhurta Chintamani</strong> (Vivah Prakaran), upay from{' '}
               <strong style={{ color: '#475569' }}>BPHS 84</strong>.
-              Payments secured by <strong style={{ color: RAZORPAY_BLUE }}>Razorpay</strong>.
+              Payments secured by {inPlayApp
+                ? <strong style={{ color: '#34A853' }}>Google Play</strong>
+                : <strong style={{ color: RAZORPAY_BLUE }}>Razorpay</strong>}.
             </p>
             <p style={{ color: '#1e293b', fontSize: '10px', margin: 0 }}>
               By Rohiit Gupta, Chief Vedic Architect . trikalvaani.com . 🔱 Mahakaal Ka Ashirwad
@@ -1606,4 +1730,4 @@ export default function KundaliMilanForm() {
   )
 }
 
-// END KundaliMilanForm v1.2 - LOCKED PER IR-13
+// END KundaliMilanForm v1.7 - LOCKED PER IR-13 (11 Oct 2026 edit: Rohiit ki permission se)

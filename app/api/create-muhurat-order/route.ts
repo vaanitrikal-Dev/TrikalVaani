@@ -1,6 +1,24 @@
 // TRIKAL VAANI - Child Birth Muhurat Paid Report - Order Creation API
 // CEO: Rohiit Gupta
 // File: app/api/create-muhurat-order/route.ts
+// VERSION: 1.4 (11 Oct 2026) — GOOGLE PLAY BILLING (sirf Play Store app ke liye)
+//   * Rohiit ke 11 Oct ke faisle: app ke andar ₹51 Google Play se (product
+//     muhurat_51). Request mein `play_purchase_token` ho tabhi naya Play
+//     branch chalta hai — PayPal branch se PEHLE, aur wahin return karta hai.
+//     Token na ho to Razorpay / PayPal BYTE-FOR-BYTE pehle jaisa.
+//   * Play mein paisa pehle hi kat chuka hota hai, isliye ye ek hi call mein:
+//     window scan (wahi buildMuhuratData) → verifyAndClaimPlay (Google se
+//     jaanch + play_purchases claim) → muhurat_orders row (status 'paid') →
+//     muhurat_readings row (slug) — bilkul wahi jo verify-muhurat-payment
+//     Razorpay ke baad banata hai. Report /muhurat/[slug] + /api/muhurat-paid
+//     wahi purane raaste se banti hai.
+//   * Safal → finishPlay(gate, slug) (token consume). Kuch bhi fail →
+//     releasePlay(gate) taaki customer USI payment se dobara koshish kare.
+//   * Same Play order dobara aaye → 409 PLAY_ALREADY_USED + purana slug.
+//   * play_order_id sirf Play rows par likha jaata hai (column migration ke
+//     pehle deploy ho to bhi Razorpay/PayPal rows par asar nahi).
+//   * Daam browser se kabhi nahi — 5100/51 TIERS se, currency gate se.
+//   * Gemini: is file mein koi Gemini model nahi (3.7 → 3.8 lagu nahi).
 // VERSION: 1.3 (30 Sep 2026) — SINGLE ₹51 / $5 TIER + SERVER-PICKED SLOT
 //   * One tier only: muhurat_51 (₹51 India / $5 PayPal). report_101 and
 //     remedies_151 are no longer sold (old rows still readable elsewhere).
@@ -23,6 +41,8 @@ import { createClient } from '@supabase/supabase-js';
 import {
   normaliseWindow, scanWindow, parseTimeTo24h, qualityLabel, pickBackups,
 } from '@/lib/muhurat-tiering';
+import crypto from 'crypto';                                                   // v1.4
+import { verifyAndClaimPlay, finishPlay, releasePlay } from '@/lib/play-billing-server'; // v1.4
 
 // CEO LOCKED pricing (30 Sep 2026): one tier, report + 10 remedies.
 const TIERS: Record<string, { rupees: number; paise: number; label: string }> = {
@@ -106,6 +126,96 @@ export async function POST(req: NextRequest) {
     const userName   = contact.name   ?? body.userName   ?? null;
     const userMobile = contact.mobile ?? body.userMobile ?? null;
     const userEmail  = contact.email  ?? body.userEmail  ?? null;
+
+    // ── v1.4 — GOOGLE PLAY branch (Play Store app only) ──────────────────────
+    // Sirf tab jab request mein play_purchase_token ho. Pehle check hota hai
+    // aur yahin return karta hai — neeche PayPal / Razorpay bilkul nahi badle.
+    if (body.play_purchase_token) {
+      const gate = await verifyAndClaimPlay('muhurat', body.play_purchase_token, 'muhurat_orders');
+      if (!gate.ok) {
+        return NextResponse.json(
+          { error: gate.error, code: gate.code, existingRef: gate.existingRef ?? null },
+          { status: gate.status }
+        );
+      }
+
+      // 1) Order row — already PAID (Google took the money). Amount from TIERS,
+      //    never from the browser. Outside India Google charged its local price:
+      //    rupee columns are NOT NULL, so the rupee equivalent is recorded and
+      //    currency 'PLAY' says it was not rupees (same idea as the PayPal row).
+      const { data: playOrder, error: playDbErr } = await supabase
+        .from('muhurat_orders')
+        .insert({
+          amount_rupees:    tier.rupees,
+          amount_paise:     tier.paise,
+          currency:         gate.currency,
+          tier:             tierKey,
+          language,
+          muhurat_data:     muhurat,
+          user_name:        userName,
+          user_mobile:      userMobile,
+          user_email:       userEmail,
+          status:           'paid',
+          payment_verified: true,
+          paid_at:          new Date().toISOString(),
+          ...(gate ? { play_order_id: gate.orderId } : {}),
+        })
+        .select('id')
+        .single();
+
+      if (playDbErr || !playOrder) {
+        console.error('[Trikal] Muhurat Play order save error:', playDbErr?.message, '| play:', gate.orderId);
+        await releasePlay(gate);
+        return NextResponse.json(
+          { error: 'Payment received but the order could not be saved. Please tap the button again — you will not be charged again.' },
+          { status: 500 }
+        );
+      }
+
+      // 2) Reading row — exactly what verify-muhurat-payment creates after
+      //    Razorpay. The report itself is built by /api/muhurat-paid when
+      //    /muhurat/[slug] opens (and by the paid-recovery cron if needed).
+      const playSlug = `m-${Date.now().toString(36)}-${crypto.randomBytes(4).toString('hex')}`;
+      const { error: playSaveErr } = await supabase
+        .from('muhurat_readings')
+        .insert({
+          order_id:         playOrder.id,
+          slug:             playSlug,
+          tier:             tierKey,
+          language,
+          muhurat_data:     muhurat,
+          vm_data:          null,
+          doshas_data:      null,
+          remedies_data:    null,
+          gemini_narrative: null,
+          geo_answer:       null,
+          pdf_url:          null,
+          is_public:        false,
+        });
+
+      if (playSaveErr) {
+        console.error('[Trikal] Muhurat Play reading save error:', playSaveErr.message, '| play:', gate.orderId);
+        // Orphan order row ko 'failed' — retry naya row banayega.
+        await supabase.from('muhurat_orders').update({ status: 'failed' }).eq('id', playOrder.id);
+        await releasePlay(gate);
+        return NextResponse.json(
+          { error: 'Payment received but the report could not be started. Please tap the button again — you will not be charged again.' },
+          { status: 500 }
+        );
+      }
+
+      await finishPlay(gate, playSlug);
+
+      return NextResponse.json({
+        provider:  'play',
+        success:   true,
+        slug:      playSlug,
+        tier:      tierKey,
+        language,
+        paymentId: gate.orderId,
+        resultUrl: `https://trikalvaani.com/muhurat/${playSlug}`,
+      });
+    }
 
     // ── PayPal branch (v1.2) — international ─────────────────────────────────
     // Returns before the Razorpay code, which is unreachable for these.
@@ -235,3 +345,4 @@ export async function POST(req: NextRequest) {
     );
   }
 }
+// END — app/api/create-muhurat-order/route.ts v1.4

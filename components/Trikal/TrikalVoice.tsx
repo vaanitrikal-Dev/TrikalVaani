@@ -5,6 +5,30 @@
  * TRIKAL VAANI — Trikaal Voice Widget
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: components/Trikal/TrikalVoice.tsx
+ * VERSION: 3.6 (11 Oct 2026) — GOOGLE PLAY BILLING, SIRF PLAY STORE APP KE ANDAR
+ *   Rohiit ne 11 Oct 2026 ko locked files edit karne ki permission di.
+ *   Rohiit ke faisle: button ka look + text same, provider ka naam "Google
+ *   Play", trust line "Secure payment via Google Play. Instant unlock.",
+ *   daam same (₹11 / ₹51 / ₹101), app mein PayPal/dollar nahi.
+ *   App mein (usePlayApp() = true):
+ *     - pricing screen ka ALAG Play block — wahi 3 pack buttons, ₹ mein.
+ *       Tap → Google Play sheet (voice_1q_11 / voice_5q_51 / voice_12q_101)
+ *       → token → /api/verify-voice-pack (play_purchase_token) → server
+ *       Google se verify karke voice_packs mein 'active' row banata hai —
+ *       bilkul wahi entitlement jo Razorpay ke baad milta hai.
+ *     - token localStorage 'trikal_voice_play_pending' mein tab tak rehta
+ *       hai jab tak server final haan/na na bole — activation atke to widget
+ *       agli baar khulte hi wahi payment dobara activate karta hai (dobara
+ *       paisa nahi; server ek Play order par ek hi pack banata hai).
+ *     - BirthForm v10.8 ka ₹11 Voice (app) 'trikal-voice:play-paid' event
+ *       bhejta hai; ye widget khul kar wahi activation chalata hai.
+ *   Website par: pricing block, handleBuyPack ka Razorpay code, PayPal,
+ *   activatePack — sab pehle jaisa. Badli hui purani lines: sirf (1)
+ *   pricing ki intro line mein `&& !inPlayApp`, (2) pricing block ki shart
+ *   `isIndia === null` ke aage ek Play shakha, (3) trust line ke ternary ke
+ *   aage Play shakha, (4) handleBuyPack ke shuru mein Play guard (naya code,
+ *   flag band ho to kuch await bhi nahi hota). Sab website par false.
+ *   Gemini: is file mein koi Gemini model nahi (3.7 → 3.8 lagu nahi).
  * VERSION: 3.5 (19 Sep 2026) — CLOSED PILL RESTYLED VIOLET
  *   WHY: the pill was gold on a gold site, so it read as decoration rather
  *   than as a product. Violet is far from the site's gold AND from the
@@ -110,6 +134,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import PayPalCheckout from '@/components/payment/PayPalCheckout';
+import { usePlayApp } from '@/components/payment/usePlayApp';                        // v3.6
+import { isPlayBillingAvailable, playBillingFlagOn, purchaseWithPlay, PLAY_PRODUCTS } from '@/lib/play-billing'; // v3.6
 
 const GOLD       = '#D4AF37';
 const GOLD_LIGHT = '#F5D76E';
@@ -135,6 +161,33 @@ const PACKS: Pack[] = [
   { id: 'p51',  price: 51,  usdLabel: '$4', questions: 5,  validityDays: 7,  label: '₹51 — Sapt Darshan',   usdName: '$4 — Sapt Darshan',  sub: '5 questions • 7 days'  },
   { id: 'p101', price: 101, usdLabel: '$7', questions: 12, validityDays: 30, label: '₹101 — Trikaal Bhakt', usdName: '$7 — Trikaal Bhakt', sub: '12 questions • 30 days' },
 ];
+
+// v3.6 — Google Play (Play Store app only). Pack -> approved Play product.
+const PLAY_KEY_FOR_PACK = { p11: 'voice_1q', p51: 'voice_5q', p101: 'voice_12q' } as const;
+// Paid-but-not-yet-activated Play token: { token, packId }. Cleared only when
+// the server gives a final answer (activated / already used / rejected).
+const PLAY_PENDING_KEY = 'trikal_voice_play_pending';
+// Fired by BirthForm v10.8 (₹11 Voice inside the app) after Google Play paid.
+export const VOICE_PLAY_PAID_EVENT = 'trikal-voice:play-paid';
+
+/**
+ * v3.6 — used by BirthForm v10.8 (Play Store app, ₹11 Voice tier) AFTER Google
+ * Play has returned a purchase token for voice_1q_11. Saves the token as a
+ * pending ₹11 pack (so it survives a reload) and wakes this widget, which
+ * activates it on its own session via /api/verify-voice-pack and opens the
+ * record flow with the birth details already filled. Never throws.
+ */
+export function handOffPlayVoicePurchase(
+  purchaseToken: string,
+  form: { name: string; dob: string; tob: string; pob: string },
+): void {
+  try {
+    localStorage.setItem(PLAY_PENDING_KEY, JSON.stringify({ token: purchaseToken, packId: 'p11' }));
+  } catch {}
+  try {
+    window.dispatchEvent(new CustomEvent(VOICE_PLAY_PAID_EVENT, { detail: { form } }));
+  } catch {}
+}
 
 declare global {
   interface Window {
@@ -557,6 +610,14 @@ export default function TrikalVoice() {
   };
 
   const handleBuyPack = async (pack: Pack) => {
+    // v3.6 — Play Store app: Google Play only, Razorpay must never open there.
+    // Checked FIRST and returned from. On the website the switch
+    // NEXT_PUBLIC_PLAY_BILLING is off, so playBillingFlagOn() is false and
+    // nothing is even awaited — the code below runs exactly as before.
+    if (playBillingFlagOn() && await isPlayBillingAvailable()) {
+      await handlePlayBuyPack(pack);
+      return;
+    }
     // v3.3 — one tap, one order. The ref is checked (not the state) because a
     // second tap can land before React has re-rendered the disabled button.
     if (buyingRef.current) return;
@@ -624,6 +685,167 @@ export default function TrikalVoice() {
       setError('Payment start nahi ho paya. Dobara try karein.');
     }
   };
+
+  // ══════════════════════════════════════════════════════════════
+  // v3.6 — GOOGLE PLAY (Play Store app only). Nothing below runs on the
+  // website: usePlayApp() is false there, no pending Play token ever exists,
+  // and nobody fires VOICE_PLAY_PAID_EVENT.
+  // ══════════════════════════════════════════════════════════════
+  const inPlayApp = usePlayApp();
+  const [playActivating, setPlayActivating] = useState(false);
+  const playActivatingRef = useRef(false);
+
+  const readPlayPending = (): { token: string; packId: Pack['id'] } | null => {
+    try {
+      const p = JSON.parse(localStorage.getItem(PLAY_PENDING_KEY) || 'null');
+      return p && typeof p.token === 'string' && p.token ? p : null;
+    } catch { return null; }
+  };
+  const clearPlayPending = () => { try { localStorage.removeItem(PLAY_PENDING_KEY); } catch {} };
+
+  /**
+   * Google Play has taken the money. The server re-verifies the token with
+   * Google and creates the ACTIVE voice_packs row on this session — the same
+   * row the Razorpay path activates, so record/consume/balance work unchanged.
+   * silent = background retry on page load: balance only, no screen change.
+   */
+  const activatePlayPending = async (silent: boolean) => {
+    if (playActivatingRef.current) return;
+    const pending = readPlayPending();
+    if (!pending) return;
+    const pack = PACKS.find(p => p.id === pending.packId);
+    if (!pack) { clearPlayPending(); return; }
+
+    playActivatingRef.current = true;
+    setPlayActivating(true);
+    if (!silent) { setError(''); setActivePack(pack); }
+    try {
+      let res: Response | null = null;
+      for (let attempt = 1; attempt <= 3; attempt++) {
+        try {
+          res = await fetch('/api/verify-voice-pack', {
+            method : 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body   : JSON.stringify({
+              play_purchase_token: pending.token,
+              packId             : pack.id,
+              sessionId          : sessionIdRef.current,
+            }),
+          });
+          if (res.ok || res.status < 500) break;   // a 4xx is a real answer
+        } catch (e) {
+          console.error(`[TrikalVoice] Play verify attempt ${attempt} threw:`, e);
+          res = null;
+        }
+        if (attempt < 3) await new Promise(r => setTimeout(r, attempt * 1500));
+      }
+      const data = res ? await res.json().catch(() => ({})) : {};
+
+      if (res?.ok) {
+        clearPlayPending();
+        setBalance(data.balance);
+        setValidUntil(data.validUntil);
+        localStorage.setItem('trikal_voice_balance',     String(data.balance));
+        localStorage.setItem('trikal_voice_valid_until', data.validUntil);
+        if (!silent) setStage('form');
+        return;
+      }
+
+      // This payment already made a pack earlier (e.g. the answer was lost on
+      // the way back). Read the balance the server holds for this session.
+      if (res?.status === 409 && data?.code === 'PLAY_ALREADY_USED') {
+        clearPlayPending();
+        const g = await fetch(`/api/voice-pack-order?sessionId=${encodeURIComponent(sessionIdRef.current)}`)
+          .then(r => r.json()).catch(() => null);
+        if (g && g.balance > 0 && g.validUntil) {
+          setBalance(g.balance);
+          setValidUntil(g.validUntil);
+          localStorage.setItem('trikal_voice_balance',     String(g.balance));
+          localStorage.setItem('trikal_voice_valid_until', g.validUntil);
+          if (!silent) setStage('form');
+          return;
+        }
+        if (!silent) setError('Ye Google Play payment pehle hi istemaal ho chuka hai.');
+        return;
+      }
+
+      // Google says the token is not a valid, unused purchase. Nothing to
+      // retry. An unconsumed Play purchase is refunded by Google itself.
+      if (res && (data?.code === 'PLAY_NOT_VALID' || data?.code === 'PLAY_BAD_REQUEST')) {
+        clearPlayPending();
+        if (!silent) setError(data.error || 'Google Play payment verify nahi hua.');
+        return;
+      }
+
+      // Network / server / PLAY_IN_PROGRESS / PLAY_DISABLED: keep the token.
+      // It is retried on the next open — the customer never pays twice.
+      console.error('[TrikalVoice] Play activation pending', { status: res?.status ?? 0, code: data?.code ?? '' });
+      if (!silent) {
+        setError(
+          (data?.code === 'PLAY_IN_PROGRESS' ? (data.error + ' ') : '') +
+          'Payment ho gaya but activation atak gaya. Paisa safe hai — ' +
+          'Trikaal Voice thodi der mein dobara kholein, apne aap activate ho jayega.'
+        );
+      }
+    } finally {
+      playActivatingRef.current = false;
+      setPlayActivating(false);
+    }
+  };
+
+  /** Pack tapped inside the Play Store app. */
+  const handlePlayBuyPack = async (pack: Pack) => {
+    if (buyingRef.current || playActivatingRef.current) return;
+    buyingRef.current = pack.id;
+    setBuying(pack.id);
+    setError('');
+    setActivePack(pack);
+    try {
+      const result = await purchaseWithPlay(PLAY_PRODUCTS[PLAY_KEY_FOR_PACK[pack.id]]);
+      if (!result.ok) {
+        if (!result.cancelled) setError(result.error);   // cancelled: show nothing
+        return;
+      }
+      // Saved BEFORE the server call, so a dropped connection never loses it.
+      try {
+        localStorage.setItem(PLAY_PENDING_KEY, JSON.stringify({ token: result.purchaseToken, packId: pack.id }));
+      } catch {}
+    } finally {
+      buyingRef.current = null;
+      setBuying(null);
+    }
+    await activatePlayPending(false);
+  };
+
+  // Page load: a paid-but-unactivated Play token from last time is
+  // activated quietly in the background.
+  useEffect(() => {
+    if (readPlayPending()) activatePlayPending(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Pricing screen opened while a Play token is still waiting → retry it.
+  useEffect(() => {
+    if (stage === 'pricing' && readPlayPending()) activatePlayPending(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [stage]);
+
+  // BirthForm v10.8 (₹11 Voice inside the app) has already taken the Play
+  // payment and saved the token under PLAY_PENDING_KEY. Open the widget,
+  // carry over the birth details they just typed, and activate.
+  useEffect(() => {
+    const onPlayPaid = (ev: Event) => {
+      const f = (ev as CustomEvent).detail?.form as Partial<BirthForm> | undefined;
+      if (f && f.name && f.dob && f.tob && f.pob) {
+        setForm({ name: f.name, dob: f.dob, tob: f.tob, pob: f.pob });
+      }
+      setStage('pricing');
+      activatePlayPending(false);
+    };
+    window.addEventListener(VOICE_PLAY_PAID_EVENT, onPlayPaid);
+    return () => window.removeEventListener(VOICE_PLAY_PAID_EVENT, onPlayPaid);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleOpen = () => {
     if (balance > 0 && new Date(validUntil) > new Date()) setStage('form');
@@ -746,11 +968,42 @@ export default function TrikalVoice() {
           {stage === 'pricing' && (
             <>
               <p style={{ color: '#fff', fontSize: 14, lineHeight: 1.6, marginBottom: 14 }}>
-                {isIndia === false
+                {isIndia === false && !inPlayApp /* v3.6 — app: ₹ only */
                   ? 'Ask Trikaal in your own voice from $1 — and hear the answer in Trikaal\u2019s voice.'
                   : '\u20B911 में अपनी आवाज़ से सवाल पूछें — Trikaal अपनी आवाज़ में जवाब देंगे।'}
               </p>
-              {isIndia === null ? (
+              {inPlayApp ? (
+                // v3.6 — Play Store app: Google Play only. Same three buttons,
+                // same look and text, ₹ prices (Google localises at checkout).
+                // No PayPal, no Razorpay here.
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  {PACKS.map(pack => (
+                    <button
+                      key={pack.id}
+                      onClick={() => handlePlayBuyPack(pack)}
+                      disabled={buying !== null || playActivating}
+                      style={{
+                        background  : `linear-gradient(135deg, ${GOLD_DARK}22, ${GOLD}11)`,
+                        border      : `1px solid ${GOLD}55`,
+                        borderRadius: 12,
+                        padding     : '14px 16px',
+                        textAlign   : 'left',
+                        cursor      : buying !== null || playActivating ? 'not-allowed' : 'pointer',
+                        color       : '#fff',
+                        opacity     : (buying !== null && buying !== pack.id) || (playActivating && activePack?.id !== pack.id) ? 0.45 : 1,
+                        transition  : 'opacity .15s ease',
+                      }}
+                    >
+                      <div style={{ color: GOLD, fontSize: 16, fontWeight: 700 }}>
+                        {buying === pack.id ? 'Opening…' : playActivating && activePack?.id === pack.id ? 'Activating…' : pack.label}
+                      </div>
+                      <div style={{ color: '#bbb', fontSize: 12, marginTop: 2 }}>
+                        {buying === pack.id ? 'Payment window khul raha hai' : playActivating && activePack?.id === pack.id ? 'Payment verify ho raha hai' : pack.sub}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              ) : isIndia === null ? (
                 // v3.4 — geo not answered yet. Until 3.3 this fell through to
                 // the RUPEE branch, because `null === false` is false. On a
                 // slow connection a foreign visitor could tap a rupee pack and
@@ -842,7 +1095,9 @@ export default function TrikalVoice() {
                 </div>
               )}
               <p style={{ color: '#777', fontSize: 11, textAlign: 'center', marginTop: 14 }}>
-                {isIndia === false
+                {inPlayApp /* v3.6 — Rohiit's approved app trust line */
+                  ? 'Secure payment via Google Play. Instant unlock. • By Rohiit Gupta, Chief Vedic Architect'
+                  : isIndia === false
                   ? '100% secure • PayPal, or pay by card without a PayPal account • By Rohiit Gupta, Chief Vedic Architect'
                   : '100% secure • Razorpay • By Rohiit Gupta, Chief Vedic Architect'}
               </p>

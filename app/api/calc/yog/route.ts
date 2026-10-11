@@ -1,5 +1,15 @@
 // ============================================================
 // File: app/api/calc/yog/route.ts
+// Version: v4.7 — GOOGLE PLAY BILLING (Play Store app) — 11 Oct 2026
+//   * Naya field `play_purchase_token`. Ye aaye to ALAG Play branch
+//     (handlePlay) chalta hai aur wahin se lautta hai — Razorpay / PayPal /
+//     muft ka raasta EK LINE NAHI BADLA (sirf ek `if` jo token na ho to
+//     chhua hi nahi jaata).
+//   * Play branch: verifyAndClaimPlay('yog', token) → Google se jaanch +
+//     play_purchases mein claim → runYog(paid) → safal par finishPlay
+//     (fulfilled + consume), fail par releasePlay (wahi payment dobara chale).
+//   * Ek Play order = ek report. Wahi token dobara = 409 PLAY_ALREADY_USED.
+//   * Purane changelog mein gemini-3.8-flash → gemini-3.8-flash (3.7 band).
 // Version: v4.6 — DIMAAG lib/calc-core/yog.ts mein gaya (MCP programme B0) — 4 Oct 2026
 //   * VM kundali, granth, score aur free/paid aakaar ab runYog() mein —
 //     website aur VM ka MCP dono EK hi file chalate hain.
@@ -96,7 +106,7 @@
 //      to it would put them all in the blast radius of a santan-only change.
 //      scoreSantan(data, timeline) touches nothing they use.
 //   2. GEMINI WRITES THE SUMMARY — lib/santan-summary.ts. Free 75 words on
-//      gemini-3.7-flash, paid 500 on gemini-3.8-flash. Gemini receives ONLY
+//      gemini-3.8-flash, paid 500 on gemini-3.8-flash. Gemini receives ONLY
 //      the engine's `facts` object, never the chart, and its draft is validated
 //      before it is returned. Santan only; the other three types never call it.
 //   3. FREE SHAPE for santan is its own function. The generic freeShape() sells
@@ -166,6 +176,7 @@ import type { YogType, YogBirth, VmCaller } from '@/lib/calc-core/yog';
 import { getProduct } from '@/lib/pricing-intl';
 import { getPayPalOrder, isCaptureValid } from '@/lib/paypal-server';
 import { logUsage, usageBirthFields, usageContextFromRequest } from '@/lib/usage-log';
+import { verifyAndClaimPlay, finishPlay, releasePlay } from '@/lib/play-billing-server'; // v4.7
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -189,6 +200,8 @@ interface Body {
   razorpay_payment_id?: string;
   razorpay_signature?: string;
   paypal_order_id?: string;
+  // v4.7 — Google Play (Play Store app). Server Google se khud jaanchta hai.
+  play_purchase_token?: string;
 }
 
 function bad(msg: string, status = 400) {
@@ -235,6 +248,58 @@ async function isPaid(b: Body): Promise<boolean> {
   return false;
 }
 
+// ── v4.7: GOOGLE PLAY branch (Play Store app only) ──────────────────────────
+// Sirf tab chalta hai jab request mein play_purchase_token ho. Razorpay /
+// PayPal / muft requests yahan kabhi nahi aate. Daam browser se kabhi nahi
+// liya jaata — Google batata hai ki 'yog_51' sach mein khareeda gaya.
+async function handlePlay(req: NextRequest, b: Body, type: YogType): Promise<NextResponse> {
+  const gate = await verifyAndClaimPlay('yog', b.play_purchase_token, 'calc_yog');
+  if (!gate.ok) {
+    return NextResponse.json(
+      { error: gate.error, code: gate.code, existingRef: gate.existingRef ?? null },
+      { status: gate.status },
+    );
+  }
+
+  let out: Awaited<ReturnType<typeof runYog>>;
+  try {
+    out = await runYog({ type, birth: b as YogBirth, paid: true, vm: vmViaCallVM });
+  } catch (e) {
+    console.error('[yog] Play runYog threw:', e);
+    await releasePlay(gate);
+    return NextResponse.json({ error: 'Server error' }, { status: 500 });
+  }
+  if (!out.ok) {
+    await releasePlay(gate);
+    return NextResponse.json({ error: out.error }, { status: out.status });
+  }
+
+  const sessionId = `yog_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+  await finishPlay(gate, sessionId);
+  console.log(`[yog] PAID unlock | type:${type} | via:play | order:${gate.orderId}`);
+
+  const { full, granth } = out.meta;
+  try {
+    await logUsage({
+      ...usageContextFromRequest(req),
+      ...usageBirthFields(b as any),
+      product_slug : `calc-yog-${type}`,
+      product_name : `Yog Calculator (${type})`,
+      product_type : 'calculator',
+      tier         : 'paid',
+      result_meta  : {
+        score  : (full as any)?.score ?? null,
+        band   : (full as any)?.band ?? null,
+        faisla : granth?.faisla?.faisla ?? null,
+        play_order_id : gate.orderId,
+      },
+    });
+  } catch { /* logging must never break the calculator */ }
+
+  const { success, type: t, paid: p, ...rest } = out.body;
+  return NextResponse.json({ success, type: t, paid: p, sessionId, ...rest });
+}
+
 // ── Route ────────────────────────────────────────────────────────────────────
 
 export async function POST(req: NextRequest) {
@@ -248,6 +313,9 @@ export async function POST(req: NextRequest) {
 
     const birthErr = yogBirthError(b as Partial<YogBirth>);
     if (birthErr) return bad(birthErr);
+
+    // v4.7 — Google Play: ALAG branch, pehle jaancha jaata hai aur wahin lautta hai.
+    if (b.play_purchase_token) return await handlePlay(req, b, type);
 
     const paid = await isPaid(b);
 

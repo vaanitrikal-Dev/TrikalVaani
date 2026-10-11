@@ -2,6 +2,16 @@
 
 // ============================================================
 // File: components/calculators/YogCalculator.tsx
+// Version: v4.8 — GOOGLE PLAY BILLING, SIRF PLAY STORE APP KE ANDAR (11 Oct 2026)
+//   * Rohiit ke faisle: button ka look + text same ("Poori report kholein — ₹51"),
+//     neeche line "Secure payment via Google Play. Instant unlock.", daam same,
+//     app mein PayPal / $ nahi.
+//   * App mein: Google Play sheet (yog_51) → purchase token → /api/calc/yog
+//     `play_purchase_token` (route v4.7 Google se khud jaanchta hai).
+//   * payWithRazorpay ke upar ek guard: app mein Razorpay KABHI nahi khulta
+//     (detection pehle khatam na hua ho tab bhi).
+//   * Website par usePlayApp() hamesha false → Razorpay, PayPal, muft — sab
+//     BYTE-FOR-BYTE pehle jaisa. Gemini ka is file mein koi naam nahi.
 // Version: v4.7 — life-span (Ayushya): band card BINA score, teen jode table, maraka chips, upay; POORA MUFT (22 Sep 2026)
 // Version: v4.6 — 💍 jawab ab /api/calc/vivah-jawab par (ad-blocker "feedback" URL rokta tha — request server tak nahi pahunchti thi) (22 Sep 2026)
 // Version: v4.5 — 💍 feedback: save fail ho to "Dhanyavaad" NAHI, saaf sandesh + dobara button (pehle galti chupchaap nigal li jaati thi) (22 Sep 2026)
@@ -179,6 +189,8 @@ import Link from 'next/link';
 import { loadRazorpayScript, openRazorpayCheckout } from '@/lib/razorpay-helper';
 import PayPalCheckout, { type PayPalProof } from '@/components/payment/PayPalCheckout';
 import ShareButtons from '@/components/result/ShareButtons';
+import { usePlayApp } from '@/components/payment/usePlayApp';                       // v4.8
+import { isPlayBillingAvailable, purchaseWithPlay, PLAY_PRODUCTS } from '@/lib/play-billing'; // v4.8
 
 const GOLD = '#D4AF37';
 const GOLD_RGBA = (a: number) => `rgba(212,175,55,${a})`;
@@ -1042,7 +1054,31 @@ export default function YogCalculator({ config }: { config: YogCalculatorConfig 
     setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 80);
   };
 
+  // ── v4.8: Google Play (Play Store app only) ────────────────────────────────
+  // Google Play paisa leta hai; /api/calc/yog v4.7 token Google se dobara
+  // jaanch kar hi report kholta hai. Daam Play Console tay karta hai (₹51).
+  const inPlayApp = usePlayApp();
+  const payWithPlay = async () => {
+    setApiError(null);
+    setPaying(true);
+    try {
+      const result = await purchaseWithPlay(PLAY_PRODUCTS.yog);
+      if (!result.ok) {
+        if (!result.cancelled) setApiError(result.error);
+        setPaying(false);
+        return;
+      }
+      await fetchPaid({ play_purchase_token: result.purchaseToken });
+    } catch {
+      setApiError('Payment ho gaya par report khul nahi payi. Support se baat karein — dobara payment na karein.');
+    }
+    setPaying(false);
+  };
+
   const payWithRazorpay = async () => {
+    // v4.8 — Play Store app mein Razorpay kabhi nahi (Google policy). Pehle
+    // jaancho aur wahin lauto; website par ye hamesha false hai.
+    if (inPlayApp || await isPlayBillingAvailable()) { await payWithPlay(); return; }
     setApiError(null);
     setPaying(true);
     try {
@@ -1423,7 +1459,19 @@ export default function YogCalculator({ config }: { config: YogCalculatorConfig 
                 )}
               </ul>
 
-              {isIndia === false ? (
+              {inPlayApp ? (
+                /* v4.8 — Play Store app: wahi button, wahi ₹51; sirf provider ka sach naam */
+                <div className="text-center">
+                  <button onClick={payWithPlay} disabled={paying}
+                    className="inline-block px-7 py-3 rounded-lg font-semibold text-sm disabled:opacity-50"
+                    style={{ background: GOLD, color: '#0B0F1A' }}>
+                    {paying ? 'Ruko…' : 'Poori report kholein — ₹51'}
+                  </button>
+                  <p className="text-xs mt-2 m-0" style={{ color: '#64748b' }}>
+                    Secure payment via Google Play. Instant unlock.
+                  </p>
+                </div>
+              ) : isIndia === false ? (
                 <PayPalCheckout
                   productKey="yog"
                   onPaid={onPayPalPaid}

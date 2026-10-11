@@ -1,7 +1,18 @@
 'use client';
 
-// 🔱 TRIKAAL VAANI | app/swapna/reading/SwapnaReadingForm.tsx | v1.1 (29 Aug 2026)
+// 🔱 TRIKAAL VAANI | app/swapna/reading/SwapnaReadingForm.tsx | v1.2 (11 Oct 2026)
 // Owner: Rohiit Gupta, Chief Vedic Architect
+//
+// v1.2 (11 Oct 2026) — GOOGLE PLAY BILLING, SIRF PLAY STORE APP KE ANDAR.
+//   BirthForm v10.7 jaisa hi. App mein (usePlayApp() = true) Pay button
+//   Google Play sheet kholta hai → purchase token → /api/predict ko
+//   `playVerification: { product_id: 'deep_reading_51', purchase_token }`
+//   (predictionTier 'paid' — predict v16.2 ka Play gate yahi maangta hai).
+//   App mein PayPal/$7 nahi dikhta, ₹51 wala button hi (text same), trust line
+//   "Secure payment via Google Play. Instant unlock.". 409 PLAY_ALREADY_USED
+//   aaye to purani report khulti hai. Website par inPlayApp HAMESHA false →
+//   Razorpay, PayPal, create-order, verify-payment — sab pehle jaisa.
+//   Gemini: is file mein koi model naam nahi — kuch nahi badla.
 //
 // v1.1 — INTERNATIONAL PAYMENT. Visitors outside India see PayPal at $7
 // instead of the ₹51 Razorpay button; Razorpay on this account rejects
@@ -21,6 +32,8 @@ import { useRouter } from 'next/navigation';
 import CityInput from '@/components/calculators/CityInput';
 import { loadRazorpayScript, openRazorpayCheckout } from '@/lib/razorpay-helper';
 import PayPalCheckout from '@/components/payment/PayPalCheckout';
+import { usePlayApp } from '@/components/payment/usePlayApp';                        // v1.2
+import { isPlayBillingAvailable, purchaseWithPlay, PLAY_PRODUCTS } from '@/lib/play-billing'; // v1.2
 
 type Lang = 'english' | 'hindi' | 'hinglish';
 interface DreamCtx { dream: string; meaning: string; symbol: string; language: Lang; }
@@ -71,6 +84,9 @@ export default function SwapnaReadingForm() {
   const [busy, setBusy] = useState(false);
   const [analyzing, setAnalyzing] = useState(false);
   const [step, setStep] = useState(0);
+  // v1.2 — true SIRF Play Store app ke andar. Upar rakha hai (early return se
+  // pehle) taaki har render mein hooks ki ginti same rahe.
+  const inPlayApp = usePlayApp();
 
   useEffect(() => {
     if (!analyzing) return;
@@ -164,6 +180,7 @@ export default function SwapnaReadingForm() {
   async function generateReading(payment: {
     paymentVerification?: any;
     paypalVerification?: any;
+    playVerification?: any;   // v1.2 — sirf Play Store app
   }) {
     setAnalyzing(true);
 
@@ -181,6 +198,7 @@ export default function SwapnaReadingForm() {
       predictionTier: 'paid',
       paymentVerification: payment.paymentVerification ?? null,
       paypalVerification:  payment.paypalVerification ?? null,
+      ...(payment.playVerification ? { playVerification: payment.playVerification } : {}), // v1.2
       birthData: {
         name: name.trim(), dob,
         tob: unknownTime ? '12:00' : tob,
@@ -204,6 +222,15 @@ export default function SwapnaReadingForm() {
     });
     const data = await predRes.json().catch(() => ({}));
     if (!predRes.ok) {
+      // v1.2 — sirf Play: is payment ki report pehle ban chuki hai (predict
+      // v16.2 ka 409). Nayi report nahi, wahi purani khol do.
+      if (predRes.status === 409 && data?.code === 'PLAY_ALREADY_USED' && typeof data?.reportUrl === 'string') {
+        try {
+          try { sessionStorage.removeItem('tv_swapna_dream'); } catch { /* ignore */ }
+          router.push(new URL(data.reportUrl).pathname);
+          return;
+        } catch { /* galat URL — neeche wali normal galti dikhegi */ }
+      }
       setAnalyzing(false);
       setErr((data && data.error) || 'Reading could not be generated. Your payment is safe — please contact support.');
       setBusy(false); return;
@@ -231,7 +258,39 @@ export default function SwapnaReadingForm() {
     }
   }
 
+  /**
+   * v1.2 — Play Store app checkout (Google Play Billing). Sirf pay() ke shuru
+   * wale Play check se aata hai. Google paisa leta hai; /api/predict v16.2
+   * token Google se verify karta hai aur report save hone ke baad consume.
+   */
+  async function payWithPlay() {
+    const v = validate();
+    if (v) { setErr(v); return; }
+    setErr(''); setBusy(true);
+    try {
+      const result = await purchaseWithPlay(PLAY_PRODUCTS.deep);
+      if (!result.ok) {
+        // cancelled = customer ne sheet khud band ki — koi galti nahi dikhani.
+        if (!result.cancelled) setErr(result.error);
+        setBusy(false); return;
+      }
+      await generateReading({
+        playVerification: { product_id: PLAY_PRODUCTS.deep, purchase_token: result.purchaseToken },
+      });
+    } catch (e: any) {
+      setAnalyzing(false);
+      setErr(e?.message || 'Something went wrong. Your payment is safe — please contact support.');
+      setBusy(false);
+    }
+  }
+
   async function pay() {
+    // v1.2 — Play Store app: Google Play only. Pehle check, phir return —
+    // neeche ka Razorpay code website ke liye bilkul same. Detection abhi
+    // poori na hui ho to bhi yahan dobara poocha jaata hai: app mein Razorpay
+    // kabhi nahi khulna chahiye.
+    if (inPlayApp || await isPlayBillingAvailable()) { await payWithPlay(); return; }
+
     const v = validate();
     if (v) { setErr(v); return; }
     setErr(''); setBusy(true);
@@ -343,8 +402,8 @@ export default function SwapnaReadingForm() {
           ⏳ Your personal reading is written live against your chart — it takes about <b style={{ color: C.s3 }}>60 seconds</b> after payment.
         </p>
 
-        {/* v1.1 — currency follows the visitor. */}
-        {isIndia === false ? (
+        {/* v1.1 — currency follows the visitor. v1.2 — Play app mein PayPal nahi, ₹51 button hi. */}
+        {isIndia === false && !inPlayApp ? (
           <div style={{ marginTop: 6 }}>
             <PayPalCheckout
               productKey="swapna"
@@ -370,7 +429,9 @@ export default function SwapnaReadingForm() {
         )}
 
         <p style={{ textAlign: 'center', fontSize: 11.5, color: C.s5, marginTop: 2 }}>
-          {isIndia === false
+          {inPlayApp
+            ? '🔒 One-time ₹51 · Secure payment via Google Play. Instant unlock. · Read against your real Swiss Ephemeris chart'
+            : isIndia === false
             ? '🔒 One-time $7 · Secured by PayPal, or pay by card without a PayPal account · Read against your real Swiss Ephemeris chart'
             : '🔒 One-time ₹51 · Secured by Razorpay · Read against your real Swiss Ephemeris chart'}
         </p>
@@ -378,3 +439,4 @@ export default function SwapnaReadingForm() {
     </div>
   );
 }
+// END — app/swapna/reading/SwapnaReadingForm.tsx v1.2

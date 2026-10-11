@@ -2,8 +2,9 @@
  * ============================================================
  * TRIKAL VAANI — Google Play Billing (BROWSER / APP side)
  * CEO & Chief Vedic Architect: Rohiit Gupta
- * File: lib/play-billing.ts   (NEW FILE)
- * VERSION: 1.0 (11 Oct 2026)
+ * File: lib/play-billing.ts
+ * VERSION: 1.1 (11 Oct 2026) — saare approved product IDs (PLAY_PRODUCTS).
+ *   v1.0 ke exports (BirthForm v10.7 jo use karta hai) BILKUL WAISE HI hain.
  * SIGNED: ROHIIT GUPTA, CEO
  * ============================================================
  * KYA KARTA HAI
@@ -27,6 +28,21 @@
 export const PLAY_BILLING_METHOD = 'https://play.google.com/billing';
 
 export const PLAY_PRODUCT_DEEP = 'deep_reading_51'; // ₹51 Deep Reading
+
+// Rohiit ne 11 Oct 2026 ko approve kiye. lib/play-billing-server.ts ke
+// PLAY_PRODUCT_IDS se HUBAHU milne chahiye (server wahi verify karta hai).
+export const PLAY_PRODUCTS = {
+  deep:       'deep_reading_51',
+  voice_1q:   'voice_1q_11',
+  voice_5q:   'voice_5q_51',
+  voice_12q:  'voice_12q_101',
+  hast_rekha: 'hast_rekha_51',
+  milan:      'milan_51',
+  muhurat:    'muhurat_51',
+  yog:        'yog_51',
+  karmic:     'karmic_101',
+  upay:       'upay_51',
+} as const;
 
 export function playBillingFlagOn(): boolean {
   return process.env.NEXT_PUBLIC_PLAY_BILLING === 'true';
@@ -77,4 +93,4 @@ export async function purchaseWithPlay(productId: string): Promise<PlayPurchaseR
     return { ok: false, cancelled: false, error: 'Google Play payment could not be completed. Please try again.' };
   }
 }
-// END — lib/play-billing.ts v1.0
+// END — lib/play-billing.ts v1.1

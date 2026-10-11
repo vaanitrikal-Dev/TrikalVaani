@@ -2,7 +2,13 @@
  * TRIKAAL VAANI — trikalvaani.com
  * Chief Vedic Architect: Rohiit Gupta
  * FILE: app/services/ex-back-reading/page.tsx
- * Version: 5.0 (06 Sep 2026) — CALCULATOR CONVERSION + keyword content
+ * Version: 5.1 (11 Oct 2026) — PLAY STORE APP: Maa Shakti dakshina section app mein HIDE.
+ *   Rohiit ka faisla #4 (11 Oct 2026): Google Play app ke andar WhatsApp par dakshina
+ *   (Arzi / Dhanyewaad amount chips + pay links) wala section NAHI dikhega — Google
+ *   bahar ke payment ki taraf bhejna mana karta hai. Sirf us section ko
+ *   <HideInPlayApp> mein lapeta. Website par sab BYTE-FOR-BYTE pehle jaisa —
+ *   koi text, styling ya doosra section nahi badla. (Is file mein gemini-3.7 nahi tha.)
+ * (previous) Version: 5.0 (06 Sep 2026) — CALCULATOR CONVERSION + keyword content
  *
  * WHAT CHANGED
  *   1. All three CTAs pointed at /?segment=ex-back. Nothing in this repo reads
@@ -71,6 +77,7 @@ import Script from "next/script";
 import SiteNav from "@/components/layout/SiteNav";
 import SiteFooter from "@/components/layout/SiteFooter";
 import ServiceReadingForm from '@/components/services/ServiceReadingForm';
+import HideInPlayApp from '@/components/payment/HideInPlayApp';
 
 export const metadata: Metadata = {
   title: { absolute: "Ex Wapas Aayega Ya Nahi — Free Jaanch | Trikaal Vaani" },
@@ -670,7 +677,7 @@ export default function ExBackReadingPage() {
           </div>
         </section>
 
-        <MaaDivineSeva />
+        <HideInPlayApp><MaaDivineSeva /></HideInPlayApp>
 
         {/* FAQ */}
         <section className="px-4 pb-4"><V6Content /></section>
@@ -884,6 +891,6 @@ function CtaSection({ headline, highlight, body, segment }: { headline: string; 
 }
 
 // ============================================================
-// END — app/services/ex-back-reading/page.tsx v4.2
+// END — app/services/ex-back-reading/page.tsx v5.1
 // 🔱 Trikaal Vaani | Rohiit Gupta, Chief Vedic Architect
 // ============================================================

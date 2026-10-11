@@ -5,9 +5,21 @@
  * TRIKAL VAANI — Upgrade Client (Rs.51 Deep Reading unlock)
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/upgrade/UpgradeClient.tsx
- * VERSION: 1.0 — NEW
+ * VERSION: 1.1 (11 Oct 2026)
  * SIGNED: ROHIIT GUPTA, CEO
  * ============================================================
+ * v1.1 (11 Oct 2026) — GOOGLE PLAY BILLING, SIRF PLAY STORE APP KE ANDAR.
+ *   BirthForm v10.7 jaisa hi. App mein (usePlayApp() = true) "Unlock Karein
+ *   — ₹51" button (text same) Google Play sheet kholta hai → purchase token →
+ *   /api/predict ko `playVerification: { product_id: 'deep_reading_51',
+ *   purchase_token }` + predictionTier 'paid' + wahi seed birthData/
+ *   userContext (predict v16.2 ka Play gate yahi maangta hai). Trust line app
+ *   mein "Secure payment via Google Play. Instant unlock.". 409
+ *   PLAY_ALREADY_USED aaye to purani report khulti hai.
+ *   Website par inPlayApp HAMESHA false → startUpgrade (Razorpay) EK LINE
+ *   NAHI BADLI. Gemini: is file mein koi model naam nahi — kuch nahi badla.
+ *   app/upgrade/page.tsx ko badalne ki zaroorat nahi padi.
+ *
  * Runs the EXACT payment sequence already proven in
  * components/landing/BirthForm.tsx -> handleRazorpayPayment():
  *   loadRazorpayScript()
@@ -34,6 +46,8 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { loadRazorpayScript, openRazorpayCheckout } from '@/lib/razorpay-helper'
 import type { UpgradeSeed } from './page'
+import { usePlayApp } from '@/components/payment/usePlayApp'                          // v1.1
+import { isPlayBillingAvailable, purchaseWithPlay, PLAY_PRODUCTS } from '@/lib/play-billing' // v1.1
 
 const GOLD = '#D4AF37'
 
@@ -67,6 +81,9 @@ export default function UpgradeClient({ seed }: { seed: UpgradeSeed | null }) {
   const [working, setWorking] = useState(false)
   const [stepIdx, setStepIdx] = useState(0)
   const [error, setError] = useState<string | null>(null)
+  // v1.1 — true SIRF Play Store app ke andar. Early return se pehle, taaki
+  // har render mein hooks ki ginti same rahe.
+  const inPlayApp = usePlayApp()
 
   /* ── Recovery screen: bad or missing link ─────────────────── */
   if (!seed || !seed.birthData) {
@@ -99,6 +116,110 @@ export default function UpgradeClient({ seed }: { seed: UpgradeSeed | null }) {
         </Link>
       </Shell>
     )
+  }
+
+  /* ── v1.1: Play Store app checkout (Google Play Billing) ───── */
+  // Sirf neeche ke button handler se aata hai jab page Play app ke andar ho.
+  // Google paisa leta hai; /api/predict v16.2 token Google se verify karta hai
+  // aur report save hone ke baad hi consume karta hai. Razorpay wala
+  // startUpgrade() isse alag hai aur bilkul nahi badla.
+  const startPlayUpgrade = async () => {
+    setError(null)
+    setBusy(true)
+
+    const result = await purchaseWithPlay(PLAY_PRODUCTS.deep)
+    if (!result.ok) {
+      // cancelled = customer ne sheet khud band ki — koi galti nahi dikhani.
+      setError(result.cancelled ? null : result.error)
+      setBusy(false)
+      return
+    }
+
+    setWorking(true)
+    const ticker = setInterval(
+      () => setStepIdx((i) => (i + 1) % STEPS.length),
+      15000
+    )
+
+    try {
+      const res = await fetch('/api/predict', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sessionId: generateSessionId(),
+          domainId: seed.domainId,
+          domainLabel: seed.domainLabel,
+          predictionTier: 'paid',
+          paymentVerification: null,
+          paypalVerification: null,
+          playVerification: {
+            product_id: PLAY_PRODUCTS.deep,
+            purchase_token: result.purchaseToken,
+          },
+          birthData: seed.birthData,
+          userContext: seed.userContext,
+          person2Data: null,
+          numerologyCompatibility: null,
+        }),
+      })
+      const data = await res.json().catch(() => ({} as any))
+      clearInterval(ticker)
+
+      if (!res.ok) {
+        // predict v16.2 ka 409: is Play payment ki report pehle ban chuki hai.
+        // Nayi report nahi — wahi purani khol do.
+        if (
+          res.status === 409 &&
+          data?.code === 'PLAY_ALREADY_USED' &&
+          typeof data?.reportUrl === 'string'
+        ) {
+          try {
+            router.push(new URL(data.reportUrl).pathname)
+            return
+          } catch {
+            /* galat URL — neeche wali normal galti dikhegi */
+          }
+        }
+        setError(
+          data?.error ||
+            'Reading generate nahi ho payi. Payment safe hai — WhatsApp karein, main khud dekhunga.'
+        )
+        setWorking(false)
+        setBusy(false)
+        return
+      }
+
+      const publicSlug = data?._meta?.publicSlug ?? null
+      const predictionId = data?._meta?.predictionId ?? null
+
+      if (publicSlug) router.push(`/report/${publicSlug}`)
+      else if (predictionId) router.push(`/result/${predictionId}`)
+      else {
+        setError(
+          'Reading ban gayi par save nahi hui. WhatsApp karein — turant bhej dunga.'
+        )
+        setWorking(false)
+        setBusy(false)
+      }
+    } catch {
+      clearInterval(ticker)
+      setError(
+        'Network error. Payment safe hai — dobara try karein ya WhatsApp karein.'
+      )
+      setWorking(false)
+      setBusy(false)
+    }
+  }
+
+  // v1.1 — button handler. Play app pehle check hota hai aur wahin return;
+  // website par seedha purana startUpgrade(). Detection poori na hui ho to
+  // dobara poochha jaata hai — app mein Razorpay kabhi nahi khulna chahiye.
+  const onUnlockClick = async () => {
+    if (inPlayApp || (await isPlayBillingAvailable())) {
+      await startPlayUpgrade()
+      return
+    }
+    await startUpgrade()
   }
 
   /* ── Payment + paid generation ────────────────────────────── */
@@ -290,7 +411,7 @@ export default function UpgradeClient({ seed }: { seed: UpgradeSeed | null }) {
 
       <button
         type="button"
-        onClick={startUpgrade}
+        onClick={onUnlockClick}
         disabled={busy}
         style={{ ...btnStyle, opacity: busy ? 0.6 : 1, border: 'none' }}
       >
@@ -298,7 +419,9 @@ export default function UpgradeClient({ seed }: { seed: UpgradeSeed | null }) {
       </button>
 
       <p style={{ margin: '10px 0 0', color: '#475569', fontSize: '11px' }}>
-        One-time · Instant access · Razorpay secure
+        {inPlayApp
+          ? 'One-time · Secure payment via Google Play. Instant unlock.'
+          : 'One-time · Instant access · Razorpay secure'}
       </p>
 
       {error && <ErrorLine text={error} />}
@@ -403,3 +526,4 @@ const btnStyle: React.CSSProperties = {
   cursor: 'pointer',
   boxShadow: '0 0 30px rgba(212,175,55,0.35)',
 }
+// END — app/upgrade/UpgradeClient.tsx v1.1

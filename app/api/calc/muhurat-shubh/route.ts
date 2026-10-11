@@ -1,5 +1,13 @@
 // ============================================================
 // File: app/api/calc/muhurat-shubh/route.ts
+// Version: v1.2 — 11 October 2026 — GOOGLE PLAY BILLING (Play Store app)
+//   * Naya field `play_purchase_token`. Aaye to ALAG Play branch (handlePlay)
+//     chalta hai aur wahin lautta hai. Razorpay / PayPal / muft ka raasta EK
+//     LINE NAHI BADLA.
+//   * Play product: yog_51 (productKey 'yog') — website par bhi ye calculator
+//     'yog' product (Rs 51) se bikta hai: /api/calc/yog/order type 'muhurat'.
+//   * verifyAndClaimPlay → VM paid soochi → safal par finishPlay (consume),
+//     fail par releasePlay (wahi payment se dobara koshish).
 // Version: v1.1 — 23 September 2026 — "kab se kab tak" (ant) aage bheja
 // Version: v1.0 — 23 September 2026
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
@@ -36,6 +44,7 @@ import { callVM } from '@/lib/callVM';
 import { getProduct } from '@/lib/pricing-intl';
 import { getPayPalOrder, isCaptureValid } from '@/lib/paypal-server';
 import { logUsage, usageBirthFields, usageContextFromRequest } from '@/lib/usage-log';
+import { verifyAndClaimPlay, finishPlay, releasePlay } from '@/lib/play-billing-server'; // v1.2
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -57,6 +66,8 @@ interface Body {
   razorpay_payment_id?: string;
   razorpay_signature?: string;
   paypal_order_id?: string;
+  // v1.2 — Google Play (Play Store app). Server Google se khud jaanchta hai.
+  play_purchase_token?: string;
 }
 
 function bad(msg: string, status = 400) {
@@ -122,6 +133,86 @@ export async function GET() {
   }
 }
 
+// ── v1.2: GOOGLE PLAY branch (Play Store app only) ──────────────────────────
+// Sirf tab jab request mein play_purchase_token ho. Paid VM call wahi hai jo
+// neeche Razorpay ke liye hota hai (tier 'paid', 12 mahine) — bas Play ka
+// claim/finish/release saath mein.
+async function handlePlay(req: NextRequest, b: Body): Promise<NextResponse> {
+  const gate = await verifyAndClaimPlay('yog', b.play_purchase_token, 'calc_muhurat_shubh');
+  if (!gate.ok) {
+    return NextResponse.json(
+      { error: gate.error, code: gate.code, existingRef: gate.existingRef ?? null },
+      { status: gate.status },
+    );
+  }
+
+  let data: any;
+  try {
+    const res = await callVM('/muhurat/shubh', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        karma: b.karma,
+        year: b.year, month: b.month, day: b.day,
+        hour: b.hour ?? 12, minute: b.minute ?? 0,
+        latitude: b.latitude, longitude: b.longitude,
+        timezone: b.timezone ?? 5.5,
+        kaam_lat: b.kaam_lat ?? null,
+        kaam_lon: b.kaam_lon ?? null,
+        kaam_tz: b.kaam_tz ?? null,
+        tier: 'paid',
+        mahine: 12,
+        shuru: b.shuru ?? null,
+        ant: b.ant ?? null,
+        prati_mahina: 5,
+      }),
+      signal: AbortSignal.timeout(60000),
+    });
+    if (!res.ok) {
+      const t = await res.text().catch(() => '');
+      console.error('[muhurat] Play VM error', res.status, t.slice(0, 300));
+      await releasePlay(gate);
+      return NextResponse.json(
+        { error: 'Muhurat engine abhi jawab nahi de raha. Thodi der mein dobara koshish kijiye.' },
+        { status: 503 });
+    }
+    data = await res.json();
+  } catch (e) {
+    console.error('[muhurat] Play failed:', e);
+    await releasePlay(gate);
+    return NextResponse.json(
+      { error: 'Muhurat nikaalte waqt dikkat aayi. Thodi der mein dobara koshish kijiye.' },
+      { status: 503 });
+  }
+  if (data?.error) {
+    await releasePlay(gate);
+    return bad(data.error, 400);
+  }
+
+  await finishPlay(gate, `muhurat-${b.karma}`);
+  console.log(`[muhurat] PAID unlock | karma:${b.karma} | via:play | order:${gate.orderId}`);
+
+  try {
+    await logUsage({
+      ...usageContextFromRequest(req),
+      ...usageBirthFields(b as any),
+      product_type: 'muhurat',
+      product_slug: `muhurat-${b.karma}`,
+      tier: 'paid',
+      birth_city: b.kaam_sthan ?? null,
+      result_meta: {
+        karma: b.karma,
+        dikhi: Array.isArray(data?.tareekhein) ? data.tareekhein.length : 0,
+        chhupi: data?.chhupi_kul ?? 0,
+        darje: data?.darje ?? null,
+        play_order_id: gate.orderId,
+      },
+    } as any);
+  } catch { /* logging kabhi grahak ka jawab na roke */ }
+
+  return NextResponse.json({ ...data, paid: true });
+}
+
 // ── POST — shubh tareekhein ──────────────────────────────────────────────────
 export async function POST(req: NextRequest) {
   let b: Body;
@@ -135,6 +226,9 @@ export async function POST(req: NextRequest) {
   for (const f of ['year', 'month', 'day', 'latitude', 'longitude'] as const) {
     if (typeof b[f] !== 'number') return bad(`Janm ka vivaran adhoora hai: ${f}`);
   }
+
+  // v1.2 — Google Play: ALAG branch, pehle jaancha jaata hai aur wahin lautta hai.
+  if (b.play_purchase_token) return await handlePlay(req, b);
 
   const paid = await isPaid(b);
   // Proof bheja par verify na hua — ye GALTI hai, chupchaap muft dena nahi.

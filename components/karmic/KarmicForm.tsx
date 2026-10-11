@@ -1,7 +1,18 @@
 // TRIKAL VAANI - KarmicForm Component
 // CEO & Chief Vedic Architect: Rohiit Gupta
 // File: components/karmic/KarmicForm.tsx
-// VERSION: 1.3 (1 Oct 2026) — ₹101 / $11 (pehle ₹251 / $19); report ab granth se
+// VERSION: 1.4 (11 Oct 2026) — GOOGLE PLAY BILLING, SIRF PLAY STORE APP KE ANDAR.
+//   Rohiit ke 11 Oct ke faisle: button ka look + text same, sirf provider ka
+//   naam "Google Play"; trust line "Secure payment via Google Play. Instant
+//   unlock."; daam same ₹101; app mein PayPal / $11 nahi dikhta.
+//   App mein: Google Play sheet (karmic_101) → purchase token →
+//   /api/verify-karmic-payment v1.3 (`play_purchase_token` + birth data) →
+//   server Google se verify karke reading banata hai → /karmic/[slug].
+//   Website par usePlayApp() HAMESHA false → Razorpay / PayPal BILKUL pehle jaise.
+//   handlePayment ke andar Razorpay code, finishAfterPayment, handlePayPalPaid —
+//   EK LINE NAHI BADLI (sirf handlePayment ke upar Play check joda).
+//   Gemini: is file mein koi Gemini model naam nahi.
+// v1.3 (1 Oct 2026) — ₹101 / $11 (pehle ₹251 / $19); report ab granth se
 // v1.2 — 27 Sep 2026 — delivery text sach kiya (CEO Option A): WhatsApp/Email auto-delivery ka koi system nahi hai, isliye 'PDF on/via WhatsApp + Email' → 'PDF download + WhatsApp share'.
 // v1.1 — INTERNATIONAL. Visitors outside India see PayPal at $19 instead of
 //   the ₹251 Razorpay button; Razorpay on this account rejects foreign cards,
@@ -21,6 +32,8 @@ import { useState, useCallback, useRef, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { loadRazorpayScript, openRazorpayCheckout } from "@/lib/razorpay-helper"
 import PayPalCheckout from "@/components/payment/PayPalCheckout"
+import { usePlayApp } from "@/components/payment/usePlayApp"                              // v1.4
+import { isPlayBillingAvailable, purchaseWithPlay, PLAY_PRODUCTS } from "@/lib/play-billing" // v1.4
 
 // -- Types -------------------------------------------------------------------
 
@@ -380,6 +393,58 @@ export default function KarmicForm() {
     else { setApiError('Payment done but link missing. WhatsApp +919211804111 with your payment ID.'); setPhase("preview") }
   }
 
+  // ── v1.4: Play Store app (Google Play Billing) ─────────────────────────────
+  // true ONLY inside the Play Store app with NEXT_PUBLIC_PLAY_BILLING=true.
+  // On the website it stays false, so Razorpay / PayPal below are untouched.
+  const inPlayApp = usePlayApp()
+
+  /**
+   * Play Store app only. Google Play takes ₹101 (local price abroad); the
+   * server re-verifies the token with Google, then creates the paid order and
+   * the reading in one step (there is no pending order for Play).
+   */
+  const handlePlayPayment = async () => {
+    setApiError(null)
+    if (!validateContact()) return
+    setPhase("paying")
+    try {
+      const result = await purchaseWithPlay(PLAY_PRODUCTS.karmic)
+      if (!result.ok) {
+        // Customer closed the sheet himself → show nothing.
+        if (!result.cancelled) setApiError(result.error)
+        setPhase("preview")
+        return
+      }
+      const verifyRes = await fetch('/api/verify-karmic-payment', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          play_purchase_token: result.purchaseToken,
+          person:   buildPersonBody(),
+          language: fields.language,
+          contact:  {
+            name:   fields.contactName,
+            mobile: `${fields.contactCountryCode}${fields.contactMobile}`,
+            email:  fields.contactEmail || null,
+          },
+        }),
+      })
+      const verifyData = await verifyRes.json().catch(() => ({}))
+      if (!verifyRes.ok) {
+        // Is payment ki reading pehle ban chuki hai → wahi purani kholo.
+        if (verifyRes.status === 409 && verifyData?.code === 'PLAY_ALREADY_USED' && typeof verifyData?.existingRef === 'string' && verifyData.existingRef) {
+          router.push(`/karmic/${verifyData.existingRef}`)
+          return
+        }
+        setApiError(verifyData.error || 'Payment verification failed. Contact support.'); setPhase("preview"); return
+      }
+      const slug = verifyData.slug
+      if (slug) { router.push(`/karmic/${slug}`) }
+      else { setApiError('Payment done but link missing. WhatsApp +919211804111 with your Google Play order ID.'); setPhase("preview") }
+    } catch (err: any) {
+      setApiError(err?.message || 'Payment flow error.'); setPhase("preview")
+    }
+  }
+
   /** PayPal has taken $19. The verify route re-confirms with PayPal. */
   const handlePayPalPaid = async (proof: { paypal_order_id: string }) => {
     setApiError(null)
@@ -393,6 +458,13 @@ export default function KarmicForm() {
 
   // STEP 2: Rs251 payment
   const handlePayment = async () => {
+    // v1.4 — Play Store app: Google Play only. Checked FIRST and returned from,
+    // so the Razorpay code below is unchanged for the website. Re-asked here in
+    // case detection had not finished — Razorpay must never open in the app.
+    if (inPlayApp || await isPlayBillingAvailable()) {
+      await handlePlayPayment()
+      return
+    }
     setApiError(null)
     if (!validateContact()) return
     setPhase("paying")
@@ -450,7 +522,7 @@ export default function KarmicForm() {
             <div className="grid gap-4">
               <div className="text-center mb-2">
                 <h3 className="text-white text-xl font-serif font-bold">Karmic Background Reading</h3>
-                <p className="text-slate-400 text-sm mt-1">BPHS · Phaladipika · 6 Dimensions + Prediction + Upay · {isIndia === false ? '$11' : '₹101'}</p>
+                <p className="text-slate-400 text-sm mt-1">BPHS · Phaladipika · 6 Dimensions + Prediction + Upay · {isIndia === false && !inPlayApp ? '$11' : '₹101'}</p>
               </div>
 
               <div>
@@ -584,7 +656,7 @@ export default function KarmicForm() {
 
               {apiError && <div className="px-4 py-3 rounded-lg text-sm text-red-300" style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)' }}>{apiError}</div>}
 
-              {isIndia === false ? (
+              {isIndia === false && !inPlayApp ? (
                 // The order route stores person_data, so PayPal's order must be
                 // created THERE rather than by the generic endpoint — otherwise
                 // the row would not exist when the money arrived.
@@ -609,8 +681,15 @@ export default function KarmicForm() {
                 <button type="button" onClick={handlePayment} disabled={phase === "paying"}
                   className="w-full py-4 rounded-xl text-sm font-bold transition-all"
                   style={{ background: phase === "paying" ? GOLD_RGBA(0.3) : `linear-gradient(135deg, ${GOLD} 0%, #F5D76E 50%, ${GOLD} 100%)`, color: '#080B12', fontSize: '15px', boxShadow: phase === "paying" ? 'none' : '0 0 30px rgba(212,175,55,0.4)' }}>
-                  {phase === "paying" ? 'Razorpay khul raha hai...' : 'Poori Reading Kholiye — ₹101 →'}
+                  {phase === "paying" ? (inPlayApp ? 'Google Play khul raha hai...' : 'Razorpay khul raha hai...') : 'Poori Reading Kholiye — ₹101 →'}
                 </button>
+              )}
+
+              {/* v1.4 — Play Store app only (Rohiit's approved trust line). */}
+              {inPlayApp && (
+                <p className="text-center text-xs text-slate-500" style={{ margin: 0 }}>
+                  🔒 Secure payment via <span style={{ color: '#34A853', fontWeight: 700 }}>Google Play</span>. Instant unlock.
+                </p>
               )}
 
               <div style={{ padding: '10px 14px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '8px', textAlign: 'center' }}>
