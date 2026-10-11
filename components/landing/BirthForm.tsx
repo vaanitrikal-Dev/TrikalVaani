@@ -2,6 +2,23 @@
 /**
  * ============================================================
  * TRIKAAL VAANI — BirthForm
+ * v10.7 (11 Oct 2026) — GOOGLE PLAY BILLING, SIRF PLAY STORE APP KE ANDAR.
+ *   Rohiit ke 11 Oct ke faisle: (1) button ka look + text same, (2) neeche ki
+ *   line "Secure payment via Google Play", (3) daam same ₹51, (4) Dakshina app
+ *   mein hide (wo is file mein nahi hai), (5) app mein PayPal/dollar nahi.
+ *   Kab chalta hai: NEXT_PUBLIC_PLAY_BILLING=true HO aur page Play Store app
+ *   (TWA) ke andar khula HO — lib/play-billing.ts isPlayBillingAvailable().
+ *   Website (Chrome, iPhone, desktop, Add-to-Home-screen) par inPlayApp
+ *   HAMESHA false → Razorpay, PayPal, free — sab BYTE-FOR-BYTE pehle jaisa.
+ *   App mein:
+ *     - Deep Reading: Google Play sheet → purchase token → /api/predict ko
+ *       `playVerification` (server Google se verify karta hai, v16.2).
+ *     - Voice (₹11): Play abhi nahi bana — saaf message, Razorpay NAHI khulta.
+ *     - Provider ka naam "Razorpay" ki jagah "Google Play" (jhoot na likhe).
+ *     - /api/predict 409 PLAY_ALREADY_USED de to seedha purani report kholta hai.
+ *   handleRazorpayPayment, handlePayPalPaid, validate — EK LINE NAHI BADLI.
+ *   Build marker → "BF v10.7 · 11-Oct-2026" (app mein " · PLAY" bhi).
+ *
  * v10.6 (27 Sep 2026) — EK BADLAAV: Deep Reading (₹51) Razorpay REDIRECT MODE.
  *   Mobile par UPI app se lautne par tab reload ho jaata tha → onSuccess kabhi
  *   nahi chalta tha → report nahi banti thi (26-27 Sep: verify-payment 2 din
@@ -130,6 +147,7 @@ import { useState, useCallback, useRef, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { loadRazorpayScript, openRazorpayCheckout } from "@/lib/razorpay-helper"
 import PayPalCheckout, { type PayPalProof } from "@/components/payment/PayPalCheckout"
+import { isPlayBillingAvailable, purchaseWithPlay, PLAY_PRODUCT_DEEP } from "@/lib/play-billing" // v10.7
 
 // ── OneSignal tagging helper (v9.8) ──────────────────────────────────────────
 // Safe, deferred. Does nothing on server. Used for abandoned-kundali Journey.
@@ -820,9 +838,39 @@ function RazorpayInlineTrustStrip({ tier }: { tier: PredictionTier }) {
   )
 }
 
+// ── v10.7: Google Play trust strip — shown ONLY inside the Play Store app ────
+// Rohiit's approved line (11 Oct 2026): "Secure payment via Google Play.
+// Instant unlock." Same box shape as the Razorpay strip above.
+function PlayInlineTrustStrip({ tier }: { tier: PredictionTier }) {
+  if (tier === 'free') return null
+  return (
+    <div
+      role="region"
+      aria-label="Google Play payment security"
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        flexWrap: 'wrap',
+        gap: '6px',
+        padding: '10px 12px',
+        background: 'rgba(52,168,83,0.06)',
+        border: '1px solid rgba(52,168,83,0.2)',
+        borderRadius: '10px',
+        marginTop: '4px',
+        maxWidth: '100%',
+      }}
+    >
+      <span style={{ fontSize: '11px', color: '#94A3B8', fontWeight: 600 }}>
+        🔒 Secure payment via <span style={{ color: '#34A853', fontWeight: 700 }}>Google Play</span>. Instant unlock.
+      </span>
+    </div>
+  )
+}
+
 // ── Tier Selector (v9.9: minWidth:0 + width:100% on cards — overflow fix) ────
 
-function TierSelector({ selected, onChange, intl = false }: { selected: PredictionTier; onChange: (t: PredictionTier) => void; intl?: boolean }) {
+function TierSelector({ selected, onChange, intl = false, play = false }: { selected: PredictionTier; onChange: (t: PredictionTier) => void; intl?: boolean; play?: boolean }) {
   const tiers = [
     { id: 'free'  as PredictionTier, icon: '🔮', label: 'Free Preview', price: 'Free', desc: 'Free · No card needed', color: '#94a3b8', features: ['Aapka chalta hua daur — granth se', 'Teen mukhya bhav, shlok ke saath', 'Instant — 60 seconds'] },
     // v9.1: an international visitor was being shown ₹51 on the card and $7 on
@@ -858,7 +906,7 @@ function TierSelector({ selected, onChange, intl = false }: { selected: Predicti
       {selected === 'paid' && (
         <div style={{ marginTop: '12px', padding: '12px', background: GOLD_RGBA(0.06), border: `1px solid ${GOLD_RGBA(0.2)}`, borderRadius: '10px' }}>
           <p style={{ margin: '0 0 4px', color: GOLD, fontSize: '11px', fontWeight: 700 }}>⚡ 900-Word Deep Vedic Analysis</p>
-          <p style={{ margin: 0, color: '#64748b', fontSize: '10px', lineHeight: 1.5 }}>{intl ? 'Premium-grade reading that elsewhere costs $60+ — Trikaal Vaani delivers it for $7. Every line carries its own verse from the BPHS, Bhrigu Sutram, Jataka Parijata and Phaladipika — no AI-written essay. PayPal-secured one-time payment; pay by card without a PayPal account.' : 'Premium-grade reading that elsewhere costs ₹500+ — Trikaal Vaani delivers it for ₹51. Har line par granth ka apna shlok — BPHS, Bhrigu Sutram, Jataka Parijata, Phaladipika. Koi AI ka likha nibandh nahi. Razorpay-secured one-time payment.'}</p>
+          <p style={{ margin: 0, color: '#64748b', fontSize: '10px', lineHeight: 1.5 }}>{intl ? 'Premium-grade reading that elsewhere costs $60+ — Trikaal Vaani delivers it for $7. Every line carries its own verse from the BPHS, Bhrigu Sutram, Jataka Parijata and Phaladipika — no AI-written essay. PayPal-secured one-time payment; pay by card without a PayPal account.' : 'Premium-grade reading that elsewhere costs ₹500+ — Trikaal Vaani delivers it for ₹51. Har line par granth ka apna shlok — BPHS, Bhrigu Sutram, Jataka Parijata, Phaladipika. Koi AI ka likha nibandh nahi. ' + (play ? 'Google Play-secured one-time payment.' : 'Razorpay-secured one-time payment.')}</p>
         </div>
       )}
     </div>
@@ -1072,7 +1120,10 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
     return Object.keys(errs).length === 0
   }
 
-  const buildPredictionBody = (paymentVerification: any = null, paypalVerification: any = null) => {
+  // v10.7 — 3rd param ONLY for the Play Store app. Every existing caller passes
+  // at most two arguments, so for them playVerification is null and the body
+  // below is exactly what it was (the key is not even added).
+  const buildPredictionBody = (paymentVerification: any = null, paypalVerification: any = null, playVerification: any = null) => {
     const sessionId      = generateSessionId()
     const age            = calculateAge(fields.dateOfBirth)
     const dynamicSegment = calculateDynamicSegment(fields.dateOfBirth, fields.gender)
@@ -1093,6 +1144,7 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
       predictionTier,
       paymentVerification,
       paypalVerification,
+      ...(playVerification ? { playVerification } : {}),   // v10.7
       birthData: {
         name:     fields.name,
         dob:      fields.dateOfBirth,
@@ -1133,20 +1185,31 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
     }
   }
 
-  const callPredictAPI = async (paymentVerification: any = null, paypalVerification: any = null) => {
+  const callPredictAPI = async (paymentVerification: any = null, paypalVerification: any = null, playVerification: any = null) => {
     // ⭐ 20 Sep — agar paisa ja chuka hai to uska id yaad rakho. Neeche har
     // galti ke saath ye dikhega.
+    // v10.7 — Play app mein yahi kaam Google ka purchase token karta hai.
     const ref = paymentVerification?.razorpay_payment_id
-             ?? paypalVerification?.paypal_order_id ?? null
+             ?? paypalVerification?.paypal_order_id
+             ?? playVerification?.purchase_token ?? null
     if (ref) setPaidRef(ref)
     try {
       const res = await fetch('/api/predict', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify(buildPredictionBody(paymentVerification, paypalVerification)),
+        body:    JSON.stringify(buildPredictionBody(paymentVerification, paypalVerification, playVerification)),
       })
       const data = await res.json()
       if (!res.ok) {
+        // v10.7 — sirf Play: is payment ki report pehle ban chuki hai
+        // (predict v16.2 ka 409). Nayi report nahi, wahi purani khol do.
+        if (res.status === 409 && data?.code === 'PLAY_ALREADY_USED' && typeof data?.reportUrl === 'string') {
+          try {
+            stopLoadingMessages()
+            router.push(new URL(data.reportUrl).pathname)
+            return
+          } catch { /* galat URL — neeche wali normal galti dikhegi */ }
+        }
         setApiError(data.error || 'Something went wrong.')
         stopLoadingMessages()
         return
@@ -1185,6 +1248,17 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
       .then(r => r.json())
       .then(g => { if (!cancelled) setIsIndia(g?.isIndia !== false) })
       .catch(() => { if (!cancelled) setIsIndia(true) })
+    return () => { cancelled = true }
+  }, [])
+
+  // ── v10.7: Play Store app detection ────────────────────────────────────────
+  // true ONLY when NEXT_PUBLIC_PLAY_BILLING=true AND the page is running inside
+  // the Play Store app (Google's Digital Goods API exists only there). On the
+  // website this stays false, so every Razorpay / PayPal path is untouched.
+  const [inPlayApp, setInPlayApp] = useState(false)
+  useEffect(() => {
+    let cancelled = false
+    isPlayBillingAvailable().then(ok => { if (!cancelled) setInPlayApp(ok) })
     return () => { cancelled = true }
   }, [])
 
@@ -1317,9 +1391,57 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
     }
   }
 
+  // ── v10.7: Play Store app checkout (Google Play Billing) ───────────────────
+  // Reached ONLY from handleSubmit when the page is inside the Play Store app.
+  // Google Play takes the money; /api/predict v16.2 re-verifies the token with
+  // Google before generating, and consumes it only after the report is saved.
+  const handlePlayPayment = async (tier: 'paid' | 'voice') => {
+    setApiError(null)
+    // Voice (₹11) ka Play product abhi nahi bana. App ke andar Razorpay khol
+    // nahi sakte (Google policy), isliye saaf message aur bas.
+    if (tier !== 'paid') {
+      setApiError('Voice Reading abhi app mein uplabdh nahi hai. Deep Reading ya Free Reading chuniye.')
+      return
+    }
+    setPaymentLoading(true)
+    try {
+      const result = await purchaseWithPlay(PLAY_PRODUCT_DEEP)
+      if (!result.ok) {
+        if (!result.cancelled) setApiError(result.error)
+        setPaymentLoading(false)
+        return
+      }
+      setIsSubmitting(true)
+      trackFB('Purchase', { value: 51, currency: 'INR', content_name: 'Deep Reading' })
+      startLoadingMessages(PAYMENT_LOADING_STEPS)
+      await callPredictAPI(null, null, {
+        product_id:     PLAY_PRODUCT_DEEP,
+        purchase_token: result.purchaseToken,
+      })
+      setIsSubmitting(false)
+      setPaymentLoading(false)
+    } catch (err: any) {
+      setApiError(err?.message || 'Payment flow error.')
+      setPaymentLoading(false)
+    }
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!validate()) return
+
+    // v10.7 — Play Store app: Google Play only. Checked FIRST and returned from,
+    // so the Razorpay / PayPal branch below is unchanged for the website.
+    // Re-asked here (not only from state) in case the detection had not
+    // finished yet — Razorpay must never open inside the Play app.
+    if (predictionTier === 'paid' || predictionTier === 'voice') {
+      const playApp = inPlayApp || await isPlayBillingAvailable()
+      if (playApp) {
+        if (!inPlayApp) setInPlayApp(true)
+        await handlePlayPayment(predictionTier)
+        return
+      }
+    }
 
     if (predictionTier === 'paid' || predictionTier === 'voice') {
       // International visitors pay through the PayPal buttons rendered below
@@ -1350,6 +1472,9 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
     if (isLoading)                  return activeSteps[loadingStep] || activeSteps[activeSteps.length-1] || 'Processing...'
     if (submitLabel)                return submitLabel
     if (predictionTier === 'free')  return '🔮 Get My Free Reading — Trikaal Ka Sandesh'
+    // v10.7 — Play Store app: same text, only the true payment provider named.
+    if (inPlayApp && predictionTier === 'paid')  return '⚡ Get My Deep Reading — Pay ₹51 via Google Play'
+    if (inPlayApp && predictionTier === 'voice') return '🎙️ Get My Voice Reading — ₹11'
     if (predictionTier === 'paid')
       return isIndia === false
         ? '⚡ Get My Deep Reading — Pay $7 via PayPal'
@@ -1446,16 +1571,21 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
                 this line on screen, the file you are looking at is NOT the file
                 that is deployed, and the problem is the deployment, not the code. */}
             <p style={{ margin: '0 0 6px', fontSize: '10px', color: '#334155', textAlign: 'right' }}>
-              BF v10.6 · 27-Sep-2026 · {isIndia === false ? 'INTL/USD' : 'IN/INR'}
+              BF v10.7 · 11-Oct-2026 · {isIndia === false ? 'INTL/USD' : 'IN/INR'}{inPlayApp ? ' · PLAY' : ''}
             </p>
 
-            <TierSelector selected={predictionTier} intl={isIndia === false} onChange={(t) => {
+            {/* v10.7 — in the Play app Google shows each buyer their own local
+                price, so the card stays in ₹ (no $ / PayPal there). */}
+            <TierSelector selected={predictionTier} intl={isIndia === false && !inPlayApp} play={inPlayApp} onChange={(t) => {
               setPredictionTier(t)
               if (t === 'paid')  trackFB('InitiateCheckout', { value: 51, currency: 'INR', content_name: 'Deep Reading' })
               if (t === 'voice') trackFB('InitiateCheckout', { value: 11, currency: 'INR', content_name: 'Voice Reading' })
             }} />
 
-            {isIndia === false && (predictionTier === 'paid' || predictionTier === 'voice') ? (
+            {inPlayApp ? (
+              // v10.7 — Play Store app: Google Play only. No PayPal, no Razorpay.
+              <PlayInlineTrustStrip tier={predictionTier} />
+            ) : isIndia === false && (predictionTier === 'paid' || predictionTier === 'voice') ? (
               // International visitors: PayPal instead of the Razorpay strip.
               // Razorpay on this account rejects international cards outright,
               // so showing its trust strip here would be a promise we cannot keep.
@@ -1785,7 +1915,7 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
             )}
 
             <button type="submit" disabled={isLoading}
-              aria-label={predictionTier === 'paid' ? 'Pay 51 rupees with Razorpay for Deep Reading' : predictionTier === 'voice' ? 'Pay 11 rupees with Razorpay for Voice Reading' : 'Get free Vedic prediction'}
+              aria-label={inPlayApp && predictionTier === 'paid' ? 'Pay 51 rupees with Google Play for Deep Reading' : inPlayApp && predictionTier === 'voice' ? 'Voice Reading' : predictionTier === 'paid' ? 'Pay 51 rupees with Razorpay for Deep Reading' : predictionTier === 'voice' ? 'Pay 11 rupees with Razorpay for Voice Reading' : 'Get free Vedic prediction'}
               className="w-full py-4 rounded-xl text-sm font-bold transition-all duration-300"
               style={{
                 background: isLoading ? GOLD_RGBA(0.3) : predictionTier === 'voice' ? 'linear-gradient(135deg,#7c3aed,#a78bfa)' : predictionTier === 'paid' ? `linear-gradient(135deg,${GOLD} 0%,#F5D76E 50%,${GOLD} 100%)` : `linear-gradient(135deg,rgba(212,175,55,0.8) 0%,${GOLD} 100%)`,
@@ -1800,10 +1930,14 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
             {!isLoading && (
               <div style={{ textAlign: 'center' }}>
                 {predictionTier === 'free'  && <p className="text-xs text-slate-600">🔒 Free forever · No card needed · No signup · Instant results</p>}
-                {predictionTier === 'paid'  && (isIndia === false
+                {/* v10.7 — Play Store app lines. On the website inPlayApp is
+                    false and the two original lines below render unchanged. */}
+                {inPlayApp && predictionTier === 'paid'  && <p className="text-xs text-slate-600">🔒 ₹51 one-time · Same depth as ₹500+ readings elsewhere · Secured by <span style={{color: '#34A853', fontWeight: 700}}>Google Play</span> · Instant access</p>}
+                {inPlayApp && predictionTier === 'voice' && <p className="text-xs text-slate-600">🎙️ ₹11 one-time · Speak your question, hear the answer</p>}
+                {!inPlayApp && predictionTier === 'paid'  && (isIndia === false
                   ? <p className="text-xs text-slate-600">🔒 $7 one-time · Same depth as $60+ readings elsewhere · Secured by <span style={{color: '#0070BA', fontWeight: 700}}>PayPal</span> · Instant access</p>
                   : <p className="text-xs text-slate-600">🔒 ₹51 one-time · Same depth as ₹500+ readings elsewhere · Secured by <span style={{color: RAZORPAY_BLUE, fontWeight: 700}}>Razorpay</span> · Instant access</p>)}
-                {predictionTier === 'voice' && (isIndia === false
+                {!inPlayApp && predictionTier === 'voice' && (isIndia === false
                   ? <p className="text-xs text-slate-600">🎙️ $1 one-time · Speak your question, hear the answer · Secured by <span style={{color: '#0070BA', fontWeight: 700}}>PayPal</span></p>
                   : <p className="text-xs text-slate-600">🎙️ ₹11 one-time · Speak your question, hear the answer · Secured by <span style={{color: RAZORPAY_BLUE, fontWeight: 700}}>Razorpay</span></p>)}
               </div>
@@ -1817,7 +1951,9 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
           <p style={{ color: '#334155', fontSize: '11px', lineHeight: 1.7, maxWidth: '480px', margin: '0 auto 12px' }}>
             Powered by <strong style={{ color: '#475569' }}>Swiss Ephemeris</strong> — the same engine used by professional astrologers worldwide.
             Validated against <strong style={{ color: '#475569' }}>BPHS</strong>, <strong style={{ color: '#475569' }}>Bhrigu Sutram</strong> and <strong style={{ color: '#475569' }}>Shadbala</strong>.
-            Payments secured by <strong style={{ color: RAZORPAY_BLUE }}>Razorpay</strong>.
+            Payments secured by {inPlayApp
+              ? <strong style={{ color: '#34A853' }}>Google Play</strong>
+              : <strong style={{ color: RAZORPAY_BLUE }}>Razorpay</strong>}.
           </p>
           <div style={{ padding: '14px 20px', background: GOLD_RGBA(0.05), border: `1px solid ${GOLD_RGBA(0.15)}`, borderRadius: '12px', marginBottom: '12px' }}>
             <p style={{ margin: '0 0 8px', color: GOLD, fontSize: '13px', fontWeight: 600 }}>🙏 Prediction ke baad — Maa Shakti ko Arzi karein</p>
