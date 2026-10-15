@@ -1,7 +1,13 @@
 'use client'
 
 /**
- * components/report/theme.tsx — v1.1 — 15 October 2026
+ * components/report/theme.tsx — v1.2 — 15 October 2026
+ *
+ * v1.2 — grah / rashi / nakshatra ke naam teen bhasha (grahL, rashiL, nakL),
+ *        bhav ki ginti (bhavN), Ch.34 ka chhota label (ch34L), Shani ke daur
+ *        (shaniL, charanL) aur Ateet ka 'kyun' (kyunL). Rohiit ki asli paid
+ *        Hindi report par 'Rahu महादशा · Saturn अन्तर्दशा', 'Kumbha लग्न',
+ *        'DHAIYA', 'Ch.34: maarak' jaise mishran pakde gaye the.
  *
  * v1.1 — VISHAY aur FAISLA ka Hindi/English (Rohiit: Hindi report mein ghar
  *        ka naam Hinglish aa raha tha). Dict saar.py ke _VISHAY_HI/_VISHAY_EN
@@ -102,4 +108,133 @@ export function faislaL(f: unknown, lang: Lang): string {
   const t = FAISLA[k]
   if (!t) return String(f ?? '')
   return lang === 'hindi' ? t[0] : lang === 'english' ? t[1] : k
+}
+
+/* ═══ v1.2 — naam teen bhasha ═══════════════════════════════════════════ */
+const norm = (v: unknown) => String(v ?? '').toLowerCase().replace(/[^a-z]/g, '')
+
+const GRAH: Record<string, [string, string, string]> = {
+  surya: ['Surya', 'सूर्य', 'Sun'], chandra: ['Chandra', 'चन्द्र', 'Moon'], mangal: ['Mangal', 'मंगल', 'Mars'],
+  budh: ['Budh', 'बुध', 'Mercury'], guru: ['Guru', 'गुरु', 'Jupiter'], shukra: ['Shukra', 'शुक्र', 'Venus'],
+  shani: ['Shani', 'शनि', 'Saturn'], rahu: ['Rahu', 'राहु', 'Rahu'], ketu: ['Ketu', 'केतु', 'Ketu'],
+}
+const GRAH_ALIAS: Record<string, string> = {
+  sun: 'surya', surya: 'surya', moon: 'chandra', chandra: 'chandra', mars: 'mangal', mangal: 'mangal',
+  mercury: 'budh', budh: 'budh', budha: 'budh', jupiter: 'guru', guru: 'guru', brihaspati: 'guru',
+  venus: 'shukra', shukra: 'shukra', saturn: 'shani', shani: 'shani', rahu: 'rahu', ketu: 'ketu',
+}
+/** "Saturn" / "Shani" → Shani · शनि · Saturn. Anjaan naam waisa hi. */
+export function grahL(v: unknown, lang: Lang): string {
+  const k = GRAH_ALIAS[norm(v)]
+  if (!k) return String(v ?? '')
+  const t = GRAH[k]
+  return lang === 'hindi' ? t[1] : lang === 'english' ? t[2] : t[0]
+}
+
+const RASHI: Record<string, [string, string]> = {
+  mesha: ['मेष', 'Aries'], vrishabha: ['वृषभ', 'Taurus'], mithuna: ['मिथुन', 'Gemini'], karka: ['कर्क', 'Cancer'],
+  simha: ['सिंह', 'Leo'], kanya: ['कन्या', 'Virgo'], tula: ['तुला', 'Libra'], vrishchika: ['वृश्चिक', 'Scorpio'],
+  dhanu: ['धनु', 'Sagittarius'], makara: ['मकर', 'Capricorn'], kumbha: ['कुम्भ', 'Aquarius'], meena: ['मीन', 'Pisces'],
+}
+const RASHI_ALIAS: Record<string, string> = {
+  mesh: 'mesha', aries: 'mesha', vrishabh: 'vrishabha', vrishab: 'vrishabha', taurus: 'vrishabha',
+  mithun: 'mithuna', gemini: 'mithuna', kark: 'karka', cancer: 'karka', simh: 'simha', leo: 'simha',
+  virgo: 'kanya', libra: 'tula', vrishchik: 'vrishchika', vrischika: 'vrishchika', scorpio: 'vrishchika',
+  dhanus: 'dhanu', sagittarius: 'dhanu', makar: 'makara', capricorn: 'makara', kumbh: 'kumbha',
+  aquarius: 'kumbha', meen: 'meena', mina: 'meena', pisces: 'meena',
+}
+/** Rashi: Hindi report par Devanagari; English par naam waisa hi (Kumbha) — 'Aquarius' nahi, kyunki Vedic report hai. */
+export function rashiL(v: unknown, lang: Lang): string {
+  const n = norm(v); const k = RASHI[n] ? n : RASHI_ALIAS[n]
+  if (!k || lang !== 'hindi') return String(v ?? '')
+  return RASHI[k][0]
+}
+
+const NAK: Record<string, string> = {
+  ashwini: 'अश्विनी', bharani: 'भरणी', krittika: 'कृत्तिका', rohini: 'रोहिणी', mrigashira: 'मृगशिरा',
+  ardra: 'आर्द्रा', punarvasu: 'पुनर्वसु', pushya: 'पुष्य', ashlesha: 'आश्लेषा', magha: 'मघा',
+  purvaphalguni: 'पूर्वा फाल्गुनी', uttaraphalguni: 'उत्तरा फाल्गुनी', hasta: 'हस्त', chitra: 'चित्रा',
+  swati: 'स्वाति', vishakha: 'विशाखा', anuradha: 'अनुराधा', jyeshtha: 'ज्येष्ठा', mula: 'मूल',
+  purvaashadha: 'पूर्वाषाढ़ा', uttaraashadha: 'उत्तराषाढ़ा', shravana: 'श्रवण', dhanishtha: 'धनिष्ठा',
+  shatabhisha: 'शतभिषा', purvabhadrapada: 'पूर्वा भाद्रपद', uttarabhadrapada: 'उत्तरा भाद्रपद', revati: 'रेवती',
+}
+const NAK_ALIAS: Record<string, string> = {
+  aswini: 'ashwini', mrigasira: 'mrigashira', mrigshira: 'mrigashira', aridra: 'ardra', pushyami: 'pushya',
+  aslesha: 'ashlesha', ashlesa: 'ashlesha', purvaphalgun: 'purvaphalguni', poorvaphalguni: 'purvaphalguni',
+  uttaraphalgun: 'uttaraphalguni', uttaraphalguna: 'uttaraphalguni', chitta: 'chitra', svati: 'swati',
+  visakha: 'vishakha', jyeshta: 'jyeshtha', jyestha: 'jyeshtha', moola: 'mula', mool: 'mula',
+  purvashadha: 'purvaashadha', poorvashadha: 'purvaashadha', uttarashadha: 'uttaraashadha',
+  shravan: 'shravana', sravana: 'shravana', dhanishta: 'dhanishtha', shatabhishaj: 'shatabhisha',
+  satabhisha: 'shatabhisha', purvabhadra: 'purvabhadrapada', poorvabhadrapada: 'purvabhadrapada',
+  uttarabhadra: 'uttarabhadrapada', revathi: 'revati',
+}
+export function nakL(v: unknown, lang: Lang): string {
+  const n = norm(v); const k = NAK[n] ? n : NAK_ALIAS[n]
+  if (!k || lang !== 'hindi') return String(v ?? '')
+  return NAK[k]
+}
+
+/** Bhav ki ginti: 4 → "4थे" / "4th" / "4the". Wahi roop jo saar.py likhta hai. */
+export function bhavN(n: number, lang: Lang): string {
+  if (lang === 'hindi') return n + (n === 1 ? 'ले' : n === 2 || n === 3 ? 'रे' : n === 4 ? 'थे' : n === 6 ? 'ठे' : 'वें')
+  if (lang === 'english') return n + (n === 1 ? 'st' : n === 2 ? 'nd' : n === 3 ? 'rd' : 'th')
+  return n + (n === 1 ? 'le' : n === 2 || n === 3 ? 're' : n === 4 ? 'the' : n === 6 ? 'the' : 've')
+}
+
+/** Ateet table ka chhota Ch.34 label. Vedic arth wahi, sirf bhasha. */
+const CH34: Record<string, [string, string]> = {
+  yogakaraka: ['योगकारक', 'yogakaraka'], shubh: ['शुभ', 'benefic'], sama: ['सम', 'neutral'],
+  sam: ['सम', 'neutral'], paap: ['पाप', 'malefic'], maarak: ['मारक', 'maraka'],
+}
+export function ch34L(v: unknown, lang: Lang): string {
+  const raw = String(v ?? '')
+  const t = CH34[raw.trim().toLowerCase()]
+  if (lang === 'hindi') return 'अ.34: ' + (t ? t[0] : raw)
+  if (lang === 'english') return 'Ch.34: ' + (t ? t[1] : raw)
+  return 'Ch.34: ' + raw
+}
+
+/** Shani ke daur ka naam. */
+const SHANI: Record<string, [string, string, string]> = {
+  'SADE SATI': ['Sade Sati', 'साढ़े साती', 'Sade Sati'], 'DHAIYA': ['Dhaiya', 'ढैया', 'Dhaiya (2.5-yr Saturn)'],
+  'KANTAK': ['Kantak Shani', 'कंटक शनि', 'Kantak Shani'],
+}
+export function shaniL(v: unknown, lang: Lang): string {
+  const k = String(v ?? '').trim().toUpperCase().replace(/[_-]/g, ' ')
+  const t = SHANI[k]
+  if (!t) return String(v ?? '')
+  return lang === 'hindi' ? t[1] : lang === 'english' ? t[2] : t[0]
+}
+
+/** Sade Sati ke charan / Dhaiya ki jagah — engine ke fixed vaakya. */
+export function charanL(v: unknown, lang: Lang): string {
+  const x = String(v ?? '').trim()
+  if (lang === 'hinglish') return x
+  const H = lang === 'hindi'
+  const fixed: Record<string, [string, string]> = {
+    'PEHLA charan (uthaav)':        ['पहला चरण (उठाव)', 'first phase (rising)'],
+    'DOOSRA charan (sabse bhaari)': ['दूसरा चरण (सबसे भारी)', 'second phase (heaviest)'],
+    'TEESRA charan (utaar)':        ['तीसरा चरण (उतार)', 'third phase (easing)'],
+  }
+  if (fixed[x]) return H ? fixed[x][0] : fixed[x][1]
+  const m = /^Chandra se (\d+)\w*$/i.exec(x)
+  if (m) return H ? `चन्द्र से ${bhavN(+m[1], 'hindi').replace(/थे$/, 'था').replace(/वें$/, 'वाँ')}` : `${bhavN(+m[1], 'english')} from the Moon`
+  return x
+}
+
+/** Ateet ke "khule vishay" ka kyun — granth_reading ke teen fixed roop. */
+export function kyunL(v: unknown, lang: Lang): string {
+  const x = String(v ?? '').trim()
+  if (lang === 'hinglish' || !x) return x
+  const H = lang === 'hindi'
+  let m = /^(\w+) khud (\d+)\w* ghar mein baitha hai$/i.exec(x)
+  if (m) return H ? `${grahL(m[1], lang)} स्वयं ${bhavN(+m[2], lang)} भाव में बैठा है`
+                  : `${grahL(m[1], lang)} itself sits in the ${bhavN(+m[2], lang)} house`
+  m = /^(\w+) (\d+)\w* ghar ka MALIK hai$/i.exec(x)
+  if (m) return H ? `${grahL(m[1], lang)} ${bhavN(+m[2], lang)} भाव का स्वामी है`
+                  : `${grahL(m[1], lang)} is the lord of the ${bhavN(+m[2], lang)} house`
+  m = /^(\w+) (.+) ka MUKHYA GRAH hai$/i.exec(x)
+  if (m) return H ? `${grahL(m[1], lang)} "${vishayL(m[2], lang)}" का मुख्य (कारक) ग्रह है`
+                  : `${grahL(m[1], lang)} is the main significator of "${vishayL(m[2], lang)}"`
+  return x
 }

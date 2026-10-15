@@ -3,6 +3,16 @@
 /**
  *
  * ══════════════════════════════════════════════════════════════════════════
+ * v12.4 — 15 OCTOBER 2026 — Rohiit ki ASLI paid Hindi report (23 Sep 1975)
+ *          par bache mishran: (a) Hero/chal raha daur: grah, lagna, nakshatra
+ *          Devanagari ("Rahu महादशा · Saturn अन्तर्दशा" → "राहु महादशा · शनि
+ *          अन्तर्दशा"); (b) ATEET: MD/AD ke naam, khule vishay ka kyun, Ch.34
+ *          label, "granth yahan chup hai", "baat nahi dikhayi ja rahi", Shani
+ *          ke daur (DHAIYA→ढैया, charan, "ABHI CHAL RAHI HAI"), aur ek row mein
+ *          akela "—" phal (engine '—' bhejta hai — ab chhapta nahi);
+ *          (c) PARAMPARIK UPAY poora Hindi (components/report/upayBhasha.ts) —
+ *          labels + har khaana. Vedic logic kahin nahi badli.
+ *
  * v12.3 — 15 OCTOBER 2026 — FINAL DEPLOY ke liye Hindi/English ke bache
  *          Hinglish leak band (Rohiit ne paid Hindi PDF par pakde):
  *          (a) GharCards ko isPaid — "18 mahine" label paid par "5 saal";
@@ -522,7 +532,8 @@ import GharCards   from '@/components/report/GharCards'
 import TeenBaatein from '@/components/report/TeenBaatein'
 import AageCards   from '@/components/report/AageCards'
 import ReportCTA   from '@/components/report/ReportCTA'
-import { vishayL } from '@/components/report/theme'
+import { vishayL, grahL, rashiL, nakL, ch34L, shaniL, charanL, kyunL } from '@/components/report/theme'
+import { upayL } from '@/components/report/upayBhasha'
 
 const GOLD    = '#D4AF37'
 const RAZORPAY_BLUE = '#3395FF'
@@ -2946,12 +2957,15 @@ function UpayCards({ remedies, isPaid, slug, lang }: { remedies: UpayItem[]; isP
   const visibleCount = isPaid ? 5 : 1
   const visible = remedies.slice(0, visibleCount)
 
+  // v12.4 — label teen bhasha, aur har khaana upayL() se (components/report/upayBhasha.ts)
+  const H = lang==='hindi', E = lang==='english'
+  const T = (v:unknown) => upayL(v, lang)
   const UPAY_CONFIG = [
-    { type: 'mantra',   icon: '🕉️', label: 'Mantra Sadhana',    color: '#60a5fa' },
-    { type: 'gemstone', icon: '💎', label: 'Ratna Therapy',      color: '#f472b6' },
-    { type: 'vrat',     icon: '🪔', label: 'Vrat aur Upasana',   color: GOLD      },
-    { type: 'dana',     icon: '🌾', label: 'Dana aur Seva',       color: '#34d399' },
-    { type: 'special',  icon: '🔱', label: 'Vishesh Upay',       color: '#a78bfa' },
+    { type: 'mantra',   icon: '🕉️', label: H?'मन्त्र साधना':E?'Mantra Sadhana':'Mantra Sadhana',      color: '#60a5fa' },
+    { type: 'gemstone', icon: '💎', label: H?'रत्न':E?'Gemstone':'Ratna',                              color: '#f472b6' },
+    { type: 'vrat',     icon: '🪔', label: H?'व्रत और उपासना':E?'Fast and worship':'Vrat aur Upasana', color: GOLD      },
+    { type: 'dana',     icon: '🌾', label: H?'दान और सेवा':E?'Charity and service':'Dana aur Seva',    color: '#34d399' },
+    { type: 'special',  icon: '🔱', label: H?'विशेष उपाय':E?'Special remedy':'Vishesh Upay',           color: '#a78bfa' },
   ]
 
   return (
@@ -2969,22 +2983,22 @@ function UpayCards({ remedies, isPaid, slug, lang }: { remedies: UpayItem[]; isP
                 <span style={{ fontSize: '22px' }}>{cfg.icon}</span>
                 <div>
                   <p style={{ margin: 0, color: cfg.color, fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
-                    Upay {upay.upay_number} — {cfg.label}
+                    {H?'उपाय':E?'Remedy':'Upay'} {upay.upay_number} — {cfg.label}
                   </p>
-                  {upay.planet && <p style={{ margin: '2px 0 0', color: '#64748b', fontSize: '11px' }}>Planet: {upay.planet}</p>}
+                  {upay.planet && <p style={{ margin: '2px 0 0', color: '#64748b', fontSize: '11px' }}>{H?'ग्रह':E?'Planet':'Grah'}: {grahL(upay.planet,lang)}</p>}
                 </div>
               </div>
 
               {upay.type === 'mantra' && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                  <p style={{ margin: 0, color: '#e2e8f0', fontSize: '14px', fontWeight: 600, fontFamily: 'Georgia,serif' }}>{upay.mantra}</p>
+                  <p style={{ margin: 0, color: '#e2e8f0', fontSize: '14px', fontWeight: 600, fontFamily: 'Georgia,serif' }}>{T(upay.mantra)}</p>
                   <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                    {upay.count && <span style={{ padding: '3px 8px', borderRadius: '6px', background: `${cfg.color}15`, color: cfg.color, fontSize: '11px' }}>🔢 {upay.count}</span>}
-                    {upay.time  && <span style={{ padding: '3px 8px', borderRadius: '6px', background: `${cfg.color}15`, color: cfg.color, fontSize: '11px' }}>⏰ {upay.time}</span>}
-                    {upay.day   && <span style={{ padding: '3px 8px', borderRadius: '6px', background: `${cfg.color}15`, color: cfg.color, fontSize: '11px' }}>📅 {upay.day}</span>}
+                    {upay.count && <span style={{ padding: '3px 8px', borderRadius: '6px', background: `${cfg.color}15`, color: cfg.color, fontSize: '11px' }}>🔢 {T(upay.count)}</span>}
+                    {upay.time  && <span style={{ padding: '3px 8px', borderRadius: '6px', background: `${cfg.color}15`, color: cfg.color, fontSize: '11px' }}>⏰ {T(upay.time)}</span>}
+                    {upay.day   && <span style={{ padding: '3px 8px', borderRadius: '6px', background: `${cfg.color}15`, color: cfg.color, fontSize: '11px' }}>📅 {T(upay.day)}</span>}
                   </div>
-                  {upay.focus   && <p style={{ margin: '4px 0 0', color: '#94a3b8', fontSize: '12px' }}>🎯 Focus: {upay.focus}</p>}
-                  {upay.special && <p style={{ margin: '2px 0 0', color: GOLD, fontSize: '12px', fontStyle: 'italic' }}>✨ {upay.special}</p>}
+                  {upay.focus   && <p style={{ margin: '4px 0 0', color: '#94a3b8', fontSize: '12px' }}>🎯 {H?'उद्देश्य':'Focus'}: {T(upay.focus)}</p>}
+                  {upay.special && <p style={{ margin: '2px 0 0', color: GOLD, fontSize: '12px', fontStyle: 'italic' }}>✨ {T(upay.special)}</p>}
                 </div>
               )}
 
@@ -2992,23 +3006,23 @@ function UpayCards({ remedies, isPaid, slug, lang }: { remedies: UpayItem[]; isP
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                   {upay.lagna_stone && (
                     <div style={{ padding: '10px 12px', background: 'rgba(244,114,182,0.06)', border: '1px solid rgba(244,114,182,0.2)', borderRadius: '8px' }}>
-                      <p style={{ margin: '0 0 4px', color: '#f472b6', fontSize: '10px', fontWeight: 700, textTransform: 'uppercase' }}>💍 {upay.lagna_stone.for}</p>
-                      <p style={{ margin: '0 0 4px', color: '#fff', fontSize: '14px', fontWeight: 600 }}>{upay.lagna_stone.stone}</p>
+                      <p style={{ margin: '0 0 4px', color: '#f472b6', fontSize: '10px', fontWeight: 700, textTransform: 'uppercase' }}>💍 {T(upay.lagna_stone.for)}</p>
+                      <p style={{ margin: '0 0 4px', color: '#fff', fontSize: '14px', fontWeight: 600 }}>{T(upay.lagna_stone.stone)}</p>
                       <p style={{ margin: 0, color: '#94a3b8', fontSize: '11px' }}>
-                        {upay.lagna_stone.metal} · {upay.lagna_stone.finger} · {upay.lagna_stone.day}
+                        {T(upay.lagna_stone.metal)} · {T(upay.lagna_stone.finger)} · {T(upay.lagna_stone.day)}
                       </p>
-                      {upay.lagna_stone.note && <p style={{ margin: '4px 0 0', color: '#64748b', fontSize: '11px', fontStyle: 'italic' }}>{upay.lagna_stone.note}</p>}
+                      {upay.lagna_stone.note && <p style={{ margin: '4px 0 0', color: '#64748b', fontSize: '11px', fontStyle: 'italic' }}>{T(upay.lagna_stone.note)}</p>}
                     </div>
                   )}
                   {upay.dasha_stone && (
                     <div style={{ padding: '10px 12px', background: 'rgba(212,175,55,0.06)', border: `1px solid ${G(0.2)}`, borderRadius: '8px' }}>
-                      <p style={{ margin: '0 0 4px', color: GOLD, fontSize: '10px', fontWeight: 700, textTransform: 'uppercase' }}>⚡ {upay.dasha_stone.for}</p>
-                      <p style={{ margin: '0 0 2px', color: '#fff', fontSize: '14px', fontWeight: 600 }}>{upay.dasha_stone.stone}</p>
+                      <p style={{ margin: '0 0 4px', color: GOLD, fontSize: '10px', fontWeight: 700, textTransform: 'uppercase' }}>⚡ {T(upay.dasha_stone.for)}</p>
+                      <p style={{ margin: '0 0 2px', color: '#fff', fontSize: '14px', fontWeight: 600 }}>{T(upay.dasha_stone.stone)}</p>
                       <p style={{ margin: '0 0 2px', color: '#94a3b8', fontSize: '11px' }}>
-                        {upay.dasha_stone.metal} · {upay.dasha_stone.finger} · {upay.dasha_stone.day}
+                        {T(upay.dasha_stone.metal)} · {T(upay.dasha_stone.finger)} · {T(upay.dasha_stone.day)}
                       </p>
-                      {upay.dasha_stone.substitute && <p style={{ margin: '2px 0', color: '#64748b', fontSize: '11px' }}>Substitute: {upay.dasha_stone.substitute}</p>}
-                      {upay.dasha_stone.note && <p style={{ margin: '2px 0 0', color: '#64748b', fontSize: '11px', fontStyle: 'italic' }}>{upay.dasha_stone.note}</p>}
+                      {upay.dasha_stone.substitute && <p style={{ margin: '2px 0', color: '#64748b', fontSize: '11px' }}>{H?'विकल्प (उपरत्न)':E?'Substitute':'Vikalp'}: {T(upay.dasha_stone.substitute)}</p>}
+                      {upay.dasha_stone.note && <p style={{ margin: '2px 0 0', color: '#64748b', fontSize: '11px', fontStyle: 'italic' }}>{T(upay.dasha_stone.note)}</p>}
                     </div>
                   )}
                 </div>
@@ -3017,33 +3031,33 @@ function UpayCards({ remedies, isPaid, slug, lang }: { remedies: UpayItem[]; isP
               {upay.type === 'vrat' && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                   <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                    {upay.name   && <span style={{ padding: '4px 10px', borderRadius: '6px', background: `${GOLD}15`, color: GOLD, fontSize: '12px', fontWeight: 600 }}>{upay.name}</span>}
-                    {upay.day    && <span style={{ padding: '4px 10px', borderRadius: '6px', background: `${cfg.color}15`, color: cfg.color, fontSize: '12px' }}>📅 {upay.day}</span>}
-                    {upay.deity  && <span style={{ padding: '4px 10px', borderRadius: '6px', background: 'rgba(167,139,250,0.1)', color: '#a78bfa', fontSize: '12px' }}>🙏 {upay.deity}</span>}
+                    {upay.name   && <span style={{ padding: '4px 10px', borderRadius: '6px', background: `${GOLD}15`, color: GOLD, fontSize: '12px', fontWeight: 600 }}>{T(upay.name)}</span>}
+                    {upay.day    && <span style={{ padding: '4px 10px', borderRadius: '6px', background: `${cfg.color}15`, color: cfg.color, fontSize: '12px' }}>📅 {T(upay.day)}</span>}
+                    {upay.deity  && <span style={{ padding: '4px 10px', borderRadius: '6px', background: 'rgba(167,139,250,0.1)', color: '#a78bfa', fontSize: '12px' }}>🙏 {T(upay.deity)}</span>}
                   </div>
-                  {upay.prasad  && <p style={{ margin: '4px 0 0', color: '#94a3b8', fontSize: '12px' }}>🌸 Prasad: {upay.prasad}</p>}
-                  {upay.yantra  && <p style={{ margin: '2px 0 0', color: '#94a3b8', fontSize: '12px' }}>🔯 Yantra: {upay.yantra} — {upay.yantra_placement}</p>}
-                  {upay.special && <p style={{ margin: '4px 0 0', color: GOLD, fontSize: '12px', fontStyle: 'italic' }}>✨ {upay.special}</p>}
+                  {upay.prasad  && <p style={{ margin: '4px 0 0', color: '#94a3b8', fontSize: '12px' }}>🌸 {H?'प्रसाद':'Prasad'}: {T(upay.prasad)}</p>}
+                  {upay.yantra  && <p style={{ margin: '2px 0 0', color: '#94a3b8', fontSize: '12px' }}>🔯 {H?'यन्त्र':'Yantra'}: {T(upay.yantra)} — {T(upay.yantra_placement)}</p>}
+                  {upay.special && <p style={{ margin: '4px 0 0', color: GOLD, fontSize: '12px', fontStyle: 'italic' }}>✨ {T(upay.special)}</p>}
                 </div>
               )}
 
               {upay.type === 'dana' && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                  {upay.items    && <p style={{ margin: 0, color: '#e2e8f0', fontSize: '13px' }}>🌾 {upay.items}</p>}
+                  {upay.items    && <p style={{ margin: 0, color: '#e2e8f0', fontSize: '13px' }}>🌾 {T(upay.items)}</p>}
                   <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '4px' }}>
-                    {upay.day       && <span style={{ padding: '3px 8px', borderRadius: '6px', background: `${cfg.color}15`, color: cfg.color, fontSize: '11px' }}>📅 {upay.day}</span>}
-                    {upay.recipient && <span style={{ padding: '3px 8px', borderRadius: '6px', background: `${cfg.color}15`, color: cfg.color, fontSize: '11px' }}>👤 {upay.recipient}</span>}
+                    {upay.day       && <span style={{ padding: '3px 8px', borderRadius: '6px', background: `${cfg.color}15`, color: cfg.color, fontSize: '11px' }}>📅 {T(upay.day)}</span>}
+                    {upay.recipient && <span style={{ padding: '3px 8px', borderRadius: '6px', background: `${cfg.color}15`, color: cfg.color, fontSize: '11px' }}>👤 {T(upay.recipient)}</span>}
                   </div>
-                  {upay.note && <p style={{ margin: '6px 0 0', color: '#64748b', fontSize: '11px', fontStyle: 'italic' }}>{upay.note}</p>}
+                  {upay.note && <p style={{ margin: '6px 0 0', color: '#64748b', fontSize: '11px', fontStyle: 'italic' }}>{T(upay.note)}</p>}
                 </div>
               )}
 
               {upay.type === 'special' && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                  {upay.text    && <p style={{ margin: 0, color: '#e2e8f0', fontSize: '13px', lineHeight: 1.6 }}>{upay.text}</p>}
-                  {upay.focus   && <p style={{ margin: '4px 0 0', color: '#a78bfa', fontSize: '12px' }}>🎯 Focus: {upay.focus}</p>}
-                  {upay.timing  && <p style={{ margin: '2px 0 0', color: GOLD, fontSize: '11px' }}>⏰ {upay.timing}</p>}
-                  {upay.blessing && <p style={{ margin: '6px 0 0', color: '#94a3b8', fontSize: '12px', fontStyle: 'italic' }}>{upay.blessing}</p>}
+                  {upay.text    && <p style={{ margin: 0, color: '#e2e8f0', fontSize: '13px', lineHeight: 1.6 }}>{T(upay.text)}</p>}
+                  {upay.focus   && <p style={{ margin: '4px 0 0', color: '#a78bfa', fontSize: '12px' }}>🎯 {H?'उद्देश्य':'Focus'}: {T(upay.focus)}</p>}
+                  {upay.timing  && <p style={{ margin: '2px 0 0', color: GOLD, fontSize: '11px' }}>⏰ {T(upay.timing)}</p>}
+                  {upay.blessing && <p style={{ margin: '6px 0 0', color: '#94a3b8', fontSize: '12px', fontStyle: 'italic' }}>{T(upay.blessing)}</p>}
                 </div>
               )}
             </div>
@@ -3254,7 +3268,7 @@ function GranthAteet({ a, lang }:{ a:any; lang:Lang }) {
             <React.Fragment key={`md-${mi}`}>
               <tr style={{...gRow(mi),
                    background: marks[mi]==='yes' ? 'rgba(34,197,94,0.08)' : G(0.05)}}>
-                <Td c={GOLD} b>{s(m.md)} <span style={{fontSize:'10px',opacity:0.7}}>MD</span></Td>
+                <Td c={GOLD} b>{grahL(s(m.md),lang)} <span style={{fontSize:'10px',opacity:0.7}}>{lang==='hindi'?'महादशा':'MD'}</span></Td>
                 {/* 🔴 16 Sep — MD row par sirf SHURU ki tareekh dikhti thi, ANT ki
                     nahi ("Ketu MD  Sep 1975"). Grahak ko agli MD dekh kar khud
                     ginna padta tha. Ab dono. */}
@@ -3278,13 +3292,13 @@ function GranthAteet({ a, lang }:{ a:any; lang:Lang }) {
                       </span>
                       {m.khule_vishay[0]?.kyun?.[0] &&
                         <div style={{color:'#64748b',fontSize:'11px',marginTop:'3px'}}>
-                          ({s(m.khule_vishay[0].kyun[0])})</div>}
+                          ({kyunL(s(m.khule_vishay[0].kyun[0]),lang)})</div>}
                     </div>
                   ) : <span style={{color:'#64748b'}}>—</span>}
                 </Td>
                 <Td c="#64748b">
                   {s(m.ch34)!=='GRANTH-CHUP'
-                    ? <span>Ch.34: {s(m.ch34)}</span>
+                    ? <span>{ch34L(s(m.ch34),lang)}</span>
                     : <span style={{fontSize:'11px'}}>{lang==='english'?'granth silent':lang==='hindi'?'ग्रन्थ चुप':'granth chup'}</span>}
                   <div style={{display:'flex',gap:'6px',marginTop:'8px'}}>
                     {(['yes','no'] as const).map(v=>(
@@ -3309,7 +3323,7 @@ function GranthAteet({ a, lang }:{ a:any; lang:Lang }) {
               {(Array.isArray(m.ad)?m.ad:[]).map((d:any,di:number)=>(
                 <tr key={`ad-${mi}-${di}`} style={gRow(di+1)}>
                   <Td c="#94a3b8">
-                    <span style={{opacity:0.5}}>└ </span>{s(m.md)}/{s(d.ad)}
+                    <span style={{opacity:0.5}}>└ </span>{grahL(s(m.md),lang)}/{grahL(s(d.ad),lang)}
                     {/* 🔴 16 Sep — pehle "Rahu/Shani← ABHI" bina space ke chhapta tha */}
                     {d.abhi && <span style={{color:'#22c55e',fontSize:'10px',
                          marginLeft:'5px',whiteSpace:'nowrap'}}>{'\u00A0← '+(lang==='english'?'NOW':lang==='hindi'?'अभी':'ABHI')}</span>}
@@ -3328,8 +3342,10 @@ function GranthAteet({ a, lang }:{ a:any; lang:Lang }) {
                     {/* 🔴 16 Sep — s() khaali ko "—" bana deta hai, aur ek asli
                         report par ek row mein akela "—" chhapa tha (BPHS 53-53).
                         Ab khaali phal chhapte hi nahi. */}
+                    {/* v12.4 — engine kabhi phal ki jagah '—' bhejta hai (Shukra/Shani,
+                        BPHS 60.53 par asli report mein akela "—" chhapa). Wo bhi band. */}
                     {(Array.isArray(d.granth)?d.granth:[])
-                      .filter((gr:any)=>gr?.phal && String(gr.phal).trim())
+                      .filter((gr:any)=>gr?.phal && String(gr.phal).trim() && String(gr.phal).trim()!=='—')
                       .map((gr:any,gi:number)=>(
                       <div key={gi} style={{marginBottom:gi?'6px':0}}>
                         <span style={{color:gr.kind==='shubh'?'#86efac':gr.kind==='kathin'?'#fca5a5':'#cbd5e1'}}>
@@ -3339,12 +3355,13 @@ function GranthAteet({ a, lang }:{ a:any; lang:Lang }) {
                     ))}
                     {(!d.granth||!d.granth.length) &&
                       <span style={{color:'#64748b',fontSize:'12px'}}>
-                        {lang==='english'?'the granth is silent here':'granth yahan chup hai'}
+                        {lang==='english'?'the granth is silent here':lang==='hindi'?'ग्रन्थ यहाँ चुप है':'granth yahan chup hai'}
                       </span>}
                     {Number(d.chhupaya_gaya)>0 &&
                       <div style={{color:'#64748b',fontSize:'11px',marginTop:'4px'}}>
                         ({d.chhupaya_gaya} {lang==='english'
                           ? 'entries not shown — the granth speaks of illness there'
+                          : lang==='hindi' ? 'बात नहीं दिखाई जा रही — ग्रन्थ वहाँ रोग की बात करता है'
                           : 'baat nahi dikhayi ja rahi — granth wahan rog ki baat karta hai'})
                       </div>}
                   </Td>
@@ -3363,13 +3380,13 @@ function GranthAteet({ a, lang }:{ a:any; lang:Lang }) {
           {shani.map((x:any,i:number)=>(
             <tr key={`sh-${i}`} style={{...gRow(i),
                  background:x.chal_raha?'rgba(250,204,21,0.12)':'rgba(250,204,21,0.05)'}}>
-              <Td c="#fbbf24" b>⚠️ {s(x.kya)}
+              <Td c="#fbbf24" b>⚠️ {shaniL(s(x.kya),lang)}
                 {x.chal_raha && <span style={{color:'#22c55e',fontSize:'10px',
-                     marginLeft:'6px',fontWeight:700}}>{'\u00A0← ABHI CHAL RAHI HAI'}</span>}
+                     marginLeft:'6px',fontWeight:700}}>{'\u00A0← '+(lang==='english'?'RUNNING NOW':lang==='hindi'?'अभी चल रही है':'ABHI CHAL RAHI HAI')}</span>}
               </Td>
               <Td c="#fbbf24">{s(x.se)} – {s(x.tak)}</Td>
-              <Td c="#94a3b8">{Array.isArray(x.charan)?x.charan.join(', '):s(x.charan)}</Td>
-              <Td c="#94a3b8">{lang==='english'?'Saturn\u2019s long cycle':'Shani ka bada chakkar'}</Td>
+              <Td c="#94a3b8">{Array.isArray(x.charan)?x.charan.map((c:any)=>charanL(c,lang)).join(', '):charanL(s(x.charan),lang)}</Td>
+              <Td c="#94a3b8">{lang==='english'?'Saturn\u2019s long cycle':lang==='hindi'?'शनि का बड़ा चक्कर':'Shani ka bada chakkar'}</Td>
               <Td c="#64748b">—</Td>
             </tr>
           ))}
@@ -4403,10 +4420,10 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
             </div>
             <p style={{margin:'0 0 6px',color:G(0.6),fontSize:'12px',fontWeight:600,letterSpacing:'0.08em',textTransform:'uppercase'}}>Vedic Astrology Analysis · {domainLabel}</p>
             {personName!=='—' && <p style={{margin:'0 0 4px',color:GOLD,fontSize:'16px',fontWeight:700,fontFamily:'Georgia,serif'}}>{personName}{lang==='english'?"'s Kundali":lang==='hindi'?' की कुण्डली':' ki Kundali'}</p>}
-            <h1 style={{margin:'0 0 6px',color:'#fff',fontSize:'22px',fontFamily:'Georgia,serif',fontWeight:700}}>{mahadasha} {lang==='hindi'?'महादशा':'Mahadasha'} · {antardasha} {lang==='hindi'?'अन्तर्दशा':'Antardasha'}</h1>
-            {adRange && <p style={{margin:'0 0 6px',color:'#cbd5e1',fontSize:'13px'}}>{lang==='english'?'Running period':lang==='hindi'?'चल रहा दौर':'Chal raha daur'}: <b style={{color:'#fff'}}>{mahadasha}/{antardasha} · {adRange}</b></p>}
+            <h1 style={{margin:'0 0 6px',color:'#fff',fontSize:'22px',fontFamily:'Georgia,serif',fontWeight:700}}>{grahL(mahadasha,lang)} {lang==='hindi'?'महादशा':'Mahadasha'} · {grahL(antardasha,lang)} {lang==='hindi'?'अन्तर्दशा':'Antardasha'}</h1>
+            {adRange && <p style={{margin:'0 0 6px',color:'#cbd5e1',fontSize:'13px'}}>{lang==='english'?'Running period':lang==='hindi'?'चल रहा दौर':'Chal raha daur'}: <b style={{color:'#fff'}}>{grahL(mahadasha,lang)}/{grahL(antardasha,lang)} · {adRange}</b></p>}
             <p style={{margin:'0 0 4px',color:'#94a3b8',fontSize:'14px'}}>{birthLine}</p>
-            <p style={{margin:'0 0 16px',color:'#64748b',fontSize:'12.5px'}}>{lagna} {lang==='hindi'?'लग्न':'Lagna'} · {nakshatra} {lang==='hindi'?'नक्षत्र':'Nakshatra'} · <span style={{color:'#475569'}}>{lang==='english'?'if these details are wrong, generate the reading again':lang==='hindi'?'यह विवरण ग़लत हो तो रीडिंग दोबारा बनाएँ':'ye vivaran galat ho to reading dobara banayein'}</span></p>
+            <p style={{margin:'0 0 16px',color:'#64748b',fontSize:'12.5px'}}>{rashiL(lagna,lang)} {lang==='hindi'?'लग्न':'Lagna'} · {nakL(nakshatra,lang)} {lang==='hindi'?'नक्षत्र':'Nakshatra'} · <span style={{color:'#475569'}}>{lang==='english'?'if these details are wrong, generate the reading again':lang==='hindi'?'यह विवरण ग़लत हो तो रीडिंग दोबारा बनाएँ':'ye vivaran galat ho to reading dobara banayein'}</span></p>
             <div style={{display:'flex',flexWrap:'wrap',gap:'6px',justifyContent:'center',marginBottom:'12px'}}>
               {[{icon:'⚡',label:'Swiss Ephemeris',color:'#60a5fa'},{icon:'📖',label:'BPHS Classical',color:'#a78bfa'},{icon:'🔮',label:'Bhrigu Nandi',color:'#f472b6'},{icon:'⚖️',label:'Shadbala',color:'#34d399'}].map(b=>(<span key={b.label} style={{display:'inline-flex',alignItems:'center',gap:'4px',padding:'5px 11px',borderRadius:'20px',fontSize:'11px',fontWeight:600,background:`${b.color}15`,border:`1px solid ${b.color}30`,color:b.color}}>{b.icon} {b.label}</span>))}
             </div>

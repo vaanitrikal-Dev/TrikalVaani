@@ -1,8 +1,10 @@
 'use client'
 
 /**
- * components/report/AageCards.tsx — v1.1 — 15 October 2026
+ * components/report/AageCards.tsx — v1.2 — 15 October 2026
  *
+ * v1.2 — grah ke naam teen bhasha ("Rahu / Shani" → "राहु / शनि"), aur
+ *        shaniL ab theme.tsx se (Ateet table bhi wahi use karta hai).
  * v1.1 — Shani ke daur ka naam (SADE SATI / DHAIYA / KANTAK) Hindi/English.
  *
  * AAGE KA DAUR — table ki jagah CARDS (mobile par 4-column table scroll
@@ -16,7 +18,7 @@
  */
 
 import React from 'react'
-import { Lang, GOLD, G, CARD_BG, s, L, Bold } from './theme'
+import { Lang, GOLD, G, CARD_BG, s, L, Bold, grahL, shaniL } from './theme'
 
 function ch34(x: unknown, lang: Lang): string {
   const d = s(x)
@@ -30,17 +32,6 @@ function ch34(x: unknown, lang: Lang): string {
   }
   const t = map[d.toLowerCase()]
   return t ? L(lang, ...t) + ' (BPHS Ch.34)' : `Ch.34: ${d}`
-}
-
-const SHANI: Record<string, [string, string, string]> = {
-  'SADE SATI': ['Sade Sati', 'साढ़े साती', 'Sade Sati'], 'DHAIYA': ['Dhaiya', 'ढैया', 'Dhaiya (2.5-yr Saturn)'],
-  'KANTAK': ['Kantak Shani', 'कंटक शनि', 'Kantak Shani'],
-}
-function shaniL(v: unknown, lang: Lang): string {
-  const k = String(v ?? '').trim().toUpperCase().replace(/[_-]/g, ' ')
-  const t = SHANI[k]
-  if (!t) return s(v)
-  return lang === 'hindi' ? t[1] : lang === 'english' ? t[2] : t[0]
 }
 
 export default function AageCards({ a, isPaid, lang, slug }: { a: any; isPaid: boolean; lang: Lang; slug: string }) {
@@ -70,14 +61,14 @@ export default function AageCards({ a, isPaid, lang, slug }: { a: any; isPaid: b
                                 background: CARD_BG, padding: '12px 14px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '10px', flexWrap: 'wrap' }}>
               <div style={{ color: GOLD, fontWeight: 700, fontSize: '14px', fontFamily: 'Georgia,serif' }}>
-                {s(x.md)} / {s(x.ad)}
+                {grahL(s(x.md), lang)} / {grahL(s(x.ad), lang)}
                 {x.abhi && <span style={{ marginLeft: '8px', color: '#22c55e', fontSize: '10px', fontWeight: 700 }}>
                   {L(lang, '← ABHI', '← अभी', '← NOW')}</span>}
               </div>
               <div style={{ color: '#e2e8f0', fontSize: '13px', fontWeight: 600 }}>{s(x.se)} – {s(x.tak)}</div>
             </div>
             {x.sd && <div style={{ color: '#64748b', fontSize: '11px', marginTop: '2px' }}>
-              {L(lang, 'Sookshma dasha', 'सूक्ष्म दशा', 'Sookshma')}: {s(x.sd)}</div>}
+              {L(lang, 'Sookshma dasha', 'सूक्ष्म दशा', 'Sookshma')}: {grahL(s(x.sd), lang)}</div>}
 
             <div style={{ marginTop: '8px', fontSize: '13px', lineHeight: 1.7 }}>
               {lines.length ? lines.map((g: any, gi: number) => (
