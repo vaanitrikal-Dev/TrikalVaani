@@ -115,7 +115,7 @@ const T: Record<string, [string, string]> = {
   // note / ashirwad
   'Dana should be given with full devotion. Maa Shakti witnesses every act of giving.':
     ['दान पूरी श्रद्धा से दें। माँ शक्ति हर दान की साक्षी हैं।', ''],
-  'Jai Maa Shakti - Trikal Vaani ke anusar yeh upay aapke liye specifically chune gaye hain':
+  'Jai Maa Shakti - Trikaal Vaani ke anusar yeh upay aapke liye specifically chune gaye hain':
     ['जय माँ शक्ति — त्रिकाल वाणी के अनुसार ये उपाय ख़ास आपके लिए चुने गए हैं', 'Jai Maa Shakti — Trikaal Vaani chose these remedies specifically for you'],
   'Wear on birth nakshatra day after purifying in raw milk':
     ['जन्म नक्षत्र वाले दिन, कच्चे दूध में शुद्ध करके पहनें', ''],
