@@ -1,7 +1,11 @@
 'use client'
 
 /**
- * components/report/TeenBaatein.tsx — v1.1 — 15 October 2026 — vishay Hindi/English (vishayL)
+ * components/report/TeenBaatein.tsx — v1.2 — 15 October 2026
+ *
+ * v1.2 — ⭐ hataate waqt uske baad ka space bhi — PDF par "( Nov 2026 से)"
+ *        chhap raha tha, ab "(Nov 2026 से)".
+ * v1.1 — vishay Hindi/English (vishayL)
  *
  * "3 baatein jo aapke liye sabse zaroori hain" — hero ke theek neeche.
  * ROHIIT (15 Oct): grahak ko pehli screen par JAWAB chahiye, granth nahi.
@@ -26,7 +30,7 @@ function firstStarMonth(d: string): number {
 }
 function starRange(d: string): string {
   const m = /⭐\s*([A-Za-z]{3,}\s+\d{4}\s*[–-]\s*[A-Za-z]{3,}\s+\d{4})/.exec(d)
-  return m ? m[1] : d.replace(/⭐/g, '').trim()
+  return m ? m[1] : d.replace(/⭐\s*/g, '').trim()
 }
 
 export default function TeenBaatein({ saar, mukhya, lang }: { saar: string; mukhya: any[]; lang: Lang }) {
@@ -40,9 +44,9 @@ export default function TeenBaatein({ saar, mukhya, lang }: { saar: string; mukh
 
   const items: { icon: string; text: string; sub: string }[] = []
   const strong = P.ghar.find(g => haalOf(g) === 'MAZBOOT' && g.prediction)
-  if (strong) items.push({ icon: '✅', text: strong.prediction, sub: strong.dates.replace(/⭐/g, '').trim() })
+  if (strong) items.push({ icon: '✅', text: strong.prediction, sub: strong.dates.replace(/⭐\s*/g, '').trim() })
   const weak = P.ghar.find(g => haalOf(g) === 'KAMZOR' && g.prediction)
-  if (weak) items.push({ icon: '⚠️', text: weak.prediction, sub: weak.dates.replace(/⭐/g, '').trim() })
+  if (weak) items.push({ icon: '⚠️', text: weak.prediction, sub: weak.dates.replace(/⭐\s*/g, '').trim() })
   const star = P.ghar.filter(g => g.hari).sort((a, b) => firstStarMonth(a.dates) - firstStarMonth(b.dates))[0]
   if (star && star !== strong && star !== weak) {
     items.push({ icon: '⭐', text: L(lang, 'Sabse paas ka shubh samay', 'सबसे पास का शुभ समय', 'Nearest favourable window')

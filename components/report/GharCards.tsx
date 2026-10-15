@@ -1,7 +1,11 @@
 'use client'
 
 /**
- * components/report/GharCards.tsx — v1.1 — 15 October 2026
+ * components/report/GharCards.tsx — v1.2 — 15 October 2026
+ *
+ * v1.2 — isPaid prop: 'koi khidki nahi' wali line ab tier dekh kar — paid par
+ *        'agle 5 saal', free par '18 mahine' (Rohiit ne paid PDF par pakda:
+ *        paid report free jaisi lag rahi thi; engine sahi tha, label galat).
  *
  * v1.1 — vishay aur faisla ab Hindi/English mein (vishayL/faislaL); 'kya'
  *        (Hinglish sub-line) sirf Hinglish report par.
@@ -80,8 +84,8 @@ export function parseSaar(saar: string): SaarParsed {
 }
 
 /* ── ek card ─────────────────────────────────────────────────────────── */
-function GharCard({ g, m, lang, parat }: {
-  g: GharParsed; m: any; lang: Lang
+function GharCard({ g, m, lang, isPaid, parat }: {
+  g: GharParsed; m: any; lang: Lang; isPaid: boolean
   parat?: (m: any) => React.ReactNode
 }) {
   const haal = String(m?.haal || (/\*\*(.+?)\*\*/.exec(g.haalLine)?.[1] ?? '')).toUpperCase()
@@ -128,9 +132,13 @@ function GharCard({ g, m, lang, parat }: {
         </div>
       ) : (
         <div style={{ marginTop: '10px', color: '#94a3b8', fontSize: '12.5px', lineHeight: 1.6 }}>
-          {L(lang, 'Agle 18 mahine mein is ghar par gochar ki koi khidki nahi — jo hai wo neeche "Kyun?" mein.',
-                   'अगले 18 महीनों में इस भाव पर गोचर की कोई खिड़की नहीं — जो है वह नीचे "क्यों?" में।',
-                   'No transit window on this house in the next 18 months — what the chart holds is under "Why?".')}
+          {isPaid
+            ? L(lang, 'Agle 5 saal mein is ghar par gochar ki koi khidki nahi — jo hai wo neeche "Kyun?" mein.',
+                      'अगले 5 वर्षों में इस भाव पर गोचर की कोई खिड़की नहीं — जो है वह नीचे "क्यों?" में।',
+                      'No transit window on this house in the next 5 years — what the chart holds is under "Why?".')
+            : L(lang, 'Agle 18 mahine mein is ghar par gochar ki koi khidki nahi — jo hai wo neeche "Kyun?" mein.',
+                      'अगले 18 महीनों में इस भाव पर गोचर की कोई खिड़की नहीं — जो है वह नीचे "क्यों?" में।',
+                      'No transit window on this house in the next 18 months — what the chart holds is under "Why?".')}
         </div>
       )}
       {faisla && (
@@ -194,8 +202,8 @@ function GharCard({ g, m, lang, parat }: {
 }
 
 /* ── poora section ───────────────────────────────────────────────────── */
-export default function GharCards({ saar, mukhya, gaun, lang, parat }: {
-  saar: string; mukhya: any[]; gaun?: any[]; lang: Lang
+export default function GharCards({ saar, mukhya, gaun, lang, isPaid, parat }: {
+  saar: string; mukhya: any[]; gaun?: any[]; lang: Lang; isPaid: boolean
   parat?: (m: any) => React.ReactNode
 }) {
   const P = parseSaar(saar)
@@ -223,7 +231,7 @@ export default function GharCards({ saar, mukhya, gaun, lang, parat }: {
         {L(lang, '🔱 Granth se aapka saar', '🔱 ग्रन्थ से आपका सार', '🔱 Your reading from the granth')}
       </div>
       {P.kul && <p style={{ margin: '0 0 6px', color: '#cbd5e1', fontSize: '13.5px', lineHeight: 1.8 }}><Bold t={P.kul}/></p>}
-      {cards.map(({ g, m }) => <GharCard key={g.bhav} g={g} m={m} lang={lang} parat={parat}/>)}
+      {cards.map(({ g, m }) => <GharCard key={g.bhav} g={g} m={m} lang={lang} isPaid={isPaid} parat={parat}/>)}
       {P.baaki.map((p, i) => (
         <p key={i} style={{ margin: '10px 0 0', color: '#cbd5e1', fontSize: '13.5px', lineHeight: 1.85, whiteSpace: 'pre-line' }}>
           <Bold t={p}/></p>

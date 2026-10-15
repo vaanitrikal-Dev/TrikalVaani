@@ -1,7 +1,9 @@
 'use client'
 
 /**
- * components/report/AageCards.tsx — v1.0 — 15 October 2026
+ * components/report/AageCards.tsx — v1.1 — 15 October 2026
+ *
+ * v1.1 — Shani ke daur ka naam (SADE SATI / DHAIYA / KANTAK) Hindi/English.
  *
  * AAGE KA DAUR — table ki jagah CARDS (mobile par 4-column table scroll
  * hoti thi). Data WAHI: granth.aage (granth_api.py aage()). Har antardasha
@@ -28,6 +30,17 @@ function ch34(x: unknown, lang: Lang): string {
   }
   const t = map[d.toLowerCase()]
   return t ? L(lang, ...t) + ' (BPHS Ch.34)' : `Ch.34: ${d}`
+}
+
+const SHANI: Record<string, [string, string, string]> = {
+  'SADE SATI': ['Sade Sati', 'साढ़े साती', 'Sade Sati'], 'DHAIYA': ['Dhaiya', 'ढैया', 'Dhaiya (2.5-yr Saturn)'],
+  'KANTAK': ['Kantak Shani', 'कंटक शनि', 'Kantak Shani'],
+}
+function shaniL(v: unknown, lang: Lang): string {
+  const k = String(v ?? '').trim().toUpperCase().replace(/[_-]/g, ' ')
+  const t = SHANI[k]
+  if (!t) return s(v)
+  return lang === 'hindi' ? t[1] : lang === 'english' ? t[2] : t[0]
 }
 
 export default function AageCards({ a, isPaid, lang, slug }: { a: any; isPaid: boolean; lang: Lang; slug: string }) {
@@ -102,7 +115,7 @@ export default function AageCards({ a, isPaid, lang, slug }: { a: any; isPaid: b
           </div>
           {shani.map((x: any, i: number) => (
             <div key={i} style={{ color: '#e2e8f0', fontSize: '13px', marginTop: '5px' }}>
-              <span style={{ fontWeight: 700 }}>{s(x.kya)}</span> <span style={{ color: '#94a3b8' }}>{s(x.se)} – {s(x.tak)}</span>
+              <span style={{ fontWeight: 700 }}>{shaniL(x.kya, lang)}</span> <span style={{ color: '#94a3b8' }}>{s(x.se)} – {s(x.tak)}</span>
             </div>
           ))}
         </div>

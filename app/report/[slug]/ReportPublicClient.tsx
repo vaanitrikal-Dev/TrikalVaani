@@ -3,6 +3,17 @@
 /**
  *
  * ══════════════════════════════════════════════════════════════════════════
+ * v12.3 — 15 OCTOBER 2026 — FINAL DEPLOY ke liye Hindi/English ke bache
+ *          Hinglish leak band (Rohiit ne paid Hindi PDF par pakde):
+ *          (a) GharCards ko isPaid — "18 mahine" label paid par "5 saal";
+ *          (b) ATEET: title, subtitle, table headers, Haan/Nahi, "← ABHI",
+ *              "granth chup" — teen bhasha; (c) FEEDBACK box: heading, button,
+ *              WhatsApp text teen bhasha, aur ab BUSINESS number 9211804111
+ *              par (pehle wa.me/?text= — bina number, galat tha); (d) UPAY:
+ *              title, subtitle, headers; (e) PARAMPARIK UPAY heading + chetavni;
+ *              (f) Hero: "Mahadasha · Antardasha", "Lagna · Nakshatra", aur
+ *              "ye vivaran galat ho to…" teen bhasha. Logic kahin nahi badli.
+ *
  * v12.2 — 15 OCTOBER 2026 — ATEET table, granth_api v5.6/v5.7 ke naye khet:
  *          (a) MD row par ant ki tareekh ab m.tak se (aakhri/chalti MD ka ant
  *              pehle khaali tha); (b) AD row par poori range d.poora_tak se,
@@ -3228,14 +3239,15 @@ function GranthAteet({ a, lang }:{ a:any; lang:Lang }) {
   const shani:any[] = Array.isArray(a?.shani_ke_daur) ? a.shani_ke_daur : []
   return (
     <GranthTableShell
-      title={lang==='english'?'Your Past':'AAPKA ATEET'}
+      title={lang==='english'?'Your Past':lang==='hindi'?'आपका अतीत':'AAPKA ATEET'}
       subtitle={lang==='english'
         ? 'From birth to today — every major period, from the granth.'
+        : lang==='hindi' ? 'जन्म से आज तक — हर बड़ा दौर, ग्रन्थ से।'
         : 'Janm se aaj tak — har bada daur, granth se.'}>
       <table style={{width:'100%',borderCollapse:'collapse'}}>
         <thead><tr style={{borderBottom:`1px solid ${G(0.15)}`}}>
-          <Th w="17%">DAUR</Th><Th w="15%">KAAL</Th><Th w="26%">GRAH KI JAGAH</Th>
-          <Th>GRANTH KYA KEHTA HAI</Th><Th w="12%">SROT</Th>
+          <Th w="17%">{lang==='english'?'PERIOD':lang==='hindi'?'दौर':'DAUR'}</Th><Th w="15%">{lang==='english'?'TIME':lang==='hindi'?'काल':'KAAL'}</Th><Th w="26%">{lang==='english'?'PLANET POSITION':lang==='hindi'?'ग्रह की जगह':'GRAH KI JAGAH'}</Th>
+          <Th>{lang==='english'?'WHAT THE GRANTH SAYS':lang==='hindi'?'ग्रन्थ क्या कहता है':'GRANTH KYA KEHTA HAI'}</Th><Th w="12%">{lang==='english'?'SOURCE':lang==='hindi'?'स्रोत':'SROT'}</Th>
         </tr></thead>
         <tbody>
           {mds.map((m:any,mi:number)=>(
@@ -3273,7 +3285,7 @@ function GranthAteet({ a, lang }:{ a:any; lang:Lang }) {
                 <Td c="#64748b">
                   {s(m.ch34)!=='GRANTH-CHUP'
                     ? <span>Ch.34: {s(m.ch34)}</span>
-                    : <span style={{fontSize:'11px'}}>granth chup</span>}
+                    : <span style={{fontSize:'11px'}}>{lang==='english'?'granth silent':lang==='hindi'?'ग्रन्थ चुप':'granth chup'}</span>}
                   <div style={{display:'flex',gap:'6px',marginTop:'8px'}}>
                     {(['yes','no'] as const).map(v=>(
                       <button key={v} type="button"
@@ -3287,8 +3299,8 @@ function GranthAteet({ a, lang }:{ a:any; lang:Lang }) {
                             ? (v==='yes'?'rgba(34,197,94,0.5)':'rgba(148,163,184,0.4)')
                             : 'rgba(255,255,255,0.14)'}`,
                           color: marks[mi]===v ? '#e2e8f0' : '#94a3b8'}}>
-                        {v==='yes' ? (lang==='english'?'✓ Yes':'✓ Haan')
-                                   : (lang==='english'?'✗ No':'✗ Nahi')}
+                        {v==='yes' ? (lang==='english'?'✓ Yes':lang==='hindi'?'✓ हाँ':'✓ Haan')
+                                   : (lang==='english'?'✗ No':lang==='hindi'?'✗ नहीं':'✗ Nahi')}
                       </button>
                     ))}
                   </div>
@@ -3300,7 +3312,7 @@ function GranthAteet({ a, lang }:{ a:any; lang:Lang }) {
                     <span style={{opacity:0.5}}>└ </span>{s(m.md)}/{s(d.ad)}
                     {/* 🔴 16 Sep — pehle "Rahu/Shani← ABHI" bina space ke chhapta tha */}
                     {d.abhi && <span style={{color:'#22c55e',fontSize:'10px',
-                         marginLeft:'5px',whiteSpace:'nowrap'}}>{'\u00A0← ABHI'}</span>}
+                         marginLeft:'5px',whiteSpace:'nowrap'}}>{'\u00A0← '+(lang==='english'?'NOW':lang==='hindi'?'अभी':'ABHI')}</span>}
                   </Td>
                   {/* v12.2 — chalti AD ka 'tak' engine aaj ki tareekh par kaat deta
                       hai (Oct 2026); poori range 'poora_tak' mein aati hai (v5.6+).
@@ -4058,13 +4070,13 @@ function GranthUpay({ u, lang }:{ u:any; lang:Lang }) {
   const list:any[] = Array.isArray(u?.upay) ? u.upay : []
   return (
     <GranthTableShell
-      title={lang==='english'?'Remedies':'UPAY'}
-      subtitle={lang==='english'?'Only where the granth gives one':'Sirf wahan jahan granth deta hai'}
+      title={lang==='english'?'Remedies':lang==='hindi'?'उपाय':'UPAY'}
+      subtitle={lang==='english'?'Only where the granth gives one':lang==='hindi'?'सिर्फ़ वहाँ जहाँ ग्रन्थ देता है':'Sirf wahan jahan granth deta hai'}
       note={s(u?.srot_ki_baat)}>
       {list.length ? (
         <table style={{width:'100%',borderCollapse:'collapse'}}>
           <thead><tr style={{borderBottom:`1px solid ${G(0.15)}`}}>
-            <Th w="16%">KIS DAUR KE LIYE</Th><Th w="22%">KIS LIYE</Th><Th>UPAY</Th><Th w="13%">SROT</Th>
+            <Th w="16%">{lang==='english'?'FOR WHICH PERIOD':lang==='hindi'?'किस दौर के लिए':'KIS DAUR KE LIYE'}</Th><Th w="22%">{lang==='english'?'FOR WHAT':lang==='hindi'?'किस लिए':'KIS LIYE'}</Th><Th>{lang==='english'?'REMEDY':lang==='hindi'?'उपाय':'UPAY'}</Th><Th w="13%">{lang==='english'?'SOURCE':lang==='hindi'?'स्रोत':'SROT'}</Th>
           </tr></thead>
           <tbody>
             {list.map((x:any,i:number)=>(
@@ -4099,16 +4111,22 @@ function GranthFeedback({ sawaal, slug, lang }:{ sawaal:string; slug:string; lan
                  border:`1px solid ${G(0.28)}`,background:'rgba(212,175,55,0.06)'}}>
       <div style={{color:GOLD,fontWeight:700,fontSize:'13px',marginBottom:'8px',
                    letterSpacing:'0.04em',textTransform:'uppercase',fontFamily:'Georgia,serif'}}>
-        {lang==='english'?'Did this match?':'Kya ye sahi tha?'}
+        {lang==='english'?'Did this match?':lang==='hindi'?'क्या यह सही था?':'Kya ye sahi tha?'}
       </div>
       <div style={{color:'#cbd5e1',fontSize:'13px',lineHeight:1.75}}>{s(sawaal)}</div>
-      <a href={`https://wa.me/?text=${encodeURIComponent(
-          `Trikaal Vaani — report ${slug}\n\nNaukri/kaam ka bada mod: \nShaadi ya rishta: \nGhar/sampatti: `)}`}
+      {/* v12.3 — pehle wa.me/?text= tha (BINA number — grahak kisi ko bhi bhej
+          deta). Ab BUSINESS number 9211804111, aur text grahak ki bhasha mein. */}
+      <a href={`https://wa.me/919211804111?text=${encodeURIComponent(
+          lang==='english'
+            ? `Trikaal Vaani — report ${slug}\n\nBig turn in job/work: \nMarriage or relationship: \nHome/property: `
+            : lang==='hindi'
+            ? `Trikaal Vaani — report ${slug}\n\nनौकरी/काम का बड़ा मोड़: \nशादी या रिश्ता: \nघर/सम्पत्ति: `
+            : `Trikaal Vaani — report ${slug}\n\nNaukri/kaam ka bada mod: \nShaadi ya rishta: \nGhar/sampatti: `)}`}
          target="_blank" rel="noopener noreferrer"
          style={{display:'inline-block',marginTop:'12px',padding:'8px 16px',
                  border:`1px solid ${G(0.4)}`,borderRadius:'7px',color:GOLD,
                  fontSize:'12px',textDecoration:'none',fontWeight:600}}>
-        {lang==='english'?'Send the three dates':'Teen tareekhein bhejiye'}
+        {lang==='english'?'Send the three dates':lang==='hindi'?'तीन तारीखें भेजिए':'Teen tareekhein bhejiye'}
       </a>
     </div>
   )
@@ -4332,11 +4350,13 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
               <div style={{padding:'13px 16px',borderBottom:`1px solid ${G(0.1)}`}}>
                 <div style={{color:GOLD,fontWeight:700,fontSize:'13px',letterSpacing:'0.04em',
                              textTransform:'uppercase',fontFamily:'Georgia,serif'}}>
-                  {lang==='english'?'Traditional Remedies':'PARAMPARIK UPAY'}
+                  {lang==='english'?'Traditional Remedies':lang==='hindi'?'पारम्परिक उपाय':'PARAMPARIK UPAY'}
                 </div>
                 <div style={{color:'#fbbf24',fontSize:'11px',marginTop:'5px',lineHeight:1.6}}>
                   ⚠️ {lang==='english'
                     ? 'These come from traditional practice, not from a verse of the granth. The granth-given remedies are above, each with its sloka number.'
+                    : lang==='hindi'
+                    ? 'ये परम्परा से आते हैं — ग्रन्थ का श्लोक नहीं हैं। ग्रन्थ के अपने उपाय ऊपर हैं, हर एक अपने श्लोक-संख्या के साथ।'
                     : 'Ye PARAMPARA se aate hain — granth ka shlok NAHI hain. Granth ke apne upay upar hain, har ek apne shlok-number ke saath.'}
                 </div>
               </div>
@@ -4383,10 +4403,10 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
             </div>
             <p style={{margin:'0 0 6px',color:G(0.6),fontSize:'12px',fontWeight:600,letterSpacing:'0.08em',textTransform:'uppercase'}}>Vedic Astrology Analysis · {domainLabel}</p>
             {personName!=='—' && <p style={{margin:'0 0 4px',color:GOLD,fontSize:'16px',fontWeight:700,fontFamily:'Georgia,serif'}}>{personName}{lang==='english'?"'s Kundali":lang==='hindi'?' की कुण्डली':' ki Kundali'}</p>}
-            <h1 style={{margin:'0 0 6px',color:'#fff',fontSize:'22px',fontFamily:'Georgia,serif',fontWeight:700}}>{mahadasha} Mahadasha · {antardasha} Antardasha</h1>
+            <h1 style={{margin:'0 0 6px',color:'#fff',fontSize:'22px',fontFamily:'Georgia,serif',fontWeight:700}}>{mahadasha} {lang==='hindi'?'महादशा':'Mahadasha'} · {antardasha} {lang==='hindi'?'अन्तर्दशा':'Antardasha'}</h1>
             {adRange && <p style={{margin:'0 0 6px',color:'#cbd5e1',fontSize:'13px'}}>{lang==='english'?'Running period':lang==='hindi'?'चल रहा दौर':'Chal raha daur'}: <b style={{color:'#fff'}}>{mahadasha}/{antardasha} · {adRange}</b></p>}
             <p style={{margin:'0 0 4px',color:'#94a3b8',fontSize:'14px'}}>{birthLine}</p>
-            <p style={{margin:'0 0 16px',color:'#64748b',fontSize:'12.5px'}}>{lagna} Lagna · {nakshatra} Nakshatra · <span style={{color:'#475569'}}>ye vivaran galat ho to reading dobara banayein</span></p>
+            <p style={{margin:'0 0 16px',color:'#64748b',fontSize:'12.5px'}}>{lagna} {lang==='hindi'?'लग्न':'Lagna'} · {nakshatra} {lang==='hindi'?'नक्षत्र':'Nakshatra'} · <span style={{color:'#475569'}}>{lang==='english'?'if these details are wrong, generate the reading again':lang==='hindi'?'यह विवरण ग़लत हो तो रीडिंग दोबारा बनाएँ':'ye vivaran galat ho to reading dobara banayein'}</span></p>
             <div style={{display:'flex',flexWrap:'wrap',gap:'6px',justifyContent:'center',marginBottom:'12px'}}>
               {[{icon:'⚡',label:'Swiss Ephemeris',color:'#60a5fa'},{icon:'📖',label:'BPHS Classical',color:'#a78bfa'},{icon:'🔮',label:'Bhrigu Nandi',color:'#f472b6'},{icon:'⚖️',label:'Shadbala',color:'#34d399'}].map(b=>(<span key={b.label} style={{display:'inline-flex',alignItems:'center',gap:'4px',padding:'5px 11px',borderRadius:'20px',fontSize:'11px',fontWeight:600,background:`${b.color}15`,border:`1px solid ${b.color}30`,color:b.color}}>{b.icon} {b.label}</span>))}
             </div>
@@ -4531,7 +4551,7 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
               RAKHA hai (neeche false && par) — rollback ek shabd ka hai. */}
           {granthOn && <GharCards saar={s((granth as any).abhi?.saar?.saar, '')}
                                   mukhya={(granth as any).abhi?.mukhya ?? []}
-                                  gaun={(granth as any).abhi?.gaun ?? []} lang={lang}
+                                  gaun={(granth as any).abhi?.gaun ?? []} lang={lang} isPaid={isPaid}
                                   parat={(m:any)=><BhavParat p={m?.parat} lang={lang}/>}/>}
           {false && granthOn && <GranthAbhi  b={(granth as any).abhi}  lang={lang}/>}
 
