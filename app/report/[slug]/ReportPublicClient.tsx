@@ -3,6 +3,13 @@
 /**
  *
  * ══════════════════════════════════════════════════════════════════════════
+ * v12.2 — 15 OCTOBER 2026 — ATEET table, granth_api v5.6/v5.7 ke naye khet:
+ *          (a) MD row par ant ki tareekh ab m.tak se (aakhri/chalti MD ka ant
+ *              pehle khaali tha); (b) AD row par poori range d.poora_tak se,
+ *              neeche "(abhi tak Oct 2026)" jab engine ne aaj par kaata ho;
+ *          (c) "Is poore daur mein khula" ke vishay naam Hindi/English
+ *              (theme.vishayL) aur label khud Hindi mein. Baaki waisa ka waisa.
+ *
  * v12.1 — 15 OCTOBER 2026 — Hindi/English vishay+faisla (components/report),
  *          aur PaidFullSummary granth mode mein band — wo Gemini-yug ka dabba
  *          hai; NO-AI par uske saare khane khaali the aur sirf ek KHAALI
@@ -504,6 +511,7 @@ import GharCards   from '@/components/report/GharCards'
 import TeenBaatein from '@/components/report/TeenBaatein'
 import AageCards   from '@/components/report/AageCards'
 import ReportCTA   from '@/components/report/ReportCTA'
+import { vishayL } from '@/components/report/theme'
 
 const GOLD    = '#D4AF37'
 const RAZORPAY_BLUE = '#3395FF'
@@ -3238,8 +3246,10 @@ function GranthAteet({ a, lang }:{ a:any; lang:Lang }) {
                 {/* 🔴 16 Sep — MD row par sirf SHURU ki tareekh dikhti thi, ANT ki
                     nahi ("Ketu MD  Sep 1975"). Grahak ko agli MD dekh kar khud
                     ginna padta tha. Ab dono. */}
+                {/* v12.2 — granth_api v5.6+ ab MD ka apna 'tak' deta hai; aakhri
+                    (chalti) MD ka ant pehle KHAALI tha kyunki agli MD hi nahi thi. */}
                 <Td c="#94a3b8">{s(m.se)}
-                  {mds[mi+1]?.se && <span style={{color:'#64748b'}}> – {s(mds[mi+1].se)}</span>}
+                  {(m.tak || mds[mi+1]?.se) && <span style={{color:'#64748b'}}> – {s(m.tak || mds[mi+1]?.se)}</span>}
                 </Td>
                 <Td c="#cbd5e1">{s(m.graha_ki_jagah)}</Td>
                 <Td>
@@ -3247,10 +3257,12 @@ function GranthAteet({ a, lang }:{ a:any; lang:Lang }) {
                     <div>
                       <span style={{color:'#22c55e',fontWeight:600}}>★ </span>
                       <span style={{color:'#e2e8f0'}}>
-                        {lang==='english'?'Open through this whole period: ':'Is poore daur mein khula: '}
+                        {lang==='english'?'Open through this whole period: '
+                          : lang==='hindi' ? 'इस पूरे दौर में खुला: ' : 'Is poore daur mein khula: '}
                       </span>
+                      {/* v12.2 — vishay ka naam Hindi/English (theme.vishayL) */}
                       <span style={{color:GOLD}}>
-                        {m.khule_vishay.map((k:any)=>s(k.vishay)).join(' · ')}
+                        {m.khule_vishay.map((k:any)=>vishayL(s(k.vishay,''),lang)||s(k.vishay)).join(' · ')}
                       </span>
                       {m.khule_vishay[0]?.kyun?.[0] &&
                         <div style={{color:'#64748b',fontSize:'11px',marginTop:'3px'}}>
@@ -3290,7 +3302,15 @@ function GranthAteet({ a, lang }:{ a:any; lang:Lang }) {
                     {d.abhi && <span style={{color:'#22c55e',fontSize:'10px',
                          marginLeft:'5px',whiteSpace:'nowrap'}}>{'\u00A0← ABHI'}</span>}
                   </Td>
-                  <Td c="#94a3b8">{s(d.se)} – {s(d.tak)}</Td>
+                  {/* v12.2 — chalti AD ka 'tak' engine aaj ki tareekh par kaat deta
+                      hai (Oct 2026); poori range 'poora_tak' mein aati hai (v5.6+).
+                      Ab: "Mar 2026 – Jan 2029 (abhi tak Oct 2026)". */}
+                  <Td c="#94a3b8">{s(d.se)} – {s(d.poora_tak || d.tak)}
+                    {d.poora_tak && d.tak && d.poora_tak!==d.tak &&
+                      <span style={{color:'#64748b',fontSize:'10px',display:'block'}}>
+                        ({lang==='english'?'till today':lang==='hindi'?'अब तक':'abhi tak'} {s(d.tak)})
+                      </span>}
+                  </Td>
                   <Td c="#94a3b8">{s(d.graha_ki_jagah)}</Td>
                   <Td>
                     {/* 🔴 16 Sep — s() khaali ko "—" bana deta hai, aur ek asli
