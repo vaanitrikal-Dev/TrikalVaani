@@ -3,6 +3,12 @@
 /**
  *
  * ══════════════════════════════════════════════════════════════════════════
+ * v12.1 — 15 OCTOBER 2026 — Hindi/English vishay+faisla (components/report),
+ *          aur PaidFullSummary granth mode mein band — wo Gemini-yug ka dabba
+ *          hai; NO-AI par uske saare khane khaali the aur sirf ek KHAALI
+ *          heading "Trikaal ka poora sandesh — Premium" chhapti thi (live par
+ *          pakda, 15 Oct). Non-granth par waise ka waisa.
+ *
  * v12.0 — 15 OCTOBER 2026 — MOBILE-FIRST, PREDICTION PEHLE (Rohiit ne
  *          mockup approve kiya; GPT audit ka 3-layer model)
  * ══════════════════════════════════════════════════════════════════════════
@@ -4674,7 +4680,7 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
 
           {!isPaid && <LockedTeaser slug={slug} lang={lang} lines={suspenseLines}/>}
 
-          {isPaid && <PaidFullSummary summaryText={summaryText} periodSummary={periodSummary} bestDates={bestDates} dosList={dosList} dontsList={dontsList} remedyHint={remedyHint} karmicInsight={karmicInsight} lang={lang}/>}
+          {!granthOn && isPaid && <PaidFullSummary summaryText={summaryText} periodSummary={periodSummary} bestDates={bestDates} dosList={dosList} dontsList={dontsList} remedyHint={remedyHint} karmicInsight={karmicInsight} lang={lang}/>}
 
           {/* v10.9 fix 2 — THE SAME LEAK AS coreMsg, IN TWO MORE PROPS.
               doAction/avoidAction come from the engine, mainAction/mainCaution

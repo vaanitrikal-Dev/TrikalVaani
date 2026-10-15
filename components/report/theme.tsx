@@ -1,7 +1,11 @@
 'use client'
 
 /**
- * components/report/theme.tsx — v1.0 — 15 October 2026
+ * components/report/theme.tsx — v1.1 — 15 October 2026
+ *
+ * v1.1 — VISHAY aur FAISLA ka Hindi/English (Rohiit: Hindi report mein ghar
+ *        ka naam Hinglish aa raha tha). Dict saar.py ke _VISHAY_HI/_VISHAY_EN
+ *        se liya — wahi 12 naam, wahi shabd.
  *
  * Report v12.0 ke naye components ka saajha saaman: rang, bhasha ka type,
  * **bold** helper, aur chhote labels. ReportPublicClient.tsx ke GOLD/G se
@@ -65,4 +69,37 @@ export function SectionHead({ title, sub }: { title: string; sub?: string }) {
       {sub && <div style={{ color: '#94a3b8', fontSize: '12px', marginTop: '3px' }}>{sub}</div>}
     </div>
   )
+}
+
+/** Engine ke 12 vishay (Hinglish) → Hindi / English. saar.py ke dict se. */
+const VISHAY: Record<string, [string, string]> = {
+  'aap khud':              ['स्वयं — शरीर और स्वभाव', 'Yourself — health and nature'],
+  'paisa aur parivar':     ['धन, संचय और कुटुम्ब', 'Wealth, savings and family'],
+  'bhai-behen aur himmat': ['भाई-बहन और पराक्रम', 'Siblings and courage'],
+  'ghar aur maa':          ['घर, भूमि और माता', 'Home, land and mother'],
+  'santan aur padhai':     ['सन्तान, विद्या और बुद्धि', 'Children, study and judgement'],
+  'mehnat aur rukavat':    ['परिश्रम, विरोध और रोग', 'Effort, obstacles and health'],
+  'shaadi aur saathi':     ['विवाह और जीवनसाथी', 'Marriage and partnership'],
+  'achanak badlaav':       ['आकस्मिक परिवर्तन और गुप्त बातें', 'Sudden change and hidden things'],
+  'bhagya aur pita':       ['भाग्य, पिता और धर्म', 'Fortune, father and dharma'],
+  'kaam aur pehchaan':     ['कर्म, पद और प्रतिष्ठा', 'Work, position and reputation'],
+  'kamai aur laabh':       ['आय और लाभ', 'Income and gains'],
+  'kharch aur videsh':     ['व्यय, दूर देश और एकान्त', 'Expense, distant places and solitude'],
+}
+export function vishayL(v: unknown, lang: Lang): string {
+  const k = String(v ?? '').trim().toLowerCase()
+  const t = VISHAY[k]
+  if (!t) return String(v ?? '')
+  return lang === 'hindi' ? t[0] : lang === 'english' ? t[1] : String(v)
+}
+
+const FAISLA: Record<string, [string, string]> = {
+  'HAAN': ['हाँ', 'YES'], 'HO SAKTA HAI': ['हो सकता है', 'POSSIBLE'], 'NAHI': ['नहीं', 'NO'],
+  'ABHI KATHIN': ['अभी कठिन', 'DIFFICULT FOR NOW'],
+}
+export function faislaL(f: unknown, lang: Lang): string {
+  const k = String(f ?? '').trim().toUpperCase()
+  const t = FAISLA[k]
+  if (!t) return String(f ?? '')
+  return lang === 'hindi' ? t[0] : lang === 'english' ? t[1] : k
 }

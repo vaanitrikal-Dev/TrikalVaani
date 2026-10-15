@@ -1,7 +1,10 @@
 'use client'
 
 /**
- * components/report/GharCards.tsx — v1.0 — 15 October 2026
+ * components/report/GharCards.tsx — v1.1 — 15 October 2026
+ *
+ * v1.1 — vishay aur faisla ab Hindi/English mein (vishayL/faislaL); 'kya'
+ *        (Hinglish sub-line) sirf Hinglish report par.
  *
  * ROHIIT KA FAISLA (15 Oct, mockup approve): har mukhya ghar ek CARD —
  *   Layer 1 (sabko)      : prediction BOLD + saari dates (⭐ = hari khidki)
@@ -23,7 +26,7 @@
  */
 
 import React from 'react'
-import { Lang, GOLD, G, CARD_BG, HAAL_COLOR, HAAL_BG, s, L, Bold } from './theme'
+import { Lang, GOLD, G, CARD_BG, HAAL_COLOR, HAAL_BG, s, L, Bold, vishayL, faislaL } from './theme'
 
 export interface GharParsed {
   bhav: number
@@ -86,8 +89,8 @@ function GharCard({ g, m, lang, parat }: {
     haal === 'MAZBOOT' ? 'Mazboot' : haal === 'KAMZOR' ? 'Kamzor' : 'Mila-jula',
     haal === 'MAZBOOT' ? 'मज़बूत' : haal === 'KAMZOR' ? 'कमज़ोर' : 'मिला-जुला',
     haal === 'MAZBOOT' ? 'Strong' : haal === 'KAMZOR' ? 'Weak' : 'Mixed')
-  const vishay = s(m?.vishay, '')
-  const kya = s(m?.kya, '')
+  const vishay = vishayL(s(m?.vishay, ''), lang)
+  const kya = lang === 'hinglish' ? s(m?.kya, '') : ''
   const bindu = m?.bindu
   const wajahList: string[] = Array.isArray(m?.wajah) ? m.wajah : []
   const nShlok = ['apne_chart_se', 'dasha_mein_aayega', 'is_ghar_ke_baare_mein']
@@ -133,7 +136,7 @@ function GharCard({ g, m, lang, parat }: {
       {faisla && (
         <div style={{ marginTop: '8px', fontSize: '11px', color: '#64748b' }}>
           {L(lang, 'Hamara faisla', 'हमारा फ़ैसला', 'Our reading')}:
-          <span style={{ color: fC, fontWeight: 800, marginLeft: '6px', fontSize: '12px' }}>{faisla}</span>
+          <span style={{ color: fC, fontWeight: 800, marginLeft: '6px', fontSize: '12px' }}>{faislaL(faisla, lang)}</span>
         </div>
       )}
 

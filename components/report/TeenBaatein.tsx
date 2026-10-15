@@ -1,7 +1,7 @@
 'use client'
 
 /**
- * components/report/TeenBaatein.tsx — v1.0 — 15 October 2026
+ * components/report/TeenBaatein.tsx — v1.1 — 15 October 2026 — vishay Hindi/English (vishayL)
  *
  * "3 baatein jo aapke liye sabse zaroori hain" — hero ke theek neeche.
  * ROHIIT (15 Oct): grahak ko pehli screen par JAWAB chahiye, granth nahi.
@@ -14,7 +14,7 @@
  */
 
 import React from 'react'
-import { Lang, GOLD, G, s, L } from './theme'
+import { Lang, GOLD, G, s, L, vishayL } from './theme'
 import { parseSaar, GharParsed } from './GharCards'
 
 const MON: Record<string, number> = { jan: 1, feb: 2, mar: 3, apr: 4, may: 5, jun: 6, jul: 7, aug: 8, sep: 9, oct: 10, nov: 11, dec: 12 }
@@ -36,7 +36,7 @@ export default function TeenBaatein({ saar, mukhya, lang }: { saar: string; mukh
     String((Array.isArray(mukhya) ? mukhya : []).find(m => Number(m?.bhav) === g.bhav)?.haal
       || (/\*\*(.+?)\*\*/.exec(g.haalLine)?.[1] ?? '')).toUpperCase()
   const vishayOf = (g: GharParsed) =>
-    s((Array.isArray(mukhya) ? mukhya : []).find(m => Number(m?.bhav) === g.bhav)?.vishay, '')
+    vishayL(s((Array.isArray(mukhya) ? mukhya : []).find(m => Number(m?.bhav) === g.bhav)?.vishay, ''), lang)
 
   const items: { icon: string; text: string; sub: string }[] = []
   const strong = P.ghar.find(g => haalOf(g) === 'MAZBOOT' && g.prediction)
