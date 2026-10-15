@@ -3,6 +3,24 @@
 /**
  *
  * ══════════════════════════════════════════════════════════════════════════
+ * v12.0 — 15 OCTOBER 2026 — MOBILE-FIRST, PREDICTION PEHLE (Rohiit ne
+ *          mockup approve kiya; GPT audit ka 3-layer model)
+ * ══════════════════════════════════════════════════════════════════════════
+ * NAYA KRAM (sirf granthOn par — purani/non-granth report JAISI THI waisi):
+ *   Hero → 3 BAATEIN (TeenBaatein) → GHAR CARDS (GharCards: saar + abhi
+ *   table ki jagah; Layer1 prediction+dates khula, "Kyun?" aur "Granth ke
+ *   shlok" tap par) → AAGE (AageCards) → Fold: ATEET (+feedback) → Fold:
+ *   UPAY (granth + paramparik) → Fold: CHAKRA + 9 grah → Fold: GEHRAAI
+ *   (Bhrigu, Shodashvarga, Ashtakavarga, Drishti, Teen Ghadiyan, Varshphal,
+ *   Argala, D9, D10, Gochar, Monthly, L1/L2/L3, Confidence) → ReportCTA
+ *   (Rohiit se 15 min, ₹499, WhatsApp Business).
+ * HATAYA KUCH NAHI — granth mode mein ye band hain: WhyYouAreHere +
+ *   EvidenceTable (ghar cards ka duplicate tha), Aaj ka Panchang (har
+ *   grahak ko ek jaisa). Non-granth par sab waise ka waisa.
+ * Naye components: components/report/{theme,Fold,GharCards,TeenBaatein,
+ *   AageCards,ReportCTA}.tsx. BhavParat (shlok ki teen parat) yahin se
+ *   render-prop ke roop mein GharCards ko jaata hai — duplicate nahi.
+ *
  * v11.1 — 15 OCTOBER 2026 — HERO + UPAY LABEL (Rohiit ke teen nirdesh)
  * ══════════════════════════════════════════════════════════════════════════
  *   1. HERO: grahak ka NAAM (report.person_name) upar, aur chalte Antardasha
@@ -474,6 +492,12 @@ import SiteFooter from '@/components/layout/SiteFooter'
 // JAATA — aur wo Vercel par deploy ke BAAD pata chalta.
 import React, { useState } from 'react'
 import { ArrowLeft, Lock, Download, Sparkles } from 'lucide-react'
+// v12.0 (15 Oct 2026) — mobile-first report: components/report/*
+import Fold        from '@/components/report/Fold'
+import GharCards   from '@/components/report/GharCards'
+import TeenBaatein from '@/components/report/TeenBaatein'
+import AageCards   from '@/components/report/AageCards'
+import ReportCTA   from '@/components/report/ReportCTA'
 
 const GOLD    = '#D4AF37'
 const RAZORPAY_BLUE = '#3395FF'
@@ -2836,8 +2860,12 @@ function PDFBtn() {
   const handle = () => {
     const st = document.createElement('style'); st.id='tv-print'
     st.textContent=`@media print {nav,footer,.site-nav,.site-footer,.no-print{display:none!important}body{background:#fff!important}*{color:#000!important;border-color:#ccc!important;background:transparent!important}}`
+    // v12.0 — folds (<details>) band hon to PDF mein unka content nahi aata.
+    // Print se pehle SAB khol do, baad mein jo band the unhe wapas band kar do.
+    const closed = Array.from(document.querySelectorAll('details:not([open])')) as HTMLDetailsElement[]
+    closed.forEach(d=>{ d.open = true })
     document.head.appendChild(st); window.print()
-    setTimeout(()=>{const e=document.getElementById('tv-print');if(e)e.remove()},1500)
+    setTimeout(()=>{const e=document.getElementById('tv-print');if(e)e.remove(); closed.forEach(d=>{ d.open = false })},1500)
   }
   return (<button onClick={handle} style={{display:'inline-flex',alignItems:'center',gap:'6px',padding:'10px 18px',borderRadius:'10px',background:G(0.08),border:`1px solid ${G(0.25)}`,color:GOLD,fontSize:'13px',fontWeight:600,cursor:'pointer'}}><Download size={14}/>PDF Download</button>)
 }
@@ -4245,6 +4273,67 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
   const hasDoAvoid     = doAction!=='—'||avoidAction!=='—'
   const hasKeyMessage  = keyMessage!=='—'
 
+  const chartBlock = (planetTable.length>0&&lagna!=='—') ? (
+            <div style={{background:BG_CARD,border:`1px solid ${G(0.15)}`,borderRadius:'16px',padding:'22px',marginBottom:'14px'}}>
+              <p style={{margin:'0 0 14px',color:GOLD,fontSize:'11px',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.08em'}}>{lbl('janmaKundali',lang)}</p>
+              <KundaliChart lagna={lagna} planets={planetTable}/>
+              <p style={{textAlign:'center',color:'#64748b',fontSize:'11px',margin:'10px 0 0'}}>Lahiri Ayanamsha · Swiss Ephemeris · BPHS classical</p>
+            </div>
+          ) : null
+  const grahaBlock = planetTable.length>0 ? (
+            <div style={{background:BG_CARD,border:`1px solid ${G(0.12)}`,borderRadius:'16px',padding:'22px',marginBottom:'14px'}}>
+              <p style={{margin:'0 0 14px',color:GOLD,fontSize:'11px',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.08em'}}>{lbl('grahaVish',lang)}</p>
+              <div style={{overflowX:'auto'}}>
+                <table style={{width:'100%',borderCollapse:'collapse',fontSize:'13px'}}>
+                  <thead><tr style={{borderBottom:`1px solid ${G(0.15)}`}}>{['Graha','Rashi','House','Nakshatra','Dignity','Strength'].map(h=>(<th key={h} style={{padding:'9px 6px',color:GOLD,fontWeight:600,textAlign:'left',fontSize:'11px',letterSpacing:'0.06em',textTransform:'uppercase'}}>{h}</th>))}</tr></thead>
+                  <tbody>
+                    {planetTable.map((p,i)=>{
+                      const hasSb = typeof p.shadbala==='number' && p.strength
+                      const sc=!hasSb?'#64748b':p.strength==='Very Strong'?'#22c55e':p.strength==='Strong'?'#86efac':p.strength==='Moderate'?GOLD:'#ef4444'
+                      const sd=!hasSb?'':p.strength==='Very Strong'?'●●':p.strength==='Strong'?'●':p.strength==='Moderate'?'◐':'○'
+                      return (<tr key={p.planet} style={{borderBottom:'1px solid rgba(255,255,255,0.04)',background:i%2===0?G(0.02):'transparent'}}><td style={{padding:'11px 6px',color:'#fff',fontWeight:600}}><span style={{color:GOLD,marginRight:'5px'}}>{PLANET_GLYPH[p.planet]??'✦'}</span>{p.planet_hi||PLANET_HI[p.planet]||p.planet}{p.retrograde&&<span style={{color:'#f59e0b',fontSize:'10px',marginLeft:'4px'}}>® Vakri</span>}</td><td style={{padding:'11px 6px',color:'#e2e8f0'}}>{p.rashi}</td><td style={{padding:'11px 6px',color:'#e2e8f0'}}>{ordinal(p.house)}</td><td style={{padding:'11px 6px',color:'#94a3b8',fontSize:'12px'}}>{p.nakshatra}</td><td style={{padding:'11px 6px',color:'#94a3b8',fontSize:'12px'}}>{p.dignity}</td><td style={{padding:'11px 6px'}}><span style={{color:sc,fontSize:'12px',fontWeight:700}}>{hasSb?<>{sd} {p.strength}{isPaid && <span style={{color:'#64748b',fontWeight:500}}> ({p.shadbala.toFixed(2)})</span>}</>:'—'}</span></td></tr>)
+                    })}
+                  </tbody>
+                </table>
+              </div>
+              <p style={{margin:'10px 0 0',color:'#475569',fontSize:'11px'}}>⚖️ Shadbala classical 6-component system (BPHS Ch.27) · Swiss Ephemeris</p>
+            </div>
+          ) : null
+  // v12.0 — paramparik upay ka block, Upay fold ke andar render hota hai
+  const paramparikUpay = (hasNewUpay || oldRemedies.length > 0) ? (
+            <div style={{margin:'22px 0',border:`1px solid ${G(0.12)}`,borderRadius:'12px',
+                         background:'rgba(10,15,30,0.4)',overflow:'hidden'}}>
+              <div style={{padding:'13px 16px',borderBottom:`1px solid ${G(0.1)}`}}>
+                <div style={{color:GOLD,fontWeight:700,fontSize:'13px',letterSpacing:'0.04em',
+                             textTransform:'uppercase',fontFamily:'Georgia,serif'}}>
+                  {lang==='english'?'Traditional Remedies':'PARAMPARIK UPAY'}
+                </div>
+                <div style={{color:'#fbbf24',fontSize:'11px',marginTop:'5px',lineHeight:1.6}}>
+                  ⚠️ {lang==='english'
+                    ? 'These come from traditional practice, not from a verse of the granth. The granth-given remedies are above, each with its sloka number.'
+                    : 'Ye PARAMPARA se aate hain — granth ka shlok NAHI hain. Granth ke apne upay upar hain, har ek apne shlok-number ke saath.'}
+                </div>
+              </div>
+              <div style={{padding:'4px 0'}}>
+                {hasNewUpay
+                  ? <UpayCards remedies={upayItems} isPaid={isPaid} slug={slug} lang={lang}/>
+                  : oldRemedies.slice(0,5).map((r:any,i:number)=>(
+                      <div key={i} style={{padding:'11px 16px',
+                           borderTop:i?'1px solid rgba(255,255,255,0.05)':'none'}}>
+                        <div style={{color:'#e2e8f0',fontSize:'13px'}}>
+                          {s(r.remedy ?? r.upay ?? r.title ?? r.mantra)}
+                        </div>
+                        {(r.planet || r.count || r.day) && (
+                          <div style={{color:'#64748b',fontSize:'11px',marginTop:'3px'}}>
+                            {[s(r.planet),s(r.count),s(r.day)].filter(x=>x&&x!=='—').join(' · ')}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+              </div>
+            </div>
+          ) : null
+
   return (
     <div style={{minHeight:'100vh',background:BG_DARK}}>
       <SiteNav/>
@@ -4296,6 +4385,10 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
               </div>
             )}
           </div>
+
+          {/* v12.0 — 3 baatein: pehli screen par jawab */}
+          {granthOn && <TeenBaatein saar={s((granth as any).abhi?.saar?.saar, '')}
+                                    mukhya={(granth as any).abhi?.mukhya ?? []} lang={lang}/>}
 
           {/* v10.9: this block was the FREE reader's Gemini summary — core
               message, do/avoid and the summary text. All of it is Gemini's
@@ -4384,7 +4477,7 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
               16 Sep: granth wala rakho. HATAYA NAHI, sirf band. */}
           {!granthOn && <SadeSatiCard pj={pj as Record<string, unknown>} lang={lang} isPaid={isPaid} slug={slug}/>}
 
-          <BhriguChapter bhriguObj={bhriguObj as Record<string, unknown>} lang={lang} isPaid={isPaid} slug={slug}/>
+          {!granthOn && <BhriguChapter bhriguObj={bhriguObj as Record<string, unknown>} lang={lang} isPaid={isPaid} slug={slug}/>}
 
 
 
@@ -4408,7 +4501,13 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
               wo TEESRE section mein dabi hui thi aur grahak ko wahan tak teen
               scroll karne padte the. Ab wo pehli cheez hai jo grahak padhta hai.
               ⚠️ Ye kram SAB JAGAH lagega — 34 calculator, 8 service, aur milan. */}
-          {granthOn && <GranthAbhi  b={(granth as any).abhi}  lang={lang}/>}
+          {/* v12.0 — GranthAbhi (table) ki jagah GharCards. GranthAbhi ka code
+              RAKHA hai (neeche false && par) — rollback ek shabd ka hai. */}
+          {granthOn && <GharCards saar={s((granth as any).abhi?.saar?.saar, '')}
+                                  mukhya={(granth as any).abhi?.mukhya ?? []}
+                                  gaun={(granth as any).abhi?.gaun ?? []} lang={lang}
+                                  parat={(m:any)=><BhavParat p={m?.parat} lang={lang}/>}/>}
+          {false && granthOn && <GranthAbhi  b={(granth as any).abhi}  lang={lang}/>}
 
           {/* ⭐ 20 Sep — US SAWAAL KA GRANTH. Sirf un domain par aata hai
               jinka product calc_varga_map mein hai (ex-back, toxic-boss,
@@ -4416,22 +4515,45 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
               Baaki par undefined rahta hai aur ye kuch nahi dikhata. */}
           {granthOn && <GranthProduct p={(granth as any).product} lang={lang}/>}
 
-          <WhyYouAreHere why={whyHere} activation={chartEv?.activation} lang={lang}/>
+          {/* v12.0 — granth mode mein ye dono GharCards ka duplicate the ("Yeh
+              bhavishyavani kyun" = wahi 5 ghar, wahi swami). Band, hataye nahi. */}
+          {!granthOn && <WhyYouAreHere why={whyHere} activation={chartEv?.activation} lang={lang}/>}
 
-          {hasEvidence && <EvidenceTable ev={chartEv} meanings={evMeanings} lang={lang} isPaid={isPaid} slug={slug}/>}
+          {!granthOn && hasEvidence && <EvidenceTable ev={chartEv} meanings={evMeanings} lang={lang} isPaid={isPaid} slug={slug}/>}
 
-          {granthOn && <GranthAteet a={(granth as any).ateet} lang={lang}/>}
-          {granthOn && <GranthFeedback sawaal={s((granth as any).feedback_sawaal)} slug={slug} lang={lang}/>}
-          {granthOn && <GranthAage  a={(granth as any).aage}  isPaid={isPaid} lang={lang} slug={slug}/>}
-          {granthOn && isPaid && (granth as any).upay && <GranthUpay u={(granth as any).upay} lang={lang}/>}
-
-          {planetTable.length>0&&lagna!=='—'&&(
-            <div style={{background:BG_CARD,border:`1px solid ${G(0.15)}`,borderRadius:'16px',padding:'22px',marginBottom:'14px'}}>
-              <p style={{margin:'0 0 14px',color:GOLD,fontSize:'11px',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.08em'}}>{lbl('janmaKundali',lang)}</p>
-              <KundaliChart lagna={lagna} planets={planetTable}/>
-              <p style={{textAlign:'center',color:'#64748b',fontSize:'11px',margin:'10px 0 0'}}>Lahiri Ayanamsha · Swiss Ephemeris · BPHS classical</p>
-            </div>
+          {/* v12.0 — AAGE pehle (cards), phir ATEET fold ke andar (230 lines,
+              default band), feedback usi ke THEEK NEECHE (Rohiit, 16 Sep). */}
+          {granthOn && <AageCards a={(granth as any).aage} isPaid={isPaid} lang={lang} slug={slug}/>}
+          {false && granthOn && <GranthAage  a={(granth as any).aage}  isPaid={isPaid} lang={lang} slug={slug}/>}
+          {granthOn && (
+            <Fold id="ateet" title={lang==='english'?'Your past':lang==='hindi'?'आपका अतीत':'Aapka ateet'}
+                  sub={lang==='english'?'Birth to today — every period, from the granth. Tap to open.'
+                      :lang==='hindi'?'जन्म से आज तक — हर दौर, ग्रन्थ से। खोलने के लिए टैप करें।'
+                      :'Janm se aaj tak — har daur, granth se. Kholne ke liye tap karein.'}
+                  count={(()=>{const m=(granth as any).ateet?.mahadasha; return Array.isArray(m)?`${m.length} MD`:''})()}>
+              <GranthAteet a={(granth as any).ateet} lang={lang}/>
+              <GranthFeedback sawaal={s((granth as any).feedback_sawaal)} slug={slug} lang={lang}/>
+            </Fold>
           )}
+          {granthOn && isPaid && ((granth as any).upay || hasNewUpay || oldRemedies.length > 0) && (
+            <Fold id="upay" title={lang==='english'?'Remedies':lang==='hindi'?'उपाय':'Upay'}
+                  sub={lang==='english'?'From the granth first; traditional ones below it. Tap to open.'
+                      :lang==='hindi'?'पहले ग्रन्थ के, फिर परम्परा के। खोलने के लिए टैप करें।'
+                      :'Pehle granth ke, phir parampara ke. Kholne ke liye tap karein.'}>
+              {(granth as any).upay && <GranthUpay u={(granth as any).upay} lang={lang}/>}
+              {paramparikUpay}
+            </Fold>
+          )}
+          {granthOn && (
+            <Fold id="chakra" title={lang==='english'?'Birth chart + 9 planets':lang==='hindi'?'जन्म कुण्डली + ९ ग्रह':'Janm kundali + 9 grah'}
+                  sub={lang==='english'?'North Indian chart, Lahiri ayanamsha, Shadbala. Tap to open.'
+                      :lang==='hindi'?'उत्तर भारतीय चक्र, लाहिरी अयनांश, षड्बल। खोलने के लिए टैप करें।'
+                      :'Uttar Bharatiya chakra, Lahiri ayanamsha, Shadbala. Kholne ke liye tap karein.'}>
+              {chartBlock}
+              {grahaBlock}
+            </Fold>
+          )}
+          {!granthOn && chartBlock}
 
           {/* ⭐ 17 Sep 2026 — PARAMPARIK UPAY, Rohiit ke faisle se.
               Granth ka upay (GranthUpay, upar) sirf 'maraka' wali shart par
@@ -4441,39 +4563,7 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
               (a) sirf PAID mein, aur (b) SAAF LIKH KAR ki wo PARAMPARIK hai,
               granth ka shlok nahi. Granth wala upar rahega, ye uske neeche
               jodta hai — dono ek saath, har ek apne naam ke saath. */}
-          {granthOn && isPaid && (hasNewUpay || oldRemedies.length > 0) && (
-            <div style={{margin:'22px 0',border:`1px solid ${G(0.12)}`,borderRadius:'12px',
-                         background:'rgba(10,15,30,0.4)',overflow:'hidden'}}>
-              <div style={{padding:'13px 16px',borderBottom:`1px solid ${G(0.1)}`}}>
-                <div style={{color:GOLD,fontWeight:700,fontSize:'13px',letterSpacing:'0.04em',
-                             textTransform:'uppercase',fontFamily:'Georgia,serif'}}>
-                  {lang==='english'?'Traditional Remedies':'PARAMPARIK UPAY'}
-                </div>
-                <div style={{color:'#fbbf24',fontSize:'11px',marginTop:'5px',lineHeight:1.6}}>
-                  ⚠️ {lang==='english'
-                    ? 'These come from traditional practice, not from a verse of the granth. The granth-given remedies are above, each with its sloka number.'
-                    : 'Ye PARAMPARA se aate hain — granth ka shlok NAHI hain. Granth ke apne upay upar hain, har ek apne shlok-number ke saath.'}
-                </div>
-              </div>
-              <div style={{padding:'4px 0'}}>
-                {hasNewUpay
-                  ? <UpayCards remedies={upayItems} isPaid={isPaid} slug={slug} lang={lang}/>
-                  : oldRemedies.slice(0,5).map((r:any,i:number)=>(
-                      <div key={i} style={{padding:'11px 16px',
-                           borderTop:i?'1px solid rgba(255,255,255,0.05)':'none'}}>
-                        <div style={{color:'#e2e8f0',fontSize:'13px'}}>
-                          {s(r.remedy ?? r.upay ?? r.title ?? r.mantra)}
-                        </div>
-                        {(r.planet || r.count || r.day) && (
-                          <div style={{color:'#64748b',fontSize:'11px',marginTop:'3px'}}>
-                            {[s(r.planet),s(r.count),s(r.day)].filter(x=>x&&x!=='—').join(' · ')}
-                          </div>
-                        )}
-                      </div>
-                    ))}
-              </div>
-            </div>
-          )}
+          {/* v12.0 — paramparik upay ab Upay fold ke andar (paramparikUpay) */}
           {granthOn && s((granth as any).samay_ki_chetavni)!=='—' && (granth as any).samay_ki_chetavni && (
             <div style={{margin:'18px 0',padding:'12px 16px',borderRadius:'9px',
                          border:'1px solid rgba(250,204,21,0.3)',background:'rgba(250,204,21,0.06)',
@@ -4482,11 +4572,33 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
             </div>
           )}
 
-          <ShodashvargaCard pj={pj as Record<string, unknown>} lang={lang} isPaid={isPaid} slug={slug}/>
+          {/* v12.0 — "Gehraai mein": advanced cards fold ke andar (granth path).
+              Non-granth par neeche waise ke waise. */}
+          {granthOn && (
+            <Fold id="gehraai" title={lang==='english'?'Deeper study':lang==='hindi'?'गहराई में':'Gehraai mein'}
+                  sub={lang==='english'?'Shodashvarga, D9, D10, Ashtakavarga, three clocks, Varshphal, transits. Tap to open.'
+                      :lang==='hindi'?'षोडशवर्ग, D9, D10, अष्टकवर्ग, तीन घड़ियाँ, वर्षफल, गोचर। खोलने के लिए टैप करें।'
+                      :'Shodashvarga, D9, D10, Ashtakavarga, teen ghadiyan, Varshphal, gochar. Kholne ke liye tap karein.'}>
+              <BhriguChapter bhriguObj={bhriguObj as Record<string, unknown>} lang={lang} isPaid={isPaid} slug={slug}/>
+              <ShodashvargaCard pj={pj as Record<string, unknown>} lang={lang} isPaid={isPaid} slug={slug}/>
+              <AshtakavargaCard engineSig={engineSig as Record<string, unknown>} lang={lang} isPaid={isPaid} slug={slug}/>
+              <DrishtiCard engineSig={engineSig as Record<string, unknown>} lang={lang} isPaid={isPaid} slug={slug}/>
+              <ThreeClocks pj={pj as Record<string, unknown>} lang={lang} isPaid={isPaid} slug={slug}/>
+              <VarshphalCard pj={pj as Record<string, unknown>} lang={lang} isPaid={isPaid} slug={slug}/>
+              <ArgalaCard engineSig={engineSig as Record<string, unknown>} lang={lang} isPaid={isPaid} slug={slug}/>
+              {isPaid && Object.keys(navamsa).length>0 && <NavamsaCard nv={navamsa} lang={lang} note={navNote}/>}
+              {isPaid && Object.keys(dasamsa).length>0 && <DasamsaCard ds={dasamsa} lang={lang} note={dasNote}/>}
+              {Object.keys(gochar).length>0 && <GocharTimeline g={gochar} lang={lang} isPaid={isPaid} slug={slug}/>}
+              {isPaid && <MonthlyOutlook rows={monthlyOut} lang={lang}/>}
+              {isPaid && <EngineSignals yogas={allYogas} bhriguTheme={bhriguTheme} bhriguPoints={bhriguPts} signals={bhriguSignals} lang={lang}/>}
+              <ConfidenceCard c={confidence} lang={lang}/>
+            </Fold>
+          )}
+          {!granthOn && <ShodashvargaCard pj={pj as Record<string, unknown>} lang={lang} isPaid={isPaid} slug={slug}/>}
 
-          <AshtakavargaCard engineSig={engineSig as Record<string, unknown>} lang={lang} isPaid={isPaid} slug={slug}/>
+          {!granthOn && <AshtakavargaCard engineSig={engineSig as Record<string, unknown>} lang={lang} isPaid={isPaid} slug={slug}/>}
 
-          <DrishtiCard engineSig={engineSig as Record<string, unknown>} lang={lang} isPaid={isPaid} slug={slug}/>
+          {!granthOn && <DrishtiCard engineSig={engineSig as Record<string, unknown>} lang={lang} isPaid={isPaid} slug={slug}/>}
 
           {/* ⭐ 16 Sep 2026 — ROHIIT KA NIRDESH: KRAM BADLA GAYA.
               Ab: Chart → Yeh Prediction Kyun → AAPKA ATEET (+ feedback)
@@ -4505,37 +4617,19 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
               ye band karo. HATAYA NAHI — flag false par wapas. */}
           {!granthOn && <SamayCard pj={pj as Record<string, unknown>} lagna={s(chartEv?.lagna as string, '')} lang={lang} isPaid={isPaid} slug={slug} planetRows={planetTable}/>}
 
-          <ThreeClocks pj={pj as Record<string, unknown>} lang={lang} isPaid={isPaid} slug={slug}/>
+          {!granthOn && <ThreeClocks pj={pj as Record<string, unknown>} lang={lang} isPaid={isPaid} slug={slug}/>}
 
-          <VarshphalCard pj={pj as Record<string, unknown>} lang={lang} isPaid={isPaid} slug={slug}/>
+          {!granthOn && <VarshphalCard pj={pj as Record<string, unknown>} lang={lang} isPaid={isPaid} slug={slug}/>}
 
-          <ArgalaCard engineSig={engineSig as Record<string, unknown>} lang={lang} isPaid={isPaid} slug={slug}/>
+          {!granthOn && <ArgalaCard engineSig={engineSig as Record<string, unknown>} lang={lang} isPaid={isPaid} slug={slug}/>}
 
-          {isPaid && Object.keys(navamsa).length>0 && <NavamsaCard nv={navamsa} lang={lang} note={navNote}/>}
-          {isPaid && Object.keys(dasamsa).length>0 && <DasamsaCard ds={dasamsa} lang={lang} note={dasNote}/>}
+          {!granthOn && isPaid && Object.keys(navamsa).length>0 && <NavamsaCard nv={navamsa} lang={lang} note={navNote}/>}
+          {!granthOn && isPaid && Object.keys(dasamsa).length>0 && <DasamsaCard ds={dasamsa} lang={lang} note={dasNote}/>}
 
-          {planetTable.length>0&&(
-            <div style={{background:BG_CARD,border:`1px solid ${G(0.12)}`,borderRadius:'16px',padding:'22px',marginBottom:'14px'}}>
-              <p style={{margin:'0 0 14px',color:GOLD,fontSize:'11px',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.08em'}}>{lbl('grahaVish',lang)}</p>
-              <div style={{overflowX:'auto'}}>
-                <table style={{width:'100%',borderCollapse:'collapse',fontSize:'13px'}}>
-                  <thead><tr style={{borderBottom:`1px solid ${G(0.15)}`}}>{['Graha','Rashi','House','Nakshatra','Dignity','Strength'].map(h=>(<th key={h} style={{padding:'9px 6px',color:GOLD,fontWeight:600,textAlign:'left',fontSize:'11px',letterSpacing:'0.06em',textTransform:'uppercase'}}>{h}</th>))}</tr></thead>
-                  <tbody>
-                    {planetTable.map((p,i)=>{
-                      const hasSb = typeof p.shadbala==='number' && p.strength
-                      const sc=!hasSb?'#64748b':p.strength==='Very Strong'?'#22c55e':p.strength==='Strong'?'#86efac':p.strength==='Moderate'?GOLD:'#ef4444'
-                      const sd=!hasSb?'':p.strength==='Very Strong'?'●●':p.strength==='Strong'?'●':p.strength==='Moderate'?'◐':'○'
-                      return (<tr key={p.planet} style={{borderBottom:'1px solid rgba(255,255,255,0.04)',background:i%2===0?G(0.02):'transparent'}}><td style={{padding:'11px 6px',color:'#fff',fontWeight:600}}><span style={{color:GOLD,marginRight:'5px'}}>{PLANET_GLYPH[p.planet]??'✦'}</span>{p.planet_hi||PLANET_HI[p.planet]||p.planet}{p.retrograde&&<span style={{color:'#f59e0b',fontSize:'10px',marginLeft:'4px'}}>® Vakri</span>}</td><td style={{padding:'11px 6px',color:'#e2e8f0'}}>{p.rashi}</td><td style={{padding:'11px 6px',color:'#e2e8f0'}}>{ordinal(p.house)}</td><td style={{padding:'11px 6px',color:'#94a3b8',fontSize:'12px'}}>{p.nakshatra}</td><td style={{padding:'11px 6px',color:'#94a3b8',fontSize:'12px'}}>{p.dignity}</td><td style={{padding:'11px 6px'}}><span style={{color:sc,fontSize:'12px',fontWeight:700}}>{hasSb?<>{sd} {p.strength}{isPaid && <span style={{color:'#64748b',fontWeight:500}}> ({p.shadbala.toFixed(2)})</span>}</>:'—'}</span></td></tr>)
-                    })}
-                  </tbody>
-                </table>
-              </div>
-              <p style={{margin:'10px 0 0',color:'#475569',fontSize:'11px'}}>⚖️ Shadbala classical 6-component system (BPHS Ch.27) · Swiss Ephemeris</p>
-            </div>
-          )}
+          {!granthOn && grahaBlock}
 
-          {Object.keys(gochar).length>0 && <GocharTimeline g={gochar} lang={lang} isPaid={isPaid} slug={slug}/>}
-          {isPaid && <MonthlyOutlook rows={monthlyOut} lang={lang}/>}
+          {!granthOn && Object.keys(gochar).length>0 && <GocharTimeline g={gochar} lang={lang} isPaid={isPaid} slug={slug}/>}
+          {!granthOn && isPaid && <MonthlyOutlook rows={monthlyOut} lang={lang}/>}
 
           {/* ⭐ 16 Sep 2026 — ACTION WINDOWS ab {!granthOn} ke peechhe. Uski
               bhasha Gemini-yug ki hai aur usme KACHCHA ANK chhapta hai —
@@ -4623,12 +4717,13 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
             doNow={isPaid ? (doAction!=='—'?doAction:mainAction) : doAction}
             avoidNow={isPaid ? (avoidAction!=='—'?avoidAction:mainCaution) : avoidAction}/>}
 
-          <div style={{background:BG_CARD,border:`1px solid ${G(0.12)}`,borderRadius:'16px',padding:'22px',marginBottom:'14px'}}>
+          {/* v12.0 — L1/L2/L3 box granth mode mein nahi: hero mein poori tareekh ke saath hai */}
+          {!granthOn && <div style={{background:BG_CARD,border:`1px solid ${G(0.12)}`,borderRadius:'16px',padding:'22px',marginBottom:'14px'}}>
             <p style={{margin:'0 0 14px',color:GOLD,fontSize:'11px',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.08em'}}>{lbl('dashaKaal',lang)}</p>
             <div style={{display:'flex',flexDirection:'column',gap:'10px'}}>
               {[{label:'Mahadasha',lord:mahadasha,color:'#60a5fa',lv:'L1'},{label:'Antardasha',lord:antardasha,color:'#a78bfa',lv:'L2'},{label:'Pratyantar',lord:pratyantar,color:GOLD,lv:'L3'}].map(({label,lord,color,lv})=>(<div key={label} style={{display:'flex',alignItems:'center',gap:'12px',padding:'12px',background:'rgba(255,255,255,0.03)',borderRadius:'10px',border:'1px solid rgba(255,255,255,0.06)'}}><div style={{width:'30px',height:'30px',borderRadius:'50%',background:`${color}20`,border:`1px solid ${color}40`,display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0,color,fontSize:'11px',fontWeight:700}}>{lv}</div><div style={{flex:1}}><p style={{margin:0,color:'#64748b',fontSize:'11px',textTransform:'uppercase',letterSpacing:'0.06em'}}>{label}</p><p style={{margin:'2px 0 0',color:'#fff',fontSize:'15px',fontWeight:700}}>{lord}</p></div></div>))}
             </div>
-          </div>
+          </div>}
 
           {granthOn && (granth as any).ant_ki_baat && (
             <div style={{margin:'26px 0 10px',padding:'16px 18px',borderRadius:'10px',
@@ -4637,14 +4732,15 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
               {s((granth as any).ant_ki_baat)}
             </div>
           )}
-          {isPaid && <EngineSignals yogas={allYogas} bhriguTheme={bhriguTheme} bhriguPoints={bhriguPts} signals={bhriguSignals} lang={lang}/>}
+          {!granthOn && isPaid && <EngineSignals yogas={allYogas} bhriguTheme={bhriguTheme} bhriguPoints={bhriguPts} signals={bhriguSignals} lang={lang}/>}
 
-          <ConfidenceCard c={confidence} lang={lang}/>
+          {!granthOn && <ConfidenceCard c={confidence} lang={lang}/>}
 
           {/* ── 5 · WEAKEST — identical for every reader on a given day ────
               Panchang is today's tithi and nakshatra. It is the same for
               everyone and has no connection to this chart, so it sits last. */}
-          {panchang._source==='swiss-ephemeris' && s(panchang.tithi as string)!=='—' && (
+          {/* v12.0 — Panchang granth mode mein nahi (Rohiit: kundali report mein irrelevant) */}
+          {!granthOn && panchang._source==='swiss-ephemeris' && s(panchang.tithi as string)!=='—' && (
             <div style={{background:BG_CARD,border:`1px solid ${G(0.12)}`,borderRadius:'16px',padding:'22px',marginBottom:'14px'}}>
               <p style={{margin:'0 0 14px',color:GOLD,fontSize:'11px',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.08em'}}>{lbl('panchang',lang)}</p>
               <div style={{display:'grid',gridTemplateColumns:'repeat(2,1fr)',gap:'8px',marginBottom:'10px'}}>
@@ -4671,6 +4767,9 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
               reader had any reason to trust the product. The component and the
               amount arrays are deleted rather than hidden, so they cannot drift
               back in. Razorpay is untouched — it still powers the ₹51 unlock. */}
+
+          {/* v12.0 — Rohiit se 15 min, ₹499 (WhatsApp Business) */}
+          {granthOn && <ReportCTA slug={slug} lang={lang} personName={personName!=='—'?personName:undefined}/>}
 
           <div style={{background:'rgba(8,14,28,0.95)',border:'1px solid rgba(255,255,255,0.06)',borderRadius:'14px',padding:'18px',marginBottom:'14px'}}>
             <div style={{display:'flex',alignItems:'center',gap:'12px',marginBottom:'12px'}}>
