@@ -3,6 +3,18 @@
 /**
  *
  * ══════════════════════════════════════════════════════════════════════════
+ * v11.1 — 15 OCTOBER 2026 — HERO + UPAY LABEL (Rohiit ke teen nirdesh)
+ * ══════════════════════════════════════════════════════════════════════════
+ *   1. HERO: grahak ka NAAM (report.person_name) upar, aur chalte Antardasha
+ *      ki POORI tareekh (ateet ke "abhi" AD ka se → aage ke "abhi" daur ka tak)
+ *      — pehle sirf "Rahu Mahadasha · Saturn Antardasha" tha, bina tareekh.
+ *   2. Hero ke 2 generic Gemini "insights" ab {!granthOn} ke peechhe —
+ *      granth report par wo har grahak ko ek hi English line dete the.
+ *      Hataya nahi, purane report par waise hi dikhte hain.
+ *   3. UPAY LABEL: "5 Classical Remedies (BPHS)" aur footer "All remedies
+ *      from BPHS" — PARAMPARIK UPAY ke neeche chhapta tha, jabki upar hi
+ *      banner kehta hai "granth ka shlok NAHI". Ab label sach bolta hai.
+ *
  * v11.0 — 21 SEPTEMBER 2026 — GRANTH KI CHAAR TABLE
  * ══════════════════════════════════════════════════════════════════════════
  * ROHIIT KA FAISLA: "Past, Present and Future should be in table format —
@@ -713,7 +725,8 @@ const L: Record<string, Record<Lang,string>> = {
   pastNoMatch:  {hinglish:'Mel nahi khaa raha? Teen wajah ho sakti hain — janm samay thoda alag ho, varnan bahut aam lage, ya purani baat theek se yaad na ho. Sabse pehle apna janm samay ek baar jaanch lijiye.', hindi:'मेल नहीं खा रहा? तीन वजह हो सकती हैं — जन्म समय थोड़ा अलग हो, वर्णन बहुत आम लगे, या पुरानी बात ठीक से याद न हो। सबसे पहले अपना जन्म समय एक बार जाँच लीजिए।', english:'Not matching? Three reasons are possible — the birth time may be slightly off, the description may read too generally, or the period may simply be too long ago to recall. Check your birth time first.'},
   pastFoot:     {hinglish:'Ye daur vishay batate hain, ghatna nahi. Koi kundali ye nahi bata sakti ki kis din kya hua — aur jo batae, wo anumaan bech raha hai.', hindi:'ये दौर विषय बताते हैं, घटना नहीं। कोई कुंडली यह नहीं बता सकती कि किस दिन क्या हुआ — और जो बताए, वह अनुमान बेच रहा है।', english:'These periods describe themes, not events. No chart can say what happened on a given day — and anyone who claims to is selling guesswork.'},
   actionWin:    {hinglish:'🗓 Action Windows — Trikaal Precision', hindi:'🗓 कार्य अवधि — त्रिकाल परिशुद्धता', english:'🗓 Action Windows — Trikaal Precision'},
-  upayTitle:    {hinglish:'🙏 Upay — 5 Classical Remedies (BPHS)', hindi:'🙏 उपाय — ५ शास्त्रीय उपाय (बीपीएचएस)', english:'🙏 Remedies — 5 Classical Upay (BPHS)'},
+  upayTitle:    {hinglish:'🙏 Paramparik Upay — 5 (granth ka shlok nahi)', hindi:'🙏 पारम्परिक उपाय — ५ (ग्रन्थ का श्लोक नहीं)', english:'🙏 Traditional Remedies — 5 (not from a granth verse)'},
+  upayFoot:     {hinglish:'Ye upay jyotish PARAMPARA se hain · Granth ke apne upay upar, apne shlok-number ke saath · Rohiit Gupta, Chief Vedic Architect', hindi:'ये उपाय ज्योतिष परम्परा से हैं · ग्रन्थ के अपने उपाय ऊपर, श्लोक-संख्या के साथ · रोहित गुप्ता, Chief Vedic Architect', english:'These remedies come from astrological tradition · The granth-given remedies are above, each with its sloka number · Rohiit Gupta, Chief Vedic Architect'},
   lockedMore:   {hinglish:'🔒 Trikaal ne aur bhi dekha hai', hindi:'🔒 त्रिकाल ने और भी देखा है', english:'🔒 Trikaal has seen more'},
   unlock51:     {hinglish:'🔓 Poora sach — ₹51',  hindi:'🔓 पूरा सच — ₹५१',  english:'🔓 The full answer — ₹51'},
   tzMonths:     {hinglish:'…aur aage ke 6 mahine?', hindi:'…और आगे के ६ महीने?', english:'…and the next 6 months?'},
@@ -2994,7 +3007,7 @@ function UpayCards({ remedies, isPaid, slug, lang }: { remedies: UpayItem[]; isP
       )}
 
       <p style={{ margin: '12px 0 0', color: '#475569', fontSize: '11px' }}>
-        All remedies from Brihat Parashara Hora Shastra · Swiss Ephemeris precision · Rohiit Gupta, Chief Vedic Architect
+        {lbl('upayFoot',lang)}
       </p>
     </div>
   )
@@ -4097,6 +4110,19 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
   const geoObj      = safeObj(pj.geoDirectAnswer)
   const geoText     = s(geoObj.text as string)!=='—' ? s(geoObj.text as string) : typeof pj.geoDirectAnswer==='string' ? s(pj.geoDirectAnswer as string) : s(report.geo_answer as string)
   const geoBullets  = splitGeoToBullets(geoText, isPaid, pj)
+  // v11.1 — grahak ka naam aur chalte AD ki poori tareekh (granth se)
+  const personName  = s(report.person_name)
+  const adRange = (():string => {
+    if(!granthOn) return ''
+    const mds:any[] = Array.isArray((granth as any).ateet?.mahadasha) ? (granth as any).ateet.mahadasha : []
+    let se = ''
+    for(const m of mds) for(const d of (Array.isArray(m?.ad)?m.ad:[])) if(d?.abhi && d?.se){ se = String(d.se) }
+    const daur:any[] = Array.isArray((granth as any).aage?.daur) ? (granth as any).aage.daur : []
+    const cur = daur.find((d:any)=>d?.abhi) ?? daur[0]
+    const tak = cur?.tak ? String(cur.tak) : ''
+    if(!se && !tak) return ''
+    return `${se || '?'} – ${tak || '?'}`
+  })()
   const summaryText = s(pj.summaryText as string)!=='—' ? s(pj.summaryText as string) : s(safeObj(pj.simpleSummary).text as string)
   const keyMessage  = s(pj.keyMessage as string)!=='—' ? s(pj.keyMessage as string) : s(safeObj(pj.simpleSummary).keyMessage as string)
   const mainAction  = s(pj.mainAction as string)!=='—' ? s(pj.mainAction as string) : s(safeObj(pj.simpleSummary).mainAction as string)
@@ -4241,7 +4267,9 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
               <div style={{height:'1px',flex:1,background:`linear-gradient(to left,transparent,${G(0.3)})`}}/>
             </div>
             <p style={{margin:'0 0 6px',color:G(0.6),fontSize:'12px',fontWeight:600,letterSpacing:'0.08em',textTransform:'uppercase'}}>Vedic Astrology Analysis · {domainLabel}</p>
+            {personName!=='—' && <p style={{margin:'0 0 4px',color:GOLD,fontSize:'16px',fontWeight:700,fontFamily:'Georgia,serif'}}>{personName}{lang==='english'?"'s Kundali":lang==='hindi'?' की कुण्डली':' ki Kundali'}</p>}
             <h1 style={{margin:'0 0 6px',color:'#fff',fontSize:'22px',fontFamily:'Georgia,serif',fontWeight:700}}>{mahadasha} Mahadasha · {antardasha} Antardasha</h1>
+            {adRange && <p style={{margin:'0 0 6px',color:'#cbd5e1',fontSize:'13px'}}>{lang==='english'?'Running period':lang==='hindi'?'चल रहा दौर':'Chal raha daur'}: <b style={{color:'#fff'}}>{mahadasha}/{antardasha} · {adRange}</b></p>}
             <p style={{margin:'0 0 4px',color:'#94a3b8',fontSize:'14px'}}>{birthLine}</p>
             <p style={{margin:'0 0 16px',color:'#64748b',fontSize:'12.5px'}}>{lagna} Lagna · {nakshatra} Nakshatra · <span style={{color:'#475569'}}>ye vivaran galat ho to reading dobara banayein</span></p>
             <div style={{display:'flex',flexWrap:'wrap',gap:'6px',justifyContent:'center',marginBottom:'12px'}}>
@@ -4257,7 +4285,8 @@ export default function ReportPublicClient({report,slug,meta}:ReportPublicClient
                 It also stops paying Flash for prose on ~191 free readings a
                 month. The bullets still generate and still save to the DB, so
                 nothing downstream changes and paid is untouched. */}
-            {isPaid && geoBullets.length>0 && (
+            {/* v11.1 — granth report par ye 2 generic Gemini line nahi */}
+            {isPaid && !granthOn && geoBullets.length>0 && (
               <div style={{background:G(0.06),border:`1px solid ${G(0.15)}`,borderRadius:'14px',padding:'16px',marginTop:'14px',textAlign:'left'}}>
                 <p style={{margin:'0 0 12px',color:G(0.65),fontSize:'11px',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.08em'}}>{lbl('vedicAnalysis',lang)} {isPaid && <span style={{color:G(0.4),marginLeft:'8px',fontSize:'10px'}}>({geoBullets.length} insights)</span>}</p>
                 <ul style={{margin:0,padding:0,listStyle:'none',display:'flex',flexDirection:'column',gap:'10px'}}>
