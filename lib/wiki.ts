@@ -1,5 +1,14 @@
 // ============================================================
 // TRIKAAL VAANI — lib/wiki.ts
+// Version: 1.3 (16 Oct 2026) — Google Discover featured image (editorial_rulings #20)
+//   v1.3: WikiHeroImage + normalizeHeroImage() + ogImageFor(). One rule for the
+//         featured image on /blog, /learn, /events and /compatibility:
+//         hero_image jsonb {url, alt, caption, source, credit}. A hero needs a
+//         usable url AND alt text, else it is ignored (never a broken <img>).
+//         ogImageFor() picks og:image / twitter / JSON-LD image: hero first,
+//         then a legacy absolute URL or /og-default.jpg, else the default.
+//         Legacy relative paths like /og/x.jpg (files that never existed in
+//         public/) and empty strings now fall back to the default image.
 // Version: 1.2 (03 Oct 2026) — NO granth is restricted any more (Rohiit's ruling, 3 Oct 2026)
 //   v1.2: RESTRICTED_WORKS is now EMPTY. Rohiit, 3 Oct 2026: "BPHS ke Sanskrit
 //         slokas dikhao ... changed the rule ... we also have our PDF in our
@@ -50,6 +59,15 @@ export interface WikiGlossaryTerm {
   term: string;
   definition: string;
   same_as: string | null; // verified Wikipedia/Wikidata URL only
+}
+
+// v1.3 — featured image (editorial_rulings #20)
+export interface WikiHeroImage {
+  url: string;            // absolute URL (Supabase Storage discover-images, or site path)
+  alt: string;            // page language, what the image shows + topic
+  caption: string | null; // short line under the image, page language
+  width: number;          // 1600 by the #20 standard
+  height: number;         // 900 by the #20 standard
 }
 
 export interface WikiHubGroup {
@@ -113,6 +131,51 @@ export function normalizeInfobox(raw: unknown): WikiInfoboxRow[] {
     if (label && value) out.push({ label, value });
   }
   return out;
+}
+
+// ── v1.3: featured image (editorial_rulings #20) ────────────
+export const SITE_ORIGIN = 'https://trikalvaani.com';
+export const DEFAULT_OG_IMAGE = { url: `${SITE_ORIGIN}/og-default.jpg`, width: 1200, height: 630 };
+
+/** https URL as-is; a site path ("/x.webp") gets the site origin; else null. */
+export function absoluteImageUrl(u: unknown): string | null {
+  if (typeof u !== 'string') return null;
+  const t = u.trim();
+  if (/^https:\/\/[^\s"'<>]+$/.test(t)) return t;
+  if (/^\/[^\s"'<>]+$/.test(t) && !t.startsWith('//')) return `${SITE_ORIGIN}${t}`;
+  return null;
+}
+
+/** hero_image jsonb → WikiHeroImage, or null (no url or no alt = no image). */
+export function normalizeHeroImage(raw: unknown): WikiHeroImage | null {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return null;
+  const o = raw as Record<string, unknown>;
+  const url = absoluteImageUrl(o.url);
+  const alt = typeof o.alt === 'string' ? o.alt.trim() : '';
+  if (!url || !alt) return null;
+  const caption = typeof o.caption === 'string' && o.caption.trim() ? o.caption.trim() : null;
+  const w = Number(o.width);
+  const h = Number(o.height);
+  return {
+    url,
+    alt,
+    caption,
+    width: Number.isFinite(w) && w > 0 ? w : 1600,
+    height: Number.isFinite(h) && h > 0 ? h : 900,
+  };
+}
+
+/** The image for og:image, twitter:image and JSON-LD Article.image.
+ *  hero first; then a legacy value only if it is an absolute https URL or the
+ *  real /og-default.jpg; anything else (empty, /og/missing.jpg) → default. */
+export function ogImageFor(
+  hero: WikiHeroImage | null,
+  legacy?: string | null,
+): { url: string; width: number; height: number } {
+  if (hero) return { url: hero.url, width: hero.width, height: hero.height };
+  const l = typeof legacy === 'string' ? legacy.trim() : '';
+  if (/^https:\/\//.test(l)) return { url: l, width: 1200, height: 630 };
+  return DEFAULT_OG_IMAGE;
 }
 
 export function normalizeGlossary(raw: unknown): WikiGlossaryTerm[] {

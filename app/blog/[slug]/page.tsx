@@ -1,7 +1,17 @@
 // ============================================================
 // TRIKAL VAANI — DYNAMIC BLOG ARTICLE PAGE (SSR)
 // CEO: Rohiit Gupta | Chief Vedic Architect
-// Version: 3.9 (11 Oct 2026 — LOT 3 Play Billing: Rohiit ka faisla — Google Play app ke andar
+// Version: 4.0 (16 Oct 2026 — GOOGLE DISCOVER FEATURED IMAGE, editorial_rulings #20, Option A
+//   approved by Rohiit 16 Oct 2026). Infobox: "Key Facts" heading → featured image → caption →
+//   rows (HeroFigure from components/wiki/WikiBlocks v1.1); Infobox also shows when a page has
+//   an image but no rows. og:image / twitter:image / JSON-LD Article.image = hero image
+//   (1600x900) via lib/wiki ogImageFor(); without a hero the legacy og_image is used only if it
+//   is a real https URL, else /og-default.jpg — this fixes the 384 posts whose empty og_image
+//   produced "https://trikalvaani.com" as the image URL and the 10 posts pointing at /og/*.jpg
+//   files that never existed. Requires lib/blog-posts.ts v3.14 + lib/wiki.ts v1.3.
+// Date: 2026-10-16
+// ------------------------------------------------------------
+// PREVIOUS: Version 3.9 (11 Oct 2026 — LOT 3 Play Billing: Rohiit ka faisla — Google Play app ke andar
 //   ₹499 On-Call Consultation ka offer NAHI dikhega (uska payment app ke bahar hota hai). Sirf
 //   8 NCR city pages ke visible fee table ki "On-Call Consultation ₹499" wali row <HideInPlayApp>
 //   mein lapeti. Website par sab BYTE-FOR-BYTE pehle jaisa; JSON-LD (FEE_LADDER / OfferCatalog)
@@ -247,6 +257,7 @@ import Link from 'next/link';
 import type { Metadata } from 'next';
 import { createClient } from '@supabase/supabase-js'; // v3.7
 import HideInPlayApp from '@/components/payment/HideInPlayApp'; // v3.9
+import { HeroFigure } from '@/components/wiki/WikiBlocks'; // v4.0
 import {
   getPostBySlug,
   getAllSlugs,
@@ -269,6 +280,8 @@ import {
   entitySchema,
   glossarySchema,
   matchEntities,
+  ogImageFor, // v4.0
+  type WikiHeroImage, // v4.0
 } from '@/lib/wiki';
 
 
@@ -515,6 +528,9 @@ export async function generateMetadata(
   if (enUrl) { languages['en-IN'] = enUrl; languages['x-default'] = enUrl; }
   if (hiUrl) { languages['hi-IN'] = hiUrl; }
 
+  // v4.0: featured image (editorial_rulings #20), safe fallback otherwise
+  const og = ogImageFor(post.heroImage, post.ogImage);
+
   return {
     // absolute → bypasses the root layout title template so the brand suffix
     // (already present in post.title) is not duplicated in the <title> tag.
@@ -541,10 +557,10 @@ export async function generateMetadata(
       authors: ['Rohiit Gupta'],
       images: [
         {
-          url: `https://trikalvaani.com${post.ogImage}`,
-          width: 1200,
-          height: 630,
-          alt: post.title,
+          url: og.url,
+          width: og.width,
+          height: og.height,
+          alt: post.heroImage?.alt ?? post.title,
         },
       ],
     },
@@ -554,7 +570,7 @@ export async function generateMetadata(
       creator: '@TrikalVaani',
       title: post.title,
       description: post.description,
-      images: [`https://trikalvaani.com${post.ogImage}`],
+      images: [og.url],
     },
     robots: {
       index: true,
@@ -586,7 +602,7 @@ function generateJsonLd(
     '@id': `${canonicalUrl}#article`,
     headline: displayTitle(post.title),
     description: post.description,
-    image: [`https://trikalvaani.com${post.ogImage}`],
+    image: [ogImageFor(post.heroImage, post.ogImage).url], // v4.0
     datePublished: post.publishedAt,
     dateModified: post.updatedAt,
     author: {
@@ -1063,8 +1079,8 @@ function SectionBlock({
 // ==================================================================
 // v3.4 — WIKIPEDIA-STYLE COMPONENTS (Infobox · Contents · Glossary)
 // ==================================================================
-function Infobox({ rows, ctx }: { rows: BlogInfoboxRow[]; ctx: CiteCtx }) {
-  if (!rows.length) return null;
+function Infobox({ rows, ctx, hero = null }: { rows: BlogInfoboxRow[]; ctx: CiteCtx; hero?: WikiHeroImage | null }) {
+  if (!rows.length && !hero) return null;
   return (
     <aside
       aria-label="Key facts"
@@ -1073,6 +1089,9 @@ function Infobox({ rows, ctx }: { rows: BlogInfoboxRow[]; ctx: CiteCtx }) {
       <div className="bg-amber-950/70 px-4 py-2 text-center font-bold text-amber-300">
         मुख्य तथ्य · Key Facts
       </div>
+      {/* v4.0: Option A — heading, then image + caption, then rows */}
+      {hero && <HeroFigure hero={hero} />}
+      {rows.length > 0 && (
       <table className="w-full">
         <tbody>
           {rows.map((r, i) => (
@@ -1087,6 +1106,7 @@ function Infobox({ rows, ctx }: { rows: BlogInfoboxRow[]; ctx: CiteCtx }) {
           ))}
         </tbody>
       </table>
+      )}
     </aside>
   );
 }
@@ -1469,7 +1489,7 @@ export default async function BlogArticlePage({
           </section>
 
           {/* ── v3.4: INFOBOX + CONTENTS (Wikipedia-style) ── */}
-          <Infobox rows={post.infobox} ctx={citeCtx} />
+          <Infobox rows={post.infobox} ctx={citeCtx} hero={post.heroImage} />
           <TableOfContents
             sections={post.sections}
             anchors={anchors}

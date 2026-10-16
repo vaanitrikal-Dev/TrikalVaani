@@ -3,7 +3,12 @@
  * TRIKAL VAANI — Compatibility Page (Programmatic SEO/GEO)
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/compatibility/[pair]/page.tsx
- * VERSION: 1.7 (1 Oct 2026 — Trikaal Vaani ka core tagline (Rohiit ne chuna): "Granth ka Gyaan · Rohiit ki Parakh · AI ki Shakti" / "Rooted in Granth · Verified by Rohiit · Powered by AI") (1 Oct 2026 — daam sahi kiye: Kundali Milan ₹51 (couple + parent), Karmic ₹101 / $11, Child Birth ₹51; Bhrigu Nandi ke purane daave hataye) — Hindi URL consolidation (canonical / hreflang /
+ * VERSION: 1.8 (16 Oct 2026 — Google Discover featured image, editorial_rulings #20: compatibility_pages.hero_image
+ *   → a "Key Facts" box with the image + caption at the top of the content (Option A look, WikiBlocks
+ *   Infobox v1.1, shown only when an image exists); og:image + twitter large card + Article.image; robots
+ *   now carries googleBot max-image-preview:large — the plain {index, follow} here replaced the root
+ *   layout's googleBot block, so these 288 pages never allowed a large preview.)
+ * PREVIOUS: VERSION 1.7 (1 Oct 2026 — Trikaal Vaani ka core tagline (Rohiit ne chuna): "Granth ka Gyaan · Rohiit ki Parakh · AI ki Shakti" / "Rooted in Granth · Verified by Rohiit · Powered by AI") (1 Oct 2026 — daam sahi kiye: Kundali Milan ₹51 (couple + parent), Karmic ₹101 / $11, Child Birth ₹51; Bhrigu Nandi ke purane daave hataye) — Hindi URL consolidation (canonical / hreflang /
  *                toggle / related links all point at /hi/compatibility/)
  * DATE:    2026-09-05
  * SIGNED: ROHIIT GUPTA, CEO
@@ -70,6 +75,8 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { createClient } from '@supabase/supabase-js';
+import { Infobox } from '@/components/wiki/WikiBlocks'; // v1.8
+import { normalizeHeroImage, ogImageFor } from '@/lib/wiki'; // v1.8
 
 // ── ISR: regenerate pages periodically, cache aggressively ───
 export const revalidate = 86400; // 24h
@@ -118,6 +125,7 @@ interface CompatRow {
   faq:           { q: string; a: string }[];
   meta_title:    string;
   meta_desc:     string;
+  hero_image?:   unknown; // v1.8 — editorial_rulings #20
 }
 
 // ── Minimal shape for related-pair links ─────────────────────
@@ -182,6 +190,9 @@ export async function generateMetadata(
   }
 
   const canonical = pairUrl(page.slug, lang === 'hi');
+  // v1.8: featured image (editorial_rulings #20), else /og-default.jpg
+  const hero = normalizeHeroImage(page.hero_image);
+  const og = ogImageFor(hero);
 
   return {
     title:       { absolute: page.meta_title },
@@ -199,8 +210,19 @@ export async function generateMetadata(
       url:         canonical,
       siteName:    'Trikaal Vaani',
       type:        'article',
+      images:      [{ url: og.url, width: og.width, height: og.height, alt: hero?.alt ?? page.meta_title }],
     },
-    robots: { index: true, follow: true },
+    twitter: {
+      card:        'summary_large_image',
+      title:       page.meta_title,
+      description: page.meta_desc,
+      images:      [og.url],
+    },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: { index: true, follow: true, 'max-image-preview': 'large', 'max-snippet': -1 },
+    },
   };
 }
 
@@ -226,6 +248,7 @@ export default async function CompatibilityPage(
   const r1 = isHi ? page.rashi1_hi : page.rashi1_en;
   const r2 = isHi ? page.rashi2_hi : page.rashi2_en;
   const canonical = pairUrl(page.slug, isHi);
+  const hero = normalizeHeroImage(page.hero_image); // v1.8
 
   // v1.1: fetch related pairs for the interlinking mesh
   const relatedPairs = await getRelatedPairs(page.rashi1_en, lang, page.slug);
@@ -354,6 +377,7 @@ export default async function CompatibilityPage(
     },
     mainEntityOfPage: canonical,
     inLanguage: isHi ? 'hi-IN' : 'en-IN',
+    image: [ogImageFor(hero).url], // v1.8
   };
 
   const breadcrumbSchema = {
@@ -430,6 +454,8 @@ export default async function CompatibilityPage(
 
       {/* EDUCATIONAL CONTENT (v1.4: dynamic body blocks incl. deep-dive sections) */}
       <section className="max-w-3xl mx-auto px-5 space-y-8">
+        {/* v1.8: featured image (editorial_rulings #20) — only when filled */}
+        {hero && <Infobox rows={[]} max={0} hero={hero} />}
         {bodyBlocks.map((block, i) => (
           <div key={i}>
             <h2 className="text-xl sm:text-2xl font-semibold text-[#D4AF37] mb-3 border-l-3 border-[#D4AF37] pl-3">
@@ -438,6 +464,7 @@ export default async function CompatibilityPage(
             <p className="text-gray-200 leading-relaxed text-[15px] sm:text-base whitespace-pre-line">{block.body}</p>
           </div>
         ))}
+        <div className="clear-both" />
       </section>
 
       {/* CTA → PAID MILAN */}

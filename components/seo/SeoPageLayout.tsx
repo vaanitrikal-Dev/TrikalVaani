@@ -1,7 +1,10 @@
 'use client'
 /* ============================================================
    components/seo/SeoPageLayout.tsx — /learn/[slug] layout
-   VERSION: 2.0 (27 Sep 2026) — TRIKAAL VAANI STANDARD FORMAT
+   VERSION: 2.1 (16 Oct 2026) — featured image in the Infobox (editorial_rulings #20,
+   Option A): seo_pillar_pages.hero_image → Infobox hero (WikiBlocks v1.1).
+   Requires lib/wiki.ts v1.3 + lib/seo-content.ts v5.
+   PREVIOUS: VERSION 2.0 (27 Sep 2026) — TRIKAAL VAANI STANDARD FORMAT
    (editorial_rulings #8 section G — same as /blog v3.6 and /events)
      • Infobox (seo_pillar_pages.infobox) + Contents (auto from ## headings)
      • ## headings get descriptive ids (lib/wiki headingAnchor)
@@ -25,6 +28,7 @@ import {
   normalizeCitations,
   normalizeInfobox,
   normalizeGlossary,
+  normalizeHeroImage,
   firstCiteAnchors,
   citeAnchor,
   stripCites,
@@ -233,6 +237,7 @@ export default function SeoPageLayout({ page, clusterPages, relatedPages }: Prop
   const citations = normalizeCitations(page.citations)
   const infobox = normalizeInfobox(page.infobox)
   const glossary = normalizeGlossary(page.glossary)
+  const hero = normalizeHeroImage(page.hero_image) // v2.1
   const md: MdState = {
     max: citations.length,
     first: firstCiteAnchors(infobox.map((r, i) => ({ text: r.value, loc: `ib${i}` })), citations.length),
@@ -699,7 +704,7 @@ export default function SeoPageLayout({ page, clusterPages, relatedPages }: Prop
           {/* Article */}
           <article className="seo-article">
             {/* v2.0: Infobox + Contents (standard format) */}
-            <Infobox rows={infobox} max={citations.length} />
+            <Infobox rows={infobox} max={citations.length} hero={hero} />
             <TableOfContents items={tocItems} />
 
             {/* Body content */}

@@ -2,7 +2,17 @@
 // 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER
 // ════════════════════════════════════════════════════════════════════════════
 // File:     components/festival/FestivalPillar.tsx
-// Version:  v2.7 (27 Sep 2026) — Trikaal Vaani standard format (Wikipedia-style)
+// Version:  v2.8 (16 Oct 2026) — Google Discover featured image (editorial_rulings #20)
+//
+// ── v2.8 ───────────────────────────────────────────────────────────────────
+// festival_content.hero_image (column added 16 Oct 2026) → Infobox image,
+// Option A approved by Rohiit: "Key Facts" heading → image → caption → rows.
+// festivalOgImage(content) is the ONE image the four routes put in og:image /
+// twitter:image, and Article.image in JSON-LD uses it too. No hero = the old
+// /og-default.jpg, exactly as before. Requires lib/wiki.ts v1.3 +
+// components/wiki/WikiBlocks.tsx v1.1.
+//
+// PREVIOUS: v2.7 (27 Sep 2026) — Trikaal Vaani standard format (Wikipedia-style)
 //
 // ── v2.7 ───────────────────────────────────────────────────────────────────
 // editorial_rulings #8 section G — same format as /blog v3.6 and /learn:
@@ -113,6 +123,7 @@ import { Infobox, TableOfContents, Glossary, References, CiteText } from "@/comp
 import {
   headingAnchor, normalizeCitations, normalizeInfobox, normalizeGlossary,
   firstCiteAnchors, citationSchema, entitySchema, glossarySchema, stripCites,
+  normalizeHeroImage, ogImageFor,
 } from "@/lib/wiki";
 
 export type Lang = "en" | "hi";
@@ -140,6 +151,8 @@ export type Content = {
   base_slug: string; page_slug: string; alt_lang_slug: string | null;
   // v2.7 — raw jsonb, normalized through lib/wiki (null until backfilled)
   citations?: unknown; infobox?: unknown; glossary?: unknown;
+  // v2.8 — featured image jsonb {url, alt, caption, source, credit}
+  hero_image?: unknown;
   seo_title: string | null; seo_description: string | null;
   direct_answer: string | null; quick_actions: string[] | null;
   significance: string | null;
@@ -232,6 +245,12 @@ export const SITE_URL = "https://trikalvaani.com";
 export const AUTHOR_NAME = "Rohiit Gupta";
 export const AUTHOR_TITLE = "Chief Vedic Architect, Trikaal Vaani";
 export const OG_IMAGE = `${SITE_URL}/og-default.jpg`;
+
+/** v2.8 — og:image / twitter:image / Article.image for one festival row:
+ *  its hero image (editorial_rulings #20) when filled, else OG_IMAGE. */
+export function festivalOgImage(content: Content | null): string {
+  return ogImageFor(normalizeHeroImage(content?.hero_image)).url;
+}
 
 export const CITY_SLUGS = new Set([
   "delhi", "mumbai", "noida", "gurgaon", "bangalore",
@@ -960,7 +979,7 @@ function buildFestivalSchema(opts: {
         url: SITE_URL,
         logo: { "@type": "ImageObject", url: `${SITE_URL}/logo.png` },
       },
-      image: [OG_IMAGE],
+      image: [festivalOgImage(content)], // v2.8
       about: [
         { "@type": "Thing", name },
         ...(festival.deity ? [{ "@type": "Thing", name: festival.deity }] : []),
@@ -1102,6 +1121,7 @@ export default async function FestivalPillar(
   const wCitations = normalizeCitations(content?.citations);
   const wInfobox = normalizeInfobox(content?.infobox);
   const wGlossary = normalizeGlossary(content?.glossary);
+  const wHero = normalizeHeroImage(content?.hero_image); // v2.8
   const wBack = firstCiteAnchors([
     ...wInfobox.map((r, i) => ({ text: r.value, loc: `ib${i}` })),
     { text: content?.significance ?? "", loc: "sig" },
@@ -1191,7 +1211,7 @@ export default async function FestivalPillar(
         )}
 
       {/* v2.7: Infobox + Contents (standard format) */}
-        <Infobox rows={wInfobox} max={wCitations.length} />
+        <Infobox rows={wInfobox} max={wCitations.length} hero={wHero} />
         <TableOfContents items={toc} />
 
       {/* LOCAL NAME — verified rows only, silent otherwise */}

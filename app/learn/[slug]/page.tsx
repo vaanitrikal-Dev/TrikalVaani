@@ -16,11 +16,21 @@ import {
   entitySchema,
   glossarySchema,
   stripCites,
+  normalizeHeroImage,
+  ogImageFor,
 } from '@/lib/wiki'
 
 /* ============================================================
    TRIKAL VAANI — /learn/[slug]
-   VERSION: 2.2 — TRIKAAL VAANI STANDARD FORMAT (27 Sep 2026)
+   VERSION: 2.3 — GOOGLE DISCOVER FEATURED IMAGE (16 Oct 2026)
+   ============================================================
+   CHANGE v2.3 (editorial_rulings #20): openGraph + twitter now carry an image
+     (they had none — /learn pages shared with no preview image) = the page's
+     hero_image when filled, else /og-default.jpg; Article.image in JSON-LD the
+     same. Visible image in the Infobox comes from SeoPageLayout v2.1.
+     Requires lib/wiki.ts v1.3 and lib/seo-content.ts v5.
+   ============================================================
+   PREVIOUS: VERSION 2.2 — TRIKAAL VAANI STANDARD FORMAT (27 Sep 2026)
    ============================================================
    CHANGE v2.2 (editorial_rulings #8 G — same format as /blog v3.6):
      • Article.citation = Chapter/Book (+ Quotation of the mool shlok where
@@ -127,6 +137,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   // URL (see hindi_slug) and carries its own metadata.
   const displayTitle = page.title_en
   const canonical = `https://trikalvaani.com/learn/${page.slug}`
+  // v2.3: featured image (editorial_rulings #20)
+  const hero = normalizeHeroImage(page.hero_image)
+  const og = ogImageFor(hero)
 
   return {
     // FIX (Sep 2026): was `title: \`${displayTitle} | Trikaal Vaani\``, a plain
@@ -161,17 +174,19 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       siteName: 'Trikaal Vaani',
       locale: 'en_IN',
       type: 'article',
+      images: [{ url: og.url, width: og.width, height: og.height, alt: hero?.alt ?? displayTitle }],
     },
     twitter: {
       card: 'summary_large_image',
       title: displayTitle,
       description: page.meta_description,
       site: '@trikalvaani',
+      images: [og.url],
     },
     robots: {
       index: true,
       follow: true,
-      googleBot: { index: true, follow: true, 'max-snippet': -1 },
+      googleBot: { index: true, follow: true, 'max-snippet': -1, 'max-image-preview': 'large' },
     },
   }
 }
@@ -231,6 +246,7 @@ export default async function SeoLearnPage({ params }: Props) {
       },
     },
     dateModified: page.created_at,
+    image: [ogImageFor(normalizeHeroImage(page.hero_image)).url], // v2.3
     mainEntityOfPage: `https://trikalvaani.com/learn/${page.slug}`,
     inLanguage: 'en-IN',
     keywords: page.primary_keyword,

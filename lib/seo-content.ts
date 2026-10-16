@@ -1,4 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
+/* v5 (16 Oct 2026) — SeoPage gains hero_image (raw jsonb, editorial_rulings #20,
+   column added 16 Oct 2026). Normalized by lib/wiki normalizeHeroImage() in
+   SeoPageLayout and app/learn/[slug]/page.tsx. No query changed (select '*'). */
 /* v4 (27 Sep 2026) — Wikipedia-style standard format (editorial_rulings #8 G):
    SeoPage gains citations / infobox / glossary (jsonb columns added to
    seo_pillar_pages on 27 Sep 2026, same shapes as blog_posts). They arrive raw;
@@ -100,6 +103,8 @@ export type SeoPage = {
   citations?: unknown
   infobox?: unknown
   glossary?: unknown
+  /* v5 — featured image jsonb {url, alt, caption, source, credit} */
+  hero_image?: unknown
 }
 
 /** Fetch a single published page by slug */

@@ -1,6 +1,12 @@
 // ============================================================
 // TRIKAAL VAANI — components/wiki/WikiBlocks.tsx
-// Version: 1.0 (27 Sep 2026)
+// Version: 1.1 (16 Oct 2026) — featured image in the Infobox (editorial_rulings #20)
+//   v1.1: HeroFigure + Infobox({ hero }). Option A approved by Rohiit 16 Oct
+//         2026: "Key Facts" heading → image → caption → rows (Wikipedia lead
+//         image). Infobox now renders when it has rows OR a hero image. Plain
+//         <img> (next.config images.unoptimized), eager (top of page), fixed
+//         16:9 box so nothing jumps while it loads.
+// Previous: Version 1.0 (27 Sep 2026)
 // Owner: Rohiit Gupta, Chief Vedic Architect
 //
 // The Wikipedia-style blocks of the Trikaal Vaani standard format
@@ -21,6 +27,7 @@ import {
   type WikiCitation,
   type WikiGlossaryTerm,
   type WikiInfoboxRow,
+  type WikiHeroImage,
 } from '@/lib/wiki';
 
 /** Plain text with [^n] markers → superscript [n] links. Markers whose n has
@@ -47,14 +54,40 @@ export function CiteText({ text, max, loc }: { text: string; max: number; loc: s
   );
 }
 
-export function Infobox({ rows, max }: { rows: WikiInfoboxRow[]; max: number }) {
-  if (!rows.length) return null;
+/** v1.1 — featured image + caption (editorial_rulings #20). Used inside the
+ *  Infobox here and by the /blog page's own Infobox. */
+export function HeroFigure({ hero }: { hero: WikiHeroImage }) {
+  return (
+    <figure className="m-0">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={hero.url}
+        alt={hero.alt}
+        width={hero.width}
+        height={hero.height}
+        loading="eager"
+        decoding="async"
+        className="block aspect-video h-auto w-full bg-slate-950 object-cover"
+      />
+      {hero.caption && (
+        <figcaption className="border-b border-amber-900/30 px-3 py-2 text-xs italic leading-snug text-slate-400">
+          {hero.caption}
+        </figcaption>
+      )}
+    </figure>
+  );
+}
+
+export function Infobox({ rows, max, hero = null }: { rows: WikiInfoboxRow[]; max: number; hero?: WikiHeroImage | null }) {
+  if (!rows.length && !hero) return null;
   return (
     <aside
       aria-label="Key facts"
       className="mb-8 overflow-hidden rounded-xl border border-amber-800/50 bg-slate-900/70 text-sm md:float-right md:mb-6 md:ml-8 md:w-80"
     >
       <div className="bg-amber-950/70 px-4 py-2 text-center font-bold text-amber-300">मुख्य तथ्य · Key Facts</div>
+      {hero && <HeroFigure hero={hero} />}
+      {rows.length > 0 && (
       <table className="w-full">
         <tbody>
           {rows.map((r, i) => (
@@ -67,6 +100,7 @@ export function Infobox({ rows, max }: { rows: WikiInfoboxRow[]; max: number }) 
           ))}
         </tbody>
       </table>
+      )}
     </aside>
   );
 }

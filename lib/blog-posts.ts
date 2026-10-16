@@ -1,7 +1,17 @@
 // ============================================================
 // TRIKAL VAANI — BLOG POSTS — SUPABASE VERSION
 // CEO: Rohiit Gupta | Chief Vedic Architect
-// Version: 3.13 (SHARED lib/wiki.ts — one source for /blog, /learn, /events)
+// Version: 3.14 (FEATURED IMAGE — editorial_rulings #20)
+// Date: 2026-10-16
+//
+// CHANGE v3.14 — BlogPost gains `heroImage` from the new column
+//   public.blog_posts.hero_image (jsonb {url, alt, caption, source, credit},
+//   added 16 Oct 2026), read through lib/wiki normalizeHeroImage() — null when
+//   empty or malformed, never a crash. getPostBySlug() already selects '*'.
+//   LIST_COLUMNS unchanged (list views never show the hero).
+//
+// ------------------------------------------------------------
+// PREVIOUS: Version 3.13 (SHARED lib/wiki.ts — one source for /blog, /learn, /events)
 // Date: 2026-09-27
 //
 // CHANGE v3.13 — no behaviour change. BlogCitation / BlogInfoboxRow /
@@ -204,7 +214,9 @@ import {
   normalizeInfobox,
   normalizeGlossary,
   normalizeHubGroup,
+  normalizeHeroImage,
   headingAnchor,
+  type WikiHeroImage,
   type WikiCitation,
   type WikiInfoboxRow,
   type WikiGlossaryTerm,
@@ -268,6 +280,7 @@ export interface BlogPost {
   glossary: BlogGlossaryTerm[];
   pillarSlug: string | null;
   hubGroup: BlogHubGroup | null; // v3.12
+  heroImage: WikiHeroImage | null; // v3.14 — editorial_rulings #20
   // ── v3.3: bilingual (EN/HI) support ──────────────────────
   lang: string;               // 'en' | 'hi'
   altLangSlug: string | null; // counterpart slug in the other language (hreflang pairing)
@@ -500,6 +513,8 @@ function mapRow(row: Record<string, unknown>): BlogPost {
     glossary:         normalizeGlossary(row.glossary),
     pillarSlug:       typeof row.pillar_slug === 'string' && row.pillar_slug.trim() ? row.pillar_slug.trim() : null,
     hubGroup:         normalizeHubGroup(row.hub_group),
+    // ── v3.14: featured image (null until filled) ─────────────
+    heroImage:        normalizeHeroImage(row.hero_image),
     // ── v3.3: bilingual (EN/HI) support ──────────────────────
     lang:             (row.lang as string) ?? 'en',
     altLangSlug:      (row.alt_lang_slug as string) ?? null,

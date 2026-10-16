@@ -1,7 +1,8 @@
 // ════════════════════════════════════════════════════════════════════════════
 // 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER
 // File:    app/events/[slug]/page.tsx
-// Version: v4.1 (28 Aug 2026) — thin route over components/festival/FestivalPillar
+// Version: v4.2 (16 Oct 2026) — og/twitter image = festivalOgImage(content) (editorial_rulings #20)
+// Previous: v4.1 (28 Aug 2026) — thin route over components/festival/FestivalPillar
 // Owner:   Rohiit Gupta, Chief Vedic Architect
 //
 // English, national. Same body as the city route; timings fall back to New
@@ -12,8 +13,8 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import FestivalPillar, {
-  SITE_URL, OG_IMAGE, AUTHOR_NAME, AUTHOR_TITLE,
-  resolveFestival, getContent, baseSlug, buildMeta,
+  SITE_URL, AUTHOR_NAME, AUTHOR_TITLE,
+  resolveFestival, getContent, festivalOgImage, baseSlug, buildMeta,
 } from "@/components/festival/FestivalPillar";
 
 export const revalidate = 86400;
@@ -35,6 +36,10 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
     languages["hi-IN"] = `${SITE_URL}/hi/${content.alt_lang_slug}`;
   }
 
+  // v4.2 (16 Oct 2026): featured image of this festival row (editorial_rulings #20),
+  // else /og-default.jpg exactly as before.
+  const ogImage = festivalOgImage(content);
+
   return {
     // absolute — app/layout.tsx sets template "%s | Trikaal Vaani".
     // buildMeta already spends the full 58-char budget, so letting the
@@ -42,8 +47,8 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
     title: { absolute: title }, description, keywords,
     alternates: { canonical: url, languages },
     authors: [{ name: `${AUTHOR_NAME}, ${AUTHOR_TITLE}` }],
-    openGraph: { title, description, url, images: [OG_IMAGE], type: "article" },
-    twitter: { card: "summary_large_image", title, description, images: [OG_IMAGE] },
+    openGraph: { title, description, url, images: [ogImage], type: "article" },
+    twitter: { card: "summary_large_image", title, description, images: [ogImage] },
     robots: { index: true, follow: true,
       googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1 } },
   };
