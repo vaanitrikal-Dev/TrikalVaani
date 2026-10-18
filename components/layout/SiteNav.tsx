@@ -3,9 +3,29 @@
 // ============================================================
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
 // FILE: components/layout/SiteNav.tsx
-// VERSION: v3.1
+// VERSION: v3.2
 // DATE: 2026-10-18
 // CHANGES:
+//   v3.2: MOBILE MENU REDESIGN (Rohiit approved 18 Oct 2026 — "bilkul simple
+//     lady bhi samajh jaye"). Mobile only; the desktop bar is untouched.
+//     - The bare ☰ icon becomes a labelled gold button "☰ Menu". Most
+//       visitors do not recognise three lines on their own; a word does.
+//     - "Start" CTA renamed "Free Kundali" (says what you get).
+//     - Open menu = icon TILES in 2 columns, Hindi name big + English small,
+//       grouped: रिपोर्ट और मिलान / पंचांग और त्योहार / और. Big gold
+//       "फ्री कुंडली देखें" button under the tiles; Services, Founder,
+//       Sign In / My Vault, language and email as small links at the bottom.
+//       Close button reads "✕ बंद करें".
+//     - First-visit hint "👆 सारी सेवाएँ यहाँ देखें" under the Menu button:
+//       shown on the first 2 visits only (counted once per browser session,
+//       localStorage key tv_menu_hint), hides itself after 5 s, and never
+//       shows again once the menu has been opened. Storage is wrapped in
+//       try/catch, so private mode simply shows no hint.
+//     - No bottom bar on purpose: a fixed bottom bar covered the form submit
+//       button in June 2026 (StickyMobileCTA was disabled for that reason)
+//       and the voice pill already sits at the bottom.
+//     PROTECTED (unchanged): desktop nav + Panchang dropdown, NAV_LINKS,
+//     logo, LangSwitcher, auth, AuthModal, body-scroll lock.
 //   v3.1: "Panchang" becomes a DROPDOWN (Rohiit approved 18 Oct 2026):
 //     ├─ आज का पंचांग    → /panchang
 //     └─ त्योहार कैलेंडर → /events  (new festival hub, app/events/page.tsx v1.0)
@@ -47,7 +67,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { Mail, User, ChevronDown, Menu, X } from 'lucide-react';
+import { Mail, User, ChevronDown, X } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
 import AuthModal from '@/components/auth/AuthModal';
@@ -82,6 +102,42 @@ const NAV_LINKS: NavLink[] = [
   { href: '/blog',                      label: 'Vedic Blog' },
   { href: '/founder',                   label: 'Founder' },
 ];
+
+// v3.2 — MOBILE MENU TILES. Hindi name big, English small, one icon each.
+// Kept separate from NAV_LINKS on purpose: the mobile menu is grouped and
+// bilingual, the desktop bar is a single English row.
+type Tile = { href: string; icon: string; hi: string; en: string };
+const MOBILE_GROUPS: { title: string; tiles: Tile[] }[] = [
+  {
+    title: 'रिपोर्ट और मिलान',
+    tiles: [
+      { href: '/#birth-form',               icon: '🔮', hi: 'मेरी कुंडली',     en: 'Kundali Report' },
+      { href: '/kundali-milan',             icon: '💑', hi: 'कुंडली मिलान',    en: 'Kundali Milan' },
+      { href: '/vivah-muhurat',             icon: '💍', hi: 'विवाह मुहूर्त',    en: 'Vivah Muhurat' },
+      { href: '/hast-rekha-calculator',     icon: '✋', hi: 'हस्त रेखा',        en: 'Hast Rekha' },
+      { href: '/karmic-background-reading', icon: '🧿', hi: 'कर्म रिपोर्ट',     en: 'Karmic Reading' },
+      { href: '/swapna',                    icon: '🌙', hi: 'सपनों का अर्थ',    en: 'Swapna Shastra' },
+    ],
+  },
+  {
+    title: 'पंचांग और त्योहार',
+    tiles: [
+      { href: '/panchang', icon: '📅', hi: 'आज का पंचांग',    en: 'Panchang' },
+      { href: '/events',   icon: '🪔', hi: 'त्योहार कैलेंडर', en: 'Festivals' },
+    ],
+  },
+  {
+    title: 'और',
+    tiles: [
+      { href: '/calculators', icon: '🧮', hi: 'फ्री कैलकुलेटर', en: 'Calculators' },
+      { href: '/blog',        icon: '📖', hi: 'ज्योतिष लेख',    en: 'Vedic Blog' },
+    ],
+  },
+];
+
+const HINT_KEY = 'tv_menu_hint';      // localStorage: number of visits the hint was shown, or 'done'
+const HINT_SESSION = 'tv_menu_hint_s'; // sessionStorage: counted for this visit already
+const HINT_MAX = 2;
 
 function LangSwitcher({ lang, setLang }: { lang: Lang; setLang: (l: Lang) => void }) {
   const [open, setOpen] = useState(false);
@@ -212,6 +268,7 @@ export default function SiteNav() {
   const [showAuth, setShowAuth] = useState(false);
   const [lang, setLang] = useState<Lang>('en');
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [showHint, setShowHint] = useState(false); // v3.2
 
   const pathname = usePathname();
   // Active if exact match or a sub-page of the link (e.g. /services/ex-back-reading)
@@ -233,6 +290,36 @@ export default function SiteNav() {
     return () => subscription.unsubscribe();
   }, []);
 
+  // v3.2 — first-visit hint: first 2 visits only, 5 s, never after the menu was opened
+  useEffect(() => {
+    try {
+      if (window.innerWidth >= 640) return;               // mobile only (sm breakpoint)
+      const raw = localStorage.getItem(HINT_KEY);
+      if (raw === 'done') return;
+      let count = Number(raw) || 0;
+      if (!sessionStorage.getItem(HINT_SESSION)) {
+        if (count >= HINT_MAX) return;
+        count += 1;
+        localStorage.setItem(HINT_KEY, String(count));
+        sessionStorage.setItem(HINT_SESSION, '1');
+      } else if (sessionStorage.getItem(HINT_SESSION) === 'hidden') {
+        return;                                           // already shown and closed on this visit
+      }
+      setShowHint(true);
+      const t = setTimeout(() => {
+        setShowHint(false);
+        try { sessionStorage.setItem(HINT_SESSION, 'hidden'); } catch {}
+      }, 5000);
+      return () => clearTimeout(t);
+    } catch { /* storage blocked → no hint */ }
+  }, []);
+
+  const openMobile = () => {
+    setMobileOpen((o) => !o);
+    setShowHint(false);
+    try { localStorage.setItem(HINT_KEY, 'done'); } catch {}
+  };
+
   // Lock body scroll when mobile menu is open
   useEffect(() => {
     document.body.style.overflow = mobileOpen ? 'hidden' : '';
@@ -252,12 +339,10 @@ export default function SiteNav() {
         <div className="max-w-6xl mx-auto h-16 flex items-center justify-between">
 
           {/* -- LOGO -- */}
-          <Link href="/" className="flex items-center gap-2.5 group" onClick={() => setMobileOpen(false)}>
+          <Link href="/" className="flex items-center gap-2 sm:gap-2.5 group max-sm:min-w-0" onClick={() => setMobileOpen(false)}>
             <div
-              className="rounded-full flex items-center justify-center transition-all duration-300 group-hover:scale-105 overflow-hidden"
+              className="rounded-full flex items-center justify-center transition-all duration-300 group-hover:scale-105 overflow-hidden w-11 h-11 sm:w-[52px] sm:h-[52px] shrink-0"
               style={{
-                width: '52px',
-                height: '52px',
                 background: `radial-gradient(circle, ${GOLD_RGBA(0.16)} 0%, rgba(2,8,23,0.5) 100%)`,
                 border: `1px solid ${GOLD_RGBA(0.35)}`,
                 boxShadow: `0 0 22px ${GOLD_RGBA(0.38)}, 0 0 8px ${GOLD_RGBA(0.55)}`,
@@ -271,7 +356,8 @@ export default function SiteNav() {
                 priority
               />
             </div>
-            <span className="font-serif font-bold text-lg text-gradient-gold tracking-wide">
+            {/* v3.2: two short lines below 380px wide (Free Kundali + Menu need the room), one line 380-639px, desktop wraps as before */}
+            <span className="font-serif font-bold text-[15px] max-sm:leading-tight min-[380px]:text-base min-[380px]:max-sm:whitespace-nowrap sm:text-lg text-gradient-gold tracking-wide">
               Trikaal Vaani
             </span>
           </Link>
@@ -346,51 +432,81 @@ export default function SiteNav() {
             </Link>
           </nav>
 
-          {/* -- MOBILE: Start button + hamburger -- */}
+          {/* -- MOBILE: Free Kundali + labelled Menu button (v3.2) -- */}
           <div className="sm:hidden flex items-center gap-2">
-            <Link
-              href="/#birth-form"
-              className="text-sm font-medium px-4 py-2 rounded-full transition-all duration-300"
-              style={{
-                background: `linear-gradient(135deg, ${GOLD} 0%, #A8820A 100%)`,
-                color: '#080B12',
-              }}
-              onClick={() => setMobileOpen(false)}
-            >
-              Start
-            </Link>
+            {!mobileOpen && (
+              <Link
+                href="/#birth-form"
+                className="text-[13px] font-semibold px-3 py-2 rounded-full whitespace-nowrap transition-all duration-300"
+                style={{
+                  background: `linear-gradient(135deg, ${GOLD} 0%, #A8820A 100%)`,
+                  color: '#080B12',
+                }}
+              >
+                Free Kundali
+              </Link>
+            )}
             <button
               aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
-              onClick={() => setMobileOpen((o) => !o)}
-              className="flex items-center justify-center rounded-lg transition-colors"
+              aria-expanded={mobileOpen}
+              onClick={openMobile}
+              className="flex items-center gap-1.5 rounded-xl px-3 py-2 text-[15px] font-bold whitespace-nowrap transition-colors"
               style={{
-                width: '40px',
-                height: '40px',
-                color: GOLD,
-                border: `1px solid ${GOLD_RGBA(0.25)}`,
-                background: GOLD_RGBA(0.06),
+                color: '#F3D67A',
+                border: `1.5px solid ${GOLD}`,
+                background: GOLD_RGBA(0.13),
               }}
             >
-              {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              {mobileOpen ? (
+                <><X className="w-4 h-4" /> बंद करें</>
+              ) : (
+                <>
+                  <span aria-hidden className="flex flex-col gap-[3px]">
+                    <i className="block w-4 h-[2px] rounded" style={{ background: '#F3D67A' }} />
+                    <i className="block w-4 h-[2px] rounded" style={{ background: '#F3D67A' }} />
+                    <i className="block w-4 h-[2px] rounded" style={{ background: '#F3D67A' }} />
+                  </span>
+                  Menu
+                </>
+              )}
             </button>
           </div>
 
         </div>
       </header>
 
+      {/* v3.2 — first-visit hint under the Menu button (mobile, max 2 visits) */}
+      {showHint && !mobileOpen && (
+        <button
+          type="button"
+          onClick={openMobile}
+          className="sm:hidden fixed right-3 rounded-xl px-3 py-2 text-sm font-semibold shadow-lg"
+          style={{ top: '70px', background: '#F3D67A', color: '#1a1200', zIndex: 9991 }}
+        >
+          <span
+            aria-hidden
+            className="absolute -top-[7px] right-7 h-0 w-0"
+            style={{ borderLeft: '7px solid transparent', borderRight: '7px solid transparent', borderBottom: '7px solid #F3D67A' }}
+          />
+          👆 सारी सेवाएँ यहाँ देखें
+        </button>
+      )}
+
       {/* -- MOBILE DROPDOWN MENU -- */}
       {mobileOpen && (
         <>
           {/* backdrop */}
           <div
-            className="fixed inset-0 z-40 sm:hidden"
-            style={{ background: 'rgba(0,0,0,0.6)', top: '64px' }}
+            className="fixed inset-0 sm:hidden"
+            style={{ background: 'rgba(0,0,0,0.6)', top: '64px', zIndex: 10000 }}
             onClick={() => setMobileOpen(false)}
           />
           {/* panel */}
           <nav
-            className="fixed left-0 right-0 z-40 sm:hidden px-4 pb-6 pt-2"
+            className="fixed left-0 right-0 sm:hidden px-4 pb-6 pt-2"
             style={{
+              // v3.2: above the side "Kya dhoond rahe hain" tab (9990) and the voice pill (9998)
+              zIndex: 10000,
               top: '64px',
               background: 'rgba(2,8,23,0.98)',
               backdropFilter: 'blur(16px)',
@@ -400,74 +516,64 @@ export default function SiteNav() {
               overflowY: 'auto',
             }}
           >
-            <div className="flex flex-col">
-              {NAV_LINKS.map((l) =>
-                l.children ? (
-                  // v3.1: heading + indented child links
-                  <div key={l.href} style={{ borderBottom: `1px solid ${GOLD_RGBA(0.08)}` }}>
-                    <p
-                      className={`pt-3.5 pb-1 text-base ${
-                        isLinkActive(l) ? 'text-[#D4AF37] font-semibold' : 'text-slate-300'
-                      }`}
-                    >
-                      {l.label}
-                    </p>
-                    {l.children.map((c) => {
-                      const on = pathname === c.href || (c.href !== '/panchang' && isActive(c.href));
+            {/* v3.2 — grouped icon tiles, Hindi big + English small */}
+            <div className="flex flex-col pt-2">
+              {MOBILE_GROUPS.map((g) => (
+                <div key={g.title} className="mb-3">
+                  <p className="mb-2 px-0.5 text-xs font-semibold tracking-wide text-slate-400">{g.title}</p>
+                  <div className="grid grid-cols-2 gap-2.5">
+                    {g.tiles.map((t) => {
+                      const on = t.href !== '/#birth-form' && isActive(t.href);
                       return (
                         <Link
-                          key={c.href}
-                          href={c.href}
+                          key={t.href}
+                          href={t.href}
                           onClick={() => setMobileOpen(false)}
                           aria-current={on ? 'page' : undefined}
-                          className={`block py-2.5 pl-4 text-[15px] transition-colors ${
-                            on ? 'text-[#D4AF37] font-semibold' : 'text-slate-400'
-                          }`}
+                          className="flex items-center gap-2.5 rounded-2xl px-2.5 py-3 transition-colors active:scale-[0.98]"
+                          style={{
+                            background: on ? GOLD_RGBA(0.14) : '#111827',
+                            border: `1px solid ${on ? GOLD : GOLD_RGBA(0.22)}`,
+                          }}
                         >
-                          {c.label}
+                          <span aria-hidden className="text-2xl leading-none">{t.icon}</span>
+                          <span className="min-w-0">
+                            <span lang="hi" className="block text-[15px] font-bold leading-tight" style={{ color: '#F3D67A' }}>{t.hi}</span>
+                            <span className="block text-xs text-slate-400 leading-tight mt-0.5">{t.en}</span>
+                          </span>
                         </Link>
                       );
                     })}
-                    <div className="pb-1" />
                   </div>
-                ) : (
-                  <Link
-                    key={l.href}
-                    href={l.href}
-                    onClick={() => setMobileOpen(false)}
-                    aria-current={isActive(l.href) ? 'page' : undefined}
-                    className={`py-3.5 text-base transition-colors ${
-                      isActive(l.href) ? 'text-[#D4AF37] font-semibold' : 'text-slate-300'
-                    }`}
-                    style={{ borderBottom: `1px solid ${GOLD_RGBA(0.08)}` }}
-                  >
-                    {l.label}
+                </div>
+              ))}
+
+              <Link
+                href="/#birth-form"
+                onClick={() => setMobileOpen(false)}
+                className="mt-1 rounded-2xl py-3.5 text-center text-base font-bold"
+                style={{ background: `linear-gradient(135deg, ${GOLD} 0%, #A8820A 100%)`, color: '#080B12' }}
+              >
+                🔮 फ्री कुंडली देखें — 60 सेकंड
+              </Link>
+
+              {/* small links: Services, Founder, Sign In / My Vault */}
+              <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-slate-300">
+                <Link href="/services" onClick={() => setMobileOpen(false)} className="underline-offset-4 hover:underline">सभी सेवाएँ · Services</Link>
+                <Link href="/founder" onClick={() => setMobileOpen(false)} className="underline-offset-4 hover:underline">Founder</Link>
+                {user ? (
+                  <Link href="/my-cosmic-records" onClick={() => setMobileOpen(false)} className="flex items-center gap-1.5 font-semibold" style={{ color: GOLD }}>
+                    <User className="w-4 h-4" /> My Vault
                   </Link>
-                )
-              )}
+                ) : (
+                  <button onClick={() => { setMobileOpen(false); setShowAuth(true); }} className="text-left underline-offset-4 hover:underline">
+                    Sign In
+                  </button>
+                )}
+              </div>
 
-              {/* Sign In / My Vault */}
-              {user ? (
-                <Link
-                  href="/my-cosmic-records"
-                  onClick={() => setMobileOpen(false)}
-                  className="py-3.5 text-base flex items-center gap-2"
-                  style={{ color: GOLD, fontWeight: 600 }}
-                >
-                  <User className="w-4 h-4" /> My Vault
-                </Link>
-              ) : (
-                <button
-                  onClick={() => { setMobileOpen(false); setShowAuth(true); }}
-                  className="py-3.5 text-base text-left text-slate-300"
-                  style={{ borderBottom: `1px solid ${GOLD_RGBA(0.08)}` }}
-                >
-                  Sign In
-                </button>
-              )}
-
-              {/* Language + email (email kept here - does not crowd the bar) */}
-              <div className="flex items-center justify-between pt-4">
+              {/* Language + email */}
+              <div className="flex items-center justify-between pt-4 mt-3" style={{ borderTop: `1px solid ${GOLD_RGBA(0.1)}` }}>
                 <LangSwitcher lang={lang} setLang={setLang} />
                 <a
                   href="mailto:rohiit@trikalvaani.com"

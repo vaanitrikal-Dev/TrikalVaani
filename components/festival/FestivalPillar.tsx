@@ -2,7 +2,20 @@
 // 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER
 // ════════════════════════════════════════════════════════════════════════════
 // File:     components/festival/FestivalPillar.tsx
-// Version:  v2.8 (16 Oct 2026) — Google Discover featured image (editorial_rulings #20)
+// Version:  v2.9 (18 Oct 2026) — site menu + Festival Calendar links
+//
+// ── v2.9 ───────────────────────────────────────────────────────────────────
+// Rohiit (18 Oct 2026): festival pages had NO site menu — a reader who
+// landed on /events/diwali-2026 could not reach anything else except by the
+// browser back button. All four routes render through this file, so:
+//   1. <SiteNav /> (components/layout/SiteNav.tsx v3.1) at the top; the
+//      article gets pt-16 so the fixed 64px menu never covers the breadcrumb.
+//   2. Breadcrumb (visible + JSON-LD): Home › Festival Calendar (/events) ›
+//      [city] › festival. /events is the new hub (app/events/page.tsx v1.0).
+//   3. "All festivals" link: /upcoming-events (a 301 to /panchang) → /events.
+//   Nothing else changed — data, sections, schema graph, CTAs untouched.
+//
+// PREVIOUS: v2.8 (16 Oct 2026) — Google Discover featured image (editorial_rulings #20)
 //
 // ── v2.8 ───────────────────────────────────────────────────────────────────
 // festival_content.hero_image (column added 16 Oct 2026) → Infobox image,
@@ -116,6 +129,7 @@
 
 import Link from "next/link";
 import { createClient } from "@supabase/supabase-js";
+import SiteNav from "@/components/layout/SiteNav";
 import { callVM } from "@/lib/callVM";
 import CalculatorLinks from "@/components/seo/CalculatorLinks";
 import citiesData from "@/app/data/cities.json";
@@ -321,6 +335,7 @@ const L = {
     panchangFor: (c: string) => `Panchang for ${c}`,
     allIndia: (f: string) => `${f} (All-India)`,
     panchangDay: "Panchang for this day", allFestivals: "All festivals",
+    calendar: "Festival Calendar",
     footer: `Dates and timings computed by Trikaal Vaani's own engine. Reviewed by ${AUTHOR_NAME}, ${AUTHOR_TITLE}.`,
     knownAs: (st: string, f: string) => `In ${st}, ${f} is known as`,
   },
@@ -383,6 +398,7 @@ const L = {
     panchangFor: (c: string) => `${c} का पंचांग`,
     allIndia: (f: string) => `${f} (पूरे भारत)`,
     panchangDay: "इस दिन का पंचांग", allFestivals: "सभी त्योहार",
+    calendar: "त्योहार कैलेंडर",
     footer: `तारीख और समय की गणना त्रिकाल वाणी के अपने इंजन से। समीक्षा: ${AUTHOR_NAME}, ${AUTHOR_TITLE}।`,
     knownAs: (st: string, f: string) => `${st} में ${f} को कहा जाता है`,
   },
@@ -996,10 +1012,12 @@ function buildFestivalSchema(opts: {
       "@id": `${url}#breadcrumb`,
       itemListElement: [
         { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
+        // v2.9 — the festival hub
+        { "@type": "ListItem", position: 2, name: lang === "hi" ? "त्योहार कैलेंडर" : "Festival Calendar", item: `${SITE_URL}/events` },
         ...(city
-          ? [{ "@type": "ListItem", position: 2, name: city.name, item: `${SITE_URL}/${city.slug}/panchang` }]
+          ? [{ "@type": "ListItem", position: 3, name: city.name, item: `${SITE_URL}/${city.slug}/panchang` }]
           : []),
-        { "@type": "ListItem", position: city ? 3 : 2, name, item: url },
+        { "@type": "ListItem", position: city ? 4 : 3, name, item: url },
       ],
     },
   ];
@@ -1163,7 +1181,9 @@ export default async function FestivalPillar(
   const VALUE = "font-semibold text-amber-100";
 
   return (
-    <article className="min-h-screen bg-[#080B12] text-white">
+    <>
+    <SiteNav />
+    <article className="min-h-screen bg-[#080B12] pt-16 text-white">
       {/* v2.5: plain <script>, rendered by this SERVER component so it lands in
           the SSR HTML. Do NOT move this to next/script — outside the root
           layout that defers the JSON into the Flight payload and the tag never
@@ -1177,6 +1197,7 @@ export default async function FestivalPillar(
 
         <nav aria-label="Breadcrumb" className="mb-8 text-sm text-slate-400">
           <Link href="/" className="hover:text-amber-300 transition">Home</Link>
+          {" · "}<Link href="/events" className="hover:text-amber-300 transition">{t.calendar}</Link>
           {city && <> · <Link href={`/${city.slug}/panchang`} className="hover:text-amber-300 transition">{placeName}</Link></>}
           <> · <span className="text-slate-300">{name}</span></>
         </nav>
@@ -1653,7 +1674,7 @@ export default async function FestivalPillar(
           {city && <li><Link href={`/${city.slug}/panchang`} className="hover:text-amber-300 transition">{t.panchangFor(placeName)}</Link></li>}
           {city && <li><Link href={festivalHref(lang, null, f.festival_slug, content?.page_slug ?? null)} className="hover:text-amber-300 transition">{t.allIndia(name)}</Link></li>}
           <li><Link href={`/panchang/${f.date}`} className="hover:text-amber-300 transition">{t.panchangDay}</Link></li>
-          <li><Link href="/upcoming-events" className="hover:text-amber-300 transition">{t.allFestivals}</Link></li>
+          <li><Link href="/events" className="hover:text-amber-300 transition">{t.allFestivals}</Link></li>
         </ul>
       </section>
 
@@ -1664,7 +1685,8 @@ export default async function FestivalPillar(
         </footer>
       </div>
     </article>
+    </>
   );
 }
 
-// END — components/festival/FestivalPillar.tsx v1.0 | Trikaal Vaani | Rohiit Gupta
+// END — components/festival/FestivalPillar.tsx v2.9 | Trikaal Vaani | Rohiit Gupta

@@ -136,6 +136,11 @@
  * 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER 🔱
  * ============================================================================
  * File:        app/sitemap.ts
+ * Version:     v9.9 — /events festival calendar hub juda (18 Oct 2026)
+ *               New page app/events/page.tsx (hub of all festival pages) added
+ *               to STATIC_ROUTES; its lastmod = newest festival_content row.
+ *               CODE_LASTMOD: /events, festival-template, /panchang/[date]
+ *               set to 2026-10-18 (site menu added to those templates).
  * Version:     v9.8 — free-upay-calculator juda (10 Oct 2026)
  * Version:     v9.7 — CODE_LASTMOD for 7 Radar-bundle pages (03 Oct 2026)
  * Version:     v9.6 — CODE_LASTMOD 2026-10-03 for 9 calculators (03 Oct 2026)
@@ -391,6 +396,7 @@ const STATIC_ROUTES = [
   '/hast-rekha-calculator',
   '/swapna',
   '/panchang',
+  '/events', // v9.9 — festival calendar hub (app/events/page.tsx)
   '/kundali-milan',
   '/karmic-background-reading',
 ];
@@ -531,14 +537,15 @@ const CODE_LASTMOD: Record<string, string> = {
   '/swapna': '2026-09-12',
   '/swapna/[symbol]': '2026-09-08',
   '/swapna/category': '2026-07-04',
-  '/panchang/[date]': '2026-09-05',
+  '/panchang/[date]': '2026-10-18',
+  '/events': '2026-10-18', // v9.9
   '/rashifal': '2026-09-12',
   '/vivah-muhurat': '2026-06-27',
   '/vivah-muhurat/[year]': '2026-09-24',
   '/[domain]': '2026-09-05',
   // festival template (components/festival/FestivalPillar.tsx) — shared by
   // /events/, /hi/ and every city copy, so a template change is a real change
-  'festival-template': '2026-09-26',
+  'festival-template': '2026-10-18',
   // local SEO
   '/astrologer-delhi': '2026-10-03',
   '/astrologer-noida': '2026-09-12',
@@ -1016,6 +1023,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     else if (path === '/calculators') priority = 0.9;
     else if (path === '/hast-rekha-calculator') priority = 0.85;
     else if (path === '/swapna') priority = 0.9;
+    else if (path === '/events') priority = 0.85;
 
     // v9.4: home and the /panchang hub change daily; the rest are code pages.
     const staticMod = path === '' || path === '/panchang' ? today : codeMod(path);
@@ -1189,6 +1197,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const dbFestivals = await readFestivalsFromDB();
   const hiSlugs = await readHindiFestivalSlugs();
   const festContentMods = await readFestivalContentDates();
+  // v9.9 — the /events hub lists every festival page → newest festival row's date
+  hubMods['/events'] = latest(codeMod('/events'), ...Array.from(festContentMods.values()));
   if (dbFestivals.length > 0) {
     for (const f of dbFestivals) {
       if (!f.is_indexed) continue; // skip no-content festivals entirely

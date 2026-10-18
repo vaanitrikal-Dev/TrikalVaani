@@ -2,8 +2,12 @@
 // 🔱 TRIKAL VAANI — CEO PROTECTION HEADER
 // ════════════════════════════════════════════════════════════════════
 // File:    app/panchang/[date]/page.tsx
-// Version: v3.4 (18 Oct 2026)
+// Version: v3.5 (18 Oct 2026)
 // Owner:   Rohiit Gupta, Chief Vedic Architect
+// Changes vs v3.4 (Rohiit, 18 Oct 2026):
+//   Site menu: <SiteNav /> added on both renders (the page and the "being
+//   computed" card) — this page had no menu. Main gets pt-16 so the fixed
+//   64px menu does not cover the breadcrumb. Nothing else changed.
 // Changes vs v3.3 (Claude, 18 Oct 2026):
 //   1. VM fallback now calls /panchang/today?date= through callVM's default
 //      base — the SAME engine as the homepage widget, /panchang and the
@@ -79,6 +83,7 @@ import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@supabase/supabase-js";
 import { callVM } from "@/lib/callVM";
+import SiteNav from "@/components/layout/SiteNav";
 
 export const revalidate = 86400;
 export const dynamicParams = true;
@@ -336,6 +341,8 @@ export default async function PanchangDatePage(
   // No data + no festival
   if (!p) {
     return (
+      <>
+      <SiteNav />
       <main className="min-h-screen bg-gradient-to-b from-amber-50 to-white pt-20">
         <div className="mx-auto max-w-2xl px-4 py-16 text-center">
           <div className="text-5xl mb-6">🔱</div>
@@ -356,6 +363,7 @@ export default async function PanchangDatePage(
           </div>
         </div>
       </main>
+      </>
     );
   }
 
@@ -393,11 +401,12 @@ export default async function PanchangDatePage(
 
   return (
     <>
+      <SiteNav />
       {schemas.map((s, i) => (
         <script key={i} type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(s) }} />
       ))}
 
-      <main className="min-h-screen bg-gradient-to-b from-amber-50 to-white">
+      <main className="min-h-screen bg-gradient-to-b from-amber-50 to-white pt-16">
         <div className="mx-auto max-w-4xl px-4 py-8 md:py-12">
 
           <nav className="mb-4 text-sm text-gray-600" aria-label="Breadcrumb">
@@ -485,7 +494,7 @@ export default async function PanchangDatePage(
           </section>
 
           <footer className="mt-8 border-t border-gray-200 pt-4 text-xs text-gray-500">
-            <p>🔱 Calculated by <strong>{AUTHOR_NAME}</strong>, {AUTHOR_TITLE}. Engine: Swiss Ephemeris · Ayanamsha: Lahiri · Version: v3.4</p>
+            <p>🔱 Calculated by <strong>{AUTHOR_NAME}</strong>, {AUTHOR_TITLE}. Engine: Swiss Ephemeris · Ayanamsha: Lahiri · Version: v3.5</p>
             <p className="mt-1 italic">&quot;Kaal bada balwan hai, sabko nach nachaye; raja ka beta bhi bhiksha mangne jaye.&quot;</p>
           </footer>
 

@@ -2,8 +2,12 @@
 // 🔱 TRIKAL VAANI — CEO PROTECTION HEADER
 // ════════════════════════════════════════════════════════════════════
 // File:    app/panchang/[date]/[slug]/page.tsx
-// Version: v1.3
+// Version: v1.4 (18 Oct 2026)
 // Owner:   Rohiit Gupta, Chief Vedic Architect
+// CHANGES v1.3 -> v1.4 (2026-10-18, Rohiit):
+//   Site menu: <SiteNav /> added — this page had no menu. Main gets pt-16 so
+//   the fixed 64px menu does not cover the breadcrumb. "Explore More" gains a
+//   link to the festival calendar (/events). Nothing else changed.
 // CHANGES v1.2 -> v1.3 (2026-09-02):
 //   1. THE VM HOLE. getFestival() and getPanchang() ran inside Promise.all,
 //      so the panchang fetch — and its VM fallback — fired even when the
@@ -64,6 +68,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@supabase/supabase-js";
 import { callVM } from "@/lib/callVM";
+import SiteNav from "@/components/layout/SiteNav";
 
 // FIX 1: was 0 — forced cache-control:private,no-store on every request
 // ISR 1hr is safe: festival dates/content never change once generated
@@ -359,11 +364,12 @@ export default async function FestivalPage(
 
   return (
     <>
+      <SiteNav />
       {schemas.map((s, i) => (
         <script key={i} type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(s) }} />
       ))}
 
-      <main className="min-h-screen bg-gradient-to-b from-amber-50 to-white">
+      <main className="min-h-screen bg-gradient-to-b from-amber-50 to-white pt-16">
         <div className="mx-auto max-w-4xl px-4 py-8 md:py-12">
 
           {/* Breadcrumb */}
@@ -510,6 +516,7 @@ export default async function FestivalPage(
             <ul className="grid grid-cols-2 gap-2 text-sm md:grid-cols-3">
               <li><Link href="/panchang" className="text-amber-700 hover:underline">Panchang Archive</Link></li>
               <li><Link href={`/panchang/${date}`} className="text-amber-700 hover:underline">Full Panchang {human}</Link></li>
+              <li><Link href="/events" className="text-amber-700 hover:underline">Festival Calendar</Link></li>
               <li><Link href="/career" className="text-amber-700 hover:underline">Career Astrology</Link></li>
               <li><Link href="/wealth" className="text-amber-700 hover:underline">Wealth Astrology</Link></li>
               <li><Link href="/marriage" className="text-amber-700 hover:underline">Marriage Astrology</Link></li>
@@ -518,7 +525,7 @@ export default async function FestivalPage(
           </section>
 
           <footer className="mt-8 border-t border-gray-200 pt-4 text-xs text-gray-500">
-            <p>🔱 By <strong>{AUTHOR_NAME}</strong>, {AUTHOR_TITLE}. Engine: Swiss Ephemeris · Ayanamsha: Lahiri · Version: v1.3</p>
+            <p>🔱 By <strong>{AUTHOR_NAME}</strong>, {AUTHOR_TITLE}. Engine: Swiss Ephemeris · Ayanamsha: Lahiri · Version: v1.4</p>
             <p className="mt-1 italic">&quot;Kaal bada balwan hai, sabko nach nachaye; raja ka beta bhi bhiksha mangne jaye.&quot;</p>
           </footer>
 

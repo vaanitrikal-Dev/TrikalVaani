@@ -2,7 +2,15 @@
 // 🔱 TRIKAL VAANI — CEO PROTECTION HEADER
 // ════════════════════════════════════════════════════════════════════
 // File:    app/panchang/page.tsx
-// Version: v2.5 (18 Oct 2026)
+// Version: v2.6 (18 Oct 2026)
+// Changes vs v2.5 (Rohiit, 18 Oct 2026 — festival calendar under Panchang):
+//   1. Site menu: <SiteNav /> added. This page had no menu at all, so the
+//      Panchang ▾ dropdown (SiteNav v3.1) led to a page you could not leave.
+//      main already has pt-20, so the fixed 64px menu does not cover it.
+//   2. "सभी त्योहार देखें →" link under the upcoming-festivals list → /events
+//      (the new festival calendar hub, app/events/page.tsx v1.0).
+//   PROTECTED (untouched): live VM panchang, fallback, festival query,
+//      archive, metadata, schema, everything else.
 // Owner:   Rohiit Gupta, Chief Vedic Architect
 // Changes vs v2.4 (Rohiit ruling 18 Oct 2026 — "kuch bhi manual nahi"):
 //   THE BUG. On 18 Oct 2026 the homepage widget showed Saptami while this
@@ -81,6 +89,7 @@ import { Metadata } from "next";
 import Link from "next/link";
 import { createClient } from "@supabase/supabase-js";
 import { callVM } from "@/lib/callVM";
+import SiteNav from "@/components/layout/SiteNav";
 
 export const revalidate = 600;
 
@@ -270,6 +279,7 @@ export default async function PanchangHubPage() {
 
   return (
     <>
+      <SiteNav />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
 
       <main className="min-h-screen bg-gradient-to-b from-amber-50 to-white pt-20">
@@ -368,6 +378,13 @@ export default async function PanchangHubPage() {
                   })
                 )}
               </div>
+              {/* v2.6 — every festival page, in one place */}
+              <Link
+                href="/events"
+                className="mt-3 inline-block text-sm font-semibold text-amber-700 hover:underline"
+              >
+                सभी त्योहार देखें — त्योहार कैलेंडर →
+              </Link>
             </section>
 
             {/* Recent Panchang Archive */}

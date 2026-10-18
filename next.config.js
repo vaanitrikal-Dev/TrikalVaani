@@ -3,11 +3,23 @@
  * 🔱 TRIKAL VAANI — CEO PROTECTION HEADER 🔱
  * ============================================================================
  * File:        next.config.js
- * Version:     v1.9 — 4 duplicate festival blog pages merged into /events
+ * Version:     v2.0 — festival URLs now land on the /events calendar
  * Date:        2026-10-18
  * Owner:       Rohiit Gupta, Chief Vedic Architect
  *
  * WHERE THIS FILE GOES: repo root -> next.config.js  (replace existing file)
+ *
+ * CHANGES vs v1.9 — 18 Oct 2026 (Rohiit: "next.config.js isko bhi theek kardo"):
+ *   The /events festival calendar hub now exists (app/events/page.tsx v1.0,
+ *   verified HTTP 200 live on 18 Oct 2026), so festival-type URLs that used
+ *   to fall back to /panchang now land on the festival calendar instead:
+ *     /upcoming-events                    -> /events   (was /panchang)
+ *     BLOCK C retired festivals (12 slugs) -> /events   (was /panchang),
+ *       pillar + all 10 city copies = 132 URLs
+ *   The two stale notes in "NOT FIXED HERE" are corrected: all 10 city
+ *   hubs (/delhi, /mumbai ...) return 200 (CityHub, built 5 Sep 2026,
+ *   re-verified live 18 Oct 2026) and /events returns 200. Only /hi (Hindi
+ *   homepage) is still open. Everything else is byte-for-byte v1.9.
  *
  * CHANGES vs v1.8 — 18 Oct 2026 (Rohiit: "merge kardo"):
  *   BLOCK E — 4 blog pages made by the night job on 18 Oct duplicated the
@@ -54,21 +66,17 @@
  *     akshaya-tritiya, buddha-purnima, mauni-amavasya, tulsi-vivah,
  *     varuthini-ekadashi, ganga-saptami, shravan-somvar, guru-pradosh,
  *     pradosh-vrat, and the generic monthly amavasya/purnima/ekadashi pages
- *     are absent from festivals_master entirely. /panchang is the closest
- *     genuinely relevant live page (/events has no hub page — it 404s).
+ *     are absent from festivals_master entirely. v2.0: they now point at
+ *     the /events festival calendar (was /panchang before /events existed).
  *     This is a HOLDING redirect. The real fix is to add these rows back to
  *     festivals_master; when that happens, delete the matching lines here.
  *
  *   BLOCK D — 15 retired /<domain>/panchang routes (301 -> /panchang).
  *
  *   NOT FIXED HERE — deliberately, needs a build not a redirect:
- *     1. /delhi /mumbai /pune /noida /chennai /kolkata /bangalore /hyderabad
- *        /gurgaon /ahmedabad — the 10 city hub pages are IN sitemap.xml but
- *        return 404. Their ~280 child /<city>/events/* pages are live but
- *        orphaned with no parent. Redirecting them would only convert a
- *        "404" error into a "Page with redirect" error while the sitemap
- *        still lists them. They must be BUILT.
- *     2. /events — no hub page exists (404), same reasoning.
+ *     1. [FIXED 5 Sep 2026] the 10 city hubs (/delhi ... /ahmedabad) were
+ *        built (components/city/CityHub.tsx) — all return 200.
+ *     2. [FIXED 18 Oct 2026] /events hub built (app/events/page.tsx).
  *     3. /hi — the Hindi homepage does not exist, while 410 /hi/* URLs sit
  *        in the sitemap. Awaiting Rohiit's build-or-redirect decision;
  *        intentionally left out of this file.
@@ -113,7 +121,7 @@ const FESTIVAL_RENAMES = {
 };
 
 // Festivals Google has indexed that are absent from festivals_master.
-// HOLDING redirect to /panchang until the rows are restored.
+// HOLDING redirect to /events (v2.0; was /panchang) until the rows are restored.
 const FESTIVALS_RETIRED = [
   'akshaya-tritiya-2026',
   'buddha-purnima-2026',
@@ -156,15 +164,15 @@ function festivalRenameRedirects() {
   return out;
 }
 
-/** Retired festivals -> /panchang, pillar + all 10 city URLs. */
+/** Retired festivals -> /events (v2.0), pillar + all 10 city URLs. */
 function retiredFestivalRedirects() {
   const out = [];
   for (const slug of FESTIVALS_RETIRED) {
-    out.push({ source: `/events/${slug}`, destination: '/panchang', permanent: true });
+    out.push({ source: `/events/${slug}`, destination: '/events', permanent: true });
     for (const city of CITIES) {
       out.push({
         source: `/${city}/events/${slug}`,
-        destination: '/panchang',
+        destination: '/events',
         permanent: true,
       });
     }
@@ -223,8 +231,8 @@ const nextConfig = {
       },
       {
         source: '/upcoming-events',
-        destination: '/panchang',
-        permanent: true, // 301 — retired page, preserve SEO equity to /panchang
+        destination: '/events',
+        permanent: true, // 301 — v2.0: retired list page -> the festival calendar (was /panchang)
       },
       {
         source: '/predict',
@@ -339,7 +347,7 @@ const nextConfig = {
       ...festivalRenameRedirects(),
 
       // ══════════════════════════════════════════════════════════════
-      // v1.8 BLOCK C — festivals missing from festivals_master (132 URLs).
+      // v1.8 BLOCK C — festivals missing from festivals_master (132 URLs) -> /events (v2.0).
       // HOLDING redirect. Delete a line once its row is restored.
       // ══════════════════════════════════════════════════════════════
       ...retiredFestivalRedirects(),
