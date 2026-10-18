@@ -2,8 +2,21 @@
 // 🔱 TRIKAL VAANI — CEO PROTECTION HEADER
 // ════════════════════════════════════════════════════════════════════
 // File:    app/panchang/[date]/page.tsx
-// Version: v3.3
+// Version: v3.4 (18 Oct 2026)
 // Owner:   Rohiit Gupta, Chief Vedic Architect
+// Changes vs v3.3 (Claude, 18 Oct 2026):
+//   1. VM fallback now calls /panchang/today?date= through callVM's default
+//      base — the SAME engine as the homepage widget, /panchang and the
+//      Jyotish connector (angas read at sunrise). It used the older /panchang
+//      endpoint at a hardcoded IP; the VM_URL constant is removed.
+//   2. Deliberately STILL Supabase-first. The v3.3 crawler protection below
+//      (bursts of uncached dates took every calculator down on 1-2 Sep) is
+//      kept: a crawler walking 731 dates must hit Supabase, not the VM.
+//      This is safe now because all 365 panchang_daily rows for 2026 were
+//      recomputed and verified against the VM engine on 18 Oct 2026, and the
+//      nightly cron (v2.4) rewrites each day's row from the same engine.
+//   PROTECTED (untouched): date window, redirect logic, metadata, schemas,
+//      JSX, Card/FAQ, ISR 86400.
 // Changes vs v3.2 (date window — Claude, 2 Sep 2026):
 //   THE PROBLEM, measured rather than guessed. On 1-2 Sep 2026 the VM logs
 //   showed bursts of /panchang calls for date=2029-10-15 and date=2030-04-12,
@@ -73,7 +86,6 @@ export const dynamicParams = true;
 const SITE_URL = "https://trikalvaani.com";
 const AUTHOR_NAME = "Rohiit Gupta";
 const AUTHOR_TITLE = "Chief Vedic Architect, Trikaal Vaani";
-const VM_URL = "http://34.47.182.227:8001";
 const OG_IMAGE = `${SITE_URL}/og-default.jpg`;
 
 // ── Types ─────────────────────────────────────────────────────────────
@@ -187,7 +199,7 @@ async function fetchFromSupabase(date: string): Promise<PanchangRow | null> {
 
 async function fetchFromVM(date: string): Promise<PanchangRow | null> {
   try {
-    const res = await callVM(`${VM_URL}/panchang?date=${date}`, {
+    const res = await callVM(`/panchang/today?date=${date}`, {
       method: "GET",
       next: { revalidate: 86400 }, signal: AbortSignal.timeout(10000)
     } as RequestInit);
@@ -473,7 +485,7 @@ export default async function PanchangDatePage(
           </section>
 
           <footer className="mt-8 border-t border-gray-200 pt-4 text-xs text-gray-500">
-            <p>🔱 Calculated by <strong>{AUTHOR_NAME}</strong>, {AUTHOR_TITLE}. Engine: Swiss Ephemeris · Ayanamsha: Lahiri · Version: v3.3</p>
+            <p>🔱 Calculated by <strong>{AUTHOR_NAME}</strong>, {AUTHOR_TITLE}. Engine: Swiss Ephemeris · Ayanamsha: Lahiri · Version: v3.4</p>
             <p className="mt-1 italic">&quot;Kaal bada balwan hai, sabko nach nachaye; raja ka beta bhi bhiksha mangne jaye.&quot;</p>
           </footer>
 

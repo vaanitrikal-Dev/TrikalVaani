@@ -2,8 +2,25 @@
 // 🔱 TRIKAL VAANI — CEO PROTECTION HEADER
 // ════════════════════════════════════════════════════════════════════
 // File:    app/panchang/page.tsx
-// Version: v2.4 (12 Sep 2026)
+// Version: v2.5 (18 Oct 2026)
 // Owner:   Rohiit Gupta, Chief Vedic Architect
+// Changes vs v2.4 (Rohiit ruling 18 Oct 2026 — "kuch bhi manual nahi"):
+//   THE BUG. On 18 Oct 2026 the homepage widget showed Saptami while this
+//   page showed Ashtami. The widget reads the VM live; this page read a
+//   panchang_daily row that had been bulk-filled months earlier and was
+//   wrong for 288 of 365 days, then cached it for an hour.
+//   1. SOURCE FLIPPED. Today's five angas now come LIVE from the VM's
+//      /panchang/today — the same engine the homepage widget and the Jyotish
+//      connector use. panchang_daily is only the fallback if the VM is down.
+//      Both views can no longer disagree.
+//   2. The orange-box sentence is now BUILT IN CODE from those live values,
+//      never read from a stored geo_answer that can go stale.
+//   3. revalidate 3600 -> 600. After IST midnight the page shows the new day
+//      within 10 minutes, not up to an hour. ~144 VM calls a day for one URL.
+//   4. VM call goes through callVM's default base (VM_ENGINE_URL or the VM
+//      IP) — the hardcoded VM_URL constant is removed.
+//   PROTECTED (untouched): metadata/title, festivals_master query, archive
+//      list, JSX layout, schema, internal links.
 // Changes vs v2.3:
 //   1. H1 widened to match the title. It read "आज का पंचांग" — three words —
 //      while the <title> fixed in v2.3 carries "तिथि, वार, नक्षत्र और राहु
@@ -65,10 +82,9 @@ import Link from "next/link";
 import { createClient } from "@supabase/supabase-js";
 import { callVM } from "@/lib/callVM";
 
-export const revalidate = 3600;
+export const revalidate = 600;
 
 const SITE_URL = "https://trikalvaani.com";
-const VM_URL = "http://34.47.182.227:8001";
 
 export const metadata: Metadata = {
   // { absolute } — app/layout.tsx sets title.template "%s | Trikaal Vaani".
@@ -157,6 +173,16 @@ function formatFull(yyyymmdd: string): string {
   });
 }
 
+// v2.5: same sentence the panchang_daily rows carry, built from live values.
+const WEEKDAY_EN = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+const MONTH_EN = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+function buildGeoAnswer(r: PanchangRow): string {
+  const [y, m, d] = r.date.split("-").map(Number);
+  const wd = WEEKDAY_EN[new Date(Date.UTC(y, m - 1, d)).getUTCDay()];
+  return `On ${wd}, ${d} ${MONTH_EN[m - 1]} ${y}, Tithi is ${r.tithi}, Nakshatra is ${r.nakshatra}, Yoga ${r.yoga}, Karana ${r.karana}. Sunrise: ${r.sunrise}, Sunset: ${r.sunset}, Rahu Kaal: ${r.rahu_kaal} (Delhi NCR). Swiss Ephemeris, Lahiri Ayanamsha.`;
+}
+
 function daysFromToday(dateStr: string, today: string): number {
   return Math.round(
     (new Date(dateStr + "T00:00:00Z").getTime() - new Date(today + "T00:00:00Z").getTime()) / 86400000
@@ -177,39 +203,44 @@ export default async function PanchangHubPage() {
   const ahead = getISTDate60DaysAhead();
   const supabase = getSupabase();
 
-  // 1. Today's panchang from Supabase
+  // 1. v2.5: today's panchang LIVE from the VM — same engine as the homepage
   let todayRow: PanchangRow | null = null;
   try {
-    const { data } = await supabase
-      .from("panchang_daily")
-      .select("date,tithi,nakshatra,yoga,karana,vara,sunrise,sunset,rahu_kaal,geo_answer")
-      .eq("date", today)
-      .eq("city", "delhi")
-      .single();
-    todayRow = data as PanchangRow | null;
-  } catch {}
-
-  // Fallback to VM if not in DB
-  if (!todayRow) {
-    try {
-      const res = await callVM(`${VM_URL}/panchang?date=${today}`, {
-        method: "GET",
-        next: { revalidate: 3600 }, signal: AbortSignal.timeout(8000)
-      } as RequestInit);
-      if (res.ok) {
-        const vm = (await res.json()) as VMPanchang;
+    const res = await callVM(`/panchang/today?date=${today}`, {
+      method: "GET",
+      next: { revalidate: 600 }, signal: AbortSignal.timeout(8000)
+    } as RequestInit);
+    if (res.ok) {
+      const vm = (await res.json()) as VMPanchang;
+      if (vm?.tithi?.name && vm?.nakshatra?.name) {
         todayRow = {
           date: today,
           tithi: `${vm.tithi.name} (${vm.tithi.paksha})`,
-          nakshatra: `${vm.nakshatra.name} पाद ${vm.nakshatra.pada}`,
-          yoga: vm.yoga.name, karana: vm.karana.name,
+          nakshatra: `${vm.nakshatra.name} Pada ${vm.nakshatra.pada}`,
+          yoga: vm.yoga?.name ?? "", karana: vm.karana?.name ?? "",
           vara: vm.weekday ?? vm.vara ?? "",
           sunrise: vm.sunrise, sunset: vm.sunset, rahu_kaal: vm.rahu_kaal,
           geo_answer: null,
         };
       }
+    }
+  } catch {}
+
+  // Fallback to panchang_daily only if the VM is unreachable
+  if (!todayRow) {
+    try {
+      const { data } = await supabase
+        .from("panchang_daily")
+        .select("date,tithi,nakshatra,yoga,karana,vara,sunrise,sunset,rahu_kaal,geo_answer")
+        .eq("date", today)
+        .eq("city", "delhi")
+        .single();
+      todayRow = data as PanchangRow | null;
     } catch {}
   }
+
+  // v2.5: the summary sentence is always rebuilt from the values shown
+  if (todayRow) todayRow.geo_answer = buildGeoAnswer(todayRow);
 
   // 2. Upcoming festivals — DYNAMIC from festivals_master
   let upcomingFestivals: FestivalRow[] = [];

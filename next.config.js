@@ -3,12 +3,23 @@
  * 🔱 TRIKAL VAANI — CEO PROTECTION HEADER 🔱
  * ============================================================================
  * File:        next.config.js
- * Version:     v1.8 — GSC 404 recovery: 55 legacy root URLs + 9 festival
- *              slug renames (pillar + 10 cities each) reconnected
- * Date:        2026-09-05
+ * Version:     v1.9 — 4 duplicate festival blog pages merged into /events
+ * Date:        2026-10-18
  * Owner:       Rohiit Gupta, Chief Vedic Architect
  *
  * WHERE THIS FILE GOES: repo root -> next.config.js  (replace existing file)
+ *
+ * CHANGES vs v1.8 — 18 Oct 2026 (Rohiit: "merge kardo"):
+ *   BLOCK E — 4 blog pages made by the night job on 18 Oct duplicated the
+ *   /events festival pages with the SAME slug. /events is the main page.
+ *   The 4 blog rows (ids 1115-1118) are unpublished in Supabase (not
+ *   deleted) and their URLs 301 to the /events twin:
+ *     /blog/dhanteras-2026       -> /events/dhanteras-2026
+ *     /blog/govardhan-puja-2026  -> /events/govardhan-puja-2026
+ *     /blog/bhai-dooj-2026       -> /events/bhai-dooj-2026
+ *     /blog/kartik-purnima-2026  -> /events/kartik-purnima-2026
+ *   All 4 destinations verified HTTP 200 on 18 Oct 2026.
+ *   Everything else is byte-for-byte identical to v1.8.
  *
  * CHANGES vs v1.7 — 5 Sep 2026:
  *   Source of truth: GSC "Not found (404)" drilldown export, 458 URLs,
@@ -337,6 +348,15 @@ const nextConfig = {
       // v1.8 BLOCK D — retired /<domain>/panchang routes (15 URLs).
       // ══════════════════════════════════════════════════════════════
       ...domainPanchangRedirects(),
+
+      // ══════════════════════════════════════════════════════════════
+      // v1.9 BLOCK E — duplicate festival blog pages merged into /events
+      // (18 Oct 2026). Blog rows 1115-1118 unpublished, not deleted.
+      // ══════════════════════════════════════════════════════════════
+      { source: '/blog/dhanteras-2026', destination: '/events/dhanteras-2026', permanent: true },
+      { source: '/blog/govardhan-puja-2026', destination: '/events/govardhan-puja-2026', permanent: true },
+      { source: '/blog/bhai-dooj-2026', destination: '/events/bhai-dooj-2026', permanent: true },
+      { source: '/blog/kartik-purnima-2026', destination: '/events/kartik-purnima-2026', permanent: true },
     ];
   },
   // ──────────────────────────────────────────────────────────────────

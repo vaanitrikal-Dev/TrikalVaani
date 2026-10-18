@@ -2,8 +2,25 @@
  * ============================================================================
  * TRIKAL VAANI — CEO PROTECTION HEADER
  * File:    app/api/cron/panchang-generate/route.ts
- * Version: v2.3 — VM call routed through lib/callVM.ts (X-Trikal-Key auto)
+ * Version: v2.4 (18 Oct 2026) — VM address + endpoint fix
  * Owner:   Rohiit Gupta, Chief Vedic Architect
+ *
+ * CHANGE v2.4 (Claude, 18 Oct 2026):
+ *   THE BUG. Every nightly run since 5 June 2026 failed all 11 rows with
+ *   "fetch failed" before Gemini was ever called (Vercel log, 17 Oct 20:32
+ *   UTC: rows_success 0, rows_failed 11). The VM address came from the Vercel
+ *   env VM_PANCHANG_URL (added 9 May), which points somewhere that stopped
+ *   answering. The homepage proxy, which ignores that env, kept working.
+ *   1. VM_PANCHANG_URL is NO LONGER READ. fetchVM calls callVM with a
+ *      relative path, so it uses callVM's default base (VM_ENGINE_URL or the
+ *      VM IP) — the same base every working calculator uses.
+ *   2. Endpoint /panchang -> /panchang/today. That is the engine the homepage
+ *      widget, /panchang and the Jyotish connector use (all five angas read
+ *      at local sunrise). The DB row written here now matches the live pages.
+ *   3. moon_sign / sun_sign are taken from /panchang/today's transit_planets
+ *      when the flat fields are absent, so the Gemini prompt still gets them.
+ *   PROTECTED (untouched): Gemini calls, cost maths, Supabase upsert columns,
+ *      generation log, IndexNow, cron auth, city list.
  *
  * CHANGE v2.3:
  *   Only the VM panchang fetch (fetchVM -> VM_URL/panchang) now goes through
@@ -52,7 +69,8 @@ const CITIES: CityContext[] = [
   { slug: "ahmedabad", name: "Ahmedabad",   state: "Gujarat",         lat: 23.0225, lon: 72.5714 },
 ];
 
-const VM_URL = process.env.VM_PANCHANG_URL || "http://34.47.182.227:8001";
+// v2.4: VM_PANCHANG_URL env removed — it was the cause of every failure since
+// 5 June. callVM() supplies the VM base for relative paths.
 const SITE_URL = process.env.SITE_URL || "https://trikalvaani.com";
 const TARGET_LANG: Lang = "en";
 const CRON_SECRET = process.env.CRON_SECRET;
@@ -74,6 +92,8 @@ interface VMRaw {
   gulika?: string; gulika_kaal?: string;
   yamaganda?: string; moon_sign?: string; sun_sign?: string;
   festivals?: object[];
+  // v2.4: /panchang/today carries the signs inside transit_planets
+  transit_planets?: { Moon?: { rashi?: string }; Sun?: { rashi?: string } };
 }
 
 // THE FIX: convert VM nested objects to flat strings PanchangData expects
@@ -107,8 +127,8 @@ function normalizeVM(raw: VMRaw, date: string): PanchangData {
     abhijit_muhurat: raw.abhijit_muhurat ?? "",
     yamaganda: raw.yamaganda,
     gulika: raw.gulika ?? raw.gulika_kaal,
-    moon_sign: raw.moon_sign,
-    sun_sign: raw.sun_sign,
+    moon_sign: raw.moon_sign ?? raw.transit_planets?.Moon?.rashi,
+    sun_sign: raw.sun_sign ?? raw.transit_planets?.Sun?.rashi,
   };
 }
 
@@ -116,7 +136,7 @@ async function fetchVM(date: string, lat?: number, lon?: number): Promise<{ raw:
   const p = new URLSearchParams({ date });
   if (lat !== undefined) p.set("lat", String(lat));
   if (lon !== undefined) p.set("lon", String(lon));
-  const res = await callVM(VM_URL + "/panchang?" + p.toString(), {
+  const res = await callVM("/panchang/today?" + p.toString(), {
     method: "GET",
     signal: AbortSignal.timeout(15000),
   });
@@ -228,7 +248,7 @@ export async function GET(req: NextRequest) {
   const t0 = Date.now();
   const date = getTodayISO();
   const results: Result[] = [];
-  console.log("[panchang-cron] START v2.3 date=" + date);
+  console.log("[panchang-cron] START v2.4 date=" + date);
 
   // 1. HUB — national, Gemini Pro
   try {
@@ -292,4 +312,4 @@ export async function GET(req: NextRequest) {
   return NextResponse.json(summary);
 }
 
-// END — route.ts v2.3 | Trikaal Vaani | Rohiit Gupta, Chief Vedic Architect
+// END — route.ts v2.4 | Trikaal Vaani | Rohiit Gupta, Chief Vedic Architect
