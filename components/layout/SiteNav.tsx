@@ -3,9 +3,16 @@
 // ============================================================
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
 // FILE: components/layout/SiteNav.tsx
-// VERSION: v3.2
+// VERSION: v3.3
 // DATE: 2026-10-18
 // CHANGES:
+//   v3.3: HINT ALWAYS ON (Rohiit ruling 18 Oct 2026: "hamesha dikhna
+//     chahiye ... always", chose "Har page par, hamesha"). The yellow
+//     "👆 सारी सेवाएँ यहाँ देखें" bubble under the mobile Menu button now
+//     shows on EVERY page, EVERY visit, and stays — it hides only while the
+//     menu is open. The 2-visit limit, the 5-second timer and the
+//     localStorage/sessionStorage keys from v3.2 are removed. Mobile only
+//     (the bubble has sm:hidden), so desktop is unchanged.
 //   v3.2: MOBILE MENU REDESIGN (Rohiit approved 18 Oct 2026 — "bilkul simple
 //     lady bhi samajh jaye"). Mobile only; the desktop bar is untouched.
 //     - The bare ☰ icon becomes a labelled gold button "☰ Menu". Most
@@ -134,10 +141,6 @@ const MOBILE_GROUPS: { title: string; tiles: Tile[] }[] = [
     ],
   },
 ];
-
-const HINT_KEY = 'tv_menu_hint';      // localStorage: number of visits the hint was shown, or 'done'
-const HINT_SESSION = 'tv_menu_hint_s'; // sessionStorage: counted for this visit already
-const HINT_MAX = 2;
 
 function LangSwitcher({ lang, setLang }: { lang: Lang; setLang: (l: Lang) => void }) {
   const [open, setOpen] = useState(false);
@@ -268,7 +271,6 @@ export default function SiteNav() {
   const [showAuth, setShowAuth] = useState(false);
   const [lang, setLang] = useState<Lang>('en');
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [showHint, setShowHint] = useState(false); // v3.2
 
   const pathname = usePathname();
   // Active if exact match or a sub-page of the link (e.g. /services/ex-back-reading)
@@ -290,35 +292,8 @@ export default function SiteNav() {
     return () => subscription.unsubscribe();
   }, []);
 
-  // v3.2 — first-visit hint: first 2 visits only, 5 s, never after the menu was opened
-  useEffect(() => {
-    try {
-      if (window.innerWidth >= 640) return;               // mobile only (sm breakpoint)
-      const raw = localStorage.getItem(HINT_KEY);
-      if (raw === 'done') return;
-      let count = Number(raw) || 0;
-      if (!sessionStorage.getItem(HINT_SESSION)) {
-        if (count >= HINT_MAX) return;
-        count += 1;
-        localStorage.setItem(HINT_KEY, String(count));
-        sessionStorage.setItem(HINT_SESSION, '1');
-      } else if (sessionStorage.getItem(HINT_SESSION) === 'hidden') {
-        return;                                           // already shown and closed on this visit
-      }
-      setShowHint(true);
-      const t = setTimeout(() => {
-        setShowHint(false);
-        try { sessionStorage.setItem(HINT_SESSION, 'hidden'); } catch {}
-      }, 5000);
-      return () => clearTimeout(t);
-    } catch { /* storage blocked → no hint */ }
-  }, []);
-
-  const openMobile = () => {
-    setMobileOpen((o) => !o);
-    setShowHint(false);
-    try { localStorage.setItem(HINT_KEY, 'done'); } catch {}
-  };
+  // v3.3 — the hint bubble is always shown on mobile while the menu is closed
+  const openMobile = () => setMobileOpen((o) => !o);
 
   // Lock body scroll when mobile menu is open
   useEffect(() => {
@@ -475,8 +450,8 @@ export default function SiteNav() {
         </div>
       </header>
 
-      {/* v3.2 — first-visit hint under the Menu button (mobile, max 2 visits) */}
-      {showHint && !mobileOpen && (
+      {/* v3.3 — hint under the Menu button: mobile, every page, always (hidden only while the menu is open) */}
+      {!mobileOpen && (
         <button
           type="button"
           onClick={openMobile}
