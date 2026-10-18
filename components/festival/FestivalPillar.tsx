@@ -2,7 +2,22 @@
 // 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER
 // ════════════════════════════════════════════════════════════════════════════
 // File:     components/festival/FestivalPillar.tsx
-// Version:  v2.9 (18 Oct 2026) — site menu + Festival Calendar links
+// Version:  v3.0 (18 Oct 2026) — dated "Last reviewed" footer from festival_content.reviewed_at
+//
+// ── v3.0 ───────────────────────────────────────────────────────────────────
+// Rohiit (18 Oct 2026): festival pages must show WHEN he last reviewed them,
+// same as /blog (editorial_rulings #8 A.6). New column
+// public.festival_content.reviewed_at (timestamptz, added 18 Oct 2026).
+//   1. Content type gains reviewed_at (getContent already selects "*").
+//   2. Footer: the existing line stays word for word; when reviewed_at is set
+//      it adds " · Last reviewed: 18 Oct 2026, 3:11 PM IST" (Hindi:
+//      "अंतिम समीक्षा"). NULL = footer exactly as v2.9, no date.
+//   3. JSON-LD: the WebPage node gets lastReviewed + reviewedBy (founder
+//      @id) only when reviewed_at is set — same rule as blog v3.3.
+//   All four routes render through this file, so EN/HI national + city
+//   pages all get it. Nothing else changed.
+//
+// PREVIOUS: v2.9 (18 Oct 2026) — site menu + Festival Calendar links
 //
 // ── v2.9 ───────────────────────────────────────────────────────────────────
 // Rohiit (18 Oct 2026): festival pages had NO site menu — a reader who
@@ -167,6 +182,8 @@ export type Content = {
   citations?: unknown; infobox?: unknown; glossary?: unknown;
   // v2.8 — featured image jsonb {url, alt, caption, source, credit}
   hero_image?: unknown;
+  // v3.0 — when Rohiit last reviewed this page (ISO timestamptz, null = not yet)
+  reviewed_at?: string | null;
   seo_title: string | null; seo_description: string | null;
   direct_answer: string | null; quick_actions: string[] | null;
   significance: string | null;
@@ -218,6 +235,27 @@ function asList(v: unknown): string[] {
 
 function asObjList<T>(v: unknown): T[] {
   return Array.isArray(v) ? (v.filter(x => x && typeof x === 'object') as T[]) : [];
+}
+
+// v3.0 — same formatter as app/blog/[slug]/page.tsx: "18 Oct 2026, 3:11 PM IST".
+// Null for a missing or unparseable value, so the footer then shows no date.
+function formatReviewedIST(iso: string | null | undefined): string | null {
+  if (!iso || typeof iso !== 'string') return null;
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return null;
+  const parts = new Intl.DateTimeFormat('en-IN', {
+    timeZone: 'Asia/Kolkata',
+    day: 'numeric', month: 'short', year: 'numeric',
+    hour: 'numeric', minute: '2-digit', hour12: true,
+  }).formatToParts(d);
+  const get = (t: string) => parts.find((p) => p.type === t)?.value ?? '';
+  // en-IN prints "Sept"; use a fixed 3-letter month so it reads "18 Oct 2026".
+  const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const monthIdx = Number(
+    new Intl.DateTimeFormat('en-US', { timeZone: 'Asia/Kolkata', month: 'numeric' }).format(d)
+  ) - 1;
+  const ampm = get('dayPeriod').toUpperCase();
+  return `${get('day')} ${MONTHS[monthIdx]} ${get('year')}, ${get('hour')}:${get('minute')} ${ampm} IST`;
 }
 
 export type LocalTerm = {
@@ -337,6 +375,7 @@ const L = {
     panchangDay: "Panchang for this day", allFestivals: "All festivals",
     calendar: "Festival Calendar",
     footer: `Dates and timings computed by Trikaal Vaani's own engine. Reviewed by ${AUTHOR_NAME}, ${AUTHOR_TITLE}.`,
+    lastReviewed: "Last reviewed",
     knownAs: (st: string, f: string) => `In ${st}, ${f} is known as`,
   },
   hi: {
@@ -400,6 +439,7 @@ const L = {
     panchangDay: "इस दिन का पंचांग", allFestivals: "सभी त्योहार",
     calendar: "त्योहार कैलेंडर",
     footer: `तारीख और समय की गणना त्रिकाल वाणी के अपने इंजन से। समीक्षा: ${AUTHOR_NAME}, ${AUTHOR_TITLE}।`,
+    lastReviewed: "अंतिम समीक्षा",
     knownAs: (st: string, f: string) => `${st} में ${f} को कहा जाता है`,
   },
 } as const;
@@ -980,7 +1020,13 @@ function buildFestivalSchema(opts: {
       inLanguage,
       datePublished: festival.date,
       dateModified: new Date().toISOString().split("T")[0],
-      mainEntityOfPage: { "@type": "WebPage", "@id": url },
+      mainEntityOfPage: {
+        "@type": "WebPage", "@id": url,
+        // v3.0: only when Rohiit has actually reviewed the page
+        ...(content?.reviewed_at && formatReviewedIST(content.reviewed_at)
+          ? { lastReviewed: content.reviewed_at, reviewedBy: { "@id": `${SITE_URL}/#rohiit-gupta` } }
+          : {}),
+      },
       author: {
         "@type": "Person",
         "@id": `${SITE_URL}/#rohiit-gupta`,
@@ -1126,6 +1172,7 @@ export default async function FestivalPillar(
     : null;
 
   const faqs = asObjList<{ q: string; a: string }>(content?.faqs);
+  const reviewedLabel = formatReviewedIST(content?.reviewed_at); // v3.0
 
   // v2.5 — self-canonical URL for this exact route, and the graph built from it.
   const canonicalUrl = `${SITE_URL}${festivalHref(
@@ -1682,6 +1729,13 @@ export default async function FestivalPillar(
 
         <footer className="mt-16 border-t border-amber-900/40 pt-8 text-sm text-slate-400">
           {t.footer}
+          {/* v3.0: date only when festival_content.reviewed_at is set */}
+          {reviewedLabel && (
+            <>
+              {" · "}{t.lastReviewed}:{" "}
+              <time dateTime={content?.reviewed_at ?? undefined}>{reviewedLabel}</time>
+            </>
+          )}
         </footer>
       </div>
     </article>
@@ -1689,4 +1743,4 @@ export default async function FestivalPillar(
   );
 }
 
-// END — components/festival/FestivalPillar.tsx v2.9 | Trikaal Vaani | Rohiit Gupta
+// END — components/festival/FestivalPillar.tsx v3.0 | Trikaal Vaani | Rohiit Gupta
