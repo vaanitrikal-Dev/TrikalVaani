@@ -3,7 +3,9 @@
  * TRIKAAL VAANI — Pricing Page
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/pricing/page.tsx
- * VERSION: 2.4 (1 Oct 2026 — daam sahi kiye: Kundali Milan ₹51 (couple + parent), Karmic ₹101 / $11, Child Birth ₹51; Bhrigu Nandi ke purane daave hataye) (30 Sep 2026)
+ * VERSION: 2.5 (18 Oct 2026)
+ * v2.5 — 18 Oct 2026 — Site menu (SiteNav) added — the page had no menu. No padding added: <main> already has py-24 (6rem), so the fixed 64px menu does not cover content. Nothing else changed.
+ * v2.4 — 1 Oct 2026 — daam sahi kiye: Kundali Milan ₹51 (couple + parent), Karmic ₹101 / $11, Child Birth ₹51; Bhrigu Nandi ke purane daave hataye (30 Sep 2026)
  * v2.3 — 30 Sep 2026 — Birth Muhurat repriced (CEO approved in chat): single ₹51 report + 10 remedies, was ₹101/₹151. Only the Birth Muhurat card, its schema Offer and CTA link changed.
  * v2.2 — 27 Sep 2026 — delivery text sach kiya (CEO Option A): WhatsApp/Email auto-delivery ka koi system nahi hai, isliye 'PDF on/via WhatsApp + Email' → 'PDF download + WhatsApp share'.
  * SIGNED: ROHIIT GUPTA, CEO
@@ -32,6 +34,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Check, Sparkles, Zap, Mic, Heart, Baby, Star } from 'lucide-react';
+import SiteNav from '@/components/layout/SiteNav';
 
 export const metadata: Metadata = {
   title: { absolute: 'Pricing — Trikaal Vaani Vedic AI Astrology' },
@@ -261,6 +264,8 @@ const pricingSchema = {
 
 export default function PricingPage() {
   return (
+    <>
+    <SiteNav />
     <main className="min-h-screen bg-[#080B12] px-4 py-24">
       {/* JSON-LD for Google SGE / Perplexity / SearchGPT */}
       <script
@@ -476,5 +481,6 @@ export default function PricingPage() {
         </div>
       </div>
     </main>
+    </>
   );
 }

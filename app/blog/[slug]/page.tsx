@@ -1,7 +1,11 @@
 // ============================================================
 // TRIKAL VAANI — DYNAMIC BLOG ARTICLE PAGE (SSR)
 // CEO: Rohiit Gupta | Chief Vedic Architect
-// Version: 4.0 (16 Oct 2026 — GOOGLE DISCOVER FEATURED IMAGE, editorial_rulings #20, Option A
+// Version: 4.1 (18 Oct 2026 — Site menu (SiteNav) added — the page had no menu; pt-16 so the
+//   fixed 64px menu does not cover content. Nothing else changed.)
+// Date: 2026-10-18
+// ------------------------------------------------------------
+// PREVIOUS: Version 4.0 (16 Oct 2026 — GOOGLE DISCOVER FEATURED IMAGE, editorial_rulings #20, Option A
 //   approved by Rohiit 16 Oct 2026). Infobox: "Key Facts" heading → featured image → caption →
 //   rows (HeroFigure from components/wiki/WikiBlocks v1.1); Infobox also shows when a page has
 //   an image but no rows. og:image / twitter:image / JSON-LD Article.image = hero image
@@ -257,6 +261,7 @@ import Link from 'next/link';
 import type { Metadata } from 'next';
 import { createClient } from '@supabase/supabase-js'; // v3.7
 import HideInPlayApp from '@/components/payment/HideInPlayApp'; // v3.9
+import SiteNav from '@/components/layout/SiteNav'; // v4.1
 import { HeroFigure } from '@/components/wiki/WikiBlocks'; // v4.0
 import {
   getPostBySlug,
@@ -1400,6 +1405,7 @@ export default async function BlogArticlePage({
 
   return (
     <>
+      <SiteNav />
       {jsonLdSchemas.map((schema, i) => (
         <script
           key={i}
@@ -1408,7 +1414,7 @@ export default async function BlogArticlePage({
         />
       ))}
 
-      <article className="min-h-screen bg-[#080B12] text-white">
+      <article className="min-h-screen bg-[#080B12] text-white pt-16">
         <div className="mx-auto max-w-4xl px-4 py-12 md:py-16">
 
           {/* BREADCRUMB */}

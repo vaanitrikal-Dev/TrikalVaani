@@ -2,8 +2,12 @@
 // 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER
 // ════════════════════════════════════════════════════════════════════
 // File:    app/rashifal/[date]/page.tsx
-// Version: v1.0
+// Version: v1.1
 // Owner:   Rohiit Gupta, Chief Vedic Architect
+// v1.1 (18 Oct 2026): Site menu (SiteNav) added — the page had no menu;
+//          pt-16 so the fixed 64px menu does not cover content (the
+//          "no data yet" branch already had pt-20, left as is). Nothing
+//          else changed.
 // Purpose: Discover-optimized daily Rashifal page. READ-ONLY display
 //          layer over daily_rashifal_cache (NO generation — the panchang
 //          cron already produces this data nightly).
@@ -25,6 +29,7 @@ import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@supabase/supabase-js";
+import SiteNav from "@/components/layout/SiteNav";
 
 export const revalidate = 86400;
 export const dynamicParams = true;
@@ -179,6 +184,8 @@ export default async function RashifalDatePage(
   // No data yet for this date
   if (!data) {
     return (
+      <>
+      <SiteNav />
       <main className="min-h-screen bg-gradient-to-b from-amber-50 to-white pt-20">
         <div className="mx-auto max-w-2xl px-4 py-16 text-center">
           <div className="text-5xl mb-6">🔱</div>
@@ -199,6 +206,7 @@ export default async function RashifalDatePage(
           </div>
         </div>
       </main>
+      </>
     );
   }
 
@@ -290,11 +298,12 @@ export default async function RashifalDatePage(
 
   return (
     <>
+      <SiteNav />
       {schemas.map((s, i) => (
         <script key={i} type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(s) }} />
       ))}
 
-      <main className="min-h-screen bg-gradient-to-b from-amber-50 to-white">
+      <main className="min-h-screen bg-gradient-to-b from-amber-50 to-white pt-16">
         <div className="mx-auto max-w-4xl px-4 py-8 md:py-12">
 
           <nav className="mb-4 text-sm text-gray-600" aria-label="Breadcrumb">

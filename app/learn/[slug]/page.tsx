@@ -8,6 +8,7 @@ import {
   getAllPublishedSlugs,
 } from '@/lib/seo-content'
 import SeoPageLayout from '@/components/seo/SeoPageLayout'
+import SiteNav from '@/components/layout/SiteNav' // v2.4
 import {
   normalizeCitations,
   normalizeGlossary,
@@ -22,7 +23,13 @@ import {
 
 /* ============================================================
    TRIKAL VAANI — /learn/[slug]
-   VERSION: 2.3 — GOOGLE DISCOVER FEATURED IMAGE (16 Oct 2026)
+   VERSION: 2.4 — SITE MENU (18 Oct 2026)
+   ============================================================
+   CHANGE v2.4: Site menu (SiteNav) added — the page had no menu; pt-16
+     wrapper so the fixed 64px menu does not cover content. Nothing else
+     changed.
+   ============================================================
+   PREVIOUS: VERSION 2.3 — GOOGLE DISCOVER FEATURED IMAGE (16 Oct 2026)
    ============================================================
    CHANGE v2.3 (editorial_rulings #20): openGraph + twitter now carry an image
      (they had none — /learn pages shared with no preview image) = the page's
@@ -293,6 +300,7 @@ export default async function SeoLearnPage({ params }: Props) {
 
   return (
     <>
+      <SiteNav />
       {schemas.map((schema, i) => (
         <script
           key={i}
@@ -309,6 +317,8 @@ export default async function SeoLearnPage({ params }: Props) {
           Rows that still carry title_hi / body_content_hi but no hindi_slug
           simply show no Hindi link until their Hindi twin row is created and
           hindi_slug is filled in. Their Hindi text is still in the table. */}
+      {/* v2.4: pt-16 so the fixed 64px SiteNav does not cover content */}
+      <div className="pt-16">
       {page.hindi_slug ? (
         <div style={{ maxWidth: '900px', margin: '12px auto 0', padding: '0 16px', textAlign: 'right' }}>
           <Link
@@ -326,6 +336,7 @@ export default async function SeoLearnPage({ params }: Props) {
         clusterPages={clusterPages}
         relatedPages={relatedPages}
       />
+      </div>
     </>
   )
 }

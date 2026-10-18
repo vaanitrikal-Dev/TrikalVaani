@@ -3,8 +3,15 @@
  * TRIKAAL VAANI — SEO Domain Pages Generator
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/[domain]/page.tsx (dynamic engine for 15 life domains + 10 city hubs)
- * VERSION: 2.9 — CITY HUB DELEGATION (05 Sep 2026)
+ * VERSION: 3.0 — SITE MENU (18 Oct 2026)
  * SIGNED: ROHIIT GUPTA, CEO
+ *
+ * v2.9 -> v3.0 CHANGES (18 Oct 2026):
+ *   - Site menu (SiteNav) added to the 15 domain pages — the page had no
+ *     menu; pt-16 on the outer wrapper so the fixed 64px menu does not cover
+ *     content. The 10 city hubs get their menu inside
+ *     components/city/CityHub.tsx v1.1 (not here), so each page has exactly
+ *     one menu. Nothing else changed.
  *
  * WHERE THIS FILE GOES: GitHub path -> app/[domain]/page.tsx (replace)
  * SHIP TOGETHER WITH: components/city/CityHub.tsx (NEW FILE) — neither
@@ -55,6 +62,7 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { supabase } from '../../lib/supabase';
 import CityHub, { CITY_SLUGS, buildCityMetadata } from '../../components/city/CityHub';
+import SiteNav from '../../components/layout/SiteNav';
 
 export const revalidate = 86400;
 
@@ -386,13 +394,14 @@ export default async function DomainPage({ params }: Props) {
 
   return (
     <>
+      <SiteNav />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }} />
 
-      <div className="min-h-screen" style={{ background: '#080B12', color: '#e2e8f0' }}>
+      <div className="min-h-screen pt-16" style={{ background: '#080B12', color: '#e2e8f0' }}>
 
         <div className="max-w-4xl mx-auto px-4 pt-6">
           <nav className="flex items-center gap-2 text-xs text-slate-500">

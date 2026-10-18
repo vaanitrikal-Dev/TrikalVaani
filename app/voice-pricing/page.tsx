@@ -3,8 +3,14 @@
  * TRIKAL VAANI — Voice Pricing SEO Landing Page
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/voice-pricing/page.tsx
- * VERSION: 2.0 — Content synced to current product (Jun 14, 2026)
+ * VERSION: 2.1 — Site menu added (18 Oct 2026)
  * SIGNED: ROHIIT GUPTA, CEO
+ *
+ * v2.1 CHANGES (18 Oct 2026):
+ *   - Site menu (SiteNav) added — the page had no menu; pt-16 so the fixed
+ *     64px menu does not cover content. Nothing else changed.
+ *
+ * PREVIOUS: VERSION 2.0 — Content synced to current product (Jun 14, 2026)
  *
  * v2.0 CHANGES:
  *   - FIXED: "Tap the mic icon" → "press and hold the mic" (current PTT UX)
@@ -19,6 +25,7 @@
 
 import type { Metadata } from 'next';
 import Script from 'next/script';
+import SiteNav from '@/components/layout/SiteNav'; // v2.1
 
 export const metadata: Metadata = {
   title: { absolute: 'Voice Astrology — ₹11 Hindi Voice Predictions' },
@@ -164,11 +171,12 @@ const PACKS = [
 export default function VoicePricingPage() {
   return (
     <>
-      <Script id="faq-schema"        type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(FAQ_SCHEMA)        }} />
+      <SiteNav />
+      <Script id="faq-schema"       type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(FAQ_SCHEMA)        }} />
       <Script id="product-schema"    type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(PRODUCT_SCHEMA)    }} />
       <Script id="breadcrumb-schema" type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(BREADCRUMB_SCHEMA) }} />
 
-      <main className="min-h-screen bg-[#080B12] text-white">
+      <main className="min-h-screen bg-[#080B12] text-white pt-16">
         {/* ── Hero with GEO direct answer (40-60 words) ───── */}
         <section className="px-6 py-16 max-w-4xl mx-auto text-center">
           <h1 className="text-4xl sm:text-5xl font-bold mb-6" style={{ color: '#D4AF37' }}>

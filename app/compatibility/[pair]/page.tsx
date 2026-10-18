@@ -3,7 +3,10 @@
  * TRIKAL VAANI — Compatibility Page (Programmatic SEO/GEO)
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/compatibility/[pair]/page.tsx
- * VERSION: 1.8 (16 Oct 2026 — Google Discover featured image, editorial_rulings #20: compatibility_pages.hero_image
+ * VERSION: 1.9 (18 Oct 2026 — Site menu (SiteNav) added — the page had no menu; pt-16 so the fixed 64px
+ *   menu does not cover content. Nothing else changed. Also covers /hi/compatibility/[pair], which renders
+ *   this component.)
+ * PREVIOUS: VERSION 1.8 (16 Oct 2026 — Google Discover featured image, editorial_rulings #20: compatibility_pages.hero_image
  *   → a "Key Facts" box with the image + caption at the top of the content (Option A look, WikiBlocks
  *   Infobox v1.1, shown only when an image exists); og:image + twitter large card + Article.image; robots
  *   now carries googleBot max-image-preview:large — the plain {index, follow} here replaced the root
@@ -77,6 +80,7 @@ import Image from 'next/image';
 import { createClient } from '@supabase/supabase-js';
 import { Infobox } from '@/components/wiki/WikiBlocks'; // v1.8
 import { normalizeHeroImage, ogImageFor } from '@/lib/wiki'; // v1.8
+import SiteNav from '@/components/layout/SiteNav'; // v1.9
 
 // ── ISR: regenerate pages periodically, cache aggressively ───
 export const revalidate = 86400; // 24h
@@ -393,7 +397,9 @@ export default async function CompatibilityPage(
   const sColor = scoreColor(page.score);
 
   return (
-    <div className="min-h-screen bg-[#080B12] text-[#f5f5f5]">
+    <>
+    <SiteNav />
+    <div className="min-h-screen bg-[#080B12] text-[#f5f5f5] pt-16">
       {/* JSON-LD */}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }} />
@@ -593,5 +599,6 @@ export default async function CompatibilityPage(
         </div>
       </footer>
     </div>
+    </>
   );
 }

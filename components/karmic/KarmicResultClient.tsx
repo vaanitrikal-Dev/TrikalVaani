@@ -1,7 +1,10 @@
 // TRIKAL VAANI — Karmic Result Client Component
 // CEO & Chief Vedic Architect: Rohiit Gupta
 // File: components/karmic/KarmicResultClient.tsx
-// VERSION: 1.3 (11 Oct 2026) — LOT 3, PLAY STORE APP: "Maa Shakti Ki Kripa" dabba ("Maa ko Arzi
+// VERSION: 1.4 (18 Oct 2026) — Site menu (SiteNav) added (rendered by app/karmic/[slug]/page.tsx v1.2) —
+//   the page had no menu; pt-16 on all three screens (waiting, error, reading) so the fixed 64px
+//   menu does not cover content. Nothing else changed.
+// PICHHLA: 1.3 (11 Oct 2026) — LOT 3, PLAY STORE APP: "Maa Shakti Ki Kripa" dabba ("Maa ko Arzi
 //   karein →" /maa-shakti button) app mein <HideInPlayApp> se chhupa — Rohiit: "Maa Shakti ko
 //   Arzi ... Dakshina hai". Website par sab pehle jaisa. Gemini: is file mein nahi.
 // PICHHLA: 1.2 (1 Oct 2026) — "📜 Granth kehta hai" sunehri dabbe mein (Rohiit), **bold** asli bold,
@@ -201,7 +204,7 @@ export default function KarmicResultClient({ initialRow }: { initialRow: KarmicR
   if (polling) {
     const progress = Math.min((elapsed / 90) * 100, 95) // 90s expected
     return (
-      <div className="min-h-screen bg-[#080B12] flex items-center justify-center px-5">
+      <div className="min-h-screen bg-[#080B12] flex items-center justify-center px-5 pt-16">
         <div className="max-w-lg w-full text-center">
 
           {/* Pulsing symbol */}
@@ -279,7 +282,7 @@ export default function KarmicResultClient({ initialRow }: { initialRow: KarmicR
   // ── ERROR STATE ────────────────────────────────────────────────────────────────
   if (error || !narrative) {
     return (
-      <div className="min-h-screen bg-[#080B12] flex items-center justify-center px-5">
+      <div className="min-h-screen bg-[#080B12] flex items-center justify-center px-5 pt-16">
         <div className="max-w-md w-full text-center">
           <div className="text-4xl mb-4">🔱</div>
           <h2 className="text-xl font-semibold text-white mb-3">Reading aa rahi hai...</h2>
@@ -305,7 +308,7 @@ export default function KarmicResultClient({ initialRow }: { initialRow: KarmicR
   const parsed = parseReading(narrative)
 
   return (
-    <div className="min-h-screen bg-[#080B12] text-[#f5f5f5]">
+    <div className="min-h-screen bg-[#080B12] text-[#f5f5f5] pt-16">
 
       {/* HERO */}
       <header className="relative overflow-hidden border-b border-[#D4AF37]/20">

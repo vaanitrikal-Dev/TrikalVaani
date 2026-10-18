@@ -38,12 +38,17 @@
  * 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER 🔱
  * ============================================================================
  * File:        app/services/page.tsx
- * Version:     v2.6 (11 Oct 2026) — LOT 3C Play Billing
- * Previous:    v2.5 — IR-0 cleanup: fake rating + phantom ₹499 removed
+ * Version:     v2.7 (18 Oct 2026) — Site menu (SiteNav) added
+ * Previous:    v2.6 (11 Oct 2026) — LOT 3C Play Billing
  * Phase:       Deliverable 3 of Master SEO Strategy
  * Owner:       Rohiit Gupta, Chief Vedic Architect
  * Domain:      trikalvaani.com/services
  * Updated:     June 03, 2026
+ *
+ * v2.7 CHANGES vs v2.6 (18 Oct 2026):
+ *   ✅ Site menu (SiteNav) added — the page had no menu. No padding added: the
+ *      hero section already has pt-28 (7rem), so the fixed 64px menu does not
+ *      cover content. Nothing else changed.
  *
  * v2.6 CHANGES vs v2.5 (11 Oct 2026):
  *   ✅ Rohiit ka faisla #1 — Play Store app ke andar payment provider ka naam
@@ -84,6 +89,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Script from "next/script";
 import PayProviderName from "@/components/payment/PayProviderName"; // v2.6
+import SiteNav from "@/components/layout/SiteNav"; // v2.7
 
 // ============================================================================
 // METADATA — SEO foundation
@@ -699,6 +705,7 @@ function V6Content() {
 export default function ServicesPage() {
   return (
     <>
+      <SiteNav />
       {/* JSON-LD Schemas — Server-rendered, JSON.stringify-safe */}
       <Script
         id="services-itemlist-schema"
@@ -1076,6 +1083,6 @@ export default function ServicesPage() {
 }
 
 // ============================================================================
-// END — app/services/page.tsx v2.6
+// END — app/services/page.tsx v2.7
 // 🔱 Trikaal Vaani | Rohiit Gupta, Chief Vedic Architect
 // ============================================================================

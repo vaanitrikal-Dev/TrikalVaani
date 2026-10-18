@@ -3,6 +3,9 @@
  * TRIKAL VAANI — Karmic Background Reading — SEO Landing Pillar
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/karmic-background-reading/page.tsx
+ * VERSION: 2.2 (18 Oct 2026) — Site menu (SiteNav) added — the page had no menu; pt-16 so the
+ *   fixed 64px menu does not cover content (the page's own hero <header> stays, now below the menu).
+ *   Nothing else changed.
  * v2.0 (1 Oct 2026) — ₹101 / $11 (pehle ₹251/$19). Report ab GRANTH se (AI band):
  *   BPHS, Phaladipika, Jataka Parijata ke vachan + 2 naye hisse (Prediction, Upay)
  *   + purva janm (Phaladipika 14.24-25) + BPHS 83 (purva janm ke shaap).
@@ -21,6 +24,7 @@
 
 import { Metadata } from 'next';
 import KarmicForm from '@/components/karmic/KarmicForm';
+import SiteNav from '@/components/layout/SiteNav'; // v2.2
 
 const SITE = 'https://trikalvaani.com';
 const URL  = `${SITE}/karmic-background-reading`;
@@ -97,7 +101,9 @@ export default function KarmicLandingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#080B12] text-[#f5f5f5]">
+    <>
+    <SiteNav />
+    <div className="min-h-screen bg-[#080B12] text-[#f5f5f5] pt-16">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(personSchema) }} />
@@ -204,5 +210,6 @@ export default function KarmicLandingPage() {
         </div>
       </footer>
     </div>
+    </>
   );
 }

@@ -3,6 +3,8 @@
  * TRIKAL VAANI — Child Birth Muhurat — Paid Result Page
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/muhurat/[slug]/page.tsx
+ * VERSION: 1.7 (18 Oct 2026) — Site menu (SiteNav) added — the page had no menu; pt-16 so the
+ *   fixed 64px menu does not cover content. Nothing else changed.
  * VERSION: 1.6 (11 Oct 2026) — LOT 3, PLAY STORE APP: "Maa Shakti Ki Kripa" dabba ("Maa ko
  *   Arzi karein →" /maa-shakti button ke saath) app mein <HideInPlayApp> se chhupa —
  *   Rohiit: "Maa Shakti ko Arzi ... Dakshina hai". Website par sab pehle jaisa. Page
@@ -36,6 +38,7 @@ import { notFound } from 'next/navigation';
 import { createClient } from '@supabase/supabase-js';
 import MuhuratRemediesCard from '@/components/muhurat/MuhuratRemediesCard';
 import HideInPlayApp from '@/components/payment/HideInPlayApp'; // v1.6
+import SiteNav from '@/components/layout/SiteNav'; // v1.7
 
 export const dynamic    = 'force-dynamic';
 export const revalidate = 0;
@@ -220,7 +223,9 @@ export default async function MuhuratResultPage({ params }: { params: { slug: st
   );
 
   return (
-    <div className="min-h-screen bg-[#080B12] text-[#f5f5f5]">
+    <>
+    <SiteNav />
+    <div className="min-h-screen bg-[#080B12] text-[#f5f5f5] pt-16">
 
       {/* ─────────── HERO ─────────── */}
       <header className="relative overflow-hidden border-b border-[#D4AF37]/20">
@@ -463,5 +468,6 @@ export default async function MuhuratResultPage({ params }: { params: { slug: st
         }
       `}</style>
     </div>
+    </>
   );
 }

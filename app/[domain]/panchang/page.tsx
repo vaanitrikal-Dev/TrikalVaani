@@ -2,8 +2,11 @@
 // 🔱 TRIKAL VAANI — CEO PROTECTION HEADER
 // ════════════════════════════════════════════════════════════════════
 // File:        app/[domain]/panchang/page.tsx
-// Version:     v1.4 — Discover optimization (Claude, June 2026)
+// Version:     v1.5 — Site menu added (18 Oct 2026)
 // Owner:       Rohiit Gupta, Chief Vedic Architect
+// CHANGES v1.4 → v1.5 (18 Oct 2026):
+//   ✅ Site menu (SiteNav) added — the page had no menu; pt-16 so the fixed
+//      64px menu does not cover content. Nothing else changed.
 // CHANGES v1.3 → v1.4 (CEO-approved):
 //   ✅ OG image added (og-default.jpg 1200×630) to openGraph + twitter.
 //   ✅ robots expanded with googleBot max-image-preview:large + max-snippet
@@ -27,6 +30,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import citiesData from "../../data/cities.json";
 import { callVM } from "@/lib/callVM";
+import SiteNav from "@/components/layout/SiteNav";
 
 export const revalidate = 86400;
 export const dynamicParams = true;
@@ -159,10 +163,11 @@ export default async function CityPanchangPage(
 
   return (
     <>
+      <SiteNav />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumb) }} />
       {faq && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faq) }} />}
 
-      <main className="min-h-screen bg-gradient-to-b from-amber-50 to-white">
+      <main className="min-h-screen bg-gradient-to-b from-amber-50 to-white pt-16">
         <div className="mx-auto max-w-4xl px-4 py-8 md:py-12">
 
           <nav className="mb-4 text-sm text-gray-600" aria-label="Breadcrumb">

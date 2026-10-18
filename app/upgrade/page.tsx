@@ -3,7 +3,9 @@
  * TRIKAL VAANI — Upgrade / Paid Unlock Page
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/upgrade/page.tsx
- * VERSION: 1.0 — NEW ROUTE
+ * VERSION: 1.1 (18 Oct 2026) — Site menu (SiteNav) added — the page had no menu; pt-16 so the
+ *   fixed 64px menu does not cover content. Nothing else changed.
+ * PREVIOUS: VERSION 1.0 — NEW ROUTE
  * SIGNED: ROHIIT GUPTA, CEO
  * ============================================================
  * WHY THIS FILE EXISTS:
@@ -56,6 +58,7 @@
 import type { Metadata } from 'next'
 import { createClient } from '@supabase/supabase-js'
 import UpgradeClient from './UpgradeClient'
+import SiteNav from '@/components/layout/SiteNav' // v1.1
 
 // This page depends on query params, so it must be dynamic. Declaring it
 // explicitly prevents the "Page changed from static to dynamic at runtime"
@@ -146,5 +149,12 @@ async function loadSeed(
 export default async function UpgradePage({ searchParams }: Props) {
   const seed = await loadSeed(searchParams?.from, searchParams?.slug)
 
-  return <UpgradeClient seed={seed} />
+  return (
+    <>
+      <SiteNav />
+      <div className="pt-16">
+        <UpgradeClient seed={seed} />
+      </div>
+    </>
+  )
 }

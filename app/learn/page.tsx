@@ -1,6 +1,8 @@
+// VERSION: 1.1 (18 Oct 2026) — Site menu (SiteNav) added — the page had no menu; pt-16 so the fixed 64px menu does not cover content. Nothing else changed.
 // (1 Oct 2026 — daam sahi kiye: Kundali Milan ₹51 (couple + parent), Karmic ₹101 / $11, Child Birth ₹51; Bhrigu Nandi ke purane daave hataye)
 import { Metadata } from 'next'
 import Link from 'next/link'
+import SiteNav from '@/components/layout/SiteNav'
 import { createClient } from '@supabase/supabase-js'
 
 export const metadata: Metadata = {
@@ -87,6 +89,7 @@ export default async function LearnIndexPage() {
 
   return (
     <>
+      <SiteNav />
       <style>{`
         .learn-root {
           min-height: 100vh;
@@ -224,7 +227,7 @@ export default async function LearnIndexPage() {
         }
       `}</style>
 
-      <div className="learn-root">
+      <div className="learn-root pt-16">
         {/* Hero */}
         <div className="learn-hero">
           <h1>Vedic Astrology <em>Knowledge Hub</em></h1>

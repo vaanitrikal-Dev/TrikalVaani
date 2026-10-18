@@ -3,8 +3,13 @@
  * 🔱 TRIKAL VAANI — CEO PROTECTION HEADER 🔱
  * ============================================================================
  * File:        components/city/CityHub.tsx
- * Version:     v1.0 — NEW FILE. City hub page for all 10 cities.
- * Date:        2026-09-05
+ * Version:     v1.1 — Site menu added (v1.0: NEW FILE. City hub page for all 10 cities.)
+ * Date:        2026-10-18
+ *
+ * v1.0 -> v1.1 (18 Oct 2026): Site menu (SiteNav) added — the page had no
+ *   menu; pt-16 so the fixed 64px menu does not cover content. The menu
+ *   lives HERE (not in app/[domain]/page.tsx) for the 10 city hubs, so each
+ *   hub renders exactly one menu. Nothing else changed.
  * Owner:       Rohiit Gupta, Chief Vedic Architect
  *
  * WHERE THIS FILE GOES:
@@ -65,6 +70,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { supabase } from '../../lib/supabase';
 import citiesData from '../../app/data/cities.json';
+import SiteNav from '../layout/SiteNav';
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -356,6 +362,7 @@ export default async function CityHub({ citySlug }: { citySlug: string }) {
 
   return (
     <>
+      <SiteNav />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(webPageSchema) }} />
       {festivals.length > 0 && (
@@ -363,7 +370,7 @@ export default async function CityHub({ citySlug }: { citySlug: string }) {
       )}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
 
-      <div className="min-h-screen" style={{ background: '#080B12', color: '#e2e8f0' }}>
+      <div className="min-h-screen pt-16" style={{ background: '#080B12', color: '#e2e8f0' }}>
 
         <div className="max-w-4xl mx-auto px-4 pt-6">
           <nav className="flex items-center gap-2 text-xs text-slate-500">

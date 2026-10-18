@@ -1,4 +1,8 @@
-// TRIKAL VAANI | app/astro/page.tsx | v1.2
+// TRIKAL VAANI | app/astro/page.tsx | v1.3
+// v1.3 (18 Oct 2026): Site menu (SiteNav) added — the page had no menu
+//   (this reverses the v1.x "NO SiteNav" design intent below, per Rohiit's
+//   approval). Outer <main> pt-12 -> pt-28 (= old 3rem gap + 4rem) so the
+//   fixed 64px menu does not cover the logo. Nothing else changed.
 // v1.2 FIX: switched logo from Trikal_Logo.png (1440x1440 with heavy transparent
 //   padding causing tiny visible owl) to Trikal_Vaani_Logo.svg (already used as
 //   favicon sitewide, scales perfectly, no padding issues). 100x100 display size.
@@ -30,6 +34,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import Script from 'next/script'
+import SiteNav from '@/components/layout/SiteNav'
 
 const GOLD = '#D4AF37'
 const GOLD_RGBA = (a: number) => `rgba(212,175,55,${a})`
@@ -84,6 +89,7 @@ const CARDS = [
 export default function AstroPage() {
   return (
     <>
+      <SiteNav />
       <Script
         id="astro-webpage-schema"
         type="application/ld+json"
@@ -106,7 +112,7 @@ export default function AstroPage() {
       />
 
       <main
-        className="min-h-screen flex flex-col items-center px-5 pt-12 pb-16"
+        className="min-h-screen flex flex-col items-center px-5 pt-28 pb-16"
         style={{ background: '#080B12', color: '#E5E7EB' }}
       >
         {/* ── Logo + Hook ── */}

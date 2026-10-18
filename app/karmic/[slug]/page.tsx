@@ -3,9 +3,13 @@
  * TRIKAL VAANI — Karmic Background Reading — Result Page
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/karmic/[slug]/page.tsx
- * VERSION: 1.1
+ * VERSION: 1.2 (18 Oct 2026)
  * SIGNED: ROHIIT GUPTA, CEO
  * ============================================================
+ * CHANGE v1.2 (18 Oct 2026):
+ *   Site menu (SiteNav) added — the page had no menu; pt-16 so the fixed
+ *   64px menu does not cover content (padding lives in KarmicResultClient
+ *   v1.4, on all three of its screens). Nothing else changed.
  * CHANGE v1.1:
  *   Replaced static "taiyaar ho rahi hai" with KarmicResultClient —
  *   a full client component with animated waiting screen, auto-polling
@@ -19,6 +23,7 @@ import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { createClient } from '@supabase/supabase-js';
 import KarmicResultClient from '@/components/karmic/KarmicResultClient';
+import SiteNav from '@/components/layout/SiteNav'; // v1.2
 
 export const dynamic    = 'force-dynamic';
 export const revalidate = 0;
@@ -47,5 +52,10 @@ export default async function KarmicResultPage({ params }: { params: { slug: str
 
   if (error || !reading) notFound();
 
-  return <KarmicResultClient initialRow={reading as any} />;
+  return (
+    <>
+      <SiteNav />
+      <KarmicResultClient initialRow={reading as any} />
+    </>
+  );
 }
