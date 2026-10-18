@@ -3,9 +3,20 @@
 // ============================================================
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
 // FILE: components/layout/SiteNav.tsx
-// VERSION: v3.0
-// DATE: 2026-07-12
+// VERSION: v3.1
+// DATE: 2026-10-18
 // CHANGES:
+//   v3.1: "Panchang" becomes a DROPDOWN (Rohiit approved 18 Oct 2026):
+//     ├─ आज का पंचांग    → /panchang
+//     └─ त्योहार कैलेंडर → /events  (new festival hub, app/events/page.tsx v1.0)
+//     Desktop: opens on hover AND on click/tap of the chevron (tablets have
+//     no hover); closes on outside click, Escape, or route change. The word
+//     "Panchang" itself still links to /panchang, so nothing old breaks.
+//     Mobile menu: "Panchang" heading with the two links indented under it.
+//     Panchang is gold (active) on /panchang/* AND /events/*.
+//     NAV_LINKS stays the single source of truth (optional `children`).
+//     PROTECTED (unchanged): every other link, logo, LangSwitcher,
+//     Sign In / My Vault, Free Analysis, hamburger, AuthModal, styling.
 //   v3.0: Added "Hast Rekha" nav link (/hast-rekha-calculator), placed
 //     immediately after Vivah Muhurat with the other reading products.
 //     Reason: AI Hast Rekha is a PAID ₹51 product, so it was removed from
@@ -50,14 +61,23 @@ const GOLD_RGBA = (a: number) => `rgba(212,175,55,${a})`;
 // v2.8: uniform styling - no per-item highlight flag.
 // v2.9: added Swapna Shastra (/swapna) with the reading products.
 // v3.0: added Hast Rekha (/hast-rekha-calculator) — paid ₹51 palm reading.
-const NAV_LINKS: { href: string; label: string }[] = [
+// v3.1: Panchang carries children → rendered as a dropdown.
+type NavLink = { href: string; label: string; children?: { href: string; label: string }[] };
+
+const NAV_LINKS: NavLink[] = [
   { href: '/services',                  label: 'Services' },
   { href: '/kundali-milan',             label: 'Kundali Milan' },
   { href: '/vivah-muhurat',             label: 'Vivah Muhurat' },
   { href: '/hast-rekha-calculator',     label: 'Hast Rekha' },
   { href: '/karmic-background-reading', label: 'Karmic Reading' },
   { href: '/swapna',                    label: 'Swapna Shastra' },
-  { href: '/panchang',                  label: 'Panchang' },
+  {
+    href: '/panchang', label: 'Panchang',
+    children: [
+      { href: '/panchang', label: 'आज का पंचांग' },
+      { href: '/events',   label: 'त्योहार कैलेंडर' },
+    ],
+  },
   { href: '/calculators',               label: 'Calculators' },
   { href: '/blog',                      label: 'Vedic Blog' },
   { href: '/founder',                   label: 'Founder' },
@@ -106,6 +126,87 @@ function LangSwitcher({ lang, setLang }: { lang: Lang; setLang: (l: Lang) => voi
   );
 }
 
+// v3.1 — desktop dropdown for a link with children (Panchang).
+function NavDropdown({
+  link, active, isActive, pathname,
+}: {
+  link: NavLink; active: boolean; isActive: (href: string) => boolean; pathname: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function onDown(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    }
+    function onKey(e: KeyboardEvent) { if (e.key === 'Escape') setOpen(false); }
+    document.addEventListener('mousedown', onDown);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('mousedown', onDown);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, []);
+
+  // close after navigating
+  useEffect(() => { setOpen(false); }, [pathname]);
+
+  return (
+    <div
+      ref={ref}
+      className="relative"
+      onMouseEnter={() => setOpen(true)}
+      onMouseLeave={() => setOpen(false)}
+    >
+      <div className="flex items-center gap-0.5">
+        <Link
+          href={link.href}
+          aria-current={active ? 'page' : undefined}
+          className={`text-sm font-medium whitespace-nowrap transition-colors duration-200 ${
+            active ? 'text-[#D4AF37]' : 'text-slate-300 hover:text-[#D4AF37]'
+          }`}
+        >
+          {link.label}
+        </Link>
+        <button
+          type="button"
+          aria-label={`${link.label} menu`}
+          aria-expanded={open}
+          aria-haspopup="true"
+          onClick={() => setOpen((o) => !o)}
+          className={`p-0.5 transition-colors ${active ? 'text-[#D4AF37]' : 'text-slate-400 hover:text-[#D4AF37]'}`}
+        >
+          <ChevronDown className={`w-3.5 h-3.5 transition-transform ${open ? 'rotate-180' : ''}`} />
+        </button>
+      </div>
+      {open && (
+        // pt-2 bridges the gap so the menu does not close while the mouse moves down
+        <div className="absolute left-1/2 -translate-x-1/2 top-full pt-2 z-50">
+          <div
+            className="rounded-xl overflow-hidden min-w-[170px] py-1"
+            style={{ background: 'rgba(11,16,26,0.98)', border: `1px solid ${GOLD_RGBA(0.2)}`, boxShadow: '0 8px 32px rgba(0,0,0,0.5)' }}
+          >
+            {link.children!.map((c) => {
+              const on = pathname === c.href || (c.href !== '/panchang' && isActive(c.href));
+              return (
+                <Link
+                  key={c.href}
+                  href={c.href}
+                  aria-current={on ? 'page' : undefined}
+                  className="block px-4 py-2.5 text-sm whitespace-nowrap transition-colors hover:bg-white/5"
+                  style={{ color: on ? GOLD : '#cbd5e1' }}
+                >
+                  {c.label}
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function SiteNav() {
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const [showAuth, setShowAuth] = useState(false);
@@ -116,6 +217,9 @@ export default function SiteNav() {
   // Active if exact match or a sub-page of the link (e.g. /services/ex-back-reading)
   const isActive = (href: string) =>
     pathname === href || pathname.startsWith(href + '/');
+  // v3.1: a parent with children is active when any child route is active
+  const isLinkActive = (l: NavLink) =>
+    isActive(l.href) || (l.children ?? []).some((c) => isActive(c.href));
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -176,20 +280,30 @@ export default function SiteNav() {
           {/* v3.0: gap 4 → 3.5 to fit the extra Hast Rekha link on one line. */}
           <nav className="hidden sm:flex items-center gap-3.5">
 
-            {NAV_LINKS.map((l) => (
-              <Link
-                key={l.href}
-                href={l.href}
-                aria-current={isActive(l.href) ? 'page' : undefined}
-                className={`text-sm font-medium whitespace-nowrap transition-colors duration-200 ${
-                  isActive(l.href)
-                    ? 'text-[#D4AF37]'
-                    : 'text-slate-300 hover:text-[#D4AF37]'
-                }`}
-              >
-                {l.label}
-              </Link>
-            ))}
+            {NAV_LINKS.map((l) =>
+              l.children ? (
+                <NavDropdown
+                  key={l.href}
+                  link={l}
+                  active={isLinkActive(l)}
+                  isActive={isActive}
+                  pathname={pathname}
+                />
+              ) : (
+                <Link
+                  key={l.href}
+                  href={l.href}
+                  aria-current={isActive(l.href) ? 'page' : undefined}
+                  className={`text-sm font-medium whitespace-nowrap transition-colors duration-200 ${
+                    isActive(l.href)
+                      ? 'text-[#D4AF37]'
+                      : 'text-slate-300 hover:text-[#D4AF37]'
+                  }`}
+                >
+                  {l.label}
+                </Link>
+              )
+            )}
 
             <LangSwitcher lang={lang} setLang={setLang} />
 
@@ -287,20 +401,50 @@ export default function SiteNav() {
             }}
           >
             <div className="flex flex-col">
-              {NAV_LINKS.map((l) => (
-                <Link
-                  key={l.href}
-                  href={l.href}
-                  onClick={() => setMobileOpen(false)}
-                  aria-current={isActive(l.href) ? 'page' : undefined}
-                  className={`py-3.5 text-base transition-colors ${
-                    isActive(l.href) ? 'text-[#D4AF37] font-semibold' : 'text-slate-300'
-                  }`}
-                  style={{ borderBottom: `1px solid ${GOLD_RGBA(0.08)}` }}
-                >
-                  {l.label}
-                </Link>
-              ))}
+              {NAV_LINKS.map((l) =>
+                l.children ? (
+                  // v3.1: heading + indented child links
+                  <div key={l.href} style={{ borderBottom: `1px solid ${GOLD_RGBA(0.08)}` }}>
+                    <p
+                      className={`pt-3.5 pb-1 text-base ${
+                        isLinkActive(l) ? 'text-[#D4AF37] font-semibold' : 'text-slate-300'
+                      }`}
+                    >
+                      {l.label}
+                    </p>
+                    {l.children.map((c) => {
+                      const on = pathname === c.href || (c.href !== '/panchang' && isActive(c.href));
+                      return (
+                        <Link
+                          key={c.href}
+                          href={c.href}
+                          onClick={() => setMobileOpen(false)}
+                          aria-current={on ? 'page' : undefined}
+                          className={`block py-2.5 pl-4 text-[15px] transition-colors ${
+                            on ? 'text-[#D4AF37] font-semibold' : 'text-slate-400'
+                          }`}
+                        >
+                          {c.label}
+                        </Link>
+                      );
+                    })}
+                    <div className="pb-1" />
+                  </div>
+                ) : (
+                  <Link
+                    key={l.href}
+                    href={l.href}
+                    onClick={() => setMobileOpen(false)}
+                    aria-current={isActive(l.href) ? 'page' : undefined}
+                    className={`py-3.5 text-base transition-colors ${
+                      isActive(l.href) ? 'text-[#D4AF37] font-semibold' : 'text-slate-300'
+                    }`}
+                    style={{ borderBottom: `1px solid ${GOLD_RGBA(0.08)}` }}
+                  >
+                    {l.label}
+                  </Link>
+                )
+              )}
 
               {/* Sign In / My Vault */}
               {user ? (
