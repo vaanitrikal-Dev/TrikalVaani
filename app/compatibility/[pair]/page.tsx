@@ -3,7 +3,18 @@
  * TRIKAL VAANI — Compatibility Page (Programmatic SEO/GEO)
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/compatibility/[pair]/page.tsx
- * VERSION: 1.9 (18 Oct 2026 — Site menu (SiteNav) added — the page had no menu; pt-16 so the fixed 64px
+ * VERSION: 2.0 (19 Oct 2026 — Wikipedia format for compatibility pages, editorial_rulings #8/#21/#23,
+ *   approved by Rohiit 19 Oct 2026 ("Yes please karo do change in GitHub"):
+ *   1) New DB columns citations / infobox / glossary (jsonb, default []) are read and rendered with the
+ *      same WikiBlocks as /blog, /learn, /events: Key Facts infobox (+ hero), Glossary, Classical Sources
+ *      with the Sanskrit mool shlok, Chapter + Quotation JSON-LD, DefinedTermSet JSON-LD.
+ *   2) Text in geo_answer, every body block and every FAQ answer now renders inline links
+ *      [label](/url), [^n] citation markers (superscript, with back-link) and **bold**. Before v2.0 these
+ *      showed as raw characters, so content jobs could not add inline links here.
+ *   3) FAQPage JSON-LD gets plain text (links and markers stripped).
+ *   NULL-SAFE: a row with empty citations/infobox/glossary and plain text renders exactly as v1.9
+ *   (checked 19 Oct 2026: 0 of 288 rows contain "](", "[^n]" or "**"). Nothing else changed.
+ * PREVIOUS: VERSION 1.9 (18 Oct 2026 — Site menu (SiteNav) added — the page had no menu; pt-16 so the fixed 64px
  *   menu does not cover content. Nothing else changed. Also covers /hi/compatibility/[pair], which renders
  *   this component.)
  * PREVIOUS: VERSION 1.8 (16 Oct 2026 — Google Discover featured image, editorial_rulings #20: compatibility_pages.hero_image
@@ -13,7 +24,7 @@
  *   layout's googleBot block, so these 288 pages never allowed a large preview.)
  * PREVIOUS: VERSION 1.7 (1 Oct 2026 — Trikaal Vaani ka core tagline (Rohiit ne chuna): "Granth ka Gyaan · Rohiit ki Parakh · AI ki Shakti" / "Rooted in Granth · Verified by Rohiit · Powered by AI") (1 Oct 2026 — daam sahi kiye: Kundali Milan ₹51 (couple + parent), Karmic ₹101 / $11, Child Birth ₹51; Bhrigu Nandi ke purane daave hataye) — Hindi URL consolidation (canonical / hreflang /
  *                toggle / related links all point at /hi/compatibility/)
- * DATE:    2026-09-05
+ * DATE:    2026-10-19 (v2.0)
  * SIGNED: ROHIIT GUPTA, CEO
  * ============================================================
  * CHANGE LOG (v1.4 → v1.5) — 5 Sep 2026:
@@ -73,13 +84,23 @@
  * ============================================================
  */
 
+import React from 'react'; // v2.0
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { createClient } from '@supabase/supabase-js';
-import { Infobox } from '@/components/wiki/WikiBlocks'; // v1.8
-import { normalizeHeroImage, ogImageFor } from '@/lib/wiki'; // v1.8
+import { Infobox, Glossary, References } from '@/components/wiki/WikiBlocks'; // v1.8, v2.0
+import {
+  normalizeHeroImage,
+  ogImageFor,
+  normalizeCitations,
+  normalizeInfobox,
+  normalizeGlossary,
+  citationSchema,
+  glossarySchema,
+  citeAnchor,
+} from '@/lib/wiki'; // v1.8, v2.0
 import SiteNav from '@/components/layout/SiteNav'; // v1.9
 
 // ── ISR: regenerate pages periodically, cache aggressively ───
@@ -130,6 +151,98 @@ interface CompatRow {
   meta_title:    string;
   meta_desc:     string;
   hero_image?:   unknown; // v1.8 — editorial_rulings #20
+  citations?:    unknown; // v2.0 — jsonb [{work, granth, adhyaya, adhyaya_name, shlok, edition, rule_en, rule_hi, sanskrit}]
+  infobox?:      unknown; // v2.0 — jsonb [{label, value}]
+  glossary?:     unknown; // v2.0 — jsonb [{term, definition, same_as}]
+}
+
+// ── v2.0: inline links + [^n] markers + **bold** (same rules as /blog v3.4) ──
+const LINK_SPLIT_RE = /(\[[^\]]+\]\([^)]+\))/g;
+const LINK_STRIP_RE = /\[[^\]]+\]\([^)]+\)/g;
+const MARK_SPLIT_RE = /(\[\^\d+\])/g;
+
+type CiteCtx = { max: number; firstRef: Map<number, string> };
+
+/** First anchor of every [^n] across the texts, in render order. Markers are
+ *  counted outside links, exactly like RichText counts them. */
+function scanMarks(texts: { text: string; loc: string; keepLinks?: boolean }[], max: number): Map<number, string> {
+  const first = new Map<number, string>();
+  if (!max) return first;
+  for (const { text, loc, keepLinks } of texts) {
+    const plain = keepLinks ? text : text.replace(LINK_STRIP_RE, '');
+    const re = /\[\^(\d+)\]/g;
+    let m: RegExpExecArray | null;
+    let occ = 0;
+    while ((m = re.exec(plain)) !== null) {
+      const n = Number(m[1]);
+      if (n >= 1 && n <= max && !first.has(n)) first.set(n, citeAnchor(n, loc, occ));
+      occ += 1;
+    }
+  }
+  return first;
+}
+
+/** Plain text for JSON-LD: links → label, markers and ** removed. */
+function plainText(text: string): string {
+  return String(text ?? '')
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+    .replace(/\[\^\d+\]/g, '')
+    .replace(/\*\*/g, '');
+}
+
+function Bold({ text, k }: { text: string; k: string }) {
+  const parts = text.split(/(\*\*[^*]+\*\*)/g);
+  return (
+    <>
+      {parts.map((p, i) =>
+        p.startsWith('**') && p.endsWith('**') && p.length > 4 ? (
+          <strong key={`${k}-${i}`} className="font-semibold text-[#D4AF37]">{p.slice(2, -2)}</strong>
+        ) : (
+          <React.Fragment key={`${k}-${i}`}>{p}</React.Fragment>
+        ),
+      )}
+    </>
+  );
+}
+
+function RichText({ text, max, loc }: { text: string; max: number; loc: string }) {
+  let occ = 0;
+  const parts = String(text ?? '').split(LINK_SPLIT_RE);
+  return (
+    <>
+      {parts.map((part, i) => {
+        const lm = part.match(/^\[([^\]]+)\]\(([^)]+)\)$/);
+        if (lm) {
+          const [, label, url] = lm;
+          const cls = 'text-[#D4AF37] font-semibold underline underline-offset-2 hover:text-amber-200 transition';
+          return url.startsWith('/') ? (
+            <Link key={`l-${i}`} href={url} className={cls}>{label}</Link>
+          ) : (
+            <a key={`l-${i}`} href={url} target="_blank" rel="noopener noreferrer" className={cls}>{label}</a>
+          );
+        }
+        return (
+          <React.Fragment key={`p-${i}`}>
+            {part.split(MARK_SPLIT_RE).map((bit, j) => {
+              const cm = bit.match(/^\[\^(\d+)\]$/);
+              if (cm) {
+                const n = Number(cm[1]);
+                const thisOcc = occ;
+                occ += 1;
+                if (n < 1 || n > max) return null; // never a dangling [n]
+                return (
+                  <sup key={`c-${i}-${j}`} id={citeAnchor(n, loc, thisOcc)} className="ml-0.5 text-xs font-semibold leading-none">
+                    <a href={`#cite-${n}`} aria-label={`Source ${n}`} className="text-amber-400 no-underline hover:text-amber-200">[{n}]</a>
+                  </sup>
+                );
+              }
+              return bit ? <Bold key={`b-${i}-${j}`} text={bit} k={`b-${i}-${j}`} /> : null;
+            })}
+          </React.Fragment>
+        );
+      })}
+    </>
+  );
 }
 
 // ── Minimal shape for related-pair links ─────────────────────
@@ -352,14 +465,31 @@ export default async function CompatibilityPage(
     { title: L.remedies,      body: page.remedies },
   ].filter((b) => b.title && b.body && String(b.body).trim().length > 0);
 
+  // v2.0: Wikipedia-format data (null-safe — empty arrays render nothing)
+  const citations = normalizeCitations(page.citations);
+  const infobox = normalizeInfobox(page.infobox);
+  const glossary = normalizeGlossary(page.glossary);
+  const maxCite = citations.length;
+  const faqList = Array.isArray(page.faq) ? page.faq : [];
+  const backRefs = scanMarks(
+    [
+      ...infobox.map((r, i) => ({ text: r.value, loc: `ib${i}`, keepLinks: true })), // Infobox counts raw text
+      { text: page.geo_answer ?? '', loc: 'geo' },
+      ...bodyBlocks.map((b, i) => ({ text: String(b.body), loc: `b${i}` })),
+      ...faqList.map((f, i) => ({ text: String(f?.a ?? ''), loc: `f${i}` })),
+    ],
+    maxCite,
+  );
+  const glossaryLd = glossarySchema(canonical, isHi, glossary);
+
   // ── JSON-LD: FAQPage + Article + BreadcrumbList ────────────
   const faqSchema = {
     '@context': 'https://schema.org',
     '@type': 'FAQPage',
-    mainEntity: page.faq.map(f => ({
+    mainEntity: faqList.map(f => ({
       '@type': 'Question',
-      name: f.q,
-      acceptedAnswer: { '@type': 'Answer', text: f.a },
+      name: plainText(f.q),
+      acceptedAnswer: { '@type': 'Answer', text: plainText(f.a) }, // v2.0: no raw markup in schema
     })),
   };
 
@@ -382,6 +512,7 @@ export default async function CompatibilityPage(
     mainEntityOfPage: canonical,
     inLanguage: isHi ? 'hi-IN' : 'en-IN',
     image: [ogImageFor(hero).url], // v1.8
+    ...(citations.length ? { citation: citations.map((c) => citationSchema(c, isHi)) } : {}), // v2.0
   };
 
   const breadcrumbSchema = {
@@ -404,6 +535,7 @@ export default async function CompatibilityPage(
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
+      {glossaryLd && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(glossaryLd) }} />}
 
       {/* Language toggle */}
       <div className="max-w-3xl mx-auto px-5 pt-5 flex justify-end gap-2 text-xs">
@@ -454,23 +586,27 @@ export default async function CompatibilityPage(
       {/* GEO DIRECT ANSWER */}
       <section className="max-w-3xl mx-auto px-5 mb-10">
         <div className="bg-[#0d1120]/60 border-l-4 border-[#D4AF37] rounded-r-xl p-5 sm:p-6">
-          <p className="text-base sm:text-lg leading-relaxed text-gray-100">{page.geo_answer}</p>
+          <p className="text-base sm:text-lg leading-relaxed text-gray-100"><RichText text={page.geo_answer ?? ''} max={maxCite} loc="geo" /></p>
         </div>
       </section>
 
       {/* EDUCATIONAL CONTENT (v1.4: dynamic body blocks incl. deep-dive sections) */}
       <section className="max-w-3xl mx-auto px-5 space-y-8">
-        {/* v1.8: featured image (editorial_rulings #20) — only when filled */}
-        {hero && <Infobox rows={[]} max={0} hero={hero} />}
+        {/* v1.8: featured image (editorial_rulings #20); v2.0: + Key Facts rows. Renders only when filled. */}
+        <Infobox rows={infobox} max={maxCite} hero={hero} />
         {bodyBlocks.map((block, i) => (
           <div key={i}>
             <h2 className="text-xl sm:text-2xl font-semibold text-[#D4AF37] mb-3 border-l-3 border-[#D4AF37] pl-3">
               {block.title}
             </h2>
-            <p className="text-gray-200 leading-relaxed text-[15px] sm:text-base whitespace-pre-line">{block.body}</p>
+            <p className="text-gray-200 leading-relaxed text-[15px] sm:text-base whitespace-pre-line">
+              <RichText text={String(block.body)} max={maxCite} loc={`b${i}`} />
+            </p>
           </div>
         ))}
         <div className="clear-both" />
+        {/* v2.0: Glossary (editorial_rulings #8 G) — only when filled */}
+        <Glossary terms={glossary} />
       </section>
 
       {/* CTA → PAID MILAN */}
@@ -512,17 +648,26 @@ export default async function CompatibilityPage(
       <section className="max-w-3xl mx-auto px-5 mb-12">
         <h2 className="text-xl sm:text-2xl font-semibold text-[#D4AF37] mb-5">{L.faqTitle}</h2>
         <div className="space-y-4">
-          {page.faq.map((f, i) => (
+          {faqList.map((f, i) => (
             <details key={i} className="bg-[#0d1120]/60 border border-[#D4AF37]/15 rounded-xl p-4 group">
               <summary className="cursor-pointer font-medium text-gray-100 list-none flex justify-between items-center">
                 {f.q}
                 <span className="text-[#D4AF37] group-open:rotate-45 transition">+</span>
               </summary>
-              <p className="mt-3 text-gray-300 text-sm leading-relaxed whitespace-pre-line">{f.a}</p>
+              <p className="mt-3 text-gray-300 text-sm leading-relaxed whitespace-pre-line">
+                <RichText text={String(f.a ?? '')} max={maxCite} loc={`f${i}`} />
+              </p>
             </details>
           ))}
         </div>
       </section>
+
+      {/* v2.0: Classical Sources with Sanskrit mool shlok (editorial_rulings #21) — only when filled */}
+      {citations.length > 0 && (
+        <div className="max-w-3xl mx-auto px-5">
+          <References citations={citations} hi={isHi} backRefs={backRefs} />
+        </div>
+      )}
 
       {/* RELATED RASHI PAIRS — v1.1 interlinking mesh */}
       {relatedPairs.length > 0 && (
