@@ -1,6 +1,8 @@
 /* ═══════════════════════════════════════════════════════════════════════════
    app/services/page.tsx — the /services index
-   Version: 2.0 (06 Sep 2026)
+   Version: 2.1 (19 Oct 2026) — competitor brand names removed from visible copy and FAQ schema
+   (Rohiit rule 18 Oct 2026): comparison section/table now names categories, not brands.
+   (previous) Version: 2.0 (06 Sep 2026)
 
    WHAT WAS WRONG, AND IT WAS BACKWARDS
      The big gold PRIMARY button on every card pointed at /?segment=${slug}.
@@ -320,10 +322,10 @@ const faqPageSchema = {
     },
     {
       "@type": "Question",
-      name: "How accurate are Trikaal Vaani readings compared to AstroSage and AstroTalk?",
+      name: "How accurate are Trikaal Vaani readings compared to other astrology apps?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "Trikaal Vaani uses Swiss Ephemeris with Lahiri Ayanamsha — the same NASA-grade planetary calculation engine used by AstroSage and professional astrologers globally. Unlike AstroTalk’s marketplace model (random astrologer quality), every Trikaal Vaani reading framework is personally designed by Rohiit Gupta using BPHS, Bhrigu Nandi Nadi, and Shadbala. Birth time accuracy within 15 minutes ensures Lagna and Pratyantar Dasha precision down to 3-7 day windows.",
+        text: "Trikaal Vaani uses Swiss Ephemeris with Lahiri Ayanamsha — the same NASA-grade planetary calculation engine used by professional astrologers globally. Unlike marketplace chat apps (random astrologer quality), every Trikaal Vaani reading framework is personally designed by Rohiit Gupta using BPHS, Bhrigu Nandi Nadi, and Shadbala. Birth time accuracy within 15 minutes ensures Lagna and Pratyantar Dasha precision down to 3-7 day windows.",
       },
     },
     {
@@ -564,8 +566,8 @@ const V6_SECTIONS: SvcSection[] = [
     ],
   },
   {
-    id: 'astrotalk-astrosage',
-    h2: 'AstroTalk aur AstroSage se farak',
+    id: 'doosre-platforms',
+    h2: 'Doosre astrology apps aur sites se farak',
     paras: [
       'Seedha uttar, usme wo bhi jo hamare paksh mein nahi jaata.',
       '**Grahon ki sthiti mein antar nahi milega.** Adhikansh gambhir tool wahi Swiss Ephemeris aur wahi Lahiri Ayanamsha use karte hain. Un platforms ke paas **zyada tool, zyada bhashaayein, mobile app, live jyotishi aur bahut purana domain authority** hai — ye maan lena chahiye.',
@@ -773,7 +775,7 @@ export default function ServicesPage() {
                 "15+ Years Vedic Study",
                 "Parashara BPHS Tradition",
                 "Swiss Ephemeris Precision",
-                "AstroSage-Level Accuracy",
+                "Granth-Based Remedies",
                 "India Based",
               ].map((badge) => (
                 <span
@@ -926,7 +928,7 @@ export default function ServicesPage() {
         </section>
 
         {/* ================================================================ */}
-        {/* COMMERCIAL INTENT — Why Trikaal Vaani vs AstroTalk / AstroSage    */}
+        {/* COMMERCIAL INTENT — Why Trikaal Vaani vs chat apps / report sites */}
         {/* ================================================================ */}
         <section className="py-16 px-4 bg-[#0D1020]">
           <div className="max-w-5xl mx-auto">
@@ -936,7 +938,7 @@ export default function ServicesPage() {
               </p>
               <h2 className="font-serif text-3xl font-bold">
                 Built Different from{" "}
-                <span className="text-[#D4AF37]">AstroTalk &amp; AstroSage</span>
+                <span className="text-[#D4AF37]">Chat Apps &amp; Free Report Sites</span>
               </h2>
             </div>
 
@@ -951,10 +953,10 @@ export default function ServicesPage() {
                       Trikaal Vaani
                     </th>
                     <th className="text-center p-4 font-semibold text-gray-500">
-                      AstroTalk
+                      Live-chat apps
                     </th>
                     <th className="text-center p-4 font-semibold text-gray-500">
-                      AstroSage
+                      Free report sites
                     </th>
                   </tr>
                 </thead>

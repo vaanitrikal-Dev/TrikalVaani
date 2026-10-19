@@ -2,7 +2,8 @@
 
 // ============================================================
 // File: app/calculators/free-health-prediction-calculator/page.tsx
-// Version: v1.2 — "kin angon ka dhyan aur kab" (ang + samay, muft) ka zikr — 22 Sep 2026
+// Version: v1.3 (19 Oct 2026) — competitor brand names removed from visible copy (Rohiit rule 18 Oct 2026). Content/logic otherwise unchanged.
+// (previous) Version: v1.2 — "kin angon ka dhyan aur kab" (ang + samay, muft) ka zikr — 22 Sep 2026
 // Version: v1.1 — 'Related reading' heading: vivah → swasthya (template ka bacha text) — 22 Sep 2026
 // Version: v1.0 — Health Prediction (Jeevan-shakti) Calculator — 22 Sep 2026
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
@@ -612,7 +613,7 @@ export default function FreeHealthPredictionCalculatorPage() {
           {/* ── Comparison ───────────────────────────────────────────── */}
           <section className="mt-4">
             <h2 className="text-2xl font-serif font-bold mb-4" style={{ color: GOLD }}>
-              Trikaal Vaani vs AstroSage vs AstroTalk — Health Prediction par
+              Trikaal Vaani vs Doosre Free Tools — Health Prediction par
             </h2>
             <p className="text-slate-300 leading-relaxed mb-4">
               Sabse bada farak <strong style={{ color: GOLD }}>disha</strong> ka hai. Saamanya tools &ldquo;mazboot 6va bhav = achhi sehat&rdquo;
@@ -628,8 +629,7 @@ export default function FreeHealthPredictionCalculatorPage() {
                   <tr style={{ background: GOLD_RGBA(0.1) }}>
                     <th scope="col" className="p-3 text-left" style={{ color: GOLD }}>Kya</th>
                     <th scope="col" className="p-3 text-left" style={{ color: GOLD }}>Trikaal Vaani</th>
-                    <th scope="col" className="p-3 text-left" style={{ color: GOLD }}>AstroSage</th>
-                    <th scope="col" className="p-3 text-left" style={{ color: GOLD }}>AstroTalk</th>
+                    <th scope="col" className="p-3 text-left" style={{ color: GOLD }}>Zyadatar free tools</th>
                   </tr>
                 </thead>
                 <tbody className="text-slate-300">
@@ -638,7 +638,6 @@ export default function FreeHealthPredictionCalculatorPage() {
                       <td className="p-3 font-semibold">{c.f}</td>
                       <td className="p-3">{c.tv}</td>
                       <td className="p-3">{c.as}</td>
-                      <td className="p-3">{c.at}</td>
                     </tr>
                   ))}
                 </tbody>

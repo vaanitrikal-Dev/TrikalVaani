@@ -2,7 +2,9 @@
 
 // ============================================================
 // File: app/calculators/free-child-birth-muhurat-calculator/page.tsx
-// Version: v1.9 (11 Oct 2026) — GOOGLE PLAY BILLING (sirf Play Store app mein)
+// Version: v1.10 (19 Oct 2026) — GSC 7-day queries: +2 H2 ('best-lagna': which lagna is best for child birth,
+//   'swati-nakshatra': Swati nakshatra for baby birth) + 2 FAQ. Form, API, paywall, Play billing unchanged.
+// (previous) Version: v1.9 (11 Oct 2026) — GOOGLE PLAY BILLING (sirf Play Store app mein)
 //   * Rohiit ke 11 Oct ke faisle: app ke andar ₹51 report Google Play se
 //     (product muhurat_51). Button ka look + text WAHI ("Poora muhurat
 //     kholein · ₹51"), sirf neeche ki line "Secure payment via Google Play.
@@ -239,6 +241,8 @@ const FAQS = [
   { q: 'Is Anuradha nakshatra good for child birth?', a: 'Haan. Anuradha ka swami Shani hai aur devta Mitra — mitrata, nishtha aur sangathan-kshamata ka nakshatra. Sadhana aur dheeraj ke liye ise bahut shubh maana gaya hai, aur ye Gandmool bhi nahi hai. Anuradha mein janme bachche ke liye naamakshar Na, Ni, Nu, Ne mein se aata hai, pada ke anusaar.' },
   { q: 'Best tithi for child birth kaunsi hai?', a: 'Shubh maani jaane wali tithiyan hain Dwitiya, Tritiya, Panchami, Saptami, Dashami, Ekadashi, Trayodashi aur Purnima. Bachni chahiye — Chaturthi, Navami aur Chaturdashi, jinhe Rikta tithi kehte hain, aur Amavasya. Par tithi nau kaarkon mein se sirf ek hai; akeli tithi par faisla nahi hota.' },
   { q: 'Abhijit muhurat kya hai aur kya delivery ke liye theek hai?', a: 'Abhijit sthaniya dopahar ke aas-paas ka lagbhag 48-minute ka samay hai — din ka aathvaan muhurat. Ise lagbhag har shubh kaary ke liye anukool maana jaata hai. Par Budhwar ko Abhijit ko chhod dene ka niyam hai. Agar aapki doctor-window mein Abhijit aata hai to calculator use uchit sthaan par gin leta hai.' },
+  { q: 'Which lagna is best for child birth?', a: 'Fixed lagnas — Vrishabh, Simha, Vrishchik and Kumbh — are traditionally preferred, with dual lagnas next. But a lagna is only strong if its lord is in a kendra or trikona, not debilitated, and the 8th house is free of malefics. The calculator checks this for every 10-minute slot in your doctor window.' },
+  { q: 'Is Swati nakshatra good for baby birth?', a: 'Yes. Swati is a favourable birth nakshatra and not Gandmool. Its lord is Rahu and deity Vayu. The naamakshar comes from Ru, Re, Ro or Ta by pada. The lagna and 8th house are still checked alongside it.' },
   { q: 'Gandmool nakshatra kya hota hai?', a: 'Chhe nakshatra Gandmool kehlate hain — Ashwini, Ashlesha, Magha, Jyeshtha, Mula aur Revati. Inme janm hone par 27 din baad Mool Shanti vidhi ki paramapara hai. Ye ashubh janm nahi hai — bahut se safal log Gandmool mein paida hue hain. Ye sirf ek vidhi ka sanket hai, koi shrap nahi. Calculator inhe alag se flag karta hai taaki aap jaan sakein.' },
   { q: 'Muhurat mil gaya par doctor ne date badal di — ab kya?', a: 'Doctor ki baat hi antim hai. Nayi date daal kar calculator dobara chala lijiye — wo us nayi window ke andar ka sabse achha samay nikaal dega. Muhurat ke liye medical salah ke khilaf jaana Jyotish mein bhi galat maana gaya hai, kyunki maa aur bachche ki suraksha se bada koi yog nahi hota.' },
   { q: 'Kitne bacche honge — ye calculator wo bata sakta hai?', a: 'Nahi, ye alag prashn hai aur alag chart maangta hai. Ye calculator ek nishchit window mein sabse shubh samay dhoondhta hai. Santan-sankhya ke liye panchma bhaav, Saptamsa D-7 aur Guru dekhe jaate hain — uske liye alag page hai.' },
@@ -456,6 +460,22 @@ const SECTIONS: MuhuratSection[] = [
       'Tithi chandra-din hai — Surya aur Chandra ke beech ke kon se banti hai, aur ek chandra maas mein 30 tithiyan hoti hain.',
       'Janm ke liye **anukool tithiyan**: Dwitiya, Tritiya, Panchami, Saptami, Dashami, Ekadashi, Trayodashi aur Purnima. **Bachne yogya**: Chaturthi, Navami aur Chaturdashi — inhe **Rikta tithi** kehte hain aur naye kaam ke liye ye tali jaati hain. Amavasya ko bhi prayah chhod diya jaata hai.',
       'Par yahan bhi wahi tolmol hai. Tithi nau kaarkon mein se **ek** hai. Rikta tithi par bhi agar Lagna mazboot ho, Lagna swami kendra mein ho aur nakshatra shubh ho, to slot kul milakar achha ho sakta hai. Calculator har kaarak alag dikhata hai — isiliye ki aap ye tolmol khud dekh sakein, sirf ek "haan/na" na milе.',
+    ],
+  },
+  {
+    id: 'best-lagna',
+    h2: 'Which Lagna Is Best for Child Birth?',
+    paras: [
+      'Lagna is the single heaviest factor, because it becomes the first house of the child for life. Tradition favours the **fixed (sthira) lagnas — Vrishabh, Simha, Vrishchik and Kumbh** — for steadiness, and the **dual lagnas — Mithun, Kanya, Dhanu and Meen** — as good second choices. Movable lagnas (Mesh, Kark, Tula, Makar) are not bad, but they are usually ranked third for a planned birth.',
+      'The sign alone does not decide it. A strong lagna has its **lord in a kendra or trikona**, not debilitated, and not in the 8th or 12th, with **no malefic in the 8th house** and benefics in the kendras. A Simha lagna with the Sun in the 8th can be weaker than a Kark lagna with a strong Moon in a kendra. The calculator scores exactly this, slot by slot, inside the window your doctor gives — so you see which lagna is actually strong in your window, not in theory.',
+    ],
+  },
+  {
+    id: 'swati-nakshatra',
+    h2: 'Is Swati Nakshatra Good for Baby Birth?',
+    paras: [
+      'Yes — **Swati is on the list of favourable nakshatras for birth**, and it is not Gandmool, so no Mool Shanti is needed. Its lord is **Rahu** and its deity **Vayu**, the wind, which tradition links with independence, adaptability and skill in trade and movement. It falls in Tula rashi, where Venus rules the sign.',
+      'Children born in Swati get a **naamakshar from Ru, Re, Ro or Ta**, depending on the pada. As with every nakshatra, Swati alone does not make a slot good — the lagna, its lord and the 8th house are read with it. More on this nakshatra at [Swati nakshatra baby birth](/blog/swati-nakshatra-baby-birth), and in Hindi at [स्वाति नक्षत्र](/blog/swati-nakshatra-baby-birth-hindi).',
     ],
   },
   {

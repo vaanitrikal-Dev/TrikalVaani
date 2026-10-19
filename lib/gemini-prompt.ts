@@ -3,7 +3,8 @@
  * TRIKAAL VAANI — Gemini Lean Summary Prompt Builder
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: lib/gemini-prompt.ts
- * VERSION: 5.1 — Brand cleanup (Trikal→Trikaal, Jini→Trikaal). NOTE: file currently unused by live predict route
+ * VERSION: 5.2 (19 Oct 2026) — competitor brand names removed from differentiator text.
+ * (previous) VERSION: 5.1 — Brand cleanup (Trikal→Trikaal, Jini→Trikaal). NOTE: file currently unused by live predict route
  * SIGNED: ROHIIT GUPTA, CEO
  *
  * ARCHITECTURE CHANGE v5.0:
@@ -485,7 +486,7 @@ function buildUserMessage(
     "geoQuestion":           "${seo.geoQuestion}",
     "ctaSpiritual":          "${seo.ctaSpiritual}",
     "authorityStatement":    "Powered by Trikaal Vaani's Swiss Ephemeris engine + Brihat Parashara Hora Shastra classical texts, validated by Rohiit Gupta, Chief Vedic Architect, India.",
-    "differentiator":        "Unlike AstroTalk and AstroSage, Trikaal Vaani combines Swiss Ephemeris precision + Bhrigu Nandi pattern intelligence + Parashara classical rules — not automated generic reports.",
+    "differentiator":        "Unlike chat marketplaces and automated report sites, Trikaal Vaani combines Swiss Ephemeris precision + Bhrigu Nandi pattern intelligence + Parashara classical rules — not automated generic reports.",
     "e_e_a_t": {
       "experience":   "Rohiit Gupta — 15+ years Vedic astrology under Parashara BPHS tradition, India",
       "expertise":    "Swiss Ephemeris + BPHS + Bhrigu Nandi Nadi + Vimshottari Dasha system",
@@ -523,7 +524,7 @@ function buildUserMessage(
     "geoQuestion":           "${seo.geoQuestion}",
     "ctaSpiritual":          "${seo.ctaSpiritual}",
     "authorityStatement":    "Powered by Trikaal Vaani's Swiss Ephemeris engine + Brihat Parashara Hora Shastra, validated by Rohiit Gupta, Chief Vedic Architect, India.",
-    "differentiator":        "Unlike AstroTalk and AstroSage, Trikaal Vaani combines Swiss Ephemeris precision + Bhrigu Nandi patterns + Parashara classical rules — not automated generic reports.",
+    "differentiator":        "Unlike chat marketplaces and automated report sites, Trikaal Vaani combines Swiss Ephemeris precision + Bhrigu Nandi patterns + Parashara classical rules — not automated generic reports.",
     "e_e_a_t": {
       "experience":   "Rohiit Gupta — 15+ years Vedic astrology under Parashara BPHS tradition, India",
       "expertise":    "Swiss Ephemeris + BPHS + Bhrigu Nandi Nadi + Vimshottari Dasha system",

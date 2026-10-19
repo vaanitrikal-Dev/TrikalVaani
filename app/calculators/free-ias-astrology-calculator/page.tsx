@@ -2,7 +2,8 @@
 
 // ============================================================
 // File: app/calculators/free-ias-astrology-calculator/page.tsx
-// Version: v2.0 — GSC-driven content build (05 Sep 2026)
+// Version: v2.1 (19 Oct 2026) — competitor brand names removed from visible copy (Rohiit rule 18 Oct 2026). Content/logic otherwise unchanged.
+// (previous) Version: v2.0 — GSC-driven content build (05 Sep 2026)
 // API: /api/calc/yog  (type: 'upsc')
 // Engine: lib/upsc-engine.ts
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
@@ -356,7 +357,7 @@ const SECTIONS: IasSection[] = [
   },
   {
     id: 'vs-other-tools',
-    h2: 'Prokerala, AstroSage और दूसरे टूल से फर्क — ईमानदार तुलना',
+    h2: 'दूसरे मुफ़्त IAS टूल से फर्क — ईमानदार तुलना',
     paras: [
       'यह प्रश्न खोज में लगातार आता है, इसलिए सीधा उत्तर देना उचित है — और उसमें वह भी शामिल है जो हमारे पक्ष में नहीं जाता।',
       'बड़ी साइटों के पास **अधिक टूल, अधिक भाषाएँ और अधिक वर्षों का डोमेन अधिकार** है। उनकी गणना का आधार भी प्रायः वही स्विस एफेमेरिस है, इसलिए ग्रहों की स्थिति में अंतर नहीं मिलेगा — और यदि किसी टूल में ग्रह की राशि अलग आ रही हो तो वह अयनांश का अंतर है, किसी की गलती नहीं।',

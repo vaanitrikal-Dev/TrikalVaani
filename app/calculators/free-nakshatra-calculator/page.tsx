@@ -2,7 +2,8 @@
 
 // ============================================================
 // File: app/calculators/free-nakshatra-calculator/page.tsx
-// Version: 4.2 (03 Oct 2026) — previous header: 4.1 (1 Oct 2026 — "📜 Granth ke Upay — BPHS 84" dabba (components/calculators/GranthUpayBox
+// Version: 4.3 (19 Oct 2026) — competitor brand names removed from visible copy (Rohiit rule 18 Oct 2026). Content/logic otherwise unchanged.
+// (previous) Version: 4.2 (03 Oct 2026) — previous header: 4.1 (1 Oct 2026 — "📜 Granth ke Upay — BPHS 84" dabba (components/calculators/GranthUpayBox
 //   4.2 (2026-10-03) — +2 H2 from DataForSEO volumes (Trikaal Keywords sheet 2-3 Oct 2026):
 //   what is my nakshatra by date of birth 2.9K + rasi nakshatra calculator by DOB 2.9K,
 //   आज का पंचांग तिथि वार नक्षत्र 27.1K (disambiguation, links /panchang). Rohini (18.1K) and
@@ -942,7 +943,7 @@ export default function FreeNakshatraCalculatorPage() {
               <Link href="/calculators/free-lagna-calculator" className="underline underline-offset-2 font-semibold" style={{ color: GOLD }}>Lagna Calculator</Link>{' '}chalaiye.
             </p>
 
-            <h2 className="text-2xl font-serif font-bold mb-4 mt-8" style={{ color: GOLD }}>Trikaal Vaani vs AstroSage vs AstroTalk</h2>
+            <h2 className="text-2xl font-serif font-bold mb-4 mt-8" style={{ color: GOLD }}>Trikaal Vaani vs Doosre Free Tools</h2>
             <div className="overflow-x-auto mb-6">
               <table className="w-full text-sm" style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid ${GOLD}33`, borderRadius: '12px' }}>
                 <thead>

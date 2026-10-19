@@ -2,7 +2,8 @@
 
 // ============================================================
 // File: app/calculators/free-lucky-day-calculator/page.tsx
-// Version: 2.1 (1 Oct 2026 — "📜 Granth ke Upay — BPHS 84" dabba (components/calculators/GranthUpayBox); upay heading "(Parashar)" -> "(Parampara)") (05 Sep 2026) — Free Lucky Day Calculator
+// Version: 2.2 (19 Oct 2026) — competitor brand names removed from visible copy (Rohiit rule 18 Oct 2026). Content/logic otherwise unchanged.
+// (previous) Version: 2.1 (1 Oct 2026 — "📜 Granth ke Upay — BPHS 84" dabba (components/calculators/GranthUpayBox); upay heading "(Parashar)" -> "(Parampara)") (05 Sep 2026) — Free Lucky Day Calculator
 // API: /api/calc/kundali (calcType: 'lucky-day')
 // Logic: strongest planet (Shadbala) → lucky day/color/number/metal/direction
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
@@ -1082,7 +1083,7 @@ export default function FreeLuckyDayCalculatorPage() {
               Lucky day par important decisions lein — naya business, job interview, property deal, ya koi shubh aarambh. Us din apna lucky color pehnein, lucky direction mein mukh karke kaam shuru karein, aur strongest planet ke mantra ka jaap karein. Yeh chhote upaay aapki natural planetary strength ko aur badhate hain.
             </p>
 
-            <h2 className="text-2xl font-serif font-bold mb-4 mt-8" style={{ color: GOLD }}>Trikaal Vaani vs AstroSage vs AstroTalk Lucky Day Calculator</h2>
+            <h2 className="text-2xl font-serif font-bold mb-4 mt-8" style={{ color: GOLD }}>Trikaal Vaani vs Doosre Free Lucky Day Calculators</h2>
             <div className="not-prose overflow-x-auto mb-6">
               <table className="w-full text-sm" style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid ${GOLD}33`, borderRadius: '12px' }}>
                 <thead>

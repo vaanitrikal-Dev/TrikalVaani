@@ -2,7 +2,9 @@
 
 // ============================================================
 // File: app/calculators/free-dasha-calculator/page.tsx
-// Version: 4.3 (19 Oct 2026 — Radar 17 Oct Content Edit Brief, page at rank 9: +3 H2, 1 H2 renamed, +2 FAQ)
+// Version: 4.4 (19 Oct 2026) — Shani lagna rule corrected to BPHS 34.23 (Vrishabh = rajyogkarak; Tula, Kumbh shubh;
+//   Makar = lagnesh), matching the Neelam page. 3 lines changed, nothing else.
+// (previous) Version: 4.3 (19 Oct 2026 — Radar 17 Oct Content Edit Brief, page at rank 9: +3 H2, 1 H2 renamed, +2 FAQ)
 //   NEW: 'mahadasha-antardasha-calculator-dob' (Free Mahadasha and Antardasha calculator 21 /
 //   analysis 13 / Dasha calculator by DOB 12 + JOIN 'mahadasha calculator by date of birth',
 //   'antardasha calculator online free'); 'numerology-dasha' (Vedic Numerology Mahadasha calculator 8);
@@ -357,7 +359,7 @@ const PILLAR: DzSection[] = [
     h2: 'कौन सी दशा अच्छी और कौन सी बुरी — और यह सवाल गलत क्यों है',
     paras: [
       'सीधा जवाब: **कोई भी दशा अपने आप में अच्छी या बुरी नहीं होती।** यह इस विषय की सबसे बड़ी गलतफहमी है, और सबसे ज्यादा डर इसी से बेचा जाता है।',
-      'एक ही ग्रह की महादशा दो लोगों के लिए बिल्कुल उल्टा फल दे सकती है, और वजह तीन हैं। **पहली — वह ग्रह आपके लग्न के लिए शुभ है या नहीं।** शनि मकर और कुंभ लग्न के लिए योगकारक तक माने जाते हैं, जबकि मेष लग्न के लिए वही शनि कठिन। **दूसरी — वह ग्रह कुंडली में कहाँ बैठा है**, किस भाव में और किस अवस्था में। **तीसरी — वह किन भावों का स्वामी है।**',
+      'एक ही ग्रह की महादशा दो लोगों के लिए बिल्कुल उल्टा फल दे सकती है, और वजह तीन हैं। **पहली — वह ग्रह आपके लग्न के लिए शुभ है या नहीं।** शनि वृषभ लग्न के लिए राजयोगकारक माने गए हैं (बृहत् पराशर होरा शास्त्र 34.23) और तुला व कुंभ लग्न के लिए शुभ, जबकि मेष लग्न के लिए वही शनि कठिन। **दूसरी — वह ग्रह कुंडली में कहाँ बैठा है**, किस भाव में और किस अवस्था में। **तीसरी — वह किन भावों का स्वामी है।**',
       'इसीलिए *"शनि की महादशा आ रही है, अब क्या होगा"* का कोई एक जवाब नहीं है — और जो कोई बिना कुंडली देखे जवाब दे दे, वह अनुमान बेच रहा है। **19 साल किसी के जीवन के सबसे अच्छे भी हो सकते हैं।**',
     ],
   },
@@ -367,7 +369,7 @@ const PILLAR: DzSection[] = [
     paras: [
       'शनि की महादशा सबसे लंबी दूसरी है — **19 साल** — और सबसे ज्यादा बदनाम भी। शास्त्रीय स्थिति इससे कहीं संतुलित है: शनि **कर्म, अनुशासन और देरी** के कारक हैं। वे फल रोकते नहीं, **टालते** हैं — और जो मिलता है वह टिकाऊ होता है।',
       'व्यवहार में जो सबसे ज्यादा दिखता है: मेहनत का फल देर से मिलना, वरिष्ठों से खिंचाव, जिम्मेदारियों का बढ़ना, और अकेलेपन का अहसास। पर यही दौर बहुत से लोगों में **स्थायी ढाँचा** भी बनाता है — नौकरी में जड़ें, संपत्ति, और वह अनुशासन जो बाद में काम आता है।',
-      'और वह बात जो साफ कहनी चाहिए: **शनि मकर, कुंभ और तुला लग्न के लिए शुभ, यहाँ तक कि योगकारक माने जाते हैं।** इन लग्नों में शनि की महादशा अक्सर जीवन का सबसे अच्छा दौर होती है। विस्तार [शनि महादशा — पूरी गाइड](/blog/shani-mahadasha-effects-guide) में है, और नौकरी से जुड़ा सवाल [शनि महादशा में नौकरी क्यों नहीं मिलती](/blog/shani-mahadasha-mein-job-kyon-nahi-milti) में। ध्यान रहे — **शनि की महादशा और साढ़े साती अलग चीजें हैं**; साढ़े साती गोचर है, महादशा नहीं। अपनी साढ़े साती अलग से [यहाँ](/calculators/free-sade-sati-calculator) देखिए।',
+      'और वह बात जो साफ कहनी चाहिए: **शनि वृषभ लग्न के लिए राजयोगकारक (BPHS 34.23), और तुला व कुंभ लग्न के लिए शुभ माने जाते हैं; मकर लग्न में शनि लग्नेश है, इसलिए वहाँ भी प्रायः सहायक।** इन लग्नों में शनि की महादशा अक्सर जीवन का सबसे अच्छा दौर होती है। विस्तार [शनि महादशा — पूरी गाइड](/blog/shani-mahadasha-effects-guide) में है, और नौकरी से जुड़ा सवाल [शनि महादशा में नौकरी क्यों नहीं मिलती](/blog/shani-mahadasha-mein-job-kyon-nahi-milti) में। ध्यान रहे — **शनि की महादशा और साढ़े साती अलग चीजें हैं**; साढ़े साती गोचर है, महादशा नहीं। अपनी साढ़े साती अलग से [यहाँ](/calculators/free-sade-sati-calculator) देखिए।',
     ],
   },
   {
@@ -503,7 +505,7 @@ const PILLAR: DzSection[] = [
     id: "shani-upay",
     h2: "Shani Mahadasha Ke Upay — Jo Sach Mein Kaam Karte Hain",
     paras: [
-      "Pehle yeh dekhiye ki Shani aapke lagna ke liye shubh hain ya nahi — **Makar, Kumbh, Tula aur Vrishabh lagna ke liye Shani shubh, kai mein yogkarak** maane jaate hain. Agar aisa hai, to upay ka matlab Shani se ladna nahi, unhe sahara dena hai.",
+      "Pehle yeh dekhiye ki Shani aapke lagna ke liye shubh hain ya nahi — **Vrishabh lagna ke liye Shani rajyogkarak (BPHS 34.23), Tula aur Kumbh ke liye shubh, aur Makar ke liye lagnesh** maane jaate hain. Agar aisa hai, to upay ka matlab Shani se ladna nahi, unhe sahara dena hai.",
       "**Kya:** kisi buzurg, mazdoor ya safai-karmi ki ek thos madad. **Kab:** Shanivar. **Kharch:** ₹50–200. **Kitne din:** 19 Shanivar. **Aapke liye kyun:** Shani seva-varg ke karak hain, aur shastra mein Shani ka sabse prabhavi upay seva aur anyaay sudharna hai. Neelam pehla upay nahi — pehle [Neelam suit karega ya nahi](/calculators/free-should-i-wear-neelam) dekhiye. Poori guide [Shani Mahadasha](/blog/shani-mahadasha-effects-guide) mein hai.",
     ],
   },

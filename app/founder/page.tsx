@@ -3,7 +3,8 @@
  * 🔱 TRIKAL VAANI — CEO PROTECTION HEADER 🔱
  * ============================================================================
  * File:        app/founder/page.tsx
- * Version: 4.6 (11 Oct 2026 — LOT 3C Play Billing: Rohiit ka faisla #1 — Play Store app ke andar
+ * Version: 4.7 (19 Oct 2026) — competitor brand name removed from bio copy.
+ * (previous) Version: 4.6 (11 Oct 2026 — LOT 3C Play Billing: Rohiit ka faisla #1 — Play Store app ke andar
  *   payment provider ka naam "Google Play" dikhega, "Razorpay" nahi (app mein Razorpay likhna
  *   asatya hoga). Teen jagah naam <PayProviderName web="Razorpay" /> se: Vision para, ₹51 Deep
  *   Reading card, "Government Registered. Razorpay Secured." heading. "Razorpay Secured" trust card
@@ -579,8 +580,8 @@ export default function FounderPage() {
               <p className="mb-4">
                 The computational backbone — Swiss Ephemeris with Lahiri
                 Ayanamsha — gives Trikaal Vaani the same planetary calculation
-                accuracy used by AstroSage, the largest Vedic astrology platform
-                in India. Layered on top: Bhrigu Nandi Nadi karmic patterns,
+                accuracy used by professional Vedic astrology software worldwide.
+                Layered on top: Bhrigu Nandi Nadi karmic patterns,
                 Shadbala six-fold strength scoring, and Pratyantar Dasha for 3-7
                 day timing precision. Trikaal Vaani is not an app. It is a
                 movement to bring real Vedic science to every Indian — at a

@@ -2,7 +2,8 @@
 
 // ============================================================
 // File: app/calculators/free-love-or-arranged-marriage-calculator/page.tsx
-// Version: v1.1 — seema 20/35 (Rohiit), button "Love ya Arranged", meter — 22 Sep 2026
+// Version: v1.2 (19 Oct 2026) — competitor brand names removed from visible copy (Rohiit rule 18 Oct 2026). Content/logic otherwise unchanged.
+// (previous) Version: v1.1 — seema 20/35 (Rohiit), button "Love ya Arranged", meter — 22 Sep 2026
 // Version: v1.0 — Love or Arranged Marriage Prediction — 22 Sep 2026
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
 // API: /api/calc/yog (type: 'love-arranged') · Engine: lib/love-arranged-engine.ts
@@ -618,7 +619,7 @@ export default function FreeLoveOrArrangedMarriageCalculatorPage() {
           {/* ── Comparison ───────────────────────────────────────────── */}
           <section className="mt-4">
             <h2 className="text-2xl font-serif font-bold mb-4" style={{ color: GOLD }}>
-              Trikaal Vaani vs AstroSage vs AstroTalk — Love or Arranged par
+              Trikaal Vaani vs Doosre Free Tools — Love or Arranged par
             </h2>
             <p className="text-slate-300 leading-relaxed mb-4">
               Sabse bada farak <strong style={{ color: GOLD }}>sach</strong> ka hai. Doosre tools parampara ke love-niyamon ko
@@ -633,8 +634,7 @@ export default function FreeLoveOrArrangedMarriageCalculatorPage() {
                   <tr style={{ background: GOLD_RGBA(0.1) }}>
                     <th scope="col" className="p-3 text-left" style={{ color: GOLD }}>Kya</th>
                     <th scope="col" className="p-3 text-left" style={{ color: GOLD }}>Trikaal Vaani</th>
-                    <th scope="col" className="p-3 text-left" style={{ color: GOLD }}>AstroSage</th>
-                    <th scope="col" className="p-3 text-left" style={{ color: GOLD }}>AstroTalk</th>
+                    <th scope="col" className="p-3 text-left" style={{ color: GOLD }}>Zyadatar free tools</th>
                   </tr>
                 </thead>
                 <tbody className="text-slate-300">
@@ -643,7 +643,6 @@ export default function FreeLoveOrArrangedMarriageCalculatorPage() {
                       <td className="p-3 font-semibold">{c.f}</td>
                       <td className="p-3">{c.tv}</td>
                       <td className="p-3">{c.as}</td>
-                      <td className="p-3">{c.at}</td>
                     </tr>
                   ))}
                 </tbody>

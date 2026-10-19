@@ -2,7 +2,8 @@
 
 // ============================================================
 // File: app/calculators/free-lagna-calculator/page.tsx
-// Version: v2.0 (05 Sep 2026) — Free Lagna (Ascendant) Calculator
+// Version: v2.1 (19 Oct 2026) — competitor brand names removed from visible copy (Rohiit rule 18 Oct 2026). Content/logic otherwise unchanged.
+// (previous) Version: v2.0 (05 Sep 2026) — Free Lagna (Ascendant) Calculator
 // Engine: Swiss Ephemeris + Parashar BPHS + Shadbala + Bhrigu
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
 // Changelog:
@@ -1043,7 +1044,7 @@ export default function FreeLagnaCalculatorPage() {
 
           {/* comparison table — kept from v1.x, unchanged */}
           <section className="mt-4 prose prose-invert max-w-none">
-            <h2 className="text-2xl font-serif font-bold mb-4 mt-8" style={{ color: GOLD }}>Trikaal Vaani vs AstroSage vs AstroTalk Lagna Calculator</h2>
+            <h2 className="text-2xl font-serif font-bold mb-4 mt-8" style={{ color: GOLD }}>Trikaal Vaani vs Doosre Free Lagna Calculators</h2>
             <div className="not-prose overflow-x-auto mb-6">
               <table className="w-full text-sm" style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid ${GOLD}33`, borderRadius: '12px' }}>
                 <thead>

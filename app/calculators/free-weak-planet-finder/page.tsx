@@ -2,7 +2,8 @@
 
 // ============================================================
 // File: app/calculators/free-weak-planet-finder/page.tsx
-// Version: 2.1 (1 Oct 2026 — "📜 Granth ke Upay — BPHS 84" dabba (components/calculators/GranthUpayBox); upay heading "(Parashar)" -> "(Parampara)") (05 Sep 2026) — Free Weak Planet Finder
+// Version: 2.2 (19 Oct 2026) — competitor brand names removed from visible copy (Rohiit rule 18 Oct 2026). Content/logic otherwise unchanged.
+// (previous) Version: 2.1 (1 Oct 2026 — "📜 Granth ke Upay — BPHS 84" dabba (components/calculators/GranthUpayBox); upay heading "(Parashar)" -> "(Parampara)") (05 Sep 2026) — Free Weak Planet Finder
 // API: /api/calc/kundali (calcType: 'weak-planet')
 // Logic: weakest planet (Shadbala) → life areas + remedies to strengthen
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
@@ -485,10 +486,10 @@ const SECTIONS: WpSection[] = [
   },
   {
     id: 'vs-others',
-    h2: 'Prokerala, AstroSage, Drik Panchang aur Indastro se farak',
+    h2: 'Doosre free weak planet tools se farak',
     paras: [
-      'Google in naamon ko is keyword ke saath bar-bar dikhata hai, isliye seedha uttar dena hi theek hai — aur usme wo bhi shaamil hai jo hamare paksh mein nahi jaata.',
-      '**Ganana mein antar nahi milega.** Adhikansh gambhir tool wahi Swiss Ephemeris aur wahi Lahiri Ayanamsha use karte hain jo hum karte hain. Rupa ka aankda milna chahiye. Agar kahin thoda antar aaye to prayah wo **ayanamsha ka chunav** hai — Lahiri, Krishnamurti aur Raman alag aankde dete hain, aur ye kisi ki galti nahi. In sites ke paas **zyada tool, zyada bhashaayein aur zyada purana domain authority** bhi hai.',
+      'Ye prashn bahut poochha jaata hai, isliye seedha uttar dena hi theek hai — aur usme wo bhi shaamil hai jo hamare paksh mein nahi jaata.',
+      '**Ganana mein antar nahi milega.** Adhikansh gambhir tool wahi Swiss Ephemeris aur wahi Lahiri Ayanamsha use karte hain jo hum karte hain. Rupa ka aankda milna chahiye. Agar kahin thoda antar aaye to prayah wo **ayanamsha ka chunav** hai — Lahiri, Krishnamurti aur Raman alag aankde dete hain, aur ye kisi ki galti nahi. Kuch bade platforms ke paas **zyada tool, zyada bhashaayein aur zyada purana domain authority** bhi hai.',
       'Antar **prastuti** mein hai. Adhikansh tool Rupa ki table de kar chhod dete hain. Ye page **minimum ke saamne ratio** dikhata hai, batata hai chhe balon mein se kaunsa gira hua hai, aur uske hisaab se upay ki disha deta hai — taaki aap use apni kundali se mila sakein aur asahmat bhi ho sakein. Yahi ek daawa hai; baaki tulna aap khud kar lijiye.',
     ],
   },
@@ -1048,7 +1049,7 @@ export default function FreeWeakPlanetFinderPage() {
 
           {/* comparison table — kept from v1.x, unchanged */}
           <section className="mt-4 prose prose-invert max-w-none">
-            <h2 className="text-2xl font-serif font-bold mb-4 mt-8" style={{ color: GOLD }}>Trikaal Vaani vs AstroSage vs AstroTalk</h2>
+            <h2 className="text-2xl font-serif font-bold mb-4 mt-8" style={{ color: GOLD }}>Trikaal Vaani vs Doosre Free Tools</h2>
             <div className="not-prose overflow-x-auto mb-6">
               <table className="w-full text-sm" style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid ${GOLD}33`, borderRadius: '12px' }}>
                 <thead>

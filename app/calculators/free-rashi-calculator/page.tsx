@@ -2,7 +2,8 @@
 
 // ============================================================
 // File: app/calculators/free-rashi-calculator/page.tsx
-// Version: 2.1 (1 Oct 2026 — "📜 Granth ke Upay — BPHS 84" dabba (components/calculators/GranthUpayBox); upay heading "(Parashar)" -> "(Parampara)") (05 Sep 2026) — Free Rashi (Moon Sign) Calculator
+// Version: 2.2 (19 Oct 2026) — competitor brand names removed from visible copy (Rohiit rule 18 Oct 2026). Content/logic otherwise unchanged.
+// (previous) Version: 2.1 (1 Oct 2026 — "📜 Granth ke Upay — BPHS 84" dabba (components/calculators/GranthUpayBox); upay heading "(Parashar)" -> "(Parampara)") (05 Sep 2026) — Free Rashi (Moon Sign) Calculator
 // Engine: Swiss Ephemeris + Parashar BPHS + Shadbala + Bhrigu
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
 // Changelog:
@@ -436,10 +437,10 @@ const SECTIONS: RcSection[] = [
   },
   {
     id: 'vs-others',
-    h2: 'AstroSage, Astrotalk aur Prokerala rashi calculator se farak',
+    h2: 'Doosre rashi calculators se farak',
     paras: [
-      'Google in naamon ko is keyword ke saath bar-bar dikhata hai, isliye seedha uttar — aur usme wo bhi jo hamare paksh mein nahi jaata.',
-      '**Rashi ke aankde mein antar nahi milega.** Adhikansh gambhir tool wahi Swiss Ephemeris aur wahi Lahiri Ayanamsha use karte hain. Rashi milni chahiye. Antar aaye to prayah ayanamsha ka chunav alag hai, jo kisi ki galti nahi. Un sites ke paas **zyada tool, zyada bhashaayein aur zyada purana domain authority** bhi hai — ye maan lena chahiye.',
+      'Ye prashn bahut poochha jaata hai, isliye seedha uttar — aur usme wo bhi jo hamare paksh mein nahi jaata.',
+      '**Rashi ke aankde mein antar nahi milega.** Adhikansh gambhir tool wahi Swiss Ephemeris aur wahi Lahiri Ayanamsha use karte hain. Rashi milni chahiye. Antar aaye to prayah ayanamsha ka chunav alag hai, jo kisi ki galti nahi. Kuch bade platforms ke paas **zyada tool, zyada bhashaayein aur zyada purana domain authority** bhi hai — ye maan lena chahiye.',
       'Antar do jagah hai. **Ek** — adhikansh tool sirf tareekh maang kar rashi de dete hain, jo Chandra ke rashi badalne wale din galat nikal sakti hai; yahan samay maanga jaata hai aur wajah bata di jaati hai. **Do** — yahan naam-se-rashi ki seema chhupayi nahi jaati. Yahi daawa hai; baaki tulna aap khud kar lijiye.',
     ],
   },
@@ -1002,7 +1003,7 @@ export default function FreeRashiCalculatorPage() {
 
           {/* comparison table — kept from v1.x, unchanged */}
           <section className="mt-4 prose prose-invert max-w-none">
-            <h2 className="text-2xl font-serif font-bold mb-4 mt-8" style={{ color: GOLD }}>Trikaal Vaani vs AstroSage vs AstroTalk Rashi Calculator</h2>
+            <h2 className="text-2xl font-serif font-bold mb-4 mt-8" style={{ color: GOLD }}>Trikaal Vaani vs Doosre Free Rashi Calculators</h2>
             <div className="not-prose overflow-x-auto mb-6">
               <table className="w-full text-sm" style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid ${GOLD}33`, borderRadius: '12px' }}>
                 <thead>

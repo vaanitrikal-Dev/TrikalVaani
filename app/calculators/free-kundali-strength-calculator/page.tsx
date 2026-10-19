@@ -2,7 +2,8 @@
 
 // ============================================================
 // File: app/calculators/free-kundali-strength-calculator/page.tsx
-// Version: 2.1 (1 Oct 2026 — "📜 Granth ke Upay — BPHS 84" dabba (components/calculators/GranthUpayBox); upay heading "(Parashar)" -> "(Parampara)") (05 Sep 2026) — Free Kundali Strength Score Calculator
+// Version: 2.2 (19 Oct 2026) — competitor brand names removed from visible copy (Rohiit rule 18 Oct 2026). Content/logic otherwise unchanged.
+// (previous) Version: 2.1 (1 Oct 2026 — "📜 Granth ke Upay — BPHS 84" dabba (components/calculators/GranthUpayBox); upay heading "(Parashar)" -> "(Parampara)") (05 Sep 2026) — Free Kundali Strength Score Calculator
 // API: /api/calc/kundali (calcType: 'kundali-strength')  [route v1.6+]
 // Logic: overall score from Shadbala ratios + grade + lagna/dasha strength
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
@@ -1092,7 +1093,7 @@ export default function FreeKundaliStrengthCalculatorPage() {
 
           {/* comparison table — kept from v1.x, unchanged */}
           <section className="mt-4 prose prose-invert max-w-none">
-            <h2 className="text-2xl font-serif font-bold mb-4 mt-8" style={{ color: GOLD }}>Trikaal Vaani vs AstroSage vs AstroTalk</h2>
+            <h2 className="text-2xl font-serif font-bold mb-4 mt-8" style={{ color: GOLD }}>Trikaal Vaani vs Doosre Free Tools</h2>
             <div className="not-prose overflow-x-auto mb-6">
               <table className="w-full text-sm" style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid ${GOLD}33`, borderRadius: '12px' }}>
                 <thead>

@@ -2,7 +2,13 @@
  * TRIKAAL VAANI — trikalvaani.com
  * Chief Vedic Architect: Rohiit Gupta
  * FILE TO PASTE → app/services/child-destiny/page.tsx
- * Version: 5.2 (19 Oct 2026) — Radar 17 Oct Content Edit Brief (rank 5): +2 H2, 1 H2 renamed, +1 FAQ
+ * Version: 5.3 (19 Oct 2026) — Rohiit 19 Oct: "don't restrict yourself, add what people are searching".
+ *   The santan (conception) H2s held back in v5.2 are now ADDED, written safely: +8 H2, +2 FAQ.
+ *   santan-yog-calculator-hi, jaldi-santan-upay, putra-yog-kundali (+ putra prapti yog 2026 / by DOB),
+ *   jadi-booti-ayurvedic, pregnant-prediction-2026, marriage-child-prediction, santan-hast-rekha,
+ *   kumbh-putra-2026. PCPNDT standing rule kept: no page text states or implies the sex of an
+ *   unborn child, and no text says a person cannot have children. Herbal items carry a vaidya/doctor line.
+ * (previous) Version: 5.2 (19 Oct 2026) — Radar 17 Oct Content Edit Brief (rank 5): +2 H2, 1 H2 renamed, +1 FAQ
  *   (visible + JSON-LD). NEW: free-child-prediction-dob (Free child prediction by DOB 8 + Hindi 7),
  *   second-child (9 — disambiguates parent's 'will I have one' vs the child's own chart).
  *   RENAMED: guru-putrakaraka (+'संतान देने वाला ग्रह' 9). DELIBERATELY NOT ADDED (brief asked):
@@ -395,6 +401,70 @@ const V6_SECTIONS: V6Section[] = [
     ],
   },
   {
+    id: 'santan-yog-calculator-hi',
+    h2: 'संतान योग कैलकुलेटर — कुंडली से संतान का योग कैसे देखें',
+    paras: [
+      'संतान का योग **माता-पिता की अपनी कुंडली** से देखा जाता है, बच्चे की कुंडली से नहीं। तीन चीज़ें मुख्य हैं: **पंचम भाव** (संतान का भाव) और उसका स्वामी, **गुरु** जो संतान का कारक है, और **सप्तमांश (D-7)** चार्ट, जो संतान के विषय की पुष्टि करता है। इन्हें चल रही दशा के साथ पढ़ा जाता है, क्योंकि योग कब फल देगा, यह दशा तय करती है।',
+      'यह सब मुफ़्त में [संतान योग कैलकुलेटर](/calculators/free-santan-yog-calculator) पर जन्म तिथि, समय और स्थान से निकलता है — योग कितना प्रबल है और कौन सा समय अनुकूल है। ज्योतिष यहाँ समय और झुकाव बताता है; संतान का विषय सबसे पहले डॉक्टर का है, और कोई कुंडली यह नहीं कहती कि किसी को संतान नहीं होगी।',
+    ],
+  },
+  {
+    id: 'jaldi-santan-upay',
+    h2: 'जल्दी संतान प्राप्ति के उपाय — ज्योतिष और परंपरा',
+    paras: [
+      'परंपरा में संतान के लिए जो उपाय सबसे अधिक किए जाते हैं, वे सरल और सुरक्षित हैं: **संतान गोपाल मंत्र** का नियमित जाप, **गुरुवार** को गुरु (बृहस्पति) के लिए पीली वस्तुओं का दान, **हरिवंश पुराण** का पाठ या श्रवण, और **पुत्रदा एकादशी** का व्रत (शास्त्र में "पुत्र" शब्द संतान के अर्थ में है)। कुंडली में पंचम भाव पर पितृ दोष का संकेत हो तो पितरों के लिए तर्पण और श्राद्ध भी किए जाते हैं।',
+      'ज्योतिषीय उपाय पंचम भाव और गुरु की स्थिति देखकर तय होते हैं — किसी की कुंडली में गुरु कमज़ोर है तो उसका उपाय, किसी में पंचम पर शनि-राहु का प्रभाव है तो उसका। **उपाय चिकित्सा के साथ चलते हैं, उसकी जगह नहीं।** छह महीने से एक साल तक कोशिश के बाद भी गर्भ न ठहरे तो डॉक्टर से जाँच ज़रूर करवाएँ। विस्तार [संतान प्राप्ति में देरी के उपाय](/blog/santan-prapti-mein-deri-astrology-upay) पर है।',
+    ],
+  },
+  {
+    id: 'putra-yog-kundali',
+    h2: 'कुंडली में पुत्र योग कैसे देखें — और पुत्र प्राप्ति के योग 2026',
+    paras: [
+      'शास्त्रों में **"पुत्र" शब्द संतान के लिए** प्रयोग होता है — बृहत् पराशर होरा शास्त्र का पंचम भाव "पुत्र भाव" कहलाता है, और गुरु "पुत्रकारक"। इसलिए कुंडली में पुत्र योग देखने का अर्थ है **संतान योग** देखना: पंचम भाव, उसका स्वामी, गुरु, जैमिनी का पुत्रकारक ग्रह और सप्तमांश। जन्म तिथि से "पुत्र प्राप्ति योग" की यही विधि है।',
+      'एक बात साफ़ है: **कोई भी ज्योतिषी या टूल गर्भ में बच्चे का लिंग नहीं बता सकता, और बताना भी नहीं चाहिए** — भारत में PCPNDT कानून के तहत गर्भ में लिंग जाँच अपराध है। 2026 के लिए जो देखा जा सकता है, वह है **संतान का अनुकूल समय** — पंचम भाव के स्वामी या गुरु की दशा, और गुरु का गोचर। इसके लिए [संतान योग कैलकुलेटर](/calculators/free-santan-yog-calculator) दशा की तारीख़ों के साथ समय बताता है।',
+    ],
+  },
+  {
+    id: 'kumbh-putra-2026',
+    h2: 'कुंभ राशि पुत्र प्राप्ति के योग 2026-27',
+    paras: [
+      'कुंभ चंद्र राशि वालों के लिए संतान का भाव मिथुन है। **गुरु 2 जून 2026 तक मिथुन में** था — यानी कुंभ से पंचम भाव पर गुरु का गोचर, जो संतान के लिए सबसे अनुकूल गोचर माना जाता है। उसके बाद गुरु कर्क में गया, और **1 नवंबर 2026 से 24 जनवरी 2027 और फिर 26 जून 2027 से** सिंह में रहेगा, जहाँ से वह कुंभ राशि (चंद्रमा) को सीधी सातवीं दृष्टि से देखता है — परिवार से जुड़े शुभ समाचारों के लिए यह सहायक माना जाता है।',
+      'पर गोचर अकेला फैसला नहीं करता। असली समय आपकी अपनी **दशा** और जन्म-कुंडली के पंचम भाव से आता है, जो लग्न पर टिका है, सिर्फ़ राशि पर नहीं। अपनी सटीक खिड़की [संतान योग कैलकुलेटर](/calculators/free-santan-yog-calculator) पर देखिए।',
+    ],
+  },
+  {
+    id: 'jadi-booti-ayurvedic',
+    h2: 'संतान प्राप्ति के लिए जड़ी बूटी और आयुर्वेदिक उपाय — पहले यह पढ़ें',
+    paras: [
+      'आयुर्वेद में गर्भधारण की तैयारी को **गर्भाधान संस्कार** और शरीर-शुद्धि से जोड़ा गया है, और स्त्री-स्वास्थ्य के लिए शतावरी जैसी औषधियाँ प्रसिद्ध हैं। पर **कोई भी जड़ी-बूटी किसी पंजीकृत आयुर्वेदिक वैद्य या डॉक्टर की सलाह के बिना न लें** — गर्भ की कोशिश के दौरान कुछ औषधियाँ नुकसान कर सकती हैं, और हर शरीर की ज़रूरत अलग होती है।',
+      'और एक चेतावनी: बाज़ार में किसी जड़ी-बूटी को **"बेटा देने वाली"** बताकर बेचना झूठ है — न आयुर्वेद ऐसा दावा करता है, न ज्योतिष। ज्योतिष की भूमिका यहाँ इतनी है कि कुंडली से अनुकूल समय और गुरु-पंचम भाव के उपाय बताए जाएँ।',
+    ],
+  },
+  {
+    id: 'pregnant-prediction-2026',
+    h2: 'When Will I Get Pregnant? Astrology Prediction 2026-27',
+    paras: [
+      'Astrology reads conception timing from **your own chart**: the 5th house and its lord, Jupiter as the karaka of children, the D-7 (Saptamsa) chart, and the running Mahadasha and Antardasha. Periods of the 5th lord, of Jupiter, or of a planet placed in or aspecting the 5th house are the windows tradition watches, and a Jupiter transit over the 5th or 9th from the Moon is read as supportive.',
+      'It cannot replace a fertility check, and no chart says a person will never conceive. Use the free [Santan Yog Calculator](/calculators/free-santan-yog-calculator) to see your supportive dasha windows for 2026-27, and keep your doctor in the loop throughout.',
+    ],
+  },
+  {
+    id: 'marriage-child-prediction',
+    h2: 'Marriage and Child Prediction by Date of Birth (Free)',
+    paras: [
+      'Marriage and children are read from different houses — the **7th for marriage** and the **5th for children** — and in that order, since the 5th usually activates after the 7th. With your date, exact time and place of birth, the free [Shadi Kab Hogi Calculator](/calculators/free-shadi-kab-hogi-calculator) gives the marriage window and the [Santan Yog Calculator](/calculators/free-santan-yog-calculator) the children window.',
+      'Once a child is born, this page reads **the child\'s own chart** for nature, learning and direction — a separate question from when a child will come.',
+    ],
+  },
+  {
+    id: 'santan-hast-rekha',
+    h2: 'संतान योग हस्त रेखा — हथेली में संतान रेखा',
+    paras: [
+      'समुद्रिक शास्त्र में संतान की रेखाएँ छोटी उंगली के नीचे, विवाह रेखा के ऊपर की खड़ी पतली रेखाएँ मानी जाती हैं, और शुक्र पर्वत (अंगूठे का आधार) का भराव भी देखा जाता है। पर **रेखाओं से संतान की संख्या या लिंग पक्का नहीं बताया जा सकता** — यह गाइड जानबूझकर ऐसा दावा नहीं करती।',
+      'विस्तार [संतान रेखा — क्या बता सकती है, क्या नहीं](/blog/hast-rekha-gyan-samudrik-shastra-margdarshika) और [महिलाओं के हाथ की रेखाएं](/blog/mahilaon-ke-haath-ki-rekhayen-santan-vivah-career) में है। अपनी हथेली की फ़ोटो से मुफ़्त जाँच [हस्त रेखा कैलकुलेटर](/hast-rekha-calculator) पर।',
+    ],
+  },
+  {
     id: 'kis-ke-liye',
     h2: 'Ye reading kin maa-baap ke liye hai',
     paras: [
@@ -669,6 +739,8 @@ export default function ChildDestinyPage() {
           { q: "Which house in astrology shows a child's education?", a: "The 4th house governs primary education. The 5th governs intelligence. The 9th governs higher education. Mercury and Jupiter placement determine the ideal academic stream." },
           { q: "What is Moon nakshatra and why does it matter for children?", a: "The Moon nakshatra determines the child's emotional nature and learning style. A child in Rohini learns through beauty and consistency. A child in Ardra learns through questioning. Understanding this transforms how parents teach." },
           { q: "At what age should I get my child's kundali read?", a: "The earlier the better. Readings are most actionable around ages 5 to 12 when education decisions begin, and at 15 to 16 for stream selection. The birth chart does not change, so a reading is relevant at any age." },
+          { q: "Can astrology tell if I will have a son (putra prapti yog)?", a: "In the classical texts 'putra' means child, and the 5th house is the house of children in general. No astrologer or tool can or should predict the sex of an unborn child — sex determination is a crime in India under the PCPNDT Act. What a chart can show is the supportive timing for children." },
+          { q: "When will I get pregnant as per astrology?", a: "Timing is read from your own chart — the 5th house and its lord, Jupiter, the D-7 chart and the running dasha. The free Santan Yog Calculator shows supportive windows. It works alongside a doctor, never instead of one." },
           { q: "Can I get a free child prediction by date of birth?", a: "Yes. The first reading is free and is built from the child's own date, exact time and place of birth — Lagna, Moon sign and nakshatra, the 5th house and its lord, Jupiter, Mercury and the running dasha. The birth time matters because the Lagna and 5th house depend on it." },
         ]} />
         <CtaSection headline="Give Your Child the Gift of" highlight="Cosmic Clarity." body="Every child is born with a unique cosmic blueprint. ₹51 to read it — before the education system overwrites it." segment="child-destiny" />

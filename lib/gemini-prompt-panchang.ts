@@ -3,7 +3,8 @@
  * 🔱 TRIKAL VAANI — CEO PROTECTION HEADER 🔱
  * ============================================================================
  * File:        lib/gemini-prompt-panchang.ts
- * Version:     v1.0
+ * Version: 1.1 (19 Oct 2026) — competitor brand names removed from prompt text so they cannot leak into generated readings.
+ * (previous) Version:     v1.0
  * Phase:       C1 — AI Content Engine (Panchang Generation)
  * Owner:       Rohiit Gupta, Chief Vedic Architect
  * Domain:      trikalvaani.com
@@ -90,7 +91,7 @@ AUTHOR: Rohiit Gupta, Chief Vedic Architect
 TAGLINE: "Kaal bada balwan hai, sabko nach nachaye; raja ka beta bhi bhiksha mangne jaye."
 TONE: Authoritative, classical Vedic, accessible to mass-market Indian readers.
 CITATIONS: Reference BPHS (Brihat Parashara Hora Shastra), Bhrigu Samhita, Surya Siddhanta where relevant.
-NEVER: Generic "horoscope app" tone. NEVER copy AstroSage/AstroTalk style.
+NEVER: Generic "horoscope app" tone. NEVER copy the style of other astrology apps or sites.
 `.trim();
 
 const GEO_RULES = `
@@ -137,7 +138,7 @@ export function buildPanchangHubPrompt(
   return `
 You are Rohiit Gupta, Chief Vedic Architect of Trikaal Vaani.
 You are writing the AUTHORITATIVE national panchang content for ${panchang.date}.
-This page must outrank AstroSage and AstroTalk for "aaj ka panchang" and "today's panchang".
+This page must outrank every competitor for "aaj ka panchang" and "today's panchang".
 
 ${BRAND_VOICE}
 
@@ -200,7 +201,7 @@ export function buildPanchangCityPrompt(
 You are Rohiit Gupta, Chief Vedic Architect of Trikaal Vaani.
 You are writing the LOCAL panchang for ${city.name} on ${panchang.date}.
 TARGET KEYWORDS: "aaj ka panchang ${city.slug}", "panchang ${city.slug} today", "${city.slug} muhurat today".
-This page MUST outrank AstroSage's city pages.
+This page MUST outrank every competitor city panchang page.
 
 ${BRAND_VOICE}
 

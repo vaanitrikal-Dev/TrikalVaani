@@ -2,7 +2,8 @@
 
 // ============================================================
 // File: app/calculators/free-gemstone-suitability-calculator/page.tsx
-// Version: v2.0 (05 Sep 2026) — Gemstone Suitability (0–100, all 9 ratna)
+// Version: v2.1 (19 Oct 2026) — competitor brand names removed from visible copy (Rohiit rule 18 Oct 2026). Content/logic otherwise unchanged.
+// (previous) Version: v2.0 (05 Sep 2026) — Gemstone Suitability (0–100, all 9 ratna)
 // Now uses shared brain: lib/jyotish/gemstone.ts + GemstoneForm + StoneScoreboard.
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
 // ============================================================
@@ -391,8 +392,8 @@ const SECTIONS: GsSection[] = [
     id: 'vs-others',
     h2: 'Doosre gemstone calculators se farak',
     paras: [
-      'Google is keyword ke saath kai naam dikhata hai — AstroSage, Prokerala, Drik Panchang, GemsMantra. Seedha uttar, usme wo bhi jo hamare paksh mein nahi jaata.',
-      '**Grahon ki sthiti mein antar nahi milega.** Adhikansh gambhir tool wahi Swiss Ephemeris aur wahi Lahiri Ayanamsha use karte hain. Un sites ke paas **zyada tool, zyada bhashaayein aur bahut purana domain authority** bhi hai.',
+      'Ye prashn bahut poochha jaata hai, isliye seedha uttar — usme wo bhi jo hamare paksh mein nahi jaata.',
+      '**Grahon ki sthiti mein antar nahi milega.** Adhikansh gambhir tool wahi Swiss Ephemeris aur wahi Lahiri Ayanamsha use karte hain. Kuch bade platforms ke paas **zyada tool, zyada bhashaayein aur bahut purana domain authority** bhi hai.',
       'Antar do jagah hai, aur dono jaanchne layak hain. **Ek — yahan nau ke nau ratna ka score aata hai, ek "recommendation" nahi**, aur har score ke saath uski wajah — bhaav-swamitva, ast sthiti, bal, dasha.',
       '**Do — hum ratna nahi bechte.** Kai gemstone calculators ka ant ek dukaan ya partner link par hota hai. Us sthiti mein "aapko ye ratna chahiye" kehna hamesha faayde ka hota hai. Yahan wo prerna hai hi nahi — aur yahi is page ka poora daawa hai.',
     ],

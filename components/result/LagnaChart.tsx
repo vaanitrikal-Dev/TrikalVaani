@@ -1,4 +1,6 @@
 'use client';
+// File: components/result/LagnaChart.tsx
+// Version: 1.1 (19 Oct 2026) — aria-label no longer names a competitor. Rendering unchanged.
 
 const GOLD = '#D4AF37';
 const GOLD_RGBA = (a: number) => `rgba(212,175,55,${a})`;
@@ -172,7 +174,7 @@ export default function LagnaChart({ ascendant, planets, name }: Props) {
             viewBox={`0 0 ${S} ${S}`}
             width="100%"
             height="100%"
-            aria-label="North Indian Lagna Kundali chart — AstroSage standard"
+            aria-label="North Indian Lagna Kundali chart — standard Vedic layout"
             style={{ display: 'block', shapeRendering: 'crispEdges' }}
           >
             <defs>
