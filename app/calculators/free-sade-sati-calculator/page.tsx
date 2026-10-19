@@ -2,10 +2,28 @@
 
 // ============================================================
 // File: app/calculators/free-sade-sati-calculator/page.tsx
-// Version: 2.2 (3 Oct 2026 — +10 keyword H2s from Trikaal Keywords 2-3 Oct 2026, all-12-rashi start/end date table, Kumbh exact dates) — Free Sade Sati Calculator (Radar E3 content build)
+// Version: 2.3 (19 Oct 2026 — Radar 17 Oct PUSH: +6 H2, 2 H2 renamed, +4 FAQ, competitor-name H2 removed) — Free Sade Sati Calculator (Radar E3 content build)
 // VM endpoint: /sade-sati (dedicated, 100% accurate)
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
 // Changelog:
+//   v2.3 (2026-10-19) — Radar weekly report 17 Oct 2026: page listed as PUSH
+//        (25 empty SERPs) + Content Edit Brief. Gap analysis against the 24
+//        existing H2s; only keywords NOT already answered were added:
+//        • NEW H2: 'kya-hota-hai' (Shani Ki Sade Sati Me Kya Hota Hai, seen 19),
+//          'current-status' (Shani Sade Sati current status, 15),
+//          'kab-khatam-hogi' (शनि की साढ़े साती कब खत्म होगी, 18),
+//          'phases-english' (Which phase of Sade Sati is worse 37 / Sade Sati
+//          phases 23 — EN counterpart of the Hindi 'kaun-sa-charan-bura'),
+//          'how-many-times' (PUSH kw: How many times Sade Sati comes in life),
+//          'mesh-upay' (PUSH kw: Shani ki Sade Sati ke upay Mesh Rashi).
+//        • RENAMED H2 (ids unchanged, so anchors/table logic intact):
+//          'calculator-by-dob' (+ "Free Online" — Sade Sati calculator online 15),
+//          'start-end-tithi' (+ "Sade Sati Chart for All Rashi" 17).
+//        • +4 FAQ (feed the existing FAQPage schema).
+//        • Comparison H2 no longer names competitors (Rohiit ruling 18 Oct 2026).
+//        • ⚠️ 'current-status' and 'kab-khatam-hogi' are date-dependent in the
+//          same way as RASHI_STATUS — update them when Saturn leaves Meen.
+//        • FORM, API, RESULT RENDERING, RASHI_STATUS, SADE_SATI_DATES: unchanged.
 //   v2.2 (2026-10-03) — +10 H2 sections (12 kept + 2 new at top, 1 after the
 //        rashi table, 7 at the end), chosen from DataForSEO volumes in the
 //        weekly Trikaal Keywords sheet: "sade sati calculator" 6.6K,
@@ -317,7 +335,7 @@ type PillarSection = { id: string; h2: string; paras: string[] };
 const PILLAR: PillarSection[] = [
   {
     id: "calculator-by-dob",
-    h2: "Sade Sati Calculator by Date of Birth — How It Works",
+    h2: "Sade Sati Calculator by Date of Birth — Free Online, How It Works",
     paras: [
       "The calculator above needs three things — **date, exact time and place of birth** — because Sade Sati is counted from your **Moon sign (Chandra Rashi)**, not your Sun sign. It takes the Moon's sidereal position from Swiss Ephemeris with Lahiri ayanamsa, compares it with Saturn's live transit, and returns a Yes/No verdict, the active phase, exact start and end dates, and the days remaining.",
       "Why the time matters: the Moon changes sign roughly every two and a quarter days, so a birth close to a sign change can flip the whole result. If you genuinely do not know the time, tick **Unknown time** — a noon chart is used — and treat the answer as provisional. You can confirm your Moon sign separately with the [Rashi Calculator](/calculators/free-rashi-calculator), and the full method is in the [Sade Sati Calculator guide](/blog/shani-sade-sati-calculator).",
@@ -332,6 +350,14 @@ const PILLAR: PillarSection[] = [
     ],
   },
   {
+    id: "kya-hota-hai",
+    h2: "Shani Ki Sade Sati Mein Kya Hota Hai?",
+    paras: [
+      "Seedha jawab: **Sade Sati mein Shani dheere-dheere zindagi ke teen hisson ki pareeksha lete hain** — pehle kharch aur neend, phir mann aur sehat, aur aakhir mein paisa aur parivar. Kram yahi isliye hai kyunki Shani aapki Chandra Rashi se pehle **12th bhaav** (kharch, videsh, akelapan), phir **Chandra Rashi par** (mann), aur phir **2nd bhaav** (dhan, kutumb, vaani) se guzarte hain — har jagah lagbhag dhaai saal.",
+      "Vyavhaar mein jo sabse zyada dikhta hai: **mehnat ka phal der se aata hai, inkaar nahi hota.** Kaam atakte hain, log parakhte hain, faisle bhaari lagte hain — aur jo cheez kachchi thi woh toot jaati hai. Par jo log is daur mein anushasan rakhte hain, unke liye yahi samay sabse pakki neev banata hai. Kitna bhaari lagega, yeh aapki kundali mein Shani ke bal aur saath chal rahi dasha par nirbhar hai — isliye pehle upar ke calculator se apna charan dekhiye. Lakshan vistaar se [साढ़ेसाती के 10 ईमानदार लक्षण](/blog/signs-of-sade-sati-hindi) mein hain.",
+    ],
+  },
+  {
     id: 'kis-rashi-par',
     h2: 'शनि की साढ़े साती किस राशि पर है?',
     paras: [
@@ -341,11 +367,27 @@ const PILLAR: PillarSection[] = [
     ],
   },
   {
+    id: "current-status",
+    h2: "Shani Sade Sati Current Status — Which Rashis Are in It Now",
+    paras: [
+      "**Current status, while Saturn transits Meen (Pisces) — until it first enters Mesh on 3 Jun 2027:** Sade Sati is running on exactly three Moon signs — **Kumbh** (final phase), **Meen** (peak phase) and **Mesh** (rising phase). **Simha** and **Dhanu** are in Dhaiya, which is a different and shorter Saturn transit, not Sade Sati. **Makar** completed its Sade Sati on 29 Mar 2025. The remaining seven signs are under no Sade Sati at all.",
+      "What changes next: on **3 Jun 2027** Saturn enters Mesh, so Kumbh's Sade Sati begins to end and **Vrishabh's begins** — but Saturn turns back into Meen on 20 Oct 2027, so the shift becomes final only on **23 Feb 2028**. All of this is counted from your **Moon sign**, not the newspaper Sun sign; if you are unsure of yours, the calculator above works it out from your birth details. The Hindi table of all 12 signs is in the section [शनि की साढ़े साती किस राशि पर है?](#kis-rashi-par).",
+    ],
+  },
+  {
     id: "start-end-tithi",
-    h2: "Sade Sati Start and End Date — All 12 Rashis",
+    h2: "Sade Sati Chart for All Rashi — Start and End Dates",
     paras: [
       "The table below gives the **start and end date of the current or next Sade Sati for every Moon sign**, computed with Swiss Ephemeris, Lahiri ayanamsa, IST — the same engine the calculator uses. Start means the day Saturn **first enters** the 12th sign from your Moon; end means the day it **finally leaves** the 2nd sign. Where Saturn's retrograde takes it back for a few months, both dates are shown — the first entry and the final exit.",
       "Two signs need a note. **Meen**: Sade Sati began on 29 Apr 2022; Saturn briefly slipped back into Makar and entered Kumbh for good on 17 Jan 2023; it ends on **17 Apr 2030**. **Kumbh**: began on 24 Jan 2020; Saturn first leaves Meen on 3 Jun 2027, comes back on 20 Oct 2027, and leaves for good on **23 Feb 2028**. Your own phase changes and days remaining come from the calculator above, and each sign links to its full page.",
+    ],
+  },
+  {
+    id: 'kab-khatam-hogi',
+    h2: 'शनि की साढ़े साती कब खत्म होगी? — अपनी राशि की अंतिम तारीख',
+    paras: [
+      'जिन तीन राशियों पर अभी साढ़ेसाती चल रही है, उनकी अंतिम तारीखें Swiss Ephemeris (लाहिड़ी अयनांश, IST) से ये हैं: **कुंभ — 23 फ़रवरी 2028**, **मीन — 17 अप्रैल 2030**, और **मेष — 31 मई 2032**। कुंभ और मीन में शनि की वक्री चाल के कारण एक "पहला निकास" भी आता है (कुंभ 3 जून 2027, मीन 8 अगस्त 2029), पर साढ़ेसाती पूरी तरह तभी खत्म मानी जाती है जब शनि अंतिम रूप से चंद्र राशि से दूसरे भाव को छोड़ते हैं।',
+      'आपकी अपनी सटीक तारीख और बचे हुए दिन ऊपर वाला कैलकुलेटर देता है — वह राशि-स्तर का अंदाज़ा नहीं, आपके जन्म के चंद्रमा से गिनकर देता है। एक ईमानदार बात: **खत्म होने की तारीख पर दबाव अचानक नहीं हटता** — ज़्यादातर लोग आखिरी छह महीनों में धीरे-धीरे राहत महसूस करते हैं, जिसके संकेत [साढ़ेसाती उतरने के लक्षण](#utarne-ke-lakshan) वाले सेक्शन में हैं। बाकी राशियों की तारीखें निकालने का तरीका [साढ़ेसाती की शुरुआत और अंत तिथि](/blog/sade-sati-start-end-date-hindi) में है।',
     ],
   },
   {
@@ -385,6 +427,15 @@ const PILLAR: PillarSection[] = [
     ],
   },
   {
+    id: "mesh-upay",
+    h2: "Shani Ki Sade Sati Ke Upay — Mesh Rashi Ke Liye",
+    paras: [
+      "Mesh par Sade Sati ka **pehla charan (aaroh)** chal raha hai — Shani Mesh se 12th bhaav, yaani **kharch, neend aur videsh** ke bhaav mein. Isliye Mesh ke upay ka zor kharch par lagaam, achhi neend aur mann ki shaanti par hona chahiye. Mesh ke swami **Mangal** hain aur parampara mein Mangal aur Shani dono Hanuman ji ke aage vinamra maane gaye hain — isliye Mesh ke liye Hanuman upasana ek saath dono grahon ko saadhti hai.",
+      "Teen upay, paanch hisson mein. **Pehla — Kya:** Hanuman Chalisa ka ek paath (8–10 minute). **Kab:** Mangalvar aur Shanivar subah. **Kharch:** muft. **Kitne din:** 11 hafte. **Aapke liye kyun:** yeh aapki rashi ke swami Mangal aur gochar ke Shani, dono ko ek upay mein saadhta hai. **Doosra — Kya:** har mahine aay ka ek chhota tay hissa alag rakhna. **Kab:** tankhwah ya aay wale din. **Kharch:** jitna sambhav ho. **Kitne din:** poori Sade Sati. **Aapke liye kyun:** 12th bhaav vyay ka hai — is charan ka sabse vyavharik upay bachat hai. **Teesra — Kya:** peepal ke neeche sarson tel ka ek diya. **Kab:** Shanivar, suryast ke baad. **Kharch:** ₹10–20. **Kitne din:** 11 Shanivar. **Aapke liye kyun:** yeh Shanivar ka paramparik Shani-upay hai aur sabke liye surakshit hai.",
+      "Neelam Mesh ke liye pehla upay nahi hai — pehle [Neelam suit karega ya nahi](/calculators/free-should-i-wear-neelam) jaanchiye. 2027 mein Shani Mesh mein neech honge; uski taiyari [मेष में शनि नीच 2027](/blog/mesh-mein-shani-neech-2027) mein, aur poora vivaran [मेष राशि साढ़ेसाती](/blog/mesh-rashi-sade-sati-hindi) mein hai.",
+    ],
+  },
+  {
     id: 'meen-rashi',
     h2: 'शनि की साढ़े साती — मीन राशि पर',
     paras: [
@@ -403,12 +454,28 @@ const PILLAR: PillarSection[] = [
     ],
   },
   {
+    id: "phases-english",
+    h2: "Sade Sati Phases — Which Phase of Sade Sati Is Worse?",
+    paras: [
+      "**Sade Sati has three phases of about 2.5 years each.** The **rising phase** — Saturn in the 12th sign from your Moon — touches expenses, sleep and distance from home. The **peak phase** — Saturn on your Moon sign itself — touches the mind, health and relationships. The **setting phase** — Saturn in the 2nd sign — touches money, family and speech. The order never changes and no phase is ever skipped.",
+      "Which is worse? The peak phase is the most **intense**, because Saturn sits directly on the Moon, the karaka of the mind. But which phase is hardest **for you** depends on Saturn's own strength in your birth chart and the dasha running alongside it — a strong Saturn carries people through even the peak phase steadily, while someone already stretched for money often finds the rising or setting phase heavier. Check Saturn's strength with the [Graha Bal Calculator](/calculators/free-graha-bal-calculator); the detailed Hindi comparison is in [साढ़ेसाती के तीन चरण](/blog/sade-sati-phases-which-is-worst-hindi).",
+    ],
+  },
+  {
     id: 'kitne-charan',
     h2: 'शनि की साढ़े साती के कितने चरण होते हैं?',
     paras: [
       '**तीन चरण, हर एक लगभग ढाई साल का, कुल साढ़े सात साल** — और यही "साढ़े साती" नाम का पूरा अर्थ है। संख्या तीन इसलिए है क्योंकि शनि आपकी चंद्र राशि से **बारहवें, पहले और दूसरे** — कुल तीन राशियों से गुजरते हैं, और शनि को एक राशि पार करने में लगभग ढाई वर्ष लगते हैं।',
       'क्रम हमेशा यही रहता है: **आरोह** (बारहवाँ भाव, चढ़ाई), फिर **मध्य** (चंद्र राशि, शिखर), फिर **अवरोह** (दूसरा भाव, उतार)। न क्रम बदलता है, न कोई चरण छूटता है। ढाई साल की अवधि भी लगभग स्थिर है, हालाँकि शनि की वक्री चाल के कारण कुछ महीनों का आगे-पीछे होता रहता है — इसीलिए ऊपर वाला कैलकुलेटर सटीक तिथियाँ देता है, गोल-मोल अंदाजा नहीं।',
       'एक और तथ्य जो कम लोग जानते हैं: **साढ़ेसाती जीवन में एक बार नहीं आती।** शनि पूरा राशिचक्र लगभग तीस वर्ष में पूरा करते हैं, इसलिए औसत आयु में **दो से तीन साढ़ेसाती चक्र** आते हैं — आमतौर पर बचपन, मध्य आयु और वृद्धावस्था में। ऊपर का कैलकुलेटर आपके जीवन के **सारे चक्र** दिखाता है, बीते हुए भी और आने वाले भी। तिथियाँ खुद कैसे निकालें, यह [साढ़ेसाती की शुरुआत और अंत तिथि](/blog/sade-sati-start-end-date-hindi) में है।',
+    ],
+  },
+  {
+    id: "how-many-times",
+    h2: "How Many Times Does Sade Sati Come in Life?",
+    paras: [
+      "**Usually two or three times.** Saturn takes about 29.5 years to go round the zodiac, so it returns to the 12th sign from your Moon roughly once every 30 years. Someone who lives into their late seventies typically meets three Sade Satis; a fourth happens only with a very long life, or when the first cycle began right around birth.",
+      "Tradition reads the cycles differently by age. The **first**, usually in childhood or youth, is felt more through parents, studies and the home; the **second**, in middle age, through career, money and responsibility — the one most people remember; the **third**, in later life, mostly through health. Treat this as a classical rule of thumb, not a fixed fate. The calculator above lists **every Sade Sati of your life — past, current and future** — with exact dates, so you can see which one you are in.",
     ],
   },
   {
@@ -538,6 +605,10 @@ const FAQS = [
   { q: 'Sade Sati mein kya karna chahiye?', a: '(1) Daily Hanuman Chalisa path. (2) Shani mantra "Om Sham Shanaicharaya Namah" 108 times. (3) Shanivar ko kaale til, sarson tel, loha, kaala vastra daan. (4) Vriddhon aur mazdooron ki seva — Shani unhi ke karak hain. (5) Discipline aur imaandari; shortcuts se bachein. Sabse prabhavi upay: kisi ke saath kiya gaya anyaay sudhar dena.' },
   { q: 'शनि को तुरंत खुश करने के क्या उपाय हैं?', a: 'Sawal mein hi ek galatfehmi hai: Shani "turant" khush nahi hote, aur yahi unka swabhav hai. Ve dhairya aur samay ke graha hain. Jo sabse jaldi asar dikhate hain woh teen hain — Hanuman Chalisa, kisi bhookhe mazdoor ya vriddh ko bhojan, aur Shanivar ko kaale til-sarson tel-loha ka daan. Par sabse tez asar kisi ke saath kiye gaye anyaay ko sudharne ka hota hai.' },
   { q: 'क्या हर राशि के लिए उपाय अलग होते हैं?', a: 'Mool upay sabhi rashiyon ke liye ek hi rehte hain. Rashi ke anusaar jo badalta hai woh upay nahi, balki zor kahan dena hai yeh hai. Kumbh: dhan aur vaani par. Meen: mann aur swasthya par, saath mein Somvar vrat. Mesh: kharch-niyantran aur ekant-sadhana par. Jin saat rashiyon par kuch nahi chal raha unhe koi Shani-upay karne ki zaroorat hi nahi.' },
+  { q: 'Shani ki Sade Sati mein kya hota hai?', a: 'Shani dheere-dheere zindagi ke teen hisson ki pareeksha lete hain — pehle charan mein kharch aur neend (12th bhaav), doosre mein mann aur sehat (Chandra Rashi), teesre mein paisa aur parivar (2nd bhaav). Mehnat ka phal der se aata hai, inkaar nahi hota. Kitna bhaari lagega yeh kundali mein Shani ke bal aur chal rahi dasha par nirbhar hai.' },
+  { q: 'Shani Sade Sati ka current status kya hai?', a: 'Jab tak Shani Meen mein hain (3 June 2027 tak pehli baar), Sade Sati sirf Kumbh (antim charan), Meen (shikhar charan) aur Mesh (pratham charan) par hai. Simha aur Dhanu par Dhaiya hai. 3 June 2027 ko Vrishabh ki Sade Sati shuru hogi, par pakka badlav 23 February 2028 ko hoga kyunki Shani beech mein vakri hokar Meen mein lautenge.' },
+  { q: 'How many times does Sade Sati come in life?', a: 'Usually two or three times. Saturn completes the zodiac in about 29.5 years, so Sade Sati returns roughly every 30 years. By tradition the first cycle is felt through parents and studies, the second through career and money, and the third mostly through health. The calculator above lists all your past, current and future cycles with exact dates.' },
+  { q: 'Mesh rashi ke liye Sade Sati ke upay kya hain?', a: 'Mesh par pehla charan chal raha hai (Shani 12th bhaav mein — kharch aur neend). Teen surakshit upay: Mangalvar aur Shanivar ko Hanuman Chalisa (11 hafte, muft), har mahine aay ka chhota hissa bachana (poori Sade Sati), aur Shanivar shaam peepal ke neeche sarson tel ka diya (11 Shanivar). Neelam bina suitability check ke na pehnein.' },
   { q: 'Sade Sati kab aati hai jeevan mein?', a: 'Har 30 saal mein ek baar, kyunki Saturn 30 saal mein poora rashichakra complete karta hai. Average life mein 2-3 Sade Sati cycles hote hain — aam taur par bachpan, madhya aayu aur vriddhavastha mein. Upar wala calculator aapke jeevan ke saare cycles dikhata hai, beete hue bhi aur aane wale bhi.' },
   { q: 'Kya Sade Sati Calculator bilkul free hai?', a: 'Haan. 100% free. Current status (Yes/No), active phase (Rising/Peak/Setting), exact start-end dates, days remaining, past + future cycles, aur 3 Parashar remedies (Mantra, Ratna, Daan) — sab free. Na signup, na card.' },
   { q: 'Sade Sati result kitne accurate hain?', a: 'Trikaal Vaani VM par dedicated /sade-sati endpoint hai jo Swiss Ephemeris (NASA-grade) se Saturn ki exact transit position calculate karta hai with Lahiri Ayanamsha — 99.9% astronomical accuracy. Yeh live compute hota hai, isliye Shani ki rashi badalne par bhi result apne aap sahi rehta hai.' },
@@ -960,7 +1031,7 @@ export default function FreeSadeSatiCalculatorPage() {
             </ol>
           </nav>
 
-          {/* ── v2.0: PILLAR CONTENT — 24 keyword-driven H2 sections ── */}
+          {/* ── v2.3: PILLAR CONTENT — 30 keyword-driven H2 sections ── */}
           <section className="mt-12">
             {PILLAR.map((s, si) => (
               <div key={s.id} id={s.id} className="scroll-mt-24 mb-10">
@@ -1033,7 +1104,7 @@ export default function FreeSadeSatiCalculatorPage() {
 
           {/* COMPARISON TABLE */}
           <section className="mt-4">
-            <h2 className="text-2xl font-serif font-bold mb-4" style={{ color: GOLD }}>Trikaal Vaani vs AstroSage vs AstroTalk Sade Sati Calculator</h2>
+            <h2 className="text-2xl font-serif font-bold mb-4" style={{ color: GOLD }}>Trikaal Vaani Sade Sati Calculator — Doosre Tools Se Kya Alag Hai</h2>
             <p className="text-slate-300 leading-relaxed mb-4">
               Sabse bada farak yeh hai ki zyadatar tools sirf <strong style={{ color: GOLD }}>&ldquo;haan ya na&rdquo;</strong> batate hain. Woh kaafi nahi hai — kyunki aapka faisla is baat par nirbhar karta hai ki <strong style={{ color: GOLD }}>kaun sa charan chal raha hai aur kitne din bache hain</strong>. Teen saal bache hain ya teen mahine, dono ka matlab bilkul alag hai.
             </p>
