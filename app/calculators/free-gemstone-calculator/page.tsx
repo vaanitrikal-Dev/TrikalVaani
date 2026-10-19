@@ -2,7 +2,12 @@
 
 // ============================================================
 // File: app/calculators/free-gemstone-calculator/page.tsx
-// Version: v2.2 (03 Oct 2026) — previous header: v2.1 — 📖 GRANTH SE dabba + LAGNA-SWAMI KA SUJHAV PARASHAR SE (BPHS Ch.34) — 21 Sep 2026
+// Version: v2.3 (19 Oct 2026) — Radar weekly report 17 Oct 2026 PUSH: all 6 calc-gemstone keywords are
+//   'tool' SERPs with no Trikaal page in them. +2 EN H2 (calculator by date of birth / lucky stone;
+//   which gemstone suits me), 2 H2 renamed so the Hindi keywords sit on the sections that already
+//   answer them (रत्न कैलकुलेटर → 'kundali-ke-hisaab-se'; मेरा भाग्य रत्न → 'punya-ratna'), +2 FAQ,
+//   comparison H2 no longer names competitors (ruling 18 Oct 2026). Form/API/result untouched.
+// (previous) Version: v2.2 (03 Oct 2026) — previous header: v2.1 — 📖 GRANTH SE dabba + LAGNA-SWAMI KA SUJHAV PARASHAR SE (BPHS Ch.34) — 21 Sep 2026
 //   v2.2 (2026-10-03) — +3 H2 from DataForSEO volumes (Trikaal Keywords sheet 2-3 Oct 2026):
 //   pukhraj/panna/gomed/neelam/moonga benefits 0.9-2.4K each (hub summary linking each
 //   should-i-wear page — no duplication), रत्न किस उंगली 0.9-1K, रत्न price 1K x3 (factors only,
@@ -376,6 +381,22 @@ const PILLAR: PillarSection[] = [
     ],
   },
   {
+    id: 'calculator-by-dob',
+    h2: 'Gemstone Calculator by Date of Birth — Your Lucky Stone, Calculated',
+    paras: [
+      'A real **gemstone calculator by date of birth** needs three things, not one: the **date, exact time and place of birth**. From these it builds your Lagna (ascendant) with Swiss Ephemeris and Lahiri ayanamsa, finds the Lagna lord, and gives that planet\'s stone as your **life stone** — with its metal, finger, day and mantra. It also shows the stone of your running Mahadasha, because what changes over the years is the dasha, not your age.',
+      'Why a date alone is not enough: the Lagna changes roughly every two hours, so a "lucky stone by date of birth" without the time can point to the wrong planet entirely. If you genuinely do not know your time, use the Moon-sign table further down as a fallback — it is an estimate, not a calculation. And whichever stone comes out, it is a candidate until the [Gemstone Suitability Calculator](/calculators/free-gemstone-suitability-calculator) confirms it is safe for your chart.',
+    ],
+  },
+  {
+    id: 'which-gemstone-suits-me',
+    h2: 'Which Gemstone Suits Me? — Free Astrology Check in Two Steps',
+    paras: [
+      '**Step one — find the candidate.** Run the calculator above: it gives the stone of your Lagna lord (your life stone) and of your current Mahadasha lord. **Step two — check it is safe.** A stone strengthens its planet, so it suits you only if that planet is a functional benefic for your Lagna, reasonably strong in Shadbala, not ruling a dusthana (6th, 8th or 12th) and not combust. The [suitability check](/calculators/free-gemstone-suitability-calculator) scores every stone 0–100 on exactly these points.',
+      'Two shortcuts to avoid: choosing by Sun sign or birth month (that is the Western birthstone system, explained below), and choosing by what is "generally lucky". Per BPHS Chapter 34 the same planet can be a yogakaraka for one Lagna and a malefic for another — Saturn, for example, is a yogakaraka for Taurus Lagna and a malefic for Aries Lagna — so the same stone can help one person and harm the next. The fuller walk-through is in [Which Gemstone Should I Wear?](/blog/which-gemstone-should-i-wear).',
+    ],
+  },
+  {
     id: 'upratna',
     h2: '84 उपरत्न कौन से हैं?',
     paras: [
@@ -404,7 +425,7 @@ const PILLAR: PillarSection[] = [
   },
   {
     id: 'kundali-ke-hisaab-se',
-    h2: 'कुंडली के हिसाब से कौन सा रत्न पहनें?',
+    h2: 'रत्न कैलकुलेटर — कुंडली के हिसाब से कौन सा रत्न पहनें?',
     paras: [
       'शास्त्रीय परंपरा में **तीन रत्न** बताए जाते हैं, और तीनों अलग काम के लिए हैं। **जीवन रत्न** — लग्न स्वामी का, जो आत्म-बल, स्वास्थ्य और समग्र जीवन को सहारा देता है; यही सबसे मुख्य है। **भाग्य रत्न** — नवम भाव के स्वामी का, क्योंकि नवम भाव भाग्य और पुण्य का स्थान है। **कार्य रत्न** — दशम भाव के स्वामी का, करियर और कर्म के लिए।',
       'पर यहीं वह बात है जो अधिकांश दुकानें नहीं बतातीं: **तीनों एक साथ पहनना अक्सर गलत होता है।** अगर तीनों में से कोई एक ग्रह आपकी कुंडली में फंक्शनल मैलेफिक है, तो उसका रत्न पहनना उस ग्रह को बल देकर नुकसान बढ़ा सकता है। रत्न ग्रह को *मजबूत* करता है — और कमजोर मैलेफिक को मजबूत करना कमजोर छोड़ देने से बुरा है।',
@@ -449,7 +470,7 @@ const PILLAR: PillarSection[] = [
   },
   {
     id: 'punya-ratna',
-    h2: 'पुण्य रत्न क्या होता है?',
+    h2: 'पुण्य रत्न और भाग्य रत्न — मेरा भाग्य रत्न कौन सा है?',
     paras: [
       '**पुण्य रत्न वह रत्न है जो नवम भाव के स्वामी ग्रह का होता है।** नाम की वजह सीधी है — नवम भाव को शास्त्र में **भाग्य स्थान, धर्म स्थान और पुण्य स्थान** कहा जाता है, इसलिए उसके स्वामी के रत्न को कुछ परंपराओं में पुण्य रत्न या भाग्य रत्न कहा जाता है।',
       'यहाँ पारिभाषिक ईमानदारी जरूरी है: **यह नाम हर परंपरा में एक जैसा नहीं है।** कुछ जगह "भाग्य रत्न" कहते हैं, कुछ जगह "पुण्य रत्न", और कुछ जगह यह शब्द किसी और अर्थ में इस्तेमाल होता है। जो सर्वमान्य है वह **तीन रत्नों की व्यवस्था** है — जीवन रत्न (लग्न स्वामी), भाग्य/पुण्य रत्न (नवम स्वामी), और कार्य रत्न (दशम स्वामी) — नाम भले बदल जाएँ, ढाँचा यही रहता है।',
@@ -508,6 +529,8 @@ const FAQS = [
   { q: 'Gemstone kaise pehnein — metal, ungli, din?', a: 'Har ratna ka apna metal (jaise Pukhraj-sona), ungli (Pukhraj-tarjani/index), aur din (Pukhraj-guruvar) hota hai. Shukla paksha mein, us graha ke din, subah snan ke baad, ratna ko kachche doodh/Gangajal se shuddh karke, mantra jaap ke saath dharan karte hain. Calculator aapko aapke ratna ke ye details deta hai.' },
   { q: 'Kitne carat / ratti ka ratna pehnein?', a: 'Aam taur par body-weight aur ratna ke hisaab se ~1 ratti per 10-12 kg (matbhed hai) sujhaya jaata hai, par sahi weight individual chart par nirbhar karta hai. Upratna ka weight aam taur par mukhya ratna se do se teen guna lagta hai kyunki woh halka hota hai. Original, certified (lab-tested), bina daag wala stone hi lein, aur weight expert se confirm karein.' },
   { q: 'Is calculator aur "Gemstone Suitability Calculator" mein kya farak hai?', a: 'Yeh calculator aapka mukhya Life Stone (Lagna-swami ka ratna) batata hai — ek quick overview. Suitability Calculator usse aage jaakar har ratna ko 0-100 score deta hai: functional benefic/malefic, Shadbala, dushthana (8th lord), combustion aur risk check karke batata hai ki konsa ratna safe hai ya avoid karein. Ratna pehnne se pehle suitability calculator zaroor use karein.' },
+  { q: 'Can I find my lucky stone by date of birth only?', a: 'Not reliably. The life stone comes from your Lagna lord, and the Lagna changes roughly every two hours — so you need the date, exact time and place of birth. Without the time, the Moon-sign table on this page is a fallback estimate. Either way, confirm the stone with the Gemstone Suitability Calculator before buying it.' },
+  { q: 'Mera bhagya ratna kaun sa hai?', a: 'Bhagya (ya Punya) ratna aapke navam bhaav ke swami graha ka ratna hota hai, kyunki navam bhaav bhagya sthan hai. Ise nikaalne ke liye lagna chahiye, yaani janm samay. Par navam swami agar aapke lagna ke liye functional malefic ho, to uska ratna madad nahi karega — pehle suitability jaanch zaroori hai.' },
   { q: 'Kya ye Gemstone Calculator free hai?', a: 'Haan, 100% free. Aapka Lagna, Lagna swami, Life Stone, current mahadasha ka ratna, metal/ungli/din/mantra aur caution — sab bilkul free. Na signup, na card.' },
   { q: 'Result kitne accurate hain?', a: 'Trikaal Vaani Swiss Ephemeris (NASA-grade) se Lahiri Ayanamsha ke saath aapka lagna aur graha positions exact nikaalta hai — 99.9% astronomical accuracy. Yeh page Lagna-swami aadharit overview deta hai; deep suitability ke liye Gemstone Suitability Calculator use karein. Ek zaroori baat: Lagna janm samay se banta hai, isliye pandrah minute ki galti poora uttar badal sakti hai.' },
 ];
@@ -887,7 +910,7 @@ export default function FreeGemstoneCalculatorPage() {
             </ol>
           </nav>
 
-          {/* ── v2.0: PILLAR CONTENT — 11 keyword-driven H2 sections ── */}
+          {/* ── v2.3: PILLAR CONTENT — 16 keyword-driven H2 sections ── */}
           <section className="mt-12">
             {PILLAR.map((s, si) => (
               <div key={s.id} id={s.id} className="scroll-mt-24 mb-10">
@@ -999,7 +1022,7 @@ export default function FreeGemstoneCalculatorPage() {
               <Link href="/blog/gemstone-faq-vedic-astrology-hindi" className="underline underline-offset-2 font-semibold" style={{ color: GOLD }}>रत्न FAQ</Link>.
             </p>
 
-            <h2 className="text-2xl font-serif font-bold mb-4 mt-8" style={{ color: GOLD }}>Trikaal Vaani vs AstroSage vs AstroTalk</h2>
+            <h2 className="text-2xl font-serif font-bold mb-4 mt-8" style={{ color: GOLD }}>Trikaal Vaani Gemstone Calculator — Doosre Tools Se Kya Alag Hai</h2>
             <p className="text-slate-300 leading-relaxed mb-4">
               Ratna ekmatra aisa upay hai jo <strong style={{ color: GOLD }}>sakriya roop se nuksan kar sakta hai</strong> — mantra ya daan galat ho to bas bekaar jaata hai, par galat ratna graha ko balshali karke sthiti bigaad sakta hai. Isliye sabse bada farak yeh hai ki calculator <strong style={{ color: GOLD }}>&ldquo;kaun sa ratna&rdquo;</strong> ke saath <strong style={{ color: GOLD }}>&ldquo;kya yeh safe hai&rdquo;</strong> bhi batata hai ya nahi.
             </p>

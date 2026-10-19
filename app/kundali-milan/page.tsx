@@ -1,4 +1,10 @@
-// TRIKAL VAANI | app/kundali-milan/page.tsx | v2.1 (1 Oct 2026)
+// TRIKAL VAANI | app/kundali-milan/page.tsx | v2.2 (19 Oct 2026)
+// v2.2 (19 Oct 2026): Radar weekly report 17 Oct — PUSH (16 empty SERPs) + Content Edit Brief
+//   (page at rank 9). +6 KM_SECTIONS H2: DOB/naam se milan in Hindi (seen 23+22+16+13),
+//   Is 27/36 good (20), वर-कन्या गुण मिलान / 36 gun milan calculator free (10x3 + PUSH),
+//   best rashi jodi / zodiac compatibility (PUSH + 11), राम-सीता के गुण (9), कुंडली मिलान ऐप (13).
+//   +2 FAQ in FAQ_SCHEMA. Bhakoot rule stated exactly as the existing 'ashtakoot-aath-koot'
+//   section states it (6-8, 9-5, 2-12 = 0). Form, pricing, tier cards, schemas' structure untouched.
 // v2.1 (Rohiit, 1 Oct 2026): EK HI PAID TIER — ₹51 / $5, couple + parent dono.
 //   Free / ₹51 / ₹101 / ₹151 ki jagah Free + ₹51. Report ab GRANTH se (AI band):
 //   aathon koot ke Sanskrit shlok (Muhurta Chintamani, Vivah Prakaran) + Hindi
@@ -116,6 +122,22 @@ const FAQ_SCHEMA = {
       acceptedAnswer: {
         '@type': 'Answer',
         text: 'A Guna score of 18 or above out of 36 is traditionally considered acceptable for marriage. Scores of 24-36 indicate excellent compatibility. Below 18 suggests significant differences but does not necessarily mean the marriage will fail - many couples with low scores have successful marriages with proper remedies.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'Is 27 out of 36 guna match good?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Yes, 27 out of 36 is a good match on the traditional scale (25-32 is very good). But check where the points came from: Nadi carries 8 and Bhakoot 7. A 27 with Nadi and Bhakoot both clear is strong; a 27 with Nadi at zero carries the heaviest Ashtakoot dosha unless a classical exception applies. Mangal Dosh is not part of the 36 Guna and must be checked separately.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'Which is the best rashi jodi for marriage?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'In Ashtakoot the rashi pairing is judged by Bhakoot: pairs at 1-1, 7-7, 3-11 and 4-10 get the full 7 points, while 6-8, 9-5 and 2-12 get zero. Friendly rashi lords add Graha Maitri points. Element-based "best match" lists are not the Ashtakoot rule. The final answer comes from the nakshatra-based 36 Guna, not the rashi alone.',
       },
     },
     {
@@ -314,6 +336,54 @@ const KM_SECTIONS: KmSection[] = [
       'बहुत से लोग मिलान इसी उम्मीद से करते हैं, इसलिए साफ कर देना ज़रूरी है: **अष्टकूट समय नहीं बताता।** वह सिर्फ यह बताता है कि दो लोगों की अनुकूलता कैसी है। *कब* का जवाब बिल्कुल अलग जगह से आता है — **चल रही महादशा और अंतर्दशा**, सप्तमेश की स्थिति, और गोचर।',
       'परंपरा में विवाह से सबसे ज़्यादा जुड़ी दशाएँ हैं **शुक्र** (विवाह का नैसर्गिक कारक), **सप्तमेश की दशा**, और **गुरु का सप्तम भाव या चंद्र से गोचर**। अपनी चल रही दशा [दशा कैलकुलेटर](/calculators/free-dasha-calculator) से मुफ्त देखी जा सकती है, और शुक्र की अंतर्दशा का विवाह से संबंध [शुक्र अंतर्दशा और विवाह योग](/blog/shukra-antardasha-vivah-yog) में है।',
       'अगर विवाह में देरी हो रही है, तो कारण अक्सर तीन में से एक होता है — और तीनों जाँचे जा सकते हैं: **कमजोर सप्तम भाव** ([सप्तम भाव कमजोर होने के 11 लक्षण](/blog/7th-house-weak-marriage-delay-reasons)), **पितृ दोष** ([पितृ दोष और विवाह में देरी](/blog/pitra-dosh-marriage-delay-hindi)), या **दशा का अनुकूल न होना** ([विवाह में देरी क्यों](/learn/why-is-my-marriage-delayed))। और जब जोड़ी तय हो जाए, तब विवाह की शुभ तिथि के लिए [विवाह मुहूर्त](/vivah-muhurat) अलग औज़ार है।',
+    ],
+  },
+  {
+    id: 'dob-se-milan',
+    h2: 'कुंडली मिलान — नाम और जन्म तिथि से (Date of Birth se Kundli Milan in Hindi)',
+    paras: [
+      'सही कुंडली मिलान के लिए दोनों की **जन्म तिथि, जन्म समय और जन्म स्थान** चाहिए — नाम केवल रिपोर्ट पर दिखाने के लिए लिया जाता है, गिनती के लिए नहीं। जन्म विवरण से दोनों का **चंद्र नक्षत्र और राशि** निकलती है, और उसी से आठों कूट के 36 गुण गिने जाते हैं। इसलिए "नाम और जन्म तिथि से मिलान" का सही अर्थ है: नाम पहचान के लिए, जन्म विवरण गणना के लिए।',
+      'अगर सिर्फ़ जन्म तिथि पता हो और समय नहीं, तो चंद्र राशि आमतौर पर सही निकल आती है पर नक्षत्र गलत हो सकता है — क्योंकि चंद्रमा एक नक्षत्र लगभग सवा दिन में पार करता है। ऐसे में गुणों को अनुमान मानिए। ऊपर का फ़ॉर्म पूरा विवरण लेकर मुफ्त में आठों कूट हिंदी में दिखाता है; अपना नक्षत्र अलग से जानना हो तो [नक्षत्र कैलकुलेटर](/calculators/free-nakshatra-calculator) है।',
+    ],
+  },
+  {
+    id: 'is-27-good',
+    h2: 'Is 27 Out of 36 Guna Match Good?',
+    paras: [
+      '**Yes — 27 out of 36 is a good match by the traditional scale** (18–24 acceptable, 25–32 very good, above 32 excellent). But the total is only half the answer. What matters as much is **where the 27 came from**: Nadi carries 8 points and Bhakoot 7, so a 27 with both Nadi and Bhakoot clear is a genuinely strong match, while a 27 with Nadi at zero carries the heaviest dosha in Ashtakoot despite the healthy total.',
+      'So read the koot-wise table, not just the number: check Nadi and Bhakoot first, then Gana. If Nadi is zero, see whether a classical exception applies — the same nakshatra with different padas, or the same rashi. And remember that Ashtakoot does not check Mangal Dosh at all; that needs both charts separately, which is what the ₹51 report covers. The full breakdown is in [36 Guna Milan Explained](/blog/36-guna-milan-explained).',
+    ],
+  },
+  {
+    id: 'var-kanya-gun-milan',
+    h2: 'वर-कन्या गुण मिलान — 36 गुण मिलान कैलकुलेटर फ्री',
+    paras: [
+      'वर-कन्या गुण मिलान वही **अष्टकूट मिलान** है — वर (लड़का) और कन्या (लड़की) की चंद्र राशि और नक्षत्र से आठ कूट: वर्ण 1, वश्य 2, तारा 3, योनि 4, ग्रह मैत्री 5, गण 6, भकूट 7, नाड़ी 8 — कुल 36 गुण। ऊपर वाला फ़ॉर्म यही **36 गुण मिलान कैलकुलेटर** है: दोनों का जन्म विवरण डालिए, और हर कूट का अंक अलग-अलग मुफ्त में मिल जाता है, न साइनअप, न कार्ड।',
+      'परंपरा में गिनती **कन्या के नक्षत्र से वर के नक्षत्र** की ओर होती है, इसलिए फ़ॉर्म में दोनों के विवरण सही खाने में भरना ज़रूरी है — अदला-बदली से वर्ण और वश्य जैसे दिशा वाले कूट के अंक बदल सकते हैं। सिर्फ़ नाम से गुण मिलान क्यों भरोसेमंद नहीं, यह ऊपर [नाम से कुंडली मिलान](#naam-se-kundali-milan) वाले सेक्शन में है। ₹51 की रिपोर्ट में हर कूट का मुहूर्त चिन्तामणि का श्लोक और परिहार भी आता है।',
+    ],
+  },
+  {
+    id: 'best-rashi-jodi',
+    h2: 'Best Rashi Jodi for Marriage — Zodiac Compatibility Kaise Padhein',
+    paras: [
+      'Ashtakoot mein rashi jodi ka asli paimana **Bhakoot** hai — kanya ki rashi se var ki rashi ki doori. **1-1 (ek hi rashi), 7-7 (aamne-saamne), 3-11 aur 4-10** ki sthiti mein Bhakoot ke poore 7 ank milte hain, jabki **6-8, 9-5 aur 2-12** mein shoonya. Iske saath **Graha Maitri** — dono rashiyon ke swamiyon ki mitrata — 5 ank aur jodti hai. Yaani "best rashi jodi" woh hai jahan Bhakoot saaf ho aur rashi-swami mitra hon.',
+      'Par do saavdhaniyan. Pehli — internet par milne wali "best rashi match" soochiyan aksar tatva (agni-agni, jal-jal) par bani hoti hain, jo Ashtakoot ka niyam nahi hai; ulta, 9-5 wali tatva-jodi mein Bhakoot shoonya hota hai. Doosri — rashi 12 hain aur nakshatra 27, isliye rashi jodi sirf shuruaati sanket hai; asli faisla nakshatra se 36 gun mein hota hai. Har jodi ka vistaar hamare 144 rashi-jodi pages mein hai — kuch udaharan neeche [राशि अनुसार जोड़ी](#rashi-compatibility) section mein.',
+    ],
+  },
+  {
+    id: 'ram-sita-gun',
+    h2: 'राम और सीता की कुंडली में कितने गुण मिले थे?',
+    paras: [
+      'यह सवाल बहुत पूछा जाता है, और अक्सर इसके साथ दावा चलता है कि "राम-सीता के 36 गुण मिले थे, फिर भी वियोग हुआ — इसलिए मिलान व्यर्थ है।" ईमानदार उत्तर: **वाल्मीकि रामायण में राम-सीता के गुण मिलान का कोई उल्लेख नहीं है।** बालकाण्ड में श्रीराम का जन्म **पुनर्वसु नक्षत्र** (अदिति देवता) और **कर्क लग्न** में बताया गया है, पर सीता का जन्म-नक्षत्र ग्रंथ में दर्ज नहीं — इसलिए 36 या कोई भी संख्या बाद की लोक-कथा है, शास्त्र नहीं।',
+      'इस प्रसंग से सीखने लायक बात दूसरी है, और वह इस पेज की बात से मेल खाती है: **गुण मिलान जीवन की गारंटी नहीं है।** वह अनुकूलता का एक माप है; जीवन में दशा, परिस्थिति, और दोनों का आचरण भी उतना ही मायने रखते हैं। इसीलिए हम कहते हैं — गुण कम हों तो घबराइए नहीं, ज़्यादा हों तो लापरवाह मत होइए।',
+    ],
+  },
+  {
+    id: 'kundali-milan-app',
+    h2: 'कुंडली मिलान ऐप चाहिए? — मोबाइल पर, बिना डाउनलोड',
+    paras: [
+      'कुंडली मिलान के लिए अलग ऐप ज़रूरी नहीं है। यह पेज मोबाइल ब्राउज़र में पूरी तरह चलता है — ऊपर फ़ॉर्म भरिए, और आठों कूट का मुफ्त परिणाम उसी स्क्रीन पर आ जाता है। ₹51 की पूरी रिपोर्ट **PDF** में मिलती है, जिसे WhatsApp पर परिवार को भेजा जा सकता है।',
+      'किसी भी ऐप या साइट पर मिलान करें, तीन बातें जाँच लीजिए: वह **जन्म समय और स्थान** माँगता है या नहीं (सिर्फ़ नाम या तारीख़ से मिलान अधूरा है); वह **हर कूट का अलग अंक** दिखाता है या सिर्फ़ कुल; और वह **मांगलिक दोष अलग से** देखता है या नहीं, क्योंकि अष्टकूट उसे नहीं पकड़ता। दोनों का मांगलिक स्टेटस मुफ्त में [मांगलिक दोष कैलकुलेटर](/calculators/free-manglik-dosh-calculator) पर देखा जा सकता है।',
     ],
   },
   {

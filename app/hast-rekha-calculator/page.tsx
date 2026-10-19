@@ -1,7 +1,12 @@
 // ═══════════════════════════════════════════════════════════════
 // app/hast-rekha-calculator/page.tsx
 // AI HAST REKHA CALCULATOR — money page (server component)
-// Version: v3.1 (03 Oct 2026) — +2 English H2 from the Radar weekly report 03 Oct 2026 — content-edit brief / PUSH list.
+// Version: v3.2 (19 Oct 2026) — Radar weekly report 17 Oct 2026 (page at rank 1, PUSH 7 SERPs).
+//   The brief's Hindi/AI/ChatGPT/scanner/male-female keywords already had their own H2 here, so
+//   only three genuine gaps were added: 'Indian palm reading free' (16+12), 'Free palm reading
+//   scanner online — male/female/India' (19+18+15+12) in English, and 'Hath ki rekha online check —
+//   photo/scanner se' (17+12+12) in Hinglish. Meaning-questions still handed off to the blog hub.
+// (previous) Version: v3.1 (03 Oct 2026) — +2 English H2 from the Radar weekly report 03 Oct 2026 — content-edit brief / PUSH list.
 //   "AI palm reading online / scanner free no sign up" and "palm reading for male / female".
 //   Price stated as on page (report ₹51). Form, upload flow, JSON-LD unchanged.
 // (previous header line) Version: v2.0
@@ -790,6 +795,30 @@ const HINDI_SECTIONS: HiSection[] = [
     paras: [
       "Tradition reads the **right hand for men and the left for women** as the main hand. Many palmists today also give weight to the hand you write and work with, because it shows the present while the other shows what you were born with. If you can, upload both — the comparison is the most useful part.",
       "The lines themselves are read the same way for both; what differs is which hand leads. The Hindi detail is in [महिलाओं की हस्तरेखा](#female-palm) and [पुरुषों की हस्तरेखा](#male-palm).",
+    ],
+  },
+  {
+    id: "indian-palm-reading-free",
+    h2: "Indian Palm Reading Free — Samudrik Shastra, Not Western Palmistry",
+    paras: [
+      "**Indian palm reading is Samudrik Shastra** — the classical Indian tradition that reads the hand through six lines and seven mounts, each mount tied to a graha (Guru, Shani, Surya, Budh, Shukra, Mangal, Chandra). That planetary link is what separates it from Western palmistry, which grew from Greek and European sources and does not connect the hand to Jyotish. It is also why an Indian reading can be cross-checked against the birth chart.",
+      "What is free here: every line-by-line and sign-by-sign guide on this page and in the hub below, in Hindi and English, plus the downloadable PDF guide. What costs ₹51 is the personal reading of **your** photo — lines, mounts, eight life scores, remedies and a PDF. The classical basis is set out in the [Samudrika Shastra guide](/blog/hast-rekha-gyan-samudrika-shastra-guide).",
+    ],
+  },
+  {
+    id: "palm-scanner-online-free",
+    h2: "Free Palm Reading Scanner Online — Male, Female and India: What You Actually Get",
+    paras: [
+      "Most \"free palm scanners\" show the same pre-written text to everyone, or exist to serve ads. This page works differently: **there is no app and no sign-up** — you upload one photo in the browser, and the engine reads the actual lines and mounts in it, stating the classical rule behind each finding. The rules are identical for men and women; only the traditionally leading hand differs (right for men, left for women), and uploading both hands gives the most useful comparison.",
+      "Be clear about one limit before you scan anything, anywhere: **no palm scanner can give a date, an age or a diagnosis**, and a tool that claims to is guessing. Timing questions — marriage, job, a difficult phase — belong to the birth chart, which you can check free with the [Kundali Calculator](/calculators/free-janam-kundali-calculator). For how this compares with asking a chatbot, see [ChatGPT से हस्तरेखा](#chatgpt-se-farak).",
+    ],
+  },
+  {
+    id: "hath-ki-rekha-online-check",
+    h2: "Hath Ki Rekha Online Check — Photo Ya Scanner Se Kaise Dekhe",
+    paras: [
+      "Online check ka sabse aasaan tareeka: **apni hatheli ki ek saaf photo** upar upload kijiye — din ki roshni mein, flash band, hatheli khuli, camera seedha upar se, kalai se ungliyon tak poora frame. Koi app download nahi, koi signup nahi, janm samay ki zaroorat nahi. Photo jitni saaf hogi, reading utni behtar — dhundhli photo mein baareek rekhaayein aur nishan chhoot jaate hain.",
+      "Photo se reading mein **chhe mukhya rekhaayein, saat parvat aur unpar bane nishan** padhe jaate hain, aur har baat ke saath likha hota hai ki woh kis rekha ya parvat se nikli. Kaun sa haath dikhayein, yeh [Palm Reading for Male and Female](#male-female-hand) mein hai; aur khud dekhna seekhna ho to [हाथ की रेखा कैसे देखें](#hath-ki-rekha-kaise-dekhe) wala kram follow kijiye.",
     ],
   },
 ];
