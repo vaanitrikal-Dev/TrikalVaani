@@ -2,7 +2,13 @@
 
 // ============================================================
 // File: app/calculators/free-shadi-kab-hogi-calculator/page.tsx
-// Version: v1.1 — 11 Oct 2026 — LOT 3, PLAY STORE APP: "Free mein kya milta hai" section ki
+// Version: v1.2 — 19 Oct 2026 — Radar weekly report 17 Oct 2026 (PUSH 8 SERPs + Content Edit Brief,
+//   page at rank 6): +6 H2 in PILLAR_2 — पुत्र के विवाह में देरी (seen 22, rank 6/13),
+//   कन्या के विवाह में विलंब (9+8), चट मंगनी पट विवाह / टोटके (25+22), रिश्ते आने के उपाय (15),
+//   विवाह के देवता (9), शिवलिंग पर क्या चढ़ाएँ (10). +3 FAQ. Competitor names REMOVED from the
+//   'tulna' H2 and the comparison table (Rohiit ruling 18 Oct 2026 — never name competitors).
+//   Cannibalisation guard and the four non-negotiables respected; engine/YogCalculator untouched.
+// (previous) Version: v1.1 — 11 Oct 2026 — LOT 3, PLAY STORE APP: "Free mein kya milta hai" section ki
 //   line "₹51 (India) / $7 (international)" app mein sirf "₹51 (India)" dikhti hai
 //   (usePlayApp + render-time replace; PILLAR data aur website text BILKUL same).
 //   Gemini: is file mein nahi.
@@ -328,8 +334,8 @@ const PILLAR: PillarSection[] = [
 // ── Sections 27-38 ───────────────────────────────────────────────────────────
 const PILLAR_2: PillarSection[] = [
   {
-    id: 'astrosage-tulna',
-    h2: 'AstroSage shadi kab hogi vs Trikaal Vaani — farak kya hai',
+    id: 'tulna',
+    h2: 'Shadi kab hogi — doosre free tools aur Trikaal Vaani mein farak kya hai',
     paras: [
       'Sabse bada farak **varga** ka hai. Zyadatar free tools sirf rasi chart dekh kar jawab de dete hain. BPHS vivah ka nirnay **Navamsa (D-9)** se karta hai — aur wahi is calculator ke 100 mein se 24 ank uthata hai.',
       'Doosra farak **karak** ka hai. Wo sabke liye Shukra padhte hain; shastra kehta hai purush ke liye Shukra aur stri ke liye Guru. Isiliye yahan gender zaroori hai — aadhi aabadi ke liye galat karak padhna aadha jawab dena hai.',
@@ -388,6 +394,54 @@ const PILLAR_2: PillarSection[] = [
       'परंपरा में विवाह की कामना से सबसे प्रचलित उपाय **सोमवार व्रत** और **शिव-पार्वती की उपासना** हैं। स्त्रियों के लिए मंगला गौरी व्रत और पुरुषों के लिए गुरुवार का नियम भी उसी श्रेणी में आते हैं।',
       'इनका शास्त्रीय स्थान **सहायक** का है, गारंटी का नहीं। और इनका असर उस ग्रह से जुड़ा होता है जो आपकी कुंडली में विवाह सँभालता है — इसीलिए एक ही व्रत सबके लिए एक जैसा फल नहीं देता।',
       'हम यहाँ कोई निश्चित संख्या या शुल्क वाली पूजा नहीं बता रहे, और जान-बूझकर नहीं बता रहे। जो साइट पहले डराए और फिर लाख रुपये की पूजा सुझाए, वह शास्त्र नहीं, पटकथा पढ़ रही है।',
+    ],
+  },
+  {
+    id: 'putra-vivah-deri',
+    h2: 'पुत्र के विवाह में देरी के कारण और उपाय — लड़के की शादी नहीं हो रही तो क्या करें',
+    paras: [
+      'लड़के की कुंडली में विवाह **शुक्र** से पढ़ा जाता है, क्योंकि शास्त्र में शुक्र पत्नी का कारक है। इसलिए देरी के सबसे आम कारण हैं: **शुक्र का कमज़ोर, अस्त या पाप-पीड़ित होना**; **सप्तम भाव या सप्तमेश पर शनि** का प्रभाव; **मंगल दोष**; और **अनुकूल दशा का अभी न आना**। इनमें से कोई भी इनकार नहीं है — यह विलंब है, और विलंब की एक अवधि होती है।',
+      'माता-पिता के लिए व्यावहारिक क्रम: पहले बेटे की कुंडली ऊपर के कैलकुलेटर पर चलाइए (gender में "male" — तभी शुक्र पढ़ा जाएगा) और देखिए रुकावट किस ब्लॉक में है। उपाय उसी ग्रह के हिसाब से: शुक्र कमज़ोर हो तो शुक्रवार को सफ़ेद वस्तुओं (चावल, मिश्री, सफ़ेद वस्त्र) का दान और "ॐ शुं शुक्राय नमः" 108 बार, 11 शुक्रवार। परंपरा में दुर्गा सप्तशती के अर्गला स्तोत्र का श्लोक "पत्नीं मनोरमां देहि मनोवृत्तानुसारिणीम्…" भी विवाह की कामना से पढ़ा जाता है। देरी के कारणों का पूरा विश्लेषण [विवाह में देरी क्यों](/learn/why-is-my-marriage-delayed) में है।',
+    ],
+  },
+  {
+    id: 'kanya-vivah-vilamb',
+    h2: 'कन्या के विवाह में विलंब — शीघ्र विवाह के लिए उपाय',
+    paras: [
+      'लड़की की कुंडली में विवाह **गुरु** से पढ़ा जाता है, क्योंकि शास्त्र में गुरु पति का कारक है — यही वजह है कि यह कैलकुलेटर gender ज़रूरी रखता है। विलंब के आम कारण: **गुरु का कमज़ोर, अस्त या नीच होना**, **सप्तम भाव पर शनि या राहु का दबाव**, **मंगल दोष**, और अनुकूल दशा का आगे होना। पहले कुंडली से कारण पहचानिए, फिर उपाय — उल्टा क्रम पैसा और समय दोनों बर्बाद करता है।',
+      'परंपरा का सबसे प्रामाणिक उपाय **कात्यायनी मंत्र** है, जो भागवत पुराण (10.22.4) में गोपियों के कात्यायनी व्रत से आता है: "कात्यायनि महामाये महायोगिन्यधीश्वरि। नन्दगोपसुतं देवि पतिं मे कुरु ते नमः॥" — प्रतिदिन या हर गुरुवार 108 बार। गुरु को बल देने के लिए गुरुवार को हल्दी या चने की दाल का दान और "ॐ बृं बृहस्पतये नमः" 108 बार, 11 गुरुवार। विवाह की उम्र का अंदाज़ा [किस उम्र में विवाह होगा](/learn/what-age-will-i-get-married) में खुला है।',
+    ],
+  },
+  {
+    id: 'chat-mangni',
+    h2: 'चट मंगनी पट विवाह के उपाय — और शादी के टोटकों की सच्चाई',
+    paras: [
+      '"चट मंगनी पट विवाह" की इच्छा समझ में आती है, पर शास्त्र में इसका अर्थ जादू नहीं है — इसका अर्थ है **अनुकूल दशा की खिड़की को पहचानकर उसी में पूरा प्रयास करना**। जब सप्तमेश, शुक्र (लड़के के लिए) या गुरु (लड़की के लिए) की दशा-अंतर्दशा चल रही हो, तब बात अपने आप तेज़ बढ़ती दिखती है। यही वजह है कि ₹51 वाली रिपोर्ट तारीख़ों वाली खिड़कियाँ देती है।',
+      'टोटकों पर ईमानदार बात: जो **शास्त्रीय** हैं वे चार तरह के हैं — मंत्र, दान, व्रत और सेवा। लोक-परंपरा में गुरुवार को केले के वृक्ष की पूजा (गुरु से जुड़ी), सोमवार को शिवलिंग पर जल, और मंगला गौरी व्रत प्रचलित हैं — ये हानिरहित हैं और श्रद्धा से किए जाएँ तो सहायक हैं। पर जो "टोटका" गोपनीयता, बड़ी रक़म या किसी और को नुकसान पहुँचाने की बात करे, वह उपाय नहीं है — उससे दूर रहिए।',
+    ],
+  },
+  {
+    id: 'rishte-aane',
+    h2: 'रिश्ते आने के उपाय — रिश्ते क्यों नहीं आ रहे?',
+    paras: [
+      'ज्योतिष में रिश्ते न आने के पीछे आमतौर पर दो परतें होती हैं: **सप्तम भाव या कारक ग्रह पर दबाव**, और **एकादश भाव** (लाभ और सामाजिक संपर्क का भाव) का कमज़ोर होना — क्योंकि रिश्ते संपर्कों से ही आते हैं। साथ में अगर अनुकूल दशा अभी आगे है, तो प्रस्ताव कम आते हैं या बात शुरू होकर रुक जाती है। कैलकुलेटर का "क्या रोक रहा है" वाला हिस्सा यही दिखाता है।',
+      'उपाय दोनों तरफ़ से कीजिए। ज्योतिषीय: कारक ग्रह का मंत्र और दान (ऊपर पुत्र/कन्या वाले सेक्शन में), और सोमवार का शिव-पार्वती पूजन। व्यावहारिक, जो उतना ही ज़रूरी है: बायोडाटा अपडेट रखना, परिवार के बड़ों और विश्वसनीय मंचों तक दायरा बढ़ाना, और हर प्रस्ताव पर जल्दी निर्णय लेना। जब रिश्ता सामने आ जाए, तब [कुंडली मिलान](/kundali-milan) से मेल देखिए।',
+    ],
+  },
+  {
+    id: 'vivah-devta',
+    h2: 'विवाह के लिए कौन सा देवता ज़िम्मेदार है?',
+    paras: [
+      'ज्योतिष में विवाह दो ग्रहों से जुड़ा है — **शुक्र** (पत्नी का कारक) और **गुरु** (पति का कारक) — और परंपरा उपासना भी उसी हिसाब से बताती है। गुरु के लिए **भगवान विष्णु और बृहस्पति देव** की उपासना, गुरुवार को; शुक्र के लिए **माता लक्ष्मी** की उपासना, शुक्रवार को।',
+      'साथ ही दांपत्य के आदर्श के रूप में **शिव-पार्वती** की पूजा सबसे व्यापक है — कन्याएँ विशेष रूप से **माँ पार्वती (गौरी)** और **माँ कात्यायनी** की उपासना करती हैं, जिसका आधार भागवत पुराण का कात्यायनी व्रत है। और हर विवाह संस्कार में सबसे पहले **गणेश जी** का पूजन होता है। आपकी कुंडली में कौन सा कारक कमज़ोर है, उसी के अनुसार उपासना चुनना सबसे सार्थक है।',
+    ],
+  },
+  {
+    id: 'shivling-upay',
+    h2: 'शिवलिंग पर क्या चढ़ाने से शादी जल्दी होती है?',
+    paras: [
+      'परंपरा में विवाह की कामना से शिवलिंग पर **जल, कच्चा दूध और बेलपत्र** चढ़ाना सबसे प्रचलित है — सोमवार को, "ॐ नमः शिवाय" के जप के साथ। कई परिवारों में **सोलह सोमवार व्रत** इसी कामना से रखा जाता है, और कन्याएँ शिव के साथ माँ पार्वती का पूजन भी करती हैं, क्योंकि शिव-पार्वती आदर्श दांपत्य के प्रतीक हैं।',
+      'एक ईमानदार बात: यह उपासना **सहायक** है, समय तय करने वाली नहीं। विवाह का समय कुंडली की दशा से खुलता है; पूजा मन को स्थिर रखती है और प्रयास में निरंतरता देती है। इसलिए पहले ऊपर के कैलकुलेटर से अपनी खिड़की देखिए, और पूजा को उसके साथ चलने दीजिए — उसकी जगह नहीं।',
     ],
   },
   {
@@ -473,6 +527,18 @@ const FAQS = [
   {
     q: 'Vivah Yog aur Vivah Muhurat mein kya farak hai?',
     a: 'Vivah Yog aapki kundali ka sawaal hai — sanyog kitna balwan hai aur kab khulega. Vivah Muhurat panchang ka sawaal hai — jo vivah tay ho chuka hai use kis din aur kis ghadi karein. Pehla sirf aapka hai; doosra sabke liye ek jaisa hota hai.',
+  },
+  {
+    q: 'Ladke ki shadi nahi ho rahi, kya karein?',
+    a: 'Ladke ki kundali mein vivah Shukra se padha jaata hai. Pehle calculator par uski kundali chalaiye (gender male) aur dekhiye rukavat kis block mein hai — Shukra kamzor, saptam par Shani, Mangal dosh ya anukool dasha ka aage hona. Shukra kamzor ho to Shukravar ko safed vastuon ka daan aur "ॐ शुं शुक्राय नमः" 108 baar, 11 Shukravar. Yeh vilamb hai, inkaar nahi.',
+  },
+  {
+    q: 'Kanya ke shighra vivah ke liye kaun sa mantra hai?',
+    a: 'Parampara mein sabse pramanik Katyayani mantra hai, jo Bhagavata Purana (10.22.4) mein gopiyon ke Katyayani vrat se aata hai: "कात्यायनि महामाये महायोगिन्यधीश्वरि। नन्दगोपसुतं देवि पतिं मे कुरु ते नमः॥" — roz ya har Guruvar 108 baar. Saath mein Guru ko bal dene ke liye Guruvar ko haldi ya chane ki daal ka daan.',
+  },
+  {
+    q: 'Rishte kyun nahi aa rahe?',
+    a: 'Jyotish mein aam taur par do kaaran hote hain — saptam bhaav ya karak graha par dabav, aur ekadash bhaav (sampark aur laabh) ka kamzor hona; saath mein anukool dasha ka aage hona. Upay dono taraf se kijiye: karak graha ka mantra-daan, aur vyavhaarik roop se biodata update rakhna aur parivar ke badon tak dayra badhana.',
   },
   {
     q: 'Kya ye calculator sach mein free hai?',
@@ -638,7 +704,7 @@ export default function FreeShadiKabHogiCalculatorPage() {
             </ol>
           </nav>
 
-          {/* ── 38 keyword-driven H2 sections ────────────────────────── */}
+          {/* ── 44 keyword-driven H2 sections (v1.2) ─────────────────── */}
           <section className="mt-12">
             {ALL.map((s, si) => (
               <div key={s.id} id={s.id} className="scroll-mt-24 mb-10">
@@ -655,7 +721,7 @@ export default function FreeShadiKabHogiCalculatorPage() {
           {/* ── Comparison ───────────────────────────────────────────── */}
           <section className="mt-4">
             <h2 className="text-2xl font-serif font-bold mb-4" style={{ color: GOLD }}>
-              Trikaal Vaani vs AstroSage vs AstroTalk — Vivah Yog par
+              Trikaal Vaani Vivah Yog Calculator — Doosre Tools Se Kya Alag Hai
             </h2>
             <p className="text-slate-300 leading-relaxed mb-4">
               Sabse bada farak <strong style={{ color: GOLD }}>varga</strong> ka hai. Zyadatar free tools sirf rasi chart
@@ -671,8 +737,7 @@ export default function FreeShadiKabHogiCalculatorPage() {
                   <tr style={{ background: GOLD_RGBA(0.1) }}>
                     <th scope="col" className="p-3 text-left" style={{ color: GOLD }}>Kya</th>
                     <th scope="col" className="p-3 text-left" style={{ color: GOLD }}>Trikaal Vaani</th>
-                    <th scope="col" className="p-3 text-left" style={{ color: GOLD }}>AstroSage</th>
-                    <th scope="col" className="p-3 text-left" style={{ color: GOLD }}>AstroTalk</th>
+                    <th scope="col" className="p-3 text-left" style={{ color: GOLD }}>Zyadatar free tools</th>
                   </tr>
                 </thead>
                 <tbody className="text-slate-300">
@@ -681,7 +746,6 @@ export default function FreeShadiKabHogiCalculatorPage() {
                       <td className="p-3 font-semibold">{c.f}</td>
                       <td className="p-3">{c.tv}</td>
                       <td className="p-3">{c.as}</td>
-                      <td className="p-3">{c.at}</td>
                     </tr>
                   ))}
                 </tbody>

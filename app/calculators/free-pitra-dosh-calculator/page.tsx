@@ -2,7 +2,14 @@
 
 // ============================================================
 // File: app/calculators/free-pitra-dosh-calculator/page.tsx
-// Version: v2.1 (03 Oct 2026) — previous header: v2.0 — Free Pitra Dosh Calculator (Radar E3 content build)
+// Version: v2.2 (19 Oct 2026) — Radar weekly report 17 Oct 2026: PUSH (11 empty SERPs) + FIX
+//   (pitru dosh check online free #11, pitra dosh calculator #12, effects on children #12).
+//   +6 H2: calculator-by-dob (EN), कैलकुलेटर/कैसे पता करें (HI) at the TOP of the pillar,
+//   14 types (EN, same honest no-fixed-list stance as v2.0), in-family, effects on
+//   children, puja cost/place/online/dates (EN). 2 H2 renamed (ids unchanged): kin-karmon-se
+//   (+ क्यों लगता है), permanently-remove (+ fully removed). +3 FAQ. Comparison H2 no longer
+//   names competitors (ruling 18 Oct 2026). Form/API/result rendering/tables unchanged.
+// (previous) Version: v2.1 (03 Oct 2026) — previous header: v2.0 — Free Pitra Dosh Calculator (Radar E3 content build)
 //   v2.1 (2026-10-03) — +2 H2 from DataForSEO volumes (Trikaal Keywords sheet 2-3 Oct 2026):
 //   पितृ दोष कब खत्म होता है 1.3K, pitra dosh ke upay 3.6K (Hinglish). '14 types' skipped:
 //   already answered honestly in 'prakar'.
@@ -292,6 +299,22 @@ type PillarSection = { id: string; h2: string; paras: string[] };
 
 const PILLAR: PillarSection[] = [
   {
+    id: "calculator-by-dob",
+    h2: "Pitra Dosh Calculator by Date of Birth — Free Online Check",
+    paras: [
+      "The calculator above checks Pitra Dosh from your **date, exact time and place of birth** — free, with no signup. It builds your chart with Swiss Ephemeris (Lahiri ayanamsa) and tests the four classical conditions: **Rahu or Ketu with the Sun**, **Saturn with or aspecting the Sun**, **Rahu, Ketu or Saturn in the 9th house**, and **their aspect on the 9th house**. You get a Yes/No verdict, the severity, the reason it formed, likely signs and three free tarpan-based remedies.",
+      "Why the birth time matters so much here: the 9th house — the house of ancestors — comes from the Lagna, and a 15-minute error can rotate every house and flip the answer. Take the time from a hospital record or birth certificate. If the result is \"No\", no Pitra Dosh puja is needed at all — and that alone saves most people the money they were about to spend. Common questions about the result are answered in [Pitra Dosh Myths vs Facts](/blog/pitra-dosh-myths-facts).",
+    ],
+  },
+  {
+    id: 'kaise-pata-karen',
+    h2: 'पितृ दोष कैलकुलेटर — कुंडली से कैसे पता करें कि पितृ दोष लगा है?',
+    paras: [
+      'पक्का पता **कुंडली से** चलता है, लक्षणों से नहीं। कुंडली में चार बातें देखी जाती हैं: **सूर्य के साथ राहु या केतु** (ग्रहण-सम योग), **सूर्य पर शनि** का प्रभाव, **नवम भाव (पितृ स्थान) में राहु, केतु या शनि**, और **नवम भाव पर इनकी दृष्टि**। इनमें से एक भी हो तो पितृ दोष माना जाता है — और कितना भारी है, यह साथ बैठे शुभ ग्रह और चल रही दशा तय करते हैं।',
+      'खुद देखना हो तो पहले [मुफ्त कुंडली](/calculators/free-janam-kundali-calculator) बनाइए और सूर्य व नवम भाव देखिए; पर सबसे तेज़ तरीका ऊपर वाला कैलकुलेटर है, जो यही चारों शर्तें डिग्री और दृष्टि सहित जाँचकर हाँ/ना देता है। सिर्फ़ "बार-बार रुकावट" या "सपने में पूर्वज" देखकर पितृ दोष मान लेना सबसे आम गलती है — ये लक्षण [साढ़ेसाती](/calculators/free-sade-sati-calculator) या कमज़ोर दशा से भी आते हैं। लक्षणों की ईमानदार सूची [पितृ दोष के 10 लक्षण](/blog/signs-of-pitra-dosh-hindi) में है।',
+    ],
+  },
+  {
     id: 'ghatak-pitra-dosh',
     h2: 'घातक पितृ दोष — क्या ऐसा कुछ सचमुच होता है?',
     paras: [
@@ -307,6 +330,14 @@ const PILLAR: PillarSection[] = [
       'यहाँ एक ईमानदार बात पहले: **शास्त्र में पितृ दोष के प्रकारों की कोई निश्चित गिनी-गिनाई सूची नहीं है।** आपको इंटरनेट पर "14 प्रकार", "7 प्रकार", "12 प्रकार" — सब मिलेंगे, और हर सूची अलग होगी, क्योंकि वे किसी एक ग्रंथ से नहीं आतीं। इसलिए हम कोई मनगढ़ंत संख्या नहीं देंगे।',
       'जो सचमुच शास्त्रीय है वह वर्गीकरण के **तीन आधार** हैं। पहला, **कौन सा ग्रह पीड़ा दे रहा है** — राहु, केतु या शनि, और हर एक का असर अलग होता है। दूसरा, **दोष किस भाव में बन रहा है** — नवम भाव का पितृ दोष और पंचम भाव का पितृ दोष एक जैसे बिल्कुल नहीं होते। तीसरा, **कर्मिक कारण** — पितृ ऋण, अधूरा श्राद्ध, या वंश में कोई अकाल मृत्यु; यह [पितृ दोष बनाम पितृ ऋण](/blog/pitra-dosh-vs-pitru-rin-hindi) में अलग से समझाया गया है।',
       'नीचे दी गई दोनों तालिकाएँ यही दो आधार खोलती हैं — ग्रह के अनुसार और भाव के अनुसार। पूरा वर्गीकरण एक साथ पढ़ना हो तो [पितृ दोष के प्रकार](/blog/types-of-pitra-dosh-hindi) देखिए।',
+    ],
+  },
+  {
+    id: "14-types",
+    h2: "14 Types of Pitra Dosh — Is There Really a Fixed List?",
+    paras: [
+      "You will find lists of 14 types, 12 types and 7 types online — and **no two lists match**, because none of them comes from a single classical text. The classical sources do not give a fixed count of Pitra Dosh types, so we will not invent one. Any page that names exactly fourteen and then sells a separate puja for each is doing marketing, not Jyotish.",
+      "What is genuinely classical is **three ways of classifying it**: by the **afflicting planet** (Rahu, Ketu or Saturn — each behaves differently), by the **house** where it forms (a 9th-house Pitra Dosh and a 5th-house one are not alike), and by the **karmic cause** (ancestral debt, rites left incomplete, an untimely death in the line). The Hindi tables above open the first two axes, each row linked to its own guide.",
     ],
   },
   {
@@ -382,12 +413,28 @@ const PILLAR: PillarSection[] = [
     ],
   },
   {
+    id: "in-family",
+    h2: "How to Know If There Is Pitra Dosh in the Family",
+    paras: [
+      "The reliable way is to **check more than one chart**. Pitra Dosh is read in an individual birth chart, but when the same signature — the Sun or the 9th house afflicted by Rahu, Ketu or Saturn — shows up in the charts of a father and his children, or in several siblings, tradition reads it as a family pattern rather than a personal one. Run the calculator above for each family member whose birth details you have.",
+      "Two family histories are also traditionally taken seriously: **an untimely death in the line whose last rites were not completed**, and **shraddha or tarpan that a branch of the family stopped doing**. Neither proves anything on its own, and no astrologer can read your great-grandfather's deeds from your chart — but if the charts show the pattern and the history fits, resuming Amavasya tarpan as a family is the simplest, classical response. The difference between a family debt and a dosha is explained in [Pitra Dosh vs Pitru Rin](/blog/pitra-dosh-vs-pitru-rin-hindi).",
+    ],
+  },
+  {
     id: 'kin-karmon-se',
-    h2: 'पितृ दोष किन कर्मों से लगता है?',
+    h2: 'पितृ दोष क्यों लगता है — किन कर्मों से?',
     paras: [
       'परंपरा में चार कारण बार-बार गिनाए जाते हैं। पहला, **श्राद्ध और तर्पण का छूट जाना** — किसी पीढ़ी में अंतिम संस्कार या वार्षिक श्राद्ध अधूरा रह गया हो। दूसरा, **वंश में अकाल मृत्यु** — जिसका विधिवत संस्कार न हुआ हो। तीसरा, **पूर्वजों द्वारा किया गया अन्याय** जिसका प्रायश्चित नहीं हुआ। चौथा, और सबसे कम बताया जाने वाला, **जीवित माता-पिता का अनादर** — शास्त्र इसे मृत पितरों की उपेक्षा से कम नहीं मानता।',
       'पर यहाँ एक बात साफ कहनी है, क्योंकि इसी जगह सबसे ज्यादा अपराध-बोध बेचा जाता है: **आपको यह जानने की जरूरत नहीं है कि कौन सा कर्म कारण बना।** कोई ज्योतिषी आपकी कुंडली देखकर यह नहीं बता सकता कि आपके परदादा ने क्या किया था — जो ऐसा दावा करे, वह कहानी सुना रहा है। कुंडली पैटर्न बताती है, इतिहास नहीं।',
       'व्यावहारिक रूप से इससे कोई फर्क भी नहीं पड़ता, क्योंकि **उपाय हर कारण के लिए एक ही हैं** — तर्पण, दान, सेवा। कारण जाने बिना भी वे उतने ही काम करते हैं। पितृ ऋण की अवधारणा और वह दोष से कैसे अलग है, यह [पितृ दोष बनाम पितृ ऋण](/blog/pitra-dosh-vs-pitru-rin-hindi) में खोला गया है।',
+    ],
+  },
+  {
+    id: "puja-cost-place",
+    h2: "Pitra Dosh Puja — Cost, Best Place, Benefits, Online and 2026 Dates",
+    paras: [
+      "**Best places, by tradition:** Gaya (Bihar) for pind daan on the Phalgu, Trimbakeshwar near Nashik for Tripindi Shraddha, and Haridwar, Prayagraj, Varanasi and Rameshwaram. **Cost:** home tarpan with water and black sesame costs ₹10–20; pilgrimage pujas vary enormously, and quotes from ten thousand to over a lakh are common — always ask for the full amount in writing before travelling. **Benefit:** the classical aim is completing what was left undone for the ancestors; what people report is a lifting of the repeating, patterned obstacles.",
+      "**At home or online:** the texts value the descendant's own tarpan above a paid ritual, so a home puja done yourself is fully valid — the step-by-step method is in the Hindi section on puja vidhi above. Online sankalp pujas, where a priest performs it in your name, are common in practice; if you choose one, still keep your own Amavasya tarpan going. **Dates:** the 2026 Pitru Paksha is over; the next falls in Bhadrapada–Ashwin 2027, and every Amavasya in between is a traditional day — check the exact date each month on the [Panchang](/panchang). And before any of it, run the calculator: if the answer is \"No\", there is no puja to book.",
     ],
   },
   {
@@ -401,7 +448,7 @@ const PILLAR: PillarSection[] = [
   },
   {
     id: 'permanently-remove',
-    h2: 'How to Remove Pitra Dosh Permanently?',
+    h2: 'How to Remove Pitra Dosh Permanently — Can It Be Fully Removed?',
     paras: [
       'The honest answer has two halves, and most pages only give you the comfortable one. **Mathematically: you cannot.** Your birth chart is fixed. The Sun sat where it sat, Rahu sat where it sat, and no puja, gemstone or donation rewrites that. Anyone promising permanent removal is selling you something that does not exist.',
       '**Practically: the effect can go quiet, and usually does.** Two mechanisms do it. The first is sustained remedial practice — a year of Amavasya tarpan and Pitru Paksha shraddha changes what people actually report, and it costs almost nothing. The second is **Dasha change**: the pressure of Pitra Dosh is felt most sharply while Rahu, Ketu, Saturn or a weak Sun period is running, and it eases noticeably when a benefic period takes over. Check which period you are in with the [free Dasha Calculator](/calculators/free-dasha-calculator).',
@@ -415,6 +462,14 @@ const PILLAR: PillarSection[] = [
       'The effect most consistently reported is **repetition**: the same category of obstacle returning, in a way that starts to feel patterned rather than accidental. A deal collapses at signature stage; then another one does. That repeating quality, more than any single misfortune, is what classical texts associate with an ancestral pattern.',
       'Beyond that, effects cluster in four areas. **Children and lineage** — delay in conception or in marriage, which is why the [5th house placement](/blog/pitra-dosh-in-5th-house) is the most searched of all. **Career and money** — steady effort producing unsteady results, covered honestly in [Pitra Dosh, Career and Money](/blog/pitra-dosh-career-money). **Family harmony** — recurring friction with the paternal side specifically. And **health of the father or father-figure**, since the Sun is the karaka.',
       'The necessary caution, again: **none of these on its own proves Pitra Dosh.** Delay in marriage is far more often [Mangal Dosh](/calculators/free-manglik-dosh-calculator) or simply a Saturn period; career stagnation is very often [Sade Sati](/calculators/free-sade-sati-calculator). Which dosha is actually driving what is exactly what [Mangal vs Kaal Sarp vs Pitra Dosh](/blog/mangal-dosh-vs-kaal-sarp-vs-pitra-dosh) separates. A remedy aimed at the wrong dosha wastes both time and money.',
+    ],
+  },
+  {
+    id: "effects-on-children",
+    h2: "Pitru Dosh Effects on Children — What It Does and Doesn't Mean",
+    paras: [
+      "Tradition links Pitra Dosh to children mainly through the **5th house** — the house of children and past-life karma. When the dosha forms there, or when the 5th lord is also afflicted, the classical concerns are **delay in conception**, and worries around a child's health, studies or direction. That is why the [5th house placement](/blog/pitra-dosh-in-5th-house) is the most searched of all.",
+      "What it does **not** mean: that your children are cursed, or that a child is born \"with\" your dosha as a punishment. Each child has their own chart, judged on its own. The practical response is the same as for any Pitra Dosh — the parent's own Amavasya tarpan and care for living elders — and, where conception is the concern, a doctor first and astrology alongside. The fuller, non-frightening discussion is in [पितृ दोष व संतान](/blog/pitra-dosh-childbirth-hindi).",
     ],
   },
   {
@@ -468,6 +523,9 @@ const FAQS = [
   { q: 'Pitru Paksha mein kya karein?', a: 'Pitru Paksha (15 din, Bhadrapad/Ashwin) mein roz pitru-tarpan, Sarva Pitru Amavasya par shraadh, Brahmin-bhoj, aur gareebon ko anna-vastra daan karein. Yeh poorvajon ki tripti aur Pitra Dosh shanti ka sabse uttam samay hai. Is saal ki exact shraadh tithiyan har saal badalti hain, isliye Panchang par dekh lijiye.' },
   { q: 'Kya Pitra Dosh agli peedhi ko affect karta hai?', a: 'Paramparik manyata hai ki asar santaan-prapti aur vansh-vriddhi par padta hai. Par yeh "shraap" nahi — niyamit tarpan, shraadh aur poorvajon ke prati shraddha se prabhav kaafi shaant ho jaata hai. Aur yeh bhi yaad rakhiye ki vivah ya santaan mein vilamb ke kaaran aksar Pitra Dosh nahi, balki Mangal Dosh ya Shani ki avadhi hote hain.' },
   { q: 'क्या लाल किताब के उपाय आप देते हैं?', a: 'Nahi. Trikaal Vaani Parashar BPHS parampara mein kaam karta hai, Lal Kitab mein nahi — woh ek alag paddhati hai, apne alag niyamon ke saath. Agar aap Lal Kitab maante hain to kisi Lal Kitab ke jaankar se hi paramarsh lijiye; do paddhatiyon ko milaiye mat, kyunki milane par na koi niyam poora laagu hota hai na koi parinaam jaancha ja sakta hai.' },
+  { q: 'How can I check Pitra Dosh by date of birth?', a: 'Enter your date, exact time and place of birth in the free calculator above. It checks the four classical conditions — Rahu/Ketu with the Sun, Saturn on the Sun, Rahu/Ketu/Saturn in the 9th house, and their aspect on the 9th — and gives a Yes/No verdict with severity. The birth time must be accurate, because the 9th house depends on it.' },
+  { q: 'Are there really 14 types of Pitra Dosh?', a: 'No fixed list exists in the classical texts — online lists of 14, 12 or 7 types all differ. What is classical is three ways of classifying it: by the afflicting planet, by the house where it forms, and by the karmic cause.' },
+  { q: 'Does Pitru Dosh affect children?', a: 'Tradition links it to children mainly through the 5th house — delay in conception or worries about a child. It does not mean children are cursed; each child has their own chart. The response is the parent\'s own tarpan and care for elders, with medical advice first where conception is the concern.' },
   { q: 'Kya ye Pitra Dosh Calculator free hai?', a: 'Haan, 100% free. Yes/No verdict, severity, dosh ki vajah, sambhavit lakshan, 3 Pitru-Tarpan remedies, aur baaki doshas ka quick check — sab bilkul free. Na signup, na card.' },
   { q: 'Result kitne accurate hain?', a: 'Trikaal Vaani Swiss Ephemeris (NASA-grade) se kundali banakar Surya aur navam bhaav par Rahu/Ketu/Shani ke prabhav ko classical niyam se check karta hai with Lahiri Ayanamsha — 99.9% astronomical accuracy. Ek zaroori baat: navam bhaav janma samay se banta hai, isliye pandrah minute ki galti poora uttar palat sakti hai. Janma samay aspatal ke record se lijiye.' },
 ];
@@ -836,7 +894,7 @@ export default function FreePitraDoshCalculatorPage() {
             </ol>
           </nav>
 
-          {/* ── v2.0: PILLAR CONTENT — 16 keyword-driven H2 sections ── */}
+          {/* ── v2.2: PILLAR CONTENT — 24 keyword-driven H2 sections ── */}
           <section className="mt-12">
             {PILLAR.map((s, si) => (
               <div key={s.id} id={s.id} className="scroll-mt-24 mb-10">
@@ -911,7 +969,7 @@ export default function FreePitraDoshCalculatorPage() {
 
           {/* COMPARISON TABLE */}
           <section className="mt-4">
-            <h2 className="text-2xl font-serif font-bold mb-4" style={{ color: GOLD }}>Trikaal Vaani vs AstroSage vs AstroTalk</h2>
+            <h2 className="text-2xl font-serif font-bold mb-4" style={{ color: GOLD }}>Trikaal Vaani Pitra Dosh Calculator — Doosre Tools Se Kya Alag Hai</h2>
             <p className="text-slate-300 leading-relaxed mb-4">
               Sabse bada farak detection ka hai. Zyadatar free tools sirf <strong style={{ color: GOLD }}>Surya par Rahu ki yuti</strong> dekh kar faisla kar dete hain, jo aadha niyam hai — navam bhaav ki drishti chhoot jaati hai aur dosh detect hi nahi hota. Trikaal Vaani <strong style={{ color: GOLD }}>Surya aur navam bhaav dono</strong> par Rahu, Ketu aur Shani ka prabhav jaanchta hai, sthiti aur drishti dono se.
             </p>

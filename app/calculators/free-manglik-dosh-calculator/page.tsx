@@ -2,7 +2,11 @@
 
 // ============================================================
 // File: app/calculators/free-manglik-dosh-calculator/page.tsx
-// Version: 2.3 (3 Oct 2026 — +10 keyword H2s from Trikaal Keywords 2-3 Oct 2026: mangal dosha calculator, manglik kya hota hai, check by DOB, remedies) — 📖 GRANTH SE: BPHS 80.48-49 (21 Sep 2026)
+// Version: 2.4 (19 Oct 2026 — Radar 17 Oct PUSH: +2 H2 'Kya Main Manglik Hoon' + 'मांगलिक कैलकुलेटर', +2 FAQ, competitor-name H2 removed)
+//   Finding: the other PUSH keywords (How is manglik dosh calculated, कैसे पता करें, check online)
+//   already had their own H2 here — the page ranks avg pos ~6 in GSC, so the gap on head
+//   calculator terms is domain authority, not missing content. Only genuinely missing H2s added.
+// (previous) Version: 2.3 (3 Oct 2026 — +10 keyword H2s from Trikaal Keywords 2-3 Oct 2026: mangal dosha calculator, manglik kya hota hai, check by DOB, remedies) — 📖 GRANTH SE: BPHS 80.48-49 (21 Sep 2026)
 // PICHHLA: v2.0 — Free Manglik Dosh Calculator (Radar E3 content build)
 // VM endpoint: /manglik-dosh (dedicated, 100% accurate)
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
@@ -304,6 +308,22 @@ const PILLAR: PillarSection[] = [
     ],
   },
   {
+    id: "kya-main-manglik-hoon",
+    h2: "Kya Main Manglik Hoon? — 20 Second Mein Pakka Jaaniye",
+    paras: [
+      "Is sawaal ka pakka jawab sirf **aapki kundali** de sakti hai — naam, rashi, janm ka din ya swabhav se nahi. Upar wale calculator mein janm tithi, **sateek samay** aur sthan daaliye; woh dekhta hai ki Mangal 1, 2, 4, 7, 8 ya 12vein bhaav mein hain ya nahi, aur saath hi **bhang (cancellation)** bhi jaanchta hai. Jawab \"haan\" aaye to yeh bhi dikhega ki dosh kitna gambhir hai aur kahin pehle se kata hua to nahi.",
+      "Teen baatein jo ghabrahat bachaati hain: **(1)** 2nd aur 12th bhaav ka dosh kam gambhir hai; **(2)** bahut se Manglik logon ki kundali mein bhang janm se hota hai; **(3)** dono paksh Manglik hon to dosh aapas mein kat jaata hai (BPHS 80.49). Agar result \"haan\" aaye aur aap pareshan hon, to agla kadam [मैं मांगलिक हूँ — अब क्या करूँ?](/blog/i-am-manglik-what-to-do-hindi) hai — aur rishta saamne ho to [Kundali Milan](/kundali-milan).",
+    ],
+  },
+  {
+    id: 'manglik-calculator-hindi',
+    h2: 'मांगलिक कैलकुलेटर — जन्म तिथि, समय और स्थान से मुफ्त जाँच',
+    paras: [
+      'यह मांगलिक कैलकुलेटर तीन चीज़ों से काम करता है: **जन्म तिथि, सटीक जन्म समय और जन्म स्थान**। Swiss Ephemeris (लाहिड़ी अयनांश) से मंगल की सटीक डिग्री निकलती है, जन्म समय से लग्न और बारह भाव बनते हैं, फिर देखा जाता है कि मंगल छह मांगलिक भावों में से किसी में हैं या नहीं — और अंत में शास्त्रीय भंग की शर्तें जाँची जाती हैं। न साइनअप, न कार्ड।',
+      'सिर्फ़ जन्म तिथि वाले कैलकुलेटर पर भरोसा क्यों नहीं: लग्न लगभग हर दो घंटे में बदलता है, इसलिए एक ही दिन जन्मे दो लोगों में से एक मांगलिक हो सकता है और दूसरा नहीं। समय न पता हो तो "Unknown time" चुनिए और परिणाम को अस्थायी मानिए। हाथ से जाँचने की विधि नीचे [कैसे पता करें कि मंगल दोष है](#kaise-pata-karein) वाले सेक्शन में है, और पूरी गाइड [मंगल दोष कैलकुलेटर गाइड](/blog/mangal-dosh-calculator-hindi) में।',
+    ],
+  },
+  {
     id: 'dosh-ki-kaat',
     h2: 'मांगलिक दोष की काट — Cancellation कब लगती है?',
     paras: [
@@ -486,6 +506,8 @@ const FAQS = [
   { q: 'Kya Manglik aur non-Manglik ki shadi ho sakti hai?', a: 'Haan. Bashart ki bhang laagu ho, ya shastriya parihar (jaise Kumbh Vivah) kiya jaaye. Sabse aam bhang yahi hai ki dono paksh Manglik hon — us sthiti mein dosh aapas mein kat jaata hai. Aur yaad rakhiye: Manglik hona vivah na hone ka kaaran nahi hai, chahe kitna bhi dar dikhaya jaaye.' },
   { q: 'Which god removes Mangal Dosha?', a: 'Hanuman ji, in every classical remedial tradition — the Hanuman Chalisa daily, especially on Tuesdays. Lord Kartikeya (Murugan) is named alongside, particularly in South India, and Lord Shiva through the Mangalnath temple at Ujjain. But no deity or ritual deletes a planetary placement. What remedies genuinely reduce is the behavioural expression of Mars — the anger and haste that actually damage a marriage.' },
   { q: 'Manglik Dosh ke remedies kya hain?', a: '(1) Mangal Mantra "Om Mangalaya Namah" 108 baar, Mangalvaar. (2) Hanuman Chalisa nitya. (3) Moonga (Red Coral) — sirf expert consultation ke baad, kabhi apne aap nahi. (4) Mangalvaar ko masoor dal, gud, laal vastra, tambe ke bartan ka daan. (5) Kumbh Vivah, agar bhang na ho. (6) Krodh par sanyam — Mangal aakramakta ke karak hain, aur yahi asal upay hai.' },
+  { q: 'Kya main Manglik hoon, kaise pata karein?', a: 'Sirf kundali se — naam, rashi ya swabhav se nahi. Upar wale calculator mein janm tithi, sateek samay aur sthan daaliye; woh batata hai ki Mangal 1, 2, 4, 7, 8 ya 12vein bhaav mein hain ya nahi, gambhirta kitni hai, aur bhang laagu hai ya nahi.' },
+  { q: 'मांगलिक कैलकुलेटर कैसे काम करता है?', a: 'Janm tithi, sateek samay aur sthan se Swiss Ephemeris dwara Mangal ki degree aur lagna se bhaav nikaale jaate hain. Mangal chhe Manglik bhaavon (1, 2, 4, 7, 8, 12) mein ho to dosh, phir shastriya bhang ki sharten jaanchi jaati hain. Bilkul muft, koi signup nahi.' },
   { q: 'Kya Manglik Calculator bilkul free hai?', a: 'Haan. 100% free. Manglik Yes/No verdict, severity (High/Medium/Low), Mars house + sign + degree, saare 6 affected bhaav, cancellation conditions, aur 3 Parashar remedies — sab free, koi signup nahi. Cancellation check hi woh hissa hai jo zyadatar muft tools mein hota hi nahi.' },
 ];
 
@@ -936,7 +958,7 @@ export default function FreeManglikDoshCalculatorPage() {
             </ol>
           </nav>
 
-          {/* ── v2.0: PILLAR CONTENT — 21 keyword-driven H2 sections ── */}
+          {/* ── v2.4: PILLAR CONTENT — 23 keyword-driven H2 sections ── */}
           <section className="mt-12">
             {PILLAR.map((s, si) => (
               <div key={s.id} id={s.id} className="scroll-mt-24 mb-10">
@@ -986,7 +1008,7 @@ export default function FreeManglikDoshCalculatorPage() {
 
           {/* COMPARISON TABLE */}
           <section className="mt-4">
-            <h2 className="text-2xl font-serif font-bold mb-4" style={{ color: GOLD }}>Trikaal Vaani vs AstroSage vs AstroTalk Manglik Calculator</h2>
+            <h2 className="text-2xl font-serif font-bold mb-4" style={{ color: GOLD }}>Trikaal Vaani Manglik Calculator — Doosre Tools Se Kya Alag Hai</h2>
             <p className="text-slate-300 leading-relaxed mb-4">
               Sabse bada farak <strong style={{ color: GOLD }}>cancellation check</strong> ka hai. Zyadatar muft tools sirf itna batate hain ki Mangal chhe bhaavon mein se kisi ek mein hai ya nahi, aur wahin ruk jaate hain — jo aadha jawab hai. <strong style={{ color: GOLD }}>Bhang (parihar)</strong> jaanche bina yeh nahi pata chalta ki dosh sakriya bhi hai ya janm se hi kata hua hai. Yahi ek gap hai jisse sabse zyada bevajah dar paida hota hai.
             </p>
