@@ -2,7 +2,13 @@
 
 // ============================================================
 // File: app/calculators/free-kaal-sarp-dosh-calculator/page.tsx
-// Version: v2.2 (03 Oct 2026) — +2 H2 from the Radar weekly report 03 Oct 2026 — content-edit brief / PUSH list.
+// Version: v2.3 (19 Oct 2026) — Radar weekly report 17 Oct 2026: PUSH (14 empty SERPs) + Content
+//   Edit Brief. Hindi H2s already answered the brief; the gap was ENGLISH searchers. +6 EN H2:
+//   most-dangerous (seen 62), types (27), remove permanently / fully removed (31+19+17),
+//   benefits (19), puja Nashik/Trimbakeshwar (19+19+18), PUSH kw 'Can I marry a guy with
+//   kaal sarp dosh?'. +3 FAQ. Comparison H2 no longer names competitors (ruling 18 Oct 2026).
+//   Form/API/result rendering/KAAL_SARP_TYPES unchanged.
+// (previous) Version: v2.2 (03 Oct 2026) — +2 H2 from the Radar weekly report 03 Oct 2026 — content-edit brief / PUSH list.
 //   effects on marriage, puja kitni baar. Form/API unchanged.
 // (previous) Version: v2.1 (03 Oct 2026) — previous header: v2.0 — Free Kaal Sarp Dosh Calculator (Radar E3 content build)
 //   v2.1 (2026-10-03) — +2 H2 from DataForSEO volumes (Trikaal Keywords sheet 2-3 Oct 2026):
@@ -471,6 +477,54 @@ const PILLAR: PillarSection[] = [
       "Jo niyamit hona chahiye wo puja nahi, **saral upay** hai: Somwar ko Mahamrityunjay jaap aur Nag Panchami ki pooja. Aur sabse pehle yeh dekhiye ki dosh bhang to nahi — tab puja ki zaroorat hi nahi. Jagah ka sawaal [निवारण कहां होता है](#nivaran-kahan) mein hai.",
     ],
   },
+  {
+    id: "most-dangerous",
+    h2: "Which Kaal Sarp Dosh Is Most Dangerous?",
+    paras: [
+      "**No Kaal Sarp type is \"the most dangerous\" by itself** — the classical texts give no danger ranking of the twelve. Each type is named after the house Rahu occupies, and each touches a different area of life, so the one that feels heaviest depends on what matters most in that person's life. In practice the types that bring the most complaints are [Karkotak](/blog/karkotak-kaal-sarp-yog) (Rahu in the 8th — sudden ups and downs), [Takshak](/blog/takshak-kaal-sarp-yog) (7th — marriage and partnership) and [Ghatak](/blog/ghatak-kaal-sarp-yog) (10th — career pace). \"Ghatak\" is only a classical name; it does not signal death.",
+      "Real severity comes from three things, not the name: **Rahu's exact degree**, whether the chart has a classical **cancellation (bhang)**, and **which dasha is running now**. A cancelled Kaal Sarp of any type is practically inactive. The cancellation rules are in [Kaal Sarp Bhang](/blog/kaal-sarp-dosh-cancellation), and your current dasha is one click away in the [Dasha Calculator](/calculators/free-dasha-calculator).",
+    ],
+  },
+  {
+    id: "types-english",
+    h2: "Types of Kaal Sarp Dosh — All 12, by Rahu's House",
+    paras: [
+      "There are **twelve types, and the type is decided only by the house Rahu sits in** — not by Ketu, not by the zodiac sign. Rahu in the 1st is **Anant**, 2nd **Kulik**, 3rd **Vasuki**, 4th **Shankhpal**, 5th **Padma**, 6th **Mahapadma**, 7th **Takshak**, 8th **Karkotak**, 9th **Shankhachur**, 10th **Ghatak**, 11th **Vishdhar** and 12th **Sheshnag**. The Hindi table in the section above links each type to its own guide.",
+      "Because houses come from the birth time, a 15-minute error can change the Lagna and with it the whole type — which is why the calculator asks for an exact time. The name also does not tell you how hard it is: Mahapadma sounds heavy, yet Rahu in the 6th often helps win over competition. The complete English guide is [12 Types of Kaal Sarp Dosh](/blog/types-of-kaal-sarp-dosh).",
+    ],
+  },
+  {
+    id: "remove-permanently",
+    h2: "How to Remove Kaal Sarp Dosh Permanently — Can It Be Fully Removed?",
+    paras: [
+      "Honest answer first: **no ritual can delete Kaal Sarp from your birth chart**, because the birth chart never changes. Anyone who promises permanent removal through one puja is selling. What can happen — and often does — is that its **effect becomes negligible**, in two ways: the chart already carries a classical **cancellation (bhang)**, in which case nothing needs to be done at all; or the **Rahu–Ketu dasha ends**, after which the same chart clearly feels lighter.",
+      "If it is active, the method that works is consistency, not cost: the Maha Mrityunjaya mantra 108 times with Monday Shiv abhishek for **40 days without a break**, and Nag Panchami puja. The order matters — first confirm the dosha with the calculator above, then check for bhang in [Kaal Sarp Bhang](/blog/kaal-sarp-dosh-cancellation), and only then start remedies from [Remedies that actually work](/blog/kaal-sarp-dosh-effects-remedies).",
+    ],
+  },
+  {
+    id: "benefits-english",
+    h2: "Kaal Sarp Dosh Benefits — The Side Nobody Mentions",
+    paras: [
+      "Fear sells, so the upside rarely gets written. Yet **many people with Kaal Sarp yog are unusually successful**, and the pattern explains why: early struggle builds discipline, repeated last-minute setbacks build resilience, and Rahu — the planet of the unconventional, foreign lands and new technology — pushes people off ordinary paths into fields where they stand out.",
+      "Three benefits show up again and again: **late but lasting success**, because what is earned through struggle tends to stay; **strong mental resilience**; and **gains abroad or in unconventional work**, most clearly in the [Sheshnag type](/blog/sheshnag-kaal-sarp-yog). This is not consolation — it is the evidence-based case made in [Kaal Sarp Dosh: 10 Myths vs Facts](/blog/kaal-sarp-dosh-myths-facts).",
+    ],
+  },
+  {
+    id: "puja-nashik",
+    h2: "Kaal Sarp Dosh Puja in Nashik (Trimbakeshwar) — What to Check Before You Book",
+    paras: [
+      "**Trimbakeshwar near Nashik**, one of the twelve Jyotirlingas, is the best-known place for Kaal Sarp shanti puja, followed by Ujjain (Mahakaleshwar), Prayagraj and Kalahasti. The puja is traditionally done **once in a life**, usually on a single day, often timed to Amavasya, Nag Panchami or a Monday. It is a valid option — but **not compulsory**: the scriptures do not say Kaal Sarp shanti is possible only at one place, and 40 days of regular jaap at home is equally accepted.",
+      "Before you book, check three things. **(1)** Run the calculator above — if the result is \"No\", no puja is needed at all. **(2)** Check for cancellation (bhang). **(3)** Ask for the full cost in writing before travelling; quotes from ten thousand to over a lakh are common, often without anyone checking your chart. Reviews online are mixed precisely because many people did the puja for a dosha they did not have. The Hindi section [निवारण कहां होता है](#nivaran-kahan) covers the places in more detail.",
+    ],
+  },
+  {
+    id: "marry-kaal-sarp",
+    h2: "Can I Marry a Guy With Kaal Sarp Dosh?",
+    paras: [
+      "**Yes.** Kaal Sarp is not a matching dosha the way Mangal Dosh is, and the classical rules do not forbid marriage with someone who has it. Marriage is judged from the **7th house, its lord, Venus (and Jupiter in a woman's chart) and the running dasha** — Kaal Sarp alone does not decide it. Its weight on marriage is considered higher mainly when Rahu or Ketu sits on the 1st–7th axis (the Anant or Takshak types).",
+      "What to actually check: run a full [Kundali Milan](/kundali-milan) for the Ashtakoot score, Nadi and Mangal Dosh on both sides; see whether his Kaal Sarp is cancelled; and look at the strength of the 7th house in both charts. If those are sound, Kaal Sarp is not a reason to say no. The fuller discussion is in [Kaal Sarp Dosh and Marriage](/blog/kaal-sarp-dosh-marriage).",
+    ],
+  },
 ];
 
 const FAQS = [
@@ -486,6 +540,9 @@ const FAQS = [
   { q: 'काल सर्प दोष कितने साल का होता है?', a: 'Janma kundali ka yog jeevan bhar rehta hai — yeh koi avadhi nahi jo samapt ho jaaye. Par asar ki tivrata dasha ke saath ghatti-badhti hai: Rahu Mahadasha (18 saal) ya Ketu Mahadasha (7 saal) mein dabav sabse zyada, Guru ya Shukra ki dasha mein wahi kundali halki lagti hai. Isliye sahi sawal "kitne saal" nahi, "abhi kaun si dasha chal rahi hai" hai.' },
   { q: 'कालसर्प दोष का निवारण कहां होता है?', a: 'Sabse prasiddh sthan Trimbakeshwar (Nashik) hai, iske alawa Ujjain, Prayagraj aur Kalahasti. Par teerth jaana anivarya nahi hai — shastra mein kahin nahi likha ki shanti sirf kisi ek sthan par sambhav hai. Ghar par 40 din ka niyamit jaap utna hi manya hai. Sabse zaroori: pehle calculator chalayein, kyunki dosh hai hi nahi to koi puja karani hi nahi.' },
   { q: 'Kya Kaal Sarp Dosh hamesha ke liye door ho sakta hai?', a: 'Ganitiya roop se nahi — janma kundali sthayi hai. Par asar lagbhag samapt ho sakta hai, do raaston se: (1) Bhang/cancellation — agar shastra-sammat bhang maujood hai to dosh janma se hi nishkriya hai. (2) Dasha parivartan — Rahu-Ketu ki dasha beetne par wahi kundali spasht roop se halki lagti hai.' },
+  { q: 'Which Kaal Sarp Dosh is most dangerous?', a: 'None by itself — the classical texts give no danger ranking of the twelve types. Severity depends on Rahu\'s exact degree, whether the chart has a cancellation (bhang), and the running dasha. Karkotak (8th), Takshak (7th) and Ghatak (10th) bring the most complaints in practice, but a cancelled Kaal Sarp of any type is practically inactive.' },
+  { q: 'Can Kaal Sarp Dosh be removed permanently?', a: 'Not from the birth chart — it never changes, and no single puja deletes it. But its effect can become negligible: if the chart has a classical cancellation, nothing needs to be done; and after the Rahu–Ketu dasha ends the same chart feels much lighter. Regular remedies, such as 40 days of Maha Mrityunjaya jaap, reduce the pressure in between.' },
+  { q: 'Can I marry a guy with Kaal Sarp Dosh?', a: 'Yes. Kaal Sarp is not a matching dosha and does not forbid marriage. Check the full Kundali Milan (Ashtakoot, Nadi, Mangal Dosh), whether his Kaal Sarp is cancelled, and the 7th house in both charts. If those are sound, Kaal Sarp alone is no reason to refuse.' },
   { q: 'Kya ye Kaal Sarp Calculator bilkul free hai?', a: 'Haan, 100% free. Yes/No verdict, dosh ka prakaar (Rahu house se), Rahu-Ketu houses, 3 Naag-puja remedies, aur baaki doshas ka quick check — sab bilkul free. Na signup, na card.' },
   { q: 'Result kitne accurate hain?', a: 'Trikaal Vaani Swiss Ephemeris (NASA-grade) se har graha ki exact longitude nikaalta hai aur Rahu-Ketu axis ke against check karta hai with Lahiri Ayanamsha — 99.9% astronomical accuracy. Zyadatar free calculators sirf rashi ya house dekhte hain, jo tab galat hota hai jab koi graha Rahu/Ketu ki hi rashi mein ho. Yahi reason hai ki yahan ke result borderline cases mein bhi badalte nahi.' },
 ];
@@ -850,7 +907,7 @@ export default function FreeKaalSarpDoshCalculatorPage() {
             </ol>
           </nav>
 
-          {/* ── v2.0: PILLAR CONTENT — 19 keyword-driven H2 sections ── */}
+          {/* ── v2.3: PILLAR CONTENT — 29 keyword-driven H2 sections ── */}
           <section className="mt-12">
             {PILLAR.map((s, si) => (
               <div key={s.id} id={s.id} className="scroll-mt-24 mb-10">
@@ -895,7 +952,7 @@ export default function FreeKaalSarpDoshCalculatorPage() {
 
           {/* COMPARISON TABLE */}
           <section className="mt-4">
-            <h2 className="text-2xl font-serif font-bold mb-4" style={{ color: GOLD }}>Trikaal Vaani vs AstroSage vs AstroTalk</h2>
+            <h2 className="text-2xl font-serif font-bold mb-4" style={{ color: GOLD }}>Trikaal Vaani Kaal Sarp Calculator — Doosre Tools Se Kya Alag Hai</h2>
             <p className="text-slate-300 leading-relaxed mb-4">
               Sabse bada farak detection method ka hai. Zyadatar free tools graha ki <strong style={{ color: GOLD }}>rashi ya house</strong> dekh kar faisla karte hain, jo tab galat ho jaata hai jab koi graha Rahu ya Ketu ki hi rashi mein baitha ho. Trikaal Vaani <strong style={{ color: GOLD }}>exact longitude arc</strong> par chalta hai, isliye borderline kundali mein bhi verdict badalta nahi.
             </p>
