@@ -2,7 +2,14 @@
 
 // ============================================================
 // File: app/calculators/free-dasha-calculator/page.tsx
-// Version: 4.2 (3 Oct 2026 — +6 keyword H2s from Trikaal Keywords 2-3 Oct 2026: Vimshottari calculator, Rahu/Ketu/Shani mahadasha remedies) — three-level dasha (Pratyantar) + content
+// Version: 4.3 (19 Oct 2026 — Radar 17 Oct Content Edit Brief, page at rank 9: +3 H2, 1 H2 renamed, +2 FAQ)
+//   NEW: 'mahadasha-antardasha-calculator-dob' (Free Mahadasha and Antardasha calculator 21 /
+//   analysis 13 / Dasha calculator by DOB 12 + JOIN 'mahadasha calculator by date of birth',
+//   'antardasha calculator online free'); 'numerology-dasha' (Vedic Numerology Mahadasha calculator 8);
+//   'cope-difficult-mahadasha' (JOIN: H2 the #1 ranking page carries that we lacked).
+//   RENAMED (id unchanged): 'pratyantar-dasha' H2 now carries 'Pratyantar Dasha Calculator' (18).
+//   FORM, API, RESULT RENDERING unchanged.
+// (previous) Version: 4.2 (3 Oct 2026 — +6 keyword H2s from Trikaal Keywords 2-3 Oct 2026: Vimshottari calculator, Rahu/Ketu/Shani mahadasha remedies) — three-level dasha (Pratyantar) + content
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
 //
 // v4.2 (2026-10-03)
@@ -293,6 +300,14 @@ const PILLAR: DzSection[] = [
     ],
   },
   {
+    id: 'mahadasha-antardasha-calculator-dob',
+    h2: 'Free Mahadasha and Antardasha Calculator by Date of Birth',
+    paras: [
+      "Enter your **date, exact time and place of birth** above and the calculator returns, free and without sign-up: your current **Mahadasha, Antardasha and Pratyantar** with start and end dates and the time left in each, all nine Antardashas of the running Mahadasha, the nine Pratyantars of the running Antardasha, and the next five Mahadashas. It is computed with Swiss Ephemeris and Lahiri ayanamsa under BPHS Vimshottari rules — the same engine for every user, with no manual guesswork.",
+      "For an analysis rather than a list, read the levels together: the Mahadasha lord sets the area of life, the Antardasha lord brings the events, and the Pratyantar colours the next few weeks. Then check what that planet means for **your** chart — its house and its nature for your Lagna — with the [Kundali Calculator](/calculators/free-janam-kundali-calculator) and [Graha Bal Calculator](/calculators/free-graha-bal-calculator). A date of birth alone is not enough: without the time the starting nakshatra and the balance of the first dasha can be wrong, shifting every date by months or years.",
+    ],
+  },
+  {
     id: 'abhi-kaun-si-dasha',
     h2: 'अभी कौन सी दशा चल रही है — तीनों स्तर एक साथ',
     paras: [
@@ -312,7 +327,7 @@ const PILLAR: DzSection[] = [
   },
   {
     id: 'pratyantar-dasha',
-    h2: 'Pratyantar Dasha — तीसरा स्तर, जो ज़्यादातर टूल नहीं देते',
+    h2: 'Pratyantar Dasha Calculator — तीसरा स्तर, जो ज़्यादातर टूल नहीं देते',
     paras: [
       '**प्रत्यंतर दशा अंतर्दशा के अंदर का काल है** — विंशोत्तरी का तीसरा स्तर। हर अंतर्दशा में फिर नौ प्रत्यंतर होते हैं, उसी क्रम में। ऊपर वाला कैलकुलेटर आपकी वर्तमान अंतर्दशा के **सभी नौ प्रत्यंतर तिथि सहित** दिखाता है, और यह बताता है कि अभी कौन सा चल रहा है।',
       'यह क्यों मायने रखता है, इसका एक व्यावहारिक कारण है। महादशा वर्षों तक चलती है और अंतर्दशा महीनों-सालों तक — दोनों बहुत बड़े खंड हैं। जब कोई पूछता है *"यह महीना ऐसा क्यों जा रहा है"*, तो जवाब अक्सर महादशा में नहीं, **प्रत्यंतर में** मिलता है। शनि/गुरु जैसी शुभ अंतर्दशा में भी राहु का प्रत्यंतर कुछ हफ्तों के लिए भ्रम ला सकता है, और वह हफ्ते बीत जाते हैं।',
@@ -407,6 +422,22 @@ const PILLAR: DzSection[] = [
       'दशा का सबसे व्यावहारिक उपयोग भविष्य जानना नहीं, **समय चुनना** है। जब आपके पास तीनों स्तर की तिथियाँ हों, तो बड़े कामों को अनुकूल खिड़कियों में रखा जा सकता है।',
       'क्षेत्र के अनुसार अलग-अलग लेख हैं, और हर एक में यह बताया गया है कि कौन सी दशा उस काम को सहारा देती है: [करियर और नौकरी बदलने की खिड़की](/blog/dasha-timing-career-window-skills-astrology-hindi) · [संपत्ति खरीदने का समय](/blog/dasha-timing-property-buy-window-astrology-hindi) · [कर्ज़ से मुक्ति](/blog/dasha-timing-debt-free-window-astrology-hindi) · [संतान और बच्चे का विकास](/blog/dasha-timing-child-development-astrology-hindi)।',
       'और भी: [रिश्ते सुधरने का समय](/blog/dasha-timing-reconnection-astrology-hindi) · [ट्रांसफर और कार्यस्थल टकराव](/blog/dasha-timing-transfer-conflict-peak-astrology-hindi) · [विदेश बसने का समय](/blog/dasha-transit-foreign-settlement-astrology-hindi) · [परीक्षा में सफलता का वर्ष](/blog/best-year-dasha-exam-success-astrology-hindi)। सरकारी नौकरी का समय अलग से [Government job dasha timing](/learn/government-job-dasha-timing) में, और धन-वृद्धि का [Wealth growth timing](/learn/wealth-growth-timing) में।',
+    ],
+  },
+  {
+    id: 'cope-difficult-mahadasha',
+    h2: 'How to Cope With a Difficult Mahadasha — A Practical Plan',
+    paras: [
+      "**First, check whether it is actually difficult for you.** A dasha is hard when its lord is a malefic for your Lagna, badly placed or weak — not because of its name. Saturn and Rahu periods are feared by default, yet they can be the most productive years of a life. Look at the lord's nature for your Lagna and its strength before assuming the worst; the [Weak Planet Finder](/calculators/free-weak-planet-finder) shows which planets in your chart genuinely need support.",
+      "If it is demanding, a three-part plan works better than any single ritual. **Time your big moves:** use the Antardasha and Pratyantar tables above to place major decisions in the friendlier sub-periods, and avoid irreversible commitments around a dasha sandhi. **Steady the planet:** the dasha lord's mantra and daan on its own weekday are safe in every chart; a gemstone is not, and needs a suitability check first. **Work with its theme:** Saturn rewards discipline, Rahu punishes haste, Ketu asks you to let go — aligning daily choices with that theme is the remedy tradition values most. Remedies for specific periods are in the Rahu, Ketu and Shani sections below.",
+    ],
+  },
+  {
+    id: 'numerology-dasha',
+    h2: 'Vedic Numerology Mahadasha vs Vimshottari — Which One Is This?',
+    paras: [
+      "\"Vedic numerology Mahadasha and Antardasha calculators\" usually derive periods from your **date of birth digits** — a number-based system that does not use the Moon's nakshatra at all. **This calculator is not that.** It uses the classical **Vimshottari** system of BPHS, where the first Mahadasha is set by the nakshatra the Moon occupied at your birth and the balance of that dasha by how far the Moon had moved through it. The two systems will usually give different planets and different dates for the same person.",
+      "Neither label makes one \"more Vedic\" than the other, but only Vimshottari is the dasha system Parashara treats as primary, and it is the one every reading on this site is built on. If you want to see the nakshatra your Vimshottari cycle started from, the [Nakshatra Calculator](/calculators/free-nakshatra-calculator) shows it, and the [Numerology Calculator](/calculators/free-numerology-calculator) covers the number-based side separately.",
     ],
   },
   {
@@ -512,6 +543,8 @@ const FAQS = [
   { q: 'Shani ki Mahadasha aur Sade Sati mein kya farak hai?', a: 'Dono bilkul alag hain. Sade Sati GOCHAR hai — Shani ka aapki Chandra rashi aur uske aas-paas se guzarna, saade saat saal. Shani ki Mahadasha 19 saal ka dasha-kaal hai, jo janm nakshatra se tay hota hai. Ek chal sakti hai aur doosri nahi. Apni Sade Sati alag se check kijiye.' },
   { q: 'दशा और गोचर में कौन ज़्यादा भारी है?', a: 'Dasha pradhan mani jaati hai. Dasha tay karti hai ki KYA sambhav hai; gochar tay karta hai ki wo KAB ghatit hoga. Agar kundali aur chal rahi dasha kisi phal ka vaada nahi karti, to kitna bhi anukool gochar use nahi la sakta. Aur agar dasha vaada karti hai, to pratikool gochar use taal sakta hai — rok nahi sakta.' },
   { q: 'दशा के अनुसार रत्न पहन सकते हैं?', a: 'Nahi, sirf dasha ke aadhar par ratna nahi pehnna chahiye. Ratna lagna aur grah ki shubhta se tay hota hai, akeli dasha se nahi. Ratna us grah ki urja BADHATA hai — agar wo grah aapke liye kashtkari hai to aap kasht badha rahe hain. Pehle Ratna Upyuktata check kijiye. Dasha ke liye sabse surakshit upay mantra aur daan hain.' },
+  { q: 'Can I calculate Mahadasha and Antardasha by date of birth only?', a: 'Not accurately. Vimshottari starts from the nakshatra of the Moon at birth and the balance of the first dasha depends on how far the Moon had moved through it — both need the exact birth time and place. With the date alone, every Mahadasha and Antardasha date can shift by months or years.' },
+  { q: 'Is this a Vedic numerology Mahadasha calculator?', a: 'No. Numerology dasha systems use the digits of your date of birth. This calculator uses the classical Vimshottari system of BPHS, based on the Moon nakshatra at birth. The two systems usually give different planets and dates.' },
   { q: 'Kya Dasha calculator bilkul free hai?', a: 'Haan, 100% free. Teenon star (Mahadasha, Antardasha, Pratyantar), agli 5 Mahadasha, poori Antardasha timeline, saare nau Pratyantar tareekh ke saath, 3 Parashar Dos, 3 Donts aur 3 remedies — sab muft, koi signup nahi.' },
 ];
 
@@ -928,7 +961,7 @@ export default function FreeDashaCalculatorPage() {
             </ol>
           </nav>
 
-          {/* ── v4.0: PILLAR CONTENT — 22 keyword-driven H2 sections ── */}
+          {/* ── v4.3: PILLAR CONTENT — 25 keyword-driven H2 sections ── */}
           <section className="mt-12">
             {PILLAR.map((s) => (
               <div key={s.id} id={s.id} className="scroll-mt-24 mb-10">

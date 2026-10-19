@@ -2,7 +2,14 @@
  * TRIKAAL VAANI — trikalvaani.com
  * Chief Vedic Architect: Rohiit Gupta
  * FILE TO PASTE → app/services/child-destiny/page.tsx
- * Version: 5.1 (11 Oct 2026) — PLAY STORE APP: Maa Shakti dakshina section app mein HIDE.
+ * Version: 5.2 (19 Oct 2026) — Radar 17 Oct Content Edit Brief (rank 5): +2 H2, 1 H2 renamed, +1 FAQ
+ *   (visible + JSON-LD). NEW: free-child-prediction-dob (Free child prediction by DOB 8 + Hindi 7),
+ *   second-child (9 — disambiguates parent's 'will I have one' vs the child's own chart).
+ *   RENAMED: guru-putrakaraka (+'संतान देने वाला ग्रह' 9). DELIBERATELY NOT ADDED (brief asked):
+ *   santan prapti upay / jadi-booti / ayurvedic / putra prapti yog — parent-side conception intent that
+ *   this header's own rule keeps on /calculators/free-santan-yog-calculator; herbal/ayurvedic items are
+ *   medical claims, and son-prediction is not something this site should publish.
+ * (previous) Version: 5.1 (11 Oct 2026) — PLAY STORE APP: Maa Shakti dakshina section app mein HIDE.
  *   Rohiit ka faisla #4 (11 Oct 2026): Google Play app ke andar WhatsApp par dakshina
  *   (Arzi / Dhanyewaad amount chips + pay links) wala section NAHI dikhega — Google
  *   bahar ke payment ki taraf bhejna mana karta hai. Sirf us section ko
@@ -87,6 +94,7 @@ const schema = {
     { "@type": "FAQPage", mainEntity: [
       { "@type": "Question", name: "Can Vedic astrology reveal my child's natural talents?", acceptedAnswer: { "@type": "Answer", text: "Yes. The 5th house governs intelligence, creativity, and natural genius. Its lord's strength and planetary associations reveal what domain the child is cosmically gifted in — before any schooling shapes them." } },
       { "@type": "Question", name: "Which house in astrology shows a child's education?", acceptedAnswer: { "@type": "Answer", text: "The 4th house governs primary education. The 5th governs intelligence. The 9th governs higher education. Mercury and Jupiter placement determine the ideal academic stream — science, arts, commerce, or vocational." } },
+      { "@type": "Question", name: "Can I get a free child prediction by date of birth?", acceptedAnswer: { "@type": "Answer", text: "Yes. The first reading is free and is built from the child's own date, exact time and place of birth — Lagna, Moon sign and nakshatra, the 5th house and its lord, Jupiter, Mercury and the running dasha. The birth time matters because the Lagna and 5th house depend on it." } },
       { "@type": "Question", name: "At what age should I get my child's kundali read?", acceptedAnswer: { "@type": "Answer", text: "The earlier the better. Readings are most actionable around ages 5 to 12 when education decisions begin, and at 15 to 16 for stream selection. The birth chart does not change, so a reading is relevant at any age." } },
     ]},
     { "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: "https://trikalvaani.com" }, { "@type": "ListItem", position: 2, name: "Services", item: "https://trikalvaani.com/services" }, { "@type": "ListItem", position: 3, name: "Child Destiny", item: "https://trikalvaani.com/services/child-destiny" }] },
@@ -110,6 +118,14 @@ const V6_SECTIONS: V6Section[] = [
       'Upar wale form mein **bachche ka** janm vivaran daaliye — aapka nahi. Tareekh, sateek samay aur sthan. Reading unke apne chart se banti hai.',
       'Dekha kya jaata hai: **panchma bhaav aur uska swami** (buddhi, shiksha, poorv-punya), **Guru** — jo shastra mein santan ka kaarak hai, **Budh** (seekhne aur samajhne ka kaarak), **chandra** (mann aur swabhav), aur **bachche ki chal rahi dasha** — jo batati hai ki abhi kaunsa daur chal raha hai.',
       '**Pehla reading free hai.** Poora vishleshan chahiye to uske baad ₹51 ka vikalp aata hai.',
+    ],
+  },
+  {
+    id: 'free-child-prediction-dob',
+    h2: 'Free Child Prediction by Date of Birth — बच्चे का भविष्य जन्म तिथि से',
+    paras: [
+      'Is page ki **child prediction free** hai aur bachche ki **janm tithi, sateek samay aur sthan** se banti hai. Swiss Ephemeris se bachche ki kundali banti hai, aur pehli reading mein uska **lagna, Chandra rashi aur nakshatra, panchma bhaav aur uska swami, Guru aur Budh ki sthiti, aur chal rahi dasha** aati hai — yaani swabhav, seekhne ka tarika aur abhi ka daur.',
+      'जन्म तिथि अकेली काफ़ी नहीं — **समय से लग्न और पंचम भाव बनते हैं**, और लग्न लगभग हर दो घंटे में बदल जाता है। इसलिए अस्पताल का रिकॉर्ड या जन्म प्रमाणपत्र देखकर समय डालिए। और जो भी परिणाम आए, उसे बच्चे की सीमा नहीं, उसका झुकाव मानिए — यह बात नीचे [पहले एक बात](#seema-nahi) वाले हिस्से में खुलकर लिखी है।',
     ],
   },
   {
@@ -144,7 +160,7 @@ const V6_SECTIONS: V6Section[] = [
   },
   {
     id: 'guru-putrakaraka',
-    h2: 'Guru — santan ka kaarak',
+    h2: 'Guru — संतान देने वाला ग्रह, aur bachche ke chart mein uska arth',
     paras: [
       'Panchma bhaav ke baad sabse zyada vazan **Guru** ka hai, kyunki shastra mein wahi **Putrakaraka** hai — santan ka kaarak.',
       'Bachche ke chart mein Guru teen cheezein dikhata hai: **gyaan aur seekhne ki gehrai**, **naitikta aur samajh**, aur **bade logon se milne wala sahara** — guru, shikshak, ya koi bada jo raah dikhaye.',
@@ -368,6 +384,14 @@ const V6_SECTIONS: V6Section[] = [
       '**Santan Yog** ka sawaal hai "kya mujhe santan hogi" — aur wo **maa-baap ke panchma bhaav** se padha jaata hai. Wo ek alag prashn hai aur uske liye alag tool hai.',
       '**Ye reading** us bachche ke liye hai jo aa chuka hai — aur wo **bachche ke apne chart** se padhi jaati hai. Do alag chart, do alag sawaal.',
       'Agar aapka sawaal pehla wala hai to [Santan Yog Calculator](/calculators/free-santan-yog-calculator) free hai, aur uska poora vishay [Child Birth Prediction](/learn/child-birth-prediction) par.',
+    ],
+  },
+  {
+    id: 'second-child',
+    h2: 'Second Child Prediction Astrology — do alag sawaal',
+    paras: [
+      '"Second child prediction" do alag prashn ho sakta hai, aur dono alag chart se padhe jaate hain. **Pehla — "kya mujhe doosri santan hogi?"** Ye maa-baap ka prashn hai: paramparik niyam mein pehli santan panchma bhaav se aur doosri **panchma se teesre, yaani saptam bhaav** se dekhi jaati hai, saath mein Guru aur chal rahi dasha. Iske liye [Santan Yog Calculator](/calculators/free-santan-yog-calculator) hai.',
+      '**Doosra — "mere doosre bachche ka swabhav aur raah kaisi hai?"** Iska uttar **us bachche ki apni kundali** se aata hai, aur wahi ye page karta hai. Do bachchon ki kundaliyaan alag hongi — lagna, nakshatra aur dasha sab alag — isliye ek ki reading doosre par lagu nahi hoti, aur dono ki tulna se bachna chahiye, jaisa [Do bachche](#do-bachche) wale hisse mein likha hai.',
     ],
   },
   {
@@ -645,6 +669,7 @@ export default function ChildDestinyPage() {
           { q: "Which house in astrology shows a child's education?", a: "The 4th house governs primary education. The 5th governs intelligence. The 9th governs higher education. Mercury and Jupiter placement determine the ideal academic stream." },
           { q: "What is Moon nakshatra and why does it matter for children?", a: "The Moon nakshatra determines the child's emotional nature and learning style. A child in Rohini learns through beauty and consistency. A child in Ardra learns through questioning. Understanding this transforms how parents teach." },
           { q: "At what age should I get my child's kundali read?", a: "The earlier the better. Readings are most actionable around ages 5 to 12 when education decisions begin, and at 15 to 16 for stream selection. The birth chart does not change, so a reading is relevant at any age." },
+          { q: "Can I get a free child prediction by date of birth?", a: "Yes. The first reading is free and is built from the child's own date, exact time and place of birth — Lagna, Moon sign and nakshatra, the 5th house and its lord, Jupiter, Mercury and the running dasha. The birth time matters because the Lagna and 5th house depend on it." },
         ]} />
         <CtaSection headline="Give Your Child the Gift of" highlight="Cosmic Clarity." body="Every child is born with a unique cosmic blueprint. ₹51 to read it — before the education system overwrites it." segment="child-destiny" />
         <SiteFooter />

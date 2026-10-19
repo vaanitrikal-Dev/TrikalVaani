@@ -2,7 +2,12 @@
 
 // ============================================================
 // File: app/calculators/free-foreign-spouse-calculator/page.tsx
-// Version: v2.1 (03 Oct 2026) — +4 H2 from the Radar weekly report 03 Oct 2026 — content-edit brief / PUSH list.
+// Version: v2.2 (19 Oct 2026) — Radar 17 Oct Content Edit Brief (page at rank 1): +3 H2, 3 H2 renamed
+//   (ids unchanged), +3 FAQ, dateModified 2026-10-19. NEW: settlement-after-marriage (50+49),
+//   spouse-prediction-dob (spouse prediction calculator / future spouse calculator free / how to find
+//   spouse), kp-astrology (12). RENAMED: what-indicates (+birth chart signs), navamsa-d9 (+Foreign Spouse
+//   Astrology in Navamsa), free-calculator (+Foreign Spouse Astrology Calculator). YogCalculator unchanged.
+// (previous) Version: v2.1 (03 Oct 2026) — +4 H2 from the Radar weekly report 03 Oct 2026 — content-edit brief / PUSH list.
 //   Rahu in 7th, कौन सा ग्रह अचानक शादी करवाता है, where will I meet my spouse,
 //   can AI predict my future spouse. YogCalculator, FAQS, JSON-LD unchanged.
 // (previous) Version: v2.0 — content + cluster interlinking (Radar Part 5, rank 15)
@@ -95,6 +100,18 @@ const FAQS = [
     "a": "Kyunki 7th house aur poora Navamsa dono lagna se bante hain, aur lagna har do ghante mein badal jaata hai. Pandrah minute ki galti 7th house ka swami badal sakti hai, aur uske saath poora jawab. Janm samay aspatal ke record ya janm pramanpatra se lijiye, ghar ki yaaddasht se nahi."
   },
   {
+    "q": "Can I predict foreign settlement after marriage from my chart?",
+    "a": "Yes, as a likelihood. Settlement after marriage needs the foreign-spouse indicators (7th house, 7th lord, Rahu, Navamsa) plus the residence indicators — the 12th house, a weak or 12th-linked 4th house, and a Dasha of a planet tied to both the 7th and 12th. Use this calculator with the Foreign Settlement Calculator together."
+  },
+  {
+    "q": "Is this the same as a KP astrology foreign spouse reading?",
+    "a": "No. This calculator is Parashari — Rasi chart, Navamsa D-9 and Jaimini Darakaraka. KP reads the 7th cusp sub-lord with Placidus cusps, so the two can differ on the same chart. Use one as a cross-check of the other, not a mix of both."
+  },
+  {
+    "q": "Can a free spouse prediction by date of birth tell me my spouse's name?",
+    "a": "No. Classical astrology describes the nature of the partner, the setting where you are likely to meet, and the timing — not a name, initial or face. Any tool that returns those from a date of birth is guessing."
+  },
+  {
     "q": "Kya ye calculator free hai?",
     "a": "Haan, poora free. Score, saare blocks ka breakdown reason ke saath, disha ka ishara aur Dasha timing — sab bina payment ke. Kundali Milan alag paid service hai."
   }
@@ -122,7 +139,7 @@ const SECTIONS: FsSection[] = [
   },
   {
     id: 'what-indicates',
-    h2: 'What Indicates a Foreign Spouse in Astrology?',
+    h2: 'What Indicates a Foreign Spouse in Astrology? — Signs in the Birth Chart',
     paras: [
       'Classically, five things point to a spouse from outside your own community, region or country. **Rahu connected to the 7th house** is the most quoted of them — Rahu is the karaka of the foreign, the unfamiliar and the culturally other, so its presence in or aspect on the marriage house is the single strongest classical indicator. The mechanism is set out in [Rahu Ketu and foreign settlement](/blog/rahu-ketu-foreign-settlement-astrology).',
       '**The 7th lord placed in the 12th, 9th or 3rd house** is the second — all three are houses of distance, and the 12th in particular is the house of foreign lands. **The 12th lord connected to the 7th** works the same way from the other direction. **Venus** — the natural karaka of marriage — sitting in a dual sign or connected to Rahu adds to it. And **Darakaraka**, the Jaimini spouse significator, placed in the 9th or 12th is a direct pointer that the spouse comes from far away.',
@@ -142,7 +159,7 @@ const SECTIONS: FsSection[] = [
   },
   {
     id: 'navamsa-d9',
-    h2: 'Navamsa (D-9) mein videshi jeevansaathi — asli jawab yahin milta hai',
+    h2: 'Foreign Spouse Astrology in Navamsa (D-9) — asli jawab yahin milta hai',
     paras: [
       'Ye is poore page ki sabse zaroori baat hai: **shaadi rasi chart se nahi, Navamsa (D-9) se padhi jaati hai** — bilkul waise jaise career Dasamsa (D-10) se padha jaata hai. Rasi chart ka 7th house **vaada** dikhata hai; Navamsa batati hai ki wo vaada **nibhega ya nahi**. Jo tool sirf 7th house dekh kar jawab de de, wo aadha kaam kar raha hai — aur zyadatar muft tools yahi karte hain.',
       'Navamsa mein kya dekha jaata hai: **7th house ka swami D-9 mein kahan gaya**, kya wo wahan bhi door ke bhaavon (9th, 12th) se juda hai, **Rahu ki D-9 mein sthiti**, aur **Darakaraka** — Jaimini paddhati ka wo graha jiski degree saat grahon mein sabse kam ho, jo jeevansaathi ka pratinidhi maana jaata hai. Darakaraka ka 9th ya 12th mein hona seedha ishara hai ki jeevansaathi door se aayega.',
@@ -158,6 +175,30 @@ const SECTIONS: FsSection[] = [
       '**राहु** को विदेश का कारक कहा जाता है, और यह सही है — पर आधा सही। राहु का असली अर्थ है **जो अपना नहीं है**: अनजान, बाहरी, अलग संस्कृति का। इसीलिए सातवें भाव से राहु का सम्बन्ध सिर्फ "विदेशी पति/पत्नी" नहीं, बल्कि **अपनी जाति, भाषा, धर्म या क्षेत्र से बाहर का जीवनसाथी** भी बताता है। व्यवहार में भारत में यह दूसरा रूप कहीं ज़्यादा आम है, और यही वह बात है जो ज़्यादातर टूल छोड़ देते हैं।',
       '**दारकारक** जैमिनी पद्धति का शब्द है और इसे समझना आसान है: **सात ग्रहों में जिसकी डिग्री सबसे कम हो, वही दारकारक है** — और वह जीवनसाथी का प्रतिनिधि माना जाता है। यह पराशर पद्धति के सातवें भाव से अलग और स्वतंत्र संकेत है, इसीलिए जब दोनों एक ही बात कहें तो योग बहुत मज़बूत माना जाता है। दारकारक का नवम या द्वादश भाव में होना सीधा इशारा है कि जीवनसाथी दूर से आएगा।',
       'एक व्यावहारिक चेतावनी: **अकेला राहु काफी नहीं है।** सातवें भाव में राहु सिर्फ स्थिति से ही लगभग हर बारहवें व्यक्ति की कुंडली में मिलता है, दृष्टियाँ गिनने से पहले ही। अगर इतना काफी होता तो हर बारहवाँ व्यक्ति विदेशी से विवाह करता, जो स्पष्ट रूप से नहीं होता। शास्त्रीय शर्त **मेल** की है — दो या तीन स्वतंत्र संकेत एक ही दिशा में, और नवमांश उनका खंडन न करे। पूरा विश्लेषण [राहु-केतु और विदेश](/blog/rahu-ketu-foreign-settlement-astrology-hindi) में है।',
+    ],
+  },
+  {
+    id: 'settlement-after-marriage',
+    h2: 'Foreign Settlement After Marriage — Astrology and Calculator',
+    paras: [
+      "Marrying someone from abroad and **settling abroad yourself after marriage** are two different yogs, and a chart can carry one without the other. The foreign-spouse yog is read from the **7th house, its lord, Rahu, Darakaraka and the Navamsa**. Settlement after marriage adds a second layer: the **12th house** (residence away from birthplace), the **4th house** (home and roots — an afflicted or weak 4th loosens them), and the **9th** (long journeys). When the 7th lord connects to the 12th **and** the 4th lord is weak or tied to the 12th, the classical reading is that marriage itself becomes the route abroad.",
+      "Timing comes from the Dasha: settlement usually happens in the period of a planet linked to both the 7th and the 12th, or of Rahu when it touches either. Run this calculator for the spouse side, then the [Foreign Settlement Calculator](/calculators/free-foreign-settlement-calculator) for the residence side — together they answer the after-marriage question better than either alone. The full combined reading is in [Foreign Spouse Astrology — NRI Marriage Yog](/blog/foreign-spouse-marriage-settlement-astrology).",
+    ],
+  },
+  {
+    id: 'spouse-prediction-dob',
+    h2: 'Free Spouse Prediction by Date of Birth and Time — How to Find Your Spouse in Astrology',
+    paras: [
+      "Astrology does not find a person; it describes **the kind of partner and the setting** the chart points to. With your **date, exact time and place of birth**, the classical method reads four things: the **7th house and any planets in it** (nature of the spouse), the **7th lord's house** (where and how you meet — work, travel, friends, abroad), **Venus** for a man's chart and **Jupiter** for a woman's as the traditional karakas, and the **Darakaraka** in Jaimini. The Navamsa then confirms or weakens each of them.",
+      "This calculator applies that method to the foreign side of the question. For **when** marriage is likely, use the free [Shadi Kab Hogi Calculator](/calculators/free-shadi-kab-hogi-calculator); for whether a specific match works, [Kundali Milan](/kundali-milan) with both charts. Any \"future spouse calculator\" that returns a name, initial or face from a date of birth is guessing — nothing in the classical texts supports it.",
+    ],
+  },
+  {
+    id: 'kp-astrology',
+    h2: 'Foreign Spouse in KP Astrology — How the Sub-Lord Reads It',
+    paras: [
+      "Krishnamurti Paddhati (KP) uses **Placidus cusps and the sub-lord** instead of whole-sign houses. In KP practice, marriage is judged from the **7th cusp sub-lord**: it should signify houses **2, 7 and 11** for marriage to be promised. A foreign or distant spouse is read when the significators of the 7th also strongly signify the **12th** (and often the **9th**), with Rahu or Ketu frequently acting as a significator through the planet they represent.",
+      "**This calculator is Parashari, not KP** — it uses the Rasi chart, Navamsa and Jaimini Darakaraka, and the two systems can disagree on the same chart because their house boundaries differ. Neither result should be read as overruling the other; if you follow KP, use its sub-lord reading as a cross-check rather than mixing its rules into this score.",
     ],
   },
   {
@@ -180,7 +221,7 @@ const SECTIONS: FsSection[] = [
   },
   {
     id: 'free-calculator',
-    h2: 'Foreign Spouse Calculator free — aur "free" ka matlab kya hai',
+    h2: 'Foreign Spouse Astrology Calculator Free — aur "free" ka matlab kya hai',
     paras: [
       'Ye calculator **poora free** hai: score, chhe blocks ka breakdown apni-apni wajah ke saath, disha ka ishara aur Dasha timing — sab bina kisi payment ke, bina signup, bina card. Kundali Milan alag paid service hai, par usse pehle ka poora diagnosis muft hai.',
       'Ab wo baat jo dhyan dene layak hai, kyunki "free" har jagah ek jaisa nahi hota. Bahut se free tools **result rok kar rakhte hain** — score dikha kar wajah chhupa lete hain, ya poori report ke liye paise maangte hain. Yahan ulta hai: **wajah hi asli cheez hai.** Ek number jiske peeche kaaran na dikhe, wo bharosa nahi maangta — wo bas maan lene ko kehta hai. Isliye har block apna niyam, apna point aur apna asli figure dikhata hai, taaki aap use apni kundali se khud milaa sakein.',
@@ -306,7 +347,7 @@ export default function FreeForeignSpouseCalculatorPage() {
     howToName: "How to check your foreign spouse yog from your Kundali",
     howToSteps: [{"name": "Enter birth details", "text": "Enter your date, exact time and place of birth."}, {"name": "The chart is computed", "text": "Swiss Ephemeris with Lahiri Ayanamsha builds your Kundali and the Navamsa D-9, which is where marriage is actually judged."}, {"name": "Read the reasons", "text": "Every rule shows its points and the figure behind them — the 7th lord, whether the Navamsa confirms it, where Rahu sits, and who your Darakaraka is."}],
     faqs: FAQS,
-    dateModified: '2026-08-29',
+    dateModified: '2026-10-19',
   });
 
   return (

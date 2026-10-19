@@ -1,7 +1,13 @@
 // ============================================================
 // File: app/calculators/free-janam-kundali-calculator/page.tsx
 // Purpose: Free AI Kundli Calculator — SEO/GEO/AEO/E-E-A-T page
-// Version: v3.1 (03 Oct 2026) — previous header: v2.0 (05 Sep 2026) — calculator + full keyword-driven content
+// Version: v3.2 (19 Oct 2026) — Radar 17 Oct Content Edit Brief (calc-kundali, rank 2): +4 H2,
+//   7 H2 renamed (ids unchanged except vs-astrosage -> tulna), +3 FAQ, competitor names removed
+//   from visible copy. NEW: dob-se-kundali (Date of birth से कुंडली कैसे निकाले 19), janam-kundli-kya
+//   (Janam Kundli 15), planet-strength-dob (Planet strength calculator 14 + by DOB 5 — hands over to
+//   /calculators/free-graha-bal-calculator, does not re-explain Shadbala), naam-se-gun (6).
+//   Form/API/JSON-LD builder unchanged.
+// (previous) Version: v3.1 (03 Oct 2026) — previous header: v2.0 (05 Sep 2026) — calculator + full keyword-driven content
 //   v3.1 (2026-10-03) — +3 H2 from DataForSEO volumes (Trikaal Keywords sheet 2-3 Oct 2026):
 //   on line kundali 49.5K, free online kundali / kundali maker 40.5K, मेरा जन्म कुंडली बताओ 14.8K,
 //   janam kundali by date of birth and time in hindi 9.9K. Feature claims limited to what the
@@ -97,6 +103,9 @@ const FAQS = [
   { q: 'North Indian aur South Indian chart alag kyun dikhte hain?', a: 'Dono ek hi jaankari dikhate hain, prastuti alag hai. North Indian mein khaane sthir hain aur rashiyaan badalti hain; South Indian mein rashiyaan sthir hain aur lagna par nishan lagta hai. Agar dono jagah lagna aur grahon ki rashi mil rahi hai to kundali ek hi hai.' },
   { q: 'Kya 40-page ki free kundali report kaam ki hoti hai?', a: 'Prayah nahi. Wo template text hoti hai — har graha ke liye pehle se likha paragraph, chart ke hisaab se jod diya gaya. Isi liye wo itni lambi hoti hai aur usme ek jagah kuch aur doosri jagah uska ulta likha milta hai. Asli vishleshan lambai se nahi, sanketon ke mel se banta hai.' },
   { q: 'Do site alag kundali dikha rahi hain — kaunsi sahi hai?', a: 'Teen wajah ho sakti hain. Ayanamsha ka antar (Lahiri, Krishnamurti, Raman), paddhati ka antar (Vedic nirayana bनाम paashchatya sayana), aur janm samay ki galti. Sabse pehle samay jaanchiye — aadhe ghante ki galti lagna ki degree badal deti hai aur do ghante ki poora lagna.' },
+  { q: 'Date of birth se kundali kaise nikale?', a: 'Janm tithi, sateek janm samay aur janm sthan teeno chahiye. Inse Swiss Ephemeris grahon ki degree nikalta hai aur samay-sthan se lagna aur 12 bhaav bante hain. Sirf tareekh se grahon ki rashi mil jaati hai, par lagna, bhaav aur dasha ka sahi aarambh samay ke bina nahi nikalta.' },
+  { q: 'Kya is kundali mein planet strength (Shadbala) dikhti hai?', a: 'Haan. Free chart mein har graha ki dignity aur Shadbala aankda dikhta hai. Chhe hisson ka poora breakdown aur kaunsa graha nyuntam bal se kam hai, uske liye Graha Bal Calculator alag aur free hai.' },
+  { q: 'नाम से गुण मिलान कितना सही है?', a: 'यह अनुमान है। नाम का पहला अक्षर नक्षत्र-पद और राशि तक ले जाता है, उसी से अष्टकूट गिने जाते हैं। पर एक अक्षर दो नक्षत्रों में आ सकता है और मांगलिक दोष नाम से नहीं दिखता। जन्म विवरण हों तो जन्म नक्षत्र से ही मिलान करें।' },
   { q: 'Kundali kaise save ya download karein?', a: 'Browser se print par jaaiye aur "Save as PDF" chuniye — phone par bhi ye vikalp share menu mein milta hai. Isse poora result ek PDF ban jaata hai. Grahon ki degree wali table zaroor save kijiye, sirf rashi wali nahi.' },
   { q: 'Janm kundali kabhi badalti hai?', a: 'Nahi. Wo ek kshan ki tasveer hai aur jeevan bhar wahi rehti hai. Jo badalta hai wo dasha hai (jo apne kram se chalti hai) aur gochar (grahon ka aaj aakash mein chalna). Isi liye kundali ek baar bana kar save kar lena kaafi hai.' },
 ];
@@ -183,6 +192,22 @@ type KcSection = { id: string; h2: string; paras: string[] };
 
 const SECTIONS: KcSection[] = [
   {
+    id: 'dob-se-kundali',
+    h2: 'Date of birth से कुंडली कैसे निकाले?',
+    paras: [
+      'जन्म तिथि से कुंडली निकालने के लिए **तीन चीज़ें** चाहिए — **जन्म तिथि, सटीक जन्म समय और जन्म स्थान।** ऊपर वाले फ़ॉर्म में तीनों डालिए; Swiss Ephemeris उस क्षण के नौ ग्रहों की सटीक डिग्री निकालता है, लाहिड़ी अयनांश से उन्हें वैदिक राशियों में रखता है, और जन्म समय व स्थान से **लग्न** और बारह भाव बनाता है। मुफ़्त स्तर पर ही उत्तर भारतीय चार्ट, ग्रहों की राशि-भाव-नक्षत्र और चल रही दशा मिल जाती है।',
+      'केवल जन्म तिथि से पूरी कुंडली नहीं बनती — उससे ग्रहों की राशि (अधिकतर) और चंद्र राशि (प्रायः) तो मिल जाती है, पर **लग्न, भाव और दशा का सही आरंभ** समय के बिना नहीं निकलता, क्योंकि लग्न लगभग हर दो घंटे में बदलता है। समय न पता हो तो क्या बनता है और क्या नहीं, यह [जन्म समय नहीं पता](#janm-samay-nahi) वाले हिस्से में है।',
+    ],
+  },
+  {
+    id: 'janam-kundli-kya',
+    h2: 'Janam Kundli — ek kshan ke aakash ki tasveer',
+    paras: [
+      '**Janam Kundli** (janm kundali, janm-patri) aapke janm ke kshan aakash ka naksha hai: us samay **purvi kshitij par kaunsi rashi udit thi (lagna)**, nau graha kis rashi, bhaav aur nakshatra mein the, aur Chandra ke nakshatra se kaunsi **Vimshottari dasha** shuru hui. Vedic jyotish mein yahi har prashn — career, vivah, santan, dhan — ka aadhaar hai, aur BPHS ke saare niyam isi chart par lagte hain.',
+      'Kundali ek baar banti hai aur jeevan bhar wahi rehti hai; jo badalta hai wo dasha aur gochar hai. Isliye banane mein sateekta sabse zaroori hai — aur padhne ka sahi kram [कुंडली कैसे देखें](#kundali-kaise-dekhe) mein diya gaya hai.',
+    ],
+  },
+  {
     id: "online-kundali-maker",
     h2: "Online Kundali Maker — Free Kundli by Date, Time and Place",
     paras: [
@@ -207,8 +232,16 @@ const SECTIONS: KcSection[] = [
     ],
   },
   {
+    id: 'planet-strength-dob',
+    h2: 'Planet Strength Calculator by Date of Birth — strength in your Kundali',
+    paras: [
+      'The free chart on this page already shows each planet\'s **dignity** (exalted, own sign, friendly, debilitated) and its **Shadbala** figure — the six-fold strength system of BPHS that adds positional, directional, temporal, motional, natural and aspectual strength. That is enough to see at a glance which planets are carrying the chart. It needs the **exact birth time**, because directional and temporal strength both depend on the Lagna and the hour.',
+      'For the full breakdown — all six components per planet, the required minimum for each, and which planets fall short — use the dedicated [Graha Bal Calculator](/calculators/free-graha-bal-calculator); to see only the planets that need support, the [Weak Planet Finder](/calculators/free-weak-planet-finder). This page builds the chart; those pages measure it.',
+    ],
+  },
+  {
     id: 'kundali-kaise-banaye',
-    h2: 'Janam Kundali kaise banaye — teen cheezein chahiye',
+    h2: 'Janam Kundli kaise banaye — teen cheezein chahiye',
     paras: [
       'Kundali banane ke liye teen cheezein chahiye aur teeno zaroori hain: **janm tithi**, **sateek janm samay**, aur **janm sthan**.',
       'Teeno kyun. **Tareekh** se grahon ki rashi aati hai. **Samay** se lagna aata hai — aur lagna se hi baarah bhaav bante hain. **Sthan** se lagna ka sudhar hota hai, kyunki wo akshansh ke saath badalta hai; ek hi kshan par Delhi aur Chennai ka lagna alag ho sakta hai.',
@@ -227,7 +260,7 @@ const SECTIONS: KcSection[] = [
   },
   {
     id: 'kundali-kaise-dekhe',
-    h2: 'कुंडली कैसे देखें — पढ़ने का सही क्रम',
+    h2: 'जन्म कुंडली कैसे देखें — पढ़ने का सही क्रम',
     paras: [
       'कुंडली बन जाने के बाद असली प्रश्न यही होता है, और अधिकतर लोग उल्टा क्रम चलते हैं — पहले यह देखते हैं कि किस खाने में कितने ग्रह हैं।',
       'सही क्रम यह है। **एक — लग्न देखिए**, क्योंकि पूरा चार्ट उसी पर खड़ा है। **दो — लग्न का स्वामी कहाँ बैठा है**, क्योंकि भाव का फल उसके स्वामी से चलता है। **तीन — चंद्र राशि और नक्षत्र**, क्योंकि दशा और गोचर इन्हीं से चलते हैं। **चार — नौ ग्रह किन भावों में हैं।** **पाँच — कौन सी दशा चल रही है**, क्योंकि वही बताती है कि अभी क्या सक्रिय है।',
@@ -356,7 +389,7 @@ const SECTIONS: KcSection[] = [
   },
   {
     id: 'mobile-par-kundali',
-    h2: 'कुंडली मोबाइल में कैसे देखें — ऐप चाहिए?',
+    h2: 'मोबाइल से कुंडली कैसे बनाएं और देखें — ऐप चाहिए?',
     paras: [
       'यह प्रश्न बहुत खोजा जाता है, और उत्तर राहत देने वाला है: **किसी ऐप की ज़रूरत नहीं।**',
       'यह पेज मोबाइल ब्राउज़र में उसी तरह चलता है जैसे कंप्यूटर पर — वही गणना, वही Swiss Ephemeris, वही परिणाम। कोई डाउनलोड नहीं, कोई साइनअप नहीं, और फ़ोन में जगह भी नहीं जाती।',
@@ -376,7 +409,7 @@ const SECTIONS: KcSection[] = [
   },
   {
     id: 'meri-kundali-bhavishya',
-    h2: 'जन्म कुंडली से भविष्य देखना — कितना सच है',
+    h2: 'जन्म तिथि से मेरा भविष्य कैसे पता करें? — कुंडली से भविष्य कितना सच है',
     paras: [
       'यह इस पेज का सबसे बड़ा प्रश्न है और इसका उत्तर ईमानदार होना चाहिए, चाहे वह बिक्री के हक़ में न जाए।',
       'शास्त्रीय स्थिति यह है: **कुंडली प्रवृत्ति दिखाती है, नियति नहीं।** वह बताती है कि कौन से क्षेत्र सहज खुलेंगे और कहाँ प्रयास अधिक लगेगा, और दशा बताती है कि कौन सा दौर किस चीज़ का है। यह मौसम के पूर्वानुमान जैसा है — दिशा बताता है, हर घटना नहीं।',
@@ -392,6 +425,14 @@ const SECTIONS: KcSection[] = [
       '**Janm kundali ek vyakti ki hoti hai.** Milan **do** kundaliyon ka mel dekhta hai, aur uski apni paddhati hai — **Ashtakoot Milan**, jisme aath koot aur 36 gun hote hain, aur wo mukhya roop se **nakshatra** par tikte hain.',
       'Isliye do logon ki kundali bana kar aankhon se mila lena milan nahi hai. Nadi, Bhakoot aur Gana jaise koot alag ganana maangte hain.',
       'Aur wo baat jo dohrayi jaani chahiye: **36 gun mil jaana ya na milna vivah ka faisla nahi hai.** Bahut se 30+ gun wale rishte nahi chalte aur 18 gun wale achhe chalte hain. Vivah se jude asli prashn — kab hoga, kya rukavat hai — ke liye [Shadi Kab Hogi Calculator](/calculators/free-shadi-kab-hogi-calculator) aur [Manglik Dosh Calculator](/calculators/free-manglik-dosh-calculator) alag hain.',
+    ],
+  },
+  {
+    id: 'naam-se-gun',
+    h2: 'नाम से गुण कैसे मिलाए जाते हैं?',
+    paras: [
+      'जब जन्म समय न हो, तब परंपरा में **नाम के पहले अक्षर** से गुण मिलाए जाते हैं। हर नक्षत्र के चार पद होते हैं और हर पद का एक अक्षर तय है (जैसे अश्विनी — चू, चे, चो, ला)। नाम का पहला अक्षर उल्टा चलकर एक **नक्षत्र-पद** और उससे **राशि** देता है, और फिर उन्हीं से अष्टकूट के आठ कूट — वर्ण, वश्य, तारा, योनि, ग्रह मैत्री, गण, भकूट, नाड़ी — गिनकर 36 में से अंक निकाले जाते हैं।',
+      'सीमा साफ़ है: यह **अनुमान** है, गणना नहीं — एक अक्षर कई बार दो नक्षत्रों में आता है, और आजकल अधिकतर नाम नक्षत्र से नहीं, पसंद से रखे जाते हैं। मांगलिक दोष और सप्तम भाव तो नाम से देखे ही नहीं जा सकते। जहाँ दोनों के जन्म विवरण हों, वहाँ [कुंडली मिलान](/kundali-milan) जन्म नक्षत्र से ही कीजिए।',
     ],
   },
   {
@@ -425,10 +466,10 @@ const SECTIONS: KcSection[] = [
     ],
   },
   {
-    id: 'vs-astrosage',
-    h2: 'AstroSage, Prokerala aur Vedic Rishi se farak',
+    id: 'tulna',
+    h2: 'Doosre free kundali tools se Trikaal Vaani kaise alag hai',
     paras: [
-      'Google in naamon ko is keyword ke saath bar-bar dikhata hai, isliye seedha uttar — usme wo bhi jo hamare paksh mein nahi jaata.',
+      'Ye prashn bahut log poochhte hain, isliye seedha uttar — usme wo bhi jo hamare paksh mein nahi jaata.',
       '**Grahon ki sthiti mein antar nahi milega.** Adhikansh gambhir tool wahi Swiss Ephemeris aur wahi Lahiri Ayanamsha use karte hain. Un sites ke paas **zyada tool, zyada bhashaayein, mobile app aur bahut purana domain authority** bhi hai — ye maan lena chahiye.',
       'Antar do jagah hai. **Ek — yahan kuch becha nahi jaata.** Koi 40-page PDF, koi paid dosh nivaran, koi "aapki kundali mein bhaari dosh hai" wali chetavni. Result saadharan hai to saadharan hi likha jaata hai.',
       '**Do — yahan likha hai ki har aankda kahan se aaya** — kaunsa ayanamsha, kaunsi library, kis niyam se. Isse aap use parakh sakte hain aur asahmat bhi ho sakte hain. Yahi ek daawa hai; baaki tulna aap khud kar lijiye.',
@@ -456,7 +497,7 @@ const SECTIONS: KcSection[] = [
   },
   {
     id: 'kya-free-hai',
-    h2: 'Is page par kya-kya milta hai, bilkul muft',
+    h2: 'Free Janam Kundali Analysis — is page par kya-kya milta hai, bilkul muft',
     paras: [
       'Poora page free hai. Milta hai: **lagna aur uska swami**, **Chandra rashi**, **Surya rashi**, **nakshatra aur pada**, **nau grahon ki sthiti degree ke saath**, unka **bhaav**, **vakri** hone ki sthiti, **dignity**, aur **chal rahi Mahadasha tatha Antardasha.**',
       'Koi signup nahi, koi card nahi, koi email nahi maanga jaata, aur koi hissa chhupa kar nahi rakha jaata.',
@@ -525,7 +566,7 @@ const SECTIONS: KcSection[] = [
   },
   {
     id: 'kundali-hindi',
-    h2: 'कुंडली हिंदी में — भाषा से गणना बदलती है?',
+    h2: 'हिंदी में ऑनलाइन कुंडली कैसे बनाएं — भाषा से गणना बदलती है?',
     paras: [
       'यह प्रश्न बहुत खोजा जाता है और उत्तर सरल है: **नहीं, भाषा से गणना नहीं बदलती।**',
       'ग्रहों की स्थिति खगोलीय तथ्य है। मेष को अंग्रेज़ी में Aries कहें या तमिल में Mesham — राशि वही रहती है। इसी तरह गुरु, Jupiter और Brihaspati एक ही ग्रह हैं।',

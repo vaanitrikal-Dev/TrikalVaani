@@ -2,7 +2,11 @@
 
 // ============================================================
 // File: app/calculators/free-graha-bal-calculator/page.tsx
-// Version: 2.1 (1 Oct 2026 — "📜 Granth ke Upay — BPHS 84" dabba (components/calculators/GranthUpayBox); upay heading "(Parashar)" -> "(Parampara)") (05 Sep 2026) — Free Graha Bal Calculator (Shadbala showcase)
+// Version: 2.2 (19 Oct 2026 — Radar 17 Oct FIX: 'ग्रह बल कैलकुलेटर' at rank 12. +2 H2 (graha-bal-hindi,
+//   shadbala-online-free), +2 FAQ, competitor names removed from comparison-table H2 and vs-others copy.
+//   'Ast/vakri' and 'kamzor grah kaise pata kare' left to free-weak-planet-finder per the v2.0 split.
+//   Form/API/JSON-LD unchanged.)
+// (previous) Version: 2.1 (1 Oct 2026 — "📜 Granth ke Upay — BPHS 84" dabba (components/calculators/GranthUpayBox); upay heading "(Parashar)" -> "(Parampara)") (05 Sep 2026) — Free Graha Bal Calculator (Shadbala showcase)
 // API: /api/calc/kundali (calcType: 'graha-bal')  [route v1.7+]
 // Logic: strongest + weakest planet, full Shadbala 6-bala breakdown
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
@@ -230,6 +234,8 @@ const FAQS = [
   { q: 'Bhava Bala kya hai — Shadbala se alag hai?', a: 'Haan. Shadbala graha ka bal naapti hai; Bhava Bala bhaav ka. Isme bhaav ke swami ka bal, bhaav mein baithe graha, us par drishti, aur bhaav ka apna swabhavik bal jud jaate hain. Prashn agar "mera dasham bhaav kitna mazboot hai" hai — graha nahi — to uttar Bhava Bala deta hai.' },
   { q: 'Rupa aur Shashtiamsha kya hain?', a: 'Ye Shadbala ki ikaiyan hain. 1 Rupa = 60 Shashtiamsha. Har bal Shashtiamsha mein naapa jaata hai aur phir Rupa mein badla jaata hai. Isi liye result mein 6.42 Rupa jaise aankde dikhte hain — wo koi manmani sankhya nahi, ek maap hai jise koi bhi doosre software mein jaanch sakta hai.' },
   { q: 'Saare grahon ka bal ek jaisa kyun nahi hota?', a: 'Kyunki har graha ka apna classical minimum alag hai — Surya aur Chandra 6.0 Rupa, Mangal 5.0, Budh 7.0, Guru 6.5, Shukra 5.5, Shani 5.0. Isliye barabar Rupa hone par bhi ek balwan aur doosra kamzor nikal sakta hai. Ye page isi liye Rupa ke saath ratio bhi dikhata hai.' },
+  { q: 'ग्रह बल कैलकुलेटर से क्या पता चलता है?', a: 'सातों ग्रहों का षड्बल — स्थान, दिग्, काल, चेष्टा, नैसर्गिक और दृक् बल — कुल रूपा, शास्त्रीय न्यूनतम और अनुपात के साथ। अनुपात 1.0 से ऊपर हो तो ग्रह बलवान माना जाता है, नीचे हो तो कमज़ोर।' },
+  { q: 'Shadbala mein Rahu-Ketu kyun nahi hote?', a: 'BPHS ki classical Shadbala sirf saat grahon — Surya se Shani — ke liye di gayi hai. Rahu-Ketu chhaya graha hain aur unka bal unke rashi-swami aur saath baithe grahon se padha jaata hai, Shadbala se nahi.' },
   { q: 'Kya har kundali mein koi na koi graha kamzor hota hai?', a: 'Lagbhag hamesha. Saat grahon ka ek saath apne minimum se upar hona bahut durlabh hai. Isliye kisi graha ka kamzor nikalna dosh nahi, kram hai. Asli sawal ye hai ki wo graha aapke lagna ke liye kitna mahatvapurn hai — aur wo bhaav-swamitva se tay hota hai, bal se nahi.' },
 ];
 
@@ -295,6 +301,22 @@ const FAQS = [
 type GbSection = { id: string; h2: string; paras: string[] };
 
 const SECTIONS: GbSection[] = [
+  {
+    id: 'graha-bal-hindi',
+    h2: 'ग्रह बल कैलकुलेटर — कुंडली में ग्रहों का बल कैसे जानें',
+    paras: [
+      'ग्रह बल यानी कुंडली में किसी ग्रह की **फल देने की क्षमता।** महर्षि पराशर ने बृहत् पराशर होरा शास्त्र (BPHS) में इसे **षड्बल** — छह प्रकार के बल — से नापने की विधि दी है: **स्थान बल** (राशि और वर्ग में स्थिति), **दिग्बल** (भाव की दिशा), **काल बल** (जन्म का समय, दिन-रात, पक्ष), **चेष्टा बल** (गति, वक्री होना), **नैसर्गिक बल** (स्वाभाविक बल) और **दृक् बल** (दूसरे ग्रहों की दृष्टि)। ऊपर का ग्रह बल कैलकुलेटर जन्म तिथि, सटीक समय और स्थान से सातों ग्रहों के छहों बल, कुल रूपा, शास्त्रीय न्यूनतम और अनुपात मुफ़्त निकालता है।',
+      'पढ़ने का नियम एक है: **अनुपात 1.0 से ऊपर तो ग्रह बलवान, नीचे तो कमज़ोर** — क्योंकि हर ग्रह का न्यूनतम अलग है (बुध 7.0, गुरु 6.5, सूर्य-चंद्र 6.0, शुक्र 5.5, मंगल-शनि 5.0 रूपा)। कौन सा ग्रह पीछे है और उसका उपाय क्या है, यह निदान [Weak Planet Finder](/calculators/free-weak-planet-finder) पर है, और हिंदी में पूरा सिद्धांत [कुंडली में षड्बल और ग्रह बल](/blog/kundali-mein-shadbala-grah-bal) में।',
+    ],
+  },
+  {
+    id: 'shadbala-online-free',
+    h2: 'Shadbala Calculator Online Free — saaton grahon ka bal ek table mein',
+    paras: [
+      'Ye **Shadbala calculator online aur poora free** hai — bina signup, bina payment. Janm tithi, sateek samay aur sthan daaliye; Swiss Ephemeris aur Lahiri ayanamsha se kundali banti hai aur **Surya se Shani tak saaton grahon** ka Shadbala nikalta hai. Rahu-Ketu classical Shadbala mein nahi gine jaate, isliye wo table mein nahi hain — ye kami nahi, BPHS ka niyam hai.',
+      'Result mein har graha ke liye chhe balon ka vibhajan, kul Rupa, minimum aur ratio dikhta hai, sabse balwan se sabse kamzor tak ranking ke saath. Janm samay bahut zaroori hai: **Dig Bala aur Kala Bala dono lagna aur ghante par tikte hain**, isliye samay ki galti in do balon ko sabse zyada badalti hai. Poori kundali ke saath dekhna ho to [Janam Kundali Calculator](/calculators/free-janam-kundali-calculator) free hai.',
+    ],
+  },
   {
     id: 'kaise-kaam',
     h2: 'Graha Bal Calculator — kaam kaise karta hai',
@@ -511,8 +533,8 @@ const SECTIONS: GbSection[] = [
     id: 'vs-others',
     h2: 'Best Shadbala Calculator kaunsa hai — imandar tulna',
     paras: [
-      'Google in naamon ko is keyword ke saath bar-bar dikhata hai, isliye seedha uttar — usme wo bhi jo hamare paksh mein nahi jaata.',
-      '**Aankda lagbhag milna chahiye.** Adhikansh gambhir tool wahi Swiss Ephemeris aur wahi Lahiri Ayanamsha use karte hain. Thoda antar upar wale teen kaarnon se aa sakta hai. Un sites ke paas **zyada tool, zyada bhashaayein aur zyada purana domain authority** bhi hai — ye maan lena chahiye.',
+      'Ye prashn bahut poochha jaata hai, isliye seedha uttar — usme wo bhi jo hamare paksh mein nahi jaata.',
+      '**Aankda lagbhag milna chahiye.** Adhikansh gambhir tool wahi Swiss Ephemeris aur wahi Lahiri Ayanamsha use karte hain. Thoda antar upar wale teen kaarnon se aa sakta hai. Kuch bade platforms ke paas **zyada tool, zyada bhashaayein aur zyada purana domain authority** bhi hai — ye maan lena chahiye.',
       'Antar do jagah hai. **Ek** — adhikansh tool kul Rupa de kar chhod dete hain; yahan **chhe balon ka vibhajan, minimum, aur ratio teeno** ek saath dikhte hain. **Do** — yahan likha hai ki har aankda kahan se aaya, taaki aap use parakh sakein aur asahmat bhi ho sakein. Yahi ek daawa hai; baaki tulna aap khud kar lijiye.',
     ],
   },
@@ -628,7 +650,7 @@ const SECTIONS: GbSection[] = [
     paras: [
       'Prashn "kya rok raha hai aur kya karun" ho — [Weak Planet Finder](/calculators/free-weak-planet-finder) uske liye bana hai: kamzor graha, uske kshetra aur classical upay.',
       'Doosre maap dekhne hon — bhaav ka bal [Kundali Strength Calculator](/calculators/free-kundali-strength-calculator), lagna ka bal [Lagna Bal Calculator](/calculators/free-lagna-bal-calculator), poori kundali [Kundali Calculator](/calculators/free-janam-kundali-calculator), aur samay [Dasha Calculator](/calculators/free-dasha-calculator).',
-      'Sidhant samajhna ho — [Shadbala](/learn/shadbala-planetary-strength-vedic-astrology), [Planets in Astrology](/learn/planets-in-astrology), [Planetary dignity](/learn/planetary-dignity-exaltation-debilitation), aur Hindi mein [कुंडली में षड्बल और ग्रह बल](/blog/kundali-mein-shadbala-grah-bal-hindi). Yog ke liye [Raj Yoga](/learn/raj-yoga) aur [Vipreet Raj Yoga](/learn/vipreet-raj-yoga).',
+      'Sidhant samajhna ho — [Shadbala](/learn/shadbala-planetary-strength-vedic-astrology), [Planets in Astrology](/learn/planets-in-astrology), [Planetary dignity](/learn/planetary-dignity-exaltation-debilitation), aur Hindi mein [कुंडली में षड्बल और ग्रह बल](/blog/kundali-mein-shadbala-grah-bal). Yog ke liye [Raj Yoga](/learn/raj-yoga) aur [Vipreet Raj Yoga](/learn/vipreet-raj-yoga).',
     ],
   },
 ];
@@ -656,7 +678,7 @@ const HUB_LEARN: GbLink[] = [
   { href: '/learn/vipreet-raj-yoga', label: 'Vipreet Raj Yoga', note: '6, 8, 12 se banta yog' },
   { href: '/learn/neech-bhang-raj-yoga', label: 'Neech Bhang Raj Yoga', note: 'Neech ka dosh kat jaana' },
   { href: '/learn/how-to-wear-gemstone-vedic', label: 'Ratna pehanne ki vidhi', note: 'Faisle ke baad' },
-  { href: '/blog/kundali-mein-shadbala-grah-bal-hindi', label: 'षड्बल और ग्रह बल — हिंदी', note: 'Hindi mein poora lekh' },
+  { href: '/blog/kundali-mein-shadbala-grah-bal', label: 'षड्बल और ग्रह बल — हिंदी', note: 'Hindi mein poora lekh' },
 ];
 
 function GbRich({ text, k }: { text: string; k: string }) {
@@ -1123,7 +1145,7 @@ export default function FreeGrahaBalCalculatorPage() {
 
           {/* comparison table — kept from v1.x, unchanged */}
           <section className="mt-4 prose prose-invert max-w-none">
-            <h2 className="text-2xl font-serif font-bold mb-4 mt-8" style={{ color: GOLD }}>Trikaal Vaani vs AstroSage vs AstroTalk</h2>
+            <h2 className="text-2xl font-serif font-bold mb-4 mt-8" style={{ color: GOLD }}>Trikaal Vaani vs doosre free Shadbala tools</h2>
             <div className="not-prose overflow-x-auto mb-6">
               <table className="w-full text-sm" style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid ${GOLD}33`, borderRadius: '12px' }}>
                 <thead>
