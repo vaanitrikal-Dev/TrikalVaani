@@ -1,10 +1,11 @@
 'use client';
 // ============================================================
 // FILE: components/analytics/GoogleAdsTag.tsx
-// VERSION: v1.0
-// PURPOSE: Google Ads Remarketing Tag — builds audiences for Search Ads
+// VERSION: v1.1
+// PURPOSE: Google Ads Remarketing Tag + GA4 (G-WCV6MTQM21) on the same gtag.js
+// CHANGELOG v1.1 (2026-10-21): added GA4 config — replaces Vercel Web Analytics
 // CEO: Rohiit Gupta | Trikaal Vaani
-// DATE: 2026-06-29
+// DATE: 2026-10-21
 // ============================================================
 // SETUP (one-time):
 //   1. Go to: Google Ads → Tools → Conversions → Install tag manually
@@ -24,6 +25,7 @@ import Script from 'next/script';
 
 // ── Replace with your actual Google Ads Conversion ID ──────────────────────
 const GOOGLE_ADS_ID = 'AW-7916189860';
+const GA4_ID = 'G-WCV6MTQM21'; // Google Analytics 4 — Measurement ID
 // ────────────────────────────────────────────────────────────────────────────
 
 // ── Conversion event tracker ───────────────────────────────────────────────
@@ -60,6 +62,7 @@ export default function GoogleAdsTag() {
           function gtag(){dataLayer.push(arguments);}
           gtag('js', new Date());
           gtag('config', '${GOOGLE_ADS_ID}');
+          gtag('config', '${GA4_ID}');
         `}
       </Script>
     </>
