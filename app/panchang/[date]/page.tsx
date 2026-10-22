@@ -2,8 +2,28 @@
 // 🔱 TRIKAL VAANI — CEO PROTECTION HEADER
 // ════════════════════════════════════════════════════════════════════
 // File:    app/panchang/[date]/page.tsx
-// Version: v3.5 (18 Oct 2026)
+// Version: v3.6 (22 Oct 2026)
 // Owner:   Rohiit Gupta, Chief Vedic Architect
+// Changes vs v3.5 (Claude, 22 Oct 2026 — Rohiit approved):
+//   BUG: /panchang/2026-10-20 redirected to /dhanteras-2026 and
+//   /panchang/2026-10-21 to /diwali-2026 — both 404. The DB delhi rows say
+//   dussehra-2026 and null, festivals_master puts Dhanteras on 6 Nov and
+//   Diwali on 8 Nov. So the page was reading an OLD copy of the row from the
+//   Next.js Data Cache (supabase-js fetch, default cache, kept across
+//   deployments). The stale value is most likely from before the 18 Oct
+//   recompute (suspected, not proven).
+//   FIX 1: getSupabase() now passes its own fetch with
+//     next: { revalidate: 3600, tags: ['panchang'] } and a header
+//     x-tv-cache: panchang-v3.6. The header is part of the Next 13.5 cache key
+//     (checked in next/dist/server/lib/incremental-cache fetchCacheKey), so
+//     every old cached row is skipped once — no manual cache purge needed.
+//     DB edits now show within 1 hour (was: never, in this bug).
+//   FIX 2: before redirecting, festivalExists() checks festivals_master for
+//     the SAME (date, festival_slug) pair the [slug] page needs. If the pair
+//     is not there, no redirect — the normal panchang page renders. A redirect
+//     can no longer point at a page that will 404.
+//   PROTECTED (untouched): date window, VM fallback, metadata, schemas, JSX,
+//     Card/FAQ, ISR 86400 export.
 // Changes vs v3.4 (Rohiit, 18 Oct 2026):
 //   Site menu: <SiteNav /> added on both renders (the page and the "being
 //   computed" card) — this page had no menu. Main gets pt-16 so the fixed
@@ -130,8 +150,35 @@ type VMPanchang = {
 function getSupabase() {
   return createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      global: {
+        // v3.6: own Data Cache key + 1 h revalidate (see header FIX 1).
+        fetch: (input: any, init?: any) => {
+          const headers = new Headers(init?.headers);
+          headers.set("x-tv-cache", "panchang-v3.6");
+          return fetch(input, {
+            ...(init || {}),
+            headers,
+            next: { revalidate: 3600, tags: ["panchang"] },
+          } as any);
+        },
+      },
+    }
   );
+}
+
+/** v3.6: does /panchang/[date]/[slug] have a festivals_master row to show? */
+async function festivalExists(date: string, slug: string): Promise<boolean> {
+  try {
+    const { data, error } = await getSupabase()
+      .from("festivals_master")
+      .select("id")
+      .eq("date", date)
+      .eq("festival_slug", slug)
+      .limit(1);
+    return !error && Array.isArray(data) && data.length > 0;
+  } catch { return false; }
 }
 
 // ── v3.3: the servable date window ────────────────────────────────────
@@ -331,7 +378,8 @@ export default async function PanchangDatePage(
   const p = await getPanchang(date);
 
   // ── REDIRECT: If festival exists → go to slug page (301) ──────────
-  if (p?.festival_slug) {
+  // v3.6: redirect only if the target page really exists (header FIX 2).
+  if (p?.festival_slug && (await festivalExists(date, p.festival_slug))) {
     redirect(`/panchang/${date}/${p.festival_slug}`);
   }
 
