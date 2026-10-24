@@ -1,7 +1,8 @@
 // ============================================================
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
 // FILE: app/layout.tsx
-// VERSION: 3.11 (1 Oct 2026 — Trikaal Vaani ka core tagline (Rohiit ne chuna): "Granth ka Gyaan · Rohiit ki Parakh · AI ki Shakti" / "Rooted in Granth · Verified by Rohiit · Powered by AI") (1 Oct 2026 — daam sahi kiye: Kundali Milan ₹51 (couple + parent), Karmic ₹101 / $11, Child Birth ₹51; Bhrigu Nandi ke purane daave hataye)  (18 Sep 2026 — TrikalPicker added) — Google Ads Tag AW-7916189860 added
+// VERSION: 3.12 (24 Oct 2026 — Vercel Web Analytics <Analytics /> hataya; GA4 G-WCV6MTQM21 ab GoogleAdsTag v1.1 se chalta hai; Vercel dashboard pe Web Analytics disabled)
+// Prior — v3.11 (1 Oct 2026 —Trikaal Vaani ka core tagline (Rohiit ne chuna): "Granth ka Gyaan · Rohiit ki Parakh · AI ki Shakti" / "Rooted in Granth · Verified by Rohiit · Powered by AI") (1 Oct 2026 — daam sahi kiye: Kundali Milan ₹51 (couple + parent), Karmic ₹101 / $11, Child Birth ₹51; Bhrigu Nandi ke purane daave hataye)  (18 Sep 2026 — TrikalPicker added) — Google Ads Tag AW-7916189860 added
 // CHANGES vs v3.6.2 (CEO-approved):
 //   ✅ ADD: GoogleAdsTag AW-7916189860 — builds Google Display +
 //      YouTube + Gmail remarketing audiences alongside Meta Pixel.
@@ -37,7 +38,6 @@ import StickyMobileCTA from "@/components/landing/StickyMobileCTA";
 import ClarityAnalytics from "@/components/analytics/ClarityAnalytics";
 import MetaPixel from "@/components/analytics/MetaPixel";
 import GoogleAdsTag from "@/components/analytics/GoogleAdsTag";
-import { Analytics } from "@vercel/analytics/next";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -426,7 +426,6 @@ export default function RootLayout({
         <StickyMobileCTA />
         {/* v3.5: Microsoft Clarity — heatmaps + session recordings */}
         <ClarityAnalytics />
-        <Analytics />
       </body>
     </html>
   );
