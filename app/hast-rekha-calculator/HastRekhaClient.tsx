@@ -2,8 +2,13 @@
 
 // ============================================================
 // File: app/hast-rekha-calculator/HastRekhaClient.tsx
-// Version: 3.1 (27 Oct 2026 — RETRY LINK) | 3.0 (27 Oct 2026 — HAST REKHA v3: GRANTH-AADHARIT, BINA AI) | v2.6 (11 Oct 2026 — GOOGLE PLAY BILLING) | v2.4 (29 Aug 2026 — INTERNATIONAL PAYMENT)
+// Version: 3.2 (27 Oct 2026 — SHUBH VARSH JANM TITHI) | 3.1 (27 Oct 2026 — RETRY LINK) | 3.0 (27 Oct 2026 — HAST REKHA v3: GRANTH-AADHARIT, BINA AI) | v2.6 (11 Oct 2026 — GOOGLE PLAY BILLING) | v2.4 (29 Aug 2026 — INTERNATIONAL PAYMENT)
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
+//
+// CHANGE v3.2 (27 Oct 2026) — VM engine 2.1.0 ab janm tithi se "आने वाले शुभ वर्ष" (granth
+//   1.8.11–16) deta hai. Form ka label sach kiya; muft dobara-photo screen par janm tithi
+//   ka khaana (sirf jab pehle khaali chhodi thi) → /api/palmistry/retry use row mein save
+//   karta hai. Rohiit approve, 27 Oct 2026.
 //
 // CHANGE v3.1 (27 Oct 2026) — ?retry=<slug>&t=<token> link (cron v1.8 alert mein CEO ko
 //   milta hai, customer ko WhatsApp par bhejna hai). Link khulte hi seedha nayi-photo
@@ -224,6 +229,7 @@ export default function HastRekhaClient({ faqs }: { faqs: FAQ[] }) {
   const [retry,      setRetry]      = useState<RetryCtx | null>(null);
   const [pendingLs,  setPendingLs]  = useState<RetryCtx | null>(null);
   const [retryBusy,  setRetryBusy]  = useState(false);
+  const [askDob,     setAskDob]     = useState(false);   // v3.2 retry screen par janm tithi
 
   const mukhya: Hand = form.gender === 'F' ? 'left' : 'right';
 
@@ -260,6 +266,9 @@ export default function HastRekhaClient({ faqs }: { faqs: FAQ[] }) {
     }
     const p = lsGet(); if (p?.mode === 'needs_photo') setPendingLs(p);
   }, []);
+
+  // v3.2 — retry screen khulte waqt janm tithi khaali thi to khaana dikhao (bharte waqt gaayab na ho)
+  useEffect(() => { if (step === 'retry') setAskDob(!form.dob); }, [step]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Photo aayi (camera ya gallery) → compress → VM jaanch ──
   const handlePhoto = useCallback(async (hand: Hand, photo: CapturedPhoto) => {
@@ -439,7 +448,7 @@ export default function HastRekhaClient({ faqs }: { faqs: FAQ[] }) {
       const u = usablePhotos();
       const res = await fetch('/api/palmistry/retry', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ slug: retry.slug, retry_token: retry.token, ...toVmPhotos(u.right, u.left), photo_consent: form.consent }),
+        body: JSON.stringify({ slug: retry.slug, retry_token: retry.token, ...toVmPhotos(u.right, u.left), photo_consent: form.consent, dob: form.dob || '' }),
       });
       if (res.status === 413) throw new Error('Photo bahut badi thi — dobara lein.');
       let data: any = null;
@@ -575,7 +584,7 @@ export default function HastRekhaClient({ faqs }: { faqs: FAQ[] }) {
               </select>
             </label>
             <label className="col-span-2 flex flex-col gap-1.5 text-xs text-slate-400">
-              <span>जन्म तिथि <span style={{ color: '#C9A635' }}>(इच्छा पर — जल्द साल-दर-साल फल के लिए)</span></span>
+              <span>जन्म तिथि <span style={{ color: '#C9A635' }}>(इच्छा पर — इससे रिपोर्ट में आपके आने वाले शुभ वर्ष भी जुड़ेंगे)</span></span>
               <input type="date" value={form.dob} max={new Date().toISOString().slice(0, 10)}
                 onChange={e => setForm(p => ({ ...p, dob: e.target.value }))}
                 className="w-full rounded-lg px-3 min-h-[46px] text-white text-[15px] focus:outline-none"
@@ -731,6 +740,15 @@ export default function HastRekhaClient({ faqs }: { faqs: FAQ[] }) {
             </div>
           )}
           {slots}
+          {askDob && (
+            <label className="flex flex-col gap-1.5 text-xs text-slate-400">
+              <span>जन्म तिथि <span style={{ color: '#C9A635' }}>(इच्छा पर — इससे रिपोर्ट में आपके आने वाले शुभ वर्ष भी जुड़ेंगे)</span></span>
+              <input type="date" value={form.dob} max={new Date().toISOString().slice(0, 10)}
+                onChange={e => setForm(p => ({ ...p, dob: e.target.value }))}
+                className="w-full rounded-lg px-3 min-h-[46px] text-white text-[15px] focus:outline-none"
+                style={{ background: GOLD_RGBA(0.05), border: `1px solid ${GOLD_RGBA(0.45)}`, colorScheme: 'dark' }} />
+            </label>
+          )}
           {error && (
             <div className="rounded-lg px-4 py-3 text-red-300 text-sm"
               style={{ background: 'rgba(220,38,38,0.15)', border: '1px solid rgba(220,38,38,0.3)' }}>⚠️ {error}</div>

@@ -1,6 +1,9 @@
 // ============================================================
 // File: app/api/palmistry/retry/route.ts
-// Version: 1.0 (27 Oct 2026) — NAYA
+// Version: 1.1 (27 Oct 2026) — janm tithi | 1.0 (27 Oct 2026) — NAYA
+// v1.1: row mein janm tithi khaali ho aur customer ne retry screen par bhari ho (YYYY-MM-DD)
+//   → wahi VM ko jaati hai (engine 2.1.0 ke "शुभ वर्ष") aur row mein save hoti hai.
+//   Pehle se bhari janm tithi KABHI nahi badalti.
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
 //
 // MUFT DOBARA-PHOTO (Rohiit faisla 27 Oct 2026: "our cost is nil, one free retry").
@@ -38,7 +41,7 @@ const supabase = createClient(
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { slug, retry_token, dominant_palm_b64, other_palm_b64, handedness, photo_consent } = body ?? {};
+    const { slug, retry_token, dominant_palm_b64, other_palm_b64, handedness, photo_consent, dob } = body ?? {};
 
     if (typeof slug !== 'string' || typeof retry_token !== 'string' || !slug || !retry_token) {
       return NextResponse.json({ error: 'Report ki pehchaan nahi mili.' }, { status: 400 });
@@ -55,6 +58,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Yeh report nahi mili.' }, { status: 404 });
     }
     const firstReport = row.tier === 'needs_photo';
+    // v1.1 — nayi janm tithi sirf tab jab row mein khaali ho
+    const newDob = !row.dob && typeof dob === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(dob) && dob <= new Date().toISOString().slice(0, 10) ? dob : null;
+    const useDob = row.dob || newDob || '';
     if (!firstReport && !(row.tier === 'paid' && !row.free_retry_used)) {
       return NextResponse.json({ error: 'Muft dobara-photo is report par pehle hi istemal ho chuki hai.', used: true }, { status: 409 });
     }
@@ -70,7 +76,7 @@ export async function POST(req: NextRequest) {
           dominant_palm_b64, other_palm_b64: other_palm_b64 ?? null,
           handedness: handedness === 'left' ? 'left' : 'right',
           user_name: row.user_name ?? '', gender: row.gender ?? 'M',
-          language: row.language ?? 'hi', dob: row.dob ?? '',
+          language: row.language ?? 'hi', dob: useDob,
         }),
         cache: 'no-store',
         signal: ctrl.signal,
@@ -135,6 +141,7 @@ export async function POST(req: NextRequest) {
       observations: [], report: data.report, pdf_url: pdf_url ?? undefined,
       tier: 'paid', free_retry_used: freeRetryUsed, engine_version: data.engine_version ?? null,
       photo_consent: consent, consent_photo_paths: consentPaths.length ? consentPaths : null,
+      ...(newDob ? { dob: newDob } : {}),
     }).eq('slug', slug);
     if (upd) console.error('[Trikal] Palm retry save error:', upd.message);
 

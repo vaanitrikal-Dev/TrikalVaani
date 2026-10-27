@@ -2,7 +2,7 @@
 
 // ============================================================
 // File: components/hastrekha/GranthReport.tsx
-// Version: 1.0 (27 Oct 2026) — NAYA
+// Version: 1.1 (27 Oct 2026) — 'varsh_phal' (शुभ वर्ष) hissa pehle se khula | 1.0 (27 Oct 2026) — NAYA
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
 //
 // Hast Rekha v3 result screen ka granth-aadharit hissa. VM engine v2.0.0
@@ -123,7 +123,7 @@ export function GranthMarkdown({ md, hideFirstHeading = false }: { md: string; h
       );
       continue;
     }
-    para.push(s);
+    para.push(s.startsWith('- ') ? '• ' + s.slice(2) : s);   // v1.1 shubh varsh ki suchi
   }
   flushTable();
   flushPara();
@@ -137,7 +137,7 @@ function headingOf(md: string): string {
 
 // ── Poora granth report: saar + band dabbe + upay card ───────────────────────
 export function GranthReportView({ data }: { data: GranthReportData }) {
-  const [open, setOpen] = useState<Record<string, boolean>>({ bhavishya: true });
+  const [open, setOpen] = useState<Record<string, boolean>>({ bhavishya: true, varsh_phal: true });
   const sections = data.sections || [];
   const upay = sections.find(s => s.id === 'upay');
   const samapan = sections.find(s => s.id === 'samapan');
