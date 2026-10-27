@@ -2,84 +2,31 @@
 
 // ============================================================
 // File: app/hast-rekha-calculator/HastRekhaClient.tsx
-// Version: 2.6 (11 Oct 2026 — GOOGLE PLAY BILLING, sirf Play Store app ke andar) | v2.5 (1 Oct 2026 — Trikaal Vaani ka core tagline (Rohiit ne chuna): "Granth ka Gyaan · Rohiit ki Parakh · AI ki Shakti" / "Rooted in Granth · Verified by Rohiit · Powered by AI") (29 Aug 2026) — INTERNATIONAL PAYMENT
+// Version: 3.0 (27 Oct 2026 — HAST REKHA v3: GRANTH-AADHARIT, BINA AI) | v2.6 (11 Oct 2026 — GOOGLE PLAY BILLING) | v2.4 (29 Aug 2026 — INTERNATIONAL PAYMENT)
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
 //
-// CHANGE v2.6 (11 Oct 2026) — GOOGLE PLAY BILLING (Play Store app ke liye)
-//   Rohiit ke 11 Oct ke faisle: (1) button ka look + text same ("Full Hast
-//   Rekha Report — ₹51"), (2) neeche ki line "Secure payment via Google Play.
-//   Instant unlock.", (3) daam same ₹51, (5) app mein PayPal / $7 nahi.
-//   Kab chalta hai: usePlayApp() true — yani NEXT_PUBLIC_PLAY_BILLING=true HO
-//   aur page Play Store app (TWA) ke andar HO. Website par HAMESHA false →
-//   Razorpay, PayPal, runAnalysis — EK LINE NAHI BADLI.
-//   App mein: handlePay() sabse PEHLE Play check karta hai → Google Play sheet
-//   (hast_rekha_51) → purchase token → runAnalysis({ play_purchase_token })
-//   → /api/palmistry/paid-analyze v4.5 Google se verify karke wahi report
-//   banata hai. Sheet band ki = koi galti nahi dikhti.
-//   Gemini: is file mein koi Gemini model naam nahi (3.7 → 3.8 lagu nahi).
+// CHANGE v3.0 (27 Oct 2026) — Rohiit approved mockup (canvas "Hast Rekha v3")
+//   1. KYC-JAISA CAMERA (components/hastrekha/GuidedPalmCamera.tsx): "Right/Left
+//      haath dikhaiye", sunehri hatheli aakriti, live ROSHNI + STHIR chip, sab hara
+//      → 3-2-1 photo apne aap. Phone par koi naya app/AI download NAHI (Option B).
+//      Photo ke baad /api/palmistry/validate (hamara VM, 1-2s) saaf wajah batata hai.
+//   2. Photo dabbe ab "Right haath / Left haath" (granth 3.1.6: purush = right,
+//      stri = left mukhya). Handedness selector hataya — engine right/left khud
+//      pehchanta hai (website right → dominant field, warna left).
+//   3. Form: janm tithi (marzi par) + photo consent checkbox (pehle se KHAALI).
+//      Privacy line ab sach: "save nahi hoti — jab tak aap haan na chunein".
+//   4. RESULT SCREEN v3 (components/hastrekha/GranthReport.tsx): saar dabba +
+//      band dabbe + upay card. SCORES, hand-shape, "AI sandesh" HATAYE.
+//      PDF + WhatsApp button upar.
+//   5. MUFT DOBARA-PHOTO: report mein koi rekha kam padhi gayi → peeli patti +
+//      button → nayi photo → /api/palmistry/retry (ek baar, muft). Pehli photo hi
+//      na padhi jaaye (needs_photo) → turant nayi photo screen, review nahi.
+//   6. "AI" wale daave hataye (hero, analyzing messages, Razorpay description).
+//   Razorpay / PayPal / Google Play ke verify raaste — badle nahi. Razorpay handler
+//   ab runAnalysis() hi bulata hai (pehle wahi code dohraya hua tha).
 //
-// CHANGE v2.4 (2026-08-29) — PAYPAL FOR VISITORS OUTSIDE INDIA
-//   Razorpay on this account rejects international cards, so foreign
-//   visitors could not buy this report at all. They now see PayPal at $7
-//   in place of the ₹51 button, with the trust line following suit.
-//   Everything after the money is taken was extracted into runAnalysis()
-//   and is shared by both payment paths — the 413 handling, the
-//   pending_review handoff and the error copy must never drift apart.
-//   handlePay() and the Razorpay handler are otherwise unchanged.
-//
-// CHANGE v2.3 (2026-07-20) — PAYLOAD DUPLICATION REMOVED
-//   v2.2's budget was correct per-image but the payload sent EVERY
-//   image TWICE (right_palm_b64 + dominant_palm_b64 held the same
-//   string; left + other likewise) -> worst case 2 x 3.4MB = 6.8MB,
-//   so 413 could still fire (it did, once, 04:26 UTC). Legacy fields
-//   are now DROPPED from the payload — route v4.1 (REQUIRED, already
-//   live) reconstructs them for the VM. True max is now ~3.4MB with
-//   real headroom under Vercel's 4.5MB limit.
-//
-// CHANGE v2.2 (2026-07-20) — CRITICAL 413 HOTFIX
-//   Live failure (Vercel logs 04:07 UTC): dual-palm upload at 1600px
-//   exceeded Vercel's 4.5MB serverless body limit -> 413 BEFORE our
-//   route ran -> non-JSON response -> Safari's res.json() threw "The
-//   string did not match the expected pattern". User paid, no report.
-//   1. compressImage now BUDGETED: starts at 1600px/0.85 and steps
-//      down (1400/1200/1000/900) until b64 <= 1.7M chars per image.
-//      Two palms + JSON always fit under 4.5MB. Most photos still
-//      ship at 1600px — accuracy kept, limit respected.
-//   2. paid-analyze response handling hardened: explicit 413 message
-//      + safe JSON parse. Raw browser/DOM errors never reach the
-//      user again — every failure path speaks Hindi and confirms
-//      payment is safe.
-//
-// CHANGE v2.1 (2026-07-19)
-//   1. HANDEDNESS FIX (accuracy-critical): form now asks which hand
-//      the user writes with. The DOMINANT hand is required; the other
-//      is optional. Labels flip automatically. Previously we forced
-//      the RIGHT palm — a left-handed user (~10% of users) was read
-//      from the wrong hand, contradicting our own FAQ.
-//      Payload: dominant image is sent in `right_palm_b64` (primary
-//      slot, backward-compatible) + new `handedness` and
-//      `dominant_palm_b64` fields. BACKEND TODO: read `handedness`.
-//   2. "आठ पर्वतों" → "सात पर्वतों" (CEO decision v1.3: 7 parvat).
-//   3. RATNA: engine's `shubh_ratna` text is NO LONGER rendered.
-//      Replaced with an honest pointer card — "ratna Kundali se tay
-//      hota hai" → gemstone suitability calculator (cross-sell that
-//      keeps the anti-fear promise intact). BACKEND TODO: stop
-//      generating shubh_ratna. 'Shubh Ratna Suggestion' removed from
-//      the included list.
-//   4. REVIEW screen: fabricated flattery ("aapki rekha itni vishesh
-//      hai") replaced with the honest premium version — extra QC
-//      because we refuse to ship a wrong report. Zero refund risk.
-//   5. PRIVACY: honest line added under CTA (photo processed only,
-//      never saved to our database/storage — verified in Supabase:
-//      palmistry_reports has no image column; only PDFs stored).
-//      NOTE: page.tsx FAQ still claims "browser session" — fix in
-//      page.tsx v1.4 (next step).
-//   6. Dead `dob` field removed (was in payload, had no input).
-//   7. Compression 1200px → 1600px (fine lines: vivah rekha, small
-//      signs survive). Quality 0.88.
-//   8. Budh Rekha mention removed from SEO paragraph (official list
-//      is 6 lines; engine doesn't read Budh Rekha yet).
-//   9. Unused `observations` no longer destructured.
+// (Pichhla itihaas v2.1–v2.6: handedness, 413 compression budget, PayPal, Play
+//  billing — sab Git history mein. Compression budget aur 413 handling yahin hai.)
 // ============================================================
 
 import { useState, useRef, useCallback, useEffect } from 'react';
@@ -88,6 +35,8 @@ import Link from 'next/link';
 import SiteNav from '@/components/layout/SiteNav';
 import { usePlayApp } from '@/components/payment/usePlayApp';                        // v2.6
 import { isPlayBillingAvailable, purchaseWithPlay, PLAY_PRODUCTS } from '@/lib/play-billing'; // v2.6
+import GuidedPalmCamera, { type CapturedPhoto } from '@/components/hastrekha/GuidedPalmCamera';   // v3.0
+import { GranthReportView, type GranthReportData } from '@/components/hastrekha/GranthReport';   // v3.0
 
 declare global {
   interface Window { Razorpay: any; }
@@ -98,8 +47,9 @@ const GOLD_RGBA = (a: number) => `rgba(212,175,55,${a})`;
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type Step = 'upload' | 'paying' | 'analyzing' | 'result' | 'review';
-type Handedness = 'right' | 'left';
+type Step = 'upload' | 'paying' | 'analyzing' | 'result' | 'review' | 'retry';
+type Hand = 'right' | 'left';
+type Check = 'checking' | 'ok' | 'warn' | 'bad';
 
 interface FAQ { q: string; a: string; }
 interface FormState {
@@ -107,51 +57,41 @@ interface FormState {
   mobile: string;
   gender: 'M' | 'F';
   language: 'hi' | 'en' | 'hinglish';
-  handedness: Handedness;
+  dob: string;
+  consent: boolean;
 }
-interface PalmImage { preview: string; b64: string; }
+interface PalmImage { preview: string; b64: string; check: Check; message: string; }
 interface PalmResult {
   success: boolean;
-  session_id: string;
+  slug?: string;
   mp_features: Record<string, any>;
-  scores: Record<string, number>;
+  scores?: Record<string, number>;
   report: Record<string, any>;
   pdf_b64: string | null;
+  pdf_url?: string | null;
+  quality_notes?: string[];
+  low_clarity?: boolean;
+  retry_token?: string | null;
+  free_retry_available?: boolean;
 }
+interface RetryCtx { slug: string; token: string; mode: 'needs_photo' | 'retry'; messages: string[]; }
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-const SCORE_META: Record<string, { label: string; icon: string }> = {
-  vitality:     { label: 'जीवन शक्ति',  icon: '⚡' },
-  career:       { label: 'करियर',        icon: '💼' },
-  wealth:       { label: 'धन',           icon: '💰' },
-  relationship: { label: 'प्रेम-विवाह',  icon: '❤️' },
-  leadership:   { label: 'नेतृत्व',      icon: '👑' },
-  creativity:   { label: 'सृजन',         icon: '🎨' },
-  spirituality: { label: 'अध्यात्म',     icon: '🕉️' },
-  health:       { label: 'स्वास्थ्य',    icon: '🌿' },
-};
-
 const ANALYZING_MSGS = [
-  'हस्त रेखाएं स्कैन हो रही हैं...',
-  'हाथ के 21 बिंदु extract हो रहे हैं...',
-  'रेखाएं sharp की जा रही हैं...',
-  'जीवन रेखा और मस्तिष्क रेखा पढ़ी जा रही हैं...',
-  'हृदय रेखा और भाग्य रेखा का विश्लेषण...',
-  'सात पर्वतों का अध्ययन हो रहा है...',
-  'समुद्रिक शास्त्र के 40+ नियम लागू हो रहे हैं...',
-  'आपके 8 जीवन आयाम गिने जा रहे हैं...',
-  'Trikaal AI आपकी विस्तृत रिपोर्ट लिख रही है...',
-  'अंतिम स्पर्श दिया जा रहा है...',
+  'हथेली के 21 बिंदु पहचाने जा रहे हैं...',
+  'पितृ, मातृ, आयु और ऊर्ध्व रेखा पढ़ी जा रही हैं...',
+  'हस्तसंजीवनम् के श्लोक मिलाए जा रहे हैं...',
+  'आपके हाथ के ७ ग्रह-स्थान देखे जा रहे हैं...',
+  'आपकी रिपोर्ट और PDF तैयार हो रही है...',
 ];
+const BLOCKING = ['haath_nahi_mila', 'ungli_ya_kalai_frame_se_bahar', 'haath_bahut_door'];
+const RETRY_LS_KEY = 'tv_hast_retry_v1';
+const HAND_HI: Record<Hand, string> = { right: 'Right', left: 'Left' };
 
 // ─── Utilities ────────────────────────────────────────────────────────────────
 
-// v2.2: BUDGETED compression. Vercel's serverless body limit is 4.5MB
-// TOTAL — and we send TWO palms. Per-image budget: <= 1.7M b64 chars
-// (~1.7MB), so dual-palm + JSON always fits. We start sharp (1600px,
-// for vivah rekha and fine signs) and step down ONLY if this photo is
-// too heavy. Most photos ship at 1600px.
+// v2.2: BUDGETED compression (Vercel body limit 4.5MB, do photo). Per image <= 1.7M b64 chars.
 const B64_BUDGET = 1_700_000;
 const COMPRESS_STEPS: Array<[number, number]> = [
   [1600, 0.85], [1400, 0.80], [1200, 0.78], [1000, 0.72], [900, 0.70],
@@ -184,19 +124,7 @@ async function compressImage(file: File): Promise<string> {
     if (b64 && b64.length <= B64_BUDGET) return b64;
   }
   if (!b64) throw new Error('Image process nahi ho payi');
-  return b64; // smallest step — always well under budget in practice
-}
-
-function scoreColor(v: number) {
-  if (v >= 75) return '#22c55e';
-  if (v >= 55) return GOLD;
-  return '#f97316';
-}
-function scoreTag(v: number): string {
-  if (v >= 80) return 'उत्तम';
-  if (v >= 65) return 'शुभ';
-  if (v >= 50) return 'मध्यम';
-  return 'सुधार';
+  return b64;
 }
 
 function downloadPDF(b64: string, name: string) {
@@ -210,73 +138,55 @@ function downloadPDF(b64: string, name: string) {
   link.click();
 }
 
-// ─── Upload Zone ─────────────────────────────────────────────────────────────
+/** Website right/left → VM fields (lib/palm-store.ts toVmPhotos jaisa). */
+function toVmPhotos(right: PalmImage | null, left: PalmImage | null) {
+  if (right) return { dominant_palm_b64: right.b64, other_palm_b64: left?.b64 ?? null, handedness: 'right' };
+  return { dominant_palm_b64: left?.b64 ?? null, other_palm_b64: null, handedness: 'left' };
+}
 
-function UploadZone({ image, onFile, label, sublabel, required, emoji }: {
-  image: PalmImage | null; onFile: (f: File) => void; label: string; sublabel?: string; required?: boolean; emoji: string;
+function lsGet(): RetryCtx | null {
+  try { const v = window.localStorage.getItem(RETRY_LS_KEY); return v ? JSON.parse(v) : null; } catch { return null; }
+}
+function lsSet(v: RetryCtx | null) {
+  try { if (v) window.localStorage.setItem(RETRY_LS_KEY, JSON.stringify(v)); else window.localStorage.removeItem(RETRY_LS_KEY); } catch { /* private mode */ }
+}
+
+// ─── Photo slot ───────────────────────────────────────────────────────────────
+
+function PhotoSlot({ hand, image, mukhya, onOpen }: {
+  hand: Hand; image: PalmImage | null; mukhya: boolean; onOpen: () => void;
 }) {
-  const galleryRef = useRef<HTMLInputElement>(null);
-  const cameraRef  = useRef<HTMLInputElement>(null);
-
+  const border = image
+    ? image.check === 'bad' ? '#EF4444' : image.check === 'warn' ? '#F59E0B' : image.check === 'checking' ? GOLD_RGBA(0.6) : '#22C55E'
+    : mukhya ? GOLD_RGBA(0.6) : 'rgba(255,255,255,0.25)';
   return (
-    <div>
-      <label className="block text-sm font-medium mb-1 text-slate-300">
-        {label}
-        {required && <span className="text-red-400 ml-1">*</span>}
-        {!required && <span className="text-slate-500 ml-1 text-xs">(Optional — behtar reading)</span>}
-      </label>
-      {sublabel && <p className="text-xs text-slate-500 mb-2">{sublabel}</p>}
-      <div
-        className="rounded-2xl p-5 text-center transition-all min-h-[210px] flex flex-col items-center justify-center"
-        style={{
-          background: 'rgba(255,255,255,0.03)',
-          border: image ? '2px dashed #22c55e' : `2px dashed ${required ? GOLD_RGBA(0.4) : 'rgba(255,255,255,0.12)'}`,
-        }}
-      >
-        {image ? (
-          <>
-            <img src={image.preview} alt={`${label} — Hast Rekha palm photo`} className="max-h-36 rounded-lg object-cover" />
-            <p className="text-green-400 text-sm mt-2">✓ Photo added</p>
-            <button onClick={() => galleryRef.current?.click()}
-              className="text-xs text-slate-500 hover:text-slate-300 mt-1.5 underline">
-              Badlein
-            </button>
-          </>
-        ) : (
-          <>
-            <div className="text-5xl mb-3">{emoji}</div>
-            <p className="text-slate-400 text-sm mb-4">Apni haath ki photo add karein</p>
-            <div className="flex gap-2.5 w-full max-w-xs">
-              <button onClick={() => cameraRef.current?.click()}
-                className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-sm font-medium transition-all hover:scale-[1.02]"
-                style={{ background: `linear-gradient(135deg, ${GOLD} 0%, #A8820A 100%)`, color: '#080B12' }}>
-                📷 Camera
-              </button>
-              <button onClick={() => galleryRef.current?.click()}
-                className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-sm font-medium transition-all hover:scale-[1.02]"
-                style={{ background: 'rgba(255,255,255,0.06)', border: `1px solid ${GOLD_RGBA(0.25)}`, color: GOLD_RGBA(0.9) }}>
-                🖼️ Gallery
-              </button>
-            </div>
-            <p className="text-slate-600 text-xs mt-3">JPG, PNG, WebP · Max 10MB</p>
-          </>
-        )}
-
-        {/* Gallery picker — opens photo library */}
-        <input ref={galleryRef} type="file" accept="image/jpeg,image/jpg,image/png,image/webp"
-          className="hidden"
-          onChange={e => { if (e.target.files?.[0]) onFile(e.target.files[0]); }} />
-
-        {/* Camera capture — opens back camera on mobile */}
-        <input ref={cameraRef} type="file" accept="image/*" capture="environment"
-          className="hidden"
-          onChange={e => { if (e.target.files?.[0]) onFile(e.target.files[0]); }} />
-      </div>
-    </div>
+    <button type="button" onClick={onOpen}
+      className="rounded-2xl min-h-[170px] p-3 flex flex-col items-center justify-center gap-1.5 text-center transition-all"
+      style={{ border: `1.5px dashed ${border}`, background: mukhya ? GOLD_RGBA(0.06) : 'rgba(255,255,255,0.03)', color: '#E5E7EB' }}>
+      {image ? (
+        <>
+          <img src={image.preview} alt={`${HAND_HI[hand]} हाथ की फोटो`} className="max-h-24 rounded-lg object-cover" />
+          <span className="text-xs leading-snug" style={{
+            color: image.check === 'bad' ? '#FCA5A5' : image.check === 'warn' ? '#FCD34D' : image.check === 'checking' ? GOLD : '#86EFAC',
+          }}>
+            {image.check === 'checking' ? 'जाँच हो रही है…' : image.message}
+          </span>
+          <span className="text-[11px] text-slate-400 underline">दोबारा लें</span>
+        </>
+      ) : (
+        <>
+          <svg aria-hidden="true" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke={mukhya ? GOLD : '#9CA3AF'} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z" /><circle cx="12" cy="13" r="3.5" /></svg>
+          <span className="text-[15px] font-bold">{HAND_HI[hand]} हाथ</span>
+          <span className="text-[11px]" style={{ color: mukhya ? '#C9A635' : '#9CA3AF' }}>
+            {mukhya ? 'आपके लिए मुख्य (ग्रंथ ३.१.६)' : 'दूसरा हाथ — भेजें तो बेहतर'}
+          </span>
+        </>
+      )}
+    </button>
   );
 }
 
-// ─── Footer (Milan-style) ─────────────────────────────────────────────────────
+// ─── Footer ───────────────────────────────────────────────────────────────────
 
 function HastRekhaFooter() {
   return (
@@ -284,11 +194,11 @@ function HastRekhaFooter() {
       <div className="max-w-4xl mx-auto px-5 py-8 text-center text-xs text-slate-500">
         <p style={{ color: GOLD, letterSpacing: '0.3em', textTransform: 'uppercase' }}>Trikaal Vaani</p>
         <p className="mt-2 text-[#D4AF37] font-semibold">Granth ka Gyaan · Rohiit ki Parakh · AI ki Shakti</p>
-          <p className="mt-1">Rooted in Granth · Verified by Rohiit · Powered by AI · Rohiit Gupta, Chief Vedic Architect</p>
+        <p className="mt-1">Rooted in Granth · Verified by Rohiit · Powered by AI · Rohiit Gupta, Chief Vedic Architect</p>
         <p className="mt-1">MSME · UDYAM-DL-10-0119070 · trikalvaani.com</p>
         <p className="mt-3 text-slate-600 italic max-w-lg mx-auto">
-          Hast Rekha reading self-reflection ke liye hai. Samudrika Shastra ek praacheen vidya hai —
-          AI isko assist karta hai. Aantim nirnay hamesha aapka.
+          Hast Rekha report granth Hastasanjeevanam (Acharya Meghavijay) ke niyamon par aadharit hai —
+          margdarshan ke liye. Aantim nirnay hamesha aapka.
         </p>
       </div>
     </footer>
@@ -299,19 +209,22 @@ function HastRekhaFooter() {
 
 export default function HastRekhaClient({ faqs }: { faqs: FAQ[] }) {
   const [step,       setStep]       = useState<Step>('upload');
-  const [domPalm,    setDomPalm]    = useState<PalmImage | null>(null); // dominant hand (required)
-  const [otherPalm,  setOtherPalm]  = useState<PalmImage | null>(null); // non-dominant (optional)
-  const [form,       setForm]       = useState<FormState>({ userName: '', mobile: '', gender: 'M', language: 'hi', handedness: 'right' });
+  const [rightPalm,  setRightPalm]  = useState<PalmImage | null>(null);
+  const [leftPalm,   setLeftPalm]   = useState<PalmImage | null>(null);
+  const [camHand,    setCamHand]    = useState<Hand | null>(null);
+  const [form,       setForm]       = useState<FormState>({ userName: '', mobile: '', gender: 'M', language: 'hi', dob: '', consent: false });
   const [msgIdx,     setMsgIdx]     = useState(0);
   const [result,     setResult]     = useState<PalmResult | null>(null);
   const [error,      setError]      = useState('');
   const [waUrl,      setWaUrl]      = useState('');
+  const [retry,      setRetry]      = useState<RetryCtx | null>(null);
+  const [pendingLs,  setPendingLs]  = useState<RetryCtx | null>(null);
+  const [retryBusy,  setRetryBusy]  = useState(false);
 
-  // v2.4 — international. Razorpay on this account rejects foreign cards, so
-  // a visitor outside India is shown PayPal ($7) instead of the ₹51 button.
-  // `?intl=1` forces the PayPal view for testing from India; one-way only.
+  const mukhya: Hand = form.gender === 'F' ? 'left' : 'right';
+
+  // v2.4 — international (PayPal $7). `?intl=1` forces the PayPal view.
   const [isIndia,    setIsIndia]    = useState<boolean | null>(null);
-  // v2.6 — true ONLY inside the Play Store app; website par hamesha false.
   const inPlayApp = usePlayApp();
   useEffect(() => {
     let cancelled = false;
@@ -331,37 +244,78 @@ export default function HastRekhaClient({ faqs }: { faqs: FAQ[] }) {
     document.body.appendChild(s);
   }, []);
 
-  const handleFile = useCallback(async (file: File, slot: 'dom' | 'other') => {
+  // v3.0 — pichhli report ki nayi photo baaki? (needs_photo)
+  useEffect(() => { const p = lsGet(); if (p?.mode === 'needs_photo') setPendingLs(p); }, []);
+
+  // ── Photo aayi (camera ya gallery) → compress → VM jaanch ──
+  const handlePhoto = useCallback(async (hand: Hand, photo: CapturedPhoto) => {
+    setCamHand(null);
     setError('');
-    if (!file.type.match(/image\/(jpeg|jpg|png|webp)/)) { setError('JPG, PNG ya WebP chahiye'); return; }
-    if (file.size > 10 * 1024 * 1024) { setError('10MB se chhoti photo upload karein'); return; }
+    const f = photo.file;
+    if (!f.type.match(/image\/(jpeg|jpg|png|webp)/)) { setError('JPG, PNG ya WebP chahiye'); return; }
+    if (f.size > 15 * 1024 * 1024) { setError('15MB se chhoti photo chunein'); return; }
+    const set = hand === 'right' ? setRightPalm : setLeftPalm;
+    let b64 = '';
+    try { b64 = await compressImage(f); }
+    catch { setError('Image process error — dobara try karein'); return; }
+    set({ preview: photo.preview, b64, check: 'checking', message: '' });
     try {
-      const preview = URL.createObjectURL(file);
-      const b64     = await compressImage(file);
-      if (slot === 'dom') setDomPalm({ preview, b64 });
-      else                setOtherPalm({ preview, b64 });
-    } catch { setError('Image process error — dobara try karein'); }
+      const r = await fetch('/api/palmistry/validate', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ image_b64: b64 }),
+      });
+      const d = await r.json();
+      if (!d?.checked) { set({ preview: photo.preview, b64, check: 'ok', message: '✓ फोटो जुड़ गई' }); return; }
+      const probs: string[] = d.photo_problems || [];
+      if (!d.hand_detected || probs.some(p => BLOCKING.includes(p))) {
+        set({ preview: photo.preview, b64, check: 'bad', message: d.reason || 'हथेली साफ नहीं दिखी — दोबारा लें' });
+      } else if (!d.is_valid) {
+        set({ preview: photo.preview, b64, check: 'warn', message: (d.reason || 'फोटो थोड़ी कमज़ोर') + ' — चलेगी, पर दोबारा लेना बेहतर' });
+      } else {
+        set({ preview: photo.preview, b64, check: 'ok', message: `✓ ${HAND_HI[hand]} हाथ की फोटो ठीक है` });
+      }
+    } catch {
+      set({ preview: photo.preview, b64, check: 'ok', message: '✓ फोटो जुड़ गई' });
+    }
   }, []);
 
+  const photosReady = () => {
+    const ps = [rightPalm, leftPalm].filter(Boolean) as PalmImage[];
+    return ps.length > 0 && ps.every(p => p.check !== 'checking') && ps.some(p => p.check !== 'bad');
+  };
+  const usablePhotos = () => ({
+    right: rightPalm && rightPalm.check !== 'bad' ? rightPalm : null,
+    left:  leftPalm  && leftPalm.check  !== 'bad' ? leftPalm  : null,
+  });
+
+  const showResult = (data: any) => {
+    setResult(data);
+    if (data.retry_token && data.slug) {
+      setRetry({ slug: data.slug, token: data.retry_token, mode: 'retry', messages: data.quality_notes || [] });
+    }
+    lsSet(null);
+    setPendingLs(null);
+    setStep('result');
+  };
+
   /**
-   * Everything after the money is taken. Extracted so PayPal and Razorpay run
-   * one identical code path — the analysis, the 413 handling, the
-   * pending_review handoff and the error copy must not drift between them.
+   * Everything after the money is taken. PayPal, Razorpay aur Play — teeno yahi ek
+   * raasta chalate hain (413, review, needs_photo, galti ka sandesh — kabhi alag nahi).
    */
   const runAnalysis = async (proof: Record<string, string>) => {
     setStep('analyzing');
     let idx = 0;
-    const timer = setInterval(() => { idx = (idx + 1) % ANALYZING_MSGS.length; setMsgIdx(idx); }, 8000);
+    const timer = setInterval(() => { idx = (idx + 1) % ANALYZING_MSGS.length; setMsgIdx(idx); }, 2500);
     try {
+      const u = usablePhotos();
       const res = await fetch('/api/palmistry/paid-analyze', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...proof,
-          dominant_palm_b64: domPalm!.b64,
-          other_palm_b64:    otherPalm?.b64 ?? null,
-          handedness:        form.handedness,
+          ...toVmPhotos(u.right, u.left),
           user_name: form.userName, user_mobile: form.mobile,
           gender: form.gender, language: form.language,
+          dob: form.dob || '', photo_consent: form.consent,
         }),
       });
       if (res.status === 413) {
@@ -373,8 +327,15 @@ export default function HastRekhaClient({ faqs }: { faqs: FAQ[] }) {
         throw new Error('Server se jawab nahi mil paya — aapka payment safe hai, kripya WhatsApp par humse sampark karein.');
       }
       if (!res.ok || !data.success) throw new Error(data.error || 'Analysis failed — payment safe hai, WhatsApp par sampark karein');
+      if (data.needs_photo) {
+        const ctx: RetryCtx = { slug: data.slug, token: data.retry_token, mode: 'needs_photo', messages: data.photo_message || [] };
+        setRetry(ctx); lsSet(ctx);
+        setRightPalm(null); setLeftPalm(null);
+        setStep('retry');
+        return;
+      }
       if (data.pending_review) { setWaUrl(data.whatsappUrl || ''); setStep('review'); return; }
-      setResult(data); setStep('result');
+      showResult(data);
     } finally {
       clearInterval(timer);
     }
@@ -391,12 +352,7 @@ export default function HastRekhaClient({ faqs }: { faqs: FAQ[] }) {
     }
   };
 
-  /**
-   * v2.6 — Play Store app checkout (Google Play Billing). Reached ONLY from
-   * handlePay() when the page is inside the Play app. Google Play takes the
-   * money; paid-analyze v4.5 re-verifies the token with Google before analysing
-   * and consumes it only after the report is produced.
-   */
+  /** v2.6 — Play Store app checkout (Google Play Billing). */
   const handlePlayPay = async () => {
     try {
       const purchase = await purchaseWithPlay(PLAY_PRODUCTS.hast_rekha);
@@ -413,12 +369,10 @@ export default function HastRekhaClient({ faqs }: { faqs: FAQ[] }) {
   };
 
   const handlePay = async () => {
-    if (!domPalm) { setError('Pradhan haath (jis se aap likhte hain) ki photo zaroor upload karein'); return; }
+    if (!photosReady()) { setError('Kam se kam ek haath ki saaf photo zaroori hai'); return; }
     setStep('paying'); setError('');
 
-    // v2.6 — Play Store app: Google Play only. Checked FIRST and returned from,
-    // so the Razorpay code below is unchanged for the website. Re-asked here in
-    // case detection had not finished — Razorpay must never open in the app.
+    // v2.6 — Play Store app: Google Play only (checked FIRST).
     if (inPlayApp || await isPlayBillingAvailable()) {
       await handlePlayPay();
       return;
@@ -439,49 +393,18 @@ export default function HastRekhaClient({ faqs }: { faqs: FAQ[] }) {
           amount:      orderData.amount,
           currency:    'INR',
           name:        'Trikaal Vaani',
-          description: 'AI Hast Rekha Report — Samudrika Shastra',
+          description: 'Hast Rekha Report — Hastasanjeevanam',
           image:       '/Trikal_Logo.png',
           prefill:     { name: form.userName, contact: form.mobile },
           theme:       { color: GOLD },
           handler: async (response: any) => {
             try {
-              setStep('analyzing');
-              let idx = 0;
-              const timer = setInterval(() => { idx = (idx + 1) % ANALYZING_MSGS.length; setMsgIdx(idx); }, 8000);
-
-              const res = await fetch('/api/palmistry/paid-analyze', {
-                method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  razorpay_order_id:   response.razorpay_order_id,
-                  razorpay_payment_id: response.razorpay_payment_id,
-                  razorpay_signature:  response.razorpay_signature,
-                  // v2.3: ONLY the new fields are sent. Route v4.1
-                  // reconstructs right/left_palm_b64 for the VM, so
-                  // sending both names here doubled the payload and
-                  // caused 413s. Never re-add the legacy fields.
-                  dominant_palm_b64:   domPalm!.b64,
-                  other_palm_b64:      otherPalm?.b64 ?? null,
-                  handedness:          form.handedness,
-                  user_name: form.userName, user_mobile: form.mobile, gender: form.gender, language: form.language,
-                }),
+              await runAnalysis({
+                razorpay_order_id:   response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature:  response.razorpay_signature,
               });
-              clearInterval(timer);
-              if (res.status === 413) {
-                throw new Error('Photos bahut badi thi — page refresh karke dobara try karein. Aapka payment safe hai.');
-              }
-              let data: any = null;
-              try { data = await res.json(); }
-              catch {
-                throw new Error('Server se jawab nahi mil paya — aapka payment safe hai, kripya WhatsApp par humse sampark karein.');
-              }
-              if (!res.ok || !data.success) throw new Error(data.error || 'Analysis failed — payment safe hai, WhatsApp par sampark karein');
-              if (data.pending_review) {
-                setWaUrl(data.whatsappUrl || '');
-                setStep('review');
-                resolve();
-                return;
-              }
-              setResult(data); setStep('result'); resolve();
+              resolve();
             } catch (e: any) { reject(e); }
           },
           modal: { ondismiss: () => { setStep('upload'); resolve(); } },
@@ -494,19 +417,65 @@ export default function HastRekhaClient({ faqs }: { faqs: FAQ[] }) {
     }
   };
 
-  const reset = () => { setStep('upload'); setResult(null); setDomPalm(null); setOtherPalm(null); setError(''); };
+  // ── Muft dobara-photo bhejna ──
+  const submitRetry = async () => {
+    if (!retry || !photosReady()) { setError('Kam se kam ek haath ki saaf photo zaroori hai'); return; }
+    setRetryBusy(true); setError('');
+    try {
+      const u = usablePhotos();
+      const res = await fetch('/api/palmistry/retry', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ slug: retry.slug, retry_token: retry.token, ...toVmPhotos(u.right, u.left), photo_consent: form.consent }),
+      });
+      if (res.status === 413) throw new Error('Photo bahut badi thi — dobara lein.');
+      let data: any = null;
+      try { data = await res.json(); } catch { throw new Error('Server se jawab nahi mila — aapki muft koshish bachi hai, dobara try karein.'); }
+      if (data?.photo_problem) {
+        setRetry({ ...retry, messages: data.photo_message?.length ? data.photo_message : ['हथेली साफ नहीं दिखी — दोबारा लें'] });
+        setError('Is photo mein bhi hatheli saaf nahi padhi gayi — aapki muft koshish abhi bachi hai, ek baar aur lein.');
+        return;
+      }
+      if (!res.ok || !data?.success) throw new Error(data?.error || 'Report dobara nahi ban payi');
+      showResult(data);
+    } catch (e: any) {
+      setError(e.message || 'Kuch galat hua — dobara try karein');
+    } finally {
+      setRetryBusy(false);
+    }
+  };
 
-  const domLabel   = form.handedness === 'right' ? 'Daya Haath — Pradhan (Dominant)'  : 'Baaya Haath — Pradhan (Dominant)';
-  const otherLabel = form.handedness === 'right' ? 'Baaya Haath (Non-dominant)'        : 'Daya Haath (Non-dominant)';
+  const openRetry = (ctx: RetryCtx) => {
+    setRetry(ctx); setRightPalm(null); setLeftPalm(null); setError(''); setStep('retry');
+    if (typeof window !== 'undefined') window.scrollTo(0, 0);
+  };
+
+  const reset = () => { setStep('upload'); setResult(null); setRightPalm(null); setLeftPalm(null); setRetry(null); setError(''); };
+
+  const camera = camHand && (
+    <GuidedPalmCamera handLabel={HAND_HI[camHand]}
+      onCapture={p => handlePhoto(camHand, p)} onClose={() => setCamHand(null)} />
+  );
+
+  const slots = (
+    <>
+      <div className="grid grid-cols-2 gap-3">
+        <PhotoSlot hand="right" image={rightPalm} mukhya={mukhya === 'right'} onOpen={() => setCamHand('right')} />
+        <PhotoSlot hand="left" image={leftPalm} mukhya={mukhya === 'left'} onOpen={() => setCamHand('left')} />
+      </div>
+      <p className="text-xs text-center text-slate-400 mt-2 leading-relaxed">
+        ग्रंथ (३.१.६): पुरुष का दायाँ, स्त्री का बायाँ हाथ मुख्य। दोनों भेजें तो और बेहतर।
+      </p>
+    </>
+  );
 
   // ═══ UPLOAD ═══
   if (step === 'upload' || step === 'paying') return (
     <>
       <SiteNav />
+      {camera}
       <main className="min-h-screen pt-20 pb-16 px-4" style={{ background: '#080B12', color: '#E5E7EB' }}>
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-2xl mx-auto">
 
-          {/* Breadcrumb */}
           <nav className="text-xs text-slate-500 mb-4">
             <Link href="/" className="hover:text-slate-300">Home</Link>
             <span className="mx-2">›</span>
@@ -515,168 +484,152 @@ export default function HastRekhaClient({ faqs }: { faqs: FAQ[] }) {
             <span style={{ color: GOLD }}>Hast Rekha</span>
           </nav>
 
-          {/* Hero */}
-          <div className="text-center mb-8">
+          {pendingLs && (
+            <div className="rounded-xl p-4 mb-5 flex flex-col gap-3" style={{ background: 'rgba(245,158,11,0.10)', border: '1px solid rgba(245,158,11,0.45)' }}>
+              <p className="text-sm" style={{ color: '#FDE68A' }}>
+                आपकी पिछली रिपोर्ट के लिए नई फोटो बाकी है — पैसे दोबारा नहीं लगेंगे।
+              </p>
+              <button type="button" onClick={() => openRetry(pendingLs)}
+                className="min-h-[44px] rounded-lg font-semibold text-sm" style={{ background: '#FBBF24', color: '#1A1200' }}>
+                नई फोटो भेजें
+              </button>
+            </div>
+          )}
+
+          <div className="text-center mb-7">
             <p className="text-xs font-semibold tracking-[0.25em] mb-3" style={{ color: GOLD_RGBA(0.8) }}>
-              SAMUDRIKA SHASTRA × AI VISION
+              HASTASANJEEVANAM · ग्रंथ-आधारित
             </p>
             <h1 className="text-3xl md:text-5xl font-serif font-bold mb-4 leading-tight" style={{ color: GOLD }}>
-              🖐️ AI Hast Rekha Calculator
+              Hast Rekha Calculator
             </h1>
             <p className="text-base md:text-lg text-slate-300 max-w-xl mx-auto leading-relaxed">
-              Ek photo — aur Trikaal AI aapke haath ki 6 rekhaon aur 7 parvaton ka poora
-              Samudrika Shastra vishleshan karti hai. PDF report aapki, hamesha ke liye.
+              Bas hatheli ki photo — aur aapki report granth <strong>Hastasanjeevanam</strong> ke shlokon se:
+              beeta samay, abhi ka daur, aage ka bhagya, 7 graha-sthaan aur upay. Report kuch second mein, PDF hamesha ke liye.
             </p>
-            <div className="flex flex-wrap gap-2 justify-center mt-5">
-              {['Hand Landmark Detection', 'Line Enhancement', 'AI Vision Scan', 'Samudrika Rules', 'PDF Report'].map(t => (
-                <span key={t} className="px-3 py-1 rounded-full text-xs"
-                  style={{ background: GOLD_RGBA(0.08), border: `1px solid ${GOLD_RGBA(0.2)}`, color: GOLD_RGBA(0.9) }}>{t}</span>
-              ))}
-            </div>
           </div>
 
-          {/* EEAT author chip */}
-          <div className="flex items-center gap-3 mb-8 p-4 rounded-xl"
+          <div className="flex items-center gap-3 mb-7 p-4 rounded-xl"
             style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
             <img src="/Rohiit-Gupta.jpg" alt="Rohiit Gupta, Chief Vedic Architect, Trikaal Vaani"
               className="w-12 h-12 rounded-full object-cover shrink-0" style={{ border: `1px solid ${GOLD_RGBA(0.4)}` }} />
             <div className="text-sm">
               <div className="font-semibold" style={{ color: GOLD }}>Rohiit Gupta</div>
-              <div className="text-slate-400">Chief Vedic Architect · 16+ saal Samudrika Shastra anubhav</div>
-              <div className="text-xs text-slate-500 mt-0.5">Parashara BPHS tradition · Classical Samudrika texts</div>
+              <div className="text-slate-400">Chief Vedic Architect · 16+ saal Jyotish anubhav</div>
+              <div className="text-xs text-slate-500 mt-0.5">Granth: Hastasanjeevanam · Upay: BPHS</div>
             </div>
           </div>
 
-          {/* Photo tips */}
-          <div className="rounded-xl p-4 mb-6" style={{ background: GOLD_RGBA(0.06), border: `1px solid ${GOLD_RGBA(0.2)}` }}>
-            <p className="font-semibold text-sm mb-3" style={{ color: GOLD }}>📸 Achhi Photo = Achhi Reading</p>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              {['Natural light mein lein', 'Poora haath frame mein', 'Ungliyan seedhi khuli', 'Rings/bangles utaar lein'].map((t, i) => (
-                <div key={i} className="flex gap-2 text-sm text-slate-300">
-                  <span className="text-green-400 shrink-0">✓</span><span>{t}</span>
-                </div>
-              ))}
-            </div>
+          {slots}
+
+          <div className="rounded-xl p-4 mt-5 mb-6" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.10)' }}>
+            <p className="font-semibold text-sm mb-2" style={{ color: GOLD }}>अच्छी फोटो कैसे लें</p>
+            {['1. दिन की रोशनी, फ्लैश बंद', '2. हथेली पूरी खुली, उँगलियाँ थोड़ी फैली', '3. फोन हथेली के ठीक ऊपर', '4. कलाई से उँगलियों तक पूरा हाथ फ्रेम में'].map(t => (
+              <p key={t} className="text-sm text-slate-300 leading-relaxed">{t}</p>
+            ))}
+            <p className="text-xs text-slate-500 mt-2">कैमरा खुलते ही बताता है — रोशनी ठीक है या नहीं, हाथ स्थिर है या नहीं।</p>
           </div>
 
-          {/* v2.1 — Handedness selector (accuracy-critical) */}
-          <div className="rounded-xl p-4 mb-6" style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid ${GOLD_RGBA(0.2)}` }}>
-            <p className="font-semibold text-sm mb-1" style={{ color: GOLD }}>✍️ Aap likhne ke liye kaun sa haath use karte hain?</p>
-            <p className="text-xs text-slate-500 mb-3">
-              Samudrika Shastra mein pradhan (dominant) haath padha jaata hai — wahi dikhata hai jo aapne banaya.
-            </p>
-            <div className="grid grid-cols-2 gap-3 max-w-sm">
-              {([['right', '🖐️ Daya (Right)'], ['left', '🤚 Baaya (Left)']] as [Handedness, string][]).map(([val, lab]) => (
-                <button key={val} onClick={() => setForm(p => ({ ...p, handedness: val }))}
-                  className="py-2.5 rounded-lg text-sm font-medium transition-all"
-                  style={form.handedness === val
-                    ? { background: `linear-gradient(135deg, ${GOLD} 0%, #A8820A 100%)`, color: '#080B12' }
-                    : { background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#cbd5e1' }}>
-                  {lab}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Upload zones — dominant first, always */}
-          <div className="grid md:grid-cols-2 gap-6 mb-7">
-            <UploadZone image={domPalm} onFile={f => handleFile(f, 'dom')} label={domLabel}
-              sublabel="Jis haath se aap likhte hain — ye zaroori hai" required emoji="🖐️" />
-            <UploadZone image={otherPalm} onFile={f => handleFile(f, 'other')} label={otherLabel}
-              sublabel="Dono haathon ka farak hi asli reading hai" emoji="🤚" />
-          </div>
-
-          {/* Form */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-            <div className="col-span-2">
-              <label className="block text-xs text-slate-500 mb-1.5">Aapka Naam</label>
-              <input type="text" placeholder="Name (PDF mein aayega)"
-                value={form.userName} onChange={e => setForm(p => ({ ...p, userName: e.target.value }))}
-                className="w-full rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none"
-                style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }} />
-            </div>
-            <div className="col-span-2">
-              <label className="block text-xs text-slate-500 mb-1.5">WhatsApp Number</label>
-              <input type="tel" inputMode="numeric" maxLength={10} placeholder="Report link ke liye (10 digit)"
-                value={form.mobile}
+          <div className="grid grid-cols-2 gap-3 mb-4">
+            <label className="col-span-2 flex flex-col gap-1.5 text-xs text-slate-400">आपका नाम
+              <input type="text" placeholder="PDF में आएगा" value={form.userName}
+                onChange={e => setForm(p => ({ ...p, userName: e.target.value }))}
+                className="w-full rounded-lg px-3 min-h-[46px] text-white text-[15px] focus:outline-none"
+                style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.12)' }} />
+            </label>
+            <label className="col-span-2 flex flex-col gap-1.5 text-xs text-slate-400">WhatsApp नंबर
+              <input type="tel" inputMode="numeric" maxLength={10} placeholder="रिपोर्ट लिंक के लिए (10 अंक)" value={form.mobile}
                 onChange={e => setForm(p => ({ ...p, mobile: e.target.value.replace(/[^0-9]/g, '').slice(0, 10) }))}
-                className="w-full rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none"
-                style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }} />
-            </div>
-            <div className="col-span-2">
-              <label className="block text-xs text-slate-500 mb-1.5">Gender</label>
-              <select value={form.gender} onChange={e => setForm(p => ({ ...p, gender: e.target.value as any }))}
-                className="w-full rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none"
-                style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}>
-                <option value="M">Purush</option>
-                <option value="F">Stri</option>
+                className="w-full rounded-lg px-3 min-h-[46px] text-white text-[15px] focus:outline-none"
+                style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.12)' }} />
+            </label>
+            <label className="flex flex-col gap-1.5 text-xs text-slate-400">पुरुष / स्त्री
+              <select value={form.gender} onChange={e => setForm(p => ({ ...p, gender: e.target.value as 'M' | 'F' }))}
+                className="w-full rounded-lg px-3 min-h-[46px] text-white text-[15px] focus:outline-none"
+                style={{ background: '#111520', border: '1px solid rgba(255,255,255,0.12)' }}>
+                <option value="M">पुरुष</option>
+                <option value="F">स्त्री</option>
               </select>
-            </div>
-            <div className="col-span-2">
-              <label className="block text-xs text-slate-500 mb-1.5">Language</label>
-              <select value={form.language} onChange={e => setForm(p => ({ ...p, language: e.target.value as any }))}
-                className="w-full rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none"
-                style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}>
+            </label>
+            <label className="flex flex-col gap-1.5 text-xs text-slate-400">भाषा
+              <select value={form.language} onChange={e => setForm(p => ({ ...p, language: e.target.value as FormState['language'] }))}
+                className="w-full rounded-lg px-3 min-h-[46px] text-white text-[15px] focus:outline-none"
+                style={{ background: '#111520', border: '1px solid rgba(255,255,255,0.12)' }}>
                 <option value="hi">हिंदी</option>
-                <option value="en">English</option>
                 <option value="hinglish">Hinglish</option>
+                <option value="en">English</option>
               </select>
-            </div>
+            </label>
+            <label className="col-span-2 flex flex-col gap-1.5 text-xs text-slate-400">
+              <span>जन्म तिथि <span style={{ color: '#C9A635' }}>(इच्छा पर — जल्द साल-दर-साल फल के लिए)</span></span>
+              <input type="date" value={form.dob} max={new Date().toISOString().slice(0, 10)}
+                onChange={e => setForm(p => ({ ...p, dob: e.target.value }))}
+                className="w-full rounded-lg px-3 min-h-[46px] text-white text-[15px] focus:outline-none"
+                style={{ background: GOLD_RGBA(0.05), border: `1px solid ${GOLD_RGBA(0.45)}`, colorScheme: 'dark' }} />
+            </label>
           </div>
+
+          <label className="flex gap-3 items-start rounded-xl p-3 mb-5 cursor-pointer"
+            style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.10)' }}>
+            <input type="checkbox" checked={form.consent} onChange={e => setForm(p => ({ ...p, consent: e.target.checked }))}
+              className="w-[22px] h-[22px] mt-0.5 shrink-0" style={{ accentColor: GOLD }} />
+            <span className="text-[13px] leading-relaxed text-slate-300">
+              मेरी हथेली की फोटो (बिना नाम-नंबर के) Trikaal Vaani का इंजन बेहतर बनाने में इस्तेमाल हो सकती है।
+              <span className="text-slate-500"> (इच्छा पर — न चुनें तो भी पूरी रिपोर्ट मिलेगी)</span>
+            </span>
+          </label>
 
           {error && (
             <div className="rounded-lg px-4 py-3 mb-4 text-red-300 text-sm"
               style={{ background: 'rgba(220,38,38,0.15)', border: '1px solid rgba(220,38,38,0.3)' }}>⚠️ {error}</div>
           )}
 
-          {/* CTA — v2.4: currency follows the visitor, not the other way round */}
+          {/* CTA — v2.4: currency follows the visitor */}
           {isIndia === false && !inPlayApp ? (
             <div>
-              {!domPalm && (
+              {!photosReady() && (
                 <p className="text-center text-xs mb-2" style={{ color: '#94a3b8' }}>
-                  Upload your dominant palm photo first.
+                  Add a clear palm photo first.
                 </p>
               )}
-              <div style={{ opacity: domPalm ? 1 : 0.4, pointerEvents: domPalm ? 'auto' : 'none' }}>
+              <div style={{ opacity: photosReady() ? 1 : 0.4, pointerEvents: photosReady() ? 'auto' : 'none' }}>
                 <PayPalCheckout
                   productKey="hast_rekha"
                   onPaid={(proof) => handlePayPalPaid({ paypal_order_id: proof.paypal_order_id })}
                   onError={(m) => setError(m)}
-                  disabled={!domPalm || step === 'paying'}
+                  disabled={!photosReady() || step === 'paying'}
                 />
               </div>
             </div>
           ) : (
-            <button onClick={handlePay} disabled={!domPalm || step === 'paying'}
-              className="w-full py-4 rounded-xl font-bold text-lg transition-all hover:scale-[1.01] disabled:opacity-30 disabled:cursor-not-allowed"
-              style={{ background: `linear-gradient(135deg, ${GOLD} 0%, #A8820A 100%)`, color: '#080B12' }}>
-              {step === 'paying' ? '⏳ Payment Processing...' : '🔮 Full Hast Rekha Report — ₹51'}
+            <button onClick={handlePay} disabled={!photosReady() || step === 'paying'}
+              className="w-full min-h-[54px] rounded-xl font-bold text-lg transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+              style={{ background: GOLD, color: '#080B12' }}>
+              {step === 'paying' ? '⏳ Payment Processing...' : 'रिपोर्ट बनाएँ — ₹51'}
             </button>
           )}
+          <p className="text-center text-xs mt-2" style={{ color: '#9CA3AF' }}>फोटो साफ न हो तो एक बार मुफ्त दोबारा भेज सकते हैं</p>
 
-          {/* What's included */}
           <div className="mt-4 rounded-xl p-4" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
             <p className="text-xs font-semibold mb-2 tracking-wide" style={{ color: GOLD_RGBA(0.85) }}>REPORT MEIN KYA HAI</p>
             <div className="grid grid-cols-2 gap-1.5">
-              {['8 Dimension Scores', '6 Mukhya Rekhaen Analysis', '7 Parvat Vishleshan', 'Vyaktitva Vishleshan',
-                'Vyavsay + Dhan Yoga', 'Prem + Vivah Sanket', 'Swasthya + Adhyatma', 'Samudrika Upay',
-                'Trikaal AI ka Sandesh', 'PDF Download ✓'].map((item, i) => (
-                <div key={i} className="flex gap-2 text-xs text-slate-400">
+              {['Har baat ke saath granth ka shlok', 'Beeta samay · Abhi · Aage', 'Budhapa aur sehat', 'Aapke haath ke 7 graha-sthaan',
+                'Sahayak graha + 3 upay (BPHS)', 'Hindi / Hinglish / English', 'Ek baar muft dobara-photo', 'PDF Download ✓'].map((item) => (
+                <div key={item} className="flex gap-2 text-xs text-slate-400">
                   <span style={{ color: GOLD }}>◈</span><span>{item}</span>
                 </div>
               ))}
             </div>
           </div>
 
-          <p className="text-center text-slate-600 text-xs mt-4">
+          <p className="text-center text-slate-500 text-xs mt-4">
             {inPlayApp
-              ? 'Secure payment via Google Play. Instant unlock. · Photo sirf analysis ke liye — hamare database mein save nahi hoti · One-time ₹51'
+              ? 'Secure payment via Google Play. Instant unlock. · Photo save nahi hoti — jab tak aap upar haan na chunein · One-time ₹51'
               : isIndia === false
-              ? 'Secure payment via PayPal — or pay by card without a PayPal account · Photo is used only for the analysis and is never stored · One-time $7'
-              : 'Secure payment via Razorpay · Photo sirf analysis ke liye — hamare database mein save nahi hoti · One-time ₹51'}
+              ? 'Secure payment via PayPal — or pay by card without a PayPal account · Your photo is not stored unless you tick the box above · One-time $7'
+              : 'Secure payment via Razorpay · Photo save nahi hoti — jab tak aap upar haan na chunein · One-time ₹51'}
           </p>
 
-          {/* AEO FAQ */}
           <section className="mt-14 pt-10 border-t" style={{ borderColor: 'rgba(255,255,255,0.06)' }}>
             <h2 className="text-2xl font-serif font-bold mb-6 text-center" style={{ color: GOLD }}>
               Aksar Pooche Jaane Wale Sawaal
@@ -692,19 +645,17 @@ export default function HastRekhaClient({ faqs }: { faqs: FAQ[] }) {
             </div>
           </section>
 
-          {/* SEO content — Budh Rekha removed (official scope = 6 lines) */}
           <section className="mt-12">
             <h2 className="text-xl font-serif font-bold mb-4" style={{ color: GOLD }}>Haath Ki Rekhaen Kya Batati Hain?</h2>
             <p className="text-sm text-slate-400 leading-relaxed">
-              Jeevan Rekha (Life Line) vitality aur swasthya batati hai. Mastishk Rekha (Head Line) career path aur
-              soch ka tarika dikhati hai. Hriday Rekha (Heart Line) prem aur rishton ki gehrai batati hai.
-              Bhagya Rekha (Fate Line) career trajectory aur bhagya sanket deti hai. Surya Rekha yash aur samridhi
-              batati hai, aur Vivah Rekha rishton ke bandhan ka sanket. Trikaal Vaani ka AI engine in sab ko
-              7 parvaton ke sandarbh mein ek saath analyze karke aapko personalized Samudrika Shastra report deta hai.
+              Granth Hastasanjeevanam (3.3.6) ke anusaar Pitr Rekha (angoothe ko gherne wali) bachpan batati hai,
+              Matr ya Dhan Rekha (hatheli ke beech ki aadi) jawani aur kamaai ka daur, aur Aayu Rekha (ungliyon ke neeche)
+              budhapa. Kalaai se ungliyon ki or jaane wali Urdhva Rekha (aajkal bhagya rekha) batati hai ki aage kaam aur pad
+              ka raasta kis or jayega (3.5.8–3.5.11). Trikaal Vaani ka engine yahi rekhaen aapki photo mein naapta hai aur
+              granth ke shlok ke saath report deta hai.
             </p>
           </section>
 
-          {/* Internal links */}
           <section className="mt-10 grid sm:grid-cols-3 gap-3">
             {[
               { href: '/calculators/free-janam-kundali-calculator', label: 'Free Kundli Calculator', emoji: '🔮' },
@@ -733,7 +684,7 @@ export default function HastRekhaClient({ faqs }: { faqs: FAQ[] }) {
       <main className="min-h-screen pt-20 flex flex-col items-center justify-center px-4 text-center"
         style={{ background: '#080B12', color: '#E5E7EB' }}>
         <div className="text-7xl mb-8 animate-pulse">🔮</div>
-        <h2 className="text-2xl font-serif font-bold mb-3" style={{ color: GOLD }}>Trikaal AI Vishleshan Kar Rahi Hai...</h2>
+        <h2 className="text-2xl font-serif font-bold mb-3" style={{ color: GOLD }}>Aapki Hast Rekha Padhi Ja Rahi Hai...</h2>
         <p className="max-w-sm min-h-[2rem]" style={{ color: GOLD_RGBA(0.85) }}>{ANALYZING_MSGS[msgIdx]}</p>
         <div className="flex gap-2 mt-8">
           {ANALYZING_MSGS.map((_, i) => (
@@ -741,12 +692,54 @@ export default function HastRekhaClient({ faqs }: { faqs: FAQ[] }) {
               style={{ width: i === msgIdx ? '32px' : '8px', background: i === msgIdx ? GOLD : 'rgba(255,255,255,0.1)' }} />
           ))}
         </div>
-        <p className="text-slate-600 text-xs mt-8">90 second tak lag sakte hain — kripya page band na karein</p>
+        <p className="text-slate-500 text-xs mt-8">Bas kuch second — kripya page band na karein</p>
       </main>
     </>
   );
 
-  // ═══ REVIEW — honest premium QC handoff (no fabricated flattery) ═══
+  // ═══ RETRY — muft dobara-photo (ya needs_photo) ═══
+  if (step === 'retry' && retry) return (
+    <>
+      <SiteNav />
+      {camera}
+      <main className="min-h-screen pt-20 pb-16 px-4" style={{ background: '#080B12', color: '#E5E7EB' }}>
+        <div className="max-w-md mx-auto flex flex-col gap-4">
+          <h1 className="text-2xl font-serif font-bold" style={{ color: GOLD }}>नई फोटो — मुफ्त</h1>
+          <p className="text-sm text-slate-300 leading-relaxed">
+            {retry.mode === 'needs_photo'
+              ? 'आपका पेमेंट मिल गया है। पर फोटो में हथेली साफ नहीं पढ़ी जा सकी, इसलिए रिपोर्ट अभी नहीं बनी। नई फोटो भेजें — पैसे दोबारा नहीं लगेंगे।'
+              : 'पैसे दोबारा नहीं लगेंगे। नई फोटो से पूरी रिपोर्ट फिर बनेगी और पुरानी की जगह ले लेगी — PDF भी।'}
+          </p>
+          {retry.messages.length > 0 && (
+            <div className="rounded-xl p-3" style={{ background: GOLD_RGBA(0.08) }}>
+              <p className="text-sm font-semibold mb-1" style={{ color: GOLD }}>पिछली फोटो में यह कमी थी</p>
+              {retry.messages.map(m => <p key={m} className="text-sm text-slate-300 leading-relaxed">{m}</p>)}
+            </div>
+          )}
+          {slots}
+          {error && (
+            <div className="rounded-lg px-4 py-3 text-red-300 text-sm"
+              style={{ background: 'rgba(220,38,38,0.15)', border: '1px solid rgba(220,38,38,0.3)' }}>⚠️ {error}</div>
+          )}
+          <button type="button" onClick={submitRetry} disabled={!photosReady() || retryBusy}
+            className="min-h-[52px] rounded-xl font-bold text-base disabled:opacity-30" style={{ background: GOLD, color: '#080B12' }}>
+            {retryBusy ? 'रिपोर्ट बन रही है…' : retry.mode === 'needs_photo' ? 'रिपोर्ट बनाएँ' : 'रिपोर्ट दोबारा बनाएँ'}
+          </button>
+          <p className="text-xs text-center text-slate-500">
+            {retry.mode === 'needs_photo' ? 'जब तक हथेली साफ न पढ़ी जाए, आप दोबारा भेज सकते हैं' : 'यह सुविधा हर रिपोर्ट पर एक बार'}
+          </p>
+          {retry.mode === 'retry' && result && (
+            <button type="button" onClick={() => { setError(''); setStep('result'); }}
+              className="min-h-[44px] rounded-xl text-sm text-slate-400" style={{ border: '1px solid rgba(255,255,255,0.12)' }}>
+              पुरानी रिपोर्ट पर वापस जाएँ
+            </button>
+          )}
+        </div>
+      </main>
+    </>
+  );
+
+  // ═══ REVIEW — sirf jab server band ho (VM error) ═══
   if (step === 'review') return (
     <>
       <SiteNav />
@@ -755,40 +748,31 @@ export default function HastRekhaClient({ faqs }: { faqs: FAQ[] }) {
         <div className="max-w-md mx-auto text-center">
           <div className="text-6xl mb-6">🔱</div>
           <h1 className="text-2xl md:text-3xl font-serif font-bold mb-4" style={{ color: GOLD }}>
-            Aapki Report Extra Jaanch Mein Hai
+            Aapki Report Thodi Der Mein
           </h1>
           <p className="text-slate-300 text-sm md:text-base leading-relaxed mb-6">
-            Hamara usool seedha hai: <strong style={{ color: GOLD }}>galat ya adhoori report kabhi nahi bhejni.</strong>{' '}
-            Aapki photo ke analysis ko hum ek baar aur saavdhani se check kar rahe hain, taaki jo report
-            aap tak pahunche wo poori tarah sahi ho. Aapki detailed report agle{' '}
-            <strong style={{ color: GOLD }}>30 minute</strong> mein WhatsApp par bheji jayegi.
+            Hamara server abhi vyast hai. Aapki photo surakshit hai aur report apne aap dobara banegi —
+            agle <strong style={{ color: GOLD }}>30 minute</strong> mein WhatsApp par bheji jayegi.
           </p>
-
           <div className="rounded-xl p-5 mb-6" style={{ background: GOLD_RGBA(0.06), border: `1px solid ${GOLD_RGBA(0.2)}` }}>
             <p className="text-sm text-slate-400 leading-relaxed">
               ✓ Aapka payment safe hai<br />
-              ✓ Report jaanch ke baad hi aayegi<br />
+              ✓ Report apne aap banegi<br />
               ✓ Koi extra charge nahi
             </p>
           </div>
-
           {waUrl && (
             <a href={waUrl} target="_blank" rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-2 w-full py-4 rounded-xl font-bold text-base transition-all hover:scale-[1.02] mb-3"
+              className="inline-flex items-center justify-center gap-2 w-full py-4 rounded-xl font-bold text-base mb-3"
               style={{ background: '#25D366', color: '#fff' }}>
-              <span>💬</span> WhatsApp Par Confirm Karein
+              WhatsApp Par Confirm Karein
             </a>
           )}
-
           <Link href="/"
-            className="inline-block w-full py-3 rounded-xl text-slate-500 hover:text-slate-300 text-sm transition-all"
+            className="inline-block w-full py-3 rounded-xl text-slate-500 hover:text-slate-300 text-sm"
             style={{ border: '1px solid rgba(255,255,255,0.08)' }}>
             Home Par Wapas Jayein
           </Link>
-
-          <p className="text-slate-600 text-xs mt-6">
-            Trikaal Vaani · Rohiit Gupta, Chief Vedic Architect
-          </p>
         </div>
       </main>
     </>
@@ -796,192 +780,117 @@ export default function HastRekhaClient({ faqs }: { faqs: FAQ[] }) {
 
   // ═══ RESULT ═══
   if (step === 'result' && result) {
-    const { scores, report, mp_features, pdf_b64 } = result;
+    const { report, mp_features, pdf_b64, pdf_url } = result;
+    const granth: GranthReportData | null = report?.granth_report ?? null;
+    const kam = Number(granth?.meta?.kam ?? 0);
+    const usedHand: Hand | null = mp_features?.hand_used === 'left' ? 'left' : mp_features?.hand_used === 'right' ? 'right' : null;
+    const mukhyaHaath: Hand | null = mp_features?.mukhya_haath === 'left' ? 'left' : mp_features?.mukhya_haath === 'right' ? 'right' : null;
+    const weak = kam > 0 || (usedHand && mukhyaHaath && usedHand !== mukhyaHaath);
+    const canRetry = !!(result.free_retry_available && retry?.token);
+    const today = new Date().toLocaleDateString('hi-IN', { day: 'numeric', month: 'long', year: 'numeric' });
+    const shareText = pdf_url ? `मेरी हस्त रेखा रिपोर्ट (Trikaal Vaani, ग्रंथ हस्तसंजीवनम्): ${pdf_url}` : '';
+
     return (
       <>
         <SiteNav />
         <main className="min-h-screen pt-20 pb-16 px-4" style={{ background: '#080B12', color: '#E5E7EB' }}>
-          <div className="max-w-3xl mx-auto">
+          <div className="max-w-2xl mx-auto flex flex-col gap-4">
 
-            {/* Header */}
-            <div className="text-center mb-8">
-              <p className="text-xs font-semibold tracking-widest mb-3" style={{ color: GOLD_RGBA(0.8) }}>VISHLESHAN COMPLETE ✓</p>
-              <h1 className="text-3xl font-serif font-bold mb-3" style={{ color: GOLD }}>Aapki Hast Rekha Report</h1>
-              {mp_features?.hand_shape && (
-                <div className="flex gap-2 justify-center flex-wrap">
-                  <span className="px-4 py-1.5 rounded-full text-sm"
-                    style={{ background: GOLD_RGBA(0.12), border: `1px solid ${GOLD_RGBA(0.3)}`, color: GOLD }}>
-                    {mp_features.hand_shape} Haath
-                  </span>
-                  {mp_features?.thumb_angle && (
-                    <span className="px-4 py-1.5 rounded-full text-sm text-slate-400"
-                      style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}>
-                      Angutha: {mp_features.thumb_angle}°
-                    </span>
-                  )}
-                </div>
+            <div className="text-center flex flex-col gap-2">
+              <p className="text-xs font-semibold tracking-[0.2em]" style={{ color: '#C9A635' }}>HASTASANJEEVANAM · ग्रंथ-आधारित</p>
+              <h1 className="text-2xl md:text-3xl font-serif font-bold leading-snug" style={{ color: GOLD }}>
+                {form.userName ? `${form.userName} जी, ` : ''}आपकी हस्त रेखा रिपोर्ट
+              </h1>
+              <p className="text-sm text-slate-400">{usedHand ? `${HAND_HI[usedHand]} हाथ से पढ़ी गई · ` : ''}{today}</p>
+            </div>
+
+            <div className="flex gap-2.5">
+              {(pdf_b64 || pdf_url) && (
+                pdf_b64 ? (
+                  <button type="button" onClick={() => downloadPDF(pdf_b64, form.userName)}
+                    className="flex-1 min-h-[48px] rounded-xl font-semibold text-[15px] text-white" style={{ background: '#16A34A' }}>
+                    PDF डाउनलोड
+                  </button>
+                ) : (
+                  <a href={pdf_url!} target="_blank" rel="noopener noreferrer"
+                    className="flex-1 min-h-[48px] rounded-xl font-semibold text-[15px] text-white flex items-center justify-center" style={{ background: '#16A34A' }}>
+                    PDF डाउनलोड
+                  </a>
+                )
+              )}
+              {shareText && (
+                <a href={`https://wa.me/?text=${encodeURIComponent(shareText)}`} target="_blank" rel="noopener noreferrer"
+                  className="flex-1 min-h-[48px] rounded-xl font-semibold text-[15px] flex items-center justify-center"
+                  style={{ border: '1px solid #25D366', color: '#4ADE80' }}>
+                  WhatsApp पर भेजें
+                </a>
               )}
             </div>
 
-            {/* PDF top CTA */}
-            {pdf_b64 && (
-              <div className="rounded-xl p-5 mb-6 flex items-center justify-between gap-4"
-                style={{ background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.3)' }}>
-                <div>
-                  <p className="text-green-400 font-semibold mb-1">📄 PDF Report Ready!</p>
-                  <p className="text-slate-400 text-sm">Aapki complete report download ke liye taiyar</p>
-                </div>
-                <button onClick={() => downloadPDF(pdf_b64, form.userName)}
-                  className="shrink-0 px-5 py-2.5 rounded-lg font-semibold text-sm bg-green-600 hover:bg-green-500 text-white transition-all">
-                  ⬇ Download PDF
-                </button>
+            {granth && !weak && (
+              <div className="rounded-xl px-4 py-3 text-sm font-semibold" style={{ background: 'rgba(34,197,94,0.10)', border: '1px solid rgba(34,197,94,0.35)', color: '#BBF7D0' }}>
+                ✓ फोटो साफ थी — चारों मुख्य रेखाएँ पढ़ी गईं
+              </div>
+            )}
+            {granth && weak && (
+              <div className="rounded-xl p-4 flex flex-col gap-3" style={{ background: 'rgba(245,158,11,0.10)', border: '1px solid rgba(245,158,11,0.45)' }}>
+                <p className="text-sm leading-relaxed" style={{ color: '#FDE68A' }}>
+                  {kam > 0
+                    ? `फोटो में ${kam} रेखा साफ नहीं दिखी — इसलिए उसका फल रिपोर्ट में नहीं जोड़ा। बाकी रिपोर्ट नीचे है।`
+                    : 'आपके मुख्य हाथ की साफ फोटो नहीं मिली — रिपोर्ट दूसरे हाथ से पढ़ी गई।'}
+                </p>
+                {canRetry ? (
+                  <button type="button" onClick={() => openRetry({ slug: retry!.slug, token: retry!.token, mode: 'retry', messages: result.quality_notes || [] })}
+                    className="min-h-[48px] rounded-xl font-bold text-[15px]" style={{ background: '#FBBF24', color: '#1A1200' }}>
+                    एक बार मुफ्त — नई फोटो भेजें
+                  </button>
+                ) : (
+                  <p className="text-xs text-slate-400">मुफ्त दोबारा-फोटो इस रिपोर्ट पर इस्तेमाल हो चुकी है।</p>
+                )}
               </div>
             )}
 
-            {/* Scores */}
-            <section className="mb-6">
-              <h2 className="text-base font-semibold mb-4 text-slate-300">📊 Aapke Samudrika Scores</h2>
-              <div className="grid grid-cols-2 gap-3">
-                {Object.entries(scores).map(([key, val]) => {
-                  const meta = SCORE_META[key]; if (!meta) return null;
-                  const col = scoreColor(val);
-                  return (
-                    <div key={key} className="rounded-xl p-4"
-                      style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
-                      <div className="flex justify-between items-start mb-2">
-                        <span className="text-sm text-slate-300">{meta.icon} {meta.label}</span>
-                        <span className="text-sm font-bold ml-2" style={{ color: GOLD }}>{val}/100</span>
-                      </div>
-                      <div className="h-1.5 rounded-full overflow-hidden mb-1.5" style={{ background: 'rgba(255,255,255,0.08)' }}>
-                        <div className="h-full rounded-full" style={{ width: `${val}%`, background: col }} />
-                      </div>
-                      <span className="text-xs" style={{ color: col }}>{scoreTag(val)}</span>
-                    </div>
-                  );
-                })}
+            {granth ? (
+              <GranthReportView data={granth} />
+            ) : (
+              // Purani reports (engine v1.x) — saada text
+              <div className="flex flex-col gap-3">
+                {['hast_parichay', 'mukhya_rekhaen', 'vyaktitva', 'vyavsay_dhan', 'prem_vivah', 'swasthya', 'adhyatma'].map(k =>
+                  report?.[k] ? (
+                    <section key={k} className="rounded-xl p-4 text-sm leading-relaxed text-slate-300 whitespace-pre-line"
+                      style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>{report[k]}</section>
+                  ) : null)}
               </div>
-            </section>
-
-            {/* Hast Parichay */}
-            {report?.hast_parichay && (
-              <section className="rounded-xl p-5 mb-5" style={{ background: GOLD_RGBA(0.06), border: `1px solid ${GOLD_RGBA(0.2)}` }}>
-                <h2 className="font-semibold mb-3 text-sm" style={{ color: GOLD }}>🖐️ Hast Parichay</h2>
-                <p className="text-slate-300 text-sm leading-relaxed">{report.hast_parichay}</p>
-              </section>
             )}
 
-            {/* Highlights */}
-            <div className="grid md:grid-cols-2 gap-4 mb-5">
-              {report?.top_strength && (
-                <div className="rounded-xl p-4" style={{ background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.25)' }}>
-                  <p className="text-green-400 text-xs font-semibold mb-2 tracking-wide">💪 SABSE BADI SHAKTI</p>
-                  <p className="text-slate-200 text-sm leading-relaxed">{report.top_strength}</p>
-                </div>
-              )}
-              {report?.top_challenge && (
-                <div className="rounded-xl p-4" style={{ background: 'rgba(249,115,22,0.08)', border: '1px solid rgba(249,115,22,0.25)' }}>
-                  <p className="text-orange-400 text-xs font-semibold mb-2 tracking-wide">🎯 DHYAN DENE WALA KSHETRA</p>
-                  <p className="text-slate-200 text-sm leading-relaxed">{report.top_challenge}</p>
-                </div>
-              )}
-            </div>
-
-            {/* Sections */}
-            {[
-              { key: 'mukhya_rekhaen', title: '〰️ Mukhya Rekhaen' },
-              { key: 'vyaktitva',      title: '🧠 Vyaktitva' },
-              { key: 'vyavsay_dhan',   title: '💼 Vyavsay aur Dhan' },
-              { key: 'prem_vivah',     title: '❤️ Prem aur Vivah' },
-              { key: 'swasthya',       title: '🌿 Swasthya' },
-              { key: 'adhyatma',       title: '🕉️ Adhyatma' },
-            ].map(({ key, title }) =>
-              report?.[key] ? (
-                <section key={key} className="rounded-xl p-5 mb-5"
-                  style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
-                  <h2 className="font-semibold text-sm mb-3 text-white">{title}</h2>
-                  <p className="text-slate-300 text-sm leading-relaxed">{report[key]}</p>
-                </section>
-              ) : null
-            )}
-
-            {/* Vishesh */}
-            {report?.vishesh_sanket && (
-              <section className="rounded-xl p-5 mb-5" style={{ background: 'rgba(139,92,246,0.08)', border: '1px solid rgba(139,92,246,0.25)' }}>
-                <h2 className="font-semibold text-sm mb-3" style={{ color: '#c4b5fd' }}>⭐ Vishesh Sanket</h2>
-                <p className="text-slate-300 text-sm leading-relaxed">{report.vishesh_sanket}</p>
-              </section>
-            )}
-
-            {/* Upay */}
-            {Array.isArray(report?.upay) && report.upay.length > 0 && (
-              <section className="rounded-xl p-5 mb-5" style={{ background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.25)' }}>
-                <h2 className="font-semibold text-sm mb-3" style={{ color: '#a5b4fc' }}>🕉️ Samudrika Upay</h2>
-                <ul className="space-y-2">
-                  {report.upay.map((u: string, i: number) => (
-                    <li key={i} className="flex gap-2.5 text-sm text-slate-300">
-                      <span className="shrink-0 mt-0.5" style={{ color: '#818cf8' }}>◈</span><span>{u}</span>
-                    </li>
-                  ))}
-                </ul>
-              </section>
-            )}
-
-            {/* v2.1 RATNA — honest pointer, engine's shubh_ratna intentionally NOT rendered.
-                Palm marks never decide a gemstone; the Kundali does. This card protects the
-                anti-fear promise AND cross-sells the gemstone calculator. */}
-            <section className="rounded-xl p-5 mb-5" style={{ background: 'rgba(59,130,246,0.08)', border: '1px solid rgba(59,130,246,0.25)' }}>
-              <h2 className="font-semibold text-sm mb-2" style={{ color: '#93c5fd' }}>💎 Ratna Ke Baare Mein Sach</h2>
-              <p className="text-slate-300 text-sm leading-relaxed mb-3">
-                Ratna kabhi hatheli ke nishan se tay nahi hota — wo aapki <strong>Kundali</strong> se hota hai.
-                Isliye hum is report mein koi ratna suggest nahi karte. Galat ratna nuksaan karta hai.
-                Apni Kundali ke hisaab se free mein check karein:
+            <section className="rounded-2xl p-4" style={{ background: 'rgba(59,130,246,0.08)', border: '1px solid rgba(96,165,250,0.35)' }}>
+              <h2 className="font-semibold text-[15px] mb-2" style={{ color: '#93C5FD' }}>रत्न के बारे में सच</h2>
+              <p className="text-sm leading-relaxed mb-3" style={{ color: '#CBD5E1' }}>
+                रत्न हथेली से नहीं, कुंडली से तय होता है। गलत रत्न नुकसान करता है — इसलिए यह रिपोर्ट कोई रत्न नहीं बताती।
               </p>
               <Link href="/calculators/free-gemstone-suitability-calculator"
-                className="inline-block px-4 py-2 rounded-lg text-sm font-semibold transition-all hover:scale-[1.02]"
-                style={{ background: 'rgba(59,130,246,0.2)', border: '1px solid rgba(59,130,246,0.4)', color: '#93c5fd' }}>
-                💎 Free Gemstone Suitability Calculator →
+                className="min-h-[44px] rounded-lg text-sm font-semibold flex items-center justify-center"
+                style={{ border: '1px solid rgba(96,165,250,0.5)', color: '#93C5FD' }}>
+                मुफ्त रत्न जाँच →
               </Link>
             </section>
 
-            {/* Trikaal AI Sandesh */}
-            {report?.jini_sandesh && (
-              <section className="rounded-xl p-6 mb-5 text-center"
-                style={{ background: `linear-gradient(135deg, ${GOLD_RGBA(0.12)}, rgba(2,8,23,0.6))`, border: `1px solid ${GOLD_RGBA(0.35)}` }}>
-                <p className="text-xs font-semibold tracking-widest mb-3" style={{ color: GOLD }}>✨ TRIKAAL AI KA SANDESH</p>
-                <p className="text-slate-200 text-sm leading-relaxed italic">{report.jini_sandesh}</p>
-              </section>
-            )}
-
-            {/* PDF bottom */}
-            {pdf_b64 && (
-              <button onClick={() => downloadPDF(pdf_b64, form.userName)}
-                className="w-full py-3.5 rounded-xl font-semibold transition-all bg-green-700 hover:bg-green-600 text-white mb-5">
-                ⬇ PDF Report Download Karein
-              </button>
-            )}
-
-            {/* Upsell — timing questions belong to the Kundali; honest bridge */}
-            <section className="rounded-2xl p-6 text-center mb-5"
-              style={{ background: `linear-gradient(135deg, ${GOLD_RGBA(0.12)}, rgba(2,8,23,0.6))`, border: `1px solid ${GOLD_RGBA(0.35)}` }}>
-              <h3 className="font-serif font-bold text-lg mb-2" style={{ color: GOLD }}>Ab Sawaal &ldquo;Kab&rdquo; Ka Hai?</h3>
-              <p className="text-slate-400 text-sm mb-5 max-w-sm mx-auto">
-                Hatheli batati hai <em>kya</em> — timing batati hai <strong>Kundali</strong>.
-                Vivah kab, career shift kab, dasha kya keh rahi hai — sab Janam Kundali se.
-              </p>
+            <section className="rounded-2xl p-5 text-center flex flex-col items-center gap-3"
+              style={{ background: `linear-gradient(160deg, ${GOLD_RGBA(0.18)}, rgba(8,11,18,0.9))`, border: `1px solid ${GOLD_RGBA(0.45)}` }}>
+              <h3 className="font-serif font-bold text-lg" style={{ color: GOLD }}>अब सवाल &ldquo;कब&rdquo; का है?</h3>
+              <p className="text-sm leading-relaxed" style={{ color: '#CBD5E1' }}>हथेली बताती है क्या — कब, यह आपकी जन्म कुंडली बताती है।</p>
               <Link href="/#birth-form"
-                className="inline-block px-8 py-3 rounded-full font-semibold text-sm transition-all hover:scale-105"
-                style={{ background: `linear-gradient(135deg, ${GOLD} 0%, #A8820A 100%)`, color: '#080B12' }}>
-                🔮 Trikaal Ka Sandesh — ₹51 →
+                className="min-h-[48px] px-6 rounded-full font-bold text-[15px] flex items-center"
+                style={{ background: GOLD, color: '#080B12' }}>
+                कुंडली रीडिंग ₹51 →
               </Link>
             </section>
 
-            {/* Retry */}
-            <button onClick={reset}
-              className="w-full py-3 rounded-xl text-slate-500 hover:text-slate-300 text-sm transition-all"
+            <button type="button" onClick={reset}
+              className="min-h-[44px] rounded-xl text-slate-500 hover:text-slate-300 text-sm"
               style={{ border: '1px solid rgba(255,255,255,0.08)' }}>
-              🔄 Nayi Photo se Dobara Try Karein
+              किसी और की नई रिपोर्ट बनाएँ
             </button>
-
           </div>
         </main>
         <HastRekhaFooter />

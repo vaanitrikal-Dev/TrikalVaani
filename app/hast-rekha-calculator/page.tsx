@@ -1,7 +1,12 @@
 // ═══════════════════════════════════════════════════════════════
 // app/hast-rekha-calculator/page.tsx
 // AI HAST REKHA CALCULATOR — money page (server component)
-// Version: v3.2 (19 Oct 2026) — Radar weekly report 17 Oct 2026 (page at rank 1, PUSH 7 SERPs).
+// Version: v3.3 (27 Oct 2026) — HAST REKHA v3 SACH: engine ab granth Hastasanjeevanam par (VM v2.0.0,
+//   bina Gemini/Claude). Page ke daave report se milaaye: "8 scores / 6 rekha / 7 parvat / 5 upay /
+//   dominant haath / photo kabhi save nahi" → 4 mukhya rekha (pitr, matr/dhan, urdhva, aayu) +
+//   7 graha-sthaan (1.5.9-10) + 3 BPHS upay + shlok; mukhya haath granth 3.1.6 (purush right, stri
+//   left); photo sirf consent par save. Title, URL, H1, keywords, hub links — badle nahi.
+// (previous) Version: v3.2 (19 Oct 2026) — Radar weekly report 17 Oct 2026 (page at rank 1, PUSH 7 SERPs).
 //   The brief's Hindi/AI/ChatGPT/scanner/male-female keywords already had their own H2 here, so
 //   only three genuine gaps were added: 'Indian palm reading free' (16+12), 'Free palm reading
 //   scanner online — male/female/India' (19+18+15+12) in English, and 'Hath ki rekha online check —
@@ -151,7 +156,7 @@ export const metadata: Metadata = {
     absolute: 'AI Hast Rekha Calculator — Palm Reading ₹51',
   },
   description:
-    'Upload one palm photo and get a classical Samudrika Shastra reading — all 6 lines and all 7 mounts, 8 life scores, personalised remedies and a PDF report. ₹51. No birth time needed. We will not tell you when you will die, and there is no puja to buy afterwards.',
+    'Upload one palm photo and get a reading from the classical text Hastasanjeevanam — past, present and future from your four main lines, the 7 planet seats of your hand, 3 BPHS remedies and a PDF, every point with its Sanskrit shloka. ₹51. No birth time. No puja to buy afterwards.',
   keywords: [
     // head + body
     'hast rekha', 'palmistry', 'hast rekha calculator', 'palm reading online',
@@ -209,7 +214,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'AI Hast Rekha Calculator — Samudrika Shastra Reading | Trikaal Vaani',
     description:
-      'One palm photo. 6 lines, 7 mounts, 8 life scores, remedies and a PDF report. ₹51. No birth time. No puja to buy afterwards.',
+      'One palm photo. Past, present and future from the classical text Hastasanjeevanam, with the shloka behind every point, 3 remedies and a PDF. ₹51. No birth time.',
     url: PAGE_URL,
     type: 'website',
     images: [
@@ -224,7 +229,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'AI Hast Rekha Calculator | Trikaal Vaani',
-    description: 'Upload a palm photo → classical Samudrika Shastra reading. PDF report ₹51. No birth time needed.',
+    description: 'Upload a palm photo → a Hastasanjeevanam reading with shlokas, remedies and a PDF. ₹51. No birth time needed.',
     images: ['https://trikalvaani.com/og-default.jpg'],
   },
   robots: { index: true, follow: true },
@@ -238,7 +243,7 @@ const FAQS = [
   },
   {
     q: 'Hast Rekha Calculator kaun si rekhaen aur parvat analyze karta hai?',
-    a: 'Trikaal Vaani ka AI calculator 6 mukhya rekhaen — Jeevan Rekha, Mastishk Rekha, Hriday Rekha, Bhagya Rekha, Surya Rekha aur Vivah Rekha — aur 7 parvat (Guru, Shani, Surya, Budh, Shukra, Mangal, Chandra) ka vishleshan karta hai. Mangal ke do kshetra hote hain, lekin parvat ek hi mana jaata hai.',
+    a: 'Trikaal Vaani ka engine granth Hastasanjeevanam (Acharya Meghavijay) ki chaar mukhya rekhaen padhta hai — Pitr (Gotra) Rekha, Matr (Dhan) Rekha, Aayu Rekha aur Urdhva Rekha (aajkal ki bhagya rekha) — aur granth ke shlok 1.5.9–10 ke anusaar haath ke 7 graha-sthaan batata hai. Jo rekha photo mein saaf na dikhe, uska phal report mein nahi joda jaata.',
   },
   {
     q: 'AI palm reading kitni accurate hoti hai?',
@@ -246,15 +251,15 @@ const FAQS = [
   },
   {
     q: 'Hast Rekha report mein kya milega?',
-    a: '8 dimension scores (career, dhan, swasthya, rishtey, urja, netritva, srijanshakti, adhyatma), haath ka Samudrika parichay, 6 rekhaon aur 7 parvaton ka vishleshan, har nishan uske parvat ke sandarbh mein, vyaktigat Samudrika upay, aur ek downloadable PDF report — Hindi, English ya Hinglish mein.',
+    a: 'Saar, phir beeta samay (Pitr rekha), abhi ka daur (Dhan rekha), aage ka kaam aur bhagya (Urdhva rekha), budhapa (Aayu rekha), haath ke 7 graha-sthaan, aapka sahayak graha aur uske 3 upay (BPHS 85) — har baat ke saath granth ka shlok aur ank. Downloadable PDF, Hindi, Hinglish ya English mein. Koi score nahi, koi umr ya tareekh nahi. Photo saaf na ho to ek baar muft dobara-photo.',
   },
   {
     q: 'Kaun sa haath upload karein — seedha ya ulta?',
-    a: 'Apna DOMINANT haath upload karein — yaani jis haath se aap likhte hain. Form mein aap select kar sakte hain ki aap right-handed hain ya left-handed, aur upload labels apne aap sahi ho jaate hain. Agar aap left-handed hain toh baaya haath hi pradhan hai, chahe purani "purush ka daya haath" wali reet kuch bhi kahe. Dominant haath dikhata hai jo aapne banaya; non-dominant dikhata hai jo aapko mila. Dono upload karein toh unke beech ka farak bhi padha jaata hai — aur asli reading wahi hai.',
+    a: 'Granth Hastasanjeevanam (3.1.6) ka niyam: purush ka DAAYA (right) aur stri ka BAAYA (left) haath mukhya hai — report usi se padhi jaati hai. Form mein dono haath ke liye alag jagah hai; mukhya haath zaroor bhejein, dono bhejein to aur behtar. Mukhya haath ki photo saaf na ho to report doosre haath se banti hai aur yeh report mein saaf likha hota hai.',
   },
   {
     q: 'Kya meri palm image save hoti hai?',
-    a: 'Aapki photo sirf analysis ke liye process hoti hai. Analysis ke liye photo hamare secure server par jaati hai, lekin hum use apne database ya storage mein save nahi karte — humne apna system check karke ye confirm kiya hai. Sirf aapki report aur PDF save hoti hai, taaki aap use dobara paa sakein. Photo bechna, share karna ya training ke liye use karna — kuch nahi hota.',
+    a: 'Aapki photo analysis ke liye hamare apne server par jaati hai aur wahan save nahi hoti — sirf aapki report aur PDF save hoti hai. Ek hi apvaad, aur woh aapki marzi se: form mein ek checkbox hai (pehle se khaali) — aap use chunein tabhi photo, bina naam-number ke, hamare engine ko behtar banane ke liye rakhi jaati hai. Server vyast hone par report dobara banane ke liye photo kuch der surakshit rakhi jaati hai aur report bante hi delete hoti hai. Photo bechna ya share karna — kabhi nahi.',
   },
   {
     q: 'Kya aap bata sakte hain ki meri shaadi kab hogi, ya main kitne saal jiyunga?',
@@ -266,7 +271,7 @@ const FAQS = [
   },
   {
     q: 'एआई हस्तरेखा कैसे काम करती है?',
-    a: 'AI koi bhavishyavani karne wali machine nahi hai. Engine wahi karta hai jo ek anubhavi paathak aankh se karta hai: photo mein rekhaon ki disha, gehrai, lambai, toot aur shaakhaayein pehchanta hai, parvaton ka ubhaar aankta hai, chihnon ka sthan tay karta hai — phir un par Samudrika Shastra ke shastriya niyam lagata hai. Machine ek cheez mein sachmuch behtar hai: wo aapka chehra dekh hi nahi sakti, isliye aapko khush karne ya darane ke liye reading badal nahi sakti.',
+    a: 'Hamara engine hamare apne server par chalta hai — koi bahari chatbot nahi. Woh photo mein chaar mukhya rekhaen pehchanta hai, naapta hai ki har rekha kahan se shuru hokar kis ungli tak jaati hai aur kahin tootti to nahi — phir granth Hastasanjeevanam mein usi haalat ka shlok dhoondhkar report banata hai. Ek hi photo par hamesha ek hi report. Aur woh aapka chehra dekh hi nahi sakta, isliye aapko khush karne ya darane ke liye reading badal nahi sakta.',
   },
   {
     q: 'क्या हस्त रेखा PDF मुफ्त में मिलेगी?',
@@ -387,9 +392,9 @@ const HINDI_SECTIONS: HiSection[] = [
     id: 'ai-se-kaise-dekhe',
     h2: 'AI से हाथ की रेखा कैसे देखें — तीन कदम',
     paras: [
-      'पूरी प्रक्रिया तीन कदम की है और दो मिनट से कम लेती है। **एक:** ऊपर फॉर्म में अपना प्रधान हाथ चुनिए — जिससे आप लिखते हैं। बाएँ हाथ वाले हैं तो बायाँ चुनिए; लेबल अपने आप बदल जाते हैं। **दो:** हथेली की फोटो अपलोड कीजिए, ऊपर बताए फोटो-नियमों के साथ। **तीन:** रिपोर्ट बन जाती है और PDF के रूप में आपके पास रहती है।',
-      'रिपोर्ट में क्या मिलता है: **आठ जीवन-क्षेत्रों के स्कोर** (करियर, धन, स्वास्थ्य, रिश्ते, ऊर्जा, नेतृत्व, सृजनशक्ति, अध्यात्म), **छह रेखाओं** और **सात पर्वतों** का विश्लेषण, हर चिह्न उसके पर्वत के संदर्भ में, और व्यक्तिगत समुद्रिक उपाय — हिंदी, अंग्रेज़ी या हिंग्लिश में, जो आप चुनें।',
-      'फोटो का क्या होता है, यह भी साफ जान लीजिए: **तस्वीर विश्लेषण के लिए हमारे सर्वर पर जाती है, पर हमारे डेटाबेस या स्टोरेज में सेव नहीं होती** — केवल आपकी रिपोर्ट सेव होती है ताकि आप उसे दोबारा पा सकें। न बेची जाती है, न साझा, न ट्रेनिंग के लिए इस्तेमाल।',
+      'पूरी प्रक्रिया तीन कदम की है और दो मिनट से कम लेती है। **एक:** ऊपर Right या Left हाथ के डिब्बे पर टैप कीजिए — कैमरा खुलेगा और बताएगा कि रोशनी ठीक है और हाथ स्थिर है; सब हरा होते ही फोटो अपने आप। ग्रंथ (३.१.६) के अनुसार पुरुष का दायाँ, स्त्री का बायाँ हाथ मुख्य है। **दो:** हमारा इंजन 1-2 सेकंड में बता देता है कि फोटो ठीक है या नहीं। **तीन:** रिपोर्ट कुछ सेकंड में बन जाती है और PDF के रूप में आपके पास रहती है।',
+      'रिपोर्ट में क्या मिलता है: **बीता समय, अभी का दौर, आगे का भाग्य और बुढ़ापा** — चार मुख्य रेखाओं (पितृ, मातृ/धन, ऊर्ध्व, आयु) से, **हाथ के ७ ग्रह-स्थान**, आपका सहायक ग्रह और उसके **३ उपाय** — और हर बात के साथ ग्रंथ **हस्तसंजीवनम्** का श्लोक। हिंदी, अंग्रेज़ी या हिंग्लिश में, जो आप चुनें।',
+      'फोटो का क्या होता है, यह भी साफ जान लीजिए: **तस्वीर विश्लेषण के लिए हमारे अपने सर्वर पर जाती है, पर सेव नहीं होती** — केवल आपकी रिपोर्ट सेव होती है ताकि आप उसे दोबारा पा सकें। फोटो केवल तब रखी जाती है जब आप फॉर्म में खुद "हाँ" चुनें (इंजन बेहतर बनाने के लिए, बिना नाम-नंबर के)। न बेची जाती है, न साझा।',
     ],
   },
   {
@@ -447,7 +452,7 @@ const HINDI_SECTIONS: HiSection[] = [
     h2: 'कौन से हाथ की फ़ोटो भेजें',
     paras: [
       'सीधा नियम — **पुरुष का दायाँ, स्त्री का बायाँ**, यही परंपरा में मुख्य हाथ माना गया है।',
-      'शास्त्रीय आधार यह है कि एक हाथ जन्म का दिया हुआ दिखाता है और दूसरा वह जो आपने अपने कर्म से बनाया। इसलिए मुख्य हाथ वही होता है जिससे आप लिखते और काम करते हैं — उसमें आज की स्थिति दिखती है।',
+      'शास्त्रीय आधार ग्रंथ हस्तसंजीवनम् का श्लोक है — *वामभागे तु नारीणां दक्षिणे पुरुषस्य च* (३.१.६): स्त्री का बायाँ, पुरुष का दायाँ। हमारी रिपोर्ट इसी नियम से मुख्य हाथ चुनती है।',
       'दोनों हाथ भेज सकते हैं तो और अच्छा — तुलना से यह पता चलता है कि जन्म की स्थिति और आज की स्थिति में कितना फ़र्क़ आया है।',
       'यह विषय पूरा [कौन सा हाथ देखें](/blog/kaun-sa-haath-dekhein-palmistry) और [Which hand to read](/blog/which-hand-to-read-palmistry-hand-shapes) में खोला गया है।',
     ],
@@ -477,7 +482,7 @@ const HINDI_SECTIONS: HiSection[] = [
     h2: 'आपकी फ़ोटो का क्या होता है',
     paras: [
       'यह प्रश्न कम पूछा जाता है और पूछा जाना चाहिए, क्योंकि हथेली की फ़ोटो निजी चीज़ है।',
-      'फ़ोटो केवल विश्लेषण बनाने के लिए ली जाती है और आपकी अपनी रिपोर्ट से जुड़ी रहती है, ताकि आप उसे दोबारा खोल सकें।',
+      'फ़ोटो केवल विश्लेषण बनाने के लिए ली जाती है और सेव नहीं होती — सेव होती है आपकी रिपोर्ट, ताकि आप उसे दोबारा खोल सकें। फोटो तभी रखी जाती है जब आप फॉर्म में खुद "हाँ" चुनें (पहले से खाली रहता है)।',
       '**यह कहीं सार्वजनिक नहीं होती, किसी को बेची नहीं जाती, और किसी विज्ञापन में उपयोग नहीं होती।**',
       'पूरा विवरण [Privacy Policy](/privacy) पर है। और एक व्यावहारिक सलाह — फ़ोटो में केवल हथेली रखिए, चेहरा या कोई और पहचान नहीं।',
     ],
@@ -486,20 +491,19 @@ const HINDI_SECTIONS: HiSection[] = [
     id: 'report-mein-kya',
     h2: 'रिपोर्ट में क्या-क्या आता है',
     paras: [
-      '**छहों मुख्य रेखाएँ** — जीवन, मस्तिष्क, हृदय, भाग्य, सूर्य और विवाह रेखा। हर एक की लंबाई, गहराई, शाखाएँ और उन पर पड़े चिह्न।',
-      '**सातों पर्वत** — गुरु, शनि, सूर्य, बुध, मंगल, शुक्र और चंद्र। कौन सा उभरा है और कौन सा दबा — यही स्वभाव का सबसे बड़ा संकेत देता है।',
-      '**आठ जीवन-अंक** — करियर, धन, विवाह, स्वास्थ्य, शिक्षा, परिवार, यात्रा और आध्यात्मिक झुकाव, हर एक 100 में से।',
-      '**पाँच उपाय** और एक **PDF रिपोर्ट** जो आप रख सकते हैं या किसी को दिखा सकते हैं। जन्म समय की कोई ज़रूरत नहीं — यही इस विधि की सबसे बड़ी सुविधा है।',
+      '**सार** — सबसे ऊपर 150-200 शब्दों में आपके हाथ की मुख्य बातें, ग्रंथ के श्लोक के साथ।',
+      '**बीता समय, अभी का दौर, आगे का भाग्य, बुढ़ापा** — ग्रंथ हस्तसंजीवनम् (३.३.६) कहता है कि पितृ रेखा बचपन, मातृ (धन) रेखा जवानी और आयु रेखा बुढ़ापा बताती है; ऊर्ध्व रेखा जिस उँगली तक पहुँचे उससे आगे के काम और पद का रास्ता (३.५.८–३.५.११)।',
+      '**हाथ के ७ ग्रह-स्थान** (१.५.९–१०) और आपका **सहायक ग्रह**, उसके **३ उपाय** (बृहत् पाराशर होरा शास्त्र, अध्याय ८५) — मंत्र, दान और व्रत।',
+      'एक **PDF रिपोर्ट** जो आप रख सकते हैं। कोई अंक नहीं, कोई उम्र या तारीख़ नहीं। फोटो साफ न हो तो **एक बार मुफ्त दोबारा-फोटो**। जन्म समय की कोई ज़रूरत नहीं।',
     ],
   },
   {
     id: 'aath-score',
-    h2: 'आठ जीवन-अंक — इनका मतलब क्या है',
+    h2: 'हर बात के साथ श्लोक — अंक क्यों नहीं',
     paras: [
-      'रिपोर्ट में आठ क्षेत्रों के अंक आते हैं, और उन्हें ठीक से समझना ज़रूरी है।',
-      'हर अंक **उस क्षेत्र से जुड़ी रेखा और पर्वत की स्थिति** से बनता है। जैसे धन का अंक सूर्य रेखा, बुध पर्वत और भाग्य रेखा से; विवाह का अंक विवाह रेखा और शुक्र पर्वत से।',
-      'यह अंक **तुलना के लिए है, भविष्यवाणी के लिए नहीं।** 82 का मतलब यह नहीं कि 82 प्रतिशत सफलता मिलेगी। मतलब यह है कि आपके अपने आठ क्षेत्रों में वह क्षेत्र अपेक्षाकृत खुला हुआ है।',
-      'सबसे काम की बात यही है — **कौन सा अंक सबसे ऊँचा है और कौन सा सबसे नीचा।** वही बताता है कि प्रयास कहाँ सहज फल देगा और कहाँ ज़्यादा लगेगा।',
+      'पहले इस रिपोर्ट में आठ क्षेत्रों के अंक आते थे। **अब नहीं आते** — और यह जानबूझकर है।',
+      '82 या 64 जैसा अंक देखने में सटीक लगता है, पर ग्रंथ में कहीं अंक नहीं हैं — ग्रंथ रेखा की **हालत** का **फल** बताता है। इसलिए अब रिपोर्ट हर बात के साथ **हस्तसंजीवनम् का श्लोक और उसका अंक** देती है, जैसे (३.५.१०)।',
+      'इसका फ़ायदा: आप हर बात **खुद जाँच सकते हैं** — कौन सी रेखा, उसकी कौन सी हालत, और ग्रंथ का कौन सा श्लोक। जो रेखा फोटो में साफ नहीं दिखी, उसके बारे में रिपोर्ट कुछ नहीं जोड़ती।',
     ],
   },
 
@@ -511,7 +515,7 @@ const HINDI_SECTIONS: HiSection[] = [
       'यह प्रश्न अब बहुत खोजा जाता है, इसलिए सीधा उत्तर — जिसमें वह भी है जो हमारे पक्ष में नहीं जाता।',
       'ChatGPT या Gemini आपकी हथेली की फ़ोटो देख सकते हैं और उस पर बात कर सकते हैं। वे भाषा में अच्छे हैं और मना नहीं करते। **इतना मान लेना चाहिए।**',
       'फ़र्क़ यह है कि वे **किसी शास्त्रीय ढाँचे पर नहीं चलते।** वे इंटरनेट पर जो पढ़ा है उसी से उत्तर बनाते हैं — और उसमें सामुद्रिक शास्त्र भी है, पश्चिमी palmistry भी, और बहुत कुछ जो किसी परंपरा का नहीं। इसलिए वही फ़ोटो दो बार भेजिए तो दो अलग उत्तर मिल सकते हैं।',
-      'यहाँ ढाँचा तय है — **सामुद्रिक शास्त्र के नियम**, छह रेखाएँ, सात पर्वत, और हर निष्कर्ष के साथ यह लिखा कि वह किस रेखा या पर्वत से निकला। इसलिए आप उसे परख सकते हैं और असहमत भी हो सकते हैं।',
+      'यहाँ ढाँचा तय है — **ग्रंथ हस्तसंजीवनम् के श्लोक**, चार मुख्य रेखाएँ, सात ग्रह-स्थान, और हर निष्कर्ष के साथ श्लोक का अंक। एक ही फोटो पर हमेशा एक ही रिपोर्ट। इसलिए आप उसे परख सकते हैं और असहमत भी हो सकते हैं।',
     ],
   },
   {
@@ -520,7 +524,7 @@ const HINDI_SECTIONS: HiSection[] = [
     paras: [
       '"हाथ की रेखा स्कैन करने वाला ऐप" बहुत खोजा जाता है, इसलिए इस पर साफ़ होना चाहिए।',
       'अधिकांश मुफ़्त स्कैनर ऐप दो में से एक काम करते हैं: या तो वे **पहले से लिखा हुआ सामान्य पाठ** दिखाते हैं जो सबके लिए एक ही होता है, या वे विज्ञापन दिखाने के लिए बने होते हैं। कुछ ऐप हथेली की फ़ोटो माँगते हैं और उसका उपयोग साफ़ नहीं बताते।',
-      'यहाँ **कोई ऐप डाउनलोड नहीं करना पड़ता।** ब्राउज़र में ही चलता है, फ़ोन में जगह नहीं लेता, और कोई अनुमति नहीं माँगता — बस एक फ़ोटो।',
+      'यहाँ **कोई ऐप डाउनलोड नहीं करना पड़ता।** ब्राउज़र में ही चलता है, फ़ोन में जगह नहीं लेता — बस फ़ोटो के लिए कैमरे की अनुमति, या गैलरी से फ़ोटो।',
       'और सबसे बड़ा फ़र्क़ — **यहाँ हर बात के साथ उसका आधार लिखा होता है।** कौन सी रेखा, कौन सा पर्वत, किस नियम से। सामान्य पाठ में वह कभी नहीं होता।',
     ],
   },
@@ -667,7 +671,7 @@ const HINDI_SECTIONS: HiSection[] = [
       'यह सबसे ज़्यादा चौंकाने वाली बात होती है जब लोग पहली बार ध्यान से देखते हैं।',
       'परंपरा का उत्तर सीधा है: **एक हाथ वह दिखाता है जो लेकर आए, दूसरा वह जो बनाया।** गैर-मुख्य हाथ जन्म की प्रवृत्ति, और मुख्य हाथ आज की स्थिति।',
       'इसलिए दोनों में **जितना फ़र्क़ है, उतना ही आपने अपने कर्म से बदला है** — और यह शास्त्र में अच्छा माना जाता है, कमी नहीं।',
-      'यदि दोनों लगभग एक जैसे हैं तो उसका अर्थ यह माना जाता है कि व्यक्ति अपनी स्वाभाविक दिशा में ही चल रहा है। दोनों भेज सकते हैं तो रिपोर्ट में यह तुलना भी आती है।',
+      'यदि दोनों लगभग एक जैसे हैं तो उसका अर्थ यह माना जाता है कि व्यक्ति अपनी स्वाभाविक दिशा में ही चल रहा है। हमारी रिपोर्ट ग्रंथ के नियम (३.१.६) से मुख्य हाथ पढ़ती है; दूसरा हाथ भेजने से मुख्य हाथ की फोटो कमज़ोर होने पर रिपोर्ट रुकती नहीं।',
     ],
   },
   {
@@ -736,10 +740,10 @@ const HINDI_SECTIONS: HiSection[] = [
     id: 'report-kaise-padhein',
     h2: 'रिपोर्ट पढ़ने का सही क्रम',
     paras: [
-      'रिपोर्ट आते ही लोग सीधे अंकों पर जाते हैं। बेहतर क्रम यह है।',
-      '**पहले तीन मुख्य रेखाएँ पढ़िए** — जीवन, मस्तिष्क, हृदय। ये तीनों स्वभाव का ढाँचा हैं और यहीं आप अपने आप को पहचानेंगे। यदि यह हिस्सा आपको सही लगे, तो बाक़ी पर भरोसा करने का आधार बनता है।',
-      '**फिर पर्वत** — कौन सा उभरा है। वही बताता है कि ऊर्जा स्वाभाविक रूप से किस तरफ़ जाती है।',
-      '**सबसे आख़िर में आठ अंक** — क्योंकि वे तुलना के लिए हैं, निर्णय के लिए नहीं। और यदि कहीं **कारण समझ न आए**, वही जगह है जहाँ दूसरी राय लेनी चाहिए। हर बात के साथ उसका आधार इसीलिए लिखा जाता है।',
+      'रिपोर्ट उसी क्रम में बनी है जिसमें उसे पढ़ना चाहिए।',
+      '**पहले "बीता समय"** — बचपन और परिवार। आप इसे खुद जानते हैं; यदि यह हिस्सा आपको सही लगे, तो बाक़ी पर भरोसा करने का आधार बनता है।',
+      '**फिर "अभी का समय" और "आगे का समय"** — कमाई का दौर, और ऊर्ध्व रेखा से काम और पद का रास्ता।',
+      '**आख़िर में ग्रह-स्थान और उपाय।** और यदि कहीं **कारण समझ न आए**, तो साथ लिखा श्लोक का अंक देखिए — हर बात का आधार इसीलिए लिखा जाता है।',
     ],
   },
   {
@@ -756,9 +760,9 @@ const HINDI_SECTIONS: HiSection[] = [
     id: 'kyun-yahi',
     h2: 'यही पेज क्यों — और क्या फ़र्क़ है',
     paras: [
-      '**कोई ऐप नहीं** — ब्राउज़र में चलता है, फ़ोन में जगह नहीं लेता, कोई अनुमति नहीं माँगता।',
+      '**कोई ऐप नहीं** — ब्राउज़र में चलता है, फ़ोन में जगह नहीं लेता; बस फ़ोटो के लिए कैमरा।',
       '**कोई जन्म समय नहीं** — केवल एक फ़ोटो। यही इस विधि की सबसे बड़ी सुविधा है।',
-      '**हर बात के साथ आधार** — कौन सी रेखा, कौन सा पर्वत, सामुद्रिक शास्त्र का कौन सा नियम। इसलिए आप उसे परख सकते हैं और असहमत भी हो सकते हैं।',
+      '**हर बात के साथ आधार** — कौन सी रेखा, उसकी कौन सी हालत, और ग्रंथ हस्तसंजीवनम् का कौन सा श्लोक। इसलिए आप उसे परख सकते हैं और असहमत भी हो सकते हैं।',
       'और **जो यहाँ नहीं है** — कोई आयु, कोई तारीख़, कोई बीमारी का नाम, कोई डर, और कोई महँगा उपाय। यही एकमात्र दावा है, और उसी पर भरोसा किया जा सकता है।',
     ],
   },
@@ -768,7 +772,7 @@ const HINDI_SECTIONS: HiSection[] = [
     paras: [
       'आप यहाँ तक पढ़ आए हैं, तो प्रश्न मन में है ही।',
       '**ऊपर हथेली की एक फ़ोटो लगाइए।** दिन की रोशनी में, हथेली खुली, कैमरा सीधा ऊपर से। दो मिनट लगेंगे।',
-      'छहों रेखाएँ, सातों पर्वत, आठ जीवन-अंक, पाँच उपाय और एक PDF रिपोर्ट — **₹51 में, तुरंत।** कोई जन्म समय नहीं, कोई साइनअप नहीं, कोई ऐप नहीं।',
+      'बीता समय, अभी का दौर, आगे का भाग्य, ७ ग्रह-स्थान, ३ उपाय और एक PDF रिपोर्ट — हर बात श्लोक के साथ — **₹51 में, कुछ सेकंड में।** कोई जन्म समय नहीं, कोई साइनअप नहीं, कोई ऐप नहीं।',
       'और जो मिलेगा वह सच होगा — **उम्र नहीं, तारीख़ नहीं, डर नहीं।** केवल वह जो हथेली सच में कहती है।',
     ],
   },
@@ -785,7 +789,7 @@ const HINDI_SECTIONS: HiSection[] = [
     id: "ai-palm-reading-online",
     h2: "AI Palm Reading Online — Upload a Photo, No Sign-Up",
     paras: [
-      "This page reads your palm from **one photo**: no app to download, no sign-up, and no birth time needed. The analysis covers the six main lines, the seven mounts and eight life scores, each with the classical Samudrik rule it comes from. The guidance and line-by-line articles on this page are free; the full personal report with five remedies and a PDF is **₹51**.",
+      "This page reads your palm from **one photo**: no app to download, no sign-up, and no birth time needed. The report reads your four main lines by the classical text **Hastasanjeevanam** — past, present, future and old age — plus the 7 planet seats of the hand, with the Sanskrit shloka and its number beside every point. The guidance and line-by-line articles on this page are free; the full personal report with three BPHS remedies and a PDF is **₹51**.",
       "Use daylight, an open palm and the camera straight above — the photo guide above explains why most bad readings start with a bad photo. For how this differs from asking ChatGPT or a scanner app, see [ChatGPT से हस्तरेखा](#chatgpt-se-farak), and for an honest view on accuracy, [AI Palm Reading Online](/blog/ai-palm-reading-online-hast-rekha).",
     ],
   },
@@ -802,14 +806,14 @@ const HINDI_SECTIONS: HiSection[] = [
     h2: "Indian Palm Reading Free — Samudrik Shastra, Not Western Palmistry",
     paras: [
       "**Indian palm reading is Samudrik Shastra** — the classical Indian tradition that reads the hand through six lines and seven mounts, each mount tied to a graha (Guru, Shani, Surya, Budh, Shukra, Mangal, Chandra). That planetary link is what separates it from Western palmistry, which grew from Greek and European sources and does not connect the hand to Jyotish. It is also why an Indian reading can be cross-checked against the birth chart.",
-      "What is free here: every line-by-line and sign-by-sign guide on this page and in the hub below, in Hindi and English, plus the downloadable PDF guide. What costs ₹51 is the personal reading of **your** photo — lines, mounts, eight life scores, remedies and a PDF. The classical basis is set out in the [Samudrika Shastra guide](/blog/hast-rekha-gyan-samudrika-shastra-guide).",
+      "What is free here: every line-by-line and sign-by-sign guide on this page and in the hub below, in Hindi and English, plus the downloadable PDF guide. What costs ₹51 is the personal reading of **your** photo — four main lines read by Hastasanjeevanam, the 7 planet seats, remedies and a PDF. The classical basis is set out in the [Samudrika Shastra guide](/blog/hast-rekha-gyan-samudrika-shastra-guide).",
     ],
   },
   {
     id: "palm-scanner-online-free",
     h2: "Free Palm Reading Scanner Online — Male, Female and India: What You Actually Get",
     paras: [
-      "Most \"free palm scanners\" show the same pre-written text to everyone, or exist to serve ads. This page works differently: **there is no app and no sign-up** — you upload one photo in the browser, and the engine reads the actual lines and mounts in it, stating the classical rule behind each finding. The rules are identical for men and women; only the traditionally leading hand differs (right for men, left for women), and uploading both hands gives the most useful comparison.",
+      "Most \"free palm scanners\" show the same pre-written text to everyone, or exist to serve ads. This page works differently: **there is no app and no sign-up** — you take one photo in the browser, and the engine reads the actual lines in it, quoting the shloka behind each finding. The rules are identical for men and women; only the traditionally leading hand differs (right for men, left for women), and uploading both hands gives the most useful comparison.",
       "Be clear about one limit before you scan anything, anywhere: **no palm scanner can give a date, an age or a diagnosis**, and a tool that claims to is guessing. Timing questions — marriage, job, a difficult phase — belong to the birth chart, which you can check free with the [Kundali Calculator](/calculators/free-janam-kundali-calculator). For how this compares with asking a chatbot, see [ChatGPT से हस्तरेखा](#chatgpt-se-farak).",
     ],
   },
@@ -818,7 +822,7 @@ const HINDI_SECTIONS: HiSection[] = [
     h2: "Hath Ki Rekha Online Check — Photo Ya Scanner Se Kaise Dekhe",
     paras: [
       "Online check ka sabse aasaan tareeka: **apni hatheli ki ek saaf photo** upar upload kijiye — din ki roshni mein, flash band, hatheli khuli, camera seedha upar se, kalai se ungliyon tak poora frame. Koi app download nahi, koi signup nahi, janm samay ki zaroorat nahi. Photo jitni saaf hogi, reading utni behtar — dhundhli photo mein baareek rekhaayein aur nishan chhoot jaate hain.",
-      "Photo se reading mein **chhe mukhya rekhaayein, saat parvat aur unpar bane nishan** padhe jaate hain, aur har baat ke saath likha hota hai ki woh kis rekha ya parvat se nikli. Kaun sa haath dikhayein, yeh [Palm Reading for Male and Female](#male-female-hand) mein hai; aur khud dekhna seekhna ho to [हाथ की रेखा कैसे देखें](#hath-ki-rekha-kaise-dekhe) wala kram follow kijiye.",
+      "Photo se reading mein granth Hastasanjeevanam ki **chaar mukhya rekhaayein aur saat graha-sthaan** padhe jaate hain, aur har baat ke saath granth ka shlok aur ank likha hota hai. Kaun sa haath dikhayein, yeh [Palm Reading for Male and Female](#male-female-hand) mein hai; aur khud dekhna seekhna ho to [हाथ की रेखा कैसे देखें](#hath-ki-rekha-kaise-dekhe) wala kram follow kijiye.",
     ],
   },
 ];
@@ -876,7 +880,7 @@ export default function HastRekhaPage() {
                 name: 'AI Hast Rekha Calculator',
                 alternateName: ['AI Palmistry Calculator India', 'Samudrika Shastra AI Tool'],
                 description:
-                  'AI-powered Indian palmistry calculator using computer vision for hand landmark detection, palm line extraction and Samudrika Shastra rule-based analysis. Personalised Hast Rekha reports in Hindi, English and Hinglish.',
+                  'Indian palmistry calculator running on Trikaal Vaani\'s own vision engine: hand landmark detection, palm line extraction and rules from the classical text Hastasanjeevanam, with the Sanskrit shloka cited for every point. Hast Rekha reports in Hindi, English and Hinglish.',
                 url: PAGE_URL,
                 applicationCategory: 'LifestyleApplication',
                 operatingSystem: 'Web, iOS, Android',
@@ -884,16 +888,17 @@ export default function HastRekhaPage() {
                 isPartOf: { '@id': 'https://trikalvaani.com/#website' },
                 offers: { '@id': `${PAGE_URL}#offer` },
                 featureList: [
-                  'AI 21-point hand landmark detection',
-                  'Palm line extraction — 6 lines and 7 mounts',
-                  'Samudrika Shastra rule engine (40+ niyam)',
-                  'Every sign read against the mount that carries it',
-                  'Dominant-hand reading with left-handed support',
-                  '8 life dimension scores',
-                  'Personalised classical remedies',
+                  '21-point hand landmark detection on our own server',
+                  'Four main lines read by Hastasanjeevanam — Pitr, Matr (Dhan), Urdhva, Aayu',
+                  'Past, present, future and old age (Hastasanjeevanam 3.3.6)',
+                  '7 planet seats of the hand (Hastasanjeevanam 1.5.9-10)',
+                  'Sanskrit shloka and its number beside every point',
+                  'Main hand by the text: right for men, left for women (3.1.6)',
+                  'Helping planet with 3 remedies from BPHS chapter 85',
+                  'Guided camera with a photo check, and one free re-upload',
                   'Downloadable PDF report',
-                  'No birth time, birth date or birth place required',
-                  'Palm photo processed for analysis only — never saved to our database or storage',
+                  'No birth time or birth place required',
+                  'Palm photo not stored unless the user opts in',
                   'Hindi, English and Hinglish support',
                 ],
                 author: { '@id': PERSON_ID },
@@ -905,7 +910,7 @@ export default function HastRekhaPage() {
                 name: 'AI Hast Rekha (Palm Reading) Report',
                 serviceType: 'Palmistry Reading',
                 description:
-                  'A classical Samudrika Shastra palm reading generated from a single palm photograph — 6 lines, 7 mounts, 8 life scores, personalised remedies and a downloadable PDF report. No birth time required.',
+                  'A palm reading from the classical text Hastasanjeevanam, generated from a single palm photograph — past, present and future from the four main lines, the 7 planet seats, 3 BPHS remedies and a downloadable PDF report, with the shloka behind every point. No birth time required.',
                 url: PAGE_URL,
                 provider: { '@id': ORG_ID },
                 areaServed: [
@@ -928,7 +933,7 @@ export default function HastRekhaPage() {
                 priceValidUntil: '2027-03-31',
                 url: PAGE_URL,
                 description:
-                  'Full Samudrika Shastra Hast Rekha report with PDF — 8 life dimension scores, 6 line and 7 mount analysis, personalised remedies. One photo. No birth time. Photo processed for analysis only, never saved. No puja, gemstone or follow-up sitting sold afterwards.',
+                  'Full Hast Rekha report from Hastasanjeevanam with PDF — four main lines, 7 planet seats, 3 BPHS remedies, shloka for every point, one free re-upload. One photo. No birth time. Photo not stored unless you opt in. No puja, gemstone or follow-up sitting sold afterwards.',
                 eligibleRegion: { '@type': 'Place', name: 'Worldwide' },
                 seller: { '@id': ORG_ID },
               },
@@ -1000,10 +1005,10 @@ export default function HastRekhaPage() {
             What is the AI Hast Rekha Calculator?
           </h2>
           <p className="text-[15px] leading-relaxed text-slate-200">
-            The AI Hast Rekha Calculator reads your palm from a single photograph and applies classical
-            Samudrika Shastra rules to what it finds — all six major lines and all seven mounts. You receive
-            eight life scores, a full classical interpretation, personalised remedies and a downloadable PDF
-            report, for ₹51. No birth time, no birth date and no birth place are required.
+            The AI Hast Rekha Calculator reads your palm from a single photograph on our own engine and
+            applies the rules of the classical text Hastasanjeevanam — your four main lines give your past,
+            present, future and old age, plus the 7 planet seats of the hand. Every point carries its Sanskrit
+            shloka; you also get 3 remedies and a PDF, for ₹51. No birth time or birth place needed.
           </p>
         </div>
 
@@ -1019,30 +1024,23 @@ export default function HastRekhaPage() {
         </p>
         <ul className="mb-4 space-y-3 text-[15px]">
           <li>
-            <strong className="text-amber-300">All six major lines.</strong> Jeevan Rekha (life line), Mastishk
-            Rekha (head line), Hriday Rekha (heart line), Bhagya Rekha (fate line), Surya Rekha (sun line) and
-            the Vivah Rekha (marriage lines) — each read against the others, never in isolation. A fate line
-            means one thing beside a strong sun line and something completely different without one.
+            <strong className="text-amber-300">Your past, present and future — from the text itself.</strong>{' '}
+            Hastasanjeevanam (3.3.6) says the Pitr line tells childhood, the Matr (Dhan) line youth and earning
+            years, and the Aayu line old age. The Urdhva line — today&rsquo;s fate line — and the finger it
+            reaches set the path of work and position (3.5.8–3.5.11).
           </li>
           <li>
-            <strong className="text-amber-300">All seven mounts.</strong> Guru (Jupiter), Shani (Saturn), Surya
-            (Sun), Budh (Mercury), Shukra (Venus), Mangal (Mars) and Chandra (Moon). The mounts supply the
-            qualities; the lines only describe what is being done with them. Most readings skip the mounts
-            entirely — which is precisely why most readings tell you nothing you can use.
+            <strong className="text-amber-300">The 7 planet seats of the hand</strong> (1.5.9–10) and your
+            helping planet — the seat your line reaches.
           </li>
           <li>
-            <strong className="text-amber-300">Every sign, read against the mount that carries it.</strong> A
-            star on the Surya Parvat indicates sudden elevation. The same star on the Shani Parvat is
-            classically read as a shock. Same symbol, opposite meaning. Placement decides everything, and any
-            reading that names a symbol without naming the mount has deleted the shastra.
+            <strong className="text-amber-300">The shloka behind every point.</strong> Each statement carries
+            the Sanskrit verse and its number, so you can check it yourself. Where a line was not clear in the
+            photo, the report adds nothing — and you get one free re-upload.
           </li>
           <li>
-            <strong className="text-amber-300">Eight life dimension scores</strong> — career, wealth, health,
-            relationships, vitality, leadership, creativity and spirituality.
-          </li>
-          <li>
-            <strong className="text-amber-300">Personalised classical remedies</strong> drawn from the
-            Samudrika corpus. Not a generic list. Not a shopping list.
+            <strong className="text-amber-300">Three remedies for your helping planet</strong> — mantra,
+            donation and fast, from Brihat Parashara Hora Shastra chapter 85. Not a shopping list.
           </li>
           <li>
             <strong className="text-amber-300">A downloadable PDF report</strong> that is yours to keep, in
@@ -1158,13 +1156,10 @@ export default function HastRekhaPage() {
         </h2>
         <ol className="mb-4 space-y-3 text-[15px]">
           <li>
-            <strong className="text-amber-300">1. Photograph your dominant hand.</strong> The hand you write
-            with — if you are left-handed, that is your left hand, regardless of the old
-            &ldquo;right-for-men&rdquo; convention, which is a reading-order tradition and not a difference in
-            meaning. Tell the form which hand you write with and the upload labels adjust themselves. The
-            dominant hand shows what you built. The non-dominant shows what you were given. Upload
-            both if you can: <strong>the difference between them is the reading</strong>, and almost nobody
-            performs it.
+            <strong className="text-amber-300">1. Photograph your main hand.</strong> The text is clear
+            (Hastasanjeevanam 3.1.6): the right hand for men, the left for women. Tap the box for that hand —
+            the camera tells you when the light is right and the hand is steady, then takes the photo itself.
+            Send both hands if you can.
           </li>
           <li>
             <strong className="text-amber-300">2. Daylight. No flash.</strong> Flash floods the palm and erases
@@ -1174,11 +1169,10 @@ export default function HastRekhaPage() {
             the fine lines, neither can the engine.
           </li>
           <li>
-            <strong className="text-amber-300">3. Upload and pay ₹51.</strong> The engine detects the lines,
-            mounts and signs, applies the classical rules, and returns your report with a downloadable PDF.
-            Your photo is processed for the analysis only — we never save it to our database or storage, and
-            we have verified our own system to confirm this. Only your report and PDF are kept, so you can
-            retrieve them again.
+            <strong className="text-amber-300">3. Pay ₹51.</strong> Our engine reads the four main lines,
+            applies the rules of Hastasanjeevanam and returns your report with a downloadable PDF in seconds.
+            Your photo is not stored unless you tick the opt-in box — only your report and PDF are kept, so you
+            can retrieve them again.
           </li>
         </ol>
         <p className="mb-4 leading-relaxed">
@@ -1203,8 +1197,9 @@ export default function HastRekhaPage() {
             clients across India — Delhi, Noida, Gurgaon and Ghaziabad — and worldwide.
           </p>
           <p className="mb-3 text-[15px] leading-relaxed">
-            The rules this engine applies are not invented. They are drawn from the classical corpus:{' '}
-            <strong>Samudrika Shastra</strong>, the <strong>Hasta Sanjeevani</strong>, the Hast Rekha khand of
+            The rules this engine applies are not invented. The report itself is built on{' '}
+            <strong>Hastasanjeevanam</strong> of Acharya Meghavijaya, with every point cited by shloka; the wider
+            tradition behind this hub includes <strong>Samudrika Shastra</strong>, the Hast Rekha khand of
             the <strong>Ravan Samhita</strong>, and the body-lakshana chapters of Varahamihira&rsquo;s{' '}
             <strong>Brihat Samhita</strong>. Where the tradition is silent — on dates, on lifespan, on disease —{' '}
             <strong>we are silent too.</strong>
@@ -1388,7 +1383,7 @@ export default function HastRekhaPage() {
             Read my palm — ₹51 →
           </Link>
           <p className="mt-2 text-xs text-slate-500">
-            One photo · No birth time · Photo never saved to our database · No puja, no gemstone, no second sitting
+            One photo · No birth time · Photo not stored unless you opt in · No puja, no gemstone, no second sitting
           </p>
         </div>
       </section>

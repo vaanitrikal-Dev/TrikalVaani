@@ -1,5 +1,19 @@
-// TRIKAL VAANI - Palmistry Paid Analyze + Verify API - v4.5
+// TRIKAL VAANI - Palmistry Paid Analyze + Verify API - v4.6
 // CEO: Rohiit Gupta | Chief Vedic Architect
+//
+// v4.6 — 27 OCT 2026 — HAST REKHA v3 (VM engine v2.0.0, granth-aadharit, bina AI):
+//   • MUFT DOBARA-PHOTO: har nayi report par retry_token (gupt) + free_retry_used=false
+//     row mein; response mein retry_token + free_retry_available. Asli retry
+//     app/api/palmistry/retry/route.ts karta hai.
+//   • NEEDS_PHOTO: engine bole "hatheli padhi hi nahi gayi" (reason photo_unreadable)
+//     to ab personal review NAHI (Rohiit: Hast Rekha mein 499/review nahi) —
+//     row tier 'needs_photo' + retry_token, customer ko turant nayi photo ka screen.
+//     Play: row save hui → finishPlay (report retry se milegi). VM band / error →
+//     pehle jaisa pending_review + cron (badla nahi).
+//   • CONSENT: photo_consent=true ho tabhi photos private 'palm-train' bucket mein
+//     (lib/palm-store.ts). Warna kuch save nahi — pehle jaisa.
+//   • dob, engine_version, photo_consent row mein. Razorpay / PayPal / Play verify,
+//     cron RETRY mode, PDF, 1-tap email — badle nahi.
 //
 // v4.5 — 11 OCT 2026 — GOOGLE PLAY BILLING (Play Store app ke liye):
 //   • Naya ALAG field `play_purchase_token` (sirf Play Store app bhejta hai).
@@ -84,6 +98,7 @@ import { createClient } from '@supabase/supabase-js';
 import crypto from 'crypto';
 import { callVM } from '@/lib/callVM';
 import { verifyAndClaimPlay, finishPlay, releasePlay } from '@/lib/play-billing-server';   // v4.5
+import { newRetryToken, saveConsentPhotos } from '@/lib/palm-store';                    // v4.6
 import type { PlayGateOk } from '@/lib/play-billing-server';                               // v4.5
 
 // ── CRITICAL: function must outlive a ~90-120s VM analyze (Vercel Pro allows 300) ──
@@ -135,6 +150,7 @@ interface PalmVerifyRequest {
   gender?:             string;
   language?:           string;
   dob?:                string;
+  photo_consent?:      boolean;         // v4.6 — sirf haan par photo save
   // v4.4 — sirf paid-recovery cron (server) ke liye
   _retry_slug?:        string;
   _retry_key?:         string;
@@ -154,8 +170,10 @@ export async function POST(req: NextRequest) {
       right_palm_b64, left_palm_b64,
       dominant_palm_b64, other_palm_b64, handedness,
       user_name, user_mobile, gender, language, dob,
+      photo_consent,
       _retry_slug, _retry_key,
     } = body;
+    const consent = photo_consent === true;   // v4.6
 
     // v4.4 — server-only retry mode (cron). Key = service role key (browser ke paas kabhi nahi).
     const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY ?? '';
@@ -179,8 +197,15 @@ export async function POST(req: NextRequest) {
         // Wahi Play order dobara: nayi report nahi — purani row (slug) wapas.
         if (gate.code === 'PLAY_ALREADY_USED' && gate.existingRef) {
           const { data: prev } = await supabase.from('palmistry_reports')
-            .select('session_id, slug, tier, mp_features, scores, observations, report, pdf_url, payment_id')
+            .select('session_id, slug, tier, mp_features, scores, observations, report, pdf_url, payment_id, retry_token, free_retry_used')
             .eq('slug', gate.existingRef).maybeSingle();
+          // v4.6 — pehli photo padhi nahi gayi thi: wahi customer nayi photo bheje
+          if (prev?.tier === 'needs_photo' && prev.retry_token) {
+            return NextResponse.json({
+              success: true, pending_review: false, needs_photo: true, already_used: true,
+              slug: prev.slug, retry_token: prev.retry_token, photo_message: [],
+            });
+          }
           if (prev?.tier === 'paid' && prev.report) {
             return NextResponse.json({
               success:        true,
@@ -195,6 +220,8 @@ export async function POST(req: NextRequest) {
               pdf_b64:        null,
               pdf_url:        prev.pdf_url ?? null,
               paymentId:      prev.payment_id ?? null,
+              retry_token:    prev.retry_token ?? null,                              // v4.6
+              free_retry_available: !!prev.retry_token && !prev.free_retry_used,     // v4.6
             });
           }
           if (prev?.tier === 'pending_review') {
@@ -404,6 +431,46 @@ export async function POST(req: NextRequest) {
     }
 
     // ── 3. Gate or genuine failure → graceful "personal review" handoff ─────
+    // v4.6 — hatheli padhi hi nahi gayi → customer se nayi photo (review nahi)
+    if (gateData && gateData.reason === 'photo_unreadable' && !isRetry) {
+      const retry_token = newRetryToken();
+      const { error: npErr } = await supabase.from('palmistry_reports').insert({
+        session_id:        `palm_needs_photo_${Date.now()}`,
+        slug,
+        user_name:         user_name   ?? null,
+        user_mobile:       user_mobile ?? null,
+        gender:            gender      ?? 'M',
+        language:          language    ?? 'hi',
+        dob:               dob         ?? null,
+        mp_features:       gateData.mp_features ?? null,
+        gemini_data:       gateData.gemini_data ?? null,
+        tier:              'needs_photo',
+        retry_token,
+        free_retry_used:   false,
+        photo_consent:     consent,
+        engine_version:    gateData.engine_version ?? null,
+        payment_id:        razorpay_payment_id ?? paypal_order_id ?? null,
+        razorpay_order_id: razorpay_order_id ?? null,
+        ...(playGate ? { payment_id: playGate.orderId, play_order_id: playGate.orderId } : {}),
+      });
+      if (npErr) {
+        console.error('[Trikal] Palm needs_photo row save failed:', npErr.message);
+        if (playGate) await releasePlay(playGate);
+        return pendingReviewResponse('low_confidence', {
+          mp_features: gateData.mp_features, gemini_data: gateData.gemini_data,
+        });
+      }
+      if (playGate) await finishPlay(playGate, slug);
+      console.warn('[Trikal] Palm needs_photo:', slug, gateData.photo_problems);
+      return NextResponse.json({
+        success:       true,
+        pending_review: false,
+        needs_photo:   true,
+        slug,
+        retry_token,
+        photo_message: Array.isArray(gateData.photo_message) ? gateData.photo_message : [],
+      });
+    }
     if (gateData) {
       return pendingReviewResponse('low_confidence', {
         mp_features: gateData.mp_features,
@@ -467,6 +534,17 @@ export async function POST(req: NextRequest) {
 
     // ── 5. Save successful report to Supabase ────────────────────────────────
     const session_id = `palm_${Date.now()}`;
+    // v4.6 — muft dobara-photo ka token + consent photos (sirf haan par)
+    const retry_token = isRetry ? null : newRetryToken();
+    let consent_photo_paths: string[] = [];
+    if (consent && !isRetry) {
+      const domB = dominant_palm_b64 ?? right_palm_b64 ?? null;
+      const othB = other_palm_b64 ?? left_palm_b64 ?? null;
+      const isLeft = (handedness ?? 'right') === 'left';
+      consent_photo_paths = await saveConsentPhotos(supabase, slug, {
+        right: isLeft ? othB : domB, left: isLeft ? domB : othB,
+      });
+    }
     const successRow = {
         session_id,
         slug,
@@ -485,6 +563,12 @@ export async function POST(req: NextRequest) {
         razorpay_order_id: razorpay_order_id,
         // v4.5 — sirf Play rows par (Razorpay/PayPal rows mein ye keys jaati hi nahi)
         ...(playGate ? { payment_id: playGate.orderId, play_order_id: playGate.orderId } : {}),
+        // v4.6
+        engine_version: analysisData.engine_version ?? null,
+        ...(isRetry ? {} : {
+          retry_token, free_retry_used: false, photo_consent: consent, dob: dob ?? null,
+          consent_photo_paths: consent_photo_paths.length ? consent_photo_paths : null,
+        }),
       };
     // v4.4 — retry: wahi pending row paid banti hai; normal: nayi row (pehle jaisa)
     const { error: saveErr } = isRetry
@@ -537,6 +621,11 @@ export async function POST(req: NextRequest) {
       pdf_b64,
       pdf_url,
       paymentId:      razorpay_payment_id,
+      // v4.6
+      retry_token,
+      free_retry_available: !!retry_token,
+      quality_notes:  analysisData.quality_notes ?? [],
+      low_clarity:    !!analysisData.low_clarity,
     });
 
   } catch (err: unknown) {
