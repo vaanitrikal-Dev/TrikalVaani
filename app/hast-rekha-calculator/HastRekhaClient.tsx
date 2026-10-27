@@ -2,8 +2,12 @@
 
 // ============================================================
 // File: app/hast-rekha-calculator/HastRekhaClient.tsx
-// Version: 3.0 (27 Oct 2026 — HAST REKHA v3: GRANTH-AADHARIT, BINA AI) | v2.6 (11 Oct 2026 — GOOGLE PLAY BILLING) | v2.4 (29 Aug 2026 — INTERNATIONAL PAYMENT)
+// Version: 3.1 (27 Oct 2026 — RETRY LINK) | 3.0 (27 Oct 2026 — HAST REKHA v3: GRANTH-AADHARIT, BINA AI) | v2.6 (11 Oct 2026 — GOOGLE PLAY BILLING) | v2.4 (29 Aug 2026 — INTERNATIONAL PAYMENT)
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
+//
+// CHANGE v3.1 (27 Oct 2026) — ?retry=<slug>&t=<token> link (cron v1.8 alert mein CEO ko
+//   milta hai, customer ko WhatsApp par bhejna hai). Link khulte hi seedha nayi-photo
+//   screen. Token ki jaanch /api/palmistry/retry server par hi karta hai.
 //
 // CHANGE v3.0 (27 Oct 2026) — Rohiit approved mockup (canvas "Hast Rekha v3")
 //   1. KYC-JAISA CAMERA (components/hastrekha/GuidedPalmCamera.tsx): "Right/Left
@@ -245,7 +249,17 @@ export default function HastRekhaClient({ faqs }: { faqs: FAQ[] }) {
   }, []);
 
   // v3.0 — pichhli report ki nayi photo baaki? (needs_photo)
-  useEffect(() => { const p = lsGet(); if (p?.mode === 'needs_photo') setPendingLs(p); }, []);
+  useEffect(() => {
+    // v3.1 — WhatsApp retry link (?retry=slug&t=token) → seedha nayi photo screen
+    const q = new URLSearchParams(window.location.search);
+    const rs = q.get('retry'), rt = q.get('t');
+    if (rs && rt) {
+      const ctx: RetryCtx = { slug: rs, token: rt, mode: 'needs_photo', messages: ['हथेली साफ नहीं दिखी थी — नीचे से नई फोटो लें (कोई पैसा नहीं लगेगा)'] };
+      lsSet(ctx); setRetry(ctx); setStep('retry');
+      return;
+    }
+    const p = lsGet(); if (p?.mode === 'needs_photo') setPendingLs(p);
+  }, []);
 
   // ── Photo aayi (camera ya gallery) → compress → VM jaanch ──
   const handlePhoto = useCallback(async (hand: Hand, photo: CapturedPhoto) => {

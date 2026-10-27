@@ -2,7 +2,16 @@
 
 // ============================================================
 // File: components/hastrekha/GuidedPalmCamera.tsx
-// Version: 1.0 (27 Oct 2026) — NAYA
+// Version: 1.1 (27 Oct 2026) — STHIRTA SUDHAAR | 1.0 (27 Oct 2026) — NAYA
+//
+// CHANGE v1.1 (Rohiit: "camera stabilisation thik kardo"):
+//   1. Hilna ab ek frame se nahi — EMA (smoothed) se mapa jaata hai. Ek jhatka
+//      countdown nahi todta; 2 lagaatar hilte frame chahiye.
+//   2. Hysteresis: sthir tab maane jab smoothed < 7, sthirta tab tootegi jab > 12
+//      (pehle ek hi seema 8 thi → chip hara-safed jhilmilata tha).
+//   3. Camera khulne ke pehle 1.2s jaanch nahi (focus/exposure set hone do).
+//   4. Countdown 3-2-1 ab 500ms har kadam (~1.5s sthir).
+//   5. 7s mein photo apne aap na hui → "button dabaiye" sandesh + shutter chamakta hai.
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
 //
 // KYC jaisa camera (Rohiit faisla 27 Oct 2026, Option B): phone par KOI naya
@@ -33,6 +42,10 @@ export default function GuidedPalmCamera({
   const prevRef   = useRef<Uint8ClampedArray | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const goodSince = useRef<number>(0);
+  const emaRef    = useRef<number | null>(null);   // v1.1 smoothed hilna
+  const steadyRef = useRef(false);                 // v1.1 hysteresis state
+  const shakyRun  = useRef(0);                     // v1.1 lagaatar hilte frames
+  const openedAt  = useRef<number>(0);             // v1.1 warm-up + manual hint
   const doneRef   = useRef(false);
   const galleryRef = useRef<HTMLInputElement>(null);
 
@@ -41,6 +54,7 @@ export default function GuidedPalmCamera({
   const [steady, setSteady] = useState<Chip>('wait');
   const [count, setCount]   = useState<number | null>(null);
   const [hint, setHint]     = useState('हथेली खोलकर सुनहरी लाइन के अंदर रखें');
+  const [manual, setManual] = useState(false);     // v1.1 7s baad button ka ishaara
 
   const stop = useCallback(() => {
     streamRef.current?.getTracks().forEach(t => t.stop());
@@ -74,6 +88,7 @@ export default function GuidedPalmCamera({
         });
         if (cancelled) { stream.getTracks().forEach(t => t.stop()); return; }
         streamRef.current = stream;
+        openedAt.current = Date.now();
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
           await videoRef.current.play().catch(() => {});
@@ -102,17 +117,32 @@ export default function GuidedPalmCamera({
       if (prevRef.current) { let s = 0; for (let j = 0; j < gray.length; j++) s += Math.abs(gray[j] - prevRef.current[j]); diff = s / gray.length; }
       prevRef.current = gray;
 
+      const now = Date.now();
+      if (!openedAt.current) openedAt.current = now;
+      const since = now - openedAt.current;
+      if (since > 7000 && !manual) setManual(true);
+
+      // v1.1 — smoothed hilna (EMA) + hysteresis + ek jhatka maaf
+      if (diff < 255) emaRef.current = emaRef.current === null ? diff : emaRef.current * 0.6 + diff * 0.4;
+      const ema = emaRef.current ?? 255;
+      if (since < 1200) { setHint('कैमरा तैयार हो रहा है…'); return; }
+      if (steadyRef.current) {
+        shakyRun.current = ema > 12 ? shakyRun.current + 1 : 0;
+        if (shakyRun.current >= 2) steadyRef.current = false;
+      } else if (ema < 7) {
+        steadyRef.current = true; shakyRun.current = 0;
+      }
+
       const l: Chip = mean < 60 ? 'bad' : mean > 225 ? 'bad' : 'ok';
-      const st: Chip = diff < 8 ? 'ok' : 'wait';
+      const st: Chip = steadyRef.current ? 'ok' : 'wait';
       setLight(l); setSteady(st);
       if (l === 'bad') setHint(mean < 60 ? 'रोशनी कम है — खिड़की के पास या लाइट में आइए' : 'रोशनी बहुत तेज़ है — सीधी धूप/फ्लैश से हटिए');
-      else if (st !== 'ok') setHint('हाथ और फोन स्थिर रखें');
+      else if (st !== 'ok') setHint(since > 7000 ? 'हाथ स्थिर नहीं हो रहा? नीचे गोल बटन दबाकर खुद फोटो लें' : 'कोहनी मेज़ पर टिकाइए, हाथ और फोन स्थिर रखें');
       else setHint('बढ़िया! हिलाइए मत…');
 
-      const now = Date.now();
       if (l === 'ok' && st === 'ok') {
         if (!goodSince.current) goodSince.current = now;
-        const left = 3 - Math.floor((now - goodSince.current) / 600);
+        const left = 3 - Math.floor((now - goodSince.current) / 500);
         setCount(left > 0 ? left : 0);
         if (left <= 0) capture();
       } else {
@@ -121,7 +151,7 @@ export default function GuidedPalmCamera({
       }
     }, 250);
     return () => clearInterval(t);
-  }, [capture]);
+  }, [capture, manual]);
 
   const chip = (state: Chip, label: string) => (
     <span className="rounded-full px-3 py-1 text-xs"
@@ -179,11 +209,12 @@ export default function GuidedPalmCamera({
         </button>
         {!camError && (
           <button type="button" onClick={capture} aria-label="फोटो लें"
-            className="w-16 h-16 rounded-full" style={{ border: '4px solid #fff', background: 'rgba(255,255,255,0.2)' }} />
+            className={`w-16 h-16 rounded-full ${manual ? 'animate-pulse' : ''}`}
+            style={{ border: `4px solid ${manual ? GOLD : '#fff'}`, background: manual ? 'rgba(212,175,55,0.35)' : 'rgba(255,255,255,0.2)' }} />
         )}
         <span className="w-[104px]" aria-hidden="true" />
       </div>
-      <p className="text-center text-xs text-slate-500 pb-4 px-4">सब हरा होते ही फोटो अपने आप — चाहें तो बटन से खुद लें</p>
+      <p className="text-center text-xs text-slate-500 pb-4 px-4">{manual ? 'अपने आप नहीं हुई? गोल बटन दबाइए — फोटो की जाँच फिर भी होगी' : 'सब हरा होते ही फोटो अपने आप — चाहें तो बटन से खुद लें'}</p>
 
       <input ref={galleryRef} type="file" accept="image/jpeg,image/jpg,image/png,image/webp" className="hidden"
         onChange={e => {

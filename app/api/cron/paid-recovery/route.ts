@@ -2,7 +2,13 @@
 // 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER
 // ════════════════════════════════════════════════════════════════════════════
 // File:     app/api/cron/paid-recovery/route.ts
-// Version:  v1.7 (10 Oct 2026)
+// Version:  v1.8 (27 Oct 2026)
+// v1.8 (27 Oct 2026) — HAST REKHA v3 'needs_photo' (paise mile, pehli photo mein hatheli
+//   padhi nahi gayi, customer ko nayi photo ka screen dikha). Pehle isDelivered ise
+//   "delivered" maanta tha → customer nayi photo na bheje to alert kabhi nahi aata.
+//   Ab: needs_photo = delivered NAHI. 60 min tak customer ko waqt (koi alert nahi),
+//   phir CEO ko EK critical alert (raiseAlertOnce, 30 din) — customer ka naam, number
+//   aur seedha retry LINK (?retry=slug&t=token) jo customer ko WhatsApp par bhejna hai.
 // v1.7 (10 Oct 2026) — UPAY REPORT (₹51) juda: notes.product 'upay' → upay_reports
 //   mein status 'ready' na ho to lib/upay-report generateUpayReport() se KHUD
 //   banata hai (wahi function jo callback chalata hai) — max 2 koshish, phir alert.
@@ -201,6 +207,18 @@ async function retryOnePalm(supa: any): Promise<string | null> {
   return null;
 }
 
+/** v1.8 — needs_photo row: 60 min tak null (intezaar), uske baad row (alert ke liye). */
+async function palmNeedsPhoto(supa: any, paymentId: string): Promise<{ waiting: boolean; row: any } | null> {
+  const { data } = await supa.from('palmistry_reports')
+    .select('slug, retry_token, created_at, user_name, user_mobile')
+    .eq('payment_id', paymentId).eq('tier', 'needs_photo')
+    .order('created_at', { ascending: false }).limit(1);
+  const row = (data ?? [])[0];
+  if (!row) return null;
+  const ageMin = (Date.now() - new Date(row.created_at).getTime()) / 60_000;
+  return { waiting: ageMin < PALM_GIVEUP_MIN, row };
+}
+
 /** 7 din se purani palm-retry photos delete (CEO policy). */
 async function cleanupOldPalmPhotos(supa: any): Promise<number> {
   const cutoff = new Date(Date.now() - PALM_PHOTO_DAYS * 24 * 3600_000).toISOString();
@@ -304,7 +322,7 @@ async function isDelivered(supa: any, product: Product, paymentId: string): Prom
   };
   switch (product) {
     case 'deep':       return one('predictions', 'razorpay_payment_id');
-    case 'hast_rekha': return one('palmistry_reports', 'payment_id', q => q.neq('tier', 'pending_review'));
+    case 'hast_rekha': return one('palmistry_reports', 'payment_id', q => q.not('tier', 'in', '(pending_review,needs_photo)')); // v1.8
     case 'karmic':     return one('karmic_orders', 'razorpay_payment_id');
     case 'milan':      return one('kundali_milan_orders', 'razorpay_payment_id');
     case 'muhurat':    return one('muhurat_orders', 'razorpay_payment_id');
@@ -507,6 +525,32 @@ export async function GET(req: NextRequest) {
         continue;
       }
 
+      // v1.8 — needs_photo: 60 min customer ko waqt, phir ek alert retry link ke saath
+      if (product === 'hast_rekha') {
+        const np = await palmNeedsPhoto(supa, p.id);
+        if (np?.waiting) { summary.notes.push(`${p.id}: hast rekha nayi photo ka intezaar`); continue; }
+        if (np) {
+          const link = `${SITE}/hast-rekha-calculator?retry=${encodeURIComponent(np.row.slug)}&t=${encodeURIComponent(np.row.retry_token ?? '')}`;
+          const mobile = np.row.user_mobile || p.contact || '';
+          const r2 = await raiseAlertOnce({
+            severity: 'critical',
+            source:   'paid-recovery',
+            subject:  `Hast Rekha: nayi photo nahi aayi — ${p.id}`,
+            body: [
+              `Customer ne ₹${p.amount / 100} diye, par photo mein hatheli padhi nahi gayi aur 60 min mein nayi photo nahi bheji.`,
+              `Customer: ${np.row.user_name ?? '-'} | ${mobile || '-'}`,
+              `Payment: ${p.id} | ${ist(p.created_at)} IST`,
+              ``,
+              `ACTION: ${waLink(mobile)} kholo aur yeh bhejo —`,
+              `"Namaste 🙏 Aapki Hast Rekha report ke liye ek saaf photo chahiye (paise dobara nahi lagenge): ${link}"`,
+              `Customer 1-2 din mein na bheje to Razorpay se ${p.id} refund karo.`,
+            ].join('\n'),
+          }, ALERT_DEDUPE_HOURS);
+          if (!r2.suppressed) summary.alerted.push(p.id);
+          continue;
+        }
+      }
+
       const res = await raiseAlertOnce({
         severity: 'critical',
         source:   'paid-recovery',
@@ -565,4 +609,4 @@ export async function GET(req: NextRequest) {
   return NextResponse.json({ ok: true, window_hours: WINDOW_SEC / 3600, ...summary });
 }
 
-// END — app/api/cron/paid-recovery/route.ts v1.7 | Trikaal Vaani | Rohiit Gupta, Chief Vedic Architect
+// END — app/api/cron/paid-recovery/route.ts v1.8 | Trikaal Vaani | Rohiit Gupta, Chief Vedic Architect
