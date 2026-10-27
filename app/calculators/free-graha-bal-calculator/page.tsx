@@ -2,7 +2,9 @@
 
 // ============================================================
 // File: app/calculators/free-graha-bal-calculator/page.tsx
-// Version: 2.2 (19 Oct 2026 — Radar 17 Oct FIX: 'ग्रह बल कैलकुलेटर' at rank 12. +2 H2 (graha-bal-hindi,
+// Version: 2.3 (24 Oct 2026 — Radar 24 Oct: +4 H2, +4 FAQ (marriage-delay planet, aalasi graha, sabse ashubh graha,
+//   shukra bal jaanch). BPHS 3.11, 3.22, 3.29, 3.59, 27.32-33 verified in bphs_slokas. Form/API/JSON-LD unchanged.)
+// (previous) Version: 2.2 (19 Oct 2026 — Radar 17 Oct FIX: 'ग्रह बल कैलकुलेटर' at rank 12. +2 H2 (graha-bal-hindi,
 //   shadbala-online-free), +2 FAQ, competitor names removed from comparison-table H2 and vs-others copy.
 //   'Ast/vakri' and 'kamzor grah kaise pata kare' left to free-weak-planet-finder per the v2.0 split.
 //   Form/API/JSON-LD unchanged.)
@@ -237,6 +239,10 @@ const FAQS = [
   { q: 'ग्रह बल कैलकुलेटर से क्या पता चलता है?', a: 'सातों ग्रहों का षड्बल — स्थान, दिग्, काल, चेष्टा, नैसर्गिक और दृक् बल — कुल रूपा, शास्त्रीय न्यूनतम और अनुपात के साथ। अनुपात 1.0 से ऊपर हो तो ग्रह बलवान माना जाता है, नीचे हो तो कमज़ोर।' },
   { q: 'Shadbala mein Rahu-Ketu kyun nahi hote?', a: 'BPHS ki classical Shadbala sirf saat grahon — Surya se Shani — ke liye di gayi hai. Rahu-Ketu chhaya graha hain aur unka bal unke rashi-swami aur saath baithe grahon se padha jaata hai, Shadbala se nahi.' },
   { q: 'Kya har kundali mein koi na koi graha kamzor hota hai?', a: 'Lagbhag hamesha. Saat grahon ka ek saath apne minimum se upar hona bahut durlabh hai. Isliye kisi graha ka kamzor nikalna dosh nahi, kram hai. Asli sawal ye hai ki wo graha aapke lagna ke liye kitna mahatvapurn hai — aur wo bhaav-swamitva se tay hota hai, bal se nahi.' },
+  { q: 'Which planet delays marriage?', a: 'No single planet. Marriage timing is read from the 7th house (marriage and partner), its lord, Venus, Jupiter and slow-moving Saturn, which points to delay, not denial. On this page you can check whether your 7th lord or Venus is above or below a ratio of 1.0. For the timing itself use the free Shadi Kab Hogi Calculator, because dates come from dasha, not from strength.' },
+  { q: 'कौन सा ग्रह आलसी बनाता है?', a: 'बृहत् पराशर होरा शास्त्र (अध्याय 3, श्लोक 29) शनि के स्वभाव को "अलसः" यानी धीमा बताता है, पर यह स्वभाव है, फ़ैसला नहीं — यही धीमापन धैर्य और टिकाऊ काम भी देता है। व्यवहार में मंगल और सूर्य का 1.0 से कम अनुपात भी ऊर्जा की कमी से जुड़ा देखा जाता है। तालिका में इनका अनुपात देखिए, और साथ में नींद व दिनचर्या भी जाँचिए।' },
+  { q: 'सबसे अशुभ ग्रह कौन सा है?', a: 'कोई ग्रह पूरी तरह अशुभ नहीं। बृहत् पराशर होरा शास्त्र (अध्याय 3, श्लोक 11) सूर्य, शनि, मंगल, क्षीण चंद्र, राहु और केतु को क्रूर स्वभाव का कहता है, पर उसी अध्याय के श्लोक 59 के अनुसार अपनी उच्च राशि में ग्रह पूरा शुभ फल देता है। आपकी कुंडली में कौन सा ग्रह कठिन फल की ओर झुका है, यह उसके बल, भाव-स्वामित्व और इष्ट-कष्ट फल से तय होता है।' },
+  { q: 'कैसे पता करें कि शुक्र मजबूत है या कमजोर?', a: 'शुक्र का शास्त्रीय न्यूनतम 5.5 रूपा (330 षष्ट्यंश) है — बृहत् पराशर होरा शास्त्र, अध्याय 27, श्लोक 32। कैलकुलेटर में Venus चुनकर Ratio देखिए: 1.0 से ऊपर तो शुक्र बलवान, नीचे तो कमज़ोर। कमज़ोर शुक्र का अर्थ बस इतना है कि प्रेम, कला और सुख के क्षेत्र में थोड़ा ज़्यादा ध्यान चाहिए।' },
 ];
 
 
@@ -642,6 +648,38 @@ const SECTIONS: GbSection[] = [
       'Paanch graha do-do rashiyon ke swami hain, isliye adhikansh grahon ka bal **do bhaavon** par ek saath asar dalta hai. Ye baat table padhte waqt aksar chhoot jaati hai.',
       'Udaharan: **Mesh lagna** mein Mangal lagnesh bhi hai aur aathve bhaav ka swami bhi. Uska ooncha bal dono jagah kaam karega — shareer aur urja mein bhi, aur aathve bhaav ke vishayon mein bhi. **Vrishabh lagna** mein Shukra lagnesh aur chhathe ka swami. Har lagna ke liye ye jodi alag hai.',
       'Iska vyavharik matlab: **kisi graha ka bal "achha" ya "bura" akela nahi hota** — wo is par nirbhar karta hai ki wo aapke lagna ke liye kaunse bhaav chala raha hai. Isi liye ye page bal dikhata hai aur bhaav-swamitva alag se — dono mila kar hi nishkarsh banta hai.',
+    ],
+  },
+  {
+    id: 'marriage-delay-planet',
+    h2: 'Which Planet Delays Marriage? What the Strength Table Can Show',
+    paras: [
+      'No single planet "delays" marriage on its own. In traditional reading, marriage is read from the **7th house (marriage and partner)**, its lord, **Venus** and **Jupiter**, while slow-moving **Saturn** is linked with delay, not denial. Shadbala adds one useful, checkable number: find which planet rules your 7th house, then read its row here. A ratio **below 1.0** for the 7th lord or Venus means that area asks for more patience and effort, not that marriage will not happen.',
+      'Strength cannot give a date, because timing comes from dasha. For the timing question use the free [Shadi Kab Hogi Calculator](/calculators/free-shadi-kab-hogi-calculator), and the common reasons are explained in [7th house weak — marriage delay reasons](/blog/7th-house-weak-marriage-delay-reasons).',
+    ],
+  },
+  {
+    id: 'aalasi-graha',
+    h2: 'कौन सा ग्रह आलसी बनाता है? — शनि का स्वभाव और बल का अंतर',
+    paras: [
+      'बृहत् पराशर होरा शास्त्र (अध्याय 3, श्लोक 29) शनि के स्वभाव में **"अलसः"** — धीमा — शब्द देता है, और अध्याय 3, श्लोक 22 शनि और मंगल को **तमस प्रकृति** का बताता है। पर यह ग्रह का **स्वभाव** है, आपकी नियति नहीं। यही धीमापन शनि से धैर्य, अनुशासन और लंबा टिकने वाला काम भी दिलाता है।',
+      'व्यवहार में सुस्ती अक्सर तब दिखती है जब **मंगल (ऊर्जा और पहल)** या **सूर्य (जीवन शक्ति)** का अनुपात 1.0 से नीचे हो — यह अनुभव से निकली पढ़ाई है, शास्त्र का नियम नहीं। ऊपर की तालिका में इन दोनों की पंक्ति देखिए, और साथ में नींद, दिनचर्या और सेहत भी जाँचिए, क्योंकि ग्रह बल एक संकेत है, निदान नहीं। कमज़ोर ग्रह के उपाय [Weak Planet Finder](/calculators/free-weak-planet-finder) पर हैं।',
+    ],
+  },
+  {
+    id: 'sabse-ashubh-graha',
+    h2: 'सबसे अशुभ ग्रह कौन सा है? — कोई ग्रह पूरी तरह बुरा नहीं',
+    paras: [
+      'बृहत् पराशर होरा शास्त्र (अध्याय 3, श्लोक 11) सूर्य, शनि, मंगल, क्षीण चंद्र, राहु और केतु को **क्रूर** स्वभाव का और बाकी ग्रहों को **सौम्य** कहता है — और जोड़ता है कि क्रूर ग्रह के साथ बैठा बुध भी क्रूर हो जाता है। यानी "क्रूर" एक स्वभाव है, कोई स्थायी सज़ा नहीं।',
+      'उसी अध्याय का श्लोक 59 कहता है कि **अपनी उच्च राशि में ग्रह पूरा शुभ फल देता है** — यह नियम क्रूर ग्रहों पर भी लागू है। इसलिए "सबसे अशुभ ग्रह" कोई एक नहीं होता। आपकी कुंडली में कौन सा ग्रह कठिन फल की ओर झुका है, यह उसके बल, भाव-स्वामित्व और इष्ट-कष्ट फल से तय होता है — और ये तीनों इसी पेज पर ऊपर समझाए गए हैं।',
+    ],
+  },
+  {
+    id: 'shukra-bal-jaanch',
+    h2: 'कैसे पता करें कि शुक्र मजबूत है या कमजोर?',
+    paras: [
+      'शुक्र का अपना पैमाना है। बृहत् पराशर होरा शास्त्र (अध्याय 27, श्लोक 32) सातों ग्रहों के न्यूनतम बल गिनाता है, जिसमें शुक्र के लिए **"सुराः" (33) × 10 = 330 षष्ट्यंश, यानी 5.5 रूपा** आता है; श्लोक 33 कहता है कि जिस ग्रह का बल इस मान तक पहुँचे, वह **बलवान** माना जाए।',
+      'तरीका सीधा है: ऊपर फ़ॉर्म भरिए, Shadbala Breakdown में **Venus** चुनिए और **Ratio** देखिए — 1.0 से ऊपर तो शुक्र बलवान, नीचे तो कमज़ोर। कमज़ोर शुक्र का मतलब रिश्ते टूटना नहीं; बस प्रेम, कला और सुख के क्षेत्र में थोड़ा ज़्यादा ध्यान चाहिए। कमज़ोरी की वजह और उपाय [Weak Planet Finder](/calculators/free-weak-planet-finder) पर हैं।',
     ],
   },
   {

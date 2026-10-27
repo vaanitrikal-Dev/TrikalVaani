@@ -2,7 +2,10 @@
 
 // ============================================================
 // File: app/calculators/free-foreign-spouse-calculator/page.tsx
-// Version: v2.2 (19 Oct 2026) — Radar 17 Oct Content Edit Brief (page at rank 1): +3 H2, 3 H2 renamed
+// Version: v2.3 (24 Oct 2026) — Radar 24 Oct: +1 H2, +1 FAQ (BPHS 24.84 on 7th lord in 12th, quoted as
+//   written; foreign reading marked as practice). Link: /learn/foreign-spouse-prediction. Other radar
+//   phrases already covered by v2.1/v2.2 sections.
+// (previous) Version: v2.2 (19 Oct 2026) — Radar 17 Oct Content Edit Brief (page at rank 1): +3 H2, 3 H2 renamed
 //   (ids unchanged), +3 FAQ, dateModified 2026-10-19. NEW: settlement-after-marriage (50+49),
 //   spouse-prediction-dob (spouse prediction calculator / future spouse calculator free / how to find
 //   spouse), kp-astrology (12). RENAMED: what-indicates (+birth chart signs), navamsa-d9 (+Foreign Spouse
@@ -112,6 +115,10 @@ const FAQS = [
     "a": "No. Classical astrology describes the nature of the partner, the setting where you are likely to meet, and the timing — not a name, initial or face. Any tool that returns those from a date of birth is guessing."
   },
   {
+    "q": "What does Brihat Parashara Hora Shastra say about the 7th lord in the 12th house?",
+    "a": "Adhyaya 24, shlok 84 (दारेशे व्ययगे जातो दरिद्रः कृपणोऽपि वा) says the native may be short of money or tight-fisted and the wife fond of spending. It does not mention a foreign spouse. The foreign reading is later practice that treats the 12th house as distance from home, and it is one placement only, so weigh it with Rahu and the Navamsa."
+  },
+  {
     "q": "Kya ye calculator free hai?",
     "a": "Haan, poora free. Score, saare blocks ka breakdown reason ke saath, disha ka ishara aur Dasha timing — sab bina payment ke. Kundali Milan alag paid service hai."
   }
@@ -155,6 +162,14 @@ const SECTIONS: FsSection[] = [
       'Often, yes — and this is one of the cleanest combinations in the whole subject. The **7th house is the spouse; the 12th house is distant lands, and also what lies outside your familiar world.** When the lord of the 7th sits in the 12th, the classical reading is that the spouse is found away from home: another country, another state, or simply outside your own community.',
       'But two qualifications matter, and skipping them is where most free tools go wrong. First, **the Navamsa has to confirm it.** If the D-9 places the 7th lord comfortably at home, the Rasi placement weakens considerably. Second, **the 12th house is not only foreign lands** — it also signifies expenditure, isolation and loss, so a badly afflicted 7th lord there can indicate distance in the relationship rather than distance in geography. A strong 7th lord in the 12th and a weak one read very differently.',
       'The honest position: this placement raises the probability meaningfully, and the calculator scores it accordingly — but it never decides the answer alone. Deeper reading is in [बारहवां भाव और विदेश](/blog/12th-house-foreign-settlement-astrology-hindi), and if the concern is marriage delay rather than a foreign match, [7th house weak — 11 symptoms](/blog/7th-house-weak-marriage-delay-reasons) is the more useful page.',
+    ],
+  },
+  {
+    id: "bphs-seventh-lord-twelfth",
+    h2: "What Brihat Parashara Hora Shastra Says About the 7th Lord in the 12th House",
+    paras: [
+      "Brihat Parashara Hora Shastra (adhyaya 24, shlok 84) gives this placement one verse: **दारेशे व्ययगे जातो दरिद्रः कृपणोऽपि वा** — the native may be short of money or tight-fisted, the wife is fond of spending, and the living may come from cloth. **The verse does not mention a foreign spouse or another country.** It reads the 12th house (foreign lands and expenses) as outflow. And it is one placement read alone: a strong, well-aspected 7th lord shows far less of it.",
+      "**Practice reading, not the verse:** the foreign-spouse meaning comes from later practice, which treats the 12th as distance from the birthplace. The calculator above scores it that way, as one block of six. The fuller basis is in [विदेशी जीवनसाथी की भविष्यवाणी](/learn/foreign-spouse-prediction).",
     ],
   },
   {

@@ -2,7 +2,9 @@
 
 // ============================================================
 // File: app/calculators/free-pitra-dosh-calculator/page.tsx
-// Version: v2.2 (19 Oct 2026) — Radar weekly report 17 Oct 2026: PUSH (11 empty SERPs) + FIX
+// Version: v2.3 (24 Oct 2026) — Radar 24 Oct: +1 H2, +2 FAQ (BPHS adhyaya 83 pitri shaap, verified in
+//   bphs_slokas; FAQ: Can a girl have Pitra Dosh, BPHS mein ullekh). All other radar phrases already covered.
+// (previous) Version: v2.2 (19 Oct 2026) — Radar weekly report 17 Oct 2026: PUSH (11 empty SERPs) + FIX
 //   (pitru dosh check online free #11, pitra dosh calculator #12, effects on children #12).
 //   +6 H2: calculator-by-dob (EN), कैलकुलेटर/कैसे पता करें (HI) at the TOP of the pillar,
 //   14 types (EN, same honest no-fixed-list stance as v2.0), in-family, effects on
@@ -341,6 +343,14 @@ const PILLAR: PillarSection[] = [
     ],
   },
   {
+    id: 'bphs-pitri-shaap',
+    h2: 'बृहत पाराशर होरा शास्त्र में पितृ शाप — ग्रंथ असल में क्या कहता है',
+    paras: [
+      'जो लोग "14 प्रकार" खोजते हैं, उनके लिए ग्रंथ की असली गिनती यह है: **बृहत पाराशर होरा शास्त्र (अध्याय 83)** संतान में बाधा के योग बताते हुए आठ तरह के शाप गिनाता है — सर्प, पितृ, मातृ, भ्रातृ, मातुल, ब्रह्म, पत्नी और प्रेत शाप। पितृ शाप उनमें से एक है, और उसके योग मुख्यतः **सूर्य और पंचम भाव (संतान और शिक्षा)** से बनते हैं — जैसे श्लोक 20 में पंचम भाव में नीच सूर्य, जिसके दोनों ओर पाप ग्रह हों। यह संतान से जुड़ा प्रसंग है, पूरे जीवन का फैसला नहीं, और कोई एक योग अकेले कुछ तय नहीं करता। पंचम भाव का विस्तार [पंचम भाव में पितृ दोष](/blog/pitra-dosh-in-5th-house-hindi) में है।',
+      'और सबसे जरूरी बात ग्रंथ खुद कहता है: अपने बताए दान-उपायों के बाद श्लोक 32 में लिखा है "पितुः शापान्मुच्यते नाऽत्र संशयः" — यानी पिता के शाप से मुक्ति मिलती है, इसमें संदेह नहीं। घर पर करने लायक सरल उपाय यह है: **क्या:** काले तिल मिले जल से तर्पण। **कब:** हर अमावस्या, सुबह स्नान के बाद। **कितने का:** ₹10–20। **कितने दिन:** 12 अमावस्या (एक वर्ष)। **आपके लिए क्यों:** ग्रंथ (श्लोक 95, "कर्मलोपे पितृणां") पितरों के छूटे कर्म को ही कारण बताता है, और तर्पण वही कर्म पूरा करता है। संतान की चिंता हो तो पहले डॉक्टर, फिर [पितृ दोष व संतान](/blog/pitra-dosh-childbirth-hindi) पढ़िए।',
+    ],
+  },
+  {
     id: 'lakshan-aur-upay',
     h2: 'पितृ दोष के लक्षण और उपाय',
     paras: [
@@ -525,6 +535,8 @@ const FAQS = [
   { q: 'क्या लाल किताब के उपाय आप देते हैं?', a: 'Nahi. Trikaal Vaani Parashar BPHS parampara mein kaam karta hai, Lal Kitab mein nahi — woh ek alag paddhati hai, apne alag niyamon ke saath. Agar aap Lal Kitab maante hain to kisi Lal Kitab ke jaankar se hi paramarsh lijiye; do paddhatiyon ko milaiye mat, kyunki milane par na koi niyam poora laagu hota hai na koi parinaam jaancha ja sakta hai.' },
   { q: 'How can I check Pitra Dosh by date of birth?', a: 'Enter your date, exact time and place of birth in the free calculator above. It checks the four classical conditions — Rahu/Ketu with the Sun, Saturn on the Sun, Rahu/Ketu/Saturn in the 9th house, and their aspect on the 9th — and gives a Yes/No verdict with severity. The birth time must be accurate, because the 9th house depends on it.' },
   { q: 'Are there really 14 types of Pitra Dosh?', a: 'No fixed list exists in the classical texts — online lists of 14, 12 or 7 types all differ. What is classical is three ways of classifying it: by the afflicting planet, by the house where it forms, and by the karmic cause.' },
+  { q: 'Can a girl have Pitra Dosh?', a: 'Yes — and it is calculated exactly the same way for a girl as for a boy: the Sun or the 9th house (luck and dharma) afflicted by Rahu, Ketu or Saturn. There is no separate or heavier "female Pitra Dosh". What differs is only the custom around who performs shraddha, and in practice a daughter, wife or granddaughter may perform it. The simplest remedy is her own tarpan with black sesame water on every Amavasya morning — Rs 10–20, for 12 Amavasyas.' },
+  { q: 'क्या बृहत पाराशर होरा शास्त्र में पितृ दोष का उल्लेख है?', a: 'हाँ, "पितृ शाप" नाम से। बृहत पाराशर होरा शास्त्र का अध्याय 83 संतान-बाधा के आठ शाप गिनाता है, जिनमें पितृ शाप एक है, और इसके योग मुख्यतः सूर्य और पंचम भाव (संतान और शिक्षा) से बनते हैं। उसी अध्याय का श्लोक 32 कहता है "पितुः शापान्मुच्यते नाऽत्र संशयः" — उपाय के बाद मुक्ति में संदेह नहीं। यानी ग्रंथ में भी यह दंड नहीं, सुधारी जा सकने वाली स्थिति है।' },
   { q: 'Does Pitru Dosh affect children?', a: 'Tradition links it to children mainly through the 5th house — delay in conception or worries about a child. It does not mean children are cursed; each child has their own chart. The response is the parent\'s own tarpan and care for elders, with medical advice first where conception is the concern.' },
   { q: 'Kya ye Pitra Dosh Calculator free hai?', a: 'Haan, 100% free. Yes/No verdict, severity, dosh ki vajah, sambhavit lakshan, 3 Pitru-Tarpan remedies, aur baaki doshas ka quick check — sab bilkul free. Na signup, na card.' },
   { q: 'Result kitne accurate hain?', a: 'Trikaal Vaani Swiss Ephemeris (NASA-grade) se kundali banakar Surya aur navam bhaav par Rahu/Ketu/Shani ke prabhav ko classical niyam se check karta hai with Lahiri Ayanamsha — 99.9% astronomical accuracy. Ek zaroori baat: navam bhaav janma samay se banta hai, isliye pandrah minute ki galti poora uttar palat sakti hai. Janma samay aspatal ke record se lijiye.' },
