@@ -2,7 +2,7 @@
 
 // ============================================================
 // File: components/hastrekha/GranthReport.tsx
-// Version: 1.1 (27 Oct 2026) — 'varsh_phal' (शुभ वर्ष) hissa pehle se khula | 1.0 (27 Oct 2026) — NAYA
+// Version: 1.2 (27 Oct 2026) — '### ' heading wale dabbe (एक दुर्लभ बात) ka khaali header theek | 1.1 (27 Oct 2026) — 'varsh_phal' (शुभ वर्ष) hissa pehle se khula | 1.0 (27 Oct 2026) — NAYA
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
 //
 // Hast Rekha v3 result screen ka granth-aadharit hissa. VM engine v2.0.0
@@ -109,6 +109,7 @@ export function GranthMarkdown({ md, hideFirstHeading = false }: { md: string; h
     }
     if (s.startsWith('### ')) {
       flushPara();
+      if (!headingSkipped) { headingSkipped = true; continue; }   // v1.2 — dabbe ke header mein ja chuka
       blocks.push(<h4 key={`h${k++}`} className="font-semibold text-base" style={{ color: GOLD, margin: 0 }}>{inline(s.slice(4), `h${k}`)}</h4>);
       continue;
     }
@@ -131,8 +132,9 @@ export function GranthMarkdown({ md, hideFirstHeading = false }: { md: string; h
 }
 
 function headingOf(md: string): string {
-  const line = md.split('\n').find(l => l.trim().startsWith('## '));
-  return line ? line.trim().slice(3).replace(/\*\*/g, '') : '';
+  // v1.2 — pehli '## ' ya '### ' line (teeno_akhand '### एक दुर्लभ बात' se shuru hota hai)
+  const line = md.split('\n').map(l => l.trim()).find(l => l.startsWith('## ') || l.startsWith('### '));
+  return line ? line.replace(/^#+\s*/, '').replace(/\*\*/g, '') : '';
 }
 
 // ── Poora granth report: saar + band dabbe + upay card ───────────────────────

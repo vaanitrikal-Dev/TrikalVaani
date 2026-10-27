@@ -2,7 +2,11 @@
 
 // ============================================================
 // File: components/hastrekha/GuidedPalmCamera.tsx
-// Version: 1.1 (27 Oct 2026) — STHIRTA SUDHAAR | 1.0 (27 Oct 2026) — NAYA
+// Version: 1.2 (27 Oct 2026) — RIGHT HAATH KI AAKRITI | 1.1 (27 Oct 2026) — STHIRTA SUDHAAR | 1.0 (27 Oct 2026) — NAYA
+//
+// CHANGE v1.2 (Rohiit, phone test 27 Oct): sunehri hatheli ki aakriti hamesha LEFT haath
+//   ki thi (angootha screen ke left). Hatheli upar karke dekhein to right haath ka angootha
+//   right taraf hota hai — ab Right haath ke liye aakriti ulti (scaleX -1) dikhti hai.
 //
 // CHANGE v1.1 (Rohiit: "camera stabilisation thik kardo"):
 //   1. Hilna ab ek frame se nahi — EMA (smoothed) se mapa jaata hai. Ek jhatka
@@ -181,8 +185,9 @@ export default function GuidedPalmCamera({
         )}
         {/* Hatheli ki aakriti */}
         {!camError && (
-          <svg aria-hidden="true" viewBox="0 0 200 290" className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
-            style={{ width: '62%', maxWidth: 320, height: 'auto' }}>
+          <svg aria-hidden="true" viewBox="0 0 200 290" className="absolute left-1/2 top-1/2"
+            style={{ width: '62%', maxWidth: 320, height: 'auto',
+              transform: `translate(-50%, -50%)${handLabel.toLowerCase() === 'right' ? ' scaleX(-1)' : ''}` }}>
             <path d="M60 280 L55 170 L30 120 Q25 105 38 102 Q50 100 58 118 L70 140 L68 40 Q68 25 80 25 Q92 25 92 40 L94 120 L98 18 Q98 4 110 4 Q122 4 122 18 L122 118 L128 30 Q130 16 142 17 Q153 19 152 33 L148 125 L158 62 Q161 50 172 52 Q182 55 180 68 L170 180 L150 280 Z"
               fill="none" stroke={GOLD} strokeWidth="3" strokeDasharray="10 7" />
           </svg>
