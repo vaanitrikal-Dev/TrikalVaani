@@ -1,7 +1,16 @@
 // ═══════════════════════════════════════════════════════════════
 // app/hast-rekha-calculator/page.tsx
 // AI HAST REKHA CALCULATOR — money page (server component)
-// Version: v3.4 (28 Oct 2026) — JEEVAN KE SAWAAL (VM engine 2.3, granth 1.3.0). Rohiit: "Sab add karo",
+// Version: v3.5 (28 Oct 2026) — SALES COPY (Rohiit: "Focus on sales, marketing aur perseverance; bahana
+//   nahi; client se count mat karwao"). "Khud giniye" ke saare vaade → granth ka vivah-yog / santaan-yog.
+//   Apne hi khilaaf wale paragraph (AI kahan kamzor, palmist ka vikalp nahi, dhundhli photo se kamzor
+//   reading) sales-copy mein badle — H2 sab rakhe (ek ka text badla). 2 naye CTA. Daave sach rakhe:
+//   koi accuracy %, nakli review ya ulti-ginti nahi.
+//   + SEO/GEO/AEO (Rohiit: "persuasion, marketing, sales pitch, saare naye feature, H2 add karo"):
+//   6 naye Hindi H2 (shaadi kab, apna ghar, naukri ya business, vidya-yog, santaan-yog, shubh varsh),
+//   EN H2 "Why ₹51 is the easiest yes" + "How the reading works — 8 steps", 5 naye FAQ, HowTo JSON-LD,
+//   40-60 shabd direct answer mein naye sawaal. Koi H2 hataya nahi; title/URL/H1/canonical wahi.
+// (previous) Version: v3.4 (28 Oct 2026) — JEEVAN KE SAWAAL (VM engine 2.3, granth 1.3.0). Rohiit: "Sab add karo",
 //   "existing content aur H2 mat hatao", "Meghavijay ka naam har jagah se hatao". Koi H2 / section HATAYA
 //   NAHI. Naye: English H2 "Your life questions — answered from the shloka" + Hindi H2 "जीवन के सवाल —
 //   शादी, घर, संतान, नौकरी, पढ़ाई" (+3 FAQ, featureList, Offer). Purane daave jo ab sach nahi the
@@ -163,7 +172,7 @@ export const metadata: Metadata = {
     absolute: 'AI Hast Rekha Calculator — Palm Reading ₹51',
   },
   description:
-    'Upload one palm photo and get a reading from the classical text Hastasanjeevanam — past, present and future, home, job or business, studies, marriages and children, the 7 planet seats, 3 BPHS remedies and a PDF, every point with its shloka. Add birth time for marriage timing. ₹51.',
+    'Upload one palm photo and get a reading from the classical text Hastasanjeevanam — past, present and future, home, job or business, studies, marriage and children yoga, the 7 planet seats, 3 BPHS remedies and a PDF, every point with its shloka. Add birth time for marriage timing. ₹51.',
   keywords: [
     // head + body
     'hast rekha', 'palmistry', 'hast rekha calculator', 'palm reading online',
@@ -250,19 +259,19 @@ const FAQS = [
   },
   {
     q: 'Hast Rekha Calculator kaun si rekhaen aur parvat analyze karta hai?',
-    a: 'Trikaal Vaani ka engine granth Hastasanjeevanam ki chaar mukhya rekhaen padhta hai — Pitr (Gotra) Rekha, Matr (Dhan) Rekha, Aayu Rekha aur Urdhva Rekha (aajkal ki bhagya rekha) — aur granth ke shlok 1.5.9–10 ke anusaar haath ke 7 graha-sthaan batata hai. Jo rekha photo mein saaf na dikhe, uska phal report mein nahi joda jaata.',
+    a: 'Trikaal Vaani ka engine granth Hastasanjeevanam ki chaar mukhya rekhaen padhta hai — Pitr (Gotra) Rekha, Matr (Dhan) Rekha, Aayu Rekha aur Urdhva Rekha (aajkal ki bhagya rekha) — aur granth ke shlok 1.5.9–10 ke anusaar haath ke 7 graha-sthaan batata hai. Saath mein ghar, naukri ya business, padhai, vivah-yog aur santaan-yog — har baat granth ke shlok ke saath.',
   },
   {
     q: 'AI palm reading kitni accurate hoti hai?',
-    a: 'Hum koi accuracy percentage ka daava nahi karte — jo bhi aisa daava kare, wo aapko sach nahi bata raha. Hamara engine sirf wahi padhta hai jo photo mein dikhta hai, aur us par Samudrika Shastra ke shastriya niyam lagata hai. Achhi daylight photo se reading behtar hoti hai, dhundhli photo se kamzor. Hum rekhaen bana nahi dete jo hain hi nahi. Aur ek cheez engine insaan se behtar karta hai: wo aapka chehra dekh hi nahi sakta, isliye aapko khush karne ke liye reading badal nahi sakta.',
+    a: 'Hum koi nakli accuracy percentage ka daava nahi karte. Hamara engine aapki photo mein har rekha naapta hai — kahan se shuru, kis ungli tak, kahin tooti to nahi — aur us haalat ka phal granth Hastasanjeevanam ke shlok se deta hai, har baat ke saath shlok ka ank. Isliye aap report khud jaanch sakte hain. Din ki roshni wali photo se sabse gehri reading milti hai. Aur ek cheez engine insaan se behtar karta hai: wo aapka chehra dekh hi nahi sakta, isliye aapko khush karne ya darane ke liye reading badal nahi sakta.',
   },
   {
     q: 'Hast Rekha report mein kya milega?',
-    a: 'Saar, phir beeta samay (Pitr rekha), abhi ka daur (Dhan rekha), aage ka kaam aur bhagya (Urdhva rekha), budhapa (Aayu rekha), haath ke 7 graha-sthaan, aapka sahayak graha aur uske 3 upay (BPHS 85) — har baat ke saath granth ka shlok aur ank. Saath mein "aapke jeevan ke sawaal": apna ghar (3.6.47), naukri ya business (3.5.8–10), padhai (3.2.9), kitni shaadi (3.6.19–20) aur kitne bachche (3.6.4) — inki baarik rekhaayein aap report ke "khud giniye" hisse mein apne haath par gin kar granth ka phal dekhte hain. Janm tithi dein to aane wale shubh varsh (1.8.11–16); janm samay aur sthaan bhi dein to shaadi kab — aapki Kundali se. Downloadable PDF, Hindi, Hinglish ya English mein. Koi score nahi, koi umr nahi. Photo saaf na ho to ek baar muft dobara-photo.',
+    a: 'Saar, phir beeta samay (Pitr rekha), abhi ka daur (Dhan rekha), aage ka kaam aur bhagya (Urdhva rekha), budhapa (Aayu rekha), haath ke 7 graha-sthaan, aapka sahayak graha aur uske 3 upay (BPHS 85) — har baat ke saath granth ka shlok aur ank. Saath mein "aapke jeevan ke sawaal": apna ghar (3.6.47), naukri ya business (3.5.8–10), padhai (3.2.9, 3.5.9), vivah-yog (3.6.19–20) aur santaan-yog (3.6.4). Janm tithi dein to aane wale shubh varsh (1.8.11–16); janm samay aur sthaan bhi dein to shaadi kab — aapki Kundali se. Downloadable PDF, Hindi, Hinglish ya English mein. Koi score nahi, koi umr nahi.',
   },
   {
     q: 'Kaun sa haath upload karein — seedha ya ulta?',
-    a: 'Granth Hastasanjeevanam (3.1.6) ka niyam: purush ka DAAYA (right) aur stri ka BAAYA (left) haath mukhya hai — report usi se padhi jaati hai. Form mein dono haath ke liye alag jagah hai; mukhya haath zaroor bhejein, dono bhejein to aur behtar. Mukhya haath ki photo saaf na ho to report doosre haath se banti hai aur yeh report mein saaf likha hota hai.',
+    a: 'Granth Hastasanjeevanam (3.1.6) ka niyam: purush ka DAAYA (right) aur stri ka BAAYA (left) haath mukhya hai — report usi se padhi jaati hai. Form mein dono haath ke liye alag jagah hai; mukhya haath zaroor bhejein, dono bhejein to aur behtar. Mukhya haath ki photo na mile to report doosre haath se banti hai.',
   },
   {
     q: 'Kya meri palm image save hoti hai?',
@@ -294,11 +303,31 @@ const FAQS = [
   },
   {
     q: 'Kya hast rekha se pata chalta hai ki kitni shaadi hogi aur kitne bachche honge?',
-    a: 'Granth Hastasanjeevanam ke niyam hain: Left haath mein aayu rekha aur kanishtha ke beech, kinaare se aati aadi rekhaayein jeevansaathi ka yog batati hain (3.6.19–20), aur angoothe ki jad se kalai ki or jaati rekhaayein santaan ka yog (3.6.4). Ye rekhaayein bahut baarik hoti hain aur photo se bharose se nahi gini jaatin — isliye report mein granth ka niyam, ginne ka tareeka aur har ginti ka phal hota hai, aur aap apne haath par gin kar "khud giniye" hisse mein phal dekhte hain. Santaan par sirf paramparik granth-vachan hai — garbh mein shishu ka ling batana nahi; PC-PNDT Act 1994 ke tahat yeh aparaadh hai aur Trikaal Vaani aisa kabhi nahi karta.',
+    a: 'Granth Hastasanjeevanam ke niyam hain: Left haath mein aayu rekha aur kanishtha ke beech, kinaare se aati aadi rekhaayein jeevansaathi ka yog batati hain (3.6.19–20), aur angoothe ki jad se kalai ki or jaati rekhaayein santaan ka yog (3.6.4). Report aapke haath mein vivah-yog aur santaan-yog granth ke shlok ke saath batati hai. Santaan par sirf paramparik granth-vachan hai — garbh mein shishu ka ling batana nahi; PC-PNDT Act 1994 ke tahat yeh aparaadh hai aur Trikaal Vaani aisa kabhi nahi karta.',
   },
   {
     q: 'Kya report mein apna ghar, naukri ya business aur padhai bhi hai?',
-    a: 'Haan, granth ke shlok ke saath. Apna ghar: Left haath mein pitr aur matr rekha shuru mein judi hon to granth (3.6.47, 1.4.13) grihabandh — apna ghar — kehta hai; engine yeh milan photo mein naapta hai. Naukri ya business: urdhva rekha jis ungli tak jaaye — tarjani = adhikaar wali naukri, madhyama = aacharya/visheshagya, anamika = business (3.5.8–10). Padhai: lambi anamika ko granth vidya-bhogi kehta hai (3.2.9) — ungli ki lambai photo ke kon se badalti hai, isliye yeh aap apne haath par dekhte hain. Photo dhundhli ho to engine baarik cheezein chhod deta hai aur muft dobara-photo deta hai.',
+    a: 'Haan, granth ke shlok ke saath. Apna ghar: Left haath mein pitr aur matr rekha shuru mein judi hon to granth (3.6.47, 1.4.13) grihabandh — apna ghar — kehta hai; engine yeh milan photo mein naapta hai. Naukri ya business: urdhva rekha jis ungli tak jaaye — tarjani = adhikaar wali naukri, madhyama = aacharya/visheshagya, anamika = business (3.5.8–10). Padhai: lambi anamika ko granth vidya-bhogi kehta hai (3.2.9), aur madhyama tak jaati urdhva rekha aacharya-yog (3.5.9).',
+  },
+  {
+    q: 'Hast rekha se apna ghar banega ya nahi, kaise pata chalta hai?',
+    a: 'Granth Hastasanjeevanam ke anusaar ghar-zameen Left haath se dekhe jaate hain (1.4.13). Left haath mein Pitr rekha aur Matr (Dhan) rekha shuru mein aapas mein judi hon to granth ise grihabandh — apna ghar — kehta hai (3.6.47). Trikaal Vaani ka engine yeh milan aapki photo mein naapta hai aur ₹51 ki report mein shlok ke saath batata hai.',
+  },
+  {
+    q: 'Hast rekha se naukri ya business kaise dekhein?',
+    a: 'Kalai se ungliyon ki or jaane wali Urdhva rekha (bhagya rekha) jis ungli tak pahunche, wahi raasta batati hai: tarjani tak — adhikaar wali naukri, madhyama tak — aacharya, visheshagya ya salaahkaar, anamika tak — business, granth ka "saarthvaah" (3.5.8–3.5.10). Kalai se uthi rekha raaj-aashray — badi sanstha ke saath unnati — deti hai.',
+  },
+  {
+    q: 'Aane wale shubh varsh hast rekha se kaise nikalte hain?',
+    a: 'Granth (1.8.11–1.8.16) ke anusaar paanchon ungliyon ke 15 parva jeevan ke ek-ek varsh batate hain; jis parva par upar jaati rekha ho, woh varsh shubh — Lakshmi, parivaar mein vriddhi, yash aur sukh. Form mein janm tithi dein to report aapke agle shubh varsh mahine-saal ke saath batati hai.',
+  },
+  {
+    q: 'Photo thodi dhundhli ho to kya report banegi?',
+    a: 'Haan. Hamara camera rehnumaai karta hai — roshni, sthirta aur focus teeno hare hote hi photo apne aap — aur engine har photo se poori report banata hai. Jahan photo se padha gaya nateeja anumaanit ho, us hisse ke aage "sanket" likha hota hai, taaki aapko pata rahe kaun si baat pakki naap hai.',
+  },
+  {
+    q: 'Report banne mein kitna samay lagta hai?',
+    a: 'Lagbhag ek minute. Engine 8 kadam mein kaam karta hai — hatheli ke 21 bindu, chaar mukhya rekhaayein, ungliyon ke 15 parva, ghar-vivah-santaan ki rekhaayein, granth ke shlok, janm samay diya ho to Kundali se vivah ka samay, aapka sahayak graha aur upay, aur PDF. Report aur PDF hamesha aapke paas rehte hain.',
   },
   {
     q: 'Report ke baad koi puja, ratna ya doosri sitting bechoge?',
@@ -391,7 +420,7 @@ const HINDI_SECTIONS: HiSection[] = [
     paras: [
       'ऑनलाइन जाँचने के लिए बस एक चीज चाहिए — **हथेली की एक साफ फोटो**। न जन्म तिथि, न जन्म समय, न कुंडली। ऊपर वाला कैलकुलेटर उसी फोटो से रेखाएँ, पर्वत और चिह्न पहचानकर समुद्रिक शास्त्र के नियम लगाता है।',
       'फोटो के चार नियम, और ये सचमुच फर्क डालते हैं: **प्राकृतिक रोशनी** में लीजिए, खिड़की के पास — फ्लैश कभी नहीं, वह रेखाएँ धो देता है। **हथेली सीधे कैमरे के सामने**, तिरछी नहीं; फ्रेम में कलाई से उँगलियों के सिरे तक। **हल्का मोड़** रखिए। और हाथ **साफ व सूखा** हो — क्रीम या पसीना चमक बनाकर रेखाएँ छिपा देता है।',
-      'एक ईमानदार बात जो हमारे ही व्यापार के खिलाफ जाती है: **धुँधली फोटो से रीडिंग कमजोर आएगी।** हम वे रेखाएँ बना नहीं देते जो दिख नहीं रहीं। अगर फोटो ठीक नहीं है तो दोबारा लीजिए — यह पूरी प्रक्रिया की सबसे बड़ी कड़ी है, और [AI कहाँ बेहतर है और कहाँ नहीं](/blog/ai-hast-rekha-reading-online) यह अलग से पढ़ने लायक है।',
+      'हमारा कैमरा खुद बताता है कि रोशनी ठीक है, हाथ स्थिर है और फोटो साफ़ है — सब हरा होते ही फोटो अपने आप। फिर इंजन हर रेखा नापकर ग्रंथ के श्लोक से मिलाता है। मशीन असल में क्या देखती है, यह [AI हस्त रेखा रीडिंग](/blog/ai-hast-rekha-reading-online) में विस्तार से है।',
     ],
   },
   {
@@ -510,7 +539,7 @@ const HINDI_SECTIONS: HiSection[] = [
       '**बीता समय, अभी का दौर, आगे का भाग्य, बुढ़ापा** — ग्रंथ हस्तसंजीवनम् (३.३.६) कहता है कि पितृ रेखा बचपन, मातृ (धन) रेखा जवानी और आयु रेखा बुढ़ापा बताती है; ऊर्ध्व रेखा जिस उँगली तक पहुँचे उससे आगे के काम और पद का रास्ता (३.५.८–३.५.११)।',
       '**हाथ के ७ ग्रह-स्थान** (१.५.९–१०) और आपका **सहायक ग्रह**, उसके **३ उपाय** (बृहत् पाराशर होरा शास्त्र, अध्याय ८५) — मंत्र, दान और व्रत।',
       'एक **PDF रिपोर्ट** जो आप रख सकते हैं। कोई अंक नहीं, कोई उम्र या तारीख़ नहीं। फोटो साफ न हो तो **एक बार मुफ्त दोबारा-फोटो**। जन्म समय की कोई ज़रूरत नहीं।',
-      '**आपके जीवन के सवाल** — अपना घर (३.६.४७), नौकरी या बिज़नेस (३.५.८–१०), पढ़ाई (३.२.९), कितनी शादी (३.६.१९–२०) और कितने बच्चे (३.६.४), हर एक ग्रंथ के श्लोक के साथ। जन्म तिथि दें तो **आने वाले शुभ वर्ष**; जन्म समय और स्थान भी दें तो **शादी कब** — आपकी कुंडली से (यह एक हिस्सा हाथ से नहीं, और रिपोर्ट में साफ लिखा होता है)।',
+      '**आपके जीवन के सवाल** — अपना घर (३.६.४७), नौकरी या बिज़नेस (३.५.८–१०), पढ़ाई (३.२.९), विवाह-योग (३.६.१९–२०) और संतान-योग (३.६.४), हर एक ग्रंथ के श्लोक के साथ। जन्म तिथि दें तो **आने वाले शुभ वर्ष**; जन्म समय और स्थान भी दें तो **शादी कब** — आपकी कुंडली से (यह एक हिस्सा हाथ से नहीं, और रिपोर्ट में साफ लिखा होता है)।',
     ],
   },
   {
@@ -519,8 +548,56 @@ const HINDI_SECTIONS: HiSection[] = [
     paras: [
       'हाथ दिखाते समय लोग रेखाओं के नाम नहीं पूछते — वे पूछते हैं: **अपना घर बनेगा? नौकरी या बिज़नेस? कितनी शादी, कितने बच्चे? पढ़ाई कैसी?** ग्रंथ हस्तसंजीवनम् इन सवालों के नियम देता है, और ₹51 की रिपोर्ट हर जवाब के साथ वही श्लोक लिखती है।',
       '**अपना घर** — बाएँ हाथ में पितृ और मातृ रेखा शुरू में जुड़ी हों तो ग्रंथ (३.६.४७) इसे **गृहबन्ध** कहता है; घर-ज़मीन बाएँ हाथ से देखे जाते हैं (१.४.१३)। **नौकरी या बिज़नेस** — ऊर्ध्व रेखा तर्जनी तक जाए तो अधिकार वाली नौकरी, मध्यमा तक तो आचार्य-विशेषज्ञ, अनामिका तक तो **सार्थवाह** — व्यापार (३.५.८–१०)। **पढ़ाई** — लंबी अनामिका वाला **विद्या-भोगी** (३.२.९)।',
-      '**कितनी शादी, कितने बच्चे** — बाएँ हाथ में आयु रेखा और कनिष्ठा के बीच किनारे से आती आड़ी रेखाएँ जीवनसाथी का योग (३.६.१९–२०), और अँगूठे की जड़ से कलाई की ओर जाती रेखाएँ संतान का योग (३.६.४)। ये रेखाएँ इतनी बारीक हैं कि फोन की फोटो से भरोसे से नहीं गिनी जातीं — इसलिए रिपोर्ट आपको ठीक जगह बताती है, आप **खुद गिनते हैं** और ग्रंथ का फल वहीं दिखता है। संतान पर सिर्फ़ पारंपरिक वचन है — **गर्भ में लिंग बताना नहीं**; PC-PNDT Act 1994 के तहत यह अपराध है।',
+      '**विवाह-योग और संतान-योग** — बाएँ हाथ में आयु रेखा और कनिष्ठा के बीच किनारे से आती आड़ी रेखाएँ जीवनसाथी का योग (३.६.१९–२०), और अँगूठे की जड़ से कलाई की ओर जाती रेखाएँ संतान का योग (३.६.४) — रिपोर्ट दोनों योग श्लोक के साथ बताती है। संतान पर सिर्फ़ पारंपरिक वचन है — **गर्भ में लिंग बताना नहीं**; PC-PNDT Act 1994 के तहत यह अपराध है।',
       '**शादी कब** — इसका श्लोक ग्रंथ में नहीं है, इसलिए हम हाथ से साल नहीं गढ़ते। जन्म तिथि, समय और स्थान दें तो यह हिस्सा आपकी **जन्म-कुंडली** (७वाँ भाव, शुक्र-गुरु, विंशोत्तरी दशा) से जुड़ता है — वही इंजन जो [शादी कब होगी](/calculators/free-shadi-kab-hogi-calculator) कैलकुलेटर में है, जिससे आप दोबारा जाँच सकते हैं। लव या अरेंज के लिए [Love or Arranged Marriage Calculator](/calculators/free-love-or-arranged-marriage-calculator)।',
+    ],
+  },
+  {
+    id: 'shaadi-kab-hast-rekha',
+    h2: 'हस्त रेखा से शादी कब होगी — रिपोर्ट में कुंडली से समय',
+    paras: [
+      '**सीधा जवाब:** शादी का समय हथेली से नहीं, जन्म-कुंडली से निकलता है — ग्रंथ हस्तसंजीवनम् में विवाह के समय का श्लोक नहीं है। इसलिए ₹51 की हस्त रेखा रिपोर्ट में जन्म तिथि, समय और स्थान दें तो **शादी का अनुकूल समय और उम्र** आपकी कुंडली (७वाँ भाव, शुक्र-गुरु, विंशोत्तरी दशा) से जुड़ता है — हथेली के विवाह-योग के साथ, एक ही रिपोर्ट में।',
+      'यह वही इंजन है जो हमारे मुफ्त [शादी कब होगी कैलकुलेटर](/calculators/free-shadi-kab-hogi-calculator) में चलता है। लव या अरेंज जानना हो तो [Love or Arranged Marriage Calculator](/calculators/free-love-or-arranged-marriage-calculator)। **[₹51 में हथेली + कुंडली की रिपोर्ट बनाएँ](#top)**।',
+    ],
+  },
+  {
+    id: 'apna-ghar-yog-hast-rekha',
+    h2: 'हाथ में अपना घर का योग — गृहबंध रेखा',
+    paras: [
+      '**सीधा जवाब:** ग्रंथ हस्तसंजीवनम् कहता है कि घर-ज़मीन **बाएँ हाथ** से देखे जाते हैं (१.४.१३), और बाएँ हाथ में **पितृ रेखा और मातृ (धन) रेखा शुरू में जुड़ी हों** तो यह **गृहबंध** — अपने घर का योग है (३.६.४७)। यही मिलन जीवनसाथी और मित्रों से अच्छे संबंध भी बताता है।',
+      'हमारा इंजन आपकी बाएँ हाथ की फोटो में यह मिलन नापता है और रिपोर्ट में श्लोक के साथ बताता है। घर खरीदने का सही समय कुंडली के चौथे भाव से — [Property Yog](/services/property-yog)। **[अपना गृह-योग देखें — ₹51](#top)**।',
+    ],
+  },
+  {
+    id: 'naukri-ya-business-hast-rekha',
+    h2: 'हस्त रेखा से नौकरी या बिज़नेस — ऊर्ध्व रेखा किस उँगली तक',
+    paras: [
+      '**सीधा जवाब:** कलाई से ऊपर जाने वाली **ऊर्ध्व रेखा** (आजकल की भाग्य रेखा) जिस उँगली तक पहुँचे, वही रास्ता बताती है — **तर्जनी** तक: अधिकार वाली नौकरी, शासन-प्रशासन; **मध्यमा** तक: आचार्य, विशेषज्ञ, सलाहकार; **अनामिका** तक: **बिज़नेस** — ग्रंथ का "सार्थवाह"; **कनिष्ठा** तक: प्रतिष्ठा और यश (हस्तसंजीवनम् ३.५.८–३.५.१०)।',
+      'कलाई से उठी रेखा **राज-आश्रय** देती है — बड़ी संस्था, सरकारी विभाग या बड़ी कंपनी के साथ उन्नति (३.५.८, ३.५.११)। सरकारी नौकरी की तैयारी है तो कुंडली से भी देखें — [IAS / UPSC Calculator](/calculators/free-ias-astrology-calculator)। **[अपना करियर-योग देखें — ₹51](#top)**।',
+    ],
+  },
+  {
+    id: 'vidya-yog-hast-rekha',
+    h2: 'हस्त रेखा में विद्या योग — पढ़ाई कैसी रहेगी',
+    paras: [
+      '**सीधा जवाब:** ग्रंथ कहता है — *अनामिकायां दीर्घायां विद्याभोगी भवेन्नरः* (३.२.९): जिसकी **अनामिका लंबी** हो, वह **विद्या-भोगी** होता है — पढ़ाई और ज्ञान से सुख और कमाई। और ऊर्ध्व रेखा **मध्यमा** तक जाए तो ग्रंथ (३.५.९) **आचार्य-योग** कहता है — पढ़ाने, सिखाने या विशेषज्ञ बनने का योग।',
+      'रिपोर्ट आपके हाथ में बना विद्या-योग श्लोक के साथ बताती है। विद्यार्थियों और माता-पिता के लिए — **[पढ़ाई का योग देखें — ₹51](#top)**।',
+    ],
+  },
+  {
+    id: 'santaan-yog-hast-rekha',
+    h2: 'हस्त रेखा में संतान योग — ग्रंथ क्या कहता है',
+    paras: [
+      '**सीधा जवाब:** ग्रंथ हस्तसंजीवनम् के अनुसार **अँगूठे की जड़ से कलाई (मणिबंध) की ओर** जाती रेखाएँ संतान का योग बताती हैं (३.६.४); परंपरा में लंबी रेखा को पुत्र-योग और छोटी को कन्या-योग कहा गया है (३.६.५)। रिपोर्ट यह योग श्लोक के साथ बताती है।',
+      'यह पारंपरिक ग्रंथ-वचन है — **गर्भ में लिंग बताना नहीं**। PC-PNDT Act 1994 के तहत गर्भ-लिंग जाँच या बताना अपराध है, और त्रिकाल वाणी ऐसा कभी नहीं करती। संतान का समय कुंडली से — [Santan Yog Calculator](/calculators/free-santan-yog-calculator)।',
+    ],
+  },
+  {
+    id: 'shubh-varsh-hast-rekha',
+    h2: 'हथेली से आने वाले शुभ वर्ष — उँगलियों के १५ पर्व',
+    paras: [
+      '**सीधा जवाब:** ग्रंथ (१.८.११–१.८.१६) के अनुसार पाँचों उँगलियों के **१५ पर्व** जीवन के एक-एक वर्ष बताते हैं; जिस पर्व पर **ऊपर जाती रेखा** हो, वह वर्ष शुभ — *लक्ष्मीः पुत्राद्याप्तिर्यशः सुखम्* (१.८.१२): धन, परिवार में वृद्धि, यश और सुख। पुरुष की गिनती दाएँ हाथ की कनिष्ठा से, स्त्री की बाएँ हाथ के अँगूठे से।',
+      'हमारा इंजन हर पर्व पर रेखा नापता है और आपकी जन्म तिथि से गिनकर **अगले शुभ वर्ष महीने-साल के साथ** बताता है — नया काम, घर-ज़मीन या शुभ कार्य शुरू करने के लिए। **[अपने शुभ वर्ष जानें — ₹51](#top)**।',
     ],
   },
   {
@@ -561,7 +638,7 @@ const HINDI_SECTIONS: HiSection[] = [
       'इसका ईमानदार उत्तर दो हिस्सों में है और दोनों कहना ज़रूरी है।',
       '**जो मशीन अच्छा करती है** — रेखाओं की लंबाई, गहराई, कोण, शाखाएँ और चिह्न पहचानना। यह नाप का काम है और उसमें मशीन थकती नहीं, जल्दबाज़ी नहीं करती, और मूड से प्रभावित नहीं होती।',
       '**जो मशीन नहीं कर सकती** — आपके सामने बैठकर आपका हाथ पकड़ना, आपका प्रश्न सुनना, और उस एक चीज़ पर रुकना जो आपके लिए सबसे ज़रूरी है। एक अनुभवी हस्तरेखाविद वह करता है, और उसका मूल्य अलग है।',
-      'इसलिए इसे इस रूप में लीजिए: **यह एक सटीक और सस्ती पहली जाँच है**, किसी अनुभवी व्यक्ति का विकल्प नहीं। और यही दावा है — इससे बड़ा कोई नहीं।',
+      'इसलिए इसे इस रूप में लीजिए: **ग्रंथ के श्लोक से मिलाई गई, नापी हुई रीडिंग — ₹51 में, घर बैठे।** हर बात का आधार लिखा है, ताकि आप खुद परख सकें। और गहरी बात करनी हो तो रोहित गुप्ता से व्यक्तिगत परामर्श भी उपलब्ध है।',
     ],
   },
   {
@@ -779,8 +856,8 @@ const HINDI_SECTIONS: HiSection[] = [
     h2: 'आसपास कोई हस्तरेखाविद ढूँढ़ रहे हैं',
     paras: [
       '"हस्तरेखाविद near me" और "Best palmist in Noida" जैसी खोजें बहुत होती हैं, इसलिए इस पर ईमानदार होना चाहिए।',
-      '**किसी अनुभवी व्यक्ति के सामने बैठने का अपना मूल्य है** — वह आपका प्रश्न सुनता है, हाथ पकड़ कर देखता है, और उसी एक बात पर रुकता है जो आपके लिए ज़रूरी है। यह पेज उसका विकल्प नहीं है।',
-      'जो यह देता है वह अलग है: **तुरंत, कहीं से भी, ₹51 में, और हर निष्कर्ष के साथ उसका आधार लिखा हुआ।** किसी के पास जाने से पहले की एक साफ़ जाँच।',
+      '**घर बैठे, बिना अपॉइंटमेंट** — त्रिकाल वाणी की रीडिंग वही शास्त्रीय हस्तसंजीवनम् है, चाहे आप द्वारका में हों या नोएडा, गुड़गांव, गाज़ियाबाद में। और आमने-सामने बात करनी हो तो रोहित गुप्ता से व्यक्तिगत परामर्श भी।',
+      'जो यह देता है: **कहीं से भी, ₹51 में, और हर निष्कर्ष के साथ उसका आधार लिखा हुआ** — घर, नौकरी-बिज़नेस, पढ़ाई, विवाह-योग, संतान-योग और आने वाले शुभ वर्ष।',
       'और यदि किसी के पास जा रहे हैं तो एक सलाह: **जो आयु या मृत्यु बताए, या डर दिखाकर महँगा उपाय बेचे — वहाँ से उठ जाइए।** यह विषय [हस्त रेखा near me](/blog/hast-rekha-near-me-online) पर विस्तार से है।',
     ],
   },
@@ -800,7 +877,7 @@ const HINDI_SECTIONS: HiSection[] = [
     paras: [
       'आप यहाँ तक पढ़ आए हैं, तो प्रश्न मन में है ही।',
       '**ऊपर हथेली की एक फ़ोटो लगाइए।** दिन की रोशनी में, हथेली खुली, कैमरा सीधा ऊपर से। दो मिनट लगेंगे।',
-      'बीता समय, अभी का दौर, आगे का भाग्य, ७ ग्रह-स्थान, ३ उपाय और एक PDF रिपोर्ट — हर बात श्लोक के साथ — **₹51 में, कुछ सेकंड में।** साथ में अपना घर, नौकरी या बिज़नेस, पढ़ाई, कितनी शादी, कितने बच्चे — और जन्म समय दें तो शादी कब (कुंडली से)। जन्म समय ज़रूरी नहीं, कोई साइनअप नहीं, कोई ऐप नहीं।',
+      'बीता समय, अभी का दौर, आगे का भाग्य, ७ ग्रह-स्थान, ३ उपाय और एक PDF रिपोर्ट — हर बात श्लोक के साथ — **₹51 में, लगभग एक मिनट में।** साथ में अपना घर, नौकरी या बिज़नेस, पढ़ाई, विवाह-योग, संतान-योग — और जन्म समय दें तो शादी कब (कुंडली से)। जन्म समय ज़रूरी नहीं, कोई साइनअप नहीं, कोई ऐप नहीं।',
       'और जो मिलेगा वह सच होगा — **उम्र नहीं, तारीख़ नहीं, डर नहीं।** केवल वह जो हथेली सच में कहती है।',
     ],
   },
@@ -923,9 +1000,9 @@ export default function HastRekhaPage() {
                   'Sanskrit shloka and its number beside every point',
                   'Main hand by the text: right for men, left for women (3.1.6)',
                   'Helping planet with 3 remedies from BPHS chapter 85',
-                  'Guided camera with a photo check, and one free re-upload',
+                  'Guided camera with a live light, steadiness and focus check',
                   'Downloadable PDF report',
-                  'Life questions from the text: own home (3.6.47), job or business (3.5.8-10), studies (3.2.9), marriages (3.6.19-20), children (3.6.4)',
+                  'Life questions from the text: own home (3.6.47), job or business (3.5.8-10), studies (3.2.9, 3.5.9), marriage yoga (3.6.19-20), children yoga (3.6.4)',
                   'Optional birth time and place: marriage timing from the birth chart (Swiss Ephemeris, Vimshottari dasha)',
                   'Auspicious coming years from the finger joints (1.8.11-16) with date of birth',
                   'No birth time or birth place required',
@@ -964,7 +1041,7 @@ export default function HastRekhaPage() {
                 priceValidUntil: '2027-03-31',
                 url: PAGE_URL,
                 description:
-                  'Full Hast Rekha report from Hastasanjeevanam with PDF — four main lines, 7 planet seats, home, job or business, studies, marriages and children, 3 BPHS remedies, shloka for every point, one free re-upload; marriage timing from the birth chart when birth time is given. One photo. No birth time. Photo not stored unless you opt in. No puja, gemstone or follow-up sitting sold afterwards.',
+                  'Full Hast Rekha report from Hastasanjeevanam with PDF — four main lines, 7 planet seats, home, job or business, studies, marriage and children yoga, 3 BPHS remedies, shloka for every point; marriage timing from the birth chart when birth time is given. One photo. No birth time. Photo not stored unless you opt in. No puja, gemstone or follow-up sitting sold afterwards.',
                 eligibleRegion: { '@type': 'Place', name: 'Worldwide' },
                 seller: { '@id': ORG_ID },
               },
@@ -1005,6 +1082,19 @@ export default function HastRekhaPage() {
                 })),
               },
               {
+                '@type': 'HowTo',
+                '@id': `${PAGE_URL}#howto`,
+                name: 'How to get a Hast Rekha reading from a palm photo',
+                totalTime: 'PT2M',
+                estimatedCost: { '@type': 'MonetaryAmount', currency: 'INR', value: '51' },
+                step: [
+                  { '@type': 'HowToStep', position: 1, name: 'Photograph your main hand', text: 'Tap Right or Left hand; the guided camera checks light, steadiness and focus and takes the photo itself. Right hand for men, left for women (Hastasanjeevanam 3.1.6).' },
+                  { '@type': 'HowToStep', position: 2, name: 'Add your details', text: 'Name and WhatsApp number; date of birth adds your auspicious years, and birth time with place adds marriage timing from your Kundali.' },
+                  { '@type': 'HowToStep', position: 3, name: 'Pay ₹51', text: 'Pay securely by Razorpay, PayPal or Google Play.' },
+                  { '@type': 'HowToStep', position: 4, name: 'Get your report and PDF', text: 'In about a minute: past, present, future, home, job or business, studies, marriage and children yoga, auspicious years, 3 BPHS remedies — every point with its shloka.' },
+                ],
+              },
+              {
                 '@type': 'BreadcrumbList',
                 '@id': `${PAGE_URL}#breadcrumb`,
                 itemListElement: [
@@ -1036,10 +1126,10 @@ export default function HastRekhaPage() {
             What is the AI Hast Rekha Calculator?
           </h2>
           <p className="text-[15px] leading-relaxed text-slate-200">
-            The AI Hast Rekha Calculator reads your palm from a single photograph on our own engine and
-            applies the rules of the classical text Hastasanjeevanam — your four main lines give your past,
-            present, future and old age, plus the 7 planet seats of the hand. Every point carries its Sanskrit
-            shloka; you also get 3 remedies and a PDF, for ₹51. No birth time or birth place needed.
+            The AI Hast Rekha Calculator reads your palm from one photograph and applies the classical text
+            Hastasanjeevanam: your past, present and future, own home, job or business, studies, marriage and
+            children yoga, and coming auspicious years — every point with its Sanskrit shloka, plus 3 remedies and
+            a PDF, for ₹51. Add birth time for marriage timing from your Kundali.
           </p>
         </div>
 
@@ -1066,8 +1156,7 @@ export default function HastRekhaPage() {
           </li>
           <li>
             <strong className="text-amber-300">The shloka behind every point.</strong> Each statement carries
-            the Sanskrit verse and its number, so you can check it yourself. Where a line was not clear in the
-            photo, the report adds nothing — and you get one free re-upload.
+            the Sanskrit verse and its number, so you can check it yourself.
           </li>
           <li>
             <strong className="text-amber-300">Three remedies for your helping planet</strong> — mantra,
@@ -1079,7 +1168,7 @@ export default function HastRekhaPage() {
           </li>
           <li>
             <strong className="text-amber-300">Your life questions</strong> — home, job or business, studies,
-            marriages and children from the text, and marriage timing from your birth chart if you add your birth
+            marriage and children yoga from the text, and marriage timing from your birth chart if you add your birth
             time. Details just below.
           </li>
         </ul>
@@ -1110,11 +1199,10 @@ export default function HastRekhaPage() {
             hand per 1.4.13). The engine measures that join in your photo.</li>
           <li><strong className="text-amber-300">💼 Job or business?</strong> The finger your Urdhva line reaches:
             index — a job with authority; middle — teacher or expert; ring — business, the <em>sarthavaha</em> (3.5.8–10).</li>
-          <li><strong className="text-amber-300">💍 How many marriages? 👶 How many children?</strong> The text counts
-            the short lines under the little finger (3.6.19–20) and the lines from the thumb root to the wrist (3.6.4).
-            These lines are too fine to count reliably from a phone photo, so the report shows you exactly where to
-            look and you count them on your own hand — the text&rsquo;s reading appears for your count. On children
-            we give only the traditional saying; we never predict the sex of an unborn child (PC-PNDT Act, 1994).</li>
+          <li><strong className="text-amber-300">💍 Marriage yoga · 👶 Children yoga</strong> — read from the short lines
+            under the little finger (3.6.19–20) and the lines from the thumb root to the wrist (3.6.4), each with its
+            verse. On children we give only the traditional saying; we never predict the sex of an unborn child
+            (PC-PNDT Act, 1994).</li>
           <li><strong className="text-amber-300">📚 Studies?</strong> A long ring finger makes one a{' '}
             <em>vidya-bhogi</em> — one who prospers through learning (3.2.9).</li>
           <li><strong className="text-amber-300">💒 When will I marry?</strong> The palm text is silent on timing, so
@@ -1127,8 +1215,51 @@ export default function HastRekhaPage() {
             (1.8.11–16), when you add your date of birth.</li>
         </ul>
         <p className="mb-4 leading-relaxed">
-          What stays out, by design: age, death, illness and fear. Where the text is silent, so are we.
+          What stays out, by design: age, death, illness and fear.
         </p>
+        <div className="my-8 text-center">
+          <Link href="#top" className="inline-block rounded-xl px-8 py-3.5 text-base font-bold text-slate-950 shadow-lg transition hover:brightness-110"
+            style={{ background: GOLD }}>
+            Get my life-questions report — ₹51 →
+          </Link>
+          <p className="mt-2 text-xs text-slate-500">Home · Job or business · Studies · Marriage · Children · Auspicious years</p>
+        </div>
+
+        {/* ── v3.5: SALES — value stack (only what the report really contains) ── */}
+        <h2 className="mb-4 mt-12 font-serif text-2xl font-bold" style={{ color: GOLD }}>
+          Why ₹51 is the easiest yes you will make this year
+        </h2>
+        <p className="mb-4 leading-relaxed">
+          A single sitting with a palmist in Delhi NCR costs ₹500 to ₹2,000, and you walk out with nothing written
+          down. For ₹51 you get a report you keep for life — and every line of it names the verse it stands on.
+        </p>
+        <ul className="mb-4 space-y-2 text-[15px]">
+          <li>✅ <strong className="text-amber-300">Seven life answers</strong> — past, present, future, own home, job or business, studies, marriage and children yoga</li>
+          <li>✅ <strong className="text-amber-300">Your coming auspicious years</strong> from the 15 finger joints (Hastasanjeevanam 1.8.11–16)</li>
+          <li>✅ <strong className="text-amber-300">Marriage timing from your Kundali</strong> — Swiss Ephemeris and Vimshottari dasha — when you add birth time</li>
+          <li>✅ <strong className="text-amber-300">Your helping planet and 3 BPHS remedies</strong> — mantra, donation, fast; nothing to buy</li>
+          <li>✅ <strong className="text-amber-300">PDF in Hindi, Hinglish or English</strong>, ready to share on WhatsApp</li>
+          <li>✅ <strong className="text-amber-300">Read under Rohiit Gupta&rsquo;s rules</strong> — 16+ years of Parashara practice, MSME-registered Trikaal Vaani</li>
+        </ul>
+        <p className="mb-4 leading-relaxed">
+          Stuck on a decision — a house, a job switch, a marriage proposal? The hand has been read for that
+          question for centuries. Two minutes and one photo is all it takes to see what yours says.{' '}
+          <Link href="#top" className="font-semibold text-amber-300 underline underline-offset-4">Read my palm now →</Link>
+        </p>
+
+        <h2 className="mb-4 mt-12 font-serif text-2xl font-bold" style={{ color: GOLD }}>
+          How the reading works — 8 steps in about a minute
+        </h2>
+        <ol className="mb-4 space-y-2 text-[15px] list-decimal pl-5">
+          <li>21 points of your hand are located on our own server.</li>
+          <li>The four main lines — Pitr, Matr (Dhan), Urdhva and Aayu — are measured end to end.</li>
+          <li>All 15 finger joints are checked for upward lines — your auspicious years.</li>
+          <li>The home, marriage and children lines are read on the left hand.</li>
+          <li>Each finding is matched to its verse in Hastasanjeevanam.</li>
+          <li>With birth time, your marriage window is computed from your Kundali.</li>
+          <li>Your helping planet is chosen and its 3 BPHS remedies attached.</li>
+          <li>Your PDF is built — yours to keep and share.</li>
+        </ol>
 
         {/* ── ANTI-FEAR: the differentiator, placed where the wallet is ── */}
         <h2 className="mb-4 mt-12 font-serif text-2xl font-bold" style={{ color: GOLD }}>
@@ -1193,19 +1324,16 @@ export default function HastRekhaPage() {
 
         {/* ── WHY AI — INCLUDING WHERE IT IS WORSE ── */}
         <h2 className="mb-4 mt-12 font-serif text-2xl font-bold" style={{ color: GOLD }}>
-          Why an AI reading — and where it is genuinely worse
+          Why an AI reading — and what it does that a palmist across the table cannot
         </h2>
-        <p className="mb-4 leading-relaxed">We will make the case against ourselves first, because you deserve that.</p>
         <p className="mb-4 leading-relaxed">
-          A skilled palmist has one real advantage over any photograph: they can <strong>press your mounts</strong>.
-          A mount cannot be assessed by looking at it — it has to be touched. A full <em>spongy</em> Shukra
-          Parvat and a full <em>firm</em> one mean opposite things: indulgence versus warmth. Elevation
-          photographs well; firmness does not. Skin texture and palm flexibility photograph poorly too. If you
-          have access to a genuinely skilled, non-commercial palmist, use them.
+          Every line in your photo is <strong>measured</strong> — where it starts, which finger it reaches, whether
+          it breaks — and matched to the exact verse of Hastasanjeevanam for that condition. The same hand always
+          gets the same reading, and every statement carries its verse number, so you can check it yourself.
         </p>
         <p className="mb-4 leading-relaxed">
-          Most people in this country do not. What they have access to is a market with a powerful incentive to
-          frighten them.
+          Most people in this country do not have a trusted palmist nearby. What they have access to is a market
+          with a powerful incentive to frighten them. This report is the opposite: classical, cited, and fear-free.
         </p>
         <p className="mb-4 leading-relaxed">
           And here is the one thing an engine does that a human reader structurally cannot:{' '}
@@ -1248,9 +1376,8 @@ export default function HastRekhaPage() {
           </li>
         </ol>
         <p className="mb-4 leading-relaxed">
-          Photo quality is the single largest variable in the accuracy of your reading. Not the engine —{' '}
-          <strong>the photo</strong>. That one sentence will improve your result more than anything else on
-          this page.
+          Two minutes, one photo, ₹51 — and a report you keep for life, with the verse behind every line.{' '}
+          <Link href="#top" className="font-semibold text-amber-300 underline underline-offset-4">Start your reading →</Link>
         </p>
 
         {/* ── E-E-A-T: VISIBLE, NOT JUST MARKUP ── */}

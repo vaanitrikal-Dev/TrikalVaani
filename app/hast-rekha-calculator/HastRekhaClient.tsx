@@ -2,8 +2,18 @@
 
 // ============================================================
 // File: app/hast-rekha-calculator/HastRekhaClient.tsx
-// Version: 3.3 (28 Oct 2026 — JEEVAN KE SAWAAL + SHAADI KAB + SAAF PHOTO) | 3.2 (27 Oct 2026 — SHUBH VARSH JANM TITHI) | 3.1 (27 Oct 2026 — RETRY LINK) | 3.0 (27 Oct 2026 — HAST REKHA v3: GRANTH-AADHARIT, BINA AI) | v2.6 (11 Oct 2026 — GOOGLE PLAY BILLING) | v2.4 (29 Aug 2026 — INTERNATIONAL PAYMENT)
+// Version: 3.4 (28 Oct 2026 — RESULT DIKHAO, BAHANA NAHI + 45s ANALYSIS) | 3.3 (28 Oct 2026 — JEEVAN KE SAWAAL + SHAADI KAB + SAAF PHOTO) | 3.2 (27 Oct 2026 — SHUBH VARSH JANM TITHI) | 3.1 (27 Oct 2026 — RETRY LINK) | 3.0 (27 Oct 2026 — HAST REKHA v3: GRANTH-AADHARIT, BINA AI) | v2.6 (11 Oct 2026 — GOOGLE PLAY BILLING) | v2.4 (29 Aug 2026 — INTERNATIONAL PAYMENT)
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
+//
+// CHANGE v3.4 (28 Oct 2026) — Rohiit: "Sirf result dikhao, question mat pucho, photo ka bahana
+//   mat do; jaisi bhi photo mile report banado; instant result se lagta hai jaancha nahi"
+//   1. Photo sirf tab roki jaati hai jab haath hi na mile. Dhundhli / galat-haath / frame wali
+//      rok aur "dobara lena behtar" sandesh hataye (VM engine 2.4 sab padhta hai).
+//   2. Result screen se peeli "rekha saaf nahi" patti, "muft nayi photo" button aur hari "photo
+//      saaf thi" patti hatayi. needs_photo (haath hi nahi mila) wala raasta wahi.
+//   3. ANALYSIS SCREEN: kam se kam 45 second, 8 asli kadam ek-ek karke tick hote hain (engine yahi
+//      sab karta hai). Jawab jaldi aaye to bhi 45s poore hote hain; der ho to aakhri kadam par rukta hai.
+//   4. "Muft dobara-photo" aur "Khud giniye" wale vaade upload page se hataye.
 //
 // CHANGE v3.3 (28 Oct 2026) — Rohiit: "Sab add karo — padhai, kitni shaadi, kitne bachche;
 //   vivah-samay ₹51 mein; existing content/H2 mat hatao; ek hi deploy"
@@ -102,14 +112,18 @@ interface RetryCtx { slug: string; token: string; mode: 'needs_photo' | 'retry';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-const ANALYZING_MSGS = [
-  'हथेली के 21 बिंदु पहचाने जा रहे हैं...',
-  'पितृ, मातृ, आयु और ऊर्ध्व रेखा पढ़ी जा रही हैं...',
-  'हस्तसंजीवनम् के श्लोक मिलाए जा रहे हैं...',
-  'घर, शादी, संतान, पढ़ाई — आपके जीवन के सवाल ग्रंथ से जोड़े जा रहे हैं...',
-  'आपके हाथ के ७ ग्रह-स्थान देखे जा रहे हैं...',
-  'आपकी रिपोर्ट और PDF तैयार हो रही है...',
+// v3.4 — analysis ke 8 kadam (engine yahi sab karta hai); kul kam se kam 45 second
+const ANALYSIS_STEPS = [
+  'हथेली के 21 बिंदु पहचाने',
+  'पितृ, मातृ, आयु और ऊर्ध्व रेखा नापी',
+  'उँगलियों के 15 पर्व जाँचे — आपके शुभ वर्ष',
+  'घर, विवाह और संतान की रेखाएँ देखीं',
+  'हस्तसंजीवनम् के श्लोक मिलाए',
+  'जन्म-कुंडली से विवाह का समय',
+  'आपका सहायक ग्रह और BPHS के उपाय',
+  'आपकी PDF रिपोर्ट तैयार',
 ];
+const MIN_ANALYSIS_MS = 45000;
 const BLOCKING = ['haath_nahi_mila', 'ungli_ya_kalai_frame_se_bahar', 'haath_bahut_door'];
 const RETRY_LS_KEY = 'tv_hast_retry_v1';
 const HAND_HI: Record<Hand, string> = { right: 'Right', left: 'Left' };
@@ -312,16 +326,9 @@ export default function HastRekhaClient({ faqs }: { faqs: FAQ[] }) {
       const n = ++tries.current[hand];
       const ulta = d.haath_disha === 'right' || d.haath_disha === 'left' ? d.haath_disha !== hand : false;
       const dhundhli = probs.includes('photo_dhundhli');
-      if (!d.hand_detected || probs.some(p => BLOCKING.includes(p))) {
-        set({ preview: photo.preview, b64, check: 'bad', message: d.reason || 'हथेली साफ नहीं दिखी — दोबारा लें' });
-      } else if (ulta && n <= 2) {
-        set({ preview: photo.preview, b64, check: 'bad', message: `यह ${HAND_HI[d.haath_disha as Hand]} हाथ लग रहा है — ${HAND_HI[hand]} हाथ की हथेली (अँगूठे वाली तरफ़ सही) दिखाकर दोबारा लें` });
-      } else if (dhundhli && n <= 2) {
-        set({ preview: photo.preview, b64, check: 'bad', message: 'फोटो धुंधली है — बारीक रेखाएँ (घर, शादी, शुभ वर्ष) नहीं पढ़ी जाएँगी। फोन स्थिर रखकर दोबारा लें' });
-      } else if (ulta) {
-        set({ preview: photo.preview, b64, check: 'warn', message: `यह ${HAND_HI[d.haath_disha as Hand]} हाथ जैसा लगा — सही है तो चलेगी` });
-      } else if (!d.is_valid) {
-        set({ preview: photo.preview, b64, check: 'warn', message: (d.reason || 'फोटो थोड़ी कमज़ोर') + ' — चलेगी, पर दोबारा लेना बेहतर' });
+      void n; void ulta; void dhundhli; void probs;      // v3.4 — sirf haath na mile tab roko
+      if (!d.hand_detected) {
+        set({ preview: photo.preview, b64, check: 'bad', message: 'फोटो में हथेली नहीं मिली — हथेली कैमरे की ओर करके दोबारा लें' });
       } else {
         set({ preview: photo.preview, b64, check: 'ok', message: `✓ ${HAND_HI[hand]} हाथ की फोटो ठीक है` });
       }
@@ -360,8 +367,18 @@ export default function HastRekhaClient({ faqs }: { faqs: FAQ[] }) {
    */
   const runAnalysis = async (proof: Record<string, string>) => {
     setStep('analyzing');
-    let idx = 0;
-    const timer = setInterval(() => { idx = (idx + 1) % ANALYZING_MSGS.length; setMsgIdx(idx); }, 2500);
+    setMsgIdx(0);
+    const t0 = Date.now();
+    const per = MIN_ANALYSIS_MS / ANALYSIS_STEPS.length;
+    // v3.4 — har ~5.6s ek kadam tick; aakhri kadam par jawab aane tak rukta hai
+    const timer = setInterval(() => {
+      setMsgIdx(Math.min(ANALYSIS_STEPS.length - 1, Math.floor((Date.now() - t0) / per)));
+    }, 400);
+    const waitMin = async () => {
+      const left = MIN_ANALYSIS_MS - (Date.now() - t0);
+      if (left > 0) await new Promise(r => setTimeout(r, left));
+      setMsgIdx(ANALYSIS_STEPS.length);
+    };
     try {
       const u = usablePhotos();
       const res = await fetch('/api/palmistry/paid-analyze', {
@@ -392,6 +409,7 @@ export default function HastRekhaClient({ faqs }: { faqs: FAQ[] }) {
         return;
       }
       if (data.pending_review) { setWaUrl(data.whatsappUrl || ''); setStep('review'); return; }
+      await waitMin();                                   // v3.4 — kam se kam 45 second
       showResult(data);
     } finally {
       clearInterval(timer);
@@ -585,11 +603,11 @@ export default function HastRekhaClient({ faqs }: { faqs: FAQ[] }) {
             </h1>
             <p className="text-base md:text-lg text-slate-300 max-w-xl mx-auto leading-relaxed">
               Bas hatheli ki photo — aur aapki report granth <strong>Hastasanjeevanam</strong> ke shlokon se:
-              beeta samay, abhi ka daur, aage ka bhagya, 7 graha-sthaan aur upay. Report kuch second mein, PDF hamesha ke liye.
+              beeta samay, abhi ka daur, aage ka bhagya, apna ghar, naukri ya business, padhai, vivah aur santaan yog, shubh varsh, 7 graha-sthaan aur upay. Lagbhag ek minute mein poori report, PDF hamesha ke liye.
             </p>
             {/* v3.3 — jeevan ke sawaal (sab report mein sach mein hain) */}
             <div className="flex flex-wrap justify-center gap-2 mt-4 max-w-xl mx-auto">
-              {['💒 शादी कब (कुंडली से)', '💍 कितनी शादी', '🏠 अपना घर', '💼 नौकरी या बिज़नेस', '📚 पढ़ाई', '👶 कितने बच्चे', '✨ आने वाले शुभ वर्ष'].map(t => (
+              {['💒 शादी कब (कुंडली से)', '💍 विवाह-योग', '🏠 अपना घर', '💼 नौकरी या बिज़नेस', '📚 पढ़ाई', '👶 संतान-योग', '✨ आने वाले शुभ वर्ष'].map(t => (
                 <span key={t} className="rounded-full px-3 py-1.5 text-xs" style={{ background: GOLD_RGBA(0.10), border: `1px solid ${GOLD_RGBA(0.35)}`, color: '#F0E2A8' }}>{t}</span>
               ))}
             </div>
@@ -698,16 +716,16 @@ export default function HastRekhaClient({ faqs }: { faqs: FAQ[] }) {
               {step === 'paying' ? '⏳ Payment Processing...' : 'रिपोर्ट बनाएँ — ₹51'}
             </button>
           )}
-          <p className="text-center text-xs mt-2" style={{ color: '#9CA3AF' }}>फोटो साफ न हो तो एक बार मुफ्त दोबारा भेज सकते हैं</p>
+          <p className="text-center text-xs mt-2" style={{ color: '#9CA3AF' }}>ग्रंथ हस्तसंजीवनम् · हर बात के साथ श्लोक · PDF हमेशा के लिए</p>
 
           <div className="mt-4 rounded-xl p-4" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
             <p className="text-xs font-semibold mb-2 tracking-wide" style={{ color: GOLD_RGBA(0.85) }}>REPORT MEIN KYA HAI</p>
             <div className="grid grid-cols-2 gap-1.5">
               {['Har baat ke saath granth ka shlok', 'Beeta samay · Abhi · Aage', 'Budhapa aur sehat', 'Aapke haath ke 7 graha-sthaan',
-                'Sahayak graha + 3 upay (BPHS)', 'Hindi / Hinglish / English', 'Ek baar muft dobara-photo', 'PDF Download ✓',
+                'Sahayak graha + 3 upay (BPHS)', 'Hindi / Hinglish / English', 'Vivah-yog · Santaan-yog (granth)', 'PDF Download ✓',
                 // v3.3 — naye sawaal
-                'Shaadi kab — Kundali se (janm samay dein)', 'Kitni shaadi · Kitne bachche (granth)', 'Apna ghar · Naukri ya business',
-                'Padhai — vidya-yog (3.2.9)', 'Aane wale shubh varsh (janm tithi dein)', 'Khud giniye — apni rekha, granth ka phal'].map((item) => (
+                'Shaadi kab — Kundali se (janm samay dein)', 'Apna ghar · Naukri ya business',
+                'Padhai — vidya / aacharya yog', 'Aane wale shubh varsh (janm tithi dein)'].map((item) => (
                 <div key={item} className="flex gap-2 text-xs text-slate-400">
                   <span style={{ color: GOLD }}>◈</span><span>{item}</span>
                 </div>
@@ -770,25 +788,47 @@ export default function HastRekhaClient({ faqs }: { faqs: FAQ[] }) {
     </>
   );
 
-  // ═══ ANALYZING ═══
-  if (step === 'analyzing') return (
-    <>
-      <SiteNav />
-      <main className="min-h-screen pt-20 flex flex-col items-center justify-center px-4 text-center"
-        style={{ background: '#080B12', color: '#E5E7EB' }}>
-        <div className="text-7xl mb-8 animate-pulse">🔮</div>
-        <h2 className="text-2xl font-serif font-bold mb-3" style={{ color: GOLD }}>Aapki Hast Rekha Padhi Ja Rahi Hai...</h2>
-        <p className="max-w-sm min-h-[2rem]" style={{ color: GOLD_RGBA(0.85) }}>{ANALYZING_MSGS[msgIdx]}</p>
-        <div className="flex gap-2 mt-8">
-          {ANALYZING_MSGS.map((_, i) => (
-            <div key={i} className="h-1.5 rounded-full transition-all duration-500"
-              style={{ width: i === msgIdx ? '32px' : '8px', background: i === msgIdx ? GOLD : 'rgba(255,255,255,0.1)' }} />
-          ))}
-        </div>
-        <p className="text-slate-500 text-xs mt-8">Bas kuch second — kripya page band na karein</p>
-      </main>
-    </>
-  );
+  // ═══ ANALYZING ═══ (v3.4 — 8 kadam, kam se kam 45s)
+  if (step === 'analyzing') {
+    const shown = ANALYSIS_STEPS.filter((_, i) => i !== 5 || (form.tob && form.lat !== null && form.dob));
+    const doneN = Math.min(msgIdx, ANALYSIS_STEPS.length);
+    const doneShown = ANALYSIS_STEPS.slice(0, doneN).filter((_, i) => i !== 5 || (form.tob && form.lat !== null && form.dob)).length;
+    const pct = Math.round((doneN / ANALYSIS_STEPS.length) * 100);
+    return (
+      <>
+        <SiteNav />
+        <main className="min-h-screen pt-24 pb-16 px-4 flex flex-col items-center" style={{ background: '#080B12', color: '#E5E7EB' }}>
+          <div className="w-full max-w-md flex flex-col gap-5">
+            <div className="text-center">
+              <div className="text-6xl mb-4 animate-pulse" aria-hidden="true">🔮</div>
+              <h2 className="text-2xl font-serif font-bold" style={{ color: GOLD }}>आपकी हस्त रेखा पढ़ी जा रही है</h2>
+              <p className="text-sm text-slate-400 mt-1">ग्रंथ हस्तसंजीवनम् से — हर रेखा, हर पर्व</p>
+            </div>
+            <div className="h-2 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.08)' }}>
+              <div className="h-full rounded-full transition-all duration-500" style={{ width: `${pct}%`, background: GOLD }} />
+            </div>
+            <ul className="flex flex-col gap-2.5" aria-live="polite">
+              {shown.map((label, i) => {
+                const done = i < doneShown;
+                const now = i === doneShown;
+                return (
+                  <li key={label} className="flex items-center gap-3 text-[15px]"
+                    style={{ color: done ? '#E5E7EB' : now ? GOLD : '#6B7280' }}>
+                    <span className="w-6 h-6 rounded-full flex items-center justify-center text-xs shrink-0"
+                      style={done ? { background: '#16A34A', color: '#fff' } : now ? { border: `2px solid ${GOLD}` } : { border: '1px solid #374151' }}>
+                      {done ? '✓' : now ? <span className="animate-pulse">•</span> : ''}
+                    </span>
+                    {label}
+                  </li>
+                );
+              })}
+            </ul>
+            <p className="text-slate-500 text-xs text-center">लगभग 1 मिनट — कृपया पेज बंद न करें</p>
+          </div>
+        </main>
+      </>
+    );
+  }
 
   // ═══ RETRY — muft dobara-photo (ya needs_photo) ═══
   if (step === 'retry' && retry) return (
@@ -930,29 +970,7 @@ export default function HastRekhaClient({ faqs }: { faqs: FAQ[] }) {
               )}
             </div>
 
-            {granth && !weak && (
-              <div className="rounded-xl px-4 py-3 text-sm font-semibold" style={{ background: 'rgba(34,197,94,0.10)', border: '1px solid rgba(34,197,94,0.35)', color: '#BBF7D0' }}>
-                ✓ फोटो साफ थी — चारों मुख्य रेखाएँ पढ़ी गईं
-              </div>
-            )}
-            {granth && weak && (
-              <div className="rounded-xl p-4 flex flex-col gap-3" style={{ background: 'rgba(245,158,11,0.10)', border: '1px solid rgba(245,158,11,0.45)' }}>
-                <p className="text-sm leading-relaxed" style={{ color: '#FDE68A' }}>
-                  {kam > 0
-                    ? `फोटो में ${kam} रेखा साफ नहीं दिखी — इसलिए उसका फल रिपोर्ट में नहीं जोड़ा। बाकी रिपोर्ट नीचे है।`
-                    : 'आपके मुख्य हाथ की साफ फोटो नहीं मिली — रिपोर्ट दूसरे हाथ से पढ़ी गई।'}
-                </p>
-                {canRetry ? (
-                  <button type="button" onClick={() => openRetry({ slug: retry!.slug, token: retry!.token, mode: 'retry', messages: result.quality_notes || [] })}
-                    className="min-h-[48px] rounded-xl font-bold text-[15px]" style={{ background: '#FBBF24', color: '#1A1200' }}>
-                    एक बार मुफ्त — नई फोटो भेजें
-                  </button>
-                ) : (
-                  <p className="text-xs text-slate-400">मुफ्त दोबारा-फोटो इस रिपोर्ट पर इस्तेमाल हो चुकी है।</p>
-                )}
-              </div>
-            )}
-
+            {/* v3.4 — photo / dobara-photo patti hatayi (Rohiit: bahana nahi) */}
             {granth ? (
               <GranthReportView data={granth} />
             ) : (
