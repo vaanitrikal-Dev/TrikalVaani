@@ -2,8 +2,17 @@
 
 // ============================================================
 // File: app/hast-rekha-calculator/HastRekhaClient.tsx
-// Version: 3.2 (27 Oct 2026 — SHUBH VARSH JANM TITHI) | 3.1 (27 Oct 2026 — RETRY LINK) | 3.0 (27 Oct 2026 — HAST REKHA v3: GRANTH-AADHARIT, BINA AI) | v2.6 (11 Oct 2026 — GOOGLE PLAY BILLING) | v2.4 (29 Aug 2026 — INTERNATIONAL PAYMENT)
+// Version: 3.3 (28 Oct 2026 — JEEVAN KE SAWAAL + SHAADI KAB + SAAF PHOTO) | 3.2 (27 Oct 2026 — SHUBH VARSH JANM TITHI) | 3.1 (27 Oct 2026 — RETRY LINK) | 3.0 (27 Oct 2026 — HAST REKHA v3: GRANTH-AADHARIT, BINA AI) | v2.6 (11 Oct 2026 — GOOGLE PLAY BILLING) | v2.4 (29 Aug 2026 — INTERNATIONAL PAYMENT)
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
+//
+// CHANGE v3.3 (28 Oct 2026) — Rohiit: "Sab add karo — padhai, kitni shaadi, kitne bachche;
+//   vivah-samay ₹51 mein; existing content/H2 mat hatao; ek hi deploy"
+//   1. Form: janm samay + janm sthaan (CityInput, marzi par) → paid-analyze v4.7 Kundali se
+//      "शादी कब होगी" report mein jodta hai. Janm tithi ke bina yeh nahi chalta — label mein likha.
+//   2. Photo jaanch: VM (engine 2.3) ki haath_disha galat haath bataye, ya photo dhundhli ho →
+//      photo ROKI jaati hai (lal). Do baar ke baad sirf chetavni (pehchaan galat bhi ho sakti hai).
+//   3. Hero / "REPORT MEIN KYA HAI" / analyzing sandesh mein naye sawaal (purane items rakhe).
+//   4. Footer se Acharya ka naam hataya (Rohiit: "remove Meghavijay name everywhere").
 //
 // CHANGE v3.2 (27 Oct 2026) — VM engine 2.1.0 ab janm tithi se "आने वाले शुभ वर्ष" (granth
 //   1.8.11–16) deta hai. Form ka label sach kiya; muft dobara-photo screen par janm tithi
@@ -46,6 +55,7 @@ import { usePlayApp } from '@/components/payment/usePlayApp';                   
 import { isPlayBillingAvailable, purchaseWithPlay, PLAY_PRODUCTS } from '@/lib/play-billing'; // v2.6
 import GuidedPalmCamera, { type CapturedPhoto } from '@/components/hastrekha/GuidedPalmCamera';   // v3.0
 import { GranthReportView, type GranthReportData } from '@/components/hastrekha/GranthReport';   // v3.0
+import CityInput from '@/components/calculators/CityInput';                                     // v3.3
 
 declare global {
   interface Window { Razorpay: any; }
@@ -68,6 +78,11 @@ interface FormState {
   language: 'hi' | 'en' | 'hinglish';
   dob: string;
   consent: boolean;
+  tob: string;                 // v3.3 'HH:MM'
+  place: string;               // v3.3
+  lat: number | null;
+  lon: number | null;
+  tz: number | null;
 }
 interface PalmImage { preview: string; b64: string; check: Check; message: string; }
 interface PalmResult {
@@ -91,6 +106,7 @@ const ANALYZING_MSGS = [
   'हथेली के 21 बिंदु पहचाने जा रहे हैं...',
   'पितृ, मातृ, आयु और ऊर्ध्व रेखा पढ़ी जा रही हैं...',
   'हस्तसंजीवनम् के श्लोक मिलाए जा रहे हैं...',
+  'घर, शादी, संतान, पढ़ाई — आपके जीवन के सवाल ग्रंथ से जोड़े जा रहे हैं...',
   'आपके हाथ के ७ ग्रह-स्थान देखे जा रहे हैं...',
   'आपकी रिपोर्ट और PDF तैयार हो रही है...',
 ];
@@ -206,7 +222,7 @@ function HastRekhaFooter() {
         <p className="mt-1">Rooted in Granth · Verified by Rohiit · Powered by AI · Rohiit Gupta, Chief Vedic Architect</p>
         <p className="mt-1">MSME · UDYAM-DL-10-0119070 · trikalvaani.com</p>
         <p className="mt-3 text-slate-600 italic max-w-lg mx-auto">
-          Hast Rekha report granth Hastasanjeevanam (Acharya Meghavijay) ke niyamon par aadharit hai —
+          Hast Rekha report granth Hastasanjeevanam ke niyamon par aadharit hai —
           margdarshan ke liye. Aantim nirnay hamesha aapka.
         </p>
       </div>
@@ -221,7 +237,7 @@ export default function HastRekhaClient({ faqs }: { faqs: FAQ[] }) {
   const [rightPalm,  setRightPalm]  = useState<PalmImage | null>(null);
   const [leftPalm,   setLeftPalm]   = useState<PalmImage | null>(null);
   const [camHand,    setCamHand]    = useState<Hand | null>(null);
-  const [form,       setForm]       = useState<FormState>({ userName: '', mobile: '', gender: 'M', language: 'hi', dob: '', consent: false });
+  const [form,       setForm]       = useState<FormState>({ userName: '', mobile: '', gender: 'M', language: 'hi', dob: '', consent: false, tob: '', place: '', lat: null, lon: null, tz: null });
   const [msgIdx,     setMsgIdx]     = useState(0);
   const [result,     setResult]     = useState<PalmResult | null>(null);
   const [error,      setError]      = useState('');
@@ -230,6 +246,8 @@ export default function HastRekhaClient({ faqs }: { faqs: FAQ[] }) {
   const [pendingLs,  setPendingLs]  = useState<RetryCtx | null>(null);
   const [retryBusy,  setRetryBusy]  = useState(false);
   const [askDob,     setAskDob]     = useState(false);   // v3.2 retry screen par janm tithi
+  const [askBirth,   setAskBirth]   = useState(false);   // v3.3 retry screen par janm samay/sthaan
+  const tries = useRef<Record<Hand, number>>({ right: 0, left: 0 });   // v3.3 galat-haath/dhundhli rok
 
   const mukhya: Hand = form.gender === 'F' ? 'left' : 'right';
 
@@ -268,7 +286,7 @@ export default function HastRekhaClient({ faqs }: { faqs: FAQ[] }) {
   }, []);
 
   // v3.2 — retry screen khulte waqt janm tithi khaali thi to khaana dikhao (bharte waqt gaayab na ho)
-  useEffect(() => { if (step === 'retry') setAskDob(!form.dob); }, [step]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { if (step === 'retry') { setAskDob(!form.dob); setAskBirth(!form.tob || form.lat === null); } }, [step]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Photo aayi (camera ya gallery) → compress → VM jaanch ──
   const handlePhoto = useCallback(async (hand: Hand, photo: CapturedPhoto) => {
@@ -290,8 +308,18 @@ export default function HastRekhaClient({ faqs }: { faqs: FAQ[] }) {
       const d = await r.json();
       if (!d?.checked) { set({ preview: photo.preview, b64, check: 'ok', message: '✓ फोटो जुड़ गई' }); return; }
       const probs: string[] = d.photo_problems || [];
+      // v3.3 — galat haath / dhundhli: do baar roko, teesri baar sirf chetavni
+      const n = ++tries.current[hand];
+      const ulta = d.haath_disha === 'right' || d.haath_disha === 'left' ? d.haath_disha !== hand : false;
+      const dhundhli = probs.includes('photo_dhundhli');
       if (!d.hand_detected || probs.some(p => BLOCKING.includes(p))) {
         set({ preview: photo.preview, b64, check: 'bad', message: d.reason || 'हथेली साफ नहीं दिखी — दोबारा लें' });
+      } else if (ulta && n <= 2) {
+        set({ preview: photo.preview, b64, check: 'bad', message: `यह ${HAND_HI[d.haath_disha as Hand]} हाथ लग रहा है — ${HAND_HI[hand]} हाथ की हथेली (अँगूठे वाली तरफ़ सही) दिखाकर दोबारा लें` });
+      } else if (dhundhli && n <= 2) {
+        set({ preview: photo.preview, b64, check: 'bad', message: 'फोटो धुंधली है — बारीक रेखाएँ (घर, शादी, शुभ वर्ष) नहीं पढ़ी जाएँगी। फोन स्थिर रखकर दोबारा लें' });
+      } else if (ulta) {
+        set({ preview: photo.preview, b64, check: 'warn', message: `यह ${HAND_HI[d.haath_disha as Hand]} हाथ जैसा लगा — सही है तो चलेगी` });
       } else if (!d.is_valid) {
         set({ preview: photo.preview, b64, check: 'warn', message: (d.reason || 'फोटो थोड़ी कमज़ोर') + ' — चलेगी, पर दोबारा लेना बेहतर' });
       } else {
@@ -310,6 +338,11 @@ export default function HastRekhaClient({ faqs }: { faqs: FAQ[] }) {
     right: rightPalm && rightPalm.check !== 'bad' ? rightPalm : null,
     left:  leftPalm  && leftPalm.check  !== 'bad' ? leftPalm  : null,
   });
+
+  /** v3.3 — janm samay + sthaan (dono hon tabhi bhejo). */
+  const birthFields = () => (form.tob && form.lat !== null && form.lon !== null && form.tz !== null
+    ? { birth_tob: form.tob, birth_place: form.place, birth_lat: form.lat, birth_lon: form.lon, birth_tz: form.tz }
+    : {});
 
   const showResult = (data: any) => {
     setResult(data);
@@ -339,6 +372,7 @@ export default function HastRekhaClient({ faqs }: { faqs: FAQ[] }) {
           user_name: form.userName, user_mobile: form.mobile,
           gender: form.gender, language: form.language,
           dob: form.dob || '', photo_consent: form.consent,
+          ...birthFields(),                                 // v3.3
         }),
       });
       if (res.status === 413) {
@@ -448,7 +482,7 @@ export default function HastRekhaClient({ faqs }: { faqs: FAQ[] }) {
       const u = usablePhotos();
       const res = await fetch('/api/palmistry/retry', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ slug: retry.slug, retry_token: retry.token, ...toVmPhotos(u.right, u.left), photo_consent: form.consent, dob: form.dob || '' }),
+        body: JSON.stringify({ slug: retry.slug, retry_token: retry.token, ...toVmPhotos(u.right, u.left), photo_consent: form.consent, dob: form.dob || '', ...birthFields() }),
       });
       if (res.status === 413) throw new Error('Photo bahut badi thi — dobara lein.');
       let data: any = null;
@@ -473,6 +507,29 @@ export default function HastRekhaClient({ faqs }: { faqs: FAQ[] }) {
   };
 
   const reset = () => { setStep('upload'); setResult(null); setRightPalm(null); setLeftPalm(null); setRetry(null); setError(''); };
+
+  // v3.3 — janm samay + sthaan ke khaane (upload aur retry dono screen par)
+  const birthInputs = (
+    <div className="col-span-2 rounded-xl p-3 flex flex-col gap-3" style={{ background: GOLD_RGBA(0.05), border: `1px solid ${GOLD_RGBA(0.35)}` }}>
+      <p className="text-xs leading-relaxed" style={{ color: '#E5D08A', margin: 0 }}>
+        💒 <strong>शादी कब होगी</strong> — जन्म तिथि, समय और स्थान दें तो यह हिस्सा आपकी <strong>जन्म-कुंडली</strong> से रिपोर्ट में जुड़ेगा
+        (ग्रंथ में शादी के समय का श्लोक नहीं है, इसलिए हाथ से नहीं)। <span className="text-slate-400">इच्छा पर — न दें तो भी पूरी रिपोर्ट मिलेगी।</span>
+      </p>
+      <label className="flex flex-col gap-1.5 text-xs text-slate-400">जन्म समय
+        <input type="time" value={form.tob} onChange={e => setForm(p => ({ ...p, tob: e.target.value }))}
+          className="w-full rounded-lg px-3 min-h-[46px] text-white text-[15px] focus:outline-none"
+          style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.12)', colorScheme: 'dark' }} />
+      </label>
+      <div className="flex flex-col gap-1.5 text-xs text-slate-400">
+        <label htmlFor="hr-birth-place">जन्म स्थान</label>
+        <CityInput id="hr-birth-place" value={form.place}
+          onSelect={(city, lat, lng, tz) => setForm(p => ({ ...p, place: city, lat, lon: lng, tz }))} />
+      </div>
+      {form.tob && form.lat !== null && !form.dob && (
+        <p className="text-xs" style={{ color: '#FCD34D', margin: 0 }}>शादी का समय निकालने के लिए ऊपर जन्म तिथि भी भरें।</p>
+      )}
+    </div>
+  );
 
   const camera = camHand && (
     <GuidedPalmCamera handLabel={HAND_HI[camHand]}
@@ -529,6 +586,15 @@ export default function HastRekhaClient({ faqs }: { faqs: FAQ[] }) {
             <p className="text-base md:text-lg text-slate-300 max-w-xl mx-auto leading-relaxed">
               Bas hatheli ki photo — aur aapki report granth <strong>Hastasanjeevanam</strong> ke shlokon se:
               beeta samay, abhi ka daur, aage ka bhagya, 7 graha-sthaan aur upay. Report kuch second mein, PDF hamesha ke liye.
+            </p>
+            {/* v3.3 — jeevan ke sawaal (sab report mein sach mein hain) */}
+            <div className="flex flex-wrap justify-center gap-2 mt-4 max-w-xl mx-auto">
+              {['💒 शादी कब (कुंडली से)', '💍 कितनी शादी', '🏠 अपना घर', '💼 नौकरी या बिज़नेस', '📚 पढ़ाई', '👶 कितने बच्चे', '✨ आने वाले शुभ वर्ष'].map(t => (
+                <span key={t} className="rounded-full px-3 py-1.5 text-xs" style={{ background: GOLD_RGBA(0.10), border: `1px solid ${GOLD_RGBA(0.35)}`, color: '#F0E2A8' }}>{t}</span>
+              ))}
+            </div>
+            <p className="text-xs text-slate-400 mt-3 max-w-md mx-auto leading-relaxed">
+              हर जवाब के साथ ग्रंथ का श्लोक। जहाँ ग्रंथ चुप है, वहाँ हम भी चुप — कोई उम्र, मृत्यु या डर नहीं।
             </p>
           </div>
 
@@ -590,6 +656,7 @@ export default function HastRekhaClient({ faqs }: { faqs: FAQ[] }) {
                 className="w-full rounded-lg px-3 min-h-[46px] text-white text-[15px] focus:outline-none"
                 style={{ background: GOLD_RGBA(0.05), border: `1px solid ${GOLD_RGBA(0.45)}`, colorScheme: 'dark' }} />
             </label>
+            {birthInputs}
           </div>
 
           <label className="flex gap-3 items-start rounded-xl p-3 mb-5 cursor-pointer"
@@ -637,7 +704,10 @@ export default function HastRekhaClient({ faqs }: { faqs: FAQ[] }) {
             <p className="text-xs font-semibold mb-2 tracking-wide" style={{ color: GOLD_RGBA(0.85) }}>REPORT MEIN KYA HAI</p>
             <div className="grid grid-cols-2 gap-1.5">
               {['Har baat ke saath granth ka shlok', 'Beeta samay · Abhi · Aage', 'Budhapa aur sehat', 'Aapke haath ke 7 graha-sthaan',
-                'Sahayak graha + 3 upay (BPHS)', 'Hindi / Hinglish / English', 'Ek baar muft dobara-photo', 'PDF Download ✓'].map((item) => (
+                'Sahayak graha + 3 upay (BPHS)', 'Hindi / Hinglish / English', 'Ek baar muft dobara-photo', 'PDF Download ✓',
+                // v3.3 — naye sawaal
+                'Shaadi kab — Kundali se (janm samay dein)', 'Kitni shaadi · Kitne bachche (granth)', 'Apna ghar · Naukri ya business',
+                'Padhai — vidya-yog (3.2.9)', 'Aane wale shubh varsh (janm tithi dein)', 'Khud giniye — apni rekha, granth ka phal'].map((item) => (
                 <div key={item} className="flex gap-2 text-xs text-slate-400">
                   <span style={{ color: GOLD }}>◈</span><span>{item}</span>
                 </div>
@@ -749,6 +819,7 @@ export default function HastRekhaClient({ faqs }: { faqs: FAQ[] }) {
                 style={{ background: GOLD_RGBA(0.05), border: `1px solid ${GOLD_RGBA(0.45)}`, colorScheme: 'dark' }} />
             </label>
           )}
+          {askBirth && <div className="grid grid-cols-2">{birthInputs}</div>}
           {error && (
             <div className="rounded-lg px-4 py-3 text-red-300 text-sm"
               style={{ background: 'rgba(220,38,38,0.15)', border: '1px solid rgba(220,38,38,0.3)' }}>⚠️ {error}</div>

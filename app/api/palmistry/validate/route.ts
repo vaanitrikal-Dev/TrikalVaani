@@ -1,6 +1,8 @@
 // ============================================================
 // File: app/api/palmistry/validate/route.ts
-// Version: 1.0 (27 Oct 2026) — NAYA
+// Version: 1.1 (28 Oct 2026) — haath_disha | 1.0 (27 Oct 2026) — NAYA
+// v1.1: VM engine v2.3 angoothe ki disha se batata hai photo Right haath ki hai ya Left
+//   (haath_disha). Client galat haath par photo rokta hai (2 baar ke baad sirf chetavni).
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
 //
 // KYC-camera ke baad photo ki jaanch: VM engine v2.0.0 /palmistry/validate
@@ -41,6 +43,7 @@ export async function POST(req: NextRequest) {
         reason:         d.reason ?? '',
         hand_detected:  !!d.hand_detected,
         photo_problems: Array.isArray(d.photo_problems) ? d.photo_problems : [],
+        haath_disha:    d.haath_disha === 'right' || d.haath_disha === 'left' ? d.haath_disha : null,   // v1.1
       });
     } catch {
       clearTimeout(t);

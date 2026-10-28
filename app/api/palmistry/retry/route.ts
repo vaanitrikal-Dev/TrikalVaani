@@ -1,6 +1,10 @@
 // ============================================================
 // File: app/api/palmistry/retry/route.ts
-// Version: 1.1 (27 Oct 2026) — janm tithi | 1.0 (27 Oct 2026) — NAYA
+// Version: 1.2 (28 Oct 2026) — shaadi kab (Kundali) | 1.1 (27 Oct 2026) — janm tithi | 1.0 (27 Oct 2026) — NAYA
+// v1.2: row ka vivah_kundali (paid-analyze v4.7 ne banaya) VM engine v2.3 ko dobara jaata hai —
+//   nayi photo par bhi "शादी कब होगी" hissa bana rehta hai. Row mein na ho aur customer retry
+//   screen par janm samay + sthaan de (aur janm tithi ho) → yahin Kundali chalti hai aur row
+//   mein save hoti hai. Pehle se bhara janm vivaran KABHI nahi badalta.
 // v1.1: row mein janm tithi khaali ho aur customer ne retry screen par bhari ho (YYYY-MM-DD)
 //   → wahi VM ko jaati hai (engine 2.1.0 ke "शुभ वर्ष") aur row mein save hoti hai.
 //   Pehle se bhari janm tithi KABHI nahi badalti.
@@ -22,6 +26,7 @@ import { createClient } from '@supabase/supabase-js';
 import { callVM } from '@/lib/callVM';
 import { notifyReportReady } from '@/lib/report-notify';
 import { saveConsentPhotos, tokenMatches } from '@/lib/palm-store';
+import { cleanBirth, vivahForPalm } from '@/lib/hastrekha/vivah-kundali';   // v1.2
 
 export const maxDuration = 120;
 export const dynamic = 'force-dynamic';
@@ -41,7 +46,8 @@ const supabase = createClient(
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { slug, retry_token, dominant_palm_b64, other_palm_b64, handedness, photo_consent, dob } = body ?? {};
+    const { slug, retry_token, dominant_palm_b64, other_palm_b64, handedness, photo_consent, dob,
+            birth_tob, birth_place, birth_lat, birth_lon, birth_tz } = body ?? {};
 
     if (typeof slug !== 'string' || typeof retry_token !== 'string' || !slug || !retry_token) {
       return NextResponse.json({ error: 'Report ki pehchaan nahi mili.' }, { status: 400 });
@@ -52,7 +58,7 @@ export async function POST(req: NextRequest) {
     }
 
     const { data: row, error: rowErr } = await supabase.from('palmistry_reports')
-      .select('slug, tier, retry_token, free_retry_used, user_name, user_mobile, gender, language, dob, photo_consent, consent_photo_paths, payment_id')
+      .select('slug, tier, retry_token, free_retry_used, user_name, user_mobile, gender, language, dob, photo_consent, consent_photo_paths, payment_id, birth_details, vivah_kundali')
       .eq('slug', slug).maybeSingle();
     if (rowErr || !row || !tokenMatches(row.retry_token, retry_token)) {
       return NextResponse.json({ error: 'Yeh report nahi mili.' }, { status: 404 });
@@ -63,6 +69,14 @@ export async function POST(req: NextRequest) {
     const useDob = row.dob || newDob || '';
     if (!firstReport && !(row.tier === 'paid' && !row.free_retry_used)) {
       return NextResponse.json({ error: 'Muft dobara-photo is report par pehle hi istemal ho chuki hai.', used: true }, { status: 409 });
+    }
+
+    // ── v1.2: shaadi kab — row se, warna (pehli baar diya ho to) abhi Kundali se ──
+    let vivah_kundali: any = row.vivah_kundali ?? null;
+    const rowBirth = cleanBirth(row.birth_details);
+    const newBirth = rowBirth ? null : cleanBirth({ tob: birth_tob, place: birth_place, lat: birth_lat, lon: birth_lon, tz: birth_tz });
+    if (!vivah_kundali && (rowBirth || newBirth) && useDob) {
+      vivah_kundali = await vivahForPalm(useDob, rowBirth ?? newBirth, row.user_name, row.gender);
     }
 
     // ── VM analyze (engine v2.0, ~2-5s) ──
@@ -77,6 +91,7 @@ export async function POST(req: NextRequest) {
           handedness: handedness === 'left' ? 'left' : 'right',
           user_name: row.user_name ?? '', gender: row.gender ?? 'M',
           language: row.language ?? 'hi', dob: useDob,
+          vivah_kundali,                                   // v1.2
         }),
         cache: 'no-store',
         signal: ctrl.signal,
@@ -142,6 +157,8 @@ export async function POST(req: NextRequest) {
       tier: 'paid', free_retry_used: freeRetryUsed, engine_version: data.engine_version ?? null,
       photo_consent: consent, consent_photo_paths: consentPaths.length ? consentPaths : null,
       ...(newDob ? { dob: newDob } : {}),
+      ...(newBirth ? { birth_details: newBirth } : {}),                  // v1.2
+      ...(vivah_kundali && !row.vivah_kundali ? { vivah_kundali } : {}), // v1.2
     }).eq('slug', slug);
     if (upd) console.error('[Trikal] Palm retry save error:', upd.message);
 

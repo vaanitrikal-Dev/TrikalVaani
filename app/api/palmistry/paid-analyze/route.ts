@@ -1,5 +1,15 @@
-// TRIKAL VAANI - Palmistry Paid Analyze + Verify API - v4.6
+// TRIKAL VAANI - Palmistry Paid Analyze + Verify API - v4.7
 // CEO: Rohiit Gupta | Chief Vedic Architect
+//
+// v4.7 — 28 OCT 2026 — SHAADI KAB ₹51 MEIN (Rohiit: "Yes give vivah-samay at 51"):
+//   • Naye optional fields birth_tob / birth_place / birth_lat / birth_lon / birth_tz.
+//     dob + ye sab hon to lib/hastrekha/vivah-kundali.ts Kundali vivah engine (runYog
+//     'vivah', paid) chalata hai → VM engine v2.3 ko 'vivah_kundali' → report mein
+//     "शादी कब होगी" hissa. Na ho / fail ho → report purane link-text ke saath (kabhi
+//     nahi rukti).
+//   • Row mein birth_details + vivah_kundali (naye jsonb columns) — retry aur cron
+//     RETRY mode dobara Kundali nahi chalaate, row se uthaate hain.
+//   • Payment verify raaste (Razorpay / PayPal / Play) — EK LINE NAHI BADLI.
 //
 // v4.6 — 27 OCT 2026 — HAST REKHA v3 (VM engine v2.0.0, granth-aadharit, bina AI):
 //   • MUFT DOBARA-PHOTO: har nayi report par retry_token (gupt) + free_retry_used=false
@@ -100,6 +110,7 @@ import { callVM } from '@/lib/callVM';
 import { verifyAndClaimPlay, finishPlay, releasePlay } from '@/lib/play-billing-server';   // v4.5
 import { newRetryToken, saveConsentPhotos } from '@/lib/palm-store';                    // v4.6
 import type { PlayGateOk } from '@/lib/play-billing-server';                               // v4.5
+import { cleanBirth, vivahForPalm } from '@/lib/hastrekha/vivah-kundali';                  // v4.7
 
 // ── CRITICAL: function must outlive a ~90-120s VM analyze (Vercel Pro allows 300) ──
 export const maxDuration = 300;
@@ -151,6 +162,12 @@ interface PalmVerifyRequest {
   language?:           string;
   dob?:                string;
   photo_consent?:      boolean;         // v4.6 — sirf haan par photo save
+  // v4.7 — janm samay + sthaan (marzi par) → Kundali se shaadi kab
+  birth_tob?:          string;
+  birth_place?:        string;
+  birth_lat?:          number;
+  birth_lon?:          number;
+  birth_tz?:           number;
   // v4.4 — sirf paid-recovery cron (server) ke liye
   _retry_slug?:        string;
   _retry_key?:         string;
@@ -171,6 +188,7 @@ export async function POST(req: NextRequest) {
       dominant_palm_b64, other_palm_b64, handedness,
       user_name, user_mobile, gender, language, dob,
       photo_consent,
+      birth_tob, birth_place, birth_lat, birth_lon, birth_tz,
       _retry_slug, _retry_key,
     } = body;
     const consent = photo_consent === true;   // v4.6
@@ -331,6 +349,7 @@ export async function POST(req: NextRequest) {
 
       const { error: reviewSaveErr } = await supabase.from('palmistry_reports').insert({
         retry_input,                                  // v4.4
+        birth_details, vivah_kundali,                 // v4.7
         retry_count:       0,                         // v4.4
         session_id:        `palm_review_${reason}_${Date.now()}`,
         slug,
@@ -381,6 +400,20 @@ export async function POST(req: NextRequest) {
       });
     };
 
+    // ── 1b. v4.7: Kundali se shaadi kab (marzi par; fail = null, report nahi rukti) ──
+    let birth_details = cleanBirth({ tob: birth_tob, place: birth_place, lat: birth_lat, lon: birth_lon, tz: birth_tz });
+    let vivah_kundali: any = null;
+    if (isRetry) {
+      const { data: prevRow } = await supabase.from('palmistry_reports')
+        .select('birth_details, vivah_kundali').eq('slug', slug).maybeSingle();
+      birth_details = birth_details ?? cleanBirth(prevRow?.birth_details);
+      vivah_kundali = prevRow?.vivah_kundali ?? null;
+    }
+    if (!vivah_kundali && birth_details && dob) {
+      vivah_kundali = await vivahForPalm(dob, birth_details, user_name, gender);
+      console.log('[Trikal] Palm vivah-kundali:', vivah_kundali ? vivah_kundali.verdict.key : 'nahi');
+    }
+
     // ── 2. VM Analysis — SINGLE attempt, 180s timeout ────────────────────────
     // (v1.1.0 dual-palm = 2nd Gemini call, ~+15-25s over the observed 85-94s)
     let analysisData: any = null;
@@ -403,6 +436,7 @@ export async function POST(req: NextRequest) {
           gender:    gender    ?? 'M',
           language:  language  ?? 'hi',
           dob:       dob       ?? '',
+          vivah_kundali,                                   // v4.7 (engine v2.3; purana engine ise chhod deta hai)
         }),
         signal: controller.signal,
       });
@@ -445,6 +479,7 @@ export async function POST(req: NextRequest) {
         mp_features:       gateData.mp_features ?? null,
         gemini_data:       gateData.gemini_data ?? null,
         tier:              'needs_photo',
+        birth_details, vivah_kundali,                 // v4.7
         retry_token,
         free_retry_used:   false,
         photo_consent:     consent,
@@ -565,6 +600,7 @@ export async function POST(req: NextRequest) {
         ...(playGate ? { payment_id: playGate.orderId, play_order_id: playGate.orderId } : {}),
         // v4.6
         engine_version: analysisData.engine_version ?? null,
+        birth_details, vivah_kundali,                 // v4.7
         ...(isRetry ? {} : {
           retry_token, free_retry_used: false, photo_consent: consent, dob: dob ?? null,
           consent_photo_paths: consent_photo_paths.length ? consent_photo_paths : null,

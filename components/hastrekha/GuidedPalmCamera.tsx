@@ -2,7 +2,16 @@
 
 // ============================================================
 // File: components/hastrekha/GuidedPalmCamera.tsx
-// Version: 1.2 (27 Oct 2026) — RIGHT HAATH KI AAKRITI | 1.1 (27 Oct 2026) — STHIRTA SUDHAAR | 1.0 (27 Oct 2026) — NAYA
+// Version: 1.3 (28 Oct 2026) — FOCUS + SAAF PHOTO | 1.2 (27 Oct 2026) — RIGHT HAATH KI AAKRITI | 1.1 (27 Oct 2026) — STHIRTA SUDHAAR | 1.0 (27 Oct 2026) — NAYA
+//
+// CHANGE v1.3 (28 Oct 2026, Rohiit: "zoom/clear photo — rekhaayein saaf dikhein"):
+//   1. Camera khulte hi lagaataar AUTO-FOCUS (focusMode 'continuous') aur focus ka bindu
+//      beech mein (hatheli) — jin phones par yeh suvidha hai. Baaki par pehle jaisa.
+//   2. Teesra chip "साफ़" — beech ke hisse ki baarik lakeeron ki tezi (sharpness) naapta hai;
+//      ab tak ki sabse saaf jhalak ka 75% ho tabhi hara. Teeno hare → 3-2-1.
+//   3. Photo ab poore camera sensor se (ImageCapture.takePhoto — Chrome/Android), video
+//      frame se nahi → zyaada pixel, baarik rekhaayein (shaadi / santaan) saaf. Na chale
+//      to pehle jaisa video frame.
 //
 // CHANGE v1.2 (Rohiit, phone test 27 Oct): sunehri hatheli ki aakriti hamesha LEFT haath
 //   ki thi (angootha screen ke left). Hatheli upar karke dekhein to right haath ka angootha
@@ -52,10 +61,14 @@ export default function GuidedPalmCamera({
   const openedAt  = useRef<number>(0);             // v1.1 warm-up + manual hint
   const doneRef   = useRef(false);
   const galleryRef = useRef<HTMLInputElement>(null);
+  const sharpRef  = useRef<HTMLCanvasElement | null>(null);   // v1.3
+  const sharpEma  = useRef<number | null>(null);              // v1.3
+  const sharpMax  = useRef<number>(0);                        // v1.3
 
   const [camError, setCamError] = useState('');
   const [light, setLight]   = useState<Chip>('wait');
   const [steady, setSteady] = useState<Chip>('wait');
+  const [sharp, setSharp]   = useState<Chip>('wait');        // v1.3
   const [count, setCount]   = useState<number | null>(null);
   const [hint, setHint]     = useState('हथेली खोलकर सुनहरी लाइन के अंदर रखें');
   const [manual, setManual] = useState(false);     // v1.1 7s baad button ka ishaara
@@ -69,15 +82,34 @@ export default function GuidedPalmCamera({
     const v = videoRef.current;
     if (!v || doneRef.current || !v.videoWidth) return;
     doneRef.current = true;
-    const c = document.createElement('canvas');
-    c.width = v.videoWidth; c.height = v.videoHeight;
-    c.getContext('2d')!.drawImage(v, 0, 0, c.width, c.height);
-    c.toBlob(blob => {
+    const finish = (blob: Blob | null) => {
       if (!blob) { doneRef.current = false; return; }
-      const file = new File([blob], `palm-${handLabel.toLowerCase()}.jpg`, { type: 'image/jpeg' });
+      const file = new File([blob], `palm-${handLabel.toLowerCase()}.jpg`, { type: blob.type || 'image/jpeg' });
       stop();
       onCapture({ file, preview: URL.createObjectURL(blob) });
-    }, 'image/jpeg', 0.92);
+    };
+    const fromVideo = () => {
+      const c = document.createElement('canvas');
+      c.width = v.videoWidth; c.height = v.videoHeight;
+      c.getContext('2d')!.drawImage(v, 0, 0, c.width, c.height);
+      c.toBlob(finish, 'image/jpeg', 0.92);
+    };
+    // v1.3 — poore sensor ki photo (jahan browser de); 4s mein na mile to video frame
+    const track = streamRef.current?.getVideoTracks()[0];
+    const IC = (typeof window !== 'undefined' ? (window as any).ImageCapture : undefined);
+    if (track && IC) {
+      let settled = false;
+      const t = setTimeout(() => { if (!settled) { settled = true; fromVideo(); } }, 4000);
+      try {
+        new IC(track).takePhoto()
+          .then((blob: Blob) => { if (!settled) { settled = true; clearTimeout(t); finish(blob); } })
+          .catch(() => { if (!settled) { settled = true; clearTimeout(t); fromVideo(); } });
+      } catch {
+        if (!settled) { settled = true; clearTimeout(t); fromVideo(); }
+      }
+      return;
+    }
+    fromVideo();
   }, [handLabel, onCapture, stop]);
 
   // ── Camera kholna ──
@@ -93,6 +125,15 @@ export default function GuidedPalmCamera({
         if (cancelled) { stream.getTracks().forEach(t => t.stop()); return; }
         streamRef.current = stream;
         openedAt.current = Date.now();
+        // v1.3 — lagaataar auto-focus, bindu beech mein (jahan phone maane)
+        try {
+          const track = stream.getVideoTracks()[0];
+          const caps: any = track?.getCapabilities ? track.getCapabilities() : {};
+          const adv: any[] = [];
+          if (Array.isArray(caps.focusMode) && caps.focusMode.includes('continuous')) adv.push({ focusMode: 'continuous' });
+          if (caps.pointsOfInterest) adv.push({ pointsOfInterest: [{ x: 0.5, y: 0.5 }] });
+          if (adv.length) await track.applyConstraints({ advanced: adv } as any).catch(() => {});
+        } catch { /* purana phone — koi baat nahi */ }
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
           await videoRef.current.play().catch(() => {});
@@ -121,6 +162,22 @@ export default function GuidedPalmCamera({
       if (prevRef.current) { let s = 0; for (let j = 0; j < gray.length; j++) s += Math.abs(gray[j] - prevRef.current[j]); diff = s / gray.length; }
       prevRef.current = gray;
 
+      // v1.3 — beech ke hisse ki sharpness (Laplacian ka ausat), 128x96
+      if (!sharpRef.current) { sharpRef.current = document.createElement('canvas'); sharpRef.current.width = 128; sharpRef.current.height = 96; }
+      const sc = sharpRef.current.getContext('2d', { willReadFrequently: true } as any) as CanvasRenderingContext2D;
+      const cw = v.videoWidth * 0.5, ch = v.videoHeight * 0.5;
+      sc.drawImage(v, (v.videoWidth - cw) / 2, (v.videoHeight - ch) / 2, cw, ch, 0, 0, 128, 96);
+      const sd = sc.getImageData(0, 0, 128, 96).data;
+      const sg = new Float32Array(128 * 96);
+      for (let i = 0, j = 0; i < sd.length; i += 4, j++) sg[j] = (sd[i] * 3 + sd[i + 1] * 6 + sd[i + 2]) / 10;
+      let lap = 0;
+      for (let y = 1; y < 95; y++) for (let x = 1; x < 127; x++) {
+        const k = y * 128 + x;
+        lap += Math.abs(4 * sg[k] - sg[k - 1] - sg[k + 1] - sg[k - 128] - sg[k + 128]);
+      }
+      lap /= 126 * 94;
+      sharpEma.current = sharpEma.current === null ? lap : sharpEma.current * 0.6 + lap * 0.4;
+
       const now = Date.now();
       if (!openedAt.current) openedAt.current = now;
       const since = now - openedAt.current;
@@ -130,6 +187,8 @@ export default function GuidedPalmCamera({
       if (diff < 255) emaRef.current = emaRef.current === null ? diff : emaRef.current * 0.6 + diff * 0.4;
       const ema = emaRef.current ?? 255;
       if (since < 1200) { setHint('कैमरा तैयार हो रहा है…'); return; }
+      if (steadyRef.current && sharpEma.current !== null) sharpMax.current = Math.max(sharpMax.current, sharpEma.current);
+      const sh: Chip = sharpEma.current !== null && sharpMax.current > 0 && sharpEma.current >= 0.75 * sharpMax.current ? 'ok' : 'wait';
       if (steadyRef.current) {
         shakyRun.current = ema > 12 ? shakyRun.current + 1 : 0;
         if (shakyRun.current >= 2) steadyRef.current = false;
@@ -139,12 +198,13 @@ export default function GuidedPalmCamera({
 
       const l: Chip = mean < 60 ? 'bad' : mean > 225 ? 'bad' : 'ok';
       const st: Chip = steadyRef.current ? 'ok' : 'wait';
-      setLight(l); setSteady(st);
+      setLight(l); setSteady(st); setSharp(sh);
       if (l === 'bad') setHint(mean < 60 ? 'रोशनी कम है — खिड़की के पास या लाइट में आइए' : 'रोशनी बहुत तेज़ है — सीधी धूप/फ्लैश से हटिए');
       else if (st !== 'ok') setHint(since > 7000 ? 'हाथ स्थिर नहीं हो रहा? नीचे गोल बटन दबाकर खुद फोटो लें' : 'कोहनी मेज़ पर टिकाइए, हाथ और फोन स्थिर रखें');
+      else if (sh !== 'ok') setHint('फ़ोकस हो रहा है — फोन हथेली से 20-25 सेमी दूर रखें');
       else setHint('बढ़िया! हिलाइए मत…');
 
-      if (l === 'ok' && st === 'ok') {
+      if (l === 'ok' && st === 'ok' && sh === 'ok') {
         if (!goodSince.current) goodSince.current = now;
         const left = 3 - Math.floor((now - goodSince.current) / 500);
         setCount(left > 0 ? left : 0);
@@ -202,7 +262,7 @@ export default function GuidedPalmCamera({
         )}
         {!camError && (
           <div className="absolute bottom-3 left-0 right-0 flex gap-2 justify-center flex-wrap">
-            {chip(light, 'रोशनी')}{chip(steady, 'स्थिर')}
+            {chip(light, 'रोशनी')}{chip(steady, 'स्थिर')}{chip(sharp, 'साफ़')}
           </div>
         )}
       </div>
