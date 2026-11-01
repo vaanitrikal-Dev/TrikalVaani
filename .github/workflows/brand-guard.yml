@@ -1,6 +1,16 @@
 name: IR Guard — auto-fix IRs + alert on violations + SEO/GEO/AEO/EEAT gaps
 
-# 🔱 Trikaal Vaani — IR (Iron Rule) Guard  v6
+# 🔱 Trikaal Vaani — IR (Iron Rule) Guard  v7
+#
+# ═══════════════════════════════════════════════════════════════════════════
+#  v6 -> v7  (2026-11-01, CEO Rohiit Gupta approved)
+#  RETIRED — AUTO-FIX  s/Jini/Trikaal/g. "Jini" was a retired persona; on
+#    1 Nov 2026 Jini came back as the live site assistant (JiniWidget, VM
+#    mcp.trikalvaani.com/jini). The rule renamed her on the live widget.
+#  FIX — "Trikal" -> "Trikaal" now skips code paths (/Trikal/, Trikal/...).
+#    It had rewritten  import ... "@/components/Trikal/JiniWidget"  to
+#    "@/components/Trikaal/..." — a folder that does not exist — and the
+#    bot's own commit 2ac5825 failed the Vercel build.
 # Runs on every push to main (and can be run manually from the Actions tab).
 #
 # ═══════════════════════════════════════════════════════════════════════════
@@ -53,7 +63,7 @@ name: IR Guard — auto-fix IRs + alert on violations + SEO/GEO/AEO/EEAT gaps
 #     • Brand spelling : "Trikal"                         -> "Trikaal"
 #     • AI vendor names : "Gemini 2.5 Pro / Claude Sonnet" -> "premium AI engine"
 #     •                   "Gemini AI"                      -> "premium AI"
-#     • Retired persona : "Jini"                           -> "Trikaal"
+#     • (v7) "Jini" rule RETIRED — Jini is the live site assistant again
 #     • False tech claim: "Prokerala API"                  -> "self-hosted Swiss Ephemeris"
 #     • Broken link     : href/url "/about"               -> "/founder"
 #     • Old VM IP       : "34.14.164.105"                  -> "34.47.182.227"   [v5: 2026-06-05]
@@ -103,11 +113,11 @@ jobs:
       # ══ PART 1: AUTO-FIX ══════════════════════════════════════════════
       # v6: "Delhi NCR" dropped from both the file-discovery grep and the
       # substitution list. Nothing else in this step changed.
-      - name: Auto-fix IRs (brand, vendor, Jini, Prokerala, about, VM IP)
+      - name: Auto-fix IRs (brand, vendor, Prokerala, about, VM IP)
         shell: bash
         run: |
           echo "IR Guard v6 — scanning & auto-fixing content IRs..."
-          FILES=$(grep -rlE 'Trikal|Gemini|Claude Sonnet|Jini|Prokerala|/about"|34\.14\.164\.105' \
+          FILES=$(grep -rlE 'Trikal|Gemini|Claude Sonnet|Prokerala|/about"|34\.14\.164\.105' \
             --include='*.ts' --include='*.tsx' --include='*.js' --include='*.jsx' --include='*.html' \
             --exclude-dir=node_modules --exclude-dir=.next --exclude-dir=.git . 2>/dev/null || true)
           for f in $FILES; do
@@ -117,7 +127,8 @@ jobs:
                     || /trikalvaani/i
                     || /legalName|alternateName|also (known|searched)|Sanskrit|double|transliteration|keyword/i
                     || /\[Trikal/ || /console\./
-                    || /X-Trikal|Trikal-|Trikal_|_Trikal|TrikalVaani|TrikalVoice|trikal-engines/);
+                    || /X-Trikal|Trikal-|Trikal_|_Trikal|TrikalVaani|TrikalVoice|trikal-engines/
+                    || m{/Trikal/|Trikal/});
               unless ($skip) {
                 s/Gemini[^"'"'"']{0,30}\+\s*Claude Sonnet(\s*polish)?/premium AI engine/g;
                 s/Gemini\s*(Pro\s*)?2\.5(\s*Pro)?(\s*Flash)?/premium AI engine/g;
@@ -126,7 +137,6 @@ jobs:
                 s/Swiss Ephemeris \+ Prokerala API/Swiss Ephemeris (self-hosted)/g;
                 s/ · Prokerala API//g;
                 s/Prokerala API/self-hosted Swiss Ephemeris/g;
-                s/\bJini\b/Trikaal/g;
                 s/\bTrikal\b/Trikaal/g;
               }
               # VM IP replacement (separate block — no skip on comments/strings;
@@ -146,7 +156,7 @@ jobs:
             git config user.name  "Trikaal IR Bot"
             git config user.email "ir-bot@users.noreply.github.com"
             git add -A
-            git commit -m "IR Guard: auto-fix brand/vendor/Jini/Prokerala/about/VM-IP [skip ci]"
+            git commit -m "IR Guard: auto-fix brand/vendor/Prokerala/about/VM-IP [skip ci]"
             git push
             echo "Auto-fixed IR violations and pushed the correction."
           else

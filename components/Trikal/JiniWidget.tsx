@@ -3,7 +3,10 @@
 // ============================================================
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
 // FILE: components/Trikal/JiniWidget.tsx
-// VERSION: 1.0 (1 Nov 2026 — pehla version; TrikalPicker ki jagah, Rohiit ji ka approved mobile design)
+// VERSION: 1.1 (1 Nov 2026 — Jini seekhti hai: milaan kam ho to "Kya aap yeh jaanna chahte hain?"
+//   ke 2-3 button; client jo chune wo VM /seekho se us niyat ka udaharan ban jaata hai.
+//   "Inmein se koi nahi" -> lekh / granth / Rohiit ji. Neeche note: "Jini se galti ho sakti hai".)
+// Prior — v1.0 (1 Nov 2026 — pehla version; TrikalPicker ki jagah, Rohiit ji ka approved mobile design)
 // ------------------------------------------------------------
 // KYA HAI:
 //   Jini — har page pe right side (beech mein) chirag. Client chirag ko 3 baar
@@ -22,7 +25,7 @@
 //   - Band karna ho: Vercel env NEXT_PUBLIC_DISABLE_JINI=true.
 // ANALYTICS (gtag + fbq, TrikalPicker jaisa):
 //   LampRub, LampDone, LampSkip, JiniOpen, JiniAsk, JiniAnswer,
-//   JiniProductClick, JiniWhatsApp
+//   JiniProductClick, JiniWhatsApp, JiniSeekh (v1.1), JiniShayadNahi (v1.1)
 // ============================================================
 
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -55,11 +58,12 @@ type Msg =
   | { k: 'blog'; title: string; url: string; answer?: string | null }
   | { k: 'granth'; items: { saar: string; hawala?: string }[] }
   | { k: 'card'; product: Product }
+  | { k: 'shayad'; sawaal: string; opts: { niyat: string; label: string }[]; fallback: Msg[]; done: boolean }
   | { k: 'wa' };
 
 const ROHIIT_DEFAULT: Rohiit = { naam: 'Rohiit ji se seedhi baat', daam: 499, url: 'https://wa.me/919211804111' };
 
-const CAP = ['✨ Chirag ghisiye — Trikaal aayegi', '👆 Ungli se ghisiye', 'Aapka sawaal, granthon ka uttar'];
+const CAP = ['✨ Chirag ghisiye — Jini aayegi', '👆 Ungli se ghisiye', 'Aapka sawaal, granthon ka uttar'];
 const LINES = [
   '🙏 Namaste! Main aapki kya sahayata kar sakti hoon?',
   'Shaadi, naukri, santan — mujhse poochiye',
@@ -360,7 +364,7 @@ export default function JiniWidget() {
     } catch {
       if (!gotAnswer) {
         setWork(steps, true);
-        push({ k: 'jini', text: 'Abhi Trikaal tak pahunch nahi ho pa rahi — thodi der baad poochiye, ya Rohiit ji se seedhi baat karein.' }, { k: 'wa' });
+        push({ k: 'jini', text: 'Abhi Jini tak pahunch nahi ho pa rahi — thodi der baad poochiye, ya Rohiit ji se seedhi baat karein.' }, { k: 'wa' });
       }
     } finally {
       setBusy(false);
@@ -393,14 +397,18 @@ export default function JiniWidget() {
       }
       if (!res.ok || !d.ok) throw new Error('samjho');
     } catch {
-      push({ k: 'jini', text: 'Abhi Trikaal tak pahunch nahi ho pa rahi — thodi der baad poochiye, ya Rohiit ji se seedhi baat karein.' }, { k: 'wa' });
+      push({ k: 'jini', text: 'Abhi Jini tak pahunch nahi ho pa rahi — thodi der baad poochiye, ya Rohiit ji se seedhi baat karein.' }, { k: 'wa' });
       setBusy(false); setPose(null);
       return;
     }
     setBusy(false);
     setPose(null);
+    await aage(d, sawaal);
+  };
 
-    // niyat nahi mili -> lekh / granth / Rohiit ji
+  // ---- samjho ke baad ka raasta (v1.1: shayad / seekho ke baad bhi yahi)
+  const aage = async (d: Record<string, any>, sawaal: string) => {
+    // niyat nahi mili -> pehle "Kya aap yeh jaanna chahte hain?", warna lekh / granth / Rohiit ji
     if (!d.niyat) {
       const m: Msg[] = [];
       if (d.blog?.url) {
@@ -413,6 +421,8 @@ export default function JiniWidget() {
         m.push({ k: 'jini', text: 'Is sawaal ka sateek uttar aapki poori kundali dekh ke hi milega.' });
       }
       m.push({ k: 'jini', text: 'Aapki baat ko gehraai se samajhne ke liye Rohiit ji se seedhi baat kar sakte hain:' }, { k: 'wa' });
+      const opts = Array.isArray(d.shayad) ? d.shayad.filter((o: any) => o && o.niyat && o.label).slice(0, 3) : [];
+      if (opts.length) { push({ k: 'shayad', sawaal, opts, fallback: m, done: false }); return; }
       push(...m);
       return;
     }
@@ -435,6 +445,37 @@ export default function JiniWidget() {
       { k: 'jini', text: d.janam === 'bachcha' ? 'Bachche ki janam tithi, samay aur sthaan bataiye:' : 'Aapki kundali dekh ke batati hoon — janam ki details bataiye:' },
       { k: 'form', niyat: d.niyat, sawaal, gender: !!d.gender_chahiye, bachcha: d.janam === 'bachcha' },
     );
+  };
+
+  // ---- v1.1: client ne "Kya aap yeh jaanna chahte hain?" mein chuna -> Jini seekhti hai
+  const chuno = async (m: Extract<Msg, { k: 'shayad' }>, niyat: string | null) => {
+    if (m.done || busy) return;
+    setMsgs((x) => x.map((y) => (y === m ? { ...m, done: true } : y)));
+    if (!niyat) {
+      track('JiniShayadNahi', { page: location.pathname });
+      push({ k: 'user', text: 'Inmein se koi nahi' }, ...m.fallback);
+      return;
+    }
+    const opt = m.opts.find((o) => o.niyat === niyat);
+    push({ k: 'user', text: opt ? opt.label : niyat });
+    track('JiniSeekh', { niyat });
+    setBusy(true);
+    let d: Record<string, any> = {};
+    try {
+      const res = await fetch(API + '/seekho', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sawaal: m.sawaal, niyat }),
+      });
+      d = await res.json().catch(() => ({}));
+      if (!res.ok || !d.ok || !d.niyat) throw new Error('seekho');
+    } catch {
+      setBusy(false);
+      push(...m.fallback);
+      return;
+    }
+    setBusy(false);
+    await aage(d, m.sawaal);
   };
 
   const submitForm = (m: Extract<Msg, { k: 'form' }>, j: Janam) => {
@@ -464,7 +505,7 @@ export default function JiniWidget() {
                 className="tvj-lamp"
                 role="button"
                 tabIndex={0}
-                aria-label="Chirag ghisiye — Trikaal aayegi"
+                aria-label="Chirag ghisiye — Jini aayegi"
                 onPointerDown={onDown}
                 onPointerMove={onMove}
                 onPointerUp={onUp}
@@ -490,12 +531,12 @@ export default function JiniWidget() {
                 className={'tvj-jini' + (entered ? ' tvj-enter' : '')}
                 role="button"
                 tabIndex={0}
-                aria-label="Trikaal se poochiye"
+                aria-label="Jini se poochiye"
                 onClick={openChat}
                 onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openChat(); } }}
               >
                 <div className="tvj-glow" />
-                <img src={jiniImg} alt="Trikaal" draggable={false} />
+                <img src={jiniImg} alt="Jini" draggable={false} />
                 <i className="tvj-spark" style={{ left: 6, top: 14, animationDelay: '.2s' }} />
                 <i className="tvj-spark" style={{ right: 4, top: 30, animationDelay: '1s' }} />
                 <i className="tvj-spark" style={{ left: 46, top: -4, animationDelay: '1.7s' }} />
@@ -509,11 +550,11 @@ export default function JiniWidget() {
 
       {/* ------------ CHAT ------------ */}
       {open && (
-        <div className="tvj-sheet" role="dialog" aria-label="Trikaal se baat">
+        <div className="tvj-sheet" role="dialog" aria-label="Jini se baat">
           <div className="tvj-head">
             <div className={'tvj-ava' + (busy ? ' tvj-busy' : '')}><img src={avatar} alt="" /></div>
             <div>
-              <b>Trikaal</b>
+              <b>Jini</b>
               <span>{busy ? 'Kaam kar rahi hoon…' : 'Granth aur aapki kundali se uttar'}</span>
             </div>
             <button type="button" aria-label="Band karein" onClick={() => setOpen(false)}>×</button>
@@ -522,7 +563,8 @@ export default function JiniWidget() {
           <div className="tvj-body" ref={bodyRef}>
             {msgs.map((m, i) => (
               <MsgView key={i} m={m} first={i === 0} avatarFor={(ps) => aaj.pose?.[ps] || jiniImg}
-                saved={saved} onSubmit={submitForm} onChip={(t) => { setQ(t); setTyped(true); inputRef.current?.focus(); }} />
+                saved={saved} onSubmit={submitForm} onChip={(t) => { setQ(t); setTyped(true); inputRef.current?.focus(); }}
+                onChuno={chuno} />
             ))}
             {msgs.length <= 1 && (
               <div className="tvj-cats">
@@ -548,6 +590,7 @@ export default function JiniWidget() {
             />
             <button type="submit" disabled={busy || q.trim().length < 2} aria-label="Bhejiye">➤</button>
           </form>
+          <p className="tvj-note">Jini se galti ho sakti hai — zaroori faisle se pehle Rohiit ji se zaroor poochein.</p>
         </div>
       )}
     </>
@@ -577,11 +620,24 @@ function ProductCard({ p }: { p: Product }) {
   );
 }
 
-function MsgView({ m, first, avatarFor, saved, onSubmit, onChip }: {
+function MsgView({ m, first, avatarFor, saved, onSubmit, onChip, onChuno }: {
   m: Msg; first: boolean; avatarFor: (pose: string) => string; saved: Janam | null;
   onSubmit: (m: Extract<Msg, { k: 'form' }>, j: Janam) => void; onChip: (t: string) => void;
+  onChuno: (m: Extract<Msg, { k: 'shayad' }>, niyat: string | null) => void;
 }) {
   switch (m.k) {
+    case 'shayad':
+      return (
+        <div className="tvj-m">
+          <span>🤔 Kya aap yeh jaanna chahte hain?</span>
+          <div className="tvj-shayad">
+            {m.opts.map((o) => (
+              <button type="button" key={o.niyat} disabled={m.done} onClick={() => onChuno(m, o.niyat)}>{o.label}</button>
+            ))}
+            <button type="button" className="tvj-nahi" disabled={m.done} onClick={() => onChuno(m, null)}>Inmein se koi nahi</button>
+          </div>
+        </div>
+      );
     case 'user':
       return <div className="tvj-u">{m.text}</div>;
     case 'jini':
@@ -819,12 +875,17 @@ const CSS = `
 .tvj-alt{background:none;border:1px solid #2c2860;border-radius:10px;padding:10px;color:#cfc8ea;cursor:pointer;font-size:13px}
 .tvj-saved{font-size:13px;color:#cfc8ea}.tvj-saved b{color:#fff3c4}
 .tvj-err{margin:0;color:#ff8a8a;font-size:12px}.tvj-priv{margin:0;color:#7d77a3;font-size:11px;text-align:center}
-.tvj-ask{position:relative;display:flex;gap:6px;padding:10px;border-top:1px solid #2c2860;padding-bottom:max(10px,env(safe-area-inset-bottom))}
+.tvj-ask{position:relative;display:flex;gap:6px;padding:10px 10px 6px;border-top:1px solid #2c2860}
 .tvj-ask input{flex:1;min-width:0;background:#0f0d2e;border:1px solid #2c2860;border-radius:10px;color:#efeaf9;padding:11px 10px;font-size:16px;outline:none}
 .tvj-ask input:focus{border-color:#D4AF37}
 .tvj-ask input.tvj-call{border-color:#D4AF37;animation:tvjCall 1.6s ease-in-out infinite}
 .tvj-ask button{background:linear-gradient(180deg,#e6c454,#b8922a);border:0;border-radius:10px;padding:0 16px;font-weight:700;font-size:16px;color:#1a1405;cursor:pointer}
 .tvj-ask button:disabled{opacity:.5;cursor:default}
+.tvj-shayad{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+.tvj-shayad button{text-align:left;font-size:13px;padding:8px 11px;border-radius:10px;border:1px solid #D4AF37;color:#fff3c4;background:#2a2208;cursor:pointer}
+.tvj-shayad button.tvj-nahi{border-color:#2c2860;background:none;color:#a9a3c9}
+.tvj-shayad button:disabled{opacity:.45;cursor:default}
+.tvj-note{margin:0;padding:0 12px 8px;font-size:10.5px;color:#7d77a3;text-align:center;padding-bottom:max(8px,env(safe-area-inset-bottom))}
 .tvj-hint{position:absolute;left:14px;bottom:calc(100% + 4px);font-size:11.5px;color:#f3d77a;text-shadow:0 0 4px #000;pointer-events:none}
 @media (prefers-reduced-motion:reduce){.tvj-dock *,.tvj-sheet *{animation-duration:.01ms!important;animation-iteration-count:1!important}}
 `;
