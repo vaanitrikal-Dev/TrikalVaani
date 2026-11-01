@@ -3,7 +3,8 @@
  * TRIKAL VAANI — Blog Index Page
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/blog/page.tsx
- * VERSION: 2.1 — Supabase Dynamic (build-safe, SWC parser fix)
+ * VERSION: 2.2 (1 Nov 2026 — nakli ginti (das hazaar seekers wali line) hatayi; IR Guard violation)
+ * Prior — 2.1 — Supabase Dynamic (build-safe, SWC parser fix)
  * SIGNED: ROHIIT GUPTA, CEO
  * ============================================================
  * Reads all published blogs from Supabase via getAllPosts().
@@ -139,8 +140,7 @@ export default async function BlogPage() {
               Get Free Daily Vedic Insights
             </h3>
             <p className="text-slate-400 text-sm mb-6 max-w-md mx-auto">
-              Join 10,000+ seekers receiving daily Gochar alerts, energy scores, and
-              Jyotish wisdom.
+              Get daily Gochar alerts, energy scores, and Jyotish wisdom.
             </p>
             <a
               href="/#birth-form"

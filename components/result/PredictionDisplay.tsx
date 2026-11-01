@@ -3,7 +3,8 @@
  * TRIKAL VAANI — Prediction Display Component
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: components/result/PredictionDisplay.tsx
- * VERSION: 1.0 — Swiss Ephemeris + Gemini 2.5 Flash Output
+ * VERSION: 1.1 (1 Nov 2026 — mahine wala daam hataya: koi subscription nahi, ₹51 ek baar ka hai; IR Guard violation)
+ * Prior — 1.0 — Swiss Ephemeris + Gemini 2.5 Flash Output
  * SIGNED: ROHIIT GUPTA, CEO
  *
  * RENDERS:
@@ -324,7 +325,7 @@ function LockedSection({ message, upgradeUrl }: { message: string; upgradeUrl: s
             color: '#080B12',
             boxShadow: `0 0 20px ${GOLD_RGBA(0.3)}`,
           }}>
-          Upgrade — ₹51/month
+          Upgrade — ₹51 one-time
         </Link>
       </div>
     </div>
@@ -742,7 +743,7 @@ export default function PredictionDisplay({
             {professional?.locked?.message ?? 'Gehri jaankari ke liye upgrade karein'}
           </h3>
           <p className="text-sm text-slate-400 mb-5 max-w-sm mx-auto">
-            Action windows, avoid dates, classical remedies, yoga detection — sab ₹51/month mein
+            Action windows, avoid dates, classical remedies, yoga detection — sab ₹51 mein — ek baar ka daam
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link href="/pricing"
@@ -752,7 +753,7 @@ export default function PredictionDisplay({
                 color: '#080B12',
                 boxShadow: `0 0 20px ${GOLD_RGBA(0.3)}`,
               }}>
-              Upgrade — ₹51/month
+              Upgrade — ₹51 one-time
             </Link>
             <Link href="/"
               className="px-6 py-3 rounded-xl text-sm font-semibold text-slate-400 transition-all"

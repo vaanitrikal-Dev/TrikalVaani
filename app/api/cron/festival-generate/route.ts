@@ -3,7 +3,7 @@
  * 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER 🔱
  * ============================================================================
  * File:    app/api/cron/festival-generate/route.ts
- * Version: v1.1
+ * Version: v1.2 (1 Nov 2026 — row ki asli date prompt + parser ko jaati hai)
  * Owner:   Rohiit Gupta, Chief Vedic Architect
  * Domain:  trikalvaani.com
  *
@@ -11,6 +11,12 @@
  *   Generates CLEAN festival page content into festivals_master using the
  *   locked template prompt (lib/gemini-prompt-festival.ts). "Golden Engine"
  *   Layer-1 generator.
+ *
+ * ── Changes vs v1.1 ────────────────────────────────────────────────
+ *   1. buildFestivalPrompt gets date: row.date, and parseFestivalContent
+ *      rejects content whose geo_answer misses that date (row is skipped,
+ *      existing content is NEVER wiped). Fixes Gemini writing last year's
+ *      dates (Diwali 2026 page said "21 October").
  *
  * ── Changes vs v1.0 ────────────────────────────────────────────────
  *   1. Simple MANUAL_KEY ("trikaal-engine-2026") so it can be triggered from
@@ -135,6 +141,7 @@ async function generateOne(row: FestivalRow, apiKey: string): Promise<Result> {
     const prompt = buildFestivalPrompt({
       festivalName: row.festival_name,
       year: row.year ?? Number(row.date.slice(0, 4)),
+      date: row.date,                                   // v1.2
       definingTithi: row.defining_tithi,
       deity: row.deity,
       planetRuler: row.planet_ruler,
@@ -142,7 +149,7 @@ async function generateOne(row: FestivalRow, apiKey: string): Promise<Result> {
     });
 
     const { text, tIn, tOut } = await callGemini(apiKey, prompt);
-    const c: FestivalContent = parseFestivalContent(text); // throws on shape/brand violation
+    const c: FestivalContent = parseFestivalContent(text, row.date); // throws on shape/brand/date violation
 
     const { error } = await supa
       .from("festivals_master")
@@ -237,4 +244,4 @@ export async function GET(req: NextRequest) {
   return NextResponse.json(summary);
 }
 
-// END — festival-generate/route.ts v1.0 | Trikaal Vaani | Rohiit Gupta
+// END — festival-generate/route.ts v1.2 | Trikaal Vaani | Rohiit Gupta

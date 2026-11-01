@@ -3,7 +3,12 @@
  * 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER 🔱
  * ============================================================================
  * File:        lib/gemini-prompt-festival.ts
- * Version:     v1.0
+ * Version:     v1.1 (1 Nov 2026 — EXACT DATE ab prompt mein jaata hai)
+ *   v1.1: festival ki asli tareekh (festivals_master.date) + weekday prompt mein
+ *         "use EXACTLY" ke saath; parser us tareekh ko geo_answer mein jaanchta hai.
+ *         Pehle tareekh nahi jaati thi -> Gemini pichhle saal ki tareekh likhta tha
+ *         (Diwali 2026 "21 October", Dhanteras "20 October" — 1 Nov 2026 ko pakda).
+ *   v1.0: pehla version
  * Phase:       Golden Engine — Festival Page Content (festivals_master)
  * Owner:       Rohiit Gupta, Chief Vedic Architect
  * Domain:      trikalvaani.com
@@ -42,6 +47,7 @@ export type Lang = "en" | "hi";
 export interface FestivalInput {
   festivalName: string; // may include the year; cleaned internally
   year: number;
+  date?: string; // v1.1: YYYY-MM-DD from festivals_master.date — the ONLY date allowed
   definingTithi: string; // e.g. "Kartik Amavasya" OR "Makara Sankranti (solar — ...)"
   deity: string | null; // primary deity; if null, prompt uses the festival's well-known deity
   planetRuler: string | null;
@@ -113,6 +119,14 @@ OUTPUT — STRICT. Return ONLY a valid JSON object (no markdown fences, no pream
 Any deviation = parse failure. BE STRICT.
 `.trim();
 
+// v1.1: "2026-11-08" -> "Sunday, 8 November 2026" (UTC so the day never shifts)
+export function humanDate(iso: string): string {
+  const d = new Date(iso.slice(0, 10) + "T00:00:00Z");
+  return d.toLocaleDateString("en-GB", {
+    weekday: "long", day: "numeric", month: "long", year: "numeric", timeZone: "UTC",
+  });
+}
+
 // strip a trailing year from a festival name ("Holi 2026" -> "Holi")
 function cleanName(name: string): string {
   return name.replace(/\s*(?:19|20)\d{2}\s*$/, "").trim();
@@ -146,7 +160,7 @@ ${langInstruction}
 FESTIVAL FACTS (use ONLY these):
 - Festival: ${name}
 - Year: ${input.year}
-- Defining tithi / marker: ${input.definingTithi}
+${input.date ? `- EXACT DATE: ${humanDate(input.date)}. Use EXACTLY this date and weekday wherever a date appears. NEVER write any other date or weekday for this festival.\n` : ""}- Defining tithi / marker: ${input.definingTithi}
 - ${deityLine}
 - ${rulerLine}
 
@@ -232,8 +246,19 @@ function stripFences(raw: string): string {
 
 const words = (s: string) => (s ? s.trim().split(/\s+/).length : 0);
 
-export function parseFestivalContent(raw: string): FestivalContent {
+export function parseFestivalContent(raw: string, date?: string): FestivalContent {
   const parsed = JSON.parse(stripFences(raw)) as FestivalContent;
+
+  // v1.1: the given date must be in the first answer (day number + month name)
+  if (date) {
+    const d = new Date(date.slice(0, 10) + "T00:00:00Z");
+    const day = String(d.getUTCDate());
+    const month = d.toLocaleDateString("en-GB", { month: "long", timeZone: "UTC" });
+    const ga = parsed.geo_answer || "";
+    if (!new RegExp(`\\b${day}(st|nd|rd|th)?\\b`).test(ga) || !ga.includes(month.slice(0, 3))) {
+      throw new Error(`geo_answer does not carry the given date ${date}`);
+    }
+  }
 
   const w = words(parsed.geo_answer);
   if (!parsed.geo_answer || w < 40 || w > 75) {
@@ -277,6 +302,6 @@ export function parseRegionalCustoms(raw: string): RegionalCustoms {
 }
 
 // ============================================================================
-// END — gemini-prompt-festival.ts v1.0
+// END — gemini-prompt-festival.ts v1.1
 // 🔱 Trikaal Vaani | Rohiit Gupta, Chief Vedic Architect
 // ============================================================================

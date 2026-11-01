@@ -3,7 +3,8 @@
  * TRIKAAL VAANI — Pricing Page
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/pricing/page.tsx
- * VERSION: 2.5 (18 Oct 2026)
+ * VERSION: 2.6 (1 Nov 2026)
+ * v2.6 — 1 Nov 2026 — locked-feature row se "line-through" class hatayi (IR Guard: kata hua daam jaisa dikhta hai). Saare plans ka locked: [] khaali hai, isliye page pe kuch nahi badla.
  * v2.5 — 18 Oct 2026 — Site menu (SiteNav) added — the page had no menu. No padding added: <main> already has py-24 (6rem), so the fixed 64px menu does not cover content. Nothing else changed.
  * v2.4 — 1 Oct 2026 — daam sahi kiye: Kundali Milan ₹51 (couple + parent), Karmic ₹101 / $11, Child Birth ₹51; Bhrigu Nandi ke purane daave hataye (30 Sep 2026)
  * v2.3 — 30 Sep 2026 — Birth Muhurat repriced (CEO approved in chat): single ₹51 report + 10 remedies, was ₹101/₹151. Only the Birth Muhurat card, its schema Offer and CTA link changed.
@@ -400,7 +401,7 @@ export default function PricingPage() {
                       <div className="w-3.5 h-3.5 mt-0.5 flex-shrink-0 flex items-center justify-center">
                         <div className="w-2.5 h-px bg-slate-600" />
                       </div>
-                      <span className="text-xs text-slate-500 leading-relaxed line-through">
+                      <span className="text-xs text-slate-500 leading-relaxed">
                         {f}
                       </span>
                     </div>

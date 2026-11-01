@@ -1,3 +1,5 @@
+// FILE: components/landing/PremiumCard.tsx
+// VERSION: 1.1 (1 Nov 2026 — kata hua nakli daam "₹2,999" hataya; IR Guard violation. File abhi kahin import nahi hoti.)
 import { Lock, Sparkles, Check, TrendingUp } from 'lucide-react';
 
 const PREMIUM_FEATURES = [
@@ -57,7 +59,6 @@ export default function PremiumCard() {
               </div>
 
               <div className="text-right">
-                <div className="text-xs text-slate-500 line-through mb-1">₹2,999</div>
                 <div className="text-2xl font-bold text-yellow-400">Early Access</div>
                 <div className="text-xs text-yellow-400/60">Limited Spots</div>
               </div>
