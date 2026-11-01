@@ -33,7 +33,7 @@ import Script from "next/script";
 import "./globals.css";
 import SchemaScript from "@/components/SchemaScript";
 import TrikalVoice from "@/components/Trikal/TrikalVoice";
-import JiniWidget from "@/components/Trikal/JiniWidget";
+import JiniWidget from "@/components/Trikaal/JiniWidget";
 import OneSignalInit from "@/components/OneSignalInit";
 import StickyMobileCTA from "@/components/landing/StickyMobileCTA";
 import ClarityAnalytics from "@/components/analytics/ClarityAnalytics";

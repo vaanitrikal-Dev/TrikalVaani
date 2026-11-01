@@ -59,7 +59,7 @@ type Msg =
 
 const ROHIIT_DEFAULT: Rohiit = { naam: 'Rohiit ji se seedhi baat', daam: 499, url: 'https://wa.me/919211804111' };
 
-const CAP = ['✨ Chirag ghisiye — Jini aayegi', '👆 Ungli se ghisiye', 'Aapka sawaal, granthon ka uttar'];
+const CAP = ['✨ Chirag ghisiye — Trikaal aayegi', '👆 Ungli se ghisiye', 'Aapka sawaal, granthon ka uttar'];
 const LINES = [
   '🙏 Namaste! Main aapki kya sahayata kar sakti hoon?',
   'Shaadi, naukri, santan — mujhse poochiye',
@@ -360,7 +360,7 @@ export default function JiniWidget() {
     } catch {
       if (!gotAnswer) {
         setWork(steps, true);
-        push({ k: 'jini', text: 'Abhi Jini tak pahunch nahi ho pa rahi — thodi der baad poochiye, ya Rohiit ji se seedhi baat karein.' }, { k: 'wa' });
+        push({ k: 'jini', text: 'Abhi Trikaal tak pahunch nahi ho pa rahi — thodi der baad poochiye, ya Rohiit ji se seedhi baat karein.' }, { k: 'wa' });
       }
     } finally {
       setBusy(false);
@@ -393,7 +393,7 @@ export default function JiniWidget() {
       }
       if (!res.ok || !d.ok) throw new Error('samjho');
     } catch {
-      push({ k: 'jini', text: 'Abhi Jini tak pahunch nahi ho pa rahi — thodi der baad poochiye, ya Rohiit ji se seedhi baat karein.' }, { k: 'wa' });
+      push({ k: 'jini', text: 'Abhi Trikaal tak pahunch nahi ho pa rahi — thodi der baad poochiye, ya Rohiit ji se seedhi baat karein.' }, { k: 'wa' });
       setBusy(false); setPose(null);
       return;
     }
@@ -464,7 +464,7 @@ export default function JiniWidget() {
                 className="tvj-lamp"
                 role="button"
                 tabIndex={0}
-                aria-label="Chirag ghisiye — Jini aayegi"
+                aria-label="Chirag ghisiye — Trikaal aayegi"
                 onPointerDown={onDown}
                 onPointerMove={onMove}
                 onPointerUp={onUp}
@@ -490,12 +490,12 @@ export default function JiniWidget() {
                 className={'tvj-jini' + (entered ? ' tvj-enter' : '')}
                 role="button"
                 tabIndex={0}
-                aria-label="Jini se poochiye"
+                aria-label="Trikaal se poochiye"
                 onClick={openChat}
                 onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openChat(); } }}
               >
                 <div className="tvj-glow" />
-                <img src={jiniImg} alt="Jini" draggable={false} />
+                <img src={jiniImg} alt="Trikaal" draggable={false} />
                 <i className="tvj-spark" style={{ left: 6, top: 14, animationDelay: '.2s' }} />
                 <i className="tvj-spark" style={{ right: 4, top: 30, animationDelay: '1s' }} />
                 <i className="tvj-spark" style={{ left: 46, top: -4, animationDelay: '1.7s' }} />
@@ -509,11 +509,11 @@ export default function JiniWidget() {
 
       {/* ------------ CHAT ------------ */}
       {open && (
-        <div className="tvj-sheet" role="dialog" aria-label="Jini se baat">
+        <div className="tvj-sheet" role="dialog" aria-label="Trikaal se baat">
           <div className="tvj-head">
             <div className={'tvj-ava' + (busy ? ' tvj-busy' : '')}><img src={avatar} alt="" /></div>
             <div>
-              <b>Jini</b>
+              <b>Trikaal</b>
               <span>{busy ? 'Kaam kar rahi hoon…' : 'Granth aur aapki kundali se uttar'}</span>
             </div>
             <button type="button" aria-label="Band karein" onClick={() => setOpen(false)}>×</button>
