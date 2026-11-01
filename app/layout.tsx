@@ -1,7 +1,8 @@
 // ============================================================
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
 // FILE: app/layout.tsx
-// VERSION: 3.12 (24 Oct 2026 — Vercel Web Analytics <Analytics /> hataya; GA4 G-WCV6MTQM21 ab GoogleAdsTag v1.1 se chalta hai; Vercel dashboard pe Web Analytics disabled)
+// VERSION: 3.13 (1 Nov 2026 — TrikalPicker hataya (GA4: sirf 0.9% ne khola); uski jagah JiniWidget v1.0 — chirag ghiso, Jini nikle, har page pe. TrikalPicker.tsx file rakhi hai, delete nahi ki)
+// Prior — v3.12 (24 Oct 2026 — Vercel Web Analytics <Analytics /> hataya; GA4 G-WCV6MTQM21 ab GoogleAdsTag v1.1 se chalta hai; Vercel dashboard pe Web Analytics disabled)
 // Prior — v3.11 (1 Oct 2026 —Trikaal Vaani ka core tagline (Rohiit ne chuna): "Granth ka Gyaan · Rohiit ki Parakh · AI ki Shakti" / "Rooted in Granth · Verified by Rohiit · Powered by AI") (1 Oct 2026 — daam sahi kiye: Kundali Milan ₹51 (couple + parent), Karmic ₹101 / $11, Child Birth ₹51; Bhrigu Nandi ke purane daave hataye)  (18 Sep 2026 — TrikalPicker added) — Google Ads Tag AW-7916189860 added
 // CHANGES vs v3.6.2 (CEO-approved):
 //   ✅ ADD: GoogleAdsTag AW-7916189860 — builds Google Display +
@@ -32,7 +33,7 @@ import Script from "next/script";
 import "./globals.css";
 import SchemaScript from "@/components/SchemaScript";
 import TrikalVoice from "@/components/Trikal/TrikalVoice";
-import TrikalPicker from "@/components/TrikalPicker";
+import JiniWidget from "@/components/Trikal/JiniWidget";
 import OneSignalInit from "@/components/OneSignalInit";
 import StickyMobileCTA from "@/components/landing/StickyMobileCTA";
 import ClarityAnalytics from "@/components/analytics/ClarityAnalytics";
@@ -414,12 +415,13 @@ export default function RootLayout({
         <SchemaScript />
         {/* TrikalVoice: floating mic — appears on ALL pages globally */}
         <TrikalVoice />
-        {/* v3.9: TrikalPicker — orange vertical product-finder tab, right edge,
-            vertically centred. Deliberately NOT at the bottom of the screen:
-            a second fixed bottom element (StickyMobileCTA v1.0) once covered
-            the form submit button on mobile. Turn off with
-            NEXT_PUBLIC_DISABLE_PICKER=true. */}
-        <TrikalPicker />
+        {/* v3.13: JiniWidget — TrikalPicker ki jagah (right edge, vertically
+            centred; neeche nahi, kyunki StickyMobileCTA aur TrikalVoice neeche
+            hain). Chirag -> Jini -> chat; VM mcp.trikalvaani.com/jini se.
+            Band karna ho: NEXT_PUBLIC_DISABLE_JINI=true.
+            Purana TrikalPicker wapas chahiye toh components/TrikalPicker.tsx
+            abhi bhi repo mein hai. */}
+        <JiniWidget />
         {/* OneSignalInit: loads OneSignal v16 Web Push SDK + init globally */}
         <OneSignalInit />
         {/* v3.4: StickyMobileCTA — mobile-only bottom-left bar */}
