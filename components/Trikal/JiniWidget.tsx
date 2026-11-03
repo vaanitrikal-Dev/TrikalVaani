@@ -3,7 +3,10 @@
 // ============================================================
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
 // FILE: components/Trikal/JiniWidget.tsx
-// VERSION: 1.1 (1 Nov 2026 — Jini seekhti hai: milaan kam ho to "Kya aap yeh jaanna chahte hain?"
+// VERSION: 1.2 (3 Nov 2026 — Rohiit ji approved Option B: "Jini soch rahi hai" — Jini ke charon taraf
+//   sone ka ghoomta chakra + chamakta tara + badalti 4 lines (3 dots ki jagah). Jawab jaldi aaye
+//   tab bhi effect kam se kam 2 second dikhta hai (MIN_SOCH). Kundali wale steps ke upar bhi wahi chakra.)
+// Prior — 1.1 (1 Nov 2026 — Jini seekhti hai: milaan kam ho to "Kya aap yeh jaanna chahte hain?"
 //   ke 2-3 button; client jo chune wo VM /seekho se us niyat ka udaharan ban jaata hai.
 //   "Inmein se koi nahi" -> lekh / granth / Rohiit ji. Neeche note: "Jini se galti ho sakti hai".)
 // Prior — v1.0 (1 Nov 2026 — pehla version; TrikalPicker ki jagah, Rohiit ji ka approved mobile design)
@@ -35,6 +38,10 @@ const API = 'https://mcp.trikalvaani.com/jini';
 const OUT_KEY = 'tv_jini_out';
 const JANAM_KEY = 'tv_jini_janam';
 const NEED = 3;
+const MIN_SOCH = 2000;   // v1.2: "soch rahi hai" effect kam se kam itne ms
+const SOCH = ['Aapka sawaal padh rahi hoon…', 'Granth khol rahi hoon…', 'Rohiit ji ke lekh dekh rahi hoon…', 'Sahi jawab chun rahi hoon…'];
+const seedhaUttar = (d: Record<string, any>) => !!d.niyat && (d.janam === 'nahi' || (!!d.seedha_page && d.janam === 'photo'));
+const ruko = (t0: number) => new Promise<void>((r) => setTimeout(r, Math.max(0, MIN_SOCH - (Date.now() - t0))));
 const WA_TEXT = 'Namaste Rohiit ji, main Jini (trikalvaani.com) se aaya hoon — ₹499 consultation chahiye.';
 
 type Aaj = {
@@ -287,7 +294,9 @@ export default function JiniWidget() {
   // ---- /uttar (SSE) — Jini ke steps live
   const runUttar = async (niyat: string, sawaal: string, janam: Partial<Janam> | null) => {
     setBusy(true);
+    const t0 = Date.now();
     let steps: Step[] = [];
+    let baad: (() => void) | null = null;   // v1.2: uttar/galti 2 sec poore hone ke baad dikhe
     push({ k: 'work', steps: [], done: false });
     const setWork = (s: Step[], done: boolean) =>
       setMsgs((x) => {
@@ -321,6 +330,7 @@ export default function JiniWidget() {
           setPose(String(data.pose || ''));
         } else if (ev === 'uttar') {
           gotAnswer = true;
+          baad = () => {
           setWork(steps, true);
           setPose('thumbs');
           push({
@@ -334,11 +344,14 @@ export default function JiniWidget() {
             rohiit: (data.rohiit as Rohiit) || ROHIIT_DEFAULT,
           });
           track('JiniAnswer', { niyat });
+          };
         } else if (ev === 'galti') {
           gotAnswer = true;
+          baad = () => {
           setWork(steps, true);
           setPose('soch');
           push({ k: 'jini', text: String(data.text || 'Abhi rukawat aayi — dobara poochiye.') }, { k: 'wa' });
+          };
         }
       };
       for (;;) {
@@ -361,8 +374,15 @@ export default function JiniWidget() {
         }
       }
       if (!gotAnswer) throw new Error('khaali');
+      await ruko(t0);
+      const b = baad as (() => void) | null;
+      baad = null;
+      if (b) b();
     } catch {
-      if (!gotAnswer) {
+      if (gotAnswer && baad) {   // v1.2: stream beech mein toota par uttar aa chuka tha
+        await ruko(t0);
+        (baad as () => void)();
+      } else if (!gotAnswer) {
         setWork(steps, true);
         push({ k: 'jini', text: 'Abhi Jini tak pahunch nahi ho pa rahi — thodi der baad poochiye, ya Rohiit ji se seedhi baat karein.' }, { k: 'wa' });
       }
@@ -382,6 +402,7 @@ export default function JiniWidget() {
     track('JiniAsk', { page: location.pathname });
     setBusy(true);
     setPose('soch');
+    const t0 = Date.now();
     let d: Record<string, any> = {};
     try {
       const res = await fetch(API + '/samjho', {
@@ -401,6 +422,7 @@ export default function JiniWidget() {
       setBusy(false); setPose(null);
       return;
     }
+    if (!seedhaUttar(d)) await ruko(t0);   // seedha /uttar ho to wahan ka chakra hi 2 sec chalega
     setBusy(false);
     setPose(null);
     await aage(d, sawaal);
@@ -460,6 +482,7 @@ export default function JiniWidget() {
     push({ k: 'user', text: opt ? opt.label : niyat });
     track('JiniSeekh', { niyat });
     setBusy(true);
+    const t0 = Date.now();
     let d: Record<string, any> = {};
     try {
       const res = await fetch(API + '/seekho', {
@@ -474,6 +497,7 @@ export default function JiniWidget() {
       push(...m.fallback);
       return;
     }
+    if (!seedhaUttar(d)) await ruko(t0);   // seedha /uttar ho to wahan ka chakra hi 2 sec chalega
     setBusy(false);
     await aage(d, m.sawaal);
   };
@@ -574,7 +598,7 @@ export default function JiniWidget() {
               </div>
             )}
             {msgs.length <= 1 && <WaRow r={ROHIIT_DEFAULT} />}
-            {busy && !msgs.some((m) => m.k === 'work' && !m.done) && <div className="tvj-m tvj-dots"><i /><i /><i /></div>}
+            {busy && !msgs.some((m) => m.k === 'work' && !m.done) && <Soch img={jiniImg} lines />}
           </div>
 
           <form className="tvj-ask" onSubmit={(e) => { e.preventDefault(); ask(); }}>
@@ -600,6 +624,23 @@ export default function JiniWidget() {
 // ============================================================
 // Chat ke andar ke hisse
 // ============================================================
+/** v1.2 (Option B): Jini dhyaan mein — sone ka ghoomta chakra, chamakta tara, badalti lines */
+function Soch({ img, lines }: { img: string; lines: boolean }) {
+  return (
+    <div className={'tvj-soch' + (lines ? ' tvj-soch-card' : '')} role="status" aria-label="Jini soch rahi hai">
+      <div className="tvj-ring">
+        <img src={img} alt="" draggable={false} />
+        <div className="tvj-orb"><i /></div>
+      </div>
+      {lines && (
+        <div className="tvj-soch-t">
+          {SOCH.map((t, i) => <span key={i} style={{ animationDelay: `${i * 1.5}s` }}>{t}</span>)}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function WaRow({ r }: { r: Rohiit }) {
   return (
     <a className="tvj-wa" href={waUrl(r)} target="_blank" rel="noopener noreferrer"
@@ -657,7 +698,7 @@ function MsgView({ m, first, avatarFor, saved, onSubmit, onChip, onChuno }: {
       const last = m.steps[m.steps.length - 1];
       return (
         <div className="tvj-m tvj-work">
-          {last && !m.done && <img className="tvj-pose" src={avatarFor(last.pose)} alt="" />}
+          {!m.done && <Soch img={last ? avatarFor(last.pose) : avatarFor('soch')} lines={false} />}
           <ol>
             {m.steps.map((s, i) => (
               <li key={i} className={i === m.steps.length - 1 && !m.done ? 'now' : 'ok'}>
@@ -859,6 +900,18 @@ const CSS = `
 .tvj-prod-t{color:#fff3c4;font-weight:700;font-size:13.5px}.tvj-prod-a{color:#cfc8ea;font-size:12.5px}.tvj-prod-c{color:#f3d77a;font-size:12.5px;font-weight:700}
 .tvj-work ol{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px}
 .tvj-work li{font-size:13px;color:#cfc8ea}.tvj-work li.now{color:#fff3c4;font-weight:600}.tvj-work li.ok span{color:#7fe3a9}
+.tvj-soch{display:flex;flex-direction:column;align-items:center;gap:12px;padding:6px 0 4px}
+.tvj-soch-card{background:linear-gradient(180deg,#1f1c50,#15133b);border:1px solid rgba(243,215,122,.25);border-radius:14px;padding:18px 10px 14px;width:100%;max-width:94%}
+.tvj-ring{position:relative;width:96px;height:96px;flex:none}
+.tvj-ring img{position:absolute;inset:8px;width:80px;height:80px;border-radius:50%;object-fit:cover;mix-blend-mode:screen;animation:tvjFloat 2.4s ease-in-out infinite}
+.tvj-ring:before{content:"";position:absolute;inset:0;border-radius:50%;border:2px dashed rgba(243,215,122,.8);animation:tvjSpin 6s linear infinite}
+.tvj-ring:after{content:"";position:absolute;inset:-6px;border-radius:50%;box-shadow:0 0 22px rgba(243,215,122,.6);animation:tvjGlow 1.6s ease-in-out infinite;pointer-events:none}
+.tvj-orb{position:absolute;inset:0;animation:tvjSpin 2.5s linear infinite}
+.tvj-orb i{position:absolute;top:-3px;left:44px;width:7px;height:7px;border-radius:50%;background:#fff3b0;box-shadow:0 0 10px #f3d77a}
+.tvj-soch-t{position:relative;width:100%;height:20px;text-align:center;color:#f3d77a;font-size:13px}
+.tvj-soch-t span{position:absolute;left:0;right:0;opacity:0;animation:tvjLine 6s infinite}
+@keyframes tvjGlow{50%{box-shadow:0 0 34px rgba(243,215,122,.95)}}
+@keyframes tvjLine{0%{opacity:0;transform:translateY(6px)}5%,22%{opacity:1;transform:none}27%,100%{opacity:0;transform:translateY(-6px)}}
 .tvj-pose{width:84px;height:84px;border-radius:50%;object-fit:cover;display:block;margin:0 auto 8px;box-shadow:0 0 0 2px #D4AF37,0 0 26px rgba(243,215,122,.6);animation:tvjFade .4s}
 .tvj-ans{display:flex;flex-direction:column;gap:8px}
 .tvj-darr{background:#2e1212;border:1px solid #8a2b2b;color:#ffd0c7;border-radius:12px;padding:9px 11px;font-size:13px}
