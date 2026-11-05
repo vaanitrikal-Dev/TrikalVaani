@@ -1,7 +1,19 @@
 // ============================================================
 // TRIKAL VAANI — BLOG POSTS — SUPABASE VERSION
 // CEO: Rohiit Gupta | Chief Vedic Architect
-// Version: 3.14 (FEATURED IMAGE — editorial_rulings #20)
+// Version: 3.15 (NOINDEX — Google manual action recovery, approved by Rohiit 5 Nov 2026)
+// Date: 2026-11-05
+//
+// CHANGE v3.15 — new column public.blog_posts.noindex (boolean, default false,
+//   added 5 Nov 2026; 658 pages set true). BlogPost gains `noindex`; mapRow()
+//   reads it (anything but true = false, so a missing column never noindexes).
+//   getPostsForSitemap() now drops noindex rows, and a kept page whose
+//   alt_lang_slug points at a noindexed page loses that hreflang pair in the
+//   sitemap (never point Google at a noindexed URL). Pages stay published and
+//   reachable; app/blog/[slug]/page.tsx v4.2 sends robots noindex,follow.
+//
+// ------------------------------------------------------------
+// PREVIOUS: Version 3.14 (FEATURED IMAGE — editorial_rulings #20)
 // Date: 2026-10-16
 //
 // CHANGE v3.14 — BlogPost gains `heroImage` from the new column
@@ -281,6 +293,7 @@ export interface BlogPost {
   pillarSlug: string | null;
   hubGroup: BlogHubGroup | null; // v3.12
   heroImage: WikiHeroImage | null; // v3.14 — editorial_rulings #20
+  noindex: boolean; // v3.15 — true = robots noindex,follow + not in sitemap
   // ── v3.3: bilingual (EN/HI) support ──────────────────────
   lang: string;               // 'en' | 'hi'
   altLangSlug: string | null; // counterpart slug in the other language (hreflang pairing)
@@ -515,6 +528,8 @@ function mapRow(row: Record<string, unknown>): BlogPost {
     hubGroup:         normalizeHubGroup(row.hub_group),
     // ── v3.14: featured image (null until filled) ─────────────
     heroImage:        normalizeHeroImage(row.hero_image),
+    // ── v3.15: manual-action recovery flag (only an explicit true counts) ──
+    noindex:          row.noindex === true,
     // ── v3.3: bilingual (EN/HI) support ──────────────────────
     lang:             (row.lang as string) ?? 'en',
     altLangSlug:      (row.alt_lang_slug as string) ?? null,
@@ -587,6 +602,7 @@ export async function getPostsForSitemap(): Promise<{
       .from('blog_posts')
       .select('slug, updated_at, lang, alt_lang_slug')
       .eq('is_published', true)
+      .eq('noindex', false) // v3.15 — noindexed pages never enter the sitemap
       .order('slug', { ascending: true })
       .range(from, to);
 
@@ -615,6 +631,13 @@ export async function getPostsForSitemap(): Promise<{
 
     // Short page means we've reached the end.
     if (batch.length < SITEMAP_PAGE_SIZE) break;
+  }
+
+  // v3.15 — drop hreflang pairs that point at a page no longer in the sitemap
+  // (its twin is noindexed). The page itself stays; only the pair goes.
+  const kept = new Set(rows.map((r) => r.slug));
+  for (const r of rows) {
+    if (r.altLangSlug && !kept.has(r.altLangSlug)) r.altLangSlug = null;
   }
 
   return { rows, error: null };

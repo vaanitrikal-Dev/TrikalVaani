@@ -1,7 +1,14 @@
 // ============================================================
 // TRIKAL VAANI — DYNAMIC BLOG ARTICLE PAGE (SSR)
 // CEO: Rohiit Gupta | Chief Vedic Architect
-// Version: 4.1 (18 Oct 2026 — Site menu (SiteNav) added — the page had no menu; pt-16 so the
+// Version: 4.2 (5 Nov 2026 — GOOGLE MANUAL ACTION RECOVERY, approved by Rohiit 5 Nov 2026.
+//   A post with blog_posts.noindex = true now sends robots "noindex, follow" (googleBot
+//   too). The page stays live, readable and linked; only Google is told not to index it.
+//   Every other post is exactly as before (index, follow). Requires lib/blog-posts.ts v3.15.
+//   Nothing else changed.)
+// Date: 2026-11-05
+// ------------------------------------------------------------
+// PREVIOUS: Version 4.1 (18 Oct 2026 — Site menu (SiteNav) added — the page had no menu; pt-16 so the
 //   fixed 64px menu does not cover content. Nothing else changed.)
 // Date: 2026-10-18
 // ------------------------------------------------------------
@@ -577,11 +584,12 @@ export async function generateMetadata(
       description: post.description,
       images: [og.url],
     },
+    // v4.2 — noindex,follow for pages flagged in blog_posts.noindex
     robots: {
-      index: true,
+      index: !post.noindex,
       follow: true,
       googleBot: {
-        index: true,
+        index: !post.noindex,
         follow: true,
         'max-video-preview': -1,
         'max-image-preview': 'large',
