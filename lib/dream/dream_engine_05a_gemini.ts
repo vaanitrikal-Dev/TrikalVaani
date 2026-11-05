@@ -1,5 +1,6 @@
 // =============================================================================
 // TRIKAAL VAANI · Dream Engine · Component 5a: THE GEMINI CALLER
+// UPDATE 3.7 → 3.8 (5 Nov 2026, CEO order: gemini-3.7-flash band — saare live calls gemini-3.8-flash pe)
 // -----------------------------------------------------------------------------
 // The dream engine's OWN Gemini caller — fully separate from the locked
 // gemini-prompt.ts. Nothing here touches your prediction path.
@@ -32,7 +33,7 @@ const genAI = new GoogleGenerativeAI(GEMINI_KEY);
 // 16 OCTOBER 2026. Mapping approved by Rohiit: flash -> 3.7, pro -> 3.8.
 // The constant names are kept so nothing downstream has to change; only the
 // model strings moved.
-const FLASH = 'gemini-3.7-flash';
+const FLASH = 'gemini-3.8-flash';
 const PRO = 'gemini-3.8-flash';
 
 function cleanJson(s: string): string {

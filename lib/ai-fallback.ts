@@ -4,6 +4,7 @@
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: lib/ai-fallback.ts
  * VERSION: 1.1 (29 Sep 2026)
+ * UPDATE 3.7 → 3.8 (5 Nov 2026, CEO order: gemini-3.7-flash band — saare live calls gemini-3.8-flash pe)
  * ============================================================
  * v1.1 (29 Sep 2026) — CLAUDE KA TIME PEHLE SE BACHA KE RAKHO
  *   Proof (Vercel log, CEO ka Milan test 06:47 IST): gemini-3.7-flash ne
@@ -49,7 +50,7 @@ export interface FallbackOptions {
   tag: string;                     // log label, e.g. "karmic"
   prompt: string;                  // user message
   systemInstruction?: string;      // optional system prompt
-  models?: string[];               // Gemini order (default 3.8 → 3.7)
+  models?: string[];               // Gemini order (default: 3.8 only)
   maxOutputTokens: number;         // Gemini budget (thinking included)
   temperature?: number;
   topP?: number;
@@ -143,7 +144,7 @@ async function callClaude(o: FallbackOptions, timeoutMs: number): Promise<string
 
 /** Gemini (retry on overload) → next Gemini → Claude Sonnet 5. Throws if all fail. */
 export async function generateWithFallback(o: FallbackOptions): Promise<FallbackResult> {
-  const models = o.models?.length ? o.models : ['gemini-3.8-flash', 'gemini-3.7-flash'];
+  const models = o.models?.length ? o.models : ['gemini-3.8-flash'];
   const errors: string[] = [];
   const left = () => o.deadlineMs - Date.now();
   const reserve = o.claudeReserveMs ?? o.claudeMinMs;

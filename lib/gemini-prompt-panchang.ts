@@ -4,6 +4,7 @@
  * ============================================================================
  * File:        lib/gemini-prompt-panchang.ts
  * Version: 1.1 (19 Oct 2026) — competitor brand names removed from prompt text so they cannot leak into generated readings.
+ * UPDATE 3.7 → 3.8 (5 Nov 2026, CEO order: gemini-3.7-flash band — saare live calls gemini-3.8-flash pe)
  * (previous) Version:     v1.0
  * Phase:       C1 — AI Content Engine (Panchang Generation)
  * Owner:       Rohiit Gupta, Chief Vedic Architect
@@ -316,12 +317,12 @@ export const GEMINI_CONFIG = {
     // thinkingBudget OMITTED — 3.x uses default reasoning. NEVER set to 0.
   },
   city: {
-    model: "gemini-3.7-flash",
+    model: "gemini-3.8-flash",
     maxOutputTokens: 12000,
     temperature: 0.65,
   },
   festival: {
-    model: "gemini-3.7-flash",
+    model: "gemini-3.8-flash",
     maxOutputTokens: 12000,
     temperature: 0.7,
   },

@@ -3,6 +3,7 @@
  * TRIKAL VAANI — shared summary writer for the yog calculators
  * File:    lib/yog-summary.ts
  * VERSION: 1.0 (3 Sep 2026)
+ * UPDATE 3.7 → 3.8 (5 Nov 2026, CEO order: gemini-3.7-flash band — saare live calls gemini-3.8-flash pe)
  * Owner:   Rohiit Gupta, Chief Vedic Architect
  * ============================================================================
  *
@@ -51,7 +52,7 @@
 const GEMINI_BASE_URL = 'https://generativelanguage.googleapis.com/v1beta/models';
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY ?? '';
 
-export const MODEL_FREE = 'gemini-3.7-flash';
+export const MODEL_FREE = 'gemini-3.8-flash';
 export const MODEL_PAID = 'gemini-3.8-flash';
 
 export const FREE_TARGET = 75;

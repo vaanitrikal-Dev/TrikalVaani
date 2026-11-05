@@ -4,6 +4,7 @@
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: lib/gemini-prompt.ts
  * VERSION: 5.2 (19 Oct 2026) — competitor brand names removed from differentiator text.
+ * UPDATE 3.7 → 3.8 (5 Nov 2026, CEO order: gemini-3.7-flash band — saare live calls gemini-3.8-flash pe)
  * (previous) VERSION: 5.1 — Brand cleanup (Trikal→Trikaal, Jini→Trikaal). NOTE: file currently unused by live predict route
  * SIGNED: ROHIIT GUPTA, CEO
  *
@@ -83,7 +84,7 @@ export interface PromptOutput {
   systemPrompt: string;
   userMessage:  string;
   useSearch:    boolean;
-  model:        string;   // 'gemini-3.7-flash' (free) | 'gemini-3.8-flash' (paid)
+  model:        string;   // 'gemini-3.8-flash' (free + paid)
 }
 
 // ─── SEO/GEO DOMAIN KEYWORDS — PRO SEO ARCHITECT ─────────────────────────────
@@ -255,7 +256,7 @@ export function buildPredictionPrompt(
   // 2.5-pro -> 3.8-flash. On the independent Artificial Analysis index
   // 3.8 Flash scores 59 and 3.7 Flash 56, against Gemini 3.1 Pro's
   // upper-40s — an upgrade in capability, and cheaper than 2.5-pro was.
-  const model   = isPaid ? 'gemini-3.8-flash' : 'gemini-3.7-flash';
+  const model   = isPaid ? 'gemini-3.8-flash' : 'gemini-3.8-flash';
 
   // Build the lean input context — only what Gemini needs
   const clientContext = buildClientContext(

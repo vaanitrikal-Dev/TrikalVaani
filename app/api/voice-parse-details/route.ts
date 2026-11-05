@@ -4,6 +4,7 @@
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/api/voice-parse-details/route.ts
  * VERSION: 1.0 — Extract {name, dob, tob, pob} from spoken transcript
+ * UPDATE 3.7 → 3.8 (5 Nov 2026, CEO order: gemini-3.7-flash band — saare live calls gemini-3.8-flash pe)
  * DATE: 2026-06-14
  *
  * PURPOSE:
@@ -25,7 +26,7 @@ export const maxDuration = 20;
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const GEMINI_URL =
-  'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.7-flash:generateContent';
+  'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent';
 
 type ParseBody = {
   transcript?: string;

@@ -5,6 +5,7 @@
    app/api/predict/route.ts
    Owner: Rohiit Gupta, Chief Vedic Architect — Trikaal Vaani
    Protected since: 06 September 2026
+   UPDATE 3.7 → 3.8 (5 Nov 2026, CEO order: gemini-3.7-flash band — saare live calls gemini-3.8-flash pe)
 
    WHY THIS FILE IS LOCKED
      Every paid reading on trikalvaani.com is generated here. This file was
@@ -550,7 +551,7 @@ export const maxDuration = 240
 // MAX_TOKENS stays 24000 — already the most generous budget in the repo,
 // and 3.x needs it more than 2.5 did because its reasoning is charged to
 // the same budget as the visible JSON.
-const GEMINI_FLASH    = 'gemini-3.7-flash'
+const GEMINI_FLASH    = 'gemini-3.8-flash'
 const GEMINI_PRO      = 'gemini-3.8-flash'
 const GEMINI_BASE_URL = 'https://generativelanguage.googleapis.com/v1beta/models'
 const GEMINI_API_KEY  = process.env.GEMINI_API_KEY  ?? ''

@@ -4,6 +4,7 @@
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/api/voice-predict/route.ts
  * VERSION: 1.5.1 (29 Sep 2026) — AI fallback (ai-fallback v1.1: Claude 10s reserve) (CEO approved: "pehle sab pe laga do")
+ * UPDATE 3.7 → 3.8 (5 Nov 2026, CEO order: gemini-3.7-flash band — saare live calls gemini-3.8-flash pe)
  *   v1.5: Pehle EK Gemini call — 503 par "Prediction failed". Ab
  *   lib/ai-fallback.ts: gemini-3.7-flash → gemini-3.8-flash (bheed par ek
  *   retry) → Claude Sonnet 5, sab 30s limit ke andar. Prompt, 6000 tokens,
@@ -32,7 +33,7 @@ export const maxDuration = 30;
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const GEMINI_URL =
-  'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.7-flash:generateContent';
+  'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent';
 
 type FlexibleBody = {
   transcription?: string;
@@ -123,7 +124,7 @@ Write a warm, specific 100-120 word Hinglish voice prediction. Count your words 
         tag: 'voice-predict',
         prompt: userMessage,
         systemInstruction: systemPrompt,
-        models: ['gemini-3.7-flash', 'gemini-3.8-flash'],
+        models: ['gemini-3.8-flash'],
         maxOutputTokens: 6000,  // CEO ORDER: 6000 tokens for rich complete Devanagari predictions
         temperature: 0.85,
         topP: 0.9,

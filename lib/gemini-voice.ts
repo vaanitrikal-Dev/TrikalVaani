@@ -4,6 +4,7 @@
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: lib/gemini-voice.ts
  * VERSION: 1.0 — Separate Voice Engine
+ * UPDATE 3.7 → 3.8 (5 Nov 2026, CEO order: gemini-3.7-flash band — saare live calls gemini-3.8-flash pe)
  * SIGNED: ROHIIT GUPTA, CEO
  *
  * ARCHITECTURE:
@@ -75,7 +76,7 @@ export interface VoiceContext {
 export interface VoicePromptOutput {
   systemPrompt: string;
   userMessage:  string;
-  model:        string;   // Always 'gemini-3.7-flash' for voice
+  model:        string;   // Always 'gemini-3.8-flash' for voice
   maxTokens:    number;   // Small — voice script only
 }
 
@@ -230,7 +231,7 @@ export function buildVoicePrompt(ctx: VoiceContext): VoicePromptOutput {
     systemPrompt,
     userMessage,
     // MIGRATED 3 Sep 2026: gemini-2.5-flash SHUTS DOWN 16 Oct 2026.
-    model:     'gemini-3.7-flash',
+    model:     'gemini-3.8-flash',
     // 400 -> 4096. NOT a quality change — a truncation fix.
     //
     // Gemini 3.x REASONS BEFORE IT WRITES, and that reasoning is charged to
