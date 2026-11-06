@@ -1,7 +1,10 @@
 // ════════════════════════════════════════════════════════════════════════════
 // 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER
 // File:    app/[domain]/events/[slug]/page.tsx
-// Version: v4.2 (16 Oct 2026) — og/twitter image = festivalOgImage(content) (editorial_rulings #20)
+// Version: v4.3 (6 Nov 2026) — robots noindex,follow unless the path is in
+//          lib/city-index-keep.ts (Google thin-content manual action, approved by Rohiit 6 Nov 2026).
+//          321 city pages that earned GSC impressions stay indexed; the rest are noindex.
+// Previous: v4.2 (16 Oct 2026) — og/twitter image = festivalOgImage(content) (editorial_rulings #20)
 // Previous: v4.1 (28 Aug 2026) — thin route over components/festival/FestivalPillar
 // Owner:   Rohiit Gupta, Chief Vedic Architect
 //
@@ -19,6 +22,7 @@ import FestivalPillar, {
   ALL_CITIES, CITY_SLUGS, SITE_URL, AUTHOR_NAME, AUTHOR_TITLE,
   resolveFestival, getContent, festivalOgImage, getLocalTerm, getVisarjan, baseSlug, buildMeta,
 } from "@/components/festival/FestivalPillar";
+import { isCityPageIndexable } from "@/lib/city-index-keep";
 
 export const revalidate = 86400;
 export const dynamicParams = true;
@@ -41,6 +45,8 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
     buildMeta({ lang: "en", festival: f, city, content, local, visarjan });
 
   const url = `${SITE_URL}/${city.slug}/events/${f.festival_slug}`;
+  // v4.3 — thin-content recovery: see lib/city-index-keep.ts
+  const indexable = isCityPageIndexable(`/${city.slug}/events/${f.festival_slug}`);
 
   // hreflang from alt_lang_slug. The site had none anywhere before v4.0, which
   // left the Hindi and English pages competing instead of covering two searches.
@@ -62,8 +68,9 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
     authors: [{ name: `${AUTHOR_NAME}, ${AUTHOR_TITLE}` }],
     openGraph: { title, description, url, images: [ogImage], type: "article" },
     twitter: { card: "summary_large_image", title, description, images: [ogImage] },
-    robots: { index: true, follow: true,
-      googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1 } },
+    // v4.3 — only city pages that earned impressions stay indexable
+    robots: { index: indexable, follow: true,
+      googleBot: { index: indexable, follow: true, "max-image-preview": "large", "max-snippet": -1 } },
   };
 }
 

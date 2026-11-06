@@ -2,7 +2,10 @@
 // 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER
 // ════════════════════════════════════════════════════════════════════════════
 // File:    app/hi/[...path]/page.tsx
-// Version: v1.3 (16 Oct 2026) — og/twitter image = festivalOgImage(content) (editorial_rulings #20)
+// Version: v1.4 (6 Nov 2026) — CITY pages (/hi/<city>/<slug>) get robots noindex,follow unless
+//          the path is in lib/city-index-keep.ts (Google thin-content manual action, approved by
+//          Rohiit 6 Nov 2026). National /hi/<slug> pages are unchanged (always index).
+// Previous: v1.3 (16 Oct 2026) — og/twitter image = festivalOgImage(content) (editorial_rulings #20)
 // Previous: v1.2 (28 Aug 2026)
 // Owner:   Rohiit Gupta, Chief Vedic Architect
 //
@@ -52,6 +55,7 @@ import FestivalPillar, {
   ALL_CITIES, CITY_SLUGS, SITE_URL, AUTHOR_NAME, AUTHOR_TITLE,
   resolveFestival, getContent, festivalOgImage, getLocalTerm, getVisarjan, baseSlug, buildMeta,
 } from "@/components/festival/FestivalPillar";
+import { isCityPageIndexable } from "@/lib/city-index-keep";
 
 export const revalidate = 86400;
 export const dynamicParams = true;
@@ -97,6 +101,8 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const url = city
     ? `${SITE_URL}/hi/${city.slug}/${p.slug}`
     : `${SITE_URL}/hi/${p.slug}`;
+  // v1.4 — national page always indexable; a city copy only if in the keep-list
+  const indexable = city ? isCityPageIndexable(`/hi/${city.slug}/${p.slug}`) : true;
 
   // hreflang from alt_lang_slug. The English side keeps the year in its slug,
   // so it is stored per row rather than derived.
@@ -121,8 +127,8 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
     openGraph: { title, description, url, images: [ogImage], type: "article", locale: "hi_IN" },
     twitter: { card: "summary_large_image", title, description, images: [ogImage] },
     robots: {
-      index: true, follow: true,
-      googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1 },
+      index: indexable, follow: true,
+      googleBot: { index: indexable, follow: true, "max-image-preview": "large", "max-snippet": -1 },
     },
   };
 }
@@ -144,4 +150,4 @@ export default async function Page({ params }: Params) {
   return <FestivalPillar festival={festival} city={city} lang="hi" />;
 }
 
-// END — app/hi/[...path]/page.tsx v1.1 | Trikaal Vaani | Rohiit Gupta
+// END — app/hi/[...path]/page.tsx v1.4 | Trikaal Vaani | Rohiit Gupta

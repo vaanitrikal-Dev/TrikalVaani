@@ -106,6 +106,13 @@
 /**
  *
  * ══════════════════════════════════════════════════════════════════════════
+ * v16.3 — 06 NOVEMBER 2026 — GOOGLE INDEXING PING BAND (Rohiit ki explicit
+ *   permission, 6 Nov 2026: "Yes for every action"). Google ne thin-content manual
+ *   action diya. Har report ek grahak ki personal reading hai — ab koi bhi report
+ *   Google ko index ke liye nahi bheji jaati. STEP 7 ka notifyGoogleIndexing() call
+ *   hata diya (Indexing API sirf job/livestream pages ke liye hai). is_public ab
+ *   DB trigger tv_force_report_private hamesha false rakhta hai. Aur kuch nahi badla.
+ * ══════════════════════════════════════════════════════════════════════════
  * v16.2 — 11 OCTOBER 2026 — GOOGLE PLAY BILLING (Play Store app ke liye)
  *   Rohiit ki explicit permission se ("haan, predict edit karo", 11 Oct 2026).
  *   Play Store app (TWA) mein payment Google Play Billing se hota hai — app
@@ -2570,9 +2577,9 @@ export async function POST(req: NextRequest) {
   // ── STEP 7: Google Indexing ───────────────────────────────────────────────
   // v15.12 — asking Google to index a page that is deliberately unlisted would
   // undo the whole point of the flag above.
-  if (!isMinor) {
-    try{notifyGoogleIndexing(`https://trikalvaani.com/report/${publicSlug}`)}catch{}
-  }
+  // v16.3 (6 Nov 2026) — DISABLED. Reports are customers' private readings and
+  // are never submitted for indexing (Google thin-content manual action).
+  void notifyGoogleIndexing; void isMinor;
 
   // ── STEP 8: Return ───────────────────────────────────────────────────────
   const totalMs = Date.now()-startMs

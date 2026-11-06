@@ -1,4 +1,14 @@
 /* ═══════════════════════════════════════════════════════════════════════════
+   v10.0 — 06 November 2026 — Google thin-content manual action recovery
+   (approved by Rohiit 6 Nov 2026). City copies of festival pages
+   (/<city>/events/<slug>, /hi/<city>/<slug>) are emitted ONLY when the path is
+   in lib/city-index-keep.ts (321 pages that earned GSC impressions); the other
+   ~2,900 copies are served with robots noindex and left out of the sitemap.
+   City hreflang pairs only point at a kept partner. National /events and
+   /hi/<festival> pages are unchanged. Nothing else changed.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════════════════════════
    v9.7 — 03 October 2026 — CODE_LASTMOD 2026-10-03 for the 7 pages changed in
    the Radar-report bundle: /astrologer-delhi, free-foreign-settlement,
    free-foreign-spouse, free-kaal-sarp-dosh, free-should-i-wear-neelam,
@@ -372,6 +382,7 @@
 
 import type { MetadataRoute } from 'next';
 import { getPostsForSitemap } from '@/lib/blog-posts';
+import { isCityPageIndexable } from '@/lib/city-index-keep'; // v10.0
 import { createClient } from '@supabase/supabase-js';
 import citiesData from './data/cities.json';
 import festivalsData from './data/festivals.json';
@@ -1233,19 +1244,24 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         if (!festivalInState(f.festival_scope, f.home_states, c.state)) continue;
 
         const enCity = `${BASE}/${c.slug}/events/${f.festival_slug}`;
-        const hiCity = hi ? `${BASE}/hi/${c.slug}/${hi}` : null;
-        const cityLangs = hi
-          ? { languages: { 'en-IN': enCity, 'hi-IN': hiCity! } }
+        // v10.0 — only city copies in lib/city-index-keep.ts are emitted
+        const enKeep = isCityPageIndexable(`/${c.slug}/events/${f.festival_slug}`);
+        const hiKeep = hi ? isCityPageIndexable(`/hi/${c.slug}/${hi}`) : false;
+        const hiCity = hi && hiKeep ? `${BASE}/hi/${c.slug}/${hi}` : null;
+        const cityLangs = hiCity && enKeep
+          ? { languages: { 'en-IN': enCity, 'hi-IN': hiCity } }
           : undefined;
 
-        entries.push({
-          url: enCity, lastModified: festMod, changeFrequency: 'monthly',
-          priority: 0.8, ...(cityLangs ? { alternates: cityLangs } : {}),
-        });
+        if (enKeep) {
+          entries.push({
+            url: enCity, lastModified: festMod, changeFrequency: 'monthly',
+            priority: 0.8, ...(cityLangs ? { alternates: cityLangs } : {}),
+          });
+        }
         if (hiCity) {
           entries.push({
             url: hiCity, lastModified: festMod, changeFrequency: 'monthly',
-            priority: 0.8, alternates: cityLangs,
+            priority: 0.8, ...(cityLangs ? { alternates: cityLangs } : {}),
           });
         }
       }
