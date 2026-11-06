@@ -2,7 +2,23 @@
 // 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER
 // ════════════════════════════════════════════════════════════════════════════
 // File:     components/festival/FestivalPillar.tsx
-// Version:  v3.0 (18 Oct 2026) — dated "Last reviewed" footer from festival_content.reviewed_at
+// Version:  v3.1 (6 Nov 2026) — ONE PAGE, ALL CITIES (Rohiit's idea, approved 6 Nov 2026)
+//
+// ── v3.1 ───────────────────────────────────────────────────────────────────
+// Google thin-content manual action (6 Nov 2026). The national page becomes the
+// one strong page for every city:
+//   1. "Timings across India" table gains the Puja Muhurat column (the number
+//      people search for) and every row gets an anchor id = city slug, so the
+//      301 from a retired city URL lands on that city's row (/events/x#hyderabad).
+//   2. NEW on national pages: every published festival_city_notes row for this
+//      festival is shown as its own section "<Festival> in <City>" (anchor
+//      id = note-<city>), right after the timings table.
+//   3. Links to a city page are used ONLY when that city page is still indexed
+//      (lib/city-index-keep.ts); otherwise they point to the row on the
+//      national page — never to a URL that redirects.
+//   City pages that stay live render exactly as before. Nothing else changed.
+//
+// PREVIOUS: v3.0 (18 Oct 2026) — dated "Last reviewed" footer from festival_content.reviewed_at
 //
 // ── v3.0 ───────────────────────────────────────────────────────────────────
 // Rohiit (18 Oct 2026): festival pages must show WHEN he last reviewed them,
@@ -147,6 +163,7 @@ import { createClient } from "@supabase/supabase-js";
 import SiteNav from "@/components/layout/SiteNav";
 import { callVM } from "@/lib/callVM";
 import CalculatorLinks from "@/components/seo/CalculatorLinks";
+import { isCityPageIndexable } from "@/lib/city-index-keep"; // v3.1
 import citiesData from "@/app/data/cities.json";
 import { Infobox, TableOfContents, Glossary, References, CiteText } from "@/components/wiki/WikiBlocks";
 import {
@@ -561,6 +578,27 @@ export async function getCityNote(
       .eq("is_published", true).limit(1);
     return (data && (data[0] as CityNote)) || null;
   } catch { return null; }
+}
+
+/** v3.1 — every published city note of one festival, for the national page. */
+export async function getAllCityNotes(
+  base: string, lang: Lang
+): Promise<(CityNote & { city_slug: string })[]> {
+  try {
+    const { data } = await supa().from("festival_city_notes")
+      .select("city_slug,heading,body,highlights,sources")
+      .eq("base_slug", base).eq("lang", lang).eq("is_published", true);
+    return (data as (CityNote & { city_slug: string })[]) ?? [];
+  } catch { return []; }
+}
+
+/** v3.1 — link to a city page only while it is indexed; else to its row on the national page. */
+export function cityFestivalHref(
+  lang: Lang, citySlug: string, enSlug: string, hiSlug: string | null
+): string {
+  const cityPath = festivalHref(lang, citySlug, enSlug, hiSlug);
+  if (isCityPageIndexable(cityPath)) return cityPath;
+  return `${festivalHref(lang, null, enSlug, hiSlug)}#${citySlug}`;
 }
 
 /**
@@ -1113,7 +1151,7 @@ export default async function FestivalPillar(
   const base = baseSlug(f.festival_slug);
   const pitra = isPitraFestival(base);
 
-  const [content, local, panchang, upcoming, catTiming, visarjan, cityNote] = await Promise.all([
+  const [content, local, panchang, upcoming, catTiming, visarjan, cityNote, allNotes] = await Promise.all([
     getContent(base, lang),
     city ? getLocalTerm(base, city.state) : Promise.resolve(null),
     city ? getPanchang(f.date, city.latitude, city.longitude, city.name)
@@ -1123,6 +1161,7 @@ export default async function FestivalPillar(
     getVisarjan(base, city?.latitude ?? 28.6139, city?.longitude ?? 77.209,
                 city?.name ?? "New Delhi"),
     city ? getCityNote(base, city.slug, lang) : Promise.resolve(null),
+    city ? Promise.resolve([] as (CityNote & { city_slug: string })[]) : getAllCityNotes(base, lang), // v3.1
   ]);
 
   // Other cities where this festival is in scope, each with its own timings.
@@ -1377,7 +1416,7 @@ export default async function FestivalPillar(
               <tr>
                 <td className="py-2 text-slate-400">{t.visarjanOn}</td>
                 <td className="py-2 text-right font-semibold text-amber-100">
-                  <Link href={festivalHref(lang, city?.slug ?? null, visarjan.slug, null)}
+                  <Link href={city ? cityFestivalHref(lang, city.slug, visarjan.slug, null) : festivalHref(lang, null, visarjan.slug, null)}
                         className="text-amber-300 hover:text-amber-200 transition">
                     {new Date(visarjan.date + "T00:00:00").toLocaleDateString(
                       lang === "hi" ? "hi-IN" : "en-IN",
@@ -1475,23 +1514,25 @@ export default async function FestivalPillar(
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead className="text-left text-slate-400">
-                <tr><th className="py-1">{t.city}</th><th>{t.sunrise}</th><th>{t.abhijit}</th><th>{t.rahu}</th></tr>
+                <tr><th className="py-1">{t.city}</th>{pujaKaal && <th>{t.pujaMuhurat}</th>}<th>{t.sunrise}</th><th>{t.abhijit}</th><th>{t.rahu}</th></tr>
               </thead>
               <tbody className="divide-y divide-amber-900/30">
                 {city && panchang && (
                   <tr className="bg-amber-50">
                     <td className="py-2 font-semibold text-amber-200">{placeName}</td>
+                    {pujaKaal && <td>{panchang.kaal?.[pujaKaal] ?? "—"}</td>}
                     <td>{panchang.sunrise}</td><td>{panchang.abhijit_muhurat}</td><td>{panchang.rahu_kaal}</td>
                   </tr>
                 )}
                 {others.map(({ city: x, p }) => (
-                  <tr key={x.slug}>
+                  <tr key={x.slug} id={x.slug} className="scroll-mt-24">
                     <td className="py-2">
-                      <Link href={festivalHref(lang, x.slug, f.festival_slug, content?.page_slug ?? null)}
+                      <Link href={cityFestivalHref(lang, x.slug, f.festival_slug, content?.page_slug ?? null)}
                             className="text-amber-300 hover:text-amber-200 transition">
                         {lang === "hi" ? x.name_hindi : x.name}
                       </Link>
                     </td>
+                    {pujaKaal && <td>{p.kaal?.[pujaKaal] ?? "—"}</td>}
                     <td>{p.sunrise}</td><td>{p.abhijit_muhurat}</td><td>{p.rahu_kaal}</td>
                   </tr>
                 ))}
@@ -1500,6 +1541,34 @@ export default async function FestivalPillar(
           </div>
         </section>
       )}
+
+      {/* v3.1 — ONE PAGE, ALL CITIES: each city's researched note, national page only */}
+      {!city && allNotes.map((n) => {
+        const c = ALL_CITIES.find((x) => x.slug === n.city_slug);
+        if (!c) return null;
+        const cName = lang === "hi" ? c.name_hindi : c.name;
+        const head = n.heading || t.inThisCity(name, cName);
+        return (
+          <section key={n.city_slug} id={`note-${n.city_slug}`}
+            className="my-10 scroll-mt-24 rounded-xl border border-amber-800/50 bg-amber-950/25 p-6 md:p-8">
+            <h2 className="mb-4 text-2xl md:text-3xl font-bold text-amber-300" id={tid(head)}>{head}</h2>
+            <div className="space-y-4">
+              {String(n.body ?? "").split(/\n\s*\n/).map((para, i) => (
+                <p key={i} className="text-slate-200 leading-relaxed">{para}</p>
+              ))}
+            </div>
+            {asList(n.highlights).length ? (
+              <ul className="mt-6 space-y-2">
+                {asList(n.highlights).map((h, i) => (
+                  <li key={i} className="flex gap-3 text-slate-200 leading-relaxed">
+                    <span className="text-amber-400" aria-hidden>◆</span><span>{h}</span>
+                  </li>
+                ))}
+              </ul>
+            ) : null}
+          </section>
+        );
+      })}
 
       {content?.significance && (
         <section className="my-10">
@@ -1706,7 +1775,7 @@ export default async function FestivalPillar(
                              city && !o.home_states.includes(city.state)))
               .map(o => (
                 <li key={o.festival_slug}>
-                  <Link href={festivalHref("en", city?.slug ?? null, o.festival_slug, null)}
+                  <Link href={city ? cityFestivalHref("en", city.slug, o.festival_slug, null) : festivalHref("en", null, o.festival_slug, null)}
                         className="text-amber-300 hover:text-amber-200 transition">{o.festival_name}</Link>
                   <span className="ml-2 text-sm text-slate-500">{o.date}</span>
                 </li>
@@ -1743,4 +1812,4 @@ export default async function FestivalPillar(
   );
 }
 
-// END — components/festival/FestivalPillar.tsx v3.0 | Trikaal Vaani | Rohiit Gupta
+// END — components/festival/FestivalPillar.tsx v3.1 | Trikaal Vaani | Rohiit Gupta

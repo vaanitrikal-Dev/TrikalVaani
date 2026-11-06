@@ -2,7 +2,10 @@
 // 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER
 // ════════════════════════════════════════════════════════════════════════════
 // File:    app/hi/[...path]/page.tsx
-// Version: v1.4 (6 Nov 2026) — CITY pages (/hi/<city>/<slug>) get robots noindex,follow unless
+// Version: v1.5 (6 Nov 2026) — ONE PAGE, ALL CITIES: a Hindi city copy NOT in
+//          lib/city-index-keep.ts now 301-redirects to /hi/<slug>#<city>. Kept city pages
+//          and all national pages render exactly as before.
+// Previous: v1.4 (6 Nov 2026) — CITY pages (/hi/<city>/<slug>) get robots noindex,follow unless
 //          the path is in lib/city-index-keep.ts (Google thin-content manual action, approved by
 //          Rohiit 6 Nov 2026). National /hi/<slug> pages are unchanged (always index).
 // Previous: v1.3 (16 Oct 2026) — og/twitter image = festivalOgImage(content) (editorial_rulings #20)
@@ -50,7 +53,7 @@
 // ════════════════════════════════════════════════════════════════════════════
 
 import { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import FestivalPillar, {
   ALL_CITIES, CITY_SLUGS, SITE_URL, AUTHOR_NAME, AUTHOR_TITLE,
   resolveFestival, getContent, festivalOgImage, getLocalTerm, getVisarjan, baseSlug, buildMeta,
@@ -143,6 +146,11 @@ export default async function Page({ params }: Params) {
   const festival = await resolveFestival(p.slug, "hi");
   if (!festival) notFound();
 
+  // v1.5 — retired Hindi city copy → the city's row on the national Hindi page
+  if (city && !isCityPageIndexable(`/hi/${city.slug}/${p.slug}`)) {
+    permanentRedirect(`/hi/${p.slug}#${city.slug}`);
+  }
+
   // A regional festival renders only where it is observed.
   if (city && festival.festival_scope === "regional" && festival.home_states?.length &&
       !festival.home_states.includes(city.state)) notFound();
@@ -150,4 +158,4 @@ export default async function Page({ params }: Params) {
   return <FestivalPillar festival={festival} city={city} lang="hi" />;
 }
 
-// END — app/hi/[...path]/page.tsx v1.4 | Trikaal Vaani | Rohiit Gupta
+// END — app/hi/[...path]/page.tsx v1.5 | Trikaal Vaani | Rohiit Gupta

@@ -1,7 +1,10 @@
 // ════════════════════════════════════════════════════════════════════════════
 // 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER
 // File:    app/[domain]/events/[slug]/page.tsx
-// Version: v4.3 (6 Nov 2026) — robots noindex,follow unless the path is in
+// Version: v4.4 (6 Nov 2026) — ONE PAGE, ALL CITIES: a city copy NOT in lib/city-index-keep.ts
+//          now 301-redirects to the national page row (/events/<slug>#<city>) instead of
+//          serving a noindexed duplicate. Kept city pages render exactly as before.
+// Previous: v4.3 (6 Nov 2026) — robots noindex,follow unless the path is in
 //          lib/city-index-keep.ts (Google thin-content manual action, approved by Rohiit 6 Nov 2026).
 //          321 city pages that earned GSC impressions stay indexed; the rest are noindex.
 // Previous: v4.2 (16 Oct 2026) — og/twitter image = festivalOgImage(content) (editorial_rulings #20)
@@ -17,7 +20,7 @@
 // ════════════════════════════════════════════════════════════════════════════
 
 import { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import FestivalPillar, {
   ALL_CITIES, CITY_SLUGS, SITE_URL, AUTHOR_NAME, AUTHOR_TITLE,
   resolveFestival, getContent, festivalOgImage, getLocalTerm, getVisarjan, baseSlug, buildMeta,
@@ -81,6 +84,11 @@ export default async function Page({ params }: Params) {
 
   const festival = await resolveFestival(params.slug, "en");
   if (!festival) notFound();
+
+  // v4.4 — retired city copy → the city's row on the national page
+  if (!isCityPageIndexable(`/${city.slug}/events/${festival.festival_slug}`)) {
+    permanentRedirect(`/events/${festival.festival_slug}#${city.slug}`);
+  }
 
   // A regional festival renders only where it is observed. Kept from v2.6.
   if (festival.festival_scope === "regional" && festival.home_states?.length &&
