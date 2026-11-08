@@ -2,18 +2,22 @@
  * ============================================================
  * TRIKAAL VAANI — MaaArziPay (Maa Shakti ko Arzi — dakshina)
  * File: components/landing/MaaArziPay.tsx   (NEW FILE)
- * VERSION: 1.0 (8 Nov 2026)
+ * VERSION: 1.1 (8 Nov 2026)
  * Owner: Rohiit Gupta, Chief Vedic Architect
  * ============================================================
+ * v1.1 (8 Nov 2026) — UPI WAPAS (Rohiit: "you can add"). ₹101 card test pass
+ *   hone ke baad Razorpay checkout se UPI hide hataya — ab UPI, Card,
+ *   NetBanking, Wallet sab. Redirect mode (option B) UPI app se lautne par
+ *   bhi record bachata hai. Neeche ki "UPI se dena ho to WhatsApp" line hatai
+ *   (ab UPI checkout mein hi hai). Baaki sab v1.0 jaisa.
+ * ------------------------------------------------------------
  * Rohiit ke faisle (8 Nov 2026):
  *   1. SIRF HOMEPAGE par — BirthForm services aur /upgrade par bhi chalta
  *      hai, isliye yeh component khud pathname === '/' check karta hai.
  *   2. Heading: "🙏 Maa Shakti ko Arzi — apni shraddha anusaar dakshina".
  *   3. Koi amount screen par NAHI, koi limit NAHI — customer khud likhe
  *      (₹1 se upar koi bhi poora rupaya).
- *   4. Razorpay checkout mein UPI NAHI dikhega (config.display.hide) —
- *      UPI ke liye Rohiit customer ko QR khud bhejte hain. Card,
- *      NetBanking, Wallet chalenge.
+ *   4. (v1.0 mein UPI hidden tha — v1.1 mein wapas.)
  *   5. Option B — REDIRECT MODE: payment ke baad Razorpay customer ko
  *      /api/dakshina-callback par bhejta hai; wahi verify + save +
  *      WhatsApp dhanyawad page dikhata hai.
@@ -29,8 +33,6 @@ import { loadRazorpayScript } from "@/lib/razorpay-helper"
 
 const GOLD = '#D4AF37'
 const GOLD_RGBA = (a: number) => `rgba(212,175,55,${a})`
-const WA_UPI = "https://wa.me/919211804111?text=" +
-  encodeURIComponent("Pranam Rohiit ji, Maa ko Arzi karna chahta hoon. UPI QR bhej dijiye. Jai Maa Shakti!")
 
 export default function MaaArziPay() {
   const pathname = usePathname()
@@ -78,13 +80,6 @@ export default function MaaArziPay() {
         // Option B — redirect mode, server par verify + save
         callback_url: `${window.location.origin}/api/dakshina-callback`,
         redirect:     true,
-        // UPI checkout mein nahi (Rohiit QR manually bhejte hain)
-        config: {
-          display: {
-            hide: [{ method: 'upi' }],
-            preferences: { show_default_blocks: true },
-          },
-        },
         modal: { ondismiss: () => setBusy(false) },
       })
       rzp.on('payment.failed', () => setBusy(false))
@@ -123,10 +118,9 @@ export default function MaaArziPay() {
       </div>
       {error && <p style={{ margin: '8px 0 0', color: '#f87171', fontSize: '11px' }}>{error}</p>}
       <p style={{ margin: '10px 0 0', color: '#475569', fontSize: '10px' }}>
-        Card · NetBanking · Wallet — secured by Razorpay. UPI se dena ho to{' '}
-        <a href={WA_UPI} target="_blank" rel="noopener noreferrer" style={{ color: GOLD, fontWeight: 700, textDecoration: 'none' }}>WhatsApp karein →</a>
+        UPI · Card · NetBanking · Wallet — secured by Razorpay
       </p>
     </div>
   )
 }
-// END — components/landing/MaaArziPay.tsx v1.0
+// END — components/landing/MaaArziPay.tsx v1.1

@@ -2,8 +2,12 @@
 // 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER
 // ════════════════════════════════════════════════════════════════════════════
 // File:     app/api/dakshina-callback/route.ts   (NEW FILE)
-// Version:  v1.0 (8 Nov 2026)
+// Version:  v1.1 (8 Nov 2026)
 // Owner:    Rohiit Gupta, Chief Vedic Architect
+//
+// v1.1 (8 Nov 2026) — Razorpay email na milne par nakli "void@razorpay.com"
+//   bharta hai; ₹101 test mein wahi message column mein save hua. Ab woh
+//   email SAVE NAHI hota. Baaki sab v1.0 jaisa.
 //
 // ── KYUN BANA ──────────────────────────────────────────────────────────────
 // Homepage ka "Maa Shakti ko Arzi" (components/landing/MaaArziPay.tsx) Razorpay
@@ -153,7 +157,7 @@ export async function POST(req: NextRequest) {
     ]);
     amountPaise = Number(p?.amount) || Number(o?.amount) || 0;
     contact = p?.contact ? String(p.contact) : null;
-    email   = p?.email   ? String(p.email)   : null;
+    email   = p?.email && String(p.email).toLowerCase() !== 'void@razorpay.com' ? String(p.email) : null;
     if (o?.notes?.type === 'dhanyawad') type = 'dhanyawad';
     reportSlug = o?.notes?.report_slug ? String(o.notes.report_slug) : null;
   } catch (e) {
@@ -204,4 +208,4 @@ ${amountText ? `<p>Aapki dakshina <b>${esc(amountText)}</b> mil gayi hai.</p>` :
 export async function GET() {
   return NextResponse.redirect(`${SITE}/`, 303);
 }
-// END — app/api/dakshina-callback/route.ts v1.0
+// END — app/api/dakshina-callback/route.ts v1.1
