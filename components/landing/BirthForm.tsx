@@ -2,6 +2,15 @@
 /**
  * ============================================================
  * TRIKAAL VAANI — BirthForm
+ * v11.0 (8 Nov 2026) — "Maa Shakti ko Arzi" AB RAZORPAY SE (Rohiit ka faisla).
+ *   Form ke neeche wala WhatsApp-only dabba hata kar naya
+ *   components/landing/MaaArziPay.tsx lagaya: khaali amount box (koi amount
+ *   nahi dikhta, koi limit nahi), Razorpay checkout bina UPI ke, redirect
+ *   mode → /api/dakshina-callback. Dabba SIRF homepage ('/') par dikhta hai
+ *   (component khud check karta hai) aur Play app mein pehle ki tarah nahi.
+ *   Payment code, validate, Razorpay/PayPal/Play — EK LINE NAHI BADLI.
+ *   Build marker → "BF v11.0 · 08-Nov-2026".
+ *
  * v10.9 (11 Oct 2026) — LOT 3: "Maa Shakti ko Arzi" dabba PLAY STORE APP mein HIDE.
  *   Rohiit ka faisla (11 Oct 2026, LOT 3): "Maa Shakti ko Arzi ... Dakshina hai" —
  *   form ke neeche wala "🙏 Prediction ke baad — Maa Shakti ko Arzi karein" dabba
@@ -179,6 +188,7 @@ import PayPalCheckout, { type PayPalProof } from "@/components/payment/PayPalChe
 import { isPlayBillingAvailable, purchaseWithPlay, PLAY_PRODUCT_DEEP } from "@/lib/play-billing" // v10.7
 import { PLAY_PRODUCTS } from "@/lib/play-billing"                                  // v10.8
 import { handOffPlayVoicePurchase } from "@/components/Trikal/TrikalVoice"          // v10.8
+import MaaArziPay from "@/components/landing/MaaArziPay"                              // v11.0
 
 // ── OneSignal tagging helper (v9.8) ──────────────────────────────────────────
 // Safe, deferred. Does nothing on server. Used for abandoned-kundali Journey.
@@ -1635,11 +1645,11 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
               </p>
             </div>
 
-            {/* BUILD MARKER — BirthForm v10.9 · 2026-10-11. If you cannot see
+            {/* BUILD MARKER — BirthForm v11.0 · 2026-11-08. If you cannot see
                 this line on screen, the file you are looking at is NOT the file
                 that is deployed, and the problem is the deployment, not the code. */}
             <p style={{ margin: '0 0 6px', fontSize: '10px', color: '#334155', textAlign: 'right' }}>
-              BF v10.9 · 11-Oct-2026 · {isIndia === false ? 'INTL/USD' : 'IN/INR'}{inPlayApp ? ' · PLAY' : ''}
+              BF v11.0 · 08-Nov-2026 · {isIndia === false ? 'INTL/USD' : 'IN/INR'}{inPlayApp ? ' · PLAY' : ''}
             </p>
 
             {/* v10.7 — in the Play app Google shows each buyer their own local
@@ -2023,21 +2033,12 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
               ? <strong style={{ color: '#34A853' }}>Google Play</strong>
               : <strong style={{ color: RAZORPAY_BLUE }}>Razorpay</strong>}.
           </p>
-          {/* v10.9 — Maa Shakti Arzi (WhatsApp) dabba: Play Store app mein nahi (LOT 3) */}
-          {!inPlayApp && (
-          <div style={{ padding: '14px 20px', background: GOLD_RGBA(0.05), border: `1px solid ${GOLD_RGBA(0.15)}`, borderRadius: '12px', marginBottom: '12px' }}>
-            <p style={{ margin: '0 0 8px', color: GOLD, fontSize: '13px', fontWeight: 600 }}>🙏 Prediction ke baad — Maa Shakti ko Arzi karein</p>
-            <p style={{ margin: '0 0 8px', color: '#475569', fontSize: '11px', lineHeight: 1.5 }}>Prediction milne ke baad aap Maa ko apni dil ki baat rakh sakte hain. Rohiit ji personally transmit karenge.</p>
-            <a href="https://wa.me/919211804111?text=Pranam%20Rohiit%20ji%2C%20Maa%20ko%20Arzi%20karna%20chahta%20hoon.%20Jai%20Maa%20Shakti!"
-              target="_blank" rel="noopener noreferrer" style={{ color: GOLD, fontSize: '12px', fontWeight: 700, textDecoration: 'none' }}>
-              📱 WhatsApp karo Rohiit ji ko →
-            </a>
-          </div>
-          )}
+          {/* v11.0 — Maa Shakti ko Arzi: ab Razorpay dakshina (sirf homepage, Play app mein nahi) */}
+          {!inPlayApp && <MaaArziPay />}
           <p style={{ color: '#1e293b', fontSize: '10px', margin: 0 }}>By Rohiit Gupta, Chief Vedic Architect · trikalvaani.com · 🔱 Mahakaal Ka Ashirwad</p>
         </div>
       </div>
     </section>
   )
 }
-// END — components/landing/BirthForm.tsx v10.9
+// END — components/landing/BirthForm.tsx v11.0
