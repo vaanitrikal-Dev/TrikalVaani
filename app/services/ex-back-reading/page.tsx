@@ -2,7 +2,8 @@
  * TRIKAAL VAANI — trikalvaani.com
  * Chief Vedic Architect: Rohiit Gupta
  * FILE: app/services/ex-back-reading/page.tsx
- * Version: 5.1 (11 Oct 2026) — PLAY STORE APP: Maa Shakti dakshina section app mein HIDE.
+ * Version: 5.2 (8 Nov 2026) — Radar weekly job cycle 2026-11-07: +1 H2 (best astrologer to get love back) +2 FAQ
+ * (previous) Version: 5.1 (11 Oct 2026) — PLAY STORE APP: Maa Shakti dakshina section app mein HIDE.
  *   Rohiit ka faisla #4 (11 Oct 2026): Google Play app ke andar WhatsApp par dakshina
  *   (Arzi / Dhanyewaad amount chips + pay links) wala section NAHI dikhega — Google
  *   bahar ke payment ki taraf bhejna mana karta hai. Sirf us section ko
@@ -96,6 +97,8 @@ const schema = {
       { "@type": "Question", name: "Can Vedic astrology predict if my ex will come back?", acceptedAnswer: { "@type": "Answer", text: "Yes. The 7th house governs reconciliation. Venus rules reunion energy. Vimshottari Dasha pinpoints the timing. Rohiit Gupta analyzes all three together." } },
       { "@type": "Question", name: "What birth details do I need?", acceptedAnswer: { "@type": "Answer", text: "Date of birth, exact time of birth, and place of birth. The more precise the birth time, the more accurate the reading." } },
       { "@type": "Question", name: "What is Navamsa D9 and why does it matter?", acceptedAnswer: { "@type": "Answer", text: "The Navamsa (D9) is the soul chart. It reveals whether a connection carries past-life karma and whether reconciliation is supported at the soul level." } },
+      { "@type": "Question", name: "How do I find the best astrologer to get my love back?", acceptedAnswer: { "@type": "Answer", text: "Look for someone who reads your 7th house, Venus or Jupiter, Ketu and the running dasha, explains the reason behind each point, gives a time window instead of a date, and tells you honestly when the chart shows the bond has ended. Avoid anyone who guarantees a return, offers rituals to control another person, or sells costly pujas out of fear. The other person keeps their own free choice." } },
+      { "@type": "Question", name: "Ex wapas aayega ya nahi — kundali se kaise pata chalta hai?", acceptedAnswer: { "@type": "Answer", text: "Kundali pakka jawab nahi deti, sambhavna aur daur batati hai. Saptam bhaav aur uska swami, ladke ke liye Shukra aur ladki ke liye Guru, Ketu (purane rishte) aur chal rahi dasha dekhi jaati hai. Saptamesh ka barahve bhaav mein hona ya rishta jodne wali dasha ka khatm hona doori ka sanket hai. Saamne wale ki apni marzi hai — koi upay use nahi badalta." } },
     ]},
     { "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: "https://trikalvaani.com" }, { "@type": "ListItem", position: 2, name: "Services", item: "https://trikalvaani.com/services" }, { "@type": "ListItem", position: 3, name: "Ex-Back Reading", item: "https://trikalvaani.com/services/ex-back-reading" }] },
   ],
@@ -130,6 +133,14 @@ const V6_SECTIONS: EbSection[] = [
       'Ye page wo nahi karta. **Agar aapke chart mein wapasi ki urja nahi hai, to reading wahi likhegi** — narmi se, par saaf.',
       'Aur ye aapke haq mein hai. Jhoothi umeed sabse mehngi cheez hai: wo aapka samay leti hai, aapki neend leti hai, aur aapko aage badhne se rokti hai. **Sach kadwa hota hai par usse aazadi milti hai.**',
       'Isi liye ye page kabhi tareekh nahi deta — "15 tareekh ko phone aayega" jaisi baat koi shastra nahi kehta. Jo milta hai wo **daur** hai, aur wo sach hota hai.',
+    ],
+  },
+  {
+    id: 'best-astrologer-love-back',
+    h2: 'Best astrologer to get love back — what an honest reading looks like',
+    paras: [
+      '**The best astrologer to get love back is not the one who promises to bring a person back — no one can, and that promise is the first warning sign.** A good one reads your own chart honestly: the 7th house (partnership) and its lord, Venus (Shukra) for a man or Jupiter (Guru) for a woman, Ketu for old bonds returning, and the running dasha for timing. They show the reasoning, give a window instead of a date, and say plainly when the chart shows that the bond has run its course.',
+      'Walk away from anyone who offers rituals to control another person, any guarantee of getting them back, or a costly puja for a dosh found in minutes. The other person has their own free will; astrology can describe your period and your choices, not decide theirs. The free reading above follows these rules, your own timing shows on the [Dasha Calculator](/calculators/free-dasha-calculator), and the difference between a tool and a human reader is laid out in [AI Astrology vs Human Astrologer](/learn/ai-astrology-vs-human-astrologer).',
     ],
   },
   {
@@ -691,6 +702,8 @@ export default function ExBackReadingPage() {
             // v4.2 FIX-2: "the same engine used by AstroSage" removed — IR competitor claim
             a: "Trikaal Vaani uses self-hosted Swiss Ephemeris with Lahiri Ayanamsha — the astronomical standard for sidereal Vedic calculation. Readings with birth times accurate to within 15 minutes are most reliable.",
           },
+          { q: "How do I find the best astrologer to get my love back?", a: "Look for someone who reads your 7th house, Venus or Jupiter, Ketu and the running dasha, explains the reason behind each point, gives a time window instead of a date, and tells you honestly when the chart shows the bond has ended. Avoid anyone who guarantees a return, offers rituals to control another person, or sells costly pujas out of fear. The other person keeps their own free choice." },
+          { q: "Ex wapas aayega ya nahi — kundali se kaise pata chalta hai?", a: "Kundali pakka jawab nahi deti, sambhavna aur daur batati hai. Saptam bhaav aur uska swami, ladke ke liye Shukra aur ladki ke liye Guru, Ketu (purane rishte) aur chal rahi dasha dekhi jaati hai. Saptamesh ka barahve bhaav mein hona ya rishta jodne wali dasha ka khatm hona doori ka sanket hai. Saamne wale ki apni marzi hai — koi upay use nahi badalta." },
         ]} />
 
         {/* CTA */}

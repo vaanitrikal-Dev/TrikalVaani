@@ -3,7 +3,8 @@
  * 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER 🔱
  * ============================================================================
  * File:        app/astrologer-delhi/page.tsx
- * Version: 1.3 (3 Oct 2026 — title/description for "astrologer in delhi ncr fees"; Services H2 renamed to carry the fees keyword; new section "Best Astrologer in Delhi — Five Checks Before You Pay" (DataForSEO 2,400/month). NAP, schema, prices UNCHANGED.)
+ * Version: 1.4 (8 Nov 2026 — Radar weekly job cycle 2026-11-07, report #14 PUSH + BRIEF: new section 4c with 3 H2 (best astrologer in Delhi online / India, Hindi: sabse badhiya jyotishi kaun, Hindi: jyotishi se baat free) +3 FAQ. Guard: near-me-fees and top-10 H2 dropped (duplicated the Fees and Five Checks H2). Person and brand names from Radar keywords NOT used (H7). Gurgaon keywords left for /astrologer-gurgaon. NAP, schema structure, prices UNCHANGED.)
+ * Previous:    1.3 (3 Oct 2026 — title/description for "astrologer in delhi ncr fees"; Services H2 renamed to carry the fees keyword; new section "Best Astrologer in Delhi — Five Checks Before You Pay" (DataForSEO 2,400/month). NAP, schema, prices UNCHANGED.)
  * Previous:    1.2 (1 Oct 2026 — daam sahi kiye: Kundali Milan ₹51 (couple + parent), Karmic ₹101 / $11, Child Birth ₹51; Bhrigu Nandi ke purane daave hataye)
  * Owner:       Rohiit Gupta, Chief Vedic Architect
  * Created:     2026-07-12
@@ -271,6 +272,30 @@ const FAQ_SCHEMA = {
     },
     {
       '@type': 'Question',
+      name: 'Can I consult the best astrologer in Delhi online?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Yes. A Vedic reading needs only your date, exact time and place of birth, so it can be done online from anywhere in India or abroad. Trikaal Vaani works from Dwarka, New Delhi and delivers every reading online — the computation is the same whether you live in Rohini, Noida or another country. Judge any astrologer, online or in person, on the five checks on this page.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'सबसे बढ़िया ज्योतिषी कौन है?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'कोई निष्पक्ष संस्था ज्योतिषियों की रैंकिंग नहीं करती, इसलिए हर टॉप 10 सूची विज्ञापन है। सबसे बढ़िया ज्योतिषी वह है जो फीस पहले लिखकर बताए, दोष की ताकत और उसका भंग दोनों बताए, महँगी पूजा या रत्न से शुरुआत न करे, अपनी गणना का तरीका बताए, और जिसकी पहचान आप खुद जाँच सकें।',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'क्या ज्योतिषी से फ्री में बात हो सकती है?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'हाँ। त्रिकाल वाणी पर +91 92118 04111 पर WhatsApp करके अपना सवाल बिना कोई भुगतान किए पूछ सकते हैं, और कुंडली, मांगलिक, साढ़ेसाती जैसे सभी कैलकुलेटर हमेशा मुफ़्त हैं। पूरी लिखित व्यक्तिगत रीडिंग या तय समय की कॉल मुफ़्त नहीं है, क्योंकि उसमें असली समय लगता है।',
+      },
+    },
+    {
+      '@type': 'Question',
       name: 'Is Trikaal Vaani a registered business?',
       acceptedAnswer: {
         '@type': 'Answer',
@@ -491,6 +516,46 @@ export default function AstrologerDelhiPage() {
             </div>
           </section>
 
+          {/* SECTION 4c — v1.4: Radar report #14 search intents, answered on this page only */}
+          <section className="py-16 px-4">
+            <div className="max-w-3xl mx-auto">
+              <h2 className="text-white text-2xl md:text-3xl font-serif font-bold mb-4">
+                Best Astrologer in Delhi Online — and for the Rest of India
+              </h2>
+              <p style={{ color: '#94a3b8', fontSize: '14px', lineHeight: 1.8, marginBottom: '16px' }}>
+                The best astrologer in Delhi online is judged the same way as one across a desk: by method, honesty and fees, not by distance. A Vedic reading needs only your <strong style={{ color: GOLD }}>date, exact time and place of birth</strong>. That is why Trikaal Vaani, based in Dwarka, delivers every reading online, and why a client in Rohini, Noida or another country gets the same computation from the same Swiss Ephemeris engine. The same test answers &ldquo;best astrologer in India&rdquo;: the city on the letterhead matters far less than the five checks above.
+              </p>
+              <p style={{ color: '#94a3b8', fontSize: '14px', lineHeight: 1.8, marginBottom: '16px' }}>
+                Start without paying: build your chart on the free{' '}
+                <Link href="/calculators/free-janam-kundali-calculator" style={{ color: GOLD, textDecoration: 'underline' }}>janam kundali calculator</Link>, and if you want to know what a human astrologer adds to a computer chart, read{' '}
+                <Link href="/learn/ai-astrology-vs-human-astrologer" style={{ color: GOLD, textDecoration: 'underline' }}>AI astrology vs a human astrologer</Link>.
+              </p>
+
+              <h2 className="text-white text-2xl md:text-3xl font-serif font-bold mb-4" lang="hi" style={{ marginTop: '40px' }}>
+                सबसे बढ़िया ज्योतिषी कौन है? — पाँच बातें जो आप खुद जाँच सकते हैं
+              </h2>
+              <p style={{ color: '#94a3b8', fontSize: '14px', lineHeight: 1.8, marginBottom: '16px' }} lang="hi">
+                सीधा जवाब: कोई निष्पक्ष संस्था ज्योतिषियों की रैंकिंग नहीं करती, इसलिए &ldquo;सबसे बढ़िया ज्योतिषी&rdquo; का नाम कोई सूची नहीं, आपकी अपनी जाँच तय करती है। पाँच बातें देखिए — <strong style={{ color: GOLD }}>फीस पहले से लिखी हो</strong>; मांगलिक या कालसर्प जैसे दोष की ताकत और उसका भंग दोनों बताए जाएँ; पहला उपाय महँगी पूजा या रत्न न हो, बल्कि मंत्र, दान या संयम हो; गणना का तरीका (एफेमेरिस, अयनांश, ग्रंथ) बताया जाए; और पता, फ़ोन और पंजीकरण आप खुद जाँच सकें।
+              </p>
+              <p style={{ color: '#94a3b8', fontSize: '14px', lineHeight: 1.8, marginBottom: '16px' }} lang="hi">
+                जो ज्योतिषी कभी यह भी कह दे कि आपकी समस्या के लिए ज्योतिष सही औज़ार नहीं है, वह अक्सर भरोसे के लायक होता है। पहले मुफ़्त{' '}
+                <Link href="/calculators/free-janam-kundali-calculator" style={{ color: GOLD, textDecoration: 'underline' }}>जन्म कुंडली</Link>{' '}बनाकर देखिए, फिर तय कीजिए।
+              </p>
+
+              <h2 className="text-white text-2xl md:text-3xl font-serif font-bold mb-4" lang="hi" style={{ marginTop: '40px' }}>
+                ज्योतिषी से बात Free — दिल्ली में मुफ़्त सलाह कैसे लें
+              </h2>
+              <p style={{ color: '#94a3b8', fontSize: '14px', lineHeight: 1.8, marginBottom: '16px' }} lang="hi">
+                हाँ, ज्योतिषी से मुफ़्त बात हो सकती है — शर्त बस इतनी कि आप जानें कि मुफ़्त में क्या मिलता है। त्रिकाल वाणी पर <strong style={{ color: GOLD }}>+91 92118 04111 पर WhatsApp</strong> करके अपना सवाल बिना किसी भुगतान के पूछ सकते हैं। कुंडली, मांगलिक दोष, साढ़ेसाती और दशा जैसी हर गणना हमेशा मुफ़्त है, क्योंकि गणना के पैसे लेना डर का फायदा उठाना है। मुफ़्त में जो नहीं मिलता, वह है पूरी लिखित व्यक्तिगत रीडिंग या तय समय की कॉल — उसमें असली समय लगता है।
+              </p>
+              <p style={{ color: '#94a3b8', fontSize: '14px', lineHeight: 1.8, marginBottom: '16px' }} lang="hi">
+                अपना मांगलिक स्टेटस{' '}
+                <Link href="/calculators/free-manglik-dosh-calculator" style={{ color: GOLD, textDecoration: 'underline' }}>मांगलिक दोष कैलकुलेटर</Link>{' '}पर और साढ़ेसाती का चरण{' '}
+                <Link href="/calculators/free-sade-sati-calculator" style={{ color: GOLD, textDecoration: 'underline' }}>साढ़ेसाती कैलकुलेटर</Link>{' '}पर मुफ़्त देखिए।
+              </p>
+            </div>
+          </section>
+
           {/* SECTION 5 — AREAS SERVED (honest: one office, online delivery) */}
           <section className="py-16 px-4" style={{ background: 'rgba(13,17,30,0.4)' }}>
             <div className="max-w-3xl mx-auto text-center">
@@ -596,4 +661,4 @@ export default function AstrologerDelhiPage() {
   )
 }
 
-// END app/astrologer-delhi/page.tsx v1.3
+// END app/astrologer-delhi/page.tsx v1.4

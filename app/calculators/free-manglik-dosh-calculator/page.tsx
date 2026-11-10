@@ -2,7 +2,8 @@
 
 // ============================================================
 // File: app/calculators/free-manglik-dosh-calculator/page.tsx
-// Version: 2.4 (19 Oct 2026 — Radar 17 Oct PUSH: +2 H2 'Kya Main Manglik Hoon' + 'मांगलिक कैलकुलेटर', +2 FAQ, competitor-name H2 removed)
+// Version: 2.5 (8 Nov 2026) — Radar weekly job cycle 2026-11-07: +1 H2 (Date of Birth से मांगलिक कैसे निकालें — Hindi language twin of 'check-by-dob') +1 FAQ
+// (previous) Version: 2.4 (19 Oct 2026 — Radar 17 Oct PUSH: +2 H2 'Kya Main Manglik Hoon' + 'मांगलिक कैलकुलेटर', +2 FAQ, competitor-name H2 removed)
 //   Finding: the other PUSH keywords (How is manglik dosh calculated, कैसे पता करें, check online)
 //   already had their own H2 here — the page ranks avg pos ~6 in GSC, so the gap on head
 //   calculator terms is domain authority, not missing content. Only genuinely missing H2s added.
@@ -308,6 +309,14 @@ const PILLAR: PillarSection[] = [
     ],
   },
   {
+    id: 'dob-se-manglik-kaise-nikale',
+    h2: 'Date of Birth से मांगलिक कैसे निकालें? — सिर्फ जन्म तिथि से कितना पता चलता है',
+    paras: [
+      'सीधा उत्तर: **केवल जन्म तिथि से मांगलिक दोष का पक्का फ़ैसला नहीं निकलता।** मांगलिक दोष मंगल के **भाव** से तय होता है, और भाव लग्न से गिने जाते हैं — लग्न के लिए जन्म का **समय और स्थान** दोनों चाहिए। जन्म तिथि से इतना ज़रूर निकलता है: मंगल किस राशि में थे, शुक्र किस राशि में थे, और अधिकतर दिनों में चंद्र की राशि भी (जिस दिन चंद्र राशि बदलते हैं, उस दिन समय चाहिए)। इनसे **चंद्र से** और **शुक्र से** मंगल की जाँच हो सकती है — लग्न वाली मुख्य जाँच नहीं।',
+      'तरीका: [राशि कैलकुलेटर](/calculators/free-rashi-calculator) से चंद्र राशि और [कुंडली कैलकुलेटर](/calculators/free-janam-kundali-calculator) से मंगल व शुक्र की राशि देखिए। चंद्र राशि को पहला मानकर मंगल तक गिनिए — मूल परंपरा में **1, 4, 7, 8 और 12**वाँ स्थान मांगलिक माना जाता है, और कई परंपराएँ **दूसरा** भी जोड़ती हैं; यही गिनती शुक्र की राशि से दोहराइए। मंगल मेष, वृश्चिक या मकर में हों तो दोष क्षीण माना जाता है ([काट की पूरी शर्तें](#dosh-ki-kaat))। अंतिम उत्तर लग्न से ही आता है — उसके लिए ऊपर वाला कैलकुलेटर या [लग्न कैलकुलेटर](/calculators/free-lagna-calculator) देखिए।',
+    ],
+  },
+  {
     id: "kya-main-manglik-hoon",
     h2: "Kya Main Manglik Hoon? — 20 Second Mein Pakka Jaaniye",
     paras: [
@@ -507,6 +516,7 @@ const FAQS = [
   { q: 'Which god removes Mangal Dosha?', a: 'Hanuman ji, in every classical remedial tradition — the Hanuman Chalisa daily, especially on Tuesdays. Lord Kartikeya (Murugan) is named alongside, particularly in South India, and Lord Shiva through the Mangalnath temple at Ujjain. But no deity or ritual deletes a planetary placement. What remedies genuinely reduce is the behavioural expression of Mars — the anger and haste that actually damage a marriage.' },
   { q: 'Manglik Dosh ke remedies kya hain?', a: '(1) Mangal Mantra "Om Mangalaya Namah" 108 baar, Mangalvaar. (2) Hanuman Chalisa nitya. (3) Moonga (Red Coral) — sirf expert consultation ke baad, kabhi apne aap nahi. (4) Mangalvaar ko masoor dal, gud, laal vastra, tambe ke bartan ka daan. (5) Kumbh Vivah, agar bhang na ho. (6) Krodh par sanyam — Mangal aakramakta ke karak hain, aur yahi asal upay hai.' },
   { q: 'Kya main Manglik hoon, kaise pata karein?', a: 'Sirf kundali se — naam, rashi ya swabhav se nahi. Upar wale calculator mein janm tithi, sateek samay aur sthan daaliye; woh batata hai ki Mangal 1, 2, 4, 7, 8 ya 12vein bhaav mein hain ya nahi, gambhirta kitni hai, aur bhang laagu hai ya nahi.' },
+  { q: 'Date of birth से मांगलिक कैसे निकालें?', a: 'केवल जन्म तिथि से पक्का उत्तर नहीं मिलता, क्योंकि मांगलिक दोष मंगल के भाव से तय होता है और भाव लग्न से बनते हैं — लग्न के लिए जन्म समय और स्थान चाहिए। जन्म तिथि से मंगल, शुक्र और अधिकतर दिनों में चंद्र की राशि निकल आती है, इसलिए चंद्र और शुक्र से गिनती हो सकती है: मंगल वहाँ से 1, 4, 7, 8 या 12वें स्थान में हों (कई परंपराएँ दूसरा भी जोड़ती हैं) तो दोष माना जाता है। अंतिम जाँच और भंग के लिए जन्म समय और स्थान के साथ ऊपर वाला कैलकुलेटर चलाइए।' },
   { q: 'मांगलिक कैलकुलेटर कैसे काम करता है?', a: 'Janm tithi, sateek samay aur sthan se Swiss Ephemeris dwara Mangal ki degree aur lagna se bhaav nikaale jaate hain. Mangal chhe Manglik bhaavon (1, 2, 4, 7, 8, 12) mein ho to dosh, phir shastriya bhang ki sharten jaanchi jaati hain. Bilkul muft, koi signup nahi.' },
   { q: 'Kya Manglik Calculator bilkul free hai?', a: 'Haan. 100% free. Manglik Yes/No verdict, severity (High/Medium/Low), Mars house + sign + degree, saare 6 affected bhaav, cancellation conditions, aur 3 Parashar remedies — sab free, koi signup nahi. Cancellation check hi woh hissa hai jo zyadatar muft tools mein hota hi nahi.' },
 ];

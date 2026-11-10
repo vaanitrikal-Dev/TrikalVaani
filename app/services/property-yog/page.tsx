@@ -2,7 +2,8 @@
  * TRIKAAL VAANI — trikalvaani.com
  * Chief Vedic Architect: Rohiit Gupta
  * FILE TO PASTE → app/services/property-yog/page.tsx
- * Version: 6.1 (11 Oct 2026) — PLAY STORE APP: Maa Shakti dakshina section app mein HIDE.
+ * Version: 6.2 (8 Nov 2026) — Radar weekly job cycle 2026-11-07: +5 H2 (house prediction, when will I buy a house / this year, which planet gives property, मकान टोटके, मकान खरीदने का महीना) +4 FAQ
+ * (previous) Version: 6.1 (11 Oct 2026) — PLAY STORE APP: Maa Shakti dakshina section app mein HIDE.
  *   Rohiit ka faisla #4 (11 Oct 2026): Google Play app ke andar WhatsApp par dakshina
  *   (Arzi / Dhanyewaad amount chips + pay links) wala section NAHI dikhega — Google
  *   bahar ke payment ki taraf bhejna mana karta hai. Sirf us section ko
@@ -154,6 +155,10 @@ const schema = {
       { "@type": "Question", name: "What is Property Yog in Vedic astrology?", acceptedAnswer: { "@type": "Answer", text: "Property Yog is a specific planetary combination indicating ownership of immovable property. Key indicators include a strong 4th house lord, Mars well-placed, and the 4th lord connected to the 11th house. When activated by the right Dasha, property acquisition becomes auspicious." } },
       { "@type": "Question", name: "Which planets govern property in Vedic astrology?", acceptedAnswer: { "@type": "Answer", text: "The 4th house governs home and property. Mars (Mangal) is the Karaka of land. Saturn determines long-term value through its transit. Jupiter aspecting the 4th house creates expansion in property." } },
       { "@type": "Question", name: "What is Sade Sati and how does it affect property buying?", acceptedAnswer: { "@type": "Answer", text: "Sade Sati is Saturn's 7.5-year transit over your Moon sign and adjacent signs. Buying property during peak Sade Sati can invite delays, disputes, or depreciation. Rohiit Gupta checks your Sade Sati status before recommending any purchase timing." } },
+      { "@type": "Question", name: "What is house prediction in astrology based on?", acceptedAnswer: { "@type": "Answer", text: "It reads the 4th house (home, mother, comfort, immovable property), the 4th house lord and Mars, the karaka of land, together with a 4th-11th house link. The birth chart shows how strong the promise of a house is; the running Mahadasha and transit show when it opens." } },
+      { "@type": "Question", name: "Will I buy a house this year according to astrology?", acceptedAnswer: { "@type": "Answer", text: "Astrology gives a window, not a date. The year is counted as supportive when the antardasha of the 4th lord, Mars or a planet in the 4th house is running and Jupiter supports the 4th house by transit. The free reading on this page and the free Dasha Calculator show whether such a period runs this year." } },
+      { "@type": "Question", name: "मकान खरीदने के लिए कौन सा सरल उपाय है?", acceptedAnswer: { "@type": "Answer", text: "मंगल भूमि का कारक है, इसलिए लगातार 8 मंगलवार, सूर्योदय के बाद पहले एक घंटे में, मुट्ठी भर मसूर की दाल और थोड़ा गुड़ किसी ज़रूरतमंद को दें — खर्च लगभग 10-20 रुपये। कोई टोटका सौदा पक्का नहीं करता; लोन और काग़ज़ की जाँच साथ में ज़रूरी है।" } },
+      { "@type": "Question", name: "कौन से महीने में मकान खरीदना शुभ होता है?", acceptedAnswer: { "@type": "Answer", text: "मकान खरीदने के लिए अलग से कोई महीना शास्त्र में तय नहीं मिलता। मुहूर्त चिन्तामणि (अध्याय 13, श्लोक 1) नए घर में प्रवेश के लिए उत्तरायण में माघ, फाल्गुन, वैशाख और ज्येष्ठ को शुभ बताता है। खरीद और रजिस्ट्री के लिए अपनी दशा और उस दिन का पंचांग ज़्यादा मायने रखते हैं।" } },
     ]},
     { "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: "https://trikalvaani.com" }, { "@type": "ListItem", position: 2, name: "Services", item: "https://trikalvaani.com/services" }, { "@type": "ListItem", position: 3, name: "Property Yog", item: "https://trikalvaani.com/services/property-yog" }] },
   ],
@@ -184,6 +189,22 @@ const V6_SECTIONS: V6Section[] = [
       'Log poochhte hain "kya meri kundali mein property yog hai". Ye sawal thoda adhoora hai, aur uska sudhra hua roop zyada kaam ka hai.',
       'Wajah: **lagbhag har kundali mein chautha bhaav hota hai aur uska swami hota hai.** Yaani "yog hai ya nahi" ka uttar prayah "hai" hi rehta hai. Asli sawal ye hai ki **wo yog abhi khula hua hai ya nahi** — aur uska uttar dasha aur gochar se aata hai, janm-chart se nahi.',
       'Isi liye ye reading do hisson mein aati hai: **kitna mazboot** (janm-chart se, jo kabhi nahi badalta) aur **kab** (dasha aur gochar se, jo badalta rehta hai). Doosra hissa hi wo hai jiske liye log yahan aate hain.',
+    ],
+  },
+  {
+    id: 'house-prediction-astrology',
+    h2: 'House Prediction in Astrology — own house and house purchase, read from the chart',
+    paras: [
+      '**House prediction in astrology reads three things together: the 4th house (ghar, maata, sukh, immovable property), its lord, and Mars (Mangal, the karaka of land).** A strong 4th lord placed in a kendra or trikona, a well-placed Mars, and a link between the 4th house and the 11th house (labh, gains) are the classic signs of owning a house. The birth chart shows how strong that promise is; the running Mahadasha and the gochar (transit) show when it opens. Astrology for house purchase is therefore a timing question, not a plain yes-or-no.',
+      'The form above reads all three from your own birth details. The full theory of houses, lords and yogas is on [Property Prediction Astrology](/learn/property-prediction-astrology), and the plain ownership question is answered on [Will I Own a House](/learn/will-i-own-a-house).',
+    ],
+  },
+  {
+    id: 'when-will-i-buy-house',
+    h2: 'When will I buy a house — and will it be this year (2026)?',
+    paras: [
+      '**Astrology answers “when will I buy a house” with a window, not a date.** The window opens when the Mahadasha or Antardasha of the 4th lord, of Mars, or of a planet sitting in the 4th house is running, and Jupiter (Guru) by gochar moves through or aspects your 4th house from the lagna or the Moon. If such an antardasha runs this year and Saturn is not pressing the 4th house, the year counts as supportive. If not, the reading shows the next period when it is.',
+      'Check it in two steps: run the free reading above for the 4th house and Mars, then open the [Dasha Calculator](/calculators/free-dasha-calculator) to see which antardasha runs through the rest of this year and the next. A supportive window is help, not a promise — the deal, the loan and the papers still decide the outcome.',
     ],
   },
   {
@@ -231,6 +252,14 @@ const V6_SECTIONS: V6Section[] = [
       'Chauthe bhaav ke baad sabse zyada vazan **Mangal** par hai, kyunki shastra mein wahi **bhoomi ka kaarak** hai — zameen, nirmaan aur achal sampatti.',
       'Reading mein Mangal ke teen pahlu dekhe jaate hain: **uska bal** (Shadbala se), **uski sthiti** (kaunsi rashi, kaunsa bhaav), aur **uski dasha** chal rahi hai ya nahi. Balwan Mangal ke daur mein sauda tez chalta hai; kamzor Mangal mein kaagaz aur nirmaan dono dheeme padte hain.',
       'Ek vyavharik sanket jo aksar sach nikalta hai: **Mangal ki dasha ya antardasha mein sampatti se juda koi na koi kaam saamne aata hai** — kharid, bikri, vivad, ya marammat. Poora vishay [Mars bhoomi karaka](/blog/mars-bhoomi-karaka-property-astrology) aur Hindi mein [मंगल भूमि कारक](/blog/mars-bhoomi-karaka-property-astrology-hindi) par hai.',
+    ],
+  },
+  {
+    id: 'which-planet-gives-property',
+    h2: 'Which planet gives property?',
+    paras: [
+      '**Mars (Mangal) is the main planet for property — it is the karaka of land (bhoomi), plots and construction.** It does not work alone. The 4th house lord decides whether a house comes into focus at all, Saturn (Shani) decides how long the property stays and holds value, Jupiter (Guru) widens the 4th house through its aspect, and Venus (Shukra) adds comfort and furnishing. The Moon is also a karaka of the 4th house, which is why peace at home is read from it. In practice, the planet among these whose dasha is running is the one to watch.',
+      'Each of these planets is explained in [Planets in Astrology](/learn/planets-in-astrology), and the real strength of your own Mars shows in the free reading above.',
     ],
   },
   {
@@ -681,6 +710,10 @@ export default function PropertyYogPage() {
           { q: "Which planets govern property in Vedic astrology?", a: "The 4th house governs home and property. Mars (Mangal) is the Karaka of land. Saturn determines long-term value through its transit. Jupiter aspecting the 4th house creates expansion in property." },
           { q: "What is Sade Sati and how does it affect property buying?", a: "Sade Sati is Saturn's 7.5-year transit over your Moon sign. Buying property during peak Sade Sati can invite delays, disputes, or depreciation. Rohiit Gupta checks your Sade Sati status before recommending any purchase timing." },
           { q: "Can astrology predict legal disputes in property purchase?", a: "Yes. The 12th house (losses), 6th house (disputes), and malefic planets in the 4th house can indicate legal complications. Rohiit Gupta reads these risk indicators as part of every property yog reading." },
+          { q: "What is house prediction in astrology based on?", a: "It reads the 4th house (home, mother, comfort, immovable property), the 4th house lord and Mars, the karaka of land, together with a 4th-11th house link. The birth chart shows how strong the promise of a house is; the running Mahadasha and transit show when it opens." },
+          { q: "Will I buy a house this year according to astrology?", a: "Astrology gives a window, not a date. The year is counted as supportive when the antardasha of the 4th lord, Mars or a planet in the 4th house is running and Jupiter supports the 4th house by transit. The free reading on this page and the free Dasha Calculator show whether such a period runs this year." },
+          { q: "मकान खरीदने के लिए कौन सा सरल उपाय है?", a: "मंगल भूमि का कारक है, इसलिए लगातार 8 मंगलवार, सूर्योदय के बाद पहले एक घंटे में, मुट्ठी भर मसूर की दाल और थोड़ा गुड़ किसी ज़रूरतमंद को दें — खर्च लगभग 10-20 रुपये। कोई टोटका सौदा पक्का नहीं करता; लोन और काग़ज़ की जाँच साथ में ज़रूरी है।" },
+          { q: "कौन से महीने में मकान खरीदना शुभ होता है?", a: "मकान खरीदने के लिए अलग से कोई महीना शास्त्र में तय नहीं मिलता। मुहूर्त चिन्तामणि (अध्याय 13, श्लोक 1) नए घर में प्रवेश के लिए उत्तरायण में माघ, फाल्गुन, वैशाख और ज्येष्ठ को शुभ बताता है। खरीद और रजिस्ट्री के लिए अपनी दशा और उस दिन का पंचांग ज़्यादा मायने रखते हैं।" },
         ]} />
         <PropertyHindiBlock />
         <CtaSection headline="Before You Sign Anything —" highlight="Read Your Stars." body="A property is a multi-lakh decision. ₹51 to verify if the timing is right — or if your chart is warning you to wait." segment="property-yog" />
@@ -739,6 +772,14 @@ const PY_SECTIONS: { id: string; h2: string; paras: string[] }[] = [
       '**मंगल — भूमि कारक।** शास्त्र में भूमि का सीधा कारक मंगल हैं, और यही कारण है कि प्रॉपर्टी की हर गंभीर रीडिंग मंगल से शुरू होती है। बलवान मंगल संपत्ति देते हैं; पीड़ित मंगल संपत्ति में विवाद, सीमा-झगड़ा या जल्दबाजी का सौदा। पूरा विश्लेषण [मंगल — भूमि कारक](/blog/mars-bhoomi-karaka-property-astrology-hindi) में है।',
       '**शनि — स्थायित्व और मूल्य।** शनि तय करते हैं कि संपत्ति टिकेगी और बढ़ेगी या बोझ बनेगी। **गुरु — विस्तार।** चतुर्थ भाव पर गुरु की दृष्टि बड़ा और शुभ घर देती है। **चंद्र — मानसिक सुख**, क्योंकि चतुर्थ भाव का कारक चंद्रमा भी है; इसीलिए कुछ लोगों को बड़ा घर मिलकर भी सुख नहीं मिलता।',
       'और एक चेतावनी जो पैसे बचाती है: **पैतृक संपत्ति के विवाद अक्सर चतुर्थ भाव के पितृ दोष से जुड़े मिलते हैं** — यह [चतुर्थ भाव में पितृ दोष](/blog/pitra-dosh-in-4th-house-hindi) में खोला गया है, और उसे [मुफ्त पितृ दोष कैलकुलेटर](/calculators/free-pitra-dosh-calculator) से जाँचा जा सकता है। इसी तरह [चौथे भाव में मंगल दोष](/blog/mangal-dosh-4th-house-effects-hindi) घर की शांति पर असर डालता है — वह [मांगलिक कैलकुलेटर](/calculators/free-manglik-dosh-calculator) से मुफ्त जाँच लीजिए।',
+    ],
+  },
+  {
+    id: 'makaan-totke',
+    h2: 'मकान खरीदने के लिए कौन से टोटके हैं? — सरल और सुरक्षित उपाय',
+    paras: [
+      '**कोई भी टोटका मकान का सौदा पक्का नहीं करता — पर मंगल से जुड़ा एक सरल उपाय मन और प्रयास दोनों को एक दिशा देता है।** मंगल भूमि का कारक है और चतुर्थ भाव घर, माता और सुख का भाव है, इसलिए पारंपरिक उपाय मंगलवार और मंगल की वस्तुओं से जुड़े हैं। नींबू-मिर्च, ताबीज़ या महँगी पूजा की ज़रूरत नहीं है। नीचे का उपाय दस-बीस रुपये का है और घर के पास ही हो जाता है। लोन, काग़ज़ और बजट की जाँच इसके साथ चलती रहे — उपाय उनकी जगह नहीं लेता।',
+      '**1. क्या करना:** मुट्ठी भर मसूर की दाल और थोड़ा गुड़ किसी ज़रूरतमंद को दीजिए या हनुमान मंदिर में अर्पित कीजिए। **2. कब:** मंगलवार को, सूर्योदय के बाद पहले एक घंटे के भीतर। **3. कितने का:** लगभग 10-20 रुपये। **4. कितने दिन:** लगातार 8 मंगलवार। **5. आपके लिए क्यों:** अगर ऊपर की रीडिंग में आपका मंगल या चतुर्थेश कमज़ोर निकला है, तो यह उसी ग्रह के दिन, उसी की वस्तु का दान है।',
     ],
   },
   {
@@ -803,6 +844,19 @@ function PropertyHindiBlock() {
             ))}
           </div>
         ))}
+
+        <div id="makaan-kharidne-ka-mahina" className="scroll-mt-24 mb-10">
+          <h2 className="font-serif text-2xl md:text-3xl font-bold mb-4 text-[#D4AF37]">कौन से महीने में मकान खरीदना शुभ होता है?</h2>
+          <p className="text-gray-300 leading-relaxed mb-4">
+            <PyRich text="**शास्त्र में मकान खरीदने के लिए अलग से कोई महीना तय नहीं मिलता; महीनों का नियम नए घर में प्रवेश (गृह प्रवेश) के लिए दिया गया है।** मुहूर्त चिन्तामणि के गृहप्रवेश प्रकरण के अनुसार नए घर में प्रवेश उत्तरायण में — माघ, फाल्गुन, वैशाख और ज्येष्ठ महीनों में — शुभ माना गया है, और साथ में मृदु व ध्रुव नक्षत्र तथा स्थिर लग्न देखे जाते हैं। खरीद या रजिस्ट्री के लिए महीने से ज़्यादा वज़न आपकी अपनी दशा और उस दिन के पंचांग का है।" k="makaan-mahina-0" />
+          </p>
+          <p className="text-gray-500 text-sm mb-4 whitespace-pre-line">
+            {'मुहूर्त चिन्तामणि, अध्याय 13, श्लोक 1\nसौम्यायने ज्येष्ठतपोऽन्त्यमाधवे यात्रानिवृत्तौ नृपतेर्नवे गृहे ।\nस्यात्प्रवेशनं द्वारभमृदुध्रुवोडुभिर्जन्मर्क्षलग्नोपचयोदये स्थिरे ॥ १ ॥'}
+          </p>
+          <p className="text-gray-300 leading-relaxed mb-4">
+            <PyRich text="इसलिए क्रम यह रखिए: पहले ऊपर के फ़ॉर्म से अपना अनुकूल दौर देखिए, फिर रजिस्ट्री का दिन [शुभ मुहूर्त कैलकुलेटर](/calculators/free-shubh-muhurat-calculator) से चुनिए, और गृह प्रवेश के लिए ऊपर बताए महीनों को प्राथमिकता दीजिए। खरीद के समय पर पूरा लेख [Best time to buy property](/learn/best-time-to-buy-property) पर है।" k="makaan-mahina-1" />
+          </p>
+        </div>
 
         <h2 className="font-serif text-2xl md:text-3xl font-bold mb-3 mt-14 text-[#D4AF37]">
           प्रॉपर्टी ज्योतिष — पूरा गाइड पढ़ें

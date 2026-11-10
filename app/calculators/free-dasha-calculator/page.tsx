@@ -2,7 +2,8 @@
 
 // ============================================================
 // File: app/calculators/free-dasha-calculator/page.tsx
-// Version: 4.4 (19 Oct 2026) — Shani lagna rule corrected to BPHS 34.23 (Vrishabh = rajyogkarak; Tula, Kumbh shubh;
+// Version: 4.5 (8 Nov 2026) — Radar weekly job cycle 2026-11-07: +2 H2 (antardasha calculator online free — length formula; Free Mahadasha and Antardasha analysis — three checks) +2 FAQ
+// (previous) Version: 4.4 (19 Oct 2026) — Shani lagna rule corrected to BPHS 34.23 (Vrishabh = rajyogkarak; Tula, Kumbh shubh;
 //   Makar = lagnesh), matching the Neelam page. 3 lines changed, nothing else.
 // (previous) Version: 4.3 (19 Oct 2026 — Radar 17 Oct Content Edit Brief, page at rank 9: +3 H2, 1 H2 renamed, +2 FAQ)
 //   NEW: 'mahadasha-antardasha-calculator-dob' (Free Mahadasha and Antardasha calculator 21 /
@@ -310,6 +311,22 @@ const PILLAR: DzSection[] = [
     ],
   },
   {
+    id: "antardasha-calculator-online",
+    h2: "Antardasha Calculator Online Free — How Each Antardasha Length Is Worked Out",
+    paras: [
+      "An antardasha calculator splits one Mahadasha into its **nine sub-periods**. The first antardasha always belongs to the Mahadasha lord itself, and the rest follow the fixed Vimshottari order. Each length is **Mahadasha years × antardasha planet years ÷ 120**. Example: in Shani Mahadasha (19 years), Shukra antardasha is 19 × 20 ÷ 120 = about **3 years 2 months**, and Surya antardasha is 19 × 6 ÷ 120 = about **11 months 12 days**. The calculator above does this free online for all nine, with exact start and end dates.",
+      "The same rule runs one level deeper for Pratyantar: antardasha length × pratyantar planet years ÷ 120. Only the first Mahadasha of a life is cut short, because part of it had already passed before birth — that balance comes from how far the Moon had moved through your birth nakshatra, which is why the exact birth time matters. A worked manual method is in the [Pratyantar dasha calculator guide](/blog/pratyantar-dasha-calculator-guide).",
+    ],
+  },
+  {
+    id: "mahadasha-antardasha-analysis",
+    h2: "Free Mahadasha and Antardasha Analysis — Three Checks for Your Chart",
+    paras: [
+      "A Mahadasha and Antardasha analysis asks three questions about the two running lords. **One:** which houses each planet rules for your Lagna, such as the 10th house (karma, career) or the 4th house (ghar, maata, sukh). **Two:** where the Antardasha lord sits counted from the Mahadasha lord — in the 1st, 4th, 7th, 10th, 5th or 9th place from it the two usually work together; in the 6th, 8th or 12th the period tends to ask for more effort. **Three:** how strong each planet is. The result above gives both lords and dates; these checks turn them into an analysis.",
+      "Check one needs your Lagna and houses — the free [Lagna Calculator](/calculators/free-lagna-calculator) gives the Lagna; check three is in the [Kundali Strength Calculator](/calculators/free-kundali-strength-calculator). No single check decides a period; the three together do. How one pair reads in practice is in [Rahu Mahadasha, Ketu Antardasha](/blog/rahu-mahadasha-ketu-antardasha).",
+    ],
+  },
+  {
     id: 'abhi-kaun-si-dasha',
     h2: 'अभी कौन सी दशा चल रही है — तीनों स्तर एक साथ',
     paras: [
@@ -548,6 +565,8 @@ const FAQS = [
   { q: 'Can I calculate Mahadasha and Antardasha by date of birth only?', a: 'Not accurately. Vimshottari starts from the nakshatra of the Moon at birth and the balance of the first dasha depends on how far the Moon had moved through it — both need the exact birth time and place. With the date alone, every Mahadasha and Antardasha date can shift by months or years.' },
   { q: 'Is this a Vedic numerology Mahadasha calculator?', a: 'No. Numerology dasha systems use the digits of your date of birth. This calculator uses the classical Vimshottari system of BPHS, based on the Moon nakshatra at birth. The two systems usually give different planets and dates.' },
   { q: 'Kya Dasha calculator bilkul free hai?', a: 'Haan, 100% free. Teenon star (Mahadasha, Antardasha, Pratyantar), agli 5 Mahadasha, poori Antardasha timeline, saare nau Pratyantar tareekh ke saath, 3 Parashar Dos, 3 Donts aur 3 remedies — sab muft, koi signup nahi.' },
+  { q: "How is the length of an Antardasha calculated?", a: "Multiply the Mahadasha years by the antardasha planet years and divide by 120. In Shani Mahadasha (19 years), Shukra antardasha = 19 × 20 ÷ 120, about 3 years 2 months; Surya antardasha = 19 × 6 ÷ 120, about 11 months 12 days. The first antardasha is always of the Mahadasha lord itself. The calculator above lists all nine with dates, free." },
+  { q: "How do I analyse my Mahadasha and Antardasha for free?", a: "Run the free calculator above to get both lords and their dates, then check three things: which houses each planet rules for your Lagna, where the Antardasha lord sits counted from the Mahadasha lord (1st, 4th, 7th, 10th, 5th or 9th usually cooperative; 6th, 8th or 12th usually more effort), and how strong both planets are." },
 ];
 
 export default function FreeDashaCalculatorPage() {

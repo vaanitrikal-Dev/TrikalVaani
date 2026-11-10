@@ -2,7 +2,8 @@
 
 // ============================================================
 // File: app/calculators/free-lagna-calculator/page.tsx
-// Version: v2.1 (19 Oct 2026) — competitor brand names removed from visible copy (Rohiit rule 18 Oct 2026). Content/logic otherwise unchanged.
+// Version: v2.2 (8 Nov 2026) — Radar weekly job cycle 2026-11-07: +1 H2 (ascendant calculator vedic astrology free) +1 FAQ. Guard: lagna bal H2 dropped (owned by /calculators/free-lagna-bal-calculator).
+// (previous) Version: v2.1 (19 Oct 2026) — competitor brand names removed from visible copy (Rohiit rule 18 Oct 2026). Content/logic otherwise unchanged.
 // (previous) Version: v2.0 (05 Sep 2026) — Free Lagna (Ascendant) Calculator
 // Engine: Swiss Ephemeris + Parashar BPHS + Shadbala + Bhrigu
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
@@ -201,6 +202,7 @@ const FAQS = [
   { q: 'Rashifal kis rashi se padhna chahiye — lagna ya Chandra rashi?', a: 'Paramparik roop se Chandra rashi se, kyunki gochar Chandra rashi se ginte hain. Kai jyotishi lagna se bhi padhne ki salah dete hain. Sabse imandar baat ye hai ki koi bhi saamanya rashifal vyaktigat nahi hota — wo ek rashi ke karodon logon ke liye ek hi hota hai.' },
   { q: 'Lagna sandhi par ho to kya karein?', a: 'Agar lagna rashi ke bilkul shuru (0 degree) ya bilkul ant (29 degree) mein nikla hai to sabse pehle janm samay dobara jaanchiye. Wahan do-teen minute ka antar bhi poora lagna badal deta hai. Hospital record ya janm pramanpatra se samay lena zaroori ho jaata hai.' },
   { q: 'Kya lagna kabhi badal sakta hai?', a: 'Nahi. Lagna janm ke kshan ka khagolik tathya hai aur jeevan bhar wahi rehta hai. Agar do jagah alag lagna mil raha hai to wajah teen mein se ek hai — janm samay ki galti, sthan ka antar, ya ayanamsha ka alag chunav. Samay sabse pehle jaanchiye.' },
+  { q: "Is there a free ascendant calculator for Vedic astrology?", a: "Yes. The calculator on this page is free and needs no sign-up. It finds the sidereal (Lahiri) ascendant from your date, exact time and place of birth, with the Lagna sign, degree, Lagna lord, Lagna nakshatra and pada. A Western app may show the next sign, because it uses the tropical zodiac." },
 ];
 
 
@@ -264,6 +266,14 @@ const SECTIONS: LcSection[] = [
       'Upar wale form mein **janm tithi, sateek samay aur janm sthan** daaliye. Lagna turant aa jaata hai — uske **swami graha**, **tatva**, **swabhav** aur **shareerik prakriti** ke saath.',
       'Teeno cheezein kyun chahiye: tareekh se din tay hota hai, **samay se lagna** (jo har lagbhag do ghante mein badalta hai), aur **sthan** se uska sudhar, kyunki lagna akshansh ke saath khisakta hai.',
       'Bina samay ke lagna nikalna **sambhav nahi hai** — koi tool nahi nikaal sakta. Din bhar mein baarah lagna udit hote hain; samay ke bina unme se ek chunna sanjog hoga, ganana nahi.',
+    ],
+  },
+  {
+    id: "ascendant-calculator-vedic",
+    h2: "Ascendant Calculator in Vedic Astrology — Free and Sidereal",
+    paras: [
+      "A Vedic ascendant calculator finds the sign rising on the eastern horizon at your birth — your **Lagna**, the 1st house (body, nature and the overall direction of life). The free calculator above needs your date, exact time and place of birth; it computes the ascendant with Swiss Ephemeris and then applies **Lahiri ayanamsa** to give the sidereal (nirayan) Lagna used in Jyotish. You get the **Lagna sign, its degree, the Lagna lord, the Lagna nakshatra and pada**, the element and the classical body and nature indications — no sign-up, no payment.",
+      "If a Western app shows a different rising sign, that is expected: Western astrology uses the tropical zodiac, and the gap is about 24 degrees, so the Vedic ascendant is often one sign earlier. The method is explained step by step in [how to find your Lagna (ascendant)](/blog/how-to-find-your-lagna-ascendant), and how the chart is built from it in [Lagna chart explained](/blog/lagna-chart-explained).",
     ],
   },
   {

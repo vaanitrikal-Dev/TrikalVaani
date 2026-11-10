@@ -2,7 +2,12 @@
 
 // ============================================================
 // File: app/calculators/free-kaal-sarp-dosh-calculator/page.tsx
-// Version: v2.3 (19 Oct 2026) — Radar weekly report 17 Oct 2026: PUSH (14 empty SERPs) + Content
+// Version: v2.4 (07 Nov 2026) — Radar 31 Oct + 7 Nov: +4 H2, +4 FAQ. PUSH kw 'free kaal sarp dosh
+//   calculator by date of birth' + 'Check Kaal Sarp Dosh in Kundli' (one H2), 'Kaal sarp yog english'
+//   (honest source note: named yoga is later tradition; Brihat Samhita 5.3 + Brihat Jataka 12.2 quoted),
+//   'Anant Kaal Sarp dosh in hindi' (Hindi H2), 'Kaal Sarp Dosh symptoms' (English twin of lakshan).
+//   Skipped: puja cost, Trimbakeshwar reviews, best pandit (no sourced fact). Form/API/UI unchanged.
+// (previous) Version: v2.3 (19 Oct 2026) — Radar weekly report 17 Oct 2026: PUSH (14 empty SERPs) + Content
 //   Edit Brief. Hindi H2s already answered the brief; the gap was ENGLISH searchers. +6 EN H2:
 //   most-dangerous (seen 62), types (27), remove permanently / fully removed (31+19+17),
 //   benefits (19), puja Nashik/Trimbakeshwar (19+19+18), PUSH kw 'Can I marry a guy with
@@ -525,6 +530,38 @@ const PILLAR: PillarSection[] = [
       "What to actually check: run a full [Kundali Milan](/kundali-milan) for the Ashtakoot score, Nadi and Mangal Dosh on both sides; see whether his Kaal Sarp is cancelled; and look at the strength of the 7th house in both charts. If those are sound, Kaal Sarp is not a reason to say no. The fuller discussion is in [Kaal Sarp Dosh and Marriage](/blog/kaal-sarp-dosh-marriage).",
     ],
   },
+  {
+    id: "calculator-by-dob",
+    h2: "Kaal Sarp Dosh Calculator by Date of Birth — How to Check It in Your Kundli",
+    paras: [
+      "**To check Kaal Sarp Dosh in your kundli, enter three things in the free calculator above: date of birth, exact time of birth and place of birth.** The date fixes where the grahas stood; the time and place fix your Lagna and the 12 bhaavs (houses = areas of life). The calculator then compares each of the seven planets, Sun to Saturn, with the exact degree of Rahu and Ketu, so the verdict is a clear Yes or No, not a guess. If it is Yes, it also names your type from Rahu's house, Anant to Sheshnag.",
+      "No birth time? Tick \"Unknown time\" — the Yes/No check still runs for that date (noon is used), but the type, which depends on houses, may be off; among the planets only the Moon moves fast enough in one day to change a borderline result. To see the whole chart with houses, make a [free Janam Kundli](/calculators/free-janam-kundali-calculator), and for what the yog means and does not mean read [Kaal Sarp Dosh — what it is, what it isn't](/blog/kaal-sarp-dosh).",
+    ],
+  },
+  {
+    id: "kaal-sarp-yog-english",
+    h2: "What Is Kaal Sarp Yog? Meaning in English, and Where the Idea Comes From",
+    paras: [
+      "**In English, Kaal Sarp Yog means the 'serpent of time' combination: all seven visible planets, Sun to Saturn, sit on one side of the Rahu–Ketu axis.** Rahu is pictured as the serpent's head and Ketu as its tail, so the planets look held between them. It is a birth-chart pattern, not a curse, and many charts that have it also carry a cancellation (bhang) that leaves it practically inactive. Its twelve types are named after Rahu's house, and the calculator above checks it by exact degree.",
+      "An honest note on sources: Kaal Sarp Yog as a named yoga is not found in Brihat Parashara Hora Shastra or the other classical granths we have checked — it belongs to later tradition. The serpent image of Rahu itself is old: Brihat Samhita (adhyaya 5, Rahuchara, shlok 3) records **मुखपुच्छविभक्तअङ्गं भुजङ्गम् आकारम् उपदिशन्त्य् अन्ये** — some describe Rahu as serpent-shaped, divided into mouth and tail, while others call it formless darkness. The classical Sarpa yoga is a different rule: Brihat Jataka (adhyaya 12, shlok 2) says **केन्द्रैः सद् असद् युतैर् दल आख्यौ स्रक् सर्पौ कथितौ पराशरेण** — the two Dala yogas, Srak and Sarpa, form when the kendras hold benefics or malefics. More on the shadow planets in [What is Rahu](/blog/what-is-rahu) and [What is Ketu](/blog/what-is-ketu).",
+    ],
+  },
+  {
+    id: "anant-kaal-sarp",
+    h2: "अनंत कालसर्प दोष — लग्न में राहु, सप्तम में केतु",
+    paras: [
+      "**अनंत कालसर्प दोष तब बनता है जब राहु लग्न में (पहला भाव = शरीर, स्वभाव और आत्मविश्वास) हो, केतु सप्तम भाव में (शादी और साझेदारी), और सातों ग्रह इन दोनों के बीच एक ही तरफ हों।** इसका असर ज़्यादातर आत्म-छवि पर दिखता है — शुरुआती जीवन में अपनी पहचान बनाने की जद्दोजहद, फ़ैसलों में उलझन, और रिश्तों में ग़लतफ़हमी। पर यही लग्न का राहु व्यक्ति को अलग सोचने वाला, जोखिम उठाने वाला और अपने दम पर आगे बढ़ने वाला भी बनाता है, और कुंडली में भंग हो तो ऊपर लिखे असर लगभग नहीं दिखते।",
+      "असर कितना होगा, यह नाम से नहीं, तीन बातों से तय होता है — राहु की डिग्री, कुंडली में भंग है या नहीं, और अभी कौन सी दशा चल रही है। ऊपर दिए कैलकुलेटर में \"Rahu: House 1\" आए तो आपका प्रकार अनंत है। पूरा विश्लेषण [अनंत काल सर्प योग](/blog/anant-kaal-sarp-yog-hindi) में है, और भंग के नियम [काल सर्प दोष भंग](/blog/kaal-sarp-dosh-cancellation-hindi) में।",
+    ],
+  },
+  {
+    id: "symptoms-english",
+    h2: "Kaal Sarp Dosh Symptoms — An Honest English Guide",
+    paras: [
+      "**Kaal Sarp Dosh has no fixed physical symptom, and no symptom proves it — only the birth chart does.** The patterns people most often report are work that stalls at the last step, results arriving later than the effort deserves, recurring dreams of snakes, and a restless mind without a clear cause. Each of these is mild on its own, and all of them commonly have other reasons. So treat them as a reason to check, not as a diagnosis: the calculator above gives a Yes or No in seconds.",
+      "The same signs often come from [Sade Sati](/calculators/free-sade-sati-calculator), a [Rahu Mahadasha](/blog/rahu-mahadasha-effects-guide) or a weak planet, which the [Weak Planet Finder](/calculators/free-weak-planet-finder) shows. When Kaal Sarp is present, the pressure tends to rise in a Rahu or Ketu dasha and ease after it — your timeline is in the [Dasha Calculator](/calculators/free-dasha-calculator). The full guide is [Kaal Sarp Dosh Signs and Symptoms](/blog/kaal-sarp-dosh-signs-symptoms).",
+    ],
+  },
 ];
 
 const FAQS = [
@@ -543,6 +580,10 @@ const FAQS = [
   { q: 'Which Kaal Sarp Dosh is most dangerous?', a: 'None by itself — the classical texts give no danger ranking of the twelve types. Severity depends on Rahu\'s exact degree, whether the chart has a cancellation (bhang), and the running dasha. Karkotak (8th), Takshak (7th) and Ghatak (10th) bring the most complaints in practice, but a cancelled Kaal Sarp of any type is practically inactive.' },
   { q: 'Can Kaal Sarp Dosh be removed permanently?', a: 'Not from the birth chart — it never changes, and no single puja deletes it. But its effect can become negligible: if the chart has a classical cancellation, nothing needs to be done; and after the Rahu–Ketu dasha ends the same chart feels much lighter. Regular remedies, such as 40 days of Maha Mrityunjaya jaap, reduce the pressure in between.' },
   { q: 'Can I marry a guy with Kaal Sarp Dosh?', a: 'Yes. Kaal Sarp is not a matching dosha and does not forbid marriage. Check the full Kundali Milan (Ashtakoot, Nadi, Mangal Dosh), whether his Kaal Sarp is cancelled, and the 7th house in both charts. If those are sound, Kaal Sarp alone is no reason to refuse.' },
+  { q: 'How do I check Kaal Sarp Dosh by date of birth?', a: 'Enter your date, exact time and place of birth in the free calculator on this page. It compares all seven planets with the exact degree of Rahu and Ketu and gives a Yes/No verdict, plus the type (Anant to Sheshnag) from Rahu\'s house. If the birth time is unknown, the Yes/No check still runs for that date, but the type may be off.' },
+  { q: 'What is Kaal Sarp Yog in English?', a: 'It means the "serpent of time" combination: all seven planets from Sun to Saturn on one side of the Rahu–Ketu axis. As a named yoga it comes from later tradition, not from BPHS; the classical Sarpa yoga of Brihat Jataka (adhyaya 12, shlok 2) is a different rule about the kendras. Many charts with Kaal Sarp also carry a cancellation (bhang).' },
+  { q: 'अनंत कालसर्प दोष क्या है?', a: 'जब राहु लग्न (पहला भाव) में और केतु सप्तम भाव (शादी और साझेदारी) में हो, और सातों ग्रह इनके बीच एक ही तरफ हों, तो अनंत कालसर्प बनता है। असर ज़्यादातर आत्म-छवि, शुरुआती संघर्ष और रिश्तों पर दिखता है, पर यही राहु स्वतंत्र सोच और हिम्मत भी देता है। भंग हो तो यह लगभग निष्क्रिय रहता है।' },
+  { q: 'What are the symptoms of Kaal Sarp Dosh?', a: 'There is no fixed physical symptom. Commonly reported patterns are work stalling at the last step, delayed results, snake dreams and restlessness — but Sade Sati, a Rahu dasha or a weak planet can cause the same signs. Only the chart confirms Kaal Sarp; the free calculator on this page checks it by exact degree.' },
   { q: 'Kya ye Kaal Sarp Calculator bilkul free hai?', a: 'Haan, 100% free. Yes/No verdict, dosh ka prakaar (Rahu house se), Rahu-Ketu houses, 3 Naag-puja remedies, aur baaki doshas ka quick check — sab bilkul free. Na signup, na card.' },
   { q: 'Result kitne accurate hain?', a: 'Trikaal Vaani Swiss Ephemeris (NASA-grade) se har graha ki exact longitude nikaalta hai aur Rahu-Ketu axis ke against check karta hai with Lahiri Ayanamsha — 99.9% astronomical accuracy. Zyadatar free calculators sirf rashi ya house dekhte hain, jo tab galat hota hai jab koi graha Rahu/Ketu ki hi rashi mein ho. Yahi reason hai ki yahan ke result borderline cases mein bhi badalte nahi.' },
 ];

@@ -1,7 +1,10 @@
 // ═══════════════════════════════════════════════════════════════
 // app/hast-rekha-calculator/page.tsx
 // AI HAST REKHA CALCULATOR — money page (server component)
-// Version: v3.5 (28 Oct 2026) — SALES COPY (Rohiit: "Focus on sales, marketing aur perseverance; bahana
+// Version: v3.6 (8 Nov 2026) — Radar weekly job cycle 2026-11-07: +3 H2 (AI palm reading free vs chatbot,
+//   free online palm reading for marriage, female/male palm in Brihat Samhita 69.12) +3 FAQ; brand names
+//   in visible text replaced with "AI chatbot" (anchor id chatgpt-se-farak kept so links do not break).
+// (previous) Version: v3.5 (28 Oct 2026) — SALES COPY (Rohiit: "Focus on sales, marketing aur perseverance; bahana
 //   nahi; client se count mat karwao"). "Khud giniye" ke saare vaade → granth ka vivah-yog / santaan-yog.
 //   Apne hi khilaaf wale paragraph (AI kahan kamzor, palmist ka vikalp nahi, dhundhli photo se kamzor
 //   reading) sales-copy mein badle — H2 sab rakhe (ek ka text badla). 2 naye CTA. Daave sach rakhe:
@@ -333,6 +336,18 @@ const FAQS = [
     q: 'Report ke baad koi puja, ratna ya doosri sitting bechoge?',
     a: 'Nahi. ₹51 ke baad kuch nahi hai — na puja, na ratna, na dhaaga, na follow-up sitting. Jis mandi mein darr dikha kar upay becha jaata hai, usi ki wajah se ye platform bana. Aur ratna kabhi hatheli ke nishan se nahi pehne jaate — wo Kundali se tay hote hain.',
   },
+  {
+    q: 'Can a general AI chatbot read my palm for free — how is this different?',
+    a: 'A general AI chatbot will talk about a palm photo for free, but it follows no fixed classical rulebook, so the same photo can get two different answers. This page measures every line in your photo and matches it to a numbered shloka of Hastasanjeevanam, and the same hand always gets the same report. The guides and the PDF guide here are free; the personal reading of your photo is ₹51.',
+  },
+  {
+    q: 'Can free online palm reading tell when I will get married?',
+    a: 'No palm can give a wedding date. The palm shows marriage yoga, which the ₹51 report reads from your photo with its verse. Timing comes from the birth chart — the 7th house, Shukra, Guru and the Vimshottari dasha — which you can check free with the Shaadi Kab Hogi calculator, or inside the same report if you add birth time and place.',
+  },
+  {
+    q: 'Is palm reading different for female and male hands?',
+    a: 'The lines are read the same way. Brihat Samhita (69.12) gives rajya-sukh for a line rising from the wrist to the middle finger on a woman’s palm (or rising up the sole of the foot), and says the same of a man. Only the leading hand differs: left for women, right for men. Home, work, studies and the 7 planet seats are read the same for everyone.',
+  },
 ];
 
 // ── Hub interlinking: this page is the HEART of the Hast Rekha hub ──
@@ -613,10 +628,10 @@ const HINDI_SECTIONS: HiSection[] = [
   // ── AI, TRUST, COMPARISON ────────────────────────────────────────────────
   {
     id: 'chatgpt-se-farak',
-    h2: 'ChatGPT से हस्तरेखा पढ़वाना — फ़र्क़ क्या है',
+    h2: 'AI चैटबॉट से हस्तरेखा पढ़वाना — फ़र्क़ क्या है',
     paras: [
       'यह प्रश्न अब बहुत खोजा जाता है, इसलिए सीधा उत्तर — जिसमें वह भी है जो हमारे पक्ष में नहीं जाता।',
-      'ChatGPT या Gemini आपकी हथेली की फ़ोटो देख सकते हैं और उस पर बात कर सकते हैं। वे भाषा में अच्छे हैं और मना नहीं करते। **इतना मान लेना चाहिए।**',
+      'आम AI चैटबॉट आपकी हथेली की फ़ोटो देख सकते हैं और उस पर बात कर सकते हैं। वे भाषा में अच्छे हैं और मना नहीं करते। **इतना मान लेना चाहिए।**',
       'फ़र्क़ यह है कि वे **किसी शास्त्रीय ढाँचे पर नहीं चलते।** वे इंटरनेट पर जो पढ़ा है उसी से उत्तर बनाते हैं — और उसमें सामुद्रिक शास्त्र भी है, पश्चिमी palmistry भी, और बहुत कुछ जो किसी परंपरा का नहीं। इसलिए वही फ़ोटो दो बार भेजिए तो दो अलग उत्तर मिल सकते हैं।',
       'यहाँ ढाँचा तय है — **ग्रंथ हस्तसंजीवनम् के श्लोक**, चार मुख्य रेखाएँ, सात ग्रह-स्थान, और हर निष्कर्ष के साथ श्लोक का अंक। एक ही फोटो पर हमेशा एक ही रिपोर्ट। इसलिए आप उसे परख सकते हैं और असहमत भी हो सकते हैं।',
     ],
@@ -895,7 +910,7 @@ const HINDI_SECTIONS: HiSection[] = [
     h2: "AI Palm Reading Online — Upload a Photo, No Sign-Up",
     paras: [
       "This page reads your palm from **one photo**: no app to download, no sign-up, and no birth time needed. The report reads your four main lines by the classical text **Hastasanjeevanam** — past, present, future and old age — plus the 7 planet seats of the hand, with the Sanskrit shloka and its number beside every point. The guidance and line-by-line articles on this page are free; the full personal report with three BPHS remedies and a PDF is **₹51**.",
-      "Use daylight, an open palm and the camera straight above — the photo guide above explains why most bad readings start with a bad photo. For how this differs from asking ChatGPT or a scanner app, see [ChatGPT से हस्तरेखा](#chatgpt-se-farak), and for an honest view on accuracy, [AI Palm Reading Online](/blog/ai-palm-reading-online-hast-rekha).",
+      "Use daylight, an open palm and the camera straight above — the photo guide above explains why most bad readings start with a bad photo. For how this differs from asking a general AI chatbot or a scanner app, see [AI चैटबॉट से हस्तरेखा](#chatgpt-se-farak), and for an honest view on accuracy, [AI Palm Reading Online](/blog/ai-palm-reading-online-hast-rekha).",
     ],
   },
   {
@@ -919,7 +934,7 @@ const HINDI_SECTIONS: HiSection[] = [
     h2: "Free Palm Reading Scanner Online — Male, Female and India: What You Actually Get",
     paras: [
       "Most \"free palm scanners\" show the same pre-written text to everyone, or exist to serve ads. This page works differently: **there is no app and no sign-up** — you take one photo in the browser, and the engine reads the actual lines in it, quoting the shloka behind each finding. The rules are identical for men and women; only the traditionally leading hand differs (right for men, left for women), and uploading both hands gives the most useful comparison.",
-      "Be clear about one limit before you scan anything, anywhere: **no palm scanner can give a date, an age or a diagnosis**, and a tool that claims to is guessing. Timing questions — marriage, job, a difficult phase — belong to the birth chart, which you can check free with the [Kundali Calculator](/calculators/free-janam-kundali-calculator). For how this compares with asking a chatbot, see [ChatGPT से हस्तरेखा](#chatgpt-se-farak).",
+      "Be clear about one limit before you scan anything, anywhere: **no palm scanner can give a date, an age or a diagnosis**, and a tool that claims to is guessing. Timing questions — marriage, job, a difficult phase — belong to the birth chart, which you can check free with the [Kundali Calculator](/calculators/free-janam-kundali-calculator). For how this compares with asking a chatbot, see [AI चैटबॉट से हस्तरेखा](#chatgpt-se-farak).",
     ],
   },
   {
@@ -928,6 +943,31 @@ const HINDI_SECTIONS: HiSection[] = [
     paras: [
       "Online check ka sabse aasaan tareeka: **apni hatheli ki ek saaf photo** upar upload kijiye — din ki roshni mein, flash band, hatheli khuli, camera seedha upar se, kalai se ungliyon tak poora frame. Koi app download nahi, koi signup nahi, janm samay ki zaroorat nahi. Photo jitni saaf hogi, reading utni behtar — dhundhli photo mein baareek rekhaayein aur nishan chhoot jaate hain.",
       "Photo se reading mein granth Hastasanjeevanam ki **chaar mukhya rekhaayein aur saat graha-sthaan** padhe jaate hain, aur har baat ke saath granth ka shlok aur ank likha hota hai. Kaun sa haath dikhayein, yeh [Palm Reading for Male and Female](#male-female-hand) mein hai; aur khud dekhna seekhna ho to [हाथ की रेखा कैसे देखें](#hath-ki-rekha-kaise-dekhe) wala kram follow kijiye.",
+    ],
+  },
+  {
+    id: "ai-palm-reading-free",
+    h2: "AI Palm Reading Free — Can a General AI Chatbot Read Your Palm Instead?",
+    paras: [
+      "A general AI chatbot will look at a palm photo you upload and talk about it for free, and it writes fluently. What it does not have is a fixed classical rulebook: it blends Samudrik Shastra, Western palmistry and guesswork, so the same photo sent twice can come back with two different readings. This page works the other way — every line in your photo is **measured**, matched to a numbered shloka of Hastasanjeevanam, and the same hand always gets the same report.",
+      "What is free here, honestly: the photo guide, every line-by-line and sign-by-sign article and the PDF guide. The personal reading of **your** photo — four main lines, the 7 planet seats (graha-sthaan), 3 BPHS remedies and a PDF — is ₹51. Take the photo with the guided camera above, or pick one from your gallery if the camera will not open. What the engine can and cannot see is in [How the AI reads a palm](/blog/ai-palm-reading-online-hast-rekha) and [Is palm reading accurate?](/blog/is-palm-reading-accurate-ai-palmistry)",
+    ],
+  },
+  {
+    id: "palm-reading-for-marriage-free",
+    h2: "Free Online Palm Reading for Marriage — What the Palm Shows and What It Cannot",
+    paras: [
+      "The palm can show **marriage yoga**, not a wedding date. The short lines that enter from the edge of the hand below the little finger are read as the yoga of a life partner, and the ₹51 report reads them from your photo with the verse beside them. **When** you will marry is a timing question for the birth chart: the 7th house (spouse and partnership), Shukra, Guru and your running Vimshottari dasha. That timing check is free, and it needs your birth time, not your palm.",
+      "Use the free [Shaadi Kab Hogi calculator](/calculators/free-shadi-kab-hogi-calculator) for timing, the [Love or Arranged Marriage Calculator](/calculators/free-love-or-arranged-marriage-calculator) for the kind of match, and [Kundali Milan](/kundali-milan) when there is a specific proposal — a palm reads one hand and cannot compare two people. Add birth time and place in the form above and the ₹51 report puts both together: marriage yoga from the hand, marriage timing from your Kundali, each clearly labelled. The line itself is explained in [Marriage line meaning](/blog/marriage-line-vivah-rekha-meaning).",
+    ],
+  },
+  {
+    id: "female-male-palm-brihat-samhita",
+    h2: "Palm Reading for Female and Male in Brihat Samhita — One Rising Line, Read the Same Way",
+    paras: [
+      "Varahamihira’s Brihat Samhita gives the body-signs of men in adhyaya 67 (purush lakshan) and of women in adhyaya 69 (kanya lakshan), yet for one rising line it names both. Verse 69.12 says a line that rises from the wrist (manibandh) to the middle finger on a woman’s palm — or a line rising upward on the sole of the foot — or the same on a man, is for **rajya-sukh** — comfort and standing. So for this line the reading is the same for female and male; only the leading hand differs.",
+      "बृहत्संहिता, अध्याय 69, श्लोक 12 — मध्यांगुलिं या मणिबन्धनोत्था रेखा गता पाणितले अंगनायाः । ऊर्ध्वस्थिता पादतलेऽथवा या पुंसोऽथवा राज्यसुखाय सा स्यात् ।",
+      "For a female palm send the left hand, for a male palm the right — both if you can — in the camera box above. A woman’s hand is not read only for marriage here: home, work, studies and the 7 planet seats are read the same for everyone. More in [Which hand to read](/blog/which-hand-to-read-palmistry-hand-shapes) and [Fate line meaning](/blog/fate-line-bhagya-rekha-meaning).",
     ],
   },
 ];

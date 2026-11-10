@@ -2,10 +2,22 @@
 
 // ============================================================
 // File: app/calculators/free-sade-sati-calculator/page.tsx
-// Version: 2.3 (19 Oct 2026 — Radar 17 Oct PUSH: +6 H2, 2 H2 renamed, +4 FAQ, competitor-name H2 removed) — Free Sade Sati Calculator (Radar E3 content build)
+// Version: v2.4 (07 Nov 2026) — Radar 31 Oct + 7 Nov: +3 H2, +3 FAQ, +1 verse (Phaladipika 26.25), +5 inline links
+// Version (previous): 2.3 (19 Oct 2026 — Radar 17 Oct PUSH: +6 H2, 2 H2 renamed, +4 FAQ, competitor-name H2 removed) — Free Sade Sati Calculator (Radar E3 content build)
 // VM endpoint: /sade-sati (dedicated, 100% accurate)
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
 // Changelog:
+//   v2.4 (2026-11-07) — Radar weekly reports 31 Oct + 7 Nov 2026 (PUSH).
+//        Gap analysis against the 30 existing H2s; only meanings NOT already
+//        answered were added:
+//        • NEW H2: 'lakshan-charan' (sade sati ke lakshan / शनि की साढ़े साती
+//          के लक्षण — phase-wise signs; cites Phaladipika 26.25),
+//          'age-start' (At what age does Sade Sati start?),
+//          'kumbh-upay' (Shani ki sade sati ke upay Kumbh rashi).
+//        • +3 FAQ (feed the existing FAQPage schema via FAQS).
+//        • Kumbh dates reused from this file / ruling #29; age example from the
+//          Trikaal Vaani sade_sati engine (15 May 1990, Delhi, Dhanu Moon).
+//        • FORM, API, RESULT RENDERING, RASHI_STATUS, SADE_SATI_DATES: unchanged.
 //   v2.3 (2026-10-19) — Radar weekly report 17 Oct 2026: page listed as PUSH
 //        (25 empty SERPs) + Content Edit Brief. Gap analysis against the 24
 //        existing H2s; only keywords NOT already answered were added:
@@ -409,6 +421,14 @@ const PILLAR: PillarSection[] = [
     ],
   },
   {
+    id: "lakshan-charan",
+    h2: "Sade Sati Ke Lakshan — Teeno Charan Mein Kaise Dikhte Hain",
+    paras: [
+      "Seedha jawab: **Sade Sati ke lakshan har charan mein alag hote hain**, kyunki Shani har charan mein aapki Chandra Rashi se alag bhaav chhoote hain. **Pehla charan** (12th bhaav = kharch, neend, ghar se doori) — achanak kharch, tooti neend, akelapan. **Doosra charan** (Chandra Rashi = mann) — thakaan, faisle mein hichak, mann ka bhaari rehna. **Teesra charan** (2nd bhaav = paisa, parivar, vaani) — paise ka hisaab, ghar ke purane mudde, boli par sanyam ki zaroorat. Koi lakshan akele Sade Sati ka saboot nahi — yahi dasha ya thakaan se bhi aate hain. Pehle upar diye calculator mein apna charan dekhiye.",
+      "Granth ek aur baat batata hai jo lakshan padhne mein kaam aati hai. Phaladipika (adhyaya 26, shlok 25) kehta hai **तुहिनकिरणमन्दौ राशिपाश्चात्यभागे** — gochar mein Chandra aur Shani apna phal rashi ke **aakhri tihai hisse** mein dete hain. Yaani naya charan shuru hote hi lakshan turant nahi aate, asar aage chalkar saaf hota hai — isliye kisi ek bure hafte ko Sade Sati ka lakshan maan lena theek nahi. Teeno charan ki poori tulna [Sade Sati ke teen charan](/blog/sade-sati-phases-which-is-worst-hindi) mein hai, aur Hindi mein lakshan-upay upar ke section [शनि की साढ़े साती के लक्षण और उपाय](#lakshan-aur-upay) mein.",
+    ],
+  },
+  {
     id: 'labh',
     h2: 'शनि की साढ़े साती के लाभ — जो कोई नहीं बताता',
     paras: [
@@ -479,6 +499,14 @@ const PILLAR: PillarSection[] = [
     ],
   },
   {
+    id: "age-start",
+    h2: "At What Age Does Sade Sati Start?",
+    paras: [
+      "**There is no fixed age — it depends on where Saturn stood from your Moon sign on the day you were born.** Sade Sati lasts about 7.5 years and Saturn returns roughly every 29.5 years, so the gap between two Sade Satis is about 22 years. That gives a simple range: your **first** Sade Sati is either already running at birth or begins at some point before about **age 22**; the **second** starts roughly 30 years after the first, and the **third** about 30 years after that. Age by itself does not make a Sade Sati heavier or lighter.",
+      "An example from the same engine the calculator uses: someone born on 15 May 1990 in Delhi with a **Dhanu (Sagittarius) Moon** was born inside a Sade Sati that ended in 1993, met the next one from **2 Nov 2014 (age 24)**, and the one after that from **11 Dec 2043 (age 53)**. Your own ages for every cycle — past and future — come from the calculator above. How the cycles tend to feel at each stage of life is in [How Many Times Does Sade Sati Come in Life?](#how-many-times), and the method for working out dates by hand is in [Sade Sati Start and End Date](/blog/sade-sati-start-end-date).",
+    ],
+  },
+  {
     id: 'utarne-ke-lakshan',
     h2: 'शनि की साढ़ेसाती उतरने के क्या लक्षण हैं?',
     paras: [
@@ -512,6 +540,15 @@ const PILLAR: PillarSection[] = [
       'कुंभ राशि इस समय साढ़ेसाती के **अंतिम चरण (अवरोह)** में है — शनि कुंभ से दूसरे भाव, यानी मीन में। यह तीनों चरणों का आखिरी है, इसलिए सीधा जवाब यह है कि **कुंभ की साढ़ेसाती तब समाप्त होगी जब शनि मीन छोड़कर मेष में प्रवेश करेंगे।**',
       "**कुंभ की साढ़ेसाती 24 जनवरी 2020 को शुरू हुई थी और 23 फ़रवरी 2028 को पूरी तरह समाप्त होगी।** बीच में एक मोड़ है: शनि 3 जून 2027 को पहली बार मेष में जाएँगे, 20 अक्टूबर 2027 को वक्री होकर मीन में लौटेंगे, और 23 फ़रवरी 2028 को अंतिम रूप से मेष में प्रवेश करेंगे। ये तिथियाँ Swiss Ephemeris (लाहिड़ी अयनांश, IST) से हैं — उसी इंजन से जिससे **ऊपर वाला कैलकुलेटर आपकी अपनी चरण-तिथियाँ और बचे हुए दिन गिनकर देता है।**",
       'और एक बात कुंभ राशि वालों के लिए, क्योंकि यह अक्सर छूट जाती है: **अंतिम चरण में दबाव धीरे-धीरे घटता है, अंतिम दिन अचानक नहीं।** अधिकांश लोग बताते हैं कि राहत खत्म होने से कुछ महीने पहले ही महसूस होने लगी। इस चरण का पूरा विवरण, प्रभाव और उपाय [कुंभ राशि साढ़ेसाती](/blog/kumbh-rashi-sade-sati-hindi) में है।',
+    ],
+  },
+  {
+    id: "kumbh-upay",
+    h2: "Shani Ki Sade Sati Ke Upay — Kumbh Rashi Ke Liye",
+    paras: [
+      "Kumbh par Sade Sati ka **antim charan (avaroh)** chal raha hai — Shani Kumbh se 2nd bhaav mein, yaani **paisa, parivar aur vaani** ke bhaav mein. Isliye Kumbh ke upay ka zor bachat, ghar ke rishton aur soch-samajhkar bolne par hona chahiye. Ek baat Kumbh ke paksh mein hai: **Kumbh rashi ke swami khud Shani hain** — vyavhaar mein isi kaaran Kumbh ki Sade Sati aksar apekshakrit sehne layak maani jaati hai, par asli bal aapki kundali mein Shani ki sthiti se tay hota hai. Yeh charan **23 February 2028** ko poora hoga (pehla nikaas 3 June 2027).",
+      "Teen upay, paanch hisson mein. **Pehla — Kya:** \"ॐ शं शनैश्चराय नमः\" 108 baar (lagbhag 10 minute). **Kab:** Shanivar subah, nahaane ke baad. **Kharch:** muft. **Kitne din:** 21 Shanivar. **Aapke liye kyun:** Shani aapki rashi ke swami bhi hain aur gochar ke graha bhi — mantra dono roop ko ek saath saadhta hai. **Doosra — Kya:** kisi mazdoor ya buzurg ko aata ya chawal dena. **Kab:** Shanivar, suryast se pehle. **Kharch:** ₹10–20. **Kitne din:** 11 Shanivar. **Aapke liye kyun:** 2nd bhaav anna aur kutumb ka hai, isliye Kumbh ke liye anna-daan sabse upyukt hai. **Teesra — Kya:** ek purana bakaya chuka dena ya ghar mein ek ankahi baat ki maafi maang lena. **Kab:** is hafte, Shanivar tak. **Kharch:** muft. **Kitne din:** ek baar, phir 6 mahine tak har mahine ke pehle Shanivar ko apna hisaab dekhna. **Aapke liye kyun:** 2nd bhaav dhan aur vaani ka hai — yahi is charan ki asli pareeksha hai.",
+      "Neelam Kumbh ke liye bhi pehla upay nahi hai — pehle [Neelam suit karega ya nahi](/calculators/free-should-i-wear-neelam) jaanchiye. Apni kundali ke hisaab se upay ki list [Upay Calculator](/calculators/free-upay-calculator) deta hai, aur poora vivaran [कुंभ राशि साढ़ेसाती](/blog/kumbh-rashi-sade-sati-hindi) mein hai.",
     ],
   },
   {
@@ -610,6 +647,9 @@ const FAQS = [
   { q: 'How many times does Sade Sati come in life?', a: 'Usually two or three times. Saturn completes the zodiac in about 29.5 years, so Sade Sati returns roughly every 30 years. By tradition the first cycle is felt through parents and studies, the second through career and money, and the third mostly through health. The calculator above lists all your past, current and future cycles with exact dates.' },
   { q: 'Mesh rashi ke liye Sade Sati ke upay kya hain?', a: 'Mesh par pehla charan chal raha hai (Shani 12th bhaav mein — kharch aur neend). Teen surakshit upay: Mangalvar aur Shanivar ko Hanuman Chalisa (11 hafte, muft), har mahine aay ka chhota hissa bachana (poori Sade Sati), aur Shanivar shaam peepal ke neeche sarson tel ka diya (11 Shanivar). Neelam bina suitability check ke na pehnein.' },
   { q: 'Sade Sati kab aati hai jeevan mein?', a: 'Har 30 saal mein ek baar, kyunki Saturn 30 saal mein poora rashichakra complete karta hai. Average life mein 2-3 Sade Sati cycles hote hain — aam taur par bachpan, madhya aayu aur vriddhavastha mein. Upar wala calculator aapke jeevan ke saare cycles dikhata hai, beete hue bhi aur aane wale bhi.' },
+  { q: 'Sade Sati ke lakshan kya hain?', a: 'Har charan mein alag. Pehle charan (12th bhaav) mein achanak kharch, tooti neend aur akelapan; doosre (Chandra Rashi par) mein thakaan, faisle mein hichak aur mann ka bhaari rehna; teesre (2nd bhaav) mein paise ka hisaab, parivar ke purane mudde aur vaani par sanyam. Phaladipika 26.25 ke anusaar Shani gochar ka phal rashi ke aakhri tihai hisse mein deta hai, isliye lakshan charan shuru hote hi nahi aate. Koi lakshan akele saboot nahi — calculator se apna charan pakka kijiye.' },
+  { q: 'At what age does Sade Sati start?', a: 'There is no fixed age. It depends on where Saturn was from your Moon sign at birth. Because Sade Sati lasts about 7.5 years and Saturn returns about every 29.5 years, the first Sade Sati is either running at birth or begins before about age 22; the second comes roughly 30 years after the first and the third about 30 years after that. The calculator above shows the exact start date and your age for every cycle.' },
+  { q: 'Kumbh rashi ke liye Sade Sati ke upay kya hain?', a: 'Kumbh par antim charan chal raha hai (Shani 2nd bhaav mein — paisa, parivar, vaani), jo 23 February 2028 ko poora hoga. Teen surakshit upay: Shanivar subah "Om Sham Shanaicharaya Namah" 108 baar (21 Shanivar, muft), Shanivar suryast se pehle kisi mazdoor ya buzurg ko ₹10–20 ka aata ya chawal (11 Shanivar), aur is hafte ek purana bakaya chukana ya maafi maangna. Kumbh ke swami khud Shani hain. Neelam bina suitability check ke na pehnein.' },
   { q: 'Kya Sade Sati Calculator bilkul free hai?', a: 'Haan. 100% free. Current status (Yes/No), active phase (Rising/Peak/Setting), exact start-end dates, days remaining, past + future cycles, aur 3 Parashar remedies (Mantra, Ratna, Daan) — sab free. Na signup, na card.' },
   { q: 'Sade Sati result kitne accurate hain?', a: 'Trikaal Vaani VM par dedicated /sade-sati endpoint hai jo Swiss Ephemeris (NASA-grade) se Saturn ki exact transit position calculate karta hai with Lahiri Ayanamsha — 99.9% astronomical accuracy. Yeh live compute hota hai, isliye Shani ki rashi badalne par bhi result apne aap sahi rehta hai.' },
 ];

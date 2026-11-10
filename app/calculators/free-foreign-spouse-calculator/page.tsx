@@ -2,7 +2,10 @@
 
 // ============================================================
 // File: app/calculators/free-foreign-spouse-calculator/page.tsx
-// Version: v2.3 (24 Oct 2026) — Radar 24 Oct: +1 H2, +1 FAQ (BPHS 24.84 on 7th lord in 12th, quoted as
+// Version: v2.4 (07 Nov 2026) — Radar 31 Oct + 7 Nov: +2 H2, +2 FAQ (videshi-ladke-se-shadi in Hindi,
+//   BPHS 80.4 + 80.17; spouse-appearance, BPHS 80.22-25 + 33.47, quoted as written). Links:
+//   /learn/chances-of-inter-caste-marriage, /learn/navamsa-chart-guide. dateModified 2026-11-07.
+// (previous) Version: v2.3 (24 Oct 2026) — Radar 24 Oct: +1 H2, +1 FAQ (BPHS 24.84 on 7th lord in 12th, quoted as
 //   written; foreign reading marked as practice). Link: /learn/foreign-spouse-prediction. Other radar
 //   phrases already covered by v2.1/v2.2 sections.
 // (previous) Version: v2.2 (19 Oct 2026) — Radar 17 Oct Content Edit Brief (page at rank 1): +3 H2, 3 H2 renamed
@@ -117,6 +120,14 @@ const FAQS = [
   {
     "q": "What does Brihat Parashara Hora Shastra say about the 7th lord in the 12th house?",
     "a": "Adhyaya 24, shlok 84 (दारेशे व्ययगे जातो दरिद्रः कृपणोऽपि वा) says the native may be short of money or tight-fisted and the wife fond of spending. It does not mention a foreign spouse. The foreign reading is later practice that treats the 12th house as distance from home, and it is one placement only, so weigh it with Rahu and the Navamsa."
+  },
+  {
+    "q": "लड़की की कुंडली में विदेशी लड़के से शादी का योग कैसे देखें?",
+    "a": "सप्तम भाव (शादी और साथी) से। बृहत् पराशर होरा शास्त्र (अध्याय 80, श्लोक 17) के अनुसार सप्तम में चर राशि हो तो पति प्रवासी — घर से दूर रहने वाला — होता है; श्लोक \"विदेशी\" शब्द नहीं कहता। योग तब मज़बूत माना जाता है जब राहु का सप्तम से सम्बन्ध, सप्तमेश 12th या 9th में, और नवमांश की पुष्टि साथ हों। अकेला एक संकेत फ़ैसला नहीं करता।"
+  },
+  {
+    "q": "Can astrology tell the physical appearance of my spouse?",
+    "a": "Only in broad terms. Brihat Parashara Hora Shastra (adhyaya 80, shlok 22-25) describes the husband's nature and attractiveness from the sign of a woman's 7th house, and adhyaya 33, shlok 47 the wife's beauty from the 7th of the Karakamsha. It gives no height, complexion or face, mixed influences give mixed results, and this calculator does not score appearance."
   },
   {
     "q": "Kya ye calculator free hai?",
@@ -284,6 +295,22 @@ const SECTIONS: FsSection[] = [
       "What it cannot do is replace the people involved — compatibility between two real charts is a separate check, done with both birth details in [Kundali Milan](/kundali-milan). Anyone claiming an AI can \"see\" your spouse is selling a story, not a reading.",
     ],
   },
+  {
+    id: "videshi-ladke-se-shadi",
+    h2: "विदेशी लड़के से शादी का योग — लड़की की कुंडली में क्या देखें?",
+    paras: [
+      "लड़की की कुंडली में पति का विचार **सप्तम भाव** (7th house = शादी और साथी) से होता है। बृहत् पराशर होरा शास्त्र (अध्याय 80, श्लोक 4) कहता है **सप्तमे पतिसौभाग्यं** — सातवाँ भाव पति का सौभाग्य दिखाता है। उसी अध्याय का श्लोक 17 जोड़ता है **चरभे च प्रवासी स्यात्** — सप्तम में चर राशि (मेष, कर्क, तुला, मकर) हो तो पति प्रवासी, यानी घर से दूर रहने या यात्रा करने वाला होता है। श्लोक \"विदेशी\" शब्द नहीं कहता; दूरी को विदेश पढ़ना बाद की परंपरा है।",
+      "इसलिए अकेली चर राशि फ़ैसला नहीं करती। विदेशी लड़के का योग तब मज़बूत माना जाता है जब साथ में **राहु** का सप्तम से सम्बन्ध हो, **सप्तमेश** 12th (दूर देश) या 9th (लम्बी यात्रा) भाव में हो, और नवमांश (D-9) भी वही दिखाए। ऊपर दिए calculator में राहु, सप्तमेश, 12th भाव और नवमांश के अंक अलग-अलग दिखते हैं। अपनी जाति या समाज से बाहर विवाह का पहलू [अंतरजातीय विवाह की संभावना](/learn/chances-of-inter-caste-marriage) में अलग से है।",
+    ],
+  },
+  {
+    id: "spouse-appearance",
+    h2: "Physical Appearance of Spouse in Astrology — What the Classical Texts Actually Say",
+    paras: [
+      "Brihat Parashara Hora Shastra describes the spouse's **nature and attractiveness**, not height, complexion or a face. For a woman's chart it reads the sign or Navamsa of the **7th house (marriage and partner)**: in a sign of Venus the husband is **कान्तः** — handsome and well liked (adhyaya 80, shlok 23); in Cancer, **कान्तः कामी मृदुः** — attractive, affectionate and gentle (shlok 25); in a sign of Mercury, learned and skilled in the arts (shlok 22); in a sign of Jupiter, virtuous and self-controlled (shlok 23).",
+      "For a man's chart, adhyaya 33, shlok 47 (**द्यूने चन्द्रगुरु यस्य भार्या तस्यातिसुन्दरी**) says Moon and Jupiter in the 7th from the Karakamsha give a very beautiful wife, and Mercury there a wife skilled in the arts. Chapter 80 adds the limit: **मिश्रे मिश्रफलं वाच्यं** — mixed influences give mixed results, weighed by the strength of sign and Navamsa. The calculator above does not score appearance; how the Navamsa is read is in the [Navamsa chart guide](/learn/navamsa-chart-guide).",
+    ],
+  },
 ];
 
 type FsLink = { href: string; label: string; note: string };
@@ -362,7 +389,7 @@ export default function FreeForeignSpouseCalculatorPage() {
     howToName: "How to check your foreign spouse yog from your Kundali",
     howToSteps: [{"name": "Enter birth details", "text": "Enter your date, exact time and place of birth."}, {"name": "The chart is computed", "text": "Swiss Ephemeris with Lahiri Ayanamsha builds your Kundali and the Navamsa D-9, which is where marriage is actually judged."}, {"name": "Read the reasons", "text": "Every rule shows its points and the figure behind them — the 7th lord, whether the Navamsa confirms it, where Rahu sits, and who your Darakaraka is."}],
     faqs: FAQS,
-    dateModified: '2026-10-19',
+    dateModified: '2026-11-07',
   });
 
   return (

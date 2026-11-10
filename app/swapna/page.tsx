@@ -1,4 +1,9 @@
-// 🔱 TRIKAAL VAANI | app/swapna/page.tsx | v2.0
+// 🔱 TRIKAAL VAANI | app/swapna/page.tsx | v2.1 (8 Nov 2026)
+// ----------------------------------------------------------------------------
+// CHANGE v2.1 (2026-11-08) — Radar weekly job cycle 2026-11-07: +6 H2 (mrit
+//   vyakti/purvaj zinda, kaun sa sapna na batayein, sabse bhagyashali sapna,
+//   khud ko / anjaan jagah, subah 5-7 baje ka sapna, swapna phal list) +6 FAQ.
+//   Static JSX section only; 3 verses cited from Brihad Yogayatra adhyaya 16.
 // ----------------------------------------------------------------------------
 // CHANGE v2.0 (2026-08-31) — Hindi layer + the 62-post blog cluster
 //   BASELINE 31 Aug 2026: 1,149 words, 7 H2, 306 Devanagari characters. The
@@ -142,6 +147,13 @@ const FAQS = [
   { q: 'Why do some dreams come true and others don\'t?', a: 'The tradition weighs the hour of the dream. A dream in the Brahma-muhurta before dawn is considered the most telling; a dream in the early night is held to be lighter.' },
   { q: 'Is my dream and my data private?', a: 'Yes. Your dream is read instantly and privately, with no sign-up required for the free meaning.' },
   { q: 'Who interprets the dreams on Trikaal Vaani?', a: 'Every meaning is traced to a classical source and validated by Rohiit Gupta, Chief Vedic Architect, with sixteen years in the Parashara BPHS tradition — then read against a Swiss Ephemeris chart.' },
+  // v2.1 — Radar weekly job cycle 2026-11-07
+  { q: 'सपने में मरे हुए इंसान को ज़िंदा देखना शुभ है या अशुभ?', a: 'परंपरा में यह डर का नहीं, पितृ स्मरण का संकेत माना जाता है। वे मुस्कुराते या आशीर्वाद देते दिखें तो इसे शुभ माना जाता है; कुछ माँगते या उदास दिखें तो इसे याद, जल-तिल अर्पण और छोटे दान की ओर इशारा माना जाता है, किसी अनहोनी का नहीं।' },
+  { q: 'कौन सा सपना किसी को नहीं बताना चाहिए?', a: 'बृहद्योगयात्रा (अध्याय 16, श्लोक 32) के अनुसार बुरा या डरावना सपना देखकर फिर से सो जाना चाहिए और उसे किसी से कहना नहीं चाहिए। शुभ सपना देखकर दोबारा न सोएँ और उसे केवल किसी सज्जन, विद्वान व्यक्ति को बताएँ (श्लोक 31) — हर किसी को नहीं।' },
+  { q: 'सबसे भाग्यशाली सपना कौन सा है?', a: 'शास्त्र किसी एक सपने को सबसे भाग्यशाली नहीं कहता, पर सफ़ेद घोड़ा, रथ, ध्वज, छत्र, कमल, रत्न या श्रेष्ठ हाथी मिलना और सपने में “अभय” या “जय” जैसे शब्द सुनना बहुत ऊँचे फल वाले बताए गए हैं (बृहद्योगयात्रा, अध्याय 16, श्लोक 20)। फल कब और कितना मिलेगा, यह आपकी दशा पर निर्भर है।' },
+  { q: 'सपने में खुद को अनजान जगह पर देखने का क्या मतलब है?', a: 'परंपरा में इसे आत्म-चिंतन और बदलाव का संकेत माना जाता है। कुंडली में अपना रूप पहला भाव (शरीर, पहचान) है और अनजान जगह बारहवाँ भाव (दूर देश, खर्च, एकांत), इसलिए ऐसे सपनों को नौकरी, शहर या जीवन के नए दौर से जोड़कर पढ़ा जाता है। जगह शांत लगे तो नए अवसर का, डर लगे तो अनिश्चितता का भाव माना जाता है।' },
+  { q: 'Subah 5 baje ya 7 baje ka sapna sach hota hai kya?', a: 'Brihad Yogayatra (adhyay 16, shlok 30) ke anusaar raat ke aakhri hisse ka sapna lagbhag ek mahine mein aur bhor ka sapna turant phal dene wala kaha gaya hai, isliye subah 4-5 baje ka sapna sabse zyada vazan rakhta hai. Suryoday ke baad (aksar 7 baje) ki halki neend ka sapna granth mein alag se nahi gina gaya. Phal pakka nahi hota — uski disha aapki dasha tay karti hai.' },
+  { q: 'क्या स्वप्न फल लिस्ट की PDF मिलती है?', a: 'हमारे पास कोई PDF नहीं है। इसी पेज पर बारह श्रेणियों वाली सूची और हर प्रतीक का अलग पेज ऑनलाइन है, और ऊपर वाले मुफ़्त टूल में अपना सपना लिखकर उसका शास्त्रीय फल तुरंत देखा जा सकता है।' },
 ];
 
 // ── JSON-LD ──────────────────────────────────────────────────────────────────
@@ -521,6 +533,93 @@ export default function SwapnaPage() {
                   ))}
                 </div>
               ))}
+            </div>
+          </section>
+
+          {/* ── v2.1: Radar weekly job cycle 2026-11-07 — search-demand H2s ── */}
+          <section className="px-4 pb-16">
+            <div className="max-w-3xl mx-auto">
+
+              <div id="mare-hue-ko-zinda-dekhna" className="scroll-mt-24 mt-6">
+                <h2 className="font-serif font-medium text-white" style={{ fontSize: 'clamp(1.5rem,3.6vw,2.1rem)' }} lang="hi">
+                  सपने में मरे हुए इंसान या पूर्वज को ज़िंदा देखना — क्या मतलब है
+                </h2>
+                <p className="mt-3 text-[1rem] leading-relaxed" style={{ color: C.s4 }} lang="hi">
+                  <SwRich k="v21-mrit-0" text="सपने में किसी मरे हुए स्वजन या पूर्वज को ज़िंदा, बात करते या घर में घूमते देखना परंपरा में डर का नहीं, **पितृ स्मरण** का संकेत माना जाता है। अर्थ इस पर टिका है कि वे क्या कर रहे थे — मुस्कुराते या आशीर्वाद देते दिखें तो इसे शुभ माना जाता है; कुछ माँगते या उदास दिखें तो इसे याद और दान की ओर इशारा माना जाता है, किसी अनहोनी का नहीं। प्रतीक का पूरा अर्थ [मृत स्वजन का सपना](/swapna/deceased_relative) पेज पर है, और ज़िंदा दिखने वाली स्थिति पर विस्तार [सपने में मरे हुए को ज़िंदा देखना](/blog/sapne-mein-mare-hue-ko-jinda-dekhna-ka-matlab) में।" />
+                </p>
+                <p className="mt-3 text-[1rem] leading-relaxed" style={{ color: C.s4 }} lang="hi">
+                  <b className="font-medium text-white">सरल उपाय — पितृ स्मरण</b><br />
+                  1. क्या करें: नहाकर दक्षिण की ओर मुँह करके एक लोटा जल में थोड़े काले तिल डालकर अर्पित करें और उनका नाम लेकर धन्यवाद कहें।<br />
+                  2. कब: सपने के अगले दिन से, सूर्योदय के बाद के पहले घंटे में।<br />
+                  3. कितने का: जल मुफ़्त, काले तिल लगभग ₹10-20।<br />
+                  4. कितने दिन: लगातार 7 दिन; सातवें दिन किसी ज़रूरतमंद को भोजन या गाय को रोटी।<br />
+                  5. आपके लिए क्यों: <SwRich k="v21-mrit-1" text="कुंडली में **9वाँ भाव** (पिता, पूर्वज, भाग्य) और **सूर्य** पितरों से जुड़े हैं — आपकी कुंडली में ये कितने सक्रिय हैं, यह [पितृ दोष कैलकुलेटर](/calculators/free-pitra-dosh-calculator) से देखा जा सकता है।" />
+                </p>
+              </div>
+
+              <div id="kaun-sa-sapna-na-batayein" className="scroll-mt-24 mt-10">
+                <h2 className="font-serif font-medium text-white" style={{ fontSize: 'clamp(1.5rem,3.6vw,2.1rem)' }} lang="hi">
+                  कौन सा सपना किसी को नहीं बताना चाहिए?
+                </h2>
+                <p className="mt-3 text-[1rem] leading-relaxed" style={{ color: C.s4 }} lang="hi">
+                  <SwRich k="v21-batana-0" text="ग्रंथ का नियम आम धारणा से थोड़ा अलग है। **बृहद्योगयात्रा** के स्वप्न-अध्याय के अनुसार **बुरा या डरावना सपना** देखने के बाद फिर से सो जाना चाहिए और **उसे किसी से कहना नहीं चाहिए** — उसकी जगह स्नान, जप और यथाशक्ति दान बताया गया है। वहीं **शुभ सपना** देखकर दोबारा न सोएँ, क्योंकि बाद में देखा गया सपना ही फल देता है, और उसे केवल किसी सज्जन, विद्वान व्यक्ति को बताएँ — हर किसी को नहीं। कई घरों में बुरा सपना किसी को सुना देने का चलन भी है; ग्रंथ का निर्देश इसके उलट है।" />
+                </p>
+                <p className="mt-2 rounded-lg px-3 py-2 font-serif text-[0.88rem]" style={{ color: C.s5, background: C.panel2, borderLeft: `2px solid ${C.line2}` }}>
+                  बृहद्योगयात्रा, अध्याय 16, श्लोक 31 — <span lang="sa">दृष्ट्वा स्वप्नं शोभनं नेह सुप्यात् पश्चाद् दृष्टो यः स पाकं विधत्ते। शंसेदिष्टं तत्र साधुद्विजेभ्यस् ते त्वाशिभिः पूजयेयुर् नरेन्द्रम्॥</span>
+                </p>
+                <p className="mt-2 rounded-lg px-3 py-2 font-serif text-[0.88rem]" style={{ color: C.s5, background: C.panel2, borderLeft: `2px solid ${C.line2}` }}>
+                  बृहद्योगयात्रा, अध्याय 16, श्लोक 32 — <span lang="sa">भूयः प्रस्वपनं न चास्य कथनं गङ्गाभिषेको जपः शान्तिः स्वस्त्ययनं निषेवणम् अपि प्रातर्गवाश्वत्थयोः। विप्रेभ्यश् च तिलान्नपानकुसुमैः पूजा यथाशक्तितः पुण्यं भारतकीर्तनं च कथितं दुःस्वप्नविच्छित्तये॥ए३२</span>
+                </p>
+              </div>
+
+              <div id="sabse-bhagyashali-sapna" className="scroll-mt-24 mt-10">
+                <h2 className="font-serif font-medium text-white" style={{ fontSize: 'clamp(1.5rem,3.6vw,2.1rem)' }} lang="hi">
+                  सबसे भाग्यशाली सपना कौन सा माना जाता है?
+                </h2>
+                <p className="mt-3 text-[1rem] leading-relaxed" style={{ color: C.s4 }} lang="hi">
+                  <SwRich k="v21-bhagya-0" text="शास्त्र किसी एक सपने को “सबसे भाग्यशाली” नहीं कहता, पर कुछ प्रतीकों को सबसे ऊँचे फल वाला बताता है। **बृहद्योगयात्रा** के अनुसार सपने में **सफ़ेद घोड़ा, रथ, ध्वज, छत्र, पंखा, कमल, रत्न या श्रेष्ठ हाथी** मिलना, और “अभय”, “जय” या “भोजन करो” जैसे शब्द सुनना बहुत बड़े, राज्य-स्तर के फल देने वाले कहे गए हैं। परंपरा में देवी-देवता, गुरु या माता-पिता का आशीर्वाद देते दिखना भी इसी श्रेणी में गिना जाता है — देखें [देव-आशीर्वाद का सपना](/swapna/deity_blessing)। फल कब और कितना मिलेगा, यह आपकी चल रही दशा पर टिका है; इसकी गारंटी शास्त्र भी नहीं देता।" />
+                </p>
+                <p className="mt-2 rounded-lg px-3 py-2 font-serif text-[0.88rem]" style={{ color: C.s5, background: C.panel2, borderLeft: `2px solid ${C.line2}` }}>
+                  बृहद्योगयात्रा, अध्याय 16, श्लोक 20 — <span lang="sa">सिततुरगरथध्वजातपत्रव्यजनसरोजमणिद्विपेन्द्रलाभाः। अभय जय च भुंक्ष्व चेति शब्दाः परिणतराज्यफलप्रदाः प्रदिष्टाः॥</span>
+                </p>
+              </div>
+
+              <div id="khud-ko-anjaan-jagah-dekhna" className="scroll-mt-24 mt-10">
+                <h2 className="font-serif font-medium text-white" style={{ fontSize: 'clamp(1.5rem,3.6vw,2.1rem)' }} lang="hi">
+                  सपने में खुद को देखना या अनजान जगह पर पाना — क्या मतलब है
+                </h2>
+                <p className="mt-3 text-[1rem] leading-relaxed" style={{ color: C.s4 }} lang="hi">
+                  <SwRich k="v21-khud-0" text="सपने में खुद को दूर से देखना, या किसी अनजान जगह पर अकेले पाना, परंपरा में **आत्म-चिंतन और बदलाव** का संकेत माना जाता है, किसी अनहोनी का नहीं। कुंडली की भाषा में अपना रूप **पहला भाव** (लग्न = शरीर, स्वभाव, पहचान) है, और अनजान जगह **बारहवाँ भाव** (दूर देश, खर्च, नींद, एकांत)। इसीलिए ऐसे सपनों को नौकरी, शहर या जीवन के किसी नए दौर से जोड़कर पढ़ा जाता है। जगह शांत लगी तो इसे नए अवसर का, और डर लगा तो अनिश्चितता का भाव माना जाता है।" />
+                </p>
+                <p className="mt-3 text-[1rem] leading-relaxed" style={{ color: C.s4 }} lang="hi">
+                  <SwRich k="v21-khud-1" text="रास्ता भटकने या खो जाने का अर्थ [खो जाने का सपना](/swapna/lost) पेज पर है, और खुद को रोते देखने पर अलग से [यह लेख](/blog/sapne-mein-khud-ko-rote-hue-dekhna-ka-matlab) है।" />
+                </p>
+              </div>
+
+              <div id="subah-ka-sapna" className="scroll-mt-24 mt-10">
+                <h2 className="font-serif font-medium text-white" style={{ fontSize: 'clamp(1.5rem,3.6vw,2.1rem)' }}>
+                  Subah 5 baje ya 7 baje ka sapna — kya sach hota hai?
+                </h2>
+                <p className="mt-3 text-[1rem] leading-relaxed" style={{ color: C.s4 }}>
+                  <SwRich k="v21-subah-0" text="Subah ke sapne ko parampara sabse jaldi phal dene wala maanti hai, aur yeh baat granth mein bhi milti hai. **Brihad Yogayatra** ke anusaar raat ke pehle pahar ka sapna lagbhag ek saal mein, doosre ka chhah mahine mein, teesre ka teen mahine mein, raat ke aakhri hisse ka ek mahine mein, aur bhor ka sapna turant phal deta hai. Isliye **subah 4-5 baje** ka sapna, jo aksar brahma muhurat mein padta hai, sabse zyada vazan rakhta hai. Par “sach hota hai” ka matlab “pakka hoga” nahi — phal ki disha aapki dasha tay karti hai." />
+                </p>
+                <p className="mt-3 text-[1rem] leading-relaxed" style={{ color: C.s4 }}>
+                  <SwRich k="v21-subah-1" text="**7 baje** tak aam taur par suraj nikal chuka hota hai. Granth ki ginti raat ke hisson tak hai; suryoday ke baad dobara aayi halki neend ka sapna alag se nahi gina gaya, isliye use “pakka sach” maanna theek nahi. Jo sapna yaad rahe aur dohraye, use upar wale tool mein likh kar uska shastriya arth dekh lijiye." />
+                </p>
+                <p className="mt-2 rounded-lg px-3 py-2 font-serif text-[0.88rem]" style={{ color: C.s5, background: C.panel2, borderLeft: `2px solid ${C.line2}` }}>
+                  बृहद्योगयात्रा, अध्याय 16, श्लोक 30 — <span lang="sa">आद्ये वर्षाद् वत्सरार्धाद् द्वितीये यामे पाको वर्षपादात् तृतीये। मासात् पाकः शर्वरीपश्चिमांशे सद्यः पाको गोविसर्गे च दृष्टे॥</span>
+                </p>
+              </div>
+
+              <div id="swapna-phal-list" className="scroll-mt-24 mt-10">
+                <h2 className="font-serif font-medium text-white" style={{ fontSize: 'clamp(1.5rem,3.6vw,2.1rem)' }} lang="hi">
+                  स्वप्न फल लिस्ट — सपनों का मतलब और उनका फल एक जगह
+                </h2>
+                <p className="mt-3 text-[1rem] leading-relaxed" style={{ color: C.s4 }} lang="hi">
+                  <SwRich k="v21-list-0" text="बहुत से लोग स्वप्न फल की PDF सूची ढूँढते हैं। हमारे पास कोई PDF नहीं है, और छपी हुई सूची की एक सीमा भी है — उसमें एक प्रतीक का एक ही अर्थ होता है, जबकि शास्त्र में अर्थ इस पर भी बदलता है कि प्रतीक ने क्या किया और सपना किस प्रहर में आया। इसी पेज पर ऊपर **बारह श्रेणियों वाली सूची** में हर सपना अपनी श्रेणी के साथ ऑनलाइन है — जैसे [मृत्यु व पूर्वज वाले सपने](/swapna/category/death)। सबसे तेज़ तरीका: ऊपर वाले टूल में अपने शब्दों में सपना लिखिए, शास्त्रीय फल वहीं मुफ़्त मिल जाएगा।" />
+                </p>
+              </div>
+
             </div>
           </section>
 

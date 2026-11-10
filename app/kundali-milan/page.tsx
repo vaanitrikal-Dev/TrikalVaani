@@ -1,4 +1,9 @@
-// TRIKAL VAANI | app/kundali-milan/page.tsx | v2.2 (19 Oct 2026)
+// TRIKAL VAANI | app/kundali-milan/page.tsx | v2.3 (08 Nov 2026)
+// v2.3 (08 Nov 2026): Radar weekly job cycle 2026-11-07 (reports #13/#14 PUSH + BRIEF).
+//   +2 English KM_SECTIONS H2: marriage matching by name and date of birth (18+12+12+11+11),
+//   love compatibility by date of birth and name (11). +2 FAQ in FAQ_SCHEMA. Hindi name/DOB
+//   intents were already answered by v2.2 sections. No verse cited (none in library says this).
+//   Form, pricing, tier cards and schema structure untouched.
 // v2.2 (19 Oct 2026): Radar weekly report 17 Oct — PUSH (16 empty SERPs) + Content Edit Brief
 //   (page at rank 9). +6 KM_SECTIONS H2: DOB/naam se milan in Hindi (seen 23+22+16+13),
 //   Is 27/36 good (20), वर-कन्या गुण मिलान / 36 gun milan calculator free (10x3 + PUSH),
@@ -138,6 +143,22 @@ const FAQ_SCHEMA = {
       acceptedAnswer: {
         '@type': 'Answer',
         text: 'In Ashtakoot the rashi pairing is judged by Bhakoot: pairs at 1-1, 7-7, 3-11 and 4-10 get the full 7 points, while 6-8, 9-5 and 2-12 get zero. Friendly rashi lords add Graha Maitri points. Element-based "best match" lists are not the Ashtakoot rule. The final answer comes from the nakshatra-based 36 Guna, not the rashi alone.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'Can kundali matching be done by name and date of birth?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Yes, with the date of birth, exact time and place — the names only label the report. The 36 guna are counted from the two Moon nakshatras, which need the birth details. Name-only matching is not real Ashtakoot, because many first letters belong to more than one nakshatra and most modern names are not chosen by nakshatra. With date only and no time, treat the score as an estimate.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'How is love compatibility checked by date of birth and name?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Through the same 36 guna Ashtakoot score used for arranged matches. For an emotional bond look first at Graha Maitri (5), Gana (6), Yoni (4) and Bhakoot (7) in the koot-wise result. Ashtakoot does not check Venus, the 5th and 7th houses or Mangal Dosh, so read those from both charts as well.',
       },
     },
     {
@@ -344,6 +365,22 @@ const KM_SECTIONS: KmSection[] = [
     paras: [
       'सही कुंडली मिलान के लिए दोनों की **जन्म तिथि, जन्म समय और जन्म स्थान** चाहिए — नाम केवल रिपोर्ट पर दिखाने के लिए लिया जाता है, गिनती के लिए नहीं। जन्म विवरण से दोनों का **चंद्र नक्षत्र और राशि** निकलती है, और उसी से आठों कूट के 36 गुण गिने जाते हैं। इसलिए "नाम और जन्म तिथि से मिलान" का सही अर्थ है: नाम पहचान के लिए, जन्म विवरण गणना के लिए।',
       'अगर सिर्फ़ जन्म तिथि पता हो और समय नहीं, तो चंद्र राशि आमतौर पर सही निकल आती है पर नक्षत्र गलत हो सकता है — क्योंकि चंद्रमा एक नक्षत्र लगभग सवा दिन में पार करता है। ऐसे में गुणों को अनुमान मानिए। ऊपर का फ़ॉर्म पूरा विवरण लेकर मुफ्त में आठों कूट हिंदी में दिखाता है; अपना नक्षत्र अलग से जानना हो तो [नक्षत्र कैलकुलेटर](/calculators/free-nakshatra-calculator) है।',
+    ],
+  },
+  {
+    id: 'matching-by-name-and-dob',
+    h2: 'Marriage Matching by Name and Date of Birth — Free, but Which One Counts?',
+    paras: [
+      '**Free marriage matching by name and date of birth** works like this here: the names only label the report — the score comes from the **date, exact time and place of birth**. Those three give each person a Moon nakshatra and rashi, and all eight koots, 36 guna in total, are counted from the two nakshatras. A name alone cannot give a nakshatra reliably, because many first letters belong to more than one nakshatra, and most modern names are not chosen by nakshatra at all.',
+      'If only the date of birth is known, the Moon sign is usually right but the nakshatra can be off — the Moon crosses one nakshatra in about a day — so treat the guna total as an estimate. The form above is free, needs no sign-up and shows every koot separately. The Hindi explanation of name-based matching is in the [नाम से कुंडली मिलान](#naam-se-kundali-milan) section above, the method and its limits are in [kundli matching online](/learn/kundli-matching-online), and your own nakshatra is on the [nakshatra calculator](/calculators/free-nakshatra-calculator).',
+    ],
+  },
+  {
+    id: 'love-compatibility-dob-name',
+    h2: 'Love Compatibility by Date of Birth and Name',
+    paras: [
+      '**Love compatibility by date of birth and name** uses the same Ashtakoot score as an arranged match — Vedic astrology has no separate love formula. The koots that speak most to an emotional bond are **Graha Maitri** (how the two Moon-sign lords get along, 5 points), **Gana** (temperament, 6), **Yoni** (natural compatibility, 4) and **Bhakoot** (7). Enter both birth details in the form above: the free result shows each of these koots on its own, so you can see where the two of you match and where you differ.',
+      'A love match also needs what Ashtakoot does not see: Venus, the 5th house (5th = romance and children) and the 7th house (7th = marriage and partner) in each chart, and Mangal Dosh. Whether a relationship is likely to end in marriage is read from those houses — see [will I have a love marriage?](/learn/will-i-have-love-marriage) and the free [love or arranged marriage calculator](/calculators/free-love-or-arranged-marriage-calculator). A low guna total is not a verdict on a relationship you have already chosen; read which koot is low before worrying.',
     ],
   },
   {

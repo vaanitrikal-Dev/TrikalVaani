@@ -2,7 +2,8 @@
 
 // ============================================================
 // File: app/calculators/free-nakshatra-calculator/page.tsx
-// Version: 4.3 (19 Oct 2026) — competitor brand names removed from visible copy (Rohiit rule 18 Oct 2026). Content/logic otherwise unchanged.
+// Version: 4.4 (8 Nov 2026) — Radar weekly job cycle 2026-11-07: +2 H2 (birth star calculator free online; mera nakshatra kya hai) +2 FAQ
+// (previous) Version: 4.3 (19 Oct 2026) — competitor brand names removed from visible copy (Rohiit rule 18 Oct 2026). Content/logic otherwise unchanged.
 // (previous) Version: 4.2 (03 Oct 2026) — previous header: 4.1 (1 Oct 2026 — "📜 Granth ke Upay — BPHS 84" dabba (components/calculators/GranthUpayBox
 //   4.2 (2026-10-03) — +2 H2 from DataForSEO volumes (Trikaal Keywords sheet 2-3 Oct 2026):
 //   what is my nakshatra by date of birth 2.9K + rasi nakshatra calculator by DOB 2.9K,
@@ -318,6 +319,22 @@ const PILLAR: PillarSection[] = [
     ],
   },
   {
+    id: "birth-star-calculator-free",
+    h2: "Birth Star Calculator Free Online — What It Needs and What It Gives",
+    paras: [
+      "A birth star calculator finds your **janma nakshatra**: the one of 27 nakshatras the Moon (Chandra) was passing through at the moment of your birth. The free calculator above does this online with no sign-up. Enter your date, exact time and place of birth; it computes the Moon position with Swiss Ephemeris and Lahiri ayanamsa and returns your **birth star, its pada (quarter), the nakshatra lord, your Moon sign (rasi), the naming syllable, gana, yoni, nadi** and a Gandmool check. It reads the Moon, not the Lagna (ascendant), which is the classical rule.",
+      "Accuracy depends on the birth time more than on the tool. The Moon crosses a nakshatra in roughly a day and a pada in about six hours, so an error of a few hours can change the pada and sometimes the star itself. Once you have it, the same star is the starting point of your [Vimshottari dasha](/calculators/free-dasha-calculator) and of nakshatra matching in [Kundali Milan](/kundali-milan); a longer walkthrough is in the [nakshatra calculator guide](/blog/nakshatra-calculator-guide).",
+    ],
+  },
+  {
+    id: "mera-nakshatra-kya-hai",
+    h2: "Mera Nakshatra Kya Hai — Kaise Pata Karein",
+    paras: [
+      "Aapka nakshatra wahi hai jismein **aapke janm ke samay Chandra tha** — 27 mein se ek. Ise jaanne ka seedha tareeka: upar wale calculator mein janm tithi, sateek janm samay aur janm sthan daaliye. Turant aapka **janm nakshatra, uska pada** (chaar mein se kaunsa), **nakshatra swami graha, Chandra rashi aur naam ka shubh akshar** aa jaata hai — bilkul free, koi signup nahi. Dhyan rahe, Lagna ka nakshatra aapka janm nakshatra nahi hai; janm nakshatra hamesha Chandra se dekha jaata hai, aur yahi namkaran, dasha aur kundali milan ka aadhar hai.",
+      "Agar sirf janm tithi pata hai aur samay nahi, to bhi calculator chalaiye — Chandra rashi prayah sahi aayegi, par nakshatra do mein se ek ho sakta hai aur pada par bharosa nahi kiya ja sakta. Samay janm pramanpatra ya hospital record se lijiye. Nakshatra milne ke baad uska swabhav, career aur vivah ke sanket alag lekhon mein hain, jaise [Rohini nakshatra ka arth aur swabhav](/blog/rohini-nakshatra-ka-arth-swabhav-career-vivah).",
+    ],
+  },
+  {
     id: 'naam-aur-rashi',
     h2: 'जन्म तारीख से नाम और राशि — ऑनलाइन कैसे निकालें',
     paras: [
@@ -430,6 +447,8 @@ const FAQS = [
   { q: 'What is a birth star in English?', a: 'It does not refer to a star you were born under in the astronomical sense. Each nakshatra is a 13°20\' segment of the ecliptic, named after a prominent star that sits in it — Rohini is associated with Aldebaran, Chitra with Spica. But the nakshatra is the segment, not the star. A nakshatra also has no Western zodiac equivalent; the two systems do not map onto each other.' },
   { q: 'Tamil / Malayalam mein nakshatra ka naam kaise pata karein?', a: 'Is page ki master table mein saare 27 nakshatra Devanagari, English, Tamil aur Malayalam — chaaron mein diye hain. Jis bhasha mein aap jaante hain us column mein dhoondhiye aur baaki padh lijiye. Dhyan rahe: transliteration kshetra aur panchangam ke hisaab se badalti hai — spelling alag ho sakti hai, nakshatra wahi rahega.' },
   { q: 'Kya Nakshatra Calculator free hai?', a: 'Haan, 100% free. Nakshatra, Pada, Namakaran akshar, Chandra Rashi, lord, deity, symbol, gana, yoni, nadi, Gandmool check, personality traits, 3 Dos, 3 Donts aur 3 remedies — sab free, koi signup nahi.' },
+  { q: "Is there a free online birth star calculator?", a: "Yes. The calculator on this page is free and needs no sign-up. Enter your date, exact time and place of birth and it returns your birth star (janma nakshatra) from the Moon position, with pada, nakshatra lord, Moon sign, naming syllable, gana, yoni, nadi and a Gandmool check." },
+  { q: "Sirf janm tithi se mera nakshatra pata chal sakta hai?", a: "Poori tarah nahi. Janm ke din Chandra aksar ek nakshatra se agle nakshatra mein chala jaata hai, isliye bina samay ke do nakshatra sambhav rehte hain. Sirf tithi se Chandra rashi prayah sahi aati hai, par nakshatra aur pada par bharosa nahi kiya ja sakta. Samay janm pramanpatra ya hospital record se lijiye." },
 ];
 
 export default function FreeNakshatraCalculatorPage() {

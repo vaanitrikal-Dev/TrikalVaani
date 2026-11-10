@@ -2,7 +2,17 @@
 
 // ============================================================
 // File: app/calculators/free-foreign-settlement-calculator/page.tsx
-// Version: v2.1 (03 Oct 2026) — +5 H2 from the Radar E3 brief (03 Oct report)
+// Version: v2.2 (07 Nov 2026) — Radar 31 Oct + 7 Nov: +1 H2, +2 FAQ (settle abroad by date of birth)
+// (previous) Version: v2.1 (03 Oct 2026) — +5 H2 from the Radar E3 brief (03 Oct report)
+//
+// CHANGE v2.2 (2026-11-07):
+//   Radar 31 Oct + 7 Nov PUSH keywords. Every other brief H2 was already
+//   answered on this page; the one missing intent was "can I tell from my
+//   date of birth alone whether I will settle abroad" — merged into one H2
+//   (id dob-settle-abroad), with the Chandra Lagna fallback cited from
+//   Phaladipika 9.13 (library-read). Two FAQ added to FAQS (they flow into
+//   the FAQPage JSON-LD through buildCalcJsonLd). Inline link to the live
+//   /learn/foreign-settlement-prediction guide. No logic, UI or CTA change.
 //
 // CHANGE v2.1 (2026-10-03):
 //   Radar report of 3 Oct 2026 flagged this page PUSH: rank 2 on its core
@@ -83,6 +93,14 @@ const FAQS = [
   {
     "q": "Kya ye calculator free hai?",
     "a": "Haan, poora free. Score, saare blocks ka breakdown, blockers, chaar raston ka vishleshan aur Dasha timing — sab bina payment ke."
+  },
+  {
+    "q": "Can I calculate if I will settle abroad based on my date of birth?",
+    "a": "Haan, aanshik roop se. Sirf janm tithi se Chandra rashi aur Nakshatra pakke milte hain, isliye kundali Chandra Lagna se padhi ja sakti hai — Phaladipika (adhyaya 9, shlok 13) bhi kehta hai ki jo phal Lagna se kaha jaye, wahi Chandra Lagna se bhi kaha ja sakta hai. Par 12th, 9th aur 4th house ka sateek hisaab janm samay se hi banta hai. Samay pata ho to upar ke calculator mein daaliye; na pata ho to Chandra se padha gaya jawab halka hai, galat nahi."
+  },
+  {
+    "q": "Will I settle abroad — astrology se kaise pata chalega?",
+    "a": "Ek akela graha nahi, kai sanket milkar batate hain: 12th house (door desh) aur uska swami, Rahu ki sthiti, 9th house (lambi yatra aur bhagya), dheela 4th house (ghar aur jadein) aur abhi chal rahi Dasha. Teen-chaar sanket ek saath milen to yog prabal mana jata hai. Ye sambhavna hai, guarantee nahi — visa, mehnat aur aapke faisle bhi utne hi zaroori hain. Upar ka calculator saaton block alag-alag wajah ke saath dikhata hai."
   }
 ];
 
@@ -286,6 +304,14 @@ const SECTIONS: FstSection[] = [
     paras: [
       "पहला कदम ज्योतिष का नहीं, दिशा का है: ऊपर के परिणाम में **चार रास्तों** (नौकरी, पढ़ाई, शादी, व्यापार) में से जो सबसे मज़बूत हो, उसी पर पहले मेहनत लगाइए — गलत दरवाज़े पर वर्षों लगाना सबसे महँगी गलती है। दूसरा — चल रही दशा देखिए; अनुकूल दशा में आवेदन करना समझदारी है।",
       "परंपरा का एक उपाय, पाँच हिस्सों में: **क्या:** \"ॐ रां राहवे नमः\" 108 बार (लगभग 10 मिनट)। **कब:** शनिवार शाम। **कितने का:** मुफ़्त। **कितने दिन:** 21 शनिवार। **आपके लिए क्यों:** राहु विदेश का मुख्य कारक है, और मंत्र उसे शांत करता है, बढ़ाता नहीं। कोई उपाय वीज़ा नहीं दिलाता — वह कागज़ात और नीति से मिलता है; और जो पूजा \"विदेश का रास्ता खोलने\" के नाम पर बड़ी राशि माँगे, उससे दूर रहिए।",
+    ],
+  },
+  {
+    id: "dob-settle-abroad",
+    h2: "Can I Calculate If I Will Settle Abroad From My Date of Birth?",
+    paras: [
+      "Yes, partly — and the calculator above is free. **Date, exact time and place** together give the full answer: the time fixes the Lagna, and the Lagna fixes which signs fall in your **12th house (door desh aur kharcha)**, **9th house (lambi yatra aur bhagya)** and **4th house (ghar aur jadein)**. With the date alone, your **Moon sign and Nakshatra** are still known, so the chart can be read from the Moon. Phaladipika (adhyaya 9, shlok 13) gives the principle: **यच्चन्द्रलग्नेऽपि तदेव वाच्यम्** — what is said from the Lagna may also be said from the Chandra Lagna.",
+      "So if your birth time is unknown, count the houses from your Moon sign: the 12th from the Moon, the house Rahu occupies from the Moon, and the Dasha sequence that starts from the Moon's Nakshatra (its exact dates shift a little with birth time). This is a lighter first read, not a wrong one — and a missing birth time never means \"no foreign yog\". If you know even a rough time, enter it in the calculator above and see which blocks change; the full house-by-house method is in the [foreign settlement prediction guide](/learn/foreign-settlement-prediction).",
     ],
   },
 ];
