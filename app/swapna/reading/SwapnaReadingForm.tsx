@@ -1,7 +1,12 @@
 'use client';
 
-// 🔱 TRIKAAL VAANI | app/swapna/reading/SwapnaReadingForm.tsx | v1.2 (11 Oct 2026)
+// 🔱 TRIKAAL VAANI | app/swapna/reading/SwapnaReadingForm.tsx | v1.3 (11 Nov 2026)
 // Owner: Rohiit Gupta, Chief Vedic Architect
+//
+// v1.3 (11 Nov 2026) — report par jaana ab window.location.assign (poora page
+//   load), router.push nahi. In-app navigation par /report/[slug] ka chunk
+//   double-encoded (%255Bslug%255D) maanga jaata hai → 404 → "Application
+//   error". Payment code EK LINE NAHI BADLI.
 //
 // v1.2 (11 Oct 2026) — GOOGLE PLAY BILLING, SIRF PLAY STORE APP KE ANDAR.
 //   BirthForm v10.7 jaisa hi. App mein (usePlayApp() = true) Pay button
@@ -227,7 +232,7 @@ export default function SwapnaReadingForm() {
       if (predRes.status === 409 && data?.code === 'PLAY_ALREADY_USED' && typeof data?.reportUrl === 'string') {
         try {
           try { sessionStorage.removeItem('tv_swapna_dream'); } catch { /* ignore */ }
-          router.push(new URL(data.reportUrl).pathname);
+          window.location.assign(new URL(data.reportUrl).pathname); // v1.3 full load
           return;
         } catch { /* galat URL — neeche wali normal galti dikhegi */ }
       }
@@ -238,7 +243,7 @@ export default function SwapnaReadingForm() {
 
     const slug = data?._meta?.publicSlug ?? data?.publicSlug ?? null;
     try { sessionStorage.removeItem('tv_swapna_dream'); } catch { /* ignore */ }
-    if (slug) router.push(`/report/${slug}`);
+    if (slug) window.location.assign(`/report/${slug}`); // v1.3 full load (ChunkLoadError fix)
     else { setAnalyzing(false); setErr('Reading ready but not saved — please contact support with your payment id.'); setBusy(false); }
   }
 
@@ -439,4 +444,4 @@ export default function SwapnaReadingForm() {
     </div>
   );
 }
-// END — app/swapna/reading/SwapnaReadingForm.tsx v1.2
+// END — app/swapna/reading/SwapnaReadingForm.tsx v1.3

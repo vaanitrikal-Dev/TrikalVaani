@@ -5,9 +5,14 @@
  * TRIKAL VAANI — Upgrade Client (Rs.51 Deep Reading unlock)
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/upgrade/UpgradeClient.tsx
- * VERSION: 1.1 (11 Oct 2026)
+ * VERSION: 1.2 (11 Nov 2026)
  * SIGNED: ROHIIT GUPTA, CEO
  * ============================================================
+ * v1.2 (11 Nov 2026) — report/result par jaana ab window.location.assign aur
+ *   "Poori Reading Kholein" plain <a> (poora page load). In-app navigation
+ *   par [slug] chunk double-encoded (%255Bslug%255D) → 404 → "Application
+ *   error". Payment code (startUpgrade, startPlayUpgrade) EK LINE NAHI BADLI.
+ *
  * v1.1 (11 Oct 2026) — GOOGLE PLAY BILLING, SIRF PLAY STORE APP KE ANDAR.
  *   BirthForm v10.7 jaisa hi. App mein (usePlayApp() = true) "Unlock Karein
  *   — ₹51" button (text same) Google Play sheet kholta hai → purchase token →
@@ -111,9 +116,9 @@ export default function UpgradeClient({ seed }: { seed: UpgradeSeed | null }) {
           Is kundali ka poora vishleshan pehle se taiyaar hai. Dobara payment ki
           zaroorat nahi.
         </p>
-        <Link href={`/report/${seed.publicSlug}`} style={btnStyle}>
+        <a href={`/report/${seed.publicSlug}`} style={btnStyle}>
           Poori Reading Kholein
-        </Link>
+        </a>
       </Shell>
     )
   }
@@ -174,7 +179,7 @@ export default function UpgradeClient({ seed }: { seed: UpgradeSeed | null }) {
           typeof data?.reportUrl === 'string'
         ) {
           try {
-            router.push(new URL(data.reportUrl).pathname)
+            window.location.assign(new URL(data.reportUrl).pathname) // v1.2
             return
           } catch {
             /* galat URL — neeche wali normal galti dikhegi */
@@ -192,8 +197,8 @@ export default function UpgradeClient({ seed }: { seed: UpgradeSeed | null }) {
       const publicSlug = data?._meta?.publicSlug ?? null
       const predictionId = data?._meta?.predictionId ?? null
 
-      if (publicSlug) router.push(`/report/${publicSlug}`)
-      else if (predictionId) router.push(`/result/${predictionId}`)
+      if (publicSlug) window.location.assign(`/report/${publicSlug}`)          // v1.2
+      else if (predictionId) window.location.assign(`/result/${predictionId}`)
       else {
         setError(
           'Reading ban gayi par save nahi hui. WhatsApp karein — turant bhej dunga.'
@@ -331,8 +336,8 @@ export default function UpgradeClient({ seed }: { seed: UpgradeSeed | null }) {
             const publicSlug = data?._meta?.publicSlug ?? null
             const predictionId = data?._meta?.predictionId ?? null
 
-            if (publicSlug) router.push(`/report/${publicSlug}`)
-            else if (predictionId) router.push(`/result/${predictionId}`)
+            if (publicSlug) window.location.assign(`/report/${publicSlug}`)          // v1.2
+            else if (predictionId) window.location.assign(`/result/${predictionId}`)
             else {
               setError(
                 'Reading ban gayi par save nahi hui. WhatsApp karein — turant bhej dunga.'
@@ -526,4 +531,4 @@ const btnStyle: React.CSSProperties = {
   cursor: 'pointer',
   boxShadow: '0 0 30px rgba(212,175,55,0.35)',
 }
-// END — app/upgrade/UpgradeClient.tsx v1.1
+// END — app/upgrade/UpgradeClient.tsx v1.2

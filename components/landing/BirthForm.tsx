@@ -2,6 +2,15 @@
 /**
  * ============================================================
  * TRIKAAL VAANI — BirthForm
+ * v11.2 (11 Nov 2026) — REPORT PAR JAANA AB POORA PAGE LOAD (Rohiit approved).
+ *   Reading save hone ke baad router.push('/report/<slug>') page ko "Application
+ *   error" de raha tha: in-app navigation mein [slug] chunk ka address do baar
+ *   encode hota hai (%255Bslug%255D → 404 → ChunkLoadError). Live par reproduce
+ *   kiya (13:08 Rohiit ki test reading save hui, phir crash). Ab
+ *   window.location.assign — seedha load par page theek khulta hai.
+ *   Payment code, validate, body — EK LINE NAHI BADLI.
+ *   Build marker → "BF v11.2 · 11-Nov-2026".
+ *
  * v11.1 (11 Nov 2026) — VAULT FIX (Rohiit approved, option A "secure").
  *   Logged-in grahak ki reading uske "My Vault" mein nahi jaati thi — form
  *   kabhi bata hi nahi raha tha ki user kaun hai (predictions mein 70 din,
@@ -1275,7 +1284,7 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
         if (res.status === 409 && data?.code === 'PLAY_ALREADY_USED' && typeof data?.reportUrl === 'string') {
           try {
             stopLoadingMessages()
-            router.push(new URL(data.reportUrl).pathname)
+            window.location.assign(new URL(data.reportUrl).pathname)   // v11.2 full load
             return
           } catch { /* galat URL — neeche wali normal galti dikhegi */ }
         }
@@ -1291,8 +1300,10 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
       const publicSlug   = data?._meta?.publicSlug   ?? null
       const predictionId = data?._meta?.predictionId ?? null
 
-      if (publicSlug)        router.push(`/report/${publicSlug}`)
-      else if (predictionId) router.push(`/result/${predictionId}`)
+      // v11.2 — full page load, NOT router.push: in-app nav to /report/[slug]
+      // crashes (ChunkLoadError, %255Bslug%255D 404) since 5 Nov 2026.
+      if (publicSlug)        window.location.assign(`/report/${publicSlug}`)
+      else if (predictionId) window.location.assign(`/result/${predictionId}`)
       else { setApiError('Prediction ready hai par save nahi hua. Please retry karo.'); stopLoadingMessages() }
     } catch {
       setApiError('Network error. Please check your connection.')
@@ -1673,11 +1684,11 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
               </p>
             </div>
 
-            {/* BUILD MARKER — BirthForm v11.1 · 2026-11-11. If you cannot see
+            {/* BUILD MARKER — BirthForm v11.2 · 2026-11-11. If you cannot see
                 this line on screen, the file you are looking at is NOT the file
                 that is deployed, and the problem is the deployment, not the code. */}
             <p style={{ margin: '0 0 6px', fontSize: '10px', color: '#334155', textAlign: 'right' }}>
-              BF v11.1 · 11-Nov-2026 · {isIndia === false ? 'INTL/USD' : 'IN/INR'}{inPlayApp ? ' · PLAY' : ''}
+              BF v11.2 · 11-Nov-2026 · {isIndia === false ? 'INTL/USD' : 'IN/INR'}{inPlayApp ? ' · PLAY' : ''}
             </p>
 
             {/* v10.7 — in the Play app Google shows each buyer their own local
@@ -2069,4 +2080,4 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
     </section>
   )
 }
-// END — components/landing/BirthForm.tsx v11.1
+// END — components/landing/BirthForm.tsx v11.2
