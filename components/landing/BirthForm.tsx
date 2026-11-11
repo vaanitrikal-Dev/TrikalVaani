@@ -2,6 +2,17 @@
 /**
  * ============================================================
  * TRIKAAL VAANI — BirthForm
+ * v11.1 (11 Nov 2026) — VAULT FIX (Rohiit approved, option A "secure").
+ *   Logged-in grahak ki reading uske "My Vault" mein nahi jaati thi — form
+ *   kabhi bata hi nahi raha tha ki user kaun hai (predictions mein 70 din,
+ *   1,104 rows, user_id = 0). Ab agar user Sign In hai to uska Supabase
+ *   login token (`accessToken`) predict body mein jaata hai. Server us token
+ *   ko KHUD Supabase se verify karta hai (create-order v1.2, predict v16.4) —
+ *   browser ka bheja userId kabhi maana nahi jaata. Sign In nahi hai to key
+ *   jaati hi nahi → body bilkul pehle jaisi.
+ *   handleRazorpayPayment, handlePayPalPaid, validate, Play — EK LINE NAHI BADLI.
+ *   Build marker → "BF v11.1 · 11-Nov-2026".
+ *
  * v11.0 (8 Nov 2026) — "Maa Shakti ko Arzi" AB RAZORPAY SE (Rohiit ka faisla).
  *   Form ke neeche wala WhatsApp-only dabba hata kar naya
  *   components/landing/MaaArziPay.tsx lagaya: khaali amount box (koi amount
@@ -189,6 +200,7 @@ import { isPlayBillingAvailable, purchaseWithPlay, PLAY_PRODUCT_DEEP } from "@/l
 import { PLAY_PRODUCTS } from "@/lib/play-billing"                                  // v10.8
 import { handOffPlayVoicePurchase } from "@/components/Trikal/TrikalVoice"          // v10.8
 import MaaArziPay from "@/components/landing/MaaArziPay"                              // v11.0
+import { supabase } from "@/lib/supabase"                                             // v11.1 vault
 
 // ── OneSignal tagging helper (v9.8) ──────────────────────────────────────────
 // Safe, deferred. Does nothing on server. Used for abandoned-kundali Journey.
@@ -1060,6 +1072,20 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
   const [numerology,     setNumerology]     = useState<ReturnType<typeof getNumerologyCompatibility> | null>(null)
   const [locating,       setLocating]       = useState(false)
 
+  // v11.1 — VAULT: logged-in user ka Supabase token. Ref (state nahi) taaki
+  // buildPredictionBody hamesha taaza token padhe aur koi re-render na ho.
+  // Token refresh / sign-in / sign-out par onAuthStateChange ise update karta hai.
+  const accessTokenRef = useRef<string | null>(null)
+  useEffect(() => {
+    supabase.auth.getSession()
+      .then(({ data }) => { accessTokenRef.current = data.session?.access_token ?? null })
+      .catch(() => { accessTokenRef.current = null })
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => {
+      accessTokenRef.current = session?.access_token ?? null
+    })
+    return () => subscription.unsubscribe()
+  }, [])
+
   const loadingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const elapsedIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const startedTaggedRef   = useRef(false)
@@ -1186,6 +1212,8 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
       paymentVerification,
       paypalVerification,
       ...(playVerification ? { playVerification } : {}),   // v10.7
+      // v11.1 — VAULT: sirf Sign In user par. Server khud verify karta hai.
+      ...(accessTokenRef.current ? { accessToken: accessTokenRef.current } : {}),
       birthData: {
         name:     fields.name,
         dob:      fields.dateOfBirth,
@@ -1645,11 +1673,11 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
               </p>
             </div>
 
-            {/* BUILD MARKER — BirthForm v11.0 · 2026-11-08. If you cannot see
+            {/* BUILD MARKER — BirthForm v11.1 · 2026-11-11. If you cannot see
                 this line on screen, the file you are looking at is NOT the file
                 that is deployed, and the problem is the deployment, not the code. */}
             <p style={{ margin: '0 0 6px', fontSize: '10px', color: '#334155', textAlign: 'right' }}>
-              BF v11.0 · 08-Nov-2026 · {isIndia === false ? 'INTL/USD' : 'IN/INR'}{inPlayApp ? ' · PLAY' : ''}
+              BF v11.1 · 11-Nov-2026 · {isIndia === false ? 'INTL/USD' : 'IN/INR'}{inPlayApp ? ' · PLAY' : ''}
             </p>
 
             {/* v10.7 — in the Play app Google shows each buyer their own local
@@ -2041,4 +2069,4 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
     </section>
   )
 }
-// END — components/landing/BirthForm.tsx v11.0
+// END — components/landing/BirthForm.tsx v11.1

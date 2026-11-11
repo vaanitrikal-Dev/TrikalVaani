@@ -106,6 +106,24 @@
 /**
  *
  * ══════════════════════════════════════════════════════════════════════════
+ * v16.4 — 11 NOVEMBER 2026 — VAULT: user_id AB SAHI SE SAVE HOTA HAI
+ *   Rohiit ki explicit permission ("A: Secure, predict mein ~15 lines", 11 Nov
+ *   2026). Customer Vishal Malhotra (₹51 paid) ka vault khaali tha. Jaanch:
+ *   70 din mein 1,104 predictions, user_id ek mein bhi nahi — BirthForm kabhi
+ *   bhejta hi nahi tha, aur yeh route body.userId ko BINA JAANCH ke maan leta.
+ *   Ab naya function resolveVaultUserId() — SIRF do raaste maanta hai:
+ *     1. body.accessToken (BirthForm v11.1, Sign In user) → Supabase se
+ *        verify → us user ka id. (free, PayPal, Play — browser seedha yahan)
+ *     2. Razorpay redirect / cron: body.userId TABHI maana jaata hai jab wo
+ *        isi razorpay_order_id ke paid_order_intents.predict_body.userId se
+ *        match kare (create-order v1.2 wahan sirf VERIFIED id rakhta hai).
+ *   Baaki har case → user_id null (pehle jaisa). Kabhi throw nahi karta,
+ *   reading kabhi nahi rukti. Function payment gate ke BAAD, save se theek
+ *   pehle chalta hai.
+ *   Badla: naya function + STEP 6 ke upar ek call + saveToSupabase call mein
+ *   `userId` → `userId: vaultUserId`. Payment gate (Razorpay/PayPal/Play), VM
+ *   payload, granth, template, slug, minor check — EK LINE NAHI BADLI.
+ * ══════════════════════════════════════════════════════════════════════════
  * v16.3 — 06 NOVEMBER 2026 — GOOGLE INDEXING PING BAND (Rohiit ki explicit
  *   permission, 6 Nov 2026: "Yes for every action"). Google ne thin-content manual
  *   action diya. Har report ek grahak ki personal reading hai — ab koi bhi report
@@ -1834,6 +1852,39 @@ async function saveToSupabase(p:{
   return data.id as string
 }
 
+// ── v16.4: VAULT — kis logged-in user ki reading hai? ─────────────────────────
+// Kabhi throw nahi karta. Pakka na ho to null (reading phir bhi banti hai,
+// bas vault mein nahi jaati). Browser ka bheja body.userId akela KABHI nahi
+// maana jaata — sirf verified token, ya create-order ka verified intent.
+async function resolveVaultUserId(
+  body: any,
+  paymentVerification: PaymentVerification | null | undefined,
+): Promise<string | null> {
+  try {
+    const tok = typeof body?.accessToken === 'string' ? body.accessToken : ''
+    if (tok.length > 20 && tok.length < 8192) {
+      const { data, error } = await supabase.auth.getUser(tok)
+      if (!error && data?.user?.id) return data.user.id
+      console.warn(`[TV-v16.4] vault token not verified: ${error?.message ?? 'no user'}`)
+      return null
+    }
+    const claimed = typeof body?.userId === 'string' ? body.userId : ''
+    const orderId = paymentVerification?.razorpay_order_id ?? ''
+    if (claimed && orderId) {
+      const { data, error } = await supabase
+        .from('paid_order_intents')
+        .select('predict_body')
+        .eq('razorpay_order_id', orderId)
+        .maybeSingle()
+      if (!error && (data as any)?.predict_body?.userId === claimed) return claimed
+      console.warn(`[TV-v16.4] vault userId did not match intent | order:${orderId}`)
+    }
+  } catch (e: any) {
+    console.warn(`[TV-v16.4] resolveVaultUserId threw (non-fatal): ${e?.message}`)
+  }
+  return null
+}
+
 // ── MAIN HANDLER ─────────────────────────────────────────────────────────────
 export async function POST(req: NextRequest) {
   const startMs = Date.now()
@@ -2500,10 +2551,14 @@ export async function POST(req: NextRequest) {
     localBirthData.cityName??'India', predictionJson
   )
 
+  // ── v16.4: VAULT — sirf verified user (token ya create-order intent) ──────
+  const vaultUserId = await resolveVaultUserId(body, paymentVerification)
+  void userId   // v16.4: body.userId ab seedha nahi maana jaata (upar dekho)
+
   // ── STEP 6: Save to Supabase ─────────────────────────────────────────────
   try {
     await saveToSupabase({
-      sessionId, userId, domainId,
+      sessionId, userId: vaultUserId ?? undefined, domainId,
       domainLabel:    domainConfig.label??domainId,
       predictionTier, birthData:localBirthData,
       userContext:    promptUserContext,

@@ -3,8 +3,21 @@
  * TRIKAL VAANI — Razorpay Order Creation API
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/api/create-order/route.ts
- * VERSION: 1.1 (27 Sep 2026)
+ * VERSION: 1.2 (11 Nov 2026)
  * SIGNED: ROHIIT GUPTA, CEO
+ * ============================================================
+ * v1.2 (11 Nov 2026) — VAULT FIX (Rohiit approved, option A "secure").
+ *   ₹51 Deep Reading redirect mode mein report /api/razorpay-callback (ya
+ *   cron) banata hai, isi intent ke predict_body se. Vault ke liye report par
+ *   user_id chahiye — par browser ka bheja userId bharose layak nahi.
+ *   Isliye: BirthForm v11.1 Sign In user ka `accessToken` bhejta hai; yahan
+ *   Supabase se verify hota hai → sirf VERIFIED `userId` intent mein jaata
+ *   hai. Token khud KABHI save nahi hota (DB mein login token nahi rakhte).
+ *   Browser ne apna `userId` bheja ho to wo hamesha hata diya jaata hai.
+ *   predict v16.4 is userId ko tabhi maanta hai jab wo isi order ke intent
+ *   se match kare. Verify fail ho to bhi order + intent pehle jaise banenge —
+ *   bas reading vault mein nahi jaayegi. Payment kabhi block nahi hota.
+ *   Order banana, price, Razorpay call — EK LINE NAHI BADLI.
  * ============================================================
  * v1.1 (27 Sep 2026) — PAYMENT SE PEHLE BIRTH DATA SAVE.
  *   27 Sep 10:39am: customer 9250886991 ne ₹51 pay kiya (PhonePe), UPI app
@@ -66,8 +79,27 @@ async function saveIntent(orderId: string, predictBody: any): Promise<void> {
       console.error(`[Trikal] intent too large (${size} bytes) — not saved | ${orderId}`);
       return;
     }
+    // v1.2 — VAULT: token verify → sirf verified userId. Token aur browser ka
+    // userId dono hata diye jaate hain.
+    const { accessToken, userId: _clientUserId, ...rest } = predictBody;
+    void _clientUserId;
+    let verifiedUserId: string | null = null;
+    if (typeof accessToken === 'string' && accessToken.length > 20 && accessToken.length < 8192) {
+      try {
+        const { data, error } = await admin().auth.getUser(accessToken);
+        if (!error && data?.user?.id) verifiedUserId = data.user.id;
+        else console.warn('[Trikal] intent: token not verified —', error?.message ?? 'no user', orderId);
+      } catch (e) {
+        console.warn('[Trikal] intent: token verify threw —', e);
+      }
+    }
     // Payment proof kabhi save nahi hota — cron use khud banata hai
-    const clean = { ...predictBody, paymentVerification: null, paypalVerification: null };
+    const clean = {
+      ...rest,
+      paymentVerification: null,
+      paypalVerification: null,
+      ...(verifiedUserId ? { userId: verifiedUserId } : {}),
+    };
     const { error } = await admin().from('paid_order_intents').insert({
       razorpay_order_id: orderId,
       product:           'deep',
@@ -127,4 +159,4 @@ export async function POST(req: NextRequest) {
     );
   }
 }
-// END — app/api/create-order/route.ts v1.1
+// END — app/api/create-order/route.ts v1.2

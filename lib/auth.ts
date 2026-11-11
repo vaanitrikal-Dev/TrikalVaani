@@ -1,14 +1,51 @@
+/**
+ * ============================================================
+ * TRIKAAL VAANI — Auth + Vault helpers
+ * File:    lib/auth.ts
+ * VERSION: v2.0 (11 Nov 2026)
+ * Owner:   Rohiit Gupta, Chief Vedic Architect
+ *
+ * v2.0 (11 Nov 2026) — VAULT FIX (Rohiit approved, 11 Nov 2026).
+ *   Customer Vishal Malhotra ne ₹51 diye, report bani, par "My Vault" khaali
+ *   tha. Jaanch mein mila ki vault KABHI kaam hi nahi kiya:
+ *     - getSavedCharts() `saved_charts` table padhta tha, aur
+ *       getUserProfile()/signUp `user_profiles` — dono tables Supabase mein
+ *       HAIN HI NAHI. Har call chup-chaap khaali/fail.
+ *     - saveChart() poore code mein kahin call nahi hota tha.
+ *   Ab:
+ *     - getVaultReadings(): seedha `predictions` se, user_id = login user.
+ *       RLS policy "Users can view own predictions" (auth.uid() = user_id)
+ *       pehle se hai — user sirf apni readings dekh sakta hai.
+ *     - getUserProfile(): asli `profiles` table (name, email).
+ *     - signUpWithEmail(): naam `profiles.name` mein (pehle galat table mein
+ *       jaata tha, isliye sabka naam trigger wala default "Friend" reh jaata).
+ *   HATAYE (koi import nahi karta tha — grep se check kiya):
+ *     saveChart, deleteChart, getSavedCharts, updateLastSessionContext.
+ *     Delete jaan-boojh kar nahi rakha: users ke liye predictions par DELETE
+ *     policy nahi hai, aur CEO ka NO-DELETE niyam hai.
+ * ============================================================
+ */
 import { supabase } from './supabase';
 
 export async function signUpWithEmail(email: string, password: string, name: string) {
   const { data, error } = await supabase.auth.signUp({ email, password });
   if (error || !data.user) return { error };
 
-  await supabase.from('user_profiles').insert({
-    id: data.user.id,
-    display_name: name,
-    email,
-  });
+  // profiles row signup trigger banata hai (default naam "Friend").
+  // Asli naam yahan likho. Session na ho (email confirm on) to RLS rok degi —
+  // tab bhi signup safal hai, sirf naam default rahega. Kabhi throw nahi.
+  try {
+    const clean = name.trim().slice(0, 100);
+    if (clean) {
+      const { error: pErr } = await supabase
+        .from('profiles')
+        .update({ name: clean, updated_at: new Date().toISOString() })
+        .eq('id', data.user.id);
+      if (pErr) console.warn('[TV-auth] profile name not saved:', pErr.message);
+    }
+  } catch (e) {
+    console.warn('[TV-auth] profile name update threw:', e);
+  }
 
   return { data };
 }
@@ -26,49 +63,52 @@ export async function getSession() {
   return data.session;
 }
 
-export async function getUserProfile(userId: string) {
-  const { data } = await supabase
-    .from('user_profiles')
-    .select('*')
+export type VaultProfile = {
+  name: string | null;
+  email: string | null;
+};
+
+export async function getUserProfile(userId: string): Promise<VaultProfile | null> {
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('name, email')
     .eq('id', userId)
     .maybeSingle();
-  return data;
+  if (error) {
+    console.warn('[TV-auth] getUserProfile:', error.message);
+    return null;
+  }
+  return (data as VaultProfile) ?? null;
 }
 
-export async function updateLastSessionContext(userId: string, context: Record<string, unknown>) {
-  await supabase
-    .from('user_profiles')
-    .update({ last_session_context: context, updated_at: new Date().toISOString() })
-    .eq('id', userId);
-}
+export type VaultReading = {
+  id: string;
+  person_name: string | null;
+  domain_label: string | null;
+  dob: string | null;
+  birth_time: string | null;
+  birth_city: string | null;
+  mahadasha: string | null;
+  antardasha: string | null;
+  prediction_tier: string | null;
+  payment_verified: boolean | null;
+  public_slug: string | null;
+  created_at: string;
+};
 
-export async function getSavedCharts(userId: string) {
-  const { data } = await supabase
-    .from('saved_charts')
-    .select('*')
-    .eq('user_id', userId)
-    .order('created_at', { ascending: false });
-  return data ?? [];
-}
-
-export async function saveChart(userId: string, chart: {
-  name: string;
-  dob: string;
-  birth_time: string;
-  city: string;
-  energy_score: number;
-  pillar_scores: Record<string, number>;
-  selected_question: string;
-  analysis_summary: string;
-}) {
+// Sirf halke columns — prediction_json / kundali_data (bade JSON) nahi mangte.
+export async function getVaultReadings(userId: string): Promise<VaultReading[]> {
   const { data, error } = await supabase
-    .from('saved_charts')
-    .insert({ user_id: userId, ...chart })
-    .select('id')
-    .maybeSingle();
-  return { data, error };
+    .from('predictions')
+    .select('id, person_name, domain_label, dob, birth_time, birth_city, mahadasha, antardasha, prediction_tier, payment_verified, public_slug, created_at')
+    .eq('user_id', userId)
+    .not('public_slug', 'is', null)
+    .order('created_at', { ascending: false })
+    .limit(100);
+  if (error) {
+    console.error('[TV-auth] getVaultReadings:', error.message);
+    return [];
+  }
+  return (data ?? []) as VaultReading[];
 }
-
-export async function deleteChart(chartId: string) {
-  return supabase.from('saved_charts').delete().eq('id', chartId);
-}
+// END — lib/auth.ts v2.0
