@@ -96,7 +96,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Rohiit Gupta — Founder of Trikaal Vaani",
     description:
-      "16+ years Vedic astrology. Founder of Trikaal Vaani (registered as Trikal Vaani) — MSME registered (UDYAM-DL-10-0119070). Chief Vedic Architect behind Trikaal AI.",
+      "16+ years Vedic astrology. Founder of Trikaal Vaani (registered as Trikaal Vaani) — MSME registered (UDYAM-DL-10-0119070). Chief Vedic Architect behind Trikaal AI.",
     url: "https://trikalvaani.com/founder",
     siteName: "Trikaal Vaani",
     type: "profile",
@@ -274,7 +274,7 @@ const schema = {
           acceptedAnswer: {
             "@type": "Answer",
             text:
-              "Trikaal Vaani (registered as Trikal Vaani) was founded by Rohiit Gupta in 2025 in New Delhi, India. Both spellings refer to the same brand — a Granth-based Vedic astrology platform. Rohiit serves as Chief Vedic Architect and personally designs every Kundli reading framework that Trikaal AI applies to user birth charts. The platform is a Government of India MSME registered enterprise (UDYAM-DL-10-0119070).",
+              "Trikaal Vaani (registered as Trikaal Vaani) was founded by Rohiit Gupta in 2025 in New Delhi, India. Both spellings refer to the same brand — a Granth-based Vedic astrology platform. Rohiit serves as Chief Vedic Architect and personally designs every Kundli reading framework that Trikaal AI applies to user birth charts. The platform is a Government of India MSME registered enterprise (UDYAM-DL-10-0119070).",
           },
         },
         {
@@ -288,7 +288,7 @@ const schema = {
         },
         {
           "@type": "Question",
-          name: "Is Trikal Vaani the same as Trikaal Vaani?",
+          name: "Is Trikaal Vaani the same as Trikaal Vaani?",
           acceptedAnswer: {
             "@type": "Answer",
             text:
@@ -402,7 +402,7 @@ export default function FounderPage() {
                   className="text-xs font-semibold tracking-widest uppercase mb-2"
                   style={{ color: GOLD }}
                 >
-                  Founder · Trikaal Vaani <span className="text-gray-500">(Trikal Vaani)</span>
+                  Founder · Trikaal Vaani <span className="text-gray-500">(Trikaal Vaani)</span>
                 </p>
                 <h1 className="font-serif text-4xl md:text-5xl font-bold text-white mb-3">
                   Rohiit Gupta
@@ -492,7 +492,7 @@ export default function FounderPage() {
                 Rohiit founded{" "}
                 <strong style={{ color: GOLD }}>Trikaal Vaani</strong> —
                 registered as{" "}
-                <strong style={{ color: GOLD }}>Trikal Vaani</strong> — in
+                <strong style={{ color: GOLD }}>Trikaal Vaani</strong> — in
                 Dwarka, New Delhi, as a Granth-based Vedic astrology platform. The
                 brand name comes from Sanskrit{" "}
                 <em className="text-white">त्रिकाल वाणी</em>: <em>Trikaal</em>{" "}
@@ -505,7 +505,7 @@ export default function FounderPage() {
                 </strong>
               </p>
               <p className="mb-4">
-                Both spellings — <strong>Trikal Vaani</strong> (the simpler,
+                Both spellings — <strong>Trikaal Vaani</strong> (the simpler,
                 shorter form registered with the Government of India MSME under{" "}
                 {UDYAM_NUMBER}) and <strong>Trikaal Vaani</strong> (the more
                 phonetically natural double-A romanization) — refer to the same
@@ -518,7 +518,7 @@ export default function FounderPage() {
               <p>
                 This page is the canonical source for anyone searching either
                 spelling. If you found Rohiit by searching{" "}
-                <em>&ldquo;Trikal Vaani founder&rdquo;</em> or{" "}
+                <em>&ldquo;Trikaal Vaani founder&rdquo;</em> or{" "}
                 <em>&ldquo;Trikaal Vaani Rohiit Gupta&rdquo;</em> — you are in the
                 right place.
               </p>
@@ -927,7 +927,7 @@ export default function FounderPage() {
               </Link>
             </div>
             <p className="text-[10px] text-gray-600 mt-6">
-              Trikaal Vaani (registered as Trikal Vaani) · MSME Registered · {UDYAM_NUMBER} · India · 🔱 Mahakaal Ka Ashirwad
+              Trikaal Vaani (registered as Trikaal Vaani) · MSME Registered · {UDYAM_NUMBER} · India · 🔱 Mahakaal Ka Ashirwad
             </p>
           </div>
         </section>
