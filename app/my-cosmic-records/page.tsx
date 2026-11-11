@@ -4,8 +4,14 @@
  * ============================================================
  * TRIKAAL VAANI — My Cosmic Records (My Vault)
  * File:    app/my-cosmic-records/page.tsx
- * VERSION: v2.0 (11 Nov 2026)
+ * VERSION: v2.1 (11 Nov 2026)
  * Owner:   Rohiit Gupta, Chief Vedic Architect
+ *
+ * v2.1 (11 Nov 2026) — "Report kholein" ab plain <a> (poora page load), <Link>
+ *   nahi. Vishal ka vault se report kholna "Application error" de raha tha:
+ *   Vercel Skew Protection ka ?dpl= + Next 13.5 [slug] chunk path ko do baar
+ *   encode karta hai (%255Bslug%255D → 404 → ChunkLoadError). Live par
+ *   headless Chrome se reproduce kiya. Seedha page load par yeh nahi hota.
  *
  * v2.0 (11 Nov 2026) — VAULT AB ASLI READINGS DIKHATA HAI (Rohiit approved
  *   design: "Simple card + Report button").
@@ -253,7 +259,11 @@ export default function MyCosmicRecordsPage() {
                     </div>
                     {r.public_slug && (
                       <div className="px-4 pb-4">
-                        <Link
+                        {/* v2.1 — plain <a>, NOT <Link>: full page load. Next 13.5 +
+                            Vercel Skew Protection (?dpl=) double-encodes the [slug]
+                            chunk path (%255B) → 404 → "Application error" on
+                            in-app navigation (Vishal, 11 Nov 2026). */}
+                        <a
                           href={`/report/${r.public_slug}`}
                           className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-sm font-semibold transition-all hover:scale-[1.02]"
                           style={{
@@ -264,7 +274,7 @@ export default function MyCosmicRecordsPage() {
                         >
                           <ScrollText className="w-4 h-4" />
                           Report kholein →
-                        </Link>
+                        </a>
                       </div>
                     )}
                   </div>
@@ -279,4 +289,4 @@ export default function MyCosmicRecordsPage() {
     </div>
   );
 }
-// END — app/my-cosmic-records/page.tsx v2.0
+// END — app/my-cosmic-records/page.tsx v2.1
