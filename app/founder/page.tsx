@@ -3,7 +3,12 @@
  * 🔱 TRIKAL VAANI — CEO PROTECTION HEADER 🔱
  * ============================================================================
  * File:        app/founder/page.tsx
- * Version: 4.7 (19 Oct 2026) — competitor brand name removed from bio copy.
+ * Version: 4.8 (11 Nov 2026) — approved by Rohiit 11 Nov 2026: "15+ years" -> "16+ years";
+ *   "India's first AI-powered" claim removed; broken spelling sentence fixed (Trikal Vaani =
+ *   registered name, Trikaal Vaani = brand spelling); "in minutes" line replaced; real address
+ *   (724, Pocket 3, Sector 19, Dwarka) in text + schema; new section "How Our Content Is Made"
+ *   linking /editorial-policy; YouTube added to sameAs. Layout, prices, CTAs unchanged.
+ * (previous) Version: 4.7 (19 Oct 2026) — competitor brand name removed from bio copy.
  * (previous) Version: 4.6 (11 Oct 2026 — LOT 3C Play Billing: Rohiit ka faisla #1 — Play Store app ke andar
  *   payment provider ka naam "Google Play" dikhega, "Razorpay" nahi (app mein Razorpay likhna
  *   asatya hoga). Teen jagah naam <PayProviderName web="Razorpay" /> se: Vision para, ₹51 Deep
@@ -57,11 +62,13 @@ import PayProviderName from "@/components/payment/PayProviderName"; // v4.6
 const UDYAM_NUMBER = "UDYAM-DL-10-0119070";
 const UDYAM_VERIFY_URL = "https://udyamregistration.gov.in/Udyam_Verify.aspx";
 const INSTAGRAM_URL = "https://instagram.com/thetrikalvaani";
+const YOUTUBE_URL = "https://www.youtube.com/@TheTrikalVaani"; // v4.8
+const ADDRESS_LINE = "724, Pocket 3, Sector 19, Dwarka, New Delhi 110075"; // v4.8
 
 export const metadata: Metadata = {
   title: { absolute: "Rohiit Gupta — Chief Vedic Architect, Trikaal Vaani" },
   description:
-    "Rohiit Gupta — Founder of Trikal Vaani (also known as Trikaal Vaani). 15+ years Vedic astrology under Parashara BPHS tradition. Government of India MSME registered (UDYAM-DL-10-0119070). Chief Vedic Architect behind Jini AI — India's first AI-powered Vedic astrology platform, Delhi NCR.",
+    "Rohiit Gupta — Founder of Trikal Vaani (also known as Trikaal Vaani). 16+ years Vedic astrology under Parashara BPHS tradition. Government of India MSME registered (UDYAM-DL-10-0119070). Chief Vedic Architect of a Granth-based Vedic astrology platform, Dwarka, New Delhi.",
   keywords: [
     "Rohiit Gupta",
     "Rohiit Gupta astrologer Delhi",
@@ -87,9 +94,9 @@ export const metadata: Metadata = {
     },
   },
   openGraph: {
-    title: "Rohiit Gupta — Founder of Trikaal Vaani (Trikaal Vaani)",
+    title: "Rohiit Gupta — Founder of Trikaal Vaani",
     description:
-      "15+ years Vedic astrology. Founder of Trikaal Vaani (also Trikaal Vaani) — MSME registered (UDYAM-DL-10-0119070). Chief Vedic Architect behind Trikaal AI.",
+      "16+ years Vedic astrology. Founder of Trikaal Vaani (registered as Trikal Vaani) — MSME registered (UDYAM-DL-10-0119070). Chief Vedic Architect behind Trikaal AI.",
     url: "https://trikalvaani.com/founder",
     siteName: "Trikaal Vaani",
     type: "profile",
@@ -99,15 +106,15 @@ export const metadata: Metadata = {
         url: "https://trikalvaani.com/Rohiit-Gupta.jpg",
         width: 800,
         height: 800,
-        alt: "Rohiit Gupta — Chief Vedic Architect, Trikaal Vaani (Trikaal Vaani)",
+        alt: "Rohiit Gupta — Chief Vedic Architect, Trikaal Vaani",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Rohiit Gupta — Founder of Trikaal Vaani (Trikaal Vaani)",
+    title: "Rohiit Gupta — Founder of Trikaal Vaani",
     description:
-      "15+ years Vedic astrology. Founder of Trikaal Vaani / Trikaal Vaani. MSME Registered. India.",
+      "16+ years Vedic astrology. Founder of Trikaal Vaani. MSME Registered. New Delhi, India.",
     site: "@thetrikalvaani",
     images: ["https://trikalvaani.com/Rohiit-Gupta.jpg"],
   },
@@ -140,14 +147,16 @@ const schema = {
       jobTitle: "Chief Vedic Architect",
       image: "https://trikalvaani.com/Rohiit-Gupta.jpg",
       description:
-        "Rohiit Gupta has studied Vedic astrology for over 15 years under the Parashara BPHS tradition. He is the founder of Trikal Vaani (also known as Trikaal Vaani) — India's first AI-powered Vedic astrology platform, registered as a Government of India MSME enterprise (UDYAM-DL-10-0119070).",
+        "Rohiit Gupta has studied Vedic astrology for over 16 years under the Parashara BPHS tradition. He is the founder of Trikal Vaani (also known as Trikaal Vaani) — a Granth-based Vedic astrology platform, registered as a Government of India MSME enterprise (UDYAM-DL-10-0119070).",
       url: "https://trikalvaani.com/founder",
       email: "rohiit@trikalvaani.com",
       telephone: "+919211804111",
       address: {
         "@type": "PostalAddress",
-        addressLocality: "India",
+        streetAddress: "724, Pocket 3, Sector 19, Dwarka",
+        addressLocality: "New Delhi",
         addressRegion: "Delhi",
+        postalCode: "110075",
         addressCountry: "IN",
       },
       worksFor: {
@@ -175,6 +184,7 @@ const schema = {
       knowsLanguage: ["en", "hi"],
       sameAs: [
         INSTAGRAM_URL,
+        YOUTUBE_URL,
         "https://trikalvaani.com",
         "https://trikalvaani.com/trikaal-vaani",
       ],
@@ -206,8 +216,10 @@ const schema = {
         "@type": "Place",
         address: {
           "@type": "PostalAddress",
-          addressLocality: "India",
+          streetAddress: "724, Pocket 3, Sector 19, Dwarka",
+          addressLocality: "New Delhi",
           addressRegion: "Delhi",
+          postalCode: "110075",
           addressCountry: "IN",
         },
       },
@@ -232,7 +244,7 @@ const schema = {
           url: "https://msme.gov.in",
         },
       },
-      sameAs: [INSTAGRAM_URL, UDYAM_VERIFY_URL],
+      sameAs: [INSTAGRAM_URL, YOUTUBE_URL, UDYAM_VERIFY_URL],
       slogan: "Kaal bada balwan hai, sabko nach nachaye",
     },
     // ── BreadcrumbList ──
@@ -253,7 +265,7 @@ const schema = {
           acceptedAnswer: {
             "@type": "Answer",
             text:
-              "Rohiit Gupta is the founder and Chief Vedic Architect of Trikal Vaani (also known as Trikaal Vaani). Based in Delhi NCR, he has 15+ years of study in the Parashara BPHS tradition specializing in Vimshottari Dasha, Pratyantar Dasha timing, Navamsa D9 chart analysis, Dhana Yoga combinations, Property Yog, and Jaimini astrology. He combined his classical Vedic expertise with Google Gemini AI to build Jini, the AI soul of Trikal Vaani. Reachable at +91-9211804111 or rohiit@trikalvaani.com.",
+              "Rohiit Gupta is the founder and Chief Vedic Architect of Trikal Vaani (also known as Trikaal Vaani). Based in Dwarka, New Delhi, he has 16+ years of study in the Parashara BPHS tradition specializing in Vimshottari Dasha, Pratyantar Dasha timing, Navamsa D9 chart analysis, Dhana Yoga combinations, Property Yog, and Jaimini astrology. He combined his classical Vedic expertise with Google Gemini AI to build Jini, the AI soul of Trikal Vaani. Reachable at +91-9211804111 or rohiit@trikalvaani.com.",
           },
         },
         {
@@ -262,7 +274,7 @@ const schema = {
           acceptedAnswer: {
             "@type": "Answer",
             text:
-              "Trikaal Vaani (officially Trikaal Vaani) was founded by Rohiit Gupta in 2025 in India. Both spellings refer to the same brand — India's first AI-powered Vedic astrology platform. Rohiit serves as Chief Vedic Architect and personally designs every Kundli reading framework that Trikaal AI applies to user birth charts. The platform is a Government of India MSME registered enterprise (UDYAM-DL-10-0119070).",
+              "Trikaal Vaani (registered as Trikal Vaani) was founded by Rohiit Gupta in 2025 in New Delhi, India. Both spellings refer to the same brand — a Granth-based Vedic astrology platform. Rohiit serves as Chief Vedic Architect and personally designs every Kundli reading framework that Trikaal AI applies to user birth charts. The platform is a Government of India MSME registered enterprise (UDYAM-DL-10-0119070).",
           },
         },
         {
@@ -271,12 +283,12 @@ const schema = {
           acceptedAnswer: {
             "@type": "Answer",
             text:
-              "Rohiit Gupta has 15+ years of Vedic astrology study under the Parashara Brihat Hora Shastra (BPHS) tradition — the oldest authoritative school of Jyotish. His expertise includes Vimshottari Dasha (120-year planetary timeline), Pratyantar Dasha (3-7 day timing precision), Navamsa D9 chart analysis, 32+ Dhana Yoga combinations, Property Yog, Shoola/Amrita/Visha yogas, Atmakaraka analysis, and Jaimini astrology. He is fluent in Hindi and English.",
+              "Rohiit Gupta has 16+ years of Vedic astrology study under the Parashara Brihat Hora Shastra (BPHS) tradition — the oldest authoritative school of Jyotish. His expertise includes Vimshottari Dasha (120-year planetary timeline), Pratyantar Dasha (3-7 day timing precision), Navamsa D9 chart analysis, 32+ Dhana Yoga combinations, Property Yog, Shoola/Amrita/Visha yogas, Atmakaraka analysis, and Jaimini astrology. He is fluent in Hindi and English.",
           },
         },
         {
           "@type": "Question",
-          name: "Is Trikaal Vaani the same as Trikaal Vaani?",
+          name: "Is Trikal Vaani the same as Trikaal Vaani?",
           acceptedAnswer: {
             "@type": "Answer",
             text:
@@ -329,7 +341,7 @@ export default function FounderPage() {
                 >
                   <Image
                     src="/Rohiit-Gupta.jpg"
-                    alt="Rohiit Gupta — Chief Vedic Architect, Trikaal Vaani (Trikaal Vaani)"
+                    alt="Rohiit Gupta — Chief Vedic Architect, Trikaal Vaani"
                     fill
                     className="object-cover object-top"
                     priority
@@ -390,7 +402,7 @@ export default function FounderPage() {
                   className="text-xs font-semibold tracking-widest uppercase mb-2"
                   style={{ color: GOLD }}
                 >
-                  Founder · Trikaal Vaani <span className="text-gray-500">(Trikaal Vaani)</span>
+                  Founder · Trikaal Vaani <span className="text-gray-500">(Trikal Vaani)</span>
                 </p>
                 <h1 className="font-serif text-4xl md:text-5xl font-bold text-white mb-3">
                   Rohiit Gupta
@@ -400,11 +412,11 @@ export default function FounderPage() {
                 </p>
                 <div className="flex flex-wrap gap-3 justify-center md:justify-start">
                   {[
-                    "15+ Years Vedic Study",
+                    "16+ Years Vedic Study",
                     "Parashara BPHS Tradition",
                     "Swiss Ephemeris",
                     "Jaimini Astrology",
-                    "India Based",
+                    "Dwarka, New Delhi",
                     "🏛️ MSME Registered",
                   ].map((t) => (
                     <span
@@ -478,10 +490,10 @@ export default function FounderPage() {
               </h2>
               <p className="mb-4">
                 Rohiit founded{" "}
-                <strong style={{ color: GOLD }}>Trikaal Vaani</strong> — also
-                romanized as{" "}
-                <strong style={{ color: GOLD }}>Trikaal Vaani</strong> — in Delhi
-                NCR as India&apos;s first AI-powered Vedic astrology platform. The
+                <strong style={{ color: GOLD }}>Trikaal Vaani</strong> —
+                registered as{" "}
+                <strong style={{ color: GOLD }}>Trikal Vaani</strong> — in
+                Dwarka, New Delhi, as a Granth-based Vedic astrology platform. The
                 brand name comes from Sanskrit{" "}
                 <em className="text-white">त्रिकाल वाणी</em>: <em>Trikaal</em>{" "}
                 (त्रिकाल) means &ldquo;three times&rdquo; — past, present, and
@@ -493,7 +505,7 @@ export default function FounderPage() {
                 </strong>
               </p>
               <p className="mb-4">
-                Both spellings — <strong>Trikaal Vaani</strong> (the simpler,
+                Both spellings — <strong>Trikal Vaani</strong> (the simpler,
                 shorter form registered with the Government of India MSME under{" "}
                 {UDYAM_NUMBER}) and <strong>Trikaal Vaani</strong> (the more
                 phonetically natural double-A romanization) — refer to the same
@@ -506,7 +518,7 @@ export default function FounderPage() {
               <p>
                 This page is the canonical source for anyone searching either
                 spelling. If you found Rohiit by searching{" "}
-                <em>&ldquo;Trikaal Vaani founder&rdquo;</em> or{" "}
+                <em>&ldquo;Trikal Vaani founder&rdquo;</em> or{" "}
                 <em>&ldquo;Trikaal Vaani Rohiit Gupta&rdquo;</em> — you are in the
                 right place.
               </p>
@@ -524,7 +536,7 @@ export default function FounderPage() {
                 Where Ancient Wisdom Meets Modern Intelligence
               </h2>
               <p className="mb-4">
-                Rohiit Gupta&apos;s journey with Vedic astrology began over 15
+                Rohiit Gupta&apos;s journey with Vedic astrology began over 16
                 years ago — not in a classroom, but through personal
                 transformation. Facing major life crossroads in career,
                 relationships, and purpose, he turned to the ancient science of
@@ -557,7 +569,7 @@ export default function FounderPage() {
                 The Vision
               </p>
               <h2 className="font-serif text-2xl font-bold text-white mb-5">
-                Why He Built Trikaal Vaani (Trikaal Vaani)
+                Why He Built Trikaal Vaani
               </h2>
               <p className="mb-4">
                 Rohiit saw a gap — millions of Indians turning to astrology apps
@@ -567,15 +579,16 @@ export default function FounderPage() {
                 divisional charts. Most apps ignored all of this.
               </p>
               <p className="mb-4">
-                In 2025, Rohiit combined his 15+ years of Vedic knowledge with
-                modern AI — specifically Google Gemini — to create{" "}
+                In 2025, Rohiit brought his 16+ years of Vedic practice together
+                with modern AI to create{" "}
                 <span style={{ color: GOLD }} className="font-semibold">
                   Trikaal
                 </span>
-                , the AI soul of Trikaal Vaani. Trikaal applies Rohiit&apos;s
-                complete Vedic framework to each user&apos;s unique birth chart,
-                delivering a personalised reading that a professional astrologer
-                would take hours to prepare — in minutes, starting at ₹51.
+                , the AI soul of Trikaal Vaani. Every reading is calculated on
+                the Swiss Ephemeris, follows the rules of Parashara BPHS, and is
+                written to editorial rules Rohiit has set down himself — a
+                personalised reading for the seeker&apos;s own birth chart,
+                starting at ₹51.
               </p>
               <p className="mb-4">
                 The computational backbone — Swiss Ephemeris with Lahiri
@@ -759,6 +772,35 @@ export default function FounderPage() {
               </div>
             </div>
 
+            {/* v4.8 — How our content is made */}
+            <div>
+              <p
+                className="text-xs font-semibold tracking-widest uppercase mb-4"
+                style={{ color: GOLD }}
+              >
+                Editorial Process
+              </p>
+              <h2 className="font-serif text-2xl font-bold text-white mb-5">
+                How Our Content Is Made
+              </h2>
+              <p className="mb-4">
+                Calculations come from the Swiss Ephemeris. Shlok come from our
+                own Granth library, and a reference is shown only when a verse
+                that supports the statement has actually been found. Article
+                drafts are written with AI under Rohiit&apos;s written editorial
+                rules, and blog articles reach search engines only after he has
+                approved them.
+              </p>
+              <p className="mb-4">
+                <Link href="/editorial-policy" style={{ color: GOLD }} className="font-semibold hover:underline">
+                  Read the full editorial policy →
+                </Link>
+              </p>
+              <p className="text-gray-500 text-xs">
+                Office: {ADDRESS_LINE}
+              </p>
+            </div>
+
             {/* Trust & Verification */}
             <div>
               <p
@@ -853,7 +895,7 @@ export default function FounderPage() {
                 Time is the greatest force.
               </p>
               <p className="text-gray-600 text-xs">
-                — Trikaal Vaani (Trikaal Vaani)
+                — Trikaal Vaani
               </p>
             </div>
           </div>
@@ -885,7 +927,7 @@ export default function FounderPage() {
               </Link>
             </div>
             <p className="text-[10px] text-gray-600 mt-6">
-              Trikaal Vaani (also: Trikaal Vaani) · MSME Registered · {UDYAM_NUMBER} · India · 🔱 Mahakaal Ka Ashirwad
+              Trikaal Vaani (registered as Trikal Vaani) · MSME Registered · {UDYAM_NUMBER} · India · 🔱 Mahakaal Ka Ashirwad
             </p>
           </div>
         </section>
@@ -905,7 +947,7 @@ function WAIcon() {
 }
 
 // ============================================================================
-// END — app/founder/page.tsx v4.6
+// END — app/founder/page.tsx v4.8
 // 🔱 Trikaal Vaani | Rohiit Gupta, Chief Vedic Architect
 // MSME Registered: UDYAM-DL-10-0119070
 // Phase 4: Brand spelling consolidation (Trikaal = Trikaal)

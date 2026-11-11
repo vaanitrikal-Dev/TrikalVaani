@@ -3,7 +3,8 @@
  * 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER 🔱
  * ============================================================================
  * File:        components/SiteFooter.tsx
- * Version: 2.6 (1 Oct 2026 — Trikaal Vaani ka core tagline (Rohiit ne chuna): "Granth ka Gyaan · Rohiit ki Parakh · AI ki Shakti" / "Rooted in Granth · Verified by Rohiit · Powered by AI") — "72+ seekers" counter removed (CEO conversion audit)
+ * Version: 2.7 (11 Nov 2026) — "15+ years" -> "16+ years" (Rohiit, 11 Nov 2026); "Editorial Policy" link added to the legal row.
+ * (previous) Version: 2.6 (1 Oct 2026 — Trikaal Vaani ka core tagline (Rohiit ne chuna): "Granth ka Gyaan · Rohiit ki Parakh · AI ki Shakti" / "Rooted in Granth · Verified by Rohiit · Powered by AI") — "72+ seekers" counter removed (CEO conversion audit)
  * Owner:       Rohiit Gupta, Chief Vedic Architect
  *
  * CHANGES vs v2.4 (CEO-approved):
@@ -91,7 +92,7 @@ export default function SiteFooter() {
                 <p className="text-xs text-slate-500 truncate">Chief Vedic Architect</p>
                 {/* ── v2.5 FIX-1: seekers counter removed → verifiable credential ── */}
                 <p className="text-xs font-semibold mt-0.5" style={{ color: GOLD_RGBA(0.85) }}>
-                  15+ years · Parashara BPHS tradition
+                  16+ years · Parashara BPHS tradition
                 </p>
               </div>
             </div>
@@ -291,6 +292,10 @@ export default function SiteFooter() {
             <span style={{ color: GOLD_RGBA(0.3) }} className="text-xs">·</span>
             <Link href="/founder" className="text-xs font-bold transition-all duration-200 hover:text-white hover:scale-105" style={{ color: GOLD }}>
               About the Founder
+            </Link>
+            <span style={{ color: GOLD_RGBA(0.3) }} className="text-xs">·</span>
+            <Link href="/editorial-policy" className="text-xs font-bold transition-all duration-200 hover:text-white hover:scale-105" style={{ color: GOLD }}>
+              Editorial Policy
             </Link>
           </div>
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3">

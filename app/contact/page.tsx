@@ -2,7 +2,10 @@
  * TRIKAL VAANI — trikalvaani.com
  * Chief Vedic Architect: Rohiit Gupta
  * FILE TO PASTE → app/contact/page.tsx (CREATE NEW)
- * Version: 1.2 (11 Oct 2026) — LOT 3, PLAY STORE APP: "Book Personal Consultation" (₹499,
+ * Version: 1.3 (11 Nov 2026) — approved by Rohiit 11 Nov 2026: real office address (Google
+ *   Business Profile address) replaces "India, India"; Organization + ContactPage JSON-LD
+ *   added; link to /editorial-policy. Nothing else changed.
+ * (previous) Version: 1.2 (11 Oct 2026) — LOT 3, PLAY STORE APP: "Book Personal Consultation" (₹499,
  *   WhatsApp) aur "Maa Shakti Arzi / Dhanyewaad" wali do help-rows app mein <HideInPlayApp>
  *   se chhupi (Rohiit ka 11 Oct faisla — bahar ka payment / dakshina). Baaki rows
  *   (Reading Support, Payment Issue, Business) aur website par sab pehle jaisa.
@@ -18,7 +21,7 @@ import HideInPlayApp from "@/components/payment/HideInPlayApp"; // v1.2
 
 export const metadata: Metadata = {
   title: { absolute: "Contact Trikaal Vaani — Astrology Support" },
-  description: "Contact Rohiit Gupta and the Trikaal Vaani team. WhatsApp, email, and booking details for Vedic astrology consultations. India, India.",
+  description: "Contact Rohiit Gupta and the Trikaal Vaani team. WhatsApp, email, office address and booking details for Vedic astrology consultations. Dwarka, New Delhi.",
   authors: [{ name: "Rohiit Gupta", url: "https://trikalvaani.com/founder" }],
   alternates: { canonical: "https://trikalvaani.com/contact" },
   openGraph: { title: "Contact Us | Trikaal Vaani", url: "https://trikalvaani.com/contact", siteName: "Trikaal Vaani", locale: "en_IN", type: "website" },
@@ -26,9 +29,52 @@ export const metadata: Metadata = {
 
 const GOLD = "#D4AF37";
 
+// v1.3 — schema for the contact page (same @id as the homepage / founder Organization)
+const contactSchema = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "ContactPage",
+      "@id": "https://trikalvaani.com/contact#page",
+      url: "https://trikalvaani.com/contact",
+      name: "Contact Trikaal Vaani",
+      about: { "@id": "https://trikalvaani.com/#organization" },
+    },
+    {
+      "@type": "Organization",
+      "@id": "https://trikalvaani.com/#organization",
+      name: "Trikaal Vaani",
+      legalName: "Trikal Vaani",
+      url: "https://trikalvaani.com",
+      email: "rohiit@trikalvaani.com",
+      telephone: "+919211804111",
+      identifier: "UDYAM-DL-10-0119070",
+      founder: { "@type": "Person", "@id": "https://trikalvaani.com/founder#rohiit-gupta", name: "Rohiit Gupta" },
+      address: {
+        "@type": "PostalAddress",
+        streetAddress: "724, Pocket 3, Sector 19, Dwarka",
+        addressLocality: "New Delhi",
+        addressRegion: "Delhi",
+        postalCode: "110075",
+        addressCountry: "IN",
+      },
+      contactPoint: {
+        "@type": "ContactPoint",
+        contactType: "customer support",
+        telephone: "+919211804111",
+        email: "rohiit@trikalvaani.com",
+        availableLanguage: ["en", "hi"],
+        areaServed: "IN",
+      },
+      sameAs: ["https://instagram.com/thetrikalvaani", "https://www.youtube.com/@TheTrikalVaani"],
+    },
+  ],
+};
+
 export default function ContactPage() {
   return (
     <main className="min-h-screen bg-[#080B12] text-white">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(contactSchema) }} />
       <SiteNav />
 
       <section className="pt-28 pb-20 px-4">
@@ -89,8 +135,9 @@ export default function ContactPage() {
               </div>
               <div className="space-y-3">
                 <div>
-                  <p className="text-gray-500 text-xs uppercase tracking-wider mb-1">Location</p>
-                  <p className="text-white">India, India</p>
+                  <p className="text-gray-500 text-xs uppercase tracking-wider mb-1">Office Address</p>
+                  <p className="text-white">724, Pocket 3, Sector 19, Dwarka,<br />New Delhi 110075, India</p>
+                  <p className="text-gray-500 text-xs mt-1">MSME Registered · UDYAM-DL-10-0119070</p>
                 </div>
                 <div>
                   <p className="text-gray-500 text-xs uppercase tracking-wider mb-1">Services</p>
@@ -139,6 +186,7 @@ export default function ContactPage() {
             <Link href="/refund" className="text-sm hover:underline" style={{ color: GOLD }}>Refund Policy</Link>
             <Link href="/services" className="text-gray-500 text-sm hover:text-gray-300">All Services</Link>
             <Link href="/founder" className="text-gray-500 text-sm hover:text-gray-300">About Rohiit Gupta</Link>
+            <Link href="/editorial-policy" className="text-gray-500 text-sm hover:text-gray-300">Editorial Policy</Link>
           </div>
 
         </div>

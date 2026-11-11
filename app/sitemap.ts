@@ -1,4 +1,9 @@
 /* ═══════════════════════════════════════════════════════════════════════════
+   v10.3 — 11 November 2026 — /editorial-policy added to STATIC_ROUTES (new page);
+   CODE_LASTMOD 2026-11-11 for /founder, /contact, /editorial-policy. Nothing else.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════════════════════════
    v10.2 — 11 November 2026 — Google thin-content recovery, step 3 (approved by
    Rohiit 11 Nov 2026). Left out of the sitemap, per lib/index-policy.ts v1.0:
    /swapna/<symbol> (unless in SWAPNA_INDEX_KEEP), /swapna/category/<c>,
@@ -164,6 +169,7 @@
  * 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER 🔱
  * ============================================================================
  * File:        app/sitemap.ts
+ * Version:     v10.3 — /editorial-policy added; founder/contact lastmod (11 Nov 2026)
  * Version:     v10.2 — thin template families out, per lib/index-policy.ts (11 Nov 2026)
  * Version:     v10.1 — far-future festival year copies + all city festival copies out (11 Nov 2026)
  * Version:     v10.0 — Index booster 20 Oct 2026: CODE_LASTMOD 2026-10-19 for 35 code pages changed on 19 Oct (commits 28b1906..47354e8). Nothing else changed.
@@ -423,6 +429,7 @@ const STATIC_ROUTES = [
   '/pricing',
   '/founder',
   '/contact',
+  '/editorial-policy', // v10.3
   '/privacy',
   '/terms',
   '/refund',
@@ -558,8 +565,9 @@ const CODE_LASTMOD: Record<string, string> = {
   // static routes
   '/voice-pricing': '2026-09-12',
   '/pricing': '2026-09-12',
-  '/founder': '2026-10-19',
-  '/contact': '2026-09-12',
+  '/founder': '2026-11-11',
+  '/contact': '2026-11-11',
+  '/editorial-policy': '2026-11-11',
   '/privacy': '2026-09-12',
   '/terms': '2026-09-12',
   '/refund': '2026-09-12',
