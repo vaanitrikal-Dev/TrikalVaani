@@ -3,7 +3,11 @@
  * TRIKAAL VAANI — SEO Domain Pages Generator
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/[domain]/page.tsx (dynamic engine for 15 life domains + 10 city hubs)
- * VERSION: 3.0 — SITE MENU (18 Oct 2026)
+ * VERSION: 3.1 — city hubs robots noindex,follow (11 Nov 2026)
+ * v3.1: the 10 city hubs (/delhi …) carry robots noindex,follow while
+ *   lib/index-policy.ts CITY_HUBS_INDEXABLE is false (Google thin-content recovery,
+ *   approved by Rohiit 11 Nov 2026). The 15 domain pages are unchanged.
+ * Previous: 3.0 — SITE MENU (18 Oct 2026)
  * SIGNED: ROHIIT GUPTA, CEO
  *
  * v2.9 -> v3.0 CHANGES (18 Oct 2026):
@@ -63,6 +67,7 @@ import Link from 'next/link';
 import { supabase } from '../../lib/supabase';
 import CityHub, { CITY_SLUGS, buildCityMetadata } from '../../components/city/CityHub';
 import SiteNav from '../../components/layout/SiteNav';
+import { NOINDEX_FOLLOW, CITY_HUBS_INDEXABLE } from '@/lib/index-policy';
 
 export const revalidate = 86400;
 
@@ -204,7 +209,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   // v2.9 — city hubs own their own metadata. Must come before the
   // domain_pages lookup, which would return null for a city and fall
   // through to the bare 'Trikaal Vaani' title.
-  if (CITY_SLUGS.has(params.domain)) return buildCityMetadata(params.domain);
+  if (CITY_SLUGS.has(params.domain)) {
+    const cityMeta = await buildCityMetadata(params.domain);
+    return CITY_HUBS_INDEXABLE ? cityMeta : { ...cityMeta, robots: NOINDEX_FOLLOW }; // v3.1
+  }
 
   const config = await getDomainPage(params.domain);
   if (!config) return { title: 'Trikaal Vaani' };

@@ -1,4 +1,6 @@
-// 🔱 TRIKAAL VAANI | app/swapna/category/[category]/page.tsx | v1.0
+// 🔱 TRIKAAL VAANI | app/swapna/category/[category]/page.tsx | v1.1 (11 Nov 2026)
+// v1.1 — robots noindex,follow while lib/index-policy.ts SWAPNA_CATEGORIES_INDEXABLE is false
+//        (Google thin-content recovery, approved by Rohiit 11 Nov 2026). Page itself unchanged.
 // Owner: Rohiit Gupta, Chief Vedic Architect
 // SWAPNA REALM PAGE — one page per dream family (12 pages), served entirely
 // from the dream_symbols Supabase table. Zero Gemini cost. ISR 1h.
@@ -7,6 +9,7 @@
 
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import { NOINDEX_FOLLOW, SWAPNA_CATEGORIES_INDEXABLE } from '@/lib/index-policy';
 import { createClient } from '@supabase/supabase-js';
 import SiteNav from '@/components/layout/SiteNav';
 import SiteFooter from '@/components/layout/SiteFooter';
@@ -94,6 +97,7 @@ export async function generateMetadata({ params }: { params: { category: string 
     alternates: { canonical: url },
     openGraph: { title, description, url, type: 'website', locale: 'en_IN', siteName: 'Trikaal Vaani' },
     twitter: { card: 'summary', title, description },
+    ...(SWAPNA_CATEGORIES_INDEXABLE ? {} : { robots: NOINDEX_FOLLOW }), // v1.1
   };
 }
 

@@ -1,4 +1,14 @@
 /* ═══════════════════════════════════════════════════════════════════════════
+   v10.2 — 11 November 2026 — Google thin-content recovery, step 3 (approved by
+   Rohiit 11 Nov 2026). Left out of the sitemap, per lib/index-policy.ts v1.0:
+   /swapna/<symbol> (unless in SWAPNA_INDEX_KEEP), /swapna/category/<c>,
+   /panchang/<date>, the 10 city hubs + /<city>/panchang, /vivah-muhurat/<year>
+   beyond next year. Festivals: a past row whose next occurrence is emitted is
+   skipped (the page redirects there); a row with no published English content
+   is skipped. Nothing else changed.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════════════════════════
    v10.1 — 11 November 2026 — Google thin-content recovery, step 2 (approved by
    Rohiit 11 Nov 2026). (1) Festival rows dated more than 400 days ahead (the
    2028–2030 year copies) are not emitted; they return on their own as their
@@ -154,6 +164,7 @@
  * 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER 🔱
  * ============================================================================
  * File:        app/sitemap.ts
+ * Version:     v10.2 — thin template families out, per lib/index-policy.ts (11 Nov 2026)
  * Version:     v10.1 — far-future festival year copies + all city festival copies out (11 Nov 2026)
  * Version:     v10.0 — Index booster 20 Oct 2026: CODE_LASTMOD 2026-10-19 for 35 code pages changed on 19 Oct (commits 28b1906..47354e8). Nothing else changed.
  * Version:     v9.9 — /events festival calendar hub juda (18 Oct 2026)
@@ -392,6 +403,10 @@
 import type { MetadataRoute } from 'next';
 import { getPostsForSitemap } from '@/lib/blog-posts';
 import { isCityPageIndexable, isFestivalFarFuture } from '@/lib/city-index-keep'; // v10.0, v10.1
+import {
+  isSwapnaSymbolIndexable, SWAPNA_CATEGORIES_INDEXABLE, PANCHANG_DATES_INDEXABLE,
+  CITY_HUBS_INDEXABLE, isVivahYearIndexable,
+} from '@/lib/index-policy'; // v10.2
 import { createClient } from '@supabase/supabase-js';
 import citiesData from './data/cities.json';
 import festivalsData from './data/festivals.json';
@@ -731,6 +746,9 @@ async function readHindiFestivalSlugs(): Promise<Map<string, string>> {
   return out;
 }
 
+/** v10.2 — base_slugs with a published English content row (filled by readFestivalContentDates). */
+const EN_FESTIVAL_CONTENT = new Set<string>();
+
 /** v9.4 — newest festival_content.updated_at per base_slug (en + hi rows). */
 async function readFestivalContentDates(): Promise<Map<string, string>> {
   const out = new Map<string, string>();
@@ -738,10 +756,11 @@ async function readFestivalContentDates(): Promise<Map<string, string>> {
     const supabase = anonClient();
     const { data, error } = await supabase
       .from('festival_content')
-      .select('base_slug, updated_at')
+      .select('base_slug, updated_at, lang')
       .eq('is_published', true);
     if (error || !data) return out;
-    for (const r of data as { base_slug: string; updated_at: string | null }[]) {
+    for (const r of data as { base_slug: string; updated_at: string | null; lang?: string | null }[]) {
+      if (r.base_slug && r.lang === 'en') EN_FESTIVAL_CONTENT.add(r.base_slug); // v10.2
       if (!r.base_slug || !r.updated_at) continue;
       const prev = out.get(r.base_slug);
       if (!prev || r.updated_at > prev) out.set(r.base_slug, r.updated_at);
@@ -1107,6 +1126,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.85,
     });
     for (const y of vivahYears) {
+      if (!isVivahYearIndexable(y)) continue; // v10.2
       entries.push({
         url: `${BASE}/vivah-muhurat/${y}`,
         lastModified: latest(codeMod('/vivah-muhurat/[year]'), vivahMods.get(y)) ?? codeMod('/vivah-muhurat/[year]'),
@@ -1209,6 +1229,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // ── City pages ─────────────────────────────────────────────────────
   const cities = readCities();
   for (const c of cities) {
+    if (!CITY_HUBS_INDEXABLE) break; // v10.2
     // v9.4: both show today's panchang / upcoming events → 00:00 IST today.
     entries.push({ url: `${BASE}/${c.slug}`, lastModified: today, changeFrequency: 'weekly', priority: 0.85 });
     entries.push({ url: `${BASE}/${c.slug}/panchang`, lastModified: today, changeFrequency: 'daily', priority: 0.8 });
@@ -1221,9 +1242,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // v9.9 — the /events hub lists every festival page → newest festival row's date
   hubMods['/events'] = latest(codeMod('/events'), ...Array.from(festContentMods.values()));
   if (dbFestivals.length > 0) {
+    // v10.2 — bases that have an upcoming occurrence inside the horizon
+    const todayStr = new Date().toISOString().slice(0, 10);
+    const upcomingBases = new Set<string>();
+    for (const f of dbFestivals) {
+      if (f.is_indexed && f.date >= todayStr && !isFestivalFarFuture(f.date)) {
+        upcomingBases.add(baseSlugOf(f.festival_slug));
+      }
+    }
     for (const f of dbFestivals) {
       if (!f.is_indexed) continue; // skip no-content festivals entirely
       if (isFestivalFarFuture(f.date)) continue; // v10.1 — year copies beyond 400 days
+      // v10.2 — past page with a next occurrence redirects there
+      if (f.date < todayStr && upcomingBases.has(baseSlugOf(f.festival_slug))) continue;
 
       // v9.4: one honest date for the national EN/HI pages and every city copy
       const festMod =
@@ -1239,10 +1270,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         ? { languages: { 'en-IN': enUrl, 'hi-IN': hiUrl! } }
         : undefined;
 
-      entries.push({
-        url: enUrl, lastModified: festMod, changeFrequency: 'monthly',
-        priority: 0.75, ...(natLangs ? { alternates: natLangs } : {}),
-      });
+      // v10.2 — the English page is emitted only when it has published content
+      if (EN_FESTIVAL_CONTENT.size === 0 || EN_FESTIVAL_CONTENT.has(baseSlugOf(f.festival_slug))) {
+        entries.push({
+          url: enUrl, lastModified: festMod, changeFrequency: 'monthly',
+          priority: 0.75, ...(natLangs ? { alternates: natLangs } : {}),
+        });
+      }
       if (hiUrl) {
         entries.push({
           url: hiUrl, lastModified: festMod, changeFrequency: 'monthly',
@@ -1286,6 +1320,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // ── WIN 3: Panchang — future dates only (today + 365 days) ────────
   const { dates: panchangDates, mods: panchangMods } = await readPanchangDates();
   for (const date of panchangDates) {
+    if (!PANCHANG_DATES_INDEXABLE) break; // v10.2
     entries.push({
       url: `${BASE}/panchang/${date}`,
       lastModified: latest(panchangMods.get(date), codeMod('/panchang/[date]')) ?? codeMod('/panchang/[date]'),
@@ -1323,6 +1358,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const dreams = await readDreamSymbols();
   hubMods['/swapna'] = latest(codeMod('/swapna'), ...Array.from(dreams.symbolMods.values()));
   for (const s of dreams.symbols) {
+    if (!isSwapnaSymbolIndexable(s)) continue; // v10.2
     entries.push({
       url: `${BASE}/swapna/${s}`,
       lastModified: latest(dreams.symbolMods.get(s), codeMod('/swapna/[symbol]')) ?? codeMod('/swapna/[symbol]'),
@@ -1331,6 +1367,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     });
   }
   for (const c of dreams.categories) {
+    if (!SWAPNA_CATEGORIES_INDEXABLE) break; // v10.2
     entries.push({
       url: `${BASE}/swapna/category/${c}`,
       lastModified: latest(dreams.categoryMods.get(c), codeMod('/swapna/category')) ?? codeMod('/swapna/category'),

@@ -2,7 +2,9 @@
 // 🔱 TRIKAL VAANI — CEO PROTECTION HEADER
 // ════════════════════════════════════════════════════════════════════
 // File:        app/[domain]/panchang/page.tsx
-// Version:     v1.5 — Site menu added (18 Oct 2026)
+// Version:     v1.6 — robots noindex,follow while lib/index-policy.ts CITY_HUBS_INDEXABLE is false
+//              (Google thin-content recovery, approved by Rohiit 11 Nov 2026). Page unchanged.
+// Previous:    v1.5 — Site menu added (18 Oct 2026)
 // Owner:       Rohiit Gupta, Chief Vedic Architect
 // CHANGES v1.4 → v1.5 (18 Oct 2026):
 //   ✅ Site menu (SiteNav) added — the page had no menu; pt-16 so the fixed
@@ -31,6 +33,7 @@ import Link from "next/link";
 import citiesData from "../../data/cities.json";
 import { callVM } from "@/lib/callVM";
 import SiteNav from "@/components/layout/SiteNav";
+import { NOINDEX_FOLLOW, CITY_HUBS_INDEXABLE } from "@/lib/index-policy";
 
 export const revalidate = 86400;
 export const dynamicParams = true;
@@ -124,7 +127,9 @@ export async function generateMetadata(
     alternates: { canonical: url },
     openGraph: { title, description, url, siteName: "Trikaal Vaani", type: "article", locale: "en_IN", images: [{ url: OG_IMAGE, width: 1200, height: 630, alt: title }] },
     twitter: { card: "summary_large_image", title, description, images: [OG_IMAGE] },
-    robots: { index: true, follow: true, googleBot: { index: true, follow: true, "max-video-preview": -1, "max-image-preview": "large", "max-snippet": -1 } },
+    robots: CITY_HUBS_INDEXABLE
+      ? { index: true, follow: true, googleBot: { index: true, follow: true, "max-video-preview": -1, "max-image-preview": "large", "max-snippet": -1 } }
+      : NOINDEX_FOLLOW, // v1.6
   };
 }
 

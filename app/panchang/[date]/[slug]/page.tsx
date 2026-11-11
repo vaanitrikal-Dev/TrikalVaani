@@ -2,7 +2,9 @@
 // 🔱 TRIKAL VAANI — CEO PROTECTION HEADER
 // ════════════════════════════════════════════════════════════════════
 // File:    app/panchang/[date]/[slug]/page.tsx
-// Version: v1.4 (18 Oct 2026)
+// Version: v1.5 (11 Nov 2026) — robots noindex,follow while lib/index-policy.ts
+//          PANCHANG_DATES_INDEXABLE is false (approved by Rohiit 11 Nov 2026). Page unchanged.
+// Previous: v1.4 (18 Oct 2026)
 // Owner:   Rohiit Gupta, Chief Vedic Architect
 // CHANGES v1.3 -> v1.4 (2026-10-18, Rohiit):
 //   Site menu: <SiteNav /> added — this page had no menu. Main gets pt-16 so
@@ -69,6 +71,7 @@ import Link from "next/link";
 import { createClient } from "@supabase/supabase-js";
 import { callVM } from "@/lib/callVM";
 import SiteNav from "@/components/layout/SiteNav";
+import { NOINDEX_FOLLOW, PANCHANG_DATES_INDEXABLE } from "@/lib/index-policy";
 
 // FIX 1: was 0 — forced cache-control:private,no-store on every request
 // ISR 1hr is safe: festival dates/content never change once generated
@@ -271,7 +274,7 @@ export async function generateMetadata(
       ],
     },
     twitter: { card: "summary_large_image", title, description },
-    robots: { index: true, follow: true },
+    robots: PANCHANG_DATES_INDEXABLE ? { index: true, follow: true } : NOINDEX_FOLLOW, // v1.5
   };
 }
 

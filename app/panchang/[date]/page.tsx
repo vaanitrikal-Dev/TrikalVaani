@@ -2,7 +2,10 @@
 // 🔱 TRIKAL VAANI — CEO PROTECTION HEADER
 // ════════════════════════════════════════════════════════════════════
 // File:    app/panchang/[date]/page.tsx
-// Version: v3.6 (22 Oct 2026)
+// Version: v3.7 (11 Nov 2026) — robots noindex,follow while lib/index-policy.ts
+//          PANCHANG_DATES_INDEXABLE is false (Google thin-content recovery, approved by
+//          Rohiit 11 Nov 2026). The /panchang hub stays indexed. Page itself unchanged.
+// Previous: v3.6 (22 Oct 2026)
 // Owner:   Rohiit Gupta, Chief Vedic Architect
 // Changes vs v3.5 (Claude, 22 Oct 2026 — Rohiit approved):
 //   BUG: /panchang/2026-10-20 redirected to /dhanteras-2026 and
@@ -104,6 +107,7 @@ import Link from "next/link";
 import { createClient } from "@supabase/supabase-js";
 import { callVM } from "@/lib/callVM";
 import SiteNav from "@/components/layout/SiteNav";
+import { NOINDEX_FOLLOW, PANCHANG_DATES_INDEXABLE } from "@/lib/index-policy";
 
 export const revalidate = 86400;
 export const dynamicParams = true;
@@ -362,7 +366,9 @@ export async function generateMetadata(
     alternates: { canonical: url },
     openGraph: { title: `${title} | Trikaal Vaani`, description, url, siteName: "Trikaal Vaani", type: "article", locale: "en_IN", images: [{ url: OG_IMAGE, width: 1200, height: 630, alt: title }] },
     twitter: { card: "summary_large_image", title, description, images: [OG_IMAGE] },
-    robots: { index: true, follow: true, googleBot: { index: true, follow: true, "max-video-preview": -1, "max-image-preview": "large", "max-snippet": -1 } },
+    robots: PANCHANG_DATES_INDEXABLE
+      ? { index: true, follow: true, googleBot: { index: true, follow: true, "max-video-preview": -1, "max-image-preview": "large", "max-snippet": -1 } }
+      : NOINDEX_FOLLOW, // v3.7
   };
 }
 

@@ -3,7 +3,10 @@
 //  File: app/vivah-muhurat/[year]/page.tsx
 //  Author: Rohiit Gupta, Chief Vedic Architect
 //  Type:  Server Component (SSR + ISR) — SEO + GEO optimised
-//  Version: 3.1 — 23 September 2026
+//  Version: 3.2 — 11 November 2026
+//  v3.2 — only this year and next year are indexable (lib/index-policy.ts
+//         isVivahYearIndexable); later years carry robots noindex,follow
+//         (Google thin-content recovery, approved by Rohiit 11 Nov 2026).
 //  v3.1 — CTA now points to the Shubh Muhurat calculator (23 Sep 2026).
 //         Until today this page said "for a personalised date, start with a
 //         free Kundali Milan" — but Kundali Milan gives a guna score, not a
@@ -21,6 +24,7 @@ import SiteNav from '@/components/layout/SiteNav';
 import { createClient } from '@supabase/supabase-js';
 import { callVM } from '@/lib/callVM';
 import type { Metadata } from 'next';
+import { NOINDEX_FOLLOW, isVivahYearIndexable } from '@/lib/index-policy';
 
 const GOLD = '#D4AF37';
 const GOLD_RGBA = (a: number) => `rgba(212,175,55,${a})`;
@@ -82,10 +86,12 @@ export async function generateMetadata(
       type: 'article',
       images: [`${SITE}/og-default.jpg`],
     },
-    robots: {
-      index: true, follow: true,
-      googleBot: { index: true, follow: true, 'max-image-preview': 'large', 'max-snippet': -1 },
-    },
+    robots: isVivahYearIndexable(year)
+      ? {
+          index: true, follow: true,
+          googleBot: { index: true, follow: true, 'max-image-preview': 'large', 'max-snippet': -1 },
+        }
+      : NOINDEX_FOLLOW, // v3.2
   };
 }
 

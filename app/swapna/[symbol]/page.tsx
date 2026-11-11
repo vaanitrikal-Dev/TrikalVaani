@@ -1,4 +1,6 @@
-// 🔱 TRIKAAL VAANI | app/swapna/[symbol]/page.tsx | v1.0
+// 🔱 TRIKAAL VAANI | app/swapna/[symbol]/page.tsx | v2.1 (11 Nov 2026)
+// v2.1 — robots noindex,follow unless the symbol is in lib/index-policy.ts SWAPNA_INDEX_KEEP
+//        (Google thin-content recovery, approved by Rohiit 11 Nov 2026). Page itself unchanged.
 // Owner: Rohiit Gupta, Chief Vedic Architect
 // SWAPNA SPOKE PAGE — one SEO page per dream symbol (~100 pages), served
 // entirely from the dream_symbols Supabase table. Zero Gemini cost. ISR 1h.
@@ -7,6 +9,7 @@
 
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import { NOINDEX_FOLLOW, isSwapnaSymbolIndexable } from '@/lib/index-policy';
 import { createClient } from '@supabase/supabase-js';
 import SiteNav from '@/components/layout/SiteNav';
 import SiteFooter from '@/components/layout/SiteFooter';
@@ -203,6 +206,7 @@ export async function generateMetadata({ params }: { params: { symbol: string } 
     alternates: { canonical: url },
     openGraph: { title, description, url, type: 'article', locale: 'en_IN', siteName: 'Trikaal Vaani' },
     twitter: { card: 'summary', title, description },
+    ...(isSwapnaSymbolIndexable(r.symbol_key) ? {} : { robots: NOINDEX_FOLLOW }), // v2.1
   };
 }
 

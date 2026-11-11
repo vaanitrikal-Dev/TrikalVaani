@@ -1,7 +1,10 @@
 // ════════════════════════════════════════════════════════════════════════════
 // 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER
 // File:    app/events/[slug]/page.tsx
-// Version: v4.3 (11 Nov 2026) — a festival page dated more than 400 days ahead (the
+// Version: v4.4 (11 Nov 2026) — (a) a PAST festival page whose next occurrence exists now
+//          308-redirects to that next page (holi-2026 → holi-2027, same text); (b) a festival
+//          with no published English content row carries robots noindex. Approved by Rohiit.
+// Previous: v4.3 (11 Nov 2026) — a festival page dated more than 400 days ahead (the
 //          2028–2030 copies) now redirects (307, temporary) to the NEXT occurrence of the
 //          same festival and carries robots noindex; it comes back on its own when its
 //          date is within range. Google thin-content recovery, approved by Rohiit 11 Nov 2026.
@@ -15,7 +18,7 @@
 // ════════════════════════════════════════════════════════════════════════════
 
 import { Metadata } from "next";
-import { notFound, redirect } from "next/navigation";
+import { notFound, redirect, permanentRedirect } from "next/navigation";
 import { createClient } from "@supabase/supabase-js";
 import { isFestivalFarFuture } from "@/lib/city-index-keep";
 import FestivalPillar, {
@@ -64,7 +67,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   // v4.2 (16 Oct 2026): featured image of this festival row (editorial_rulings #20),
   // else /og-default.jpg exactly as before.
   const ogImage = festivalOgImage(content);
-  const indexable = !isFestivalFarFuture(f.date); // v4.3
+  const indexable = !isFestivalFarFuture(f.date) && !!content; // v4.3, v4.4
 
   return {
     // absolute — app/layout.tsx sets template "%s | Trikaal Vaani".
@@ -88,6 +91,12 @@ export default async function Page({ params }: Params) {
   if (isFestivalFarFuture(festival.date)) {
     const next = await nextOccurrenceSlug(baseSlug(festival.festival_slug));
     if (next && next !== festival.festival_slug) redirect(`/events/${next}`);
+  }
+
+  // v4.4 — this year's date has passed → the next occurrence (permanent)
+  if (festival.date < new Date().toISOString().slice(0, 10)) {
+    const next = await nextOccurrenceSlug(baseSlug(festival.festival_slug));
+    if (next && next !== festival.festival_slug) permanentRedirect(`/events/${next}`);
   }
 
   return <FestivalPillar festival={festival} city={null} lang="en" />;
