@@ -1,7 +1,17 @@
 // ════════════════════════════════════════════════════════════════════════════
 // 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER
-// File:    lib/city-index-keep.ts   (NEW FILE)
-// Version: v1.0 (6 Nov 2026) — Google manual action recovery, approved by Rohiit 6 Nov 2026
+// File:    lib/city-index-keep.ts
+// Version: v1.1 (11 Nov 2026) — approved by Rohiit 11 Nov 2026 ("sab ke liye haan"):
+//          (1) CITY_PAGES_RETIRED = true: the 321 kept city copies are retired too —
+//              every city festival URL now redirects to its row on the national page
+//              and leaves the sitemap (Google "thin content: affects all pages";
+//              city copies are the doorway pattern). The list below stays as a record;
+//              set the flag to false to bring those 321 back.
+//          (2) isFestivalFarFuture(): festival pages dated more than 400 days ahead
+//              (the 2028–2030 copies) are not emitted or rendered until their date
+//              comes within range. Used by app/events/[slug]/page.tsx v4.3 and
+//              app/sitemap.ts v10.1.
+// Previous: v1.0 (6 Nov 2026) — Google manual action recovery, approved by Rohiit 6 Nov 2026
 // Owner:   Rohiit Gupta, Chief Vedic Architect
 //
 // WHY: Google sent a "thin content" manual action on 6 Nov 2026. The site had
@@ -341,7 +351,24 @@ export const CITY_INDEX_KEEP: ReadonlySet<string> = new Set<string>([
   '/pune/events/sharad-navratri-2028',
 ]);
 
+/** v1.1 — true = no city festival copy is indexable; all redirect to the national page. */
+export const CITY_PAGES_RETIRED = true;
+
 /** True when a city festival path (no domain, no trailing slash) may be indexed. */
 export function isCityPageIndexable(path: string): boolean {
+  if (CITY_PAGES_RETIRED) return false;
   return CITY_INDEX_KEEP.has(path);
 }
+
+/** v1.1 — how far ahead a dated festival page (/events/<festival>-<year>) is published. */
+export const FESTIVAL_HORIZON_DAYS = 400;
+
+/** v1.1 — true when a festival date (YYYY-MM-DD) lies beyond the publishing horizon. */
+export function isFestivalFarFuture(date: string | null | undefined): boolean {
+  if (!date) return false;
+  const cutoff = new Date(Date.now() + FESTIVAL_HORIZON_DAYS * 86400000)
+    .toISOString().slice(0, 10);
+  return date.slice(0, 10) > cutoff;
+}
+
+// END — lib/city-index-keep.ts v1.1 | Trikaal Vaani | Rohiit Gupta

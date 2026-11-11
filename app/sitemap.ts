@@ -1,4 +1,12 @@
 /* ═══════════════════════════════════════════════════════════════════════════
+   v10.1 — 11 November 2026 — Google thin-content recovery, step 2 (approved by
+   Rohiit 11 Nov 2026). (1) Festival rows dated more than 400 days ahead (the
+   2028–2030 year copies) are not emitted; they return on their own as their
+   date comes within range. (2) All city festival copies are retired in
+   lib/city-index-keep.ts v1.1, so the city loop emits none. Nothing else changed.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════════════════════════
    v10.0 — 06 November 2026 — Google thin-content manual action recovery
    (approved by Rohiit 6 Nov 2026). City copies of festival pages
    (/<city>/events/<slug>, /hi/<city>/<slug>) are emitted ONLY when the path is
@@ -146,6 +154,7 @@
  * 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER 🔱
  * ============================================================================
  * File:        app/sitemap.ts
+ * Version:     v10.1 — far-future festival year copies + all city festival copies out (11 Nov 2026)
  * Version:     v10.0 — Index booster 20 Oct 2026: CODE_LASTMOD 2026-10-19 for 35 code pages changed on 19 Oct (commits 28b1906..47354e8). Nothing else changed.
  * Version:     v9.9 — /events festival calendar hub juda (18 Oct 2026)
  *               New page app/events/page.tsx (hub of all festival pages) added
@@ -382,7 +391,7 @@
 
 import type { MetadataRoute } from 'next';
 import { getPostsForSitemap } from '@/lib/blog-posts';
-import { isCityPageIndexable } from '@/lib/city-index-keep'; // v10.0
+import { isCityPageIndexable, isFestivalFarFuture } from '@/lib/city-index-keep'; // v10.0, v10.1
 import { createClient } from '@supabase/supabase-js';
 import citiesData from './data/cities.json';
 import festivalsData from './data/festivals.json';
@@ -1214,6 +1223,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   if (dbFestivals.length > 0) {
     for (const f of dbFestivals) {
       if (!f.is_indexed) continue; // skip no-content festivals entirely
+      if (isFestivalFarFuture(f.date)) continue; // v10.1 — year copies beyond 400 days
 
       // v9.4: one honest date for the national EN/HI pages and every city copy
       const festMod =
