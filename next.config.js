@@ -3,11 +3,16 @@
  * 🔱 TRIKAL VAANI — CEO PROTECTION HEADER 🔱
  * ============================================================================
  * File:        next.config.js
- * Version:     v2.0 — festival URLs now land on the /events calendar
- * Date:        2026-10-18
+ * Version:     v2.1 — Noida / Gurgaon / Ghaziabad local pages redirect to /astrologer-delhi
+ * Date:        2026-11-12
  * Owner:       Rohiit Gupta, Chief Vedic Architect
  *
  * WHERE THIS FILE GOES: repo root -> next.config.js  (replace existing file)
+ *
+ * CHANGES vs v2.0 — 12 Nov 2026 (Rohiit approved, Google thin-content recovery):
+ *   /astrologer-noida, /astrologer-gurgaon, /astrologer-ghaziabad were 54% the same
+ *   text for cities with no office (doorway pattern). They now 301 to /astrologer-delhi,
+ *   the page with the real verified address. /astrologer-gurugram now goes straight there.
  *
  * CHANGES vs v1.9 — 18 Oct 2026 (Rohiit: "next.config.js isko bhi theek kardo"):
  *   The /events festival calendar hub now exists (app/events/page.tsx v1.0,
@@ -304,7 +309,10 @@ const nextConfig = {
       { source: '/about', destination: '/founder', permanent: true },
       { source: '/privacy-policy', destination: '/privacy', permanent: true },
       { source: '/refund-policy', destination: '/refund', permanent: true },
-      { source: '/astrologer-gurugram', destination: '/astrologer-gurgaon', permanent: true },
+      { source: '/astrologer-gurugram', destination: '/astrologer-delhi', permanent: true }, // v2.1
+      { source: '/astrologer-noida', destination: '/astrologer-delhi', permanent: true }, // v2.1
+      { source: '/astrologer-gurgaon', destination: '/astrologer-delhi', permanent: true }, // v2.1
+      { source: '/astrologer-ghaziabad', destination: '/astrologer-delhi', permanent: true }, // v2.1
       { source: '/astrologer-chennai', destination: '/services', permanent: true },
       { source: '/astrologer-ahmedabad', destination: '/services', permanent: true },
       { source: '/astrologer-faridabad', destination: '/astrologer-delhi', permanent: true },

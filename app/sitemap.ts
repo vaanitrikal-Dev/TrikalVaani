@@ -1,4 +1,11 @@
 /* ═══════════════════════════════════════════════════════════════════════════
+   v10.4 — 12 November 2026 — only URLs that answer 200 directly: the three
+   redirected local pages (noida, gurgaon, ghaziabad -> /astrologer-delhi,
+   next.config.js v2.1), /digital-career (308 -> /career) and the /vivah-muhurat
+   index (307 -> current year) are no longer emitted. Nothing else changed.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════════════════════════
    v10.3 — 11 November 2026 — /editorial-policy added to STATIC_ROUTES (new page);
    CODE_LASTMOD 2026-11-11 for /founder, /contact, /editorial-policy. Nothing else.
    ═══════════════════════════════════════════════════════════════════════════ */
@@ -169,6 +176,7 @@
  * 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER 🔱
  * ============================================================================
  * File:        app/sitemap.ts
+ * Version:     v10.4 — redirecting URLs out (12 Nov 2026)
  * Version:     v10.3 — /editorial-policy added; founder/contact lastmod (11 Nov 2026)
  * Version:     v10.2 — thin template families out, per lib/index-policy.ts (11 Nov 2026)
  * Version:     v10.1 — far-future festival year copies + all city festival copies out (11 Nov 2026)
@@ -459,9 +467,7 @@ const STATIC_ROUTES = [
 // ─────────────────────────────────────────────────────────────────────────────
 const LOCAL_ROUTES = [
   '/astrologer-delhi',
-  '/astrologer-noida',
-  '/astrologer-gurgaon',
-  '/astrologer-ghaziabad',
+  // v10.4 — noida, gurgaon, ghaziabad now redirect to /astrologer-delhi (next.config.js v2.1)
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1127,7 +1133,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // /vivah-muhurat (index → current year) + /vivah-muhurat/{year} per rolling year.
   const { years: vivahYears, mods: vivahMods } = await readVivahYears();
   if (vivahYears.length > 0) {
-    entries.push({
+    if (false) entries.push({ // v10.4 — /vivah-muhurat 307-redirects to the current year
       url: `${BASE}/vivah-muhurat`,
       lastModified: latest(codeMod('/vivah-muhurat'), codeMod('/vivah-muhurat/[year]'), ...Array.from(vivahMods.values())) ?? codeMod('/vivah-muhurat'),
       changeFrequency: 'monthly',
@@ -1147,6 +1153,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // ── 15 Pillar Domain Pages ─────────────────────────────────────────
   const domainSlugs = await readDomainSlugs();
   for (const d of domainSlugs) {
+    if (d.slug === 'digital-career') continue; // v10.4 — 308 -> /career
     entries.push({
       url: `${BASE}/${d.slug}`,
       lastModified: latest(d.updatedAt) ?? codeMod('/[domain]'),

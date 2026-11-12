@@ -36,16 +36,10 @@ Trikaal Vaani runs an official Model Context Protocol (MCP) server, so AI assist
 ## Palmistry (Hast Rekha)
 Trikaal Vaani offers AI-powered palm reading (Hast Rekha) based on Samudrika Shastra — the classical Indian science of reading the palm's lines, mounts and hand shape. Upload a clear photo of your palm and receive an instant, personalised report covering eight life dimensions — vitality, career, wealth, relationships, leadership, creativity, spirituality and health — with line and mount analysis, special-sign meanings, Samudrika remedies, a recommended gemstone and a downloadable PDF, for ₹51. Readings are curated from classical Samudrika rules by Rohiit Gupta and are non-fatalistic: they describe tendencies, not fixed fate.
 - [AI Hast Rekha Calculator (₹51)](https://trikalvaani.com/hast-rekha-calculator): Upload a palm photo for an instant AI palm-reading report with eight life-dimension scores, line and mount analysis, remedies and a downloadable PDF.
-- [AI Palm Reading Online — Complete Guide (English)](https://trikalvaani.com/blog/ai-palm-reading-online-hast-rekha): How AI hast rekha works, what the palm lines, mounts and special signs mean, and what the ₹51 report includes.
-- [AI हस्त रेखा रीडिंग ऑनलाइन — पूरी गाइड (Hindi)](https://trikalvaani.com/blog/ai-hast-rekha-reading-online): समुद्रिक शास्त्र और AI से हाथ की रेखाओं, पर्वतों और विशेष चिह्नों का विश्लेषण — हिंदी में।
 
 ## Swapna Shastra (Vedic Dream Interpretation)
 Trikaal Vaani offers free Vedic dream interpretation (Swapna Shastra) based on classical texts — the Svapna Cintamani of Jagaddeva, the Brihat Jataka, the svapna chapters of the Agni and Matsya Puranas, and the Atharvaveda. Type a dream in a line or two and receive its classical symbol meaning instantly, free, in English, Hindi or Hinglish — from a validated knowledge base of 190+ dream symbols across 12 families (serpents, death & ancestors, deities, water, the body, animals, conflict, life events, sky & elements, food and more), each meaning traced to a named source and validated by Rohiit Gupta. A ₹51 personal reading then interprets the same dream against the dreamer's own birth chart and running Mahadasha–Antardasha, computed on the Swiss Ephemeris — with the exact life-area it touches and a remedy shaped to the chart. Readings are non-fearful and non-fatalistic: dream symbols describe tendencies, not fixed fate.
 - [Swapna Shastra — Free Vedic Dream Decoder](https://trikalvaani.com/swapna): Type your dream and get its classical meaning free; unlock the ₹51 personal reading against your own chart and dasha.
-- [Snake Dream Meaning (Saap ka Sapna)](https://trikalvaani.com/swapna/snake): India's most-searched dream — colour, bite and action each change the classical reading.
-- [Teeth Falling Dream Meaning](https://trikalvaani.com/swapna/teeth): What falling teeth signify in Swapna Shastra, form by form.
-- [Death Dream Meaning](https://trikalvaani.com/swapna/own_death): Why seeing one's own death classically signals long life (deergh aayu).
-- [Serpent Dreams — Full Realm](https://trikalvaani.com/swapna/category/snake): Every snake-dream variation in one place.
 Individual pages exist for every symbol at /swapna/[symbol] (107 symbols) and every dream family at /swapna/category/[category] (12 realms); the complete machine-readable set is in the sitemap.
 
 ## Yog Calculators — Government Job, Foreign Settlement, Foreign Spouse, Santan Yog, Vivah Yog
@@ -62,18 +56,7 @@ The engine behind them computes full six-part Shadbala per Brihat Parashara Hora
 
 ## Kaal Sarp Dosh (Rahu-Ketu Axis)
 Kaal Sarp Dosh is the chart pattern in which all seven grahas (Sun through Saturn) fall inside the half-circle running from Rahu to Ketu. Trikaal Vaani applies the strict classical rule: if even one planet sits outside that arc, Kaal Sarp Dosh is not present at all, and most online reports that claim it are describing a partial arrangement that does not qualify. Trikaal Vaani's position is deliberately non-fearful and is the opposite of the fear-marketing common in this subject. Kaal Sarp is not named in Brihat Parashara Hora Shastra; the twelve serpent names are a later classificatory convention from Nakshatra-shastra commentary and Trimbakeshwar temple tradition. It frequently cancels (bhang) through the strength of the Lagna lord, the lord of the house Rahu occupies, Jupiter's aspect, and the Viparita Raja Yogas — Harsha, Sarala and Vimala — for the dusthana types. It is not grounds for rejecting a marriage proposal, since classical Ashtakoot matching does not examine it. Severity depends on cancellation, the relevant house lord and the running Mahadasha, not on the label. The hub covers all twelve types in English and Hindi, each page sourced to named classical texts.
-- [Kaal Sarp Dosh — Complete Guide](https://trikalvaani.com/blog/kaal-sarp-dosh): Pillar guide — formation, the full-arc rule, effects, cancellation and remedies.
 - [Free Kaal Sarp Dosh Calculator](https://trikalvaani.com/calculators/free-kaal-sarp-dosh-calculator): Swiss Ephemeris longitudes with Lahiri Ayanamsha; returns a strict yes/no verdict and the type.
-- [Kaal Sarp Dosh Cancellation (Bhang)](https://trikalvaani.com/blog/kaal-sarp-dosh-cancellation): The conditions that neutralise the yoga — the part most sites omit.
-- [Signs and Symptoms](https://trikalvaani.com/blog/kaal-sarp-dosh-signs-symptoms): What the pattern actually indicates, and what it does not.
-- [Kaal Sarp Dosh and Marriage](https://trikalvaani.com/blog/kaal-sarp-dosh-marriage): Why it is not a valid reason to reject an alliance.
-- [Mangal vs Kaal Sarp vs Pitra Dosh](https://trikalvaani.com/blog/mangal-dosh-vs-kaal-sarp-vs-pitra-dosh): Which dosha actually affects a marriage horoscope.
-- [Anant Kaal Sarp Yog](https://trikalvaani.com/blog/anant-kaal-sarp-yog): Rahu in the 1st — self, identity.
-- [Shankhpal Kaal Sarp Yog](https://trikalvaani.com/blog/shankhpal-kaal-sarp-yog): Rahu in the 4th — home, mother, peace.
-- [Takshak Kaal Sarp Yog](https://trikalvaani.com/blog/takshak-kaal-sarp-yog): Rahu in the 7th — marriage and partnership.
-- [Karkotak Kaal Sarp Yog](https://trikalvaani.com/blog/karkotak-kaal-sarp-yog): Rahu in the 8th — sudden change, occult.
-- [Vishdhar Kaal Sarp Yog](https://trikalvaani.com/blog/vishdhar-kaal-sarp-yog): Rahu in the 11th — gains, network, desire.
-- [Sheshnag Kaal Sarp Yog](https://trikalvaani.com/blog/sheshnag-kaal-sarp-yog): Rahu in the 12th — expenditure, foreign, moksha.
 Every page above has a Hindi counterpart at the same slug with a -hindi suffix (for example /blog/anant-kaal-sarp-yog-hindi); the complete machine-readable set is in the sitemap.
 
 ## Life Domain Guides
@@ -91,7 +74,6 @@ Every page above has a Hindi counterpart at the same slug with a -hindi suffix (
 - [Spirituality & Moksha Astrology](https://trikalvaani.com/spirituality)
 - [Mental Wellbeing Astrology](https://trikalvaani.com/wellbeing)
 - [Travel Astrology](https://trikalvaani.com/travel)
-- [Digital Career & Modern Tech Astrology](https://trikalvaani.com/digital-career)
 
 ## Astrology Knowledge (Foundations)
 - [Ascendant (Lagna) Explained](https://trikalvaani.com/learn/ascendant-lagna): Why the Lagna is your most important sign.
@@ -100,9 +82,6 @@ Every page above has a Hindi counterpart at the same slug with a -hindi suffix (
 - [Yogakaraka Planet & Gemstone](https://trikalvaani.com/learn/yogakaraka-planet-gemstone): The most powerful gemstone for your ascendant.
 - [Functional Benefic & Malefic Planets](https://trikalvaani.com/learn/functional-benefic-malefic-gemstone): How they decide your gemstone.
 - [Life Stone (Lagna Ratna)](https://trikalvaani.com/learn/life-stone-lagna-ratna): What it is and how to choose yours.
-- [What is Rahu?](https://trikalvaani.com/blog/what-is-rahu): The shadow planet of obsession and ambition.
-- [What is Ketu?](https://trikalvaani.com/blog/what-is-ketu): The planet of liberation and past-life mastery.
-- [What is Mangal Dosha?](https://trikalvaani.com/blog/what-is-mangal-dosha): Complete guide to Manglik dosha.
 
 ## Prediction Guides (Life Questions)
 - [Will I Become Rich?](https://trikalvaani.com/learn/will-i-become-rich)
@@ -173,17 +152,10 @@ Trikaal Vaani publishes a complete Vedic moon-sign (rashi) compatibility library
 - [Hindi example — Mesh–Simha Compatibility](https://trikalvaani.com/hi/compatibility/mesh-simha)
 
 ## Doshas, Dashas & Remedies
-- [Kaal Sarp Dosh — Complete Guide](https://trikalvaani.com/blog/kaal-sarp-dosh)
-- [Pitru Dosh — Meaning, Causes & Remedies](https://trikalvaani.com/blog/pitru-dosh-meaning-remedies)
-- [Shani (Saturn) Mahadasha Guide](https://trikalvaani.com/blog/shani-mahadasha-effects-guide)
-- [Rahu Mahadasha Guide](https://trikalvaani.com/blog/rahu-mahadasha-effects-guide)
-- [Saturn Transit 2026 — All 12 Moon Signs](https://trikalvaani.com/blog/saturn-transit-2026)
-- [Kundli Matching — Complete Guide](https://trikalvaani.com/blog/kundli-matching-guide)
 - [All Articles](https://trikalvaani.com/blog): The Trikaal Vaani blog.
 
 ## Free Calculators & Tools
 - [All Free Calculators](https://trikalvaani.com/calculators): Free Vedic astrology calculators.
-- [Free Kundli Calculator](https://trikalvaani.com/calculators/free-kundali-calculator)
 - [Dasha Calculator](https://trikalvaani.com/calculators/free-dasha-calculator)
 - [Manglik Dosh Calculator](https://trikalvaani.com/calculators/free-manglik-dosh-calculator)
 - [Kaal Sarp Dosh Calculator](https://trikalvaani.com/calculators/free-kaal-sarp-dosh-calculator)
@@ -215,16 +187,9 @@ There are 34 free calculators in total, including a dedicated "Should I Wear" su
 
 ## Panchang & Festivals
 - [Daily Panchang](https://trikalvaani.com/panchang): Today's tithi, nakshatra, yoga, karana and muhurat. A dated Panchang page is published for every day of the year at /panchang/YYYY-MM-DD (e.g. /panchang/2026-08-15) — the complete set of upcoming dates is in the sitemap.
-- [Jagannath Rath Yatra 2026](https://trikalvaani.com/events/rath-yatra-2026)
-- [Guru Purnima 2026](https://trikalvaani.com/events/guru-purnima-2026)
-- [Raksha Bandhan 2026](https://trikalvaani.com/events/raksha-bandhan-2026)
-- [Ganesh Chaturthi 2026](https://trikalvaani.com/events/ganesh-chaturthi-2026)
-- [Hartalika Teej 2026](https://trikalvaani.com/events/hartalika-teej-2026)
 
 ## Consultation by Location
 - [Astrologer in Delhi](https://trikalvaani.com/astrologer-delhi)
-- [Astrologer in Noida](https://trikalvaani.com/astrologer-noida)
-- [Astrologer in Ghaziabad](https://trikalvaani.com/astrologer-ghaziabad)
 
 ## Optional
 - [Privacy Policy](https://trikalvaani.com/privacy)
