@@ -3,7 +3,10 @@
 // ============================================================
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
 // FILE: components/Trikal/JiniWidget.tsx
-// VERSION: 1.2 (3 Nov 2026 — Rohiit ji approved Option B: "Jini soch rahi hai" — Jini ke charon taraf
+// VERSION: 1.3 (15 Nov 2026 — Rohiit ji approved "sab ke liye haan": lekh ke jawab ke neeche VM ka
+//   "aadhar" (Jini v1.11) ho to ek line "📜 Granth mein is vishay par: Dharma Sindhu — <pariccheda>". Sirf granth ka
+//   naam — koi arth nahi. aadhar na ho to pehle jaisa. Baaki koi badlaav nahi.)
+// Prior — 1.2 (3 Nov 2026 — Rohiit ji approved Option B: "Jini soch rahi hai" — Jini ke charon taraf
 //   sone ka ghoomta chakra + chamakta tara + badalti 4 lines (3 dots ki jagah). Jawab jaldi aaye
 //   tab bhi effect kam se kam 2 second dikhta hai (MIN_SOCH). Kundali wale steps ke upar bhi wahi chakra.)
 // Prior — 1.1 (1 Nov 2026 — Jini seekhti hai: milaan kam ho to "Kya aap yeh jaanna chahte hain?"
@@ -436,6 +439,7 @@ export default function JiniWidget() {
       if (d.blog?.url) {
         m.push({ k: 'jini', text: 'Is sawaal pe Trikaal Vaani ka yeh lekh dekhiye:' });
         m.push({ k: 'blog', title: d.blog.title || 'Lekh padhiye', url: d.blog.url, answer: d.blog.answer });
+        if (typeof d.aadhar === 'string' && d.aadhar.trim()) m.push({ k: 'jini', text: '📜 Granth mein is vishay par: ' + d.aadhar.trim().slice(0, 120) });   // v1.3
       } else if (Array.isArray(d.granth) && d.granth.length) {
         m.push({ k: 'jini', text: 'Granth is baare mein kehte hain:' });
         m.push({ k: 'granth', items: d.granth });
