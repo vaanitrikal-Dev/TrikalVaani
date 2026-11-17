@@ -2,7 +2,9 @@
 
 // ============================================================
 // File: app/calculators/free-sade-sati-calculator/page.tsx
-// Version: v2.4 (07 Nov 2026) — Radar 31 Oct + 7 Nov: +3 H2, +3 FAQ, +1 verse (Phaladipika 26.25), +5 inline links
+// Version: v2.5 (15 Nov 2026) — Radar 14 Nov (report 15) PUSH: +2 H2 ('mesh-kab-tak', 'kumbh-2026'), +3 FAQ,
+//   +2 verses (Phaladipika 26.49, 26.22). Dates reused from SADE_SATI_DATES / existing sections only.
+// Version (previous): v2.4 (07 Nov 2026) — Radar 31 Oct + 7 Nov: +3 H2, +3 FAQ, +1 verse (Phaladipika 26.25), +5 inline links
 // Version (previous): 2.3 (19 Oct 2026 — Radar 17 Oct PUSH: +6 H2, 2 H2 renamed, +4 FAQ, competitor-name H2 removed) — Free Sade Sati Calculator (Radar E3 content build)
 // VM endpoint: /sade-sati (dedicated, 100% accurate)
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
@@ -456,6 +458,14 @@ const PILLAR: PillarSection[] = [
     ],
   },
   {
+    id: "mesh-kab-tak",
+    h2: "Mesh Rashi Mein Shani Ki Sade Sati Kab Tak Rahegi?",
+    paras: [
+      "Seedha jawab: **Mesh rashi par Shani ki Sade Sati 29 March 2025 se chal rahi hai aur 31 May 2032 ko poori hogi** — kul lagbhag saadhe saat saal. Abhi **pehla charan** hai: Shani Meen mein, jo Mesh se 12th bhaav (kharch, neend, videsh) hai. **Doosra charan** 3 June 2027 ko shuru hoga jab Shani Mesh par aayenge; 20 October 2027 ko vakri hokar Shani Meen mein lautenge, aur yeh charan pakka **23 February 2028** se chalega. **Teesra charan** (2nd bhaav = paisa, parivar, vaani) 8 August 2029 ko pehli baar aur pakka **17 April 2030** se. Yeh rashi-star ki tareekhein hain — aapki apni tareekh aur bache hue din upar wala calculator deta hai.",
+      "Sabse dhyan dene wala daur doosra charan hai, kyunki tab Shani Mesh mein **neech** honge — dhairya ki pareeksha zyada, par neech ka matlab haar nahi, dheema phal hai. Granth upay ka raasta bhi saath deta hai: Phaladipika (adhyaya 26, shlok 49) kehta hai **जपेच्च तत्प्रीतिकरैः सुकर्मभिः करोति शान्तिं व्रतदानवन्दनैः** — dasha ya gochar mein graha pratikool hon, tab bhi jap, achhe karm, vrat, daan aur vandana se shaanti milti hai. Mesh ke paanch-hisson wale upay upar [Shani Ki Sade Sati Ke Upay — Mesh Rashi Ke Liye](#mesh-upay) mein hain, aur 2027 ki taiyari [मेष में शनि नीच 2027](/blog/mesh-mein-shani-neech-2027) mein.",
+    ],
+  },
+  {
     id: 'meen-rashi',
     h2: 'शनि की साढ़े साती — मीन राशि पर',
     paras: [
@@ -549,6 +559,14 @@ const PILLAR: PillarSection[] = [
       "Kumbh par Sade Sati ka **antim charan (avaroh)** chal raha hai — Shani Kumbh se 2nd bhaav mein, yaani **paisa, parivar aur vaani** ke bhaav mein. Isliye Kumbh ke upay ka zor bachat, ghar ke rishton aur soch-samajhkar bolne par hona chahiye. Ek baat Kumbh ke paksh mein hai: **Kumbh rashi ke swami khud Shani hain** — vyavhaar mein isi kaaran Kumbh ki Sade Sati aksar apekshakrit sehne layak maani jaati hai, par asli bal aapki kundali mein Shani ki sthiti se tay hota hai. Yeh charan **23 February 2028** ko poora hoga (pehla nikaas 3 June 2027).",
       "Teen upay, paanch hisson mein. **Pehla — Kya:** \"ॐ शं शनैश्चराय नमः\" 108 baar (lagbhag 10 minute). **Kab:** Shanivar subah, nahaane ke baad. **Kharch:** muft. **Kitne din:** 21 Shanivar. **Aapke liye kyun:** Shani aapki rashi ke swami bhi hain aur gochar ke graha bhi — mantra dono roop ko ek saath saadhta hai. **Doosra — Kya:** kisi mazdoor ya buzurg ko aata ya chawal dena. **Kab:** Shanivar, suryast se pehle. **Kharch:** ₹10–20. **Kitne din:** 11 Shanivar. **Aapke liye kyun:** 2nd bhaav anna aur kutumb ka hai, isliye Kumbh ke liye anna-daan sabse upyukt hai. **Teesra — Kya:** ek purana bakaya chuka dena ya ghar mein ek ankahi baat ki maafi maang lena. **Kab:** is hafte, Shanivar tak. **Kharch:** muft. **Kitne din:** ek baar, phir 6 mahine tak har mahine ke pehle Shanivar ko apna hisaab dekhna. **Aapke liye kyun:** 2nd bhaav dhan aur vaani ka hai — yahi is charan ki asli pareeksha hai.",
       "Neelam Kumbh ke liye bhi pehla upay nahi hai — pehle [Neelam suit karega ya nahi](/calculators/free-should-i-wear-neelam) jaanchiye. Apni kundali ke hisaab se upay ki list [Upay Calculator](/calculators/free-upay-calculator) deta hai, aur poora vivaran [कुंभ राशि साढ़ेसाती](/blog/kumbh-rashi-sade-sati-hindi) mein hai.",
+    ],
+  },
+  {
+    id: "kumbh-2026",
+    h2: "Kumbh Rashi Sade Sati 2026 — Is Saal Kaun Sa Charan Aur Kya Asar?",
+    paras: [
+      "Seedha jawab: **2026 bhar Kumbh rashi Sade Sati ke teesre yaani antim charan (avaroh) mein hai** — Shani Meen mein, jo Kumbh se 2nd bhaav (paisa, parivar aur vaani) hai. Is saal Shani ka vakri daur (27 July se 11 December 2026) bhi poora Meen ke andar hai, isliye 2026 mein charan nahi badalta. Badlav 2027 mein shuru hoga: Shani 3 June 2027 ko Mesh mein jaayenge, 20 October 2027 ko laut aayenge, aur Kumbh ki Sade Sati **23 February 2028** ko poori hogi. Apni sateek tareekh aur bache din upar wale calculator se dekhiye.",
+      "Granth is charan ki disha bhi batata hai. Phaladipika (adhyaya 26, shlok 22) gochar ke Shani ka phal Chandra Rashi se kram se ginaata hai, aur doosre sthan ke liye kehta hai **धनसुतविहतिं** — dhan aur santaan se jude kaamon mein rukawat. Isi liye 2026 mein Kumbh walon ki chinta zyada paise aur parivar-santaan ki hoti hai, mann ki kam. Yeh rukawat hai, nuksaan ka faisla nahi — kitni lagegi yeh aapki kundali mein Shani ke bal par nirbhar hai, jo [Graha Bal Calculator](/calculators/free-graha-bal-calculator) dikhata hai. Is charan ke paanch-hisson wale upay upar [Shani Ki Sade Sati Ke Upay — Kumbh Rashi Ke Liye](#kumbh-upay) mein hain, aur Shani ke agle gochar ka poora chitra [Shani Gochar 2027](/blog/shani-gochar-2027-sampoorna-margdarshan) mein.",
     ],
   },
   {
@@ -650,6 +668,9 @@ const FAQS = [
   { q: 'Sade Sati ke lakshan kya hain?', a: 'Har charan mein alag. Pehle charan (12th bhaav) mein achanak kharch, tooti neend aur akelapan; doosre (Chandra Rashi par) mein thakaan, faisle mein hichak aur mann ka bhaari rehna; teesre (2nd bhaav) mein paise ka hisaab, parivar ke purane mudde aur vaani par sanyam. Phaladipika 26.25 ke anusaar Shani gochar ka phal rashi ke aakhri tihai hisse mein deta hai, isliye lakshan charan shuru hote hi nahi aate. Koi lakshan akele saboot nahi — calculator se apna charan pakka kijiye.' },
   { q: 'At what age does Sade Sati start?', a: 'There is no fixed age. It depends on where Saturn was from your Moon sign at birth. Because Sade Sati lasts about 7.5 years and Saturn returns about every 29.5 years, the first Sade Sati is either running at birth or begins before about age 22; the second comes roughly 30 years after the first and the third about 30 years after that. The calculator above shows the exact start date and your age for every cycle.' },
   { q: 'Kumbh rashi ke liye Sade Sati ke upay kya hain?', a: 'Kumbh par antim charan chal raha hai (Shani 2nd bhaav mein — paisa, parivar, vaani), jo 23 February 2028 ko poora hoga. Teen surakshit upay: Shanivar subah "Om Sham Shanaicharaya Namah" 108 baar (21 Shanivar, muft), Shanivar suryast se pehle kisi mazdoor ya buzurg ko ₹10–20 ka aata ya chawal (11 Shanivar), aur is hafte ek purana bakaya chukana ya maafi maangna. Kumbh ke swami khud Shani hain. Neelam bina suitability check ke na pehnein.' },
+  { q: 'Mesh rashi mein Shani ki Sade Sati kab tak rahegi?', a: 'Mesh par Sade Sati 29 March 2025 se chal rahi hai aur 31 May 2032 ko poori hogi. Abhi pehla charan hai (Shani 12th bhaav mein). Doosra charan 3 June 2027 se shuru hoga, pakka 23 February 2028 se, jab Shani Mesh mein neech honge. Teesra charan 8 August 2029 se, pakka 17 April 2030 se. Apni sateek tareekh aur bache din upar ka calculator deta hai.' },
+  { q: 'Kumbh rashi Sade Sati 2026 mein kaun sa charan hai?', a: 'Poore 2026 mein Kumbh antim charan (avaroh) mein hai — Shani Meen mein, yaani Kumbh se 2nd bhaav (paisa, parivar, vaani). 27 July se 11 December 2026 ka vakri Shani bhi Meen ke andar hi rehta hai, isliye 2026 mein charan nahi badalta. Kumbh ki Sade Sati 23 February 2028 ko poori hogi (pehla nikaas 3 June 2027).' },
+  { q: 'Meen rashi Sade Sati start and end date kya hai?', a: 'Meen par Sade Sati 29 April 2022 ko shuru hui (Shani kuch samay Makar mein laute aur 17 January 2023 ko pakke taur par Kumbh mein aaye) aur 17 April 2030 ko poori hogi; pehla nikaas 8 August 2029 ko. Abhi shikhar charan chal raha hai, jo 3 June 2027 ko pehli baar aur 23 February 2028 ko pakka badlega. Tareekhein Swiss Ephemeris (Lahiri, IST) se hain.' },
   { q: 'Kya Sade Sati Calculator bilkul free hai?', a: 'Haan. 100% free. Current status (Yes/No), active phase (Rising/Peak/Setting), exact start-end dates, days remaining, past + future cycles, aur 3 Parashar remedies (Mantra, Ratna, Daan) — sab free. Na signup, na card.' },
   { q: 'Sade Sati result kitne accurate hain?', a: 'Trikaal Vaani VM par dedicated /sade-sati endpoint hai jo Swiss Ephemeris (NASA-grade) se Saturn ki exact transit position calculate karta hai with Lahiri Ayanamsha — 99.9% astronomical accuracy. Yeh live compute hota hai, isliye Shani ki rashi badalne par bhi result apne aap sahi rehta hai.' },
 ];

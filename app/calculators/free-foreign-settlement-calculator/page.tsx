@@ -2,7 +2,10 @@
 
 // ============================================================
 // File: app/calculators/free-foreign-settlement-calculator/page.tsx
-// Version: v2.2 (07 Nov 2026) — Radar 31 Oct + 7 Nov: +1 H2, +2 FAQ (settle abroad by date of birth)
+// Version: v2.3 (15 Nov 2026) — Radar report #15: +0 H2, +3 FAQ (which planet, when will I travel
+//   abroad, success in foreign land). Every report H2 intent was already answered by v2.0-v2.2
+//   sections, so FAQ only (they flow into the FAQPage JSON-LD through buildCalcJsonLd).
+// (previous) Version: v2.2 (07 Nov 2026) — Radar 31 Oct + 7 Nov: +1 H2, +2 FAQ (settle abroad by date of birth)
 // (previous) Version: v2.1 (03 Oct 2026) — +5 H2 from the Radar E3 brief (03 Oct report)
 //
 // CHANGE v2.2 (2026-11-07):
@@ -101,6 +104,18 @@ const FAQS = [
   {
     "q": "Will I settle abroad — astrology se kaise pata chalega?",
     "a": "Ek akela graha nahi, kai sanket milkar batate hain: 12th house (door desh) aur uska swami, Rahu ki sthiti, 9th house (lambi yatra aur bhagya), dheela 4th house (ghar aur jadein) aur abhi chal rahi Dasha. Teen-chaar sanket ek saath milen to yog prabal mana jata hai. Ye sambhavna hai, guarantee nahi — visa, mehnat aur aapke faisle bhi utne hi zaroori hain. Upar ka calculator saaton block alag-alag wajah ke saath dikhata hai."
+  },
+  {
+    "q": "Which planet is responsible for foreign settlement?",
+    "a": "Koi ek graha nahi. Rahu sabse prabal akela sanket hai (videsh aur anjaan ka karak), Shani lambi mehnat aur tikaav deta hai, Guru mauka aur madad laata hai, aur Chandra tay karta hai ki mann door rehna seh payega ya nahi. Inke saath 12th house (door desh) ka swami score ka sabse bada hissa tay karta hai. Teen-chaar sanket ek saath milen tabhi yog prabal mana jata hai — upar ka calculator har sanket alag dikhata hai."
+  },
+  {
+    "q": "When will I travel abroad — astrology se kaise predict karein?",
+    "a": "Yatra aur basna alag yog hain. Yatra mukhya roop se 3rd house (chhoti yatra), 9th house (lambi yatra) aur 12th house (door desh) se padhi jaati hai, aur samay Dasha se — jab inme se kisi bhaav ke swami ya Rahu ki mahadasha ya antardasha chale, to window khulti hai. Ye sambhavna batata hai, ticket ki tareekh nahi. Apni chal rahi Dasha free Dasha Calculator mein dekhiye."
+  },
+  {
+    "q": "Success in foreign land astrology mein kaise dekhte hain?",
+    "a": "Videsh mein basna aur wahan safal hona do alag sawaal hain. Safalta ke liye settlement ke bhaav (12th, 9th) ka 10th house (kaam) ya 11th house (laabh) se judna, mazboot Lagna swami aur Dasamsa D-10 ki pushti dekhi jaati hai. Ek chart mein basne ka yog ho sakta hai aur safalta ghar par — calculator dono ko alag blocks mein dikhata hai. Ye pravritti hai, guarantee nahi."
   }
 ];
 

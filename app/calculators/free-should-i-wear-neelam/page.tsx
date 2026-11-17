@@ -2,7 +2,11 @@
 
 // ============================================================
 // File: app/calculators/free-should-i-wear-neelam/page.tsx
-// Version: v2.2 (19 Oct 2026) — Radar weekly report 17 Oct 2026 PUSH (18 empty SERPs):
+// Version: v2.3 (15 Nov 2026) — Radar weekly job cycle 2026-11-14 (report #15 PUSH):
+//   +1 English H2 inside `guidance` (Blue Sapphire ring benefits for female) +2 FAQ
+//   (ring benefits for female; blue sapphire side effects in astrology — the side-effects
+//   intent was already answered by existing H2s, so FAQ only). No citation added.
+// (previous) Version: v2.2 (19 Oct 2026) — Radar weekly report 17 Oct 2026 PUSH (18 empty SERPs):
 //   +5 H2 inside `guidance` — kaun si rashi (lagna, not rashi), positive effects,
 //   kab nahi pehnna, kis din/kab pehnna, nuksan + kya karein, side effects for
 //   females; 'Rules After Wearing' H2 made bilingual; +3 FAQ.
@@ -104,6 +108,13 @@ const config: FocusedStoneConfig = {
       <p className="text-slate-300 leading-relaxed mb-4">
         What tradition does advise is extra caution during pregnancy and in illness — avoid starting any new strong gemstone then, and treat health concerns medically first. If you are trying to understand a marriage or family question through Saturn, the stone is rarely the first step; a full chart reading is. You can compare Saturn&apos;s role in your chart with the free <a href="/calculators/free-weak-planet-finder" style={{ color: GOLD }} className="underline">Weak Planet Finder</a>.
       </p>
+      <h2 className="text-2xl font-serif font-bold mb-4 mt-10" style={{ color: GOLD }}>Blue Sapphire Ring Benefits for Female — What Women Can Expect When It Suits</h2>
+      <p className="text-slate-300 leading-relaxed mb-4">
+        Blue Sapphire ring benefits for a woman are the same Saturn benefits any chart gets — <strong style={{ color: GOLD }}>the stone does not work differently by gender.</strong> When Saturn (Shani — karma, discipline and patience) is a benefic for your Lagna, as for Taurus, Libra or Aquarius Lagna, women who wear it commonly describe steadier focus at work, less hesitation over long-pending decisions, and more stamina for routine and responsibility — in a job, in exam preparation, or in running a household or business. The benefit builds slowly over weeks, in keeping with Saturn&apos;s nature.
+      </p>
+      <p className="text-slate-300 leading-relaxed mb-4">
+        What decides it is your chart, not being a woman: Lagna, Saturn&apos;s strength and a clean 3-day trial. The ring is traditionally worn on the middle finger in silver or panchdhatu, as in the rules below. If Saturn is a malefic for your Lagna, the kinder route is a free remedy instead of the stone — such as the Shani mantra on Saturdays given in the Nuksan section above. Why the same stone helps one chart and not another is explained in <a href="/learn/functional-benefic-malefic-gemstone" style={{ color: GOLD }} className="underline">functional benefic and malefic gemstones</a>; the free score above runs that check for you.
+      </p>
       <h2 className="text-2xl font-serif font-bold mb-4 mt-10" style={{ color: GOLD }}>नीलम कितने रत्ती का पहनें — और असली नीलम की पहचान</h2>
       <p className="text-slate-300 leading-relaxed mb-4">
         वज़न का कोई एक शास्त्रीय नियम नहीं है; प्रचलन में <strong>3 से 7 रत्ती</strong> के बीच पहना जाता है। उससे ज़्यादा ज़रूरी है कि रत्न असली और बिना दरार हो। घर पर पानी या दूध वाले &ldquo;टेस्ट&rdquo; भरोसेमंद नहीं होते — <strong style={{ color: GOLD }}>प्रमाणित लैब सर्टिफ़िकेट</strong> लीजिए, जो यह भी बताए कि रत्न heated है या unheated। कीमत वज़न, मूल स्थान, रंग और उपचार से तय होती है, इसलिए कोई एक भाव सही नहीं होता।
@@ -122,6 +133,8 @@ const config: FocusedStoneConfig = {
     { q: 'Which rashi should not wear blue sapphire?', a: 'Neelam is decided by Lagna (ascendant), not by Moon sign or name rashi. Per BPHS Chapter 34, Saturn is a malefic for Aries, Leo, Scorpio and Pisces Lagna — they should not wear Blue Sapphire. It suits Taurus Lagna best (Saturn is yogakaraka), and Libra and Aquarius Lagna (Saturn is benefic). Others only after a check and a 3-day trial.' },
     { q: 'Neelam kis din aur kab pehnna chahiye?', a: 'Parampara mein Shanivar ko — shaam ko, ya Shanivar subah ki Shani hora mein. Shukla paksha aur Pushya, Anuradha ya Uttarabhadrapada nakshatra ho to aur achha. Pehle ganga jal ya kachche doodh se shuddhi aur "ॐ शं शनैश्चराय नमः" 108 baar. Par pehle suitability aur 3 din ka trial — muhurat baad mein.' },
     { q: 'Are blue sapphire side effects different for females?', a: 'No. The classical rules are the same for every chart — Lagna, Saturn strength, suitability check and a 3-day trial. Tradition only advises not starting any new strong gemstone during pregnancy or illness, and treating health concerns medically first.' },
+    { q: 'What are the benefits of a blue sapphire ring for females?', a: 'The same as for any chart — the classical rules do not change by gender. When Saturn is a benefic for your Lagna (Taurus, Libra or Aquarius) and the 3-day trial is clean, women commonly describe steadier focus, more patience with responsibilities and movement in long-stalled work. The benefit builds over weeks, not overnight, and it never replaces effort or medical care.' },
+    { q: 'What are blue sapphire side effects in astrology?', a: 'Tradition reads them as signs that Neelam does not suit the chart: disturbed sleep, frightening dreams, small accidents, sudden losses or a heavy mood, usually noticed during the 3-day trial. Before wearing, the tradition checks your Lagna, Saturn strength, dignity and afflictions — the free score on this page does that. If signs appear, remove the stone and do not continue; the Shani mantra on Saturdays is a free, safe remedy.' },
     { q: 'Yeh Neelam suitability check free hai?', a: 'Haan, 100% free. Aapka Saturn ka 0–100 suitability score, risk aur verdict bilkul muft.' },
   ],
 };

@@ -1,4 +1,9 @@
-// TRIKAL VAANI | app/kundali-milan/page.tsx | v2.3 (08 Nov 2026)
+// TRIKAL VAANI | app/kundali-milan/page.tsx | v2.4 (15 Nov 2026)
+// v2.4 (15 Nov 2026): Radar weekly job cycle 2026-11-14 (report #15). +1 KM_SECTIONS H2:
+//   राशि नाम से कुंडली मिलान / फ्री कुंडली मिलान by name / नाम से विवाह गुण मिलान (28+24+15),
+//   stating which koots a name rashi can and cannot count (15 of 36). +1 FAQ (gun milan by
+//   name only). DOB, name+DOB, 27/36, var-kanya, best rashi jodi, app intents already answered.
+//   No verse cited (none in library says this).
 // v2.3 (08 Nov 2026): Radar weekly job cycle 2026-11-07 (reports #13/#14 PUSH + BRIEF).
 //   +2 English KM_SECTIONS H2: marriage matching by name and date of birth (18+12+12+11+11),
 //   love compatibility by date of birth and name (11). +2 FAQ in FAQ_SCHEMA. Hindi name/DOB
@@ -151,6 +156,14 @@ const FAQ_SCHEMA = {
       acceptedAnswer: {
         '@type': 'Answer',
         text: 'Yes, with the date of birth, exact time and place — the names only label the report. The 36 guna are counted from the two Moon nakshatras, which need the birth details. Name-only matching is not real Ashtakoot, because many first letters belong to more than one nakshatra and most modern names are not chosen by nakshatra. With date only and no time, treat the score as an estimate.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'Can gun milan be done by name only, for free?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Only partly. From the name rashi (taken from the first letter of the name) four koots can be counted: Varna 1, Vashya 2, Graha Maitri 5 and Bhakoot 7, which is 15 of the 36 points. Tara, Yoni, Gana and Nadi (21 points, including the 8-point Nadi) need the Moon nakshatra, which a name cannot fix reliably. Treat a name-only result as an early hint and use date, time and place of birth for the full 36 guna.',
       },
     },
     {
@@ -365,6 +378,14 @@ const KM_SECTIONS: KmSection[] = [
     paras: [
       'सही कुंडली मिलान के लिए दोनों की **जन्म तिथि, जन्म समय और जन्म स्थान** चाहिए — नाम केवल रिपोर्ट पर दिखाने के लिए लिया जाता है, गिनती के लिए नहीं। जन्म विवरण से दोनों का **चंद्र नक्षत्र और राशि** निकलती है, और उसी से आठों कूट के 36 गुण गिने जाते हैं। इसलिए "नाम और जन्म तिथि से मिलान" का सही अर्थ है: नाम पहचान के लिए, जन्म विवरण गणना के लिए।',
       'अगर सिर्फ़ जन्म तिथि पता हो और समय नहीं, तो चंद्र राशि आमतौर पर सही निकल आती है पर नक्षत्र गलत हो सकता है — क्योंकि चंद्रमा एक नक्षत्र लगभग सवा दिन में पार करता है। ऐसे में गुणों को अनुमान मानिए। ऊपर का फ़ॉर्म पूरा विवरण लेकर मुफ्त में आठों कूट हिंदी में दिखाता है; अपना नक्षत्र अलग से जानना हो तो [नक्षत्र कैलकुलेटर](/calculators/free-nakshatra-calculator) है।',
+    ],
+  },
+  {
+    id: 'rashi-naam-se-milan',
+    h2: 'राशि नाम से गुण मिलान — 36 में से सिर्फ़ 15 अंक ही क्यों गिने जा सकते हैं',
+    paras: [
+      'राशि नाम से कुंडली मिलान में नाम के पहले अक्षर से **नाम राशि** मानी जाती है, और उसी से गुण गिने जाते हैं। पर आठ में से केवल चार कूट राशि पर चलते हैं — **वर्ण (1), वश्य (2), ग्रह मैत्री (5) और भकूट (7)**, कुल 15 अंक। बाकी चार — **तारा (3), योनि (4), गण (6) और नाड़ी (8)**, कुल 21 अंक — चंद्र नक्षत्र से निकलते हैं, जो नाम के अक्षर से पक्का तय नहीं होता। इसलिए नाम से विवाह गुण मिलान फ्री में करें तो उसे 15 अंकों का शुरुआती संकेत मानिए, 36 गुण का फैसला नहीं।',
+      'सबसे भारी कूट, **नाड़ी (8 अंक)**, नाम राशि से जाँचा ही नहीं जा सकता — यही इस तरीके की सबसे बड़ी सीमा है। दूसरी बात: नाम राशि और **जन्म राशि** (जन्म के समय चंद्रमा की राशि) अक्सर अलग निकलती हैं, क्योंकि ज़्यादातर नाम नक्षत्र देखकर नहीं रखे जाते। जन्म तिथि पता हो तो असली चंद्र राशि [राशि कैलकुलेटर](/calculators/free-rashi-calculator) पर मुफ्त देख लीजिए; जन्म समय और स्थान भी हों तो ऊपर का फ़ॉर्म पूरे 36 गुण अलग-अलग गिनता है। किसी राशि-जोड़ी का स्वभाव [मेष – सिंह](/compatibility/mesh-simha) जैसे राशि-जोड़ी पेजों पर है।',
     ],
   },
   {

@@ -2,7 +2,12 @@
 
 // ============================================================
 // File: app/calculators/free-shadi-kab-hogi-calculator/page.tsx
-// Version: v1.2 — 19 Oct 2026 — Radar weekly report 17 Oct 2026 (PUSH 8 SERPs + Content Edit Brief,
+// Version: v1.3 — 15 Nov 2026 — Radar weekly job cycle 2026-11-14 (report #15): PUSH keywords
+//   "love marriage yog in kundli", "marriage age prediction by date of birth", पुत्र के विवाह के
+//   उपाय, तुरंत शादी के उपाय already had H2s (love-ya-arranged, marriage-age, putra-vivah-deri,
+//   turant-shadi-ke-upay) — no new H2. +2 FAQ only: love marriage yog, one 5-line karak upay.
+//   FAQS feed buildCalcJsonLd, so FAQPage JSON-LD picks them up. Engine untouched. No verse cited.
+// (previous) Version: v1.2 — 19 Oct 2026 — Radar weekly report 17 Oct 2026 (PUSH 8 SERPs + Content Edit Brief,
 //   page at rank 6): +6 H2 in PILLAR_2 — पुत्र के विवाह में देरी (seen 22, rank 6/13),
 //   कन्या के विवाह में विलंब (9+8), चट मंगनी पट विवाह / टोटके (25+22), रिश्ते आने के उपाय (15),
 //   विवाह के देवता (9), शिवलिंग पर क्या चढ़ाएँ (10). +3 FAQ. Competitor names REMOVED from the
@@ -539,6 +544,14 @@ const FAQS = [
   {
     q: 'Rishte kyun nahi aa rahe?',
     a: 'Jyotish mein aam taur par do kaaran hote hain — saptam bhaav ya karak graha par dabav, aur ekadash bhaav (sampark aur laabh) ka kamzor hona; saath mein anukool dasha ka aage hona. Upay dono taraf se kijiye: karak graha ka mantra-daan, aur vyavhaarik roop se biodata update rakhna aur parivar ke badon tak dayra badhana.',
+  },
+  {
+    q: 'Love marriage yog in kundli kaise dekhein?',
+    a: 'Panchvein bhaav (5th = prem) aur saatvein bhaav (7th = shaadi aur saathi) ke swamiyon ka judna — yuti, drishti ya rashi-parivartan — love marriage ka sabse seedha yog maana jaata hai. Shukra ya Rahu ka 5th ya 7th se judna is sanket ko aur saaf karta hai. Ye ek sanket hai, guarantee nahi: anukool dasha ke bina koi yog khulta nahi. Prem ya arranged ka alag hisaab free Love or Arranged Marriage Calculator karta hai; ye calculator shaadi ka samay padhta hai.',
+  },
+  {
+    q: 'Shaadi jaldi ho, iske liye ek seedha upay kya hai?',
+    a: 'Shastra "turant" ka vaada nahi karta, par karak graha ko bal dene ka ek saral upay hai. Kya karna hai: apne karak ka beej mantra 108 baar — ladke ke liye "ॐ शुं शुक्राय नमः", ladki ke liye "ॐ बृं बृहस्पतये नमः". Kab: ladke Shukravar, ladki Guruvar, subah snan ke baad suryoday se ek ghante ke andar. Kitne ka: free; chahein to Rs 10-20 ka daan (safed chawal ya chane ki daal). Kitne din: 11 hafte, har hafte usi din. Aapke liye kyon: calculator mein jo karak kamzor dikhe, ye usi ko bal deta hai — dasha ki khidki phir bhi apne samay par khulti hai.',
   },
   {
     q: 'Kya ye calculator sach mein free hai?',

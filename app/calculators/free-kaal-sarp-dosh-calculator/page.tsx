@@ -2,7 +2,10 @@
 
 // ============================================================
 // File: app/calculators/free-kaal-sarp-dosh-calculator/page.tsx
-// Version: v2.4 (07 Nov 2026) — Radar 31 Oct + 7 Nov: +4 H2, +4 FAQ. PUSH kw 'free kaal sarp dosh
+// Version: v2.5 (15 Nov 2026) — Radar 14 Nov (report 15): +2 H2 ('puja-benefits', 'puja-at-home' = PUSH kw
+//   'Can Kaal Sarp Dosh Puja be done at home'), +3 FAQ, +2 verses (Phaladipika 26.50, 26.49 — conduct/japa,
+//   not Kaal Sarp itself). Skipped: Trimbakeshwar cost/reviews/best pandit (no sourced fact). Form/API unchanged.
+// (previous) Version: v2.4 (07 Nov 2026) — Radar 31 Oct + 7 Nov: +4 H2, +4 FAQ. PUSH kw 'free kaal sarp dosh
 //   calculator by date of birth' + 'Check Kaal Sarp Dosh in Kundli' (one H2), 'Kaal sarp yog english'
 //   (honest source note: named yoga is later tradition; Brihat Samhita 5.3 + Brihat Jataka 12.2 quoted),
 //   'Anant Kaal Sarp dosh in hindi' (Hindi H2), 'Kaal Sarp Dosh symptoms' (English twin of lakshan).
@@ -523,6 +526,22 @@ const PILLAR: PillarSection[] = [
     ],
   },
   {
+    id: "puja-benefits",
+    h2: "Kaal Sarp Puja Benefits — What the Puja Can and Cannot Do",
+    paras: [
+      "**The honest benefit of a Kaal Sarp puja is steadiness, not erasure.** A puja does not move Rahu, Ketu or any other graha in your birth chart, and no classical text promises that it removes the yog. What people commonly describe after a sincere puja is less fear about the dosha, a calmer mind, and the resolve to keep the simpler remedies going — which matters most during a Rahu or Ketu dasha, when Kaal Sarp pressure is felt most. And if the calculator above says No, or the chart has a cancellation (bhang), the puja has nothing to fix.",
+      "The classical texts put the weight on conduct rather than on the size of a ritual. Phaladipika (adhyaya 26, shlok 50) says **अहिंसकस्य दान्तस्य धर्मार्जितधनस्य च । सर्वदा नियमस्थस्य सदा सानुग्रहा ग्रहाः** — the grahas are always favourable to one who is non-violent, self-controlled, earns honestly and keeps a steady discipline. The verse is about all grahas, not Kaal Sarp by name, but the lesson fits: a puja helps most as the start of a habit, not as a one-day transaction. Tradition does the shanti puja once in a life ([how often](#puja-kitni-baar)); your running dasha is in the [Dasha Calculator](/calculators/free-dasha-calculator), and the basics are in [Kaal Sarp Dosha explained](/learn/kaal-sarp-dosha).",
+    ],
+  },
+  {
+    id: "puja-at-home",
+    h2: "Can Kaal Sarp Dosh Puja Be Done at Home?",
+    paras: [
+      "**Yes. A simple Kaal Sarp shanti can be done at home, by you, without travelling anywhere.** No classical text says Kaal Sarp shanti is valid at only one temple — the yog is not even named in BPHS — and the remedies tradition ties to the Rahu–Ketu axis are Shiva upasana, mantra jaap and daan, all of which can be done at home. What the home form cannot be is a one-day event: its strength is regularity. First run the calculator above; if it says No, or the chart has a cancellation (bhang), there is nothing to perform.",
+      "**What:** offer water or raw milk on a Shivling (at home or a nearby temple), then chant the Maha Mrityunjaya mantra 108 times (about 15 minutes). **When:** every morning after bath, starting on a Monday. **Cost:** free, or ₹10–20 for milk. **How many days:** 40 days without a break. **Why for you:** if the calculator shows Kaal Sarp active without bhang — and especially if a Rahu or Ketu dasha is running — this is the remedy Phaladipika (adhyaya 26, shlok 49) points to: **जपेच्च तत्प्रीतिकरैः सुकर्मभिः करोति शान्तिं व्रतदानवन्दनैः**, japa, good deeds, vrat, daan and vandana bring peace when grahas are unfavourable in dasha or transit. A temple puja (Trimbakeshwar, Ujjain) stays a valid choice, not a compulsory one — see [निवारण कहां होता है](#nivaran-kahan).",
+    ],
+  },
+  {
     id: "marry-kaal-sarp",
     h2: "Can I Marry a Guy With Kaal Sarp Dosh?",
     paras: [
@@ -584,6 +603,9 @@ const FAQS = [
   { q: 'What is Kaal Sarp Yog in English?', a: 'It means the "serpent of time" combination: all seven planets from Sun to Saturn on one side of the Rahu–Ketu axis. As a named yoga it comes from later tradition, not from BPHS; the classical Sarpa yoga of Brihat Jataka (adhyaya 12, shlok 2) is a different rule about the kendras. Many charts with Kaal Sarp also carry a cancellation (bhang).' },
   { q: 'अनंत कालसर्प दोष क्या है?', a: 'जब राहु लग्न (पहला भाव) में और केतु सप्तम भाव (शादी और साझेदारी) में हो, और सातों ग्रह इनके बीच एक ही तरफ हों, तो अनंत कालसर्प बनता है। असर ज़्यादातर आत्म-छवि, शुरुआती संघर्ष और रिश्तों पर दिखता है, पर यही राहु स्वतंत्र सोच और हिम्मत भी देता है। भंग हो तो यह लगभग निष्क्रिय रहता है।' },
   { q: 'What are the symptoms of Kaal Sarp Dosh?', a: 'There is no fixed physical symptom. Commonly reported patterns are work stalling at the last step, delayed results, snake dreams and restlessness — but Sade Sati, a Rahu dasha or a weak planet can cause the same signs. Only the chart confirms Kaal Sarp; the free calculator on this page checks it by exact degree.' },
+  { q: 'Kaal Sarp Dosh ke lakshan kya hain?', a: 'Koi nishchit shaaririk lakshan nahi hota. Aam taur par bataye jaane wale pattern hain: kaam aakhri kadam par atakna, mehnat ke hisaab se phal der se milna, sapne mein saanp dikhna aur bina saaf kaaran ki bechaini. Par yahi sanket Sade Sati, Rahu dasha ya kamzor graha se bhi aate hain — isliye lakshan se label mat lagaiye, upar ke calculator se exact degree par jaanch kijiye.' },
+  { q: 'What are the benefits of Kaal Sarp Puja?', a: 'The honest benefit is steadiness, not erasure: a puja does not change Rahu, Ketu or any graha in the birth chart. People commonly describe less fear and a calmer mind, and the resolve to keep simple remedies going through a Rahu or Ketu dasha. Phaladipika 26.50 puts the weight on conduct — the grahas favour the self-controlled and disciplined. If the calculator says No or the chart has bhang, no puja is needed.' },
+  { q: 'Can Kaal Sarp Dosh Puja be done at home?', a: 'Yes. Offer water or raw milk on a Shivling and chant the Maha Mrityunjaya mantra 108 times every morning after bath, starting on a Monday, for 40 days without a break — free or Rs 10-20. No classical text limits Kaal Sarp shanti to one temple. Trimbakeshwar or Ujjain stay a valid choice, not a compulsory one. Run the calculator first: if it says No, there is nothing to perform.' },
   { q: 'Kya ye Kaal Sarp Calculator bilkul free hai?', a: 'Haan, 100% free. Yes/No verdict, dosh ka prakaar (Rahu house se), Rahu-Ketu houses, 3 Naag-puja remedies, aur baaki doshas ka quick check — sab bilkul free. Na signup, na card.' },
   { q: 'Result kitne accurate hain?', a: 'Trikaal Vaani Swiss Ephemeris (NASA-grade) se har graha ki exact longitude nikaalta hai aur Rahu-Ketu axis ke against check karta hai with Lahiri Ayanamsha — 99.9% astronomical accuracy. Zyadatar free calculators sirf rashi ya house dekhte hain, jo tab galat hota hai jab koi graha Rahu/Ketu ki hi rashi mein ho. Yahi reason hai ki yahan ke result borderline cases mein bhi badalte nahi.' },
 ];

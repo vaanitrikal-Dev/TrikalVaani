@@ -1,7 +1,11 @@
 // ═══════════════════════════════════════════════════════════════
 // app/hast-rekha-calculator/page.tsx
 // AI HAST REKHA CALCULATOR — money page (server component)
-// Version: v3.6 (8 Nov 2026) — Radar weekly job cycle 2026-11-07: +3 H2 (AI palm reading free vs chatbot,
+// Version: v3.7 (15 Nov 2026) — Radar weekly job cycle 2026-11-14 (report #15): PUSH "ai palm reading online
+//   free" and "ai se hath ki rekha kaise dekhe" already had H2s (ai-palm-reading-online, ai-palm-reading-free,
+//   ai-se-kaise-dekhe) — no new H2. +1 Hinglish FAQ (AI se haath ki rekha kaise dekhein), feeds FAQPage
+//   JSON-LD and the client accordion via FAQS. No new citation.
+// (previous) Version: v3.6 (8 Nov 2026) — Radar weekly job cycle 2026-11-07: +3 H2 (AI palm reading free vs chatbot,
 //   free online palm reading for marriage, female/male palm in Brihat Samhita 69.12) +3 FAQ; brand names
 //   in visible text replaced with "AI chatbot" (anchor id chatgpt-se-farak kept so links do not break).
 // (previous) Version: v3.5 (28 Oct 2026) — SALES COPY (Rohiit: "Focus on sales, marketing aur perseverance; bahana
@@ -335,6 +339,10 @@ const FAQS = [
   {
     q: 'Report ke baad koi puja, ratna ya doosri sitting bechoge?',
     a: 'Nahi. ₹51 ke baad kuch nahi hai — na puja, na ratna, na dhaaga, na follow-up sitting. Jis mandi mein darr dikha kar upay becha jaata hai, usi ki wajah se ye platform bana. Aur ratna kabhi hatheli ke nishan se nahi pehne jaate — wo Kundali se tay hote hain.',
+  },
+  {
+    q: 'AI se haath ki rekha kaise dekhein?',
+    a: 'Teen kadam, do minute se kam. Ek: upar Right ya Left haath ke box par tap kijiye — camera roshni, sthirta aur focus jaanchta hai aur sab hara hote hi photo khud le leta hai (camera na khule to gallery se photo chuniye). Purush ka daayaan aur stri ka baayaan haath mukhya maana jaata hai; dono bhejein to aur behtar. Do: engine 1-2 second mein bata deta hai ki photo theek hai ya nahi. Teen: report lagbhag ek minute mein banti hai — chaar mukhya rekhaayein, 7 graha-sthaan aur har baat ke saath granth ka shlok, PDF ke saath. Photo guide aur saare lekh free hain; aapki photo ki personal report ₹51 ki hai. AI hatheli se tareekh ya umr nahi batata — samay ke sawaal Kundali se dekhe jaate hain.',
   },
   {
     q: 'Can a general AI chatbot read my palm for free — how is this different?',

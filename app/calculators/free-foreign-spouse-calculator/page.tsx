@@ -2,7 +2,11 @@
 
 // ============================================================
 // File: app/calculators/free-foreign-spouse-calculator/page.tsx
-// Version: v2.4 (07 Nov 2026) — Radar 31 Oct + 7 Nov: +2 H2, +2 FAQ (videshi-ladke-se-shadi in Hindi,
+// Version: v2.5 (15 Nov 2026) — Radar report #15 PUSH: +1 H2, +1 FAQ (Ketu in the 7th house,
+//   Chamatkara Chintamani 10.7, quoted as written; the verse does not mention a foreign spouse).
+//   7th-lord-in-12th, what-indicates and calculator-free intents already answered — skipped.
+//   Link: /learn/navamsa-chart-guide. dateModified 2026-11-15.
+// (previous) Version: v2.4 (07 Nov 2026) — Radar 31 Oct + 7 Nov: +2 H2, +2 FAQ (videshi-ladke-se-shadi in Hindi,
 //   BPHS 80.4 + 80.17; spouse-appearance, BPHS 80.22-25 + 33.47, quoted as written). Links:
 //   /learn/chances-of-inter-caste-marriage, /learn/navamsa-chart-guide. dateModified 2026-11-07.
 // (previous) Version: v2.3 (24 Oct 2026) — Radar 24 Oct: +1 H2, +1 FAQ (BPHS 24.84 on 7th lord in 12th, quoted as
@@ -128,6 +132,10 @@ const FAQS = [
   {
     "q": "Can astrology tell the physical appearance of my spouse?",
     "a": "Only in broad terms. Brihat Parashara Hora Shastra (adhyaya 80, shlok 22-25) describes the husband's nature and attractiveness from the sign of a woman's 7th house, and adhyaya 33, shlok 47 the wife's beauty from the 7th of the Karakamsha. It gives no height, complexion or face, mixed influences give mixed results, and this calculator does not score appearance."
+  },
+  {
+    "q": "Does having Ketu in the 7th house indicate a foreign spouse?",
+    "a": "Not on its own. Chamatkara Chintamani (adhyaya 10, shlok 7) says Ketu in the 7th brings much concern with journeys (शिखी सप्तमे भूयसी मार्गचिन्ता) and does not mention a foreign spouse. This calculator gives Ketu no points; the foreign reading comes from Rahu linked to the 7th, the 7th lord in the 12th or 9th, Darakaraka and the Navamsa agreeing."
   },
   {
     "q": "Kya ye calculator free hai?",
@@ -311,6 +319,14 @@ const SECTIONS: FsSection[] = [
       "For a man's chart, adhyaya 33, shlok 47 (**द्यूने चन्द्रगुरु यस्य भार्या तस्यातिसुन्दरी**) says Moon and Jupiter in the 7th from the Karakamsha give a very beautiful wife, and Mercury there a wife skilled in the arts. Chapter 80 adds the limit: **मिश्रे मिश्रफलं वाच्यं** — mixed influences give mixed results, weighed by the strength of sign and Navamsa. The calculator above does not score appearance; how the Navamsa is read is in the [Navamsa chart guide](/learn/navamsa-chart-guide).",
     ],
   },
+  {
+    id: "ketu-7th",
+    h2: "Does Ketu in the 7th House Indicate a Foreign Spouse?",
+    paras: [
+      "Not by itself, and the classical verse does not say so. **Ketu** (the south node — detachment and the unusual) in the **7th house (marriage and partner)** is read differently from Rahu. Chamatkara Chintamani (adhyaya 10, shlok 7) opens its Ketu-in-the-7th verse with **शिखी सप्तमे भूयसी मार्गचिन्ता** — Ketu in the 7th brings much concern with journeys — and adds **कीटगः सर्वदालाभकारी**: in Scorpio it is always gainful. The same verse notes strain around the spouse and expenses, but it is one placement, weighed against the 7th lord and the Navamsa. **It never mentions a foreign spouse.**",
+      "**Practice reading, not the verse:** Ketu in the 7th always means Rahu in the 1st, and some practitioners read that axis as a partner from a different background. This calculator gives Ketu no points of its own; its foreign-spouse weight goes to Rahu in or aspecting the 7th, the 7th lord in the 12th or 9th, Darakaraka and Navamsa confirmation. If Ketu sits in your 7th, check those blocks in your result above — if they are quiet, Ketu describes the nature of the bond, not its geography. How the Navamsa weighs it is in the [Navamsa chart guide](/learn/navamsa-chart-guide).",
+    ],
+  },
 ];
 
 type FsLink = { href: string; label: string; note: string };
@@ -389,7 +405,7 @@ export default function FreeForeignSpouseCalculatorPage() {
     howToName: "How to check your foreign spouse yog from your Kundali",
     howToSteps: [{"name": "Enter birth details", "text": "Enter your date, exact time and place of birth."}, {"name": "The chart is computed", "text": "Swiss Ephemeris with Lahiri Ayanamsha builds your Kundali and the Navamsa D-9, which is where marriage is actually judged."}, {"name": "Read the reasons", "text": "Every rule shows its points and the figure behind them — the 7th lord, whether the Navamsa confirms it, where Rahu sits, and who your Darakaraka is."}],
     faqs: FAQS,
-    dateModified: '2026-11-07',
+    dateModified: '2026-11-15',
   });
 
   return (
