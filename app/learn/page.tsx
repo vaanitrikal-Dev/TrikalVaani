@@ -1,14 +1,17 @@
-// VERSION: 1.1 (18 Oct 2026) — Site menu (SiteNav) added — the page had no menu; pt-16 so the fixed 64px menu does not cover content. Nothing else changed.
+// VERSION: 1.2 (19 Nov 2026) — robots noindex,follow while lib/index-policy.ts LEARN_HUB_INDEXABLE is false (approved by Rohiit 19 Nov 2026). Nothing else changed.
+// PREVIOUS: 1.1 (18 Oct 2026) — Site menu (SiteNav) added — the page had no menu; pt-16 so the fixed 64px menu does not cover content. Nothing else changed.
 // (1 Oct 2026 — daam sahi kiye: Kundali Milan ₹51 (couple + parent), Karmic ₹101 / $11, Child Birth ₹51; Bhrigu Nandi ke purane daave hataye)
 import { Metadata } from 'next'
 import Link from 'next/link'
 import SiteNav from '@/components/layout/SiteNav'
 import { createClient } from '@supabase/supabase-js'
+import { LEARN_HUB_INDEXABLE } from '@/lib/index-policy' // v1.2
 
 export const metadata: Metadata = {
   title: { absolute: 'Vedic Astrology Knowledge Hub | Trikaal Vaani' },
   description: 'India\'s most comprehensive Vedic astrology guide — 90+ expert articles on predictions, yogas, doshas, transits, and festivals. Written by Rohiit Gupta, Chief Vedic Architect.',
   alternates: { canonical: 'https://trikalvaani.com/learn' },
+  robots: { index: LEARN_HUB_INDEXABLE, follow: true, googleBot: { index: LEARN_HUB_INDEXABLE, follow: true } }, // v1.2
   openGraph: {
     title: 'Vedic Astrology Knowledge Hub | Trikaal Vaani',
     description: 'India\'s most comprehensive Vedic astrology guide — 90+ expert articles.',

@@ -2,7 +2,9 @@
 // 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER
 // ════════════════════════════════════════════════════════════════════════════
 // File:    app/hi/[...path]/page.tsx
-// Version: v1.5 (6 Nov 2026) — ONE PAGE, ALL CITIES: a Hindi city copy NOT in
+// Version: v1.6 (19 Nov 2026) — national Hindi festival page indexable only when its date is
+//          today..+92 days (lib/index-policy.ts). Approved by Rohiit 19 Nov 2026.
+// Previous: v1.5 (6 Nov 2026) — ONE PAGE, ALL CITIES: a Hindi city copy NOT in
 //          lib/city-index-keep.ts now 301-redirects to /hi/<slug>#<city>. Kept city pages
 //          and all national pages render exactly as before.
 // Previous: v1.4 (6 Nov 2026) — CITY pages (/hi/<city>/<slug>) get robots noindex,follow unless
@@ -59,6 +61,7 @@ import FestivalPillar, {
   resolveFestival, getContent, festivalOgImage, getLocalTerm, getVisarjan, baseSlug, buildMeta,
 } from "@/components/festival/FestivalPillar";
 import { isCityPageIndexable } from "@/lib/city-index-keep";
+import { isFestivalInIndexWindow } from "@/lib/index-policy"; // v1.6
 
 export const revalidate = 86400;
 export const dynamicParams = true;
@@ -105,7 +108,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
     ? `${SITE_URL}/hi/${city.slug}/${p.slug}`
     : `${SITE_URL}/hi/${p.slug}`;
   // v1.4 — national page always indexable; a city copy only if in the keep-list
-  const indexable = city ? isCityPageIndexable(`/hi/${city.slug}/${p.slug}`) : true;
+  const indexable = (city ? isCityPageIndexable(`/hi/${city.slug}/${p.slug}`) : true) && isFestivalInIndexWindow(f.date); // v1.6
 
   // hreflang from alt_lang_slug. The English side keeps the year in its slug,
   // so it is stored per row rather than derived.
@@ -158,4 +161,4 @@ export default async function Page({ params }: Params) {
   return <FestivalPillar festival={festival} city={city} lang="hi" />;
 }
 
-// END — app/hi/[...path]/page.tsx v1.5 | Trikaal Vaani | Rohiit Gupta
+// END — app/hi/[...path]/page.tsx v1.6 | Trikaal Vaani | Rohiit Gupta

@@ -3,7 +3,10 @@
  * TRIKAL VAANI — Compatibility Page (Programmatic SEO/GEO)
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/compatibility/[pair]/page.tsx
- * VERSION: 2.0 (19 Oct 2026 — Wikipedia format for compatibility pages, editorial_rulings #8/#21/#23,
+ * VERSION: 2.1 (19 Nov 2026 — robots noindex,follow while lib/index-policy.ts COMPATIBILITY_INDEXABLE
+ *   is false (Google thin-content recovery, approved by Rohiit 19 Nov 2026). Page stays live.
+ *   Covers /hi/compatibility/[pair] too, which spreads this metadata.)
+ * PREVIOUS: VERSION 2.0 (19 Oct 2026 — Wikipedia format for compatibility pages, editorial_rulings #8/#21/#23,
  *   approved by Rohiit 19 Oct 2026 ("Yes please karo do change in GitHub"):
  *   1) New DB columns citations / infobox / glossary (jsonb, default []) are read and rendered with the
  *      same WikiBlocks as /blog, /learn, /events: Key Facts infobox (+ hero), Glossary, Classical Sources
@@ -102,6 +105,7 @@ import {
   citeAnchor,
 } from '@/lib/wiki'; // v1.8, v2.0
 import SiteNav from '@/components/layout/SiteNav'; // v1.9
+import { COMPATIBILITY_INDEXABLE } from '@/lib/index-policy'; // v2.1
 
 // ── ISR: regenerate pages periodically, cache aggressively ───
 export const revalidate = 86400; // 24h
@@ -336,9 +340,9 @@ export async function generateMetadata(
       images:      [og.url],
     },
     robots: {
-      index: true,
+      index: COMPATIBILITY_INDEXABLE, // v2.1
       follow: true,
-      googleBot: { index: true, follow: true, 'max-image-preview': 'large', 'max-snippet': -1 },
+      googleBot: { index: COMPATIBILITY_INDEXABLE, follow: true, 'max-image-preview': 'large', 'max-snippet': -1 },
     },
   };
 }

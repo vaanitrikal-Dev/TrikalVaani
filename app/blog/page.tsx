@@ -3,7 +3,8 @@
  * TRIKAL VAANI — Blog Index Page
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/blog/page.tsx
- * VERSION: 2.2 (1 Nov 2026 — nakli ginti (das hazaar seekers wali line) hatayi; IR Guard violation)
+ * VERSION: 2.3 (19 Nov 2026 — lists only indexed (reviewed) posts via lib/blog-posts.ts v3.16; no code change here)
+ * Prior — 2.2 (1 Nov 2026 — nakli ginti (das hazaar seekers wali line) hatayi; IR Guard violation)
  * Prior — 2.1 — Supabase Dynamic (build-safe, SWC parser fix)
  * SIGNED: ROHIIT GUPTA, CEO
  * ============================================================

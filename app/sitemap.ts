@@ -1,4 +1,11 @@
 /* ═══════════════════════════════════════════════════════════════════════════
+   v10.5 — 19 November 2026 — after the rejected reconsideration (approved by
+   Rohiit 19 Nov 2026), per lib/index-policy.ts v1.1: the 288 compatibility
+   pages, the /learn hub and every /learn page not in LEARN_INDEX_KEEP are no
+   longer emitted; festival pages only for dates today..+92 days. Nothing else.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════════════════════════
    v10.4 — 12 November 2026 — only URLs that answer 200 directly: the three
    redirected local pages (noida, gurgaon, ghaziabad -> /astrologer-delhi,
    next.config.js v2.1), /digital-career (308 -> /career) and the /vivah-muhurat
@@ -176,6 +183,7 @@
  * 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER 🔱
  * ============================================================================
  * File:        app/sitemap.ts
+ * Version:     v10.5 — compatibility, /learn and out-of-window festivals out (19 Nov 2026)
  * Version:     v10.4 — redirecting URLs out (12 Nov 2026)
  * Version:     v10.3 — /editorial-policy added; founder/contact lastmod (11 Nov 2026)
  * Version:     v10.2 — thin template families out, per lib/index-policy.ts (11 Nov 2026)
@@ -420,7 +428,8 @@ import { isCityPageIndexable, isFestivalFarFuture } from '@/lib/city-index-keep'
 import {
   isSwapnaSymbolIndexable, SWAPNA_CATEGORIES_INDEXABLE, PANCHANG_DATES_INDEXABLE,
   CITY_HUBS_INDEXABLE, isVivahYearIndexable,
-} from '@/lib/index-policy'; // v10.2
+  COMPATIBILITY_INDEXABLE, isLearnIndexable, LEARN_HUB_INDEXABLE, isFestivalInIndexWindow,
+} from '@/lib/index-policy'; // v10.2, v10.5
 import { createClient } from '@supabase/supabase-js';
 import citiesData from './data/cities.json';
 import festivalsData from './data/festivals.json';
@@ -1177,6 +1186,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   for (const row of compatRows) compatSlugs.add(row.slug);
 
   for (const row of compatRows) {
+    if (!COMPATIBILITY_INDEXABLE) break; // v10.5
     const enUrl = `${BASE}/compatibility/${row.slug}`;
     const hiUrl = `${BASE}/hi/compatibility/${row.slug}`;
     const languages = { 'en-IN': enUrl, 'hi-IN': hiUrl };
@@ -1270,6 +1280,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       if (isFestivalFarFuture(f.date)) continue; // v10.1 — year copies beyond 400 days
       // v10.2 — past page with a next occurrence redirects there
       if (f.date < todayStr && upcomingBases.has(baseSlugOf(f.festival_slug))) continue;
+      if (!isFestivalInIndexWindow(f.date)) continue; // v10.5 — today..+92 days only
 
       // v9.4: one honest date for the national EN/HI pages and every city copy
       const festMod =
@@ -1402,7 +1413,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     console.log(`[sitemap] learn OK — ${seoPages.length} URLs` + (learnError ? ` (warning: ${learnError})` : ''));
   }
 
-  entries.push({
+  if (LEARN_HUB_INDEXABLE) entries.push({ // v10.5
     url: `${BASE}/learn`,
     // v9.4: the hub lists every /learn/ page → its newest page's date
     lastModified: latest(codeMod('/learn'), ...seoPages.map((x) => x.updated_at)) ?? codeMod('/learn'),
@@ -1412,6 +1423,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   let learnPairs = 0;
   for (const page of seoPages) {
+    if (!isLearnIndexable(page.slug)) continue; // v10.5
     const enUrl = `${BASE}/learn/${page.slug}`;
     const entry: MetadataRoute.Sitemap[0] = {
       url: enUrl,

@@ -1,7 +1,17 @@
 // ============================================================
 // TRIKAL VAANI — BLOG POSTS — SUPABASE VERSION
 // CEO: Rohiit Gupta | Chief Vedic Architect
-// Version: 3.15 (NOINDEX — Google manual action recovery, approved by Rohiit 5 Nov 2026)
+// Version: 3.16 (19 Nov 2026 — lists show only indexed posts, approved by Rohiit 19 Nov 2026)
+// Date: 2026-11-19
+//
+// CHANGE v3.16 — Google rejected the 12 Nov reconsideration. The /blog hub was
+//   still listing all 1,182 posts, including ~1,146 noindexed ones, so a reviewer
+//   saw the whole AI-drafted set from one indexed page. getAllPosts(),
+//   getRelatedPosts() and getHubChildren() now return only noindex = false rows.
+//   Noindexed posts stay published and reachable by their own URL.
+//
+// ------------------------------------------------------------
+// PREVIOUS: Version 3.15 (NOINDEX — Google manual action recovery, approved by Rohiit 5 Nov 2026)
 // Date: 2026-11-05
 //
 // CHANGE v3.15 — new column public.blog_posts.noindex (boolean, default false,
@@ -556,6 +566,7 @@ export async function getAllPosts(): Promise<BlogPost[]> {
       .from('blog_posts')
       .select(LIST_COLUMNS)
       .eq('is_published', true)
+      .eq('noindex', false) // v3.16 — the hub lists indexed posts only
       .order('published_at', { ascending: false })
       .range(from, to);
 
@@ -689,7 +700,8 @@ export async function getRelatedPosts(slugs: string[]): Promise<BlogPost[]> {
     .from('blog_posts')
     .select(LIST_COLUMNS)
     .in('slug', slugs)
-    .eq('is_published', true);
+    .eq('is_published', true)
+    .eq('noindex', false); // v3.16
 
   if (error) {
     console.error('[TV-Blog] getRelatedPosts error:', error.message);
@@ -715,6 +727,7 @@ export async function getHubChildren(pillarSlug: string): Promise<HubChild[]> {
     .select('slug, title, category, hub_group')
     .eq('pillar_slug', pillarSlug)
     .eq('is_published', true)
+    .eq('noindex', false) // v3.16
     .order('slug', { ascending: true })
     .limit(500);
 

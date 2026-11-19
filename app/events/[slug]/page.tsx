@@ -1,7 +1,9 @@
 // ════════════════════════════════════════════════════════════════════════════
 // 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER
 // File:    app/events/[slug]/page.tsx
-// Version: v4.4 (11 Nov 2026) — (a) a PAST festival page whose next occurrence exists now
+// Version: v4.5 (19 Nov 2026) — indexable only when the festival date is today..+92 days
+//          (lib/index-policy.ts isFestivalInIndexWindow). Approved by Rohiit 19 Nov 2026.
+// Previous: v4.4 (11 Nov 2026) — (a) a PAST festival page whose next occurrence exists now
 //          308-redirects to that next page (holi-2026 → holi-2027, same text); (b) a festival
 //          with no published English content row carries robots noindex. Approved by Rohiit.
 // Previous: v4.3 (11 Nov 2026) — a festival page dated more than 400 days ahead (the
@@ -21,6 +23,7 @@ import { Metadata } from "next";
 import { notFound, redirect, permanentRedirect } from "next/navigation";
 import { createClient } from "@supabase/supabase-js";
 import { isFestivalFarFuture } from "@/lib/city-index-keep";
+import { isFestivalInIndexWindow } from "@/lib/index-policy"; // v4.5
 import FestivalPillar, {
   SITE_URL, AUTHOR_NAME, AUTHOR_TITLE,
   resolveFestival, getContent, festivalOgImage, baseSlug, buildMeta,
@@ -67,7 +70,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   // v4.2 (16 Oct 2026): featured image of this festival row (editorial_rulings #20),
   // else /og-default.jpg exactly as before.
   const ogImage = festivalOgImage(content);
-  const indexable = !isFestivalFarFuture(f.date) && !!content; // v4.3, v4.4
+  const indexable = !isFestivalFarFuture(f.date) && !!content && isFestivalInIndexWindow(f.date); // v4.3, v4.4, v4.5
 
   return {
     // absolute — app/layout.tsx sets template "%s | Trikaal Vaani".

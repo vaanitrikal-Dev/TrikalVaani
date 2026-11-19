@@ -20,10 +20,17 @@ import {
   normalizeHeroImage,
   ogImageFor,
 } from '@/lib/wiki'
+import { isLearnIndexable } from '@/lib/index-policy' // v2.5
 
 /* ============================================================
    TRIKAL VAANI — /learn/[slug]
-   VERSION: 2.4 — SITE MENU (18 Oct 2026)
+   VERSION: 2.5 — NOINDEX UNTIL REVIEWED (19 Nov 2026)
+   ============================================================
+   CHANGE v2.5: robots noindex,follow unless the slug is in
+     lib/index-policy.ts LEARN_INDEX_KEEP (Google thin-content recovery,
+     approved by Rohiit 19 Nov 2026). Page stays live. Nothing else changed.
+   ============================================================
+   PREVIOUS: VERSION 2.4 — SITE MENU (18 Oct 2026)
    ============================================================
    CHANGE v2.4: Site menu (SiteNav) added — the page had no menu; pt-16
      wrapper so the fixed 64px menu does not cover content. Nothing else
@@ -191,9 +198,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       images: [og.url],
     },
     robots: {
-      index: true,
+      index: isLearnIndexable(page.slug), // v2.5
       follow: true,
-      googleBot: { index: true, follow: true, 'max-snippet': -1, 'max-image-preview': 'large' },
+      googleBot: { index: isLearnIndexable(page.slug), follow: true, 'max-snippet': -1, 'max-image-preview': 'large' },
     },
   }
 }
