@@ -3,8 +3,13 @@
  * TRIKAL VAANI — Google Play Billing (BROWSER / APP side)
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: lib/play-billing.ts
- * VERSION: 1.1 (11 Oct 2026) — saare approved product IDs (PLAY_PRODUCTS).
- *   v1.0 ke exports (BirthForm v10.7 jo use karta hai) BILKUL WAISE HI hain.
+ * VERSION: 1.2 (22 Nov 2026) — "You already own this item" fix (Rohiit approved 22 Nov).
+ *   purchaseWithPlay() ab payment sheet kholne se PEHLE Google se poochhta hai ki
+ *   is product ki koi purani, bina-consume purchase padi hai kya (listPurchases).
+ *   Mili to wahi token lauta deta hai — server use verify + consume karta hai.
+ *   Pehle: verify ek baar fail hua (jaise 401) to grahak hamesha ke liye atak
+ *   jaata tha. Exports aur unka shape BILKUL WAISE HI hain — koi caller nahi badla.
+ * Prior: 1.1 (11 Oct 2026) — saare approved product IDs (PLAY_PRODUCTS).
  * SIGNED: ROHIIT GUPTA, CEO
  * ============================================================
  * KYA KARTA HAI
@@ -66,10 +71,37 @@ export type PlayPurchaseResult =
   | { ok: true; purchaseToken: string }
   | { ok: false; cancelled: boolean; error: string };
 
+/**
+ * Is product ki koi purani purchase jo abhi consume NAHI hui (Play kehta hai
+ * "You already own this item") — uska token. Na mile ya API na ho to null.
+ * Kabhi throw nahi karta.
+ */
+async function findUnconsumedPurchase(productId: string): Promise<string | null> {
+  try {
+    const w = window as any;
+    if (typeof w.getDigitalGoodsService !== 'function') return null;
+    const service = await w.getDigitalGoodsService(PLAY_BILLING_METHOD);
+    if (!service || typeof service.listPurchases !== 'function') return null;
+    const purchases: any[] = (await service.listPurchases()) || [];
+    const hit = purchases.find((p) => p && p.itemId === productId && p.purchaseToken);
+    return hit ? String(hit.purchaseToken) : null;
+  } catch (e: any) {
+    console.error('[PlayBilling] listPurchases failed:', e?.name, e?.message);
+    return null;
+  }
+}
+
 /** Google Play payment sheet kholta hai. Kabhi throw nahi karta. */
 export async function purchaseWithPlay(productId: string): Promise<PlayPurchaseResult> {
   if (typeof window === 'undefined' || typeof (window as any).PaymentRequest !== 'function') {
     return { ok: false, cancelled: false, error: 'Google Play payment is not available on this device.' };
+  }
+  // v1.2: pehle se kharida hua par istemaal na hua (pichhla verify fail) —
+  // naya payment mat kholo, wahi token server ko do.
+  const pending = await findUnconsumedPurchase(productId);
+  if (pending) {
+    console.log('[PlayBilling] reusing unconsumed purchase for', productId);
+    return { ok: true, purchaseToken: pending };
   }
   try {
     const request = new PaymentRequest(
@@ -93,4 +125,4 @@ export async function purchaseWithPlay(productId: string): Promise<PlayPurchaseR
     return { ok: false, cancelled: false, error: 'Google Play payment could not be completed. Please try again.' };
   }
 }
-// END — lib/play-billing.ts v1.1
+// END — lib/play-billing.ts v1.2
