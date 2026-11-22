@@ -122,7 +122,7 @@ export default function PrivacyPage() {
                   "Google Play Billing — in-app purchases in the Android app",
                   "Supabase — database, authentication and file storage",
                   "self-hosted Swiss Ephemeris — Vedic astrology calculations (Lahiri Ayanamsha)",
-                  "Google Gemini AI — reading generation, voice-to-text and palm photo analysis",
+                  "Google premium AI — reading generation, voice-to-text and palm photo analysis",
                   "ElevenLabs — spoken voice replies in Trikaal Voice",
                   "Google Analytics and Google Ads — traffic and advertising measurement",
                   "Meta (Facebook) Pixel — advertising measurement",
