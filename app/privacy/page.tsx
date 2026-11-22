@@ -2,7 +2,11 @@
  * TRIKAL VAANI — trikalvaani.com
  * Chief Vedic Architect: Rohiit Gupta
  * FILE TO PASTE → app/privacy/page.tsx (REPLACE EXISTING)
- * Version: 2.1 (1 Oct 2026 — Trikaal Vaani ka core tagline (Rohiit ne chuna): "Granth ka Gyaan · Rohiit ki Parakh · AI ki Shakti" / "Rooted in Granth · Verified by Rohiit · Powered by AI") — Full SEO + EEAT + Razorpay compliant
+ * Version: 2.2 (22 Nov 2026 — Google Play app launch: Play Billing, voice recordings,
+ *   palm photos, AI processors (Gemini, ElevenLabs), analytics/ads cookies (GA4, Google Ads,
+ *   Meta Pixel), OneSignal push, and a "Delete your account" section (#delete-account) whose
+ *   link goes into Play Console. Approved by Rohiit 22 Nov 2026.)
+ * Prior: 2.1 (1 Oct 2026 — core tagline) — Full SEO + EEAT + Razorpay compliant
  */
 
 import type { Metadata } from "next";
@@ -31,8 +35,9 @@ export default function PrivacyPage() {
           <div className="mb-12">
             <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: GOLD }}>Legal</p>
             <h1 className="font-serif text-4xl font-bold text-white mb-4">Privacy Policy</h1>
-            <p className="text-gray-500 text-sm">Effective: 1 January 2025 · Last Updated: April 2025</p>
-            <p className="text-gray-500 text-sm mt-1">Operated by: <span style={{ color: GOLD }}>Rohiit Gupta</span> — Trikaal Vaani, India, India</p>
+            <p className="text-gray-500 text-sm">Effective: 1 January 2025 · Last Updated: 22 November 2026</p>
+            <p className="text-gray-500 text-sm mt-1">Operated by: <span style={{ color: GOLD }}>Rohiit Gupta</span> — Trikaal Vaani, Delhi, India</p>
+            <p className="text-gray-500 text-sm mt-1">Applies to trikalvaani.com and the Trikaal Vaani Android app (com.trikalvaani.app) on Google Play.</p>
             <div className="mt-6 h-px w-16" style={{ background: `linear-gradient(90deg, ${GOLD}, transparent)` }} />
           </div>
 
@@ -46,9 +51,14 @@ export default function PrivacyPage() {
                   "Date, time, and place of birth — required for Vedic astrology calculations",
                   "Name and email address — for account creation and reading delivery",
                   "Mobile number — for WhatsApp delivery of readings and booking confirmations",
-                  "Payment information — processed securely by Razorpay (we do not store card details)",
+                  "Voice recordings — when you ask a question by voice in Trikaal Voice (used only to convert your speech to text)",
+                  "Palm photos — when you use the Hast Rekha (palm reading) report",
+                  "Payment information — processed by Razorpay, PayPal or Google Play (we do not store card or bank details)",
+                  "Purchase records — order ID, product and amount, to deliver what you paid for",
                   "Device and browser information — for performance and security",
-                  "IP address — for fraud prevention and security",
+                  "IP address and approximate country — for fraud prevention, security and showing prices in the right currency",
+                  "Usage data — pages visited and actions taken, through analytics cookies (see section 8)",
+                  "Push notification token — only if you allow notifications",
                 ].map((item, i) => (
                   <li key={i} className="flex items-start gap-2 list-none">
                     <span style={{ color: GOLD }} className="flex-shrink-0 mt-0.5">✦</span>{item}
@@ -63,7 +73,11 @@ export default function PrivacyPage() {
                 {[
                   "To generate your personalised Vedic astrology reading using Trikaal AI",
                   "To deliver your reading via email or WhatsApp",
-                  "To process payments and send receipts",
+                  "To process payments, verify Google Play purchases and send receipts",
+                  "To turn your voice question into text and reply with a spoken answer",
+                  "To analyse your palm photo for the Hast Rekha report",
+                  "To send notifications you have allowed (for example daily Panchang)",
+                  "To measure site traffic and the performance of our advertising",
                   "To create and manage your account",
                   "To send booking confirmations for personal consultations with Rohiit Gupta",
                   "To improve our platform and services",
@@ -95,17 +109,24 @@ export default function PrivacyPage() {
 
             <div>
               <h2 className="font-serif text-xl font-bold mb-4" style={{ color: GOLD }}>4. Payment Data</h2>
-              <p>All payments are processed by <strong className="text-white">Razorpay</strong> — a PCI DSS compliant payment gateway. Trikaal Vaani does not store, process, or transmit your card number, CVV, or banking credentials. Razorpay&apos;s privacy policy applies to payment data: <a href="https://razorpay.com/privacy/" target="_blank" rel="noopener noreferrer" style={{ color: GOLD }} className="hover:underline">razorpay.com/privacy</a></p>
+              <p className="mb-3">On the website, payments are processed by <strong className="text-white">Razorpay</strong> (India) and <strong className="text-white">PayPal</strong> (international) — both PCI DSS compliant. Razorpay&apos;s privacy policy: <a href="https://razorpay.com/privacy/" target="_blank" rel="noopener noreferrer" style={{ color: GOLD }} className="hover:underline">razorpay.com/privacy</a></p>
+              <p className="mb-3">In the Trikaal Vaani Android app, purchases are processed by <strong className="text-white">Google Play Billing</strong>. Google handles your payment method; we receive only the order details (order ID, product, purchase token) needed to verify the purchase and unlock your report. Google&apos;s privacy policy: <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" style={{ color: GOLD }} className="hover:underline">policies.google.com/privacy</a></p>
+              <p>Trikaal Vaani never stores your card number, CVV, UPI PIN or banking credentials.</p>
             </div>
 
             <div>
               <h2 className="font-serif text-xl font-bold mb-4" style={{ color: GOLD }}>5. Third-Party Services</h2>
               <ul className="space-y-2">
                 {[
-                  "Razorpay — payment processing",
-                  "Supabase — database and authentication",
+                  "Razorpay and PayPal — website payment processing",
+                  "Google Play Billing — in-app purchases in the Android app",
+                  "Supabase — database, authentication and file storage",
                   "self-hosted Swiss Ephemeris — Vedic astrology calculations (Lahiri Ayanamsha)",
-                  "Google premium AI — Trikaal AI reading generation",
+                  "Google Gemini AI — reading generation, voice-to-text and palm photo analysis",
+                  "ElevenLabs — spoken voice replies in Trikaal Voice",
+                  "Google Analytics and Google Ads — traffic and advertising measurement",
+                  "Meta (Facebook) Pixel — advertising measurement",
+                  "OneSignal — push notifications (only if you allow them)",
                   "Vercel — website hosting",
                   "OpenStreetMap / Nominatim — birth place geocoding",
                   "WhatsApp / Interakt — reading and booking delivery",
@@ -118,7 +139,23 @@ export default function PrivacyPage() {
             </div>
 
             <div>
-              <h2 className="font-serif text-xl font-bold mb-4" style={{ color: GOLD }}>6. Your Rights</h2>
+              <h2 className="font-serif text-xl font-bold mb-4" style={{ color: GOLD }}>6. Voice Recordings &amp; Palm Photos</h2>
+              <ul className="space-y-2">
+                {[
+                  "Voice: your recording is sent securely to Google Gemini only to convert it to text. We do not store the audio file, and the text of your question is used only to prepare your answer.",
+                  "Microphone access is used only while you hold the mic button in Trikaal Voice. You can deny or remove the permission at any time in your phone or browser settings.",
+                  "Palm photos: used only to prepare your Hast Rekha report. A photo is kept temporarily so the report can be retried if generation fails, and is deleted once your report is delivered.",
+                  "We never sell voice recordings, photos or any personal data.",
+                ].map((item, i) => (
+                  <li key={i} className="flex items-start gap-2 list-none">
+                    <span style={{ color: GOLD }} className="flex-shrink-0 mt-0.5">✦</span>{item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div>
+              <h2 className="font-serif text-xl font-bold mb-4" style={{ color: GOLD }}>7. Your Rights</h2>
               <ul className="space-y-2">
                 {[
                   "Access the personal data we hold about you",
@@ -136,22 +173,42 @@ export default function PrivacyPage() {
             </div>
 
             <div>
-              <h2 className="font-serif text-xl font-bold mb-4" style={{ color: GOLD }}>7. Cookies</h2>
-              <p>Trikaal Vaani uses essential cookies only — for authentication, session management, and security. We do not use advertising or tracking cookies.</p>
+              <h2 className="font-serif text-xl font-bold mb-4" style={{ color: GOLD }}>8. Cookies &amp; Analytics</h2>
+              <p className="mb-3">We use essential cookies for login, sessions and security. We also use analytics and advertising cookies from Google Analytics, Google Ads and Meta (Facebook) Pixel to understand how visitors use the site and to measure our advertising.</p>
+              <p>These cookies do not contain your birth details or readings. You can block or delete cookies in your browser settings; the site will still work.</p>
+            </div>
+
+            <div id="delete-account" className="scroll-mt-28">
+              <h2 className="font-serif text-xl font-bold mb-4" style={{ color: GOLD }}>9. Delete Your Account &amp; Data</h2>
+              <p className="mb-3">This applies to both trikalvaani.com and the Trikaal Vaani Android app (com.trikalvaani.app). To delete your account and personal data:</p>
+              <ul className="space-y-2">
+                {[
+                  "Email rohiit@trikalvaani.com with the subject \"Delete my account\", or send the same message on WhatsApp to +91 92118 04111.",
+                  "Write the email address or mobile number you used on Trikaal Vaani, so we can find your account.",
+                  "We confirm your request and delete your account within 30 days.",
+                  "What is deleted: your profile, birth details, saved readings, palm photos and remaining voice-question credits.",
+                  "What is kept: payment and invoice records, for 7 years, because Indian tax law requires it. These are not used for any other purpose.",
+                ].map((item, i) => (
+                  <li key={i} className="flex items-start gap-2 list-none">
+                    <span style={{ color: GOLD }} className="flex-shrink-0 mt-0.5">✦</span>{item}
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-3">You can also ask us to delete only some data (for example one reading) without closing your account.</p>
             </div>
 
             <div>
-              <h2 className="font-serif text-xl font-bold mb-4" style={{ color: GOLD }}>8. Data Retention</h2>
+              <h2 className="font-serif text-xl font-bold mb-4" style={{ color: GOLD }}>10. Data Retention</h2>
               <p>We retain your data for as long as your account is active. If you delete your account, your personal data will be permanently deleted within 30 days, except where required by law (payment records retained for 7 years for tax compliance).</p>
             </div>
 
             <div>
-              <h2 className="font-serif text-xl font-bold mb-4" style={{ color: GOLD }}>9. Children&apos;s Privacy</h2>
-              <p>Trikaal Vaani is not directed at children under 13. We do not knowingly collect personal data from children.</p>
+              <h2 className="font-serif text-xl font-bold mb-4" style={{ color: GOLD }}>11. Children&apos;s Privacy</h2>
+              <p>Trikaal Vaani is meant for users aged 18 and above. It is not directed at children, and we do not knowingly collect personal data from anyone under 18.</p>
             </div>
 
             <div>
-              <h2 className="font-serif text-xl font-bold mb-4" style={{ color: GOLD }}>10. Contact Us</h2>
+              <h2 className="font-serif text-xl font-bold mb-4" style={{ color: GOLD }}>12. Contact Us</h2>
               <div className="border border-white/10 rounded-xl p-5 space-y-2" style={{ background: `rgba(212,175,55,0.04)` }}>
                 <p><span className="text-white font-semibold">Rohiit Gupta</span> — Chief Vedic Architect</p>
                 <p>Trikaal Vaani — trikalvaani.com · Delhi NCR, India</p>
