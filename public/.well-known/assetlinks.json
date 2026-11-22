@@ -1,0 +1,15 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.trikalvaani.app",
+      "sha256_cert_fingerprints": [
+        "8B:C7:34:CA:64:01:46:21:0C:07:04:B4:96:EA:ED:F3:E8:1B:65:8A:6C:F3:08:71:BF:2D:53:FA:BC:D3:35:D9",
+        "CA:E8:6A:AD:39:69:40:9F:16:1B:78:BA:56:BE:A9:6B:00:4B:97:B2:AA:C6:12:69:88:F7:BD:13:0B:BB:CB:E8",
+        "DA:F4:F2:03:74:76:77:AC:00:B2:13:C0:28:C7:14:BB:9F:3A:EA:4C:CE:4E:E3:99:8D:11:EE:EE:99:80:52:7B",
+        "F3:81:4C:2D:8F:40:B4:2A:D2:76:93:20:B1:AE:8F:A7:D4:8C:52:CB:2C:40:32:F6:D2:B9:04:09:3F:FC:15:35"
+      ]
+    }
+  }
+]
