@@ -3,7 +3,13 @@
  * TRIKAL VAANI — Google Play Billing (SERVER side)
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: lib/play-billing-server.ts
- * VERSION: 1.1 (11 Oct 2026) — saare approved product IDs + "ek order = ek
+ * VERSION: 1.2 (23 Nov 2026) — 401 JAANCH (Rohiit approved 23 Nov). Google
+ *   purchase verify par 401 "insufficient permissions" aata hai to ab server
+ *   logs mein saboot likhta hai: kaunsa service account (email + key id, KOI
+ *   secret nahi), token kis account ka hai, aur wahi account app ki product
+ *   list / naya productsv2 API dekh pata hai ya nahi. Grahak ka flow BILKUL
+ *   WAISA hi — ye sirf console.error likhta hai, kabhi throw nahi karta.
+ * Prior: 1.1 (11 Oct 2026) — saare approved product IDs + "ek order = ek
  *   fulfilment" helper (verifyAndClaimPlay / finishPlay / releasePlay) jo
  *   Supabase table public.play_purchases par chalta hai. v1.0 ke saare
  *   exports (predict v16.2 jo use karta hai) BILKUL WAISE HI hain.
@@ -167,6 +173,9 @@ export async function getPlayPurchase(productId: string, purchaseToken: string):
   });
   if (!res.ok) {
     const t = await res.text().catch(() => '');
+    if (res.status === 401 || res.status === 403) {
+      await diagnosePlayAccess(token, productId, purchaseToken); // v1.2 — sirf log
+    }
     throw new Error(`Play purchases.products.get ${res.status}: ${t.slice(0, 200)}`);
   }
   const j = (await res.json()) as Record<string, unknown>;
@@ -179,6 +188,39 @@ export async function getPlayPurchase(productId: string, purchaseToken: string):
     regionCode: typeof j.regionCode === 'string' ? j.regionCode : null,
     purchaseTimeMillis: typeof j.purchaseTimeMillis === 'string' ? j.purchaseTimeMillis : null,
   };
+}
+
+/**
+ * v1.2 — 401/403 aane par saboot log karta hai. KABHI THROW NAHI KARTA.
+ * Koi secret log nahi hota: sirf service account ka email, key id ke pehle
+ * 8 akshar, project id, package name, aur Google ke jawab ke status/shuruaat.
+ */
+async function diagnosePlayAccess(accessToken: string, productId: string, purchaseToken: string): Promise<void> {
+  const out: string[] = [];
+  try {
+    try {
+      const sa = JSON.parse(process.env.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON ?? '{}') as Record<string, string>;
+      out.push(`sa=${sa.client_email} key=${String(sa.private_key_id ?? '').slice(0, 8)} project=${sa.project_id}`);
+    } catch { out.push('sa=UNPARSEABLE'); }
+    out.push(`pkg=${JSON.stringify(process.env.PLAY_PACKAGE_NAME ?? '')}`);
+
+    const probe = async (label: string, url: string) => {
+      try {
+        const r = await fetch(url, { headers: { Authorization: `Bearer ${accessToken}` }, cache: 'no-store' });
+        const t = await r.text().catch(() => '');
+        out.push(`${label}=${r.status} ${t.replace(/\s+/g, ' ').slice(0, 160)}`);
+      } catch (e: any) { out.push(`${label}=THREW ${e?.message}`); }
+    };
+    await probe('tokeninfo', `https://oauth2.googleapis.com/tokeninfo?access_token=${encodeURIComponent(accessToken)}`);
+    const app = `${API_BASE}/${encodeURIComponent(packageName())}`;
+    await probe('inappproducts', `${app}/inappproducts?maxResults=1`);
+    await probe('onetimeproducts', `${app}/oneTimeProducts?pageSize=1`);
+    await probe('productsv2', `${app}/purchases/productsv2/tokens/${encodeURIComponent(purchaseToken)}`);
+    out.push(`product=${productId}`);
+  } catch (e: any) {
+    out.push(`diag threw ${e?.message}`);
+  }
+  console.error(`[PlayBilling][DIAG] ${out.join(' || ')}`);
 }
 
 /** Asli, paid, abhi tak istemaal na hua purchase? */
@@ -388,5 +430,5 @@ export async function releasePlay(gate: PlayGateOk): Promise<void> {
     console.error(`[PlayBilling] releasePlay threw | ${gate.orderId}: ${e?.message}`);
   }
 }
-// END — lib/play-billing-server.ts v1.1
+// END — lib/play-billing-server.ts v1.2
 
