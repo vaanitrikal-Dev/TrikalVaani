@@ -3,7 +3,12 @@
  * TRIKAL VAANI — Voice TTS API
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/api/voice-tts/route.ts
- * VERSION: 6.0 — ElevenLabs REMOVED. Gemini 3.8 Flash TTS is now primary.
+ * VERSION: 6.1 (24 Nov 2026) — BALANCE CHECK (Rohiit approved 24 Nov 2026).
+ *   Awaaz banane se pehle lib/voice-balance.ts: session ka active pack na ho
+ *   to 402. Pehle koi bhi bina pack ke Rohiit ki awaaz mein TTS le sakta tha.
+ *   Widget TTS ko consume (PATCH) se PEHLE bulata hai, isliye asli grahak ka
+ *   balance tab tak > 0 hota hai — flow nahi badla. Baaki sab v6.0 jaisa.
+ * Prior: 6.0 — ElevenLabs REMOVED. Gemini 3.8 Flash TTS is now primary.
  * DATE: 5 Oct 2026   ·   Approved by CEO in chat (ElevenLabs subscription ending)
  *
  * CHAIN (product never goes silent):
@@ -32,6 +37,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { checkVoiceBalance } from '@/lib/voice-balance'; // v6.1
 
 export const runtime = 'nodejs';
 export const maxDuration = 60; // CACHE-BUST-v6.0
@@ -170,6 +176,8 @@ export async function POST(req: NextRequest) {
     const { text, sessionId } = await req.json();
     if (!text || typeof text !== 'string') return NextResponse.json({ error: 'Text required' }, { status: 400 });
     if (!sessionId) return NextResponse.json({ error: 'Session required' }, { status: 401 });
+    const bal = await checkVoiceBalance(String(sessionId)); // v6.1
+    if (!bal.ok) return NextResponse.json({ error: 'No active voice pack' }, { status: 402 });
 
     const words = text.trim().split(/\s+/);
     const clean = words.slice(0, 200).join(' ')

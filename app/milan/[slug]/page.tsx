@@ -1,4 +1,6 @@
 /**
+ * v1.15 (24 Nov 2026) — "Maa Shakti ko Arzi" button /maa-shakti (404, page hai hi nahi) se
+ *   /?ref=milan-<slug>#maa-arzi par — homepage ka Arzi dabba. Rohiit approved 24 Nov.
  * v1.14 (24 Nov 2026) — Next 16 upgrade (Vercel->Cloudflare move, Rohiit approved): params/searchParams now awaited. Nothing else changed.
  * v1.13 (18 Oct 2026) — Site menu (SiteNav) added — the page had no menu; pt-16 so the fixed
  *   64px menu does not cover content. Nothing else changed.
@@ -474,7 +476,7 @@ export default async function MilanResultPage(props: { params: Promise<{ slug: s
           </p>
           <div className="mt-6">
             <a
-              href={`/maa-shakti?ref=milan-${m.slug}`}
+              href={`/?ref=milan-${m.slug}#maa-arzi`}
               className="inline-block px-7 py-3 rounded-lg bg-[#D4AF37] hover:bg-[#b8962e] text-[#080B12] font-semibold tracking-wide transition shadow-lg"
             >
               Maa ko Arzi karein →

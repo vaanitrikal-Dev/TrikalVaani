@@ -2,7 +2,11 @@
  * ============================================================
  * TRIKAAL VAANI — MaaArziPay (Maa Shakti ko Arzi — dakshina)
  * File: components/landing/MaaArziPay.tsx   (NEW FILE)
- * VERSION: 1.1 (8 Nov 2026)
+ * VERSION: 1.2 (24 Nov 2026) — id="maa-arzi" anchor jodha (Rohiit approved 24 Nov):
+ *   Milan / Muhurat / Karmic result pages ka "Maa Shakti ko Arzi" button
+ *   /maa-shakti par jaata tha jo page hai hi nahi (404). Ab wo /#maa-arzi
+ *   par aata hai — seedha is dabbe tak. Payment code EK LINE NAHI BADLA.
+ * Prior: 1.1 (8 Nov 2026)
  * Owner: Rohiit Gupta, Chief Vedic Architect
  * ============================================================
  * v1.1 (8 Nov 2026) — UPI WAPAS (Rohiit: "you can add"). ₹101 card test pass
@@ -91,7 +95,7 @@ export default function MaaArziPay() {
   }
 
   return (
-    <div style={{ padding: '14px 20px', background: GOLD_RGBA(0.05), border: `1px solid ${GOLD_RGBA(0.15)}`, borderRadius: '12px', marginBottom: '12px' }}>
+    <div id="maa-arzi" style={{ scrollMarginTop: '90px', padding: '14px 20px', background: GOLD_RGBA(0.05), border: `1px solid ${GOLD_RGBA(0.15)}`, borderRadius: '12px', marginBottom: '12px' }}>
       <p style={{ margin: '0 0 8px', color: GOLD, fontSize: '13px', fontWeight: 600 }}>🙏 Maa Shakti ko Arzi — apni shraddha anusaar dakshina</p>
       <p style={{ margin: '0 0 10px', color: '#475569', fontSize: '11px', lineHeight: 1.5 }}>Maa ke charnon mein apni dil ki baat rakhein. Rohiit ji personally transmit karenge.</p>
       <div style={{ display: 'flex', gap: '8px', maxWidth: '340px', margin: '0 auto' }}>
@@ -123,4 +127,4 @@ export default function MaaArziPay() {
     </div>
   )
 }
-// END — components/landing/MaaArziPay.tsx v1.1
+// END — components/landing/MaaArziPay.tsx v1.2

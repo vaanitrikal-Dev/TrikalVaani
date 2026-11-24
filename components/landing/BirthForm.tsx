@@ -2,6 +2,18 @@
 /**
  * ============================================================
  * TRIKAAL VAANI — BirthForm
+ * v11.3 (24 Nov 2026) — WEBSITE SE "VOICE ₹11" CARD HATAYA (Rohiit: option A).
+ *   Website par Voice tier ka Razorpay/PayPal payment lene ke baad /voice?…
+ *   par bhejta tha — wo page repo mein hai hi nahi (404): grahak ka paisa
+ *   kat-ta, jawab nahi milta. Ab website par sirf Free + Deep Reading cards
+ *   (2 column). Voice website par floating Trikaal Voice mic widget se hi
+ *   bikta hai (jo poora chalta hai). Play Store app mein Voice card WAISE HI
+ *   hai — wahan v10.8 handoff widget tak sahi chalta hai.
+ *   Bachaav: handleRazorpayPayment / handlePayPalPaid mein tier 'voice' aaye
+ *   to paisa lene se PEHLE saaf message aur return.
+ *   Deep Reading, Free, validate, Play — EK LINE NAHI BADLI.
+ *   Build marker → "BF v11.3 · 24-Nov-2026".
+ *
  * v11.2 (11 Nov 2026) — REPORT PAR JAANA AB POORA PAGE LOAD (Rohiit approved).
  *   Reading save hone ke baad router.push('/report/<slug>') page ko "Application
  *   error" de raha tha: in-app navigation mein [slug] chunk ka address do baar
@@ -940,12 +952,12 @@ function TierSelector({ selected, onChange, intl = false, play = false }: { sele
     // lose a sale. `intl` is passed down from the form's geo check.
     { id: 'paid'  as PredictionTier, icon: '⚡', label: 'Deep Reading',  price: intl ? '$7' : '₹51',  desc: 'Full Vedic Analysis', color: GOLD,      features: ['Poore daur ka granth-paath', 'Upay — jahan granth deta hai', intl ? 'Worth $60+, yours at $7' : 'Worth ₹500+, yours at ₹51'], highlight: true },
     { id: 'voice' as PredictionTier, icon: '🎙️', label: 'Voice',        price: intl ? '$1' : '₹11',  desc: 'Hear it in 60 sec',   color: '#a78bfa', features: ['Speak your question', 'Answer in your language', 'Most personal format'] },
-  ]
+  ].filter(t => play || t.id !== 'voice') // v11.3: website par Voice card nahi (sirf Play app mein)
 
   return (
     <div>
       <label className="block text-sm font-medium text-slate-300 mb-3">Reading Type <span className="text-yellow-400">*</span></label>
-      <div className="grid grid-cols-3 gap-1.5" style={{ maxWidth: '100%' }}>
+      <div className={play ? 'grid grid-cols-3 gap-1.5' : 'grid grid-cols-2 gap-1.5'} style={{ maxWidth: '100%' }}>
         {tiers.map(tier => (
           <button key={tier.id} type="button" onClick={() => onChange(tier.id)}
             aria-label={`Select ${tier.label} for ${tier.price}`}
@@ -1345,6 +1357,10 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
   /** Runs after PayPal has taken the money. The server re-verifies with PayPal. */
   const handlePayPalPaid = async (tier: 'paid' | 'voice', proof: PayPalProof) => {
     setApiError(null)
+    if ((tier as string) === 'voice') { // v11.3: website Voice band — /voice page nahi hai
+      setApiError('Voice ke liye screen ke kone wala 🎙️ Trikaal Voice button dabaiye.')
+      return
+    }
     setPaymentLoading(true)
     try {
       const verifyRes = await fetch('/api/verify-payment', {
@@ -1387,6 +1403,10 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
 
   const handleRazorpayPayment = async (tier: 'paid' | 'voice') => {
     setApiError(null)
+    if ((tier as string) === 'voice') { // v11.3: paisa lene se PEHLE rok — /voice page nahi hai
+      setApiError('Voice ke liye screen ke kone wala 🎙️ Trikaal Voice button dabaiye.')
+      return
+    }
     setPaymentLoading(true)
 
     try {
@@ -1688,7 +1708,7 @@ export default function BirthForm({ selectedCategory, onSubmit, loading = false,
                 this line on screen, the file you are looking at is NOT the file
                 that is deployed, and the problem is the deployment, not the code. */}
             <p style={{ margin: '0 0 6px', fontSize: '10px', color: '#334155', textAlign: 'right' }}>
-              BF v11.2 · 11-Nov-2026 · {isIndia === false ? 'INTL/USD' : 'IN/INR'}{inPlayApp ? ' · PLAY' : ''}
+              BF v11.3 · 24-Nov-2026 · {isIndia === false ? 'INTL/USD' : 'IN/INR'}{inPlayApp ? ' · PLAY' : ''}
             </p>
 
             {/* v10.7 — in the Play app Google shows each buyer their own local

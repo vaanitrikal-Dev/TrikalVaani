@@ -3,6 +3,8 @@
  * TRIKAL VAANI — Child Birth Muhurat — Paid Result Page
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/muhurat/[slug]/page.tsx
+ * VERSION: 1.9 (24 Nov 2026) — "Maa Shakti ko Arzi" button /maa-shakti (404) se
+ *   /?ref=muhurat-<slug>#maa-arzi par — homepage ka Arzi dabba. Rohiit approved 24 Nov.
  * VERSION: 1.8 (24 Nov 2026) — Next 16 upgrade (Vercel->Cloudflare move, Rohiit approved): params/searchParams now awaited. Nothing else changed.
  * VERSION: 1.7 (18 Oct 2026) — Site menu (SiteNav) added — the page had no menu; pt-16 so the
  *   fixed 64px menu does not cover content. Nothing else changed.
@@ -399,7 +401,7 @@ export default async function MuhuratResultPage(props: { params: Promise<{ slug:
           )}
           <div className="mt-6">
             <a
-              href={`/maa-shakti?ref=muhurat-${r.slug}`}
+              href={`/?ref=muhurat-${r.slug}#maa-arzi`}
               className="inline-block px-7 py-3 rounded-lg bg-[#D4AF37] hover:bg-[#b8962e] text-[#080B12] font-semibold tracking-wide transition shadow-lg"
             >
               Maa ko Arzi karein →

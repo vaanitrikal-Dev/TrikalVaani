@@ -1,6 +1,8 @@
 // TRIKAL VAANI — Karmic Result Client Component
 // CEO & Chief Vedic Architect: Rohiit Gupta
 // File: components/karmic/KarmicResultClient.tsx
+// VERSION: 1.5 (24 Nov 2026) — "Maa Shakti ko Arzi" button /maa-shakti (404) se
+//   /?ref=karmic-<slug>#maa-arzi par — homepage ka Arzi dabba. Rohiit approved 24 Nov.
 // VERSION: 1.4 (18 Oct 2026) — Site menu (SiteNav) added (rendered by app/karmic/[slug]/page.tsx v1.2) —
 //   the page had no menu; pt-16 on all three screens (waiting, error, reading) so the fixed 64px
 //   menu does not cover content. Nothing else changed.
@@ -373,7 +375,7 @@ export default function KarmicResultClient({ initialRow }: { initialRow: KarmicR
             </p>
           )}
           <div className="mt-6">
-            <Link href={`/maa-shakti?ref=karmic-${slug}`}
+            <Link href={`/?ref=karmic-${slug}#maa-arzi`}
               className="inline-block px-7 py-3 rounded-lg bg-[#D4AF37] hover:bg-[#b8962e] text-[#080B12] font-semibold tracking-wide transition shadow-lg">
               Maa ko Arzi karein →
             </Link>
