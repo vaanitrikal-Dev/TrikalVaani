@@ -2,7 +2,9 @@
 
 // ============================================================
 // File: app/calculators/free-should-i-wear-neelam/page.tsx
-// Version: v2.3 (15 Nov 2026) — Radar weekly job cycle 2026-11-14 (report #15 PUSH):
+// Version: v2.4 (21 Nov 2026) — Radar 21 Nov (report 16) PUSH: +0 H2 (side effects + nuksan already
+//   answered by existing H2s), +1 FAQ (Neelam pehnne ke nuksan, remedy in ruling #4 form), +0 verses.
+// (previous) Version: v2.3 (15 Nov 2026) — Radar weekly job cycle 2026-11-14 (report #15 PUSH):
 //   +1 English H2 inside `guidance` (Blue Sapphire ring benefits for female) +2 FAQ
 //   (ring benefits for female; blue sapphire side effects in astrology — the side-effects
 //   intent was already answered by existing H2s, so FAQ only). No citation added.
@@ -135,6 +137,7 @@ const config: FocusedStoneConfig = {
     { q: 'Are blue sapphire side effects different for females?', a: 'No. The classical rules are the same for every chart — Lagna, Saturn strength, suitability check and a 3-day trial. Tradition only advises not starting any new strong gemstone during pregnancy or illness, and treating health concerns medically first.' },
     { q: 'What are the benefits of a blue sapphire ring for females?', a: 'The same as for any chart — the classical rules do not change by gender. When Saturn is a benefic for your Lagna (Taurus, Libra or Aquarius) and the 3-day trial is clean, women commonly describe steadier focus, more patience with responsibilities and movement in long-stalled work. The benefit builds over weeks, not overnight, and it never replaces effort or medical care.' },
     { q: 'What are blue sapphire side effects in astrology?', a: 'Tradition reads them as signs that Neelam does not suit the chart: disturbed sleep, frightening dreams, small accidents, sudden losses or a heavy mood, usually noticed during the 3-day trial. Before wearing, the tradition checks your Lagna, Saturn strength, dignity and afflictions — the free score on this page does that. If signs appear, remove the stone and do not continue; the Shani mantra on Saturdays is a free, safe remedy.' },
+    { q: 'Neelam pehnne ke nuksan kya hain?', a: 'Nuksan tab hota hai jab Neelam chart ko suit na kare — jab Shani aapke lagna ke liye paap hon (Mesh, Simha, Vrischik, Meen lagna), kundali mein neecha ya bahut peedit hon, ya ratna mein darar ho. Sanket aksar 3 din ke trial mein hi dikh jaate hain — neend bigadna, chhoti chot, achanak kharch ya mann bhaari rehna. Isme darne ki baat nahi: ratna utaar dijiye. Uski jagah muft upay: har Shanivar shaam sooryast ke baad "ॐ शं शनैश्चराय नमः" 108 baar, lagataar 11 Shanivar — yeh ratna ke bina aapki kundali ke Shani (karm aur anushasan) ko shaant sahara deta hai. Pehnne se pehle is page ka free score dekhein.' },
     { q: 'Yeh Neelam suitability check free hai?', a: 'Haan, 100% free. Aapka Saturn ka 0–100 suitability score, risk aur verdict bilkul muft.' },
   ],
 };

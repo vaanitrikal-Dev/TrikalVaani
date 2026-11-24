@@ -1,4 +1,8 @@
-// TRIKAL VAANI | app/kundali-milan/page.tsx | v2.4 (15 Nov 2026)
+// TRIKAL VAANI | app/kundali-milan/page.tsx | v2.5 (21 Nov 2026)
+// v2.5 (21 Nov 2026): Radar 21 Nov (report 16) PUSH: +2 KM_SECTIONS H2 (कुंडली मिलान इन हिंदी
+//   (20, Hindi); Soulmate compatibility by date of birth (12, English)), +1 FAQ (soulmate),
+//   +0 verses (none in library says this). DOB, name+DOB, rashi naam, 27/36, free, app,
+//   var-kanya, best rashi, zodiac, love-by-DOB intents already answered by v2.2-v2.4 sections.
 // v2.4 (15 Nov 2026): Radar weekly job cycle 2026-11-14 (report #15). +1 KM_SECTIONS H2:
 //   राशि नाम से कुंडली मिलान / फ्री कुंडली मिलान by name / नाम से विवाह गुण मिलान (28+24+15),
 //   stating which koots a name rashi can and cannot count (15 of 36). +1 FAQ (gun milan by
@@ -172,6 +176,14 @@ const FAQ_SCHEMA = {
       acceptedAnswer: {
         '@type': 'Answer',
         text: 'Through the same 36 guna Ashtakoot score used for arranged matches. For an emotional bond look first at Graha Maitri (5), Gana (6), Yoni (4) and Bhakoot (7) in the koot-wise result. Ashtakoot does not check Venus, the 5th and 7th houses or Mangal Dosh, so read those from both charts as well.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'Can soulmate compatibility be found by date of birth?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Vedic astrology has no soulmate score. What it measures is compatibility: the 36 guna Ashtakoot from both Moon nakshatras, plus Venus, the 7th house and Mangal Dosh in each chart. With the date of birth alone the Moon sign is usually right but the nakshatra can be off, so the guna total is an estimate. Add exact birth time and place for a reliable result.',
       },
     },
     {
@@ -405,6 +417,14 @@ const KM_SECTIONS: KmSection[] = [
     ],
   },
   {
+    id: 'soulmate-compatibility-dob',
+    h2: 'Soulmate Compatibility by Date of Birth — What Vedic Matching Can and Cannot Say',
+    paras: [
+      '**Soulmate compatibility by date of birth** is a popular search, but Vedic astrology has no soulmate test and no single soulmate number. What it does measure is compatibility: the **36 guna Ashtakoot**, counted from the two **Moon nakshatras** (the star the Moon occupied at birth), and then **Venus** (the natural karaka of love and marriage), the **7th bhaav** (7th house = marriage and partner) and **Mangal Dosh** in each chart. The form above counts the 36 guna and shows each koot separately, free.',
+      'Be clear about what a date alone can do. If the birth time is unknown, the form uses a 12:00 noon chart: the Moon sign is usually right, but the nakshatra can be off because the Moon crosses one nakshatra in about a day — so read the guna total as an estimate. With exact time and place the result is reliable. A high score is a good sign, not a promise; a low one is a reason to read which koot is low, not a verdict. A two-chart reading that goes beyond Ashtakoot, including Navamsa (D-9) and dasha, is on the [compatibility reading](/services/compatibility) page.',
+    ],
+  },
+  {
     id: 'is-27-good',
     h2: 'Is 27 Out of 36 Guna Match Good?',
     paras: [
@@ -442,6 +462,14 @@ const KM_SECTIONS: KmSection[] = [
     paras: [
       'कुंडली मिलान के लिए अलग ऐप ज़रूरी नहीं है। यह पेज मोबाइल ब्राउज़र में पूरी तरह चलता है — ऊपर फ़ॉर्म भरिए, और आठों कूट का मुफ्त परिणाम उसी स्क्रीन पर आ जाता है। ₹51 की पूरी रिपोर्ट **PDF** में मिलती है, जिसे WhatsApp पर परिवार को भेजा जा सकता है।',
       'किसी भी ऐप या साइट पर मिलान करें, तीन बातें जाँच लीजिए: वह **जन्म समय और स्थान** माँगता है या नहीं (सिर्फ़ नाम या तारीख़ से मिलान अधूरा है); वह **हर कूट का अलग अंक** दिखाता है या सिर्फ़ कुल; और वह **मांगलिक दोष अलग से** देखता है या नहीं, क्योंकि अष्टकूट उसे नहीं पकड़ता। दोनों का मांगलिक स्टेटस मुफ्त में [मांगलिक दोष कैलकुलेटर](/calculators/free-manglik-dosh-calculator) पर देखा जा सकता है।',
+    ],
+  },
+  {
+    id: 'kundali-milan-hindi',
+    h2: 'कुंडली मिलान इन हिंदी — परिणाम और रिपोर्ट हिंदी में',
+    paras: [
+      'कुंडली मिलान इन हिंदी के लिए अलग टूल की ज़रूरत नहीं — ऊपर के फ़ॉर्म में भाषा चुनने का विकल्प है: **हिंग्लिश, शुद्ध हिंदी या English**। भाषा बदलने से गणना नहीं बदलती। हर भाषा में दोनों के **चंद्र नक्षत्र** (जन्म के समय चंद्रमा जिस नक्षत्र में था) से वही आठ कूट गिने जाते हैं — वर्ण, वश्य, तारा, योनि, ग्रह मैत्री, गण, भकूट और नाड़ी, कुल 36 गुण। भाषा सिर्फ़ यह तय करती है कि नतीजा किन शब्दों में लिखा जाए। ₹51 की रिपोर्ट में माता-पिता के लिए अलग **शुद्ध हिंदी संस्करण** आता है, जिसमें मुहूर्त चिन्तामणि (विवाह प्रकरण) के संस्कृत श्लोक और उनका हिन्दी अर्थ दिया होता है।',
+      'हिंदी में परिणाम पढ़ते समय तीन शब्द याद रखिए: **कूट** यानी मिलान का एक पैमाना, **दोष** यानी वह कूट जिसमें अंक शून्य आए, और **परिहार** यानी वह शास्त्रीय स्थिति जिसमें दोष रद्द माना जाता है। मिलान के साथ दोनों की अपनी जन्म कुंडली अलग से देखनी हो, तो [जन्म कुंडली कैलकुलेटर](/calculators/free-janam-kundali-calculator) मुफ्त है।',
     ],
   },
   {

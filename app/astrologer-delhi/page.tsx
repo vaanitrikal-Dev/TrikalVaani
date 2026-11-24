@@ -3,7 +3,8 @@
  * 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER 🔱
  * ============================================================================
  * File:        app/astrologer-delhi/page.tsx
- * Version: 1.4 (8 Nov 2026 — Radar weekly job cycle 2026-11-07, report #14 PUSH + BRIEF: new section 4c with 3 H2 (best astrologer in Delhi online / India, Hindi: sabse badhiya jyotishi kaun, Hindi: jyotishi se baat free) +3 FAQ. Guard: near-me-fees and top-10 H2 dropped (duplicated the Fees and Five Checks H2). Person and brand names from Radar keywords NOT used (H7). Gurgaon keywords left for /astrologer-gurgaon. NAP, schema structure, prices UNCHANGED.)
+ * Version: v1.5 (21 Nov 2026) — Radar 21 Nov (report 16) PUSH: +1 H2 (Best Astrologer in Greater Noida — no office claimed, online delivery, five checks), +1 FAQ, +0 verses. NAP, schema structure, prices UNCHANGED.
+ * Version (previous): 1.4 (8 Nov 2026 — Radar weekly job cycle 2026-11-07, report #14 PUSH + BRIEF: new section 4c with 3 H2 (best astrologer in Delhi online / India, Hindi: sabse badhiya jyotishi kaun, Hindi: jyotishi se baat free) +3 FAQ. Guard: near-me-fees and top-10 H2 dropped (duplicated the Fees and Five Checks H2). Person and brand names from Radar keywords NOT used (H7). Gurgaon keywords left for /astrologer-gurgaon. NAP, schema structure, prices UNCHANGED.)
  * Previous:    1.3 (3 Oct 2026 — title/description for "astrologer in delhi ncr fees"; Services H2 renamed to carry the fees keyword; new section "Best Astrologer in Delhi — Five Checks Before You Pay" (DataForSEO 2,400/month). NAP, schema, prices UNCHANGED.)
  * Previous:    1.2 (1 Oct 2026 — daam sahi kiye: Kundali Milan ₹51 (couple + parent), Karmic ₹101 / $11, Child Birth ₹51; Bhrigu Nandi ke purane daave hataye)
  * Owner:       Rohiit Gupta, Chief Vedic Architect
@@ -296,6 +297,14 @@ const FAQ_SCHEMA = {
     },
     {
       '@type': 'Question',
+      name: 'Is there a Trikaal Vaani astrologer in Greater Noida?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'There is no Trikaal Vaani office in Greater Noida — the only address is 724, Pocket 3, Sector 19, Dwarka, New Delhi. Greater Noida is part of the Delhi NCR served online: a reading needs only your date, exact time and place of birth, and the fees are the same as everywhere else, listed on the pricing page. Judge any astrologer in Greater Noida on the five checks on this page.',
+      },
+    },
+    {
+      '@type': 'Question',
       name: 'Is Trikaal Vaani a registered business?',
       acceptedAnswer: {
         '@type': 'Answer',
@@ -552,6 +561,19 @@ export default function AstrologerDelhiPage() {
                 अपना मांगलिक स्टेटस{' '}
                 <Link href="/calculators/free-manglik-dosh-calculator" style={{ color: GOLD, textDecoration: 'underline' }}>मांगलिक दोष कैलकुलेटर</Link>{' '}पर और साढ़ेसाती का चरण{' '}
                 <Link href="/calculators/free-sade-sati-calculator" style={{ color: GOLD, textDecoration: 'underline' }}>साढ़ेसाती कैलकुलेटर</Link>{' '}पर मुफ़्त देखिए।
+              </p>
+
+              {/* v1.5 — Radar report 16 (21 Nov 2026): Greater Noida intent. No office claimed there — one real NAP only. */}
+              <h2 className="text-white text-2xl md:text-3xl font-serif font-bold mb-4" style={{ marginTop: '40px' }}>
+                Best Astrologer in Greater Noida — How to Choose, and How Readings Reach You
+              </h2>
+              <p style={{ color: '#94a3b8', fontSize: '14px', lineHeight: 1.8, marginBottom: '16px' }}>
+                Trikaal Vaani has no office in Greater Noida, and we will not pretend to. The only address is Dwarka, New Delhi — but Greater Noida is part of the Delhi NCR this practice serves, and every reading is delivered online from your <strong style={{ color: GOLD }}>date, exact time and place of birth</strong>. A client there gets the same Swiss Ephemeris chart and the same fees as one in Dwarka. To find the best astrologer in Greater Noida, use the five checks above on anyone you consider: published fees, graded doshas, cheap remedies first, a stated method, and an identity you can verify.
+              </p>
+              <p style={{ color: '#94a3b8', fontSize: '14px', lineHeight: 1.8, marginBottom: '16px' }}>
+                Every fee is listed on the{' '}
+                <Link href="/pricing" style={{ color: GOLD, textDecoration: 'underline' }}>pricing page</Link>, and you can test the method first with the free{' '}
+                <Link href="/calculators/free-janam-kundali-calculator" style={{ color: GOLD, textDecoration: 'underline' }}>janam kundali calculator</Link>.
               </p>
             </div>
           </section>

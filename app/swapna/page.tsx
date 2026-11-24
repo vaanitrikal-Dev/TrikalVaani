@@ -1,4 +1,6 @@
-// 🔱 TRIKAAL VAANI | app/swapna/page.tsx | v2.2 (15 Nov 2026)
+// 🔱 TRIKAAL VAANI | app/swapna/page.tsx | v2.3 (21 Nov 2026)
+// Version: v2.3 (21 Nov 2026) — Radar 21 Nov (report 16) PUSH: +1 H2 (Kya subah ke bure sapne sach hote hain), +1 FAQ, +2 verses re-used on new section (Brihad Yogayatra 16.30 bhor ka sapna jaldi phal, 16.32 dusvapna shanti; Guard: opening line aligned with 16.30)
+// Version (previous): v2.2 (15 Nov 2026)
 // ----------------------------------------------------------------------------
 // CHANGE v2.2 (2026-11-15) — Radar weekly job cycle 2026-11-14 (report 15):
 //   +3 H2 (svargiya mata-pita, din mein sapna, saanp / kaala saanp) +3 FAQ.
@@ -162,6 +164,8 @@ const FAQS = [
   { q: 'सपने में स्वर्गीय माता-पिता को देखने का क्या मतलब है?', a: 'परंपरा में इसे स्नेह और मार्गदर्शन का संकेत माना जाता है, किसी अनहोनी का नहीं। कुंडली में माँ का कारक चंद्रमा और चौथा भाव (माता, घर, मन) है, पिता का कारक सूर्य और नौवाँ भाव (पिता, पूर्वज, भाग्य)। बृहद्योगयात्रा (अध्याय 16, श्लोक 23) के अनुसार सपने में पितर जो कहें उसे सच्चा संकेत माना गया है, इसलिए उनकी बात जागते ही लिख लें। फल कब मिलेगा, यह आपकी दशा तय करती है।' },
   { q: 'दिन में सपना देखना शुभ है या अशुभ?', a: 'न शुभ, न अशुभ। बृहद्योगयात्रा (अध्याय 16, श्लोक 12) चिंता, बीमारी और बीती बातों से आए सपनों की तरह दिन में देखे गए सपनों को भी निष्फल कहती है। इसलिए दोपहर की झपकी में आए डरावने सपने से घबराने की ज़रूरत नहीं।' },
   { q: 'सपने में काला साँप देखने का क्या मतलब है?', a: 'परंपरा में काले साँप को अक्सर राहु से जोड़ा जाता है, यानी किसी छिपी चिंता या अटकी बात पर ध्यान देने का इशारा, किसी अनहोनी का नहीं। यह सपना अपने आप में कालसर्प दोष का सबूत नहीं है; कुंडली में राहु-केतु कहाँ हैं, यह मुफ़्त कालसर्प दोष कैलकुलेटर से देखा जा सकता है।' },
+  // v2.3 — Radar weekly job cycle 2026-11-21 (report 16)
+  { q: 'Kya subah ke bure sapne sach hote hain?', a: 'Brihad Yogayatra (adhyay 16, shlok 30) bhor ke sapne ko jaldi phal dene wala kehta hai, par bura sapna faisla nahi, chetavani hai. Wahi granth (adhyay 16, shlok 32) bure sapne ke baad dobara so jaane, sapna kisi ko na sunane, snan, jap aur yathashakti daan ko uska asar shaant karne ka tareeka batati hai. Chinta ya beemari se aaye sapne granth mein nishphal gine gaye hain. Phal ki disha aapki chal rahi dasha tay karti hai.' },
 ];
 
 // ── JSON-LD ──────────────────────────────────────────────────────────────────
@@ -632,6 +636,30 @@ export default function SwapnaPage() {
                 </p>
                 <p className="mt-2 rounded-lg px-3 py-2 font-serif text-[0.88rem]" style={{ color: C.s5, background: C.panel2, borderLeft: `2px solid ${C.line2}` }}>
                   बृहद्योगयात्रा, अध्याय 16, श्लोक 30 — <span lang="sa">आद्ये वर्षाद् वत्सरार्धाद् द्वितीये यामे पाको वर्षपादात् तृतीये। मासात् पाकः शर्वरीपश्चिमांशे सद्यः पाको गोविसर्गे च दृष्टे॥</span>
+                </p>
+              </div>
+
+              {/* v2.3 — Radar cycle 2026-11-21 (report 16) */}
+              <div id="subah-ke-bure-sapne" className="scroll-mt-24 mt-10">
+                <h2 className="font-serif font-medium text-white" style={{ fontSize: 'clamp(1.5rem,3.6vw,2.1rem)' }}>
+                  Kya subah ke bure sapne sach hote hain?
+                </h2>
+                <p className="mt-3 text-[1rem] leading-relaxed" style={{ color: C.s4 }}>
+                  <SwRich k="v23-bure-0" text="**Brihad Yogayatra** bhor ke sapne ko jaldi phal dene wala kehta hai — achha ho ya bura. Par “jaldi phal” ka matlab “badla na ja sake” nahi: wahi granth bure sapne (dusvapna) ka asar kaatne ka seedha tareeka bhi saath mein deta hai: **dobara so jaiye aur sapna kisi ko mat sunaiye**, subah snan, jap aur yathashakti chhota daan. Matlab bura sapna chetavani hai, faisla nahi. Man ka karak **Chandrama** hai aur **12va bhaav** (neend, ekaant) neend se juda hai; chinta ya beemari se aaye sapne granth mein nishphal gine gaye hain. Sapna baar baar aaye to use upar wale tool mein likh kar uska shastriya arth dekhiye." />
+                </p>
+                <p className="mt-3 text-[1rem] leading-relaxed" style={{ color: C.s4 }}>
+                  <b className="font-medium text-white">Saral upay — subah ke bure sapne ke baad</b><br />
+                  1. Kya karein: nahakar apne isht devta ka naam 11 baar lijiye aur thode kaale til kisi mandir ya zaroorat-mand ko daan kijiye; sapna kisi ko mat sunaiye.<br />
+                  2. Kab: usi din subah, suryoday ke baad ke pehle ghante mein.<br />
+                  3. Kitne ka: jap muft, kaale til lagbhag ₹10-20.<br />
+                  4. Kitne din: lagatar 3 din.<br />
+                  5. Aapke liye kyun: <SwRich k="v23-bure-1" text="sapne ka asar aapki chal rahi dasha se judta hai — kaunsi mahadasha chal rahi hai, yeh [dasha calculator](/calculators/free-dasha-calculator) par muft dekhiye." />
+                </p>
+                <p className="mt-2 rounded-lg px-3 py-2 font-serif text-[0.88rem]" style={{ color: C.s5, background: C.panel2, borderLeft: `2px solid ${C.line2}` }}>
+                  बृहद्योगयात्रा, अध्याय 16, श्लोक 30 — <span lang="sa">आद्ये वर्षाद् वत्सरार्धाद् द्वितीये यामे पाको वर्षपादात् तृतीये। मासात् पाकः शर्वरीपश्चिमांशे सद्यः पाको गोविसर्गे च दृष्टे॥</span>
+                </p>
+                <p className="mt-2 rounded-lg px-3 py-2 font-serif text-[0.88rem]" style={{ color: C.s5, background: C.panel2, borderLeft: `2px solid ${C.line2}` }}>
+                  बृहद्योगयात्रा, अध्याय 16, श्लोक 32 — <span lang="sa">भूयः प्रस्वपनं न चास्य कथनं गङ्गाभिषेको जपः शान्तिः स्वस्त्ययनं निषेवणम् अपि प्रातर्गवाश्वत्थयोः। विप्रेभ्यश् च तिलान्नपानकुसुमैः पूजा यथाशक्तितः पुण्यं भारतकीर्तनं च कथितं दुःस्वप्नविच्छित्तये॥ए३२</span>
                 </p>
               </div>
 

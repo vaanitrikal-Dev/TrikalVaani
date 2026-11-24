@@ -2,7 +2,10 @@
 
 // ============================================================
 // File: app/calculators/free-foreign-settlement-calculator/page.tsx
-// Version: v2.3 (15 Nov 2026) — Radar report #15: +0 H2, +3 FAQ (which planet, when will I travel
+// Version: v2.4 (21 Nov 2026) — Radar 21 Nov (report 16) PUSH: +0 H2, +2 FAQ (foreign yog in kundli free,
+//   permanent foreign settlement), +0 verses. All 18 report H2 intents already answered by v2.0-v2.2
+//   sections (near-duplicates merged), so FAQ only; they flow into the FAQPage JSON-LD via buildCalcJsonLd.
+// (previous) Version: v2.3 (15 Nov 2026) — Radar report #15: +0 H2, +3 FAQ (which planet, when will I travel
 //   abroad, success in foreign land). Every report H2 intent was already answered by v2.0-v2.2
 //   sections, so FAQ only (they flow into the FAQPage JSON-LD through buildCalcJsonLd).
 // (previous) Version: v2.2 (07 Nov 2026) — Radar 31 Oct + 7 Nov: +1 H2, +2 FAQ (settle abroad by date of birth)
@@ -116,6 +119,14 @@ const FAQS = [
   {
     "q": "Success in foreign land astrology mein kaise dekhte hain?",
     "a": "Videsh mein basna aur wahan safal hona do alag sawaal hain. Safalta ke liye settlement ke bhaav (12th, 9th) ka 10th house (kaam) ya 11th house (laabh) se judna, mazboot Lagna swami aur Dasamsa D-10 ki pushti dekhi jaati hai. Ek chart mein basne ka yog ho sakta hai aur safalta ghar par — calculator dono ko alag blocks mein dikhata hai. Ye pravritti hai, guarantee nahi."
+  },
+  {
+    "q": "Kundli mein foreign yog free mein kaise dekhein?",
+    "a": "Upar ka calculator poora free hai aur aapki kundli se videsh yog ke paanch mukhya sanket padhta hai: 12th house (door desh) ka swami kahan baitha hai, Rahu 1, 3, 7, 9, 10 ya 12 bhaav mein hai ya nahi, 9th house (lambi yatra aur bhagya) ka 12th se sambandh, 4th house (ghar aur jadein) ki pakad kitni dheeli hai, aur abhi 12th lord, 9th lord ya Rahu ki Dasha chal rahi hai ya nahi. Ek akela sanket yog nahi banata — teen-chaar ek saath milen tab yog prabal mana jata hai. Ye sambhavna hai, guarantee nahi."
+  },
+  {
+    "q": "Permanent foreign settlement ka yog kaise pehchanein?",
+    "a": "Videsh jaana aur wahin hamesha ke liye bas jaana alag baatein hain. Permanence zyadatar 4th house (ghar aur jadein) se padhi jaati hai — 4th house ya uska swami kamzor ho, ya 4th lord 12th mein baitha ho, to wapas kheenchne wali pakad halki rehti hai. Saath mein 12th lord ka Lagna swami se judna aur Rahu ka 4th par prabhav bhi dekha jata hai. Ye pravritti hai, guarantee nahi — visa, parivaar aur aapka faisla bhi utne hi zaroori hain."
   }
 ];
 
