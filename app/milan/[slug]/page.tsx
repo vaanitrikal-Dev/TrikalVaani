@@ -1,4 +1,5 @@
 /**
+ * v1.14 (24 Nov 2026) — Next 16 upgrade (Vercel->Cloudflare move, Rohiit approved): params/searchParams now awaited. Nothing else changed.
  * v1.13 (18 Oct 2026) — Site menu (SiteNav) added — the page had no menu; pt-16 so the fixed
  *   64px menu does not cover content. Nothing else changed.
  * v1.12 (11 Oct 2026) — LOT 3, PLAY STORE APP: "Maa Shakti Ki Kripa" dabba ("Maa ko Arzi
@@ -188,7 +189,8 @@ export async function generateMetadata({ params }: { params: { slug: string } })
 }
 
 // ── PAGE ──────────────────────────────────────────────────────
-export default async function MilanResultPage({ params }: { params: { slug: string } }) {
+export default async function MilanResultPage(props: { params: Promise<{ slug: string }> }) {
+  const params = await props.params;
   const { slug } = params;
 
   const { data: milan, error } = await supabase

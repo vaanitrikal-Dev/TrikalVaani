@@ -3,6 +3,7 @@
  * TRIKAL VAANI — Compatibility Page (Programmatic SEO/GEO)
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/compatibility/[pair]/page.tsx
+ * VERSION: 2.2 (24 Nov 2026) — Next 16 upgrade (Vercel->Cloudflare move, Rohiit approved): params/searchParams now awaited. Nothing else changed.
  * VERSION: 2.1 (19 Nov 2026 — robots noindex,follow while lib/index-policy.ts COMPATIBILITY_INDEXABLE
  *   is false (Google thin-content recovery, approved by Rohiit 19 Nov 2026). Page stays live.
  *   Covers /hi/compatibility/[pair] too, which spreads this metadata.)
@@ -301,8 +302,10 @@ function resolveLang(searchParams: { [k: string]: string | string[] | undefined 
 
 // ── Metadata (dynamic SEO) ───────────────────────────────────
 export async function generateMetadata(
-  { params, searchParams }: { params: { pair: string }; searchParams: { [k: string]: string | string[] | undefined } }
+  props: { params: Promise<{ pair: string }>; searchParams: Promise<{ [k: string]: string | string[] | undefined }> }
 ): Promise<Metadata> {
+  const searchParams = await props.searchParams;
+  const params = await props.params;
   const lang = resolveLang(searchParams);
   const page = await getPage(params.pair, lang);
 
@@ -358,8 +361,10 @@ function scoreColor(score: number): string {
 
 // ── PAGE ─────────────────────────────────────────────────────
 export default async function CompatibilityPage(
-  { params, searchParams }: { params: { pair: string }; searchParams: { [k: string]: string | string[] | undefined } }
+  props: { params: Promise<{ pair: string }>; searchParams: Promise<{ [k: string]: string | string[] | undefined }> }
 ) {
+  const searchParams = await props.searchParams;
+  const params = await props.params;
   const lang = resolveLang(searchParams);
   const page = await getPage(params.pair, lang);
 

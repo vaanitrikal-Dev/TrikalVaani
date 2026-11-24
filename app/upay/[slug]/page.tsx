@@ -3,6 +3,7 @@
  * TRIKAL VAANI — Upay Report Page (₹51)
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/upay/[slug]/page.tsx
+ * VERSION: 1.2 (24 Nov 2026) — Next 16 upgrade (Vercel->Cloudflare move, Rohiit approved): params/searchParams now awaited. Nothing else changed.
  * VERSION: 1.1 (10 Oct 2026)
  *   v1.1: 'vishesh' (grahak ki apni baat) bhi select — report mein dikhti hai.
  * ============================================================
@@ -26,7 +27,8 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-export default async function UpayReportPage({ params }: { params: { slug: string } }) {
+export default async function UpayReportPage(props: { params: Promise<{ slug: string }> }) {
+  const params = await props.params;
   const { slug } = params;
   if (!SLUG_RE.test(slug)) notFound();
   const supa = upayAdmin();

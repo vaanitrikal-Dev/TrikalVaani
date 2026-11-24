@@ -3,6 +3,7 @@
  * TRIKAAL VAANI — Public SEO Result Page
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/report/[slug]/page.tsx
+ * VERSION: 3.4 (24 Nov 2026) — Next 16 upgrade (Vercel->Cloudflare move, Rohiit approved): params/searchParams now awaited. Nothing else changed.
  * VERSION: 3.3 — indexability follows is_public ONLY (v3.2 read a dead column)
  * SIGNED: ROHIIT GUPTA, CEO
  * ============================================================
@@ -132,9 +133,8 @@ async function getReport(slug: string): Promise<ReportRow | null> {
 
 // ── generateMetadata ──────────────────────────────────────────────────────────
 
-export async function generateMetadata(
-  { params }: { params: { slug: string } }
-): Promise<Metadata> {
+export async function generateMetadata(props: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const params = await props.params;
   if (!isValidSlug(params.slug)) {
     return { title: { absolute: 'Report Not Found | Trikaal Vaani' } }
   }
@@ -311,9 +311,8 @@ function buildSchema(report: ReportRow, meta: ReturnType<typeof generateSeoMeta>
 
 // ── Page Component ────────────────────────────────────────────────────────────
 
-export default async function ReportPage(
-  { params }: { params: { slug: string } }
-) {
+export default async function ReportPage(props: { params: Promise<{ slug: string }> }) {
+  const params = await props.params;
   if (!isValidSlug(params.slug)) notFound()
 
   const report = await getReport(params.slug)

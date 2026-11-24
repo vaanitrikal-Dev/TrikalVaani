@@ -3,6 +3,7 @@
  * TRIKAL VAANI — Upgrade / Paid Unlock Page
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/upgrade/page.tsx
+ * VERSION: 1.2 (24 Nov 2026) — Next 16 upgrade (Vercel->Cloudflare move, Rohiit approved): params/searchParams now awaited. Nothing else changed.
  * VERSION: 1.1 (18 Oct 2026) — Site menu (SiteNav) added — the page had no menu; pt-16 so the
  *   fixed 64px menu does not cover content. Nothing else changed.
  * PREVIOUS: VERSION 1.0 — NEW ROUTE
@@ -75,11 +76,11 @@ export const metadata: Metadata = {
 }
 
 interface Props {
-  searchParams: {
+  searchParams: Promise<{
     from?: string
     slug?: string
     tier?: string
-  }
+  }>
 }
 
 export interface UpgradeSeed {
@@ -146,7 +147,8 @@ async function loadSeed(
   }
 }
 
-export default async function UpgradePage({ searchParams }: Props) {
+export default async function UpgradePage(props: Props) {
+  const searchParams = await props.searchParams;
   const seed = await loadSeed(searchParams?.from, searchParams?.slug)
 
   return (

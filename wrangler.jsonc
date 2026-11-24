@@ -1,0 +1,59 @@
+/**
+ * ============================================================================
+ * FILE   : wrangler.jsonc  (repo root)
+ * VERSION: v1.2
+ * DATE   : 24 Nov 2026
+ * OWNER  : Rohiit Gupta, Chief Vedic Architect
+ *
+ * v1.2: D1 binding NEXT_TAG_CACHE_D1 (trikalvaani-tag-cache) for page
+ *   revalidation (open-next.config.ts v1.1).
+ *
+ * v1.1: entry is now worker.ts (adds the 3 crons from vercel.json, UTC).
+ *   Crons are inert until secret CRON_ENABLED=1 (set on domain-switch day).
+ *
+ * WHAT: Cloudflare Workers config for trikalvaani.com (Vercel -> Cloudflare move).
+ *   Built by @opennextjs/cloudflare. Branch: cloudflare-migration.
+ *   Secrets (64 env keys) are NOT in this file — they live in Cloudflare secrets.
+ *   No custom domain here yet: live domain switch only after Rohiit's OK.
+ * ============================================================================
+ */
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"main": "worker.ts",
+	"name": "trikalvaani",
+	"compatibility_date": "2026-11-24",
+	"compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+	"assets": {
+		"directory": ".open-next/assets",
+		"binding": "ASSETS"
+	},
+	"services": [
+		{
+			// Self-reference binding, name must match "name" above
+			"binding": "WORKER_SELF_REFERENCE",
+			"service": "trikalvaani"
+		}
+	],
+	"r2_buckets": [
+		{
+			// ISR / page cache (revalidate pages). Bucket must exist before first deploy.
+			"binding": "NEXT_INC_CACHE_R2_BUCKET",
+			"bucket_name": "trikalvaani-opennext-cache"
+		}
+	],
+	"d1_databases": [
+		{
+			// Tag cache: makes revalidatePath/revalidateTag (/api/revalidate) work
+			"binding": "NEXT_TAG_CACHE_D1",
+			"database_name": "trikalvaani-tag-cache",
+			"database_id": "c4d0507c-13ef-4ba6-8426-95e8d932c471"
+		}
+	],
+	"triggers": {
+		// Same as vercel.json crons (UTC): panchang daily, festival Monday, paid-recovery 5 min
+		"crons": ["30 20 * * *", "0 1 * * 1", "*/5 * * * *"]
+	},
+	"observability": {
+		"enabled": true
+	}
+}

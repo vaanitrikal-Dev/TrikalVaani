@@ -1,6 +1,7 @@
 // ════════════════════════════════════════════════════════════════════════════
 // 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER
 // File:    app/[domain]/events/[slug]/page.tsx
+// Version: v4.5 (24 Nov 2026) — Next 16 upgrade (Vercel->Cloudflare move, Rohiit approved): params/searchParams now awaited. Nothing else changed.
 // Version: v4.4 (6 Nov 2026) — ONE PAGE, ALL CITIES: a city copy NOT in lib/city-index-keep.ts
 //          now 301-redirects to the national page row (/events/<slug>#<city>) instead of
 //          serving a noindexed duplicate. Kept city pages render exactly as before.
@@ -30,9 +31,10 @@ import { isCityPageIndexable } from "@/lib/city-index-keep";
 export const revalidate = 86400;
 export const dynamicParams = true;
 
-type Params = { params: { domain: string; slug: string } };
+type Params = { params: Promise<{ domain: string; slug: string }> };
 
-export async function generateMetadata({ params }: Params): Promise<Metadata> {
+export async function generateMetadata(props: Params): Promise<Metadata> {
+  const params = await props.params;
   const city = ALL_CITIES.find(c => c.slug === params.domain);
   const f = city ? await resolveFestival(params.slug, "en") : null;
   if (!city || !f) return {};
@@ -77,7 +79,8 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   };
 }
 
-export default async function Page({ params }: Params) {
+export default async function Page(props: Params) {
+  const params = await props.params;
   if (!CITY_SLUGS.has(params.domain)) notFound();
   const city = ALL_CITIES.find(c => c.slug === params.domain);
   if (!city) notFound();

@@ -2,6 +2,7 @@
 // 🔱 TRIKAL VAANI — CEO PROTECTION HEADER
 // ════════════════════════════════════════════════════════════════════
 // File:    app/panchang/[date]/page.tsx
+// Version: v3.8 (24 Nov 2026) — Next 16 upgrade (Vercel->Cloudflare move, Rohiit approved): params/searchParams now awaited. Nothing else changed.
 // Version: v3.7 (11 Nov 2026) — robots noindex,follow while lib/index-policy.ts
 //          PANCHANG_DATES_INDEXABLE is false (Google thin-content recovery, approved by
 //          Rohiit 11 Nov 2026). The /panchang hub stays indexed. Page itself unchanged.
@@ -317,9 +318,8 @@ async function getPanchang(date: string): Promise<PanchangRow | null> {
 }
 
 // ── Metadata ──────────────────────────────────────────────────────────
-export async function generateMetadata(
-  { params }: { params: { date: string } }
-): Promise<Metadata> {
+export async function generateMetadata(props: { params: Promise<{ date: string }> }): Promise<Metadata> {
+  const params = await props.params;
   const { date } = params;
   // v3.3: window check before any fetch. An out-of-range date must not cost
   // a Supabase query here either — generateMetadata runs on the same request.
@@ -373,9 +373,8 @@ export async function generateMetadata(
 }
 
 // ── Page ──────────────────────────────────────────────────────────────
-export default async function PanchangDatePage(
-  { params }: { params: { date: string } }
-) {
+export default async function PanchangDatePage(props: { params: Promise<{ date: string }> }) {
+  const params = await props.params;
   const { date } = params;
   // v3.3: out-of-window dates 404 here, BEFORE getPanchang() runs. This is
   // the line that stops a crawler walking to 2030 from reaching the VM.

@@ -3,6 +3,7 @@
 //  File: app/vivah-muhurat/[year]/page.tsx
 //  Author: Rohiit Gupta, Chief Vedic Architect
 //  Type:  Server Component (SSR + ISR) — SEO + GEO optimised
+//  Version: 3.3 (24 Nov 2026) — Next 16 upgrade (Vercel->Cloudflare move, Rohiit approved): params/searchParams now awaited. Nothing else changed.
 //  Version: 3.2 — 11 November 2026
 //  v3.2 — only this year and next year are indexable (lib/index-policy.ts
 //         isVivahYearIndexable); later years carry robots noindex,follow
@@ -70,9 +71,8 @@ export async function generateStaticParams() {
   return rollingYears().map((y) => ({ year: String(y) }));
 }
 
-export async function generateMetadata(
-  { params }: { params: { year: string } },
-): Promise<Metadata> {
+export async function generateMetadata(props: { params: Promise<{ year: string }> }): Promise<Metadata> {
+  const params = await props.params;
   const year = params.year;
   return {
     title: { absolute: `Vivah Muhurat ${year} — Shubh Dates, Time & Lagna` },
@@ -149,9 +149,8 @@ function qualityColor(q: string) {
   return '#94A3B8';
 }
 
-export default async function VivahMuhuratYearPage(
-  { params }: { params: { year: string } },
-) {
+export default async function VivahMuhuratYearPage(props: { params: Promise<{ year: string }> }) {
+  const params = await props.params;
   const year = parseInt(params.year, 10);
   if (!year || year < 2020 || year > 2100) notFound();
 

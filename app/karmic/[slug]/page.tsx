@@ -3,6 +3,7 @@
  * TRIKAL VAANI — Karmic Background Reading — Result Page
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/karmic/[slug]/page.tsx
+ * VERSION: 1.3 (24 Nov 2026) — Next 16 upgrade (Vercel->Cloudflare move, Rohiit approved): params/searchParams now awaited. Nothing else changed.
  * VERSION: 1.2 (18 Oct 2026)
  * SIGNED: ROHIIT GUPTA, CEO
  * ============================================================
@@ -41,7 +42,8 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default async function KarmicResultPage({ params }: { params: { slug: string } }) {
+export default async function KarmicResultPage(props: { params: Promise<{ slug: string }> }) {
+  const params = await props.params;
   const { slug } = params;
 
   const { data: reading, error } = await supabase

@@ -1,6 +1,7 @@
 // ════════════════════════════════════════════════════════════════════════════
 // 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER
 // File:    app/events/[slug]/page.tsx
+// Version: v4.6 (24 Nov 2026) — Next 16 upgrade (Vercel->Cloudflare move, Rohiit approved): params/searchParams now awaited. Nothing else changed.
 // Version: v4.5 (19 Nov 2026) — indexable only when the festival date is today..+92 days
 //          (lib/index-policy.ts isFestivalInIndexWindow). Approved by Rohiit 19 Nov 2026.
 // Previous: v4.4 (11 Nov 2026) — (a) a PAST festival page whose next occurrence exists now
@@ -32,7 +33,7 @@ import FestivalPillar, {
 export const revalidate = 86400;
 export const dynamicParams = true;
 
-type Params = { params: { slug: string } };
+type Params = { params: Promise<{ slug: string }> };
 
 /** v4.3 — slug of the next upcoming occurrence of this festival, or null. */
 async function nextOccurrenceSlug(base: string): Promise<string | null> {
@@ -53,7 +54,8 @@ async function nextOccurrenceSlug(base: string): Promise<string | null> {
   } catch { return null; }
 }
 
-export async function generateMetadata({ params }: Params): Promise<Metadata> {
+export async function generateMetadata(props: Params): Promise<Metadata> {
+  const params = await props.params;
   const f = await resolveFestival(params.slug, "en");
   if (!f) return {};
   const content = await getContent(baseSlug(f.festival_slug), "en");
@@ -86,7 +88,8 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   };
 }
 
-export default async function Page({ params }: Params) {
+export default async function Page(props: Params) {
+  const params = await props.params;
   const festival = await resolveFestival(params.slug, "en");
   if (!festival) notFound();
 

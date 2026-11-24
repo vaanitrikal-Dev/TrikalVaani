@@ -2,6 +2,7 @@
 // 🔱 TRIKAL VAANI — CEO PROTECTION HEADER
 // ════════════════════════════════════════════════════════════════════
 // File:        app/[domain]/panchang/page.tsx
+// Version: v1.7 (24 Nov 2026) — Next 16 upgrade (Vercel->Cloudflare move, Rohiit approved): params/searchParams now awaited. Nothing else changed.
 // Version:     v1.6 — robots noindex,follow while lib/index-policy.ts CITY_HUBS_INDEXABLE is false
 //              (Google thin-content recovery, approved by Rohiit 11 Nov 2026). Page unchanged.
 // Previous:    v1.5 — Site menu added (18 Oct 2026)
@@ -104,9 +105,8 @@ function formatDate(yyyymmdd: string): string {
   });
 }
 
-export async function generateMetadata(
-  { params }: { params: { domain: string } }
-): Promise<Metadata> {
+export async function generateMetadata(props: { params: Promise<{ domain: string }> }): Promise<Metadata> {
+  const params = await props.params;
   const c = findCity(params.domain);
   if (!c) return { title: "Not Found" };
   // FIX (5 Sep 2026): the old title was a plain string ending "| Trikaal
@@ -133,9 +133,8 @@ export async function generateMetadata(
   };
 }
 
-export default async function CityPanchangPage(
-  { params }: { params: { domain: string } }
-) {
+export default async function CityPanchangPage(props: { params: Promise<{ domain: string }> }) {
+  const params = await props.params;
   const c = findCity(params.domain);
   if (!c) notFound();
 

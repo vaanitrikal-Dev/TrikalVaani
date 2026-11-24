@@ -1,4 +1,5 @@
-// 🔱 TRIKAAL VAANI | app/swapna/[symbol]/page.tsx | v2.1 (11 Nov 2026)
+// 🔱 TRIKAAL VAANI | app/swapna/[symbol]/page.tsx | v2.2 (24 Nov 2026)
+// v2.2 — Next 16 upgrade (Vercel->Cloudflare move, Rohiit approved): params/searchParams now awaited. Nothing else changed.
 // v2.1 — robots noindex,follow unless the symbol is in lib/index-policy.ts SWAPNA_INDEX_KEEP
 //        (Google thin-content recovery, approved by Rohiit 11 Nov 2026). Page itself unchanged.
 // Owner: Rohiit Gupta, Chief Vedic Architect
@@ -137,7 +138,8 @@ function tendencySummary(rows: Row[]): string {
 }
 
 // ── metadata ────────────────────────────────────────────────────────────────
-export async function generateMetadata({ params }: { params: { symbol: string } }): Promise<Metadata> {
+export async function generateMetadata(props: { params: Promise<{ symbol: string }> }): Promise<Metadata> {
+  const params = await props.params;
   const rows = await getSymbolRows(params.symbol);
   if (rows.length === 0) return { title: { absolute: 'Swapna Shastra — Sapno Ka Matlab | Trikaal Vaani' } };
   const r = rows[0];
@@ -211,7 +213,8 @@ export async function generateMetadata({ params }: { params: { symbol: string } 
 }
 
 // ── page ────────────────────────────────────────────────────────────────────
-export default async function SwapnaSymbolPage({ params }: { params: { symbol: string } }) {
+export default async function SwapnaSymbolPage(props: { params: Promise<{ symbol: string }> }) {
+  const params = await props.params;
   const rows = await getSymbolRows(params.symbol);
   if (rows.length === 0) notFound();
 

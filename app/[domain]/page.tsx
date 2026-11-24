@@ -3,6 +3,7 @@
  * TRIKAAL VAANI — SEO Domain Pages Generator
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/[domain]/page.tsx (dynamic engine for 15 life domains + 10 city hubs)
+ * VERSION: 3.2 (24 Nov 2026) — Next 16 upgrade (Vercel->Cloudflare move, Rohiit approved): params/searchParams now awaited. Nothing else changed.
  * VERSION: 3.1 — city hubs robots noindex,follow (11 Nov 2026)
  * v3.1: the 10 city hubs (/delhi …) carry robots noindex,follow while
  *   lib/index-policy.ts CITY_HUBS_INDEXABLE is false (Google thin-content recovery,
@@ -202,10 +203,11 @@ async function getOtherDomains(slug: string): Promise<OtherDomain[]> {
 }
 
 interface Props {
-  params: { domain: string };
+  params: Promise<{ domain: string }>;
 }
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata(props: Props): Promise<Metadata> {
+  const params = await props.params;
   // v2.9 — city hubs own their own metadata. Must come before the
   // domain_pages lookup, which would return null for a city and fall
   // through to the bare 'Trikaal Vaani' title.
@@ -270,7 +272,8 @@ export async function generateStaticParams() {
   return [...domainParams, ...cityParams];
 }
 
-export default async function DomainPage({ params }: Props) {
+export default async function DomainPage(props: Props) {
+  const params = await props.params;
   if (RESERVED_SLUGS.includes(params.domain)) notFound();
 
   // v2.9 — /delhi, /mumbai, /pune, /noida, /chennai, /kolkata, /bangalore,

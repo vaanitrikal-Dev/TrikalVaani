@@ -1,4 +1,5 @@
-// 🔱 TRIKAAL VAANI | app/swapna/category/[category]/page.tsx | v1.1 (11 Nov 2026)
+// 🔱 TRIKAAL VAANI | app/swapna/category/[category]/page.tsx | v1.2 (24 Nov 2026)
+// v1.2 — Next 16 upgrade (Vercel->Cloudflare move, Rohiit approved): params/searchParams now awaited. Nothing else changed.
 // v1.1 — robots noindex,follow while lib/index-policy.ts SWAPNA_CATEGORIES_INDEXABLE is false
 //        (Google thin-content recovery, approved by Rohiit 11 Nov 2026). Page itself unchanged.
 // Owner: Rohiit Gupta, Chief Vedic Architect
@@ -86,7 +87,8 @@ async function getCategorySymbols(category: string): Promise<Row[]> {
   } catch { return []; }
 }
 
-export async function generateMetadata({ params }: { params: { category: string } }): Promise<Metadata> {
+export async function generateMetadata(props: { params: Promise<{ category: string }> }): Promise<Metadata> {
+  const params = await props.params;
   const realm = REALMS[params.category];
   if (!realm) return { title: 'Dream Meanings | Swapna Shastra — Trikaal Vaani' };
   const title = `${realm.en} (${realm.hi}) — Meanings in Vedic Swapna Shastra | Trikaal Vaani`;
@@ -101,7 +103,8 @@ export async function generateMetadata({ params }: { params: { category: string 
   };
 }
 
-export default async function SwapnaCategoryPage({ params }: { params: { category: string } }) {
+export default async function SwapnaCategoryPage(props: { params: Promise<{ category: string }> }) {
+  const params = await props.params;
   const realm = REALMS[params.category];
   if (!realm) notFound();
 

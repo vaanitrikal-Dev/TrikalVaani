@@ -3,6 +3,7 @@
  * TRIKAL VAANI — Result Page (Server Component)
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/result/[id]/page.tsx
+ * VERSION: 2.1 (24 Nov 2026) — Next 16 upgrade (Vercel->Cloudflare move, Rohiit approved): params/searchParams now awaited. Nothing else changed.
  * VERSION: 2.0 — Correct Supabase field mapping + props to ResultClient
  * SIGNED: ROHIIT GUPTA, CEO
  * 🔒 LOCKED — DO NOT EDIT WITHOUT CEO APPROVAL
@@ -20,10 +21,11 @@ const supabase = createClient(
 );
 
 interface Props {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata(props: Props): Promise<Metadata> {
+  const params = await props.params;
   const { data } = await supabase
     .from('predictions')
     .select('person_name, domain_label, lagna, nakshatra, tier')
@@ -44,7 +46,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default async function ResultPage({ params }: Props) {
+export default async function ResultPage(props: Props) {
+  const params = await props.params;
   const { data: row, error } = await supabase
     .from('predictions')
     .select('*')

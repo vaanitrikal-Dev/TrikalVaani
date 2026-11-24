@@ -1,6 +1,7 @@
 // ============================================================
 // TRIKAL VAANI — DYNAMIC BLOG ARTICLE PAGE (SSR)
 // CEO: Rohiit Gupta | Chief Vedic Architect
+// Version: 4.3 (24 Nov 2026) — Next 16 upgrade (Vercel->Cloudflare move, Rohiit approved): params/searchParams now awaited. Nothing else changed.
 // Version: 4.2 (5 Nov 2026 — GOOGLE MANUAL ACTION RECOVERY, approved by Rohiit 5 Nov 2026.
 //   A post with blog_posts.noindex = true now sends robots "noindex, follow" (googleBot
 //   too). The page stays live, readable and linked; only Google is told not to index it.
@@ -510,9 +511,8 @@ async function learnSlugForHindiPost(hindiSlug: string): Promise<string | null> 
 // ==================================================================
 // METADATA
 // ==================================================================
-export async function generateMetadata(
-  { params }: { params: { slug: string } }
-): Promise<Metadata> {
+export async function generateMetadata(props: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const params = await props.params;
   const post = await getPostBySlug(params.slug);
 
   if (!post) {
@@ -1369,11 +1369,12 @@ function LocalNapBlock({ lang, primaryHref }: { lang: string; primaryHref?: stri
 // ==================================================================
 // MAIN PAGE COMPONENT
 // ==================================================================
-export default async function BlogArticlePage({
-  params,
-}: {
-  params: { slug: string };
-}) {
+export default async function BlogArticlePage(
+  props: {
+    params: Promise<{ slug: string }>;
+  }
+) {
+  const params = await props.params;
   const post = await getPostBySlug(params.slug);
 
   if (!post) {

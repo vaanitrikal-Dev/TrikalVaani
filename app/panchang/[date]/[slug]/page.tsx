@@ -2,6 +2,7 @@
 // 🔱 TRIKAL VAANI — CEO PROTECTION HEADER
 // ════════════════════════════════════════════════════════════════════
 // File:    app/panchang/[date]/[slug]/page.tsx
+// Version: v1.6 (24 Nov 2026) — Next 16 upgrade (Vercel->Cloudflare move, Rohiit approved): params/searchParams now awaited. Nothing else changed.
 // Version: v1.5 (11 Nov 2026) — robots noindex,follow while lib/index-policy.ts
 //          PANCHANG_DATES_INDEXABLE is false (approved by Rohiit 11 Nov 2026). Page unchanged.
 // Previous: v1.4 (18 Oct 2026)
@@ -219,9 +220,8 @@ async function getPanchang(date: string): Promise<PanchangRow | null> {
 }
 
 // ── Metadata ──────────────────────────────────────────────────────────
-export async function generateMetadata(
-  { params }: { params: { date: string; slug: string } }
-): Promise<Metadata> {
+export async function generateMetadata(props: { params: Promise<{ date: string; slug: string }> }): Promise<Metadata> {
+  const params = await props.params;
   const { date, slug } = params;
   if (!isValidDate(date)) return { title: "Not Found" };
 
@@ -341,9 +341,8 @@ function buildSchemas(
 }
 
 // ── Page ──────────────────────────────────────────────────────────────
-export default async function FestivalPage(
-  { params }: { params: { date: string; slug: string } }
-) {
+export default async function FestivalPage(props: { params: Promise<{ date: string; slug: string }> }) {
+  const params = await props.params;
   const { date, slug } = params;
   if (!isValidDate(date)) notFound();
 

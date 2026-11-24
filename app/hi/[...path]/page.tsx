@@ -2,6 +2,7 @@
 // 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER
 // ════════════════════════════════════════════════════════════════════════════
 // File:    app/hi/[...path]/page.tsx
+// Version: v1.7 (24 Nov 2026) — Next 16 upgrade (Vercel->Cloudflare move, Rohiit approved): params/searchParams now awaited. Nothing else changed.
 // Version: v1.6 (19 Nov 2026) — national Hindi festival page indexable only when its date is
 //          today..+92 days (lib/index-policy.ts). Approved by Rohiit 19 Nov 2026.
 // Previous: v1.5 (6 Nov 2026) — ONE PAGE, ALL CITIES: a Hindi city copy NOT in
@@ -66,7 +67,7 @@ import { isFestivalInIndexWindow } from "@/lib/index-policy"; // v1.6
 export const revalidate = 86400;
 export const dynamicParams = true;
 
-type Params = { params: { path: string[] } };
+type Params = { params: Promise<{ path: string[] }> };
 
 /**
  * Split the path into a city (optional) and a festival slug.
@@ -83,7 +84,8 @@ function parse(path: string[]) {
   return { citySlug, slug };
 }
 
-export async function generateMetadata({ params }: Params): Promise<Metadata> {
+export async function generateMetadata(props: Params): Promise<Metadata> {
+  const params = await props.params;
   const p = parse(params.path);
   if (!p) return {};
   const city = p.citySlug ? ALL_CITIES.find(c => c.slug === p.citySlug) : null;
@@ -139,7 +141,8 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   };
 }
 
-export default async function Page({ params }: Params) {
+export default async function Page(props: Params) {
+  const params = await props.params;
   const p = parse(params.path);
   if (!p) notFound();
 

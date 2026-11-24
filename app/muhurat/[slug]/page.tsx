@@ -3,6 +3,7 @@
  * TRIKAL VAANI — Child Birth Muhurat — Paid Result Page
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/muhurat/[slug]/page.tsx
+ * VERSION: 1.8 (24 Nov 2026) — Next 16 upgrade (Vercel->Cloudflare move, Rohiit approved): params/searchParams now awaited. Nothing else changed.
  * VERSION: 1.7 (18 Oct 2026) — Site menu (SiteNav) added — the page had no menu; pt-16 so the
  *   fixed 64px menu does not cover content. Nothing else changed.
  * VERSION: 1.6 (11 Oct 2026) — LOT 3, PLAY STORE APP: "Maa Shakti Ki Kripa" dabba ("Maa ko
@@ -171,7 +172,8 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 // ── PAGE ──────────────────────────────────────────────────────
-export default async function MuhuratResultPage({ params }: { params: { slug: string } }) {
+export default async function MuhuratResultPage(props: { params: Promise<{ slug: string }> }) {
+  const params = await props.params;
   const { slug } = params;
 
   const { data: reading, error } = await supabase

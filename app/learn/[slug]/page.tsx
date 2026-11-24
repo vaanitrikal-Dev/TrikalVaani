@@ -24,6 +24,7 @@ import { isLearnIndexable } from '@/lib/index-policy' // v2.5
 
 /* ============================================================
    TRIKAL VAANI — /learn/[slug]
+   VERSION: 2.6 (24 Nov 2026) — Next 16 upgrade (Vercel->Cloudflare move, Rohiit approved): params/searchParams now awaited. Nothing else changed.
    VERSION: 2.5 — NOINDEX UNTIL REVIEWED (19 Nov 2026)
    ============================================================
    CHANGE v2.5: robots noindex,follow unless the slug is in
@@ -129,7 +130,7 @@ import { isLearnIndexable } from '@/lib/index-policy' // v2.5
 export const revalidate = 86400
 
 interface Props {
-  params: { slug: string }
+  params: Promise<{ slug: string }>
 }
 
 /* ── generateStaticParams ── */
@@ -143,7 +144,8 @@ export async function generateStaticParams() {
 }
 
 /* ── generateMetadata ── */
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata(props: Props): Promise<Metadata> {
+  const params = await props.params;
   const page = await getSeoPageBySlug(params.slug)
   if (!page) return {}
 
@@ -206,7 +208,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 /* ── Page Component ── */
-export default async function SeoLearnPage({ params }: Props) {
+export default async function SeoLearnPage(props: Props) {
+  const params = await props.params;
   // v2.0: ONE fetch. The old code called getSeoPageBySlug twice inside this
   // Promise.all — the second call re-fetched the same row only to read
   // .cluster — and generateMetadata makes a third. React's cache() would have

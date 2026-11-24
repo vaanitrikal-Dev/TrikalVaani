@@ -2,6 +2,7 @@
 // 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER
 // ════════════════════════════════════════════════════════════════════
 // File:    app/rashifal/[date]/page.tsx
+// Version: v1.2 (24 Nov 2026) — Next 16 upgrade (Vercel->Cloudflare move, Rohiit approved): params/searchParams now awaited. Nothing else changed.
 // Version: v1.1
 // Owner:   Rohiit Gupta, Chief Vedic Architect
 // v1.1 (18 Oct 2026): Site menu (SiteNav) added — the page had no menu;
@@ -114,9 +115,8 @@ async function getRashifal(date: string): Promise<RashifalRow | null> {
 }
 
 // ── Metadata ──────────────────────────────────────────────────────────
-export async function generateMetadata(
-  { params }: { params: { date: string } }
-): Promise<Metadata> {
+export async function generateMetadata(props: { params: Promise<{ date: string }> }): Promise<Metadata> {
+  const params = await props.params;
   const { date } = params;
   if (!isValidDate(date)) return { title: "Rashifal Not Found | Trikaal Vaani" };
 
@@ -171,9 +171,8 @@ export async function generateMetadata(
 }
 
 // ── Page ──────────────────────────────────────────────────────────────
-export default async function RashifalDatePage(
-  { params }: { params: { date: string } }
-) {
+export default async function RashifalDatePage(props: { params: Promise<{ date: string }> }) {
+  const params = await props.params;
   const { date } = params;
   if (!isValidDate(date)) notFound();
 

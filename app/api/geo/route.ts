@@ -3,8 +3,13 @@
  * TRIKAL VAANI — Visitor Country Detection
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/api/geo/route.ts
- * VERSION: 1.0
+ * VERSION: 1.1 (24 Nov 2026)
  * SIGNED: ROHIIT GUPTA, CEO
+ * ============================================================
+ * v1.1 (24 Nov 2026, Rohiit approved — Vercel->Cloudflare move): also reads
+ *   Cloudflare's `cf-ipcountry` header, so foreign visitors still get USD/PayPal
+ *   on Cloudflare. Vercel header is checked first (unchanged on Vercel).
+ *   Cloudflare sends "XX"/"T1" for unknown/Tor — those fall back to 'IN' as before.
  * ============================================================
  * Reads Vercel's own geo header. Free, no external API, no key.
  *
@@ -25,8 +30,11 @@ import { isIndia } from '@/lib/pricing-intl';
 export const dynamic = 'force-dynamic';
 
 export async function GET(req: NextRequest) {
+  const cf = req.headers.get('cf-ipcountry')?.toUpperCase();
   const country =
-    req.headers.get('x-vercel-ip-country')?.toUpperCase() || 'IN';
+    req.headers.get('x-vercel-ip-country')?.toUpperCase() ||
+    (cf && cf !== 'XX' && cf !== 'T1' ? cf : '') ||
+    'IN';
 
   return NextResponse.json(
     {

@@ -2,6 +2,7 @@
 // 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER
 // ════════════════════════════════════════════════════════════════════════════
 // File:    app/hi/compatibility/[pair]/page.tsx
+// Version: v1.1 (24 Nov 2026) — Next 16 upgrade (Vercel->Cloudflare move, Rohiit approved): params/searchParams now awaited. Nothing else changed.
 // Version: v1.0 (28 Aug 2026)
 // Owner:   Rohiit Gupta, Chief Vedic Architect
 //
@@ -47,9 +48,10 @@ export const dynamicParams = true;
 
 const SITE = "https://trikalvaani.com";
 
-type Params = { params: { pair: string } };
+type Params = { params: Promise<{ pair: string }> };
 
-export async function generateMetadata({ params }: Params): Promise<Metadata> {
+export async function generateMetadata(props: Params): Promise<Metadata> {
+  const params = await props.params;
   const meta = await baseMetadata({ params, searchParams: { lang: "hi" } });
 
   // The base page canonicalises to /compatibility/{pair}?lang=hi, because until
@@ -69,7 +71,8 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   };
 }
 
-export default async function Page({ params }: Params) {
+export default async function Page(props: Params) {
+  const params = await props.params;
   return CompatibilityPage({ params, searchParams: { lang: "hi" } });
 }
 
