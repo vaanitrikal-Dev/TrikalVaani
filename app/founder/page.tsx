@@ -3,7 +3,8 @@
  * 🔱 TRIKAL VAANI — CEO PROTECTION HEADER 🔱
  * ============================================================================
  * File:        app/founder/page.tsx
- * Version: 4.8 (11 Nov 2026) — approved by Rohiit 11 Nov 2026: "15+ years" -> "16+ years";
+ * Version: 4.9 (26 Nov 2026) — Person schema sameAs: /trikaal-vaani link removed (404). Rohiit approved 26 Nov 2026. Nothing else changed.
+ * (previous) Version: 4.8 (11 Nov 2026) — approved by Rohiit 11 Nov 2026: "15+ years" -> "16+ years";
  *   "India's first AI-powered" claim removed; broken spelling sentence fixed (Trikal Vaani =
  *   registered name, Trikaal Vaani = brand spelling); "in minutes" line replaced; real address
  *   (724, Pocket 3, Sector 19, Dwarka) in text + schema; new section "How Our Content Is Made"
@@ -186,7 +187,7 @@ const schema = {
         INSTAGRAM_URL,
         YOUTUBE_URL,
         "https://trikalvaani.com",
-        "https://trikalvaani.com/trikaal-vaani",
+        // v4.9 — "https://trikalvaani.com/trikaal-vaani" removed (page returns 404)
       ],
     },
     // ── Organization Schema (Brand spelling consolidation) ──
@@ -947,7 +948,7 @@ function WAIcon() {
 }
 
 // ============================================================================
-// END — app/founder/page.tsx v4.8
+// END — app/founder/page.tsx v4.9
 // 🔱 Trikaal Vaani | Rohiit Gupta, Chief Vedic Architect
 // MSME Registered: UDYAM-DL-10-0119070
 // Phase 4: Brand spelling consolidation (Trikaal = Trikaal)

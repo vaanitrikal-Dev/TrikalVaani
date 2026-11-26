@@ -40,7 +40,6 @@ Trikaal Vaani offers AI-powered palm reading (Hast Rekha) based on Samudrika Sha
 ## Swapna Shastra (Vedic Dream Interpretation)
 Trikaal Vaani offers free Vedic dream interpretation (Swapna Shastra) based on classical texts — the Svapna Cintamani of Jagaddeva, the Brihat Jataka, the svapna chapters of the Agni and Matsya Puranas, and the Atharvaveda. Type a dream in a line or two and receive its classical symbol meaning instantly, free, in English, Hindi or Hinglish — from a validated knowledge base of 190+ dream symbols across 12 families (serpents, death & ancestors, deities, water, the body, animals, conflict, life events, sky & elements, food and more), each meaning traced to a named source and validated by Rohiit Gupta. A ₹51 personal reading then interprets the same dream against the dreamer's own birth chart and running Mahadasha–Antardasha, computed on the Swiss Ephemeris — with the exact life-area it touches and a remedy shaped to the chart. Readings are non-fearful and non-fatalistic: dream symbols describe tendencies, not fixed fate.
 - [Swapna Shastra — Free Vedic Dream Decoder](https://trikalvaani.com/swapna): Type your dream and get its classical meaning free; unlock the ₹51 personal reading against your own chart and dasha.
-Individual pages exist for every symbol at /swapna/[symbol] (107 symbols) and every dream family at /swapna/category/[category] (12 realms); the complete machine-readable set is in the sitemap.
 
 ## Yog Calculators — Government Job, Foreign Settlement, Foreign Spouse, Santan Yog, Vivah Yog
 Trikaal Vaani publishes five free yog calculators that differ from the usual astrology scoring tool in one specific way: each one returns the REASON behind every point, with the actual figure it used, not only a headline number. A rule cannot award points without stating its reason, so the score and the explanation can never disagree. Each is a yog STRENGTH score — a measure of how many classical combinations for that outcome are present in the chart and how strong they are — and explicitly not a prediction of an exam result, a visa decision or a marriage. Every result carries that disclaimer.
@@ -55,9 +54,8 @@ The engine behind them computes full six-part Shadbala per Brihat Parashara Hora
 - [Love or Arranged Marriage Prediction by Date of Birth](https://trikalvaani.com/calculators/free-love-or-arranged-marriage-calculator): A completely free calculator that reads ten traditional (parampara) signs — the 5th-7th lord connection, Venus with Mars, Rahu in or linked to the 5th/7th, Moon with Venus, the 5th/7th lord in the 11th, a 5th-7th link in the Navamsa, Venus in the 5th/7th or in the ascendant, the 5th lord in the ascendant and the 7th lord in the 3rd — and reports a lean: Love ki or jhukaav, Dono ka mel (love-cum-arranged) or Arranged ki or jhukaav. It states plainly that none of the six classical texts (BPHS, Jataka Parijata, Phaladipika, Bhrigu Sutram, Brihat Jataka, Chamatkar Chintamani) gives a direct love-or-arranged rule, labels every sign as tradition, and says that when these traditional signs were checked on known real marriages they did not separate love marriages from others — so the result is a lean, never a certainty. Married users can tap their real marriage type; answers are stored with the chart only (never a name) and used to re-test and re-weight the signs monthly. Marriage timing comes from the BPHS Vimshottari dasha. It never predicts caste, religion or community.
 
 ## Kaal Sarp Dosh (Rahu-Ketu Axis)
-Kaal Sarp Dosh is the chart pattern in which all seven grahas (Sun through Saturn) fall inside the half-circle running from Rahu to Ketu. Trikaal Vaani applies the strict classical rule: if even one planet sits outside that arc, Kaal Sarp Dosh is not present at all, and most online reports that claim it are describing a partial arrangement that does not qualify. Trikaal Vaani's position is deliberately non-fearful and is the opposite of the fear-marketing common in this subject. Kaal Sarp is not named in Brihat Parashara Hora Shastra; the twelve serpent names are a later classificatory convention from Nakshatra-shastra commentary and Trimbakeshwar temple tradition. It frequently cancels (bhang) through the strength of the Lagna lord, the lord of the house Rahu occupies, Jupiter's aspect, and the Viparita Raja Yogas — Harsha, Sarala and Vimala — for the dusthana types. It is not grounds for rejecting a marriage proposal, since classical Ashtakoot matching does not examine it. Severity depends on cancellation, the relevant house lord and the running Mahadasha, not on the label. The hub covers all twelve types in English and Hindi, each page sourced to named classical texts.
+Kaal Sarp Dosh is the chart pattern in which all seven grahas (Sun through Saturn) fall inside the half-circle running from Rahu to Ketu. Trikaal Vaani applies the strict classical rule: if even one planet sits outside that arc, Kaal Sarp Dosh is not present at all, and most online reports that claim it are describing a partial arrangement that does not qualify. Trikaal Vaani's position is deliberately non-fearful and is the opposite of the fear-marketing common in this subject. Kaal Sarp is not named in Brihat Parashara Hora Shastra; the twelve serpent names are a later classificatory convention from Nakshatra-shastra commentary and Trimbakeshwar temple tradition. It frequently cancels (bhang) through the strength of the Lagna lord, the lord of the house Rahu occupies, Jupiter's aspect, and the Viparita Raja Yogas — Harsha, Sarala and Vimala — for the dusthana types. It is not grounds for rejecting a marriage proposal, since classical Ashtakoot matching does not examine it. Severity depends on cancellation, the relevant house lord and the running Mahadasha, not on the label.
 - [Free Kaal Sarp Dosh Calculator](https://trikalvaani.com/calculators/free-kaal-sarp-dosh-calculator): Swiss Ephemeris longitudes with Lahiri Ayanamsha; returns a strict yes/no verdict and the type.
-Every page above has a Hindi counterpart at the same slug with a -hindi suffix (for example /blog/anant-kaal-sarp-yog-hindi); the complete machine-readable set is in the sitemap.
 
 ## Life Domain Guides
 - [Career & Profession Astrology](https://trikalvaani.com/career)
@@ -74,82 +72,6 @@ Every page above has a Hindi counterpart at the same slug with a -hindi suffix (
 - [Spirituality & Moksha Astrology](https://trikalvaani.com/spirituality)
 - [Mental Wellbeing Astrology](https://trikalvaani.com/wellbeing)
 - [Travel Astrology](https://trikalvaani.com/travel)
-
-## Astrology Knowledge (Foundations)
-- [Ascendant (Lagna) Explained](https://trikalvaani.com/learn/ascendant-lagna): Why the Lagna is your most important sign.
-- [The 12 Houses (Bhavas)](https://trikalvaani.com/learn/houses-in-astrology): Complete guide to all twelve houses.
-- [Gemstone Astrology — All 9 Stones](https://trikalvaani.com/learn/gemstone-astrology-vedic): Ratna Vigyan guide to the nine Vedic gemstones.
-- [Yogakaraka Planet & Gemstone](https://trikalvaani.com/learn/yogakaraka-planet-gemstone): The most powerful gemstone for your ascendant.
-- [Functional Benefic & Malefic Planets](https://trikalvaani.com/learn/functional-benefic-malefic-gemstone): How they decide your gemstone.
-- [Life Stone (Lagna Ratna)](https://trikalvaani.com/learn/life-stone-lagna-ratna): What it is and how to choose yours.
-
-## Prediction Guides (Life Questions)
-- [Will I Become Rich?](https://trikalvaani.com/learn/will-i-become-rich)
-- [Wealth Prediction & Dhan Yoga](https://trikalvaani.com/learn/wealth-prediction-astrology)
-- [Career Prediction by Astrology](https://trikalvaani.com/learn/career-prediction-astrology)
-- [Government Job (Sarkari Naukri) Yoga](https://trikalvaani.com/learn/government-job-chances): Pillar guide to government service in the birth chart.
-- [UPSC / IAS Success Prediction](https://trikalvaani.com/learn/upsc-success-prediction): House-by-house IAS, IPS, IFS and IRS mapping and multi-attempt Dasha timing.
-- [10th House & Government Job](https://trikalvaani.com/learn/10th-house-government-job-astrology): The 10th lord through all twelve houses, and which planet in the 10th maps to which government sector.
-- [Saturn (Shani) & Government Job](https://trikalvaani.com/learn/saturn-shani-government-job-astrology): Saturn Mahadasha, Sade Sati and why its middle phase is often career-transformative rather than only difficult.
-- [Sun (Surya) & Raj Yoga for Government Job](https://trikalvaani.com/learn/sun-surya-raj-yoga-government-job): Sun's dignity, Neecha Bhanga and Vipreet Raja Yoga, and Budh-Aditya.
-- [Banking & PSU Job Astrology](https://trikalvaani.com/learn/banking-psu-job-astrology): Why banking and engineering PSUs are astrologically different tracks, not one.
-- [SSC, Railway & Police Job Astrology](https://trikalvaani.com/learn/ssc-railway-police-job-astrology): Three distinct signatures under one page, with the bar for SSC lower than UPSC.
-- [Government Job Dasha Timing](https://trikalvaani.com/learn/government-job-dasha-timing): Which Mahadasha and Antardasha combinations actually deliver an appointment.
-- [Business Success Prediction](https://trikalvaani.com/learn/business-success-prediction)
-- [Financial Loss — Why Am I Losing Money?](https://trikalvaani.com/learn/financial-loss-prediction)
-- [What Age Will I Get Married?](https://trikalvaani.com/learn/what-age-will-i-get-married)
-- [Why Is My Marriage Delayed?](https://trikalvaani.com/learn/why-is-my-marriage-delayed)
-- [Will I Have a Love Marriage?](https://trikalvaani.com/learn/will-i-have-love-marriage)
-- [Marriage Compatibility (Kundali Milan) Analysis](https://trikalvaani.com/learn/marriage-compatibility-analysis)
-- [Child Birth Prediction](https://trikalvaani.com/learn/child-birth-prediction)
-- [Will I Own a House?](https://trikalvaani.com/learn/will-i-own-a-house)
-- [Property Prediction by Astrology](https://trikalvaani.com/learn/property-prediction-astrology)
-- [Property Dispute Prediction](https://trikalvaani.com/learn/property-dispute-prediction)
-- [Land Dispute Resolution Timing](https://trikalvaani.com/learn/land-dispute-resolution)
-- [All Learn Guides](https://trikalvaani.com/learn): Full library of Vedic astrology knowledge and prediction guides.
-
-## Jupiter Transit 2026 (Guru Singh Rashi Gochar)
-Jupiter (Guru) transits Leo (Singh Rashi) from July 2026 to June 2027. This is one of the most significant planetary transits of 2026–27. Trikaal Vaani provides BPHS-based analysis for all 12 moon signs with career, finance, marriage and remedy guidance by Rohiit Gupta.
-
-- [Jupiter Transit 2026 — Complete Analysis (Pillar)](https://trikalvaani.com/learn/jupiter-transit-2026): Full Vedic analysis of Jupiter in Leo 2026–27. Exact dates, 12-rashi overview, classical shlokas, ashtakavarga, upay.
-- [Jupiter Transit 2026 — All 12 Rashis at a Glance](https://trikalvaani.com/learn/jupiter-leo-2026-12-rashis): Quick comparison of all 12 moon signs' Jupiter transit effects.
-- [Jupiter Transit 2026 Aries (Mesh Rashi) — Pancham Guru](https://trikalvaani.com/learn/guru-gochar-2026-mesh-rashi): 5th-house Jupiter for Aries — best transit in 12 years. Career, love marriage, children and investments.
-- [Jupiter Transit 2026 Taurus (Vrishabh Rashi) — Chaturtham Guru](https://trikalvaani.com/learn/guru-gochar-2026-vrishabh-rashi): 4th-house Jupiter for Taurus — property purchase, mother's blessings, home happiness.
-- [Jupiter Transit 2026 Gemini (Mithun Rashi) — Tritiya Guru](https://trikalvaani.com/learn/guru-gochar-2026-mithun-rashi): 3rd-house Jupiter for Gemini — self-effort, media and travel opportunities.
-- [Jupiter Transit 2026 Cancer (Karka Rashi) — Dwitiya Guru](https://trikalvaani.com/learn/guru-gochar-2026-karka-rashi): 2nd-house Jupiter for Cancer — wealth accumulation, family joy and banking gains.
-- [Jupiter Transit 2026 Leo (Singh Rashi) — Janma Guru](https://trikalvaani.com/learn/guru-gochar-2026-singh-rashi): Birth-sign Jupiter for Leo — new beginnings, personality growth and leadership.
-- [Jupiter Transit 2026 Virgo (Kanya Rashi) — Dwadash Guru](https://trikalvaani.com/learn/guru-gochar-2026-kanya-rashi): 12th-house Jupiter for Virgo — foreign opportunities, spirituality and expense management.
-- [Jupiter Transit 2026 Libra (Tula Rashi) — Ekadash Guru](https://trikalvaani.com/learn/guru-gochar-2026-tula-rashi): 11th-house Jupiter for Libra — income surge, networking and wish fulfilment.
-- [Jupiter Transit 2026 Scorpio (Vrishchik Rashi) — Dasham Guru](https://trikalvaani.com/learn/guru-gochar-2026-vrishchik-rashi): 10th-house Jupiter for Scorpio — career peak, promotion and government recognition.
-- [Jupiter Transit 2026 Sagittarius (Dhanu Rashi) — Navam Guru](https://trikalvaani.com/learn/guru-gochar-2026-dhanu-rashi): 9th-house Jupiter for Sagittarius — fortune, guru grace and foreign opportunities. Gaj Kesari-like effect.
-- [Jupiter Transit 2026 Capricorn (Makar Rashi) — Ashtam Guru](https://trikalvaani.com/learn/guru-gochar-2026-makar-rashi): 8th-house Jupiter for Capricorn — patience required, caution advised, spiritual growth.
-- [Jupiter Transit 2026 Aquarius (Kumbh Rashi) — Saptam Guru](https://trikalvaani.com/learn/guru-gochar-2026-kumbh-rashi): 7th-house Jupiter for Aquarius — best marriage yoga of 2026–27, business partnerships.
-- [Jupiter Transit 2026 Pisces (Meen Rashi) — Shashtham Guru](https://trikalvaani.com/learn/guru-gochar-2026-meen-rashi): 6th-house Jupiter for Pisces — hard work rewarded, health care, competition victory.
-
-## Mercury Retrograde June 2026 (Budh Vakri)
-Mercury (Budh) goes retrograde on 18 June 2026 in Gemini (Mithun Rashi) — its own sign — making this one of the most impactful Mercury retrograde periods of 2026. It goes direct on 12 July 2026. Post-shadow ends 25 July 2026. Trikaal Vaani provides BPHS-based rashi-wise impact and Ganesh-upay guidance for all 12 signs.
-
-- [Mercury Retrograde June 2026 — Complete Guide (Pillar)](https://trikalvaani.com/learn/mercury-retrograde-june-2026): Full Vedic analysis. Exact dates 18 Jun–12 Jul 2026, 3 mistakes to avoid, week-by-week guidance, all-12-rashi overview, DO's & DON'Ts, shastriya upay.
-- [Mercury Retrograde June 2026 — Remedies for All 12 Rashis](https://trikalvaani.com/learn/budh-vakri-2026-upay-sare-rashi): Universal and rashi-specific upay — mantra, daan, Ganesh puja, lifestyle protocol.
-- [Mercury Retrograde 2026 Aries (Mesh Rashi)](https://trikalvaani.com/learn/budh-vakri-2026-mesh-rashi): 3rd-house retrograde — sibling communication, travel delays, avoid verbal agreements.
-- [Mercury Retrograde 2026 Taurus (Vrishabh Rashi)](https://trikalvaani.com/learn/budh-vakri-2026-vrishabh-rashi): 2nd-house retrograde — bank documents, family finance, verify all transactions.
-- [Mercury Retrograde 2026 Gemini (Mithun Rashi)](https://trikalvaani.com/learn/budh-vakri-2026-mithun-rashi): Most affected sign — retrograde in own sign (1st house). Double impact on personality, decisions and communication.
-- [Mercury Retrograde 2026 Cancer (Karka Rashi)](https://trikalvaani.com/learn/budh-vakri-2026-karka-rashi): 12th-house retrograde — hidden enemies, unexpected expenses, spiritual growth opportunity.
-- [Mercury Retrograde 2026 Leo (Singh Rashi)](https://trikalvaani.com/learn/budh-vakri-2026-singh-rashi): 11th-house retrograde — social media caution, friend misunderstandings, delay new income contracts.
-- [Mercury Retrograde 2026 Virgo (Kanya Rashi)](https://trikalvaani.com/learn/budh-vakri-2026-kanya-rashi): Second most affected sign — 10th-house retrograde in mool-trikona sign. Career and Boss communication highest risk.
-- [Mercury Retrograde 2026 Libra (Tula Rashi)](https://trikalvaani.com/learn/budh-vakri-2026-tula-rashi): 9th-house retrograde — visa documents, foreign travel, higher education admissions need triple-checking.
-- [Mercury Retrograde 2026 Scorpio (Vrishchik Rashi)](https://trikalvaani.com/learn/budh-vakri-2026-vrishchik-rashi): 8th-house retrograde — joint finances, insurance, tax documents and hidden matters surface.
-- [Mercury Retrograde 2026 Sagittarius (Dhanu Rashi)](https://trikalvaani.com/learn/budh-vakri-2026-dhanu-rashi): 7th-house retrograde — spouse communication, business partner contracts and court filings need care.
-- [Mercury Retrograde 2026 Capricorn (Makar Rashi)](https://trikalvaani.com/learn/budh-vakri-2026-makar-rashi): 6th-house retrograde — health documentation, employee written instructions, daily routine disruption.
-- [Mercury Retrograde 2026 Aquarius (Kumbh Rashi)](https://trikalvaani.com/learn/budh-vakri-2026-kumbh-rashi): 5th-house retrograde — delay speculative investments, children's study support, creative project revision.
-- [Mercury Retrograde 2026 Pisces (Meen Rashi)](https://trikalvaani.com/learn/budh-vakri-2026-meen-rashi): 4th-house retrograde — home electronics repair (don't buy new), property signing after 25 July, mother communication care.
-
-## Marriage Compatibility (Rashi Matching Library)
-Trikaal Vaani publishes a complete Vedic moon-sign (rashi) compatibility library covering all 144 pair combinations of the 12 rashis — each page with Ashtakoot Guna Milan scoring, relationship strengths, challenges and remedy guidance. Available in both English at /compatibility/[rashi1-rashi2] and Hindi at /hi/compatibility/[rashi1-rashi2], for 288 pages total. The complete machine-readable set is in the sitemap (link in the Optional section below); a few representative pages are listed here so AI assistants understand the depth and URL pattern.
-- [Aries–Leo Compatibility (Mesh–Simha)](https://trikalvaani.com/compatibility/mesh-simha)
-- [Aries–Libra Compatibility (Mesh–Tula)](https://trikalvaani.com/compatibility/mesh-tula)
-- [Gemini–Libra Compatibility (Mithun–Tula)](https://trikalvaani.com/compatibility/mithun-tula)
-- [Hindi example — Mesh–Simha Compatibility](https://trikalvaani.com/hi/compatibility/mesh-simha)
 
 ## Doshas, Dashas & Remedies
 - [All Articles](https://trikalvaani.com/blog): The Trikaal Vaani blog.
@@ -186,7 +108,7 @@ Trikaal Vaani publishes a complete Vedic moon-sign (rashi) compatibility library
 There are 34 free calculators in total, including a dedicated "Should I Wear" suitability check for each of the nine Vedic gemstones at /calculators/free-should-i-wear-[stone]; the complete set is on the calculators hub and in the sitemap.
 
 ## Panchang & Festivals
-- [Daily Panchang](https://trikalvaani.com/panchang): Today's tithi, nakshatra, yoga, karana and muhurat. A dated Panchang page is published for every day of the year at /panchang/YYYY-MM-DD (e.g. /panchang/2026-08-15) — the complete set of upcoming dates is in the sitemap.
+- [Daily Panchang](https://trikalvaani.com/panchang): Today's tithi, nakshatra, yoga, karana and muhurat.
 
 ## Consultation by Location
 - [Astrologer in Delhi](https://trikalvaani.com/astrologer-delhi)

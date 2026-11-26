@@ -1,7 +1,12 @@
-// 🔱 TRIKAL VAANI | app/page.tsx | v11.7
+// 🔱 TRIKAL VAANI | app/page.tsx | v11.8
 // Owner: Rohiit Gupta, Chief Vedic Architect
-// Date: 2026-06-29
+// Date: 2026-11-26
 // ============================================================================
+// v11.7 → v11.8 (26 Nov 2026, Rohiit approved — Google recovery readiness):
+//   ✅ Homepage "latest posts" now shows only indexable posts (blog_posts.noindex not true).
+//   ✅ FALLBACK_POSTS replaced — old slugs were 404 / redirect / noindex.
+//   Nothing else changed.
+// ----------------------------------------------------------------------------
 // v11.6 → v11.7 — SALES ORIENTATION PASS + CALCSTRIP MOVED TO #1.5:
 //   ✅ CalcStrip moved from slot #3.5 → slot #1.5 (after Hero, before
 //      HomeClient). Maximum early discovery — users who miss the birth form
@@ -96,30 +101,31 @@ interface HomeBlogPost {
   read_time_minutes: number;
 }
 
+// v11.8 — fallback = 3 posts Rohiit has reviewed (indexed). Old fallback slugs were 404/redirect.
 const FALLBACK_POSTS: HomeBlogPost[] = [
   {
-    slug: 'shani-gochar-2026-saturn-transit',
-    title: "Shani Gochar 2026: What Saturn's Transit Through Aquarius Means for Your Rashi",
-    description: 'Saturn — the great teacher of karma — continues its powerful 2.5-year transit through Aquarius. Understand how this Gochar affects all 12 Rashis in 2026.',
-    category: 'Gochar / Transits',
-    published_at: '2026-01-15',
-    read_time_minutes: 8,
+    slug: 'is-rahu-ketu-transit-2026-dangerous',
+    title: 'Is Rahu-Ketu Transit 2026 Dangerous?',
+    description: 'Rahu-Ketu transit on 5 Dec 2026: is it dangerous? The Phaladeepika rule for all 12 Moon signs, the 4 that need care, Saturn, eclipses and a low-cost upay.',
+    category: 'Planetary Transit',
+    published_at: '2026-09-07',
+    read_time_minutes: 15,
   },
   {
-    slug: 'rahu-ketu-axis-2026-karmic-shift',
-    title: 'Rahu-Ketu Axis 2026: The Pisces-Virgo Karmic Shift and What It Means for India',
-    description: 'The shadow planets Rahu and Ketu are now deeply embedded in the Pisces-Virgo axis — the most spiritually significant transit of the decade.',
-    category: 'Gochar / Transits',
-    published_at: '2026-02-20',
-    read_time_minutes: 10,
+    slug: 'shani-gochar-2027-meaning-guide',
+    title: 'Shani Gochar 2027 Meaning: How to Read It',
+    description: 'Shani gochar 2027 meaning explained from Phaladeepika: house from Moon, vedha, latta, Ashtakavarga and neecha Saturn. Check your free Sade Sati phase now.',
+    category: 'Planetary Transit',
+    published_at: '2026-09-21',
+    read_time_minutes: 13,
   },
   {
-    slug: 'guru-gochar-taurus-2026-wealth-growth',
-    title: "Guru Gochar 2026: Jupiter's Promise of Wealth, Property & Spiritual Abundance",
-    description: 'Jupiter — Brihaspati, the cosmic guru — continues its journey through Taurus in early 2026 before moving to Gemini. A rare window for wealth building.',
-    category: 'Gochar / Transits',
-    published_at: '2026-03-10',
-    read_time_minutes: 7,
+    slug: '36-guna-milan-explained',
+    title: '36 Guna Milan: Is 27/36 Good? All 8 Koots',
+    description: 'How many gunas should match? Is 27 out of 36 good? All 8 koots with points, plus Nadi and Bhakoot exceptions from Muhurta Chintamani. Check free.',
+    category: 'Vedic Astrology',
+    published_at: '2026-05-21',
+    read_time_minutes: 13,
   },
 ];
 
@@ -133,6 +139,8 @@ async function getLatestPosts(): Promise<HomeBlogPost[]> {
       .from('blog_posts')
       .select('slug, title, description, category, published_at, read_time_minutes')
       .eq('is_published', true)
+      // v11.8 — only posts open to Google (noindex false/null). Noindexed posts are not promoted on the homepage.
+      .not('noindex', 'is', true)
       .order('published_at', { ascending: false })
       .limit(3);
     if (error || !data || data.length === 0) return FALLBACK_POSTS;
@@ -385,7 +393,7 @@ export default async function HomePage() {
 }
 
 // ============================================================================
-// END — app/page.tsx v11.7
+// END — app/page.tsx v11.8
 // 🔱 Trikaal Vaani | Rohiit Gupta, Chief Vedic Architect
 // CEO LOCKED: TIERED LAYOUT — earning sections above mobile fold
 // ============================================================================

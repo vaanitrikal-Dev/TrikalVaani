@@ -3,7 +3,8 @@
  * 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER 🔱
  * ============================================================================
  * File:        components/SiteFooter.tsx
- * Version: 2.7 (11 Nov 2026) — "15+ years" -> "16+ years" (Rohiit, 11 Nov 2026); "Editorial Policy" link added to the legal row.
+ * Version: 2.8 (26 Nov 2026) — Research links: 4 broken links (vedic-vs-western 404, shani-gochar-2026 noindex, rahu-ketu-axis redirect, /trikaal-vaani 404) replaced with Editorial Policy, Founder, Rahu-Ketu Gochar 2026, Shani Gochar 2027 (Rohiit approved 26 Nov 2026). Nothing else changed.
+ * (previous) Version: 2.7 (11 Nov 2026) — "15+ years" -> "16+ years" (Rohiit, 11 Nov 2026); "Editorial Policy" link added to the legal row.
  * (previous) Version: 2.6 (1 Oct 2026 — Trikaal Vaani ka core tagline (Rohiit ne chuna): "Granth ka Gyaan · Rohiit ki Parakh · AI ki Shakti" / "Rooted in Granth · Verified by Rohiit · Powered by AI") — "72+ seekers" counter removed (CEO conversion audit)
  * Owner:       Rohiit Gupta, Chief Vedic Architect
  *
@@ -163,17 +164,18 @@ export default function SiteFooter() {
                 Research &amp; Methodology
                 <ExternalLink className="w-3 h-3 opacity-50" />
               </Link>
-              <Link href="/blog/vedic-astrology-vs-western-astrology" className="text-xs text-slate-500 hover:text-slate-300 transition-colors">
-                Vedic vs Western Astrology
+              {/* ── v2.8 (26 Nov 2026): 4 broken links replaced (404 / noindex / redirect) — Rohiit approved ── */}
+              <Link href="/editorial-policy" className="text-xs text-slate-500 hover:text-slate-300 transition-colors">
+                Editorial Policy
               </Link>
-              <Link href="/blog/shani-gochar-2026-saturn-transit" className="text-xs text-slate-500 hover:text-slate-300 transition-colors">
-                Shani Gochar 2026
+              <Link href="/founder" className="text-xs text-slate-500 hover:text-slate-300 transition-colors">
+                Founder — Rohiit Gupta
               </Link>
-              <Link href="/blog/rahu-ketu-axis-2026-karmic-shift" className="text-xs text-slate-500 hover:text-slate-300 transition-colors">
-                Rahu-Ketu Transit 2026
+              <Link href="/blog/is-rahu-ketu-transit-2026-dangerous" className="text-xs text-slate-500 hover:text-slate-300 transition-colors">
+                Rahu-Ketu Gochar 2026
               </Link>
-              <Link href="/trikaal-vaani" className="text-xs text-slate-500 hover:text-slate-300 transition-colors">
-                Trikaal Vaani — Brand Origin
+              <Link href="/blog/shani-gochar-2027-meaning-guide" className="text-xs text-slate-500 hover:text-slate-300 transition-colors">
+                Shani Gochar 2027
               </Link>
             </nav>
 
@@ -321,7 +323,7 @@ export default function SiteFooter() {
 }
 
 // ============================================================================
-// END — components/SiteFooter.tsx v2.5
+// END — components/SiteFooter.tsx v2.8
 // 🔱 Trikaal Vaani | Rohiit Gupta, Chief Vedic Architect
 // MSME Registered: UDYAM-DL-10-0119070
 // ============================================================================
