@@ -3,7 +3,8 @@
  * 🔱 TRIKAAL VAANI — CEO PROTECTION HEADER 🔱
  * ============================================================================
  * File:        components/SiteFooter.tsx
- * Version: 2.8 (26 Nov 2026) — Research links: 4 broken links (vedic-vs-western 404, shani-gochar-2026 noindex, rahu-ketu-axis redirect, /trikaal-vaani 404) replaced with Editorial Policy, Founder, Rahu-Ketu Gochar 2026, Shani Gochar 2027 (Rohiit approved 26 Nov 2026). Nothing else changed.
+ * Version: 2.9 (26 Nov 2026) — Instagram link fixed: @trikalvaani -> @thetrikalvaani (Rohiit's real handle). Rohiit approved. Nothing else changed.
+ * (previous) Version: 2.8 (26 Nov 2026) — Research links: 4 broken links (vedic-vs-western 404, shani-gochar-2026 noindex, rahu-ketu-axis redirect, /trikaal-vaani 404) replaced with Editorial Policy, Founder, Rahu-Ketu Gochar 2026, Shani Gochar 2027 (Rohiit approved 26 Nov 2026). Nothing else changed.
  * (previous) Version: 2.7 (11 Nov 2026) — "15+ years" -> "16+ years" (Rohiit, 11 Nov 2026); "Editorial Policy" link added to the legal row.
  * (previous) Version: 2.6 (1 Oct 2026 — Trikaal Vaani ka core tagline (Rohiit ne chuna): "Granth ka Gyaan · Rohiit ki Parakh · AI ki Shakti" / "Rooted in Granth · Verified by Rohiit · Powered by AI") — "72+ seekers" counter removed (CEO conversion audit)
  * Owner:       Rohiit Gupta, Chief Vedic Architect
@@ -183,13 +184,13 @@ export default function SiteFooter() {
               Connect
             </p>
             <a
-              href="https://www.instagram.com/trikalvaani"
+              href="https://www.instagram.com/thetrikalvaani"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 text-xs text-slate-500 hover:text-slate-300 transition-colors"
             >
               <Instagram className="w-3.5 h-3.5" />
-              @trikalvaani
+              @thetrikalvaani
             </a>
           </div>
         </div>
@@ -323,7 +324,7 @@ export default function SiteFooter() {
 }
 
 // ============================================================================
-// END — components/SiteFooter.tsx v2.8
+// END — components/SiteFooter.tsx v2.9
 // 🔱 Trikaal Vaani | Rohiit Gupta, Chief Vedic Architect
 // MSME Registered: UDYAM-DL-10-0119070
 // ============================================================================

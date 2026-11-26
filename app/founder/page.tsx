@@ -3,7 +3,8 @@
  * 🔱 TRIKAL VAANI — CEO PROTECTION HEADER 🔱
  * ============================================================================
  * File:        app/founder/page.tsx
- * Version: 4.9 (26 Nov 2026) — Person schema sameAs: /trikaal-vaani link removed (404). Rohiit approved 26 Nov 2026. Nothing else changed.
+ * Version: 5.0 (26 Nov 2026) — spelling fix (Rohiit approved 26 Nov 2026): registered name shown as "Trikal Vaani" (MSME) wherever text said "Trikaal Vaani (registered as Trikaal Vaani)"; FAQ "Is Trikal Vaani the same as Trikaal Vaani?"; schema alternateName first item = "Trikal Vaani"; legalName "Trikal Vaani Global" -> "Trikal Vaani". Layout, prices, CTAs unchanged.
+ * (previous) Version: 4.9 (26 Nov 2026) — Person schema sameAs: /trikaal-vaani link removed (404). Rohiit approved 26 Nov 2026. Nothing else changed.
  * (previous) Version: 4.8 (11 Nov 2026) — approved by Rohiit 11 Nov 2026: "15+ years" -> "16+ years";
  *   "India's first AI-powered" claim removed; broken spelling sentence fixed (Trikal Vaani =
  *   registered name, Trikaal Vaani = brand spelling); "in minutes" line replaced; real address
@@ -74,9 +75,9 @@ export const metadata: Metadata = {
     "Rohiit Gupta",
     "Rohiit Gupta astrologer Delhi",
     "Trikaal Vaani founder",
-    "Trikaal Vaani founder",
+    "Trikal Vaani founder",
     "Trikaal Vaani Rohiit Gupta",
-    "Trikaal Vaani Rohiit Gupta",
+    "Trikal Vaani Rohiit Gupta",
     "vedic astrologer India",
     "Chief Vedic Architect",
     "Rohiit Gupta vedic astrology",
@@ -97,7 +98,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Rohiit Gupta — Founder of Trikaal Vaani",
     description:
-      "16+ years Vedic astrology. Founder of Trikaal Vaani (registered as Trikaal Vaani) — MSME registered (UDYAM-DL-10-0119070). Chief Vedic Architect behind Trikaal AI.",
+      "16+ years Vedic astrology. Founder of Trikaal Vaani (registered as Trikal Vaani) — MSME registered (UDYAM-DL-10-0119070). Chief Vedic Architect behind Trikaal AI.",
     url: "https://trikalvaani.com/founder",
     siteName: "Trikaal Vaani",
     type: "profile",
@@ -164,7 +165,7 @@ const schema = {
         "@type": "Organization",
         "@id": "https://trikalvaani.com/#organization",
         name: "Trikaal Vaani",
-        alternateName: ["Trikaal Vaani", "Trikalvaani", "Trikaalvaani"],
+        alternateName: ["Trikal Vaani", "Trikalvaani", "Trikaalvaani"],
         url: "https://trikalvaani.com",
         identifier: UDYAM_NUMBER,
       },
@@ -196,7 +197,7 @@ const schema = {
       "@id": "https://trikalvaani.com/#organization",
       name: "Trikaal Vaani",
       alternateName: [
-        "Trikaal Vaani",
+        "Trikal Vaani",
         "Trikaalvaani",
         "Trikalvaani",
         "Trikaal Vaani AI",
@@ -204,7 +205,7 @@ const schema = {
         "त्रिकाल वाणी",
         "त्रिकाळ वाणी",
       ],
-      legalName: "Trikal Vaani Global",
+      legalName: "Trikal Vaani",
       url: "https://trikalvaani.com",
       logo: "https://trikalvaani.com/logo.png",
       founder: {
@@ -275,7 +276,7 @@ const schema = {
           acceptedAnswer: {
             "@type": "Answer",
             text:
-              "Trikaal Vaani (registered as Trikaal Vaani) was founded by Rohiit Gupta in 2025 in New Delhi, India. Both spellings refer to the same brand — a Granth-based Vedic astrology platform. Rohiit serves as Chief Vedic Architect and personally designs every Kundli reading framework that Trikaal AI applies to user birth charts. The platform is a Government of India MSME registered enterprise (UDYAM-DL-10-0119070).",
+              "Trikaal Vaani (registered as Trikal Vaani) was founded by Rohiit Gupta in 2025 in New Delhi, India. Both spellings refer to the same brand — a Granth-based Vedic astrology platform. Rohiit serves as Chief Vedic Architect and personally designs every Kundli reading framework that Trikaal AI applies to user birth charts. The platform is a Government of India MSME registered enterprise (UDYAM-DL-10-0119070).",
           },
         },
         {
@@ -289,7 +290,7 @@ const schema = {
         },
         {
           "@type": "Question",
-          name: "Is Trikaal Vaani the same as Trikaal Vaani?",
+          name: "Is Trikal Vaani the same as Trikaal Vaani?",
           acceptedAnswer: {
             "@type": "Answer",
             text:
@@ -403,7 +404,7 @@ export default function FounderPage() {
                   className="text-xs font-semibold tracking-widest uppercase mb-2"
                   style={{ color: GOLD }}
                 >
-                  Founder · Trikaal Vaani <span className="text-gray-500">(Trikaal Vaani)</span>
+                  Founder · Trikaal Vaani <span className="text-gray-500">(Trikal Vaani)</span>
                 </p>
                 <h1 className="font-serif text-4xl md:text-5xl font-bold text-white mb-3">
                   Rohiit Gupta
@@ -493,7 +494,7 @@ export default function FounderPage() {
                 Rohiit founded{" "}
                 <strong style={{ color: GOLD }}>Trikaal Vaani</strong> —
                 registered as{" "}
-                <strong style={{ color: GOLD }}>Trikaal Vaani</strong> — in
+                <strong style={{ color: GOLD }}>Trikal Vaani</strong> — in
                 Dwarka, New Delhi, as a Granth-based Vedic astrology platform. The
                 brand name comes from Sanskrit{" "}
                 <em className="text-white">त्रिकाल वाणी</em>: <em>Trikaal</em>{" "}
@@ -506,7 +507,7 @@ export default function FounderPage() {
                 </strong>
               </p>
               <p className="mb-4">
-                Both spellings — <strong>Trikaal Vaani</strong> (the simpler,
+                Both spellings — <strong>Trikal Vaani</strong> (the simpler,
                 shorter form registered with the Government of India MSME under{" "}
                 {UDYAM_NUMBER}) and <strong>Trikaal Vaani</strong> (the more
                 phonetically natural double-A romanization) — refer to the same
@@ -928,7 +929,7 @@ export default function FounderPage() {
               </Link>
             </div>
             <p className="text-[10px] text-gray-600 mt-6">
-              Trikaal Vaani (registered as Trikaal Vaani) · MSME Registered · {UDYAM_NUMBER} · India · 🔱 Mahakaal Ka Ashirwad
+              Trikaal Vaani (registered as Trikal Vaani) · MSME Registered · {UDYAM_NUMBER} · India · 🔱 Mahakaal Ka Ashirwad
             </p>
           </div>
         </section>
@@ -948,7 +949,7 @@ function WAIcon() {
 }
 
 // ============================================================================
-// END — app/founder/page.tsx v4.9
+// END — app/founder/page.tsx v5.0
 // 🔱 Trikaal Vaani | Rohiit Gupta, Chief Vedic Architect
 // MSME Registered: UDYAM-DL-10-0119070
 // Phase 4: Brand spelling consolidation (Trikaal = Trikaal)
