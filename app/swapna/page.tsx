@@ -1,5 +1,6 @@
 // 🔱 TRIKAAL VAANI | app/swapna/page.tsx | v2.3 (21 Nov 2026)
-// Version: v2.3 (21 Nov 2026) — Radar 21 Nov (report 16) PUSH: +1 H2 (Kya subah ke bure sapne sach hote hain), +1 FAQ, +2 verses re-used on new section (Brihad Yogayatra 16.30 bhor ka sapna jaldi phal, 16.32 dusvapna shanti; Guard: opening line aligned with 16.30)
+// Version: v2.4 (27 Nov 2026) — hreflang hi-IN → /hi/swapna removed (404). Rohiit approved. Nothing else changed.
+// Version (previous): v2.3 (21 Nov 2026) — Radar 21 Nov (report 16) PUSH: +1 H2 (Kya subah ke bure sapne sach hote hain), +1 FAQ, +2 verses re-used on new section (Brihad Yogayatra 16.30 bhor ka sapna jaldi phal, 16.32 dusvapna shanti; Guard: opening line aligned with 16.30)
 // Version (previous): v2.2 (15 Nov 2026)
 // ----------------------------------------------------------------------------
 // CHANGE v2.2 (2026-11-15) — Radar weekly job cycle 2026-11-14 (report 15):
@@ -59,10 +60,7 @@ export const metadata: Metadata = {
   ],
   alternates: {
     canonical: 'https://trikalvaani.com/swapna',
-    languages: {
-      'en-IN': 'https://trikalvaani.com/swapna',
-      'hi-IN': 'https://trikalvaani.com/hi/swapna',
-    },
+    // v2.4 — hi-IN /hi/swapna alternate removed (404)
   },
   openGraph: {
     title: 'Swapna Shastra | Free Vedic Dream Meaning & Interpretation — Trikaal Vaani',
@@ -765,5 +763,5 @@ export default function SwapnaPage() {
 }
 
 // ============================================================================
-// END — app/swapna/page.tsx v1.0 · 🔱 Trikaal Vaani
+// END — app/swapna/page.tsx v2.4 · 🔱 Trikaal Vaani
 // ============================================================================

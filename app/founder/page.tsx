@@ -3,7 +3,8 @@
  * 🔱 TRIKAL VAANI — CEO PROTECTION HEADER 🔱
  * ============================================================================
  * File:        app/founder/page.tsx
- * Version: 5.0 (26 Nov 2026) — spelling fix (Rohiit approved 26 Nov 2026): registered name shown as "Trikal Vaani" (MSME) wherever text said "Trikaal Vaani (registered as Trikaal Vaani)"; FAQ "Is Trikal Vaani the same as Trikaal Vaani?"; schema alternateName first item = "Trikal Vaani"; legalName "Trikal Vaani Global" -> "Trikal Vaani". Layout, prices, CTAs unchanged.
+ * Version: 5.1 (27 Nov 2026) — hreflang hi-IN → /hi/founder removed (404). Rohiit approved. Nothing else changed.
+ * (previous) Version: 5.0 (26 Nov 2026) — spelling fix (Rohiit approved 26 Nov 2026): registered name shown as "Trikal Vaani" (MSME) wherever text said "Trikaal Vaani (registered as Trikaal Vaani)"; FAQ "Is Trikal Vaani the same as Trikaal Vaani?"; schema alternateName first item = "Trikal Vaani"; legalName "Trikal Vaani Global" -> "Trikal Vaani". Layout, prices, CTAs unchanged.
  * (previous) Version: 4.9 (26 Nov 2026) — Person schema sameAs: /trikaal-vaani link removed (404). Rohiit approved 26 Nov 2026. Nothing else changed.
  * (previous) Version: 4.8 (11 Nov 2026) — approved by Rohiit 11 Nov 2026: "15+ years" -> "16+ years";
  *   "India's first AI-powered" claim removed; broken spelling sentence fixed (Trikal Vaani =
@@ -89,11 +90,7 @@ export const metadata: Metadata = {
   authors: [{ name: "Rohiit Gupta", url: "https://trikalvaani.com/founder" }],
   alternates: {
     canonical: "https://trikalvaani.com/founder",
-    languages: {
-      "en-IN": "https://trikalvaani.com/founder",
-      "hi-IN": "https://trikalvaani.com/hi/founder",
-      "x-default": "https://trikalvaani.com/founder",
-    },
+    // v5.1 — hi-IN /hi/founder alternate removed (404)
   },
   openGraph: {
     title: "Rohiit Gupta — Founder of Trikaal Vaani",
@@ -949,7 +946,7 @@ function WAIcon() {
 }
 
 // ============================================================================
-// END — app/founder/page.tsx v5.0
+// END — app/founder/page.tsx v5.1
 // 🔱 Trikaal Vaani | Rohiit Gupta, Chief Vedic Architect
 // MSME Registered: UDYAM-DL-10-0119070
 // Phase 4: Brand spelling consolidation (Trikaal = Trikaal)

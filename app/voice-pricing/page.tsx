@@ -3,7 +3,8 @@
  * TRIKAL VAANI — Voice Pricing SEO Landing Page
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/voice-pricing/page.tsx
- * VERSION: 2.1 — Site menu added (18 Oct 2026)
+ * VERSION: 2.2 — hreflang hi-IN → /hi/voice-pricing removed (404) (27 Nov 2026, Rohiit approved). Nothing else changed.
+ * PREVIOUS: VERSION 2.1 — Site menu added (18 Oct 2026)
  * SIGNED: ROHIIT GUPTA, CEO
  *
  * v2.1 CHANGES (18 Oct 2026):
@@ -44,10 +45,7 @@ export const metadata: Metadata = {
   ],
   alternates: {
     canonical: '/voice-pricing',
-    languages: {
-      'en-IN': '/voice-pricing',
-      'hi-IN': '/hi/voice-pricing',
-    },
+    // v2.2 — hi-IN /hi/voice-pricing alternate removed (404)
   },
   openGraph: {
     title      : 'Voice Astrology by Trikaal — ₹11 Voice Predictions',

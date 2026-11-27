@@ -3,6 +3,7 @@
  * TRIKAAL VAANI — SEO Domain Pages Generator
  * CEO & Chief Vedic Architect: Rohiit Gupta
  * File: app/[domain]/page.tsx (dynamic engine for 15 life domains + 10 city hubs)
+ * VERSION: 3.3 (27 Nov 2026) — hreflang 'hi' → /hi/<domain> removed (404). Rohiit approved. Nothing else changed.
  * VERSION: 3.2 (24 Nov 2026) — Next 16 upgrade (Vercel->Cloudflare move, Rohiit approved): params/searchParams now awaited. Nothing else changed.
  * VERSION: 3.1 — city hubs robots noindex,follow (11 Nov 2026)
  * v3.1: the 10 city hubs (/delhi …) carry robots noindex,follow while
@@ -227,10 +228,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     authors:     [{ name: 'Rohiit Gupta', url: 'https://trikalvaani.com/founder' }],
     alternates: {
       canonical: `https://trikalvaani.com/${config.slug}`,
-      languages: {
-        'hi': `https://trikalvaani.com/hi/${config.slug}`,
-        'en': `https://trikalvaani.com/${config.slug}`,
-      },
+      // v3.3 — 'hi' alternate (/hi/<domain>) removed: those pages return 404
     },
     openGraph: {
       title:       config.title,

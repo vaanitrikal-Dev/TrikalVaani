@@ -1,4 +1,5 @@
-// TRIKAL VAANI | app/kundali-milan/page.tsx | v2.5 (21 Nov 2026)
+// TRIKAL VAANI | app/kundali-milan/page.tsx | v2.6 (27 Nov 2026)
+// v2.6 (27 Nov 2026): hreflang hi-IN → /hi/kundali-milan removed (404). Rohiit approved. Nothing else changed.
 // v2.5 (21 Nov 2026): Radar 21 Nov (report 16) PUSH: +2 KM_SECTIONS H2 (कुंडली मिलान इन हिंदी
 //   (20, Hindi); Soulmate compatibility by date of birth (12, English)), +1 FAQ (soulmate),
 //   +0 verses (none in library says this). DOB, name+DOB, rashi naam, 27/36, free, app,
@@ -87,10 +88,7 @@ export const metadata: Metadata = {
   keywords: 'kundali matching, kundli milan, 36 guna milan, free kundali matching, ashtakoot, mangal dosh, nadi dosh, vedic compatibility, marriage matching, jyotish milan',
   alternates: {
     canonical: 'https://trikalvaani.com/kundali-milan',
-    languages: {
-      'en-IN': 'https://trikalvaani.com/kundali-milan',
-      'hi-IN': 'https://trikalvaani.com/hi/kundali-milan',
-    },
+    // v2.6 — hi-IN /hi/kundali-milan alternate removed (404)
   },
   openGraph: {
     title: 'Kundali Milan - Free 36 Guna Matching & Vedic Compatibility | Trikaal Vaani',

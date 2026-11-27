@@ -1,7 +1,8 @@
 // ============================================================
 // CEO: Rohiit Gupta | Chief Vedic Architect | Trikaal Vaani
 // FILE: app/layout.tsx
-// VERSION: 3.14 (1 Nov 2026 — IR Guard bot ne import raasta "components/Trikaal/" kar diya tha (folder hai hi nahi, build fail) — wapas "components/Trikal/JiniWidget")
+// VERSION: 3.15 (27 Nov 2026 — hreflang hi-IN → /hi hataya (page 404 deta hai). Rohiit approved. Kuch aur nahi badla)
+// Prior — v3.14 (1 Nov 2026 — IR Guard bot ne import raasta "components/Trikaal/" kar diya tha (folder hai hi nahi, build fail) — wapas "components/Trikal/JiniWidget")
 // Prior — v3.13 (1 Nov 2026 — TrikalPicker hataya (GA4: sirf 0.9% ne khola); uski jagah JiniWidget v1.0 — chirag ghiso, Jini nikle, har page pe. TrikalPicker.tsx file rakhi hai, delete nahi ki)
 // Prior — v3.12 (24 Oct 2026 — Vercel Web Analytics <Analytics /> hataya; GA4 G-WCV6MTQM21 ab GoogleAdsTag v1.1 se chalta hai; Vercel dashboard pe Web Analytics disabled)
 // Prior — v3.11 (1 Oct 2026 —Trikaal Vaani ka core tagline (Rohiit ne chuna): "Granth ka Gyaan · Rohiit ki Parakh · AI ki Shakti" / "Rooted in Granth · Verified by Rohiit · Powered by AI") (1 Oct 2026 — daam sahi kiye: Kundali Milan ₹51 (couple + parent), Karmic ₹101 / $11, Child Birth ₹51; Bhrigu Nandi ke purane daave hataye)  (18 Sep 2026 — TrikalPicker added) — Google Ads Tag AW-7916189860 added
@@ -123,10 +124,7 @@ export const metadata: Metadata = {
   },
   alternates: {
     canonical: "https://trikalvaani.com/",
-    languages: {
-      "en-IN": "https://trikalvaani.com/",
-      "hi-IN": "https://trikalvaani.com/hi",
-    },
+    // v3.15 — hi-IN /hi alternate removed: /hi returns 404 (hreflang to 404 = Google error)
   },
   other: {
     "meta-author": "Rohiit Gupta",

@@ -2,6 +2,7 @@
 
 // ============================================================
 // File: app/calculators/free-shubh-muhurat-calculator/page.tsx
+// Version: v1.9 (27 Nov 2026) — 5 tooti kadiyan theek (404/redirect): janam-kundali, ias-astrology (govt job), santan-yog-calculator, /home (property), /wealth. Rohiit approved. Kuch aur nahi badla.
 // Version: v1.8 (23 Sep 2026) — poori soochi WhatsApp par bhejne wala hissa
 //   (Rohiit: "isko marketing feature ki tarah likho") — muhurat ghar mein
 //   milkar chuna jaata hai, isliye soochi ka pariwar tak jaana hi asli kaam
@@ -103,7 +104,7 @@ const PILLAR: PillarSection[] = [
       "Har din ke paanch ang hote hain: **tithi, vaar, nakshatra, yog aur karan**. Muhurat inhi paanchon ko milakar bana hota hai, kisi ek se nahi.",
       "Hamara engine har tareekh par teen cheezein sabse pehle dekhta hai — **nakshatra** (kaam ke varg ka hai ya nahi, BS 97.6-12), **tithi** (us kaam ki tithi hai ya nahi, BS 98) aur **karan** (BS 99.3-5). Teeno baith jayein to wo din **shreshth**.",
       "Phir wo din hataye jaate hain jo granth mana karta hai: **Rikta tithi, Vishti (Bhadra) karan, Amavasya, Vyatipata aur Vaidhriti yog, aur tikshna-ugra nakshatra**. Aur aakhir mein aapki kundali se **Tara bala** aur **Chandra bala** dekhi jaati hai.",
-      "Har din ke andar ka samay bhi wahin nikalta hai — suryoday se, aur usme se **Rahu Kaal, Yamaganda aur Gulika** hata kar. Kundali ka poora vivaran [Janam Kundali Calculator](/calculators/free-kundali-calculator) se muft dekh sakte hain.",
+      "Har din ke andar ka samay bhi wahin nikalta hai — suryoday se, aur usme se **Rahu Kaal, Yamaganda aur Gulika** hata kar. Kundali ka poora vivaran [Janam Kundali Calculator](/calculators/free-janam-kundali-calculator) se muft dekh sakte hain.",
     ],
   },
   {
@@ -176,7 +177,7 @@ const PILLAR: PillarSection[] = [
       "Griha pravesh ke liye granth **dhruva nakshatra** kehta hai — Rohini aur teeno Uttara (97.6), kyunki ye wo kaam hai jo hamesha rehna hai. Saath mein **mridu varg** (Mrigashira, Chitra, Anuradha, Revati) bhi lagta hai — 97.10 ka mangal-karya wala varg.",
       "Karan mein **Taitila** (ashray) aur **Gara** (ghar) aate hain (99.3-4), aur tithi mein doosri (ghar ki neenv) aur dasvi-gyarahvi.",
       "Lagna par bhi granth ka niyam hai: **sthir raashi udit ho** aur wo lagna aapki janm-raashi se 8va ya 12va na ho (97.16). Ye jaanch engine agle version mein jodegi — abhi nakshatra, tithi, karan aur varjit par nateeja aata hai.",
-      "Naya ghar khareedne ka yog kundali mein hai ya nahi, ye [Property Yog](/learn/property-yog-kundali) par padh sakte hain.",
+      "Naya ghar khareedne ka yog kundali mein hai ya nahi, ye [Property Yog](/home) par padh sakte hain.",
     ],
   },
   {
@@ -194,7 +195,7 @@ const PILLAR: PillarSection[] = [
     paras: [
       "Form bharna, coaching shuru karna, admission — ye sab **gyan aur kala** ke kaam hain, aur granth inhe **laghu varg** deta hai: Hasta, Ashwini, Pushya (97.9). Saath mein **mridu varg** (Mrigashira, Chitra, Anuradha, Revati) aur **dhruva varg** (Rohini, teeno Uttara) — kyunki padhai wo cheez hai jo tikni chahiye.",
       "UPSC, NEET, JEE, SSC, State PSC, CUET — dropdown mein **exam form bharna** ek hi option hai, kyunki granth ka niyam sab par ek hai. Karan mein **Bava** aur **Kimstughna** (naya shubh aarambh).",
-      "Sarkari naukri ka yog aapki kundali mein hai ya nahi, ye alag sawaal hai — uske liye [Government Job Yog Calculator](/calculators/free-government-job-calculator) hai. Muhurat sirf shuruaat ka samay deta hai, nateeja nahi.",
+      "Sarkari naukri ka yog aapki kundali mein hai ya nahi, ye alag sawaal hai — uske liye [Government Job Yog Calculator](/calculators/free-ias-astrology-calculator) hai. Muhurat sirf shuruaat ka samay deta hai, nateeja nahi.",
       "Aur seedhi baat: **form shubh muhurat mein bharne se padhai nahi ho jaati.** Muhurat shuruaat ko sahara deta hai, mehnat ki jagah nahi leta.",
     ],
   },
@@ -214,7 +215,7 @@ const PILLAR: PillarSection[] = [
       "**Mundan** ke liye granth ke apne nakshatra hain (97.12) aur uske nishedh bhi — sandhya ka samay, Rikta tithi, navami aur **Vishti** (97.13). Tithi mein teesri.",
       "**Karnavedha** par granth aur saaf hai: Pushya, Mrigashira, Chitra, Revati, Shravana, aur **Guru ka lagna** (98.17 / 99.6).",
       "**Namkaran aur Annaprashan** ke nakshatra Muhurta parampara se aate hain — hum unpar \"parampara\" label lagate hain, granth ka dawa nahi karte.",
-      "Bachche ki kundali se jude doosre sawaal [Santan Yog Calculator](/calculators/free-santan-yog) par hain.",
+      "Bachche ki kundali se jude doosre sawaal [Santan Yog Calculator](/calculators/free-santan-yog-calculator) par hain.",
     ],
   },
   {
@@ -473,7 +474,7 @@ const PILLAR: PillarSection[] = [
     paras: [
       "Sone ke liye granth mein do baatein milti hain: **paNya** yani kharid-farokht (laghu varg, 97.9) aur **abhushan** (mridu varg, 97.10). Karan mein **Vanija**.",
       "Dhanteras aur Akshaya Tritiya par sona lena **parampara** hai — us din ka apna maan hai. Par agar aap bade nivesh ke liye din chun rahe hain, to apni kundali se chuna hua din zyada kaam ka hai.",
-      "Nivesh, SIP aur loan lena bhi dropdown mein alag-alag hain. Dhan ke yog kundali mein kaise dekhein, ye [Wealth Yog](/learn/wealth-yog-kundali) par hai.",
+      "Nivesh, SIP aur loan lena bhi dropdown mein alag-alag hain. Dhan ke yog kundali mein kaise dekhein, ye [Wealth Yog](/wealth) par hai.",
     ],
   },
   {
@@ -509,7 +510,7 @@ const PILLAR: PillarSection[] = [
     h2: "Doosre muft calculator jo iske saath kaam aate hain",
     paras: [
       "Muhurat shuruaat ka samay deta hai; kundali batati hai ki wo kaam aapke chart mein kaisa hai. Dono saath padhiye.",
-      "Ghar ke liye [Property Yog](/learn/property-yog-kundali), shaadi ke liye [Shadi Kab Hogi](/calculators/free-shadi-kab-hogi-calculator), sarkari naukri ke liye [Government Job Calculator](/calculators/free-government-job-calculator), aur sehat ke liye [Health Prediction](/calculators/free-health-prediction-calculator).",
+      "Ghar ke liye [Property Yog](/home), shaadi ke liye [Shadi Kab Hogi](/calculators/free-shadi-kab-hogi-calculator), sarkari naukri ke liye [Government Job Calculator](/calculators/free-ias-astrology-calculator), aur sehat ke liye [Health Prediction](/calculators/free-health-prediction-calculator).",
       "Chal rahi dasha jaanni ho to [Dasha Calculator](/calculators/free-dasha-calculator), aur Sade Sati ke liye [Sade Sati Calculator](/calculators/free-sade-sati-calculator) — sab muft.",
     ],
   },

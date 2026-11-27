@@ -1,6 +1,7 @@
-// 🔱 TRIKAL VAANI | app/page.tsx | v11.8
+// 🔱 TRIKAL VAANI | app/page.tsx | v11.9
 // Owner: Rohiit Gupta, Chief Vedic Architect
-// Date: 2026-11-26
+// Date: 2026-11-27
+// v11.8 → v11.9 (27 Nov 2026, Rohiit approved): hreflang hi-IN → /hi removed (404). Nothing else changed.
 // ============================================================================
 // v11.7 → v11.8 (26 Nov 2026, Rohiit approved — Google recovery readiness):
 //   ✅ Homepage "latest posts" now shows only indexable posts (blog_posts.noindex not true).
@@ -58,10 +59,7 @@ export const metadata: Metadata = {
     "Free AI kundli, Kundali Milan & accurate Vedic predictions for career, marriage, wealth & health by Rohiit Gupta, Chief Vedic Architect.",
   alternates: {
     canonical: 'https://trikalvaani.com/',
-    languages: {
-      'en-IN': 'https://trikalvaani.com/',
-      'hi-IN': 'https://trikalvaani.com/hi',
-    },
+    // v11.9 — hi-IN /hi alternate removed: /hi returns 404
   },
   openGraph: {
     title: 'Trikaal Vaani | Free Kundli, Kundali Milan & Accurate AI Vedic Astrology',
@@ -393,7 +391,7 @@ export default async function HomePage() {
 }
 
 // ============================================================================
-// END — app/page.tsx v11.8
+// END — app/page.tsx v11.9
 // 🔱 Trikaal Vaani | Rohiit Gupta, Chief Vedic Architect
 // CEO LOCKED: TIERED LAYOUT — earning sections above mobile fold
 // ============================================================================
